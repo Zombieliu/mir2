@@ -58,6 +58,7 @@ use super::assets::CrystalButtonAssetSet;
 use super::hud::{free_inventory_slots, CrystalHudAction};
 use super::item_tooltip::{
     crystal_item_tooltip_document, crystal_item_tooltip_document_from_source,
+    crystal_item_tooltip_document_from_source_with_options, CrystalItemTooltipOptions,
 };
 use super::panel_layouts::{
     GAME_SHOP_CELL_SIZE, GAME_SHOP_COLUMN_STEP, GAME_SHOP_GRID_ORIGIN, GAME_SHOP_PAGE_COLUMNS,
@@ -73,6 +74,10 @@ use super::spec::{CrystalButtonSpec, CrystalFrameSpec, CrystalRect};
 use super::widget::{spawn_crystal_image_button, CrystalImageButton, CrystalItemHint};
 
 const BIG_MAP_SEARCH_COOLDOWN_MS: u64 = 1_000;
+const NPC_GOODS_CELL_WIDTH: f32 = 205.0;
+const NPC_GOODS_CELL_HEIGHT: f32 = 32.0;
+const NPC_GOODS_ICON_AREA_WIDTH: i32 = 40;
+const NPC_GOODS_NEW_ICON_ASSET: &str = "original-ui/Prguse/550.png";
 
 /// Overlay mutation must run before any `Res<NativePlayerUiState>` readers in
 /// the same Update. Unordered Res + ResMut on this resource panics Bevy B0001.
@@ -1993,6 +1998,27 @@ struct OverlaySkillListViewport;
 
 #[derive(Component)]
 struct OverlayGameShopProduct;
+
+#[derive(Component)]
+struct OverlayNpcShopGoodCell;
+
+#[derive(Component)]
+struct OverlayNpcShopGoodIcon;
+
+#[derive(Component)]
+struct OverlayNpcShopGoodName;
+
+#[derive(Component)]
+struct OverlayNpcShopGoodPrice;
+
+#[derive(Component)]
+struct OverlayNpcShopGoodCount;
+
+#[derive(Component)]
+struct OverlayNpcShopGoodSelectionDivider;
+
+#[derive(Component)]
+struct OverlayNpcShopGoodNewIcon;
 
 #[derive(Component)]
 struct OverlayStorage;
@@ -7087,49 +7113,117 @@ fn overlay_inventory_count(
         });
 }
 
-/// One authoritative NPC-shop row. `ShopGood` is intentionally not coerced
-/// into an `ItemModel`: its catalogue index, stock, and selection identity
-/// belong to the server-provided shop snapshot rather than the player's bag.
+fn crystal_npc_goods_cell_rect(row: usize) -> CrystalRect {
+    CrystalRect::new(
+        10.0,
+        34.0 + row as f32 * 33.0,
+        NPC_GOODS_CELL_WIDTH,
+        NPC_GOODS_CELL_HEIGHT,
+    )
+}
+
+fn crystal_npc_goods_icon_rect(good: &ShopGood) -> Option<CrystalRect> {
+    if good.icon == 0 || good.icon_width == 0 || good.icon_height == 0 {
+        return None;
+    }
+    let width = i32::from(good.icon_width);
+    let height = i32::from(good.icon_height);
+    Some(CrystalRect::new(
+        ((NPC_GOODS_ICON_AREA_WIDTH - width) / 2) as f32,
+        ((NPC_GOODS_CELL_HEIGHT as i32 - height) / 2) as f32,
+        width as f32,
+        height as f32,
+    ))
+}
+
+fn crystal_npc_goods_new_icon_visible(good: &ShopGood, goods: &[ShopGood]) -> bool {
+    let Some(source) = good.tooltip_source.as_ref() else {
+        return false;
+    };
+    let Some(item) = source.user_item.as_ref() else {
+        return false;
+    };
+    let item_index = source.info.item_index;
+    let mut matching = 0usize;
+    let mut has_non_shop_item = false;
+    for candidate in goods {
+        let Some(candidate_source) = candidate.tooltip_source.as_ref() else {
+            continue;
+        };
+        if candidate_source.info.item_index != item_index {
+            continue;
+        }
+        matching += 1;
+        has_non_shop_item |= candidate_source
+            .user_item
+            .as_ref()
+            .is_some_and(|candidate| !candidate.is_shop_item);
+    }
+    let multiple_available = matching > 1 && has_non_shop_item;
+    !item.is_shop_item || multiple_available
+}
+
+/// Crystal MirGoodsCell: one 205x32 click/hover surface, with a 40x32 icon
+/// area and independent name/count/price labels at their source coordinates.
 fn overlay_absolute_shop_good_button(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
     good: &ShopGood,
-    label: &str,
     rect: CrystalRect,
     action: OverlayButton,
     player: &crate::read_model::PlayerStats,
+    selected: bool,
+    hide_added_stats: bool,
+    show_new_icon: bool,
 ) {
     let mut entity = parent.spawn((
+        OverlayNpcShopGoodCell,
         Node {
             position_type: PositionType::Absolute,
             left: Val::Px(rect.left),
             top: Val::Px(rect.top),
             width: Val::Px(rect.width),
             height: Val::Px(rect.height),
-            padding: UiRect::axes(Val::Px(2.0), Val::Px(1.0)),
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(4.0),
+            overflow: Overflow::clip(),
             ..default()
         },
-        BackgroundColor(Color::srgba(0.10, 0.07, 0.03, 0.36)),
+        BackgroundColor(Color::NONE),
+        Outline::new(
+            Val::Px(1.0),
+            Val::Px(0.0),
+            if selected {
+                Color::srgb(0.0, 1.0, 0.0)
+            } else {
+                Color::NONE
+            },
+        ),
         Button,
         action,
     ));
-    if let Some(document) = crystal_item_tooltip_document_from_source(
+    if let Some(document) = crystal_item_tooltip_document_from_source_with_options(
         &good.name,
         good.icon,
         u32::from(good.count),
         good.tooltip_source.as_ref(),
         player,
+        CrystalItemTooltipOptions { hide_added_stats },
     ) {
         entity.insert(CrystalItemHint(document));
     }
     entity.with_children(|row| {
-        if let (Some(asset_server), Some(path)) = (asset_server, item_icon_path(good.icon)) {
+        if let (Some(asset_server), Some(path), Some(icon_rect)) = (
+            asset_server,
+            item_icon_path(good.icon),
+            crystal_npc_goods_icon_rect(good),
+        ) {
             row.spawn((
+                OverlayNpcShopGoodIcon,
                 Node {
-                    width: Val::Px(28.0),
-                    height: Val::Px(28.0),
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(icon_rect.left),
+                    top: Val::Px(icon_rect.top),
+                    width: Val::Px(icon_rect.width),
+                    height: Val::Px(icon_rect.height),
                     ..default()
                 },
                 ImageNode {
@@ -7140,13 +7234,89 @@ fn overlay_absolute_shop_good_button(
             ));
         }
         row.spawn((
-            Text::new(label.to_owned()),
+            OverlayNpcShopGoodName,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(44.0),
+                top: Val::Px(0.0),
+                ..default()
+            },
+            Text::new(good.name.clone()),
             TextFont {
                 font_size: FontSize::Px(9.0),
                 ..default()
             },
-            TextColor(TEXT),
+            TextColor(Color::WHITE),
+            TextLayout::new(Justify::Left, LineBreak::NoWrap),
         ));
+        row.spawn((
+            OverlayNpcShopGoodPrice,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(44.0),
+                top: Val::Px(14.0),
+                ..default()
+            },
+            Text::new(format!("Price: {} gold", good.price)),
+            TextFont {
+                font_size: FontSize::Px(9.0),
+                ..default()
+            },
+            TextColor(Color::WHITE),
+            TextLayout::new(Justify::Left, LineBreak::NoWrap),
+        ));
+        if good.count > 1 {
+            row.spawn((
+                OverlayNpcShopGoodCount,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(23.0),
+                    top: Val::Px(17.0),
+                    ..default()
+                },
+                Text::new(good.count.to_string()),
+                TextFont {
+                    font_size: FontSize::Px(9.0),
+                    ..default()
+                },
+                TextColor(Color::srgb(1.0, 1.0, 0.0)),
+                TextLayout::new(Justify::Left, LineBreak::NoWrap),
+            ));
+        }
+        if selected {
+            row.spawn((
+                OverlayNpcShopGoodSelectionDivider,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(40.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(1.0),
+                    height: Val::Px(NPC_GOODS_CELL_HEIGHT),
+                    ..default()
+                },
+                BackgroundColor(Color::srgb(0.0, 1.0, 0.0)),
+            ));
+        }
+        if show_new_icon {
+            if let Some(asset_server) = asset_server {
+                row.spawn((
+                    OverlayNpcShopGoodNewIcon,
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(190.0),
+                        top: Val::Px(5.0),
+                        width: Val::Px(12.0),
+                        height: Val::Px(9.0),
+                        ..default()
+                    },
+                    ImageNode {
+                        image: asset_server.load(NPC_GOODS_NEW_ICON_ASSET),
+                        image_mode: bevy::ui::widget::NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
+            }
+        }
     });
 }
 
@@ -9910,21 +10080,17 @@ fn render_shop(
         .enumerate()
     {
         let selected = shop.selected_id == Some(good.unique_id);
-        let label = format!(
-            "{}{}  {}  {}",
-            if selected { "▶ " } else { "" },
-            short_name(&good.name, &good.unique_id.to_string()),
-            good.price,
-            good.stock_label(),
-        );
+        let show_new_icon = crystal_npc_goods_new_icon_visible(good, &shop.goods);
         overlay_absolute_shop_good_button(
             parent,
             asset_server,
             good,
-            &label,
-            CrystalRect::new(10.0, 34.0 + row as f32 * 33.0, 202.0, 30.0),
+            crystal_npc_goods_cell_rect(row),
             OverlayButton::SelectShopGood(good.unique_id),
             player,
+            selected,
+            shop.hide_added_stats,
+            show_new_icon,
         );
     }
     if shop.goods.is_empty() {
@@ -11916,6 +12082,140 @@ mod tests {
         }];
         app.update();
         assert_rendered_rich_hint(&mut app, "Trade Potion (5)");
+    }
+
+    #[test]
+    fn npc_goods_cell_uses_crystal_geometry_labels_selection_and_hidden_added_stats() {
+        let mut app = overlay_render_test_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::NpcShop;
+
+        let mut source = surface_tooltip_source(221, "Wooden Sword", 7, 101, 3);
+        source.info.item_type = 1;
+        source.info.stats = vec![
+            crate::inventory::CrystalItemStatModel { stat: 4, value: 2 },
+            crate::inventory::CrystalItemStatModel { stat: 5, value: 4 },
+        ];
+        let item = source.user_item.as_mut().expect("shop user item");
+        item.is_shop_item = false;
+        item.cursed = true;
+        item.added_stats = vec![crate::inventory::CrystalItemStatModel { stat: 5, value: 9 }];
+
+        {
+            let mut shop = app.world_mut().resource_mut::<ShopModel>();
+            shop.service_mode = NpcShopServiceMode::Buy;
+            shop.hide_added_stats = true;
+            shop.selected_id = Some(101);
+            shop.goods = vec![ShopGood {
+                unique_id: 101,
+                name: "Wooden Sword".to_owned(),
+                price: 50,
+                count: 3,
+                icon: 7,
+                icon_width: 36,
+                icon_height: 26,
+                tooltip_source: Some(source),
+                ..Default::default()
+            }];
+        }
+
+        app.update();
+
+        {
+            let world = app.world_mut();
+            let mut cell_query = world.query_filtered::<
+                (&Node, &Outline, &CrystalItemHint),
+                With<OverlayNpcShopGoodCell>,
+            >();
+            let (cell, outline, hint) = cell_query.single(world).expect("NPC goods cell");
+            assert_eq!(cell.left, Val::Px(10.0));
+            assert_eq!(cell.top, Val::Px(34.0));
+            assert_eq!(cell.width, Val::Px(205.0));
+            assert_eq!(cell.height, Val::Px(32.0));
+            assert_eq!(outline.width, Val::Px(1.0));
+            assert_eq!(outline.color, Color::srgb(0.0, 1.0, 0.0));
+            assert!(hint.0.plain_text().contains("DC + 2~4"));
+            assert!(!hint.0.plain_text().contains("(+9)"));
+            assert!(!hint.0.plain_text().contains("Cursed"));
+
+            let mut icon_query = world.query_filtered::<&Node, With<OverlayNpcShopGoodIcon>>();
+            let icon = icon_query.single(world).expect("true-size shop icon");
+            assert_eq!(icon.left, Val::Px(2.0));
+            assert_eq!(icon.top, Val::Px(3.0));
+            assert_eq!(icon.width, Val::Px(36.0));
+            assert_eq!(icon.height, Val::Px(26.0));
+
+            let mut divider_query =
+                world.query_filtered::<&Node, With<OverlayNpcShopGoodSelectionDivider>>();
+            let divider = divider_query.single(world).expect("selection divider");
+            assert_eq!(divider.left, Val::Px(40.0));
+            assert_eq!(divider.height, Val::Px(32.0));
+
+            let mut new_icon_query =
+                world.query_filtered::<&Node, With<OverlayNpcShopGoodNewIcon>>();
+            let new_icon = new_icon_query.single(world).expect("Crystal new icon");
+            assert_eq!(new_icon.left, Val::Px(190.0));
+            assert_eq!(new_icon.top, Val::Px(5.0));
+            assert_eq!(new_icon.width, Val::Px(12.0));
+            assert_eq!(new_icon.height, Val::Px(9.0));
+        }
+
+        let (name, name_left, name_top) = {
+            let world = app.world_mut();
+            let mut query = world.query_filtered::<(&Text, &Node), With<OverlayNpcShopGoodName>>();
+            let (text, node) = query.single(world).expect("name label");
+            (text.0.clone(), node.left, node.top)
+        };
+        let (price, price_left, price_top) = {
+            let world = app.world_mut();
+            let mut query = world.query_filtered::<(&Text, &Node), With<OverlayNpcShopGoodPrice>>();
+            let (text, node) = query.single(world).expect("price label");
+            (text.0.clone(), node.left, node.top)
+        };
+        let (count, count_left, count_top) = {
+            let world = app.world_mut();
+            let mut query = world.query_filtered::<(&Text, &Node), With<OverlayNpcShopGoodCount>>();
+            let (text, node) = query.single(world).expect("count label");
+            (text.0.clone(), node.left, node.top)
+        };
+        assert_eq!(name, "Wooden Sword");
+        assert_eq!((name_left, name_top), (Val::Px(44.0), Val::Px(0.0)));
+        assert_eq!(price, "Price: 50 gold");
+        assert_eq!((price_left, price_top), (Val::Px(44.0), Val::Px(14.0)));
+        assert_eq!(count, "3");
+        assert_eq!((count_left, count_top), (Val::Px(23.0), Val::Px(17.0)));
+    }
+
+    #[test]
+    fn npc_goods_geometry_and_new_marker_match_mir_goods_cell_rules() {
+        assert_eq!(
+            crystal_npc_goods_cell_rect(7),
+            CrystalRect::new(10.0, 265.0, 205.0, 32.0)
+        );
+        let mut good = ShopGood {
+            icon: 7,
+            icon_width: 36,
+            icon_height: 26,
+            tooltip_source: Some(surface_tooltip_source(221, "Sword", 7, 1, 1)),
+            ..Default::default()
+        };
+        assert_eq!(
+            crystal_npc_goods_icon_rect(&good),
+            Some(CrystalRect::new(2.0, 3.0, 36.0, 26.0))
+        );
+        good.tooltip_source
+            .as_mut()
+            .unwrap()
+            .user_item
+            .as_mut()
+            .unwrap()
+            .is_shop_item = true;
+        assert!(!crystal_npc_goods_new_icon_visible(
+            &good,
+            std::slice::from_ref(&good)
+        ));
     }
 
     #[test]

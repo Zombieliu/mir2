@@ -1,5 +1,33 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-09-03 native Crystal NPC goods-cell checkpoint: the fresh Windows EXE
+> SHA-256
+> `159B13E722451C6F44B036C6B3ABD141E19362EDB28ED29180F34C6849A7DD8A`
+> followed the real login -> Scott -> View route and rendered populated NPC
+> goods at BichonProvince `(288,616)`. Baseline capture
+> `docs/generated/player-qa/native-ui-parity-20260903-npc-shop/mir2-in-game-1788375662467-1.png`
+> has SHA-256
+> `B62E187B4042434875FACF9130F20A0D443CF72C4D63462A1E8C084FBDC1FF6C`;
+> selected/hover capture
+> `docs/generated/player-qa/native-ui-parity-20260903-npc-shop/mir2-in-game-1788375687703-2.png`
+> has SHA-256
+> `DCECFE0FC836F6CBA4961D40E6F259622DAAA075059CFF13817F8C9B304349DA`.
+> Both sidecars bind run `npc-shop-20260903-r2`, `panel=NpcShop`, 1024x768,
+> DPI 1.0 and the same world state. The second visibly freezes Crystal's
+> `205x32` Lime-selected cell, true-size centred icon, separate name/count/
+> price labels and shared item hint. `NPCGoods.HideAddedStats` is preserved
+> through the packet/model/runtime chain and has a regression proving it
+> hides additions and `Cursed`, not base/bind text. Source authority is
+> `MirGoodsCell.cs:20-140`, `NPCDialogs.cs:1071-1082,1348`,
+> `ServerPackets.cs:3082-3104` and `GameScene.cs:4199`. Native UI passes
+> 514/514; runtime 212/212; Windows 519/520, with only the pre-existing Archer
+> atlas fixture failure. Full report:
+> `docs/generated/player-qa/native-ui-parity-20260903-npc-shop/README.md`.
+> Sidecars remain `eligible=false`; duplicate/sub-goods topology, the other
+> specialized item-surface layouts/captures, trusted build/light provenance,
+> 100/125/150% DPI and human Crystal comparison remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+>
 > 2026-09-03 native remaining item-tooltip surface checkpoint: packet adapters
 > now retain complete tooltip source for NPC shop, GameShop, fixed/selectable
 > quest rewards, guild storage and trade. Automated coverage verifies Crystal's

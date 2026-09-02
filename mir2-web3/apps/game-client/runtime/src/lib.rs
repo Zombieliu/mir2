@@ -2152,6 +2152,7 @@ fn ingest_pending_shop_model(
                             });
                         shop.goods = model.goods;
                         shop.selected_id = selected_valid;
+                        shop.hide_added_stats = model.hide_added_stats;
                         reconcile_shop_refresh(&mut pending, &old, &shop);
                         mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Shop);
                     }
@@ -8214,7 +8215,7 @@ mod native_data_path_tests {
             r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Hello","gold":10,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":false}]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_shop_model(
-            r#"{"goods":[{"unique_id":9,"name":"Potion","price":50,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
+            r#"{"goods":[{"unique_id":9,"name":"Potion","price":50,"count":20,"stock":-1,"panel_type":0}],"hide_added_stats":true}"#.to_owned()
         ));
         assert!(native_ingest::push_native_storage_model(
             r#"{"items":[{"key":"sword","name":"Iron Sword","quantity":1,"slot":3,"container":4}],"size":30,"has_password":false,"unlocked":true,"has_expanded":false,"expiry":0}"#.to_owned()
@@ -8249,6 +8250,11 @@ mod native_data_path_tests {
                 .goods
                 .len(),
             1
+        );
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::shop::ShopModel>()
+                .hide_added_stats
         );
         assert_eq!(
             app.world()
@@ -8285,7 +8291,7 @@ mod native_data_path_tests {
             r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Updated","gold":20,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":true}]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_shop_model(
-            r#"{"goods":[{"unique_id":9,"name":"Potion","price":60,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
+            r#"{"goods":[{"unique_id":9,"name":"Potion","price":60,"count":20,"stock":-1,"panel_type":0}],"hide_added_stats":false}"#.to_owned()
         ));
         assert!(native_ingest::push_native_npc_shop_service(
             r#"{"mode":"buy","repairRate":null}"#.to_owned()
@@ -8311,6 +8317,7 @@ mod native_data_path_tests {
             let shop = app.world().resource::<mir2_client_bevy::shop::ShopModel>();
             assert_eq!(shop.selected_id, None);
             assert!(shop.allows_buy());
+            assert!(!shop.hide_added_stats);
         }
         assert!(native_ingest::push_native_npc_shop_service(
             r#"{"mode":"repair","repairRate":1.5}"#.to_owned()
@@ -8413,6 +8420,11 @@ mod native_data_path_tests {
             .resource::<mir2_client_bevy::shop::ShopModel>()
             .goods
             .is_empty());
+        assert!(
+            !app.world()
+                .resource::<mir2_client_bevy::shop::ShopModel>()
+                .hide_added_stats
+        );
         assert!(app
             .world()
             .resource::<mir2_client_bevy::storage::StorageModel>()

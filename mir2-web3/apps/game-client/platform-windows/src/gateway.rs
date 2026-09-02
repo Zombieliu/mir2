@@ -4519,6 +4519,7 @@ fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCurs
     json!({
         "goods": goods,
         "selected_id": Value::Null,
+        "hide_added_stats": shop_hide_added_stats(payload),
         "selected_bag_slot_for_sell": Value::Null,
         "selected_bag_slot_for_repair": Value::Null,
     })
@@ -4540,6 +4541,7 @@ fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCu
     json!({
         "goods": goods,
         "selected_id": Value::Null,
+        "hide_added_stats": shop_hide_added_stats(payload),
         "selected_bag_slot_for_sell": Value::Null,
         "selected_bag_slot_for_repair": Value::Null,
     })
@@ -4557,6 +4559,10 @@ fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) 
         .get("tooltipSource")
         .cloned()
         .or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));
+    let icon = value_u32(item.get("icon"))
+        .and_then(|value| u16::try_from(value).ok())
+        .unwrap_or_default();
+    let icon_geometry = item_frame_geometry(icon);
     Some(json!({
         "unique_id": id,
         "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
@@ -4566,10 +4572,25 @@ fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) 
         "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))
             .and_then(|value| u8::try_from(value).ok())
             .unwrap_or(u8::try_from(fallback).unwrap_or_default()),
-        "icon": value_u32(item.get("icon")).and_then(|value| u16::try_from(value).ok()).unwrap_or_default(),
+        "icon": icon,
+        "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),
+        "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),
         "description": value_string(item.get("description")).unwrap_or_default(),
         "tooltip_source": tooltip_source,
     }))
+}
+
+fn shop_hide_added_stats(payload: &Value) -> bool {
+    [
+        "hideAddedStats",
+        "hide_added_stats",
+        "shopHideAddedStats",
+        "shop_hide_added_stats",
+    ]
+    .iter()
+    .find_map(|key| payload.get(*key))
+    .and_then(Value::as_bool)
+    .unwrap_or(false)
 }
 
 fn try_transform_shop_model_from_packet(
@@ -5627,9 +5648,10 @@ mod tests {
     fn recovered_npc_goods_populates_only_the_independent_npc_shop_model() {
         let model = try_transform_shop_model_from_packet(
             &json!({
-                "list": [{ "uniqueId": 9, "name": "Potion", "price": 50, "count": 20 }],
+                "list": [{ "uniqueId": 9, "name": "Potion", "price": 50, "count": 20, "icon": 7 }],
                 "rate": 1.0,
                 "panelType": 0,
+                "hideAddedStats": true,
             }),
             &NativeUiPlayerCursor::default(),
         )
@@ -5639,6 +5661,20 @@ mod tests {
         assert_eq!(shop.goods.len(), 1);
         assert_eq!(shop.goods[0].unique_id, 9);
         assert_eq!(shop.goods[0].price, 50);
+        assert_eq!(shop.goods[0].icon_width, 36);
+        assert_eq!(shop.goods[0].icon_height, 26);
+        assert!(shop.hide_added_stats);
+
+        let snapshot = transform_shop_model_from_snapshot(
+            &json!({
+                "npc_goods": [{ "unique_id": 10, "name": "Blade", "icon": 7 }],
+                "shop_hide_added_stats": true,
+            }),
+            &NativeUiPlayerCursor::default(),
+        );
+        let snapshot = serde_json::from_value::<mir2_client_bevy::shop::ShopModel>(snapshot)
+            .expect("snapshot ShopModel");
+        assert!(snapshot.hide_added_stats);
         assert!(try_transform_shop_model_from_packet(
             &json!({
                 "list": [{ "name": "missing identity" }]

@@ -28,6 +28,37 @@ humanVisualAudioFeelClosed: false
 formalPublisherSigningClosed: false
 ```
 
+## 2026-09-03 NPC MirGoodsCell and HideAddedStats checkpoint
+
+The bounded NPC-goods row no longer uses Candidate's combined compact label.
+It follows Crystal `MirGoodsCell.cs:20-140`: one `205x32` click/hover surface,
+the source-size item image centred within `40x32`, name at `(44,0)`, yellow
+count at `(23,17)`, price at `(44,14)`, Lime selection border/divider and
+original `Prguse/550` New art at `(190,5)`. The New rule also follows
+`NPCDialogs.cs:1348`: `!IsShopItem || MultipleAvailable`, where multiple means
+more than one same-index good and at least one non-shop instance. Cell rows
+remain at `(10, 34 + row*33)` under source `Prguse/1000`.
+
+Crystal's `NPCGoods.HideAddedStats` bit (`ServerPackets.cs:3082-3104`, assigned
+at `GameScene.cs:4199`) now survives packet/snapshot adapters, serde and ECS
+refresh. Only NPC-shop hint construction consumes it. Tests prove added
+attack/defence values and `Cursed` disappear while base stats and other bind
+lines remain intact.
+
+The freshly built client EXE SHA-256 is
+`159B13E722451C6F44B036C6B3ABD141E19362EDB28ED29180F34C6849A7DD8A`.
+Real Windows input traversed login -> Scott -> View, then F12 captured a
+populated baseline and Lime-selected/hover state at BichonProvince `(288,616)`
+under `../native-ui-parity-20260903-npc-shop/`. Both sidecars freeze run
+`npc-shop-20260903-r2`, `panel=NpcShop`, 1024x768 and DPI 1.0. Native UI passes
+514/514, runtime 212/212 and Windows 519/520; only the already registered
+Archer `/ARArmour/00/24.png` fixture assertion fails.
+
+This bounds the NPC row/HideAddedStats leaf only. Duplicate/sub-goods panel
+topology, other item-surface geometry and populated captures, trusted package/
+light provenance, real DPI and human Crystal comparison remain open. All
+claim-state flags above stay false/null.
+
 ## 2026-09-03 remaining item-tooltip surface projection checkpoint
 
 The five sparse surfaces left by the personal-item checkpoint now retain the
@@ -180,7 +211,7 @@ SHA-256 rather than assuming every image represents one build.
 | WN-ITEM-001 | P1 | Inventory/belt geometry | Inventory and belt cell size, spacing, frame, padding, clipping, footer and icon fit match Crystal. | Bag1/Bag2/QuestInventory now use source `316x236` geometry, exact grid/icon centring, footer values/states and a source movable-window path with real-pointer before/after evidence. The same-EXE tooltip run also freezes the four starter icons in the source grid. Belt-wide geometry, trusted same-state comparison and DPI/human acceptance remain open. | Source-derived bounds, no-overlap assertions, original item-size/offset tests, same-item side-by-side screenshot, trusted exact-EXE evidence, and 100/125/150% DPI checks. |
 | WN-ITEM-004 | P1 | Inventory delete flow | The footer bin enters Crystal DeleteMode, follows the pointer with source cursor/audio, prompts for stack quantity where required, confirms deletion and sends DeleteItem; it never aliases ground DropItem. | The bounded implementation now has Crystal DeleteMode cursor/audio, right-click cancel, stack amount/single confirm, exact `DeleteItem` instance/count forwarding, receipt correlation and stale-item guards. A same-EXE single-item prompt was captured without pressing YES; live stacked-item evidence and human acceptance remain open. | Live authoritative stacked-item amount recording, locked/stale/cancel regression ledger, trusted package provenance and human comparison. |
 | WN-ITEM-002 | P0 | Item icons | Every carried/belt/equipment item in the audited slice renders its exact source icon, count, durability overlays, and unavailable state. | Source-sized/centred starter bag icons and stack-count rules are implemented and present in the current same-EXE run. Complete audited item-manifest coverage, durability/unavailable overlay denominator, DPI and human comparison remain open. | Item manifest coverage, missing-asset fail-closed test, representative grid screenshot, and complete audited-slice count. |
-| WN-ITEM-003 | P1 | Item detail tooltip | Hover shows source-correct name, type, weight, durability, stats, requirements, bind/trade restrictions, description, price, and comparison where Crystal does. | Bounded personal-item implementation is green: exact/real item plus recursive socket/user metadata and player stats drive Crystal's eleven ordered sections on inventory, belt, equipment, personal storage and warehouse-side bag; disabled cells stay hoverable, .NET expiry/seal/rental text and `+(28,28)` clamping are tested, and real-pointer same-EXE WoodenSword evidence exists. NPC/cash shops, quest rewards, guild storage, trade, soul-bound name lookup and Hero requirement id 129 remain open. | Extend authoritative metadata to every remaining item surface; add known specialized-item matrix, trusted package/light plus 100/125/150% DPI captures, and human same-state Crystal comparison. |
+| WN-ITEM-003 | P1 | Item detail tooltip | Hover shows source-correct name, type, weight, durability, stats, requirements, bind/trade restrictions, description, price, and comparison where Crystal does. | Bounded personal-item implementation is green: exact/real item plus recursive socket/user metadata and player stats drive Crystal's eleven ordered sections on inventory, belt, equipment, personal storage and warehouse-side bag; disabled cells stay hoverable, .NET expiry/seal/rental text and `+(28,28)` clamping are tested, and real-pointer same-EXE WoodenSword evidence exists. NPC shop now also has the source `205x32` MirGoodsCell layout, `HideAddedStats` behavior and a populated selected/hover F12 capture. GameShop, quest rewards, guild storage and trade retain complete tooltip metadata but still need exact layouts and populated captures; duplicate/sub-goods topology, soul-bound name lookup and Hero requirement id 129 remain open. | Close remaining specialized-surface geometry/topology and populated captures; add known specialized-item matrix, trusted package/light plus 100/125/150% DPI captures, and human same-state Crystal comparison. |
 | WN-UI-001 | P1 | Overall bitmap/text fidelity | Frames, button bevels, bitmap/GDI-like text, colors, opacity, spacing, and z-order match Crystal rather than merely occupying similar regions. | User rejects current overall UI parity and says it trails Web. | Fixed-view screenshot pairs, per-panel geometry ledger, font/text raster review, and human acceptance. |
 | WN-CHAR-001 | P1 | Character paper doll | CharacterDialog uses gender-specific page art and composes wing, resolved armour, weapon, helmet-or-hair and 14 equipment cells in Crystal draw order with each `.Lib` frame's source offset. | Failed. Candidate draws the shell and equipment icons but lacks `gender/hair/wingEffect` in the UI read model, lacks the `StateItem` export/offset chain, omits the composite layers, and displays a non-source `class + level` title. | Runtime-field provenance, `StateItem`/hair/wing export hashes, layer/order/offset geometry tests, representative class/gender/equipment matrix, same-state same-EXE screenshots and human acceptance. |
 | WN-AUDIO-001 | P2 | Development audio policy | During active parity development, background music remains muted while effects/UI sounds stay enabled; release restores the intended music policy. | A bounded mute commit exists; final release restore is intentionally open. | Config/build-mode tests and physical audio acceptance. |

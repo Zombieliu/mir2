@@ -110,6 +110,14 @@ impl CrystalItemTooltipDocument {
     }
 }
 
+/// Surface-specific switches used by Crystal when constructing an item label.
+/// NPC shops can suppress mutable added stats without changing inventory,
+/// equipment, storage, trade, or reward tooltips.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct CrystalItemTooltipOptions {
+    pub hide_added_stats: bool,
+}
+
 /// Build the source-ordered tooltip document from authoritative inputs.
 ///
 /// Missing `tooltip_source` never triggers catalogue inference. The fallback
@@ -119,7 +127,15 @@ pub fn crystal_item_tooltip_document(
     item: &ItemModel,
     player: &PlayerStats,
 ) -> CrystalItemTooltipDocument {
-    crystal_item_tooltip_document_at(item, player, dotnet_ticks_now_utc())
+    crystal_item_tooltip_document_with_options(item, player, CrystalItemTooltipOptions::default())
+}
+
+pub fn crystal_item_tooltip_document_with_options(
+    item: &ItemModel,
+    player: &PlayerStats,
+    options: CrystalItemTooltipOptions,
+) -> CrystalItemTooltipDocument {
+    crystal_item_tooltip_document_at_with_options(item, player, dotnet_ticks_now_utc(), options)
 }
 
 /// Build the shared Crystal label for a non-inventory item surface (NPC
@@ -133,13 +149,31 @@ pub fn crystal_item_tooltip_document_from_source(
     source: Option<&CrystalItemTooltipSourceModel>,
     player: &PlayerStats,
 ) -> Option<CrystalItemTooltipDocument> {
+    crystal_item_tooltip_document_from_source_with_options(
+        name,
+        icon,
+        quantity,
+        source,
+        player,
+        CrystalItemTooltipOptions::default(),
+    )
+}
+
+pub fn crystal_item_tooltip_document_from_source_with_options(
+    name: &str,
+    icon: u16,
+    quantity: u32,
+    source: Option<&CrystalItemTooltipSourceModel>,
+    player: &PlayerStats,
+    options: CrystalItemTooltipOptions,
+) -> Option<CrystalItemTooltipDocument> {
     let source = source?.clone();
     let (durability_current, durability_max) = source
         .user_item
         .as_ref()
         .map(|item| (Some(item.current_dura), Some(item.max_dura)))
         .unwrap_or((None, None));
-    Some(crystal_item_tooltip_document(
+    Some(crystal_item_tooltip_document_with_options(
         &ItemModel {
             name: name.to_owned(),
             icon,
@@ -150,13 +184,29 @@ pub fn crystal_item_tooltip_document_from_source(
             ..Default::default()
         },
         player,
+        options,
     ))
 }
 
+#[cfg(test)]
 fn crystal_item_tooltip_document_at(
     item: &ItemModel,
     player: &PlayerStats,
     now_dotnet_ticks: i64,
+) -> CrystalItemTooltipDocument {
+    crystal_item_tooltip_document_at_with_options(
+        item,
+        player,
+        now_dotnet_ticks,
+        CrystalItemTooltipOptions::default(),
+    )
+}
+
+fn crystal_item_tooltip_document_at_with_options(
+    item: &ItemModel,
+    player: &PlayerStats,
+    now_dotnet_ticks: i64,
+    options: CrystalItemTooltipOptions,
 ) -> CrystalItemTooltipDocument {
     let broken = item.durability_current == Some(0)
         && item.durability_max.is_some_and(|maximum| maximum != 0);
@@ -173,13 +223,22 @@ fn crystal_item_tooltip_document_at(
     let mut sections = Vec::with_capacity(11);
 
     push_nonempty(&mut sections, name_section(item, info, user));
-    push_nonempty(&mut sections, attack_section(real_info, user, source));
-    push_nonempty(&mut sections, defence_section(real_info, user, source));
+    push_nonempty(
+        &mut sections,
+        attack_section(real_info, user, source, options.hide_added_stats),
+    );
+    push_nonempty(
+        &mut sections,
+        defence_section(real_info, user, source, options.hide_added_stats),
+    );
     push_nonempty(&mut sections, weight_section(info, real_info));
     push_nonempty(&mut sections, awake_section(real_info, user));
     push_nonempty(&mut sections, socket_section(real_info, user, source));
     push_nonempty(&mut sections, need_section(item, real_info, user, player));
-    push_nonempty(&mut sections, bind_section(info, user, now_dotnet_ticks));
+    push_nonempty(
+        &mut sections,
+        bind_section(info, user, now_dotnet_ticks, options.hide_added_stats),
+    );
     push_nonempty(&mut sections, overlap_section(real_info));
     push_nonempty(&mut sections, story_section(info, real_info));
     push_nonempty(&mut sections, gm_section(user));
@@ -352,6 +411,7 @@ fn attack_section(
     info: &CrystalItemInfoModel,
     user: Option<&CrystalUserItemModel>,
     source: &CrystalItemTooltipSourceModel,
+    hide_added_stats: bool,
 ) -> CrystalItemTooltipSection {
     let mut section = CrystalItemTooltipSection::new(CrystalItemTooltipSectionKind::Attack);
     let origin = &source.info;
@@ -379,6 +439,7 @@ fn attack_section(
         source,
         4,
         5,
+        hide_added_stats,
     );
     push_range_stat(
         &mut section,
@@ -389,6 +450,7 @@ fn attack_section(
         source,
         6,
         7,
+        hide_added_stats,
     );
     push_range_stat(
         &mut section,
@@ -399,10 +461,11 @@ fn attack_section(
         source,
         8,
         9,
+        hide_added_stats,
     );
 
     let luck = base_stat(info, 15);
-    let added_luck = total_added_stat(user, source, 15);
+    let added_luck = total_added_stat(user, source, 15, hide_added_stats);
     if luck != 0 || added_luck != 0 {
         let total = luck + added_luck;
         let text = if info.item_type == 36 && info.shape == 28 {
@@ -426,6 +489,7 @@ fn attack_section(
         user,
         source,
         10,
+        hide_added_stats,
     );
     let holy = base_stat(info, 21);
     if holy > 0 {
@@ -433,7 +497,7 @@ fn attack_section(
     }
 
     let attack_speed = base_stat(info, 14);
-    let added_attack_speed = total_added_stat(user, source, 14);
+    let added_attack_speed = total_added_stat(user, source, 14, hide_added_stats);
     if attack_speed != 0 || added_attack_speed != 0 {
         let total = attack_speed + added_attack_speed;
         let text = if gem {
@@ -456,6 +520,7 @@ fn attack_section(
         user,
         source,
         22,
+        hide_added_stats,
     );
     push_single_stat_variant(
         &mut section,
@@ -465,6 +530,7 @@ fn attack_section(
         user,
         source,
         23,
+        hide_added_stats,
     );
     if !gem {
         push_single_stat(
@@ -479,6 +545,7 @@ fn attack_section(
             source,
             35,
             false,
+            hide_added_stats,
         );
         push_single_stat(
             &mut section,
@@ -488,6 +555,7 @@ fn attack_section(
             source,
             36,
             false,
+            hide_added_stats,
         );
         let reflect = base_stat(info, 19);
         if reflect > 0 {
@@ -498,9 +566,33 @@ fn attack_section(
             section.push_white(format!("HP Drain Rate: {hp_drain}%"));
         }
     }
-    push_rate_stat(&mut section, "Exp Rate: ", info, user, source, 100);
-    push_rate_stat(&mut section, "Drop Rate: ", info, user, source, 101);
-    push_rate_stat(&mut section, "Gold Rate: ", info, user, source, 102);
+    push_rate_stat(
+        &mut section,
+        "Exp Rate: ",
+        info,
+        user,
+        source,
+        100,
+        hide_added_stats,
+    );
+    push_rate_stat(
+        &mut section,
+        "Drop Rate: ",
+        info,
+        user,
+        source,
+        101,
+        hide_added_stats,
+    );
+    push_rate_stat(
+        &mut section,
+        "Gold Rate: ",
+        info,
+        user,
+        source,
+        102,
+        hide_added_stats,
+    );
     section
 }
 
@@ -508,6 +600,7 @@ fn defence_section(
     info: &CrystalItemInfoModel,
     user: Option<&CrystalUserItemModel>,
     source: &CrystalItemTooltipSourceModel,
+    hide_added_stats: bool,
 ) -> CrystalItemTooltipSection {
     let mut section = CrystalItemTooltipSection::new(CrystalItemTooltipSectionKind::Defence);
     let origin = &source.info;
@@ -516,7 +609,7 @@ fn defence_section(
 
     let min_ac = base_stat(info, 0);
     let max_ac = base_stat(info, 1);
-    let added_ac = total_added_stat(user, source, 1);
+    let added_ac = total_added_stat(user, source, 1, hide_added_stats);
     if min_ac > 0 || max_ac > 0 || added_ac > 0 {
         let text = if gem {
             format!("Adds +{} AC", min_ac + max_ac + added_ac)
@@ -550,7 +643,7 @@ fn defence_section(
 
     let min_mac = base_stat(info, 2);
     let max_mac = base_stat(info, 3);
-    let added_mac = total_added_stat(user, source, 3);
+    let added_mac = total_added_stat(user, source, 3, hide_added_stats);
     if min_mac > 0 || max_mac > 0 || added_mac > 0 {
         let text = if fishing {
             format!("AutoReel Chance + {}%", max_mac + added_mac)
@@ -567,9 +660,27 @@ fn defence_section(
     }
 
     if origin.item_type != 40 {
-        push_single_stat(&mut section, "Max HP + ", info, user, source, 12, false);
+        push_single_stat(
+            &mut section,
+            "Max HP + ",
+            info,
+            user,
+            source,
+            12,
+            false,
+            hide_added_stats,
+        );
     }
-    push_single_stat(&mut section, "Max MP + ", info, user, source, 13, false);
+    push_single_stat(
+        &mut section,
+        "Max MP + ",
+        info,
+        user,
+        source,
+        13,
+        false,
+        hide_added_stats,
+    );
     for (label, stat) in [
         ("Max HP + ", 46),
         ("Max MP + ", 47),
@@ -583,7 +694,16 @@ fn defence_section(
         ("Mana Recovery + ", 33),
         ("Poison Recovery + ", 34),
     ] {
-        push_single_stat(&mut section, label, info, user, source, stat, false);
+        push_single_stat(
+            &mut section,
+            label,
+            info,
+            user,
+            source,
+            stat,
+            false,
+            hide_added_stats,
+        );
     }
     push_single_stat_variant(
         &mut section,
@@ -593,8 +713,18 @@ fn defence_section(
         user,
         source,
         11,
+        hide_added_stats,
     );
-    push_single_stat(&mut section, "Strong + ", info, user, source, 20, false);
+    push_single_stat(
+        &mut section,
+        "Strong + ",
+        info,
+        user,
+        source,
+        20,
+        false,
+        hide_added_stats,
+    );
     push_single_stat_variant(
         &mut section,
         "Poison Resist + ",
@@ -603,6 +733,7 @@ fn defence_section(
         user,
         source,
         31,
+        hide_added_stats,
     );
     push_single_stat_variant(
         &mut section,
@@ -612,6 +743,7 @@ fn defence_section(
         user,
         source,
         30,
+        hide_added_stats,
     );
     for (label, stat) in [
         ("Max DC + ", 42),
@@ -846,6 +978,7 @@ fn bind_section(
     info: &CrystalItemInfoModel,
     user: Option<&CrystalUserItemModel>,
     now_dotnet_ticks: i64,
+    hide_added_stats: bool,
 ) -> CrystalItemTooltipSection {
     let mut section = CrystalItemTooltipSection::new(CrystalItemTooltipSectionKind::Bind);
     let flags = info.bind as u16;
@@ -875,7 +1008,9 @@ fn bind_section(
         // same empty suffix in the original client.
         section.push("Soulbound to: ", CrystalItemTooltipColour::Yellow);
     }
-    if user.is_some_and(|user| user.cursed && (!info.need_identify || user.identified)) {
+    if !hide_added_stats
+        && user.is_some_and(|user| user.cursed && (!info.need_identify || user.identified))
+    {
         section.push("Cursed", CrystalItemTooltipColour::Yellow);
     }
     if info.item_type == 18 {
@@ -1025,10 +1160,11 @@ fn push_range_stat(
     source: &CrystalItemTooltipSourceModel,
     min_stat: u8,
     max_stat: u8,
+    hide_added_stats: bool,
 ) {
     let minimum = base_stat(info, min_stat);
     let maximum = base_stat(info, max_stat);
-    let added = total_added_stat(user, source, max_stat);
+    let added = total_added_stat(user, source, max_stat, hide_added_stats);
     if minimum > 0 || maximum > 0 || added > 0 {
         let text = match gem_label {
             Some(gem_label) => format!("Adds +{} {gem_label}", minimum + maximum + added),
@@ -1050,9 +1186,10 @@ fn push_single_stat_variant(
     user: Option<&CrystalUserItemModel>,
     source: &CrystalItemTooltipSourceModel,
     stat: u8,
+    hide_added_stats: bool,
 ) {
     let base = base_stat(info, stat);
-    let added = total_added_stat(user, source, stat);
+    let added = total_added_stat(user, source, stat, hide_added_stats);
     if base > 0 || added > 0 {
         let text = match gem_label {
             Some(gem_label) => format!("Adds +{} {gem_label}", base + added),
@@ -1070,9 +1207,10 @@ fn push_single_stat(
     source: &CrystalItemTooltipSourceModel,
     stat: u8,
     percent: bool,
+    hide_added_stats: bool,
 ) {
     let base = base_stat(info, stat);
-    let added = total_added_stat(user, source, stat);
+    let added = total_added_stat(user, source, stat, hide_added_stats);
     if base > 0 || added > 0 {
         section.push(
             format!(
@@ -1106,9 +1244,10 @@ fn push_rate_stat(
     user: Option<&CrystalUserItemModel>,
     source: &CrystalItemTooltipSourceModel,
     stat: u8,
+    hide_added_stats: bool,
 ) {
     let base = base_stat(info, stat);
-    let added = total_added_stat(user, source, stat);
+    let added = total_added_stat(user, source, stat, hide_added_stats);
     if base != 0 || added != 0 {
         let total = base + added;
         section.push(
@@ -1134,7 +1273,11 @@ fn total_added_stat(
     user: Option<&CrystalUserItemModel>,
     source: &CrystalItemTooltipSourceModel,
     stat: u8,
+    hide_added_stats: bool,
 ) -> i32 {
+    if hide_added_stats {
+        return 0;
+    }
     let Some(user) = user else { return 0 };
     if source.info.need_identify && !user.identified {
         return 0;
@@ -1704,6 +1847,51 @@ mod tests {
             .first()
             .unwrap();
         assert_eq!(required.colour, CrystalItemTooltipColour::Red);
+    }
+
+    #[test]
+    fn npc_shop_hide_added_stats_preserves_base_and_bind_text_but_hides_curse() {
+        let mut item = potion();
+        item.name = "Wooden Sword".to_owned();
+        let source = item.tooltip_source.as_mut().unwrap();
+        source.info = CrystalItemInfoModel {
+            item_index: 221,
+            name: "WoodenSword".to_owned(),
+            item_type: 1,
+            bind: 0x0002,
+            stats: vec![
+                CrystalItemStatModel { stat: 4, value: 2 },
+                CrystalItemStatModel { stat: 5, value: 4 },
+            ],
+            ..Default::default()
+        };
+        source.user_item = Some(CrystalUserItemModel {
+            unique_id: 42,
+            item_index: 221,
+            count: 1,
+            soul_bound_id: -1,
+            identified: true,
+            cursed: true,
+            added_stats: vec![CrystalItemStatModel { stat: 5, value: 9 }],
+            ..Default::default()
+        });
+
+        let normal = crystal_item_tooltip_document(&item, &PlayerStats::default()).plain_text();
+        assert!(normal.contains("DC + 2~13 (+9)"));
+        assert!(normal.contains("Cursed"));
+
+        let hidden = crystal_item_tooltip_document_with_options(
+            &item,
+            &PlayerStats::default(),
+            CrystalItemTooltipOptions {
+                hide_added_stats: true,
+            },
+        )
+        .plain_text();
+        assert!(hidden.contains("DC + 2~4"));
+        assert!(!hidden.contains("(+9)"));
+        assert!(!hidden.contains("Cursed"));
+        assert!(hidden.contains("Can't drop"));
     }
 
     #[test]

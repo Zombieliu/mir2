@@ -2,6 +2,34 @@
 
 Last updated: 2026-09-03
 
+> 2026-09-03 Windows-native Crystal NPC goods-cell checkpoint: Candidate now
+> renders each NPC catalog entry as Crystal's source `MirGoodsCell` rather
+> than the former combined text row. The full `205x32` cell is the click/hover
+> target; original item pixels are centred in the `40x32` icon region; name,
+> yellow count and localized-shape `Price: N gold` text use `(44,0)`,
+> `(23,17)` and `(44,14)`; selection uses the Lime outline plus x=40 divider;
+> and the original `Prguse/550` marker follows `!IsShopItem ||
+> MultipleAvailable`. `NPCGoods.HideAddedStats` is retained end-to-end and
+> passed only to this surface's shared Crystal hint renderer, which suppresses
+> added attack/defence values and `Cursed` without suppressing base or other
+> bind text. These rules come from `MirGoodsCell.cs:20-140`,
+> `NPCDialogs.cs:1071-1082,1348`, `ServerPackets.cs:3082-3104` and
+> `GameScene.cs:4199`.
+>
+> The exact freshly built client EXE SHA-256 is
+> `159B13E722451C6F44B036C6B3ABD141E19362EDB28ED29180F34C6849A7DD8A`.
+> Real Windows pointer input followed login -> Scott -> View at
+> `BichonProvince (288,616)`. Run `npc-shop-20260903-r2` records the populated
+> baseline and selected/hover states at
+> `docs/generated/player-qa/native-ui-parity-20260903-npc-shop/`; both F12
+> sidecars report `panel=NpcShop`, 1024x768 and DPI 1.0. Native UI passes
+> 514/514, runtime 212/212, and Windows is 519/520 with only the existing
+> Archer atlas fixture failure. The source-sized NPC row leaf is bounded, but
+> duplicate/sub-goods topology, exact layouts/live captures for GameShop,
+> quest rewards, guild storage and trade, trusted package/light provenance,
+> DPI coverage and human comparison remain open. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+>
 > 2026-09-03 Windows-native remaining item-tooltip surfaces: NPC shop,
 > GameShop, fixed/selectable quest rewards, guild storage and trade now carry
 > the complete Crystal tooltip source into the shared hint renderer. The route

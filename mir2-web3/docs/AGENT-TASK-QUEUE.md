@@ -1,5 +1,27 @@
 # Agent Task Queue
 
+> Windows-native Crystal NPC `MirGoodsCell` checkpoint (2026-09-03): the
+> bounded NPC-goods row now follows the source `205x32` hit/hover rectangle,
+> `40x32` true-size icon centring, labels at `(44,0)`, `(23,17)` and `(44,14)`,
+> Lime selected border/divider, and `Prguse/550` New marker rule. The
+> `NPCGoods.HideAddedStats` packet bit now survives Gateway, shared model and
+> runtime ingestion and affects only NPC-shop hints: mutable added attack/
+> defence values and `Cursed` are suppressed while base stats and other bind
+> text remain. Authority is Crystal `MirGoodsCell.cs:20-140`,
+> `NPCDialogs.cs:1071-1082,1348`, `ServerPackets.cs:3082-3104` and
+> `GameScene.cs:4199`. Native UI passes 514/514; runtime passes 212/212;
+> Windows reaches 519/520 with only the already tracked Archer atlas fixture
+> assertion for `/ARArmour/00/24.png`; a fresh Debug EXE builds with SHA-256
+> `159B13E722451C6F44B036C6B3ABD141E19362EDB28ED29180F34C6849A7DD8A`.
+> Real Windows input exercised login -> Scott -> View and produced baseline
+> plus selected/hover F12 evidence under
+> `docs/generated/player-qa/native-ui-parity-20260903-npc-shop/`. This closes
+> the bounded NPC row/HideAddedStats leaf, not the complete shop/item-detail
+> denominator: duplicate/sub-goods topology, other item-surface layouts and
+> populated captures, trusted build/light provenance, DPI and human Crystal
+> comparison remain open. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+>
 > Windows-native Crystal remaining item-surface tooltip projection checkpoint
 > (2026-09-03): NPC goods, GameShop entries, fixed/selectable quest rewards,
 > guild storage and both sides of trade now retain a complete tooltip source
