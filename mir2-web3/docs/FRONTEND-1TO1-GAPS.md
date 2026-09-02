@@ -2,6 +2,40 @@
 
 Last updated: 2026-09-03
 
+> 2026-09-03 Windows-native full-catalogue icon/high-armour checkpoint: the
+> original export now follows all 1,628 catalogue rows (913 base Images) plus
+> the eleven Amulet/Poison stack images from `Shared/Data/ItemData.cs:641-681`.
+> A mandatory 924-image gate checks catalogue/source identity, metadata,
+> geometry, decoded pixel and PNG hashes, including missing file-plus-meta,
+> substitutions, new catalogue images and missing quantity variants. The
+> source exporter added 643 PNGs, preserving all 360 prior files byte-for-byte.
+> Exact CArmour/09 and /10 exports add all 3,232 source frames. Direct source
+> RGBA/geometry checks and 512 complete Warrior gender/direction/standing/
+> walking/running composites pass through the existing actor-library path.
+>
+> Debug EXE SHA-256
+> `55CA1D61A6977F164B1D6222DE2AAAFD4E21FEF4A1C5DB898EBEE6FF0FBDB993`
+> produced four actual HeavenArmour/MirArmour gender captures and a same-process
+> auto-Character -> manual Inventory -> unequip -> Items/595 in first bag cell
+> -> re-equip cycle. The completed auto-capture helper now returns before
+> target preparation; its App regression also preserves page/tab/later-notice
+> state. The live fixture does not unlock ITEMS II, so its manual screenshot
+> proves panel release on page 0, not live second-page retention. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-item-actor-assets/README.md`.
+>
+> Windows 524/524, item suite 11/11 plus 924-image closure, original exporter
+> regressions and the ten-control Windows PowerShell 5.1 self-test pass.
+> Full frontend logic still fails on the absent local WebGPU WASM file;
+> all five later checks pass independently. This supersedes the specific
+> missing MirArmour icon/head-only self-body/one-shot-helper notes below.
+> Runtime quantity-image selection and live stack tests, world CHumEffect
+> wings, name-only remote-player observations on rapid QA reconnect, complete
+> class/action/gear and specialized-item surfaces, original same-state pairs,
+> trusted package/light, real DPI and human acceptance remain open. Eight
+> sidecars stay draft/ineligible; the later additive eleven-frame export has
+> a separately recorded manifest identity. No denominator leaf was removed.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-09-03 Windows-native Character wing/unequip checkpoint: Simulation now
 > derives `WingEffect` from the wearer's exact, non-broken real armour template,
 > and Gateway preserves self-only authority, explicit zero clearing and partial

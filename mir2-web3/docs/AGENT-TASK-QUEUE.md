@@ -1,5 +1,33 @@
 # Agent Task Queue
 
+> Windows item-icon/high-armour asset checkpoint (2026-09-03): the complete
+> 1,628-row catalogue requires 913 base images plus eleven source
+> `UserItem.Image` Amulet/Poison quantity images. All 924 are now exported and
+> integrity-gated; 643 missing PNGs were added without changing the 360 older
+> PNGs. CArmour/09 and /10 each retain all 1,616 source frames, closing the
+> observed HeavenArmour/MirArmour self-body asset hole. Direct comparison of
+> all 3,232 new body frames matches original pixels and geometry; 512
+> Warrior gender/direction/stand/walk/run composites pass. The fresh Debug
+> EXE SHA-256 is
+> `55CA1D61A6977F164B1D6222DE2AAAFD4E21FEF4A1C5DB898EBEE6FF0FBDB993`.
+> Four live cases and an auto-capture -> manual Inventory -> unequip ->
+> first-bag-icon -> re-equip cycle are recorded under
+> `docs/generated/player-qa/native-ui-parity-20260903-item-actor-assets/`.
+> The one-shot capture helper now releases UI control before preparing again.
+> Windows 524/524, item gate 11/11 and 924-image closure, source exporter
+> regression, and the ten-control Windows PowerShell 5.1 gate self-test pass.
+>
+> This supersedes the missing-icon/head-only/one-shot notes in the older
+> checkpoint below. WN-ITEM-002 still retains runtime quantity selection,
+> overlays and live stack coverage; WN-ACTOR-001 retains world CHumEffect
+> wings and the full class/action/soak denominator. New WN-ACTOR-002 records
+> name-only prior-player observations during rapid QA process switches.
+> Source item operations, original same-state pairs, trusted package/light,
+> DPI and human acceptance remain open. Full frontend logic still fails at
+> the absent local WebGPU WASM artifact, not the icon gate; its five later
+> checks pass independently. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`; goal and draft stacked PR #250 remain open.
+
 > Windows Character wing and real unequip checkpoint (2026-09-03): source
 > `HumanObject.RefreshEquipmentStats` now supplies the real armour's
 > `WingEffect` to the self-only native read model. Source `Prguse2/1202..1205`

@@ -344,22 +344,28 @@ fn auto_capture_system(
     let Some(shell) = shell.as_deref() else {
         return;
     };
-    if let Some(target) = runtime.auto.as_ref().map(|auto| auto.target) {
-        prepare_auto_capture_target(
-            target,
-            shell,
-            player_ui.as_deref_mut(),
-            notice.as_deref_mut(),
-            inventory.as_deref(),
-        );
-    }
+    // A one-shot capture owns the UI only until it queues its screenshot.
+    // Checking completion after preparation reopens Character every frame and
+    // closes later notices, preventing manual verification after auto capture.
+    let Some(target) = runtime
+        .auto
+        .as_ref()
+        .filter(|auto| !auto.done)
+        .map(|auto| auto.target)
+    else {
+        return;
+    };
+    prepare_auto_capture_target(
+        target,
+        shell,
+        player_ui.as_deref_mut(),
+        notice.as_deref_mut(),
+        inventory.as_deref(),
+    );
     let capture_slug = {
         let Some(auto) = runtime.auto.as_mut() else {
             return;
         };
-        if auto.done {
-            return;
-        }
         let target_matches = capture_target_matches(
             auto.target,
             shell,
@@ -1223,6 +1229,77 @@ fn sha256_hex(bytes: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn completed_auto_capture_releases_panel_and_notice_control() {
+        let mut app = App::new();
+        app.insert_resource(
+            NativeCaptureConfig::from_values(
+                Some("unused-auto-capture-test"),
+                None,
+                Some("character"),
+                None,
+            )
+            .unwrap(),
+        );
+        app.insert_resource(NativeCaptureRuntime {
+            capture_index: 0,
+            auto: Some(NativeAutoCaptureState {
+                target: NativeCaptureTarget::CharacterOpen,
+                countdown: None,
+                done: false,
+            }),
+        });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NoticeDialogState::default());
+        app.add_systems(Update, auto_capture_system);
+        // With no authoritative UiReadModel yet, preparation opens the target
+        // but must not queue a screenshot. Active preparation remains intact.
+        app.update();
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .equipment_open());
+
+        app.world_mut()
+            .resource_mut::<NativeCaptureRuntime>()
+            .auto
+            .as_mut()
+            .unwrap()
+            .done = true;
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.toggle_equipment();
+            state.toggle_inventory();
+            state.inventory_page = 1;
+            state.character_page = CharacterPage::Stats2;
+        }
+        assert!(app.world_mut().resource_mut::<NoticeDialogState>().observe(
+            mir2_client_bevy::crystal_ui::notice::NoticePacketUpdate {
+                generation: 1,
+                sequence: 1,
+                title: "Later notice".to_owned(),
+                message: "Must remain open".to_owned(),
+            }
+        ));
+        for _ in 0..3 {
+            app.update();
+        }
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(state.inventory_open());
+        assert!(!state.equipment_open());
+        assert_eq!(state.inventory_page, 1);
+        assert_eq!(state.character_page, CharacterPage::Stats2);
+        assert!(app.world().resource::<NoticeDialogState>().is_open());
+        assert_eq!(
+            app.world().resource::<NativeCaptureRuntime>().capture_index,
+            0
+        );
+    }
 
     #[test]
     fn capture_disabled_without_dir_env_value() {

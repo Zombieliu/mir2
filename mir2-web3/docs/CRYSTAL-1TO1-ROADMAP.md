@@ -1,5 +1,26 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest Windows original-asset closure checkpoint (2026-09-03): all 913
+> catalogue base images plus eleven source Amulet/Poison count-derived images
+> are required by a fail-closed 924-image gate. The 643 previously missing
+> Items PNGs now come directly from the original Items.Lib; 360 prior PNGs
+> were pixel-verified and preserved byte-for-byte. Full CArmour/09 and /10
+> exports add 3,232 original body frames. Native tests cover every exported
+> frame and 512 complete Warrior stand/walk/run composites; live captures
+> verify both genders of HeavenArmour/MirArmour, restored worn icons and a
+> real unequip/first-bag/re-equip cycle. The optional automatic capture now
+> releases panel control after its one shot. Windows 524/524, icon tests
+> 11/11, all 924 images, Crystal exporter tests and Windows PowerShell 5.1's
+> ten-control self-test pass. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-item-actor-assets/README.md`.
+> Full frontend logic remains incomplete at the missing local WebGPU WASM;
+> its five following checks pass separately. Quantity-dependent runtime
+> icon selection, world wings, remote-player appearance/lifecycle, the full
+> class/action/item-surface denominator, original paired captures, trusted
+> package/light, real DPI and human acceptance stay open. The newer checkpoint
+> supersedes only the bounded missing-icon/high-armour/QA-release leaves
+> below. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > Latest Character wing projection/Windows verification (2026-09-03):
 > Simulation follows Crystal `HumanObject.cs:1795-1847` for real-armour
 > `Looks_Wings`, broken base durability and explicit zero; `@SETLIGHT` retains

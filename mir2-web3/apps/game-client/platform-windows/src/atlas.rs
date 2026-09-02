@@ -2057,6 +2057,136 @@ mod tests {
     }
 
     #[test]
+    fn high_armour_exports_keep_every_original_frame_and_exact_geometry() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        // Crystal PlayerObject.SetLibraries selects Shape 9/10 independently
+        // of the CharacterDialog StateItem image. Both source libraries contain
+        // 1616 frames, including the complete female 808-offset half.
+        for (library, source_sha, male_size, female_size) in [
+            (
+                "CArmour/09",
+                "9469eb3cd092518751fcee6c5703ae590575251b3087006e3c8cb3dce8e0e2da",
+                (72, 76, 7, -48),
+                (60, 72, 10, -48),
+            ),
+            (
+                "CArmour/10",
+                "870304f256bad11ec24516d65792b80549545f14fe72feb521e2bff99a6dfe09",
+                (68, 76, 7, -49),
+                (64, 72, 7, -48),
+            ),
+        ] {
+            let meta_path = assets::asset_path(&format!("original-ui/{library}/meta.json"))
+                .expect("high-armour source metadata");
+            let meta: Value = serde_json::from_slice(&fs::read(meta_path).unwrap()).unwrap();
+            assert_eq!(meta["sourceLibrary"]["sha256"], source_sha);
+            assert_eq!(meta["count"], 1616);
+            assert_eq!(meta["frames"].as_array().unwrap().len(), 1616);
+            for (frame, (width, height, offset_x, offset_y)) in [(0, male_size), (808, female_size)]
+            {
+                assert_eq!(
+                    original_frame_geometry(library, frame),
+                    Some(OriginalFrameGeometry {
+                        width,
+                        height,
+                        offset_x,
+                        offset_y
+                    })
+                );
+            }
+            for frame in 0..1616_i64 {
+                let geometry = original_frame_geometry(library, frame)
+                    .unwrap_or_else(|| panic!("missing {library}/{frame} geometry"));
+                let layer = build_entity_layer(
+                    index,
+                    &mut HashMap::new(),
+                    "1000:body".to_owned(),
+                    &format!("/original-ui/{library}"),
+                    frame,
+                    100.0,
+                    200.0,
+                    5.0,
+                )
+                .unwrap_or_else(|| panic!("missing {library}/{frame} PNG or layer"));
+                assert_eq!(layer["path"], format!("/original-ui/{library}/{frame}.png"));
+                assert_eq!(layer["width"], json!(geometry.width as f32));
+                assert_eq!(layer["height"], json!(geometry.height as f32));
+                assert_eq!(layer["left"], json!(100.0 + geometry.offset_x as f32));
+                assert_eq!(layer["top"], json!(200.0 + geometry.offset_y as f32));
+                assert!(layer.get("atlasKey").is_none());
+            }
+        }
+    }
+
+    #[test]
+    fn high_armour_stand_walk_run_retains_body_hair_and_weapon_in_all_directions() {
+        for library in ["CArmour/09", "CArmour/10"] {
+            for (body_offset, weapon_offset) in [(0_i64, 0_i64), (808, 416)] {
+                for (direction_index, direction) in [
+                    "Up",
+                    "UpRight",
+                    "Right",
+                    "DownRight",
+                    "Down",
+                    "DownLeft",
+                    "Left",
+                    "UpLeft",
+                ]
+                .iter()
+                .enumerate()
+                {
+                    let payload = json!({
+                        "sceneView": {"center": {"x": 290, "y": 620}},
+                        "entities": [{"objectId": 1000, "kind": "selfPlayer", "classKey": "warrior",
+                            "genderKey": if body_offset == 0 { "male" } else { "female" },
+                            "x": 290, "y": 620, "direction": direction,
+                            "sprite": {"bodyLibrary": library, "hairLibrary": "CHair/00",
+                                "weaponLibrary": "CWeapon/00", "frameBaseOffset": body_offset,
+                                "weaponFrameOffset": weapon_offset}}]
+                    });
+                    for (action, start, count) in [
+                        (AnimationAction::Standing, 0_i64, 4_i64),
+                        (AnimationAction::Walking, 32, 6),
+                        (AnimationAction::Running, 80, 6),
+                    ] {
+                        for phase in 0..count {
+                            let relative = start + direction_index as i64 * count + phase;
+                            let poses = HashMap::from([("1000".to_owned(), (relative, action))]);
+                            let state =
+                                build_entity_render_state_with_poses(&payload, &poses).unwrap();
+                            let entity = &state["entities"][0];
+                            let layers = entity["layers"].as_array().unwrap();
+                            assert_eq!(layers.len(), 3,
+                                "{library} offset {body_offset}, {direction}, {action:?}, phase {phase}");
+                            let body = layers
+                                .iter()
+                                .find(|layer| layer["key"] == "1000:body")
+                                .expect("never degrade to a floating hair/weapon composite");
+                            assert_eq!(
+                                body["path"],
+                                format!("/original-ui/{library}/{}.png", body_offset + relative)
+                            );
+                            let hair = layers
+                                .iter()
+                                .find(|layer| layer["key"] == "1000:hair")
+                                .unwrap();
+                            let weapon = layers
+                                .iter()
+                                .find(|layer| layer["key"] == "1000:weapon-primary")
+                                .unwrap();
+                            assert!(body["z"].as_f64().unwrap() < hair["z"].as_f64().unwrap());
+                            assert_eq!(
+                                weapon["z"].as_f64().unwrap() < body["z"].as_f64().unwrap(),
+                                weapon_is_rear(direction)
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
     fn unpacked_player_frame_keeps_pixel_hit_and_atomic_highlight() {
         let index = starter_atlas_index().expect("starter atlas index");
         let layer = build_entity_layer(
