@@ -2,6 +2,18 @@
 
 Last updated: 2026-09-03
 
+> 2026-09-03 native launch regression: a relocated executable's resource
+> junction lost the separate development map-layout path, producing actors
+> and HUD over a black world. The map locator now resolves the real directory,
+> and startup checks/decode map 0 before opening. The screenshot coordinate
+> produces 849 map draws with all 221 local image references present; native
+> host tests pass 537/537 serially. Default-parallel GameShop queue failures
+> remain separately recorded. The repaired EXE is open at login after explicit
+> Computer Use resumption; authenticated world visuals still need manual login.
+> No full-pack download, resource migration or store reset was performed.
+> Evidence: `docs/generated/player-qa/native-ui-parity-20260903-map-relocation/README.md`.
+> This is not closure of any whole-window/global parity or human acceptance gate.
+
 > 2026-09-03 trade completion source/headless checkpoint: WN-ITEM-002/003
 > no longer receive a premature completion when a shared offer is merely
 > prepared. Actual delivery completes once; the durable path waits for its

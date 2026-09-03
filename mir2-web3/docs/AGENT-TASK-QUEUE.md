@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-09-03 user-requested native launch repair: fixed the directory-junction
+> map-layout lookup and added startup presence/decode checks. Native host
+> 537/537 serial tests, the reported Bichon viewport's 849 draws/221 local
+> images and the offline build pass. Three parallel GameShop queue failures
+> remain recorded outside this fix. User explicitly resumed Computer Use;
+> repaired client opened at login, pending manual login/world visual check.
+> No resources, store or server logic were changed. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-map-relocation/README.md`.
+> After this launch handoff, the source trade invitation/pair/private-routing
+> leaf below remains the next shared-logic candidate. Mac work is a proposal,
+> not a dispatched task. All 33 IDs and global/human gates remain open.
+
 > Shared-trade completion checkpoint (2026-09-03): personal confirmation now
 > locks only; a typed shared preparation reserves outgoing assets without
 > S.TradeConfirm. Successful delivery sends completion once, and the durable

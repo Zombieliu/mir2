@@ -1,5 +1,18 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-09-03 relocated-launch map repair: the native map locator resolves a
+> junction's physical asset root before looking for the development map pack.
+> Startup now requires/decodes map 0 and no longer labels an index alone as
+> Full ready. The reported Bichon (302,634) viewport resolves 849 map draws and
+> 221 local image references; Windows host tests pass 537/537 serially from a
+> non-repository directory using the relocated asset entry. Three default-
+> parallel GameShop queue failures are separately recorded, not claimed fixed.
+> The user explicitly resumed Computer Use; the repaired EXE was opened at
+> login. Manual login/in-game visual verification remains pending. No assets,
+> store or Gateway were changed. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-map-relocation/README.md`.
+> All 33 IDs and global visual/feel acceptance gates remain open.
+
 > 2026-09-03 trade completion source/headless checkpoint: shared preparation
 > no longer closes the source-correct trade windows by emitting completion.
 > Successful/saved delivery completes once, including an empty incoming side;

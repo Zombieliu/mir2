@@ -653,23 +653,7 @@ fn resolve_map_tile_draws_in_bounds(
 
 /// Locate a local map pack file (`.map.gz`) for the given map file name.
 fn find_map_file(map_file_name: &str) -> Option<PathBuf> {
-    let file_name = Path::new(map_file_name).file_name()?.to_str()?;
-    if file_name != map_file_name || file_name.contains("..") {
-        return None;
-    }
-    let stem = file_name
-        .strip_suffix(".map.gz")
-        .or_else(|| file_name.strip_suffix(".map"))
-        .unwrap_or(file_name);
-    let root = assets::asset_root()?;
-    [
-        root.join("crystal-map-pack"),
-        root.join("generated/crystal-map-pack"),
-        root.join("../lib/generated/crystal-map-pack"),
-    ]
-    .into_iter()
-    .map(|pack| pack.join(format!("{stem}.map.gz")))
-    .find(|candidate| candidate.is_file())
+    assets::crystal_map_path(&assets::asset_root()?, map_file_name)
 }
 
 /// Locate the map-atlas manifest built by `assets:map-atlas:build`.
@@ -1501,6 +1485,47 @@ pub fn has_local_map_atlas() -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bichon_screenshot_viewport_has_local_floor_and_object_images() {
+        let root = assets::asset_root().expect("configured native assets");
+        let map = load_map("0").expect("Bichon map layout must decode");
+        let state = build_map_render_state_for_file(
+            &map,
+            MapViewport {
+                center_x: 302,
+                center_y: 634,
+                width: 22,
+                height: 18,
+            },
+            "0",
+        )
+        .expect("real map render state at the reported black-map coordinate");
+        assert_eq!(state["enabled"], true);
+        assert_eq!(state["ackKey"], "native-map:0:302:634");
+        let atlas_tiles = state["tiles"].as_array().expect("atlas tiles");
+        let standalone_tiles = state["standaloneTiles"]
+            .as_array()
+            .expect("standalone tiles");
+        assert!(atlas_tiles.len() + standalone_tiles.len() > 100);
+        let mut images = HashSet::new();
+        for entry in state["atlases"]
+            .as_array()
+            .expect("atlases")
+            .iter()
+            .chain(standalone_tiles)
+        {
+            let url = entry["imageUrl"].as_str().expect("local image URL");
+            let path = root.join(url.trim_start_matches('/'));
+            assert!(path.is_file(), "missing Bichon image: {}", path.display());
+            images.insert(url.to_owned());
+        }
+        assert!(!images.is_empty());
+        eprintln!(
+            "[map-relocation-regression] Bichon (302,634): {} atlas tiles, {} standalone tiles, {} local images",
+            atlas_tiles.len(), standalone_tiles.len(), images.len()
+        );
+    }
 
     #[test]
     fn destination_map_identity_is_part_of_the_render_handoff_key() {

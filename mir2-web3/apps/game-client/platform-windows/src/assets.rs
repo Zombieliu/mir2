@@ -26,6 +26,37 @@ pub fn has_local_full() -> bool {
 pub const ASSET_ROOT_ENV: &str = "MIR2_NATIVE_ASSET_ROOT";
 pub const ASSET_ROOT_ENV_ALIAS: &str = "MIR2_ASSET_ROOT";
 
+/// Find map layout bytes in a packaged bundle or beside the real development
+/// asset directory. Resolve a junction/symlink before looking for siblings:
+/// `installed/mir2-assets/../lib` otherwise refers to the installation directory
+/// on Windows, not to the checkout that the asset link targets.
+pub fn crystal_map_path(asset_root: &Path, map_file_name: &str) -> Option<PathBuf> {
+    let file_name = Path::new(map_file_name).file_name()?.to_str()?;
+    if file_name != map_file_name || file_name.contains("..") || file_name.contains(['\\', ':']) {
+        return None;
+    }
+    let stem = file_name
+        .strip_suffix(".map.gz")
+        .or_else(|| file_name.strip_suffix(".map"))
+        .unwrap_or(file_name);
+    if stem.is_empty() {
+        return None;
+    }
+    let file_name = format!("{stem}.map.gz");
+    for pack in ["crystal-map-pack", "generated/crystal-map-pack"] {
+        let candidate = asset_root.join(pack).join(&file_name);
+        if candidate.is_file() {
+            return Some(candidate);
+        }
+    }
+    let physical_root = asset_root.canonicalize().ok()?;
+    let candidate = physical_root
+        .parent()?
+        .join("lib/generated/crystal-map-pack")
+        .join(file_name);
+    candidate.is_file().then_some(candidate)
+}
+
 /// Resolve the directory whose contents mirror `apps/web/public`.
 ///
 /// Installed builds look beside the executable (or in a macOS app's Resources
@@ -104,11 +135,12 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
             let mut message = format!(
                 "no Mir2 asset bundle found. Place a complete mir2-assets directory beside the executable, or set {ASSET_ROOT_ENV}."
             );
-            message.push_str(" Required files: bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, original-ui/Prguse2/meta.json, original-ui/Prguse2/1202.png through 1205.png, and the four original-ui/Cursors native PNGs.");
+            message.push_str(" Required files: crystal-map-pack/0.map.gz (or generated/crystal-map-pack/0.map.gz; development also supports the physical asset root's sibling lib/generated/crystal-map-pack), bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, original-ui/Prguse2/meta.json, original-ui/Prguse2/1202.png through 1205.png, and the four original-ui/Cursors native PNGs.");
             for (candidate, diag) in diagnostics {
                 message.push_str(&format!(
-                    "\n  candidate {} -> entity={} map={} native_map_keyed={} effect={} items={} state_items={} character_wings={} cursors={} complete={}",
+                    "\n  candidate {} -> map_layout={} entity={} map={} native_map_keyed={} effect={} items={} state_items={} character_wings={} cursors={} complete={}",
                     candidate.display(),
+                    diag.has_crystal_map_pack,
                     diag.has_entity_manifest,
                     diag.has_map_manifest,
                     diag.has_native_map_keyed_manifest,
@@ -127,8 +159,9 @@ pub fn require_asset_root() -> Result<PathBuf, String> {
 
 fn incomplete_asset_error(path: &Path, diagnostics: AssetRootDiagnostics) -> String {
     format!(
-        "asset bundle at {} is incomplete (entity_manifest={} map_manifest={} native_map_keyed_manifest={} effect_manifest={} item_icons={} state_items={} character_wings={} crystal_cursors={}). Need bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, original-ui/Prguse2/meta.json, original-ui/Prguse2/1202.png through 1205.png, and the four original-ui/Cursors native PNGs. The window will not open with a missing pack.",
+        "asset bundle at {} is incomplete (map_layout={} entity_manifest={} map_manifest={} native_map_keyed_manifest={} effect_manifest={} item_icons={} state_items={} character_wings={} crystal_cursors={}). Need crystal-map-pack/0.map.gz (or generated/crystal-map-pack/0.map.gz; development also supports the physical asset root's sibling lib/generated/crystal-map-pack), bevy-entity-atlases/manifest.json, generated/map-atlas/manifest.json, generated/native-map-keyed/manifest.json, original-effects/effects.generated.json, original-ui/Items/meta.json, original-ui/Items/0.png, original-ui/Items/3792.png, original-ui/StateItem/meta.json, original-ui/StateItem/30.png, original-ui/StateItem/5152.png, original-ui/Prguse2/meta.json, original-ui/Prguse2/1202.png through 1205.png, and the four original-ui/Cursors native PNGs. The window will not open with a missing pack.",
         path.display(),
+        diagnostics.has_crystal_map_pack,
         diagnostics.has_entity_manifest,
         diagnostics.has_map_manifest,
         diagnostics.has_native_map_keyed_manifest,
@@ -169,6 +202,7 @@ fn development_asset_candidates() -> Vec<PathBuf> {
 #[derive(Debug, Clone, Copy)]
 pub struct AssetRootDiagnostics {
     pub is_complete: bool,
+    pub has_crystal_map_pack: bool,
     pub has_entity_manifest: bool,
     pub has_map_manifest: bool,
     pub has_native_map_keyed_manifest: bool,
@@ -180,6 +214,7 @@ pub struct AssetRootDiagnostics {
 }
 
 pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
+    let has_crystal_map_pack = crystal_map_path(candidate, "0").is_some();
     let has_entity_manifest = candidate
         .join("bevy-entity-atlases/manifest.json")
         .is_file();
@@ -214,7 +249,8 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
     ]
     .iter()
     .all(|name| cursor_root.join(name).is_file());
-    let is_complete = has_entity_manifest
+    let is_complete = has_crystal_map_pack
+        && has_entity_manifest
         && has_map_manifest
         && has_native_map_keyed_manifest
         && has_effect_manifest
@@ -224,6 +260,7 @@ pub fn diagnose_asset_root(candidate: &Path) -> AssetRootDiagnostics {
         && has_crystal_cursors;
     AssetRootDiagnostics {
         is_complete,
+        has_crystal_map_pack,
         has_entity_manifest,
         has_map_manifest,
         has_native_map_keyed_manifest,
@@ -417,10 +454,113 @@ pub fn asset_path(web_path: &str) -> Option<PathBuf> {
 mod tests {
     use super::*;
 
+    fn map_fixture_root(label: &str) -> PathBuf {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!(
+            "mir2-map-path-{label}-{}-{nonce}",
+            std::process::id()
+        ));
+        std::fs::create_dir(&root).expect("unique map fixture directory");
+        root
+    }
+
+    fn write_fixture_map(path: &Path, bytes: &[u8]) {
+        std::fs::create_dir_all(path.parent().expect("map parent")).expect("map directory");
+        std::fs::write(path, bytes).expect("fixture map bytes");
+    }
+
+    #[test]
+    fn crystal_map_path_prefers_packaged_layouts_and_rejects_traversal() {
+        let dir = map_fixture_root("packaged");
+        let root = dir.join("public");
+        std::fs::create_dir(&root).expect("asset directory");
+        let sibling = dir.join("lib/generated/crystal-map-pack/0.map.gz");
+        write_fixture_map(&sibling, b"development");
+        assert_eq!(
+            crystal_map_path(&root, "0").expect("development map"),
+            sibling.canonicalize().expect("physical development map")
+        );
+
+        let generated = root.join("generated/crystal-map-pack/0.map.gz");
+        write_fixture_map(&generated, b"generated");
+        assert_eq!(crystal_map_path(&root, "0.map"), Some(generated));
+        let packaged = root.join("crystal-map-pack/0.map.gz");
+        write_fixture_map(&packaged, b"packaged");
+        for name in ["0", "0.map", "0.map.gz"] {
+            assert_eq!(crystal_map_path(&root, name), Some(packaged.clone()));
+        }
+        for name in ["", ".map", ".map.gz", "../0", "maps/0", "..\\0", "C:\\0"] {
+            assert!(crystal_map_path(&root, name).is_none(), "rejected {name}");
+        }
+        assert!(crystal_map_path(&root, "missing").is_none());
+        std::fs::remove_dir_all(dir).expect("remove isolated map fixture");
+    }
+
+    #[test]
+    #[cfg(any(windows, unix))]
+    fn crystal_map_path_follows_directory_alias_before_sibling_lookup() {
+        let dir = map_fixture_root("alias");
+        let physical_root = dir.join("checkout/apps/web/public");
+        std::fs::create_dir_all(&physical_root).expect("physical asset directory");
+        let physical_map = dir.join("checkout/apps/web/lib/generated/crystal-map-pack/0.map.gz");
+        write_fixture_map(&physical_map, b"physical checkout map");
+        let installed = dir.join("installed");
+        std::fs::create_dir(&installed).expect("installation directory");
+        // A same-named sibling at the alias location must not shadow the map
+        // belonging to the real asset directory.
+        write_fixture_map(
+            &installed.join("lib/generated/crystal-map-pack/0.map.gz"),
+            b"unrelated installation sibling",
+        );
+        let alias = installed.join("mir2-assets");
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            let output = std::process::Command::new("powershell.exe")
+                .args([
+                    "-NoLogo",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-Command",
+                    "$ErrorActionPreference = 'Stop'; New-Item -ItemType Junction -Path $env:MIR2_TEST_MAP_ALIAS -Target $env:MIR2_TEST_MAP_TARGET | Out-Null",
+                ])
+                .env("MIR2_TEST_MAP_ALIAS", &alias)
+                .env("MIR2_TEST_MAP_TARGET", &physical_root)
+                .creation_flags(0x08000000) // CREATE_NO_WINDOW: filesystem fixture only.
+                .output()
+                .expect("create Windows directory junction");
+            assert!(
+                output.status.success(),
+                "junction fixture failed: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        #[cfg(unix)]
+        std::os::unix::fs::symlink(&physical_root, &alias).expect("create directory symlink");
+
+        for name in ["0", "0.map", "0.map.gz"] {
+            let resolved =
+                crystal_map_path(&alias, name).expect("map through relocated asset root");
+            assert_eq!(resolved, physical_map.canonicalize().expect("physical map"));
+            assert_eq!(std::fs::read(resolved).unwrap(), b"physical checkout map");
+        }
+        assert!(diagnose_asset_root(&alias).has_crystal_map_pack);
+        #[cfg(windows)]
+        std::fs::remove_dir(&alias).expect("remove junction, keeping target intact");
+        #[cfg(unix)]
+        std::fs::remove_file(&alias).expect("remove symlink, keeping target intact");
+        assert!(physical_map.is_file());
+        std::fs::remove_dir_all(dir).expect("remove isolated map fixture");
+    }
+
     #[test]
     fn repository_asset_root_is_discovered_without_compile_time_paths() {
         let root = asset_root().expect("repo checkout should expose apps/web/public");
         let diagnostics = diagnose_asset_root(&root);
+        assert!(diagnostics.has_crystal_map_pack);
         assert!(diagnostics.has_entity_manifest);
         assert!(diagnostics.has_map_manifest);
         assert!(diagnostics.has_native_map_keyed_manifest);
@@ -537,8 +677,22 @@ mod tests {
         ] {
             std::fs::write(cursor_root.join(name), []).expect("cursor image");
         }
+        let missing_map = diagnose_asset_root(&dir);
+        assert!(missing_map.has_crystal_cursors);
+        assert!(!missing_map.has_crystal_map_pack);
+        assert!(
+            !missing_map.is_complete,
+            "textures alone must not pass startup"
+        );
+        assert!(incomplete_asset_error(&dir, missing_map).contains("map_layout=false"));
+        assert!(incomplete_asset_error(&dir, missing_map).contains("0.map.gz"));
+
+        write_fixture_map(
+            &dir.join("crystal-map-pack/0.map.gz"),
+            b"map presence fixture",
+        );
         let complete = diagnose_asset_root(&dir);
-        assert!(complete.has_crystal_cursors);
+        assert!(complete.has_crystal_map_pack);
         assert!(complete.is_complete);
 
         let _ = std::fs::remove_dir_all(&dir);

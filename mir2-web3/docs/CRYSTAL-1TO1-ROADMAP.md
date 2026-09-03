@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-03 native map-relocation repair: resolve physical asset-root siblings
+> behind directory junctions/symlinks; require/decode the Bichon layout during
+> startup. This restores the missing map producer at the user's (302,634)
+> coordinate without moving the F-drive full pack or modifying saved state.
+> Native host 537/537 serial tests and the locked offline build pass; the
+> initial parallel GameShop queue failures are retained as a separate issue.
+> Repaired EXE opened at login after explicit user resumption; manual login
+> and actual world visual verification remain pending. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-map-relocation/README.md`.
+> No server change or full server rerun. All 33 backlog IDs and human gates
+> remain open; visualAccepted=false, accepted=false, globalParityPercent=null.
+
 > Shared-trade completion checkpoint (2026-09-03): separate personal lock,
 > typed escrow preparation and successful/saved delivery. Unilateral, waiting,
 > rejected or unknown outcomes no longer emit source completion; successful

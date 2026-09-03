@@ -67,7 +67,7 @@ fn report_r2_progress_via_chat(
     let has_full = assets::has_local_full();
     let is_remote_active = r2 > 0 || cached_files > 0;
     let msg = if has_full {
-        format!("[Assets] Local {local} / Remote {r2} -- Full ready (Bichon town local, cache {cached_files} files)")
+        format!("[Assets] Local {local} / Remote {r2} -- Full index + local map pack found (cache {cached_files} entries)")
     } else if !is_remote_active {
         format!("[Assets] Local {local} / Remote 0 -- Starter only, Bichon town needs full/R2 (cache {cached_files} files)")
     } else if r2 == 0 && cached_files > 0 {
@@ -117,8 +117,9 @@ fn main() {
     });
     let diag = assets::diagnose_asset_root(&asset_root);
     eprintln!(
-        "[platform-windows] asset_root={} has_entity_manifest={} has_map_manifest={} has_native_map_keyed_manifest={} has_effect_manifest={} has_character_wings={} has_crystal_cursors={} complete={}",
+        "[platform-windows] asset_root={} has_map_layout={} has_entity_manifest={} has_map_manifest={} has_native_map_keyed_manifest={} has_effect_manifest={} has_character_wings={} has_crystal_cursors={} complete={}",
         asset_root.display(),
+        diag.has_crystal_map_pack,
         diag.has_entity_manifest,
         diag.has_map_manifest,
         diag.has_native_map_keyed_manifest,
@@ -127,6 +128,16 @@ fn main() {
         diag.has_crystal_cursors,
         diag.is_complete
     );
+    if map_parser::load_map("0").is_none() {
+        eprintln!(
+            "[platform-windows] FATAL: Bichon map layout 0.map.gz could not be decoded under {}. Repair the map pack before launching.",
+            asset_root.display()
+        );
+        std::process::exit(1);
+    }
+    if let Some(map_path) = assets::crystal_map_path(&asset_root, "0") {
+        eprintln!("[platform-windows] map_layout={}", map_path.display());
+    }
     eprintln!(
         "[platform-windows] gateway_url={} window={}x{}",
         session.gateway_url, session.window_width, session.window_height
