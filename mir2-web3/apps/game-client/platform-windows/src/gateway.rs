@@ -39,6 +39,9 @@ use crate::native_protocol::{
 };
 use crate::session_config::NativeReconnectConfig;
 
+#[path = "trade_projection.rs"]
+mod trade_projection;
+
 /// The gateway WebSocket endpoint for the local development gateway.
 pub const LOCAL_GATEWAY_WS_URL: &str = "ws://127.0.0.1:7110/ws";
 const NATIVE_RESUME_PROTOCOL: &str = "nativeResumeV1";
@@ -1230,9 +1233,15 @@ fn add_social_item_tooltip_sources(
             };
             let partner_items = source_items
                 .into_iter()
-                .filter(|item| !item.is_null())
                 .map(|item| {
-                    let mut entry = item.as_object().cloned().unwrap_or_default();
+                    if item.is_null() {
+                        return Value::Null;
+                    }
+                    let Some(mut entry) = item.as_object().cloned() else {
+                        // Preserve malformed values for the bounded model to
+                        // reject; do not turn them into invented empty items.
+                        return item;
+                    };
                     let item_index = value_i32(item.get("item_index"));
                     if let Some(item_index) = item_index {
                         entry.insert("itemIndex".to_owned(), json!(item_index));
@@ -3351,6 +3360,11 @@ where
 
             // Feed the shared inventory model so client-bevy renders the bag.
             let inventory = transform_inventory_model(&payload);
+            if trade_projection::observe_own_offer(&payload, &inventory, social_cursor) {
+                let social_json =
+                    serde_json::to_string(social_cursor).map_err(|error| error.to_string())?;
+                let _ = mir2_bevy_runtime::native_ingest::push_native_social_model(social_json);
+            }
             let inventory_json = serde_json::to_string(&inventory).map_err(|e| e.to_string())?;
             let _ = mir2_bevy_runtime::native_ingest::push_native_inventory_model(inventory_json);
 
@@ -9091,7 +9105,7 @@ mod tests {
         add_social_item_tooltip_sources("TradeItem", &mut trade_payload, &cursor);
         let mut trade = SocialModel::default();
         assert!(trade.apply_packet("TradeItem", &trade_payload));
-        let trade_item = &trade.trade.partner_items[0];
+        let trade_item = trade.trade.partner_items[0].as_ref().unwrap();
         assert_eq!(
             (trade_item.unique_id, trade_item.item_index),
             (Some(88), Some(658))
@@ -9128,6 +9142,41 @@ mod tests {
             (99, 658, 2)
         );
         assert!(guild_item.tooltip_source.is_some());
+    }
+
+    #[test]
+    fn trade_item_tooltip_adapter_preserves_holes_and_rejects_malformed_wire_rows() {
+        let cursor = NativeUiPlayerCursor::default();
+        let carried = CrystalUserItemModel {
+            unique_id: 88,
+            item_index: 658,
+            count: 4,
+            identified: true,
+            ..Default::default()
+        };
+        let mut payload = json!({"tradeItems":[null,carried,null,null,null]});
+        add_social_item_tooltip_sources("TradeItem", &mut payload, &cursor);
+        assert_eq!(payload["partnerItems"].as_array().unwrap().len(), 5);
+        let mut model = SocialModel::default();
+        assert!(model.apply_packet("TradeItem", &payload));
+        assert!(model.trade.partner_items[0].is_none());
+        assert!(model.trade.partner_items[4].is_none());
+        assert_eq!(
+            model.trade.partner_items[1].as_ref().unwrap().unique_id,
+            Some(88)
+        );
+        let before = model.clone();
+        for bad in [
+            json!(42),
+            json!(false),
+            json!({}),
+            json!({"unique_id":88,"count":65536}),
+        ] {
+            let mut malformed = json!({"tradeItems":[null,bad]});
+            add_social_item_tooltip_sources("TradeItem", &mut malformed, &cursor);
+            assert!(!model.apply_packet("TradeItem", &malformed));
+            assert_eq!(model, before);
+        }
     }
 
     #[test]

@@ -1,5 +1,28 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-09-03 accepted-exchange TradeDialog source/headless checkpoint: source
+> own/guest 204x152 windows and original controls, ten fixed sparse cells each,
+> independent inventory, exact current-count icons/hints and basic amount/
+> lock/close state are covered. Explicit exchange/unlock ownership survives
+> coalesced social events; own-offer projection is identity-bound/read-only.
+> Native UI 591/591, Windows 534/534, runtime 212/212, UI core 43/43 and
+> item-icon 11/11 with 924 images pass. The asset verifier matches 561 PNGs,
+> preserves all 552 prior Prguse/Title PNGs and rejects 32 negative controls.
+> Report: `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+>
+> Do not sign off a complete trade route: grids are read-only, source item
+> operations and invitation/cancel messages remain open, and Candidate's
+> unilateral S.TradeConfirm plus absolute/deferred-debit TradeGold differ
+> from Crystal. Fix and verify transaction phases/conservation before the
+> full route. No backend code changed or full-server suite ran this round.
+> Computer Use remains paused after user Escape: no GUI launch, input or
+> screenshot occurred. After explicit resumption, bind the final-source EXE
+> and real state to populated own/guest windows, invitations, gold additions,
+> item operations, lock/unlock, cancel and mutual settlement, with same-state
+> original pairs. Full editing/GDI, Gold 106.wav, overlap/topmost, package/
+> light, actual DPI, soak, legal/signing and human gates stay open. Preserve
+> all 33 IDs; `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-09-03 primary-item source/logic checkpoint: bag, belt, equipment,
 > personal storage and NPC goods use original alpha-bound GetTrueSize while
 > drawing the complete bitmap. Legitimate source Items/0, stackable count 1,

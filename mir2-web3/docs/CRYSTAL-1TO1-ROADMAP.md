@@ -1,5 +1,27 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> Latest accepted-exchange TradeDialog checkpoint (2026-09-03): native own/
+> guest windows now use source 204x152 geometry, ten fixed sparse slots each,
+> original controls/amount art and independent inventory visibility. Source
+> completion versus unlock/cancel, exchange ownership and exact read-only
+> own-offer projection are tested. Cells are still read-only; the removed
+> first-ten-bag/to=0 shortcut is not a source item-operation implementation.
+> Native UI 591/591, Windows 534/534, runtime 212/212, UI core 43/43 and the
+> 11-test/924-image gate pass. Original assets match 561 PNGs; five new source
+> frames are added while all 552 prior Prguse/Title PNG bytes are preserved.
+> Report: `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+>
+> Full trade remains blocked by confirmed source mismatches: Candidate emits
+> S.TradeConfirm during unilateral preparation before mutual/durable outcome,
+> and TradeGold overwrites an offer instead of source delta/immediate escrow.
+> These are the next priority CLI audit/fix, with conservation, refunds,
+> idempotence and unknown-outcome recovery preserved. No backend logic was
+> changed or full-server suite rerun here. Invitation/cancel messages, gold
+> audio, full editing, item operations/overlays and all-window routing remain
+> open. Computer Use is still paused; no new GUI or same-EXE capture is claimed.
+> All 33 IDs and original-pair/package/light/DPI/soak/legal/signing/human gates
+> remain; `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > Latest primary-item true-size checkpoint (2026-09-03): the alpha-bound
 > GetTrueSize/full-bitmap rule now covers bag/belt/equipment/personal storage
 > and NPC goods, including valid source zero images and stackable count 1.

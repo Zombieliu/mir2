@@ -60,6 +60,7 @@ use crate::storage::{
 #[cfg(test)]
 use crate::storage::{storage_deposit_enabled, storage_withdraw_enabled};
 
+use super::amount_input::{AmountKeyAction, CrystalAmountInput};
 use super::assets::CrystalButtonAssetSet;
 use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
 use super::hud::{free_inventory_slots, CrystalHudAction};
@@ -92,6 +93,10 @@ mod guild_storage_tests;
 #[cfg(test)]
 #[path = "primary_item_image_tests.rs"]
 mod primary_item_image_tests;
+
+#[path = "trade_dialog.rs"]
+mod trade_dialog;
+pub use trade_dialog::TradeDialogUi;
 
 const BIG_MAP_SEARCH_COOLDOWN_MS: u64 = 1_000;
 const NPC_GOODS_CELL_WIDTH: f32 = 205.0;
@@ -774,6 +779,7 @@ pub struct NativePlayerUiState {
     pub guild_recruit_draft: String,
     pub guild_recruit_focused: bool,
     pub guild_gold_prompt: Option<GuildGoldPrompt>,
+    pub trade_dialog: TradeDialogUi,
     pub guild_gold_ready_at_ms: u64,
     pub guild_storage: GuildStorageUi,
     pub selected_guild_rank: Option<u8>,
@@ -877,6 +883,7 @@ impl Default for NativePlayerUiState {
             guild_recruit_draft: String::new(),
             guild_recruit_focused: false,
             guild_gold_prompt: None,
+            trade_dialog: TradeDialogUi::default(),
             guild_gold_ready_at_ms: 0,
             guild_storage: GuildStorageUi::default(),
             selected_guild_rank: None,
@@ -960,7 +967,7 @@ impl NativePlayerUiState {
         self.core.is_guild_open()
     }
     pub fn trade_open(&self) -> bool {
-        self.core.is_trade_open()
+        self.trade_dialog.open || self.core.is_trade_open()
     }
     pub fn minimap_visible(&self) -> bool {
         self.core.minimap_visible()
@@ -1050,6 +1057,7 @@ impl NativePlayerUiState {
             || self.inspect.is_some()
             || self.inventory_delete_prompt.is_some()
             || self.guild_gold_prompt.is_some()
+            || self.trade_dialog.open
             || self.help.open
     }
     pub fn blocks_world_action(&self, dialog_open: bool, dead: bool) -> bool {
@@ -1099,6 +1107,7 @@ impl NativePlayerUiState {
         self.guild_recruit_draft.clear();
         self.guild_recruit_focused = false;
         self.guild_gold_prompt = None;
+        self.trade_dialog.hide();
         self.guild_storage.end_drag();
         self.selected_guild_rank = None;
         self.guild_rank_name_draft.clear();
@@ -1111,7 +1120,9 @@ impl NativePlayerUiState {
     }
 
     pub fn amount_modal_open(&self) -> bool {
-        self.inventory_delete_prompt.is_some() || self.guild_gold_prompt.is_some()
+        self.inventory_delete_prompt.is_some()
+            || self.guild_gold_prompt.is_some()
+            || self.trade_dialog.gold_prompt.is_some()
     }
 
     /// Open the source-shaped delete prompt for one current carried-item
@@ -2013,6 +2024,15 @@ struct OverlayGuildGoldModal;
 struct OverlayGuildGoldInput;
 
 #[derive(Component)]
+struct OverlayTrade;
+
+#[derive(Component)]
+struct OverlayTradeGoldModal;
+
+#[derive(Component)]
+struct OverlayTradeGoldInput;
+
+#[derive(Component)]
 pub struct OverlayGuildStorageCell {
     /// Original server slot, not the visible row/column's renumbered index.
     pub slot: usize,
@@ -2202,7 +2222,9 @@ enum OverlayButton {
     TradeAccept,
     TradeDecline,
     TradeGoldOffer,
-    TradeDepositItem(u8),
+    TradeGoldConfirm,
+    TradeGoldCancel,
+    TradeGoldClose,
     TradeConfirm,
     TradeCancel,
     Logout,
@@ -2421,6 +2443,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     sync_big_map_ui,
                     sync_local_panel_models,
                     sync_guild_storage_ui,
+                    trade_dialog::sync,
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate)
@@ -2432,6 +2455,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     consume_mail_operation_feedback,
                     consume_hud_buttons,
                     process_help_drag,
+                    trade_dialog::process_drag,
                     process_inventory_drag,
                     process_inventory_delete_pointer,
                     process_guild_storage_pointer,
@@ -2856,6 +2880,30 @@ fn spawn_overlay_root(mut commands: Commands) {
                 BackgroundColor(Color::NONE),
             ));
             root.spawn((
+                OverlayTrade,
+                Node {
+                    position_type: PositionType::Absolute,
+                    width: Val::Px(1024.0),
+                    height: Val::Px(768.0),
+                    display: Display::None,
+                    ..default()
+                },
+                BackgroundColor(Color::NONE),
+            ));
+            root.spawn((
+                OverlayTradeGoldModal,
+                Button,
+                Node {
+                    position_type: PositionType::Absolute,
+                    width: Val::Px(1024.0),
+                    height: Val::Px(768.0),
+                    display: Display::None,
+                    ..default()
+                },
+                GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
+                BackgroundColor(Color::NONE),
+            ));
+            root.spawn((
                 OverlayEquipment,
                 Node {
                     position_type: PositionType::Absolute,
@@ -3271,6 +3319,13 @@ fn process_inventory_drag(
             state.inventory_window.end_drag();
             return;
         };
+        // The accepted trade pair is drawn above Inventory. Its child cells
+        // and controls own the press too, not only its draggable background.
+        if state.trade_dialog.covers_cursor(start) {
+            state.inventory_window.end_drag();
+            state.inventory_window.remember_cursor(current_cursor);
+            return;
+        }
         if state.inventory_window.begin_drag(start.x, start.y) {
             if let Some(end) = current_cursor {
                 state.inventory_window.drag_to(end.x, end.y);
@@ -3483,100 +3538,21 @@ pub(crate) fn process_overlay_keyboard(
     } = keyboard_controls;
 
     if state.guild_gold_prompt.is_some() {
-        // Preserve event order when typing/backspace/Enter share one frame.
-        // Drain the whole batch even after closing, so later keys from that
-        // modal cannot leak into a newly opened textbox on the next frame.
         let events: Vec<_> = typed.read().cloned().collect();
-        let mut confirm = false;
-        let mut cancel = false;
-        if events.is_empty() {
-            // Also support hosts/tests which provide only ButtonInput edges.
-            cancel = keys.just_pressed(KeyCode::Escape);
-            confirm = keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::NumpadEnter);
-            let prompt = state.guild_gold_prompt.as_mut().expect("open gold prompt");
-            if (keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight))
-                && keys.just_pressed(KeyCode::KeyA)
-            {
-                prompt.select_all = true;
-            }
-            if keys.just_pressed(KeyCode::Backspace) {
-                prompt.backspace();
-            }
-        } else {
-            let control_bit = |key| match key {
-                KeyCode::ControlLeft => 1u8,
-                KeyCode::ControlRight => 2u8,
-                _ => 0,
-            };
-            let mut controls = u8::from(keys.pressed(KeyCode::ControlLeft))
-                | (u8::from(keys.pressed(KeyCode::ControlRight)) << 1);
-            // ButtonInput is the final frame state. Recover the starting
-            // modifier state for a coalesced Ctrl-down/A/Ctrl-up sequence.
-            for event in events.iter().rev() {
-                let bit = control_bit(event.key_code);
-                if event.state == ButtonState::Released {
-                    controls |= bit;
-                } else if !event.repeat {
-                    controls &= !bit;
-                }
-            }
-            for event in events {
-                let bit = control_bit(event.key_code);
-                if bit != 0 {
-                    if event.state == ButtonState::Pressed {
-                        controls |= bit;
-                    } else {
-                        controls &= !bit;
-                    }
-                    continue;
-                }
-                if event.state != ButtonState::Pressed {
-                    continue;
-                }
-                match event.key_code {
-                    KeyCode::Escape => {
-                        cancel = true;
-                        break;
-                    }
-                    KeyCode::Enter | KeyCode::NumpadEnter => {
-                        confirm = true;
-                        break;
-                    }
-                    KeyCode::Backspace => state
-                        .guild_gold_prompt
-                        .as_mut()
-                        .expect("open gold prompt")
-                        .backspace(),
-                    KeyCode::KeyA if controls != 0 => {
-                        state
-                            .guild_gold_prompt
-                            .as_mut()
-                            .expect("open gold prompt")
-                            .select_all = true;
-                    }
-                    _ => {
-                        if let Some(text) = &event.text {
-                            state
-                                .guild_gold_prompt
-                                .as_mut()
-                                .expect("open gold prompt")
-                                .push_text(text);
-                        }
-                    }
-                }
-            }
-        }
-        if cancel {
+        let action = state
+            .guild_gold_prompt
+            .as_mut()
+            .unwrap()
+            .input
+            .key_action(&keys, &events);
+        if action == AmountKeyAction::Cancel {
             state.guild_gold_prompt = None;
-        } else if confirm {
+        } else if action == AmountKeyAction::Confirm {
             if state
                 .guild_gold_prompt
                 .as_ref()
                 .is_some_and(|prompt| prompt.amount().is_none())
             {
-                // MirAmountBox invokes Click directly, even when invalid text
-                // hides OK. uint.TryParse leaves Amount=0, so Enter disposes
-                // the dialog without sending a GuildStorageGoldChange packet.
                 state.guild_gold_prompt = None;
             } else if let Some(social) = social.as_deref_mut() {
                 confirm_guild_gold(
@@ -3588,6 +3564,31 @@ pub(crate) fn process_overlay_keyboard(
                         .unwrap_or(0),
                     &mut intents,
                 );
+            }
+        }
+        return;
+    }
+    if state.trade_dialog.gold_prompt.is_some() {
+        let events: Vec<_> = typed.read().cloned().collect();
+        let action = state
+            .trade_dialog
+            .gold_prompt
+            .as_mut()
+            .unwrap()
+            .input
+            .key_action(&keys, &events);
+        if action == AmountKeyAction::Cancel {
+            state.trade_dialog.gold_prompt = None;
+        } else if action == AmountKeyAction::Confirm {
+            if let Some(social) = social.as_deref_mut() {
+                trade_dialog::confirm_gold(
+                    &mut state,
+                    social,
+                    ui.as_deref().map(|model| model.player.gold).unwrap_or(0),
+                    &mut intents,
+                );
+            } else {
+                state.trade_dialog.gold_prompt = None;
             }
         }
         return;
@@ -4059,9 +4060,13 @@ pub(crate) fn process_overlay_keyboard(
         if state.core.panel != mir2_ui_core::state::UiPanel::None
             || state.inspect.is_some()
             || state.help_open()
+            || state.trade_dialog.open
         {
-            // If shop/storage open, Escape acts as Cancel
+            // GameScene.Closeall deliberately omits both TradeDialogs. Escape
+            // closes Inventory/other general windows, not the active exchange.
+            let trade = std::mem::take(&mut state.trade_dialog);
             state.close_all_windows();
+            state.trade_dialog = trade;
             state.shop_quantity = 1;
             if let Some(skill_binding) = skill_binding.as_deref_mut() {
                 skill_binding.clear_selection();
@@ -4200,9 +4205,20 @@ fn process_overlay_buttons(
         })
         .unwrap_or((0, 0, String::new()));
     let gold_modal_was_open = state.guild_gold_prompt.is_some();
+    let trade_modal_was_open = state.trade_dialog.gold_prompt.is_some();
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
     for (interaction, button) in buttons.iter() {
         if *interaction != Interaction::Pressed {
+            continue;
+        }
+        if (trade_modal_was_open || state.trade_dialog.gold_prompt.is_some())
+            && !matches!(
+                *button,
+                OverlayButton::TradeGoldConfirm
+                    | OverlayButton::TradeGoldCancel
+                    | OverlayButton::TradeGoldClose
+            )
+        {
             continue;
         }
         if (gold_modal_was_open || state.guild_gold_prompt.is_some())
@@ -4818,45 +4834,29 @@ fn process_overlay_buttons(
                 });
             }
             OverlayButton::TradeGoldOffer => {
-                if social.trade.state == "open" {
-                    intents.push_social_pending(
-                        &mut social,
-                        NativePlayerUiIntent::TradeGold { amount: 100 },
-                    );
-                }
+                trade_dialog::open_gold(&mut state, &social, gold);
             }
-            OverlayButton::TradeDepositItem(slot) => {
-                if social.trade.state != "open" || slot >= 10 {
-                    continue;
-                }
-                let Some(item) = inventory
-                    .items
-                    .iter()
-                    .find(|item| item.container == 0 && item.slot == u32::from(slot))
-                else {
-                    continue;
-                };
-                if item_unique_id(item).is_none() {
-                    continue;
-                }
-                intents.push_social_pending(
-                    &mut social,
-                    NativePlayerUiIntent::TradeDepositItem {
-                        from: i32::from(slot),
-                        to: 0,
-                    },
-                );
+            OverlayButton::TradeGoldConfirm => {
+                trade_dialog::confirm_gold(&mut state, &mut social, gold, &mut intents);
+                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+            }
+            OverlayButton::TradeGoldCancel | OverlayButton::TradeGoldClose => {
+                state.trade_dialog.gold_prompt = None;
+                ui_audio.push(if *button == OverlayButton::TradeGoldClose {
+                    crate::audio::NativeUiSound::ButtonA
+                } else {
+                    crate::audio::NativeUiSound::ButtonB
+                });
             }
             OverlayButton::TradeConfirm => {
-                if social.trade.state == "open" && !social.trade.my_confirmed {
-                    intents.push_social_pending(
-                        &mut social,
-                        NativePlayerUiIntent::TradeConfirm { locked: true },
-                    );
+                if trade_dialog::toggle_lock(&mut state, &social, &mut intents) {
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
                 }
             }
             OverlayButton::TradeCancel => {
-                intents.push_social_pending(&mut social, NativePlayerUiIntent::TradeCancel);
+                if trade_dialog::cancel(&mut state, &mut social, &mut intents) {
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                }
             }
             OverlayButton::Logout => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::Logout);
@@ -6255,9 +6255,28 @@ fn render_guild_gold_modal(
     asset_server: Option<&AssetServer>,
     prompt: Option<&GuildGoldPrompt>,
 ) {
-    let Some(prompt) = prompt else {
-        return;
-    };
+    if let Some(prompt) = prompt {
+        render_gold_amount_modal(
+            parent,
+            asset_server,
+            prompt.action.title(),
+            &prompt.input,
+            [
+                OverlayButton::GuildGoldConfirm,
+                OverlayButton::GuildGoldCancel,
+                OverlayButton::GuildGoldClose,
+            ],
+        );
+    }
+}
+
+fn render_gold_amount_modal(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    title: &str,
+    input: &CrystalAmountInput,
+    actions: [OverlayButton; 3],
+) {
     parent
         .spawn((
             Node {
@@ -6287,7 +6306,7 @@ fn render_guild_gold_modal(
                     361,
                     362,
                     CrystalRect::new(180.0, 3.0, 24.0, 21.0),
-                    OverlayButton::GuildGoldClose,
+                    actions[2],
                 );
                 dialog
                     .spawn(Node {
@@ -6299,11 +6318,10 @@ fn render_guild_gold_modal(
                         ..default()
                     })
                     .with_children(|cell| {
-                        spawn_original_item_image(cell, asset_server, 116, 38, 34);
+                        spawn_original_item_image(cell, asset_server, 116, 38, 34)
                     });
-                // Source hides OK for invalid uint input; a dim disabled button
-                // would introduce an image that Crystal does not draw.
-                if prompt.amount().is_some() {
+                // Invalid input hides OK, rather than drawing a dim replacement.
+                if input.amount().is_some() {
                     spawn_overlay_crystal_button(
                         dialog,
                         asset_server,
@@ -6312,7 +6330,7 @@ fn render_guild_gold_modal(
                         201,
                         202,
                         CrystalRect::new(23.0, 76.0, 76.0, 25.0),
-                        OverlayButton::GuildGoldConfirm,
+                        actions[0],
                     );
                 }
                 spawn_overlay_crystal_button(
@@ -6323,50 +6341,53 @@ fn render_guild_gold_modal(
                     204,
                     205,
                     CrystalRect::new(110.0, 76.0, 76.0, 25.0),
-                    OverlayButton::GuildGoldCancel,
+                    actions[1],
                 );
             }
             overlay_text_at(
                 dialog,
-                prompt.action.title(),
+                title,
                 CrystalRect::new(19.0, 8.0, 158.0, 14.0),
                 10.0,
                 Color::WHITE,
             );
-            let border = match prompt.amount() {
+            let border = match input.amount() {
                 None => Color::srgb(1.0, 0.0, 0.0),
-                Some(amount) if amount == prompt.max_amount => Color::srgb(1.0, 0.647, 0.0),
+                Some(amount) if amount == input.max_amount => Color::srgb(1.0, 0.647, 0.0),
                 Some(_) => Color::srgb(0.0, 1.0, 0.0),
             };
-            dialog
-                .spawn((
-                    OverlayGuildGoldInput,
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(58.0),
-                        top: Val::Px(43.0),
-                        width: Val::Px(132.0),
-                        height: Val::Px(19.0),
-                        border: UiRect::all(Val::Px(1.0)),
-                        padding: UiRect::axes(Val::Px(2.0), Val::Px(0.0)),
-                        align_items: AlignItems::Center,
-                        overflow: Overflow::clip(),
+            let mut field = dialog.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(58.0),
+                    top: Val::Px(43.0),
+                    width: Val::Px(132.0),
+                    height: Val::Px(19.0),
+                    border: UiRect::all(Val::Px(1.0)),
+                    padding: UiRect::axes(Val::Px(2.0), Val::Px(0.0)),
+                    align_items: AlignItems::Center,
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                BackgroundColor(Color::BLACK),
+                BorderColor::all(border),
+            ));
+            if actions[0] == OverlayButton::TradeGoldConfirm {
+                field.insert(OverlayTradeGoldInput);
+            } else {
+                field.insert(OverlayGuildGoldInput);
+            }
+            field.with_children(|field| {
+                field.spawn((
+                    Text::new(input.draft.clone()),
+                    TextFont {
+                        font_size: FontSize::Px(10.0),
                         ..default()
                     },
-                    BackgroundColor(Color::BLACK),
-                    BorderColor::all(border),
-                ))
-                .with_children(|input| {
-                    input.spawn((
-                        Text::new(prompt.draft.clone()),
-                        TextFont {
-                            font_size: FontSize::Px(10.0),
-                            ..default()
-                        },
-                        TextColor(Color::WHITE),
-                        TextLayout::new(Justify::Left, LineBreak::NoWrap),
-                    ));
-                });
+                    TextColor(Color::WHITE),
+                    TextLayout::new(Justify::Left, LineBreak::NoWrap),
+                ));
+            });
         });
 }
 
@@ -6398,6 +6419,8 @@ fn render_overlays(
             Query<(Entity, &mut Node), With<OverlayInventoryDeleteModal>>,
             Query<(Entity, &mut Node, &mut GlobalZIndex), With<OverlayInventoryDeleteCursor>>,
             Query<(Entity, &mut Node), With<OverlayGuildGoldModal>>,
+            Query<(Entity, &mut Node), With<OverlayTrade>>,
+            Query<(Entity, &mut Node), With<OverlayTradeGoldModal>>,
         )>,
     )>,
     mut commands: Commands,
@@ -6566,7 +6589,9 @@ fn render_overlays(
         fill_panel(
             &mut commands,
             &mut secondary.p6(),
-            state.group_open() || state.guild_open() || state.trade_open(),
+            state.group_open()
+                || state.guild_open()
+                || (state.core.is_trade_open() && !state.trade_dialog.open),
             |parent| {
                 render_social(
                     parent,
@@ -6591,6 +6616,34 @@ fn render_overlays(
     }
     {
         let mut delete_layers = panels.p2();
+        fill_panel(
+            &mut commands,
+            &mut delete_layers.p3(),
+            state.trade_dialog.open,
+            |parent| {
+                trade_dialog::render(parent, asset_server.as_deref(), &social, &state, &ui.player);
+            },
+        );
+        fill_panel(
+            &mut commands,
+            &mut delete_layers.p4(),
+            state.trade_dialog.gold_prompt.is_some(),
+            |parent| {
+                if let Some(prompt) = &state.trade_dialog.gold_prompt {
+                    render_gold_amount_modal(
+                        parent,
+                        asset_server.as_deref(),
+                        "Trade Amount:",
+                        &prompt.input,
+                        [
+                            OverlayButton::TradeGoldConfirm,
+                            OverlayButton::TradeGoldCancel,
+                            OverlayButton::TradeGoldClose,
+                        ],
+                    );
+                }
+            },
+        );
         fill_panel(
             &mut commands,
             &mut delete_layers.p2(),
@@ -9313,121 +9366,21 @@ fn overlay_clickable_text_at(
     });
 }
 
-fn spawn_partner_trade_item(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    item: &crate::social::TradeItemModel,
-    player: &crate::read_model::PlayerStats,
-) {
-    let name = item
-        .name
-        .as_deref()
-        .or_else(|| {
-            item.tooltip_source
-                .as_ref()
-                .map(|source| source.info.name.as_str())
-        })
-        .unwrap_or("Item");
-    let icon = concrete_item_image_index(0, u32::from(item.count), item.tooltip_source.as_ref());
-    let mut row = parent.spawn((
-        Node {
-            width: Val::Percent(100.0),
-            height: Val::Px(34.0),
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(5.0),
-            ..default()
-        },
-        BackgroundColor(Color::srgba(0.08, 0.06, 0.03, 0.42)),
-        Interaction::None,
-        FocusPolicy::Block,
-    ));
-    if let Some(document) = crystal_item_tooltip_document_from_source(
-        name,
-        icon.unwrap_or_default(),
-        u32::from(item.count),
-        item.tooltip_source.as_ref(),
-        player,
-    ) {
-        row.insert(CrystalItemHint(document));
-    }
-    row.with_children(|content| {
-        if let (Some(asset_server), Some(index)) = (asset_server, icon) {
-            content
-                .spawn(Node {
-                    width: Val::Px(36.0),
-                    height: Val::Px(32.0),
-                    flex_shrink: 0.0,
-                    ..default()
-                })
-                .with_children(|cell| {
-                    spawn_original_item_image(cell, asset_server, index, 36, 32);
-                });
-        }
-        content.spawn((
-            Text::new(format!("{} x{}", short_name(name, "Item"), item.count)),
-            TextFont {
-                font_size: FontSize::Px(9.0),
-                ..default()
-            },
-            TextColor(TEXT),
-        ));
-    });
-}
-
-fn spawn_trade_offer_item(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    item: &ItemModel,
-    player: &crate::read_model::PlayerStats,
-) {
-    let mut row = parent.spawn((
-        Button,
-        OverlayButton::TradeDepositItem(item.slot.min(9) as u8),
-        Node {
-            width: Val::Percent(100.0),
-            height: Val::Px(34.0),
-            align_items: AlignItems::Center,
-            column_gap: Val::Px(5.0),
-            ..default()
-        },
-        BackgroundColor(BUTTON_BG),
-        CrystalItemHint(crystal_item_tooltip_document(item, player)),
-    ));
-    row.with_children(|content| {
-        if let (Some(asset_server), Some(index)) = (asset_server, item.user_item_image_index()) {
-            content
-                .spawn(Node {
-                    width: Val::Px(36.0),
-                    height: Val::Px(32.0),
-                    flex_shrink: 0.0,
-                    ..default()
-                })
-                .with_children(|cell| {
-                    spawn_original_item_image(cell, asset_server, index, 36, 32);
-                });
-        }
-        content.spawn((
-            Text::new(format!(
-                "Offer {} x{}",
-                short_name(&item.name, &item.key),
-                item.quantity
-            )),
-            TextFont {
-                font_size: FontSize::Px(9.0),
-                ..default()
-            },
-            TextColor(TEXT),
-        ));
-    });
-}
-
 fn render_trade_panel(
     parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
+    _asset_server: Option<&AssetServer>,
     social: &crate::social::SocialModel,
-    inventory: &InventoryModel,
-    player: &crate::read_model::PlayerStats,
+    _inventory: &InventoryModel,
+    _player: &crate::read_model::PlayerStats,
 ) {
+    // Only the legacy invitation/idle surface remains here. Accepted offers
+    // belong exclusively to TradeDialog/GuestTradeDialog; do not retain the
+    // invented text rows, first-ten bag mapping or fixed 100-gold control.
+    // Original MirMessageBox invitation/cancellation geometry is a separate
+    // tracked leaf, not accepted by the new trade window geometry tests.
+    if social.trade.state == "open" {
+        return;
+    }
     parent
         .spawn((
             Node {
@@ -9443,85 +9396,22 @@ fn render_trade_panel(
             },
             BackgroundColor(PANEL_BG),
         ))
-        .with_children(|trade_parent| {
-            title(trade_parent, "Trade");
-            let trade = &social.trade;
-            body(
-                trade_parent,
-                &format!(
-                    "State: {}  Partner: {}",
-                    if trade.state.is_empty() {
-                        "idle"
-                    } else {
-                        &trade.state
-                    },
-                    trade.partner.as_deref().unwrap_or("-")
-                ),
-            );
-            body(
-                trade_parent,
-                &format!(
-                    "Partner gold: {}  Items: {}  Confirmed: {}",
-                    trade.partner_gold,
-                    trade.partner_items.len(),
-                    trade.partner_confirmed
-                ),
-            );
-            for item in &trade.partner_items {
-                spawn_partner_trade_item(trade_parent, asset_server, item, player);
-            }
-            if trade.state == "requested" {
-                overlay_button(
-                    trade_parent,
-                    "Accept trade",
-                    OverlayButton::TradeAccept,
-                    true,
+        .with_children(|dialog| {
+            title(dialog, "Trade");
+            if social.trade.state == "requested" {
+                body(
+                    dialog,
+                    &format!(
+                        "Player {} has requested to trade with you.",
+                        social.trade.partner.as_deref().unwrap_or("")
+                    ),
                 );
-                overlay_button(
-                    trade_parent,
-                    "Decline trade",
-                    OverlayButton::TradeDecline,
-                    true,
-                );
-            } else if trade.state == "open" {
-                overlay_button(
-                    trade_parent,
-                    "Offer 100 gold",
-                    OverlayButton::TradeGoldOffer,
-                    true,
-                );
-                for item in inventory
-                    .items
-                    .iter()
-                    .filter(|item| {
-                        item.container == 0 && item.slot < 10 && item_unique_id(item).is_some()
-                    })
-                    .take(10)
-                {
-                    spawn_trade_offer_item(trade_parent, asset_server, item, player);
-                }
-                overlay_button(
-                    trade_parent,
-                    "Confirm trade",
-                    OverlayButton::TradeConfirm,
-                    !trade.my_confirmed,
-                );
-                overlay_button(
-                    trade_parent,
-                    "Cancel trade",
-                    OverlayButton::TradeCancel,
-                    true,
-                );
+                overlay_button(dialog, "Accept trade", OverlayButton::TradeAccept, true);
+                overlay_button(dialog, "Decline trade", OverlayButton::TradeDecline, true);
             } else {
-                overlay_button(
-                    trade_parent,
-                    "Request trade",
-                    OverlayButton::TradeRequest,
-                    true,
-                );
+                overlay_button(dialog, "Request trade", OverlayButton::TradeRequest, true);
             }
-            body(trade_parent, &format!("Pending: {}", social.pending.len()));
-            overlay_button(trade_parent, "Close", OverlayButton::CloseSocial, true);
+            overlay_button(dialog, "Close", OverlayButton::CloseSocial, true);
         });
 }
 
@@ -12792,13 +12682,17 @@ mod tests {
         app.world_mut()
             .resource_mut::<crate::social::SocialModel>()
             .trade
-            .partner_items = vec![crate::social::TradeItemModel {
+            .partner_items = vec![Some(crate::social::TradeItemModel {
             unique_id: Some(303),
             item_index: Some(661),
             name: Some("Trade Potion".to_owned()),
             count: 5,
             tooltip_source: Some(surface_tooltip_source(661, "Trade Potion", 535, 303, 5)),
-        }];
+        })];
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .trade_dialog
+            .open = true;
         app.update();
         assert_rendered_rich_hint(&mut app, "Trade Potion (5)");
     }

@@ -478,6 +478,10 @@ fn primary_trade_rows_use_current_user_item_image_and_unstretched_original_pixel
         .resource_mut::<NativePlayerUiState>()
         .core
         .panel = mir2_ui_core::state::UiPanel::Trade;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .trade_dialog
+        .open = true;
     let mut poison = source(2961);
     poison.info.item_type = 8;
     poison.info.shape = 2;
@@ -486,18 +490,18 @@ fn primary_trade_rows_use_current_user_item_image_and_unstretched_original_pixel
         .resource_mut::<crate::social::SocialModel>()
         .trade
         .partner_items = vec![
-        crate::social::TradeItemModel {
+        Some(crate::social::TradeItemModel {
             unique_id: Some(100),
             count: 50,
             tooltip_source: Some(poison),
             ..default()
-        },
-        crate::social::TradeItemModel {
+        }),
+        Some(crate::social::TradeItemModel {
             unique_id: Some(101),
             count: 1,
             tooltip_source: Some(source(0)),
             ..default()
-        },
+        }),
     ];
     app.update();
     load_original_images(app.world_mut());

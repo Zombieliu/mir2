@@ -225,7 +225,15 @@ Stop and ask only when:
 
 The authoritative current round is in `docs/AGENT-TASK-QUEUE.md`. If this file and the queue disagree, trust the queue and update this section.
 
-Current checkpoint:
+Current checkpoint (2026-09-03):
+
+- Active task: the Windows native Crystal UI/state/interaction parity goal remains active, with all 33 user-observed backlog IDs retained.
+- Latest bounded source/headless checkpoint: `native-ui-parity-20260903-trade-dialog`; native UI 591/591, Windows 534/534, client runtime 212/212 and UI core 43/43 pass. Evidence and exact limitations are in `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+- Next CLI leaf: separate unilateral shared-trade preparation from source completion, audit TradeGold delta/escrow and conservation, then finish exact native item operations. Full trade and whole-project Candidate closure are not established.
+- Computer Use remains paused after user Escape; no foreground launch/input/capture may resume without explicit user resumption. Source/headless work may continue.
+- Branch: `codex/windows-player-journey`; stacked PR #250 remains Draft. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; original-pair/package/light/DPI/soak/legal/signing/human gates stay open.
+
+Historical checkpoint (2026-04-29; not current whole-project acceptance):
 
 - Active round: `2026-04-29-R309`.
 - Active task: keep accepted stable-diff packet parity green while closing remaining same-scene frontend visual/resource gaps before human visual/feel acceptance.
@@ -237,7 +245,7 @@ Current checkpoint:
 - Restart handoff file: `docs/AGENT-RESUME-HANDOFF.md`.
 - Windows continuation checklist: `docs/WINDOWS-CONTINUATION.md`.
 
-Latest completed rounds:
+Historical completed rounds:
 
 | Round | Result |
 | --- | --- |

@@ -1,5 +1,38 @@
 # Agent Task Queue
 
+> Windows accepted-exchange TradeDialog checkpoint (2026-09-03): original
+> independent 204x152 own/guest windows, ten fixed 2*x+y cells per side,
+> Prguse/389-390, Title/520-522, source controls and the gold MirAmountBox
+> replace the generic accepted-trade panel. Inventory stays independent;
+> Escape follows source Closeall and does not cancel the pair. Sparse cells,
+> current-count images/hints, exact own-offer identity, exchange/unlock
+> revisions and pending/modal ownership have headless coverage. Cells remain
+> read-only: legacy first-ten-bag/to=0 shortcuts are removed, not accepted as
+> source deposit/retrieve/merge. Invitation UI and full editing remain open.
+> Final native UI 591/591, Windows 534/534, runtime 212/212, UI core 43/43,
+> item-icon 11/11 with 924 images, and formatting pass. Original asset checks
+> match 561 PNGs, preserve all 552 prior Prguse/Title PNGs byte-for-byte and
+> reject 32 negative controls. Five source PNGs are added.
+>
+> Next priority CLI leaf: separate shared-trade lock/prepare from completed
+> settlement. Candidate currently emits S.TradeConfirm before partner match
+> and durable outcome, but Crystal uses it only for completed exchange.
+> Also audit TradeGold's positive-delta/immediate-escrow contract: Candidate
+> currently overwrites the offer and defers debit. Preserve conservation,
+> idempotence, cancellation/refunds, save/disconnect and unknown-outcome holds;
+> do not patch += or suppress completion in isolation. Then finish exact
+> native item operations/slot addressing and paired packet routing. Backend
+> source is unchanged this round; no full-server test claim is made.
+>
+> Report: `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> This advances only the previous trade window/basic-control leaf, not full
+> transactions, invitation/cancel messages, gold audio, state overlays or
+> all-window input/topmost behavior. Computer Use stays paused after user
+> Escape; no GUI/input/capture occurred. All 33 IDs, original-pair/package/
+> light/DPI/soak/legal/signing/human gates and the goal remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`;
+> stacked PR #250 stays Draft.
+
 > Windows primary-item true-size checkpoint (2026-09-03): bag, belt,
 > equipment, personal storage and NPC goods now share source alpha-bound
 > GetTrueSize centring, full unstretched original images and valid source

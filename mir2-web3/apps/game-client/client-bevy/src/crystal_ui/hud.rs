@@ -1843,7 +1843,7 @@ where
     }
 }
 
-fn format_gold(gold: u32) -> String {
+pub(super) fn format_gold(gold: u32) -> String {
     let digits = gold.to_string();
     let mut output = String::with_capacity(digits.len() + digits.len() / 3);
     for (i, digit) in digits.chars().enumerate() {

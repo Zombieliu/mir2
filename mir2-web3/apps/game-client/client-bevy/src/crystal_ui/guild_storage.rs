@@ -188,57 +188,32 @@ impl GuildGoldAction {
 pub struct GuildGoldPrompt {
     pub action: GuildGoldAction,
     pub guild_name: String,
-    pub max_amount: u32,
-    pub draft: String,
-    pub select_all: bool,
+    pub input: super::amount_input::CrystalAmountInput,
 }
 
 impl GuildGoldPrompt {
+    pub fn amount(&self) -> Option<u32> {
+        self.input.amount()
+    }
+
     pub fn new(action: GuildGoldAction, guild_name: String, max_amount: u32) -> Self {
         Self {
             action,
             guild_name,
-            max_amount,
-            draft: max_amount.to_string(),
-            select_all: true,
+            input: super::amount_input::CrystalAmountInput::new(max_amount),
         }
     }
+}
 
-    pub fn amount(&self) -> Option<u32> {
-        self.draft
-            .parse::<u32>()
-            .ok()
-            .filter(|amount| *amount <= self.max_amount)
+impl std::ops::Deref for GuildGoldPrompt {
+    type Target = super::amount_input::CrystalAmountInput;
+    fn deref(&self) -> &Self::Target {
+        &self.input
     }
-
-    pub fn push_text(&mut self, text: &str) {
-        for ch in text.chars().filter(char::is_ascii_digit) {
-            if self.select_all {
-                self.draft.clear();
-                self.select_all = false;
-            }
-            // WinForms TextBox's default MaxLength. An overflowing uint is
-            // invalid (red/hidden OK), not a saturated or wrapped request.
-            if self.draft.len() < 32_767 {
-                self.draft.push(ch);
-            }
-            if self
-                .draft
-                .parse::<u32>()
-                .is_ok_and(|amount| amount > self.max_amount)
-            {
-                self.draft = self.max_amount.to_string();
-            }
-        }
-    }
-
-    pub fn backspace(&mut self) {
-        if self.select_all {
-            self.draft.clear();
-        } else {
-            self.draft.pop();
-        }
-        self.select_all = false;
+}
+impl std::ops::DerefMut for GuildGoldPrompt {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.input
     }
 }
 

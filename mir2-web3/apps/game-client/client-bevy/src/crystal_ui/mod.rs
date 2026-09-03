@@ -3,6 +3,7 @@
 //! These modules contain presentation data and coordinate transforms only.
 //! They do not own login, character, quest, inventory, or gameplay authority.
 
+pub mod amount_input;
 pub mod assets;
 pub mod chat;
 pub mod guild_storage;

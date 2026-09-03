@@ -2,6 +2,30 @@
 
 Last updated: 2026-09-03
 
+> 2026-09-03 accepted-exchange TradeDialog source/headless checkpoint:
+> WN-ITEM-002/003 now include the original independent own/guest window
+> geometry/art, ten fixed sparse cells per side, current-count full-bitmap
+> icons/hints, independent bag, basic dragging and source amount/lock/close
+> controls. Exact partner/nonce/slot/UniqueID read-only projection and explicit
+> exchange/unlock revisions prevent compacted cells or stale modal ownership.
+> Escape does not cancel trade, as in Crystal Closeall. Native UI 591/591,
+> Windows 534/534, runtime 212/212, UI core 43/43, the 11-test/924-image gate
+> and 561 original PNG checks pass; all 552 prior Prguse/Title PNGs are intact.
+>
+> This is not complete trade: the grids remain read-only and legacy bag/to=0
+> actions were removed. Original invitation/cancel MirMessageBoxes, Gold
+> 106.wav, complete amount editing/GDI, item operations/overlays and full
+> window input/topmost remain open. Candidate also sends S.TradeConfirm before
+> mutual/durable settlement and has non-source TradeGold overwrite/deferred-
+> debit semantics. Source-correct client completion handling exposes this
+> backend gap; it must not be disguised as a partner lock. Next work must fix
+> transaction phases and conservation before claiming full UI interaction.
+> Backend source is unchanged here. Report:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> Computer Use stays paused after user Escape; no new GUI capture exists.
+> All 33 IDs and original-pair/package/light/DPI/soak/legal/signing/human gates
+> remain; `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > 2026-09-03 native primary-item true-size checkpoint: WN-ITEM-001/002/003,
 > WN-CHAR-001 and the belt leaf of WN-HUD-001 now have source alpha-size
 > centring/full-bitmap, valid source Items/0 and actual-PNG regressions.

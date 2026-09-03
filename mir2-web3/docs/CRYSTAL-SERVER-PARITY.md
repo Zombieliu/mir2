@@ -1,5 +1,28 @@
 # Crystal Server Parity
 
+> Open shared-trade wire/escrow mismatch (2026-09-03 source audit): Crystal
+> `GameScene.cs:6329-6347` treats S.TradeConfirm as completed exchange, but
+> Candidate `runtime/packets.rs:5191-5274` and `runtime/session.rs:432-446`
+> produce/use it during unilateral preparation. Gateway
+> `apps/gateway/src/routing.rs:11028-11168` returns the initial packet before
+> mutual durable settlement, including waiting/rollback/unknown outcomes.
+> Crystal `Server/MirObjects/PlayerObject.cs:10778-10822` makes C.TradeGold a
+> positive delta with immediate owner debit and guest cumulative update;
+> Candidate `apps/simulation/src/runtime/packets.rs:5059-5073` instead replaces
+> the offer, rejects locked edits and defers debit. These are confirmed open
+> source contracts, not fixed by the new source-shaped native windows.
+>
+> Next work: separate lock/prepare from completion, then align escrow/deltas
+> and packet ownership while preserving conservation, cancellation/refunds,
+> idempotence, save/disconnect and durable unknown-outcome recovery. Backend
+> source/schema/stores/auth are unchanged this checkpoint. Native UI 591/591,
+> Windows 534/534, client runtime 212/212 and UI core 43/43 pass; full server
+> tests were not rerun and older outcomes are not current proof. Exact source
+> hashes and client limitations (including read-only trade cells):
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> All 33 backlog IDs and paired-state/package/light/DPI/soak/human gates remain;
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
 > Source stack-image server/client checkpoint (2026-09-03): the pure
 > `UserItem.Image` rule now projects authoritative quantity onto personal
 > item snapshots and NPC goods. Exact Info.Image/type/shape/StackSize are

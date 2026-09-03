@@ -1,5 +1,29 @@
 # Backend 1:1 Progress
 
+> Open trade source mismatches confirmed during native UI work (2026-09-03):
+> Crystal S.TradeConfirm denotes completed exchange. Candidate
+> `apps/simulation/src/runtime/packets.rs:5191-5274` emits it during unilateral
+> offer preparation; `runtime/session.rs:432-446` uses it as an internal
+> success marker, while `apps/gateway/src/routing.rs:11028-11168` retains the
+> initial packet before partner match/durable outcome, including waiting,
+> rollback and unknown-outcome paths. A source-correct client therefore closes
+> the trade windows too early. This is not evidence of mutual settlement.
+> Crystal `PlayerObject.cs:10778-10822` also adds positive TradeGold deltas and
+> immediately debits escrow; Candidate `runtime/packets.rs:5059-5073` overwrites
+> offered_gold, rejects locked changes and defers debit. Both remain open.
+>
+> Next bounded backend leaf must separate lock/prepare/commit/completion and
+> audit item/gold conservation, repeat commands, refunds, idempotence, durable
+> unknown-outcome holds, save/disconnect and paired packet routing. Do not
+> change += or debit timing in isolation. This round changes only native
+> presentation/read models; server code, schema, auth and stores are untouched.
+> Native UI 591/591, Windows 534/534, client runtime 212/212 and UI core 43/43
+> pass; no current full Simulation/Gateway result is claimed. Findings/hashes:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> Historical tracked-slice results do not close these source contracts or
+> full native trade, whose item cells remain read-only. No server/global
+> percentage or human acceptance is claimed; the goal and Draft PR remain open.
+
 > Source UserItem.Image projection checkpoint (2026-09-03): personal bag,
 > belt, storage and equipment snapshots derive icons from exact source
 > Info.Image/type/shape/StackSize and authoritative quantity; Gateway NPC
