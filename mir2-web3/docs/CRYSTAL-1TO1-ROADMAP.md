@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-03 Mac Android workstream handoff prepared at the user's request:
+> `docs/ANDROID-MAC-HANDOFF.md` separates existing Capacitor/WebView and native
+> Rust/Bevy readiness, reusable code/assets, safe branch sync, bounded writes
+> and source/APK/device evidence. The first suggested milestone is an actual
+> Web-shell player loop on Android; native transport/assembly/device gaps stay
+> explicit. No Android implementation, build, install or acceptance is claimed
+> by this documentation/publication checkpoint, and no Mac task was dispatched.
+
 > 2026-09-03 native map-relocation repair: resolve physical asset-root siblings
 > behind directory junctions/symlinks; require/decode the Bichon layout during
 > startup. This restores the missing map producer at the user's (302,634)

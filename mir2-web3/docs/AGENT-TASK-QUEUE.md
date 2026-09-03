@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-03 user-requested Mac Android handoff: the Windows map-relocation
+> repair is committed as `63b80fda3cdb4fda54fa4b1867c1c140b9e6db01`.
+> `docs/ANDROID-MAC-HANDOFF.md` defines safe branch synchronization and a
+> separate `codex/android-player-journey` lane: existing Capacitor device
+> baseline first, then a bounded native Bevy follow-up based on evidence.
+> AND-MAC-00..03 are not executed or accepted here; no Mac task was dispatched.
+> Git does not transfer the local full resource pack or update the remote Web
+> loaded by the mobile shell. Android does not inherit the next Windows trade
+> backend leaf; shared files remain single-writer. Windows work and all
+> current acceptance gates remain open.
+
 > 2026-09-03 user-requested native launch repair: fixed the directory-junction
 > map-layout lookup and added startup presence/decode checks. Native host
 > 537/537 serial tests, the reported Bichon viewport's 849 draws/221 local
