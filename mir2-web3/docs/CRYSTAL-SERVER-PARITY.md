@@ -1,6 +1,23 @@
 # Crystal Server Parity
 
-> Open shared-trade wire/escrow mismatch (2026-09-03 source audit): Crystal
+> Shared-trade completion checkpoint (2026-09-03): internal lock/preparation
+> no longer emits S.TradeConfirm. Matching delivery sends completion once;
+> durable projection waits for its atomic save/event marker and safely
+> retries. escrowPrepared separates reservation from completion while legacy
+> completed debit snapshots remain recoverable without another debit.
+> Simulation 1491/1491 + dedicated 7/7, Gateway 672 passed / one existing ignored, protocol
+> 40/40, game-data 39/39 and 1380 client tests pass. Initial
+> fixture/assertion and mixed-cache failures are retained in the evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> This is one source wire-semantic correction, not a full transaction or
+> packet-order parity claim. TradeGold delta/immediate escrow, invitation/
+> private routing, editable locks, capacity keep-offer behavior, mail fallback
+> and item operations remain open. Production routing/authority/auth and
+> wire IDs are unchanged; no SQL migration or live-store mutation occurred.
+> No GUI/capture; all 33 IDs and original-pair/package/light/DPI/soak/human
+> gates remain. visualAccepted=false, accepted=false, globalParityPercent=null.
+
+> Historical shared-trade wire/escrow audit (2026-09-03): Crystal
 > `GameScene.cs:6329-6347` treats S.TradeConfirm as completed exchange, but
 > Candidate `runtime/packets.rs:5191-5274` and `runtime/session.rs:432-446`
 > produce/use it during unilateral preparation. Gateway

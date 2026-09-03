@@ -1,6 +1,36 @@
 # Agent Task Queue
 
-> Windows accepted-exchange TradeDialog checkpoint (2026-09-03): original
+> Shared-trade completion checkpoint (2026-09-03): personal confirmation now
+> locks only; a typed shared preparation reserves outgoing assets without
+> S.TradeConfirm. Successful delivery sends completion once, and the durable
+> path waits for the saved projection/event marker. New escrowPrepared state
+> remains distinct from completed; legacy completed debit snapshots recover
+> without another debit. Matching ownership and held-state guards prevent
+> replay credit or direct release outside the shared settlement owner.
+>
+> Final Simulation 1491/1491 plus dedicated completion 7/7, Gateway 672 passed / one existing ignored,
+> protocol 40/40, game-data 39/39, native UI 591/591, Windows
+> 534/534, runtime 212/212 and UI core 43/43 pass. The fixed durable empty-
+> incoming completion/mark-retry test and five two-session conservation tests
+> also pass. Native source, assets, wire definitions and locks are unchanged.
+> Windows uses an isolated host target after a mixed-cache compile failure.
+> Initial fixture/expectation failures and all exact hashes/results are in
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+>
+> This supersedes only premature completion, not full source trade. Next CLI
+> work: original invitation/pair ownership and private notifications, then
+> positive-delta/immediate editable gold escrow, bilateral unlock and exact
+> item custody/operations. Preserve conservation, save/restart, cancellation/
+> mail fallback and durable unknown-outcome holds. Candidate capacity failure
+> still cancels/refunds instead of source Unlock=true retaining the offer;
+> native trade cells remain read-only. Do not patch += or debit timing alone.
+>
+> Computer Use remains paused after user Escape; no GUI/input/capture occurred.
+> All 33 IDs and original-pair/package/light/DPI/soak/legal/signing/human gates
+> remain open. Goal incomplete; PR #250 Draft. visualAccepted=false, accepted=false,
+> globalParityPercent=null.
+
+> Historical Windows accepted-exchange TradeDialog checkpoint (2026-09-03): original
 > independent 204x152 own/guest windows, ten fixed 2*x+y cells per side,
 > Prguse/389-390, Title/520-522, source controls and the gold MirAmountBox
 > replace the generic accepted-trade panel. Inventory stays independent;

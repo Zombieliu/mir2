@@ -1,6 +1,21 @@
 # Windows 原生可玩闭环验收清单
 
-> 2026-09-03 accepted-exchange TradeDialog source/headless checkpoint: source
+> 2026-09-03 trade completion source/headless checkpoint: shared preparation
+> no longer closes the source-correct trade windows by emitting completion.
+> Successful/saved delivery completes once, including an empty incoming side;
+> pending/rejected/unknown outcomes do not. Simulation 1491/1491 + dedicated
+> 7/7, Gateway 672 passed / one existing ignored and all 1380 native/client tests pass. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> This supersedes only premature completion. Original invitation/private
+> routing, positive gold additions/immediate escrow, unlock/re-edit, capacity
+> failure retaining offers, cancellation/mail and item operations remain.
+> Native cells are read-only. No GUI/input/screenshot occurred while Computer
+> Use remains paused after Escape. After explicit resumption, verify populated
+> final-source windows and real paired transactions against same-state Crystal.
+> All 33 IDs, package/light/DPI/soak/legal/signing/human gates remain open;
+> visualAccepted=false, accepted=false, globalParityPercent=null; PR #250 Draft.
+
+> Historical 2026-09-03 accepted-exchange TradeDialog checkpoint: source
 > own/guest 204x152 windows and original controls, ten fixed sparse cells each,
 > independent inventory, exact current-count icons/hints and basic amount/
 > lock/close state are covered. Explicit exchange/unlock ownership survives

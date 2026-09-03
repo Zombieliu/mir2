@@ -1,6 +1,22 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> Latest accepted-exchange TradeDialog checkpoint (2026-09-03): native own/
+> Shared-trade completion checkpoint (2026-09-03): separate personal lock,
+> typed escrow preparation and successful/saved delivery. Unilateral, waiting,
+> rejected or unknown outcomes no longer emit source completion; successful
+> delivery emits it once. Additive escrowPrepared state retains legacy saved
+> debit compatibility. Final Simulation 1491/1491 + completion 7/7, Gateway
+> 672 passed / one existing ignored, protocol 40/40, game-data 39/39 and all 1380
+> native/client tests pass. Exact source, diagnostics and scope:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> This supersedes only the premature-completion finding below. Gold delta/
+> immediate escrow, invitation/pair routing, source unlock/capacity handling,
+> cancellation/mail fallback and item operations remain open. Native cells
+> remain read-only; Candidate completion-last is not exact packet-order parity.
+> No GUI/capture while Computer Use is paused. All 33 IDs and original-pair/
+> package/light/DPI/soak/legal/signing/human gates remain; visualAccepted=false,
+> accepted=false, globalParityPercent=null. Goal and Draft PR #250 stay open.
+
+> Historical accepted-exchange TradeDialog checkpoint (2026-09-03): native own/
 > guest windows now use source 204x152 geometry, ten fixed sparse slots each,
 > original controls/amount art and independent inventory visibility. Source
 > completion versus unlock/cancel, exchange ownership and exact read-only

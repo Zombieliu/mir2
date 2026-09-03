@@ -2,7 +2,21 @@
 
 Last updated: 2026-09-03
 
-> 2026-09-03 accepted-exchange TradeDialog source/headless checkpoint:
+> 2026-09-03 trade completion source/headless checkpoint: WN-ITEM-002/003
+> no longer receive a premature completion when a shared offer is merely
+> prepared. Actual delivery completes once; the durable path waits for its
+> saved projection. Simulation 1491/1491 + dedicated 7/7 and Gateway 672 passed / one existing ignored
+> pass, as do native UI 591/591, Windows 534/534, runtime 212/212 and UI core
+> 43/43. Native source/assets are unchanged. Exact evidence and diagnostics:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> Source gold delta/immediate escrow, invitation/pair ownership, keep-offer
+> capacity rejection, unlock/re-edit and exact item operations remain open;
+> both native trade grids are still read-only. This is not full trade or
+> packet-order parity. No GUI/capture while Computer Use remains paused.
+> All 33 IDs and original-pair/package/light/DPI/soak/legal/signing/human gates
+> remain. visualAccepted=false, accepted=false, globalParityPercent=null.
+
+> Historical 2026-09-03 accepted-exchange TradeDialog source/headless checkpoint:
 > WN-ITEM-002/003 now include the original independent own/guest window
 > geometry/art, ten fixed sparse cells per side, current-count full-bitmap
 > icons/hints, independent bag, basic dragging and source amount/lock/close

@@ -6610,7 +6610,19 @@ pub struct Stage5TradeState {
     pub accepted: bool,
     #[serde(default)]
     pub locked: bool,
+    /// Outgoing assets are reserved for a shared settlement, not delivered.
+    /// Saved atomically with the debit so recovery must not debit them again.
+    #[serde(default)]
+    pub escrow_prepared: bool,
+    /// Legacy snapshots used this for an outgoing escrow debit. New shared
+    /// trades use escrow_prepared and stay incomplete until delivery succeeds.
     pub completed: bool,
+}
+
+impl Stage5TradeState {
+    pub(crate) fn outgoing_escrow_debited(&self) -> bool {
+        self.escrow_prepared || self.completed
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

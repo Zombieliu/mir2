@@ -430,16 +430,21 @@ impl SimulationSession {
     }
 
     pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
-        let offer = build_shared_trade_offer(self.app.world());
-        let packets = super::packets::stage5_trade_confirm_packet(self.app.world_mut(), true);
-        let confirmed = packets
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::TradeConfirm));
-        let packets = self.finalize_packets(packets);
-        if confirmed {
-            (packets, offer)
-        } else {
-            (packets, None)
+        // Preserve source rejection/unlock packets before building the owned
+        // offer: a mismatched deposited UID must not disappear as a bare None.
+        if let Err(packets) = super::packets::validate_trade_confirmation(self.app.world_mut()) {
+            return (self.finalize_packets(packets), None);
+        }
+        let Some(offer) = build_shared_trade_offer(self.app.world()) else {
+            return (Vec::new(), None);
+        };
+        match super::packets::prepare_shared_trade_escrow(self.app.world_mut()) {
+            super::packets::SharedTradePreparation::Prepared(packets) => {
+                (self.finalize_packets(packets), Some(offer))
+            }
+            super::packets::SharedTradePreparation::Rejected(packets) => {
+                (self.finalize_packets(packets), None)
+            }
         }
     }
 
@@ -453,6 +458,9 @@ impl SimulationSession {
     }
 
     pub fn apply_shared_trade_delivery(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        if !shared_trade_offer_matches_active_escrow(self.app.world(), offer, false) {
+            return Vec::new();
+        }
         let packets = apply_shared_trade_offer(self.app.world_mut(), offer, false);
         self.finalize_packets(packets)
     }
@@ -524,6 +532,9 @@ impl SimulationSession {
     }
 
     pub fn rollback_shared_trade_offer(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        if !shared_trade_offer_matches_active_escrow(self.app.world(), offer, true) {
+            return Vec::new();
+        }
         let packets = apply_shared_trade_offer(self.app.world_mut(), offer, true);
         self.finalize_packets(packets)
     }
@@ -1432,7 +1443,7 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     let character = session.selected_character.as_ref()?;
     let stage5 = world.resource::<Stage5SystemsResource>();
     let trade = stage5.stage5_systems.trade.as_ref()?;
-    if trade.completed
+    if trade.outgoing_escrow_debited()
         || trade.settlement_nonce.len() != 32
         || !trade
             .settlement_nonce
@@ -1472,6 +1483,44 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
         gold: trade.offered_gold,
         items,
     })
+}
+
+fn shared_trade_offer_matches_active_escrow(
+    world: &World,
+    offer: &SharedTradeOffer,
+    rollback: bool,
+) -> bool {
+    if !is_in_world(world) {
+        return false;
+    }
+    let session = world.resource::<SessionResource>();
+    let Some(character) = session.selected_character.as_ref() else {
+        return false;
+    };
+    let systems = world.resource::<Stage5SystemsResource>();
+    let Some(trade) = systems.stage5_systems.trade.as_ref() else {
+        return false;
+    };
+    if !trade.outgoing_escrow_debited() {
+        return false;
+    }
+    if rollback {
+        session.account_id.as_deref() == Some(offer.account_id.as_str())
+            && character.index == offer.character_index
+            && character.name.eq_ignore_ascii_case(&offer.character_name)
+            && trade.partner.eq_ignore_ascii_case(&offer.partner_name)
+            && trade.settlement_nonce == offer.settlement_nonce
+            && trade.offered_gold == offer.gold
+    } else {
+        character.name.eq_ignore_ascii_case(&offer.partner_name)
+            && trade.partner.eq_ignore_ascii_case(&offer.character_name)
+            && trade.settlement_nonce != offer.settlement_nonce
+            && offer.settlement_nonce.len() == 32
+            && offer
+                .settlement_nonce
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    }
 }
 
 fn apply_shared_trade_offer(
@@ -1542,6 +1591,23 @@ fn apply_shared_trade_offer(
             .stage5_systems
             .trade = None;
         packets.push(ServerPacket::TradeCancel { unlock: false });
+    } else if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .as_ref()
+        .is_some_and(|trade| {
+            trade.outgoing_escrow_debited()
+                && trade.partner.eq_ignore_ascii_case(&offer.character_name)
+        })
+    {
+        world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade = None;
+        // Crystal GameScene.TradeConfirm resets both windows. Emit it only
+        // after this committed delivery has actually materialized.
+        packets.push(ServerPacket::TradeConfirm);
     }
 
     packets
@@ -1604,7 +1670,7 @@ fn apply_shared_trade_settlement_projection(
                         .partner
                         .eq_ignore_ascii_case(&incoming_offer.character_name) =>
             {
-                trade.completed
+                trade.outgoing_escrow_debited()
             }
             Some(_) => {
                 return Err(
@@ -1613,7 +1679,7 @@ fn apply_shared_trade_settlement_projection(
             }
             // A crash may restore a checkpoint from before the trade UI was
             // opened. Such a snapshot cannot contain the outgoing debit,
-            // because debit and the matching completed trade state are saved
+            // because debit and the matching prepared trade state are saved
             // atomically in one CharacterSaveRecord.
             None => false,
         }
@@ -1716,6 +1782,10 @@ fn apply_shared_trade_settlement_projection(
             .into_iter()
             .map(|(_, item)| ServerPacket::GainedItem { item }),
     );
+    // The public wrapper releases these packets only after the projection and
+    // its idempotency marker have been saved together. Save failure restores
+    // the checkpoint and must not announce a completed trade.
+    packets.push(ServerPacket::TradeConfirm);
     Ok(packets)
 }
 

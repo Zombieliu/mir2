@@ -3206,6 +3206,7 @@ mod character_save_item_validation_tests {
             offered_currency: CurrencyKind::Gold,
             accepted: false,
             locked: false,
+            escrow_prepared: false,
             completed: false,
         });
         systems.auction.push(Stage5AuctionListing {

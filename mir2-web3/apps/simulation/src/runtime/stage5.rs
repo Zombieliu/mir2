@@ -3680,6 +3680,7 @@ impl SimulationSession {
             offered_currency: CurrencyKind::Gold,
             accepted: false,
             locked: false,
+            escrow_prepared: false,
             completed: false,
         });
         Vec::new()
@@ -3721,7 +3722,7 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
-        if trade.completed || trade.locked {
+        if trade.outgoing_escrow_debited() || trade.locked {
             return vec![system_message(&localized_text_or_fallback(
                 language,
                 "server.NotFound",
@@ -3769,7 +3770,7 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
-        if trade.completed || trade.locked {
+        if trade.outgoing_escrow_debited() || trade.locked {
             return vec![system_message(&localized_text_or_fallback(
                 language,
                 "server.NotFound",

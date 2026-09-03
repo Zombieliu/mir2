@@ -1,6 +1,25 @@
 # Backend 1:1 Progress
 
-> Open trade source mismatches confirmed during native UI work (2026-09-03):
+> Shared-trade completion phase correction (2026-09-03): S.TradeConfirm is
+> no longer an escrow-preparation acknowledgement. Personal confirmation
+> locks only; typed shared preparation reserves once with escrowPrepared=true
+> and completed=false. Delivery clears the current exchange and completes
+> once; durable delivery publishes only after projection/event-marker save.
+> Legacy completed=true remains recognized as an already-debited snapshot.
+> Current-exchange ownership, held-state mutation, replay, refund and
+> save-fault guards have dedicated coverage. Gateway production routing and
+> fencing are unchanged; the save field is additive, with no SQL migration,
+> authentication relaxation or live-store mutation.
+> Final Simulation 1491/1491 + dedicated 7/7, Gateway 672 passed / one existing ignored, protocol
+> 40/40, game-data 39/39 and 1380 client tests pass. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> Only premature completion is superseded below. Source invitation/private
+> packet routing, positive-delta/immediate gold escrow, editable locks,
+> capacity rejection retaining offers, cancellation/mail fallback, late
+> delivery/gold-cap edges and exact item custody remain open. No global
+> backend percentage or human acceptance is claimed; goal incomplete and PR #250 Draft.
+
+> Historical trade source audit during native UI work (2026-09-03):
 > Crystal S.TradeConfirm denotes completed exchange. Candidate
 > `apps/simulation/src/runtime/packets.rs:5191-5274` emits it during unilateral
 > offer preparation; `runtime/session.rs:432-446` uses it as an internal

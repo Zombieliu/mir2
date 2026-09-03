@@ -40500,7 +40500,10 @@ fn return_incoming_item_tree_through_path(
                 account_id: "sender-account".to_string(),
                 character_index: 0,
                 character_name: "Sender".to_string(),
-                partner_name: "Scout".to_string(),
+                partner_name: session
+                    .active_identity()
+                    .expect("trade receiver")
+                    .character_name,
                 gold: 0,
                 items: vec![super::SharedTradeOfferItem {
                     item_state_json: serde_json::to_string(&item).expect("incoming trade item"),
@@ -40508,6 +40511,8 @@ fn return_incoming_item_tree_through_path(
                     unique_id: super::item_unique_id(&item),
                 }],
             };
+            session.trade_request("Sender");
+            assert!(session.shared_trade_confirm().1.is_some());
             let packets = session.apply_shared_trade_delivery(&offer);
             assert!(packets
                 .iter()
@@ -40747,7 +40752,10 @@ fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() 
                     account_id: "sender-account".to_string(),
                     character_index: 0,
                     character_name: "Sender".to_string(),
-                    partner_name: "Scout".to_string(),
+                    partner_name: session
+                        .active_identity()
+                        .expect("trade receiver")
+                        .character_name,
                     gold: 77,
                     items: vec![super::SharedTradeOfferItem {
                         item_state_json: serde_json::to_string(&item)
@@ -40756,6 +40764,8 @@ fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() 
                         unique_id: super::item_unique_id(&item),
                     }],
                 };
+                session.trade_request("Sender");
+                assert!(session.shared_trade_confirm().1.is_some());
                 let packets = session.apply_shared_trade_delivery(&offer);
                 assert!(
                     packets
@@ -41004,7 +41014,10 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                         account_id: "sender-account".to_string(),
                         character_index: 0,
                         character_name: "Sender".to_string(),
-                        partner_name: "Scout".to_string(),
+                        partner_name: session
+                            .active_identity()
+                            .expect("trade receiver")
+                            .character_name,
                         gold: 77,
                         items: vec![super::SharedTradeOfferItem {
                             item_state_json: serde_json::to_string(&item).unwrap(),
@@ -41012,6 +41025,8 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                             unique_id: super::item_unique_id(&item),
                         }],
                     };
+                    session.trade_request("Sender");
+                    assert!(session.shared_trade_confirm().1.is_some());
                     let packets = session.apply_shared_trade_delivery(&offer);
                     assert!(packets
                         .iter()
@@ -61781,7 +61796,7 @@ fn trade_packets_without_partner_preserve_crystal_noop_and_ack_shape() {
 }
 
 #[test]
-fn trade_packets_offer_items_gold_and_confirm_from_stage5_state() {
+fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -61849,15 +61864,10 @@ fn trade_packets_offer_items_gold_and_confirm_from_stage5_state() {
         .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
 
     let confirm_packets = session.handle_packet(ClientPacket::TradeConfirm { locked: true });
-    assert!(confirm_packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 25 })));
-    assert!(confirm_packets
-        .iter()
-        .any(|packet| matches!(packet, ServerPacket::TradeConfirm)));
+    assert!(confirm_packets.is_empty());
     let snapshot = session.world_snapshot();
-    assert_eq!(snapshot.gold, starting_gold - 25);
-    assert!(!snapshot
+    assert_eq!(snapshot.gold, starting_gold);
+    assert!(snapshot
         .inventory_items
         .iter()
         .any(|item| item.key == "red-potion" && i32::from(item.slot) == red_potion_slot));
@@ -61865,7 +61875,10 @@ fn trade_packets_offer_items_gold_and_confirm_from_stage5_state() {
         .stage5_systems
         .trade
         .as_ref()
-        .is_some_and(|trade| trade.completed && trade.accepted && trade.locked));
+        .is_some_and(|trade| !trade.completed
+            && !trade.escrow_prepared
+            && trade.accepted
+            && trade.locked));
 }
 
 #[test]
@@ -61895,7 +61908,7 @@ fn repeated_trade_request_cannot_replace_an_already_debited_offer() {
     assert_eq!(preserved.settlement_nonce, completed.settlement_nonce);
     assert_eq!(preserved.partner, "Trader");
     assert_eq!(preserved.offered_gold, 25);
-    assert!(preserved.completed);
+    assert!(preserved.escrow_prepared && !preserved.completed);
     assert_eq!(session.world_snapshot().gold, starting_gold - 25);
 
     session.rollback_shared_trade_offer(&offer);

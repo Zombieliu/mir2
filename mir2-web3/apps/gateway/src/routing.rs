@@ -12599,6 +12599,9 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "trade_completion_tests.rs"]
+    mod trade_completion_tests;
+
     use super::{
         delayed_player_action_packets, filter_stale_owner_dead_entity_packets,
         gateway_zone_magic_requires_item_consumption, gateway_zone_magic_targets_ground,
@@ -17140,7 +17143,7 @@ mod tests {
         assert_eq!(trade.settlement_nonce, offer.settlement_nonce);
         assert_eq!(trade.partner, offer.partner_name);
         assert_eq!(trade.offered_gold, offer.gold);
-        assert!(trade.completed);
+        assert!(trade.escrow_prepared && !trade.completed);
     }
 
     #[test]
@@ -24563,7 +24566,7 @@ mod tests {
             .world_snapshot()
             .stage5_systems
             .trade
-            .expect("completed unmatched offer");
+            .expect("prepared unmatched offer");
         assert_eq!(first.world_snapshot().gold, starting_gold - 30);
         assert!(!has_inventory_key(&first, "red-potion"));
 
@@ -24575,7 +24578,7 @@ mod tests {
             .expect("original unmatched offer remains");
         assert_eq!(preserved.settlement_nonce, original.settlement_nonce);
         assert_eq!(preserved.offered_gold, 30);
-        assert!(preserved.completed);
+        assert!(preserved.escrow_prepared && !preserved.completed);
 
         second.handle_packet(ClientPacket::TradeCancel);
         first.handle_packet(ClientPacket::KeepAlive { time: 31 });
