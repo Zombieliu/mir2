@@ -27,8 +27,8 @@ use mir2_client_bevy::pending_operations::{
 };
 use mir2_client_bevy::quest_model::{
     CombatTargetModel, CombatTargetUpdate, GroundPickupModel, NearbyNpc, NearbyNpcModel,
-    NpcDialogModel, NpcDialogOption, NpcDialogUpdate, Quest, QuestObjective, QuestReward,
-    QuestStatus, QuestTracker, RecentPickup,
+    NpcDialogModel, NpcDialogOption, NpcDialogUpdate, Quest, QuestDetailText, QuestObjective,
+    QuestReward, QuestStatus, QuestTracker, RecentPickup,
 };
 use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
 use mir2_client_bevy::read_model::UiReadModel;
@@ -49,6 +49,9 @@ const MAX_NEARBY_DISTANCE: u32 = 18;
 #[derive(Debug, Clone, Default)]
 struct QuestDefinition {
     title: String,
+    group: Option<String>,
+    min_level_needed: i32,
+    detail: QuestDetailText,
     accept_npc_index: Option<u32>,
     finish_npc_index: Option<u32>,
     objectives: Vec<String>,
@@ -1955,6 +1958,18 @@ pub fn forward_quest_ui_intents(
                     quest_index,
                 }
             }
+            QuestUiIntent::ShareQuest { quest_index } => {
+                let allowed = tracker.as_deref().is_some_and(|tracker| {
+                    tracker
+                        .active_quests
+                        .iter()
+                        .any(|quest| quest.quest_index == quest_index && quest.status.is_active())
+                });
+                if !allowed {
+                    continue;
+                }
+                NativeOutboundCommand::ShareQuest { quest_index }
+            }
             QuestUiIntent::AttackTarget { object_id } => {
                 if world_actions_blocked {
                     continue;
@@ -2096,6 +2111,15 @@ pub fn forward_quest_ui_intents(
                 hero_inventory,
             } => NativeOutboundCommand::DropItem {
                 key,
+                unique_id,
+                count,
+                hero_inventory,
+            },
+            NativePlayerUiIntent::DeleteItem {
+                unique_id,
+                count,
+                hero_inventory,
+            } => NativeOutboundCommand::DeleteItem {
                 unique_id,
                 count,
                 hero_inventory,
@@ -2551,6 +2575,21 @@ fn parse_quest_definition(payload: &Value) -> QuestDefinition {
     let title = string_at(payload, "name")
         .or_else(|| info.and_then(|value| string_at(value, "name")))
         .unwrap_or_default();
+    let group = string_at(payload, "group")
+        .or_else(|| info.and_then(|value| string_at(value, "group")))
+        .filter(|value| !value.trim().is_empty());
+    let min_level_needed = payload
+        .get("minLevelNeeded")
+        .and_then(value_i32)
+        .or_else(|| {
+            info.and_then(|value| {
+                value
+                    .get("min_level_needed")
+                    .or_else(|| value.get("minLevelNeeded"))
+                    .and_then(value_i32)
+            })
+        })
+        .unwrap_or(0);
     let accept_npc_index = info
         .and_then(|value| value.get("npc_index").or_else(|| value.get("npcIndex")))
         .and_then(value_u32);
@@ -2562,7 +2601,7 @@ fn parse_quest_definition(payload: &Value) -> QuestDefinition {
         })
         .and_then(value_u32)
         .or(accept_npc_index);
-    let objectives = payload
+    let objectives: Vec<String> = payload
         .get("objectives")
         .and_then(Value::as_array)
         .map(|items| {
@@ -2574,14 +2613,68 @@ fn parse_quest_definition(payload: &Value) -> QuestDefinition {
                 .collect()
         })
         .unwrap_or_default();
-    let description = payload
+    let description_lines = payload
         .get("descriptionLines")
         .and_then(string_array)
-        .filter(|lines| !lines.is_empty())
-        .map(|lines| strip_crystal_markup(&lines.join("\n")));
+        .or_else(|| {
+            info.and_then(|value| value.get("description"))
+                .and_then(string_array)
+        })
+        .unwrap_or_default()
+        .into_iter()
+        .map(|line| strip_crystal_markup(&line))
+        .filter(|line| !line.trim().is_empty())
+        .collect::<Vec<_>>();
+    let task_description_lines = if objectives.is_empty() {
+        info.and_then(|value| value.get("task_description"))
+            .and_then(string_array)
+            .unwrap_or_default()
+            .into_iter()
+            .map(|line| strip_crystal_markup(&line))
+            .filter(|line| !line.trim().is_empty())
+            .collect()
+    } else {
+        objectives.clone()
+    };
+    let return_description_lines = payload
+        .get("returnDescriptionLines")
+        .and_then(string_array)
+        .or_else(|| {
+            info.and_then(|value| value.get("return_description"))
+                .and_then(string_array)
+        })
+        .unwrap_or_default()
+        .into_iter()
+        .map(|line| strip_crystal_markup(&line))
+        .filter(|line| !line.trim().is_empty())
+        .collect();
+    let completion_description_lines = payload
+        .get("completionDescriptionLines")
+        .and_then(string_array)
+        .or_else(|| {
+            info.and_then(|value| value.get("completion_description"))
+                .and_then(string_array)
+        })
+        .unwrap_or_default()
+        .into_iter()
+        .map(|line| strip_crystal_markup(&line))
+        .filter(|line| !line.trim().is_empty())
+        .collect();
+    let time_limit = string_at(payload, "timeLimit").filter(|value| !value.trim().is_empty());
+    let description = (!description_lines.is_empty()).then(|| description_lines.join("\n"));
+    let detail = QuestDetailText {
+        description_lines,
+        task_description_lines,
+        return_description_lines,
+        completion_description_lines,
+        time_limit,
+    };
 
     QuestDefinition {
         title: strip_crystal_markup(&title),
+        group,
+        min_level_needed,
+        detail,
         accept_npc_index,
         finish_npc_index,
         objectives,
@@ -2641,9 +2734,9 @@ fn transform_quest_tracker(
                                 definition.title.clone()
                             }
                         });
-                    let unknown_text = string_at(quest, "summary")
-                        .filter(|text| !text.trim().is_empty())
-                        .or(definition.description.clone());
+                    let unknown_text = definition.description.clone().or_else(|| {
+                        string_at(quest, "summary").filter(|text| !text.trim().is_empty())
+                    });
 
                     Some(Quest {
                         quest_index,
@@ -2651,6 +2744,9 @@ fn transform_quest_tracker(
                         finish_npc_index: definition.finish_npc_index,
                         title: strip_crystal_markup(&title),
                         npc_name,
+                        group: definition.group.clone(),
+                        min_level_needed: definition.min_level_needed,
+                        detail: definition.detail.clone(),
                         status,
                         objectives,
                         rewards,
@@ -2757,6 +2853,12 @@ fn parse_quest_rewards(value: Option<&Value>) -> Vec<QuestReward> {
                     item_id,
                     name: strip_crystal_markup(&name),
                     quantity,
+                    icon: item.get("icon").and_then(value_u32),
+                    selection_index: (field == "selectItems")
+                        .then(|| item.get("selectionIndex").and_then(value_i32).unwrap_or(0)),
+                    tooltip_source: item
+                        .get("tooltipSource")
+                        .and_then(|source| serde_json::from_value(source.clone()).ok()),
                 });
             }
         }
@@ -3197,6 +3299,11 @@ mod tests {
                 count: 2,
                 hero_inventory: false,
             });
+            queue.push_intent(NativePlayerUiIntent::DeleteItem {
+                unique_id: 15,
+                count: 3,
+                hero_inventory: false,
+            });
             queue.push_intent(NativePlayerUiIntent::MoveItem {
                 grid: "inventory".into(),
                 unique_id: 10,
@@ -3230,7 +3337,7 @@ mod tests {
         app.update();
 
         let commands = receiver.try_iter().collect::<Vec<_>>();
-        assert_eq!(commands.len(), 6);
+        assert_eq!(commands.len(), 7);
         assert!(matches!(
             &commands[0],
             GatewayCommand::Wire(NativeOutboundCommand::DropItem {
@@ -3242,6 +3349,14 @@ mod tests {
         ));
         assert!(matches!(
             &commands[1],
+            GatewayCommand::Wire(NativeOutboundCommand::DeleteItem {
+                unique_id: 15,
+                count: 3,
+                hero_inventory: false,
+            })
+        ));
+        assert!(matches!(
+            &commands[2],
             GatewayCommand::Wire(NativeOutboundCommand::MoveItem {
                 grid,
                 from: 0,
@@ -3249,7 +3364,7 @@ mod tests {
             }) if grid == "inventory"
         ));
         assert!(matches!(
-            &commands[2],
+            &commands[3],
             GatewayCommand::Wire(NativeOutboundCommand::MergeItem {
                 grid_from,
                 grid_to,
@@ -3258,7 +3373,7 @@ mod tests {
             }) if grid_from == "inventory" && grid_to == "inventory"
         ));
         assert!(matches!(
-            &commands[3],
+            &commands[4],
             GatewayCommand::Wire(NativeOutboundCommand::SplitItem {
                 unique_id: 12,
                 grid,
@@ -3266,7 +3381,7 @@ mod tests {
             }) if grid == "inventory"
         ));
         assert!(matches!(
-            &commands[4],
+            &commands[5],
             GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
                 request_id,
                 from: 3,
@@ -3274,7 +3389,7 @@ mod tests {
             }) if request_id == "st-0000000000000001"
         ));
         assert!(matches!(
-            &commands[5],
+            &commands[6],
             GatewayCommand::Wire(NativeOutboundCommand::TakeBackItem {
                 request_id,
                 from: 9,
@@ -3357,6 +3472,9 @@ mod tests {
                 finish_npc_index: Some(3),
                 title: "Quest 11".to_owned(),
                 npc_name: None,
+                group: None,
+                min_level_needed: 0,
+                detail: Default::default(),
                 status: QuestStatus::InProgress,
                 objectives: Vec::new(),
                 rewards: Vec::new(),
@@ -4086,9 +4204,14 @@ mod tests {
             payload: json!({
                 "id":1,
                 "name":"Assistant's Request",
+                "group":"BichonProvince",
+                "minLevelNeeded":1,
                 "descriptionLines":["Welcome to {Border Village/Yellow}"],
                 "objectives":[{"text":"Transport {CannibalLeaves/LightSteelBlue}"}],
-                "rewards":{"experience":10,"items":[{"itemIndex":658,"name":"(HP)DrugSmall"}]},
+                "returnDescriptionLines":["Return to {CraftLady/LimeGreen}"],
+                "completionDescriptionLines":["Thank you."],
+                "timeLimit":"05:00",
+                "rewards":{"experience":10,"items":[{"itemIndex":658,"icon":31,"name":"(HP)DrugSmall"}]},
                 "info":{"index":1,"npc_index":3,"finish_npc_index":4}
             }),
         })
@@ -4105,8 +4228,32 @@ mod tests {
         assert_eq!(quest.accept_npc_index, Some(3));
         assert_eq!(quest.finish_npc_index, Some(4));
         assert_eq!(quest.npc_name.as_deref(), Some("Assistant - Jane"));
+        assert_eq!(quest.group.as_deref(), Some("BichonProvince"));
+        assert_eq!(quest.min_level_needed, 1);
+        assert_eq!(
+            quest.detail.description_lines,
+            ["Welcome to Border Village"]
+        );
+        assert_eq!(
+            quest.detail.task_description_lines,
+            ["Transport CannibalLeaves"]
+        );
+        assert_eq!(
+            quest.detail.return_description_lines,
+            ["Return to CraftLady"]
+        );
+        assert_eq!(quest.detail.completion_description_lines, ["Thank you."]);
+        assert_eq!(quest.detail.time_limit.as_deref(), Some("05:00"));
         assert_eq!(quest.objectives[0].text, "Deliver leaves");
         assert_eq!(quest.rewards.len(), 2);
+        assert!(matches!(
+            &quest.rewards[1],
+            QuestReward::Item {
+                icon: Some(31),
+                selection_index: None,
+                ..
+            }
+        ));
         assert_eq!(quest.status, QuestStatus::NotStarted);
     }
 

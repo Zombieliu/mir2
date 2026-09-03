@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::config::{
     EquipmentSlot, ItemContainer, ItemGrade, Stage5HeroMagicState, WorldItemSnapshot,
+    WorldItemTooltipSource,
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
@@ -477,10 +478,48 @@ fn validate_item_state_key_for_exact_index(
 
 impl ItemState {
     pub(super) fn snapshot(&self, language: LanguageCode) -> WorldItemSnapshot {
+        let tooltip_source = exact_item_index_for_item_state(self)
+            .ok()
+            .and_then(|item_index| unique_crystal_item_by_index(item_index).ok())
+            .map(|info| {
+                let user_item = try_user_item_from_item_state(self).ok();
+                let socket_infos = user_item
+                    .as_ref()
+                    .map(|item| {
+                        item.slots
+                            .iter()
+                            .map(|slot| {
+                                slot.as_ref().and_then(|socket| {
+                                    unique_crystal_item_by_index(socket.item_index).ok()
+                                })
+                            })
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                WorldItemTooltipSource {
+                    info,
+                    real_info: None,
+                    user_item,
+                    socket_infos,
+                    real_socket_infos: Vec::new(),
+                }
+            });
         WorldItemSnapshot {
             key: self.key.clone(),
             name: localized_item_name(language, &self.key, &self.name),
-            icon: self.icon,
+            // Derive from source identity and live quantity. A legacy saved
+            // icon must not override a known ItemInfo.Image, and split/merge/
+            // use/save must not leave a cached count-band image behind.
+            icon: tooltip_source.as_ref().map_or(self.icon, |source| {
+                let info = &source.info;
+                mir2_game_data::crystal_user_item_image(
+                    info.item_type,
+                    info.shape,
+                    info.stack_size,
+                    info.image,
+                    self.quantity,
+                )
+            }),
             unique_id: item_unique_id(self),
             slot: self.slot,
             container: self.container,
@@ -499,6 +538,7 @@ impl ItemState {
             grade: self.grade,
             added_attack: self.added_attack,
             added_defence: self.added_defence,
+            tooltip_source,
         }
     }
 
@@ -3846,6 +3886,30 @@ mod item_identity_roundtrip_tests {
 
         validate_item_state_carrier(&reloaded).expect("saved carrier should validate");
         assert_eq!(user_item_from_item_state(&reloaded), expected);
+    }
+
+    #[test]
+    fn world_snapshot_carries_exact_tooltip_catalogue_instance_and_socket_order() {
+        let expected = complex_user_item();
+        let state = try_item_state_from_user_item(state_for_user_item(&expected), &expected)
+            .expect("protocol identity should hydrate");
+
+        let snapshot = state.snapshot(LanguageCode::English);
+        let source = snapshot
+            .tooltip_source
+            .expect("known unambiguous Crystal item should expose tooltip source");
+        assert_eq!(source.info.item_index, expected.item_index);
+        assert_eq!(source.user_item.as_ref(), Some(&expected));
+        assert_eq!(source.socket_infos.len(), expected.slots.len());
+        assert_eq!(source.socket_infos[0], None);
+        assert_eq!(
+            source.socket_infos[1].as_ref().map(|info| info.item_index),
+            expected.slots[1].as_ref().map(|item| item.item_index)
+        );
+        assert_eq!(
+            source.socket_infos[2].as_ref().map(|info| info.item_index),
+            expected.slots[2].as_ref().map(|item| item.item_index)
+        );
     }
 
     #[test]

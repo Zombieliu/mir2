@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use bevy::text::LineBreak;
 use mir2_bevy_runtime::entity_animation::AnimationAction;
+use mir2_bevy_runtime::PresentationPoseBuffer;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
@@ -40,7 +41,9 @@ const CRYSTAL_QUEST_MARKER_FALLBACK_LEFT_PX: f32 = 12.0;
 const CRYSTAL_QUEST_MARKER_FALLBACK_TOP_PX: f32 = -58.0;
 
 #[derive(Component)]
-pub(crate) struct NativeEntityOverlayRoot;
+pub(crate) struct NativeEntityOverlayRoot {
+    follows_camera: bool,
+}
 
 #[derive(Resource, Debug, Default)]
 pub struct NativeEntityOverlays {
@@ -181,6 +184,7 @@ struct DamageFloaterEntry {
     top: f32,
     width: f32,
     font_size: f32,
+    follows_camera: bool,
 }
 
 #[derive(Debug)]
@@ -193,6 +197,7 @@ struct OverlayEntry {
     width: f32,
     font_size: f32,
     self_health_ratio: Option<f32>,
+    follows_camera: bool,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -261,12 +266,13 @@ pub fn sync_native_entity_overlays(
     mut commands: Commands,
     shell: Res<NativeShellModel>,
     mut overlays: ResMut<NativeEntityOverlays>,
-    roots: Query<Entity, With<NativeEntityOverlayRoot>>,
+    mut roots: Query<(Entity, &NativeEntityOverlayRoot, &mut Node)>,
     mut quest_marker_images: Query<(&NativeQuestMarker, &mut ImageNode)>,
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     player_ui: Option<Res<NativePlayerUiState>>,
     presentation: Res<NativeEntityPresentation>,
+    presentation_poses: Res<PresentationPoseBuffer>,
     quest_tracker: Option<Res<QuestTracker>>,
 ) {
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
@@ -277,9 +283,33 @@ pub fn sync_native_entity_overlays(
         .retain(|floater| floater.expires_at_ms > now_ms);
     if overlays.active_floaters.len() != previous_floater_count
         || !overlays.active_floaters.is_empty()
-        || presentation.has_active_motion(motion_now_ms)
+        || presentation.has_active_non_self_motion(motion_now_ms)
     {
         overlays.dirty = true;
+    }
+    let fallback_camera_offset = presentation.camera_screen_offset(motion_now_ms);
+    let shared_pose_active = presentation_poses.native_overlay_active();
+    let shared_center = presentation_poses.native_overlay_center();
+    let camera_offset = if shared_pose_active {
+        presentation_poses.native_overlay_camera_offset()
+    } else {
+        fallback_camera_offset
+    };
+    // World labels live in a retained camera root. Moving the local player now
+    // changes this one Node instead of deleting and recreating every glyph on
+    // every 100 ms movement phase. Self labels remain screen locked.
+    for (_, root, mut node) in &mut roots {
+        let (left, top) = if root.follows_camera {
+            camera_offset
+        } else {
+            (0.0, 0.0)
+        };
+        if node.left != Val::Px(left) {
+            node.left = Val::Px(left);
+        }
+        if node.top != Val::Px(top) {
+            node.top = Val::Px(top);
+        }
     }
     let in_game = shell.screen == NativeShellScreen::InGame;
     let visibility = OverlayVisibility::from_player_ui(player_ui.as_deref());
@@ -306,12 +336,32 @@ pub fn sync_native_entity_overlays(
     {
         return;
     }
+    // Map/entity snapshots can arrive on adjacent frames. Keep the last
+    // complete overlay tree until the shared renderer commits the same center;
+    // rebuilding from the newest packet center here would expose a one-cell
+    // mixed frame during every movement acknowledgement.
+    let payload_center = overlays
+        .latest_payload
+        .as_ref()
+        .and_then(payload_scene_center);
+    if in_game
+        && shared_pose_active
+        && (shared_center.is_none()
+            || matches!(
+                (payload_center, shared_center),
+                (Some(payload), Some(shared))
+                    if payload != (i64::from(shared.0), i64::from(shared.1))
+            ))
+    {
+        overlays.dirty = true;
+        return;
+    }
     overlays.last_in_game = in_game;
     overlays.last_visibility = Some(visibility);
     overlays.last_hovered_object_id = hovered_object_id.map(str::to_owned);
     overlays.last_self_hovered = self_hovered;
     overlays.dirty = false;
-    for root in &roots {
+    for (root, _, _) in &mut roots {
         commands.entity(root).despawn();
     }
     if !in_game {
@@ -327,148 +377,174 @@ pub fn sync_native_entity_overlays(
         .flatten()
         .filter_map(|entity| {
             let object_id = entity.get("objectId").and_then(normalized_object_id)?;
-            Some((
-                object_id.clone(),
-                presentation.entity_screen_offset(&object_id, motion_now_ms),
-            ))
+            let entity_offset = presentation_poses
+                .native_overlay_entity_offset(&object_id)
+                .unwrap_or_else(|| {
+                    let combined = presentation.entity_screen_offset(&object_id, motion_now_ms);
+                    (
+                        combined.0 - fallback_camera_offset.0,
+                        combined.1 - fallback_camera_offset.1,
+                    )
+                });
+            Some((object_id, entity_offset))
         })
         .collect::<HashMap<_, _>>();
-    let camera_offset = presentation.camera_screen_offset(motion_now_ms);
-    let entries = overlay_entries_with_motion(
+    let center_override = shared_center.map(|(x, y)| (i64::from(x), i64::from(y)));
+    let entries = overlay_entries_with_motion_at_center(
         payload,
         visibility,
         hovered_object_id,
         self_hovered,
         quest_tracker.as_deref(),
         &motion_offsets,
-        camera_offset,
+        (0.0, 0.0),
+        center_override,
     );
-    let floaters = damage_floater_entries_with_motion(
+    let floaters = damage_floater_entries_with_motion_at_center(
         payload,
         &overlays.active_floaters,
         now_ms,
         &motion_offsets,
+        center_override,
     );
     if entries.is_empty() && floaters.is_empty() {
         return;
     }
 
-    commands
-        .spawn((
-            NativeEntityOverlayRoot,
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(0.0),
-                top: Val::Px(0.0),
-                width: Val::Px(STAGE_WIDTH),
-                height: Val::Px(STAGE_HEIGHT),
-                ..default()
-            },
-            GlobalZIndex(OVERLAY_Z_INDEX),
-        ))
-        .with_children(|root| {
-            for entry in entries {
-                if let Some(ratio) = entry.self_health_ratio {
-                    root.spawn((
-                        Node {
-                            position_type: PositionType::Absolute,
-                            left: Val::Px(entry.left + 8.0),
-                            top: Val::Px(entry.top - 47.0),
-                            width: Val::Px(32.0),
-                            height: Val::Px(4.0),
-                            border: UiRect::all(Val::Px(1.0)),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb_u8(0x27, 0x00, 0x00)),
-                        BorderColor::all(Color::srgb_u8(0x10, 0x10, 0x10)),
-                    ))
-                    .with_children(|bar| {
-                        bar.spawn((
+    let (world_entries, fixed_entries): (Vec<_>, Vec<_>) =
+        entries.into_iter().partition(|entry| entry.follows_camera);
+    let (world_floaters, fixed_floaters): (Vec<_>, Vec<_>) = floaters
+        .into_iter()
+        .partition(|floater| floater.follows_camera);
+    for (follows_camera, entries, floaters) in [
+        (true, world_entries, world_floaters),
+        (false, fixed_entries, fixed_floaters),
+    ] {
+        if entries.is_empty() && floaters.is_empty() {
+            continue;
+        }
+        let (root_left, root_top) = if follows_camera {
+            camera_offset
+        } else {
+            (0.0, 0.0)
+        };
+        commands
+            .spawn((
+                NativeEntityOverlayRoot { follows_camera },
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(root_left),
+                    top: Val::Px(root_top),
+                    width: Val::Px(STAGE_WIDTH),
+                    height: Val::Px(STAGE_HEIGHT),
+                    ..default()
+                },
+                GlobalZIndex(OVERLAY_Z_INDEX),
+            ))
+            .with_children(|root| {
+                for entry in entries {
+                    if let Some(ratio) = entry.self_health_ratio {
+                        root.spawn((
                             Node {
-                                width: Val::Percent((ratio * 100.0).clamp(0.0, 100.0)),
-                                height: Val::Percent(100.0),
+                                position_type: PositionType::Absolute,
+                                left: Val::Px(entry.left + 8.0),
+                                top: Val::Px(entry.top - 47.0),
+                                width: Val::Px(32.0),
+                                height: Val::Px(4.0),
+                                border: UiRect::all(Val::Px(1.0)),
                                 ..default()
                             },
-                            BackgroundColor(Color::srgb_u8(0x00, 0xc0, 0x00)),
+                            BackgroundColor(Color::srgb_u8(0x27, 0x00, 0x00)),
+                            BorderColor::all(Color::srgb_u8(0x10, 0x10, 0x10)),
+                        ))
+                        .with_children(|bar| {
+                            bar.spawn((
+                                Node {
+                                    width: Val::Percent((ratio * 100.0).clamp(0.0, 100.0)),
+                                    height: Val::Percent(100.0),
+                                    ..default()
+                                },
+                                BackgroundColor(Color::srgb_u8(0x00, 0xc0, 0x00)),
+                            ));
+                        });
+                    }
+
+                    if let Some(marker) = entry.quest_marker {
+                        root.spawn((
+                            Name::new(format!("NativeQuestMarker:{marker:?}")),
+                            NativeQuestMarker(marker),
+                            Node {
+                                position_type: PositionType::Absolute,
+                                left: Val::Px(entry.left),
+                                top: Val::Px(entry.top),
+                                width: Val::Px(CRYSTAL_QUEST_MARKER_WIDTH_PX),
+                                height: Val::Px(CRYSTAL_QUEST_MARKER_HEIGHT_PX),
+                                ..default()
+                            },
+                            ImageNode {
+                                image: asset_server.load(marker.asset_path(quest_marker_phase)),
+                                ..default()
+                            },
                         ));
-                    });
-                }
+                    }
 
-                if let Some(marker) = entry.quest_marker {
-                    root.spawn((
-                        Name::new(format!("NativeQuestMarker:{marker:?}")),
-                        NativeQuestMarker(marker),
-                        Node {
-                            position_type: PositionType::Absolute,
-                            left: Val::Px(entry.left),
-                            top: Val::Px(entry.top),
-                            width: Val::Px(CRYSTAL_QUEST_MARKER_WIDTH_PX),
-                            height: Val::Px(CRYSTAL_QUEST_MARKER_HEIGHT_PX),
-                            ..default()
-                        },
-                        ImageNode {
-                            image: asset_server.load(marker.asset_path(quest_marker_phase)),
-                            ..default()
-                        },
-                    ));
-                }
-
-                let Some(name) = entry.name else {
-                    continue;
-                };
-                for offset in crystal_outline_offsets() {
+                    let Some(name) = entry.name else {
+                        continue;
+                    };
+                    for offset in crystal_outline_offsets() {
+                        root.spawn((
+                            Node {
+                                position_type: PositionType::Absolute,
+                                left: Val::Px(entry.left + offset.x),
+                                top: Val::Px(entry.top + offset.y),
+                                width: Val::Px(entry.width),
+                                min_width: Val::Px(entry.width),
+                                ..default()
+                            },
+                            Text::new(name.clone()),
+                            crystal_text_font(entry.font_size),
+                            TextColor(Color::BLACK),
+                            TextLayout::new(Justify::Center, LineBreak::NoWrap),
+                        ));
+                    }
                     root.spawn((
                         Node {
                             position_type: PositionType::Absolute,
-                            left: Val::Px(entry.left + offset.x),
-                            top: Val::Px(entry.top + offset.y),
+                            left: Val::Px(entry.left + 1.0),
+                            top: Val::Px(entry.top + 1.0),
                             width: Val::Px(entry.width),
                             min_width: Val::Px(entry.width),
                             ..default()
                         },
-                        Text::new(name.clone()),
+                        Text::new(name),
                         crystal_text_font(entry.font_size),
-                        TextColor(Color::BLACK),
+                        TextColor(entry.color),
                         TextLayout::new(Justify::Center, LineBreak::NoWrap),
                     ));
                 }
-                root.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(entry.left + 1.0),
-                        top: Val::Px(entry.top + 1.0),
-                        width: Val::Px(entry.width),
-                        min_width: Val::Px(entry.width),
-                        ..default()
-                    },
-                    Text::new(name),
-                    crystal_text_font(entry.font_size),
-                    TextColor(entry.color),
-                    TextLayout::new(Justify::Center, LineBreak::NoWrap),
-                ));
-            }
-            for floater in floaters {
-                root.spawn((
-                    Name::new(format!("NativeDamageFloater:{}", floater.key)),
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(floater.left),
-                        top: Val::Px(floater.top),
-                        width: Val::Px(floater.width),
-                        min_width: Val::Px(floater.width),
-                        ..default()
-                    },
-                    Text::new(floater.text),
-                    crystal_text_font(floater.font_size),
-                    TextColor(floater.color),
-                    TextLayout::justify(Justify::Center),
-                    TextShadow {
-                        offset: Vec2::splat(1.0),
-                        color: Color::BLACK,
-                    },
-                ));
-            }
-        });
+                for floater in floaters {
+                    root.spawn((
+                        Name::new(format!("NativeDamageFloater:{}", floater.key)),
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(floater.left),
+                            top: Val::Px(floater.top),
+                            width: Val::Px(floater.width),
+                            min_width: Val::Px(floater.width),
+                            ..default()
+                        },
+                        Text::new(floater.text),
+                        crystal_text_font(floater.font_size),
+                        TextColor(floater.color),
+                        TextLayout::justify(Justify::Center),
+                        TextShadow {
+                            offset: Vec2::splat(1.0),
+                            color: Color::BLACK,
+                        },
+                    ));
+                }
+            });
+    }
 }
 
 /// `MirLabel.DrawControl` renders the black outline in this exact order before
@@ -497,15 +573,19 @@ fn damage_floater_entries_with_motion(
     now_ms: u64,
     motion_offsets: &HashMap<String, (f32, f32)>,
 ) -> Vec<DamageFloaterEntry> {
-    let center = payload.get("sceneView").and_then(|view| view.get("center"));
-    let center_x = center
-        .and_then(|center| center.get("x"))
-        .and_then(value_i64)
-        .unwrap_or(0);
-    let center_y = center
-        .and_then(|center| center.get("y"))
-        .and_then(value_i64)
-        .unwrap_or(0);
+    damage_floater_entries_with_motion_at_center(payload, floaters, now_ms, motion_offsets, None)
+}
+
+fn damage_floater_entries_with_motion_at_center(
+    payload: &Value,
+    floaters: &[ActiveDamageFloater],
+    now_ms: u64,
+    motion_offsets: &HashMap<String, (f32, f32)>,
+    center_override: Option<(i64, i64)>,
+) -> Vec<DamageFloaterEntry> {
+    let (center_x, center_y) = center_override
+        .or_else(|| payload_scene_center(payload))
+        .unwrap_or((0, 0));
     let origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
     let origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
     let player_object_id = payload
@@ -555,8 +635,14 @@ fn damage_floater_entries_with_motion(
                 .get("kind")
                 .and_then(Value::as_str)
                 .unwrap_or("monster");
+            let is_self = kind == "selfPlayer" || player_object_id == Some(floater.object_id);
             let is_player = matches!(kind, "selfPlayer" | "player" | "hero")
                 || player_object_id == Some(floater.object_id);
+            let (motion_x, motion_y) = if is_self {
+                (0.0, 0.0)
+            } else {
+                (motion_x, motion_y)
+            };
             let life_ms = floater
                 .expires_at_ms
                 .saturating_sub(floater.started_at_ms)
@@ -588,6 +674,7 @@ fn damage_floater_entries_with_motion(
                 top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 65.0 + rise + motion_y,
                 width: 80.0,
                 font_size,
+                follows_camera: !is_self,
             })
         })
         .collect()
@@ -620,15 +707,32 @@ fn overlay_entries_with_motion(
     motion_offsets: &HashMap<String, (f32, f32)>,
     camera_offset: (f32, f32),
 ) -> Vec<OverlayEntry> {
-    let center = payload.get("sceneView").and_then(|view| view.get("center"));
-    let center_x = center
-        .and_then(|center| center.get("x"))
-        .and_then(value_i64)
-        .unwrap_or(0);
-    let center_y = center
-        .and_then(|center| center.get("y"))
-        .and_then(value_i64)
-        .unwrap_or(0);
+    overlay_entries_with_motion_at_center(
+        payload,
+        visibility,
+        hovered_object_id,
+        self_hovered,
+        quest_tracker,
+        motion_offsets,
+        camera_offset,
+        None,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+fn overlay_entries_with_motion_at_center(
+    payload: &Value,
+    visibility: OverlayVisibility,
+    hovered_object_id: Option<&str>,
+    self_hovered: bool,
+    quest_tracker: Option<&QuestTracker>,
+    motion_offsets: &HashMap<String, (f32, f32)>,
+    camera_offset: (f32, f32),
+    center_override: Option<(i64, i64)>,
+) -> Vec<OverlayEntry> {
+    let (center_x, center_y) = center_override
+        .or_else(|| payload_scene_center(payload))
+        .unwrap_or((0, 0));
     let origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
     let origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
     let player_hp = payload.get("playerHp").and_then(value_i64);
@@ -661,11 +765,15 @@ fn overlay_entries_with_motion(
                     Value::String(value) if !value.is_empty() => Some(value.clone()),
                     _ => None,
                 });
-                let (motion_x, motion_y) = object_id
-                    .as_deref()
-                    .and_then(|object_id| motion_offsets.get(object_id))
-                    .copied()
-                    .unwrap_or((0.0, 0.0));
+                let (motion_x, motion_y) = if is_self {
+                    (0.0, 0.0)
+                } else {
+                    object_id
+                        .as_deref()
+                        .and_then(|object_id| motion_offsets.get(object_id))
+                        .copied()
+                        .unwrap_or((0.0, 0.0))
+                };
                 let hovered = if is_self {
                     self_hovered
                 } else {
@@ -728,6 +836,7 @@ fn overlay_entries_with_motion(
                             width: CRYSTAL_QUEST_MARKER_WIDTH_PX,
                             font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                             self_health_ratio: None,
+                            follows_camera: true,
                         });
                     }
                 }
@@ -744,6 +853,7 @@ fn overlay_entries_with_motion(
                         width,
                         font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                         self_health_ratio: None,
+                        follows_camera: !is_self,
                     });
                 }
                 if matches!(kind, "npc" | "monster") {
@@ -769,6 +879,7 @@ fn overlay_entries_with_motion(
                             width,
                             font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                             self_health_ratio: None,
+                            follows_camera: true,
                         });
                     }
                 } else {
@@ -781,6 +892,7 @@ fn overlay_entries_with_motion(
                         width,
                         font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                         self_health_ratio: None,
+                        follows_camera: !is_self,
                     });
                 }
                 entity_entries
@@ -806,23 +918,16 @@ fn overlay_entries_with_motion(
             if max_hp > 0 {
                 let x = entity.get("x").and_then(value_i64).unwrap_or(0);
                 let y = entity.get("y").and_then(value_i64).unwrap_or(0);
-                let object_id = entity
-                    .get("objectId")
-                    .and_then(normalized_object_id)
-                    .unwrap_or_default();
-                let (motion_x, motion_y) = motion_offsets
-                    .get(&object_id)
-                    .copied()
-                    .unwrap_or((0.0, 0.0));
                 entries.push(OverlayEntry {
                     name: None,
                     quest_marker: None,
                     color: Color::WHITE,
-                    left: origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x,
-                    top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 17.0 + motion_y,
+                    left: origin_x + (x - center_x) as f32 * CELL_WIDTH,
+                    top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 17.0,
                     width: 50.0,
                     font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                     self_health_ratio: Some((hp as f32 / max_hp as f32).clamp(0.0, 1.0)),
+                    follows_camera: false,
                 });
             }
         }
@@ -857,11 +962,20 @@ fn overlay_entries_with_motion(
                         width: 80.0,
                         font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                         self_health_ratio: None,
+                        follows_camera: true,
                     })
                 }),
         );
     }
     entries
+}
+
+fn payload_scene_center(payload: &Value) -> Option<(i64, i64)> {
+    let center = payload.get("sceneView")?.get("center")?;
+    Some((
+        center.get("x").and_then(value_i64)?,
+        center.get("y").and_then(value_i64)?,
+    ))
 }
 
 fn quest_marker_for_entity(
@@ -1181,7 +1295,10 @@ mod tests {
             ],
             "groundDrops": [{"objectId": 9, "name": "Potion", "x": 11, "y": 20}]
         });
-        let offsets = HashMap::from([("1".to_owned(), (0.0, 0.0)), ("2".to_owned(), (-16.0, 8.0))]);
+        let offsets = HashMap::from([
+            ("1".to_owned(), (24.0, -12.0)),
+            ("2".to_owned(), (-16.0, 8.0)),
+        ]);
         let entries = overlay_entries_with_motion(
             &payload,
             OverlayVisibility {
@@ -1203,6 +1320,9 @@ mod tests {
         assert_eq!((named("Self").left, named("Self").top), (480.0, 335.0));
         assert_eq!((named("Deer").left, named("Deer").top), (512.0, 342.0));
         assert_eq!((named("Potion").left, named("Potion").top), (552.0, 334.0));
+        assert!(!named("Self").follows_camera);
+        assert!(named("Deer").follows_camera);
+        assert!(named("Potion").follows_camera);
         let health = entries
             .iter()
             .find(|entry| entry.self_health_ratio.is_some())
@@ -1230,6 +1350,62 @@ mod tests {
         .expect("moving damage floater");
         assert_eq!(moved_entry.left - static_entry.left, -16.0);
         assert_eq!(moved_entry.top - static_entry.top, 8.0);
+    }
+
+    #[test]
+    fn world_nameplate_is_pixel_stable_across_run_ack_center_rebase() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 12, "y": 22}},
+            "entities": [
+                {"objectId": 2, "kind": "monster", "name": "Deer", "x": 14, "y": 23}
+            ]
+        });
+        let visibility = OverlayVisibility {
+            name_view: true,
+            drop_view: false,
+        };
+        let source_center_entry = overlay_entries_with_motion_at_center(
+            &payload,
+            visibility,
+            None,
+            false,
+            None,
+            &HashMap::new(),
+            (0.0, 0.0),
+            Some((10, 20)),
+        )
+        .pop()
+        .expect("source-centered monster name");
+        let target_center_entry = overlay_entries_with_motion_at_center(
+            &payload,
+            visibility,
+            None,
+            false,
+            None,
+            &HashMap::new(),
+            (0.0, 0.0),
+            Some((12, 22)),
+        )
+        .pop()
+        .expect("target-centered monster name");
+
+        // A two-cell diagonal Run recenters the packet geometry by 96x64 px.
+        // The renderer-owned camera pose rebases by the inverse amount, so the
+        // composed nameplate pixel must not move at the authoritative ACK.
+        let source_camera = (-16.0, -10.0);
+        let target_camera = (80.0, 54.0);
+        assert_eq!(
+            (
+                source_center_entry.left + source_camera.0,
+                source_center_entry.top + source_camera.1,
+            ),
+            (
+                target_center_entry.left + target_camera.0,
+                target_center_entry.top + target_camera.1,
+            )
+        );
+        assert!(source_center_entry.follows_camera);
+        assert!(target_center_entry.follows_camera);
     }
 
     #[test]
@@ -1347,6 +1523,9 @@ mod tests {
                     finish_npc_index: Some(3),
                     title: "Available".to_owned(),
                     npc_name: Some("Assistant Jane".to_owned()),
+                    group: Some("BichonProvince".to_owned()),
+                    min_level_needed: 1,
+                    detail: Default::default(),
                     status: QuestStatus::NotStarted,
                     objectives: vec![],
                     rewards: vec![],
@@ -1358,6 +1537,9 @@ mod tests {
                     finish_npc_index: Some(4),
                     title: "Progress".to_owned(),
                     npc_name: Some("CraftsLady Jude".to_owned()),
+                    group: Some("BichonProvince".to_owned()),
+                    min_level_needed: 1,
+                    detail: Default::default(),
                     status: QuestStatus::InProgress,
                     objectives: vec![],
                     rewards: vec![],
@@ -1369,6 +1551,9 @@ mod tests {
                     finish_npc_index: Some(5),
                     title: "Turn In".to_owned(),
                     npc_name: Some("Merchant Ruben".to_owned()),
+                    group: Some("BichonProvince".to_owned()),
+                    min_level_needed: 1,
+                    detail: Default::default(),
                     status: QuestStatus::ReadyToTurnIn,
                     objectives: vec![],
                     rewards: vec![],

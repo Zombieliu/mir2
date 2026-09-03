@@ -17,6 +17,8 @@ use mir2_client_bevy::quest_model::{CombatTargetModel, NpcDialogModel};
 use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
+use std::cmp::Reverse;
+use std::collections::{BinaryHeap, HashMap, VecDeque};
 
 use crate::effects::{NativeEffects, CELL_HEIGHT, CELL_WIDTH};
 use crate::entity_presentation::NativeEntityPresentation;
@@ -66,9 +68,13 @@ const CRYSTAL_MOVE_PRESENTATION_MS: f64 = 600.0;
 const CRYSTAL_RUN_PRIME_MS: f64 = 1_200.0;
 const CRYSTAL_CORRECTION_BLOCK_MS: f64 = 400.0;
 const MOVEMENT_PENDING_MAX_AGE_MS: f64 = 3_000.0;
+const MOVEMENT_IN_FLIGHT_LIMIT: usize = 2;
 const MOVEMENT_BLOCKED_STEP_MAX_AGE_MS: f64 = 3_000.0;
 const MOVEMENT_BLOCKED_STEP_LIMIT: usize = 16;
 const CRYSTAL_NPC_CLICK_GUARD_MS: f64 = 5_000.0;
+const CRYSTAL_PICKUP_INTERVAL_MS: f64 = 200.0;
+const CRYSTAL_NEW_MOVE_PATH_LIMIT: i32 = 20;
+const CRYSTAL_NEW_MOVE_SEARCH_LIMIT: usize = 4_096;
 
 #[derive(Clone, Debug, PartialEq)]
 struct PendingSelfMove {
@@ -76,6 +82,7 @@ struct PendingSelfMove {
     to: (i32, i32),
     direction: &'static str,
     mode: WorldPointerMovementMode,
+    distance: i32,
     sent_at_ms: f64,
     visual_until_ms: f64,
 }
@@ -97,13 +104,14 @@ enum MovementAckOutcome {
 }
 
 /// Crystal-style native movement controller. The shared Zone remains the only
-/// gameplay authority; this resource owns one bounded pending intent plus a
-/// presentation-only prediction copied into the shared runtime. ACKs either
-/// confirm that visual path or clear it and expose the authoritative tile.
+/// gameplay authority; this resource owns a two-entry pending-intent window
+/// plus presentation-only prediction copied into the shared runtime. ACKs
+/// retire that path in order or clear it and expose the authoritative tile.
 #[derive(bevy::prelude::Resource, Default, Debug)]
 pub struct WorldPointerMovementState {
     active: Option<WorldPointerMovementMode>,
-    pending: Option<PendingSelfMove>,
+    auto_path_destination: Option<(i32, i32)>,
+    pending: VecDeque<PendingSelfMove>,
     self_object_id: Option<String>,
     authoritative_position: Option<(i32, i32)>,
     authoritative_direction: Option<String>,
@@ -113,6 +121,7 @@ pub struct WorldPointerMovementState {
     last_packet_ack_at_ms: Option<f64>,
     last_npc_object_id: Option<u32>,
     npc_click_blocked_until_ms: f64,
+    last_tile_pickup_at_ms: Option<f64>,
     blocked_steps: Vec<BlockedSelfMove>,
     last_plan_block_trace_at_ms: Option<f64>,
 }
@@ -142,8 +151,36 @@ impl WorldPointerMovementState {
         self.last_plan_block_trace_at_ms = None;
     }
 
+    fn start_auto_path(&mut self, destination: (i32, i32), at_ms: f64) {
+        self.stop_hold(at_ms, "autoPathStarted");
+        if self.auto_path_destination != Some(destination) {
+            crate::movement_trace::record(serde_json::json!({
+                "type": "autoPathStarted",
+                "atMs": at_ms,
+                "destinationX": destination.0,
+                "destinationY": destination.1,
+            }));
+        }
+        self.auto_path_destination = Some(destination);
+        self.last_plan_block_trace_at_ms = None;
+    }
+
+    fn stop_auto_path(&mut self, at_ms: f64, reason: &'static str) {
+        if let Some(destination) = self.auto_path_destination.take() {
+            crate::movement_trace::record(serde_json::json!({
+                "type": "autoPathStopped",
+                "atMs": at_ms,
+                "destinationX": destination.0,
+                "destinationY": destination.1,
+                "reason": reason,
+            }));
+        }
+        self.last_plan_block_trace_at_ms = None;
+    }
+
     fn reset_controller(&mut self, at_ms: f64, reason: &'static str) {
         self.stop_hold(at_ms, reason);
+        self.stop_auto_path(at_ms, reason);
         crate::movement_trace::record(serde_json::json!({
             "type": "movementControllerReset",
             "atMs": at_ms,
@@ -177,9 +214,17 @@ impl WorldPointerMovementState {
     }
 
     fn can_send(&self, now_ms: f64) -> bool {
-        self.pending.is_none()
+        self.pending.len() < MOVEMENT_IN_FLIGHT_LIMIT
             && now_ms >= self.next_move_send_at_ms
             && now_ms >= self.input_blocked_until_ms
+    }
+
+    fn planning_origin(&self, fallback: (i32, i32)) -> (i32, i32) {
+        self.pending
+            .back()
+            .map(|pending| pending.to)
+            .or(self.authoritative_position)
+            .unwrap_or(fallback)
     }
 
     fn effective_mode(
@@ -245,12 +290,13 @@ impl WorldPointerMovementState {
             }
             return false;
         }
-        self.pending = None;
+        self.pending.clear();
         self.next_move_send_at_ms = 0.0;
         self.run_primed_until_ms = 0.0;
         self.input_blocked_until_ms = 0.0;
         self.last_npc_object_id = None;
         self.npc_click_blocked_until_ms = 0.0;
+        self.last_tile_pickup_at_ms = None;
         self.self_object_id = Some(object_id.to_owned());
         self.authoritative_position = Some(position);
         self.authoritative_direction = Some(direction.to_owned());
@@ -261,29 +307,43 @@ impl WorldPointerMovementState {
         self.authoritative_position = Some((ack.x, ack.y));
         self.authoritative_direction = Some(ack.direction.clone());
         self.last_packet_ack_at_ms = Some(now_ms);
-        let Some(pending) = self.pending.take() else {
+        let Some(front) = self.pending.front().cloned() else {
             return MovementAckOutcome::Accepted;
         };
-        let outcome = if (ack.x, ack.y) == pending.to {
+
+        let confirmed_index = self
+            .pending
+            .iter()
+            .position(|pending| pending.to == (ack.x, ack.y));
+        let outcome = if let Some(index) = confirmed_index {
+            for _ in 0..=index {
+                let _ = self.pending.pop_front();
+            }
             MovementAckOutcome::Confirmed
-        } else if pending.mode == WorldPointerMovementMode::Run
-            && (ack.x, ack.y) == movement_target(pending.from, pending.direction, 1)
+        } else if front.mode == WorldPointerMovementMode::Run
+            && (1..front.distance).any(|distance| {
+                (ack.x, ack.y) == movement_target(front.from, front.direction, distance)
+            })
         {
+            self.pending.clear();
             MovementAckOutcome::Degraded
         } else {
+            self.pending.clear();
             MovementAckOutcome::Correction
         };
         if matches!(
             outcome,
             MovementAckOutcome::Confirmed | MovementAckOutcome::Degraded
         ) {
-            self.next_move_send_at_ms = self.next_move_send_at_ms.max(pending.visual_until_ms);
             self.run_primed_until_ms = now_ms + CRYSTAL_RUN_PRIME_MS;
+            if outcome == MovementAckOutcome::Degraded {
+                self.next_move_send_at_ms = now_ms.max(front.visual_until_ms);
+            }
         } else {
-            self.remember_blocked_step(&pending, now_ms);
+            self.remember_blocked_step(&front, now_ms);
             self.run_primed_until_ms = 0.0;
             self.input_blocked_until_ms = now_ms + CRYSTAL_CORRECTION_BLOCK_MS;
-            self.next_move_send_at_ms = self.next_move_send_at_ms.max(self.input_blocked_until_ms);
+            self.next_move_send_at_ms = self.input_blocked_until_ms;
         }
         outcome
     }
@@ -388,6 +448,30 @@ fn pickup_tile_intent(
         .map(|_| QuestUiIntent::PickUpTile)
 }
 
+fn queue_tile_pickup_if_ready(
+    movement: &mut WorldPointerMovementState,
+    queue: Option<&mut QuestUiIntentQueue>,
+    hovered_grid_position: Option<(i32, i32)>,
+    origin: (i32, i32),
+    now_ms: f64,
+) -> bool {
+    if hovered_grid_position != Some(origin)
+        || movement
+            .last_tile_pickup_at_ms
+            .is_some_and(|last| now_ms < last + CRYSTAL_PICKUP_INTERVAL_MS)
+    {
+        return false;
+    }
+    let Some(queue) = queue else {
+        return false;
+    };
+    if !queue.push_intent(QuestUiIntent::PickUpTile) {
+        return false;
+    }
+    movement.last_tile_pickup_at_ms = Some(now_ms);
+    true
+}
+
 fn movement_direction_toward(
     hovered_grid_position: Option<(i32, i32)>,
     origin: (i32, i32),
@@ -439,6 +523,144 @@ fn movement_target(origin: (i32, i32), direction: &str, distance: i32) -> (i32, 
     (origin.0 + dx * distance, origin.1 + dy * distance)
 }
 
+fn movement_direction_between(origin: (i32, i32), destination: (i32, i32)) -> Option<&'static str> {
+    movement_direction_toward(Some(destination), origin)
+}
+
+fn chebyshev_distance(left: (i32, i32), right: (i32, i32)) -> i32 {
+    left.0.abs_diff(right.0).max(left.1.abs_diff(right.1)) as i32
+}
+
+fn auto_path_step_blocked(
+    movement: &WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: Option<&NativeEntityPresentation>,
+    self_object_id: &str,
+    map_file_name: Option<&str>,
+    origin: (i32, i32),
+    destination: (i32, i32),
+) -> bool {
+    let Some(direction) = movement_direction_between(origin, destination) else {
+        return true;
+    };
+    movement.step_was_rejected(origin, direction, WorldPointerMovementMode::Walk)
+        || movement.step_was_rejected(origin, direction, WorldPointerMovementMode::Run)
+        || entity_blocks_movement(entities, presentation, self_object_id, destination)
+        || map_file_name.is_some_and(|map_file_name| {
+            crate::map_parser::map_cell_blocks_movement(map_file_name, destination.0, destination.1)
+                == Some(true)
+        })
+}
+
+/// Bounded eight-way A* matching Crystal NewMove's 20-cell click path. The
+/// route is rebuilt from the latest authoritative/predicted origin before each
+/// send, so a Zone correction cannot leave the client consuming stale nodes.
+#[allow(clippy::too_many_arguments)]
+fn find_crystal_auto_path(
+    movement: &WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: Option<&NativeEntityPresentation>,
+    self_object_id: &str,
+    map_file_name: Option<&str>,
+    origin: (i32, i32),
+    destination: (i32, i32),
+) -> Option<Vec<(i32, i32)>> {
+    if origin == destination {
+        return Some(Vec::new());
+    }
+    if chebyshev_distance(origin, destination) > CRYSTAL_NEW_MOVE_PATH_LIMIT
+        || auto_path_step_blocked(
+            movement,
+            entities,
+            presentation,
+            self_object_id,
+            map_file_name,
+            origin,
+            destination,
+        ) && chebyshev_distance(origin, destination) == 1
+    {
+        return None;
+    }
+
+    let mut frontier = BinaryHeap::new();
+    let mut costs = HashMap::new();
+    let mut came_from = HashMap::new();
+    let mut tie_breaker = 0_i32;
+    costs.insert(origin, 0_i32);
+    frontier.push(Reverse((
+        chebyshev_distance(origin, destination),
+        0_i32,
+        tie_breaker,
+        origin.0,
+        origin.1,
+    )));
+
+    let mut expanded = 0_usize;
+    while let Some(Reverse((_estimate, cost, _tie, x, y))) = frontier.pop() {
+        let current = (x, y);
+        if current == destination {
+            let mut route = Vec::new();
+            let mut cursor = destination;
+            while cursor != origin {
+                route.push(cursor);
+                cursor = *came_from.get(&cursor)?;
+            }
+            route.reverse();
+            return Some(route);
+        }
+        if costs.get(&current).copied() != Some(cost) {
+            continue;
+        }
+        expanded += 1;
+        if expanded > CRYSTAL_NEW_MOVE_SEARCH_LIMIT {
+            break;
+        }
+        let preferred = movement_direction_toward(Some(destination), current)?;
+        let directions = [
+            Some(preferred),
+            rotate_direction(preferred, 1),
+            rotate_direction(preferred, -1),
+            rotate_direction(preferred, 2),
+            rotate_direction(preferred, -2),
+            rotate_direction(preferred, 3),
+            rotate_direction(preferred, -3),
+            rotate_direction(preferred, 4),
+        ];
+        for direction in directions.into_iter().flatten() {
+            let next = movement_target(current, direction, 1);
+            let next_cost = cost + 1;
+            if next_cost > CRYSTAL_NEW_MOVE_PATH_LIMIT
+                || chebyshev_distance(next, origin) > CRYSTAL_NEW_MOVE_PATH_LIMIT
+                || auto_path_step_blocked(
+                    movement,
+                    entities,
+                    presentation,
+                    self_object_id,
+                    map_file_name,
+                    current,
+                    next,
+                )
+                || costs
+                    .get(&next)
+                    .is_some_and(|known_cost| *known_cost <= next_cost)
+            {
+                continue;
+            }
+            costs.insert(next, next_cost);
+            came_from.insert(next, current);
+            tie_breaker = tie_breaker.saturating_add(1);
+            frontier.push(Reverse((
+                next_cost + chebyshev_distance(next, destination),
+                next_cost,
+                tie_breaker,
+                next.0,
+                next.1,
+            )));
+        }
+    }
+    None
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct PlannedPointerMove {
     direction: &'static str,
@@ -471,12 +693,13 @@ fn movement_step_blocked(
     origin: (i32, i32),
     direction: &'static str,
     mode: WorldPointerMovementMode,
+    run_distance: i32,
 ) -> bool {
     if movement.step_was_rejected(origin, direction, mode) {
         return true;
     }
     let distance = if mode == WorldPointerMovementMode::Run {
-        2
+        run_distance.max(2)
     } else {
         1
     };
@@ -503,6 +726,7 @@ fn plan_crystal_pointer_move(
     origin: (i32, i32),
     direction: &'static str,
     requested_mode: WorldPointerMovementMode,
+    run_distance: i32,
     now_ms: f64,
 ) -> Option<PlannedPointerMove> {
     movement.prune_blocked_steps(now_ms);
@@ -515,6 +739,7 @@ fn plan_crystal_pointer_move(
         origin,
         direction,
         requested_mode,
+        run_distance,
     ) {
         return Some(PlannedPointerMove {
             direction,
@@ -532,6 +757,7 @@ fn plan_crystal_pointer_move(
             origin,
             direction,
             WorldPointerMovementMode::Walk,
+            run_distance,
         )
     {
         return Some(PlannedPointerMove {
@@ -556,6 +782,7 @@ fn plan_crystal_pointer_move(
             origin,
             alternate,
             WorldPointerMovementMode::Walk,
+            run_distance,
         ) {
             return Some(PlannedPointerMove {
                 direction: alternate,
@@ -587,17 +814,23 @@ fn send_pointer_move(
 ) -> bool {
     let effective_mode = movement.effective_mode(requested_mode, now_ms);
     let distance = if effective_mode == WorldPointerMovementMode::Run {
-        2
+        presentation.self_run_distance(object_id).max(2)
     } else {
         1
     };
+    let visual_duration_ms = presentation
+        .self_motion_duration_ms(object_id, effective_mode == WorldPointerMovementMode::Run)
+        .map(|duration| duration as f64)
+        .unwrap_or(CRYSTAL_MOVE_PRESENTATION_MS)
+        .max(CRYSTAL_MOVE_PRESENTATION_MS);
     let pending = PendingSelfMove {
         from: origin,
         to: movement_target(origin, direction, distance),
         direction,
         mode: effective_mode,
+        distance,
         sent_at_ms: now_ms,
-        visual_until_ms: now_ms + CRYSTAL_MOVE_PRESENTATION_MS,
+        visual_until_ms: now_ms + visual_duration_ms,
     };
     let intent = match requested_mode {
         WorldPointerMovementMode::Walk => PlayerIntent::Walk {
@@ -620,7 +853,9 @@ fn send_pointer_move(
         crate::entity_presentation::native_motion_clock_ms(),
     );
     push_movement_shadow_command(now_ms, &pending);
-    movement.pending = Some(pending);
+    movement.next_move_send_at_ms = pending.visual_until_ms;
+    movement.run_primed_until_ms = now_ms + CRYSTAL_RUN_PRIME_MS;
+    movement.pending.push_back(pending);
     movement.last_plan_block_trace_at_ms = None;
     true
 }
@@ -715,10 +950,12 @@ fn push_movement_shadow_authoritative(
 
 /// Convert Crystal world mouse input into bounded intents. Left click keeps the
 /// pixel-tested combat/NPC/pickup priorities and walks while empty world stays
-/// held. Right click runs while empty world stays held. The shared Zone remains
-/// authoritative and may degrade the first movement from standstill to a walk.
+/// held. Right-click NewMove stores a bounded destination and continues after
+/// mouse-up, rebuilding its route from each authoritative/predicted origin.
+/// The shared Zone remains authoritative and may degrade the first run to walk.
 pub fn mouse_world_interaction_system(
     mouse: Res<ButtonInput<MouseButton>>,
+    keys: Option<Res<ButtonInput<KeyCode>>>,
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
@@ -762,7 +999,8 @@ pub fn mouse_world_interaction_system(
         && !left_released
         && !right_released
         && movement.active.is_none()
-        && movement.pending.is_none()
+        && movement.auto_path_destination.is_none()
+        && movement.pending.is_empty()
         && !ack_waiting
     {
         return;
@@ -777,6 +1015,7 @@ pub fn mouse_world_interaction_system(
     };
     let Ok(window) = windows.single() else {
         movement.stop_hold(now_ms, "missingWindow");
+        movement.stop_auto_path(now_ms, "missingWindow");
         return;
     };
     if shell.screen != NativeShellScreen::InGame {
@@ -790,7 +1029,7 @@ pub fn mouse_world_interaction_system(
 
     let Some((object_id, entity_position, entity_direction)) = authoritative_player(&entities)
     else {
-        if movement.self_object_id.is_some() || movement.pending.is_some() {
+        if movement.self_object_id.is_some() || !movement.pending.is_empty() {
             push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
             movement.reset_controller(now_ms, "missingPlayer");
             if let Some(inbox) = gameplay_inbox.as_deref() {
@@ -816,9 +1055,12 @@ pub fn mouse_world_interaction_system(
             if ack.object_id != object_id {
                 continue;
             }
-            let predicted = movement.pending.as_ref().map(|pending| pending.to);
+            let predicted = movement.pending.back().map(|pending| pending.to);
             let outcome = movement.reconcile_ack(&ack, now_ms);
             push_movement_shadow_authoritative(now_ms, &ack, predicted, outcome);
+            if movement.auto_path_destination == Some((ack.x, ack.y)) {
+                movement.stop_auto_path(now_ms, "destinationReached");
+            }
             if matches!(
                 outcome,
                 MovementAckOutcome::Degraded | MovementAckOutcome::Correction
@@ -832,19 +1074,21 @@ pub fn mouse_world_interaction_system(
             packet_ack_observed = true;
         }
     }
-    let snapshot_reconciles_pending = movement.pending.as_ref().is_some_and(|pending| {
+    let snapshot_reconciles_pending = movement.pending.iter().any(|pending| {
         entity_position == pending.to
             || (pending.mode == WorldPointerMovementMode::Run
-                && entity_position == movement_target(pending.from, pending.direction, 1))
+                && (1..pending.distance).any(|distance| {
+                    entity_position == movement_target(pending.from, pending.direction, distance)
+                }))
     });
     if !packet_ack_observed
-        && (movement.pending.is_none() || snapshot_reconciles_pending)
+        && (movement.pending.is_empty() || snapshot_reconciles_pending)
         && movement.authoritative_position != Some(entity_position)
         && movement
             .last_packet_ack_at_ms
             .is_none_or(|at_ms| now_ms >= at_ms + 250.0)
     {
-        let predicted = movement.pending.as_ref().map(|pending| pending.to);
+        let predicted = movement.pending.back().map(|pending| pending.to);
         let snapshot = NativeSelfMovementAck {
             packet: "worldSnapshot".to_owned(),
             object_id: object_id.clone(),
@@ -854,6 +1098,9 @@ pub fn mouse_world_interaction_system(
         };
         let outcome = movement.reconcile_ack(&snapshot, now_ms);
         push_movement_shadow_authoritative(now_ms, &snapshot, predicted, outcome);
+        if movement.auto_path_destination == Some(entity_position) {
+            movement.stop_auto_path(now_ms, "destinationReached");
+        }
         if matches!(
             outcome,
             MovementAckOutcome::Degraded | MovementAckOutcome::Correction
@@ -868,11 +1115,11 @@ pub fn mouse_world_interaction_system(
 
     if movement
         .pending
-        .as_ref()
+        .front()
         .is_some_and(|pending| now_ms >= pending.sent_at_ms + MOVEMENT_PENDING_MAX_AGE_MS)
     {
-        let predicted = movement.pending.as_ref().map(|pending| pending.to);
-        movement.pending = None;
+        let predicted = movement.pending.back().map(|pending| pending.to);
+        movement.pending.clear();
         movement.run_primed_until_ms = 0.0;
         movement.input_blocked_until_ms = now_ms + CRYSTAL_CORRECTION_BLOCK_MS;
         movement.next_move_send_at_ms = movement.input_blocked_until_ms;
@@ -899,6 +1146,7 @@ pub fn mouse_world_interaction_system(
 
     if !window.focused {
         movement.stop_hold(now_ms, "windowUnfocused");
+        movement.stop_auto_path(now_ms, "windowUnfocused");
         return;
     }
 
@@ -910,10 +1158,26 @@ pub fn mouse_world_interaction_system(
         || is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
     {
         movement.stop_hold(now_ms, "worldInputBlocked");
+        movement.stop_auto_path(now_ms, "worldInputBlocked");
+        return;
+    }
+
+    // Keyboard and pointer movement share one prediction window. Let a held
+    // directional key own the frame so a ready auto-path step cannot be sent
+    // immediately before the keyboard command and then be coalesced away by
+    // the Gateway's latest-intent slot.
+    if keys
+        .as_deref()
+        .and_then(pressed_keyboard_direction)
+        .is_some()
+    {
+        movement.stop_hold(now_ms, "keyboardInput");
+        movement.stop_auto_path(now_ms, "keyboardInput");
         return;
     }
 
     if right_pressed {
+        movement.stop_auto_path(now_ms, "newRightClick");
         // Crystal reserves right-click object interactions (for example Ctrl+
         // inspect). Until those are implemented, never turn an object click
         // into movement through the actor beneath the pointer.
@@ -922,21 +1186,22 @@ pub fn mouse_world_interaction_system(
             return;
         }
         let origin = movement.authoritative_position.unwrap_or(entity_position);
-        if let (Some(target), Some(cursor_stage), Some(effects)) = (
-            presentation.hovered_grid_position(),
-            presentation.hover_cursor_stage(),
-            effects.as_deref_mut(),
-        ) {
+        if let Some(target) = presentation.hovered_grid_position() {
             if target != origin {
-                let _ = effects.start_new_move_destination(
-                    animation_now_ms,
-                    target,
-                    new_move_draw_offset(cursor_stage),
-                );
+                movement.start_auto_path(target, now_ms);
+                if let (Some(cursor_stage), Some(effects)) =
+                    (presentation.hover_cursor_stage(), effects.as_deref_mut())
+                {
+                    let _ = effects.start_new_move_destination(
+                        animation_now_ms,
+                        target,
+                        new_move_draw_offset(cursor_stage),
+                    );
+                }
             }
         }
-        movement.begin(WorldPointerMovementMode::Run, now_ms);
     } else if left_pressed {
+        movement.stop_auto_path(now_ms, "leftClick");
         if let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
             .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
         {
@@ -958,7 +1223,12 @@ pub fn mouse_world_interaction_system(
                 return;
             }
             if let Some(queue) = queue.as_deref_mut() {
-                queue.push_intent(intent);
+                let is_tile_pickup = matches!(&intent, QuestUiIntent::PickUpTile);
+                if queue.push_intent(intent) {
+                    if is_tile_pickup {
+                        movement.last_tile_pickup_at_ms = Some(now_ms);
+                    }
+                }
             }
             return;
         }
@@ -973,33 +1243,101 @@ pub fn mouse_world_interaction_system(
         }
     }
 
-    let Some(mode) = movement.active else {
-        return;
+    let auto_path_destination = movement.auto_path_destination;
+    let mode = if auto_path_destination.is_some() {
+        WorldPointerMovementMode::Run
+    } else {
+        let Some(mode) = movement.active else {
+            return;
+        };
+        let held = match mode {
+            WorldPointerMovementMode::Walk => mouse.pressed(MouseButton::Left),
+            WorldPointerMovementMode::Run => mouse.pressed(MouseButton::Right),
+        };
+        if !held {
+            movement.stop_hold(now_ms, "buttonReleased");
+            return;
+        }
+        mode
     };
-    let held = match mode {
-        WorldPointerMovementMode::Walk => mouse.pressed(MouseButton::Left),
-        WorldPointerMovementMode::Run => mouse.pressed(MouseButton::Right),
-    };
-    if !held {
-        movement.stop_hold(now_ms, "buttonReleased");
-        return;
-    }
     // Crystal keeps an already-active pointer hold alive while the cursor
     // crosses another actor. Initial clicks on actors are still handled by
     // the branches above, while the movement planner below continues to
     // validate occupancy and steer around blocked tiles.
 
+    let authoritative_origin = movement.authoritative_position.unwrap_or(entity_position);
+    // Crystal's MapControl.CheckInput checks the selected tile before trying
+    // another movement step. Once a held left-click arrives on the tile under
+    // the cursor, it emits PickUp (throttled by PickUpTime) even though item
+    // objects are not part of the renderer-neutral entity model. Keep this on
+    // the normal QuestUiIntentQueue so the Gateway remains authoritative.
+    if auto_path_destination.is_none()
+        && mode == WorldPointerMovementMode::Walk
+        && queue_tile_pickup_if_ready(
+            &mut movement,
+            queue.as_deref_mut(),
+            presentation.hovered_grid_position(),
+            authoritative_origin,
+            now_ms,
+        )
+    {
+        return;
+    }
     if !movement.can_send(now_ms) {
         return;
     }
-    let origin = movement.authoritative_position.unwrap_or(entity_position);
-    let (Some(direction), Some(commands)) = (
-        movement_direction_toward(presentation.hovered_grid_position(), origin),
-        commands.as_deref(),
-    ) else {
+    let origin = movement.planning_origin(entity_position);
+    let Some(commands) = commands.as_deref() else {
         return;
     };
     let map_file_name = presentation.current_map_file_name().map(ToOwned::to_owned);
+    let run_distance = presentation.self_run_distance(&object_id).max(2);
+    let (direction, requested_mode) = if let Some(destination) = auto_path_destination {
+        if origin == destination {
+            movement.stop_auto_path(now_ms, "destinationReached");
+            return;
+        }
+        let Some(path) = find_crystal_auto_path(
+            &movement,
+            &entities,
+            Some(presentation),
+            &object_id,
+            map_file_name.as_deref(),
+            origin,
+            destination,
+        ) else {
+            movement.trace_plan_blocked(now_ms, origin, "down", mode);
+            movement.stop_auto_path(now_ms, "pathUnavailable");
+            return;
+        };
+        let Some(first) = path.first().copied() else {
+            movement.stop_auto_path(now_ms, "destinationReached");
+            return;
+        };
+        let Some(direction) = movement_direction_between(origin, first) else {
+            movement.stop_auto_path(now_ms, "invalidPath");
+            return;
+        };
+        let can_run_route = path.len() >= run_distance as usize
+            && (1..run_distance as usize).all(|index| {
+                movement_direction_between(path[index - 1], path[index]) == Some(direction)
+            });
+        (
+            direction,
+            if can_run_route {
+                WorldPointerMovementMode::Run
+            } else {
+                WorldPointerMovementMode::Walk
+            },
+        )
+    } else {
+        let Some(direction) =
+            movement_direction_toward(presentation.hovered_grid_position(), origin)
+        else {
+            return;
+        };
+        (direction, mode)
+    };
     let Some(planned) = plan_crystal_pointer_move(
         &mut movement,
         &entities,
@@ -1008,10 +1346,11 @@ pub fn mouse_world_interaction_system(
         map_file_name.as_deref(),
         origin,
         direction,
-        mode,
+        requested_mode,
+        run_distance,
         now_ms,
     ) else {
-        movement.trace_plan_blocked(now_ms, origin, direction, mode);
+        movement.trace_plan_blocked(now_ms, origin, direction, requested_mode);
         return;
     };
     let _ = send_pointer_move(
@@ -1050,74 +1389,129 @@ pub fn sanitize_native_hud_pointer_input(
     }
 }
 
-/// Forward walk intents on WASD / arrow key presses.
-pub fn keyboard_walk_system(
+fn pressed_keyboard_direction(keys: &ButtonInput<KeyCode>) -> Option<&'static str> {
+    let up = keys.pressed(KeyCode::KeyW) || keys.pressed(KeyCode::ArrowUp);
+    let down = keys.pressed(KeyCode::KeyS) || keys.pressed(KeyCode::ArrowDown);
+    let left = keys.pressed(KeyCode::KeyA) || keys.pressed(KeyCode::ArrowLeft);
+    let right = keys.pressed(KeyCode::KeyD) || keys.pressed(KeyCode::ArrowRight);
+    let dx = i32::from(right) - i32::from(left);
+    let dy = i32::from(down) - i32::from(up);
+    match (dx, dy) {
+        (0, -1) => Some("up"),
+        (1, -1) => Some("upright"),
+        (1, 0) => Some("right"),
+        (1, 1) => Some("downright"),
+        (0, 1) => Some("down"),
+        (-1, 1) => Some("downleft"),
+        (-1, 0) => Some("left"),
+        (-1, -1) => Some("upleft"),
+        _ => None,
+    }
+}
+
+/// Route held WASD / arrow input through the same prediction, collision,
+/// cadence and ACK controller as mouse movement. This deliberately has one
+/// sender for walk and Shift+run so a same-frame pair cannot be coalesced into
+/// a packet that disagrees with the locally predicted command.
+#[allow(clippy::too_many_arguments)]
+pub fn keyboard_movement_system(
     keys: Res<ButtonInput<KeyCode>>,
-    commands: Res<GatewayCommands>,
+    commands: Option<Res<GatewayCommands>>,
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    entities: Option<Res<EntityModelSet>>,
+    mut presentation: Option<ResMut<NativeEntityPresentation>>,
+    time: Option<Res<Time>>,
     windows: Query<&Window>,
+    mut movement: ResMut<WorldPointerMovementState>,
 ) {
-    if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
-        let pressed = walk_key_map()
-            .into_iter()
-            .filter_map(|(code, direction)| keys.just_pressed(code).then_some(direction))
-            .collect::<Vec<_>>();
-        if !pressed.is_empty() {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        player_ui.as_deref(),
+        notice.as_deref(),
+        &windows,
+    ) {
+        return;
+    }
+    let Some(direction) = pressed_keyboard_direction(&keys) else {
+        return;
+    };
+    let now_ms = time
+        .as_deref()
+        .map(|time| time.elapsed_secs_f64() * 1_000.0)
+        .unwrap_or(0.0);
+    if walk_key_map()
+        .into_iter()
+        .any(|(code, _)| keys.just_pressed(code))
+    {
+        movement.stop_hold(now_ms, "keyboardInput");
+        movement.stop_auto_path(now_ms, "keyboardInput");
+        if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
             eprintln!(
-                "[native-input] walk keys={pressed:?} screen={:?}",
+                "[native-input] movement direction={direction} run={} screen={:?}",
+                keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight),
                 shell.as_deref().map(|model| model.screen)
             );
         }
     }
-    if !gameplay_input_enabled(
-        shell.as_deref(),
-        player_ui.as_deref(),
-        notice.as_deref(),
-        &windows,
-    ) {
+    let (Some(commands), Some(entities), Some(presentation)) = (
+        commands.as_deref(),
+        entities.as_deref(),
+        presentation.as_deref_mut(),
+    ) else {
+        return;
+    };
+    let Some((object_id, entity_position, entity_direction)) = authoritative_player(entities)
+    else {
+        return;
+    };
+    if movement.observe_identity(&object_id, entity_position, entity_direction.as_str()) {
+        push_movement_shadow_reset(
+            now_ms,
+            &object_id,
+            entity_position,
+            entity_direction.as_str(),
+        );
+    }
+    if !movement.can_send(now_ms) {
         return;
     }
-    if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) {
+    let origin = movement.planning_origin(entity_position);
+    let requested_mode = if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) {
+        WorldPointerMovementMode::Run
+    } else {
+        WorldPointerMovementMode::Walk
+    };
+    let map_file_name = presentation.current_map_file_name().map(ToOwned::to_owned);
+    let run_distance = presentation.self_run_distance(&object_id).max(2);
+    let Some(planned) = plan_crystal_pointer_move(
+        &mut movement,
+        entities,
+        Some(presentation),
+        &object_id,
+        map_file_name.as_deref(),
+        origin,
+        direction,
+        requested_mode,
+        run_distance,
+        now_ms,
+    ) else {
+        movement.trace_plan_blocked(now_ms, origin, direction, requested_mode);
         return;
-    }
-    for (code, direction) in walk_key_map() {
-        if keys.just_pressed(code) {
-            commands.send(PlayerIntent::Walk {
-                direction: direction.to_owned(),
-            });
-        }
-    }
-}
-
-/// Forward run intents on WASD / arrows while Shift is held.
-pub fn keyboard_run_system(
-    keys: Res<ButtonInput<KeyCode>>,
-    commands: Res<GatewayCommands>,
-    shell: Option<Res<NativeShellModel>>,
-    player_ui: Option<Res<NativePlayerUiState>>,
-    notice: Option<Res<NoticeDialogState>>,
-    windows: Query<&Window>,
-) {
-    if !gameplay_input_enabled(
-        shell.as_deref(),
-        player_ui.as_deref(),
-        notice.as_deref(),
-        &windows,
-    ) {
-        return;
-    }
-    if !keys.pressed(KeyCode::ShiftLeft) && !keys.pressed(KeyCode::ShiftRight) {
-        return;
-    }
-    for (code, direction) in walk_key_map() {
-        if keys.just_pressed(code) {
-            commands.send(PlayerIntent::Run {
-                direction: direction.to_owned(),
-            });
-        }
-    }
+    };
+    let animation_now_ms = now_ms.clamp(0.0, u64::MAX as f64) as u64;
+    let _ = send_pointer_move(
+        commands,
+        presentation,
+        &mut movement,
+        &object_id,
+        origin,
+        planned.direction,
+        planned.mode,
+        now_ms,
+        animation_now_ms,
+    );
 }
 
 /// Forward the E-key clockwise turn as an absolute intent derived from the
@@ -1415,6 +1809,7 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bevy::prelude::IntoScheduleConfigs;
     use mir2_client_bevy::entities::{EntityKind, EntityModel, EntityModelSet};
     use mir2_client_bevy::read_model::UiReadModel;
 
@@ -1427,6 +1822,8 @@ mod tests {
         app.insert_resource(ButtonInput::<KeyCode>::default());
         app.insert_resource(GatewayCommands::new(sender));
         app.init_resource::<WorldPointerMovementState>();
+        app.init_resource::<NativeEntityPresentation>();
+        app.insert_resource(bevy::prelude::Time::<()>::default());
         app.insert_resource(NativeShellModel {
             screen: NativeShellScreen::InGame,
             ..Default::default()
@@ -1544,8 +1941,9 @@ mod tests {
 
     fn install_world_action(app: &mut bevy::prelude::App, action: WorldAction) {
         match action {
-            WorldAction::Walk => app.add_systems(bevy::prelude::Update, keyboard_walk_system),
-            WorldAction::Run => app.add_systems(bevy::prelude::Update, keyboard_run_system),
+            WorldAction::Walk | WorldAction::Run => {
+                app.add_systems(bevy::prelude::Update, keyboard_movement_system)
+            }
             WorldAction::Turn => app.add_systems(bevy::prelude::Update, keyboard_turn_system),
             WorldAction::Revive => {
                 app.add_systems(bevy::prelude::Update, keyboard_town_revive_system)
@@ -1600,6 +1998,23 @@ mod tests {
                 y,
                 direction: direction.to_owned(),
             });
+    }
+
+    fn pending_test_move(
+        from: (i32, i32),
+        to: (i32, i32),
+        mode: WorldPointerMovementMode,
+        sent_at_ms: f64,
+    ) -> PendingSelfMove {
+        PendingSelfMove {
+            from,
+            to,
+            direction: "right",
+            mode,
+            distance: chebyshev_distance(from, to).max(1),
+            sent_at_ms,
+            visual_until_ms: sent_at_ms + CRYSTAL_MOVE_PRESENTATION_MS,
+        }
     }
 
     #[test]
@@ -1696,6 +2111,7 @@ mod tests {
                 (10, 10),
                 "right",
                 WorldPointerMovementMode::Run,
+                2,
                 0.0,
             ),
             Some(PlannedPointerMove {
@@ -1723,6 +2139,7 @@ mod tests {
                 (10, 10),
                 "right",
                 WorldPointerMovementMode::Run,
+                2,
                 1.0,
             ),
             Some(PlannedPointerMove {
@@ -1730,6 +2147,18 @@ mod tests {
                 mode: WorldPointerMovementMode::Walk,
             })
         );
+    }
+
+    #[test]
+    fn crystal_auto_path_prefers_the_direct_open_route() {
+        let movement = WorldPointerMovementState::default();
+        let entities = movement_entities();
+
+        let route =
+            find_crystal_auto_path(&movement, &entities, None, "1000", None, (10, 10), (12, 10))
+                .expect("open two-cell route");
+
+        assert_eq!(route, vec![(11, 10), (12, 10)]);
     }
 
     #[test]
@@ -1957,6 +2386,18 @@ mod tests {
                 .drain_intents(),
             vec![QuestUiIntent::PickUpTile]
         );
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.update();
+        assert!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents()
+                .is_empty(),
+            "initial same-tile click and held path must not double-send"
+        );
     }
 
     #[test]
@@ -1992,7 +2433,7 @@ mod tests {
         assert!(marker.contains("/original-effects/Magic3/500.png"));
         {
             let state = app.world().resource::<WorldPointerMovementState>();
-            let pending = state.pending.as_ref().expect("first run pending");
+            let pending = state.pending.front().expect("first run pending");
             assert_eq!(pending.mode, WorldPointerMovementMode::Walk);
             assert_eq!(pending.from, (10, 10));
             assert_eq!(pending.to, (11, 10));
@@ -2053,7 +2494,89 @@ mod tests {
     }
 
     #[test]
-    fn right_hold_repeats_run_only_after_authoritative_progress() {
+    fn left_hold_picks_up_after_authoritative_arrival_on_cursor_tile() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(movement_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        // With center (10, 10), this cursor cell resolves to (11, 10).
+        presentation.set_hover_grid_context_for_test((10, 10), (528.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction }))
+                if direction == "right"
+        ));
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .expect("self player")
+            .x = 11;
+        push_test_movement_ack(&app, 11, 10, "right");
+        advance_movement_clock(&mut app, 600);
+        app.update();
+
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::PickUpTile]
+        );
+        assert!(
+            receiver.try_recv().is_err(),
+            "pickup must use the intent queue"
+        );
+
+        // Crystal's PickUpTime is 200ms; a held button may issue another
+        // pickup only after that server request interval.
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+
+        advance_movement_clock(&mut app, 199);
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+
+        advance_movement_clock(&mut app, 1);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::PickUpTile]
+        );
+    }
+
+    #[test]
+    fn right_click_auto_path_continues_after_mouse_release_and_authoritative_progress() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
@@ -2080,8 +2603,11 @@ mod tests {
         app.world_mut()
             .resource_mut::<ButtonInput<MouseButton>>()
             .clear_just_pressed(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Right);
         app.update();
-        assert!(receiver.try_recv().is_err(), "held run flooded before ack");
+        assert!(receiver.try_recv().is_err(), "auto path flooded before ack");
 
         app.world_mut()
             .resource_mut::<EntityModelSet>()
@@ -2095,17 +2621,228 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
         let state = app.world().resource::<WorldPointerMovementState>();
-        let pending = state.pending.as_ref().expect("primed run pending");
-        assert_eq!(pending.mode, WorldPointerMovementMode::Run);
+        let pending = state.pending.front().expect("destination walk pending");
+        assert_eq!(pending.mode, WorldPointerMovementMode::Walk);
         assert_eq!(pending.from, (11, 10));
-        assert_eq!(pending.to, (13, 10));
+        assert_eq!(pending.to, (12, 10));
+        assert_eq!(state.auto_path_destination, Some((12, 10)));
+
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .expect("self player")
+            .x = 12;
+        push_test_movement_ack(&app, 12, 10, "right");
+        advance_movement_clock(&mut app, 600);
+        app.update();
+
+        let state = app.world().resource::<WorldPointerMovementState>();
+        assert!(state.pending.is_empty());
+        assert_eq!(state.auto_path_destination, None);
+        assert!(
+            receiver.try_recv().is_err(),
+            "destination ack overshot path"
+        );
     }
 
     #[test]
-    fn active_pointer_hold_survives_cursor_crossing_an_actor() {
+    fn right_click_auto_path_buffers_destination_step_after_mouse_release() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(movement_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+        ));
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Right);
+        advance_movement_clock(&mut app, 600);
+        app.update();
+
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
+        ));
+        {
+            let state = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(state.pending.len(), MOVEMENT_IN_FLIGHT_LIMIT);
+            let first = state
+                .pending
+                .front()
+                .expect("initial walk remains in flight");
+            assert_eq!(first.from, (10, 10));
+            assert_eq!(first.to, (11, 10));
+            assert_eq!(first.mode, WorldPointerMovementMode::Walk);
+            let second = state
+                .pending
+                .back()
+                .expect("buffered destination walk is in flight");
+            assert_eq!(second.from, (11, 10));
+            assert_eq!(second.to, (12, 10));
+            assert_eq!(second.mode, WorldPointerMovementMode::Walk);
+        }
+
+        advance_movement_clock(&mut app, 600);
+        app.update();
+        assert!(
+            receiver.try_recv().is_err(),
+            "two-entry movement window admitted an unbounded third intent"
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .len(),
+            MOVEMENT_IN_FLIGHT_LIMIT
+        );
+    }
+
+    #[test]
+    fn ordered_movement_acks_retire_only_the_confirmed_fifo_prefix() {
+        let mut movement = WorldPointerMovementState::default();
+        movement.pending.push_back(pending_test_move(
+            (10, 10),
+            (11, 10),
+            WorldPointerMovementMode::Walk,
+            0.0,
+        ));
+        movement.pending.push_back(pending_test_move(
+            (11, 10),
+            (13, 10),
+            WorldPointerMovementMode::Run,
+            600.0,
+        ));
+
+        assert_eq!(
+            movement.reconcile_ack(
+                &NativeSelfMovementAck {
+                    packet: "UserLocation".to_owned(),
+                    object_id: "1000".to_owned(),
+                    x: 11,
+                    y: 10,
+                    direction: "right".to_owned(),
+                },
+                700.0,
+            ),
+            MovementAckOutcome::Confirmed
+        );
+        assert_eq!(movement.authoritative_position, Some((11, 10)));
+        assert_eq!(movement.pending.len(), 1);
+        assert_eq!(movement.pending.front().expect("run tail").to, (13, 10));
+
+        assert_eq!(
+            movement.reconcile_ack(
+                &NativeSelfMovementAck {
+                    packet: "UserLocation".to_owned(),
+                    object_id: "1000".to_owned(),
+                    x: 13,
+                    y: 10,
+                    direction: "right".to_owned(),
+                },
+                900.0,
+            ),
+            MovementAckOutcome::Confirmed
+        );
+        assert!(movement.pending.is_empty());
+        assert_eq!(movement.authoritative_position, Some((13, 10)));
+    }
+
+    #[test]
+    fn correction_clears_the_entire_speculative_movement_window() {
+        let mut movement = WorldPointerMovementState::default();
+        movement.pending.push_back(pending_test_move(
+            (10, 10),
+            (11, 10),
+            WorldPointerMovementMode::Walk,
+            0.0,
+        ));
+        movement.pending.push_back(pending_test_move(
+            (11, 10),
+            (13, 10),
+            WorldPointerMovementMode::Run,
+            600.0,
+        ));
+
+        assert_eq!(
+            movement.reconcile_ack(
+                &NativeSelfMovementAck {
+                    packet: "UserLocation".to_owned(),
+                    object_id: "1000".to_owned(),
+                    x: 10,
+                    y: 10,
+                    direction: "right".to_owned(),
+                },
+                100.0,
+            ),
+            MovementAckOutcome::Correction
+        );
+        assert!(movement.pending.is_empty());
+        assert_eq!(movement.authoritative_position, Some((10, 10)));
+        assert_eq!(movement.run_primed_until_ms, 0.0);
+        assert_eq!(movement.input_blocked_until_ms, 500.0);
+        assert!(movement.step_was_rejected((10, 10), "right", WorldPointerMovementMode::Walk));
+    }
+
+    #[test]
+    fn later_authoritative_snapshot_can_confirm_the_whole_buffered_prefix() {
+        let mut movement = WorldPointerMovementState::default();
+        movement.pending.push_back(pending_test_move(
+            (10, 10),
+            (11, 10),
+            WorldPointerMovementMode::Walk,
+            0.0,
+        ));
+        movement.pending.push_back(pending_test_move(
+            (11, 10),
+            (13, 10),
+            WorldPointerMovementMode::Run,
+            600.0,
+        ));
+
+        assert_eq!(
+            movement.reconcile_ack(
+                &NativeSelfMovementAck {
+                    packet: "worldSnapshot".to_owned(),
+                    object_id: "1000".to_owned(),
+                    x: 13,
+                    y: 10,
+                    direction: "right".to_owned(),
+                },
+                900.0,
+            ),
+            MovementAckOutcome::Confirmed
+        );
+        assert!(movement.pending.is_empty());
+        assert_eq!(movement.authoritative_position, Some((13, 10)));
+    }
+
+    #[test]
+    fn active_auto_path_survives_cursor_crossing_an_actor() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
@@ -2138,9 +2875,10 @@ mod tests {
         app.update();
 
         let state = app.world().resource::<WorldPointerMovementState>();
-        assert_eq!(state.active, Some(WorldPointerMovementMode::Run));
+        assert_eq!(state.active, None);
+        assert_eq!(state.auto_path_destination, Some((12, 10)));
         assert!(
-            state.pending.is_some(),
+            !state.pending.is_empty(),
             "actor hover discarded the pending run"
         );
         assert!(
@@ -2150,7 +2888,7 @@ mod tests {
     }
 
     #[test]
-    fn authoritative_snapshot_progress_releases_pending_when_packet_ack_is_missing() {
+    fn authoritative_snapshot_progress_advances_auto_path_without_packet_ack() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
@@ -2189,13 +2927,13 @@ mod tests {
 
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
         let state = app.world().resource::<WorldPointerMovementState>();
-        let pending = state.pending.as_ref().expect("snapshot released next run");
-        assert_eq!(pending.mode, WorldPointerMovementMode::Run);
+        let pending = state.pending.front().expect("snapshot released next run");
+        assert_eq!(pending.mode, WorldPointerMovementMode::Walk);
         assert_eq!(pending.from, (11, 10));
-        assert_eq!(pending.to, (13, 10));
+        assert_eq!(pending.to, (12, 10));
     }
 
     #[test]
@@ -2233,7 +2971,7 @@ mod tests {
         app.update();
 
         let state = app.world().resource::<WorldPointerMovementState>();
-        assert!(state.pending.is_none());
+        assert!(state.pending.is_empty());
         assert!(state.self_object_id.is_none());
         assert!(state.active.is_none());
     }
@@ -2273,7 +3011,7 @@ mod tests {
         assert!(receiver.try_recv().is_err(), "correction resent movement");
         {
             let state = app.world().resource::<WorldPointerMovementState>();
-            assert!(state.pending.is_none());
+            assert!(state.pending.is_empty());
             assert_eq!(state.authoritative_position, Some((10, 10)));
             assert_eq!(state.run_primed_until_ms, 0.0);
             assert_eq!(state.input_blocked_until_ms, 500.0);
@@ -2293,7 +3031,7 @@ mod tests {
             .world()
             .resource::<WorldPointerMovementState>()
             .pending
-            .as_ref()
+            .front()
             .expect("Crystal alternate walk pending");
         assert_eq!(pending.from, (10, 10));
         assert_eq!(pending.to, (11, 11));
@@ -2336,7 +3074,7 @@ mod tests {
     fn closing_a_panel_restores_input_and_emits_only_once() {
         let (mut app, receiver) = input_app();
         app.insert_resource(NativePlayerUiState::default());
-        app.add_systems(bevy::prelude::Update, keyboard_walk_system);
+        app.add_systems(bevy::prelude::Update, keyboard_movement_system);
 
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
@@ -2416,10 +3154,7 @@ mod tests {
     #[test]
     fn shift_direction_emits_only_run() {
         let (mut app, receiver) = input_app();
-        app.add_systems(
-            bevy::prelude::Update,
-            (keyboard_walk_system, keyboard_run_system),
-        );
+        app.add_systems(bevy::prelude::Update, keyboard_movement_system);
         {
             let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
             keys.press(KeyCode::ShiftLeft);
@@ -2487,7 +3222,7 @@ mod tests {
         let mut shell = NativeShellModel::default();
         shell.screen = NativeShellScreen::Login;
         app.insert_resource(shell);
-        app.add_systems(bevy::prelude::Update, keyboard_walk_system);
+        app.add_systems(bevy::prelude::Update, keyboard_movement_system);
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::KeyD);
@@ -2501,7 +3236,7 @@ mod tests {
     fn live_d_moves_right_ingame_without_mutating_ui_state() {
         let (mut app, receiver) = input_app();
         app.insert_resource(NativePlayerUiState::default());
-        app.add_systems(bevy::prelude::Update, keyboard_walk_system);
+        app.add_systems(bevy::prelude::Update, keyboard_movement_system);
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::KeyD);
@@ -2512,8 +3247,71 @@ mod tests {
             receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        let pending = movement
+            .pending
+            .front()
+            .expect("keyboard prediction pending");
+        assert_eq!(pending.from, (0, 0));
+        assert_eq!(pending.to, (1, 0));
+        assert_eq!(pending.mode, WorldPointerMovementMode::Walk);
         let ui = app.world().resource::<NativePlayerUiState>();
         assert!(!ui.options_open());
+    }
+
+    #[test]
+    fn keyboard_prediction_is_retired_by_the_shared_authoritative_ack_controller() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(
+            bevy::prelude::Update,
+            (mouse_world_interaction_system, keyboard_movement_system).chain(),
+        );
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyD);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
+        ));
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .release(KeyCode::KeyD);
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .iter_mut()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer)
+            .expect("self player")
+            .x = 1;
+        app.world()
+            .resource::<GameplayEventInbox>()
+            .push_movement_ack(NativeSelfMovementAck {
+                packet: "UserLocation".to_owned(),
+                object_id: "self".to_owned(),
+                x: 1,
+                y: 0,
+                direction: "right".to_owned(),
+            });
+        advance_movement_clock(&mut app, 600);
+
+        app.update();
+
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        assert!(movement.pending.is_empty());
+        assert_eq!(movement.authoritative_position, Some((1, 0)));
+        assert!(
+            receiver.try_recv().is_err(),
+            "released keyboard path resent"
+        );
     }
 
     #[test]

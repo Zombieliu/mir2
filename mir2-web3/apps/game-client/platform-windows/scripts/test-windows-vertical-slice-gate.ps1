@@ -100,6 +100,11 @@ $controls = @(
         -Executable "npm.cmd" `
         -Arguments @("--prefix", "apps/web", "run", "assets:native-map-keyed:build")
     New-Control `
+        -Id "catalogue-item-icon-closure" `
+        -Description "Every catalogue Image has original pixels, geometry, and source fingerprints" `
+        -Executable "npm.cmd" `
+        -Arguments @("--prefix", "apps/web", "run", "test:item-icons")
+    New-Control `
         -Id "native-host-contract" `
         -Description "Windows native host and client contract tests" `
         -Executable $cargo `
@@ -200,6 +205,7 @@ $controls = @(
 $expectedControlIds = @(
     "native-asset-root-preparation",
     "native-keyed-map-preparation",
+    "catalogue-item-icon-closure",
     "native-host-contract",
     "five-class-bichon-functional-slice",
     "ordinary-unprivileged-candidate-loop",
@@ -253,6 +259,12 @@ function Assert-Contract {
     if ($nativeKeyedPreparation.executable -cne "npm.cmd" -or
         $nativeKeyedPreparation.arguments -cnotcontains "assets:native-map-keyed:build") {
         throw "the native asset-root preparation must build keyed and additive native map pages"
+    }
+
+    $itemIcons = $controls | Where-Object { $_.id -ceq "catalogue-item-icon-closure" }
+    if ($itemIcons.executable -cne "npm.cmd" -or
+        ($itemIcons.arguments -join '|') -cne '--prefix|apps/web|run|test:item-icons') {
+        throw "the item icon control must verify the complete current catalogue"
     }
 
     $vertical = $controls | Where-Object { $_.id -ceq "five-class-bichon-functional-slice" }

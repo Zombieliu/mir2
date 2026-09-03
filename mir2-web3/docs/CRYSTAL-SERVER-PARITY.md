@@ -1,5 +1,153 @@
 # Crystal Server Parity
 
+> Shared-trade completion checkpoint (2026-09-03): internal lock/preparation
+> no longer emits S.TradeConfirm. Matching delivery sends completion once;
+> durable projection waits for its atomic save/event marker and safely
+> retries. escrowPrepared separates reservation from completion while legacy
+> completed debit snapshots remain recoverable without another debit.
+> Simulation 1491/1491 + dedicated 7/7, Gateway 672 passed / one existing ignored, protocol
+> 40/40, game-data 39/39 and 1380 client tests pass. Initial
+> fixture/assertion and mixed-cache failures are retained in the evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> This is one source wire-semantic correction, not a full transaction or
+> packet-order parity claim. TradeGold delta/immediate escrow, invitation/
+> private routing, editable locks, capacity keep-offer behavior, mail fallback
+> and item operations remain open. Production routing/authority/auth and
+> wire IDs are unchanged; no SQL migration or live-store mutation occurred.
+> No GUI/capture; all 33 IDs and original-pair/package/light/DPI/soak/human
+> gates remain. visualAccepted=false, accepted=false, globalParityPercent=null.
+
+> Historical shared-trade wire/escrow audit (2026-09-03): Crystal
+> `GameScene.cs:6329-6347` treats S.TradeConfirm as completed exchange, but
+> Candidate `runtime/packets.rs:5191-5274` and `runtime/session.rs:432-446`
+> produce/use it during unilateral preparation. Gateway
+> `apps/gateway/src/routing.rs:11028-11168` returns the initial packet before
+> mutual durable settlement, including waiting/rollback/unknown outcomes.
+> Crystal `Server/MirObjects/PlayerObject.cs:10778-10822` makes C.TradeGold a
+> positive delta with immediate owner debit and guest cumulative update;
+> Candidate `apps/simulation/src/runtime/packets.rs:5059-5073` instead replaces
+> the offer, rejects locked edits and defers debit. These are confirmed open
+> source contracts, not fixed by the new source-shaped native windows.
+>
+> Next work: separate lock/prepare from completion, then align escrow/deltas
+> and packet ownership while preserving conservation, cancellation/refunds,
+> idempotence, save/disconnect and durable unknown-outcome recovery. Backend
+> source/schema/stores/auth are unchanged this checkpoint. Native UI 591/591,
+> Windows 534/534, client runtime 212/212 and UI core 43/43 pass; full server
+> tests were not rerun and older outcomes are not current proof. Exact source
+> hashes and client limitations (including read-only trade cells):
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> All 33 backlog IDs and paired-state/package/light/DPI/soak/human gates remain;
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> Source stack-image server/client checkpoint (2026-09-03): the pure
+> `UserItem.Image` rule now projects authoritative quantity onto personal
+> item snapshots and NPC goods. Exact Info.Image/type/shape/StackSize are
+> used; neither saved icon caches nor viewer realInfo override source image
+> identity. Raw UserItem fields, ItemInfo.Image, mutation rules and save data
+> remain unchanged. Shared game-data 39/39 and real protocol integration
+> 4/4 pass, including bag/belt/storage/equipment thresholds, both poisons,
+> cross-belt merge, equip/remove and save/reload. Full Simulation 1491/1491
+> and Gateway 667 passed / one existing ignored pass on the final source;
+> Windows 527/527 also passes.
+> Crystal ground ObjectItem sends Item.Image but the original client uses
+> FloorItems: that separate runtime/asset path is not fixed by this Items
+> projection. GameShop, QuestCell, crafting shadows and mail-list thumbnails
+> deliberately retain source base-image behavior; guild/trade and other
+> actual-item surfaces remain open. The historical initial PNG predates
+> the final ordinary-item icon correction and does not close final-source
+> same-EXE input, Crystal pairing, trusted provenance, DPI or human gates.
+> Source and evidence: `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+> No schema/store migration, auth relaxation or whole-server acceptance is
+> implied; `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> Character wing server/client note (2026-09-03): the prior missing-wing note
+> below is superseded. `Looks_Wings` now derives from server-owned real armour
+> metadata with Crystal's broken-base-durability rule, and explicit zero
+> clears the effect after unequip. Personal snapshots do not lend self
+> appearance to other actors; ObjectPlayer keeps its own wire effect, while
+> native partial snapshots and session resets retain the intended ownership
+> boundary. `@SETLIGHT` preserves the current equipment-derived effect.
+> Full Simulation 1491/1491, Gateway 666 active/1 ignored, dedicated wing
+> integration 5/5 and affected recall integration 2/2 pass. Windows 521/521,
+> native UI 519/519 and runtime 212/212 pass with same-EXE four-frame and real
+> unequip/re-equip evidence in
+> `docs/generated/player-qa/native-ui-parity-20260903-character-wings/README.md`.
+> The fixed native unequip path uses the existing normalized-bag destination
+> contract; raw Crystal/belt addressing and amulet merge parity remain open.
+> This is a bounded appearance/projection correction, not completion of
+> server gameplay, distributed authority, source item interaction UI,
+> packaging/light, DPI or human visual acceptance. No server/global percentage
+> is reported.
+
+> Crystal remaining tooltip surfaces note (2026-09-03): NPC shop, GameShop,
+> quest reward, guild-storage and trade packets now feed the native client a
+> complete tooltip source without moving authority into presentation code.
+> Instance-bearing surfaces retain their real `UserItem`; catalogue previews
+> follow Crystal's different GameShop and Quest constructors; exact item-index
+> joins and viewer-specific `GetRealItem` fail closed when source identity is
+> absent or ambiguous. Native UI passes 511/511 and the current Windows Debug
+> build succeeds; Windows is 519/520 solely because of the registered Archer
+> atlas fixture assertion. This supersedes the sparse-surface statement in the
+> prior note below. It does not close distributed item ownership, panel visual
+> geometry, same-EXE populated evidence, device or human acceptance, and no
+> server/global percentage is reported.
+>
+> Crystal item-tooltip server-client note (2026-09-03): item ownership and
+> mutation remain server-authoritative; this slice adds only the complete
+> presentation source needed by a faithful client. Simulation resolves each
+> visible personal item with Crystal `Functions.GetRealItem`, retains recursive
+> socket `UserItem` records and exposes current player requirement stats;
+> Gateway carries those exact values to Windows. Focused Simulation/game-data
+> regressions and client native-ui 509/509 pass. The same-EXE WoodenSword hover
+> proves the bounded route, but NPC/cash shops, quest rewards, guild storage and
+> trade remain sparse and must not fabricate metadata. This does not complete
+> distributed account/item ownership, packaging, DPI/device or human visual
+> acceptance, and no server/global percentage is reported.
+
+> CharacterDialog server-client projection note (2026-09-02): no new client
+> authority was introduced. The personal Simulation remains authoritative for
+> equipped items and now projects each Crystal template's `ItemInfo.Image` in
+> `EquipmentItemSnapshot`; existing `UserInformation` gender/hair and existing
+> world/player guild fields are retained by Gateway instead of disappearing on
+> a later partial snapshot. The Windows host resolves presentation geometry
+> from exact exported `StateItem` metadata and fails closed when data is
+> missing. Focused server/Gateway regressions and aligned `1231` native
+> evidence pass. Wing state is still unavailable, and this does not complete
+> Character stats, multiplayer Zone ownership, packaging, device or human
+> acceptance; no server/global percentage is reported.
+
+> Zone movement/light server-client note (2026-09-01): the authoritative Zone
+> now treats both Walk and Run as real 600 ms movement windows and consumes only
+> the latest intent when the actual clock reaches readiness. It no longer
+> executes against a future tick or a 120 ms early grace window; blocked moves
+> still correct only the owner and successful moves retain normal owner/AOI
+> packet surfaces. Windows may predict Crystal's two-cell Run or three cells
+> for mounted/SwiftFeet presentation, but collision and final transform remain
+> server-owned. The local server's unset/`dynamic` light mode now follows the
+> same Crystal UTC time-of-day formula instead of a Debug-only forced Day; fixed
+> `1..4` overrides remain deterministic QA controls, and no gamma manipulation
+> is involved. `shared_zone` passes 204/204 and focused light regressions pass.
+> This closes only the identified local timing/configuration mismatch; full
+> distributed Zone, live-WSS, device and human frontend acceptance remain open,
+> with no server/global percentage reported.
+
+> Character-select LastAccess server/client note (2026-09-01): the local path
+> now follows Crystal's UTC `CharacterInfo.LastLogoutDate`/
+> `SelectInfo.LastAccess` lifecycle instead of returning a hard-coded date.
+> Authoritative final `LogOut`, `Disconnect` and abnormal transport teardown
+> persist the binary DateTime beside the final character snapshot, recovery
+> replay retains the logout-save semantic, subsequent rosters expose it, and
+> Gateway retains its exact signed 64-bit representation. Web and Windows
+> consume it without precision loss; Windows formats the reconstructed value as
+> `yyyy/MM/dd HH:mm:ss`. Focused Simulation 2/2, Gateway LastAccess 2/2,
+> recovery replay 1/1, native protocol 1/1, Windows adapter 1/1 and select UI
+> 6/6 regressions pass. A legacy or new character still correctly shows `Never`
+> until its first completed logout. The adjacent preview residency/shared-clock
+> repair is client presentation only; the local Debug comparison is not
+> same-EXE/device/human acceptance and no server or global percentage is
+> reported.
+
 > Windows NPC click/DataRange server-client note (2026-08-29): revision
 > `dd3179559` is source-bound to Crystal `GameScene.OnMouseClick` and
 > `PlayerObject.CallNPC`. Windows sends `CallNPC [@Main]` immediately for a

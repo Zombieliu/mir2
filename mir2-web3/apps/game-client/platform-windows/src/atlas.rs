@@ -602,7 +602,7 @@ fn original_frame_pixels(frame_path: &str) -> Option<Arc<StarterAtlasPixelPage>>
 
     let loaded = assets::asset_path(&cache_key)
         .and_then(|path| fs::read(path).ok())
-        .and_then(|bytes| decode_png_rgba(&bytes))
+        .and_then(|bytes: Vec<u8>| decode_png_rgba(&bytes))
         .map(|(width, height, rgba)| {
             Arc::new(StarterAtlasPixelPage {
                 width,
@@ -626,18 +626,25 @@ fn original_frame_pixels(frame_path: &str) -> Option<Arc<StarterAtlasPixelPage>>
     loaded
 }
 
-fn sprite_library_exists(library: &str) -> bool {
+fn sprite_library_in_atlas(index: &StarterAtlasIndex, library: &str) -> bool {
     let encoded_prefix = format!("{}/", library.trim_end_matches('/')).replace(' ', "%20");
-    starter_atlas_index().is_some_and(|index| {
-        index
-            .rect_by_path
-            .keys()
-            .any(|path| path.starts_with(&encoded_prefix))
-    }) || assets::asset_path(library.trim_start_matches('/')).is_some_and(|path| path.is_dir())
+    index
+        .rect_by_path
+        .keys()
+        .any(|path| path.starts_with(&encoded_prefix))
 }
 
-fn available_sprite_library(sprite: Option<&Value>, field: &str) -> Option<String> {
-    sprite_library(sprite, field).filter(|library| sprite_library_exists(library))
+fn sprite_library_exists(library: &str) -> bool {
+    starter_atlas_index().is_some_and(|index| sprite_library_in_atlas(index, library))
+        || assets::asset_path(library.trim_start_matches('/')).is_some_and(|path| path.is_dir())
+}
+
+fn available_sprite_library(
+    sprite: Option<&Value>,
+    field: &str,
+    library_exists: &impl Fn(&str) -> bool,
+) -> Option<String> {
+    sprite_library(sprite, field).filter(|library| library_exists(library))
 }
 
 fn uses_archer_alt(action: AnimationAction) -> bool {
@@ -670,6 +677,14 @@ fn uses_assassin_alt(action: AnimationAction) -> bool {
 pub(crate) fn resolved_native_sprite(
     entity: &Value,
     action: AnimationAction,
+) -> ResolvedNativeSprite {
+    resolved_native_sprite_with_availability(entity, action, &sprite_library_exists)
+}
+
+fn resolved_native_sprite_with_availability(
+    entity: &Value,
+    action: AnimationAction,
+    library_exists: &impl Fn(&str) -> bool,
 ) -> ResolvedNativeSprite {
     let kind = entity
         .get("kind")
@@ -731,11 +746,11 @@ pub(crate) fn resolved_native_sprite(
         weapon_library_secondary = None;
         weapon_frame_offset = Some(gender_weapon_offset);
     }
-    let alt_body_library = available_sprite_library(sprite, "altBodyLibrary");
-    let alt_hair_library = available_sprite_library(sprite, "altHairLibrary");
-    let alt_weapon_library = available_sprite_library(sprite, "altWeaponLibrary");
+    let alt_body_library = available_sprite_library(sprite, "altBodyLibrary", library_exists);
+    let alt_hair_library = available_sprite_library(sprite, "altHairLibrary", library_exists);
+    let alt_weapon_library = available_sprite_library(sprite, "altWeaponLibrary", library_exists);
     let alt_weapon_library_secondary =
-        available_sprite_library(sprite, "altWeaponLibrarySecondary");
+        available_sprite_library(sprite, "altWeaponLibrarySecondary", library_exists);
     let archer_alt = class_key == "archer"
         && alt_body_library
             .as_deref()
@@ -972,6 +987,7 @@ fn build_entity_render_state_internal(
         effect_visible,
         index,
         STARTER_ATLAS_PIXELS.get().and_then(Option::as_ref),
+        sprite_library_exists,
     )
 }
 
@@ -982,6 +998,7 @@ fn build_entity_render_state_with_index(
     effect_visible: bool,
     index: &StarterAtlasIndex,
     pixels: Option<&StarterAtlasPixels>,
+    library_exists: impl Fn(&str) -> bool,
 ) -> Option<Value> {
     let (center_x, center_y) = scene_center(payload);
     let entity_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
@@ -1008,6 +1025,14 @@ fn build_entity_render_state_with_index(
                         .unwrap_or("monster");
                     let x = entity.get("x").and_then(Value::as_i64).unwrap_or(0);
                     let y = entity.get("y").and_then(Value::as_i64).unwrap_or(0);
+                    let sort_x = entity
+                        .get("motionSortX")
+                        .and_then(Value::as_i64)
+                        .unwrap_or(x);
+                    let sort_y = entity
+                        .get("motionSortY")
+                        .and_then(Value::as_i64)
+                        .unwrap_or(y);
                     let direction = entity
                         .get("direction")
                         .and_then(Value::as_str)
@@ -1028,7 +1053,8 @@ fn build_entity_render_state_with_index(
                         .and_then(|poses| poses.get(&object_id))
                         .map(|(_, action)| *action)
                         .unwrap_or_else(|| payload_animation_action(entity));
-                    let resolved_sprite = resolved_native_sprite(entity, action);
+                    let resolved_sprite =
+                        resolved_native_sprite_with_availability(entity, action, &library_exists);
                     let relative_frame = pose_overrides
                         .and_then(|poses| poses.get(&object_id))
                         .map(|(frame, _)| *frame)
@@ -1041,7 +1067,10 @@ fn build_entity_render_state_with_index(
                         .saturating_add(relative_frame);
                     let root_left = entity_origin_x + (x - center_x) as f32 * CELL_WIDTH;
                     let root_top = entity_origin_y + (y - center_y) as f32 * CELL_HEIGHT;
-                    let z_base = entity_z_base(x, y);
+                    // Match Crystal's split CurrentLocation/MapLocation model:
+                    // screen placement is destination-relative, while an
+                    // unfinished move remains sorted at its source cell.
+                    let z_base = entity_z_base(sort_x, sort_y);
                     let mut layers = Vec::new();
 
                     let mount_library = resolved_sprite.mount_library.as_ref();
@@ -1189,6 +1218,8 @@ fn build_entity_render_state_with_index(
                         "motionFromY",
                         "motionToX",
                         "motionToY",
+                        "motionSortX",
+                        "motionSortY",
                         "motionStartedMs",
                         "motionDurationMs",
                     ] {
@@ -1353,6 +1384,7 @@ pub(crate) fn build_entity_render_state_with_manifest_for_test(
         effect_visible,
         &index,
         None,
+        |library| sprite_library_in_atlas(&index, library),
     )
 }
 
@@ -1385,6 +1417,7 @@ pub(crate) fn build_entity_render_state_with_manifest_and_pixels_for_test(
         effect_visible,
         &index,
         Some(&pixels),
+        |library| sprite_library_in_atlas(&index, library),
     )
 }
 
@@ -2024,6 +2057,136 @@ mod tests {
     }
 
     #[test]
+    fn high_armour_exports_keep_every_original_frame_and_exact_geometry() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        // Crystal PlayerObject.SetLibraries selects Shape 9/10 independently
+        // of the CharacterDialog StateItem image. Both source libraries contain
+        // 1616 frames, including the complete female 808-offset half.
+        for (library, source_sha, male_size, female_size) in [
+            (
+                "CArmour/09",
+                "9469eb3cd092518751fcee6c5703ae590575251b3087006e3c8cb3dce8e0e2da",
+                (72, 76, 7, -48),
+                (60, 72, 10, -48),
+            ),
+            (
+                "CArmour/10",
+                "870304f256bad11ec24516d65792b80549545f14fe72feb521e2bff99a6dfe09",
+                (68, 76, 7, -49),
+                (64, 72, 7, -48),
+            ),
+        ] {
+            let meta_path = assets::asset_path(&format!("original-ui/{library}/meta.json"))
+                .expect("high-armour source metadata");
+            let meta: Value = serde_json::from_slice(&fs::read(meta_path).unwrap()).unwrap();
+            assert_eq!(meta["sourceLibrary"]["sha256"], source_sha);
+            assert_eq!(meta["count"], 1616);
+            assert_eq!(meta["frames"].as_array().unwrap().len(), 1616);
+            for (frame, (width, height, offset_x, offset_y)) in [(0, male_size), (808, female_size)]
+            {
+                assert_eq!(
+                    original_frame_geometry(library, frame),
+                    Some(OriginalFrameGeometry {
+                        width,
+                        height,
+                        offset_x,
+                        offset_y
+                    })
+                );
+            }
+            for frame in 0..1616_i64 {
+                let geometry = original_frame_geometry(library, frame)
+                    .unwrap_or_else(|| panic!("missing {library}/{frame} geometry"));
+                let layer = build_entity_layer(
+                    index,
+                    &mut HashMap::new(),
+                    "1000:body".to_owned(),
+                    &format!("/original-ui/{library}"),
+                    frame,
+                    100.0,
+                    200.0,
+                    5.0,
+                )
+                .unwrap_or_else(|| panic!("missing {library}/{frame} PNG or layer"));
+                assert_eq!(layer["path"], format!("/original-ui/{library}/{frame}.png"));
+                assert_eq!(layer["width"], json!(geometry.width as f32));
+                assert_eq!(layer["height"], json!(geometry.height as f32));
+                assert_eq!(layer["left"], json!(100.0 + geometry.offset_x as f32));
+                assert_eq!(layer["top"], json!(200.0 + geometry.offset_y as f32));
+                assert!(layer.get("atlasKey").is_none());
+            }
+        }
+    }
+
+    #[test]
+    fn high_armour_stand_walk_run_retains_body_hair_and_weapon_in_all_directions() {
+        for library in ["CArmour/09", "CArmour/10"] {
+            for (body_offset, weapon_offset) in [(0_i64, 0_i64), (808, 416)] {
+                for (direction_index, direction) in [
+                    "Up",
+                    "UpRight",
+                    "Right",
+                    "DownRight",
+                    "Down",
+                    "DownLeft",
+                    "Left",
+                    "UpLeft",
+                ]
+                .iter()
+                .enumerate()
+                {
+                    let payload = json!({
+                        "sceneView": {"center": {"x": 290, "y": 620}},
+                        "entities": [{"objectId": 1000, "kind": "selfPlayer", "classKey": "warrior",
+                            "genderKey": if body_offset == 0 { "male" } else { "female" },
+                            "x": 290, "y": 620, "direction": direction,
+                            "sprite": {"bodyLibrary": library, "hairLibrary": "CHair/00",
+                                "weaponLibrary": "CWeapon/00", "frameBaseOffset": body_offset,
+                                "weaponFrameOffset": weapon_offset}}]
+                    });
+                    for (action, start, count) in [
+                        (AnimationAction::Standing, 0_i64, 4_i64),
+                        (AnimationAction::Walking, 32, 6),
+                        (AnimationAction::Running, 80, 6),
+                    ] {
+                        for phase in 0..count {
+                            let relative = start + direction_index as i64 * count + phase;
+                            let poses = HashMap::from([("1000".to_owned(), (relative, action))]);
+                            let state =
+                                build_entity_render_state_with_poses(&payload, &poses).unwrap();
+                            let entity = &state["entities"][0];
+                            let layers = entity["layers"].as_array().unwrap();
+                            assert_eq!(layers.len(), 3,
+                                "{library} offset {body_offset}, {direction}, {action:?}, phase {phase}");
+                            let body = layers
+                                .iter()
+                                .find(|layer| layer["key"] == "1000:body")
+                                .expect("never degrade to a floating hair/weapon composite");
+                            assert_eq!(
+                                body["path"],
+                                format!("/original-ui/{library}/{}.png", body_offset + relative)
+                            );
+                            let hair = layers
+                                .iter()
+                                .find(|layer| layer["key"] == "1000:hair")
+                                .unwrap();
+                            let weapon = layers
+                                .iter()
+                                .find(|layer| layer["key"] == "1000:weapon-primary")
+                                .unwrap();
+                            assert!(body["z"].as_f64().unwrap() < hair["z"].as_f64().unwrap());
+                            assert_eq!(
+                                weapon["z"].as_f64().unwrap() < body["z"].as_f64().unwrap(),
+                                weapon_is_rear(direction)
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
     fn unpacked_player_frame_keeps_pixel_hit_and_atomic_highlight() {
         let index = starter_atlas_index().expect("starter atlas index");
         let layer = build_entity_layer(
@@ -2178,6 +2341,8 @@ mod tests {
                 "motionFromY": 7.0,
                 "motionToX": 9.0,
                 "motionToY": 7.0,
+                "motionSortX": 8,
+                "motionSortY": 6,
                 "motionStartedMs": 1700000000100_u64,
                 "motionDurationMs": 600,
                 "sprite": {
@@ -2196,6 +2361,22 @@ mod tests {
         assert_eq!(entity["motionToY"], json!(7.0));
         assert_eq!(entity["motionStartedMs"], json!(1_700_000_000_100_u64));
         assert_eq!(entity["motionDurationMs"], json!(600));
+        let body = &entity["layers"][0];
+        assert_eq!(
+            body["left"],
+            json!(484.0),
+            "visual root stays at the target cell"
+        );
+        assert_eq!(
+            body["top"],
+            json!(344.0),
+            "visual root stays at the target cell"
+        );
+        assert_eq!(
+            body["z"],
+            json!(60_805.0),
+            "an active move keeps Crystal's source-cell sort depth"
+        );
     }
 
     #[test]
@@ -2474,6 +2655,19 @@ mod tests {
 
     #[test]
     fn archer_walk_and_range_two_use_alt_layers_then_standing_returns_to_common_body() {
+        // This contract test owns its asset availability. It must not depend
+        // on a developer's untracked ARArmour directory or a CI package cache.
+        let manifest = routing_atlas_manifest_fixture(&[
+            "/original-ui/ARArmour/00/24.png",
+            "/original-ui/ARHair/00/24.png",
+            "/original-ui/ARWeapon/00%20S/24.png",
+            "/original-ui/ARArmour/00/192.png",
+            "/original-ui/ARHair/00/192.png",
+            "/original-ui/ARWeapon/00%20S/192.png",
+            "/original-ui/CArmour/00/0.png",
+            "/original-ui/CHair/00/0.png",
+            "/original-ui/CWeapon/00/0.png",
+        ]);
         let payload = json!({
             "sceneView": { "center": { "x": 9, "y": 7 } },
             "entities": [{
@@ -2499,9 +2693,11 @@ mod tests {
                 }
             }]
         });
-        let walking = build_entity_render_state_with_poses(
+        let walking = build_entity_render_state_with_manifest_for_test(
             &payload,
             &HashMap::from([("1002".to_owned(), (24, AnimationAction::Walking))]),
+            true,
+            &manifest,
         )
         .expect("archer walking render state");
         let walking_layers = walking["entities"][0]["layers"]
@@ -2533,7 +2729,12 @@ mod tests {
         }));
 
         let archer = &payload["entities"][0];
-        let range_two = resolved_native_sprite(archer, AnimationAction::AttackRange2);
+        let index = parse_starter_atlas_manifest(&manifest).expect("archer fixture atlas");
+        let range_two = resolved_native_sprite_with_availability(
+            archer,
+            AnimationAction::AttackRange2,
+            &|library| sprite_library_in_atlas(&index, library),
+        );
         assert_eq!(range_two.body_library, "/original-ui/ARArmour/00");
         assert_eq!(
             range_two.hair_library.as_deref(),
@@ -2545,9 +2746,38 @@ mod tests {
         );
         assert!(range_two.weapon_library_secondary.is_none());
 
-        let standing = build_entity_render_state_with_poses(
+        let range_render = build_entity_render_state_with_manifest_for_test(
+            &payload,
+            &HashMap::from([("1002".to_owned(), (192, AnimationAction::AttackRange2))]),
+            true,
+            &manifest,
+        )
+        .expect("archer ranged render state");
+        assert!(range_render["entities"][0]["layers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|layer| layer["path"]
+                .as_str()
+                .is_some_and(|path| path.ends_with("/ARArmour/00/192.png"))));
+
+        let unavailable =
+            resolved_native_sprite_with_availability(archer, AnimationAction::Walking, &|_| false);
+        assert_eq!(unavailable.body_library, "/original-ui/CArmour/00");
+        assert_eq!(
+            unavailable.hair_library.as_deref(),
+            Some("/original-ui/CHair/00")
+        );
+        assert_eq!(
+            unavailable.weapon_library.as_deref(),
+            Some("/original-ui/CWeapon/00")
+        );
+
+        let standing = build_entity_render_state_with_manifest_for_test(
             &payload,
             &HashMap::from([("1002".to_owned(), (0, AnimationAction::Standing))]),
+            true,
+            &manifest,
         )
         .expect("archer standing render state");
         assert!(standing["entities"][0]["layers"]

@@ -5875,6 +5875,7 @@ fn world_entity_from_monster_info(info: &MonsterInfo) -> WorldEntitySnapshot {
         hp: None,
         max_hp: None,
         light: info.light,
+        wing_effect: None,
         name_colour_argb: info.name_colour_argb,
         dead: info.dead,
         // ObjectMonster carries behaviour AI but no authoritative relationship.
@@ -5913,6 +5914,7 @@ fn world_entity_from_zone_monster_spawn(
         hp: Some(monster.hp),
         max_hp: Some(monster.max_hp),
         light: 0,
+        wing_effect: None,
         name_colour_argb: spawn.name_colour_argb,
         dead: monster.dead,
         disposition: monster
@@ -6038,6 +6040,7 @@ fn world_entity_from_object_player_info(
         hp: None,
         max_hp: None,
         light: info.light,
+        wing_effect: Some(info.wing_effect),
         name_colour_argb: info.name_colour_argb,
         dead: info.dead,
         disposition: WorldEntityDisposition::Friendly,
@@ -6068,6 +6071,7 @@ fn world_entity_from_npc_info(info: &NpcInfo) -> WorldEntitySnapshot {
         hp: None,
         max_hp: None,
         light: 10,
+        wing_effect: None,
         name_colour_argb: info.name_colour_argb,
         dead: false,
         disposition: WorldEntityDisposition::Neutral,
@@ -7552,7 +7556,7 @@ pub(crate) fn persist_zone_teardown_checkpoint(
         return Err("teardown persist active identity changed after preparation".to_string());
     }
     runtime.restore_active_character_checkpoint(prepared.checkpoint())?;
-    runtime.save_active_character()
+    runtime.save_active_character_for_logout()
 }
 
 pub(crate) fn release_zone_teardown_fence(runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
@@ -12200,6 +12204,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         self.inner.save_active_character()
     }
 
+    fn save_active_character_for_logout(&mut self) -> Result<(), String> {
+        self.sync_pending_zone_movement_transform()?;
+        self.inner.save_active_character_for_logout()
+    }
+
     fn refresh_active_external_mail(&mut self) -> bool {
         self.inner.refresh_active_external_mail()
     }
@@ -12590,6 +12599,9 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "trade_completion_tests.rs"]
+    mod trade_completion_tests;
+
     use super::{
         delayed_player_action_packets, filter_stale_owner_dead_entity_packets,
         gateway_zone_magic_requires_item_consumption, gateway_zone_magic_targets_ground,
@@ -14785,6 +14797,7 @@ mod tests {
         let entity = world_entity_from_object_player_info(&info, None);
         assert_eq!(entity.riding_mount, Some(false));
         assert_eq!(entity.fishing, Some(true));
+        assert_eq!(entity.wing_effect, Some(6));
         let sprite = entity.sprite.expect("remote appearance sprite");
         assert_eq!(sprite.body_library, "CArmour/03");
         assert_eq!(sprite.hair_library.as_deref(), Some("CHair/02"));
@@ -17130,7 +17143,7 @@ mod tests {
         assert_eq!(trade.settlement_nonce, offer.settlement_nonce);
         assert_eq!(trade.partner, offer.partner_name);
         assert_eq!(trade.offered_gold, offer.gold);
-        assert!(trade.completed);
+        assert!(trade.escrow_prepared && !trade.completed);
     }
 
     #[test]
@@ -19834,7 +19847,7 @@ mod tests {
             .iter()
             .any(|packet| matches!(packet, ServerPacket::ObjectWalk { .. })));
 
-        thread::sleep(Duration::from_millis(520));
+        thread::sleep(Duration::from_millis(620));
         let started = Instant::now();
         let turn_execution = ingress
             .try_execute(ClientPacket::Turn {
@@ -20874,7 +20887,7 @@ mod tests {
     }
 
     #[test]
-    fn shared_in_process_registry_consumes_nearly_ready_crystal_run_chain() {
+    fn shared_in_process_registry_consumes_ready_crystal_run_chain() {
         let registry = ZoneRegistry::in_process();
         let mut session =
             GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
@@ -20890,7 +20903,7 @@ mod tests {
                 if location.position.x == 4 && location.position.y == 7
         )));
 
-        thread::sleep(Duration::from_millis(520));
+        thread::sleep(Duration::from_millis(620));
         let second_packets = session.handle_packet(ClientPacket::Run {
             direction: MirDirection::Right,
         });
@@ -20901,7 +20914,7 @@ mod tests {
                 ServerPacket::UserLocation { location }
                     if location.position.x == 6 && location.position.y == 7
             )),
-            "nearly-ready run intent should not wait for a later world tick: {second_packets:?}"
+            "ready run intent should not wait for a later world tick: {second_packets:?}"
         );
     }
 
@@ -24553,7 +24566,7 @@ mod tests {
             .world_snapshot()
             .stage5_systems
             .trade
-            .expect("completed unmatched offer");
+            .expect("prepared unmatched offer");
         assert_eq!(first.world_snapshot().gold, starting_gold - 30);
         assert!(!has_inventory_key(&first, "red-potion"));
 
@@ -24565,7 +24578,7 @@ mod tests {
             .expect("original unmatched offer remains");
         assert_eq!(preserved.settlement_nonce, original.settlement_nonce);
         assert_eq!(preserved.offered_gold, 30);
-        assert!(preserved.completed);
+        assert!(preserved.escrow_prepared && !preserved.completed);
 
         second.handle_packet(ClientPacket::TradeCancel);
         first.handle_packet(ClientPacket::KeepAlive { time: 31 });
@@ -25426,6 +25439,7 @@ mod tests {
             hp: Some(12),
             max_hp: Some(12),
             light: 0,
+            wing_effect: None,
             name_colour_argb: -1,
             dead: false,
             disposition: WorldEntityDisposition::Neutral,
@@ -25516,6 +25530,7 @@ mod tests {
             hp: None,
             max_hp: None,
             light: 3,
+            wing_effect: Some(0),
             name_colour_argb: -1,
             dead: false,
             disposition: WorldEntityDisposition::Friendly,

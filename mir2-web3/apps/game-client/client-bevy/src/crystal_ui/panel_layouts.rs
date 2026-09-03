@@ -224,6 +224,10 @@ pub const INVENTORY_PANEL_SIZE: Size = Size {
     width: 316,
     height: 236,
 };
+/// `GameScene` constructs the ordinary InventoryDialog without overriding
+/// `MirControl.Location`, whose source default is `(0,0)`. Service/trade
+/// dialogs may move it later; the direct I/F9/HUD path starts here.
+pub const INVENTORY_PANEL_ORIGIN: Point = Point { x: 0, y: 0 };
 pub const INVENTORY_PAGE_COLUMNS: usize = 8;
 pub const INVENTORY_PAGE_ROWS: usize = 5;
 pub const INVENTORY_PAGE_SIZE: usize = INVENTORY_PAGE_COLUMNS * INVENTORY_PAGE_ROWS;
@@ -232,6 +236,28 @@ pub const INVENTORY_GRID_STEP: Point = Point { x: 37, y: 33 };
 pub const INVENTORY_CELL_SIZE: Size = Size {
     width: 36,
     height: 32,
+};
+/// Crystal `InventoryDialog` footer controls.  These are independent of the
+/// selected bag page and remain visible while the dialog is open.
+pub const INVENTORY_GOLD_LABEL_ORIGIN: Point = Point { x: 40, y: 212 };
+pub const INVENTORY_GOLD_LABEL_SIZE: Size = Size {
+    width: 111,
+    height: 14,
+};
+pub const INVENTORY_WEIGHT_BAR_ORIGIN: Point = Point { x: 182, y: 217 };
+pub const INVENTORY_WEIGHT_BAR_SIZE: Size = Size {
+    width: 84,
+    height: 6,
+};
+pub const INVENTORY_FREE_SLOT_LABEL_ORIGIN: Point = Point { x: 268, y: 212 };
+pub const INVENTORY_FREE_SLOT_LABEL_SIZE: Size = Size {
+    width: 26,
+    height: 14,
+};
+pub const INVENTORY_DELETE_BUTTON_ORIGIN: Point = Point { x: 291, y: 212 };
+pub const INVENTORY_DELETE_BUTTON_SIZE: Size = Size {
+    width: 16,
+    height: 15,
 };
 
 /// CharacterDialog owns the Crystal skill page. It uses Title/504 as the
@@ -269,6 +295,7 @@ pub const GAME_SHOP_COLUMN_STEP: i32 = 132;
 pub const GAME_SHOP_ROW_STEP: i32 = 160;
 
 pub const INVENTORY_LAYOUT_SOURCE: SourceRef = SourceRef::new(INVENTORY_FILE, 148, 181);
+pub const INVENTORY_FOOTER_SOURCE: SourceRef = SourceRef::new(INVENTORY_FILE, 23, 195);
 pub const SKILL_LAYOUT_SOURCE: SourceRef = SourceRef::new(CHARACTER_FILE, 136, 143);
 pub const SKILL_ROWS_SOURCE: SourceRef = SourceRef::new(CHARACTER_FILE, 550, 593);
 
@@ -2083,6 +2110,42 @@ mod tests {
             inventory_last.y as u32 + INVENTORY_CELL_SIZE.height <= INVENTORY_PANEL_SIZE.height
         );
         assert_eq!(INVENTORY_PAGE_SIZE, 40);
+        assert_eq!(INVENTORY_GOLD_LABEL_ORIGIN, Point { x: 40, y: 212 });
+        assert_eq!(
+            INVENTORY_GOLD_LABEL_SIZE,
+            Size {
+                width: 111,
+                height: 14
+            }
+        );
+        assert_eq!(INVENTORY_WEIGHT_BAR_ORIGIN, Point { x: 182, y: 217 });
+        assert_eq!(
+            INVENTORY_WEIGHT_BAR_SIZE,
+            Size {
+                width: 84,
+                height: 6
+            }
+        );
+        assert_eq!(INVENTORY_FREE_SLOT_LABEL_ORIGIN, Point { x: 268, y: 212 });
+        assert_eq!(
+            INVENTORY_FREE_SLOT_LABEL_SIZE,
+            Size {
+                width: 26,
+                height: 14
+            }
+        );
+        assert_eq!(INVENTORY_DELETE_BUTTON_ORIGIN, Point { x: 291, y: 212 });
+        assert_eq!(
+            INVENTORY_DELETE_BUTTON_SIZE,
+            Size {
+                width: 16,
+                height: 15
+            }
+        );
+        assert_eq!(
+            INVENTORY_FOOTER_SOURCE,
+            SourceRef::new(INVENTORY_FILE, 23, 195)
+        );
 
         let skill_last_y = SKILL_ROW_ORIGIN.y + SKILL_ROW_STEP_Y * (SKILL_PAGE_SIZE as i32 - 1);
         assert!(SKILL_ROW_ORIGIN.x as u32 + SKILL_ROW_SIZE.width <= SKILL_PANEL_SIZE.width);

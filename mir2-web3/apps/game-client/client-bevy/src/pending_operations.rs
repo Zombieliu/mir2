@@ -122,6 +122,10 @@ pub enum PendingOperationKey {
         count: u16,
         hero_inventory: bool,
     },
+    DeleteItem {
+        unique_id: u64,
+        count: u16,
+    },
     Move {
         grid: String,
         unique_id: u64,
@@ -254,6 +258,11 @@ pub enum InventoryOperationAck {
         hero_inventory: bool,
         success: bool,
     },
+    Delete {
+        unique_id: u64,
+        count: u16,
+        success: bool,
+    },
     Move {
         grid: String,
         from: i32,
@@ -284,6 +293,7 @@ impl InventoryOperationAck {
     pub fn success(&self) -> bool {
         match self {
             Self::Drop { success, .. }
+            | Self::Delete { success, .. }
             | Self::Move { success, .. }
             | Self::Merge { success, .. }
             | Self::Split { success, .. }
@@ -294,6 +304,7 @@ impl InventoryOperationAck {
     pub fn label(&self) -> &'static str {
         match self {
             Self::Drop { .. } => "Drop",
+            Self::Delete { .. } => "Delete",
             Self::Move { .. } => "Move",
             Self::Merge { .. } => "Merge",
             Self::Split { .. } => "Split",
@@ -329,6 +340,15 @@ pub fn apply_inventory_operation_ack(
                 hero_inventory: pending_hero,
             },
         ) => unique_id == pending_id && count == pending_count && hero_inventory == pending_hero,
+        (
+            InventoryOperationAck::Delete {
+                unique_id, count, ..
+            },
+            PendingOperationKey::DeleteItem {
+                unique_id: pending_id,
+                count: pending_count,
+            },
+        ) => unique_id == pending_id && count == pending_count,
         (
             InventoryOperationAck::Move { grid, from, to, .. },
             PendingOperationKey::Move {
@@ -907,6 +927,7 @@ pub fn reconcile_inventory_refresh(
         PendingOperationKey::Drop {
             unique_id, count, ..
         }
+        | PendingOperationKey::DeleteItem { unique_id, count }
         | PendingOperationKey::Sell { unique_id, count }
         | PendingOperationKey::Split {
             unique_id, count, ..
@@ -1541,6 +1562,41 @@ mod tests {
     }
 
     #[test]
+    fn delete_receipt_releases_only_matching_instance_and_count() {
+        let mut pending = PendingOperations::default();
+        let exact = PendingOperationKey::DeleteItem {
+            unique_id: 70,
+            count: 2,
+        };
+        let other_count = PendingOperationKey::DeleteItem {
+            unique_id: 70,
+            count: 1,
+        };
+        assert!(pending.try_begin(exact.clone()));
+        assert!(pending.try_begin(other_count.clone()));
+        let mut feedback = InventoryOperationFeedback::default();
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Delete {
+                    unique_id: 70,
+                    count: 2,
+                    success: true,
+                },
+            ),
+            1
+        );
+        assert!(!pending.contains(&exact));
+        assert!(pending.contains(&other_count));
+        assert_eq!(
+            feedback.last.as_ref().map(InventoryOperationAck::label),
+            Some("Delete")
+        );
+    }
+
+    #[test]
     fn sell_nack_releases_only_matching_item_and_count() {
         let mut pending = PendingOperations::default();
         let exact = PendingOperationKey::Sell {
@@ -2126,6 +2182,9 @@ mod tests {
             finish_npc_index: Some(2),
             title: format!("Quest {quest_index}"),
             npc_name: None,
+            group: None,
+            min_level_needed: 0,
+            detail: Default::default(),
             status,
             objectives: Vec::new(),
             rewards: Vec::new(),
@@ -2172,6 +2231,9 @@ mod tests {
             finish_npc_index: Some(2),
             title: "Quest 40".to_owned(),
             npc_name: None,
+            group: None,
+            min_level_needed: 0,
+            detail: Default::default(),
             status,
             objectives: Vec::new(),
             rewards: Vec::new(),
@@ -2343,7 +2405,7 @@ mod native_ui_tests {
         {
             let mut state = app.world_mut().resource_mut::<QuestUiState>();
             state.selected_quest_index = Some(7);
-            state.tracking_quest_index = Some(7);
+            state.tracked_quest_indices.push(7);
             state.set_feedback("A quest", false);
         }
         app.world_mut()
@@ -2355,6 +2417,9 @@ mod native_ui_tests {
                 finish_npc_index: Some(2),
                 title: "A quest".to_owned(),
                 npc_name: Some("A NPC".to_owned()),
+                group: None,
+                min_level_needed: 0,
+                detail: Default::default(),
                 status: QuestStatus::InProgress,
                 objectives: Vec::new(),
                 rewards: Vec::new(),
@@ -2393,10 +2458,11 @@ mod native_ui_tests {
             .active_quests
             .is_empty());
         assert!(app.world().resource::<CombatTargetModel>().target.is_none());
-        assert_eq!(
-            app.world().resource::<QuestUiState>().tracking_quest_index,
-            None
-        );
+        assert!(app
+            .world()
+            .resource::<QuestUiState>()
+            .tracked_quest_indices
+            .is_empty());
         assert!(app
             .world_mut()
             .resource_mut::<QuestUiIntentQueue>()

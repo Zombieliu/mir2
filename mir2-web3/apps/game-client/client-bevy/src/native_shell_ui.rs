@@ -47,6 +47,7 @@ const GENDERS: [&str; 2] = ["Male", "Female"];
 const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
     spec::CrystalRect::new(348.0, 224.0, 328.0, 350.0);
 const AUX_CONFIRM_PANEL: spec::CrystalRect = spec::CrystalRect::new(348.0, 286.0, 328.0, 196.0);
+const CONNECTION_LOST_PANEL: spec::CrystalRect = spec::CrystalRect::new(284.0, 289.0, 456.0, 190.0);
 
 const NEW_CHARACTER_FRAME: spec::CrystalRect = spec::CrystalRect::new(218.0, 154.0, 588.0, 460.0);
 const NEW_CHARACTER_TITLE: spec::CrystalRect = spec::CrystalRect::new(424.0, 165.0, 187.0, 20.0);
@@ -1542,40 +1543,38 @@ fn render_connection_lost(
     model: &NativeShellModel,
     aux_focus: NativeShellAuxFocus,
 ) {
-    spawn_auxiliary_panel(parent, asset_server, AUX_CONFIRM_PANEL);
+    spawn_native_image(
+        parent,
+        asset_server,
+        "original-ui/Prguse/360.png",
+        CONNECTION_LOST_PANEL,
+    );
     spawn_aux_text(
         parent,
         "Connection Lost",
-        spec::CrystalRect::new(366.0, 304.0, 292.0, 28.0),
-        19.0,
+        spec::CrystalRect::new(319.0, 316.0, 390.0, 24.0),
+        18.0,
         GOLD,
         Justify::Center,
     );
     spawn_aux_text(
         parent,
         "Press Enter, Escape, or Retry to reconnect.",
-        spec::CrystalRect::new(366.0, 350.0, 292.0, 25.0),
-        13.0,
+        spec::CrystalRect::new(319.0, 348.0, 390.0, 30.0),
+        12.0,
         CREAM,
         Justify::Center,
     );
     if let Some(notice) = &model.notice {
+        let notice_summary = connection_notice_summary(&notice.message);
         spawn_aux_notice(
             parent,
-            &notice.message,
+            &notice_summary,
             notice.kind,
-            spec::CrystalRect::new(366.0, 374.0, 292.0, 20.0),
+            spec::CrystalRect::new(319.0, 388.0, 390.0, 34.0),
         );
     }
-    let retry_spec = CrystalButtonSpec::new(
-        "Title",
-        320,
-        321,
-        322,
-        spec::CrystalRect::new(575.0, 398.0, 42.0, 42.0),
-        48.0,
-        48.0,
-    );
+    let retry_spec = connection_lost_retry_spec();
     spawn_crystal_image_button(
         parent,
         asset_server,
@@ -1585,14 +1584,35 @@ fn render_connection_lost(
         aux_focus.connection_retry,
         true,
     );
-    spawn_aux_text(
-        parent,
-        "Retry",
-        spec::CrystalRect::new(524.0, 444.0, 144.0, 20.0),
-        12.0,
-        CREAM,
-        Justify::Center,
-    );
+}
+
+const fn connection_lost_retry_spec() -> CrystalButtonSpec {
+    CrystalButtonSpec::new(
+        "Title",
+        200,
+        201,
+        202,
+        spec::CrystalRect::new(644.0, 446.0, 76.0, 25.0),
+        76.0,
+        25.0,
+    )
+}
+
+fn connection_notice_summary(message: &str) -> String {
+    if let Some(start) = message.rfind("(os error ") {
+        if let Some(relative_end) = message[start..].find(')') {
+            let end = start + relative_end + 1;
+            return format!("Cannot reach the local Gateway.\n{}", &message[start..end]);
+        }
+    }
+
+    const MAX_NOTICE_CHARS: usize = 72;
+    let mut summary = message.split_whitespace().collect::<Vec<_>>().join(" ");
+    if summary.chars().count() > MAX_NOTICE_CHARS {
+        summary = summary.chars().take(MAX_NOTICE_CHARS - 1).collect();
+        summary.push('…');
+    }
+    summary
 }
 
 fn character_class_index(class_name: &str) -> u16 {
@@ -1689,8 +1709,10 @@ fn spawn_aux_text(
     color: Color,
     justify: Justify,
 ) {
+    let mut node = absolute_node(rect);
+    node.overflow = Overflow::clip();
     parent.spawn((
-        absolute_node(rect),
+        node,
         Text::new(value.to_owned()),
         body_font(size),
         TextColor(color),
@@ -2519,5 +2541,43 @@ mod tests {
         ));
         assert!(queue.is_empty());
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+    }
+
+    #[test]
+    fn connection_notice_collapses_localized_socket_text_to_a_bounded_summary() {
+        assert_eq!(
+            connection_notice_summary(
+                "gateway connect failed: IO error: 由于目标计算机积极拒绝，无法连接。 (os error 10061)"
+            ),
+            "Cannot reach the local Gateway.\n(os error 10061)"
+        );
+    }
+
+    #[test]
+    fn connection_notice_truncation_is_unicode_safe() {
+        let source = "网关连接失败".repeat(20);
+        let summary = connection_notice_summary(&source);
+        assert_eq!(summary.chars().count(), 72);
+        assert!(summary.ends_with('…'));
+    }
+
+    #[test]
+    fn connection_lost_dialog_uses_crystal_message_box_and_ok_button_geometry() {
+        assert_eq!(
+            CONNECTION_LOST_PANEL,
+            spec::CrystalRect::new(284.0, 289.0, 456.0, 190.0)
+        );
+        assert_eq!(
+            connection_lost_retry_spec(),
+            CrystalButtonSpec::new(
+                "Title",
+                200,
+                201,
+                202,
+                spec::CrystalRect::new(644.0, 446.0, 76.0, 25.0),
+                76.0,
+                25.0,
+            )
+        );
     }
 }

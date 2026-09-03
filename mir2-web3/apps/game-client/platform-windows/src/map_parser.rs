@@ -29,8 +29,17 @@ const STAGE_HEIGHT: f32 = 768.0;
 const CELL_WIDTH: f32 = 48.0;
 const CELL_HEIGHT: f32 = 32.0;
 pub(crate) const MAP_RENDER_GUARD_CELLS: i32 = 6;
+const CRYSTAL_VIEW_RANGE_X: i32 = 16;
+const CRYSTAL_VIEW_RANGE_Y: i32 = 17;
+const CRYSTAL_FLOOR_LOOKAHEAD_ROWS: i32 = 5;
+const CRYSTAL_OBJECT_LOOKAHEAD_ROWS: i32 = 25;
 pub(crate) const MAP_FRONT_DEPTH_ORDER: f32 = 1.0;
 const MAP_TILE_ANIMATION_DEPTH_ORDER: f32 = -0.5;
+// Crystal composites Back plus static 48x32/96x64 Middle/Front frames into a
+// floor render target before DrawObjects. Keep that whole pass below the
+// y-sorted actor/object band while preserving its y-then-x draw order.
+const MAP_FLOOR_DEPTH_MIN: f32 = -2.0;
+const MAP_FLOOR_DEPTH_SPAN: f64 = 1.0;
 
 /// A parsed type-100 map cell.
 #[derive(Debug, Clone)]
@@ -523,21 +532,27 @@ pub fn resolve_map_tile_draws(map: &ParsedMap) -> Vec<MapTileDraw> {
 }
 
 fn resolve_map_tile_draws_in_viewport(map: &ParsedMap, viewport: MapViewport) -> Vec<MapTileDraw> {
-    let margin_x = viewport.draw_margin_x();
-    let margin_y = viewport.draw_margin_y();
-    resolve_map_tile_draws_in_bounds(
+    let mut draws = resolve_map_tile_draws_in_bounds(
         map,
-        viewport.center_x.saturating_sub(margin_x).max(0),
         viewport
             .center_x
-            .saturating_add(margin_x)
+            .saturating_sub(viewport.draw_margin_x())
+            .max(0),
+        viewport
+            .center_x
+            .saturating_add(viewport.draw_margin_x())
             .min(i32::from(map.width).saturating_sub(1)),
-        viewport.center_y.saturating_sub(margin_y).max(0),
         viewport
             .center_y
-            .saturating_add(margin_y)
+            .saturating_sub(viewport.draw_margin_y())
+            .max(0),
+        viewport
+            .center_y
+            .saturating_add(viewport.object_draw_bottom_margin_y())
             .min(i32::from(map.height).saturating_sub(1)),
-    )
+    );
+    draws.retain(|draw| viewport.retains_draw(draw.layer, draw.x, draw.y));
+    draws
 }
 
 fn resolve_map_tile_draws_in_bounds(
@@ -638,23 +653,7 @@ fn resolve_map_tile_draws_in_bounds(
 
 /// Locate a local map pack file (`.map.gz`) for the given map file name.
 fn find_map_file(map_file_name: &str) -> Option<PathBuf> {
-    let file_name = Path::new(map_file_name).file_name()?.to_str()?;
-    if file_name != map_file_name || file_name.contains("..") {
-        return None;
-    }
-    let stem = file_name
-        .strip_suffix(".map.gz")
-        .or_else(|| file_name.strip_suffix(".map"))
-        .unwrap_or(file_name);
-    let root = assets::asset_root()?;
-    [
-        root.join("crystal-map-pack"),
-        root.join("generated/crystal-map-pack"),
-        root.join("../lib/generated/crystal-map-pack"),
-    ]
-    .into_iter()
-    .map(|pack| pack.join(format!("{stem}.map.gz")))
-    .find(|candidate| candidate.is_file())
+    assets::crystal_map_path(&assets::asset_root()?, map_file_name)
 }
 
 /// Locate the map-atlas manifest built by `assets:map-atlas:build`.
@@ -720,6 +719,35 @@ enum ResolvedMapFrame {
         rect_key: String,
         asset: StandaloneAsset,
     },
+}
+
+fn floor_sized_frame(width: u32, height: u32) -> bool {
+    (width == CELL_WIDTH as u32 && height == CELL_HEIGHT as u32)
+        || (width == (CELL_WIDTH * 2.0) as u32 && height == (CELL_HEIGHT * 2.0) as u32)
+}
+
+fn map_draw_is_floor(layer: TileLayer, animated: bool, width: u32, height: u32) -> bool {
+    layer == TileLayer::Back || (!animated && floor_sized_frame(width, height))
+}
+
+fn map_floor_depth(map: &ParsedMap, x: i32, y: i32) -> f32 {
+    let width = u64::from(map.width);
+    let height = u64::from(map.height);
+    let cell_count = width.saturating_mul(height);
+    if cell_count == 0 {
+        return MAP_FLOOR_DEPTH_MIN;
+    }
+    let x = u64::try_from(x.max(0))
+        .unwrap_or(0)
+        .min(width.saturating_sub(1));
+    let y = u64::try_from(y.max(0))
+        .unwrap_or(0)
+        .min(height.saturating_sub(1));
+    let rank = y
+        .saturating_mul(width)
+        .saturating_add(x)
+        .min(cell_count.saturating_sub(1));
+    (f64::from(MAP_FLOOR_DEPTH_MIN) + rank as f64 / cell_count as f64 * MAP_FLOOR_DEPTH_SPAN) as f32
 }
 
 fn build_original_map_frame_path(library: &str, frame_index: i32) -> String {
@@ -1017,16 +1045,40 @@ impl MapViewport {
     }
 
     pub(crate) fn draw_margin_x(self) -> i32 {
-        self.width / 2 + MAP_RENDER_GUARD_CELLS
+        (self.width / 2 + MAP_RENDER_GUARD_CELLS).max(CRYSTAL_VIEW_RANGE_X)
     }
 
     pub(crate) fn draw_margin_y(self) -> i32 {
-        self.height / 2 + MAP_RENDER_GUARD_CELLS
+        (self.height / 2 + MAP_RENDER_GUARD_CELLS).max(CRYSTAL_VIEW_RANGE_Y)
+    }
+
+    fn floor_draw_bottom_margin_y(self) -> i32 {
+        self.draw_margin_y()
+            .max(CRYSTAL_VIEW_RANGE_Y + CRYSTAL_FLOOR_LOOKAHEAD_ROWS)
+    }
+
+    fn object_draw_bottom_margin_y(self) -> i32 {
+        self.draw_margin_y()
+            .max(CRYSTAL_VIEW_RANGE_Y + CRYSTAL_OBJECT_LOOKAHEAD_ROWS)
     }
 
     pub(crate) fn retains_cell(self, x: i32, y: i32) -> bool {
         x.abs_diff(self.center_x) <= self.draw_margin_x() as u32
             && y.abs_diff(self.center_y) <= self.draw_margin_y() as u32
+    }
+
+    fn retains_draw(self, layer: TileLayer, x: i32, y: i32) -> bool {
+        if x.abs_diff(self.center_x) > self.draw_margin_x() as u32 {
+            return false;
+        }
+        let min_y = self.center_y.saturating_sub(self.draw_margin_y());
+        let max_y = self.center_y.saturating_add(match layer {
+            TileLayer::Back => self.floor_draw_bottom_margin_y(),
+            TileLayer::TileAnimation | TileLayer::Middle | TileLayer::Front => {
+                self.object_draw_bottom_margin_y()
+            }
+        });
+        (min_y..=max_y).contains(&y)
     }
 }
 
@@ -1134,7 +1186,7 @@ fn build_map_render_state_with_indexes(
     let tile_origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
 
     for draw in &draws {
-        if !viewport.retains_cell(draw.x, draw.y) {
+        if !viewport.retains_draw(draw.layer, draw.x, draw.y) {
             continue;
         }
 
@@ -1233,7 +1285,7 @@ fn build_map_render_state_with_indexes(
         let animated = effective_frame_count > 1;
         let cell_left = tile_origin_x + (draw.x - viewport.center_x) as f32 * CELL_WIDTH;
         let cell_top = tile_origin_y + (draw.y - viewport.center_y) as f32 * CELL_HEIGHT;
-        let depth = (draw.y * 1_000 + draw.x * 10) as f32 + draw.z;
+        let cell_depth = (draw.y * 1_000 + draw.x * 10) as f32 + draw.z;
         let layer_key = match draw.layer {
             TileLayer::Back => "back",
             TileLayer::TileAnimation => "tile-animation",
@@ -1244,6 +1296,13 @@ fn build_map_render_state_with_indexes(
         for (phase, resolved) in resolved_frames {
             match resolved {
                 ResolvedMapFrame::Standalone { rect_key, asset } => {
+                    let draw_as_floor =
+                        map_draw_is_floor(draw.layer, animated, asset.width, asset.height);
+                    let depth = if draw_as_floor {
+                        map_floor_depth(map, draw.x, draw.y)
+                    } else {
+                        cell_depth
+                    };
                     let (left, top) = match asset.placement_mode {
                         StandalonePlacementMode::BottomLeft => {
                             (cell_left, cell_top + CELL_HEIGHT - asset.height as f32)
@@ -1274,11 +1333,13 @@ fn build_map_render_state_with_indexes(
                         .entry(atlas_key.clone())
                         .or_default()
                         .insert(rect.key.clone());
-                    let floor_sized = (rect.width == CELL_WIDTH as u32
-                        && rect.height == CELL_HEIGHT as u32)
-                        || (rect.width == (CELL_WIDTH * 2.0) as u32
-                            && rect.height == (CELL_HEIGHT * 2.0) as u32);
-                    let draw_as_floor = draw.layer == TileLayer::Back || (!animated && floor_sized);
+                    let draw_as_floor =
+                        map_draw_is_floor(draw.layer, animated, rect.width, rect.height);
+                    let depth = if draw_as_floor {
+                        map_floor_depth(map, draw.x, draw.y)
+                    } else {
+                        cell_depth
+                    };
                     let (left, top) = if draw_as_floor {
                         (cell_left, cell_top)
                     } else {
@@ -1416,12 +1477,55 @@ fn map_cache_key(map_file_name: &str) -> Option<String> {
 
 /// Whether a local map pack + atlas are available for real map rendering.
 pub fn has_local_map_atlas() -> bool {
-    find_map_file("0").is_some() && find_map_atlas_manifest().is_some()
+    find_map_file("0").is_some()
+        && find_map_atlas_manifest().is_some()
+        && find_native_keyed_manifest().is_some()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bichon_screenshot_viewport_has_local_floor_and_object_images() {
+        let root = assets::asset_root().expect("configured native assets");
+        let map = load_map("0").expect("Bichon map layout must decode");
+        let state = build_map_render_state_for_file(
+            &map,
+            MapViewport {
+                center_x: 302,
+                center_y: 634,
+                width: 22,
+                height: 18,
+            },
+            "0",
+        )
+        .expect("real map render state at the reported black-map coordinate");
+        assert_eq!(state["enabled"], true);
+        assert_eq!(state["ackKey"], "native-map:0:302:634");
+        let atlas_tiles = state["tiles"].as_array().expect("atlas tiles");
+        let standalone_tiles = state["standaloneTiles"]
+            .as_array()
+            .expect("standalone tiles");
+        assert!(atlas_tiles.len() + standalone_tiles.len() > 100);
+        let mut images = HashSet::new();
+        for entry in state["atlases"]
+            .as_array()
+            .expect("atlases")
+            .iter()
+            .chain(standalone_tiles)
+        {
+            let url = entry["imageUrl"].as_str().expect("local image URL");
+            let path = root.join(url.trim_start_matches('/'));
+            assert!(path.is_file(), "missing Bichon image: {}", path.display());
+            images.insert(url.to_owned());
+        }
+        assert!(!images.is_empty());
+        eprintln!(
+            "[map-relocation-regression] Bichon (302,634): {} atlas tiles, {} standalone tiles, {} local images",
+            atlas_tiles.len(), standalone_tiles.len(), images.len()
+        );
+    }
 
     #[test]
     fn destination_map_identity_is_part_of_the_render_handoff_key() {
@@ -1524,6 +1628,13 @@ mod tests {
         }
     }
 
+    fn front_cell(library: i16, frame: i16) -> MapCell {
+        let mut cell = middle_cell(-1, -1);
+        cell.front_index = library;
+        cell.front_image = frame + 1;
+        cell
+    }
+
     fn viewport() -> MapViewport {
         MapViewport {
             center_x: 0,
@@ -1547,13 +1658,52 @@ mod tests {
             height: 15,
         };
         let draws = resolve_map_tile_draws_in_viewport(&map, viewport);
-        let expected_width = viewport.draw_margin_x() * 2 + 1;
-        let expected_height = viewport.draw_margin_y() * 2 + 1;
+        let min_x = (viewport.center_x - viewport.draw_margin_x()).max(0);
+        let max_x = (viewport.center_x + viewport.draw_margin_x()).min(i32::from(map.width) - 1);
+        let min_y = (viewport.center_y - viewport.draw_margin_y()).max(0);
+        let max_y = (viewport.center_y + viewport.object_draw_bottom_margin_y())
+            .min(i32::from(map.height) - 1);
+        let expected_width = max_x - min_x + 1;
+        let expected_height = max_y - min_y + 1;
         assert_eq!(draws.len(), (expected_width * expected_height) as usize);
         assert!(draws
             .iter()
-            .all(|draw| viewport.retains_cell(draw.x, draw.y)));
+            .all(|draw| viewport.retains_draw(draw.layer, draw.x, draw.y)));
+        assert!(draws
+            .iter()
+            .any(|draw| draw.y > viewport.center_y + viewport.draw_margin_y()));
         assert!(draws.len() < resolve_map_tile_draws(&map).len());
+    }
+
+    #[test]
+    fn crystal_object_lookahead_keeps_bottom_anchored_buildings_below_old_window() {
+        let width = 80_u16;
+        let height = 100_u16;
+        let mut map = ParsedMap {
+            width,
+            height,
+            cells: vec![middle_cell(-1, -1); usize::from(width) * usize::from(height)],
+        };
+        let viewport = MapViewport {
+            center_x: 40,
+            center_y: 40,
+            width: 24,
+            height: 18,
+        };
+        let anchor = (40_i32, viewport.center_y + viewport.draw_margin_y() + 6);
+        map.cells[anchor.0 as usize * usize::from(height) + anchor.1 as usize] =
+            middle_cell(18, 8447);
+
+        let draws = resolve_map_tile_draws_in_viewport(&map, viewport);
+
+        assert!(draws.iter().any(|draw| {
+            draw.x == anchor.0
+                && draw.y == anchor.1
+                && draw.layer == TileLayer::Middle
+                && draw.frame_index == 8447
+        }));
+        assert!(!viewport.retains_cell(anchor.0, anchor.1));
+        assert!(viewport.retains_draw(TileLayer::Middle, anchor.0, anchor.1));
     }
 
     #[test]
@@ -2263,6 +2413,65 @@ mod tests {
         assert_eq!(state["tiles"][0]["top"], json!(352.0));
         assert_eq!(state["stageWidth"], json!(STAGE_WIDTH));
         assert_eq!(state["stageHeight"], json!(STAGE_HEIGHT));
+    }
+
+    #[test]
+    fn crystal_floor_sized_static_frames_stay_below_the_actor_depth_band() {
+        for (width, height) in [(48, 32), (96, 64)] {
+            let map = ParsedMap {
+                width: 1,
+                height: 1,
+                cells: vec![front_cell(0, 1)],
+            };
+            let rect_key = atlas_rect_key("WemadeMir2/Tiles", 1);
+            let atlas = atlas_index_for(&rect_key, width, height);
+            let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, None)
+                .expect("static floor-sized front frame");
+            let z = state["tiles"][0]["z"].as_f64().expect("floor z");
+            assert!(
+                (-2.0..-1.0).contains(&z),
+                "{width}x{height} static frame must use the global floor band, got {z}"
+            );
+        }
+
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![front_cell(0, 1)],
+        };
+        let rect_key = atlas_rect_key("WemadeMir2/Tiles", 1);
+        let atlas = atlas_index_for(&rect_key, 48, 64);
+        let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, None)
+            .expect("ordinary front object");
+        assert_eq!(
+            state["tiles"][0]["z"],
+            json!(MAP_FRONT_DEPTH_ORDER),
+            "a tall front object must remain in the y-sorted object band"
+        );
+    }
+
+    #[test]
+    fn keyed_static_floor_frame_uses_the_same_global_floor_depth_band() {
+        let map = ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![middle_cell(2, 7112)],
+        };
+        let rect_key = atlas_rect_key("WemadeMir2/Objects", 7112);
+        let atlas = atlas_index_for(&rect_key, 48, 32);
+        let standalone = standalone_index_for(
+            &rect_key,
+            "/generated/native-map-keyed/pages/floor.png",
+            48,
+            32,
+        );
+        let state =
+            build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone))
+                .expect("keyed static floor frame");
+        let z = state["standaloneTiles"][0]["z"]
+            .as_f64()
+            .expect("standalone floor z");
+        assert!((-2.0..-1.0).contains(&z), "got {z}");
     }
 
     #[test]

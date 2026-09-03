@@ -225,7 +225,18 @@ Stop and ask only when:
 
 The authoritative current round is in `docs/AGENT-TASK-QUEUE.md`. If this file and the queue disagree, trust the queue and update this section.
 
-Current checkpoint:
+Current checkpoint (2026-09-03):
+
+- User-requested publication/Android handoff: `docs/ANDROID-MAC-HANDOFF.md` assigns a separate proposed Mac execution lane from the verified Windows source branch, with Capacitor real-device baseline followed by a bounded native Bevy gap/implementation slice. The handoff is prepared, not dispatched or device-verified; Android does not take over the Windows trade leaf. Coordinate any edits to shared client modules and global docs before writing.
+- User-requested launch repair: native asset junctions now resolve the physical map-layout sibling; startup requires/decodes Bichon map 0. The reported viewport resolves 849 draws and 221 local images; native host tests pass 537/537 serially and the offline build passes. Three default-parallel GameShop queue failures are recorded separately. Repaired EXE opened at login; manual login/in-game visual verification is pending. Evidence: `docs/generated/player-qa/native-ui-parity-20260903-map-relocation/README.md`.
+- Current task: the Windows native Crystal UI/state/interaction parity goal remains incomplete, with all 33 user-observed backlog IDs retained. CLI publication resumed after user-authorized recovery of about 241 MiB from one verified, recoverably backed-up generated test PDB; no source, EXE, store, recording or process was removed/stopped.
+- Latest bounded source/headless checkpoint: `native-ui-parity-20260903-trade-completion`; personal lock and typed escrow preparation emit no completion. Successful delivery completes once; durable delivery waits for the saved projection/event marker. New escrowPrepared state preserves legacy saved debit recovery without another debit. Evidence, exact source hashes, storage recovery and diagnostics are in `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+- Final verification: Simulation 1491/1491 plus dedicated completion 7/7; Gateway 672 passed and one existing ignored PostgreSQL test; protocol 40/40, game-data 39/39, native UI 591/591, Windows 534/534, client runtime 212/212 and UI core 43/43. All 3629 non-overlapping tests pass. Focused incoming-carrier, two-session conservation and durable mark-retry tests also pass. The Windows host uses a fresh dedicated target after a mixed-cache compile failure.
+- Next CLI leaf: source invitation/pair ownership and private notifications, positive-delta/immediate editable gold escrow, bilateral unlock and exact item custody/operations. Preserve conservation, cancellation/mail fallback, save/restart and unknown-outcome holds. Source capacity rejection retains offers; Candidate still cancels/refunds. Native cells remain read-only. Full trade, exact packet-order parity and whole-project Candidate closure are not established.
+- The user explicitly resumed Computer Use for native launch/repair after the earlier Escape. Scoped launch/capture resumed; authentication remains a manual user handoff under the skill. Do not claim authenticated world visual acceptance from the login capture or headless tests.
+- Branch: `codex/windows-player-journey`; stacked PR #250 remains Draft. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; original-pair/package/light/DPI/soak/legal/signing/human gates stay open.
+
+Historical checkpoint (2026-04-29; not current whole-project acceptance):
 
 - Active round: `2026-04-29-R309`.
 - Active task: keep accepted stable-diff packet parity green while closing remaining same-scene frontend visual/resource gaps before human visual/feel acceptance.
@@ -237,7 +248,7 @@ Current checkpoint:
 - Restart handoff file: `docs/AGENT-RESUME-HANDOFF.md`.
 - Windows continuation checklist: `docs/WINDOWS-CONTINUATION.md`.
 
-Latest completed rounds:
+Historical completed rounds:
 
 | Round | Result |
 | --- | --- |

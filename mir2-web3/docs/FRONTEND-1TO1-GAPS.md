@@ -1,6 +1,582 @@
 # Frontend 1:1 Gaps
 
-Last updated: 2026-08-29
+Last updated: 2026-09-03
+
+> 2026-09-03 native launch regression: a relocated executable's resource
+> junction lost the separate development map-layout path, producing actors
+> and HUD over a black world. The map locator now resolves the real directory,
+> and startup checks/decode map 0 before opening. The screenshot coordinate
+> produces 849 map draws with all 221 local image references present; native
+> host tests pass 537/537 serially. Default-parallel GameShop queue failures
+> remain separately recorded. The repaired EXE is open at login after explicit
+> Computer Use resumption; authenticated world visuals still need manual login.
+> No full-pack download, resource migration or store reset was performed.
+> Evidence: `docs/generated/player-qa/native-ui-parity-20260903-map-relocation/README.md`.
+> This is not closure of any whole-window/global parity or human acceptance gate.
+
+> 2026-09-03 trade completion source/headless checkpoint: WN-ITEM-002/003
+> no longer receive a premature completion when a shared offer is merely
+> prepared. Actual delivery completes once; the durable path waits for its
+> saved projection. Simulation 1491/1491 + dedicated 7/7 and Gateway 672 passed / one existing ignored
+> pass, as do native UI 591/591, Windows 534/534, runtime 212/212 and UI core
+> 43/43. Native source/assets are unchanged. Exact evidence and diagnostics:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> Source gold delta/immediate escrow, invitation/pair ownership, keep-offer
+> capacity rejection, unlock/re-edit and exact item operations remain open;
+> both native trade grids are still read-only. This is not full trade or
+> packet-order parity. No GUI/capture while Computer Use remains paused.
+> All 33 IDs and original-pair/package/light/DPI/soak/legal/signing/human gates
+> remain. visualAccepted=false, accepted=false, globalParityPercent=null.
+
+> Historical 2026-09-03 accepted-exchange TradeDialog source/headless checkpoint:
+> WN-ITEM-002/003 now include the original independent own/guest window
+> geometry/art, ten fixed sparse cells per side, current-count full-bitmap
+> icons/hints, independent bag, basic dragging and source amount/lock/close
+> controls. Exact partner/nonce/slot/UniqueID read-only projection and explicit
+> exchange/unlock revisions prevent compacted cells or stale modal ownership.
+> Escape does not cancel trade, as in Crystal Closeall. Native UI 591/591,
+> Windows 534/534, runtime 212/212, UI core 43/43, the 11-test/924-image gate
+> and 561 original PNG checks pass; all 552 prior Prguse/Title PNGs are intact.
+>
+> This is not complete trade: the grids remain read-only and legacy bag/to=0
+> actions were removed. Original invitation/cancel MirMessageBoxes, Gold
+> 106.wav, complete amount editing/GDI, item operations/overlays and full
+> window input/topmost remain open. Candidate also sends S.TradeConfirm before
+> mutual/durable settlement and has non-source TradeGold overwrite/deferred-
+> debit semantics. Source-correct client completion handling exposes this
+> backend gap; it must not be disguised as a partner lock. Next work must fix
+> transaction phases and conservation before claiming full UI interaction.
+> Backend source is unchanged here. Report:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> Computer Use stays paused after user Escape; no new GUI capture exists.
+> All 33 IDs and original-pair/package/light/DPI/soak/legal/signing/human gates
+> remain; `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-03 native primary-item true-size checkpoint: WN-ITEM-001/002/003,
+> WN-CHAR-001 and the belt leaf of WN-HUD-001 now have source alpha-size
+> centring/full-bitmap, valid source Items/0 and actual-PNG regressions.
+> Equipment's fourteen cells and personal storage now use original 36x32
+> bounds; bag/grid/NPC-row clipping is removed, source StackSize shows count
+> 1 and persistent belt loading/clearing cannot leave a stale/white icon.
+> Warehouse-side, trade and amount icon regions also use the helper, while
+> their full windows, operations and overlays remain separate open work.
+> All 1003 exported PNGs match original RGBA/metadata, 5015 node geometries
+> pass, and full native UI 562/562, Windows 528/528, runtime 212/212, UI core
+> 43/43, the 11-test/924-image gate and formatting are green. The original
+> fixture reproduces exactly after newline normalization.
+>
+> This supersedes the primary centring/zero-image gaps in the historical
+> Guild note below. No new GUI capture or final-source same-EXE claim is
+> made while Computer Use remains paused after user Escape. Full trade/
+> GameShop/Quest/other layouts, source item operations/state overlays,
+> FloorItems, WN-CHAR-002 slot contracts and all 33 backlog IDs remain open
+> as recorded, with original-pair/package/light/DPI/soak/human gates intact.
+> `docs/generated/player-qa/native-ui-parity-20260903-item-true-size/README.md`.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> Historical 2026-09-03 native Guild storage checkpoint: WN-ITEM-002/003 now include
+> source-shaped eight-column storage, fourteen authoritative rows and an
+> eight-row viewport with original integer scrolling and stable slot IDs.
+> Current counts select source UserItem.Image; alpha-bound GetTrueSize centres
+> the unchanged full PNG, including legitimate Items/0. Original tab/scroll
+> assets, leader-only withdrawal and MirAmountBox replace generic buttons and
+> the inline amount field. Amount ownership, stale guild/rank/balance, zero,
+> pending/cooldown and focus/session cases have headless coverage; no client
+> gold mutation is introduced. Final native UI 551/551, focused Guild 44/44,
+> Windows 527/527, runtime 212/212, stack integration 4/4,
+> UI core 43/43, protocol 40/40, game-data 39/39, the 11-test/924-image gate
+> and 41 direct original-frame RGBA/geometry checks pass.
+> The source alpha audit finds 550/1003 frame-size differences and 478 altered
+> 35-pixel-cell offsets. Primary bag/belt/equipment/storage/NPC paths still use
+> PNG-frame centring and need correction; earlier PNG pixel checks did not
+> compare against original GetTrueSize. Guild/coin is the only corrected path
+> in this round. Primary Items/0 handling also remains open.
+>
+> This is not fresh GUI evidence: user Escape still pauses Computer Use, and
+> no new application EXE or capture was produced. Guild item dragging/store/
+> retrieve/merge, source state overlays, full WinForms text editing/GDI raster,
+> Guild window movement/topmost pointer dispatch and cross-action LastGuildMsg
+> remain open. Current Windows/runtime/integration checks and exact scope:
+> `docs/generated/player-qa/native-ui-parity-20260903-guild-storage/README.md`.
+> Trade/other surfaces, FloorItems, prior original-pair/package/light/DPI/human
+> gates and all 33 backlog IDs are retained; `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-03 native source stack-image checkpoint: bag/belt/equipment/storage
+> and NPC goods now select the original UserItem.Image from exact Info and
+> live count before resolving true-size geometry. Ordinary known source
+> identities override stale cached icon values; GameShop/Quest/craft-shadow/
+> mail-list base-image exceptions stay intact. Windows 527/527, game-data
+> 39/39, stack integration 4/4 and the 11-test/924-image asset gate pass.
+> Full Simulation 1491/1491 and Gateway 667 passed / one existing ignored
+> subsequently passed on the same final source; no failed test was excluded.
+>
+> A read-only check of the initial inventory PNG matches all 24 fixed bag
+> cells (6,161 opaque RGB samples), with 86 rejected wrong frames and 96
+> rejected one-pixel translations. It excludes count-label pixels, alpha
+> edges and other panels. Crucially, both captured binaries predate the
+> final ordinary-item base-icon correction, and the user stopped Computer
+> Use before manual transitions. No current-source EXE or interactive
+> stack acceptance is claimed, and foreground work must remain paused until
+> the user explicitly resumes it. Report and unchanged draft sidecar:
+> `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+>
+> WN-ITEM-002 remains open for guild/trade and every other actual-item surface,
+> ground FloorItems, durability/locked/selected/sealed/unavailable overlays,
+> final-source manual input, original paired state, real DPI and human QA.
+> WN-CHAR-002 source operations/raw-versus-normalized belt addressing and all
+> other backlog IDs remain unchanged. No prior denominator is discarded;
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-03 Windows-native full-catalogue icon/high-armour checkpoint: the
+> original export now follows all 1,628 catalogue rows (913 base Images) plus
+> the eleven Amulet/Poison stack images from `Shared/Data/ItemData.cs:641-681`.
+> A mandatory 924-image gate checks catalogue/source identity, metadata,
+> geometry, decoded pixel and PNG hashes, including missing file-plus-meta,
+> substitutions, new catalogue images and missing quantity variants. The
+> source exporter added 643 PNGs, preserving all 360 prior files byte-for-byte.
+> Exact CArmour/09 and /10 exports add all 3,232 source frames. Direct source
+> RGBA/geometry checks and 512 complete Warrior gender/direction/standing/
+> walking/running composites pass through the existing actor-library path.
+>
+> Debug EXE SHA-256
+> `55CA1D61A6977F164B1D6222DE2AAAFD4E21FEF4A1C5DB898EBEE6FF0FBDB993`
+> produced four actual HeavenArmour/MirArmour gender captures and a same-process
+> auto-Character -> manual Inventory -> unequip -> Items/595 in first bag cell
+> -> re-equip cycle. The completed auto-capture helper now returns before
+> target preparation; its App regression also preserves page/tab/later-notice
+> state. The live fixture does not unlock ITEMS II, so its manual screenshot
+> proves panel release on page 0, not live second-page retention. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-item-actor-assets/README.md`.
+>
+> Windows 524/524, item suite 11/11 plus 924-image closure, original exporter
+> regressions and the ten-control Windows PowerShell 5.1 self-test pass.
+> Full frontend logic still fails on the absent local WebGPU WASM file;
+> all five later checks pass independently. This supersedes the specific
+> missing MirArmour icon/head-only self-body/one-shot-helper notes below.
+> Runtime quantity-image selection and live stack tests, world CHumEffect
+> wings, name-only remote-player observations on rapid QA reconnect, complete
+> class/action/gear and specialized-item surfaces, original same-state pairs,
+> trusted package/light, real DPI and human acceptance remain open. Eight
+> sidecars stay draft/ineligible; the later additive eleven-frame export has
+> a separately recorded manifest identity. No denominator leaf was removed.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-03 Windows-native Character wing/unequip checkpoint: Simulation now
+> derives `WingEffect` from the wearer's exact, non-broken real armour template,
+> and Gateway preserves self-only authority, explicit zero clearing and partial
+> snapshot/session-reset semantics. CharacterDialog draws only source effects
+> 1/2, only while armour exists, using original `Prguse2/1202..1205` intrinsic
+> rectangles and SourceAlpha + One DrawBlend before the existing StateItem
+> armour -> weapon -> helmet-or-hair layers. Four retained material handles
+> avoid per-frame GPU asset churn; startup requires all four source PNGs.
+>
+> Final Debug EXE SHA-256
+> `8BA170AA654FCE1EB911033203C22F018EAD2A4B973F04A4F80A8679E2FF6F20`
+> produced four gender/effect captures and a real-pointer same-process
+> WingOneM cycle at BichonProvince `(290,620)`: wing present -> armour removed
+> and wing absent -> exact item in bag cell 0 -> re-equipped and wing restored.
+> This exposed and fixes the old `RemoveItem { grid: equipment, to: -1 }` and
+> the raw-array/normalized-bag offset mismatch. The current Gateway takes a
+> normalized 0-based bag destination; it must not receive Crystal's raw +6.
+> The client waits for authoritative state and refuses stale/full-bag targets.
+>
+> Native UI 519/519, runtime 212/212, Windows 521/521, Simulation 1491/1491,
+> Gateway 666 active/1 ignored, wing integration 5/5 and the affected recall
+> integration 2/2 pass. The formerly failing Archer atlas test now owns its
+> deterministic manifest availability and tests the real unavailable-library
+> fallback; production routing is unchanged. Evidence and source/hash ledger:
+> `docs/generated/player-qa/native-ui-parity-20260903-character-wings/README.md`.
+> This supersedes older notes below that wing data is absent or the Windows
+> suite has a known Archer failure. The generic item-operation popup,
+> name-based equip destinations, belt-first amulet/merge path, full Character
+> tabs/class/gear matrix, missing MirArmour icons `Items/595` and `605`,
+> head-only high-armour world actors, original same-state pairing, trusted
+> package/light provenance, DPI and human acceptance remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-03 Windows-native Crystal NPC goods-cell checkpoint: Candidate now
+> renders each NPC catalog entry as Crystal's source `MirGoodsCell` rather
+> than the former combined text row. The full `205x32` cell is the click/hover
+> target; original item pixels are centred in the `40x32` icon region; name,
+> yellow count and localized-shape `Price: N gold` text use `(44,0)`,
+> `(23,17)` and `(44,14)`; selection uses the Lime outline plus x=40 divider;
+> and the original `Prguse/550` marker follows `!IsShopItem ||
+> MultipleAvailable`. `NPCGoods.HideAddedStats` is retained end-to-end and
+> passed only to this surface's shared Crystal hint renderer, which suppresses
+> added attack/defence values and `Cursed` without suppressing base or other
+> bind text. These rules come from `MirGoodsCell.cs:20-140`,
+> `NPCDialogs.cs:1071-1082,1348`, `ServerPackets.cs:3082-3104` and
+> `GameScene.cs:4199`.
+>
+> The exact freshly built client EXE SHA-256 is
+> `159B13E722451C6F44B036C6B3ABD141E19362EDB28ED29180F34C6849A7DD8A`.
+> Real Windows pointer input followed login -> Scott -> View at
+> `BichonProvince (288,616)`. Run `npc-shop-20260903-r2` records the populated
+> baseline and selected/hover states at
+> `docs/generated/player-qa/native-ui-parity-20260903-npc-shop/`; both F12
+> sidecars report `panel=NpcShop`, 1024x768 and DPI 1.0. Native UI passes
+> 514/514, runtime 212/212, and Windows is 519/520 with only the existing
+> Archer atlas fixture failure. The source-sized NPC row leaf is bounded, but
+> duplicate/sub-goods topology, exact layouts/live captures for GameShop,
+> quest rewards, guild storage and trade, trusted package/light provenance,
+> DPI coverage and human comparison remain open. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+>
+> 2026-09-03 Windows-native remaining item-tooltip surfaces: NPC shop,
+> GameShop, fixed/selectable quest rewards, guild storage and trade now carry
+> the complete Crystal tooltip source into the shared hint renderer. The route
+> distinguishes actual wire `UserItem` instances from Crystal's synthetic
+> catalogue previews, preserves GameShop count/full durability, keeps Quest
+> reward count outside the synthetic item, applies viewer-specific
+> `GetRealItem`, and fails closed on missing or duplicate indexes. Rich hover is
+> active even for non-clickable reward/shop cells and cleans up through the
+> same delayed lifecycle as personal items. Native UI passes 511/511; Windows
+> is 519/520 with only the existing Archer atlas fixture assertion, and the
+> current Windows Debug build succeeds. This removes the sparse-model blocker
+> recorded in the older checkpoint below, not the remaining panel-layout work:
+> exact GameShop/guild/trade geometry, source-sized hit regions, NPC
+> hide-added-stat behavior, populated same-EXE captures, DPI and human visual
+> comparison remain open. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+>
+> 2026-09-03 Windows-native Crystal item-tooltip checkpoint: the Candidate now
+> renders the source eleven-section item hint rather than a compact substitute
+> for authoritative inventory, belt, equipment, personal-storage and
+> warehouse-side bag cells. It consumes exact/real item and recursive socket
+> metadata plus live player stats, masks unidentified values, colours unmet
+> requirements red, formats expiry/seal/rental .NET times, preserves disabled
+> cell hover without actions, and anchors at Crystal cursor `+(28,28)` with
+> viewport clamping. Client native-ui passes 509/509 and focused source/time,
+> lifecycle, Simulation and game-data regressions pass.
+>
+> Same-process evidence uses EXE SHA-256
+> `5257E859B4AB173A8076B58778C59D09D291A7EB90F0FCFA38F696E46181A56F`.
+> The real-pointer F12 frame is
+> `docs/generated/player-qa/native-ui-parity-20260903-item-tooltip/item-tooltip-in-game-1788370099170-2.png`
+> (SHA-256
+> `82F2D5ACAB20874FB31D3C3B3EF8EA105D03495BD32ACED27D7BDE0EE6B78AB`)
+> at `BichonProvince (288,616)`; it visibly preserves the exact WoodenSword
+> field order after the item operation layer is dismissed. NPC/cash shops,
+> quest rewards, guild storage and trade remain open because their compact
+> models do not yet carry full authoritative metadata. Trusted package/light
+> provenance, DPI and human comparison also remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-03 Windows-native InventoryDialog movable checkpoint: Crystal
+> declares the `Title/196` root `Movable=true` and `Sort=true` in
+> `InventoryDialog.cs:25-31`; generic movement records the press offset,
+> follows the pointer, clamps the true window size to the stage and stops on
+> release in `MirControl.cs:852-935`. Native now keeps a persistent
+> `InventoryDialogUi` position, starts only from parent-owned background
+> pixels (not tabs, Add, Close, Gold/free-count/delete controls or any of the
+> forty item cells), preserves placement across Hide/Show, and clamps the
+> source `316x236` frame to `(0..707, 0..531)` at 1024x768. The input path also
+> retains the pre-press cursor so Windows SendInput/high-polling event batches
+> cannot mistake the drag destination for its source.
+>
+> Original `Title/196.png` is `316x236` (SHA-256
+> `987ACE9AA582868FF589DD923C64109E8D883549C9B80FE72ED7AFD981A0CB3B`).
+> Final current-tree r5 EXE SHA-256
+> `F08FC69F744BC9D6895A7756CF98AAF5A69EEEF4CA8AF10F65BA78D8663B33D3`
+> produced same-run/same-character/same-world before and after evidence at
+> BichonProvince `(287,616)`: origin
+> `docs/generated/player-qa/native-ui-parity-20260903-inventory-drag-final/inventory-drag-inventory-1788365024393-1.png`
+> (`64F8A6A4ECB500F40C508ED804FDA686DEEF11A4FDAF507601680202064A5B5C`)
+> and moved
+> `docs/generated/player-qa/native-ui-parity-20260903-inventory-drag-final/inventory-drag-in-game-1788365096792-2.png`
+> (`AED8F77D8F8F6A43E80F985A13748ECFD11BA26C33B462A406F01F6185C8CFE3`).
+> Their sidecars freeze `inventoryLocation=0.00,0.00` then
+> `275.00,208.00`, with the same run id, panel, page, item state and world
+> coordinate. Drag regressions pass 4/4 and the complete native-ui suite
+> passes 496/496. This closes movable placement only; live stacked-item
+> amount evidence, locked/sealed overlays, the full source item tooltip,
+> authoritative light/trusted package provenance and human comparison remain
+> open. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-02 Windows-native InventoryDialog precision/DeleteMode checkpoint:
+> the three source pages now keep Crystal's exact cell geometry, draw item
+> icons at their exported size centered in the cell, show stack count only
+> when greater than one, and keep QuestInventory read-only. The footer follows
+> `InventoryDialog.cs:134-193,384-427`: Gold at `(40,212)`, the `84x6`
+> `Prguse/24` weight bar at `(182,217)`, free slots at `(268,212)`, and the
+> delete control at `(291,212)`. DeleteMode now uses source ButtonA/ButtonB
+> sounds and steady frame `Prguse2/368`, right-click cancellation, the
+> top-centred `Prguse2/366` cursor, Crystal's `204x109` `Prguse/238`
+> `MirAmountBox` for stacks, and the `456x190` `Prguse/360` Yes/No message box
+> for a single item. Confirmed requests cross the native protocol as the exact
+> item instance/count `DeleteItem`; pending-operation correlation and stale
+> stack/replacement guards release only on the matching authoritative receipt.
+>
+> The current-tree EXE (SHA-256
+> `61F053C88FB4BCFF6C6BE0FB4A43C1AE8C807437986B3289D3A55536CC5EFF26`)
+> produced the Quest-page precision capture
+> `docs/generated/player-qa/native-ui-parity-20260902-inventory/inventory-final-inventory-1788360618712-1.png`
+> (SHA-256
+> `28FCCB8F7E7C0061823C9C3F494F489E04A7C4A79BC2FF5CA60A981498F087D3`)
+> and, through a real Gateway disposable four-item character, the non-
+> destructive single-item confirmation capture
+> `docs/generated/player-qa/native-ui-parity-20260902-inventory-delete/inventory-delete-final-inventory-delete-1788362950757-1.png`
+> (SHA-256
+> `50F30B959365E5E2F4B2F6C1BA677118A683A4A7E91E47FEB4E5E6953F8761B1`).
+> YES was deliberately not pressed, so evidence creation deleted no item. The
+> full native-ui suite passes 492/492, and focused Windows capture, protocol,
+> bridge and receipt regressions pass. The stack amount path is exact and
+> automated but still lacks a live authoritative stacked-item screenshot;
+> movable panel placement, locked/sealed overlays, full source tooltip,
+> authoritative light/trusted package provenance and human comparison remain
+> open. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-02 Windows-native CharacterDialog source-parity checkpoint: the
+> Character page now uses Crystal's `264x380` root at `(760,0)`, male/female
+> `Prguse/340|341` page, `Title/500..503` tabs, `Title/504` name bar,
+> `Prguse2/360..362` close button and all fourteen source equipment-cell
+> rectangles. The renderer consumes authoritative `UserInformation`
+> gender/hair/guild/class data and equipment `ItemInfo.Image`, resolves exact
+> `StateItem` width/height/x/y metadata, and composes armour -> weapon ->
+> helmet-or-hair with Crystal offsets. The native asset gate now requires the
+> exported `StateItem` closure (214 metadata frames and 214 PNGs) plus the
+> gender/hair frames; the manifest asset hash is
+> `f5b49eef701a32209a0bd2bfdeecac202110f6413acdc07708eafe5d598666b5`.
+>
+> Auto-capture can now open Character through the real native UI reducer and
+> waits until name, map, max HP and self position are authoritative. It also
+> closes the login notice through `NoticeDialogState::close`, so aligned
+> evidence cannot pass by racing an incomplete startup frame. The latest
+> linked current-tree EXE is SHA-256
+> `996CF54AF6A2560EECFA03E87296EDFF797FE3B59C7400DCEB453B53A86C3656`;
+> its clean 1024x768 `1231` capture is
+> `docs/generated/player-qa/native-ui-parity-20260902-character/character-clean-character-1788359861663-1.png`
+> (SHA-256
+> `DED8B034522963FDDD68913F5A41B7F6E2DBF02FBCE7FCC3C7702BCB6062DE36`).
+> The paired sidecar freezes `panel=Character`, map `BichonProvince` and
+> `(290,620)`. Focused Character geometry/composition, StateItem projection,
+> asset-gate and capture suites pass, including capture 17/17. This remains
+> draft implementation evidence: the sidecar lacks authoritative light and
+> trusted package provenance, Crystal wing state is not yet available to the
+> Candidate, the remaining Character tabs are not fully source-complete, and
+> no human visual acceptance is recorded. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-02 Windows-native Quest interaction source-parity checkpoint:
+> Crystal's four distinct Quest surfaces now have source-shaped native paths
+> instead of being collapsed into one custom panel. The NPC Quest List uses
+> the source `316x466` geometry at `(487,0)`, `Prguse/950`, `Title/14`,
+> `Prguse/951|957`, `Title/270|273|276`, and `Title/530`; it lists only quests
+> exposed by the current NPC and accepts the runtime's real
+> `@quest:accept:<id>` / `@quest:finish:<id>` links (plus the legacy Crystal
+> forms) while retaining the exact NPC object-id gate. Diary secondary-click
+> now toggles a stable, ordered maximum of five tracked current quests; the
+> tracker is frameless at source `(0,100)`, includes every objective line, and
+> has no invented implicit fallback. Detail CANCEL now opens Crystal's
+> `456x190` `Prguse/360` message box with `Title/206` YES, `Title/210` NO and
+> exact copy `Are you sure you want to cancel this quest?`; abandon is emitted
+> only after YES, while NO/Escape preserves the quest and all independent
+> Quest windows.
+>
+> A rebuilt current-tree Windows EXE (SHA-256
+> `5A6D52FEB89949E23CA177D5A56FC24069D18CBD69C8BB6E2E7E55790BC2C099`)
+> exercised the real local Gateway path with a fresh isolated QA character.
+> Blacksmith Smith's quest 5 was accepted through `@quest:accept:5`, the NPC
+> marker advanced from available `!` to current `?`, Diary showed `In
+> Progress`, right-click produced `Kill Deer (0 / 10)` and `Kill Scarecrow (0 /
+> 10)`, row left-click opened independent Detail, and CANCEL -> NO left the
+> quest and tracking intact. Renderer-owned evidence is
+> `docs/generated/player-qa/native-ui-parity-20260902/quest-ui-q2-in-game-1788354007393-1.png`
+> (NPC List visual, SHA-256
+> `F8401924BFED5AEF0764C287EEC30340D48EBD0063E0F32D0AE1213B96291679`) and
+> the q3 captures `quest-ui-q3-in-game-1788354708271-1.png` (Diary + tracker,
+> `789449D4683A38DB272A1CB078279EF2172C4EBE114F420B3A762EC74D8DC4D9`),
+> `quest-ui-q3-in-game-1788354757568-2.png` (exact CANCEL confirmation,
+> `46FC9EDF6FB6A8706236900375B09B66FFB0421D6ADF6E2B2DBBB410C9BD68BE`),
+> and `quest-ui-q3-in-game-1788354839986-3.png` (NO-preserved stable state,
+> `7D3EC23D6C17BC79BEEA595276C1D0E3C4A5AC8C5FD6D120CEDEA8EC6665F0B8`)
+> in the same directory. Verification passes Quest UI 52/52, Rust fmt,
+> current-tree Windows build, original asset-manifest regeneration (40,877
+> assets; asset hash
+> `3d6b7f125a91121ccde5b9a2db5dfa4faba5e29be2f27bc4bcfc62a086ec45e4`),
+> real mouse/keyboard interaction, visual inspection and targeted
+> `git diff --check`. The generic NPC conversation body remains visibly
+> non-source-shaped; credit-reward/item-frame fidelity, hover/pressed animation,
+> tracker persistence, capture-sidecar coverage for NPC List/tracker/message-box
+> state, trusted same-EXE comparison and final human acceptance also remain
+> open. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-02 Windows-native Quest Detail source-parity checkpoint: the
+> source-shaped Diary checkpoint below now opens a separate Detail window on
+> row left-click. Detail uses Crystal's `(532,60)` geometry and original
+> `Prguse/960`, `Title/16|17|616..618`, and
+> `Prguse/919|965|966|979|989` assets, source scroll controls, 16-line message
+> model, description/task/return/completion/time fields, fixed/select reward
+> metadata, and SHARE/CANCEL command gates. Closing Diary leaves Detail open,
+> matching Crystal. Gateway and Windows adapters retain the required quest
+> fields, `shareQuest` reaches the camel-case native wire command, and both
+> current-quest states can request abandon as Crystal's server permits. Final
+> renderer-owned evidence against an isolated import of Crystal character
+> `1231` is
+> `docs/generated/player-qa/native-ui-parity-20260902/quest-detail-final-in-game-1788351341163-1.png`
+> (Diary + Detail, SHA-256
+> `2F733E4EEC558B2C9D52B2D09A906AC6B56889ECA01A450258BBE0480B452B59`) and
+> `docs/generated/player-qa/native-ui-parity-20260902/quest-detail-final-in-game-1788351355082-2.png`
+> (independent Detail, SHA-256
+> `2B7F52B46F439F44B88AAB0F6A7C5700B244CC710FECBA7EB520B5DABAE00A01`).
+> Their draft sidecars bind BichonProvince `(290,620)` and respectively record
+> `panel=QuestLog;questDetail=Some(1)` and
+> `panel=None;questDetail=Some(1)`. Verification passed native Quest UI 45/45,
+> Windows definition adapter 1/1, native command serialization 1/1, capture
+> sidecar 1/1, Gateway contract 1/1, Windows/Gateway builds, visual inspection,
+> original asset-manifest regeneration (40,838 assets), and
+> `git diff --check`. Remaining Quest leaves include the exact CANCEL
+> confirmation message box, NPC Quest List, right-click five-slot tracking,
+> the locally absent Crystal credit-reward frame, exact MLibrary item-frame
+> fit, trusted same-EXE comparison, and final human acceptance.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-02 Windows-native Quest Diary source-parity checkpoint: the Q-key
+> surface no longer reuses the `Title/670` Mail frame or presents invented
+> All/Active/New/Done filters, inline detail and action controls. It now uses
+> Crystal `QuestDiaryDialog` geometry and original assets (`Prguse/961`,
+> `Title/15`, `Prguse/917|918|956|997`, `Prguse2/360..362`, and
+> `Title/193..195`), starts at `(192,60)` in the 1024x768 client area, groups
+> current quests in source order, expands groups by default, and renders the
+> source `List: n/20`, `LvN` and `Complete`/`In Progress` labels. The Gateway
+> and Windows adapter now retain `group` and `minLevelNeeded` instead of losing
+> them between `NewQuestInfo` and the native read model. The canonical Crystal
+> `1231` Wizard/Male state was imported into an isolated Candidate slot; live
+> verification showed `List: 1/20`, `BichonProvince`, the tracked check,
+> `Lv1 Assistant's Request`, and `Complete`. Renderer-owned evidence is
+> `docs/generated/player-qa/native-ui-parity-20260902/quest-diary-in-game-1788348421931-1.png`
+> with SHA-256
+> `29ACF7E67FBA7726441556C1AD07B054D386DD99C09D6870C4D453BDF49B9C8F` and
+> a truthful draft sidecar. Verification passed native Quest UI 43/43,
+> Windows adapter 1/1, Gateway contract 1/1, Windows build, asset-manifest
+> regeneration (40,827 assets), and `git diff --check`. This earlier checkpoint
+> closed only the Diary main-surface leaf; the Detail/left-click leaves it
+> listed as open are superseded by the newer checkpoint above. NPC Quest List,
+> right-click five-slot tracking, trusted same-EXE comparison and final human
+> acceptance remain open. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-02 Windows-native Run lighting-camera closure: the shader-only
+> `144x96` virtual guard described below was necessary but did not make a
+> stationary light pass follow a moving presentation camera. The final defect
+> was a frame-of-reference mismatch: `MainCamera` followed the committed
+> display-Hz player pose while `MirLightingBufferCamera` and
+> `MirLightingComposite` remained at the map-frame origin, turning the
+> defensive `border_darkness` margin into the user-visible straight strip.
+> The runtime now synchronizes both lighting followers immediately after
+> `follow_player`, before publishing the presentation pose. A non-origin-camera
+> regression preserves lighting Z/scale and locks the guarded composite size;
+> shared runtime passes 211/211. Live 1024x768 Bichon QA on the current-tree
+> Debug EXE exercised left, reverse-diagonal and downward-diagonal multi-cell
+> runs against the local `7010` Gateway with continuous viewport edges and no
+> fixed-width black band. The remaining soft night-light falloff is expected
+> scene lighting. This closes this specific Run edge-exposure leaf only;
+> broader movement feel and final human frontend acceptance remain open.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-02 Windows-native user-reported dialog-parity goal, first bounded
+> implementation checkpoint: Crystal source audit confirms that the reported
+> Character mismatch is a missing paper-doll composition/data chain, Inventory
+> is missing source footer semantics and exact item fit/delete behavior, and
+> Quest incorrectly substitutes one custom Mail-framed panel for Crystal's
+> distinct Diary/List/Detail/Tracking surfaces. The first Inventory footer
+> slice now uses source coordinates for numeric-only comma-formatted Gold,
+> free-slot count, the three source weight-bar assets/thresholds and the
+> `Prguse2/366..368` bin artwork; `UI_32bit/470` and `471` were exported from
+> the original library. The bin deliberately does not reuse DropItem: Crystal's
+> cursor delete mode, stack quantity prompt, confirmation and DeleteItem flow
+> remain an explicit open leaf. Focused formatting, geometry, weight/gold and
+> fail-closed action tests pass. A current-working-tree Windows EXE
+> (`C9B0CE3DD549D82251430A410CACCB8B192A38E3FA2D890CA46A3C1F4D4B4481`)
+> produced the renderer-owned 1024x768 capture
+> `docs/generated/player-qa/windows-visual-parity/ui-gap-inventory-current-working-tree/inventory-working-tree-in-game-1788335861573-1.png`
+> (`0236FAA64D1FDF2A194154428E3E027A73667601827D11EA392DD0F19F97E847`).
+> Its sidecar correctly remains `mir2-native-visual-capture-draft-v1` with
+> incomplete authoritative state and unavailable trusted package provenance;
+> it is implementation evidence, not same-state Crystal comparison or final
+> acceptance. The submitted pair mixes seeded `demo/Scout` with Crystal
+> character `1231`; canonical appearance/inventory/quest-state extraction and
+> slot mapping are now a separate P0 QA leaf before those content differences
+> can be scored. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-01 Windows-native Run viewport-edge/performance checkpoint: the bright
+> strip captured during Run came from a stage-sized world-space lighting
+> composite moving with the presentation camera, not missing map bindings. An
+> initial physical `1312x960` offscreen target fixed the strip but added about
+> 60% light-pass pixels and was superseded after the user reported that the
+> picture felt unable to keep up. Native now renders the light texture at the
+> original `1024x768`; a `1312x960` composite mesh provides a shader-only
+> `144x96` virtual guard whose central region is sampled 1:1 and whose exterior
+> emits the exact ambient darkness. This covers the maximum Run presentation
+> offset without the enlarged offscreen fill cost or screen-relative lights.
+> Runtime tests pass 207/207, the locked Windows Debug build passes, and fresh
+> live directional routes recorded five Run plus eleven Walk commands with
+> 16/16 confirmed authoritative locations, zero correction/rollback,
+> acknowledgement latency of 13-77 ms (31 ms average), and
+> `missingBindings=0` throughout. The running Debug comparison retains the dark
+> viewport-edge coverage. This closes the diagnosed edge-exposure/performance
+> regression, not wider movement feel or final human frontend acceptance.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-01 Windows-native building-opacity repair checkpoint: the user's
+> `(294,616)` side-by-side proved that the remaining pale appearance was
+> isolated to ordinary Middle/Front building slices, not map gamma. Crystal
+> exports those `.Lib` frames with authoritative 0/255 alpha and draws them at
+> opacity 1, while the native pack was applying a second black-key/feather pass
+> that changed real dark roof and wall pixels to partial alpha. Local normal
+> frames now use the same byte-for-byte RGBA staging as additive frames; runtime
+> blend selection remains driven by Crystal map flags. Rebuilt map-0 manifest
+> SHA-256 is
+> `E82E5573E98BDFC65B7EF463C9F09585F12805399E0783F7837D95F2D0AC1B1D`.
+> Visible regression frames `#7680/#7684/#7688/#7692/#7695/#7701/#8403/#8413/#8678`
+> are byte-identical to source, the native pack test passes, and a fresh live
+> 1024x768 observation at the same coordinate shows opaque dark buildings with
+> no ground wash-through. This closes the diagnosed native alpha defect, not
+> the wider map/UI/VFX denominator or human acceptance.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-01 Windows-native map depth/building/movement checkpoint: the
+> user-observed missing buildings were a crop/asset-completeness defect, not an
+> intentional rendering difference. Native now applies Crystal's `16x17` map
+> cell scan plus a 25-row Middle/Front bottom-anchor lookahead and fails closed
+> unless the native keyed manifest is present. The rebuilt map-0 manifest
+> (`E82E5573E98BDFC65B7EF463C9F09585F12805399E0783F7837D95F2D0AC1B1D`)
+> records 7,672 refs / 4,703 entries / 4,520 keyed / 183 additive / 2,969
+> current missing-source entries, includes the complete ten-frame
+> `Objects#2723..2732` family, and produces live `tiles=1090`,
+> `standalone=334`, `missingBindings=0`, `incompleteFamilies=0`. The 2,508
+> figures below remain historical pre-all-phase baselines, not the current pack
+> denominator. Native Debug no longer forces Day: absent a fixed override it
+> uses Crystal's UTC dynamic light setting, with no gamma hack. Keyboard and
+> pointer movement share NewMove/ACK/collision/prediction; released right-click
+> paths continue to their destination, Run predicts the source-backed two/three
+> cells, and server Walk/Run cadence is the real 600 ms. Focused Windows suites
+> pass 42/42, 35/35 and 28/28; the pack Node test and shared Zone 204/204 pass.
+> This removes the diagnosed automated blockers but does not close the wider
+> map/UI/VFX denominator or human frontend acceptance. `visualAccepted=false`,
+> `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-01 Windows-native character-select regression checkpoint: the user's
+> occupied-roster comparison invalidated the older broad WN-VIS-005 acceptance
+> wording. Native Last Online data was not connected to durable logout metadata,
+> its label/value typography drifted from Crystal, and loading preview frames on
+> demand exposed transparent intervals as visible flicker. The bounded repair
+> now carries UTC binary LastAccess from final/abnormal server save through
+> Gateway into Web and Windows, restores Arial 8 pt and the source row bounds,
+> retains all 16 preview frames, advances all layers from one clock only after
+> every target layer is dependency-loaded, and implements Crystal's explicit
+> `VerticalCenter` flag through a fixed 21 px flex container rather than a
+> coordinate offset. Focused cross-layer tests and a
+> 1024x768 local Debug comparison pass, including nonblank samples across a full
+> animation loop. Historical empty-roster 100/100 evidence remains historical;
+> this occupied-roster regression is only Candidate-repaired until the user
+> accepts the running window. `visualAccepted=false`, `accepted=false`,
+> `globalParityPercent=null`.
 
 > 2026-08-29 Windows native login-notice implementation checkpoint: Crystal
 > runtime `StartGame` now emits a project-owned `UpdateNotice` only after a

@@ -4303,6 +4303,8 @@ mod tests {
         assert!(service.bootstrap_fenced(&alice, Some(&context)));
         assert!(service.bootstrap_fenced(&bob, Some(&context)));
 
+        let alice_starting_gold = alice.world_snapshot().gold;
+        let bob_starting_gold = bob.world_snapshot().gold;
         assert!(!alice.trade_request(&bob_identity.character_name).is_empty());
         assert!(!bob.trade_request(&alice_identity.character_name).is_empty());
         let deposited = alice
@@ -4313,8 +4315,13 @@ mod tests {
         assert!(deposited
             .iter()
             .any(|packet| matches!(packet, ServerPacket::TradeGold { amount: 10 })));
-        let (_, alice_offer) = alice.shared_trade_confirm();
-        let (_, bob_offer) = bob.shared_trade_confirm();
+        let (alice_prepare, alice_offer) = alice.shared_trade_confirm();
+        let (bob_prepare, bob_offer) = bob.shared_trade_confirm();
+        for packets in [&alice_prepare, &bob_prepare] {
+            assert!(!packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::TradeConfirm)));
+        }
         let alice_offer = alice_offer.expect("Alice trade offer");
         let bob_offer = bob_offer.expect("Bob trade offer");
         let transaction = economy_transaction_for_trade(&context, &alice_offer, &bob_offer)
@@ -4330,20 +4337,37 @@ mod tests {
         assert!(service.has_pending_trade_projection_fenced(&bob, Some(&context)));
 
         let alice_packets = service.reconcile_trade_projections_fenced(&mut alice, Some(&context));
-        assert!(alice_packets.is_empty());
+        // Alice receives no assets, but her durably applied side of the
+        // exchange still completes. Preparation was not that completion.
+        assert_eq!(alice_packets, vec![ServerPacket::TradeConfirm]);
+        assert_eq!(alice.world_snapshot().gold, alice_starting_gold - 10);
         assert!(!service.has_pending_trade_projection_fenced(&alice, Some(&context)));
+        assert!(service
+            .reconcile_trade_projections_fenced(&mut alice, Some(&context))
+            .is_empty());
 
         // A database mark failure must preserve the pending row but cannot hide
         // the just-persisted client delivery. The following retry sees the
         // durable character marker and only marks the row projected.
         store.fail_next_trade_projection_mark();
         let bob_packets = service.reconcile_trade_projections_fenced(&mut bob, Some(&context));
-        assert!(!bob_packets.is_empty());
+        assert_eq!(
+            bob_packets,
+            vec![
+                ServerPacket::GainedGold { gold: 10 },
+                ServerPacket::TradeConfirm,
+            ]
+        );
+        assert_eq!(bob.world_snapshot().gold, bob_starting_gold + 10);
         assert!(service.has_pending_trade_projection_fenced(&bob, Some(&context)));
         assert!(service
             .reconcile_trade_projections_fenced(&mut bob, Some(&context))
             .is_empty());
         assert!(!service.has_pending_trade_projection_fenced(&bob, Some(&context)));
+        assert_eq!(
+            alice.world_snapshot().gold + bob.world_snapshot().gold,
+            alice_starting_gold + bob_starting_gold
+        );
     }
 
     #[test]

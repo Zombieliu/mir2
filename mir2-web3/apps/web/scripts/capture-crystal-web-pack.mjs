@@ -17,6 +17,7 @@ import {
   CRYSTAL_NATIVE_CLIENT_WIDTH,
 } from "./crystal-native-capture-state.mjs";
 import { redactCaptureSecrets, redactCommandArgs } from "./capture-secret-redaction.mjs";
+import { redactExtractedNativeState } from "./extract-crystal-account-state.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..", "..");
@@ -41,10 +42,14 @@ const crystalVisibleChatLines =
 const account = args.account ?? process.env.MIR2_QA_ACCOUNT ?? DEFAULT_ACCOUNT;
 const password = args.password ?? process.env.MIR2_QA_PASSWORD ?? DEFAULT_PASSWORD;
 const createAccount = booleanArg(args.createAccount ?? process.env.MIR2_CREATE_ACCOUNT, false);
-const characterName = args.characterName ?? account;
-const map = args.map ?? DEFAULT_MAP;
-const x = numberArg(args.x, DEFAULT_X);
-const y = numberArg(args.y, DEFAULT_Y);
+const characterOverrideProvided = args.characterName !== undefined || args.character !== undefined;
+const mapOverrideProvided = args.map !== undefined;
+const xOverrideProvided = args.x !== undefined;
+const yOverrideProvided = args.y !== undefined;
+let characterName = args.characterName ?? args.character ?? account;
+let map = args.map ?? DEFAULT_MAP;
+let x = numberArg(args.x, DEFAULT_X);
+let y = numberArg(args.y, DEFAULT_Y);
 const crystalAnimationSeed = numberArg(
   args.crystalAnimationSeed ?? process.env.MIR2_CRYSTAL_ANIMATION_SEED,
   DEFAULT_CRYSTAL_ANIMATION_SEED,
@@ -81,6 +86,12 @@ async function main() {
   await fs.mkdir(packDir, { recursive: true });
 
   const accountStateSync = await syncWebAccountStateFromNative();
+  if (accountStateSync?.mode !== "skipped") {
+    characterName = accountStateSync.characterName ?? characterName;
+    map = accountStateSync.map?.fileName ?? map;
+    x = numberArg(accountStateSync.map?.position?.x, x);
+    y = numberArg(accountStateSync.map?.position?.y, y);
+  }
   const nativeCapture = nativeSourceImage
     ? await captureProvidedNativeImage()
     : await captureNativeWindow();
@@ -416,43 +427,59 @@ async function syncWebAccountStateFromNative() {
 
   const sourceNativeStatePath = path.resolve(nativeStatePath);
   const copiedNativeStatePath = path.join(packDir, "native-account-state.json");
-  if (path.resolve(sourceNativeStatePath).toLowerCase() !== path.resolve(copiedNativeStatePath).toLowerCase()) {
-    await fs.copyFile(sourceNativeStatePath, copiedNativeStatePath);
-  }
+  const sourceNativeState = await readJson(sourceNativeStatePath);
+  const evidenceNativeState = redactExtractedNativeState(sourceNativeState);
+  await fs.writeFile(copiedNativeStatePath, `${JSON.stringify(evidenceNativeState, null, 2)}\n`, "utf8");
 
+  const preflightSummaryPath = path.join(packDir, "web-account-sync-preflight.json");
   const syncSummaryPath = path.join(packDir, "web-account-sync.json");
   const qaStatePath = path.join(packDir, "qa-character-state.json");
+  const importerPath = path.join(SCRIPT_DIR, "upsert-web-account-from-crystal-state.mjs");
+  const commonArgs = [
+    "--nativeState",
+    copiedNativeStatePath,
+    "--accountStore",
+    accountStorePath,
+    "--account",
+    account,
+    ...(characterOverrideProvided ? ["--characterName", characterName] : []),
+    ...(mapOverrideProvided ? ["--map", String(map)] : []),
+    ...(xOverrideProvided ? ["--x", String(x)] : []),
+    ...(yOverrideProvided ? ["--y", String(y)] : []),
+    "--strictUiState",
+    "true",
+  ];
+  const childEnv = password ? { MIR2_QA_PASSWORD: password } : {};
+  const preflight = await runNodeScript(
+    importerPath,
+    [...commonArgs, "--writeStore", "false", "--output", preflightSummaryPath],
+    { timeoutMs: 30_000, env: childEnv },
+  );
+  if (preflight.wroteAccountStore || preflight.strictUiState?.passed !== true) {
+    throw new Error(`Crystal state sync preflight did not pass safely: ${JSON.stringify(preflight.strictUiState)}`);
+  }
   const result = await runNodeScript(
-    path.join(SCRIPT_DIR, "upsert-web-account-from-crystal-state.mjs"),
+    importerPath,
     [
-      "--nativeState",
-      copiedNativeStatePath,
-      "--accountStore",
-      accountStorePath,
-      "--account",
-      account,
-      "--password",
-      password,
-      "--characterName",
-      characterName,
-      "--map",
-      String(map),
-      "--x",
-      String(x),
-      "--y",
-      String(y),
+      ...commonArgs,
+      "--writeStore",
+      "true",
       "--output",
       syncSummaryPath,
       "--qaStateOutput",
       qaStatePath,
     ],
-    { timeoutMs: 30_000 },
+    { timeoutMs: 30_000, env: childEnv },
   );
+  if (!result.wroteAccountStore || result.strictUiState?.passed !== true) {
+    throw new Error(`Crystal state sync did not produce a strict account-store write: ${JSON.stringify(result)}`);
+  }
 
   return {
     ...result,
-    mode: "nativeStateToWebAccountStoreAndQaPayload",
+    mode: "strictPreflightThenNativeStateToWebAccountStoreAndQaPayload",
     nativeAccountStatePath: copiedNativeStatePath,
+    preflightSummaryPath,
     syncSummaryPath,
     qaStatePath,
   };
@@ -472,8 +499,6 @@ async function captureWebScene(qaCharacterStatePath) {
       rawPrefix,
       "--account",
       account,
-      "--password",
-      password,
       ...(createAccount ? ["--createAccount", "true", "--characterName", characterName] : []),
       ...(qaCharacterStatePath ? ["--qaCharacterState", qaCharacterStatePath] : []),
       ...(args.qaControlToken ? ["--qaControlToken", args.qaControlToken] : []),
@@ -496,7 +521,10 @@ async function captureWebScene(qaCharacterStatePath) {
       "--settleMs",
       String(numberArg(args.webSettleMs, 1500)),
     ],
-    { timeoutMs: numberArg(args.webCaptureTimeoutMs, 150_000) },
+    {
+      timeoutMs: numberArg(args.webCaptureTimeoutMs, 150_000),
+      env: password ? { MIR2_QA_PASSWORD: password } : {},
+    },
   );
   if (!result.screenshotPath || !result.statePath) {
     throw new Error(`Web capture did not return screenshot/state paths: ${JSON.stringify(result)}`);
@@ -547,7 +575,7 @@ async function runJsonCommand(command, commandArgs, options = {}) {
   const child = spawn(command, commandArgs, {
     cwd: options.cwd ?? REPO_ROOT,
     windowsHide: true,
-    env: process.env,
+    env: { ...process.env, ...(options.env ?? {}) },
   });
   let stdout = "";
   let stderr = "";

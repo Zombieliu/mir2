@@ -13,11 +13,14 @@ use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    apply_crystal_map_metadata, crystal_base_vitals, new_stage5_mail_delivery_nonce,
-    AccountBanStatus, AccountRecord, AccountSourceRefreshOutcome, CharacterRecord,
-    CharacterSaveRecord, ItemContainer, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
+    apply_crystal_map_metadata, crystal_bag_slot_capacity, crystal_base_vitals,
+    is_valid_crystal_inventory_capacity, new_stage5_mail_delivery_nonce, AccountBanStatus,
+    AccountRecord, AccountSourceRefreshOutcome, CharacterRecord, CharacterSaveRecord,
+    ItemContainer, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
+    CRYSTAL_MAX_INVENTORY_CAPACITY,
 };
 
+use super::buffs::BuffState;
 use super::components::{
     entity_facing, entity_player_vitals, entity_position, player_entity, PlayerVitals,
 };
@@ -26,6 +29,8 @@ use super::equipment::{
     equipment_state_from_item_state, item_state_from_equipment_state,
     refresh_mount_resource_from_equipment, seed_equipment_items_for_character, EquipmentState,
 };
+#[cfg(test)]
+use super::inventory::free_bag_slots;
 use super::inventory::{
     crystal_start_inventory_items, normalize_inventory_known_item_metadata,
     normalize_inventory_unique_ids, refresh_storage_password_state, seed_belt_items,
@@ -51,7 +56,7 @@ use super::resources::{
     SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::session::SimulationSession;
-use super::skills::seed_skills;
+use super::skills::{seed_skills, SkillState};
 use super::stage5::{
     merge_native_game_shop_ledger_mail, validate_stage5_mail_item_carriers,
     validate_stage5_systems_item_carriers,
@@ -154,6 +159,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     let map = world.resource::<MapRuntimeResource>();
     let quests = world.resource::<QuestResource>();
     let skills = world.resource::<SkillResource>();
+    let buffs = world.resource::<BuffResource>();
     let npc_state = world.resource::<NpcStateResource>();
     let rental = world.resource::<ItemRentalResource>();
     let stage5 = world.resource::<Stage5SystemsResource>();
@@ -184,6 +190,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         pk_points: player_runtime.pk_points,
         chat_banned: player_runtime.chat_banned,
         chat_ban_until_ms: player_runtime.chat_ban_until_ms,
+        inventory_capacity: resources.inventory_capacity,
         inventory_items_json: encode_state_vec(&resources.inventory_items),
         belt_items_json: encode_state_vec(&resources.belt_items),
         hero_inventory_items_json: encode_state_vec(&hero_inventory.items),
@@ -192,6 +199,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         equipment_items_explicit_empty: resources.equipment_items.is_empty(),
         quest_states_json: encode_state_vec(&quests.quests),
         skill_states_json: encode_state_vec(&skills.skills),
+        buff_states_json: encode_state_vec(&buffs.buffs),
         npc_flag_states_json: encode_state_vec(&npc_state.npc_flags),
         npc_saved_values_json: encode_state_vec(&npc_state.npc_saved_values),
         npc_buy_back_items_json: encode_state_vec(&npc_state.npc_buy_back_items),
@@ -243,6 +251,37 @@ pub(super) fn crystal_character_select_state(
 }
 
 pub(super) fn persist_active_character_save(world: &World) -> Result<(), String> {
+    persist_active_character_save_inner(world, None)
+}
+
+fn current_crystal_logout_binary_datetime() -> i64 {
+    const DOTNET_TICKS_AT_UNIX_EPOCH: i64 = 621_355_968_000_000_000;
+    const DOTNET_DATETIME_KIND_UTC: i64 = 1_i64 << 62;
+
+    // Crystal's `Envir.Now` starts from `DateTime.UtcNow`, so
+    // `LastLogoutDate.ToBinary()` carries the UTC kind bit. Reusing the
+    // inventory/rental helper here would mark the same ticks as Local and make
+    // the native select screen apply the host timezone a second time.
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system time should be after unix epoch");
+    let ticks = DOTNET_TICKS_AT_UNIX_EPOCH
+        + i64::try_from(now.as_secs()).expect("unix seconds should fit in i64") * 10_000_000
+        + i64::from(now.subsec_nanos() / 100);
+    ticks | DOTNET_DATETIME_KIND_UTC
+}
+
+/// Crystal records `LastLogoutDate` only when an in-world character leaves the
+/// world. Keep that select-screen metadata in the same durable transaction as
+/// the final private character snapshot.
+pub(super) fn persist_active_character_save_for_logout(world: &World) -> Result<(), String> {
+    persist_active_character_save_inner(world, Some(current_crystal_logout_binary_datetime()))
+}
+
+fn persist_active_character_save_inner(
+    world: &World,
+    last_access_binary_datetime: Option<i64>,
+) -> Result<(), String> {
     let Some(save) = snapshot_active_character_save(world) else {
         return Ok(());
     };
@@ -260,7 +299,7 @@ pub(super) fn persist_active_character_save(world: &World) -> Result<(), String>
         return Err("active character full-save snapshot identity mismatch".to_string());
     }
     let expected_revision = save.revision;
-    match persist_character_save(world, &account_id, save)? {
+    match persist_character_save_inner(world, &account_id, save, last_access_binary_datetime)? {
         PersistCharacterSaveResult::Full(committed_revision) => {
             if !world
                 .resource::<SessionResource>()
@@ -778,7 +817,16 @@ mod stale_mail_status_merge_tests {
 pub(super) fn persist_character_save(
     world: &World,
     account_id: &str,
+    save: CharacterSaveRecord,
+) -> Result<PersistCharacterSaveResult, String> {
+    persist_character_save_inner(world, account_id, save, None)
+}
+
+fn persist_character_save_inner(
+    world: &World,
+    account_id: &str,
     mut save: CharacterSaveRecord,
+    last_access_binary_datetime: Option<i64>,
 ) -> Result<PersistCharacterSaveResult, String> {
     let config = world.resource::<RuntimeConfigResource>().config.clone();
     let active_character = {
@@ -869,6 +917,11 @@ pub(super) fn persist_character_save(
             *character = save.character.clone();
         }
         account.saves.insert(character_index, save);
+        if let Some(last_access_binary_datetime) = last_access_binary_datetime {
+            account
+                .character_last_access_binary_datetimes
+                .insert(character_index, last_access_binary_datetime);
+        }
         Ok(PersistCharacterSaveResult::Full(committed_revision))
     })
 }
@@ -917,6 +970,21 @@ pub(super) fn account_characters(
         .accounts
         .get(account_id)
         .map(|account| account.characters.clone())
+        .unwrap_or_default()
+}
+
+pub(super) fn account_select_infos(
+    config: &SimulationConfig,
+    account_id: &str,
+) -> Vec<mir2_protocol::SelectInfo> {
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    store
+        .accounts
+        .get(account_id)
+        .map(AccountRecord::select_infos)
         .unwrap_or_default()
 }
 
@@ -1515,6 +1583,9 @@ pub(super) fn delete_character_from_account(
         account
             .characters
             .retain(|character| character.index != character_index);
+        account
+            .character_last_access_binary_datetimes
+            .remove(&character_index);
         account.saves.remove(&character_index);
         Ok(existing.name)
     })
@@ -1657,6 +1728,10 @@ pub(super) fn normalize_legacy_default_account_demo_seed_state(
     }
     if save.inventory_items_json.is_empty() {
         save.inventory_items_json = encode_state_vec(&seed_inventory_items());
+        changed = true;
+    }
+    if save.inventory_capacity != CRYSTAL_MAX_INVENTORY_CAPACITY {
+        save.inventory_capacity = CRYSTAL_MAX_INVENTORY_CAPACITY;
         changed = true;
     }
     if save.belt_items_json.is_empty() {
@@ -2109,6 +2184,27 @@ fn decode_and_validate_character_items(
     validate_saved_item_states("storage", &storage_items)?;
     validate_saved_item_states("hero inventory", &hero_inventory_items)?;
     validate_saved_equipment_states("equipment", &equipment_items)?;
+    if !is_valid_crystal_inventory_capacity(save.inventory_capacity) {
+        return Err(format!(
+            "invalid Crystal inventory capacity {}",
+            save.inventory_capacity
+        ));
+    }
+    let bag_capacity = crystal_bag_slot_capacity(save.inventory_capacity);
+    for (index, item) in inventory_items.iter().enumerate() {
+        if matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2) {
+            let logical_slot = match item.container {
+                ItemContainer::Bag1 => u16::from(item.slot),
+                ItemContainer::Bag2 => 40 + u16::from(item.slot),
+                _ => unreachable!(),
+            };
+            if logical_slot >= bag_capacity {
+                return Err(format!(
+                    "invalid inventory item at index {index}: slot {logical_slot} exceeds Crystal bag capacity {bag_capacity}"
+                ));
+            }
+        }
+    }
 
     Ok((
         inventory_items,
@@ -2180,6 +2276,9 @@ struct DecodedCharacterSavePreflight {
     storage_items: Vec<ItemState>,
     equipment_items: Vec<EquipmentState>,
     hero_inventory_items: Vec<ItemState>,
+    quest_states: Vec<QuestState>,
+    skill_states: Vec<SkillState>,
+    buff_states: Vec<BuffState>,
     stage5_systems: Stage5SystemsState,
     npc_buy_back_items: Vec<NpcBuyBackState>,
     npc_used_goods_items: Vec<NpcUsedGoodsState>,
@@ -2190,6 +2289,12 @@ fn decode_and_validate_character_save(
 ) -> Result<DecodedCharacterSavePreflight, String> {
     let (inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
         decode_and_validate_character_items(save)?;
+    let buff_states = decode_state_vec::<BuffState>(&save.buff_states_json)
+        .ok_or_else(|| "failed to decode buff state".to_string())?;
+    let quest_states = decode_state_vec::<QuestState>(&save.quest_states_json)
+        .ok_or_else(|| "failed to decode quest state".to_string())?;
+    let skill_states = decode_state_vec::<SkillState>(&save.skill_states_json)
+        .ok_or_else(|| "failed to decode skill state".to_string())?;
     let stage5_systems = decode_and_validate_stage5_systems(save)?;
     let npc_buy_back_items = decode_and_validate_npc_buy_back_items(&save.npc_buy_back_items_json)?;
     let npc_used_goods_items =
@@ -2200,6 +2305,9 @@ fn decode_and_validate_character_save(
         storage_items,
         equipment_items,
         hero_inventory_items,
+        quest_states,
+        skill_states,
+        buff_states,
         stage5_systems,
         npc_buy_back_items,
         npc_used_goods_items,
@@ -2221,6 +2329,9 @@ pub(super) fn apply_character_save(
         storage_items,
         equipment_items,
         hero_inventory_items,
+        quest_states,
+        skill_states,
+        buff_states,
         stage5_systems,
         npc_buy_back_items,
         npc_used_goods_items,
@@ -2336,6 +2447,7 @@ pub(super) fn apply_character_save(
         player_runtime.chat_spam_tick = 0;
     }
     let mut resources = world.resource_mut::<InventoryResource>();
+    resources.inventory_capacity = save.inventory_capacity;
     resources.inventory_items = inventory_items;
     resources.belt_items = belt_items;
     resources.storage_items = storage_items;
@@ -2371,11 +2483,9 @@ pub(super) fn apply_character_save(
         queue.pending_ground_spell_actions = Vec::new();
         queue.pending_movement_command = None;
     }
-    world.resource_mut::<QuestResource>().quests =
-        decode_state_vec(&save.quest_states_json).unwrap_or_default();
-    world.resource_mut::<SkillResource>().skills =
-        decode_state_vec(&save.skill_states_json).unwrap_or_default();
-    world.resource_mut::<BuffResource>().buffs = Vec::new();
+    world.resource_mut::<QuestResource>().quests = quest_states;
+    world.resource_mut::<SkillResource>().skills = skill_states;
+    world.resource_mut::<BuffResource>().buffs = buff_states;
     {
         let mut rental = world.resource_mut::<ItemRentalResource>();
         rental.rented_items = decode_state_vec(&save.item_rental_records_json).unwrap_or_default();
@@ -2723,6 +2833,12 @@ mod character_save_item_validation_tests {
         use std::fs;
 
         let (config, mut session, root, path) = atomic_fixture("zero-active-save");
+        let baseline_save = {
+            let store = config.account_store.lock().unwrap();
+            store.accounts["demo"].saves[&0].clone()
+        };
+        validate_character_save_record(&baseline_save)
+            .unwrap_or_else(|error| panic!("zero-active-save baseline is invalid: {error}"));
         assert!(session
             .handle_packet(ClientPacket::Login {
                 account_id: "demo".to_string(),
@@ -2730,10 +2846,13 @@ mod character_save_item_validation_tests {
             })
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
-        assert!(session
-            .handle_packet(ClientPacket::StartGame { character_index: 0 })
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+        let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(
+            start_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })),
+            "unexpected StartGame packets: {start_packets:?}"
+        );
         config
             .save_account_store()
             .expect("active-save fixture should have a durable baseline");
@@ -3087,6 +3206,7 @@ mod character_save_item_validation_tests {
             offered_currency: CurrencyKind::Gold,
             accepted: false,
             locked: false,
+            escrow_prepared: false,
             completed: false,
         });
         systems.auction.push(Stage5AuctionListing {
@@ -3196,6 +3316,105 @@ mod character_save_item_validation_tests {
         assert_eq!(second_persisted, first_persisted);
 
         let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn crystal_buff_state_survives_save_preflight_and_apply() {
+        let config = SimulationConfig::default();
+        let mut session = SimulationSession::new(config.clone());
+        let mut save = legacy_save_with_inventory(&config);
+        let rested = BuffState {
+            key: "rested".to_string(),
+            name: "Rested".to_string(),
+            description: "Crystal rested buff.".to_string(),
+            expires_at_tick: 10_092,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: vec![mir2_protocol::UserItemStat {
+                stat: 100,
+                value: 5,
+            }],
+        };
+        save.buff_states_json = encode_state_vec(&vec![rested]);
+
+        apply_character_save(session.app.world_mut(), &save)
+            .expect("valid imported Crystal buff should apply");
+        let buffs = &session.app.world().resource::<BuffResource>().buffs;
+        assert_eq!(buffs.len(), 1);
+        assert_eq!(buffs[0].key, "rested");
+        assert_eq!(buffs[0].expires_at_tick, 10_092);
+        assert_eq!(buffs[0].stats[0].stat, 100);
+        assert_eq!(buffs[0].stats[0].value, 5);
+
+        save.buff_states_json = vec!["{not valid buff state".to_string()];
+        assert!(validate_character_save_record(&save)
+            .unwrap_err()
+            .contains("failed to decode buff state"));
+    }
+
+    #[test]
+    fn crystal_inventory_capacity_controls_bag2_and_user_information_raw_slots() {
+        let config = SimulationConfig::default();
+        let mut session = SimulationSession::new(config.clone());
+        let mut save = legacy_save_with_inventory(&config);
+        let mut inventory: Vec<ItemState> =
+            decode_state_vec(&save.inventory_items_json).expect("fixture inventory should decode");
+        let mut bag2_item = inventory
+            .first()
+            .cloned()
+            .expect("fixture should contain a starter inventory item");
+        bag2_item.container = ItemContainer::Bag2;
+        bag2_item.slot = 7;
+        bag2_item.unique_id = 79_322;
+        bag2_item.user_item_metadata = None;
+        inventory.push(bag2_item);
+        save.inventory_capacity = 54;
+        save.inventory_items_json = encode_state_vec(&inventory);
+
+        apply_character_save(session.app.world_mut(), &save)
+            .expect("first Crystal expansion and Bag2 slot 7 should apply");
+        rebuild_world(session.app.world_mut());
+        let resources = session.app.world().resource::<InventoryResource>();
+        assert_eq!(resources.inventory_capacity, 54);
+        assert_eq!(free_bag_slots(resources), 54 - 6 - inventory.len() as u16);
+        let raw = user_inventory_slots(
+            resources.inventory_capacity,
+            &resources.belt_items,
+            &resources.inventory_items,
+        );
+        assert_eq!(raw.len(), 54);
+        assert!(
+            raw[53].is_some(),
+            "Bag2 slot 7 must occupy raw index 46 + 7"
+        );
+
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.inventory_capacity, 54);
+        assert_eq!(snapshot.max_bag_slots, 48);
+        let persisted = snapshot_active_character_save(session.app.world())
+            .expect("active character state should snapshot");
+        assert_eq!(persisted.inventory_capacity, 54);
+
+        save.inventory_capacity = 46;
+        assert!(validate_character_save_record(&save)
+            .unwrap_err()
+            .contains("exceeds Crystal bag capacity 40"));
+    }
+
+    #[test]
+    fn malformed_quest_and_skill_state_fail_preflight_instead_of_clearing() {
+        let config = SimulationConfig::default();
+        let mut save = legacy_save_with_inventory(&config);
+        save.quest_states_json = vec!["{not valid quest state".to_string()];
+        assert!(validate_character_save_record(&save)
+            .unwrap_err()
+            .contains("failed to decode quest state"));
+
+        save.quest_states_json = Vec::new();
+        save.skill_states_json = vec!["{not valid skill state".to_string()];
+        assert!(validate_character_save_record(&save)
+            .unwrap_err()
+            .contains("failed to decode skill state"));
     }
 }
 
@@ -3421,6 +3640,8 @@ impl SimulationSession {
                         .stage5_systems
                         .appearance
                         .hair,
+                    resources.inventory_capacity,
+                    &resources.belt_items,
                     &resources.inventory_items,
                     &resources.equipment_items,
                     self.app

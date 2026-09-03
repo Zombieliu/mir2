@@ -34,6 +34,9 @@ const MAX_PENDING_UI_SOUND_EVENTS: usize = 8;
 /// UI cues stay separate from packet-authoritative gameplay audio so a local
 /// pointer edge can never manufacture or deduplicate a gameplay packet cue.
 pub const NATIVE_UI_BUTTON_A_FILE: &str = "103.wav";
+/// Crystal `SoundList.ButtonB = 10104`, mapped by `SoundList.lst` to 104.wav.
+/// Inventory delete-mode cancellation uses this distinct local UI cue.
+pub const NATIVE_UI_BUTTON_B_FILE: &str = "104.wav";
 /// Crystal `SoundList.ButtonC = 10105`, mapped by `SoundList.lst` to 105.wav.
 /// Larger menu-style HUD buttons use this distinct local UI cue.
 pub const NATIVE_UI_BUTTON_C_FILE: &str = "105.wav";
@@ -95,6 +98,7 @@ pub struct NativeGameplaySoundEvent {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NativeUiSound {
     ButtonA,
+    ButtonB,
     ButtonC,
 }
 
@@ -102,6 +106,7 @@ impl NativeUiSound {
     fn file_name(self) -> &'static str {
         match self {
             Self::ButtonA => NATIVE_UI_BUTTON_A_FILE,
+            Self::ButtonB => NATIVE_UI_BUTTON_B_FILE,
             Self::ButtonC => NATIVE_UI_BUTTON_C_FILE,
         }
     }
@@ -253,7 +258,11 @@ pub(crate) fn initialize_native_audio(
     }
     runtime.ui_paths.clear();
     runtime.ui_sources.clear();
-    for file_name in [NATIVE_UI_BUTTON_A_FILE, NATIVE_UI_BUTTON_C_FILE] {
+    for file_name in [
+        NATIVE_UI_BUTTON_A_FILE,
+        NATIVE_UI_BUTTON_B_FILE,
+        NATIVE_UI_BUTTON_C_FILE,
+    ] {
         let (path, source) = load_first_valid_wav(&[file_name], &mut sources);
         if let (Some(path), Some(source)) = (path, source) {
             runtime.ui_paths.insert(file_name.to_owned(), path);
@@ -1169,6 +1178,22 @@ mod tests {
             file_name: NATIVE_UI_BUTTON_A_FILE.to_owned(),
         }));
         assert_eq!(gameplay.len(), 0);
+    }
+
+    #[test]
+    fn ui_button_b_uses_crystal_104_wav_mapping() {
+        let mut queue = NativeUiAudioQueue::default();
+        queue.push(NativeUiSound::ButtonB);
+        assert_eq!(queue.drain_bounded(8), vec![NativeUiSound::ButtonB]);
+        assert_eq!(NativeUiSound::ButtonB.file_name(), "104.wav");
+
+        let mut gameplay = NativeGameplayAudioQueue::default();
+        assert!(!gameplay.push(NativeGameplaySoundEvent {
+            generation: 1,
+            sequence: 1,
+            cue: "ui.ButtonB".to_owned(),
+            file_name: NATIVE_UI_BUTTON_B_FILE.to_owned(),
+        }));
     }
 
     #[test]

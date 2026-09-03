@@ -1,5 +1,163 @@
 # Backend 1:1 Progress
 
+> Shared-trade completion phase correction (2026-09-03): S.TradeConfirm is
+> no longer an escrow-preparation acknowledgement. Personal confirmation
+> locks only; typed shared preparation reserves once with escrowPrepared=true
+> and completed=false. Delivery clears the current exchange and completes
+> once; durable delivery publishes only after projection/event-marker save.
+> Legacy completed=true remains recognized as an already-debited snapshot.
+> Current-exchange ownership, held-state mutation, replay, refund and
+> save-fault guards have dedicated coverage. Gateway production routing and
+> fencing are unchanged; the save field is additive, with no SQL migration,
+> authentication relaxation or live-store mutation.
+> Final Simulation 1491/1491 + dedicated 7/7, Gateway 672 passed / one existing ignored, protocol
+> 40/40, game-data 39/39 and 1380 client tests pass. Evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> Only premature completion is superseded below. Source invitation/private
+> packet routing, positive-delta/immediate gold escrow, editable locks,
+> capacity rejection retaining offers, cancellation/mail fallback, late
+> delivery/gold-cap edges and exact item custody remain open. No global
+> backend percentage or human acceptance is claimed; goal incomplete and PR #250 Draft.
+
+> Historical trade source audit during native UI work (2026-09-03):
+> Crystal S.TradeConfirm denotes completed exchange. Candidate
+> `apps/simulation/src/runtime/packets.rs:5191-5274` emits it during unilateral
+> offer preparation; `runtime/session.rs:432-446` uses it as an internal
+> success marker, while `apps/gateway/src/routing.rs:11028-11168` retains the
+> initial packet before partner match/durable outcome, including waiting,
+> rollback and unknown-outcome paths. A source-correct client therefore closes
+> the trade windows too early. This is not evidence of mutual settlement.
+> Crystal `PlayerObject.cs:10778-10822` also adds positive TradeGold deltas and
+> immediately debits escrow; Candidate `runtime/packets.rs:5059-5073` overwrites
+> offered_gold, rejects locked changes and defers debit. Both remain open.
+>
+> Next bounded backend leaf must separate lock/prepare/commit/completion and
+> audit item/gold conservation, repeat commands, refunds, idempotence, durable
+> unknown-outcome holds, save/disconnect and paired packet routing. Do not
+> change += or debit timing in isolation. This round changes only native
+> presentation/read models; server code, schema, auth and stores are untouched.
+> Native UI 591/591, Windows 534/534, client runtime 212/212 and UI core 43/43
+> pass; no current full Simulation/Gateway result is claimed. Findings/hashes:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> Historical tracked-slice results do not close these source contracts or
+> full native trade, whose item cells remain read-only. No server/global
+> percentage or human acceptance is claimed; the goal and Draft PR remain open.
+
+> Source UserItem.Image projection checkpoint (2026-09-03): personal bag,
+> belt, storage and equipment snapshots derive icons from exact source
+> Info.Image/type/shape/StackSize and authoritative quantity; Gateway NPC
+> goods apply the same rule while preserving every raw UserItem field.
+> Amulet 200/300 and Poison 50/100/150 boundaries now update after real
+> SplitItem/MergeItem/EquipItem/RemoveItem and save/logout/reload sequences.
+> The source selector covers every 16-bit count for all three shapes, guard
+> fields and the entire 1,628-row catalogue. Known ordinary items override
+> stale legacy icons without rewriting persistent ItemInfo or instance state.
+> Game-data 39/39 and dedicated integration 4/4 pass on final source, as do
+> full Simulation 1491/1491 and Gateway 667 passed / one existing ignored.
+> Windows is 527/527. The locked regular Gateway outputs are avoided using a fresh
+> system-temp build directory, normal full library harness and unchanged
+> manifest; failed earlier locked-file attempts are not passing evidence.
+> No schema migration, authority relaxation, new protocol mutation or shared
+> Zone change is made. Ground ObjectItem/FloorItems, secondary item surfaces,
+> source native operation UI and final-source real-input evidence remain
+> open. Initial captured binaries predate the final ordinary-icon correction.
+> Evidence: `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+> All source-pair/trusted package/DPI/human gates remain open; no global or
+> server-wide parity percentage is claimed.
+
+> Character wing authoritative projection checkpoint (2026-09-03):
+> Simulation resets wing appearance to zero, resolves the exact equipped
+> armour's `GetRealItem` for the current class/level and ignores broken items
+> according to the base template's durability, matching Crystal
+> `HumanObject.cs:1795-1847`. It does not trust a client-supplied effect or an
+> instance MaxDura of zero. `WorldEntitySnapshot.wingEffect` is optional for
+> unknown actors, explicit zero for no wing, and self-only in personal world
+> collection; real ObjectPlayer appearance is retained by Gateway. The
+> `@SETLIGHT` PlayerUpdate path no longer overwrites valid wings with zero.
+> Native consumption preserves partial snapshots and clears session state.
+> Full Simulation 1491/1491 and Gateway 666 active/1 ignored pass; dedicated
+> wing catalogue/broken/no-armour/unequip/re-equip/save/reload tests pass 5/5,
+> and the affected recall integration passes 2/2.
+>
+> Real Windows input also verifies an exact armour instance moves to the first
+> free bag cell and back while wings clear/restore. The current item endpoint
+> uses normalized bag indexes; the client now respects this contract without
+> weakening item authority. Crystal raw Inventory/belt index unification and
+> belt-first amulet merging are still open and must not be claimed by this
+> slice. No schema/store migration, authentication relaxation, shared-Zone
+> ownership change, backend/global percentage or human acceptance is implied.
+> Evidence: `docs/generated/player-qa/native-ui-parity-20260903-character-wings/README.md`.
+
+> Crystal non-personal tooltip projection checkpoint (2026-09-03): the native
+> packet boundary now enriches NPC goods, GameShop, quest rewards, guild
+> storage and trade with a complete presentation source while leaving all item
+> ownership and mutation server-authoritative. Actual wire `UserItem` records
+> are retained for instance surfaces; catalogue surfaces mirror Crystal's
+> GameShop and Quest constructors. Viewer-dependent `GetRealItem` uses the
+> exact base row, and absent/duplicate indexes remain partial rather than
+> selecting an arbitrary row. Packet/model/ECS regressions pass, native UI is
+> 511/511 and the current Windows Debug build succeeds. Windows is 519/520 only
+> because of the pre-existing Archer atlas fixture assertion. This supersedes
+> the sparse-model limitation in the older checkpoint below; it is still a
+> read-model projection, not new item authority or a backend/global completion
+> claim.
+>
+> Crystal item-tooltip projection checkpoint (2026-09-03): Simulation now
+> projects exact item-template data, the viewer-resolved `Functions.GetRealItem`
+> result, recursive user-item/socket records and live player stats for bag,
+> belt, equipment, hero inventory and personal storage snapshots. Gateway
+> preserves this source without deriving presentation-only replacements, and
+> missing templates fail closed. Focused tooltip projection 3/3, start-equipment
+> metadata 1/1 and game-data real-item 1/1 tests pass; the Windows consumer's
+> native-ui suite passes 509/509. This is a read-model projection, not new item
+> authority. NPC/cash shop, quest reward, guild-storage and trade models do not
+> yet carry the complete source, while distributed ownership, package/light,
+> DPI and human gates remain open. No backend/global percentage is claimed.
+
+> CharacterDialog presentation-data checkpoint (2026-09-02): the Simulation
+> `EquipmentItemSnapshot` now includes the authoritative Crystal template
+> `ItemInfo.Image`, and Gateway retains packet-owned gender, hair, guild name
+> and guild rank across partial world refreshes. Gateway augments equipment
+> rows only with exact width/height/x/y from the exported `StateItem` metadata;
+> absent image/metadata remains absent rather than falling back to a guessed
+> paper-doll layer. Focused Simulation equipment projection and Gateway cursor/
+> geometry regressions pass, and the Windows `1231` capture confirms the data
+> reaches the Character surface. This is a bounded read-model projection, not
+> new gameplay authority or completion of Character stats/wing semantics; no
+> backend/global percentage or human acceptance is claimed.
+
+> Shared-Zone movement/light checkpoint (2026-09-01): Walk and Run now use
+> their real 600 ms readiness window. Zone ticks no longer advance movement
+> against a fabricated future timestamp or accept the former 120 ms grace;
+> when readiness is reached, the single-writer state consumes the latest intent
+> once, preserving correction-on-failure and authoritative ACK behavior. This
+> aligns the server clock with the unified Windows NewMove controller, whose
+> ordinary/mounted-or-SwiftFeet Run distances are two/three cells without
+> weakening collision authority. The Debug-only forced-Day default was also
+> removed: an absent or `dynamic` fixed-light setting follows Crystal's UTC
+> time-of-day formula, while explicit deterministic test overrides remain.
+> `shared_zone` passes 204/204 and the focused dynamic/fixed-light regressions
+> pass. This is a bounded timing/configuration correction; it does not complete
+> distributed Zone ownership, the full gameplay denominator, live-WSS or human
+> frontend acceptance, and no backend/global percentage is claimed.
+
+> Character-select LastAccess backend checkpoint (2026-09-01): Crystal's
+> per-character UTC `LastLogoutDate` is now updated only by the final in-world
+> `LogOut`/`Disconnect` path, including Gateway abnormal transport teardown, in
+> the same account-store transaction as the authoritative character snapshot;
+> ordinary checkpoint saves do not change it, and delete removes the metadata.
+> Recovery-journal replay also uses the final logout-save semantic. Account
+> roster construction injects the stored value into `SelectInfo`, while legacy/
+> new characters with no completed logout retain zero and display `Never`.
+> Gateway emits `lastAccessBinaryDatetime` as a decimal string for LoginSuccess,
+> NewCharacterSuccess and LogOutSuccess so JavaScript cannot lose .NET tick
+> precision, and the Web parser consumes it instead of substituting the browser's
+> current time. Focused Simulation security-lifecycle regressions pass 2/2,
+> Gateway LastAccess regressions pass 2/2, recovery replay passes 1/1, and
+> locked Gateway/native builds pass. This closes the bounded persistence/
+> transport defect only; it does not change broader backend, distributed
+> ownership, live-WSS or global parity status.
+
 > Windows NPC DataRange backend checkpoint (2026-08-29): revision
 > `dd3179559` removes the Rust-only one-tile dialog gate. Initial interaction,
 > active-dialog links/inputs and quest accept/finish now share the existing

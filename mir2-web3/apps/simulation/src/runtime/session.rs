@@ -42,8 +42,8 @@ use super::skills::*;
 use bevy_ecs::prelude::{Resource, World};
 
 use crate::config::{
-    CharacterRecord, GroundDropSnapshot, ItemContainer, SimulationConfig, WorldEntityKind,
-    WorldEntitySnapshot, WorldSnapshot,
+    GroundDropSnapshot, ItemContainer, SimulationConfig, WorldEntityKind, WorldEntitySnapshot,
+    WorldSnapshot, CRYSTAL_MAX_INVENTORY_CAPACITY,
 };
 use crate::runtime::zone::{
     SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterRespawnPolicy,
@@ -209,6 +209,7 @@ impl SimulationSession {
         super::mining::rebuild_mine_spots(app.world_mut());
         app.insert_resource(super::hazard::MapHazardResource::default());
         let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
+        inventory.inventory_capacity = CRYSTAL_MAX_INVENTORY_CAPACITY;
         inventory.inventory_items = seed_inventory_items();
         inventory.belt_items = seed_belt_items();
         inventory.storage_items = seed_storage_items();
@@ -271,6 +272,10 @@ impl SimulationSession {
 
     pub fn save_active_character(&self) -> Result<(), String> {
         persist_active_character_save(self.app.world())
+    }
+
+    pub fn save_active_character_for_logout(&self) -> Result<(), String> {
+        persist_active_character_save_for_logout(self.app.world())
     }
 
     pub fn has_shared_economy_projection_event(&self, event_id: &str) -> bool {
@@ -425,16 +430,21 @@ impl SimulationSession {
     }
 
     pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
-        let offer = build_shared_trade_offer(self.app.world());
-        let packets = super::packets::stage5_trade_confirm_packet(self.app.world_mut(), true);
-        let confirmed = packets
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::TradeConfirm));
-        let packets = self.finalize_packets(packets);
-        if confirmed {
-            (packets, offer)
-        } else {
-            (packets, None)
+        // Preserve source rejection/unlock packets before building the owned
+        // offer: a mismatched deposited UID must not disappear as a bare None.
+        if let Err(packets) = super::packets::validate_trade_confirmation(self.app.world_mut()) {
+            return (self.finalize_packets(packets), None);
+        }
+        let Some(offer) = build_shared_trade_offer(self.app.world()) else {
+            return (Vec::new(), None);
+        };
+        match super::packets::prepare_shared_trade_escrow(self.app.world_mut()) {
+            super::packets::SharedTradePreparation::Prepared(packets) => {
+                (self.finalize_packets(packets), Some(offer))
+            }
+            super::packets::SharedTradePreparation::Rejected(packets) => {
+                (self.finalize_packets(packets), None)
+            }
         }
     }
 
@@ -448,6 +458,9 @@ impl SimulationSession {
     }
 
     pub fn apply_shared_trade_delivery(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        if !shared_trade_offer_matches_active_escrow(self.app.world(), offer, false) {
+            return Vec::new();
+        }
         let packets = apply_shared_trade_offer(self.app.world_mut(), offer, false);
         self.finalize_packets(packets)
     }
@@ -519,6 +532,9 @@ impl SimulationSession {
     }
 
     pub fn rollback_shared_trade_offer(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        if !shared_trade_offer_matches_active_escrow(self.app.world(), offer, true) {
+            return Vec::new();
+        }
         let packets = apply_shared_trade_offer(self.app.world_mut(), offer, true);
         self.finalize_packets(packets)
     }
@@ -578,6 +594,7 @@ impl SimulationSession {
                 return vec![ServerPacket::Login { result: 4 }];
             }
         };
+        let select_infos = account_select_infos(&config, account_id);
         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
         session.account_id = Some(account_id.to_string());
         session.characters = characters;
@@ -587,11 +604,7 @@ impl SimulationSession {
         session.selected_character = None;
         session.clear_active_save_revision();
         vec![ServerPacket::LoginSuccess {
-            characters: session
-                .characters
-                .iter()
-                .map(CharacterRecord::to_select_info)
-                .collect(),
+            characters: select_infos,
         }]
     }
 
@@ -1430,7 +1443,7 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     let character = session.selected_character.as_ref()?;
     let stage5 = world.resource::<Stage5SystemsResource>();
     let trade = stage5.stage5_systems.trade.as_ref()?;
-    if trade.completed
+    if trade.outgoing_escrow_debited()
         || trade.settlement_nonce.len() != 32
         || !trade
             .settlement_nonce
@@ -1472,6 +1485,44 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     })
 }
 
+fn shared_trade_offer_matches_active_escrow(
+    world: &World,
+    offer: &SharedTradeOffer,
+    rollback: bool,
+) -> bool {
+    if !is_in_world(world) {
+        return false;
+    }
+    let session = world.resource::<SessionResource>();
+    let Some(character) = session.selected_character.as_ref() else {
+        return false;
+    };
+    let systems = world.resource::<Stage5SystemsResource>();
+    let Some(trade) = systems.stage5_systems.trade.as_ref() else {
+        return false;
+    };
+    if !trade.outgoing_escrow_debited() {
+        return false;
+    }
+    if rollback {
+        session.account_id.as_deref() == Some(offer.account_id.as_str())
+            && character.index == offer.character_index
+            && character.name.eq_ignore_ascii_case(&offer.character_name)
+            && trade.partner.eq_ignore_ascii_case(&offer.partner_name)
+            && trade.settlement_nonce == offer.settlement_nonce
+            && trade.offered_gold == offer.gold
+    } else {
+        character.name.eq_ignore_ascii_case(&offer.partner_name)
+            && trade.partner.eq_ignore_ascii_case(&offer.character_name)
+            && trade.settlement_nonce != offer.settlement_nonce
+            && offer.settlement_nonce.len() == 32
+            && offer
+                .settlement_nonce
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    }
+}
+
 fn apply_shared_trade_offer(
     world: &mut World,
     offer: &SharedTradeOffer,
@@ -1486,6 +1537,7 @@ fn apply_shared_trade_offer(
         .resource::<InventoryResource>()
         .inventory_items
         .clone();
+    let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
     let mut delivered_items = Vec::new();
     for offered_item in &offer.items {
         let Ok(mut item) = serde_json::from_str::<ItemState>(&offered_item.item_state_json) else {
@@ -1501,6 +1553,7 @@ fn apply_shared_trade_offer(
             &staged_inventory,
             item.container,
             item.slot,
+            inventory_capacity,
         ) else {
             return trade_offer_delivery_failed_packets(world, rollback);
         };
@@ -1538,6 +1591,23 @@ fn apply_shared_trade_offer(
             .stage5_systems
             .trade = None;
         packets.push(ServerPacket::TradeCancel { unlock: false });
+    } else if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .as_ref()
+        .is_some_and(|trade| {
+            trade.outgoing_escrow_debited()
+                && trade.partner.eq_ignore_ascii_case(&offer.character_name)
+        })
+    {
+        world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade = None;
+        // Crystal GameScene.TradeConfirm resets both windows. Emit it only
+        // after this committed delivery has actually materialized.
+        packets.push(ServerPacket::TradeConfirm);
     }
 
     packets
@@ -1600,7 +1670,7 @@ fn apply_shared_trade_settlement_projection(
                         .partner
                         .eq_ignore_ascii_case(&incoming_offer.character_name) =>
             {
-                trade.completed
+                trade.outgoing_escrow_debited()
             }
             Some(_) => {
                 return Err(
@@ -1609,7 +1679,7 @@ fn apply_shared_trade_settlement_projection(
             }
             // A crash may restore a checkpoint from before the trade UI was
             // opened. Such a snapshot cannot contain the outgoing debit,
-            // because debit and the matching completed trade state are saved
+            // because debit and the matching prepared trade state are saved
             // atomically in one CharacterSaveRecord.
             None => false,
         }
@@ -1631,6 +1701,7 @@ fn apply_shared_trade_settlement_projection(
         .resource::<InventoryResource>()
         .inventory_items
         .clone();
+    let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
     let mut outgoing_deleted_items = Vec::new();
     if !outgoing_already_debited {
         let mut outgoing_ids = BTreeSet::new();
@@ -1672,6 +1743,7 @@ fn apply_shared_trade_settlement_projection(
             &staged_inventory,
             item.container,
             item.slot,
+            inventory_capacity,
         )
         .ok_or_else(|| "trade projection has no free inventory slot".to_string())?;
         item.container = container;
@@ -1710,6 +1782,10 @@ fn apply_shared_trade_settlement_projection(
             .into_iter()
             .map(|(_, item)| ServerPacket::GainedItem { item }),
     );
+    // The public wrapper releases these packets only after the projection and
+    // its idempotency marker have been saved together. Save failure restores
+    // the checkpoint and must not announce a completed trade.
+    packets.push(ServerPacket::TradeConfirm);
     Ok(packets)
 }
 
@@ -1924,6 +2000,7 @@ fn preferred_or_empty_trade_delivery_slot(
         &inventory.inventory_items,
         preferred_container,
         preferred_slot,
+        inventory.inventory_capacity,
     )
 }
 
@@ -1931,17 +2008,26 @@ fn preferred_or_empty_trade_delivery_slot_for_items(
     items: &[ItemState],
     preferred_container: ItemContainer,
     preferred_slot: u8,
+    inventory_capacity: u16,
 ) -> Option<(ItemContainer, u8)> {
     if matches!(
         preferred_container,
         ItemContainer::Bag1 | ItemContainer::Bag2
-    ) && !items
-        .iter()
-        .any(|item| item.container == preferred_container && item.slot == preferred_slot)
-    {
-        return Some((preferred_container, preferred_slot));
+    ) {
+        let logical_slot = match preferred_container {
+            ItemContainer::Bag1 => preferred_slot,
+            ItemContainer::Bag2 => 40u8.saturating_add(preferred_slot),
+            _ => unreachable!(),
+        };
+        if is_valid_inventory_slot(logical_slot, inventory_capacity)
+            && !items
+                .iter()
+                .any(|item| item.container == preferred_container && item.slot == preferred_slot)
+        {
+            return Some((preferred_container, preferred_slot));
+        }
     }
-    find_empty_inventory_item_slot(items, ItemContainer::Bag1)
+    find_empty_inventory_item_slot(items, ItemContainer::Bag1, inventory_capacity)
 }
 
 #[cfg(test)]

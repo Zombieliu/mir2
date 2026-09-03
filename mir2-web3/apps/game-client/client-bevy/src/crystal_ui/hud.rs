@@ -10,7 +10,7 @@ use bevy::text::LineBreak;
 use bevy::ui::{widget::NodeImageMode, Display, FocusPolicy, Node, PositionType, Val};
 use bevy::window::PrimaryWindow;
 
-use crate::inventory::{item_icon_path, InventoryModel, ItemModel};
+use crate::inventory::{InventoryModel, ItemModel};
 use crate::mail::MailModel;
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
@@ -18,13 +18,19 @@ use crate::pending_operations::{PendingLifecycleSet, SessionResetRevision};
 use crate::read_model::UiReadModel;
 
 use super::assets::CrystalButtonAssetSet;
+use super::item_image::{layout_original_item_images, original_item_image_bundle};
+use super::item_tooltip::crystal_item_tooltip_document;
 use super::notice::NoticeDialogState;
 use super::overlays::{NativePlayerUiSet, NativePlayerUiState};
 use super::spec::{hud as spec, CrystalFrameSpec, CrystalRect};
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
+use super::widget::{
+    spawn_crystal_image_button, CrystalHint, CrystalItemHint, Mir2CrystalHintPlugin,
+};
+
 #[cfg(test)]
-use super::widget::CrystalHintStyle;
-use super::widget::{spawn_crystal_image_button, CrystalHint, Mir2CrystalHintPlugin};
+#[path = "hud_item_image_tests.rs"]
+mod hud_item_image_tests;
 
 const WHITE: Color = Color::WHITE;
 pub(crate) const HUD_Z_INDEX: i32 = 950;
@@ -325,7 +331,7 @@ impl CrystalNewMailBlink {
 /// Exact source-relative positions from Crystal's `MainDialog`.
 pub const HP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 673.0, 100.0, 14.0);
 pub const MP_TEXT_RECT: CrystalRect = CrystalRect::new(0.0, 688.0, 100.0, 14.0);
-pub const LEVEL_RECT: CrystalRect = CrystalRect::new(5.0, 724.0, 30.0, 14.0);
+pub const LEVEL_RECT: CrystalRect = CrystalRect::new(5.0, 724.0, 22.0, 14.0);
 pub const NAME_RECT: CrystalRect = CrystalRect::new(6.0, 736.0, 90.0, 16.0);
 pub const GOLD_RECT: CrystalRect = CrystalRect::new(919.0, 735.0, 99.0, 13.0);
 pub const EXPERIENCE_TEXT_RECT: CrystalRect = CrystalRect::new(491.0, 749.0, 40.0, 12.0);
@@ -367,7 +373,9 @@ impl Plugin for Mir2CrystalHudPlugin {
             )
             .add_systems(
                 Update,
-                update_hud_inventory.run_if(resource_changed::<InventoryModel>),
+                update_hud_inventory
+                    .run_if(resource_changed::<InventoryModel>)
+                    .before(layout_original_item_images),
             )
             .add_systems(
                 Update,
@@ -905,22 +913,14 @@ fn spawn_belt_slot(
         CrystalHudAction::BeltUse(slot),
     ));
     hit_target.with_children(|button| {
-        let path = item.and_then(|item| item_icon_path(item.icon));
         button.spawn((
             CrystalHudBeltIcon { slot },
-            Node {
-                display: if path.is_some() {
-                    Display::Flex
-                } else {
-                    Display::None
-                },
-                ..default()
-            },
-            ImageNode {
-                image: path.map(|path| asset_server.load(path)).unwrap_or_default(),
-                image_mode: NodeImageMode::Auto,
-                ..default()
-            },
+            original_item_image_bundle(
+                asset_server,
+                item.and_then(ItemModel::user_item_image_index),
+                32,
+                32,
+            ),
         ));
     });
     spawn_text(
@@ -1018,15 +1018,16 @@ fn spawn_vertical_centered_text<T: Component>(
 ) {
     let mut container = text_absolute_node(rect);
     container.align_items = AlignItems::Center;
+    container.justify_content = horizontal_justify_content(justify);
     parent.spawn(container).with_children(|text_root| {
         spawn_text_entity(
             text_root,
             marker,
             value,
-            full_width_text_node(),
+            auto_sized_text_node(),
             font_size,
             color,
-            justify,
+            Justify::Left,
             true,
         );
     });
@@ -1044,6 +1045,7 @@ fn spawn_vertical_centered_text_with_container<C: Component, T: Component>(
 ) {
     let mut container = text_absolute_node(rect);
     container.align_items = AlignItems::Center;
+    container.justify_content = horizontal_justify_content(justify);
     parent
         .spawn((container_marker, container))
         .with_children(|text_root| {
@@ -1051,20 +1053,25 @@ fn spawn_vertical_centered_text_with_container<C: Component, T: Component>(
                 text_root,
                 marker,
                 value,
-                full_width_text_node(),
+                auto_sized_text_node(),
                 font_size,
                 color,
-                justify,
+                Justify::Left,
                 true,
             );
         });
 }
 
-fn full_width_text_node() -> Node {
-    Node {
-        width: Val::Percent(100.0),
-        ..default()
+fn horizontal_justify_content(justify: Justify) -> JustifyContent {
+    match justify {
+        Justify::Center => JustifyContent::Center,
+        Justify::Right | Justify::End => JustifyContent::FlexEnd,
+        Justify::Justified | Justify::Left | Justify::Start => JustifyContent::FlexStart,
     }
+}
+
+fn auto_sized_text_node() -> Node {
+    Node::default()
 }
 
 fn spawn_unoutlined_text<T: Component>(
@@ -1459,12 +1466,14 @@ fn update_hud_inventory(
         free_inventory_slots(&inventory).to_string(),
     );
     for (marker, mut image, mut node) in &mut icons {
-        if let Some(path) =
-            belt_slot_item(&inventory, marker.slot).and_then(|item| item_icon_path(item.icon))
-        {
-            image.image = asset_server.load(path);
-            node.display = Display::Flex;
-        } else {
+        let handle = belt_slot_item(&inventory, marker.slot)
+            .and_then(ItemModel::user_item_image_index)
+            .map(|index| asset_server.load(format!("original-ui/Items/{index}.png")))
+            .unwrap_or_default();
+        if image.image != handle {
+            image.image = handle;
+            // The shared layout runs after this update, even if the new PNG
+            // has not loaded. Never show the old icon's rectangle meanwhile.
             node.display = Display::None;
         }
     }
@@ -1475,19 +1484,20 @@ fn update_hud_inventory(
 fn sync_belt_hit_targets(
     mut commands: Commands,
     inventory: Res<InventoryModel>,
+    ui: Res<UiReadModel>,
     targets: Query<(Entity, &CrystalHudBeltHitTarget, Option<&Button>)>,
 ) {
     for (entity, marker, button) in &targets {
         let item = belt_slot_item(&inventory, marker.slot).filter(|item| item.unique_id.is_some());
         let enabled = item.is_some();
         if let Some(item) = item {
-            let broken = item.durability_current == Some(0)
-                && item.durability_max.is_some_and(|maximum| maximum != 0);
             commands
                 .entity(entity)
-                .insert(CrystalHint::item(basic_item_hint(item), broken));
+                .insert(CrystalItemHint(crystal_item_tooltip_document(
+                    item, &ui.player,
+                )));
         } else {
-            commands.entity(entity).remove::<CrystalHint>();
+            commands.entity(entity).remove::<CrystalItemHint>();
         }
         match (enabled, button.is_some()) {
             (true, false) => {
@@ -1731,53 +1741,7 @@ pub const fn belt_control_spec(
 /// authoritative native item snapshot. Missing requirement/bind/awake/rental
 /// fields stay absent instead of being guessed in the presentation layer.
 pub fn basic_item_hint(item: &ItemModel) -> String {
-    let mut lines = vec![bounded_belt_label(&item.name, 64)];
-    if let Some(grade) = item.grade.as_deref().filter(|grade| !grade.is_empty()) {
-        lines.push(format!("Grade: {}", bounded_belt_label(grade, 32)));
-    }
-    if item.quantity > 1 {
-        lines.push(format!("Quantity: {}", item.quantity));
-    }
-    if !item.description.is_empty() {
-        lines.extend(
-            item.description
-                .lines()
-                .take(3)
-                .map(|line| bounded_belt_label(line, 80)),
-        );
-    }
-    if let (Some(current), Some(maximum)) = (item.durability_current, item.durability_max) {
-        lines.push(format!("Durability: {current}/{maximum}"));
-    }
-    if item.attack != 0 || item.added_attack != 0 {
-        lines.push(format!(
-            "Attack: {}{}",
-            item.attack,
-            signed_item_bonus(item.added_attack)
-        ));
-    }
-    if item.defence != 0 || item.added_defence != 0 {
-        lines.push(format!(
-            "Defence: {}{}",
-            item.defence,
-            signed_item_bonus(item.added_defence)
-        ));
-    }
-    if item.added_luck != 0 {
-        lines.push(format!("Luck: {:+}", item.added_luck));
-    }
-    if item.socket_slots != 0 {
-        lines.push(format!("Sockets: {}", item.socket_slots));
-    }
-    lines.join("\n")
-}
-
-fn signed_item_bonus(value: i32) -> String {
-    if value == 0 {
-        String::new()
-    } else {
-        format!(" ({value:+})")
-    }
+    crystal_item_tooltip_document(item, &Default::default()).plain_text()
 }
 
 fn update_hud_map_model(
@@ -1879,7 +1843,7 @@ where
     }
 }
 
-fn format_gold(gold: u32) -> String {
+pub(super) fn format_gold(gold: u32) -> String {
     let digits = gold.to_string();
     let mut output = String::with_capacity(digits.len() + digits.len() / 3);
     for (i, digit) in digits.chars().enumerate() {
@@ -1908,16 +1872,12 @@ pub fn free_inventory_slots(model: &InventoryModel) -> u32 {
     u32::from(model.effective_capacity()).saturating_sub(occupied)
 }
 
-/// Produce a bounded label suitable for one 40-pixel belt slot.
+/// MirItemCell's stack label, including one for a source stackable item.
 pub fn belt_item_label(model: &InventoryModel, slot: u8) -> String {
     let Some(item) = belt_slot_item(model, slot) else {
         return String::new();
     };
-    if item.quantity > 1 {
-        item.quantity.to_string()
-    } else {
-        String::new()
-    }
+    item.crystal_stack_label()
 }
 
 /// Crystal `BeltDialog.Key` uses a fixed 26x14 label at `(8 + slot*35, 2)`
@@ -1951,7 +1911,9 @@ pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::inventory::ItemModel;
+    use crate::inventory::{
+        CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel, ItemModel,
+    };
 
     #[test]
     fn inventory_button_uses_exact_crystal_three_state_assets_and_geometry() {
@@ -2105,8 +2067,25 @@ mod tests {
     }
 
     #[test]
-    fn centered_hud_text_fills_its_source_rect_before_justification() {
-        assert_eq!(full_width_text_node().width, Val::Percent(100.0));
+    fn centered_hud_text_uses_flex_alignment_for_unwrapped_single_lines() {
+        assert_eq!(
+            horizontal_justify_content(Justify::Center),
+            JustifyContent::Center
+        );
+        assert_eq!(
+            horizontal_justify_content(Justify::Left),
+            JustifyContent::FlexStart
+        );
+        assert_eq!(
+            horizontal_justify_content(Justify::Right),
+            JustifyContent::FlexEnd
+        );
+        assert_eq!(auto_sized_text_node().width, Val::Auto);
+    }
+
+    #[test]
+    fn level_label_matches_crystal_autosize_extraction_bounds() {
+        assert_eq!(LEVEL_RECT, CrystalRect::new(5.0, 724.0, 22.0, 14.0));
     }
 
     #[test]
@@ -2147,6 +2126,7 @@ mod tests {
     fn belt_hit_target_tracks_late_population_and_clear() {
         let mut app = App::new();
         app.init_resource::<InventoryModel>()
+            .init_resource::<UiReadModel>()
             .add_systems(Update, sync_belt_hit_targets);
         let target = app
             .world_mut()
@@ -2167,38 +2147,57 @@ mod tests {
             slot: 0,
             container: 1,
             icon: 7,
+            tooltip_source: Some(CrystalItemTooltipSourceModel {
+                info: CrystalItemInfoModel {
+                    item_index: 7,
+                    name: "Potion".to_owned(),
+                    item_type: 1,
+                    durability: 10,
+                    ..Default::default()
+                },
+                user_item: Some(CrystalUserItemModel {
+                    unique_id: 77,
+                    item_index: 7,
+                    current_dura: 10,
+                    max_dura: 10,
+                    count: 2,
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
             ..ItemModel::default()
         }];
         app.update();
         assert!(app.world().entity(target).contains::<Button>());
-        assert_eq!(
-            app.world()
-                .entity(target)
-                .get::<CrystalHint>()
-                .map(|hint| hint.0.as_str()),
-            Some("Potion\nQuantity: 2")
-        );
-        assert_eq!(
-            app.world()
-                .entity(target)
-                .get::<CrystalHint>()
-                .map(|hint| hint.1),
-            Some(CrystalHintStyle::Item { broken: false })
-        );
+        let hint = app
+            .world()
+            .entity(target)
+            .get::<CrystalItemHint>()
+            .expect("populated belt cell has a rich item hint");
+        assert!(hint.0.source_complete);
+        assert!(!hint.0.broken);
+        assert!(hint.0.plain_text().contains("Potion (2)"));
 
         {
             let mut inventory = app.world_mut().resource_mut::<InventoryModel>();
             inventory.items[0].durability_current = Some(0);
             inventory.items[0].durability_max = Some(10);
+            let user = inventory.items[0]
+                .tooltip_source
+                .as_mut()
+                .unwrap()
+                .user_item
+                .as_mut()
+                .unwrap();
+            user.current_dura = 0;
+            user.max_dura = 10;
         }
         app.update();
-        assert_eq!(
-            app.world()
-                .entity(target)
-                .get::<CrystalHint>()
-                .map(|hint| hint.1),
-            Some(CrystalHintStyle::Item { broken: true })
-        );
+        assert!(app
+            .world()
+            .entity(target)
+            .get::<CrystalItemHint>()
+            .is_some_and(|hint| hint.0.broken));
 
         app.world_mut()
             .resource_mut::<InventoryModel>()
@@ -2206,7 +2205,7 @@ mod tests {
             .clear();
         app.update();
         assert!(!app.world().entity(target).contains::<Button>());
-        assert!(!app.world().entity(target).contains::<CrystalHint>());
+        assert!(!app.world().entity(target).contains::<CrystalItemHint>());
     }
 
     #[test]
@@ -2436,7 +2435,7 @@ mod tests {
     }
 
     #[test]
-    fn basic_item_hint_uses_only_supported_authoritative_fields() {
+    fn legacy_item_hint_is_explicitly_partial_and_preserves_supported_fields() {
         let item = ItemModel {
             name: "Bronze Sword".to_owned(),
             quantity: 1,
@@ -2452,10 +2451,13 @@ mod tests {
             socket_slots: 2,
             ..ItemModel::default()
         };
+        let document = crystal_item_tooltip_document(&item, &Default::default());
+        assert!(!document.source_complete);
         assert_eq!(
-            basic_item_hint(&item),
-            "Bronze Sword\nGrade: Rare\nA reliable blade.\nDurability: 7/10\nAttack: 3 (+2)\nDefence: 1 (-1)\nLuck: +1\nSockets: 2"
+            document.plain_text(),
+            "Bronze Sword\nRare\nDurability: 7/10\nAttack: 3 (+2)\nLuck: +1\nDefence: 1 (-1)\nSockets: 2\nItem Description\nA reliable blade."
         );
+        assert_eq!(basic_item_hint(&item), document.plain_text());
     }
 
     #[test]

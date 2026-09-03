@@ -344,6 +344,14 @@ pub trait WorldRuntime: Send + Sync {
         Err("world runtime does not support active character checkpoint restore".to_string())
     }
     fn save_active_character(&mut self) -> Result<(), String>;
+    /// Persist a final world-leave snapshot and Crystal LastLogoutDate.
+    ///
+    /// Remote/test runtimes that cannot distinguish the lifecycle keep their
+    /// existing save behavior; the in-process runtime overrides this with the
+    /// exact final-save path.
+    fn save_active_character_for_logout(&mut self) -> Result<(), String> {
+        self.save_active_character()
+    }
     fn refresh_active_external_mail(&mut self) -> bool;
 }
 
@@ -873,6 +881,10 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn save_active_character(&mut self) -> Result<(), String> {
         self.session.save_active_character()
+    }
+
+    fn save_active_character_for_logout(&mut self) -> Result<(), String> {
+        self.session.save_active_character_for_logout()
     }
 
     fn refresh_active_external_mail(&mut self) -> bool {

@@ -6,6 +6,8 @@
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 
+use crate::inventory::CrystalItemTooltipSourceModel;
+
 use crate::inventory::InventoryModel;
 
 pub const SHOP_QUANTITY_MIN: u16 = 1;
@@ -59,10 +61,25 @@ pub struct ShopGood {
     pub panel_type: u8,
     /// Uses the same Crystal Items atlas exported for carried items.
     pub icon: u16,
+    /// Legacy full PNG-frame dimensions, not alpha-bound GetTrueSize.
+    /// The native renderer measures the loaded original pixels instead.
+    pub icon_width: u16,
+    pub icon_height: u16,
     pub description: String,
+    /// Exact Crystal `MirGoodsCell.Item` inputs for `CreateItemLabel`.
+    /// Missing metadata remains explicit so legacy packets never invent stats.
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 impl ShopGood {
+    pub fn user_item_image_index(&self) -> Option<u16> {
+        crate::inventory::concrete_item_image_index(
+            self.icon,
+            u32::from(self.count),
+            self.tooltip_source.as_ref(),
+        )
+    }
+
     pub fn stock_label(&self) -> String {
         if self.stock < 0 {
             "∞".to_owned()
@@ -77,6 +94,9 @@ impl ShopGood {
 pub struct ShopModel {
     pub goods: Vec<ShopGood>,
     pub selected_id: Option<u64>,
+    /// Crystal's NPCGoods.HideAddedStats switch. It applies only while
+    /// constructing MirGoodsCell tooltips for this authoritative catalog.
+    pub hide_added_stats: bool,
     /// NPC sell selection is independent from Warehouse deposit selection.
     pub selected_bag_slot_for_sell: Option<u32>,
     /// NPC repair selection is independent from sell and Warehouse state.
@@ -285,6 +305,7 @@ mod tests {
         let model = ShopModel {
             goods: vec![good(1, 10, -1)],
             selected_id: Some(1),
+            hide_added_stats: true,
             selected_bag_slot_for_sell: Some(2),
             selected_bag_slot_for_repair: Some(3),
             service_mode: NpcShopServiceMode::Buy,

@@ -9003,7 +9003,16 @@ fn npc_goods_item_json(item: &UserItem, rate: f32) -> Value {
 
     if let Some(template) = crystal_item_by_index(item.item_index) {
         entry.insert("name".into(), json!(template.name));
-        entry.insert("icon".into(), json!(template.image));
+        entry.insert(
+            "icon".into(),
+            json!(mir2_game_data::crystal_user_item_image(
+                template.item_type,
+                template.shape,
+                template.stack_size,
+                template.image,
+                u32::from(item.count),
+            )),
+        );
         entry.insert(
             "price".into(),
             json!(((template.price as f32) * rate).floor() as u32),
@@ -9394,7 +9403,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                         "name": character.name,
                         "level": character.level,
                         "class": format!("{:?}", character.class),
-                        "gender": format!("{:?}", character.gender)
+                        "gender": format!("{:?}", character.gender),
+                        "lastAccessBinaryDatetime": character.last_access_binary_datetime.to_string()
                     })
                 }).collect::<Vec<_>>()
             }
@@ -9418,7 +9428,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                     "name": char_info.name,
                     "level": char_info.level,
                     "class": format!("{:?}", char_info.class),
-                    "gender": format!("{:?}", char_info.gender)
+                    "gender": format!("{:?}", char_info.gender),
+                    "lastAccessBinaryDatetime": char_info.last_access_binary_datetime.to_string()
                 }
             }
         }),
@@ -11636,6 +11647,7 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             if !info.group.is_empty() {
                 payload.insert("group".into(), json!(info.group));
             }
+            payload.insert("minLevelNeeded".into(), json!(info.min_level_needed));
             if !info.description.is_empty() {
                 payload.insert("descriptionLines".into(), json!(info.description));
             }
@@ -11648,6 +11660,18 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                             .map(|line| quest_objective_json(line))
                             .collect(),
                     ),
+                );
+            }
+            if !info.return_description.is_empty() {
+                payload.insert(
+                    "returnDescriptionLines".into(),
+                    json!(info.return_description),
+                );
+            }
+            if !info.completion_description.is_empty() {
+                payload.insert(
+                    "completionDescriptionLines".into(),
+                    json!(info.completion_description),
                 );
             }
             if let Some(rewards) = quest_rewards_json(info) {
@@ -11723,7 +11747,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                         "name": character.name,
                         "level": character.level,
                         "class": format!("{:?}", character.class),
-                        "gender": format!("{:?}", character.gender)
+                        "gender": format!("{:?}", character.gender),
+                        "lastAccessBinaryDatetime": character.last_access_binary_datetime.to_string()
                     })
                 }).collect::<Vec<_>>()
             }
@@ -12804,6 +12829,36 @@ mod tests {
     }
 
     #[test]
+    fn character_roster_events_preserve_crystal_last_access_ticks() {
+        let character = || SelectInfo {
+            index: 7,
+            name: "LastSeenHero".to_string(),
+            level: 12,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            last_access_binary_datetime: -8584918932854775808,
+        };
+
+        let login = super::server_packet_to_event(&ServerPacket::LoginSuccess {
+            characters: vec![character()],
+        });
+        let logout = super::server_packet_to_event(&ServerPacket::LogOutSuccess {
+            characters: vec![character()],
+        });
+        let created = super::server_packet_to_event(&ServerPacket::NewCharacterSuccess {
+            char_info: character(),
+        });
+
+        for value in [
+            &login["payload"]["characters"][0],
+            &logout["payload"]["characters"][0],
+            &created["payload"]["character"],
+        ] {
+            assert_eq!(value["lastAccessBinaryDatetime"], "-8584918932854775808");
+        }
+    }
+
+    #[test]
     fn raw_server_events_expose_copyable_payload_fields() {
         let raw = super::server_packet_to_event(&ServerPacket::Raw {
             packet_id: ServerPacketId::TimeOfDay,
@@ -13014,6 +13069,40 @@ mod tests {
         let craft = super::server_packet_to_event(&ServerPacket::CraftItem { success: false });
         assert_eq!(craft["packet"], "CraftItem");
         assert_eq!(craft["payload"]["success"], false);
+    }
+
+    #[test]
+    fn npc_goods_stack_images_follow_live_count_and_keep_raw_user_item() {
+        for (index, count, image) in [
+            (710, 49, 3673),
+            (710, 50, 3674),
+            (710, 100, 2960),
+            (710, 150, 3675),
+            (711, 49, 3670),
+            (711, 50, 3671),
+            (711, 100, 2961),
+            (711, 150, 3672),
+            (712, 199, 3660),
+            (712, 200, 3661),
+            (712, 300, 3662),
+            (714, 5, 277),
+        ] {
+            let mut item = sample_user_item(71_001, count);
+            item.item_index = index;
+            let before = serde_json::to_value(&item).unwrap();
+            let event = super::server_packet_to_event(&ServerPacket::NPCGoods {
+                list: vec![item],
+                rate: 1.0,
+                panel_type: 0,
+                hide_added_stats: false,
+            });
+            let good = &event["payload"]["list"][0];
+            assert_eq!(good["icon"], image);
+            assert_eq!(good["count"], count);
+            for (key, value) in before.as_object().unwrap() {
+                assert_eq!(&good[key], value, "raw UserItem field {key}");
+            }
+        }
     }
 
     #[test]
@@ -15349,6 +15438,7 @@ mod tests {
         assert_eq!(info["payload"]["id"], 1001);
         assert_eq!(info["payload"]["name"], "Field Wasp");
         assert_eq!(info["payload"]["group"], "Starter");
+        assert_eq!(info["payload"]["minLevelNeeded"], 1);
         assert_eq!(
             info["payload"]["descriptionLines"][0],
             "Help the town guard."
@@ -15359,6 +15449,14 @@ mod tests {
         );
         assert_eq!(info["payload"]["objectives"][0]["current"], 0);
         assert_eq!(info["payload"]["objectives"][0]["required"], 3);
+        assert_eq!(
+            info["payload"]["returnDescriptionLines"][0],
+            "Return to the guard."
+        );
+        assert_eq!(
+            info["payload"]["completionDescriptionLines"][0],
+            "Good work."
+        );
         assert_eq!(info["payload"]["rewards"]["gold"], 500);
         assert_eq!(info["payload"]["rewards"]["experience"], 1_200);
         assert_eq!(

@@ -1,6 +1,7 @@
 //! Shared Crystal-style widgets for the native shell.
 
 use bevy::prelude::*;
+use bevy::text::{Justify, LineBreak, TextLayout};
 use bevy::ui::{
     AlignItems, Display, FocusPolicy, JustifyContent, Node, Overflow, PositionType, UiRect,
     UiSystems, Val,
@@ -8,6 +9,9 @@ use bevy::ui::{
 use bevy::window::PrimaryWindow;
 
 use super::assets::CrystalButtonAssetSet;
+use super::item_tooltip::{
+    CrystalItemTooltipColour, CrystalItemTooltipDocument, CrystalItemTooltipSection,
+};
 use super::spec::{CrystalButtonSpec, CrystalRect, STAGE_HEIGHT, STAGE_WIDTH};
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 
@@ -21,6 +25,7 @@ pub const CRYSTAL_ITEM_HINT_BORDER: Color = Color::srgb_u8(148, 146, 148);
 pub const CRYSTAL_ITEM_HINT_BROKEN_BORDER: Color = Color::srgb_u8(255, 0, 0);
 pub const CRYSTAL_ITEM_HINT_TEXT: Color = Color::WHITE;
 pub const CRYSTAL_ITEM_HINT_CURSOR_OFFSET: f32 = 28.0;
+pub const CRYSTAL_ITEM_HINT_SECTION_BORDER: Color = Color::srgb_u8(128, 128, 128);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CrystalHintStyle {
@@ -42,11 +47,27 @@ impl CrystalHint {
     }
 }
 
+/// Rich, source-sectioned item tooltip attached to a `MirItemCell` hit target.
+/// It is separate from the one-colour control hint so grade/stat/bind/story
+/// colours and cumulative section outlines are not lost.
+#[derive(Component, Debug, Clone, PartialEq, Eq)]
+pub struct CrystalItemHint(pub CrystalItemTooltipDocument);
+
 #[derive(Component, Debug)]
 pub struct CrystalHintOverlayRoot;
 
 #[derive(Component, Debug)]
 pub struct CrystalHintOverlayText;
+
+#[derive(Component, Debug)]
+pub struct CrystalItemHintOverlayRoot;
+
+#[derive(Component, Debug, Clone, Default, PartialEq, Eq)]
+struct CrystalItemHintOverlayState {
+    active: bool,
+    document: Option<CrystalItemTooltipDocument>,
+    layout_pending: bool,
+}
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrystalHintOverlayStyle(pub CrystalHintStyle);
@@ -64,18 +85,30 @@ pub struct Mir2CrystalHintPlugin;
 
 impl Plugin for Mir2CrystalHintPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_crystal_hint_overlay)
-            .add_systems(Update, sync_crystal_hint_overlay)
-            // Text measurement is refreshed in UiSystems::Content. Position the
-            // overlay before layout so the same frame's transform uses the new
-            // cursor position. A changed label remains hidden for one layout
-            // pass, preventing a stale-size flash when hints change length.
-            .add_systems(
-                PostUpdate,
-                position_crystal_hint_overlay
-                    .after(UiSystems::Content)
-                    .before(UiSystems::Layout),
-            );
+        app.add_systems(
+            Startup,
+            (spawn_crystal_hint_overlay, spawn_crystal_item_hint_overlay),
+        )
+        .add_systems(
+            Update,
+            (sync_crystal_hint_overlay, sync_crystal_item_hint_overlay),
+        )
+        // Text measurement is refreshed in UiSystems::Content. Position the
+        // overlay before layout so the same frame's transform uses the new
+        // cursor position. A changed label remains hidden for one layout
+        // pass, preventing a stale-size flash when hints change length.
+        .add_systems(
+            PostUpdate,
+            position_crystal_hint_overlay
+                .after(UiSystems::Content)
+                .before(UiSystems::Layout),
+        )
+        .add_systems(
+            PostUpdate,
+            position_crystal_item_hint_overlay
+                .after(UiSystems::Content)
+                .before(UiSystems::Layout),
+        );
     }
 }
 
@@ -231,6 +264,152 @@ fn spawn_crystal_hint_overlay(mut commands: Commands) {
                 FocusPolicy::Pass,
             ));
         });
+}
+
+fn spawn_crystal_item_hint_overlay(mut commands: Commands) {
+    commands.spawn((
+        CrystalItemHintOverlayRoot,
+        CrystalItemHintOverlayState::default(),
+        CrystalHintOverlayLayoutState::default(),
+        Node {
+            position_type: PositionType::Absolute,
+            display: Display::Flex,
+            flex_direction: FlexDirection::Column,
+            border: UiRect::all(Val::Px(1.0)),
+            max_width: Val::Percent(90.0),
+            max_height: Val::Percent(90.0),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(CRYSTAL_ITEM_HINT_BACKGROUND),
+        BorderColor::all(CRYSTAL_ITEM_HINT_BORDER),
+        FocusPolicy::Pass,
+        Visibility::Hidden,
+        GlobalZIndex(CRYSTAL_HINT_Z_INDEX + 1),
+    ));
+}
+
+fn sync_crystal_item_hint_overlay(
+    mut commands: Commands,
+    hints: Query<(Entity, &Interaction, &CrystalItemHint)>,
+    mut roots: Query<
+        (
+            Entity,
+            &mut CrystalItemHintOverlayState,
+            &mut BorderColor,
+            &mut Visibility,
+        ),
+        With<CrystalItemHintOverlayRoot>,
+    >,
+) {
+    let selected = hints
+        .iter()
+        .filter(|(_, interaction, _)| {
+            matches!(**interaction, Interaction::Hovered | Interaction::Pressed)
+        })
+        .min_by_key(|(entity, _, _)| entity.to_bits())
+        .map(|(_, _, hint)| &hint.0);
+    let Ok((entity, mut state, mut border, mut visibility)) = roots.single_mut() else {
+        return;
+    };
+    let Some(document) = selected else {
+        state.active = false;
+        if *visibility != Visibility::Hidden {
+            *visibility = Visibility::Hidden;
+        }
+        return;
+    };
+
+    state.active = true;
+    let desired_border = BorderColor::all(if document.broken {
+        CRYSTAL_ITEM_HINT_BROKEN_BORDER
+    } else {
+        CRYSTAL_ITEM_HINT_BORDER
+    });
+    if *border != desired_border {
+        *border = desired_border;
+    }
+    if state.document.as_ref() == Some(document) {
+        return;
+    }
+
+    state.document = Some(document.clone());
+    state.layout_pending = true;
+    if *visibility != Visibility::Hidden {
+        *visibility = Visibility::Hidden;
+    }
+    commands.entity(entity).despawn_children();
+    commands.entity(entity).with_children(|root| {
+        spawn_crystal_item_hint_document(root, document);
+    });
+}
+
+fn spawn_crystal_item_hint_document(
+    root: &mut ChildSpawnerCommands,
+    document: &CrystalItemTooltipDocument,
+) {
+    let last = document.sections.len().saturating_sub(1);
+    for (index, section) in document.sections.iter().enumerate() {
+        spawn_crystal_item_hint_section(root, section);
+        if index != last {
+            root.spawn((
+                Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Px(1.0),
+                    flex_shrink: 0.0,
+                    ..default()
+                },
+                BackgroundColor(CRYSTAL_ITEM_HINT_SECTION_BORDER),
+                FocusPolicy::Pass,
+            ));
+        }
+    }
+}
+
+fn spawn_crystal_item_hint_section(
+    root: &mut ChildSpawnerCommands,
+    section: &CrystalItemTooltipSection,
+) {
+    root.spawn((
+        Node {
+            display: Display::Flex,
+            flex_direction: FlexDirection::Column,
+            padding: UiRect::new(Val::Px(3.0), Val::Px(3.0), Val::Px(3.0), Val::Px(3.0)),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        FocusPolicy::Pass,
+    ))
+    .with_children(|section_root| {
+        for line in &section.lines {
+            section_root.spawn((
+                Text::new(line.text.clone()),
+                crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
+                TextColor(crystal_item_tooltip_colour(line.colour)),
+                TextLayout::new(Justify::Left, LineBreak::NoWrap),
+                TextShadow {
+                    offset: Vec2::splat(1.0),
+                    color: Color::BLACK,
+                },
+                FocusPolicy::Pass,
+            ));
+        }
+    });
+}
+
+fn crystal_item_tooltip_colour(colour: CrystalItemTooltipColour) -> Color {
+    match colour {
+        CrystalItemTooltipColour::White => Color::WHITE,
+        CrystalItemTooltipColour::Yellow => Color::srgb_u8(255, 255, 0),
+        CrystalItemTooltipColour::DeepSkyBlue => Color::srgb_u8(0, 191, 255),
+        CrystalItemTooltipColour::DarkOrange => Color::srgb_u8(255, 140, 0),
+        CrystalItemTooltipColour::Plum => Color::srgb_u8(221, 160, 221),
+        CrystalItemTooltipColour::Red => Color::srgb_u8(255, 0, 0),
+        CrystalItemTooltipColour::Cyan => Color::srgb_u8(0, 255, 255),
+        CrystalItemTooltipColour::DarkKhaki => Color::srgb_u8(189, 183, 107),
+        CrystalItemTooltipColour::Khaki => Color::srgb_u8(240, 230, 140),
+        CrystalItemTooltipColour::Orchid => Color::srgb_u8(218, 112, 214),
+    }
 }
 
 fn sync_crystal_hint_overlay(
@@ -410,6 +589,63 @@ fn position_crystal_hint_overlay(
     }
 }
 
+fn position_crystal_item_hint_overlay(
+    windows: Query<&Window, With<PrimaryWindow>>,
+    mut roots: Query<
+        (
+            &mut Node,
+            &ComputedNode,
+            &mut CrystalItemHintOverlayState,
+            &mut CrystalHintOverlayLayoutState,
+            &mut Visibility,
+        ),
+        With<CrystalItemHintOverlayRoot>,
+    >,
+) {
+    let Ok((mut node, computed, mut state, mut layout_state, mut visibility)) = roots.single_mut()
+    else {
+        return;
+    };
+    if !state.active {
+        if *visibility != Visibility::Hidden {
+            *visibility = Visibility::Hidden;
+        }
+        return;
+    }
+    let Ok(window) = windows.single() else {
+        *visibility = Visibility::Hidden;
+        return;
+    };
+    let Some(cursor) = window.cursor_position() else {
+        *visibility = Visibility::Hidden;
+        return;
+    };
+
+    let bounds = Vec2::new(window.resolution.width(), window.resolution.height());
+    let scale_factor = window.scale_factor();
+    let bounds_changed = layout_state.last_window_bounds != Some(bounds);
+    let scale_factor_changed = layout_state.last_window_scale_factor != Some(scale_factor);
+    layout_state.last_window_bounds = Some(bounds);
+    layout_state.last_window_scale_factor = Some(scale_factor);
+    if state.layout_pending || bounds_changed || scale_factor_changed {
+        state.layout_pending = false;
+        *visibility = Visibility::Hidden;
+        return;
+    }
+
+    let logical_size = computed.size() * computed.inverse_scale_factor;
+    if logical_size.x <= 0.0 || logical_size.y <= 0.0 {
+        *visibility = Visibility::Hidden;
+        return;
+    }
+    let position = crystal_item_hint_position_for_bounds(cursor, logical_size, bounds);
+    node.left = Val::Px(position.x);
+    node.top = Val::Px(position.y);
+    if *visibility != Visibility::Visible {
+        *visibility = Visibility::Visible;
+    }
+}
+
 pub fn crystal_hint_position(cursor: Vec2, size: Vec2) -> Vec2 {
     crystal_hint_position_for_style(CrystalHintStyle::Control, cursor, size)
 }
@@ -432,6 +668,15 @@ pub fn crystal_hint_position_for_bounds(
         }
         CrystalHintStyle::Item { .. } => cursor + Vec2::splat(CRYSTAL_ITEM_HINT_CURSOR_OFFSET),
     };
+    Vec2::new(candidate.x.clamp(0.0, max_x), candidate.y.clamp(0.0, max_y))
+}
+
+/// Crystal `GameScene.Process` positions ItemLabel at mouse + 28 and clamps
+/// its right/bottom edges exactly to ScreenWidth/ScreenHeight (no extra pixel).
+pub fn crystal_item_hint_position_for_bounds(cursor: Vec2, size: Vec2, bounds: Vec2) -> Vec2 {
+    let max_x = (bounds.x - size.x).max(0.0);
+    let max_y = (bounds.y - size.y).max(0.0);
+    let candidate = cursor + Vec2::splat(CRYSTAL_ITEM_HINT_CURSOR_OFFSET);
     Vec2::new(candidate.x.clamp(0.0, max_x), candidate.y.clamp(0.0, max_y))
 }
 
@@ -568,6 +813,111 @@ mod tests {
             ),
             Vec2::new(943.0, 727.0)
         );
+        assert_eq!(
+            crystal_item_hint_position_for_bounds(
+                Vec2::new(1020.0, 760.0),
+                Vec2::new(80.0, 40.0),
+                Vec2::new(1024.0, 768.0),
+            ),
+            Vec2::new(944.0, 728.0),
+            "GameScene clamps ItemLabel exactly to the screen edge without the generic -1 inset"
+        );
+    }
+
+    #[test]
+    fn rich_item_hint_keeps_children_across_renderer_entity_churn() {
+        use super::super::item_tooltip::{
+            CrystalItemTooltipLine, CrystalItemTooltipSection, CrystalItemTooltipSectionKind,
+        };
+
+        let document = CrystalItemTooltipDocument {
+            sections: vec![CrystalItemTooltipSection {
+                kind: CrystalItemTooltipSectionKind::Name,
+                lines: vec![CrystalItemTooltipLine {
+                    text: "Small HP Drug".to_owned(),
+                    colour: CrystalItemTooltipColour::Yellow,
+                }],
+            }],
+            broken: false,
+            source_complete: true,
+        };
+        let mut app = App::new();
+        app.add_systems(Startup, spawn_crystal_item_hint_overlay)
+            .add_systems(Update, sync_crystal_item_hint_overlay);
+        let first_target = app
+            .world_mut()
+            .spawn((Interaction::Hovered, CrystalItemHint(document.clone())))
+            .id();
+        app.update();
+
+        let root = app
+            .world_mut()
+            .query_filtered::<Entity, With<CrystalItemHintOverlayRoot>>()
+            .single(app.world())
+            .expect("rich item tooltip root");
+        let first_children = app
+            .world()
+            .entity(root)
+            .get::<Children>()
+            .expect("rendered document children")
+            .to_vec();
+        assert!(!first_children.is_empty());
+
+        app.world_mut().despawn(first_target);
+        app.world_mut()
+            .spawn((Interaction::Hovered, CrystalItemHint(document.clone())));
+        app.update();
+
+        let state = app
+            .world()
+            .entity(root)
+            .get::<CrystalItemHintOverlayState>()
+            .expect("rich item tooltip state");
+        assert!(state.active);
+        assert_eq!(state.document.as_ref(), Some(&document));
+        assert_eq!(
+            app.world()
+                .entity(root)
+                .get::<Children>()
+                .expect("stable children")
+                .to_vec(),
+            first_children,
+            "Inventory children are recreated each frame; identical tooltip content must not restart layout forever"
+        );
+    }
+
+    #[test]
+    fn rich_item_hint_remains_active_while_the_item_cell_is_pressed() {
+        use super::super::item_tooltip::{
+            CrystalItemTooltipLine, CrystalItemTooltipSection, CrystalItemTooltipSectionKind,
+        };
+
+        let document = CrystalItemTooltipDocument {
+            sections: vec![CrystalItemTooltipSection {
+                kind: CrystalItemTooltipSectionKind::Name,
+                lines: vec![CrystalItemTooltipLine {
+                    text: "Wooden Sword".to_owned(),
+                    colour: CrystalItemTooltipColour::Yellow,
+                }],
+            }],
+            broken: false,
+            source_complete: true,
+        };
+        let mut app = App::new();
+        app.add_systems(Startup, spawn_crystal_item_hint_overlay)
+            .add_systems(Update, sync_crystal_item_hint_overlay);
+        app.world_mut()
+            .spawn((Interaction::Pressed, CrystalItemHint(document.clone())));
+
+        app.update();
+
+        let state = app
+            .world_mut()
+            .query_filtered::<&CrystalItemHintOverlayState, With<CrystalItemHintOverlayRoot>>()
+            .single(app.world())
+            .expect("rich item tooltip state");
+        assert!(state.active);
+        assert_eq!(state.document.as_ref(), Some(&document));
     }
 
     #[test]

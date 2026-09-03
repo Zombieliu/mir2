@@ -8,6 +8,13 @@
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct CrystalPlayerStatModel {
+    pub stat: u8,
+    pub value: i32,
+}
+
 /// Player stats surfaced by the HUD.
 ///
 /// All values are `Option`-safe and clamped by [`UiReadModel::normalized_hp`]
@@ -23,6 +30,10 @@ pub struct PlayerStats {
     pub max_mp: i32,
     pub gold: u32,
     pub credit: u32,
+    /// `Some` means the server supplied its authoritative Crystal stat block;
+    /// a missing id inside that block is zero. `None` is a legacy/partial
+    /// snapshot and must not be treated as proof that a requirement is met.
+    pub crystal_stats: Option<Vec<CrystalPlayerStatModel>>,
     pub level: u32,
     pub experience: i64,
     pub max_experience: i64,
@@ -33,6 +44,18 @@ pub struct PlayerStats {
     /// Older snapshots may omit it; `None` keeps the catalog visible while the
     /// server remains the final authority for a purchase.
     pub class_name: Option<String>,
+    /// Crystal `UserInformation.Gender`. Kept optional so an old or partial
+    /// snapshot cannot silently invent the CharacterDialog paper doll.
+    pub gender: Option<String>,
+    /// Crystal's zero-based hair style index. `0` is a real style, therefore
+    /// absence is represented by `None` rather than a numeric sentinel.
+    pub hair: Option<u8>,
+    /// Crystal `UserObject.WingEffect`. Only values 1 and 2 select a
+    /// CharacterDialog wing frame; `0` and other values intentionally draw
+    /// nothing. Kept optional so partial snapshots cannot invent an effect.
+    pub wing_effect: Option<u8>,
+    pub guild_name: Option<String>,
+    pub guild_rank_name: Option<String>,
     pub map_name: Option<String>,
     /// Server-authoritative safe-zone membership for the local player.
     pub in_safe_zone: bool,
@@ -137,6 +160,7 @@ mod tests {
                 max_mp: 50,
                 gold: 1234,
                 credit: 45,
+                crystal_stats: Some(vec![CrystalPlayerStatModel { stat: 5, value: 4 }]),
                 level: 3,
                 experience: 435,
                 max_experience: 900,
@@ -144,6 +168,11 @@ mod tests {
                 max_weight: 50,
                 name: Some("Demo".to_owned()),
                 class_name: Some("Warrior".to_owned()),
+                gender: Some("Male".to_owned()),
+                hair: Some(0),
+                wing_effect: Some(1),
+                guild_name: Some("DemoGuild".to_owned()),
+                guild_rank_name: Some("Member".to_owned()),
                 map_name: Some("BichonProvince".to_owned()),
                 in_safe_zone: true,
             },
@@ -188,5 +217,21 @@ mod tests {
         assert_eq!(model.player.normalized_experience(), 1.0);
         assert_eq!(model.player.normalized_weight(), 1.0);
         assert_eq!(model.player.available_weight(), 0);
+    }
+
+    #[test]
+    fn wing_effect_round_trips_without_defaulting_missing_authority() {
+        let json = serde_json::to_value(sample()).expect("serialize player read model");
+        assert_eq!(json["player"]["wingEffect"], serde_json::json!(1));
+        let restored: UiReadModel = serde_json::from_value(json).expect("player read model");
+        assert_eq!(restored.player.wing_effect, Some(1));
+
+        let legacy: UiReadModel =
+            serde_json::from_value(serde_json::json!({"player": {}})).expect("legacy player");
+        assert_eq!(legacy.player.wing_effect, None);
+        let cleared: UiReadModel =
+            serde_json::from_value(serde_json::json!({"player": {"wingEffect": 0}}))
+                .expect("explicit no-wing state");
+        assert_eq!(cleared.player.wing_effect, Some(0));
     }
 }

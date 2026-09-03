@@ -1174,7 +1174,7 @@ fn replay_envelope(
         .restore_active_character_checkpoint(&payload.checkpoint)
         .map_err(|error| replay_conflict(format!("restore recovery checkpoint: {error}")))?;
     session
-        .save_active_character()
+        .save_active_character_for_logout()
         .map_err(|error| format!("recovery DB save failed; journal retained: {error}"))?;
     let committed = session.active_character_checkpoint().ok_or_else(|| {
         "recovery DB save returned success but active checkpoint disappeared".to_string()

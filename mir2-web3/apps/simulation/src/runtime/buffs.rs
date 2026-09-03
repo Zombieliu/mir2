@@ -4,6 +4,7 @@ use mir2_game_data::{
     localized_text_or_fallback, starter_server_data, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{crystal_stat_label, ClientBuff, ServerPacket, UserItemStat};
+use serde::{Deserialize, Serialize};
 
 use super::components::{current_player_is_dead, hero_entity, player_entity, PlayerVitals};
 use super::crystal_compat::*;
@@ -11,7 +12,7 @@ use super::items::{crystal_item_stat_value, user_item_stat_total};
 use super::packets::{object_health_info_for_entity, object_mana_info_for_entity};
 use super::resources::{BuffResource, PlayerRuntimeResource, PotionRecoveryResource};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(super) struct BuffState {
     pub(super) key: String,
     pub(super) name: String,
