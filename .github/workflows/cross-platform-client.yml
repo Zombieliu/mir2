@@ -359,7 +359,7 @@ jobs:
           set -euo pipefail
 
           TARGET="aarch64-linux-android"
-          API_LEVEL="${MIR2_ANDROID_API_LEVEL:-26}"
+          API_LEVEL="${MIR2_ANDROID_API_LEVEL:-31}"
           [[ "$API_LEVEL" =~ ^[0-9]+$ ]] || { echo "Invalid Android API level: $API_LEVEL" >&2; exit 1; }
 
           NDK_HOME=""
