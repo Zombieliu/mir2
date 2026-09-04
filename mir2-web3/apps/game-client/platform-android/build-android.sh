@@ -83,13 +83,12 @@ echo "[platform-android] ${MODE} ${TARGET} with Rust ${TOOLCHAIN}, NDK ${NDK_HOM
 ndk_args=(
   "+${TOOLCHAIN}"
   ndk
-  --manifest-path "${MANIFEST}"
   --target "${ABI}"
   --platform "${API_LEVEL}"
 )
 
 if [[ "${MODE}" == "check" ]]; then
-  cargo "${ndk_args[@]}" check --lib --locked --offline
+  cargo "${ndk_args[@]}" --manifest-path "${MANIFEST}" check --lib --locked --offline
   echo "[platform-android] target check passed"
   exit 0
 fi
@@ -111,7 +110,7 @@ fi
 staged_lib="${NDK_OUTPUT}/${ABI}/libmir2_platform_android.so"
 native_lib="${JNI_ROOT}/${ABI}/libmir2_platform_android.so"
 rm -f "${staged_lib}"
-cargo "${ndk_args[@]}" --output-dir "${NDK_OUTPUT}" "${build_args[@]}"
+cargo "${ndk_args[@]}" --manifest-path "${MANIFEST}" --output-dir "${NDK_OUTPUT}" "${build_args[@]}"
 [[ -f "${staged_lib}" ]] || fail "cargo-ndk did not produce '${staged_lib}'"
 mkdir -p "${JNI_ROOT}/${ABI}"
 rm -f "${native_lib}" "${JNI_ROOT}/${ABI}/libmir2_bevy_runtime.so"
