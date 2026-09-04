@@ -1,63 +1,114 @@
 param(
     [ValidateSet('check', 'package')]
-    [string]$Mode = $(if ($env:MIR2_ANDROID_MODE) { $env:MIR2_ANDROID_MODE } else { 'check' })
+    [string]$Mode = $(if ($env:MIR2_ANDROID_MODE) { $env:MIR2_ANDROID_MODE } else { 'check' }),
+    [ValidateSet('debug', 'release')]
+    [string]$Variant = $(if ($env:MIR2_ANDROID_VARIANT) { $env:MIR2_ANDROID_VARIANT } else { 'debug' })
 )
 
 $ErrorActionPreference = 'Stop'
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $manifest = Join-Path $scriptDir 'Cargo.toml'
+$androidProject = Join-Path $scriptDir 'android'
+$jniRoot = Join-Path $androidProject 'app\src\main\jniLibs'
+$ndkOutput = Join-Path $scriptDir 'target\android-jni'
 $toolchain = if ($env:MIR2_CLIENT_TOOLCHAIN) { $env:MIR2_CLIENT_TOOLCHAIN } else { '1.95.0' }
 $target = if ($env:MIR2_ANDROID_TARGET) { $env:MIR2_ANDROID_TARGET } else { 'aarch64-linux-android' }
-$apiLevel = if ($env:MIR2_ANDROID_API_LEVEL) { $env:MIR2_ANDROID_API_LEVEL } else { '26' }
+$abi = if ($env:MIR2_ANDROID_ABI) { $env:MIR2_ANDROID_ABI } else { 'arm64-v8a' }
+$apiLevel = if ($env:MIR2_ANDROID_API_LEVEL) { [int]$env:MIR2_ANDROID_API_LEVEL } else { 31 }
+$rustProfile = if ($env:MIR2_ANDROID_RUST_PROFILE) { $env:MIR2_ANDROID_RUST_PROFILE } else { 'release' }
 
 function Fail([string]$Message) {
     throw "[platform-android] error: $Message"
 }
 
-if (-not (Get-Command cargo -ErrorAction SilentlyContinue)) { Fail "required command 'cargo' is not on PATH" }
-if (-not (Get-Command rustup -ErrorAction SilentlyContinue)) { Fail "required command 'rustup' is not on PATH" }
+if ($target -ne 'aarch64-linux-android' -or $abi -ne 'arm64-v8a') {
+    Fail 'M0 supports only aarch64-linux-android / arm64-v8a'
+}
+if ($apiLevel -lt 31) { Fail 'GameActivity M0 requires MIR2_ANDROID_API_LEVEL >= 31' }
+if ($rustProfile -notin @('debug', 'release')) { Fail "MIR2_ANDROID_RUST_PROFILE must be 'debug' or 'release'" }
+
+foreach ($command in @('cargo', 'cargo-ndk', 'rustup')) {
+    if (-not (Get-Command $command -ErrorAction SilentlyContinue)) {
+        Fail "required command '$command' is not on PATH"
+    }
+}
 
 & rustup run $toolchain rustc --version *> $null
-if ($LASTEXITCODE -ne 0) { Fail "Rust toolchain '$toolchain' is unavailable; install it locally or set MIR2_CLIENT_TOOLCHAIN" }
+if ($LASTEXITCODE -ne 0) {
+    Fail "Rust toolchain '$toolchain' is unavailable; install it locally or set MIR2_CLIENT_TOOLCHAIN"
+}
 
 $installedTargets = @(& rustup target list --installed --toolchain $toolchain)
 if ($installedTargets -notcontains $target) {
     Fail "Rust target '$target' is not installed for '$toolchain'; run 'rustup target add --toolchain $toolchain $target'"
 }
 
+$sdkRoot = if ($env:ANDROID_SDK_ROOT) { $env:ANDROID_SDK_ROOT } elseif ($env:ANDROID_HOME) { $env:ANDROID_HOME } else { Join-Path $env:LOCALAPPDATA 'Android\Sdk' }
+if (-not (Test-Path -LiteralPath $sdkRoot)) { Fail 'Android SDK not found; set ANDROID_SDK_ROOT or ANDROID_HOME' }
+
 $ndkHome = if ($env:ANDROID_NDK_HOME) { $env:ANDROID_NDK_HOME } elseif ($env:ANDROID_NDK_ROOT) { $env:ANDROID_NDK_ROOT } else { $null }
-$sdkRoots = @($env:ANDROID_SDK_ROOT, $env:ANDROID_HOME, (Join-Path $env:LOCALAPPDATA 'Android\Sdk')) | Where-Object { $_ }
 if (-not $ndkHome) {
-    foreach ($sdkRoot in $sdkRoots) {
-        $ndkRoot = Join-Path $sdkRoot 'ndk'
-        if (Test-Path -LiteralPath $ndkRoot) {
-            $ndkHome = Get-ChildItem -LiteralPath $ndkRoot -Directory | Sort-Object Name -Descending | Select-Object -First 1 -ExpandProperty FullName
-            if ($ndkHome) { break }
-        }
+    $ndkRoot = Join-Path $sdkRoot 'ndk'
+    if (Test-Path -LiteralPath $ndkRoot) {
+        $ndkHome = Get-ChildItem -LiteralPath $ndkRoot -Directory |
+            Sort-Object { [version]$_.Name } -Descending |
+            Select-Object -First 1 -ExpandProperty FullName
     }
 }
-if (-not $ndkHome -or -not (Test-Path -LiteralPath $ndkHome)) { Fail 'Android NDK not found; set ANDROID_NDK_HOME or ANDROID_NDK_ROOT' }
+if (-not $ndkHome -or -not (Test-Path -LiteralPath $ndkHome)) {
+    Fail 'Android NDK not found; set ANDROID_NDK_HOME or ANDROID_NDK_ROOT'
+}
 
-$prebuiltRoot = Join-Path $ndkHome 'toolchains\llvm\prebuilt'
-$prebuilt = Get-ChildItem -LiteralPath $prebuiltRoot -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
-if (-not $prebuilt) { Fail "NDK LLVM prebuilt directory not found below '$ndkHome'" }
-
-$targetEnv = $target.ToUpperInvariant().Replace('-', '_')
-$linkerPattern = "$target$apiLevel-clang*"
-$linker = Get-ChildItem -LiteralPath (Join-Path $prebuilt.FullName 'bin') -Filter $linkerPattern -File -ErrorAction SilentlyContinue | Select-Object -First 1
-$ar = Get-ChildItem -LiteralPath (Join-Path $prebuilt.FullName 'bin') -Filter 'llvm-ar*' -File -ErrorAction SilentlyContinue | Select-Object -First 1
-if (-not $linker) { Fail "NDK linker '$target$apiLevel-clang' is missing" }
-if (-not $ar) { Fail "NDK llvm-ar is missing" }
-
-Set-Item -Path "Env:CARGO_TARGET_${targetEnv}_LINKER" -Value $linker.FullName
-Set-Item -Path "Env:CARGO_TARGET_${targetEnv}_AR" -Value $ar.FullName
+$env:ANDROID_SDK_ROOT = $sdkRoot
+$env:ANDROID_NDK_HOME = $ndkHome
 
 Write-Host "[platform-android] $Mode $target with Rust $toolchain, NDK $ndkHome, API $apiLevel"
-if ($Mode -eq 'package') {
-    if (-not (Get-Command cargo-apk -ErrorAction SilentlyContinue)) { Fail "required command 'cargo-apk' is not on PATH" }
-    & cargo "+$toolchain" apk --manifest-path $manifest --target $target --release --locked --offline
-} else {
-    & cargo "+$toolchain" check --manifest-path $manifest --target $target --locked --offline
+$ndkArgs = @("+$toolchain", 'ndk', '--manifest-path', $manifest, '--target', $abi, '--platform', "$apiLevel")
+
+if ($Mode -eq 'check') {
+    & cargo @ndkArgs check --lib --locked --offline
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host '[platform-android] target check passed'
+    exit 0
 }
+
+if (-not (Get-Command java -ErrorAction SilentlyContinue)) { Fail "required command 'java' is not on PATH" }
+$gradleWrapper = Join-Path $androidProject 'gradlew.bat'
+if (-not (Test-Path -LiteralPath $gradleWrapper)) { Fail 'checked-in Gradle wrapper is missing' }
+
+$buildArgs = @('build', '--lib', '--locked', '--offline')
+$gradleTask = 'assembleDebug'
+$apkPath = Join-Path $androidProject 'app\build\outputs\apk\debug\app-debug.apk'
+if ($rustProfile -eq 'release') {
+    $buildArgs += '--release'
+}
+if ($Variant -eq 'release') {
+    $gradleTask = 'assembleRelease'
+    $apkPath = Join-Path $androidProject 'app\build\outputs\apk\release\app-release-unsigned.apk'
+}
+
+$nativeLib = Join-Path $jniRoot "$abi\libmir2_platform_android.so"
+$stagedLib = Join-Path $ndkOutput "$abi\libmir2_platform_android.so"
+Remove-Item -LiteralPath $stagedLib -Force -ErrorAction SilentlyContinue
+& cargo @ndkArgs --output-dir $ndkOutput @buildArgs
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-Write-Host "[platform-android] $Mode gate passed"
+if (-not (Test-Path -LiteralPath $stagedLib)) { Fail "cargo-ndk did not produce '$stagedLib'" }
+$nativeDir = Split-Path -Parent $nativeLib
+New-Item -ItemType Directory -Path $nativeDir -Force | Out-Null
+Remove-Item -LiteralPath $nativeLib -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath (Join-Path $nativeDir 'libmir2_bevy_runtime.so') -Force -ErrorAction SilentlyContinue
+Copy-Item -LiteralPath $stagedLib -Destination $nativeLib
+
+Push-Location $androidProject
+try {
+    & $gradleWrapper --no-daemon $gradleTask
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+} finally {
+    Pop-Location
+}
+
+if (-not (Test-Path -LiteralPath $apkPath)) { Fail "Gradle did not produce '$apkPath'" }
+$apkSha = (Get-FileHash -Algorithm SHA256 -LiteralPath $apkPath).Hash.ToLowerInvariant()
+Write-Host "[platform-android] APK: $apkPath"
+Write-Host "[platform-android] SHA-256: $apkSha"
+Write-Host '[platform-android] package gate passed'
