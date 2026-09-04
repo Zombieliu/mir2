@@ -78,6 +78,8 @@ fi
 export ANDROID_SDK_ROOT="${SDK_ROOT}"
 export ANDROID_NDK_HOME="${NDK_HOME}"
 
+cd "${SCRIPT_DIR}"
+
 echo "[platform-android] ${MODE} ${TARGET} with Rust ${TOOLCHAIN}, NDK ${NDK_HOME}, API ${API_LEVEL}"
 
 ndk_args=(
