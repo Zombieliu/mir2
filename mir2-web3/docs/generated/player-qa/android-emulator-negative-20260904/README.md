@@ -24,9 +24,12 @@ This evidence extends the macOS packaging baseline with installation, cold launc
 | Build fingerprint | `google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys` |
 | Display | 1080 x 2340, 440 dpi |
 | Android System WebView | 91.0.4472.114 |
+| Android Emulator | 31.3.10.0 (build 8807927) |
 | Physical device | none |
 
 The emulator was started without `-wipe-data`. `adb devices -l` showed exactly one target before installation. The package was not previously installed, so no existing application data was replaced or cleared.
+
+The emulator reported that it is out of date, an unexpected system-image feature string, and a missing `emulator/bin64/e2fsck` executable while attempting to resize userdata from 800 MB to 20,480 MB. These warnings did not prevent this run, but the emulator/tooling installation should be refreshed before performance or longer soak acceptance.
 
 ## Installation and cold launch
 
@@ -85,6 +88,20 @@ File: chrome-error://chromewebdata/ - Line 1 - Msg: Uncaught TypeError: Cannot r
 
 The error came from the WebView-generated error document rather than the unavailable Mir2 page. It did not crash or restart the app. It is retained as a negative-path observation; no lifecycle or shared Web code was changed on this evidence-only round.
 
+## Emulator reboot persistence
+
+After the first run, the emulator was shut down normally and restarted with `-no-snapshot-load` to force a full Android boot from persisted userdata. The package remained installed at the same version, and its install timestamps were unchanged:
+
+```text
+package:/data/app/.../com.obelisklabs.mir2-.../base.apk
+versionCode=1
+versionName=1.0
+firstInstallTime=2026-09-04 13:28:38
+lastUpdateTime=2026-09-04 13:28:38
+```
+
+A second post-reboot cold launch succeeded with `TotalTime: 539 ms` and `WaitTime: 543 ms`. Capacitor emitted `App started` and `App resumed`; no app ANR, fatal exception, or process crash was observed. This confirms package and basic app-lifecycle persistence only, not player-state persistence.
+
 ## Diagnostic snapshot
 
 | Metric | Observed value |
@@ -109,6 +126,7 @@ Passed in this round:
 - cold launch
 - build-time endpoint propagation
 - background/resume without process replacement, ANR, or crash
+- package persistence and cold launch after a full emulator reboot without loading a snapshot
 - durable screenshots with SHA-256 values
 
 Still unaccepted:
@@ -120,6 +138,7 @@ Still unaccepted:
 - offline/reconnect behavior in a functioning game session
 - exit/re-entry persistence
 - physical-device input, WebView compatibility, performance, thermal, and soak evidence
+- updated emulator tooling and a clean userdata-resize warning baseline
 - native Bevy Android networking and host integration
 
 ## Next gate
