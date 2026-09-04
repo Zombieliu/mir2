@@ -335,6 +335,7 @@ jobs:
         run: |
           rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal
           rustup target add --toolchain "$RUST_TOOLCHAIN" aarch64-linux-android
+          cargo "+$RUST_TOOLCHAIN" install cargo-ndk --version 4.1.2 --locked
       - name: Fetch native Bevy dependencies
         working-directory: .
         run: >-
