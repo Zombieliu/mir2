@@ -55,23 +55,43 @@ or Shop mutation variants; opening those panels is therefore not evidence of a
 corresponding Android wire action. This bridge does not invent those commands.
 
 This closes the reducer-to-wire-command and receipt-to-reducer adaptation
-only. The repository still does not provide an Android WebSocket transport or
-APK/device evidence, so this crate must not be described as an online-playable
-Android client.
+only. The repository still does not provide an Android WebSocket transport, so
+this crate must not be described as an online-playable Android client.
+
+## Native M0 host
+
+`android/` is a Gradle GameActivity host for the Rust `cdylib`. The build path
+is deliberately explicit:
+
+1. `cargo-ndk` cross-compiles `libmir2_platform_android.so` for
+   `arm64-v8a`.
+2. The library is copied into Gradle's generated `jniLibs` tree.
+3. `MainActivity` loads that library and GameActivity invokes Bevy's
+   `android_main`, which is emitted by `#[bevy_main]`.
+4. The shared Bevy runtime renders an asset-free M0 marker and logs
+   `MIR2_ANDROID_M0_FRAME_READY`.
+
+The marker proves only that the native Activity, Bevy/Winit renderer, and
+shared runtime reached a rendered frame. It is not evidence of login,
+WebSocket transport, authoritative world state, or a complete native client.
 
 ## Local prerequisites
 
-The build gate is intentionally offline and never installs tools. Provide all
-of the following locally before a target build:
+The Rust build gate is intentionally offline and never installs tools. Gradle
+may populate its normal dependency cache on the first package build. Provide
+all of the following locally before a target build:
 
 - Rust toolchain `1.95.0` and target `aarch64-linux-android`
-- Android SDK, NDK, and Java
-- `cargo-apk` for APK packaging
+- Android SDK and NDK
+- Java 17 or newer for Gradle/AGP
+- `cargo-ndk` 4.1.2
 - `adb` for emulator or device checks
 
 Set `ANDROID_SDK_ROOT` and `ANDROID_NDK_HOME` (or `ANDROID_NDK_ROOT`) when the
-SDK/NDK are not in the standard user location. The gate uses Android API 26 by
-default; override it with `MIR2_ANDROID_API_LEVEL` when that API is installed.
+SDK/NDK are not in the standard user location. The GameActivity flavor uses
+Android API 31 by default and rejects lower values. Supporting API 26 would
+require a separately tested NativeActivity flavor; lowering this package's
+minimum SDK does not make GameActivity compatible.
 
 ## Host checks
 
@@ -101,14 +121,27 @@ On a Unix-like shell:
 MIR2_ANDROID_MODE=package ./build-android.sh
 ```
 
-The first command runs an offline target check. The package mode uses the
-`cargo-apk` metadata in `Cargo.toml` and writes the release APK under Cargo's
-target directory. Missing tools or targets fail with the exact local command
-needed to prepare them; no download is attempted.
+The first command runs an offline `cargo-ndk` target check. Package mode builds
+an optimized Rust library inside a debug-signed APK by default and writes it
+to:
+
+```text
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Set `MIR2_ANDROID_VARIANT=release` for an unsigned release package. Set
+`MIR2_ANDROID_RUST_PROFILE=debug` only when native debug symbols are actually
+needed; a Bevy debug library makes the APK impractically large. The packaging
+script stages all Cargo outputs under `target/` and copies only
+`libmir2_platform_android.so` into the APK. Generated native libraries, APKs,
+Gradle caches, passwords, and signing keys are ignored and must not be
+committed. Missing local tools or targets fail before the build is attempted.
 
 ## Emulator/device handoff
 
 Only after an APK exists, verify the endpoint explicitly with `adb devices`.
-Install with `adb install -r <apk>` and launch package `com.mir2.web3`. An
-`adb` listing alone is not evidence that the game launched or that a physical
-device was used.
+Install with `adb install -r <apk>` and launch package `com.mir2.web3`. For M0,
+capture the rendered frame, the `MIR2_ANDROID_M0_FRAME_READY` log entry, and a
+background/resume check. An `adb` listing alone is not evidence that the game
+launched or that a physical device was used; emulator evidence must not be
+reported as physical-device acceptance.

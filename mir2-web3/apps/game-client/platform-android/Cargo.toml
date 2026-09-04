@@ -6,13 +6,6 @@ publish = false
 description = "Native Android host for the mir2-web3 Bevy client"
 license = "MIT"
 
-[package.metadata.android]
-package = "com.mir2.web3"
-apk_name = "mir2-web3"
-min_sdk_version = 26
-target_sdk_version = 35
-build_targets = ["aarch64-linux-android"]
-
 # Host crates stay independent from the server workspace while the client tree
 # is migrated incrementally, matching client-core, runtime and platform-windows.
 [workspace]
@@ -30,6 +23,6 @@ path = "src/main.rs"
 mir2-bevy-runtime = { path = "../runtime" }
 mir2-ui-core = { path = "../ui-core" }
 mir2-client-bevy = { path = "../client-bevy" }
-bevy = { version = "0.19.0", default-features = false, features = ["bevy_asset", "bevy_ui", "bevy_text", "bevy_core_pipeline", "bevy_render", "bevy_sprite", "bevy_winit", "multi_threaded", "png", "android-game-activity"] }
+bevy = { version = "0.19.0", default-features = false, features = ["bevy_asset", "bevy_ui", "bevy_text", "bevy_core_pipeline", "bevy_log", "bevy_render", "bevy_sprite", "bevy_winit", "multi_threaded", "png", "android-game-activity"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

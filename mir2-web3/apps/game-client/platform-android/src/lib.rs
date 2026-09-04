@@ -495,7 +495,29 @@ pub fn build_android_runtime_app() -> App {
         ..RuntimeWindowSpec::native("mir2-web3 (android)")
     });
     app.add_plugins(AndroidShellPlugin);
+    #[cfg(target_os = "android")]
+    app.insert_resource(ClearColor(Color::srgb(0.015, 0.035, 0.075)))
+        .insert_resource(bevy::winit::WinitSettings::mobile())
+        .add_systems(Startup, spawn_android_m0_marker);
     app
+}
+
+/// Asset-free launch marker for the first native Android milestone.
+///
+/// It gives device evidence a deterministic rendered surface before the
+/// transport and world snapshot path are connected. Later native milestones
+/// may remove this once the authoritative scene is always available.
+#[cfg(target_os = "android")]
+fn spawn_android_m0_marker(mut commands: Commands) {
+    commands.spawn((
+        Sprite::from_color(Color::srgb(0.08, 0.78, 0.72), Vec2::new(460.0, 180.0)),
+        Transform::from_xyz(0.0, 0.0, 10.0),
+    ));
+    commands.spawn((
+        Sprite::from_color(Color::srgb(0.95, 0.72, 0.18), Vec2::new(300.0, 36.0)),
+        Transform::from_xyz(0.0, 0.0, 11.0),
+    ));
+    info!("MIR2_ANDROID_M0_FRAME_READY");
 }
 
 /// The function name is intentional: Bevy's Android macro emits the
