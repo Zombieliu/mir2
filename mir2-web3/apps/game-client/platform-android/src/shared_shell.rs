@@ -112,14 +112,25 @@ impl Plugin for AndroidSharedShellPlugin {
                 mir2_client_bevy::crystal_ui::notice::Mir2CrystalNoticePlugin,
                 mir2_client_bevy::quest_ui::Mir2QuestUiPlugin,
             ))
-            .add_systems(PreUpdate, receive.before(bevy::input::InputSystems))
+            .add_systems(
+                PreUpdate,
+                (receive, discard_inactive_player_commands)
+                    .chain()
+                    .before(bevy::input::InputSystems),
+            )
             .add_systems(
                 PreUpdate,
                 remember_editor_touch.after(bevy::ui::UiSystems::Focus),
             )
             .add_systems(
                 PostUpdate,
-                (fit_stage.in_set(AndroidStageFit), forward_intents, keyboard).chain(),
+                (
+                    fit_stage.in_set(AndroidStageFit),
+                    forward_intents,
+                    discard_inactive_player_commands,
+                    keyboard,
+                )
+                    .chain(),
             );
         #[cfg(feature = "ui-preview")]
         crate::ui_preview::install(app);
@@ -197,6 +208,7 @@ fn player_editor_bottom(field: Option<&str>) -> f32 {
 fn receive(
     mut model: ResMut<NativeShellModel>,
     mut host: ResMut<HostState>,
+    mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
     mut intents: ResMut<NativeUiIntentQueue>,
     mut player: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
     mut key_events: Option<ResMut<Messages<bevy::input::keyboard::KeyboardInput>>>,
@@ -306,6 +318,11 @@ fn receive(
             continue;
         }
         let phase = value["phase"].as_str().unwrap_or("");
+        if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
+            if let Some(effects) = effects.as_deref_mut() {
+                discard_player_commands(effects);
+            }
+        }
         let message = value["message"]
             .as_str()
             .unwrap_or("Connection unavailable")
@@ -397,6 +414,7 @@ fn forward_intents(
     mut model: ResMut<NativeShellModel>,
     host: Res<HostState>,
     mut intents: ResMut<NativeUiIntentQueue>,
+    mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
 ) {
     for intent in intents.drain() {
         match intent {
@@ -418,13 +436,50 @@ fn forward_intents(
                 }
             }
             Intent::Retry => send(json!({"type":"connect"})),
-            Intent::Logout => send(json!({"type":"disconnect"})),
+            Intent::Logout => {
+                if let Some(effects) = effects.as_deref_mut() {
+                    discard_player_commands(effects);
+                }
+                send(json!({"type":"disconnect"}));
+            }
             _ => {
                 model.apply_gateway_event(Event::OperationFailure {
                     message: "This account operation is not wired in the Android UI milestone."
                         .into(),
                 });
             }
+        }
+    }
+}
+
+// Only unsent shared Gateway effects are invalidated. Local option persistence
+// and application effects must survive; this is not a server rollback/receipt.
+fn discard_player_commands(effects: &mut mir2_client_bevy::crystal_ui::overlays::UiEffectQueue) {
+    let mut discarded = 0;
+    for effect in effects.drain() {
+        if matches!(effect, mir2_ui_core::effect::UiEffect::GatewayCommand(_)) {
+            discarded += 1;
+        } else {
+            effects.push(effect);
+        }
+    }
+    if discarded > 0 {
+        debug!("Discarded {discarded} unsent shared player commands at Android session boundary");
+        #[cfg(feature = "ui-preview")]
+        info!("ANDROID_UI_PREVIEW_DISCARD count={discarded} unsent shared commands");
+    }
+}
+
+fn discard_inactive_player_commands(
+    model: Res<NativeShellModel>,
+    windows: Query<&Window>,
+    mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
+) {
+    let active =
+        model.screen == Screen::InGame && windows.single().is_ok_and(|window| window.focused);
+    if !active {
+        if let Some(effects) = effects.as_deref_mut() {
+            discard_player_commands(effects);
         }
     }
 }
@@ -496,6 +551,87 @@ fn keyboard(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn invalidation_discards_network_effects_but_retains_local_effects_in_order() {
+        use mir2_client_bevy::crystal_ui::overlays::UiEffectQueue;
+        use mir2_ui_core::effect::{GatewayCommand, UiEffect};
+        let mut effects = UiEffectQueue::default();
+        effects.push(UiEffect::ExitApplication);
+        effects.push(UiEffect::GatewayCommand(GatewayCommand::TownRevive));
+        effects.push(UiEffect::ExitApplication);
+        discard_player_commands(&mut effects);
+        discard_player_commands(&mut effects);
+        assert_eq!(
+            effects.drain(),
+            vec![UiEffect::ExitApplication, UiEffect::ExitApplication]
+        );
+    }
+
+    #[test]
+    fn inactive_cleanup_runs_before_and_after_ui_producers_and_never_replays_on_resume() {
+        use mir2_client_bevy::crystal_ui::overlays::UiEffectQueue;
+        use mir2_ui_core::effect::{GatewayCommand, UiEffect};
+        fn produce(mut effects: ResMut<UiEffectQueue>) {
+            effects.push(UiEffect::GatewayCommand(GatewayCommand::TownRevive));
+        }
+        for (in_game, focused, has_window) in [
+            (false, true, true),
+            (true, false, true),
+            (true, true, false),
+            (true, true, true),
+        ] {
+            let mut app = App::new();
+            app.insert_resource(NativeShellModel {
+                screen: if in_game {
+                    Screen::InGame
+                } else {
+                    Screen::Login
+                },
+                ..default()
+            })
+            .init_resource::<UiEffectQueue>()
+            .add_systems(PreUpdate, discard_inactive_player_commands)
+            .add_systems(Update, produce)
+            .add_systems(PostUpdate, discard_inactive_player_commands);
+            if has_window {
+                app.world_mut().spawn(Window {
+                    focused,
+                    ..default()
+                });
+            }
+            app.world_mut()
+                .resource_mut::<UiEffectQueue>()
+                .push(UiEffect::GatewayCommand(GatewayCommand::TownRevive));
+            app.update();
+            let active = in_game && focused && has_window;
+            let first = app.world_mut().resource_mut::<UiEffectQueue>().drain();
+            assert_eq!(first.len(), if active { 2 } else { 0 });
+            app.world_mut().resource_mut::<NativeShellModel>().screen = Screen::InGame;
+            let world = app.world_mut();
+            if has_window {
+                world
+                    .query::<&mut Window>()
+                    .single_mut(world)
+                    .unwrap()
+                    .focused = true;
+            } else {
+                world.spawn(Window {
+                    focused: true,
+                    ..default()
+                });
+            }
+            app.update();
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<UiEffectQueue>()
+                    .drain()
+                    .len(),
+                1,
+                "only the new frame's intent remains after resume"
+            );
+        }
+    }
 
     #[test]
     fn guild_notice_keeps_all_eight_text_lines_above_ime() {
