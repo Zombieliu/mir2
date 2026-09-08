@@ -11,7 +11,7 @@ mkdir -p "$task_output"
 git -C "$task_script_dir" rev-parse HEAD > "$task_output/source-head.txt"
 git -C "$task_script_dir" status --short > "$task_output/source-status.txt"
 "$task_adb" shell getprop ro.build.fingerprint > "$task_output/device.txt"
-for task_scene in login empty-roster roster create password safekey delete-character connecting starting disconnected hud inventory character skills quests options platform menu gameshop npcshop mail bigmap storage group guild trade chat-settings npc death chat help; do
+for task_scene in login empty-roster roster create password safekey delete-character connecting starting disconnected hud inventory inventory-amount character skills quests options platform menu gameshop npcshop mail mail-compose bigmap storage group guild trade chat-settings npc death chat help; do
   "$task_adb" shell am force-stop "$task_package"
   "$task_adb" shell am start -W -n "$task_package/com.mir2.web3.MainActivity" --es ui_scene "$task_scene" > "$task_output/$task_scene-launch.txt"
   task_pid="$("$task_adb" shell pidof "$task_package" | tr -d '\r')"
@@ -30,4 +30,4 @@ for task_scene in login empty-roster roster create password safekey delete-chara
   fi
   echo "$task_scene captured"
 done
-echo "31 offline specimens captured; NOT live, physical-device or full interaction acceptance."
+echo "33 offline specimens captured; NOT live, physical-device or full interaction acceptance."

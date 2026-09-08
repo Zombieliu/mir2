@@ -806,6 +806,7 @@ pub enum MailComposeFocus {
 pub struct MailComposeUi {
     pub focus: MailComposeFocus,
     pub last_notice: Option<String>,
+    pub attachment_page: usize,
 }
 
 /// Renderer-only state for the Crystal BigMap search field. Authoritative map,
@@ -2268,6 +2269,8 @@ enum OverlayButton {
     DeleteMail(u64),
     OpenMailCompose,
     MailRecipientFocus,
+    MailAttachmentPagePrev,
+    MailAttachmentPageNext,
     MailMessageFocus,
     MailGoldInc,
     MailGoldDec,
@@ -2348,6 +2351,7 @@ struct OverlayRenderModels<'w> {
     inventory_feedback: Res<'w, InventoryOperationFeedback>,
     mail: Res<'w, MailModel>,
     mail_ui: Res<'w, MailUiState>,
+    mail_compose_ui: Option<Res<'w, MailComposeUi>>,
     big_map: Res<'w, BigMapModel>,
     big_map_ui: Res<'w, BigMapUiState>,
     ui: Res<'w, UiReadModel>,
@@ -5227,6 +5231,17 @@ fn process_overlay_buttons(
                 );
                 compose_ui.focus = MailComposeFocus::Recipient;
                 compose_ui.last_notice = None;
+                compose_ui.attachment_page = 0;
+            }
+            OverlayButton::MailAttachmentPagePrev | OverlayButton::MailAttachmentPageNext => {
+                let (_, pages) = mail_attachment_page(&inventory, compose_ui.attachment_page);
+                let page = compose_ui.attachment_page.min(pages - 1);
+                compose_ui.attachment_page =
+                    if matches!(*button, OverlayButton::MailAttachmentPagePrev) {
+                        page.saturating_sub(1)
+                    } else {
+                        (page + 1).min(pages - 1)
+                    };
             }
             OverlayButton::MailRecipientFocus => {
                 compose_ui.focus = MailComposeFocus::Recipient;
@@ -6455,6 +6470,7 @@ fn render_overlays(
         inventory_feedback,
         mail,
         mail_ui,
+        mail_compose_ui,
         big_map,
         big_map_ui,
         ui,
@@ -6554,6 +6570,7 @@ fn render_overlays(
                     &mail_ui,
                     &inventory,
                     &state,
+                    &mail_compose_ui.as_deref().cloned().unwrap_or_default(),
                 )
             },
         );
@@ -7728,7 +7745,9 @@ fn overlay_absolute_button(
     ));
     if enabled {
         entity.insert((Button, action));
-        if is_text_input_action(action) { entity.insert(NativeTextInputTarget); }
+        if is_text_input_action(action) {
+            entity.insert(NativeTextInputTarget);
+        }
     }
     if !label.is_empty() {
         entity.with_children(|button| {
@@ -9900,6 +9919,7 @@ fn render_mail(
     mail_ui: &MailUiState,
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
+    compose_ui: &MailComposeUi,
 ) {
     if let Some(asset_server) = asset_server {
         spawn_overlay_frame(
@@ -9934,8 +9954,7 @@ fn render_mail(
         );
     }
     if let Some(compose) = state.core.mail_compose.as_ref() {
-        render_mail_compose(parent, compose, inventory);
-        overlay_button(parent, "Cancel", OverlayButton::CancelMailCompose, true);
+        render_mail_compose(parent, compose, inventory, compose_ui);
         return;
     }
     let page = mail.page(mail_ui.cursor.page);
@@ -10068,14 +10087,21 @@ fn render_mail_compose(
     parent: &mut ChildSpawnerCommands,
     draft: &mir2_ui_core::state::MailComposeDraft,
     inventory: &InventoryModel,
+    ui: &MailComposeUi,
 ) {
-    body(parent, "Write mail (Tab switches field; Esc cancels)");
+    overlay_text_at(
+        parent,
+        "Write mail",
+        CrystalRect::new(10.0, 8.0, 235.0, 18.0),
+        11.0,
+        TEXT,
+    );
     let message_label = if draft.message.is_empty() {
         "<type>".to_owned()
     } else {
         short_name(&draft.message, "<type>")
     };
-    overlay_button(
+    overlay_absolute_button(
         parent,
         &format!(
             "Recipient: {}",
@@ -10085,79 +10111,218 @@ fn render_mail_compose(
                 &draft.recipient
             }
         ),
+        CrystalRect::new(10.0, 32.0, 290.0, 26.0),
         OverlayButton::MailRecipientFocus,
         true,
     );
-    overlay_button(
+    overlay_absolute_button(
         parent,
         &format!("Message: {message_label}"),
+        CrystalRect::new(10.0, 62.0, 290.0, 26.0),
         OverlayButton::MailMessageFocus,
         true,
     );
-    parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            body(row, &format!("Gold: {}", draft.gold));
-            overlay_button(row, "-100", OverlayButton::MailGoldDec, draft.gold >= 100);
-            overlay_button(row, "+100", OverlayButton::MailGoldInc, true);
-        });
-    body(
+    overlay_text_at(
+        parent,
+        &format!("Gold: {}", draft.gold),
+        CrystalRect::new(10.0, 98.0, 170.0, 18.0),
+        10.0,
+        TEXT,
+    );
+    overlay_absolute_button(
+        parent,
+        "-100",
+        CrystalRect::new(185.0, 92.0, 54.0, 26.0),
+        OverlayButton::MailGoldDec,
+        draft.gold >= 100,
+    );
+    overlay_absolute_button(
+        parent,
+        "+100",
+        CrystalRect::new(245.0, 92.0, 54.0, 26.0),
+        OverlayButton::MailGoldInc,
+        true,
+    );
+    overlay_text_at(
         parent,
         &format!("Attachments: {}/5", draft.attachment_unique_ids.len()),
+        CrystalRect::new(10.0, 126.0, 290.0, 18.0),
+        10.0,
+        TEXT,
     );
-    for id in &draft.attachment_unique_ids {
-        if let Some(item) = inventory
-            .items
-            .iter()
-            .find(|item| item.container == 0 && item.unique_id == Some(*id))
-        {
-            parent
-                .spawn(Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(4.0),
-                    ..default()
-                })
-                .with_children(|row| {
-                    body(row, &format!("{} ×{}", item.name, item.quantity));
-                    overlay_button(
-                        row,
-                        "Remove",
-                        OverlayButton::RemoveMailAttachment(*id),
-                        true,
-                    );
-                });
-        }
-    }
-    for item in inventory.items_in(0) {
-        let Some(id) = item.unique_id else { continue };
-        if draft.attachment_unique_ids.contains(&id) {
-            continue;
-        }
-        if draft.attachment_unique_ids.len() >= MAX_MAIL_ATTACHMENTS {
-            break;
-        }
-        overlay_button(
+    let (items, pages) = mail_attachment_page(inventory, ui.attachment_page);
+    for (row, item) in items.into_iter().enumerate() {
+        let id = item
+            .unique_id
+            .expect("attachment page filters missing identity");
+        let selected = draft.attachment_unique_ids.contains(&id);
+        overlay_absolute_button(
             parent,
             &format!(
-                "Attach {} ×{} (slot {})",
-                item.name, item.quantity, item.slot
+                "{} {} ×{} (slot {})",
+                if selected { "Remove" } else { "Attach" },
+                short_name(&item.name, &item.key),
+                item.quantity,
+                item.slot
             ),
-            OverlayButton::AddMailAttachment(id),
-            true,
+            CrystalRect::new(10.0, 150.0 + row as f32 * 32.0, 290.0, 28.0),
+            if selected {
+                OverlayButton::RemoveMailAttachment(id)
+            } else {
+                OverlayButton::AddMailAttachment(id)
+            },
+            selected || draft.attachment_unique_ids.len() < MAX_MAIL_ATTACHMENTS,
         );
     }
-    overlay_button(
+    let page = ui.attachment_page.min(pages - 1);
+    overlay_absolute_button(
+        parent,
+        "<",
+        CrystalRect::new(10.0, 350.0, 54.0, 28.0),
+        OverlayButton::MailAttachmentPagePrev,
+        page > 0,
+    );
+    overlay_text_at(
+        parent,
+        &format!("{}/{}", page + 1, pages),
+        CrystalRect::new(125.0, 357.0, 72.0, 18.0),
+        10.0,
+        TEXT,
+    );
+    overlay_absolute_button(
+        parent,
+        ">",
+        CrystalRect::new(246.0, 350.0, 54.0, 28.0),
+        OverlayButton::MailAttachmentPageNext,
+        page + 1 < pages,
+    );
+    overlay_absolute_button(
         parent,
         "Send",
+        CrystalRect::new(10.0, 408.0, 138.0, 28.0),
         OverlayButton::SubmitMail,
         !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty(),
     );
+    overlay_absolute_button(
+        parent,
+        "Cancel",
+        CrystalRect::new(162.0, 408.0, 138.0, 28.0),
+        OverlayButton::CancelMailCompose,
+        true,
+    );
+}
+
+// Presentation-only paging. Shared reducers still enforce attachment count and
+// the server validates every identity. No inventory item is changed here.
+fn mail_attachment_page(inventory: &InventoryModel, requested: usize) -> (Vec<&ItemModel>, usize) {
+    let items: Vec<_> = inventory
+        .items_in(0)
+        .into_iter()
+        .filter(|item| item.unique_id.is_some())
+        .collect();
+    let pages = items.len().div_ceil(6).max(1);
+    let start = requested.min(pages - 1) * 6;
+    (items.into_iter().skip(start).take(6).collect(), pages)
+}
+
+#[cfg(test)]
+mod mail_compose_paging_tests {
+    use super::*;
+
+    #[test]
+    fn populated_compose_controls_stay_inside_mail_frame() {
+        let inventory = InventoryModel {
+            items: (0..40)
+                .map(|slot| ItemModel {
+                    container: 0,
+                    slot,
+                    unique_id: Some(u64::from(slot) + 1),
+                    ..default()
+                })
+                .collect(),
+            ..default()
+        };
+        let mut world = World::new();
+        world
+            .commands()
+            .spawn(Node::default())
+            .with_children(|parent| {
+                render_mail_compose(parent, &default(), &inventory, &default());
+            });
+        world.flush();
+        let mut buttons = 0;
+        for (node, button) in world
+            .query::<(&Node, Option<&OverlayButton>)>()
+            .iter(&world)
+        {
+            if let (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) =
+                (node.left, node.top, node.width, node.height)
+            {
+                assert!(
+                    left >= 0.0 && top >= 0.0 && left + width <= 312.0 && top + height <= 444.0
+                );
+            }
+            if matches!(button, Some(OverlayButton::AddMailAttachment(_))) {
+                buttons += 1;
+            }
+        }
+        assert_eq!(buttons, 6);
+    }
+
+    #[test]
+    fn all_eligible_items_remain_reachable_and_stale_pages_clamp() {
+        let inventory = InventoryModel {
+            items: (0..13)
+                .map(|slot| ItemModel {
+                    container: 0,
+                    slot,
+                    unique_id: Some(u64::from(slot) + 1),
+                    ..default()
+                })
+                .collect(),
+            ..default()
+        };
+        let mut seen = Vec::new();
+        for page in 0..3 {
+            let (items, pages) = mail_attachment_page(&inventory, page);
+            assert_eq!(pages, 3);
+            assert!(items.len() <= 6);
+            seen.extend(items.into_iter().map(|item| item.slot));
+        }
+        assert_eq!(seen, (0..13).collect::<Vec<_>>());
+        assert_eq!(mail_attachment_page(&inventory, usize::MAX).0[0].slot, 12);
+        let empty = InventoryModel::default();
+        assert_eq!(mail_attachment_page(&empty, usize::MAX).1, 1);
+        assert!(mail_attachment_page(&empty, 0).0.is_empty());
+    }
+
+    #[test]
+    fn unaddressable_or_other_container_items_do_not_create_rows() {
+        let inventory = InventoryModel {
+            items: vec![
+                ItemModel {
+                    container: 0,
+                    unique_id: None,
+                    ..default()
+                },
+                ItemModel {
+                    container: 2,
+                    unique_id: Some(2),
+                    ..default()
+                },
+                ItemModel {
+                    container: 0,
+                    unique_id: Some(3),
+                    ..default()
+                },
+            ],
+            ..default()
+        };
+        let (items, pages) = mail_attachment_page(&inventory, 0);
+        assert_eq!(pages, 1);
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].unique_id, Some(3));
+    }
 }
 
 fn big_map_view_position(point: BigMapPoint, width: i32, height: i32) -> (f32, f32) {
@@ -11747,7 +11912,9 @@ fn overlay_button(
     ));
     if enabled {
         entity.insert((Button, action));
-        if is_text_input_action(action) { entity.insert(NativeTextInputTarget); }
+        if is_text_input_action(action) {
+            entity.insert(NativeTextInputTarget);
+        }
     }
     entity.with_children(|button| {
         button.spawn((
@@ -11767,9 +11934,15 @@ fn overlay_button(
 }
 
 fn is_text_input_action(action: OverlayButton) -> bool {
-    matches!(action, OverlayButton::GroupInviteNameFocus | OverlayButton::GuildRecruitNameFocus
-        | OverlayButton::GuildRankNameFocus | OverlayButton::MailRecipientFocus
-        | OverlayButton::MailMessageFocus | OverlayButton::BigMapSearchFocus)
+    matches!(
+        action,
+        OverlayButton::GroupInviteNameFocus
+            | OverlayButton::GuildRecruitNameFocus
+            | OverlayButton::GuildRankNameFocus
+            | OverlayButton::MailRecipientFocus
+            | OverlayButton::MailMessageFocus
+            | OverlayButton::BigMapSearchFocus
+    )
 }
 
 #[cfg(test)]
