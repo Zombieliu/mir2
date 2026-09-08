@@ -156,7 +156,10 @@ fn fit_stage(
     let available = (window.height() - host.ime_bottom / window.scale_factor()).max(1.0);
     let panel = mir2_client_bevy::crystal_ui::spec::login::PANEL.rect;
     let top = if host.ime_bottom > 0.0 && model.screen == Screen::InGame {
-        let editor_bottom = player_editor_bottom(forms.field(&player).map(|field| field.0));
+        let field = forms
+            .field(&player)
+            .or_else(|| crate::text_input::player_field(&player));
+        let editor_bottom = player_editor_bottom(field.map(|field| field.0));
         (available / fit.scale - editor_bottom).min(fit.offset_y / fit.scale)
     } else if host.ime_bottom > 0.0 {
         (available / (2.0 * fit.scale) - panel.top - panel.height * 0.5)
@@ -173,6 +176,14 @@ fn fit_stage(
 
 fn player_editor_bottom(field: Option<&str>) -> f32 {
     match field {
+        Some("guild-notice") => {
+            // Shared notice text starts at panel +61, in 9px type. Reserve
+            // 12px per permitted line plus a gutter, not the bottom HUD row.
+            mir2_client_bevy::crystal_ui::overlays::CRYSTAL_GUILD_PANEL_RECT.top
+                + 61.0
+                + mir2_client_bevy::social::MAX_NOTICE_LINES as f32 * 12.0
+                + 8.0
+        }
         Some("inventory-amount" | "guild-amount" | "trade-amount") => {
             let rect = mir2_client_bevy::crystal_ui::overlays::CRYSTAL_DELETE_AMOUNT_RECT;
             rect.top + rect.height + 8.0
@@ -485,6 +496,11 @@ fn keyboard(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn guild_notice_keeps_all_eight_text_lines_above_ime() {
+        assert_eq!(player_editor_bottom(Some("guild-notice")), 333.0);
+    }
 
     #[test]
     fn every_shared_amount_dialog_uses_its_modal_geometry_for_ime() {

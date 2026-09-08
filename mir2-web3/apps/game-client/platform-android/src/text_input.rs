@@ -126,6 +126,28 @@ mod tests {
         edit_player(&mut state, "chat", "stale");
         assert_eq!(state.chat_draft.chars().count(), 60);
     }
+
+    #[test]
+    fn guild_notice_ime_reuses_shared_filter_and_freezes_pending_draft() {
+        let mut state = NativePlayerUiState::default();
+        state.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        state.core.panel = mir2_ui_core::state::UiPanel::Guild;
+        state.guild_notice_editing = true;
+        let text = format!("公告\n{}\n第二行\t", "x".repeat(70));
+        let mut expected = String::new();
+        mir2_client_bevy::crystal_ui::overlays::push_guild_notice_text(&mut expected, &text);
+        edit_player(&mut state, "guild-notice", &text);
+        assert_eq!(state.guild_notice_draft, expected);
+        assert!(state.guild_notice_draft.contains('\n'));
+        state.guild_notice_submission = Some(vec!["pending".into()]);
+        assert!(player_field(&state).is_none());
+        edit_player(&mut state, "guild-notice", "stale");
+        assert_eq!(state.guild_notice_draft, expected);
+        state.guild_notice_submission = None;
+        state.guild_notice_editing = false;
+        edit_player(&mut state, "guild-notice", "closed");
+        assert_eq!(state.guild_notice_draft, expected);
+    }
 }
 
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;

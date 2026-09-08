@@ -287,6 +287,8 @@ fn populate_specimens(world: &mut World, scene: &str) {
         social.guild.notice = vec!["Offline notice specimen. No guild was created.".into()];
         social.guild.member_count = 1;
         social.guild.max_members = 50;
+        // Offline permission specimen only; the preview host cannot send requests.
+        social.guild.permissions = vec!["notice".into()];
     }
 }
 
