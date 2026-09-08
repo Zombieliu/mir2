@@ -8414,18 +8414,20 @@ fn render_help(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetSer
             TEXT,
         );
         for (row, (shortcut, information)) in rows.iter().enumerate() {
-            let top = 142.0 + row as f32 * 20.0;
+            // All 18 shortcut rows must end inside the body (y < 475),
+            // before the page label at y=480. Keep every original row.
+            let top = 142.0 + row as f32 * 18.0;
             overlay_text_at(
                 parent,
                 shortcut,
-                CrystalRect::new(30.0, top, 95.0, 23.0),
+                CrystalRect::new(30.0, top, 95.0, 18.0),
                 9.0,
                 GOLD,
             );
             overlay_text_at(
                 parent,
                 information,
-                CrystalRect::new(131.0, top, 400.0, 23.0),
+                CrystalRect::new(131.0, top, 400.0, 18.0),
                 9.0,
                 TEXT,
             );
@@ -17180,6 +17182,39 @@ mod tests {
             .intents
             .is_empty());
         assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
+    }
+
+    #[test]
+    fn help_shortcut_rows_stay_inside_body_without_losing_content() {
+        let mut app = overlay_render_test_app();
+        for page in 0..3 {
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .help
+                .display_page(page);
+            app.update();
+            let world = app.world_mut();
+            for (_, information) in help_shortcut_rows(page as u8).unwrap() {
+                let nodes = world
+                    .query::<(&Text, &Node)>()
+                    .iter(world)
+                    .filter(|(text, _)| text.0 == *information)
+                    .map(|(_, node)| node.clone())
+                    .collect::<Vec<_>>();
+                assert_eq!(nodes.len(), 1, "page {page}: {information}");
+                let Val::Px(top) = nodes[0].top else {
+                    panic!("pixel top")
+                };
+                let Val::Px(height) = nodes[0].height else {
+                    panic!("pixel height")
+                };
+                assert!(
+                    top >= 142.0 && top + height <= 475.0,
+                    "page {page}: {information} extends to {}",
+                    top + height
+                );
+            }
+        }
     }
 
     #[test]
