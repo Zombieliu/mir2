@@ -553,6 +553,98 @@ mod tests {
     use super::*;
 
     #[test]
+    fn shared_session_reset_clears_android_player_intents_without_reusing_storage_ids() {
+        use mir2_client_bevy::{
+            crystal_ui::overlays::{
+                MailComposeUi, NativePlayerUiIntent, NativePlayerUiIntentQueue,
+                NativePlayerUiState, UiEffectQueue,
+            },
+            pending_operations::{
+                apply_overlay_session_reset, observe_native_session_boundary,
+                AuthoritativeModelRevisions, InventoryOperationFeedback,
+                NativeSessionBoundaryTracker, OverlayResetTracker, PendingOperations,
+                SessionResetGameShopPreservation, SessionResetRevision,
+            },
+        };
+        for destination in [Screen::Login, Screen::ConnectionLost] {
+            let mut app = App::new();
+            app.insert_resource(NativeShellModel {
+                screen: Screen::InGame,
+                ..default()
+            })
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<UiEffectQueue>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<InventoryOperationFeedback>()
+            .init_resource::<NativeSessionBoundaryTracker>()
+            .init_resource::<OverlayResetTracker>()
+            .init_resource::<AuthoritativeModelRevisions>()
+            .init_resource::<SessionResetRevision>()
+            .init_resource::<SessionResetGameShopPreservation>()
+            // Match the shared plugin: reset runs before input/boundary observation.
+            .add_systems(
+                Update,
+                (apply_overlay_session_reset, observe_native_session_boundary).chain(),
+            );
+            app.update();
+            let first_id = app.world_mut().resource_scope(
+                |world, mut queue: Mut<NativePlayerUiIntentQueue>| {
+                    let mut pending = world.resource_mut::<PendingOperations>();
+                    assert!(queue.push_storage_pending_intent(&mut pending, true, 7, 0, 1));
+                    let queued = queue.drain_intents();
+                    let NativePlayerUiIntent::StoreItem { request_id, .. } = &queued[0] else {
+                        panic!("expected storage intent")
+                    };
+                    let id = request_id.clone();
+                    for intent in queued {
+                        assert!(queue.push_intent(intent));
+                    }
+                    assert!(queue.push_intent(NativePlayerUiIntent::Chat {
+                        message: "old-session".into()
+                    }));
+                    id
+                },
+            );
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .chat_draft = "old draft".into();
+            app.world_mut().resource_mut::<NativeShellModel>().screen = destination;
+            app.update();
+            assert_eq!(app.world().resource::<SessionResetRevision>().0, 1);
+            app.update();
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents()
+                .is_empty());
+            assert!(app.world().resource::<PendingOperations>().is_empty());
+            assert!(app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .chat_draft
+                .is_empty());
+            let next_id = app.world_mut().resource_scope(
+                |world, mut queue: Mut<NativePlayerUiIntentQueue>| {
+                    let mut pending = world.resource_mut::<PendingOperations>();
+                    assert!(queue.push_storage_pending_intent(&mut pending, true, 8, 0, 1));
+                    let queued = queue.drain_intents();
+                    let NativePlayerUiIntent::StoreItem { request_id, .. } = &queued[0] else {
+                        panic!("expected storage intent")
+                    };
+                    request_id.clone()
+                },
+            );
+            assert_ne!(
+                first_id, next_id,
+                "session cleanup must not reset request identity"
+            );
+        }
+    }
+
+    #[test]
     fn invalidation_discards_network_effects_but_retains_local_effects_in_order() {
         use mir2_client_bevy::crystal_ui::overlays::UiEffectQueue;
         use mir2_ui_core::effect::{GatewayCommand, UiEffect};
