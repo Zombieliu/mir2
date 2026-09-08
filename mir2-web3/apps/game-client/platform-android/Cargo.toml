@@ -23,6 +23,9 @@ path = "src/main.rs"
 mir2-bevy-runtime = { path = "../runtime" }
 mir2-ui-core = { path = "../ui-core" }
 mir2-client-bevy = { path = "../client-bevy" }
-bevy = { version = "0.19.0", default-features = false, features = ["bevy_asset", "bevy_ui", "bevy_text", "bevy_core_pipeline", "bevy_log", "bevy_render", "bevy_sprite", "bevy_winit", "multi_threaded", "png", "android-game-activity"] }
+bevy = { version = "0.19.0", default-features = false, features = ["bevy_asset", "bevy_ui", "bevy_text", "default_font", "bevy_core_pipeline", "bevy_log", "bevy_render", "bevy_sprite", "bevy_winit", "multi_threaded", "png", "android-game-activity"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = "=0.22.4"

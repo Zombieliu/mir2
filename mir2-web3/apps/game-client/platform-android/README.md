@@ -1,4 +1,48 @@
-# Android native client scaffold
+# Android native client
+
+## Login host (2026-09-08)
+
+`android/app/src/main/java/com/mir2/web3/GatewaySession.java` supplies a bounded
+login/character-selection WSS host using OkHttp 4.12.0 and Android's normal TLS
+trust and hostname verification. Enter an approved `wss://.../ws` endpoint in
+the Activity; there is no default production endpoint. Cleartext, embedded
+credentials, query credentials and redirects are rejected.
+
+The native form sends the existing BrowserCommand `clientVersion`,
+`login {accountId,password}`, `startGame {characterIndex}` and `keepAlive`
+shapes (see Windows `native_protocol.rs` and Android `gateway_bridge.rs`).
+An account ID is only a username paired with a password, never an authenticated
+identity assertion. It does not send PasskeyLogin or invent authentication.
+LoginSuccess supplies the selectable roster. StartGame result 4 plus server
+character/map/position data are required before IN_GAME is shown. The host
+accepts packet-first data and the matching selfPlayer in worldSnapshot.
+JNI forwards only the bounded display text to Bevy; this milestone does not
+populate the shared world-render/gameplay resources or render map assets.
+
+Only the endpoint is stored in private preferences. Passwords, account names,
+session tokens and character state are not persisted. Form state saving and
+autofill are disabled. Passwords are cleared after submission/backgrounding;
+phase logs omit credentials and raw messages. Login screens prohibit captures;
+the secret form is hidden before in-game captures are allowed.
+
+On background, disconnect, timeout or transport failure, the socket and old
+roster/position are discarded. Reconnect requires an explicit button and fresh
+login. No command is replayed and nativeResumeV1 is not advertised. Automatic
+credential-based resume, process-death session persistence, character creation,
+movement and complete gameplay remain subsequent work. The existing reducer
+transaction queues below are **not** connected to this login-only socket.
+
+Host TLS/protocol tests (test certificates are generated only in JVM memory):
+
+```bash
+cd android
+./gradlew testDebugUnitTest
+```
+
+These MockWebServer tests do not establish real Gateway authentication. See
+`docs/generated/player-qa/native-android-login-20260908/README.md` in the main
+project for the actual build and device evidence, including outstanding live
+environment acceptance.
 
 This crate is the native Android shell for the shared Bevy client. UI actions
 are routed through `mir2-ui-core`; the Android layer only owns lifecycle,
@@ -55,8 +99,8 @@ or Shop mutation variants; opening those panels is therefore not evidence of a
 corresponding Android wire action. This bridge does not invent those commands.
 
 This closes the reducer-to-wire-command and receipt-to-reducer adaptation
-only. The repository still does not provide an Android WebSocket transport, so
-this crate must not be described as an online-playable Android client.
+only. The login-only Activity socket does not drain these gameplay queues;
+this crate must not be described as a complete online-playable Android client.
 
 ## Native M0 host
 
@@ -68,10 +112,10 @@ is deliberately explicit:
 2. The library is copied into Gradle's generated `jniLibs` tree.
 3. `MainActivity` loads that library and GameActivity invokes Bevy's
    `android_main`, which is emitted by `#[bevy_main]`.
-4. The shared Bevy runtime renders an asset-free M0 marker and logs
-   `MIR2_ANDROID_M0_FRAME_READY`.
+4. The shared Bevy runtime renders the login host's latest status text. The
+   earlier M0 teal/gold marker is replaced by this native text display.
 
-The marker proves only that the native Activity, Bevy/Winit renderer, and
+The historical M0 marker proved only that the native Activity, Bevy/Winit renderer, and
 shared runtime reached a rendered frame. It is not evidence of login,
 WebSocket transport, authoritative world state, or a complete native client.
 
@@ -141,7 +185,7 @@ committed. Missing local tools or targets fail before the build is attempted.
 
 Only after an APK exists, verify the endpoint explicitly with `adb devices`.
 Install with `adb install -r <apk>` and launch package `com.mir2.web3`. For M0,
-capture the rendered frame, the `MIR2_ANDROID_M0_FRAME_READY` log entry, and a
+capture the rendered frame, the `Mir2NativeSession` phase log entries, and a
 background/resume check. An `adb` listing alone is not evidence that the game
 launched or that a physical device was used; emulator evidence must not be
 reported as physical-device acceptance.

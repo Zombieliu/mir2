@@ -5,7 +5,8 @@
     <application
         android:allowBackup="false"
         android:hardwareAccelerated="true"
-        android:label="Mir2 Native M0"
+        android:label="Mir2 Native"
+        android:usesCleartextTraffic="false"
         android:supportsRtl="true"
         android:theme="@style/Theme.Mir2Native">
         <activity

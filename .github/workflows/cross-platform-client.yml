@@ -410,6 +410,9 @@ jobs:
 
           echo "Using Android NDK LLVM tools from $LLVM_BIN"
           mir2-web3/apps/game-client/platform-android/build-android.sh
+      - name: Test native Android login host
+        working-directory: mir2-web3/apps/game-client/platform-android/android
+        run: ./gradlew --no-daemon testDebugUnitTest
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: mir2-android-debug-apk
