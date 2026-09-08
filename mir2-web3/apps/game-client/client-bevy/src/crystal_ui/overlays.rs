@@ -8862,6 +8862,22 @@ fn render_guild_notice(
         TEXT,
     );
     let can_edit = guild.name.is_some() && social_has_permission(guild, "notice");
+    if can_edit && state.guild_notice_editing && state.guild_notice_submission.is_none() {
+        // Transparent input hit surface only: Android can reopen its IME
+        // without invoking BeginEdit again (which would replace the draft).
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: px(rect.left + 13.0),
+                top: px(rect.top + 61.0),
+                width: px(322.0),
+                height: px(330.0),
+                ..default()
+            },
+            Button,
+            NativeTextInputTarget,
+        ));
+    }
     if can_edit {
         let action = if state.guild_notice_editing {
             OverlayButton::GuildPublishNotice
@@ -13582,6 +13598,61 @@ mod tests {
                 .join("\n")
         ))
         .is_none());
+    }
+
+    #[test]
+    fn guild_notice_touch_target_exists_only_for_editable_draft() {
+        for (editing, pending, permission, expected) in [
+            (true, false, true, 1),
+            (false, false, true, 0),
+            (true, true, true, 0),
+            (true, false, false, 0),
+        ] {
+            let mut app = App::new();
+            app.add_plugins((MinimalPlugins, AssetPlugin::default()))
+                .init_asset::<Image>();
+            let server = app.world().resource::<AssetServer>().clone();
+            let guild = crate::social::GuildModel {
+                name: Some("Offline".into()),
+                permissions: if permission {
+                    vec!["notice".into()]
+                } else {
+                    vec![]
+                },
+                ..default()
+            };
+            let state = NativePlayerUiState {
+                guild_notice_editing: editing,
+                guild_notice_submission: pending.then(|| vec!["Pending".into()]),
+                ..default()
+            };
+            let world = app.world_mut();
+            world
+                .commands()
+                .spawn(Node::default())
+                .with_children(|parent| {
+                    render_guild_notice(parent, &server, &guild, &state, CRYSTAL_GUILD_PANEL_RECT);
+                });
+            world.flush();
+            let targets: Vec<_> = world
+                .query_filtered::<
+                    (&Node, Option<&OverlayButton>),
+                    (With<Button>, With<NativeTextInputTarget>),
+                >()
+                .iter(world)
+                .collect();
+            assert_eq!(
+                targets.len(), expected,
+                "editing={editing} pending={pending} permission={permission}"
+            );
+            for (node, action) in targets {
+                assert!(action.is_none(), "retapping must not publish the notice");
+                assert_eq!(node.left, px(CRYSTAL_GUILD_PANEL_RECT.left + 13.0));
+                assert_eq!(node.top, px(CRYSTAL_GUILD_PANEL_RECT.top + 61.0));
+                assert_eq!(node.width, px(322.0));
+                assert_eq!(node.height, px(330.0));
+            }
+        }
     }
 
     #[test]
