@@ -7,6 +7,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.KeyEvent;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
@@ -30,7 +31,7 @@ public final class MainActivity extends GameActivity {
     private OkHttpClient client;
     private EditText ime;
     private String editing = "";
-    private boolean updating, foreground, sensitiveEditor;
+    private boolean updating, foreground, sensitiveEditor, imeWasVisible;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -45,6 +46,12 @@ public final class MainActivity extends GameActivity {
         });
         ime.setOnApplyWindowInsetsListener((view, insets) -> {
             nativeEvent(GatewaySession.object("type", "insets", "bottom", insets.getInsets(WindowInsets.Type.ime()).bottom).toString());
+            boolean visible = insets.isVisible(WindowInsets.Type.ime());
+            boolean dismissed = imeWasVisible && !visible;
+            imeWasVisible = visible;
+            // Android can consume Back to hide the IME without calling the
+            // Activity. Do not consume the next Back a second time as an editor.
+            if (dismissed && !editing.isEmpty()) hideKeyboard();
             return insets;
         });
         ime.setAlpha(0f);
@@ -144,6 +151,25 @@ public final class MainActivity extends GameActivity {
         updating = false;
         ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(ime.getWindowToken(), 0);
         ime.clearFocus();
+    }
+
+    // GameActivity consumes Back in its native key handler (BrowserBack), so
+    // Activity's default onBackPressed route is never reached. IME pre-dispatch
+    // still gets first refusal; only a tracked, uncancelled key-up cancels UI.
+    @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (event.getRepeatCount() == 0) event.startTracking();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (event.isTracking() && !event.isCanceled()) onBackPressed();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     @Override public void onBackPressed() {

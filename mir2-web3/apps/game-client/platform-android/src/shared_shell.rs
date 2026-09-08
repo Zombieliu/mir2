@@ -71,6 +71,26 @@ struct HostState {
     ime_bottom: f32,
 }
 
+#[derive(Resource, Default)]
+struct EditorTouch(bool);
+
+fn remember_editor_touch(
+    mut touch: ResMut<EditorTouch>,
+    mut held: Local<bool>,
+    targets: Query<
+        &Interaction,
+        With<mir2_client_bevy::crystal_ui::overlays::NativeTextInputTarget>,
+    >,
+) {
+    // Capture before Update rebuilds overlay children. Querying those children
+    // in PostUpdate loses the press when the focused field did not change.
+    let pressed = targets
+        .iter()
+        .any(|interaction| *interaction == Interaction::Pressed);
+    touch.0 = pressed && !*held;
+    *held = pressed;
+}
+
 pub struct AndroidSharedShellPlugin;
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct AndroidStageFit;
@@ -83,6 +103,7 @@ impl Plugin for AndroidSharedShellPlugin {
         ));
         app.insert_resource(model)
             .init_resource::<HostState>()
+            .init_resource::<EditorTouch>()
             .add_plugins(Mir2NativeShellUiPlugin)
             .add_plugins((
                 mir2_client_bevy::crystal_ui::minimap::Mir2CrystalMiniMapPlugin,
@@ -92,6 +113,10 @@ impl Plugin for AndroidSharedShellPlugin {
                 mir2_client_bevy::quest_ui::Mir2QuestUiPlugin,
             ))
             .add_systems(PreUpdate, receive.before(bevy::input::InputSystems))
+            .add_systems(
+                PreUpdate,
+                remember_editor_touch.after(bevy::ui::UiSystems::Focus),
+            )
             .add_systems(
                 PostUpdate,
                 (fit_stage.in_set(AndroidStageFit), forward_intents, keyboard).chain(),
@@ -106,6 +131,8 @@ fn fit_stage(
     windows: Query<&Window>,
     host: Res<HostState>,
     model: Res<NativeShellModel>,
+    player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
+    forms: crate::form_input::FormInput,
     mut scale: ResMut<UiScale>,
     mut roots: Query<
         (&mut Node, Has<NativeShellRoot>),
@@ -129,7 +156,17 @@ fn fit_stage(
     let available = (window.height() - host.ime_bottom / window.scale_factor()).max(1.0);
     let panel = mir2_client_bevy::crystal_ui::spec::login::PANEL.rect;
     let top = if host.ime_bottom > 0.0 && model.screen == Screen::InGame {
-        (available / fit.scale - 750.0).min(fit.offset_y / fit.scale)
+        let editor_bottom = match forms.field(&player).map(|field| field.0) {
+            Some("inventory-amount") => {
+                let rect = mir2_client_bevy::crystal_ui::overlays::CRYSTAL_DELETE_AMOUNT_RECT;
+                rect.top + rect.height + 8.0
+            }
+            // Mail compose fields are at the top of the source Mail panel;
+            // panning the bottom HUD to the IME would move them off-screen.
+            Some("mail-recipient" | "mail-message") => 0.0,
+            _ => 750.0,
+        };
+        (available / fit.scale - editor_bottom).min(fit.offset_y / fit.scale)
     } else if host.ime_bottom > 0.0 {
         (available / (2.0 * fit.scale) - panel.top - panel.height * 0.5)
             .min(fit.offset_y / fit.scale)
@@ -196,14 +233,10 @@ fn receive(
         if value["type"] == "back" {
             match model.screen {
                 Screen::InGame => {
-                    if let Some(player) = player.as_deref_mut() {
-                        if player.chat_focused() {
-                            player.set_chat_focused(false);
-                        } else if player.blocks_world_click() {
-                            player.close_windows();
-                        } else {
-                            player.toggle_menu();
-                        }
+                    if let (Some(events), Ok(window)) =
+                        (key_events.as_deref_mut(), windows.single())
+                    {
+                        shared_back_key(events, window);
                     }
                 }
                 Screen::CharacterCreate => {
@@ -327,6 +360,25 @@ fn receive(
     }
 }
 
+// Android Back must follow the same modal priority and cancellation rules as
+// desktop Escape, not clear parent windows and bypass the shared reducers.
+fn shared_back_key(events: &mut Messages<bevy::input::keyboard::KeyboardInput>, window: Entity) {
+    use bevy::input::{
+        keyboard::{Key, KeyboardInput},
+        ButtonState,
+    };
+    for state in [ButtonState::Pressed, ButtonState::Released] {
+        events.write(KeyboardInput {
+            key_code: KeyCode::Escape,
+            logical_key: Key::Escape,
+            state,
+            text: None,
+            repeat: false,
+            window,
+        });
+    }
+}
+
 fn forward_intents(
     mut model: ResMut<NativeShellModel>,
     host: Res<HostState>,
@@ -367,6 +419,7 @@ fn keyboard(
     model: Res<NativeShellModel>,
     player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
     forms: crate::form_input::FormInput,
+    editor_touch: Res<EditorTouch>,
     interactions: Query<(&Interaction, &CrystalLoginAction), Changed<Interaction>>,
     extra_fields: Query<
         (
@@ -397,15 +450,17 @@ fn keyboard(
             .flatten()
     });
     let field_name = field.map(|v| v.0.to_owned());
-    let pressed = interactions.iter().any(|(interaction, action)| {
-        *interaction == Interaction::Pressed
-            && matches!(
-                action,
-                CrystalLoginAction::FocusAccount | CrystalLoginAction::FocusPassword
-            )
-    }) || extra_fields
-        .iter()
-        .any(|(interaction, _)| *interaction == Interaction::Pressed)
+    let pressed = editor_touch.0
+        || interactions.iter().any(|(interaction, action)| {
+            *interaction == Interaction::Pressed
+                && matches!(
+                    action,
+                    CrystalLoginAction::FocusAccount | CrystalLoginAction::FocusPassword
+                )
+        })
+        || extra_fields
+            .iter()
+            .any(|(interaction, _)| *interaction == Interaction::Pressed)
         || (model.screen == Screen::InGame && field_name.is_some() && field_name != *last_field);
     if pressed {
         if let Some((field, text, password)) = field {
@@ -427,6 +482,43 @@ fn keyboard(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn android_back_is_one_shared_escape_press_release_pair() {
+        let mut events = Messages::default();
+        let window = Entity::PLACEHOLDER;
+        shared_back_key(&mut events, window);
+        let sent: Vec<_> = events.drain().collect();
+        assert_eq!(sent.len(), 2);
+        assert_eq!(sent[0].state, bevy::input::ButtonState::Pressed);
+        assert_eq!(sent[1].state, bevy::input::ButtonState::Released);
+        assert!(sent.iter().all(|event| event.key_code == KeyCode::Escape
+            && event.text.is_none()
+            && !event.repeat));
+    }
+
+    #[test]
+    fn repeated_editor_tap_reopens_but_held_press_does_not_reset_ime() {
+        let mut app = App::new();
+        app.init_resource::<EditorTouch>()
+            .add_systems(Update, remember_editor_touch);
+        let field = app
+            .world_mut()
+            .spawn((
+                Interaction::Pressed,
+                mir2_client_bevy::crystal_ui::overlays::NativeTextInputTarget,
+            ))
+            .id();
+        app.update();
+        assert!(app.world().resource::<EditorTouch>().0);
+        app.update();
+        assert!(!app.world().resource::<EditorTouch>().0);
+        *app.world_mut().get_mut::<Interaction>(field).unwrap() = Interaction::None;
+        app.update();
+        *app.world_mut().get_mut::<Interaction>(field).unwrap() = Interaction::Pressed;
+        app.update();
+        assert!(app.world().resource::<EditorTouch>().0);
+    }
 
     #[test]
     fn host_drives_shared_shell_without_a_parallel_form_or_fake_world() {

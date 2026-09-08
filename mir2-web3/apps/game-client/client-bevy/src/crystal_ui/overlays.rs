@@ -1360,7 +1360,7 @@ pub const OVERLAY_SHELL_Z: i32 = 1000;
 
 /// `MirAmountBox` / `MirMessageBox` use integer centering at Crystal's fixed
 /// 1024x768 stage. Their dimensions come from Prguse frames 238 and 360.
-const CRYSTAL_DELETE_AMOUNT_RECT: CrystalRect = CrystalRect::new(410.0, 329.0, 204.0, 109.0);
+pub const CRYSTAL_DELETE_AMOUNT_RECT: CrystalRect = CrystalRect::new(410.0, 329.0, 204.0, 109.0);
 const CRYSTAL_DELETE_CONFIRM_RECT: CrystalRect = CrystalRect::new(284.0, 289.0, 456.0, 190.0);
 const CRYSTAL_DELETE_CURSOR_SIZE: (f32, f32) = (16.0, 15.0);
 
@@ -2049,6 +2049,11 @@ struct OverlayInventoryDeleteDialog;
 
 #[derive(Component)]
 struct OverlayInventoryDeleteAmountInput;
+
+/// Platform IME activation target. Hosts observe presses but all field edits
+/// and actions still go through the shared model and its validators.
+#[derive(Component)]
+pub struct NativeTextInputTarget;
 
 #[derive(Component)]
 struct OverlayEquipment;
@@ -5940,7 +5945,7 @@ fn delete_amount_backspace(state: &mut NativePlayerUiState) {
     }
 }
 
-fn push_delete_amount_text(state: &mut NativePlayerUiState, text: &str) {
+pub fn push_delete_amount_text(state: &mut NativePlayerUiState, text: &str) {
     let Some(InventoryDeletePrompt::Amount {
         target,
         draft,
@@ -6176,6 +6181,8 @@ fn render_inventory_delete_modal(
                     dialog
                         .spawn((
                             OverlayInventoryDeleteAmountInput,
+                            Button,
+                            NativeTextInputTarget,
                             Node {
                                 position_type: PositionType::Absolute,
                                 left: Val::Px(58.0),
@@ -7721,6 +7728,7 @@ fn overlay_absolute_button(
     ));
     if enabled {
         entity.insert((Button, action));
+        if is_text_input_action(action) { entity.insert(NativeTextInputTarget); }
     }
     if !label.is_empty() {
         entity.with_children(|button| {
@@ -11739,6 +11747,7 @@ fn overlay_button(
     ));
     if enabled {
         entity.insert((Button, action));
+        if is_text_input_action(action) { entity.insert(NativeTextInputTarget); }
     }
     entity.with_children(|button| {
         button.spawn((
@@ -11755,6 +11764,12 @@ fn overlay_button(
             TextLayout::new(Justify::Left, LineBreak::NoWrap),
         ));
     });
+}
+
+fn is_text_input_action(action: OverlayButton) -> bool {
+    matches!(action, OverlayButton::GroupInviteNameFocus | OverlayButton::GuildRecruitNameFocus
+        | OverlayButton::GuildRankNameFocus | OverlayButton::MailRecipientFocus
+        | OverlayButton::MailMessageFocus | OverlayButton::BigMapSearchFocus)
 }
 
 #[cfg(test)]

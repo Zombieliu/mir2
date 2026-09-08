@@ -2,7 +2,9 @@
 use bevy::{ecs::system::SystemParam, prelude::*};
 use mir2_client_bevy::{
     big_map::BigMapModel,
-    crystal_ui::overlays::{BigMapUiState, MailComposeFocus, MailComposeUi, NativePlayerUiState},
+    crystal_ui::overlays::{
+        BigMapUiState, InventoryDeletePrompt, MailComposeFocus, MailComposeUi, NativePlayerUiState,
+    },
     storage::StorageModel,
 };
 
@@ -18,6 +20,9 @@ impl FormInput<'_> {
         &'a self,
         state: &'a NativePlayerUiState,
     ) -> Option<(&'static str, &'a str, bool)> {
+        if let Some(InventoryDeletePrompt::Amount { draft, .. }) = &state.inventory_delete_prompt {
+            return Some(("inventory-amount", draft, false));
+        }
         if let Some(prompt) = &state.guild_gold_prompt {
             return Some(("guild-amount", &prompt.input.draft, false));
         }
@@ -55,6 +60,16 @@ impl FormInput<'_> {
         }
         use mir2_ui_core::{action::UiAction, reducer::reduce};
         match field {
+            "inventory-amount" => {
+                if let Some(InventoryDeletePrompt::Amount {
+                    draft, select_all, ..
+                }) = &mut state.inventory_delete_prompt
+                {
+                    draft.clear();
+                    *select_all = false;
+                }
+                mir2_client_bevy::crystal_ui::overlays::push_delete_amount_text(state, text);
+            }
             "mail-recipient" => {
                 state.core = reduce(
                     &state.core,
@@ -108,6 +123,36 @@ impl FormInput<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn inventory_amount_uses_shared_bounds_without_mutating_the_stack() {
+        use mir2_client_bevy::inventory::{InventoryModel, ItemModel};
+        let inventory = InventoryModel {
+            items: vec![ItemModel {
+                unique_id: Some(7),
+                container: 0,
+                slot: 2,
+                quantity: 12,
+                key: "fixture".into(),
+                name: "Fixture".into(),
+                ..default()
+            }],
+            ..default()
+        };
+        let mut state = NativePlayerUiState::default();
+        assert!(state.open_inventory_delete_for_slot(&inventory, 2));
+        let mut world = World::new();
+        let mut system = bevy::ecs::system::SystemState::<FormInput>::new(&mut world);
+        let mut forms = system.get_mut(&mut world).unwrap();
+        assert_eq!(forms.field(&state).unwrap().0, "inventory-amount");
+        forms.edit(&mut state, "inventory-amount", "999abc");
+        assert_eq!(forms.field(&state).unwrap().1, "12");
+        forms.edit(&mut state, "inventory-amount", "");
+        assert_eq!(forms.field(&state).unwrap().1, "");
+        state.inventory_delete_prompt = None;
+        forms.edit(&mut state, "inventory-amount", "3");
+        assert!(state.inventory_delete_prompt.is_none());
+        assert_eq!(inventory.items[0].quantity, 12);
+    }
     #[test]
     fn locked_storage_keyboard_never_edits_balance_or_unlocks() {
         let mut world = World::new();

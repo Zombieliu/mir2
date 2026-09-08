@@ -39,6 +39,8 @@ pub const SCENES: &[&str] = &[
     "death",
     "chat",
     "help",
+    "inventory-amount",
+    "mail-compose",
 ];
 
 #[derive(Resource, Default)]
@@ -114,7 +116,7 @@ fn apply(world: &mut World) {
         return;
     } // let normal session-boundary clearing run first
     let panel = match scene.as_str() {
-        "inventory" => UiPanel::Inventory,
+        "inventory" | "inventory-amount" => UiPanel::Inventory,
         "character" => UiPanel::Character,
         "skills" => UiPanel::Skill,
         "quests" => UiPanel::QuestLog,
@@ -123,7 +125,7 @@ fn apply(world: &mut World) {
         "menu" => UiPanel::Menu,
         "gameshop" => UiPanel::GameShop,
         "npcshop" => UiPanel::NpcShop,
-        "mail" => UiPanel::Mail,
+        "mail" | "mail-compose" => UiPanel::Mail,
         "bigmap" => UiPanel::BigMap,
         "storage" => UiPanel::Storage,
         "group" => UiPanel::Group,
@@ -152,6 +154,20 @@ fn apply(world: &mut World) {
     model.player.max_weight = 100;
     drop(model);
     populate_specimens(world, &scene);
+    if scene == "inventory-amount" {
+        world.resource_scope(|world, mut state: Mut<NativePlayerUiState>| {
+            state.open_inventory_delete_for_slot(
+                world.resource::<mir2_client_bevy::inventory::InventoryModel>(),
+                11,
+            );
+        });
+    }
+    if scene == "mail-compose" {
+        world
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .mail_compose = Some(mir2_ui_core::state::MailComposeDraft::default());
+    }
     info!("ANDROID_UI_PREVIEW_READY scene={scene}");
 }
 
@@ -213,11 +229,15 @@ fn populate_specimens(world: &mut World, scene: &str) {
         social::SocialModel,
         storage::StorageModel,
     };
-    let items: Vec<ItemModel> = (0..12).map(|slot| serde_json::from_value(serde_json::json!({
-        "unique_id":9000+slot, "key":format!("ui-only-{slot}"), "name":format!("UI specimen {slot}"),
+    let items: Vec<ItemModel> = (0..12)
+        .map(|slot| {
+            serde_json::from_value(serde_json::json!({
+        "uniqueId":9000+slot, "key":format!("ui-only-{slot}"), "name":format!("UI specimen {slot}"),
         "quantity":slot+1, "slot":slot, "container":0, "icon":100+slot,
         "description":"Offline visual specimen. Not a server-owned item."
-    })).expect("static UI item specimen")).collect();
+    })).expect("static UI item specimen")
+        })
+        .collect();
     world.insert_resource(InventoryModel {
         items: items.clone(),
         gold: 12345,
@@ -273,9 +293,19 @@ fn populate_specimens(world: &mut World, scene: &str) {
 mod tests {
     use super::*;
     #[test]
+    fn item_specimens_have_identity_for_shared_local_dialogs() {
+        let mut world = World::new();
+        world.init_resource::<mir2_client_bevy::social::SocialModel>();
+        populate_specimens(&mut world, "inventory-amount");
+        let inventory = world.resource::<mir2_client_bevy::inventory::InventoryModel>();
+        assert_eq!(inventory.items[11].unique_id, Some(9011));
+        let mut state = NativePlayerUiState::default();
+        assert!(state.open_inventory_delete_for_slot(inventory, 11));
+    }
+    #[test]
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 31);
+        assert_eq!(SCENES.len(), 33);
     }
 }
