@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-08 Android UI correction: the isolated Android host now uses the same
+> Crystal login/select plugin and model as Windows, via additive `native-shell-ui`.
+> The Java player form and debug-text screen are removed. API 31 login/IME/
+> background-retry screenshots and shared-model tests are recorded in
+> `docs/generated/player-qa/native-android-shared-ui-20260908/README.md`.
+> This is bounded shell UI evidence, not live character-selection, gameplay,
+> physical-device or full parity acceptance. No Windows backend work is included.
+
 > 2026-09-03 Mac Android workstream handoff prepared at the user's request:
 > `docs/ANDROID-MAC-HANDOFF.md` separates existing Capacitor/WebView and native
 > Rust/Bevy readiness, reusable code/assets, safe branch sync, bounded writes

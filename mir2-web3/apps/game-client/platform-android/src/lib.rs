@@ -6,8 +6,8 @@
 
 pub mod android_input;
 pub mod gateway_bridge;
-#[cfg(target_os = "android")]
-mod login_display;
+#[cfg(any(target_os = "android", test))]
+mod shared_shell;
 
 use android_input::{
     apply_android_lifecycle_messages, collect_android_back_key, route_android_input_messages,
@@ -500,8 +500,7 @@ pub fn build_android_runtime_app() -> App {
     #[cfg(target_os = "android")]
     app.insert_resource(ClearColor(Color::srgb(0.015, 0.035, 0.075)))
         .insert_resource(bevy::winit::WinitSettings::mobile())
-        .add_systems(Startup, login_display::spawn)
-        .add_systems(Update, login_display::update);
+        .add_plugins(shared_shell::AndroidSharedShellPlugin);
     app
 }
 

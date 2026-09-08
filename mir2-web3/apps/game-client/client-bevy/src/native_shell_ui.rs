@@ -276,7 +276,8 @@ pub fn cycle_change_password_focus(
 }
 
 #[derive(Component)]
-struct NativeShellRoot;
+/// Platform hosts may fit the shared 1024x768 stage to their safe viewport.
+pub struct NativeShellRoot;
 
 #[derive(Component)]
 struct NativeShellContent;

@@ -1,29 +1,48 @@
 # Android native client
 
-## Login host (2026-09-08)
+## Shared Crystal UI (2026-09-08)
+
+Android now installs the same `Mir2NativeShellUiPlugin` / `NativeShellModel`
+used by Windows, enabled through the additive `native-shell-ui` feature.
+Windows `native-ui` still enables this shell plus its existing gameplay/audio
+features. No fork of the login/select layout was made. Java's visible login
+form and the Bevy debug-text screen were removed. The only Java editor is a
+transparent 1-pixel OS IME input connection; visible fields and actions belong
+to the shared Crystal shell. The 1024x768 stage fits uniformly with letterboxing;
+while typing it pans upward to keep the login panel readable above the IME.
+
+Package with `MIR2_ANDROID_UI_ASSET_ROOT` pointing to a local approved asset
+root containing `original-ui/{ChrSel,Prguse,Prguse2,Title}/*.png`. Gradle stages
+only those images in generated build output. The files are not committed.
+Set `MIR2_GATEWAY_WS_URL` explicitly at build time for approved online tests.
+Neither an exported Activity intent nor old endpoint preferences override it.
+With no endpoint the actual shared login screen shows a configuration notice;
+it does not fabricate a connection or a selectable test character.
+
+## Login transport
 
 `android/app/src/main/java/com/mir2/web3/GatewaySession.java` supplies a bounded
 login/character-selection WSS host using OkHttp 4.12.0 and Android's normal TLS
-trust and hostname verification. Enter an approved `wss://.../ws` endpoint in
-the Activity; there is no default production endpoint. Cleartext, embedded
+trust and hostname verification. Configure an approved `wss://.../ws` endpoint
+at build time; there is no default production endpoint. Cleartext, embedded
 credentials, query credentials and redirects are rejected.
 
-The native form sends the existing BrowserCommand `clientVersion`,
+The shared shell's intents send the existing BrowserCommand `clientVersion`,
 `login {accountId,password}`, `startGame {characterIndex}` and `keepAlive`
 shapes (see Windows `native_protocol.rs` and Android `gateway_bridge.rs`).
 An account ID is only a username paired with a password, never an authenticated
 identity assertion. It does not send PasskeyLogin or invent authentication.
-LoginSuccess supplies the selectable roster. StartGame result 4 plus server
-character/map/position data are required before IN_GAME is shown. The host
-accepts packet-first data and the matching selfPlayer in worldSnapshot.
-JNI forwards only the bounded display text to Bevy; this milestone does not
-populate the shared world-render/gameplay resources or render map assets.
+LoginSuccess supplies the shared selectable roster including class/gender/level.
+JNI delivers host events to the shared model and shared intents back to the
+host. Transport StartGame/position acceptance does not currently complete the
+shared gameplay scene: the shell stays on its transition surface, not a fake
+in-game screen. Map rendering and full player flow remain follow-up work.
 
-Only the endpoint is stored in private preferences. Passwords, account names,
-session tokens and character state are not persisted. Form state saving and
-autofill are disabled. Passwords are cleared after submission/backgrounding;
-phase logs omit credentials and raw messages. Login screens prohibit captures;
-the secret form is hidden before in-game captures are allowed.
+Passwords, account names, session tokens and character state are not persisted.
+Editor state saving and autofill are disabled. Passwords are cleared after
+submission/backgrounding. Logs omit credentials and raw messages. Empty login
+screens can be captured; entered credentials and the SafeKey/password-change
+surfaces enable FLAG_SECURE. No genuine credentials were entered during UI QA.
 
 On background, disconnect, timeout or transport failure, the socket and old
 roster/position are discarded. Reconnect requires an explicit button and fresh
@@ -40,9 +59,9 @@ cd android
 ```
 
 These MockWebServer tests do not establish real Gateway authentication. See
-`docs/generated/player-qa/native-android-login-20260908/README.md` in the main
-project for the actual build and device evidence, including outstanding live
-environment acceptance.
+`docs/generated/player-qa/native-android-shared-ui-20260908/README.md` in the main
+project for current UI evidence; the earlier `native-android-login-20260908`
+pack describes the superseded debug form, not the current player interface.
 
 This crate is the native Android shell for the shared Bevy client. UI actions
 are routed through `mir2-ui-core`; the Android layer only owns lifecycle,
@@ -112,8 +131,8 @@ is deliberately explicit:
 2. The library is copied into Gradle's generated `jniLibs` tree.
 3. `MainActivity` loads that library and GameActivity invokes Bevy's
    `android_main`, which is emitted by `#[bevy_main]`.
-4. The shared Bevy runtime renders the login host's latest status text. The
-   earlier M0 teal/gold marker is replaced by this native text display.
+4. The shared Bevy runtime renders the Crystal native shell. Both the earlier
+   M0 teal/gold marker and the later login debug text have been removed.
 
 The historical M0 marker proved only that the native Activity, Bevy/Winit renderer, and
 shared runtime reached a rendered frame. It is not evidence of login,

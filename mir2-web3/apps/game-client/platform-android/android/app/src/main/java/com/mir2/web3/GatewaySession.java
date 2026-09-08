@@ -25,7 +25,12 @@ final class GatewaySession implements AutoCloseable {
     static final class Character {
         final int index;
         final String name;
-        Character(int index, String name) { this.index = index; this.name = name; }
+        final int level;
+        final String className, genderName;
+        Character(int index, String name, int level, String className, String genderName) {
+            this.index = index; this.name = name; this.level = level;
+            this.className = className; this.genderName = genderName;
+        }
         @Override public String toString() { return name + " (#" + index + ")"; }
     }
 
@@ -186,7 +191,8 @@ final class GatewaySession implements AutoCloseable {
                     if (index < 0 || next.stream().anyMatch(c -> c.index == index)) {
                         throw new IllegalArgumentException("character index");
                     }
-                    next.add(new Character(index, bounded(row.getString("name"))));
+                    next.add(new Character(index, bounded(row.getString("name")), row.optInt("level", 0),
+                            row.optString("class", "Unknown"), row.optString("gender", "Unknown")));
                 }
                 characters = next;
                 phase = Phase.CHARACTERS;

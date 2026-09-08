@@ -2,6 +2,29 @@ plugins {
     id 'com.android.application'
 }
 
+// External licensed Crystal UI files, staged into generated build output only.
+// Never silently ship a blank shell when the original image pack is missing.
+def uiRoot = System.getenv('MIR2_ANDROID_UI_ASSET_ROOT')
+def prepareSharedUi = tasks.register('prepareSharedUi', Sync) {
+    if (uiRoot) from(uiRoot) {
+        include 'original-ui/ChrSel/*.png', 'original-ui/Prguse/*.png', 'original-ui/Prguse2/*.png', 'original-ui/Title/*.png'
+    }
+    into layout.buildDirectory.dir('generated/shared-ui-assets')
+}
+tasks.configureEach { task ->
+    if (task.name == 'mergeDebugAssets' || task.name == 'mergeReleaseAssets') {
+        task.dependsOn prepareSharedUi
+        task.doFirst {
+            if (!uiRoot || !file("${uiRoot}/original-ui/ChrSel/0.png").isFile()
+                    || !file("${uiRoot}/original-ui/Title/30.png").isFile()
+                    || !file("${uiRoot}/original-ui/Prguse/360.png").isFile()
+                    || !file("${uiRoot}/original-ui/Prguse/1084.png").isFile()) {
+                throw new GradleException('Set MIR2_ANDROID_UI_ASSET_ROOT to the approved shared Crystal UI asset root')
+            }
+        }
+    }
+}
+
 android {
     namespace 'com.mir2.web3'
     compileSdk 35
@@ -10,8 +33,9 @@ android {
         applicationId 'com.mir2.web3'
         minSdk 31
         targetSdk 35
-        versionCode 2
-        versionName '0.1.0-login'
+        versionCode 3
+        versionName '0.1.0-shared-ui'
+        buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
 
         ndk {
             abiFilters 'arm64-v8a'
@@ -35,11 +59,13 @@ android {
 
     buildFeatures {
         prefab true
+        buildConfig true
     }
 
     sourceSets {
         main {
             jniLibs.srcDirs = ['src/main/jniLibs']
+            assets.srcDir layout.buildDirectory.dir('generated/shared-ui-assets')
         }
     }
 }

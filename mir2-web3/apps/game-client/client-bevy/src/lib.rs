@@ -23,7 +23,7 @@ pub mod character;
 pub mod chat;
 #[cfg(feature = "native-ui")]
 pub mod chat_settings_effects;
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-shell-ui")]
 pub mod crystal_ui;
 pub mod entities;
 pub mod game_shop;
@@ -32,9 +32,9 @@ pub mod hud;
 pub mod inventory;
 pub mod mail;
 pub mod map;
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-shell-ui")]
 pub mod native_shell;
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-shell-ui")]
 pub mod native_shell_ui;
 #[cfg(feature = "native-ui")]
 pub mod options_effects;

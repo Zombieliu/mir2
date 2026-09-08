@@ -1,181 +1,168 @@
 package com.mir2.web3;
 
 import android.os.Bundle;
-import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
 import android.text.InputType;
-import android.view.Gravity;
+import android.text.TextWatcher;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
-import java.util.concurrent.TimeUnit;
-import okhttp3.OkHttpClient;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import com.google.androidgamesdk.GameActivity;
+import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+/** Platform I/O only. Visible player UI is the shared Crystal Bevy shell. */
 public final class MainActivity extends GameActivity {
+    private static native void nativeEvent(String json);
+    private static native String nativePoll();
+    static { System.loadLibrary("mir2_platform_android"); }
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private GatewaySession session;
     private OkHttpClient client;
-    private EditText endpoint, account, password;
-    private Spinner roster;
-    private Button connect, login, enter;
-    private TextView status;
-    private boolean destroyed;
-    private GatewaySession.Phase lastPhase;
-    private static native void nativeStatus(String text);
-    static {
-        System.loadLibrary("mir2_platform_android");
-    }
+    private EditText ime;
+    private String editing = "";
+    private boolean updating, foreground;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-        client = new OkHttpClient.Builder()
-                .connectTimeout(12, TimeUnit.SECONDS)
-                .readTimeout(25, TimeUnit.SECONDS)
-                .writeTimeout(12, TimeUnit.SECONDS)
-                .pingInterval(10, TimeUnit.SECONDS)
-                .followRedirects(false).followSslRedirects(false).build();
-        buildLoginPanel();
-        nativeStatus("Connect to your approved test Gateway");
-        session = new GatewaySession(client, view -> runOnUiThread(() -> render(view)));
+    @Override protected void onCreate(Bundle state) {
+        super.onCreate(state);
+        // Transparent OS input connection, not a second player-facing form.
+        ime = new EditText(this);
+        ime.setSingleLine(true);
+        ime.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_FLAG_NO_FULLSCREEN | EditorInfo.IME_ACTION_DONE);
+        ime.setOnEditorActionListener((view, action, event) -> { hideKeyboard(); return true; });
+        ime.setOnApplyWindowInsetsListener((view, insets) -> {
+            nativeEvent(GatewaySession.object("type", "insets", "bottom", insets.getInsets(WindowInsets.Type.ime()).bottom).toString());
+            return insets;
+        });
+        ime.setAlpha(0f);
+        ime.setSaveEnabled(false);
+        ime.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
+        ime.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+        addContentView(ime, new FrameLayout.LayoutParams(1, 1));
+        ime.addTextChangedListener(new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!updating && !editing.isEmpty()) {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                    nativeEvent(GatewaySession.object("type", "edit", "field", editing, "text", s.toString()).toString());
+                }
+            }
+            public void afterTextChanged(Editable s) {}
+        });
+        client = new OkHttpClient.Builder().connectTimeout(12, TimeUnit.SECONDS)
+                .readTimeout(25, TimeUnit.SECONDS).writeTimeout(12, TimeUnit.SECONDS)
+                .pingInterval(10, TimeUnit.SECONDS).followRedirects(false).followSslRedirects(false).build();
+        session = new GatewaySession(client, view -> {
+            JSONArray roster = new JSONArray();
+            for (GatewaySession.Character character : view.characters) {
+                roster.put(GatewaySession.object("index", character.index, "name", character.name,
+                        "level", character.level, "className", character.className, "genderName", character.genderName));
+            }
+            nativeEvent(GatewaySession.object("phase", view.phase.name(), "message", view.message, "characters", roster).toString());
+        });
+        connect();
         hideSystemUi();
     }
 
-    private EditText field(LinearLayout panel, String hint, boolean secret) {
-        EditText input = new EditText(this);
-        input.setHint(hint);
-        input.setSingleLine(true);
-        input.setTextColor(Color.WHITE);
-        input.setHintTextColor(Color.LTGRAY);
-        input.setSaveEnabled(false);
-        input.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | (secret
-                ? InputType.TYPE_TEXT_VARIATION_PASSWORD : InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD));
-        panel.addView(input);
-        return input;
+    private void connect() {
+        // Explicit build-time configuration; exported intents cannot override the URL.
+        if (BuildConfig.MIR2_GATEWAY_URL.isEmpty()) {
+            nativeEvent(GatewaySession.object("phase", "UNCONFIGURED", "message",
+                    "Test server not configured.").toString());
+            return;
+        }
+        try { session.connect(BuildConfig.MIR2_GATEWAY_URL); }
+        catch (IllegalArgumentException error) {
+            nativeEvent(GatewaySession.object("phase", "UNCONFIGURED", "message", "Invalid approved WSS endpoint configuration").toString());
+        }
     }
 
-    private Button button(LinearLayout panel, String text, View.OnClickListener action) {
-        Button result = new Button(this);
-        result.setText(text);
-        result.setOnClickListener(action);
-        panel.addView(result);
-        return result;
-    }
-
-    private void buildLoginPanel() {
-        LinearLayout panel = new LinearLayout(this);
-        panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(16, 8, 16, 8);
-        panel.setBackgroundColor(0xE6102030);
-        endpoint = field(panel, "Approved wss:// Gateway /ws", false);
-        account = field(panel, "Test account", false);
-        password = field(panel, "Password (not saved)", true);
-        // Only a non-secret endpoint is remembered. Credentials are always entered by the user.
-        endpoint.setText(getPreferences(MODE_PRIVATE).getString("gateway", ""));
-        connect = button(panel, "Connect / retry", v -> {
-            try {
-                String address = endpoint.getText().toString().trim();
-                GatewaySession.endpoint(address);
-                getPreferences(MODE_PRIVATE).edit().putString("gateway", address).apply();
-                session.connect(address);
-            } catch (IllegalArgumentException error) {
-                status.setText("Enter WSS endpoint without credentials, query or fragment");
+    private final Runnable pump = new Runnable() {
+        @Override public void run() {
+            if (!foreground) return;
+            for (int i = 0; i < 16; i++) {
+                String raw = nativePoll();
+                if (raw.isEmpty()) break;
+                try {
+                    JSONObject command = new JSONObject(raw);
+                    switch (command.getString("type")) {
+                        case "connect": connect(); break;
+                        case "login": session.login(command.getString("account"), command.getString("password")); break;
+                        case "start": session.start(command.getInt("index")); break;
+                        case "disconnect": session.disconnect("Disconnected. Reconnect to refresh server state."); break;
+                        case "keyboard":
+                            editing = command.getString("field");
+                            updating = true;
+                            ime.setInputType(InputType.TYPE_CLASS_TEXT | (editing.equals("password")
+                                    ? InputType.TYPE_TEXT_VARIATION_PASSWORD : InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)
+                                    | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                            ime.setText(command.getString("text"));
+                            ime.setSelection(ime.length());
+                            updating = false;
+                            ime.requestFocus();
+                            ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).showSoftInput(ime, InputMethodManager.SHOW_IMPLICIT);
+                            break;
+                        case "hideKeyboard": hideKeyboard(); break;
+                        case "privacy":
+                            if (command.getBoolean("secure")) getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                            else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                            break;
+                        default: break;
+                    }
+                } catch (Exception error) {
+                    session.disconnect("Host command failed; reconnect");
+                }
             }
-        });
-        login = button(panel, "Log in", v -> {
-            session.login(account.getText().toString().trim(), password.getText().toString());
-            password.setText("");
-        });
-        roster = new Spinner(this);
-        panel.addView(roster);
-        enter = button(panel, "Enter world", v -> {
-            Object selected = roster.getSelectedItem();
-            if (selected instanceof GatewaySession.Character) session.start(((GatewaySession.Character) selected).index);
-        });
-        button(panel, "Disconnect", v -> session.disconnect("Disconnected. Log in again."));
-        status = new TextView(this);
-        status.setTextColor(Color.WHITE);
-        status.setText("Configure approved test Gateway");
-        panel.addView(status);
-        login.setEnabled(false);
-        enter.setEnabled(false);
-        android.widget.FrameLayout.LayoutParams layout = new android.widget.FrameLayout.LayoutParams(
-                (int) (350 * getResources().getDisplayMetrics().density), ViewGroup.LayoutParams.MATCH_PARENT,
-                Gravity.START | Gravity.TOP);
-        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
-        scroll.addView(panel);
-        addContentView(scroll, layout);
+            handler.postDelayed(this, 33);
+        }
+    };
+
+    private void hideKeyboard() {
+        editing = "";
+        updating = true;
+        ime.setText("");
+        updating = false;
+        ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(ime.getWindowToken(), 0);
+        ime.clearFocus();
     }
 
-    private void render(GatewaySession.View view) {
-        if (destroyed) return;
-        if (lastPhase != view.phase) {
-            android.util.Log.i("Mir2NativeSession", "phase=" + view.phase.name());
-            lastPhase = view.phase;
-        }
-        status.setText(view.message);
-        nativeStatus(view.message);
-        login.setEnabled(view.phase == GatewaySession.Phase.READY);
-        enter.setEnabled(view.phase == GatewaySession.Phase.CHARACTERS && !view.characters.isEmpty());
-        ArrayAdapter<GatewaySession.Character> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item, view.characters);
-        roster.setAdapter(adapter);
-        // Allow evidence capture only after secrets have been cleared from the form.
-        if (view.phase == GatewaySession.Phase.IN_GAME) {
-            password.setText("");
-            password.setVisibility(View.GONE);
-            account.setVisibility(View.GONE);
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-        } else {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-            password.setVisibility(View.VISIBLE);
-            account.setVisibility(View.VISIBLE);
-        }
+    @Override protected void onStart() {
+        super.onStart();
+        foreground = true;
+        handler.post(pump);
     }
-
     @Override protected void onStop() {
-        if (session != null) session.disconnect("Backgrounded. Reconnect and log in to refresh server state.");
-        if (password != null) password.setText("");
+        foreground = false;
+        handler.removeCallbacks(pump);
+        hideKeyboard();
+        session.disconnect("Backgrounded. Reconnect and log in to refresh server state.");
         super.onStop();
     }
-
     @Override protected void onDestroy() {
-        destroyed = true;
-        if (session != null) session.close();
-        if (client != null) {
-            client.dispatcher().executorService().shutdown();
-            client.connectionPool().evictAll();
-        }
+        session.close();
+        client.dispatcher().executorService().shutdown();
+        client.connectionPool().evictAll();
         super.onDestroy();
     }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            hideSystemUi();
-        }
+    @Override public void onWindowFocusChanged(boolean focused) {
+        super.onWindowFocusChanged(focused);
+        if (focused) hideSystemUi();
     }
-
     private void hideSystemUi() {
         getWindow().setDecorFitsSystemWindows(false);
         WindowInsetsController controller = getWindow().getInsetsController();
-        if (controller == null) {
-            return;
+        if (controller != null) {
+            controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            controller.hide(WindowInsets.Type.systemBars());
         }
-        controller.setSystemBarsBehavior(
-                WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        );
-        controller.hide(WindowInsets.Type.systemBars());
     }
 }
