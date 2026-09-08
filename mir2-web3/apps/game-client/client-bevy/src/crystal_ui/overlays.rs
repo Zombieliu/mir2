@@ -650,7 +650,7 @@ fn guild_notice_lines(draft: &str) -> Option<Vec<String>> {
     Some(lines)
 }
 
-fn push_guild_notice_text(draft: &mut String, text: &str) {
+pub fn push_guild_notice_text(draft: &mut String, text: &str) {
     for ch in text.chars() {
         if ch == '\n' {
             if draft.split('\n').count() < crate::social::MAX_NOTICE_LINES {
@@ -678,7 +678,7 @@ fn valid_social_name(name: &str) -> bool {
         && trimmed.chars().all(|ch| !ch.is_control())
 }
 
-fn push_social_name_text(draft: &mut String, text: &str) {
+pub fn push_social_name_text(draft: &mut String, text: &str) {
     for ch in text.chars() {
         if !ch.is_control() && draft.chars().count() < 32 {
             draft.push(ch);
@@ -2009,7 +2009,7 @@ impl NativePlayerUiIntentQueue {
 }
 
 #[derive(Component)]
-struct OverlayRoot;
+pub struct OverlayRoot;
 
 #[derive(Component)]
 struct OverlayInventory;
@@ -2322,14 +2322,14 @@ struct OverlayButtonControls<'w, 's> {
     mail_ui: ResMut<'w, MailUiState>,
     storage_ui: ResMut<'w, StorageUiState>,
     shop_ui: ResMut<'w, ShopUiState>,
-    ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
+    ui_audio: ResMut<'w, crate::ui_audio::NativeUiAudioQueue>,
     buttons: Query<'w, 's, (&'static Interaction, &'static OverlayButton), Changed<Interaction>>,
 }
 
 #[derive(SystemParam)]
 pub(crate) struct OverlayKeyboardControls<'w> {
     surface_signals: Option<ResMut<'w, UiSurfaceSignals>>,
-    ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
+    ui_audio: ResMut<'w, crate::ui_audio::NativeUiAudioQueue>,
     ui: Option<Res<'w, UiReadModel>>,
 }
 
@@ -2409,9 +2409,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<SkillModel>()
             .init_resource::<crate::social::SocialModel>()
             .init_resource::<crate::options_effects::OptionsRuntime>()
-            .init_resource::<crate::audio::NativeAudioRuntime>()
-            .init_resource::<crate::audio::NativeGameplayAudioQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<CursorMoved>()
             .add_message::<MouseWheel>()
             .add_systems(Startup, spawn_overlay_root)
@@ -2420,7 +2418,6 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     crate::skill_binding_persistence::load_persisted_skill_bindings,
                     crate::options_effects::load_persisted_options,
-                    crate::audio::initialize_native_audio,
                 )
                     .chain(),
             )
@@ -2461,12 +2458,10 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     process_guild_storage_pointer,
                     process_overlay_keyboard,
                     process_overlay_buttons,
-                    crate::audio::sync_native_ui_audio,
                     consume_exit_application,
                     crate::pending_operations::observe_native_session_boundary,
                     reconcile_native_game_shop_ui_state,
                     crate::options_effects::consume_options_effects,
-                    crate::audio::sync_native_audio,
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate),
@@ -2476,6 +2471,25 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (render_overlays, layout_original_item_images)
                     .chain()
                     .in_set(NativePlayerUiSet::Read),
+            );
+        #[cfg(feature = "native-ui")]
+        app.init_resource::<crate::audio::NativeAudioRuntime>()
+            .init_resource::<crate::audio::NativeGameplayAudioQueue>()
+            .add_systems(
+                Startup,
+                crate::audio::initialize_native_audio
+                    .after(crate::options_effects::load_persisted_options),
+            )
+            .add_systems(
+                Update,
+                (
+                    crate::audio::sync_native_ui_audio
+                        .after(process_overlay_buttons)
+                        .before(consume_exit_application),
+                    crate::audio::sync_native_audio
+                        .after(crate::options_effects::consume_options_effects),
+                )
+                    .in_set(NativePlayerUiSet::Mutate),
             );
     }
 }
@@ -3115,7 +3129,7 @@ fn consume_hud_buttons(
     shell: Option<Res<NativeShellModel>>,
     inventory: Res<InventoryModel>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
-    mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
+    mut ui_audio: ResMut<crate::ui_audio::NativeUiAudioQueue>,
 ) {
     if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame)
         || state.amount_modal_open()
@@ -3184,7 +3198,7 @@ fn consume_hud_buttons(
     }
 }
 
-fn hud_pointer_sound(action: CrystalHudAction) -> Option<crate::audio::NativeUiSound> {
+fn hud_pointer_sound(action: CrystalHudAction) -> Option<crate::ui_audio::NativeUiSound> {
     match action {
         // Crystal `MainDialog` assigns ButtonA to the five small lower-right
         // HUD buttons. Keep this bounded to source-audited controls.
@@ -3192,11 +3206,11 @@ fn hud_pointer_sound(action: CrystalHudAction) -> Option<crate::audio::NativeUiS
         | CrystalHudAction::Character
         | CrystalHudAction::Skill
         | CrystalHudAction::Quest
-        | CrystalHudAction::Option => Some(crate::audio::NativeUiSound::ButtonA),
+        | CrystalHudAction::Option => Some(crate::ui_audio::NativeUiSound::ButtonA),
         // Crystal `MenuButton` and `GameShopButton` use the distinct
         // `SoundList.ButtonC` local UI cue.
         CrystalHudAction::Menu | CrystalHudAction::GameShop => {
-            Some(crate::audio::NativeUiSound::ButtonC)
+            Some(crate::ui_audio::NativeUiSound::ButtonC)
         }
         _ => None,
     }
@@ -3358,7 +3372,7 @@ fn process_inventory_delete_pointer(
     mut state: ResMut<NativePlayerUiState>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
+    mut ui_audio: ResMut<crate::ui_audio::NativeUiAudioQueue>,
 ) {
     if !state.inventory_open()
         || !state.inventory_delete_mode
@@ -3384,7 +3398,7 @@ fn process_inventory_delete_pointer(
     );
     if panel.contains(cursor.x, cursor.y) {
         state.cancel_inventory_delete();
-        ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+        ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
     }
 }
 
@@ -3600,12 +3614,12 @@ pub(crate) fn process_overlay_keyboard(
     if state.inventory_delete_prompt.is_some() {
         if keys.just_pressed(KeyCode::Escape) {
             state.cancel_inventory_delete();
-            ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+            ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
             return;
         }
         if keys.just_pressed(KeyCode::Enter) {
             if confirm_inventory_delete(&mut state, &inventory, &mut intents, &mut pending) {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
             }
             return;
         }
@@ -4252,7 +4266,7 @@ fn process_overlay_buttons(
                     // Crystal CharacterDialog.CloseButton uses ButtonA. Keep
                     // the source-audited cue local to this control rather than
                     // assigning sound to every generic CloseWindows caller.
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
                 state.close_windows();
                 state.shop_quantity = 1;
@@ -4265,15 +4279,15 @@ fn process_overlay_buttons(
                 state.help.toggle();
             }
             OverlayButton::CloseHelp => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 state.help.hide();
             }
             OverlayButton::HelpPrevious => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 state.help.previous_page();
             }
             OverlayButton::HelpNext => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 state.help.next_page();
             }
             OverlayButton::CloseInspect => {
@@ -4512,7 +4526,7 @@ fn process_overlay_buttons(
                 state.guild_recruit_focused = false;
                 state.guild_gold_prompt = None;
                 state.guild_storage.end_drag();
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 if page != GuildLeftPage::Ranks {
                     state.selected_guild_rank = None;
                     state.guild_rank_name_draft.clear();
@@ -4696,7 +4710,7 @@ fn process_overlay_buttons(
             OverlayButton::GuildGoldDeposit | OverlayButton::GuildGoldWithdraw => {
                 // MirButton defaults to ButtonB, including a click rejected
                 // by StorageAddGold/StorageRemoveGold's send cooldown.
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
                 let action = if *button == OverlayButton::GuildGoldDeposit {
                     GuildGoldAction::Deposit
                 } else {
@@ -4713,7 +4727,7 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::GuildGoldConfirm => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
                 confirm_guild_gold(
                     &mut state,
                     &mut social,
@@ -4727,16 +4741,16 @@ fn process_overlay_buttons(
             OverlayButton::GuildGoldCancel | OverlayButton::GuildGoldClose => {
                 state.guild_gold_prompt = None;
                 ui_audio.push(if *button == OverlayButton::GuildGoldClose {
-                    crate::audio::NativeUiSound::ButtonA
+                    crate::ui_audio::NativeUiSound::ButtonA
                 } else {
-                    crate::audio::NativeUiSound::ButtonB
+                    crate::ui_audio::NativeUiSound::ButtonB
                 });
             }
             OverlayButton::GuildStoragePreviousRow | OverlayButton::GuildStorageNextRow => {
                 if !state.guild_open() || state.guild_left_page != GuildLeftPage::Storage {
                     continue;
                 }
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 if *button == OverlayButton::GuildStoragePreviousRow {
                     state.guild_storage.previous_row();
                 } else {
@@ -4838,24 +4852,24 @@ fn process_overlay_buttons(
             }
             OverlayButton::TradeGoldConfirm => {
                 trade_dialog::confirm_gold(&mut state, &mut social, gold, &mut intents);
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
             }
             OverlayButton::TradeGoldCancel | OverlayButton::TradeGoldClose => {
                 state.trade_dialog.gold_prompt = None;
                 ui_audio.push(if *button == OverlayButton::TradeGoldClose {
-                    crate::audio::NativeUiSound::ButtonA
+                    crate::ui_audio::NativeUiSound::ButtonA
                 } else {
-                    crate::audio::NativeUiSound::ButtonB
+                    crate::ui_audio::NativeUiSound::ButtonB
                 });
             }
             OverlayButton::TradeConfirm => {
                 if trade_dialog::toggle_lock(&mut state, &social, &mut intents) {
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
             }
             OverlayButton::TradeCancel => {
                 if trade_dialog::cancel(&mut state, &mut social, &mut intents) {
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
             }
             OverlayButton::Logout => {
@@ -4884,26 +4898,26 @@ fn process_overlay_buttons(
                 {
                     // DelItemButton itself owns ButtonA even when an existing
                     // selected cell opens the prompt without toggling mode.
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                     let _ = state.open_inventory_delete_for_slot(&inventory, slot);
                 } else {
                     state.inventory_delete_mode = !state.inventory_delete_mode;
                     state.inventory_delete_prompt = None;
                     ui_audio.push(if state.inventory_delete_mode {
-                        crate::audio::NativeUiSound::ButtonA
+                        crate::ui_audio::NativeUiSound::ButtonA
                     } else {
-                        crate::audio::NativeUiSound::ButtonB
+                        crate::ui_audio::NativeUiSound::ButtonB
                     });
                 }
             }
             OverlayButton::InventoryDeleteConfirm => {
                 if confirm_inventory_delete(&mut state, &inventory, &mut intents, &mut pending) {
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
                 }
             }
             OverlayButton::InventoryDeleteCancel => {
                 state.cancel_inventory_delete();
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
             }
             OverlayButton::InventoryDeleteAmountClose => {
                 if matches!(
@@ -4915,7 +4929,7 @@ fn process_overlay_buttons(
                     // CancelDelete callback, so delete mode remains active.
                     state.inventory_delete_prompt = None;
                     state.inspect = None;
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
             }
             OverlayButton::DropInspected => {
@@ -5125,7 +5139,7 @@ fn process_overlay_buttons(
                 // MirButton.Sound = SoundList.ButtonA. Keep the cue on the
                 // local Changed<Interaction> press edge; switching pages must
                 // never manufacture a gateway intent.
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 state.character_page = page;
                 state.inspect = None;
             }
@@ -5135,7 +5149,7 @@ fn process_overlay_buttons(
                     // locked second tab still clicks (Crystal opens an
                     // expansion prompt), but it must never expose a phantom
                     // empty page while expansion authority is unavailable.
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                     if page != 1 || inventory.second_bag_unlocked() {
                         state.inventory_page = page;
                         state.inspect = None;
@@ -11761,7 +11775,7 @@ mod tests {
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .init_resource::<NativePlayerUiIntentQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
@@ -11779,7 +11793,7 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -11794,7 +11808,7 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
@@ -11807,15 +11821,15 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
 
         app.world_mut().entity_mut(button).insert(Interaction::None);
@@ -11830,12 +11844,12 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
         app.world_mut()
-            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
             .drain_bounded(8);
 
         // A stale press outside InGame is neither a click nor a sound.
@@ -11852,7 +11866,7 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -11864,7 +11878,7 @@ mod tests {
             .toggle_inventory();
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -12159,7 +12173,7 @@ mod tests {
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .init_resource::<NativePlayerUiIntentQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
@@ -12197,7 +12211,7 @@ mod tests {
         assert_eq!(state.character_page, CharacterPage::Character);
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
@@ -12215,12 +12229,12 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
         app.world_mut()
-            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
             .drain_bounded(8);
 
         // A second edge closes the already-visible CharacterPage and plays
@@ -12237,12 +12251,12 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
         app.world_mut()
-            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
             .drain_bounded(8);
 
         // Disabled image buttons are not valid clicks even if a synthetic
@@ -12264,7 +12278,7 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -12280,7 +12294,7 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -12318,7 +12332,7 @@ mod tests {
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .init_resource::<NativePlayerUiIntentQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
@@ -12338,9 +12352,9 @@ mod tests {
         assert!(app.world().resource::<NativePlayerUiState>().menu_open());
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonC]
+            vec![crate::ui_audio::NativeUiSound::ButtonC]
         );
         assert!(app
             .world()
@@ -12362,7 +12376,7 @@ mod tests {
             app.init_resource::<NativePlayerUiState>()
                 .init_resource::<InventoryModel>()
                 .init_resource::<NativePlayerUiIntentQueue>()
-                .init_resource::<crate::audio::NativeUiAudioQueue>()
+                .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .insert_resource(NativeShellModel {
                     screen: NativeShellScreen::InGame,
                     ..Default::default()
@@ -12377,9 +12391,9 @@ mod tests {
             app.update();
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA],
+                vec![crate::ui_audio::NativeUiSound::ButtonA],
                 "{action:?} must emit exactly one Crystal ButtonA edge"
             );
             assert!(app
@@ -12396,7 +12410,7 @@ mod tests {
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .init_resource::<NativePlayerUiIntentQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
@@ -12424,9 +12438,9 @@ mod tests {
         }
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonC]
+            vec![crate::ui_audio::NativeUiSound::ButtonC]
         );
 
         app.world_mut().entity_mut(button).insert(Interaction::None);
@@ -12442,9 +12456,9 @@ mod tests {
         }
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonC]
+            vec![crate::ui_audio::NativeUiSound::ButtonC]
         );
         assert!(app
             .world()
@@ -12873,7 +12887,6 @@ mod tests {
         let mut app = App::new();
         app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
             .init_asset::<Image>()
-            .init_asset::<bevy::audio::AudioSource>()
             .init_resource::<ButtonInput<KeyCode>>()
             .add_message::<KeyboardInput>()
             .insert_resource(NativeShellModel {
@@ -12886,6 +12899,8 @@ mod tests {
             ));
 
         // Startup creates the actual HUD/Quest/Options entities.
+        #[cfg(feature = "native-ui")]
+        app.init_asset::<bevy::audio::AudioSource>();
         app.update();
 
         let option_button = {
@@ -13062,7 +13077,7 @@ mod tests {
         app.init_resource::<MailUiState>()
             .init_resource::<StorageUiState>()
             .init_resource::<ShopUiState>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .init_resource::<BigMapModel>()
             .init_resource::<BigMapGatewayIntentQueue>()
             .init_resource::<BigMapUiState>()
@@ -13392,7 +13407,7 @@ mod tests {
             .init_resource::<InventoryModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
@@ -13642,7 +13657,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .configure_sets(
                 Update,
@@ -13674,7 +13689,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .add_systems(Update, process_overlay_keyboard);
         let mut shell = NativeShellModel::default();
@@ -13744,7 +13759,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .add_systems(Update, process_overlay_keyboard);
         let mut shell = NativeShellModel::default();
@@ -13775,7 +13790,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .add_systems(Update, process_overlay_keyboard);
         app.insert_resource(NativeShellModel {
@@ -13814,7 +13829,7 @@ mod tests {
                 .init_resource::<ShopModel>()
                 .init_resource::<StorageModel>()
                 .init_resource::<ButtonInput<KeyCode>>()
-                .init_resource::<crate::audio::NativeUiAudioQueue>()
+                .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .add_message::<KeyboardInput>()
                 .add_systems(Update, process_overlay_keyboard);
             app.insert_resource(NativeShellModel {
@@ -13859,7 +13874,7 @@ mod tests {
             assert_eq!(state.character_page, CharacterPage::Character);
             assert_eq!(
                 app.world()
-                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .resource::<crate::ui_audio::NativeUiAudioQueue>()
                     .len(),
                 0
             );
@@ -15338,16 +15353,16 @@ mod tests {
             );
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA]
+                vec![crate::ui_audio::NativeUiSound::ButtonA]
             );
 
             // A held button is not another Crystal click edge.
             app.update();
             assert_eq!(
                 app.world()
-                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .resource::<crate::ui_audio::NativeUiAudioQueue>()
                     .len(),
                 0
             );
@@ -15357,7 +15372,7 @@ mod tests {
             app.update();
             assert_eq!(
                 app.world()
-                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .resource::<crate::ui_audio::NativeUiAudioQueue>()
                     .len(),
                 0
             );
@@ -15367,9 +15382,9 @@ mod tests {
             app.update();
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA]
+                vec![crate::ui_audio::NativeUiSound::ButtonA]
             );
             app.world_mut().despawn(entity);
         }
@@ -15401,16 +15416,16 @@ mod tests {
             );
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA]
+                vec![crate::ui_audio::NativeUiSound::ButtonA]
             );
 
             // A held close control is not a second Crystal click edge.
             app.update();
             assert_eq!(
                 app.world()
-                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .resource::<crate::ui_audio::NativeUiAudioQueue>()
                     .len(),
                 0
             );
@@ -15431,9 +15446,9 @@ mod tests {
                 .equipment_open());
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA]
+                vec![crate::ui_audio::NativeUiSound::ButtonA]
             );
             app.world_mut().despawn(entity);
         }
@@ -15455,7 +15470,7 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -15485,9 +15500,9 @@ mod tests {
         );
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA],
+            vec![crate::ui_audio::NativeUiSound::ButtonA],
             "Crystal's locked MirButton still emits its click cue"
         );
         app.world_mut().resource_mut::<InventoryModel>().capacity = 54;
@@ -15499,9 +15514,9 @@ mod tests {
         );
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
         press(&mut app, OverlayButton::SkillPageNext);
         assert_eq!(
@@ -16551,7 +16566,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
@@ -16869,7 +16884,7 @@ mod tests {
         assert!(app.world().resource::<NativePlayerUiState>().help_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -16878,27 +16893,27 @@ mod tests {
         assert_eq!(app.world().resource::<NativePlayerUiState>().help.page, 44);
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
 
         press_help_button(&mut app, OverlayButton::HelpNext);
         assert_eq!(app.world().resource::<NativePlayerUiState>().help.page, 0);
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
 
         press_help_button(&mut app, OverlayButton::CloseHelp);
         assert!(!app.world().resource::<NativePlayerUiState>().help_open());
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
         assert!(app
             .world()

@@ -35,8 +35,8 @@ case "${MODE}" in
 esac
 
 case "${VARIANT}" in
-  debug|release) ;;
-  *) fail "MIR2_ANDROID_VARIANT must be 'debug' or 'release'" ;;
+  debug|release|uiPreview) ;;
+  *) fail "MIR2_ANDROID_VARIANT must be 'debug', 'release' or 'uiPreview'" ;;
 esac
 
 case "${RUST_PROFILE}" in
@@ -107,6 +107,11 @@ fi
 if [[ "${VARIANT}" == "release" ]]; then
   gradle_task="assembleRelease"
   apk_path="${ANDROID_PROJECT}/app/build/outputs/apk/release/app-release-unsigned.apk"
+fi
+if [[ "${VARIANT}" == "uiPreview" ]]; then
+  build_args+=(--features ui-preview)
+  gradle_task="assembleUiPreview"
+  apk_path="${ANDROID_PROJECT}/app/build/outputs/apk/uiPreview/app-uiPreview.apk"
 fi
 
 staged_lib="${NDK_OUTPUT}/${ABI}/libmir2_platform_android.so"

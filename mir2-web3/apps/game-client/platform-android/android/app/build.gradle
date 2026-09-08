@@ -7,12 +7,13 @@ plugins {
 def uiRoot = System.getenv('MIR2_ANDROID_UI_ASSET_ROOT')
 def prepareSharedUi = tasks.register('prepareSharedUi', Sync) {
     if (uiRoot) from(uiRoot) {
-        include 'original-ui/ChrSel/*.png', 'original-ui/Prguse/*.png', 'original-ui/Prguse2/*.png', 'original-ui/Title/*.png'
+        include 'original-ui/ChrSel/*.png', 'original-ui/Prguse/*.png', 'original-ui/Prguse2/*.png', 'original-ui/Title/*.png',
+                'original-ui/Items/*.png', 'original-ui/Help/*.png', 'original-ui/MMap/*.png', 'original-ui/StateItem/*.png'
     }
     into layout.buildDirectory.dir('generated/shared-ui-assets')
 }
 tasks.configureEach { task ->
-    if (task.name == 'mergeDebugAssets' || task.name == 'mergeReleaseAssets') {
+    if (task.name == 'mergeDebugAssets' || task.name == 'mergeReleaseAssets' || task.name == 'mergeUiPreviewAssets') {
         task.dependsOn prepareSharedUi
         task.doFirst {
             if (!uiRoot || !file("${uiRoot}/original-ui/ChrSel/0.png").isFile()
@@ -43,10 +44,18 @@ android {
     }
 
     buildTypes {
+        uiPreview {
+            initWith debug
+            applicationIdSuffix '.uipreview'
+            matchingFallbacks = ['debug']
+            buildConfigField 'boolean', 'UI_PREVIEW', 'true'
+        }
         debug {
             debuggable true
+            buildConfigField 'boolean', 'UI_PREVIEW', 'false'
         }
         release {
+            buildConfigField 'boolean', 'UI_PREVIEW', 'false'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

@@ -5,9 +5,16 @@
 //! Winit/asset loading, then enters this same app construction path.
 
 pub mod android_input;
+#[cfg(any(target_os = "android", test))]
+mod form_input;
 pub mod gateway_bridge;
 #[cfg(any(target_os = "android", test))]
+mod mobile_ui;
+#[cfg(any(target_os = "android", test))]
 mod shared_shell;
+mod text_input;
+#[cfg(feature = "ui-preview")]
+mod ui_preview;
 
 use android_input::{
     apply_android_lifecycle_messages, collect_android_back_key, route_android_input_messages,

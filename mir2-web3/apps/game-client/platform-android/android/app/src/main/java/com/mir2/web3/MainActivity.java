@@ -30,7 +30,7 @@ public final class MainActivity extends GameActivity {
     private OkHttpClient client;
     private EditText ime;
     private String editing = "";
-    private boolean updating, foreground;
+    private boolean updating, foreground, sensitiveEditor;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -38,7 +38,11 @@ public final class MainActivity extends GameActivity {
         ime = new EditText(this);
         ime.setSingleLine(true);
         ime.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_FLAG_NO_FULLSCREEN | EditorInfo.IME_ACTION_DONE);
-        ime.setOnEditorActionListener((view, action, event) -> { hideKeyboard(); return true; });
+        ime.setOnEditorActionListener((view, action, event) -> {
+            nativeEvent(GatewaySession.object("type", "submit", "field", editing).toString());
+            hideKeyboard();
+            return true;
+        });
         ime.setOnApplyWindowInsetsListener((view, insets) -> {
             nativeEvent(GatewaySession.object("type", "insets", "bottom", insets.getInsets(WindowInsets.Type.ime()).bottom).toString());
             return insets;
@@ -52,7 +56,7 @@ public final class MainActivity extends GameActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!updating && !editing.isEmpty()) {
-                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                    if (sensitiveEditor) getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
                     nativeEvent(GatewaySession.object("type", "edit", "field", editing, "text", s.toString()).toString());
                 }
             }
@@ -74,6 +78,11 @@ public final class MainActivity extends GameActivity {
     }
 
     private void connect() {
+        if (BuildConfig.UI_PREVIEW) {
+            nativeEvent(GatewaySession.object("type", "uiPreview", "scene",
+                    getIntent().getStringExtra("ui_scene") == null ? "hud" : getIntent().getStringExtra("ui_scene")).toString());
+            return;
+        }
         // Explicit build-time configuration; exported intents cannot override the URL.
         if (BuildConfig.MIR2_GATEWAY_URL.isEmpty()) {
             nativeEvent(GatewaySession.object("phase", "UNCONFIGURED", "message",
@@ -96,15 +105,17 @@ public final class MainActivity extends GameActivity {
                     JSONObject command = new JSONObject(raw);
                     switch (command.getString("type")) {
                         case "connect": connect(); break;
-                        case "login": session.login(command.getString("account"), command.getString("password")); break;
-                        case "start": session.start(command.getInt("index")); break;
+                        case "login": if (!BuildConfig.UI_PREVIEW) session.login(command.getString("account"), command.getString("password")); break;
+                        case "start": if (!BuildConfig.UI_PREVIEW) session.start(command.getInt("index")); break;
                         case "disconnect": session.disconnect("Disconnected. Reconnect to refresh server state."); break;
                         case "keyboard":
                             editing = command.getString("field");
+                            sensitiveEditor = command.optBoolean("password") || editing.contains("account");
                             updating = true;
-                            ime.setInputType(InputType.TYPE_CLASS_TEXT | (editing.equals("password")
+                            ime.setInputType(InputType.TYPE_CLASS_TEXT | (command.optBoolean("password", editing.equals("password"))
                                     ? InputType.TYPE_TEXT_VARIATION_PASSWORD : InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)
                                     | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                            if (command.optBoolean("numeric")) ime.setInputType(InputType.TYPE_CLASS_NUMBER);
                             ime.setText(command.getString("text"));
                             ime.setSelection(ime.length());
                             updating = false;
@@ -133,6 +144,11 @@ public final class MainActivity extends GameActivity {
         updating = false;
         ((InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(ime.getWindowToken(), 0);
         ime.clearFocus();
+    }
+
+    @Override public void onBackPressed() {
+        if (!editing.isEmpty()) { hideKeyboard(); return; }
+        nativeEvent(GatewaySession.object("type", "back").toString());
     }
 
     @Override protected void onStart() {

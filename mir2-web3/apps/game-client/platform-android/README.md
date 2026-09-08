@@ -3,7 +3,8 @@
 ## Shared Crystal UI (2026-09-08)
 
 Android now installs the same `Mir2NativeShellUiPlugin` / `NativeShellModel`
-used by Windows, enabled through the additive `native-shell-ui` feature.
+used by Windows, now enabled through the additive `native-player-ui` feature.
+The HUD, overlays, minimap, chat, notices and quest/NPC plugins are also mounted.
 Windows `native-ui` still enables this shell plus its existing gameplay/audio
 features. No fork of the login/select layout was made. Java's visible login
 form and the Bevy debug-text screen were removed. The only Java editor is a
@@ -12,7 +13,7 @@ to the shared Crystal shell. The 1024x768 stage fits uniformly with letterboxing
 while typing it pans upward to keep the login panel readable above the IME.
 
 Package with `MIR2_ANDROID_UI_ASSET_ROOT` pointing to a local approved asset
-root containing `original-ui/{ChrSel,Prguse,Prguse2,Title}/*.png`. Gradle stages
+root containing `original-ui/{ChrSel,Prguse,Prguse2,Title,Items,Help,MMap,StateItem}/*.png`. Gradle stages
 only those images in generated build output. The files are not committed.
 Set `MIR2_GATEWAY_WS_URL` explicitly at build time for approved online tests.
 Neither an exported Activity intent nor old endpoint preferences override it.
@@ -20,6 +21,13 @@ With no endpoint the actual shared login screen shows a configuration notice;
 it does not fabricate a connection or a selectable test character.
 
 ## Login transport
+
+For explicitly offline UI specimens, package with
+`MIR2_ANDROID_VARIANT=uiPreview`; this produces the separate
+`com.mir2.web3.uipreview` APK. Its network entrypoints are disabled and its
+fixtures are labelled. Use `capture-ui-preview.sh OUTPUT_DIRECTORY` to collect
+31 specimen routes. See `docs/ANDROID-UI-COVERAGE.md` for implemented surfaces
+and remaining interaction/live-device gates; registration is not acceptance.
 
 `android/app/src/main/java/com/mir2/web3/GatewaySession.java` supplies a bounded
 login/character-selection WSS host using OkHttp 4.12.0 and Android's normal TLS

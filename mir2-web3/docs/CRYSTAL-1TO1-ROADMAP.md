@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-08 Android player UI assembly: the native host now mounts the shared
+> gameplay UI plugins via `native-player-ui`, with a touch panel launcher,
+> focused OS text-input adapters and isolated offline preview APK. Source
+> new-character preview offsets/animation are corrected. Scope and open gates:
+> `docs/ANDROID-UI-COVERAGE.md`. This is not completed Android UI acceptance,
+> live gameplay, physical-device verification or Windows backend work.
+
 > 2026-09-08 Android UI correction: the isolated Android host now uses the same
 > Crystal login/select plugin and model as Windows, via additive `native-shell-ui`.
 > The Java player form and debug-text screen are removed. API 31 login/IME/

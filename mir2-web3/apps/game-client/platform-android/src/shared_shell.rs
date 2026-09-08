@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use mir2_client_bevy::{
     crystal_ui::{login::CrystalLoginAction, CrystalStageTransform},
     native_shell::{
-        CharacterSummary, LoginFocus, NativeGatewayEvent as Event, NativeShellModel,
+        CharacterSummary, NativeGatewayEvent as Event, NativeShellModel,
         NativeShellScreen as Screen, NativeUiIntent as Intent, NativeUiIntentQueue, ShellNotice,
     },
     native_shell_ui::{Mir2NativeShellUiPlugin, NativeShellRoot},
@@ -72,6 +72,8 @@ struct HostState {
 }
 
 pub struct AndroidSharedShellPlugin;
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct AndroidStageFit;
 impl Plugin for AndroidSharedShellPlugin {
     fn build(&self, app: &mut App) {
         let mut model = NativeShellModel::default();
@@ -82,16 +84,41 @@ impl Plugin for AndroidSharedShellPlugin {
         app.insert_resource(model)
             .init_resource::<HostState>()
             .add_plugins(Mir2NativeShellUiPlugin)
-            .add_systems(PreUpdate, receive)
-            .add_systems(PostUpdate, (fit_stage, forward_intents, keyboard).chain());
+            .add_plugins((
+                mir2_client_bevy::crystal_ui::minimap::Mir2CrystalMiniMapPlugin,
+                mir2_client_bevy::crystal_ui::hud::Mir2CrystalHudPlugin,
+                mir2_client_bevy::crystal_ui::chat::Mir2CrystalChatPlugin,
+                mir2_client_bevy::crystal_ui::notice::Mir2CrystalNoticePlugin,
+                mir2_client_bevy::quest_ui::Mir2QuestUiPlugin,
+            ))
+            .add_systems(PreUpdate, receive.before(bevy::input::InputSystems))
+            .add_systems(
+                PostUpdate,
+                (fit_stage.in_set(AndroidStageFit), forward_intents, keyboard).chain(),
+            );
+        #[cfg(feature = "ui-preview")]
+        crate::ui_preview::install(app);
+        crate::mobile_ui::install(app);
     }
 }
 
 fn fit_stage(
     windows: Query<&Window>,
     host: Res<HostState>,
+    model: Res<NativeShellModel>,
     mut scale: ResMut<UiScale>,
-    mut roots: Query<&mut Node, With<NativeShellRoot>>,
+    mut roots: Query<
+        (&mut Node, Has<NativeShellRoot>),
+        Or<(
+            With<NativeShellRoot>,
+            With<mir2_client_bevy::crystal_ui::hud::CrystalHudRoot>,
+            With<mir2_client_bevy::crystal_ui::chat::CrystalChatRoot>,
+            With<mir2_client_bevy::crystal_ui::notice::CrystalNoticeRoot>,
+            With<mir2_client_bevy::crystal_ui::minimap::CrystalMiniMapRoot>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayRoot>,
+            With<mir2_client_bevy::quest_ui::QuestUiRoot>,
+        )>,
+    >,
 ) {
     let Ok(window) = windows.single() else {
         return;
@@ -101,14 +128,16 @@ fn fit_stage(
     // its login panel above the keyboard instead of shrinking it to a thumbnail.
     let available = (window.height() - host.ime_bottom / window.scale_factor()).max(1.0);
     let panel = mir2_client_bevy::crystal_ui::spec::login::PANEL.rect;
-    let top = if host.ime_bottom > 0.0 {
+    let top = if host.ime_bottom > 0.0 && model.screen == Screen::InGame {
+        (available / fit.scale - 750.0).min(fit.offset_y / fit.scale)
+    } else if host.ime_bottom > 0.0 {
         (available / (2.0 * fit.scale) - panel.top - panel.height * 0.5)
             .min(fit.offset_y / fit.scale)
     } else {
         fit.offset_y / fit.scale
     };
     scale.0 = fit.scale;
-    for mut root in &mut roots {
+    for (mut root, _is_shell) in &mut roots {
         root.left = px(fit.offset_x / fit.scale);
         root.top = px(top);
     }
@@ -118,6 +147,11 @@ fn receive(
     mut model: ResMut<NativeShellModel>,
     mut host: ResMut<HostState>,
     mut intents: ResMut<NativeUiIntentQueue>,
+    mut player: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    mut key_events: Option<ResMut<Messages<bevy::input::keyboard::KeyboardInput>>>,
+    windows: Query<Entity, With<Window>>,
+    mut forms: crate::form_input::FormInput,
+    #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
     let values: Vec<_> = INBOX
         .lock()
@@ -125,24 +159,101 @@ fn receive(
         .drain(..)
         .collect();
     for value in values {
+        if value["type"] == "submit" {
+            let active = crate::text_input::shell_field(&model)
+                .map(|v| v.0)
+                .or_else(|| {
+                    player
+                        .as_deref()
+                        .filter(|_| model.screen == Screen::InGame)
+                        .and_then(|p| {
+                            forms
+                                .field(p)
+                                .or_else(|| crate::text_input::player_field(p))
+                        })
+                        .map(|v| v.0)
+                });
+            if active.is_some() && active == value["field"].as_str() {
+                if let (Some(events), Ok(window)) = (key_events.as_deref_mut(), windows.single()) {
+                    use bevy::input::{
+                        keyboard::{Key, KeyboardInput},
+                        ButtonState,
+                    };
+                    for state in [ButtonState::Pressed, ButtonState::Released] {
+                        events.write(KeyboardInput {
+                            key_code: KeyCode::Enter,
+                            logical_key: Key::Enter,
+                            state,
+                            text: None,
+                            repeat: false,
+                            window,
+                        });
+                    }
+                }
+            }
+            continue;
+        }
+        if value["type"] == "back" {
+            match model.screen {
+                Screen::InGame => {
+                    if let Some(player) = player.as_deref_mut() {
+                        if player.chat_focused() {
+                            player.set_chat_focused(false);
+                        } else if player.blocks_world_click() {
+                            player.close_windows();
+                        } else {
+                            player.toggle_menu();
+                        }
+                    }
+                }
+                Screen::CharacterCreate => {
+                    model.apply_ui_intent(Intent::CancelCharacterCreate);
+                }
+                Screen::ChangePassword => {
+                    model.apply_ui_intent(Intent::CancelChangePassword);
+                }
+                Screen::SafeKey => {
+                    model.apply_ui_intent(Intent::CloseSafeKey);
+                }
+                Screen::DeleteConfirm { .. } => {
+                    model.apply_ui_intent(Intent::CancelDeleteCharacter);
+                }
+                _ => {}
+            }
+            continue;
+        }
+        #[cfg(feature = "ui-preview")]
+        if value["type"] == "uiPreview" {
+            if let Some(scene) = value["scene"]
+                .as_str()
+                .filter(|s| crate::ui_preview::SCENES.contains(s))
+            {
+                preview.scene = Some(scene.to_owned());
+            }
+            continue;
+        }
         if value["type"] == "insets" {
             host.ime_bottom = value["bottom"].as_u64().unwrap_or(0).min(8192) as f32;
             continue;
         }
         if value["type"] == "edit" {
-            // The invisible OS editor is only an input adapter; the shared model owns text.
-            if model.screen == Screen::Login {
-                let text = value["text"].as_str().unwrap_or("");
-                match (value["field"].as_str(), model.login.focus) {
-                    (Some("account"), LoginFocus::Account) => {
-                        model.login.account =
-                            text.chars().filter(|c| !c.is_control()).take(24).collect()
-                    }
-                    (Some("password"), LoginFocus::Password) => {
-                        model.login.password =
-                            text.chars().filter(|c| !c.is_control()).take(32).collect()
-                    }
-                    _ => {}
+            crate::text_input::edit_shell(
+                &mut model,
+                value["field"].as_str().unwrap_or(""),
+                value["text"].as_str().unwrap_or(""),
+            );
+            if model.screen == Screen::InGame {
+                if let Some(player) = player.as_deref_mut() {
+                    forms.edit(
+                        player,
+                        value["field"].as_str().unwrap_or(""),
+                        value["text"].as_str().unwrap_or(""),
+                    );
+                    crate::text_input::edit_player(
+                        player,
+                        value["field"].as_str().unwrap_or(""),
+                        value["text"].as_str().unwrap_or(""),
+                    );
                 }
             }
             continue;
@@ -254,36 +365,53 @@ fn forward_intents(
 
 fn keyboard(
     model: Res<NativeShellModel>,
+    player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
+    forms: crate::form_input::FormInput,
     interactions: Query<(&Interaction, &CrystalLoginAction), Changed<Interaction>>,
+    extra_fields: Query<
+        (
+            &Interaction,
+            &mir2_client_bevy::native_shell_ui::NativeShellField,
+        ),
+        Changed<Interaction>,
+    >,
     mut was_editing: Local<bool>,
     mut privacy: Local<bool>,
+    mut last_field: Local<Option<String>>,
 ) {
     let sensitive = !model.login.account.is_empty()
         || !model.login.password.is_empty()
+        || (model.screen == Screen::InGame && forms.field(&player).is_some_and(|v| v.2))
         || matches!(model.screen, Screen::ChangePassword | Screen::SafeKey);
     if *privacy != sensitive {
         send(json!({"type":"privacy","secure":sensitive}));
         *privacy = sensitive;
     }
-    let field = if model.screen == Screen::Login {
-        match model.login.focus {
-            LoginFocus::Account => Some(("account", &model.login.account)),
-            LoginFocus::Password => Some(("password", &model.login.password)),
-            _ => None,
-        }
-    } else {
-        None
-    };
+    let field = crate::text_input::shell_field(&model).or_else(|| {
+        (model.screen == Screen::InGame)
+            .then(|| {
+                forms
+                    .field(&player)
+                    .or_else(|| crate::text_input::player_field(&player))
+            })
+            .flatten()
+    });
+    let field_name = field.map(|v| v.0.to_owned());
     let pressed = interactions.iter().any(|(interaction, action)| {
         *interaction == Interaction::Pressed
             && matches!(
                 action,
                 CrystalLoginAction::FocusAccount | CrystalLoginAction::FocusPassword
             )
-    });
+    }) || extra_fields
+        .iter()
+        .any(|(interaction, _)| *interaction == Interaction::Pressed)
+        || (model.screen == Screen::InGame && field_name.is_some() && field_name != *last_field);
     if pressed {
-        if let Some((field, text)) = field {
-            send(json!({"type":"keyboard","field":field,"text":text}));
+        if let Some((field, text, password)) = field {
+            send(
+                json!({"type":"keyboard","field":field,"text":text,"password":password,"numeric":field.ends_with("amount")}),
+            );
             *was_editing = true;
         } else if *was_editing {
             send(json!({"type":"hideKeyboard"}));
@@ -293,6 +421,7 @@ fn keyboard(
         send(json!({"type":"hideKeyboard"}));
         *was_editing = false;
     }
+    *last_field = field_name;
 }
 
 #[cfg(test)]
@@ -304,6 +433,8 @@ mod tests {
         INBOX.lock().unwrap().clear();
         OUTBOX.lock().unwrap().clear();
         let mut app = App::new();
+        #[cfg(feature = "ui-preview")]
+        app.init_resource::<crate::ui_preview::PreviewRequest>();
         app.init_resource::<NativeShellModel>()
             .init_resource::<HostState>()
             .init_resource::<NativeUiIntentQueue>()
