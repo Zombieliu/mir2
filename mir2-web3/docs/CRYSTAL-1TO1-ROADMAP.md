@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local source `77edc7afb`: guild notice IME now keeps
+> all eight shared text lines above the keyboard on API 31; Back/Cancel
+> restores the offline notice. normal78/preview80, both APK gates pass.
+> Evidence: `docs/generated/player-qa/native-android-guild-ime-20260909/README.md`.
+> Local only; full-screen layout, online gameplay, device and human gates remain.
+
 > 2026-09-08 Android local UI follow-up: `ac1a37d55` makes touch rail Close
 > include shared Help; API 31 before/after and normal76/preview78 tests pass.
 > Prior local IME/Back, mail paging, gold and multiline editor evidence is in
