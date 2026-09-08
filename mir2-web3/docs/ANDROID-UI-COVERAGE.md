@@ -57,10 +57,12 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
-- Final API 31 touch smoke exposed two interaction gaps: a title-bar drag
-  starting at the top edge invoked Android system chrome instead of moving
-  the bag; the touch launcher's Close hid the bag but left its item-action
-  overlay visible. These are recorded failures, not accepted interactions.
+- The two initial touch gaps have targeted API 31 regression evidence at
+  source `62344b0e5`: same-frame tap edges and hit-test ordering are fixed;
+  bag/help keep a 24 OS-logical-pixel top gutter. Bag dragging and short-tap
+  inspect → Panels → Close now pass. See
+  [touch regression evidence](generated/player-qa/native-android-touch-20260908/README.md).
+  This does not establish every window's touch behavior or physical-device acceptance.
 - The real login socket still lacks the shared gameplay bootstrap/read-model
   projection and complete gameplay/transaction intent dispatch. Real StartGame
   remains on the transition screen, rather than fabricating a playable map.

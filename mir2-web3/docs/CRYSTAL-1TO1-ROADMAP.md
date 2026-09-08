@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-08 Android touch regression: `62344b0e5` orders pointer updates before
+> UI hit testing, preserves same-frame tap release, and keeps bag/help drag
+> handles below system gestures. API 31 bag drag and inspect/Close pass;
+> normal host 68/68, preview 69/69 (overlapping), shared visuals 572/572.
+> Evidence: `docs/generated/player-qa/native-android-touch-20260908/README.md`.
+> Only Android code changed; whole UI, online gameplay and real-device gates remain.
+
 > 2026-09-08 Android player UI assembly: the native host now mounts the shared
 > gameplay UI plugins via `native-player-ui`, with a touch panel launcher,
 > focused OS text-input adapters and isolated offline preview APK. Source
