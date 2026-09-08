@@ -1,13 +1,17 @@
 //! Android touch affordances over the existing shared player UI state.
 use bevy::prelude::*;
 use mir2_client_bevy::{
-    crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState},
+    crystal_ui::overlays::{
+        dispatch_ui_action, NativePlayerUiSet, NativePlayerUiState, UiEffectQueue,
+    },
     native_shell::{NativeShellModel, NativeShellScreen},
+    read_model::UiReadModel,
 };
 
 #[derive(Component, Clone, Copy)]
 enum Action {
     Panels,
+    Revive,
     Bag,
     Character,
     Skills,
@@ -33,6 +37,7 @@ struct TouchPointer {
 }
 pub fn install(app: &mut App) {
     app.init_resource::<RailState>()
+        .init_resource::<UiEffectQueue>()
         .init_resource::<TouchPointer>()
         .add_systems(Startup, spawn)
         .add_systems(
@@ -138,6 +143,7 @@ fn spawn(mut commands: Commands) {
         .with_children(|rail| {
             for (label, action) in [
                 ("Panels", Action::Panels),
+                ("Revive", Action::Revive),
                 ("Bag", Action::Bag),
                 ("Char", Action::Character),
                 ("Skills", Action::Skills),
@@ -178,6 +184,8 @@ fn spawn(mut commands: Commands) {
 }
 fn visibility(
     shell: Res<NativeShellModel>,
+    state: Res<NativePlayerUiState>,
+    ui: Option<Res<UiReadModel>>,
     scale: Res<UiScale>,
     mut rail: ResMut<RailState>,
     mut roots: Query<&mut Node, (With<TouchRail>, Without<Action>)>,
@@ -203,7 +211,12 @@ fn visibility(
     for (action, mut node) in &mut buttons {
         node.width = px(64.0 * unit);
         node.height = px(48.0 * unit);
-        node.display = if rail.expanded || matches!(action, Action::Panels) {
+        let visible = if matches!(action, Action::Revive) {
+            can_request_revive(&shell, &state, ui.as_deref())
+        } else {
+            rail.expanded || matches!(action, Action::Panels)
+        };
+        node.display = if visible {
             Display::Flex
         } else {
             Display::None
@@ -215,6 +228,8 @@ fn visibility(
 }
 fn buttons(
     shell: Res<NativeShellModel>,
+    ui: Option<Res<UiReadModel>>,
+    mut effects: Option<ResMut<UiEffectQueue>>,
     mut state: ResMut<NativePlayerUiState>,
     mut rail: ResMut<RailState>,
     mut buttons: Query<(&Interaction, &Action, &mut BackgroundColor), Changed<Interaction>>,
@@ -233,6 +248,19 @@ fn buttons(
             continue;
         }
         match action {
+            Action::Revive => {
+                if can_request_revive(&shell, &state, ui.as_deref()) {
+                    if let Some(effects) = effects.as_deref_mut() {
+                        dispatch_ui_action(
+                            &mut state.core,
+                            effects,
+                            mir2_ui_core::action::UiAction::TownRevive,
+                        );
+                        #[cfg(feature = "ui-preview")]
+                        info!("ANDROID_UI_PREVIEW_INTENT townRevive (queued only, no server)");
+                    }
+                }
+            }
             Action::Panels => {
                 rail.expanded = !rail.expanded;
                 continue;
@@ -254,6 +282,17 @@ fn buttons(
     }
 }
 
+fn can_request_revive(
+    shell: &NativeShellModel,
+    state: &NativePlayerUiState,
+    ui: Option<&UiReadModel>,
+) -> bool {
+    shell.screen == NativeShellScreen::InGame
+        && state.core.screen == mir2_ui_core::state::UiScreen::InGame
+        && !state.amount_modal_open()
+        && ui.is_some_and(|ui| ui.player.max_hp > 0 && ui.player.hp <= 0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -261,6 +300,58 @@ mod tests {
         touch::{TouchInput, TouchPhase},
         InputPlugin,
     };
+
+    #[test]
+    fn revive_touch_queues_shared_intent_once_without_local_resurrection() {
+        use mir2_ui_core::effect::{GatewayCommand, UiEffect};
+        let mut app = App::new();
+        let mut state = NativePlayerUiState::default();
+        state.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        let mut ui = UiReadModel::default();
+        ui.player.max_hp = 200;
+        ui.player.hp = 0;
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        })
+        .insert_resource(state)
+        .insert_resource(ui)
+        .init_resource::<UiEffectQueue>()
+        .init_resource::<RailState>()
+        .add_systems(Update, buttons);
+        app.world_mut().spawn((
+            Interaction::Pressed,
+            Action::Revive,
+            BackgroundColor(Color::NONE),
+        ));
+        app.update();
+        app.update(); // Held interaction must not enqueue another request.
+        assert_eq!(
+            app.world_mut().resource_mut::<UiEffectQueue>().drain(),
+            vec![UiEffect::GatewayCommand(GatewayCommand::TownRevive)]
+        );
+        assert_eq!(app.world().resource::<UiReadModel>().player.hp, 0);
+    }
+
+    #[test]
+    fn revive_requires_known_dead_player_and_both_active_screens() {
+        let mut shell = NativeShellModel::default();
+        let mut state = NativePlayerUiState::default();
+        let mut ui = UiReadModel::default();
+        assert!(!can_request_revive(&shell, &state, Some(&ui)));
+        shell.screen = NativeShellScreen::InGame;
+        state.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        assert!(!can_request_revive(&shell, &state, None));
+        ui.player.max_hp = 0;
+        assert!(!can_request_revive(&shell, &state, Some(&ui)));
+        ui.player.max_hp = 200;
+        ui.player.hp = 1;
+        assert!(!can_request_revive(&shell, &state, Some(&ui)));
+        ui.player.hp = 0;
+        assert!(can_request_revive(&shell, &state, Some(&ui)));
+        state.core.screen = mir2_ui_core::state::UiScreen::Login;
+        assert!(!can_request_revive(&shell, &state, Some(&ui)));
+    }
 
     #[test]
     fn touch_close_also_closes_shared_help() {
@@ -468,5 +559,24 @@ mod tests {
             }
         }
         assert_eq!(visible, 1, "rail is collapsed by default");
+        let mut ui = UiReadModel::default();
+        ui.player.hp = 0;
+        ui.player.max_hp = 200;
+        app.insert_resource(ui);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .screen = mir2_ui_core::state::UiScreen::InGame;
+        app.update();
+        let world = app.world_mut();
+        let mut targets = world.query::<(&Action, &Node)>();
+        let revive = targets
+            .iter(world)
+            .find(|(action, _)| matches!(action, Action::Revive))
+            .unwrap()
+            .1;
+        assert_eq!(revive.display, Display::Flex);
+        assert_eq!(revive.height, px(96));
+        assert_eq!(revive.width, px(128));
     }
 }
