@@ -57,9 +57,14 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- Local source `bed749479` adds a guarded notice-body IME touch target.
+  API 31 repeated Back/retap retains the draft; Cancel restores the notice.
+  Shared576, normal78/preview80 and both APK gates pass. Live publication
+  and physical-device acceptance remain open; source is local only.
+  [Retap evidence](generated/player-qa/native-android-guild-retap-20260909/README.md).
 - Local source `77edc7afb` fixes guild notice IME panning text offscreen.
   API 31 eight-line input and Back/Cancel are verified, normal78/preview80
-  and both APK gates pass. Notice-body retap and live publication remain open.
+  and both APK gates pass. Retap is addressed above; live publication remains open.
   [Guild evidence](generated/player-qa/native-android-guild-ime-20260909/README.md).
   Remote remains Draft `99a1cd121`; this source is local only.
 - Local source `ac1a37d55` fixes touch rail Close leaving Help open, using the

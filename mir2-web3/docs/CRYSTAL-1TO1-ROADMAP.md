@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local source `bed749479`: editable guild notice body
+> now reopens IME without resetting/publishing the draft. API 31 repeated
+> Back/retap and Cancel pass; shared576/normal78/preview80, both APK gates pass.
+> Evidence: `docs/generated/player-qa/native-android-guild-retap-20260909/README.md`.
+> LOCAL ONLY; online/device/full-screen/whole-game acceptance remains open.
+
 > 2026-09-09 Android local source `77edc7afb`: guild notice IME now keeps
 > all eight shared text lines above the keyboard on API 31; Back/Cancel
 > restores the offline notice. normal78/preview80, both APK gates pass.
