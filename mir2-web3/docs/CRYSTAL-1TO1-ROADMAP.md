@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local source `06a5dea1a`: death-only 64x48 touch Revive
+> emits the existing shared TownRevive intent; no local HP/world mutation.
+> API 31 long-press/log and alive-hidden checks, normal80/preview82 and both
+> APK gates pass. Evidence: `docs/generated/player-qa/native-android-revive-touch-20260909/README.md`.
+> UI-to-queue only, not real resurrection; source local-only, global gates open.
+
 > 2026-09-09 Android local source `bed749479`: editable guild notice body
 > now reopens IME without resetting/publishing the draft. API 31 repeated
 > Back/retap and Cancel pass; shared576/normal78/preview80, both APK gates pass.

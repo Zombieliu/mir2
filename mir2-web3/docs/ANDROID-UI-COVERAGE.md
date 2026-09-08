@@ -57,6 +57,11 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- Local source `06a5dea1a` adds death-only Android Revive touch action.
+  API 31 touch emits a shared TownRevive intent, without restoring HP;
+  alive state hides the target. normal80/preview82 and both APK gates pass.
+  [Revive evidence](generated/player-qa/native-android-revive-touch-20260909/README.md).
+  This is UI-to-queue only: real socket/receipt and lifecycle wiring remain open.
 - Local source `bed749479` adds a guarded notice-body IME touch target.
   API 31 repeated Back/retap retains the draft; Cancel restores the notice.
   Shared576, normal78/preview80 and both APK gates pass. Live publication
@@ -97,8 +102,8 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
   actual request/result wiring and an approved Gateway test environment.
 - Populated quests/skills/shops/maps, all nested dialogs and item operations
   need scenario-level interaction evidence, not merely a screenshot of a root panel.
-- Dedicated virtual joystick, multi-touch combat/skill controls and touch-only
-  revival require a further Android input slice; desktop keyboard affordances
+- Dedicated virtual joystick, multi-touch combat/skill controls and the actual
+  revival round trip require further Android work; desktop keyboard affordances
   in the shared UI do not prove phone usability.
 - Android audio, exact Crystal visual/feel parity, physical-device touch/IME,
   lifecycle/reconnect, low-end performance, signing and human acceptance remain open.
