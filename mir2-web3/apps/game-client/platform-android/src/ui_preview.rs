@@ -152,6 +152,7 @@ fn apply(world: &mut World) {
     model.player.mp = 60;
     model.player.max_mp = 100;
     model.player.max_weight = 100;
+    model.player.gold = 12345;
     drop(model);
     populate_specimens(world, &scene);
     if scene == "inventory-amount" {

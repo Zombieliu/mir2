@@ -6409,9 +6409,9 @@ fn render_gold_amount_modal(
                 BorderColor::all(border),
             ));
             if actions[0] == OverlayButton::TradeGoldConfirm {
-                field.insert(OverlayTradeGoldInput);
+                field.insert((Button, NativeTextInputTarget, OverlayTradeGoldInput));
             } else {
-                field.insert(OverlayGuildGoldInput);
+                field.insert((Button, NativeTextInputTarget, OverlayGuildGoldInput));
             }
             field.with_children(|field| {
                 field.spawn((

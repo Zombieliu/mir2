@@ -156,16 +156,7 @@ fn fit_stage(
     let available = (window.height() - host.ime_bottom / window.scale_factor()).max(1.0);
     let panel = mir2_client_bevy::crystal_ui::spec::login::PANEL.rect;
     let top = if host.ime_bottom > 0.0 && model.screen == Screen::InGame {
-        let editor_bottom = match forms.field(&player).map(|field| field.0) {
-            Some("inventory-amount") => {
-                let rect = mir2_client_bevy::crystal_ui::overlays::CRYSTAL_DELETE_AMOUNT_RECT;
-                rect.top + rect.height + 8.0
-            }
-            // Mail compose fields are at the top of the source Mail panel;
-            // panning the bottom HUD to the IME would move them off-screen.
-            Some("mail-recipient" | "mail-message") => 0.0,
-            _ => 750.0,
-        };
+        let editor_bottom = player_editor_bottom(forms.field(&player).map(|field| field.0));
         (available / fit.scale - editor_bottom).min(fit.offset_y / fit.scale)
     } else if host.ime_bottom > 0.0 {
         (available / (2.0 * fit.scale) - panel.top - panel.height * 0.5)
@@ -177,6 +168,18 @@ fn fit_stage(
     for (mut root, _is_shell) in &mut roots {
         root.left = px(fit.offset_x / fit.scale);
         root.top = px(top);
+    }
+}
+
+fn player_editor_bottom(field: Option<&str>) -> f32 {
+    match field {
+        Some("inventory-amount" | "guild-amount" | "trade-amount") => {
+            let rect = mir2_client_bevy::crystal_ui::overlays::CRYSTAL_DELETE_AMOUNT_RECT;
+            rect.top + rect.height + 8.0
+        }
+        // Mail editors are at the top of the source panel, not at the HUD.
+        Some("mail-recipient" | "mail-message") => 0.0,
+        _ => 750.0,
     }
 }
 
@@ -482,6 +485,15 @@ fn keyboard(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_shared_amount_dialog_uses_its_modal_geometry_for_ime() {
+        for field in ["inventory-amount", "guild-amount", "trade-amount"] {
+            assert_eq!(player_editor_bottom(Some(field)), 446.0);
+        }
+        assert_eq!(player_editor_bottom(Some("mail-message")), 0.0);
+        assert_eq!(player_editor_bottom(Some("chat")), 750.0);
+    }
 
     #[test]
     fn android_back_is_one_shared_escape_press_release_pair() {
