@@ -57,6 +57,12 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- Latest local editor source `fafbc716f` adds trade/guild amount IME geometry
+  and multiline mail/notice input. Trade amount reopening/cancel and two-line
+  mail text have API 31 evidence; guild-specific populated cases remain open.
+  Android tests 74/74 normal, 76/76 preview; shared UI 575/575. These later
+  commits/evidence are not yet confirmed remote: PR head last verified `99a1cd121`
+  after HTTP 408/SSH push failures. [Latest editor evidence](generated/player-qa/native-android-editors-20260908/README.md).
 - Source `79d6d7ce2` fixes GameActivity Back bypass, shared modal cancellation,
   same-field IME reopening and inventory amount bounds. Source `99a1cd121`
   bounds mail compose with six-row attachment paging. API 31 amount/recipient
