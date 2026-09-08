@@ -57,6 +57,11 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- Local source `ac1a37d55` fixes touch rail Close leaving Help open, using the
+  shared complete-close method. API 31 before/after replay and host tests
+  76/76 normal, 78/78 preview pass; modal/inactive guards remain intact.
+  [Close evidence](generated/player-qa/native-android-rail-close-20260908/README.md).
+  Read-only remote check remains `99a1cd121`, Draft; no push retry this round.
 - Latest local editor source `fafbc716f` adds trade/guild amount IME geometry
   and multiline mail/notice input. Trade amount reopening/cancel and two-line
   mail text have API 31 evidence; guild-specific populated cases remain open.

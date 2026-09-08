@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-08 Android local UI follow-up: `ac1a37d55` makes touch rail Close
+> include shared Help; API 31 before/after and normal76/preview78 tests pass.
+> Prior local IME/Back, mail paging, gold and multiline editor evidence is in
+> `docs/ANDROID-UI-COVERAGE.md`. Remote PR remains Draft at `99a1cd121` after
+> earlier push failures; later local commits are not claimed published.
+> Full touch gameplay, host wiring, real Gateway/device and human gates remain.
+
 > 2026-09-08 Android touch regression: `62344b0e5` orders pointer updates before
 > UI hit testing, preserves same-frame tap release, and keeps bag/help drag
 > handles below system gestures. API 31 bag drag and inspect/Close pass;
