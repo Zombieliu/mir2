@@ -57,6 +57,12 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- Offline refresh at `a8bb81954`: 33/33 specimen captures/log checks,
+  shared576/normal83/preview85 and preview APK build pass. This is smoke,
+  not all-interaction acceptance. Visual sampling retains centered 4:3 HUD,
+  Help last-row/footer overlap, clipped amount title and mail action area
+  obscured by IME. Full-screen layout and these usability gaps stay open.
+  [Refresh evidence](generated/player-qa/native-android-33-refresh-20260909/README.md).
 - Test-only `7770110db` verifies existing shared session reset from Android:
   Login/ConnectionLost clears ordinary player intents/pending/drafts on the
   next update, without reusing storage request IDs. normal83/preview85,
