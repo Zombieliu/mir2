@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local `13f001d0b`: unsent shared UI Gateway effects are
+> discarded at observed session/inactive boundaries; local effects preserved.
+> API 31 background/resume logs one discarded revive; normal82/preview84 and
+> both APK gates pass. `docs/generated/player-qa/native-android-ui-session-20260909/README.md`.
+> One queue only; full transport generations, online/device/global gates remain.
+
 > 2026-09-09 Android local source `06a5dea1a`: death-only 64x48 touch Revive
 > emits the existing shared TownRevive intent; no local HP/world mutation.
 > API 31 long-press/log and alive-hidden checks, normal80/preview82 and both

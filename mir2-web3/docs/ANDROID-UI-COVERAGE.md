@@ -57,6 +57,11 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- Local source `13f001d0b` discards unsent shared Gateway effects at disconnect,
+  reconnect start, logout and inactive/unfocused boundaries, preserving local effects.
+  API 31 queued revive → Home → resume logs one discarded command; normal82/
+  preview84 and both APK gates pass. Other queues/in-flight/generation wiring remain.
+  [Session evidence](generated/player-qa/native-android-ui-session-20260909/README.md).
 - Local source `06a5dea1a` adds death-only Android Revive touch action.
   API 31 touch emits a shared TownRevive intent, without restoring HP;
   alive state hides the target. normal80/preview82 and both APK gates pass.
