@@ -4,6 +4,10 @@ use mir2_client_bevy::native_shell::{
     NativeShellScreen as Screen,
 };
 
+pub fn is_multiline_editor(field: &str) -> bool {
+    matches!(field, "mail-message" | "guild-notice")
+}
+
 pub fn shell_field(model: &NativeShellModel) -> Option<(&'static str, &str, bool)> {
     match model.screen {
         Screen::Login => match model.login.focus {
@@ -67,6 +71,21 @@ pub fn edit_shell(model: &mut NativeShellModel, field: &str, text: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn only_long_form_shared_drafts_accept_ime_newlines() {
+        assert!(is_multiline_editor("mail-message"));
+        assert!(is_multiline_editor("guild-notice"));
+        for field in [
+            "password",
+            "account",
+            "character-name",
+            "chat",
+            "trade-amount",
+            "mail-recipient",
+        ] {
+            assert!(!is_multiline_editor(field));
+        }
+    }
     #[test]
     fn stale_editor_cannot_change_another_screen_or_field() {
         let mut model = NativeShellModel::default();

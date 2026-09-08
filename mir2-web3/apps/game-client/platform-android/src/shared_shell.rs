@@ -468,7 +468,7 @@ fn keyboard(
     if pressed {
         if let Some((field, text, password)) = field {
             send(
-                json!({"type":"keyboard","field":field,"text":text,"password":password,"numeric":field.ends_with("amount")}),
+                json!({"type":"keyboard","field":field,"text":text,"password":password,"numeric":field.ends_with("amount"),"multiline":crate::text_input::is_multiline_editor(field)}),
             );
             *was_editing = true;
         } else if *was_editing {

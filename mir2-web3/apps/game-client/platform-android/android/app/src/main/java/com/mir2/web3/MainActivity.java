@@ -31,7 +31,7 @@ public final class MainActivity extends GameActivity {
     private OkHttpClient client;
     private EditText ime;
     private String editing = "";
-    private boolean updating, foreground, sensitiveEditor, imeWasVisible;
+    private boolean updating, foreground, sensitiveEditor, imeWasVisible, multilineEditor;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -40,6 +40,9 @@ public final class MainActivity extends GameActivity {
         ime.setSingleLine(true);
         ime.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_FLAG_NO_FULLSCREEN | EditorInfo.IME_ACTION_DONE);
         ime.setOnEditorActionListener((view, action, event) -> {
+            // A newline in a long-form shared draft is text, not SubmitMail or
+            // a guild operation. Leave it to the normal EditText connection.
+            if (multilineEditor && (action == EditorInfo.IME_NULL || action == EditorInfo.IME_ACTION_NONE)) return false;
             nativeEvent(GatewaySession.object("type", "submit", "field", editing).toString());
             hideKeyboard();
             return true;
@@ -118,11 +121,16 @@ public final class MainActivity extends GameActivity {
                         case "keyboard":
                             editing = command.getString("field");
                             sensitiveEditor = command.optBoolean("password") || editing.contains("account");
+                            multilineEditor = command.optBoolean("multiline") && !sensitiveEditor && !command.optBoolean("numeric");
                             updating = true;
                             ime.setInputType(InputType.TYPE_CLASS_TEXT | (command.optBoolean("password", editing.equals("password"))
                                     ? InputType.TYPE_TEXT_VARIATION_PASSWORD : InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD)
-                                    | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                                    | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                                    | (multilineEditor ? InputType.TYPE_TEXT_FLAG_MULTI_LINE : 0));
                             if (command.optBoolean("numeric")) ime.setInputType(InputType.TYPE_CLASS_NUMBER);
+                            ime.setSingleLine(!multilineEditor);
+                            ime.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_FLAG_NO_FULLSCREEN
+                                    | (multilineEditor ? EditorInfo.IME_ACTION_NONE : EditorInfo.IME_ACTION_DONE));
                             ime.setText(command.getString("text"));
                             ime.setSelection(ime.length());
                             updating = false;

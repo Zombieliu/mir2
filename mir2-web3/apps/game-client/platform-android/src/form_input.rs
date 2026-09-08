@@ -198,4 +198,43 @@ mod tests {
             .attachment_unique_ids
             .is_empty());
     }
+
+    #[test]
+    fn mail_body_preserves_newlines_and_shared_length_limit() {
+        let mut world = World::new();
+        world.insert_resource(MailComposeUi {
+            focus: MailComposeFocus::Message,
+            ..default()
+        });
+        let mut state = NativePlayerUiState::default();
+        state.core.mail_compose = Some(default());
+        let mut system = bevy::ecs::system::SystemState::<FormInput>::new(&mut world);
+        system
+            .get_mut(&mut world)
+            .unwrap()
+            .edit(&mut state, "mail-message", "A\nB");
+        assert_eq!(state.core.mail_compose.as_ref().unwrap().message, "A\nB");
+        system
+            .get_mut(&mut world)
+            .unwrap()
+            .edit(&mut state, "mail-message", &"界".repeat(300));
+        assert_eq!(
+            state
+                .core
+                .mail_compose
+                .as_ref()
+                .unwrap()
+                .message
+                .chars()
+                .count(),
+            256
+        );
+        assert!(state
+            .core
+            .mail_compose
+            .as_ref()
+            .unwrap()
+            .recipient
+            .is_empty());
+    }
 }
