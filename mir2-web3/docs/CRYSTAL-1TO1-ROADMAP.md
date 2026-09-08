@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android test-only `7770110db` verifies existing shared reset
+> clears ordinary player intents/pending/drafts after logout/disconnect and
+> retains storage request-ID continuity. normal83/preview85, pending31 and
+> normal APK pass. `docs/generated/player-qa/native-android-reset-integration-20260909/README.md`.
+> No new runtime implementation or live transaction/device acceptance.
+
 > 2026-09-09 Android local `13f001d0b`: unsent shared UI Gateway effects are
 > discarded at observed session/inactive boundaries; local effects preserved.
 > API 31 background/resume logs one discarded revive; normal82/preview84 and

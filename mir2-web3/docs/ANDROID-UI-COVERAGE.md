@@ -57,6 +57,12 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- Test-only `7770110db` verifies existing shared session reset from Android:
+  Login/ConnectionLost clears ordinary player intents/pending/drafts on the
+  next update, without reusing storage request IDs. normal83/preview85,
+  shared pending31 and normal APK pass. No duplicate reset implementation.
+  [Reset audit](generated/player-qa/native-android-reset-integration-20260909/README.md).
+  Live generations, unknown outcomes and real account transitions remain open.
 - Local source `13f001d0b` discards unsent shared Gateway effects at disconnect,
   reconnect start, logout and inactive/unfocused boundaries, preserving local effects.
   API 31 queued revive → Home → resume logs one discarded command; normal82/
