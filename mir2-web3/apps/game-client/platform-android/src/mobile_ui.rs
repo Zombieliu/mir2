@@ -1,7 +1,7 @@
 //! Android touch affordances over the existing shared player UI state.
 use bevy::prelude::*;
 use mir2_client_bevy::{
-    crystal_ui::overlays::NativePlayerUiState,
+    crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState},
     native_shell::{NativeShellModel, NativeShellScreen},
 };
 
@@ -35,8 +35,19 @@ pub fn install(app: &mut App) {
     app.init_resource::<RailState>()
         .init_resource::<TouchPointer>()
         .add_systems(Startup, spawn)
-        .add_systems(Update, buttons)
-        .add_systems(PreUpdate, touch_pointer.after(bevy::input::InputSystems))
+        .add_systems(
+            Update,
+            (buttons, keep_drag_handles_reachable)
+                .chain()
+                .after(NativePlayerUiSet::Mutate)
+                .before(NativePlayerUiSet::Read),
+        )
+        .add_systems(
+            PreUpdate,
+            touch_pointer
+                .after(bevy::input::InputSystems)
+                .before(bevy::ui::UiSystems::Focus),
+        )
         .add_systems(
             PostUpdate,
             visibility.after(super::shared_shell::AndroidStageFit),
@@ -62,6 +73,7 @@ fn touch_pointer(
             mouse.release(MouseButton::Left);
         }
         pointer.wait_for_release = true;
+        window.set_cursor_position(None);
         return;
     }
     if pointer.wait_for_release {
@@ -72,6 +84,9 @@ fn touch_pointer(
         if let Some(touch) = touches.get_pressed(owner) {
             window.set_cursor_position(Some(touch.position()));
         } else {
+            if let Some(touch) = touches.get_released(owner) {
+                window.set_cursor_position(Some(touch.position()));
+            }
             mouse.release(MouseButton::Left);
             pointer.owner = None;
             pointer.wait_for_release = touches.iter().next().is_some();
@@ -80,7 +95,29 @@ fn touch_pointer(
         pointer.owner = Some(touch.id());
         window.set_cursor_position(Some(touch.position()));
         mouse.press(MouseButton::Left);
+        // A quick tap can start and end within one frame. Keep both edges for
+        // the shared handlers, without synthesizing an extra frame of holding.
+        if touches.get_pressed(touch.id()).is_none() {
+            mouse.release(MouseButton::Left);
+            pointer.owner = None;
+            pointer.wait_for_release = touches.iter().next().is_some();
+        }
     }
+}
+
+fn keep_drag_handles_reachable(
+    scale: Res<UiScale>,
+    shell: Res<NativeShellModel>,
+    mut state: ResMut<NativePlayerUiState>,
+) {
+    if shell.screen != NativeShellScreen::InGame {
+        return;
+    }
+    // Do not intercept Android's system gesture. Move only the local movable
+    // window positions, leaving the shared stage/hit-test transform unchanged.
+    let gutter = (24.0 / scale.0.max(0.01)).min(100.0);
+    state.inventory_window.top = state.inventory_window.top.max(gutter);
+    state.help.top = state.help.top.max(gutter);
 }
 fn spawn(mut commands: Commands) {
     commands
@@ -220,6 +257,129 @@ fn buttons(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bevy::input::{
+        touch::{TouchInput, TouchPhase},
+        InputPlugin,
+    };
+
+    fn pointer_app() -> (App, Entity) {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, InputPlugin))
+            .init_resource::<TouchPointer>()
+            .add_systems(PreUpdate, touch_pointer.after(bevy::input::InputSystems));
+        let window = app.world_mut().spawn(Window::default()).id();
+        (app, window)
+    }
+
+    fn touch(app: &mut App, window: Entity, id: u64, phase: TouchPhase, x: f32) {
+        app.world_mut().write_message(TouchInput {
+            window,
+            id,
+            phase,
+            position: Vec2::new(x, 100.0),
+            force: None,
+        });
+    }
+
+    #[test]
+    fn ui_hit_testing_observes_the_new_tap_not_the_previous_cursor() {
+        #[derive(Resource, Default)]
+        struct HitPosition(Option<Vec2>);
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, InputPlugin))
+            .init_resource::<NativeShellModel>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<UiScale>()
+            .init_resource::<HitPosition>()
+            .add_systems(
+                PreUpdate,
+                (|windows: Query<&Window>, mut hit: ResMut<HitPosition>| {
+                    hit.0 = windows.single().unwrap().cursor_position();
+                })
+                .in_set(bevy::ui::UiSystems::Focus)
+                .after(bevy::input::InputSystems),
+            );
+        install(&mut app);
+        let mut initial = Window::default();
+        initial.set_cursor_position(Some(Vec2::new(20.0, 20.0)));
+        let window = app.world_mut().spawn(initial).id();
+        touch(&mut app, window, 1, TouchPhase::Started, 300.0);
+        touch(&mut app, window, 1, TouchPhase::Ended, 300.0);
+        app.update();
+        assert_eq!(
+            app.world().resource::<HitPosition>().0,
+            Some(Vec2::new(300.0, 100.0))
+        );
+    }
+
+    #[test]
+    fn same_frame_tap_has_release_edge_and_does_not_hold_mouse() {
+        let (mut app, window) = pointer_app();
+        touch(&mut app, window, 1, TouchPhase::Started, 300.0);
+        touch(&mut app, window, 1, TouchPhase::Ended, 300.0);
+        app.update();
+        let mouse = app.world().resource::<ButtonInput<MouseButton>>();
+        assert!(mouse.just_pressed(MouseButton::Left));
+        assert!(mouse.just_released(MouseButton::Left));
+        assert!(!mouse.pressed(MouseButton::Left));
+        assert_eq!(
+            app.world().get::<Window>(window).unwrap().cursor_position(),
+            Some(Vec2::new(300.0, 100.0))
+        );
+    }
+
+    #[test]
+    fn secondary_finger_cannot_inherit_drag_after_owner_releases() {
+        let (mut app, window) = pointer_app();
+        touch(&mut app, window, 1, TouchPhase::Started, 300.0);
+        app.update();
+        touch(&mut app, window, 2, TouchPhase::Started, 600.0);
+        touch(&mut app, window, 1, TouchPhase::Ended, 300.0);
+        app.update();
+        assert!(!app
+            .world()
+            .resource::<ButtonInput<MouseButton>>()
+            .pressed(MouseButton::Left));
+        app.update();
+        assert_eq!(
+            app.world().get::<Window>(window).unwrap().cursor_position(),
+            Some(Vec2::new(300.0, 100.0))
+        );
+    }
+
+    #[test]
+    fn android_drag_handles_keep_system_gesture_gutter() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .insert_resource(UiScale(0.5))
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .init_resource::<NativePlayerUiState>()
+            .add_systems(Update, keep_drag_handles_reachable);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .inventory_window
+                .top,
+            48.0
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .inventory_window
+            .top = 200.0;
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .inventory_window
+                .top,
+            200.0
+        );
+    }
+
     #[test]
     fn touch_targets_keep_48_logical_pixels_after_stage_scaling() {
         let mut app = App::new();
