@@ -248,7 +248,7 @@ fn buttons(
                 let focused = state.chat_focused();
                 state.set_chat_focused(!focused);
             }
-            Action::Close => state.close_windows(),
+            Action::Close => state.close_all_windows(),
         }
         rail.expanded = false;
     }
@@ -261,6 +261,73 @@ mod tests {
         touch::{TouchInput, TouchPhase},
         InputPlugin,
     };
+
+    #[test]
+    fn touch_close_also_closes_shared_help() {
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        })
+        .init_resource::<NativePlayerUiState>()
+        .init_resource::<RailState>()
+        .add_systems(Update, buttons);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .help
+            .open = true;
+        app.world_mut().spawn((
+            Interaction::Pressed,
+            Action::Close,
+            BackgroundColor(Color::NONE),
+        ));
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().help.open);
+    }
+
+    #[test]
+    fn touch_close_cannot_bypass_amount_modal_or_inactive_shell() {
+        use mir2_client_bevy::inventory::{InventoryModel, ItemModel};
+        for in_game in [false, true] {
+            let mut app = App::new();
+            app.insert_resource(NativeShellModel {
+                screen: if in_game {
+                    NativeShellScreen::InGame
+                } else {
+                    NativeShellScreen::Login
+                },
+                ..default()
+            })
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<RailState>()
+            .add_systems(Update, buttons);
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.help.open = true;
+            if in_game {
+                let inventory = InventoryModel {
+                    items: vec![ItemModel {
+                        unique_id: Some(1),
+                        quantity: 2,
+                        container: 0,
+                        slot: 0,
+                        ..default()
+                    }],
+                    ..default()
+                };
+                assert!(state.open_inventory_delete_for_slot(&inventory, 0));
+            }
+            drop(state);
+            app.world_mut().spawn((
+                Interaction::Pressed,
+                Action::Close,
+                BackgroundColor(Color::NONE),
+            ));
+            app.update();
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(state.help.open);
+            assert_eq!(state.amount_modal_open(), in_game);
+        }
+    }
 
     fn pointer_app() -> (App, Entity) {
         let mut app = App::new();
