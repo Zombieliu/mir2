@@ -37,7 +37,7 @@ Normal debug/release variants cannot select fixtures using Activity extras.
 The preview Java host refuses to connect, log in or StartGame. Every specimen
 has an OFFLINE UI PREVIEW label; no fake Gateway login or bootstrap is emitted.
 
-The 31 named specimens cover:
+The 33 named specimens cover (including inventory amount and mail compose):
 
 | Area | Specimens |
 | --- | --- |
@@ -57,6 +57,12 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- Source `79d6d7ce2` fixes GameActivity Back bypass, shared modal cancellation,
+  same-field IME reopening and inventory amount bounds. Source `99a1cd121`
+  bounds mail compose with six-row attachment paging. API 31 amount/recipient
+  input, Back priority, Help close and page-two attachment selection have
+  targeted evidence. Other nested fields and multiline IME are still open.
+  [IME and mail evidence](generated/player-qa/native-android-ime-20260908/README.md).
 - The two initial touch gaps have targeted API 31 regression evidence at
   source `62344b0e5`: same-frame tap edges and hit-test ordering are fixed;
   bag/help keep a 24 OS-logical-pixel top gutter. Bag dragging and short-tap
