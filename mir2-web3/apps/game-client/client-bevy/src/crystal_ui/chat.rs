@@ -943,24 +943,30 @@ fn spawn_chat_settings_panel(
                 ..default()
             },
             ImageNode {
-                image: asset_server.load(title_asset(466)),
+                // ChatOptionDialog.SwitchTab also changes the label-bearing skin.
+                image: asset_server.load(title_asset(match state.settings_tab {
+                    CrystalChatSettingsTab::Filters => 466,
+                    CrystalChatSettingsTab::Chat => 467,
+                })),
                 ..default()
             },
         ))
         .with_children(|panel| {
+            // This asset pack labels 464/465 FILTER and 462/463 CHAT BOX;
+            // keep the label and action paired, unlike the legacy C# indices.
             spawn_chat_settings_button(
                 panel,
                 asset_server,
                 if state.settings_tab == CrystalChatSettingsTab::Filters {
-                    463
+                    465
                 } else {
-                    462
+                    464
                 },
-                463,
+                465,
                 if state.settings_tab == CrystalChatSettingsTab::Filters {
-                    462
+                    464
                 } else {
-                    463
+                    465
                 },
                 CrystalChatAssetLibrary::Title,
                 (8.0, 8.0),
@@ -970,15 +976,15 @@ fn spawn_chat_settings_panel(
                 panel,
                 asset_server,
                 if state.settings_tab == CrystalChatSettingsTab::Chat {
-                    465
+                    463
                 } else {
-                    464
+                    462
                 },
-                464,
+                463,
                 if state.settings_tab == CrystalChatSettingsTab::Chat {
-                    464
+                    462
                 } else {
-                    465
+                    463
                 },
                 CrystalChatAssetLibrary::Title,
                 (78.0, 8.0),
@@ -2331,6 +2337,67 @@ mod tests {
             },
             &settings,
         ));
+    }
+
+    #[test]
+    fn settings_background_tracks_active_tab() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<ChatModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_plugins(Mir2CrystalChatPlugin);
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.core.screen = mir2_ui_core::state::UiScreen::InGame;
+            ui.core.panel = mir2_ui_core::state::UiPanel::ChatSettings;
+        }
+        for (tab, index) in [
+            (CrystalChatSettingsTab::Filters, 466),
+            (CrystalChatSettingsTab::Chat, 467),
+            (CrystalChatSettingsTab::Filters, 466),
+        ] {
+            app.world_mut()
+                .resource_mut::<CrystalChatState>()
+                .settings_tab = tab;
+            app.update();
+            let expected: Handle<Image> = app
+                .world()
+                .resource::<AssetServer>()
+                .load(title_asset(index));
+            let world = app.world_mut();
+            let image = world
+                .query_filtered::<&ImageNode, With<CrystalChatSettingsModal>>()
+                .single(world)
+                .unwrap();
+            assert_eq!(
+                image.image, expected,
+                "wrong settings background for {tab:?}"
+            );
+            for (action, button) in world
+                .query::<(&CrystalChatAction, &CrystalChatSettingsButton)>()
+                .iter(world)
+            {
+                let (target, base) = match action {
+                    CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Filters) => {
+                        (CrystalChatSettingsTab::Filters, 464)
+                    }
+                    CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Chat) => {
+                        (CrystalChatSettingsTab::Chat, 462)
+                    }
+                    _ => continue,
+                };
+                // The staged Title PNGs label 462/463 CHAT BOX and 464/465 FILTER.
+                assert_eq!(button.normal, base + u16::from(tab == target));
+                assert!([base, base + 1].contains(&button.hover));
+                assert!([base, base + 1].contains(&button.pressed));
+            }
+        }
     }
 
     #[test]
