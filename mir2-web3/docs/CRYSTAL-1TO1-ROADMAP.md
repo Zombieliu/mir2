@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local `8423b220c`: shared ordinary/rich hints convert
+> OS-logical cursor/bounds to UiScale coordinates. Failure-first/system
+> tests, shared581/normal84/preview86, both APKs and API31 ordinary hint
+> screenshots pass. `docs/generated/player-qa/native-android-hint-scale-20260909/README.md`.
+> Full-screen/live/physical-device and rich-hint visual gates remain open.
+
 > 2026-09-09 Android local `74883f8b3`: first safe-edge slice groups shared
 > minimap controls and aligns them with the image at right top; Panels below.
 > API31 collapse/Mail/IME hits, shared579/normal84/preview86/Java8 and both

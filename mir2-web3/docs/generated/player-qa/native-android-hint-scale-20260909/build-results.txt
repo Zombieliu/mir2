@@ -1,0 +1,6 @@
+/tmp/android-hint-debug-build.log:BUILD SUCCESSFUL in 9s
+/tmp/android-hint-debug-build.log:[platform-android] SHA-256: 5acacb7dcb21467d120d825c7316b58c6aa3aa62cee7c85c2548488a66266942
+/tmp/android-hint-debug-build.log:[platform-android] package gate passed
+/tmp/android-hint-build.log:BUILD SUCCESSFUL in 11s
+/tmp/android-hint-build.log:[platform-android] SHA-256: 062ae55aef610d9fe8bf679eb6820f8a9f51d0ad6fc3ecf16534fd3966d132ce
+/tmp/android-hint-build.log:[platform-android] package gate passed

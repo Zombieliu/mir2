@@ -59,6 +59,12 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- `8423b220c` fixes ordinary/rich hint coordinate conversion under UiScale.
+  The earlier "old stage clamp" diagnosis was imprecise: window coordinates
+  were being scaled twice. Failure-first/system tests shared581,
+  normal84/preview86, both APKs and API31 Mini Map/Mail hint screenshots pass.
+  [Hint evidence](generated/player-qa/native-android-hint-scale-20260909/README.md).
+  Cutout/IME-rich-hint and whole-screen interaction acceptance remain open.
 - `74883f8b3`: first edge-layout slice, shared minimap group/image aligned
   at Android safe edge, shared Bevy button hits verified after moving.
   Expanded → collapse → Mail → compose/IME on API31 passes; shared579,
