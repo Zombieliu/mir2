@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local `08f658a53` bounds shared Help shortcut rows
+> above the page footer, preserving all text/pages. Failure-first test,
+> shared577/normal83/preview85 and API 31 page1/page2 captures pass.
+> Evidence: `docs/generated/player-qa/native-android-help-rows-20260909/README.md`.
+> Bounded layout fix only; full-screen/online/physical-device acceptance open.
+
 > 2026-09-09 Android test-only `7770110db` verifies existing shared reset
 > clears ordinary player intents/pending/drafts after logout/disconnect and
 > retains storage request-ID continuity. normal83/preview85, pending31 and

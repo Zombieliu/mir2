@@ -57,6 +57,11 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- `08f658a53` fixes shared Help text-row/footer overlap without deleting
+  content or changing pages. Failure-first geometry test, shared577,
+  normal83/preview85 and API 31 page1 → page2 touch/screenshots pass.
+  [Help evidence](generated/player-qa/native-android-help-rows-20260909/README.md).
+  Phone-specific guidance, target sizes and full-screen layout remain open.
 - Offline refresh at `a8bb81954`: 33/33 specimen captures/log checks,
   shared576/normal83/preview85 and preview APK build pass. This is smoke,
   not all-interaction acceptance. Visual sampling retains centered 4:3 HUD,
