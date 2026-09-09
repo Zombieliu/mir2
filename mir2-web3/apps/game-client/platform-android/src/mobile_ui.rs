@@ -123,8 +123,14 @@ fn keep_drag_handles_reachable(
     // Do not intercept Android's system gesture. Move only the local movable
     // window positions, leaving the shared stage/hit-test transform unchanged.
     let gutter = (24.0 / scale.0.max(0.01)).min(100.0);
-    state.inventory_window.top = state.inventory_window.top.max(gutter);
-    state.help.top = state.help.top.max(gutter);
+    // Avoid marking the whole shared UI changed when the clamp is a no-op:
+    // chat rebuilds on that signal and would lose its button interactions.
+    if state.inventory_window.top < gutter {
+        state.inventory_window.top = gutter;
+    }
+    if state.help.top < gutter {
+        state.help.top = gutter;
+    }
 }
 fn spawn(mut commands: Commands) {
     commands
@@ -310,6 +316,32 @@ fn can_request_revive(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn settled_drag_positions_do_not_invalidate_shared_ui_each_frame() {
+        let mut app = App::new();
+        app.insert_resource(UiScale(0.5))
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .init_resource::<NativePlayerUiState>()
+            .add_systems(Update, keep_drag_handles_reachable);
+        app.update();
+        let tick = app
+            .world()
+            .get_resource_ref::<NativePlayerUiState>()
+            .unwrap()
+            .last_changed();
+        app.update();
+        assert_eq!(
+            app.world()
+                .get_resource_ref::<NativePlayerUiState>()
+                .unwrap()
+                .last_changed(),
+            tick
+        );
+    }
+
     use super::*;
     use bevy::input::{
         touch::{TouchInput, TouchPhase},

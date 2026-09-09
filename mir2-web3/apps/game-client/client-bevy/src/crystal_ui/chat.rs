@@ -357,6 +357,9 @@ impl Plugin for Mir2CrystalChatPlugin {
             .add_systems(
                 Update,
                 (
+                    // Capture presses from the current tree before a model
+                    // refresh can despawn it during render_crystal_chat.
+                    consume_chat_button_interactions,
                     handle_chat_settings_keys,
                     handle_chat_scroll_keys,
                     consume_chat_actions,
@@ -365,7 +368,6 @@ impl Plugin for Mir2CrystalChatPlugin {
                     render_crystal_chat,
                     sync_chat_button_visuals,
                     sync_chat_settings_button_visuals,
-                    consume_chat_button_interactions,
                 )
                     .chain(),
             );
@@ -904,7 +906,12 @@ fn spawn_chat_frame_with_spec(
             ..default()
         },
         ImageNode {
-            image: asset_server.load(crystal_asset(frame.library, frame.index)),
+            // Crystal ChatDialog.UpdateBackground selects the preceding frame;
+            // transparency is authored in that asset, not a global alpha tint.
+            image: asset_server.load(crystal_asset(
+                frame.library,
+                frame.index - u16::from(transparent),
+            )),
             color: chat_tint(transparent),
             ..default()
         },
@@ -1290,20 +1297,13 @@ fn spawn_chat_input(
     ));
 }
 
-fn chat_tint(transparent: bool) -> Color {
-    if transparent {
-        Color::srgba(1.0, 1.0, 1.0, 0.8)
-    } else {
-        Color::WHITE
-    }
+fn chat_tint(_transparent: bool) -> Color {
+    Color::WHITE
 }
 
-fn chat_color(color: Color, transparent: bool) -> Color {
-    if !transparent {
-        return color;
-    }
-    let srgba = color.to_srgba();
-    Color::srgba(srgba.red, srgba.green, srgba.blue, srgba.alpha * 0.8)
+fn chat_color(color: Color, _transparent: bool) -> Color {
+    // Source labels retain their own channel foreground/background colors.
+    color
 }
 
 fn spawn_chat_button(
@@ -2334,10 +2334,92 @@ mod tests {
     }
 
     #[test]
-    fn transparent_chat_tint_matches_crystal_binary_opacity() {
+    fn settings_press_survives_same_frame_model_invalidation() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<ChatModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_plugins(Mir2CrystalChatPlugin);
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.core.screen = mir2_ui_core::state::UiScreen::InGame;
+            ui.core.panel = mir2_ui_core::state::UiPanel::ChatSettings;
+        }
+        app.update();
+        let world = app.world_mut();
+        let button = world
+            .query::<(Entity, &CrystalChatAction)>()
+            .iter(world)
+            .find(|(_, action)| {
+                **action == CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Chat)
+            })
+            .unwrap()
+            .0;
+        *world.get_mut::<Interaction>(button).unwrap() = Interaction::Pressed;
+        // A concurrent read-model refresh must not delete the press before
+        // the shared action consumer can observe it.
+        world.resource_mut::<ChatModel>().set_changed();
+        app.update();
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().settings_tab,
+            CrystalChatSettingsTab::Chat
+        );
+    }
+
+    #[test]
+    fn chat_background_uses_source_frame_for_all_sizes_and_transparency_modes() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<ChatModel>()
+            .init_resource::<CrystalChatState>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_systems(Startup, spawn_chat_root)
+            .add_systems(Update, render_crystal_chat);
+        for (size, index) in [
+            (CrystalChatWindowSize::Small, 2221),
+            (CrystalChatWindowSize::Medium, 2224),
+            (CrystalChatWindowSize::Large, 2227),
+        ] {
+            for transparent in [false, true] {
+                {
+                    let mut state = app.world_mut().resource_mut::<CrystalChatState>();
+                    state.window_size = size;
+                    state.applied_settings.transparent = transparent;
+                }
+                app.update();
+                let expected: Handle<Image> = app
+                    .world()
+                    .resource::<AssetServer>()
+                    .load(prguse_asset(index - u16::from(transparent)));
+                let world = app.world_mut();
+                assert!(
+                    world
+                        .query::<&ImageNode>()
+                        .iter(world)
+                        .any(|image| image.image == expected && image.color == Color::WHITE),
+                    "missing source chat frame for {size:?}, transparent={transparent}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn transparent_chat_preserves_source_color_opacity() {
         assert_eq!(chat_tint(false).to_srgba().alpha, 1.0);
-        assert_eq!(chat_tint(true).to_srgba().alpha, 0.8);
-        assert_eq!(chat_color(Color::WHITE, true).to_srgba().alpha, 0.8);
+        assert_eq!(chat_tint(true).to_srgba().alpha, 1.0);
+        assert_eq!(chat_color(Color::WHITE, true), Color::WHITE);
+        assert_eq!(chat_color(Color::NONE, true), Color::NONE);
     }
 
     #[test]

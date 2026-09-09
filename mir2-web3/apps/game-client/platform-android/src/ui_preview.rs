@@ -137,7 +137,7 @@ fn apply(world: &mut World) {
     };
     let mut state = world.resource_mut::<NativePlayerUiState>();
     state.core.screen = UiScreen::InGame;
-    state.core.panel = panel;
+    initialize_panel(&mut state.core, panel);
     if scene == "chat" {
         state.set_chat_focused(true);
     }
@@ -179,6 +179,19 @@ fn apply(world: &mut World) {
             .mail_compose = Some(mir2_ui_core::state::MailComposeDraft::default());
     }
     info!("ANDROID_UI_PREVIEW_READY scene={scene}");
+}
+
+fn initialize_panel(state: &mut mir2_ui_core::state::UiState, panel: UiPanel) {
+    if panel == UiPanel::ChatSettings {
+        // OpenChatSettings toggles the panel: start closed and let the shared
+        // lifecycle create its draft instead of constructing a partial state.
+        state.panel = UiPanel::None;
+        *state =
+            mir2_ui_core::reducer::reduce(state, mir2_ui_core::action::UiAction::OpenChatSettings)
+                .state;
+    } else {
+        state.panel = panel;
+    }
 }
 
 fn populate_specimens(world: &mut World, scene: &str) {
@@ -304,6 +317,20 @@ fn populate_specimens(world: &mut World, scene: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn chat_settings_preview_opens_with_an_applicable_draft() {
+        let mut state = mir2_ui_core::state::UiState::default();
+        state.screen = UiScreen::InGame;
+        initialize_panel(&mut state, UiPanel::ChatSettings);
+        assert_eq!(state.panel, UiPanel::ChatSettings);
+        assert!(state.chat_settings_draft.is_some());
+        let applied = mir2_ui_core::reducer::reduce(
+            &state,
+            mir2_ui_core::action::UiAction::ApplyChatSettings,
+        )
+        .state;
+        assert_eq!(applied.panel, UiPanel::None);
+    }
     #[test]
     fn item_specimens_have_identity_for_shared_local_dialogs() {
         let mut world = World::new();
