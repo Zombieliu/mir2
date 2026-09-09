@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local `ce08b88c9`: inventory amount prompt uses a
+> two-line title, retaining the observed specimen name without covering
+> controls. shared578/normal83/preview85, both APKs and API31 IME/Cancel pass.
+> Evidence: `docs/generated/player-qa/native-android-amount-title-20260909/README.md`.
+> Arbitrary long-name, full-screen, live and real-device gates remain open.
+
 > 2026-09-09 Android local `08f658a53` bounds shared Help shortcut rows
 > above the page footer, preserving all text/pages. Failure-first test,
 > shared577/normal83/preview85 and API 31 page1/page2 captures pass.

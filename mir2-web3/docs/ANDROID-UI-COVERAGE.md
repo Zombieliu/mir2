@@ -57,6 +57,11 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- `ce08b88c9` wraps the inventory amount title into two lines, preserving
+  the specimen item name above icon/input. Failure-first layout test,
+  shared578/normal83/preview85, both APK builds and API31 IME/Cancel pass.
+  [Amount title evidence](generated/player-qa/native-android-amount-title-20260909/README.md).
+  Longer-than-two-line names, localization and phone-wide layout remain open.
 - `08f658a53` fixes shared Help text-row/footer overlap without deleting
   content or changing pages. Failure-first geometry test, shared577,
   normal83/preview85 and API 31 page1 → page2 touch/screenshots pass.
