@@ -10114,6 +10114,12 @@ fn render_mail(
     }
 }
 
+/// Presentation groups let mobile hosts reflow the same shared mail actions.
+#[derive(Component)]
+pub struct MailComposeDetails;
+#[derive(Component)]
+pub struct MailComposeFooter;
+
 fn render_mail_compose(
     parent: &mut ChildSpawnerCommands,
     draft: &mir2_ui_core::state::MailComposeDraft,
@@ -10153,94 +10159,124 @@ fn render_mail_compose(
         OverlayButton::MailMessageFocus,
         true,
     );
-    overlay_text_at(
-        parent,
-        &format!("Gold: {}", draft.gold),
-        CrystalRect::new(10.0, 98.0, 170.0, 18.0),
-        10.0,
-        TEXT,
-    );
-    overlay_absolute_button(
-        parent,
-        "-100",
-        CrystalRect::new(185.0, 92.0, 54.0, 26.0),
-        OverlayButton::MailGoldDec,
-        draft.gold >= 100,
-    );
-    overlay_absolute_button(
-        parent,
-        "+100",
-        CrystalRect::new(245.0, 92.0, 54.0, 26.0),
-        OverlayButton::MailGoldInc,
-        true,
-    );
-    overlay_text_at(
-        parent,
-        &format!("Attachments: {}/5", draft.attachment_unique_ids.len()),
-        CrystalRect::new(10.0, 126.0, 290.0, 18.0),
-        10.0,
-        TEXT,
-    );
-    let (items, pages) = mail_attachment_page(inventory, ui.attachment_page);
-    for (row, item) in items.into_iter().enumerate() {
-        let id = item
-            .unique_id
-            .expect("attachment page filters missing identity");
-        let selected = draft.attachment_unique_ids.contains(&id);
-        overlay_absolute_button(
-            parent,
-            &format!(
-                "{} {} ×{} (slot {})",
-                if selected { "Remove" } else { "Attach" },
-                short_name(&item.name, &item.key),
-                item.quantity,
-                item.slot
-            ),
-            CrystalRect::new(10.0, 150.0 + row as f32 * 32.0, 290.0, 28.0),
-            if selected {
-                OverlayButton::RemoveMailAttachment(id)
-            } else {
-                OverlayButton::AddMailAttachment(id)
+    parent
+        .spawn((
+            MailComposeDetails,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Px(312.0),
+                height: Val::Px(444.0),
+                ..default()
             },
-            selected || draft.attachment_unique_ids.len() < MAX_MAIL_ATTACHMENTS,
-        );
-    }
-    let page = ui.attachment_page.min(pages - 1);
-    overlay_absolute_button(
-        parent,
-        "<",
-        CrystalRect::new(10.0, 350.0, 54.0, 28.0),
-        OverlayButton::MailAttachmentPagePrev,
-        page > 0,
-    );
-    overlay_text_at(
-        parent,
-        &format!("{}/{}", page + 1, pages),
-        CrystalRect::new(125.0, 357.0, 72.0, 18.0),
-        10.0,
-        TEXT,
-    );
-    overlay_absolute_button(
-        parent,
-        ">",
-        CrystalRect::new(246.0, 350.0, 54.0, 28.0),
-        OverlayButton::MailAttachmentPageNext,
-        page + 1 < pages,
-    );
-    overlay_absolute_button(
-        parent,
-        "Send",
-        CrystalRect::new(10.0, 408.0, 138.0, 28.0),
-        OverlayButton::SubmitMail,
-        !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty(),
-    );
-    overlay_absolute_button(
-        parent,
-        "Cancel",
-        CrystalRect::new(162.0, 408.0, 138.0, 28.0),
-        OverlayButton::CancelMailCompose,
-        true,
-    );
+            FocusPolicy::Pass,
+        ))
+        .with_children(|parent| {
+            overlay_text_at(
+                parent,
+                &format!("Gold: {}", draft.gold),
+                CrystalRect::new(10.0, 98.0, 170.0, 18.0),
+                10.0,
+                TEXT,
+            );
+            overlay_absolute_button(
+                parent,
+                "-100",
+                CrystalRect::new(185.0, 92.0, 54.0, 26.0),
+                OverlayButton::MailGoldDec,
+                draft.gold >= 100,
+            );
+            overlay_absolute_button(
+                parent,
+                "+100",
+                CrystalRect::new(245.0, 92.0, 54.0, 26.0),
+                OverlayButton::MailGoldInc,
+                true,
+            );
+            overlay_text_at(
+                parent,
+                &format!("Attachments: {}/5", draft.attachment_unique_ids.len()),
+                CrystalRect::new(10.0, 126.0, 290.0, 18.0),
+                10.0,
+                TEXT,
+            );
+            let (items, pages) = mail_attachment_page(inventory, ui.attachment_page);
+            for (row, item) in items.into_iter().enumerate() {
+                let id = item
+                    .unique_id
+                    .expect("attachment page filters missing identity");
+                let selected = draft.attachment_unique_ids.contains(&id);
+                overlay_absolute_button(
+                    parent,
+                    &format!(
+                        "{} {} ×{} (slot {})",
+                        if selected { "Remove" } else { "Attach" },
+                        short_name(&item.name, &item.key),
+                        item.quantity,
+                        item.slot
+                    ),
+                    CrystalRect::new(10.0, 150.0 + row as f32 * 32.0, 290.0, 28.0),
+                    if selected {
+                        OverlayButton::RemoveMailAttachment(id)
+                    } else {
+                        OverlayButton::AddMailAttachment(id)
+                    },
+                    selected || draft.attachment_unique_ids.len() < MAX_MAIL_ATTACHMENTS,
+                );
+            }
+            let page = ui.attachment_page.min(pages - 1);
+            overlay_absolute_button(
+                parent,
+                "<",
+                CrystalRect::new(10.0, 350.0, 54.0, 28.0),
+                OverlayButton::MailAttachmentPagePrev,
+                page > 0,
+            );
+            overlay_text_at(
+                parent,
+                &format!("{}/{}", page + 1, pages),
+                CrystalRect::new(125.0, 357.0, 72.0, 18.0),
+                10.0,
+                TEXT,
+            );
+            overlay_absolute_button(
+                parent,
+                ">",
+                CrystalRect::new(246.0, 350.0, 54.0, 28.0),
+                OverlayButton::MailAttachmentPageNext,
+                page + 1 < pages,
+            );
+        });
+    parent
+        .spawn((
+            MailComposeFooter,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Px(312.0),
+                height: Val::Px(444.0),
+                ..default()
+            },
+            FocusPolicy::Pass,
+        ))
+        .with_children(|parent| {
+            overlay_absolute_button(
+                parent,
+                "Send",
+                CrystalRect::new(10.0, 408.0, 138.0, 28.0),
+                OverlayButton::SubmitMail,
+                !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty(),
+            );
+            overlay_absolute_button(
+                parent,
+                "Cancel",
+                CrystalRect::new(162.0, 408.0, 138.0, 28.0),
+                OverlayButton::CancelMailCompose,
+                true,
+            );
+        });
 }
 
 // Presentation-only paging. Shared reducers still enforce attachment count and
@@ -10259,6 +10295,41 @@ fn mail_attachment_page(inventory: &InventoryModel, requested: usize) -> (Vec<&I
 #[cfg(test)]
 mod mail_compose_paging_tests {
     use super::*;
+
+    #[test]
+    fn compose_footer_can_move_without_moving_fields_or_attachment_controls() {
+        let mut world = World::new();
+        world
+            .commands()
+            .spawn(Node::default())
+            .with_children(|parent| {
+                render_mail_compose(parent, &default(), &default(), &default());
+            });
+        world.flush();
+        let footer = world
+            .query_filtered::<Entity, With<MailComposeFooter>>()
+            .single(&world)
+            .expect("shared footer presentation group");
+        let details = world
+            .query_filtered::<Entity, With<MailComposeDetails>>()
+            .single(&world)
+            .expect("shared attachment presentation group");
+        for (action, parent) in world.query::<(&OverlayButton, &ChildOf)>().iter(&world) {
+            match action {
+                OverlayButton::SubmitMail | OverlayButton::CancelMailCompose => {
+                    assert_eq!(parent.parent(), footer)
+                }
+                OverlayButton::MailGoldInc | OverlayButton::MailGoldDec => {
+                    assert_eq!(parent.parent(), details)
+                }
+                OverlayButton::MailRecipientFocus | OverlayButton::MailMessageFocus => {
+                    assert_ne!(parent.parent(), footer);
+                    assert_ne!(parent.parent(), details);
+                }
+                _ => {}
+            }
+        }
+    }
 
     #[test]
     fn populated_compose_controls_stay_inside_mail_frame() {

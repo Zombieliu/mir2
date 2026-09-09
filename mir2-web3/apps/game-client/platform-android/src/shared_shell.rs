@@ -130,6 +130,7 @@ impl Plugin for AndroidSharedShellPlugin {
                 PostUpdate,
                 (
                     fit_stage.in_set(AndroidStageFit),
+                    fit_mail_composer,
                     forward_intents,
                     discard_inactive_player_commands,
                     keyboard,
@@ -191,7 +192,7 @@ fn fit_stage(
         let field = forms
             .field(&player)
             .or_else(|| crate::text_input::player_field(&player));
-        let editor_bottom = player_editor_bottom(field.map(|field| field.0));
+        let editor_bottom = player_editor_bottom(field.map(|field| field.0), fit.scale);
         (available / fit.scale - editor_bottom).min(fit.offset_y / fit.scale)
     } else if host.ime_bottom > 0.0 {
         (available / (2.0 * fit.scale) - panel.top - panel.height * 0.5)
@@ -245,6 +246,57 @@ fn fit_stage(
     }
 }
 
+// Keep the two text fields visible while IME is open. Temporarily collapse
+// attachment/gold controls and move the SAME shared footer under the fields;
+// do not pan the entire 444px panel and push the recipient off screen.
+fn fit_mail_composer(
+    host: Res<HostState>,
+    scale: Res<UiScale>,
+    mut details: Query<
+        &mut Node,
+        (
+            With<mir2_client_bevy::crystal_ui::overlays::MailComposeDetails>,
+            Without<mir2_client_bevy::crystal_ui::overlays::MailComposeFooter>,
+            Without<Button>,
+        ),
+    >,
+    mut footers: Query<
+        (&mut Node, &Children),
+        (
+            With<mir2_client_bevy::crystal_ui::overlays::MailComposeFooter>,
+            Without<Button>,
+        ),
+    >,
+    mut buttons: Query<
+        &mut Node,
+        (
+            Without<mir2_client_bevy::crystal_ui::overlays::MailComposeDetails>,
+            Without<mir2_client_bevy::crystal_ui::overlays::MailComposeFooter>,
+        ),
+    >,
+) {
+    let editing = host.ime_bottom > 0.0;
+    for mut node in &mut details {
+        node.display = if editing {
+            Display::None
+        } else {
+            Display::Flex
+        };
+    }
+    for (mut node, children) in &mut footers {
+        node.top = px(if editing { 110.0 - 408.0 } else { 0.0 });
+        for child in children.iter() {
+            if let Ok(mut button) = buttons.get_mut(child) {
+                button.height = px(if editing {
+                    (44.0 / scale.0.max(0.01)).max(28.0)
+                } else {
+                    28.0
+                });
+            }
+        }
+    }
+}
+
 fn belt_edge_origin(
     fit: CrystalStageTransform,
     height: f32,
@@ -270,7 +322,7 @@ fn minimap_edge_origin(width: f32, dpi: f32, scale: f32, safe_right: f32, safe_t
     )
 }
 
-fn player_editor_bottom(field: Option<&str>) -> f32 {
+fn player_editor_bottom(field: Option<&str>, scale: f32) -> f32 {
     match field {
         Some("guild-notice") => {
             // Shared notice text starts at panel +61, in 9px type. Reserve
@@ -284,8 +336,10 @@ fn player_editor_bottom(field: Option<&str>) -> f32 {
             let rect = mir2_client_bevy::crystal_ui::overlays::CRYSTAL_DELETE_AMOUNT_RECT;
             rect.top + rect.height + 8.0
         }
-        // Mail editors are at the top of the source panel, not at the HUD.
-        Some("mail-recipient" | "mail-message") => 0.0,
+        // Mail panel top + compact footer top + touch target + IME gutter.
+        Some("mail-recipient" | "mail-message") => {
+            5.0 + 110.0 + (44.0 / scale.max(0.01)).max(28.0) + 8.0 / scale.max(0.01)
+        }
         _ => 750.0,
     }
 }
@@ -860,16 +914,90 @@ mod tests {
 
     #[test]
     fn guild_notice_keeps_all_eight_text_lines_above_ime() {
-        assert_eq!(player_editor_bottom(Some("guild-notice")), 333.0);
+        assert_eq!(player_editor_bottom(Some("guild-notice"), 1.0), 333.0);
     }
 
     #[test]
     fn every_shared_amount_dialog_uses_its_modal_geometry_for_ime() {
         for field in ["inventory-amount", "guild-amount", "trade-amount"] {
-            assert_eq!(player_editor_bottom(Some(field)), 446.0);
+            assert_eq!(player_editor_bottom(Some(field), 1.0), 446.0);
         }
-        assert_eq!(player_editor_bottom(Some("mail-message")), 0.0);
-        assert_eq!(player_editor_bottom(Some("chat")), 750.0);
+        assert_eq!(player_editor_bottom(Some("chat"), 1.0), 750.0);
+    }
+
+    #[test]
+    fn mail_ime_footer_reflows_and_restores_without_replacing_shared_buttons() {
+        use mir2_client_bevy::crystal_ui::overlays::{MailComposeDetails, MailComposeFooter};
+        let mut app = App::new();
+        app.init_resource::<HostState>()
+            .init_resource::<UiScale>()
+            .add_systems(Update, fit_mail_composer);
+        let details = app
+            .world_mut()
+            .spawn((MailComposeDetails, Node::default()))
+            .id();
+        let button = app
+            .world_mut()
+            .spawn((
+                Button,
+                Node {
+                    top: px(408),
+                    height: px(28),
+                    ..default()
+                },
+            ))
+            .id();
+        let footer = app
+            .world_mut()
+            .spawn((MailComposeFooter, Node::default()))
+            .add_child(button)
+            .id();
+        // Disabled Send has no Button component, but must retain the same size.
+        let disabled = app
+            .world_mut()
+            .spawn(Node {
+                top: px(408),
+                height: px(28),
+                ..default()
+            })
+            .id();
+        app.world_mut().entity_mut(footer).add_child(disabled);
+        for scale in [0.35, 0.535, 1.0, 2.0] {
+            app.world_mut().resource_mut::<UiScale>().0 = scale;
+            for editing in [true, false, true, false] {
+                app.world_mut().resource_mut::<HostState>().ime_bottom =
+                    if editing { 500.0 } else { 0.0 };
+                app.update();
+                let footer_node = app.world().get::<Node>(footer).unwrap();
+                let button_node = app.world().get::<Node>(button).unwrap();
+                assert_eq!(
+                    app.world().get::<Node>(details).unwrap().display,
+                    if editing {
+                        Display::None
+                    } else {
+                        Display::Flex
+                    }
+                );
+                assert_eq!(footer_node.top, px(if editing { -298.0 } else { 0.0 }));
+                let height = if editing {
+                    (44.0 / scale).max(28.0)
+                } else {
+                    28.0
+                };
+                assert_eq!(button_node.height, px(height));
+                assert_eq!(
+                    app.world().get::<Node>(disabled).unwrap().height,
+                    px(height)
+                );
+                assert_eq!(button_node.top, px(408));
+                if editing {
+                    assert!(height * scale >= 44.0);
+                    let bottom = player_editor_bottom(Some("mail-message"), scale);
+                    assert!(((bottom - 115.0 - height) * scale - 8.0).abs() < 0.001);
+                    assert_eq!(bottom, player_editor_bottom(Some("mail-recipient"), scale));
+                }
+            }
+        }
     }
 
     #[test]
