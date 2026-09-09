@@ -40768,7 +40768,7 @@ fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() 
                 assert!(session.shared_trade_confirm().1.is_some());
                 let packets = session.apply_shared_trade_delivery(&offer);
                 assert!(
-                    packets
+                    !packets
                         .iter()
                         .any(|packet| matches!(packet, ServerPacket::TradeCancel { .. })),
                     "{path:?} must reject the invalid recursive carrier"
@@ -41028,7 +41028,7 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                     session.trade_request("Sender");
                     assert!(session.shared_trade_confirm().1.is_some());
                     let packets = session.apply_shared_trade_delivery(&offer);
-                    assert!(packets
+                    assert!(!packets
                         .iter()
                         .any(|packet| matches!(packet, ServerPacket::TradeCancel { .. })));
                     assert!(!packets.iter().any(|packet| matches!(
@@ -61825,7 +61825,10 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
     );
     assert_eq!(
         session.handle_packet(ClientPacket::TradeGold { amount: 25 }),
-        vec![ServerPacket::TradeGold { amount: 25 }]
+        vec![
+            ServerPacket::LoseGold { gold: 25 },
+            ServerPacket::TradeGold { amount: 25 }
+        ]
     );
     let deposit_packets = session.handle_packet(ClientPacket::DepositTradeItem {
         from: red_potion_slot,
@@ -61866,7 +61869,7 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
     let confirm_packets = session.handle_packet(ClientPacket::TradeConfirm { locked: true });
     assert!(confirm_packets.is_empty());
     let snapshot = session.world_snapshot();
-    assert_eq!(snapshot.gold, starting_gold);
+    assert_eq!(snapshot.gold, starting_gold - 25);
     assert!(snapshot
         .inventory_items
         .iter()
@@ -62050,7 +62053,10 @@ fn durable_trade_projection_replays_pretrade_checkpoint_once() {
         .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
     assert_eq!(
         session.handle_packet(ClientPacket::TradeGold { amount: 25 }),
-        vec![ServerPacket::TradeGold { amount: 25 }]
+        vec![
+            ServerPacket::LoseGold { gold: 25 },
+            ServerPacket::TradeGold { amount: 25 }
+        ]
     );
     let (_, own_offer) = session.shared_trade_confirm();
     let own_offer = own_offer.expect("validated own offer");
@@ -62133,7 +62139,10 @@ fn shared_trade_projection_save_failure_rolls_back_and_retries_once() {
         .any(|packet| matches!(packet, ServerPacket::DepositTradeItem { success: true, .. })));
     assert_eq!(
         session.handle_packet(ClientPacket::TradeGold { amount: 25 }),
-        vec![ServerPacket::TradeGold { amount: 25 }]
+        vec![
+            ServerPacket::LoseGold { gold: 25 },
+            ServerPacket::TradeGold { amount: 25 }
+        ]
     );
     let (_, own_offer) = session.shared_trade_confirm();
     let own_offer = own_offer.expect("completed own offer");
@@ -62377,7 +62386,7 @@ fn trade_confirm_revalidates_offered_items_before_escrow_lock() {
     let snapshot = session.world_snapshot();
 
     assert!(confirm_packets.is_empty());
-    assert_eq!(snapshot.gold, starting_gold);
+    assert_eq!(snapshot.gold, starting_gold - 25);
     assert!(snapshot
         .inventory_items
         .iter()
@@ -65523,6 +65532,13 @@ fn market_packets_consign_buy_and_get_back_stage5_auction_state() {
         .stage5_systems
         .auction
         .push(Stage5AuctionListing {
+            item_state_json: Some({
+                let template = super::super::items::crystal_item_template_for_item_key("blue-potion").unwrap();
+                let mut item = super::super::items::embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+                item.key = "blue-potion".to_string();
+                item.unique_id = 880_001;
+                serde_json::to_string(&item).unwrap()
+            }),
             id: 88,
             seller: "Merchant".to_string(),
             item_key: "blue-potion".to_string(),
@@ -65587,6 +65603,7 @@ fn market_packets_consign_buy_and_get_back_stage5_auction_state() {
         .stage5_systems
         .auction
         .push(Stage5AuctionListing {
+            item_state_json: None,
             id: 89,
             seller: "Scout".to_string(),
             item_key: "red-potion".to_string(),
@@ -65622,9 +65639,17 @@ fn market_packets_consign_buy_and_get_back_stage5_auction_state() {
 
 #[test]
 fn refine_packets_move_cancel_start_and_check_stage5_state() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
+    let mut config = SimulationConfig::default();
+    config.refine_duration_ms = 0;
+    let mut session = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 1_000_000;
+    item_custody_tests::activate_refine_service(&mut session, "REFINE");
     session
         .app
         .world_mut()
@@ -65688,16 +65713,19 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
     )));
 
     let refine_packets = session.handle_packet(ClientPacket::RefineItem { unique_id: 4 });
-    assert_eq!(
-        refine_packets,
-        vec![ServerPacket::RefineItem { unique_id: 4 }]
-    );
+    assert!(refine_packets
+        .iter()
+        .any(|p| matches!(p, ServerPacket::RefineItem { unique_id: 4 })));
+    assert!(refine_packets
+        .iter()
+        .any(|p| matches!(p, ServerPacket::NPCCollectRefine { success: true })));
     let in_oven = session.world_snapshot();
-    assert!(in_oven.stage5_systems.refine.ready);
-    assert_eq!(in_oven.stage5_systems.refine.pending_unique_id, 4);
+    assert!(in_oven.stage5_systems.refine.oven_item_state_json.is_none());
+    assert_eq!(in_oven.stage5_systems.refine.pending_unique_id, 0);
 
     // BlackIronOre is present, but there is no DC/MC/SC ingredient, so Crystal
     // sets RefinedValue::None and the weapon is smashed on test.
+    item_custody_tests::activate_refine_service(&mut session, "REFINECHECK");
     let check_packets = session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
     assert!(check_packets
         .iter()
@@ -65717,18 +65745,34 @@ fn refine_packets_move_cancel_start_and_check_stage5_state() {
 
 #[test]
 fn refine_without_proper_materials_smashes_weapon() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
+    let mut config = SimulationConfig::default();
+    config.refine_duration_ms = 0;
+    let mut session = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 1_000_000;
+    item_custody_tests::activate_refine_service(&mut session, "REFINE");
 
     // Crystal proceeds even with no ingredients (RefinedValue stays None).
     let refine_packets = session.handle_packet(ClientPacket::RefineItem { unique_id: 4 });
-    assert_eq!(
-        refine_packets,
-        vec![ServerPacket::RefineItem { unique_id: 4 }]
-    );
-    assert!(session.world_snapshot().stage5_systems.refine.ready);
+    assert!(refine_packets
+        .iter()
+        .any(|p| matches!(p, ServerPacket::RefineItem { unique_id: 4 })));
+    assert!(refine_packets
+        .iter()
+        .any(|p| matches!(p, ServerPacket::NPCCollectRefine { success: true })));
+    assert!(session
+        .world_snapshot()
+        .stage5_systems
+        .refine
+        .oven_item_state_json
+        .is_none());
 
+    item_custody_tests::activate_refine_service(&mut session, "REFINECHECK");
     let check = session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
     assert!(check
         .iter()
@@ -65743,9 +65787,17 @@ fn refine_without_proper_materials_smashes_weapon() {
 #[test]
 fn refine_outcome_is_deterministic_across_runs() {
     fn dagger_survives() -> bool {
-        let mut session = SimulationSession::new(SimulationConfig::default());
+        let mut config = SimulationConfig::default();
+        config.refine_duration_ms = 0;
+        let mut session = SimulationSession::new(config);
         login_demo_account_for_persistence_test(&mut session);
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<PlayerRuntimeResource>()
+            .gold = 1_000_000;
+        item_custody_tests::activate_refine_service(&mut session, "REFINE");
         session
             .app
             .world_mut()
@@ -65755,6 +65807,7 @@ fn refine_outcome_is_deterministic_across_runs() {
         add_inventory_crystal_item(&mut session, "BlackIronOre", 2);
         session.handle_packet(ClientPacket::DepositRefineItem { from: 2, to: 0 });
         session.handle_packet(ClientPacket::RefineItem { unique_id: 4 });
+        item_custody_tests::activate_refine_service(&mut session, "REFINECHECK");
         session.handle_packet(ClientPacket::CheckRefine { unique_id: 4 });
         session
             .world_snapshot()
@@ -69195,6 +69248,9 @@ fn poison_resistance_reduces_player_poison_tick_damage() {
     login_demo_account_for_persistence_test(&mut resisted);
     resisted.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equipped_armour_push_stat(&mut resisted, super::CRYSTAL_STAT_POISON_RESIST, 5);
+    assert_eq!(resisted.zone_player_combat_stats().poison_resist,
+        super::player_stats(resisted.app.world()).poison_resist());
+    assert!(resisted.zone_player_combat_stats().poison_resist > 0);
     {
         let player = super::player_entity(resisted.app.world()).expect("player");
         let mut entity = resisted.app.world_mut().entity_mut(player);
@@ -69232,6 +69288,7 @@ fn magic_resistance_grants_miss_chance_against_incoming_magic() {
     // shrug a magic blow (Crystal GetArmour MAC miss check).
     equipped_armour_push_stat(&mut session, super::CRYSTAL_STAT_MAGIC_RESIST, 6);
     assert_eq!(super::player_stats(session.app.world()).magic_resist(), 2);
+    assert_eq!(session.zone_player_combat_stats().magic_resist, 2);
 
     let (mut misses, mut hits) = (0, 0);
     for tick in 0..200 {
@@ -69738,6 +69795,7 @@ fn auction_buy_spends_city_currency_for_remote_listing() {
         .stage5_systems
         .auction
         .push(Stage5AuctionListing {
+            item_state_json: None,
             id: 1,
             seller: "OtherPlayer".to_string(),
             item_key: "red-potion".to_string(),
@@ -69933,3 +69991,5 @@ fn platinum_176_q47_ring_override_is_quest_only_and_oma_cave_scoped() {
     )
     .is_empty());
 }
+#[path = "item_custody_tests.rs"]
+mod item_custody_tests;

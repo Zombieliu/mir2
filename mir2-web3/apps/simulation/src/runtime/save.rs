@@ -171,6 +171,8 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     let direction = entity_facing(world, player)?;
     let vitals = entity_player_vitals(world, player)?;
 
+    let mut saved_systems = stage5.stage5_systems.clone();
+    super::refine_oven::snapshot_timer(&mut saved_systems.refine, true);
     Some(CharacterSaveRecord {
         revision,
         character,
@@ -207,8 +209,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         item_rental_records_json: encode_state_vec(&rental.rented_items),
         has_rented_item: rental.has_rented_item,
         stage5_systems_json: Some(
-            serde_json::to_string(&stage5.stage5_systems)
-                .expect("stage5 systems state should serialize"),
+            serde_json::to_string(&saved_systems).expect("stage5 systems state should serialize"),
         ),
     })
 }
@@ -1720,6 +1721,27 @@ pub(super) fn normalize_legacy_default_account_demo_seed_state(
     if save.character.index != 0 || save.character.level != 7 {
         return false;
     }
+    // A live trade can legitimately hold the entire wallet or inventory.
+    // Treating that saved zero as a legacy demo seed would manufacture assets.
+    if save
+        .stage5_systems_json
+        .as_deref()
+        .and_then(|encoded| serde_json::from_str::<Stage5SystemsState>(encoded).ok())
+        .is_some_and(|systems| {
+            systems.trade.is_some()
+                || systems
+                    .auction
+                    .iter()
+                    .any(|listing| listing.item_state_json.is_some())
+                || systems.refine.oven_item_state_json.is_some()
+                || !systems.refine.slots.is_empty()
+                || !systems.refine.item_states.is_empty()
+                || systems.refine.pending_unique_id != 0
+                || systems.refine.refining
+        })
+    {
+        return false;
+    }
 
     let mut changed = false;
     if save.gold == 0 {
@@ -2015,6 +2037,24 @@ fn migrate_legacy_candidate_stage5_systems(systems: &mut Stage5SystemsState) -> 
     }
     for listing in &mut systems.auction {
         canonicalize_legacy_candidate_key(&mut listing.item_key)?;
+        if let Some(encoded) = listing.item_state_json.as_mut() {
+            let mut item: ItemState = serde_json::from_str(encoded).map_err(|e| e.to_string())?;
+            if migrate_legacy_candidate_item_state(&mut item)? {
+                *encoded = serde_json::to_string(&item).map_err(|e| e.to_string())?;
+            }
+        }
+    }
+    if let Some(encoded) = systems.refine.oven_item_state_json.as_mut() {
+        let mut item: ItemState = serde_json::from_str(encoded).map_err(|e| e.to_string())?;
+        if migrate_legacy_candidate_item_state(&mut item)? {
+            *encoded = serde_json::to_string(&item).map_err(|e| e.to_string())?;
+        }
+    }
+    for encoded in systems.refine.item_states.values_mut() {
+        let mut item: ItemState = serde_json::from_str(encoded).map_err(|e| e.to_string())?;
+        if migrate_legacy_candidate_item_state(&mut item)? {
+            *encoded = serde_json::to_string(&item).map_err(|e| e.to_string())?;
+        }
     }
     for key in systems.refine.slots.values_mut() {
         canonicalize_legacy_candidate_key(key)?;
@@ -2287,7 +2327,7 @@ struct DecodedCharacterSavePreflight {
 fn decode_and_validate_character_save(
     save: &CharacterSaveRecord,
 ) -> Result<DecodedCharacterSavePreflight, String> {
-    let (inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
+    let (mut inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
         decode_and_validate_character_items(save)?;
     let buff_states = decode_state_vec::<BuffState>(&save.buff_states_json)
         .ok_or_else(|| "failed to decode buff state".to_string())?;
@@ -2295,7 +2335,8 @@ fn decode_and_validate_character_save(
         .ok_or_else(|| "failed to decode quest state".to_string())?;
     let skill_states = decode_state_vec::<SkillState>(&save.skill_states_json)
         .ok_or_else(|| "failed to decode skill state".to_string())?;
-    let stage5_systems = decode_and_validate_stage5_systems(save)?;
+    let mut stage5_systems = decode_and_validate_stage5_systems(save)?;
+    super::refine_oven::migrate_legacy_pending(&mut inventory_items, &mut stage5_systems.refine)?;
     let npc_buy_back_items = decode_and_validate_npc_buy_back_items(&save.npc_buy_back_items_json)?;
     let npc_used_goods_items =
         decode_and_validate_npc_used_goods_items(&save.npc_used_goods_items_json)?;
@@ -2332,10 +2373,28 @@ pub(super) fn apply_character_save(
         quest_states,
         skill_states,
         buff_states,
-        stage5_systems,
+        mut stage5_systems,
         npc_buy_back_items,
         npc_used_goods_items,
     } = decode_and_validate_character_save(save)?;
+    super::refine_oven::restore_timer(&mut stage5_systems.refine)?;
+    let custody_ids = super::item_custody::reserved_ids(&stage5_systems)?;
+    let mut restored_inventory = world.resource::<InventoryResource>().clone();
+    restored_inventory.reserved_item_unique_ids.clear();
+    restored_inventory.inventory_capacity = save.inventory_capacity;
+    restored_inventory.inventory_items = inventory_items;
+    restored_inventory.belt_items = belt_items;
+    restored_inventory.storage_items = storage_items;
+    restored_inventory.equipment_items = equipment_items;
+    if custody_ids
+        .iter()
+        .any(|id| super::inventory::inventory_unique_id_is_used(&restored_inventory, *id))
+    {
+        return Err("saved inventory collides with a held market/refine UID".into());
+    }
+    restored_inventory.reserved_item_unique_ids = custody_ids;
+    normalize_inventory_known_item_metadata(&mut restored_inventory);
+    normalize_inventory_unique_ids(&mut restored_inventory);
     {
         let mut session = world.resource_mut::<SessionResource>();
         session.selected_character = Some(save.character.clone());
@@ -2446,15 +2505,7 @@ pub(super) fn apply_character_save(
         player_runtime.chat_next_allowed_at_ms = 0;
         player_runtime.chat_spam_tick = 0;
     }
-    let mut resources = world.resource_mut::<InventoryResource>();
-    resources.inventory_capacity = save.inventory_capacity;
-    resources.inventory_items = inventory_items;
-    resources.belt_items = belt_items;
-    resources.storage_items = storage_items;
-    resources.equipment_items = equipment_items;
-    normalize_inventory_known_item_metadata(&mut resources);
-    normalize_inventory_unique_ids(&mut resources);
-    drop(resources);
+    *world.resource_mut::<InventoryResource>() = restored_inventory;
     refresh_mount_resource_from_equipment(world);
     world.resource_mut::<HeroInventoryResource>().items = hero_inventory_items;
     world.resource_mut::<Stage5SystemsResource>().stage5_systems = stage5_systems;
@@ -3203,6 +3254,7 @@ mod character_save_item_validation_tests {
             offered_slots: BTreeMap::new(),
             offered_unique_ids: BTreeMap::new(),
             offered_gold: 0,
+            held_gold: None,
             offered_currency: CurrencyKind::Gold,
             accepted: false,
             locked: false,
@@ -3210,6 +3262,7 @@ mod character_save_item_validation_tests {
             completed: false,
         });
         systems.auction.push(Stage5AuctionListing {
+            item_state_json: None,
             id: 1,
             seller: "LegacyCarrier".to_string(),
             item_key: "guide-ring-right".to_string(),

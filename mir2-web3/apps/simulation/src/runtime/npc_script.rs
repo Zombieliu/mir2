@@ -701,6 +701,10 @@ pub(super) fn run_crystal_npc_script_impl(
             );
             if label_key == "STORAGE" {
                 packets.extend(crystal_npc_storage_open_packets(world));
+            } else if label_key == "REFINE" {
+                packets.extend(super::refine_oven::menu(world));
+            } else if label_key == "REFINECOLLECT" {
+                packets.extend(super::refine_oven::collect(world));
             } else {
                 packets.extend(service_packets);
             }

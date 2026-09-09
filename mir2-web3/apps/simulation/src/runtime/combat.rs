@@ -346,8 +346,8 @@ pub(super) fn apply_damage_to_current_player(
     }
 
     // Crystal `@SUPERMAN` (`GMNeverDie`): the GM is invincible — incoming damage is
-    // ignored and they cannot die. All player-damage paths (combat, hazards) funnel
-    // through here, so this one guard covers them.
+    // ignored and they cannot die. Personal combat/hazard decisions use this
+    // guard; shared Zone settlements already include the authoritative decision.
     if world.resource::<GmRuntimeResource>().gm_never_die {
         return PlayerDamageOutcome {
             applied: false,
@@ -356,6 +356,26 @@ pub(super) fn apply_damage_to_current_player(
         };
     }
 
+    let adjusted_damage = crystal_player_damage_after_status(world, damage);
+    apply_settled_damage_to_current_player(world, adjusted_damage, packets)
+}
+
+/// Commit an already resolved HP loss. The shared Zone calls this after its
+/// own immunity/status/armour decisions; running those decisions again here
+/// would let the private mirror disagree with the shared world. The ordinary
+/// personal damage path uses the same final vitals/death transition below.
+pub(super) fn apply_settled_damage_to_current_player(
+    world: &mut World,
+    damage: i32,
+    packets: &mut Vec<ServerPacket>,
+) -> PlayerDamageOutcome {
+    if damage <= 0 {
+        return PlayerDamageOutcome {
+            applied: false,
+            died: false,
+            amount: 0,
+        };
+    }
     let Some(player) = player_entity(world) else {
         return PlayerDamageOutcome {
             applied: false,
@@ -364,12 +384,11 @@ pub(super) fn apply_damage_to_current_player(
         };
     };
 
-    let adjusted_damage = crystal_player_damage_after_status(world, damage);
     let Some((updated_vitals, was_alive)) = ({
         let mut entity = world.entity_mut(player);
         entity.get_mut::<PlayerVitals>().map(|mut vitals| {
             let was_alive = vitals.hp > 0;
-            vitals.hp = vitals.hp.saturating_sub(adjusted_damage).max(0);
+            vitals.hp = vitals.hp.saturating_sub(damage).max(0);
             (*vitals, was_alive)
         })
     }) else {
@@ -379,6 +398,17 @@ pub(super) fn apply_damage_to_current_player(
             amount: 0,
         };
     };
+
+    // An already dead life cannot be settled a second time: do not advance
+    // its damage clock, emit another transition, or re-trigger the caller's
+    // death penalty. Explicit revival makes a later death eligible again.
+    if !was_alive {
+        return PlayerDamageOutcome {
+            applied: false,
+            died: false,
+            amount: 0,
+        };
+    }
 
     {
         let tick = runtime_tick(world);
@@ -405,7 +435,7 @@ pub(super) fn apply_damage_to_current_player(
     PlayerDamageOutcome {
         applied: was_alive,
         died,
-        amount: adjusted_damage,
+        amount: damage,
     }
 }
 
@@ -638,6 +668,9 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         // Luck biases the physical attack-power roll (Crystal GetAttackPower), so
         // the zone melee/range path matches the per-session path's Luck handling.
         luck: stats.luck(),
+        poison_resist: stats.poison_resist(),
+        magic_resist: stats.magic_resist(),
+        gm_never_die: world.resource::<GmRuntimeResource>().gm_never_die,
     }
 }
 

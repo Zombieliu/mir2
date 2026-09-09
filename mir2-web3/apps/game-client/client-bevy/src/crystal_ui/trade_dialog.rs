@@ -43,8 +43,24 @@ pub struct TradeGoldPrompt {
     pub open_revision: u64,
     pub input: CrystalAmountInput,
 }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TradeMessage {
+    Invitation { partner: String, revision: u64 },
+    Cancelled { revision: u64 },
+}
+impl TradeMessage {
+    pub fn revision(&self) -> u64 {
+        match self {
+            Self::Invitation { revision, .. } | Self::Cancelled { revision } => *revision,
+        }
+    }
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct TradeDialogUi {
+    pub input_consumed: bool,
+    pub message: Option<TradeMessage>,
+    seen_invite_revision: u64,
+    seen_cancel_revision: u64,
     pub open: bool,
     pub positions: [Vec2; 2],
     pub front: TradeSide,
@@ -62,6 +78,10 @@ pub struct TradeDialogUi {
 impl Default for TradeDialogUi {
     fn default() -> Self {
         Self {
+            input_consumed: false,
+            message: None,
+            seen_invite_revision: 0,
+            seen_cancel_revision: 0,
             open: false,
             positions: [
                 Vec2::new(OWN_RECT.left, OWN_RECT.top),
@@ -93,7 +113,28 @@ impl TradeDialogUi {
         self.last_cursor = None;
     }
     pub(super) fn observe(&mut self, model: &crate::social::SocialModel) -> bool {
+        self.input_consumed = false;
         let trade = &model.trade;
+        if trade.state == "requested" && trade.invite_revision != self.seen_invite_revision {
+            self.message = trade
+                .partner
+                .clone()
+                .map(|partner| TradeMessage::Invitation {
+                    partner,
+                    revision: trade.invite_revision,
+                });
+        } else if trade.cancel_revision != 0 && trade.cancel_revision != self.seen_cancel_revision {
+            self.message = Some(TradeMessage::Cancelled {
+                revision: trade.cancel_revision,
+            });
+        } else if matches!(&self.message, Some(TradeMessage::Invitation { partner, revision })
+            if trade.state != "requested" || trade.partner.as_ref() != Some(partner) || trade.invite_revision != *revision)
+            || trade.state == "open"
+        {
+            self.message = None;
+        }
+        self.seen_invite_revision = trade.invite_revision;
+        self.seen_cancel_revision = trade.cancel_revision;
         let open = trade.state == "open" && trade.partner.is_some();
         let changed = self.seen_revision != Some(trade.event_revision);
         let unlocked =
@@ -195,6 +236,113 @@ impl TradeDialogUi {
             self.positions[side.index()] = Vec2::new(p.x.clamp(0.0, 820.0), p.y.clamp(0.0, 616.0));
         }
     }
+}
+
+/// Dispose the original message box on either answer, but open trade windows
+/// only on S.TradeAccept. Rendered controls carry their invitation identity so
+/// an old click cannot reply to a replacement invitation.
+pub(super) fn answer_message(
+    state: &mut NativePlayerUiState,
+    model: &crate::social::SocialModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    revision: u64,
+    accept: bool,
+) -> bool {
+    let Some(message) = state.trade_dialog.message.as_ref() else {
+        return false;
+    };
+    if message.revision() != revision {
+        return false;
+    }
+    if let TradeMessage::Invitation { partner, .. } = message {
+        if model.trade.state != "requested"
+            || model.trade.invite_revision != revision
+            || model.trade.partner.as_ref() != Some(partner)
+        {
+            return false;
+        }
+        intents.push_transient_unique(NativePlayerUiIntent::TradeReply {
+            accept_invite: accept,
+        });
+    }
+    state.trade_dialog.message = None;
+    state.trade_dialog.input_consumed = true;
+    true
+}
+
+pub(super) fn render_message(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    message: &TradeMessage,
+) {
+    // MirMessageBox.cs: Prguse/360, centered 456x190 at 1024x768.
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(284.0),
+                top: Val::Px(289.0),
+                width: Val::Px(456.0),
+                height: Val::Px(190.0),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|dialog| {
+            let revision = message.revision();
+            if let Some(assets) = asset_server {
+                spawn_overlay_frame(dialog, assets, "original-ui/Prguse/360.png", 456.0, 190.0);
+                match message {
+                    TradeMessage::Invitation { .. } => {
+                        spawn_overlay_crystal_button(
+                            dialog,
+                            assets,
+                            "Title",
+                            206,
+                            207,
+                            208,
+                            CrystalRect::new(260.0, 157.0, 76.0, 25.0),
+                            OverlayButton::TradeAccept(revision),
+                        );
+                        spawn_overlay_crystal_button(
+                            dialog,
+                            assets,
+                            "Title",
+                            210,
+                            211,
+                            212,
+                            CrystalRect::new(360.0, 157.0, 76.0, 25.0),
+                            OverlayButton::TradeDecline(revision),
+                        );
+                    }
+                    TradeMessage::Cancelled { .. } => spawn_overlay_crystal_button(
+                        dialog,
+                        assets,
+                        "Title",
+                        200,
+                        201,
+                        202,
+                        CrystalRect::new(360.0, 157.0, 76.0, 25.0),
+                        OverlayButton::TradeMessageClose(revision),
+                    ),
+                }
+            }
+            let text = match message {
+                TradeMessage::Invitation { partner, .. } => {
+                    format!("Player {partner} has requested to trade with you.")
+                }
+                TradeMessage::Cancelled { .. } => {
+                    "Deal cancelled.\nTo deal correctly you must face the other party.".into()
+                }
+            };
+            overlay_text_at(
+                dialog,
+                &text,
+                CrystalRect::new(35.0, 35.0, 390.0, 110.0),
+                10.0,
+                TEXT,
+            );
+        });
 }
 
 #[derive(Component)]

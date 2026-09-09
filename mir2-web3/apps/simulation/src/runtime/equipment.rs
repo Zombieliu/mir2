@@ -1295,6 +1295,17 @@ pub(super) fn try_equip_item(
             .equipment_items
             .iter()
             .find(|item| item.slot == target_slot);
+        // A legacy slot-derived return must not take the identity of an item
+        // currently held by market/refine. Reject before removing either item.
+        if replaced.is_some_and(|existing| {
+            let returned =
+                item_state_from_equipment_state(existing.clone(), item.container, item.slot);
+            resources
+                .reserved_item_unique_ids
+                .contains(&returned.unique_id)
+        }) {
+            return None;
+        }
         if replaced.is_some_and(|item| user_item_from_equipment_state(item).is_none()) {
             return None;
         }
@@ -1453,6 +1464,12 @@ pub(super) fn remove_equipped_item_impl(
         let equipment = &resources.equipment_items[index];
         let unequipped =
             item_state_from_equipment_state(equipment.clone(), destination.0, destination.1);
+        if resources
+            .reserved_item_unique_ids
+            .contains(&unequipped.unique_id)
+        {
+            return vec![failed_packet];
+        }
         if validated_item_state_user_item(&unequipped).is_none() {
             return vec![failed_packet];
         }

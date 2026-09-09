@@ -121,19 +121,7 @@ impl ZoneManager {
 
     pub fn join(&mut self, join: ZoneJoin) -> Vec<ZoneOutbound> {
         let key = ZoneKey::for_map(join.map_file_name.clone());
-        let mut outbounds = Vec::new();
-        if let Some(previous_key) = self.session_zones.get(&join.session_id).cloned() {
-            if previous_key != key {
-                outbounds.extend(self.handle_for_key(
-                    previous_key,
-                    ZoneCommand::Leave {
-                        session_id: join.session_id.clone(),
-                    },
-                ));
-            }
-        }
-        outbounds.extend(self.handle_for_key(key, ZoneCommand::Join(join)));
-        outbounds
+        self.handle_for_key(key, ZoneCommand::Join(join))
     }
 
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
@@ -281,11 +269,38 @@ impl ZoneManager {
     }
 
     pub fn handle_for_key(&mut self, key: ZoneKey, command: ZoneCommand) -> Vec<ZoneOutbound> {
-        match &command {
-            ZoneCommand::Join(join) => {
-                self.session_zones
-                    .insert(join.session_id.clone(), key.clone());
+        // All Join entry points share this transfer path. Carry the same online
+        // player's receipt clock before removing its old Zone incarnation;
+        // otherwise map changes restart sequences at one under the same ID.
+        if let ZoneCommand::Join(join) = command {
+            let session_id = join.session_id.clone();
+            let previous_key = self.session_zones.get(&session_id).cloned();
+            let mut outbounds = Vec::new();
+            let mut transferred_clock = None;
+            if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+                transferred_clock = self
+                    .zones
+                    .get(&previous_key)
+                    .and_then(|zone| zone.player_vital_clock(&session_id));
+                outbounds.extend(self.handle_for_key(
+                    previous_key,
+                    ZoneCommand::Leave {
+                        session_id: session_id.clone(),
+                    },
+                ));
             }
+            self.session_zones.insert(session_id.clone(), key.clone());
+            let zone = self
+                .zones
+                .entry(key.clone())
+                .or_insert_with(|| ZoneRuntime::new(key));
+            outbounds.extend(zone.handle(ZoneCommand::Join(join)));
+            if let Some(clock) = transferred_clock {
+                zone.restore_player_vital_clock(&session_id, clock);
+            }
+            return outbounds;
+        }
+        match &command {
             ZoneCommand::Leave { session_id } => {
                 self.session_zones.remove(session_id);
             }
@@ -404,6 +419,13 @@ impl ZoneManager {
         self.zones.get(key)?.player_last_seen_move_seq(session_id)
     }
 
+    pub fn player_life_generation(&self, session_id: &SessionId) -> Option<u64> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_life_generation(session_id)
+    }
+
+    /// Trusted server-only Harvest admission query for the player's active
+    /// Zone. No raw client command can synchronize the predicates it reads.
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_vitals(session_id)

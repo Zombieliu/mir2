@@ -74,6 +74,7 @@ use super::inventory::*;
 use super::inventory::{
     current_weight, expand_storage_rental_impl, free_bag_slots, storage_password_required,
 };
+use super::item_custody;
 use super::items::*;
 use super::items::{
     crystal_item_template_for_item_key, item_info_from_crystal_template, user_item_from_item_state,
@@ -3769,7 +3770,12 @@ fn stage5_market_listing_matches(listing: &Stage5AuctionListing, normalized_quer
 /// consignments, so `ItemType` is `Consign` (1) and the consignment date is left
 /// at `0` (Crystal `DateTime.MinValue.ToBinary()`), which the gateway omits.
 fn stage5_client_auction(listing: &Stage5AuctionListing) -> ClientAuction {
-    let item = stage5_market_user_item(&listing.item_key);
+    let item = listing
+        .item_state_json
+        .as_deref()
+        .and_then(|encoded| item_custody::decode(&listing.item_key, encoded).ok())
+        .and_then(|item| try_user_item_from_item_state(&item).ok())
+        .unwrap_or_else(|| stage5_market_user_item(&listing.item_key));
     ClientAuction {
         auction_id: u64::from(listing.id),
         item,
@@ -3782,10 +3788,8 @@ fn stage5_client_auction(listing: &Stage5AuctionListing) -> ClientAuction {
     }
 }
 
-/// Builds a minimal `UserItem` for a market listing from its `item_key`. The
-/// market only needs identity (index/name/grade via the template) plus a count
-/// of 1, so durability / stats default to the template values the way a freshly
-/// created `UserItem` would (`Crystal` markets ship the stored `UserItem`).
+/// Legacy key-only listings remain displayable. This template preview is never
+/// used to return or sell an item: delivery requires the exact custody carrier.
 fn stage5_market_user_item(item_key: &str) -> UserItem {
     let template = crystal_item_template_for_item_key(item_key);
     let item_index = template
@@ -3899,6 +3903,35 @@ fn stage5_consign_item_packet(
             ServerPacket::MarketFail { reason: 1 },
         ];
     };
+    if item_custody::refresh(world).is_err() {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
+    }
+    let pending_refine_uid = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .pending_unique_id;
+    if pending_refine_uid != 0 && pending_refine_uid == unique_id {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
+    }
+    let Some(encoded) = item_custody::encode(&item) else {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
+    };
+    if !item_custody::can_take(world.resource::<InventoryResource>(), &item) {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
+    }
     let seller = stage5_player_name(world);
     let id = {
         let stage5 = world.resource::<Stage5SystemsResource>();
@@ -3909,7 +3942,13 @@ fn stage5_consign_item_packet(
             .map(|listing| listing.id)
             .max()
             .unwrap_or(0)
-            + 1
+            .checked_add(1)
+    };
+    let Some(id) = id else {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
     };
     world
         .resource_mut::<InventoryResource>()
@@ -3920,6 +3959,7 @@ fn stage5_consign_item_packet(
         .stage5_systems
         .auction
         .push(Stage5AuctionListing {
+            item_state_json: Some(encoded),
             id,
             seller,
             item_key: item.key.clone(),
@@ -3929,6 +3969,7 @@ fn stage5_consign_item_packet(
             cancelled: false,
             expired: false,
         });
+    item_custody::refresh(world).expect("validated custody transfer");
     vec![
         ServerPacket::ConsignItem {
             unique_id,
@@ -3940,7 +3981,7 @@ fn stage5_consign_item_packet(
     ]
 }
 
-fn stage5_market_buy_packet(
+pub(super) fn stage5_market_buy_packet(
     world: &mut World,
     auction_id: u64,
     bid_price: u32,
@@ -3981,12 +4022,24 @@ fn stage5_market_buy_packet(
     if world.resource::<PlayerRuntimeResource>().gold < price {
         return vec![ServerPacket::MarketFail { reason: 4 }];
     }
+    if listing.currency != crate::config::CurrencyKind::Gold
+        || item_custody::refresh(world).is_err()
     {
-        let inventory = world.resource::<InventoryResource>();
-        if !can_gain_item_quantity(&inventory, ItemContainer::Bag1, &listing.item_key, 1) {
-            return vec![ServerPacket::MarketFail { reason: 5 }];
-        }
+        return vec![ServerPacket::MarketFail { reason: 7 }];
     }
+    let Some(item) = listing
+        .item_state_json
+        .as_deref()
+        .and_then(|encoded| item_custody::decode(&listing.item_key, encoded).ok())
+    else {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    };
+    let Some((inventory, changed)) =
+        item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, true)
+    else {
+        return vec![ServerPacket::MarketFail { reason: 5 }];
+    };
+    let updates = item_custody::returned_packets(world.resource::<InventoryResource>(), &changed);
     world.resource_mut::<PlayerRuntimeResource>().gold -= price;
     {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
@@ -3994,27 +4047,19 @@ fn stage5_market_buy_packet(
         listing.price = price;
         listing.sold = true;
     }
-    add_or_increment_item(
+    *world.resource_mut::<InventoryResource>() = inventory;
+    item_custody::refresh(world).expect("validated custody transfer");
+    let mut packets = vec![ServerPacket::LoseGold { gold: price }];
+    packets.extend(updates);
+    packets.extend(vec![stage5_market_success_key_args(
         world,
-        ItemContainer::Bag1,
-        &listing.item_key,
-        &stage5_item_name(&listing.item_key),
-        "Stage 5 market purchase.",
-        21,
-        1,
-        1,
-    );
-    vec![
-        ServerPacket::LoseGold { gold: price },
-        stage5_market_success_key_args(
-            world,
-            "server.BoughtItemForGold",
-            [stage5_item_name(&listing.item_key), price.to_string()],
-        ),
-    ]
+        "server.BoughtItemForGold",
+        [stage5_item_name(&listing.item_key), price.to_string()],
+    )]);
+    packets
 }
 
-fn stage5_market_get_back_packet(
+pub(super) fn stage5_market_get_back_packet(
     world: &mut World,
     _mode: u8,
     auction_id: u64,
@@ -4023,35 +4068,39 @@ fn stage5_market_get_back_packet(
         return Vec::new();
     }
     let seller = stage5_player_name(world);
-    let listing_index = {
-        let stage5 = world.resource::<Stage5SystemsResource>();
-        if auction_id == 0 {
-            stage5
-                .stage5_systems
-                .auction
-                .iter()
-                .position(|listing| listing.seller.eq_ignore_ascii_case(&seller))
-        } else {
-            let Ok(listing_id) = u32::try_from(auction_id) else {
-                return vec![ServerPacket::MarketFail { reason: 7 }];
-            };
-            stage5.stage5_systems.auction.iter().position(|listing| {
-                listing.id == listing_id && listing.seller.eq_ignore_ascii_case(&seller)
-            })
-        }
-    };
-    let Some(index) = listing_index else {
+    let Some(index) = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .iter()
+        .position(|l| {
+            (auction_id == 0 || u64::from(l.id) == auction_id)
+                && l.seller.eq_ignore_ascii_case(&seller)
+        })
+    else {
         return vec![ServerPacket::MarketFail { reason: 7 }];
     };
     let listing = world
-        .resource_mut::<Stage5SystemsResource>()
+        .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .auction
-        .remove(index);
-    if listing.sold {
+        .auction[index]
+        .clone();
+    if listing.currency != crate::config::CurrencyKind::Gold
+        || item_custody::refresh(world).is_err()
+    {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    }
+    let packets = if listing.sold {
         let settlement = stage5_market_settlement(listing.price);
-        world.resource_mut::<PlayerRuntimeResource>().gold += settlement.earnings;
-        return vec![
+        let Some(gold) = world
+            .resource::<PlayerRuntimeResource>()
+            .gold
+            .checked_add(settlement.earnings)
+        else {
+            return vec![ServerPacket::MarketFail { reason: 4 }];
+        };
+        world.resource_mut::<PlayerRuntimeResource>().gold = gold;
+        vec![
             ServerPacket::GainedGold {
                 gold: settlement.earnings,
             },
@@ -4065,35 +4114,35 @@ fn stage5_market_get_back_packet(
                     settlement.commission.to_string(),
                 ],
             ),
-        ];
-    }
-    {
-        let inventory = world.resource::<InventoryResource>();
-        if !can_gain_item_quantity(&inventory, ItemContainer::Bag1, &listing.item_key, 1) {
-            world
-                .resource_mut::<Stage5SystemsResource>()
-                .stage5_systems
-                .auction
-                .push(listing);
+        ]
+    } else {
+        let Some(item) = listing
+            .item_state_json
+            .as_deref()
+            .and_then(|encoded| item_custody::decode(&listing.item_key, encoded).ok())
+        else {
+            return vec![ServerPacket::MarketFail { reason: 7 }];
+        };
+        let Some((inventory, changed)) =
+            item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, true)
+        else {
             return vec![ServerPacket::MarketFail { reason: 5 }];
-        }
-    }
-    add_or_increment_item(
-        world,
-        ItemContainer::Bag1,
-        &listing.item_key,
-        &stage5_item_name(&listing.item_key),
-        "Stage 5 market return.",
-        21,
-        1,
-        1,
-    );
-    vec![ServerPacket::MarketSuccess {
-        message: format!(
-            "Returned {} from market.",
-            stage5_item_name(&listing.item_key)
-        ),
-    }]
+        };
+        let mut packets =
+            item_custody::returned_packets(world.resource::<InventoryResource>(), &changed);
+        *world.resource_mut::<InventoryResource>() = inventory;
+        packets.push(ServerPacket::MarketSuccess {
+            message: format!("Returned {} from market.", item.name),
+        });
+        packets
+    };
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .remove(index);
+    item_custody::refresh(world).expect("validated custody transfer");
+    packets
 }
 
 fn stage5_market_sell_now_packet(world: &mut World, auction_id: u64) -> Vec<ServerPacket> {
@@ -4123,53 +4172,60 @@ fn stage5_deposit_refine_item_packet(world: &mut World, from: i32, to: i32) -> V
     if !is_in_world(world) {
         return Vec::new();
     }
-    let Some(from_slot) = stage5_refine_slot(from) else {
-        return vec![ServerPacket::DepositRefineItem {
+    let failure = || {
+        vec![ServerPacket::DepositRefineItem {
             from,
             to,
             success: false,
-        }];
+        }]
     };
-    let Some(to_slot) = stage5_refine_slot(to) else {
-        return vec![ServerPacket::DepositRefineItem {
-            from,
-            to,
-            success: false,
-        }];
+    if !super::refine_oven::service(world, "REFINE") {
+        return failure();
+    }
+    let (Ok(from_slot), Some(to_slot)) = (u8::try_from(from), stage5_refine_slot(to)) else {
+        return failure();
     };
-    if world
+    let refine = &world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .refine
-        .slots
-        .contains_key(&to_slot)
-    {
-        return vec![ServerPacket::DepositRefineItem {
-            from,
-            to,
-            success: false,
-        }];
+        .refine;
+    if refine.pending_unique_id != 0 || refine.refining || refine.slots.contains_key(&to_slot) {
+        return failure();
     }
-    let Some(item) = ({
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        inventory
-            .inventory_items
-            .iter()
-            .position(|item| inventory_item_matches_index(item, from_slot))
-            .map(|index| inventory.inventory_items.remove(index))
-    }) else {
-        return vec![ServerPacket::DepositRefineItem {
-            from,
-            to,
-            success: false,
-        }];
+    if item_custody::refresh(world).is_err() {
+        return failure();
+    }
+    let inventory = world.resource::<InventoryResource>();
+    if !is_valid_inventory_slot(from_slot, inventory.inventory_capacity) {
+        return failure();
+    }
+    let Some(index) = inventory
+        .inventory_items
+        .iter()
+        .position(|i| inventory_item_matches_index(i, from_slot))
+    else {
+        return failure();
     };
+    let item = inventory.inventory_items[index].clone();
+    let Some(encoded) = item_custody::encode(&item) else {
+        return failure();
+    };
+    if !item_custody::can_take(inventory, &item) {
+        return failure();
+    }
     world
-        .resource_mut::<Stage5SystemsResource>()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .remove(index);
+    let mut state = world.resource_mut::<Stage5SystemsResource>();
+    state.stage5_systems.refine.slots.insert(to_slot, item.key);
+    state
         .stage5_systems
         .refine
-        .slots
-        .insert(to_slot, item.key);
+        .item_states
+        .insert(to_slot, encoded);
+    drop(state);
+    item_custody::refresh(world).expect("validated custody transfer");
     vec![ServerPacket::DepositRefineItem {
         from,
         to,
@@ -4181,37 +4237,45 @@ fn stage5_retrieve_refine_item_packet(world: &mut World, from: i32, to: i32) -> 
     if !is_in_world(world) {
         return Vec::new();
     }
-    let Some(from_slot) = stage5_refine_slot(from) else {
-        return vec![ServerPacket::RetrieveRefineItem {
+    let failure = || {
+        vec![ServerPacket::RetrieveRefineItem {
             from,
             to,
             success: false,
-        }];
+        }]
     };
-    let Some(item_key) = world
-        .resource_mut::<Stage5SystemsResource>()
+    let (Some(from_slot), Ok(to_slot)) = (stage5_refine_slot(from), u8::try_from(to)) else {
+        return failure();
+    };
+    if item_custody::refresh(world).is_err() {
+        return failure();
+    }
+    let refine = &world
+        .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .refine
+        .refine;
+    let Some(item) = refine
         .slots
-        .remove(&from_slot)
+        .get(&from_slot)
+        .zip(refine.item_states.get(&from_slot))
+        .and_then(|(key, encoded)| item_custody::decode(key, encoded).ok())
     else {
-        return vec![ServerPacket::RetrieveRefineItem {
-            from,
-            to,
-            success: false,
-        }];
+        return failure();
     };
-    let preferred_slot = u8::try_from(to).unwrap_or(0);
-    add_or_increment_item(
-        world,
-        ItemContainer::Bag1,
-        &item_key,
-        &stage5_item_name(&item_key),
-        "Stage 5 refine return.",
-        preferred_slot,
-        1,
-        1,
-    );
+    let Some((inventory, _)) = item_custody::plan_return(
+        world.resource::<InventoryResource>(),
+        &item,
+        Some(to_slot),
+        false,
+    ) else {
+        return failure();
+    };
+    *world.resource_mut::<InventoryResource>() = inventory;
+    let mut state = world.resource_mut::<Stage5SystemsResource>();
+    state.stage5_systems.refine.slots.remove(&from_slot);
+    state.stage5_systems.refine.item_states.remove(&from_slot);
+    drop(state);
+    item_custody::refresh(world).expect("validated custody transfer");
     vec![ServerPacket::RetrieveRefineItem {
         from,
         to,
@@ -4220,33 +4284,55 @@ fn stage5_retrieve_refine_item_packet(world: &mut World, from: i32, to: i32) -> 
 }
 
 fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
+    if !is_in_world(world) || item_custody::refresh(world).is_err() {
         return Vec::new();
     }
-    let returned = {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        stage5.stage5_systems.refine.refining = false;
-        stage5.stage5_systems.refine.ready = false;
-        stage5.stage5_systems.refine.current_item = None;
-        std::mem::take(&mut stage5.stage5_systems.refine.slots)
-    };
-    let mut packets = vec![ServerPacket::RefineCancel];
-    for (slot, item_key) in returned {
-        add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &item_key,
-            &stage5_item_name(&item_key),
-            "Stage 5 refine cancel return.",
-            slot,
-            1,
-            1,
-        );
+    let slots = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .slots
+        .clone();
+    let mut packets = Vec::new();
+    for (slot, key) in slots {
+        let encoded = world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .refine
+            .item_states
+            .get(&slot)
+            .cloned();
+        let Some(item) = encoded
+            .as_deref()
+            .and_then(|v| item_custody::decode(&key, v).ok())
+        else {
+            continue;
+        };
+        let Some((inventory, changed)) =
+            item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, false)
+        else {
+            continue;
+        };
+        let destination = inventory_index_for_item(&changed[0]).expect("bag destination");
+        *world.resource_mut::<InventoryResource>() = inventory;
+        let mut state = world.resource_mut::<Stage5SystemsResource>();
+        state.stage5_systems.refine.slots.remove(&slot);
+        state.stage5_systems.refine.item_states.remove(&slot);
         packets.push(ServerPacket::RetrieveRefineItem {
             from: i32::from(slot),
-            to: i32::from(slot),
+            to: i32::from(destination),
             success: true,
         });
+    }
+    item_custody::refresh(world).expect("validated custody transfer");
+    if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .slots
+        .is_empty()
+    {
+        packets.push(ServerPacket::RefineCancel);
     }
     packets
 }
@@ -4258,22 +4344,15 @@ fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
 // the C# reference; these are sane defaults that make refine real (success/
 // fail/material cost/soft cap) instead of an unconditional +1.
 // --- Crystal weapon refine (Server/Settings.cs + PlayerObject.RefineItem/CheckRefine) ---
-// Constants mirror Crystal `Settings.Refine*`; the chance formula and outcome
-// mirror `PlayerObject.RefineItem` / `CheckRefine`. The shared refine slots only
-// retain item identity, so per-instance ingredient durability/added-stats are
-// taken from the item templates at full durability — everything else is exact.
+// Ingredients retain actual durability and added stats; refine_oven owns the
+// target lifecycle. The deterministic RNG remains a documented source deviation.
 const REFINE_BASE_CHANCE: i32 = 20;
-const REFINE_INCREASE: i32 = 1;
-const REFINE_CRIT_CHANCE: i32 = 10;
-const REFINE_CRIT_INCREASE: i32 = 2;
 const REFINE_WEP_STAT_REDUCE: i32 = 6;
 const REFINE_ITEM_STAT_REDUCE: i32 = 15;
 const REFINE_ORE_NAME: &str = "BlackIronOre";
 
 fn refine_template_for_key(key: &str) -> Option<CrystalItemTemplate> {
-    key.strip_prefix("crystal-item-")
-        .and_then(|index| index.parse::<i32>().ok())
-        .and_then(crystal_item_by_index)
+    crystal_item_template_for_item_key(key)
 }
 
 /// Aggregated ingredient contributions, mirroring the loop in Crystal
@@ -4291,36 +4370,43 @@ pub(super) struct RefineComponents {
     pub ore_purity: i32,
 }
 
-fn refine_components(slots: &BTreeMap<u8, String>) -> RefineComponents {
+pub(super) fn refine_components(items: &[ItemState]) -> RefineComponents {
     let mut c = RefineComponents::default();
-    for key in slots.values() {
-        let Some(template) = refine_template_for_key(key) else {
+    for item in items {
+        let Some(template) = refine_template_for_key(&item.key) else {
             continue;
         };
+        if template.item_type == CRYSTAL_ITEM_TYPE_WEAPON {
+            continue;
+        }
+        let wire = try_user_item_from_item_state(item).expect("validated ingredient");
         let max_dc = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_DC);
         let max_mc = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_MC);
         let max_sc = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_SC);
         if max_dc > 0 || max_mc > 0 || max_sc > 0 {
-            c.total_dc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_DC) + max_dc;
-            c.total_mc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_MC) + max_mc;
-            c.total_sc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_SC) + max_sc;
+            c.total_dc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_DC)
+                + max_dc
+                + user_item_stat_total(&wire.added_stats, CRYSTAL_STAT_MAX_DC);
+            c.total_mc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_MC)
+                + max_mc
+                + user_item_stat_total(&wire.added_stats, CRYSTAL_STAT_MAX_MC);
+            c.total_sc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_SC)
+                + max_sc
+                + user_item_stat_total(&wire.added_stats, CRYSTAL_STAT_MAX_SC);
             c.required_level += i32::from(template.required_amount);
-            // Templates are at full durability, so both Crystal dura checks pass.
-            c.durability += 1;
-            c.current_dura += 1;
+            c.durability += i32::from(wire.max_dura / 1000 == template.durability / 1000);
+            c.current_dura += i32::from(wire.current_dura / 1000 == wire.max_dura / 1000);
             c.item_amount += 1;
         }
         if template.name == REFINE_ORE_NAME {
-            c.ore_purity += i32::from(template.durability) / 1000;
+            c.ore_purity += i32::from(wire.current_dura) / 1000;
             c.ore_amount += 1;
         }
     }
     c
 }
 
-/// Crystal `RefinedValue` selection: the strictly-highest of DC/MC/SC totals.
-/// A tie (or all zero) yields `None`, which Crystal smashes on test.
-fn refine_target_stat(c: &RefineComponents) -> (Option<u8>, i32) {
+pub(super) fn refine_target_stat(c: &RefineComponents) -> (Option<u8>, i32) {
     if c.total_dc > c.total_mc && c.total_dc > c.total_sc {
         (Some(CRYSTAL_STAT_MAX_DC), c.total_dc)
     } else if c.total_mc > c.total_dc && c.total_mc > c.total_sc {
@@ -4387,13 +4473,13 @@ pub(super) fn refine_deterministic_1_99(tick: u64, unique_id: u64, salt: u64) ->
     (value % 99) as i32 + 1
 }
 
-fn refine_weapon_required(item: &ItemState) -> i32 {
+pub(super) fn refine_weapon_required(item: &ItemState) -> i32 {
     refine_template_for_key(&item.key)
         .map(|template| i32::from(template.required_amount))
         .unwrap_or(0)
 }
 
-fn refine_weapon_added_stat_sum(item: &ItemState) -> i32 {
+pub(super) fn refine_weapon_added_stat_sum(item: &ItemState) -> i32 {
     let added = |stat: u8| -> i32 {
         item.added_stats
             .iter()
@@ -4407,7 +4493,7 @@ fn refine_weapon_added_stat_sum(item: &ItemState) -> i32 {
         + added(CRYSTAL_STAT_MAX_SC)
 }
 
-fn refine_weapon_luck(item: &ItemState) -> i32 {
+pub(super) fn refine_weapon_luck(item: &ItemState) -> i32 {
     item.added_stats
         .iter()
         .filter(|entry| entry.stat == CRYSTAL_STAT_LUCK)
@@ -4415,13 +4501,13 @@ fn refine_weapon_luck(item: &ItemState) -> i32 {
         .sum()
 }
 
-fn refine_is_weapon(item: &ItemState) -> bool {
+pub(super) fn refine_is_weapon(item: &ItemState) -> bool {
     refine_template_for_key(&item.key)
         .map(|template| template.item_type == CRYSTAL_ITEM_TYPE_WEAPON)
         .unwrap_or(item.attack > 0 || item.added_attack > 0)
 }
 
-fn apply_refine_success(item: &mut ItemState, stat: u8, amount: i32) {
+pub(super) fn apply_refine_success(item: &mut ItemState, stat: u8, amount: i32) {
     if stat == CRYSTAL_STAT_MAX_DC {
         item.added_attack = item.added_attack.saturating_add(amount);
     } else if let Some(existing) = item.added_stats.iter_mut().find(|entry| entry.stat == stat) {
@@ -4434,144 +4520,11 @@ fn apply_refine_success(item: &mut ItemState, stat: u8, amount: i32) {
     }
 }
 
-fn stage5_refine_return_deposited_materials(world: &mut World) -> Vec<ServerPacket> {
-    let returned = std::mem::take(
-        &mut world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .refine
-            .slots,
-    );
-    for (slot, item_key) in returned {
-        add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &item_key,
-            &stage5_item_name(&item_key),
-            "Stage 5 refine return.",
-            slot,
-            1,
-            1,
-        );
-    }
-    vec![ServerPacket::NPCCollectRefine { success: false }]
-}
-
 fn stage5_refine_item_packet(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
-        return Vec::new();
-    }
-    let Some(item) = world
-        .resource::<InventoryResource>()
-        .inventory_items
-        .iter()
-        .find(|item| item_matches_inventory_unique_id(item, unique_id))
-        .cloned()
-    else {
-        return vec![ServerPacket::NPCCollectRefine { success: false }];
-    };
-    // Crystal Settings.OnlyRefineWeapon: only weapons can be refined.
-    if !refine_is_weapon(&item) {
-        return stage5_refine_return_deposited_materials(world);
-    }
-    let slots = world
-        .resource::<Stage5SystemsResource>()
-        .stage5_systems
-        .refine
-        .slots
-        .clone();
-    let components = refine_components(&slots);
-    let (target, refine_stat) = refine_target_stat(&components);
-    let chance = refine_success_chance_crystal(
-        &components,
-        refine_stat,
-        refine_weapon_required(&item),
-        refine_weapon_added_stat_sum(&item),
-        refine_weapon_luck(&item),
-        true,
-    )
-    .clamp(0, 100) as u8;
-    {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        let refine = &mut stage5.stage5_systems.refine;
-        refine.current_item = Some(item.key.clone());
-        refine.refining = true;
-        refine.ready = true;
-        refine.pending_unique_id = unique_id;
-        refine.pending_chance = chance;
-        // 0 == RefinedValue::None -> the weapon is smashed when checked.
-        refine.pending_stat = target.unwrap_or(0);
-        refine.slots.clear(); // ingredients consumed by the attempt
-    }
-    vec![ServerPacket::RefineItem { unique_id }]
+    super::refine_oven::start(world, unique_id)
 }
-
 fn stage5_check_refine_packet(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
-        return Vec::new();
-    }
-    let (chance, mut target, pending_unique_id) = {
-        let refine = &world
-            .resource::<Stage5SystemsResource>()
-            .stage5_systems
-            .refine;
-        (
-            refine.pending_chance,
-            refine.pending_stat,
-            refine.pending_unique_id,
-        )
-    };
-    if pending_unique_id != unique_id {
-        return vec![ServerPacket::NPCCollectRefine { success: false }];
-    }
-    let tick = super::session::runtime_tick(world);
-    // Crystal CheckRefine: a failed roll sets RefinedValue::None (-> smashed);
-    // a separate crit roll multiplies the gain.
-    if refine_deterministic_1_99(tick, unique_id, 0x05A1) > i32::from(chance) {
-        target = 0;
-    }
-    let mut refine_added = REFINE_INCREASE;
-    if refine_deterministic_1_99(tick, unique_id, 0xC817) < REFINE_CRIT_CHANCE {
-        refine_added *= REFINE_CRIT_INCREASE;
-    }
-    let mut smashed = false;
-    let found = {
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        if let Some(position) = inventory
-            .inventory_items
-            .iter()
-            .position(|item| item_matches_inventory_unique_id(item, unique_id))
-        {
-            if target == 0 {
-                inventory.inventory_items.remove(position); // item smashed on test
-                smashed = true;
-            } else {
-                apply_refine_success(
-                    &mut inventory.inventory_items[position],
-                    target,
-                    refine_added,
-                );
-            }
-            true
-        } else {
-            false
-        }
-    };
-    world
-        .resource_mut::<Stage5SystemsResource>()
-        .stage5_systems
-        .refine = Default::default();
-    if !found {
-        return vec![ServerPacket::NPCCollectRefine { success: false }];
-    }
-    vec![
-        ServerPacket::RefineItem { unique_id },
-        system_message(if smashed {
-            "Item smashed on test."
-        } else {
-            "Refine succeeded."
-        }),
-    ]
+    super::refine_oven::check(world, unique_id)
 }
 
 fn stage5_open_door_packet(world: &mut World, door_index: u8) -> Vec<ServerPacket> {
@@ -5015,6 +4968,7 @@ pub(super) fn stage5_trade_request_packet(
         offered_slots: BTreeMap::new(),
         offered_unique_ids: BTreeMap::new(),
         offered_gold: 0,
+        held_gold: Some(0),
         offered_currency: crate::config::CurrencyKind::Gold,
         accepted: false,
         locked: false,
@@ -5039,11 +4993,7 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
         return Vec::new();
     }
     if !accept_invite {
-        world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .trade = None;
-        return vec![ServerPacket::TradeCancel { unlock: false }];
+        return stage5_trade_cancel_packet(world);
     }
     let partner = {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
@@ -5057,6 +5007,7 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
                 offered_slots: BTreeMap::new(),
                 offered_unique_ids: BTreeMap::new(),
                 offered_gold: 0,
+                held_gold: Some(0),
                 offered_currency: crate::config::CurrencyKind::Gold,
                 accepted: false,
                 locked: false,
@@ -5069,20 +5020,43 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
 }
 
 fn stage5_trade_gold_packet(world: &mut World, amount: u32) -> Vec<ServerPacket> {
-    if world.resource::<PlayerRuntimeResource>().gold < amount {
-        return Vec::new();
-    }
-    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-    let Some(trade) = stage5.stage5_systems.trade.as_mut() else {
-        return Vec::new();
+    let available = world.resource::<PlayerRuntimeResource>().gold;
+    let next = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let Some(trade) = stage5.stage5_systems.trade.as_mut() else {
+            return Vec::new();
+        };
+        if trade.outgoing_escrow_debited() {
+            return Vec::new();
+        }
+        // Crystal unlocks before validating even an invalid amount. Shared
+        // coordination clears the partner's confirmation separately.
+        trade.accepted = false;
+        trade.locked = false;
+        let Some(held) = trade.validated_held_gold() else {
+            return Vec::new();
+        };
+        if trade.offered_currency != crate::config::CurrencyKind::Gold
+            || amount == 0
+            || available < amount
+        {
+            return Vec::new();
+        }
+        let (Some(offered), Some(held)) = (
+            trade.offered_gold.checked_add(amount),
+            held.checked_add(amount),
+        ) else {
+            return Vec::new();
+        };
+        trade.offered_gold = offered;
+        trade.held_gold = Some(held);
+        offered
     };
-    if trade.outgoing_escrow_debited() || trade.locked {
-        return Vec::new();
-    }
-    trade.offered_gold = amount;
-    trade.accepted = false;
-    trade.locked = false;
-    vec![ServerPacket::TradeGold { amount }]
+    world.resource_mut::<PlayerRuntimeResource>().gold = available - amount;
+    vec![
+        ServerPacket::LoseGold { gold: amount },
+        ServerPacket::TradeGold { amount: next },
+    ]
 }
 
 fn stage5_deposit_trade_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
@@ -5258,7 +5232,7 @@ pub(super) fn prepare_shared_trade_escrow(world: &mut World) -> SharedTradePrepa
             .as_ref()
             .expect("validated trade");
         (
-            trade.offered_gold,
+            trade.offered_gold - trade.validated_held_gold().expect("validated gold custody"),
             trade
                 .offered_slots
                 .values()
@@ -5284,6 +5258,7 @@ pub(super) fn prepare_shared_trade_escrow(world: &mut World) -> SharedTradePrepa
             .expect("validated trade");
         trade.accepted = true;
         trade.locked = true;
+        trade.held_gold = Some(trade.offered_gold);
         trade.escrow_prepared = true;
         trade.completed = false;
     }
@@ -5320,7 +5295,10 @@ pub(super) fn validate_trade_confirmation(world: &mut World) -> Result<(), Vec<S
             return Err(Vec::new());
         }
         (
-            trade.offered_gold,
+            match trade.validated_held_gold() {
+                Some(held) => trade.offered_gold - held,
+                None => return Err(Vec::new()),
+            },
             trade.offered_slots.clone(),
             trade.offered_unique_ids.clone(),
         )
@@ -5372,26 +5350,37 @@ fn stage5_trade_abort_on_tampered_offer(world: &mut World) -> Vec<ServerPacket> 
 }
 
 pub(super) fn stage5_trade_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
-    if world
-        .resource::<Stage5SystemsResource>()
-        .stage5_systems
-        .trade
-        .as_ref()
-        .is_some_and(Stage5TradeState::outgoing_escrow_debited)
-    {
+    let held = {
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        let Some(trade) = stage5.stage5_systems.trade.as_ref() else {
+            return Vec::new();
+        };
+        if trade.outgoing_escrow_debited() {
+            return Vec::new();
+        }
+        let Some(held) = trade.validated_held_gold() else {
+            return Vec::new();
+        };
+        held
+    };
+    let Some(refunded) = world
+        .resource::<PlayerRuntimeResource>()
+        .gold
+        .checked_add(held)
+    else {
         return Vec::new();
-    }
-    let had_trade = world
+    };
+    world.resource_mut::<PlayerRuntimeResource>().gold = refunded;
+    world
         .resource_mut::<Stage5SystemsResource>()
         .stage5_systems
-        .trade
-        .take()
-        .is_some();
-    if had_trade {
-        vec![ServerPacket::TradeCancel { unlock: false }]
-    } else {
-        Vec::new()
+        .trade = None;
+    let mut packets = Vec::new();
+    if held > 0 {
+        packets.push(ServerPacket::GainedGold { gold: held });
     }
+    packets.push(ServerPacket::TradeCancel { unlock: false });
+    packets
 }
 
 pub(super) fn stage5_intelligent_creature_list_packet(world: &World) -> ServerPacket {
@@ -6238,6 +6227,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let player_vitals = player_entity(world).and_then(|entity| entity_player_vitals(world, entity));
     let mut stage5_systems = stage5.stage5_systems.clone();
     stage5_systems.item_rental = item_rental_snapshot(world);
+    super::refine_oven::snapshot_timer(&mut stage5_systems.refine, false);
 
     // Seed every known city to 0 so the HUD renders a stable row set, then
     // overlay the player's actual balances.

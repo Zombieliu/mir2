@@ -401,7 +401,8 @@ impl Plugin for Mir2CrystalHudPlugin {
                     sync_belt_presentation,
                 )
                     .chain()
-                    .in_set(NativePlayerUiSet::Mutate),
+                    .in_set(NativePlayerUiSet::Mutate)
+                    .after(super::overlays::process_overlay_keyboard),
             )
             .add_plugins(Mir2CrystalHintPlugin)
             .add_plugins(super::overlays::Mir2CrystalOverlayPlugin);
@@ -1518,9 +1519,14 @@ fn consume_belt_control_actions(
         (Changed<Interaction>, With<Button>),
     >,
     shell: Res<NativeShellModel>,
+    player_ui: Option<Res<NativePlayerUiState>>,
     mut presentation: ResMut<CrystalBeltPresentation>,
 ) {
-    if shell.screen != NativeShellScreen::InGame {
+    if shell.screen != NativeShellScreen::InGame
+        || player_ui
+            .as_deref()
+            .is_some_and(NativePlayerUiState::amount_modal_open)
+    {
         return;
     }
     for (interaction, action) in &interactions {
@@ -2283,6 +2289,32 @@ mod tests {
         ));
         app.update();
         assert!(!app.world().resource::<CrystalBeltPresentation>().visible);
+    }
+
+    #[test]
+    fn trade_message_answer_frame_blocks_belt_controls() {
+        let mut app = App::new();
+        app.init_resource::<CrystalBeltPresentation>()
+            .init_resource::<NativePlayerUiState>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_systems(Update, consume_belt_control_actions);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .trade_dialog
+            .input_consumed = true;
+        let before = *app.world().resource::<CrystalBeltPresentation>();
+        for action in [
+            CrystalBeltControlAction::Rotate,
+            CrystalBeltControlAction::Close,
+        ] {
+            app.world_mut()
+                .spawn((Button, Interaction::Pressed, action));
+        }
+        app.update();
+        assert_eq!(*app.world().resource::<CrystalBeltPresentation>(), before);
     }
 
     #[test]

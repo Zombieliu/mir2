@@ -839,6 +839,7 @@ pub(super) fn crystal_npc_service_packets_for_label_with_markets(
             refining: false,
         }]),
         "REFINECHECK" => Some(vec![ServerPacket::NPCCheckRefine]),
+        "REFINECOLLECT" => Some(vec![ServerPacket::NPCCollectRefine { success: false }]),
         "REPLACEWEDDINGRING" => Some(vec![ServerPacket::NPCReplaceWedRing { rate: 1.0 }]),
         "STORAGE" => Some(vec![ServerPacket::NPCStorage]),
         _ => None,
@@ -856,6 +857,9 @@ pub(super) fn record_crystal_npc_service_context(
         matches!(
             packet,
             ServerPacket::NPCSell
+                | ServerPacket::NPCRefine { .. }
+                | ServerPacket::NPCCheckRefine
+                | ServerPacket::NPCCollectRefine { .. }
                 | ServerPacket::NPCGoods { .. }
                 | ServerPacket::NPCRepair { .. }
                 | ServerPacket::NPCSRepair { .. }

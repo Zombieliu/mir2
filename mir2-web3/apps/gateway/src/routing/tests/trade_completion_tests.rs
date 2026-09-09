@@ -26,16 +26,7 @@ fn completion_count(packets: &[ServerPacket]) -> usize {
 }
 
 fn open_pair(first: &mut GatewaySession, second: &mut GatewaySession) {
-    first.handle_packet(ClientPacket::TradeRequest);
-    second.handle_packet(ClientPacket::TradeRequest);
-    for session in [first, second] {
-        assert!(session
-            .handle_packet(ClientPacket::TradeReply {
-                accept_invite: true
-            })
-            .iter()
-            .any(|p| matches!(p, ServerPacket::TradeAccept { .. })));
-    }
+    open_shared_trade_pair(first, second);
 }
 
 fn prepare_first(first: &mut GatewaySession) -> Vec<ServerPacket> {

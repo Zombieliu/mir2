@@ -28,6 +28,12 @@ pub struct ZoneReplayCombatStats {
     pub critical_rate: i32,
     pub critical_damage: i32,
     pub luck: i32,
+    #[serde(default, skip_serializing_if = "super::types::zone_stat_is_zero")]
+    pub poison_resist: i32,
+    #[serde(default, skip_serializing_if = "super::types::zone_stat_is_zero")]
+    pub magic_resist: i32,
+    #[serde(default, skip_serializing_if = "super::types::zone_flag_is_false")]
+    pub gm_never_die: bool,
 }
 
 impl From<ZoneReplayCombatStats> for ZonePlayerCombatStats {
@@ -48,6 +54,9 @@ impl From<ZoneReplayCombatStats> for ZonePlayerCombatStats {
             critical_rate: value.critical_rate,
             critical_damage: value.critical_damage,
             luck: value.luck,
+            poison_resist: value.poison_resist,
+            magic_resist: value.magic_resist,
+            gm_never_die: value.gm_never_die,
         }
     }
 }

@@ -131,6 +131,9 @@ pub struct TradeItemModel {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct TradeModel {
+    /// Packet identities survive unrelated social events in the same frame.
+    pub invite_revision: u64,
+    pub cancel_revision: u64,
     /// Cursor revision for a validated trade packet, not a transaction receipt.
     /// UI-local locks must react even to repeated equal partner offers.
     pub event_revision: u64,
@@ -657,6 +660,7 @@ impl SocialModel {
                 self.trade = TradeModel {
                     partner: Some(name),
                     state: "requested".to_owned(),
+                    invite_revision: next_trade_revision,
                     ..TradeModel::default()
                 };
                 changed = true;
@@ -730,7 +734,10 @@ impl SocialModel {
                 if unlock {
                     self.trade.my_confirmed = false;
                 } else {
-                    self.trade = TradeModel::default();
+                    self.trade = TradeModel {
+                        cancel_revision: next_trade_revision,
+                        ..TradeModel::default()
+                    };
                 }
                 changed = true;
             }

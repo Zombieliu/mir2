@@ -119,6 +119,40 @@ function main() {
   const maps = parseMaps(reader);
   const items = parseItems(reader);
   const monsterByIndex = parseMonsters(reader);
+  // Narrow repair/verification mode: read authoritative DB Stat.Accuracy without
+  // regenerating unrelated manifests, timestamps, or current content overrides.
+  if (process.env.MIR2_CRYSTAL_MONSTER_ACCURACY_ONLY) {
+    const original = readFileSync(monsterOutputPath, "utf8");
+    const manifest = JSON.parse(original);
+    if (manifest.crystal_db_version !== version || manifest.crystal_db_custom_version !== customVersion
+        || manifest.monsters.length !== monsterByIndex.size) {
+      throw new Error("Monster accuracy repair requires matching DB version and complete monster index set");
+    }
+    for (const monster of manifest.monsters) {
+      const source = monsterByIndex.get(monster.monster_index);
+      if (!source || source.name !== monster.name || source.ai !== monster.ai || source.image !== monster.image) {
+        throw new Error(`Monster identity mismatch at ${monster.monster_index}`);
+      }
+    }
+    if (process.env.MIR2_CRYSTAL_MONSTER_ACCURACY_ONLY !== "check") {
+      const repaired = original.replace(/^\s*"accuracy": -?\d+,\r?\n/gm, "")
+        .replace(/(\s*)"monster_index": (\d+),(\r?\n)/g, (match, space, index, newline) => {
+          const indent = space.slice(space.lastIndexOf("\n") + 1);
+          return `${space}"monster_index": ${index},${newline}${indent}"accuracy": ${monsterByIndex.get(Number(index)).accuracy},${newline}`;
+        });
+      const withoutAccuracy = (text) => JSON.stringify(JSON.parse(text), (key, value) => key === "accuracy" ? undefined : value);
+      if (withoutAccuracy(repaired) !== withoutAccuracy(original)) throw new Error("Unrelated monster content changed");
+      writeFileSync(monsterOutputPath, repaired);
+    }
+    const checked = JSON.parse(readFileSync(monsterOutputPath, "utf8"));
+    for (const monster of checked.monsters) {
+      if (monster.accuracy !== monsterByIndex.get(monster.monster_index).accuracy) {
+        throw new Error(`Stat 10 accuracy mismatch for ${monster.name}`);
+      }
+    }
+    console.log(`Verified ${checked.monsters.length} monster accuracies against Server.MirDB Stat 10; Shinsu=${checked.monsters.find(m => m.name === "Shinsu")?.accuracy}`);
+    return;
+  }
   const npcs = parseNpcs(reader, maps);
   const quests = parseQuests(reader, version, items, monsterByIndex, npcs, maps, settings);
   const recipes = parseRecipes(items);
@@ -571,6 +605,7 @@ function parseMonsters(reader) {
     const max_mc = stats.get(7) ?? 0;
     const min_sc = stats.get(8) ?? 0;
     const max_sc = stats.get(9) ?? 0;
+    const accuracy = stats.get(10) ?? 0;
     const agility = stats.get(11) ?? 0;
     const light = reader.readUInt8();
     const attack_speed = reader.readUInt16();
@@ -604,6 +639,7 @@ function parseMonsters(reader) {
       max_mc,
       min_sc,
       max_sc,
+      accuracy,
       agility,
       light,
       attack_speed,

@@ -15,6 +15,7 @@ mod capture;
 mod clipboard;
 mod cursor;
 mod effects;
+mod entity_health;
 mod entity_overlays;
 mod entity_presentation;
 mod frame_sets;
@@ -26,6 +27,7 @@ mod movement_trace;
 mod native_protocol;
 mod session_config;
 mod shell_bridge;
+mod timing;
 
 /// Whether an effect frame PNG (a web path like /original-effects/Magic/0.png)
 /// exists under the native asset root. Used by effects.rs so a missing asset
@@ -90,6 +92,8 @@ fn report_r2_progress_via_chat(
 }
 
 fn main() {
+    timing::initialize();
+    let config_started = std::time::Instant::now();
     console_error_panic_hook::set_once();
     movement_trace::initialize();
 
@@ -99,6 +103,8 @@ fn main() {
             std::process::exit(2);
         });
 
+    timing::report("configuration", config_started);
+    let assets_started = std::time::Instant::now();
     // Cross-thread channels: Bevy owns visible UI state on the main thread; one
     // async task exclusively owns the WebSocket.
     let (command_tx, command_rx) = gateway::command_channel(256);
@@ -142,12 +148,15 @@ fn main() {
         "[platform-windows] gateway_url={} window={}x{}",
         session.gateway_url, session.window_width, session.window_height
     );
+    timing::report("asset_validation_and_map_decode", assets_started);
+    let app_started = std::time::Instant::now();
     let mut app = build_runtime_app(RuntimeWindowSpec {
         asset_root: asset_root.to_string_lossy().into_owned(),
         width: session.window_width,
         height: session.window_height,
         ..RuntimeWindowSpec::native("mir2-web3 (native)")
     });
+    timing::report("build_runtime_app", app_started);
     app.world_mut()
         .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()
         .set_native_consumer_enabled(true);
@@ -200,6 +209,7 @@ fn main() {
     app.init_resource::<mir2_client_bevy::big_map::BigMapGatewayIntentQueue>();
     app.init_resource::<entity_presentation::NativeEntityPresentation>();
     app.init_resource::<entity_overlays::NativeEntityOverlays>();
+    app.init_resource::<entity_health::MonsterHealthState>();
     app.init_resource::<effects::NativeEffects>();
     app.init_resource::<input::WorldPointerMovementState>();
     app.insert_resource(shell_bridge::NativeAutoLoginFlow::from_config(
@@ -254,6 +264,7 @@ fn main() {
         (
             entity_overlays::sync_native_entity_overlays
                 .after(mir2_bevy_runtime::RuntimePresentationSet),
+            entity_health::sync_native_monster_health,
             effects::tick_native_effects,
             mir2_client_bevy::audio::sync_native_gameplay_audio
                 .after(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
@@ -270,7 +281,10 @@ fn main() {
     app.insert_resource(R2ChatReporter::default());
     app.add_systems(bevy::app::Update, report_r2_progress_via_chat);
 
-    eprintln!("[platform-windows] native window opened; runtime running");
+    timing::milestone("host_configured");
+    app.add_systems(bevy::app::Update, |mut reported: bevy::prelude::Local<bool>| {
+        if !*reported { timing::milestone("first_main_update"); *reported = true; }
+    });
 
     let gateway_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
     let gateway_url = session.gateway_url;
@@ -292,6 +306,7 @@ fn main() {
     // Run the Bevy loop on the main thread; the gateway task runs on its own
     // tokio runtime in the background and pushes snapshots into the runtime
     // channel. The runtime handle stays alive until the window closes.
+    timing::milestone("enter_event_loop");
     app.run();
 
     // Best-effort: drop the gateway task after the window closes.

@@ -1,5 +1,10 @@
 {
   "version": 3,
+  "sourceLibrary": {
+    "path": "Prguse2.Lib",
+    "sha256": "510ebc77315089075fc472c9ef745be2e16c6dece970c307d6859ce074cce861",
+    "bytes": 3557648
+  },
   "count": 1602,
   "frameSet": {
     "seek": 3557644,
@@ -7,6 +12,38 @@
     "actions": []
   },
   "frames": [
+    {
+      "index": 0,
+      "width": 32,
+      "height": 4,
+      "x": 7,
+      "y": -44,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "08391e22c10e3bbfd526e4e7a03b9ea2c7844b67ee45a8c05958276f8ec7d40a",
+      "pngSha256": "2b2654a1eaae5d35b11fc263b2dc7aec9b0187e06d8d729e50ba4c2c4329244f",
+      "path": "/original-ui/Prguse2/0.png",
+      "maskPath": null
+    },
+    {
+      "index": 1,
+      "width": 32,
+      "height": 4,
+      "x": 7,
+      "y": -44,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "dc667490d7326d14c6a738c14d504c5294c84d69bb1a87301807b7d7ce77823d",
+      "pngSha256": "124710e1e9910c49af757b17555eef145ebe7ca703cf2d35ecdaff1f85899495",
+      "path": "/original-ui/Prguse2/1.png",
+      "maskPath": null
+    },
     {
       "index": 197,
       "width": 12,
@@ -18,6 +55,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "f131ea9d33249f871cb1bc0b083ece8f9535a10aec7186dd156c6f10321b62f4",
+      "pngSha256": "68d5dcdd66f9afc2cbdadeb38c08928bf7b460da7307d5890e16a866d9bf1a62",
       "path": "/original-ui/Prguse2/197.png",
       "maskPath": null
     },
@@ -32,6 +71,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "4745df06050a9f0af241b7b6f192b041bd2ff5ec6a9ca79c685119d7a9d208a3",
+      "pngSha256": "faea99e763f68f04f196a6e7b8f8146e243a5ad41f6d71c38504782d6fe3ff28",
       "path": "/original-ui/Prguse2/198.png",
       "maskPath": null
     },
@@ -46,6 +87,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "2e28166e582c35b82e917cf56cc321ff7b4a335aa828a5b75738776112a346e8",
+      "pngSha256": "c45f511fe8f4dcef38df04072b25c683100b3c51f6e9df106d40e8e9f46075aa",
       "path": "/original-ui/Prguse2/199.png",
       "maskPath": null
     },
@@ -60,6 +103,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "9260661c860f8f2ca20f19ffeb975baec92512932820955ed2ad74394039bb0f",
+      "pngSha256": "4838c23a4a0dfe20f8a630b043333e58222a0f10ab6c3bb1ebd9ca5a3fbaba1b",
       "path": "/original-ui/Prguse2/205.png",
       "maskPath": null
     },
@@ -74,6 +119,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "e35315b2a039a52b1c375b1680f64c5440ae929ab411079a9a782c24f2a58dc4",
+      "pngSha256": "cd5674fa1847f06ad071b425109ae87ff354352a6eb0da87355800031f05686d",
       "path": "/original-ui/Prguse2/206.png",
       "maskPath": null
     },
@@ -88,6 +135,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "8b9af1ddb5b54277b73e2565a6921d3c8a46ee32044031018258a89418cfb302",
+      "pngSha256": "1319dc528e2dec4c124d9b2e704a3a73a73e0531d454248d57bd86236c4d21f5",
       "path": "/original-ui/Prguse2/207.png",
       "maskPath": null
     },
@@ -102,6 +151,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "7a5c1f6d87318391817e8d12fa1ea4eeafe7c46b42c29c42691c927cc514ad64",
+      "pngSha256": "049f1055d62c5ea713e6de8c5548cd940d45b0a90eab105f662193e2a70f4a40",
       "path": "/original-ui/Prguse2/208.png",
       "maskPath": null
     },
@@ -116,6 +167,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "a4f1ad000a0d3b59850321bca519ca365eb5fd26d21ef3c4ee4949f40457ecea",
+      "pngSha256": "c3fd7b85719ba3fd03c684a8c10c6663cec63b073b09e55ec24f000ddc35962f",
       "path": "/original-ui/Prguse2/209.png",
       "maskPath": null
     },
@@ -130,6 +183,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "e8346a697bca1a9f5f1e2748aff1dcb1f77531550eed563a7c4779f4ab5a6164",
+      "pngSha256": "e45d6ecbd0d3d64efc7611d419ce766891cfd6e5608257ebc5f9abd222f18128",
       "path": "/original-ui/Prguse2/240.png",
       "maskPath": null
     },
@@ -144,6 +199,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "5a27a9416f07ae344c3bfc0880c0e07b36a191696ecdf9e172227f9b9605082d",
+      "pngSha256": "03520fc271104e0bee1579fc40bc64d04f4bc703aa44be27904619748a63f5e4",
       "path": "/original-ui/Prguse2/241.png",
       "maskPath": null
     },
@@ -158,6 +215,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "167f844b8a2c7412d6d86da92cc784ac9a952f6b06ed9555b3c1c5eeb60492bd",
+      "pngSha256": "d839c8589628f14226d4e097e6b6dce4b727471a8a4048f1c200ae124680236b",
       "path": "/original-ui/Prguse2/242.png",
       "maskPath": null
     },
@@ -172,6 +231,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "0617c297953ac2fa25dbe6fa4ceaf8cc3a5b16ade406cb4032071d0517abcb06",
+      "pngSha256": "590c4a5b9eeac35e92868ad19bc45e19b9efc31c6e7d26837df61a371db4b50b",
       "path": "/original-ui/Prguse2/243.png",
       "maskPath": null
     },
@@ -186,6 +247,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "676005cd346661ffde33640b5bbd8170e28b3f38c691266c034a6beb811a3d55",
+      "pngSha256": "26db8a0b2fc08502cb22515c9516cdf1d6bed3e81aea3117703f100875e02dad",
       "path": "/original-ui/Prguse2/244.png",
       "maskPath": null
     },
@@ -200,6 +263,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "d21125dc988031840ce479b053df7051d22ce0e3930578a7fd286714ebf22785",
+      "pngSha256": "a91cba1f86fa00540c4e508562a629b4136de78534e8f37cd506a3f697e9d18a",
       "path": "/original-ui/Prguse2/245.png",
       "maskPath": null
     },
@@ -214,6 +279,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "596a3fbf1fb56b7ae62e59c91e644205cdd39a509ae68bea4522dcdde165ab43",
+      "pngSha256": "b0d59a3ba2acd9d19d69d27f66b794cb41aa9a48e3c08ab891ac3b9e2c0a550f",
       "path": "/original-ui/Prguse2/257.png",
       "maskPath": null
     },
@@ -228,6 +295,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "5f89a79d4a9627bdd07c9134bcb63f17536dc683bff819fc3e0b905bbc523ffe",
+      "pngSha256": "66f7ac491fb0e29e04a7b6a439520602061268ff77e92b5c1325101322647bd1",
       "path": "/original-ui/Prguse2/258.png",
       "maskPath": null
     },
@@ -242,6 +311,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "156a10f5c7ba27c295618ce27e09ec1373652dd8d0a11676d08e941898c372b0",
+      "pngSha256": "4a26b04cab167e2cdb171cb452bff2f5f98f0e01c451c87958ae003ec85144f5",
       "path": "/original-ui/Prguse2/259.png",
       "maskPath": null
     },
@@ -256,6 +327,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "7bacfd35f4ceb0d0c78bcea0f98edca8532b458d7ee05f4aa28a46e651f8348b",
+      "pngSha256": "cc9b847edab6ca636fa2d8fcf000442feccdb6a03b8dd5728dafdcc23578f16d",
       "path": "/original-ui/Prguse2/360.png",
       "maskPath": null
     },
@@ -270,6 +343,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "f082a9de2c9b0de55cb12d8ca24d5c9647a605c83df69f4cbeab98acc7a321c1",
+      "pngSha256": "d54980265b8f71298cf2f5563f6bfd0793190b8c6e5f315ab18b43b38d864b2c",
       "path": "/original-ui/Prguse2/361.png",
       "maskPath": null
     },
@@ -284,6 +359,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "b89fb05149ebdb0cde56aa8b5e374dd8b4e26f026d797f009457ee74d1eda443",
+      "pngSha256": "50ad0583d409593cf3b3a43ab54ff85665cfc0c1efc0a08f574473674973d39c",
       "path": "/original-ui/Prguse2/362.png",
       "maskPath": null
     },
@@ -298,6 +375,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "d77877b2dbeaa1be0ed9f9962caf301784147ecd655a2fa57fb4e1017f838a08",
+      "pngSha256": "0e19b3e3ea07869a418a293e2226fe3bbfb5de2f2f046be2ce888a088c792652",
       "path": "/original-ui/Prguse2/366.png",
       "maskPath": null
     },
@@ -312,6 +391,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "b888a1409db68ae494395eee54134d6c5f273eeda1cb5ad2124d4de2eb381ae2",
+      "pngSha256": "13ca0b125a282ea8504e23554a182c20c59c39239bfb8462033e55c12f20e3c5",
       "path": "/original-ui/Prguse2/367.png",
       "maskPath": null
     },
@@ -326,6 +407,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "2885a6766c73729e447e895d7ded0500702fc259de1390ae2eff496e3c1e42be",
+      "pngSha256": "23e894ce68a684a9e674a93e17d1d8965d417ba1e2f1c1b998c183fa4d38f37b",
       "path": "/original-ui/Prguse2/368.png",
       "maskPath": null
     },
@@ -340,6 +423,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "066f126e58d69f7a49ff203935495692f4e08f5f158163b2fbb38020702ab167",
+      "pngSha256": "9d7624a749bd231620a7356cca4e1d8f30ffa035dee3b79d0f04cc5aa92857a5",
       "path": "/original-ui/Prguse2/423.png",
       "maskPath": null
     },
@@ -354,6 +439,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "3a7f0b1ea53b95ed379ff837b51a651e963122b79e4527fd25e39f5118b11a12",
+      "pngSha256": "a1b21b415e70a3e6e449a3df5682ae462ce1f96f3072baca4daefe538b6c6040",
       "path": "/original-ui/Prguse2/431.png",
       "maskPath": null
     },
@@ -368,6 +455,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "73c4eac2f5378be0fed21bf755a04c0e3bc42a469536c9a855ce1db6b05b8544",
+      "pngSha256": "511f59f37595175cf6c80acca3ede19c1975eb951e226dc5ce9f3055cca6e450",
       "path": "/original-ui/Prguse2/432.png",
       "maskPath": null
     },
@@ -382,6 +471,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "b8cf8a7662927b6d5d9c31da400df163c8a05fe11c6de0fa56d81496beb7071c",
+      "pngSha256": "cb68ca095e05f01e249ecf7d2fda2054b1fbbac04cd2acebdb285091481ac536",
       "path": "/original-ui/Prguse2/433.png",
       "maskPath": null
     },
@@ -396,6 +487,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "f131ea9d33249f871cb1bc0b083ece8f9535a10aec7186dd156c6f10321b62f4",
+      "pngSha256": "68d5dcdd66f9afc2cbdadeb38c08928bf7b460da7307d5890e16a866d9bf1a62",
       "path": "/original-ui/Prguse2/470.png",
       "maskPath": null
     },
@@ -410,6 +503,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "4745df06050a9f0af241b7b6f192b041bd2ff5ec6a9ca79c685119d7a9d208a3",
+      "pngSha256": "faea99e763f68f04f196a6e7b8f8146e243a5ad41f6d71c38504782d6fe3ff28",
       "path": "/original-ui/Prguse2/471.png",
       "maskPath": null
     },
@@ -424,6 +519,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "2e28166e582c35b82e917cf56cc321ff7b4a335aa828a5b75738776112a346e8",
+      "pngSha256": "c45f511fe8f4dcef38df04072b25c683100b3c51f6e9df106d40e8e9f46075aa",
       "path": "/original-ui/Prguse2/472.png",
       "maskPath": null
     },
@@ -438,6 +535,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "8b9af1ddb5b54277b73e2565a6921d3c8a46ee32044031018258a89418cfb302",
+      "pngSha256": "1319dc528e2dec4c124d9b2e704a3a73a73e0531d454248d57bd86236c4d21f5",
       "path": "/original-ui/Prguse2/473.png",
       "maskPath": null
     },
@@ -452,6 +551,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "7a5c1f6d87318391817e8d12fa1ea4eeafe7c46b42c29c42691c927cc514ad64",
+      "pngSha256": "049f1055d62c5ea713e6de8c5548cd940d45b0a90eab105f662193e2a70f4a40",
       "path": "/original-ui/Prguse2/474.png",
       "maskPath": null
     },
@@ -466,6 +567,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "a4f1ad000a0d3b59850321bca519ca365eb5fd26d21ef3c4ee4949f40457ecea",
+      "pngSha256": "c3fd7b85719ba3fd03c684a8c10c6663cec63b073b09e55ec24f000ddc35962f",
       "path": "/original-ui/Prguse2/475.png",
       "maskPath": null
     },
@@ -480,6 +583,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "a7a352094a92eef635e27d9294d5ad7e16bf440caa43faa1fda70b39b07e33d4",
+      "pngSha256": "f071ab4b78e34e2e5fb11ed5e69f6b19a8a433d8d469102a0af5a365ee698b4e",
       "path": "/original-ui/Prguse2/1202.png",
       "maskPath": null
     },
@@ -494,6 +599,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "85a28aeecca965db7bea820670cda5920cce5db9621025af50343d8ed8cc7cf6",
+      "pngSha256": "d7a3e6a83089fc586b5d994f7e783e47cf83b8fe1ec3b67e38a387bf032fca4f",
       "path": "/original-ui/Prguse2/1203.png",
       "maskPath": null
     },
@@ -508,6 +615,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "f791116fb09cc56401ede32a91e203d999550303a9fa3677d24559b316da9acc",
+      "pngSha256": "956b010c3c5abb893a8134097e138e625d85180b04d0978d13f942608a3cc947",
       "path": "/original-ui/Prguse2/1204.png",
       "maskPath": null
     },
@@ -522,6 +631,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "9ea687eb4321cde266bd9d4f35e3641e8eee56d8d8b114ed3015d655f3cdcb37",
+      "pngSha256": "d79edc797081849f6ee1b4376b63a8aaaf2fd353132d94a07802025dda46374d",
       "path": "/original-ui/Prguse2/1205.png",
       "maskPath": null
     },
@@ -536,6 +647,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "7efbca3babc44c613417bcc11d8f3b9ac037a6d6b9ca53555ca8d6a42be5d9e3",
+      "pngSha256": "811e9f7b9ce8bff4b39300a49682973017f007afa4ceb1987813b9c76b4262d4",
       "path": "/original-ui/Prguse2/1340.png",
       "maskPath": null
     },
@@ -550,6 +663,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "2cdc256448d2fab5a54e350b546708b69baf9eb9813b90c7a891ac7a0b0fa626",
+      "pngSha256": "f4c85b6e68e8b147af3eb4d4082e88aaafc6f1a47f5ea205b8fa00d40a091c8d",
       "path": "/original-ui/Prguse2/1341.png",
       "maskPath": null
     },
@@ -564,6 +679,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "990d8ed9fc0eb5599f58fc9fafcfa18894ed3b5d6c8176fcfedf2327644db4c9",
+      "pngSha256": "b4498860d51585939f18ca89ae046ca6fc940763d8cdda04c1a75a237fd6c5c4",
       "path": "/original-ui/Prguse2/1342.png",
       "maskPath": null
     },
@@ -578,6 +695,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "5c6e5b4c9215dd79899844b013750620f4aaa1c5371403dbb41716488dfeb569",
+      "pngSha256": "8db94fd54bd5193c723350578e7c94f34c9690287370cd16aa73d829a2a9c748",
       "path": "/original-ui/Prguse2/1350.png",
       "maskPath": null
     },
@@ -592,6 +711,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "3e34b4e85d256b79223546bd5e7717f61dd7cf189d315b99d0bf8c3f34d4eb87",
+      "pngSha256": "90b1180b424b13691a582a0b389c21fa74d38308ae68a223e5f44607a43ecb57",
       "path": "/original-ui/Prguse2/1360.png",
       "maskPath": null
     },
@@ -606,6 +727,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "f30f7075dfbf8ba7236f6e2d3b11228f0c9b38a7bb16d4484bedf416df630604",
+      "pngSha256": "a3a312dbac137d19c59df3c06930c12930a850ccd1660a99ca9c48e617fe85f1",
       "path": "/original-ui/Prguse2/1365.png",
       "maskPath": null
     },
@@ -620,6 +743,8 @@
       "hasMask": false,
       "maskWidth": null,
       "maskHeight": null,
+      "rgbaSha256": "4a9591902b07221536d2bd1d9684944ce650f001d0ad20741b0f939c4aededaf",
+      "pngSha256": "88a6f99b9981daab194aad449f247b12d94fdc51be265ea733daf6646b76ae01",
       "path": "/original-ui/Prguse2/1366.png",
       "maskPath": null
     }

@@ -2422,6 +2422,7 @@ mod tests {
             deleted: false,
         });
         systems.auction.push(Stage5AuctionListing {
+            item_state_json: None,
             id: 3,
             seller: owner_name.to_string(),
             item_key: "iron-sword".to_string(),
@@ -2558,6 +2559,7 @@ mod tests {
             let mut systems = Stage5SystemsState::default();
             // Mark the auction sold so it should no longer be "active".
             systems.auction.push(Stage5AuctionListing {
+                item_state_json: None,
                 id: 3,
                 seller: owner_name.clone(),
                 item_key: "iron-sword".to_string(),
@@ -3425,6 +3427,9 @@ pub struct SimulationConfig {
     pub scene_view: SceneView,
     pub map_collision: StarterMapCollision,
     pub require_storage_password: bool,
+    /// Crystal RefineTime in milliseconds and RefineCost multiplier.
+    pub refine_duration_ms: u64,
+    pub refine_cost: u32,
     pub monster_spawn_source: MonsterSpawnSource,
     pub terrain_patches: Vec<TerrainPatchTemplate>,
     pub decor_objects: Vec<DecorObjectTemplate>,
@@ -3636,6 +3641,8 @@ impl SimulationConfig {
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
             safe_zone_border_effects: imported_safe_zone_border_enabled(&scene.map.file_name),
+            refine_duration_ms: 20 * 60_000,
+            refine_cost: 125,
             login_notice: None,
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),
@@ -6602,6 +6609,10 @@ pub struct Stage5TradeState {
     #[serde(default)]
     pub offered_unique_ids: BTreeMap<u8, u64>,
     pub offered_gold: u32,
+    /// Gold removed from the available wallet but still owned by this trade.
+    /// None is a legacy snapshot: only prepared/completed Gold offers were debited.
+    #[serde(default)]
+    pub held_gold: Option<u32>,
     /// Currency the offered amount is denominated in (gold by default; a city
     /// token when the player picks one in the trade window). Net-new field —
     /// defaults to gold so existing trade state decodes unchanged.
@@ -6623,11 +6634,31 @@ impl Stage5TradeState {
     pub(crate) fn outgoing_escrow_debited(&self) -> bool {
         self.escrow_prepared || self.completed
     }
+
+    /// Validate custody without inferring an item debit from a gold-only hold.
+    pub(crate) fn validated_held_gold(&self) -> Option<u32> {
+        if self.offered_currency != CurrencyKind::Gold {
+            return (self.held_gold.unwrap_or(0) == 0).then_some(0);
+        }
+        let held = self.held_gold.unwrap_or_else(|| {
+            if self.outgoing_escrow_debited() {
+                self.offered_gold
+            } else {
+                0
+            }
+        });
+        (held <= self.offered_gold
+            && (!self.outgoing_escrow_debited() || held == self.offered_gold))
+            .then_some(held)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5AuctionListing {
+    /// Complete server-owned instance. Missing legacy payloads are never reconstructed for delivery.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub item_state_json: Option<String>,
     pub id: u32,
     pub seller: String,
     pub item_key: String,
@@ -6645,17 +6676,24 @@ pub struct Stage5AuctionListing {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Stage5RefineState {
+    /// Sole authoritative owner while the target is in the oven.
+    pub oven_item_state_json: Option<String>,
+    /// Remaining duration at the most recent save, used across server starts.
+    pub remaining_ms: u64,
+    /// Same-process monotonic anchor keeps offline character waiting advancing.
+    pub clock_epoch: Option<String>,
+    pub collect_deadline_ms: Option<u64>,
+    /// Exact held ingredients; slots remains a compatibility/read-model key mirror.
+    pub item_states: BTreeMap<u8, String>,
     pub slots: BTreeMap<u8, String>,
     pub current_item: Option<String>,
     pub refining: bool,
     pub ready: bool,
-    /// Unique id of the weapon currently "in the oven" (set at RefineItem).
+    /// Legacy immediately-ready bag target. Migrated only when its instance exists.
     pub pending_unique_id: u64,
-    /// Success chance (0-100) computed from the deposited ingredients at
-    /// RefineItem time and rolled against at CheckRefine.
+    /// Legacy chance. New jobs store the raw signed chance on the held item.
     pub pending_chance: u8,
-    /// Target stat code (Crystal MaxDC/MaxMC/MaxSC) the refine will add on
-    /// success, chosen from the ingredients' bias and the weapon's stats.
+    /// Legacy Crystal stat code; new items use RefinedValue None/DC/MC/SC (0..3).
     pub pending_stat: u8,
 }
 

@@ -367,7 +367,8 @@ impl Plugin for Mir2CrystalChatPlugin {
                     sync_chat_settings_button_visuals,
                     consume_chat_button_interactions,
                 )
-                    .chain(),
+                    .chain()
+                    .after(crate::crystal_ui::overlays::NativePlayerUiSet::Mutate),
             );
     }
 }
@@ -522,6 +523,9 @@ fn consume_chat_actions(
         return;
     }
     let actions = queue.drain();
+    if player_ui.amount_modal_open() {
+        return;
+    }
     // Need filtered length for scroll bounds. We compute based on current state before applying?
     // For correctness we recompute after each filter change.
     for action in actions {
@@ -625,6 +629,7 @@ fn handle_chat_settings_keys(
     mut queue: ResMut<CrystalChatActionQueue>,
 ) {
     if !shell.is_some_and(|s| s.screen == NativeShellScreen::InGame)
+        || player_ui.amount_modal_open()
         || !player_ui.core.chat_settings_open()
     {
         return;
@@ -652,7 +657,7 @@ fn handle_chat_scroll_keys(
     if !shell.is_some_and(|s| s.screen == NativeShellScreen::InGame) {
         return;
     }
-    if player_ui.core.chat_settings_open() {
+    if player_ui.core.chat_settings_open() || player_ui.amount_modal_open() {
         return;
     }
     // Avoid scrolling while typing (chat focused in overlay state is separate,
@@ -1414,7 +1419,11 @@ fn chat_button_frame(interaction: Interaction, button: &CrystalChatButton) -> u1
 fn consume_chat_button_interactions(
     buttons: Query<(&Interaction, &CrystalChatAction), (Changed<Interaction>, With<Button>)>,
     mut actions: ResMut<CrystalChatActionQueue>,
+    player_ui: Res<NativePlayerUiState>,
 ) {
+    if player_ui.amount_modal_open() {
+        return;
+    }
     for (interaction, button) in buttons {
         if *interaction == Interaction::Pressed {
             actions.actions.push(*button);
@@ -2417,6 +2426,54 @@ mod tests {
                 .drain_intents(),
             vec![NativePlayerUiIntent::TradeRequest]
         );
+    }
+
+    #[test]
+    fn trade_message_blocks_chat_scroll_buttons_and_queued_actions() {
+        let mut app = App::new();
+        app.init_resource::<CrystalChatActionQueue>()
+            .init_resource::<CrystalChatState>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<UiEffectQueue>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<ChatModel>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<NativeShellModel>()
+            .add_systems(
+                Update,
+                (
+                    handle_chat_scroll_keys,
+                    consume_chat_actions,
+                    consume_chat_button_interactions,
+                )
+                    .chain(),
+            );
+        app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::InGame;
+        // input_consumed also covers the frame when Yes/No disposed the box.
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .trade_dialog
+            .input_consumed = true;
+        app.world_mut().resource_mut::<CrystalChatState>().scroll = 5;
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Home);
+        app.world_mut()
+            .resource_mut::<CrystalChatActionQueue>()
+            .push(CrystalChatAction::TradeRequest);
+        app.world_mut().spawn((
+            Button,
+            Interaction::Pressed,
+            CrystalChatAction::TradeRequest,
+        ));
+        app.update();
+        assert_eq!(app.world().resource::<CrystalChatState>().scroll, 5);
+        assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
     }
 
     #[test]

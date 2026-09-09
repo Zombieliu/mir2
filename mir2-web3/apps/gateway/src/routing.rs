@@ -26,7 +26,7 @@ use mir2_simulation::{
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
     ZoneBossRewardAudit, ZoneCommand, ZoneKey, ZoneManager, ZoneMonsterDefense,
     ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound,
-    ZoneRuntimeHandle, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneRuntimeHandle, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -930,28 +930,25 @@ impl HostedZoneOwnerCommandClient {
         external_commit_authorized: bool,
     ) -> Result<WorldCommandExecution, String> {
         let mode = request.mode();
-        // A journal sequence proves ordering, not caller authority. Only an
-        // authenticated production-player command on the active owner may
-        // perform external economy effects. Direct/admin-style requests and
-        // standby replay stay unfenced from the durable store even when the
-        // replication layer attaches a real source sequence.
-        let economy_context = match (external_commit_authorized, mode) {
-            (
-                true,
+        // Preserve verified ordering for deterministic active/standby replay.
+        // Ordering never grants external commit authority: Direct requests and
+        // standby replay carry the sequence with authorization explicitly false.
+        let may_commit_externally = external_commit_authorized
+            && matches!(
+                mode,
                 ZoneOwnerCommandMode::ProductionPlayer {
-                    authenticated: true,
-                },
-            ) => request.source_sequence().map(|source_sequence| {
-                SharedAccountInventoryExecutionContext {
-                    zone_id: request.owner_lease().zone_id().clone(),
-                    fencing_generation: request.owner_lease().fencing_token(),
-                    source_sequence,
-                    created_at_ms: shared_gateway_now_ms(),
-                    external_commit_authorized: true,
+                    authenticated: true
                 }
-            }),
-            _ => None,
-        };
+            );
+        let economy_context = request.source_sequence().map(|source_sequence| {
+            SharedAccountInventoryExecutionContext {
+                zone_id: request.owner_lease().zone_id().clone(),
+                fencing_generation: request.owner_lease().fencing_token(),
+                source_sequence,
+                created_at_ms: shared_gateway_now_ms(),
+                external_commit_authorized: may_commit_externally,
+            }
+        });
         let command = request.into_command();
         let mut runtime = self
             .runtime
@@ -1531,6 +1528,18 @@ pub trait SharedAccountInventoryService: fmt::Debug + Send + Sync {
         SharedAccountInventoryCommitOutcome::Confirmed(self.commit(runtime, envelope))
     }
 
+    /// Namespace in-memory receipts without granting durable commit authority.
+    /// Durable services still validate only the supplied execution context.
+    fn commit_in_zone(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        _zone_id: &ZoneId,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        self.commit_fenced(runtime, context, envelope)
+    }
+
     /// Retry a previously uncertain durable command. Durable implementations
     /// must prove that `expected_idempotency_key` is the key produced by the
     /// checkpointed execution context before contacting their store.
@@ -1660,13 +1669,24 @@ impl InProcessAccountInventoryService {
     }
 }
 
-impl SharedAccountInventoryService for InProcessAccountInventoryService {
-    fn commit(
+impl InProcessAccountInventoryService {
+    fn commit_in_scope(
         &self,
         runtime: &mut InProcessWorldRuntime,
+        scope: Option<(&ZoneId, bool)>,
         envelope: SharedAccountInventoryCommandEnvelope,
     ) -> SharedAccountInventoryTransactionReceipt {
-        let idempotency_key = envelope.idempotency_key();
+        let idempotency_key = envelope.idempotency_key().map(|key| {
+            scope.map_or_else(
+                || key.clone(),
+                |(zone, ordered)| {
+                    SharedAccountInventoryCommandKey(
+                        serde_json::to_string(&(zone.as_str(), ordered, &key.0))
+                            .expect("receipt namespace is serializable"),
+                    )
+                },
+            )
+        });
         if let Some(key) = idempotency_key.as_ref() {
             if let Some(receipt) = self
                 .committed_receipts
@@ -1756,6 +1776,46 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
             }
         }
         receipt
+    }
+}
+
+impl SharedAccountInventoryService for InProcessAccountInventoryService {
+    fn commit(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        self.commit_in_scope(runtime, None, envelope)
+    }
+
+    fn commit_fenced(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        SharedAccountInventoryCommitOutcome::Confirmed(self.commit_in_scope(
+            runtime,
+            context.map(|c| (&c.zone_id, true)),
+            envelope,
+        ))
+    }
+
+    fn commit_in_zone(
+        &self,
+        runtime: &mut InProcessWorldRuntime,
+        zone_id: &ZoneId,
+        context: Option<&SharedAccountInventoryExecutionContext>,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        // Journal sequence and local fallback sequence are independent domains.
+        // The epoch is intentionally absent: replay of the same ordered command
+        // under a replacement owner must still find the original receipt.
+        SharedAccountInventoryCommitOutcome::Confirmed(self.commit_in_scope(
+            runtime,
+            Some((zone_id, context.is_some())),
+            envelope,
+        ))
     }
 }
 
@@ -2070,6 +2130,8 @@ struct ZonePlayerPresence {
     entity: WorldEntitySnapshot,
     free_bag_slots: u16,
     #[serde(default)]
+    allow_trade: Option<bool>,
+    #[serde(default)]
     pk_points: i32,
 }
 
@@ -2193,10 +2255,86 @@ impl UnresolvedGroundDropSettlement {
     }
 }
 
+// Pair authority uses online incarnations, never display names.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct SharedTradePeer {
+    key: ZonePresenceKey,
+    owner_object_id: u32,
+    peer_object_id: u32,
+}
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+struct SharedTradeLinks {
+    invitations: Vec<(ZonePresenceKey, SharedTradePeer)>,
+    pairs: Vec<(ZonePresenceKey, SharedTradePeer)>,
+    initializations: Vec<(ZonePresenceKey, String)>,
+    cancellations: Vec<ZonePresenceKey>,
+    #[serde(default)]
+    refusals: Vec<(ZonePresenceKey, String)>,
+    #[serde(default)]
+    unlocks: Vec<(ZonePresenceKey, SharedTradePeer)>,
+}
 const SHARED_ZONE_STATE_CHECKPOINT_VERSION: u32 = 3;
 const SHARED_ZONE_FACTORY_CHECKPOINT_VERSION: u32 = 2;
 const MAX_PENDING_ZONE_PACKETS_PER_PLAYER: usize =
     crate::zone_rpc::DEFAULT_ZONE_RPC_MAX_OUTBOUND_MESSAGES;
+
+/// Old checkpoints store signed integers. Native producers now supply the
+/// mutation-time receipt; serde keeps old integer queues readable verbatim.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+enum QueuedZoneVitalDelta {
+    Legacy(i32),
+    Settled {
+        delta: i32,
+        settlement: ZoneVitalSettlement,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        death_location: Option<(Point, MirDirection)>,
+    },
+}
+
+impl From<i32> for QueuedZoneVitalDelta {
+    fn from(value: i32) -> Self {
+        Self::Legacy(value)
+    }
+}
+
+// Keep legacy queue assertions explicit about their original scalar meaning.
+impl PartialEq<i32> for QueuedZoneVitalDelta {
+    fn eq(&self, other: &i32) -> bool {
+        self.signed_delta() == *other
+    }
+}
+
+impl QueuedZoneVitalDelta {
+    fn signed_delta(&self) -> i32 {
+        match self {
+            Self::Legacy(delta) | Self::Settled { delta, .. } => *delta,
+        }
+    }
+    fn new(
+        delta: i32,
+        settlement: Option<ZoneVitalSettlement>,
+        death_location: Option<(Point, MirDirection)>,
+    ) -> Self {
+        match settlement {
+            Some(settlement) => Self::Settled {
+                delta,
+                settlement,
+                death_location,
+            },
+            None => Self::Legacy(delta),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+struct ZoneVitalReceiptProgress {
+    object_id: u32,
+    highest_sequence: u64,
+    // Death acknowledgement is independent from the delta high-water mark:
+    // a delayed old-life death must still be penalized after a newer heal.
+    penalized_death_generations: BTreeSet<u64>,
+}
 
 #[derive(Debug)]
 struct SharedInProcessZoneState {
@@ -2216,12 +2354,14 @@ struct SharedInProcessZoneState {
     pending_zone_shout_consumes: BTreeMap<ZonePresenceKey, (bool, bool)>,
     pending_zone_ground_drop_claims: BTreeMap<ZonePresenceKey, Vec<GroundDropClaimTicket>>,
     pending_zone_monster_kill_awards: BTreeMap<ZonePresenceKey, Vec<ZoneMonsterKillAward>>,
-    pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<i32>>,
+    pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<QueuedZoneVitalDelta>>,
     pending_zone_player_heals: BTreeMap<ZonePresenceKey, Vec<i32>>,
+    vital_receipt_progress: BTreeMap<ZonePresenceKey, ZoneVitalReceiptProgress>,
     teardown_fences: BTreeSet<ZonePresenceKey>,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
     players: BTreeMap<ZonePresenceKey, ZonePlayerPresence>,
     maps: BTreeMap<String, ZoneMapSnapshotLayer>,
+    trade_links: SharedTradeLinks,
     trade_offers: BTreeMap<ZonePresenceKey, SharedTradeOffer>,
     pending_trade_deliveries: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
     pending_trade_rollbacks: BTreeMap<ZonePresenceKey, Vec<SharedTradeOffer>>,
@@ -2273,12 +2413,16 @@ struct SharedInProcessZoneStateCheckpoint {
     pending_zone_shout_consumes: Vec<(ZonePresenceKey, (bool, bool))>,
     pending_zone_ground_drop_claims: Vec<(ZonePresenceKey, Vec<GroundDropClaimTicket>)>,
     pending_zone_monster_kill_awards: Vec<(ZonePresenceKey, Vec<ZoneMonsterKillAward>)>,
-    pending_zone_player_damages: Vec<(ZonePresenceKey, Vec<i32>)>,
+    pending_zone_player_damages: Vec<(ZonePresenceKey, Vec<QueuedZoneVitalDelta>)>,
     pending_zone_player_heals: Vec<(ZonePresenceKey, Vec<i32>)>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    vital_receipt_progress: Vec<(ZonePresenceKey, ZoneVitalReceiptProgress)>,
     #[serde(default)]
     teardown_fences: Vec<ZonePresenceKey>,
     players: Vec<(ZonePresenceKey, ZonePlayerPresence)>,
     maps: BTreeMap<String, ZoneMapSnapshotLayer>,
+    #[serde(default)]
+    trade_links: SharedTradeLinks,
     trade_offers: Vec<(ZonePresenceKey, SharedTradeOffer)>,
     pending_trade_deliveries: Vec<(ZonePresenceKey, Vec<SharedTradeOffer>)>,
     pending_trade_rollbacks: Vec<(ZonePresenceKey, Vec<SharedTradeOffer>)>,
@@ -2415,8 +2559,10 @@ impl SharedInProcessZoneStateCheckpoint {
         self.pending_zone_monster_kill_awards.clear();
         self.pending_zone_player_damages.clear();
         self.pending_zone_player_heals.clear();
+        self.vital_receipt_progress.clear();
         self.teardown_fences.clear();
         self.players.clear();
+        self.trade_links = SharedTradeLinks::default();
         self.trade_offers.clear();
         self.pending_trade_deliveries.clear();
         self.pending_trade_rollbacks.clear();
@@ -2488,10 +2634,12 @@ impl SharedInProcessZoneState {
             pending_zone_monster_kill_awards: BTreeMap::new(),
             pending_zone_player_damages: BTreeMap::new(),
             pending_zone_player_heals: BTreeMap::new(),
+            vital_receipt_progress: BTreeMap::new(),
             teardown_fences: BTreeSet::new(),
             live_zone_outbounds: BTreeMap::new(),
             players: BTreeMap::new(),
             maps: BTreeMap::new(),
+            trade_links: SharedTradeLinks::default(),
             trade_offers: BTreeMap::new(),
             pending_trade_deliveries: BTreeMap::new(),
             pending_trade_rollbacks: BTreeMap::new(),
@@ -2559,9 +2707,11 @@ impl SharedInProcessZoneState {
                 .into_iter()
                 .collect(),
             pending_zone_player_heals: self.pending_zone_player_heals.clone().into_iter().collect(),
+            vital_receipt_progress: self.vital_receipt_progress.clone().into_iter().collect(),
             teardown_fences: self.teardown_fences.clone().into_iter().collect(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
+            trade_links: self.trade_links.clone(),
             trade_offers: self.trade_offers.clone().into_iter().collect(),
             pending_trade_deliveries: self.pending_trade_deliveries.clone().into_iter().collect(),
             pending_trade_rollbacks: self.pending_trade_rollbacks.clone().into_iter().collect(),
@@ -2601,9 +2751,11 @@ impl SharedInProcessZoneState {
             pending_zone_monster_kill_awards: Vec::new(),
             pending_zone_player_damages: Vec::new(),
             pending_zone_player_heals: Vec::new(),
+            vital_receipt_progress: Vec::new(),
             teardown_fences: Vec::new(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
+            trade_links: SharedTradeLinks::default(),
             trade_offers: Vec::new(),
             pending_trade_deliveries: Vec::new(),
             pending_trade_rollbacks: Vec::new(),
@@ -2847,15 +2999,27 @@ impl SharedInProcessZoneState {
                 .pending_zone_monster_kill_awards
                 .into_iter()
                 .collect(),
-            pending_zone_player_damages: checkpoint
-                .pending_zone_player_damages
-                .into_iter()
-                .collect(),
-            pending_zone_player_heals: checkpoint.pending_zone_player_heals.into_iter().collect(),
+            pending_zone_player_damages: {
+                let mut deltas: BTreeMap<ZonePresenceKey, Vec<QueuedZoneVitalDelta>> =
+                    checkpoint.pending_zone_player_damages.into_iter().collect();
+                // The legacy format only preserves damage-then-heal order.
+                for (key, heals) in checkpoint.pending_zone_player_heals {
+                    deltas.entry(key).or_default().extend(
+                        heals
+                            .into_iter()
+                            .filter(|amount| *amount > 0)
+                            .map(|amount| QueuedZoneVitalDelta::Legacy(-amount)),
+                    );
+                }
+                deltas
+            },
+            pending_zone_player_heals: BTreeMap::new(),
+            vital_receipt_progress: checkpoint.vital_receipt_progress.into_iter().collect(),
             teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
             live_zone_outbounds: BTreeMap::new(),
             players,
             maps: checkpoint.maps,
+            trade_links: checkpoint.trade_links,
             trade_offers: checkpoint.trade_offers.into_iter().collect(),
             pending_trade_deliveries: checkpoint.pending_trade_deliveries.into_iter().collect(),
             pending_trade_rollbacks: checkpoint.pending_trade_rollbacks.into_iter().collect(),
@@ -2932,6 +3096,7 @@ impl SharedInProcessZoneState {
                 map_file_name,
                 entity,
                 free_bag_slots,
+                allow_trade: existing_presence.as_ref().and_then(|p| p.allow_trade),
                 pk_points,
             },
         );
@@ -2939,6 +3104,9 @@ impl SharedInProcessZoneState {
     }
 
     fn remove_player(&mut self, key: &ZonePresenceKey) -> Vec<ZoneOutbound> {
+        self.close_trade_links(key, true);
+        self.trade_links.cancellations.retain(|owner| owner != key);
+        self.trade_links.refusals.retain(|(owner, _)| owner != key);
         if let Some(presence) = self.players.get(key).cloned() {
             self.remove_owned_shared_entities(
                 &presence.entity.name,
@@ -2964,6 +3132,7 @@ impl SharedInProcessZoneState {
         self.pending_zone_monster_kill_awards.remove(key);
         self.pending_zone_player_damages.remove(key);
         self.pending_zone_player_heals.remove(key);
+        self.vital_receipt_progress.remove(key);
         self.teardown_fences.remove(key);
         self.live_zone_outbounds.remove(key);
     }
@@ -3403,17 +3572,29 @@ impl SharedInProcessZoneState {
             .unwrap_or_default()
     }
 
+    // Signed settled vital deltas preserve interleaved healing and damage.
+    // Positive is damage, negative is healing; old positive queues remain valid.
     fn queue_zone_player_damage(&mut self, key: ZonePresenceKey, damage: i32) {
-        if damage <= 0 {
+        if damage == 0 || damage == i32::MIN {
             return;
         }
         self.pending_zone_player_damages
             .entry(key)
             .or_default()
-            .push(damage);
+            .push(QueuedZoneVitalDelta::Legacy(damage));
     }
 
-    fn take_pending_zone_player_damages(&mut self, key: &ZonePresenceKey) -> Vec<i32> {
+    fn queue_zone_player_vital_delta(&mut self, key: ZonePresenceKey, delta: QueuedZoneVitalDelta) {
+        self.pending_zone_player_damages
+            .entry(key)
+            .or_default()
+            .push(delta);
+    }
+
+    fn take_pending_zone_player_damages(
+        &mut self,
+        key: &ZonePresenceKey,
+    ) -> Vec<QueuedZoneVitalDelta> {
         self.pending_zone_player_damages
             .remove(key)
             .unwrap_or_default()
@@ -3445,7 +3626,7 @@ impl SharedInProcessZoneState {
         Option<(bool, bool)>,
         Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
-        Vec<i32>,
+        Vec<QueuedZoneVitalDelta>,
         Vec<i32>,
     ) {
         self.dispatch_zone_outbounds_with_fence_policy(outbounds, current_key, false)
@@ -3462,7 +3643,7 @@ impl SharedInProcessZoneState {
         Option<(bool, bool)>,
         Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
-        Vec<i32>,
+        Vec<QueuedZoneVitalDelta>,
         Vec<i32>,
     ) {
         let mut current_packets = Vec::new();
@@ -3472,12 +3653,26 @@ impl SharedInProcessZoneState {
         let mut current_monster_kill_awards = Vec::new();
         let mut current_player_damages = Vec::new();
         let mut current_player_heals = Vec::new();
+        let mut death_locations: BTreeMap<SessionId, VecDeque<(Point, MirDirection)>> =
+            BTreeMap::new();
         for outbound in outbounds {
             match outbound {
                 ZoneOutbound::ToSession {
                     session_id,
                     packets,
                 } => {
+                    for packet in &packets {
+                        if let ServerPacket::Death {
+                            location,
+                            direction,
+                        } = packet
+                        {
+                            death_locations
+                                .entry(session_id.clone())
+                                .or_default()
+                                .push_back((location.clone(), *direction));
+                        }
+                    }
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
@@ -3608,7 +3803,11 @@ impl SharedInProcessZoneState {
                         self.queue_zone_monster_kill_award(key, award);
                     }
                 }
-                ZoneOutbound::PlayerDamaged { session_id, damage } => {
+                ZoneOutbound::PlayerDamaged {
+                    session_id,
+                    damage,
+                    settlement,
+                } => {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
@@ -3617,13 +3816,26 @@ impl SharedInProcessZoneState {
                     {
                         continue;
                     }
+                    if damage <= 0 {
+                        continue;
+                    }
+                    let death_location = settlement
+                        .as_ref()
+                        .filter(|s| s.death_transition)
+                        .and_then(|_| death_locations.get_mut(&session_id))
+                        .and_then(VecDeque::pop_front);
+                    let delta = QueuedZoneVitalDelta::new(damage, settlement, death_location);
                     if current_key == Some(&key) {
-                        current_player_damages.push(damage);
+                        current_player_damages.push(delta);
                     } else {
-                        self.queue_zone_player_damage(key, damage);
+                        self.queue_zone_player_vital_delta(key, delta);
                     }
                 }
-                ZoneOutbound::PlayerHealed { session_id, amount } => {
+                ZoneOutbound::PlayerHealed {
+                    session_id,
+                    amount,
+                    settlement,
+                } => {
                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
                         continue;
                     };
@@ -3632,10 +3844,14 @@ impl SharedInProcessZoneState {
                     {
                         continue;
                     }
+                    if amount <= 0 {
+                        continue;
+                    }
+                    let delta = QueuedZoneVitalDelta::new(-amount, settlement, None);
                     if current_key == Some(&key) {
-                        current_player_heals.push(amount);
+                        current_player_damages.push(delta);
                     } else {
-                        self.queue_zone_player_heal(key, amount);
+                        self.queue_zone_player_vital_delta(key, delta);
                     }
                 }
             }
@@ -3694,6 +3910,26 @@ impl SharedInProcessZoneState {
             .into_iter()
             .map(|monster| (monster.object_id, monster))
             .collect::<BTreeMap<_, _>>();
+        // A corpse can expire while the Zone has no AOI observers (or no
+        // sessions at all). Reconcile authoritative retirement before merging
+        // a personal snapshot; an internal reserved respawn slot is not a
+        // public corpse that metadata may reinsert.
+        let retired_corpse_packets = self
+            .zone_manager
+            .zone(&ZoneKey::for_map(&map_file_name))
+            .map(|zone| {
+                native_monsters
+                    .values()
+                    .filter(|monster| monster.dead && !zone.retains_object_id(monster.object_id))
+                    .map(|monster| ServerPacket::ObjectRemove {
+                        object_id: monster.object_id,
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
+        if !retired_corpse_packets.is_empty() {
+            self.apply_shared_entity_packets(&map_file_name, &retired_corpse_packets);
+        }
         let map = self.maps.entry(map_file_name).or_default();
         for mut entity in entities {
             let native_monster = (entity.kind == WorldEntityKind::Monster)
@@ -4544,6 +4780,7 @@ impl SharedInProcessZoneState {
     }
 
     fn apply_zone_packets_to_map_layer(&mut self, key: &ZonePresenceKey, packets: &[ServerPacket]) {
+        let mut visibility_only_remove_ids = BTreeSet::new();
         if let Some(map_file_name) = self
             .players
             .get(key)
@@ -4563,7 +4800,7 @@ impl SharedInProcessZoneState {
             // moving monster can reappear as a legacy projection with no native
             // combat target and soak attacks indefinitely.
             let zone_key = ZoneKey::for_map(&map_file_name);
-            let visibility_only_remove_ids = self
+            visibility_only_remove_ids = self
                 .zone_manager
                 .zone(&zone_key)
                 .map(|zone| {
@@ -4600,10 +4837,102 @@ impl SharedInProcessZoneState {
         for packet in packets {
             match packet {
                 ServerPacket::ObjectRemove { object_id }
-                | ServerPacket::IntelligentCreaturePickup { object_id } => {
+                    if !visibility_only_remove_ids.contains(object_id) =>
+                {
+                    self.remove_shared_drop_for_key(key, *object_id);
+                }
+                ServerPacket::IntelligentCreaturePickup { object_id } => {
                     self.remove_shared_drop_for_key(key, *object_id);
                 }
                 _ => {}
+            }
+        }
+    }
+
+    fn valid_trade_peer(&self, owner: &ZonePresenceKey, peer: &SharedTradePeer) -> bool {
+        owner != &peer.key
+            && self
+                .players
+                .get(owner)
+                .is_some_and(|p| p.zone_object_id == peer.owner_object_id)
+            && self
+                .players
+                .get(&peer.key)
+                .is_some_and(|p| p.zone_object_id == peer.peer_object_id)
+    }
+    fn trade_partner(&self, key: &ZonePresenceKey) -> Option<ZonePresenceKey> {
+        let peer = &self
+            .trade_links
+            .pairs
+            .iter()
+            .find(|(owner, _)| owner == key)?
+            .1;
+        if !self.valid_trade_peer(key, peer) {
+            return None;
+        }
+        let reciprocal = &self
+            .trade_links
+            .pairs
+            .iter()
+            .find(|(owner, _)| owner == &peer.key)?
+            .1;
+        (reciprocal.key == *key && self.valid_trade_peer(&peer.key, reciprocal))
+            .then(|| peer.key.clone())
+    }
+    fn trade_admission_pending(&self, key: &ZonePresenceKey) -> bool {
+        self.trade_links.cancellations.contains(key)
+            || self
+                .trade_links
+                .initializations
+                .iter()
+                .any(|(owner, _)| owner == key)
+            || self
+                .pending_trade_rollbacks
+                .get(key)
+                .is_some_and(|v| !v.is_empty())
+            || self
+                .pending_trade_deliveries
+                .get(key)
+                .is_some_and(|v| !v.is_empty())
+            || self.has_unresolved_trade_settlement_for_presence(key)
+            || self.trade_offers.contains_key(key)
+    }
+
+    fn close_trade_links(&mut self, key: &ZonePresenceKey, notify: bool) {
+        let partners = self
+            .trade_links
+            .pairs
+            .iter()
+            .filter(|(owner, peer)| owner == key || &peer.key == key)
+            .map(|(owner, _)| owner.clone())
+            .collect::<Vec<_>>();
+        self.trade_links
+            .pairs
+            .retain(|(owner, peer)| owner != key && &peer.key != key);
+        let invitees = self
+            .trade_links
+            .invitations
+            .iter()
+            .filter(|(owner, peer)| owner == key || &peer.key == key)
+            .map(|(owner, _)| owner.clone())
+            .collect::<Vec<_>>();
+        self.trade_links
+            .invitations
+            .retain(|(owner, peer)| owner != key && &peer.key != key);
+        self.trade_links
+            .initializations
+            .retain(|(owner, _)| !partners.contains(owner));
+        self.trade_links
+            .unlocks
+            .retain(|(owner, peer)| owner != key && &peer.key != key);
+        for owner in invitees {
+            self.queue_zone_packets(owner, vec![ServerPacket::TradeCancel { unlock: false }]);
+        }
+        if notify {
+            for owner in partners {
+                if &owner != key && !self.trade_links.cancellations.contains(&owner) {
+                    self.trade_links.cancellations.push(owner);
+                }
             }
         }
     }
@@ -4873,12 +5202,8 @@ impl SharedInProcessZoneState {
         character_name: &str,
     ) -> Option<SharedTradeOffer> {
         let own_offer = self.trade_offers.remove(key);
-        let owner_keys = self
-            .trade_offers
-            .iter()
-            .filter(|(_, offer)| offer.partner_name.eq_ignore_ascii_case(character_name))
-            .map(|(owner_key, _)| owner_key.clone())
-            .collect::<Vec<_>>();
+        let owner_keys = self.trade_partner(key).into_iter().collect::<Vec<_>>();
+        let _ = character_name;
         for owner_key in owner_keys {
             if let Some(offer) = self.trade_offers.remove(&owner_key) {
                 self.pending_trade_rollbacks
@@ -6910,6 +7235,7 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             inner: InProcessWorldRuntime::new(config),
             zone_state: resources.zone_state.clone(),
             account_inventory_service: self.account_inventory_service.clone(),
+            inventory_zone_id: zone_id.clone(),
             npc_world_service: self.npc_world_service.clone(),
             economy_execution_context: None,
             last_ground_drop_projection_reconciliation_identity: None,
@@ -6918,7 +7244,6 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
                 resources.movement_sender,
                 resources.zone_state,
             ),
-            shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
             last_shared_entity_ids_by_map: BTreeMap::new(),
             last_shared_drop_ids_by_map: BTreeMap::new(),
@@ -7484,12 +7809,12 @@ struct SharedInProcessZoneSessionRuntime {
     inner: InProcessWorldRuntime,
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
+    inventory_zone_id: ZoneId,
     npc_world_service: SharedNpcWorldServiceHandle,
     economy_execution_context: Option<SharedAccountInventoryExecutionContext>,
     last_ground_drop_projection_reconciliation_identity: Option<ActiveSessionIdentity>,
     trade_projection_reconciliation_state: TradeProjectionReconciliationState,
     movement_ingress: SharedZoneMovementIngress,
-    shared_skill_item_request_seq: u64,
     force_next_zone_transform_sync: bool,
     last_shared_entity_ids_by_map: BTreeMap<String, BTreeSet<u32>>,
     last_shared_drop_ids_by_map: BTreeMap<String, BTreeSet<u32>>,
@@ -7634,7 +7959,12 @@ impl SharedInProcessZoneSessionRuntime {
         );
         let service = Arc::clone(&self.account_inventory_service);
         let context = self.economy_execution_context.clone();
-        let outcome = service.commit_fenced(&mut self.inner, context.as_ref(), envelope);
+        let outcome = service.commit_in_zone(
+            &mut self.inner,
+            &self.inventory_zone_id,
+            context.as_ref(),
+            envelope,
+        );
         if is_ground_drop_projection
             && matches!(
                 &outcome,
@@ -7788,8 +8118,11 @@ impl SharedInProcessZoneSessionRuntime {
         if let Some(context) = self.economy_execution_context.as_ref() {
             return context.source_sequence;
         }
-        self.shared_skill_item_request_seq = self.shared_skill_item_request_seq.saturating_add(1);
-        self.shared_skill_item_request_seq
+        self.zone_state
+            .lock()
+            .expect("shared zone request sequence mutex should not be poisoned")
+            .next_economy_source_sequence()
+            .expect("shared zone request sequence exhausted")
     }
 
     fn execute_shared_gold_drop(&mut self, amount: u32) -> Vec<ServerPacket> {
@@ -8090,6 +8423,9 @@ impl SharedInProcessZoneSessionRuntime {
             snapshot.player_pk_points,
             !allow_transform_sync,
         );
+        if let Some(presence) = zone_state.players.get_mut(&key) {
+            presence.allow_trade = Some(self.inner.shared_trade_allowed());
+        }
         let local_self_object_id = snapshot
             .entities
             .iter()
@@ -8287,6 +8623,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         self.apply_zone_transform(transform);
         self.apply_zone_shout_consume(shout_consume);
+        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         packets
@@ -8313,6 +8650,7 @@ impl SharedInProcessZoneSessionRuntime {
         drop(zone_state);
         self.apply_zone_transform(transform);
         self.apply_zone_shout_consume(shout_consume);
+        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         packets
@@ -8551,6 +8889,7 @@ impl SharedInProcessZoneSessionRuntime {
         };
         self.apply_zone_transform(transform);
         self.apply_zone_shout_consume(shout_consume);
+        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         self.apply_zone_player_buff_packets(&packets);
@@ -8628,6 +8967,7 @@ impl SharedInProcessZoneSessionRuntime {
         // Zone snapshot wins over any stale private mirror.
         self.apply_zone_transform(pending_transform);
         self.apply_zone_shout_consume(shout_consume);
+        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         self.apply_zone_player_buff_packets(&packets);
@@ -8695,6 +9035,7 @@ impl SharedInProcessZoneSessionRuntime {
     ) -> Vec<ServerPacket> {
         let (mut packets, ground_drop_claims, monster_kill_awards, player_damages, player_heals) =
             self.dispatch_zone_player_command_collecting_claims(command, tick_after_command);
+        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         self.apply_zone_player_buff_packets(&packets);
@@ -8718,7 +9059,7 @@ impl SharedInProcessZoneSessionRuntime {
         Vec<ServerPacket>,
         Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
-        Vec<i32>,
+        Vec<QueuedZoneVitalDelta>,
         Vec<i32>,
     ) {
         let mut commands = vec![command];
@@ -8737,7 +9078,7 @@ impl SharedInProcessZoneSessionRuntime {
         Vec<ServerPacket>,
         Vec<GroundDropClaimTicket>,
         Vec<ZoneMonsterKillAward>,
-        Vec<i32>,
+        Vec<QueuedZoneVitalDelta>,
         Vec<i32>,
     ) {
         let Some(key) = self.current_presence_key() else {
@@ -8776,14 +9117,240 @@ impl SharedInProcessZoneSessionRuntime {
         )
     }
 
-    fn apply_zone_player_damages(&mut self, damages: Vec<i32>) -> Vec<ServerPacket> {
+    fn settle_pending_zone_vitals_before_save(&mut self) {
+        let packets = self.apply_pending_zone_packets();
+        self.force_inner_to_current_zone_vitals();
+        if !packets.is_empty() {
+            if let Some(key) = self.current_presence_key() {
+                self.zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned")
+                    .queue_zone_packets(key, packets);
+            }
+        }
+    }
+
+    fn apply_zone_player_damages(
+        &mut self,
+        damages: Vec<impl Into<QueuedZoneVitalDelta>>,
+    ) -> Vec<ServerPacket> {
         let mut packets = Vec::new();
+        let mut saw_stamped = false;
         for damage in damages {
-            if self.inner.apply_zone_player_damage(damage) {
-                packets.extend(self.inner.apply_zone_player_death_penalty());
+            match damage.into() {
+                QueuedZoneVitalDelta::Legacy(damage) => {
+                    // Legacy checkpoints cannot prove a generation or receipt.
+                    // Preserve their old signed-delta / first-local-death behavior.
+                    if damage < 0 {
+                        if let Some(heal) = damage.checked_neg() {
+                            self.inner.apply_zone_player_heal(heal);
+                        }
+                    } else if self.inner.apply_zone_player_damage(damage) {
+                        packets.extend(self.apply_zone_death_penalty_and_register_drops());
+                    }
+                }
+                QueuedZoneVitalDelta::Settled {
+                    delta,
+                    settlement,
+                    death_location,
+                } => {
+                    if settlement.receipt_sequence == 0
+                        || settlement.hp_before < 0
+                        || settlement.hp_after < 0
+                        || delta == 0
+                        || settlement.hp_before.checked_sub(settlement.hp_after) != Some(delta)
+                        || settlement.death_transition
+                            != (settlement.hp_before > 0 && settlement.hp_after == 0)
+                    {
+                        continue;
+                    }
+                    let Some(key) = self.current_presence_key() else {
+                        continue;
+                    };
+                    let decision = {
+                        let mut state = self
+                            .zone_state
+                            .lock()
+                            .expect("shared zone presence mutex should not be poisoned");
+                        let current = state.zone_sessions.get(&key).and_then(|session| {
+                            Some((
+                                state.players.get(&key)?.zone_object_id,
+                                state.zone_manager.player_life_generation(session)?,
+                                state.zone_manager.player_transform(session)?,
+                            ))
+                        });
+                        current.and_then(|(object_id, generation, transform)| {
+                            // Old online incarnations and future lives are never
+                            // allowed to mutate this authenticated character.
+                            if object_id != settlement.object_id
+                                || settlement.life_generation > generation
+                            {
+                                return None;
+                            }
+                            let progress =
+                                state.vital_receipt_progress.entry(key.clone()).or_default();
+                            if progress.object_id != object_id {
+                                *progress = ZoneVitalReceiptProgress {
+                                    object_id,
+                                    ..Default::default()
+                                };
+                            }
+                            let apply_delta = settlement.life_generation == generation
+                                && settlement.receipt_sequence > progress.highest_sequence;
+                            progress.highest_sequence =
+                                progress.highest_sequence.max(settlement.receipt_sequence);
+                            let apply_death = settlement.death_transition
+                                && progress
+                                    .penalized_death_generations
+                                    .insert(settlement.life_generation);
+                            Some((apply_delta, apply_death, transform))
+                        })
+                    };
+                    let Some((apply_delta, apply_death, current_transform)) = decision else {
+                        continue;
+                    };
+                    saw_stamped = true;
+                    if apply_delta {
+                        // The private mirror may already have been refreshed to
+                        // hp_after. Commit from the receipt's exact precondition
+                        // instead of subtracting again from a later snapshot.
+                        self.inner
+                            .force_authoritative_player_vitals(Some(settlement.hp_before), None);
+                        if delta > 0 {
+                            self.inner.apply_zone_player_damage(delta);
+                        } else if let Some(heal) = delta.checked_neg() {
+                            self.inner.apply_zone_player_heal(heal);
+                        }
+                    }
+                    if apply_death {
+                        // A true old-life death retains its one penalty even if
+                        // its HP delta has been superseded by a later revival.
+                        self.inner.force_authoritative_player_vitals(Some(0), None);
+                        if let Some((position, direction)) = death_location {
+                            self.inner
+                                .force_authoritative_player_transform(position, direction);
+                        }
+                        packets.extend(self.apply_zone_death_penalty_and_register_drops());
+                        self.inner.force_authoritative_player_transform(
+                            current_transform.0,
+                            current_transform.1,
+                        );
+                    }
+                }
+            }
+        }
+        if saw_stamped {
+            // This deliberately bypasses the legacy acknowledged-private-death
+            // guard: these receipts originate from the shared life authority.
+            if let Some(session) = self.current_zone_session_id() {
+                let current = self
+                    .zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned")
+                    .zone_manager
+                    .player_vitals(&session);
+                if let Some((hp, _, mp)) = current {
+                    let snapshot = self.inner.world_snapshot();
+                    if snapshot.player_hp != Some(hp) || snapshot.player_mp != Some(mp) {
+                        self.inner
+                            .force_authoritative_player_vitals(Some(hp), Some(mp));
+                    }
+                    if hp > 0 {
+                        if let Some(id) = self.inner.world_snapshot().player_object_id {
+                            self.owner_dead_entity_ids.remove(&id);
+                        }
+                    }
+                }
             }
         }
         packets
+    }
+
+    fn apply_zone_death_penalty_and_register_drops(&mut self) -> Vec<ServerPacket> {
+        let before: BTreeSet<u32> = self
+            .inner
+            .world_snapshot()
+            .ground_drops
+            .iter()
+            .map(|drop| drop.object_id)
+            .collect();
+        let mut packets = self.inner.apply_zone_player_death_penalty();
+        let mut spawned: Vec<_> = self
+            .inner
+            .world_snapshot()
+            .ground_drops
+            .iter()
+            .filter(|drop| !before.contains(&drop.object_id))
+            .map(ground_drop_spawn_packet)
+            .collect();
+        self.remap_player_ground_drop_packets(&mut spawned);
+        if !spawned.is_empty() {
+            if let Some(key) = self.current_presence_key() {
+                let snapshot = self.inner.world_snapshot();
+                let mut state = self
+                    .zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned");
+                let exact = self.current_snapshot_ground_drops_for_shared_state(
+                    &snapshot,
+                    &state,
+                    Some(&key),
+                );
+                state.sync_authoritative_zone_drops_for_key(&key, &exact);
+            }
+            if let Some(session_id) = self.current_zone_session_id() {
+                self.sync_current_shared_ground_drops_to_zone(&session_id);
+            }
+            packets.extend(spawned);
+        }
+        packets
+    }
+
+    fn filter_stale_owner_vital_packets(
+        &self,
+        packets: &mut Vec<ServerPacket>,
+        deltas: &[QueuedZoneVitalDelta],
+    ) {
+        let Some(key) = self.current_presence_key() else {
+            return;
+        };
+        let state = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        let Some(session) = state.zone_sessions.get(&key) else {
+            return;
+        };
+        let (Some(presence), Some(generation), Some((hp, _, _))) = (
+            state.players.get(&key),
+            state.zone_manager.player_life_generation(session),
+            state.zone_manager.player_vitals(session),
+        ) else {
+            return;
+        };
+        let object_id = presence.zone_object_id;
+        let has_stale = deltas.iter().any(|delta| {
+            matches!(delta,
+            QueuedZoneVitalDelta::Settled { settlement, .. }
+                if settlement.object_id == object_id && settlement.life_generation < generation)
+        });
+        if !has_stale {
+            return;
+        }
+        let local_id = self.inner.world_snapshot().player_object_id;
+        let owner = |id: u32| id == object_id || Some(id) == local_id;
+        packets.retain(|packet| match packet {
+            ServerPacket::Death { .. } if hp > 0 => false,
+            ServerPacket::ObjectDied { info } if hp > 0 && owner(info.object_id) => false,
+            ServerPacket::ObjectHealth { info }
+                if hp > 0 && owner(info.object_id) && info.percent == 0 =>
+            {
+                false
+            }
+            ServerPacket::Revived if hp == 0 => false,
+            ServerPacket::ObjectRevived { info } if hp == 0 && owner(info.object_id) => false,
+            _ => true,
+        });
     }
 
     fn apply_zone_player_heals(&mut self, heals: Vec<i32>) {
@@ -8798,6 +9365,29 @@ impl SharedInProcessZoneSessionRuntime {
         };
         self.inner
             .apply_zone_player_buff_packets(packets, zone_object_id);
+    }
+
+    /// The shared Zone broadcasts its global actor id. The owner's personal
+    /// snapshot still addresses SelfPlayer by its local id. Rebase only the
+    /// final owner-facing action copies, after all shared-state/broadcast use.
+    fn normalize_owner_attack_animation_packets(&self, packets: &mut [ServerPacket]) {
+        let (Some(zone_id), Some(local_id)) = (
+            self.current_zone_player_object_id(),
+            self.local_self_object_id(),
+        ) else {
+            return;
+        };
+        for packet in packets {
+            match packet {
+                ServerPacket::ObjectAttack { info } if info.object_id == zone_id => {
+                    info.object_id = local_id;
+                }
+                ServerPacket::ObjectRangeAttack { info } if info.object_id == zone_id => {
+                    info.object_id = local_id;
+                }
+                _ => {}
+            }
+        }
     }
 
     fn current_zone_player_object_id(&self) -> Option<u32> {
@@ -8903,6 +9493,7 @@ impl SharedInProcessZoneSessionRuntime {
         };
         self.apply_zone_transform(transform);
         self.apply_zone_shout_consume(shout_consume);
+        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         self.apply_zone_player_buff_packets(&packets);
@@ -10693,6 +11284,7 @@ impl SharedInProcessZoneSessionRuntime {
         ) = dispatched;
         self.apply_zone_transform(transform);
         self.apply_zone_shout_consume(shout_consume);
+        self.filter_stale_owner_vital_packets(&mut zone_packets, &player_damages);
         zone_packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         self.apply_zone_player_buff_packets(&zone_packets);
@@ -10808,6 +11400,17 @@ impl SharedInProcessZoneSessionRuntime {
             packets.extend(self.reconcile_durable_trade_projections());
         }
         packets.extend(self.apply_finalized_shared_trade_packets());
+        packets.extend(self.apply_shared_trade_link_events());
+        // A process restart drops live pairs, but the character checkpoint
+        // retains its available wallet and the separate gold hold together.
+        // Query durable outcomes first: absence of a live pair alone is not
+        // permission to refund a possibly committed exchange.
+        if !self.has_shared_trade_pair()
+            && self.inner.shared_trade_unprepared_held_gold().is_some()
+            && !self.has_pending_durable_trade_projection()
+        {
+            packets.extend(self.inner.recover_unprepared_trade_gold());
+        }
         packets
     }
 
@@ -10830,10 +11433,53 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let mut packets = Vec::new();
         for offer in deliveries {
-            packets.extend(self.inner.apply_shared_trade_delivery(&offer));
+            packets.extend(self.apply_finalized_trade_offer(&offer, false));
         }
         for offer in rollbacks {
-            packets.extend(self.inner.rollback_shared_trade_offer(&offer));
+            packets.extend(self.apply_finalized_trade_offer(&offer, true));
+        }
+        packets
+    }
+
+    fn apply_finalized_trade_offer(
+        &mut self,
+        offer: &SharedTradeOffer,
+        rollback: bool,
+    ) -> Vec<ServerPacket> {
+        let packets = if rollback {
+            self.inner.rollback_shared_trade_offer(offer)
+        } else {
+            self.inner.apply_shared_trade_delivery(offer)
+        };
+        let completed = packets.iter().any(|packet| {
+            if rollback {
+                matches!(packet, ServerPacket::TradeCancel { unlock: false })
+            } else {
+                matches!(packet, ServerPacket::TradeConfirm)
+            }
+        });
+        if !completed
+            && self
+                .inner
+                .shared_trade_offer_matches_active_escrow(offer, rollback)
+        {
+            if let Some(key) = self.current_presence_key() {
+                // Capacity/cap failures preserve both the personal custody and
+                // its finalized coordinator decision for a later safe retry.
+                let mut state = self
+                    .zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned");
+                let pending = if rollback {
+                    &mut state.pending_trade_rollbacks
+                } else {
+                    &mut state.pending_trade_deliveries
+                };
+                let offers = pending.entry(key).or_default();
+                if !offers.contains(offer) {
+                    offers.push(offer.clone());
+                }
+            }
         }
         packets
     }
@@ -10887,9 +11533,25 @@ impl SharedInProcessZoneSessionRuntime {
             .lock()
             .expect("shared zone presence mutex should not be poisoned")
             .cancel_trade_offers_for_presence(&key, &character_name);
-        own_offer
-            .map(|offer| self.inner.rollback_shared_trade_offer(&offer))
-            .unwrap_or_default()
+        self.zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned")
+            .close_trade_links(&key, true);
+        if let Some(offer) = own_offer {
+            self.apply_finalized_trade_offer(&offer, true)
+        } else if !self.has_unresolved_trade_settlement()
+            && matches!(
+                &self.trade_projection_reconciliation_state,
+                TradeProjectionReconciliationState::Clear(identity)
+                    if self.inner.active_identity().as_ref() == Some(identity)
+            )
+        {
+            // Also covers teardown, which must not perform an external lookup.
+            // Prepared custody cannot be released by this personal API.
+            self.inner.shared_trade_cancel(false)
+        } else {
+            Vec::new()
+        }
     }
 
     fn cancel_pending_shared_trade_offers(&mut self) -> Vec<ServerPacket> {
@@ -11025,17 +11687,364 @@ impl SharedInProcessZoneSessionRuntime {
             .unwrap_or_default()
     }
 
+    fn execute_shared_trade_request(&mut self) -> Vec<ServerPacket> {
+        if self.inner.has_active_shared_trade_state() || self.has_pending_durable_trade_projection()
+        {
+            return Vec::new();
+        }
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let mut state = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        if state.teardown_fences.contains(&key) || state.trade_partner(&key).is_some() {
+            return Vec::new();
+        }
+        let Some(owner) = state.players.get(&key).cloned() else {
+            return Vec::new();
+        };
+        if owner.entity.dead || owner.entity.hp == Some(0) {
+            return Vec::new();
+        }
+        let here = Point {
+            x: owner.entity.x,
+            y: owner.entity.y,
+        };
+        let front = point_in_direction(&here, owner.entity.direction);
+        let Some((peer_key, peer)) = state
+            .players
+            .iter()
+            .find(|(candidate, player)| {
+                *candidate != &key
+                    && player.map_file_name == owner.map_file_name
+                    && player.entity.x == front.x
+                    && player.entity.y == front.y
+                    && point_in_direction(&front, player.entity.direction) == here
+                    && !player.entity.dead
+                    && player.entity.hp != Some(0)
+            })
+            .map(|(key, player)| (key.clone(), player.clone()))
+        else {
+            return Vec::new();
+        };
+        if state.teardown_fences.contains(&peer_key)
+            || peer.allow_trade == Some(false)
+            || state.trade_partner(&peer_key).is_some()
+            || state
+                .trade_links
+                .invitations
+                .iter()
+                .any(|(recipient, _)| recipient == &peer_key)
+            || state.trade_admission_pending(&peer_key)
+        {
+            return Vec::new();
+        }
+        state.trade_links.invitations.push((
+            peer_key.clone(),
+            SharedTradePeer {
+                key,
+                owner_object_id: peer.zone_object_id,
+                peer_object_id: owner.zone_object_id,
+            },
+        ));
+        state.queue_zone_packets(
+            peer_key,
+            vec![ServerPacket::TradeRequest {
+                name: owner.entity.name,
+            }],
+        );
+        Vec::new()
+    }
+
+    fn execute_shared_trade_reply(&mut self, accept: bool) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let mut state = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        let Some(index) = state
+            .trade_links
+            .invitations
+            .iter()
+            .position(|(recipient, _)| recipient == &key)
+        else {
+            return Vec::new();
+        };
+        let (_, peer) = state.trade_links.invitations.remove(index);
+        if !state.valid_trade_peer(&key, &peer)
+            || state.teardown_fences.contains(&key)
+            || state.teardown_fences.contains(&peer.key)
+        {
+            return Vec::new();
+        }
+        let owner_name = state.players[&key].entity.name.clone();
+        let peer_name = state.players[&peer.key].entity.name.clone();
+        if !accept {
+            state.trade_links.refusals.push((peer.key, owner_name));
+            return Vec::new();
+        }
+        if state.trade_partner(&key).is_some()
+            || state.trade_partner(&peer.key).is_some()
+            || state.trade_admission_pending(&peer.key)
+            || state.trade_admission_pending(&key)
+            || self.inner.has_active_shared_trade_state()
+        {
+            return Vec::new();
+        }
+        // Acceptance invalidates other invitations involving either participant.
+        // Do not send a stale invitation cancellation to an already accepted pair.
+        let obsolete_recipients = state
+            .trade_links
+            .invitations
+            .iter()
+            .filter(|(recipient, invitation)| {
+                recipient == &key
+                    || recipient == &peer.key
+                    || invitation.key == key
+                    || invitation.key == peer.key
+            })
+            .map(|(recipient, _)| recipient.clone())
+            .collect::<Vec<_>>();
+        state
+            .trade_links
+            .invitations
+            .retain(|(recipient, invitation)| {
+                recipient != &key
+                    && recipient != &peer.key
+                    && invitation.key != key
+                    && invitation.key != peer.key
+            });
+        for recipient in obsolete_recipients {
+            if recipient != key && recipient != peer.key {
+                state.queue_zone_packets(
+                    recipient,
+                    vec![ServerPacket::TradeCancel { unlock: false }],
+                );
+            }
+        }
+        state.trade_links.pairs.push((key.clone(), peer.clone()));
+        state.trade_links.pairs.push((
+            peer.key.clone(),
+            SharedTradePeer {
+                key: key.clone(),
+                owner_object_id: peer.peer_object_id,
+                peer_object_id: peer.owner_object_id,
+            },
+        ));
+        state
+            .trade_links
+            .initializations
+            .push((peer.key.clone(), owner_name.clone()));
+        state.queue_zone_packets(
+            peer.key,
+            vec![ServerPacket::TradeAccept { name: owner_name }],
+        );
+        drop(state);
+        let _ = self.inner.trade_request(&peer_name);
+        self.inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeReply {
+                accept_invite: true,
+            }))
+            .unwrap_or_default()
+    }
+
+    fn apply_shared_trade_link_events(&mut self) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let (initialize, cancel, refusals, unlock) = {
+            let mut state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let initialize = state
+                .trade_links
+                .initializations
+                .iter()
+                .position(|(owner, _)| owner == &key)
+                .map(|index| state.trade_links.initializations.remove(index).1);
+            let initialize = initialize.filter(|_| state.trade_partner(&key).is_some());
+            let cancel = state.trade_links.cancellations.contains(&key);
+            state
+                .trade_links
+                .cancellations
+                .retain(|owner| owner != &key);
+            let refusals = state
+                .trade_links
+                .refusals
+                .iter()
+                .filter(|(owner, _)| owner == &key)
+                .map(|(_, name)| name.clone())
+                .collect::<Vec<_>>();
+            state
+                .trade_links
+                .refusals
+                .retain(|(owner, _)| owner != &key);
+            let unlock = state
+                .trade_links
+                .unlocks
+                .iter()
+                .any(|(owner, peer)| owner == &key && state.valid_trade_peer(owner, peer));
+            state.trade_links.unlocks.retain(|(owner, _)| owner != &key);
+            (initialize, cancel, refusals, unlock)
+        };
+        let mut packets = refusals
+            .iter()
+            .map(|name| self.inner.shared_trade_refusal_message(name))
+            .collect::<Vec<_>>();
+        if cancel && !self.has_pending_durable_trade_projection() {
+            packets.extend(self.inner.shared_trade_cancel(false));
+            return packets;
+        }
+        if unlock && !self.has_pending_durable_trade_projection() {
+            // Crystal TradeUnlock changes server locks without a wire ACK.
+            let _ = self.inner.shared_trade_cancel(true);
+        }
+        if let Some(name) = initialize {
+            if !self.inner.has_active_shared_trade_state()
+                && !self.has_pending_durable_trade_projection()
+            {
+                let _ = self.inner.trade_request(&name);
+                let _ = self
+                    .inner
+                    .execute(WorldCommand::ClientPacket(ClientPacket::TradeReply {
+                        accept_invite: true,
+                    }));
+            }
+        }
+        packets
+    }
+
+    fn has_shared_trade_pair(&self) -> bool {
+        self.current_presence_key().is_some_and(|key| {
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .trade_partner(&key)
+                .is_some()
+        })
+    }
+
+    fn shared_trade_pair_has_prepared_offer(&self) -> bool {
+        self.current_presence_key().is_some_and(|key| {
+            let state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            state.trade_offers.contains_key(&key)
+                || state
+                    .trade_partner(&key)
+                    .is_some_and(|peer| state.trade_offers.contains_key(&peer))
+        })
+    }
+
+    fn execute_shared_trade_gold(&mut self, amount: u32) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        {
+            let mut state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            let Some(partner) = state.trade_partner(&key) else {
+                return Vec::new();
+            };
+            // This leaf supports editing before preparation. Prepared items
+            // remain held until settlement or the existing safe cancel path.
+            if state.trade_offers.contains_key(&key) || state.trade_offers.contains_key(&partner) {
+                return Vec::new();
+            }
+            let Some((_, peer)) = state
+                .trade_links
+                .pairs
+                .iter()
+                .find(|(owner, _)| owner == &partner)
+                .cloned()
+            else {
+                return Vec::new();
+            };
+            state
+                .trade_links
+                .unlocks
+                .retain(|(owner, _)| owner != &partner);
+            state.trade_links.unlocks.push((partner, peer));
+        }
+        let _ = self.inner.shared_trade_cancel(true);
+        // The durable opening balance is the pre-escrow wallet. Bootstrapping
+        // at confirmation would seed an already reduced balance and debit twice.
+        if amount > 0
+            && self.inner.world_snapshot().gold >= amount
+            && !self.bootstrap_account_inventory()
+        {
+            return self.cancel_pending_shared_trade_offers();
+        }
+        self.inner
+            .execute(WorldCommand::ClientPacket(ClientPacket::TradeGold {
+                amount,
+            }))
+            .unwrap_or_default()
+    }
+
+    fn route_shared_trade_notifications(&mut self, packets: &mut Vec<ServerPacket>) {
+        let Some(key) = self.current_presence_key() else {
+            return;
+        };
+        let mut state = self
+            .zone_state
+            .lock()
+            .expect("shared zone presence mutex should not be poisoned");
+        let partner = state.trade_partner(&key);
+        let mut private = Vec::new();
+        packets.retain(|packet| {
+            if matches!(
+                packet,
+                ServerPacket::TradeGold { .. } | ServerPacket::TradeItem { .. }
+            ) {
+                private.push(packet.clone());
+                false
+            } else {
+                true
+            }
+        });
+        if let Some(partner) = partner {
+            state.queue_zone_packets(partner, private);
+        }
+    }
+
     fn execute_shared_trade_confirm(&mut self, locked: bool) -> Vec<ServerPacket> {
         if !locked {
-            let packets = self.cancel_pending_shared_trade_offers();
-            if packets.is_empty() {
+            let prepared = self.current_presence_key().is_some_and(|key| {
+                let state = self
+                    .zone_state
+                    .lock()
+                    .expect("shared zone presence mutex should not be poisoned");
+                state.trade_offers.contains_key(&key)
+                    || state
+                        .trade_partner(&key)
+                        .is_some_and(|peer| state.trade_offers.contains_key(&peer))
+            });
+            if !prepared {
+                // An editable unlock does not end the accepted pair.
                 return self.inner.shared_trade_cancel(true);
+            }
+            // Candidate escrow is reserved at confirmation. Until source editable
+            // escrow is implemented, unlocking a reserved pair cancels/refunds it.
+            let mut packets = self.cancel_pending_shared_trade_offers();
+            if packets.is_empty() {
+                packets.extend(self.inner.shared_trade_cancel(false));
             }
             return packets;
         }
 
         if !self.bootstrap_account_inventory() {
-            return self.inner.shared_trade_cancel(false);
+            let mut packets = self.cancel_pending_shared_trade_offers();
+            packets.extend(self.inner.shared_trade_cancel(false));
+            return packets;
         }
         let (mut packets, offer) = self.inner.shared_trade_confirm();
         let Some(offer) = offer else {
@@ -11054,9 +12063,31 @@ impl SharedInProcessZoneSessionRuntime {
                 .zone_state
                 .lock()
                 .expect("shared zone presence mutex should not be poisoned");
-            let partner_key = zone_state.player_key_by_name(&offer.partner_name);
+            let partner_key = zone_state.trade_partner(&self_key).filter(|peer| {
+                offer.account_id == self_key.account_id
+                    && offer.character_index == self_key.character_index
+                    && zone_state
+                        .players
+                        .get(peer)
+                        .is_some_and(|p| p.entity.name.eq_ignore_ascii_case(&offer.partner_name))
+            });
             if let Some(partner_key) = partner_key {
-                if let Some(partner_offer) = zone_state.trade_offers.remove(&partner_key) {
+                let reciprocal =
+                    zone_state
+                        .trade_offers
+                        .get(&partner_key)
+                        .is_none_or(|partner_offer| {
+                            partner_offer.account_id == partner_key.account_id
+                                && partner_offer.character_index == partner_key.character_index
+                                && zone_state.players.get(&self_key).is_some_and(|p| {
+                                    p.entity
+                                        .name
+                                        .eq_ignore_ascii_case(&partner_offer.partner_name)
+                                })
+                        });
+                if !reciprocal {
+                    rollback_self = Some(offer.clone());
+                } else if let Some(partner_offer) = zone_state.trade_offers.remove(&partner_key) {
                     let partner_free_bag_slots = zone_state
                         .players
                         .get(&partner_key)
@@ -11088,6 +12119,10 @@ impl SharedInProcessZoneSessionRuntime {
         let mut durable_settlement = false;
         let mut unknown_settlement = false;
         if let Some((partner_key, partner_offer)) = matched_offer {
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .close_trade_links(&self_key, false);
             let settlement = self.settle_shared_trade(&offer, &partner_offer);
             let mut zone_state = self
                 .zone_state
@@ -11139,10 +12174,14 @@ impl SharedInProcessZoneSessionRuntime {
         }
 
         if let Some(offer) = rollback_self {
-            packets.extend(self.inner.rollback_shared_trade_offer(&offer));
+            self.zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .close_trade_links(&self_key, true);
+            packets.extend(self.apply_finalized_trade_offer(&offer, true));
         }
         for offer in deliver_to_self {
-            packets.extend(self.inner.apply_shared_trade_delivery(&offer));
+            packets.extend(self.apply_finalized_trade_offer(&offer, false));
         }
         if unknown_settlement {
             // Neither side may regain or reuse the debited assets until the
@@ -11238,6 +12277,7 @@ impl SharedInProcessZoneSessionRuntime {
                 },
                 false,
             );
+        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
@@ -11314,6 +12354,7 @@ impl SharedInProcessZoneSessionRuntime {
                 },
                 false,
             );
+        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
         self.apply_zone_player_heals(player_heals);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
@@ -11598,12 +12639,6 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         )
         .then(|| self.adjacent_remote_player_name())
         .flatten();
-        let shared_trade_partner = matches!(
-            &command,
-            WorldCommand::ClientPacket(ClientPacket::TradeRequest)
-        )
-        .then(|| self.adjacent_remote_player_name())
-        .flatten();
         let shared_pickup_object_id = match &command {
             WorldCommand::PickUp { object_id } => Some(Some(*object_id)),
             WorldCommand::ClientPacket(ClientPacket::PickUp) => Some(None),
@@ -11813,6 +12848,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             && self.recent_zone_player_movement_input_window_active(Self::zone_now_ms())
         {
             self.filter_stale_owner_dead_entity_packets(&mut packets);
+            self.normalize_owner_attack_animation_packets(&mut packets);
             return Ok(packets);
         }
         if !unavailable_shared_target {
@@ -11854,8 +12890,47 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             } else {
                 Vec::new()
             }
+        } else if matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::TradeRequest)
+        ) {
+            self.execute_shared_trade_request()
+        } else if let WorldCommand::ClientPacket(ClientPacket::TradeReply { accept_invite }) =
+            &command
+        {
+            self.execute_shared_trade_reply(*accept_invite)
+        } else if is_trade_state_mutation && !is_trade_cancel && !self.has_shared_trade_pair() {
+            Vec::new()
+        } else if matches!(
+            &command,
+            WorldCommand::ClientPacket(
+                ClientPacket::DepositTradeItem { .. } | ClientPacket::RetrieveTradeItem { .. }
+            )
+        ) && self.shared_trade_pair_has_prepared_offer()
+        {
+            // A peer's prepared offer is also a confirmation. Until editable
+            // preparation exists, withdrawing an item must not reuse it.
+            match &command {
+                WorldCommand::ClientPacket(ClientPacket::DepositTradeItem { from, to }) => {
+                    vec![ServerPacket::DepositTradeItem {
+                        from: *from,
+                        to: *to,
+                        success: false,
+                    }]
+                }
+                WorldCommand::ClientPacket(ClientPacket::RetrieveTradeItem { from, to }) => {
+                    vec![ServerPacket::RetrieveTradeItem {
+                        from: *from,
+                        to: *to,
+                        success: false,
+                    }]
+                }
+                _ => unreachable!(),
+            }
         } else if let Some(locked) = shared_trade_confirm {
             self.execute_shared_trade_confirm(locked)
+        } else if let WorldCommand::ClientPacket(ClientPacket::TradeGold { amount }) = &command {
+            self.execute_shared_trade_gold(*amount)
         } else if is_trade_cancel {
             if self.has_pending_durable_trade_projection() {
                 Vec::new()
@@ -11878,14 +12953,6 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.inner.execute(command)?
         } else if let Some(partner_name) = shared_rental_partner {
             self.execute_shared_item_rental_request(partner_name)
-        } else if let Some(partner_name) = shared_trade_partner {
-            if self.inner.has_active_shared_trade_state()
-                || self.has_pending_durable_trade_projection()
-            {
-                Vec::new()
-            } else {
-                self.inner.trade_request(&partner_name)
-            }
         } else if let Some(amount) = shared_gold_drop_amount {
             self.execute_shared_gold_drop(amount)
         } else if let Some((unique_id, count, hero_inventory)) = shared_inventory_item_drop {
@@ -11926,6 +12993,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             self.inner.execute(command)?
         };
+        if is_trade_state_mutation {
+            self.route_shared_trade_notifications(&mut command_packets);
+        }
         if removes_presence {
             self.cancel_pending_shared_rental_offers();
             packets.extend(self.remove_presence());
@@ -11950,6 +13020,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         if is_low_latency_zone_packet {
             packets.extend(command_packets);
             self.filter_stale_owner_dead_entity_packets(&mut packets);
+            self.normalize_owner_attack_animation_packets(&mut packets);
             return Ok(packets);
         }
         if let Some(before) = shared_npc_entity_baseline.as_ref() {
@@ -12066,6 +13137,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 .filter_stale_dead_entity_packets_for_key(&current_key, &mut packets);
         }
         self.filter_stale_owner_dead_entity_packets(&mut packets);
+        self.normalize_owner_attack_animation_packets(&mut packets);
         Ok(packets)
     }
 
@@ -12201,11 +13273,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn save_active_character(&mut self) -> Result<(), String> {
         self.sync_pending_zone_movement_transform()?;
+        self.settle_pending_zone_vitals_before_save();
         self.inner.save_active_character()
     }
 
     fn save_active_character_for_logout(&mut self) -> Result<(), String> {
         self.sync_pending_zone_movement_transform()?;
+        self.settle_pending_zone_vitals_before_save();
         self.inner.save_active_character_for_logout()
     }
 
@@ -12599,8 +13673,20 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "inventory_receipt_scope_tests.rs"]
+    mod inventory_receipt_scope_tests;
+    #[path = "ordered_economy_replay_tests.rs"]
+    mod ordered_economy_replay_tests;
+    #[path = "owner_attack_animation_tests.rs"]
+    mod owner_attack_animation_tests;
+    #[path = "shared_drop_aoi_tests.rs"]
+    mod shared_drop_aoi_tests;
     #[path = "trade_completion_tests.rs"]
     mod trade_completion_tests;
+    #[path = "trade_gold_tests.rs"]
+    mod trade_gold_tests;
+    #[path = "trade_invitation_tests.rs"]
+    mod trade_invitation_tests;
 
     use super::{
         delayed_player_action_packets, filter_stale_owner_dead_entity_packets,
@@ -12613,10 +13699,10 @@ mod tests {
         zone_monster_spawn_from_shared_entity, HostedZoneOwnerCommandClient,
         InMemoryZoneOwnerLeaseAuthority, InProcessAccountInventoryService,
         InProcessNpcWorldService, InProcessZoneRuntimeFactory, MapZoneSessionRouter,
-        PerMapSessionRouter, SessionRouteRequest, SessionRouter, SharedAccountInventoryCommand,
-        SharedAccountInventoryCommandEnvelope, SharedAccountInventoryCommitOutcome,
-        SharedAccountInventoryExecutionContext, SharedAccountInventoryService,
-        SharedAccountInventoryServiceHandle, SharedDropPickupResult,
+        PerMapSessionRouter, QueuedZoneVitalDelta, SessionRouteRequest, SessionRouter,
+        SharedAccountInventoryCommand, SharedAccountInventoryCommandEnvelope,
+        SharedAccountInventoryCommitOutcome, SharedAccountInventoryExecutionContext,
+        SharedAccountInventoryService, SharedAccountInventoryServiceHandle, SharedDropPickupResult,
         SharedInProcessZoneFactoryCheckpoint, SharedInProcessZoneRuntimeFactory,
         SharedInProcessZoneSessionRuntime, SharedInProcessZoneState, SharedNpcEntitySideEffect,
         SharedNpcWorldCommand, SharedNpcWorldCommandEnvelope, SharedNpcWorldService,
@@ -12642,7 +13728,7 @@ mod tests {
         SharedAccountInventoryTransactionReceipt, SharedNpcSavedValue, SharedTradeOffer,
         WorldCommand, WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldRuntime,
         ZoneBossRewardAudit, ZoneChatProfile, ZoneCollision, ZoneCommand, ZoneJoin, ZoneKey,
-        ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
+        ZoneManager, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn,
         ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
         ZonePlayerCombatStats, ZoneRuntime, ZoneRuntimeHandle,
     };
@@ -16021,18 +17107,16 @@ mod tests {
 
         let contexts = contexts.lock().expect("economy fence contexts should lock");
         assert_eq!(contexts.len(), 4);
-        assert_eq!(
-            contexts[0], None,
-            "Direct mode is not externally authorized"
-        );
-        assert_eq!(
-            contexts[1], None,
-            "unauthenticated production mode is not externally authorized"
-        );
-        assert_eq!(
-            contexts[2], None,
-            "standby replay is not externally authorized"
-        );
+        for (context, expected_sequence) in contexts[..3].iter().zip([41, 42, 43]) {
+            let context = context.as_ref().expect("verified ordering is retained");
+            assert_eq!(context.source_sequence, expected_sequence);
+            assert_eq!(context.zone_id, ZoneId::new("test-shared-zone"));
+            assert_eq!(context.fencing_generation, 1);
+            assert!(
+                !context.external_commit_authorized,
+                "Direct, unauthenticated and replay ordering must not authorize external writes"
+            );
+        }
         let active_context = contexts[3]
             .as_ref()
             .expect("active production command should receive a context");
@@ -16796,14 +17880,13 @@ mod tests {
         let first_starting_gold = first.world_snapshot().gold;
         let second_starting_gold = second.world_snapshot().gold;
 
-        first.handle_packet(ClientPacket::TradeRequest);
-        second.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
+        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
         let first_confirm = first.handle_packet(ClientPacket::TradeConfirm { locked: true });
-        assert!(first_confirm
+        assert!(!first_confirm
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 30 })));
-        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
         let unknown_packets = second
             .execute_production_player_command(
                 true,
@@ -16811,7 +17894,7 @@ mod tests {
             )
             .expect("authenticated ordered trade confirmation should execute")
             .packets;
-        assert!(unknown_packets
+        assert!(!unknown_packets
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
         assert!(
@@ -17898,10 +18981,12 @@ mod tests {
                 ZoneOutbound::PlayerDamaged {
                     session_id: current_session_id,
                     damage: 3,
+                    settlement: None,
                 },
                 ZoneOutbound::PlayerDamaged {
                     session_id: remote_session_id,
                     damage: 5,
+                    settlement: None,
                 },
             ],
             Some(&current_key),
@@ -17909,6 +18994,536 @@ mod tests {
 
         assert_eq!(current_damages, vec![3]);
         assert_eq!(state.take_pending_zone_player_damages(&remote_key), vec![5]);
+    }
+
+    #[test]
+    fn signed_zone_vitals_preserve_heal_then_damage_for_current_and_remote_sessions() {
+        let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut current = shared_session_runtime(shared.clone());
+        start_demo_runtime(&mut current);
+        let mut remote = shared_session_runtime(shared.clone());
+        start_new_runtime(&mut remote, "signed-remote", "SignedRemote");
+        current
+            .inner
+            .force_authoritative_player_vitals(Some(5), None);
+        remote
+            .inner
+            .force_authoritative_player_vitals(Some(5), None);
+        let current_key = current.current_presence_key().unwrap();
+        let remote_key = remote.current_presence_key().unwrap();
+        let a = current.current_zone_session_id().unwrap();
+        let b = remote.current_zone_session_id().unwrap();
+        let deltas = {
+            let mut state = shared.lock().unwrap();
+            let (_, _, _, _, _, deltas, legacy_heals) = state.dispatch_zone_outbounds(
+                vec![
+                    ZoneOutbound::PlayerHealed {
+                        session_id: a.clone(),
+                        amount: 4,
+                        settlement: None,
+                    },
+                    ZoneOutbound::PlayerHealed {
+                        session_id: b.clone(),
+                        amount: 4,
+                        settlement: None,
+                    },
+                    ZoneOutbound::PlayerDamaged {
+                        session_id: a,
+                        damage: 6,
+                        settlement: None,
+                    },
+                    ZoneOutbound::PlayerDamaged {
+                        session_id: b,
+                        damage: 6,
+                        settlement: None,
+                    },
+                ],
+                Some(&current_key),
+            );
+            assert_eq!(deltas, vec![-4, 6]);
+            assert!(legacy_heals.is_empty());
+            assert_eq!(state.pending_zone_player_damages[&remote_key], vec![-4, 6]);
+            deltas
+        };
+        let current_packets = current.apply_zone_player_damages(deltas);
+        let remote_packets = remote.apply_pending_zone_packets();
+        assert_eq!(current.inner.world_snapshot().player_hp, Some(3));
+        assert_eq!(remote.inner.world_snapshot().player_hp, Some(3));
+        for packet in current_packets.iter().chain(remote_packets.iter()) {
+            assert!(
+                !matches!(
+                    packet,
+                    ServerPacket::Death { .. } | ServerPacket::DeleteItem { .. }
+                ),
+                "ordering must not cause a false death or death penalty"
+            );
+        }
+    }
+
+    #[test]
+    fn legacy_checkpoint_heals_are_migrated_before_new_signed_damage() {
+        let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(shared.clone());
+        start_demo_runtime(&mut runtime);
+        runtime
+            .inner
+            .force_authoritative_player_vitals(Some(5), None);
+        let key = runtime.current_presence_key().unwrap();
+        let session = runtime.current_zone_session_id().unwrap();
+        // Build the genuine old in-memory queue representation, then ask its
+        // normal checkpoint writer to serialize it. No commitment is rewritten.
+        let checkpoint = {
+            let mut state = shared.lock().unwrap();
+            state
+                .pending_zone_player_damages
+                .insert(key.clone(), vec![1.into()]);
+            state.pending_zone_player_heals.insert(key.clone(), vec![4]);
+            state.checkpoint().unwrap()
+        };
+        let mut restored = SharedInProcessZoneState::restore(checkpoint).unwrap();
+        assert!(restored.pending_zone_player_heals.is_empty());
+        restored.dispatch_zone_outbounds(
+            vec![ZoneOutbound::PlayerDamaged {
+                session_id: session,
+                damage: 6,
+                settlement: None,
+            }],
+            None,
+        );
+        let deltas = restored.take_pending_zone_player_damages(&key);
+        assert_eq!(deltas, vec![1, -4, 6]);
+        runtime.apply_zone_player_damages(deltas);
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(2));
+    }
+
+    fn real_vital_receipt_fixture() -> (
+        Arc<Mutex<SharedInProcessZoneState>>,
+        SharedInProcessZoneSessionRuntime,
+        Vec<ZoneOutbound>,
+        i32,
+    ) {
+        let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut owner = shared_session_runtime(shared.clone());
+        start_demo_runtime(&mut owner);
+        let mut caster = shared_session_runtime(shared.clone());
+        start_new_runtime_with_class(
+            &mut caster,
+            "receipt-caster",
+            "ReceiptCaster",
+            MirClass::Taoist,
+        );
+        owner.inner.apply_zone_unlawful_player_kill(300);
+        let owner_key = owner.current_presence_key().unwrap();
+        let caster_key = caster.current_presence_key().unwrap();
+        let owner_session = owner.current_zone_session_id().unwrap();
+        let caster_session = caster.current_zone_session_id().unwrap();
+        let mut owner_join = owner
+            .inner
+            .active_zone_join_snapshot(owner_session.as_str())
+            .unwrap();
+        let mut caster_join = caster
+            .inner
+            .active_zone_join_snapshot(caster_session.as_str())
+            .unwrap();
+        let owner_max = owner_join.max_hp;
+        assert!(owner_max > 40);
+        owner_join.hp = 40;
+        owner_join.chat_profile.in_safe_zone = false;
+        owner_join.combat_stats = Default::default();
+        caster_join.class = MirClass::Taoist;
+        caster_join.chat_profile.attack_mode = 5;
+        caster_join.chat_profile.in_safe_zone = false;
+        caster_join.position = Point {
+            x: owner_join.position.x + 1,
+            y: owner_join.position.y,
+        };
+        caster_join.combat_stats = mir2_simulation::ZonePlayerCombatStats {
+            min_dc: 500,
+            max_dc: 500,
+            accuracy: 100,
+            ..Default::default()
+        };
+        let mut state = shared.lock().unwrap();
+        owner_join.object_id = state.players[&owner_key].zone_object_id;
+        caster_join.object_id = state.players[&caster_key].zone_object_id;
+        let owner_id = owner_join.object_id;
+        // Use the real Zone state machine with authenticated identities. An
+        // empty world isolates receipts from unrelated NPC/monster cadence.
+        state.zone_manager = ZoneManager::new();
+        state.zone_manager.handle(ZoneCommand::Join(owner_join));
+        state.zone_manager.handle(ZoneCommand::Join(caster_join));
+        state
+            .zone_manager
+            .handle(ZoneCommand::sync_player_combat_state(
+                caster_session.clone(),
+                MirClass::Taoist,
+                true,
+                false,
+                true,
+                false,
+                false,
+                false,
+            ));
+        let owner_pos = state
+            .zone_manager
+            .player_transform(&owner_session)
+            .unwrap()
+            .0;
+        let caster_pos = state
+            .zone_manager
+            .player_transform(&caster_session)
+            .unwrap()
+            .0;
+        assert!(
+            (owner_pos.x - caster_pos.x)
+                .abs()
+                .max((owner_pos.y - caster_pos.y).abs())
+                <= 1
+        );
+        state.zone_manager.handle(ZoneCommand::Tick { now_ms: 1 });
+        let mut events = state
+            .zone_manager
+            .handle(ZoneCommand::Tick { now_ms: 4001 });
+        events.extend(state.zone_manager.handle(ZoneCommand::PlayerAttackObject {
+            session_id: caster_session.clone(),
+            object_id: owner_id,
+            direction: MirDirection::Left,
+            spell: 0,
+            level: 0,
+            attack_type: 0,
+            damage: 1,
+            now_ms: 4002,
+        }));
+        assert_eq!(
+            state.zone_manager.player_vitals(&owner_session).unwrap().0,
+            0
+        );
+        state.zone_manager.handle(ZoneCommand::UpdateChatProfile {
+            session_id: caster_session.clone(),
+            profile: ZoneChatProfile {
+                attack_mode: 0,
+                in_safe_zone: false,
+                ..Default::default()
+            },
+        });
+        events.extend(state.zone_manager.handle(ZoneCommand::PlayerCastMagic {
+            session_id: caster_session.clone(),
+            object_id: owner_id,
+            spell: Spell::Reincarnation,
+            direction: MirDirection::Left,
+            target: owner_pos,
+            cast: true,
+            level: 3,
+            damage: 0,
+            mp_cost: 0,
+            cooldown_ms: 0,
+            now_ms: 5003,
+        }));
+        events.extend(
+            state
+                .zone_manager
+                .handle(ZoneCommand::Tick { now_ms: 10003 }),
+        );
+        events.extend(
+            state
+                .zone_manager
+                .handle(ZoneCommand::ResolveReincarnation {
+                    session_id: owner_session.clone(),
+                    accept: true,
+                    now_ms: 10004,
+                }),
+        );
+        assert_eq!(
+            state.zone_manager.player_life_generation(&owner_session),
+            Some(1)
+        );
+        state.zone_manager.handle(ZoneCommand::UpdateChatProfile {
+            session_id: caster_session.clone(),
+            profile: ZoneChatProfile {
+                attack_mode: 5,
+                in_safe_zone: false,
+                ..Default::default()
+            },
+        });
+        state
+            .zone_manager
+            .handle(ZoneCommand::UpdatePlayerCombatStats {
+                session_id: caster_session.clone(),
+                stats: mir2_simulation::ZonePlayerCombatStats {
+                    min_dc: 5,
+                    max_dc: 5,
+                    accuracy: 100,
+                    ..Default::default()
+                },
+            });
+        events.extend(state.zone_manager.handle(ZoneCommand::PlayerAttackObject {
+            session_id: caster_session,
+            object_id: owner_id,
+            direction: MirDirection::Left,
+            spell: 0,
+            level: 0,
+            attack_type: 0,
+            damage: 9999,
+            now_ms: 11005,
+        }));
+        let expected = owner_max / 2 - 5;
+        assert_eq!(
+            state.zone_manager.player_vitals(&owner_session).unwrap().0,
+            expected
+        );
+        let receipts: Vec<_> = events
+            .iter()
+            .filter_map(|event| match event {
+                ZoneOutbound::PlayerDamaged {
+                    session_id,
+                    settlement,
+                    ..
+                }
+                | ZoneOutbound::PlayerHealed {
+                    session_id,
+                    settlement,
+                    ..
+                } if *session_id == owner_session => {
+                    Some(settlement.expect("real producer receipt"))
+                }
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            receipts.len(),
+            4,
+            "heal, death, revival, new-life hit: {receipts:?}"
+        );
+        assert_eq!(
+            receipts
+                .iter()
+                .map(|r| (r.life_generation, r.receipt_sequence))
+                .collect::<Vec<_>>(),
+            vec![(0, 1), (0, 2), (1, 3), (1, 4)]
+        );
+        assert!(receipts[1].death_transition);
+        assert_eq!(receipts[2].hp_before, 0);
+        assert!(!receipts[2].death_transition);
+        drop(state);
+        (shared, owner, events, expected)
+    }
+
+    fn private_item_count(runtime: &SharedInProcessZoneSessionRuntime) -> usize {
+        let snapshot = runtime.inner.world_snapshot();
+        snapshot.inventory_items.len() + snapshot.equipment_items.len()
+    }
+
+    #[test]
+    fn generated_vital_receipts_preserve_batched_death_revival_for_current_and_queued_owners() {
+        for current in [false, true] {
+            let (shared, mut runtime, events, expected) = real_vital_receipt_fixture();
+            let key = runtime.current_presence_key().unwrap();
+            let before_count = private_item_count(&runtime);
+            let (mut packets, _, _, _, _, deltas, _) = shared
+                .lock()
+                .unwrap()
+                .dispatch_zone_outbounds(events.clone(), current.then_some(&key));
+            if current {
+                runtime.filter_stale_owner_vital_packets(&mut packets, &deltas);
+                packets.extend(runtime.apply_zone_player_damages(deltas));
+            } else {
+                packets = runtime.apply_pending_zone_packets();
+            }
+            assert_eq!(runtime.inner.world_snapshot().player_hp, Some(expected));
+            assert_eq!(private_item_count(&runtime), before_count - 2);
+            assert!(
+                !packets
+                    .iter()
+                    .any(|p| matches!(p, ServerPacket::Death { .. })),
+                "a queued old-life Death cannot kill the revived owner's UI"
+            );
+            let before = runtime.inner.active_character_checkpoint().unwrap();
+            let before_tick = runtime.inner.world_snapshot().tick;
+            // Restore a genuine signed Zone checkpoint and replay the same
+            // delivered receipts. No checkpoint fields or roots are rewritten.
+            let restored =
+                SharedInProcessZoneState::restore(shared.lock().unwrap().checkpoint().unwrap())
+                    .unwrap();
+            *shared.lock().unwrap() = restored;
+            shared.lock().unwrap().dispatch_zone_outbounds(events, None);
+            let again = runtime.apply_pending_zone_packets();
+            assert!(!again
+                .iter()
+                .any(|p| matches!(p, ServerPacket::DeleteItem { .. })));
+            let after = runtime.inner.active_character_checkpoint().unwrap();
+            assert_eq!(before.inventory_items_json, after.inventory_items_json);
+            assert_eq!(before.equipment_items_json, after.equipment_items_json);
+            assert_eq!(after.hp, expected);
+            assert_eq!(runtime.inner.world_snapshot().tick, before_tick);
+        }
+    }
+
+    #[test]
+    fn delayed_old_death_receipt_is_not_lost_after_new_life_receipts_are_acknowledged() {
+        let (shared, mut runtime, events, expected) = real_vital_receipt_fixture();
+        let key = runtime.current_presence_key().unwrap();
+        let current_events = events
+            .iter()
+            .filter(|event| {
+                matches!(event,
+            ZoneOutbound::PlayerDamaged { settlement: Some(s), .. }
+            | ZoneOutbound::PlayerHealed { settlement: Some(s), .. } if s.life_generation == 1)
+            })
+            .cloned()
+            .collect();
+        let before = private_item_count(&runtime);
+        let (_, _, _, _, _, deltas, _) = shared
+            .lock()
+            .unwrap()
+            .dispatch_zone_outbounds(current_events, Some(&key));
+        runtime.apply_zone_player_damages(deltas);
+        assert_eq!(private_item_count(&runtime), before);
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(expected));
+        shared
+            .lock()
+            .unwrap()
+            .dispatch_zone_outbounds(events.clone(), None);
+        runtime.apply_pending_zone_packets();
+        assert_eq!(private_item_count(&runtime), before - 2);
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(expected));
+        shared.lock().unwrap().dispatch_zone_outbounds(events, None);
+        runtime.apply_pending_zone_packets();
+        assert_eq!(private_item_count(&runtime), before - 2);
+    }
+
+    #[test]
+    fn receipt_from_another_incarnation_or_future_generation_is_rejected() {
+        let (shared, mut runtime, events, _) = real_vital_receipt_fixture();
+        let key = runtime.current_presence_key().unwrap();
+        let base = events
+            .iter()
+            .find_map(|event| match event {
+                ZoneOutbound::PlayerDamaged {
+                    damage,
+                    settlement: Some(s),
+                    ..
+                } if s.death_transition => Some((*damage, *s)),
+                _ => None,
+            })
+            .unwrap();
+        let before = runtime.inner.active_character_checkpoint().unwrap();
+        for (object_id, generation) in [(base.1.object_id + 1, 0), (base.1.object_id, 2)] {
+            let mut settlement = base.1;
+            settlement.object_id = object_id;
+            settlement.life_generation = generation;
+            runtime.apply_zone_player_damages(vec![QueuedZoneVitalDelta::Settled {
+                delta: base.0,
+                settlement,
+                death_location: None,
+            }]);
+        }
+        let after = runtime.inner.active_character_checkpoint().unwrap();
+        assert_eq!(before.hp, after.hp);
+        assert_eq!(before.inventory_items_json, after.inventory_items_json);
+        assert_eq!(before.equipment_items_json, after.equipment_items_json);
+        assert!(!shared
+            .lock()
+            .unwrap()
+            .vital_receipt_progress
+            .contains_key(&key));
+    }
+
+    #[test]
+    fn lethal_delta_registers_death_penalty_drops_without_waiting_for_snapshot_tick() {
+        let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(shared.clone());
+        start_demo_runtime(&mut runtime);
+        for key in [
+            "death-delta-a",
+            "death-delta-b",
+            "death-delta-c",
+            "death-delta-d",
+        ] {
+            runtime
+                .execute(WorldCommand::Stage5Command {
+                    action: "qa.giveItem".into(),
+                    args: vec![key.into()],
+                })
+                .unwrap();
+        }
+        runtime.inner.apply_zone_unlawful_player_kill(300);
+        runtime.sync_zone_snapshot();
+        let before = runtime.inner.world_snapshot();
+        let before_ids: BTreeSet<_> = before.ground_drops.iter().map(|d| d.object_id).collect();
+        let before_inventory = before.inventory_items.len() + before.equipment_items.len();
+        let hp = before.player_hp.unwrap();
+        // This is the same immediate delta applier used by the low-latency
+        // paths. Deliberately do not run Tick/KeepAlive or sync_zone_snapshot.
+        let packets = runtime.apply_zone_player_damages(vec![hp]);
+        assert_eq!(runtime.inner.world_snapshot().player_hp, Some(0));
+        let after = runtime.inner.world_snapshot();
+        assert_eq!(
+            after.inventory_items.len() + after.equipment_items.len(),
+            before_inventory - 2
+        );
+        let newly_created: Vec<_> = after
+            .ground_drops
+            .iter()
+            .filter(|d| !before_ids.contains(&d.object_id))
+            .collect();
+        assert_eq!(newly_created.len(), 2);
+        let session = runtime.current_zone_session_id().unwrap();
+        let map = after.map_file_name.as_ref().unwrap();
+        let shared_ids: Vec<_> = newly_created
+            .iter()
+            .map(|d| runtime.local_ground_drop_zone_ids[&(map.clone(), d.object_id)])
+            .collect();
+        {
+            let state = shared.lock().unwrap();
+            let zone_key = state.zone_manager.zone_key_for_session(&session).unwrap();
+            let zone = state.zone_manager.zone(&zone_key).unwrap();
+            let checkpoint: serde_json::Value =
+                serde_json::from_slice(&zone.checkpoint_bytes().unwrap()).unwrap();
+            for (original, id) in newly_created.iter().zip(shared_ids.iter()) {
+                let committed: GroundDropSnapshot = serde_json::from_value(
+                    checkpoint["ground_drops"][id.to_string()]["drop"].clone(),
+                )
+                .unwrap();
+                assert_eq!(
+                    committed.loot, original.loot,
+                    "the shared object preserves the exact dropped item UID and stats"
+                );
+                assert_eq!(
+                    state.maps[map].ground_drops[id].loot, original.loot,
+                    "gateway pickup/snapshot projection must preserve the same exact item payload"
+                );
+            }
+            for id in &shared_ids {
+                assert!(
+                    zone.has_ground_drop(*id),
+                    "death drop must already be claimable in authoritative Zone"
+                );
+                assert!(packets
+                    .iter()
+                    .any(|p| matches!(p,ServerPacket::ObjectItem{info} if info.object_id==*id)));
+            }
+        }
+        let count_before = {
+            let state = shared.lock().unwrap();
+            let key = state.zone_manager.zone_key_for_session(&session).unwrap();
+            state.zone_manager.zone(&key).unwrap().ground_drop_count()
+        };
+        assert!(
+            runtime.apply_zone_player_damages(vec![hp]).is_empty(),
+            "repeated lethal delivery must not penalize a dead player twice"
+        );
+        runtime.sync_current_shared_ground_drops_to_zone(&session);
+        let state = shared.lock().unwrap();
+        let key = state.zone_manager.zone_key_for_session(&session).unwrap();
+        let zone = state.zone_manager.zone(&key).unwrap();
+        assert_eq!(
+            zone.ground_drop_count(),
+            count_before,
+            "reprojection must not clone the same item UID"
+        );
+        for id in shared_ids {
+            assert!(zone.has_ground_drop(id));
+        }
     }
 
     #[test]
@@ -17931,22 +19546,27 @@ mod tests {
             .zone_session_keys
             .insert(remote_session_id.clone(), remote_key.clone());
 
-        let (_, _, _, _, _, _, current_heals) = state.dispatch_zone_outbounds(
+        let (_, _, _, _, _, current_heals, _) = state.dispatch_zone_outbounds(
             vec![
                 ZoneOutbound::PlayerHealed {
                     session_id: current_session_id,
                     amount: 3,
+                    settlement: None,
                 },
                 ZoneOutbound::PlayerHealed {
                     session_id: remote_session_id,
                     amount: 5,
+                    settlement: None,
                 },
             ],
             Some(&current_key),
         );
 
-        assert_eq!(current_heals, vec![3]);
-        assert_eq!(state.take_pending_zone_player_heals(&remote_key), vec![5]);
+        assert_eq!(current_heals, vec![-3]);
+        assert_eq!(
+            state.take_pending_zone_player_damages(&remote_key),
+            vec![-5]
+        );
     }
 
     #[test]
@@ -17978,6 +19598,7 @@ mod tests {
                 vec![ZoneOutbound::PlayerDamaged {
                     session_id,
                     damage: 4,
+                    settlement: None,
                 }],
                 None,
             );
@@ -18019,6 +19640,7 @@ mod tests {
                 vec![ZoneOutbound::PlayerHealed {
                     session_id,
                     amount: 4,
+                    settlement: None,
                 }],
                 None,
             );
@@ -19520,7 +21142,10 @@ mod tests {
                 .expect("shared zone state should lock")
                 .pending_zone_player_damages
                 .get(&target_key)
-                .cloned(),
+                .map(|deltas| deltas
+                    .iter()
+                    .map(QueuedZoneVitalDelta::signed_delta)
+                    .collect::<Vec<_>>()),
             Some(vec![expected_lethal_damage])
         );
         let target_packets = target
@@ -24390,23 +26015,8 @@ mod tests {
 
     #[test]
     fn shared_in_process_registry_uses_adjacent_remote_player_for_trade_request() {
-        let (mut first, _second) = started_shared_zone_sessions();
-
-        let packets = first.handle_packet(ClientPacket::TradeRequest);
-
-        assert!(packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::TradeRequest { name } if name == "Blade"
-        )));
-        assert!(first
-            .handle_packet(ClientPacket::TradeReply {
-                accept_invite: true,
-            })
-            .iter()
-            .any(|packet| matches!(
-                packet,
-                ServerPacket::TradeAccept { name } if name == "Blade"
-            )));
+        let (mut first, mut second) = started_shared_zone_sessions();
+        open_shared_trade_pair(&mut first, &mut second);
     }
 
     #[test]
@@ -24426,25 +26036,24 @@ mod tests {
         let second_starting_gold = second.world_snapshot().gold;
         let first_red_slot = inventory_slot_for_key(&first, "red-potion");
 
-        first.handle_packet(ClientPacket::TradeRequest);
-        second.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
         first.handle_packet(ClientPacket::DepositTradeItem {
             from: first_red_slot,
             to: 0,
         });
+        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
         let first_confirm = first.handle_packet(ClientPacket::TradeConfirm { locked: true });
 
-        assert!(first_confirm
+        assert!(!first_confirm
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 30 })));
         assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
         assert!(!has_inventory_key(&first, "red-potion"));
 
-        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
         let second_confirm = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
 
-        assert!(second_confirm
+        assert!(!second_confirm
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
         assert!(second_confirm
@@ -24481,14 +26090,13 @@ mod tests {
         start_demo_character(&mut first);
         start_new_character(&mut second, "trade-ledger-second", "LedgerBob");
 
-        first.handle_packet(ClientPacket::TradeRequest);
-        second.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
-        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
         second.handle_packet(ClientPacket::TradeGold { amount: 40 });
+        first.handle_packet(ClientPacket::TradeConfirm { locked: true });
         second.handle_packet(ClientPacket::TradeConfirm { locked: true });
 
-        assert_eq!(*bootstraps.lock().expect("bootstrap count should lock"), 2);
+        assert_eq!(*bootstraps.lock().expect("bootstrap count should lock"), 3);
         let trades = trades.lock().expect("recorded trades should lock");
         assert_eq!(trades.len(), 1);
         let (second_offer, first_offer) = &trades[0];
@@ -24519,8 +26127,7 @@ mod tests {
         start_new_character(&mut second, "trade-deferred-second", "DeferredBob");
 
         let first_starting_gold = first.world_snapshot().gold;
-        first.handle_packet(ClientPacket::TradeRequest);
-        second.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
         first.handle_packet(ClientPacket::TradeConfirm { locked: true });
         let second_packets = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
@@ -24555,7 +26162,7 @@ mod tests {
         let starting_gold = first.world_snapshot().gold;
         let red_slot = inventory_slot_for_key(&first, "red-potion");
 
-        first.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
         first.handle_packet(ClientPacket::DepositTradeItem {
             from: red_slot,
@@ -24588,11 +26195,11 @@ mod tests {
 
     #[test]
     fn unmatched_offerer_logout_rolls_back_before_persisting_character() {
-        let (mut first, _second) = started_shared_zone_sessions();
+        let (mut first, mut second) = started_shared_zone_sessions();
         let starting_gold = first.world_snapshot().gold;
         let red_slot = inventory_slot_for_key(&first, "red-potion");
 
-        first.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
         first.handle_packet(ClientPacket::DepositTradeItem {
             from: red_slot,
@@ -24626,7 +26233,7 @@ mod tests {
         let first_starting_gold = first.world_snapshot().gold;
         let first_red_slot = inventory_slot_for_key(&first, "red-potion");
 
-        first.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
         first.handle_packet(ClientPacket::DepositTradeItem {
             from: first_red_slot,
@@ -24659,7 +26266,7 @@ mod tests {
         let first_starting_gold = first.world_snapshot().gold;
         let first_red_slot = inventory_slot_for_key(&first, "red-potion");
 
-        first.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
         first.handle_packet(ClientPacket::DepositTradeItem {
             from: first_red_slot,
@@ -24701,21 +26308,20 @@ mod tests {
         let second_starting_gold = second.world_snapshot().gold;
         let first_red_slot = inventory_slot_for_key(&first, "red-potion");
 
-        first.handle_packet(ClientPacket::TradeRequest);
-        second.handle_packet(ClientPacket::TradeRequest);
+        open_shared_trade_pair(&mut first, &mut second);
         first.handle_packet(ClientPacket::TradeGold { amount: 30 });
         first.handle_packet(ClientPacket::DepositTradeItem {
             from: first_red_slot,
             to: 0,
         });
+        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
         first.handle_packet(ClientPacket::TradeConfirm { locked: true });
         assert_eq!(first.world_snapshot().gold, first_starting_gold - 30);
         assert!(!has_inventory_key(&first, "red-potion"));
 
-        second.handle_packet(ClientPacket::TradeGold { amount: 40 });
         let failed_confirm = second.handle_packet(ClientPacket::TradeConfirm { locked: true });
 
-        assert!(failed_confirm
+        assert!(!failed_confirm
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 40 })));
         assert!(failed_confirm
@@ -25055,6 +26661,50 @@ mod tests {
         );
     }
 
+    fn face_shared_trade_pair(first: &mut GatewaySession, second: &mut GatewaySession) {
+        let snapshot = first.world_snapshot();
+        let owner = snapshot
+            .entities
+            .iter()
+            .find(|p| p.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        second.transfer_map(&format!(
+            "crystal:{}:{}:{}",
+            snapshot.map_file_name.as_deref().unwrap(),
+            owner.x + 1,
+            owner.y
+        ));
+        first.handle_packet(ClientPacket::Turn {
+            direction: MirDirection::Right,
+        });
+        second.handle_packet(ClientPacket::Turn {
+            direction: MirDirection::Left,
+        });
+        first.handle_packet(ClientPacket::KeepAlive { time: 991 });
+        second.handle_packet(ClientPacket::KeepAlive { time: 991 });
+    }
+    fn open_shared_trade_pair(first: &mut GatewaySession, second: &mut GatewaySession) {
+        face_shared_trade_pair(first, second);
+        assert!(!first
+            .handle_packet(ClientPacket::TradeRequest)
+            .iter()
+            .any(|p| matches!(p, ServerPacket::TradeRequest { .. })));
+        assert!(second
+            .handle_packet(ClientPacket::KeepAlive { time: 992 })
+            .iter()
+            .any(|p| matches!(p, ServerPacket::TradeRequest { .. })));
+        assert!(second
+            .handle_packet(ClientPacket::TradeReply {
+                accept_invite: true
+            })
+            .iter()
+            .any(|p| matches!(p, ServerPacket::TradeAccept { .. })));
+        assert!(first
+            .handle_packet(ClientPacket::KeepAlive { time: 993 })
+            .iter()
+            .any(|p| matches!(p, ServerPacket::TradeAccept { .. })));
+    }
+
     fn started_shared_zone_sessions() -> (GatewaySession, GatewaySession) {
         let registry = ZoneRegistry::in_process();
         let config = GatewayConfig::default();
@@ -25101,12 +26751,12 @@ mod tests {
             inner: InProcessWorldRuntime::new(GatewayConfig::default()),
             zone_state: zone_state.clone(),
             account_inventory_service,
+            inventory_zone_id: ZoneId::new("test-shared-zone"),
             npc_world_service,
             economy_execution_context: None,
             last_ground_drop_projection_reconciliation_identity: None,
             trade_projection_reconciliation_state: TradeProjectionReconciliationState::Unknown,
             movement_ingress: super::SharedZoneMovementIngress::new(movement_sender, zone_state),
-            shared_skill_item_request_seq: 0,
             force_next_zone_transform_sync: false,
             last_shared_entity_ids_by_map: Default::default(),
             last_shared_drop_ids_by_map: Default::default(),
@@ -25601,4 +27251,6 @@ mod tests {
     mod abnormal_teardown_zone_drain_tests {
         include!("abnormal_teardown_zone_drain_tests.rs");
     }
+    #[path = "harvest_corpse_expiry_tests.rs"]
+    mod harvest_corpse_expiry_tests;
 }

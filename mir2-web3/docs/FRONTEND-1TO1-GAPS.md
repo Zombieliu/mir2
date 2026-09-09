@@ -1,5 +1,147 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-08 repeated StartGame: bootstrap completion was incorrectly scoped to socket lifetime. Successful StartGame now rearms initialization; next accepted snapshot completes world entry once.
+> Evidence: `docs/generated/player-qa/windows-reenter-world-20260908/README.md`. Live verification remains pending.
+
+> 2026-09-08 self/camera mismatch: cached owner attack coordinates were applied after UserLocation, overwriting the sprite position but not scene center. Owner transform now applies after object overlays.
+> Evidence: `docs/generated/player-qa/windows-self-camera-20260908/README.md`. Live acceptance remains pending.
+
+> 2026-09-08 user still reports rubber-banding after the single-in-flight build. Native input now aligns wire/prediction mode, uses real-time deadlines and send-based run eligibility, and prevents stale snapshots from overriding packet position.
+> Evidence: `docs/generated/player-qa/windows-run-clock-20260908/README.md`. Long-hold live acceptance remains open.
+
+> 2026-09-08 native movement backpressure: one unacknowledged move; delayed ACK no longer triggers speculative queuing or timeout ownership loss/retry.
+> Evidence: `docs/generated/player-qa/windows-movement-backpressure-20260908/README.md`. Live running-under-load acceptance remains open.
+
+> 2026-09-08: native monotonic startup/atlas/connect/login/StartGame timing added.
+> CPU/transport milestones explicitly do not assert first rendered frame or playable readiness.
+> Evidence: `docs/generated/player-qa/windows-timing-20260908/README.md`.
+
+> 2026-09-08 native owner swing: Zone ObjectAttack used a different actor ID
+> from the personal SelfPlayer snapshot. Owner-facing execute returns now
+> normalize own ObjectAttack/ObjectRangeAttack IDs after shared-state and
+> observer processing. Two-session public regression passes (owner local ID,
+> observer/shared-state Zone ID). Full Gateway regression: 696 passed, zero
+> failed, one PostgreSQL-environment ignore. Isolated localhost service updated;
+> live swing acceptance awaits manual login.
+> Evidence: `docs/generated/player-qa/windows-owner-swing-20260908/README.md`.
+> This does not close asynchronous combat identity or global visual parity.
+
+> 2026-09-08 ground-item/name fix: native world rendering now consumes
+> groundDrops using original DNItems (5280 exported frames), including gold
+> quantity frames. Names use intrinsic-text centering; drop-name camera motion
+> is applied once. Windows 554 tests and package/verifier self-tests pass.
+> Evidence: `docs/generated/player-qa/windows-ground-label-20260908/README.md`.
+> New development output still needs live visual acceptance; global gates false.
+
+> 2026-09-08 resumed Windows gameplay QA: single-click chase, repeated damage,
+> post-hit red monster bars, death-time bar removal, and a Deer/Venison drop
+> were observed in the running combat-animation development output. Evidence:
+> `docs/generated/player-qa/windows-combat-animation-20260908/live-*.jpg`.
+> Attack/Struck animation continuity is still visually unaccepted; these
+> sampled stills do not establish animation parity. Global gates stay false.
+
+> 2026-09-08 combat animation/health feedback: preserve newer self ObjectAttack
+> hints over retained movement, admit every packet projection to ActionFeed,
+> and exclude combat actions from movement-echo filtering. Actual renderer-frame
+> regressions verify self/monster Attack1 then Struck. Monster bars now render
+> original Prguse2/0+1 with packet health and expiry/generation. Ordinary Zone
+> hits use Expire=0, so a new confirmed normal/critical positive damage event
+> supplies a five-second local display window; snapshots/healing do not renew.
+> Nodes remain retained, expiry/removal works during render-center delays.
+> Windows 553/553 and both package/verifier self-tests pass. Development output:
+> `C:\mir2-combat-animation-20260908`; signed Candidate unchanged. In-game
+> visual acceptance and broader combat parity remain open. Evidence:
+> `docs/generated/player-qa/windows-combat-animation-20260908/README.md`.
+
+> 2026-09-08 Windows hover/combat input: NPC/monster highlights now use Crystal's
+> additive 0.3 redraw. Ordinary monster clicks retain a target, walk to a
+> reachable attack neighbour, follow movement and repeat attacks after arrival
+> ACK using the source level/attack-speed interval. Death/removal, manual input,
+> blocked UI, focus/session/identity changes cancel pursuit. Archer class-weapon
+> range behaviour remains stationary. Windows 546/546 pass; independent review
+> is closed. Authenticated in-game visual/combat acceptance and broader combat
+> parity remain open. Development output: `C:\mir2-combat-20260908`; signed
+> Candidate unchanged. Evidence:
+> `docs/generated/player-qa/windows-combat-input-20260908/README.md`.
+
+> 2026-09-08 NPC quest-marker flicker: markers now retain an independent image
+> entity keyed by objectId while names/damage overlays rebuild. Both original
+> animation frames keep strong asset handles across swaps and NPC visibility.
+> Original 500 ms animation and camera offsets remain. A 90-frame ECS regression
+> checks stable entity/position, frame swaps, quest changes, movement, removal
+> and disconnect. Windows 541/541 pass; independent review found no blockers.
+> Human in-game flicker acceptance remains pending; signed Candidate unchanged.
+> Evidence: `docs/generated/player-qa/windows-npc-marker-20260908/README.md`.
+
+> 2026-09-08 login-door transition: accepted LoginSuccess now hides the login
+> dialog, plays Crystal ChrSel frames 1..18 at 100 ms per frame, and only then
+> reveals character selection. Frame 0 remains the idle door; all 19 images
+> must be resident before advancing. The original Sound/100.wav plays once,
+> independently from button sounds. StartGame and developer auto-start wait
+> for completion; disconnect cancels stale selection. UI 603/603 and Windows
+> 540/540 pass. Development hotfix: `C:\mir2-login-door-20260908`; actual startup
+> reached the connected login window. Authenticated visual/audio acceptance
+> remains open, as do other login/selection UX gaps. Signed Candidate unchanged.
+> Evidence: `docs/generated/player-qa/windows-login-door-20260908/README.md`.
+
+> 2026-09-08 sustained right-button running: accepted world presses now retain
+> a Run hold and refresh the cursor target until mouse-up, so reaching the first
+> clicked tile does not stop a held run. Outside-world presses remain inert.
+> Input 44/44 and Windows host 539/539 pass; an optimized development hotfix is
+> available at `C:\mir2-right-hold-20260908`. Manual held-mouse acceptance is
+> pending; signed Candidate unchanged. Evidence:
+> `docs/generated/player-qa/windows-right-hold-20260908/README.md`.
+
+> 2026-09-08 Windows repackaging checkpoint: clean snapshot `4264b9149`
+> builds and passes the signed Candidate verifier (37,534 files). Sound104
+> package/allowlist mismatch and malformed-Unicode PE scan false positive are
+> fixed with self-tests and independent review; 704 required paths are checked
+> against the verifier allowlist. The exact final EXE opened the real native
+> login window and connected to the rebuilt isolated local Gateway. Authentication
+> is a manual handoff; in-game trade/map, DPI/soak/human acceptance remain open.
+> Evidence: `docs/generated/player-qa/windows-repackage-20260908/README.md`.
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade gold custody checkpoint: positive incremental offers
+> now debit the wallet immediately; preparation/recovery only debit outstanding
+> gold. Persisted heldGold preserves legacy snapshots and is independent from
+> prepared item custody. Cancel/teardown and orphan positive-hold recovery refund
+> once; save failure restores custody. Cap/materialization failures retain final
+> retry authority. Ledger bootstrap occurs before the first eligible debit.
+> Any prepared participant blocks gold and item edits; item failure ACKs prevent
+> withdrawing an offer while reusing the peer's previous confirmation.
+> Simulation 1491 unit + 374 unique integration tests are verified. Gateway resolved
+> coverage is 695 passed / one existing environmental ignore: the initial full
+> run had one queued-notification fixture assertion, corrected by a test-only
+> change and a passing 10/10 gold rerun. Production code did not change for that
+> correction. Format/diff and independent bounded review pass. Exact raw results:
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-gold/README.md`.
+> Next: separate confirmation tickets from exact held-item custody, then editable
+> prepared offers and native deposit/retrieve/merge. Prepared unlock still cancels/
+> refunds; source capacity rejection retention, zero-held orphan cleanup, request
+> throttle/error chats, screenshots and all 33 backlog IDs remain open. No UI/
+> Windows-host rerun, package, interactive launch, live-store write or deployment
+> occurred. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade invitation/private-pair checkpoint: native source
+> MirMessageBox Yes/No and cancellation OK, invitation revision ownership,
+> keyboard disposal and modal input isolation are implemented. Shared Gateway
+> invitations go only to the facing recipient; accepted reciprocal presence
+> pairs own guest gold/item notifications and settlement matching. Refusal,
+> teardown, old-cleanup/new-invite ordering and bootstrap failure are covered.
+> Native UI 598/598, Windows 537/537, Gateway 685 passed / one existing ignored,
+> and new Gateway security tests 13/13 pass;
+> the final full Gateway result and source hashes are recorded in
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-invitation/README.md`.
+> Next: positive-delta/immediate editable gold escrow and bilateral unlock,
+> then exact item custody and native deposit/retrieve/merge operations. Cells
+> remain read-only; prepared unlock still cancels/refunds. Request throttle,
+> complete error chats, original paired screenshots, package/light/DPI/soak/
+> legal/signing/human gates and all 33 IDs remain open. No interactive launch,
+> screenshot, production rollout or live-store write occurred this round.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+
 Last updated: 2026-09-03
 
 > 2026-09-03 native launch regression: a relocated executable's resource

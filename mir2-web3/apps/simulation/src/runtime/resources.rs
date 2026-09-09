@@ -659,6 +659,7 @@ impl MapRuntimeResource {
 
 #[derive(Resource, Debug, Clone)]
 pub(super) struct InventoryResource {
+    pub(super) reserved_item_unique_ids: std::collections::BTreeSet<u64>,
     pub(super) inventory_capacity: u16,
     pub(super) inventory_items: Vec<ItemState>,
     pub(super) belt_items: Vec<ItemState>,
@@ -677,6 +678,7 @@ pub(super) struct InventoryResource {
 impl InventoryResource {
     pub(super) fn new(base_storage_slots: u16) -> Self {
         Self {
+            reserved_item_unique_ids: Default::default(),
             inventory_capacity: default_inventory_capacity(),
             inventory_items: Vec::new(),
             belt_items: Vec::new(),

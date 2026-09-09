@@ -1,3 +1,5 @@
+use super::entity_combat::ZoneEntityCombatState;
+use super::{PetSpecialWorld, TreeQueenWorld};
 use std::collections::{BTreeMap, BTreeSet};
 
 use mir2_protocol::{
@@ -8,6 +10,7 @@ use sha2::{Digest, Sha256};
 
 use super::{
     canonical_ground_drop_claim_idempotency_key, canonical_ground_drop_payload_digest,
+    HellWorldState, HornedEncounterWorld, NativePeriodicPlayerPoison,
     PendingNativeGroundSpellAction, PendingNativeMonsterHit, PendingNativePlayerHeal,
     PendingNativePlayerHit, PendingNativeProjectile, PendingNativeSummon, ZoneHazardState,
     ZoneObjectDeadState, ZoneRuntime,
@@ -112,6 +115,20 @@ struct CanonicalZoneStateV4<'a> {
     next_ground_drop_claim_id: u64,
     open_doors: &'a BTreeMap<u8, u64>,
     hazard: &'a ZoneHazardState,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    hell_world: &'a Option<HellWorldState>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    horned_encounter_world: &'a Option<HornedEncounterWorld>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pet_special_world: &'a Option<PetSpecialWorld>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    entity_combat: &'a Option<ZoneEntityCombatState>,
+    #[serde(skip_serializing_if = "checkpoint_counter_is_zero")]
+    next_monster_incarnation: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tree_queen_world: &'a Option<TreeQueenWorld>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    native_periodic_player_poisons: &'a Vec<NativePeriodicPlayerPoison>,
     next_object_id: u32,
 }
 
@@ -180,6 +197,20 @@ struct ZoneRuntimeCheckpoint {
     next_ground_drop_claim_id: u64,
     open_doors: BTreeMap<u8, u64>,
     hazard: ZoneHazardState,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    hell_world: Option<HellWorldState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    horned_encounter_world: Option<HornedEncounterWorld>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pet_special_world: Option<PetSpecialWorld>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    entity_combat: Option<ZoneEntityCombatState>,
+    #[serde(default, skip_serializing_if = "checkpoint_counter_is_zero")]
+    next_monster_incarnation: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    tree_queen_world: Option<TreeQueenWorld>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    native_periodic_player_poisons: Vec<NativePeriodicPlayerPoison>,
     next_object_id: u32,
 }
 
@@ -251,6 +282,13 @@ impl ZoneRuntime {
             next_ground_drop_claim_id: self.next_ground_drop_claim_id,
             open_doors: &self.open_doors,
             hazard: &self.hazard,
+            hell_world: &self.hell_world,
+            horned_encounter_world: &self.horned_encounter_world,
+            pet_special_world: &self.pet_special_world,
+            entity_combat: &self.entity_combat,
+            next_monster_incarnation: self.next_monster_incarnation,
+            tree_queen_world: &self.tree_queen_world,
+            native_periodic_player_poisons: &self.native_periodic_player_poisons,
             next_object_id: self.next_object_id,
         };
         let bytes = serde_json::to_vec(&state)
@@ -592,6 +630,13 @@ impl ZoneRuntime {
             next_ground_drop_claim_id: self.next_ground_drop_claim_id,
             open_doors: self.open_doors.clone(),
             hazard: self.hazard.clone(),
+            hell_world: self.hell_world.clone(),
+            horned_encounter_world: self.horned_encounter_world.clone(),
+            pet_special_world: self.pet_special_world.clone(),
+            entity_combat: self.entity_combat.clone(),
+            next_monster_incarnation: self.next_monster_incarnation,
+            tree_queen_world: self.tree_queen_world.clone(),
+            native_periodic_player_poisons: self.native_periodic_player_poisons.clone(),
             next_object_id: self.next_object_id,
         };
         serde_json::to_vec(&checkpoint)
@@ -692,6 +737,25 @@ impl ZoneRuntime {
         runtime.next_ground_drop_claim_id = checkpoint.next_ground_drop_claim_id;
         runtime.open_doors = checkpoint.open_doors;
         runtime.hazard = checkpoint.hazard;
+        if checkpoint_version == ZONE_RUNTIME_CHECKPOINT_VERSION {
+            runtime.hell_world = checkpoint.hell_world;
+            runtime.horned_encounter_world = checkpoint.horned_encounter_world;
+            runtime.pet_special_world = checkpoint.pet_special_world;
+            runtime.entity_combat = checkpoint.entity_combat;
+            runtime.next_monster_incarnation = checkpoint.next_monster_incarnation;
+            runtime.tree_queen_world = checkpoint.tree_queen_world;
+            runtime.native_periodic_player_poisons = checkpoint.native_periodic_player_poisons;
+        }
+        // Legacy commitments do not authenticate these forward fields.
+
+        runtime.next_monster_incarnation = runtime.next_monster_incarnation.max(
+            runtime
+                .native_monsters
+                .values()
+                .map(|m| m.incarnation)
+                .max()
+                .unwrap_or(0),
+        );
         runtime.next_object_id = checkpoint.next_object_id;
 
         for door_index in runtime.open_doors.keys().copied().collect::<Vec<_>>() {
@@ -1625,4 +1689,8 @@ mod tests {
             _ => false,
         }));
     }
+}
+
+fn checkpoint_counter_is_zero(value: &u64) -> bool {
+    *value == 0
 }

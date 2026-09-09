@@ -651,6 +651,31 @@ impl InProcessWorldRuntime {
         self.session.item_rental_cancel()
     }
 
+    pub fn shared_trade_offer_matches_active_escrow(
+        &self,
+        offer: &SharedTradeOffer,
+        rollback: bool,
+    ) -> bool {
+        self.session
+            .shared_trade_offer_matches_active_escrow(offer, rollback)
+    }
+
+    pub fn shared_trade_unprepared_held_gold(&self) -> Option<u32> {
+        self.session.shared_trade_unprepared_held_gold()
+    }
+
+    pub fn recover_unprepared_trade_gold(&mut self) -> Vec<ServerPacket> {
+        self.session.recover_unprepared_trade_gold()
+    }
+
+    pub fn shared_trade_allowed(&self) -> bool {
+        self.session.shared_trade_allowed()
+    }
+
+    pub fn shared_trade_refusal_message(&self, name: &str) -> ServerPacket {
+        self.session.shared_trade_refusal_message(name)
+    }
+
     pub fn trade_request(&mut self, partner_name: &str) -> Vec<ServerPacket> {
         self.session.trade_request(partner_name)
     }

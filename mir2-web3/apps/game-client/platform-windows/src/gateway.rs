@@ -1765,6 +1765,8 @@ where
             resume_state.retry_attempt = resume_state.retry_attempt.saturating_add(1);
         }
 
+        crate::timing::reset_requests();
+        let connect_started = Instant::now();
         let mut socket = match connect_gateway_with_resume_controls(
             base_url,
             &mut commands,
@@ -1844,6 +1846,7 @@ where
         };
 
         generation = generation.wrapping_add(1);
+        crate::timing::report(&format!("websocket_connected:generation{generation}"), connect_started);
         eprintln!("[gateway-client] connected generation={generation} resume={attempting_resume}");
         let mut phase = if attempting_resume {
             ConnectionPhase::AwaitingResume
@@ -2703,6 +2706,11 @@ where
                         let _ = mir2_bevy_runtime::native_ingest::push_native_data_reset();
                         continue;
                     }
+                    let timed_request = match &command {
+                        GatewayCommand::Wire(NativeOutboundCommand::Login { .. }) => Some("login"),
+                        GatewayCommand::Wire(NativeOutboundCommand::StartGame { .. }) => Some("start_game"),
+                        _ => None,
+                    };
                     let trace_player_command = matches!(&command, GatewayCommand::Player(_));
                     let payload = match command {
                         GatewayCommand::Connect => continue,
@@ -2730,6 +2738,7 @@ where
                         lighting_publisher.reset_session();
                         lighting_publisher.push_clear_state();
                     }
+                    let send_started = Instant::now();
                     if let Err(error) = socket
                         .send(Message::Text(payload.to_string().into()))
                         .await
@@ -2744,6 +2753,7 @@ where
                         }
                         return Err(format!("gateway command send failed: {error}"));
                     }
+                    crate::timing::sent(timed_request, send_started);
                     if let Some(request) = game_shop_request {
                         if !game_shop_receipt_gate.record_successful_send(request) {
                             game_shop_receipt_gate.clear_terminal();
@@ -3079,6 +3089,12 @@ where
         });
     }
 
+    // Bootstrap belongs to each successful world entry, not the socket's
+    // lifetime. Logout/character selection may reuse this connection.
+    if matches!(&parsed, InboundEvent::Packet(PacketEvent::StartGameAck(ack)) if ack.result == Some(4)) {
+        *connection_bootstrap_sent = false;
+    }
+
     let is_world_snapshot = text_kind(text).as_deref() == Some("worldSnapshot");
     let snapshot_ingest = handle_gateway_text_with_world_ingest(
         text,
@@ -3103,10 +3119,12 @@ where
             .map_err(|error| format!("invalid gateway payload: {error}"))?;
         let payload = value.get("payload").unwrap_or(&Value::Null);
         if !*connection_bootstrap_sent {
-            if let Some(character) = resumed_character_from_snapshot(
-                payload,
-                resume_state.character_index.or(context.character_index),
-            ) {
+            let character_index = if *phase == ConnectionPhase::Resumed {
+                resume_state.character_index.or(context.character_index)
+            } else {
+                context.character_index
+            };
+            if let Some(character) = resumed_character_from_snapshot(payload, character_index) {
                 let _ = shell_events.send(ShellGatewayEvent::PlayerBootstrapped { character });
                 *connection_bootstrap_sent = true;
             }
@@ -3315,6 +3333,7 @@ where
                 // so the native console stays readable while the map renders.
                 *snapshot_log_counter += 1;
                 if *snapshot_log_counter <= 3 {
+                    crate::timing::milestone(&format!("world_snapshot_forwarded:{}", *snapshot_log_counter));
                     eprintln!(
                         "[gateway-client] forwarded world snapshot #{}",
                         *snapshot_log_counter
@@ -3394,6 +3413,7 @@ where
         }
         "packet" => {
             let packet = event.packet.as_deref().unwrap_or("?");
+            crate::timing::reply(packet);
             match packet {
                 "LoginSuccess" => {
                     eprintln!("[gateway-client] LoginSuccess");
@@ -9372,6 +9392,83 @@ mod tests {
             }
             other => panic!("unexpected event: {other:?}"),
         }
+
+        // A second successful StartGame on the same socket must re-arm
+        // bootstrap, while subsequent ordinary snapshots stay deduplicated.
+        let start_ack = r#"{"type":"packet","packet":"StartGame","payload":{"result":4}}"#;
+        handle_gateway_text_for_connection(
+            start_ack,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("second StartGame ACK");
+        assert!(matches!(shell_receiver.try_recv(), Ok(ShellGatewayEvent::StartGameAck { accepted: true, .. })));
+        assert!(!connection_bootstrap_sent);
+        handle_gateway_text_for_connection(
+            &snapshot,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("accepted opening snapshot");
+        assert!(matches!(shell_receiver.try_recv(), Ok(ShellGatewayEvent::PlayerBootstrapped { .. })));
+        handle_gateway_text_for_connection(
+            &snapshot,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("accepted opening snapshot");
+        assert!(shell_receiver.try_recv().is_err(), "ordinary snapshots must not repeat bootstrap");
     }
 
     #[test]

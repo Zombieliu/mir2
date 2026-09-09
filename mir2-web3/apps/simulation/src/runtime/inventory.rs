@@ -1142,11 +1142,11 @@ fn normalize_user_item_tree_unique_ids(
         // the first exact zero; every later zero is a collision.
     } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
         while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-            *next_unique_id = next_unique_id.saturating_add(1);
+            *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
         }
         item.unique_id = *next_unique_id;
         seen.insert(item.unique_id);
-        *next_unique_id = next_unique_id.saturating_add(1);
+        *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
     }
     for embedded in item.slots.iter_mut().flatten() {
         normalize_user_item_tree_unique_ids(embedded, seen, next_unique_id, preserve_exact_zero);
@@ -1180,7 +1180,8 @@ fn equipment_tree_unique_id_is_used(
 }
 
 pub(super) fn inventory_unique_id_is_used(resources: &InventoryResource, unique_id: u64) -> bool {
-    item_list_unique_id_is_used(&resources.belt_items, unique_id)
+    resources.reserved_item_unique_ids.contains(&unique_id)
+        || item_list_unique_id_is_used(&resources.belt_items, unique_id)
         || item_list_unique_id_is_used(&resources.inventory_items, unique_id)
         || item_list_unique_id_is_used(&resources.storage_items, unique_id)
         || resources
@@ -1219,6 +1220,7 @@ fn collect_item_tree_unique_ids(items: &[ItemState], seen: &mut BTreeSet<u64>) {
 }
 
 fn collect_inventory_unique_ids(resources: &InventoryResource, seen: &mut BTreeSet<u64>) {
+    seen.extend(&resources.reserved_item_unique_ids);
     collect_item_tree_unique_ids(&resources.belt_items, seen);
     collect_item_tree_unique_ids(&resources.inventory_items, seen);
     collect_item_tree_unique_ids(&resources.storage_items, seen);
@@ -1242,6 +1244,7 @@ fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
                 .iter()
                 .map(equipment_tree_max_unique_id),
         )
+        .chain(resources.reserved_item_unique_ids.iter().copied())
         .max()
         .unwrap_or(0)
 }
@@ -1249,7 +1252,7 @@ fn inventory_max_unique_id(resources: &InventoryResource) -> u64 {
 fn next_available_unique_id(resources: &InventoryResource, minimum: u64) -> u64 {
     let mut unique_id = minimum.max(1);
     while inventory_unique_id_is_used(resources, unique_id) {
-        unique_id = unique_id.saturating_add(1);
+        unique_id = unique_id.checked_add(1).unwrap_or(1);
     }
     unique_id
 }
@@ -1279,9 +1282,10 @@ pub(super) fn allocate_item_unique_id_avoiding(
         .iter()
         .map(item_tree_max_unique_id)
         .fold(inventory_max_unique_id(resources), u64::max);
-    let mut unique_id = next_available_unique_id(resources, max_existing.saturating_add(1));
+    let mut unique_id =
+        next_available_unique_id(resources, max_existing.checked_add(1).unwrap_or(1));
     while item_list_unique_id_is_used(reserved_items, unique_id) {
-        unique_id = next_available_unique_id(resources, unique_id.saturating_add(1));
+        unique_id = next_available_unique_id(resources, unique_id.checked_add(1).unwrap_or(1));
     }
     unique_id
 }
@@ -1319,7 +1323,8 @@ fn normalize_incoming_item_tree_unique_ids_impl(
     let mut next_unique_id = inventory_max_unique_id(resources)
         .max(reserved_max)
         .max(incoming_max)
-        .saturating_add(1)
+        .checked_add(1)
+        .unwrap_or(1)
         .max(1);
 
     fn normalize_tree(
@@ -1336,11 +1341,11 @@ fn normalize_incoming_item_tree_unique_ids_impl(
             // protocol identity collision and is deterministically repaired.
         } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
             while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-                *next_unique_id = next_unique_id.saturating_add(1);
+                *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
             }
             item.unique_id = *next_unique_id;
             seen.insert(item.unique_id);
-            *next_unique_id = next_unique_id.saturating_add(1);
+            *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
         }
         if let Some(metadata) = item.user_item_metadata.as_mut() {
             for embedded in metadata.slots.iter_mut().flatten() {
@@ -1430,10 +1435,10 @@ fn normalize_item_list_unique_ids(
                     exact_equipment_root_unique_ids.contains(&*next_unique_id)
                 }
             {
-                *next_unique_id = next_unique_id.saturating_add(1);
+                *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
             }
             let allocated = *next_unique_id;
-            *next_unique_id = next_unique_id.saturating_add(1);
+            *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
             allocated
         };
         item.unique_id = normalized_unique_id;
@@ -1468,11 +1473,11 @@ fn normalize_embedded_item_unique_ids(
             // Preserve the first exact zero; repair subsequent collisions.
         } else if current_unique_id == 0 || !seen.insert(current_unique_id) {
             while *next_unique_id == 0 || seen.contains(&*next_unique_id) {
-                *next_unique_id = next_unique_id.saturating_add(1);
+                *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
             }
             item.unique_id = *next_unique_id;
             seen.insert(item.unique_id);
-            *next_unique_id = next_unique_id.saturating_add(1);
+            *next_unique_id = next_unique_id.checked_add(1).unwrap_or(1);
         }
         normalize_item_state_children_unique_ids(item, seen, next_unique_id);
     }
@@ -1482,14 +1487,20 @@ pub(super) fn normalize_inventory_unique_ids(resources: &mut InventoryResource) 
     // Exact equipped roots retain their existing precedence. Every remaining root is
     // then normalized through one global belt -> inventory -> storage identity
     // set and allocator, so only the first occurrence survives a collision.
-    let exact_equipment_root_unique_ids = resources
+    let mut exact_equipment_root_unique_ids = resources
         .equipment_items
         .iter()
         .filter_map(|equipment| equipment.user_item_unique_id)
         .collect::<BTreeSet<_>>();
-    let next_after_all_existing = inventory_max_unique_id(resources).saturating_add(1).max(1);
+    // Held identities also forbid legacy slot-derived aliases during repair.
+    exact_equipment_root_unique_ids.extend(&resources.reserved_item_unique_ids);
+    let next_after_all_existing = inventory_max_unique_id(resources)
+        .checked_add(1)
+        .unwrap_or(1)
+        .max(1);
 
     let mut seen = exact_equipment_root_unique_ids.clone();
+    seen.extend(&resources.reserved_item_unique_ids);
     let mut next_unique_id = next_after_all_existing;
     normalize_item_list_unique_ids(
         &mut resources.belt_items,
@@ -1542,6 +1553,19 @@ pub(super) fn item_heal_values_for_key(key: &str) -> (i32, i32) {
 
 fn normalize_item_list_known_metadata(items: &mut [ItemState]) {
     for item in items {
+        // This is only a fallback for legacy seed items without healing data.
+        // Acquired Crystal items already carry their template's HP/MP values
+        // (Red Potion is 30, not the old starter alias's 35). Even an explicit
+        // zero on an exact protocol carrier must survive checkpoint restore.
+        if item.heal_hp != 0
+            || item.heal_mp != 0
+            || item
+                .user_item_metadata
+                .as_ref()
+                .is_some_and(|metadata| metadata.item_index.is_some())
+        {
+            continue;
+        }
         let (heal_hp, heal_mp) = item_heal_values_for_key(&item.key);
         if heal_hp > 0 || heal_mp > 0 {
             item.heal_hp = heal_hp;
@@ -2897,7 +2921,7 @@ pub(super) fn merge_item_impl(
     }]
 }
 
-fn item_stack_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
+pub(super) fn item_stack_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
     let (Ok(mut left_protocol), Ok(mut right_protocol)) = (
         try_user_item_from_item_state(left),
         try_user_item_from_item_state(right),
@@ -3136,7 +3160,12 @@ pub(super) fn split_item_impl(
             // Crystal's storage item identity is scoped by the Storage grid;
             // the empty slot is therefore the canonical ID even when another
             // grid uses the same numeric value.
-            split.unique_id = default_item_unique_id(split.container, next_slot);
+            let preferred = default_item_unique_id(split.container, next_slot);
+            split.unique_id = if resources.reserved_item_unique_ids.contains(&preferred) {
+                allocate_item_unique_id(&resources, split.container, next_slot)
+            } else {
+                preferred
+            };
             split.quantity = u32::from(count);
             let Ok(split_packet_item) = try_user_item_from_item_state(&split) else {
                 return vec![failed_packet];
@@ -3248,6 +3277,60 @@ mod stack_identity_tests {
     use super::super::equipment::EquipmentState;
     use super::super::npc::ActiveNpcServiceState;
     use super::super::resources::NpcStateResource;
+
+    #[test]
+    fn known_healing_metadata_preserves_crystal_checkpoint_roundtrip() {
+        let template = crystal_item_template_for_item_key("red-potion").unwrap();
+        let mut item = embedded_item_state_from_template(&template, ItemContainer::Belt, 3);
+        item.unique_id = 41;
+        assert_eq!(
+            item.heal_hp, 30,
+            "fixture must use the imported Crystal HP stat"
+        );
+        let carrier = try_user_item_from_item_state(&item).unwrap();
+        let item = try_item_state_from_user_item(item, &carrier).unwrap();
+        assert_eq!(
+            item.user_item_metadata.as_ref().unwrap().item_index,
+            Some(template.item_index)
+        );
+        let before = serde_json::to_string(&vec![item]).unwrap();
+        let mut restored: Vec<ItemState> = serde_json::from_str(&before).unwrap();
+        normalize_item_list_known_metadata(&mut restored);
+        assert_eq!(serde_json::to_string(&restored).unwrap(), before);
+        normalize_item_list_known_metadata(&mut restored);
+        assert_eq!(
+            serde_json::to_string(&restored).unwrap(),
+            before,
+            "repeated restore is stable"
+        );
+    }
+    #[test]
+    fn known_healing_metadata_only_fills_legacy_missing_values() {
+        let mut legacy = identity_stack(41, 0, ItemContainer::Belt, 1);
+        assert_eq!((legacy.heal_hp, legacy.heal_mp), (0, 0));
+        normalize_item_list_known_metadata(std::slice::from_mut(&mut legacy));
+        assert_eq!((legacy.heal_hp, legacy.heal_mp), (35, 0));
+        legacy.heal_hp = 30;
+        normalize_item_list_known_metadata(std::slice::from_mut(&mut legacy));
+        assert_eq!(
+            legacy.heal_hp, 30,
+            "nonzero saved values need no protocol sidecar to be authoritative"
+        );
+        legacy.heal_hp = 0;
+        legacy.user_item_metadata = Some(metadata(0));
+        normalize_item_list_known_metadata(std::slice::from_mut(&mut legacy));
+        assert_eq!(
+            (legacy.heal_hp, legacy.heal_mp),
+            (0, 0),
+            "exact source-backed zero is not legacy missing data"
+        );
+        legacy.user_item_metadata.as_mut().unwrap().item_index = None;
+        normalize_item_list_known_metadata(std::slice::from_mut(&mut legacy));
+        assert_eq!(
+            legacy.heal_hp, 35,
+            "pre-index sidecars retain legacy compatibility"
+        );
+    }
 
     fn identity_stack(
         unique_id: u64,

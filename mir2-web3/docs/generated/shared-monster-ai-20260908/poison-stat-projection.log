@@ -1,0 +1,464 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:735:5
+    |
+728 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+735 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:818:15
+    |
+818 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:1671:5
+     |
+1671 |     sender.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+     = note: `#[warn(unused_must_use)]` (part of `#[warn(unused)]`) on by default
+help: use `let _ = ...` to ignore the resulting value
+     |
+1671 |     let _ = sender.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:2964:5
+     |
+2964 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2964 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:2987:5
+     |
+2987 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2987 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3077:5
+     |
+3077 |     first.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3077 |     let _ = first.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3141:5
+     |
+3141 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3141 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3208:5
+     |
+3208 |     first.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3208 |     let _ = first.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3431:5
+     |
+3431 |     alpha.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3431 |     let _ = alpha.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3432:5
+     |
+3432 |     beta.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3432 |     let _ = beta.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:6629:5
+     |
+6629 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+6629 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:28377:5
+      |
+28377 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+28377 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:29365:5
+      |
+29365 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+29365 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:30393:5
+      |
+30393 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+30393 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:32285:5
+      |
+32285 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+32285 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:35437:5
+      |
+35437 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+35437 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:42277:5
+      |
+42277 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+42277 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:42602:5
+      |
+42602 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+42602 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:56316:5
+      |
+56316 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+56316 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:57418:5
+      |
+57418 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+57418 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:58956:5
+      |
+58956 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+58956 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:60881:5
+      |
+60881 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+60881 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:62481:5
+      |
+62481 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+62481 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:62809:5
+      |
+62809 |     sender.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+62809 |     let _ = sender.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63243:5
+      |
+63243 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63243 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63442:5
+      |
+63442 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63442 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63560:5
+      |
+63560 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63560 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63961:5
+      |
+63961 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63961 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64012:5
+      |
+64012 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64012 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64022:5
+      |
+64022 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64022 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:65145:5
+      |
+65145 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+65145 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:66262:5
+      |
+66262 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+66262 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:69715:5
+      |
+69715 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+69715 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\stage5.rs:2648:9
+     |
+2648 |         session_a.save_active_character();
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2648 |         let _ = session_a.save_active_character();
+     |         +++++++
+
+warning: `mir2-simulation` (lib test) generated 42 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 33.13s
+     Running unittests src\lib.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\mir2_simulation-d929d371be2a2cf8.exe)
+
+running 2 tests
+test runtime::session::tests::poison_resistance_reduces_player_poison_tick_damage ... ok
+test runtime::zone::types::combat_state_tests::poison_resistance_preserves_legacy_zero_encoding_and_round_trips_nonzero ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1498 filtered out; finished in 1.41s
+

@@ -1876,6 +1876,8 @@ pub struct CrystalMonsterTemplate {
     pub min_sc: i32,
     pub max_sc: i32,
     #[serde(default)]
+    pub accuracy: i32,
+    #[serde(default)]
     pub agility: i32,
     pub light: u8,
     pub attack_speed: u16,
@@ -3952,6 +3954,19 @@ mod tests {
         assert!(summary.commands.iter().any(|entry| {
             entry.command == "CONQUESTGUARD" && entry.runtime_status == "implemented"
         }));
+    }
+
+    #[test]
+    fn monster_accuracy_preserves_source_stat_and_legacy_manifest_compatibility() {
+        // Server.MirDB Stat 10, verified with the generator's accuracy-only
+        // check mode. This guards against dropping Accuracy during serde load.
+        let shinsu = crystal_monster_by_name("Shinsu").expect("Shinsu template");
+        assert_eq!(shinsu.accuracy, 25);
+        let mut legacy = serde_json::to_value(&shinsu).unwrap();
+        legacy.as_object_mut().unwrap().remove("accuracy");
+        let restored: super::CrystalMonsterTemplate = serde_json::from_value(legacy).unwrap();
+        assert_eq!(restored.accuracy, 0);
+        assert_eq!(restored.max_dc, shinsu.max_dc);
     }
 
     #[test]

@@ -1,5 +1,55 @@
 # Agent Orchestration
 
+> 2026-09-08 Windows repackaging checkpoint: clean snapshot `4264b9149`
+> builds and passes the signed Candidate verifier (37,534 files). Sound104
+> package/allowlist mismatch and malformed-Unicode PE scan false positive are
+> fixed with self-tests and independent review; 704 required paths are checked
+> against the verifier allowlist. The exact final EXE opened the real native
+> login window and connected to the rebuilt isolated local Gateway. Authentication
+> is a manual handoff; in-game trade/map, DPI/soak/human acceptance remain open.
+> Evidence: `docs/generated/player-qa/windows-repackage-20260908/README.md`.
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade gold custody checkpoint: positive incremental offers
+> now debit the wallet immediately; preparation/recovery only debit outstanding
+> gold. Persisted heldGold preserves legacy snapshots and is independent from
+> prepared item custody. Cancel/teardown and orphan positive-hold recovery refund
+> once; save failure restores custody. Cap/materialization failures retain final
+> retry authority. Ledger bootstrap occurs before the first eligible debit.
+> Any prepared participant blocks gold and item edits; item failure ACKs prevent
+> withdrawing an offer while reusing the peer's previous confirmation.
+> Simulation 1491 unit + 374 unique integration tests are verified. Gateway resolved
+> coverage is 695 passed / one existing environmental ignore: the initial full
+> run had one queued-notification fixture assertion, corrected by a test-only
+> change and a passing 10/10 gold rerun. Production code did not change for that
+> correction. Format/diff and independent bounded review pass. Exact raw results:
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-gold/README.md`.
+> Next: separate confirmation tickets from exact held-item custody, then editable
+> prepared offers and native deposit/retrieve/merge. Prepared unlock still cancels/
+> refunds; source capacity rejection retention, zero-held orphan cleanup, request
+> throttle/error chats, screenshots and all 33 backlog IDs remain open. No UI/
+> Windows-host rerun, package, interactive launch, live-store write or deployment
+> occurred. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade invitation/private-pair checkpoint: native source
+> MirMessageBox Yes/No and cancellation OK, invitation revision ownership,
+> keyboard disposal and modal input isolation are implemented. Shared Gateway
+> invitations go only to the facing recipient; accepted reciprocal presence
+> pairs own guest gold/item notifications and settlement matching. Refusal,
+> teardown, old-cleanup/new-invite ordering and bootstrap failure are covered.
+> Native UI 598/598, Windows 537/537, Gateway 685 passed / one existing ignored,
+> and new Gateway security tests 13/13 pass;
+> the final full Gateway result and source hashes are recorded in
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-invitation/README.md`.
+> Next: positive-delta/immediate editable gold escrow and bilateral unlock,
+> then exact item custody and native deposit/retrieve/merge operations. Cells
+> remain read-only; prepared unlock still cancels/refunds. Request throttle,
+> complete error chats, original paired screenshots, package/light/DPI/soak/
+> legal/signing/human gates and all 33 IDs remain open. No interactive launch,
+> screenshot, production rollout or live-store write occurred this round.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+
 > Latest Windows visual-parity sync (2026-08-28): VIS-04 Scarecrow Struck
 > audio revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` binds Crystal's
 > exact `005-2.wav` flinch-first plus optional attacker-weapon `60..65.wav`
@@ -232,7 +282,7 @@ Current checkpoint (2026-09-03):
 - Current task: the Windows native Crystal UI/state/interaction parity goal remains incomplete, with all 33 user-observed backlog IDs retained. CLI publication resumed after user-authorized recovery of about 241 MiB from one verified, recoverably backed-up generated test PDB; no source, EXE, store, recording or process was removed/stopped.
 - Latest bounded source/headless checkpoint: `native-ui-parity-20260903-trade-completion`; personal lock and typed escrow preparation emit no completion. Successful delivery completes once; durable delivery waits for the saved projection/event marker. New escrowPrepared state preserves legacy saved debit recovery without another debit. Evidence, exact source hashes, storage recovery and diagnostics are in `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
 - Final verification: Simulation 1491/1491 plus dedicated completion 7/7; Gateway 672 passed and one existing ignored PostgreSQL test; protocol 40/40, game-data 39/39, native UI 591/591, Windows 534/534, client runtime 212/212 and UI core 43/43. All 3629 non-overlapping tests pass. Focused incoming-carrier, two-session conservation and durable mark-retry tests also pass. The Windows host uses a fresh dedicated target after a mixed-cache compile failure.
-- Next CLI leaf: source invitation/pair ownership and private notifications, positive-delta/immediate editable gold escrow, bilateral unlock and exact item custody/operations. Preserve conservation, cancellation/mail fallback, save/restart and unknown-outcome holds. Source capacity rejection retains offers; Candidate still cancels/refunds. Native cells remain read-only. Full trade, exact packet-order parity and whole-project Candidate closure are not established.
+- Next CLI leaf (2026-09-08): separate confirmation tickets from exact held-item custody so post-confirm edits invalidate both confirmations without releasing assets; then native deposit/retrieve/merge. Positive-delta immediate gold custody before preparation is implemented. Prepared unlock and capacity rejection still cancel/refund. Close zero-held orphan cleanup, source request throttle/error messages and original paired screenshots in follow-up leaves. Preserve durable unknown-outcome holds and legacy/save/restart conservation. All 33 backlog IDs and global acceptance remain open.
 - The user explicitly resumed Computer Use for native launch/repair after the earlier Escape. Scoped launch/capture resumed; authentication remains a manual user handoff under the skill. Do not claim authenticated world visual acceptance from the login capture or headless tests.
 - Branch: `codex/windows-player-journey`; stacked PR #250 remains Draft. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; original-pair/package/light/DPI/soak/legal/signing/human gates stay open.
 

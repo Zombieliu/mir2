@@ -55,7 +55,8 @@ pub struct NativeEntityOverlays {
     last_visibility: Option<OverlayVisibility>,
     last_hovered_object_id: Option<String>,
     last_self_hovered: bool,
-    last_quest_marker_phase: u8,
+    // Keep both animation frames alive across label rebuilds and frame swaps.
+    quest_marker_assets: HashMap<u16, Handle<Image>>,
 }
 
 /// Local Crystal name/drop presentation flags. They only select which labels
@@ -78,6 +79,9 @@ impl OverlayVisibility {
 }
 
 impl NativeEntityOverlays {
+    pub(crate) fn render_payload(&self) -> Option<&Value> {
+        self.latest_payload.as_ref()
+    }
     pub fn reset_session(&mut self) {
         self.latest_payload = None;
         self.active_floaters.clear();
@@ -190,6 +194,7 @@ struct DamageFloaterEntry {
 #[derive(Debug)]
 struct OverlayEntry {
     name: Option<String>,
+    marker_object_id: Option<String>,
     quest_marker: Option<QuestMarkerKind>,
     color: Color,
     left: f32,
@@ -212,8 +217,13 @@ enum QuestMarkerKind {
     QuestionGreen = 53,
 }
 
-#[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) struct NativeQuestMarker(QuestMarkerKind);
+#[derive(Component, Clone, Debug, PartialEq)]
+pub(crate) struct NativeQuestMarker {
+    kind: QuestMarkerKind,
+    object_id: String,
+    left: f32,
+    top: f32,
+}
 
 impl QuestMarkerKind {
     fn from_crystal_discriminant(value: i64) -> Option<Self> {
@@ -266,8 +276,11 @@ pub fn sync_native_entity_overlays(
     mut commands: Commands,
     shell: Res<NativeShellModel>,
     mut overlays: ResMut<NativeEntityOverlays>,
-    mut roots: Query<(Entity, &NativeEntityOverlayRoot, &mut Node)>,
-    mut quest_marker_images: Query<(&NativeQuestMarker, &mut ImageNode)>,
+    mut roots: Query<(Entity, &NativeEntityOverlayRoot, &mut Node), Without<NativeQuestMarker>>,
+    mut quest_marker_images: Query<
+        (Entity, &mut NativeQuestMarker, &mut ImageNode, &mut Node),
+        Without<NativeEntityOverlayRoot>,
+    >,
     time: Res<Time>,
     asset_server: Res<AssetServer>,
     player_ui: Option<Res<NativePlayerUiState>>,
@@ -316,10 +329,20 @@ pub fn sync_native_entity_overlays(
     let hovered_object_id = presentation.hovered_object_id();
     let self_hovered = presentation.self_hovered();
     let quest_marker_phase = quest_marker_animation_phase(now_ms);
-    if overlays.last_quest_marker_phase != quest_marker_phase {
-        overlays.last_quest_marker_phase = quest_marker_phase;
-        for (marker, mut image) in &mut quest_marker_images {
-            image.image = asset_server.load(marker.0.asset_path(quest_marker_phase));
+    for (_, marker, mut image, mut node) in &mut quest_marker_images {
+        if node.left != Val::Px(marker.left + camera_offset.0) {
+            node.left = Val::Px(marker.left + camera_offset.0);
+        }
+        if node.top != Val::Px(marker.top + camera_offset.1) {
+            node.top = Val::Px(marker.top + camera_offset.1);
+        }
+        if let Some(handle) = overlays
+            .quest_marker_assets
+            .get(&(marker.kind.first_frame_index() + u16::from(quest_marker_phase)))
+        {
+            if image.image != *handle {
+                image.image = handle.clone();
+            }
         }
     }
     if quest_tracker
@@ -365,9 +388,15 @@ pub fn sync_native_entity_overlays(
         commands.entity(root).despawn();
     }
     if !in_game {
+        for (entity, _, _, _) in &mut quest_marker_images {
+            commands.entity(entity).despawn();
+        }
         return;
     }
     let Some(payload) = overlays.latest_payload.as_ref() else {
+        for (entity, _, _, _) in &mut quest_marker_images {
+            commands.entity(entity).despawn();
+        }
         return;
     };
     let motion_offsets = payload
@@ -407,6 +436,70 @@ pub fn sync_native_entity_overlays(
         &motion_offsets,
         center_override,
     );
+    // NPC markers are retained independently from names and damage floaters.
+    // Rebuilding those every motion tick must not replace the image entity.
+    let mut desired = entries
+        .iter()
+        .filter_map(|entry| {
+            Some((
+                entry.marker_object_id.clone()?,
+                (entry.quest_marker?, entry.left, entry.top),
+            ))
+        })
+        .collect::<HashMap<_, _>>();
+    for (kind, _, _) in desired.values() {
+        for phase in 0..2 {
+            overlays
+                .quest_marker_assets
+                .entry(kind.first_frame_index() + u16::from(phase))
+                .or_insert_with(|| asset_server.load(kind.asset_path(phase)));
+        }
+    }
+    for (entity, mut marker, mut image, mut node) in &mut quest_marker_images {
+        if let Some((kind, left, top)) = desired.remove(&marker.object_id) {
+            marker.kind = kind;
+            marker.left = left;
+            marker.top = top;
+            if node.left != Val::Px(left + camera_offset.0) {
+                node.left = Val::Px(left + camera_offset.0);
+            }
+            if node.top != Val::Px(top + camera_offset.1) {
+                node.top = Val::Px(top + camera_offset.1);
+            }
+            let handle = &overlays.quest_marker_assets
+                [&(kind.first_frame_index() + u16::from(quest_marker_phase))];
+            if image.image != *handle {
+                image.image = handle.clone();
+            }
+        } else {
+            commands.entity(entity).despawn();
+        }
+    }
+    for (object_id, (kind, left, top)) in desired {
+        commands.spawn((
+            Name::new(format!("NativeQuestMarker:{kind:?}")),
+            NativeQuestMarker {
+                kind,
+                object_id,
+                left,
+                top,
+            },
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(left + camera_offset.0),
+                top: Val::Px(top + camera_offset.1),
+                width: Val::Px(CRYSTAL_QUEST_MARKER_WIDTH_PX),
+                height: Val::Px(CRYSTAL_QUEST_MARKER_HEIGHT_PX),
+                ..default()
+            },
+            GlobalZIndex(OVERLAY_Z_INDEX),
+            ImageNode::new(
+                overlays.quest_marker_assets
+                    [&(kind.first_frame_index() + u16::from(quest_marker_phase))]
+                    .clone(),
+            ),
+        ));
+    }
     if entries.is_empty() && floaters.is_empty() {
         return;
     }
@@ -469,58 +562,37 @@ pub fn sync_native_entity_overlays(
                         });
                     }
 
-                    if let Some(marker) = entry.quest_marker {
-                        root.spawn((
-                            Name::new(format!("NativeQuestMarker:{marker:?}")),
-                            NativeQuestMarker(marker),
-                            Node {
-                                position_type: PositionType::Absolute,
-                                left: Val::Px(entry.left),
-                                top: Val::Px(entry.top),
-                                width: Val::Px(CRYSTAL_QUEST_MARKER_WIDTH_PX),
-                                height: Val::Px(CRYSTAL_QUEST_MARKER_HEIGHT_PX),
-                                ..default()
-                            },
-                            ImageNode {
-                                image: asset_server.load(marker.asset_path(quest_marker_phase)),
-                                ..default()
-                            },
-                        ));
-                    }
-
                     let Some(name) = entry.name else {
                         continue;
                     };
-                    for offset in crystal_outline_offsets() {
-                        root.spawn((
-                            Node {
-                                position_type: PositionType::Absolute,
-                                left: Val::Px(entry.left + offset.x),
-                                top: Val::Px(entry.top + offset.y),
-                                width: Val::Px(entry.width),
-                                min_width: Val::Px(entry.width),
-                                ..default()
-                            },
-                            Text::new(name.clone()),
-                            crystal_text_font(entry.font_size),
-                            TextColor(Color::BLACK),
-                            TextLayout::new(Justify::Center, LineBreak::NoWrap),
-                        ));
-                    }
-                    root.spawn((
-                        Node {
+                    for (offset, color) in crystal_outline_offsets()
+                        .into_iter()
+                        .map(|offset| (offset, Color::BLACK))
+                        .chain(std::iter::once((Vec2::ONE, entry.color)))
+                    {
+                        // Center the measured text node, not its unbounded NoWrap
+                        // line box. Each NPC row keeps the same tile-center anchor.
+                        root.spawn(Node {
                             position_type: PositionType::Absolute,
-                            left: Val::Px(entry.left + 1.0),
-                            top: Val::Px(entry.top + 1.0),
+                            left: Val::Px(entry.left + offset.x),
+                            top: Val::Px(entry.top + offset.y),
                             width: Val::Px(entry.width),
-                            min_width: Val::Px(entry.width),
+                            justify_content: JustifyContent::Center,
                             ..default()
-                        },
-                        Text::new(name),
-                        crystal_text_font(entry.font_size),
-                        TextColor(entry.color),
-                        TextLayout::new(Justify::Center, LineBreak::NoWrap),
-                    ));
+                        })
+                        .with_children(|line| {
+                            line.spawn((
+                                Node {
+                                    flex_shrink: 0.0,
+                                    ..default()
+                                },
+                                Text::new(name.clone()),
+                                crystal_text_font(entry.font_size),
+                                TextColor(color),
+                                TextLayout::new(Justify::Center, LineBreak::NoWrap),
+                            ));
+                        });
+                    }
                 }
                 for floater in floaters {
                     root.spawn((
@@ -727,7 +799,7 @@ fn overlay_entries_with_motion_at_center(
     self_hovered: bool,
     quest_tracker: Option<&QuestTracker>,
     motion_offsets: &HashMap<String, (f32, f32)>,
-    camera_offset: (f32, f32),
+    _camera_offset: (f32, f32),
     center_override: Option<(i64, i64)>,
 ) -> Vec<OverlayEntry> {
     let (center_x, center_y) = center_override
@@ -830,6 +902,7 @@ fn overlay_entries_with_motion_at_center(
                         entity_entries.push(OverlayEntry {
                             name: None,
                             quest_marker: Some(marker),
+                            marker_object_id: entity.get("objectId").and_then(normalized_object_id),
                             color: Color::WHITE,
                             left: marker_left,
                             top: marker_top,
@@ -847,6 +920,7 @@ fn overlay_entries_with_motion_at_center(
                     entity_entries.push(OverlayEntry {
                         name: Some(guild_name.to_owned()),
                         quest_marker: None,
+                        marker_object_id: None,
                         color,
                         left,
                         top: top + CRYSTAL_PLAYER_GUILD_TOP_OFFSET_PX + corpse_shift,
@@ -865,6 +939,7 @@ fn overlay_entries_with_motion_at_center(
                         entity_entries.push(OverlayEntry {
                             name: Some(line.to_owned()),
                             quest_marker: None,
+                            marker_object_id: None,
                             color: if kind == "npc" && line_index > 0 {
                                 Color::WHITE
                             } else {
@@ -886,6 +961,7 @@ fn overlay_entries_with_motion_at_center(
                     entity_entries.push(OverlayEntry {
                         name: Some(name.to_owned()),
                         quest_marker: None,
+                        marker_object_id: None,
                         color,
                         left,
                         top: top + CRYSTAL_PLAYER_NAME_TOP_OFFSET_PX + corpse_shift,
@@ -921,6 +997,7 @@ fn overlay_entries_with_motion_at_center(
                 entries.push(OverlayEntry {
                     name: None,
                     quest_marker: None,
+                    marker_object_id: None,
                     color: Color::WHITE,
                     left: origin_x + (x - center_x) as f32 * CELL_WIDTH,
                     top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 17.0,
@@ -954,11 +1031,10 @@ fn overlay_entries_with_motion_at_center(
                     Some(OverlayEntry {
                         name: Some(name.to_owned()),
                         quest_marker: None,
+                        marker_object_id: None,
                         color: Color::srgb_u8(0xff, 0xe6, 0x58),
-                        left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0
-                            + camera_offset.0,
-                        top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 18.0
-                            + camera_offset.1,
+                        left: origin_x + (x - center_x) as f32 * CELL_WIDTH - 16.0,
+                        top: origin_y + (y - center_y) as f32 * CELL_HEIGHT - 18.0,
                         width: 80.0,
                         font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
                         self_health_ratio: None,
@@ -1079,6 +1155,124 @@ fn argb_color(value: i64) -> Option<Color> {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn marker_entity_survives_rebuilds_animation_and_status_changes_then_leaves() {
+        let mut app = App::new();
+        app.add_plugins((
+            bevy::app::TaskPoolPlugin::default(),
+            bevy::asset::AssetPlugin::default(),
+        ));
+        app.init_asset::<Image>();
+        app.insert_resource(Time::<()>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.init_resource::<NativeEntityPresentation>();
+        app.init_resource::<PresentationPoseBuffer>();
+        let mut overlays = NativeEntityOverlays::default();
+        for index in 983..=988 {
+            let handle = app
+                .world_mut()
+                .resource_mut::<Assets<Image>>()
+                .add(Image::default());
+            overlays.quest_marker_assets.insert(index, handle);
+        }
+        let mut payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "entities": [{"objectId": 3, "kind": "npc", "name": "Smith", "x": 11, "y": 20, "questIcon": 2}]
+        });
+        overlays.replace_payload(payload.clone());
+        app.insert_resource(overlays);
+        app.add_systems(Update, sync_native_entity_overlays);
+        app.update();
+        let marker_entity = app
+            .world_mut()
+            .query_filtered::<Entity, With<NativeQuestMarker>>()
+            .single(app.world())
+            .unwrap();
+        let original_left = app.world().get::<Node>(marker_entity).unwrap().left;
+        for frame in 1..=90 {
+            // Simulate unrelated movement/hover/floater invalidation each render frame.
+            app.world_mut().resource_mut::<NativeEntityOverlays>().dirty = true;
+            app.world_mut()
+                .resource_mut::<Time>()
+                .advance_by(std::time::Duration::from_millis(16));
+            app.update();
+            assert_eq!(
+                app.world_mut()
+                    .query_filtered::<Entity, With<NativeQuestMarker>>()
+                    .single(app.world())
+                    .unwrap(),
+                marker_entity
+            );
+            assert_eq!(
+                app.world().get::<Node>(marker_entity).unwrap().left,
+                original_left
+            );
+            let index = 985 + u16::from(quest_marker_animation_phase(frame * 16));
+            assert_eq!(
+                app.world().get::<ImageNode>(marker_entity).unwrap().image,
+                app.world()
+                    .resource::<NativeEntityOverlays>()
+                    .quest_marker_assets[&index]
+            );
+        }
+        payload["entities"][0]["questIcon"] = json!(3);
+        payload["entities"][0]["x"] = json!(12);
+        app.world_mut()
+            .resource_mut::<NativeEntityOverlays>()
+            .replace_payload(payload.clone());
+        app.update();
+        assert_eq!(
+            app.world()
+                .get::<NativeQuestMarker>(marker_entity)
+                .unwrap()
+                .kind,
+            QuestMarkerKind::QuestionYellow
+        );
+        assert_ne!(
+            app.world().get::<Node>(marker_entity).unwrap().left,
+            original_left
+        );
+        let populated_payload = payload.clone();
+        payload["entities"] = json!([]);
+        app.world_mut()
+            .resource_mut::<NativeEntityOverlays>()
+            .replace_payload(payload);
+        app.update();
+        assert!(app.world().get_entity(marker_entity).is_err());
+        // Both frames remain strongly retained even with no visible NPC.
+        assert_eq!(
+            app.world()
+                .resource::<NativeEntityOverlays>()
+                .quest_marker_assets
+                .len(),
+            6
+        );
+        app.world_mut()
+            .resource_mut::<NativeEntityOverlays>()
+            .replace_payload(populated_payload);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<Entity, With<NativeQuestMarker>>()
+                .iter(app.world())
+                .count(),
+            1
+        );
+        app.world_mut().resource_mut::<NativeShellModel>().screen =
+            NativeShellScreen::ConnectionLost;
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<Entity, With<NativeQuestMarker>>()
+                .iter(app.world())
+                .count(),
+            0
+        );
+    }
 
     #[test]
     fn identical_payload_does_not_rebuild_entity_overlays() {
@@ -1319,7 +1513,8 @@ mod tests {
         };
         assert_eq!((named("Self").left, named("Self").top), (480.0, 335.0));
         assert_eq!((named("Deer").left, named("Deer").top), (512.0, 342.0));
-        assert_eq!((named("Potion").left, named("Potion").top), (552.0, 334.0));
+        // The retained world root contributes camera motion exactly once.
+        assert_eq!((named("Potion").left, named("Potion").top), (512.0, 334.0));
         assert!(!named("Self").follows_camera);
         assert!(named("Deer").follows_camera);
         assert!(named("Potion").follows_camera);

@@ -22,7 +22,7 @@ use std::collections::{BinaryHeap, HashMap, VecDeque};
 
 use crate::effects::{NativeEffects, CELL_HEIGHT, CELL_WIDTH};
 use crate::entity_presentation::NativeEntityPresentation;
-use crate::gameplay_bridge::{GameplayEventInbox, NativeSelfMovementAck};
+use crate::gameplay_bridge::{GameplayEventInbox, NativeSelfMovementAck, NativeWorldClickState};
 use crate::gateway::{GatewayCommand, GatewayCommandSender, PlayerIntent};
 use crate::native_protocol::NativeOutboundCommand;
 
@@ -64,11 +64,33 @@ enum WorldPointerMovementMode {
     Run,
 }
 
+// Gameplay deadlines must follow elapsed wall time, not Bevy's clamped
+// virtual animation clock. The fallback supports minimal headless fixtures.
+fn movement_now_ms(time: Option<&Time>, real: Option<&Time<bevy::time::Real>>) -> f64 {
+    real.map(|time| time.elapsed_secs_f64() * 1000.0)
+        .or_else(|| time.map(|time| time.elapsed_secs_f64() * 1000.0))
+        .unwrap_or(0.0)
+}
+
 const CRYSTAL_MOVE_PRESENTATION_MS: f64 = 600.0;
 const CRYSTAL_RUN_PRIME_MS: f64 = 1_200.0;
 const CRYSTAL_CORRECTION_BLOCK_MS: f64 = 400.0;
 const MOVEMENT_PENDING_MAX_AGE_MS: f64 = 3_000.0;
-const MOVEMENT_IN_FLIGHT_LIMIT: usize = 2;
+
+fn crystal_attack_request_interval_ms(model: Option<&UiReadModel>) -> f64 {
+    // Crystal UserObject.RefreshStats: AttackSpeed stat 14, with a 550 ms floor.
+    let Some(model) = model else {
+        return 1400.0;
+    };
+    let speed = model
+        .player
+        .crystal_stats
+        .as_ref()
+        .and_then(|stats| stats.iter().find(|stat| stat.stat == 14))
+        .map_or(0_i64, |stat| i64::from(stat.value));
+    (1400 - speed * 60 - (i64::from(model.player.level) * 14).min(370)).max(550) as f64
+}
+const MOVEMENT_IN_FLIGHT_LIMIT: usize = 1;
 const MOVEMENT_BLOCKED_STEP_MAX_AGE_MS: f64 = 3_000.0;
 const MOVEMENT_BLOCKED_STEP_LIMIT: usize = 16;
 const CRYSTAL_NPC_CLICK_GUARD_MS: f64 = 5_000.0;
@@ -104,14 +126,17 @@ enum MovementAckOutcome {
 }
 
 /// Crystal-style native movement controller. The shared Zone remains the only
-/// gameplay authority; this resource owns a two-entry pending-intent window
+/// gameplay authority; this resource owns a single unacknowledged movement slot
 /// plus presentation-only prediction copied into the shared runtime. ACKs
 /// retire that path in order or clear it and expose the authoritative tile.
 #[derive(bevy::prelude::Resource, Default, Debug)]
 pub struct WorldPointerMovementState {
     active: Option<WorldPointerMovementMode>,
     auto_path_destination: Option<(i32, i32)>,
+    attack_target: Option<u32>,
+    next_attack_request_at_ms: f64,
     pending: VecDeque<PendingSelfMove>,
+    movement_stall_reported: bool,
     self_object_id: Option<String>,
     authoritative_position: Option<(i32, i32)>,
     authoritative_direction: Option<String>,
@@ -291,12 +316,18 @@ impl WorldPointerMovementState {
             return false;
         }
         self.pending.clear();
+        self.movement_stall_reported = false;
+        self.attack_target = None;
+        self.next_attack_request_at_ms = 0.0;
+        self.auto_path_destination = None;
+        self.active = None;
         self.next_move_send_at_ms = 0.0;
         self.run_primed_until_ms = 0.0;
         self.input_blocked_until_ms = 0.0;
         self.last_npc_object_id = None;
         self.npc_click_blocked_until_ms = 0.0;
         self.last_tile_pickup_at_ms = None;
+        self.last_packet_ack_at_ms = None;
         self.self_object_id = Some(object_id.to_owned());
         self.authoritative_position = Some(position);
         self.authoritative_direction = Some(direction.to_owned());
@@ -304,9 +335,12 @@ impl WorldPointerMovementState {
     }
 
     fn reconcile_ack(&mut self, ack: &NativeSelfMovementAck, now_ms: f64) -> MovementAckOutcome {
+        self.movement_stall_reported = false;
         self.authoritative_position = Some((ack.x, ack.y));
         self.authoritative_direction = Some(ack.direction.clone());
-        self.last_packet_ack_at_ms = Some(now_ms);
+        if ack.packet != "worldSnapshot" {
+            self.last_packet_ack_at_ms = Some(now_ms);
+        }
         let Some(front) = self.pending.front().cloned() else {
             return MovementAckOutcome::Accepted;
         };
@@ -335,7 +369,9 @@ impl WorldPointerMovementState {
             outcome,
             MovementAckOutcome::Confirmed | MovementAckOutcome::Degraded
         ) {
-            self.run_primed_until_ms = now_ms + CRYSTAL_RUN_PRIME_MS;
+            // Sending precedes server execution; this is a conservative bound.
+            // Receiving a delayed ACK must not restart the server's run window.
+            self.run_primed_until_ms = front.sent_at_ms + CRYSTAL_RUN_PRIME_MS;
             if outcome == MovementAckOutcome::Degraded {
                 self.next_move_send_at_ms = now_ms.max(front.visual_until_ms);
             }
@@ -832,7 +868,7 @@ fn send_pointer_move(
         sent_at_ms: now_ms,
         visual_until_ms: now_ms + visual_duration_ms,
     };
-    let intent = match requested_mode {
+    let intent = match effective_mode {
         WorldPointerMovementMode::Walk => PlayerIntent::Walk {
             direction: direction.to_owned(),
         },
@@ -856,6 +892,7 @@ fn send_pointer_move(
     movement.next_move_send_at_ms = pending.visual_until_ms;
     movement.run_primed_until_ms = now_ms + CRYSTAL_RUN_PRIME_MS;
     movement.pending.push_back(pending);
+    movement.movement_stall_reported = false;
     movement.last_plan_block_trace_at_ms = None;
     true
 }
@@ -960,10 +997,10 @@ pub fn mouse_world_interaction_system(
     player_ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
-    ui_read_model: Option<Res<UiReadModel>>,
+    (ui_read_model, click_state): (Option<Res<UiReadModel>>, Option<Res<NativeWorldClickState>>),
     entities: Option<Res<EntityModelSet>>,
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
-    time: Option<Res<Time>>,
+    (time, real_time): (Option<Res<Time>>, Option<Res<Time<bevy::time::Real>>>),
     windows: Query<&Window>,
     mut queue: Option<ResMut<QuestUiIntentQueue>>,
     commands: Option<Res<GatewayCommands>>,
@@ -975,10 +1012,7 @@ pub fn mouse_world_interaction_system(
     let right_pressed = mouse.just_pressed(MouseButton::Right);
     let left_released = mouse.just_released(MouseButton::Left);
     let right_released = mouse.just_released(MouseButton::Right);
-    let now_ms = time
-        .as_deref()
-        .map(|time| time.elapsed_secs_f64() * 1_000.0)
-        .unwrap_or(0.0);
+    let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
     if left_pressed {
         trace_pointer_input(now_ms, "left", "down");
     }
@@ -1000,12 +1034,15 @@ pub fn mouse_world_interaction_system(
         && !right_released
         && movement.active.is_none()
         && movement.auto_path_destination.is_none()
+        && movement.attack_target.is_none()
         && movement.pending.is_empty()
         && !ack_waiting
     {
         return;
     }
-    let animation_now_ms = now_ms.clamp(0.0, u64::MAX as f64) as u64;
+    let animation_now_ms = time.as_deref()
+        .map(|time| time.elapsed().as_millis().min(u128::from(u64::MAX)) as u64)
+        .unwrap_or(0);
     let (Some(shell), Some(entities), Some(presentation)) =
         (shell, entities, presentation.as_deref_mut())
     else {
@@ -1014,6 +1051,7 @@ pub fn mouse_world_interaction_system(
         return;
     };
     let Ok(window) = windows.single() else {
+        movement.attack_target = None;
         movement.stop_hold(now_ms, "missingWindow");
         movement.stop_auto_path(now_ms, "missingWindow");
         return;
@@ -1084,9 +1122,9 @@ pub fn mouse_world_interaction_system(
     if !packet_ack_observed
         && (movement.pending.is_empty() || snapshot_reconciles_pending)
         && movement.authoritative_position != Some(entity_position)
-        && movement
-            .last_packet_ack_at_ms
-            .is_none_or(|at_ms| now_ms >= at_ms + 250.0)
+        // Once packet authority is available, an unsequenced personal world
+        // snapshot cannot supersede it merely because 250 ms has elapsed.
+        && movement.last_packet_ack_at_ms.is_none()
     {
         let predicted = movement.pending.back().map(|pending| pending.to);
         let snapshot = NativeSelfMovementAck {
@@ -1113,38 +1151,28 @@ pub fn mouse_world_interaction_system(
         }
     }
 
-    if movement
-        .pending
-        .front()
-        .is_some_and(|pending| now_ms >= pending.sent_at_ms + MOVEMENT_PENDING_MAX_AGE_MS)
+    // A timeout cannot revoke a command already sent over the socket. Keep
+    // the slot occupied until a real ACK/correction or session reset arrives;
+    // otherwise held input re-sends from a stale origin while the old command
+    // may still execute. Finish the current prediction without adding steps.
+    if !movement.movement_stall_reported
+        && movement.pending.front().is_some_and(|pending| {
+            now_ms >= pending.sent_at_ms + MOVEMENT_PENDING_MAX_AGE_MS
+        })
     {
-        let predicted = movement.pending.back().map(|pending| pending.to);
-        movement.pending.clear();
-        movement.run_primed_until_ms = 0.0;
-        movement.input_blocked_until_ms = now_ms + CRYSTAL_CORRECTION_BLOCK_MS;
-        movement.next_move_send_at_ms = movement.input_blocked_until_ms;
-        let position = movement.authoritative_position.unwrap_or(entity_position);
-        let direction = movement
-            .authoritative_direction
-            .clone()
-            .unwrap_or_else(|| entity_direction.clone());
-        presentation.cancel_local_self_prediction(&object_id, position, &direction);
-        let timeout = NativeSelfMovementAck {
-            packet: "MovementTimeout".to_owned(),
-            object_id: object_id.clone(),
-            x: position.0,
-            y: position.1,
-            direction,
-        };
-        push_movement_shadow_authoritative(
-            now_ms,
-            &timeout,
-            predicted,
-            MovementAckOutcome::Correction,
-        );
+        movement.movement_stall_reported = true;
+        let age_ms = now_ms - movement.pending.front().unwrap().sent_at_ms;
+        crate::movement_trace::record(serde_json::json!({
+            "type": "movementAckStalled",
+            "atMs": now_ms,
+            "ageMs": age_ms,
+            "pendingCount": movement.pending.len(),
+        }));
+        eprintln!("[movement] awaiting_authoritative_ack age_ms={age_ms:.1} pending=1; additional movement paused");
     }
 
     if !window.focused {
+        movement.attack_target = None;
         movement.stop_hold(now_ms, "windowUnfocused");
         movement.stop_auto_path(now_ms, "windowUnfocused");
         return;
@@ -1158,6 +1186,7 @@ pub fn mouse_world_interaction_system(
         || is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
     {
         movement.stop_hold(now_ms, "worldInputBlocked");
+        movement.attack_target = None;
         movement.stop_auto_path(now_ms, "worldInputBlocked");
         return;
     }
@@ -1168,15 +1197,26 @@ pub fn mouse_world_interaction_system(
     // the Gateway's latest-intent slot.
     if keys
         .as_deref()
+        .is_some_and(|keys| keys.just_pressed(KeyCode::Escape))
+    {
+        movement.attack_target = None;
+        movement.stop_auto_path(now_ms, "escape");
+        movement.stop_hold(now_ms, "escape");
+        return;
+    }
+    if keys
+        .as_deref()
         .and_then(pressed_keyboard_direction)
         .is_some()
     {
         movement.stop_hold(now_ms, "keyboardInput");
+        movement.attack_target = None;
         movement.stop_auto_path(now_ms, "keyboardInput");
         return;
     }
 
     if right_pressed {
+        movement.attack_target = None;
         movement.stop_auto_path(now_ms, "newRightClick");
         // Crystal reserves right-click object interactions (for example Ctrl+
         // inspect). Until those are implemented, never turn an object click
@@ -1201,48 +1241,189 @@ pub fn mouse_world_interaction_system(
             }
         }
     } else if left_pressed {
+        movement.attack_target = None;
         movement.stop_auto_path(now_ms, "leftClick");
-        if let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
-            .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
-        {
-            movement.stop_hold(now_ms, "leftWorldIntent");
-            // Crystal sends CallNPC immediately and lets the server enforce
-            // its square DataRange=16 gate. It does not auto-walk adjacent.
-            if let QuestUiIntent::InteractNpc { npc_object_id } = &intent {
-                let npc_object_id = *npc_object_id;
-                if movement.last_npc_object_id == Some(npc_object_id)
-                    && now_ms <= movement.npc_click_blocked_until_ms
-                {
+        let modified = keys.as_deref().is_some_and(|keys| {
+            keys.pressed(KeyCode::AltLeft)
+                || keys.pressed(KeyCode::AltRight)
+                || keys.pressed(KeyCode::ShiftLeft)
+                || keys.pressed(KeyCode::ShiftRight)
+        });
+        if !modified {
+            if let Some(QuestUiIntent::AttackTarget { object_id }) =
+                hovered_world_intent(presentation.hovered_object_id(), &entities)
+            {
+                movement.stop_hold(now_ms, "attackTarget");
+                movement.attack_target = Some(object_id);
+            }
+        }
+        if movement.attack_target.is_none() {
+            if let Some(intent) = hovered_world_intent(presentation.hovered_object_id(), &entities)
+                .or_else(|| pickup_tile_intent(presentation.hovered_grid_position(), &entities))
+            {
+                movement.stop_hold(now_ms, "leftWorldIntent");
+                // Crystal sends CallNPC immediately and lets the server enforce
+                // its square DataRange=16 gate. It does not auto-walk adjacent.
+                if let QuestUiIntent::InteractNpc { npc_object_id } = &intent {
+                    let npc_object_id = *npc_object_id;
+                    if movement.last_npc_object_id == Some(npc_object_id)
+                        && now_ms <= movement.npc_click_blocked_until_ms
+                    {
+                        return;
+                    }
+                    movement.last_npc_object_id = Some(npc_object_id);
+                    movement.npc_click_blocked_until_ms = now_ms + CRYSTAL_NPC_CLICK_GUARD_MS;
+                    if let Some(queue) = queue.as_deref_mut() {
+                        queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id });
+                    }
                     return;
                 }
-                movement.last_npc_object_id = Some(npc_object_id);
-                movement.npc_click_blocked_until_ms = now_ms + CRYSTAL_NPC_CLICK_GUARD_MS;
                 if let Some(queue) = queue.as_deref_mut() {
-                    queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id });
+                    let is_tile_pickup = matches!(&intent, QuestUiIntent::PickUpTile);
+                    if queue.push_intent(intent) {
+                        if is_tile_pickup {
+                            movement.last_tile_pickup_at_ms = Some(now_ms);
+                        }
+                    }
                 }
                 return;
             }
-            if let Some(queue) = queue.as_deref_mut() {
-                let is_tile_pickup = matches!(&intent, QuestUiIntent::PickUpTile);
-                if queue.push_intent(intent) {
-                    if is_tile_pickup {
-                        movement.last_tile_pickup_at_ms = Some(now_ms);
-                    }
+
+            // A player or another non-interactable actor is still solid world
+            // content. Do not reinterpret that pixel hit as movement through it.
+            if presentation.hovered_object_id().is_some() {
+                movement.stop_hold(now_ms, "leftClickActor");
+                return;
+            } else {
+                movement.begin(WorldPointerMovementMode::Walk, now_ms);
+            }
+        }
+    }
+
+    // A right-button hold follows the current cursor as the camera/player
+    // moves, rather than terminating at the tile from the initial down edge.
+    // Arm only an accepted world press; blocked UI/actor presses must not
+    // become movement merely because the cursor later leaves that surface.
+    if right_pressed && presentation.hovered_grid_position().is_some() {
+        movement.begin(WorldPointerMovementMode::Run, now_ms);
+    }
+    if movement.active == Some(WorldPointerMovementMode::Run) {
+        if mouse.pressed(MouseButton::Right) {
+            if let Some(target) = presentation.hovered_grid_position() {
+                movement.auto_path_destination = Some(target);
+            }
+        } else {
+            movement.stop_hold(now_ms, "buttonReleased");
+        }
+    }
+
+    if let Some(target_id) = movement.attack_target {
+        if keys.as_deref().is_some_and(|keys| {
+            keys.pressed(KeyCode::AltLeft)
+                || keys.pressed(KeyCode::AltRight)
+                || keys.pressed(KeyCode::ShiftLeft)
+                || keys.pressed(KeyCode::ShiftRight)
+        }) {
+            movement.attack_target = None;
+            movement.stop_auto_path(now_ms, "combatModifier");
+            return;
+        }
+        let target = entities.entities.iter().find(|entity| {
+            entity.object_id.parse::<u32>().ok() == Some(target_id)
+                && entity.kind == EntityKind::Monster
+                && !entity.name.ends_with(')')
+        });
+        let valid = click_state.as_deref().is_none_or(|state| {
+            state.targets.get(&target_id).is_some_and(|target| {
+                target.dead == Some(false) && !matches!(target.ai, Some(64 | 70))
+            })
+        });
+        let Some(target) = target.filter(|_| valid) else {
+            movement.attack_target = None;
+            movement.stop_auto_path(now_ms, "targetUnavailable");
+            return;
+        };
+        let archer_weapon = click_state.as_deref().is_some_and(|state| {
+            state
+                .class
+                .as_deref()
+                .is_some_and(|class| class.eq_ignore_ascii_case("Archer"))
+                && state.has_class_weapon == Some(true)
+        });
+        let ranged = archer_weapon
+            && click_state.as_deref().is_some_and(|state| {
+                state.riding_mount == Some(false) && state.fishing == Some(false)
+            });
+        let reach = if ranged { 9 } else { 1 };
+        let origin = movement.authoritative_position.unwrap_or(entity_position);
+        if (target.x - origin.0).abs().max((target.y - origin.1).abs()) <= reach {
+            movement.stop_auto_path(now_ms, "targetInRange");
+            if movement.pending.is_empty()
+                && now_ms >= movement.next_move_send_at_ms
+                && now_ms >= movement.next_attack_request_at_ms
+            {
+                if queue.as_deref_mut().is_some_and(|queue| {
+                    queue.push_intent(QuestUiIntent::AttackTarget {
+                        object_id: target_id,
+                    })
+                }) {
+                    // Request pacing only; the Gateway owns attack eligibility and cooldown.
+                    let interval = crystal_attack_request_interval_ms(ui_read_model.as_deref());
+                    movement.next_attack_request_at_ms = now_ms + interval;
+                    movement.next_move_send_at_ms = now_ms + interval;
                 }
             }
             return;
         }
-
-        // A player or another non-interactable actor is still solid world
-        // content. Do not reinterpret that pixel hit as movement through it.
-        if presentation.hovered_object_id().is_some() {
-            movement.stop_hold(now_ms, "leftClickActor");
+        // Crystal keeps an Archer with the class weapon stationary when the
+        // selected target is out of range (GameScene.CheckInput).
+        if archer_weapon {
+            movement.stop_auto_path(now_ms, "archerOutOfRange");
             return;
-        } else {
-            movement.begin(WorldPointerMovementMode::Walk, now_ms);
         }
+        if !movement.can_send(now_ms) {
+            return;
+        }
+        let planning_origin = movement.planning_origin(entity_position);
+        if !movement.pending.is_empty()
+            && (target.x - planning_origin.0)
+                .abs()
+                .max((target.y - planning_origin.1).abs())
+                <= reach
+        {
+            return;
+        }
+        // Never route into the occupied target tile. Replan towards a reachable
+        // attack neighbour using the latest authoritative target position.
+        let map = presentation.current_map_file_name();
+        let mut best: Option<Vec<(i32, i32)>> = None;
+        for dx in -1..=1 {
+            for dy in -1..=1 {
+                if dx == 0 && dy == 0 {
+                    continue;
+                }
+                if let Some(path) = find_crystal_auto_path(
+                    &movement,
+                    &entities,
+                    Some(presentation),
+                    &object_id,
+                    map,
+                    planning_origin,
+                    (target.x + dx, target.y + dy),
+                ) {
+                    if !path.is_empty() && best.as_ref().is_none_or(|old| path.len() < old.len()) {
+                        best = Some(path);
+                    }
+                }
+            }
+        }
+        let Some(destination) = best.and_then(|path| path.last().copied()) else {
+            movement.attack_target = None;
+            movement.stop_auto_path(now_ms, "targetUnreachable");
+            return;
+        };
+        movement.auto_path_destination = Some(destination);
     }
-
     let auto_path_destination = movement.auto_path_destination;
     let mode = if auto_path_destination.is_some() {
         WorldPointerMovementMode::Run
@@ -1318,7 +1499,8 @@ pub fn mouse_world_interaction_system(
             movement.stop_auto_path(now_ms, "invalidPath");
             return;
         };
-        let can_run_route = path.len() >= run_distance as usize
+        let can_run_route = movement.attack_target.is_none()
+            && path.len() >= run_distance as usize
             && (1..run_distance as usize).all(|index| {
                 movement_direction_between(path[index - 1], path[index]) == Some(direction)
             });
@@ -1422,7 +1604,7 @@ pub fn keyboard_movement_system(
     notice: Option<Res<NoticeDialogState>>,
     entities: Option<Res<EntityModelSet>>,
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
-    time: Option<Res<Time>>,
+    (time, real_time): (Option<Res<Time>>, Option<Res<Time<bevy::time::Real>>>),
     windows: Query<&Window>,
     mut movement: ResMut<WorldPointerMovementState>,
 ) {
@@ -1437,10 +1619,7 @@ pub fn keyboard_movement_system(
     let Some(direction) = pressed_keyboard_direction(&keys) else {
         return;
     };
-    let now_ms = time
-        .as_deref()
-        .map(|time| time.elapsed_secs_f64() * 1_000.0)
-        .unwrap_or(0.0);
+    let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
     if walk_key_map()
         .into_iter()
         .any(|(code, _)| keys.just_pressed(code))
@@ -1500,7 +1679,9 @@ pub fn keyboard_movement_system(
         movement.trace_plan_blocked(now_ms, origin, direction, requested_mode);
         return;
     };
-    let animation_now_ms = now_ms.clamp(0.0, u64::MAX as f64) as u64;
+    let animation_now_ms = time.as_deref()
+        .map(|time| time.elapsed().as_millis().min(u128::from(u64::MAX)) as u64)
+        .unwrap_or(0);
     let _ = send_pointer_move(
         commands,
         presentation,
@@ -2219,6 +2400,299 @@ mod tests {
     }
 
     #[test]
+    fn monster_click_chases_moving_target_then_attacks_after_ack_and_stops_on_death() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        let mut entities = world_entities();
+        entities.entities[2].x = 15;
+        entities.entities[2].y = 10;
+        app.insert_resource(entities);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hovered_object_id_for_test(Some("2001"));
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert!(matches!(receiver.try_recv(), Ok(GatewayCommand::Player(_))));
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Left);
+        // Move the monster after the click; pursuit must not stick to its old tile.
+        app.world_mut().resource_mut::<EntityModelSet>().entities[2].x = 17;
+        let mut attacked = false;
+        for _ in 0..16 {
+            let pending = app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .back()
+                .cloned();
+            if let Some(pending) = pending {
+                assert_ne!(pending.to, (17, 10), "must not enter occupied monster tile");
+                let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+                entities.entities[0].x = pending.to.0;
+                entities.entities[0].y = pending.to.1;
+                drop(entities);
+                push_test_movement_ack(&app, pending.to.0, pending.to.1, pending.direction);
+            }
+            advance_movement_clock(&mut app, 600);
+            app.update();
+            while receiver.try_recv().is_ok() {}
+            let intents = app
+                .world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents();
+            if !intents.is_empty() {
+                assert_eq!(
+                    intents,
+                    vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+                );
+                let entities = app.world().resource::<EntityModelSet>();
+                assert!(
+                    (entities.entities[0].x - 17)
+                        .abs()
+                        .max((entities.entities[0].y - 10).abs())
+                        <= 1
+                );
+                assert!(app
+                    .world()
+                    .resource::<WorldPointerMovementState>()
+                    .pending
+                    .is_empty());
+                attacked = true;
+                break;
+            }
+        }
+        assert!(
+            attacked,
+            "single released click must eventually reach and attack"
+        );
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        advance_movement_clock(&mut app, 1400);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+        );
+        let mut state = NativeWorldClickState::default();
+        state.targets.insert(
+            2001,
+            crate::gameplay_bridge::CrystalWorldClickTarget {
+                kind: EntityKind::Monster,
+                object_id: 2001,
+                x: 17,
+                y: 10,
+                dead: Some(true),
+                ai: Some(0),
+                harvestable: Some(false),
+            },
+        );
+        app.insert_resource(state);
+        advance_movement_clock(&mut app, 600);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target,
+            None
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+    }
+
+    #[test]
+    fn attack_request_cadence_uses_crystal_stats_and_floor() {
+        assert_eq!(crystal_attack_request_interval_ms(None), 1400.0);
+        let mut model = UiReadModel::default();
+        model.player.level = 7;
+        model.player.crystal_stats =
+            Some(vec![mir2_client_bevy::read_model::CrystalPlayerStatModel {
+                stat: 14,
+                value: 2,
+            }]);
+        assert_eq!(crystal_attack_request_interval_ms(Some(&model)), 1182.0);
+        model.player.level = 100;
+        model.player.crystal_stats.as_mut().unwrap()[0].value = 20;
+        assert_eq!(crystal_attack_request_interval_ms(Some(&model)), 550.0);
+    }
+
+    #[test]
+    fn archer_target_outside_range_does_not_walk_but_attacks_when_target_enters_range() {
+        let (mut app, receiver) = input_app();
+        let mut model = UiReadModel::default();
+        model.player.level = 100;
+        model.player.crystal_stats =
+            Some(vec![mir2_client_bevy::read_model::CrystalPlayerStatModel {
+                stat: 14,
+                value: 20,
+            }]);
+        app.insert_resource(model);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        let mut entities = world_entities();
+        entities.entities[2].x = 22;
+        entities.entities[2].y = 10;
+        app.insert_resource(entities);
+        let mut state = NativeWorldClickState {
+            class: Some("Archer".to_owned()),
+            has_class_weapon: Some(true),
+            riding_mount: Some(false),
+            fishing: Some(false),
+            ..Default::default()
+        };
+        state.targets.insert(
+            2001,
+            crate::gameplay_bridge::CrystalWorldClickTarget {
+                kind: EntityKind::Monster,
+                object_id: 2001,
+                x: 22,
+                y: 10,
+                dead: Some(false),
+                ai: Some(0),
+                harvestable: Some(false),
+            },
+        );
+        app.insert_resource(state);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hovered_object_id_for_test(Some("2001"));
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear();
+        app.world_mut().resource_mut::<EntityModelSet>().entities[2].x = 19;
+        app.world_mut()
+            .resource_mut::<NativeWorldClickState>()
+            .targets
+            .get_mut(&2001)
+            .unwrap()
+            .x = 19;
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+        );
+        assert!(receiver.try_recv().is_err());
+        advance_movement_clock(&mut app, 549);
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        advance_movement_clock(&mut app, 1);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+        );
+    }
+
+    #[test]
+    fn new_player_identity_cannot_inherit_old_pursuit() {
+        let mut movement = WorldPointerMovementState::default();
+        movement.observe_identity("old", (10, 10), "right");
+        movement.attack_target = Some(2001);
+        movement.next_attack_request_at_ms = 1500.0;
+        movement.auto_path_destination = Some((14, 10));
+        movement.active = Some(WorldPointerMovementMode::Walk);
+        assert!(movement.observe_identity("new", (20, 20), "left"));
+        assert_eq!(movement.attack_target, None);
+        assert_eq!(movement.auto_path_destination, None);
+        assert_eq!(movement.active, None);
+        assert_eq!(movement.next_attack_request_at_ms, 0.0);
+    }
+
+    #[test]
+    fn pursuit_cancels_on_escape_focus_loss_modal_and_target_removal() {
+        for reason in ["escape", "focus", "modal", "removed"] {
+            let (mut app, receiver) = input_app();
+            let mut window = Window::default();
+            window.focused = reason != "focus";
+            app.world_mut().spawn(window);
+            app.insert_resource(ButtonInput::<MouseButton>::default());
+            app.insert_resource(world_entities());
+            app.init_resource::<QuestUiIntentQueue>();
+            app.init_resource::<NpcDialogModel>();
+            // Initialise identity before arming a retained target.
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .observe_identity("1000", (10, 10), "right");
+            app.world_mut()
+                .resource_mut::<WorldPointerMovementState>()
+                .attack_target = Some(2001);
+            match reason {
+                "escape" => app
+                    .world_mut()
+                    .resource_mut::<ButtonInput<KeyCode>>()
+                    .press(KeyCode::Escape),
+                "modal" => app.world_mut().resource_mut::<NpcDialogModel>().is_open = true,
+                "removed" => app
+                    .world_mut()
+                    .resource_mut::<EntityModelSet>()
+                    .entities
+                    .retain(|entity| entity.object_id != "2001"),
+                _ => {}
+            }
+            app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .attack_target,
+                None,
+                "{reason}"
+            );
+            assert!(
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents()
+                    .is_empty(),
+                "{reason}"
+            );
+            assert!(receiver.try_recv().is_err(), "{reason}");
+        }
+    }
+
+    #[test]
     fn distant_npc_click_queues_interaction_immediately_without_movement() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
@@ -2423,7 +2897,7 @@ mod tests {
 
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
         let marker = app
             .world_mut()
@@ -2576,6 +3050,124 @@ mod tests {
     }
 
     #[test]
+    fn right_hold_started_outside_world_does_not_arm_on_entering_world() {
+        let (mut app, receiver) = input_app();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(movement_entities());
+        app.insert_resource(NativeEntityPresentation::default());
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+        app.update();
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hover_grid_context_for_test((10, 10), (672.0, 352.0));
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        assert_eq!(movement.active, None);
+        assert_eq!(movement.auto_path_destination, None);
+    }
+
+    #[test]
+    fn right_hold_refreshes_cursor_target_across_multiple_acknowledged_steps() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(movement_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (672.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { .. }))
+        ));
+        let initial_target = app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .auto_path_destination
+            .unwrap();
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+
+        // Keep the same screen coordinate, as the real presentation recomputes
+        // its world tile relative to the moving player/camera each frame.
+        for _ in 0..5 {
+            let destination = app
+                .world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .back()
+                .unwrap()
+                .to;
+            let player = app
+                .world_mut()
+                .resource_mut::<EntityModelSet>()
+                .into_inner()
+                .entities
+                .iter_mut()
+                .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                .unwrap();
+            player.x = destination.0;
+            player.y = destination.1;
+            push_test_movement_ack(&app, destination.0, destination.1, "right");
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .set_hover_grid_context_for_test(destination, (672.0, 352.0));
+            advance_movement_clock(&mut app, 600);
+            app.update();
+            assert!(
+                matches!(receiver.try_recv(), Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right")
+            );
+            app.update();
+            assert!(
+                receiver.try_recv().is_err(),
+                "held button must respect movement cadence"
+            );
+        }
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        assert!(
+            movement.pending.back().unwrap().to.0 > initial_target.0,
+            "hold stopped at its original destination"
+        );
+        assert_eq!(movement.active, Some(WorldPointerMovementMode::Run));
+        let released_target = movement.auto_path_destination;
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Right);
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hover_grid_context_for_test((10, 10), (352.0, 352.0));
+        app.update();
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        assert_eq!(movement.active, None);
+        assert_eq!(
+            movement.auto_path_destination, released_target,
+            "mouse-up must stop retargeting"
+        );
+    }
+
+    #[test]
     fn right_click_auto_path_continues_after_mouse_release_and_authoritative_progress() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
@@ -2597,7 +3189,7 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
 
         app.world_mut()
@@ -2651,7 +3243,7 @@ mod tests {
     }
 
     #[test]
-    fn right_click_auto_path_buffers_destination_step_after_mouse_release() {
+    fn stale_snapshot_cannot_rewind_packet_authority_after_250ms() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
         app.world_mut().spawn(Window::default());
@@ -2672,54 +3264,103 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
+        ));
+
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+        push_test_movement_ack(&app, 11, 10, "right");
+        advance_movement_clock(&mut app, 100);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        // Entity snapshot still reports the old tile. Waiting past the old
+        // 250 ms fallback threshold must not overwrite a newer packet ACK.
+        advance_movement_clock(&mut app, 350);
+        app.update();
+        let state = app.world().resource::<WorldPointerMovementState>();
+        assert_eq!(state.authoritative_position, Some((11, 10)));
+        assert!(state.pending.is_empty());
+        assert!(receiver.try_recv().is_err());
+    }
+
+    #[test]
+    fn delayed_movement_ack_does_not_queue_or_retry_after_timeout() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(movement_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
 
         app.world_mut()
             .resource_mut::<ButtonInput<MouseButton>>()
             .clear_just_pressed(MouseButton::Right);
-        app.world_mut()
-            .resource_mut::<ButtonInput<MouseButton>>()
-            .release(MouseButton::Right);
-        advance_movement_clock(&mut app, 600);
-        app.update();
-
-        assert!(matches!(
-            receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
-        ));
-        {
+        // Keep the right button held through a delay longer than the old
+        // timeout. No new movement may be based on an unconfirmed position.
+        for delay in [600, 600, 3000, 3000] {
+            advance_movement_clock(&mut app, delay);
+            app.update();
+            assert!(receiver.try_recv().is_err(), "unacknowledged movement was queued/retried");
             let state = app.world().resource::<WorldPointerMovementState>();
-            assert_eq!(state.pending.len(), MOVEMENT_IN_FLIGHT_LIMIT);
-            let first = state
-                .pending
-                .front()
-                .expect("initial walk remains in flight");
-            assert_eq!(first.from, (10, 10));
-            assert_eq!(first.to, (11, 10));
-            assert_eq!(first.mode, WorldPointerMovementMode::Walk);
-            let second = state
-                .pending
-                .back()
-                .expect("buffered destination walk is in flight");
-            assert_eq!(second.from, (11, 10));
-            assert_eq!(second.to, (12, 10));
-            assert_eq!(second.mode, WorldPointerMovementMode::Walk);
+            assert_eq!(state.pending.len(), 1);
+            assert_eq!(state.pending.front().unwrap().from, (10, 10));
+            assert_eq!(state.pending.front().unwrap().to, (11, 10));
         }
-
-        advance_movement_clock(&mut app, 600);
+        // The late real ACK retires the original move and allows exactly one
+        // fresh request from the confirmed tile, without replaying old steps.
+        push_test_movement_ack(&app, 11, 10, "right");
         app.update();
-        assert!(
-            receiver.try_recv().is_err(),
-            "two-entry movement window admitted an unbounded third intent"
-        );
-        assert_eq!(
-            app.world()
-                .resource::<WorldPointerMovementState>()
-                .pending
-                .len(),
-            MOVEMENT_IN_FLIGHT_LIMIT
-        );
+        assert!(matches!(receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"));
+        assert!(receiver.try_recv().is_err());
+        let state = app.world().resource::<WorldPointerMovementState>();
+        assert_eq!(state.pending.len(), 1);
+        assert_eq!(state.pending.front().unwrap().from, (11, 10));
+        assert_eq!(state.pending.front().unwrap().to, (12, 10));
+        assert_eq!(state.pending.front().unwrap().mode, WorldPointerMovementMode::Walk);
+    }
+
+    #[test]
+    fn movement_deadlines_use_real_time_after_frame_stall() {
+        let mut animation = Time::default();
+        animation.advance_by(std::time::Duration::from_millis(250));
+        let mut real = Time::<bevy::time::Real>::default();
+        real.advance_by(std::time::Duration::from_millis(2000));
+        let now = movement_now_ms(Some(&animation), Some(&real));
+        assert_eq!(now, 2000.0);
+        let mut movement = WorldPointerMovementState::default();
+        movement.run_primed_until_ms = 1200.0;
+        assert_eq!(movement.effective_mode(WorldPointerMovementMode::Run, now), WorldPointerMovementMode::Walk);
+    }
+
+    #[test]
+    fn late_ack_does_not_renew_expired_run_eligibility() {
+        let mut movement = WorldPointerMovementState::default();
+        movement.pending.push_back(pending_test_move(
+            (10, 10), (11, 10), WorldPointerMovementMode::Walk, 0.0,
+        ));
+        let ack = NativeSelfMovementAck {
+            packet: "UserLocation".to_owned(), object_id: "self".to_owned(),
+            x: 11, y: 10, direction: "right".to_owned(),
+        };
+        assert_eq!(movement.reconcile_ack(&ack, 2000.0), MovementAckOutcome::Confirmed);
+        assert_eq!(movement.effective_mode(WorldPointerMovementMode::Run, 2000.0), WorldPointerMovementMode::Walk);
     }
 
     #[test]
@@ -2863,7 +3504,7 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
 
         app.world_mut()
@@ -2875,7 +3516,7 @@ mod tests {
         app.update();
 
         let state = app.world().resource::<WorldPointerMovementState>();
-        assert_eq!(state.active, None);
+        assert_eq!(state.active, Some(WorldPointerMovementMode::Run));
         assert_eq!(state.auto_path_destination, Some((12, 10)));
         assert!(
             !state.pending.is_empty(),
@@ -2909,7 +3550,7 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
         app.world_mut()
             .resource_mut::<ButtonInput<MouseButton>>()
@@ -2998,7 +3639,7 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "right"
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
         app.world_mut()
             .resource_mut::<ButtonInput<MouseButton>>()
@@ -3152,7 +3793,7 @@ mod tests {
     }
 
     #[test]
-    fn shift_direction_emits_only_run() {
+    fn shift_direction_starts_with_one_matching_walk() {
         let (mut app, receiver) = input_app();
         app.add_systems(bevy::prelude::Update, keyboard_movement_system);
         {
@@ -3166,7 +3807,7 @@ mod tests {
         assert_eq!(intents.len(), 1);
         assert!(matches!(
             &intents[0],
-            GatewayCommand::Player(PlayerIntent::Run { direction }) if direction == "up"
+            GatewayCommand::Player(PlayerIntent::Walk { direction }) if direction == "up"
         ));
     }
 

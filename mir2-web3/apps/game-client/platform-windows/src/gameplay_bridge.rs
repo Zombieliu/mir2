@@ -69,6 +69,7 @@ pub struct NativeGameplayAdapter {
     authoritative_player_animation: Option<NativeAnimationHint>,
     animation_sequence: u64,
     damage_sequence: u64,
+    health_sequence: u64,
     damage_events: VecDeque<NativeDamageEvent>,
     effect_sequence: u64,
     effect_events: VecDeque<NativeEffectEvent>,
@@ -853,28 +854,6 @@ impl NativeGameplayAdapter {
     /// transform until save/disconnect.
     pub fn apply_authoritative_overlay(&self, payload: &mut Value) {
         let player_object_id = payload.get("playerObjectId").and_then(value_u32);
-        if let Some(transform) = &self.authoritative_player_transform {
-            if let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) {
-                if let Some(player) = entities.iter_mut().find(|entity| {
-                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
-                        || (player_object_id.is_some()
-                            && entity.get("objectId").and_then(value_u32) == player_object_id)
-                }) {
-                    player["x"] = Value::from(transform.x);
-                    player["y"] = Value::from(transform.y);
-                    if let Some(direction) = &transform.direction {
-                        player["direction"] = Value::from(direction.clone());
-                    }
-                }
-            }
-            if let Some(center) = payload
-                .get_mut("sceneView")
-                .and_then(|view| view.get_mut("center"))
-            {
-                center["x"] = Value::from(transform.x);
-                center["y"] = Value::from(transform.y);
-            }
-        }
 
         if let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) {
             entities.retain(|entity| {
@@ -912,6 +891,33 @@ impl NativeGameplayAdapter {
             }
         }
 
+        // Cached object actions carry the position at the time of attack.
+        // Apply owner transform LAST so those retained coordinates cannot
+        // separate the self sprite from the scene center on later movement.
+        if let Some(transform) = &self.authoritative_player_transform {
+            if let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) {
+                if let Some(player) = entities.iter_mut().find(|entity| {
+                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                        || (player_object_id.is_some()
+                            && entity.get("objectId").and_then(value_u32) == player_object_id)
+                }) {
+                    player["x"] = Value::from(transform.x);
+                    player["y"] = Value::from(transform.y);
+                    if let Some(direction) = &transform.direction {
+                        player["direction"] = Value::from(direction.clone());
+                    }
+                }
+            }
+            if let Some(center) = payload
+                .get_mut("sceneView")
+                .and_then(|view| view.get_mut("center"))
+            {
+                center["x"] = Value::from(transform.x);
+                center["y"] = Value::from(transform.y);
+            }
+        }
+
+
         apply_authoritative_player_vitals(
             payload,
             player_object_id,
@@ -926,7 +932,16 @@ impl NativeGameplayAdapter {
                         || (player_object_id.is_some()
                             && entity.get("objectId").and_then(value_u32) == player_object_id)
                 }) {
-                    apply_animation_hint(player, hint);
+                    // Owner movement/Struck hints and echoed ObjectAttack share
+                    // one sequence clock. Never overwrite a newer object action
+                    // with the retained hint from an earlier owner packet.
+                    if player
+                        .get("_nativeAnimationSequence")
+                        .and_then(Value::as_u64)
+                        .is_none_or(|sequence| hint.sequence >= sequence)
+                    {
+                        apply_animation_hint(player, hint);
+                    }
                 }
             }
         }
@@ -993,6 +1008,7 @@ impl NativeGameplayAdapter {
             self.effect_sequence = 0;
             self.animation_sequence = 0;
             self.damage_sequence = 0;
+            self.health_sequence = 0;
             self.notice_sequence = 0;
             self.notice_update = None;
             self.clear_zone_state();
@@ -1295,10 +1311,29 @@ impl NativeGameplayAdapter {
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
+        self.health_sequence = self.health_sequence.saturating_add(1);
         let overlay = self.zone_entities.entry(object_id).or_default();
         overlay.insert("objectId".to_owned(), Value::from(object_id));
+        overlay.insert(
+            "_healthRevision".to_owned(),
+            Value::from(self.health_sequence),
+        );
+        overlay.insert("_healthGeneration".to_owned(), Value::from(self.generation));
+        overlay.insert(
+            "_healthExpireSeconds".to_owned(),
+            Value::from(
+                body.get("expire")
+                    .and_then(Value::as_i64)
+                    .unwrap_or(0)
+                    .max(0),
+            ),
+        );
         copy_packet_fields(body, overlay, &["hp", "maxHp"]);
         if let Some(percent) = body.get("percent").and_then(value_i32) {
+            overlay.insert(
+                "_healthPercent".to_owned(),
+                Value::from(percent.clamp(0, 100)),
+            );
             overlay.insert(
                 "_packetHealthPercent".to_owned(),
                 Value::from(percent.clamp(0, 100)),
@@ -1356,6 +1391,19 @@ impl NativeGameplayAdapter {
             return;
         }
         self.damage_sequence = self.damage_sequence.saturating_add(1);
+        if body.get("damage").and_then(value_i32).unwrap_or(0) > 0
+            && matches!(
+                body.get("damageType").and_then(value_i32).unwrap_or(0),
+                0 | 2
+            )
+        {
+            // UI reveal only: health still comes from ObjectHealth. Ordinary
+            // shared-Zone hit packets currently carry Expire=0.
+            self.zone_entities.entry(object_id).or_default().insert(
+                "_healthHitRevision".to_owned(),
+                Value::from(self.damage_sequence),
+            );
+        }
         self.damage_events.push_back(NativeDamageEvent {
             sequence: self.damage_sequence,
             object_id,
@@ -1399,6 +1447,16 @@ impl NativeGameplayAdapter {
         }
         .unwrap_or(1)
         .max(1);
+        if is_gold {
+            let frame = match quantity {
+                0..=99 => 112,
+                100..=199 => 113,
+                200..=499 => 114,
+                500..=999 => 115,
+                _ => 116,
+            };
+            overlay.insert("image".to_owned(), Value::from(frame));
+        }
         overlay.insert("quantity".to_owned(), Value::from(quantity));
         if overlay.get("name").is_none() {
             overlay.insert(
@@ -1681,6 +1739,7 @@ pub fn drain_gameplay_events(
         models.pending.release_all_quest_operations();
         inbox.clear_movement_acks();
         models.notice.reset_session();
+        models.entity_presentation.reset_session();
     }
     if !should_apply_gameplay_snapshot(shell.screen) {
         *models.quests = QuestTracker::default();
@@ -1703,6 +1762,18 @@ pub fn drain_gameplay_events(
     }
     if snapshots.is_empty() {
         return;
+    }
+    let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    // HUD state may coalesce to the latest snapshot; actor action feeds may
+    // not. Consume every packet projection before selecting the final UI view.
+    for payload in snapshots
+        .iter()
+        .filter(|snapshot| !snapshot.big_map_only)
+        .filter_map(|snapshot| snapshot.entity_render_payload.as_ref())
+    {
+        models
+            .entity_presentation
+            .observe_packet_payload(payload.clone(), now_ms);
     }
     for update in snapshots
         .iter()
@@ -1757,7 +1828,6 @@ pub fn drain_gameplay_events(
             &snapshot.effect_events,
             &snapshot.zone_entity_tiles,
         );
-        models.entity_presentation.replace_payload(payload.clone());
         models.entity_overlays.replace_payload(payload);
     }
 }
@@ -4509,6 +4579,32 @@ mod tests {
     }
 
     #[test]
+    fn cached_self_attack_cannot_separate_player_from_camera_after_movement() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut base = gameplay_payload();
+        let object_id = base["entities"][0]["objectId"].clone();
+        base["playerObjectId"] = object_id.clone();
+        adapter.observe_world_snapshot(&base);
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectAttack".to_owned(),
+            payload: json!({"objectId":object_id,"location":{"x":288,"y":616},"direction":"Down","type":0}),
+        });
+        for (x, y) in [(289,615), (290,613), (286,618)] {
+            adapter.observe_packet(&PacketEvent::Other {
+                packet: "UserLocation".to_owned(),
+                payload: json!({"x":x,"y":y,"direction":"UpRight"}),
+            });
+            let mut payload = base.clone();
+            adapter.apply_authoritative_overlay(&mut payload);
+            assert_eq!(payload["entities"][0]["x"], json!(x));
+            assert_eq!(payload["entities"][0]["y"], json!(y));
+            assert_eq!(payload["entities"][0]["direction"], json!("UpRight"));
+            assert_eq!(payload["sceneView"]["center"]["x"], json!(x));
+            assert_eq!(payload["sceneView"]["center"]["y"], json!(y));
+        }
+    }
+
+    #[test]
     fn user_location_overlays_stale_personal_snapshot() {
         let mut adapter = NativeGameplayAdapter::default();
         adapter.observe_packet(&PacketEvent::Other {
@@ -4523,6 +4619,67 @@ mod tests {
         assert_eq!(payload["entities"][0]["direction"], json!("UpRight"));
         assert_eq!(payload["sceneView"]["center"]["x"], json!(289));
         assert_eq!(payload["sceneView"]["center"]["y"], json!(615));
+    }
+
+    #[test]
+    fn newer_self_object_actions_survive_retained_owner_movement_and_struck_hints() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut base = gameplay_payload();
+        let object_id = base["entities"][0]["objectId"].clone();
+        base["playerObjectId"] = object_id.clone();
+        adapter.observe_world_snapshot(&base);
+        adapter.authoritative_player_animation = Some(adapter.next_animation_hint("walking"));
+        for (packet, expected) in [
+            ("ObjectAttack", "attack1"),
+            ("ObjectRangeAttack", "attackRange1"),
+        ] {
+            assert!(adapter.observe_packet(&PacketEvent::Other {
+                packet: packet.to_owned(),
+                payload: json!({"objectId": object_id, "direction": "Right"}),
+            }));
+            let mut rendered = base.clone();
+            adapter.apply_authoritative_overlay(&mut rendered);
+            assert_eq!(rendered["entities"][0]["_nativeAnimationAction"], expected);
+        }
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "Struck".to_owned(),
+            payload: json!({"attackerId": 2001}),
+        }));
+        let mut rendered = base.clone();
+        adapter.apply_authoritative_overlay(&mut rendered);
+        assert_eq!(rendered["entities"][0]["_nativeAnimationAction"], "struck");
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectAttack".to_owned(),
+            payload: json!({"objectId": object_id}),
+        }));
+        adapter.apply_authoritative_overlay(&mut rendered);
+        assert_eq!(rendered["entities"][0]["_nativeAnimationAction"], "attack1");
+    }
+
+    #[test]
+    fn repeated_object_health_refreshes_packet_revision_without_damage_or_animation() {
+        let mut adapter = NativeGameplayAdapter::default();
+        for revision in 1..=2 {
+            assert!(adapter.observe_packet(&PacketEvent::Other {
+                packet: "ObjectHealth".to_owned(),
+                payload: json!({"objectId": 2001, "percent": 75, "expire": 5}),
+            }));
+            let overlay = &adapter.zone_entities[&2001];
+            assert_eq!(overlay["_healthRevision"], revision);
+            assert_eq!(overlay["_healthPercent"], 75);
+            assert_eq!(overlay["_healthExpireSeconds"], 5);
+            assert_eq!(adapter.animation_sequence, 0);
+            assert_eq!(adapter.damage_sequence, 0);
+        }
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectHealth".to_owned(),
+            payload: json!({"objectId": 2001, "percent": 120, "expire": -1}),
+        }));
+        assert_eq!(adapter.zone_entities[&2001]["_healthPercent"], 100);
+        assert_eq!(adapter.zone_entities[&2001]["_healthExpireSeconds"], 0);
+        adapter.set_generation(2);
+        assert_eq!(adapter.health_sequence, 0);
+        assert!(adapter.zone_entities.is_empty());
     }
 
     #[test]

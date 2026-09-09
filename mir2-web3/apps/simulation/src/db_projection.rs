@@ -753,6 +753,7 @@ mod tests {
             deleted: false,
         });
         systems.auction.push(crate::config::Stage5AuctionListing {
+            item_state_json: None,
             id: 5,
             seller: "Hero".to_string(),
             item_key: "iron-sword".to_string(),

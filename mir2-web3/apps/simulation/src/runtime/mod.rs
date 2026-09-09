@@ -11,6 +11,7 @@ mod gm_commands;
 mod hazard;
 mod hero_ai;
 mod inventory;
+mod item_custody;
 mod items;
 mod leveling;
 mod map;
@@ -25,6 +26,7 @@ mod onchain;
 mod packets;
 mod pathfind;
 mod quests;
+mod refine_oven;
 mod rental;
 mod resources;
 mod save;
@@ -61,6 +63,7 @@ pub use zone::{
     ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
     ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
+    ZoneVitalSettlement,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

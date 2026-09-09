@@ -8,7 +8,7 @@
 
 use core::fmt;
 use std::collections::VecDeque;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use bevy::prelude::Resource;
 
@@ -17,6 +17,7 @@ pub enum NativeShellScreen {
     Connecting,
     Login,
     Authenticating,
+    OpeningLogin,
     CharacterSelect,
     CharacterCreate,
     StartingGame,
@@ -379,6 +380,7 @@ impl ShellNotice {
 #[derive(Clone, Default, PartialEq, Eq, Resource)]
 pub struct NativeShellModel {
     pub screen: NativeShellScreen,
+    pub login_opening_elapsed: Duration,
     pub login: LoginForm,
     pub login_request_in_flight: bool,
     pub register_request_in_flight: bool,
@@ -438,7 +440,29 @@ impl fmt::Debug for NativeShellModel {
 }
 
 impl NativeShellModel {
+    /// Crystal shows idle ChrSel/0, then frames 1..18 at 100 ms each.
+    /// The nineteenth offset completes the animation instead of being drawn.
+    pub fn login_opening_frame(&self) -> u32 {
+        if self.screen == NativeShellScreen::OpeningLogin {
+            (1 + self.login_opening_elapsed.as_millis() / 100).min(18) as u32
+        } else {
+            0
+        }
+    }
+
+    pub fn advance_login_opening(&mut self, delta: Duration) {
+        if self.screen != NativeShellScreen::OpeningLogin {
+            return;
+        }
+        self.login_opening_elapsed = self.login_opening_elapsed.saturating_add(delta);
+        if self.login_opening_elapsed >= Duration::from_millis(1800) {
+            self.screen = NativeShellScreen::CharacterSelect;
+            self.login_opening_elapsed = Duration::ZERO;
+        }
+    }
+
     fn clear_session_payload(&mut self) {
+        self.login_opening_elapsed = Duration::ZERO;
         self.characters.clear();
         self.selected_character_index = None;
         self.active_character = None;
@@ -1014,7 +1038,8 @@ impl NativeShellModel {
             ) if self.login_request_in_flight => {
                 self.login_request_in_flight = false;
                 self.logout_request_in_flight = false;
-                self.screen = NativeShellScreen::CharacterSelect;
+                self.screen = NativeShellScreen::OpeningLogin;
+                self.login_opening_elapsed = Duration::ZERO;
                 self.last_account = Some(account);
                 self.selected_character_index = characters.first().map(|character| character.index);
                 self.characters = characters;
@@ -1222,6 +1247,57 @@ impl NativeShellModel {
 mod tests {
     use super::*;
 
+    #[test]
+    fn login_door_uses_original_frames_and_blocks_start_until_completion() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Authenticating;
+        model.login_request_in_flight = true;
+        let event = NativeGatewayEvent::LoginSuccess {
+            account: "door-test".to_owned(),
+            characters: vec![CharacterSummary::new(7, "Hero", 1, "Warrior", "Male")],
+        };
+        assert!(model.apply_gateway_event(event.clone()));
+        assert_eq!(model.screen, NativeShellScreen::OpeningLogin);
+        assert_eq!(model.login_opening_frame(), 1);
+        assert!(!model.apply_ui_intent(NativeUiIntent::StartGame));
+        model.advance_login_opening(Duration::from_millis(99));
+        assert_eq!(model.login_opening_frame(), 1);
+        model.advance_login_opening(Duration::from_millis(1));
+        assert_eq!(model.login_opening_frame(), 2);
+        assert!(!model.apply_gateway_event(event));
+        assert_eq!(model.login_opening_frame(), 2, "duplicate success restarted door");
+        model.advance_login_opening(Duration::from_millis(1699));
+        assert_eq!(model.screen, NativeShellScreen::OpeningLogin);
+        assert_eq!(model.login_opening_frame(), 18);
+        model.advance_login_opening(Duration::from_millis(1));
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert_eq!(model.selected_character_index, Some(7));
+        assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+    }
+
+    #[test]
+    fn disconnect_during_door_cannot_later_reveal_stale_characters() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::Authenticating;
+        model.login_request_in_flight = true;
+        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            account: "door-test".to_owned(), characters: Vec::new(),
+        }));
+        model.advance_login_opening(Duration::from_millis(900));
+        assert!(model.apply_gateway_event(NativeGatewayEvent::Disconnect { reason: None }));
+        model.advance_login_opening(Duration::from_secs(10));
+        assert_eq!(model.screen, NativeShellScreen::ConnectionLost);
+    }
+
+    impl NativeShellModel {
+        // Existing post-login scenarios start after the visual transition.
+        fn apply_completed_login_for_test(&mut self, event: NativeGatewayEvent) -> bool {
+            let applied = self.apply_gateway_event(event);
+            self.advance_login_opening(Duration::from_millis(1800));
+            applied
+        }
+    }
+
     fn model_with_valid_login() -> NativeShellModel {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::Login;
@@ -1261,7 +1337,7 @@ mod tests {
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
         assert_eq!(model.screen, NativeShellScreen::Authenticating);
 
-        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+        assert!(model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
             account: "test-account".to_owned(),
             characters: starter_characters(),
         }));
@@ -1317,7 +1393,7 @@ mod tests {
         );
 
         assert!(
-            register_then_login.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            register_then_login.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
                 account: "test-account".to_owned(),
                 characters: starter_characters(),
             })
@@ -1334,7 +1410,7 @@ mod tests {
         assert!(login_then_register.apply_ui_intent(NativeUiIntent::Login));
 
         assert!(
-            login_then_register.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            login_then_register.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
                 account: "test-account".to_owned(),
                 characters: starter_characters(),
             })
@@ -1422,7 +1498,7 @@ mod tests {
         assert!(model.apply_ui_intent(NativeUiIntent::RegisterAccount));
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
 
-        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+        assert!(model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
             account: "test-account".to_owned(),
             characters: starter_characters(),
         }));
@@ -1432,7 +1508,7 @@ mod tests {
         assert!(model.register_request_in_flight);
 
         assert!(
-            !model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+            !model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
                 account: "stale-account".to_owned(),
                 characters: vec![CharacterSummary::new(9, "stale", 99, "Wizard", "Male")],
             })
@@ -1508,7 +1584,7 @@ mod tests {
     fn empty_roster_is_supported_after_login_success() {
         let mut model = model_with_valid_login();
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
-        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+        assert!(model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
             account: "test-account".to_owned(),
             characters: Vec::new(),
         }));
@@ -1632,7 +1708,7 @@ mod tests {
         assert!(!before.contains("secret-pass"));
 
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
-        assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
+        assert!(model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
             account: "test-account".to_owned(),
             characters: Vec::new(),
         }));

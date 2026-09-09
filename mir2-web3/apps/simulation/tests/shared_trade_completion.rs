@@ -100,12 +100,12 @@ fn shared_preparation_is_not_completion_and_cannot_be_debited_twice() {
     let (packets, own) = session.shared_trade_confirm();
     let own = own.expect("typed preparation returns the identified offer");
     assert_eq!(completions(&packets), 0);
-    assert_eq!(packets, vec![ServerPacket::LoseGold { gold: 25 }]);
+    assert!(packets.is_empty());
     let held = session.world_snapshot();
     let trade = held.stage5_systems.trade.as_ref().unwrap();
     assert!(trade.escrow_prepared && trade.locked && trade.accepted);
     assert!(!trade.completed);
-    assert_eq!(held.gold, before.gold - 25);
+    assert_eq!(held.gold, before.gold);
     assert_eq!(held.inventory_items.len() + 1, before.inventory_items.len());
     assert_eq!(session.shared_trade_confirm(), (Vec::new(), None));
     for packet in [
@@ -129,13 +129,13 @@ fn shared_preparation_is_not_completion_and_cannot_be_debited_twice() {
     assert!(refund
         .iter()
         .any(|p| matches!(p, ServerPacket::TradeCancel { unlock: false })));
-    assert_eq!(session.world_snapshot().gold, before.gold);
+    assert_eq!(session.world_snapshot().gold, before.gold + 25);
     assert_eq!(
         session.world_snapshot().inventory_items.len(),
         before.inventory_items.len()
     );
     assert!(session.rollback_shared_trade_offer(&own).is_empty());
-    assert_eq!(session.world_snapshot().gold, before.gold);
+    assert_eq!(session.world_snapshot().gold, before.gold + 25);
 }
 
 #[test]
@@ -178,7 +178,7 @@ fn invalid_offer_identity_or_slots_cannot_prepare_or_charge_gold() {
                 trade["offeredSlots"] = json!({"10": slot});
                 trade["offeredUniqueIds"] = json!({"10": uid});
             }
-            "balance" => trade["offeredGold"] = json!(session.world_snapshot().gold + 1),
+            "balance" => trade["offeredGold"] = json!(session.world_snapshot().gold + 26),
             _ => unreachable!(),
         }
         checkpoint.stage5_systems_json = Some(systems.to_string());
@@ -231,6 +231,7 @@ fn durable_completion_is_after_saved_delivery_once_for_live_legacy_and_pretrade_
                 .as_object_mut()
                 .unwrap()
                 .remove("escrowPrepared");
+            systems["trade"].as_object_mut().unwrap().remove("heldGold");
             systems["trade"]["completed"] = json!(true);
             held.stage5_systems_json = Some(systems.to_string());
             session.restore_active_character_checkpoint(&held).unwrap();

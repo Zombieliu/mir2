@@ -1058,6 +1058,8 @@ impl NativePlayerUiState {
             || self.inventory_delete_prompt.is_some()
             || self.guild_gold_prompt.is_some()
             || self.trade_dialog.open
+            || self.trade_dialog.message.is_some()
+            || self.trade_dialog.input_consumed
             || self.help.open
     }
     pub fn blocks_world_action(&self, dialog_open: bool, dead: bool) -> bool {
@@ -1123,6 +1125,8 @@ impl NativePlayerUiState {
         self.inventory_delete_prompt.is_some()
             || self.guild_gold_prompt.is_some()
             || self.trade_dialog.gold_prompt.is_some()
+            || self.trade_dialog.message.is_some()
+            || self.trade_dialog.input_consumed
     }
 
     /// Open the source-shaped delete prompt for one current carried-item
@@ -2219,8 +2223,9 @@ enum OverlayButton {
     GuildRankNameSave,
     GuildRankTogglePermission(u8),
     TradeRequest,
-    TradeAccept,
-    TradeDecline,
+    TradeAccept(u64),
+    TradeDecline(u64),
+    TradeMessageClose(u64),
     TradeGoldOffer,
     TradeGoldConfirm,
     TradeGoldCancel,
@@ -2447,6 +2452,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate)
+                    .before(consume_hud_buttons)
                     .before(process_overlay_keyboard),
             )
             .add_systems(
@@ -3537,6 +3543,35 @@ pub(crate) fn process_overlay_keyboard(
         ui,
     } = keyboard_controls;
 
+    if let Some(message) = state.trade_dialog.message.as_ref() {
+        let revision = message.revision();
+        let action = typed
+            .read()
+            .filter(|event| event.state == ButtonState::Pressed && !event.repeat)
+            .find_map(|event| match event.key_code {
+                KeyCode::Escape => Some(false),
+                KeyCode::Enter | KeyCode::NumpadEnter => Some(true),
+                _ => None,
+            })
+            .or_else(|| {
+                if keys.just_pressed(KeyCode::Escape) {
+                    Some(false)
+                } else if keys.just_pressed(KeyCode::Enter)
+                    || keys.just_pressed(KeyCode::NumpadEnter)
+                {
+                    Some(true)
+                } else {
+                    None
+                }
+            });
+        typed.clear();
+        if let Some(accept) = action {
+            if let Some(social) = social.as_deref() {
+                trade_dialog::answer_message(&mut state, social, &mut intents, revision, accept);
+            }
+        }
+        return;
+    }
     if state.guild_gold_prompt.is_some() {
         let events: Vec<_> = typed.read().cloned().collect();
         let action = state
@@ -4207,8 +4242,31 @@ fn process_overlay_buttons(
     let gold_modal_was_open = state.guild_gold_prompt.is_some();
     let trade_modal_was_open = state.trade_dialog.gold_prompt.is_some();
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
+    let message_was_open = state.trade_dialog.message.is_some();
     for (interaction, button) in buttons.iter() {
         if *interaction != Interaction::Pressed {
+            continue;
+        }
+        if state.trade_dialog.input_consumed {
+            continue;
+        }
+        if message_was_open || state.trade_dialog.message.is_some() {
+            match *button {
+                OverlayButton::TradeAccept(revision) => {
+                    trade_dialog::answer_message(&mut state, &social, &mut intents, revision, true);
+                }
+                OverlayButton::TradeDecline(revision)
+                | OverlayButton::TradeMessageClose(revision) => {
+                    trade_dialog::answer_message(
+                        &mut state,
+                        &social,
+                        &mut intents,
+                        revision,
+                        false,
+                    );
+                }
+                _ => {}
+            }
             continue;
         }
         if (trade_modal_was_open || state.trade_dialog.gold_prompt.is_some())
@@ -4818,21 +4876,13 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::TradeRequest => {
-                intents.push_social_pending(&mut social, NativePlayerUiIntent::TradeRequest);
+                // The inviter receives no request acknowledgement; refusal can
+                // be only a chat line. Never leave an unresolvable pending key.
+                intents.push_transient_unique(NativePlayerUiIntent::TradeRequest);
             }
-            OverlayButton::TradeAccept => {
-                intents.push_social_pending(
-                    &mut social,
-                    NativePlayerUiIntent::TradeReply {
-                        accept_invite: true,
-                    },
-                );
-            }
-            OverlayButton::TradeDecline => {
-                intents.push_transient_unique(NativePlayerUiIntent::TradeReply {
-                    accept_invite: false,
-                });
-            }
+            OverlayButton::TradeAccept(_)
+            | OverlayButton::TradeDecline(_)
+            | OverlayButton::TradeMessageClose(_) => {}
             OverlayButton::TradeGoldOffer => {
                 trade_dialog::open_gold(&mut state, &social, gold);
             }
@@ -6627,9 +6677,11 @@ fn render_overlays(
         fill_panel(
             &mut commands,
             &mut delete_layers.p4(),
-            state.trade_dialog.gold_prompt.is_some(),
+            state.trade_dialog.gold_prompt.is_some() || state.trade_dialog.message.is_some(),
             |parent| {
-                if let Some(prompt) = &state.trade_dialog.gold_prompt {
+                if let Some(message) = &state.trade_dialog.message {
+                    trade_dialog::render_message(parent, asset_server.as_deref(), message);
+                } else if let Some(prompt) = &state.trade_dialog.gold_prompt {
                     render_gold_amount_modal(
                         parent,
                         asset_server.as_deref(),
@@ -9373,12 +9425,8 @@ fn render_trade_panel(
     _inventory: &InventoryModel,
     _player: &crate::read_model::PlayerStats,
 ) {
-    // Only the legacy invitation/idle surface remains here. Accepted offers
-    // belong exclusively to TradeDialog/GuestTradeDialog; do not retain the
-    // invented text rows, first-ten bag mapping or fixed 100-gold control.
-    // Original MirMessageBox invitation/cancellation geometry is a separate
-    // tracked leaf, not accepted by the new trade window geometry tests.
-    if social.trade.state == "open" {
+    // Invitations are independent modal MirMessageBoxes, not this panel.
+    if social.trade.state == "open" || social.trade.state == "requested" {
         return;
     }
     parent
@@ -9398,19 +9446,7 @@ fn render_trade_panel(
         ))
         .with_children(|dialog| {
             title(dialog, "Trade");
-            if social.trade.state == "requested" {
-                body(
-                    dialog,
-                    &format!(
-                        "Player {} has requested to trade with you.",
-                        social.trade.partner.as_deref().unwrap_or("")
-                    ),
-                );
-                overlay_button(dialog, "Accept trade", OverlayButton::TradeAccept, true);
-                overlay_button(dialog, "Decline trade", OverlayButton::TradeDecline, true);
-            } else {
-                overlay_button(dialog, "Request trade", OverlayButton::TradeRequest, true);
-            }
+            overlay_button(dialog, "Request trade", OverlayButton::TradeRequest, true);
             overlay_button(dialog, "Close", OverlayButton::CloseSocial, true);
         });
 }
