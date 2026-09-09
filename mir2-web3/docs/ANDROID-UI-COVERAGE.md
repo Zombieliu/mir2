@@ -7,6 +7,14 @@ are not edited.
 
 ## Implemented
 
+- Local `bc392f889`: Android IME temporarily collapses mail attachment/gold
+  presentation and moves the same shared Send/Cancel under the fields, with
+  44 logical-pixel targets. IME dismissal restores details and geometry.
+  Shared585/normal87/preview90, both APKs and API31 draft/attachment/Cancel
+  short flow pass. Evidence:
+  `generated/player-qa/native-android-mail-compact-20260909/README.md`.
+  Longer run was killed by lowmemorykiller at ~1.2GB RSS; memory/stability
+  and process-death recovery remain open, not hidden by the short-flow pass.
 - Local `5b909ce45`: ChatSettings now switches Title/466→467 with the tab;
   FILTER/CHAT BOX image families match actual staged PNG labels and actions.
   Failure-first tests, shared584/normal86/preview89, both APKs and API31

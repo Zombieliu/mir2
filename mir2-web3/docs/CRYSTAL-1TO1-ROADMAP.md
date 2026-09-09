@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local `bc392f889`: compact mail IME footer with shared
+> action identities and restored attachment/draft presentation. Shared585/
+> normal87/preview90, both APKs, API31 short typing/attachment/Cancel pass.
+> `docs/generated/player-qa/native-android-mail-compact-20260909/README.md`.
+> Longer attempt hit lowmemorykiller (~1.2GB RSS); memory/soak gate remains
+> open alongside whole phone layout, live networking and physical device.
+
 > 2026-09-09 Android local `5b909ce45`: ChatSettings tab background and
 > staged FILTER/CHAT BOX label mapping corrected. Failure-first tests,
 > shared584/normal86/preview89, both APKs and API31 tab/transparent/Apply pass.
