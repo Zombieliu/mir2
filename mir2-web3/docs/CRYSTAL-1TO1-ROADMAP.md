@@ -1,5 +1,10 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android memory baseline: 33 cold-launch UI specimens pass,
+> but repeated mail editing reproduces native-heap growth and a second
+> lowmemorykiller termination (1171124KB RSS). No fix/soak acceptance claimed.
+> `docs/generated/player-qa/native-android-memory-baseline-20260909/README.md`.
+
 > 2026-09-09 Android local `bc392f889`: compact mail IME footer with shared
 > action identities and restored attachment/draft presentation. Shared585/
 > normal87/preview90, both APKs, API31 short typing/attachment/Cancel pass.

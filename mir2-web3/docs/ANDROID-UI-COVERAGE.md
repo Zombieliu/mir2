@@ -87,6 +87,11 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- `native-android-memory-baseline-20260909`: 33 cold-launch specimens pass;
+  Help idle RSS ~303MiB, but repeated mail editing grows from 513→820MiB
+  across 20 samples, then is killed again at 1171124KB RSS. Native heap
+  growth is reproducible; exact allocation/lifetime cause is not diagnosed.
+  Prior short-flow passes do not close stability. Instrument before fixing.
 - `8423b220c` fixes ordinary/rich hint coordinate conversion under UiScale.
   The earlier "old stage clamp" diagnosis was imprecise: window coordinates
   were being scaled twice. Failure-first/system tests shared581,
