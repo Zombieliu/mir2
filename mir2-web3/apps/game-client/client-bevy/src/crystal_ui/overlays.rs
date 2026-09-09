@@ -6177,13 +6177,26 @@ fn render_inventory_delete_modal(
                             OverlayButton::InventoryDeleteCancel,
                         );
                     }
-                    overlay_text_at(
-                        dialog,
-                        &format!("Delete how many '{name}'?", name = target.name),
-                        CrystalRect::new(19.0, 8.0, 158.0, 14.0),
-                        10.0,
-                        TEXT,
-                    );
+                    // Two title lines fit above the item at y=34, without
+                    // painting the item name underneath the close button.
+                    dialog.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: px(19.0),
+                            top: px(4.0),
+                            width: px(158.0),
+                            height: px(28.0),
+                            overflow: Overflow::clip(),
+                            ..default()
+                        },
+                        Text::new(format!("Delete how many '{name}'?", name = target.name)),
+                        TextFont {
+                            font_size: FontSize::Px(10.0),
+                            ..default()
+                        },
+                        TextColor(TEXT),
+                        TextLayout::new(Justify::Left, LineBreak::WordBoundary),
+                    ));
 
                     let parsed = draft.parse::<u32>().ok();
                     let border = match parsed {
@@ -17182,6 +17195,35 @@ mod tests {
             .intents
             .is_empty());
         assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
+    }
+
+    #[test]
+    fn delete_amount_title_reserves_two_lines_before_item_and_input() {
+        let mut app = overlay_render_test_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .inventory_delete_prompt = Some(InventoryDeletePrompt::Amount {
+            target: InventoryDeleteTarget {
+                unique_id: 42,
+                slot: 0,
+                key: "specimen".into(),
+                name: "UI specimen 12".into(),
+                max_count: 12,
+            },
+            draft: "12".into(),
+            select_all: true,
+        });
+        app.update();
+        let world = app.world_mut();
+        let mut query = world.query::<(&Text, &Node, &TextLayout)>();
+        let (_, node, layout) = query
+            .iter(world)
+            .find(|(text, _, _)| text.0 == "Delete how many 'UI specimen 12'?")
+            .expect("full item name stays in the prompt");
+        assert_eq!(layout.linebreak, LineBreak::WordBoundary);
+        assert_eq!(node.top, Val::Px(4.0));
+        assert_eq!(node.height, Val::Px(28.0));
+        assert_eq!(node.width, Val::Px(158.0));
     }
 
     #[test]
