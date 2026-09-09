@@ -1,5 +1,10 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android priority correction: playable login→StartGame→map/player
+> loop first, physical-device acceptance deferred. First typed server-position
+> Java/JNI/Rust bridge passes Java8/Android88/preview91. It is partial host
+> data storage, NOT shared scene bootstrap or a live player-loop acceptance.
+
 > 2026-09-09 Android memory baseline: 33 cold-launch UI specimens pass,
 > but repeated mail editing reproduces native-heap growth and a second
 > lowmemorykiller termination (1171124KB RSS). No fix/soak acceptance claimed.

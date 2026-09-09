@@ -5,6 +5,24 @@ Android UI acceptance or a completed online client**. Work is isolated on
 `codex/android-player-journey`; the original checkout and Windows backend
 are not edited.
 
+## Current priority — playable flow first
+
+User correction on 2026-09-09: finish the actual game flow before requesting
+physical-device acceptance. Prioritize real login/roster/StartGame → shared
+scene/bootstrap → authoritative movement and basic player actions. Whole phone
+UI/input follows that playable flow; offline polish and memory diagnosis must
+not displace it. Physical-device purchase/testing is deferred, not a blocker
+to implementing the client. Approved live Gateway still required for live claims.
+
+First host-data bridge increment carries immutable server player/map/x/y in
+GatewaySession.View and JNI JSON, validating into Rust HostState rather than
+parsing a notice. Non-world phases clear it. Java TLS fixtures8/8, Android88/88,
+preview91/91 pass. Initial direct Gradle invocation lacked ANDROID_HOME; rerun
+with the existing SDK path passed. Logs `/tmp/android-world-bridge-{java,rust,preview}.log`.
+This stores a partial server projection only: shared world/render bootstrap,
+full packet/read-model/effect routing, real Gateway login and visible map are
+NOT complete. No new APK/screenshot/live acceptance claimed in this increment.
+
 ## Implemented
 
 - Local `bc392f889`: Android IME temporarily collapses mail attachment/gold
