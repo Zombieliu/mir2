@@ -518,6 +518,7 @@ fn sync_crystal_hint_overlay(
 
 fn position_crystal_hint_overlay(
     windows: Query<&Window, With<PrimaryWindow>>,
+    ui_scale: Option<Res<UiScale>>,
     mut roots: Query<
         (
             &mut Node,
@@ -558,9 +559,11 @@ fn position_crystal_hint_overlay(
         *visibility = Visibility::Hidden;
         return;
     };
-    let bounds = Vec2::new(window.resolution.width(), window.resolution.height());
+    let scale = hint_ui_scale(ui_scale.as_deref());
+    let cursor = cursor / scale;
+    let bounds = Vec2::new(window.resolution.width(), window.resolution.height()) / scale;
     let bounds_changed = layout_state.last_window_bounds != Some(bounds);
-    let scale_factor = window.scale_factor();
+    let scale_factor = window.scale_factor() * scale;
     let scale_factor_changed = layout_state.last_window_scale_factor != Some(scale_factor);
     if bounds_changed {
         layout_state.last_window_bounds = Some(bounds);
@@ -591,6 +594,7 @@ fn position_crystal_hint_overlay(
 
 fn position_crystal_item_hint_overlay(
     windows: Query<&Window, With<PrimaryWindow>>,
+    ui_scale: Option<Res<UiScale>>,
     mut roots: Query<
         (
             &mut Node,
@@ -621,8 +625,10 @@ fn position_crystal_item_hint_overlay(
         return;
     };
 
-    let bounds = Vec2::new(window.resolution.width(), window.resolution.height());
-    let scale_factor = window.scale_factor();
+    let scale = hint_ui_scale(ui_scale.as_deref());
+    let cursor = cursor / scale;
+    let bounds = Vec2::new(window.resolution.width(), window.resolution.height()) / scale;
+    let scale_factor = window.scale_factor() * scale;
     let bounds_changed = layout_state.last_window_bounds != Some(bounds);
     let scale_factor_changed = layout_state.last_window_scale_factor != Some(scale_factor);
     layout_state.last_window_bounds = Some(bounds);
@@ -644,6 +650,16 @@ fn position_crystal_item_hint_overlay(
     if *visibility != Visibility::Visible {
         *visibility = Visibility::Visible;
     }
+}
+
+// Window cursor/bounds are OS-logical pixels, but root Node::Px positions
+// and ComputedNode::size * inverse_scale_factor are unscaled UI coordinates.
+// Convert once; never apply the centered game-stage offset to an overlay root.
+fn hint_ui_scale(scale: Option<&UiScale>) -> f32 {
+    scale
+        .map(|scale| scale.0)
+        .filter(|scale| scale.is_finite() && *scale > 0.0)
+        .unwrap_or(1.0)
 }
 
 pub fn crystal_hint_position(cursor: Vec2, size: Vec2) -> Vec2 {
@@ -1001,6 +1017,100 @@ mod tests {
                 .0,
             Some(hovered)
         );
+    }
+
+    #[test]
+    fn item_hint_system_uses_scaled_ui_coordinates_and_remeasures_on_scale_change() {
+        let mut app = App::new();
+        app.insert_resource(UiScale(0.5));
+        let mut window = Window::default();
+        window.resolution.set(1280.0, 720.0);
+        window.set_cursor_position(Some(Vec2::new(1200.0, 60.0)));
+        app.world_mut().spawn((window, PrimaryWindow));
+        let root = app
+            .world_mut()
+            .spawn((
+                CrystalItemHintOverlayRoot,
+                CrystalItemHintOverlayState {
+                    active: true,
+                    ..default()
+                },
+                CrystalHintOverlayLayoutState::default(),
+                Node::default(),
+                ComputedNode {
+                    size: Vec2::new(100.0, 40.0),
+                    inverse_scale_factor: 1.0,
+                    ..default()
+                },
+                Visibility::Hidden,
+            ))
+            .id();
+        app.add_systems(Update, position_crystal_item_hint_overlay);
+        for scale in [0.5, 1.0, 2.0] {
+            app.world_mut().resource_mut::<UiScale>().0 = scale;
+            app.update();
+            assert_eq!(
+                *app.world().get::<Visibility>(root).unwrap(),
+                Visibility::Hidden
+            );
+            app.update();
+            let expected = crystal_item_hint_position_for_bounds(
+                Vec2::new(1200.0, 60.0) / scale,
+                Vec2::new(100.0, 40.0),
+                Vec2::new(1280.0, 720.0) / scale,
+            );
+            let node = app.world().get::<Node>(root).unwrap();
+            assert_eq!(node.left, Val::Px(expected.x));
+            assert_eq!(node.top, Val::Px(expected.y));
+            assert_eq!(
+                *app.world().get::<Visibility>(root).unwrap(),
+                Visibility::Visible
+            );
+        }
+    }
+
+    #[test]
+    fn hint_system_converts_window_coordinates_to_scaled_ui_space() {
+        let mut app = App::new();
+        app.insert_resource(UiScale(0.5));
+        let target = app.world_mut().spawn_empty().id();
+        let mut window = Window::default();
+        window.resolution.set(1280.0, 720.0);
+        window.set_cursor_position(Some(Vec2::new(1200.0, 60.0)));
+        app.world_mut().spawn((window, PrimaryWindow));
+        let root = app
+            .world_mut()
+            .spawn((
+                CrystalHintOverlayRoot,
+                CrystalHintOverlayStyle(CrystalHintStyle::Control),
+                CrystalHintOverlayTarget(Some(target)),
+                CrystalHintOverlayLayoutState::default(),
+                Node::default(),
+                ComputedNode::default(),
+                Visibility::Hidden,
+            ))
+            .id();
+        app.world_mut()
+            .spawn((CrystalHintOverlayText, Text::new("Mail")));
+        app.add_systems(Update, position_crystal_hint_overlay);
+        for scale in [0.5, 1.0, 2.0] {
+            app.world_mut().resource_mut::<UiScale>().0 = scale;
+            app.update();
+            assert_eq!(
+                *app.world().get::<Visibility>(root).unwrap(),
+                Visibility::Hidden
+            );
+            app.update();
+            let expected = crystal_hint_position_for_bounds(
+                CrystalHintStyle::Control,
+                Vec2::new(1200.0, 60.0) / scale,
+                Vec2::ZERO,
+                Vec2::new(1280.0, 720.0) / scale,
+            );
+            let node = app.world().get::<Node>(root).unwrap();
+            assert_eq!(node.left, Val::Px(expected.x));
+            assert_eq!(node.top, Val::Px(expected.y));
+        }
     }
 
     #[test]
