@@ -66,9 +66,11 @@ fn send(value: Value) {
 }
 
 #[derive(Resource, Default)]
-struct HostState {
+pub(crate) struct HostState {
     phase: String,
     ime_bottom: f32,
+    pub(crate) safe_right: f32,
+    pub(crate) safe_top: f32,
 }
 
 #[derive(Resource, Default)]
@@ -130,7 +132,8 @@ impl Plugin for AndroidSharedShellPlugin {
                     discard_inactive_player_commands,
                     keyboard,
                 )
-                    .chain(),
+                    .chain()
+                    .before(bevy::ui::UiSystems::Layout),
             );
         #[cfg(feature = "ui-preview")]
         crate::ui_preview::install(app);
@@ -146,16 +149,26 @@ fn fit_stage(
     forms: crate::form_input::FormInput,
     mut scale: ResMut<UiScale>,
     mut roots: Query<
-        (&mut Node, Has<NativeShellRoot>),
-        Or<(
-            With<NativeShellRoot>,
-            With<mir2_client_bevy::crystal_ui::hud::CrystalHudRoot>,
-            With<mir2_client_bevy::crystal_ui::chat::CrystalChatRoot>,
-            With<mir2_client_bevy::crystal_ui::notice::CrystalNoticeRoot>,
-            With<mir2_client_bevy::crystal_ui::minimap::CrystalMiniMapRoot>,
-            With<mir2_client_bevy::crystal_ui::overlays::OverlayRoot>,
-            With<mir2_client_bevy::quest_ui::QuestUiRoot>,
-        )>,
+        (
+            &mut Node,
+            Has<mir2_client_bevy::crystal_ui::minimap::CrystalMiniMapRoot>,
+        ),
+        (
+            Or<(
+                With<NativeShellRoot>,
+                With<mir2_client_bevy::crystal_ui::hud::CrystalHudRoot>,
+                With<mir2_client_bevy::crystal_ui::chat::CrystalChatRoot>,
+                With<mir2_client_bevy::crystal_ui::notice::CrystalNoticeRoot>,
+                With<mir2_client_bevy::crystal_ui::minimap::CrystalMiniMapRoot>,
+                With<mir2_client_bevy::crystal_ui::overlays::OverlayRoot>,
+                With<mir2_client_bevy::quest_ui::QuestUiRoot>,
+            )>,
+            Without<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
+        ),
+    >,
+    mut minimap_layers: Query<
+        &mut Node,
+        With<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
     >,
 ) {
     let Ok(window) = windows.single() else {
@@ -179,10 +192,35 @@ fn fit_stage(
         fit.offset_y / fit.scale
     };
     scale.0 = fit.scale;
-    for (mut root, _is_shell) in &mut roots {
-        root.left = px(fit.offset_x / fit.scale);
-        root.top = px(top);
+    let map_origin = minimap_edge_origin(
+        window.width(),
+        window.scale_factor(),
+        fit.scale,
+        host.safe_right,
+        host.safe_top,
+    );
+    for (mut root, is_map_image) in &mut roots {
+        root.left = px(if is_map_image {
+            map_origin.x
+        } else {
+            fit.offset_x / fit.scale
+        });
+        root.top = px(if is_map_image { map_origin.y } else { top });
     }
+    // The frame/actions are children of the centered HUD; the map image is
+    // a separate root. Compensate the parent transform so they stay aligned,
+    // even while the dialog stage pans for IME. Bevy hits the moved nodes.
+    for mut layer in &mut minimap_layers {
+        layer.left = px(map_origin.x - fit.offset_x / fit.scale);
+        layer.top = px(map_origin.y - top);
+    }
+}
+
+fn minimap_edge_origin(width: f32, dpi: f32, scale: f32, safe_right: f32, safe_top: f32) -> Vec2 {
+    Vec2::new(
+        (width - safe_right / dpi - 8.0) / scale - 1024.0,
+        (safe_top / dpi + 8.0) / scale,
+    )
 }
 
 fn player_editor_bottom(field: Option<&str>) -> f32 {
@@ -293,6 +331,8 @@ fn receive(
         }
         if value["type"] == "insets" {
             host.ime_bottom = value["bottom"].as_u64().unwrap_or(0).min(8192) as f32;
+            host.safe_right = value["safeRight"].as_u64().unwrap_or(0).min(8192) as f32;
+            host.safe_top = value["safeTop"].as_u64().unwrap_or(0).min(8192) as f32;
             continue;
         }
         if value["type"] == "edit" {
@@ -551,6 +591,29 @@ fn keyboard(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn minimap_anchor_preserves_scale_and_safe_edge_across_aspects() {
+        for (width, height, dpi, right, top) in [
+            (1024.0, 768.0, 1.0, 0.0, 0.0),
+            (891.0, 411.0, 2.625, 63.0, 24.0),
+            (1280.0, 720.0, 1.0, 40.0, 32.0),
+        ] {
+            let fit = CrystalStageTransform::fit(width, height);
+            let origin = minimap_edge_origin(width, dpi, fit.scale, right, top);
+            assert!(((origin.x + 1024.0) * fit.scale - (width - right / dpi - 8.0)).abs() < 0.001);
+            assert!((origin.y * fit.scale - (top / dpi + 8.0)).abs() < 0.001);
+            // A translated group moves both visual and button geometry. No
+            // independent window-cursor rewrite is applied to centered dialogs.
+            let button_x = 903.0;
+            let screen_x = (origin.x + button_x) * fit.scale;
+            assert!((screen_x / fit.scale - origin.x - button_x).abs() < 0.001);
+            for dialog_top in [fit.offset_y / fit.scale, -180.0] {
+                let group_top = origin.y - dialog_top;
+                assert!((dialog_top + group_top - origin.y).abs() < 0.001);
+            }
+        }
+    }
 
     #[test]
     fn shared_session_reset_clears_android_player_intents_without_reusing_storage_ids() {

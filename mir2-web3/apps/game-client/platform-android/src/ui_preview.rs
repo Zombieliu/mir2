@@ -153,7 +153,16 @@ fn apply(world: &mut World) {
     model.player.max_mp = 100;
     model.player.max_weight = 100;
     model.player.gold = 12345;
+    if scene == "hud" {
+        // Offline presentation specimen only, never a Gateway bootstrap.
+        model.player.map_name = Some("BichonProvince".into());
+    }
     drop(model);
+    if scene == "hud" {
+        let mut map = world.resource_mut::<mir2_client_bevy::map::MapModel>();
+        map.center_x = 320;
+        map.center_y = 43;
+    }
     populate_specimens(world, &scene);
     if scene == "inventory-amount" {
         world.resource_scope(|world, mut state: Mut<NativePlayerUiState>| {

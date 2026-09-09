@@ -55,7 +55,9 @@ pub fn install(app: &mut App) {
         )
         .add_systems(
             PostUpdate,
-            visibility.after(super::shared_shell::AndroidStageFit),
+            visibility
+                .after(super::shared_shell::AndroidStageFit)
+                .before(bevy::ui::UiSystems::Layout),
         );
 }
 
@@ -187,19 +189,32 @@ fn visibility(
     state: Res<NativePlayerUiState>,
     ui: Option<Res<UiReadModel>>,
     scale: Res<UiScale>,
+    host: Option<Res<crate::shared_shell::HostState>>,
+    windows: Query<&Window>,
     mut rail: ResMut<RailState>,
     mut roots: Query<&mut Node, (With<TouchRail>, Without<Action>)>,
     mut buttons: Query<(&Action, &mut Node), Without<TouchRail>>,
     mut labels: Query<&mut TextFont, With<RailLabel>>,
 ) {
     let unit = 1.0 / scale.0.max(0.01);
+    let dpi = windows
+        .single()
+        .map(|window| window.scale_factor())
+        .unwrap_or(1.0);
+    let safe_top = host.as_ref().map(|h| h.safe_top / dpi).unwrap_or(0.0);
+    let safe_right = host.as_ref().map(|h| h.safe_right / dpi).unwrap_or(0.0);
+    let expanded_map = mir2_client_bevy::crystal_ui::hud::minimap_is_expanded(
+        state.minimap_visible(),
+        ui.as_ref().and_then(|ui| ui.player.map_name.as_deref()),
+    );
+    let map_bottom = mir2_client_bevy::crystal_ui::hud::minimap_footer_top(expanded_map) + 20.0;
     if shell.screen != NativeShellScreen::InGame {
         rail.expanded = false;
     }
     for mut node in &mut roots {
         node.width = px(if rail.expanded { 132.0 } else { 64.0 } * unit);
-        node.top = px(48.0 * unit);
-        node.right = px(8.0 * unit);
+        node.top = px((safe_top + 16.0 + map_bottom * scale.0).max(48.0) * unit);
+        node.right = px((safe_right + 8.0) * unit);
         node.row_gap = px(4.0 * unit);
         node.column_gap = px(4.0 * unit);
         node.display = if shell.screen == NativeShellScreen::InGame {
