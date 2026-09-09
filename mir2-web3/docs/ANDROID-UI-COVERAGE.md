@@ -7,6 +7,13 @@ are not edited.
 
 ## Implemented
 
+- `a6af7cb6d`: chat presses are consumed before a changed model rebuilds
+  the tree. API31 tab/transparent/Apply now works; source transparent frames
+  replace global alpha tint, and offline settings gets a proper shared draft.
+  Shared583/normal86/preview89, both APKs pass. Redundant root Pass patches
+  removed; no-op Android clamp guard retained. Evidence:
+  `generated/player-qa/native-android-chat-input-20260909/README.md`.
+  Settings skin parity and mobile whole-screen layout remain open.
 - Local `f2246b476` separates the shared belt presentation group and anchors
   it bottom-left when the phone gutter fits, with source-layout fallback.
   Rotation/Close use shared controls; IME hides the layer and preserves its

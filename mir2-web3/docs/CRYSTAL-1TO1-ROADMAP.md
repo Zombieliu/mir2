@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local `a6af7cb6d`: runtime trace and failing regression
+> locate chat event loss before tree rebuild. Consume presses first; API31
+> tab/transparent/Apply passes. Source frame transparency and preview draft
+> corrected; redundant root patches removed. Shared583/normal86/preview89,
+> both APKs pass. `docs/generated/player-qa/native-android-chat-input-20260909/README.md`.
+> Full phone layout, skin parity, gameplay/network and device gates remain open.
+
 > 2026-09-09 Android local `f2246b476`: shared belt identity group, phone
 > safe-left/bottom gutter placement with fallback and IME hiding. Shared581/
 > normal85/preview87/Java8, both APKs and API31 Rotate/Close/IME restore pass.
