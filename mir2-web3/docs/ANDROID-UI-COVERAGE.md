@@ -7,6 +7,12 @@ are not edited.
 
 ## Implemented
 
+- Local `5b909ce45`: ChatSettings now switches Title/466→467 with the tab;
+  FILTER/CHAT BOX image families match actual staged PNG labels and actions.
+  Failure-first tests, shared584/normal86/preview89, both APKs and API31
+  tab/transparent/Apply pass. Evidence:
+  `generated/player-qa/native-android-chat-skin-20260909/README.md`.
+  Phone target sizing and remaining settings presentation still open.
 - `a6af7cb6d`: chat presses are consumed before a changed model rebuilds
   the tree. API31 tab/transparent/Apply now works; source transparent frames
   replace global alpha tint, and offline settings gets a proper shared draft.

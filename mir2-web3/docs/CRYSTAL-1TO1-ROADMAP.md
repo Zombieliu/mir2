@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local `5b909ce45`: ChatSettings tab background and
+> staged FILTER/CHAT BOX label mapping corrected. Failure-first tests,
+> shared584/normal86/preview89, both APKs and API31 tab/transparent/Apply pass.
+> `docs/generated/player-qa/native-android-chat-skin-20260909/README.md`.
+> Offline only; full phone layout/input, networking and real-device gates open.
+
 > 2026-09-09 Android local `a6af7cb6d`: runtime trace and failing regression
 > locate chat event loss before tree rebuild. Consume presses first; API31
 > tab/transparent/Apply passes. Source frame transparency and preview draft
