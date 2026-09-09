@@ -51,7 +51,8 @@ public final class MainActivity extends GameActivity {
             android.graphics.Insets safe = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
             nativeEvent(GatewaySession.object("type", "insets",
                     "bottom", insets.getInsets(WindowInsets.Type.ime()).bottom,
-                    "safeRight", safe.right, "safeTop", safe.top).toString());
+                    "safeRight", safe.right, "safeTop", safe.top,
+                    "safeLeft", safe.left, "safeBottom", safe.bottom).toString());
             boolean visible = insets.isVisible(WindowInsets.Type.ime());
             boolean dismissed = imeWasVisible && !visible;
             imeWasVisible = visible;

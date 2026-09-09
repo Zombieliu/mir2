@@ -71,6 +71,8 @@ pub(crate) struct HostState {
     ime_bottom: f32,
     pub(crate) safe_right: f32,
     pub(crate) safe_top: f32,
+    safe_left: f32,
+    safe_bottom: f32,
 }
 
 #[derive(Resource, Default)]
@@ -148,6 +150,7 @@ fn fit_stage(
     player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
     forms: crate::form_input::FormInput,
     mut scale: ResMut<UiScale>,
+    belt: Res<mir2_client_bevy::crystal_ui::hud::CrystalBeltPresentation>,
     mut roots: Query<
         (
             &mut Node,
@@ -164,12 +167,17 @@ fn fit_stage(
                 With<mir2_client_bevy::quest_ui::QuestUiRoot>,
             )>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
+            Without<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
         ),
     >,
     mut minimap_layers: Query<
         &mut Node,
-        With<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
+        (
+            With<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
+            Without<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
+        ),
     >,
+    mut belt_layers: Query<&mut Node, With<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>>,
 ) {
     let Ok(window) = windows.single() else {
         return;
@@ -214,6 +222,45 @@ fn fit_stage(
         layer.left = px(map_origin.x - fit.offset_x / fit.scale);
         layer.top = px(map_origin.y - top);
     }
+    let belt_origin = belt_edge_origin(
+        fit,
+        window.height(),
+        host.safe_left / window.scale_factor(),
+        host.safe_bottom / window.scale_factor(),
+        belt.vertical,
+    );
+    for mut layer in &mut belt_layers {
+        let offset = belt_origin
+            .map(|origin| origin - Vec2::new(fit.offset_x / fit.scale, top))
+            .unwrap_or(Vec2::ZERO);
+        layer.left = px(offset.x);
+        layer.top = px(offset.y);
+        // Editing must not leave relocated item buttons active over the IME.
+        // The user's shared visible/orientation preference is left unchanged.
+        layer.display = if host.ime_bottom > 0.0 {
+            Display::None
+        } else {
+            Display::Flex
+        };
+    }
+}
+
+fn belt_edge_origin(
+    fit: CrystalStageTransform,
+    height: f32,
+    safe_left: f32,
+    safe_bottom: f32,
+    vertical: bool,
+) -> Option<Vec2> {
+    let frame = mir2_client_bevy::crystal_ui::hud::belt_frame_rect(vertical);
+    let left = safe_left + 8.0;
+    if left + frame.width * fit.scale + 8.0 > fit.offset_x {
+        return None; // Keep the source layout when the side gutter cannot fit it.
+    }
+    Some(Vec2::new(
+        left / fit.scale - frame.left,
+        (height - safe_bottom - 8.0) / fit.scale - frame.top - frame.height,
+    ))
 }
 
 fn minimap_edge_origin(width: f32, dpi: f32, scale: f32, safe_right: f32, safe_top: f32) -> Vec2 {
@@ -333,6 +380,8 @@ fn receive(
             host.ime_bottom = value["bottom"].as_u64().unwrap_or(0).min(8192) as f32;
             host.safe_right = value["safeRight"].as_u64().unwrap_or(0).min(8192) as f32;
             host.safe_top = value["safeTop"].as_u64().unwrap_or(0).min(8192) as f32;
+            host.safe_left = value["safeLeft"].as_u64().unwrap_or(0).min(8192) as f32;
+            host.safe_bottom = value["safeBottom"].as_u64().unwrap_or(0).min(8192) as f32;
             continue;
         }
         if value["type"] == "edit" {
@@ -591,6 +640,27 @@ fn keyboard(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn belt_edge_fits_side_gutter_and_falls_back_without_overlap() {
+        let fit = CrystalStageTransform::fit(891.0, 411.0);
+        for vertical in [false, true] {
+            let frame = mir2_client_bevy::crystal_ui::hud::belt_frame_rect(vertical);
+            let origin = belt_edge_origin(fit, 411.0, 0.0, 12.0, vertical).unwrap();
+            assert!(((origin.x + frame.left) * fit.scale - 8.0).abs() < 0.001);
+            assert!(((origin.y + frame.top + frame.height) * fit.scale - 391.0).abs() < 0.001);
+            assert!((origin.x + frame.left + frame.width) * fit.scale < fit.offset_x);
+        }
+        assert!(belt_edge_origin(
+            CrystalStageTransform::fit(1024.0, 768.0),
+            768.0,
+            0.0,
+            0.0,
+            false
+        )
+        .is_none());
+        assert!(belt_edge_origin(fit, 411.0, 100.0, 0.0, false).is_none());
+    }
 
     #[test]
     fn minimap_anchor_preserves_scale_and_safe_edge_across_aspects() {

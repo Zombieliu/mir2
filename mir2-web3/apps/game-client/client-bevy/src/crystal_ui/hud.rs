@@ -148,6 +148,10 @@ pub struct CrystalHudRoot;
 #[derive(Component, Debug)]
 pub struct CrystalHudMiniMapLayer;
 
+/// Independent presentation layer; slots and controls keep shared actions.
+#[derive(Component, Debug)]
+pub struct CrystalHudBeltLayer;
+
 #[derive(Component, Debug)]
 pub struct CrystalHudHpOrb;
 
@@ -574,28 +578,35 @@ fn spawn_crystal_hud(
             );
 
             root.spawn((
-                CrystalHudBeltFrame,
-                absolute_node(BELT_FRAME),
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse/1932.png"),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
-            root.spawn((
-                CrystalHudBeltTint,
-                absolute_node(BELT_FRAME),
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse/1933.png"),
-                    color: Color::srgba(1.0, 1.0, 1.0, 0.5),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
-            for slot in 0..BELT_SLOT_COUNT {
-                spawn_belt_slot(root, &asset_server, &inventory, slot);
-            }
-            spawn_belt_controls(root, &asset_server);
+                CrystalHudBeltLayer,
+                absolute_node(CrystalRect::new(0.0, 0.0, 1024.0, 768.0)),
+                FocusPolicy::Pass,
+            ))
+            .with_children(|root| {
+                root.spawn((
+                    CrystalHudBeltFrame,
+                    absolute_node(BELT_FRAME),
+                    ImageNode {
+                        image: asset_server.load("original-ui/Prguse/1932.png"),
+                        image_mode: NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
+                root.spawn((
+                    CrystalHudBeltTint,
+                    absolute_node(BELT_FRAME),
+                    ImageNode {
+                        image: asset_server.load("original-ui/Prguse/1933.png"),
+                        color: Color::srgba(1.0, 1.0, 1.0, 0.5),
+                        image_mode: NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
+                for slot in 0..BELT_SLOT_COUNT {
+                    spawn_belt_slot(root, &asset_server, &inventory, slot);
+                }
+                spawn_belt_controls(root, &asset_server);
+            });
 
             spawn_hud_buttons(root, &asset_server);
             root.spawn((
@@ -1966,6 +1977,23 @@ mod tests {
         {
             assert_eq!(parent.parent(), layer);
         }
+        let (belt_layer, belt_node) = world
+            .query_filtered::<(Entity, &Node), With<CrystalHudBeltLayer>>()
+            .single(world)
+            .unwrap();
+        assert_eq!(belt_node.left, Val::Px(0.0));
+        assert_eq!(belt_node.top, Val::Px(0.0));
+        let parents = world
+            .query_filtered::<&ChildOf, Or<(
+                With<CrystalHudBeltFrame>,
+                With<CrystalHudBeltTint>,
+                With<CrystalHudBeltHitTarget>,
+                With<CrystalBeltControlAction>,
+            )>>()
+            .iter(world)
+            .collect::<Vec<_>>();
+        assert_eq!(parents.len(), 10); // 2 frames, 6 item targets, 2 controls.
+        assert!(parents.iter().all(|parent| parent.parent() == belt_layer));
     }
     use crate::inventory::{
         CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel, ItemModel,
