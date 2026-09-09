@@ -38,10 +38,25 @@ final class GatewaySession implements AutoCloseable {
         final Phase phase;
         final String message;
         final List<Character> characters;
-        View(Phase phase, String message, List<Character> characters) {
+        final WorldPosition world;
+        View(Phase phase, String message, List<Character> characters, WorldPosition world) {
             this.phase = phase;
             this.message = message;
             this.characters = Collections.unmodifiableList(new ArrayList<>(characters));
+            this.world = world;
+        }
+    }
+
+    /** Immutable authenticated server projection, not a client-authored transform. */
+    static final class WorldPosition {
+        final String playerName, mapFileName;
+        final int x, y;
+        WorldPosition(String playerName, String mapFileName, int x, int y) {
+            this.playerName = playerName; this.mapFileName = mapFileName;
+            this.x = x; this.y = y;
+        }
+        JSONObject toJson() {
+            return object("playerName", playerName, "mapFileName", mapFileName, "x", x, "y", y);
         }
     }
 
@@ -297,7 +312,12 @@ final class GatewaySession implements AutoCloseable {
         deadlineEpoch++;
         if (deadline != null) { deadline.cancel(false); deadline = null; }
     }
-    private void publish(String text) { observer.accept(new View(phase, text, characters)); }
+    private void publish(String text) {
+        WorldPosition world = phase == Phase.IN_GAME && startAccepted
+                && !player.isEmpty() && !map.isEmpty() && x != null && y != null
+                ? new WorldPosition(player, map, x, y) : null;
+        observer.accept(new View(phase, text, characters, world));
+    }
     private static String bounded(String value) {
         if (value.isBlank() || value.length() > 128) throw new IllegalArgumentException("text limit");
         return value;

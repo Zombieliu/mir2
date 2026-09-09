@@ -68,11 +68,37 @@ fn send(value: Value) {
 #[derive(Resource, Default)]
 pub(crate) struct HostState {
     phase: String,
+    world: Option<HostWorldPosition>,
     ime_bottom: f32,
     pub(crate) safe_right: f32,
     pub(crate) safe_top: f32,
     safe_left: f32,
     safe_bottom: f32,
+}
+
+#[derive(Clone, Debug, PartialEq, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct HostWorldPosition {
+    player_name: String,
+    map_file_name: String,
+    x: u32,
+    y: u32,
+}
+
+fn host_world_position(value: &Value, screen: Screen) -> Option<HostWorldPosition> {
+    if value["phase"] != "IN_GAME" || !matches!(screen, Screen::StartingGame | Screen::InGame) {
+        return None;
+    }
+    let world: HostWorldPosition = serde_json::from_value(value["world"].clone()).ok()?;
+    if [&world.player_name, &world.map_file_name]
+        .iter()
+        .any(|s| s.trim().is_empty() || s.chars().count() > 128)
+        || world.x > i32::MAX as u32
+        || world.y > i32::MAX as u32
+    {
+        return None;
+    }
+    Some(world)
 }
 
 #[derive(Resource, Default)]
@@ -461,6 +487,9 @@ fn receive(
             continue;
         }
         let phase = value["phase"].as_str().unwrap_or("");
+        // Typed server data must not be recovered by parsing UI message text.
+        // Reset on any non-world phase, including a map transition or reconnect.
+        host.world = host_world_position(&value, model.screen);
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
             if let Some(effects) = effects.as_deref_mut() {
                 discard_player_commands(effects);
@@ -694,6 +723,32 @@ fn keyboard(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn structured_world_requires_active_start_and_never_parses_notice_text() {
+        let event = json!({"phase":"IN_GAME", "world": {
+            "playerName":"ServerPlayer", "mapFileName":"0", "x":302, "y":634
+        }});
+        let position = host_world_position(&event, Screen::StartingGame).unwrap();
+        assert_eq!((position.x, position.y), (302, 634));
+        assert_eq!(position.map_file_name, "0");
+        assert!(host_world_position(&event, Screen::Login).is_none());
+        assert!(host_world_position(
+            &json!({"phase":"IN_GAME", "message":"Server position: (302,634)"}),
+            Screen::StartingGame
+        )
+        .is_none());
+        for phase in ["DISCONNECTED", "CONNECTING", "STARTING", "CHARACTERS"] {
+            let mut changed = event.clone();
+            changed["phase"] = json!(phase);
+            assert!(host_world_position(&changed, Screen::StartingGame).is_none());
+        }
+        for x in [json!(-1), json!(1.5), json!("302"), json!(4294967295u64)] {
+            let mut invalid = event.clone();
+            invalid["world"]["x"] = x;
+            assert!(host_world_position(&invalid, Screen::StartingGame).is_none());
+        }
+    }
 
     #[test]
     fn belt_edge_fits_side_gutter_and_falls_back_without_overlap() {

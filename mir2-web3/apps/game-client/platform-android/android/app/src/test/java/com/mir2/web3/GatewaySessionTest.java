@@ -93,12 +93,20 @@ public class GatewaySessionTest {
         peer.send("{\"type\":\"packet\",\"packet\":\"UserInformation\",\"payload\":{\"name\":\"Fixture\"}}");
         peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":302,\"y\":634}}");
         GatewaySession.View state = phase(GatewaySession.Phase.IN_GAME);
+        assertNotNull(state.world);
+        assertEquals("Fixture", state.world.playerName);
+        assertEquals("0", state.world.mapFileName);
+        assertEquals(302, state.world.x);
+        assertEquals(634, state.world.y);
+        assertEquals(302, state.world.toJson().getInt("x"));
         assertTrue(state.message.contains("(302, 634)"));
         assertTrue(state.message.contains("Map: 0"));
         assertFalse(state.message.contains("fixture-secret"));
         session.disconnect("Backgrounded");
         GatewaySession.View stopped = phase(GatewaySession.Phase.DISCONNECTED);
         assertTrue(stopped.characters.isEmpty());
+        assertNull(stopped.world);
+        assertEquals(302, state.world.x); // Previously published view remains immutable.
         assertFalse(stopped.message.contains("302"));
     }
 

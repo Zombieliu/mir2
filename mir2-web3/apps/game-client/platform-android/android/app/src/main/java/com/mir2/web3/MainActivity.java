@@ -85,7 +85,8 @@ public final class MainActivity extends GameActivity {
                 roster.put(GatewaySession.object("index", character.index, "name", character.name,
                         "level", character.level, "className", character.className, "genderName", character.genderName));
             }
-            nativeEvent(GatewaySession.object("phase", view.phase.name(), "message", view.message, "characters", roster).toString());
+            nativeEvent(GatewaySession.object("phase", view.phase.name(), "message", view.message,
+                    "characters", roster, "world", view.world == null ? JSONObject.NULL : view.world.toJson()).toString());
         });
         connect();
         hideSystemUi();
