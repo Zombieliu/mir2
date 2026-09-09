@@ -11,8 +11,10 @@ are not edited.
   HUD/overlays, minimap, chat, notices and quest/NPC plugins used by Windows.
   `native-ui` remains the desktop superset with the audio playback backend.
   Typed UI sound intents are shared separately; this does not implement Android audio.
-- All shared root layers use one 1024×768 fit. Android's collapsible panel
-  launcher maintains 64×48 OS-logical targets independently of that scale.
+- Most shared layers retain the 1024×768 fit. `74883f8b3` independently
+  anchors minimap image/frame/actions to the top-right safe edge; the panel
+  launcher follows below it with 64×48 OS-logical targets. Bottom HUD/chat
+  and dialogs are not yet phone-wide responsive layouts.
 - One touch owner feeds existing Crystal pointer/drag handlers. Secondary
   fingers cannot inherit a released drag; focus loss releases the pointer.
   This is not a completed multi-touch movement/combat controller.
@@ -57,6 +59,12 @@ captures a screenshot and process log, and fails on panic/FATAL/missing asset er
 
 ## Still open — do not mark the whole UI done
 
+- `74883f8b3`: first edge-layout slice, shared minimap group/image aligned
+  at Android safe edge, shared Bevy button hits verified after moving.
+  Expanded → collapse → Mail → compose/IME on API31 passes; shared579,
+  normal84/preview86, Java8 and both APKs pass. Hover hints still use old
+  coordinates; bottom HUD/chat/world and complete input masks remain open.
+  [Edge evidence](generated/player-qa/native-android-minimap-edge-20260909/README.md).
 - `ce08b88c9` wraps the inventory amount title into two lines, preserving
   the specimen item name above icon/input. Failure-first layout test,
   shared578/normal83/preview85, both APK builds and API31 IME/Cancel pass.
