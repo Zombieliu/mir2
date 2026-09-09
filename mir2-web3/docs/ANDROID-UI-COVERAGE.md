@@ -7,6 +7,13 @@ are not edited.
 
 ## Implemented
 
+- Local `f2246b476` separates the shared belt presentation group and anchors
+  it bottom-left when the phone gutter fits, with source-layout fallback.
+  Rotation/Close use shared controls; IME hides the layer and preserves its
+  preference. Shared581/normal85/preview87/Java8 and both APKs pass; API31
+  horizontal/vertical/IME/restore/Close inspected. Evidence:
+  `generated/player-qa/native-android-belt-edge-20260909/README.md`.
+  Empty-belt evidence only; phone-sized targets and whole gameplay masks open.
 - Android enables `client-bevy/native-player-ui`: the exact shared shell,
   HUD/overlays, minimap, chat, notices and quest/NPC plugins used by Windows.
   `native-ui` remains the desktop superset with the audio playback backend.

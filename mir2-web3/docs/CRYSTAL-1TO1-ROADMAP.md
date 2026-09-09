@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-09 Android local `f2246b476`: shared belt identity group, phone
+> safe-left/bottom gutter placement with fallback and IME hiding. Shared581/
+> normal85/preview87/Java8, both APKs and API31 Rotate/Close/IME restore pass.
+> `docs/generated/player-qa/native-android-belt-edge-20260909/README.md`.
+> Empty-belt presentation only; bottom HUD/chat, phone target sizing, gameplay
+> masks, world/live and physical-device acceptance remain open.
+
 > 2026-09-09 Android local `8423b220c`: shared ordinary/rich hints convert
 > OS-logical cursor/bounds to UiScale coordinates. Failure-first/system
 > tests, shared581/normal84/preview86, both APKs and API31 ordinary hint
