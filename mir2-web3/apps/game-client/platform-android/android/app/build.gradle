@@ -21,7 +21,8 @@ def worldAssetRoot = System.getenv('MIR2_ANDROID_WORLD_ASSET_ROOT')
 def prepareWorldAssets = tasks.register('prepareWorldAssets', Sync) {
     if (worldAssetRoot) from(worldAssetRoot) {
         include 'generated/map-atlas/manifest.json', 'generated/map-atlas/**/*.png',
-                'generated/crystal-map-pack/0.map'
+                'generated/crystal-map-pack/0.map',
+                'generated/native-map-keyed/manifest.json', 'generated/native-map-keyed/pages/*.png'
     }
     into layout.buildDirectory.dir('generated/world-assets')
     doFirst {
@@ -31,11 +32,31 @@ def prepareWorldAssets = tasks.register('prepareWorldAssets', Sync) {
         if (worldAssetRoot && !file("${worldAssetRoot}/generated/crystal-map-pack/0.map").isFile()) {
             throw new GradleException('MIR2_ANDROID_WORLD_ASSET_ROOT does not contain generated/crystal-map-pack/0.map')
         }
+        if (worldAssetRoot && !file("${worldAssetRoot}/generated/native-map-keyed/manifest.json").isFile()) {
+            throw new GradleException('MIR2_ANDROID_WORLD_ASSET_ROOT does not contain generated/native-map-keyed/manifest.json')
+        }
+    }
+}
+
+// The entity atlas is generated from the same approved Crystal source pack as
+// the Web renderer and is checked in as an immutable, content-addressed build
+// input. Android decodes only the pages referenced by the current snapshot.
+def entityAtlasRoot = file("${projectDir}/../../../../web/public/bevy-entity-atlases")
+def prepareEntityAssets = tasks.register('prepareEntityAssets', Sync) {
+    from(entityAtlasRoot) {
+        include 'manifest.json', '*.png'
+        into 'bevy-entity-atlases'
+    }
+    into layout.buildDirectory.dir('generated/entity-assets')
+    doFirst {
+        if (!file("${entityAtlasRoot}/manifest.json").isFile()) {
+            throw new GradleException('The shared Bevy entity-atlas manifest is missing')
+        }
     }
 }
 tasks.configureEach { task ->
     if (task.name == 'mergeDebugAssets' || task.name == 'mergeReleaseAssets' || task.name == 'mergeUiPreviewAssets') {
-        task.dependsOn prepareSharedUi, prepareWorldAssets
+        task.dependsOn prepareSharedUi, prepareWorldAssets, prepareEntityAssets
         task.doFirst {
             if (!uiRoot || !file("${uiRoot}/original-ui/ChrSel/0.png").isFile()
                     || !file("${uiRoot}/original-ui/Title/30.png").isFile()
@@ -97,6 +118,7 @@ android {
             jniLibs.srcDirs = ['src/main/jniLibs']
             assets.srcDir layout.buildDirectory.dir('generated/shared-ui-assets')
             assets.srcDir layout.buildDirectory.dir('generated/world-assets')
+            assets.srcDir layout.buildDirectory.dir('generated/entity-assets')
         }
     }
 }

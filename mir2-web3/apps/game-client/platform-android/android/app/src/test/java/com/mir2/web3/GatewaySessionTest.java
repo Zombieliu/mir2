@@ -177,10 +177,22 @@ public class GatewaySessionTest {
         assertEquals(42, retained.getLong("playerObjectId"));
         peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":301,\"y\":630}}");
         assertNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        String refreshed = world.replace("\"x\":300", "\"x\":301");
+        peer.send(refreshed);
+        GatewaySession.View refreshedView = phase(GatewaySession.Phase.IN_GAME);
+        assertNotNull(refreshedView.worldSnapshot);
+        assertEquals(301, refreshedView.world.x);
         peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
         GatewaySession.View changed = phase(GatewaySession.Phase.STARTING);
         assertNull(changed.world);
         assertNull(changed.worldSnapshot);
+        String destination = world.replace("\"mapFileName\":\"0\"", "\"mapFileName\":\"1\"")
+                .replace("\"x\":300", "\"x\":50").replace("\"y\":630", "\"y\":60");
+        peer.send(destination);
+        GatewaySession.View destinationView = phase(GatewaySession.Phase.IN_GAME);
+        assertEquals("1", destinationView.world.mapFileName);
+        assertEquals(50, destinationView.world.x);
+        assertNotNull(destinationView.worldSnapshot);
         session.disconnect("Test end");
         assertNull(phase(GatewaySession.Phase.DISCONNECTED).worldSnapshot);
         assertEquals(2, new JSONObject(accepted.worldSnapshot).getJSONArray("entities").length());

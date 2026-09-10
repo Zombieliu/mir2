@@ -19,6 +19,7 @@ pub const SCENES: &[&str] = &[
     "starting",
     "disconnected",
     "hud",
+    "world-render",
     "inventory",
     "character",
     "skills",
@@ -51,7 +52,29 @@ pub struct PreviewRequest {
 
 pub fn install(app: &mut App) {
     app.init_resource::<PreviewRequest>()
+        .add_systems(Update, report_world_render_ready)
         .add_systems(PostUpdate, apply);
+}
+
+fn report_world_render_ready(
+    receipt: Res<mir2_bevy_runtime::native_render_receipt::NativeRenderReceipt>,
+    mut reported: Local<bool>,
+) {
+    if *reported {
+        return;
+    }
+    if let Some(ready) = receipt.ready_for(u64::MAX) {
+        info!(
+            request_id = ready.request_id,
+            center_x = ready.center_x,
+            center_y = ready.center_y,
+            map_tiles = ready.map_tile_count,
+            entities = ready.entity_count,
+            entity_layers = ready.entity_layer_count,
+            "ANDROID_WORLD_RENDER_READY"
+        );
+        *reported = true;
+    }
 }
 
 fn apply(world: &mut World) {
@@ -153,15 +176,38 @@ fn apply(world: &mut World) {
     model.player.max_mp = 100;
     model.player.max_weight = 100;
     model.player.gold = 12345;
-    if scene == "hud" {
+    if matches!(scene.as_str(), "hud" | "world-render") {
         // Offline presentation specimen only, never a Gateway bootstrap.
         model.player.map_name = Some("BichonProvince".into());
     }
     drop(model);
-    if scene == "hud" {
+    if matches!(scene.as_str(), "hud" | "world-render") {
         let mut map = world.resource_mut::<mir2_client_bevy::map::MapModel>();
-        map.center_x = 320;
-        map.center_y = 43;
+        map.center_x = if scene == "world-render" { 302 } else { 320 };
+        map.center_y = if scene == "world-render" { 634 } else { 43 };
+    }
+    #[cfg(target_os = "android")]
+    if scene == "world-render" {
+        let scene = crate::world_projection::ProjectedScene {
+            map_file_name: "0".into(),
+            center_x: 302,
+            center_y: 634,
+            width: 22,
+            height: 18,
+        };
+        let snapshot = serde_json::json!({
+            "playerObjectId":"9001",
+            "entities":[
+                {"objectId":"9001","kind":"selfPlayer","name":"OFFLINE UI FIXTURE","x":302,"y":634,"direction":"Down",
+                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}},
+                {"objectId":"9002","kind":"monster","name":"Offline monster","x":304,"y":634,"direction":"Down",
+                 "sprite":{"bodyLibrary":"Monster/003","frameBaseOffset":0,"directionStride":4}}
+            ]
+        })
+        .to_string();
+        if !crate::world_assets::request_packaged_map_atlas_load(scene, snapshot, u64::MAX) {
+            warn!("offline world-render preview asset request was not accepted");
+        }
     }
     populate_specimens(world, &scene);
     if scene == "inventory-amount" {
@@ -345,6 +391,6 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 33);
+        assert_eq!(SCENES.len(), 34);
     }
 }

@@ -81,10 +81,95 @@ try {
   const mapPackRoot = path.join(output, 'generated/crystal-map-pack');
   await fs.mkdir(mapPackRoot, {recursive:true});
   await fs.writeFile(path.join(mapPackRoot, '0.map'), bichonMapBytes, {flag:'wx'});
+  const parsedMap = (() => {
+    const width = bichonMapBytes.readUInt16LE(4);
+    const height = bichonMapBytes.readUInt16LE(6);
+    if (8 + width * height * 26 > bichonMapBytes.length) throw new Error('Incomplete Bichon cell data');
+    const cells = [];
+    for (let offset = 8; offset < 8 + width * height * 26; offset += 26) {
+      cells.push({
+        middleIndex:bichonMapBytes.readInt16LE(offset + 6), middleImage:bichonMapBytes.readInt16LE(offset + 8),
+        frontIndex:bichonMapBytes.readInt16LE(offset + 10), frontImage:bichonMapBytes.readInt16LE(offset + 12),
+        frontAnimationFrame:bichonMapBytes[offset + 16], middleAnimationFrame:bichonMapBytes[offset + 18],
+      });
+    }
+    return {width,height,cells};
+  })();
+  const mapMir3LibraryKey = (index, base, root) => {
+    const offset = index - base;
+    if (offset < 0 || offset >= 75) return null;
+    const state = Math.floor(offset / 15), slot = offset % 15;
+    const names = ['Tilesc','Tiles30c','Tiles5c','SmTilesc','Housesc','Cliffsc','Dungeonsc','Innersc','Furnituresc','Wallsc','SmObjectsc','Animationsc','Object1c','Object2c'];
+    const name = names[slot];
+    if (!name) return null;
+    if (root === 'WemadeMir3' && (name === 'Object1c' || name === 'Object2c')) return `${root}/${name}`;
+    if (root === 'WemadeMir3') {
+      const folder = ['', 'Wood', 'Sand', 'Snow', 'Forest'][state];
+      return folder ? `${root}/${folder}/${name}` : `${root}/${name}`;
+    }
+    return `${root}/${name}${['','wood','sand','snow','forest'][state] ?? ''}`;
+  };
+  const libraryKey = index => mapMir3LibraryKey(index, 200, 'WemadeMir3') ?? mapMir3LibraryKey(index, 300, 'ShandaMir3') ?? ({
+    0:'WemadeMir2/Tiles',1:'WemadeMir2/SmTiles',2:'WemadeMir2/Objects',90:'WemadeMir2/Objects_32bit',
+    100:'ShandaMir2/Tiles',110:'ShandaMir2/SmTiles',120:'ShandaMir2/Objects',190:'ShandaMir2/AniTiles1',
+  }[index] ?? (index >= 3 && index <= 29 ? `WemadeMir2/Objects${index - 1}`
+    : index >= 101 && index <= 109 ? `ShandaMir2/Tiles${index - 99}`
+    : index >= 111 && index <= 119 ? `ShandaMir2/SmTiles${index - 109}`
+    : index >= 121 && index <= 150 ? `ShandaMir2/Objects${index - 119}` : 'WemadeMir2/Tiles'));
+  const standaloneLibrary = library => /\/(?:objects(?:_32bit|\d*)?|smobjects\d*|furnitures?c?|walls?c?|animations?c?|houses?c?|cliffs?c?|dungeons?c?|inners?c?|object[12]c)$/i.test(`/${library}`);
+  const references = new Map();
+  const addFamily = (library, frame, count, additive) => {
+    for (let phase = 0; phase < Math.max(1, count); phase += 1) {
+      if (frame + phase < 0 || (!additive && !standaloneLibrary(library))) continue;
+      const key = `${library}#${frame + phase}`;
+      const old = references.get(key);
+      if (!old || (additive && !old.additive)) references.set(key, {key,library,frame:frame + phase,additive});
+    }
+  };
+  for (const cell of parsedMap.cells) {
+    const middleCount = cell.middleAnimationFrame > 0 && cell.middleAnimationFrame < 255 ? cell.middleAnimationFrame & 15 : 0;
+    const middleAdditive = middleCount === 8 || middleCount === 10 || (cell.middleAnimationFrame & 128) !== 0;
+    if (cell.middleIndex >= 0 && cell.middleImage > 0) addFamily(libraryKey(cell.middleIndex), cell.middleImage - 1, middleCount, middleAdditive);
+    const frontCount = cell.frontAnimationFrame > 0 ? cell.frontAnimationFrame & 127 : 0;
+    const frontFrame = (cell.frontImage & 0x7fff) - 1;
+    if (cell.frontIndex >= 0 && frontFrame >= 0) addFamily(libraryKey(cell.frontIndex), frontFrame, frontCount, (cell.frontAnimationFrame & 128) !== 0);
+  }
+  const keyedRoot = path.join(output, 'generated/native-map-keyed');
+  const keyedPages = path.join(keyedRoot, 'pages');
+  await fs.mkdir(keyedPages, {recursive:true});
+  const keyedEntries = [];
+  const emittedHashes = new Set();
+  let keyedMissing = 0, keyedBytes = 0, additiveEntries = 0;
+  for (const reference of [...references.values()].sort((a,b) => a.key.localeCompare(b.key))) {
+    const source = path.join(sourceRoot, ...reference.library.split('/'), `${reference.frame}.png`);
+    let bytes;
+    try { bytes = await fs.readFile(source); } catch (error) {
+      if (error.code === 'ENOENT') { keyedMissing += 1; continue; }
+      throw error;
+    }
+    if (!bytes.length || bytes.length > 16 * 1024 * 1024) throw new Error(`Invalid standalone source ${reference.key}`);
+    const metadata = await sharp(bytes, {limitInputPixels:4096*4096}).metadata();
+    if (!metadata.width || !metadata.height) throw new Error(`Missing standalone dimensions ${reference.key}`);
+    const digest = hash(bytes), fileName = `${digest}.png`;
+    if (!emittedHashes.has(digest)) {
+      await fs.writeFile(path.join(keyedPages, fileName), bytes, {flag:'wx'});
+      emittedHashes.add(digest);
+      keyedBytes += bytes.length;
+    }
+    if (reference.additive) additiveEntries += 1;
+    keyedEntries.push({key:reference.key,imageUrl:`/generated/native-map-keyed/pages/${fileName}`,width:metadata.width,height:metadata.height});
+  }
+  const keyedManifest = {schemaVersion:1,kind:'mir2-native-map-keyed-manifest',mapFileName:'0',mapFileNames:['0'],entries:keyedEntries,
+    stats:{mapCount:1,referenceCount:references.size,emittedEntryCount:keyedEntries.length,keyedEntryCount:keyedEntries.length-additiveEntries,
+      additiveEntryCount:additiveEntries,fullPackEntryCount:0,noDrawReferenceCount:0,missingSourceCount:keyedMissing,removedArtifacts:0,imageBytes:keyedBytes}};
+  const keyedJson = JSON.stringify(keyedManifest)+'\n';
+  await fs.writeFile(path.join(keyedRoot,'manifest.json'),keyedJson,{flag:'wx'});
   const report = {output,sourceRoot,helperSha256,manifestSha256:hash(json),...manifest.stats,
     bichonMapCompressedBytes:bichonMapCompressed.length,bichonMapCompressedSha256:hash(bichonMapCompressed),
     bichonMapBytes:bichonMapBytes.length,bichonMapSha256:hash(bichonMapBytes),
-    scope:'Local exported raw-upload tile libraries plus bounded Bichon 0.map; keyed objects, full Bichon coverage and Android rendering unverified'};
+    nativeKeyedManifestSha256:hash(keyedJson),nativeKeyedReferenceCount:references.size,
+    nativeKeyedEntryCount:keyedEntries.length,nativeKeyedMissingSourceCount:keyedMissing,nativeKeyedImageBytes:keyedBytes,
+    scope:'Local exported raw-upload tile libraries, Bichon 0.map, and locally available immutable standalone object frames; Android rendering unverified'};
   await fs.writeFile(path.join(output,'build-report.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify(report,null,2));
 } catch (error) {

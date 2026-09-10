@@ -6,21 +6,25 @@
 
 pub mod android_input;
 #[cfg(any(target_os = "android", test))]
+mod entity_render;
+#[cfg(any(target_os = "android", test))]
 mod form_input;
 pub mod gateway_bridge;
+#[cfg(any(target_os = "android", test))]
+mod map_objects;
 #[cfg(any(target_os = "android", test))]
 mod map_render;
 #[cfg(any(target_os = "android", test))]
 mod mobile_ui;
 #[cfg(any(target_os = "android", test))]
 mod shared_shell;
-#[cfg(any(target_os = "android", test))]
-mod world_projection;
-#[cfg(any(target_os = "android", test))]
-mod world_assets;
 mod text_input;
 #[cfg(feature = "ui-preview")]
 mod ui_preview;
+#[cfg(any(target_os = "android", test))]
+mod world_assets;
+#[cfg(any(target_os = "android", test))]
+mod world_projection;
 
 use android_input::{
     apply_android_lifecycle_messages, collect_android_back_key, route_android_input_messages,

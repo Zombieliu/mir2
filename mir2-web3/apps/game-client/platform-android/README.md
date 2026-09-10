@@ -17,16 +17,17 @@ root containing `original-ui/{ChrSel,Prguse,Prguse2,Title,Items,Help,MMap,StateI
 only those images in generated build output. The files are not committed.
 Optionally set `MIR2_ANDROID_WORLD_ASSET_ROOT` to an approved generated asset
 root containing `generated/map-atlas/manifest.json`, its PNG pages, and the
-bounded raw map `generated/crystal-map-pack/0.map`. Gradle stages only those
-two generated subtrees. On the first validated Bichon world snapshot, the
-Android host validates schema/count/geometry/path/memory limits, decodes every
-PNG off the render thread, parses the Crystal type-100 map, and derives the
-shared `MapRenderState` draw list around the authoritative server position.
-It then publishes the complete raw-RGBA page set followed by the matching map
-state through the bounded native runtime queue. A disconnect, map change, or
-newer world generation cancels stale background work. A missing or rejected
-pack remains a visible loading error; it does not fall back to synthetic
-terrain.
+bounded raw map `generated/crystal-map-pack/0.map`, plus
+`generated/native-map-keyed/manifest.json` and its content-addressed pages.
+Gradle also stages the tracked shared `bevy-entity-atlases` manifest/pages. On
+each accepted Bichon world snapshot, the Android host validates schema, counts,
+geometry, paths and memory limits; decodes the packaged map atlas and the
+entity/keyed pages used by that view off the render thread; parses the Crystal
+type-100 map; and derives the matching
+shared `MapRenderState` and `EntityRenderState`. It publishes state before
+bounded raw-RGBA batches through the native runtime queue. Disconnect, map
+change or a newer world generation cancels stale background work. A missing or
+rejected pack remains a visible loading error; there is no synthetic fallback.
 Set `MIR2_GATEWAY_WS_URL` explicitly at build time for approved online tests.
 Neither an exported Activity intent nor old endpoint preferences override it.
 With no endpoint the actual shared login screen shows a configuration notice;
@@ -38,7 +39,8 @@ For explicitly offline UI specimens, package with
 `MIR2_ANDROID_VARIANT=uiPreview`; this produces the separate
 `com.mir2.web3.uipreview` APK. Its network entrypoints are disabled and its
 fixtures are labelled. Use `capture-ui-preview.sh OUTPUT_DIRECTORY` to collect
-31 specimen routes. See `docs/ANDROID-UI-COVERAGE.md` for implemented surfaces
+the specimen routes. The `world-render` specimen is an offline rendering
+fixture, not a login result. See `docs/ANDROID-UI-COVERAGE.md` for implemented surfaces
 and remaining interaction/live-device gates; registration is not acceptance.
 
 `android/app/src/main/java/com/mir2/web3/GatewaySession.java` supplies a bounded
@@ -54,16 +56,25 @@ An account ID is only a username paired with a password, never an authenticated
 identity assertion. It does not send PasskeyLogin or invent authentication.
 LoginSuccess supplies the shared selectable roster including class/gender/level.
 JNI delivers host events to the shared model and shared intents back to the
-host. Transport StartGame/position acceptance does not currently complete the
-shared gameplay scene: the shell stays on its transition surface, not a fake
-in-game screen. The shared runtime now has a bounded native raw-RGBA map-atlas
-ingress, and the Android host now loads a packaged compact-v2 manifest/PNG pack
-and produces the initial Bichon floor draw list from the authoritative scene
-center. The current bounded producer intentionally rejects or counts keyed and
-additive object layers it cannot render faithfully; the real `(302,634)` pack
-baseline queues 607 floor tiles across seven atlases and reports 215 unresolved
-object draws. Character/entity atlases, render-ready bootstrap, visible runtime
-acceptance, and the full player flow therefore remain follow-up work.
+host. An accepted complete world snapshot is projected into the shared world,
+HUD, map and entity read models. Android then parses the packaged raw Crystal
+map, resolves ordinary atlas draws plus keyed/additive standalone objects, and
+resolves every visible server entity into the shared entity-atlas contract.
+Map/entity state is published before its bounded image batches so queue pressure
+cannot evict the state that owns those images. Only the same exact request
+remaining complete across two consecutive rendered frames, with a non-empty
+map, a visible self actor and zero unresolved visible map or entity entries,
+releases the StartGame transition. New snapshots received while
+an asset load is active replace one deferred frame; stale receipts cannot
+release the latest transition or scene update.
+
+The checked local Bichon `(302,634)` viewport renders 607 atlas draws and 242
+keyed/additive standalone draws (849 total) with zero unresolved visible draws,
+plus the fixture self player and monster. The available Mac source export is
+not a complete whole-map asset pack: 2,969 of 7,672 Bichon standalone references
+are absent outside that viewport. Missing assets remain explicit and block a
+strict render receipt when encountered. They are not replaced with synthetic
+terrain or silently called complete.
 
 Passwords, account names, session tokens and character state are not persisted.
 Editor state saving and autofill are disabled. Passwords are cleared after
@@ -75,8 +86,11 @@ On background, disconnect, timeout or transport failure, the socket and old
 roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
-movement and complete gameplay remain subsequent work. The existing reducer
-transaction queues below are **not** connected to this login-only socket.
+movement packet presentation and complete gameplay remain subsequent work. The
+existing reducer transaction queues below are **not** connected to this
+login-only socket. MockWebServer verifies the TLS/protocol state machine but is
+not real account acceptance; an approved WSS endpoint and test account are
+required for that gate.
 
 Host TLS/protocol tests (test certificates are generated only in JVM memory):
 

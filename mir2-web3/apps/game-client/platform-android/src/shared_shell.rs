@@ -18,15 +18,20 @@ fn enqueue_host_event(queue: &mut VecDeque<Value>, text: &str) {
     // Snapshot JSON is escaped once inside the host envelope. Retain the small
     // limit for ordinary input events and bound aggregate snapshot memory too.
     let parsed = (text.len() <= 2 * 1024 * 1024 + 65536)
-        .then(|| serde_json::from_str::<Value>(text).ok()).flatten();
+        .then(|| serde_json::from_str::<Value>(text).ok())
+        .flatten();
     let valid = parsed.as_ref().is_some_and(|value| {
         let snapshot_bytes = value["worldSnapshot"].as_str().map_or(0, str::len);
         snapshot_bytes <= 1024 * 1024
             && text.len() <= 65536 + 2 * snapshot_bytes
             && queue.len() < 32
-            && queue.iter().map(|event| {
-                65536 + event["worldSnapshot"].as_str().map_or(0, str::len)
-            }).sum::<usize>() + snapshot_bytes + 65536 <= 8 * 1024 * 1024
+            && queue
+                .iter()
+                .map(|event| 65536 + event["worldSnapshot"].as_str().map_or(0, str::len))
+                .sum::<usize>()
+                + snapshot_bytes
+                + 65536
+                <= 8 * 1024 * 1024
     });
     if valid {
         queue.push_back(parsed.unwrap());
@@ -81,12 +86,49 @@ pub(crate) struct HostState {
     phase: String,
     world: Option<HostWorldPosition>,
     pending_world_request: Option<u64>,
+    pending_render_request: Option<u64>,
     ime_bottom: f32,
     pub(crate) safe_right: f32,
     pub(crate) safe_top: f32,
     safe_left: f32,
     safe_bottom: f32,
-    map_assets_requested: bool,
+    render_load_active: bool,
+    deferred_render_load: Option<DeferredRenderLoad>,
+}
+
+#[derive(Debug)]
+struct DeferredRenderLoad {
+    scene: crate::world_projection::ProjectedScene,
+    world_snapshot: String,
+    request_id: u64,
+}
+
+#[cfg(target_os = "android")]
+fn start_deferred_render_load(host: &mut HostState) {
+    if host.render_load_active {
+        return;
+    }
+    let Some(request) = host.deferred_render_load.take() else {
+        return;
+    };
+    let DeferredRenderLoad {
+        scene,
+        world_snapshot,
+        request_id,
+    } = request;
+    if crate::world_assets::request_packaged_map_atlas_load(
+        scene.clone(),
+        world_snapshot.clone(),
+        request_id,
+    ) {
+        host.render_load_active = true;
+    } else {
+        host.deferred_render_load = Some(DeferredRenderLoad {
+            scene,
+            world_snapshot,
+            request_id,
+        });
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, serde::Deserialize)]
@@ -169,6 +211,7 @@ impl Plugin for AndroidSharedShellPlugin {
                 PostUpdate,
                 (
                     observe_world_receipt,
+                    observe_render_receipt,
                     fit_stage.in_set(AndroidStageFit),
                     fit_mail_composer,
                     forward_intents,
@@ -398,6 +441,7 @@ fn receive(
 ) {
     #[cfg(target_os = "android")]
     if let Some(event) = crate::world_assets::poll_packaged_map_atlas_load() {
+        host.render_load_active = false;
         match event {
             crate::world_assets::PackagedMapAtlasLoadEvent::Ready(summary) => {
                 info!(
@@ -405,17 +449,28 @@ fn receive(
                     sprites = summary.source_count,
                     compressed_bytes = summary.compressed_bytes,
                     rgba_bytes = summary.rgba_bytes,
+                    map_object_rgba_bytes = summary.map_object_rgba_bytes,
                     map_width = summary.map_width,
                     map_height = summary.map_height,
                     map_atlases = summary.map_atlas_count,
                     map_tiles = summary.map_tile_count,
+                    map_standalone_tiles = summary.map_standalone_tile_count,
                     unresolved_draws = summary.unresolved_draw_count,
-                    "packaged Android map frame queued"
+                    entity_pages = summary.entity_page_count,
+                    entities = summary.entity_count,
+                    entity_layers = summary.entity_layer_count,
+                    unresolved_entities = summary.unresolved_entity_count,
+                    entity_compressed_bytes = summary.entity_compressed_bytes,
+                    entity_rgba_bytes = summary.entity_rgba_bytes,
+                    "packaged Android world frame queued"
                 );
                 if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
                     model.notice = Some(ShellNotice::info(format!(
-                        "Map frame queued: {} tiles from {} atlas pages; keyed objects and character art still pending.",
-                        summary.map_tile_count, summary.map_atlas_count
+                        "World frame queued: {} map tiles and {} entity layers ({} unresolved map draws, {} unresolved entities).",
+                        summary.map_tile_count + summary.map_standalone_tile_count,
+                        summary.entity_layer_count,
+                        summary.unresolved_draw_count,
+                        summary.unresolved_entity_count,
                     )));
                 }
             }
@@ -538,25 +593,36 @@ fn receive(
         // Typed server data must not be recovered by parsing UI message text.
         // Reset on any non-world phase, including a map transition or reconnect.
         let next_world = host_world_position(&value, model.screen);
-        let map_changed = host.world.as_ref().zip(next_world.as_ref())
+        let map_changed = host
+            .world
+            .as_ref()
+            .zip(next_world.as_ref())
             .is_some_and(|(old, next)| old.map_file_name != next.map_file_name);
         host.world = next_world;
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
             host.pending_world_request = None;
-            host.map_assets_requested = false;
+            host.pending_render_request = None;
+            host.render_load_active = false;
+            host.deferred_render_load = None;
             #[cfg(target_os = "android")]
             crate::world_assets::cancel_packaged_map_atlas_load();
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
             host.pending_world_request = None;
-            host.map_assets_requested = false;
+            host.pending_render_request = None;
+            host.render_load_active = false;
+            host.deferred_render_load = None;
             #[cfg(target_os = "android")]
             crate::world_assets::cancel_packaged_map_atlas_load();
             mir2_bevy_runtime::native_ingest::push_native_scene_reset();
         }
         if let (Some(world), Some(raw)) = (&host.world, value["worldSnapshot"].as_str()) {
             let projected = crate::world_projection::project(
-                raw, &world.map_file_name, &world.player_name, world.x, world.y,
+                raw,
+                &world.map_file_name,
+                &world.player_name,
+                world.x,
+                world.y,
             );
             let mut projected_scene = None;
             let queued = projected.is_some_and(|projection| {
@@ -568,13 +634,15 @@ fn receive(
                     entities,
                     scene,
                 } = projection;
+                let world_snapshot = world.clone();
                 host.pending_world_request = Some(request_id);
+                host.pending_render_request = Some(request_id);
                 let queued = mir2_bevy_runtime::native_ingest::push_native_world_state(world)
                     && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui)
                     && mir2_bevy_runtime::native_ingest::push_native_map_model(map)
                     && mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entities);
                 if queued {
-                    projected_scene = Some(scene);
+                    projected_scene = Some((scene, world_snapshot, request_id));
                 }
                 queued
             });
@@ -584,6 +652,9 @@ fn receive(
                 mir2_bevy_runtime::native_ingest::push_native_data_reset();
                 host.world = None;
                 host.pending_world_request = None;
+                host.pending_render_request = None;
+                host.render_load_active = false;
+                host.deferred_render_load = None;
                 host.phase = "DISCONNECTED".into();
                 model.apply_gateway_event(Event::Disconnect {
                     reason: Some("World snapshot rejected; reconnect".into()),
@@ -594,11 +665,17 @@ fn receive(
                 continue;
             }
             #[cfg(target_os = "android")]
-            if !host.map_assets_requested {
-                if let Some(scene) = projected_scene {
-                    host.map_assets_requested =
-                        crate::world_assets::request_packaged_map_atlas_load(scene);
-                }
+            if let Some((scene, world_snapshot, request_id)) = projected_scene {
+                // Keep only the newest authoritative frame while a previous
+                // map/entity asset build is active. When it completes, the
+                // next update starts this deferred frame; stale receipts cannot
+                // unlock a transition because pending_render_request holds the
+                // newest request id.
+                host.deferred_render_load = Some(DeferredRenderLoad {
+                    scene,
+                    world_snapshot,
+                    request_id,
+                });
             }
         }
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
@@ -672,6 +749,8 @@ fn receive(
         }
         host.phase = phase.to_owned();
     }
+    #[cfg(target_os = "android")]
+    start_deferred_render_load(&mut host);
 }
 
 fn matching_world_receipt(
@@ -682,6 +761,72 @@ fn matching_world_receipt(
     (pending == Some(id)).then_some(outcome)
 }
 
+fn render_receipt_matches_player(
+    ready: &mir2_bevy_runtime::native_render_receipt::NativeRenderReady,
+    world: Option<&HostWorldPosition>,
+    character: &CharacterSummary,
+) -> bool {
+    // The scene center is an authoritative camera/render coordinate, not
+    // necessarily the player's tile (for example, a server may clamp it near
+    // map edges). The exact request id already binds this receipt to the
+    // accepted snapshot, so only the authenticated player identity must match.
+    ready.request_id != 0 && world.is_some_and(|world| world.player_name == character.name)
+}
+
+fn observe_render_receipt(
+    mut host: ResMut<HostState>,
+    mut model: ResMut<NativeShellModel>,
+    receipt: Option<Res<mir2_bevy_runtime::native_render_receipt::NativeRenderReceipt>>,
+) {
+    let Some(request_id) = host.pending_render_request else {
+        return;
+    };
+    let Some(ready) = receipt
+        .as_deref()
+        .and_then(|receipt| receipt.ready_for(request_id))
+    else {
+        return;
+    };
+    if model.screen == Screen::InGame {
+        // Normal in-map snapshots refresh the renderer without replaying the
+        // StartGame transition. Exact request matching above still prevents a
+        // stale frame from clearing the newest pending update.
+        host.pending_render_request = None;
+        return;
+    }
+    if model.screen != Screen::StartingGame {
+        return;
+    }
+    let Some(character) = model
+        .selected_character_index
+        .and_then(|selected| {
+            model
+                .characters
+                .iter()
+                .find(|character| character.index == selected)
+        })
+        .cloned()
+    else {
+        model.notice = Some(ShellNotice::error(
+            "Render completed without a selected authenticated character.",
+        ));
+        return;
+    };
+    if !render_receipt_matches_player(&ready, host.world.as_ref(), &character) {
+        model.notice = Some(ShellNotice::error(
+            "Render receipt does not match the authenticated player.",
+        ));
+        return;
+    }
+    if model.apply_gateway_event(Event::PlayerBootstrapped { character }) {
+        host.pending_render_request = None;
+        model.notice = Some(ShellNotice::info(format!(
+            "Entered game with {} map tiles and {} entity layers.",
+            ready.map_tile_count, ready.entity_layer_count
+        )));
+    }
+}
+
 fn observe_world_receipt(
     mut host: ResMut<HostState>,
     mut model: ResMut<NativeShellModel>,
@@ -690,18 +835,27 @@ fn observe_world_receipt(
     mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
 ) {
     use mir2_bevy_runtime::native_world_receipt::WorldApplyOutcome;
-    let Some(outcome) = receipt.as_deref()
-        .and_then(|receipt| matching_world_receipt(host.pending_world_request, receipt)) else { return; };
+    let Some(outcome) = receipt
+        .as_deref()
+        .and_then(|receipt| matching_world_receipt(host.pending_world_request, receipt))
+    else {
+        return;
+    };
     host.pending_world_request = None;
     match outcome {
         WorldApplyOutcome::Applied => {
             // Data acceptance is not map/entity render readiness or Bootstrap.
             if model.screen == Screen::StartingGame {
-                model.notice = Some(ShellNotice::info("World data applied; waiting for map and character assets."));
+                model.notice = Some(ShellNotice::info(
+                    "World data applied; waiting for map and character assets.",
+                ));
             }
         }
         WorldApplyOutcome::DecodeRejected => {
             host.world = None;
+            host.pending_render_request = None;
+            host.render_load_active = false;
+            host.deferred_render_load = None;
             host.phase = "DISCONNECTED".into();
             model.apply_gateway_event(Event::Disconnect {
                 reason: Some("World data could not be decoded; reconnect".into()),
@@ -710,7 +864,9 @@ fn observe_world_receipt(
             crate::world_assets::cancel_packaged_map_atlas_load();
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
             intents.drain().for_each(drop);
-            if let Some(effects) = effects.as_deref_mut() { discard_player_commands(effects); }
+            if let Some(effects) = effects.as_deref_mut() {
+                discard_player_commands(effects);
+            }
             OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
             send(json!({"type":"disconnect"}));
         }
@@ -877,37 +1033,95 @@ fn keyboard(
 #[cfg(test)]
 mod tests {
     #[test]
+    fn render_receipt_accepts_an_authoritative_camera_center_away_from_player_tile() {
+        use mir2_bevy_runtime::native_render_receipt::NativeRenderReady;
+        let ready = NativeRenderReady {
+            request_id: 42,
+            center_x: 299,
+            center_y: 630,
+            map_tile_count: 607,
+            entity_count: 2,
+            entity_layer_count: 2,
+        };
+        let world = HostWorldPosition {
+            player_name: "Fixture".into(),
+            map_file_name: "0".into(),
+            x: 302,
+            y: 634,
+        };
+        let character = CharacterSummary::new(7, "Fixture", 12, "Wizard", "Female");
+        assert!(super::render_receipt_matches_player(
+            &ready,
+            Some(&world),
+            &character
+        ));
+
+        let other = CharacterSummary::new(8, "Other", 1, "Warrior", "Male");
+        assert!(!super::render_receipt_matches_player(
+            &ready,
+            Some(&world),
+            &other
+        ));
+        assert!(!super::render_receipt_matches_player(
+            &ready, None, &character
+        ));
+    }
+
+    #[test]
     fn world_receipt_requires_exact_request_and_does_not_unlock_gameplay() {
         use mir2_bevy_runtime::native_world_receipt::{NativeWorldReceipt, WorldApplyOutcome};
-        let receipt = NativeWorldReceipt { last: Some((41, WorldApplyOutcome::Applied)) };
+        let receipt = NativeWorldReceipt {
+            last: Some((41, WorldApplyOutcome::Applied)),
+        };
         assert_eq!(super::matching_world_receipt(None, &receipt), None);
         assert_eq!(super::matching_world_receipt(Some(42), &receipt), None);
         let mut app = App::new();
         let mut model = NativeShellModel::default();
         model.screen = Screen::StartingGame;
         app.insert_resource(model)
-            .insert_resource(HostState { pending_world_request: Some(41), ..default() })
+            .insert_resource(HostState {
+                pending_world_request: Some(41),
+                ..default()
+            })
             .insert_resource(receipt)
             .init_resource::<NativeUiIntentQueue>()
             .add_systems(Update, observe_world_receipt);
         app.update();
-        assert_eq!(app.world().resource::<NativeShellModel>().screen, Screen::StartingGame);
-        assert!(app.world().resource::<HostState>().pending_world_request.is_none());
-        let rejected = NativeWorldReceipt { last: Some((42, WorldApplyOutcome::DecodeRejected)) };
-        assert_eq!(super::matching_world_receipt(Some(42), &rejected), Some(WorldApplyOutcome::DecodeRejected));
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::StartingGame
+        );
+        assert!(app
+            .world()
+            .resource::<HostState>()
+            .pending_world_request
+            .is_none());
+        let rejected = NativeWorldReceipt {
+            last: Some((42, WorldApplyOutcome::DecodeRejected)),
+        };
+        assert_eq!(
+            super::matching_world_receipt(Some(42), &rejected),
+            Some(WorldApplyOutcome::DecodeRejected)
+        );
         assert_eq!(super::matching_world_receipt(Some(43), &rejected), None);
     }
 
     #[test]
     fn host_inbox_accepts_large_snapshot_but_bounds_memory_and_fails_closed() {
         let mut queue = std::collections::VecDeque::new();
-        let event = serde_json::json!({"phase":"IN_GAME", "worldSnapshot":"x".repeat(900_000)}).to_string();
+        let event =
+            serde_json::json!({"phase":"IN_GAME", "worldSnapshot":"x".repeat(900_000)}).to_string();
         super::enqueue_host_event(&mut queue, &event);
         assert_eq!(queue[0]["worldSnapshot"].as_str().unwrap().len(), 900_000);
-        for _ in 0..8 { super::enqueue_host_event(&mut queue, &event); }
+        for _ in 0..8 {
+            super::enqueue_host_event(&mut queue, &event);
+        }
         assert_eq!(queue.len(), 1);
         assert_eq!(queue[0]["phase"], "DISCONNECTED");
-        super::enqueue_host_event(&mut queue, &serde_json::json!({"text":"x".repeat(65537)}).to_string());
+        super::enqueue_host_event(
+            &mut queue,
+            &serde_json::json!({"text":"x".repeat(65537)}).to_string(),
+        );
         assert_eq!(queue.len(), 1);
         assert_eq!(queue[0]["phase"], "DISCONNECTED");
         super::enqueue_host_event(&mut queue, "not JSON");

@@ -5,6 +5,7 @@
 //! until the separate native keyed-object pack is connected.
 
 use crate::{
+    map_objects::MapObjectPack,
     world_assets::{MapAtlasPageDescriptor, WorldAssetError},
     world_projection::ProjectedScene,
 };
@@ -76,6 +77,8 @@ struct MapTileDraw {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct MapRenderState {
+    #[serde(rename = "_nativeWorldRequest")]
+    native_world_request: u64,
     enabled: bool,
     stage_width: f32,
     stage_height: f32,
@@ -83,9 +86,10 @@ struct MapRenderState {
     revision: u64,
     center_x: i32,
     center_y: i32,
+    unresolved_draw_count: usize,
     atlases: Vec<MapRenderAtlas>,
     tiles: Vec<MapTile>,
-    standalone_tiles: Vec<serde_json::Value>,
+    standalone_tiles: Vec<MapStandaloneTile>,
     retained_image_keys: Vec<String>,
 }
 
@@ -125,14 +129,33 @@ struct MapTile {
     animation_tick: u32,
 }
 
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MapStandaloneTile {
+    key: String,
+    image_key: String,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
+    z: f32,
+    additive: bool,
+    animation_phase: u32,
+    animation_frame_count: u32,
+    animation_tick: u32,
+}
+
 #[derive(Debug)]
 pub(crate) struct MapRenderProduct {
     pub(crate) json: String,
     pub(crate) tile_count: usize,
+    pub(crate) standalone_tile_count: usize,
     pub(crate) atlas_count: usize,
     pub(crate) unresolved_draw_count: usize,
     pub(crate) map_width: u16,
     pub(crate) map_height: u16,
+    pub(crate) atlas_keys: Vec<String>,
+    pub(crate) standalone_source_keys: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -547,7 +570,9 @@ fn build_render_state(
     map: &ParsedMap,
     scene: &ProjectedScene,
     descriptors: &[MapAtlasPageDescriptor],
+    map_objects: &MapObjectPack,
     stem: &str,
+    request_id: u64,
 ) -> Result<MapRenderProduct, WorldAssetError> {
     let viewport = Viewport::from(scene);
     let mut rect_index = HashMap::new();
@@ -558,6 +583,8 @@ fn build_render_state(
     }
 
     let mut tiles = Vec::new();
+    let mut standalone_tiles = Vec::new();
+    let mut standalone_source_keys = BTreeSet::new();
     let mut used: BTreeMap<usize, BTreeSet<usize>> = BTreeMap::new();
     let mut unresolved_draw_count = 0usize;
     let tile_origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH
@@ -566,7 +593,87 @@ fn build_render_state(
 
     for draw in resolve_draws(map, viewport) {
         if draw.additive || library_requires_standalone(&draw.library) {
-            unresolved_draw_count += 1;
+            let requested_frame_count = draw.frame_count.max(1);
+            let mut resolved = Vec::with_capacity(requested_frame_count as usize);
+            for phase in 0..requested_frame_count {
+                let Some(frame_index) = i32::try_from(phase)
+                    .ok()
+                    .and_then(|phase| draw.frame_step.checked_mul(phase))
+                    .and_then(|offset| draw.frame_index.checked_add(offset))
+                else {
+                    resolved.clear();
+                    break;
+                };
+                let source_key = format!("{}#{frame_index}", draw.library);
+                let Some(entry) = map_objects.entries.get(&source_key) else {
+                    resolved.clear();
+                    break;
+                };
+                resolved.push((phase, source_key, entry));
+            }
+            let family_complete = resolved.len() == requested_frame_count as usize;
+            if !family_complete {
+                let source_key = format!("{}#{}", draw.library, draw.frame_index);
+                let Some(entry) = map_objects.entries.get(&source_key) else {
+                    unresolved_draw_count += 1;
+                    continue;
+                };
+                unresolved_draw_count += 1;
+                resolved = vec![(0, source_key, entry)];
+            }
+            let effective_frame_count = if family_complete {
+                requested_frame_count
+            } else {
+                1
+            };
+            let animated = effective_frame_count > 1;
+            let cell_left = tile_origin_x + (draw.x - viewport.center_x) as f32 * CELL_WIDTH;
+            let cell_top = tile_origin_y + (draw.y - viewport.center_y) as f32 * CELL_HEIGHT;
+            let cell_depth = (draw.y * 1_000 + draw.x * 10) as f32 + draw.z;
+            let layer_key = match draw.layer {
+                TileLayer::Back => "back",
+                TileLayer::TileAnimation => "tile-animation",
+                TileLayer::Middle => "mid",
+                TileLayer::Front => "front",
+            };
+            for (phase, source_key, entry) in resolved {
+                let draw_as_floor =
+                    map_draw_is_floor(draw.layer, animated, entry.width, entry.height);
+                let z = if draw_as_floor {
+                    map_floor_depth(map, draw.x, draw.y)
+                } else {
+                    cell_depth
+                };
+                let (left, top) = if draw_as_floor {
+                    (cell_left, cell_top)
+                } else if let Some((offset_x, offset_y)) = entry.offset {
+                    (cell_left + offset_x as f32, cell_top + offset_y as f32)
+                } else {
+                    (
+                        cell_left + (CELL_WIDTH - entry.width as f32) / 2.0,
+                        cell_top + CELL_HEIGHT - entry.height as f32,
+                    )
+                };
+                let base_key = format!("{layer_key}:{}:{}", draw.x, draw.y);
+                standalone_tiles.push(MapStandaloneTile {
+                    key: if animated {
+                        format!("{base_key}:anim:{phase}")
+                    } else {
+                        base_key
+                    },
+                    image_key: entry.image_key.clone(),
+                    left,
+                    top,
+                    width: entry.width as f32,
+                    height: entry.height as f32,
+                    z,
+                    additive: draw.additive,
+                    animation_phase: phase,
+                    animation_frame_count: effective_frame_count,
+                    animation_tick: draw.animation_tick,
+                });
+                standalone_source_keys.insert(source_key);
+            }
             continue;
         }
         let requested_frame_count = draw.frame_count.max(1);
@@ -683,6 +790,7 @@ fn build_render_state(
         })
         .collect::<Vec<_>>();
     let state = MapRenderState {
+        native_world_request: request_id,
         enabled: true,
         stage_width: STAGE_WIDTH,
         stage_height: STAGE_HEIGHT,
@@ -693,17 +801,25 @@ fn build_render_state(
         revision: map_render_revision(stem, viewport),
         center_x: viewport.center_x,
         center_y: viewport.center_y,
+        unresolved_draw_count,
         atlases,
         tiles,
-        standalone_tiles: Vec::new(),
+        standalone_tiles,
         retained_image_keys: Vec::new(),
     };
     Ok(MapRenderProduct {
         tile_count: state.tiles.len(),
+        standalone_tile_count: state.standalone_tiles.len(),
         atlas_count: state.atlases.len(),
         unresolved_draw_count,
         map_width: map.width,
         map_height: map.height,
+        atlas_keys: state
+            .atlases
+            .iter()
+            .map(|atlas| atlas.key.clone())
+            .collect(),
+        standalone_source_keys: standalone_source_keys.into_iter().collect(),
         json: serde_json::to_string(&state)
             .map_err(|error| WorldAssetError::new(format!("map render state rejected: {error}")))?,
     })
@@ -712,6 +828,8 @@ fn build_render_state(
 pub(crate) fn load_map_render_state<F>(
     scene: &ProjectedScene,
     descriptors: &[MapAtlasPageDescriptor],
+    map_objects: &MapObjectPack,
+    request_id: u64,
     mut read_asset: F,
 ) -> Result<MapRenderProduct, WorldAssetError>
 where
@@ -726,13 +844,19 @@ where
         ));
     }
     let map = parse_type100_map(&bytes)?;
-    build_render_state(&map, scene, descriptors, &stem)
+    build_render_state(&map, scene, descriptors, map_objects, &stem, request_id)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::world_assets::load_map_atlas_bundle;
+
+    fn objects() -> MapObjectPack {
+        MapObjectPack {
+            entries: HashMap::new(),
+        }
+    }
 
     fn type100_fixture() -> Vec<u8> {
         let width = 4u16;
@@ -784,31 +908,46 @@ mod tests {
     #[test]
     fn type100_floor_draw_uses_shared_runtime_wire_shape() {
         let map = parse_type100_map(&type100_fixture()).unwrap();
-        let product = build_render_state(&map, &scene(), &[descriptor()], "0").unwrap();
+        let product =
+            build_render_state(&map, &scene(), &[descriptor()], &objects(), "0", 7).unwrap();
         assert_eq!(product.tile_count, 1);
         assert_eq!(product.atlas_count, 1);
         assert_eq!((product.map_width, product.map_height), (4, 4));
         let value: serde_json::Value = serde_json::from_str(&product.json).unwrap();
+        assert_eq!(value["_nativeWorldRequest"], 7);
         assert_eq!(value["ackKey"], "native-map:0:2:2");
         assert_eq!(value["tiles"][0]["rectKey"], "WemadeMir2/Tiles#7");
         assert_eq!(value["atlases"][0]["imageUrl"], serde_json::Value::Null);
+        assert_eq!(product.atlas_keys, ["map:WemadeMir2/Tiles#p0"]);
     }
 
     #[test]
     fn packaged_loader_rejects_unsafe_names_and_builds_valid_map() {
         let bytes = type100_fixture();
-        let product = load_map_render_state(&scene(), &[descriptor()], |path, max_bytes| {
-            assert_eq!(path, "generated/crystal-map-pack/0.map");
-            assert!(bytes.len() <= max_bytes);
-            Ok(bytes.clone())
-        })
+        let product = load_map_render_state(
+            &scene(),
+            &[descriptor()],
+            &objects(),
+            9,
+            |path, max_bytes| {
+                assert_eq!(path, "generated/crystal-map-pack/0.map");
+                assert!(bytes.len() <= max_bytes);
+                Ok(bytes.clone())
+            },
+        )
         .unwrap();
         assert_eq!(product.tile_count, 1);
 
         let mut invalid = scene();
         invalid.map_file_name = "../0".into();
-        let error =
-            load_map_render_state(&invalid, &[descriptor()], |_, _| unreachable!()).unwrap_err();
+        let error = load_map_render_state(
+            &invalid,
+            &[descriptor()],
+            &objects(),
+            9,
+            |_, _| unreachable!(),
+        )
+        .unwrap_err();
         assert!(error.to_string().contains("safe asset key"));
     }
 
@@ -837,16 +976,52 @@ mod tests {
             width: 22,
             height: 18,
         };
-        let product = load_map_render_state(&scene, &bundle.descriptors, read).unwrap();
+        let objects = crate::map_objects::load_map_object_pack("0", read).unwrap();
+        let product =
+            load_map_render_state(&scene, &bundle.descriptors, &objects, 11, read).unwrap();
+        let state: serde_json::Value = serde_json::from_str(&product.json).unwrap();
+        let visible_atlas_tiles = state["tiles"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|tile| {
+                let atlas_key = tile["atlasKey"].as_str().unwrap();
+                let rect_key = tile["rectKey"].as_str().unwrap();
+                let page_index = bundle
+                    .descriptors
+                    .iter()
+                    .position(|descriptor| descriptor.key == atlas_key)
+                    .unwrap();
+                let descriptor = &bundle.descriptors[page_index];
+                let rect = descriptor
+                    .rects
+                    .iter()
+                    .find(|rect| rect.key == rect_key)
+                    .unwrap();
+                let page = &bundle.pages[page_index];
+                (rect.y..rect.y + rect.height).any(|y| {
+                    (rect.x..rect.x + rect.width).any(|x| {
+                        let offset = ((y * page.width + x) * 4) as usize;
+                        page.rgba[offset + 3] != 0
+                            && page.rgba[offset..offset + 3]
+                                .iter()
+                                .any(|channel| *channel != 0)
+                    })
+                })
+            })
+            .count();
         assert_eq!((product.map_width, product.map_height), (700, 700));
         assert_eq!(
             product.tile_count, 607,
             "real viewport remains deterministic"
         );
         assert_eq!(product.atlas_count, 7);
+        assert_eq!(product.atlas_keys.len(), product.atlas_count);
+        assert_eq!(visible_atlas_tiles, product.tile_count);
         assert_eq!(
-            product.unresolved_draw_count, 215,
-            "keyed objects remain explicit instead of becoming fake floor"
+            product.unresolved_draw_count, 0,
+            "the initial Bichon viewport has complete standalone object coverage"
         );
+        assert!(!product.standalone_source_keys.is_empty());
     }
 }

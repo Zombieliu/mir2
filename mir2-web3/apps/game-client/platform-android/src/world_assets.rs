@@ -113,11 +113,19 @@ pub(crate) struct PackagedMapAtlasSummary {
     pub(crate) source_count: usize,
     pub(crate) compressed_bytes: usize,
     pub(crate) rgba_bytes: usize,
+    pub(crate) map_object_rgba_bytes: usize,
     pub(crate) map_width: u16,
     pub(crate) map_height: u16,
     pub(crate) map_atlas_count: usize,
     pub(crate) map_tile_count: usize,
+    pub(crate) map_standalone_tile_count: usize,
     pub(crate) unresolved_draw_count: usize,
+    pub(crate) entity_page_count: usize,
+    pub(crate) entity_count: usize,
+    pub(crate) entity_layer_count: usize,
+    pub(crate) unresolved_entity_count: usize,
+    pub(crate) entity_compressed_bytes: usize,
+    pub(crate) entity_rgba_bytes: usize,
 }
 
 #[cfg(target_os = "android")]
@@ -421,6 +429,31 @@ static ANDROID_MAP_ATLAS_LOAD: std::sync::Mutex<AndroidMapAtlasLoadState> =
     });
 
 #[cfg(target_os = "android")]
+fn render_load_is_current(generation: u64) -> bool {
+    let state = ANDROID_MAP_ATLAS_LOAD
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    state.active && state.generation == generation
+}
+
+#[cfg(target_os = "android")]
+fn wait_for_native_render_queue(generation: u64) -> bool {
+    const LOW_WATER_BYTES: usize = 16 * 1024 * 1024;
+    const POLLS: usize = 1_000;
+    for _ in 0..POLLS {
+        if !render_load_is_current(generation) {
+            return false;
+        }
+        match mir2_bevy_runtime::native_ingest::native_pending_buffer_bytes() {
+            Some(bytes) if bytes <= LOW_WATER_BYTES => return true,
+            Some(_) => std::thread::sleep(std::time::Duration::from_millis(2)),
+            None => return false,
+        }
+    }
+    false
+}
+
+#[cfg(target_os = "android")]
 fn read_packaged_asset(path: &str, max_bytes: usize) -> Result<Vec<u8>, WorldAssetError> {
     use std::{ffi::CString, io::Read};
 
@@ -454,6 +487,8 @@ fn read_packaged_asset(path: &str, max_bytes: usize) -> Result<Vec<u8>, WorldAss
 #[cfg(target_os = "android")]
 pub(crate) fn request_packaged_map_atlas_load(
     scene: crate::world_projection::ProjectedScene,
+    world_snapshot: String,
+    request_id: u64,
 ) -> bool {
     let mut state = ANDROID_MAP_ATLAS_LOAD
         .lock()
@@ -469,58 +504,152 @@ pub(crate) fn request_packaged_map_atlas_load(
 
     std::thread::spawn(move || {
         let loaded = load_map_atlas_bundle(read_packaged_asset).and_then(|bundle| {
-            crate::map_render::load_map_render_state(
+            let map_name = scene
+                .map_file_name
+                .strip_suffix(".map.gz")
+                .or_else(|| scene.map_file_name.strip_suffix(".map"))
+                .unwrap_or(&scene.map_file_name)
+                .to_ascii_lowercase();
+            let map_objects =
+                crate::map_objects::load_map_object_pack(&map_name, read_packaged_asset)?;
+            let map_render = crate::map_render::load_map_render_state(
                 &scene,
                 &bundle.descriptors,
+                &map_objects,
+                request_id,
                 read_packaged_asset,
-            )
-            .map(|map_render| (bundle, map_render))
+            )?;
+            let map_object_images = crate::map_objects::decode_selected_map_objects(
+                &map_objects,
+                &map_render.standalone_source_keys,
+                read_packaged_asset,
+            )?;
+            let entity_render = crate::entity_render::load_entity_render_state(
+                &world_snapshot,
+                &scene,
+                request_id,
+                read_packaged_asset,
+            )?;
+            Ok((bundle, map_render, map_object_images, entity_render))
         });
-        // Keep the generation lock through publication. A reset either wins
-        // before this point and suppresses the stale load, or waits and then
-        // queues a SceneReset after the complete batch.
+        let event = match loaded {
+            Ok((mut bundle, map_render, map_object_images, entity_render)) => {
+                let active_map_atlases = map_render
+                    .atlas_keys
+                    .iter()
+                    .map(String::as_str)
+                    .collect::<std::collections::HashSet<_>>();
+                bundle
+                    .pages
+                    .retain(|page| active_map_atlases.contains(page.key.as_str()));
+                drop(active_map_atlases);
+                let active_map_rgba_bytes = bundle
+                    .pages
+                    .iter()
+                    .map(|page| page.rgba.len())
+                    .sum::<usize>();
+                let map_object_rgba_bytes = map_object_images
+                    .iter()
+                    .map(|image| image.rgba.len())
+                    .sum::<usize>();
+                let summary = PackagedMapAtlasSummary {
+                    page_count: bundle.pages.len(),
+                    source_count: bundle.source_count,
+                    compressed_bytes: bundle.compressed_bytes,
+                    rgba_bytes: active_map_rgba_bytes,
+                    map_object_rgba_bytes,
+                    map_width: map_render.map_width,
+                    map_height: map_render.map_height,
+                    map_atlas_count: map_render.atlas_count,
+                    map_tile_count: map_render.tile_count,
+                    map_standalone_tile_count: map_render.standalone_tile_count,
+                    unresolved_draw_count: map_render.unresolved_draw_count,
+                    entity_page_count: entity_render.pages.len(),
+                    entity_count: entity_render.entity_count,
+                    entity_layer_count: entity_render.layer_count,
+                    unresolved_entity_count: entity_render.unresolved_entity_count,
+                    entity_compressed_bytes: entity_render.compressed_bytes,
+                    entity_rgba_bytes: entity_render.rgba_bytes,
+                };
+                // Publish the render-state pair before its image batch. The
+                // runtime deliberately clears map images while no active map
+                // state exists; sending pages first therefore lets a fast
+                // render frame ingest and immediately discard them while the
+                // Android producer is still decoding/queueing later objects.
+                // An active state is safe to expose early because both the map
+                // and entity sync paths wait for every referenced image before
+                // committing any sprites or a render-ready receipt.
+                let state = ANDROID_MAP_ATLAS_LOAD
+                    .lock()
+                    .unwrap_or_else(|poisoned| poisoned.into_inner());
+                if state.generation != generation {
+                    return;
+                }
+                let states_accepted =
+                    mir2_bevy_runtime::native_ingest::push_native_map_render_state(map_render.json)
+                        && mir2_bevy_runtime::native_ingest::push_native_entity_render_state(
+                            entity_render.json,
+                        );
+                drop(state);
+
+                let images_accepted = states_accepted
+                    && bundle.pages.into_iter().all(|page| {
+                        wait_for_native_render_queue(generation)
+                            && mir2_bevy_runtime::native_ingest::push_native_map_render_atlas(
+                                page.key,
+                                page.width,
+                                page.height,
+                                page.rgba,
+                            )
+                    })
+                    && map_object_images.into_iter().all(|image| {
+                        wait_for_native_render_queue(generation)
+                            && mir2_bevy_runtime::native_ingest::push_native_map_render_atlas(
+                                image.key,
+                                image.width,
+                                image.height,
+                                image.rgba,
+                            )
+                    })
+                    && entity_render.pages.into_iter().all(|page| {
+                        wait_for_native_render_queue(generation)
+                            && mir2_bevy_runtime::native_ingest::push_native_entity_render_atlas(
+                                page.key,
+                                page.width,
+                                page.height,
+                                page.rgba,
+                            )
+                    });
+                let queue_ready = images_accepted && wait_for_native_render_queue(generation);
+                let mut state = ANDROID_MAP_ATLAS_LOAD
+                    .lock()
+                    .unwrap_or_else(|poisoned| poisoned.into_inner());
+                if state.generation != generation {
+                    return;
+                }
+                if queue_ready {
+                    state.active = false;
+                    state.event = Some(PackagedMapAtlasLoadEvent::Ready(summary));
+                    return;
+                } else {
+                    // This also removes already-consumed pages if the bounded
+                    // queue ever rejects the tail of a pack.
+                    mir2_bevy_runtime::native_ingest::push_native_scene_reset();
+                    state.active = false;
+                    state.event = Some(PackagedMapAtlasLoadEvent::Failed(
+                        "Bevy rejected the packaged map-atlas or draw-state batch".into(),
+                    ));
+                    return;
+                }
+            }
+            Err(error) => PackagedMapAtlasLoadEvent::Failed(error.to_string()),
+        };
         let mut state = ANDROID_MAP_ATLAS_LOAD
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
         if state.generation != generation {
             return;
         }
-        let event = match loaded {
-            Ok((bundle, map_render)) => {
-                let summary = PackagedMapAtlasSummary {
-                    page_count: bundle.pages.len(),
-                    source_count: bundle.source_count,
-                    compressed_bytes: bundle.compressed_bytes,
-                    rgba_bytes: bundle.rgba_bytes,
-                    map_width: map_render.map_width,
-                    map_height: map_render.map_height,
-                    map_atlas_count: map_render.atlas_count,
-                    map_tile_count: map_render.tile_count,
-                    unresolved_draw_count: map_render.unresolved_draw_count,
-                };
-                let accepted = bundle.pages.into_iter().all(|page| {
-                    mir2_bevy_runtime::native_ingest::push_native_map_render_atlas(
-                        page.key,
-                        page.width,
-                        page.height,
-                        page.rgba,
-                    )
-                }) && mir2_bevy_runtime::native_ingest::push_native_map_render_state(
-                    map_render.json,
-                );
-                if accepted {
-                    PackagedMapAtlasLoadEvent::Ready(summary)
-                } else {
-                    // This also removes already-consumed pages if the bounded
-                    // queue ever rejects the tail of a pack.
-                    mir2_bevy_runtime::native_ingest::push_native_scene_reset();
-                    PackagedMapAtlasLoadEvent::Failed(
-                        "Bevy rejected the packaged map-atlas or draw-state batch".into(),
-                    )
-                }
-            }
-            Err(error) => PackagedMapAtlasLoadEvent::Failed(error.to_string()),
-        };
         state.active = false;
         state.event = Some(event);
     });

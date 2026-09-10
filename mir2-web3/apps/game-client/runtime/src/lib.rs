@@ -7,12 +7,13 @@ mod lighting;
 mod local_motion;
 mod motion;
 mod movement_shadow;
-pub mod native_world_receipt;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native_ingest;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
+pub mod native_render_receipt;
+pub mod native_world_receipt;
 mod presentation_pose;
 mod remote_motion;
 
@@ -27,6 +28,13 @@ use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
 use bevy::math::{Rect, URect, UVec2};
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+
+// Native scene packs can contain hundreds of independently-addressable map
+// objects plus multi-megabyte actor atlas pages. Limit each typed image
+// consumer so Android does not turn the entire batch into GPU assets during a
+// single frame. One oversized atlas page is still consumed to guarantee
+// forward progress.
+const NATIVE_RENDER_IMAGE_INGEST_BYTES_PER_FRAME: usize = 8 * 1024 * 1024;
 use bevy::window::{CompositeAlphaMode, WindowResolution};
 use js_sys::Function;
 use mir2_client_bevy::pending_operations::{
@@ -682,6 +690,8 @@ struct MineNode {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EntityRenderState {
+    #[serde(default, rename = "_nativeWorldRequest")]
+    native_world_request: u64,
     enabled: bool,
     stage_width: f32,
     stage_height: f32,
@@ -689,6 +699,8 @@ struct EntityRenderState {
     center_x: Option<i32>,
     #[serde(default)]
     center_y: Option<i32>,
+    #[serde(default)]
+    unresolved_entity_count: usize,
     #[serde(default)]
     atlases: Vec<EntityRenderAtlas>,
     #[serde(default)]
@@ -792,6 +804,8 @@ enum EntityKind {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MapRenderState {
+    #[serde(default, rename = "_nativeWorldRequest")]
+    native_world_request: u64,
     enabled: bool,
     stage_width: f32,
     stage_height: f32,
@@ -803,6 +817,8 @@ struct MapRenderState {
     center_x: Option<i32>,
     #[serde(default)]
     center_y: Option<i32>,
+    #[serde(default)]
+    unresolved_draw_count: usize,
     /// Atlas page descriptors (key + page dims + the source rects within the
     /// page). Carries the rect geometry the per-tile `atlas_rect_key` indexes
     /// into; mirrors `EntityRenderState.atlases` so the same layout-building
@@ -1357,6 +1373,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
     let mut app = App::new();
     app.insert_resource(ClearColor(FLOOR_COLOR))
         .init_resource::<native_world_receipt::NativeWorldReceipt>()
+        .init_resource::<native_render_receipt::NativeRenderReceipt>()
         .insert_resource(RuntimeWorldState::default())
         .insert_resource(RuntimeEntityRenderState::default())
         .insert_resource(RuntimeEntityRenderAtlases::default())
@@ -1514,6 +1531,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 sync_mine_nodes,
                 begin_presentation_pose_frame,
                 sync_entity_render_layers,
+                publish_native_render_receipt,
                 follow_player,
                 follow_lighting_camera,
                 publish_presentation_pose_frame,
@@ -1566,7 +1584,11 @@ fn ingest_pending_world_state(
         |message| {
             if let native_ingest::NativeInboundMessage::WorldState(json) = message {
                 if !native_world_receipt::apply(
-                    &json, &mut state, &mut snap_buf, time.elapsed_secs_f64(), receipt.as_deref_mut(),
+                    &json,
+                    &mut state,
+                    &mut snap_buf,
+                    time.elapsed_secs_f64(),
+                    receipt.as_deref_mut(),
                 ) {
                     publish_status("native-decode-error", "invalid native world snapshot");
                 }
@@ -1652,13 +1674,14 @@ fn ingest_pending_entity_render_atlases(
             atlas_resource.images.insert(atlas.key, handle);
         }
     });
-    native.drain_matching(
+    native.drain_matching_bounded_bytes(
         |message| {
             matches!(
                 message,
                 native_ingest::NativeInboundMessage::EntityRenderAtlas { .. }
             )
         },
+        NATIVE_RENDER_IMAGE_INGEST_BYTES_PER_FRAME,
         |message| {
             if let native_ingest::NativeInboundMessage::EntityRenderAtlas {
                 key,
@@ -3510,13 +3533,14 @@ fn ingest_pending_map_render_images(
             atlas_resource.revision = atlas_resource.revision.wrapping_add(1);
         }
     });
-    native.drain_matching(
+    native.drain_matching_bounded_bytes(
         |message| {
             matches!(
                 message,
                 native_ingest::NativeInboundMessage::MapRenderAtlas { .. }
             )
         },
+        NATIVE_RENDER_IMAGE_INGEST_BYTES_PER_FRAME,
         |message| {
             if let native_ingest::NativeInboundMessage::MapRenderAtlas {
                 key,
@@ -3926,6 +3950,7 @@ fn sync_map_render(
                     if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
                         sprite.image = image;
                         sprite.texture_atlas = Some(texture_atlas);
+                        sprite.rect = None;
                     }
                 }
             }
@@ -4164,7 +4189,8 @@ fn sync_map_render(
 fn trace_native_map_state(last: &mut Option<String>, message: String) {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        if (std::env::var_os("MIR2_NATIVE_TRACE_MAP").is_some()
+        if (cfg!(target_os = "android")
+            || std::env::var_os("MIR2_NATIVE_TRACE_MAP").is_some()
             || std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some())
             && last.as_ref() != Some(&message)
         {
@@ -4972,6 +4998,112 @@ fn sync_entity_render_layers(
         .retain(|object_id, _| alive_actor_objects.contains(object_id));
 
     presentation_poses.set_applied_entity_center(entity_center);
+}
+
+fn publish_native_render_receipt(
+    map_state: Res<RuntimeMapRenderState>,
+    entity_state: Res<RuntimeEntityRenderState>,
+    map_atlases: Res<RuntimeMapRenderAtlases>,
+    registry: Res<SceneRegistry>,
+    mut receipt: ResMut<native_render_receipt::NativeRenderReceipt>,
+    mut preview_trace: Local<Option<String>>,
+) {
+    let mut map_current = false;
+    let mut map_missing = 0usize;
+    if let Some(snapshot) = map_state
+        .snapshot
+        .as_ref()
+        .filter(|snapshot| snapshot.enabled)
+    {
+        let applied = registry.map_render.applied.as_ref();
+        let current = applied.is_some_and(|applied| {
+            applied.producer_revision == snapshot.revision
+                && applied.image_revision == map_atlases.revision
+        });
+        map_current = current;
+        if current {
+            map_missing = map_render_missing_bindings(snapshot, &map_atlases).len();
+            receipt.mark_map(
+                snapshot.native_world_request,
+                snapshot.center_x.zip(snapshot.center_y),
+                registry.map_render.tiles.len(),
+                snapshot.unresolved_draw_count.saturating_add(map_missing),
+            );
+        } else {
+            receipt.clear_map();
+        }
+    } else {
+        receipt.clear_map();
+    }
+
+    let mut entity_all_layers_live = false;
+    let mut entity_self_visible = false;
+    if let Some(snapshot) = entity_state
+        .snapshot
+        .as_ref()
+        .filter(|snapshot| snapshot.enabled)
+    {
+        let expected_layer_count = snapshot
+            .entities
+            .iter()
+            .map(|entity| entity.layers.len())
+            .sum::<usize>();
+        let all_layers_live = registry.entity_render_pending_images.is_empty()
+            && snapshot.entities.iter().all(|entity| {
+                entity.layers.iter().all(|layer| {
+                    registry
+                        .entity_render_layers
+                        .contains_key(&entity_render_layer_key(entity, layer))
+                })
+            });
+        let self_visible = all_layers_live
+            && snapshot.entities.iter().any(|entity| {
+                entity.is_self
+                    && !entity.layers.is_empty()
+                    && entity.layers.iter().all(|layer| {
+                        registry
+                            .entity_render_layers
+                            .contains_key(&entity_render_layer_key(entity, layer))
+                    })
+            });
+        entity_all_layers_live = all_layers_live;
+        entity_self_visible = self_visible;
+        receipt.mark_entities(
+            snapshot.native_world_request,
+            snapshot.center_x.zip(snapshot.center_y),
+            snapshot.entities.len(),
+            expected_layer_count,
+            snapshot.unresolved_entity_count,
+            self_visible,
+        );
+    } else {
+        receipt.clear_entities();
+    }
+    receipt.finish_frame();
+
+    let preview_request = map_state
+        .snapshot
+        .as_ref()
+        .map(|snapshot| snapshot.native_world_request)
+        .or_else(|| {
+            entity_state
+                .snapshot
+                .as_ref()
+                .map(|snapshot| snapshot.native_world_request)
+        });
+    if preview_request == Some(u64::MAX) {
+        let message = format!(
+            "map_current={map_current} map_live={} map_missing={map_missing} map_image_revision={} entity_live={} entity_self_visible={entity_self_visible} entity_layers={}",
+            registry.map_render.tiles.len(),
+            map_atlases.revision,
+            entity_all_layers_live,
+            registry.entity_render_layers.len(),
+        );
+        if preview_trace.as_ref() != Some(&message) {
+            eprintln!("[android-world-render] {message}");
+            *preview_trace = Some(message);
+        }
+    }
 }
 
 struct EntityRenderImageBinding {

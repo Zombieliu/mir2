@@ -67,5 +67,13 @@ impl NativeInbound {
     ) {
     }
 
+    pub(crate) fn drain_matching_bounded_bytes(
+        &self,
+        _matches: impl FnMut(&NativeInboundMessage) -> bool,
+        _max_bytes: usize,
+        _on_message: impl FnMut(NativeInboundMessage),
+    ) {
+    }
+
     pub(crate) fn discard_stale_data_before_latest_reset(&self) {}
 }
