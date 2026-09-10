@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `75d0eac46`: authoritative native map/object/entity
+> rendering is connected through the shared Bevy contracts. The checked
+> Bichon `(302,634)` view renders 607 atlas + 242 keyed/additive draws (849,
+> zero visible misses) and two entity layers; exact-request readiness now
+> requires the same complete scene for two consecutive frames. Android
+> 110/110, runtime 232/232, Java TLS fixture 8/8, API31 target, UI Preview and
+> normal APK gates pass. An API31 ARM64 emulator cold-started to a visible
+> 2340x1080 full world frame and survived Home/resume in the same process.
+> The world screenshot is explicitly offline; the normal APK has no configured
+> Gateway and stops at the real shared login screen. Approved WSS/account login,
+> complete gameplay queue wiring, the 2,969 missing Bichon object sources,
+> other maps, physical-device journey and soak remain open. Evidence:
+> `docs/generated/player-qa/native-android-world-render-20260911/README.md`.
+
 > 2026-09-11 Android `529189a6e`: the approved local world pack now includes
 > bounded raw Bichon `0.map`; the Android host strictly parses its Crystal
 > type-100 cells and derives shared `MapRenderState` from the authoritative

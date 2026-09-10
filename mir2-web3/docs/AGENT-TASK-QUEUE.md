@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> 2026-09-11 Android render slice `75d0eac46`: complete visible Bichon viewport
+> production now includes ordinary atlas draws, keyed/additive objects and
+> server-described entity layers. A two-consecutive-frame exact receipt gates
+> StartGame/map-change presentation; state-first bounded ingestion prevents
+> atlas floods from evicting owning scene state. Android 110, runtime 232,
+> Java TLS fixture 8, API31 cross-check and both APK packages pass. The API31
+> ARM64 emulator shows the full 849-draw world plus two entities and survives
+> background/resume. This closes only the offline emulator rendering task.
+> Next Android external gate: supply an approved WSS endpoint/test account and
+> connect the remaining gameplay reducer queues, then run login -> roster ->
+> StartGame -> render on emulator; physical-device touch/IME/network/soak follows.
+> The local Bichon export still lacks 2,969 object references. Evidence:
+> `docs/generated/player-qa/native-android-world-render-20260911/README.md`.
+> No live login, physical device, global completion, or human acceptance claimed.
+
 > 2026-09-10 menu parity is in progress. Shared Ranking presence now uses
 > stable account/character identity across local factory Zones, excluding
 > replicas and leaving players (simulation 3/3, Gateway integration 1/1).

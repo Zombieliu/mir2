@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `75d0eac46`: the native shared renderer now consumes
+> authoritative map center/object/entity snapshots, resolves the checked
+> Bichon viewport to 849 map draws plus visible self/monster layers, and delays
+> StartGame/map-change completion until the exact scene is complete across two
+> rendered frames. API31 emulator cold-start and same-process Home/resume are
+> visibly verified with an explicitly offline fixture. The normal APK safely
+> stops at the shared login screen because no Gateway URL was supplied.
+> Real WSS/account login, all gameplay queue-to-socket wiring, missing map
+> sources/other maps, physical-device touch/IME/network/soak and human visual
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-world-render-20260911/README.md`.
+
 > 2026-09-10 native Keyboard menu: Crystal Title119 editor is connected to
 > actual key capture, strict/relaxed modifiers, Delete unbind, full reset,
 > grouped scrolling, movable window, and application-scoped atomic JSON save/load.
