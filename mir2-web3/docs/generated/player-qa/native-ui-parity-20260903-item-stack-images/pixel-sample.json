@@ -1,0 +1,1261 @@
+{
+  "schemaVersion": "mir2-native-stack-image-pixel-sample-v1",
+  "capture": "stack-images-r1-inventory-1788384324956-1.png",
+  "captureSha256": "59cf01834bf46c918a4fea8f9a3d698117941b676244ae5e06cc59d1b519463e",
+  "sidecarSha256": "7ff144642cbbf18aa233dba20181ece00e1846c09f337a18e901a0b522d6a90d",
+  "catalogueSha256": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+  "sourceRule": "Crystal 92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d Shared/Data/ItemData.cs:641-681",
+  "matchedSlots": 24,
+  "checkedOpaquePixels": 6161,
+  "mismatchedPixels": 0,
+  "rejectedWrongFrames": 86,
+  "rejectedOnePixelTranslations": 96,
+  "scope": "Fixed 24 bag cells; exact RGB of opaque source pixels above the count region",
+  "notProven": [
+    "count-label pixels",
+    "transparent edges",
+    "belt and other panels",
+    "manual stack transitions",
+    "current-source executable identity",
+    "Crystal same-state pair",
+    "other DPI",
+    "trusted package and light provenance",
+    "human visual acceptance"
+  ],
+  "visualAccepted": false,
+  "accepted": false,
+  "cases": [
+    {
+      "slot": 0,
+      "itemIndex": 712,
+      "fixtureCount": 300,
+      "expectedImage": 3662,
+      "sourcePngSha256": "223876a9260f6c107dee129bd17a11df30e0f9b8991953c88338237ce58a1fb5",
+      "x": 11,
+      "y": 38,
+      "width": 32,
+      "height": 30,
+      "checkedPixels": 350,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3660,
+          "mismatchedPixels": 68
+        },
+        {
+          "frame": 3661,
+          "mismatchedPixels": 56
+        },
+        {
+          "frame": 270,
+          "mismatchedPixels": 319
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 320
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 320
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 348
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 299
+        }
+      ]
+    },
+    {
+      "slot": 1,
+      "itemIndex": 712,
+      "fixtureCount": 1,
+      "expectedImage": 3660,
+      "sourcePngSha256": "f63381d67b1d67bda82262b26c4cc8d61e90641af79edb01b7cfd40ecb3be29c",
+      "x": 48,
+      "y": 38,
+      "width": 32,
+      "height": 30,
+      "checkedPixels": 350,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3661,
+          "mismatchedPixels": 68
+        },
+        {
+          "frame": 3662,
+          "mismatchedPixels": 68
+        },
+        {
+          "frame": 270,
+          "mismatchedPixels": 319
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 319
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 319
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 348
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 299
+        }
+      ]
+    },
+    {
+      "slot": 2,
+      "itemIndex": 712,
+      "fixtureCount": 199,
+      "expectedImage": 3660,
+      "sourcePngSha256": "f63381d67b1d67bda82262b26c4cc8d61e90641af79edb01b7cfd40ecb3be29c",
+      "x": 85,
+      "y": 38,
+      "width": 32,
+      "height": 30,
+      "checkedPixels": 350,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3661,
+          "mismatchedPixels": 68
+        },
+        {
+          "frame": 3662,
+          "mismatchedPixels": 68
+        },
+        {
+          "frame": 270,
+          "mismatchedPixels": 319
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 319
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 319
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 348
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 299
+        }
+      ]
+    },
+    {
+      "slot": 3,
+      "itemIndex": 712,
+      "fixtureCount": 200,
+      "expectedImage": 3661,
+      "sourcePngSha256": "3e0720423a6c68d99b7102d22b04877e82f6d2e277ce820b7539dc6066fd995b",
+      "x": 122,
+      "y": 38,
+      "width": 32,
+      "height": 30,
+      "checkedPixels": 350,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3660,
+          "mismatchedPixels": 68
+        },
+        {
+          "frame": 3662,
+          "mismatchedPixels": 56
+        },
+        {
+          "frame": 270,
+          "mismatchedPixels": 319
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 317
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 317
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 346
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 297
+        }
+      ]
+    },
+    {
+      "slot": 4,
+      "itemIndex": 712,
+      "fixtureCount": 299,
+      "expectedImage": 3661,
+      "sourcePngSha256": "3e0720423a6c68d99b7102d22b04877e82f6d2e277ce820b7539dc6066fd995b",
+      "x": 159,
+      "y": 38,
+      "width": 32,
+      "height": 30,
+      "checkedPixels": 350,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3660,
+          "mismatchedPixels": 68
+        },
+        {
+          "frame": 3662,
+          "mismatchedPixels": 56
+        },
+        {
+          "frame": 270,
+          "mismatchedPixels": 319
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 317
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 317
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 346
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 297
+        }
+      ]
+    },
+    {
+      "slot": 5,
+      "itemIndex": 712,
+      "fixtureCount": 500,
+      "expectedImage": 3662,
+      "sourcePngSha256": "223876a9260f6c107dee129bd17a11df30e0f9b8991953c88338237ce58a1fb5",
+      "x": 196,
+      "y": 38,
+      "width": 32,
+      "height": 30,
+      "checkedPixels": 350,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3660,
+          "mismatchedPixels": 68
+        },
+        {
+          "frame": 3661,
+          "mismatchedPixels": 56
+        },
+        {
+          "frame": 270,
+          "mismatchedPixels": 319
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 320
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 320
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 348
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 299
+        }
+      ]
+    },
+    {
+      "slot": 8,
+      "itemIndex": 710,
+      "fixtureCount": 1,
+      "expectedImage": 3673,
+      "sourcePngSha256": "c2e77b6ed307a0f39cd66465f6acffaeac6b06ee5973d6dbf7d47178e4b4b179",
+      "x": 19,
+      "y": 72,
+      "width": 16,
+      "height": 28,
+      "checkedPixels": 129,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3674,
+          "mismatchedPixels": 169
+        },
+        {
+          "frame": 2960,
+          "mismatchedPixels": 253
+        },
+        {
+          "frame": 3675,
+          "mismatchedPixels": 260
+        },
+        {
+          "frame": 259,
+          "mismatchedPixels": 268
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 115
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 115
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 105
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 86
+        }
+      ]
+    },
+    {
+      "slot": 9,
+      "itemIndex": 710,
+      "fixtureCount": 49,
+      "expectedImage": 3673,
+      "sourcePngSha256": "c2e77b6ed307a0f39cd66465f6acffaeac6b06ee5973d6dbf7d47178e4b4b179",
+      "x": 56,
+      "y": 72,
+      "width": 16,
+      "height": 28,
+      "checkedPixels": 129,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3674,
+          "mismatchedPixels": 169
+        },
+        {
+          "frame": 2960,
+          "mismatchedPixels": 253
+        },
+        {
+          "frame": 3675,
+          "mismatchedPixels": 260
+        },
+        {
+          "frame": 259,
+          "mismatchedPixels": 268
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 115
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 115
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 105
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 86
+        }
+      ]
+    },
+    {
+      "slot": 10,
+      "itemIndex": 710,
+      "fixtureCount": 50,
+      "expectedImage": 3674,
+      "sourcePngSha256": "3c6e6f887e5f7c317ee76754ae063428e97f76b3d8aaffaf6d2f331d8a9b6b64",
+      "x": 89,
+      "y": 72,
+      "width": 24,
+      "height": 27,
+      "checkedPixels": 183,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3673,
+          "mismatchedPixels": 115
+        },
+        {
+          "frame": 2960,
+          "mismatchedPixels": 249
+        },
+        {
+          "frame": 3675,
+          "mismatchedPixels": 213
+        },
+        {
+          "frame": 259,
+          "mismatchedPixels": 268
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 158
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 158
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 171
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 136
+        }
+      ]
+    },
+    {
+      "slot": 11,
+      "itemIndex": 710,
+      "fixtureCount": 99,
+      "expectedImage": 3674,
+      "sourcePngSha256": "3c6e6f887e5f7c317ee76754ae063428e97f76b3d8aaffaf6d2f331d8a9b6b64",
+      "x": 126,
+      "y": 72,
+      "width": 24,
+      "height": 27,
+      "checkedPixels": 183,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3673,
+          "mismatchedPixels": 115
+        },
+        {
+          "frame": 2960,
+          "mismatchedPixels": 249
+        },
+        {
+          "frame": 3675,
+          "mismatchedPixels": 213
+        },
+        {
+          "frame": 259,
+          "mismatchedPixels": 268
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 158
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 158
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 171
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 136
+        }
+      ]
+    },
+    {
+      "slot": 12,
+      "itemIndex": 710,
+      "fixtureCount": 100,
+      "expectedImage": 2960,
+      "sourcePngSha256": "33036db94b25231b1a67ee1026c1c495b68697cf9a0184fe900996ac988df67c",
+      "x": 161,
+      "y": 71,
+      "width": 28,
+      "height": 29,
+      "checkedPixels": 259,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3673,
+          "mismatchedPixels": 123
+        },
+        {
+          "frame": 3674,
+          "mismatchedPixels": 173
+        },
+        {
+          "frame": 3675,
+          "mismatchedPixels": 250
+        },
+        {
+          "frame": 259,
+          "mismatchedPixels": 268
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 238
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 238
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 264
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 219
+        }
+      ]
+    },
+    {
+      "slot": 13,
+      "itemIndex": 710,
+      "fixtureCount": 149,
+      "expectedImage": 2960,
+      "sourcePngSha256": "33036db94b25231b1a67ee1026c1c495b68697cf9a0184fe900996ac988df67c",
+      "x": 198,
+      "y": 71,
+      "width": 28,
+      "height": 29,
+      "checkedPixels": 259,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3673,
+          "mismatchedPixels": 123
+        },
+        {
+          "frame": 3674,
+          "mismatchedPixels": 173
+        },
+        {
+          "frame": 3675,
+          "mismatchedPixels": 250
+        },
+        {
+          "frame": 259,
+          "mismatchedPixels": 268
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 238
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 238
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 264
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 219
+        }
+      ]
+    },
+    {
+      "slot": 14,
+      "itemIndex": 710,
+      "fixtureCount": 150,
+      "expectedImage": 3675,
+      "sourcePngSha256": "20b8b5387fe87f68373eaf832ac81421a0611e3d8bd4037c8645e707ce666e84",
+      "x": 235,
+      "y": 71,
+      "width": 28,
+      "height": 29,
+      "checkedPixels": 266,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3673,
+          "mismatchedPixels": 123
+        },
+        {
+          "frame": 3674,
+          "mismatchedPixels": 130
+        },
+        {
+          "frame": 2960,
+          "mismatchedPixels": 243
+        },
+        {
+          "frame": 259,
+          "mismatchedPixels": 268
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 230
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 230
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 262
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 215
+        }
+      ]
+    },
+    {
+      "slot": 15,
+      "itemIndex": 710,
+      "fixtureCount": 500,
+      "expectedImage": 3675,
+      "sourcePngSha256": "20b8b5387fe87f68373eaf832ac81421a0611e3d8bd4037c8645e707ce666e84",
+      "x": 272,
+      "y": 71,
+      "width": 28,
+      "height": 29,
+      "checkedPixels": 266,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3673,
+          "mismatchedPixels": 123
+        },
+        {
+          "frame": 3674,
+          "mismatchedPixels": 130
+        },
+        {
+          "frame": 2960,
+          "mismatchedPixels": 243
+        },
+        {
+          "frame": 259,
+          "mismatchedPixels": 268
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 230
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 230
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 262
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 215
+        }
+      ]
+    },
+    {
+      "slot": 16,
+      "itemIndex": 711,
+      "fixtureCount": 1,
+      "expectedImage": 3670,
+      "sourcePngSha256": "5cc824cfa233d099d78659491ac18029b1d2bf1b863a904b8d3ad2d2153aeb32",
+      "x": 17,
+      "y": 104,
+      "width": 20,
+      "height": 29,
+      "checkedPixels": 132,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3671,
+          "mismatchedPixels": 197
+        },
+        {
+          "frame": 2961,
+          "mismatchedPixels": 242
+        },
+        {
+          "frame": 3672,
+          "mismatchedPixels": 243
+        },
+        {
+          "frame": 258,
+          "mismatchedPixels": 262
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 120
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 120
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 122
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 94
+        }
+      ]
+    },
+    {
+      "slot": 17,
+      "itemIndex": 711,
+      "fixtureCount": 49,
+      "expectedImage": 3670,
+      "sourcePngSha256": "5cc824cfa233d099d78659491ac18029b1d2bf1b863a904b8d3ad2d2153aeb32",
+      "x": 54,
+      "y": 104,
+      "width": 20,
+      "height": 29,
+      "checkedPixels": 132,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3671,
+          "mismatchedPixels": 197
+        },
+        {
+          "frame": 2961,
+          "mismatchedPixels": 242
+        },
+        {
+          "frame": 3672,
+          "mismatchedPixels": 243
+        },
+        {
+          "frame": 258,
+          "mismatchedPixels": 262
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 120
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 120
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 122
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 94
+        }
+      ]
+    },
+    {
+      "slot": 18,
+      "itemIndex": 711,
+      "fixtureCount": 50,
+      "expectedImage": 3671,
+      "sourcePngSha256": "08b8232c031d9ad289f0d5349f2455e0ba1f65171613c63536cca1f0f16ec7c9",
+      "x": 89,
+      "y": 105,
+      "width": 24,
+      "height": 27,
+      "checkedPixels": 202,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3670,
+          "mismatchedPixels": 127
+        },
+        {
+          "frame": 2961,
+          "mismatchedPixels": 254
+        },
+        {
+          "frame": 3672,
+          "mismatchedPixels": 250
+        },
+        {
+          "frame": 258,
+          "mismatchedPixels": 262
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 184
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 184
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 182
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 147
+        }
+      ]
+    },
+    {
+      "slot": 19,
+      "itemIndex": 711,
+      "fixtureCount": 99,
+      "expectedImage": 3671,
+      "sourcePngSha256": "08b8232c031d9ad289f0d5349f2455e0ba1f65171613c63536cca1f0f16ec7c9",
+      "x": 126,
+      "y": 105,
+      "width": 24,
+      "height": 27,
+      "checkedPixels": 202,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3670,
+          "mismatchedPixels": 127
+        },
+        {
+          "frame": 2961,
+          "mismatchedPixels": 254
+        },
+        {
+          "frame": 3672,
+          "mismatchedPixels": 250
+        },
+        {
+          "frame": 258,
+          "mismatchedPixels": 262
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 184
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 184
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 182
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 147
+        }
+      ]
+    },
+    {
+      "slot": 20,
+      "itemIndex": 711,
+      "fixtureCount": 100,
+      "expectedImage": 2961,
+      "sourcePngSha256": "12574e5e42645b999117fc4278885c7c6206c47d7382a7fa8482b18738df2670",
+      "x": 161,
+      "y": 104,
+      "width": 28,
+      "height": 29,
+      "checkedPixels": 259,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3670,
+          "mismatchedPixels": 115
+        },
+        {
+          "frame": 3671,
+          "mismatchedPixels": 197
+        },
+        {
+          "frame": 3672,
+          "mismatchedPixels": 253
+        },
+        {
+          "frame": 258,
+          "mismatchedPixels": 262
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 244
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 244
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 270
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 224
+        }
+      ]
+    },
+    {
+      "slot": 21,
+      "itemIndex": 711,
+      "fixtureCount": 149,
+      "expectedImage": 2961,
+      "sourcePngSha256": "12574e5e42645b999117fc4278885c7c6206c47d7382a7fa8482b18738df2670",
+      "x": 198,
+      "y": 104,
+      "width": 28,
+      "height": 29,
+      "checkedPixels": 259,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3670,
+          "mismatchedPixels": 115
+        },
+        {
+          "frame": 3671,
+          "mismatchedPixels": 197
+        },
+        {
+          "frame": 3672,
+          "mismatchedPixels": 253
+        },
+        {
+          "frame": 258,
+          "mismatchedPixels": 262
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 244
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 244
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 270
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 224
+        }
+      ]
+    },
+    {
+      "slot": 22,
+      "itemIndex": 711,
+      "fixtureCount": 150,
+      "expectedImage": 3672,
+      "sourcePngSha256": "59831a1b67d06e87e374ee4b990930810ae9ae6fd73d4accfadeb7d4e5c28d23",
+      "x": 235,
+      "y": 104,
+      "width": 28,
+      "height": 29,
+      "checkedPixels": 266,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3670,
+          "mismatchedPixels": 109
+        },
+        {
+          "frame": 3671,
+          "mismatchedPixels": 186
+        },
+        {
+          "frame": 2961,
+          "mismatchedPixels": 246
+        },
+        {
+          "frame": 258,
+          "mismatchedPixels": 262
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 242
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 242
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 272
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 224
+        }
+      ]
+    },
+    {
+      "slot": 23,
+      "itemIndex": 711,
+      "fixtureCount": 500,
+      "expectedImage": 3672,
+      "sourcePngSha256": "59831a1b67d06e87e374ee4b990930810ae9ae6fd73d4accfadeb7d4e5c28d23",
+      "x": 272,
+      "y": 104,
+      "width": 28,
+      "height": 29,
+      "checkedPixels": 266,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3670,
+          "mismatchedPixels": 109
+        },
+        {
+          "frame": 3671,
+          "mismatchedPixels": 186
+        },
+        {
+          "frame": 2961,
+          "mismatchedPixels": 246
+        },
+        {
+          "frame": 258,
+          "mismatchedPixels": 262
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 242
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 242
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 272
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 224
+        }
+      ]
+    },
+    {
+      "slot": 24,
+      "itemIndex": 714,
+      "fixtureCount": 5,
+      "expectedImage": 277,
+      "sourcePngSha256": "bff43d67840188261263d8c441b77134f67d39658cbb302a8a220fff3067c539",
+      "x": 11,
+      "y": 138,
+      "width": 32,
+      "height": 28,
+      "checkedPixels": 322,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3660,
+          "mismatchedPixels": 350
+        },
+        {
+          "frame": 3662,
+          "mismatchedPixels": 350
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 320
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 320
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 342
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 296
+        }
+      ]
+    },
+    {
+      "slot": 25,
+      "itemIndex": 713,
+      "fixtureCount": 1,
+      "expectedImage": 466,
+      "sourcePngSha256": "582c8c8b5eb60295594b290fc28cde2ab793cb2d401fe564e96892aa523c13df",
+      "x": 48,
+      "y": 137,
+      "width": 32,
+      "height": 29,
+      "checkedPixels": 347,
+      "mismatchedPixels": 0,
+      "rejectedFrames": [
+        {
+          "frame": 3660,
+          "mismatchedPixels": 344
+        },
+        {
+          "frame": 3662,
+          "mismatchedPixels": 344
+        }
+      ],
+      "rejectedTranslations": [
+        {
+          "dx": -1,
+          "dy": 0,
+          "mismatchedPixels": 344
+        },
+        {
+          "dx": 1,
+          "dy": 0,
+          "mismatchedPixels": 344
+        },
+        {
+          "dx": 0,
+          "dy": -1,
+          "mismatchedPixels": 368
+        },
+        {
+          "dx": 0,
+          "dy": 1,
+          "mismatchedPixels": 319
+        }
+      ]
+    }
+  ]
+}

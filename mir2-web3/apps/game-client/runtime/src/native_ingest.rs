@@ -93,6 +93,9 @@ pub(crate) enum NativeInboundMessage {
     /// Apply authoritative storage metadata from a storage result packet.
     StoragePatch(String),
     SkillModel(String),
+    HeroModel(String),
+    HeroModelReceipt(String),
+    SkillModelReceipt(String),
     SocialModel(String),
     EntityRenderAtlas {
         key: String,
@@ -418,6 +421,7 @@ fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::ShopModel(_)
             | NativeInboundMessage::StorageModel(_)
             | NativeInboundMessage::StorageItems(_)
+            | NativeInboundMessage::HeroModel(_)
             | NativeInboundMessage::SkillModel(_)
             | NativeInboundMessage::EntityRenderAtlas { .. }
     )
@@ -447,6 +451,7 @@ fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessag
         | (NativeInboundMessage::ShopModel(_), NativeInboundMessage::ShopModel(_))
         | (NativeInboundMessage::StorageModel(_), NativeInboundMessage::StorageModel(_))
         | (NativeInboundMessage::StorageItems(_), NativeInboundMessage::StorageItems(_))
+        | (NativeInboundMessage::HeroModel(_), NativeInboundMessage::HeroModel(_))
         | (NativeInboundMessage::SkillModel(_), NativeInboundMessage::SkillModel(_)) => true,
         (
             NativeInboundMessage::EntityRenderAtlas { key: left, .. },
@@ -470,11 +475,18 @@ fn is_critical_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::NpcShopService(_)
             | NativeInboundMessage::StoragePatch(_)
             | NativeInboundMessage::SocialModel(_)
+            | NativeInboundMessage::HeroModelReceipt(_)
+            | NativeInboundMessage::SkillModelReceipt(_)
     )
 }
 
 fn is_operation_ack(message: &NativeInboundMessage) -> bool {
-    matches!(message, NativeInboundMessage::InventoryOperationAck(_))
+    matches!(
+        message,
+        NativeInboundMessage::InventoryOperationAck(_)
+            | NativeInboundMessage::HeroModelReceipt(_)
+            | NativeInboundMessage::SkillModelReceipt(_)
+    )
 }
 
 fn native_message_bytes(message: &NativeInboundMessage) -> usize {
@@ -500,7 +512,10 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         | NativeInboundMessage::StorageModel(json)
         | NativeInboundMessage::StorageItems(json)
         | NativeInboundMessage::StoragePatch(json)
+        | NativeInboundMessage::HeroModel(json)
         | NativeInboundMessage::SkillModel(json)
+        | NativeInboundMessage::HeroModelReceipt(json)
+        | NativeInboundMessage::SkillModelReceipt(json)
         | NativeInboundMessage::SocialModel(json) => json.capacity(),
         NativeInboundMessage::EntityRenderAtlas { key, pixels, .. } => {
             key.capacity().saturating_add(pixels.capacity())
@@ -674,8 +689,36 @@ pub fn push_native_storage_patch(json: String) -> bool {
 /// Native-host entry point: push a skill model JSON.
 ///
 /// The payload mirrors `mir2-client-bevy::skill_model::SkillModel`.
+pub fn push_native_hero_model(json: String) -> bool {
+    let receipt = serde_json::from_str::<serde_json::Value>(&json)
+        .ok()
+        .is_some_and(|v| {
+            v.get("skillKeyAck").is_some_and(|ack| !ack.is_null())
+                || v.get("itemResultReceipt")
+                    .and_then(serde_json::Value::as_bool)
+                    == Some(true)
+        });
+    send_native(if receipt {
+        NativeInboundMessage::HeroModelReceipt(json)
+    } else {
+        NativeInboundMessage::HeroModel(json)
+    })
+}
+
 pub fn push_native_skill_model(json: String) -> bool {
-    send_native(NativeInboundMessage::SkillModel(json))
+    let receipt = serde_json::from_str::<serde_json::Value>(&json)
+        .ok()
+        .and_then(|v| {
+            v.get("skillKeyAck")
+                .or_else(|| v.get("skill_key_ack"))
+                .cloned()
+        })
+        .is_some_and(|v| !v.is_null());
+    send_native(if receipt {
+        NativeInboundMessage::SkillModelReceipt(json)
+    } else {
+        NativeInboundMessage::SkillModel(json)
+    })
 }
 
 /// Native-host entry point: push authoritative Group/Guild/Trade state.
@@ -846,7 +889,10 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::StorageModel(_)
             | NativeInboundMessage::StorageItems(_)
             | NativeInboundMessage::StoragePatch(_)
+            | NativeInboundMessage::HeroModel(_)
             | NativeInboundMessage::SkillModel(_)
+            | NativeInboundMessage::HeroModelReceipt(_)
+            | NativeInboundMessage::SkillModelReceipt(_)
             | NativeInboundMessage::SocialModel(_)
     )
 }
@@ -871,6 +917,44 @@ mod tests {
             pending: VecDeque::new(),
             game_shop_receipt: None,
         }
+    }
+
+    #[test]
+    fn hero_receipts_retain_each_snapshot_and_reset_with_session() {
+        let mut buffer = active_buffer();
+        assert!(buffer.enqueue(NativeInboundMessage::HeroModel("old".into())));
+        for id in [51, 52] {
+            assert!(buffer.enqueue(NativeInboundMessage::HeroModelReceipt(id.to_string())));
+        }
+        for serial in 0..1000 {
+            assert!(buffer.enqueue(NativeInboundMessage::HeroModel(serial.to_string())));
+        }
+        assert_eq!(buffer.pending.len(), 3);
+        assert!(matches!(&buffer.pending[0], NativeInboundMessage::HeroModelReceipt(v) if v=="51"));
+        assert!(matches!(&buffer.pending[1], NativeInboundMessage::HeroModelReceipt(v) if v=="52"));
+        assert!(matches!(&buffer.pending[2], NativeInboundMessage::HeroModel(v) if v=="999"));
+        assert!(buffer.enqueue(NativeInboundMessage::DataReset));
+        assert!(!buffer.pending.iter().any(|v| matches!(
+            v,
+            NativeInboundMessage::HeroModel(_) | NativeInboundMessage::HeroModelReceipt(_)
+        )));
+    }
+
+    #[test]
+    fn skill_receipt_is_not_coalesced_with_newer_skill_snapshots() {
+        let mut buffer = active_buffer();
+        let receipt = r#"{"skillKeyAck":{"requestId":73},"skills":[{"hotkey":16}]}"#.to_owned();
+        assert!(buffer.enqueue(NativeInboundMessage::SkillModel("old".into())));
+        assert!(buffer.enqueue(NativeInboundMessage::SkillModelReceipt(receipt.clone())));
+        for serial in 0..1000 {
+            assert!(buffer.enqueue(NativeInboundMessage::SkillModel(serial.to_string())));
+        }
+        let models: Vec<_> = buffer.pending.iter().collect();
+        assert_eq!(models.len(), 2);
+        assert!(
+            matches!(models[0], NativeInboundMessage::SkillModelReceipt(json) if json == &receipt)
+        );
+        assert!(matches!(models[1], NativeInboundMessage::SkillModel(json) if json == "999"));
     }
 
     #[test]

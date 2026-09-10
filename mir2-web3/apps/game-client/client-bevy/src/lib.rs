@@ -27,6 +27,7 @@ pub mod chat_settings_effects;
 pub mod crystal_ui;
 pub mod entities;
 pub mod game_shop;
+pub mod hero_model;
 #[cfg(feature = "native-ui")]
 pub mod hud;
 pub mod inventory;

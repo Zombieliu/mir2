@@ -14,13 +14,14 @@ use mir2_protocol::{
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    crystal_base_vitals, new_stage5_mail_delivery_nonce, AccountStore, CharacterRecord,
-    CurrencyKind, EquipmentSlot, ItemContainer, ItemGrade, Stage5AuctionListing, Stage5GuildState,
-    Stage5HeroState, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
-    WorldEntityDisposition,
+    crystal_base_vitals, is_valid_crystal_inventory_capacity, new_stage5_mail_delivery_nonce,
+    AccountStore, CharacterRecord, CurrencyKind, EquipmentSlot, ItemContainer, ItemGrade,
+    Stage5AuctionListing, Stage5GuildState, Stage5HeroState, Stage5MailMessage, Stage5SystemsState,
+    Stage5TradeState, WorldEntityDisposition,
 };
 use crate::{NativeGameShopPurchaseRequest, NATIVE_GAME_SHOP_PURCHASE_PROTOCOL_V2};
 
+use super::buffs::BuffState;
 use super::components::{
     entity_by_object_id, entity_position, player_entity, DisplayName, Facing, Npc, NpcAgent,
     ObjectId, PlayerVitals, Position, WorldObject,
@@ -49,11 +50,12 @@ use super::map::spawn_stage5_hero;
 use super::monsters::{
     crystal_dynamic_monster_template, crystal_spawn_candidates_on_map, spawn_runtime_monster,
 };
-use super::npc::ActiveNpcServiceState;
+use super::npc::{ActiveNpcServiceState, NpcFlagState};
 use super::packets::{
     decode_crystal_payload, object_health_info_for_entity, stage5_append_mail_to_save,
     stage5_guild_request_war_packet,
 };
+use super::quests::QuestState;
 use super::resources::{
     is_in_world, InventoryResource, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
     RuntimeConfigResource, SessionResource, Stage5SystemsResource,
@@ -63,6 +65,7 @@ use super::save::{
     snapshot_active_character_save, validate_character_save_record,
 };
 use super::session::{current_language, system_message, SimulationSession};
+use super::skills::SkillState;
 use super::social_economy::{
     stage5_mail_exact_item_slots, stage5_social_add_friend_entry, stage5_trade_item_can_enter,
     Stage5SocialAddResult,
@@ -181,6 +184,14 @@ pub(super) fn validate_stage5_guild_storage_item_carriers(
 pub(super) fn validate_stage5_systems_item_carriers(
     systems: &Stage5SystemsState,
 ) -> Result<(), String> {
+    if systems
+        .trade
+        .as_ref()
+        .is_some_and(|trade| trade.validated_held_gold().is_none())
+    {
+        return Err("invalid trade gold custody".to_string());
+    }
+    super::item_custody::reserved_ids(systems)?;
     validate_stage5_mail_item_carriers(&systems.mail)?;
     validate_stage5_guild_storage_item_carriers(&systems.guild)?;
     if systems.economy_projection_event_ids.iter().any(|event_id| {
@@ -657,8 +668,12 @@ pub(super) fn stage5_claim_mail_authoritative(
 
     let exact_item_slots = {
         let resources = world.resource::<InventoryResource>();
-        let slots = stage5_mail_exact_item_slots(&resources.inventory_items, &item_states)
-            .ok_or(Stage5MailClaimError::Capacity)?;
+        let slots = stage5_mail_exact_item_slots(
+            &resources.inventory_items,
+            &item_states,
+            resources.inventory_capacity,
+        )
+        .ok_or(Stage5MailClaimError::Capacity)?;
         let mut keyed_quantities = BTreeMap::<&str, u32>::new();
         for key in &keyed_items {
             *keyed_quantities.entry(key.as_str()).or_default() += 1;
@@ -3129,6 +3144,8 @@ struct QaApplyNativeCharacterState {
     gold: Option<u32>,
     #[serde(default)]
     credit: Option<u32>,
+    #[serde(default, alias = "pk_points")]
+    pk_points: Option<i32>,
     #[serde(default, alias = "city_currencies")]
     city_currencies: Option<BTreeMap<String, u32>>,
     #[serde(default, alias = "inventory_items_json")]
@@ -3139,6 +3156,24 @@ struct QaApplyNativeCharacterState {
     storage_items_json: Vec<String>,
     #[serde(default, alias = "equipment_items_json")]
     equipment_items_json: Vec<String>,
+    #[serde(default, alias = "quest_states_json")]
+    quest_states_json: Vec<String>,
+    #[serde(default, alias = "skill_states_json")]
+    skill_states_json: Vec<String>,
+    #[serde(default, alias = "npc_flag_states_json")]
+    npc_flag_states_json: Vec<String>,
+    #[serde(default, alias = "buff_states_json")]
+    buff_states_json: Vec<String>,
+    #[serde(default)]
+    hair: Option<u8>,
+    #[serde(default, alias = "inventory_capacity")]
+    inventory_capacity: Option<u16>,
+    #[serde(default, alias = "attack_mode")]
+    attack_mode: Option<u8>,
+    #[serde(default, alias = "pet_mode")]
+    pet_mode: Option<u8>,
+    #[serde(default, alias = "allow_group")]
+    allow_group: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -3635,6 +3670,19 @@ impl SimulationSession {
     }
 
     fn stage5_trade_start(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        if self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade
+            .as_ref()
+            .is_some_and(|trade| {
+                trade.outgoing_escrow_debited() || trade.validated_held_gold() != Some(0)
+            })
+        {
+            return Vec::new();
+        }
         let partner = args
             .first()
             .cloned()
@@ -3650,9 +3698,11 @@ impl SimulationSession {
             offered_slots: BTreeMap::new(),
             offered_unique_ids: BTreeMap::new(),
             offered_gold: 0,
+            held_gold: None,
             offered_currency: CurrencyKind::Gold,
             accepted: false,
             locked: false,
+            escrow_prepared: false,
             completed: false,
         });
         Vec::new()
@@ -3694,7 +3744,8 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
-        if trade.completed || trade.locked {
+        if trade.outgoing_escrow_debited() || trade.locked || trade.validated_held_gold() != Some(0)
+        {
             return vec![system_message(&localized_text_or_fallback(
                 language,
                 "server.NotFound",
@@ -3742,7 +3793,7 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
-        if trade.completed || trade.locked {
+        if trade.outgoing_escrow_debited() || trade.locked {
             return vec![system_message(&localized_text_or_fallback(
                 language,
                 "server.NotFound",
@@ -3756,6 +3807,19 @@ impl SimulationSession {
     }
 
     fn stage5_trade_accept(&mut self) -> Vec<ServerPacket> {
+        if self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade
+            .as_ref()
+            .is_some_and(|trade| {
+                trade.outgoing_escrow_debited() || trade.validated_held_gold() != Some(0)
+            })
+        {
+            return Vec::new();
+        }
         let language = current_language(self.app.world());
         let Some((offered_gold, offered_currency, offered_items)) = self
             .app
@@ -3833,6 +3897,11 @@ impl SimulationSession {
             .as_mut()
         {
             trade.accepted = true;
+            trade.held_gold = Some(if trade.offered_currency == CurrencyKind::Gold {
+                trade.offered_gold
+            } else {
+                0
+            });
             trade.completed = true;
         }
         vec![system_message(&localized_text_or_fallback(
@@ -3843,12 +3912,7 @@ impl SimulationSession {
     }
 
     fn stage5_trade_cancel(&mut self) -> Vec<ServerPacket> {
-        self.app
-            .world_mut()
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .trade = None;
-        Vec::new()
+        super::packets::stage5_trade_cancel_packet(self.app.world_mut())
     }
 
     fn stage5_shop_buy(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -4804,6 +4868,7 @@ impl SimulationSession {
             .unwrap_or(0)
             + 1;
         stage5.stage5_systems.auction.push(Stage5AuctionListing {
+            item_state_json: None,
             id,
             seller,
             item_key,
@@ -4825,6 +4890,21 @@ impl SimulationSession {
                 ["auction.buy".to_string()],
             ))];
         };
+        if self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .auction
+            .iter()
+            .any(|listing| listing.id == id && listing.item_state_json.is_some())
+        {
+            return super::packets::stage5_market_buy_packet(
+                self.app.world_mut(),
+                u64::from(id),
+                0,
+            );
+        }
         let language = current_language(self.app.world());
         let (index, price, currency, item_key, seller) = {
             let stage5 = self.app.world().resource::<Stage5SystemsResource>();
@@ -4922,6 +5002,21 @@ impl SimulationSession {
                 ["auction.cancel".to_string()],
             ))];
         };
+        if self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .auction
+            .iter()
+            .any(|listing| listing.id == id && listing.item_state_json.is_some())
+        {
+            return super::packets::stage5_market_get_back_packet(
+                self.app.world_mut(),
+                0,
+                u64::from(id),
+            );
+        }
         let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
         if let Some(listing) = stage5
             .stage5_systems
@@ -5474,9 +5569,11 @@ impl SimulationSession {
         let quantity = parse_u32_arg(&args, 1).unwrap_or(1).max(1);
         let language = current_language(self.app.world());
         let mut resources = self.app.world_mut().resource_mut::<InventoryResource>();
-        let Some((container, slot)) =
-            find_empty_inventory_item_slot(&resources.inventory_items, ItemContainer::Bag1)
-        else {
+        let Some((container, slot)) = find_empty_inventory_item_slot(
+            &resources.inventory_items,
+            ItemContainer::Bag1,
+            resources.inventory_capacity,
+        ) else {
             return vec![system_message(&localized_text_or_fallback(
                 language,
                 "server.YouCannotCarryAnymore",
@@ -5543,11 +5640,25 @@ impl SimulationSession {
             || decode_state_vec::<ItemState>(&state.belt_items_json).is_none()
             || decode_state_vec::<ItemState>(&state.storage_items_json).is_none()
             || decode_state_vec::<EquipmentState>(&state.equipment_items_json).is_none()
+            || decode_state_vec::<QuestState>(&state.quest_states_json).is_none()
+            || decode_state_vec::<SkillState>(&state.skill_states_json).is_none()
+            || decode_state_vec::<NpcFlagState>(&state.npc_flag_states_json).is_none()
+            || decode_state_vec::<BuffState>(&state.buff_states_json).is_none()
         {
             return vec![system_message(&format_localized_text(
                 language,
                 "server.InvalidPacketReceived",
                 ["qa.applyNativeState item state".to_string()],
+            ))];
+        }
+        if state
+            .inventory_capacity
+            .is_some_and(|capacity| !is_valid_crystal_inventory_capacity(capacity))
+        {
+            return vec![system_message(&format_localized_text(
+                language,
+                "server.InvalidPacketReceived",
+                ["qa.applyNativeState inventory capacity".to_string()],
             ))];
         }
 
@@ -5606,6 +5717,9 @@ impl SimulationSession {
         if let Some(credit) = state.credit {
             save.credit = credit;
         }
+        if let Some(pk_points) = state.pk_points {
+            save.pk_points = pk_points;
+        }
         if let Some(city_currencies) = state.city_currencies {
             save.city_currencies = city_currencies;
         }
@@ -5614,6 +5728,48 @@ impl SimulationSession {
         save.storage_items_json = state.storage_items_json;
         save.equipment_items_json = state.equipment_items_json;
         save.equipment_items_explicit_empty = true;
+        save.quest_states_json = state.quest_states_json;
+        save.skill_states_json = state.skill_states_json;
+        save.npc_flag_states_json = state.npc_flag_states_json;
+        save.buff_states_json = state.buff_states_json;
+        if let Some(inventory_capacity) = state.inventory_capacity {
+            save.inventory_capacity = inventory_capacity;
+        }
+        let mut systems = match save.stage5_systems_json.as_deref() {
+            Some(encoded) => match serde_json::from_str::<Stage5SystemsState>(encoded) {
+                Ok(systems) => systems,
+                Err(_) => {
+                    return vec![system_message(&format_localized_text(
+                        language,
+                        "server.InvalidPacketReceived",
+                        ["qa.applyNativeState stage5 systems".to_string()],
+                    ))]
+                }
+            },
+            None => Stage5SystemsState::default(),
+        };
+        if let Some(hair) = state.hair {
+            systems.appearance.hair = hair;
+        }
+        if let Some(attack_mode) = state.attack_mode {
+            systems.attack_mode = attack_mode;
+        }
+        if let Some(pet_mode) = state.pet_mode {
+            systems.pet_mode = pet_mode;
+        }
+        if let Some(allow_group) = state.allow_group {
+            systems.group.allow_group = allow_group;
+        }
+        save.stage5_systems_json = match serde_json::to_string(&systems) {
+            Ok(encoded) => Some(encoded),
+            Err(_) => {
+                return vec![system_message(&format_localized_text(
+                    language,
+                    "server.InvalidPacketReceived",
+                    ["qa.applyNativeState stage5 systems".to_string()],
+                ))]
+            }
+        };
 
         if apply_character_save(self.app.world_mut(), &save).is_err() {
             return vec![system_message(&format_localized_text(

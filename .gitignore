@@ -46,6 +46,8 @@ tools/procmon/
 **/.chrome-cdp-*/
 **/.edge-cdp-*/
 **/.tmp-*/
+.mir2-player-qa/
+**/.mir2-player-qa/
 .wrangler/
 **/.screens-*.png
 **/screenshots/

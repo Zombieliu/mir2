@@ -56,6 +56,10 @@ use super::skills::{
 };
 use super::stats::{deterministic_range_roll, player_stats, PlayerStats};
 
+#[cfg(test)]
+#[path = "warrior_preparation_tests.rs"]
+mod warrior_preparation_tests;
+
 #[allow(deprecated)]
 pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection) -> Option<u32> {
     attack_target_in_direction_at_distance(world, direction, 1)
@@ -235,12 +239,12 @@ fn crystal_skill_level(world: &World, spell_name: &str) -> Option<u8> {
         .map(|skill| skill.level)
 }
 
-fn crystal_skill_magic(world: &World, spell_name: &str) -> Option<(CrystalMagicTemplate, u8)> {
+pub(super) fn crystal_skill_magic(world: &World, spell_name: &str) -> Option<(CrystalMagicTemplate, u8)> {
     let level = crystal_skill_level(world, spell_name)?;
     Some((crystal_magic_by_spell(spell_name)?, level))
 }
 
-fn skill_toggle_state(world: &World, spell: Spell) -> bool {
+pub(super) fn skill_toggle_state(world: &World, spell: Spell) -> bool {
     world
         .resource::<SkillResource>()
         .spell_toggles
@@ -346,8 +350,8 @@ pub(super) fn apply_damage_to_current_player(
     }
 
     // Crystal `@SUPERMAN` (`GMNeverDie`): the GM is invincible — incoming damage is
-    // ignored and they cannot die. All player-damage paths (combat, hazards) funnel
-    // through here, so this one guard covers them.
+    // ignored and they cannot die. Personal combat/hazard decisions use this
+    // guard; shared Zone settlements already include the authoritative decision.
     if world.resource::<GmRuntimeResource>().gm_never_die {
         return PlayerDamageOutcome {
             applied: false,
@@ -356,6 +360,26 @@ pub(super) fn apply_damage_to_current_player(
         };
     }
 
+    let adjusted_damage = crystal_player_damage_after_status(world, damage);
+    apply_settled_damage_to_current_player(world, adjusted_damage, packets)
+}
+
+/// Commit an already resolved HP loss. The shared Zone calls this after its
+/// own immunity/status/armour decisions; running those decisions again here
+/// would let the private mirror disagree with the shared world. The ordinary
+/// personal damage path uses the same final vitals/death transition below.
+pub(super) fn apply_settled_damage_to_current_player(
+    world: &mut World,
+    damage: i32,
+    packets: &mut Vec<ServerPacket>,
+) -> PlayerDamageOutcome {
+    if damage <= 0 {
+        return PlayerDamageOutcome {
+            applied: false,
+            died: false,
+            amount: 0,
+        };
+    }
     let Some(player) = player_entity(world) else {
         return PlayerDamageOutcome {
             applied: false,
@@ -364,12 +388,11 @@ pub(super) fn apply_damage_to_current_player(
         };
     };
 
-    let adjusted_damage = crystal_player_damage_after_status(world, damage);
     let Some((updated_vitals, was_alive)) = ({
         let mut entity = world.entity_mut(player);
         entity.get_mut::<PlayerVitals>().map(|mut vitals| {
             let was_alive = vitals.hp > 0;
-            vitals.hp = vitals.hp.saturating_sub(adjusted_damage).max(0);
+            vitals.hp = vitals.hp.saturating_sub(damage).max(0);
             (*vitals, was_alive)
         })
     }) else {
@@ -379,6 +402,17 @@ pub(super) fn apply_damage_to_current_player(
             amount: 0,
         };
     };
+
+    // An already dead life cannot be settled a second time: do not advance
+    // its damage clock, emit another transition, or re-trigger the caller's
+    // death penalty. Explicit revival makes a later death eligible again.
+    if !was_alive {
+        return PlayerDamageOutcome {
+            applied: false,
+            died: false,
+            amount: 0,
+        };
+    }
 
     {
         let tick = runtime_tick(world);
@@ -405,7 +439,7 @@ pub(super) fn apply_damage_to_current_player(
     PlayerDamageOutcome {
         applied: was_alive,
         died,
-        amount: adjusted_damage,
+        amount: damage,
     }
 }
 
@@ -619,6 +653,7 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
     let stats = player_stats(world);
     let slaying = crystal_slaying_melee_bonus(world);
     super::ZonePlayerCombatStats {
+        item_drop_rate_percent: stats.get(101).max(0),
         min_dc: (stats.min_dc() + slaying).max(0),
         max_dc: (stats.max_dc() + slaying).max(0),
         min_mc: stats.min_mc(),
@@ -638,6 +673,9 @@ fn crystal_zone_player_combat_stats(world: &World) -> super::ZonePlayerCombatSta
         // Luck biases the physical attack-power roll (Crystal GetAttackPower), so
         // the zone melee/range path matches the per-session path's Luck handling.
         luck: stats.luck(),
+        poison_resist: stats.poison_resist(),
+        magic_resist: stats.magic_resist(),
+        gm_never_die: world.resource::<GmRuntimeResource>().gm_never_die,
     }
 }
 
@@ -1649,16 +1687,49 @@ pub(super) fn deterministic_chance_roll(
         return true;
     }
 
-    let value = current_tick.wrapping_mul(0x9E37_79B9_7F4A_7C15)
+    combat_chance_value(current_tick, attacker_id, salt) % denominator == 0
+}
+
+fn combat_chance_value(current_tick: u64, attacker_id: u32, salt: u64) -> u64 {
+    current_tick.wrapping_mul(0x9E37_79B9_7F4A_7C15)
         ^ u64::from(attacker_id).wrapping_mul(0xBF58_476D_1CE4_E5B9)
-        ^ salt.wrapping_mul(0x94D0_49BB_1331_11EB);
-    value % denominator == 0
+        ^ salt.wrapping_mul(0x94D0_49BB_1331_11EB)
+}
+
+fn slaying_roll_arms(level: u8, roll: u64) -> bool {
+    // HumanObject.Attack: Random.Next(12) <= magic.Level.
+    roll < 12 && roll <= u64::from(level.min(3))
+}
+
+fn prepare_slaying_after_attack(world: &mut World, roll: u64) -> Vec<ServerPacket> {
+    let Some(level) = crystal_skill_level(world, "Slaying") else {
+        return Vec::new();
+    };
+    if world.resource::<SkillResource>().slaying_armed
+        || skill_toggle_state(world, Spell::Slaying)
+        || !slaying_roll_arms(level, roll)
+    {
+        return Vec::new();
+    }
+    world.resource_mut::<SkillResource>().slaying_armed = true;
+    set_skill_toggle_state(world, Spell::Slaying, true);
+    vec![ServerPacket::SpellToggle {
+        object_id: current_player_object_id(world).unwrap_or_default(),
+        spell: Spell::Slaying,
+        can_use: true,
+    }]
+}
+
+fn slaying_attack_roll(world: &World) -> u64 {
+    // Reuse the existing combat chance seed, retaining all twelve outcomes.
+    combat_chance_value(runtime_tick(world), current_player_object_id(world).unwrap_or_default(), 2) % 12
 }
 
 pub(super) fn apply_player_paralysis(world: &mut World, current_tick: u64, duration_ticks: u64) {
     apply_or_refresh_buff(
         world,
         BuffState {
+            real_time_duration: None,
             key: CAVE_MAGGOT_PARALYSIS_BUFF_KEY.to_string(),
             name: "Paralysis".to_string(),
             description: "Movement is stopped by paralysis poison.".to_string(),
@@ -1674,6 +1745,7 @@ pub(super) fn apply_player_red_poison(world: &mut World, current_tick: u64, dura
     apply_or_refresh_buff(
         world,
         BuffState {
+            real_time_duration: None,
             key: YIMOOGI_RED_POISON_BUFF_KEY.to_string(),
             name: "Red Poison".to_string(),
             description: "Crystal red poison is active.".to_string(),
@@ -1693,6 +1765,7 @@ pub(super) fn apply_toxic_ghoul_green_poison(
     apply_or_refresh_buff(
         world,
         BuffState {
+            real_time_duration: None,
             key: TOXIC_GHOUL_GREEN_POISON_BUFF_KEY.to_string(),
             name: "Green Poison".to_string(),
             description: "Crystal green poison is active.".to_string(),
@@ -1725,6 +1798,7 @@ pub(super) fn apply_pending_player_status_effect(
             apply_or_refresh_buff(
                 world,
                 BuffState {
+                    real_time_duration: None,
                     key: HELL_KEEPER_DAZED_BUFF_KEY.to_string(),
                     name: "Dazed".to_string(),
                     description: "Crystal dazed poison is active.".to_string(),
@@ -1747,6 +1821,7 @@ pub(super) fn apply_pending_player_status_effect(
             apply_or_refresh_buff(
                 world,
                 BuffState {
+                    real_time_duration: None,
                     key: MAN_TREE_STUN_BUFF_KEY.to_string(),
                     name: "Stun".to_string(),
                     description: "Crystal stun poison is active.".to_string(),
@@ -1774,6 +1849,7 @@ pub(super) fn apply_pending_player_status_effect(
                 apply_or_refresh_buff(
                     world,
                     BuffState {
+                        real_time_duration: None,
                         key: ICE_GUARD_SLOW_BUFF_KEY.to_string(),
                         name: "Slow".to_string(),
                         description: "Crystal slow poison is active.".to_string(),
@@ -1794,6 +1870,7 @@ pub(super) fn apply_pending_player_status_effect(
                 apply_or_refresh_buff(
                     world,
                     BuffState {
+                        real_time_duration: None,
                         key: ICE_GUARD_FROZEN_BUFF_KEY.to_string(),
                         name: "Frozen".to_string(),
                         description: "Crystal frozen poison is active.".to_string(),
@@ -1822,6 +1899,7 @@ pub(super) fn apply_pending_player_status_effect(
                 apply_or_refresh_buff(
                     world,
                     BuffState {
+                        real_time_duration: None,
                         key: ICE_GUARD_SLOW_BUFF_KEY.to_string(),
                         name: "Slow".to_string(),
                         description: "Crystal slow poison is active.".to_string(),
@@ -1854,6 +1932,7 @@ pub(super) fn apply_pending_player_status_effect(
             apply_or_refresh_buff(
                 world,
                 BuffState {
+                    real_time_duration: None,
                     key: ICE_GUARD_FROZEN_BUFF_KEY.to_string(),
                     name: "Frozen".to_string(),
                     description: "Crystal frozen poison is active.".to_string(),
@@ -1876,6 +1955,7 @@ pub(super) fn apply_pending_player_status_effect(
             apply_or_refresh_buff(
                 world,
                 BuffState {
+                    real_time_duration: None,
                     key: ICE_GUARD_SLOW_BUFF_KEY.to_string(),
                     name: "Slow".to_string(),
                     description: "Crystal slow poison is active.".to_string(),
@@ -1920,6 +2000,7 @@ pub(super) fn apply_pending_player_status_effect(
             apply_or_refresh_buff(
                 world,
                 BuffState {
+                    real_time_duration: None,
                     key: ICE_GUARD_SLOW_BUFF_KEY.to_string(),
                     name: "Slow".to_string(),
                     description: "Crystal slow poison is active.".to_string(),
@@ -1942,6 +2023,7 @@ pub(super) fn apply_pending_player_status_effect(
             apply_or_refresh_buff(
                 world,
                 BuffState {
+                    real_time_duration: None,
                     key: FROST_TIGER_BLEEDING_BUFF_KEY.to_string(),
                     name: "Bleeding".to_string(),
                     description: "Crystal bleeding poison is active.".to_string(),
@@ -1964,6 +2046,7 @@ pub(super) fn apply_pending_player_status_effect(
             apply_or_refresh_buff(
                 world,
                 BuffState {
+                    real_time_duration: None,
                     key: RESTLESS_JAR_BLINDNESS_BUFF_KEY.to_string(),
                     name: "Blindness".to_string(),
                     description: "Crystal blindness poison is active.".to_string(),
@@ -3135,6 +3218,15 @@ impl SimulationSession {
         {
             return (Spell::None, 0, base_damage);
         }
+        if active_spell == Spell::TwinDrakeBlade {
+            let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
+            let mp = player_entity(world)
+                .and_then(|player| world.get::<PlayerVitals>(player))
+                .map(|vitals| vitals.mp).unwrap_or_default();
+            if mp < cost {
+                return (Spell::None, 0, base_damage);
+            }
+        }
         (
             active_spell,
             level,
@@ -3143,18 +3235,38 @@ impl SimulationSession {
     }
 
     pub fn commit_zone_melee_attack_spell(&mut self, spell: Spell) -> Vec<ServerPacket> {
-        if !is_in_world(self.app.world())
-            || !matches!(spell, Spell::Slaying | Spell::FlamingSword)
-            || !skill_toggle_state(self.app.world(), spell)
-        {
+        if !is_in_world(self.app.world()) {
             return Vec::new();
         }
-        set_skill_toggle_state(self.app.world_mut(), spell, false);
-        vec![ServerPacket::SpellToggle {
-            object_id: current_player_object_id(self.app.world()).unwrap_or_default(),
-            spell,
-            can_use: false,
-        }]
+        let mut packets = Vec::new();
+        if matches!(spell, Spell::Slaying | Spell::FlamingSword | Spell::TwinDrakeBlade)
+            && skill_toggle_state(self.app.world(), spell)
+        {
+            if spell == Spell::TwinDrakeBlade {
+                if let (Some((magic, level)), Some(player)) = (
+                    crystal_skill_magic(self.app.world(), "TwinDrakeBlade"),
+                    player_entity(self.app.world()),
+                ) {
+                    let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
+                    self.app.world_mut().entity_mut(player).get_mut::<PlayerVitals>().expect("player vitals").mp -= cost;
+                    if let Some(info) = object_mana_info_for_entity(self.app.world(), player) {
+                        packets.push(ServerPacket::ObjectMana { info });
+                    }
+                }
+            }
+            set_skill_toggle_state(self.app.world_mut(), spell, false);
+            if spell == Spell::Slaying {
+                self.app.world_mut().resource_mut::<SkillResource>().slaying_armed = false;
+            }
+            packets.push(ServerPacket::SpellToggle {
+                object_id: current_player_object_id(self.app.world()).unwrap_or_default(),
+                spell,
+                can_use: false,
+            });
+        }
+        let roll = slaying_attack_roll(self.app.world());
+        packets.extend(prepare_slaying_after_attack(self.app.world_mut(), roll));
+        packets
     }
 
     /// Authoritative combat stat block handed to the shared zone so the zone —
@@ -3467,27 +3579,8 @@ impl SimulationSession {
             }
         }
 
-        if let Some(level) = crystal_skill_level(self.app.world(), "Slaying") {
-            let should_arm = {
-                let skills = self.app.world().resource::<SkillResource>();
-                !skills.slaying_armed
-                    && !skill_toggle_state(self.app.world(), Spell::Slaying)
-                    && (level >= 3
-                        || deterministic_chance_roll(current_tick, player_object_id, 2, 12))
-            };
-            if should_arm {
-                self.app
-                    .world_mut()
-                    .resource_mut::<SkillResource>()
-                    .slaying_armed = true;
-                set_skill_toggle_state(self.app.world_mut(), Spell::Slaying, true);
-                packets.push(ServerPacket::SpellToggle {
-                    object_id: player_object_id,
-                    spell: Spell::Slaying,
-                    can_use: true,
-                });
-            }
-        }
+        let slaying_roll = slaying_attack_roll(self.app.world());
+        packets.extend(prepare_slaying_after_attack(self.app.world_mut(), slaying_roll));
 
         if let Some(level) = crystal_skill_level(self.app.world(), "Meditation") {
             if level >= 3

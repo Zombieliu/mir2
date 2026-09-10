@@ -78,6 +78,7 @@ async fn async_main() -> std::io::Result<()> {
     };
     let config = configure_save_recovery_mac_key(config, encoded_recovery_key.as_deref())
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
     let chat_hub = ChatBroadcastHub::from_env()?;
     let _chat_broadcast_task = chat_hub.spawn();
 

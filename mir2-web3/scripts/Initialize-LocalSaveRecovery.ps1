@@ -49,6 +49,15 @@ function Assert-Mir2CurrentUserOnlyAcl {
 function Set-Mir2CurrentUserOnlyAcl {
     param([Parameter(Mandatory = $true)][string]$LiteralPath, [Parameter(Mandatory = $true)][bool]$IsDirectory)
     if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) { throw "Use scripts/Initialize-LocalSaveRecovery.sh on Unix." }
+    # Reapplying an identical protected ACL is unnecessary and can fail on an
+    # otherwise healthy local volume under transient metadata pressure. Keep
+    # the operation fail-closed: only skip the write after the full ownership /
+    # inheritance / allow-list assertion already succeeds.
+    try {
+        Assert-Mir2CurrentUserOnlyAcl -LiteralPath $LiteralPath
+        return
+    }
+    catch { }
     try {
         $Identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
         $Security = if ($IsDirectory) { New-Object System.Security.AccessControl.DirectorySecurity } else { New-Object System.Security.AccessControl.FileSecurity }
@@ -57,7 +66,10 @@ function Set-Mir2CurrentUserOnlyAcl {
         $Inheritance = if ($IsDirectory) { [System.Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [System.Security.AccessControl.InheritanceFlags]::ObjectInherit } else { [System.Security.AccessControl.InheritanceFlags]::None }
         $Rule = New-Object System.Security.AccessControl.FileSystemAccessRule($Identity.User, [System.Security.AccessControl.FileSystemRights]::FullControl, $Inheritance, [System.Security.AccessControl.PropagationFlags]::None, [System.Security.AccessControl.AccessControlType]::Allow)
         $Security.AddAccessRule($Rule)
-        if ($IsDirectory) { [System.IO.Directory]::SetAccessControl($LiteralPath, $Security) } else { [System.IO.File]::SetAccessControl($LiteralPath, $Security) }
+        # PowerShell 7 / modern .NET no longer exposes the legacy static
+        # Directory.SetAccessControl/File.SetAccessControl methods. Set-Acl
+        # accepts the same explicit FileSystemSecurity object on both paths.
+        Set-Acl -LiteralPath $LiteralPath -AclObject $Security
         Assert-Mir2CurrentUserOnlyAcl -LiteralPath $LiteralPath
     }
     catch { throw "Failed to enforce current-user-only ACL on $LiteralPath" }

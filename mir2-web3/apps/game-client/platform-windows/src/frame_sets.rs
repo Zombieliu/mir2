@@ -490,3 +490,28 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod pet_frames_tests {
+    use super::*;
+    #[test]
+    fn all_fifteen_pet_libraries_load_embedded_frame_sets_instead_of_generic_monster() {
+        let catalog = load_frame_set_catalog();
+        for i in 0..=14 {
+            let library = format!("Pet/{i:02}");
+            assert!(catalog.libraries.contains_key(&library), "{library}");
+        }
+        let flame = catalog.catalog_for(EntityKind::Monster, "Pet/08");
+        let third = flame.descriptor(AnimationAction::Attack3).unwrap();
+        assert_eq!(
+            (third.start, third.frame_count, third.frame_interval_ms),
+            (176, 10, 100)
+        );
+        let snow = catalog.catalog_for(EntityKind::Monster, "Pet/09");
+        let second = snow.descriptor(AnimationAction::Attack2).unwrap();
+        assert_eq!(
+            (second.start, second.frame_count, second.frame_interval_ms),
+            (152, 7, 100)
+        );
+    }
+}

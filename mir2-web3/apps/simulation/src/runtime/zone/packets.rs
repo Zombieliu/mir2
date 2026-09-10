@@ -137,7 +137,8 @@ pub(crate) fn apply_observer_action_state(
         ServerPacket::ObjectPoisoned { object_id, poison }
             if *object_id == owner_local_object_id =>
         {
-            player.poison = *poison;
+            player.poison =
+                (*poison & !player.native_status_poison) | player.active_status_poison(now_ms);
         }
         ServerPacket::ObjectLevelEffects {
             object_id,
@@ -181,9 +182,12 @@ pub(crate) fn apply_observer_action_state(
         }
         ServerPacket::ObjectDied { info } if info.object_id == owner_local_object_id => {
             player.dead = true;
+            player.clear_status_poisons();
         }
         ServerPacket::ObjectRevived { info } if info.object_id == owner_local_object_id => {
+            if player.dead { player.life_generation = player.life_generation.saturating_add(1); }
             player.dead = false;
+            player.clear_status_poisons();
         }
         ServerPacket::ObjectEffect { info } if info.object_id == owner_local_object_id => {
             player.effect = info.effect;
@@ -657,7 +661,11 @@ pub(crate) fn observer_action_packet(
         }),
         ServerPacket::ObjectPoisoned { object_id, poison } => Some(ServerPacket::ObjectPoisoned {
             object_id: rebase_object_id(*object_id),
-            poison: *poison,
+            poison: if *object_id == owner_local_object_id {
+                player.poison
+            } else {
+                *poison
+            },
         }),
         ServerPacket::MagicDelay {
             object_id,

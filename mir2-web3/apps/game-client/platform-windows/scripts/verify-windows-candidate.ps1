@@ -11,6 +11,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$PetSoundNames = @('pet_pig.wav','pet_chick.wav','pet_kitty.wav','pet_skeleton.wav','pet_pigman.wav','pet_weman.wav','pet_blackdragon.wav','pet_olympicmascot.wav','pet_frog.wav','pet_monkey.wav','pet_pickup.wav')
 $PlayerCombatSoundNames = @('70.wav','71.wav','72.wav','73.wav','80.wav','81.wav','82.wav','83.wav','138.wav','139.wav','144.wav','145.wav','tiger_struck_1.wav','tiger_struck_2.wav','wolf_struck1.wav')
 $MonsterCombatSoundNames = @('005-1.wav','005-2.wav','005-3.wav','60.wav','61.wav','62.wav','63.wav','64.wav','65.wav')
 $EntityAtlasClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'entity-atlas-closure.ps1'
@@ -19,6 +20,9 @@ if (-not (Test-Path -LiteralPath $EntityAtlasClosureScript -PathType Leaf)) { th
 $PlayerSpriteClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'player-sprite-closure.ps1'
 if (-not (Test-Path -LiteralPath $PlayerSpriteClosureScript -PathType Leaf)) { throw "player sprite closure validator missing: $PlayerSpriteClosureScript" }
 . $PlayerSpriteClosureScript
+$PetGuildClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'pet-guild-asset-closure.ps1'
+if (-not (Test-Path -LiteralPath $PetGuildClosureScript -PathType Leaf)) { throw 'pet/guild closure validator missing' }
+. $PetGuildClosureScript
 $PlayerSpriteFamilyNames = @('CArmour','CHair','CWeapon','ARArmour','ARHair','ARWeapon','AArmour','AHair','AWeapon','Mount')
 
 function Write-Utf8NoBom { param([string]$Path, [string]$Text); [IO.File]::WriteAllText($Path, $Text, [Text.UTF8Encoding]::new($false)) }
@@ -59,6 +63,32 @@ function Assert-ItemIconClosure {
     $allFiles = @(Get-ChildItem -LiteralPath $itemsRoot -File -Force)
     if ($allFiles.Count -ne ($pngNames.Count + 1)) { throw "item icon directory contains unexpected files: $itemsRoot" }
     return [ordered]@{ fileCount = $allFiles.Count; pngCount = $pngNames.Count; referencedPngCount = $referenced.Count }
+}
+function Assert-StateItemClosure {
+    param([Parameter(Mandatory = $true)][string]$OriginalUiRoot)
+    $stateItemRoot = Join-Path $OriginalUiRoot 'StateItem'
+    if (-not (Test-Path -LiteralPath $stateItemRoot -PathType Container)) { throw "state item root missing: $stateItemRoot" }
+    $metaPath = Join-Path $stateItemRoot 'meta.json'
+    if (-not (Test-Path -LiteralPath $metaPath -PathType Leaf)) { throw "state item meta missing: $metaPath" }
+    $meta = ConvertFrom-JsonPreservingDateStrings -Text (Get-Content -LiteralPath $metaPath -Raw)
+    if ($null -eq $meta -or $null -eq $meta.frames -or @($meta.frames).Count -eq 0) { throw "state item meta invalid or empty: $metaPath" }
+    $referenced = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($frame in @($meta.frames)) {
+        $index = [int]$frame.index; $width = [int]$frame.width; $height = [int]$frame.height; $framePath = [string]$frame.path
+        $expectedPath = "/original-ui/StateItem/$index.png"
+        if ($index -lt 0 -or $width -le 0 -or $height -le 0) { throw "state item frame geometry invalid at index $index in $metaPath" }
+        if ($framePath -cne $expectedPath) { throw "state item frame path mismatch at index ${index}: $framePath" }
+        $fileName = "$index.png"
+        if (-not $referenced.Add($fileName)) { throw "duplicate state item frame index in meta: $index" }
+        $frameFile = Join-Path $stateItemRoot $fileName
+        if (-not (Test-Path -LiteralPath $frameFile -PathType Leaf)) { throw "state item frame referenced by meta is missing: $frameFile" }
+    }
+    $pngFiles = @(Get-ChildItem -LiteralPath $stateItemRoot -File -Force | Where-Object { $_.Extension -ieq '.png' })
+    foreach ($png in $pngFiles) { if (-not $referenced.Contains($png.Name)) { throw "unreferenced state item png present: $($png.FullName)" } }
+    if ($pngFiles.Count -ne $referenced.Count) { throw "state item closure count mismatch: png=$($pngFiles.Count) referenced=$($referenced.Count)" }
+    $allFiles = @(Get-ChildItem -LiteralPath $stateItemRoot -File -Force)
+    if ($allFiles.Count -ne ($pngFiles.Count + 1)) { throw "state item directory contains unexpected files: $stateItemRoot" }
+    return [ordered]@{ fileCount = $allFiles.Count; pngCount = $pngFiles.Count; referencedPngCount = $referenced.Count }
 }
 function Test-StructuredBuildContract {
     param([object]$Attestation)
@@ -204,14 +234,15 @@ function Test-PackageRelativeFileAllowed {
     if($rootFiles -ccontains $RelativePath){return $true};if($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json'){return $true}
     if($RelativePath.StartsWith('mir2-assets/original-ui/Items/',[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.json',[StringComparison]::OrdinalIgnoreCase)-or$RelativePath.EndsWith('.png',[StringComparison]::OrdinalIgnoreCase)}
     if(@('mir2-assets/original-ui/Sound/005-1.wav','mir2-assets/original-ui/Sound/005-2.wav','mir2-assets/original-ui/Sound/005-3.wav','mir2-assets/original-ui/Sound/60.wav','mir2-assets/original-ui/Sound/61.wav','mir2-assets/original-ui/Sound/62.wav','mir2-assets/original-ui/Sound/63.wav','mir2-assets/original-ui/Sound/64.wav','mir2-assets/original-ui/Sound/65.wav') -ccontains $RelativePath){return $true}
-    if($RelativePath -ceq 'mir2-assets/original-ui/Sound/105.wav'){return $true}
-    if(@('mir2-assets/original-ui/Sound/M41-1.wav','mir2-assets/original-ui/Sound/M41-2.wav','mir2-assets/original-ui/Sound/M76-0.wav') -ccontains $RelativePath){return $true}
+    if(@('mir2-assets/original-ui/Sound/100.wav', 'mir2-assets/original-ui/Sound/104.wav','mir2-assets/original-ui/Sound/105.wav') -ccontains $RelativePath){return $true}
+    if(@('mir2-assets/original-ui/Sound/M41-1.wav','mir2-assets/original-ui/Sound/M41-2.wav','mir2-assets/original-ui/Sound/M76-0.wav','mir2-assets/original-ui/Sound/M69-0.wav') -ccontains $RelativePath){return $true}
     if(@('mir2-assets/original-ui/Sound/Login2.wav','mir2-assets/original-ui/Sound/Select2.wav','mir2-assets/original-ui/Sound/103.wav','mir2-assets/original-ui/Sound/70.wav','mir2-assets/original-ui/Sound/71.wav','mir2-assets/original-ui/Sound/72.wav','mir2-assets/original-ui/Sound/73.wav','mir2-assets/original-ui/Sound/80.wav','mir2-assets/original-ui/Sound/81.wav','mir2-assets/original-ui/Sound/82.wav','mir2-assets/original-ui/Sound/83.wav','mir2-assets/original-ui/Sound/138.wav','mir2-assets/original-ui/Sound/139.wav','mir2-assets/original-ui/Sound/144.wav','mir2-assets/original-ui/Sound/145.wav','mir2-assets/original-ui/Sound/tiger_struck_1.wav','mir2-assets/original-ui/Sound/tiger_struck_2.wav','mir2-assets/original-ui/Sound/wolf_struck1.wav','mir2-assets/original-ui/Sound/M8-1.wav','mir2-assets/original-ui/Sound/M31-0.wav','mir2-assets/original-ui/Sound/M31-1.wav','mir2-assets/original-ui/Sound/M31-2.wav','mir2-assets/original-ui/Sound/M34-0.wav','mir2-assets/original-ui/Sound/M34-1.wav','mir2-assets/original-ui/Sound/M34-2.wav','mir2-assets/original-ui/Sound/M39-0.wav','mir2-assets/original-ui/Sound/M39-1.wav','mir2-assets/original-ui/Sound/M40-0.wav','mir2-assets/original-ui/Sound/M61-0.wav','mir2-assets/original-ui/Sound/M61-1.wav','mir2-assets/original-ui/Sound/M64-0.wav','mir2-assets/original-ui/Sound/M64-1.wav','mir2-assets/original-ui/Sound/M64-2.wav','mir2-assets/original-ui/Sound/M79-1.wav') -ccontains $RelativePath){return $true}
     if(@('mir2-assets/original-ui/Cursors/Cursor_Default.png','mir2-assets/original-ui/Cursors/Cursor_Normal_Atk.png','mir2-assets/original-ui/Cursors/Cursor_Compulsion_Atk.png','mir2-assets/original-ui/Cursors/Cursor_Npc.png') -ccontains $RelativePath){return $true}
     if($RelativePath.StartsWith('mir2-assets/crystal-map-pack/',[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.map.gz',[StringComparison]::OrdinalIgnoreCase)}
-    $imageJsonRoots=@('mir2-assets/bevy-entity-atlases/','mir2-assets/generated/map-atlas/','mir2-assets/generated/native-map-keyed/','mir2-assets/original-effects/','mir2-assets/original-ui/ChrSel/','mir2-assets/original-ui/Help/','mir2-assets/original-ui/MMap/','mir2-assets/original-ui/Prguse/','mir2-assets/original-ui/Prguse2/','mir2-assets/original-ui/UI_32bit/','mir2-assets/original-ui/Title/','mir2-assets/original-ui/Monster/000/','mir2-assets/original-ui/NPC/00/')
+    $imageJsonRoots=@('mir2-assets/original-ui/Pet/','mir2-assets/bevy-entity-atlases/','mir2-assets/generated/map-atlas/','mir2-assets/generated/native-map-keyed/','mir2-assets/original-effects/','mir2-assets/original-ui/ChrSel/','mir2-assets/original-ui/Help/','mir2-assets/original-ui/MMap/','mir2-assets/original-ui/Prguse/','mir2-assets/original-ui/DNItems/', 'mir2-assets/original-ui/GuildSkill/','mir2-assets/original-ui/MagIcon2/','mir2-assets/original-ui/MagIcon/','mir2-assets/original-ui/BuffIcon/', 'mir2-assets/original-ui/Prguse2/','mir2-assets/original-ui/StateItem/','mir2-assets/original-ui/UI_32bit/','mir2-assets/original-ui/Title/','mir2-assets/original-ui/Monster/000/','mir2-assets/original-ui/NPC/00/')
     foreach($familyName in $PlayerSpriteFamilyNames){$imageJsonRoots += "mir2-assets/original-ui/$familyName/"}
     foreach($prefix in $imageJsonRoots){if($RelativePath.StartsWith($prefix,[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.json',[StringComparison]::OrdinalIgnoreCase)-or$RelativePath.EndsWith('.png',[StringComparison]::OrdinalIgnoreCase)}}
+    foreach ($petSound in $PetSoundNames) { if ($RelativePath -ceq ('mir2-assets/original-ui/Sound/' + $petSound)) { return $true } }
     return $false
 }
 
@@ -219,7 +250,7 @@ function Test-PackageRelativeDirectoryAllowed {
     param([string]$RelativePath)
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
     if(@('logs','mir2-assets','mir2-assets/generated','mir2-assets/original-ui','mir2-assets/original-ui/Cursors','mir2-assets/original-ui/Items','mir2-assets/original-ui/Monster','mir2-assets/original-ui/NPC','mir2-assets/original-ui/Sound') -ccontains $RelativePath){return $true}
-    $treeRoots=@('mir2-assets/bevy-entity-atlases','mir2-assets/generated/map-atlas','mir2-assets/generated/native-map-keyed','mir2-assets/crystal-map-pack','mir2-assets/original-effects','mir2-assets/original-ui/ChrSel','mir2-assets/original-ui/Help','mir2-assets/original-ui/Items','mir2-assets/original-ui/MMap','mir2-assets/original-ui/Prguse','mir2-assets/original-ui/Prguse2','mir2-assets/original-ui/UI_32bit','mir2-assets/original-ui/Title','mir2-assets/original-ui/Monster/000','mir2-assets/original-ui/NPC/00')
+    $treeRoots=@('mir2-assets/original-ui/Pet','mir2-assets/bevy-entity-atlases','mir2-assets/generated/map-atlas','mir2-assets/generated/native-map-keyed','mir2-assets/crystal-map-pack','mir2-assets/original-effects','mir2-assets/original-ui/ChrSel','mir2-assets/original-ui/Help','mir2-assets/original-ui/Items','mir2-assets/original-ui/MMap','mir2-assets/original-ui/Prguse','mir2-assets/original-ui/DNItems', 'mir2-assets/original-ui/GuildSkill','mir2-assets/original-ui/MagIcon2','mir2-assets/original-ui/MagIcon','mir2-assets/original-ui/BuffIcon', 'mir2-assets/original-ui/Prguse2','mir2-assets/original-ui/StateItem','mir2-assets/original-ui/UI_32bit','mir2-assets/original-ui/Title','mir2-assets/original-ui/Monster/000','mir2-assets/original-ui/NPC/00')
     foreach($familyName in $PlayerSpriteFamilyNames){$treeRoots += "mir2-assets/original-ui/$familyName"}
     foreach($root in $treeRoots){if($RelativePath -ceq $root -or $RelativePath.StartsWith($root+'/',[StringComparison]::Ordinal)){return $true}}
     return $false
@@ -343,7 +374,19 @@ function Assert-NoBuildPathStrings {
         $oddCount = $range.count - 1; $oddCount -= ($oddCount % 2)
         if ($oddCount -ge 2) { [void]$views.Add([pscustomobject]@{ kind = 'UTF-16LE/odd'; text = [Text.Encoding]::Unicode.GetString($bytes, $range.offset + 1, $oddCount); regex = $unicodeRegex }) }
         foreach ($view in $views) {
-            try { $match = $view.regex.Match($view.text) } catch [Text.RegularExpressions.RegexMatchTimeoutException] { throw "PE path inspection timed out in section '$($range.name)' ($($view.kind))" }
+            try {
+                $match = $view.regex.Match($view.text)
+                # A Unicode decoder error is not an encoded string boundary.
+                # Do not mistake a valid prefix of random bytes for a path.
+                # NextMatch preserves the greedy match (a lookahead can backtrack
+                # to a shorter false positive) and still checks later strings.
+                # ASCII scanning remains independent of Unicode decoding.
+                while ($match.Success -and $view.kind -ne 'ASCII' -and
+                    ($match.Index + $match.Length) -lt $view.text.Length -and
+                    $view.text[$match.Index + $match.Length] -eq [char]0xFFFD) {
+                    $match = $match.NextMatch()
+                }
+            } catch [Text.RegularExpressions.RegexMatchTimeoutException] { throw "PE path inspection timed out in section '$($range.name)' ($($view.kind))" }
             if ($match.Success) {
                 $sample = $match.Value; if ($sample.Length -gt 180) { $sample = $sample.Substring(0, 180) }
                 throw "EXE contains machine/CI absolute source path or non-basename PDB reference in section '$($range.name)' ($($view.kind)): $sample"
@@ -365,13 +408,19 @@ function Fail([string]$Message) { [void]$script:Failures.Add($Message); Write-Ho
 
 function Get-RequiredCandidateFiles {
     param([string]$ExeName)
-    $required = @($ExeName, 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s', 'mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'mir2-assets\bevy-entity-atlases\manifest.json', 'mir2-assets\generated\map-atlas\manifest.json', 'mir2-assets\generated\native-map-keyed\manifest.json', 'mir2-assets\original-effects\effects.generated.json', 'mir2-assets\crystal-map-pack\0.map.gz', 'mir2-assets\original-ui\frame-sets.generated.json', 'mir2-assets\original-ui\Items\meta.json', 'mir2-assets\original-ui\Items\0.png', 'mir2-assets\original-ui\Items\3792.png', 'mir2-assets\original-ui\Prguse\20.png', 'mir2-assets\original-ui\Sound\Login2.wav', 'mir2-assets\original-ui\Sound\Select2.wav', 'mir2-assets\original-ui\Sound\103.wav', 'mir2-assets\original-ui\Sound\M8-1.wav', 'mir2-assets\original-ui\Sound\M31-0.wav', 'mir2-assets\original-ui\Sound\M31-1.wav', 'mir2-assets\original-ui\Sound\M31-2.wav', 'mir2-assets\original-ui\Sound\M34-0.wav', 'mir2-assets\original-ui\Sound\M34-1.wav', 'mir2-assets\original-ui\Sound\M34-2.wav', 'mir2-assets\original-ui\Sound\M39-0.wav', 'mir2-assets\original-ui\Sound\M39-1.wav', 'mir2-assets\original-ui\Sound\M40-0.wav', 'mir2-assets\original-ui\Sound\M61-0.wav', 'mir2-assets\original-ui\Sound\M61-1.wav', 'mir2-assets\original-ui\Sound\M64-0.wav', 'mir2-assets\original-ui\Sound\M64-1.wav', 'mir2-assets\original-ui\Sound\M64-2.wav', 'mir2-assets\original-ui\Sound\M79-1.wav')
-    $required += 'mir2-assets\original-ui\Sound\105.wav'
+    $required = @($ExeName, 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s', 'mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'mir2-assets\bevy-entity-atlases\manifest.json', 'mir2-assets\generated\map-atlas\manifest.json', 'mir2-assets\generated\native-map-keyed\manifest.json', 'mir2-assets\original-effects\effects.generated.json', 'mir2-assets\crystal-map-pack\0.map.gz', 'mir2-assets\original-ui\frame-sets.generated.json', 'mir2-assets\original-ui\Items\meta.json', 'mir2-assets\original-ui\Items\0.png', 'mir2-assets\original-ui\Items\3792.png', 'mir2-assets\original-ui\StateItem\meta.json', 'mir2-assets\original-ui\StateItem\30.png', 'mir2-assets\original-ui\StateItem\5152.png', 'mir2-assets\original-ui\Prguse\20.png', 'mir2-assets\original-ui\Sound\Login2.wav', 'mir2-assets\original-ui\Sound\Select2.wav', 'mir2-assets\original-ui\Sound\103.wav', 'mir2-assets\original-ui\Sound\M8-1.wav', 'mir2-assets\original-ui\Sound\M31-0.wav', 'mir2-assets\original-ui\Sound\M31-1.wav', 'mir2-assets\original-ui\Sound\M31-2.wav', 'mir2-assets\original-ui\Sound\M34-0.wav', 'mir2-assets\original-ui\Sound\M34-1.wav', 'mir2-assets\original-ui\Sound\M34-2.wav', 'mir2-assets\original-ui\Sound\M39-0.wav', 'mir2-assets\original-ui\Sound\M39-1.wav', 'mir2-assets\original-ui\Sound\M40-0.wav', 'mir2-assets\original-ui\Sound\M61-0.wav', 'mir2-assets\original-ui\Sound\M61-1.wav', 'mir2-assets\original-ui\Sound\M64-0.wav', 'mir2-assets\original-ui\Sound\M64-1.wav', 'mir2-assets\original-ui\Sound\M64-2.wav', 'mir2-assets\original-ui\Sound\M79-1.wav')
+    $required += @('mir2-assets\original-ui\Sound\100.wav', 'mir2-assets\original-ui\Sound\104.wav', 'mir2-assets\original-ui\Sound\105.wav')
+    foreach($index in @(24,238,360)){ $required += "mir2-assets\original-ui\Prguse\$index.png" }
+    foreach($index in @(100..104) + @(340,341) + @(441..449) + @(461..469) + @(481..489) + @(501..509)){ $required += "mir2-assets\original-ui\Prguse\$index.png" }
+    foreach($index in @(200..208) + @(210..212) + @(500..504)){ $required += "mir2-assets\original-ui\Title\$index.png" }
+    foreach($index in @(470,471)){ $required += "mir2-assets\original-ui\UI_32bit\$index.png" }
     foreach($cursorName in @('Cursor_Default.png','Cursor_Normal_Atk.png','Cursor_Compulsion_Atk.png','Cursor_Npc.png')){ $required += "mir2-assets\original-ui\Cursors\$cursorName" }
     foreach($soundName in $PlayerCombatSoundNames){ $required += "mir2-assets\original-ui\Sound\$soundName" }
     foreach($soundName in $MonsterCombatSoundNames){ $required += "mir2-assets\original-ui\Sound\$soundName" }
-    foreach($soundName in @('M41-1.wav','M41-2.wav','M76-0.wav')){ $required += "mir2-assets\original-ui\Sound\$soundName" }
-    foreach($index in @(197,205,207,360,431,1340,1350) + @(450..468)){ $required += "mir2-assets\original-ui\Prguse2\$index.png" }
+    foreach($soundName in @('M41-1.wav','M41-2.wav','M76-0.wav','M69-0.wav')){ $required += "mir2-assets\original-ui\Sound\$soundName" }
+    $required += @('mir2-assets\original-ui\DNItems\meta.json', 'mir2-assets\original-ui\DNItems\0.png', 'mir2-assets\original-ui\DNItems\112.png')
+    foreach ($relative in Get-PetGuildRequiredFiles) { $required += ('mir2-assets/' + $relative).Replace('/', '\') }
+    foreach($index in @(0,1,197,205,207,360,366,367,368,431,1340,1350) + @(450..468)){ $required += "mir2-assets\original-ui\Prguse2\$index.png" }
     foreach($index in @(0..41)){ $required += "mir2-assets\original-ui\Help\$index.png" }
     foreach($index in @(57,168,169,196,197,198,411,567,633,634,635,636,637,638,737,738,739,820,821,822,823,824,827,848,850,851,853)){ $required += "mir2-assets\original-ui\Title\$index.png" }
     foreach($index in 826..828){ $required += "mir2-assets\original-ui\Prguse\$index.png" }
@@ -408,12 +457,21 @@ function Test-FileIdentity {
 }
 
 if ($SelfTest) {
+    foreach ($requiredFile in @(Get-RequiredCandidateFiles -ExeName 'mir2-platform-windows.exe')) {
+        if (-not (Test-PackageRelativeFileAllowed -RelativePath ($requiredFile.Replace('\', '/')) -ExeName 'mir2-platform-windows.exe')) {
+            throw "required-file/allowlist contradiction: $requiredFile"
+        }
+    }
     $dateVector = ConvertFrom-JsonPreservingDateStrings -Text '{"buildCompletedUtc":"2026-08-25T20:51:33.9697458+00:00"}'
     if (-not ($dateVector.buildCompletedUtc -is [string]) -or [string]$dateVector.buildCompletedUtc -cne '2026-08-25T20:51:33.9697458+00:00') { throw 'JSON parser changed an attestation UTC string into a locale-dependent value' }
     $selfRoot = Join-Path ([IO.Path]::GetTempPath()) ('mir2-verify-selftest-' + [guid]::NewGuid().ToString('N')); New-Item -ItemType Directory -Path $selfRoot | Out-Null
     $certificate=$null; $wrongCertificate=$null; $rsa=$null; $wrongRsa=$null
     try {
         if ($Launch) { throw 'SelfTest must preserve default nonlaunch behavior' }
+        $selfRepo = Find-RepoRoot -StartPath (Split-Path -Parent $PSCommandPath)
+        Test-PetGuildAssetClosure -OriginalUiRoot (Join-Path $selfRepo 'apps\web\public\original-ui') -TemporaryRoot $selfRoot
+        $stateItemClosure = Assert-StateItemClosure -OriginalUiRoot (Join-Path $selfRepo 'apps\web\public\original-ui')
+        if ($stateItemClosure.pngCount -ne 218) { throw "Character StateItem source closure count changed: $($stateItemClosure.pngCount)" }
         if (-not (Test-SystemDependency -Name 'dwrite.dll') -or -not (Test-SystemDependency -Name 'DWRITE.DLL')) { throw 'DirectWrite system dependency self-test rejected dwrite.dll' }
         if (Test-SystemDependency -Name 'mir2-local.dll') { throw 'system dependency self-test accepted an unlisted local DLL' }
         if (-not (Test-PathWithin -Path (Join-Path $selfRoot 'child') -Root $selfRoot)) { throw 'containment self-test failed' }; if (Test-PathWithin -Path (Join-Path $selfRoot '..\escape') -Root $selfRoot) { throw 'escape containment self-test failed' }
@@ -421,7 +479,7 @@ if ($SelfTest) {
         $adsNormal=Join-Path $selfRoot 'ads-normal';New-Item -ItemType Directory -Path $adsNormal|Out-Null;$adsNormalFile=Join-Path $adsNormal 'normal.bin';[IO.File]::WriteAllBytes($adsNormalFile,[byte[]](1,2,3));Assert-NoAlternateDataStreams -Path $adsNormal;$adsVerifyResult='creation-unsupported';try{Set-Content -LiteralPath $adsNormalFile -Stream Zone.Identifier -Value '[ZoneTransfer]' -NoNewline -ErrorAction Stop;$fileAdsCreated=$true}catch{$fileAdsCreated=$false};if($fileAdsCreated){$fileRejected=$false;try{Assert-NoAlternateDataStreams -Path $adsNormal}catch{$fileRejected=$true};if(-not$fileRejected){throw 'verify ADS inspection accepted file named stream'};$adsDirectory=Join-Path $selfRoot 'ads-directory';New-Item -ItemType Directory -Path $adsDirectory|Out-Null;Set-Content -LiteralPath $adsDirectory -Stream DirectoryMarker -Value marker -NoNewline -ErrorAction Stop;$directoryRejected=$false;try{Assert-NoAlternateDataStreams -Path $adsDirectory}catch{$directoryRejected=$true};if(-not$directoryRejected){throw 'verify ADS inspection accepted directory named stream'};$adsVerifyResult='passed'};Write-Host "VERIFY_ADS_SELFTEST=$adsVerifyResult"
         $cultureEntries=@([pscustomobject]@{path='I.png';size=[int64]1;sha256=('1'*64)},[pscustomobject]@{path='i.png';size=[int64]2;sha256=('2'*64)},[pscustomobject]@{path=(([string][char]0x0130)+'.png');size=[int64]3;sha256=('3'*64)},[pscustomobject]@{path=(([string][char]0x0131)+'.png');size=[int64]4;sha256=('4'*64)},[pscustomobject]@{path=(([string][char]0x4E2D)+([string][char]0x6587)+'.json');size=[int64]5;sha256=('5'*64)})
         $selfTestThread=[Threading.Thread]::CurrentThread;$savedCulture=$selfTestThread.CurrentCulture;$savedUiCulture=$selfTestThread.CurrentUICulture;$cultureAggregate=$null;try{foreach($cultureName in @('tr-TR','zh-CN','en-US')){$testCulture=[Globalization.CultureInfo]::GetCultureInfo($cultureName);$selfTestThread.CurrentCulture=$testCulture;$selfTestThread.CurrentUICulture=$testCulture;$candidateAggregate=Get-TextSha256 -Text (Get-ManifestCanonicalText -Entries $cultureEntries);if($null-eq$cultureAggregate){$cultureAggregate=$candidateAggregate}elseif($candidateAggregate-cne$cultureAggregate){throw "manifest aggregate changed under culture: $cultureName"}}}finally{$selfTestThread.CurrentCulture=$savedCulture;$selfTestThread.CurrentUICulture=$savedUiCulture}
-        $unicodeNoBreakSpace=[string][char]0x00A0;$unicodeFullwidthFullStop=[string][char]0xFF0E;$allowedLayoutVectors=@('mir2-platform-windows.exe','mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s','mir2-assets/bevy-entity-atlases/manifest.json','mir2-assets/generated/map-atlas/0.png','mir2-assets/generated/native-map-keyed/manifest.json','mir2-assets/crystal-map-pack/0.map.gz','mir2-assets/original-effects/effects.generated.json','mir2-assets/original-effects/sprite.v1.final.PNG',('mir2-assets/original-effects/folder'+$unicodeNoBreakSpace+'/0.png'),('mir2-assets/original-effects/payload'+$unicodeFullwidthFullStop+'exe.png'),'mir2-assets/original-ui/frame-sets.generated.json','mir2-assets/original-ui/ChrSel/0.png','mir2-assets/original-ui/Items/meta.json','mir2-assets/original-ui/Items/0.png','mir2-assets/original-ui/Items/3792.png','mir2-assets/original-ui/Sound/Login2.wav','mir2-assets/original-ui/Sound/Select2.wav','mir2-assets/original-ui/Sound/103.wav','mir2-assets/original-ui/Sound/M8-1.wav','mir2-assets/original-ui/Sound/M31-0.wav','mir2-assets/original-ui/Sound/M31-1.wav','mir2-assets/original-ui/Sound/M31-2.wav','mir2-assets/original-ui/Sound/M34-0.wav','mir2-assets/original-ui/Sound/M34-1.wav','mir2-assets/original-ui/Sound/M34-2.wav','mir2-assets/original-ui/Sound/M39-0.wav','mir2-assets/original-ui/Sound/M39-1.wav','mir2-assets/original-ui/Sound/M40-0.wav','mir2-assets/original-ui/Sound/M41-1.wav','mir2-assets/original-ui/Sound/M41-2.wav','mir2-assets/original-ui/Sound/M61-0.wav','mir2-assets/original-ui/Sound/M61-1.wav','mir2-assets/original-ui/Sound/M64-0.wav','mir2-assets/original-ui/Sound/M64-1.wav','mir2-assets/original-ui/Sound/M64-2.wav','mir2-assets/original-ui/Sound/M76-0.wav','mir2-assets/original-ui/Sound/M79-1.wav','mir2-assets/original-ui/CArmour/01/meta.json','mir2-assets/original-ui/ARWeapon/00 S/0.png','mir2-assets/original-ui/Mount/11/0.png');foreach($soundName in $PlayerCombatSoundNames){$allowedLayoutVectors+='mir2-assets/original-ui/Sound/'+$soundName};foreach($rel in $allowedLayoutVectors){if(-not(Test-PackageRelativeFileAllowed -RelativePath $rel -ExeName 'mir2-platform-windows.exe')){throw "strict allowlist rejected valid path: $rel"}}
+        $unicodeNoBreakSpace=[string][char]0x00A0;$unicodeFullwidthFullStop=[string][char]0xFF0E;$allowedLayoutVectors=@('mir2-platform-windows.exe','mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s','mir2-assets/bevy-entity-atlases/manifest.json','mir2-assets/generated/map-atlas/0.png','mir2-assets/generated/native-map-keyed/manifest.json','mir2-assets/crystal-map-pack/0.map.gz','mir2-assets/original-effects/effects.generated.json','mir2-assets/original-effects/sprite.v1.final.PNG',('mir2-assets/original-effects/folder'+$unicodeNoBreakSpace+'/0.png'),('mir2-assets/original-effects/payload'+$unicodeFullwidthFullStop+'exe.png'),'mir2-assets/original-ui/frame-sets.generated.json','mir2-assets/original-ui/ChrSel/0.png','mir2-assets/original-ui/GuildSkill/meta.json','mir2-assets/original-ui/GuildSkill/47.png','mir2-assets/original-ui/BuffIcon/264.png','mir2-assets/original-ui/Items/meta.json','mir2-assets/original-ui/Items/0.png','mir2-assets/original-ui/Items/3792.png','mir2-assets/original-ui/StateItem/meta.json','mir2-assets/original-ui/StateItem/30.png','mir2-assets/original-ui/Sound/Login2.wav','mir2-assets/original-ui/Sound/Select2.wav','mir2-assets/original-ui/Sound/103.wav','mir2-assets/original-ui/Sound/M8-1.wav','mir2-assets/original-ui/Sound/M31-0.wav','mir2-assets/original-ui/Sound/M31-1.wav','mir2-assets/original-ui/Sound/M31-2.wav','mir2-assets/original-ui/Sound/M34-0.wav','mir2-assets/original-ui/Sound/M34-1.wav','mir2-assets/original-ui/Sound/M34-2.wav','mir2-assets/original-ui/Sound/M39-0.wav','mir2-assets/original-ui/Sound/M39-1.wav','mir2-assets/original-ui/Sound/M40-0.wav','mir2-assets/original-ui/Sound/M41-1.wav','mir2-assets/original-ui/Sound/M41-2.wav','mir2-assets/original-ui/Sound/M61-0.wav','mir2-assets/original-ui/Sound/M61-1.wav','mir2-assets/original-ui/Sound/M64-0.wav','mir2-assets/original-ui/Sound/M64-1.wav','mir2-assets/original-ui/Sound/M64-2.wav','mir2-assets/original-ui/Sound/M76-0.wav','mir2-assets/original-ui/Sound/M69-0.wav','mir2-assets/original-ui/Sound/M79-1.wav','mir2-assets/original-ui/CArmour/01/meta.json','mir2-assets/original-ui/ARWeapon/00 S/0.png','mir2-assets/original-ui/Mount/11/0.png');foreach($soundName in $PlayerCombatSoundNames){$allowedLayoutVectors+='mir2-assets/original-ui/Sound/'+$soundName};foreach($rel in $allowedLayoutVectors){if(-not(Test-PackageRelativeFileAllowed -RelativePath $rel -ExeName 'mir2-platform-windows.exe')){throw "strict allowlist rejected valid path: $rel"}}
         $allowedLayoutVectors += @('mir2-assets/original-ui/Sound/005-1.wav','mir2-assets/original-ui/Sound/005-2.wav','mir2-assets/original-ui/Sound/005-3.wav','mir2-assets/original-ui/Sound/60.wav','mir2-assets/original-ui/Sound/61.wav','mir2-assets/original-ui/Sound/62.wav','mir2-assets/original-ui/Sound/63.wav','mir2-assets/original-ui/Sound/64.wav','mir2-assets/original-ui/Sound/65.wav','mir2-assets/original-ui/Sound/105.wav'); foreach($rel in $allowedLayoutVectors){if(-not(Test-PackageRelativeFileAllowed -RelativePath $rel -ExeName 'mir2-platform-windows.exe')){throw "strict allowlist rejected valid native audio path: $rel"}}
         $requiredProbe = Join-Path $selfRoot 'required-probe'; New-Item -ItemType Directory -Path $requiredProbe | Out-Null; foreach ($relative in Get-RequiredCandidateFiles -ExeName 'mir2-platform-windows.exe') { $probePath = Join-Path $requiredProbe $relative; New-Item -ItemType Directory -Path (Split-Path -Parent $probePath) -Force | Out-Null; [IO.File]::WriteAllBytes($probePath, [byte[]](1)) }; if (@(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe').Count -ne 0) { throw 'required-file self-test rejected a complete probe package' }; Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\frame-sets.generated.json') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\frame-sets.generated.json') { throw 'required-file self-test did not fail closed for missing frame-set catalog' }
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\frame-sets.generated.json'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Sound\103.wav') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Sound\103.wav') { throw 'required-file self-test did not fail closed for missing VIS-03 ButtonA sound' }
@@ -429,7 +487,8 @@ if ($SelfTest) {
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Items\meta.json'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Items\0.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Items\0.png') { throw 'required-file self-test did not fail closed for missing first item icon' }
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Items\0.png'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Items\3792.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Items\3792.png') { throw 'required-file self-test did not fail closed for missing tail item icon' }
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Items\3792.png'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Title\823.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Title\823.png') { throw 'required-file self-test did not fail closed for missing VIS-03 disabled Teleport asset' }
-        [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Title\823.png'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Sound\105.wav') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Sound\105.wav') { throw 'required-file self-test did not fail closed for missing main HUD ButtonC sound' }
+        [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Title\823.png'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\StateItem\meta.json') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\StateItem\meta.json') { throw 'required-file self-test did not fail closed for missing Character StateItem meta' }
+        [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\StateItem\meta.json'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Sound\105.wav') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Sound\105.wav') { throw 'required-file self-test did not fail closed for missing main HUD ButtonC sound' }
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Sound\105.wav'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Prguse\1962.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Prguse\1962.png') { throw 'required-file self-test did not fail closed for missing main HUD Menu pressed asset' }
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Prguse\1962.png'), [byte[]](1)); Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Prguse\828.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Prguse\828.png') { throw 'required-file self-test did not fail closed for missing main HUD GameShop pressed asset' }
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Prguse\828.png'), [byte[]](1))
@@ -441,6 +500,12 @@ if ($SelfTest) {
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Title\57.png'), [byte[]](1));
         Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Title\169.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Title\169.png') { throw 'required-file self-test did not fail closed for missing locked second-inventory-tab asset' }
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Title\169.png'), [byte[]](1));
+        Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Prguse\24.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Prguse\24.png') { throw 'required-file self-test did not fail closed for missing inventory low-weight bar asset' }
+        [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Prguse\24.png'), [byte[]](1));
+        Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\UI_32bit\470.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\UI_32bit\470.png') { throw 'required-file self-test did not fail closed for missing inventory high-weight bar asset' }
+        [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\UI_32bit\470.png'), [byte[]](1));
+        Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Prguse2\368.png') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Prguse2\368.png') { throw 'required-file self-test did not fail closed for missing inventory bin pressed asset' }
+        [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Prguse2\368.png'), [byte[]](1));
         Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Sound\005-3.wav') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Sound\005-3.wav') { throw 'required-file self-test did not fail closed for missing VIS-04 Scarecrow death sound' }
         [IO.File]::WriteAllBytes((Join-Path $requiredProbe 'mir2-assets\original-ui\Sound\005-3.wav'), [byte[]](1));
         Remove-Item -LiteralPath (Join-Path $requiredProbe 'mir2-assets\original-ui\Sound\005-1.wav') -Force; $missingRequired = @(Get-MissingRequiredCandidateFiles -PackageRoot $requiredProbe -ExeName 'mir2-platform-windows.exe'); if ($missingRequired.Count -ne 1 -or $missingRequired[0] -cne 'mir2-assets\original-ui\Sound\005-1.wav') { throw 'required-file self-test did not fail closed for missing VIS-04 Scarecrow attack sound' }
@@ -519,6 +584,17 @@ if ($SelfTest) {
         foreach ($encoding in @([Text.Encoding]::ASCII, [Text.Encoding]::Unicode)) { foreach ($candidatePath in $allowedPaths) { [IO.File]::WriteAllBytes($pathScanFile, $encoding.GetBytes($candidatePath)); Assert-NoBuildPathStrings -ExePath $pathScanFile } }
         $nulTerminatedRustPath = [Text.Encoding]::ASCII.GetBytes(('//rustc/' + ('a' * 40) + '/library' + [char]0)); [IO.File]::WriteAllBytes($pathScanFile, $nulTerminatedRustPath); Assert-NoBuildPathStrings -ExePath $pathScanFile
         [IO.File]::WriteAllBytes($pathScanFile, [byte[]](0x42,0x3A,0x5C,0xA0,0xEC,0x75,0x18,0x40,0x84,0xED,0x0F)); Assert-NoBuildPathStrings -ExePath $pathScanFile
+        # Actual optimized EXE .rdata bytes: the apparent O:\ path ends at
+        # malformed UTF-8, rather than an encoded path/string boundary.
+        $binaryPathPrefix = [byte[]](0x04,0x4F,0x3A,0x5C,0x21,0xD8,0xB7,0x6A,0x2D,0xAE,0x5C,0x1D)
+        [IO.File]::WriteAllBytes($pathScanFile, $binaryPathPrefix); Assert-NoBuildPathStrings -ExePath $pathScanFile
+        foreach ($encoding in @([Text.Encoding]::UTF8, [Text.Encoding]::Unicode)) {
+            $laterPath = $encoding.GetBytes($unicodeBlockedPath)
+            $mixedBytes = $binaryPathPrefix + [byte[]](0) + $laterPath
+            [IO.File]::WriteAllBytes($pathScanFile, $mixedBytes)
+            $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }
+            if (-not $rejected) { throw 'build path scanner skipped a real Unicode path after malformed binary' }
+        }
         $execLeak = [Text.Encoding]::ASCII.GetBytes('C:\buildfarm\client.pdb'); $safeData = [Text.Encoding]::ASCII.GetBytes('assets/relative/sprite.png'); $sectionBytes = New-Object byte[] ($execLeak.Length + $safeData.Length); [Array]::Copy($execLeak, 0, $sectionBytes, 0, $execLeak.Length); [Array]::Copy($safeData, 0, $sectionBytes, $execLeak.Length, $safeData.Length); [IO.File]::WriteAllBytes($pathScanFile, $sectionBytes)
         $sectionPe = [pscustomobject]@{ sections = @([pscustomobject]@{ name = '.text'; rawPointer = 0; rawSize = $execLeak.Length; characteristics = [uint32]0x60000020 }, [pscustomobject]@{ name = '.rdata'; rawPointer = $execLeak.Length; rawSize = $safeData.Length; characteristics = [uint32]0x40000040 }) }; Assert-NoBuildPathStrings -ExePath $pathScanFile -PeInfo $sectionPe
         $sectionPe.sections[0].characteristics = [uint32]0x40000040; $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile -PeInfo $sectionPe } catch { $rejected = $true }; if (-not $rejected) { throw 'PE path scanner accepted a leak in a non-executable section' }
@@ -557,6 +633,8 @@ $candidateSoundIdentities = @(
     [pscustomobject]@{ name='64.wav'; size=[int64]70818; sha256='BC8EDB1BB3367B888006FD3AC9C909208E2B623E3B4814CF02DB37F151ADF400' },
     [pscustomobject]@{ name='65.wav'; size=[int64]68848; sha256='19A905F01B171898044C5374997A5390160E80C113EA0EB110270457D1262EAA' },
     [pscustomobject]@{ name='103.wav'; size=[int64]26546; sha256='7A55D27DEA18F70EB4FF4F324B682EFAB4996406EFAE3E94467D3C39CCCC674A' },
+    [pscustomobject]@{ name='100.wav'; size=[int64]724992; sha256='81E6BB9FCEA28CE1FEA8455D6CAB48ACED9E96C4FACB3480DD70D5D3E758CD86' },
+    [pscustomobject]@{ name='104.wav'; size=[int64]35394; sha256='12543A6AE326313269166D59E76B9BB5C81348EFBEB9C2F47A6841F20F430A17' },
     [pscustomobject]@{ name='105.wav'; size=[int64]39004; sha256='7BF17D6D9AAAA71BFBE2FA5D449446BDFC1B07B9832FF40440E0098116E7F5F0' },
     [pscustomobject]@{ name='70.wav'; size=[int64]43452; sha256='B4987C79614A0D230A801082C7A82384FD658B428DA78E378D78758667F40A53' },
     [pscustomobject]@{ name='71.wav'; size=[int64]54204; sha256='18A002E22FF6F06DB25A9FB84BE02D1EE7521089733E07EEECFE8671C42A1AC0' },
@@ -590,10 +668,16 @@ $candidateSoundIdentities = @(
     [pscustomobject]@{ name='M64-0.wav'; size=[int64]151328; sha256='2736DA89BADEEA678DD17BC903D6AAC7D63595405D82E8C0E0C9F2FAF3E684C3' },
     [pscustomobject]@{ name='M64-1.wav'; size=[int64]168768; sha256='3487AAA8B8218D68F34D9ACE7CFBD95A13667737216DED6BE16702CCE48E161E' },
     [pscustomobject]@{ name='M64-2.wav'; size=[int64]228532; sha256='2D3F6EC560E0F11C86C95EBCE1E78907A154C127103E1B226B04203041B5689E' },
+    # SoundList.lst 20710 explicitly maps BlessedArmour to M69-0 (not missing M71-0).
+    [pscustomobject]@{ name='M69-0.wav'; size=[int64]152196; sha256='9242C030F168D03D3A3C2D7D6048DC1EE98A85BAF5117EEF0124AB61E66E51EB' },
     [pscustomobject]@{ name='M76-0.wav'; size=[int64]445740; sha256='4EB43491B7360A8B55A5565DC19C98542DEB36EBE10F101CD2C37473DC825744' },
     [pscustomobject]@{ name='M79-1.wav'; size=[int64]484496; sha256='9098F96106FB880720711FB829B9CCDFEB8DB1883132BC680629FCD0360EA83D' }
 )
 foreach ($identity in $candidateSoundIdentities) { $soundPath = Join-Path $PackageRoot ('mir2-assets\original-ui\Sound\' + $identity.name); if ((Test-Path -LiteralPath $soundPath -PathType Leaf) -and -not (Test-FileIdentity -Path $soundPath -ExpectedSize $identity.size -ExpectedSha256 $identity.sha256)) { Fail "$($identity.name) identity mismatch" } }
+try {
+    $petGuildClosure = Assert-PetGuildAssetClosure -OriginalUiRoot (Join-Path $PackageRoot 'mir2-assets\original-ui')
+    Write-Host "petGuildClosure=libraries:$($petGuildClosure.libraries),png:$($petGuildClosure.png),sounds:$($petGuildClosure.sounds)"
+} catch { Fail "pet/guild closure failed: $($_.Exception.Message)" }
 try {
     $entityAtlasClosure = Assert-EntityAtlasClosure -ManifestPath (Join-Path $PackageRoot 'mir2-assets\bevy-entity-atlases\manifest.json') -AssetRoot (Join-Path $PackageRoot 'mir2-assets')
     Write-Host "entityAtlasClosure=atlases:$($entityAtlasClosure.atlasCount),pages:$($entityAtlasClosure.pageCount)"
@@ -614,6 +698,13 @@ try {
 }
 catch {
     Fail "item icon closure failed: $($_.Exception.Message)"
+}
+try {
+    $stateItemClosure = Assert-StateItemClosure -OriginalUiRoot (Join-Path $PackageRoot 'mir2-assets\original-ui')
+    Write-Host "stateItemClosure=files:$($stateItemClosure.fileCount),png:$($stateItemClosure.pngCount)"
+}
+catch {
+    Fail "state item closure failed: $($_.Exception.Message)"
 }
 
 $textExtensions = @('.txt','.md','.toml','.json','.ini','.cfg','.yaml','.yml','.env')

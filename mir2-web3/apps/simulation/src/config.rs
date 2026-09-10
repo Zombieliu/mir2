@@ -17,8 +17,8 @@ use mir2_game_data::{
     content_profile_respawn_overrides_for_map, crystal_map_respawns_by_file_name,
     crystal_respawn_manifest, platinum_176_profile, platinum_176_profile_bundle,
     starter_map_collision, starter_scene, validate_content_profile, ContentProfile,
-    ContentSkillRule, CrystalRespawnTemplate, DecorObjectTemplate, MapBounds, SceneBootstrap,
-    SceneView, StarterMapCollision, TerrainPatchTemplate,
+    ContentSkillRule, CrystalItemTemplate, CrystalRespawnTemplate, DecorObjectTemplate, MapBounds,
+    SceneBootstrap, SceneView, StarterMapCollision, TerrainPatchTemplate,
 };
 use mir2_protocol::{
     ClientIntelligentCreature, MapInformation, MirClass, MirDirection, MirGender, Notice,
@@ -52,13 +52,17 @@ pub struct CharacterRecord {
 
 impl CharacterRecord {
     pub fn to_select_info(&self) -> SelectInfo {
+        self.to_select_info_with_last_access(0)
+    }
+
+    pub fn to_select_info_with_last_access(&self, last_access_binary_datetime: i64) -> SelectInfo {
         SelectInfo {
             index: self.index,
             name: self.name.clone(),
             level: self.level,
             class: self.class,
             gender: self.gender,
-            last_access_binary_datetime: 638452800000000000,
+            last_access_binary_datetime,
         }
     }
 
@@ -75,7 +79,41 @@ impl CharacterRecord {
 }
 
 pub type SharedAccountStore = Arc<Mutex<AccountStore>>;
-const ACCOUNT_STORE_SCHEMA_VERSION: u16 = 2;
+#[path = "config_prepared_kill.rs"]
+mod prepared_kill;
+pub use prepared_kill::{PreparedKillAccountSource, PreparedKillPublication, PreparedKillPublicationFailure};
+#[cfg(test)]
+#[path = "item_identity_reservation.rs"]
+mod item_identity_reservation;
+#[cfg(test)]
+#[path = "item_identity_postgres.rs"]
+mod item_identity_postgres;
+#[cfg(test)]
+#[path = "config_item_identity.rs"]
+mod item_identity;
+
+#[path="config_guild_clock.rs"]
+pub(crate) mod guild_clock;
+#[path = "config_file_authority.rs"]
+mod file_authority;
+#[path = "config_guild_clock_driver.rs"]
+mod guild_clock_driver;
+#[path = "config_guild_experience.rs"]
+pub(crate) mod guild_experience;
+pub use guild_experience::{GuildExperienceJournal, GuildExperienceEvent};
+const ACCOUNT_STORE_SCHEMA_VERSION: u16 = 5;
+
+#[path = "config_hero_registry.rs"]
+mod hero_registry;
+#[path = "config_hero_postgres.rs"]
+mod hero_postgres;
+pub use hero_registry::{SharedHeroAttachmentRef, SharedHeroCustody, SharedHeroRecord, SharedHeroState};
+
+#[path = "config_shared_guilds.rs"]
+mod shared_guild_store;
+pub use shared_guild_store::{
+    SharedGuildBuff, SharedGuildMember, SharedGuildRank, SharedGuildRecord, SharedGuildStoredItem,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountStore {
@@ -91,6 +129,22 @@ pub struct AccountStore {
     /// never enter this map.
     #[serde(rename = "gameShopGlobalPurchases", default)]
     pub game_shop_global_purchases: BTreeMap<i32, u64>,
+    #[serde(rename = "sharedGuilds", default)]
+    pub shared_guilds: BTreeMap<String, SharedGuildRecord>,
+    #[serde(rename = "sharedHeroes", default, deserialize_with = "hero_registry::deserialize_records")]
+    pub shared_heroes: BTreeMap<i32, SharedHeroRecord>,
+    #[serde(rename = "heroIdHighWatermark", default)]
+    pub hero_id_high_watermark: i32,
+    #[serde(skip)]
+    source_hero_versions: BTreeMap<i32, i64>,
+    #[serde(skip)]
+    source_hero_allocator_version: Option<i64>,
+    #[serde(rename = "guildClock", default, skip_serializing_if = "Option::is_none")]
+    pub(crate) guild_clock: Option<guild_clock::GuildClockRecord>,
+    #[serde(skip)]
+    source_guild_clock_version: Option<i64>,
+    #[serde(skip)]
+    source_guild_versions: BTreeMap<String, i64>,
     pub accounts: BTreeMap<String, AccountRecord>,
     #[serde(skip)]
     source_account_versions: BTreeMap<String, i64>,
@@ -111,6 +165,14 @@ impl AccountStore {
             next_character_index: 1,
             game_shop_global_purchases: BTreeMap::new(),
             accounts,
+            shared_guilds: BTreeMap::new(),
+            shared_heroes: BTreeMap::new(),
+            hero_id_high_watermark: 0,
+            source_hero_versions: BTreeMap::new(),
+            source_hero_allocator_version: None,
+            guild_clock: None,
+            source_guild_clock_version: None,
+            source_guild_versions: BTreeMap::new(),
             source_account_versions: BTreeMap::new(),
             source_save_versions: BTreeMap::new(),
             source_game_shop_global_version: None,
@@ -172,8 +234,13 @@ impl AccountStore {
     }
 
     fn migrate_to_current_schema(mut self) -> Self {
-        if self.schema_version < ACCOUNT_STORE_SCHEMA_VERSION {
-            self.schema_version = ACCOUNT_STORE_SCHEMA_VERSION;
+        // Never promote authority fields which did not exist in the tagged
+        // schema. Version 3 guild records otherwise survive the clock upgrade.
+        let impossible_guilds=self.schema_version<3 && !self.shared_guilds.is_empty();
+        let impossible_clock=self.schema_version<4 && self.guild_clock.is_some();
+        let impossible_heroes=self.schema_version<5 && (!self.shared_heroes.is_empty() || self.hero_id_high_watermark != 0);
+        if self.schema_version<ACCOUNT_STORE_SCHEMA_VERSION && !impossible_guilds && !impossible_clock && !impossible_heroes {
+            self.schema_version=ACCOUNT_STORE_SCHEMA_VERSION;
         }
         self.normalize_next_character_index();
         self
@@ -200,6 +267,10 @@ impl AccountStore {
     }
 
     fn with_source_versions(mut self, versions: AccountStoreSourceVersions) -> Self {
+        if let Some(clock)=versions.clock {self.guild_clock=Some(clock.record);self.source_guild_clock_version=Some(clock.version);}
+        self.source_hero_versions = versions.heroes.heroes;
+        self.source_hero_allocator_version = versions.heroes.allocator;
+        self.source_guild_versions = versions.guilds;
         self.source_account_versions = versions.accounts;
         self.source_save_versions = versions.saves;
         self.source_game_shop_global_version = versions.game_shop_global_version;
@@ -249,6 +320,14 @@ impl AccountStore {
             next_character_index: self.next_character_index,
             game_shop_global_purchases: self.game_shop_global_purchases.clone(),
             accounts,
+            shared_guilds: self.shared_guilds.clone(),
+            shared_heroes: self.shared_heroes.clone(),
+            hero_id_high_watermark: self.hero_id_high_watermark,
+            source_hero_versions: self.source_hero_versions.clone(),
+            source_hero_allocator_version: self.source_hero_allocator_version,
+            guild_clock: self.guild_clock.clone(),
+            source_guild_clock_version: self.source_guild_clock_version,
+            source_guild_versions: self.source_guild_versions.clone(),
             source_account_versions,
             source_save_versions,
             source_game_shop_global_version: self.source_game_shop_global_version,
@@ -257,6 +336,10 @@ impl AccountStore {
     }
 
     fn merge_source_versions(&mut self, versions: AccountStoreSourceVersions) {
+        if let Some(clock)=versions.clock {self.guild_clock=Some(clock.record);self.source_guild_clock_version=Some(clock.version);}
+        self.source_hero_versions.extend(versions.heroes.heroes);
+        if let Some(version)=versions.heroes.allocator {self.source_hero_allocator_version=Some(version);}
+        self.source_guild_versions.extend(versions.guilds);
         for (account_id, version) in versions.accounts {
             self.source_account_versions.insert(account_id, version);
         }
@@ -275,6 +358,9 @@ impl AccountStore {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct AccountStoreSourceVersions {
+    clock: Option<guild_clock::GuildClockSourceVersion>,
+    guilds: BTreeMap<String, i64>,
+    heroes: hero_registry::HeroSourceVersions,
     accounts: BTreeMap<String, i64>,
     saves: BTreeMap<String, BTreeMap<i32, i64>>,
     game_shop_global_version: Option<i64>,
@@ -284,6 +370,13 @@ struct AccountStoreSourceVersions {
 enum AccountStoreMutationScope<'a> {
     Accounts(&'a [String]),
     AccountsWithGlobal(&'a [String]),
+    AccountsWithHeroes { account_ids: &'a [String], hero_ids: &'a [i32], allocate: bool },
+    AccountsWithHeroesAndGuilds { account_ids: &'a [String], hero_ids: &'a [i32], allocate: bool, guild_ids: &'a [String] },
+    AccountsWithGuilds {
+        account_ids: &'a [String],
+        guild_ids: &'a [String],
+    },
+    AccountsWithGlobalAndGuilds { account_ids: &'a [String], guild_ids: &'a [String] },
     FullRestore,
 }
 
@@ -292,12 +385,18 @@ enum AccountStoreTransactionScopeError {
     OutOfScopeAccountChanged { account_id: String },
     SourceMetadataChanged { field: &'static str },
     UnauthorizedGlobalStockChanged,
+    OutOfScopeGuildChanged { guild_id: String },
+    InvalidGuildState(String),
+    InvalidHeroState(String),
     AccountFingerprintFailed { account_id: String, reason: String },
 }
 
 impl fmt::Display for AccountStoreTransactionScopeError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::OutOfScopeGuildChanged { guild_id } => write!(formatter, "guild {guild_id} changed outside the authorized scope"),
+            Self::InvalidHeroState(reason) => write!(formatter, "invalid shared Hero state: {reason}"),
+            Self::InvalidGuildState(reason) => write!(formatter, "invalid shared guild state: {reason}"),
             Self::OutOfScopeAccountChanged { account_id } => write!(
                 formatter,
                 "account-store transaction scope violation: account {account_id} changed outside the authorized scope"
@@ -325,9 +424,15 @@ fn validate_account_store_transaction_scope(
     staged: &AccountStore,
     scope: AccountStoreMutationScope<'_>,
 ) -> Result<(), AccountStoreTransactionScopeError> {
+    hero_registry::validate_scope(original, staged, scope)?;
+    guild_clock::validate_store_scope(original,staged,scope)?;
+    shared_guild_store::validate_guild_scope(original, staged, scope)?;
     let (account_ids, include_global) = match scope {
         AccountStoreMutationScope::Accounts(account_ids) => (account_ids, false),
-        AccountStoreMutationScope::AccountsWithGlobal(account_ids) => (account_ids, true),
+        AccountStoreMutationScope::AccountsWithGlobal(account_ids) | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids, .. } => (account_ids, true),
+        AccountStoreMutationScope::AccountsWithGuilds { account_ids, .. }
+        | AccountStoreMutationScope::AccountsWithHeroes { account_ids, .. }
+        | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. } => (account_ids, false),
         AccountStoreMutationScope::FullRestore => return Ok(()),
     };
     let authorized = account_ids.iter().cloned().collect::<BTreeSet<_>>();
@@ -358,6 +463,10 @@ fn validate_account_store_transaction_scope(
 
     for (changed, field) in [
         (
+            original.source_guild_versions != staged.source_guild_versions,
+            "source_guild_versions",
+        ),
+        (
             original.source_account_versions != staged.source_account_versions,
             "source_account_versions",
         ),
@@ -386,6 +495,13 @@ fn validate_account_store_transaction_scope(
 
 #[derive(Debug, Clone)]
 struct AccountStoreMutationPlan {
+    /// Compensation is fenced by its own committed receipt even for a File
+    /// primary's PostgreSQL mirror. Never overwrite a later domain mutation.
+    force_source_cas: bool,
+    clock: Option<guild_clock::GuildClockMutation>,
+    guilds: BTreeMap<String, shared_guild_store::GuildMutation>,
+    heroes: BTreeMap<i32, hero_registry::HeroMutation>,
+    hero_allocator: Option<hero_registry::HeroAllocatorMutation>,
     accounts: BTreeMap<String, AccountStoreAccountMutation>,
     global_stock: Option<AccountStoreGlobalStockMutation>,
 }
@@ -435,7 +551,11 @@ fn build_account_store_mutation_plan(
     let mut account_ids = BTreeSet::new();
     match scope {
         AccountStoreMutationScope::Accounts(scoped_ids)
-        | AccountStoreMutationScope::AccountsWithGlobal(scoped_ids) => {
+        | AccountStoreMutationScope::AccountsWithGlobal(scoped_ids)
+        | AccountStoreMutationScope::AccountsWithGuilds { account_ids: scoped_ids, .. }
+        | AccountStoreMutationScope::AccountsWithHeroes { account_ids: scoped_ids, .. }
+        | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids: scoped_ids, .. }
+        | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids: scoped_ids, .. } => {
             account_ids.extend(scoped_ids.iter().cloned());
         }
         AccountStoreMutationScope::FullRestore => {
@@ -496,7 +616,7 @@ fn build_account_store_mutation_plan(
 
     let include_global = matches!(
         scope,
-        AccountStoreMutationScope::AccountsWithGlobal(_) | AccountStoreMutationScope::FullRestore
+        AccountStoreMutationScope::AccountsWithGlobal(_) | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { .. } | AccountStoreMutationScope::FullRestore
     );
     let global_stock = if force_global_stock
     // The migrated game_shop_global_stock row is a singleton.  Full restore
@@ -517,6 +637,11 @@ fn build_account_store_mutation_plan(
     };
 
     AccountStoreMutationPlan {
+        force_source_cas: false,
+        clock: matches!(scope,AccountStoreMutationScope::FullRestore).then(||guild_clock::GuildClockMutation::Invalidate{business:desired.guild_clock.clone().unwrap_or_default()}),
+        guilds: shared_guild_store::build_guild_mutations(original, desired, scope),
+        heroes: hero_registry::build_mutations(original, desired, scope),
+        hero_allocator: hero_registry::build_allocator_mutation(original, desired, scope),
         accounts,
         global_stock,
     }
@@ -598,6 +723,18 @@ fn apply_account_store_mutation_source_versions(
     plan: &AccountStoreMutationPlan,
     versions: AccountStoreSourceVersions,
 ) {
+    if let Some(clock)=versions.clock {store.guild_clock=Some(clock.record);store.source_guild_clock_version=Some(clock.version);}
+    store.source_hero_versions.extend(versions.heroes.heroes);
+    if let Some(version)=versions.heroes.allocator {store.source_hero_allocator_version=Some(version);}
+    for (guild_id, mutation) in &plan.guilds {
+        if mutation.desired.is_none() {
+            store.source_guild_versions.remove(guild_id);
+        } else if let Some(version) = versions.guilds.get(guild_id) {
+            store
+                .source_guild_versions
+                .insert(guild_id.clone(), *version);
+        }
+    }
     for (account_id, mutation) in &plan.accounts {
         if mutation.desired_account.is_none() {
             store.source_account_versions.remove(account_id);
@@ -635,6 +772,9 @@ pub struct AccountStoreRepositoryStatus {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct AccountStoreRepositorySave {
+    pub(crate) clock: Option<guild_clock::GuildClockSourceVersion>,
+    pub guild_versions: BTreeMap<String, i64>,
+    pub(crate) heroes: hero_registry::HeroSourceVersions,
     pub account_versions: BTreeMap<String, i64>,
     pub save_versions: BTreeMap<String, BTreeMap<i32, i64>>,
     pub game_shop_global_version: Option<i64>,
@@ -643,6 +783,9 @@ pub struct AccountStoreRepositorySave {
 impl From<AccountStoreSourceVersions> for AccountStoreRepositorySave {
     fn from(value: AccountStoreSourceVersions) -> Self {
         Self {
+            clock: value.clock,
+            guild_versions: value.guilds,
+            heroes: value.heroes,
             account_versions: value.accounts,
             save_versions: value.saves,
             game_shop_global_version: value.game_shop_global_version,
@@ -653,6 +796,9 @@ impl From<AccountStoreSourceVersions> for AccountStoreRepositorySave {
 impl AccountStoreRepositorySave {
     fn into_source_versions(self) -> AccountStoreSourceVersions {
         AccountStoreSourceVersions {
+            clock: self.clock,
+            guilds: self.guild_versions,
+            heroes: self.heroes,
             accounts: self.account_versions,
             saves: self.save_versions,
             game_shop_global_version: self.game_shop_global_version,
@@ -744,7 +890,18 @@ impl FileAccountStoreRepository {
 
 impl AccountStoreRepository for FileAccountStoreRepository {
     fn load(&self, default_character: CharacterRecord) -> Result<AccountStore, String> {
-        Ok(AccountStore::load_or_new(&self.path, default_character))
+        let store = match fs::read(&self.path) {
+            Ok(bytes) => serde_json::from_slice::<AccountStore>(&bytes)
+                .map_err(|error| format!("invalid file account store JSON: {error}"))?,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                AccountStore::new(default_character.clone())
+            }
+            Err(error) => return Err(format!("failed to read file account store: {error}")),
+        }
+        .migrate_to_current_schema();
+        hero_registry::validate_complete_state(&store)?;
+        shared_guild_store::validate_complete_guild_state(&store)?;
+        Ok(store.with_default_account(default_character))
     }
 
     fn save(&self, store: &AccountStore) -> Result<AccountStoreRepositorySave, String> {
@@ -1332,6 +1489,13 @@ pub struct AccountRecord {
     /// tooling / account provisioning; never granted implicitly.
     #[serde(default)]
     pub gm_level: u8,
+    /// Crystal `CharacterInfo.LastLogoutDate`, keyed by character index.
+    ///
+    /// This lives on the account record so the select roster can be produced
+    /// without loading a private in-world save. Legacy stores deserialize as
+    /// `Never` (zero) until that character next leaves the world.
+    #[serde(default)]
+    pub character_last_access_binary_datetimes: BTreeMap<i32, i64>,
     pub characters: Vec<CharacterRecord>,
     pub saves: BTreeMap<i32, CharacterSaveRecord>,
 }
@@ -1363,6 +1527,7 @@ impl AccountRecord {
             ban_until_ms: None,
             banned_at_ms: None,
             gm_level: 0,
+            character_last_access_binary_datetimes: BTreeMap::new(),
             characters: vec![default_character],
             saves,
         }
@@ -1381,9 +1546,24 @@ impl AccountRecord {
             ban_until_ms: None,
             banned_at_ms: None,
             gm_level: 0,
+            character_last_access_binary_datetimes: BTreeMap::new(),
             characters: Vec::new(),
             saves: BTreeMap::new(),
         }
+    }
+
+    pub fn select_infos(&self) -> Vec<SelectInfo> {
+        self.characters
+            .iter()
+            .map(|character| {
+                character.to_select_info_with_last_access(
+                    self.character_last_access_binary_datetimes
+                        .get(&character.index)
+                        .copied()
+                        .unwrap_or_default(),
+                )
+            })
+            .collect()
     }
 
     pub fn active_ban(&self, now_ms: u64) -> Option<AccountBanStatus> {
@@ -1478,6 +1658,8 @@ impl CurrencyKind {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharacterSaveRecord {
+    #[serde(default, skip_serializing_if = "GuildExperienceJournal::is_empty")]
+    pub guild_experience_journal: GuildExperienceJournal,
     /// Optimistic revision for the complete private character snapshot.
     ///
     /// Legacy saves deserialize at revision zero. Every durable character
@@ -1512,10 +1694,25 @@ pub struct CharacterSaveRecord {
     pub chat_banned: bool,
     #[serde(default)]
     pub chat_ban_until_ms: Option<u64>,
+    /// Crystal `CharacterInfo.Inventory.Length`, including the six belt cells.
+    /// The unexpanded array is 46 cells; expansion unlocks Bag2 in the exact
+    /// sequence 54, 58, ..., 86.
+    #[serde(default = "default_inventory_capacity")]
+    pub inventory_capacity: u16,
     pub inventory_items_json: Vec<String>,
     pub belt_items_json: Vec<String>,
     #[serde(default)]
     pub hero_inventory_items_json: Vec<String>,
+    #[serde(default)]
+    pub hero_equipment_items_json: Vec<String>,
+    #[serde(default)]
+    pub hero_inventory_capacity: Option<u8>,
+    #[serde(default)]
+    pub hero_inventory_legacy_40: bool,
+    #[serde(default)]
+    pub hero_vitals: Option<HeroVitalsState>,
+    #[serde(default)]
+    pub hero_registry_attachment: Option<SharedHeroAttachmentRef>,
     #[serde(default)]
     pub storage_items_json: Vec<String>,
     pub equipment_items_json: Vec<String>,
@@ -1523,6 +1720,10 @@ pub struct CharacterSaveRecord {
     pub equipment_items_explicit_empty: bool,
     pub quest_states_json: Vec<String>,
     pub skill_states_json: Vec<String>,
+    /// Active Crystal buffs, encoded as exact private runtime states. Legacy
+    /// saves default to no active buffs, matching the historical behavior.
+    #[serde(default)]
+    pub buff_states_json: Vec<String>,
     #[serde(default)]
     pub npc_flag_states_json: Vec<String>,
     #[serde(default)]
@@ -1562,6 +1763,7 @@ impl CharacterSaveRecord {
         let (max_hp, mp) = crystal_base_vitals(character.class, character.level);
         Self {
             revision: 0,
+            guild_experience_journal: GuildExperienceJournal::default(),
             character,
             map_file_name: String::new(),
             map_title: String::new(),
@@ -1579,14 +1781,21 @@ impl CharacterSaveRecord {
             pk_points: 0,
             chat_banned: false,
             chat_ban_until_ms: None,
+            inventory_capacity: default_inventory_capacity(),
             inventory_items_json: Vec::new(),
             belt_items_json: Vec::new(),
             hero_inventory_items_json: Vec::new(),
+            hero_equipment_items_json: Vec::new(),
+            hero_inventory_capacity: None,
+            hero_inventory_legacy_40: false,
+            hero_vitals: None,
+            hero_registry_attachment: None,
             storage_items_json: Vec::new(),
             equipment_items_json: Vec::new(),
             equipment_items_explicit_empty: false,
             quest_states_json: Vec::new(),
             skill_states_json: Vec::new(),
+            buff_states_json: Vec::new(),
             npc_flag_states_json: Vec::new(),
             npc_saved_values_json: Vec::new(),
             npc_buy_back_items_json: Vec::new(),
@@ -1600,6 +1809,25 @@ impl CharacterSaveRecord {
 
 const fn default_max_experience() -> i64 {
     100
+}
+
+pub const CRYSTAL_BELT_SLOT_COUNT: u16 = 6;
+pub const CRYSTAL_BASE_INVENTORY_CAPACITY: u16 = 46;
+pub const CRYSTAL_MAX_INVENTORY_CAPACITY: u16 = 86;
+
+pub const fn default_inventory_capacity() -> u16 {
+    CRYSTAL_BASE_INVENTORY_CAPACITY
+}
+
+pub const fn is_valid_crystal_inventory_capacity(capacity: u16) -> bool {
+    capacity == CRYSTAL_BASE_INVENTORY_CAPACITY
+        || (capacity >= 54
+            && capacity <= CRYSTAL_MAX_INVENTORY_CAPACITY
+            && (capacity - 54) % 4 == 0)
+}
+
+pub const fn crystal_bag_slot_capacity(capacity: u16) -> u16 {
+    capacity.saturating_sub(CRYSTAL_BELT_SLOT_COUNT)
 }
 
 #[cfg(test)]
@@ -1691,6 +1919,14 @@ mod tests {
                 next_character_index: 1,
                 game_shop_global_purchases: BTreeMap::new(),
                 accounts,
+                shared_guilds: BTreeMap::new(),
+            shared_heroes: BTreeMap::new(),
+            hero_id_high_watermark: 0,
+            source_hero_versions: BTreeMap::new(),
+            source_hero_allocator_version: None,
+                guild_clock: None,
+            source_guild_clock_version: None,
+            source_guild_versions: BTreeMap::new(),
                 source_account_versions: BTreeMap::new(),
                 source_save_versions: BTreeMap::new(),
                 source_game_shop_global_version: None,
@@ -1852,6 +2088,7 @@ mod tests {
         assert!(save.npc_saved_values_json.is_empty());
         assert!(save.npc_buy_back_items_json.is_empty());
         assert!(save.npc_used_goods_items_json.is_empty());
+        assert_eq!(save.inventory_capacity, CRYSTAL_BASE_INVENTORY_CAPACITY);
         assert_eq!(save.experience, 0);
         assert_eq!(save.max_experience, 100);
         let account = store
@@ -2044,7 +2281,7 @@ mod tests {
             .expect("account store should save atomically");
 
         let saved = fs::read_to_string(&path).expect("saved account store should exist");
-        assert!(saved.contains(r#""schemaVersion": 2"#));
+        assert_eq!(serde_json::from_str::<Value>(&saved).unwrap()["schemaVersion"], ACCOUNT_STORE_SCHEMA_VERSION);
         assert!(saved.contains(r#""accounts""#));
 
         let temp_files = fs::read_dir(&dir)
@@ -2364,6 +2601,7 @@ mod tests {
             deleted: false,
         });
         systems.auction.push(Stage5AuctionListing {
+            item_state_json: None,
             id: 3,
             seller: owner_name.to_string(),
             item_key: "iron-sword".to_string(),
@@ -2500,6 +2738,7 @@ mod tests {
             let mut systems = Stage5SystemsState::default();
             // Mark the auction sold so it should no longer be "active".
             systems.auction.push(Stage5AuctionListing {
+                item_state_json: None,
                 id: 3,
                 seller: owner_name.clone(),
                 item_key: "iron-sword".to_string(),
@@ -2943,6 +3182,7 @@ pub struct MapDropRuleRecord {
     pub no_drop_monster: bool,
     pub no_mount: bool,
     pub no_hero: bool,
+    pub no_intelligent_creatures: bool,
     pub need_bridle: bool,
 }
 
@@ -3078,6 +3318,8 @@ pub enum AccountStoreTransactionFault {
 pub(crate) enum AccountStoreTransactionScopeObservation {
     AccountOnly,
     WithGlobal,
+    WithGuilds,
+    WithHeroes,
     FullRestore,
 }
 
@@ -3367,6 +3609,9 @@ pub struct SimulationConfig {
     pub scene_view: SceneView,
     pub map_collision: StarterMapCollision,
     pub require_storage_password: bool,
+    /// Crystal RefineTime in milliseconds and RefineCost multiplier.
+    pub refine_duration_ms: u64,
+    pub refine_cost: u32,
     pub monster_spawn_source: MonsterSpawnSource,
     pub terrain_patches: Vec<TerrainPatchTemplate>,
     pub decor_objects: Vec<DecorObjectTemplate>,
@@ -3412,10 +3657,14 @@ pub struct SimulationConfig {
     pub save_recovery_dir: Option<PathBuf>,
     save_recovery_mac_key: Option<SaveRecoveryMacKey>,
     pub content_profile: Option<ContentProfileRuntime>,
+    file_authority: Option<Arc<file_authority::FileAuthority>>,
+    guild_clock_driver: Arc<Mutex<guild_clock_driver::ClockDriverState>>,
+    guild_clock_updates: Arc<std::sync::atomic::AtomicU64>,
     account_store_persist_lock: Arc<Mutex<()>>,
     /// Shared by every clone/rebind that can reach the same durable store.
-    /// Once publication has an unknown outcome, only process restart plus a
-    /// fresh durable reload may create a writable state again.
+    /// Unknown File publication remains fenced across handle release and restart.
+    /// Only explicit reconciliation may restore writes; reload does not clear it.
+    /// See docs/FILE-PUBLICATION-FENCE.md for the durable marker contract.
     account_store_write_state: Arc<Mutex<AccountStoreWriteState>>,
     #[cfg(any(test, feature = "test-support"))]
     account_store_transaction_fault: Arc<Mutex<Option<AccountStoreTransactionFault>>>,
@@ -3468,6 +3717,8 @@ impl SimulationConfig {
             .clone();
         let mut fork = self.clone();
         fork.account_store = Arc::new(Mutex::new(account_store));
+        fork.guild_clock_driver = Arc::new(Mutex::new(guild_clock_driver::ClockDriverState::default()));
+        fork.guild_clock_updates = Arc::new(std::sync::atomic::AtomicU64::new(0));
         fork.account_store_persist_lock = Arc::new(Mutex::new(()));
         #[cfg(test)]
         {
@@ -3484,6 +3735,7 @@ impl SimulationConfig {
     pub fn fork_for_replica_apply(&self) -> Result<Self, String> {
         let mut fork = self.fork_with_isolated_account_store()?;
         fork.account_store_path = None;
+        fork.file_authority = None;
         fork.account_store_database_url = None;
         fork.save_recovery_dir = None;
         fork.save_recovery_mac_key = None;
@@ -3494,6 +3746,9 @@ impl SimulationConfig {
     /// store when its Zone is promoted. The Session keeps its reconstructed
     /// world state while future character saves use the live host repository.
     pub fn rebind_account_store_from(&mut self, authoritative: &Self) {
+        self.file_authority = authoritative.file_authority.clone();
+        self.guild_clock_driver = Arc::clone(&authoritative.guild_clock_driver);
+        self.guild_clock_updates = Arc::clone(&authoritative.guild_clock_updates);
         self.account_store = Arc::clone(&authoritative.account_store);
         self.account_store_path = authoritative.account_store_path.clone();
         self.account_store_database_url = authoritative.account_store_database_url.clone();
@@ -3578,6 +3833,8 @@ impl SimulationConfig {
             map_transfers: starter_map_transfers(),
             safe_zones: starter_safe_zones(),
             safe_zone_border_effects: imported_safe_zone_border_enabled(&scene.map.file_name),
+            refine_duration_ms: 20 * 60_000,
+            refine_cost: 125,
             login_notice: None,
             map_drop_rules: Vec::new(),
             mine_zones: Vec::new(),
@@ -3590,6 +3847,9 @@ impl SimulationConfig {
             save_recovery_dir: None,
             save_recovery_mac_key: None,
             content_profile: None,
+            file_authority: None,
+            guild_clock_updates: Arc::new(std::sync::atomic::AtomicU64::new(0)),
+            guild_clock_driver: Arc::new(Mutex::new(guild_clock_driver::ClockDriverState::default())),
             account_store_persist_lock: Arc::new(Mutex::new(())),
             account_store_write_state: Arc::new(Mutex::new(AccountStoreWriteState::Writable)),
             #[cfg(any(test, feature = "test-support"))]
@@ -3721,17 +3981,30 @@ impl SimulationConfig {
     }
 
     pub fn with_account_store_path(mut self, path: impl Into<PathBuf>) -> Self {
-        let path = path.into();
-        let repository = FileAccountStoreRepository::new(path.clone());
-        self.account_store = Arc::new(Mutex::new(
-            repository
-                .load(self.default_character.clone())
-                .unwrap_or_else(|error| {
-                    eprintln!("failed to load file account store, using default: {error}");
-                    AccountStore::new(self.default_character.clone())
-                }),
-        ));
-        self.account_store_path = Some(path);
+        let path=path.into();
+        match file_authority::FileAuthority::acquire(&path,self.default_character.clone()) {
+            Ok(authority)=>{
+                self.guild_clock_driver=Arc::clone(&authority.clock_driver);
+                self.guild_clock_updates=Arc::clone(&authority.clock_updates);
+                self.account_store=Arc::clone(&authority.store);
+                self.account_store_persist_lock=Arc::clone(&authority.persist_lock);
+                self.account_store_write_state=Arc::clone(&authority.write_state);
+                self.account_store_path=Some(authority.path.clone());
+                self.file_authority=Some(authority);
+            }
+            Err(error)=>{
+                eprintln!("file account store authority unavailable; writes frozen: {error}");
+                // Never freeze an unrelated previously bound authority when a
+                // builder tries to bind a different invalid/busy file.
+                self.account_store_write_state=Arc::new(Mutex::new(AccountStoreWriteState::Writable));
+                self.freeze_account_store_writes(format!("invalid file account store authority: {error}"));
+                self.file_authority=None;
+                self.account_store_path=Some(path.clone());
+                self.account_store=Arc::new(Mutex::new(fs::read(&path).ok().and_then(|bytes|serde_json::from_slice::<AccountStore>(&bytes).ok()).unwrap_or_else(||{
+                    let mut unavailable=AccountStore::new(self.default_character.clone());unavailable.accounts.clear();unavailable
+                })));
+            }
+        }
         self
     }
 
@@ -3876,7 +4149,10 @@ impl SimulationConfig {
         let store = loader(database_url.clone(), self.default_character.clone())
             .map_err(|error| format!("failed to load postgres account store: {error}"))?;
         self.account_store = Arc::new(Mutex::new(store));
+        self.guild_clock_driver = Arc::new(Mutex::new(guild_clock_driver::ClockDriverState::default()));
+        self.guild_clock_updates = Arc::new(std::sync::atomic::AtomicU64::new(0));
         self.account_store_path = None;
+        self.file_authority = None;
         self.account_store_database_url = Some(database_url);
         self.account_store_database_mode = AccountStoreDatabaseMode::SourceOfTruth;
         Ok(self)
@@ -3930,20 +4206,25 @@ impl SimulationConfig {
         }
     }
 
-    fn ensure_account_store_writable(&self) -> Result<(), String> {
+    pub(crate) fn ensure_account_store_writable(&self) -> Result<(), String> {
         let state = self.account_store_write_state.lock().map_err(|_| {
             "account-store write-state mutex poisoned; writes are blocked".to_string()
         })?;
         match &*state {
             AccountStoreWriteState::Writable => Ok(()),
             AccountStoreWriteState::Frozen { reason } => Err(format!(
-                "account-store writes are frozen until restart and durable reload: {reason}"
+                "account-store writes are frozen until explicit durable reconciliation: {reason}"
             )),
         }
     }
 
     fn freeze_account_store_writes(&self, reason: String) -> String {
-        let reason = format!("{reason}; live AccountStore was not published");
+        let mut reason = format!("{reason}; live AccountStore was not published");
+        if let (Some(authority),Some(path))=(self.file_authority.as_ref(),self.account_store_path.as_deref()) {
+            if authority.owns(self,path) {
+                if let Err(error)=authority.persist_freeze(&reason){reason=format!("{reason}; durable freeze marker failed: {error}");}
+            }
+        }
         match self.account_store_write_state.lock() {
             Ok(mut state) => {
                 if matches!(*state, AccountStoreWriteState::Writable) {
@@ -3972,11 +4253,34 @@ impl SimulationConfig {
         }
     }
 
+    fn ensure_file_writer_binding(&self)->Result<(),String>{
+        if let Some(path)=self.account_store_path.as_deref() {
+            if !self.file_authority.as_ref().is_some_and(|authority|authority.owns(self,path)) {
+                return Err("file write requires the path's shared authority; isolated replay must rebind before saving".into());
+            }
+        }
+        Ok(())
+    }
+
+    fn begin_file_publication(&self) -> Result<Option<file_authority::PublicationGuard<'_>>, String> {
+        match self.account_store_path.as_deref() {
+            Some(path) => {
+                let authority = self.file_authority.as_ref().filter(|authority| authority.owns(self, path))
+                    .ok_or("publication requires the path's shared File authority")?;
+                authority.begin_publication().map(Some)
+            }
+            None => Ok(None),
+        }
+    }
+
     fn save_file_account_store(
         &self,
         path: &Path,
         store: &AccountStore,
     ) -> Result<AccountStoreRepositorySave, AccountStoreFileCommitError> {
+        if !self.file_authority.as_ref().is_some_and(|authority|authority.owns(self,path)) {
+            return Err(AccountStoreFileCommitError::not_committed(io::Error::new(io::ErrorKind::PermissionDenied,"file write requires the path's shared authority; isolated replay must rebind before saving")));
+        }
         let fault = self.take_account_store_file_commit_fault();
         FileAccountStoreRepository::new(path).save_with_commit_outcome(store, fault)
     }
@@ -3996,10 +4300,18 @@ impl SimulationConfig {
             if let Some(probe) = probe.as_mut() {
                 probe.invocations = probe.invocations.saturating_add(1);
                 probe.last_plan_includes_global = Some(mutation_plan.global_stock.is_some());
-                return probe.outcome.clone();
+                return probe.outcome.clone().map_err(|error|self.map_clock_repository_error(mutation_plan,error)).and_then(|receipt|{hero_registry::validate_receipt(mutation_plan,&receipt).map_err(|error|self.freeze_account_store_writes(error))?;Ok(receipt)});
             }
         }
-        PostgresAccountStoreRepository::new(database_url, mode).save_mutation_plan(mutation_plan)
+        PostgresAccountStoreRepository::new(database_url, mode).save_mutation_plan(mutation_plan).map_err(|error|self.map_clock_repository_error(mutation_plan,error)).and_then(|receipt|{hero_registry::validate_receipt(mutation_plan,&receipt).map_err(|error|self.freeze_account_store_writes(error))?;Ok(receipt)})
+    }
+
+    fn map_clock_repository_error(&self,plan:&AccountStoreMutationPlan,error:String)->String{
+        if (plan.clock.is_some() && error.starts_with(guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN))
+            || ((!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.starts_with(guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN))
+            || ((!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.starts_with(hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)) {
+            self.freeze_account_store_writes(error)
+        }else{error}
     }
 
     fn take_account_store_file_commit_fault(&self) -> Option<AccountStoreFileCommitFault> {
@@ -4054,6 +4366,7 @@ impl SimulationConfig {
             .lock()
             .map_err(|_| "account store persist mutex poisoned".to_string())?;
         self.ensure_account_store_writable()?;
+        self.ensure_file_writer_binding()?;
         let store = {
             let store = self
                 .account_store
@@ -4083,9 +4396,14 @@ impl SimulationConfig {
                 && scoped_account_id.is_none(),
         );
 
+        let publication = self.begin_file_publication()?;
         if let Some(path) = self.account_store_path.as_deref() {
-            self.save_file_account_store(path, &store)
-                .map_err(|error| self.map_file_commit_error(error))?;
+            if let Err(error) = self.save_file_account_store(path, &store) {
+                if !error.is_commit_outcome_unknown() {
+                    if let Some(publication) = publication { publication.settle()?; }
+                }
+                return Err(self.map_file_commit_error(error));
+            }
         }
         if let Some(database_url) = self.account_store_database_url.as_deref() {
             let source_versions = write_repository(
@@ -4105,6 +4423,7 @@ impl SimulationConfig {
                 );
             }
         }
+        if let Some(publication) = publication { publication.settle()?; }
         Ok(())
     }
 
@@ -4164,9 +4483,38 @@ impl SimulationConfig {
     where
         F: FnOnce(&mut AccountStore) -> Result<T, String>,
     {
+        self.commit_account_store_transaction_authorized_inner(scope, None, transaction)
+    }
+
+    pub(crate) fn commit_account_store_transaction_with_guild_experience_permit<T, F>(
+        &self,
+        account_ids: &[String],
+        permit: &guild_experience::GuildExperienceCommitPermit,
+        transaction: F,
+    ) -> Result<T, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<T, String>,
+    {
+        self.commit_account_store_transaction_authorized_inner(
+            AccountStoreMutationScope::Accounts(account_ids), Some(permit), transaction,
+        )
+    }
+
+    fn commit_account_store_transaction_authorized_inner<T, F>(
+        &self,
+        scope: AccountStoreMutationScope<'_>,
+        permit: Option<&guild_experience::GuildExperienceCommitPermit>,
+        transaction: F,
+    ) -> Result<T, String>
+    where
+        F: FnOnce(&mut AccountStore) -> Result<T, String>,
+    {
         let empty_account_scope = match scope {
             AccountStoreMutationScope::Accounts(account_ids)
             | AccountStoreMutationScope::AccountsWithGlobal(account_ids) => account_ids.is_empty(),
+            AccountStoreMutationScope::AccountsWithGuilds { account_ids, guild_ids }
+            | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids, guild_ids } => account_ids.is_empty() && guild_ids.is_empty(),
+            AccountStoreMutationScope::AccountsWithHeroes { account_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. } => account_ids.is_empty(),
             AccountStoreMutationScope::FullRestore => false,
         };
         if empty_account_scope {
@@ -4181,6 +4529,7 @@ impl SimulationConfig {
             .lock()
             .map_err(|_| "account store persist mutex poisoned".to_string())?;
         self.ensure_account_store_writable()?;
+        self.ensure_file_writer_binding()?;
         let mut live_store = self
             .account_store
             .lock()
@@ -4188,8 +4537,44 @@ impl SimulationConfig {
         let original_store = live_store.clone();
         let mut staged_store = original_store.clone();
         let result = transaction(&mut staged_store)?;
+        if matches!(scope,AccountStoreMutationScope::FullRestore){
+            staged_store=staged_store.migrate_to_current_schema();
+            hero_registry::validate_complete_state(&staged_store)?;
+            shared_guild_store::validate_complete_guild_state(&staged_store)?;
+            let original_generation=original_store.guild_clock.as_ref().map_or(0,|clock|clock.generation);
+            staged_store.guild_clock=Some(staged_store.guild_clock.clone().unwrap_or_default().invalidate_preserving_anchor(original_generation)?);
+        }
+
         validate_account_store_transaction_scope(&original_store, &staged_store, scope)
             .map_err(|error| error.to_string())?;
+        // The caller has passed its original scope check. Only this fixed
+        // consumer may derive additional guild writes from authorized source
+        // checkpoints; caller-supplied unrelated Guild changes already failed.
+        let xp_accounts: &[String] = match scope {
+            AccountStoreMutationScope::Accounts(ids) | AccountStoreMutationScope::AccountsWithGlobal(ids) => ids,
+            AccountStoreMutationScope::AccountsWithGuilds { account_ids, .. }
+            | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids, .. }
+            | AccountStoreMutationScope::AccountsWithHeroes { account_ids, .. }
+            | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. } => account_ids,
+            AccountStoreMutationScope::FullRestore => &[],
+        };
+        let mut xp_guilds = if matches!(scope,AccountStoreMutationScope::FullRestore) { BTreeSet::new() }
+            else { guild_experience::settle_authorized_sources(&original_store,&mut staged_store,xp_accounts,permit)? };
+        if let AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. }
+            | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. }
+            | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. } = scope {
+            xp_guilds.extend(guild_ids.iter().cloned());
+        }
+        let xp_changed = !xp_guilds.is_empty();
+        let xp_guild_ids: Vec<String> = xp_guilds.into_iter().collect();
+        let scope = if xp_guild_ids.is_empty() { scope } else {
+            match scope {
+                AccountStoreMutationScope::AccountsWithGlobal(_) | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { .. } => AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids: xp_accounts, guild_ids: &xp_guild_ids },
+                AccountStoreMutationScope::AccountsWithHeroes { hero_ids, allocate, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { hero_ids, allocate, .. } => AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids: xp_accounts, hero_ids, allocate, guild_ids: &xp_guild_ids },
+                _ => AccountStoreMutationScope::AccountsWithGuilds { account_ids: xp_accounts, guild_ids: &xp_guild_ids },
+            }
+        };
+        validate_account_store_transaction_scope(&original_store,&staged_store,scope).map_err(|error|error.to_string())?;
         let mutation_plan =
             build_account_store_mutation_plan(&original_store, &staged_store, scope, false);
 
@@ -4225,45 +4610,66 @@ impl SimulationConfig {
             mutation_plan.global_stock.is_some(),
         );
         let mut postgres_versions = None;
+        let publication = self.begin_file_publication()?;
 
         match (
             self.account_store_path.as_deref(),
             self.account_store_database_url.as_deref(),
         ) {
             (Some(path), Some(database_url)) => {
-                // File mode with a configured database uses the file as the
-                // source and PostgreSQL as a synchronous mirror.  Write the
-                // mirror first so a mirror failure cannot advance the source.
-                // A known pre-publication file failure is compensated with the
-                // original mirror snapshot. An outcome-unknown file publish is
-                // never compensated or retried: both writes may already hold
-                // the staged value, so the process freezes until durable
-                // reconciliation after restart. This ordering is fail-closed;
-                // it does not claim cross-database atomicity.
-                self.save_account_store_mutation_plan_to_repository(
-                    database_url,
-                    AccountStoreDatabaseMode::Mirror,
-                    &mutation_plan,
-                )?;
-                if let Err(file_error) = self.save_file_account_store(path, &staged_store) {
-                    if file_error.is_commit_outcome_unknown() {
-                        return Err(self.map_file_commit_error(file_error));
+                // Mirror-first ordering is retained. FullRestore additionally
+                // carries a fenced clock receipt; compensation may never revive
+                // its owner or overwrite a later clock/guild revision.
+                let receipt=self.save_account_store_mutation_plan_to_repository(database_url,AccountStoreDatabaseMode::Mirror,&mutation_plan)?;
+                hero_registry::validate_receipt(&mutation_plan,&receipt).map_err(|error|self.freeze_account_store_writes(error))?;
+                staged_store.source_hero_versions.extend(receipt.heroes.heroes.clone());
+                if let Some(version)=receipt.heroes.allocator{staged_store.source_hero_allocator_version=Some(version);}
+                if mutation_plan.clock.is_some() {
+                    let Some(clock)=receipt.clock.as_ref() else{return Err(self.freeze_account_store_writes("clock restore repository omitted its durable receipt".into()));};
+                    staged_store.guild_clock=Some(clock.record.clone());staged_store.source_guild_clock_version=Some(clock.version);
+                }
+                if let Err(file_error)=self.save_file_account_store(path,&staged_store){
+                    if file_error.is_commit_outcome_unknown(){return Err(self.map_file_commit_error(file_error));}
+                    let carries_heroes=!mutation_plan.heroes.is_empty() || mutation_plan.hero_allocator.is_some();
+                    let (mut hero_restored,mut compensation_plan)=if carries_heroes {
+                        hero_registry::prepare_compensation(&original_store,&staged_store,&mutation_plan,&rollback_plan,&receipt)
+                            .map_err(|error|self.freeze_account_store_writes(error))?
+                    }else{(original_store.clone(),rollback_plan.clone())};
+                    if !mutation_plan.guilds.is_empty() || mutation_plan.carries_guild_experience_source() || mutation_plan.clock.is_some() {
+                        compensation_plan.fence_compensation(&receipt,&staged_store);
                     }
-                    return match self.save_account_store_mutation_plan_to_repository(
-                        database_url,
-                        AccountStoreDatabaseMode::Mirror,
-                        &rollback_plan,
-                    ) {
-                        Ok(_) => Err(file_error.to_string()),
-                        Err(rollback_error) => Err(self.freeze_account_store_writes(format!(
-                            "file account-store write was not committed ({file_error}), but postgres mirror compensation failed: {rollback_error}"
-                        ))),
+                    if let Some(clock)=receipt.clock.as_ref(){
+                        compensation_plan.clock=Some(guild_clock::GuildClockMutation::Compensate{business:original_store.guild_clock.clone().unwrap_or_default(),expected_clock_version:clock.version});
+                        for (id,mutation) in &mut compensation_plan.guilds {mutation.expected_version=receipt.guild_versions.get(id).copied();}
+                    }
+                    return match self.save_account_store_mutation_plan_to_repository(database_url,AccountStoreDatabaseMode::Mirror,&compensation_plan){
+                        Ok(compensated)=>{
+                            if carries_heroes {
+                                hero_registry::validate_receipt(&compensation_plan,&compensated).map_err(|error|self.freeze_account_store_writes(error))?;
+                                if let Some(clock)=compensated.clock.as_ref(){hero_restored.guild_clock=Some(clock.record.clone());hero_restored.source_guild_clock_version=Some(clock.version);}
+                                apply_account_store_mutation_source_versions(&mut hero_restored,&compensation_plan,compensated.into_source_versions());
+                                if let Err(error)=self.save_file_account_store(path,&hero_restored){return Err(self.freeze_account_store_writes(format!("Hero compensation committed in PostgreSQL but File publication failed: {error}")));}
+                                *live_store=hero_restored;
+                            } else if mutation_plan.clock.is_some(){
+                                let Some(clock)=compensated.clock else{return Err(self.freeze_account_store_writes("clock restore compensation omitted its durable receipt".into()));};
+                                let mut restored=original_store.clone();restored.guild_clock=Some(clock.record);restored.source_guild_clock_version=Some(clock.version);
+                                if let Err(error)=self.save_file_account_store(path,&restored){return Err(self.freeze_account_store_writes(format!("clock restore business rollback succeeded in PostgreSQL, but fenced File compensation failed: {error}")));}
+                                *live_store=restored;
+                            }
+                            if let Some(publication) = publication { publication.settle()?; }
+                            Err(file_error.to_string())
+                        },
+                        Err(rollback_error)=>Err(self.freeze_account_store_writes(format!("file account-store write was not committed ({file_error}), but postgres mirror compensation failed: {rollback_error}"))),
                     };
                 }
             }
             (Some(path), None) => {
-                self.save_file_account_store(path, &staged_store)
-                    .map_err(|error| self.map_file_commit_error(error))?;
+                if let Err(error) = self.save_file_account_store(path, &staged_store) {
+                    if !error.is_commit_outcome_unknown() {
+                        if let Some(publication) = publication { publication.settle()?; }
+                    }
+                    return Err(self.map_file_commit_error(error));
+                }
             }
             (None, Some(database_url)) => {
                 postgres_versions = Some(
@@ -4278,6 +4684,11 @@ impl SimulationConfig {
             (None, None) => {}
         }
 
+        if let Some(publication) = publication { publication.settle()?; }
+        if let Some(versions)=postgres_versions.as_ref(){
+            staged_store.source_hero_versions.extend(versions.heroes.heroes.clone());
+            if let Some(version)=versions.heroes.allocator{staged_store.source_hero_allocator_version=Some(version);}
+        }
         if self.account_store_database_mode == AccountStoreDatabaseMode::SourceOfTruth {
             if let Some(versions) = postgres_versions {
                 apply_account_store_mutation_source_versions(
@@ -4288,6 +4699,7 @@ impl SimulationConfig {
             }
         }
         *live_store = staged_store;
+        if xp_changed { self.guild_clock_updates.fetch_add(1,std::sync::atomic::Ordering::AcqRel); }
         Ok(result)
     }
 
@@ -4305,8 +4717,12 @@ impl SimulationConfig {
             AccountStoreMutationScope::Accounts(_) => {
                 AccountStoreTransactionScopeObservation::AccountOnly
             }
-            AccountStoreMutationScope::AccountsWithGlobal(_) => {
+            AccountStoreMutationScope::AccountsWithGlobal(_) | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { .. } => {
                 AccountStoreTransactionScopeObservation::WithGlobal
+            }
+            AccountStoreMutationScope::AccountsWithHeroes { .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { .. } => AccountStoreTransactionScopeObservation::WithHeroes,
+            AccountStoreMutationScope::AccountsWithGuilds { .. } => {
+                AccountStoreTransactionScopeObservation::WithGuilds
             }
             AccountStoreMutationScope::FullRestore => {
                 AccountStoreTransactionScopeObservation::FullRestore
@@ -4535,6 +4951,11 @@ impl SimulationConfig {
                 backup_path.display()
             )
         })?;
+        // Existing authority must be valid before optional development fixture insertion.
+        // Otherwise a missing demo owner could be manufactured into a valid guild leader.
+        let decoded = decoded.migrate_to_current_schema();
+        hero_registry::validate_complete_state(&decoded)?;
+        shared_guild_store::validate_complete_guild_state(&decoded)?;
         let mut restored = if self.allows_default_account_fixture() {
             decoded.with_default_account(self.default_character.clone())
         } else {
@@ -4543,6 +4964,10 @@ impl SimulationConfig {
         .migrate_to_current_schema();
         // Backup JSON deliberately excludes optimistic source metadata.  Full
         // restore builds every expected version from the locked live image.
+        restored.source_guild_clock_version=None;
+        restored.source_guild_versions.clear();
+        restored.source_hero_versions.clear();
+        restored.source_hero_allocator_version=None;
         restored.source_account_versions.clear();
         restored.source_save_versions.clear();
         restored.source_game_shop_global_version = None;
@@ -4700,7 +5125,7 @@ fn load_game_shop_global_stock_from_postgres(
     std::thread::spawn(move || {
         let mut client = pool.connection()?;
         pool.ensure_migrated(&mut client)?;
-        load_game_shop_global_stock(&mut client)
+        load_game_shop_global_stock(&mut *client)
     })
     .join()
     .map_err(|_| "postgres game-shop global-stock refresh thread panicked".to_string())?
@@ -4713,9 +5138,10 @@ fn load_account_store_from_postgres_with_pool(
     std::thread::spawn(move || {
         let mut client = pool.connection()?;
         pool.ensure_migrated(&mut client)?;
+        let mut transaction = client.build_transaction().isolation_level(postgres::IsolationLevel::RepeatableRead).read_only(true).start().map_err(|e| format!("postgres store snapshot failed: {e}"))?;
         let (game_shop_global_purchases, game_shop_global_version) =
-            load_game_shop_global_stock(&mut client)?;
-        let account_rows = client
+            load_game_shop_global_stock(&mut transaction)?;
+        let account_rows = transaction
             .query(
                 "SELECT account_id, raw_json, store_version FROM accounts ORDER BY account_id",
                 &[],
@@ -4730,7 +5156,7 @@ fn load_account_store_from_postgres_with_pool(
                 )
             })
             .collect();
-        let save_rows = client
+        let save_rows = transaction
             .query(
                 "SELECT account_id, character_index, save_version FROM character_saves ORDER BY account_id, character_index",
                 &[],
@@ -4745,12 +5171,20 @@ fn load_account_store_from_postgres_with_pool(
                 )
             })
             .collect();
-        assemble_account_store_from_postgres_rows(
+        let mut store = assemble_account_store_from_postgres_rows(
             account_rows,
             save_rows,
             game_shop_global_purchases,
             game_shop_global_version,
-        )
+        )?;
+        shared_guild_store::load_guilds(&mut transaction, &mut store)?;
+        hero_postgres::load_heroes(&mut transaction, &mut store)?;
+        hero_registry::validate_complete_state(&store)?;
+        let clock=guild_clock::load_postgres(&mut transaction)?;
+        store.guild_clock=Some(clock.record);
+        store.source_guild_clock_version=Some(clock.version);
+        transaction.commit().map_err(|e| e.to_string())?;
+        Ok(store)
     })
     .join()
     .map_err(|_| "postgres account-store load thread panicked".to_string())?
@@ -4784,6 +5218,14 @@ fn assemble_account_store_from_postgres_rows(
         next_character_index: 0,
         game_shop_global_purchases,
         accounts,
+        shared_guilds: BTreeMap::new(),
+            shared_heroes: BTreeMap::new(),
+            hero_id_high_watermark: 0,
+            source_hero_versions: BTreeMap::new(),
+            source_hero_allocator_version: None,
+        guild_clock: None,
+        source_guild_clock_version: None,
+        source_guild_versions: BTreeMap::new(),
         source_account_versions: BTreeMap::new(),
         source_save_versions: BTreeMap::new(),
         source_game_shop_global_version: None,
@@ -4794,7 +5236,7 @@ fn assemble_account_store_from_postgres_rows(
 }
 
 fn load_game_shop_global_stock(
-    client: &mut Client,
+    client: &mut impl postgres::GenericClient,
 ) -> Result<(BTreeMap<i32, u64>, Option<i64>), String> {
     client
         .query_opt(
@@ -4877,13 +5319,16 @@ fn save_account_store_mutation_plan_to_postgres_with_pool(
     plan: AccountStoreMutationPlan,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    let carries_clock=plan.clock.is_some();
+    let carries_guilds=!plan.guilds.is_empty() || plan.carries_guild_experience_source();
+    let carries_heroes=!plan.heroes.is_empty() || plan.hero_allocator.is_some();
     std::thread::spawn(move || {
         let mut client = pool.connection()?;
         pool.ensure_migrated(&mut client)?;
         write_account_store_mutation_plan_to_postgres(&mut client, &plan, mode)
     })
     .join()
-    .map_err(|_| "postgres account-store mutation thread panicked".to_string())?
+    .map_err(|_|if carries_clock{format!("{}: postgres clock transaction worker panicked",guild_clock::CLOCK_COMMIT_OUTCOME_UNKNOWN)}else if carries_guilds{format!("{}: postgres guild transaction worker panicked",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if carries_heroes{format!("{}: postgres Hero transaction worker panicked",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else{"postgres account-store mutation thread panicked".to_string()})?
 }
 
 fn write_account_store_mutation_plan_to_postgres(
@@ -4891,22 +5336,41 @@ fn write_account_store_mutation_plan_to_postgres(
     plan: &AccountStoreMutationPlan,
     mode: AccountStoreDatabaseMode,
 ) -> Result<AccountStoreSourceVersions, String> {
+    let mode=if plan.force_source_cas {AccountStoreDatabaseMode::SourceOfTruth}else{mode};
     let mut transaction = client
         .transaction()
         .map_err(|error| format!("postgres account-store transaction failed: {error}"))?;
-    let source_versions = execute_account_store_mutation_plan(plan, |operation| match operation {
-        AccountStoreMutationOperation::GlobalStock(mutation) => {
-            write_game_shop_global_stock_mutation(&mut transaction, mutation, mode)
-                .map(AccountStoreMutationOperationResult::GlobalStock)
-        }
-        AccountStoreMutationOperation::Account {
-            account_id,
-            mutation,
-        } => write_account_store_account_mutation(&mut transaction, account_id, mutation, mode),
-    })?;
+    let source_versions = write_account_store_mutation_plan_in_transaction(&mut transaction, plan, mode)?;
     transaction
         .commit()
-        .map_err(|error| format!("postgres account-store commit failed: {error}"))?;
+        .map_err(|error|if plan.clock.is_some(){guild_clock::classify_commit_error(error).to_string()}else if (!plan.guilds.is_empty() || plan.carries_guild_experience_source()) && error.as_db_error().is_none(){format!("{}: postgres guild commit response unavailable: {error}",guild_experience::GUILD_COMMIT_OUTCOME_UNKNOWN)}else if (!plan.heroes.is_empty() || plan.hero_allocator.is_some()) && error.as_db_error().is_none(){format!("{}: postgres Hero commit response unavailable: {error}",hero_registry::HERO_COMMIT_OUTCOME_UNKNOWN)}else{format!("postgres account-store commit failed: {error}")})?;
+    Ok(source_versions)
+}
+
+fn write_account_store_mutation_plan_in_transaction(
+    transaction: &mut Transaction<'_>,
+    plan: &AccountStoreMutationPlan,
+    mode: AccountStoreDatabaseMode,
+) -> Result<AccountStoreSourceVersions, String> {
+    let clock_version=plan.clock.as_ref().map(|clock|clock.write(transaction)).transpose()?;
+    plan.lock_guild_plan(transaction)?;
+    let guild_versions =
+        shared_guild_store::write_guild_mutations(transaction, &plan.guilds, if matches!(plan.clock,Some(guild_clock::GuildClockMutation::Compensate{..})){AccountStoreDatabaseMode::SourceOfTruth}else{mode})?;
+    let hero_versions=hero_postgres::write_hero_mutations(transaction,&plan.heroes,plan.hero_allocator.as_ref(),mode)?;
+    let mut source_versions =
+        execute_account_store_mutation_plan(plan, |operation| match operation {
+            AccountStoreMutationOperation::GlobalStock(mutation) => {
+                write_game_shop_global_stock_mutation(transaction, mutation, mode)
+                    .map(AccountStoreMutationOperationResult::GlobalStock)
+            }
+            AccountStoreMutationOperation::Account {
+                account_id,
+                mutation,
+            } => write_account_store_account_mutation(transaction, account_id, mutation, mode),
+        })?;
+    source_versions.clock=clock_version;
+    source_versions.guilds = guild_versions;
+    source_versions.heroes=hero_versions;
     Ok(source_versions)
 }
 
@@ -5694,6 +6158,11 @@ pub struct WorldEntitySnapshot {
     /// Crystal object light encoding: radius is `light % 15`; players also use
     /// `light / 15` as the source-strength bucket.
     pub light: u8,
+    /// Crystal `Looks_Wings`: the non-broken armour's real ItemInfo.Effect.
+    /// Explicit zero clears an existing effect; absent means this producer
+    /// does not model the actor's appearance (never borrow another actor's).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub wing_effect: Option<u8>,
     pub name_colour_argb: i32,
     pub dead: bool,
     /// Authoritative player mount state. Remote/session-external players use
@@ -5746,6 +6215,39 @@ pub struct WorldItemSnapshot {
     pub grade: ItemGrade,
     pub added_attack: i32,
     pub added_defence: i32,
+    /// Exact Crystal `ItemInfo` + `UserItem` pair used by
+    /// `GameScene.CreateItemLabel`. Older snapshots omit it and clients must
+    /// keep the tooltip partial instead of guessing catalogue or instance
+    /// state from the display name.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tooltip_source: Option<WorldItemTooltipSource>,
+}
+
+/// Lossless source inputs for Crystal's eleven-section item tooltip.
+///
+/// `info` is the immutable `ItemInfo` projection from `Server.MirDB` while
+/// `user_item` is the concrete instance. Equipment snapshots created by an
+/// older save path can still expose `info` without manufacturing missing
+/// instance-only fields.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WorldItemTooltipSource {
+    pub info: CrystalItemTemplate,
+    /// Crystal `Functions.GetRealItem(info, player.level, player.class)` for
+    /// the active viewer. Name/bind identity still comes from `info`; stats,
+    /// requirements and several type-specific lines use this resolved row.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub real_info: Option<CrystalItemTemplate>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_item: Option<UserItem>,
+    /// Direct socket `ItemInfo` values in the same positional order as
+    /// `user_item.slots`. Crystal renders each socket's FriendlyName and also
+    /// folds its base stats into the parent tooltip.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub socket_infos: Vec<Option<CrystalItemTemplate>>,
+    /// Viewer-resolved rows corresponding positionally to `socket_infos`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub real_socket_infos: Vec<Option<CrystalItemTemplate>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -5753,9 +6255,17 @@ pub struct WorldItemSnapshot {
 pub struct EquipmentItemSnapshot {
     pub slot: EquipmentSlot,
     pub key: String,
+    /// Exact Crystal `UserItem.UniqueID` for this worn instance. Legacy
+    /// equipment saves may not have retained it, so absence remains explicit.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unique_id: Option<u64>,
     pub quantity: u32,
     pub name: String,
     pub icon: u16,
+    /// Crystal `ItemInfo.Image` index used by CharacterDialog's
+    /// `Libraries.StateItems.Draw`. This is not the bag icon.
+    #[serde(default)]
+    pub state_image: u16,
     pub shape: Option<u16>,
     pub description: String,
     pub durability_current: u16,
@@ -5769,6 +6279,12 @@ pub struct EquipmentItemSnapshot {
     pub socket_slots: u8,
     pub sealed_expiry_time_binary_datetime: i64,
     pub sealed_next_time_binary_datetime: i64,
+    /// Crystal tooltip source reconstructed through the same bounded
+    /// `EquipmentState -> UserItem` carrier used by native equipment packets.
+    /// Legacy or invalid carriers can still expose catalogue-only information;
+    /// absence of `user_item` remains explicit and fail-closed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub tooltip_source: Option<WorldItemTooltipSource>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -5949,7 +6465,7 @@ pub struct BuffSnapshot {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct Stage5SystemsState {
     pub group: Stage5GroupState,
     pub guild: Stage5GuildState,
@@ -5986,6 +6502,18 @@ pub struct Stage5SystemsState {
     pub name_lists: Vec<String>,
     #[serde(default)]
     pub intelligent_creatures: Vec<ClientIntelligentCreature>,
+    /// None identifies old saves which encoded summon state in pet_mode.
+    /// Some(0) is dismissed; a positive value is an owned summoned pet type.
+    #[serde(default)]
+    pub summoned_intelligent_creature_type: Option<u8>,
+    #[serde(default)]
+    pub intelligent_creature_state_version: u8,
+    #[serde(default)]
+    pub intelligent_creature_pearls: i32,
+    #[serde(default)]
+    pub intelligent_creature_operations: u16,
+    #[serde(default)]
+    pub intelligent_creature_operation_receipts: BTreeSet<String>,
     #[serde(default)]
     pub item_rental: Stage5ItemRentalSnapshot,
     /// Player attack mode (Crystal `PlayerObject.AMode`, set by `C.ChangeAMode`).
@@ -6026,11 +6554,63 @@ impl Default for Stage5SystemsState {
             appearance: Stage5AppearanceState::default(),
             name_lists: Vec::new(),
             intelligent_creatures: Vec::new(),
+            summoned_intelligent_creature_type: Some(99),
+            intelligent_creature_state_version: 1,
+            intelligent_creature_pearls: 0,
+            intelligent_creature_operations: 0,
+            intelligent_creature_operation_receipts: BTreeSet::new(),
             item_rental: Stage5ItemRentalSnapshot::default(),
             attack_mode: 0,
             pet_mode: 0,
             pk_decay_elapsed_ticks: 0,
         }
+    }
+}
+
+impl Stage5SystemsState {
+    pub fn migrate_legacy_intelligent_creature_state(&mut self) {
+        if self.summoned_intelligent_creature_type.is_none() {
+            self.summoned_intelligent_creature_type = Some(
+                self.intelligent_creatures
+                    .iter()
+                    .find(|creature| creature.pet_mode != 0 && creature.pet_type <= 14)
+                    .map(|creature| creature.pet_type)
+                    .unwrap_or(99),
+            );
+            for creature in &mut self.intelligent_creatures {
+                creature.pet_mode = 0;
+            }
+        } else if self.intelligent_creature_state_version == 0
+            && self.summoned_intelligent_creature_type == Some(0)
+        {
+            // The previous native schema incorrectly used zero for dismissed.
+            // Versioning distinguishes that old sentinel from Crystal's BabyPig.
+            self.summoned_intelligent_creature_type = Some(99);
+        }
+        if self
+            .summoned_intelligent_creature_type
+            .is_some_and(|kind| kind > 14 && kind != 99)
+        {
+            self.summoned_intelligent_creature_type = Some(99);
+        }
+        if self.intelligent_creature_state_version == 0 {
+            for creature in &mut self.intelligent_creatures {
+                creature.blackstone_time = creature.blackstone_time.max(0) / 1000;
+                creature.maintain_food_time = creature.maintain_food_time.max(0) / 1000;
+            }
+        }
+        self.intelligent_creature_state_version = 1;
+    }
+
+    pub fn active_intelligent_creature(&self) -> Option<&ClientIntelligentCreature> {
+        let pet_type = self.summoned_intelligent_creature_type?;
+        (pet_type <= 14)
+            .then(|| {
+                self.intelligent_creatures
+                    .iter()
+                    .find(|creature| creature.pet_type == pet_type)
+            })
+            .flatten()
     }
 }
 
@@ -6123,11 +6703,31 @@ pub struct Stage5SocialState {
     pub blocked: Vec<String>,
     #[serde(default)]
     pub memos: BTreeMap<String, String>,
+    /// Stable server identity; names remain projections for existing chat/mail.
+    #[serde(default)]
+    pub friend_identities: BTreeMap<String, Stage5FriendIdentity>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Stage5FriendIdentity {
+    pub account_id: String,
+    pub character_index: i32,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5RelationshipState {
+    #[serde(default)]
+    pub partner_identity: Option<Stage5FriendIdentity>,
+    #[serde(default)]
+    pub authority_revision: u64,
+    #[serde(default)]
+    pub allow_lover_recall: bool,
+    #[serde(default)]
+    pub married_at_ms: u64,
+    #[serde(default)]
+    pub cooldown_until_ms: u64,
     #[serde(default = "default_stage5_allow_marriage")]
     pub allow_marriage: bool,
     #[serde(default)]
@@ -6145,13 +6745,18 @@ pub struct Stage5RelationshipState {
 }
 
 const fn default_stage5_allow_marriage() -> bool {
-    true
+    false
 }
 
 impl Default for Stage5RelationshipState {
     fn default() -> Self {
         Self {
-            allow_marriage: true,
+            partner_identity: None,
+            authority_revision: 0,
+            allow_lover_recall: false,
+            married_at_ms: 0,
+            cooldown_until_ms: 0,
+            allow_marriage: false,
             partner_name: String::new(),
             married_date_binary_datetime: 0,
             map_name: String::new(),
@@ -6162,9 +6767,37 @@ impl Default for Stage5RelationshipState {
     }
 }
 
+/// Server-only monotonic mentorship accounting. The relationship epoch is
+/// independent from timestamps and bonus amounts are fixed at settlement.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Stage5MentorLedger {
+    pub relationship_epoch: u64,
+    pub bank_earned: u64,
+    pub bank_settled: u64,
+    pub local_event_sequence: u64,
+    pub bank_events: BTreeSet<String>,
+    pub leveling_credit: u64,
+    pub leveling_applied: u64,
+    pub balance_credit: u64,
+    pub balance_applied: u64,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5MentorState {
+    #[serde(default)]
+    pub ledger: Stage5MentorLedger,
+    #[serde(default)]
+    pub partner_identity: Option<Stage5FriendIdentity>,
+    #[serde(default)]
+    pub is_mentor: bool,
+    #[serde(default)]
+    pub established_at_ms: u64,
+    #[serde(default)]
+    pub cooldown_until_ms: u64,
+    #[serde(default)]
+    pub authority_revision: u64,
     #[serde(default = "default_stage5_allow_mentor")]
     pub allow_mentor: bool,
     #[serde(default)]
@@ -6182,13 +6815,19 @@ pub struct Stage5MentorState {
 }
 
 const fn default_stage5_allow_mentor() -> bool {
-    true
+    false
 }
 
 impl Default for Stage5MentorState {
     fn default() -> Self {
         Self {
-            allow_mentor: true,
+            ledger: Stage5MentorLedger::default(),
+            partner_identity: None,
+            is_mentor: false,
+            established_at_ms: 0,
+            cooldown_until_ms: 0,
+            authority_revision: 0,
+            allow_mentor: false,
             name: String::new(),
             level: 0,
             online: false,
@@ -6492,6 +7131,10 @@ pub struct Stage5TradeState {
     #[serde(default)]
     pub offered_unique_ids: BTreeMap<u8, u64>,
     pub offered_gold: u32,
+    /// Gold removed from the available wallet but still owned by this trade.
+    /// None is a legacy snapshot: only prepared/completed Gold offers were debited.
+    #[serde(default)]
+    pub held_gold: Option<u32>,
     /// Currency the offered amount is denominated in (gold by default; a city
     /// token when the player picks one in the trade window). Net-new field —
     /// defaults to gold so existing trade state decodes unchanged.
@@ -6500,12 +7143,44 @@ pub struct Stage5TradeState {
     pub accepted: bool,
     #[serde(default)]
     pub locked: bool,
+    /// Outgoing assets are reserved for a shared settlement, not delivered.
+    /// Saved atomically with the debit so recovery must not debit them again.
+    #[serde(default)]
+    pub escrow_prepared: bool,
+    /// Legacy snapshots used this for an outgoing escrow debit. New shared
+    /// trades use escrow_prepared and stay incomplete until delivery succeeds.
     pub completed: bool,
+}
+
+impl Stage5TradeState {
+    pub(crate) fn outgoing_escrow_debited(&self) -> bool {
+        self.escrow_prepared || self.completed
+    }
+
+    /// Validate custody without inferring an item debit from a gold-only hold.
+    pub(crate) fn validated_held_gold(&self) -> Option<u32> {
+        if self.offered_currency != CurrencyKind::Gold {
+            return (self.held_gold.unwrap_or(0) == 0).then_some(0);
+        }
+        let held = self.held_gold.unwrap_or_else(|| {
+            if self.outgoing_escrow_debited() {
+                self.offered_gold
+            } else {
+                0
+            }
+        });
+        (held <= self.offered_gold
+            && (!self.outgoing_escrow_debited() || held == self.offered_gold))
+            .then_some(held)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5AuctionListing {
+    /// Complete server-owned instance. Missing legacy payloads are never reconstructed for delivery.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub item_state_json: Option<String>,
     pub id: u32,
     pub seller: String,
     pub item_key: String,
@@ -6523,17 +7198,24 @@ pub struct Stage5AuctionListing {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 pub struct Stage5RefineState {
+    /// Sole authoritative owner while the target is in the oven.
+    pub oven_item_state_json: Option<String>,
+    /// Remaining duration at the most recent save, used across server starts.
+    pub remaining_ms: u64,
+    /// Same-process monotonic anchor keeps offline character waiting advancing.
+    pub clock_epoch: Option<String>,
+    pub collect_deadline_ms: Option<u64>,
+    /// Exact held ingredients; slots remains a compatibility/read-model key mirror.
+    pub item_states: BTreeMap<u8, String>,
     pub slots: BTreeMap<u8, String>,
     pub current_item: Option<String>,
     pub refining: bool,
     pub ready: bool,
-    /// Unique id of the weapon currently "in the oven" (set at RefineItem).
+    /// Legacy immediately-ready bag target. Migrated only when its instance exists.
     pub pending_unique_id: u64,
-    /// Success chance (0-100) computed from the deposited ingredients at
-    /// RefineItem time and rolled against at CheckRefine.
+    /// Legacy chance. New jobs store the raw signed chance on the held item.
     pub pending_chance: u8,
-    /// Target stat code (Crystal MaxDC/MaxMC/MaxSC) the refine will add on
-    /// success, chosen from the ingredients' bias and the weapon's stats.
+    /// Legacy Crystal stat code; new items use RefinedValue None/DC/MC/SC (0..3).
     pub pending_stat: u8,
 }
 
@@ -6592,6 +7274,11 @@ pub struct Stage5AppearanceState {
     pub hair: u8,
 }
 
+/// Current Hero pools persisted separately from identity and maximum stats.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroVitalsState { pub hp: i32, pub mp: i32 }
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Stage5HeroState {
@@ -6603,7 +7290,7 @@ pub struct Stage5HeroState {
     pub gender: MirGender,
     pub behaviour: u8,
     #[serde(default)]
-    pub experience: u32,
+    pub experience: i64,
     #[serde(default)]
     pub spawned: bool,
     #[serde(default)]
@@ -6658,6 +7345,15 @@ pub struct MapTransferSnapshot {
     pub to_direction: MirDirection,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroVitalsSnapshot { pub hp:i32, pub max_hp:i32, pub mp:i32, pub max_mp:i32 }
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct HeroWeightsSnapshot { pub bag:u32, pub wear:u32, pub hand:u32 }
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerWeightsSnapshot { pub bag:u32, pub wear:u32, pub hand:u32 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldSnapshot {
@@ -6671,6 +7367,11 @@ pub struct WorldSnapshot {
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
     pub player_max_mp: Option<i32>,
+    /// Authoritative Crystal stat block used by client presentation such as
+    /// item requirement colouring. Presence (including an empty array) means
+    /// missing stat ids are known zero; older snapshots omit the field.
+    #[serde(default)]
+    pub player_crystal_stats: Vec<UserItemStat>,
     #[serde(default)]
     pub player_pk_points: i32,
     pub player_experience: i64,
@@ -6684,9 +7385,15 @@ pub struct WorldSnapshot {
     #[serde(default)]
     pub city_currencies: BTreeMap<String, u32>,
     pub current_weight: u16,
+    /// Real source item weights; absent when legacy templates cannot be resolved.
+    #[serde(default)]
+    pub player_weights: Option<PlayerWeightsSnapshot>,
     pub max_weight: u16,
     pub free_bag_slots: u16,
     pub max_bag_slots: u16,
+    /// Authoritative Crystal inventory-array length, including six belt cells.
+    #[serde(default = "default_inventory_capacity")]
+    pub inventory_capacity: u16,
     pub storage_size: u16,
     pub has_expanded_storage: bool,
     pub has_storage_password: bool,
@@ -6702,6 +7409,16 @@ pub struct WorldSnapshot {
     pub inventory_items: Vec<WorldItemSnapshot>,
     #[serde(default)]
     pub hero_inventory_items: Vec<WorldItemSnapshot>,
+    #[serde(default)]
+    pub hero_equipment_items: Vec<WorldItemSnapshot>,
+    #[serde(default)]
+    pub hero_inventory_capacity: u8,
+    #[serde(default)]
+    pub hero_stats: Vec<mir2_protocol::UserItemStat>,
+    #[serde(default)]
+    pub hero_vitals: Option<HeroVitalsSnapshot>,
+    #[serde(default)]
+    pub hero_weights: HeroWeightsSnapshot,
     #[serde(default)]
     pub storage_items: Vec<WorldItemSnapshot>,
     pub equipment_items: Vec<EquipmentItemSnapshot>,
@@ -6739,6 +7456,25 @@ impl Serialize for WorldSnapshotClientView<'_> {
                 if let Some(loot) = drop.get_mut("loot").and_then(Value::as_object_mut) {
                     loot.remove("exactItem");
                     loot.remove("exact_item");
+                }
+            }
+        }
+        if let Some(systems) = value.get_mut("stage5Systems") {
+            if let Some(object) = systems.as_object_mut() {
+                object.remove("intelligentCreatureStateVersion");
+                object.remove("intelligentCreatureOperationReceipts");
+                object.remove("intelligentCreatureOperations");
+            }
+            if let Some(social) = systems.get_mut("social").and_then(Value::as_object_mut) {
+                social.remove("friendIdentities");
+            }
+            for domain in ["mentor", "relationship"] {
+                if let Some(relation) = systems.get_mut(domain).and_then(Value::as_object_mut) {
+                    relation.remove("partnerIdentity");
+                    relation.remove("authorityRevision");
+                    relation.remove("ledger");
+                    relation.remove("establishedAtMs");
+                    relation.remove("marriedAtMs");
                 }
             }
         }

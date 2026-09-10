@@ -740,7 +740,7 @@ fn crystal_npc_profile_allows_item(world: &World, item: &UserItem) -> bool {
 
 pub(super) fn filter_crystal_npc_goods_for_profile(world: &World, packets: &mut [ServerPacket]) {
     for packet in packets {
-        if let ServerPacket::NPCGoods { list, .. } = packet {
+        if let ServerPacket::NPCGoods { list, .. } | ServerPacket::NPCPearlGoods { list, .. } = packet {
             list.retain(|item| crystal_npc_profile_allows_item(world, item));
         }
     }
@@ -785,6 +785,11 @@ pub(super) fn crystal_npc_service_packets_for_label_with_markets(
             CRYSTAL_PANEL_BUY,
             CRYSTAL_GOODS_HIDE_ADDED_STATS,
         )]),
+        "PEARLBUY" => Some(vec![ServerPacket::NPCPearlGoods {
+            list: script.map(crystal_npc_trade_goods_for_script).unwrap_or_default(),
+            rate: crystal_npc_price_rate_for_script(script),
+            panel_type: CRYSTAL_PANEL_BUY,
+        }]),
         "BUYNEW" => Some(vec![crystal_npc_goods_packet_for_script(
             script,
             CRYSTAL_PANEL_BUY,
@@ -839,6 +844,7 @@ pub(super) fn crystal_npc_service_packets_for_label_with_markets(
             refining: false,
         }]),
         "REFINECHECK" => Some(vec![ServerPacket::NPCCheckRefine]),
+        "REFINECOLLECT" => Some(vec![ServerPacket::NPCCollectRefine { success: false }]),
         "REPLACEWEDDINGRING" => Some(vec![ServerPacket::NPCReplaceWedRing { rate: 1.0 }]),
         "STORAGE" => Some(vec![ServerPacket::NPCStorage]),
         _ => None,
@@ -856,7 +862,11 @@ pub(super) fn record_crystal_npc_service_context(
         matches!(
             packet,
             ServerPacket::NPCSell
+                | ServerPacket::NPCRefine { .. }
+                | ServerPacket::NPCCheckRefine
+                | ServerPacket::NPCCollectRefine { .. }
                 | ServerPacket::NPCGoods { .. }
+                | ServerPacket::NPCPearlGoods { .. }
                 | ServerPacket::NPCRepair { .. }
                 | ServerPacket::NPCSRepair { .. }
                 | ServerPacket::NPCStorage
@@ -945,6 +955,7 @@ pub(super) fn buy_item_impl(
 
     let key = crystal_item_key_for_template(&template);
     let cost = crystal_npc_purchase_cost(&template, buy_count, rate);
+    let uses_pearls = service.label_key == "PEARLBUY";
     let player_name = world
         .resource::<SessionResource>()
         .selected_character
@@ -953,7 +964,10 @@ pub(super) fn buy_item_impl(
         .unwrap_or_default();
     {
         let resources = world.resource::<InventoryResource>();
-        if world.resource::<PlayerRuntimeResource>().gold < cost {
+        let balance = if uses_pearls {
+            world.resource::<super::resources::Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls.max(0) as u32
+        } else { world.resource::<PlayerRuntimeResource>().gold };
+        if balance < cost {
             return Vec::new();
         }
         if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &key, buy_count) {
@@ -962,7 +976,11 @@ pub(super) fn buy_item_impl(
     }
 
     {
-        world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
+        if uses_pearls {
+            world.resource_mut::<super::resources::Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls -= cost as i32;
+        } else {
+            world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
+        }
     }
     match purchase_item.source {
         CrystalNpcPurchaseSource::BuyBack => {
@@ -1002,12 +1020,9 @@ pub(super) fn buy_item_impl(
         added_defence,
     );
 
-    let mut packets = vec![
-        ServerPacket::LoseGold { gold: cost },
-        ServerPacket::GainedItem {
-            item: user_item_from_item_state(&gained),
-        },
-    ];
+    let mut packets = Vec::new();
+    if !uses_pearls { packets.push(ServerPacket::LoseGold { gold: cost }); }
+    packets.push(ServerPacket::GainedItem { item: user_item_from_item_state(&gained) });
     match purchase_item.source {
         CrystalNpcPurchaseSource::BuyBack => {
             packets.push(crystal_npc_goods_packet(
@@ -1252,3 +1267,7 @@ pub(super) fn crystal_sell_value_for_item(item: &ItemState) -> u32 {
         })
         .unwrap_or_else(|| u32::from(item.weight.max(1)) * item.quantity.max(1))
 }
+
+#[cfg(test)]
+#[path = "npc_pearl_tests.rs"]
+mod pearl_tests;

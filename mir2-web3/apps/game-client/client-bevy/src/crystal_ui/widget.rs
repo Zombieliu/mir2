@@ -1,6 +1,7 @@
 //! Shared Crystal-style widgets for the native shell.
 
 use bevy::prelude::*;
+use bevy::text::{Justify, LineBreak, TextLayout};
 use bevy::ui::{
     AlignItems, Display, FocusPolicy, JustifyContent, Node, Overflow, PositionType, UiRect,
     UiSystems, Val,
@@ -8,6 +9,9 @@ use bevy::ui::{
 use bevy::window::PrimaryWindow;
 
 use super::assets::CrystalButtonAssetSet;
+use super::item_tooltip::{
+    CrystalItemTooltipColour, CrystalItemTooltipDocument, CrystalItemTooltipSection,
+};
 use super::spec::{CrystalButtonSpec, CrystalRect, STAGE_HEIGHT, STAGE_WIDTH};
 use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 
@@ -21,6 +25,7 @@ pub const CRYSTAL_ITEM_HINT_BORDER: Color = Color::srgb_u8(148, 146, 148);
 pub const CRYSTAL_ITEM_HINT_BROKEN_BORDER: Color = Color::srgb_u8(255, 0, 0);
 pub const CRYSTAL_ITEM_HINT_TEXT: Color = Color::WHITE;
 pub const CRYSTAL_ITEM_HINT_CURSOR_OFFSET: f32 = 28.0;
+pub const CRYSTAL_ITEM_HINT_SECTION_BORDER: Color = Color::srgb_u8(128, 128, 128);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CrystalHintStyle {
@@ -42,11 +47,27 @@ impl CrystalHint {
     }
 }
 
+/// Rich, source-sectioned item tooltip attached to a `MirItemCell` hit target.
+/// It is separate from the one-colour control hint so grade/stat/bind/story
+/// colours and cumulative section outlines are not lost.
+#[derive(Component, Debug, Clone, PartialEq, Eq)]
+pub struct CrystalItemHint(pub CrystalItemTooltipDocument);
+
 #[derive(Component, Debug)]
 pub struct CrystalHintOverlayRoot;
 
 #[derive(Component, Debug)]
 pub struct CrystalHintOverlayText;
+
+#[derive(Component, Debug)]
+pub struct CrystalItemHintOverlayRoot;
+
+#[derive(Component, Debug, Clone, Default, PartialEq, Eq)]
+struct CrystalItemHintOverlayState {
+    active: bool,
+    document: Option<CrystalItemTooltipDocument>,
+    layout_pending: bool,
+}
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrystalHintOverlayStyle(pub CrystalHintStyle);
@@ -60,12 +81,44 @@ struct CrystalHintOverlayLayoutState {
     last_window_scale_factor: Option<f32>,
 }
 
+#[derive(Resource, Default)]
+struct CapturedControlHint(Option<(Entity, CrystalHint)>);
+fn capture_control_hint(
+    hints: Query<(
+        Entity,
+        &Interaction,
+        &CrystalHint,
+        Option<&CrystalImageButton>,
+    )>,
+    mut captured: ResMut<CapturedControlHint>,
+) {
+    captured.0 = hints
+        .iter()
+        .filter(|(_, i, _, b)| **i == Interaction::Hovered && b.is_none_or(|b| b.enabled))
+        .min_by_key(|(e, _, _, _)| e.to_bits())
+        .map(|(e, _, h, _)| (e, h.clone()));
+}
 pub struct Mir2CrystalHintPlugin;
 
 impl Plugin for Mir2CrystalHintPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_crystal_hint_overlay)
-            .add_systems(Update, sync_crystal_hint_overlay)
+        app.init_resource::<CapturedControlHint>()
+            .add_systems(PreUpdate, capture_control_hint.after(UiSystems::Focus))
+            .add_systems(
+                PostUpdate,
+                paint_rebuilt_crystal_buttons
+                    .after(UiSystems::Layout)
+                    .after(UiSystems::Stack)
+                    .after(bevy::camera::visibility::VisibilitySystems::VisibilityPropagate),
+            )
+            .add_systems(
+                Startup,
+                (spawn_crystal_hint_overlay, spawn_crystal_item_hint_overlay),
+            )
+            .add_systems(
+                Update,
+                (sync_crystal_hint_overlay, sync_crystal_item_hint_overlay),
+            )
             // Text measurement is refreshed in UiSystems::Content. Position the
             // overlay before layout so the same frame's transform uses the new
             // cursor position. A changed label remains hidden for one layout
@@ -73,6 +126,12 @@ impl Plugin for Mir2CrystalHintPlugin {
             .add_systems(
                 PostUpdate,
                 position_crystal_hint_overlay
+                    .after(UiSystems::Content)
+                    .before(UiSystems::Layout),
+            )
+            .add_systems(
+                PostUpdate,
+                position_crystal_item_hint_overlay
                     .after(UiSystems::Content)
                     .before(UiSystems::Layout),
             );
@@ -233,7 +292,154 @@ fn spawn_crystal_hint_overlay(mut commands: Commands) {
         });
 }
 
+fn spawn_crystal_item_hint_overlay(mut commands: Commands) {
+    commands.spawn((
+        CrystalItemHintOverlayRoot,
+        CrystalItemHintOverlayState::default(),
+        CrystalHintOverlayLayoutState::default(),
+        Node {
+            position_type: PositionType::Absolute,
+            display: Display::Flex,
+            flex_direction: FlexDirection::Column,
+            border: UiRect::all(Val::Px(1.0)),
+            max_width: Val::Percent(90.0),
+            max_height: Val::Percent(90.0),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(CRYSTAL_ITEM_HINT_BACKGROUND),
+        BorderColor::all(CRYSTAL_ITEM_HINT_BORDER),
+        FocusPolicy::Pass,
+        Visibility::Hidden,
+        GlobalZIndex(CRYSTAL_HINT_Z_INDEX + 1),
+    ));
+}
+
+fn sync_crystal_item_hint_overlay(
+    mut commands: Commands,
+    hints: Query<(Entity, &Interaction, &CrystalItemHint)>,
+    mut roots: Query<
+        (
+            Entity,
+            &mut CrystalItemHintOverlayState,
+            &mut BorderColor,
+            &mut Visibility,
+        ),
+        With<CrystalItemHintOverlayRoot>,
+    >,
+) {
+    let selected = hints
+        .iter()
+        .filter(|(_, interaction, _)| {
+            matches!(**interaction, Interaction::Hovered | Interaction::Pressed)
+        })
+        .min_by_key(|(entity, _, _)| entity.to_bits())
+        .map(|(_, _, hint)| &hint.0);
+    let Ok((entity, mut state, mut border, mut visibility)) = roots.single_mut() else {
+        return;
+    };
+    let Some(document) = selected else {
+        state.active = false;
+        if *visibility != Visibility::Hidden {
+            *visibility = Visibility::Hidden;
+        }
+        return;
+    };
+
+    state.active = true;
+    let desired_border = BorderColor::all(if document.broken {
+        CRYSTAL_ITEM_HINT_BROKEN_BORDER
+    } else {
+        CRYSTAL_ITEM_HINT_BORDER
+    });
+    if *border != desired_border {
+        *border = desired_border;
+    }
+    if state.document.as_ref() == Some(document) {
+        return;
+    }
+
+    state.document = Some(document.clone());
+    state.layout_pending = true;
+    if *visibility != Visibility::Hidden {
+        *visibility = Visibility::Hidden;
+    }
+    commands.entity(entity).despawn_children();
+    commands.entity(entity).with_children(|root| {
+        spawn_crystal_item_hint_document(root, document);
+    });
+}
+
+fn spawn_crystal_item_hint_document(
+    root: &mut ChildSpawnerCommands,
+    document: &CrystalItemTooltipDocument,
+) {
+    let last = document.sections.len().saturating_sub(1);
+    for (index, section) in document.sections.iter().enumerate() {
+        spawn_crystal_item_hint_section(root, section);
+        if index != last {
+            root.spawn((
+                Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Px(1.0),
+                    flex_shrink: 0.0,
+                    ..default()
+                },
+                BackgroundColor(CRYSTAL_ITEM_HINT_SECTION_BORDER),
+                FocusPolicy::Pass,
+            ));
+        }
+    }
+}
+
+fn spawn_crystal_item_hint_section(
+    root: &mut ChildSpawnerCommands,
+    section: &CrystalItemTooltipSection,
+) {
+    root.spawn((
+        Node {
+            display: Display::Flex,
+            flex_direction: FlexDirection::Column,
+            padding: UiRect::new(Val::Px(3.0), Val::Px(3.0), Val::Px(3.0), Val::Px(3.0)),
+            flex_shrink: 0.0,
+            ..default()
+        },
+        FocusPolicy::Pass,
+    ))
+    .with_children(|section_root| {
+        for line in &section.lines {
+            section_root.spawn((
+                Text::new(line.text.clone()),
+                crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
+                TextColor(crystal_item_tooltip_colour(line.colour)),
+                TextLayout::new(Justify::Left, LineBreak::NoWrap),
+                TextShadow {
+                    offset: Vec2::splat(1.0),
+                    color: Color::BLACK,
+                },
+                FocusPolicy::Pass,
+            ));
+        }
+    });
+}
+
+fn crystal_item_tooltip_colour(colour: CrystalItemTooltipColour) -> Color {
+    match colour {
+        CrystalItemTooltipColour::White => Color::WHITE,
+        CrystalItemTooltipColour::Yellow => Color::srgb_u8(255, 255, 0),
+        CrystalItemTooltipColour::DeepSkyBlue => Color::srgb_u8(0, 191, 255),
+        CrystalItemTooltipColour::DarkOrange => Color::srgb_u8(255, 140, 0),
+        CrystalItemTooltipColour::Plum => Color::srgb_u8(221, 160, 221),
+        CrystalItemTooltipColour::Red => Color::srgb_u8(255, 0, 0),
+        CrystalItemTooltipColour::Cyan => Color::srgb_u8(0, 255, 255),
+        CrystalItemTooltipColour::DarkKhaki => Color::srgb_u8(189, 183, 107),
+        CrystalItemTooltipColour::Khaki => Color::srgb_u8(240, 230, 140),
+        CrystalItemTooltipColour::Orchid => Color::srgb_u8(218, 112, 214),
+    }
+}
+
 fn sync_crystal_hint_overlay(
+    captured: Option<Res<CapturedControlHint>>,
     hints: Query<(
         Entity,
         &Interaction,
@@ -253,7 +459,7 @@ fn sync_crystal_hint_overlay(
     >,
     mut texts: Query<(&mut Text, &mut TextColor), With<CrystalHintOverlayText>>,
 ) {
-    let selected = hints
+    let fallback = hints
         .iter()
         .filter(|(_, interaction, _, image_button)| {
             **interaction == Interaction::Hovered
@@ -262,6 +468,9 @@ fn sync_crystal_hint_overlay(
         .min_by_key(|(entity, _, _, _)| entity.to_bits())
         .map(|(entity, _, hint, _)| (entity, hint));
 
+    let selected = captured
+        .as_ref()
+        .map_or(fallback, |capture| capture.0.as_ref().map(|(e, h)| (*e, h)));
     let Ok((mut root, mut background, mut border, mut overlay_style, mut target, mut visibility)) =
         roots.single_mut()
     else {
@@ -277,8 +486,7 @@ fn sync_crystal_hint_overlay(
         return;
     };
     if let Some((entity, selected)) = selected.filter(|(_, value)| !value.0.is_empty()) {
-        let content_changed =
-            target.0 != Some(entity) || text.0 != selected.0 || overlay_style.0 != selected.1;
+        let content_changed = text.0 != selected.0 || overlay_style.0 != selected.1;
         if text.0 != selected.0 {
             text.0.clone_from(&selected.0);
         }
@@ -410,6 +618,63 @@ fn position_crystal_hint_overlay(
     }
 }
 
+fn position_crystal_item_hint_overlay(
+    windows: Query<&Window, With<PrimaryWindow>>,
+    mut roots: Query<
+        (
+            &mut Node,
+            &ComputedNode,
+            &mut CrystalItemHintOverlayState,
+            &mut CrystalHintOverlayLayoutState,
+            &mut Visibility,
+        ),
+        With<CrystalItemHintOverlayRoot>,
+    >,
+) {
+    let Ok((mut node, computed, mut state, mut layout_state, mut visibility)) = roots.single_mut()
+    else {
+        return;
+    };
+    if !state.active {
+        if *visibility != Visibility::Hidden {
+            *visibility = Visibility::Hidden;
+        }
+        return;
+    }
+    let Ok(window) = windows.single() else {
+        *visibility = Visibility::Hidden;
+        return;
+    };
+    let Some(cursor) = window.cursor_position() else {
+        *visibility = Visibility::Hidden;
+        return;
+    };
+
+    let bounds = Vec2::new(window.resolution.width(), window.resolution.height());
+    let scale_factor = window.scale_factor();
+    let bounds_changed = layout_state.last_window_bounds != Some(bounds);
+    let scale_factor_changed = layout_state.last_window_scale_factor != Some(scale_factor);
+    layout_state.last_window_bounds = Some(bounds);
+    layout_state.last_window_scale_factor = Some(scale_factor);
+    if state.layout_pending || bounds_changed || scale_factor_changed {
+        state.layout_pending = false;
+        *visibility = Visibility::Hidden;
+        return;
+    }
+
+    let logical_size = computed.size() * computed.inverse_scale_factor;
+    if logical_size.x <= 0.0 || logical_size.y <= 0.0 {
+        *visibility = Visibility::Hidden;
+        return;
+    }
+    let position = crystal_item_hint_position_for_bounds(cursor, logical_size, bounds);
+    node.left = Val::Px(position.x);
+    node.top = Val::Px(position.y);
+    if *visibility != Visibility::Visible {
+        *visibility = Visibility::Visible;
+    }
+}
+
 pub fn crystal_hint_position(cursor: Vec2, size: Vec2) -> Vec2 {
     crystal_hint_position_for_style(CrystalHintStyle::Control, cursor, size)
 }
@@ -435,6 +700,15 @@ pub fn crystal_hint_position_for_bounds(
     Vec2::new(candidate.x.clamp(0.0, max_x), candidate.y.clamp(0.0, max_y))
 }
 
+/// Crystal `GameScene.Process` positions ItemLabel at mouse + 28 and clamps
+/// its right/bottom edges exactly to ScreenWidth/ScreenHeight (no extra pixel).
+pub fn crystal_item_hint_position_for_bounds(cursor: Vec2, size: Vec2, bounds: Vec2) -> Vec2 {
+    let max_x = (bounds.x - size.x).max(0.0);
+    let max_y = (bounds.y - size.y).max(0.0);
+    let candidate = cursor + Vec2::splat(CRYSTAL_ITEM_HINT_CURSOR_OFFSET);
+    Vec2::new(candidate.x.clamp(0.0, max_x), candidate.y.clamp(0.0, max_y))
+}
+
 pub fn sync_crystal_image_buttons(
     asset_server: Res<AssetServer>,
     buttons: Query<
@@ -456,6 +730,115 @@ pub fn sync_crystal_image_buttons(
                 continue;
             };
             node.image = image.clone();
+        }
+    }
+}
+
+// Match Bevy 0.19 focus clipping, whose helper is private to bevy_ui.
+fn crystal_clip_check(
+    point: Vec2,
+    entity: Entity,
+    clipping: &Query<(&ComputedNode, &bevy::ui::UiGlobalTransform, &Node)>,
+    parents: &Query<&ChildOf, Without<bevy::ui::OverrideClip>>,
+) -> bool {
+    if let Ok(parent) = parents.get(entity) {
+        if let Ok((computed, transform, node)) = clipping.get(parent.0) {
+            if !node.overflow.is_visible()
+                && transform.try_inverse().is_none_or(|inverse| {
+                    !computed
+                        .resolve_clip_rect(node.overflow, node.overflow_clip_margin)
+                        .contains(inverse.transform_point2(point))
+                })
+            {
+                return false;
+            }
+        }
+        return crystal_clip_check(point, parent.0, clipping, parents);
+    }
+    true
+}
+// Paint only: normal Bevy Focus remains the sole producer of click interactions.
+// Overlay rows are recreated in Update, so inspect their final geometry after layout.
+fn paint_rebuilt_crystal_buttons(
+    assets: Option<Res<AssetServer>>,
+    stack: Option<Res<bevy::ui::UiStack>>,
+    primary: Query<Entity, With<PrimaryWindow>>,
+    windows: Query<&Window>,
+    cameras: Query<(Entity, &Camera, &bevy::camera::RenderTarget)>,
+    mouse: Option<Res<ButtonInput<MouseButton>>>,
+    nodes: Query<(
+        &ComputedNode,
+        &bevy::ui::UiGlobalTransform,
+        &bevy::ui::ComputedUiTargetCamera,
+        Option<&InheritedVisibility>,
+        Option<&FocusPolicy>,
+    )>,
+    clipping: Query<(&ComputedNode, &bevy::ui::UiGlobalTransform, &Node)>,
+    parents: Query<&ChildOf, Without<bevy::ui::OverrideClip>>,
+    buttons: Query<(Entity, &CrystalImageButton, &Children)>,
+    mut sprites: Query<&mut ImageNode, With<CrystalImageButtonSprite>>,
+) {
+    let (Some(assets), Some(stack), Some(mouse)) = (assets, stack, mouse) else {
+        return;
+    };
+    let primary = primary.iter().next();
+    let pointers: std::collections::HashMap<_, _> = cameras
+        .iter()
+        .filter_map(|(e, c, t)| {
+            let bevy::camera::NormalizedRenderTarget::Window(w) = t.normalize(primary)? else {
+                return None;
+            };
+            let window = windows.get(w.entity()).ok()?;
+            Some((
+                e,
+                window.physical_cursor_position()?
+                    - c.physical_viewport_rect()
+                        .map(|r| r.min.as_vec2())
+                        .unwrap_or_default(),
+            ))
+        })
+        .collect();
+    let mut hovered = std::collections::HashSet::new();
+    'partitions: for range in stack.partition.iter().rev() {
+        for &entity in stack.uinodes[range.clone()].iter().rev() {
+            let Ok((node, transform, camera, visible, policy)) = nodes.get(entity) else {
+                continue;
+            };
+            if !visible.is_some_and(|v| v.get()) {
+                continue;
+            }
+            let Some(point) = camera.get().and_then(|c| pointers.get(&c)) else {
+                continue;
+            };
+            if !node.contains_point(*transform, *point)
+                || !crystal_clip_check(*point, entity, &clipping, &parents)
+            {
+                continue;
+            }
+            hovered.insert(entity);
+            if policy.is_none_or(|p| *p == FocusPolicy::Block) {
+                break 'partitions;
+            }
+        }
+    }
+    for (entity, button, children) in &buttons {
+        let interaction = if hovered.contains(&entity) {
+            if mouse.pressed(MouseButton::Left) {
+                Interaction::Pressed
+            } else {
+                Interaction::Hovered
+            }
+        } else {
+            Interaction::None
+        };
+        let state = resolve_button_visual_state(Some(interaction), button.focused, button.enabled);
+        let image = assets.load(state.asset_path(&button.assets).to_owned());
+        for child in children.iter() {
+            if let Ok(mut sprite) = sprites.get_mut(child) {
+                if sprite.image != image {
+                    sprite.image = image.clone();
+                }
+            }
         }
     }
 }
@@ -568,6 +951,111 @@ mod tests {
             ),
             Vec2::new(943.0, 727.0)
         );
+        assert_eq!(
+            crystal_item_hint_position_for_bounds(
+                Vec2::new(1020.0, 760.0),
+                Vec2::new(80.0, 40.0),
+                Vec2::new(1024.0, 768.0),
+            ),
+            Vec2::new(944.0, 728.0),
+            "GameScene clamps ItemLabel exactly to the screen edge without the generic -1 inset"
+        );
+    }
+
+    #[test]
+    fn rich_item_hint_keeps_children_across_renderer_entity_churn() {
+        use super::super::item_tooltip::{
+            CrystalItemTooltipLine, CrystalItemTooltipSection, CrystalItemTooltipSectionKind,
+        };
+
+        let document = CrystalItemTooltipDocument {
+            sections: vec![CrystalItemTooltipSection {
+                kind: CrystalItemTooltipSectionKind::Name,
+                lines: vec![CrystalItemTooltipLine {
+                    text: "Small HP Drug".to_owned(),
+                    colour: CrystalItemTooltipColour::Yellow,
+                }],
+            }],
+            broken: false,
+            source_complete: true,
+        };
+        let mut app = App::new();
+        app.add_systems(Startup, spawn_crystal_item_hint_overlay)
+            .add_systems(Update, sync_crystal_item_hint_overlay);
+        let first_target = app
+            .world_mut()
+            .spawn((Interaction::Hovered, CrystalItemHint(document.clone())))
+            .id();
+        app.update();
+
+        let root = app
+            .world_mut()
+            .query_filtered::<Entity, With<CrystalItemHintOverlayRoot>>()
+            .single(app.world())
+            .expect("rich item tooltip root");
+        let first_children = app
+            .world()
+            .entity(root)
+            .get::<Children>()
+            .expect("rendered document children")
+            .to_vec();
+        assert!(!first_children.is_empty());
+
+        app.world_mut().despawn(first_target);
+        app.world_mut()
+            .spawn((Interaction::Hovered, CrystalItemHint(document.clone())));
+        app.update();
+
+        let state = app
+            .world()
+            .entity(root)
+            .get::<CrystalItemHintOverlayState>()
+            .expect("rich item tooltip state");
+        assert!(state.active);
+        assert_eq!(state.document.as_ref(), Some(&document));
+        assert_eq!(
+            app.world()
+                .entity(root)
+                .get::<Children>()
+                .expect("stable children")
+                .to_vec(),
+            first_children,
+            "Inventory children are recreated each frame; identical tooltip content must not restart layout forever"
+        );
+    }
+
+    #[test]
+    fn rich_item_hint_remains_active_while_the_item_cell_is_pressed() {
+        use super::super::item_tooltip::{
+            CrystalItemTooltipLine, CrystalItemTooltipSection, CrystalItemTooltipSectionKind,
+        };
+
+        let document = CrystalItemTooltipDocument {
+            sections: vec![CrystalItemTooltipSection {
+                kind: CrystalItemTooltipSectionKind::Name,
+                lines: vec![CrystalItemTooltipLine {
+                    text: "Wooden Sword".to_owned(),
+                    colour: CrystalItemTooltipColour::Yellow,
+                }],
+            }],
+            broken: false,
+            source_complete: true,
+        };
+        let mut app = App::new();
+        app.add_systems(Startup, spawn_crystal_item_hint_overlay)
+            .add_systems(Update, sync_crystal_item_hint_overlay);
+        app.world_mut()
+            .spawn((Interaction::Pressed, CrystalItemHint(document.clone())));
+
+        app.update();
+
+        let state = app
+            .world_mut()
+            .query_filtered::<&CrystalItemHintOverlayState, With<CrystalItemHintOverlayRoot>>()
+            .single(app.world())
+            .expect("rich item tooltip state");
+        assert!(state.active);
+        assert_eq!(state.document.as_ref(), Some(&document));
     }
 
     #[test]
@@ -650,6 +1138,99 @@ mod tests {
                 .unwrap()
                 .0,
             Some(hovered)
+        );
+    }
+
+    #[test]
+    fn rebuilt_button_picking_honors_clipped_grandparent_and_override_clip() {
+        use bevy::ecs::system::RunSystemOnce;
+        let mut world = World::new();
+        let parent = world
+            .spawn((
+                Node {
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                ComputedNode {
+                    size: Vec2::splat(20.),
+                    ..default()
+                },
+                bevy::ui::UiGlobalTransform::default(),
+            ))
+            .id();
+        let middle = world
+            .spawn((
+                Node::default(),
+                ComputedNode::default(),
+                bevy::ui::UiGlobalTransform::default(),
+                ChildOf(parent),
+            ))
+            .id();
+        let target = world.spawn((Node::default(), ChildOf(middle))).id();
+        let query =
+            move |clipping: Query<(&ComputedNode, &bevy::ui::UiGlobalTransform, &Node)>,
+                  parents: Query<&ChildOf, Without<bevy::ui::OverrideClip>>| {
+                crystal_clip_check(Vec2::new(50., 0.), target, &clipping, &parents)
+            };
+        assert!(!world.run_system_once(query).unwrap());
+        world.entity_mut(target).insert(bevy::ui::OverrideClip);
+        assert!(world.run_system_once(query).unwrap());
+    }
+
+    #[test]
+    fn captured_hint_survives_rebuilt_target_without_rehiding_identical_text() {
+        let mut app = App::new();
+        app.init_resource::<CapturedControlHint>();
+        app.add_systems(PreUpdate, capture_control_hint);
+        app.add_systems(Update, sync_crystal_hint_overlay);
+        let root = app
+            .world_mut()
+            .spawn((
+                CrystalHintOverlayRoot,
+                CrystalHintOverlayStyle(CrystalHintStyle::Control),
+                CrystalHintOverlayTarget::default(),
+                Node::default(),
+                BackgroundColor(CRYSTAL_HINT_BACKGROUND),
+                BorderColor::all(CRYSTAL_HINT_BORDER),
+                Visibility::Hidden,
+            ))
+            .id();
+        app.world_mut().spawn((
+            CrystalHintOverlayText,
+            Text::new(""),
+            TextColor(CRYSTAL_HINT_TEXT),
+        ));
+        let first = app
+            .world_mut()
+            .spawn((Interaction::Hovered, CrystalHint::new("Map")))
+            .id();
+        app.update();
+        app.world_mut().entity_mut(root).insert(Visibility::Visible);
+        app.world_mut().despawn(first);
+        app.world_mut()
+            .spawn((Interaction::Hovered, CrystalHint::new("Map")));
+        app.update();
+        assert_eq!(
+            *app.world().get::<Visibility>(root).unwrap(),
+            Visibility::Visible
+        );
+        // Capture happens before Update rebuild: no dependency on the old Entity's lifetime.
+        let captured = app
+            .world()
+            .resource::<CapturedControlHint>()
+            .0
+            .as_ref()
+            .unwrap()
+            .clone();
+        app.world_mut().despawn(captured.0);
+        bevy::ecs::system::RunSystemOnce::run_system_once(
+            app.world_mut(),
+            sync_crystal_hint_overlay,
+        )
+        .unwrap();
+        assert_eq!(
+            *app.world().get::<Visibility>(root).unwrap(),
+            Visibility::Visible
         );
     }
 

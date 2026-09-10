@@ -13,8 +13,9 @@ use std::sync::Arc;
 use bevy::audio::{
     AudioPlayer, AudioSink, AudioSinkPlayback, AudioSource, PlaybackSettings, Volume,
 };
-use bevy::prelude::{Assets, Commands, Component, Entity, Query, Res, ResMut, Resource};
+use bevy::prelude::{Assets, Commands, Component, Entity, Local, Query, Res, ResMut, Resource};
 
+use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use crate::options_effects::OptionsRuntime;
 
 const MUSIC_FILE: &str = "Main.wav";
@@ -34,14 +35,30 @@ const MAX_PENDING_UI_SOUND_EVENTS: usize = 8;
 /// UI cues stay separate from packet-authoritative gameplay audio so a local
 /// pointer edge can never manufacture or deduplicate a gameplay packet cue.
 pub const NATIVE_UI_BUTTON_A_FILE: &str = "103.wav";
+/// Crystal `SoundList.ButtonB = 10104`, mapped by `SoundList.lst` to 104.wav.
+/// Inventory delete-mode cancellation uses this distinct local UI cue.
+pub const NATIVE_UI_BUTTON_B_FILE: &str = "104.wav";
 /// Crystal `SoundList.ButtonC = 10105`, mapped by `SoundList.lst` to 105.wav.
 /// Larger menu-style HUD buttons use this distinct local UI cue.
 pub const NATIVE_UI_BUTTON_C_FILE: &str = "105.wav";
+/// Crystal LoginEffect (10100), played once after an accepted login.
+pub const NATIVE_LOGIN_DOOR_FILE: &str = "100.wav";
 
 /// Gameplay clips are an internal, fail-closed allowlist. Packet payloads never
 /// become file paths: the platform effect adapter can only request a cue listed
 /// here and packaging verifies the same exact files.
 pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
+    "pet_pickup.wav",
+    "pet_pig.wav",
+    "pet_chick.wav",
+    "pet_kitty.wav",
+    "pet_skeleton.wav",
+    "pet_pigman.wav",
+    "pet_weman.wav",
+    "pet_blackdragon.wav",
+    "pet_olympicmascot.wav",
+    "pet_frog.wav",
+    "pet_monkey.wav",
     "005-1.wav",
     "005-2.wav",
     "005-3.wav",
@@ -81,6 +98,8 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "M64-0.wav",
     "M64-1.wav",
     "M64-2.wav",
+    // Original SoundList.lst 20710: BlessedArmour launch.
+    "M69-0.wav",
     "M79-1.wav",
 ];
 
@@ -95,6 +114,7 @@ pub struct NativeGameplaySoundEvent {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NativeUiSound {
     ButtonA,
+    ButtonB,
     ButtonC,
 }
 
@@ -102,6 +122,7 @@ impl NativeUiSound {
     fn file_name(self) -> &'static str {
         match self {
             Self::ButtonA => NATIVE_UI_BUTTON_A_FILE,
+            Self::ButtonB => NATIVE_UI_BUTTON_B_FILE,
             Self::ButtonC => NATIVE_UI_BUTTON_C_FILE,
         }
     }
@@ -216,6 +237,9 @@ pub struct NativeGameplaySoundEffectTrack;
 #[derive(Component)]
 pub struct NativeUiSoundEffectTrack;
 
+#[derive(Component)]
+pub(crate) struct NativeLoginDoorTrack;
+
 /// Load the existing Crystal WAVs and start the persisted music setting.
 pub(crate) fn initialize_native_audio(
     mut runtime: ResMut<NativeAudioRuntime>,
@@ -253,7 +277,12 @@ pub(crate) fn initialize_native_audio(
     }
     runtime.ui_paths.clear();
     runtime.ui_sources.clear();
-    for file_name in [NATIVE_UI_BUTTON_A_FILE, NATIVE_UI_BUTTON_C_FILE] {
+    for file_name in [
+        NATIVE_UI_BUTTON_A_FILE,
+        NATIVE_UI_BUTTON_B_FILE,
+        NATIVE_UI_BUTTON_C_FILE,
+        NATIVE_LOGIN_DOOR_FILE,
+    ] {
         let (path, source) = load_first_valid_wav(&[file_name], &mut sources);
         if let (Some(path), Some(source)) = (path, source) {
             runtime.ui_paths.insert(file_name.to_owned(), path);
@@ -386,13 +415,51 @@ pub(crate) fn sync_native_ui_audio(
     runtime: Res<NativeAudioRuntime>,
     mut queue: ResMut<NativeUiAudioQueue>,
     sound_entities: Query<Entity, bevy::ecs::query::With<NativeUiSoundEffectTrack>>,
+    shell: Option<Res<NativeShellModel>>,
+    mut was_opening_login: Local<bool>,
+    door_entities: Query<Entity, bevy::ecs::query::With<NativeLoginDoorTrack>>,
 ) {
+    let screen = shell.as_deref().map(|shell| shell.screen);
+    let opening = screen == Some(NativeShellScreen::OpeningLogin);
+    let start_door = opening && !*was_opening_login;
+    // Consume the transition even when muted or the exact clip is unavailable;
+    // enabling audio later must not replay a past login effect.
+    *was_opening_login = opening;
+    let keep_door = matches!(
+        screen,
+        Some(
+            NativeShellScreen::OpeningLogin
+                | NativeShellScreen::CharacterSelect
+                | NativeShellScreen::CharacterCreate
+                | NativeShellScreen::DeleteConfirm { .. }
+                | NativeShellScreen::SafeKey
+                | NativeShellScreen::StartingGame
+                | NativeShellScreen::InGame
+        )
+    );
+    if start_door || !keep_door || !options.audio.sound_enabled || options.audio.sound_volume == 0 {
+        for entity in door_entities.iter() {
+            commands.entity(entity).despawn();
+        }
+    }
     if !options.audio.sound_enabled || options.audio.sound_volume == 0 {
         queue.clear_pending();
         for entity in sound_entities.iter() {
             commands.entity(entity).despawn();
         }
         return;
+    }
+
+    if start_door {
+        if let Some(source) = runtime.ui_sources.get(NATIVE_LOGIN_DOOR_FILE).cloned() {
+            // Keep this separate from button tracks: another click must not
+            // cut off the four-second door effect when selection appears.
+            commands.spawn((
+                NativeLoginDoorTrack,
+                AudioPlayer::new(source),
+                PlaybackSettings::DESPAWN.with_volume(sound_volume(options.audio.sound_volume)),
+            ));
+        }
     }
 
     let trigger_sources = queue
@@ -1005,6 +1072,22 @@ mod tests {
     }
 
     #[test]
+    fn blessed_armour_uses_registered_sound_without_invented_filename() {
+        let mut queue = NativeGameplayAudioQueue::default();
+        for (sequence, (file, accepted)) in [
+            ("M69-0.wav", true), ("M71-0.wav", false),
+            ("M71-1.wav", false), ("M17-0.wav", false),
+            ("../M69-0.wav", false),
+        ].into_iter().enumerate() {
+            assert_eq!(queue.push(NativeGameplaySoundEvent {
+                generation: 1, sequence: sequence as u64,
+                cue: "BlessedArmour.launch".into(), file_name: file.into(),
+            }), accepted, "{file}");
+        }
+        assert_eq!(queue.len(), 1);
+    }
+
+    #[test]
     fn gameplay_sound_queue_is_allowlisted_bounded_and_generation_scoped() {
         let mut queue = NativeGameplayAudioQueue::default();
         let lightning = NativeGameplaySoundEvent {
@@ -1172,6 +1255,22 @@ mod tests {
     }
 
     #[test]
+    fn ui_button_b_uses_crystal_104_wav_mapping() {
+        let mut queue = NativeUiAudioQueue::default();
+        queue.push(NativeUiSound::ButtonB);
+        assert_eq!(queue.drain_bounded(8), vec![NativeUiSound::ButtonB]);
+        assert_eq!(NativeUiSound::ButtonB.file_name(), "104.wav");
+
+        let mut gameplay = NativeGameplayAudioQueue::default();
+        assert!(!gameplay.push(NativeGameplaySoundEvent {
+            generation: 1,
+            sequence: 1,
+            cue: "ui.ButtonB".to_owned(),
+            file_name: NATIVE_UI_BUTTON_B_FILE.to_owned(),
+        }));
+    }
+
+    #[test]
     fn ui_button_c_uses_its_own_exact_file_mapping() {
         let mut queue = NativeUiAudioQueue::default();
         queue.push(NativeUiSound::ButtonC);
@@ -1290,6 +1389,92 @@ mod tests {
         app.update();
         assert_eq!(count_sound_entities(&mut app), 0);
         assert_eq!(app.world().resource::<NativeUiAudioQueue>().len(), 0);
+    }
+
+    fn login_door_count(app: &mut App) -> usize {
+        app.world_mut()
+            .query_filtered::<Entity, bevy::ecs::query::With<NativeLoginDoorTrack>>()
+            .iter(app.world())
+            .count()
+    }
+
+    #[test]
+    fn login_door_is_once_per_opening_survives_selection_and_stops_on_disconnect() {
+        let mut app = app();
+        app.init_resource::<NativeShellModel>();
+        app.world_mut()
+            .resource_mut::<OptionsRuntime>()
+            .audio
+            .sound_enabled = true;
+        app.world_mut()
+            .resource_mut::<OptionsRuntime>()
+            .audio
+            .sound_volume = 50;
+        app.world_mut()
+            .resource_mut::<NativeAudioRuntime>()
+            .ui_sources
+            .insert(
+                NATIVE_LOGIN_DOOR_FILE.to_owned(),
+                bevy::asset::Handle::<AudioSource>::default(),
+            );
+        app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::OpeningLogin;
+        app.update();
+        assert_eq!(login_door_count(&mut app), 1);
+        app.update();
+        assert_eq!(login_door_count(&mut app), 1);
+        app.world_mut().resource_mut::<NativeShellModel>().screen =
+            NativeShellScreen::CharacterSelect;
+        app.update();
+        assert_eq!(login_door_count(&mut app), 1);
+        app.world_mut().resource_mut::<NativeShellModel>().screen =
+            NativeShellScreen::ConnectionLost;
+        app.update();
+        assert_eq!(login_door_count(&mut app), 0);
+        app.world_mut().resource_mut::<NativeShellModel>().screen = NativeShellScreen::OpeningLogin;
+        app.update();
+        assert_eq!(login_door_count(&mut app), 1);
+    }
+
+    #[test]
+    fn login_door_does_not_replay_after_muting_or_a_missing_source() {
+        for missing_source in [false, true] {
+            let mut app = app();
+            app.init_resource::<NativeShellModel>();
+            app.world_mut()
+                .resource_mut::<OptionsRuntime>()
+                .audio
+                .sound_enabled = missing_source;
+            app.world_mut()
+                .resource_mut::<OptionsRuntime>()
+                .audio
+                .sound_volume = 50;
+            if !missing_source {
+                app.world_mut()
+                    .resource_mut::<NativeAudioRuntime>()
+                    .ui_sources
+                    .insert(
+                        NATIVE_LOGIN_DOOR_FILE.to_owned(),
+                        bevy::asset::Handle::<AudioSource>::default(),
+                    );
+            }
+            app.world_mut().resource_mut::<NativeShellModel>().screen =
+                NativeShellScreen::OpeningLogin;
+            app.update();
+            assert_eq!(login_door_count(&mut app), 0);
+            app.world_mut()
+                .resource_mut::<OptionsRuntime>()
+                .audio
+                .sound_enabled = true;
+            app.world_mut()
+                .resource_mut::<NativeAudioRuntime>()
+                .ui_sources
+                .insert(
+                    NATIVE_LOGIN_DOOR_FILE.to_owned(),
+                    bevy::asset::Handle::<AudioSource>::default(),
+                );
+            app.update();
+            assert_eq!(login_door_count(&mut app), 0);
+        }
     }
 
     #[test]

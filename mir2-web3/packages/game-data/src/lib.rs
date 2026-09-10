@@ -3,7 +3,19 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
+mod crystal_guild_settings;
+mod crystal_creature_settings;
+mod crystal_hero_settings;
+pub use crystal_hero_settings::{crystal_hero_settings, calculate_crystal_hero_base_stat, CrystalHeroSettings, CrystalHeroSource, CrystalHeroRules};
+pub use crystal_creature_settings::{crystal_creature_settings, CrystalCreatureSettings};
+#[cfg(test)]
+mod crystal_item_image;
 pub mod crystal_map_events;
+pub use crystal_guild_settings::{
+    crystal_guild_buff_definitions, crystal_guild_settings, CrystalGuildCreationCost,
+    CrystalGuildSettings,
+};
+pub use mir2_protocol::crystal_user_item_image;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -1873,6 +1885,8 @@ pub struct CrystalMonsterTemplate {
     pub min_sc: i32,
     pub max_sc: i32,
     #[serde(default)]
+    pub accuracy: i32,
+    #[serde(default)]
     pub agility: i32,
     pub light: u8,
     pub attack_speed: u16,
@@ -1995,6 +2009,8 @@ pub struct CrystalRespawnMap {
     pub no_drop_monster: bool,
     #[serde(default)]
     pub no_mount: bool,
+    #[serde(default)]
+    pub no_intelligent_creatures: bool,
     #[serde(default)]
     pub no_hero: bool,
     #[serde(default)]
@@ -2739,6 +2755,63 @@ pub fn crystal_item_by_index(item_index: i32) -> Option<CrystalItemTemplate> {
         .find(|item| item.item_index == item_index)
 }
 
+/// Exact data-selection port of Crystal `Functions.GetRealItem`.
+///
+/// The stored `UserItem.Info` remains the origin for identity/name/bind data,
+/// while several tooltip and equipment paths select a class/level-specific
+/// catalogue row for stats, requirements, shape, and image presentation.
+pub fn crystal_real_item_for_player(
+    origin: &CrystalItemTemplate,
+    level: u16,
+    class: MirClass,
+) -> CrystalItemTemplate {
+    if !origin.class_based && !origin.level_based {
+        return origin.clone();
+    }
+
+    let items = crystal_item_manifest().items;
+    let class_flag = 1u8 << class as u8;
+    if origin.class_based && origin.level_based {
+        let mut output = origin.clone();
+        for info in items {
+            if info.name.starts_with(&origin.name)
+                && info.required_class == class_flag
+                && info.required_type == 0
+                && u16::from(info.required_amount) <= level
+                && output.required_amount <= info.required_amount
+                && origin.required_gender == info.required_gender
+            {
+                output = info;
+            }
+        }
+        return output;
+    }
+
+    if origin.class_based {
+        return items
+            .into_iter()
+            .find(|info| {
+                info.name.starts_with(&origin.name)
+                    && info.required_class == class_flag
+                    && origin.required_gender == info.required_gender
+            })
+            .unwrap_or_else(|| origin.clone());
+    }
+
+    let mut output = origin.clone();
+    for info in items {
+        if info.name.starts_with(&origin.name)
+            && info.required_type == 0
+            && u16::from(info.required_amount) <= level
+            && output.required_amount < info.required_amount
+            && origin.required_gender == info.required_gender
+        {
+            output = info;
+        }
+    }
+    output
+}
+
 pub fn crystal_random_item_stat_profile(id: u8) -> Option<CrystalRandomItemStatProfile> {
     crystal_random_item_stats_manifest()
         .profiles
@@ -2868,11 +2941,12 @@ mod tests {
         crystal_npc_info_manifest, crystal_npc_manifest, crystal_npc_script_by_key,
         crystal_quest_packet_manifest, crystal_quest_packet_payloads,
         crystal_random_item_stat_profile, crystal_random_item_stats_manifest,
-        crystal_recipe_bootstrap_packets, crystal_recipe_packet_manifest, crystal_recipes,
-        crystal_respawn_manifest, crystal_starter_region_respawns, format_localized_text,
-        localization_bundle, localized_text, platinum_176_profile, platinum_176_profile_bundle,
-        starter_map_collision, starter_scene, starter_server_data, validate_content_profile,
-        ContentLevelRate, ContentRatePolicy, DropTemplate, LanguageCode, MapCellAttribute,
+        crystal_real_item_for_player, crystal_recipe_bootstrap_packets,
+        crystal_recipe_packet_manifest, crystal_recipes, crystal_respawn_manifest,
+        crystal_starter_region_respawns, format_localized_text, localization_bundle,
+        localized_text, platinum_176_profile, platinum_176_profile_bundle, starter_map_collision,
+        starter_scene, starter_server_data, validate_content_profile, ContentLevelRate,
+        ContentRatePolicy, DropTemplate, LanguageCode, MapCellAttribute,
         MonsterSpawnDispositionTemplate, SkillEffectTemplate,
     };
     use mir2_protocol::{MirClass, Point};
@@ -3563,6 +3637,33 @@ mod tests {
     }
 
     #[test]
+    fn crystal_real_item_selection_matches_class_and_level_variants() {
+        let spirit_blade = crystal_item_by_index(1).expect("SpiritBlade origin");
+        assert_eq!(
+            crystal_real_item_for_player(&spirit_blade, 20, MirClass::Warrior).item_index,
+            2
+        );
+        assert_eq!(
+            crystal_real_item_for_player(&spirit_blade, 20, MirClass::Wizard).item_index,
+            3
+        );
+
+        let heaven_armour = crystal_item_by_index(375).expect("HeavenArmour level origin");
+        assert_eq!(
+            crystal_real_item_for_player(&heaven_armour, 39, MirClass::Warrior).item_index,
+            376
+        );
+        assert_eq!(
+            crystal_real_item_for_player(&heaven_armour, 50, MirClass::Warrior).item_index,
+            378
+        );
+        assert_eq!(
+            crystal_real_item_for_player(&heaven_armour, 10, MirClass::Warrior).item_index,
+            375
+        );
+    }
+
+    #[test]
     fn crystal_random_item_stats_manifest_loads() {
         let manifest = crystal_random_item_stats_manifest();
 
@@ -3864,6 +3965,19 @@ mod tests {
         assert!(summary.commands.iter().any(|entry| {
             entry.command == "CONQUESTGUARD" && entry.runtime_status == "implemented"
         }));
+    }
+
+    #[test]
+    fn monster_accuracy_preserves_source_stat_and_legacy_manifest_compatibility() {
+        // Server.MirDB Stat 10, verified with the generator's accuracy-only
+        // check mode. This guards against dropping Accuracy during serde load.
+        let shinsu = crystal_monster_by_name("Shinsu").expect("Shinsu template");
+        assert_eq!(shinsu.accuracy, 25);
+        let mut legacy = serde_json::to_value(&shinsu).unwrap();
+        legacy.as_object_mut().unwrap().remove("accuracy");
+        let restored: super::CrystalMonsterTemplate = serde_json::from_value(legacy).unwrap();
+        assert_eq!(restored.accuracy, 0);
+        assert_eq!(restored.max_dc, shinsu.max_dc);
     }
 
     #[test]

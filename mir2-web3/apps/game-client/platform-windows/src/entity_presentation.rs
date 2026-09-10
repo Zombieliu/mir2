@@ -28,6 +28,12 @@ struct NativeMotionWindow {
     from_y: f32,
     to_x: f32,
     to_y: f32,
+    /// Crystal keeps `MapLocation` at the source cell until the movement
+    /// action completes even though `CurrentLocation` already contains the
+    /// destination. Use the same integer anchor for y-sort depth while the
+    /// visual position advances through the movement phases.
+    sort_x: i32,
+    sort_y: i32,
     started_ms: u64,
     expires_ms: u64,
     phase_count: u16,
@@ -102,6 +108,14 @@ impl NativeEntityPresentation {
         self.pending_payload = Some(payload);
     }
 
+    /// Admit packet actions in arrival order, even when several projections
+    /// arrive before the next render. Rendering still publishes only the final
+    /// scene, while the existing per-actor ActionFeed retains combat actions.
+    pub(crate) fn observe_packet_payload(&mut self, payload: Value, now_ms: u64) {
+        self.replace_payload(payload);
+        self.sync_pending_payload(now_ms, native_motion_clock_ms());
+    }
+
     pub(crate) fn hovered_object_id(&self) -> Option<&str> {
         self.hovered_object_id.as_deref()
     }
@@ -111,7 +125,13 @@ impl NativeEntityPresentation {
     }
 
     pub(crate) fn hovered_grid_position(&self) -> Option<(i32, i32)> {
-        let (cursor_x, cursor_y) = self.hover_cursor_stage?;
+        self.grid_position_for_stage(self.hover_cursor_stage?)
+    }
+
+    pub(crate) fn grid_position_for_stage(
+        &self,
+        (cursor_x, cursor_y): (f32, f32),
+    ) -> Option<(i32, i32)> {
         if !(0.0..1024.0).contains(&cursor_x) || !(0.0..768.0).contains(&cursor_y) {
             return None;
         }
@@ -134,12 +154,113 @@ impl NativeEntityPresentation {
         ))
     }
 
+    pub(crate) fn magic_target_flags(&self, object_id: &str) -> (bool, u32, u8) {
+        let entity = self
+            .latest_payload
+            .as_ref()
+            .and_then(|p| p.get("entities"))
+            .and_then(Value::as_array)
+            .and_then(|all| {
+                all.iter().find(|e| {
+                    e.get("objectId").and_then(value_object_id).as_deref() == Some(object_id)
+                })
+            });
+        entity
+            .map(|e| {
+                (
+                    e.get("dead").and_then(Value::as_bool) == Some(true),
+                    e.get("masterObjectId").and_then(Value::as_u64).unwrap_or(0) as u32,
+                    e.get("ai").and_then(Value::as_u64).unwrap_or(0) as u8,
+                )
+            })
+            .unwrap_or_default()
+    }
+
     pub(crate) fn hover_cursor_stage(&self) -> Option<(f32, f32)> {
         self.hover_cursor_stage
     }
 
     pub(crate) fn current_map_file_name(&self) -> Option<&str> {
         self.latest_payload.as_ref()?.get("mapFileName")?.as_str()
+    }
+
+    /// Crystal runs three cells while mounted or while Swift Feet is active;
+    /// ordinary running remains two cells. This mirrors authoritative packet
+    /// state strictly for presentation prediction—the Zone still validates the
+    /// actual distance and corrects stale client state.
+    pub(crate) fn self_equipment_pose(&self, object_id: &str) -> Option<(bool, i16)> {
+        let standing = self
+            .world
+            .active_states()
+            .find(|(id, _)| *id == object_id)
+            .map(|(_, state)| state.pose().action == AnimationAction::Standing)?;
+        let entity = self
+            .latest_payload
+            .as_ref()?
+            .get("entities")?
+            .as_array()?
+            .iter()
+            .find(|e| e.get("objectId").and_then(value_object_id).as_deref() == Some(object_id))?;
+        Some((
+            standing,
+            entity
+                .get("transformType")
+                .and_then(Value::as_i64)
+                .and_then(|n| i16::try_from(n).ok())
+                .unwrap_or(-1),
+        ))
+    }
+
+    pub(crate) fn self_run_distance(&self, object_id: &str) -> i32 {
+        let Some(entity) = self
+            .latest_payload
+            .as_ref()
+            .and_then(|payload| payload.get("entities"))
+            .and_then(Value::as_array)
+            .and_then(|entities| {
+                entities.iter().find(|entity| {
+                    entity.get("objectId").and_then(value_object_id).as_deref() == Some(object_id)
+                        && entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                })
+            })
+        else {
+            return 2;
+        };
+        let mounted = entity.get("ridingMount").and_then(Value::as_bool) == Some(true);
+        let sneaking = entity
+            .get("sneakingActive")
+            .or_else(|| entity.get("sneaking"))
+            .and_then(Value::as_bool)
+            == Some(true);
+        let swift_feet = !sneaking
+            && entity
+                .get("buffs")
+                .and_then(Value::as_array)
+                .is_some_and(|buffs| buffs.iter().any(|buff| buff.as_i64() == Some(102)));
+        if mounted || swift_feet {
+            3
+        } else {
+            2
+        }
+    }
+
+    pub(crate) fn self_motion_duration_ms(&self, object_id: &str, running: bool) -> Option<u64> {
+        let entity = self
+            .latest_payload
+            .as_ref()?
+            .get("entities")?
+            .as_array()?
+            .iter()
+            .find(|entity| {
+                entity.get("objectId").and_then(value_object_id).as_deref() == Some(object_id)
+                    && entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+            })?;
+        let action = if running {
+            AnimationAction::Running
+        } else {
+            AnimationAction::Walking
+        };
+        Some(u64::from(native_motion_phase_count(entity, action)) * CRYSTAL_MOVE_PHASE_MS)
     }
 
     pub(crate) fn tile_has_blocking_entity(
@@ -163,6 +284,12 @@ impl NativeEntityPresentation {
         self.motion_windows
             .values()
             .any(|window| now_ms < window.expires_ms)
+    }
+
+    pub(crate) fn has_active_non_self_motion(&self, now_ms: u64) -> bool {
+        self.motion_windows.iter().any(|(object_id, window)| {
+            self.self_object_id.as_deref() != Some(object_id.as_str()) && now_ms < window.expires_ms
+        })
     }
 
     pub(crate) fn camera_screen_offset(&self, now_ms: u64) -> (f32, f32) {
@@ -257,6 +384,8 @@ impl NativeEntityPresentation {
                 from_y: from.1 as f32,
                 to_x: to.0 as f32,
                 to_y: to.1 as f32,
+                sort_x: from.0,
+                sort_y: from.1,
                 started_ms: motion_now_ms,
                 expires_ms,
                 phase_count,
@@ -681,6 +810,8 @@ impl NativeEntityPresentation {
                             from_y: motion_from_y,
                             to_x: x as f32,
                             to_y: y as f32,
+                            sort_x: from_x,
+                            sort_y: from_y,
                             started_ms,
                             expires_ms,
                             phase_count,
@@ -718,6 +849,8 @@ impl NativeEntityPresentation {
                 entity["motionFromY"] = Value::from(window.from_y);
                 entity["motionToX"] = Value::from(window.to_x);
                 entity["motionToY"] = Value::from(window.to_y);
+                entity["motionSortX"] = Value::from(window.sort_x);
+                entity["motionSortY"] = Value::from(window.sort_y);
                 entity["motionStartedMs"] = Value::from(window.started_ms);
                 entity["motionDurationMs"] =
                     Value::from(window.expires_ms.saturating_sub(window.started_ms));
@@ -747,6 +880,58 @@ impl NativeEntityPresentation {
             mir2_bevy_runtime::clear_mir2_self_camera_motion();
             self.self_object_id = None;
         }
+    }
+
+    fn expire_native_motion_windows(&mut self, now_ms: u64) {
+        let expired = self
+            .motion_windows
+            .iter()
+            .filter(|(_, window)| now_ms >= window.expires_ms)
+            .map(|(object_id, _)| object_id.clone())
+            .collect::<HashSet<_>>();
+        if expired.is_empty() {
+            return;
+        }
+
+        self.motion_windows
+            .retain(|object_id, _| !expired.contains(object_id));
+        if let Some(entities) = self
+            .latest_payload
+            .as_mut()
+            .and_then(|payload| payload.get_mut("entities"))
+            .and_then(Value::as_array_mut)
+        {
+            for entity in entities {
+                let Some(object_id) = entity.get("objectId").and_then(value_object_id) else {
+                    continue;
+                };
+                if !expired.contains(&object_id) {
+                    continue;
+                }
+                if let Some(object) = entity.as_object_mut() {
+                    for field in [
+                        "motionFromX",
+                        "motionFromY",
+                        "motionToX",
+                        "motionToY",
+                        "motionSortX",
+                        "motionSortY",
+                        "motionStartedMs",
+                        "motionDurationMs",
+                    ] {
+                        object.remove(field);
+                    }
+                }
+            }
+        }
+        if self
+            .self_object_id
+            .as_ref()
+            .is_some_and(|object_id| expired.contains(object_id))
+        {
+            mir2_bevy_runtime::clear_mir2_self_camera_motion();
+        }
+        self.payload_dirty = true;
     }
 
     fn render_state_if_changed(&mut self, now_ms: u64, effect_visible: bool) -> Option<Value> {
@@ -794,6 +979,11 @@ impl NativeEntityPresentation {
         F: FnOnce(&Value, &HashMap<String, (i64, AnimationAction)>, bool) -> Option<Value>,
     {
         self.sync_pending_payload(animation_now_ms, motion_now_ms);
+        // A quiet connection may not deliver another snapshot exactly when a
+        // movement action ends. Remove its MapLocation-style sort anchor from
+        // the retained payload on the local clock so depth always settles on
+        // the destination without waiting for another packet.
+        self.expire_native_motion_windows(motion_now_ms);
         let payload = self.latest_payload.as_ref()?;
         let effect_visibility_changed =
             self.last_effect_visible.replace(effect_visible) != Some(effect_visible);
@@ -1134,6 +1324,15 @@ fn json_millis(value: &Value) -> Option<u64> {
 }
 
 fn is_stale_self_source_echo(entity: &Value, x: i32, y: i32, window: NativeMotionWindow) -> bool {
+    // An attack/struck packet at the predicted source tile is a real action,
+    // not a delayed movement echo. Keep it available to the ActionFeed.
+    if entity
+        .get("_nativeAnimationAction")
+        .and_then(Value::as_str)
+        .is_some_and(|action| !matches!(action, "standing" | "walking" | "running"))
+    {
+        return false;
+    }
     let source_distance = (x as f32 - window.from_x)
         .abs()
         .max((y as f32 - window.from_y).abs());
@@ -1308,6 +1507,29 @@ mod tests {
     }
 
     #[test]
+    fn movement_prediction_uses_crystal_run_distance_and_real_motion_window() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.latest_payload = Some(player_payload(1));
+        assert_eq!(presentation.self_run_distance("1"), 2);
+        assert_eq!(presentation.self_motion_duration_ms("1", false), Some(600));
+        assert_eq!(presentation.self_motion_duration_ms("1", true), Some(600));
+
+        presentation.latest_payload = Some(mounted_player_payload(2, "walking"));
+        assert_eq!(presentation.self_run_distance("1"), 3);
+        assert_eq!(presentation.self_motion_duration_ms("1", false), Some(800));
+        assert_eq!(presentation.self_motion_duration_ms("1", true), Some(600));
+
+        let mut swift_feet = player_payload(3);
+        swift_feet["entities"][0]["buffs"] = json!([102]);
+        presentation.latest_payload = Some(swift_feet.clone());
+        assert_eq!(presentation.self_run_distance("1"), 3);
+
+        swift_feet["entities"][0]["sneakingActive"] = json!(true);
+        presentation.latest_payload = Some(swift_feet);
+        assert_eq!(presentation.self_run_distance("1"), 2);
+    }
+
+    #[test]
     fn movement_collision_uses_live_payload_and_does_not_block_on_corpses() {
         let mut payload = player_payload(1);
         payload["mapFileName"] = json!("0.map");
@@ -1468,12 +1690,94 @@ mod tests {
     }
 
     #[test]
+    fn same_frame_packet_payloads_retain_attack_then_struck_in_action_feed() {
+        for kind in ["selfPlayer", "monster"] {
+            let mut presentation = NativeEntityPresentation::default();
+            let mut payload = player_payload(1);
+            payload["entities"][0]["kind"] = json!(kind);
+            if kind == "monster" {
+                payload["entities"][0]["sprite"]["bodyLibrary"] = json!("Monster/005");
+            }
+            payload["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+            presentation.observe_packet_payload(payload.clone(), 0);
+            payload["entities"][0]["_nativeAnimationAction"] = json!("struck");
+            payload["entities"][0]["_nativeAnimationSequence"] = json!(2);
+            presentation.observe_packet_payload(payload.clone(), 0);
+            // Repeated UI/health projections must not replay the same action.
+            presentation.observe_packet_payload(payload, 0);
+            let state = presentation.world.active_state("1").unwrap();
+            let actions = std::iter::once(state.pose().action)
+                .chain(state.queued_actions().map(|event| event.action))
+                .collect::<Vec<_>>();
+            assert!(
+                actions.contains(&AnimationAction::Attack1),
+                "{kind}: {actions:?}"
+            );
+            assert_eq!(
+                actions
+                    .iter()
+                    .filter(|action| **action == AnimationAction::Struck)
+                    .count(),
+                1
+            );
+            assert_eq!(state.last_enqueued_event_sequence(), Some(2));
+            let mut attack_frames = HashSet::new();
+            let mut struck_frames = HashSet::new();
+            let mut played_actions = Vec::new();
+            // Drive the real presentation tick and inspect the frame/action
+            // pair passed to the renderer, not merely queued event presence.
+            for now_ms in (0..=5_000).step_by(25) {
+                presentation.render_state_if_changed_with_clocks(
+                    now_ms,
+                    now_ms,
+                    true,
+                    |_, frames, _| {
+                        let (frame, action) = frames["1"];
+                        if matches!(action, AnimationAction::Attack1 | AnimationAction::Struck) {
+                            if played_actions.last() != Some(&action) {
+                                played_actions.push(action);
+                            }
+                            match action {
+                                AnimationAction::Attack1 => {
+                                    attack_frames.insert(frame);
+                                }
+                                AnimationAction::Struck => {
+                                    struck_frames.insert(frame);
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        Some(Value::Null)
+                    },
+                );
+            }
+            assert_eq!(
+                played_actions,
+                vec![AnimationAction::Attack1, AnimationAction::Struck],
+                "{kind}: actions were skipped, reordered or replayed"
+            );
+            assert!(
+                attack_frames.len() >= 2,
+                "{kind}: attack did not advance: {attack_frames:?}"
+            );
+            assert!(
+                struck_frames.len() >= 2,
+                "{kind}: struck did not advance: {struck_frames:?}"
+            );
+            presentation.reset_session();
+            assert!(presentation.world.active_state("1").is_none());
+        }
+    }
+
+    #[test]
     fn native_motion_offset_matches_crystal_phase_boundaries_and_even_pixels() {
         let horizontal = NativeMotionWindow {
             from_x: 10.0,
             from_y: 10.0,
             to_x: 11.0,
             to_y: 10.0,
+            sort_x: 10,
+            sort_y: 10,
             started_ms: 1_000,
             expires_ms: 1_600,
             phase_count: 6,
@@ -1494,6 +1798,8 @@ mod tests {
             from_y: 10.0,
             to_x: 10.0,
             to_y: 9.0,
+            sort_x: 10,
+            sort_y: 10,
             started_ms: 2_000,
             expires_ms: 2_600,
             phase_count: 6,
@@ -1531,6 +1837,8 @@ mod tests {
         let entity = &rendered["entities"][0];
         assert_eq!(entity["motionFromX"], json!(10.0));
         assert_eq!(entity["motionToX"], json!(11.0));
+        assert_eq!(entity["motionSortX"], json!(10));
+        assert_eq!(entity["motionSortY"], json!(10));
         assert_eq!(entity["motionStartedMs"], json!(1_700_000_000_100_u64));
         assert_eq!(entity["motionDurationMs"], json!(600));
         assert_eq!(
@@ -1566,6 +1874,37 @@ mod tests {
     }
 
     #[test]
+    fn movement_sort_anchor_expires_without_waiting_for_another_snapshot() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(player_payload(1));
+        let _ = presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial payload");
+
+        let mut moved = player_payload(2);
+        moved["sceneView"]["center"]["x"] = json!(11);
+        moved["entities"][0]["x"] = json!(11);
+        presentation.replace_payload(moved);
+        let moving = presentation
+            .render_state_if_changed_with_clocks(100, 1_100, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("moving payload");
+        assert_eq!(moving["entities"][0]["motionSortX"], json!(10));
+
+        let settled = presentation
+            .render_state_if_changed_with_clocks(700, 1_700, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("locally settled payload");
+        assert!(settled["entities"][0].get("motionSortX").is_none());
+        assert!(settled["entities"][0].get("motionFromX").is_none());
+        assert_eq!(settled["entities"][0]["x"], json!(11));
+    }
+
+    #[test]
     fn local_self_command_starts_pixels_immediately_and_ack_keeps_its_window() {
         let mut presentation = NativeEntityPresentation::default();
         let mut initial = player_payload(7);
@@ -1586,6 +1925,11 @@ mod tests {
             100,
             1_100,
         ));
+        assert!(presentation.has_active_motion(1_100));
+        assert!(
+            !presentation.has_active_non_self_motion(1_100),
+            "local self motion must move the retained camera root instead of rebuilding labels"
+        );
         let predicted = presentation
             .render_state_if_changed_with_clocks(100, 1_100, true, |payload, frames, _| {
                 assert_eq!(
@@ -1621,6 +1965,8 @@ mod tests {
         assert_eq!(confirmed.animation_sequence, 9);
         assert_eq!(rendered["entities"][0]["motionFromX"], json!(10.0));
         assert_eq!(rendered["entities"][0]["motionToX"], json!(11.0));
+        assert_eq!(rendered["entities"][0]["motionSortX"], json!(10));
+        assert_eq!(rendered["entities"][0]["motionSortY"], json!(10));
         assert_eq!(rendered["entities"][0]["motionStartedMs"], json!(1_100));
         assert_eq!(presentation.last_applied_sequence.get("1"), Some(&9));
     }
@@ -1919,6 +2265,17 @@ mod tests {
             .expect("player animation state");
         assert_eq!(state.last_started_event_sequence(), Some(11));
         assert_eq!(state.queue_depth(), 0);
+
+        let mut struck = player_payload(13);
+        struck["entities"][0]["direction"] = json!("right");
+        struck["entities"][0]["_nativeAnimationAction"] = json!("struck");
+        presentation.replace_payload(struck);
+        presentation.sync_pending_payload(300, 1_300);
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.last_enqueued_event_sequence(), Some(13));
+        assert!(std::iter::once(state.pose().action)
+            .chain(state.queued_actions().map(|event| event.action))
+            .any(|action| action == AnimationAction::Struck));
     }
 
     #[test]
@@ -2365,7 +2722,7 @@ mod tests {
                 assert_eq!(highlight[field], normal[field], "redraw {role} {field}");
             }
             assert_eq!(highlight["opacity"], json!(0.3));
-            assert_eq!(highlight["additive"], json!(false));
+            assert_eq!(highlight["additive"], json!(true));
             assert!(highlight["z"].as_f64() > normal["z"].as_f64());
         }
         assert!(
@@ -2622,13 +2979,16 @@ mod tests {
             assert_eq!(normal["path"], json!(expected_body));
             assert_eq!(highlight["path"], normal["path"]);
             assert_eq!(highlight["opacity"], json!(0.3));
-            assert_eq!(highlight["additive"], json!(false));
+            assert_eq!(highlight["additive"], json!(true));
             assert!(normal["z"].as_f64().unwrap() < front_z);
             assert!(front_z < highlight["z"].as_f64().unwrap());
 
             let effects = layers
                 .iter()
-                .filter(|layer| layer["additive"].as_bool() == Some(true))
+                .filter(|layer| {
+                    layer["additive"].as_bool() == Some(true)
+                        && layer["key"] != json!("2005:target-highlight:body")
+                })
                 .collect::<Vec<_>>();
             assert_eq!(effects.len(), usize::from(expected_effect.is_some()));
             if let Some(expected_effect) = expected_effect {

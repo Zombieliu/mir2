@@ -3,7 +3,9 @@ use mir2_game_data::{DoorMapCellTemplate, LanguageCode, MapBounds};
 use mir2_protocol::{IntelligentCreatureRules, MapInformation, MirDirection, Point, Spell};
 use serde::{Deserialize, Serialize};
 
-use crate::config::{CharacterRecord, SimulationConfig, Stage5SystemsState};
+use crate::config::{
+    default_inventory_capacity, CharacterRecord, SimulationConfig, Stage5SystemsState,
+};
 
 use super::buffs::BuffState;
 use super::combat::PendingCombatAction;
@@ -657,6 +659,8 @@ impl MapRuntimeResource {
 
 #[derive(Resource, Debug, Clone)]
 pub(super) struct InventoryResource {
+    pub(super) reserved_item_unique_ids: std::collections::BTreeSet<u64>,
+    pub(super) inventory_capacity: u16,
     pub(super) inventory_items: Vec<ItemState>,
     pub(super) belt_items: Vec<ItemState>,
     pub(super) storage_items: Vec<ItemState>,
@@ -674,6 +678,8 @@ pub(super) struct InventoryResource {
 impl InventoryResource {
     pub(super) fn new(base_storage_slots: u16) -> Self {
         Self {
+            reserved_item_unique_ids: Default::default(),
+            inventory_capacity: default_inventory_capacity(),
             inventory_items: Vec::new(),
             belt_items: Vec::new(),
             storage_items: Vec::new(),
@@ -693,11 +699,16 @@ impl InventoryResource {
 #[derive(Resource, Debug, Clone)]
 pub(super) struct HeroInventoryResource {
     pub(super) items: Vec<ItemState>,
+    pub(super) equipment: Vec<ItemState>,
+    pub(super) capacity: u8,
+    pub(super) legacy_40: bool,
+    pub(super) saved_vitals: Option<crate::config::HeroVitalsState>,
+    pub(super) registry_attachment: Option<crate::config::SharedHeroAttachmentRef>,
 }
 
 impl HeroInventoryResource {
     pub(super) fn new() -> Self {
-        Self { items: Vec::new() }
+        Self { items: Vec::new(), equipment: Vec::new(), capacity: 10, legacy_40: false, saved_vitals: None, registry_attachment: None }
     }
 }
 

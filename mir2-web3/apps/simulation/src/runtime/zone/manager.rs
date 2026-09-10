@@ -34,6 +34,122 @@ struct ZoneManagerCheckpoint {
 }
 
 impl ZoneManager {
+    pub fn sync_intelligent_creature(
+        &mut self,
+        session_id: &SessionId,
+        creature: Option<mir2_protocol::ClientIntelligentCreature>,
+        allowed_object_ids: std::collections::BTreeSet<u32>,
+        group_members: Vec<String>,
+        map_allows: bool,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return vec![];
+        };
+        self.zones
+            .get_mut(key)
+            .map(|z| {
+                z.sync_intelligent_creature(
+                    session_id,
+                    creature,
+                    allowed_object_ids,
+                    group_members,
+                    map_allows,
+                    now_ms,
+                )
+            })
+            .unwrap_or_default()
+    }
+    pub fn request_intelligent_creature_pickup(
+        &mut self,
+        session_id: &SessionId,
+        mouse_mode: bool,
+        location: Point,
+    ) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones.get_mut(key).is_some_and(|z| {
+            z.request_intelligent_creature_pickup(session_id, mouse_mode, location)
+        })
+    }
+    pub fn intelligent_creature_object_id(&self, session_id: &SessionId) -> Option<u32> {
+        self.zones
+            .get(self.session_zones.get(session_id)?)?
+            .intelligent_creature_object_id(session_id)
+    }
+    pub fn intelligent_creature_intent_is_current(
+        &self,
+        intent: &super::CreaturePickupIntent,
+    ) -> bool {
+        self.session_zones
+            .get(&intent.owner.session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|z| z.intelligent_creature_intent_is_current(intent))
+    }
+    pub fn settle_intelligent_creature_pickup(
+        &mut self,
+        session_id: &SessionId,
+        creature_object_id: u32,
+        drop_id: u32,
+    ) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones.get_mut(key).is_some_and(|z| {
+            z.settle_intelligent_creature_pickup(session_id, creature_object_id, drop_id)
+        })
+    }
+    /// Search all zones because an already-started operation survives leaving its
+    /// visual actor. Preserve every other owner's entries in their original order.
+    pub fn drain_intelligent_creature_operations(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Vec<super::CreatureOperation> {
+        self.zones
+            .values_mut()
+            .flat_map(|z| z.drain_intelligent_creature_operations_for(session_id))
+            .collect()
+    }
+    pub fn drain_intelligent_creature_pickup_intents(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Vec<super::CreaturePickupIntent> {
+        self.zones
+            .values_mut()
+            .flat_map(|z| z.drain_intelligent_creature_pickup_intents_for(session_id))
+            .collect()
+    }
+    pub fn settle_intelligent_creature_operation(
+        &mut self,
+        session_id: &SessionId,
+        operation_id: &str,
+    ) -> bool {
+        let mut settled = false;
+        for zone in self.zones.values_mut() {
+            settled |= zone.settle_intelligent_creature_operation(session_id, operation_id);
+        }
+        settled
+    }
+    /// Internal authenticated-account recovery path. Session IDs identify the
+    /// original delivery, while account + character owns the durable receipt.
+    /// Callers must derive both arguments from their active identity, never wire
+    /// input. Ack using the returned operation's original owner.session_id.
+    pub fn peek_intelligent_creature_operations_for_identity(
+        &self,
+        account_id: &str,
+        character_index: i32,
+    ) -> Vec<super::CreatureOperation> {
+        if account_id.is_empty() {
+            return Vec::new();
+        }
+        self.zones
+            .values()
+            .flat_map(|zone| {
+                zone.peek_intelligent_creature_operations_for_identity(account_id, character_index)
+            })
+            .collect()
+    }
     pub fn new() -> Self {
         Self {
             zones: BTreeMap::new(),
@@ -121,19 +237,7 @@ impl ZoneManager {
 
     pub fn join(&mut self, join: ZoneJoin) -> Vec<ZoneOutbound> {
         let key = ZoneKey::for_map(join.map_file_name.clone());
-        let mut outbounds = Vec::new();
-        if let Some(previous_key) = self.session_zones.get(&join.session_id).cloned() {
-            if previous_key != key {
-                outbounds.extend(self.handle_for_key(
-                    previous_key,
-                    ZoneCommand::Leave {
-                        session_id: join.session_id.clone(),
-                    },
-                ));
-            }
-        }
-        outbounds.extend(self.handle_for_key(key, ZoneCommand::Join(join)));
-        outbounds
+        self.handle_for_key(key, ZoneCommand::Join(join))
     }
 
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
@@ -281,11 +385,38 @@ impl ZoneManager {
     }
 
     pub fn handle_for_key(&mut self, key: ZoneKey, command: ZoneCommand) -> Vec<ZoneOutbound> {
-        match &command {
-            ZoneCommand::Join(join) => {
-                self.session_zones
-                    .insert(join.session_id.clone(), key.clone());
+        // All Join entry points share this transfer path. Carry the same online
+        // player's receipt clock before removing its old Zone incarnation;
+        // otherwise map changes restart sequences at one under the same ID.
+        if let ZoneCommand::Join(join) = command {
+            let session_id = join.session_id.clone();
+            let previous_key = self.session_zones.get(&session_id).cloned();
+            let mut outbounds = Vec::new();
+            let mut transferred_clock = None;
+            if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+                transferred_clock = self
+                    .zones
+                    .get(&previous_key)
+                    .and_then(|zone| zone.player_vital_clock(&session_id));
+                outbounds.extend(self.handle_for_key(
+                    previous_key,
+                    ZoneCommand::Leave {
+                        session_id: session_id.clone(),
+                    },
+                ));
             }
+            self.session_zones.insert(session_id.clone(), key.clone());
+            let zone = self
+                .zones
+                .entry(key.clone())
+                .or_insert_with(|| ZoneRuntime::new(key));
+            outbounds.extend(zone.handle(ZoneCommand::Join(join)));
+            if let Some(clock) = transferred_clock {
+                zone.restore_player_vital_clock(&session_id, clock);
+            }
+            return outbounds;
+        }
+        match &command {
             ZoneCommand::Leave { session_id } => {
                 self.session_zones.remove(session_id);
             }
@@ -404,6 +535,13 @@ impl ZoneManager {
         self.zones.get(key)?.player_last_seen_move_seq(session_id)
     }
 
+    pub fn player_life_generation(&self, session_id: &SessionId) -> Option<u64> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_life_generation(session_id)
+    }
+
+    /// Trusted server-only Harvest admission query for the player's active
+    /// Zone. No raw client command can synchronize the predicates it reads.
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_vitals(session_id)

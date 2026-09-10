@@ -10,6 +10,8 @@ use mir2_ui_core::game_shop::{next_request_sequence, request_id_for_sequence};
 pub use mir2_ui_core::game_shop::{GameShopFailureCode, GameShopReceipt, GameShopRequest};
 use serde::{Deserialize, Serialize};
 
+use crate::inventory::CrystalItemTooltipSourceModel;
+
 pub const GAME_SHOP_QUANTITY_MIN: u8 = 1;
 pub const GAME_SHOP_QUANTITY_MAX: u8 = 99;
 /// Defensive ceiling for server-provided catalog rows. The authoritative
@@ -67,6 +69,9 @@ pub struct GameShopEntry {
     pub date_binary_datetime: i64,
     pub can_buy_credit: bool,
     pub can_buy_gold: bool,
+    /// Source-faithful temporary `UserItem` created by Crystal while the
+    /// pointer is inside the product image (`MirGameShopCell.OnMouseMove`).
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 impl Default for GameShopEntry {
@@ -89,6 +94,7 @@ impl Default for GameShopEntry {
             date_binary_datetime: 0,
             can_buy_credit: false,
             can_buy_gold: false,
+            tooltip_source: None,
         }
     }
 }

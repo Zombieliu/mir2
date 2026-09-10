@@ -1,5 +1,417 @@
 # Crystal Server Parity
 
+> 2026-09-10 resumed three-class QA: R3 live testing exposed missing FireBang
+> ground completion, frame-final modifier matching and self-spell cursor rejection.
+> R4 bounded fixes additionally close shared TwinDrake atomic mana payment and
+> ordinary-attack Slaying preparation, with focused regression evidence in
+> generated/player-qa/native-keyboard-20260910/three-class-live-20260910.md.
+> Frozen source daf546c8 is under combined validation/packaging; all66 original
+> paired visual gates remain open. No global percentage or final acceptance.
+
+> 2026-09-10 three-class follow-up: all66 active source skills are represented in
+> isolated test fixtures, not claimed as visually accepted. Slaying is classified
+> Passive following Crystal GameScene's hotkey return branch; manual cast sends
+> no spell/toggle and spends no MP, while binding and automatic melee behavior
+> remain covered (new1/1, adjacent2/2). Gateway's additive magicName metadata
+> preserves explicit names and supplies source MagicInfo names over starter
+> aliases. Existing shared-magic actor rejection stays enabled; native's sender
+> is fixed to identify its actual self actor. Paired skill effects and a matched
+> rebuilt Gateway are pending; no global parity percentage is claimed.
+
+> PostgreSQL prepared-kill production adapter now passes 7/7 isolated real-PG
+> tests, 32/32 economy regressions and 2/2 ordinary pending-source regressions.
+> The actual runtime publishes its complete character checkpoint, derived Guild
+> mutations, balance legs, receipt and outbox in one PostgreSQL transaction.
+> Mirror and SourceOfTruth modes are exercised through the ordinary service;
+> replay uses the committed checkpoint without rerunning gameplay. Exact changed
+> legs and locked pre-effect balances must match the authoritative source.
+> Historical ledger drift is rejected, never silently credited or corrected.
+> Receipt ingestion rejects stripped source proofs; diagnostic Debug omits
+> database credentials and account contents. After PG commit, failed Mirror File
+> publication retains the durable fence instead of compensating only one domain.
+> Evidence: `C:/mir2-build/prepared-kill-baseline-postgres-tests.log`,
+> `C:/mir2-build/prepared-kill-baseline-economy-tests.log` and
+> `C:/mir2-build/prepared-kill-baseline-source-tests.log`.
+> Still open: death-time Zone capture, ordinary non-kill XP ledger synchronization
+> and an explicit reconciliation operator tool. Baseline rejection is containment,
+> not completion of those flows. These source changes postdate the frozen visual
+> candidate; no live-store migration or dual-client visual acceptance is claimed.
+
+> InProcess delivery follow-up: ordinary shared-kill delivery now uses the
+> typed complete-source transaction. Known failures retain the pending award;
+> uncertain local publication has its own outcome without a fabricated PG lease.
+> The first delivery key is fixed before hashing and retained in the pending
+> envelope across serialization and a changed delivery Zone. A new service
+> instance consults durable source receipts rather than an in-memory cache.
+> XP tests pass 14/14 (one separate PG ignore), new Gateway queue/replay tests
+> 2/2 and existing kill-award regressions 2/2. Account-only no-Guild kill receipts
+> now receive the same unknown-COMMIT classification and compensation fencing.
+> Evidence: `C:/mir2-build/guild-xp-stable-key-runtime-tests.log`,
+> `C:/mir2-build/guild-stable-source-queue-tests.log`,
+> `C:/mir2-build/guild-stable-source-kill-regression-tests.log`.
+> File publication fencing is now durable: the already-locked writer handle
+> writes and syncs a pending marker before publication, and clears it only after
+> confirmed completion or confirmed compensation. Unknown outcomes, early exits,
+> released Config handles and restart retain the fence. Root verification:
+> Config 115/115, isolated PostgreSQL 9/9 and File publication boundaries 10/10;
+> see [File publication evidence](FILE-PUBLICATION-FENCE.md).
+> Remaining blockers: authoritative death-time Zone capture is not populated,
+> ordinary non-kill XP changes still need ledger synchronization,
+> and an explicit operational reconciliation tool is not implemented. These tests
+> do not establish power-loss guarantees for every storage medium.
+> No live migration, package or dual-client visual acceptance occurred.
+
+
+> Runtime follow-up: a keyed shared-kill consumer now verifies the full award
+> hash and recipient identity, persists its kill receipt with the complete
+> character/Guild source checkpoint, and restores gameplay state on a known
+> failed commit. Its regression passes failure/retry, captured final amount,
+> logout/login replay and changed-payload rejection. The ordinary File XP test
+> also verifies Hero live buff and action-clock rollback via an opaque transient
+> checkpoint. Targeted XP tests now pass 13/13 (one PostgreSQL-specific ignore).
+> This API is not yet the production Gateway route: typed unknown/deferred
+> outcomes, live Zone selection and PostgreSQL economy atomic publication remain
+> open. All existing Zone producers currently emit no capture; the optional
+> serialized field preserves old checkpoint encoding when absent.
+> Evidence: `C:/mir2-build/guild-xp-runtime-kill-tests.log`.
+
+
+> Guild XP capture authorization follow-up: the transaction consumer now requires
+> a non-deserializable server permit matching stable character identity, the
+> complete kill payload hash and immutable selection hash before accepting a
+> shared-kill receipt or an older membership epoch. File failure/retry retains
+> the captured rounded amount; disbanded Guilds produce an explicit skipped
+> receipt without recreation. Missing permits, altered amounts, fabricated
+> outcomes and omitted source events are rejected. Targeted XP tests pass 12/12
+> (one separate PostgreSQL test ignored by this filter), including three new
+> capture-domain tests. These are domain/File tests, not a production Zone kill
+> delivery claim: Zone/Gateway capture production and the complete PostgreSQL
+> economy transaction are still unfinished. Evidence:
+> `C:/mir2-build/guild-xp-captured-permit-tests.log`.
+
+
+> 2026-09-10 Guild XP source checkpoint: the fixed account transaction consumer
+> now validates source identity/revision/sequence and membership epoch, derives
+> the Guild write scope only after the caller's original scope passes, and
+> saves full character state plus per-event Guild receipts atomically. Ordinary
+> NPC/quest/combat entry wrappers and personal timers journal the actual
+> GainExp amount; a failed File write restores source state and NPC/timer state.
+> Nine targeted tests passed, including the real NPC GainExp helper through
+> failed save, retry and logout/login. This is not an end-to-end NPC-page test.
+> Shared kill capture currently has only its immutable selection type/pure
+> test: Zone envelope/profile integration, old-Guild authorization, and the
+> PostgreSQL economy-ledger/source-checkpoint transaction remain unfinished.
+> Guild COMMIT transport uncertainty now freezes the shared File writer
+> authority. Mirror compensation uses its own committed Guild/account/save
+> versions; an independent PostgreSQL writer advancing either source or Guild
+> makes the entire old compensation fail. The dedicated PostgreSQL regression
+> passed 1/1, and existing clock PostgreSQL regressions passed 6/6.
+> Existing personal social-XP eligibility/order remains a separate prerequisite;
+> recording the current GainExp amount does not prove those rates match Crystal.
+> The whole Guild XP feature is therefore not Candidate-complete. No live
+> migration, package rebuild or dual-client visual acceptance occurred.
+> Evidence: `C:/mir2-build/guild-xp-source-wrapper-tests.log` (9-test checkpoint),
+> `C:/mir2-build/guild-xp-postgres-compensation-tests.log`,
+> `C:/mir2-build/guild-clock-after-xp-fencing-tests.log`.
+
+> Clock follow-up: a live coordinator retains its last successfully published
+> owner/generation. Scheduling beyond the 30-second lease admits at most one
+> elapsed minute when that exact generation still owns the locked clock; only
+> restart/takeover reanchors without charging downtime. Reusing a token with a
+> different generation cannot advance. PostgreSQL standbys now observe a
+> repeatable-read Guild/version snapshot and emit a refresh signal without
+> changing the lease, even when another stats read already refreshed their
+> local Guild image. File mirrors never adopt another owner's read snapshot.
+> Clock 14/14 local tests and 8/8 dedicated PostgreSQL tests pass:
+> `C:/mir2-build/guild-clock-late-owner-tests.log`,
+> `C:/mir2-build/guild-clock-late-owner-postgres-tests.log`.
+
+> 2026-09-10 shared Guild clock candidate: a server-lifetime Gateway worker now
+> drives minute expiry with no online players. File configurations share the
+> canonical-path writer lock and freeze state; PostgreSQL uses a database-time
+> singleton lease and atomic Clock/Guild CAS. Takeover/restore fence old owners,
+> re-anchor without offline deductions, and compensate only exact receipts.
+> Focused evidence: File/schema/clock 12 passed, real isolated PostgreSQL 6
+> passed, Gateway empty-server worker 1 passed, Gateway tests compile passed.
+> Guild XP earning/points progression is still unconnected; no live migration,
+> new Windows packaging, dual-client visual acceptance or global percentage is
+> claimed. Details: [Shared Guild integration](SHARED-GUILD-INTEGRATION.md).
+
+> 2026-09-10 menu parity is in progress. Shared Ranking presence now uses
+> stable account/character identity across local factory Zones, excluding
+> replicas and leaving players (simulation 3/3, Gateway integration 1/1).
+> Creature updates now preserve server-owned properties, reject fabricated
+> pets and separate summon state from pickup mode; authority/migration 5/5,
+> simulation regressions 4/4 and Gateway regressions 8/8 pass. Legitimate
+> creature acquisition/actor rendering, distributed ranking and final native
+> visual acceptance remain open. See `NATIVE-MENU-CRYSTAL-PARITY.md`.
+> No global completion percentage or final acceptance is claimed.
+
+> 2026-09-09 trade merge/reorder: native item selection now sends exact-UID
+> merges across Inventory/Trade and slot moves/swaps within own Trade.
+> Partial merges preserve the remainder and target identity; server validates
+> metadata, capacity, logical grid membership and editable offer state.
+> Shared routing blocks edits when either participant is prepared and refreshes
+> the partner offer. Trade merges require exact ACK/NACK, not inventory-delta
+> inference. Evidence: `docs/generated/player-qa/native-trade-merge-20260909/README.md`.
+> This deliberately completes a client interaction rejected by this Crystal
+> server checkout. Full custody/prepared editing and live package/visual gates
+> remain open; no global UI completion or acceptance percentage is claimed.
+
+> 2026-09-09 native trade item operations: inventory-to-own-trade deposit and
+> own-trade-to-selected-bag retrieval are connected to ordinary packet intents.
+> Server retrieval now validates the exact offered instance and destination,
+> preserves item identity/metadata, and rejects occupied/out-of-capacity cells.
+> UI selection is bound to item state and the current exchange; guest cells,
+> locked trades and covering dialogs reject input. Failed host sends release
+> only the matching unsent operation. Automated evidence and remaining gaps:
+> `docs/generated/player-qa/native-trade-items-20260909/README.md`.
+> Merge, trade-slot movement, complete item custody and live Windows visual
+> acceptance remain open. All 33 global UI backlog IDs remain open;
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
+> 2026-09-09 bounded shared update integration implemented for all 47 existing
+> personal dedicated monster modules: owned-monster combat, status leases,
+> targets, summons, death/retirement and checkpoint/fork are connected.
+> Full simulation baseline: 2193 passed; later HellKnight guard: Zone
+> 102 + Hell/shared Zone 221 passed. Inventory restore fix: 98 passed.
+> Gateway full baseline: 785 passed / 7 failed / 1 ignored; all initial
+> failures resolved across persistence reruns (4 + Q1-Q4) and RPC 30 reruns.
+> Receipt namespace 4, drop regression 47, economy/replay 39 and Gate11 2 pass.
+> Later corpse expiry fix: full simulation 2197, Gateway expiry 2 pass.
+> These are version-bound, overlapping results, not a fresh final-source full Gateway run.
+> Evidence and remaining Crystal-only gaps:
+> `docs/generated/shared-monster-ai-20260908/shared-update-delivery-20260909.md`.
+> Next gaps include independent respawn groups/live IDs and legacy corpse migration.
+> No Windows package or visual acceptance; globalComplete=false, accepted=false.
+
+> 2026-09-08 F02-B refine oven custody: full target moves out of the bag,
+> timer-gated NPC collection preserves the instance and retries safely on full bags.
+> Collected pending refinement belongs to each item; successful check uses ItemUpgraded,
+> and repeat requests cannot charge/collect/upgrade twice. Legacy migration requires
+> an existing unambiguous target; corrupt clocks and custody collisions fail closed.
+> New oven integration 10/10, previous market/material integration 9/9, focused
+> refine library 9/9 pass. Evidence: `docs/generated/player-qa/refine-oven-custody-20260908/README.md`.
+> This supersedes the oven-target implementation gap below, not all refine parity:
+> deterministic RNG and last-persisted-remaining restart semantics remain explicit
+> deviations. Windows core journey, same-version package and visual acceptance are next.
+> No live-store write or deployment. `accepted=false`, `visualAccepted=false`,
+> `globalParityPercent=null`.
+
+> 2026-09-08 whole-game audit F01/F02 custody repair: ordinary market and
+> refine-material custody now persist full instances, stage capacity/merges before
+> transfer, and preserve held items on failure/reload. Custody reserves recursive
+> UIDs; MAX/zero/legacy aliases and storage split/equipment return collisions are
+> covered. New regressions: 9 ordinary-packet + 5 UID tests pass; adjacent market,
+> refine, UID, split and remove tests pass; Gateway/Admin API test targets compile.
+> Evidence: `docs/generated/player-qa/market-refine-custody-20260908/README.md`.
+> Broad intermediate runs also pass: 1491 library tests and 383
+> integration tests; final UID hardening has separate focused/adjacent results.
+> These are version-bounded runs, not a final-source full rerun.
+> This closes the bounded instance-loss repair only: shared market service and
+> full refine target/oven/timer remain open, as do Windows journey/package/visual
+> gates. Legacy key-only records remain held and cannot mint template replacements.
+> No live-store write, deployment or package. `accepted=false`,
+> `visualAccepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 native owner swing: Zone ObjectAttack used a different actor ID
+> from the personal SelfPlayer snapshot. Owner-facing execute returns now
+> normalize own ObjectAttack/ObjectRangeAttack IDs after shared-state and
+> observer processing. Two-session public regression passes (owner local ID,
+> observer/shared-state Zone ID). Full Gateway regression: 696 passed, zero
+> failed, one PostgreSQL-environment ignore. Isolated localhost service updated;
+> live swing acceptance awaits manual login.
+> Evidence: `docs/generated/player-qa/windows-owner-swing-20260908/README.md`.
+> This does not close asynchronous combat identity or global visual parity.
+
+> 2026-09-08 Windows trade gold custody checkpoint: positive incremental offers
+> now debit the wallet immediately; preparation/recovery only debit outstanding
+> gold. Persisted heldGold preserves legacy snapshots and is independent from
+> prepared item custody. Cancel/teardown and orphan positive-hold recovery refund
+> once; save failure restores custody. Cap/materialization failures retain final
+> retry authority. Ledger bootstrap occurs before the first eligible debit.
+> Any prepared participant blocks gold and item edits; item failure ACKs prevent
+> withdrawing an offer while reusing the peer's previous confirmation.
+> Simulation 1491 unit + 374 unique integration tests are verified. Gateway resolved
+> coverage is 695 passed / one existing environmental ignore: the initial full
+> run had one queued-notification fixture assertion, corrected by a test-only
+> change and a passing 10/10 gold rerun. Production code did not change for that
+> correction. Format/diff and independent bounded review pass. Exact raw results:
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-gold/README.md`.
+> Next: separate confirmation tickets from exact held-item custody, then editable
+> prepared offers and native deposit/retrieve/merge. Prepared unlock still cancels/
+> refunds; source capacity rejection retention, zero-held orphan cleanup, request
+> throttle/error chats, screenshots and all 33 backlog IDs remain open. No UI/
+> Windows-host rerun, package, interactive launch, live-store write or deployment
+> occurred. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade invitation/private-pair checkpoint: native source
+> MirMessageBox Yes/No and cancellation OK, invitation revision ownership,
+> keyboard disposal and modal input isolation are implemented. Shared Gateway
+> invitations go only to the facing recipient; accepted reciprocal presence
+> pairs own guest gold/item notifications and settlement matching. Refusal,
+> teardown, old-cleanup/new-invite ordering and bootstrap failure are covered.
+> Native UI 598/598, Windows 537/537, Gateway 685 passed / one existing ignored,
+> and new Gateway security tests 13/13 pass;
+> the final full Gateway result and source hashes are recorded in
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-invitation/README.md`.
+> Next: positive-delta/immediate editable gold escrow and bilateral unlock,
+> then exact item custody and native deposit/retrieve/merge operations. Cells
+> remain read-only; prepared unlock still cancels/refunds. Request throttle,
+> complete error chats, original paired screenshots, package/light/DPI/soak/
+> legal/signing/human gates and all 33 IDs remain open. No interactive launch,
+> screenshot, production rollout or live-store write occurred this round.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+
+> Shared-trade completion checkpoint (2026-09-03): internal lock/preparation
+> no longer emits S.TradeConfirm. Matching delivery sends completion once;
+> durable projection waits for its atomic save/event marker and safely
+> retries. escrowPrepared separates reservation from completion while legacy
+> completed debit snapshots remain recoverable without another debit.
+> Simulation 1491/1491 + dedicated 7/7, Gateway 672 passed / one existing ignored, protocol
+> 40/40, game-data 39/39 and 1380 client tests pass. Initial
+> fixture/assertion and mixed-cache failures are retained in the evidence:
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+> This is one source wire-semantic correction, not a full transaction or
+> packet-order parity claim. TradeGold delta/immediate escrow, invitation/
+> private routing, editable locks, capacity keep-offer behavior, mail fallback
+> and item operations remain open. Production routing/authority/auth and
+> wire IDs are unchanged; no SQL migration or live-store mutation occurred.
+> No GUI/capture; all 33 IDs and original-pair/package/light/DPI/soak/human
+> gates remain. visualAccepted=false, accepted=false, globalParityPercent=null.
+
+> Historical shared-trade wire/escrow audit (2026-09-03): Crystal
+> `GameScene.cs:6329-6347` treats S.TradeConfirm as completed exchange, but
+> Candidate `runtime/packets.rs:5191-5274` and `runtime/session.rs:432-446`
+> produce/use it during unilateral preparation. Gateway
+> `apps/gateway/src/routing.rs:11028-11168` returns the initial packet before
+> mutual durable settlement, including waiting/rollback/unknown outcomes.
+> Crystal `Server/MirObjects/PlayerObject.cs:10778-10822` makes C.TradeGold a
+> positive delta with immediate owner debit and guest cumulative update;
+> Candidate `apps/simulation/src/runtime/packets.rs:5059-5073` instead replaces
+> the offer, rejects locked edits and defers debit. These are confirmed open
+> source contracts, not fixed by the new source-shaped native windows.
+>
+> Next work: separate lock/prepare from completion, then align escrow/deltas
+> and packet ownership while preserving conservation, cancellation/refunds,
+> idempotence, save/disconnect and durable unknown-outcome recovery. Backend
+> source/schema/stores/auth are unchanged this checkpoint. Native UI 591/591,
+> Windows 534/534, client runtime 212/212 and UI core 43/43 pass; full server
+> tests were not rerun and older outcomes are not current proof. Exact source
+> hashes and client limitations (including read-only trade cells):
+> `docs/generated/player-qa/native-ui-parity-20260903-trade-dialog/README.md`.
+> All 33 backlog IDs and paired-state/package/light/DPI/soak/human gates remain;
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> Source stack-image server/client checkpoint (2026-09-03): the pure
+> `UserItem.Image` rule now projects authoritative quantity onto personal
+> item snapshots and NPC goods. Exact Info.Image/type/shape/StackSize are
+> used; neither saved icon caches nor viewer realInfo override source image
+> identity. Raw UserItem fields, ItemInfo.Image, mutation rules and save data
+> remain unchanged. Shared game-data 39/39 and real protocol integration
+> 4/4 pass, including bag/belt/storage/equipment thresholds, both poisons,
+> cross-belt merge, equip/remove and save/reload. Full Simulation 1491/1491
+> and Gateway 667 passed / one existing ignored pass on the final source;
+> Windows 527/527 also passes.
+> Crystal ground ObjectItem sends Item.Image but the original client uses
+> FloorItems: that separate runtime/asset path is not fixed by this Items
+> projection. GameShop, QuestCell, crafting shadows and mail-list thumbnails
+> deliberately retain source base-image behavior; guild/trade and other
+> actual-item surfaces remain open. The historical initial PNG predates
+> the final ordinary-item icon correction and does not close final-source
+> same-EXE input, Crystal pairing, trusted provenance, DPI or human gates.
+> Source and evidence: `docs/generated/player-qa/native-ui-parity-20260903-item-stack-images/README.md`.
+> No schema/store migration, auth relaxation or whole-server acceptance is
+> implied; `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> Character wing server/client note (2026-09-03): the prior missing-wing note
+> below is superseded. `Looks_Wings` now derives from server-owned real armour
+> metadata with Crystal's broken-base-durability rule, and explicit zero
+> clears the effect after unequip. Personal snapshots do not lend self
+> appearance to other actors; ObjectPlayer keeps its own wire effect, while
+> native partial snapshots and session resets retain the intended ownership
+> boundary. `@SETLIGHT` preserves the current equipment-derived effect.
+> Full Simulation 1491/1491, Gateway 666 active/1 ignored, dedicated wing
+> integration 5/5 and affected recall integration 2/2 pass. Windows 521/521,
+> native UI 519/519 and runtime 212/212 pass with same-EXE four-frame and real
+> unequip/re-equip evidence in
+> `docs/generated/player-qa/native-ui-parity-20260903-character-wings/README.md`.
+> The fixed native unequip path uses the existing normalized-bag destination
+> contract; raw Crystal/belt addressing and amulet merge parity remain open.
+> This is a bounded appearance/projection correction, not completion of
+> server gameplay, distributed authority, source item interaction UI,
+> packaging/light, DPI or human visual acceptance. No server/global percentage
+> is reported.
+
+> Crystal remaining tooltip surfaces note (2026-09-03): NPC shop, GameShop,
+> quest reward, guild-storage and trade packets now feed the native client a
+> complete tooltip source without moving authority into presentation code.
+> Instance-bearing surfaces retain their real `UserItem`; catalogue previews
+> follow Crystal's different GameShop and Quest constructors; exact item-index
+> joins and viewer-specific `GetRealItem` fail closed when source identity is
+> absent or ambiguous. Native UI passes 511/511 and the current Windows Debug
+> build succeeds; Windows is 519/520 solely because of the registered Archer
+> atlas fixture assertion. This supersedes the sparse-surface statement in the
+> prior note below. It does not close distributed item ownership, panel visual
+> geometry, same-EXE populated evidence, device or human acceptance, and no
+> server/global percentage is reported.
+>
+> Crystal item-tooltip server-client note (2026-09-03): item ownership and
+> mutation remain server-authoritative; this slice adds only the complete
+> presentation source needed by a faithful client. Simulation resolves each
+> visible personal item with Crystal `Functions.GetRealItem`, retains recursive
+> socket `UserItem` records and exposes current player requirement stats;
+> Gateway carries those exact values to Windows. Focused Simulation/game-data
+> regressions and client native-ui 509/509 pass. The same-EXE WoodenSword hover
+> proves the bounded route, but NPC/cash shops, quest rewards, guild storage and
+> trade remain sparse and must not fabricate metadata. This does not complete
+> distributed account/item ownership, packaging, DPI/device or human visual
+> acceptance, and no server/global percentage is reported.
+
+> CharacterDialog server-client projection note (2026-09-02): no new client
+> authority was introduced. The personal Simulation remains authoritative for
+> equipped items and now projects each Crystal template's `ItemInfo.Image` in
+> `EquipmentItemSnapshot`; existing `UserInformation` gender/hair and existing
+> world/player guild fields are retained by Gateway instead of disappearing on
+> a later partial snapshot. The Windows host resolves presentation geometry
+> from exact exported `StateItem` metadata and fails closed when data is
+> missing. Focused server/Gateway regressions and aligned `1231` native
+> evidence pass. Wing state is still unavailable, and this does not complete
+> Character stats, multiplayer Zone ownership, packaging, device or human
+> acceptance; no server/global percentage is reported.
+
+> Zone movement/light server-client note (2026-09-01): the authoritative Zone
+> now treats both Walk and Run as real 600 ms movement windows and consumes only
+> the latest intent when the actual clock reaches readiness. It no longer
+> executes against a future tick or a 120 ms early grace window; blocked moves
+> still correct only the owner and successful moves retain normal owner/AOI
+> packet surfaces. Windows may predict Crystal's two-cell Run or three cells
+> for mounted/SwiftFeet presentation, but collision and final transform remain
+> server-owned. The local server's unset/`dynamic` light mode now follows the
+> same Crystal UTC time-of-day formula instead of a Debug-only forced Day; fixed
+> `1..4` overrides remain deterministic QA controls, and no gamma manipulation
+> is involved. `shared_zone` passes 204/204 and focused light regressions pass.
+> This closes only the identified local timing/configuration mismatch; full
+> distributed Zone, live-WSS, device and human frontend acceptance remain open,
+> with no server/global percentage reported.
+
+> Character-select LastAccess server/client note (2026-09-01): the local path
+> now follows Crystal's UTC `CharacterInfo.LastLogoutDate`/
+> `SelectInfo.LastAccess` lifecycle instead of returning a hard-coded date.
+> Authoritative final `LogOut`, `Disconnect` and abnormal transport teardown
+> persist the binary DateTime beside the final character snapshot, recovery
+> replay retains the logout-save semantic, subsequent rosters expose it, and
+> Gateway retains its exact signed 64-bit representation. Web and Windows
+> consume it without precision loss; Windows formats the reconstructed value as
+> `yyyy/MM/dd HH:mm:ss`. Focused Simulation 2/2, Gateway LastAccess 2/2,
+> recovery replay 1/1, native protocol 1/1, Windows adapter 1/1 and select UI
+> 6/6 regressions pass. A legacy or new character still correctly shows `Never`
+> until its first completed logout. The adjacent preview residency/shared-clock
+> repair is client presentation only; the local Debug comparison is not
+> same-EXE/device/human acceptance and no server or global percentage is
+> reported.
+
 > Windows NPC click/DataRange server-client note (2026-08-29): revision
 > `dd3179559` is source-bound to Crystal `GameScene.OnMouseClick` and
 > `PlayerObject.CallNPC`. Windows sends `CallNPC [@Main]` immediately for a

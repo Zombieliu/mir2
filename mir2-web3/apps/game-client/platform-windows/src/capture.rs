@@ -8,15 +8,22 @@ mod provenance;
 use bevy::{
     input::ButtonInput,
     prelude::{
-        App, Image, KeyCode, On, Plugin, Query, Res, ResMut, Resource, Update, Window, With,
+        App, Image, KeyCode, On, Plugin, PostUpdate, Query, Res, ResMut, Resource, Window, With,
     },
     render::view::screenshot::{Screenshot, ScreenshotCaptured},
     window::PrimaryWindow,
 };
-use mir2_client_bevy::crystal_ui::{notice::NoticeDialogState, NativePlayerUiState};
+use mir2_bevy_runtime::capture_context::RenderedCaptureContext;
+use mir2_client_bevy::crystal_ui::{
+    notice::NoticeDialogState, overlays::CharacterPage, NativePlayerUiState,
+};
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
+use mir2_client_bevy::inventory::InventoryModel;
+#[cfg(test)]
+use mir2_client_bevy::inventory::ItemModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{CombatTargetModel, QuestStatus, QuestTracker};
+use mir2_client_bevy::quest_ui::QuestUiState;
 use mir2_client_bevy::read_model::UiReadModel;
 use serde::Serialize;
 use std::{
@@ -53,6 +60,10 @@ pub struct NativeCaptureConfig {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum NativeCaptureTarget {
     Screen(NativeShellScreen),
+    CharacterOpen,
+    InventoryOpen,
+    InventoryQuestOpen,
+    InventoryDeleteOpen,
     NoticeOpen,
     QuestAccepted,
     Combat,
@@ -125,7 +136,24 @@ struct NativeCaptureRuntime {
 struct NativeAutoCaptureState {
     target: NativeCaptureTarget,
     countdown: Option<u32>,
+    identity: Option<(u64, String)>,
     done: bool,
+}
+
+impl NativeAutoCaptureState {
+    fn observe_rendered_identity(&mut self, rendered: Option<&RenderedCaptureContext>) -> bool {
+        if !is_world_scene(capture_target_slug(self.target)) {
+            return true;
+        }
+        let identity = rendered
+            .filter(|value| value.ready())
+            .and_then(|value| Some((value.epoch, value.map_file_name.clone()?)));
+        if self.identity != identity {
+            self.countdown = None;
+            self.identity = identity;
+        }
+        self.identity.is_some()
+    }
 }
 
 /// Snapshot taken when a screenshot is requested, before Bevy completes the
@@ -150,9 +178,9 @@ struct NativeCaptureWorld {
     map: Option<String>,
     x: Option<i32>,
     y: Option<i32>,
-    // Lighting is managed by the Windows host bridge and is not exposed as a
-    // capture resource. A missing light must remain explicit rather than be
-    // guessed from time, map, or a visual effect.
+    map_file_name: Option<String>,
+    epoch: Option<u64>,
+    // Populated only from the state consumed by runtime presentation.
     light: Option<String>,
 }
 
@@ -205,6 +233,8 @@ struct NativeCaptureV1Sidecar {
 #[serde(rename_all = "camelCase")]
 struct NativeCaptureV1World {
     map: String,
+    map_file_name: String,
+    epoch: u64,
     x: i32,
     y: i32,
     light: String,
@@ -269,6 +299,7 @@ impl Plugin for Mir2NativeScreenshotPlugin {
         if let Some(target) = config.auto_target {
             runtime.auto = Some(NativeAutoCaptureState {
                 target,
+                identity: None,
                 countdown: None,
                 done: false,
             });
@@ -276,7 +307,7 @@ impl Plugin for Mir2NativeScreenshotPlugin {
 
         app.insert_resource(config);
         app.insert_resource(runtime);
-        app.add_systems(Update, (manual_capture_system, auto_capture_system));
+        app.add_systems(PostUpdate, (manual_capture_system, auto_capture_system));
     }
 }
 
@@ -289,9 +320,25 @@ fn manual_capture_system(
     ui: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
     player_ui: Option<Res<NativePlayerUiState>>,
+    quest_ui: Option<Res<QuestUiState>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    rendered: Option<Res<RenderedCaptureContext>>,
 ) {
-    if !keys.just_pressed(KeyCode::F12) {
+    // Ctrl+Shift+F12 remains the explicit QA evidence shortcut. Ordinary
+    // screenshots follow Crystal's configurable key-release binding.
+    let qa = keys.just_pressed(KeyCode::F12)
+        && (keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight))
+        && (keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight));
+    let bound = player_ui.as_deref().is_some_and(|u| {
+        !u.keyboard.open
+            && !u.keyboard.input_consumed
+            && mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::released(
+                &u.keyboard,
+                &keys,
+                "Screenshot",
+            )
+    });
+    if !qa && !bound {
         return;
     }
 
@@ -309,7 +356,9 @@ fn manual_capture_system(
             ui.as_deref(),
             entities.as_deref(),
             player_ui.as_deref(),
+            quest_ui.as_deref(),
             primary_dpi_scale(&windows),
+            rendered.as_deref(),
         ),
     );
 }
@@ -321,30 +370,51 @@ fn auto_capture_system(
     shell: Option<Res<NativeShellModel>>,
     tracker: Option<Res<QuestTracker>>,
     combat: Option<Res<CombatTargetModel>>,
-    notice: Option<Res<NoticeDialogState>>,
+    mut notice: Option<ResMut<NoticeDialogState>>,
     ui: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
-    player_ui: Option<Res<NativePlayerUiState>>,
+    mut player_ui: Option<ResMut<NativePlayerUiState>>,
+    inventory: Option<Res<InventoryModel>>,
+    quest_ui: Option<Res<QuestUiState>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    rendered: Option<Res<RenderedCaptureContext>>,
 ) {
     let Some(shell) = shell.as_deref() else {
         return;
     };
+    // A one-shot capture owns the UI only until it queues its screenshot.
+    // Checking completion after preparation reopens Character every frame and
+    // closes later notices, preventing manual verification after auto capture.
+    let Some(target) = runtime
+        .auto
+        .as_ref()
+        .filter(|auto| !auto.done)
+        .map(|auto| auto.target)
+    else {
+        return;
+    };
+    prepare_auto_capture_target(
+        target,
+        shell,
+        player_ui.as_deref_mut(),
+        notice.as_deref_mut(),
+        inventory.as_deref(),
+    );
     let capture_slug = {
         let Some(auto) = runtime.auto.as_mut() else {
             return;
         };
-        if auto.done {
-            return;
-        }
         let target_matches = capture_target_matches(
             auto.target,
             shell,
             tracker.as_deref(),
             combat.as_deref(),
             notice.as_deref(),
+            ui.as_deref(),
+            entities.as_deref(),
+            player_ui.as_deref(),
             config.quest_index,
-        );
+        ) && auto.observe_rendered_identity(rendered.as_deref());
         if env::var_os("MIR2_NATIVE_TRACE_CAPTURE").is_some()
             && CAPTURE_TRACE_FRAME.fetch_add(1, Ordering::Relaxed) % 60 == 0
         {
@@ -404,7 +474,9 @@ fn auto_capture_system(
                 ui.as_deref(),
                 entities.as_deref(),
                 player_ui.as_deref(),
+                quest_ui.as_deref(),
                 primary_dpi_scale(&windows),
+                rendered.as_deref(),
             ),
         );
     }
@@ -430,19 +502,22 @@ fn capture_request(
     ui: Option<&UiReadModel>,
     entities: Option<&EntityModelSet>,
     player_ui: Option<&NativePlayerUiState>,
+    quest_ui: Option<&QuestUiState>,
     dpi_scale: Option<f32>,
+    rendered: Option<&RenderedCaptureContext>,
 ) -> NativeCaptureRequest {
-    let is_world_scene = matches!(
-        scene,
-        "in-game" | "quest-accepted" | "combat" | "quest-complete"
-    );
+    let is_world_scene = is_world_scene(scene);
     let map_name = is_world_scene
         .then(|| ui.and_then(|model| model.player.map_name.clone()))
         .flatten();
-    let world = NativeCaptureWorld {
-        light: map_name
-            .as_deref()
-            .and_then(crate::map_parser::lighting::capture_light_state_for_map),
+    let mut world = NativeCaptureWorld {
+        light: is_world_scene
+            .then(|| rendered.and_then(|v| v.light.clone()))
+            .flatten(),
+        map_file_name: is_world_scene
+            .then(|| rendered.and_then(|v| v.map_file_name.clone()))
+            .flatten(),
+        epoch: is_world_scene.then(|| rendered.map(|v| v.epoch)).flatten(),
         map: map_name,
         x: is_world_scene
             .then(|| self_player_position(entities).map(|position| position.0))
@@ -451,7 +526,14 @@ fn capture_request(
             .then(|| self_player_position(entities).map(|position| position.1))
             .flatten(),
     };
-    let ui_state = safe_ui_state_slug(shell, player_ui);
+    if is_world_scene {
+        if let Some(rendered) = rendered {
+            world.map = rendered.map_title.clone();
+            world.x = rendered.x;
+            world.y = rendered.y;
+        }
+    }
+    let ui_state = safe_ui_state_slug(shell, player_ui, quest_ui);
     let sidecar_path = png_path.with_extension("json");
 
     NativeCaptureRequest {
@@ -491,6 +573,7 @@ fn primary_dpi_scale(windows: &Query<&Window, With<PrimaryWindow>>) -> Option<f3
 fn safe_ui_state_slug(
     shell: Option<&NativeShellModel>,
     player_ui: Option<&NativePlayerUiState>,
+    quest_ui: Option<&QuestUiState>,
 ) -> Option<String> {
     let shell_slug = shell
         .map(|model| native_shell_screen_slug(model.screen))
@@ -500,16 +583,22 @@ fn safe_ui_state_slug(
     };
     let core = &player_ui.core;
     Some(format!(
-        "shell={};screen={:?};panel={:?};minimap={};chatFocused={};security={:?};inspect={};inventoryOperation={};dropConfirm={}",
+        "shell={};screen={:?};panel={:?};inventoryPage={};inventoryLocation={:.2},{:.2};questDetail={:?};minimap={};chatFocused={};security={:?};inspect={};inventoryOperation={};dropConfirm={};inventoryDeleteMode={};inventoryDeletePrompt={}",
         shell_slug,
         core.screen,
         core.panel,
+        player_ui.inventory_page,
+        player_ui.inventory_window.left,
+        player_ui.inventory_window.top,
+        quest_ui.and_then(|state| state.detail_quest_index),
         core.minimap_visible,
         core.chat_focused,
         core.security.panel,
         player_ui.inspect.is_some(),
         player_ui.inventory_operation.is_some(),
         player_ui.drop_confirmation.is_some(),
+        player_ui.inventory_delete_mode,
+        player_ui.inventory_delete_prompt_open(),
     ))
 }
 
@@ -591,6 +680,8 @@ fn native_capture_v1_sidecar(
     let world = if is_world_scene(&request.scene) {
         Some(NativeCaptureV1World {
             map: request.world.map.clone()?,
+            map_file_name: request.world.map_file_name.clone()?,
+            epoch: request.world.epoch?,
             x: request.world.x?,
             y: request.world.y?,
             light: request.world.light.clone()?,
@@ -633,7 +724,15 @@ fn capture_acceptance_blockers(
     }
     if !matches!(
         request.scene.as_str(),
-        "login" | "character-select" | "in-game" | "quest-accepted" | "combat" | "quest-complete"
+        "login"
+            | "character-select"
+            | "in-game"
+            | "character"
+            | "inventory"
+            | "inventory-delete"
+            | "quest-accepted"
+            | "combat"
+            | "quest-complete"
     ) {
         blockers.push("scene-not-supported-by-v1");
     }
@@ -653,7 +752,9 @@ fn capture_acceptance_blockers(
         && (request.world.map.is_none()
             || request.world.x.is_none()
             || request.world.y.is_none()
-            || request.world.light.is_none())
+            || request.world.light.is_none()
+            || request.world.map_file_name.is_none()
+            || request.world.epoch.is_none())
     {
         blockers.push("authoritative-world-state-incomplete");
     }
@@ -681,7 +782,13 @@ fn capture_acceptance_blockers(
 fn is_world_scene(scene: &str) -> bool {
     matches!(
         scene,
-        "in-game" | "quest-accepted" | "combat" | "quest-complete"
+        "in-game"
+            | "character"
+            | "inventory"
+            | "inventory-delete"
+            | "quest-accepted"
+            | "combat"
+            | "quest-complete"
     )
 }
 
@@ -747,10 +854,45 @@ fn capture_target_matches(
     tracker: Option<&QuestTracker>,
     combat: Option<&CombatTargetModel>,
     notice: Option<&NoticeDialogState>,
+    ui: Option<&UiReadModel>,
+    entities: Option<&EntityModelSet>,
+    player_ui: Option<&NativePlayerUiState>,
     quest_index: Option<i32>,
 ) -> bool {
     match target {
         NativeCaptureTarget::Screen(screen) => shell.screen == screen,
+        NativeCaptureTarget::CharacterOpen => {
+            shell.screen == NativeShellScreen::InGame
+                && player_ui.is_some_and(|state| {
+                    state.equipment_open() && state.character_page == CharacterPage::Character
+                })
+                && notice.is_none_or(|state| !state.is_open())
+                && authoritative_player_state_ready(ui, entities)
+        }
+        NativeCaptureTarget::InventoryOpen => {
+            shell.screen == NativeShellScreen::InGame
+                && player_ui
+                    .is_some_and(|state| state.inventory_open() && state.inventory_page == 0)
+                && notice.is_none_or(|state| !state.is_open())
+                && authoritative_player_state_ready(ui, entities)
+        }
+        NativeCaptureTarget::InventoryQuestOpen => {
+            shell.screen == NativeShellScreen::InGame
+                && player_ui
+                    .is_some_and(|state| state.inventory_open() && state.inventory_page == 2)
+                && notice.is_none_or(|state| !state.is_open())
+                && authoritative_player_state_ready(ui, entities)
+        }
+        NativeCaptureTarget::InventoryDeleteOpen => {
+            shell.screen == NativeShellScreen::InGame
+                && player_ui.is_some_and(|state| {
+                    state.inventory_open()
+                        && state.inventory_page == 0
+                        && state.inventory_delete_prompt_open()
+                })
+                && notice.is_none_or(|state| !state.is_open())
+                && authoritative_player_state_ready(ui, entities)
+        }
         NativeCaptureTarget::NoticeOpen => {
             shell.screen == NativeShellScreen::InGame
                 && notice.is_some_and(NoticeDialogState::is_open)
@@ -784,9 +926,107 @@ fn capture_target_matches(
     }
 }
 
+fn authoritative_player_state_ready(
+    ui: Option<&UiReadModel>,
+    entities: Option<&EntityModelSet>,
+) -> bool {
+    let Some(player) = ui.map(|model| &model.player) else {
+        return false;
+    };
+    player
+        .name
+        .as_deref()
+        .is_some_and(|value| !value.trim().is_empty())
+        && player
+            .map_name
+            .as_deref()
+            .is_some_and(|value| !value.trim().is_empty())
+        && player.max_hp > 0
+        && self_player_position(entities).is_some()
+}
+
+fn prepare_auto_capture_target(
+    target: NativeCaptureTarget,
+    shell: &NativeShellModel,
+    player_ui: Option<&mut NativePlayerUiState>,
+    notice: Option<&mut NoticeDialogState>,
+    inventory: Option<&InventoryModel>,
+) {
+    if shell.screen != NativeShellScreen::InGame {
+        return;
+    }
+    if matches!(
+        target,
+        NativeCaptureTarget::CharacterOpen
+            | NativeCaptureTarget::InventoryOpen
+            | NativeCaptureTarget::InventoryQuestOpen
+            | NativeCaptureTarget::InventoryDeleteOpen
+    ) {
+        if let Some(notice) = notice {
+            notice.close();
+        }
+    }
+    let Some(state) = player_ui else {
+        return;
+    };
+    match target {
+        NativeCaptureTarget::CharacterOpen => {
+            if !state.equipment_open() {
+                state.toggle_equipment();
+            }
+            if state.character_page != CharacterPage::Character {
+                state.character_page = CharacterPage::Character;
+            }
+        }
+        NativeCaptureTarget::InventoryOpen => {
+            if !state.inventory_open() {
+                state.toggle_inventory();
+            }
+            state.inventory_page = 0;
+        }
+        NativeCaptureTarget::InventoryQuestOpen => {
+            if !state.inventory_open() {
+                state.toggle_inventory();
+            }
+            state.inventory_page = 2;
+        }
+        NativeCaptureTarget::InventoryDeleteOpen => {
+            if !state.inventory_open() {
+                state.toggle_inventory();
+            }
+            state.inventory_page = 0;
+            state.inventory_delete_mode = true;
+            if !state.inventory_delete_prompt_open() {
+                if let Some(inventory) = inventory {
+                    if let Some(slot) = inventory
+                        .items_in(0)
+                        .into_iter()
+                        .find(|item| {
+                            item.unique_id.is_some()
+                                && item.quantity > 0
+                                && u16::try_from(item.quantity).is_ok()
+                        })
+                        .map(|item| item.slot)
+                    {
+                        let _ = state.open_inventory_delete_for_slot(inventory, slot);
+                    }
+                }
+            }
+        }
+        NativeCaptureTarget::Screen(_)
+        | NativeCaptureTarget::NoticeOpen
+        | NativeCaptureTarget::QuestAccepted
+        | NativeCaptureTarget::Combat
+        | NativeCaptureTarget::QuestComplete => {}
+    }
+}
+
 fn capture_target_slug(target: NativeCaptureTarget) -> &'static str {
     match target {
         NativeCaptureTarget::Screen(screen) => native_shell_screen_slug(screen),
+        NativeCaptureTarget::CharacterOpen => "character",
+        NativeCaptureTarget::InventoryOpen | NativeCaptureTarget::InventoryQuestOpen => "inventory",
+        NativeCaptureTarget::InventoryDeleteOpen => "inventory-delete",
         NativeCaptureTarget::NoticeOpen => "notice-open",
         NativeCaptureTarget::QuestAccepted => "quest-accepted",
         NativeCaptureTarget::Combat => "combat",
@@ -799,6 +1039,7 @@ fn native_shell_screen_slug(screen: NativeShellScreen) -> &'static str {
         NativeShellScreen::Connecting => "connecting",
         NativeShellScreen::Login => "login",
         NativeShellScreen::Authenticating => "authenticating",
+        NativeShellScreen::OpeningLogin => "opening-login",
         NativeShellScreen::CharacterSelect => "character-select",
         NativeShellScreen::CharacterCreate => "character-create",
         NativeShellScreen::StartingGame => "starting-game",
@@ -816,6 +1057,7 @@ fn parse_shell_screen_slug(raw: &str) -> Option<NativeShellScreen> {
         "connecting" => Some(NativeShellScreen::Connecting),
         "login" => Some(NativeShellScreen::Login),
         "authenticating" => Some(NativeShellScreen::Authenticating),
+        "opening-login" => Some(NativeShellScreen::OpeningLogin),
         "characterselect" => Some(NativeShellScreen::CharacterSelect),
         "character-select" | "character_select" => Some(NativeShellScreen::CharacterSelect),
         "charactercreate" => Some(NativeShellScreen::CharacterCreate),
@@ -833,6 +1075,18 @@ fn parse_shell_screen_slug(raw: &str) -> Option<NativeShellScreen> {
 fn parse_capture_target_slug(raw: &str) -> Option<NativeCaptureTarget> {
     let normalized = sanitize_capture_label(&raw.to_ascii_lowercase().replace('_', "-"));
     match normalized.as_str() {
+        "character" | "character-open" | "character-dialog" => {
+            Some(NativeCaptureTarget::CharacterOpen)
+        }
+        "inventory" | "inventory-open" | "inventory-dialog" => {
+            Some(NativeCaptureTarget::InventoryOpen)
+        }
+        "inventory-quest" | "quest-inventory" | "inventory-quest-open" => {
+            Some(NativeCaptureTarget::InventoryQuestOpen)
+        }
+        "inventory-delete" | "inventory-delete-open" | "delete-inventory" => {
+            Some(NativeCaptureTarget::InventoryDeleteOpen)
+        }
         "notice" | "notice-open" | "login-notice" => Some(NativeCaptureTarget::NoticeOpen),
         "quest-accepted" | "questaccepted" => Some(NativeCaptureTarget::QuestAccepted),
         "combat" | "combat-damaged" => Some(NativeCaptureTarget::Combat),
@@ -1034,6 +1288,78 @@ mod tests {
     use super::*;
 
     #[test]
+    fn completed_auto_capture_releases_panel_and_notice_control() {
+        let mut app = App::new();
+        app.insert_resource(
+            NativeCaptureConfig::from_values(
+                Some("unused-auto-capture-test"),
+                None,
+                Some("character"),
+                None,
+            )
+            .unwrap(),
+        );
+        app.insert_resource(NativeCaptureRuntime {
+            capture_index: 0,
+            auto: Some(NativeAutoCaptureState {
+                target: NativeCaptureTarget::CharacterOpen,
+                identity: None,
+                countdown: None,
+                done: false,
+            }),
+        });
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NoticeDialogState::default());
+        app.add_systems(PostUpdate, auto_capture_system);
+        // With no authoritative UiReadModel yet, preparation opens the target
+        // but must not queue a screenshot. Active preparation remains intact.
+        app.update();
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .equipment_open());
+
+        app.world_mut()
+            .resource_mut::<NativeCaptureRuntime>()
+            .auto
+            .as_mut()
+            .unwrap()
+            .done = true;
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.toggle_equipment();
+            state.toggle_inventory();
+            state.inventory_page = 1;
+            state.character_page = CharacterPage::Stats2;
+        }
+        assert!(app.world_mut().resource_mut::<NoticeDialogState>().observe(
+            mir2_client_bevy::crystal_ui::notice::NoticePacketUpdate {
+                generation: 1,
+                sequence: 1,
+                title: "Later notice".to_owned(),
+                message: "Must remain open".to_owned(),
+            }
+        ));
+        for _ in 0..3 {
+            app.update();
+        }
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(state.inventory_open());
+        assert!(!state.equipment_open());
+        assert_eq!(state.inventory_page, 1);
+        assert_eq!(state.character_page, CharacterPage::Stats2);
+        assert!(app.world().resource::<NoticeDialogState>().is_open());
+        assert_eq!(
+            app.world().resource::<NativeCaptureRuntime>().capture_index,
+            0
+        );
+    }
+
+    #[test]
     fn capture_disabled_without_dir_env_value() {
         assert!(
             NativeCaptureConfig::from_values(None, Some("login"), Some("login"), None).is_none()
@@ -1083,6 +1409,223 @@ mod tests {
             parse_capture_target_slug("login-notice"),
             Some(NativeCaptureTarget::NoticeOpen)
         );
+        assert_eq!(
+            parse_capture_target_slug("character-dialog"),
+            Some(NativeCaptureTarget::CharacterOpen)
+        );
+        assert_eq!(
+            parse_capture_target_slug("inventory_open"),
+            Some(NativeCaptureTarget::InventoryOpen)
+        );
+        assert_eq!(
+            parse_capture_target_slug("quest-inventory"),
+            Some(NativeCaptureTarget::InventoryQuestOpen)
+        );
+        assert_eq!(
+            parse_capture_target_slug("inventory-delete-open"),
+            Some(NativeCaptureTarget::InventoryDeleteOpen)
+        );
+    }
+
+    #[test]
+    fn panel_capture_targets_open_through_the_native_ui_reducer() {
+        let shell = NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        };
+        let ui = UiReadModel {
+            player: mir2_client_bevy::read_model::PlayerStats {
+                name: Some("1231".to_owned()),
+                map_name: Some("BichonProvince".to_owned()),
+                hp: 16,
+                max_hp: 16,
+                ..Default::default()
+            },
+        };
+        let entities = EntityModelSet {
+            entities: vec![mir2_client_bevy::entities::EntityModel {
+                object_id: "1000".to_owned(),
+                kind: EntityKind::SelfPlayer,
+                name: "1231".to_owned(),
+                x: 287,
+                y: 618,
+                level: Some(1),
+                direction: Some("Down".to_owned()),
+            }],
+        };
+        let mut player_ui = NativePlayerUiState {
+            character_page: CharacterPage::Stats2,
+            ..Default::default()
+        };
+        let mut notice = NoticeDialogState::default();
+        assert!(
+            notice.observe(mir2_client_bevy::crystal_ui::notice::NoticePacketUpdate {
+                generation: 1,
+                sequence: 1,
+                title: "Welcome".to_owned(),
+                message: "Candidate notice".to_owned(),
+            })
+        );
+
+        prepare_auto_capture_target(
+            NativeCaptureTarget::CharacterOpen,
+            &shell,
+            Some(&mut player_ui),
+            Some(&mut notice),
+            None,
+        );
+        assert!(player_ui.equipment_open());
+        assert_eq!(player_ui.character_page, CharacterPage::Character);
+        assert!(!notice.is_open());
+        assert!(!capture_target_matches(
+            NativeCaptureTarget::CharacterOpen,
+            &shell,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(&player_ui),
+            None,
+        ));
+        assert!(capture_target_matches(
+            NativeCaptureTarget::CharacterOpen,
+            &shell,
+            None,
+            None,
+            None,
+            Some(&ui),
+            Some(&entities),
+            Some(&player_ui),
+            None,
+        ));
+
+        prepare_auto_capture_target(
+            NativeCaptureTarget::InventoryOpen,
+            &shell,
+            Some(&mut player_ui),
+            None,
+            None,
+        );
+        assert!(player_ui.inventory_open());
+        assert!(capture_target_matches(
+            NativeCaptureTarget::InventoryOpen,
+            &shell,
+            None,
+            None,
+            None,
+            Some(&ui),
+            Some(&entities),
+            Some(&player_ui),
+            None,
+        ));
+
+        prepare_auto_capture_target(
+            NativeCaptureTarget::InventoryQuestOpen,
+            &shell,
+            Some(&mut player_ui),
+            None,
+            None,
+        );
+        assert_eq!(player_ui.inventory_page, 2);
+        assert!(capture_target_matches(
+            NativeCaptureTarget::InventoryQuestOpen,
+            &shell,
+            None,
+            None,
+            None,
+            Some(&ui),
+            Some(&entities),
+            Some(&player_ui),
+            None,
+        ));
+
+        let inventory = InventoryModel {
+            items: vec![ItemModel {
+                unique_id: Some(124),
+                key: "itm-124".to_owned(),
+                name: "Health Potion".to_owned(),
+                quantity: 1,
+                slot: 0,
+                container: 0,
+                icon: 255,
+                icon_width: 32,
+                icon_height: 21,
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        prepare_auto_capture_target(
+            NativeCaptureTarget::InventoryDeleteOpen,
+            &shell,
+            Some(&mut player_ui),
+            None,
+            Some(&inventory),
+        );
+        assert_eq!(player_ui.inventory_page, 0);
+        assert!(player_ui.inventory_delete_mode);
+        assert!(player_ui.inventory_delete_prompt_open());
+        assert!(capture_target_matches(
+            NativeCaptureTarget::InventoryDeleteOpen,
+            &shell,
+            None,
+            None,
+            None,
+            Some(&ui),
+            Some(&entities),
+            Some(&player_ui),
+            None,
+        ));
+    }
+
+    #[test]
+    fn panel_capture_targets_do_not_mutate_non_game_screens() {
+        let shell = NativeShellModel {
+            screen: NativeShellScreen::Login,
+            ..Default::default()
+        };
+        let mut player_ui = NativePlayerUiState::default();
+
+        prepare_auto_capture_target(
+            NativeCaptureTarget::CharacterOpen,
+            &shell,
+            Some(&mut player_ui),
+            None,
+            None,
+        );
+        assert!(!player_ui.equipment_open());
+        assert!(!capture_target_matches(
+            NativeCaptureTarget::CharacterOpen,
+            &shell,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(&player_ui),
+            None,
+        ));
+    }
+
+    #[test]
+    fn panel_capture_scenes_are_supported_world_scenes() {
+        for scene in ["character", "inventory", "inventory-delete"] {
+            let request = capture_request(
+                PathBuf::from(format!("captures/native-{scene}-1.png")),
+                scene,
+                None,
+                None,
+                None,
+                Some(&NativePlayerUiState::default()),
+                None,
+                Some(1.0),
+                None,
+            );
+            let blockers = capture_acceptance_blockers(&request, 1024, 768);
+            assert!(is_world_scene(scene));
+            assert!(!blockers.contains(&"scene-not-supported-by-v1"));
+            assert!(blockers.contains(&"authoritative-world-state-incomplete"));
+        }
     }
 
     #[test]
@@ -1144,6 +1687,7 @@ mod tests {
         let mut runtime = NativeCaptureRuntime::default();
         runtime.auto = Some(NativeAutoCaptureState {
             target: NativeCaptureTarget::Screen(NativeShellScreen::InGame),
+            identity: None,
             countdown: Some(2),
             done: false,
         });
@@ -1166,6 +1710,9 @@ mod tests {
                 finish_npc_index: Some(3),
                 title: "CraftsLady's Request".to_owned(),
                 npc_name: Some("CraftsLady".to_owned()),
+                group: Some("BichonProvince".to_owned()),
+                min_level_needed: 1,
+                detail: Default::default(),
                 status: QuestStatus::InProgress,
                 objectives: Vec::new(),
                 rewards: Vec::new(),
@@ -1187,6 +1734,9 @@ mod tests {
             Some(&tracker),
             Some(&combat),
             None,
+            None,
+            None,
+            None,
             Some(2)
         ));
         assert!(capture_target_matches(
@@ -1194,6 +1744,9 @@ mod tests {
             &shell,
             Some(&tracker),
             Some(&combat),
+            None,
+            None,
+            None,
             None,
             Some(2)
         ));
@@ -1204,6 +1757,9 @@ mod tests {
             Some(&tracker),
             Some(&combat),
             None,
+            None,
+            None,
+            None,
             Some(2)
         ));
         assert!(!capture_target_matches(
@@ -1211,6 +1767,9 @@ mod tests {
             &shell,
             Some(&tracker),
             Some(&combat),
+            None,
+            None,
+            None,
             None,
             Some(2)
         ));
@@ -1229,6 +1788,9 @@ mod tests {
             None,
             None,
             Some(&notice),
+            None,
+            None,
+            None,
             None
         ));
 
@@ -1246,6 +1808,9 @@ mod tests {
             None,
             None,
             Some(&notice),
+            None,
+            None,
+            None,
             None
         ));
     }
@@ -1274,6 +1839,10 @@ mod tests {
         let mut player_ui = NativePlayerUiState::default();
         player_ui.core.login_account = "must-not-leak".to_owned();
         player_ui.core.login_password = "must-not-leak".to_owned();
+        let quest_ui = QuestUiState {
+            detail_quest_index: Some(42),
+            ..Default::default()
+        };
         let request = capture_request(
             PathBuf::from("captures/native-in-game-1.png"),
             "in-game",
@@ -1281,7 +1850,9 @@ mod tests {
             Some(&ui),
             Some(&entities),
             Some(&player_ui),
+            Some(&quest_ui),
             Some(1.25),
+            None,
         );
         let sidecar: serde_json::Value = serde_json::from_slice(
             &serialize_capture_sidecar(&request, 1024, 768, "a".repeat(64)).expect("sidecar"),
@@ -1299,6 +1870,8 @@ mod tests {
         assert_eq!(sidecar["acceptance"]["eligible"], false);
         let ui_state = sidecar["uiState"].as_str().expect("safe UI state");
         assert!(ui_state.contains("panel=None"));
+        assert!(ui_state.contains("inventoryLocation=0.00,0.00"));
+        assert!(ui_state.contains("questDetail=Some(42)"));
         assert!(!ui_state.contains("must-not-leak"));
     }
 
@@ -1325,7 +1898,9 @@ mod tests {
             None,
             None,
             Some(&NativePlayerUiState::default()),
+            None,
             Some(1.0),
+            None,
         );
         request.run_id = Some("pair-001".to_owned());
         request.build = NativeCaptureBuild {
@@ -1369,5 +1944,71 @@ mod tests {
         assert!(write_atomic_bytes(&path, b"second").is_err());
         assert_eq!(fs::read(&path).expect("preserved bytes"), b"first");
         let _ = fs::remove_file(path);
+    }
+    #[test]
+    fn world_auto_capture_waits_and_restarts_on_epoch_or_map_change() {
+        let mut auto = NativeAutoCaptureState {
+            target: NativeCaptureTarget::Screen(NativeShellScreen::InGame),
+            countdown: None,
+            identity: None,
+            done: false,
+        };
+        assert!(!auto.observe_rendered_identity(None));
+        let mut rendered = RenderedCaptureContext {
+            epoch: 1,
+            map_file_name: Some("0".into()),
+            map_title: Some("BichonProvince".into()),
+            x: Some(288),
+            y: Some(616),
+            light: None,
+        };
+        assert!(!auto.observe_rendered_identity(Some(&rendered)));
+        rendered.light = Some("setting=4;mapDarkLight=0".into());
+        assert!(auto.observe_rendered_identity(Some(&rendered)));
+        auto.countdown = Some(12);
+        assert!(auto.observe_rendered_identity(Some(&rendered)));
+        assert_eq!(auto.countdown, Some(12));
+        rendered.epoch = 2;
+        assert!(auto.observe_rendered_identity(Some(&rendered)));
+        assert_eq!(auto.countdown, None);
+        auto.countdown = Some(12);
+        rendered.map_file_name = Some("0141".into());
+        assert!(auto.observe_rendered_identity(Some(&rendered)));
+        assert_eq!(auto.countdown, None);
+    }
+
+    #[test]
+    fn manual_capture_serializes_consumed_identity_and_keeps_missing_light_ineligible() {
+        let mut rendered = RenderedCaptureContext {
+            epoch: 8,
+            map_file_name: Some("0".into()),
+            map_title: Some("BichonProvince".into()),
+            x: Some(288),
+            y: Some(616),
+            light: None,
+        };
+        let make = |value: &RenderedCaptureContext| {
+            capture_request(
+                PathBuf::from("capture.png"),
+                "in-game",
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some(1.0),
+                Some(value),
+            )
+        };
+        let draft = make(&rendered);
+        assert!(capture_acceptance_blockers(&draft, 1024, 768)
+            .contains(&"authoritative-world-state-incomplete"));
+        rendered.light = Some("setting=4;mapDarkLight=0".into());
+        let ready = make(&rendered);
+        assert!(!capture_acceptance_blockers(&ready, 1024, 768)
+            .contains(&"authoritative-world-state-incomplete"));
+        assert_eq!(ready.world.map_file_name.as_deref(), Some("0"));
+        assert_eq!(ready.world.epoch, Some(8));
+        assert_eq!(ready.world.map.as_deref(), Some("BichonProvince"));
     }
 }

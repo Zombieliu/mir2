@@ -330,6 +330,7 @@ pub trait WorldRuntime: Send + Sync {
     }
 
     fn world_snapshot(&self) -> WorldSnapshot;
+    fn supports_magic_key_assignment(&self,_spell:mir2_protocol::Spell,_key:u8,_old_key:u8)->bool{false}
     fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
         Vec::new()
     }
@@ -344,6 +345,14 @@ pub trait WorldRuntime: Send + Sync {
         Err("world runtime does not support active character checkpoint restore".to_string())
     }
     fn save_active_character(&mut self) -> Result<(), String>;
+    /// Persist a final world-leave snapshot and Crystal LastLogoutDate.
+    ///
+    /// Remote/test runtimes that cannot distinguish the lifecycle keep their
+    /// existing save behavior; the in-process runtime overrides this with the
+    /// exact final-save path.
+    fn save_active_character_for_logout(&mut self) -> Result<(), String> {
+        self.save_active_character()
+    }
     fn refresh_active_external_mail(&mut self) -> bool;
 }
 
@@ -365,12 +374,98 @@ impl InProcessWorldRuntime {
         self.session.rebind_account_store(authoritative);
     }
 
+    pub fn shared_social_message(&self, key: &str, args: &[String]) -> ServerPacket {
+        self.session.shared_social_message(key, args)
+    }
+    pub fn refresh_shared_marriage(
+        &mut self,
+        online: &std::collections::BTreeMap<(String, i32), String>,
+        now_ms: u64,
+        force: bool,
+    ) -> Vec<mir2_protocol::ServerPacket> {
+        self.session.refresh_shared_marriage(online, now_ms, force)
+    }
+    pub fn refresh_shared_mentor_with_levels(
+        &mut self,
+        online: &std::collections::BTreeMap<(String, i32), Option<u16>>,
+        force: bool,
+    ) -> Option<mir2_protocol::ServerPacket> {
+        self.session
+            .refresh_shared_mentor_with_levels(online, force)
+    }
+    pub fn shared_mentor_config(&self) -> Option<SimulationConfig> {
+        self.session.shared_mentor_config()
+    }
+    pub fn refresh_shared_social_buffs(&mut self, online: &std::collections::BTreeSet<(String, i32)>) -> Result<Vec<ServerPacket>, String> {
+        self.session.refresh_shared_social_buffs(online)
+    }
+    pub fn social_experience_buff_rates(&self) -> (Option<i32>, Option<i32>) {
+        self.session.social_experience_buff_rates()
+    }
+    pub fn refresh_shared_mentor(
+        &mut self,
+        online: &std::collections::BTreeSet<(String, i32)>,
+        force: bool,
+    ) -> Option<mir2_protocol::ServerPacket> {
+        self.session.refresh_shared_mentor(online, force)
+    }
+
     pub fn into_session(self) -> SimulationSession {
         self.session
     }
 
+    pub fn ranking_with_online_characters(
+        &self,
+        rank_type: u8,
+        rank_index: i32,
+        online_only: bool,
+        online_characters: &std::collections::BTreeSet<(String, i32)>,
+    ) -> Vec<ServerPacket> {
+        self.session.ranking_with_online_characters(
+            rank_type,
+            rank_index,
+            online_only,
+            online_characters,
+        )
+    }
+
+    pub fn friends_with_online_characters(
+        &mut self,
+        online_characters: &std::collections::BTreeSet<(String, i32)>,
+    ) -> Option<ServerPacket> {
+        self.session
+            .friends_with_online_characters(online_characters)
+    }
+
     pub fn local_player_object_id(&self) -> Option<u32> {
         self.session.local_player_object_id()
+    }
+
+    pub fn shared_intelligent_creature_map_allowed(&self) -> bool {
+        self.session.shared_intelligent_creature_map_allowed()
+    }
+    pub fn dismiss_unspawned_shared_intelligent_creature(
+        &mut self,
+    ) -> Vec<mir2_protocol::ServerPacket> {
+        self.session.dismiss_unspawned_shared_intelligent_creature()
+    }
+
+    pub fn commit_shared_intelligent_creature_operation(
+        &mut self,
+        pet_type: u8,
+        operation_id: &str,
+    ) -> Result<Vec<mir2_protocol::ServerPacket>, String> {
+        self.session
+            .commit_shared_intelligent_creature_operation(pet_type, operation_id)
+    }
+
+    pub fn record_shared_intelligent_creature_operation(
+        &mut self,
+        pet_type: u8,
+        operation_id: &str,
+    ) -> Vec<mir2_protocol::ServerPacket> {
+        self.session
+            .record_shared_intelligent_creature_operation(pet_type, operation_id)
     }
 
     pub fn has_active_intelligent_creature_auto_pickup(&self) -> bool {
@@ -479,6 +574,30 @@ impl InProcessWorldRuntime {
         )
     }
 
+    pub fn reconcile_shared_monster_kill_receipt(&mut self, key: &str, hash: &str) -> Result<(), crate::PreparedKillPublicationFailure> {
+        self.session.reconcile_shared_monster_kill_receipt(key,hash)
+    }
+
+    pub fn commit_shared_monster_kill_via_postgres<T,F>(&mut self, key: &str, award: &crate::runtime::zone::ZoneMonsterKillAward, publish: F)
+        -> Result<(T, Vec<ServerPacket>), crate::PreparedKillPublicationFailure>
+    where F: FnOnce(&crate::PreparedKillAccountSource) -> Result<crate::PreparedKillPublication<T>, crate::PreparedKillPublicationFailure> {
+        self.session.commit_shared_monster_kill_via_postgres(key,award,publish)
+    }
+
+    pub fn commit_shared_monster_kill_award_with_receipt(
+        &mut self,
+        key: &str,
+        award: &crate::runtime::zone::ZoneMonsterKillAward,
+    ) -> SharedAccountInventoryTransactionReceipt {
+        self.session.commit_shared_monster_kill_award_with_receipt(key, award)
+    }
+
+    pub fn try_commit_shared_monster_kill_award_with_receipt(
+        &mut self, key: &str, award: &crate::runtime::zone::ZoneMonsterKillAward,
+    ) -> Result<(SharedAccountInventoryTransactionReceipt, bool), crate::runtime::SharedMonsterKillCommitFailure> {
+        self.session.try_commit_shared_monster_kill_award_with_receipt(key, award)
+    }
+
     pub fn commit_shared_skill_item_consumption_transaction(
         &mut self,
         spell: Spell,
@@ -508,6 +627,43 @@ impl InProcessWorldRuntime {
 
     /// Advance only the personal compatibility state for a session whose map
     /// monsters and hazards are owned by a shared Zone runtime.
+    pub fn refresh_shared_guild_authority(&self) -> Result<(), String> {
+        self.session.refresh_shared_guild_authority()
+    }
+    pub fn enable_shared_guild_authority(&mut self) {
+        self.session.enable_shared_guild_authority();
+    }
+    pub fn submit_shared_guild_name(&mut self, name: &str) -> Result<Vec<ServerPacket>, String> {
+        self.session.submit_shared_guild_name(name)
+    }
+    pub fn change_shared_guild_gold(
+        &mut self,
+        change_type: u8,
+        amount: u32,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.session.change_shared_guild_gold(change_type, amount)
+    }
+    pub fn change_shared_guild_item(
+        &mut self,
+        change_type: u8,
+        from: i32,
+        to: i32,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.session.change_shared_guild_item(change_type, from, to)
+    }
+    pub fn change_shared_guild_buff(
+        &mut self,
+        action: u8,
+        id: i32,
+    ) -> Result<Vec<ServerPacket>, String> {
+        self.session.change_shared_guild_buff(action, id)
+    }
+    pub fn shared_guild_packets(
+        &mut self,
+        online: &std::collections::BTreeSet<(String, i32)>,
+    ) -> Vec<ServerPacket> {
+        self.session.shared_guild_packets(online)
+    }
     pub fn tick_shared_zone_personal_state(&mut self) -> Vec<ServerPacket> {
         self.session.tick_shared_zone_personal_state()
     }
@@ -643,6 +799,31 @@ impl InProcessWorldRuntime {
         self.session.item_rental_cancel()
     }
 
+    pub fn shared_trade_offer_matches_active_escrow(
+        &self,
+        offer: &SharedTradeOffer,
+        rollback: bool,
+    ) -> bool {
+        self.session
+            .shared_trade_offer_matches_active_escrow(offer, rollback)
+    }
+
+    pub fn shared_trade_unprepared_held_gold(&self) -> Option<u32> {
+        self.session.shared_trade_unprepared_held_gold()
+    }
+
+    pub fn recover_unprepared_trade_gold(&mut self) -> Vec<ServerPacket> {
+        self.session.recover_unprepared_trade_gold()
+    }
+
+    pub fn shared_trade_allowed(&self) -> bool {
+        self.session.shared_trade_allowed()
+    }
+
+    pub fn shared_trade_refusal_message(&self, name: &str) -> ServerPacket {
+        self.session.shared_trade_refusal_message(name)
+    }
+
     pub fn trade_request(&mut self, partner_name: &str) -> Vec<ServerPacket> {
         self.session.trade_request(partner_name)
     }
@@ -719,6 +900,9 @@ impl InProcessWorldRuntime {
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
+    fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        self.session.supports_magic_key_assignment(spell,key,old_key)
+    }
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -732,6 +916,9 @@ impl WorldRuntime for InProcessWorldRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        let xp_source = matches!(&command, WorldCommand::Attack{..}|WorldCommand::Interact{..}
+            |WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}|WorldCommand::CastSkill{..});
+        let before = if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
         let packets = match command {
             WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
             WorldCommand::NativeGameShopPurchase(request) => {
@@ -800,7 +987,7 @@ impl WorldRuntime for InProcessWorldRuntime {
             }
             WorldCommand::Tick => self.session.tick(),
         };
-        Ok(packets)
+        self.session.finish_guild_experience_command(before,packets)
     }
 
     fn execute_with_outcome(
@@ -873,6 +1060,10 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn save_active_character(&mut self) -> Result<(), String> {
         self.session.save_active_character()
+    }
+
+    fn save_active_character_for_logout(&mut self) -> Result<(), String> {
+        self.session.save_active_character_for_logout()
     }
 
     fn refresh_active_external_mail(&mut self) -> bool {

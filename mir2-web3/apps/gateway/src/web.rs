@@ -97,14 +97,70 @@ static WEB_PERSISTENCE_SESSION_ADMISSION: OnceLock<Arc<Semaphore>> = OnceLock::n
 const AUTH_REVISION_BLOCKED: u64 = u64::MAX;
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
 
+/// Native bridge receipt metadata; the original C.MagicKey packet is unchanged.
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SkillKeyRequest {
+    request_id: u64,
+    spell: String,
+    key: u8,
+    old_key: u8,
+}
+
+impl SkillKeyRequest {
+    fn from_command(command: &BrowserCommand) -> Option<Self> {
+        let BrowserCommand::MagicKey {
+            spell,
+            key,
+            old_key,
+            request_id: Some(request_id),
+        } = command
+        else {
+            return None;
+        };
+        Some(Self {
+            request_id: *request_id,
+            spell: spell.clone(),
+            key: *key,
+            old_key: *old_key,
+        })
+    }
+
+    fn receipt(&self, payload: &Value, processed_in_world: bool) -> Value {
+        let (skills, key_field) = if self.key > 16 || self.old_key > 16 {
+            (payload.pointer("/stage5Systems/heroLearnedMagics"), "key")
+        } else {
+            (payload.get("knownSkills"), "hotkey")
+        };
+        let accepted = processed_in_world
+            && skills.and_then(Value::as_array).is_some_and(|skills| {
+                skills.iter().any(|skill| {
+                    skill
+                        .get("spell")
+                        .and_then(Value::as_str)
+                        .and_then(|spell| parse_spell_name(spell).ok())
+                        .is_some_and(|spell| Some(spell) == parse_spell_name(&self.spell).ok())
+                        && skill.get(key_field).and_then(Value::as_u64) == Some(u64::from(self.key))
+                })
+            });
+        json!({"requestId": self.request_id, "spell": self.spell, "key": self.key,
+            "oldKey": self.old_key, "accepted": accepted})
+    }
+}
+
 enum ParsedSocketInput {
     Action {
         action: SessionAction,
         quest_operation_request: Option<QuestOperationRequest>,
+        skill_key_request: Option<SkillKeyRequest>,
     },
     ClientCapabilities(Vec<String>),
     ResumeSession(ResumeCredential),
     ResumeRejected,
+    SkillKeyRejected {
+        request: SkillKeyRequest,
+        error: String,
+    },
     ProtocolError(String),
 }
 
@@ -1621,6 +1677,16 @@ enum BrowserCommand {
         grid: String,
         to: i32,
     },
+    EquipSlotItem {
+        #[serde(alias = "uniqueId")]
+        unique_id: u64,
+        grid: String,
+        #[serde(alias = "gridTo")]
+        grid_to: String,
+        #[serde(alias = "toUniqueId")]
+        to_unique_id: u64,
+        to: i32,
+    },
     RemoveSlotItem {
         #[serde(alias = "uniqueId")]
         unique_id: u64,
@@ -1740,6 +1806,8 @@ enum BrowserCommand {
         key: u8,
         #[serde(alias = "oldKey", default)]
         old_key: u8,
+        #[serde(alias = "requestId", default)]
+        request_id: Option<u64>,
     },
     Magic {
         #[serde(alias = "objectId", default)]
@@ -1771,7 +1839,7 @@ enum BrowserCommand {
     },
     // Crystal `C.SetAutoPotValue` (Shared/ClientPackets.cs:1221). Sets the
     // hero auto-potion HP/MP trigger percentage. `stat` is the Crystal `Stat`
-    // byte (0 = HP, otherwise MP), matching MirConnection.SetAutoPotValue.
+    // byte (12 = HP, 13 = MP), matching PlayerObject.SetAutoPotValue.
     SetAutoPotValue {
         stat: u8,
         value: u32,
@@ -1863,6 +1931,10 @@ enum BrowserCommand {
     },
     AllowMentor,
     CancelMentor,
+    GuildBuffUpdate {
+        action: u8,
+        id: i32,
+    },
     DepositTradeItem {
         from: i32,
         to: i32,
@@ -4861,12 +4933,17 @@ fn spawn_socket_reader(
                         continue;
                     }
                 };
+            let skill_key_request = SkillKeyRequest::from_command(&command);
             let action = match browser_command_to_action(command) {
                 Ok(action) => action,
                 Err(error) => {
+                    let input = match skill_key_request {
+                        Some(request) => ParsedSocketInput::SkillKeyRejected { request, error },
+                        None => ParsedSocketInput::ProtocolError(error),
+                    };
                     if input_tx
                         .send(SocketInbound::Queued(QueuedSocketInput::new(
-                            ParsedSocketInput::ProtocolError(error),
+                            input,
                             Arc::clone(&reader_pending_count),
                             message_permit,
                         )))
@@ -4919,6 +4996,7 @@ fn spawn_socket_reader(
                     ParsedSocketInput::Action {
                         action,
                         quest_operation_request,
+                        skill_key_request,
                     },
                     Arc::clone(&reader_pending_count),
                     message_permit,
@@ -5085,7 +5163,7 @@ async fn handle_socket_inner(
                     continue;
                 }
                 let parsed_input = queued_input.take_input();
-                let (mut action, quest_operation_request) = match parsed_input {
+                let (mut action, quest_operation_request, skill_key_request) = match parsed_input {
                     ParsedSocketInput::ClientCapabilities(capabilities) => {
                         match validate_native_client_capabilities(&capabilities) {
                             Ok(capabilities) => {
@@ -5251,7 +5329,15 @@ async fn handle_socket_inner(
                     ParsedSocketInput::Action {
                         action,
                         quest_operation_request,
-                    } => (action, quest_operation_request),
+                        skill_key_request,
+                    } => (action, quest_operation_request, skill_key_request),
+                    ParsedSocketInput::SkillKeyRejected { request, error } => {
+                        if send_world_snapshot_with_skill_ack(&sender, session, Some(&request), false).await.is_err()
+                            || send_error_message(&sender, &error).await.is_err() {
+                            return;
+                        }
+                        continue;
+                    }
                     ParsedSocketInput::ProtocolError(error) => {
                         if send_error_message(&sender, &error).await.is_err() {
                             return;
@@ -5516,6 +5602,9 @@ async fn handle_socket_inner(
                                 session,
                                 pending_start_game_route_lease.as_ref(),
                             );
+                            if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), false).await.is_err() {
+                                return;
+                            }
                             if let Some(request) = quest_operation_request.as_ref() {
                                 let nack = quest_operation_ack_for_responses(request, &[]);
                                 if send_world_snapshot_with_quest_ack(
@@ -5553,6 +5642,11 @@ async fn handle_socket_inner(
                         }
                     }
                 }
+                let skill_key_permitted = match &action {
+                    SessionAction::Packet(ClientPacket::MagicKey { spell, key, old_key }) =>
+                        tokio::task::block_in_place(|| session.supports_magic_key_assignment(*spell, *key, *old_key)),
+                    _ => false,
+                };
                 let execution_result = match catch_gateway_panic("web session action", || {
                     tokio::task::block_in_place(|| {
                         if let Some(request) = native_game_shop_request.as_ref() {
@@ -5584,6 +5678,9 @@ async fn handle_socket_inner(
                             return;
                         }
                         eprintln!("web session action rejected; internal detail: {error}");
+                        if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), false).await.is_err() {
+                            return;
+                        }
                         if let Some(request) = quest_operation_request.as_ref() {
                             let nack = quest_operation_ack_for_responses(request, &[]);
                             if send_world_snapshot_with_quest_ack(
@@ -5618,6 +5715,9 @@ async fn handle_socket_inner(
                             return;
                         }
                         eprintln!("web session action panicked; internal detail: {error}");
+                        if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), false).await.is_err() {
+                            return;
+                        }
                         if let Some(request) = quest_operation_request.as_ref() {
                             let nack = quest_operation_ack_for_responses(request, &[]);
                             if send_world_snapshot_with_quest_ack(
@@ -5858,6 +5958,9 @@ async fn handle_socket_inner(
                         "Player state synchronization is temporarily unavailable.",
                     )
                     .await;
+                    return;
+                }
+                if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), skill_key_permitted).await.is_err() {
                     return;
                 }
                 if let (Some(request), Some(receipt)) = (
@@ -7368,6 +7471,19 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             unique_id,
             to,
         })),
+        BrowserCommand::EquipSlotItem {
+            unique_id,
+            grid,
+            grid_to,
+            to_unique_id,
+            to,
+        } => Ok(SessionAction::Packet(ClientPacket::EquipSlotItem {
+            grid: parse_grid(&grid)?,
+            unique_id,
+            to,
+            grid_to: parse_grid(&grid_to)?,
+            to_unique_id,
+        })),
         BrowserCommand::RemoveSlotItem {
             unique_id,
             grid,
@@ -7539,6 +7655,7 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
             spell,
             key,
             old_key,
+            request_id: _,
         } => Ok(SessionAction::Packet(ClientPacket::MagicKey {
             spell: parse_spell_name(&spell)?,
             key,
@@ -7672,6 +7789,15 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         }
         BrowserCommand::AllowMentor => Ok(SessionAction::Packet(ClientPacket::AllowMentor)),
         BrowserCommand::CancelMentor => Ok(SessionAction::Packet(ClientPacket::CancelMentor)),
+        BrowserCommand::GuildBuffUpdate { action, id } => {
+            if action > 2 {
+                return Err("unsupported guild buff action".to_owned());
+            }
+            Ok(SessionAction::Packet(ClientPacket::GuildBuffUpdate {
+                action,
+                id,
+            }))
+        }
         BrowserCommand::DepositTradeItem { from, to } => {
             Ok(SessionAction::Packet(ClientPacket::DepositTradeItem {
                 from,
@@ -8139,11 +8265,41 @@ async fn send_world_snapshot_with_quest_ack(
     session: &GatewaySession,
     quest_operation_ack: Option<&QuestOperationAck>,
 ) -> Result<(), String> {
+    send_world_snapshot_with_receipts(sender, session, quest_operation_ack, None).await
+}
+
+async fn send_world_snapshot_with_skill_ack(
+    sender: &SharedWebSocketSender,
+    session: &GatewaySession,
+    request: Option<&SkillKeyRequest>,
+    processed: bool,
+) -> Result<(), String> {
+    let Some(request) = request else {
+        return Ok(());
+    };
+    let in_world = processed && tokio::task::block_in_place(|| session.active_identity().is_some());
+    send_world_snapshot_with_receipts(sender, session, None, Some((request, in_world))).await
+}
+
+async fn send_world_snapshot_with_receipts(
+    sender: &SharedWebSocketSender,
+    session: &GatewaySession,
+    quest_operation_ack: Option<&QuestOperationAck>,
+    skill_key_ack: Option<(&SkillKeyRequest, bool)>,
+) -> Result<(), String> {
     let snapshot = catch_gateway_panic("web world_snapshot", || {
         tokio::task::block_in_place(|| session.world_snapshot())
     })?;
     let mut payload =
         serde_json::to_value(snapshot.client_view()).map_err(|error| error.to_string())?;
+    project_known_skill_icons(&mut payload);
+    if let Some((request, processed)) = skill_key_ack {
+        let ack = request.receipt(&payload, processed);
+        payload
+            .as_object_mut()
+            .ok_or_else(|| "world snapshot must serialize as a JSON object".to_string())?
+            .insert("skillKeyAck".into(), ack);
+    }
     if let Some(ack) = quest_operation_ack {
         let object = payload
             .as_object_mut()
@@ -8166,6 +8322,25 @@ async fn send_world_snapshot_with_quest_ack(
         ))
         .await
         .map_err(|error| error.to_string())
+}
+
+fn project_known_skill_icons(payload: &mut Value) {
+    let Some(skills) = payload.get_mut("knownSkills").and_then(Value::as_array_mut) else {
+        return;
+    };
+    for skill in skills {
+        let definition = skill
+            .get("spell")
+            .and_then(Value::as_str)
+            .and_then(mir2_game_data::crystal_magic_by_spell);
+        let (Some(definition), Some(record)) = (definition, skill.as_object_mut()) else {
+            continue;
+        };
+        // Explicit wire metadata wins, including icon zero and localized names.
+        // `name` may still be a starter alias, so keep the authoritative name separate.
+        record.entry("icon").or_insert_with(|| json!(definition.icon));
+        record.entry("magicName").or_insert_with(|| json!(definition.name));
+    }
 }
 
 fn realm_info_event(config: &GatewayConfig) -> Value {
@@ -9003,7 +9178,16 @@ fn npc_goods_item_json(item: &UserItem, rate: f32) -> Value {
 
     if let Some(template) = crystal_item_by_index(item.item_index) {
         entry.insert("name".into(), json!(template.name));
-        entry.insert("icon".into(), json!(template.image));
+        entry.insert(
+            "icon".into(),
+            json!(mir2_game_data::crystal_user_item_image(
+                template.item_type,
+                template.shape,
+                template.stack_size,
+                template.image,
+                u32::from(item.count),
+            )),
+        );
         entry.insert(
             "price".into(),
             json!(((template.price as f32) * rate).floor() as u32),
@@ -9231,8 +9415,15 @@ fn quest_time_limit_label(time_limit_in_seconds: i32) -> Option<String> {
 }
 
 fn monster_packet_sprite(image: u16) -> Value {
+    // Crystal MonsterObject uses Libraries.Pets for its distinct 10000..10014
+    // image family. These are not Monster/10000 atlas pages.
+    let body_library = if (10_000..=10_014).contains(&image) {
+        format!("Pet/{:02}", image - 10_000)
+    } else {
+        format!("Monster/{image:03}")
+    };
     json!({
-        "bodyLibrary": format!("Monster/{image:03}"),
+        "bodyLibrary": body_library,
         "hairLibrary": null,
         "weaponLibrary": null,
         "weaponLibrarySecondary": null,
@@ -9394,7 +9585,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                         "name": character.name,
                         "level": character.level,
                         "class": format!("{:?}", character.class),
-                        "gender": format!("{:?}", character.gender)
+                        "gender": format!("{:?}", character.gender),
+                        "lastAccessBinaryDatetime": character.last_access_binary_datetime.to_string()
                     })
                 }).collect::<Vec<_>>()
             }
@@ -9418,7 +9610,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                     "name": char_info.name,
                     "level": char_info.level,
                     "class": format!("{:?}", char_info.class),
-                    "gender": format!("{:?}", char_info.gender)
+                    "gender": format!("{:?}", char_info.gender),
+                    "lastAccessBinaryDatetime": char_info.last_access_binary_datetime.to_string()
                 }
             }
         }),
@@ -9693,6 +9886,15 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "rate": rate,
                 "panelType": panel_type,
                 "hideAddedStats": hide_added_stats
+            }
+        }),
+        ServerPacket::NPCPearlGoods { list, rate, panel_type } => json!({
+            "type": "packet",
+            "packet": "NPCPearlGoods",
+            "payload": {
+                "list": npc_goods_list_json(list, *rate),
+                "rate": rate,
+                "panelType": panel_type
             }
         }),
         ServerPacket::NPCSell => json!({
@@ -10176,6 +10378,15 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "to": to,
                 "success": success
             }
+        }),
+        ServerPacket::EquipSlotItem {
+            grid,
+            unique_id,
+            to,
+            grid_to,
+            success,
+        } => json!({
+            "type":"packet", "packet":"EquipSlotItem", "payload": { "grid":format!("{:?}",grid), "uniqueId":unique_id, "to":to, "gridTo":format!("{:?}",grid_to), "success":success }
         }),
         ServerPacket::RemoveSlotItem {
             grid,
@@ -10661,6 +10872,11 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "percent": info.percent,
                 "expire": info.expire
             }
+        }),
+        ServerPacket::ObjectPoisoned { object_id, poison } => json!({
+            "type": "packet",
+            "packet": "ObjectPoisoned",
+            "payload": { "objectId": object_id, "poison": poison }
         }),
         ServerPacket::ObjectMana { info } => json!({
             "type": "packet",
@@ -11369,6 +11585,7 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             "type": "packet",
             "packet": "FriendUpdate",
             "payload": {
+                "friendRecords": friends,
                 "friends": friends
                     .iter()
                     .filter(|friend| !friend.blocked)
@@ -11636,6 +11853,7 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
             if !info.group.is_empty() {
                 payload.insert("group".into(), json!(info.group));
             }
+            payload.insert("minLevelNeeded".into(), json!(info.min_level_needed));
             if !info.description.is_empty() {
                 payload.insert("descriptionLines".into(), json!(info.description));
             }
@@ -11648,6 +11866,18 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                             .map(|line| quest_objective_json(line))
                             .collect(),
                     ),
+                );
+            }
+            if !info.return_description.is_empty() {
+                payload.insert(
+                    "returnDescriptionLines".into(),
+                    json!(info.return_description),
+                );
+            }
+            if !info.completion_description.is_empty() {
+                payload.insert(
+                    "completionDescriptionLines".into(),
+                    json!(info.completion_description),
                 );
             }
             if let Some(rewards) = quest_rewards_json(info) {
@@ -11723,7 +11953,8 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                         "name": character.name,
                         "level": character.level,
                         "class": format!("{:?}", character.class),
-                        "gender": format!("{:?}", character.gender)
+                        "gender": format!("{:?}", character.gender),
+                        "lastAccessBinaryDatetime": character.last_access_binary_datetime.to_string()
                     })
                 }).collect::<Vec<_>>()
             }
@@ -12059,6 +12290,77 @@ mod tests {
         let observed = with_env_var(NAME, Some("recovered"), || std::env::var(NAME).unwrap());
         assert_eq!(observed, "recovered");
         assert_eq!(std::env::var_os(NAME), previous);
+    }
+
+    #[test]
+    fn creature_world_sprite_uses_original_pet_family_for_all_fifteen_images() {
+        for pet_type in 0_u16..15 {
+            let sprite = super::monster_packet_sprite(10_000 + pet_type);
+            assert_eq!(sprite["bodyLibrary"], format!("Pet/{pet_type:02}"));
+            assert_eq!(sprite["frameBaseOffset"], 0);
+        }
+        assert_eq!(
+            super::monster_packet_sprite(5)["bodyLibrary"],
+            "Monster/005"
+        );
+        assert_eq!(
+            super::monster_packet_sprite(9_999)["bodyLibrary"],
+            "Monster/9999"
+        );
+        assert_eq!(
+            super::monster_packet_sprite(10_015)["bodyLibrary"],
+            "Monster/10015"
+        );
+    }
+
+    #[test]
+    fn guild_buff_menu_commands_preserve_source_actions_and_server_ids() {
+        for action in 0_u8..=2 {
+            let command = serde_json::from_value::<BrowserCommand>(serde_json::json!({
+                "type": "guildBuffUpdate", "action": action, "id": 50,
+            }))
+            .unwrap();
+            assert!(matches!(super::browser_command_to_action(command).unwrap(),
+                SessionAction::Packet(ClientPacket::GuildBuffUpdate { action: a, id: 50 }) if a == action));
+        }
+        assert!(
+            super::browser_command_to_action(BrowserCommand::GuildBuffUpdate { action: 3, id: 50 })
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn skill_icons_use_server_spell_definition_and_preserve_explicit_zero() {
+        let definition = mir2_game_data::crystal_magic_by_spell("FireBall").unwrap();
+        let mut payload = json!({"knownSkills": [
+            {"key": "unrelated-runtime-key", "spell": "FireBall"},
+            {"spell": "FireBall", "icon": 0},
+            {"spell": "FireBall", "icon": 201},
+            {"spell": "UnknownServerSpell"},
+            {"key": "basic-attack", "spell": null}
+        ]});
+        super::project_known_skill_icons(&mut payload);
+        assert_eq!(payload["knownSkills"][0]["icon"], json!(definition.icon));
+        assert_eq!(payload["knownSkills"][1]["icon"], json!(0));
+        assert_eq!(payload["knownSkills"][2]["icon"], json!(201));
+        assert!(payload["knownSkills"][3].get("icon").is_none());
+        assert!(payload["knownSkills"][4].get("icon").is_none());
+    }
+
+    #[test]
+    fn skill_names_use_magic_definition_without_overwriting_server_names() {
+        let mut payload = json!({"knownSkills": [
+            {"spell":"Fury", "name":"Battle Focus", "icon":0},
+            {"spell":"Healing", "name":"Minor Heal"},
+            {"spell":"Fury", "magicName":"定制怒气"},
+            {"spell":"UnknownServerSpell", "name":"Custom skill"}
+        ]});
+        super::project_known_skill_icons(&mut payload);
+        assert_eq!(payload["knownSkills"][0]["magicName"], "Fury");
+        assert_eq!(payload["knownSkills"][0]["icon"], 0);
+        assert_eq!(payload["knownSkills"][1]["magicName"], "Healing");
+        assert_eq!(payload["knownSkills"][2]["magicName"], "定制怒气");
+        assert!(payload["knownSkills"][3].get("magicName").is_none());
     }
 
     fn sample_intelligent_creature(slot_index: i32) -> ClientIntelligentCreature {
@@ -12804,6 +13106,36 @@ mod tests {
     }
 
     #[test]
+    fn character_roster_events_preserve_crystal_last_access_ticks() {
+        let character = || SelectInfo {
+            index: 7,
+            name: "LastSeenHero".to_string(),
+            level: 12,
+            class: MirClass::Warrior,
+            gender: MirGender::Male,
+            last_access_binary_datetime: -8584918932854775808,
+        };
+
+        let login = super::server_packet_to_event(&ServerPacket::LoginSuccess {
+            characters: vec![character()],
+        });
+        let logout = super::server_packet_to_event(&ServerPacket::LogOutSuccess {
+            characters: vec![character()],
+        });
+        let created = super::server_packet_to_event(&ServerPacket::NewCharacterSuccess {
+            char_info: character(),
+        });
+
+        for value in [
+            &login["payload"]["characters"][0],
+            &logout["payload"]["characters"][0],
+            &created["payload"]["character"],
+        ] {
+            assert_eq!(value["lastAccessBinaryDatetime"], "-8584918932854775808");
+        }
+    }
+
+    #[test]
     fn raw_server_events_expose_copyable_payload_fields() {
         let raw = super::server_packet_to_event(&ServerPacket::Raw {
             packet_id: ServerPacketId::TimeOfDay,
@@ -12962,6 +13294,19 @@ mod tests {
     }
 
     #[test]
+    fn object_poisoned_event_preserves_actor_and_full_mask() {
+        for poison in [0, 1, u16::MAX] {
+            let event = super::server_packet_to_event(&ServerPacket::ObjectPoisoned {
+                object_id: 2001, poison,
+            });
+            assert_eq!(event["packet"], "ObjectPoisoned");
+            assert_eq!(event["payload"]["objectId"], 2001);
+            assert_eq!(event["payload"]["poison"], poison);
+            assert!(event["payload"].get("ownerId").is_none());
+        }
+    }
+
+    #[test]
     fn combine_item_server_event_exposes_crystal_payload_fields() {
         let packet = super::server_packet_to_event(&ServerPacket::CombineItem {
             grid: MirGridType::Inventory,
@@ -12999,6 +13344,17 @@ mod tests {
         assert_eq!(goods["payload"]["list"][0]["price"], 50);
         assert_eq!(goods["payload"]["list"][0]["item_index"], 658);
 
+        let mut pearl_item = sample_user_item(43_122_689, 1);
+        pearl_item.item_index = 658;
+        let pearls = super::server_packet_to_event(&ServerPacket::NPCPearlGoods {
+            list: vec![pearl_item], rate: 1.25, panel_type: 3,
+        });
+        assert_eq!(pearls["packet"], "NPCPearlGoods");
+        assert_eq!(pearls["payload"]["list"], goods["payload"]["list"]);
+        assert_eq!(pearls["payload"]["rate"], goods["payload"]["rate"]);
+        assert_eq!(pearls["payload"]["panelType"], goods["payload"]["panelType"]);
+        assert!(pearls["payload"].get("hideAddedStats").is_none());
+
         let repair = super::server_packet_to_event(&ServerPacket::NPCRepair { rate: 1.5 });
         assert_eq!(repair["packet"], "NPCRepair");
         assert_eq!(repair["payload"]["rate"], 1.5);
@@ -13014,6 +13370,40 @@ mod tests {
         let craft = super::server_packet_to_event(&ServerPacket::CraftItem { success: false });
         assert_eq!(craft["packet"], "CraftItem");
         assert_eq!(craft["payload"]["success"], false);
+    }
+
+    #[test]
+    fn npc_goods_stack_images_follow_live_count_and_keep_raw_user_item() {
+        for (index, count, image) in [
+            (710, 49, 3673),
+            (710, 50, 3674),
+            (710, 100, 2960),
+            (710, 150, 3675),
+            (711, 49, 3670),
+            (711, 50, 3671),
+            (711, 100, 2961),
+            (711, 150, 3672),
+            (712, 199, 3660),
+            (712, 200, 3661),
+            (712, 300, 3662),
+            (714, 5, 277),
+        ] {
+            let mut item = sample_user_item(71_001, count);
+            item.item_index = index;
+            let before = serde_json::to_value(&item).unwrap();
+            let event = super::server_packet_to_event(&ServerPacket::NPCGoods {
+                list: vec![item],
+                rate: 1.0,
+                panel_type: 0,
+                hide_added_stats: false,
+            });
+            let good = &event["payload"]["list"][0];
+            assert_eq!(good["icon"], image);
+            assert_eq!(good["count"], count);
+            for (key, value) in before.as_object().unwrap() {
+                assert_eq!(&good[key], value, "raw UserItem field {key}");
+            }
+        }
     }
 
     #[test]
@@ -13177,6 +13567,34 @@ mod tests {
             }
             _ => panic!("unexpected action"),
         }
+    }
+
+    #[test]
+    fn equip_slot_item_menu_bridge_retains_target_and_exact_failure_identity() {
+        for (name, target) in [
+            ("mount", mir2_protocol::MirGridType::Mount),
+            ("fishing", mir2_protocol::MirGridType::Fishing),
+        ] {
+            let command: BrowserCommand = serde_json::from_value(serde_json::json!({"type":"equipSlotItem","uniqueId":42,"grid":"inventory","to":3,"gridTo":name,"toUniqueId":987})).unwrap();
+            let action = super::browser_command_to_action(command).unwrap();
+            assert!(
+                matches!(action, SessionAction::Packet(ClientPacket::EquipSlotItem { grid:mir2_protocol::MirGridType::Inventory, unique_id:42, to:3, grid_to, to_unique_id:987 }) if grid_to==target)
+            );
+            let ack = super::server_packet_to_event(&ServerPacket::EquipSlotItem {
+                grid: mir2_protocol::MirGridType::Inventory,
+                unique_id: 42,
+                to: 3,
+                grid_to: target,
+                success: false,
+            });
+            assert_eq!(ack["packet"], "EquipSlotItem");
+            assert_eq!(
+                ack["payload"],
+                serde_json::json!({"grid":"Inventory","uniqueId":42,"to":3,"gridTo":format!("{target:?}"),"success":false})
+            );
+        }
+        let invalid: BrowserCommand=serde_json::from_value(serde_json::json!({"type":"equipSlotItem","uniqueId":42,"grid":"inventory","to":3,"gridTo":"madeUpGrid","toUniqueId":987})).unwrap();
+        assert!(super::browser_command_to_action(invalid).is_err());
     }
 
     #[test]
@@ -14929,6 +15347,55 @@ mod tests {
     }
 
     #[test]
+    fn skill_key_receipt_tracks_processed_request_and_authoritative_assignment() {
+        let command: BrowserCommand = serde_json::from_value(serde_json::json!({
+            "type":"magicKey", "spell":"Fury", "key":16, "oldKey":5, "requestId":42
+        }))
+        .unwrap();
+        let request = super::SkillKeyRequest::from_command(&command).unwrap();
+        let assigned = serde_json::json!({"knownSkills":[{"spell":"Fury","hotkey":16}]});
+        let receipt = request.receipt(&assigned, true);
+        assert_eq!(
+            receipt,
+            serde_json::json!({"requestId":42,"spell":"Fury","key":16,"oldKey":5,"accepted":true})
+        );
+        // Matching state is not proof that a rejected/unqueued request ran.
+        assert_eq!(request.receipt(&assigned, false)["accepted"], false);
+        assert_eq!(
+            request.receipt(
+                &serde_json::json!({"knownSkills":[{"spell":"Fury","hotkey":5}]}),
+                true
+            )["accepted"],
+            false
+        );
+        assert_eq!(
+            request.receipt(&serde_json::json!({"knownSkills":[]}), true)["accepted"],
+            false
+        );
+        let action = super::browser_command_to_action(command).unwrap();
+        assert!(matches!(
+            action,
+            SessionAction::Packet(ClientPacket::MagicKey {
+                spell: Spell::Fury,
+                key: 16,
+                old_key: 5
+            })
+        ));
+        let legacy: BrowserCommand =
+            serde_json::from_value(serde_json::json!({"type":"magicKey","spell":"Fury","key":0}))
+                .unwrap();
+        assert!(super::SkillKeyRequest::from_command(&legacy).is_none());
+        let clear_hero = super::SkillKeyRequest {
+            request_id: 43,
+            spell: "Fury".into(),
+            key: 0,
+            old_key: 17,
+        };
+        let hero = serde_json::json!({"knownSkills":[{"spell":"Fury","hotkey":17}],"stage5Systems":{"heroLearnedMagics":[{"spell":"Fury","key":0}]}});
+        assert_eq!(clear_hero.receipt(&hero, true)["accepted"], true);
+    }
+
+    #[test]
     fn magic_commands_map_to_crystal_protocol_packets() {
         let key_command = serde_json::from_str::<BrowserCommand>(
             r#"{"type":"magicKey","spell":"Fury","key":5,"oldKey":0}"#,
@@ -15349,6 +15816,7 @@ mod tests {
         assert_eq!(info["payload"]["id"], 1001);
         assert_eq!(info["payload"]["name"], "Field Wasp");
         assert_eq!(info["payload"]["group"], "Starter");
+        assert_eq!(info["payload"]["minLevelNeeded"], 1);
         assert_eq!(
             info["payload"]["descriptionLines"][0],
             "Help the town guard."
@@ -15359,6 +15827,14 @@ mod tests {
         );
         assert_eq!(info["payload"]["objectives"][0]["current"], 0);
         assert_eq!(info["payload"]["objectives"][0]["required"], 3);
+        assert_eq!(
+            info["payload"]["returnDescriptionLines"][0],
+            "Return to the guard."
+        );
+        assert_eq!(
+            info["payload"]["completionDescriptionLines"][0],
+            "Good work."
+        );
         assert_eq!(info["payload"]["rewards"]["gold"], 500);
         assert_eq!(info["payload"]["rewards"]["experience"], 1_200);
         assert_eq!(
@@ -15513,12 +15989,12 @@ mod tests {
     #[test]
     fn hero_and_world_control_commands_map_to_crystal_protocol_packets() {
         let auto_pot_value = serde_json::from_str::<BrowserCommand>(
-            r#"{"type":"setAutoPotValue","stat":0,"value":80}"#,
+            r#"{"type":"setAutoPotValue","stat":12,"value":80}"#,
         )
         .expect("set auto pot value command should deserialize");
         assert!(matches!(
             super::browser_command_to_action(auto_pot_value).expect("auto pot value maps"),
-            SessionAction::Packet(ClientPacket::SetAutoPotValue { stat: 0, value: 80 })
+            SessionAction::Packet(ClientPacket::SetAutoPotValue { stat: 12, value: 80 })
         ));
 
         let auto_pot_item = serde_json::from_str::<BrowserCommand>(
@@ -16049,6 +16525,13 @@ mod tests {
             ],
         });
         assert_eq!(friends["packet"], "FriendUpdate");
+        let native: Vec<ClientFriend> =
+            serde_json::from_value(friends["payload"]["friendRecords"].clone())
+                .expect("native roster preserves typed identity");
+        assert_eq!(native.len(), 2);
+        assert_eq!(native[0].index, 42);
+        assert_eq!(native[1].index, 43);
+        assert!(native[1].blocked);
         // Roster is split: non-blocked entries in `friends`, blocked in `blocked`.
         assert_eq!(friends["payload"]["friends"][0]["name"], "Blade");
         assert_eq!(friends["payload"]["friends"][0]["online"], true);
@@ -16068,6 +16551,7 @@ mod tests {
             }],
         });
         assert!(no_memo["payload"]["friends"][0].get("memo").is_none());
+        assert_eq!(no_memo["payload"]["friendRecords"][0]["memo"], "");
     }
 
     #[test]
@@ -16265,6 +16749,7 @@ mod tests {
                 super::ParsedSocketInput::Action {
                     action: SessionAction::Tick,
                     quest_operation_request: None,
+                    skill_key_request: None,
                 },
                 std::sync::Arc::clone(&pending),
                 bytes
@@ -16279,6 +16764,7 @@ mod tests {
                 super::ParsedSocketInput::Action {
                     action: SessionAction::Tick,
                     quest_operation_request: None,
+                    skill_key_request: None,
                 }
             ));
             assert_eq!(pending.load(std::sync::atomic::Ordering::Acquire), 1);

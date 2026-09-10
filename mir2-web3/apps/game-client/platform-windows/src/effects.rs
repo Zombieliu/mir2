@@ -870,6 +870,19 @@ impl EffectCatalog {
         self.resolve_animation(entry, direction, 0)
     }
 
+    fn warrior_attack_animation(
+        &self,
+        spell: &str,
+        direction: u32,
+        level: u32,
+    ) -> Option<Animation> {
+        if spell == "FlamingSword" {
+            return self.spell_attack_overlay_animation(spell, direction);
+        }
+        let entry = self.map_by_name.get(&format!("Warrior{spell}Attack"))?;
+        self.resolve_animation(entry, direction, level)
+    }
+
     pub(crate) fn spell_world_animation(
         &self,
         spell: &str,
@@ -1182,6 +1195,25 @@ struct LocalProjectileTarget {
     target_id: Option<u32>,
     fallback: (i32, i32),
     resolved_at_launch: bool,
+}
+
+/// Crystal PlayerObject Spell-completion talismans. Unlike targeted bolts,
+/// their completion effect is anchored to the packet TargetPoint, even when
+/// the tracked object has moved or died. SoundList.lst only registers 20710
+/// from these calls, mapping it to M69-0. Unregistered source IDs stay silent.
+fn ground_talisman(spell: &str) -> Option<(&'static str, Option<(&'static str, &'static str)>)> {
+    Some(match spell {
+        "MassHiding" => ("MassHiding", None),
+        "SoulShield" => ("SoulShield", None),
+        "BlessedArmour" => (
+            "BlessedArmour",
+            Some(("BlessedArmour.projectile", "M69-0.wav")),
+        ),
+        "Curse" => ("Curse", None),
+        "Plague" => ("Plague", None),
+        "PoisonCloud" => ("PoisonCloud", None),
+        _ => return None,
+    })
 }
 
 /// Renderer-neutral light emitted by one currently-active effect phase.
@@ -1903,6 +1935,10 @@ impl NativeEffects {
                     )),
                 ),
                 "LeftGuardRangeProjectile" => ("LeftGuardRangeProjectile", None),
+                spell if ground_talisman(spell).is_some() => {
+                    let (spell, _) = ground_talisman(spell).expect("checked talisman");
+                    (spell, None)
+                }
                 _ => continue,
             };
             let bound_target = target_state
@@ -1916,6 +1952,18 @@ impl NativeEffects {
                 continue;
             };
             let source = (from_x as i32, from_y as i32);
+            let source = if ground_talisman(spell).is_some() {
+                self.source_object_ids
+                    .get(&instance.key)
+                    .and_then(|id| resolve_tile(&instance.key, *id))
+                    .unwrap_or(source)
+            } else {
+                source
+            };
+            if ground_talisman(spell).is_some() {
+                instance.from_x = Some(source.0 as f32);
+                instance.from_y = Some(source.1 as f32);
+            }
             let direction = projectile_direction16(source, destination);
             let launch_animation = effect_catalog().as_ref().and_then(|catalog| {
                 if spell == "LeftGuardRangeProjectile" {
@@ -1941,18 +1989,20 @@ impl NativeEffects {
             instance.queued = if spell == "LeftGuardRangeProjectile" {
                 None
             } else {
-                bound_target.and_then(|_| {
-                    effect_catalog()
-                        .as_ref()
-                        .and_then(|catalog| catalog.spell_impact_animation(spell))
-                })
+                bound_target
+                    .or_else(|| ground_talisman(spell).map(|_| destination))
+                    .and_then(|_| {
+                        effect_catalog()
+                            .as_ref()
+                            .and_then(|catalog| catalog.spell_impact_animation(spell))
+                    })
             };
             target_state.resolved_at_launch = true;
             if let Some(target_id) = target_state.target_id.filter(|_| bound_target.is_some()) {
                 anchors_to_insert.push((instance.key.clone(), target_id));
             }
-            if let Some((impact_sound_cue, impact_sound_file)) =
-                impact_sound.filter(|_| instance.queued.is_some())
+            if let Some((impact_sound_cue, impact_sound_file)) = impact_sound
+                .filter(|_| instance.queued.is_some() || ground_talisman(spell).is_some())
             {
                 launch_impact_sounds.push(PendingEffectSound {
                     key: instance.key.clone(),
@@ -1979,6 +2029,17 @@ impl NativeEffects {
         let mut detached_left_guard_targets = Vec::new();
         let mut local_projectile_impact_due = Vec::new();
         for instance in &mut self.active {
+            if ground_talisman(&instance.provenance.spell).is_some()
+                && instance.current.as_ref().is_some_and(|animation| {
+                    now_ms >= instance.start_at.saturating_add(animation.duration_ms)
+                })
+            {
+                if let Some(target) = self.local_projectile_targets.get(&instance.key) {
+                    instance.tile_x = target.fallback.0;
+                    instance.tile_y = target.fallback.1;
+                }
+                continue;
+            }
             let Some(object_id) = anchors.get(&instance.key) else {
                 continue;
             };
@@ -1994,6 +2055,7 @@ impl NativeEffects {
                         "SoulFireBall" => (true, Some(SOUL_FIREBALL_IMPACT_SOUND_CUE)),
                         "Hallucination" => (true, Some(HALLUCINATION_IMPACT_SOUND_CUE)),
                         "LeftGuardRangeProjectile" => (true, None),
+                        spell if ground_talisman(spell).is_some() => (true, None),
                         _ => (false, None),
                     };
                 if is_local_projectile {
@@ -2022,7 +2084,8 @@ impl NativeEffects {
                         }
                     }
                 };
-            } else if instance.provenance.spell == "LeftGuardRangeProjectile"
+            } else if (instance.provenance.spell == "LeftGuardRangeProjectile"
+                || ground_talisman(&instance.provenance.spell).is_some())
                 && now_ms > instance.start_at
                 && self
                     .local_projectile_targets
@@ -2051,6 +2114,34 @@ impl NativeEffects {
                 }
             }
         }
+        // The missile completes into an independent point effect. Release the
+        // caster/target attachment and deliver arrival-only sounds before the
+        // renderer prunes PoisonCloud's bitmap-free completion.
+        let completed_talismans = self
+            .active
+            .iter()
+            .filter(|instance| {
+                ground_talisman(&instance.provenance.spell).is_some()
+                    && instance.current.as_ref().is_some_and(|animation| {
+                        now_ms >= instance.start_at.saturating_add(animation.duration_ms)
+                    })
+            })
+            .map(|instance| instance.key.clone())
+            .collect::<HashSet<_>>();
+        for key in &completed_talismans {
+            self.anchor_object_ids.remove(key);
+            self.source_object_ids.remove(key);
+        }
+        let mut completed_sounds = Vec::new();
+        self.pending_sounds.retain(|sound| {
+            if completed_talismans.contains(&sound.key) && now_ms >= sound.due_at_ms {
+                completed_sounds.push(sound.event.clone());
+                false
+            } else {
+                true
+            }
+        });
+        self.ready_sounds.extend(completed_sounds);
         if !missing.is_empty() {
             self.active
                 .retain(|instance| !missing.contains(&instance.key));
@@ -2118,6 +2209,7 @@ impl NativeEffects {
         provenance: &EffectProvenance,
         suppress_duplicate_scarecrow_struck: bool,
     ) {
+        self.cancel_pet_prestart(packet, payload);
         match packet {
             "MapChanged" | "LogOutSuccess" => self.clear_active_effects(),
             "Struck" | "ObjectStruck" => {
@@ -2130,6 +2222,7 @@ impl NativeEffects {
                 self.apply_player_death_sound(payload, provenance);
                 self.apply_scarecrow_death_sound(payload, provenance);
             }
+            "IntelligentCreaturePickup" => self.apply_pet_pickup_sound(payload, provenance),
             "ObjectAttack" => self.apply_object_attack(payload, provenance),
             "ObjectRangeAttack" => self.apply_object_range_attack(payload, zone_tiles, provenance),
             "ObjectMagic" => self.apply_object_magic(payload, provenance),
@@ -2230,13 +2323,45 @@ impl NativeEffects {
     }
 
     fn apply_object_attack(&mut self, payload: &Value, provenance: &EffectProvenance) {
+        self.apply_pet_attack_effects(payload, provenance);
         self.apply_scarecrow_attack_sound(payload, provenance);
-        let flaming_sword = payload.get("spell").is_some_and(|value| {
-            value.as_u64() == Some(8) || value.as_str() == Some("FlamingSword")
+        let spell = payload.get("spell").and_then(|value| {
+            value.as_str().or_else(|| {
+                value.as_u64().and_then(|id| match id {
+                    2 => Some("Slaying"),
+                    3 => Some("Thrusting"),
+                    4 => Some("HalfMoon"),
+                    6 => Some("TwinDrakeBlade"),
+                    8 => Some("FlamingSword"),
+                    10 => Some("CrossHalfMoon"),
+                    _ => None,
+                })
+            })
         });
-        if !flaming_sword {
+        let Some(spell) = spell.filter(|spell| {
+            matches!(
+                *spell,
+                "Slaying"
+                    | "Thrusting"
+                    | "HalfMoon"
+                    | "TwinDrakeBlade"
+                    | "FlamingSword"
+                    | "CrossHalfMoon"
+            )
+        }) else {
             return;
-        }
+        };
+        // Only the authoritative attack packet chooses the overlay/level. A
+        // learned/toggled skill or a monster attack Type cannot invent one.
+        let level = match spell {
+            "Slaying" | "Thrusting" | "HalfMoon" => {
+                match payload.get("level").and_then(Value::as_u64) {
+                    Some(level @ 0..=3) => level as u32,
+                    _ => return,
+                }
+            }
+            _ => 0,
+        };
         let Some(catalog) = effect_catalog() else {
             return;
         };
@@ -2258,22 +2383,35 @@ impl NativeEffects {
             .and_then(Value::as_str)
             .map(direction_index)
             .unwrap_or(4);
-        let Some(animation) = catalog.spell_attack_overlay_animation("FlamingSword", direction)
-        else {
+        let Some(animation) = catalog.warrior_attack_animation(spell, direction, level) else {
             return;
         };
 
         // One overlay per attacker: a newer authoritative attack restarts its
         // six-frame clock while distinct attackers remain independent.
-        let key = format!("flaming-sword-{object_id}");
-        self.active.retain(|instance| instance.key != key);
+        let key = if spell == "FlamingSword" {
+            format!("flaming-sword-{object_id}")
+        } else {
+            format!("warrior-attack-{object_id}")
+        };
+        let previous_keys = [
+            format!("flaming-sword-{object_id}"),
+            format!("warrior-attack-{object_id}"),
+        ];
+        self.active
+            .retain(|instance| !previous_keys.contains(&instance.key));
+        for previous in &previous_keys {
+            self.anchor_object_ids.remove(previous);
+        }
         self.pending_sounds.retain(|pending| pending.key != key);
         self.anchor_object_ids.insert(key.clone(), object_id);
-        self.queue_immediate_sound(
-            provenance,
-            FLAMING_SWORD_SOUND_CUE,
-            FLAMING_SWORD_SOUND_FILE,
-        );
+        if spell == "FlamingSword" {
+            self.queue_immediate_sound(
+                provenance,
+                FLAMING_SWORD_SOUND_CUE,
+                FLAMING_SWORD_SOUND_FILE,
+            );
+        }
         self.active.push(EffectInstance {
             key,
             kind: EffectKindTag::AttackOverlay,
@@ -2541,6 +2679,11 @@ impl NativeEffects {
         let now = self.now_ms;
         let start_at = now.saturating_add(spell_action_ms);
         let key = self.next_key(tag);
+        if ground_talisman(spell).is_some() {
+            if let Some(source_id) = source_id {
+                self.source_object_ids.insert(key.clone(), source_id);
+            }
+        }
         self.local_projectile_targets.insert(
             key.clone(),
             LocalProjectileTarget {
@@ -2602,6 +2745,18 @@ impl NativeEffects {
         let Some(spell) = payload.get("spell").and_then(Value::as_str) else {
             return;
         };
+        if let Some((spell, launch_sound)) = ground_talisman(spell) {
+            self.schedule_local_projectile_from_object_magic(
+                payload,
+                catalog,
+                provenance,
+                spell,
+                "ground-talisman",
+                600,
+                launch_sound,
+            );
+            return;
+        }
         if spell == "FireWall" {
             // Crystal plays M39-0 and the attached Magic/1620..1629 cast at
             // action start even when Cast=false. Only the post-Spell-action
@@ -2795,6 +2950,38 @@ impl NativeEffects {
                 },
             });
         }
+        if spell == "ImmortalSkin" {
+            // Crystal creates these two attached layers concurrently. The
+            // secondary's 600 ms lifetime is not an impact after the 2397 ms
+            // primary (17 * floor(2400 / 17)) finishes.
+            if let Some(object_id) = payload
+                .get("objectId")
+                .and_then(Value::as_u64)
+                .and_then(|id| u32::try_from(id).ok())
+            {
+                self.anchor_object_ids.insert(key.clone(), object_id);
+                if let Some(secondary) = catalog.map_animation("ImmortalSkinSecondary", 0) {
+                    let secondary_key = self.next_key("immortal-skin-secondary");
+                    self.anchor_object_ids
+                        .insert(secondary_key.clone(), object_id);
+                    self.active.push(EffectInstance {
+                        key: secondary_key,
+                        kind: EffectKindTag::Cast,
+                        tile_x: x as i32,
+                        tile_y: y as i32,
+                        from_x: None,
+                        from_y: None,
+                        current: Some(secondary),
+                        queued: None,
+                        return_queued: None,
+                        started_at: now,
+                        start_at: now,
+                        persistent_object_id: None,
+                        provenance: provenance.clone(),
+                    });
+                }
+            }
+        }
         self.active.push(EffectInstance {
             key,
             kind: EffectKindTag::Cast,
@@ -2810,6 +2997,35 @@ impl NativeEffects {
             persistent_object_id: None,
             provenance: provenance.clone(),
         });
+        if spell == "FireBang" && payload.get("cast").and_then(Value::as_bool) == Some(true) {
+            // Crystal PlayerObject: after the six-frame Spell action, create
+            // Magic 1660..1669 at TargetPoint even when TargetID is zero.
+            // This independent ground explosion has no projectile/actor anchor.
+            if let (Some(target_x), Some(target_y), Some(source_id), Some(impact)) = (
+                value_f32(payload, "target", "x"),
+                value_f32(payload, "target", "y"),
+                payload.get("objectId").and_then(Value::as_u64).and_then(|id| u32::try_from(id).ok()),
+                catalog.spell_impact_animation("FireBang"),
+            ) {
+                let impact_key = self.next_key("firebang-impact");
+                self.prestart_source_object_ids.insert(impact_key.clone(), source_id);
+                self.active.push(EffectInstance {
+                    key: impact_key,
+                    kind: EffectKindTag::Impact,
+                    tile_x: target_x as i32,
+                    tile_y: target_y as i32,
+                    from_x: None,
+                    from_y: None,
+                    current: Some(impact),
+                    queued: None,
+                    return_queued: None,
+                    started_at: now,
+                    start_at: now.saturating_add(600),
+                    persistent_object_id: None,
+                    provenance: provenance.clone(),
+                });
+            }
+        }
         if spell == "FireBall" {
             self.schedule_local_projectile_from_object_magic(
                 payload,
@@ -2886,7 +3102,9 @@ impl NativeEffects {
         // own their delayed local missile. FireBounce differs: dedupe only its
         // legacy initial player-to-target supplement below, then consume later
         // monster-to-monster packets as authoritative bounce hops.
-        if matches!(spell, "SoulFireBall" | "GreatFireBall" | "Hallucination") {
+        if matches!(spell, "SoulFireBall" | "GreatFireBall" | "Hallucination")
+            || ground_talisman(spell).is_some()
+        {
             return;
         }
         let open_id = |name: &str| -> Option<u32> {
@@ -3453,9 +3671,14 @@ impl NativeEffects {
                 .iter()
                 .filter_map(|(key, anchored_id)| {
                     (*anchored_id == object_id
-                        && left_guard_start_times
+                        && (left_guard_start_times
                             .get(key)
-                            .is_some_and(|start_at| self.now_ms > *start_at))
+                            .is_some_and(|start_at| self.now_ms > *start_at)
+                            || self.active.iter().any(|instance| {
+                                instance.key == *key
+                                    && ground_talisman(&instance.provenance.spell).is_some()
+                                    && self.now_ms >= instance.start_at
+                            })))
                     .then_some(key.clone())
                 })
                 .collect::<HashSet<_>>()
@@ -3687,8 +3910,15 @@ fn instance_current_tile(
         // Projectile: source -> destination; Return: destination -> source.
         // Use kind to distinguish, since pointer equality fails for cloned test anims.
         if animation.kind == "projectile" {
-            let progress =
-                projectile_progress(animation.duration_ms, now_ms.saturating_sub(started_at));
+            let progress = if ground_talisman(&instance.provenance.spell).is_some() {
+                // Missile.Draw uses the integer processing frame, rather than
+                // interpolating continuously between Crystal's 30 ms steps.
+                let count = (animation.duration_ms / 30).max(1);
+                let interval = (animation.duration_ms / count).max(1);
+                (now_ms.saturating_sub(started_at) / interval).min(count) as f32 / count as f32
+            } else {
+                projectile_progress(animation.duration_ms, now_ms.saturating_sub(started_at))
+            };
             let dx = (instance.tile_x as f32 - from_x) * progress;
             let dy = (instance.tile_y as f32 - from_y) * progress;
             return (from_x + dx, from_y + dy);
@@ -3893,6 +4123,259 @@ mod tests {
     use crate::gameplay_bridge::{NativeEffectEvent, NativeGameplayAdapter};
     use crate::native_protocol::PacketEvent;
     use serde_json::json;
+
+    fn firebang_event(sequence: u64, cast: bool, target_id: u32) -> NativeEffectEvent {
+        let mut event = talisman_event("FireBang", sequence, cast, target_id);
+        event.payload["target"] = json!({"x":287,"y":622});
+        event
+    }
+
+    #[test]
+    fn firebang_empty_ground_completion_has_exact_frames_and_fixed_target() {
+        let mut fx = NativeEffects::default();
+        let zone = HashMap::from([(1000,(288,616)),(2000,(287,620))]);
+        let event = firebang_event(1,true,0);
+        fx.observe(0,288,616,&[event.clone(),event],&zone);
+        assert_eq!(fx.active.len(),2,"duplicate must not schedule two explosions");
+        let before: Value = serde_json::from_str(&fx.tick_with_visibility(599,true).unwrap()).unwrap();
+        assert!(before["effects"].as_array().unwrap().iter().all(|v| !v["imageUrl"].as_str().unwrap().ends_with("/1660.png")));
+        for (now,frame) in [(600,1660),(1500,1669)] {
+            let state: Value = serde_json::from_str(&fx.tick_with_visibility(now,true).unwrap()).unwrap();
+            assert_eq!(state["effects"].as_array().unwrap().len(),1);
+            assert!(state["effects"][0]["imageUrl"].as_str().unwrap().ends_with(&format!("/{frame}.png")));
+            assert_eq!((fx.active[0].tile_x,fx.active[0].tile_y),(287,622));
+        }
+        let end: Value = serde_json::from_str(&fx.tick_with_visibility(1600,true).unwrap()).unwrap();
+        assert_eq!(end["effects"],json!([]));
+        assert!(fx.take_due_sound_events(1600).is_empty());
+
+        let mut fx = NativeEffects::default();
+        fx.observe(0,288,616,&[firebang_event(1,true,2000)],&zone);
+        fx.observe(601,288,616,&[],&HashMap::from([(1000,(288,616)),(2000,(280,610))]));
+        fx.tick_with_visibility(601,true);
+        assert_eq!((fx.active[0].tile_x,fx.active[0].tile_y),(287,622));
+        assert!(fx.anchor_object_ids.is_empty());
+    }
+
+    #[test]
+    fn firebang_failed_cast_and_source_lifecycle_do_not_leak_completion() {
+        let zone=HashMap::from([(1000,(288,616))]);
+        let mut fx=NativeEffects::default();
+        fx.observe(0,288,616,&[firebang_event(1,false,0)],&zone);
+        assert_eq!(fx.active.len(),1);
+        assert!(fx.prestart_source_object_ids.is_empty());
+        let state: Value=serde_json::from_str(&fx.tick_with_visibility(600,true).unwrap()).unwrap();
+        assert_eq!(state["effects"],json!([]));
+        for removed_at in [100,601] {
+            let mut fx=NativeEffects::default();
+            fx.observe(0,288,616,&[firebang_event(1,true,0)],&zone);
+            if removed_at>600 { fx.tick_with_visibility(601,true); }
+            fx.observe(removed_at,288,616,&[NativeEffectEvent { generation:42,sequence:2,packet:"ObjectRemove".into(),payload:json!({"objectId":1000}) }],&HashMap::new());
+            fx.tick_with_visibility(700,true);
+            assert_eq!(fx.active.len(),usize::from(removed_at>600));
+        }
+        let mut fx=NativeEffects::default();
+        fx.observe(0,288,616,&[firebang_event(1,true,0)],&zone);
+        let mut next_generation=firebang_event(1,false,0);
+        next_generation.generation=43;
+        fx.observe(100,288,616,&[next_generation],&zone);
+        assert!(fx.prestart_source_object_ids.is_empty());
+        let state: Value=serde_json::from_str(&fx.tick_with_visibility(700,true).unwrap()).unwrap();
+        assert_eq!(state["effects"],json!([]),"new generation must retire old pending explosion");
+        for reset_connection in [false,true] {
+            let mut fx=NativeEffects::default();
+            fx.observe(0,288,616,&[firebang_event(1,true,0)],&zone);
+            if reset_connection { fx.reset_for_new_connection(); } else { fx.clear_active_effects(); }
+            assert!(fx.active.is_empty());
+            assert!(fx.prestart_source_object_ids.is_empty());
+        }
+    }
+
+    fn talisman_event(spell: &str, sequence: u64, cast: bool, target_id: u32) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 42,
+            packet: "ObjectMagic".into(),
+            payload: json!({
+                "objectId":1000,"spell":spell,"direction":"Up","location":{"x":288,"y":616},
+                "targetId":target_id,"target":{"x":288,"y":611},"cast":cast,"level":3
+            }),
+        }
+    }
+
+    #[test]
+    fn ground_talismans_launch_after_spell_and_complete_at_fixed_point_with_source_sounds() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        for (spell, impact_path, duration) in [
+            ("MassHiding", Some("/Magic/1540.png"), 800),
+            ("SoulShield", Some("/Magic/1320.png"), 1200),
+            ("BlessedArmour", Some("/Magic/1340.png"), 1200),
+            ("Curse", Some("/Magic2/950.png"), 1992),
+            ("Plague", Some("/Magic3/110.png"), 1200),
+            ("PoisonCloud", None, 0),
+        ] {
+            let mut fx = NativeEffects::default();
+            fx.observe(0, 288, 616, &[talisman_event(spell, 1, true, 0)], &zone);
+            assert_eq!(fx.active.len(), 1, "{spell}");
+            assert!(fx.take_due_sound_events(0).is_empty());
+            let before: Value =
+                serde_json::from_str(&fx.tick_with_visibility(599, true).unwrap()).unwrap();
+            assert_eq!(before["effects"], json!([]));
+            let launch: Value =
+                serde_json::from_str(&fx.tick_with_visibility(600, true).unwrap()).unwrap();
+            assert!(launch["effects"][0]["imageUrl"]
+                .as_str()
+                .unwrap()
+                .ends_with("/Magic/1160.png"));
+            let (_, launch_sound) = ground_talisman(spell).unwrap();
+            let sounds = fx.take_due_sound_events(600);
+            assert_eq!(sounds.len(), usize::from(spell == "BlessedArmour"));
+            if spell == "BlessedArmour" {
+                assert_eq!(sounds[0].file_name, "M69-0.wav");
+            }
+            if let Some((cue, file)) = launch_sound {
+                assert_eq!((&*sounds[0].cue, &*sounds[0].file_name), (cue, file));
+            }
+            assert!(fx.take_due_sound_events(849).is_empty());
+            let impact: Value =
+                serde_json::from_str(&fx.tick_with_visibility(850, true).unwrap()).unwrap();
+            let sounds = fx.take_due_sound_events(850);
+            assert!(
+                sounds.is_empty(),
+                "{spell} unregistered source arrival sound remains silent"
+            );
+            if let Some(path) = impact_path {
+                assert!(impact["effects"][0]["imageUrl"]
+                    .as_str()
+                    .unwrap()
+                    .ends_with(path));
+                assert_eq!(fx.active[0].queued.as_ref().unwrap().duration_ms, duration);
+                assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (288, 611));
+            } else {
+                assert_eq!(impact["effects"], json!([]));
+            }
+            assert!(fx.take_due_sound_events(850).is_empty());
+        }
+    }
+
+    #[test]
+    fn ground_talismans_reject_failed_cast_and_compatibility_packets_and_reset_cleanly() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        for spell in [
+            "MassHiding",
+            "SoulShield",
+            "BlessedArmour",
+            "Curse",
+            "Plague",
+            "PoisonCloud",
+        ] {
+            let mut fx = NativeEffects::default();
+            fx.observe(0, 288, 616, &[talisman_event(spell, 1, false, 0)], &zone);
+            assert!(fx.active.is_empty());
+            let compat = NativeEffectEvent {
+                sequence: 2,
+                generation: 42,
+                packet: "ObjectProjectile".into(),
+                payload: json!({"spell":spell,"sourceId":1000,"destinationId":0}),
+            };
+            fx.observe(1, 288, 616, &[compat], &zone);
+            assert!(fx.active.is_empty());
+            let event = talisman_event(spell, 3, true, 0);
+            fx.observe(2, 288, 616, &[event.clone(), event], &zone);
+            assert_eq!(fx.active.len(), 1);
+            fx.reset_for_new_connection();
+            assert!(fx.active.is_empty());
+            assert!(fx.take_due_sound_events(2000).is_empty());
+        }
+    }
+
+    #[test]
+    fn ground_talismans_track_flight_but_impact_packet_point_even_when_target_dies() {
+        let zone = HashMap::from([(1000, (288, 616)), (2041, (288, 610))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[talisman_event("Curse", 1, true, 2041)],
+            &zone,
+        );
+        fx.tick_with_visibility(600, true);
+        assert_eq!(fx.active[0].current.as_ref().unwrap().duration_ms, 300);
+        fx.replace_dead_action_object_ids(HashSet::from([2041]));
+        fx.tick_with_visibility(900, true);
+        assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (288, 611));
+        assert!(fx.active[0].queued.is_some());
+        assert!(fx.anchor_object_ids.is_empty());
+        assert!(fx.take_due_sound_events(900).is_empty());
+    }
+
+    #[test]
+    fn ground_talismans_resolve_all_sixteen_directions() {
+        let catalog = effect_catalog().as_ref().unwrap();
+        for spell in [
+            "MassHiding",
+            "SoulShield",
+            "BlessedArmour",
+            "Curse",
+            "Plague",
+            "PoisonCloud",
+        ] {
+            assert!(catalog.spell_cast_animation(spell, 0).is_none());
+            for direction in 0..16 {
+                let anim = catalog
+                    .spell_projectile_animation(spell, direction)
+                    .unwrap();
+                assert_eq!(anim.frames.len(), 3);
+                assert!(anim.frames[0]
+                    .path
+                    .ends_with(&format!("/Magic/{}.png", 1160 + direction * 10)));
+            }
+        }
+    }
+
+    #[test]
+    fn ground_talismans_keep_launched_target_reference_but_cancel_removed_caster() {
+        let zone = HashMap::from([(1000, (288, 616)), (2041, (288, 611))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(
+            0,
+            288,
+            616,
+            &[talisman_event("Plague", 1, true, 2041)],
+            &zone,
+        );
+        fx.tick_with_visibility(600, true);
+        let removal = NativeEffectEvent {
+            generation: 42,
+            sequence: 2,
+            packet: "ObjectRemove".into(),
+            payload: json!({"objectId":2041}),
+        };
+        fx.observe(
+            700,
+            288,
+            616,
+            &[removal],
+            &HashMap::from([(1000, (288, 616))]),
+        );
+        assert_eq!(fx.active.len(), 1);
+        fx.tick_with_visibility(850, true);
+        assert!(fx.active[0].queued.is_some());
+        assert!(fx.take_due_sound_events(850).is_empty());
+
+        let mut removed = NativeEffects::default();
+        removed.observe(0, 288, 616, &[talisman_event("Plague", 1, true, 0)], &zone);
+        let removal = NativeEffectEvent {
+            generation: 42,
+            sequence: 2,
+            packet: "ObjectRemove".into(),
+            payload: json!({"objectId":1000}),
+        };
+        removed.observe(100, 288, 616, &[removal], &HashMap::new());
+        assert!(removed.active.is_empty());
+        assert!(removed.take_due_sound_events(2000).is_empty());
+    }
 
     #[test]
     fn new_move_destination_uses_crystal_magic3_frames_and_expires_at_600ms() {
@@ -9733,6 +10216,123 @@ mod tests {
     }
 
     #[test]
+    fn warrior_attack_source_frames_cover_all_directions_and_packet_levels() {
+        let catalog = EffectCatalog::load().expect("exported source assets");
+        for (spell, library, base, stride, levelled) in [
+            ("Slaying", "Magic", 1820, 10, true),
+            ("Thrusting", "Magic", 2190, 10, true),
+            ("HalfMoon", "Magic", 2560, 10, true),
+            ("TwinDrakeBlade", "Magic2", 220, 20, false),
+            ("CrossHalfMoon", "Magic2", 40, 10, false),
+        ] {
+            for level in 0..if levelled { 4 } else { 1 } {
+                for direction in 0..8 {
+                    let anim = catalog
+                        .warrior_attack_animation(spell, direction, level)
+                        .unwrap();
+                    assert_eq!(
+                        (anim.frames.len(), anim.interval, anim.duration_ms),
+                        (6, 100, 600)
+                    );
+                    assert_eq!(anim.light, Some(0));
+                    assert!((anim.opacity - 0.7).abs() < f32::EPSILON);
+                    for (index, frame) in anim.frames.iter().enumerate() {
+                        let source = base
+                            + direction * stride
+                            + if levelled { level * 90 } else { 0 }
+                            + index as u32;
+                        assert!(
+                            frame.path.ends_with(&format!("/{library}/{source}.png")),
+                            "{spell}/{direction}/{level}: {}",
+                            frame.path
+                        );
+                    }
+                    assert!(anim.frame_at(599).is_some());
+                    assert!(anim.frame_at(600).is_none());
+                }
+            }
+            assert!(catalog.warrior_attack_animation(spell, 8, 0).is_none());
+        }
+        assert!(catalog.warrior_attack_animation("HalfMoon", 0, 4).is_none());
+    }
+
+    #[test]
+    fn warrior_attack_uses_packet_spell_and_level_and_follows_actor() {
+        let mut zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        let event = NativeEffectEvent {
+            sequence: 1,
+            generation: 16,
+            packet: "ObjectAttack".into(),
+            payload: json!({"objectId":1000,"location":{"x":288,"y":616},"direction":"Right","spell":"HalfMoon","level":3}),
+        };
+        fx.observe(0, 288, 616, &[event.clone()], &zone);
+        assert_eq!(fx.active.len(), 1);
+        assert!(fx.active[0].current.as_ref().unwrap().frames[0]
+            .path
+            .ends_with("/Magic/2850.png"));
+        fx.observe(50, 288, 616, &[event], &zone);
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].started_at, 0);
+        zone.insert(1000, (289, 617));
+        fx.observe(200, 288, 616, &[], &zone);
+        assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (289, 617));
+        for (sequence, spell, level) in [
+            (2, "Thrusting", json!(null)),
+            (3, "Slaying", json!(4)),
+            (4, "Fencing", json!(3)),
+        ] {
+            let mut rejected = NativeEffects::default();
+            rejected.observe(0,288,616,&[NativeEffectEvent {sequence,generation:16,packet:"ObjectAttack".into(),
+                payload:json!({"objectId":1000,"location":{"x":288,"y":616},"direction":"Right","spell":spell,"level":level})}],&zone);
+            assert!(rejected.active.is_empty());
+        }
+        fx.tick_with_visibility(600, true);
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
+    fn immortal_skin_layers_start_together_follow_actor_and_expire_independently() {
+        let mut zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        let event = NativeEffectEvent {
+            sequence: 1,
+            generation: 16,
+            packet: "ObjectMagic".into(),
+            payload: json!({"objectId":1000,"location":{"x":288,"y":616},"direction":"Down","spell":"ImmortalSkin","cast":true}),
+        };
+        fx.observe(0, 288, 616, &[event.clone()], &zone);
+        assert_eq!(fx.active.len(), 2);
+        let mut durations = fx
+            .active
+            .iter()
+            .map(|e| e.current.as_ref().unwrap().duration_ms)
+            .collect::<Vec<_>>();
+        durations.sort();
+        assert_eq!(durations, vec![600, 2397]);
+        let paths = fx
+            .active
+            .iter()
+            .map(|e| e.current.as_ref().unwrap().frames[0].path.as_str())
+            .collect::<Vec<_>>();
+        assert!(paths.iter().any(|p| p.ends_with("/Magic3/550.png")));
+        assert!(paths.iter().any(|p| p.ends_with("/Magic3/570.png")));
+        assert!(fx.active.iter().all(|e| e.start_at == 0));
+        fx.observe(50, 288, 616, &[event], &zone);
+        assert_eq!(fx.active.len(), 2);
+        zone.insert(1000, (289, 617));
+        fx.observe(200, 288, 616, &[], &zone);
+        assert!(fx.active.iter().all(|e| (e.tile_x, e.tile_y) == (289, 617)));
+        fx.tick_with_visibility(600, true);
+        assert_eq!(fx.active.len(), 1);
+        assert!(fx.active[0].current.as_ref().unwrap().frames[0]
+            .path
+            .ends_with("/Magic3/550.png"));
+        fx.tick_with_visibility(2397, true);
+        assert!(fx.active.is_empty());
+    }
+
+    #[test]
     fn flaming_sword_object_attack_tracks_attacker_and_expires_at_six_frames() {
         let mut zone = HashMap::from([(1000, (288, 616))]);
         let mut fx = NativeEffects::default();
@@ -10325,3 +10925,5 @@ mod tests {
         }
     }
 }
+
+include!("pet_effects.rs");

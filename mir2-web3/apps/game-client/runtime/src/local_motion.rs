@@ -5,8 +5,14 @@
 //! the renderer. A rollback-gated path may select its pose for rendering, but it
 //! never mutates authoritative movement state or sends a gameplay command.
 
+#[cfg(target_arch = "wasm32")]
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
+#[cfg(not(target_arch = "wasm32"))]
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Mutex,
+};
 
 use bevy::prelude::*;
 use serde::Serialize;
@@ -22,12 +28,22 @@ const MAX_SMOOTH_TILE_DISTANCE: f32 = 3.0;
 const PIXEL_MATCH_EPSILON: f32 = 0.01;
 const PATH_MATCH_EPSILON_TILES: f32 = 0.001;
 
+#[cfg(target_arch = "wasm32")]
 thread_local! {
     static PENDING_EVENT_JSON: RefCell<VecDeque<String>> = const { RefCell::new(VecDeque::new()) };
     static PENDING_EVENT_DROP_COUNT: Cell<u64> = const { Cell::new(0) };
     static PENDING_PRESENTATION_ENABLED: Cell<Option<bool>> = const { Cell::new(None) };
     static LATEST_DIAGNOSTICS: RefCell<Option<LocalMotionDiagnostics>> = const { RefCell::new(None) };
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+static PENDING_EVENT_JSON: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
+#[cfg(not(target_arch = "wasm32"))]
+static PENDING_EVENT_DROP_COUNT: AtomicU64 = AtomicU64::new(0);
+#[cfg(not(target_arch = "wasm32"))]
+static PENDING_PRESENTATION_ENABLED: Mutex<Option<bool>> = Mutex::new(None);
+#[cfg(not(target_arch = "wasm32"))]
+static LATEST_DIAGNOSTICS: Mutex<Option<LocalMotionDiagnostics>> = Mutex::new(None);
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -732,6 +748,7 @@ fn coordinates_match(left: f32, right: f32) -> bool {
 }
 
 pub(crate) fn enqueue_local_motion_event_json(json: String) {
+    #[cfg(target_arch = "wasm32")]
     PENDING_EVENT_JSON.with(|pending| {
         let mut pending = pending.borrow_mut();
         if pending.len() >= MAX_PENDING_EVENT_JSON {
@@ -740,31 +757,118 @@ pub(crate) fn enqueue_local_motion_event_json(json: String) {
         }
         pending.push_back(json);
     });
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let mut pending = PENDING_EVENT_JSON
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        if pending.len() >= MAX_PENDING_EVENT_JSON {
+            pending.pop_front();
+            PENDING_EVENT_DROP_COUNT.fetch_add(1, Ordering::Relaxed);
+        }
+        pending.push_back(json);
+    }
 }
 
 pub(crate) fn get_local_motion_diagnostics_json() -> String {
+    #[cfg(target_arch = "wasm32")]
     let diagnostics = LATEST_DIAGNOSTICS
         .with(|latest| latest.borrow().clone())
         .unwrap_or_default();
+
+    #[cfg(not(target_arch = "wasm32"))]
+    let diagnostics = LATEST_DIAGNOSTICS
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .clone()
+        .unwrap_or_default();
+
     serde_json::to_string(&diagnostics).unwrap_or_else(|_| {
         r#"{"serializationError":"local motion diagnostics were not finite"}"#.to_owned()
     })
 }
 
 pub(crate) fn set_local_motion_presentation_enabled(enabled: bool) {
+    #[cfg(target_arch = "wasm32")]
     PENDING_PRESENTATION_ENABLED.with(|pending| pending.set(Some(enabled)));
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        *PENDING_PRESENTATION_ENABLED
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(enabled);
+    }
 }
 
 fn take_pending_presentation_enabled() -> Option<bool> {
-    PENDING_PRESENTATION_ENABLED.with(|pending| pending.replace(None))
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_PRESENTATION_ENABLED.with(|pending| pending.replace(None))
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        PENDING_PRESENTATION_ENABLED
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .take()
+    }
 }
 
 fn drain_pending_event_json() -> Vec<String> {
-    PENDING_EVENT_JSON.with(|pending| pending.borrow_mut().drain(..).collect())
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_EVENT_JSON.with(|pending| pending.borrow_mut().drain(..).collect())
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        PENDING_EVENT_JSON
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .drain(..)
+            .collect()
+    }
 }
 
 fn take_pending_event_drop_count() -> u64 {
-    PENDING_EVENT_DROP_COUNT.with(|count| count.replace(0))
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_EVENT_DROP_COUNT.with(|count| count.replace(0))
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        PENDING_EVENT_DROP_COUNT.swap(0, Ordering::Relaxed)
+    }
+}
+
+#[cfg(test)]
+fn reset_local_motion_bridge_for_test() {
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_EVENT_JSON.with(|pending| pending.borrow_mut().clear());
+        PENDING_EVENT_DROP_COUNT.with(|count| count.set(0));
+        PENDING_PRESENTATION_ENABLED.with(|pending| pending.set(None));
+        LATEST_DIAGNOSTICS.with(|latest| latest.borrow_mut().take());
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        PENDING_EVENT_JSON
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clear();
+        PENDING_EVENT_DROP_COUNT.store(0, Ordering::Relaxed);
+        *PENDING_PRESENTATION_ENABLED
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = None;
+        LATEST_DIAGNOSTICS
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .take();
+    }
 }
 
 #[derive(Default)]
@@ -790,9 +894,17 @@ fn publish_local_motion_diagnostics_system(
     _main_thread: NonSend<LocalMotionMainThread>,
 ) {
     let snapshot = shadow.diagnostics_snapshot();
+    #[cfg(target_arch = "wasm32")]
     LATEST_DIAGNOSTICS.with(|latest| {
         *latest.borrow_mut() = Some(snapshot);
     });
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        *LATEST_DIAGNOSTICS
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(snapshot);
+    }
 }
 
 pub(crate) struct LocalMotionPresentationShadowPlugin;
@@ -812,6 +924,8 @@ impl Plugin for LocalMotionPresentationShadowPlugin {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    static BRIDGE_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
     fn sync_clock_at(
         shadow: &mut LocalMotionPresentationShadow,
@@ -982,7 +1096,10 @@ mod tests {
 
     #[test]
     fn presentation_takeover_is_disabled_by_default_and_applies_pending_toggle() {
-        PENDING_PRESENTATION_ENABLED.with(|pending| pending.set(None));
+        let _guard = BRIDGE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        reset_local_motion_bridge_for_test();
         let mut app = App::new();
         app.add_plugins((
             motion::CrystalMoveClockPlugin,
@@ -1343,10 +1460,10 @@ mod tests {
 
     #[test]
     fn plugin_ingests_and_publishes_serializable_diagnostics() {
-        PENDING_EVENT_JSON.with(|pending| pending.borrow_mut().clear());
-        PENDING_EVENT_DROP_COUNT.with(|count| count.set(0));
-        PENDING_PRESENTATION_ENABLED.with(|pending| pending.set(None));
-        LATEST_DIAGNOSTICS.with(|latest| latest.borrow_mut().take());
+        let _guard = BRIDGE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        reset_local_motion_bridge_for_test();
         enqueue_local_motion_event_json(serde_json::to_string(&reset_event()).expect("reset json"));
         enqueue_local_motion_event_json(
             serde_json::to_string(&walk_command(100.0)).expect("command json"),
@@ -1368,5 +1485,37 @@ mod tests {
             serde_json::from_str(&get_local_motion_diagnostics_json()).expect("diagnostics json");
         assert_eq!(value["commandEventCount"], 1);
         assert_eq!(value["pendingCommandCount"], 1);
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn native_bridge_carries_input_and_toggle_across_threads() {
+        let _guard = BRIDGE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        reset_local_motion_bridge_for_test();
+
+        std::thread::spawn(|| {
+            set_local_motion_presentation_enabled(true);
+            enqueue_local_motion_event_json(
+                serde_json::to_string(&reset_event()).expect("reset json"),
+            );
+            enqueue_local_motion_event_json(
+                serde_json::to_string(&walk_command(100.0)).expect("command json"),
+            );
+        })
+        .join()
+        .expect("producer thread completes");
+
+        let mut app = App::new();
+        app.add_plugins((
+            motion::CrystalMoveClockPlugin,
+            LocalMotionPresentationShadowPlugin,
+        ));
+        app.world_mut().run_schedule(PreUpdate);
+        let shadow = app.world().resource::<LocalMotionPresentationShadow>();
+        assert!(shadow.presentation_enabled());
+        assert_eq!(shadow.command_event_count, 1);
+        assert_eq!(shadow.pending_commands.len(), 1);
     }
 }

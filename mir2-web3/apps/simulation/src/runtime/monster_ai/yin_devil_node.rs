@@ -110,6 +110,7 @@ fn yin_devil_node_complete_attack(
         _ => buff_metadata(key, "Ultimate Enhancer", "Increases physical attack."),
     };
     let buff = super::super::buffs::BuffState {
+        real_time_duration: None,
         key: key.to_string(),
         name,
         description,

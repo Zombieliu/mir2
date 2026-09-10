@@ -1,0 +1,437 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "native-ui-parity-20260903-trade-completion",
+  "implementationParentCommit": "84f0905ac6532a1c38eaf3cc61c4bfc41d576e36",
+  "branch": "codex/windows-player-journey",
+  "pullRequest": "https://github.com/Zombieliu/mir2/pull/250",
+  "pullRequestDraft": true,
+  "scope": "Remove premature shared-trade completion; separate local lock, typed escrow preparation and successful delivery. Not complete source trade, escrow or visual parity.",
+  "visualAccepted": false,
+  "accepted": false,
+  "globalParityPercent": null,
+  "goalStatus": "incomplete",
+  "phaseContract": [
+    {
+      "phase": "personal confirmation",
+      "outgoingAssets": "unchanged by confirmation",
+      "completionPacket": false
+    },
+    {
+      "phase": "shared preparation",
+      "outgoingAssets": "reserved once in Candidate escrow",
+      "completionPacket": false
+    },
+    {
+      "phase": "successful non-durable delivery",
+      "outgoingAssets": "previously reserved; incoming projection applied and current trade cleared",
+      "completionPacket": true
+    },
+    {
+      "phase": "durable delivery",
+      "outgoingAssets": "projection and event marker saved atomically; checkpoint restored on save failure",
+      "completionPacket": true
+    }
+  ],
+  "sourceOrderingCaveat": "Completion last in each Candidate projection is a persistence publication rule, not exact Crystal per-packet order parity: original PlayerObject swaps two parties in a loop.",
+  "persistenceCompatibility": {
+    "newEscrowPreparedDefault": false,
+    "legacyCompletedDebitRecognized": true,
+    "newSharedPreparedCompleted": false,
+    "sqlMigration": false,
+    "liveStoresMutated": false
+  },
+  "gui": {
+    "computerUse": "paused by user Escape",
+    "launched": false,
+    "inputInjected": false,
+    "screenshotCaptured": false,
+    "sameExeAcceptance": false,
+    "oldCapturesRelabelled": false
+  },
+  "unchangedScope": {
+    "nativeClientSource": true,
+    "protocolWire": true,
+    "assets": true,
+    "manifestsAndLocks": true,
+    "authentication": true,
+    "sharedZoneAuthority": true,
+    "productionGatewayRoutingLogic": true
+  },
+  "openContracts": [
+    "C.TradeGold positive deltas, immediate owner debit, cumulative guest notification and source unlocking",
+    "Source invitation targeting/reply lifecycle; current test fixtures use the Candidate two-request adapter",
+    "Deposit/retrieve/merge custody and exact slots; native trade cells remain read-only",
+    "Source unlock/re-edit behavior while waiting and source capacity-rejection keep-offer semantics",
+    "Full cancellation/mail fallback, late delivery failure/requeue and all gold-cap edge cases",
+    "Exact paired packet ordering, localized messages, Gold 106.wav and full input/overlays",
+    "Final-source same-EXE real-input/original paired-state/package/light/DPI/soak/legal/signing/human gates"
+  ],
+  "initialDiagnostics": [
+    {
+      "kind": "full simulation run",
+      "result": "1488 passed, 3 failed",
+      "cause": "Three old incoming-carrier fixtures addressed Scout although their logged-in receivers were UidIngress, BadIngress and ZeroIngress.",
+      "resolution": "Use active receiver identity and a prepared exchange; preserve all existing nested-UID, quantity, invalid-carrier and save/reload assertions.",
+      "subsequentFocusedResult": "10/10 incoming_ tests passed"
+    },
+    {
+      "kind": "mixed-target Windows build",
+      "result": "compile failed before tests",
+      "observation": "Bevy crate-identity type errors while native source and dependency locks were unchanged. The shared target contained a bare standalone runtime rlib written after the previous host build.",
+      "resolution": "Use a fresh Windows-only system-temp target; do not change dependencies or reuse it for the standalone runtime.",
+      "causeStatus": "Build-cache collision inferred from the shared artifact and a successful Windows-only cold rebuild with unchanged sources/locks",
+      "isolatedResult": {
+        "passed": 534,
+        "failed": 0,
+        "ignored": 0,
+        "exitCode": 0
+      }
+    },
+    {
+      "kind": "first final-source Gateway full run",
+      "result": "671 passed, 1 failed, 1 existing ignored",
+      "test": "economy::tests::durable_trade_rows_reconcile_each_party_after_ledger_commit_and_retry_mark",
+      "cause": "Alice's committed side had no incoming assets, so the old test expected no packets; a completed empty incoming projection now correctly emits TradeConfirm.",
+      "resolution": "Assert exact completion for Alice, gain-plus-completion for Bob, no completion during preparation, both-party gold conservation and no repeated completion on projection-mark retry. Gateway test code only; production code, Simulation and native sources unchanged.",
+      "subsequentResult": "Corrected full Gateway run: 672 passed, 0 failed, 1 existing ignored",
+      "durationSeconds": 665.75,
+      "subsequentFocusedResults": {
+        "durableProjection": 1,
+        "twoSessionCompletion": 5
+      }
+    }
+  ],
+  "testExecution": {
+    "rust": "1.95.0",
+    "locked": true,
+    "offline": true,
+    "rustTestThreads": 1,
+    "buildJobs": 2,
+    "incremental": false,
+    "devAndTestDebug": 0,
+    "backendAndStandaloneClientTarget": "C:/Users/Administrator/AppData/Local/Temp/mir2-stack-image-regression-44eb501f0d1842aeb14ce9fc23e1e23f",
+    "windowsOnlyTarget": "C:/Users/Administrator/AppData/Local/Temp/mir2-trade-completion-windows-340f7ca3b1f44af6a6ae18576bb183e1",
+    "gatewayFinalTarget": "C:/Users/Administrator/AppData/Local/Temp/mir2-trade-completion-gateway-66c27b0a8f6c40aaafe31998175e9ee2",
+    "gatewayTargetCacheSeededFrom": "C:/Users/Administrator/AppData/Local/Temp/mir2-stack-image-regression-44eb501f0d1842aeb14ce9fc23e1e23f"
+  },
+  "recordedAtUtc": "2026-09-03T05:51:17Z",
+  "backlogCount": 33,
+  "backlogIds": [
+    "WN-ACTOR-001",
+    "WN-ACTOR-002",
+    "WN-AUDIO-001",
+    "WN-BOOT-001",
+    "WN-BOOT-002",
+    "WN-CHAR-001",
+    "WN-CHAR-002",
+    "WN-CHAT-001",
+    "WN-CHAT-002",
+    "WN-CHAT-003",
+    "WN-HUD-001",
+    "WN-HUD-002",
+    "WN-HUD-003",
+    "WN-HUD-004",
+    "WN-INPUT-001",
+    "WN-INPUT-002",
+    "WN-INPUT-003",
+    "WN-ITEM-001",
+    "WN-ITEM-002",
+    "WN-ITEM-003",
+    "WN-ITEM-004",
+    "WN-QA-001",
+    "WN-QA-002",
+    "WN-QUEST-001",
+    "WN-QUEST-002",
+    "WN-QUEST-003",
+    "WN-QUEST-004",
+    "WN-UI-001",
+    "WN-WORLD-001",
+    "WN-WORLD-002",
+    "WN-WORLD-003",
+    "WN-WORLD-004",
+    "WN-WORLD-005"
+  ],
+  "sourceEvidence": {
+    "baselineCommit": "84f0905ac6532a1c38eaf3cc61c4bfc41d576e36",
+    "crystalRevision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+    "crystalScopedStatus": [],
+    "codeHashes": [
+      {
+        "path": "apps/simulation/src/config.rs",
+        "localFileSha256": "c0e4b25d5c0c209ca4d759037f43a50842d9999c6bc69258d6c074a3ff71ef06",
+        "lfNormalizedSha256": "c0e4b25d5c0c209ca4d759037f43a50842d9999c6bc69258d6c074a3ff71ef06"
+      },
+      {
+        "path": "apps/simulation/src/runtime/packets.rs",
+        "localFileSha256": "41094177a743cc5d7c20469c58d60addab9c7abed5d33dc09d8c7e63f26f7549",
+        "lfNormalizedSha256": "41094177a743cc5d7c20469c58d60addab9c7abed5d33dc09d8c7e63f26f7549"
+      },
+      {
+        "path": "apps/simulation/src/runtime/session.rs",
+        "localFileSha256": "633c75634d3b2be43ba6548bbc0a0bd97f6268b65e16581659569e6cb9107919",
+        "lfNormalizedSha256": "633c75634d3b2be43ba6548bbc0a0bd97f6268b65e16581659569e6cb9107919"
+      },
+      {
+        "path": "apps/simulation/src/runtime/stage5.rs",
+        "localFileSha256": "33e07644192712e78140777288e3e54b2a0ee5194f3a6036f27e5b6f2de46fb8",
+        "lfNormalizedSha256": "33e07644192712e78140777288e3e54b2a0ee5194f3a6036f27e5b6f2de46fb8"
+      },
+      {
+        "path": "apps/simulation/src/runtime/save.rs",
+        "localFileSha256": "e3fb329f8874027dcfef13a2c2c4af6888beba23597ed00c11c7f21289122a87",
+        "lfNormalizedSha256": "e3fb329f8874027dcfef13a2c2c4af6888beba23597ed00c11c7f21289122a87"
+      },
+      {
+        "path": "apps/simulation/src/runtime/tests.rs",
+        "localFileSha256": "8fab9a1ce2e44268831b2259e590841a6dbe38b1c7ead7ebb0ef4dbe8bf5806e",
+        "lfNormalizedSha256": "8fab9a1ce2e44268831b2259e590841a6dbe38b1c7ead7ebb0ef4dbe8bf5806e"
+      },
+      {
+        "path": "apps/simulation/tests/shared_trade_completion.rs",
+        "localFileSha256": "e5e969b8a00902697bc90596547805193cb08c0c00b0f593f5f2446e89a99528",
+        "lfNormalizedSha256": "e5e969b8a00902697bc90596547805193cb08c0c00b0f593f5f2446e89a99528"
+      },
+      {
+        "path": "apps/gateway/src/routing.rs",
+        "localFileSha256": "2793bb76b4881192d1512b0670127cb781bd77d944206d59e144e97825349435",
+        "lfNormalizedSha256": "2793bb76b4881192d1512b0670127cb781bd77d944206d59e144e97825349435"
+      },
+      {
+        "path": "apps/gateway/src/routing/tests/trade_completion_tests.rs",
+        "localFileSha256": "24da3dba454e63d2841c70f289a8127194e74339331b835b9fae6b2623cb2ca1",
+        "lfNormalizedSha256": "24da3dba454e63d2841c70f289a8127194e74339331b835b9fae6b2623cb2ca1"
+      },
+      {
+        "path": "apps/gateway/src/economy.rs",
+        "localFileSha256": "f4fb9359767cc91d7247198a17eb4fd4860e8d29e3bb767eb89fcb560c61f720",
+        "lfNormalizedSha256": "f4fb9359767cc91d7247198a17eb4fd4860e8d29e3bb767eb89fcb560c61f720"
+      }
+    ],
+    "crystalFiles": [
+      {
+        "path": "Server/MirObjects/PlayerObject.cs",
+        "sha256": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11"
+      },
+      {
+        "path": "Client/MirScenes/GameScene.cs",
+        "sha256": "935d1ca35ddf4800bccdac4cd1675fcb59a269560a57bf98c2b952a459ffb504"
+      },
+      {
+        "path": "Client/MirScenes/Dialogs/TradeDialogs.cs",
+        "sha256": "93433bb70cc2eb6792e4039f794197c851ff085abba2ffed627811ed23c58baf"
+      },
+      {
+        "path": "Shared/ServerPackets.cs",
+        "sha256": "12a81d64c9d1ce1d5c2245f8fc6da5fa9aba9f3b83281603df0117ebd8a004e2"
+      }
+    ],
+    "backlogCount": 33,
+    "backlogIds": [
+      "WN-ACTOR-001",
+      "WN-ACTOR-002",
+      "WN-AUDIO-001",
+      "WN-BOOT-001",
+      "WN-BOOT-002",
+      "WN-CHAR-001",
+      "WN-CHAR-002",
+      "WN-CHAT-001",
+      "WN-CHAT-002",
+      "WN-CHAT-003",
+      "WN-HUD-001",
+      "WN-HUD-002",
+      "WN-HUD-003",
+      "WN-HUD-004",
+      "WN-INPUT-001",
+      "WN-INPUT-002",
+      "WN-INPUT-003",
+      "WN-ITEM-001",
+      "WN-ITEM-002",
+      "WN-ITEM-003",
+      "WN-ITEM-004",
+      "WN-QA-001",
+      "WN-QA-002",
+      "WN-QUEST-001",
+      "WN-QUEST-002",
+      "WN-QUEST-003",
+      "WN-QUEST-004",
+      "WN-UI-001",
+      "WN-WORLD-001",
+      "WN-WORLD-002",
+      "WN-WORLD-003",
+      "WN-WORLD-004",
+      "WN-WORLD-005"
+    ],
+    "nativeProtocolManifestDiff": [],
+    "gatewayTestExpectationUpdatedAfterSimulationAndClientPass": true
+  },
+  "nativeTestBinary": {
+    "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-completion-windows-340f7ca3b1f44af6a6ae18576bb183e1\\debug\\deps\\mir2_platform_windows-3128e1bf004ab25e.exe",
+    "bytes": 56914944,
+    "sha256": "e350bb8672df0273e547abc80b5b947cb0dfa22137b3fc480fdfae4188bc8f6b",
+    "role": "headless unit-test harness, not a player EXE or GUI capture"
+  },
+  "formatCheck": {
+    "exitCode": 0,
+    "at": {
+      "current_time": "2026-09-03 00:57:17 UTC"
+    }
+  },
+  "nextSourceAudit": {
+    "priority": "Next bounded source-trade work, not implemented in this checkpoint",
+    "source": {
+      "invitation": "PlayerObject.TradeRequest/TradeReply: invited peer receives request; one accepted invitation binds both parties and sends two TradeAccept packets",
+      "gold": "PlayerObject.TradeGold: unlock both, validate amount >= 1 and available wallet, add to TradeGoldAmount, debit once, owner LoseGold(delta), peer TradeGold(cumulative)",
+      "item": "Deposit/Retrieve move the actual UserItem immediately between real inventory and Info.Trade; TradeItem updates peer and unlocks",
+      "capacity": "TradeConfirm capacity/gold-cap refusal sends Unlock=true and keeps the exchange; not full cancellation",
+      "cancellation": "TradeCancel returns escrow to each owner, using mail fallback when needed, then resets both windows",
+      "ordering": "Source per-party completion order arises from the mutual atomic swap loop; do not equate Candidate completion-last with exact source packet order"
+    },
+    "prerequisites": [
+      "Pair invitation/ownership and directed private packets",
+      "Gold escrow saved before mutual preparation with backward compatibility",
+      "Distinguish editable reserved offer from settlement-fenced prepared offer",
+      "Return/refund owner custody exactly once on cancel/disconnect/recovery, hold unknown outcomes",
+      "Keep actual inventory slot/unique-item custody and source UI operations aligned"
+    ],
+    "requiredMatrices": [
+      "Two-session single invitation accepted/refused/repeated/wrong peer",
+      "Repeated positive additions, zero/insufficient wallet, maximum total and authoritative owner/peer views",
+      "Add/edit after own or peer lock with both source lock states reset; no mutation during unknown-outcome fence",
+      "Cancel before prepare and after one confirmation; exact gold and item conservation across both owners and escrow",
+      "Successful mutual settlement, repeated packets, durable save failure/restart/relogin and no second debit/refund",
+      "Capacity rejection retains offer/unlocks; cancellation bag-full mail fallback verified",
+      "No production QA/debug/auth bypass and no disconnected personal-world clone"
+    ]
+  },
+  "verification": [
+    {
+      "suite": "Simulation library",
+      "passed": 1491,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 671.43,
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-simulation --features test-support --lib -- --quiet"
+    },
+    {
+      "suite": "Dedicated completion integration",
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 8.65,
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-simulation --features test-support --test shared_trade_completion -- --quiet"
+    },
+    {
+      "suite": "Gateway library, corrected final run",
+      "passed": 672,
+      "failed": 0,
+      "ignored": 1,
+      "seconds": 664.56,
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-gateway --lib -- --quiet",
+      "ignoredReason": "channel_identity::tests::postgres_store_is_shared_across_gateway_instances requires MIR2_CHANNEL_IDENTITY_TEST_DATABASE_URL"
+    },
+    {
+      "suite": "Gateway corrected durable projection/mark retry",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 1.85,
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-gateway --lib economy::tests::durable_trade_rows_reconcile_each_party_after_ledger_commit_and_retry_mark -- --exact --quiet"
+    },
+    {
+      "suite": "Gateway two-session completion/conservation",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 37.75,
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-gateway --lib trade_completion_tests -- --quiet"
+    },
+    {
+      "suite": "Incoming carrier adjacent regression",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 12.54,
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-simulation --features test-support --lib incoming_ -- --quiet"
+    },
+    {
+      "suite": "Protocol library",
+      "passed": 40,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 0.01,
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-protocol -p mir2-game-data --lib -- --quiet"
+    },
+    {
+      "suite": "Game-data library",
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 0.64,
+      "command": "same combined package command as Protocol"
+    },
+    {
+      "suite": "Native client UI",
+      "passed": 591,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 0.92,
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui -- --quiet"
+    },
+    {
+      "suite": "Windows host, fresh dedicated target",
+      "passed": 534,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 18.34,
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/platform-windows/Cargo.toml -- --quiet"
+    },
+    {
+      "suite": "Client runtime",
+      "passed": 212,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 0.17,
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/runtime/Cargo.toml -- --quiet"
+    },
+    {
+      "suite": "UI core",
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "seconds": 0.02,
+      "command": "cargo +1.95.0 test --locked --offline -p mir2-ui-core -- --quiet"
+    }
+  ],
+  "totalNonOverlappingPassingTests": 3629,
+  "goalResumption": {
+    "previousToolStatus": "blocked",
+    "storageBlockResolved": true,
+    "userRequestedContinuation": true,
+    "objectiveCompleted": false
+  },
+  "storageRecovery": {
+    "priorWorkspaceDriveFreeBytes": 0,
+    "priorGitFailure": "index.lock write error: Out of diskspace",
+    "approvalReceived": true,
+    "authorizedScope": "One exact generated simulation test PDB; no broad cleanup",
+    "operation": "verified recoverable move of one generated test PDB",
+    "original": "E:\\mir2-player-journey\\mir2-web3\\target\\debug\\deps\\mir2_simulation-2f78b5c02a5460b3.pdb",
+    "backup": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\mir2-trade-pdb-backup-d29e32c5976d40b2b32ae72862eecbb4\\mir2_simulation-2f78b5c02a5460b3.pdb",
+    "bytes": 253022208,
+    "sha256": "6e03779e1b7ecf58e57fe189de651f44039182955c3e1d8c460ac4eb28819bf9",
+    "originalAbsent": true,
+    "backupExists": true,
+    "completedUtc": "2026-09-03T05:47:22.0075207Z",
+    "freeBytes": 252653568,
+    "sourceExeStoresRecordingsPreserved": true,
+    "processesStopped": false,
+    "testsRerunAfterMove": false,
+    "testedCodeHashesRechecked": true
+  },
+  "publication": {
+    "reportContainsImplementationCommit": true,
+    "revisionBinding": "Use containing Git commit plus the ten exact code/test SHA-256 values; implementationParentCommit is not a post-change commit.",
+    "requestedTarget": "Existing Draft PR #250; no merge or force push",
+    "remoteCiIncludedInLocalTestClaim": false
+  }
+}

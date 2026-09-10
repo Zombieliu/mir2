@@ -87,7 +87,6 @@ pub fn drain_gateway_events(
             continue;
         }
         let connected = matches!(&event, NativeGatewayEvent::Connected);
-        let login_succeeded = matches!(&event, NativeGatewayEvent::LoginSuccess { .. });
         let reconnect_bootstrap = match &event {
             NativeGatewayEvent::PlayerBootstrapped { ref character }
                 if matches!(
@@ -137,21 +136,21 @@ pub fn drain_gateway_events(
                 auto_login.submitted = true;
             }
         }
-
-        if login_succeeded {
-            if let Some(character_index) = auto_login.desired_character_index.take() {
-                if shell.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index })
-                    && shell.apply_ui_intent(NativeUiIntent::StartGame)
-                {
-                    commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::StartGame {
-                        character_index,
-                    }));
-                }
+    }
+    // Explicit development auto-login must wait for the original door animation,
+    // including frames with no new Gateway event, before starting a character.
+    if shell.screen == NativeShellScreen::CharacterSelect {
+        if let Some(character_index) = auto_login.desired_character_index.take() {
+            if shell.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index })
+                && shell.apply_ui_intent(NativeUiIntent::StartGame)
+            {
+                commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::StartGame {
+                    character_index,
+                }));
             }
         }
     }
 }
-
 /// Forward already-validated widget intents to the Gateway owner. Local-only
 /// navigation/selection intents are intentionally ignored here.
 pub fn forward_native_ui_intents(
@@ -300,6 +299,50 @@ mod tests {
         app.update();
         let shell = app.world().resource::<NativeShellModel>().clone();
         (receiver.try_iter().collect(), shell)
+    }
+
+    #[test]
+    fn development_auto_start_waits_for_door_even_without_another_gateway_event() {
+        let config = NativeAutoLogin {
+            account_id: "door-test".into(),
+            password: "test".into(),
+            character_index: Some(7),
+        };
+        let mut shell = initial_shell_model(Some(&config));
+        shell.screen = NativeShellScreen::Authenticating;
+        shell.login_request_in_flight = true;
+        let (events, inbox) = mpsc::channel();
+        let (commands, sent) = mpsc::channel();
+        let mut app = bevy::prelude::App::new();
+        app.insert_resource(shell);
+        app.insert_resource(GatewayEventInbox::new(inbox));
+        app.insert_resource(GatewayCommands::new(commands));
+        app.insert_resource(NativeAutoLoginFlow::from_config(Some(&config)));
+        app.add_systems(bevy::prelude::Update, drain_gateway_events);
+        events
+            .send(NativeGatewayEvent::LoginSuccess {
+                account: "door-test".into(),
+                characters: vec![CharacterSummary::new(7, "Hero", 1, "Warrior", "Male")],
+            })
+            .unwrap();
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            NativeShellScreen::OpeningLogin
+        );
+        assert!(sent.try_recv().is_err());
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .advance_login_opening(std::time::Duration::from_millis(1800));
+        app.update();
+        assert!(matches!(
+            sent.try_recv(),
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::StartGame {
+                character_index: 7
+            }))
+        ));
+        app.update();
+        assert!(sent.try_recv().is_err());
     }
 
     #[test]

@@ -1,0 +1,416 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "native-ui-parity-20260903-trade-dialog",
+  "recordedAtUtc": "2026-09-03T00:05:16Z",
+  "implementationParentCommit": "a614d51014c5ca4754ff991ad0946ca181e1ee08",
+  "branch": "codex/windows-player-journey",
+  "pullRequest": "https://github.com/Zombieliu/mir2/pull/250",
+  "pullRequestDraft": true,
+  "scope": "Accepted-exchange window geometry/basic controls and authoritative client read model; not complete item interaction, transaction or visual parity",
+  "visualAccepted": false,
+  "accepted": false,
+  "globalParityPercent": null,
+  "goalStatus": "active",
+  "backlogCount": 33,
+  "backlogIds": [
+    "WN-ACTOR-001",
+    "WN-ACTOR-002",
+    "WN-AUDIO-001",
+    "WN-BOOT-001",
+    "WN-BOOT-002",
+    "WN-CHAR-001",
+    "WN-CHAR-002",
+    "WN-CHAT-001",
+    "WN-CHAT-002",
+    "WN-CHAT-003",
+    "WN-HUD-001",
+    "WN-HUD-002",
+    "WN-HUD-003",
+    "WN-HUD-004",
+    "WN-INPUT-001",
+    "WN-INPUT-002",
+    "WN-INPUT-003",
+    "WN-ITEM-001",
+    "WN-ITEM-002",
+    "WN-ITEM-003",
+    "WN-ITEM-004",
+    "WN-QA-001",
+    "WN-QA-002",
+    "WN-QUEST-001",
+    "WN-QUEST-002",
+    "WN-QUEST-003",
+    "WN-QUEST-004",
+    "WN-UI-001",
+    "WN-WORLD-001",
+    "WN-WORLD-002",
+    "WN-WORLD-003",
+    "WN-WORLD-004",
+    "WN-WORLD-005"
+  ],
+  "sourceEvidence": {
+    "crystalRevision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+    "crystalReferenceScopedStatus": [],
+    "crystalFiles": [
+      {
+        "path": "Client/MirScenes/Dialogs/TradeDialogs.cs",
+        "sha256": "93433bb70cc2eb6792e4039f794197c851ff085abba2ffed627811ed23c58baf"
+      },
+      {
+        "path": "Client/MirScenes/GameScene.cs",
+        "sha256": "935d1ca35ddf4800bccdac4cd1675fcb59a269560a57bf98c2b952a459ffb504"
+      },
+      {
+        "path": "Client/MirControls/MirItemCell.cs",
+        "sha256": "01d650b790e82f7d591ebb6162157672debe1df7a743e61b0d624bdf98ce3e84"
+      },
+      {
+        "path": "Client/MirControls/MirAmountBox.cs",
+        "sha256": "d2f1cf4032bcbfb235138eece1d5a0dca94355d10a1bfaa44c3e75a086873b65"
+      },
+      {
+        "path": "Client/MirControls/MirControl.cs",
+        "sha256": "6356acf1fd91ad8f38bd9f2d25f1e33c62dab1d9072bcbfef60a8b2e5e82bd26"
+      },
+      {
+        "path": "Client/MirGraphics/MLibrary.cs",
+        "sha256": "afda6ebb7a163d745d6398ea5c92ce80524daa6fb85c6167a09514867cf6f8c8"
+      },
+      {
+        "path": "Shared/ServerPackets.cs",
+        "sha256": "12a81d64c9d1ce1d5c2245f8fc6da5fa9aba9f3b83281603df0117ebd8a004e2"
+      },
+      {
+        "path": "Shared/Data/ItemData.cs",
+        "sha256": "8d0d549f299edd9c9379a3876f04ea2f9e827f0f703e7bca1eecfd8379fbf9f0"
+      },
+      {
+        "path": "Server/MirObjects/PlayerObject.cs",
+        "sha256": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11"
+      }
+    ],
+    "implementationAndAssetMetadataHashes": [
+      {
+        "path": "apps/game-client/client-bevy/src/social.rs",
+        "localFileSha256": "f1e34430333ac6af1aee5399b0075b1d40bfa6ecde0a6e820353d309303b9bda",
+        "lfNormalizedSha256": "f1e34430333ac6af1aee5399b0075b1d40bfa6ecde0a6e820353d309303b9bda"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/social_trade_tests.rs",
+        "localFileSha256": "72536592efdbcd027603c301819c0270f2ccfd561574f44cd0a1decab314265d",
+        "lfNormalizedSha256": "72536592efdbcd027603c301819c0270f2ccfd561574f44cd0a1decab314265d"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/amount_input.rs",
+        "localFileSha256": "2446d51f4340280ed7c7534290b230b2de7a71a7ea33ac185cb6693a78f03172",
+        "lfNormalizedSha256": "2446d51f4340280ed7c7534290b230b2de7a71a7ea33ac185cb6693a78f03172"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+        "localFileSha256": "2c41d2386987c38b36df6d77acbad5547c1918beb64b3a844109dec6b5325858",
+        "lfNormalizedSha256": "2c41d2386987c38b36df6d77acbad5547c1918beb64b3a844109dec6b5325858"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+        "localFileSha256": "85128b36ab4d0814e5fe8c89f4d61b1e8627ad7e2a32ba0c5a112e6138f968f2",
+        "lfNormalizedSha256": "85128b36ab4d0814e5fe8c89f4d61b1e8627ad7e2a32ba0c5a112e6138f968f2"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "localFileSha256": "089ea1846f496be69ea0a93e6904a8de89e4910017a45a99b91b351d0dff1a28",
+        "lfNormalizedSha256": "089ea1846f496be69ea0a93e6904a8de89e4910017a45a99b91b351d0dff1a28"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/guild_storage.rs",
+        "localFileSha256": "2b9b27155a33db4e8058fa2e0b94d8caa5dadc815357ff9af9fc02cd5f3ec6a4",
+        "lfNormalizedSha256": "2b9b27155a33db4e8058fa2e0b94d8caa5dadc815357ff9af9fc02cd5f3ec6a4"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+        "localFileSha256": "dc522c44fc17bfc6caf93ec3faee1216b26a5d839ca97a3a3231b985a4cdb777",
+        "lfNormalizedSha256": "dc522c44fc17bfc6caf93ec3faee1216b26a5d839ca97a3a3231b985a4cdb777"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/mod.rs",
+        "localFileSha256": "ef4c8e58292b732981e9bbbd3261353850ed82a785ac0bd681364242779dfb3f",
+        "lfNormalizedSha256": "ef4c8e58292b732981e9bbbd3261353850ed82a785ac0bd681364242779dfb3f"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+        "localFileSha256": "f4d289d829c81d30d111ba739e1898c60c8bdfa8f1bd957a01b5de31adc2fe29",
+        "lfNormalizedSha256": "f4d289d829c81d30d111ba739e1898c60c8bdfa8f1bd957a01b5de31adc2fe29"
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/gateway.rs",
+        "localFileSha256": "fe0b1f5a78aa12b65e361e729cd0dcf12b5566ecb1cb3cad81fb7f94bdbdb56d",
+        "lfNormalizedSha256": "fe0b1f5a78aa12b65e361e729cd0dcf12b5566ecb1cb3cad81fb7f94bdbdb56d"
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/trade_projection.rs",
+        "localFileSha256": "24ee8e1b34c06dcf1d29a9d4105a6109e11f7e585376952f7a9d55251245183d",
+        "lfNormalizedSha256": "24ee8e1b34c06dcf1d29a9d4105a6109e11f7e585376952f7a9d55251245183d"
+      },
+      {
+        "path": "apps/web/scripts/verify-trade-dialog-assets.mjs",
+        "localFileSha256": "ea63f7a4805a8eed45bbe5b223ec3abff38dc17f739eda029c8a07845668d9ec",
+        "lfNormalizedSha256": "ea63f7a4805a8eed45bbe5b223ec3abff38dc17f739eda029c8a07845668d9ec"
+      },
+      {
+        "path": "apps/web/scripts/crystal-ui-export-manifest.json",
+        "localFileSha256": "cd99fe105cbac5d93c468eb9e82bb4146f3c60a653a06a74219768ca672b9de7",
+        "lfNormalizedSha256": "cd99fe105cbac5d93c468eb9e82bb4146f3c60a653a06a74219768ca672b9de7"
+      },
+      {
+        "path": "apps/web/public/original-ui/Prguse/meta.json",
+        "localFileSha256": "66609dd75b3e4860cc63a37a148d6d6bacac4c9ceca6c95aa6ae10ce908b6b30",
+        "lfNormalizedSha256": "66609dd75b3e4860cc63a37a148d6d6bacac4c9ceca6c95aa6ae10ce908b6b30"
+      },
+      {
+        "path": "apps/web/public/original-ui/Title/meta.json",
+        "localFileSha256": "c7c1ebb9044e3ddb27628bc46f526cada962049c9a51760c0443e01c01ccbd4b",
+        "lfNormalizedSha256": "c7c1ebb9044e3ddb27628bc46f526cada962049c9a51760c0443e01c01ccbd4b"
+      },
+      {
+        "path": "apps/web/public/original-ui/manifest.generated.json",
+        "localFileSha256": "a5fcd0a861fd5ca06b3b01a639d2640b181b81883462f32f4dedd15067198a79",
+        "lfNormalizedSha256": "a5fcd0a861fd5ca06b3b01a639d2640b181b81883462f32f4dedd15067198a79"
+      }
+    ],
+    "hashesRecheckedAfterFinalRustTests": true,
+    "backendFilesAuditedWithoutModification": [
+      {
+        "path": "apps/simulation/src/runtime/packets.rs",
+        "localFileSha256": "360023b621bf1a037ff62f5cd777fa87a5dd693520ee304370f537c6c4ea7e56",
+        "lfNormalizedSha256": "360023b621bf1a037ff62f5cd777fa87a5dd693520ee304370f537c6c4ea7e56"
+      },
+      {
+        "path": "apps/simulation/src/runtime/session.rs",
+        "localFileSha256": "358dec2983af02b67561442f176e3caf96fc44769028c51c6a5be47112bf8ac3",
+        "lfNormalizedSha256": "358dec2983af02b67561442f176e3caf96fc44769028c51c6a5be47112bf8ac3"
+      },
+      {
+        "path": "apps/gateway/src/routing.rs",
+        "localFileSha256": "fa233777ef0c3cf883af8c88e90b85c513c05f634c201e834e592e1b3da9bd13",
+        "lfNormalizedSha256": "fa233777ef0c3cf883af8c88e90b85c513c05f634c201e834e592e1b3da9bd13"
+      }
+    ]
+  },
+  "geometry": {
+    "logicalViewport": [
+      1024,
+      768
+    ],
+    "ownWindow": [
+      298,
+      418,
+      204,
+      152
+    ],
+    "guestWindow": [
+      522,
+      418,
+      204,
+      152
+    ],
+    "ownName": [
+      20,
+      10,
+      150,
+      14
+    ],
+    "guestName": [
+      0,
+      10,
+      204,
+      14
+    ],
+    "gold": [
+      35,
+      123,
+      90,
+      15
+    ],
+    "ownConfirm": [
+      135,
+      120,
+      48,
+      25
+    ],
+    "ownClose": [
+      181,
+      3,
+      24,
+      21
+    ],
+    "guestHasConfirmOrClose": false,
+    "cellCountPerSide": 10,
+    "cellSize": [
+      36,
+      32
+    ],
+    "cellPitch": [
+      37,
+      33
+    ],
+    "cellPosition": "x = 10 + 37 * floor(slot / 2), y = 39 + 33 * (slot % 2); source slot = 2*x+y",
+    "inventoryOnTradeAccept": [
+      708,
+      0
+    ],
+    "amountWindow": [
+      410,
+      329,
+      204,
+      109
+    ]
+  },
+  "checks": {
+    "rust": [
+      {
+        "name": "native-ui",
+        "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui -- --quiet",
+        "passed": 591,
+        "failed": 0,
+        "ignored": 0,
+        "filteredOut": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "windows-host",
+        "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/platform-windows/Cargo.toml -- --quiet",
+        "passed": 534,
+        "failed": 0,
+        "ignored": 0,
+        "filteredOut": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "client-runtime",
+        "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/runtime/Cargo.toml -- --quiet",
+        "passed": 212,
+        "failed": 0,
+        "ignored": 0,
+        "filteredOut": 0,
+        "exitCode": 0
+      },
+      {
+        "name": "ui-core",
+        "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/ui-core/Cargo.toml -- --quiet",
+        "passed": 43,
+        "failed": 0,
+        "ignored": 0,
+        "filteredOut": 0,
+        "exitCode": 0
+      }
+    ],
+    "rustTotalPassed": 1380,
+    "newNativeTests": 29,
+    "newWindowsTests": 6,
+    "itemIconGate": {
+      "command": "npm.cmd --prefix apps/web run test:item-icons",
+      "exitCode": 0,
+      "passed": 11,
+      "failed": 0,
+      "catalogueRows": 1628,
+      "baseImages": 913,
+      "quantityImages": 11,
+      "requiredImages": 924
+    },
+    "originalAssets": {
+      "command": "node apps/web/scripts/verify-trade-dialog-assets.mjs <Crystal-client-Data-directory>",
+      "exitCode": 0,
+      "report": "source-assets.json",
+      "verifiedPngs": 561,
+      "preservedPriorPrguseTitlePngs": 552,
+      "newFrames": 5,
+      "relevantFrames": 16,
+      "rejectedNegativeControls": 32
+    },
+    "formatting": {
+      "manifestPaths": [
+        "apps/game-client/client-bevy/Cargo.toml",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "apps/game-client/runtime/Cargo.toml",
+        "apps/game-client/ui-core/Cargo.toml"
+      ],
+      "commandTemplate": "cargo +1.95.0 fmt --manifest-path <manifest> --check",
+      "exitCode": 0
+    },
+    "scriptSyntax": {
+      "command": "node --check apps/web/scripts/verify-trade-dialog-assets.mjs",
+      "exitCode": 0
+    },
+    "diffWhitespace": {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    "fullSimulationAndGatewayRunThisCheckpoint": false,
+    "compilerWarningsRetained": true
+  },
+  "testEnvironment": {
+    "rustToolchain": "1.95.0",
+    "cargoTargetDir": "C:/Users/Administrator/AppData/Local/Temp/mir2-stack-image-regression-44eb501f0d1842aeb14ce9fc23e1e23f",
+    "CARGO_BUILD_JOBS": "2",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "RUST_TEST_THREADS": "1",
+    "rustHarnessesRunSequentially": true
+  },
+  "safety": {
+    "computerUsePausedAfterUserEscape": true,
+    "applicationGuiLaunched": false,
+    "foregroundInputInjected": false,
+    "newScreenshotsCaptured": false,
+    "oldCapturesRelabelled": false,
+    "backendTransactionLogicChanged": false,
+    "wireSchemaChanged": false,
+    "authOrProductionQaGatesRelaxed": false,
+    "localGoldInventoryOrSettlementInvented": false,
+    "unrelatedProcessesStopped": false,
+    "filesDeletedOrMovedThisCheckpoint": false,
+    "humanVisualAcceptanceRequired": true
+  },
+  "openLeaves": [
+    {
+      "priority": "P0",
+      "name": "Separate unilateral shared-trade prepare/lock from completed transaction",
+      "evidence": [
+        "Crystal Client/MirScenes/GameScene.cs:6329-6347",
+        "Crystal Server/MirObjects/PlayerObject.cs:10823 onward",
+        "apps/simulation/src/runtime/packets.rs:5191-5274",
+        "apps/simulation/src/runtime/session.rs:432-446",
+        "apps/gateway/src/routing.rs:11028-11168"
+      ],
+      "status": "Open source mismatch: Candidate returns S.TradeConfirm while an offer is only prepared, before partner match and durable settlement; the source-correct native consumer closes the pair on this completion packet."
+    },
+    {
+      "priority": "P0",
+      "name": "TradeGold positive delta, cumulative offer, immediate escrow and correct peer routing",
+      "evidence": [
+        "Crystal Server/MirObjects/PlayerObject.cs:10778-10822",
+        "apps/simulation/src/runtime/packets.rs:5059-5073"
+      ],
+      "status": "Open: Candidate overwrites offered_gold and defers debit. Do not patch += in isolation; audit conservation, repeat commands, cancellation/refunds, save/disconnect and durable unknown outcomes."
+    },
+    {
+      "priority": "P1",
+      "name": "Source native deposit/retrieve/merge, selected-cell and slot-address contract",
+      "status": "Open: both trade grids are read-only. Legacy first-ten-bag/to=0 shortcuts were removed. Reservations remain in Candidate bag state until its current confirm path."
+    },
+    {
+      "priority": "P1",
+      "name": "Invitation/cancellation source MirMessageBoxes, gold audio 106.wav and full MirAmountBox editing",
+      "status": "Open: legacy invitation/idle panel remains; no source automatic invitation popup; clipboard/caret/IME/GDI and gold click audio remain unimplemented."
+    },
+    {
+      "priority": "P1",
+      "name": "All-window overlap/topmost/input routing, state overlays and other concrete-item/base-preview/FloorItems surfaces",
+      "status": "Open; pair-local dragging and an inventory-drag guard are not a complete window manager."
+    },
+    {
+      "priority": "acceptance",
+      "name": "Final-source same-EXE real-input and original same-account/character/position/state pairs",
+      "status": "Open until explicit Computer Use resumption; trusted package/light, actual 100/125/150% DPI, soak, signing/legal and human gates retained."
+    }
+  ]
+}

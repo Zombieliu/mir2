@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "crystalRevision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "source": "Client/MirScenes/Dialogs/TradeDialogs.cs; MirControls/MirAmountBox.cs; original library bytes",
+  "verifiedOriginalPngCount": 561,
+  "preservedPriorPngCount": 552,
+  "newOriginalFrameCount": 5,
+  "relevantFrameCount": 16,
+  "rejectedNegativeControls": 32,
+  "visualAccepted": false,
+  "accepted": false,
+  "globalParityPercent": null,
+  "libraries": [
+    {
+      "name": "Prguse",
+      "sourceLibrarySha256": "584b67694a420a29c98f51b04cdf681acf1ed071c15c57014fdfd59c762a3c96",
+      "sourceLibraryBytes": 12414386,
+      "metadataFrameCount": 342,
+      "verifiedOriginalPngCount": 342,
+      "preservedPriorPngCount": 340,
+      "priorPngFingerprintSha256": "ae1080f545585121f7141ca5d91d2008e93beb0b8c4722e90396cf56b54977f3"
+    },
+    {
+      "name": "Title",
+      "sourceLibrarySha256": "bd3e9485548e9b3cb5d4cb261c9a01a07752fb41fcea7f5d8569e602feaed648",
+      "sourceLibraryBytes": 5617784,
+      "metadataFrameCount": 215,
+      "verifiedOriginalPngCount": 215,
+      "preservedPriorPngCount": 212,
+      "priorPngFingerprintSha256": "bb40973bbf53f5e913497a8dc2dedd52d45cff58abc415db009fba087b57701e"
+    },
+    {
+      "name": "Prguse2",
+      "sourceLibrarySha256": "510ebc77315089075fc472c9ef745be2e16c6dece970c307d6859ce074cce861",
+      "sourceLibraryBytes": 3557648,
+      "metadataFrameCount": 44,
+      "verifiedOriginalPngCount": 3,
+      "preservedPriorPngCount": 0,
+      "priorPngFingerprintSha256": null
+    },
+    {
+      "name": "Items",
+      "sourceLibrarySha256": "5d5f6e0251d2e5f7d87cb18352be2c2999ea311a7aa988de63dcf2fa78f9fb5a",
+      "sourceLibraryBytes": 4035433,
+      "metadataFrameCount": 1003,
+      "verifiedOriginalPngCount": 1,
+      "preservedPriorPngCount": 0,
+      "priorPngFingerprintSha256": null
+    }
+  ],
+  "relevantFrames": [
+    {
+      "library": "Prguse",
+      "index": 238,
+      "width": 204,
+      "height": 109,
+      "x": -250,
+      "y": -204,
+      "pngSha256": "98a3ea286cd85b010852048f7358580480b896cbe9231d67c42b4e68c7eac7e3",
+      "rgbaSha256": "870740b052bfd1a2bbe39d53dd45f797090442df8742c64364eef11be8727f9d",
+      "newlyExported": false
+    },
+    {
+      "library": "Prguse",
+      "index": 389,
+      "width": 204,
+      "height": 152,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "a768126f64c51b626cd32e53cd53951f18484cd3628ed82c9034b11670766503",
+      "rgbaSha256": "c3046d690290705a41f8a02cff17323a3bd7e6a54fcb9475b22fe5768e6368ce",
+      "newlyExported": true
+    },
+    {
+      "library": "Prguse",
+      "index": 390,
+      "width": 204,
+      "height": 152,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "64ed6a2d14a53ae81fd694a6539075fe8ad878fcff18fb3578b3e2aa9ed1d5e4",
+      "rgbaSha256": "fba5d5c8f6b85901f4f95a16f3e90d510aef5a2a85e24f8b5270c2026f68eaa1",
+      "newlyExported": true
+    },
+    {
+      "library": "Title",
+      "index": 200,
+      "width": 76,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "858bf44e33eef2addff9312a994d40eceafed23d8b73d6497cb4119761075482",
+      "rgbaSha256": "1541d8a197a4d32822ebfdb1606226030dc49759c9a1b559d6f9087b4394fa2b",
+      "newlyExported": false
+    },
+    {
+      "library": "Title",
+      "index": 201,
+      "width": 76,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "14228b35f8cdaaf32718b8098705300411fdbf38679851dbeb052506da533c67",
+      "rgbaSha256": "42bc4c9f2437960585f9f34fa7298f4b9e45ed8a3315cb6ea66b269cfa793256",
+      "newlyExported": false
+    },
+    {
+      "library": "Title",
+      "index": 202,
+      "width": 76,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "a966aff370d4905e2252464e73793caaeed9e377f3114cb5a3056ee8524dc2db",
+      "rgbaSha256": "7eede8cff66391fa396a7347b13ac9ca0abbbd896ea244f19a48f5d5879e9dfc",
+      "newlyExported": false
+    },
+    {
+      "library": "Title",
+      "index": 203,
+      "width": 76,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "8c5d6d182ec3e838e5900faeb1f9ec10b9bda51f57a050c787453af550f43526",
+      "rgbaSha256": "17783191597297f88e88430227359cf8270faa413d04e2b5939ba563105c21cf",
+      "newlyExported": false
+    },
+    {
+      "library": "Title",
+      "index": 204,
+      "width": 76,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "b6cd7161a1b53a8ec8f7aa173ffdbc8845996ec65a69777d1685568760623838",
+      "rgbaSha256": "a2c9646dcda88076b5c16aa4b8f525a47a61103411cf81623d1061bcd7e58925",
+      "newlyExported": false
+    },
+    {
+      "library": "Title",
+      "index": 205,
+      "width": 76,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "fdebf8884ec1f86102bf7ffef6f139e410cdbd9cbe3648f3fc77d1c5c454cbe3",
+      "rgbaSha256": "d3d1e14a42edab1043f09fc5fd5044ccdf5159c3da23255c95b802c8c0d458eb",
+      "newlyExported": false
+    },
+    {
+      "library": "Title",
+      "index": 520,
+      "width": 48,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "582cb8b782e3b5ae2a73e81c25542b9bd8b7bcef9eccad937e936a17b6dacced",
+      "rgbaSha256": "ac8b313747d90675d94c713b22b1e2c2da16d45fd31031e6a7b18154712488b0",
+      "newlyExported": true
+    },
+    {
+      "library": "Title",
+      "index": 521,
+      "width": 48,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "f72f040d8190c39e8a865fe30fbb6142f91576ca6fe9e815aca878f5e7a65fe1",
+      "rgbaSha256": "284009c4a685e58e0325ff95b39d9902e3e1472940bcbf4fabe38ba089226faa",
+      "newlyExported": true
+    },
+    {
+      "library": "Title",
+      "index": 522,
+      "width": 48,
+      "height": 25,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "7646a6b82d44ecef39630f9fd4e2cb66c1c66cb9a55ca52562d271423e19b4e2",
+      "rgbaSha256": "ac7904d2ff70f4cc60fd8c668ae81f35f2de5644933c781d650c334a276cbb53",
+      "newlyExported": true
+    },
+    {
+      "library": "Prguse2",
+      "index": 360,
+      "width": 24,
+      "height": 21,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "4e481bca194a082812caa01c6e4fdee387c016cf520b68b5fbb5fa2635d04675",
+      "rgbaSha256": "7bacfd35f4ceb0d0c78bcea0f98edca8532b458d7ee05f4aa28a46e651f8348b",
+      "newlyExported": false
+    },
+    {
+      "library": "Prguse2",
+      "index": 361,
+      "width": 24,
+      "height": 21,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "2a25918cd9b5acde7b9acc5b67fd0fddb537cd018dc7e2695436ab0bf7095238",
+      "rgbaSha256": "f082a9de2c9b0de55cb12d8ca24d5c9647a605c83df69f4cbeab98acc7a321c1",
+      "newlyExported": false
+    },
+    {
+      "library": "Prguse2",
+      "index": 362,
+      "width": 24,
+      "height": 21,
+      "x": 0,
+      "y": 0,
+      "pngSha256": "98614f07962fedc5722113a213ea0c6b89695680dc8cc91f708e5eb65f24fed2",
+      "rgbaSha256": "b89fb05149ebdb0cde56aa8b5e374dd8b4e26f026d797f009457ee74d1eda443",
+      "newlyExported": false
+    },
+    {
+      "library": "Items",
+      "index": 116,
+      "width": 44,
+      "height": 30,
+      "x": 0,
+      "y": 2,
+      "pngSha256": "36ef8baddb9c626252948c2b93ff210f82e8dffd4b119e73fcb690cb41f8b9d6",
+      "rgbaSha256": "83aa8fc83c8003919e2d057828eef53aa26ad4ecac290f16ce873cb36237c57d",
+      "newlyExported": false
+    }
+  ]
+}

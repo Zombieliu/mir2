@@ -1,4 +1,5 @@
 mod additive_material;
+pub mod capture_context;
 pub mod entity_animation;
 mod entity_animation_bridge;
 mod interpolation;
@@ -13,6 +14,8 @@ pub mod native_ingest;
 mod native_ingest;
 mod presentation_pose;
 mod remote_motion;
+
+pub use presentation_pose::PresentationPoseBuffer;
 
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
@@ -49,6 +52,12 @@ const COMPILED_RENDER_BACKEND: &str = "webgl2";
 )))]
 const COMPILED_RENDER_BACKEND: &str = "native";
 
+/// The ordered runtime stage that commits map/entity centers and publishes the
+/// exact camera/entity presentation pose used by the renderer. Native UI
+/// overlays schedule after this set so they never observe a mixed-center frame.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct RuntimePresentationSet;
+
 // Both wasm backends composite transparently over the DOM map/floor/UI layers, so
 // Bevy can be the entity renderer on non-WebGPU too (the webgl2 build was opaque,
 // which forced the DOM WebGl2EntityAtlasLayer to draw entities there).
@@ -73,11 +82,46 @@ thread_local! {
     static PENDING_EFFECT_RENDER_STATE: RefCell<Option<EffectRenderState>> = const { RefCell::new(None) };
     static PENDING_LIGHTING_RENDER_STATE: RefCell<Option<lighting::LightingRenderState>> = const { RefCell::new(None) };
     static PENDING_SCENE_RESET: Cell<bool> = const { Cell::new(false) };
-    // Optional self-player motion window (from_x, from_y, to_x, to_y, started_ms,
-    // expires_ms) for the display-Hz camera-scroll path (?bevySelfCamera=1). None
-    // (the default) ⇒ `follow_player` keeps the camera pinned at origin = the
-    // current fold-in behaviour.
-    static PENDING_SELF_CAMERA_MOTION: Cell<Option<(f32, f32, f32, f32, f64, f64)>> = const { Cell::new(None) };
+}
+
+type SelfCameraMotionWindow = (f32, f32, f32, f32, f64, f64);
+
+// Browser calls and the WASM Bevy schedule share one thread. Native input and
+// render systems can run on different Bevy workers, so the same bridge must be
+// process-wide there instead of thread-local.
+#[cfg(target_arch = "wasm32")]
+thread_local! {
+    static PENDING_SELF_CAMERA_MOTION: Cell<Option<SelfCameraMotionWindow>> = const { Cell::new(None) };
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+static PENDING_SELF_CAMERA_MOTION: std::sync::Mutex<Option<SelfCameraMotionWindow>> =
+    std::sync::Mutex::new(None);
+
+fn set_pending_self_camera_motion(window: Option<SelfCameraMotionWindow>) {
+    #[cfg(target_arch = "wasm32")]
+    PENDING_SELF_CAMERA_MOTION.with(|cell| cell.set(window));
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        *PENDING_SELF_CAMERA_MOTION
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = window;
+    }
+}
+
+fn pending_self_camera_motion() -> Option<SelfCameraMotionWindow> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_SELF_CAMERA_MOTION.with(Cell::get)
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        *PENDING_SELF_CAMERA_MOTION
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
 }
 
 #[derive(Resource, Default, Clone)]
@@ -145,7 +189,10 @@ impl Plugin for Mir2NativeSessionBoundaryPlugin {
             .init_resource::<mir2_client_bevy::shop::ShopModel>()
             .init_resource::<mir2_client_bevy::game_shop::GameShopModel>()
             .init_resource::<mir2_client_bevy::storage::StorageModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
             .init_resource::<mir2_client_bevy::skill_model::SkillModel>()
+            .init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>()
             .init_resource::<mir2_client_bevy::social::SocialModel>()
             .init_resource::<PendingOperations>()
             .init_resource::<InventoryOperationFeedback>()
@@ -518,6 +565,8 @@ struct MirLightingComposite;
 #[serde(rename_all = "camelCase")]
 pub(crate) struct WorldSnapshot {
     #[serde(default)]
+    pub(crate) map_file_name: Option<String>,
+    #[serde(default)]
     pub(crate) map_title: Option<String>,
     #[serde(default)]
     pub(crate) player_object_id: Option<String>,
@@ -677,6 +726,12 @@ struct EntityRenderEntry {
     grid_x: Option<i32>,
     #[serde(default)]
     grid_y: Option<i32>,
+    /// Optional Crystal `MapLocation` equivalent used only for y-sort during
+    /// an active movement action. X/Y placement still uses `grid_x/grid_y`.
+    #[serde(default)]
+    motion_sort_x: Option<i32>,
+    #[serde(default)]
+    motion_sort_y: Option<i32>,
     #[serde(default)]
     layers: Vec<EntityRenderLayer>,
     // Opt-in (`?bevyEntityInterp=1`) per-entity sub-cell motion window, in CSS-px
@@ -1223,8 +1278,7 @@ pub fn set_mir2_self_camera_motion(
     started_ms: f64,
     expires_ms: f64,
 ) {
-    PENDING_SELF_CAMERA_MOTION
-        .with(|cell| cell.set(Some((from_x, from_y, to_x, to_y, started_ms, expires_ms))));
+    set_pending_self_camera_motion(Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)));
 }
 
 /// Clear the retained self-camera interpolation window immediately.
@@ -1235,7 +1289,7 @@ pub fn set_mir2_self_camera_motion(
 /// source tile.
 #[wasm_bindgen(js_name = clearMir2SelfCameraMotion)]
 pub fn clear_mir2_self_camera_motion() {
-    PENDING_SELF_CAMERA_MOTION.with(|cell| cell.set(None));
+    set_pending_self_camera_motion(None);
 }
 
 /// Window/surface configuration for a Mir2 runtime host.
@@ -1308,6 +1362,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(RuntimeMapRenderAtlases::default())
         .insert_resource(RuntimeEffectRenderState::default())
         .insert_resource(RuntimeLightingRenderState::default())
+        .init_resource::<capture_context::RenderedCaptureContext>()
         .insert_resource(RuntimeLightingSceneResetTracker::default())
         .insert_resource(RuntimeMapCameraOffset::default())
         .insert_resource(SceneRegistry::default())
@@ -1324,7 +1379,10 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(mir2_client_bevy::shop::ShopModel::default())
         .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
         .insert_resource(mir2_client_bevy::storage::StorageModel::default())
+        .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+        .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
         .insert_resource(mir2_client_bevy::skill_model::SkillModel::default())
+        .init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>()
         .insert_resource(mir2_client_bevy::social::SocialModel::default())
         .insert_resource(PendingOperations::default())
         .insert_resource(InventoryOperationFeedback::default())
@@ -1434,7 +1492,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 ingest_pending_storage_patch,
                 ingest_pending_storage_items,
                 ingest_pending_storage_model,
-                ingest_pending_skill_model,
+                (ingest_pending_hero_model, ingest_pending_skill_model).chain(),
                 ingest_pending_social_model,
                 ingest_pending_chat_line,
             )
@@ -1455,10 +1513,13 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 begin_presentation_pose_frame,
                 sync_entity_render_layers,
                 follow_player,
+                follow_lighting_camera,
                 publish_presentation_pose_frame,
             )
-                .chain(),
+                .chain()
+                .in_set(RuntimePresentationSet),
         );
+    app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(
         Update,
@@ -1915,7 +1976,7 @@ fn apply_scene_reset_to_runtime(
     *map_camera_offset = RuntimeMapCameraOffset::default();
     *snapshots = interpolation::SnapshotBuffer::default();
     *motion_table = motion::EntityMotionTable::default();
-    *presentation_poses = presentation_pose::PresentationPoseBuffer::default();
+    presentation_poses.reset_scene();
 
     clear_scene_registry(
         &mut commands,
@@ -1990,15 +2051,24 @@ fn apply_session_reset_to_runtime_models(
     mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
     mut game_shop: ResMut<mir2_client_bevy::game_shop::GameShopModel>,
     mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
-    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+    skill_state: (
+        ResMut<mir2_client_bevy::skill_model::SkillModel>,
+        Option<ResMut<mir2_client_bevy::skill_model::SkillModelReceipts>>,
+        Option<ResMut<mir2_client_bevy::hero_model::HeroModel>>,
+        Option<ResMut<mir2_client_bevy::hero_model::HeroModelReceipts>>,
+    ),
     mut social: ResMut<mir2_client_bevy::social::SocialModel>,
     mut inventory_feedback: ResMut<InventoryOperationFeedback>,
     mut preservation: ResMut<SessionResetGameShopPreservation>,
 ) {
+    let (mut skills, mut receipts, mut hero, mut hero_receipts) = skill_state;
     if tracker.0 == reset.0 {
         return;
     }
     tracker.0 = reset.0;
+    if let Some(receipts) = receipts.as_deref_mut() {
+        receipts.0.clear();
+    }
     *ui = mir2_client_bevy::read_model::UiReadModel::default();
     surface_signals.npc_shop_open_requested = false;
     *map = mir2_client_bevy::map::MapModel::default();
@@ -2016,6 +2086,12 @@ fn apply_session_reset_to_runtime_models(
     }
     *storage = mir2_client_bevy::storage::StorageModel::default();
     *skills = mir2_client_bevy::skill_model::SkillModel::default();
+    if let Some(hero) = hero.as_deref_mut() {
+        *hero = Default::default();
+    }
+    if let Some(receipts) = hero_receipts.as_deref_mut() {
+        receipts.0.clear();
+    }
     social.clear_session();
     inventory_feedback.last = None;
 }
@@ -2102,6 +2178,7 @@ fn ingest_pending_shop_model(
                             });
                         shop.goods = model.goods;
                         shop.selected_id = selected_valid;
+                        shop.hide_added_stats = model.hide_added_stats;
                         reconcile_shop_refresh(&mut pending, &old, &shop);
                         mark_authoritative_refresh(&mut revisions, AuthoritativeModelDomain::Shop);
                     }
@@ -2488,16 +2565,61 @@ fn ingest_pending_storage_model(
     );
 }
 
-fn ingest_pending_skill_model(
-    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+fn ingest_pending_hero_model(
+    mut hero: ResMut<mir2_client_bevy::hero_model::HeroModel>,
+    mut receipts: ResMut<mir2_client_bevy::hero_model::HeroModelReceipts>,
     native: Res<native_ingest::NativeInbound>,
 ) {
     native.drain_matching(
-        |message| matches!(message, native_ingest::NativeInboundMessage::SkillModel(_)),
         |message| {
-            if let native_ingest::NativeInboundMessage::SkillModel(json) = message {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::HeroModel(_)
+                    | native_ingest::NativeInboundMessage::HeroModelReceipt(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::HeroModel(json)
+            | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message
+            {
+                match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {
+                    Ok(model) => {
+                        if model.skill_key_ack.is_some() {
+                            receipts.0.push_back(model.clone());
+                        }
+                        *hero = model;
+                    }
+                    Err(error) => eprintln!("[runtime] hero model decode error: {error}"),
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_skill_model(
+    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+    native: Res<native_ingest::NativeInbound>,
+    mut receipts: Option<ResMut<mir2_client_bevy::skill_model::SkillModelReceipts>>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::SkillModel(_)
+                    | native_ingest::NativeInboundMessage::SkillModelReceipt(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::SkillModel(json)
+            | native_ingest::NativeInboundMessage::SkillModelReceipt(json) = message
+            {
                 match serde_json::from_str::<mir2_client_bevy::skill_model::SkillModel>(&json) {
                     Ok(model) => {
+                        if model.skill_key_ack.is_some() {
+                            if let Some(receipts) = receipts.as_deref_mut() {
+                                receipts.0.push_back(model.clone());
+                            }
+                        }
                         *skills = model;
                     }
                     Err(error) => {
@@ -2650,8 +2772,10 @@ fn ingest_pending_lighting_render_state(
 
 /// Retained Crystal light buffer. A dedicated camera clears an offscreen image
 /// to Crystal's darkness colour and adds every `Lighting/N.png` source on an
-/// isolated render layer. A full-stage main-pass mesh then multiplies the
-/// completed light-buffer RGB with the world. This preserves Crystal's
+/// isolated render layer. A guarded main-pass mesh then multiplies the
+/// completed light-buffer RGB with the world; its shader fills the out-of-stage
+/// guard with the same darkness colour without enlarging the offscreen target.
+/// This preserves Crystal's
 /// `scene * (darkness + lights)` equation instead of the visibly-wrong
 /// `scene * darkness + lights` approximation. Day has no light pass.
 fn sync_lighting_render(
@@ -2702,6 +2826,9 @@ fn sync_lighting_render(
         clear_lighting!();
         return;
     };
+    let composite_size = lighting::guarded_light_composite_size(stage_size);
+    let uv_scale_offset = lighting::guarded_light_uv_scale_offset(stage_size);
+    let border_darkness = darkness.to_linear();
 
     if registry
         .lighting_darkness
@@ -2726,7 +2853,11 @@ fn sync_lighting_render(
         }
         if let Ok(mut transform) = transform_query.get_mut(handle.composite_entity) {
             transform.translation = dark_position;
-            transform.scale = Vec3::new(snapshot.stage_width, snapshot.stage_height, 1.0);
+            transform.scale = Vec3::new(composite_size.x as f32, composite_size.y as f32, 1.0);
+        }
+        if let Some(mut material) = multiply_materials.get_mut(&handle.material) {
+            material.uv_scale_offset = uv_scale_offset;
+            material.border_darkness = border_darkness;
         }
     } else {
         let buffer_image = images.add(Image::new_target_texture(
@@ -2752,14 +2883,16 @@ fn sync_lighting_render(
         let mesh = additive_cache.unit_quad(&mut meshes);
         let material = multiply_materials.add(lighting::CrystalMultiplyMaterial {
             light_buffer: buffer_image.clone(),
+            uv_scale_offset,
+            border_darkness,
         });
         let composite_entity = commands
             .spawn((
                 Mesh2d(mesh),
                 MeshMaterial2d(material.clone()),
                 Transform::from_translation(dark_position).with_scale(Vec3::new(
-                    snapshot.stage_width,
-                    snapshot.stage_height,
+                    composite_size.x as f32,
+                    composite_size.y as f32,
                     1.0,
                 )),
                 MirLightingComposite,
@@ -3154,9 +3287,12 @@ fn sync_effect_render(
                         transform.scale = Vec3::new(shadow_size.x, shadow_size.y, 1.0);
                     }
                 } else {
+                    // Bichon safe-zone pillars flicker with a dense ground lattice;
+                    // the 0.28 alpha disc pulsed as a black circle. Keep the shadow
+                    // but make it faint so the lattice stays full at 285,620.
                     let mesh = meshes.add(Ellipse::new(0.5, 0.5));
                     let material = shadow_materials.add(ColorMaterial::from_color(Color::srgba(
-                        0.02, 0.01, 0.01, 0.28,
+                        0.02, 0.01, 0.01, 0.08,
                     )));
                     let entity = commands
                         .spawn((
@@ -3378,12 +3514,12 @@ fn ingest_pending_map_render_images(
 }
 
 /// Stage 2 (unified y-sort) z scale. Map tiles and entities derive z from the
-/// SAME `viewportDepthForCell`; the entity producer pre-multiplies by
+/// SAME `viewportDepthForCell` for y-sorted objects; the entity producer pre-multiplies by
 /// MAP_TILE_ENTITY_DEPTH_GAIN (the `depth*10+order` in buildBevyEntityRenderState)
 /// before the runtime's `/ MAP_TILE_Z_DENOM` (entity_render_layer_position). The
-/// map producer feeds RAW depth, so apply the same ×10 here → map world-z lands on
-/// the IDENTICAL band as entities (floor behind ≈0.2, tall fronts above actors ≈3.9,
-/// objects interleave with actors by cell row) — Crystal's single y-sorted band.
+/// map producer feeds RAW depth, so apply the same ×10 here. Static floor-pass
+/// frames use a dedicated negative raw band; tall fronts and actors continue to
+/// interleave by cell row like Crystal's DrawObjects pass.
 const MAP_TILE_ENTITY_DEPTH_GAIN: f32 = 10.0;
 const MAP_TILE_Z_DENOM: f32 = 100_000.0;
 const CRYSTAL_MAP_ANIMATION_INTERVAL_MS: u128 = 100;
@@ -5048,9 +5184,11 @@ fn entity_render_actor_root(
     let origin_y = ((snapshot.stage_height * 0.5 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
     let root_left = origin_x + (i64::from(grid_x) - i64::from(center_x)) as f32 * CELL_WIDTH;
     let root_top = origin_y + (i64::from(grid_y) - i64::from(center_y)) as f32 * CELL_HEIGHT;
-    let depth = i64::from(grid_y)
+    let sort_x = entity.motion_sort_x.unwrap_or(grid_x);
+    let sort_y = entity.motion_sort_y.unwrap_or(grid_y);
+    let depth = i64::from(sort_y)
         .saturating_mul(1_000)
-        .saturating_add(i64::from(grid_x).saturating_mul(10))
+        .saturating_add(i64::from(sort_x).saturating_mul(10))
         .saturating_mul(ENTITY_DEPTH_GAIN) as f32
         / WORLD_DEPTH_DIVISOR;
 
@@ -5151,8 +5289,7 @@ fn self_camera_screen_offset(
     motion_table: &motion::EntityMotionTable,
     applied_map_center: Option<presentation_pose::PresentationGridCenter>,
 ) -> (Vec2, presentation_pose::CameraPoseSource) {
-    let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) =
-        PENDING_SELF_CAMERA_MOTION.with(|cell| cell.get())
+    let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) = pending_self_camera_motion()
     else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     };
@@ -5222,24 +5359,22 @@ fn self_camera_offset_for_applied_center(
 }
 
 fn active_self_camera_motion_window(now_ms: f64) -> Option<local_motion::LocalTsMotionWindow> {
-    PENDING_SELF_CAMERA_MOTION.with(|cell| {
-        cell.get()
-            .map(|(from_x, from_y, to_x, to_y, started_ms, expires_ms)| {
-                local_motion::LocalTsMotionWindow {
-                    from_x,
-                    from_y,
-                    to_x,
-                    to_y,
-                    started_ms,
-                    expires_ms,
-                }
-            })
-            .filter(|window| {
-                window.expires_ms > window.started_ms
-                    && now_ms < window.expires_ms
-                    && (window.from_x != window.to_x || window.from_y != window.to_y)
-            })
-    })
+    pending_self_camera_motion()
+        .map(|(from_x, from_y, to_x, to_y, started_ms, expires_ms)| {
+            local_motion::LocalTsMotionWindow {
+                from_x,
+                from_y,
+                to_x,
+                to_y,
+                started_ms,
+                expires_ms,
+            }
+        })
+        .filter(|window| {
+            window.expires_ms > window.started_ms
+                && now_ms < window.expires_ms
+                && (window.from_x != window.to_x || window.from_y != window.to_y)
+        })
 }
 
 #[cfg(test)]
@@ -5314,6 +5449,23 @@ mod self_camera_motion_tests {
             ),
             None
         );
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn native_self_camera_window_crosses_the_input_render_thread_boundary() {
+        clear_mir2_self_camera_motion();
+        std::thread::spawn(|| {
+            set_mir2_self_camera_motion(10.0, 5.0, 12.0, 5.0, 100.0, 700.0);
+        })
+        .join()
+        .expect("input producer thread completes");
+
+        assert_eq!(
+            pending_self_camera_motion(),
+            Some((10.0, 5.0, 12.0, 5.0, 100.0, 700.0))
+        );
+        clear_mir2_self_camera_motion();
     }
 }
 
@@ -5506,6 +5658,42 @@ fn follow_player(
     camera_transform.translation.x = focus.x as f32 * TILE_SIZE;
     camera_transform.translation.y = -(focus.y as f32) * TILE_SIZE;
     camera_transform.translation.z = 1000.0;
+}
+
+/// Keep the offscreen light pass and its main-pass multiply quad in the exact
+/// same presented coordinate frame as the world camera.
+///
+/// The light target is screen-sized. If it remains at the map-frame origin
+/// while `follow_player` scrolls the main camera, the viewport crosses from the
+/// sampled target into the multiply material's dark virtual guard. That is the
+/// straight one-cell black strip visible during Run. Moving both lighting
+/// followers after the main camera commits its display-Hz pose keeps the real
+/// light buffer over the whole visible stage; the guard stays offscreen as a
+/// defensive margin only.
+fn follow_lighting_camera(
+    main_camera_query: Query<
+        &Transform,
+        (
+            With<MainCamera>,
+            Without<MirLightingBufferCamera>,
+            Without<MirLightingComposite>,
+        ),
+    >,
+    mut lighting_query: Query<
+        &mut Transform,
+        (
+            Or<(With<MirLightingBufferCamera>, With<MirLightingComposite>)>,
+            Without<MainCamera>,
+        ),
+    >,
+) {
+    let Ok(main_camera) = main_camera_query.single() else {
+        return;
+    };
+    for mut transform in &mut lighting_query {
+        transform.translation.x = main_camera.translation.x;
+        transform.translation.y = main_camera.translation.y;
+    }
 }
 
 /// Per-cell entities for a rendered mine vein: a constant dark rock base plus an
@@ -6102,6 +6290,33 @@ fn publish_map_status(phase: &str, message: &str, ack_key: &str, image_keys: &[S
 #[cfg(test)]
 mod entity_atlas_tests {
     use super::*;
+
+    #[test]
+    fn retained_actor_root_uses_target_xy_and_crystal_motion_sort_depth() {
+        let snapshot: EntityRenderState = serde_json::from_str(
+            r#"{
+                "enabled": true,
+                "stageWidth": 1024.0,
+                "stageHeight": 768.0,
+                "centerX": 9,
+                "centerY": 7,
+                "entities": [{
+                    "objectId": "moving",
+                    "gridX": 9,
+                    "gridY": 7,
+                    "motionSortX": 8,
+                    "motionSortY": 6
+                }]
+            }"#,
+        )
+        .expect("entity render state");
+
+        let root = entity_render_actor_root(&snapshot, &snapshot.entities[0], Vec2::ZERO)
+            .expect("actor root");
+        assert_eq!(root.x, -32.0, "X placement follows the destination grid");
+        assert_eq!(root.y, 32.0, "Y placement follows the destination grid");
+        assert_eq!(root.z, 0.608, "depth follows the source sort grid");
+    }
 
     #[test]
     fn stable_map_render_revision_skips_only_the_applied_image_generation() {
@@ -7284,6 +7499,49 @@ mod effect_mask_shadow_tests {
     }
 
     #[test]
+    fn lighting_buffer_and_composite_follow_the_presented_main_camera() {
+        let mut app = App::new();
+        app.add_systems(Update, follow_lighting_camera);
+
+        app.world_mut()
+            .spawn((MainCamera, Transform::from_xyz(-47.5, 31.25, 0.0)));
+        let buffer_camera = app
+            .world_mut()
+            .spawn((MirLightingBufferCamera, Transform::from_xyz(0.0, 0.0, -2.0)))
+            .id();
+        let composite = app
+            .world_mut()
+            .spawn((
+                MirLightingComposite,
+                Transform::from_translation(Vec3::new(0.0, 0.0, 500.0))
+                    .with_scale(Vec3::new(1312.0, 960.0, 1.0)),
+            ))
+            .id();
+
+        app.update();
+
+        let buffer_transform = app
+            .world()
+            .get::<Transform>(buffer_camera)
+            .expect("lighting buffer camera transform exists");
+        assert_eq!(buffer_transform.translation, Vec3::new(-47.5, 31.25, -2.0));
+
+        let composite_transform = app
+            .world()
+            .get::<Transform>(composite)
+            .expect("lighting composite transform exists");
+        assert_eq!(
+            composite_transform.translation,
+            Vec3::new(-47.5, 31.25, 500.0)
+        );
+        assert_eq!(
+            composite_transform.scale,
+            Vec3::new(1312.0, 960.0, 1.0),
+            "camera following must not disturb the guarded composite geometry"
+        );
+    }
+
+    #[test]
     fn sync_effect_render_spawns_primary_mask_and_shadow_and_cleans_up() {
         // Run the real ECS sync_effect_render system and verify the layer
         // lifecycle: spawn, update, despawn, and asset recycling.
@@ -7742,6 +8000,7 @@ mod effect_mask_shadow_tests {
         app.world_mut()
             .resource_mut::<RuntimeLightingRenderState>()
             .snapshot = Some(lighting::LightingRenderState {
+            map_file_name: None,
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
@@ -7803,19 +8062,39 @@ mod effect_mask_shadow_tests {
             app.world().get::<RenderLayers>(first_layer).is_some(),
             "light sprite cannot leak into the main scene pass"
         );
-        assert!(
-            app.world()
-                .resource::<Assets<Image>>()
-                .get(&buffer_image)
-                .is_some(),
-            "offscreen target is retained while active"
+        let light_buffer = app
+            .world()
+            .resource::<Assets<Image>>()
+            .get(&buffer_image)
+            .expect("offscreen target is retained while active");
+        assert_eq!(
+            (light_buffer.width(), light_buffer.height()),
+            (1024, 768),
+            "the offscreen light pass remains stage-sized"
         );
-        assert!(
-            app.world()
-                .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
-                .get(&multiply_material)
-                .is_some(),
-            "multiply material samples the retained target"
+        let composite_transform = app
+            .world()
+            .get::<Transform>(composite_entity)
+            .expect("lighting composite transform exists");
+        assert_eq!(
+            composite_transform.scale,
+            Vec3::new(1312.0, 960.0, 1.0),
+            "the multiply mesh carries the virtual three-cell guard"
+        );
+        let multiply = app
+            .world()
+            .resource::<Assets<crate::lighting::CrystalMultiplyMaterial>>()
+            .get(&multiply_material)
+            .expect("multiply material samples the retained target");
+        assert_eq!(
+            multiply.uv_scale_offset,
+            Vec4::new(1.28125, 1.25, -0.140625, -0.125),
+            "the guarded quad keeps the central stage at 1:1 sampling"
+        );
+        assert_eq!(
+            multiply.border_darkness,
+            Color::srgb_u8(119, 136, 153).to_linear(),
+            "the virtual guard uses the exact offscreen clear colour"
         );
 
         // Map change, logout and reconnect all advance SceneResetRevision. Run
@@ -7851,6 +8130,7 @@ mod effect_mask_shadow_tests {
     fn sync_lighting_stage_resize_rebuilds_without_leaking_old_targets() {
         let mut app = sync_test_app();
         let state = |width, height| lighting::LightingRenderState {
+            map_file_name: None,
             enabled: true,
             stage_width: width,
             stage_height: height,
@@ -7938,6 +8218,8 @@ mod native_data_path_tests {
             .insert_resource(mir2_client_bevy::shop::ShopModel::default())
             .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
             .insert_resource(mir2_client_bevy::storage::StorageModel::default())
+            .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
             .insert_resource(mir2_client_bevy::skill_model::SkillModel::default())
             .insert_resource(mir2_client_bevy::social::SocialModel::default())
             .insert_resource(PendingOperations::default())
@@ -8000,6 +8282,28 @@ mod native_data_path_tests {
     }
 
     #[test]
+    fn skill_ingest_keeps_full_receipt_when_newer_model_arrives_in_same_frame() {
+        let _guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>();
+        assert!(native_ingest::push_native_skill_model(r#"{"authority":{"sessionEpoch":7,"snapshotSerial":9,"playerObjectId":3},"skillKeyAck":{"requestId":73,"spell":"FireBall","key":16,"oldKey":0,"accepted":true},"skills":[{"id":1,"name":"Fire Ball","hotkey":16}]}"#.into()));
+        assert!(native_ingest::push_native_skill_model(r#"{"authority":{"sessionEpoch":7,"snapshotSerial":10,"playerObjectId":3},"skills":[{"id":1,"name":"Fire Ball","hotkey":3}]}"#.into()));
+        app.update();
+        let latest = app
+            .world()
+            .resource::<mir2_client_bevy::skill_model::SkillModel>();
+        assert_eq!(latest.bindings[0].hotkey, Some(3));
+        assert!(latest.skill_key_ack.is_none());
+        let receipts = app
+            .world()
+            .resource::<mir2_client_bevy::skill_model::SkillModelReceipts>();
+        assert_eq!(receipts.0.len(), 1);
+        assert_eq!(receipts.0[0].bindings[0].hotkey, Some(16));
+        assert_eq!(receipts.0[0].authority.snapshot_serial, 9);
+        assert_eq!(receipts.0[0].skill_key_ack.as_ref().unwrap().request_id, 73);
+    }
+
+    #[test]
     fn native_mail_shop_storage_payloads_update_preserve_reject_and_reset() {
         let _native_queue_guard = native_ingest::native_queue_test_guard();
         let mut app = ingest_app();
@@ -8008,7 +8312,7 @@ mod native_data_path_tests {
             r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Hello","gold":10,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":false}]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_shop_model(
-            r#"{"goods":[{"unique_id":9,"name":"Potion","price":50,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
+            r#"{"goods":[{"unique_id":9,"name":"Potion","price":50,"count":20,"stock":-1,"panel_type":0}],"hide_added_stats":true}"#.to_owned()
         ));
         assert!(native_ingest::push_native_storage_model(
             r#"{"items":[{"key":"sword","name":"Iron Sword","quantity":1,"slot":3,"container":4}],"size":30,"has_password":false,"unlocked":true,"has_expanded":false,"expiry":0}"#.to_owned()
@@ -8043,6 +8347,11 @@ mod native_data_path_tests {
                 .goods
                 .len(),
             1
+        );
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::shop::ShopModel>()
+                .hide_added_stats
         );
         assert_eq!(
             app.world()
@@ -8079,7 +8388,7 @@ mod native_data_path_tests {
             r#"{"mails":[{"id":7,"sender":"GM","subject":"Gift","body":"Updated","gold":20,"items":[{"name":"Potion"}],"claimed":false,"locked":false,"read":true}]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_shop_model(
-            r#"{"goods":[{"unique_id":9,"name":"Potion","price":60,"count":20,"stock":-1,"panel_type":0}]}"#.to_owned()
+            r#"{"goods":[{"unique_id":9,"name":"Potion","price":60,"count":20,"stock":-1,"panel_type":0}],"hide_added_stats":false}"#.to_owned()
         ));
         assert!(native_ingest::push_native_npc_shop_service(
             r#"{"mode":"buy","repairRate":null}"#.to_owned()
@@ -8105,6 +8414,7 @@ mod native_data_path_tests {
             let shop = app.world().resource::<mir2_client_bevy::shop::ShopModel>();
             assert_eq!(shop.selected_id, None);
             assert!(shop.allows_buy());
+            assert!(!shop.hide_added_stats);
         }
         assert!(native_ingest::push_native_npc_shop_service(
             r#"{"mode":"repair","repairRate":1.5}"#.to_owned()
@@ -8207,6 +8517,11 @@ mod native_data_path_tests {
             .resource::<mir2_client_bevy::shop::ShopModel>()
             .goods
             .is_empty());
+        assert!(
+            !app.world()
+                .resource::<mir2_client_bevy::shop::ShopModel>()
+                .hide_added_stats
+        );
         assert!(app
             .world()
             .resource::<mir2_client_bevy::storage::StorageModel>()
@@ -8694,12 +9009,15 @@ mod native_data_path_tests {
         assert!(native_ingest::push_native_inventory_model(
             r#"{"gold":111,"items":[]}"#.to_owned()
         ));
+        assert!(native_ingest::push_native_ui_read_model(
+            r#"{"player":{"name":"Account A","wingEffect":1}}"#.to_owned()
+        ));
         assert!(native_ingest::push_native_data_reset());
         assert!(native_ingest::push_native_inventory_model(
             r#"{"gold":222,"items":[]}"#.to_owned()
         ));
         assert!(native_ingest::push_native_ui_read_model(
-            r#"{"player":{"name":"Account B","hp":10,"maxHp":10}}"#.to_owned()
+            r#"{"player":{"name":"Account B","hp":10,"maxHp":10,"wingEffect":2}}"#.to_owned()
         ));
 
         app.update();
@@ -8717,6 +9035,13 @@ mod native_data_path_tests {
                 .name
                 .as_deref(),
             Some("Account B")
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::read_model::UiReadModel>()
+                .player
+                .wing_effect,
+            Some(2)
         );
     }
 }

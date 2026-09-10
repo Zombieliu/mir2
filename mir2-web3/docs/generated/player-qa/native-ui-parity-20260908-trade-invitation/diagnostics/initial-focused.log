@@ -1,0 +1,162 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7302:25
+     |
+7302 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:225:8
+    |
+109 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+225 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+229 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:734:5
+    |
+727 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+734 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:303:19
+    |
+119 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+303 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:817:15
+    |
+817 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4222:8
+     |
+3180 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4222 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: `mir2-simulation` (lib) generated 14 warnings
+   Compiling mir2-gateway v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\gateway)
+error[E0599]: no function or associated item named `default` found for struct `routing::SharedInProcessZoneState` in the current scope
+    --> apps\gateway\src\routing\tests\trade_invitation_tests.rs:227:63
+     |
+ 227 |     let state = Arc::new(Mutex::new(SharedInProcessZoneState::default()));
+     |                                                               ^^^^^^^ function or associated item not found in `routing::SharedInProcessZoneState`
+     |
+    ::: apps\gateway\src\routing.rs:2220:1
+     |
+2220 | struct SharedInProcessZoneState {
+     | ------------------------------- function or associated item `default` not found for this struct
+     |
+note: if you're trying to build a new `routing::SharedInProcessZoneState` consider using one of the following associated functions:
+      routing::SharedInProcessZoneState::new
+      routing::SharedInProcessZoneState::restore
+    --> apps\gateway\src\routing.rs:2496:5
+     |
+2496 |     fn new() -> Self {
+     |     ^^^^^^^^^^^^^^^^
+...
+2656 |     fn restore(checkpoint: SharedInProcessZoneStateCheckpoint) -> Result<Self, String> {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = help: items from traits can only be used if the trait is implemented and in scope
+     = note: the following traits define an item `default`, perhaps you need to implement one of them:
+             candidate #1: `Default`
+             candidate #2: `tinyvec::array::Array`
+
+error[E0599]: no function or associated item named `default` found for struct `routing::SharedInProcessZoneState` in the current scope
+    --> apps\gateway\src\routing\tests\trade_invitation_tests.rs:256:63
+     |
+ 256 |     let state = Arc::new(Mutex::new(SharedInProcessZoneState::default()));
+     |                                                               ^^^^^^^ function or associated item not found in `routing::SharedInProcessZoneState`
+     |
+    ::: apps\gateway\src\routing.rs:2220:1
+     |
+2220 | struct SharedInProcessZoneState {
+     | ------------------------------- function or associated item `default` not found for this struct
+     |
+note: if you're trying to build a new `routing::SharedInProcessZoneState` consider using one of the following associated functions:
+      routing::SharedInProcessZoneState::new
+      routing::SharedInProcessZoneState::restore
+    --> apps\gateway\src\routing.rs:2496:5
+     |
+2496 |     fn new() -> Self {
+     |     ^^^^^^^^^^^^^^^^
+...
+2656 |     fn restore(checkpoint: SharedInProcessZoneStateCheckpoint) -> Result<Self, String> {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     = help: items from traits can only be used if the trait is implemented and in scope
+     = note: the following traits define an item `default`, perhaps you need to implement one of them:
+             candidate #1: `Default`
+             candidate #2: `tinyvec::array::Array`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `mir2-gateway` (lib test) due to 2 previous errors
