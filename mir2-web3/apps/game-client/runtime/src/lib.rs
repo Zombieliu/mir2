@@ -6,6 +6,7 @@ mod lighting;
 mod local_motion;
 mod motion;
 mod movement_shadow;
+pub mod native_world_receipt;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod native_ingest;
 #[cfg(target_arch = "wasm32")]
@@ -1349,6 +1350,7 @@ impl RuntimeWindowSpec {
 pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
     let mut app = App::new();
     app.insert_resource(ClearColor(FLOOR_COLOR))
+        .init_resource::<native_world_receipt::NativeWorldReceipt>()
         .insert_resource(RuntimeWorldState::default())
         .insert_resource(RuntimeEntityRenderState::default())
         .insert_resource(RuntimeEntityRenderAtlases::default())
@@ -1539,6 +1541,7 @@ fn ingest_pending_world_state(
     mut snap_buf: ResMut<interpolation::SnapshotBuffer>,
     time: Res<Time>,
     native: Res<native_ingest::NativeInbound>,
+    mut receipt: Option<ResMut<native_world_receipt::NativeWorldReceipt>>,
 ) {
     // WASM path: thread-local cells written by the JS host.
     PENDING_WORLD_STATE.with(|pending| {
@@ -1551,14 +1554,9 @@ fn ingest_pending_world_state(
         |message| matches!(message, native_ingest::NativeInboundMessage::WorldState(_)),
         |message| {
             if let native_ingest::NativeInboundMessage::WorldState(json) = message {
-                if let Ok(snapshot) = serde_json::from_str::<WorldSnapshot>(&json) {
-                    apply_world_snapshot(
-                        &mut state,
-                        &mut snap_buf,
-                        time.elapsed_secs_f64(),
-                        snapshot,
-                    );
-                } else {
+                if !native_world_receipt::apply(
+                    &json, &mut state, &mut snap_buf, time.elapsed_secs_f64(), receipt.as_deref_mut(),
+                ) {
                     publish_status("native-decode-error", "invalid native world snapshot");
                 }
             }

@@ -80,6 +80,7 @@ fn send(value: Value) {
 pub(crate) struct HostState {
     phase: String,
     world: Option<HostWorldPosition>,
+    pending_world_request: Option<u64>,
     ime_bottom: f32,
     pub(crate) safe_right: f32,
     pub(crate) safe_top: f32,
@@ -166,6 +167,7 @@ impl Plugin for AndroidSharedShellPlugin {
             .add_systems(
                 PostUpdate,
                 (
+                    observe_world_receipt,
                     fit_stage.in_set(AndroidStageFit),
                     fit_mail_composer,
                     forward_intents,
@@ -505,8 +507,10 @@ fn receive(
             .is_some_and(|(old, next)| old.map_file_name != next.map_file_name);
         host.world = next_world;
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
+            host.pending_world_request = None;
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
+            host.pending_world_request = None;
             mir2_bevy_runtime::native_ingest::push_native_scene_reset();
         }
         if let (Some(world), Some(raw)) = (&host.world, value["worldSnapshot"].as_str()) {
@@ -514,12 +518,14 @@ fn receive(
                 raw, &world.map_file_name, &world.player_name, world.x, world.y,
             );
             let queued = projected.is_some_and(|projection| {
+                host.pending_world_request = Some(projection.request_id);
                 mir2_bevy_runtime::native_ingest::push_native_world_state(projection.world)
                     && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(projection.ui)
             });
             if !queued {
                 mir2_bevy_runtime::native_ingest::push_native_data_reset();
                 host.world = None;
+                host.pending_world_request = None;
                 host.phase = "DISCONNECTED".into();
                 model.apply_gateway_event(Event::Disconnect {
                     reason: Some("World snapshot rejected; reconnect".into()),
@@ -600,6 +606,47 @@ fn receive(
             _ => {}
         }
         host.phase = phase.to_owned();
+    }
+}
+
+fn matching_world_receipt(
+    pending: Option<u64>,
+    receipt: &mir2_bevy_runtime::native_world_receipt::NativeWorldReceipt,
+) -> Option<mir2_bevy_runtime::native_world_receipt::WorldApplyOutcome> {
+    let (id, outcome) = receipt.last?;
+    (pending == Some(id)).then_some(outcome)
+}
+
+fn observe_world_receipt(
+    mut host: ResMut<HostState>,
+    mut model: ResMut<NativeShellModel>,
+    receipt: Option<Res<mir2_bevy_runtime::native_world_receipt::NativeWorldReceipt>>,
+    mut intents: ResMut<NativeUiIntentQueue>,
+    mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
+) {
+    use mir2_bevy_runtime::native_world_receipt::WorldApplyOutcome;
+    let Some(outcome) = receipt.as_deref()
+        .and_then(|receipt| matching_world_receipt(host.pending_world_request, receipt)) else { return; };
+    host.pending_world_request = None;
+    match outcome {
+        WorldApplyOutcome::Applied => {
+            // Data acceptance is not map/entity render readiness or Bootstrap.
+            if model.screen == Screen::StartingGame {
+                model.notice = Some(ShellNotice::info("World data applied; waiting for map and character assets."));
+            }
+        }
+        WorldApplyOutcome::DecodeRejected => {
+            host.world = None;
+            host.phase = "DISCONNECTED".into();
+            model.apply_gateway_event(Event::Disconnect {
+                reason: Some("World data could not be decoded; reconnect".into()),
+            });
+            mir2_bevy_runtime::native_ingest::push_native_data_reset();
+            intents.drain().for_each(drop);
+            if let Some(effects) = effects.as_deref_mut() { discard_player_commands(effects); }
+            OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+            send(json!({"type":"disconnect"}));
+        }
     }
 }
 
@@ -762,6 +809,28 @@ fn keyboard(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn world_receipt_requires_exact_request_and_does_not_unlock_gameplay() {
+        use mir2_bevy_runtime::native_world_receipt::{NativeWorldReceipt, WorldApplyOutcome};
+        let receipt = NativeWorldReceipt { last: Some((41, WorldApplyOutcome::Applied)) };
+        assert_eq!(super::matching_world_receipt(None, &receipt), None);
+        assert_eq!(super::matching_world_receipt(Some(42), &receipt), None);
+        let mut app = App::new();
+        let mut model = NativeShellModel::default();
+        model.screen = Screen::StartingGame;
+        app.insert_resource(model)
+            .insert_resource(HostState { pending_world_request: Some(41), ..default() })
+            .insert_resource(receipt)
+            .init_resource::<NativeUiIntentQueue>()
+            .add_systems(Update, observe_world_receipt);
+        app.update();
+        assert_eq!(app.world().resource::<NativeShellModel>().screen, Screen::StartingGame);
+        assert!(app.world().resource::<HostState>().pending_world_request.is_none());
+        let rejected = NativeWorldReceipt { last: Some((42, WorldApplyOutcome::DecodeRejected)) };
+        assert_eq!(super::matching_world_receipt(Some(42), &rejected), Some(WorldApplyOutcome::DecodeRejected));
+        assert_eq!(super::matching_world_receipt(Some(43), &rejected), None);
+    }
+
     #[test]
     fn host_inbox_accepts_large_snapshot_but_bounds_memory_and_fails_closed() {
         let mut queue = std::collections::VecDeque::new();

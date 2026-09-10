@@ -5,6 +5,7 @@ use serde_json::{json, Map, Value};
 use std::collections::HashSet;
 
 pub(crate) struct Projection {
+    pub request_id: u64,
     pub world: String,
     pub ui: String,
 }
@@ -101,7 +102,9 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
         entity["movementStartedMs"] = json!(started);
         entity["movementDurationMs"] = json!(duration);
     }
+    let request_id = mir2_bevy_runtime::native_world_receipt::tag_world_request(&mut world)?;
     Some(Projection {
+        request_id,
         world: world.to_string(),
         ui: json!({"player": stats}).to_string(),
     })
