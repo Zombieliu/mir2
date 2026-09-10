@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `529189a6e`: the approved local world pack now includes
+> bounded raw Bichon `0.map`; the Android host strictly parses its Crystal
+> type-100 cells and derives shared `MapRenderState` from the authoritative
+> scene center after atlas validation. The real `(302,634)` baseline queues
+> 607 floor tiles across seven atlases and leaves 215 keyed/additive object
+> draws explicit as unresolved. Generation cancellation prevents stale
+> background atlas/map publication after disconnect, map change, or reconnect.
+> Android 102/102, Java 8/8, API31, focused runtime ingress, release Rust, and
+> debug APK package gates pass. APK SHA-256:
+> `1ec1c9ac1acdcd15924e5e770993c4b01fe78e8909d4382ec2c903b0f3c38a62`.
+> The APK has no Gateway URL and was not installed or launched; keyed object
+> layers, entity/character atlases, render-ready bootstrap, visible emulator
+> gameplay, online login, and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-bichon-map-frame-20260911/README.md`.
+
 > 2026-09-11 Android `15ec8e366`: the native host can now stage an approved
 > compact-v2 map-atlas pack into APK assets, validate its paths/counts/stats/
 > geometry/memory bounds, decode all PNG pages off the render thread, and send
