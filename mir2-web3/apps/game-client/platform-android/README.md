@@ -122,9 +122,9 @@ unchanged Rust-produced BrowserCommand through `GatewaySession`, and reports
 the exact lease sequence once. Background/socket loss closes the generation;
 sent-but-unacknowledged transaction mutations become unknown and are never
 replayed. Queue overflow rejects the new command and exposes a counter/status
-instead of silently dropping it. Session-control/auth commands remain on the
-dedicated login state machine; the gameplay writer rejects them, including
-`passkeyLogin`.
+instead of silently dropping it. Session-bootstrap/auth commands remain on
+the dedicated login state machine; the gameplay writer rejects them,
+including `passkeyLogin`.
 
 Inbound `gameShopReceipt` text now has a separate bounded
 `AndroidGatewayInboundQueue`. `AndroidShellPlugin` registers that resource and

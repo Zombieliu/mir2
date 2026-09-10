@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `f1ee2148c`: existing shared gameplay commands now use
+> the Activity's authenticated `IN_GAME` WSS socket through a bounded JNI
+> lease/sequence bridge. Lifecycle and connection generation changes close
+> outstanding mutations without replay, while login/bootstrap commands cannot
+> enter this writer. Android 110/110, Java TLS 9/9, API31 target and normal APK
+> package/cold-launch gates pass. The APK SHA-256 is
+> `f9d369bd322fa3a3b03adda23f35dcfc40f5eaf4f42067e982eb66acdd7297dc`.
+> Its emulator launch had no Gateway URL, so approved-account login, complete
+> inbound gameplay/receipt projection, online journey and physical-device
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-gameplay-socket-20260911/README.md`.
+
 > 2026-09-11 Android `75d0eac46`: authoritative native map/object/entity
 > rendering is connected through the shared Bevy contracts. The checked
 > Bichon `(302,634)` view renders 607 atlas + 242 keyed/additive draws (849,

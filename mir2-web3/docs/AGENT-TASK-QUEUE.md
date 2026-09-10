@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `f1ee2148c`: the bounded shared gameplay-command queue
+> now drains through JNI only onto the current authenticated `IN_GAME` WSS
+> session, with exact lease reporting and fail-closed lifecycle/generation
+> handling. Bootstrap/auth commands including `passkeyLogin` are rejected at
+> this writer boundary. Android 110/110, Java TLS fixture 9/9, arm64 API31 and
+> normal APK package/launch gates pass; APK SHA-256 is
+> `f9d369bd322fa3a3b03adda23f35dcfc40f5eaf4f42067e982eb66acdd7297dc`.
+> The emulator launch used an empty Gateway URL and therefore proves no live
+> login. Next Android code leaf is authoritative inbound gameplay/receipt
+> projection into shared reducers; approved WSS/account and physical phone
+> acceptance remain external gates. Evidence:
+> `docs/generated/player-qa/native-android-gameplay-socket-20260911/README.md`.
+
 > 2026-09-11 Android render slice `75d0eac46`: complete visible Bichon viewport
 > production now includes ordinary atlas draws, keyed/additive objects and
 > server-described entity layers. A two-consecutive-frame exact receipt gates

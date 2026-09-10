@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `f1ee2148c`: the shared reducer's bounded gameplay
+> commands now cross JNI to the current authenticated `IN_GAME` WSS socket,
+> with exact lease acknowledgement and fail-closed background/disconnect
+> handling. Auth/bootstrap commands remain isolated. Android 110, Java TLS 9,
+> arm64 API31 and normal APK build/launch gates pass. The launch used no
+> Gateway URL and is not live-login evidence. Complete authoritative inbound
+> packet/receipt projection, approved online journey, real-device input/network
+> acceptance and human visual acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-gameplay-socket-20260911/README.md`.
+
 > 2026-09-11 Android `75d0eac46`: the native shared renderer now consumes
 > authoritative map center/object/entity snapshots, resolves the checked
 > Bichon viewport to 849 map draws plus visible self/monster layers, and delays

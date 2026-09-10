@@ -99,7 +99,7 @@ logs remain local/ignored and are not committed.
 | Native authoritative map/object/entity code | Implemented and automated | Exact snapshot/request contracts and strict render receipt are covered |
 | API 31 visible world frame | Passed on emulator fixture | Offline, labelled fixture only |
 | Real HTTPS/WSS login -> roster -> StartGame -> rendered world | **Not run / open** | No approved `MIR2_GATEWAY_WS_URL` or test account was available; credentials were not sought or persisted |
-| Complete live gameplay command loop | **Open** | The Activity socket is still login/snapshot-focused; the existing gameplay reducer queues are not all drained onto this socket |
+| Complete live gameplay command loop | **Open** | Outbound reducer commands are wired by later commit `f1ee2148c`, but ordinary inbound gameplay/receipt projection and live validation remain incomplete |
 | Physical Android device acceptance | **Not run / open** | `adb devices -l` listed only `emulator-5554`; no physical phone was connected |
 | Whole-map/all-map object closure | **Open** | The local Bichon export lacks 2,969 referenced standalone sources and no other complete map pack was supplied |
 | Touch/IME/network/background/soak on real device | **Open** | Requires an approved endpoint/account, physical phone, and real player journey |
