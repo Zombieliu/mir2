@@ -20,12 +20,16 @@ def prepareSharedUi = tasks.register('prepareSharedUi', Sync) {
 def worldAssetRoot = System.getenv('MIR2_ANDROID_WORLD_ASSET_ROOT')
 def prepareWorldAssets = tasks.register('prepareWorldAssets', Sync) {
     if (worldAssetRoot) from(worldAssetRoot) {
-        include 'generated/map-atlas/manifest.json', 'generated/map-atlas/**/*.png'
+        include 'generated/map-atlas/manifest.json', 'generated/map-atlas/**/*.png',
+                'generated/crystal-map-pack/0.map'
     }
     into layout.buildDirectory.dir('generated/world-assets')
     doFirst {
         if (worldAssetRoot && !file("${worldAssetRoot}/generated/map-atlas/manifest.json").isFile()) {
             throw new GradleException('MIR2_ANDROID_WORLD_ASSET_ROOT does not contain generated/map-atlas/manifest.json')
+        }
+        if (worldAssetRoot && !file("${worldAssetRoot}/generated/crystal-map-pack/0.map").isFile()) {
+            throw new GradleException('MIR2_ANDROID_WORLD_ASSET_ROOT does not contain generated/crystal-map-pack/0.map')
         }
     }
 }

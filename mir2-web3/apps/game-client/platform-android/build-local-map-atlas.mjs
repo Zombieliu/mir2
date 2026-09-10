@@ -5,6 +5,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
+import {gunzipSync} from 'node:zlib';
 const [webInput, outputInput] = process.argv.slice(2);
 if (!webInput || !outputInput) {
   console.error('Usage: node build-local-map-atlas.mjs EXISTING_WEB_ROOT NEW_OUTPUT_PUBLIC_ROOT');
@@ -21,7 +22,12 @@ try {
   try { await fs.lstat(output); throw new Error('Output already exists'); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
   const helper = path.join(webRoot, 'scripts/build-map-atlas-pack.mjs');
+  const bichonMapSource = path.join(webRoot, 'lib/generated/crystal-map-pack/0.map.gz');
   const helperSha256 = hash(await fs.readFile(helper));
+  const bichonMapCompressed = await fs.readFile(bichonMapSource);
+  if (!bichonMapCompressed.length || bichonMapCompressed.length > 4 * 1024 * 1024) throw new Error('Invalid Bichon map layout');
+  const bichonMapBytes = gunzipSync(bichonMapCompressed, {maxOutputLength:32 * 1024 * 1024});
+  if (bichonMapBytes.length < 8 || bichonMapBytes[2] !== 0x43 || bichonMapBytes[3] !== 0x23) throw new Error('Bichon map is not Crystal type 100');
   const {packIntoPages, mapAtlasLibrarySupportsRawUpload, DEFAULT_MAX_PAGE_PIXELS} = await import(pathToFileURL(helper));
   const sharp = createRequire(helper)('sharp');
   const libraries = [];
@@ -72,8 +78,13 @@ try {
       imageBytes:pages.reduce((sum,p)=>sum+p.b,0),maxPageBytes:Math.max(...pages.map(p=>p.b)),maxPagePixels:DEFAULT_MAX_PAGE_PIXELS}};
   const json = JSON.stringify(manifest)+'\n';
   await fs.writeFile(path.join(atlasRoot,'manifest.json'),json,{flag:'wx'});
+  const mapPackRoot = path.join(output, 'generated/crystal-map-pack');
+  await fs.mkdir(mapPackRoot, {recursive:true});
+  await fs.writeFile(path.join(mapPackRoot, '0.map'), bichonMapBytes, {flag:'wx'});
   const report = {output,sourceRoot,helperSha256,manifestSha256:hash(json),...manifest.stats,
-    scope:'Local exported raw-upload tile libraries only; keyed objects, full Bichon coverage and Android rendering unverified'};
+    bichonMapCompressedBytes:bichonMapCompressed.length,bichonMapCompressedSha256:hash(bichonMapCompressed),
+    bichonMapBytes:bichonMapBytes.length,bichonMapSha256:hash(bichonMapBytes),
+    scope:'Local exported raw-upload tile libraries plus bounded Bichon 0.map; keyed objects, full Bichon coverage and Android rendering unverified'};
   await fs.writeFile(path.join(output,'build-report.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
   console.log(JSON.stringify(report,null,2));
 } catch (error) {

@@ -9,6 +9,8 @@ pub mod android_input;
 mod form_input;
 pub mod gateway_bridge;
 #[cfg(any(target_os = "android", test))]
+mod map_render;
+#[cfg(any(target_os = "android", test))]
 mod mobile_ui;
 #[cfg(any(target_os = "android", test))]
 mod shared_shell;

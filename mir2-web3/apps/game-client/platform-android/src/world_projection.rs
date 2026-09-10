@@ -10,6 +10,16 @@ pub(crate) struct Projection {
     pub ui: String,
     pub map: String,
     pub entities: String,
+    pub scene: ProjectedScene,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct ProjectedScene {
+    pub map_file_name: String,
+    pub center_x: i32,
+    pub center_y: i32,
+    pub width: i32,
+    pub height: i32,
 }
 
 pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Option<Projection> {
@@ -106,11 +116,8 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
     }
     // Use the same renderer-neutral types consumed by native runtime. This does
     // not install the optional placeholder terrain/entity rendering plugins.
-    let center = world
-        .get("sceneView")
-        .filter(|view| !view.is_null())
-        .map(|view| view.get("center"))
-        .unwrap_or(None);
+    let scene_view = world.get("sceneView").filter(|view| !view.is_null());
+    let center = scene_view.map(|view| view.get("center")).unwrap_or(None);
     if world.get("sceneView").is_some_and(|view| !view.is_null()) && center.is_none() {
         return None;
     }
@@ -122,6 +129,21 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
         // A partial snapshot can lack a viewport. Center on its already
         // validated authoritative self position, never a synthetic origin.
         None => (i32::try_from(x).ok()?, i32::try_from(y).ok()?),
+    };
+    let view_dimension = |key: &str, default: i32| -> Option<i32> {
+        match scene_view.and_then(|view| view.get(key)) {
+            None | Some(Value::Null) => Some(default),
+            Some(value) => i32::try_from(value.as_i64()?)
+                .ok()
+                .map(|value| value.clamp(1, 128)),
+        }
+    };
+    let scene = ProjectedScene {
+        map_file_name: map.to_owned(),
+        center_x,
+        center_y,
+        width: view_dimension("width", 19)?,
+        height: view_dimension("height", 15)?,
     };
     let map_model: mir2_client_bevy::map::MapModel = serde_json::from_value(json!({
         "centerX": center_x, "centerY": center_y,
@@ -138,6 +160,7 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
         ui: json!({"player": stats}).to_string(),
         map: serde_json::to_string(&map_model).ok()?,
         entities: serde_json::to_string(&entity_model).ok()?,
+        scene,
     })
 }
 
@@ -178,6 +201,16 @@ mod tests {
         assert_eq!(ui.player.map_name.as_deref(), Some("Bichon"));
         let map: mir2_client_bevy::map::MapModel = serde_json::from_str(&projected.map).unwrap();
         assert_eq!((map.center_x, map.center_y), (300, 630));
+        assert_eq!(
+            projected.scene,
+            ProjectedScene {
+                map_file_name: "0".into(),
+                center_x: 300,
+                center_y: 630,
+                width: 21,
+                height: 17,
+            }
+        );
         let entities: mir2_client_bevy::entities::EntityModelSet =
             serde_json::from_str(&projected.entities).unwrap();
         assert_eq!(entities.entities.len(), 2);
@@ -234,7 +267,11 @@ mod tests {
         let p = project(&world.to_string(), "0", "Fixture", 300, 630).unwrap();
         let map: mir2_client_bevy::map::MapModel = serde_json::from_str(&p.map).unwrap();
         assert_eq!((map.center_x, map.center_y), (300, 630));
+        assert_eq!((p.scene.width, p.scene.height), (19, 15));
         world["sceneView"] = json!({"center":{"x":"299","y":630}});
+        assert!(project(&world.to_string(), "0", "Fixture", 300, 630).is_none());
+        world = snapshot();
+        world["sceneView"]["width"] = json!("21");
         assert!(project(&world.to_string(), "0", "Fixture", 300, 630).is_none());
         world = snapshot();
         world["entities"][1]["direction"] = json!(7);

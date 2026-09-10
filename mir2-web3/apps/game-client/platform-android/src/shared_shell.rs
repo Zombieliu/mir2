@@ -405,12 +405,17 @@ fn receive(
                     sprites = summary.source_count,
                     compressed_bytes = summary.compressed_bytes,
                     rgba_bytes = summary.rgba_bytes,
-                    "packaged Android map atlas loaded"
+                    map_width = summary.map_width,
+                    map_height = summary.map_height,
+                    map_atlases = summary.map_atlas_count,
+                    map_tiles = summary.map_tile_count,
+                    unresolved_draws = summary.unresolved_draw_count,
+                    "packaged Android map frame queued"
                 );
                 if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
                     model.notice = Some(ShellNotice::info(format!(
-                        "Map atlas ready: {} pages / {} sprites; waiting for the authoritative draw list and character assets.",
-                        summary.page_count, summary.source_count
+                        "Map frame queued: {} tiles from {} atlas pages; keyed objects and character art still pending.",
+                        summary.map_tile_count, summary.map_atlas_count
                     )));
                 }
             }
@@ -539,24 +544,43 @@ fn receive(
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
             host.pending_world_request = None;
             host.map_assets_requested = false;
+            #[cfg(target_os = "android")]
+            crate::world_assets::cancel_packaged_map_atlas_load();
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
             host.pending_world_request = None;
             host.map_assets_requested = false;
+            #[cfg(target_os = "android")]
+            crate::world_assets::cancel_packaged_map_atlas_load();
             mir2_bevy_runtime::native_ingest::push_native_scene_reset();
         }
         if let (Some(world), Some(raw)) = (&host.world, value["worldSnapshot"].as_str()) {
             let projected = crate::world_projection::project(
                 raw, &world.map_file_name, &world.player_name, world.x, world.y,
             );
+            let mut projected_scene = None;
             let queued = projected.is_some_and(|projection| {
-                host.pending_world_request = Some(projection.request_id);
-                mir2_bevy_runtime::native_ingest::push_native_world_state(projection.world)
-                    && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(projection.ui)
-                    && mir2_bevy_runtime::native_ingest::push_native_map_model(projection.map)
-                    && mir2_bevy_runtime::native_ingest::push_native_entity_model_set(projection.entities)
+                let crate::world_projection::Projection {
+                    request_id,
+                    world,
+                    ui,
+                    map,
+                    entities,
+                    scene,
+                } = projection;
+                host.pending_world_request = Some(request_id);
+                let queued = mir2_bevy_runtime::native_ingest::push_native_world_state(world)
+                    && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui)
+                    && mir2_bevy_runtime::native_ingest::push_native_map_model(map)
+                    && mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entities);
+                if queued {
+                    projected_scene = Some(scene);
+                }
+                queued
             });
             if !queued {
+                #[cfg(target_os = "android")]
+                crate::world_assets::cancel_packaged_map_atlas_load();
                 mir2_bevy_runtime::native_ingest::push_native_data_reset();
                 host.world = None;
                 host.pending_world_request = None;
@@ -571,8 +595,10 @@ fn receive(
             }
             #[cfg(target_os = "android")]
             if !host.map_assets_requested {
-                host.map_assets_requested = true;
-                crate::world_assets::request_packaged_map_atlas_load();
+                if let Some(scene) = projected_scene {
+                    host.map_assets_requested =
+                        crate::world_assets::request_packaged_map_atlas_load(scene);
+                }
             }
         }
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
@@ -680,6 +706,8 @@ fn observe_world_receipt(
             model.apply_gateway_event(Event::Disconnect {
                 reason: Some("World data could not be decoded; reconnect".into()),
             });
+            #[cfg(target_os = "android")]
+            crate::world_assets::cancel_packaged_map_atlas_load();
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
             intents.drain().for_each(drop);
             if let Some(effects) = effects.as_deref_mut() { discard_player_commands(effects); }
