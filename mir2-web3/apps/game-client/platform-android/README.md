@@ -44,7 +44,10 @@ LoginSuccess supplies the shared selectable roster including class/gender/level.
 JNI delivers host events to the shared model and shared intents back to the
 host. Transport StartGame/position acceptance does not currently complete the
 shared gameplay scene: the shell stays on its transition surface, not a fake
-in-game screen. Map rendering and full player flow remain follow-up work.
+in-game screen. The shared runtime now has a bounded native raw-RGBA map-atlas
+ingress, but the Android host does not yet load the staged manifest/PNG pages or
+produce the authoritative viewport draw list. Map/entity rendering and the full
+player flow therefore remain follow-up work.
 
 Passwords, account names, session tokens and character state are not persisted.
 Editor state saving and autofill are disabled. Passwords are cleared after

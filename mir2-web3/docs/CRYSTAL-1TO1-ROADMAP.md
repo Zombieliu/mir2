@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `31946256b`: the bounded native runtime queue now accepts
+> validated/coalesced raw RGBA map-atlas pages and the Bevy consumer installs
+> them in the real map-render registry, including scene/session reset semantics.
+> Runtime228/Android94/WASM/API31 checks pass. Android manifest/PNG loading,
+> authoritative map draw-list and entity-atlas producers, render-ready
+> bootstrap, APK/emulator/live/device acceptance remain open.
+> `docs/generated/player-qa/native-android-map-atlas-ingress-20260911/README.md`.
+
 > 2026-09-10 Android `ced102ba9`: shared map/entity read-model ingress wired;
 > Android94/preview97/API31 target check pass. Actual atlas/resource producers
 > and render-ready remain open; no new APK/device/live acceptance claimed.
