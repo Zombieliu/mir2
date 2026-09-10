@@ -3,9 +3,18 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
+mod crystal_guild_settings;
+mod crystal_creature_settings;
+mod crystal_hero_settings;
+pub use crystal_hero_settings::{crystal_hero_settings, calculate_crystal_hero_base_stat, CrystalHeroSettings, CrystalHeroSource, CrystalHeroRules};
+pub use crystal_creature_settings::{crystal_creature_settings, CrystalCreatureSettings};
 #[cfg(test)]
 mod crystal_item_image;
 pub mod crystal_map_events;
+pub use crystal_guild_settings::{
+    crystal_guild_buff_definitions, crystal_guild_settings, CrystalGuildCreationCost,
+    CrystalGuildSettings,
+};
 pub use mir2_protocol::crystal_user_item_image;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -2000,6 +2009,8 @@ pub struct CrystalRespawnMap {
     pub no_drop_monster: bool,
     #[serde(default)]
     pub no_mount: bool,
+    #[serde(default)]
+    pub no_intelligent_creatures: bool,
     #[serde(default)]
     pub no_hero: bool,
     #[serde(default)]

@@ -7372,11 +7372,13 @@ export default function HomePage() {
   function sendMagicSkill(skill: KnownSkill, target: { x: number; y: number; objectId?: string } | null, direction?: string) {
     const origin = self ?? world.entities.find((entity) => entity.objectId === world.playerObjectId) ?? null;
     const castTarget = target ?? origin;
-    if (!origin || !castTarget) {
+    const casterObjectId = Number(origin?.objectId);
+    if (!origin || !castTarget || !Number.isInteger(casterObjectId) || casterObjectId <= 0 || casterObjectId > 0xffffffff) {
       return false;
     }
     return send({
       type: "magic",
+      objectId: casterObjectId,
       spell: spellNameForSkill(skill),
       direction: direction ?? origin.direction ?? "Down",
       targetId: castTarget.objectId ? Number(castTarget.objectId) : 0,

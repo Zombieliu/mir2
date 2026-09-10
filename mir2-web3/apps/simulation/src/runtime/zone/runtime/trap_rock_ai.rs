@@ -177,6 +177,7 @@ impl ZoneRuntime {
                                         _ => 47,
                                     };
                                     let spawn = ZoneMonsterSpawn {
+                                        crystal_drop_seed: None,
                                         object_id: child,
                                         name: m.name.clone(),
                                         name_colour_argb: -1,

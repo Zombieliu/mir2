@@ -13,6 +13,8 @@ const REPLAY_COMMITMENT_DOMAIN: &[u8] = b"obelisk.mir2.zone-replay.v1\0";
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneReplayCombatStats {
+    #[serde(default, skip_serializing_if = "super::types::zone_stat_is_zero")]
+    pub item_drop_rate_percent: i32,
     pub min_dc: i32,
     pub max_dc: i32,
     pub min_mc: i32,
@@ -39,6 +41,7 @@ pub struct ZoneReplayCombatStats {
 impl From<ZoneReplayCombatStats> for ZonePlayerCombatStats {
     fn from(value: ZoneReplayCombatStats) -> Self {
         Self {
+            item_drop_rate_percent: value.item_drop_rate_percent,
             min_dc: value.min_dc,
             max_dc: value.max_dc,
             min_mc: value.min_mc,
@@ -232,6 +235,7 @@ impl ZoneReplayCommand {
             } => ZoneCommand::SpawnMonster {
                 session_id: session_id.into(),
                 monster: ZoneMonsterSpawn {
+                    crystal_drop_seed: None,
                     object_id,
                     name,
                     name_colour_argb,

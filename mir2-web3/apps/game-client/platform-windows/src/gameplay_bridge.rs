@@ -32,6 +32,7 @@ use mir2_client_bevy::quest_model::{
 };
 use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
 use mir2_client_bevy::read_model::UiReadModel;
+use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
 use serde_json::Value;
 
 use crate::gateway::GatewayCommand;
@@ -369,6 +370,16 @@ pub const MAX_BUFFERED_EFFECT_EVENTS: usize = 96;
 /// One complete replacement of native gameplay presentation state.
 #[derive(Debug, Clone, Default)]
 pub struct NativeGameplaySnapshot {
+    pub player_inspect: Option<mir2_client_bevy::crystal_ui::overlays::ranking_dialog::player_inspect::PlayerInspectReadback>,
+    pub equipment_creature_packet: Option<mir2_protocol::ServerPacket>,
+    pub equipment_owner_id: Option<u32>,
+    pub ranking_packet: Option<mir2_protocol::ServerPacket>,
+    pub friend_packet: Option<mir2_protocol::ServerPacket>,
+    pub combat_mode_packet:Option<mir2_protocol::ServerPacket>,
+    pub guild_buff_packet: Option<mir2_protocol::ServerPacket>,
+    pub hero_buff_event: Option<mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event>,
+    pub status_buff_event: Option<(Option<u32>, mir2_client_bevy::crystal_ui::overlays::status_hud::BuffEvent)>,
+    pub social_bond_packet: Option<mir2_protocol::ServerPacket>,
     /// WebSocket connection generation that produced this snapshot. ACKs and
     /// presentation deltas from an older generation must not affect a resumed
     /// connection.
@@ -669,10 +680,39 @@ impl NativeGameplayAdapter {
                 "ObjectNpc" | "NewNpcInfo" => self.upsert_zone_entity(payload, "npc"),
                 "ObjectPlayer" | "ObjectHero" => self.upsert_zone_entity(payload, "player"),
                 "MountUpdate" => self.patch_zone_entity_mount(payload),
-                "ObjectWalk" => self.patch_zone_entity_transform(payload, Some("walking")),
-                "ObjectRun" => self.patch_zone_entity_transform(payload, Some("running")),
+                "ObjectWalk" | "ObjectRun" => {
+                    let changed = self.patch_zone_entity_transform(
+                        payload,
+                        Some(if packet == "ObjectWalk" {
+                            "walking"
+                        } else {
+                            "running"
+                        }),
+                    );
+                    if packet_object_id(payload)
+                        .and_then(|id| self.zone_entities.get(&id))
+                        .and_then(|e| e.get("ai"))
+                        .and_then(Value::as_u64)
+                        == Some(64)
+                    {
+                        self.record_actor_effect(packet, payload, packet_object_id(payload), None);
+                    }
+                    changed
+                }
                 "ObjectDashAttack" => self.patch_zone_entity_transform(payload, Some("dashAttack")),
-                "ObjectTurn" => self.patch_zone_entity_transform(payload, None),
+                "ObjectTurn" => {
+                    let pet = packet_object_id(payload)
+                        .and_then(|id| self.zone_entities.get(&id))
+                        .and_then(|e| e.get("ai"))
+                        .and_then(Value::as_u64)
+                        == Some(64);
+                    let changed =
+                        self.patch_zone_entity_transform(payload, pet.then_some("standing"));
+                    if pet {
+                        self.record_actor_effect(packet, payload, packet_object_id(payload), None);
+                    }
+                    changed
+                }
                 "ObjectHarvest" => self.patch_zone_entity_action(payload, "harvest", true),
                 "ObjectHarvested" => {
                     let changed = self.patch_zone_entity_action(payload, "skeleton", true);
@@ -684,7 +724,29 @@ impl NativeGameplayAdapter {
                     changed
                 }
                 "ObjectAttack" => {
-                    let changed = self.patch_zone_entity_action(payload, "attack1", true);
+                    let object_id = packet_object_id(payload);
+                    let is_player = object_id == self.latest_player_object_id
+                        || object_id
+                            .and_then(|id| self.zone_entities.get(&id))
+                            .and_then(|v| v.get("kind"))
+                            .and_then(Value::as_str)
+                            .is_some_and(|kind| kind == "player" || kind == "self");
+                    let action = if is_player {
+                        "attack1"
+                    } else {
+                        match packet_body(payload)
+                            .get("attackType")
+                            .or_else(|| packet_body(payload).get("type"))
+                            .and_then(Value::as_u64)
+                            .unwrap_or(0)
+                        {
+                            1 => "attack2",
+                            2 => "attack3",
+                            3 => "attack4",
+                            _ => "attack1",
+                        }
+                    };
+                    let changed = self.patch_zone_entity_action(payload, action, true);
                     // Most attacks are ignored by the effect consumer. Preserve
                     // the typed packet so spell-bearing Attack1 overlays such
                     // as FlamingSword and source-owned monster audio can be
@@ -773,6 +835,15 @@ impl NativeGameplayAdapter {
                         payload,
                         player_object_id,
                         packet_body(payload).get("attackerId").and_then(value_u32),
+                    );
+                    true
+                }
+                "IntelligentCreaturePickup" => {
+                    self.record_actor_effect(
+                        "IntelligentCreaturePickup",
+                        payload,
+                        packet_object_id(payload),
+                        None,
                     );
                     true
                 }
@@ -916,7 +987,6 @@ impl NativeGameplayAdapter {
                 center["y"] = Value::from(transform.y);
             }
         }
-
 
         apply_authoritative_player_vitals(
             payload,
@@ -1191,6 +1261,7 @@ impl NativeGameplayAdapter {
                 "genderKey",
                 "level",
                 "image",
+                "ai",
                 "light",
                 "nameColourArgb",
                 "dead",
@@ -1528,6 +1599,16 @@ impl NativeGameplayAdapter {
             big_map: self.big_map.clone(),
             authoritative_self_movement: None,
             notice_update: self.notice_update.clone(),
+            equipment_creature_packet: None,
+            equipment_owner_id: None,
+            ranking_packet: None,
+            friend_packet: None,
+            combat_mode_packet: None,
+            guild_buff_packet: None,
+            status_buff_event: None,
+            hero_buff_event: None,
+            social_bond_packet: None,
+            player_inspect: None,
         }
     }
 
@@ -1708,6 +1789,8 @@ fn apply_authoritative_observe_state(
 
 #[derive(SystemParam)]
 pub(crate) struct GameplayDrainModels<'w> {
+    chat: Option<ResMut<'w, mir2_client_bevy::chat::ChatModel>>,
+    player_ui: Option<ResMut<'w, NativePlayerUiState>>,
     quests: ResMut<'w, QuestTracker>,
     dialog: ResMut<'w, NpcDialogModel>,
     nearby_npcs: ResMut<'w, NearbyNpcModel>,
@@ -1732,6 +1815,13 @@ pub fn drain_gameplay_events(
 ) {
     let (snapshots, transport_advanced) = inbox.drain();
     if transport_advanced {
+        if let Some(ui) = models.player_ui.as_deref_mut() {
+            ui.ranking = Default::default();
+            ui.equipment_dialogs = Default::default();
+            ui.creature = Default::default();
+            ui.status_hud = Default::default();
+            ui.hero_buffs = Default::default();
+        }
         // Clear the old connection's request correlations before any same-frame
         // UI mutation, even when presentation is currently gated by Login or
         // CharacterSelect. Otherwise observing the generation while gated could
@@ -1742,6 +1832,13 @@ pub fn drain_gameplay_events(
         models.entity_presentation.reset_session();
     }
     if !should_apply_gameplay_snapshot(shell.screen) {
+        if let Some(ui) = models.player_ui.as_deref_mut() {
+            ui.ranking = Default::default();
+            ui.equipment_dialogs = Default::default();
+            ui.creature = Default::default();
+            ui.status_hud = Default::default();
+            ui.hero_buffs = Default::default();
+        }
         *models.quests = QuestTracker::default();
         *models.dialog = NpcDialogModel::default();
         *models.nearby_npcs = NearbyNpcModel::default();
@@ -1762,6 +1859,73 @@ pub fn drain_gameplay_events(
     }
     if snapshots.is_empty() {
         return;
+    }
+    if let Some(ui) = models.player_ui.as_deref_mut() {
+        ui.creature.bootstrap_allowed = true;
+        if snapshots
+            .iter()
+            .flat_map(|s| &s.effect_events)
+            .any(|e| e.packet == "Struck")
+        {
+            ui.leave_game.combat(std::time::Instant::now());
+        }
+        for data in snapshots.iter().filter_map(|s| s.player_inspect.as_ref()) {
+            ui.ranking.player_inspect.receive(data.clone());
+        }
+        for snapshot in &snapshots {
+            if let Some(event)=&snapshot.hero_buff_event {ui.hero_buffs.observe(event,std::time::Instant::now());}
+            if let Some((owner,event)) = &snapshot.status_buff_event {
+                ui.status_hud.observe(*owner,event,std::time::Instant::now());
+            }
+            if let Some(packet) = &snapshot.equipment_creature_packet {
+                ui.creature.observe(packet);
+                {
+                    let owner = snapshot.equipment_owner_id.unwrap_or(0);
+                    ui.equipment_dialogs
+                        .observe(owner, packet, time.elapsed().as_millis() as u64);
+                }
+            }
+        }
+        for packet in snapshots
+            .iter()
+            .filter_map(|s| s.guild_buff_packet.as_ref())
+        {
+            if let mir2_protocol::ServerPacket::GuildBuffList {
+                remove,
+                active_buffs,
+                guild_buffs,
+            } = packet
+            {
+                ui.guild_panel
+                    .buffs
+                    .apply_packet(*remove, active_buffs, guild_buffs);
+            }
+        }
+        for packet in snapshots
+            .iter()
+            .filter_map(|s| s.social_bond_packet.as_ref())
+        {
+            ui.social_bonds.observe(packet);
+        }
+        for packet in snapshots
+            .iter()
+            .filter_map(|s| s.combat_mode_packet.as_ref())
+        {
+            if let (Some(text), Some(chat)) =
+                (ui.combat_modes.observe(packet), models.chat.as_deref_mut())
+            {
+                chat.push(mir2_client_bevy::chat::ChatLine {
+                    text: text.into(),
+                    channel: "hint".into(),
+                });
+            }
+        }
+        for packet in snapshots.iter().filter_map(|s| s.friend_packet.as_ref()) {
+            ui.friends.apply_packet(packet);
+        }
+        for packet in snapshots.iter().filter_map(|s| s.ranking_packet.as_ref()) {
+            ui.ranking.apply_packet(packet);
+        }
     }
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     // HUD state may coalesce to the latest snapshot; actor action feeds may
@@ -1895,6 +2059,24 @@ pub fn forward_big_map_intents(
     }
 }
 
+fn trade_item_pending_operation(intent: &NativePlayerUiIntent) -> Option<SocialPendingOperation> {
+    match intent {
+        NativePlayerUiIntent::TradeDepositItem { from, to } => {
+            Some(SocialPendingOperation::TradeDeposit {
+                from: *from,
+                to: *to,
+            })
+        }
+        NativePlayerUiIntent::TradeRetrieveItem { from, to } => {
+            Some(SocialPendingOperation::TradeRetrieve {
+                from: *from,
+                to: *to,
+            })
+        }
+        _ => None,
+    }
+}
+
 /// Convert presentation intents into exact Gateway commands. The shell state
 /// gate prevents stale button events from crossing login/character screens.
 pub fn forward_quest_ui_intents(
@@ -1913,13 +2095,33 @@ pub fn forward_quest_ui_intents(
     read_model: Option<Res<UiReadModel>>,
     tracker: Option<Res<QuestTracker>>,
     inventory: Option<Res<InventoryModel>>,
+    mut social: Option<ResMut<SocialModel>>,
 ) {
     let pending = intents.drain_intents();
     let player_pending = player_ui_intents
         .map(|mut queue| queue.drain_intents())
         .unwrap_or_default();
     if shell.screen != NativeShellScreen::InGame {
+        if let Some(ui) = player_ui_state.as_deref_mut() {
+            ui.ranking = Default::default();
+            ui.equipment_dialogs = Default::default();
+            ui.creature = Default::default();
+            ui.status_hud = Default::default();
+            ui.hero_buffs = Default::default();
+        }
+        if let Some(social) = social.as_deref_mut() {
+            for intent in &player_pending {
+                if let Some(operation) = trade_item_pending_operation(intent) {
+                    social.pending.retain(|entry| entry != &operation);
+                }
+            }
+        }
         if let Some(operation_pending) = operation_pending.as_deref_mut() {
+            for intent in &player_pending {
+                if let Some(key) = intent.pending_key() {
+                    operation_pending.release(&key);
+                }
+            }
             for intent in &pending {
                 if let Some(key) = intent.pending_key() {
                     operation_pending.release(&key);
@@ -2101,6 +2303,16 @@ pub fn forward_quest_ui_intents(
                 NativeOutboundCommand::PickUpTile
             }
         };
+        if matches!(
+            &command,
+            NativeOutboundCommand::Attack { .. }
+                | NativeOutboundCommand::AttackDirection { .. }
+                | NativeOutboundCommand::RangeAttack { .. }
+        ) {
+            if let Some(ui) = player_ui_state.as_deref_mut() {
+                ui.leave_game.combat(std::time::Instant::now());
+            }
+        }
         if !commands.send_command(GatewayCommand::Wire(command)) {
             retry_intents.push(retry_intent);
         }
@@ -2119,7 +2331,23 @@ pub fn forward_quest_ui_intents(
     }
 
     for intent in player_pending {
+        let bond_request = match &intent {
+            NativePlayerUiIntent::SocialBondPacket(packet) => Some(packet.clone()),
+            _ => None,
+        };
+        let hero_request = match &intent {
+            NativePlayerUiIntent::HeroPacket(packet) => Some(packet.clone()),
+            _ => None,
+        };
+        let equipment_request = match &intent {
+            NativePlayerUiIntent::EquipmentCreaturePacket(packet) => Some(packet.clone()),
+            _ => None,
+        };
+        let trade_item_pending = trade_item_pending_operation(&intent);
         let storage_pending_key = match &intent {
+            NativePlayerUiIntent::MoveItem { .. } | NativePlayerUiIntent::MergeItem { .. } => {
+                intent.pending_key()
+            }
             NativePlayerUiIntent::StoreItem {
                 request_id,
                 unique_id,
@@ -2145,6 +2373,30 @@ pub fn forward_quest_ui_intents(
             _ => None,
         };
         let command = match intent {
+            NativePlayerUiIntent::GuildBuffUpdate(request) => {
+                NativeOutboundCommand::GuildBuffUpdate {
+                    action: request.action,
+                    id: request.id,
+                }
+            }
+            NativePlayerUiIntent::SocialBondPacket(packet) => {
+                let Some(command) = crate::social_bond_wire::command(&packet) else {
+                    continue;
+                };
+                command
+            }
+            NativePlayerUiIntent::HeroPacket(packet) => {
+                let Some(command) = crate::hero_wire::command(&packet) else {
+                    continue;
+                };
+                command
+            }
+            NativePlayerUiIntent::EquipmentCreaturePacket(packet) => {
+                let Some(command) = crate::equipment_creature_wire::command(&packet) else {
+                    continue;
+                };
+                command
+            }
             NativePlayerUiIntent::UseItem {
                 key,
                 unique_id,
@@ -2343,6 +2595,17 @@ pub fn forward_quest_ui_intents(
             NativePlayerUiIntent::GroupRemoveMember { name } => {
                 NativeOutboundCommand::DelMember { name }
             }
+            NativePlayerUiIntent::MagicKey {
+                request_id,
+                spell,
+                key,
+                old_key,
+            } => NativeOutboundCommand::MagicKey {
+                request_id,
+                spell,
+                key,
+                old_key,
+            },
             NativePlayerUiIntent::GroupInvite { accept_invite } => {
                 NativeOutboundCommand::GroupInvite { accept_invite }
             }
@@ -2389,6 +2652,35 @@ pub fn forward_quest_ui_intents(
                 };
                 command
             }
+            NativePlayerUiIntent::GetRanking {
+                rank_type,
+                rank_index,
+                online_only,
+            } => NativeOutboundCommand::GetRanking {
+                rank_type,
+                rank_index,
+                online_only,
+            },
+            NativePlayerUiIntent::InspectRanking { object_id } => NativeOutboundCommand::Inspect {
+                object_id,
+                ranking: true,
+                hero: false,
+            },
+            NativePlayerUiIntent::RefreshFriends => NativeOutboundCommand::RefreshFriends,
+            NativePlayerUiIntent::RemoveFriend { character_index } => {
+                NativeOutboundCommand::RemoveFriend { character_index }
+            }
+            NativePlayerUiIntent::AddFriendMemo {
+                character_index,
+                memo,
+            } => NativeOutboundCommand::AddMemo {
+                character_index,
+                memo,
+            },
+            NativePlayerUiIntent::AddFriend { name, blocked } => {
+                NativeOutboundCommand::AddFriend { name, blocked }
+            }
+            NativePlayerUiIntent::ObservePlayer { name } => NativeOutboundCommand::Observe { name },
             NativePlayerUiIntent::TradeRequest => NativeOutboundCommand::TradeRequest,
             NativePlayerUiIntent::TradeReply { accept_invite } => {
                 NativeOutboundCommand::TradeReply { accept_invite }
@@ -2411,7 +2703,227 @@ pub fn forward_quest_ui_intents(
             NativeOutboundCommand::GameShopBuy { request_id, .. } => Some(request_id.clone()),
             _ => None,
         };
-        if !commands.send_command(GatewayCommand::Wire(command)) {
+        let ranking_request = match &command {
+            NativeOutboundCommand::GetRanking {
+                rank_type,
+                rank_index,
+                online_only,
+            } => Some(mir2_protocol::ClientPacket::GetRanking {
+                rank_type: *rank_type,
+                rank_index: *rank_index,
+                online_only: *online_only,
+            }),
+            _ => None,
+        };
+        let friend_request = match &command {
+            NativeOutboundCommand::AddFriend { name, blocked } => {
+                Some(mir2_protocol::ClientPacket::AddFriend {
+                    name: name.clone(),
+                    blocked: *blocked,
+                })
+            }
+            NativeOutboundCommand::RemoveFriend { character_index } => {
+                Some(mir2_protocol::ClientPacket::RemoveFriend {
+                    character_index: *character_index,
+                })
+            }
+            NativeOutboundCommand::AddMemo {
+                character_index,
+                memo,
+            } => Some(mir2_protocol::ClientPacket::AddMemo {
+                character_index: *character_index,
+                memo: memo.clone(),
+            }),
+            _ => None,
+        };
+        let guild_edit_request = match &command {
+            NativeOutboundCommand::EditGuildMember {
+                change_type,
+                rank_index,
+                name,
+                rank_name,
+            } => Some((*change_type, *rank_index, name.clone(), rank_name.clone())),
+            _ => None,
+        };
+        let guild_notice_request = match &command {
+            NativeOutboundCommand::EditGuildNotice { notice } => Some(notice.clone()),
+            _ => None,
+        };
+        let buff_request = match &command {
+            NativeOutboundCommand::GuildBuffUpdate { action, id } => Some(
+                mir2_client_bevy::crystal_ui::overlays::guild_buff_dialog::GuildBuffRequest {
+                    action: *action,
+                    id: *id,
+                },
+            ),
+            _ => None,
+        };
+        let magic_key_request = if let NativeOutboundCommand::MagicKey {
+            request_id,
+            spell,
+            key,
+            old_key,
+        } = &command
+        {
+            Some((*request_id, spell.clone(), *key, *old_key))
+        } else {
+            None
+        };
+        let group_invite_identity = if matches!(&command, NativeOutboundCommand::GroupInvite { .. })
+        {
+            player_ui_state
+                .as_deref()
+                .and_then(|ui| ui.group_dialog.answered.clone())
+        } else {
+            None
+        };
+        let guild_invite_identity = if matches!(&command, NativeOutboundCommand::GuildInvite { .. })
+        {
+            player_ui_state
+                .as_deref()
+                .and_then(|ui| ui.guild_panel.answered_invite.clone())
+        } else {
+            None
+        };
+        let group_request = match &command {
+            NativeOutboundCommand::AddMember { name } => Some((false, name.clone())),
+            NativeOutboundCommand::DelMember { name } => Some((true, name.clone())),
+            _ => None,
+        };
+        let is_inspect_request = matches!(
+            &command,
+            NativeOutboundCommand::Inspect { ranking: true, .. }
+        );
+        let sent = commands.send_command(GatewayCommand::Wire(command));
+        if let (Some((request_id, spell, key, old_key)), Some(ui)) =
+            (magic_key_request, player_ui_state.as_deref_mut())
+        {
+            ui.skill_assign
+                .dispatched(request_id, &spell, key, old_key, sent);
+            ui.hero
+                .assign
+                .transport_result(request_id, &spell, key, old_key, sent);
+        }
+        if !sent {
+            if let Some(notice) = guild_notice_request {
+                if let Some(ui) = player_ui_state.as_deref_mut() {
+                    if ui.guild_notice_submission.as_ref() == Some(&notice) {
+                        ui.guild_notice_submission = None;
+                        ui.guild_notice_editing = true;
+                    }
+                }
+                if let Some(social) = social.as_deref_mut() {
+                    social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildNotice{notice:pending} if pending==&notice));
+                }
+            }
+            if let Some((change_type, rank_index, name, rank_name)) = guild_edit_request {
+                if let Some(social) = social.as_deref_mut() {
+                    social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildMember{change_type:t,rank_index:i,name:n} if *t==change_type && *i==rank_index && n==&name));
+                }
+                if let Some(ui) = player_ui_state.as_deref_mut() {
+                    ui.guild_panel.create_ready_ms = 0;
+                    match change_type {
+                        0 if ui.guild_recruit_draft.is_empty() => {
+                            ui.guild_recruit_draft = name;
+                            ui.guild_recruit_focused = true;
+                            let draft = ui.guild_recruit_draft.clone();
+                            ui.guild_panel.sync_recruit(&draft);
+                        }
+                        3 if ui.selected_guild_rank == Some(rank_index)
+                            && ui.guild_rank_name_draft == rank_name =>
+                        {
+                            ui.guild_panel.rank_name_ready_ms = 0;
+                            ui.guild_rank_name_focused = true;
+                            ui.guild_panel.rank_editor.editor_focused = true;
+                        }
+                        5 => ui.guild_panel.rank_option_ready_ms = 0,
+                        _ => {}
+                    }
+                }
+            }
+            if let Some(identity) = group_invite_identity {
+                if let (Some(ui), Some(social)) =
+                    (player_ui_state.as_deref_mut(), social.as_deref())
+                {
+                    ui.group_dialog.restore_invitation(&identity, &social.group);
+                }
+                if let Some(social) = social.as_deref_mut() {
+                    social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GroupInviteAccept{inviter,invite_epoch} if inviter==&identity.0 && *invite_epoch==identity.1));
+                }
+            }
+            if let Some(identity) = guild_invite_identity {
+                if let Some(ui) = player_ui_state.as_deref_mut() {
+                    if ui.guild_panel.answered_invite.as_ref() == Some(&identity) {
+                        ui.guild_panel.answered_invite = None;
+                        if ui.guild_panel.invite.is_none() {
+                            ui.guild_panel.invite = Some(identity.clone());
+                        }
+                    }
+                }
+                if let Some(social) = social.as_deref_mut() {
+                    social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildInviteAccept{inviter,invite_epoch} if inviter==&identity.0 && *invite_epoch==identity.1));
+                }
+            }
+            if let (Some(ui), Some(request)) = (player_ui_state.as_deref_mut(), buff_request) {
+                ui.guild_panel.buffs.send_failed(request);
+            }
+            if let (Some(ui), Some((remove, text))) =
+                (player_ui_state.as_deref_mut(), group_request.as_ref())
+            {
+                ui.group_dialog.restore_unsent(*remove, text);
+            }
+            if let (Some(social), Some((remove, text))) =
+                (social.as_deref_mut(), group_request.as_ref())
+            {
+                social.pending.retain(|p| match p {
+                    mir2_client_bevy::social::SocialPendingOperation::GroupAdd { name } => {
+                        *remove || name != text
+                    }
+                    mir2_client_bevy::social::SocialPendingOperation::GroupRemove { name } => {
+                        !*remove || name != text
+                    }
+                    _ => true,
+                });
+            }
+            if let (Some(ui), Some(packet)) =
+                (player_ui_state.as_deref_mut(), hero_request.as_ref())
+            {
+                mir2_client_bevy::crystal_ui::overlays::hero_dialog::host::release_unsent(
+                    &mut ui.hero,
+                    packet,
+                );
+            }
+            if let (Some(ui), Some(packet)) =
+                (player_ui_state.as_deref_mut(), bond_request.as_ref())
+            {
+                ui.social_bonds.release_unsent(packet);
+            }
+            if let (Some(ui), Some(packet)) =
+                (player_ui_state.as_deref_mut(), equipment_request.as_ref())
+            {
+                ui.equipment_dialogs.release_unsent(packet);
+                ui.creature.release_unsent(packet);
+            }
+            if let (Some(ui), Some(packet)) =
+                (player_ui_state.as_deref_mut(), friend_request.as_ref())
+            {
+                ui.friends.restore_unsent(packet);
+            }
+            if is_inspect_request {
+                if let Some(ui) = player_ui_state.as_deref_mut() {
+                    ui.ranking.player_inspect.fail_unsent();
+                }
+            }
+            if let (Some(ui), Some(packet)) =
+                (player_ui_state.as_deref_mut(), ranking_request.as_ref())
+            {
+                ui.ranking.release_unsent(packet, 0);
+            }
+            // No command reached the transport: there can be no server ACK.
+            // Release only this operation; never fabricate an offer or receipt.
+            if let (Some(social), Some(operation)) = (social.as_deref_mut(), trade_item_pending) {
+                social.pending.retain(|entry| entry != &operation);
+            }
             if let Some(request_id) = game_shop_request_id {
                 if let Some(pending) = operation_pending.as_mut() {
                     pending.release(
@@ -3347,6 +3859,151 @@ mod tests {
             })
         ));
         assert_eq!(commands.len(), 2);
+    }
+
+    #[test]
+    fn trade_item_intents_preserve_slots_and_wait_for_authoritative_ack() {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .init_resource::<SocialModel>()
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        for intent in [
+            NativePlayerUiIntent::TradeDepositItem { from: 37, to: 8 },
+            NativePlayerUiIntent::TradeRetrieveItem { from: 8, to: 49 },
+        ] {
+            let op = trade_item_pending_operation(&intent).unwrap();
+            app.world_mut()
+                .resource_mut::<SocialModel>()
+                .begin_pending(op);
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .push_intent(intent);
+        }
+        app.update();
+        let sent = receiver.try_iter().collect::<Vec<_>>();
+        assert_eq!(sent.len(), 2);
+        assert!(matches!(
+            &sent[0],
+            GatewayCommand::Wire(NativeOutboundCommand::DepositTradeItem { from: 37, to: 8 })
+        ));
+        assert!(matches!(
+            &sent[1],
+            GatewayCommand::Wire(NativeOutboundCommand::RetrieveTradeItem { from: 8, to: 49 })
+        ));
+        assert_eq!(
+            app.world().resource::<SocialModel>().pending.len(),
+            2,
+            "transport acceptance is not a trade/item acknowledgment"
+        );
+        app.update();
+        assert_eq!(
+            receiver.try_iter().count(),
+            0,
+            "accepted commands are not automatically replayed"
+        );
+    }
+
+    #[test]
+    fn trade_item_send_failure_releases_only_the_unsent_operation() {
+        for in_game in [true, false] {
+            let (sender, receiver) = std::sync::mpsc::channel();
+            drop(receiver);
+            let mut app = App::new();
+            let mut shell = NativeShellModel::default();
+            if in_game {
+                shell.screen = NativeShellScreen::InGame;
+            }
+            app.insert_resource(shell)
+                .init_resource::<QuestUiIntentQueue>()
+                .init_resource::<NativePlayerUiIntentQueue>()
+                .init_resource::<SocialModel>()
+                .insert_resource(GatewayCommands::new(sender))
+                .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+            let untouched = SocialPendingOperation::TradeRetrieve { from: 3, to: 12 };
+            {
+                let mut social = app.world_mut().resource_mut::<SocialModel>();
+                social.trade.state = "open".into();
+                social.trade.partner = Some("Partner".into());
+                social.begin_pending(SocialPendingOperation::TradeDeposit { from: 37, to: 8 });
+                social.begin_pending(untouched.clone());
+            }
+            let before_offer = app.world().resource::<SocialModel>().trade.clone();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .push_intent(NativePlayerUiIntent::TradeDepositItem { from: 37, to: 8 });
+            app.update();
+            let social = app.world().resource::<SocialModel>();
+            assert_eq!(social.pending, vec![untouched]);
+            assert_eq!(
+                social.trade, before_offer,
+                "send failure must not manufacture inventory/offer state"
+            );
+            assert!(
+                social.last_event.is_none(),
+                "send failure is not a synthetic server ACK"
+            );
+        }
+    }
+
+    #[test]
+    fn trade_merge_and_move_unsent_intents_release_exact_inventory_pending() {
+        for in_game in [true, false] {
+            for intent in [
+                NativePlayerUiIntent::MoveItem {
+                    grid: "Trade".into(),
+                    unique_id: 71,
+                    from: 2,
+                    to: 7,
+                },
+                NativePlayerUiIntent::MergeItem {
+                    grid_from: "Trade".into(),
+                    grid_to: "inventory".into(),
+                    id_from: 71,
+                    id_to: 72,
+                },
+            ] {
+                let (sender, receiver) = std::sync::mpsc::channel();
+                drop(receiver);
+                let mut app = App::new();
+                let mut shell = NativeShellModel::default();
+                if in_game {
+                    shell.screen = NativeShellScreen::InGame;
+                }
+                app.insert_resource(shell)
+                    .init_resource::<QuestUiIntentQueue>()
+                    .init_resource::<NativePlayerUiIntentQueue>()
+                    .init_resource::<PendingOperations>()
+                    .insert_resource(GatewayCommands::new(sender))
+                    .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+                let key = intent.pending_key().unwrap();
+                let unrelated = PendingOperationKey::Merge {
+                    grid_from: "inventory".into(),
+                    grid_to: "inventory".into(),
+                    id_from: 91,
+                    id_to: 92,
+                };
+                app.world_mut()
+                    .resource_mut::<PendingOperations>()
+                    .try_begin(key.clone());
+                app.world_mut()
+                    .resource_mut::<PendingOperations>()
+                    .try_begin(unrelated.clone());
+                app.world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .push_intent(intent);
+                app.update();
+                let pending = app.world().resource::<PendingOperations>();
+                assert!(!pending.contains(&key));
+                assert!(pending.contains(&unrelated));
+            }
+        }
     }
 
     #[test]
@@ -4589,7 +5246,7 @@ mod tests {
             packet: "ObjectAttack".to_owned(),
             payload: json!({"objectId":object_id,"location":{"x":288,"y":616},"direction":"Down","type":0}),
         });
-        for (x, y) in [(289,615), (290,613), (286,618)] {
+        for (x, y) in [(289, 615), (290, 613), (286, 618)] {
             adapter.observe_packet(&PacketEvent::Other {
                 packet: "UserLocation".to_owned(),
                 payload: json!({"x":x,"y":y,"direction":"UpRight"}),
@@ -6421,4 +7078,58 @@ mod tests {
             "transport intent must not change local map"
         );
     }
+}
+
+#[cfg(test)]
+mod pet_actor_tests {
+    use super::*;
+    #[test]
+    fn packet_only_pet_keeps_ai_and_all_attack_types_without_changing_player_attack() {
+        let mut a = NativeGameplayAdapter::default();
+        a.observe_packet(&PacketEvent::Other{packet:"ObjectMonster".into(),payload:serde_json::json!({"objectId":700,"ai":64,"image":10000,"name":"Pig_Owner","location":{"x":1,"y":2}})});
+        assert_eq!(a.zone_entities[&700]["ai"], 64);
+        for (ty, action) in [
+            (0, "attack1"),
+            (1, "attack2"),
+            (2, "attack3"),
+            (3, "attack4"),
+        ] {
+            a.observe_packet(&PacketEvent::Other{packet:"ObjectAttack".into(),payload:serde_json::json!({"objectId":700,"attackType":ty,"location":{"x":1,"y":2}})});
+            assert_eq!(a.zone_entities[&700]["_nativeAnimationAction"], action);
+        }
+        a.observe_packet(&PacketEvent::Other {
+            packet: "ObjectPlayer".into(),
+            payload: serde_json::json!({"objectId":701,"name":"Peer","location":{"x":1,"y":2}}),
+        });
+        a.observe_packet(&PacketEvent::Other {
+            packet: "ObjectAttack".into(),
+            payload: serde_json::json!({"objectId":701,"attackType":3}),
+        });
+        assert_eq!(a.zone_entities[&701]["_nativeAnimationAction"], "attack1");
+        a.observe_packet(&PacketEvent::Other {
+            packet: "IntelligentCreaturePickup".into(),
+            payload: serde_json::json!({"objectId":700}),
+        });
+        let event = a.effect_events.back().unwrap();
+        assert_eq!(event.packet, "IntelligentCreaturePickup");
+        assert_eq!(event.payload["_nativeTarget"]["objectId"], 700);
+        a.observe_packet(&PacketEvent::Other{packet:"ObjectTurn".into(),payload:serde_json::json!({"objectId":700,"direction":"down","location":{"x":1,"y":2}})});
+        assert_eq!(a.zone_entities[&700]["_nativeAnimationAction"], "standing");
+        assert_eq!(a.effect_events.back().unwrap().packet, "ObjectTurn");
+    }
+}
+
+#[cfg(test)]
+mod status_buff_order_tests {
+ use super::*;
+ use mir2_client_bevy::crystal_ui::overlays::status_hud::{BuffEvent,StatusHud};
+ #[test]fn ordered_buff_deltas_survive_world_replacement_and_old_generation_is_discarded(){
+ let(sender,receiver)=mpsc::channel();let inbox=GameplayEventInbox::new(receiver);let now=std::time::Instant::now();
+ for(generation,packet,payload)in [(1,"AddBuff",serde_json::json!({"objectId":1,"buffType":5,"remainingMs":10000,"infinite":false,"paused":false,"stats":[],"values":[]})),(2,"AddBuff",serde_json::json!({"objectId":1,"buffType":24,"remainingMs":10000,"infinite":false,"paused":false,"stats":[],"values":[]})),(2,"PauseBuff",serde_json::json!({"objectId":1,"buffType":24,"paused":true}))]{
+ sender.send(NativeGameplaySnapshot{generation,big_map_only:true,status_buff_event:Some((Some(1),BuffEvent::parse(packet,&payload,now).unwrap())),..Default::default()}).unwrap();
+ }
+ sender.send(NativeGameplaySnapshot{generation:2,..Default::default()}).unwrap();
+ let(snapshots,_)=inbox.drain();assert_eq!(snapshots.len(),3);let mut ui=StatusHud::default();for snapshot in snapshots{if let Some((owner,event))=snapshot.status_buff_event{ui.observe(owner,&event,now);}}
+ assert_eq!(ui.buffs.len(),1);assert_eq!(ui.buffs[0].kind,"MagicShield");assert!(ui.buffs[0].paused);
+ }
 }

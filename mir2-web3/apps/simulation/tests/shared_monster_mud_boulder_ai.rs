@@ -44,6 +44,7 @@ fn player(name: &str, id: u32, x: i32, y: i32) -> ZoneJoin {
 }
 fn spawn(ai: u8) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: ID,
         name: "Guard".into(),
         name_colour_argb: -1,

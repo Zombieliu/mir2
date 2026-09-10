@@ -905,6 +905,32 @@ fn add_inventory_crystal_item_with_metadata(
     });
 }
 
+fn seed_equipped_fishing_attachments(session: &mut SimulationSession, bait_count: u32) {
+    {
+        let mut fishing = session.app.world_mut().resource_mut::<FishingResource>();
+        fishing.slot_items[0] = Some(fishing_slot_item_state(
+            "FishingHook",
+            0,
+            99000,
+            1,
+            Some(100),
+        ));
+        fishing.slot_items[2] = Some(fishing_slot_item_state(
+            "FishBait", 2, 99002, bait_count, None,
+        ));
+        fishing.slot_items[4] = Some(fishing_slot_item_state(
+            "FishingReel",
+            4,
+            99004,
+            1,
+            Some(100),
+        ));
+    }
+    assert!(crate::runtime::fishing::persist_fishing_slots_to_equipment(
+        session.app.world_mut()
+    ));
+}
+
 fn fishing_slot_item_state(
     template_name: &str,
     slot: u8,
@@ -6563,6 +6589,7 @@ fn world_snapshot_serializes_authoritative_native_combat_predicates() {
         .resource_mut::<BuffResource>()
         .buffs
         .push(BuffState {
+            real_time_duration: None,
             key: super::HELL_KEEPER_DAZED_BUFF_KEY.to_string(),
             name: "Dazed".to_string(),
             description: String::new(),
@@ -8958,6 +8985,7 @@ fn no_drop_monster_map_rule_makes_harvest_corpse_find_nothing() {
         no_drop_monster: true,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -26372,6 +26400,7 @@ fn gm_clearbuffs_removes_all_buffs() {
         .resource_mut::<BuffResource>()
         .buffs
         .push(BuffState {
+            real_time_duration: None,
             key: "haste".to_string(),
             name: "Haste".to_string(),
             description: String::new(),
@@ -26864,6 +26893,7 @@ fn gm_toggle_transform_pauses_and_unpauses_buff() {
         .resource_mut::<BuffResource>()
         .buffs
         .push(BuffState {
+            real_time_duration: None,
             key: "transform".to_string(),
             name: "Transform".to_string(),
             description: String::new(),
@@ -33265,6 +33295,7 @@ fn drop_item_packet_rejects_when_current_map_disallows_throw_item() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -33326,6 +33357,7 @@ fn drop_item_packet_dead_player_short_circuits_before_no_throw_item_message() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -33375,6 +33407,7 @@ fn no_drop_monster_map_rule_suppresses_field_wasp_quest_drop() {
         no_drop_monster: true,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -37293,6 +37326,7 @@ fn use_item_packet_static_potion_rejects_on_no_drug_map() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -37543,6 +37577,7 @@ fn use_item_packet_dynamic_crystal_potion_rejects_on_no_drug_map() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -37816,6 +37851,7 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_rejects_on_no_escape_map() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -37909,6 +37945,7 @@ fn use_item_packet_dynamic_crystal_random_teleport_rejects_on_no_random_map() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -38406,6 +38443,7 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
         no_drop_monster: false,
         no_mount: true,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -38446,6 +38484,7 @@ fn use_item_packet_equipped_mount_respects_crystal_map_and_slot_gates() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: true,
     });
     let mut session = SimulationSession::new(config);
@@ -38532,6 +38571,7 @@ fn transfer_onto_no_mount_map_force_dismounts_player() {
         no_drop_monster: false,
         no_mount: true,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -38974,6 +39014,7 @@ fn use_item_packet_dead_player_resurrection_scroll_rejects_on_no_reincarnation_m
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -45731,6 +45772,7 @@ fn town_teleport_packet_rejects_when_current_map_disallows_town_teleport() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: false,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -48806,6 +48848,7 @@ fn magic_packet_crystal_cripple_shot_consumes_poison_buff_and_spreads_green_pois
         .resource_mut::<BuffResource>()
         .buffs
         .push(super::BuffState {
+            real_time_duration: None,
             key: "poison-shot".to_string(),
             name: "Poison Shot".to_string(),
             description: "Crystal Poison Shot buff is active.".to_string(),
@@ -50650,6 +50693,7 @@ fn magic_packet_crystal_purification_removes_player_curse_debuff() {
         .resource_mut::<BuffResource>()
         .buffs
         .push(super::BuffState {
+            real_time_duration: None,
             key: "curse".to_string(),
             name: "Curse".to_string(),
             description: "Crystal Curse debuff is active.".to_string(),
@@ -51378,6 +51422,7 @@ fn magic_packet_crystal_skill_gain_multiplier_scales_practice_experience() {
         .resource_mut::<BuffResource>()
         .buffs
         .push(super::BuffState {
+            real_time_duration: None,
             key: "skill-gain".to_string(),
             name: "Skill Gain".to_string(),
             description: "Crystal skill gain multiplier is active.".to_string(),
@@ -53968,6 +54013,7 @@ fn magic_packet_crystal_one_with_nature_spends_arrow_buffs_and_applies_area_effe
         .resource_mut::<BuffResource>()
         .buffs
         .push(super::BuffState {
+            real_time_duration: None,
             key: "vampire-shot".to_string(),
             name: "Vampire Shot".to_string(),
             description: "test buff".to_string(),
@@ -53982,6 +54028,7 @@ fn magic_packet_crystal_one_with_nature_spends_arrow_buffs_and_applies_area_effe
         .resource_mut::<BuffResource>()
         .buffs
         .push(super::BuffState {
+            real_time_duration: None,
             key: "poison-shot".to_string(),
             name: "Poison Shot".to_string(),
             description: "test buff".to_string(),
@@ -56255,6 +56302,8 @@ fn stage5_social_group_guild_mail_persist_across_reload() {
     let temp_dir = unique_runtime_temp_dir("stage5-social");
     let store_path = temp_dir.join("accounts.json");
     let config = SimulationConfig::default().with_account_store_path(store_path.clone());
+    add_rental_mail_target(&config, "Miner", 81);
+    add_rental_mail_target(&config, "Spammer", 82);
     let mut session = SimulationSession::new(config);
     register_test_account(&session, "stage5-social");
     session.handle_packet(ClientPacket::Login {
@@ -61248,6 +61297,7 @@ fn fishing_packets_toggle_crystal_update_surface() {
     );
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     add_inventory_crystal_item(&mut session, "FishBait", 31);
+    seed_equipped_fishing_attachments(&mut session, 1);
     let object_id = current_player_object_id(session.app.world()).expect("player object id");
     let fishing_point = {
         let location = current_location(session.app.world());
@@ -61263,6 +61313,14 @@ fn fishing_packets_toggle_crystal_update_surface() {
         cast_packets,
         vec![
             ServerPacket::DuraChanged {
+                unique_id: 99000,
+                current_dura: 99
+            },
+            ServerPacket::DeleteItem {
+                unique_id: 99002,
+                count: 1
+            },
+            ServerPacket::DuraChanged {
                 unique_id: 0,
                 current_dura: rod_current_dura,
             },
@@ -61270,7 +61328,7 @@ fn fishing_packets_toggle_crystal_update_surface() {
                 object_id,
                 fishing: true,
                 progress_percent: 0,
-                chance_percent: 28,
+                chance_percent: 38,
                 fishing_point: fishing_point.clone(),
                 found_fish: false,
             },
@@ -61285,7 +61343,7 @@ fn fishing_packets_toggle_crystal_update_surface() {
             object_id,
             fishing: true,
             progress_percent: 0,
-            chance_percent: 28,
+            chance_percent: 38,
             fishing_point: fishing_point.clone(),
             found_fish: false,
         }]
@@ -61298,7 +61356,7 @@ fn fishing_packets_toggle_crystal_update_surface() {
             object_id,
             fishing: false,
             progress_percent: 100,
-            chance_percent: 28,
+            chance_percent: 38,
             fishing_point,
             found_fish: false,
         }]
@@ -61343,6 +61401,7 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
     add_inventory_crystal_item(&mut session, "FishBait", 31);
     add_inventory_crystal_item(&mut session, "FishBait", 32);
     add_inventory_crystal_item(&mut session, "FishBait", 33);
+    seed_equipped_fishing_attachments(&mut session, 3);
     let fish_index = mir2_game_data::crystal_item_by_name("SwordFish")
         .expect("SwordFish template should exist")
         .item_index;
@@ -61398,7 +61457,7 @@ fn fishing_tick_reels_loot_and_autocasts_after_found_fish() {
         ServerPacket::FishingUpdate {
             fishing: true,
             progress_percent: 0,
-            chance_percent: 28,
+            chance_percent: 38,
             found_fish: false,
             ..
         }
@@ -61511,6 +61570,10 @@ fn fishing_cast_consumes_slot_backed_bait_and_damages_hook() {
         fishing.slot_items[2] = Some(fishing_slot_item_state("FishBait", 2, 9_502, 2, None));
     }
 
+    assert!(crate::runtime::fishing::persist_fishing_slots_to_equipment(
+        session.app.world_mut()
+    ));
+
     let packets = session.handle_packet(ClientPacket::FishingCast { cast_out: true });
 
     assert!(packets.iter().any(|packet| matches!(
@@ -61572,6 +61635,10 @@ fn fishing_autocast_prefers_slot_backed_reel_over_resource_flag() {
         fishing.slot_items[2] = Some(fishing_slot_item_state("FishBait", 2, 9_512, 2, None));
     }
 
+    assert!(crate::runtime::fishing::persist_fishing_slots_to_equipment(
+        session.app.world_mut()
+    ));
+
     assert!(session
         .handle_packet(ClientPacket::FishingChangeAutocast { auto_cast: true })
         .is_empty());
@@ -61582,6 +61649,9 @@ fn fishing_autocast_prefers_slot_backed_reel_over_resource_flag() {
         .world_mut()
         .resource_mut::<FishingResource>()
         .slot_items[4] = Some(fishing_slot_item_state("FishingReel", 4, 9_514, 1, Some(2)));
+    assert!(crate::runtime::fishing::persist_fishing_slots_to_equipment(
+        session.app.world_mut()
+    ));
     let packets = session.handle_packet(ClientPacket::FishingChangeAutocast { auto_cast: true });
 
     assert!(session.app.world().resource::<FishingResource>().auto_cast);
@@ -61609,6 +61679,10 @@ fn fishing_autocast_reel_durability_cancels_slot_backed_recast() {
         fishing.slot_items[2] = Some(fishing_slot_item_state("FishBait", 2, 9_522, 3, None));
         fishing.slot_items[4] = Some(fishing_slot_item_state("FishingReel", 4, 9_524, 1, Some(1)));
     }
+
+    assert!(crate::runtime::fishing::persist_fishing_slots_to_equipment(
+        session.app.world_mut()
+    ));
 
     super::set_runtime_tick(session.app.world_mut(), 0);
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
@@ -61670,6 +61744,10 @@ fn fishing_retry_cast_uses_slot_backed_finder_stats_and_durability() {
         ));
     }
 
+    assert!(crate::runtime::fishing::persist_fishing_slots_to_equipment(
+        session.app.world_mut()
+    ));
+
     let packets = session.handle_packet(ClientPacket::FishingCast { cast_out: true });
 
     assert!(packets.iter().any(|packet| matches!(
@@ -61703,6 +61781,7 @@ fn fishing_reel_uses_crystal_miss_and_monster_event_paths() {
     let mut session = authenticated_demo_fishing_session();
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     add_inventory_crystal_item(&mut session, "FishBait", 31);
+    seed_equipped_fishing_attachments(&mut session, 1);
     assert!(
         session
             .handle_packet(ClientPacket::FishingCast { cast_out: true })
@@ -62601,6 +62680,13 @@ fn send_mail_rejects_invalid_text_and_every_ambiguous_or_ineligible_attachment_a
 #[test]
 fn mail_friend_packets_preserve_crystal_ack_surface() {
     let mut session = authenticated_demo_mail_session();
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    add_rental_mail_target(&config, "Blade", 81);
     session
         .app
         .world_mut()
@@ -62714,31 +62800,33 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
         }),
         vec![ServerPacket::FriendUpdate {
             friends: vec![mir2_protocol::ClientFriend {
-                index: 0,
+                index: 81,
                 name: "Blade".to_string(),
                 memo: String::new(),
                 blocked: false,
-                online: true,
+                online: false,
             }],
         }]
     );
     assert_eq!(
         session.handle_packet(ClientPacket::AddMemo {
-            character_index: 0,
+            character_index: 81,
             memo: "party lead".to_string(),
         }),
         vec![ServerPacket::FriendUpdate {
             friends: vec![mir2_protocol::ClientFriend {
-                index: 0,
+                index: 81,
                 name: "Blade".to_string(),
                 memo: "party lead".to_string(),
                 blocked: false,
-                online: true,
+                online: false,
             }],
         }]
     );
     assert_eq!(
-        session.handle_packet(ClientPacket::RemoveFriend { character_index: 0 }),
+        session.handle_packet(ClientPacket::RemoveFriend {
+            character_index: 81
+        }),
         vec![ServerPacket::FriendUpdate {
             friends: Vec::new(),
         }]
@@ -62748,6 +62836,13 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
 #[test]
 fn mail_send_to_blocked_friend_uses_crystal_blacklist_rejection() {
     let mut session = authenticated_demo_mail_session();
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone();
+    add_rental_mail_target(&config, "Blade", 81);
     session
         .app
         .world_mut()
@@ -64414,7 +64509,7 @@ fn intelligent_creature_packets_update_state_and_pick_up_ground_gold() {
         vec![ServerPacket::UpdateIntelligentCreatureList {
             creature_list: Vec::new(),
             creature_summoned: false,
-            summoned_creature_type: 0,
+            summoned_creature_type: 99,
             pearl_count: 0,
         }]
     );
@@ -64456,13 +64551,20 @@ fn intelligent_creature_packets_update_state_and_pick_up_ground_gold() {
     expected_creature.creature_rules =
         super::intelligent_creature_default_rules(expected_creature.pet_type);
 
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .intelligent_creatures
+        .push(expected_creature.clone());
     let update_packets = session.handle_packet(ClientPacket::UpdateIntelligentCreature {
         creature: creature.clone(),
         summon_me: true,
         unsummon_me: false,
         release_me: false,
     });
-    assert!(update_packets.iter().any(|packet| matches!(
+    assert!(!update_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::NewIntelligentCreature { creature: new_creature }
             if new_creature.custom_name == "Buddy"
@@ -64508,8 +64610,7 @@ fn intelligent_creature_packets_update_state_and_pick_up_ground_gold() {
         .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 100 })));
     assert_eq!(session.world_snapshot().gold, starting_gold);
 
-    let mut unsummoned = expected_creature.clone();
-    unsummoned.pet_mode = 0;
+    let unsummoned = expected_creature.clone();
     assert_eq!(
         session.handle_packet(ClientPacket::UpdateIntelligentCreature {
             creature: expected_creature.clone(),
@@ -64520,7 +64621,7 @@ fn intelligent_creature_packets_update_state_and_pick_up_ground_gold() {
         vec![ServerPacket::UpdateIntelligentCreatureList {
             creature_list: vec![unsummoned.clone()],
             creature_summoned: false,
-            summoned_creature_type: 0,
+            summoned_creature_type: 99,
             pearl_count: 0,
         }]
     );
@@ -64534,7 +64635,7 @@ fn intelligent_creature_packets_update_state_and_pick_up_ground_gold() {
         vec![ServerPacket::UpdateIntelligentCreatureList {
             creature_list: Vec::new(),
             creature_summoned: false,
-            summoned_creature_type: 0,
+            summoned_creature_type: 99,
             pearl_count: 0,
         }]
     );
@@ -64552,9 +64653,9 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
         custom_name: "Buddy".to_string(),
         fullness: 1200,
         slot_index: 0,
-        expire_binary_datetime: 638000000000000000,
-        blackstone_time: 12_000,
-        pet_mode: 1,
+        expire_binary_datetime: 0,
+        blackstone_time: 12,
+        pet_mode: 0,
         creature_rules: mir2_protocol::IntelligentCreatureRules {
             minimal_fullness: 0,
             mouse_pickup_enabled: false,
@@ -64577,8 +64678,18 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
             pet_pickup_others: true,
         },
         pickup_grade: 2,
-        maintain_food_time: 24_000,
+        maintain_food_time: 24,
     };
+    let mut owned = creature.clone();
+    owned.creature_rules = super::intelligent_creature_default_rules(owned.pet_type);
+    owned.pet_mode = 0;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .intelligent_creatures
+        .push(owned);
     session.handle_packet(ClientPacket::UpdateIntelligentCreature {
         creature,
         summon_me: true,
@@ -64590,12 +64701,17 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
     session.handle_packet(ClientPacket::DropGold { amount: 75 });
     assert_eq!(session.world_snapshot().gold, starting_gold - 75);
 
-    let tick_packets = session.tick();
+    session.handle_packet(ClientPacket::RequestIntelligentCreatureUpdates { update: true });
+    let mut tick_packets = session.tick();
+    session.app.world_mut().remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
+    let now = crate::runtime::inventory::current_binary_datetime();
+    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 0, now, &mut tick_packets);
+    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 1000, now, &mut tick_packets);
     assert!(tick_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::UpdateIntelligentCreatureList { creature_list, .. }
             if creature_list.len() == 1
-                && creature_list[0].blackstone_time == 13_000
+                && creature_list[0].blackstone_time == 13
                 && creature_list[0].fullness == 1200
     )));
     assert!(tick_packets
@@ -64606,8 +64722,8 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
         .any(|packet| matches!(packet, ServerPacket::GainedGold { gold: 75 })));
     assert_eq!(session.world_snapshot().gold, starting_gold);
 
-    for _ in 0..9 {
-        session.tick();
+    for second in 2..=25 {
+        crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), second * 1000, now, &mut Vec::new());
     }
     assert!(matches!(
         session
@@ -64615,9 +64731,9 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
             .as_slice(),
         [ServerPacket::UpdateIntelligentCreatureList { creature_list, .. }]
             if creature_list.len() == 1
-                && creature_list[0].fullness == 1199
-                && creature_list[0].blackstone_time == 22_000
-                && creature_list[0].maintain_food_time == 23_000
+                && creature_list[0].fullness == 1198
+                && creature_list[0].blackstone_time == 37
+                && creature_list[0].maintain_food_time == 0
     ));
 }
 
@@ -64633,9 +64749,9 @@ fn intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses() {
         custom_name: "Buddy".to_string(),
         fullness: 500,
         slot_index: 0,
-        expire_binary_datetime: 638000000000000000,
-        blackstone_time: 12_000,
-        pet_mode: 1,
+        expire_binary_datetime: 0,
+        blackstone_time: 12,
+        pet_mode: 0,
         creature_rules: mir2_protocol::IntelligentCreatureRules {
             minimal_fullness: 0,
             mouse_pickup_enabled: false,
@@ -64658,9 +64774,19 @@ fn intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses() {
             pet_pickup_others: true,
         },
         pickup_grade: 2,
-        maintain_food_time: 24_000,
+        maintain_food_time: 24,
     };
 
+    let mut owned = creature.clone();
+    owned.creature_rules = super::intelligent_creature_default_rules(owned.pet_type);
+    owned.pet_mode = 0;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .intelligent_creatures
+        .push(owned);
     session.handle_packet(ClientPacket::UpdateIntelligentCreature {
         creature,
         summon_me: true,
@@ -64670,7 +64796,11 @@ fn intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses() {
 
     let starting_gold = session.world_snapshot().gold;
     session.handle_packet(ClientPacket::DropGold { amount: 75 });
-    let tick_packets = session.tick();
+    let mut tick_packets = session.tick();
+    session.app.world_mut().remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
+    let now = crate::runtime::inventory::current_binary_datetime();
+    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 0, now, &mut tick_packets);
+    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 1000, now, &mut tick_packets);
     assert!(!tick_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::IntelligentCreaturePickup { .. })));
@@ -64682,7 +64812,7 @@ fn intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses() {
         session
             .handle_packet(ClientPacket::RequestIntelligentCreatureUpdates { update: true })
             .as_slice(),
-        [ServerPacket::UpdateIntelligentCreatureList { creature_list, .. }] if creature_list[0].blackstone_time == 13_000
+        [ServerPacket::UpdateIntelligentCreatureList { creature_list, .. }] if creature_list[0].blackstone_time == 13
     ));
 }
 
@@ -64725,6 +64855,16 @@ fn intelligent_creature_filter_applies_category_and_grade_rules() {
         pickup_grade: 2,
         maintain_food_time: 24_000,
     };
+    let mut owned = creature.clone();
+    owned.creature_rules = super::intelligent_creature_default_rules(owned.pet_type);
+    owned.pet_mode = 0;
+    session
+        .app
+        .world_mut()
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .intelligent_creatures
+        .push(owned);
     session.handle_packet(ClientPacket::UpdateIntelligentCreature {
         creature,
         summon_me: true,
@@ -65007,37 +65147,37 @@ fn hero_auto_pot_packets_update_stage5_hero_state_and_echo_crystal_ack() {
     });
 
     assert_eq!(
-        session.handle_packet(ClientPacket::SetAutoPotValue { stat: 0, value: 75 }),
-        vec![ServerPacket::SetAutoPotValue { stat: 0, value: 75 }]
+        session.handle_packet(ClientPacket::SetAutoPotValue { stat: 12, value: 75 }),
+        vec![ServerPacket::SetAutoPotValue { stat: 12, value: 75 }]
     );
     assert_eq!(
         session.handle_packet(ClientPacket::SetAutoPotValue {
-            stat: 1,
+            stat: 13,
             value: 140
         }),
         vec![ServerPacket::SetAutoPotValue {
-            stat: 1,
+            stat: 13,
             value: 140
         }]
     );
     assert_eq!(
         session.handle_packet(ClientPacket::SetAutoPotItem {
             grid: MirGridType::HeroHpItem,
-            item_index: 109,
+            item_index: 658,
         }),
         vec![ServerPacket::SetAutoPotItem {
             grid: MirGridType::HeroHpItem as u8,
-            item_index: 109,
+            item_index: 658,
         }]
     );
     assert_eq!(
         session.handle_packet(ClientPacket::SetAutoPotItem {
             grid: MirGridType::HeroMpItem,
-            item_index: 110,
+            item_index: 659,
         }),
         vec![ServerPacket::SetAutoPotItem {
             grid: MirGridType::HeroMpItem as u8,
-            item_index: 110,
+            item_index: 659,
         }]
     );
     assert_eq!(
@@ -65045,10 +65185,7 @@ fn hero_auto_pot_packets_update_stage5_hero_state_and_echo_crystal_ack() {
             grid: MirGridType::Inventory,
             item_index: -1,
         }),
-        vec![ServerPacket::SetAutoPotItem {
-            grid: MirGridType::Inventory as u8,
-            item_index: 0,
-        }]
+        Vec::<ServerPacket>::new()
     );
 
     let hero = session
@@ -65059,8 +65196,8 @@ fn hero_auto_pot_packets_update_stage5_hero_state_and_echo_crystal_ack() {
     assert!(hero.auto_pot);
     assert_eq!(hero.auto_hp_percent, 75);
     assert_eq!(hero.auto_mp_percent, 99);
-    assert_eq!(hero.hp_item_index, 109);
-    assert_eq!(hero.mp_item_index, 0);
+    assert_eq!(hero.hp_item_index, 658);
+    assert_eq!(hero.mp_item_index, 659);
 }
 
 #[test]
@@ -65077,12 +65214,12 @@ fn transfer_hero_item_moves_player_bag_item_to_hero_inventory() {
     let packets = session.handle_packet(ClientPacket::TransferHeroItem { from: 4, to: 3 });
 
     assert_eq!(
-        packets,
-        vec![ServerPacket::TransferHeroItem {
+        packets.first(),
+        Some(&ServerPacket::TransferHeroItem {
             from: 4,
             to: 3,
             success: true,
-        }]
+        })
     );
     let snapshot = session.world_snapshot();
     assert!(!snapshot
@@ -65110,12 +65247,12 @@ fn take_back_hero_item_returns_to_player_bag_slot() {
     let packets = session.handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 10 });
 
     assert_eq!(
-        packets,
-        vec![ServerPacket::TakeBackHeroItem {
+        packets.first(),
+        Some(&ServerPacket::TakeBackHeroItem {
             from: 3,
             to: 10,
             success: true,
-        }]
+        })
     );
     let snapshot = session.world_snapshot();
     assert!(snapshot.hero_inventory_items.is_empty());
@@ -65203,12 +65340,12 @@ fn hero_inventory_use_item_consumes_potion_and_restores_hero_health() {
         class: MirClass::Warrior,
     });
     assert_eq!(
-        session.handle_packet(ClientPacket::TransferHeroItem { from: 0, to: 0 }),
-        vec![ServerPacket::TransferHeroItem {
+        session.handle_packet(ClientPacket::TransferHeroItem { from: 0, to: 0 }).first().cloned(),
+        Some(ServerPacket::TransferHeroItem {
             from: 0,
             to: 0,
             success: true,
-        }]
+        })
     );
     let red_potion = session
         .world_snapshot()
@@ -65224,7 +65361,7 @@ fn hero_inventory_use_item_consumes_potion_and_restores_hero_health() {
         .entity_mut(hero_entity)
         .get_mut::<PlayerVitals>()
         .expect("hero vitals")
-        .hp = 20;
+        .hp = 1;
 
     let packets = session.handle_packet(ClientPacket::UseItem {
         unique_id: red_potion.unique_id,
@@ -65259,7 +65396,7 @@ fn hero_inventory_use_item_consumes_potion_and_restores_hero_health() {
         .into_iter()
         .find(|entity| entity.object_id == 1001)
         .expect("hero should remain visible");
-    assert_eq!(hero.hp, Some(30));
+    assert_eq!(hero.hp, Some(11));
 }
 
 #[test]
@@ -65280,7 +65417,7 @@ fn hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold() {
         .find(|item| item.key == "red-potion")
         .cloned()
         .expect("red potion should be in hero inventory");
-    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 0, value: 90 });
+    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 12, value: 90 });
     session.handle_packet(ClientPacket::SetAutoPotItem {
         grid: MirGridType::HeroHpItem,
         item_index: 658,
@@ -65292,7 +65429,7 @@ fn hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold() {
         .entity_mut(hero_entity)
         .get_mut::<PlayerVitals>()
         .expect("hero vitals")
-        .hp = 20;
+        .hp = 1;
 
     let auto_packets = session.handle_packet(ClientPacket::Turn {
         direction: MirDirection::Down,
@@ -65326,7 +65463,7 @@ fn hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold() {
         .into_iter()
         .find(|entity| entity.object_id == 1001)
         .expect("hero should remain visible");
-    assert_eq!(hero.hp, Some(30));
+    assert_eq!(hero.hp, Some(11));
 }
 
 #[test]
@@ -65344,6 +65481,7 @@ fn new_hero_on_no_hero_map_stays_unsummoned_with_crystal_system_message() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: true,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -65423,6 +65561,7 @@ fn hero_is_unsummoned_when_entering_crystal_no_hero_map() {
         no_drop_monster: false,
         no_mount: false,
         no_hero: true,
+        no_intelligent_creatures: false,
         need_bridle: false,
     });
     let mut session = SimulationSession::new(config);
@@ -65533,8 +65672,13 @@ fn market_packets_consign_buy_and_get_back_stage5_auction_state() {
         .auction
         .push(Stage5AuctionListing {
             item_state_json: Some({
-                let template = super::super::items::crystal_item_template_for_item_key("blue-potion").unwrap();
-                let mut item = super::super::items::embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+                let template =
+                    super::super::items::crystal_item_template_for_item_key("blue-potion").unwrap();
+                let mut item = super::super::items::embedded_item_state_from_template(
+                    &template,
+                    ItemContainer::Bag1,
+                    0,
+                );
                 item.key = "blue-potion".to_string();
                 item.unique_id = 880_001;
                 serde_json::to_string(&item).unwrap()
@@ -67497,6 +67641,7 @@ fn setup_fishing_session() -> SimulationSession {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equip_crystal_item(&mut session, "BlueFishingRod", EquipmentSlot::Weapon);
     add_inventory_crystal_item(&mut session, "FishBait", 31);
+    seed_equipped_fishing_attachments(&mut session, 1);
     session
         .app
         .world_mut()
@@ -69248,8 +69393,10 @@ fn poison_resistance_reduces_player_poison_tick_damage() {
     login_demo_account_for_persistence_test(&mut resisted);
     resisted.handle_packet(ClientPacket::StartGame { character_index: 0 });
     equipped_armour_push_stat(&mut resisted, super::CRYSTAL_STAT_POISON_RESIST, 5);
-    assert_eq!(resisted.zone_player_combat_stats().poison_resist,
-        super::player_stats(resisted.app.world()).poison_resist());
+    assert_eq!(
+        resisted.zone_player_combat_stats().poison_resist,
+        super::player_stats(resisted.app.world()).poison_resist()
+    );
     assert!(resisted.zone_player_combat_stats().poison_resist > 0);
     {
         let player = super::player_entity(resisted.app.world()).expect("player");
@@ -69993,3 +70140,8 @@ fn platinum_176_q47_ring_override_is_quest_only_and_oma_cave_scoped() {
 }
 #[path = "item_custody_tests.rs"]
 mod item_custody_tests;
+
+mod fishing_equipment_regression {
+    use super::*;
+    include!("fishing_equipment_tests.rs");
+}

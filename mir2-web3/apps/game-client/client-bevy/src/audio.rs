@@ -48,6 +48,17 @@ pub const NATIVE_LOGIN_DOOR_FILE: &str = "100.wav";
 /// become file paths: the platform effect adapter can only request a cue listed
 /// here and packaging verifies the same exact files.
 pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
+    "pet_pickup.wav",
+    "pet_pig.wav",
+    "pet_chick.wav",
+    "pet_kitty.wav",
+    "pet_skeleton.wav",
+    "pet_pigman.wav",
+    "pet_weman.wav",
+    "pet_blackdragon.wav",
+    "pet_olympicmascot.wav",
+    "pet_frog.wav",
+    "pet_monkey.wav",
     "005-1.wav",
     "005-2.wav",
     "005-3.wav",
@@ -87,6 +98,8 @@ pub const NATIVE_GAMEPLAY_SOUND_FILES: &[&str] = &[
     "M64-0.wav",
     "M64-1.wav",
     "M64-2.wav",
+    // Original SoundList.lst 20710: BlessedArmour launch.
+    "M69-0.wav",
     "M79-1.wav",
 ];
 
@@ -1056,6 +1069,22 @@ mod tests {
         assert!(sounds
             .iter()
             .all(|(_, settings)| matches!(settings.mode, PlaybackMode::Despawn)));
+    }
+
+    #[test]
+    fn blessed_armour_uses_registered_sound_without_invented_filename() {
+        let mut queue = NativeGameplayAudioQueue::default();
+        for (sequence, (file, accepted)) in [
+            ("M69-0.wav", true), ("M71-0.wav", false),
+            ("M71-1.wav", false), ("M17-0.wav", false),
+            ("../M69-0.wav", false),
+        ].into_iter().enumerate() {
+            assert_eq!(queue.push(NativeGameplaySoundEvent {
+                generation: 1, sequence: sequence as u64,
+                cue: "BlessedArmour.launch".into(), file_name: file.into(),
+            }), accepted, "{file}");
+        }
+        assert_eq!(queue.len(), 1);
     }
 
     #[test]

@@ -189,6 +189,9 @@ pub enum SharedItemRentalDelivery {
 }
 
 impl SimulationSession {
+    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        super::skills::supports_magic_key_assignment(self.app.world(),spell,key,old_key)
+    }
     pub fn new(config: SimulationConfig) -> Self {
         let mut app = HeadlessRuntime::new();
         let initial_collision = runtime_map_collision_data(&config.map.file_name)
@@ -697,10 +700,9 @@ impl SimulationSession {
             .world()
             .resource::<Stage5SystemsResource>()
             .stage5_systems
-            .intelligent_creatures
-            .iter()
-            .any(|creature| {
-                creature.pet_mode != 0
+            .active_intelligent_creature()
+            .is_some_and(|creature| {
+                creature.pet_mode == 0
                     && creature.creature_rules.auto_pickup_enabled
                     && creature.fullness >= creature.creature_rules.minimal_fullness.max(0)
                     && creature.creature_rules.auto_pickup_range > 0
@@ -791,8 +793,8 @@ impl SimulationSession {
         let stage5 = self.app.world().resource::<Stage5SystemsResource>();
         let permissions = self.app.world().resource::<PlayerPermissionResource>();
         let player_runtime = self.app.world().resource::<PlayerRuntimeResource>();
-        let guild_name = (!stage5.stage5_systems.guild.name.trim().is_empty())
-            .then(|| stage5.stage5_systems.guild.name.clone());
+        let guild_name = (!snapshot.stage5_systems.guild.name.trim().is_empty())
+            .then(|| snapshot.stage5_systems.guild.name.clone());
         let mentor_name = (!stage5.stage5_systems.mentor.name.trim().is_empty())
             .then(|| stage5.stage5_systems.mentor.name.clone());
         let relationship_name = (!stage5
@@ -823,7 +825,7 @@ impl SimulationSession {
             chat_profile: ZoneChatProfile {
                 group_members: stage5.stage5_systems.group.members.clone(),
                 guild_name,
-                active_guild_wars: stage5.stage5_systems.guild.active_wars.clone(),
+                active_guild_wars: snapshot.stage5_systems.guild.active_wars.clone(),
                 blocked_names: stage5.stage5_systems.social.blocked.clone(),
                 mentor_name,
                 relationship_name,
@@ -1148,6 +1150,7 @@ impl SimulationSession {
         super::buffs::apply_or_refresh_buff(
             world,
             super::buffs::BuffState {
+                real_time_duration: None,
                 key: key.to_string(),
                 name,
                 description,
@@ -1287,6 +1290,7 @@ impl SimulationSession {
         let max_hp = vitals.max_hp.max(1);
 
         Some(ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id,
             name: name.clone(),
             name_colour_argb: -1,

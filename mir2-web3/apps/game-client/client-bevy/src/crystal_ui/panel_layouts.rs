@@ -271,8 +271,8 @@ pub const SKILL_PAGE_SIZE: usize = 7;
 pub const SKILL_PAGE_ORIGIN: Point = Point { x: 8, y: 90 };
 pub const SKILL_ROW_ORIGIN: Point = Point { x: 16, y: 98 };
 pub const SKILL_ROW_SIZE: Size = Size {
-    width: 210,
-    height: 28,
+    width: 231,
+    height: 33,
 };
 pub const SKILL_ROW_STEP_Y: i32 = 33;
 

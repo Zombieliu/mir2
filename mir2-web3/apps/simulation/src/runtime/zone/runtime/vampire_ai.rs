@@ -32,6 +32,7 @@ mod death_tests {
             combat_stats: Default::default(),
         }));
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 60,
             name: "VampireSpider".into(),
             name_colour_argb: -1,
@@ -514,6 +515,8 @@ impl ZoneRuntime {
                 out.extend(self.group_monster_kill_awards(
                     &reward,
                     ZoneMonsterKillAward {
+                        source_receipt_key: None,
+                        experience_selection: None,
                         monster_object_id: target_id,
                         killed_at_ms: now,
                         monster_name: name,

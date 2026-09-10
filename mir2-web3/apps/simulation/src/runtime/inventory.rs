@@ -2643,6 +2643,12 @@ pub(super) fn move_item_impl(
     from: i32,
     to: i32,
 ) -> Vec<ServerPacket> {
+    if grid == MirGridType::HeroInventory {
+        return super::hero_inventory::move_item(world, from, to);
+    }
+    if grid == MirGridType::Trade {
+        return super::packets::stage5_move_trade_item_packet(world, from, to);
+    }
     let failed_packet = ServerPacket::MoveItem {
         grid,
         from,
@@ -2690,6 +2696,19 @@ pub(super) fn move_item_impl(
         }
     }
 
+    if grid == MirGridType::Inventory
+        && world
+            .resource::<InventoryResource>()
+            .inventory_items
+            .iter()
+            .any(|item| {
+                (inventory_item_matches_index(item, from_slot)
+                    || inventory_item_matches_index(item, to_slot))
+                    && super::packets::stage5_trade_reserves_item(world, item)
+            })
+    {
+        return vec![failed_packet];
+    }
     let mut resources = world.resource_mut::<InventoryResource>();
     let items = match grid {
         MirGridType::Inventory => &mut resources.inventory_items,
@@ -2757,6 +2776,15 @@ pub(super) fn merge_item_impl(
     id_from: u64,
     id_to: u64,
 ) -> Vec<ServerPacket> {
+    if matches!(grid_from, MirGridType::HeroInventory | MirGridType::HeroEquipment)
+        || matches!(grid_to, MirGridType::HeroInventory | MirGridType::HeroEquipment) {
+        return super::hero_inventory::merge_item(world, grid_from, grid_to, id_from, id_to);
+    }
+    if grid_from == MirGridType::Trade || grid_to == MirGridType::Trade {
+        return super::packets::stage5_merge_trade_item_packet(
+            world, grid_from, grid_to, id_from, id_to,
+        );
+    }
     let failed_packet = ServerPacket::MergeItem {
         grid_from,
         grid_to,
@@ -2796,6 +2824,18 @@ pub(super) fn merge_item_impl(
         }
     }
 
+    if world
+        .resource::<InventoryResource>()
+        .inventory_items
+        .iter()
+        .any(|item| {
+            ((grid_from == MirGridType::Inventory && item_unique_id(item) == id_from)
+                || (grid_to == MirGridType::Inventory && item_unique_id(item) == id_to))
+                && super::packets::stage5_trade_reserves_item(world, item)
+        })
+    {
+        return vec![failed_packet];
+    }
     let mut resources = world.resource_mut::<InventoryResource>();
     let storage_slot_limit = accessible_storage_size(&resources);
     let success = match (grid_from, grid_to) {

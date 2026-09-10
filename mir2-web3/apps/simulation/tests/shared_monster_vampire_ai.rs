@@ -80,6 +80,7 @@ fn enemy(z: &mut ZoneRuntime, spider: u32, mac: i32) {
         .position;
     z.spawn_world_event_monster(
         &ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 9001,
             name: "Scarecrow".into(),
             name_colour_argb: -1,

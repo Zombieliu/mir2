@@ -1,5 +1,175 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-10 resumed three-class QA: R3 live testing exposed missing FireBang
+> ground completion, frame-final modifier matching and self-spell cursor rejection.
+> R4 bounded fixes additionally close shared TwinDrake atomic mana payment and
+> ordinary-attack Slaying preparation, with focused regression evidence in
+> generated/player-qa/native-keyboard-20260910/three-class-live-20260910.md.
+> Frozen source daf546c8 is under combined validation/packaging; all66 original
+> paired visual gates remain open. No global percentage or final acceptance.
+
+> 2026-09-10 three-class skill verification: isolated ordinary creation/learning
+> prepared Warrior17, Wizard24 and Taoist25 active skills. Actual Windows casting
+> exposed a zero actor ID rejected by shared authority; native input now uses the
+> current nonzero player ID. Five warrior attack overlays, ImmortalSkin's second
+> layer and six Taoist flying-talisman chains are repaired; Windows regression
+> checkpoint616/616 passed. Slaying is now correctly passive (new1/1, adjacent2/2).
+> Authoritative skill-name projection has focused tests; a new matched signed
+> client/Gateway package and all66 paired visual gates remain open. This is not
+> all-skills acceptance. See generated/player-qa/native-keyboard-20260910/three-class-live-20260910.md.
+
+> PostgreSQL prepared-kill production adapter now passes 7/7 isolated real-PG
+> tests, 32/32 economy regressions and 2/2 ordinary pending-source regressions.
+> The actual runtime publishes its complete character checkpoint, derived Guild
+> mutations, balance legs, receipt and outbox in one PostgreSQL transaction.
+> Mirror and SourceOfTruth modes are exercised through the ordinary service;
+> replay uses the committed checkpoint without rerunning gameplay. Exact changed
+> legs and locked pre-effect balances must match the authoritative source.
+> Historical ledger drift is rejected, never silently credited or corrected.
+> Receipt ingestion rejects stripped source proofs; diagnostic Debug omits
+> database credentials and account contents. After PG commit, failed Mirror File
+> publication retains the durable fence instead of compensating only one domain.
+> Evidence: `C:/mir2-build/prepared-kill-baseline-postgres-tests.log`,
+> `C:/mir2-build/prepared-kill-baseline-economy-tests.log` and
+> `C:/mir2-build/prepared-kill-baseline-source-tests.log`.
+> Still open: death-time Zone capture, ordinary non-kill XP ledger synchronization
+> and an explicit reconciliation operator tool. Baseline rejection is containment,
+> not completion of those flows. These source changes postdate the frozen visual
+> candidate; no live-store migration or dual-client visual acceptance is claimed.
+
+> InProcess delivery follow-up: ordinary shared-kill delivery now uses the
+> typed complete-source transaction. Known failures retain the pending award;
+> uncertain local publication has its own outcome without a fabricated PG lease.
+> The first delivery key is fixed before hashing and retained in the pending
+> envelope across serialization and a changed delivery Zone. A new service
+> instance consults durable source receipts rather than an in-memory cache.
+> XP tests pass 14/14 (one separate PG ignore), new Gateway queue/replay tests
+> 2/2 and existing kill-award regressions 2/2. Account-only no-Guild kill receipts
+> now receive the same unknown-COMMIT classification and compensation fencing.
+> Evidence: `C:/mir2-build/guild-xp-stable-key-runtime-tests.log`,
+> `C:/mir2-build/guild-stable-source-queue-tests.log`,
+> `C:/mir2-build/guild-stable-source-kill-regression-tests.log`.
+> File publication fencing is now durable: the already-locked writer handle
+> writes and syncs a pending marker before publication, and clears it only after
+> confirmed completion or confirmed compensation. Unknown outcomes, early exits,
+> released Config handles and restart retain the fence. Root verification:
+> Config 115/115, isolated PostgreSQL 9/9 and File publication boundaries 10/10;
+> see [File publication evidence](FILE-PUBLICATION-FENCE.md).
+> Remaining blockers: authoritative death-time Zone capture is not populated,
+> ordinary non-kill XP changes still need ledger synchronization,
+> and an explicit operational reconciliation tool is not implemented. These tests
+> do not establish power-loss guarantees for every storage medium.
+> No live migration, package or dual-client visual acceptance occurred.
+
+
+> Runtime follow-up: a keyed shared-kill consumer now verifies the full award
+> hash and recipient identity, persists its kill receipt with the complete
+> character/Guild source checkpoint, and restores gameplay state on a known
+> failed commit. Its regression passes failure/retry, captured final amount,
+> logout/login replay and changed-payload rejection. The ordinary File XP test
+> also verifies Hero live buff and action-clock rollback via an opaque transient
+> checkpoint. Targeted XP tests now pass 13/13 (one PostgreSQL-specific ignore).
+> This API is not yet the production Gateway route: typed unknown/deferred
+> outcomes, live Zone selection and PostgreSQL economy atomic publication remain
+> open. All existing Zone producers currently emit no capture; the optional
+> serialized field preserves old checkpoint encoding when absent.
+> Evidence: `C:/mir2-build/guild-xp-runtime-kill-tests.log`.
+
+
+> Guild XP capture authorization follow-up: the transaction consumer now requires
+> a non-deserializable server permit matching stable character identity, the
+> complete kill payload hash and immutable selection hash before accepting a
+> shared-kill receipt or an older membership epoch. File failure/retry retains
+> the captured rounded amount; disbanded Guilds produce an explicit skipped
+> receipt without recreation. Missing permits, altered amounts, fabricated
+> outcomes and omitted source events are rejected. Targeted XP tests pass 12/12
+> (one separate PostgreSQL test ignored by this filter), including three new
+> capture-domain tests. These are domain/File tests, not a production Zone kill
+> delivery claim: Zone/Gateway capture production and the complete PostgreSQL
+> economy transaction are still unfinished. Evidence:
+> `C:/mir2-build/guild-xp-captured-permit-tests.log`.
+
+
+> 2026-09-10 Guild XP source checkpoint: the fixed account transaction consumer
+> now validates source identity/revision/sequence and membership epoch, derives
+> the Guild write scope only after the caller's original scope passes, and
+> saves full character state plus per-event Guild receipts atomically. Ordinary
+> NPC/quest/combat entry wrappers and personal timers journal the actual
+> GainExp amount; a failed File write restores source state and NPC/timer state.
+> Nine targeted tests passed, including the real NPC GainExp helper through
+> failed save, retry and logout/login. This is not an end-to-end NPC-page test.
+> Shared kill capture currently has only its immutable selection type/pure
+> test: Zone envelope/profile integration, old-Guild authorization, and the
+> PostgreSQL economy-ledger/source-checkpoint transaction remain unfinished.
+> Guild COMMIT transport uncertainty now freezes the shared File writer
+> authority. Mirror compensation uses its own committed Guild/account/save
+> versions; an independent PostgreSQL writer advancing either source or Guild
+> makes the entire old compensation fail. The dedicated PostgreSQL regression
+> passed 1/1, and existing clock PostgreSQL regressions passed 6/6.
+> Existing personal social-XP eligibility/order remains a separate prerequisite;
+> recording the current GainExp amount does not prove those rates match Crystal.
+> The whole Guild XP feature is therefore not Candidate-complete. No live
+> migration, package rebuild or dual-client visual acceptance occurred.
+> Evidence: `C:/mir2-build/guild-xp-source-wrapper-tests.log` (9-test checkpoint),
+> `C:/mir2-build/guild-xp-postgres-compensation-tests.log`,
+> `C:/mir2-build/guild-clock-after-xp-fencing-tests.log`.
+
+> Clock follow-up: a live coordinator retains its last successfully published
+> owner/generation. Scheduling beyond the 30-second lease admits at most one
+> elapsed minute when that exact generation still owns the locked clock; only
+> restart/takeover reanchors without charging downtime. Reusing a token with a
+> different generation cannot advance. PostgreSQL standbys now observe a
+> repeatable-read Guild/version snapshot and emit a refresh signal without
+> changing the lease, even when another stats read already refreshed their
+> local Guild image. File mirrors never adopt another owner's read snapshot.
+> Clock 14/14 local tests and 8/8 dedicated PostgreSQL tests pass:
+> `C:/mir2-build/guild-clock-late-owner-tests.log`,
+> `C:/mir2-build/guild-clock-late-owner-postgres-tests.log`.
+
+> 2026-09-10 shared Guild clock candidate: a server-lifetime Gateway worker now
+> drives minute expiry with no online players. File configurations share the
+> canonical-path writer lock and freeze state; PostgreSQL uses a database-time
+> singleton lease and atomic Clock/Guild CAS. Takeover/restore fence old owners,
+> re-anchor without offline deductions, and compensate only exact receipts.
+> Focused evidence: File/schema/clock 12 passed, real isolated PostgreSQL 6
+> passed, Gateway empty-server worker 1 passed, Gateway tests compile passed.
+> Guild XP earning/points progression is still unconnected; no live migration,
+> new Windows packaging, dual-client visual acceptance or global percentage is
+> claimed. Details: [Shared Guild integration](SHARED-GUILD-INTEGRATION.md).
+
+> 2026-09-10 menu parity is in progress. Shared Ranking presence now uses
+> stable account/character identity across local factory Zones, excluding
+> replicas and leaving players (simulation 3/3, Gateway integration 1/1).
+> Creature updates now preserve server-owned properties, reject fabricated
+> pets and separate summon state from pickup mode; authority/migration 5/5,
+> simulation regressions 4/4 and Gateway regressions 8/8 pass. Legitimate
+> creature acquisition/actor rendering, distributed ranking and final native
+> visual acceptance remain open. See `NATIVE-MENU-CRYSTAL-PARITY.md`.
+> No global completion percentage or final acceptance is claimed.
+
+> 2026-09-09 trade merge/reorder: native item selection now sends exact-UID
+> merges across Inventory/Trade and slot moves/swaps within own Trade.
+> Partial merges preserve the remainder and target identity; server validates
+> metadata, capacity, logical grid membership and editable offer state.
+> Shared routing blocks edits when either participant is prepared and refreshes
+> the partner offer. Trade merges require exact ACK/NACK, not inventory-delta
+> inference. Evidence: `docs/generated/player-qa/native-trade-merge-20260909/README.md`.
+> This deliberately completes a client interaction rejected by this Crystal
+> server checkout. Full custody/prepared editing and live package/visual gates
+> remain open; no global UI completion or acceptance percentage is claimed.
+
+> 2026-09-09 native trade item operations: inventory-to-own-trade deposit and
+> own-trade-to-selected-bag retrieval are connected to ordinary packet intents.
+> Server retrieval now validates the exact offered instance and destination,
+> preserves item identity/metadata, and rejects occupied/out-of-capacity cells.
+> UI selection is bound to item state and the current exchange; guest cells,
+> locked trades and covering dialogs reject input. Failed host sends release
+> only the matching unsent operation. Automated evidence and remaining gaps:
+> `docs/generated/player-qa/native-trade-items-20260909/README.md`.
+> Merge, trade-slot movement, complete item custody and live Windows visual
+> acceptance remain open. All 33 global UI backlog IDs remain open;
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
 > 2026-09-09 bounded shared update integration implemented for all 47 existing
 > personal dedicated monster modules: owned-monster combat, status leases,
 > targets, summons, death/retirement and checkpoint/fork are connected.
@@ -5706,3 +5876,7 @@ visual/feel acceptance.
   supersedes the older EXE only for exact-head nonvisual internal evidence and
   leaves every live, UI, DPI, soak, human, semantic-denominator, and formal
   signing gate open. Its acceptance and visual truth fields remain false.
+
+## 2026-09-09 native trade drag fix
+
+The intermittent item drag is fixed by replaying ordered Winit/Bevy WindowEvent input and retaining a preselected source until release. Pointer tracking survives pending/modal gesture cancellation. Native UI 624/624 and Windows host 561/561 serial pass. Exact signed EXE B62330DFA03EB8A2A5976C0662A327D95A2E65A4721C0B3E2D0ECC3F9DE75599 passed seven native drag operations: deposit, occupied swap, preselected-source move, retrieve, redeposit and partial merge, with matching ACKs. This supersedes the prior drag-open finding only; full-game acceptance remains false. Evidence: [drag fix](generated/player-qa/native-trade-drag-fix-20260909/README.md).

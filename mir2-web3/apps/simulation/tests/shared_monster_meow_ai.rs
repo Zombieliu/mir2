@@ -48,6 +48,7 @@ fn fixture(ai: u8, name: &str, player_x: i32, monster_id: u32) -> ZoneRuntime {
         session_id: SessionId::new("player"),
         now_ms: 0,
         monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: monster_id,
             name: name.into(),
             name_colour_argb: -1,
@@ -234,6 +235,7 @@ fn owned_stone_target(ranged: bool) -> (ZoneRuntime, u32) {
         .position;
     z.spawn_world_event_monster(
         &ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: ID,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,
@@ -451,6 +453,7 @@ fn full_totem_forces_meow_special_attack_past_a_closer_player() {
     assert!(
         z.spawn_world_event_monster(
             &ZoneMonsterSpawn {
+                crystal_drop_seed: None,
                 object_id: id,
                 name: "ArcherGuard".into(),
                 name_colour_argb: -1,

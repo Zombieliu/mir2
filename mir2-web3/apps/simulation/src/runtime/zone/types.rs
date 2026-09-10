@@ -186,6 +186,9 @@ pub struct ZoneChatItem {
 /// back to the legacy trusted scalar so existing callers keep working.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct ZonePlayerCombatStats {
+    /// Trusted current ItemDropRatePercent, never a client command field.
+    #[serde(default, skip_serializing_if = "zone_stat_is_zero")]
+    pub item_drop_rate_percent: i32,
     pub min_dc: i32,
     pub max_dc: i32,
     pub min_mc: i32,
@@ -348,6 +351,9 @@ impl ZoneMonsterRespawnPolicy {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterSpawn {
+    /// Server-authored original drop-table roll. None preserves explicit/custom loot.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crystal_drop_seed: Option<u64>,
     pub object_id: u32,
     pub name: String,
     pub name_colour_argb: i32,
@@ -427,6 +433,12 @@ impl ZoneMonsterDefense {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ZoneMonsterKillAward {
+    /// Gateway fixes this server-only namespace before first durable delivery.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_receipt_key: Option<String>,
+    /// Immutable server selection; legacy envelopes never infer a later Guild.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience_selection: Option<super::ZoneExperienceSelection>,
     pub monster_object_id: u32,
     /// Authoritative time of this monster incarnation's death. Crystal reuses
     /// a spawn's object id after respawn, so the object id alone cannot be an
@@ -833,6 +845,9 @@ pub struct GroundDropClaimTicket {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneNativeMonster {
+    /// Server-authored original drop-table roll. None preserves explicit/custom loot.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crystal_drop_seed: Option<u64>,
     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
     pub incarnation: u64,
     #[serde(default, skip_serializing_if = "zone_poison_is_zero")]
@@ -974,6 +989,7 @@ impl ZoneNativeMonster {
             position: spawn.position.clone(),
             direction: spawn.direction,
             dead: hp == 0,
+            crystal_drop_seed: spawn.crystal_drop_seed,
             drops: spawn.drops.clone(),
             next_ai_ready_at_ms: 0,
             next_attack_ready_at_ms: 0,

@@ -320,6 +320,7 @@ mod tests {
         assert_eq!(zone.players[&id].poison, 0);
         zone.spawn_world_event_monster(
             &ZoneMonsterSpawn {
+                crystal_drop_seed: None,
                 object_id: 77,
                 name: "Scarecrow".into(),
                 name_colour_argb: -1,

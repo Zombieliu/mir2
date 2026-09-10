@@ -26,6 +26,7 @@ fn add_attacker_at(z: &mut ZoneRuntime, trap: u32, actor:u32, dx:i32) {
         .position;
     z.spawn_world_event_monster(
         &ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: actor,
             name: "Ancient_WoomaGuardian".into(),
             name_colour_argb: -1,

@@ -20,6 +20,7 @@ fn exercise_corpse_expiry(empty_zone: bool) {
     };
     let id = 9_700_109;
     let spawn = ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: id,
         name: "Deer".into(),
         name_colour_argb: -1,

@@ -470,7 +470,7 @@ pub(super) fn equipment_slot_unique_id(slot: EquipmentSlot) -> Option<u64> {
     equipment_slot_index(slot).and_then(|index| u64::try_from(index).ok())
 }
 
-fn validated_item_state_user_item(item: &ItemState) -> Option<UserItem> {
+pub(super) fn validated_item_state_user_item(item: &ItemState) -> Option<UserItem> {
     let user_item = try_user_item_from_item_state(item).ok()?;
     mir2_game_data::crystal_item_by_index(user_item.item_index)?;
     Some(user_item)
@@ -1228,11 +1228,13 @@ pub(super) fn gm_toggle_ride(world: &mut World) -> Vec<ServerPacket> {
         mount_resource.riding_mount = wants_ride && can_ride;
         (mount_resource.riding_mount, mount_resource.mount_type)
     };
-    vec![ServerPacket::MountUpdate {
+    let mut packets=vec![ServerPacket::MountUpdate {
         object_id: current_player_object_id(world).unwrap_or_default(),
         mount_type,
         riding_mount,
-    }]
+    }];
+    packets.extend(super::hero_ai::hero_mount::sync_owner_toggle(world));
+    packets
 }
 
 pub(super) struct EquipItemMutationResult {
@@ -1406,7 +1408,7 @@ pub(super) fn equip_item_impl(
         success: false,
     };
     if matches!(grid, MirGridType::HeroInventory) {
-        return vec![failed_packet];
+        return super::hero_inventory::equip_item(world, unique_id, to);
     }
     let Some(result) = try_equip_item(world, grid, unique_id, to) else {
         return vec![failed_packet];
@@ -1437,7 +1439,7 @@ pub(super) fn remove_equipped_item_impl(
         success: false,
     };
     if matches!(grid, MirGridType::HeroInventory) {
-        return vec![failed_packet];
+        return super::hero_inventory::remove_item(world, unique_id, to);
     }
     if !matches!(grid, MirGridType::Inventory | MirGridType::Storage) {
         return vec![failed_packet];
@@ -1776,6 +1778,89 @@ fn equip_mount_slot_item_impl(
     true
 }
 
+fn equip_fishing_slot_item_impl(
+    world: &mut World,
+    grid: MirGridType,
+    unique_id: u64,
+    to: i32,
+    rod_unique_id: u64,
+) -> bool {
+    let Some(expected_type) = [28, 29, 30, 31, 32]
+        .get(usize::try_from(to).unwrap_or(usize::MAX))
+        .copied()
+    else {
+        return false;
+    };
+    if !matches!(grid, MirGridType::Inventory | MirGridType::Storage)
+        || (grid == MirGridType::Storage
+            && (!active_crystal_storage_service(world) || storage_locked(world)))
+    {
+        return false;
+    }
+    let Some((source_index, next_rod)) = (|| -> Option<(usize, EquipmentState)> {
+        let resources = world.resource::<InventoryResource>();
+        let sources = if grid == MirGridType::Inventory {
+            &resources.inventory_items
+        } else {
+            &resources.storage_items
+        };
+        let source_index = unique_item_index_for_protocol_reference(sources, grid, unique_id)?;
+        let source = &sources[source_index];
+        if super::packets::stage5_trade_reserves_item(world, source)
+            || resources
+                .reserved_item_unique_ids
+                .contains(&source.unique_id)
+            || resources.reserved_item_unique_ids.contains(&rod_unique_id)
+        {
+            return None;
+        }
+        let template = crystal_item_template_for_item_key(&source.key)?;
+        if template.item_type != expected_type
+            || crystal_item_requirement_rejection_key(world, resources, &template).is_some()
+        {
+            return None;
+        }
+        let soul_bound_id = item_state_soul_bound_id(source);
+        if soul_bound_id >= 0 && current_character_index(world) != Some(soul_bound_id) {
+            return None;
+        }
+        let rod = resources
+            .equipment_items
+            .iter()
+            .find(|item| item.slot == EquipmentSlot::Weapon)?;
+        let rod_template = crystal_item_template_for_item_key(&rod.key)?;
+        if rod_template.item_type != super::crystal_compat::CRYSTAL_ITEM_TYPE_WEAPON
+            || !super::crystal_compat::CRYSTAL_FISHING_ROD_SHAPES.contains(&rod_template.shape)
+            || user_item_from_equipment_state(rod)?.unique_id != rod_unique_id
+        {
+            return None;
+        }
+        Some((
+            source_index,
+            equipment_state_with_socket_inserted(rod, source, to)?,
+        ))
+    })() else {
+        return false;
+    };
+    let mut next = world.resource::<InventoryResource>().clone();
+    if grid == MirGridType::Inventory {
+        next.inventory_items.remove(source_index);
+    } else {
+        next.storage_items.remove(source_index);
+    }
+    let Some(index) = next
+        .equipment_items
+        .iter()
+        .position(|item| item.slot == EquipmentSlot::Weapon)
+    else {
+        return false;
+    };
+    next.equipment_items[index] = next_rod;
+    *world.resource_mut::<InventoryResource>() = next;
+    super::stats::refresh_player_stats(world);
+    true
+}
+
 /// Insert a Crystal socket item into the exact protocol slot requested by the
 /// client. `Socket` is the canonical Crystal target grid; `Inventory` remains
 /// accepted for the earlier native-client envelope and only targets bag hosts.
@@ -1797,8 +1882,13 @@ pub(super) fn equip_slot_item_impl(
     if !super::resources::is_in_world(world) {
         return vec![failed];
     }
-    if grid_to == MirGridType::Mount {
-        if !equip_mount_slot_item_impl(world, grid, unique_id, to, to_unique_id) {
+    if matches!(grid_to, MirGridType::Mount | MirGridType::Fishing) {
+        let success = if grid_to == MirGridType::Mount {
+            equip_mount_slot_item_impl(world, grid, unique_id, to, to_unique_id)
+        } else {
+            equip_fishing_slot_item_impl(world, grid, unique_id, to, to_unique_id)
+        };
+        if !success {
             return vec![failed];
         }
         return vec![ServerPacket::EquipSlotItem {
@@ -1965,7 +2055,29 @@ pub(super) fn remove_equipped_slot_item_impl(
                 };
                 reference
             }
-            // Fishing embedded slots remain a separate follow-on.
+            MirGridType::Fishing => {
+                let Some(index) = resources
+                    .equipment_items
+                    .iter()
+                    .position(|item| item.slot == EquipmentSlot::Weapon)
+                else {
+                    return vec![failed_packet];
+                };
+                let host = &resources.equipment_items[index];
+                let Some(template) = crystal_item_template_for_item_key(&host.key) else {
+                    return vec![failed_packet];
+                };
+                if template.item_type != super::crystal_compat::CRYSTAL_ITEM_TYPE_WEAPON
+                    || !super::crystal_compat::CRYSTAL_FISHING_ROD_SHAPES.contains(&template.shape)
+                    || user_item_from_equipment_state(host)
+                        .is_none_or(|item| item.unique_id != from_unique_id)
+                    || resources.reserved_item_unique_ids.contains(&from_unique_id)
+                    || resources.reserved_item_unique_ids.contains(&unique_id)
+                {
+                    return vec![failed_packet];
+                }
+                SocketHostReference::Equipment(index)
+            }
             _ => return vec![failed_packet],
         };
 

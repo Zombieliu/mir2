@@ -1,5 +1,38 @@
 # Agent Task Queue
 
+> 2026-09-10 menu parity is in progress. Shared Ranking presence now uses
+> stable account/character identity across local factory Zones, excluding
+> replicas and leaving players (simulation 3/3, Gateway integration 1/1).
+> Creature updates now preserve server-owned properties, reject fabricated
+> pets and separate summon state from pickup mode; authority/migration 5/5,
+> simulation regressions 4/4 and Gateway regressions 8/8 pass. Legitimate
+> creature acquisition/actor rendering, distributed ranking and final native
+> visual acceptance remain open. See `NATIVE-MENU-CRYSTAL-PARITY.md`.
+> No global completion percentage or final acceptance is claimed.
+
+> 2026-09-09 trade merge/reorder: native item selection now sends exact-UID
+> merges across Inventory/Trade and slot moves/swaps within own Trade.
+> Partial merges preserve the remainder and target identity; server validates
+> metadata, capacity, logical grid membership and editable offer state.
+> Shared routing blocks edits when either participant is prepared and refreshes
+> the partner offer. Trade merges require exact ACK/NACK, not inventory-delta
+> inference. Evidence: `docs/generated/player-qa/native-trade-merge-20260909/README.md`.
+> This deliberately completes a client interaction rejected by this Crystal
+> server checkout. Full custody/prepared editing and live package/visual gates
+> remain open; no global UI completion or acceptance percentage is claimed.
+
+> 2026-09-09 native trade item operations: inventory-to-own-trade deposit and
+> own-trade-to-selected-bag retrieval are connected to ordinary packet intents.
+> Server retrieval now validates the exact offered instance and destination,
+> preserves item identity/metadata, and rejects occupied/out-of-capacity cells.
+> UI selection is bound to item state and the current exchange; guest cells,
+> locked trades and covering dialogs reject input. Failed host sends release
+> only the matching unsent operation. Automated evidence and remaining gaps:
+> `docs/generated/player-qa/native-trade-items-20260909/README.md`.
+> Merge, trade-slot movement, complete item custody and live Windows visual
+> acceptance remain open. All 33 global UI backlog IDs remain open;
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
 > 2026-09-09 bounded shared update integration implemented for all 47 existing
 > personal dedicated monster modules: owned-monster combat, status leases,
 > targets, summons, death/retirement and checkpoint/fork are connected.

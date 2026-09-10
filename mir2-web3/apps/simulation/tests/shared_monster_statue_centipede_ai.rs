@@ -94,6 +94,7 @@ fn owned_target(ai: u8, source_id: u32) -> (ZoneRuntime, u32) {
         .position;
     z.spawn_world_event_monster(
         &ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: source_id,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,

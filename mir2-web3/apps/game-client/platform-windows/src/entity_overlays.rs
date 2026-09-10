@@ -73,7 +73,9 @@ impl OverlayVisibility {
         let options = state.map(|state| &state.core.options);
         Self {
             name_view: options.map(|options| options.name_view).unwrap_or(true),
-            drop_view: options.map(|options| options.drop_view).unwrap_or(true),
+            drop_view: options.map(|options| options.drop_view).unwrap_or(true)
+                || state
+                    .is_some_and(|state| state.local_keys.drops_visible(std::time::Instant::now())),
         }
     }
 }
@@ -871,6 +873,15 @@ fn overlay_entries_with_motion_at_center(
                 } else {
                     0.0
                 };
+                let pet_name_offset = if kind == "monster" && name.contains('_') {
+                    match entity.get("image").and_then(Value::as_u64) {
+                        Some(10001) => -10.,
+                        Some(10000..=10014) => -20.,
+                        _ => 0.,
+                    }
+                } else {
+                    0.
+                };
                 let corpse_shift = if dead {
                     CRYSTAL_CORPSE_NAME_SHIFT_Y_PX
                 } else {
@@ -949,6 +960,7 @@ fn overlay_entries_with_motion_at_center(
                             top: top
                                 + CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX
                                 + line_adjustment
+                                + pet_name_offset
                                 + line_index as f32 * CRYSTAL_SPLIT_NAME_LINE_STEP_PX
                                 + corpse_shift,
                             width,

@@ -1,8 +1,11 @@
 //! Crystal TradeDialogs.cs: two independent 204x152 windows and 2*x+y slots.
-//! Rendering / client-local controls only. Offers and wallet values stay in the
-//! server read models; a local lock indication is not a settlement receipt.
+//! Native controls send validated trade requests. Offers and wallet values stay
+//! in server read models; selection and local locks are not settlement receipts.
 use super::super::amount_input::CrystalAmountInput;
 use super::*;
+#[path = "trade_item_input.rs"]
+mod items;
+pub(super) use items::{draw_selection, process_items};
 
 pub(super) const OWN_RECT: CrystalRect = CrystalRect::new(298.0, 418.0, 204.0, 152.0);
 pub(super) const GUEST_RECT: CrystalRect = CrystalRect::new(522.0, 418.0, 204.0, 152.0);
@@ -74,6 +77,7 @@ pub struct TradeDialogUi {
     closed_locally: bool,
     drag: Option<(TradeSide, Vec2)>,
     last_cursor: Option<Vec2>,
+    item_input: items::TradeItemInput,
 }
 impl Default for TradeDialogUi {
     fn default() -> Self {
@@ -98,6 +102,7 @@ impl Default for TradeDialogUi {
             closed_locally: false,
             drag: None,
             last_cursor: None,
+            item_input: Default::default(),
         }
     }
 }
@@ -107,6 +112,7 @@ impl TradeDialogUi {
     }
     pub fn hide(&mut self) {
         self.open = false;
+        self.item_input = Default::default();
         self.gold_prompt = None;
         self.drag = None;
         self.closed_locally = true;
@@ -156,6 +162,9 @@ impl TradeDialogUi {
         self.seen_unlock_revision = Some(trade.unlock_revision);
         self.seen_partner = trade.partner.clone();
         self.observed_open = open;
+        if !open || fresh_exchange {
+            self.item_input = Default::default();
+        }
         if !open {
             self.open = false;
             self.gold_prompt = None;
@@ -496,9 +505,17 @@ pub(super) fn toggle_lock(
         || model.trade.state != "open"
         || model.trade.partner.is_none()
         || state.amount_modal_open()
+        || model.pending.iter().any(|p| {
+            matches!(
+                p,
+                crate::social::SocialPendingOperation::TradeDeposit { .. }
+                    | crate::social::SocialPendingOperation::TradeRetrieve { .. }
+            )
+        })
     {
         return false;
     }
+    state.trade_dialog.item_input = Default::default();
     let locked = !state.trade_dialog.locked(&model.trade);
     if !intents.push_transient_unique(NativePlayerUiIntent::TradeConfirm { locked }) {
         return false;
@@ -646,6 +663,17 @@ pub(super) fn render(
                     152.0,
                 );
                 let own = side == TradeSide::Own;
+                if own {
+                    if let Some(notice) = state.trade_dialog.item_input.notice {
+                        overlay_text_at(
+                            window,
+                            notice,
+                            CrystalRect::new(8.0, 105.0, 190.0, 12.0),
+                            9.0,
+                            TEXT,
+                        );
+                    }
+                }
                 label(
                     window,
                     if own { OWN_NAME } else { GUEST_NAME },
@@ -728,7 +756,24 @@ pub(super) fn render(
                         items.get(slot).and_then(Option::as_ref),
                         player,
                     );
+                    if own {
+                        draw_selection(window, state, false, slot, cell_rect(slot).unwrap());
+                    }
                 }
             });
     }
+}
+
+/// The current backend reserves an offered item in its original bag slot.
+/// Hide only confirmed own offers in presentation; never mutate InventoryModel.
+pub(super) fn offered_bag_item(social: &crate::social::SocialModel, item: &ItemModel) -> bool {
+    social.trade.state == "open"
+        && item.container == 0
+        && item.unique_id.is_some()
+        && social
+            .trade
+            .my_items
+            .iter()
+            .flatten()
+            .any(|offer| offer.unique_id == item.unique_id)
 }

@@ -175,6 +175,7 @@ impl ZoneRuntime {
         };
         let child = self.unique_object_id(0);
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: child,
             name: t.name.clone(),
             name_colour_argb: -1,
@@ -282,6 +283,7 @@ mod retirement_tests {
         // Trusted producer fixture recreates ownership the same way as the summon
         // producer; this is a real new incarnation, not a modified checkpoint.
         let make_spawn = |id: u32, m: &ZoneNativeMonster| ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: id,
             name: m.name.clone(),
             name_colour_argb: -1,

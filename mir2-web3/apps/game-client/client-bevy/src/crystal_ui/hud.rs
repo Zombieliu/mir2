@@ -356,7 +356,7 @@ impl Plugin for Mir2CrystalHudPlugin {
             .add_systems(Startup, spawn_crystal_hud)
             .add_systems(
                 Update,
-                update_hud_visibility.run_if(resource_changed::<NativeShellModel>),
+                update_hud_visibility.after(NativePlayerUiSet::Mutate),
             )
             .add_systems(
                 Update,
@@ -1149,12 +1149,15 @@ fn to_bevy_rect(rect: HudSourceRect) -> bevy::math::Rect {
 
 fn update_hud_visibility(
     shell: Res<NativeShellModel>,
+    state: Option<Res<NativePlayerUiState>>,
     mut roots: Query<&mut Node, With<CrystalHudRoot>>,
 ) {
     let Ok(mut root) = roots.single_mut() else {
         return;
     };
-    root.display = if shell.screen == NativeShellScreen::InGame {
+    root.display = if shell.screen == NativeShellScreen::InGame
+        && !state.as_deref().is_some_and(|s| s.local_keys.camera_hidden)
+    {
         Display::Flex
     } else {
         Display::None
@@ -1565,13 +1568,15 @@ fn toggle_belt_from_keyboard(
     {
         return;
     }
-    let control = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
-    if !keys.just_pressed(KeyCode::KeyZ) {
-        return;
-    }
-    if control {
+    let defaults = super::overlays::keyboard_dialog::KeyboardDialogUi::default();
+    let bindings = player_ui
+        .as_deref()
+        .map(|u| &u.keyboard)
+        .unwrap_or(&defaults);
+    if super::overlays::keyboard_dialog::host::triggered(bindings, &keys, "BeltFlip") {
         presentation.vertical = !presentation.vertical;
-    } else {
+    }
+    if super::overlays::keyboard_dialog::host::triggered(bindings, &keys, "Belt") {
         presentation.visible = !presentation.visible;
     }
 }
@@ -2043,6 +2048,39 @@ mod tests {
         blink.reset_unread_ids(Vec::new());
         assert!(!blink.visible);
         assert_eq!(blink.hidden_edges, 0);
+    }
+
+    #[test]
+    fn camera_mode_hides_actual_hud_root_and_restores_it() {
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<NativePlayerUiState>()
+        .add_systems(Update, update_hud_visibility);
+        let root = app
+            .world_mut()
+            .spawn((CrystalHudRoot, Node::default()))
+            .id();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .local_keys
+            .camera_hidden = true;
+        app.update();
+        assert_eq!(
+            app.world().get::<Node>(root).unwrap().display,
+            Display::None
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .local_keys
+            .camera_hidden = false;
+        app.update();
+        assert_eq!(
+            app.world().get::<Node>(root).unwrap().display,
+            Display::Flex
+        );
     }
 
     #[test]

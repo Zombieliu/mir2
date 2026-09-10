@@ -537,6 +537,7 @@ impl ZoneRuntime {
             )
         };
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: Some(pending.drop_roll ^ u64::from(child_id)),
             object_id: child_id,
             name: template.name.clone(),
             name_colour_argb: -1,
@@ -704,6 +705,8 @@ impl ZoneRuntime {
             out.extend(self.group_monster_kill_awards(
                 &owner,
                 ZoneMonsterKillAward {
+                    source_receipt_key: None,
+                    experience_selection: None,
                     monster_object_id: id,
                     killed_at_ms: now_ms,
                     monster_name: name,

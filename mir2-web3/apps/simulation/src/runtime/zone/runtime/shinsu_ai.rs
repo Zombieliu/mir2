@@ -18,6 +18,7 @@ mod expiry_tests {
     fn shinsu_expiry_blocks_mode_attack_and_both_pending_hit_queues() {
         let mut z = ZoneRuntime::new(ZoneKey::for_map("shinsu-expiry"));
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 18,
             name: "Shinsu".into(),
             name_colour_argb: -1,

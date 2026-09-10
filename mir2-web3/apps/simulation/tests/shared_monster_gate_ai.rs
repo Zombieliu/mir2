@@ -46,6 +46,7 @@ fn fixture(collision: ZoneCollision) -> ZoneRuntime {
         session_id: SessionId::new("kicker"),
         now_ms: 0,
         monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: ID,
             name: "SabukGate".into(),
             name_colour_argb: -1,

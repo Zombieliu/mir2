@@ -399,6 +399,8 @@ impl ZoneRuntime {
             out.extend(self.group_monster_kill_awards(
                 &owner,
                 ZoneMonsterKillAward {
+                    source_receipt_key: None,
+                    experience_selection: None,
                     monster_object_id: id,
                     killed_at_ms: now,
                     monster_name: name,
@@ -642,6 +644,7 @@ impl ZoneRuntime {
         };
         let id = self.unique_object_id(0);
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: Some(now / 300),
             object_id: id,
             name: t.name.clone(),
             name_colour_argb: -1,

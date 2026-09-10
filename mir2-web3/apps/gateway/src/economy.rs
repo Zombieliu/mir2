@@ -32,6 +32,8 @@ const ECONOMY_TRADE_SETTLEMENT_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-trade
 const ECONOMY_BOOTSTRAP_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-bootstrap.v1\0";
 const ECONOMY_TRADE_DOMAIN: &[u8] = b"obelisk.mir2.game-economy-trade.v1\0";
 const MAX_ECONOMY_LEGS: usize = 128;
+mod prepared_kill;
+use prepared_kill::{PreparedKillProjection, PreparedKillSource};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -147,6 +149,9 @@ pub struct EconomyTransactionEnvelope {
 
 impl EconomyTransactionEnvelope {
     pub fn validate(&self) -> Result<(), String> {
+        self.validate_inner(false)
+    }
+    fn validate_inner(&self, prepared: bool) -> Result<(), String> {
         if self.idempotency_key.trim().is_empty()
             || self.idempotency_key.len() > 512
             || self.idempotency_key.chars().any(char::is_control)
@@ -159,7 +164,7 @@ impl EconomyTransactionEnvelope {
         if self.fencing_generation == 0 {
             return Err("economy fencing generation must be positive".to_string());
         }
-        if self.legs.is_empty() || self.legs.len() > MAX_ECONOMY_LEGS {
+        if (!prepared && self.legs.is_empty()) || self.legs.len() > MAX_ECONOMY_LEGS {
             return Err(format!(
                 "economy transaction must contain 1..={MAX_ECONOMY_LEGS} legs"
             ));
@@ -200,7 +205,10 @@ impl EconomyTransactionEnvelope {
     }
 
     pub fn event_id(&self) -> Result<String, String> {
-        self.validate()?;
+        self.event_id_inner(false)
+    }
+    fn event_id_inner(&self, prepared: bool) -> Result<String, String> {
+        self.validate_inner(prepared)?;
         let payload = serde_json::to_vec(self)
             .map_err(|error| format!("encode economy transaction: {error}"))?;
         let mut hasher = Sha256::new();
@@ -215,7 +223,10 @@ impl EconomyTransactionEnvelope {
     /// the same authoritative effect can recover without becoming a new debit
     /// or credit.
     pub fn business_effect_id(&self) -> Result<String, String> {
-        self.validate()?;
+        self.business_effect_id_inner(false)
+    }
+    fn business_effect_id_inner(&self, prepared: bool) -> Result<String, String> {
+        self.validate_inner(prepared)?;
         let payload = serde_json::to_vec(&EconomyBusinessEffect {
             idempotency_key: &self.idempotency_key,
             transaction_kind: self.transaction_kind,
@@ -255,6 +266,8 @@ pub struct EconomyTransactionReceipt {
     /// project the original recipient's asset mutation into this character.
     #[serde(default)]
     pub settled_elsewhere: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_checkpoint_digest: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -282,6 +295,8 @@ pub struct EconomyOutboxEvent {
     /// second private projection.
     #[serde(default)]
     pub receipt_digest: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source_checkpoint: Option<PreparedKillProjection>,
 }
 /// Canonical typed materialization instructions held by a trade outbox event.
 /// They are serialized into `EconomyTransactionEnvelope::metadata`, so the
@@ -397,10 +412,19 @@ fn validate_duplicate_business_effect(
     stored_receipt: &EconomyTransactionReceipt,
     requested: &EconomyTransactionEnvelope,
 ) -> Result<DuplicateBusinessEffect, String> {
-    let stored_event_id = stored_event.envelope.event_id()?;
-    let stored_business_effect_id = stored_event.envelope.business_effect_id()?;
-    let requested_business_effect_id = requested.business_effect_id()?;
-    let expected_balance_keys = aggregate_legs(&stored_event.envelope.legs)?
+    let prepared = stored_event.source_checkpoint.is_some();
+    match (&stored_event.source_checkpoint, &stored_receipt.source_checkpoint_digest) {
+        (Some(projection), Some(digest)) => {
+            prepared_kill::validate_projection(&stored_event.envelope, projection)?;
+            if projection.digest()? != *digest { return Err("prepared kill checkpoint integrity mismatch".into()); }
+        }
+        (None, None) => (),
+        _ => return Err("prepared kill checkpoint commitment missing".into()),
+    }
+    let stored_event_id = stored_event.envelope.event_id_inner(prepared)?;
+    let stored_business_effect_id = stored_event.envelope.business_effect_id_inner(prepared)?;
+    let requested_business_effect_id = requested.business_effect_id_inner(prepared)?;
+    let expected_balance_keys = aggregate_legs_inner(&stored_event.envelope.legs, prepared)?
         .keys()
         .map(balance_receipt_key)
         .collect::<Result<BTreeSet<_>, _>>()?;
@@ -790,8 +814,25 @@ impl PostgresEconomyStore {
         &self,
         envelope: &EconomyTransactionEnvelope,
     ) -> Result<EconomyTransactionReceipt, String> {
-        envelope.validate()?;
-        let event_id = envelope.event_id()?;
+        self.transact_with_source(envelope, None).map(|(receipt, _)| receipt)
+    }
+
+    fn transact_prepared_kill(&self, envelope: &EconomyTransactionEnvelope, source: &dyn PreparedKillSource)
+        -> Result<(EconomyTransactionReceipt, PreparedKillProjection), String> {
+        let (receipt, checkpoint) = self.transact_with_source(envelope, Some(source))?;
+        Ok((receipt, checkpoint.ok_or("prepared kill checkpoint missing after commit")?))
+    }
+
+    fn transact_with_source(&self, envelope: &EconomyTransactionEnvelope, source: Option<&dyn PreparedKillSource>)
+        -> Result<(EconomyTransactionReceipt, Option<PreparedKillProjection>), String> {
+        if let Some(source) = source { prepared_kill::validate_source(envelope, source)?; }
+        else {
+            envelope.validate()?;
+            if envelope.metadata.get("operation").map(String::as_str) == Some("preparedMonsterKillExperience") {
+                return Err("prepared kill requires a trusted source participant".into());
+            }
+        }
+        let event_id = envelope.event_id_inner(source.is_some())?;
         let trade_projection_rows = trade_projection_rows_from_envelope(envelope, &event_id)?;
         let ground_drop_projection = ground_drop_projection_from_envelope(envelope, &event_id)?;
         let mut client = self.connect()?;
@@ -819,16 +860,28 @@ impl PostgresEconomyStore {
                 .map_err(|error| format!("decode stored economy receipt: {error}"))?;
             let event: EconomyOutboxEvent = serde_json::from_value(row.get("payload"))
                 .map_err(|error| format!("decode stored economy outbox event: {error}"))?;
-            return duplicate_receipt_from_stored(&event, &receipt, envelope);
+            let receipt = duplicate_receipt_from_stored(&event, &receipt, envelope)?;
+            if source.is_some() != event.source_checkpoint.is_some() { return Err("economy source capability mismatch".into()); }
+            return Ok((receipt, event.source_checkpoint));
         }
 
-        let characters = envelope
+        if let Some(source) = source {
+            prepared_kill::lock_live_zone_lease(&mut transaction, envelope)?;
+            source.lock_guilds(&mut transaction)?;
+        }
+        let mut characters = envelope
             .legs
             .iter()
             .map(|leg| (leg.balance.account_id.clone(), leg.balance.character_index))
             .collect::<BTreeSet<_>>();
+        if let Some(source) = source { characters.insert((source.identity().account_id.clone(), source.identity().character_index)); }
         lock_economy_characters(&mut transaction, &characters)?;
-        let aggregated = aggregate_legs(&envelope.legs)?;
+        let source_checkpoint = if let Some(source) = source {
+            let checkpoint = source.publish_source(&mut transaction)?;
+            prepared_kill::validate_projection(envelope, &checkpoint)?;
+            Some(checkpoint)
+        } else { None };
+        let aggregated = aggregate_legs_inner(&envelope.legs, source.is_some())?;
         let unique_item_ids = aggregated
             .keys()
             .filter(|key| key.asset_kind == "item")
@@ -860,6 +913,11 @@ impl PostgresEconomyStore {
                 )
                 .map_err(|error| format!("economy balance lock failed: {error}"))?;
             let current: i64 = row.get("amount");
+            if let Some(source) = source {
+                if source.expected_before().get(&key).copied() != Some(current) {
+                    return Err("prepared kill ledger baseline differs from authoritative source; reconciliation required".into());
+                }
+            }
             let after = current
                 .checked_add(delta)
                 .ok_or_else(|| "economy balance overflow".to_string())?;
@@ -921,6 +979,7 @@ impl PostgresEconomyStore {
             balances_after,
             duplicate: false,
             settled_elsewhere: false,
+            source_checkpoint_digest: source_checkpoint.as_ref().map(PreparedKillProjection::digest).transpose()?,
         };
         let receipt_json = serde_json::to_value(&receipt)
             .map_err(|error| format!("encode economy receipt: {error}"))?;
@@ -929,6 +988,7 @@ impl PostgresEconomyStore {
             idempotency_key: envelope.idempotency_key.clone(),
             envelope: envelope.clone(),
             receipt_digest: receipt_integrity_digest(&receipt)?,
+            source_checkpoint: source_checkpoint.clone(),
         };
         let event_json = serde_json::to_value(&event)
             .map_err(|error| format!("encode economy outbox event: {error}"))?;
@@ -1000,8 +1060,10 @@ impl PostgresEconomyStore {
         }
         transaction
             .commit()
-            .map_err(|error| format!("economy transaction commit failed: {error}"))?;
-        Ok(receipt)
+            .map_err(|error| if source.is_some() {
+                format!("PREPARED_KILL_COMMIT_OUTCOME_UNKNOWN: {error}")
+            } else { format!("economy transaction commit failed: {error}") })?;
+        Ok((receipt, source_checkpoint))
     }
 
     fn pending_trade_projections(
@@ -1346,12 +1408,22 @@ impl PostgresEconomyStore {
         processed_at_ms: u64,
     ) -> Result<EconomyInboxReceipt, String> {
         validate_worker_or_consumer("consumer", consumer_id)?;
-        if event.event_id != event.envelope.event_id()? {
+        if event.event_id != event.envelope.event_id_inner(event.source_checkpoint.is_some())? {
             return Err("economy inbox event digest mismatch".to_string());
         }
         let payload = serde_json::to_value(event)
             .map_err(|error| format!("encode economy inbox event: {error}"))?;
         let mut client = self.connect()?;
+        if event.source_checkpoint.is_some() || event.envelope.metadata.get("operation").map(String::as_str) == Some("preparedMonsterKillExperience") {
+            let row = client.query_opt(
+                "SELECT receipt FROM game_economy_transactions WHERE event_id=$1",
+                &[&event.event_id],
+            ).map_err(|error| format!("prepared kill inbox receipt lookup failed: {error}"))?
+                .ok_or("prepared kill inbox requires its committed receipt")?;
+            let receipt: EconomyTransactionReceipt = serde_json::from_value(row.get(0))
+                .map_err(|error| format!("decode prepared kill inbox receipt: {error}"))?;
+            validate_stored_economy_transaction(event, &receipt)?;
+        }
         let inserted = client
             .execute(
                 "INSERT INTO game_economy_inbox
@@ -1512,6 +1584,8 @@ impl PostgresEconomyStore {
 }
 
 trait EconomySettlementStore: std::fmt::Debug + Send + Sync {
+    fn prepared_kill_store(&self) -> Option<&PostgresEconomyStore> { None }
+
     fn ensure_migrated(&self) -> Result<(), String>;
 
     fn bootstrap_character(
@@ -1555,6 +1629,7 @@ trait EconomySettlementStore: std::fmt::Debug + Send + Sync {
 }
 
 impl EconomySettlementStore for PostgresEconomyStore {
+    fn prepared_kill_store(&self) -> Option<&PostgresEconomyStore> { Some(self) }
     fn ensure_migrated(&self) -> Result<(), String> {
         PostgresEconomyStore::ensure_migrated(self)
     }
@@ -1893,6 +1968,19 @@ impl SharedAccountInventoryService for PostgresEconomyAccountInventoryService {
                 receipt: Self::failed_receipt(&envelope.command),
             };
         };
+        if let (Some(store), SharedAccountInventoryCommand::MonsterKillAward(award)) = (self.store.prepared_kill_store(), &envelope.command) {
+            let key = award.source_receipt_key.clone().unwrap_or_else(|| format!("zone:{}:{}",context.zone_id,envelope.stable_idempotency_key()));
+            let failed = Self::failed_receipt(&envelope.command);
+            if runtime.active_identity().as_ref()!=Some(&envelope.identity) || !self.bootstrap_fenced(runtime,Some(context)) {
+                return SharedAccountInventoryCommitOutcome::Deferred { receipt: failed };
+            }
+            let mut award=award.clone(); award.source_receipt_key=Some(key.clone());
+            return match store.commit_runtime_kill(runtime,context,&envelope.identity,&key,&award) {
+                Ok((_,packets))=>SharedAccountInventoryCommitOutcome::Confirmed(SharedAccountInventoryTransactionReceipt {kind: SharedAccountInventoryTransactionKind::MonsterKillAward,committed:true,packets}),
+                Err(mir2_simulation::PreparedKillPublicationFailure::Rejected(_))=>SharedAccountInventoryCommitOutcome::Deferred {receipt:failed},
+                Err(mir2_simulation::PreparedKillPublicationFailure::OutcomeUnknown(_))=>SharedAccountInventoryCommitOutcome::OutcomeUnknown {idempotency_key:key,execution_context:context.clone(),receipt:failed},
+            };
+        }
         let mut outcome_unknown = None;
         let receipt = (|| -> SharedAccountInventoryTransactionReceipt {
             if runtime.active_identity().as_ref() != Some(&envelope.identity) {
@@ -2706,6 +2794,9 @@ fn lock_economy_characters(
 }
 
 fn aggregate_legs(legs: &[EconomyLeg]) -> Result<BTreeMap<EconomyBalanceKey, i64>, String> {
+    aggregate_legs_inner(legs, false)
+}
+fn aggregate_legs_inner(legs: &[EconomyLeg], prepared: bool) -> Result<BTreeMap<EconomyBalanceKey, i64>, String> {
     let mut aggregated = BTreeMap::<EconomyBalanceKey, i64>::new();
     for leg in legs {
         let value = aggregated.entry(leg.balance.clone()).or_default();
@@ -2714,7 +2805,7 @@ fn aggregate_legs(legs: &[EconomyLeg]) -> Result<BTreeMap<EconomyBalanceKey, i64
             .ok_or_else(|| "economy aggregate delta overflow".to_string())?;
     }
     aggregated.retain(|_, delta| *delta != 0);
-    if aggregated.is_empty() {
+    if aggregated.is_empty() && !prepared {
         return Err("economy transaction has no net effect".to_string());
     }
     Ok(aggregated)
@@ -3069,12 +3160,14 @@ mod tests {
                 balances_after,
                 duplicate: false,
                 settled_elsewhere: false,
+                source_checkpoint_digest: None,
             };
             let event = EconomyOutboxEvent {
                 event_id: receipt.event_id.clone(),
                 idempotency_key: envelope.idempotency_key.clone(),
                 envelope: envelope.clone(),
                 receipt_digest: receipt_integrity_digest(&receipt)?,
+                source_checkpoint: None,
             };
             state.balances = next_balances;
             let delayed_visibility = state.delay_commit_visibility_until_lookup;
@@ -3276,14 +3369,14 @@ mod tests {
             Ok(())
         }
     }
-    fn start_test_runtime(
+    pub(super) fn start_test_runtime(
         account_id: &str,
         character_name: &str,
     ) -> Result<InProcessWorldRuntime, String> {
         start_test_runtime_with_config(crate::GatewayConfig::default(), account_id, character_name)
     }
 
-    fn start_test_runtime_with_config(
+    pub(super) fn start_test_runtime_with_config(
         config: crate::GatewayConfig,
         account_id: &str,
         character_name: &str,

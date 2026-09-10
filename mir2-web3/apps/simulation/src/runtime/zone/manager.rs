@@ -34,6 +34,122 @@ struct ZoneManagerCheckpoint {
 }
 
 impl ZoneManager {
+    pub fn sync_intelligent_creature(
+        &mut self,
+        session_id: &SessionId,
+        creature: Option<mir2_protocol::ClientIntelligentCreature>,
+        allowed_object_ids: std::collections::BTreeSet<u32>,
+        group_members: Vec<String>,
+        map_allows: bool,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return vec![];
+        };
+        self.zones
+            .get_mut(key)
+            .map(|z| {
+                z.sync_intelligent_creature(
+                    session_id,
+                    creature,
+                    allowed_object_ids,
+                    group_members,
+                    map_allows,
+                    now_ms,
+                )
+            })
+            .unwrap_or_default()
+    }
+    pub fn request_intelligent_creature_pickup(
+        &mut self,
+        session_id: &SessionId,
+        mouse_mode: bool,
+        location: Point,
+    ) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones.get_mut(key).is_some_and(|z| {
+            z.request_intelligent_creature_pickup(session_id, mouse_mode, location)
+        })
+    }
+    pub fn intelligent_creature_object_id(&self, session_id: &SessionId) -> Option<u32> {
+        self.zones
+            .get(self.session_zones.get(session_id)?)?
+            .intelligent_creature_object_id(session_id)
+    }
+    pub fn intelligent_creature_intent_is_current(
+        &self,
+        intent: &super::CreaturePickupIntent,
+    ) -> bool {
+        self.session_zones
+            .get(&intent.owner.session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|z| z.intelligent_creature_intent_is_current(intent))
+    }
+    pub fn settle_intelligent_creature_pickup(
+        &mut self,
+        session_id: &SessionId,
+        creature_object_id: u32,
+        drop_id: u32,
+    ) -> bool {
+        let Some(key) = self.session_zones.get(session_id) else {
+            return false;
+        };
+        self.zones.get_mut(key).is_some_and(|z| {
+            z.settle_intelligent_creature_pickup(session_id, creature_object_id, drop_id)
+        })
+    }
+    /// Search all zones because an already-started operation survives leaving its
+    /// visual actor. Preserve every other owner's entries in their original order.
+    pub fn drain_intelligent_creature_operations(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Vec<super::CreatureOperation> {
+        self.zones
+            .values_mut()
+            .flat_map(|z| z.drain_intelligent_creature_operations_for(session_id))
+            .collect()
+    }
+    pub fn drain_intelligent_creature_pickup_intents(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Vec<super::CreaturePickupIntent> {
+        self.zones
+            .values_mut()
+            .flat_map(|z| z.drain_intelligent_creature_pickup_intents_for(session_id))
+            .collect()
+    }
+    pub fn settle_intelligent_creature_operation(
+        &mut self,
+        session_id: &SessionId,
+        operation_id: &str,
+    ) -> bool {
+        let mut settled = false;
+        for zone in self.zones.values_mut() {
+            settled |= zone.settle_intelligent_creature_operation(session_id, operation_id);
+        }
+        settled
+    }
+    /// Internal authenticated-account recovery path. Session IDs identify the
+    /// original delivery, while account + character owns the durable receipt.
+    /// Callers must derive both arguments from their active identity, never wire
+    /// input. Ack using the returned operation's original owner.session_id.
+    pub fn peek_intelligent_creature_operations_for_identity(
+        &self,
+        account_id: &str,
+        character_index: i32,
+    ) -> Vec<super::CreatureOperation> {
+        if account_id.is_empty() {
+            return Vec::new();
+        }
+        self.zones
+            .values()
+            .flat_map(|zone| {
+                zone.peek_intelligent_creature_operations_for_identity(account_id, character_index)
+            })
+            .collect()
+    }
     pub fn new() -> Self {
         Self {
             zones: BTreeMap::new(),

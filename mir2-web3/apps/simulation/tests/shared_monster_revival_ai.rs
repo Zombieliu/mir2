@@ -60,6 +60,7 @@ fn fixture(id: u32) -> ZoneRuntime {
 
 fn zombie_spawn(id: u32) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: id,
         name: "Zombie3".into(),
         name_colour_argb: -1,

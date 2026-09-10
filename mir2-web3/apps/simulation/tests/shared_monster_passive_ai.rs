@@ -20,6 +20,7 @@ fn fixture(timid: bool) -> (ZoneRuntime, u32) {
         assert!(
             zone.spawn_world_event_monster(
                 &ZoneMonsterSpawn {
+                    crystal_drop_seed: None,
                     object_id: id,
                     name: "Deer".into(),
                     name_colour_argb: -1,

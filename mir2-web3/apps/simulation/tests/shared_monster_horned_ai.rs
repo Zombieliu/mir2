@@ -44,6 +44,7 @@ fn join(z: &mut ZoneRuntime, name: &str, id: u32, pos: Point) {
 }
 fn spawn(id: u32, ai: u8, name: &str, pos: Point, hp: i32) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: id,
         name: name.into(),
         name_colour_argb: -1,

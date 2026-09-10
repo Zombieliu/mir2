@@ -13,9 +13,9 @@ use crate::inventory::CrystalItemTooltipSourceModel;
 
 pub const MAX_GROUP_MEMBERS: usize = 15;
 pub const MAX_GUILD_MEMBERS: usize = 200;
-pub const MAX_GUILD_RANKS: usize = 32;
+pub const MAX_GUILD_RANKS: usize = 255;
 pub const MAX_GUILD_STORAGE_ITEMS: usize = 112;
-pub const MAX_NOTICE_LINES: usize = 8;
+pub const MAX_NOTICE_LINES: usize = 200;
 pub const MAX_TRADE_ITEMS: usize = 10;
 pub const MAX_SOCIAL_PENDING: usize = 8;
 pub const MAX_GUILD_PERMISSIONS: usize = 8;
@@ -50,6 +50,7 @@ pub struct GroupMemberModel {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GroupModel {
+    pub member_maps: std::collections::BTreeMap<String, String>,
     pub active: bool,
     pub allow_invites: bool,
     pub leader_name: Option<String>,
@@ -63,6 +64,7 @@ pub struct GroupModel {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GuildMemberModel {
+    pub last_login_binary_datetime: i64,
     pub name: String,
     pub id: i32,
     pub online: bool,
@@ -94,6 +96,7 @@ pub struct GuildStorageItemModel {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GuildModel {
+    pub spare_points: u8,
     pub name: Option<String>,
     pub notice: Vec<String>,
     pub rank_name: Option<String>,
@@ -304,6 +307,14 @@ impl SocialModel {
         self.reconcile_pending(&old);
     }
 
+    /// Each wire arrival is a new request; repeated state projections are not.
+    pub fn apply_network_packet(&mut self, packet: &str, payload: &Value) -> bool {
+        if packet == "GroupInvite" && clean_name(payload.get("name")).is_some() {
+            self.group.pending_invite_from = None;
+        }
+        self.apply_packet(packet, payload)
+    }
+
     /// Fold one ordinary gateway ServerPacket payload into the cursor model.
     /// Returns false for unknown, missing, or over-limit payloads.
     pub fn apply_packet(&mut self, packet: &str, payload: &Value) -> bool {
@@ -329,6 +340,7 @@ impl SocialModel {
                     return false;
                 };
                 self.group.members.retain(|member| member.name != name);
+                self.group.member_maps.remove(&name);
                 changed = true;
             }
             "GroupInvite" => {
@@ -364,6 +376,24 @@ impl SocialModel {
                 upsert_group_member(&mut self.group, name);
                 if !was_active && self.group.active {
                     self.group.pending_invite_from = None;
+                }
+                changed = true;
+            }
+            "GroupMembersMap" => {
+                let (Some(name), Some(map)) = (
+                    clean_name(payload.get("playerName")),
+                    payload.get("playerMap").and_then(Value::as_str),
+                ) else {
+                    return false;
+                };
+                if !self.group.member_maps.contains_key(&name)
+                    && self.group.member_maps.len() >= MAX_GROUP_MEMBERS
+                {
+                    return false;
+                }
+                self.group.member_maps.insert(name.clone(), map.to_owned());
+                if let Some(member) = self.group.members.iter_mut().find(|m| m.name == name) {
+                    member.map = Some(map.to_owned());
                 }
                 changed = true;
             }
@@ -423,6 +453,8 @@ impl SocialModel {
                 };
                 self.guild.name = Some(name);
                 self.guild.rank_name = clean_name(Some(&Value::String(raw_rank.to_owned())));
+                self.guild.spare_points =
+                    value_u8(guild_field(payload, "spare_points", "sparePoints")).unwrap_or(0);
                 self.guild.level = value_u8(guild_field(payload, "level", "level")).unwrap_or(0);
                 self.guild.experience = value_i64(guild_field(payload, "experience", "experience"))
                     .unwrap_or(0)
@@ -1035,6 +1067,12 @@ fn parse_group_member(value: &Value) -> Option<GroupMemberModel> {
 
 fn parse_guild_member(value: &Value) -> Option<GuildMemberModel> {
     Some(GuildMemberModel {
+        last_login_binary_datetime: value_i64(
+            value
+                .get("last_login_binary_datetime")
+                .or_else(|| value.get("lastLoginBinaryDatetime")),
+        )
+        .unwrap_or(0),
         name: clean_name(value.get("name"))?,
         id: value_i32(value.get("id")).unwrap_or(0),
         online: value

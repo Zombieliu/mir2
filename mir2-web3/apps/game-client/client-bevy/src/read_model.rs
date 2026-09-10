@@ -15,6 +15,14 @@ pub struct CrystalPlayerStatModel {
     pub value: i32,
 }
 
+/// Exact server display weights; a missing block remains unknown.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PlayerWeights {
+    pub bag: u32,
+    pub wear: u32,
+    pub hand: u32,
+}
+
 /// Player stats surfaced by the HUD.
 ///
 /// All values are `Option`-safe and clamped by [`UiReadModel::normalized_hp`]
@@ -38,6 +46,9 @@ pub struct PlayerStats {
     pub experience: i64,
     pub max_experience: i64,
     pub current_weight: u16,
+    /// Distinguishes an authoritative empty bag from missing legacy weight data.
+    pub current_weight_known: bool,
+    pub weights: Option<PlayerWeights>,
     pub max_weight: u16,
     pub name: Option<String>,
     /// Authoritative class name used to apply GameShop class restrictions.
@@ -165,6 +176,8 @@ mod tests {
                 experience: 435,
                 max_experience: 900,
                 current_weight: 1,
+                current_weight_known: true,
+                weights: None,
                 max_weight: 50,
                 name: Some("Demo".to_owned()),
                 class_name: Some("Warrior".to_owned()),

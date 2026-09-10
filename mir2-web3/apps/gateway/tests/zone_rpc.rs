@@ -126,6 +126,7 @@ fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
     ));
     let zone_id = ZoneId::primary();
     let spawn = ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: 0x7000_0044,
         name: "WoomaSoldier".to_string(),
         name_colour_argb: -1,

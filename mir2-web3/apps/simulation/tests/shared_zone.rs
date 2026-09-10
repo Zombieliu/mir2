@@ -807,6 +807,7 @@ fn gold_drop(
 
 fn native_monster_spawn(object_id: u32, x: i32, y: i32) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id,
         name: "Field Wasp".to_string(),
         name_colour_argb: -1,
@@ -5234,6 +5235,7 @@ fn zone_neutral_harvestable_monster_accepts_only_adjacent_melee() {
         session_id: materialized_attacker.clone(),
         object_id: 9_151,
         monster: Some(ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 9_151,
             ..deer
         }),

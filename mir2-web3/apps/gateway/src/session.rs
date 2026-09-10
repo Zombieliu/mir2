@@ -173,6 +173,9 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
+    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        self.runtime.supports_magic_key_assignment(spell,key,old_key)
+    }
     pub fn new(config: GatewayConfig) -> Self {
         Self::new_with_zone_registry(config, &ZoneRegistry::in_process())
     }

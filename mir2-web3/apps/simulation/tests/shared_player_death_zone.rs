@@ -41,6 +41,7 @@ fn fixture(ai: u8, id: u32, hp: i32, gm: bool) -> ZoneRuntime {
         session_id: SessionId::new("owner"),
         now_ms: 0,
         monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: id,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,

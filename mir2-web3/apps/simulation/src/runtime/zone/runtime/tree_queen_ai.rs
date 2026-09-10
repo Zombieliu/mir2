@@ -671,6 +671,7 @@ mod power_tests {
             combat_stats: Default::default(),
         }));
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: id,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,

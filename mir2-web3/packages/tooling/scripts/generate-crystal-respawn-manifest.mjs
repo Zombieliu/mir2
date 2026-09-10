@@ -117,6 +117,46 @@ function main() {
   }
 
   const maps = parseMaps(reader);
+  // Narrow map-rule repair: preserve existing generated content and timestamps.
+  if (process.env.MIR2_CRYSTAL_CREATURE_MAP_RULE_ONLY) {
+    const byIndex = new Map(maps.map((map) => [map.map_index, map]));
+    const repairs = [respawnOutputPath, webRespawnOutputPath].map((outputPath) => {
+      const original = readFileSync(outputPath, "utf8");
+      const manifest = JSON.parse(original);
+      if (manifest.crystal_db_version !== version || manifest.crystal_db_custom_version !== customVersion
+          || manifest.maps.length !== maps.length) {
+        throw new Error("Creature map-rule repair requires a matching complete map database");
+      }
+      for (const map of manifest.maps) {
+        const source = byIndex.get(map.map_index);
+        if (!source || source.map_file_name !== map.map_file_name || source.map_title !== map.map_title) {
+          throw new Error(`Map identity mismatch at ${map.map_index}`);
+        }
+      }
+      let cursor = 0;
+      const repaired = original.replace(/^\s*"no_intelligent_creatures": (true|false),\r?\n/gm, "")
+        .replace(/(^[ \t]*)"no_hero":/gm, (match, indent) => {
+          const source = byIndex.get(manifest.maps[cursor++].map_index);
+          return `${indent}"no_intelligent_creatures": ${source.no_intelligent_creatures},\n${match}`;
+        });
+      const stripRule = (text) => JSON.stringify(JSON.parse(text), (key, value) => key === "no_intelligent_creatures" ? undefined : value);
+      if (cursor !== maps.length || stripRule(repaired) !== stripRule(original)) {
+        throw new Error("Creature map-rule repair changed unrelated map content");
+      }
+      return { outputPath, repaired };
+    });
+    for (const { outputPath, repaired } of repairs) {
+      if (process.env.MIR2_CRYSTAL_CREATURE_MAP_RULE_ONLY !== "check") writeFileSync(outputPath, repaired);
+      const checked = JSON.parse(readFileSync(outputPath, "utf8"));
+      for (const map of checked.maps) {
+        if (map.no_intelligent_creatures !== byIndex.get(map.map_index).no_intelligent_creatures) {
+          throw new Error(`NoIntelligentCreatures mismatch for ${map.map_file_name}`);
+        }
+      }
+    }
+    console.log(`Verified ${maps.length} creature map rules in both manifests; forbidden=${maps.filter(map => map.no_intelligent_creatures).length}`);
+    return;
+  }
   const items = parseItems(reader);
   const monsterByIndex = parseMonsters(reader);
   // Narrow repair/verification mode: read authoritative DB Stat.Accuracy without
@@ -204,6 +244,7 @@ function main() {
         no_drop_player: map.no_drop_player,
         no_drop_monster: map.no_drop_monster,
         no_mount: map.no_mount,
+        no_intelligent_creatures: map.no_intelligent_creatures,
         no_hero: map.no_hero,
         need_bridle: map.need_bridle,
         safe_zones: map.safe_zones,
@@ -449,7 +490,7 @@ function parseMaps(reader) {
     reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
-    reader.readBoolean();
+    const no_intelligent_creatures = reader.readBoolean();
     const no_hero = reader.readBoolean();
     reader.readInt32();
     reader.readBoolean();
@@ -476,6 +517,7 @@ function parseMaps(reader) {
       no_drop_player,
       no_drop_monster,
       no_mount,
+      no_intelligent_creatures,
       no_hero,
       need_bridle,
       safe_zones,

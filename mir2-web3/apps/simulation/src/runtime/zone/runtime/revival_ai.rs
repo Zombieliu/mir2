@@ -119,6 +119,7 @@ impl ZoneRuntime {
         let experience = (u64::from(monster.experience) * u64::from(100 - 25 * state.revival_count)
             / 100) as u32;
         let drop_roll = state.next_random();
+        monster.crystal_drop_seed = Some(drop_roll);
         state.last_drop_roll = Some(drop_roll);
         let name = monster.name.clone();
         // Never let a poison from the previous life resume after resurrection.
@@ -136,8 +137,8 @@ impl ZoneRuntime {
         // player-item carriers must never be cloned into another life. The
         // existing generator produces exact metadata with uid_assigned=false;
         // the established durable pickup allocator assigns fresh item UIDs.
-        // OPEN: owner drop bonuses and runtime custom map drop-rule overrides
-        // are not part of the existing Zone drop generator's contract.
+        // Owner bonuses are applied at the common authoritative death boundary
+        // using this retained roll. Custom map overrides remain gateway-authored.
         let no_drop = mir2_game_data::crystal_map_respawns_ref(&self.key.map_file_name)
             .is_some_and(|map| map.no_drop_monster);
         let drops = if no_drop {

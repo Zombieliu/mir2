@@ -622,3 +622,13 @@
 - Windows 125%/150% DPI、长时间运行、断网重连和发布包离线资源仍需最终人工矩阵确认。
 
 这些限制应进入 `FRONTEND-1TO1-GAPS.md`，不能用本次“可玩闭环通过”替代最终 Crystal 1:1 人工接受。
+
+## 2026-09-09 trade visual rerun
+
+Click-select/place partial merge, chosen-slot retrieve, occupied trade swap and empty trade move passed native visual checks with successful server ACKs. Continuous drag did not dispatch; full-consumption/directional/lock/cancel visual cases remain open. See [scoped evidence](generated/player-qa/windows-trade-visual-20260909/README.md). Candidate/global visual acceptance remains false.
+
+Drag-only follow-up: one native drag MoveItem Trade 9 -> 4 succeeded after repositioning the panel, but adjacent attempts did not dispatch and one selected the destination. Drag is intermittent under Sky input; acceptance remains open. See the scoped evidence follow-up.
+
+## 2026-09-09 native trade drag fix
+
+The intermittent item drag is fixed by replaying ordered Winit/Bevy WindowEvent input and retaining a preselected source until release. Pointer tracking survives pending/modal gesture cancellation. Native UI 624/624 and Windows host 561/561 serial pass. Exact signed EXE B62330DFA03EB8A2A5976C0662A327D95A2E65A4721C0B3E2D0ECC3F9DE75599 passed seven native drag operations: deposit, occupied swap, preselected-source move, retrieve, redeposit and partial merge, with matching ACKs. This supersedes the prior drag-open finding only; full-game acceptance remains false. Evidence: [drag fix](generated/player-qa/native-trade-drag-fix-20260909/README.md).

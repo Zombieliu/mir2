@@ -56,6 +56,8 @@ pub struct ShopGood {
     pub unique_id: u64,
     pub name: String,
     pub price: u32,
+    /// Authoritative NPCPearlGoods currency; never inferred from item identity.
+    pub use_pearls: bool,
     pub count: u16,
     pub stock: i32,
     pub panel_type: u8,
@@ -72,6 +74,18 @@ pub struct ShopGood {
 }
 
 impl ShopGood {
+    pub fn price_label(&self) -> String {
+        if self.use_pearls {
+            format!(
+                "Price: {} pearl{}",
+                self.price,
+                if self.price > 1 { "s" } else { "" }
+            )
+        } else {
+            format!("Price: {} gold", self.price)
+        }
+    }
+
     pub fn user_item_image_index(&self) -> Option<u16> {
         crate::inventory::concrete_item_image_index(
             self.icon,
@@ -192,6 +206,15 @@ pub fn shop_quantity_dec(q: u16) -> u16 {
 }
 
 pub fn shop_buy_enabled(shop: &ShopModel, inventory: &InventoryModel, quantity: u16) -> bool {
+    shop_buy_enabled_with_pearls(shop, inventory, quantity, 0)
+}
+
+pub fn shop_buy_enabled_with_pearls(
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    quantity: u16,
+    pearls: u32,
+) -> bool {
     let Some(good) = shop.selected() else {
         return false;
     };
@@ -203,7 +226,12 @@ pub fn shop_buy_enabled(shop: &ShopModel, inventory: &InventoryModel, quantity: 
         return false;
     }
     let total_price = good.price.saturating_mul(qty);
-    if inventory.gold < total_price {
+    let balance = if good.use_pearls {
+        pearls
+    } else {
+        inventory.gold
+    };
+    if balance < total_price {
         return false;
     }
     let occupied = inventory.items.iter().filter(|i| i.container == 0).count() as u32;
@@ -398,5 +426,36 @@ mod tests {
             repair_rate: None,
         }));
         assert_eq!(model.service_mode, NpcShopServiceMode::Closed);
+    }
+}
+
+#[cfg(test)]
+mod pearl_tests {
+    use super::*;
+    #[test]
+    fn pearl_catalog_uses_pearls_without_spending_gold_for_ui_validation() {
+        let mut shop = ShopModel {
+            goods: vec![ShopGood {
+                unique_id: 1,
+                price: 50,
+                use_pearls: true,
+                stock: -1,
+                ..Default::default()
+            }],
+            selected_id: Some(1),
+            ..Default::default()
+        };
+        let mut inventory = InventoryModel::default();
+        inventory.gold = 10000;
+        assert!(!shop_buy_enabled(&shop, &inventory, 1));
+        assert!(!shop_buy_enabled_with_pearls(&shop, &inventory, 2, 99));
+        inventory.gold = 0;
+        assert!(shop_buy_enabled_with_pearls(&shop, &inventory, 2, 100));
+        assert_eq!(shop.goods[0].price_label(), "Price: 50 pearls");
+        shop.goods[0].price = 1;
+        assert_eq!(shop.goods[0].price_label(), "Price: 1 pearl");
+        shop.goods[0].use_pearls = false;
+        assert!(!shop_buy_enabled_with_pearls(&shop, &inventory, 1, 100));
+        assert_eq!(shop.goods[0].price_label(), "Price: 1 gold");
     }
 }

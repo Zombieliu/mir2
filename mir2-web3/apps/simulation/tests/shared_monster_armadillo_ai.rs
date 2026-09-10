@@ -46,6 +46,7 @@ fn player(session: &str, object_id: u32, position: Point) -> ZoneJoin {
 
 fn monster(ai: u8, position: Point) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: MONSTER_ID,
         name: if ai == 11 { "WoomaTaurus" } else { "Scarecrow" }.to_string(),
         name_colour_argb: -1,

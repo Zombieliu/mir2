@@ -125,7 +125,13 @@ impl NativeEntityPresentation {
     }
 
     pub(crate) fn hovered_grid_position(&self) -> Option<(i32, i32)> {
-        let (cursor_x, cursor_y) = self.hover_cursor_stage?;
+        self.grid_position_for_stage(self.hover_cursor_stage?)
+    }
+
+    pub(crate) fn grid_position_for_stage(
+        &self,
+        (cursor_x, cursor_y): (f32, f32),
+    ) -> Option<(i32, i32)> {
         if !(0.0..1024.0).contains(&cursor_x) || !(0.0..768.0).contains(&cursor_y) {
             return None;
         }
@@ -148,6 +154,28 @@ impl NativeEntityPresentation {
         ))
     }
 
+    pub(crate) fn magic_target_flags(&self, object_id: &str) -> (bool, u32, u8) {
+        let entity = self
+            .latest_payload
+            .as_ref()
+            .and_then(|p| p.get("entities"))
+            .and_then(Value::as_array)
+            .and_then(|all| {
+                all.iter().find(|e| {
+                    e.get("objectId").and_then(value_object_id).as_deref() == Some(object_id)
+                })
+            });
+        entity
+            .map(|e| {
+                (
+                    e.get("dead").and_then(Value::as_bool) == Some(true),
+                    e.get("masterObjectId").and_then(Value::as_u64).unwrap_or(0) as u32,
+                    e.get("ai").and_then(Value::as_u64).unwrap_or(0) as u8,
+                )
+            })
+            .unwrap_or_default()
+    }
+
     pub(crate) fn hover_cursor_stage(&self) -> Option<(f32, f32)> {
         self.hover_cursor_stage
     }
@@ -160,6 +188,29 @@ impl NativeEntityPresentation {
     /// ordinary running remains two cells. This mirrors authoritative packet
     /// state strictly for presentation prediction—the Zone still validates the
     /// actual distance and corrects stale client state.
+    pub(crate) fn self_equipment_pose(&self, object_id: &str) -> Option<(bool, i16)> {
+        let standing = self
+            .world
+            .active_states()
+            .find(|(id, _)| *id == object_id)
+            .map(|(_, state)| state.pose().action == AnimationAction::Standing)?;
+        let entity = self
+            .latest_payload
+            .as_ref()?
+            .get("entities")?
+            .as_array()?
+            .iter()
+            .find(|e| e.get("objectId").and_then(value_object_id).as_deref() == Some(object_id))?;
+        Some((
+            standing,
+            entity
+                .get("transformType")
+                .and_then(Value::as_i64)
+                .and_then(|n| i16::try_from(n).ok())
+                .unwrap_or(-1),
+        ))
+    }
+
     pub(crate) fn self_run_distance(&self, object_id: &str) -> i32 {
         let Some(entity) = self
             .latest_payload

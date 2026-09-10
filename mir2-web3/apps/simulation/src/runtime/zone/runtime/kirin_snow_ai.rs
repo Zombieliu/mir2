@@ -418,6 +418,7 @@ impl ZoneRuntime {
             let Some(position) = position else { break };
             let child = self.unique_object_id(0);
             let spawn = ZoneMonsterSpawn {
+                crystal_drop_seed: Some(now / 300),
                 object_id: child,
                 name: t.name.clone(),
                 name_colour_argb: -1,
@@ -812,6 +813,7 @@ mod life_clear_tests {
             combat_stats: Default::default(),
         }));
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 180,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,

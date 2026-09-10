@@ -53,6 +53,7 @@ fn packets_for<'a>(out: &'a [ZoneOutbound], name: &str) -> Vec<&'a ServerPacket>
 }
 fn wild(id: u32, position: Point) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: id,
         name: "ArcherGuard".into(),
         name_colour_argb: -1,

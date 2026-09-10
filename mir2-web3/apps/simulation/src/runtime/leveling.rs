@@ -122,6 +122,9 @@ pub(super) fn apply_experience_gain(world: &mut World, amount: i64) -> Vec<Serve
     if amount <= 0 {
         return Vec::new();
     }
+    if !super::shared_guild_experience::record_gain_or_reject(world,amount) {
+        return Vec::new();
+    }
 
     let mut level = player_current_level(world);
     let (mut experience, mut max_experience) = {

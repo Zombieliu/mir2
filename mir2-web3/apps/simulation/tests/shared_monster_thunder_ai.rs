@@ -76,6 +76,7 @@ fn owned_stone_target() -> (ZoneRuntime, u32) {
         .position;
     z.spawn_world_event_monster(
         &ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: ID,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,
@@ -219,6 +220,7 @@ fn fixture(hp: i32) -> ZoneRuntime {
     assert!(
         zone.spawn_world_event_monster(
             &ZoneMonsterSpawn {
+                crystal_drop_seed: None,
                 object_id: ID,
                 name: "ElectricElement".into(),
                 name_colour_argb: -1,

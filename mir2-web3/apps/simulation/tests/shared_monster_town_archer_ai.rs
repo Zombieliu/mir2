@@ -38,6 +38,7 @@ fn fixture(pk: i32) -> ZoneRuntime {
         session_id: SessionId::new("player"),
         now_ms: 0,
         monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: ID,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,
@@ -87,6 +88,7 @@ fn town_archer_missing_disposition_cannot_acquire_or_continue_shooting() {
         session_id: SessionId::new("player"),
         now_ms: 1,
         monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: ID,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,

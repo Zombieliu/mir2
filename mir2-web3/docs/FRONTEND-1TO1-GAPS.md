@@ -1,5 +1,50 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-10 native Keyboard menu: Crystal Title119 editor is connected to
+> actual key capture, strict/relaxed modifiers, Delete unbind, full reset,
+> grouped scrolling, movable window, and application-scoped atomic JSON save/load.
+> The 96 source entries remain editable; 49 currently have native handlers and
+> 47 remain pending system integration. Existing hard-coded conflicting menu,
+> belt, skill, quest and screenshot keys now read the saved catalog. QA capture
+> is Ctrl+Shift+F12; ordinary PrintScreen release is configurable and F12 opens
+> Options. This is `implemented_pending_functional_and_visual`, not accepted.
+> Exact handler matrix and remaining input/layout differences:
+> `docs/generated/player-qa/native-keyboard-20260910/README.md`.
+
+
+> 2026-09-10 menu parity is in progress. Shared Ranking presence now uses
+> stable account/character identity across local factory Zones, excluding
+> replicas and leaving players (simulation 3/3, Gateway integration 1/1).
+> Creature updates now preserve server-owned properties, reject fabricated
+> pets and separate summon state from pickup mode; authority/migration 5/5,
+> simulation regressions 4/4 and Gateway regressions 8/8 pass. Legitimate
+> creature acquisition/actor rendering, distributed ranking and final native
+> visual acceptance remain open. See `NATIVE-MENU-CRYSTAL-PARITY.md`.
+> No global completion percentage or final acceptance is claimed.
+
+> 2026-09-09 trade merge/reorder: native item selection now sends exact-UID
+> merges across Inventory/Trade and slot moves/swaps within own Trade.
+> Partial merges preserve the remainder and target identity; server validates
+> metadata, capacity, logical grid membership and editable offer state.
+> Shared routing blocks edits when either participant is prepared and refreshes
+> the partner offer. Trade merges require exact ACK/NACK, not inventory-delta
+> inference. Evidence: `docs/generated/player-qa/native-trade-merge-20260909/README.md`.
+> This deliberately completes a client interaction rejected by this Crystal
+> server checkout. Full custody/prepared editing and live package/visual gates
+> remain open; no global UI completion or acceptance percentage is claimed.
+
+> 2026-09-09 native trade item operations: inventory-to-own-trade deposit and
+> own-trade-to-selected-bag retrieval are connected to ordinary packet intents.
+> Server retrieval now validates the exact offered instance and destination,
+> preserves item identity/metadata, and rejects occupied/out-of-capacity cells.
+> UI selection is bound to item state and the current exchange; guest cells,
+> locked trades and covering dialogs reject input. Failed host sends release
+> only the matching unsent operation. Automated evidence and remaining gaps:
+> `docs/generated/player-qa/native-trade-items-20260909/README.md`.
+> Merge, trade-slot movement, complete item custody and live Windows visual
+> acceptance remain open. All 33 global UI backlog IDs remain open;
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
 > 2026-09-08 repeated StartGame: bootstrap completion was incorrectly scoped to socket lifetime. Successful StartGame now rearms initialization; next accepted snapshot completes world entry once.
 > Evidence: `docs/generated/player-qa/windows-reenter-world-20260908/README.md`. Live verification remains pending.
 
@@ -3890,3 +3935,7 @@ Human acceptance is still required for:
   page renders without a black/blank stage. The full item-lifecycle browser
   script was blocked before character selection by the local gateway account
   fixture and is not claimed as a passing gameplay certificate.
+
+## 2026-09-09 native trade drag fix
+
+The intermittent item drag is fixed by replaying ordered Winit/Bevy WindowEvent input and retaining a preselected source until release. Pointer tracking survives pending/modal gesture cancellation. Native UI 624/624 and Windows host 561/561 serial pass. Exact signed EXE B62330DFA03EB8A2A5976C0662A327D95A2E65A4721C0B3E2D0ECC3F9DE75599 passed seven native drag operations: deposit, occupied swap, preselected-source move, retrieve, redeposit and partial merge, with matching ACKs. This supersedes the prior drag-open finding only; full-game acceptance remains false. Evidence: [drag fix](generated/player-qa/native-trade-drag-fix-20260909/README.md).

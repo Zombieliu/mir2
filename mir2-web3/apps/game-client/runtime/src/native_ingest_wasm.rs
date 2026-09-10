@@ -34,6 +34,9 @@ pub(crate) enum NativeInboundMessage {
     StorageItems(String),
     StoragePatch(String),
     SkillModel(String),
+    HeroModel(String),
+    HeroModelReceipt(String),
+    SkillModelReceipt(String),
     SocialModel(String),
     EntityRenderAtlas {
         key: String,

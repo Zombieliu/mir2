@@ -11,6 +11,7 @@ fn p(x: i32, y: i32) -> Point {
 }
 fn spawn(id: u32, ai: u8, hp: i32, position: Point) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: id,
         name: if ai == 50 {
             "GreatFoxSpirit"

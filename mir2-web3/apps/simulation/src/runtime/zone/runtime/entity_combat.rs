@@ -63,6 +63,7 @@ mod tests {
             .0;
         zone.spawn_world_event_monster(
             &ZoneMonsterSpawn {
+                crystal_drop_seed: None,
                 object_id: 9000,
                 name: "ArcherGuard".into(),
                 name_colour_argb: -1,
@@ -557,6 +558,7 @@ mod tests {
     fn spawn_target_child(zone: &mut ZoneRuntime, id: u32, ai: u8, position: Point) {
         zone.spawn_world_event_monster(
             &ZoneMonsterSpawn {
+                crystal_drop_seed: None,
                 object_id: id,
                 name: "ArcherGuard".into(),
                 name_colour_argb: -1,

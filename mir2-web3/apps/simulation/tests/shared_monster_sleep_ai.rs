@@ -10,6 +10,7 @@ fn p(x: i32, y: i32) -> Point {
 }
 fn spawn(ai: u8) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: ID,
         name: if ai == 34 { "FrostTiger" } else { "MirStatue" }.into(),
         name_colour_argb: -1,

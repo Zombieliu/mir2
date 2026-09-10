@@ -1,3 +1,11 @@
+#[path = "shared_guilds.rs"]
+mod shared_guilds;
+#[path = "shared_creatures.rs"]
+mod shared_creatures;
+#[path = "shared_marriage.rs"]
+mod shared_marriage;
+#[path = "shared_mentor.rs"]
+mod shared_mentor;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use std::fmt;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -1373,6 +1381,12 @@ pub enum SharedTradeSettlementOutcome {
 #[derive(Debug, Clone, PartialEq)]
 pub enum SharedAccountInventoryCommitOutcome {
     Confirmed(SharedAccountInventoryTransactionReceipt),
+    /// The local source repository froze after an uncertain publication. No
+    /// PostgreSQL lease token exists for this path; retain its original key.
+    LocalSourceOutcomeUnknown {
+        idempotency_key: String,
+        receipt: SharedAccountInventoryTransactionReceipt,
+    },
     /// No ordered/fenced execution context was available and the service did
     /// not contact the durable store or mutate the private projection.
     Deferred {
@@ -1393,6 +1407,7 @@ impl SharedAccountInventoryCommitOutcome {
         match self {
             Self::Confirmed(receipt)
             | Self::Deferred { receipt }
+            | Self::LocalSourceOutcomeUnknown { receipt, .. }
             | Self::OutcomeUnknown { receipt, .. } => receipt,
         }
     }
@@ -1405,6 +1420,7 @@ impl std::ops::Deref for SharedAccountInventoryCommitOutcome {
         match self {
             Self::Confirmed(receipt)
             | Self::Deferred { receipt }
+            | Self::LocalSourceOutcomeUnknown { receipt, .. }
             | Self::OutcomeUnknown { receipt, .. } => receipt,
         }
     }
@@ -1415,6 +1431,7 @@ impl std::ops::DerefMut for SharedAccountInventoryCommitOutcome {
         match self {
             Self::Confirmed(receipt)
             | Self::Deferred { receipt }
+            | Self::LocalSourceOutcomeUnknown { receipt, .. }
             | Self::OutcomeUnknown { receipt, .. } => receipt,
         }
     }
@@ -1670,6 +1687,41 @@ impl InProcessAccountInventoryService {
 }
 
 impl InProcessAccountInventoryService {
+    fn commit_source_aware(
+        &self, runtime: &mut InProcessWorldRuntime, scope: Option<(&ZoneId, bool)>,
+        envelope: SharedAccountInventoryCommandEnvelope,
+    ) -> SharedAccountInventoryCommitOutcome {
+        let SharedAccountInventoryCommand::MonsterKillAward(award) = &envelope.command else {
+            return SharedAccountInventoryCommitOutcome::Confirmed(self.commit_in_scope(runtime, scope, envelope));
+        };
+        let rejected = || SharedAccountInventoryTransactionReceipt {
+            kind: SharedAccountInventoryTransactionKind::MonsterKillAward, committed: false, packets: vec![],
+        };
+        if runtime.active_identity().as_ref() != Some(&envelope.identity) {
+            return SharedAccountInventoryCommitOutcome::Confirmed(rejected());
+        }
+        let Some(base_key) = envelope.idempotency_key() else {
+            return SharedAccountInventoryCommitOutcome::Confirmed(rejected());
+        };
+        let key = award.source_receipt_key.clone().unwrap_or_else(|| scope.map_or_else(|| base_key.0.clone(), |(zone, ordered)|
+            serde_json::to_string(&(zone.as_str(), ordered, &base_key.0)).expect("receipt namespace serializable")));
+        let mut prepared_award = award.clone();
+        prepared_award.source_receipt_key = Some(key.clone());
+        match runtime.try_commit_shared_monster_kill_award_with_receipt(&key, &prepared_award) {
+            Ok((receipt, replayed)) => {
+                if receipt.committed && !replayed {
+                    if let Some(audit) = award.boss_audit.clone() {
+                        self.boss_reward_audits.lock().expect("boss audit mutex").push(audit);
+                    }
+                }
+                SharedAccountInventoryCommitOutcome::Confirmed(receipt)
+            }
+            Err(mir2_simulation::SharedMonsterKillCommitFailure::Deferred(_)) =>
+                SharedAccountInventoryCommitOutcome::Deferred { receipt: rejected() },
+            Err(mir2_simulation::SharedMonsterKillCommitFailure::OutcomeUnknown(_)) =>
+                SharedAccountInventoryCommitOutcome::LocalSourceOutcomeUnknown { idempotency_key: key, receipt: rejected() },
+        }
+    }
     fn commit_in_scope(
         &self,
         runtime: &mut InProcessWorldRuntime,
@@ -1785,7 +1837,7 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
         runtime: &mut InProcessWorldRuntime,
         envelope: SharedAccountInventoryCommandEnvelope,
     ) -> SharedAccountInventoryTransactionReceipt {
-        self.commit_in_scope(runtime, None, envelope)
+        self.commit_source_aware(runtime, None, envelope).into_receipt()
     }
 
     fn commit_fenced(
@@ -1794,11 +1846,11 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
         context: Option<&SharedAccountInventoryExecutionContext>,
         envelope: SharedAccountInventoryCommandEnvelope,
     ) -> SharedAccountInventoryCommitOutcome {
-        SharedAccountInventoryCommitOutcome::Confirmed(self.commit_in_scope(
+        self.commit_source_aware(
             runtime,
             context.map(|c| (&c.zone_id, true)),
             envelope,
-        ))
+        )
     }
 
     fn commit_in_zone(
@@ -1811,11 +1863,11 @@ impl SharedAccountInventoryService for InProcessAccountInventoryService {
         // Journal sequence and local fallback sequence are independent domains.
         // The epoch is intentionally absent: replay of the same ordered command
         // under a replacement owner must still find the original receipt.
-        SharedAccountInventoryCommitOutcome::Confirmed(self.commit_in_scope(
+        self.commit_source_aware(
             runtime,
             Some((zone_id, context.is_some())),
             envelope,
-        ))
+        )
     }
 }
 
@@ -5374,6 +5426,7 @@ impl fmt::Debug for SharedZoneMutationCapture {
 
 #[derive(Clone)]
 pub struct SharedInProcessZoneRuntimeFactory {
+    shared_mentors: Arc<Mutex<shared_mentor::SharedMentorCoordinator>>,
     zones: Arc<Mutex<BTreeMap<ZoneId, SharedInProcessZoneResources>>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
     npc_world_service: SharedNpcWorldServiceHandle,
@@ -5401,6 +5454,9 @@ impl fmt::Debug for SharedInProcessZoneRuntimeFactory {
 impl SharedInProcessZoneRuntimeFactory {
     pub fn new() -> Self {
         Self {
+            shared_mentors: Arc::new(Mutex::new(
+                crate::routing::shared_mentor::SharedMentorCoordinator::default(),
+            )),
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service: Arc::new(InProcessAccountInventoryService::new()),
             npc_world_service: Arc::new(InProcessNpcWorldService),
@@ -5417,6 +5473,9 @@ impl SharedInProcessZoneRuntimeFactory {
         tick_cadences: BTreeMap<ZoneId, Duration>,
     ) -> Self {
         Self {
+            shared_mentors: Arc::new(Mutex::new(
+                crate::routing::shared_mentor::SharedMentorCoordinator::default(),
+            )),
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service: Arc::new(InProcessAccountInventoryService::new()),
             npc_world_service: Arc::new(InProcessNpcWorldService),
@@ -5434,6 +5493,9 @@ impl SharedInProcessZoneRuntimeFactory {
         account_inventory_service: SharedAccountInventoryServiceHandle,
     ) -> Self {
         Self {
+            shared_mentors: Arc::new(Mutex::new(
+                crate::routing::shared_mentor::SharedMentorCoordinator::default(),
+            )),
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service,
             npc_world_service: Arc::new(InProcessNpcWorldService),
@@ -5447,6 +5509,9 @@ impl SharedInProcessZoneRuntimeFactory {
 
     pub fn fresh(&self) -> Self {
         Self {
+            shared_mentors: Arc::new(Mutex::new(
+                crate::routing::shared_mentor::SharedMentorCoordinator::default(),
+            )),
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service: self.account_inventory_service.clone(),
             npc_world_service: self.npc_world_service.clone(),
@@ -5465,6 +5530,9 @@ impl SharedInProcessZoneRuntimeFactory {
 
     pub(crate) fn fresh_replica(&self) -> Self {
         Self {
+            shared_mentors: Arc::new(Mutex::new(
+                crate::routing::shared_mentor::SharedMentorCoordinator::default(),
+            )),
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service: self.account_inventory_service.clone(),
             npc_world_service: self.npc_world_service.clone(),
@@ -5836,6 +5904,9 @@ impl SharedInProcessZoneRuntimeFactory {
         account_inventory_service: SharedAccountInventoryServiceHandle,
     ) -> Self {
         Self {
+            shared_mentors: Arc::new(Mutex::new(
+                crate::routing::shared_mentor::SharedMentorCoordinator::default(),
+            )),
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service,
             npc_world_service: Arc::new(InProcessNpcWorldService),
@@ -5852,6 +5923,9 @@ impl SharedInProcessZoneRuntimeFactory {
         npc_world_service: SharedNpcWorldServiceHandle,
     ) -> Self {
         Self {
+            shared_mentors: Arc::new(Mutex::new(
+                crate::routing::shared_mentor::SharedMentorCoordinator::default(),
+            )),
             zones: Arc::new(Mutex::new(BTreeMap::new())),
             account_inventory_service,
             npc_world_service,
@@ -6289,6 +6363,7 @@ fn zone_monster_spawn_from_shared_entity(
         .max(1);
     let hp = entity.hp.unwrap_or(max_hp).clamp(0, max_hp);
     Some(ZoneMonsterSpawn {
+        crystal_drop_seed: Some(current_tick),
         object_id: entity.object_id,
         name: entity.name.clone(),
         name_colour_argb: entity.name_colour_argb,
@@ -7233,6 +7308,17 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
         let resources = self.resources_for_zone(zone_id);
         Box::new(SharedInProcessZoneSessionRuntime {
             inner: InProcessWorldRuntime::new(config),
+            shared_social_generation: self
+                .shared_mentors
+                .lock()
+                .expect("social coordinator")
+                .generation
+                .clone(),
+            last_social_refresh: None,
+            next_social_refresh_ms: 0,
+            shared_mentors: self.shared_mentors.clone(),
+            ranking_zones: self.zones.clone(),
+            ranking_replica_zones: self.replica_zone_ids.clone(),
             zone_state: resources.zone_state.clone(),
             account_inventory_service: self.account_inventory_service.clone(),
             inventory_zone_id: zone_id.clone(),
@@ -7807,6 +7893,12 @@ enum TradeProjectionReconciliationState {
 
 struct SharedInProcessZoneSessionRuntime {
     inner: InProcessWorldRuntime,
+    shared_social_generation: Arc<AtomicU64>,
+    last_social_refresh: Option<u64>,
+    next_social_refresh_ms: u64,
+    shared_mentors: Arc<Mutex<shared_mentor::SharedMentorCoordinator>>,
+    ranking_zones: Arc<Mutex<BTreeMap<ZoneId, SharedInProcessZoneResources>>>,
+    ranking_replica_zones: Arc<Mutex<BTreeSet<ZoneId>>>,
     zone_state: Arc<Mutex<SharedInProcessZoneState>>,
     account_inventory_service: SharedAccountInventoryServiceHandle,
     inventory_zone_id: ZoneId,
@@ -7915,6 +8007,40 @@ impl fmt::Debug for SharedInProcessZoneSessionRuntime {
 }
 
 impl SharedInProcessZoneSessionRuntime {
+    fn online_character_identities(&self) -> Result<BTreeSet<(String, i32)>, String> {
+        // Release the registry lock before acquiring any Zone lock, and
+        // release all presence locks before reading the account store.
+        let zones: Vec<_> = {
+            let replicas = self
+                .ranking_replica_zones
+                .lock()
+                .map_err(|_| "ranking Zone replica registry unavailable".to_string())?;
+            self.ranking_zones
+                .lock()
+                .map_err(|_| "ranking Zone registry unavailable".to_string())?
+                .iter()
+                .filter(|(zone_id, _)| !replicas.contains(*zone_id))
+                .map(|(_, resources)| resources.zone_state.clone())
+                .collect()
+        };
+        let mut online_characters = BTreeSet::new();
+        for zone in zones {
+            let zone = zone
+                .lock()
+                .map_err(|_| "ranking Zone presence unavailable".to_string())?;
+            online_characters.extend(
+                zone.players
+                    .keys()
+                    .filter(|key| {
+                        zone.zone_sessions.contains_key(*key)
+                            && !zone.teardown_fences.contains(*key)
+                    })
+                    .map(|key| (key.account_id.clone(), key.character_index)),
+            );
+        }
+        Ok(online_characters)
+    }
+
     fn zone_now_ms() -> u64 {
         shared_gateway_now_ms()
     }
@@ -8399,6 +8525,11 @@ impl SharedInProcessZoneSessionRuntime {
             .last_shared_drop_ids_by_map
             .insert(map_file_name.clone(), shared_drop_ids)
             .unwrap_or_default();
+        let social_presence_changed = zone_state.players.get(&key).is_none_or(|previous| {
+            previous.map_file_name != map_file_name
+                || previous.entity.level != self_entity.level
+                || previous.entity.name != self_entity.name
+        });
         let previous_map = zone_state
             .players
             .get(&key)
@@ -8423,6 +8554,9 @@ impl SharedInProcessZoneSessionRuntime {
             snapshot.player_pk_points,
             !allow_transform_sync,
         );
+        if social_presence_changed {
+            self.shared_social_generation.fetch_add(1, Ordering::AcqRel);
+        }
         if let Some(presence) = zone_state.players.get_mut(&key) {
             presence.allow_trade = Some(self.inner.shared_trade_allowed());
         }
@@ -8630,6 +8764,8 @@ impl SharedInProcessZoneSessionRuntime {
     }
 
     fn remove_presence(&mut self) -> Vec<ServerPacket> {
+        let social = self.shared_mentors.clone();
+        let mut social_guard = social.lock().expect("social lifecycle coordinator");
         let Some(key) = self
             .movement_ingress
             .session_state
@@ -8639,11 +8775,16 @@ impl SharedInProcessZoneSessionRuntime {
         else {
             return Vec::new();
         };
+        social_guard.forget(&key);
+        social_guard.guild_invitations.retain(|recipient,_|recipient!=&key);
+        social_guard.guild_permissions.remove(&key);
         let mut zone_state = self
             .zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned");
         let outbounds = zone_state.remove_player(&key);
+        self.shared_social_generation.fetch_add(1, Ordering::AcqRel);
+        self.last_social_refresh = None;
         let (mut packets, transform, shout_consume, _, _, player_damages, player_heals) =
             zone_state.dispatch_zone_outbounds(outbounds, Some(&key));
         zone_state.forget_zone_session(&key);
@@ -9102,7 +9243,16 @@ impl SharedInProcessZoneSessionRuntime {
                 if zone_state.command_mutates_teardown_fence(&command) {
                     continue;
                 }
+                let creature_settlement = match &command {
+                    ZoneCommand::CommitGroundDropClaimWithTicket { session_id, ticket }
+                    | ZoneCommand::CancelGroundDropClaimWithTicket { session_id, ticket, .. } =>
+                        zone_state.zone_manager.intelligent_creature_object_id(session_id).map(|actor| (session_id.clone(), actor, ticket.object_id)),
+                    _ => None,
+                };
                 outbounds.extend(zone_state.zone_manager.handle(command));
+                if let Some((session_id, actor, drop_id)) = creature_settlement {
+                    zone_state.zone_manager.settle_intelligent_creature_pickup(&session_id, actor, drop_id);
+                }
             }
             zone_state.dispatch_zone_outbounds(outbounds, Some(&key))
         };
@@ -9419,11 +9569,15 @@ impl SharedInProcessZoneSessionRuntime {
         let mut packets = Vec::new();
         let mut awards = awards.into_iter();
         while let Some(award) = awards.next() {
-            let retry_award = award.clone();
-            let receipt = self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
+            let mut retry_award = award.clone();
+            let outcome = self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                 identity: identity.clone(),
                 command: SharedAccountInventoryCommand::MonsterKillAward(award),
             });
+            if let SharedAccountInventoryCommitOutcome::LocalSourceOutcomeUnknown { idempotency_key, .. } | SharedAccountInventoryCommitOutcome::OutcomeUnknown { idempotency_key, .. } = &outcome {
+                retry_award.source_receipt_key = Some(idempotency_key.clone());
+            }
+            let receipt = outcome.into_receipt();
             debug_assert_eq!(
                 receipt.kind,
                 SharedAccountInventoryTransactionKind::MonsterKillAward
@@ -9451,21 +9605,32 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(identity) = self.inner.active_identity() else {
             return Vec::new();
         };
-        awards
-            .into_iter()
-            .flat_map(|award| {
-                let receipt =
-                    self.commit_account_inventory(SharedAccountInventoryCommandEnvelope {
-                        identity: identity.clone(),
-                        command: SharedAccountInventoryCommand::MonsterKillAward(award),
-                    });
-                debug_assert_eq!(
-                    receipt.kind,
-                    SharedAccountInventoryTransactionKind::MonsterKillAward
-                );
-                receipt.packets
-            })
-            .collect()
+        let key = ZonePresenceKey::from_identity(&identity);
+        let mut remaining = awards.into_iter();
+        let mut packets = Vec::new();
+        while let Some(mut award) = remaining.next() {
+            let outcome = self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+                identity: identity.clone(),
+                command: SharedAccountInventoryCommand::MonsterKillAward(award.clone()),
+            });
+            if let SharedAccountInventoryCommitOutcome::LocalSourceOutcomeUnknown { idempotency_key, .. } | SharedAccountInventoryCommitOutcome::OutcomeUnknown { idempotency_key, .. } = &outcome {
+                award.source_receipt_key = Some(idempotency_key.clone());
+            }
+            match outcome {
+                SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed => packets.extend(receipt.packets),
+                _ => {
+                    // Keep the exact original envelope on known failure and
+                    // unknown publication alike. A frozen source rejects later
+                    // polls before any gameplay or repository attempt occurs.
+                    let mut retry = vec![award];
+                    retry.extend(remaining);
+                    self.zone_state.lock().expect("shared zone presence mutex")
+                        .prepend_zone_monster_kill_awards(key, retry);
+                    break;
+                }
+            }
+        }
+        packets
     }
 
     fn dispatch_zone_fenced_teardown_followup(
@@ -9551,7 +9716,8 @@ impl SharedInProcessZoneSessionRuntime {
                     idempotency_key,
                     execution_context,
                     ..
-                } => Some((idempotency_key.clone(), execution_context.clone())),
+                } => Some((idempotency_key.clone(), Some(execution_context.clone()))),
+                SharedAccountInventoryCommitOutcome::LocalSourceOutcomeUnknown { idempotency_key, .. } => Some((idempotency_key.clone(), None)),
                 SharedAccountInventoryCommitOutcome::Confirmed(_)
                 | SharedAccountInventoryCommitOutcome::Deferred { .. } => None,
             };
@@ -9562,6 +9728,14 @@ impl SharedInProcessZoneSessionRuntime {
             );
             let followup = if receipt.committed {
                 self.retire_local_ground_drop_projection(&drop);
+                let creature_settled = {
+                    let mut state = self.zone_state.lock().expect("shared zone presence mutex");
+                    state.zone_manager.intelligent_creature_object_id(&ticket.session_id)
+                        .is_some_and(|actor| state.zone_manager.settle_intelligent_creature_pickup(&ticket.session_id, actor, object_id))
+                };
+                if creature_settled {
+                    receipt.packets.insert(0, ServerPacket::IntelligentCreaturePickup { object_id });
+                }
                 Some(ZoneCommand::CommitGroundDropClaimWithTicket {
                     session_id: ticket.session_id.clone(),
                     ticket,
@@ -9573,7 +9747,7 @@ impl SharedInProcessZoneSessionRuntime {
                 if !self.retain_unresolved_zone_ground_drop_claim(
                     &ticket,
                     idempotency_key,
-                    Some(execution_context),
+                    execution_context,
                 ) {
                     self.requeue_zone_ground_drop_claim(ticket);
                 }
@@ -9649,6 +9823,21 @@ impl SharedInProcessZoneSessionRuntime {
 
     fn local_self_object_id(&self) -> Option<u32> {
         self.inner.local_player_object_id()
+    }
+
+    fn validate_shared_magic_actor(&self, command: &WorldCommand) -> Result<(), String> {
+        if let WorldCommand::ClientPacket(ClientPacket::Magic { object_id, .. }) = command {
+            // A player's Zone attack always spends that player's resources.
+            // Hero casts need their own shared actor dispatcher; allowing them
+            // to fall through to the personal world is not shared authority.
+            if *object_id == 0
+                || self.current_zone_session_id().is_none()
+                || self.local_self_object_id() != Some(*object_id)
+            {
+                return Err("shared magic requires the active player actor; independent Hero casting is not available yet".into());
+            }
+        }
+        Ok(())
     }
 
     fn dispatch_zone_observer_packets(
@@ -10092,6 +10281,7 @@ impl SharedInProcessZoneSessionRuntime {
         &self,
         command: &WorldCommand,
     ) -> Option<ZoneNativePlayerAttack> {
+        self.validate_shared_magic_actor(command).ok()?;
         let (mut object_id, packet_direction, mut kind) = match command {
             WorldCommand::Attack { object_id } => (
                 *object_id,
@@ -10538,16 +10728,44 @@ impl SharedInProcessZoneSessionRuntime {
             }
         };
         let mut dispatched = self.dispatch_zone_player_command(command, false);
-        if let Some(spell) = melee_spell_to_commit.filter(|spell| *spell != Spell::None) {
+        if let Some(spell) = melee_spell_to_commit {
+            // Dispatch still carries Zone IDs here; wire-owner remapping runs
+            // later. Compare the exact authenticated presence, not the target.
+            let actor_id = self.current_presence_key().and_then(|key| {
+                self.zone_state.lock()
+                    .expect("shared zone presence mutex should not be poisoned")
+                    .players.get(&key).map(|presence| presence.zone_object_id)
+            });
             let accepted = dispatched.iter().any(|packet| {
                 matches!(
                     packet,
                     ServerPacket::ObjectAttack { info }
-                        if info.object_id != target_object_id && info.spell == spell as u8
+                        if Some(info.object_id) == actor_id && info.spell == spell as u8
                 )
             });
             if accepted {
                 dispatched.extend(self.inner.commit_zone_melee_attack_spell(spell));
+                if spell == Spell::TwinDrakeBlade {
+                    // The Zone already charged the accepted swing atomically.
+                    // Refresh only mana: a queued hit/death must never be
+                    // overwritten with this personal session's older HP.
+                    let authoritative_mp = self.current_zone_session_id().and_then(|session| {
+                        self.zone_state.lock()
+                            .expect("shared zone presence mutex should not be poisoned")
+                            .zone_manager.player_vitals(&session).map(|(_, _, mp)| mp)
+                    });
+                    if let Some(mp) = authoritative_mp {
+                        self.inner.force_authoritative_player_vitals(None, Some(mp));
+                        let max_mp = self.inner.world_snapshot().player_max_mp.unwrap_or(1).max(1);
+                        for packet in &mut dispatched {
+                            if let ServerPacket::ObjectMana { info } = packet {
+                                if Some(info.object_id) == self.local_self_object_id() {
+                                    info.percent = ((i64::from(mp) * 100) / i64::from(max_mp)).clamp(0, 100) as u8;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         let mut pk_colour_changed = false;
@@ -11238,6 +11456,13 @@ impl SharedInProcessZoneSessionRuntime {
         );
         let receipt = match outcome {
             SharedAccountInventoryCommitOutcome::Deferred { .. } => return Vec::new(),
+            SharedAccountInventoryCommitOutcome::LocalSourceOutcomeUnknown { idempotency_key, .. } => {
+                if idempotency_key == expected_idempotency_key {
+                    self.zone_state.lock().expect("shared zone presence mutex")
+                        .retain_unresolved_ground_drop_outcome_key(&settlement, idempotency_key);
+                }
+                return Vec::new();
+            }
             SharedAccountInventoryCommitOutcome::OutcomeUnknown {
                 idempotency_key,
                 execution_context,
@@ -12224,145 +12449,11 @@ impl SharedInProcessZoneSessionRuntime {
         ))
     }
 
-    fn pick_up_shared_drop_with_intelligent_creature(
-        &mut self,
-        location: Point,
-        mouse_mode: bool,
-    ) -> Vec<ServerPacket> {
-        let snapshot = self.inner.world_snapshot();
-        let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
-            return Vec::new();
-        };
-        let Some(active_creature) = snapshot
-            .stage5_systems
-            .intelligent_creatures
-            .iter()
-            .find(|creature| creature.pet_mode != 0)
-            .cloned()
-        else {
-            return Vec::new();
-        };
-        if active_creature.fullness < active_creature.creature_rules.minimal_fullness.max(0) {
-            return Vec::new();
-        }
-        let target_location = if mouse_mode {
-            if !active_creature.creature_rules.mouse_pickup_enabled {
-                return Vec::new();
-            }
-            location
-        } else {
-            if !active_creature.creature_rules.semi_auto_pickup_enabled
-                || active_creature.pet_mode != 1
-            {
-                return Vec::new();
-            }
-            Point {
-                x: self_entity.x,
-                y: self_entity.y,
-            }
-        };
-        let Some(session_id) = self.current_zone_session_id() else {
-            return Vec::new();
-        };
-        self.sync_current_shared_ground_drops_to_zone(&session_id);
-        let picker_group_members = snapshot.stage5_systems.group.members.clone();
-        let (mut packets, claims, monster_kill_awards, player_damages, player_heals) = self
-            .dispatch_zone_player_command_collecting_claims(
-                ZoneCommand::ClaimGroundDrop {
-                    session_id,
-                    object_id: None,
-                    target: target_location,
-                    group_members: picker_group_members,
-                    now_ms: Self::zone_now_ms(),
-                },
-                false,
-            );
-        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
-        packets.extend(self.apply_zone_player_damages(player_damages));
-        self.apply_zone_player_heals(player_heals);
-        packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
-        let (claim_packets, canceled_claims) =
-            self.apply_shared_intelligent_creature_drop_claims(&active_creature, claims);
-        remove_object_remove_packets(&mut packets, &canceled_claims);
-        packets.extend(claim_packets);
-        packets
+    fn pick_up_shared_drop_with_intelligent_creature(&mut self, location: Point, mouse_mode: bool) -> Vec<ServerPacket> {
+        self.request_shared_intelligent_creature_actor_pickup(location, mouse_mode)
     }
-
     fn auto_pick_up_shared_drop_with_intelligent_creature(&mut self) -> Vec<ServerPacket> {
-        if !self.inner.has_active_intelligent_creature_auto_pickup() {
-            return Vec::new();
-        }
-        let snapshot = self.inner.world_snapshot();
-        let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
-            return Vec::new();
-        };
-        let Some(active_creature) = snapshot
-            .stage5_systems
-            .intelligent_creatures
-            .iter()
-            .find(|creature| {
-                creature.pet_mode != 0
-                    && creature.creature_rules.auto_pickup_enabled
-                    && creature.fullness >= creature.creature_rules.minimal_fullness.max(0)
-                    && creature.creature_rules.auto_pickup_range > 0
-            })
-            .cloned()
-        else {
-            return Vec::new();
-        };
-        let picker_location = Point {
-            x: self_entity.x,
-            y: self_entity.y,
-        };
-        let Some(session_id) = self.current_zone_session_id() else {
-            return Vec::new();
-        };
-        self.sync_current_shared_ground_drops_to_zone(&session_id);
-        let picker_group_members = snapshot.stage5_systems.group.members.clone();
-        let candidate_drops = self
-            .zone_state
-            .lock()
-            .expect("shared zone presence mutex should not be poisoned")
-            .map_layer(snapshot.map_file_name.as_deref())
-            .map(|layer| layer.ground_drops.into_values().collect::<Vec<_>>())
-            .unwrap_or_else(|| snapshot.ground_drops.clone());
-        let allowed_object_ids = snapshot
-            .ground_drops
-            .iter()
-            .chain(candidate_drops.iter())
-            .filter(|drop| {
-                let distance = (drop.x - picker_location.x)
-                    .abs()
-                    .max((drop.y - picker_location.y).abs());
-                distance <= active_creature.creature_rules.auto_pickup_range
-                    && intelligent_creature_allows_ground_drop(&active_creature, drop)
-            })
-            .map(|drop| drop.object_id)
-            .collect::<BTreeSet<_>>();
-        if allowed_object_ids.is_empty() {
-            return Vec::new();
-        }
-        let (mut packets, claims, monster_kill_awards, player_damages, player_heals) = self
-            .dispatch_zone_player_command_collecting_claims(
-                ZoneCommand::ClaimNearestGroundDrop {
-                    session_id,
-                    origin: picker_location,
-                    max_range: active_creature.creature_rules.auto_pickup_range,
-                    allowed_object_ids,
-                    group_members: picker_group_members,
-                    now_ms: Self::zone_now_ms(),
-                },
-                false,
-            );
-        self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
-        packets.extend(self.apply_zone_player_damages(player_damages));
-        self.apply_zone_player_heals(player_heals);
-        packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
-        let (claim_packets, canceled_claims) =
-            self.apply_shared_intelligent_creature_drop_claims(&active_creature, claims);
-        remove_object_remove_packets(&mut packets, &canceled_claims);
-        packets.extend(claim_packets);
-        packets
+        self.drain_shared_intelligent_creature_actor()
     }
 
     fn apply_shared_intelligent_creature_drop_claims(
@@ -12422,7 +12513,8 @@ impl SharedInProcessZoneSessionRuntime {
                 idempotency_key,
                 execution_context,
                 ..
-            } => Some((idempotency_key.clone(), execution_context.clone())),
+            } => Some((idempotency_key.clone(), Some(execution_context.clone()))),
+                SharedAccountInventoryCommitOutcome::LocalSourceOutcomeUnknown { idempotency_key, .. } => Some((idempotency_key.clone(), None)),
             SharedAccountInventoryCommitOutcome::Confirmed(_)
             | SharedAccountInventoryCommitOutcome::Deferred { .. } => None,
         };
@@ -12447,7 +12539,7 @@ impl SharedInProcessZoneSessionRuntime {
             if !self.retain_unresolved_zone_ground_drop_claim(
                 &ticket,
                 idempotency_key,
-                Some(execution_context),
+                execution_context,
             ) {
                 self.requeue_zone_ground_drop_claim(ticket);
             }
@@ -12508,6 +12600,9 @@ impl Drop for SharedInProcessZoneSessionRuntime {
 }
 
 impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        self.inner.supports_magic_key_assignment(spell,key,old_key)
+    }
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
@@ -12521,6 +12616,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        self.validate_shared_magic_actor(&command)?;
+        self.inner.enable_shared_guild_authority();
+        if matches!(&command,WorldCommand::ClientPacket(ClientPacket::StartGame{..})){self.inner.refresh_shared_guild_authority()?;}
         self.last_game_shop_purchase_outcome = None;
         if self.current_presence_key().is_some_and(|key| {
             self.zone_state
@@ -12601,18 +12699,62 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             &command,
             WorldCommand::ClientPacket(ClientPacket::TradeCancel)
         );
-        let is_trade_state_mutation = matches!(
-            &command,
-            WorldCommand::ClientPacket(
-                ClientPacket::TradeRequest
-                    | ClientPacket::TradeReply { .. }
-                    | ClientPacket::TradeGold { .. }
-                    | ClientPacket::DepositTradeItem { .. }
-                    | ClientPacket::RetrieveTradeItem { .. }
-                    | ClientPacket::TradeConfirm { .. }
-                    | ClientPacket::TradeCancel
-            )
-        );
+        let trade_item_failure = match &command {
+            WorldCommand::ClientPacket(ClientPacket::DepositTradeItem { from, to }) => {
+                Some(ServerPacket::DepositTradeItem {
+                    from: *from,
+                    to: *to,
+                    success: false,
+                })
+            }
+            WorldCommand::ClientPacket(ClientPacket::RetrieveTradeItem { from, to }) => {
+                Some(ServerPacket::RetrieveTradeItem {
+                    from: *from,
+                    to: *to,
+                    success: false,
+                })
+            }
+            WorldCommand::ClientPacket(ClientPacket::MoveItem {
+                grid: mir2_protocol::MirGridType::Trade,
+                from,
+                to,
+            }) => Some(ServerPacket::MoveItem {
+                grid: mir2_protocol::MirGridType::Trade,
+                from: *from,
+                to: *to,
+                success: false,
+            }),
+            WorldCommand::ClientPacket(ClientPacket::MergeItem {
+                grid_from,
+                grid_to,
+                id_from,
+                id_to,
+            }) if *grid_from == mir2_protocol::MirGridType::Trade
+                || *grid_to == mir2_protocol::MirGridType::Trade =>
+            {
+                Some(ServerPacket::MergeItem {
+                    grid_from: *grid_from,
+                    grid_to: *grid_to,
+                    id_from: *id_from,
+                    id_to: *id_to,
+                    success: false,
+                })
+            }
+            _ => None,
+        };
+        let is_trade_state_mutation = trade_item_failure.is_some()
+            || matches!(
+                &command,
+                WorldCommand::ClientPacket(
+                    ClientPacket::TradeRequest
+                        | ClientPacket::TradeReply { .. }
+                        | ClientPacket::TradeGold { .. }
+                        | ClientPacket::DepositTradeItem { .. }
+                        | ClientPacket::RetrieveTradeItem { .. }
+                        | ClientPacket::TradeConfirm { .. }
+                        | ClientPacket::TradeCancel
+                )
+            );
         let shared_trade_confirm = match &command {
             WorldCommand::ClientPacket(ClientPacket::TradeConfirm { locked }) => Some(*locked),
             _ => None,
@@ -12672,6 +12814,8 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 | WorldCommand::SubmitNpcInput { .. }
                 | WorldCommand::ClientPacket(
                     ClientPacket::PickUp
+                        | ClientPacket::GuildStorageGoldChange { .. }
+                        | ClientPacket::GuildStorageItemChange { .. }
                         | ClientPacket::Harvest { .. }
                         | ClientPacket::DropGold { .. }
                         | ClientPacket::DropItem { .. }
@@ -12883,13 +13027,45 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let blocks_durable_trade_mutation =
             is_trade_state_mutation && self.has_pending_durable_trade_projection();
         let mut command_packets = if blocks_durable_trade_mutation {
-            Vec::new()
+            trade_item_failure.clone().into_iter().collect()
         } else if unavailable_shared_target {
             if shared_harvest_direction.is_some() {
                 self.authoritative_zone_owner_correction()
             } else {
                 Vec::new()
             }
+        } else if shared_guilds::is_guild_command(&command) {
+            self.execute_shared_guild(&command)
+        } else if let WorldCommand::ClientPacket(ClientPacket::GetRanking {
+            rank_type,
+            rank_index,
+            online_only,
+        }) = &command
+        {
+            let online_characters = self.online_character_identities()?;
+            self.inner.ranking_with_online_characters(
+                *rank_type,
+                *rank_index,
+                *online_only,
+                &online_characters,
+            )
+        } else if let WorldCommand::ClientPacket(
+            packet @ (ClientPacket::AddMentor { .. }
+            | ClientPacket::MentorReply { .. }
+            | ClientPacket::AllowMentor
+            | ClientPacket::CancelMentor),
+        ) = &command
+        {
+            self.execute_shared_mentor(packet)
+        } else if let WorldCommand::ClientPacket(
+            packet @ (ClientPacket::MarriageRequest
+            | ClientPacket::MarriageReply { .. }
+            | ClientPacket::ChangeMarriage
+            | ClientPacket::DivorceRequest
+            | ClientPacket::DivorceReply { .. }),
+        ) = &command
+        {
+            self.execute_shared_marriage(packet)
         } else if matches!(
             &command,
             WorldCommand::ClientPacket(ClientPacket::TradeRequest)
@@ -12900,33 +13076,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         {
             self.execute_shared_trade_reply(*accept_invite)
         } else if is_trade_state_mutation && !is_trade_cancel && !self.has_shared_trade_pair() {
-            Vec::new()
-        } else if matches!(
-            &command,
-            WorldCommand::ClientPacket(
-                ClientPacket::DepositTradeItem { .. } | ClientPacket::RetrieveTradeItem { .. }
-            )
-        ) && self.shared_trade_pair_has_prepared_offer()
-        {
+            trade_item_failure.clone().into_iter().collect()
+        } else if trade_item_failure.is_some() && self.shared_trade_pair_has_prepared_offer() {
             // A peer's prepared offer is also a confirmation. Until editable
             // preparation exists, withdrawing an item must not reuse it.
-            match &command {
-                WorldCommand::ClientPacket(ClientPacket::DepositTradeItem { from, to }) => {
-                    vec![ServerPacket::DepositTradeItem {
-                        from: *from,
-                        to: *to,
-                        success: false,
-                    }]
-                }
-                WorldCommand::ClientPacket(ClientPacket::RetrieveTradeItem { from, to }) => {
-                    vec![ServerPacket::RetrieveTradeItem {
-                        from: *from,
-                        to: *to,
-                        success: false,
-                    }]
-                }
-                _ => unreachable!(),
-            }
+            trade_item_failure.clone().into_iter().collect()
         } else if let Some(locked) = shared_trade_confirm {
             self.execute_shared_trade_confirm(locked)
         } else if let WorldCommand::ClientPacket(ClientPacket::TradeGold { amount }) = &command {
@@ -12993,6 +13147,58 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             self.inner.execute(command)?
         };
+        let clock_generation = self.inner.shared_mentor_config().map_or(0, |config| config.shared_guild_clock_generation());
+        let social_signature = self.shared_social_generation.load(Ordering::Acquire).wrapping_add(clock_generation);
+        let force_social = command_packets.iter().any(|p| {
+            matches!(
+                p,
+                ServerPacket::MentorUpdate { .. } | ServerPacket::LoverUpdate { .. } | ServerPacket::GuildStatus { .. }
+            )
+        });
+        if !is_low_latency_zone_packet
+            && (force_social
+                || self.last_social_refresh != Some(social_signature)
+                || Self::zone_now_ms() >= self.next_social_refresh_ms)
+        {
+            let force = command_packets
+                .iter()
+                .any(|p| matches!(p, ServerPacket::MentorUpdate { .. }));
+            if let Some(update) = self.refresh_shared_mentor_packets(force) {
+                command_packets.retain(|p| !matches!(p, ServerPacket::MentorUpdate { .. }));
+                command_packets.push(update);
+            }
+            let force = command_packets
+                .iter()
+                .any(|p| matches!(p, ServerPacket::LoverUpdate { .. }));
+            let marriage_updates = self.refresh_shared_marriage_packets(force);
+            if marriage_updates
+                .iter()
+                .any(|p| matches!(p, ServerPacket::LoverUpdate { .. }))
+            {
+                command_packets.retain(|p| !matches!(p, ServerPacket::LoverUpdate { .. }));
+            }
+            command_packets.extend(marriage_updates);
+            let guild_updates = self.refresh_shared_guild_packets();
+            command_packets.retain(|packet|!matches!(packet,ServerPacket::GuildStatus{..}|ServerPacket::GuildMemberChange{..}));
+            command_packets.extend(guild_updates);
+            command_packets.extend(self.refresh_shared_social_buff_packets());
+            // Preserve the pre-scan generation so concurrent changes refresh on the next tick.
+            self.last_social_refresh = Some(social_signature);
+            self.next_social_refresh_ms = self.next_marriage_day_refresh_ms();
+        }
+        if command_packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::FriendUpdate { .. }))
+        {
+            let online = self.online_character_identities()?;
+            if let Some(authoritative) = self.inner.friends_with_online_characters(&online) {
+                for packet in &mut command_packets {
+                    if matches!(packet, ServerPacket::FriendUpdate { .. }) {
+                        *packet = authoritative.clone();
+                    }
+                }
+            }
+        }
         if is_trade_state_mutation {
             self.route_shared_trade_notifications(&mut command_packets);
         }
@@ -13122,6 +13328,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         self.filter_stale_owner_dead_entity_packets(&mut packets);
         if !removes_presence && !skip_tail_zone_snapshot {
             packets.extend(self.sync_zone_snapshot());
+            packets.extend(self.sync_shared_intelligent_creature_actor());
         }
         if is_start_game && self.current_presence_key().is_some() {
             // The pre-command recovery pass cannot see an identity/presence
@@ -13673,6 +13880,10 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "guild_kill_source_tests.rs"]
+    mod guild_kill_source_tests;
+    #[path = "creature_authority_tests.rs"]
+    mod creature_authority_tests;
     #[path = "inventory_receipt_scope_tests.rs"]
     mod inventory_receipt_scope_tests;
     #[path = "ordered_economy_replay_tests.rs"]
@@ -13687,6 +13898,8 @@ mod tests {
     mod trade_gold_tests;
     #[path = "trade_invitation_tests.rs"]
     mod trade_invitation_tests;
+    #[path = "trade_item_edit_tests.rs"]
+    mod trade_item_edit_tests;
 
     use super::{
         delayed_player_action_packets, filter_stale_owner_dead_entity_packets,
@@ -15572,6 +15785,7 @@ mod tests {
         let factory = SharedInProcessZoneRuntimeFactory::new();
         let zone_id = ZoneId::primary();
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 0x7000_0042,
             name: "WoomaSoldier".to_string(),
             name_colour_argb: -1,
@@ -15645,6 +15859,7 @@ mod tests {
         let factory = SharedInProcessZoneRuntimeFactory::new();
         let zone_id = ZoneId::primary();
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 0x7000_0043,
             name: "WoomaSoldier".to_string(),
             name_colour_argb: -1,
@@ -16516,6 +16731,8 @@ mod tests {
 
         let drop = shared_gold_drop(9101, 329, 269, Some(current_zone_object_id), Some(100));
         let award = ZoneMonsterKillAward {
+            source_receipt_key: None,
+            experience_selection: None,
             monster_object_id: 9100,
             killed_at_ms: 1_000,
             monster_name: "Field Wasp".to_string(),
@@ -16563,6 +16780,8 @@ mod tests {
         let before_experience = runtime.inner.world_snapshot().player_experience;
 
         let packets = runtime.apply_zone_monster_kill_awards(vec![ZoneMonsterKillAward {
+            source_receipt_key: None,
+            experience_selection: None,
             monster_object_id: 9100,
             killed_at_ms: 1_000,
             monster_name: "Field Wasp".to_string(),
@@ -16684,6 +16903,8 @@ mod tests {
             SharedAccountInventoryCommandEnvelope {
                 identity: wrong_identity,
                 command: SharedAccountInventoryCommand::MonsterKillAward(ZoneMonsterKillAward {
+                    source_receipt_key: None,
+                    experience_selection: None,
                     monster_object_id: 9100,
                     killed_at_ms: 1_000,
                     monster_name: "Field Wasp".to_string(),
@@ -16760,6 +16981,8 @@ mod tests {
         let award_envelope = SharedAccountInventoryCommandEnvelope {
             identity: identity.clone(),
             command: SharedAccountInventoryCommand::MonsterKillAward(ZoneMonsterKillAward {
+                source_receipt_key: None,
+                experience_selection: None,
                 monster_object_id: 9100,
                 killed_at_ms: 1_000,
                 monster_name: "Field Wasp".to_string(),
@@ -16790,6 +17013,8 @@ mod tests {
             SharedAccountInventoryCommandEnvelope {
                 identity: identity.clone(),
                 command: SharedAccountInventoryCommand::MonsterKillAward(ZoneMonsterKillAward {
+                    source_receipt_key: None,
+                    experience_selection: None,
                     monster_object_id: 9100,
                     killed_at_ms: 2_000,
                     monster_name: "Field Wasp".to_string(),
@@ -18138,14 +18363,86 @@ mod tests {
             ClientPacket::TradeGold { amount: 1 },
             ClientPacket::DepositTradeItem { from: 0, to: 0 },
             ClientPacket::RetrieveTradeItem { from: 0, to: 0 },
+            ClientPacket::MoveItem {
+                grid: MirGridType::Trade,
+                from: 0,
+                to: 1,
+            },
+            ClientPacket::MergeItem {
+                grid_from: MirGridType::Trade,
+                grid_to: MirGridType::Trade,
+                id_from: 1,
+                id_to: 2,
+            },
+            ClientPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Trade,
+                id_from: 1,
+                id_to: 2,
+            },
+            ClientPacket::MergeItem {
+                grid_from: MirGridType::Trade,
+                grid_to: MirGridType::Inventory,
+                id_from: 1,
+                id_to: 2,
+            },
             ClientPacket::TradeConfirm { locked: false },
             ClientPacket::TradeCancel,
         ];
         for packet in mutations {
-            assert!(runtime
-                .execute(WorldCommand::ClientPacket(packet))
-                .expect("guarded trade packet")
-                .is_empty());
+            let expected = match &packet {
+                ClientPacket::DepositTradeItem { from, to } => {
+                    vec![ServerPacket::DepositTradeItem {
+                        from: *from,
+                        to: *to,
+                        success: false,
+                    }]
+                }
+                ClientPacket::RetrieveTradeItem { from, to } => {
+                    vec![ServerPacket::RetrieveTradeItem {
+                        from: *from,
+                        to: *to,
+                        success: false,
+                    }]
+                }
+                ClientPacket::MoveItem { grid, from, to } => vec![ServerPacket::MoveItem {
+                    grid: *grid,
+                    from: *from,
+                    to: *to,
+                    success: false,
+                }],
+                ClientPacket::MergeItem {
+                    grid_from,
+                    grid_to,
+                    id_from,
+                    id_to,
+                } => vec![ServerPacket::MergeItem {
+                    grid_from: *grid_from,
+                    grid_to: *grid_to,
+                    id_from: *id_from,
+                    id_to: *id_to,
+                    success: false,
+                }],
+                _ => Vec::new(),
+            };
+            let before_command = runtime.inner.world_snapshot();
+            assert_eq!(
+                runtime
+                    .execute(WorldCommand::ClientPacket(packet))
+                    .expect("guarded trade packet"),
+                expected,
+                "item failures acknowledge the exact command without releasing custody"
+            );
+            let after_command = runtime.inner.world_snapshot();
+            assert_eq!(
+                after_command.inventory_items,
+                before_command.inventory_items
+            );
+            assert_eq!(after_command.gold, before_command.gold);
+            assert_eq!(
+                after_command.stage5_systems.trade,
+                before_command.stage5_systems.trade
+            );
         }
         assert!(!runtime.inner.has_active_shared_trade_state());
         let calls_while_pending = *calls.lock().expect("probe count should lock");
@@ -18207,14 +18504,86 @@ mod tests {
             ClientPacket::TradeGold { amount: 1 },
             ClientPacket::DepositTradeItem { from: 0, to: 0 },
             ClientPacket::RetrieveTradeItem { from: 0, to: 0 },
+            ClientPacket::MoveItem {
+                grid: MirGridType::Trade,
+                from: 0,
+                to: 1,
+            },
+            ClientPacket::MergeItem {
+                grid_from: MirGridType::Trade,
+                grid_to: MirGridType::Trade,
+                id_from: 1,
+                id_to: 2,
+            },
+            ClientPacket::MergeItem {
+                grid_from: MirGridType::Inventory,
+                grid_to: MirGridType::Trade,
+                id_from: 1,
+                id_to: 2,
+            },
+            ClientPacket::MergeItem {
+                grid_from: MirGridType::Trade,
+                grid_to: MirGridType::Inventory,
+                id_from: 1,
+                id_to: 2,
+            },
             ClientPacket::TradeConfirm { locked: false },
             ClientPacket::TradeCancel,
         ];
         for packet in mutations {
-            assert!(runtime
-                .execute(WorldCommand::ClientPacket(packet))
-                .expect("guarded trade packet")
-                .is_empty());
+            let expected = match &packet {
+                ClientPacket::DepositTradeItem { from, to } => {
+                    vec![ServerPacket::DepositTradeItem {
+                        from: *from,
+                        to: *to,
+                        success: false,
+                    }]
+                }
+                ClientPacket::RetrieveTradeItem { from, to } => {
+                    vec![ServerPacket::RetrieveTradeItem {
+                        from: *from,
+                        to: *to,
+                        success: false,
+                    }]
+                }
+                ClientPacket::MoveItem { grid, from, to } => vec![ServerPacket::MoveItem {
+                    grid: *grid,
+                    from: *from,
+                    to: *to,
+                    success: false,
+                }],
+                ClientPacket::MergeItem {
+                    grid_from,
+                    grid_to,
+                    id_from,
+                    id_to,
+                } => vec![ServerPacket::MergeItem {
+                    grid_from: *grid_from,
+                    grid_to: *grid_to,
+                    id_from: *id_from,
+                    id_to: *id_to,
+                    success: false,
+                }],
+                _ => Vec::new(),
+            };
+            let before_command = runtime.inner.world_snapshot();
+            assert_eq!(
+                runtime
+                    .execute(WorldCommand::ClientPacket(packet))
+                    .expect("guarded trade packet"),
+                expected,
+                "item failures acknowledge the exact command without releasing custody"
+            );
+            let after_command = runtime.inner.world_snapshot();
+            assert_eq!(
+                after_command.inventory_items,
+                before_command.inventory_items
+            );
+            assert_eq!(after_command.gold, before_command.gold);
+            assert_eq!(
+                after_command.stage5_systems.trade,
+                before_command.stage5_systems.trade
+            );
         }
 
         let after = runtime.inner.world_snapshot();
@@ -18251,6 +18620,8 @@ mod tests {
         let before_experience = runtime.inner.world_snapshot().player_experience;
 
         let award_packets = runtime.apply_zone_monster_kill_awards(vec![ZoneMonsterKillAward {
+            source_receipt_key: None,
+            experience_selection: None,
             monster_object_id: 9100,
             killed_at_ms: 1_000,
             monster_name: "Field Wasp".to_string(),
@@ -23862,6 +24233,87 @@ mod tests {
     }
 
     #[test]
+    fn gateway_twin_drake_shared_mana_commits_once_and_survives_refresh() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "twin-mana", "TwinBlade");
+        let mut save = runtime.inner.active_character_checkpoint().unwrap();
+        save.character.level = 60;
+        save.mp = 200;
+        save.max_mp = 200;
+        save.skill_states_json = vec![serde_json::json!({
+            "key":"twindrakeblade", "name":"TwinDrakeBlade", "description":"",
+            "level":3, "cooldown_ticks":0, "cooldown_ends_at":0
+        }).to_string()];
+        runtime.inner.restore_active_character_checkpoint(&save).unwrap();
+        let session = runtime.current_zone_session_id().unwrap();
+        let snapshot = runtime.inner.world_snapshot();
+        zone_state.lock().unwrap().zone_manager.handle(ZoneCommand::SyncPlayerVitals {
+            session_id: session.clone(), hp: snapshot.player_hp.unwrap(),
+            max_hp: snapshot.player_max_hp.unwrap(), mp: 200,
+        });
+        let (target, _) = prepare_gateway_range_fixture(&mut runtime, 1);
+        let magic = mir2_game_data::crystal_magic_by_spell("TwinDrakeBlade").unwrap();
+        let cost = i32::from(magic.base_cost) + 3 * i32::from(magic.level_cost);
+        let prepared = runtime.execute(WorldCommand::ClientPacket(ClientPacket::SpellToggle {
+            spell: Spell::TwinDrakeBlade, toggle_state: 1,
+        })).unwrap();
+        assert!(prepared.iter().any(|p| matches!(p, ServerPacket::ObjectMagic { spell: Spell::TwinDrakeBlade, cast: false, .. })));
+        assert_eq!(runtime.inner.world_snapshot().player_mp, Some(200 - cost));
+        assert_eq!(zone_state.lock().unwrap().zone_manager.player_vitals(&session).unwrap().2, 200 - cost);
+        // Repeating preparation must not consume the second payment.
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::SpellToggle {
+            spell: Spell::TwinDrakeBlade, toggle_state: 1,
+        })).unwrap();
+        assert_eq!(runtime.inner.world_snapshot().player_mp, Some(200 - cost));
+        let attack = |spell| WorldCommand::ClientPacket(ClientPacket::Attack { direction: MirDirection::Right, spell });
+        let packets = runtime.execute(attack(Spell::TwinDrakeBlade)).unwrap();
+        assert!(packets.iter().any(|p| matches!(p, ServerPacket::ObjectAttack { info } if info.spell == Spell::TwinDrakeBlade as u8)), "{packets:?}; target={target:?}");
+        assert_eq!(runtime.inner.world_snapshot().player_mp, Some(200 - 2 * cost), "actor={:?} packets={packets:?}", runtime.local_self_object_id());
+        assert_eq!(zone_state.lock().unwrap().zone_manager.player_vitals(&session).unwrap().2, 200 - 2 * cost);
+        let retried = runtime.execute(attack(Spell::TwinDrakeBlade)).unwrap();
+        assert!(!retried.iter().any(|p| matches!(p, ServerPacket::ObjectAttack { .. })));
+        runtime.force_inner_to_current_zone_vitals();
+        assert_eq!(runtime.inner.world_snapshot().player_mp, Some(200 - 2 * cost), "actor={:?} packets={packets:?}", runtime.local_self_object_id());
+        runtime.execute(WorldCommand::Tick).unwrap();
+        assert_eq!(zone_state.lock().unwrap().zone_manager.player_vitals(&session).unwrap().2, 200 - 2 * cost);
+    }
+
+    #[test]
+    fn gateway_ordinary_accepted_attack_prepares_passive_slaying_without_mana() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "slaying-routing", "SlayBlade");
+        let mut save = runtime.inner.active_character_checkpoint().unwrap();
+        save.character.level = 60;
+        save.skill_states_json = vec![serde_json::json!({
+            "key":"slaying", "name":"Slaying", "description":"",
+            "level":3, "cooldown_ticks":0, "cooldown_ends_at":0
+        }).to_string()];
+        runtime.inner.restore_active_character_checkpoint(&save).unwrap();
+        prepare_gateway_range_fixture(&mut runtime, 1);
+        // Select an eligible deterministic combat roll; the assertion below
+        // exercises the ordinary client packet's shared accepted-attack hook.
+        let actor = runtime.local_self_object_id().unwrap();
+        for _ in 0..32 {
+            let tick = runtime.inner.world_snapshot().tick;
+            let roll = (tick.wrapping_mul(0x9E37_79B9_7F4A_7C15)
+                ^ u64::from(actor).wrapping_mul(0xBF58_476D_1CE4_E5B9)
+                ^ 2_u64.wrapping_mul(0x94D0_49BB_1331_11EB)) % 12;
+            if roll <= 3 { break; }
+            runtime.inner.execute(WorldCommand::Tick).unwrap();
+        }
+        runtime.force_inner_to_current_zone_vitals();
+        let before = runtime.inner.world_snapshot().player_mp;
+        let packets = runtime.execute(WorldCommand::ClientPacket(ClientPacket::Attack {
+            direction: MirDirection::Right, spell: Spell::None,
+        })).unwrap();
+        assert!(packets.iter().any(|p| matches!(p, ServerPacket::ObjectAttack { info } if info.spell == Spell::None as u8)));
+        assert!(packets.iter().any(|p| matches!(p, ServerPacket::SpellToggle { spell: Spell::Slaying, can_use: true, .. })), "{packets:?}");
+        assert_eq!(runtime.inner.world_snapshot().player_mp, before);
+    }
+
+    #[test]
     fn gateway_prefilter_uses_explicit_disposition_for_friendly_and_hostile_ai0() {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut runtime = shared_session_runtime(zone_state.clone());
@@ -24176,6 +24628,39 @@ mod tests {
                     .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
             }
         }
+    }
+
+    #[test]
+    fn shared_magic_rejects_nonplayer_actor_before_any_fallback() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        start_demo_runtime(&mut runtime);
+        let before = runtime.world_snapshot();
+        let player = before.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).unwrap();
+        let target = before.entities.iter().find(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead).unwrap();
+        for actor in [0, player.object_id.checked_add(1).unwrap(), u32::MAX] {
+            for (spell, target_id) in [(Spell::FireBall, target.object_id), (Spell::FireWall, 0), (Spell::SummonSkeleton, 0), (Spell::MagicShield, actor)] {
+                let command = WorldCommand::ClientPacket(ClientPacket::Magic {
+                    object_id: actor, spell, direction: MirDirection::Right, target_id,
+                    location: Point { x: target.x, y: target.y }, spell_target_lock: true,
+                });
+                assert!(runtime.prepare_zone_native_player_attack(&command).is_none());
+                assert!(runtime.execute(command).unwrap_err().contains("active player actor"));
+            }
+        }
+        let after = runtime.world_snapshot();
+        assert_eq!(after.player_mp, before.player_mp);
+        assert_eq!(after.player_hp, before.player_hp);
+        assert_eq!(after.inventory_items, before.inventory_items);
+        assert_eq!(after.entities, before.entities);
+        assert_eq!(after.tick, before.tick);
+        let valid = WorldCommand::ClientPacket(ClientPacket::Magic {
+            object_id: player.object_id, spell: Spell::Healing, direction: MirDirection::Right,
+            target_id: player.object_id, location: Point { x: player.x, y: player.y }, spell_target_lock: true,
+        });
+        assert!(runtime.validate_shared_magic_actor(&valid).is_ok());
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::LogOut)).unwrap();
+        assert!(runtime.execute(valid).is_err(), "the prior actor cannot cast after leaving its Zone");
     }
 
     #[test]
@@ -25705,7 +26190,8 @@ mod tests {
 
     #[test]
     fn shared_in_process_registry_intelligent_creature_picks_up_remote_shared_gold() {
-        let (mut first, mut second) = started_shared_zone_sessions();
+        let (mut first, mut second) =
+            started_shared_zone_sessions_with_creature(shared_pickup_creature());
         second.handle_packet(ClientPacket::UpdateIntelligentCreature {
             creature: shared_pickup_creature(),
             summon_me: true,
@@ -25722,13 +26208,15 @@ mod tests {
             .cloned()
             .expect("second session should see the shared gold drop");
 
-        let packets = second.handle_packet(ClientPacket::IntelligentCreaturePickup {
+        let mut packets = second.handle_packet(ClientPacket::IntelligentCreaturePickup {
             mouse_mode: true,
             location: Point {
                 x: shared_drop.x,
                 y: shared_drop.y,
             },
         });
+
+        packets.extend(wait_for_shared_creature_pickup(&mut second));
 
         assert!(packets.iter().any(|packet| matches!(
             packet,
@@ -25760,7 +26248,8 @@ mod tests {
 
     #[test]
     fn shared_in_process_registry_intelligent_creature_auto_picks_remote_shared_gold() {
-        let (mut first, mut second) = started_shared_zone_sessions();
+        let (mut first, mut second) =
+            started_shared_zone_sessions_with_creature(shared_pickup_creature());
         second.handle_packet(ClientPacket::UpdateIntelligentCreature {
             creature: shared_pickup_creature(),
             summon_me: true,
@@ -25778,7 +26267,7 @@ mod tests {
             .expect("second session should see the shared gold drop");
         second.transfer_map(&format!("crystal:0:{}:{}", shared_drop.x, shared_drop.y));
 
-        let packets = second.tick();
+        let packets = wait_for_shared_creature_pickup(&mut second);
 
         assert!(packets.iter().any(|packet| matches!(
             packet,
@@ -25805,13 +26294,13 @@ mod tests {
 
     #[test]
     fn shared_in_process_registry_intelligent_creature_filter_blocks_remote_shared_item() {
-        let (mut first, mut second) = started_shared_zone_sessions();
         let mut creature = shared_pickup_creature();
         creature.filter.pet_pickup_all = false;
         creature.filter.pet_pickup_gold = true;
         creature.filter.pet_pickup_others = false;
         creature.filter.pet_pickup_weapons = false;
         creature.creature_rules.auto_pickup_enabled = false;
+        let (mut first, mut second) = started_shared_zone_sessions_with_creature(creature.clone());
         second.handle_packet(ClientPacket::UpdateIntelligentCreature {
             creature,
             summon_me: true,
@@ -26705,6 +27194,39 @@ mod tests {
             .any(|p| matches!(p, ServerPacket::TradeAccept { .. })));
     }
 
+    fn started_shared_zone_sessions_with_creature(
+        mut creature: ClientIntelligentCreature,
+    ) -> (GatewaySession, GatewaySession) {
+        let registry = ZoneRegistry::in_process();
+        let config = GatewayConfig::default();
+        let mut first = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        let mut second = GatewaySession::new_with_zone_registry(config.clone(), &registry);
+        start_demo_character(&mut first);
+        start_new_character(&mut second, "second", "Blade");
+        let identity = second.active_identity().unwrap();
+        second.handle_packet(ClientPacket::LogOut);
+        {
+            let mut store = config.account_store.lock().unwrap();
+            let save = store
+                .accounts
+                .get_mut(&identity.account_id)
+                .unwrap()
+                .saves
+                .get_mut(&identity.character_index)
+                .unwrap();
+            let mut systems: mir2_simulation::Stage5SystemsState =
+                serde_json::from_str(save.stage5_systems_json.as_deref().unwrap()).unwrap();
+            creature.pet_mode = 0;
+            systems.intelligent_creatures = vec![creature];
+            systems.summoned_intelligent_creature_type = Some(99);
+            save.stage5_systems_json = Some(serde_json::to_string(&systems).unwrap());
+        }
+        second.handle_packet(ClientPacket::StartGame {
+            character_index: identity.character_index,
+        });
+        (first, second)
+    }
+
     fn started_shared_zone_sessions() -> (GatewaySession, GatewaySession) {
         let registry = ZoneRegistry::in_process();
         let config = GatewayConfig::default();
@@ -26747,8 +27269,18 @@ mod tests {
             zone_state.clone(),
             Duration::from_secs(60 * 60),
         );
+        let shared_mentors = Arc::new(Mutex::new(
+            crate::routing::shared_mentor::SharedMentorCoordinator::default(),
+        ));
+        let shared_social_generation = shared_mentors.lock().unwrap().generation.clone();
         SharedInProcessZoneSessionRuntime {
             inner: InProcessWorldRuntime::new(GatewayConfig::default()),
+            shared_social_generation,
+            last_social_refresh: None,
+            next_social_refresh_ms: 0,
+            shared_mentors,
+            ranking_zones: Arc::new(Mutex::new(BTreeMap::new())),
+            ranking_replica_zones: Arc::new(Mutex::new(BTreeSet::new())),
             zone_state: zone_state.clone(),
             account_inventory_service,
             inventory_zone_id: ZoneId::new("test-shared-zone"),
@@ -27212,6 +27744,16 @@ mod tests {
         }
     }
 
+    fn wait_for_shared_creature_pickup(session: &mut GatewaySession) -> Vec<ServerPacket> {
+        let mut packets = Vec::new();
+        for _ in 0..120 {
+            std::thread::sleep(std::time::Duration::from_millis(25));
+            packets.extend(session.tick());
+            if packets.iter().any(|p| matches!(p, ServerPacket::IntelligentCreaturePickup { .. })) { break; }
+        }
+        packets
+    }
+
     fn shared_pickup_creature() -> ClientIntelligentCreature {
         ClientIntelligentCreature {
             pet_type: 1,
@@ -27219,9 +27761,9 @@ mod tests {
             custom_name: "Buddy".to_string(),
             fullness: 1200,
             slot_index: 0,
-            expire_binary_datetime: 638000000000000000,
+            expire_binary_datetime: 0,
             blackstone_time: 0,
-            pet_mode: 1,
+            pet_mode: 0,
             creature_rules: IntelligentCreatureRules {
                 minimal_fullness: 0,
                 mouse_pickup_enabled: true,
@@ -27244,7 +27786,7 @@ mod tests {
                 pet_pickup_others: true,
             },
             pickup_grade: 0,
-            maintain_food_time: 24_000,
+            maintain_food_time: 24,
         }
     }
 

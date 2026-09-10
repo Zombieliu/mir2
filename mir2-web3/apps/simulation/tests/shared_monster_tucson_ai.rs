@@ -48,6 +48,7 @@ fn fixture(ai: u8, name: &str, player_x: i32, monster_id: u32) -> ZoneRuntime {
         session_id: SessionId::new("player"),
         now_ms: 0,
         monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: monster_id,
             name: name.into(),
             name_colour_argb: -1,
@@ -241,6 +242,7 @@ fn owned_target(stone: bool, source_id: u32) -> (ZoneRuntime, u32) {
         .position;
     z.spawn_world_event_monster(
         &ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: source_id,
             name: "ArcherGuard".into(),
             name_colour_argb: -1,

@@ -365,10 +365,11 @@ pub(super) fn resolved_monster_drop_templates(
     let mut drops = Vec::new();
     for sample_index in 0..drop_sample_multiplier {
         let sample_tick = current_tick.wrapping_add(u64::from(sample_index).wrapping_mul(104_729));
-        drops.extend(resolved_monster_drop_templates_at_tick(
+        drops.extend(resolved_monster_drop_templates_at_tick_with_rate(
             monster_object_id,
             monster_name,
             sample_tick,
+            super::stats::player_stats(world).get(101).max(0),
         ));
         drops.extend(content_profile_monster_drop_templates(
             config,
@@ -464,8 +465,17 @@ pub(super) fn resolved_monster_drop_templates_at_tick(
     monster_name: &str,
     current_tick: u64,
 ) -> Vec<ResolvedDropTemplate> {
+    resolved_monster_drop_templates_at_tick_with_rate(monster_object_id, monster_name, current_tick, 0)
+}
+
+pub(super) fn resolved_monster_drop_templates_at_tick_with_rate(
+    monster_object_id: u32,
+    monster_name: &str,
+    current_tick: u64,
+    item_drop_rate_percent: i32,
+) -> Vec<ResolvedDropTemplate> {
     let crystal_drops =
-        crystal_monster_drop_templates(monster_name, monster_object_id, current_tick);
+        crystal_monster_drop_templates_with_rate(monster_name, monster_object_id, current_tick, item_drop_rate_percent);
     if !crystal_drops.is_empty() {
         return crystal_drops;
     }
@@ -526,6 +536,15 @@ pub(super) fn crystal_monster_drop_templates(
     monster_object_id: u32,
     current_tick: u64,
 ) -> Vec<ResolvedDropTemplate> {
+    crystal_monster_drop_templates_with_rate(monster_name, monster_object_id, current_tick, 0)
+}
+
+pub(super) fn crystal_monster_drop_templates_with_rate(
+    monster_name: &str,
+    monster_object_id: u32,
+    current_tick: u64,
+    item_drop_rate_percent: i32,
+) -> Vec<ResolvedDropTemplate> {
     let Some(drop_table) = crystal_drop_table_for_monster_name(monster_name) else {
         return Vec::new();
     };
@@ -538,7 +557,7 @@ pub(super) fn crystal_monster_drop_templates(
         .flat_map(|section| section.entries)
     {
         if let Some(mut resolved) =
-            crystal_attempt_drop_entry(&entry, current_tick, monster_object_id, entry_salt)
+            crystal_attempt_drop_entry_with_rate(&entry, current_tick, monster_object_id, entry_salt, item_drop_rate_percent)
         {
             drops.append(&mut resolved);
         }
@@ -559,16 +578,27 @@ pub(super) fn crystal_attempt_drop_entry(
     monster_object_id: u32,
     entry_salt: usize,
 ) -> Option<Vec<ResolvedDropTemplate>> {
-    if !crystal_drop_entry_should_drop(entry, current_tick, monster_object_id, entry_salt) {
+    crystal_attempt_drop_entry_with_rate(entry, current_tick, monster_object_id, entry_salt, 0)
+}
+
+pub(super) fn crystal_attempt_drop_entry_with_rate(
+    entry: &CrystalDropEntry,
+    current_tick: u64,
+    monster_object_id: u32,
+    entry_salt: usize,
+    item_drop_rate_percent: i32,
+) -> Option<Vec<ResolvedDropTemplate>> {
+    if !crystal_drop_entry_should_drop_with_rate(entry, current_tick, monster_object_id, entry_salt, item_drop_rate_percent) {
         return None;
     }
 
     if let Some(group) = &entry.group {
-        return Some(crystal_resolve_group_drop(
+        return Some(crystal_resolve_group_drop_with_rate(
             group,
             current_tick,
             monster_object_id,
             entry_salt,
+            item_drop_rate_percent,
         ));
     }
 
@@ -582,13 +612,23 @@ pub(super) fn crystal_resolve_group_drop(
     monster_object_id: u32,
     entry_salt: usize,
 ) -> Vec<ResolvedDropTemplate> {
+    crystal_resolve_group_drop_with_rate(group, current_tick, monster_object_id, entry_salt, 0)
+}
+
+pub(super) fn crystal_resolve_group_drop_with_rate(
+    group: &mir2_game_data::CrystalDropGroup,
+    current_tick: u64,
+    monster_object_id: u32,
+    entry_salt: usize,
+    item_drop_rate_percent: i32,
+) -> Vec<ResolvedDropTemplate> {
     let mut gold_drops = Vec::new();
     let mut item_drops = Vec::new();
 
     for (child_index, child) in group.entries.iter().enumerate() {
         let child_salt = crystal_group_child_drop_salt(entry_salt, child_index);
         let Some(resolved) =
-            crystal_attempt_drop_entry(child, current_tick, monster_object_id, child_salt)
+            crystal_attempt_drop_entry_with_rate(child, current_tick, monster_object_id, child_salt, item_drop_rate_percent)
         else {
             continue;
         };
@@ -627,16 +667,33 @@ pub(super) fn crystal_drop_entry_should_drop(
     monster_object_id: u32,
     entry_index: usize,
 ) -> bool {
+    crystal_drop_entry_should_drop_with_rate(entry, current_tick, monster_object_id, entry_index, 0)
+}
+
+pub(super) fn crystal_drop_entry_should_drop_with_rate(
+    entry: &CrystalDropEntry,
+    current_tick: u64,
+    monster_object_id: u32,
+    entry_index: usize,
+    item_drop_rate_percent: i32,
+) -> bool {
     match (entry.chance_numerator, entry.chance_denominator) {
         (Some(numerator), Some(denominator)) => deterministic_drop_ratio_roll(
             current_tick,
             monster_object_id,
             u64::try_from(entry_index).expect("entry index should fit u64"),
             numerator,
-            denominator,
+            crystal_adjusted_drop_denominator(denominator, item_drop_rate_percent),
         ),
         _ => entry.chance_raw == "0",
     }
+}
+
+/// Crystal reduces the integer denominator, not the number of independent rolls.
+pub(super) fn crystal_adjusted_drop_denominator(chance: u32, percent: i32) -> u32 {
+    let base = (chance as f32 / mir2_game_data::crystal_creature_settings().drop_rate) as u32;
+    let reduction = u64::from(base) * percent.max(0) as u64 / 100;
+    u64::from(base).saturating_sub(reduction).max(1) as u32
 }
 
 pub(super) fn deterministic_drop_ratio_roll(
@@ -1479,7 +1536,16 @@ pub(super) fn zone_ground_drop_snapshots_for_monster_at_tick(
     monster_name: &str,
     current_tick: u64,
 ) -> Vec<GroundDropSnapshot> {
-    resolved_monster_drop_templates_at_tick(monster_object_id, monster_name, current_tick)
+    zone_ground_drop_snapshots_for_monster_at_tick_with_rate(monster_object_id, monster_name, current_tick, 0)
+}
+
+pub(super) fn zone_ground_drop_snapshots_for_monster_at_tick_with_rate(
+    monster_object_id: u32,
+    monster_name: &str,
+    current_tick: u64,
+    item_drop_rate_percent: i32,
+) -> Vec<GroundDropSnapshot> {
+    resolved_monster_drop_templates_at_tick_with_rate(monster_object_id, monster_name, current_tick, item_drop_rate_percent)
         .into_iter()
         .filter_map(|drop| zone_ground_drop_snapshot_from_template(monster_name, drop))
         .collect()
@@ -3051,7 +3117,7 @@ impl SharedAccountInventoryTransactionReceipt {
         }
     }
 
-    fn monster_kill_award(committed: bool, packets: Vec<ServerPacket>) -> Self {
+    pub(super) fn monster_kill_award(committed: bool, packets: Vec<ServerPacket>) -> Self {
         Self {
             kind: SharedAccountInventoryTransactionKind::MonsterKillAward,
             committed,
@@ -3353,6 +3419,7 @@ impl SimulationSession {
             monster_object_id,
             monster_name,
             experience,
+            None,
         );
         SharedAccountInventoryTransactionReceipt {
             kind: receipt.kind,
@@ -3361,11 +3428,12 @@ impl SimulationSession {
         }
     }
 
-    fn commit_shared_monster_kill_award_transaction_impl(
+    pub(super) fn commit_shared_monster_kill_award_transaction_impl(
         &mut self,
         monster_object_id: u32,
         monster_name: &str,
         experience: u32,
+        selected_experience: Option<u32>,
     ) -> SharedAccountInventoryTransactionReceipt {
         let world = self.app.world_mut();
         if !is_in_world(world) {
@@ -3422,7 +3490,7 @@ impl SimulationSession {
                 }
             }
         }
-        if experience > 0 {
+        if selected_experience.unwrap_or(experience) > 0 {
             let player_level = super::leveling::player_current_level(world);
             let experience_multiplier = world
                 .resource::<RuntimeConfigResource>()
@@ -3432,7 +3500,7 @@ impl SimulationSession {
             let experience = experience.saturating_mul(qa_natural_kill_experience_multiplier());
             // Marriage / mentorship / guild membership grant a Crystal-style
             // experience-rate bonus (no-op for an unattached player).
-            let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
+            let experience = selected_experience.unwrap_or_else(|| super::stats::crystal_apply_social_exp_rate(world, experience));
             // Crystal `PlayerObject.GainExp`: bank the experience and auto-level
             // through every threshold it clears (emits GainExperience +, on a
             // level gain, LevelChanged + ObjectHealth).

@@ -933,6 +933,7 @@ mod forced_target_tests {
         }
         z.spawn_authoritative_monster(
             &ZoneMonsterSpawn {
+                crystal_drop_seed: None,
                 object_id: id,
                 name: "ArcherGuard".into(),
                 name_colour_argb: -1,

@@ -1265,7 +1265,11 @@ mod tests {
         model.advance_login_opening(Duration::from_millis(1));
         assert_eq!(model.login_opening_frame(), 2);
         assert!(!model.apply_gateway_event(event));
-        assert_eq!(model.login_opening_frame(), 2, "duplicate success restarted door");
+        assert_eq!(
+            model.login_opening_frame(),
+            2,
+            "duplicate success restarted door"
+        );
         model.advance_login_opening(Duration::from_millis(1699));
         assert_eq!(model.screen, NativeShellScreen::OpeningLogin);
         assert_eq!(model.login_opening_frame(), 18);
@@ -1281,7 +1285,8 @@ mod tests {
         model.screen = NativeShellScreen::Authenticating;
         model.login_request_in_flight = true;
         assert!(model.apply_gateway_event(NativeGatewayEvent::LoginSuccess {
-            account: "door-test".to_owned(), characters: Vec::new(),
+            account: "door-test".to_owned(),
+            characters: Vec::new(),
         }));
         model.advance_login_opening(Duration::from_millis(900));
         assert!(model.apply_gateway_event(NativeGatewayEvent::Disconnect { reason: None }));
@@ -1337,10 +1342,12 @@ mod tests {
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
         assert_eq!(model.screen, NativeShellScreen::Authenticating);
 
-        assert!(model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
-            account: "test-account".to_owned(),
-            characters: starter_characters(),
-        }));
+        assert!(
+            model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: starter_characters(),
+            })
+        );
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert_eq!(model.login.password, "");
         assert_eq!(model.characters.len(), 2);
@@ -1392,12 +1399,12 @@ mod tests {
             NativeShellScreen::Authenticating
         );
 
-        assert!(
-            register_then_login.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+        assert!(register_then_login.apply_completed_login_for_test(
+            NativeGatewayEvent::LoginSuccess {
                 account: "test-account".to_owned(),
                 characters: starter_characters(),
-            })
-        );
+            }
+        ));
         assert!(!register_then_login.login_request_in_flight);
         assert!(!register_then_login.register_request_in_flight);
         assert_eq!(
@@ -1409,12 +1416,12 @@ mod tests {
         assert!(login_then_register.apply_ui_intent(NativeUiIntent::RegisterAccount));
         assert!(login_then_register.apply_ui_intent(NativeUiIntent::Login));
 
-        assert!(
-            login_then_register.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+        assert!(login_then_register.apply_completed_login_for_test(
+            NativeGatewayEvent::LoginSuccess {
                 account: "test-account".to_owned(),
                 characters: starter_characters(),
-            })
-        );
+            }
+        ));
         assert!(!login_then_register.login_request_in_flight);
         assert!(login_then_register.register_request_in_flight);
         assert_eq!(
@@ -1498,10 +1505,12 @@ mod tests {
         assert!(model.apply_ui_intent(NativeUiIntent::RegisterAccount));
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
 
-        assert!(model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
-            account: "test-account".to_owned(),
-            characters: starter_characters(),
-        }));
+        assert!(
+            model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: starter_characters(),
+            })
+        );
         let screen = model.screen;
         let characters = model.characters.clone();
         let notice = model.notice.clone();
@@ -1584,10 +1593,12 @@ mod tests {
     fn empty_roster_is_supported_after_login_success() {
         let mut model = model_with_valid_login();
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
-        assert!(model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
-            account: "test-account".to_owned(),
-            characters: Vec::new(),
-        }));
+        assert!(
+            model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: Vec::new(),
+            })
+        );
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert_eq!(model.characters.len(), 0);
     }
@@ -1708,10 +1719,12 @@ mod tests {
         assert!(!before.contains("secret-pass"));
 
         assert!(model.apply_ui_intent(NativeUiIntent::Login));
-        assert!(model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
-            account: "test-account".to_owned(),
-            characters: Vec::new(),
-        }));
+        assert!(
+            model.apply_completed_login_for_test(NativeGatewayEvent::LoginSuccess {
+                account: "test-account".to_owned(),
+                characters: Vec::new(),
+            })
+        );
         let after = format!("{:?}", model);
         assert!(!after.contains("secret-pass"));
         assert_eq!(model.login.password, "");

@@ -6,7 +6,9 @@
 //! movement; the client only expresses the request.
 
 use bevy::input::ButtonInput;
-use bevy::prelude::{Interaction, KeyCode, MouseButton, Query, Res, ResMut, Time, Window, With};
+use bevy::prelude::{
+    Interaction, KeyCode, Local, MouseButton, Query, Res, ResMut, Time, Window, With,
+};
 use mir2_client_bevy::crystal_ui::hud::{belt_slot_item, CrystalHudAction};
 use mir2_client_bevy::crystal_ui::notice::NoticeDialogState;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
@@ -446,6 +448,8 @@ pub fn is_pointer_captured_for_movement(
     }
     player_ui.is_some_and(|ui| {
         ui.blocks_world_click()
+            || ui.skill_bars.hovered
+            || ui.skill_bars.dragging.is_some()
             || ui.captures_pointer(is_dragging_window, is_dragging_scrollbar, button_pressed)
     })
 }
@@ -994,7 +998,7 @@ pub fn mouse_world_interaction_system(
     mouse: Res<ButtonInput<MouseButton>>,
     keys: Option<Res<ButtonInput<KeyCode>>>,
     shell: Option<Res<NativeShellModel>>,
-    player_ui: Option<Res<NativePlayerUiState>>,
+    mut player_ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
     (ui_read_model, click_state): (Option<Res<UiReadModel>>, Option<Res<NativeWorldClickState>>),
@@ -1032,6 +1036,9 @@ pub fn mouse_world_interaction_system(
         && !right_pressed
         && !left_released
         && !right_released
+        && !player_ui
+            .as_deref()
+            .is_some_and(|ui| ui.local_keys.auto_run)
         && movement.active.is_none()
         && movement.auto_path_destination.is_none()
         && movement.attack_target.is_none()
@@ -1040,7 +1047,8 @@ pub fn mouse_world_interaction_system(
     {
         return;
     }
-    let animation_now_ms = time.as_deref()
+    let animation_now_ms = time
+        .as_deref()
         .map(|time| time.elapsed().as_millis().min(u128::from(u64::MAX)) as u64)
         .unwrap_or(0);
     let (Some(shell), Some(entities), Some(presentation)) =
@@ -1156,9 +1164,10 @@ pub fn mouse_world_interaction_system(
     // otherwise held input re-sends from a stale origin while the old command
     // may still execute. Finish the current prediction without adding steps.
     if !movement.movement_stall_reported
-        && movement.pending.front().is_some_and(|pending| {
-            now_ms >= pending.sent_at_ms + MOVEMENT_PENDING_MAX_AGE_MS
-        })
+        && movement
+            .pending
+            .front()
+            .is_some_and(|pending| now_ms >= pending.sent_at_ms + MOVEMENT_PENDING_MAX_AGE_MS)
     {
         movement.movement_stall_reported = true;
         let age_ms = now_ms - movement.pending.front().unwrap().sent_at_ms;
@@ -1182,8 +1191,58 @@ pub fn mouse_world_interaction_system(
     let dead = ui_read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
-    if notice.as_deref().is_some_and(NoticeDialogState::is_open)
+    // PreUpdate precedes the current frame's UI focus pass. Use actual current
+    // cursor geometry as well as captured interaction, so crossing onto a bar
+    // and pressing in the same frame cannot issue a world movement request.
+    let over_skill_bar = player_ui.as_deref().is_some_and(|ui| {
+        ui.core.options.skill_bar
+            && windows.iter().any(|window| {
+                window.cursor_position().is_some_and(|cursor| {
+                    let transform =
+                        mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+                            window.resolution.width(),
+                            window.resolution.height(),
+                        );
+                    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                    ui.skill_bars
+                        .visible
+                        .iter()
+                        .enumerate()
+                        .any(|(bar, visible)| {
+                            let p = ui.core.options.skill_bar_positions[bar];
+                            *visible
+                                && (p[0] as f32..p[0] as f32 + 216.).contains(&x)
+                                && (p[1] as f32..p[1] as f32 + 28.).contains(&y)
+                        })
+                })
+            })
+    });
+    let over_hero_window = player_ui.as_deref().is_some_and(|ui| {
+        ui.hero.interactive
+            && window.cursor_position().is_some_and(|cursor| {
+                let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+                    window.resolution.width(),
+                    window.resolution.height(),
+                );
+                let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                mir2_client_bevy::crystal_ui::overlays::hero_dialog::geometry::hit(
+                    &ui.hero,
+                    [x, y],
+                    ui.hero.front,
+                )
+                .0
+                .is_some()
+                    || ui.hero.modal()
+                    || ui.hero.dragging.is_some()
+            })
+    });
+    if over_skill_bar
+        || over_hero_window
+        || notice.as_deref().is_some_and(NoticeDialogState::is_open)
         || is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
+        || player_ui
+            .as_deref()
+            .is_some_and(|ui| ui.skill_bars.hovered || ui.skill_bars.dragging.is_some())
     {
         movement.stop_hold(now_ms, "worldInputBlocked");
         movement.attack_target = None;
@@ -1204,17 +1263,28 @@ pub fn mouse_world_interaction_system(
         movement.stop_hold(now_ms, "escape");
         return;
     }
-    if keys
-        .as_deref()
-        .and_then(pressed_keyboard_direction)
-        .is_some()
-    {
+    if keys.as_deref().is_some_and(|keys| {
+        walk_key_map().iter().any(|(key, _)| {
+            keys.pressed(*key)
+                && !player_ui
+                    .as_deref()
+                    .is_some_and(|ui| key_owned_by_binding(&ui.keyboard, keys, *key))
+        })
+    }) {
         movement.stop_hold(now_ms, "keyboardInput");
         movement.attack_target = None;
         movement.stop_auto_path(now_ms, "keyboardInput");
         return;
     }
 
+    if left_pressed || right_pressed {
+        if let Some(ui) = player_ui.as_deref_mut() {
+            ui.local_keys.set_auto_run(false);
+        }
+    }
+    let auto_run = player_ui
+        .as_deref()
+        .is_some_and(|ui| ui.local_keys.auto_run);
     if right_pressed {
         movement.attack_target = None;
         movement.stop_auto_path(now_ms, "newRightClick");
@@ -1304,13 +1374,20 @@ pub fn mouse_world_interaction_system(
     // moves, rather than terminating at the tile from the initial down edge.
     // Arm only an accepted world press; blocked UI/actor presses must not
     // become movement merely because the cursor later leaves that surface.
+    if auto_run && presentation.hovered_grid_position().is_some() {
+        movement.begin(WorldPointerMovementMode::Run, now_ms);
+        movement.attack_target = None;
+        movement.auto_path_destination = None;
+    }
     if right_pressed && presentation.hovered_grid_position().is_some() {
         movement.begin(WorldPointerMovementMode::Run, now_ms);
     }
     if movement.active == Some(WorldPointerMovementMode::Run) {
-        if mouse.pressed(MouseButton::Right) {
-            if let Some(target) = presentation.hovered_grid_position() {
-                movement.auto_path_destination = Some(target);
+        if mouse.pressed(MouseButton::Right) || auto_run {
+            if !auto_run {
+                if let Some(target) = presentation.hovered_grid_position() {
+                    movement.auto_path_destination = Some(target);
+                }
             }
         } else {
             movement.stop_hold(now_ms, "buttonReleased");
@@ -1433,7 +1510,7 @@ pub fn mouse_world_interaction_system(
         };
         let held = match mode {
             WorldPointerMovementMode::Walk => mouse.pressed(MouseButton::Left),
-            WorldPointerMovementMode::Run => mouse.pressed(MouseButton::Right),
+            WorldPointerMovementMode::Run => mouse.pressed(MouseButton::Right) || auto_run,
         };
         if !held {
             movement.stop_hold(now_ms, "buttonReleased");
@@ -1518,7 +1595,14 @@ pub fn mouse_world_interaction_system(
         else {
             return;
         };
-        (direction, mode)
+        (
+            direction,
+            if auto_run && ui_read_model.as_deref().is_some_and(|ui| ui.player.hp < 10) {
+                WorldPointerMovementMode::Walk
+            } else {
+                mode
+            },
+        )
     };
     let Some(planned) = plan_crystal_pointer_move(
         &mut movement,
@@ -1532,6 +1616,43 @@ pub fn mouse_world_interaction_system(
         run_distance,
         now_ms,
     ) else {
+        // Original tries walking and turning before the rod cast branch.
+        if requested_mode == WorldPointerMovementMode::Walk && auto_path_destination.is_none() {
+            if let Some(ui) = player_ui.as_deref_mut() {
+                if ui.equipment_dialogs.rod.is_some() {
+                    let water = movement_target(origin, direction, 3);
+                    if map_file_name
+                        .as_deref()
+                        .and_then(|map| crate::map_parser::fishing_attribute(map, water.0, water.1))
+                        .is_some()
+                    {
+                        if entity_direction != direction {
+                            commands.send(PlayerIntent::Turn {
+                                direction: direction.into(),
+                            });
+                            movement.next_move_send_at_ms = now_ms + 200.0;
+                            return;
+                        }
+                        if let Some((standing, transform)) =
+                            presentation.self_equipment_pose(&object_id)
+                        {
+                            ui.equipment_dialogs.standing = standing;
+                            if let Some(packet) =
+                                ui.equipment_dialogs
+                                    .cast(animation_now_ms, true, true, transform)
+                            {
+                                if !commands.send_command(GatewayCommand::Wire(
+                                    NativeOutboundCommand::FishingCast { cast_out: true },
+                                )) {
+                                    ui.equipment_dialogs.release_unsent(&packet);
+                                }
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         movement.trace_plan_blocked(now_ms, origin, direction, requested_mode);
         return;
     };
@@ -1616,7 +1737,16 @@ pub fn keyboard_movement_system(
     ) {
         return;
     }
-    let Some(direction) = pressed_keyboard_direction(&keys) else {
+    // Original shortcuts take precedence over the prototype WASD adapter.
+    let mut movement_keys = keys.clone();
+    if let Some(ui) = player_ui.as_deref() {
+        for key in keys.get_pressed() {
+            if key_owned_by_binding(&ui.keyboard, &keys, *key) {
+                movement_keys.release(*key);
+            }
+        }
+    }
+    let Some(direction) = pressed_keyboard_direction(&movement_keys) else {
         return;
     };
     let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
@@ -1679,7 +1809,8 @@ pub fn keyboard_movement_system(
         movement.trace_plan_blocked(now_ms, origin, direction, requested_mode);
         return;
     };
-    let animation_now_ms = time.as_deref()
+    let animation_now_ms = time
+        .as_deref()
         .map(|time| time.elapsed().as_millis().min(u128::from(u64::MAX)) as u64)
         .unwrap_or(0);
     let _ = send_pointer_move(
@@ -1727,6 +1858,12 @@ pub fn keyboard_turn_system(
 
     // Q is the cross-client Quest Log shortcut. It must never also emit a
     // world turn on the frame that the native quest UI opens or closes.
+    if player_ui
+        .as_deref()
+        .is_some_and(|u| key_owned_by_binding(&u.keyboard, &keys, KeyCode::KeyE))
+    {
+        return;
+    }
     let turn_delta = if keys.just_pressed(KeyCode::KeyE) {
         Some(1)
     } else {
@@ -1757,6 +1894,12 @@ pub fn keyboard_town_revive_system(
     ) {
         return;
     }
+    if player_ui
+        .as_deref()
+        .is_some_and(|u| key_owned_by_binding(&u.keyboard, &keys, KeyCode::KeyV))
+    {
+        return;
+    }
     if !keys.just_pressed(KeyCode::KeyV) {
         return;
     }
@@ -1769,9 +1912,123 @@ pub fn keyboard_town_revive_system(
 }
 
 /// Belt 1-6 uses the corresponding belt item. F1-F8 select the learned skill
-/// assigned to that server-provided hotkey, falling back only when the server
-/// omitted a hotkey. This function only emits a request: the server remains
+/// assigned to that explicit server-provided hotkey. This function only emits a request: the server remains
 /// the authority for damage, MP, cooldown, level and range.
+// Personal FireBall tests do not establish shared Zone authority. Keep the actual
+// input route closed until Gateway actor routing and Hero Zone casting pass together.
+const HERO_SHARED_MANUAL_CAST_VERIFIED: bool = false;
+
+/// Only end-to-end verified Hero casting may reach the shared server.
+pub fn keyboard_hero_skill_system(
+    keys: Res<ButtonInput<KeyCode>>,
+    commands: Res<GatewayCommands>,
+    shell: Option<Res<NativeShellModel>>,
+    entities: Res<EntityModelSet>,
+    combat: Option<Res<CombatTargetModel>>,
+    hero: Option<Res<mir2_client_bevy::hero_model::HeroModel>>,
+    ui: Option<Res<NativePlayerUiState>>,
+    notice: Option<Res<NoticeDialogState>>,
+    windows: Query<&Window>,
+    presentation: Option<Res<NativeEntityPresentation>>,
+    mut memory: Local<spell_targeting::SpellTargetMemory>,
+    mut throttle: Local<(u64, u64, u64)>,
+) {
+    if !HERO_SHARED_MANUAL_CAST_VERIFIED {
+        return;
+    }
+    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), &windows) {
+        return;
+    }
+    let (Some(hero), Some(ui), Some(presentation)) = (hero, ui, presentation) else {
+        return;
+    };
+    let identity = (hero.session_epoch, hero.hero_generation);
+    if (throttle.0, throttle.1) != identity {
+        *throttle = (identity.0, identity.1, 0);
+        *memory = Default::default();
+    }
+    let now = mir2_client_bevy::hero_model::hero_clock_ms();
+    if now < throttle.2 {
+        return;
+    }
+    let Some(info) = hero.info.as_ref().filter(|i| hero.spawned && i.hp > 0) else {
+        return;
+    };
+    let Some(actor) = entities
+        .entities
+        .iter()
+        .find(|e| e.object_id == info.object_id.to_string())
+    else {
+        return;
+    };
+    for index in 1..=8u8 {
+        let function = format!("HeroSkill{index}");
+        if !mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::triggered(
+            &ui.keyboard,
+            &keys,
+            &function,
+        ) {
+            continue;
+        }
+        let Some(magic) = info.magics.iter().find(|m| m.key == index + 16) else {
+            continue;
+        };
+        if !matches!(ui.combat_modes.pet, 0 | 2 | 4) || !hero_fireball_ready(&hero, magic, now) {
+            continue;
+        }
+        memory.session(hero.session_epoch);
+        let Some(aim) = memory.aim(
+            "FireBall",
+            actor,
+            &entities,
+            &presentation,
+            combat.as_deref(),
+        ) else {
+            continue;
+        };
+        if commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::Magic {
+            object_id: info.object_id,
+            spell: "FireBall".into(),
+            direction: aim.direction,
+            target_id: aim.target_id,
+            x: aim.location.0,
+            y: aim.location.1,
+            spell_target_lock: ui.keyboard.lock_for_function_event(&function),
+        })) {
+            throttle.2 = now.saturating_add(200);
+        }
+    }
+}
+fn hero_fireball_ready(
+    hero: &mir2_client_bevy::hero_model::HeroModel,
+    magic: &mir2_protocol::ClientMagic,
+    now: u64,
+) -> bool {
+    let Some(info) = hero.info.as_ref() else {
+        return false;
+    };
+    magic.spell == mir2_protocol::Spell::FireBall
+        && hero.fishing != Some(true)
+        && hero.poison.is_none_or(|p| p & 16 == 0)
+        && (hero.riding_mount != Some(true)
+            || info
+                .equipment
+                .as_ref()
+                .and_then(|items| items.get(13))
+                .and_then(Option::as_ref)
+                .and_then(|mount| mount.slots.get(1))
+                .is_some_and(Option::is_some))
+        && hero.spawned
+        && info.hp > 0
+        && i64::from(info.mp)
+            >= i64::from(magic.base_cost) + i64::from(magic.level) * i64::from(magic.level_cost)
+        && hero
+            .magic_clocks
+            .iter()
+            .find(|c| c.spell == magic.spell)
+            .is_some_and(|c| c.remaining_ms(now) == 0)
+}
+
 pub fn keyboard_skill_system(
     keys: Res<ButtonInput<KeyCode>>,
     commands: Res<GatewayCommands>,
@@ -1781,141 +2038,239 @@ pub fn keyboard_skill_system(
     ui_read_model: Option<Res<UiReadModel>>,
     skills: Option<Res<SkillModel>>,
     inventory: Option<Res<InventoryModel>>,
-    player_ui: Option<Res<NativePlayerUiState>>,
+    mut player_ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     windows: Query<&Window>,
+    presentation: Option<Res<NativeEntityPresentation>>,
+    mut item_intents: Option<
+        ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>,
+    >,
+    mut magic_target: bevy::prelude::Local<spell_targeting::SpellTargetMemory>,
 ) {
+    if !shell
+        .as_deref()
+        .is_some_and(|s| s.screen == NativeShellScreen::InGame)
+    {
+        *magic_target = Default::default();
+    }
     if !gameplay_input_enabled(
         shell.as_deref(),
         player_ui.as_deref(),
         notice.as_deref(),
         &windows,
     ) {
-        return;
-    }
-
-    let belt_slot = if keys.just_pressed(KeyCode::Digit1) {
-        Some(0)
-    } else if keys.just_pressed(KeyCode::Digit2) {
-        Some(1)
-    } else if keys.just_pressed(KeyCode::Digit3) {
-        Some(2)
-    } else if keys.just_pressed(KeyCode::Digit4) {
-        Some(3)
-    } else if keys.just_pressed(KeyCode::Digit5) {
-        Some(4)
-    } else if keys.just_pressed(KeyCode::Digit6) {
-        Some(5)
-    } else {
-        None
-    };
-    if let Some(slot) = belt_slot {
-        if inventory.is_some_and(|model| belt_slot_item(model.as_ref(), slot).is_some()) {
-            commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::UseItem {
-                key: None,
-                unique_id: None,
-                slot: Some(slot),
-                grid: Some("belt".to_owned()),
-            }));
+        if let Some(ui) = player_ui.as_deref_mut() {
+            ui.skill_bars.pending_casts.clear();
         }
         return;
     }
-    let Some(skill_slot) = skill_shortcut_slot(&keys) else {
-        return;
+
+    let defaults =
+        mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::KeyboardDialogUi::default();
+    let bindings = player_ui
+        .as_deref()
+        .map(|u| &u.keyboard)
+        .unwrap_or(&defaults);
+    let triggered = |name: &str| {
+        mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::triggered(
+            bindings, &keys, name,
+        )
     };
+    let belt_slot = (1..=6u8)
+        .find(|slot| triggered(&format!("Belt{slot}")) || triggered(&format!("Belt{slot}Alt")))
+        .map(|slot| slot - 1);
+    if let Some(slot) = belt_slot {
+        let now = mir2_client_bevy::hero_model::hero_clock_ms();
+        if inventory.is_some_and(|model| belt_slot_item(model.as_ref(), slot).is_some())
+            && item_intents
+                .as_deref()
+                .is_none_or(|queue| queue.use_item_ready(now))
+        {
+            let sent =
+                commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::UseItem {
+                    key: None,
+                    unique_id: None,
+                    slot: Some(slot),
+                    grid: Some("belt".to_owned()),
+                }));
+            if sent {
+                if let Some(queue) = item_intents.as_deref_mut() {
+                    queue.commit_item_use(now, 300);
+                }
+            }
+        }
+        return;
+    }
+    let mut slots: Vec<(u8, Option<[f32; 2]>, bool)> = (1..=16u8)
+        .filter(|slot| {
+            let bar = if *slot <= 8 { 1 } else { 2 };
+            let key = (*slot - 1) % 8 + 1;
+            triggered(&format!("Bar{bar}Skill{key}"))
+        })
+        .map(|slot| (slot, None, false))
+        .collect();
+    let mode_actions: Vec<String> = bindings
+        .bindings
+        .iter()
+        .filter(|b| {
+            b.function.starts_with("Attackmode")
+                || b.function.starts_with("Petmode")
+                || matches!(b.function.as_str(), "ChangeAttackmode" | "ChangePetmode")
+        })
+        .filter(|b| triggered(&b.function))
+        .map(|b| b.function.clone())
+        .collect();
+    if let Some(ui) = player_ui.as_deref_mut() {
+        slots.extend(
+            ui.skill_bars
+                .pending_casts
+                .drain(..)
+                .map(|(slot, cursor)| (slot, cursor, true)),
+        );
+        for action in mode_actions {
+            if let Some(request) = ui.combat_modes.request(&action, std::time::Instant::now()) {
+                use mir2_client_bevy::crystal_ui::overlays::combat_mode_keys::ModeRequest;
+                let wire = match request {
+                    ModeRequest::Attack(mode) => NativeOutboundCommand::ChangeAMode { mode },
+                    ModeRequest::Pet(mode) => NativeOutboundCommand::ChangePMode { mode },
+                };
+                if !commands.send_command(GatewayCommand::Wire(wire)) {
+                    ui.combat_modes.failed_cycle(&action);
+                }
+            }
+            if !action.starts_with("Change") {
+                return;
+            }
+        }
+    }
     let Some(skills) = skills.as_deref() else {
         return;
     };
-    let Some(selection) = skills.selection_for_shortcut(skill_slot) else {
-        return;
-    };
-    if selection.cast_kind.as_deref() == Some("passive") {
-        return;
-    }
-    if selection.cooldown_remaining_ticks > 0 {
-        return;
-    }
-    let Some(ui) = ui_read_model.as_deref() else {
-        return;
-    };
-    if ui.player.hp <= 0 {
-        return;
-    }
-    if selection
-        .mp_cost
-        .is_some_and(|mp_cost| ui.player.mp < i32::try_from(mp_cost).unwrap_or(i32::MAX))
-    {
-        return;
-    }
-    let Some(spell) = selection.spell.filter(|spell| !spell.trim().is_empty()) else {
-        return;
-    };
-    if selection.cast_kind.as_deref() == Some("toggle") {
-        commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::SpellToggle {
-            spell,
-            // `canUse` is the authoritative current toggle state. Unknown is
-            // not passive; the safe first request is an explicit enable.
-            toggle_state: if selection.can_use == Some(true) {
-                0
-            } else {
-                1
-            },
-        }));
-        return;
-    }
-    let player = entities
-        .entities
-        .iter()
-        .find(|entity| entity.kind == EntityKind::SelfPlayer);
-    let direction = player
-        .and_then(|entity| entity.direction.as_deref())
-        .unwrap_or("down")
-        .to_owned();
-    let selected_target = combat_target
-        .as_deref()
-        .and_then(|model| model.target.as_ref())
-        .and_then(|target| {
-            entities
-                .entities
-                .iter()
-                .find(|entity| entity.object_id == target.object_id.to_string())
-                .map(|entity| (target.object_id, entity.x, entity.y))
+    // Crystal evaluates each matching key binding; an empty primary slot
+    // must not swallow a bound second-bank action on the same physical key.
+    for (skill_slot, cursor_stage, pointer_cast) in slots {
+        let Some(selection) = skills.selection_for_shortcut(skill_slot) else {
+            continue;
+        };
+        if selection.cast_kind.as_deref() == Some("passive") {
+            continue;
+        }
+        if selection.cooldown_remaining_ticks > 0
+            || player_ui.as_deref().is_some_and(|ui| {
+                skills.skill_for_shortcut(skill_slot).is_some_and(|skill| {
+                    ui.skill_bars
+                        .remaining_ms(skill.id, skills, std::time::Instant::now())
+                        > 0
+                })
+            })
+        {
+            continue;
+        }
+        let Some(ui) = ui_read_model.as_deref() else {
+            continue;
+        };
+        if ui.player.hp <= 0 {
+            continue;
+        }
+        if selection
+            .mp_cost
+            .is_some_and(|mp_cost| ui.player.mp < i32::try_from(mp_cost).unwrap_or(i32::MAX))
+        {
+            continue;
+        }
+        let Some(spell) = selection.spell.filter(|spell| !spell.trim().is_empty()) else {
+            continue;
+        };
+        if selection.cast_kind.as_deref() == Some("toggle") {
+            commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::SpellToggle {
+                spell,
+                // `canUse` is the authoritative current toggle state. Unknown is
+                // not passive; the safe first request is an explicit enable.
+                toggle_state: if selection.can_use == Some(true) {
+                    0
+                } else {
+                    1
+                },
+            }));
+            continue;
+        }
+        let player = entities
+            .entities
+            .iter()
+            .find(|entity| entity.kind == EntityKind::SelfPlayer);
+        let Some(player) = player else {
+            continue;
+        };
+        let Some(presentation) = presentation.as_deref() else {
+            continue;
+        };
+        magic_target.session(skills.authority.session_epoch);
+        let Some(aim) = magic_target.aim_at(
+            &spell,
+            player,
+            &entities,
+            presentation,
+            combat_target.as_deref(),
+            cursor_stage,
+        ) else {
+            continue;
+        };
+        let direction = aim.direction;
+        let (target_id, target_x, target_y) = (aim.target_id, aim.location.0, aim.location.1);
+        let lock = player_ui.as_deref().is_some_and(|ui| {
+            if pointer_cast {
+                return ui.keyboard.spell_target_lock;
+            }
+            ui.keyboard.lock_for_function_event(&format!(
+                "Bar{}Skill{}",
+                if skill_slot <= 8 { 1 } else { 2 },
+                (skill_slot - 1) % 8 + 1
+            ))
         });
-    let Some(player) = player else {
-        return;
-    };
-    let (target_id, target_x, target_y, lock) = match selection.cast_kind.as_deref() {
-        Some("direction") | Some("self") => (0, player.x, player.y, false),
-        Some("ground") => selected_target
-            .map(|(_, x, y)| (0, x, y, false))
-            .unwrap_or_else(|| {
-                let (dx, dy) = direction_to_delta(&direction);
-                (0, player.x + dx, player.y + dy, false)
-            }),
-        _ => selected_target
-            .map(|(id, x, y)| (id, x, y, true))
-            .unwrap_or_else(|| {
-                // No selected target: express a forward tile intent. The
-                // server still validates whether this spell can use it.
-                let (dx, dy) = direction_to_delta(&direction);
-                (0, player.x + dx, player.y + dy, false)
-            }),
-    };
-    commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::Magic {
-        object_id: 0,
-        spell,
-        direction,
-        target_id,
-        x: target_x,
-        y: target_y,
-        spell_target_lock: lock,
-    }));
+        let Some(object_id) = player.object_id.parse::<u32>().ok().filter(|id| *id != 0) else {
+            // Shared-world casting must name the current authoritative actor.
+            // A placeholder identity is not permission to cast for another entity.
+            continue;
+        };
+        if let Some(ui) = player_ui.as_deref_mut() {
+            ui.leave_game.combat(std::time::Instant::now());
+        }
+        commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::Magic {
+            object_id,
+            spell,
+            direction,
+            target_id,
+            x: target_x,
+            y: target_y,
+            spell_target_lock: lock,
+        }));
+    }
 }
 
+fn key_owned_by_binding(
+    model: &mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::KeyboardDialogUi,
+    keys: &ButtonInput<KeyCode>,
+    key: KeyCode,
+) -> bool {
+    use mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::{key_name, modifiers};
+    let name = model
+        .logical_names
+        .get(&format!("{key:?}"))
+        .cloned()
+        .or_else(|| key_name(key));
+    name.is_some_and(|name| {
+        model
+            .bindings
+            .iter()
+            .any(|b| b.matches(&name, modifiers(keys)))
+    })
+}
+
+#[cfg(test)]
 fn skill_shortcut_slot(keys: &ButtonInput<KeyCode>) -> Option<u8> {
     // Crystal's primary skill bar is the unmodified F1-F8 bank. Ctrl+F1-F8
     // belongs to the second skill bar and Shift+F1-F8 belongs to the hero bar;
-    // neither bank is modeled by this single-bar bridge yet. SkillMode changes
+    // this test helper only addresses the primary bank. Runtime dispatch supports both player banks. SkillMode changes
     // presentation, not the primary bank's modifier requirements.
     if keys.pressed(KeyCode::ControlLeft)
         || keys.pressed(KeyCode::ControlRight)
@@ -1994,7 +2349,7 @@ mod tests {
     use mir2_client_bevy::entities::{EntityKind, EntityModel, EntityModelSet};
     use mir2_client_bevy::read_model::UiReadModel;
 
-    fn input_app() -> (
+    pub(super) fn input_app() -> (
         bevy::prelude::App,
         std::sync::mpsc::Receiver<GatewayCommand>,
     ) {
@@ -2011,7 +2366,7 @@ mod tests {
         });
         app.insert_resource(EntityModelSet {
             entities: vec![EntityModel {
-                object_id: "self".to_owned(),
+                object_id: "1000".to_owned(),
                 kind: EntityKind::SelfPlayer,
                 name: "Self".to_owned(),
                 x: 0,
@@ -2020,6 +2375,9 @@ mod tests {
                 direction: Some("up".to_owned()),
             }],
         });
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hover_grid_context_for_test((0, 0), (480., 320.));
         (app, receiver)
     }
 
@@ -3079,6 +3437,80 @@ mod tests {
     }
 
     #[test]
+    fn autorun_moves_without_mouse_hold_and_stays_ack_bounded() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.init_resource::<ButtonInput<MouseButton>>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<NpcDialogModel>()
+            .init_resource::<QuestUiIntentQueue>();
+        let mut ui = UiReadModel::default();
+        ui.player.hp = 100;
+        ui.player.max_hp = 100;
+        app.insert_resource(ui).insert_resource(movement_entities());
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hover_grid_context_for_test((10, 10), (672., 352.));
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .local_keys
+            .set_auto_run(true);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyD);
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.update();
+        assert!(
+            matches!(receiver.try_recv(),Ok(GatewayCommand::Player(PlayerIntent::Walk{direction})) if direction=="right")
+        );
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .auto_path_destination
+            .is_none());
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        let destination = app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .pending
+            .back()
+            .unwrap()
+            .to;
+        {
+            let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+            let p = entities
+                .entities
+                .iter_mut()
+                .find(|p| p.kind == EntityKind::SelfPlayer)
+                .unwrap();
+            p.x = destination.0;
+            p.y = destination.1;
+        }
+        push_test_movement_ack(&app, destination.0, destination.1, "right");
+        advance_movement_clock(&mut app, 600);
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hover_grid_context_for_test(destination, (672., 352.));
+        app.update();
+        assert!(
+            matches!(receiver.try_recv(),Ok(GatewayCommand::Player(PlayerIntent::Run{direction})) if direction=="right")
+        );
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.update();
+        assert!(
+            !app.world()
+                .resource::<NativePlayerUiState>()
+                .local_keys
+                .auto_run,
+            "accepted world click cancels source autorun"
+        );
+    }
+
+    #[test]
     fn right_hold_refreshes_cursor_target_across_multiple_acknowledged_steps() {
         let (mut app, receiver) = input_app();
         install_movement_clock_and_inbox(&mut app);
@@ -3267,7 +3699,8 @@ mod tests {
             Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
 
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
             .clear_just_pressed(MouseButton::Right);
         push_test_movement_ack(&app, 11, 10, "right");
         advance_movement_clock(&mut app, 100);
@@ -3316,7 +3749,10 @@ mod tests {
         for delay in [600, 600, 3000, 3000] {
             advance_movement_clock(&mut app, delay);
             app.update();
-            assert!(receiver.try_recv().is_err(), "unacknowledged movement was queued/retried");
+            assert!(
+                receiver.try_recv().is_err(),
+                "unacknowledged movement was queued/retried"
+            );
             let state = app.world().resource::<WorldPointerMovementState>();
             assert_eq!(state.pending.len(), 1);
             assert_eq!(state.pending.front().unwrap().from, (10, 10));
@@ -3333,7 +3769,10 @@ mod tests {
         assert_eq!(state.pending.len(), 1);
         assert_eq!(state.pending.front().unwrap().from, (11, 10));
         assert_eq!(state.pending.front().unwrap().to, (12, 10));
-        assert_eq!(state.pending.front().unwrap().mode, WorldPointerMovementMode::Walk);
+        assert_eq!(
+            state.pending.front().unwrap().mode,
+            WorldPointerMovementMode::Walk
+        );
     }
 
     #[test]
@@ -3346,21 +3785,36 @@ mod tests {
         assert_eq!(now, 2000.0);
         let mut movement = WorldPointerMovementState::default();
         movement.run_primed_until_ms = 1200.0;
-        assert_eq!(movement.effective_mode(WorldPointerMovementMode::Run, now), WorldPointerMovementMode::Walk);
+        assert_eq!(
+            movement.effective_mode(WorldPointerMovementMode::Run, now),
+            WorldPointerMovementMode::Walk
+        );
     }
 
     #[test]
     fn late_ack_does_not_renew_expired_run_eligibility() {
         let mut movement = WorldPointerMovementState::default();
         movement.pending.push_back(pending_test_move(
-            (10, 10), (11, 10), WorldPointerMovementMode::Walk, 0.0,
+            (10, 10),
+            (11, 10),
+            WorldPointerMovementMode::Walk,
+            0.0,
         ));
         let ack = NativeSelfMovementAck {
-            packet: "UserLocation".to_owned(), object_id: "self".to_owned(),
-            x: 11, y: 10, direction: "right".to_owned(),
+            packet: "UserLocation".to_owned(),
+            object_id: "self".to_owned(),
+            x: 11,
+            y: 10,
+            direction: "right".to_owned(),
         };
-        assert_eq!(movement.reconcile_ack(&ack, 2000.0), MovementAckOutcome::Confirmed);
-        assert_eq!(movement.effective_mode(WorldPointerMovementMode::Run, 2000.0), WorldPointerMovementMode::Walk);
+        assert_eq!(
+            movement.reconcile_ack(&ack, 2000.0),
+            MovementAckOutcome::Confirmed
+        );
+        assert_eq!(
+            movement.effective_mode(WorldPointerMovementMode::Run, 2000.0),
+            WorldPointerMovementMode::Walk
+        );
     }
 
     #[test]
@@ -3874,30 +4328,20 @@ mod tests {
     }
 
     #[test]
-    fn live_d_moves_right_ingame_without_mutating_ui_state() {
+    fn crystal_bound_d_does_not_emit_prototype_walk_or_prediction() {
         let (mut app, receiver) = input_app();
         app.insert_resource(NativePlayerUiState::default());
         app.add_systems(bevy::prelude::Update, keyboard_movement_system);
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::KeyD);
-
         app.update();
-
-        assert!(matches!(
-            receiver.try_recv(),
-            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
-        ));
-        let movement = app.world().resource::<WorldPointerMovementState>();
-        let pending = movement
+        assert!(receiver.try_recv().is_err());
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
             .pending
-            .front()
-            .expect("keyboard prediction pending");
-        assert_eq!(pending.from, (0, 0));
-        assert_eq!(pending.to, (1, 0));
-        assert_eq!(pending.mode, WorldPointerMovementMode::Walk);
-        let ui = app.world().resource::<NativePlayerUiState>();
-        assert!(!ui.options_open());
+            .is_empty());
     }
 
     #[test]
@@ -3916,7 +4360,7 @@ mod tests {
         );
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
-            .press(KeyCode::KeyD);
+            .press(KeyCode::ArrowRight);
 
         app.update();
         assert!(matches!(
@@ -3925,7 +4369,7 @@ mod tests {
         ));
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
-            .release(KeyCode::KeyD);
+            .release(KeyCode::ArrowRight);
         app.world_mut()
             .resource_mut::<EntityModelSet>()
             .entities
@@ -4035,7 +4479,278 @@ mod tests {
     }
 
     #[test]
-    fn f1_selects_a_server_learned_skill_with_target_and_direction() {
+    fn original_hero_belt_keys_never_alias_player_belt_slots() {
+        for key in [
+            KeyCode::Digit7,
+            KeyCode::Digit8,
+            KeyCode::Numpad7,
+            KeyCode::Numpad8,
+        ] {
+            let (mut app, rx) = input_app();
+            app.init_resource::<NativePlayerUiState>();
+            let mut inventory = InventoryModel::default();
+            // Invalid extra player belt slots used to receive Hero shortcuts.
+            for slot in [6, 7] {
+                inventory
+                    .items
+                    .push(mir2_client_bevy::inventory::ItemModel {
+                        slot,
+                        container: 1,
+                        key: "potion".into(),
+                        name: "Potion".into(),
+                        quantity: 1,
+                        ..Default::default()
+                    });
+            }
+            app.insert_resource(inventory)
+                .add_systems(bevy::prelude::Update, keyboard_skill_system);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(key);
+            app.update();
+            assert!(rx.try_recv().is_err());
+        }
+    }
+
+    #[test]
+    fn configured_direct_mode_uses_ordinary_wire_and_modal_blocks_it() {
+        let (mut app, receiver) = input_app();
+        app.insert_resource(NativePlayerUiState::default())
+            .add_systems(bevy::prelude::Update, keyboard_skill_system);
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            let bind = ui
+                .keyboard
+                .bindings
+                .iter_mut()
+                .find(|b| b.function == "AttackmodeEnemyguild")
+                .unwrap();
+            bind.key = "F12".into();
+            bind.alt = 0;
+            bind.ctrl = 0;
+            bind.shift = 0;
+            bind.tilde = 0;
+        }
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F12);
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::ChangeAMode {
+                mode: 3
+            }))
+        ));
+        assert_eq!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .combat_modes
+                .attack,
+            0,
+            "requests are not authoritative acknowledgements"
+        );
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .group_dialog
+            .invitation = Some(("Peer".into(), 1));
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F12);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+    }
+
+    #[test]
+    fn player_magic_uses_current_actor_and_rejects_placeholder_identities() {
+        for pointer in [false, true] {
+            for identity in ["0", "self", "invalid", "4294967296", "1234"] {
+                let (mut app, receiver) = input_app();
+                let mut ui = NativePlayerUiState::default();
+                ui.skill_bars.cursor = Some([960., 32.]);
+                if pointer {
+                    ui.skill_bars.queue_cast(1);
+                }
+                app.insert_resource(ui);
+                let mut shell = NativeShellModel::default();
+                shell.screen = NativeShellScreen::InGame;
+                app.insert_resource(shell);
+                app.insert_resource(UiReadModel {
+                    player: mir2_client_bevy::read_model::PlayerStats {
+                        hp: 10,
+                        max_hp: 20,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                });
+                app.insert_resource(serde_json::from_value::<SkillModel>(serde_json::json!({
+                    "skills":[{"id":7,"spell":"FireWall","name":"Fire Wall","hotkey":1,"castKind":"ground"}]
+                })).unwrap());
+                app.world_mut().resource_mut::<EntityModelSet>().entities[0].object_id =
+                    identity.into();
+                app.add_systems(bevy::prelude::Update, keyboard_skill_system);
+                if !pointer {
+                    app.world_mut()
+                        .resource_mut::<ButtonInput<KeyCode>>()
+                        .press(KeyCode::F1);
+                }
+                app.update();
+                if identity == "1234" {
+                    assert!(matches!(
+                        receiver.try_recv(),
+                        Ok(GatewayCommand::Wire(NativeOutboundCommand::Magic {
+                            object_id: 1234,
+                            ..
+                        }))
+                    ));
+                    app.world_mut().resource_mut::<EntityModelSet>().entities[0].object_id =
+                        "4321".into();
+                    app.world_mut()
+                        .resource_mut::<ButtonInput<KeyCode>>()
+                        .reset_all();
+                    if pointer {
+                        app.world_mut()
+                            .resource_mut::<NativePlayerUiState>()
+                            .skill_bars
+                            .queue_cast(1);
+                    } else {
+                        app.world_mut()
+                            .resource_mut::<ButtonInput<KeyCode>>()
+                            .press(KeyCode::F1);
+                    }
+                    app.update();
+                    assert!(
+                        matches!(
+                            receiver.try_recv(),
+                            Ok(GatewayCommand::Wire(NativeOutboundCommand::Magic {
+                                object_id: 4321,
+                                ..
+                            }))
+                        ),
+                        "replaced actor must not reuse the previous identity"
+                    );
+                } else {
+                    assert!(
+                        receiver.try_recv().is_err(),
+                        "invalid actor {identity}, pointer={pointer}"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn skill_bar_click_casts_second_bank_with_cursor_and_obeys_modal() {
+        let (mut app, receiver) = input_app();
+        let mut state = NativePlayerUiState::default();
+        state.skill_bars.cursor = Some([960., 32.]);
+        state.skill_bars.queue_cast(9);
+        app.insert_resource(state);
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::InGame;
+        app.insert_resource(shell);
+        app.insert_resource(UiReadModel {
+            player: mir2_client_bevy::read_model::PlayerStats {
+                hp: 10,
+                max_hp: 20,
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+        app.insert_resource(serde_json::from_value::<SkillModel>(serde_json::json!({"skills":[{"id":7,"spell":"FireWall","name":"Fire Wall","hotkey":9,"castKind":"ground"}]})).unwrap());
+        app.add_systems(bevy::prelude::Update, keyboard_skill_system);
+        app.update();
+        assert!(
+            matches!(receiver.try_recv(),Ok(GatewayCommand::Wire(NativeOutboundCommand::Magic{object_id:1000,spell,x:10,y:-10,spell_target_lock:false,..})) if spell=="FireWall")
+        );
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.skill_bars.queue_cast(9);
+            state.group_dialog.invitation = Some(("Peer".into(), 1));
+        }
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .skill_bars
+            .pending_casts
+            .is_empty());
+    }
+
+    #[test]
+    fn hero_manual_cast_stays_closed_until_shared_actor_authority_is_verified() {
+        use mir2_client_bevy::hero_model::HeroModel;
+        for (hp, mp, spell, allowed) in [
+            (10, 10, "FireBall", true),
+            (0, 10, "FireBall", false),
+            (10, 0, "FireBall", false),
+            (10, 10, "ThunderBolt", false),
+        ] {
+            let (mut app, receiver) = input_app();
+            let mut hero = HeroModel::default();
+            hero.apply_packet_at("HeroInformation",&serde_json::json!({"info":{
+                "object_id":12,"name":"Hero","class":"Wizard","gender":"Male","level":20,"hair":0,"hp":hp,"mp":mp,"experience":0,"max_experience":100,"inventory":[],"equipment":null,"auto_pot":false,"auto_hp_percent":30,"auto_mp_percent":30,"hp_item_index":0,"mp_item_index":0,
+                "magics":[{"name":spell,"spell":spell,"base_cost":1,"level_cost":0,"icon":1,"level1":1,"level2":2,"level3":3,"need1":1,"need2":2,"need3":3,"level":1,"key":17,"experience":0,"delay":100,"range":8,"cast_time":-1000}]
+            }}),0);
+            hero.spawned = true;
+            assert_eq!(
+                hero_fireball_ready(&hero, &hero.info.as_ref().unwrap().magics[0], 0),
+                allowed
+            );
+            app.insert_resource(hero);
+            app.insert_resource(NativePlayerUiState::default());
+            app.insert_resource(CombatTargetModel {
+                target: Some(mir2_client_bevy::quest_model::CombatTarget {
+                    object_id: 2001,
+                    name: "Target".into(),
+                    hp: 10,
+                    max_hp: 10,
+                    is_player: false,
+                }),
+            });
+            app.world_mut()
+                .resource_mut::<EntityModelSet>()
+                .entities
+                .extend([
+                    mir2_client_bevy::entities::EntityModel {
+                        object_id: "12".into(),
+                        kind: EntityKind::Player,
+                        name: "Hero".into(),
+                        x: 10,
+                        y: 10,
+                        level: Some(20),
+                        direction: Some("down".into()),
+                    },
+                    mir2_client_bevy::entities::EntityModel {
+                        object_id: "2001".into(),
+                        kind: EntityKind::Monster,
+                        name: "Target".into(),
+                        x: 12,
+                        y: 10,
+                        level: Some(1),
+                        direction: Some("down".into()),
+                    },
+                ]);
+            app.add_systems(bevy::prelude::Update, keyboard_hero_skill_system);
+            {
+                let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+                keys.press(KeyCode::ShiftLeft);
+                keys.press(KeyCode::F1);
+            }
+            app.update();
+            let messages: Vec<_> = receiver.try_iter().collect();
+            assert!(
+                messages.is_empty(),
+                "a locally ready Hero must not enter the unverified shared player route"
+            );
+        }
+    }
+
+    #[test]
+    fn remapped_primary_skill_preserves_server_target_and_direction() {
         let (mut app, receiver) = input_app();
         // A live client always owns this UI resource. Its SkillMode option must
         // not suppress Crystal's unmodified primary F-key bank.
@@ -4074,6 +4789,8 @@ mod tests {
             ..Default::default()
         });
         app.insert_resource(SkillModel {
+            authority: Default::default(),
+            skill_key_ack: None,
             skills: vec![mir2_client_bevy::skill_model::SkillEntry {
                 id: 7,
                 name: "FireBall".to_owned(),
@@ -4093,8 +4810,165 @@ mod tests {
         });
         app.add_systems(bevy::prelude::Update, keyboard_skill_system);
         app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .keyboard
+            .bindings
+            .iter_mut()
+            .find(|b| b.function == "Bar1Skill1")
+            .unwrap()
+            .key = "F4".into();
+        app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::F1);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "old binding must not cast");
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F4);
+        app.update();
+        let cmd = receiver.try_recv().expect("skill command");
+        match cmd {
+            GatewayCommand::Wire(NativeOutboundCommand::Magic {
+                object_id,
+                spell,
+                direction,
+                target_id,
+                x,
+                y,
+                spell_target_lock,
+                ..
+            }) => {
+                assert_eq!(object_id, 1000, "cast names the authoritative self actor");
+                assert_eq!(spell, "FireBall");
+                assert_eq!(direction, "downright");
+                assert_eq!(target_id, 2001);
+                assert_eq!(x, 12);
+                assert_eq!(y, 10);
+                assert!(!spell_target_lock, "selection does not invent target lock");
+            }
+            other => panic!("unexpected command {other:?}"),
+        }
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .keyboard
+            .bindings
+            .iter_mut()
+            .find(|b| b.function == "TargetSpellLockOn")
+            .unwrap()
+            .key = "F4".into();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F4);
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Magic {
+                spell_target_lock: true,
+                ..
+            }))
+        ));
+    }
+
+    #[test]
+    fn remapped_second_bar_skill16_preserves_server_target_and_direction() {
+        let (mut app, receiver) = input_app();
+        // A live client always owns this UI resource. Its SkillMode option must
+        // not suppress Crystal's unmodified primary F-key bank.
+        app.insert_resource(NativePlayerUiState::default());
+        // Insert combat target and UI so skill is allowed.
+        app.insert_resource(mir2_client_bevy::quest_model::CombatTargetModel {
+            target: Some(mir2_client_bevy::quest_model::CombatTarget {
+                object_id: 2001,
+                name: "Scarecrow".to_owned(),
+                hp: 20,
+                max_hp: 20,
+                is_player: false,
+            }),
+        });
+        app.world_mut()
+            .resource_mut::<EntityModelSet>()
+            .entities
+            .push(mir2_client_bevy::entities::EntityModel {
+                object_id: "2001".to_owned(),
+                kind: EntityKind::Monster,
+                name: "Scarecrow".to_owned(),
+                x: 12,
+                y: 10,
+                level: Some(1),
+                direction: Some("down".to_owned()),
+            });
+        let mut shell = NativeShellModel::default();
+        shell.screen = NativeShellScreen::InGame;
+        app.insert_resource(shell);
+        app.insert_resource(UiReadModel {
+            player: mir2_client_bevy::read_model::PlayerStats {
+                hp: 10,
+                max_hp: 20,
+                ..Default::default()
+            },
+            ..Default::default()
+        });
+        app.insert_resource(SkillModel {
+            authority: Default::default(),
+            skill_key_ack: None,
+            skills: vec![mir2_client_bevy::skill_model::SkillEntry {
+                id: 7,
+                name: "FireBall".to_owned(),
+                level: 2,
+                key: Some("fireball".to_owned()),
+                cooldown_ms: 1200,
+                mp_cost: 0,
+            }],
+            bindings: vec![mir2_client_bevy::skill_model::SkillBinding {
+                skill_id: 7,
+                spell: Some("FireBall".to_owned()),
+                hotkey: Some(16),
+                cast_kind: Some("target".to_owned()),
+                offensive: Some(true),
+                ..Default::default()
+            }],
+        });
+        app.add_systems(bevy::prelude::Update, keyboard_skill_system);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .keyboard
+            .bindings
+            .iter_mut()
+            .find(|b| b.function == "Bar2Skill8")
+            .unwrap()
+            .key = "F4".into();
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            let bind = ui
+                .keyboard
+                .bindings
+                .iter_mut()
+                .find(|b| b.function == "Bar2Skill8")
+                .unwrap();
+            bind.alt = 0;
+            bind.ctrl = 0;
+            bind.shift = 0;
+            bind.tilde = 0;
+        }
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F1);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "old binding must not cast");
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::F4);
         app.update();
         let cmd = receiver.try_recv().expect("skill command");
         match cmd {
@@ -4108,11 +4982,11 @@ mod tests {
                 ..
             }) => {
                 assert_eq!(spell, "FireBall");
-                assert_eq!(direction, "up");
+                assert_eq!(direction, "downright");
                 assert_eq!(target_id, 2001);
                 assert_eq!(x, 12);
                 assert_eq!(y, 10);
-                assert!(spell_target_lock);
+                assert!(!spell_target_lock, "selection does not invent target lock");
             }
             other => panic!("unexpected command {other:?}"),
         }
@@ -4135,6 +5009,8 @@ mod tests {
             ..Default::default()
         });
         app.insert_resource(SkillModel {
+            authority: Default::default(),
+            skill_key_ack: None,
             skills: vec![mir2_client_bevy::skill_model::SkillEntry {
                 id: 42,
                 name: "Localized display name".to_owned(),
@@ -4178,6 +5054,8 @@ mod tests {
                 ..Default::default()
             });
             app.insert_resource(SkillModel {
+                authority: Default::default(),
+                skill_key_ack: None,
                 skills: vec![mir2_client_bevy::skill_model::SkillEntry {
                     id: 9,
                     name: "Localized sword display".to_owned(),
@@ -4228,6 +5106,8 @@ mod tests {
             ..Default::default()
         });
         app.insert_resource(SkillModel {
+            authority: Default::default(),
+            skill_key_ack: None,
             skills: vec![mir2_client_bevy::skill_model::SkillEntry {
                 id: 10,
                 name: "Passive display".to_owned(),
@@ -4266,6 +5146,8 @@ mod tests {
             ..Default::default()
         });
         app.insert_resource(SkillModel {
+            authority: Default::default(),
+            skill_key_ack: None,
             skills: vec![
                 mir2_client_bevy::skill_model::SkillEntry {
                     id: 1,
@@ -4320,6 +5202,8 @@ mod tests {
             (SkillModel::default(), 30, 30),
             (
                 SkillModel {
+                    authority: Default::default(),
+                    skill_key_ack: None,
                     skills: vec![mir2_client_bevy::skill_model::SkillEntry {
                         id: 1,
                         name: "FireBall".to_owned(),
@@ -4342,6 +5226,8 @@ mod tests {
             ),
             (
                 SkillModel {
+                    authority: Default::default(),
+                    skill_key_ack: None,
                     skills: vec![mir2_client_bevy::skill_model::SkillEntry {
                         id: 1,
                         name: "FireBall".to_owned(),
@@ -4441,6 +5327,18 @@ mod tests {
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::Digit1);
+        app.init_resource::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>();
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>()
+            .commit_item_use(0, u64::MAX);
+        app.update();
+        assert!(
+            receiver.try_recv().is_err(),
+            "Hero's shared item clock must gate player belt keys"
+        );
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>()
+            .commit_item_use(0, 0);
         app.update();
         match receiver.try_recv().expect("belt use") {
             GatewayCommand::Wire(NativeOutboundCommand::UseItem { slot, grid, .. }) => {
@@ -4449,5 +5347,46 @@ mod tests {
             }
             other => panic!("{other:?}"),
         }
+        let mut queue = app
+            .world_mut()
+            .resource_mut::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>(
+        );
+        assert!(
+            !queue.push_intent(
+                mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntent::HeroPacket(
+                    mir2_protocol::ClientPacket::UseItem {
+                        grid: mir2_protocol::MirGridType::HeroInventory,
+                        unique_id: 88
+                    }
+                )
+            ),
+            "player belt use must gate Hero use"
+        );
     }
 }
+
+pub fn sync_native_equipment_pose(
+    mut ui: Option<ResMut<NativePlayerUiState>>,
+    entities: Option<Res<EntityModelSet>>,
+    presentation: Option<Res<NativeEntityPresentation>>,
+) {
+    let (Some(ui), Some(entities), Some(presentation)) =
+        (ui.as_deref_mut(), entities, presentation)
+    else {
+        return;
+    };
+    let Some((id, _, _)) = authoritative_player(&entities) else {
+        ui.equipment_dialogs.standing = false;
+        return;
+    };
+    ui.equipment_dialogs.standing = presentation
+        .self_equipment_pose(&id)
+        .is_some_and(|(standing, _)| standing);
+}
+
+#[path = "keyboard_world_actions.rs"]
+mod world_actions;
+pub use world_actions::keyboard_world_actions_system;
+
+#[path = "spell_targeting.rs"]
+mod spell_targeting;

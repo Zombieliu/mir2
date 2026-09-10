@@ -39,6 +39,7 @@ fn fixture(ai: u8, players: bool) -> ZoneRuntime {
         zone.handle(ZoneCommand::Join(join("far", 103, point(100, 100))));
     }
     let spawn = ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: BOSS,
         name: if ai == 30 { "BoneLord" } else { "ZumaTaurus" }.into(),
         name_colour_argb: -1,

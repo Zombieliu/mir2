@@ -303,7 +303,10 @@ fn decode_starter_entity_atlas_pages(
             );
             return None;
         }
-        crate::timing::report(&format!("atlas_read_verify_decode:{}", page.key), page_started);
+        crate::timing::report(
+            &format!("atlas_read_verify_decode:{}", page.key),
+            page_started,
+        );
         decoded.push((page.key.clone(), width, height, pixels, path));
     }
     Some(decoded)
@@ -476,11 +479,21 @@ fn is_player_sprite_library(library: &str) -> bool {
         )
 }
 
+fn is_pet_sprite_library(library: &str) -> bool {
+    let Some(index) = library.strip_prefix("Pet/") else {
+        return false;
+    };
+    index.len() == 2
+        && index.bytes().all(|b| b.is_ascii_digit())
+        && index.parse::<u8>().is_ok_and(|i| i <= 14)
+}
+
 fn player_frame_path_parts(frame_path: &str) -> Option<(String, i64, String)> {
     let relative = frame_path.trim().trim_start_matches('/').replace('\\', "/");
     let source_path = relative.strip_prefix("original-ui/")?;
     let (library, file_name) = source_path.rsplit_once('/')?;
-    if library != "DNItems" && !is_player_sprite_library(library) {
+    if library != "DNItems" && !is_player_sprite_library(library) && !is_pet_sprite_library(library)
+    {
         return None;
     }
     let frame = file_name.strip_suffix(".png")?.parse::<i64>().ok()?;
@@ -3394,5 +3407,37 @@ mod tests {
             rgb_to_rgba(&[1, 2, 3, 4, 5, 6]),
             vec![1, 2, 3, 255, 4, 5, 6, 255]
         );
+    }
+}
+
+#[cfg(test)]
+mod pet_path_tests {
+    use super::*;
+    #[test]
+    fn pet_world_frame_fallback_is_strict_and_preserves_real_geometry() {
+        for i in 0..=14 {
+            let path = format!("original-ui/Pet/{i:02}/0.png");
+            assert!(player_frame_path_parts(&path).is_some());
+            let geometry =
+                verified_player_frame_geometry(&path).expect("pet standing source geometry");
+            let pixels = original_frame_pixels(&path).expect("pet standing pixels");
+            assert_eq!(
+                (pixels.width, pixels.height),
+                (geometry.width, geometry.height)
+            );
+        }
+        for path in [
+            "original-ui/Pet/15/0.png",
+            "original-ui/Pet/1/0.png",
+            "original-ui/Pet/../0.png",
+            "original-ui/Pet/00/-1.png",
+            "original-ui/Pet/00/00.png",
+            "original-ui/Pets/00/0.png",
+        ] {
+            assert!(player_frame_path_parts(path).is_none(), "{path}");
+        }
+        let g = verified_player_frame_geometry("original-ui/Pet/08/280.png")
+            .expect("real exported flame frame");
+        assert_eq!((g.width, g.height), (56, 76));
     }
 }

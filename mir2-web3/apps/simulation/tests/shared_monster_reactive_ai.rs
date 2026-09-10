@@ -50,6 +50,7 @@ fn zone_with_ai(
     assert!(
         zone.spawn_world_event_monster(
             &ZoneMonsterSpawn {
+                crystal_drop_seed: None,
                 object_id: 9008,
                 name: match ai {
                     38 => "HolyDeva",

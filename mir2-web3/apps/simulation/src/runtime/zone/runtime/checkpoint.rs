@@ -1,5 +1,7 @@
 use super::entity_combat::ZoneEntityCombatState;
+use super::intelligent_creature_host::CreatureHost;
 use super::{PetSpecialWorld, TreeQueenWorld};
+use crate::runtime::zone::intelligent_creatures::{CreatureOperation, CreaturePickupIntent};
 use std::collections::{BTreeMap, BTreeSet};
 
 use mir2_protocol::{
@@ -130,6 +132,12 @@ struct CanonicalZoneStateV4<'a> {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     native_periodic_player_poisons: &'a Vec<NativePeriodicPlayerPoison>,
     next_object_id: u32,
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+    intelligent_creatures: &'a BTreeMap<SessionId, CreatureHost>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    intelligent_creature_intents: &'a Vec<CreaturePickupIntent>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    intelligent_creature_operations: &'a Vec<CreatureOperation>,
 }
 
 #[derive(Serialize)]
@@ -212,6 +220,12 @@ struct ZoneRuntimeCheckpoint {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     native_periodic_player_poisons: Vec<NativePeriodicPlayerPoison>,
     next_object_id: u32,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    intelligent_creatures: BTreeMap<SessionId, CreatureHost>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    intelligent_creature_intents: Vec<CreaturePickupIntent>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    intelligent_creature_operations: Vec<CreatureOperation>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -259,6 +273,9 @@ impl ZoneRuntime {
     /// deterministic for a fixed signed game-module version.
     pub fn canonical_state_root(&self) -> Result<String, String> {
         let state = CanonicalZoneStateV4 {
+            intelligent_creatures: &self.intelligent_creatures,
+            intelligent_creature_intents: &self.intelligent_creature_intents,
+            intelligent_creature_operations: &self.intelligent_creature_operations,
             version: CANONICAL_ZONE_STATE_VERSION,
             key: &self.key,
             collision: &self.collision,
@@ -603,6 +620,9 @@ impl ZoneRuntime {
 
     pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
         let checkpoint = ZoneRuntimeCheckpoint {
+            intelligent_creatures: self.intelligent_creatures.clone(),
+            intelligent_creature_intents: self.intelligent_creature_intents.clone(),
+            intelligent_creature_operations: self.intelligent_creature_operations.clone(),
             version: ZONE_RUNTIME_CHECKPOINT_VERSION,
             state_root: self.canonical_state_root()?,
             key: self.key.clone(),
@@ -712,6 +732,11 @@ impl ZoneRuntime {
         runtime.harvested_object_ids = checkpoint.harvested_object_ids;
         runtime.native_monsters = checkpoint.native_monsters;
         runtime.native_monster_respawns = checkpoint.native_monster_respawns;
+        if checkpoint_version == ZONE_RUNTIME_CHECKPOINT_VERSION {
+            runtime.intelligent_creatures = checkpoint.intelligent_creatures;
+            runtime.intelligent_creature_intents = checkpoint.intelligent_creature_intents;
+            runtime.intelligent_creature_operations = checkpoint.intelligent_creature_operations;
+        }
         if checkpoint_version != ZONE_RUNTIME_CHECKPOINT_VERSION {
             // v1-v3 roots did not commit respawn policy/due state. Ignore any
             // forward fields injected into legacy JSON before authenticating
@@ -814,6 +839,7 @@ impl ZoneRuntime {
             }
             _ => unreachable!("checkpoint version was validated above"),
         }
+        runtime.validate_intelligent_creature_checkpoint()?;
         Ok(runtime)
     }
 }
@@ -856,6 +882,7 @@ mod tests {
 
     fn checkpoint_scheduled_monster(object_id: u32) -> ZoneMonsterSpawn {
         ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id,
             name: "CheckpointWasp".to_string(),
             name_colour_argb: -1,
@@ -1549,6 +1576,7 @@ mod tests {
 
         let mut runtime = ZoneRuntime::new(ZoneKey::for_map("D022"));
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 9_100_001,
             name: "WoomaSoldier".to_string(),
             name_colour_argb: -1,
@@ -1589,6 +1617,7 @@ mod tests {
 
         let mut runtime = ZoneRuntime::new(ZoneKey::for_map("D022"));
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 9_100_099,
             name: "LegacyHostile".to_string(),
             name_colour_argb: -1,
@@ -1655,6 +1684,7 @@ mod tests {
             combat_stats: ZonePlayerCombatStats::default(),
         }));
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 9_100_002,
             name: "WoomaTaurus".to_string(),
             name_colour_argb: -65_281,

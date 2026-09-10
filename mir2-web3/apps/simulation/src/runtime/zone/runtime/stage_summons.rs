@@ -26,6 +26,7 @@ mod tests {
         let template = crystal_monster_by_name("ZumaTaurus").unwrap();
         let mut zone = ZoneRuntime::new(ZoneKey::for_map("stage-wave-unit"));
         let spawn = ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: 17,
             name: template.name.clone(),
             name_colour_argb: -1,
@@ -322,6 +323,7 @@ impl ZoneRuntime {
                     break;
                 };
                 let spawn = ZoneMonsterSpawn {
+                    crystal_drop_seed: Some(now_ms / 300),
                     object_id: child_id,
                     name: template.name.clone(),
                     name_colour_argb: -1,

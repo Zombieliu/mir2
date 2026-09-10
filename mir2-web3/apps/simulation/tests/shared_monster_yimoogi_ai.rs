@@ -48,6 +48,7 @@ fn fixture(ai: u8, name: &str, player_x: i32, monster_id: u32) -> ZoneRuntime {
         session_id: SessionId::new("player"),
         now_ms: 0,
         monster: ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id: monster_id,
             name: name.into(),
             name_colour_argb: -1,
@@ -179,6 +180,7 @@ fn yimoogi_state(z: &ZoneRuntime, id: u32) -> serde_json::Value {
 }
 fn yimoogi_owned_spawn(id: u32, position: Point) -> ZoneMonsterSpawn {
     ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: id,
         name: "Guard".into(),
         name_colour_argb: -1,
