@@ -86,6 +86,7 @@ pub(crate) struct HostState {
     pub(crate) safe_top: f32,
     safe_left: f32,
     safe_bottom: f32,
+    map_assets_requested: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, serde::Deserialize)]
@@ -395,6 +396,34 @@ fn receive(
     mut forms: crate::form_input::FormInput,
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
+    #[cfg(target_os = "android")]
+    if let Some(event) = crate::world_assets::poll_packaged_map_atlas_load() {
+        match event {
+            crate::world_assets::PackagedMapAtlasLoadEvent::Ready(summary) => {
+                info!(
+                    pages = summary.page_count,
+                    sprites = summary.source_count,
+                    compressed_bytes = summary.compressed_bytes,
+                    rgba_bytes = summary.rgba_bytes,
+                    "packaged Android map atlas loaded"
+                );
+                if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
+                    model.notice = Some(ShellNotice::info(format!(
+                        "Map atlas ready: {} pages / {} sprites; waiting for the authoritative draw list and character assets.",
+                        summary.page_count, summary.source_count
+                    )));
+                }
+            }
+            crate::world_assets::PackagedMapAtlasLoadEvent::Failed(message) => {
+                warn!(%message, "packaged Android map atlas load failed");
+                if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
+                    model.notice = Some(ShellNotice::error(format!(
+                        "Packaged map atlas unavailable: {message}"
+                    )));
+                }
+            }
+        }
+    }
     let values: Vec<_> = INBOX
         .lock()
         .unwrap_or_else(|e| e.into_inner())
@@ -509,9 +538,11 @@ fn receive(
         host.world = next_world;
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
             host.pending_world_request = None;
+            host.map_assets_requested = false;
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
             host.pending_world_request = None;
+            host.map_assets_requested = false;
             mir2_bevy_runtime::native_ingest::push_native_scene_reset();
         }
         if let (Some(world), Some(raw)) = (&host.world, value["worldSnapshot"].as_str()) {
@@ -537,6 +568,11 @@ fn receive(
                 OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
                 send(json!({"type":"disconnect"}));
                 continue;
+            }
+            #[cfg(target_os = "android")]
+            if !host.map_assets_requested {
+                host.map_assets_requested = true;
+                crate::world_assets::request_packaged_map_atlas_load();
             }
         }
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
