@@ -1,5 +1,10 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-10 Android `ced102ba9`: shared map/entity read-model ingress wired;
+> Android94/preview97/API31 target check pass. Actual atlas/resource producers
+> and render-ready remain open; no new APK/device/live acceptance claimed.
+> `docs/generated/player-qa/native-android-scene-models-20260910/README.md`.
+
 > 2026-09-10 Android local `0ee203649`: exact-request world-data application
 > receipts from shared runtime; native-queue/Bevy-update regression distinguishes
 > enqueue, apply and decode rejection. Runtime215 serial/Android93/preview96 and

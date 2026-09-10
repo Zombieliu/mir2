@@ -14,7 +14,16 @@ UI/input follows that playable flow; offline polish and memory diagnosis must
 not displace it. Physical-device purchase/testing is deferred, not a blocker
 to implementing the client. Approved live Gateway still required for live claims.
 
-2026-09-10 local `0ee203649` adds exact-request shared runtime world-data
+2026-09-10 local `ced102ba9` feeds shared MapModel/EntityModelSet ingress from
+the same validated snapshot. Shared serde validates terrain/entities; map center
+uses server sceneView or authoritative self position when the viewport is absent.
+Android94/preview97/API31 target check pass. No placeholder render plugins are
+enabled. Standard map-atlas/native-map-keyed manifests were absent in both checked
+checkouts; Android staging contains only original-ui. Other authorized asset roots
+still need checking. No new APK, scene render or live acceptance.
+Evidence: `generated/player-qa/native-android-scene-models-20260910/README.md`.
+
+Earlier 2026-09-10 local `0ee203649` adds exact-request shared runtime world-data
 receipts. A real native-queue/Bevy-update regression proves that enqueue alone
 has no receipt, coalesced latest data is actually applied, and invalid world
 schema reports rejection without replacing valid state. Android ignores stale
