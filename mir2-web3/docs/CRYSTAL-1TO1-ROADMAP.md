@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-10 Android local `0ee203649`: exact-request world-data application
+> receipts from shared runtime; native-queue/Bevy-update regression distinguishes
+> enqueue, apply and decode rejection. Runtime215 serial/Android93/preview96 and
+> Android target check pass. No render-ready, new APK or live-player acceptance.
+> `docs/generated/player-qa/native-android-world-receipt-20260910/README.md`.
+
 > 2026-09-10 Android local `af5acf6ad`: complete server snapshot Java/JNI
 > forwarding and shared runtime world/HUD ingress, with bounded messages and
 > session/map resets. Java TLS8/Android92/preview95 pass. Map/entity render

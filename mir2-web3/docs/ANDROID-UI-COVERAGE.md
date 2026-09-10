@@ -14,7 +14,17 @@ UI/input follows that playable flow; offline polish and memory diagnosis must
 not displace it. Physical-device purchase/testing is deferred, not a blocker
 to implementing the client. Approved live Gateway still required for live claims.
 
-2026-09-10 local source `af5acf6ad` now retains the complete immutable Gateway
+2026-09-10 local `0ee203649` adds exact-request shared runtime world-data
+receipts. A real native-queue/Bevy-update regression proves that enqueue alone
+has no receipt, coalesced latest data is actually applied, and invalid world
+schema reports rejection without replacing valid state. Android ignores stale
+request IDs and keeps StartingGame even after Applied; decode rejection resets
+and disconnects. Runtime215 serial/Android93/preview96 and Android target check
+pass. This closes world-data acknowledgement only, NOT assets/render readiness.
+No APK or device run for this increment; the APK below remains source `af5acf6ad`.
+Evidence: `generated/player-qa/native-android-world-receipt-20260910/README.md`.
+
+Earlier 2026-09-10 local source `af5acf6ad` retains the complete immutable Gateway
 world snapshot through Java/JNI and forwards a wire-shape projection to shared
 runtime world/HUD ingress. StartGame/self identity gates remain; pending snapshots
 are not exposed before acceptance or replayed by later position packets. Host
