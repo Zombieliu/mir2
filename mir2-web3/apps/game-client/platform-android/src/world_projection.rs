@@ -8,6 +8,8 @@ pub(crate) struct Projection {
     pub request_id: u64,
     pub world: String,
     pub ui: String,
+    pub map: String,
+    pub entities: String,
 }
 
 pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Option<Projection> {
@@ -102,11 +104,40 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
         entity["movementStartedMs"] = json!(started);
         entity["movementDurationMs"] = json!(duration);
     }
+    // Use the same renderer-neutral types consumed by native runtime. This does
+    // not install the optional placeholder terrain/entity rendering plugins.
+    let center = world
+        .get("sceneView")
+        .filter(|view| !view.is_null())
+        .map(|view| view.get("center"))
+        .unwrap_or(None);
+    if world.get("sceneView").is_some_and(|view| !view.is_null()) && center.is_none() {
+        return None;
+    }
+    let (center_x, center_y) = match center {
+        Some(center) => (
+            i32::try_from(center["x"].as_u64()?).ok()?,
+            i32::try_from(center["y"].as_u64()?).ok()?,
+        ),
+        // A partial snapshot can lack a viewport. Center on its already
+        // validated authoritative self position, never a synthetic origin.
+        None => (i32::try_from(x).ok()?, i32::try_from(y).ok()?),
+    };
+    let map_model: mir2_client_bevy::map::MapModel = serde_json::from_value(json!({
+        "centerX": center_x, "centerY": center_y,
+        "patches": world.get("terrainPatches").cloned().unwrap_or(json!([])),
+        "timeOfDayLightSetting": world["lightSetting"].as_u64().filter(|v| *v <= 4),
+    }))
+    .ok()?;
+    let entity_model: mir2_client_bevy::entities::EntityModelSet =
+        serde_json::from_value(json!({"entities": world["entities"]})).ok()?;
     let request_id = mir2_bevy_runtime::native_world_receipt::tag_world_request(&mut world)?;
     Some(Projection {
         request_id,
         world: world.to_string(),
         ui: json!({"player": stats}).to_string(),
+        map: serde_json::to_string(&map_model).ok()?,
+        entities: serde_json::to_string(&entity_model).ok()?,
     })
 }
 
@@ -145,6 +176,13 @@ mod tests {
         assert_eq!(ui.player.gold, 123);
         assert_eq!(ui.player.class_name.as_deref(), Some("Warrior"));
         assert_eq!(ui.player.map_name.as_deref(), Some("Bichon"));
+        let map: mir2_client_bevy::map::MapModel = serde_json::from_str(&projected.map).unwrap();
+        assert_eq!((map.center_x, map.center_y), (300, 630));
+        let entities: mir2_client_bevy::entities::EntityModelSet =
+            serde_json::from_str(&projected.entities).unwrap();
+        assert_eq!(entities.entities.len(), 2);
+        assert_eq!(entities.entities[1].object_id, "43");
+        assert_eq!((entities.entities[1].x, entities.entities[1].y), (301, 630));
     }
 
     #[test]
@@ -179,5 +217,30 @@ mod tests {
         assert_eq!(ui.player.hp, 0);
         assert_eq!(ui.player.current_weight, 0);
         assert_eq!(ui.player.level, 0);
+    }
+
+    #[test]
+    fn scene_projection_uses_server_center_and_validates_shared_schema() {
+        let mut world = snapshot();
+        world["sceneView"]["center"]["x"] = json!(299);
+        world["lightSetting"] = json!(3);
+        world["terrainPatches"] = json!([{"x":290,"y":620,"width":20,"height":20,"kind":"grass"}]);
+        let p = project(&world.to_string(), "0", "Fixture", 300, 630).unwrap();
+        let map: mir2_client_bevy::map::MapModel = serde_json::from_str(&p.map).unwrap();
+        assert_eq!(map.center_x, 299);
+        assert_eq!(map.patches.len(), 1);
+        assert_eq!(map.time_of_day_light_setting, Some(3));
+        world["sceneView"] = Value::Null;
+        let p = project(&world.to_string(), "0", "Fixture", 300, 630).unwrap();
+        let map: mir2_client_bevy::map::MapModel = serde_json::from_str(&p.map).unwrap();
+        assert_eq!((map.center_x, map.center_y), (300, 630));
+        world["sceneView"] = json!({"center":{"x":"299","y":630}});
+        assert!(project(&world.to_string(), "0", "Fixture", 300, 630).is_none());
+        world = snapshot();
+        world["entities"][1]["direction"] = json!(7);
+        assert!(project(&world.to_string(), "0", "Fixture", 300, 630).is_none());
+        world = snapshot();
+        world["terrainPatches"] = json!([{"x":0,"y":0,"width":1,"height":1,"kind":"unknown"}]);
+        assert!(project(&world.to_string(), "0", "Fixture", 300, 630).is_none());
     }
 }

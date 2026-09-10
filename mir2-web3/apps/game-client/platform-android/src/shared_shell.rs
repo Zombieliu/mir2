@@ -521,6 +521,8 @@ fn receive(
                 host.pending_world_request = Some(projection.request_id);
                 mir2_bevy_runtime::native_ingest::push_native_world_state(projection.world)
                     && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(projection.ui)
+                    && mir2_bevy_runtime::native_ingest::push_native_map_model(projection.map)
+                    && mir2_bevy_runtime::native_ingest::push_native_entity_model_set(projection.entities)
             });
             if !queued {
                 mir2_bevy_runtime::native_ingest::push_native_data_reset();
