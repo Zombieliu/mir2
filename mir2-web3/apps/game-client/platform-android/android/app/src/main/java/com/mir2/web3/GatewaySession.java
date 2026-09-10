@@ -166,6 +166,19 @@ final class GatewaySession implements AutoCloseable {
         if (send(object("type", "startGame", "characterIndex", index))) publish("Entering world…");
     }
 
+    /** Write one Rust-produced gameplay BrowserCommand on this authenticated session. */
+    synchronized boolean sendAuthenticated(JSONObject command) {
+        if (phase != Phase.IN_GAME || socket == null) return false;
+        String type = command.optString("type", "");
+        if (type.isEmpty() || type.length() > 64
+                || type.equals("clientVersion") || type.equals("keepAlive")
+                || type.equals("login") || type.equals("newAccount")
+                || type.equals("startGame") || type.equals("passkeyLogin")) {
+            return false;
+        }
+        return socket.send(command.toString());
+    }
+
     private void receive(JSONObject envelope) throws JSONException {
         String type = envelope.getString("type");
         if (type.equals("error")) { disconnect("Gateway rejected request; reconnect and log in again"); return; }

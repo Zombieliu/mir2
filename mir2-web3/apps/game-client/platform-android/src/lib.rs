@@ -307,6 +307,77 @@ pub extern "C" fn mir2_android_gateway_report_write_result(sequence: u64, sent: 
     true
 }
 
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayHostStart<'a>(
+    _: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+) {
+    mir2_android_gateway_host_start();
+}
+
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayHostStop<'a>(
+    _: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+) {
+    mir2_android_gateway_host_stop();
+}
+
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayConnectionLost<'a>(
+    _: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+) {
+    mir2_android_gateway_connection_lost();
+}
+
+/// JNI string wrapper around the bounded native gateway mailbox. The JSON is
+/// already produced from a closed Rust enum; Java only writes it to the live
+/// authenticated socket and returns the exact sequence result.
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayPoll<'a>(
+    mut env: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+) -> jni::sys::jstring {
+    env.with_env(|env| -> Result<_, jni::errors::Error> {
+        let required = unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) };
+        if required <= 0 || required as usize > 64 * 1024 {
+            if required < 0 || required as usize > 64 * 1024 {
+                mir2_android_gateway_connection_lost();
+            }
+            return Ok(env.new_string("")?.into_raw());
+        }
+        let mut bytes = vec![0_u8; required as usize];
+        let copied =
+            unsafe { mir2_android_gateway_copy_next_outbound(bytes.as_mut_ptr(), bytes.len()) };
+        if copied != required {
+            mir2_android_gateway_connection_lost();
+            return Ok(env.new_string("")?.into_raw());
+        }
+        let envelope = String::from_utf8(bytes).unwrap_or_else(|_| {
+            mir2_android_gateway_connection_lost();
+            String::new()
+        });
+        Ok(env.new_string(envelope)?.into_raw())
+    })
+    .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
+}
+
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayReport<'a>(
+    _: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+    sequence: jni::sys::jlong,
+    sent: jni::sys::jboolean,
+) -> jni::sys::jboolean {
+    sequence > 0 && mir2_android_gateway_report_write_result(sequence as u64, sent)
+}
+
 fn drive_android_gateway_host_transport(
     enabled: Res<AndroidGatewayTransportEnabled>,
     shell: Res<AndroidShellState>,

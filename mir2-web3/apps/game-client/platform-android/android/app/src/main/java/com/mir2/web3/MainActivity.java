@@ -25,6 +25,11 @@ import org.json.JSONObject;
 public final class MainActivity extends GameActivity {
     private static native void nativeEvent(String json);
     private static native String nativePoll();
+    private static native void nativeGatewayHostStart();
+    private static native void nativeGatewayHostStop();
+    private static native void nativeGatewayConnectionLost();
+    private static native String nativeGatewayPoll();
+    private static native boolean nativeGatewayReport(long sequence, boolean sent);
     static { System.loadLibrary("mir2_platform_android"); }
     private final Handler handler = new Handler(Looper.getMainLooper());
     private GatewaySession session;
@@ -32,6 +37,7 @@ public final class MainActivity extends GameActivity {
     private EditText ime;
     private String editing = "";
     private boolean updating, foreground, sensitiveEditor, imeWasVisible, multilineEditor;
+    private volatile boolean gatewayHostActive, networkReportedAvailable;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -88,6 +94,20 @@ public final class MainActivity extends GameActivity {
             nativeEvent(GatewaySession.object("phase", view.phase.name(), "message", view.message,
                     "characters", roster, "world", view.world == null ? JSONObject.NULL : view.world.toJson(),
                     "worldSnapshot", view.worldSnapshot == null ? JSONObject.NULL : view.worldSnapshot).toString());
+            boolean networkAvailable = view.phase != GatewaySession.Phase.DISCONNECTED
+                    && view.phase != GatewaySession.Phase.CONNECTING;
+            if (networkAvailable != networkReportedAvailable) {
+                networkReportedAvailable = networkAvailable;
+                nativeEvent(GatewaySession.object("type", "lifecycle", "state",
+                        networkAvailable ? "networkAvailable" : "networkUnavailable").toString());
+            }
+            if (view.phase == GatewaySession.Phase.IN_GAME && !gatewayHostActive) {
+                nativeGatewayHostStart();
+                gatewayHostActive = true;
+            } else if (view.phase == GatewaySession.Phase.DISCONNECTED && gatewayHostActive) {
+                nativeGatewayConnectionLost();
+                gatewayHostActive = false;
+            }
         });
         connect();
         hideSystemUi();
@@ -154,6 +174,26 @@ public final class MainActivity extends GameActivity {
                     session.disconnect("Host command failed; reconnect");
                 }
             }
+            if (!BuildConfig.UI_PREVIEW && gatewayHostActive) {
+                for (int i = 0; i < 16; i++) {
+                    String raw = nativeGatewayPoll();
+                    if (raw.isEmpty()) break;
+                    boolean sent = false;
+                    long sequence = 0;
+                    try {
+                        JSONObject envelope = new JSONObject(raw);
+                        sequence = envelope.getLong("sequence");
+                        sent = session.sendAuthenticated(envelope.getJSONObject("command"));
+                    } catch (Exception ignored) {
+                        sent = false;
+                    }
+                    boolean accepted = nativeGatewayReport(sequence, sent);
+                    if (!accepted || !sent) {
+                        session.disconnect("Gameplay send failed; reconnect and log in again");
+                        break;
+                    }
+                }
+            }
             handler.postDelayed(this, 33);
         }
     };
@@ -194,16 +234,21 @@ public final class MainActivity extends GameActivity {
     @Override protected void onStart() {
         super.onStart();
         foreground = true;
+        nativeEvent(GatewaySession.object("type", "lifecycle", "state", "resume").toString());
         handler.post(pump);
     }
     @Override protected void onStop() {
         foreground = false;
         handler.removeCallbacks(pump);
+        nativeEvent(GatewaySession.object("type", "lifecycle", "state", "pause").toString());
         hideKeyboard();
         session.disconnect("Backgrounded. Reconnect and log in to refresh server state.");
         super.onStop();
     }
     @Override protected void onDestroy() {
+        nativeEvent(GatewaySession.object("type", "lifecycle", "state", "destroy").toString());
+        nativeGatewayHostStop();
+        gatewayHostActive = false;
         session.close();
         client.dispatcher().executorService().shutdown();
         client.connectionPool().evictAll();

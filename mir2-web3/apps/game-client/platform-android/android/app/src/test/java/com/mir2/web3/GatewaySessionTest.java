@@ -204,4 +204,22 @@ public class GatewaySessionTest {
         peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":1.5,\"y\":2}}");
         assertTrue(phase(GatewaySession.Phase.DISCONNECTED).characters.isEmpty());
     }
+
+    @Test public void gameplayWritesRequireAnAuthenticatedInGameSession() throws Exception {
+        connect();
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "attack", "objectId", 99)));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        roster(); session.start(7);
+        commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapInformation\",\"payload\":{\"fileName\":\"0\"}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserInformation\",\"payload\":{\"name\":\"Fixture\"}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":302,\"y\":634}}");
+        phase(GatewaySession.Phase.IN_GAME);
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "login", "accountId", "forged")));
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type", "attack", "objectId", 99)));
+        JSONObject command = commands.poll(3, TimeUnit.SECONDS);
+        assertEquals("attack", command.getString("type"));
+        assertEquals(99, command.getInt("objectId"));
+    }
 }

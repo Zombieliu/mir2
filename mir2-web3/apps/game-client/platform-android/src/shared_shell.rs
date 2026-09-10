@@ -437,6 +437,7 @@ fn receive(
     mut key_events: Option<ResMut<Messages<bevy::input::keyboard::KeyboardInput>>>,
     windows: Query<Entity, With<Window>>,
     mut forms: crate::form_input::FormInput,
+    mut lifecycle_messages: Option<ResMut<Messages<crate::android_input::AndroidLifecycleMessage>>>,
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
     #[cfg(target_os = "android")]
@@ -490,6 +491,24 @@ fn receive(
         .drain(..)
         .collect();
     for value in values {
+        if value["type"] == "lifecycle" {
+            let event = match value["state"].as_str() {
+                Some("resume") => Some(crate::android_input::AndroidLifecycleEvent::Resume),
+                Some("pause") => Some(crate::android_input::AndroidLifecycleEvent::Pause),
+                Some("destroy") => Some(crate::android_input::AndroidLifecycleEvent::Destroy),
+                Some("networkAvailable") => {
+                    Some(crate::android_input::AndroidLifecycleEvent::NetworkAvailable)
+                }
+                Some("networkUnavailable") => {
+                    Some(crate::android_input::AndroidLifecycleEvent::NetworkUnavailable)
+                }
+                _ => None,
+            };
+            if let (Some(messages), Some(event)) = (lifecycle_messages.as_deref_mut(), event) {
+                messages.write(crate::android_input::AndroidLifecycleMessage(event));
+            }
+            continue;
+        }
         if value["type"] == "submit" {
             let active = crate::text_input::shell_field(&model)
                 .map(|v| v.0)

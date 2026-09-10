@@ -87,10 +87,12 @@ roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
 movement packet presentation and complete gameplay remain subsequent work. The
-existing reducer transaction queues below are **not** connected to this
-login-only socket. MockWebServer verifies the TLS/protocol state machine but is
-not real account acceptance; an approved WSS endpoint and test account are
-required for that gate.
+existing reducer command queue is now connected to the authenticated in-game
+socket through the bounded JNI lease mailbox described below. Authoritative
+gameplay packet/receipt ingestion is still incomplete, so this is not an online
+player-loop acceptance. MockWebServer verifies the TLS/protocol state machine
+but is not real account acceptance; an approved WSS endpoint and test account
+are required for that gate.
 
 Host TLS/protocol tests (test certificates are generated only in JVM memory):
 
@@ -113,11 +115,16 @@ safe-area, keyboard, back-button, and joystick translation.
 `src/gateway_bridge.rs` consumes `UiEffect::GatewayCommand`, converts the
 supported commands to the same camelCase JSON shapes accepted by the Web and
 Windows BrowserCommand path, and retains them in a bounded FIFO
-`AndroidGatewayOutboundQueue`. The Activity/WebSocket host must call
-`drain_ready(&AndroidShellState, max_entries)` only while the app is in the
-foreground and the network is available. Background and unavailable-network
-states retain entries. Queue overflow rejects the new command and exposes a
-counter/status instead of silently dropping it.
+`AndroidGatewayOutboundQueue`. The Bevy update drains only while Android is in
+the foreground, the network is available, and an authenticated in-game socket
+generation is active. `MainActivity` polls a bounded JNI envelope, writes the
+unchanged Rust-produced BrowserCommand through `GatewaySession`, and reports
+the exact lease sequence once. Background/socket loss closes the generation;
+sent-but-unacknowledged transaction mutations become unknown and are never
+replayed. Queue overflow rejects the new command and exposes a counter/status
+instead of silently dropping it. Session-control/auth commands remain on the
+dedicated login state machine; the gameplay writer rejects them, including
+`passkeyLogin`.
 
 Inbound `gameShopReceipt` text now has a separate bounded
 `AndroidGatewayInboundQueue`. `AndroidShellPlugin` registers that resource and
@@ -154,13 +161,11 @@ command. Non-gateway effects (`ApplyAudioSettings`,
 window, persistence, notices, and exit effects) remain in `AndroidUiEffects`
 for platform-side handling.
 
-The current shared `mir2_ui_core::GatewayCommand` enum has no Mail, Storage,
-or Shop mutation variants; opening those panels is therefore not evidence of a
-corresponding Android wire action. This bridge does not invent those commands.
-
-This closes the reducer-to-wire-command and receipt-to-reducer adaptation
-only. The login-only Activity socket does not drain these gameplay queues;
-this crate must not be described as a complete online-playable Android client.
+This closes the reducer-to-live-socket outbound adaptation only. Most ordinary
+server gameplay packets and the transaction receipt variants are not yet fed
+back into all shared reducers, and no approved live account has exercised the
+path. This crate must not yet be described as a complete online-playable
+Android client.
 
 ## Native M0 host
 
