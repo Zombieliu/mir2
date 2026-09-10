@@ -86,7 +86,8 @@ public final class MainActivity extends GameActivity {
                         "level", character.level, "className", character.className, "genderName", character.genderName));
             }
             nativeEvent(GatewaySession.object("phase", view.phase.name(), "message", view.message,
-                    "characters", roster, "world", view.world == null ? JSONObject.NULL : view.world.toJson()).toString());
+                    "characters", roster, "world", view.world == null ? JSONObject.NULL : view.world.toJson(),
+                    "worldSnapshot", view.worldSnapshot == null ? JSONObject.NULL : view.worldSnapshot).toString());
         });
         connect();
         hideSystemUi();

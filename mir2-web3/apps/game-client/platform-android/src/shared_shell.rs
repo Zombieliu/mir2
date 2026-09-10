@@ -14,6 +14,28 @@ use std::{collections::VecDeque, sync::Mutex};
 static INBOX: Mutex<VecDeque<Value>> = Mutex::new(VecDeque::new());
 static OUTBOX: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
 
+fn enqueue_host_event(queue: &mut VecDeque<Value>, text: &str) {
+    // Snapshot JSON is escaped once inside the host envelope. Retain the small
+    // limit for ordinary input events and bound aggregate snapshot memory too.
+    let parsed = (text.len() <= 2 * 1024 * 1024 + 65536)
+        .then(|| serde_json::from_str::<Value>(text).ok()).flatten();
+    let valid = parsed.as_ref().is_some_and(|value| {
+        let snapshot_bytes = value["worldSnapshot"].as_str().map_or(0, str::len);
+        snapshot_bytes <= 1024 * 1024
+            && text.len() <= 65536 + 2 * snapshot_bytes
+            && queue.len() < 32
+            && queue.iter().map(|event| {
+                65536 + event["worldSnapshot"].as_str().map_or(0, str::len)
+            }).sum::<usize>() + snapshot_bytes + 65536 <= 8 * 1024 * 1024
+    });
+    if valid {
+        queue.push_back(parsed.unwrap());
+    } else {
+        queue.clear();
+        queue.push_back(json!({"phase":"DISCONNECTED","message":"Invalid or overflowing host event; reconnect"}));
+    }
+}
+
 #[cfg(target_os = "android")]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeEvent<'a>(
@@ -23,19 +45,8 @@ pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeEvent<'a>(
 ) {
     env.with_env(|_| -> Result<(), jni::errors::Error> {
         let text = text.to_string();
-        if text.len() <= 65536 {
-            if let Ok(value) = serde_json::from_str(&text) {
-                let mut queue = INBOX.lock().unwrap_or_else(|e| e.into_inner());
-                if queue.len() >= 32 {
-                    queue.clear();
-                    queue.push_back(
-                        json!({"phase":"DISCONNECTED","message":"Host event overflow; reconnect"}),
-                    );
-                } else {
-                    queue.push_back(value);
-                }
-            }
-        }
+        let mut queue = INBOX.lock().unwrap_or_else(|e| e.into_inner());
+        enqueue_host_event(&mut queue, &text);
         Ok(())
     })
     .resolve::<jni::errors::ThrowRuntimeExAndDefault>();
@@ -489,7 +500,36 @@ fn receive(
         let phase = value["phase"].as_str().unwrap_or("");
         // Typed server data must not be recovered by parsing UI message text.
         // Reset on any non-world phase, including a map transition or reconnect.
-        host.world = host_world_position(&value, model.screen);
+        let next_world = host_world_position(&value, model.screen);
+        let map_changed = host.world.as_ref().zip(next_world.as_ref())
+            .is_some_and(|(old, next)| old.map_file_name != next.map_file_name);
+        host.world = next_world;
+        if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
+            mir2_bevy_runtime::native_ingest::push_native_data_reset();
+        } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
+            mir2_bevy_runtime::native_ingest::push_native_scene_reset();
+        }
+        if let (Some(world), Some(raw)) = (&host.world, value["worldSnapshot"].as_str()) {
+            let projected = crate::world_projection::project(
+                raw, &world.map_file_name, &world.player_name, world.x, world.y,
+            );
+            let queued = projected.is_some_and(|projection| {
+                mir2_bevy_runtime::native_ingest::push_native_world_state(projection.world)
+                    && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(projection.ui)
+            });
+            if !queued {
+                mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                host.world = None;
+                host.phase = "DISCONNECTED".into();
+                model.apply_gateway_event(Event::Disconnect {
+                    reason: Some("World snapshot rejected; reconnect".into()),
+                });
+                intents.drain().for_each(drop);
+                OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+                send(json!({"type":"disconnect"}));
+                continue;
+            }
+        }
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
             if let Some(effects) = effects.as_deref_mut() {
                 discard_player_commands(effects);
@@ -546,8 +586,8 @@ fn receive(
                     accepted: true,
                     reason: None,
                 });
-                // This round validates shell UI only. Do not replace the player screen
-                // with a debug position label or claim a rendered gameplay scene.
+                // Ingress is not bootstrap acceptance. Keep the loading screen
+                // until the shared map/entity asset pipeline is actually ready.
                 model.notice = Some(ShellNotice::info(message));
             }
             "DISCONNECTED" => {
@@ -722,6 +762,22 @@ fn keyboard(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn host_inbox_accepts_large_snapshot_but_bounds_memory_and_fails_closed() {
+        let mut queue = std::collections::VecDeque::new();
+        let event = serde_json::json!({"phase":"IN_GAME", "worldSnapshot":"x".repeat(900_000)}).to_string();
+        super::enqueue_host_event(&mut queue, &event);
+        assert_eq!(queue[0]["worldSnapshot"].as_str().unwrap().len(), 900_000);
+        for _ in 0..8 { super::enqueue_host_event(&mut queue, &event); }
+        assert_eq!(queue.len(), 1);
+        assert_eq!(queue[0]["phase"], "DISCONNECTED");
+        super::enqueue_host_event(&mut queue, &serde_json::json!({"text":"x".repeat(65537)}).to_string());
+        assert_eq!(queue.len(), 1);
+        assert_eq!(queue[0]["phase"], "DISCONNECTED");
+        super::enqueue_host_event(&mut queue, "not JSON");
+        assert_eq!(queue[0]["phase"], "DISCONNECTED");
+    }
+
     use super::*;
 
     #[test]

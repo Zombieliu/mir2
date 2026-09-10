@@ -1,0 +1,180 @@
+//! Wire-shape adaptation only. The server remains authoritative; rendering and
+//! bootstrap acceptance are owned by the shared runtime, not this adapter.
+use mir2_client_bevy::read_model::PlayerStats;
+use serde_json::{json, Map, Value};
+use std::collections::HashSet;
+
+pub(crate) struct Projection {
+    pub world: String,
+    pub ui: String,
+}
+
+pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Option<Projection> {
+    let mut world: Value = serde_json::from_str(raw).ok()?;
+    let owner = object_id(&world["playerObjectId"])?;
+    if world["mapFileName"].as_str()? != map {
+        return None;
+    }
+    let entities = world["entities"].as_array()?;
+    if entities.is_empty() || entities.len() > 8192 {
+        return None;
+    }
+    let mut ids = HashSet::new();
+    let mut self_player = None;
+    for entity in entities {
+        let id = object_id(&entity["objectId"])?;
+        if !ids.insert(id) {
+            return None;
+        }
+        for key in ["x", "y"] {
+            i32::try_from(entity[key].as_u64()?).ok()?;
+        }
+        if !matches!(
+            entity["kind"].as_str()?,
+            "selfPlayer" | "player" | "monster" | "npc"
+        ) {
+            return None;
+        }
+        entity["name"].as_str()?;
+        if entity["kind"] == "selfPlayer" {
+            if self_player.is_some()
+                || id != owner
+                || entity["name"] != name
+                || entity["x"] != x
+                || entity["y"] != y
+            {
+                return None;
+            }
+            self_player = Some(entity);
+        }
+    }
+    let player = self_player?;
+    let mut stats = Map::new();
+    for (wire, field) in [
+        ("playerHp", "hp"),
+        ("playerMaxHp", "maxHp"),
+        ("playerMp", "mp"),
+        ("playerMaxMp", "maxMp"),
+        ("gold", "gold"),
+        ("credit", "credit"),
+        ("playerCrystalStats", "crystalStats"),
+        ("playerExperience", "experience"),
+        ("playerMaxExperience", "maxExperience"),
+        ("currentWeight", "currentWeight"),
+        ("maxWeight", "maxWeight"),
+        ("mapTitle", "mapName"),
+        ("inSafeZone", "inSafeZone"),
+    ] {
+        if let Some(value) = world.get(wire).filter(|value| !value.is_null()) {
+            stats.insert(field.into(), value.clone());
+        }
+    }
+    for (wire, field) in [
+        ("name", "name"),
+        ("level", "level"),
+        ("class", "className"),
+        ("gender", "gender"),
+        ("hair", "hair"),
+        ("wingEffect", "wingEffect"),
+        ("guildName", "guildName"),
+        ("guildRankName", "guildRankName"),
+    ] {
+        if let Some(value) = player.get(wire).filter(|value| !value.is_null()) {
+            stats.insert(field.into(), value.clone());
+        }
+    }
+    // Deserialize through the actual shared HUD type, including integer ranges.
+    let stats: PlayerStats = serde_json::from_value(Value::Object(stats)).ok()?;
+    world["playerObjectId"] = json!(owner.to_string());
+    world["selectedObjectId"] = match world.get("selectedObjectId") {
+        None | Some(Value::Null) => Value::Null,
+        Some(value) => json!(u32::try_from(value.as_u64()?).ok()?.to_string()),
+    };
+    for entity in world["entities"].as_array_mut()? {
+        entity["objectId"] = json!(object_id(&entity["objectId"])?.to_string());
+        // Same runtime millisecond fields used by the existing Windows producer.
+        let started = entity["movementStartedAt"].as_f64();
+        let duration = match (started, entity["movementUntil"].as_f64()) {
+            (Some(start), Some(end)) if end > start => Some(end - start),
+            _ => None,
+        };
+        entity["movementStartedMs"] = json!(started);
+        entity["movementDurationMs"] = json!(duration);
+    }
+    Some(Projection {
+        world: world.to_string(),
+        ui: json!({"player": stats}).to_string(),
+    })
+}
+
+fn object_id(value: &Value) -> Option<u32> {
+    let id = u32::try_from(value.as_u64()?).ok()?;
+    (id != 0).then_some(id)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn snapshot() -> Value {
+        json!({"playerObjectId": 42, "mapFileName": "0", "mapTitle": "Bichon",
+            "playerHp": 30, "playerMaxHp": 50, "gold": 123,
+            "sceneView": {"center": {"x": 300, "y": 630}, "width": 21, "height": 17},
+            "entities": [{"objectId": 42, "kind": "selfPlayer", "name": "Fixture",
+                "x": 300, "y": 630, "class": "Warrior", "level": 7,
+                "movementStartedAt": 1000, "movementUntil": 1300},
+                {"objectId": 43, "kind": "monster", "name": "Deer", "x": 301, "y": 630}],
+            "terrainPatches": [], "decorObjects": [], "mineNodes": []})
+    }
+
+    #[test]
+    fn retains_scene_and_actors_and_uses_shared_hud_type() {
+        let source = snapshot();
+        let projected = project(&source.to_string(), "0", "Fixture", 300, 630).unwrap();
+        let world: Value = serde_json::from_str(&projected.world).unwrap();
+        assert_eq!(world["playerObjectId"], "42");
+        assert_eq!(world["entities"][1]["objectId"], "43");
+        assert_eq!(world["sceneView"], source["sceneView"]);
+        assert_eq!(world["entities"][0]["movementDurationMs"], 300.0);
+        let ui: mir2_client_bevy::read_model::UiReadModel =
+            serde_json::from_str(&projected.ui).unwrap();
+        assert_eq!(ui.player.hp, 30);
+        assert_eq!(ui.player.gold, 123);
+        assert_eq!(ui.player.class_name.as_deref(), Some("Warrior"));
+        assert_eq!(ui.player.map_name.as_deref(), Some("Bichon"));
+    }
+
+    #[test]
+    fn rejects_stale_mismatched_and_invalid_authority() {
+        let raw = snapshot().to_string();
+        assert!(project(&raw, "1", "Fixture", 300, 630).is_none());
+        assert!(project(&raw, "0", "Other", 300, 630).is_none());
+        assert!(project(&raw, "0", "Fixture", 301, 630).is_none());
+        for invalid in [json!("42"), json!(42.5), json!(0), json!(4294967296u64)] {
+            let mut world = snapshot();
+            world["playerObjectId"] = invalid;
+            assert!(project(&world.to_string(), "0", "Fixture", 300, 630).is_none());
+        }
+        let mut world = snapshot();
+        world["entities"][1]["objectId"] = json!(42);
+        assert!(project(&world.to_string(), "0", "Fixture", 300, 630).is_none());
+        world = snapshot();
+        world["playerHp"] = json!("30");
+        assert!(project(&world.to_string(), "0", "Fixture", 300, 630).is_none());
+    }
+
+    #[test]
+    fn nullable_snapshot_scalars_use_shared_defaults_without_rejecting_the_scene() {
+        let mut world = snapshot();
+        world["playerHp"] = Value::Null;
+        world["currentWeight"] = Value::Null;
+        world["entities"][0]["level"] = Value::Null;
+        world["selectedObjectId"] = json!(0);
+        let projection = project(&world.to_string(), "0", "Fixture", 300, 630).unwrap();
+        let ui: mir2_client_bevy::read_model::UiReadModel =
+            serde_json::from_str(&projection.ui).unwrap();
+        assert_eq!(ui.player.hp, 0);
+        assert_eq!(ui.player.current_weight, 0);
+        assert_eq!(ui.player.level, 0);
+    }
+}

@@ -1,5 +1,6 @@
 package com.mir2.web3;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -39,11 +40,13 @@ final class GatewaySession implements AutoCloseable {
         final String message;
         final List<Character> characters;
         final WorldPosition world;
-        View(Phase phase, String message, List<Character> characters, WorldPosition world) {
+        final String worldSnapshot;
+        View(Phase phase, String message, List<Character> characters, WorldPosition world, String worldSnapshot) {
             this.phase = phase;
             this.message = message;
             this.characters = Collections.unmodifiableList(new ArrayList<>(characters));
             this.world = world;
+            this.worldSnapshot = worldSnapshot;
         }
     }
 
@@ -73,6 +76,7 @@ final class GatewaySession implements AutoCloseable {
     private String player = "", map = "";
     private Integer x, y;
     private boolean startAccepted;
+    private String pendingSnapshot;
     private boolean closed;
 
     GatewaySession(OkHttpClient client, Consumer<View> observer) {
@@ -116,7 +120,10 @@ final class GatewaySession implements AutoCloseable {
             @Override public void onMessage(WebSocket ws, String text) {
                 synchronized (GatewaySession.this) {
                     if (attempt != generation) return;
-                    if (text.length() > 1024 * 1024) { disconnect("Gateway message too large"); return; }
+                    if (text.length() > 1024 * 1024
+                            || text.getBytes(StandardCharsets.UTF_8).length > 1024 * 1024) {
+                        disconnect("Gateway message too large"); return;
+                    }
                     try { receive(new JSONObject(text)); }
                     catch (JSONException | IllegalArgumentException error) {
                         disconnect("Invalid gateway response; reconnect and log in again");
@@ -177,6 +184,8 @@ final class GatewaySession implements AutoCloseable {
                     player = bounded(entity.getString("name"));
                     map = bounded(world.getString("mapFileName"));
                     readPosition(entity);
+                    // Keep the complete immutable server payload until StartGame is accepted.
+                    pendingSnapshot = world.toString();
                     publishWorld();
                     return;
                 }
@@ -236,6 +245,7 @@ final class GatewaySession implements AutoCloseable {
                 break;
             case "UserInformation":
                 if (!worldPending()) return;
+                pendingSnapshot = null;
                 player = bounded(payload.getString("name"));
                 JSONObject location = payload.optJSONObject("location");
                 if (location != null) readPosition(location);
@@ -244,6 +254,7 @@ final class GatewaySession implements AutoCloseable {
                 break;
             case "MapInformation": case "MapChanged":
                 if (!worldPending()) return;
+                pendingSnapshot = null;
                 if (phase == Phase.IN_GAME) {
                     phase = Phase.STARTING;
                     armDeadline(generation);
@@ -255,6 +266,7 @@ final class GatewaySession implements AutoCloseable {
                 break;
             case "UserLocation":
                 if (!worldPending()) return;
+                pendingSnapshot = null;
                 readPosition(payload);
                 publishWorld();
                 break;
@@ -279,7 +291,9 @@ final class GatewaySession implements AutoCloseable {
         cancelDeadline();
         publish("Character: " + player + "\nMap: " + map + "\nServer position: (" + x + ", " + y + ")");
     }
-    private void resetWorld() { player = map = ""; x = y = null; startAccepted = false; }
+    private void resetWorld() {
+        player = map = ""; x = y = null; startAccepted = false; pendingSnapshot = null;
+    }
     synchronized void disconnect(String reason) {
         generation++;
         cancelDeadline();
@@ -316,7 +330,9 @@ final class GatewaySession implements AutoCloseable {
         WorldPosition world = phase == Phase.IN_GAME && startAccepted
                 && !player.isEmpty() && !map.isEmpty() && x != null && y != null
                 ? new WorldPosition(player, map, x, y) : null;
-        observer.accept(new View(phase, text, characters, world));
+        String snapshot = world == null ? null : pendingSnapshot;
+        if (snapshot != null) pendingSnapshot = null; // Deliver once, never replay on a later packet.
+        observer.accept(new View(phase, text, characters, world, snapshot));
     }
     private static String bounded(String value) {
         if (value.isBlank() || value.length() > 128) throw new IllegalArgumentException("text limit");

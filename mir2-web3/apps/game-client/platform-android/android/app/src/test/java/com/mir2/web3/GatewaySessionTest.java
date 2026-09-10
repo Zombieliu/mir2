@@ -166,9 +166,24 @@ public class GatewaySessionTest {
                 + "{\"objectId\":999,\"kind\":\"monster\",\"name\":\"Deer\",\"x\":1,\"y\":2},"
                 + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":300,\"y\":630}]}}";
         peer.send(world);
-        assertEquals(GatewaySession.Phase.STARTING, views.poll(3, TimeUnit.SECONDS).phase);
+        GatewaySession.View waiting = views.poll(3, TimeUnit.SECONDS);
+        assertEquals(GatewaySession.Phase.STARTING, waiting.phase);
+        assertNull(waiting.worldSnapshot);
         peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
-        assertTrue(phase(GatewaySession.Phase.IN_GAME).message.contains("(300, 630)"));
+        GatewaySession.View accepted = phase(GatewaySession.Phase.IN_GAME);
+        assertTrue(accepted.message.contains("(300, 630)"));
+        JSONObject retained = new JSONObject(accepted.worldSnapshot);
+        assertEquals(2, retained.getJSONArray("entities").length());
+        assertEquals(42, retained.getLong("playerObjectId"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":301,\"y\":630}}");
+        assertNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        GatewaySession.View changed = phase(GatewaySession.Phase.STARTING);
+        assertNull(changed.world);
+        assertNull(changed.worldSnapshot);
+        session.disconnect("Test end");
+        assertNull(phase(GatewaySession.Phase.DISCONNECTED).worldSnapshot);
+        assertEquals(2, new JSONObject(accepted.worldSnapshot).getJSONArray("entities").length());
     }
 
     @Test public void malformedPositionInvalidatesSession() throws Exception {

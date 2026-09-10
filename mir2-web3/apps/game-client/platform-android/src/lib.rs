@@ -12,6 +12,8 @@ pub mod gateway_bridge;
 mod mobile_ui;
 #[cfg(any(target_os = "android", test))]
 mod shared_shell;
+#[cfg(any(target_os = "android", test))]
+mod world_projection;
 mod text_input;
 #[cfg(feature = "ui-preview")]
 mod ui_preview;
