@@ -15,6 +15,13 @@ while typing it pans upward to keep the login panel readable above the IME.
 Package with `MIR2_ANDROID_UI_ASSET_ROOT` pointing to a local approved asset
 root containing `original-ui/{ChrSel,Prguse,Prguse2,Title,Items,Help,MMap,StateItem}/*.png`. Gradle stages
 only those images in generated build output. The files are not committed.
+Optionally set `MIR2_ANDROID_WORLD_ASSET_ROOT` to an approved generated asset
+root containing `generated/map-atlas/manifest.json` and its PNG pages. Gradle
+stages only that map-atlas subtree. On the first validated world snapshot, the
+Android host validates schema/count/geometry/path/memory limits, decodes every
+PNG off the render thread, and then publishes the complete raw-RGBA page set
+through the bounded native runtime queue. A missing or rejected pack remains a
+visible loading error; it does not fall back to synthetic terrain.
 Set `MIR2_GATEWAY_WS_URL` explicitly at build time for approved online tests.
 Neither an exported Activity intent nor old endpoint preferences override it.
 With no endpoint the actual shared login screen shows a configuration notice;
@@ -45,8 +52,9 @@ JNI delivers host events to the shared model and shared intents back to the
 host. Transport StartGame/position acceptance does not currently complete the
 shared gameplay scene: the shell stays on its transition surface, not a fake
 in-game screen. The shared runtime now has a bounded native raw-RGBA map-atlas
-ingress, but the Android host does not yet load the staged manifest/PNG pages or
-produce the authoritative viewport draw list. Map/entity rendering and the full
+ingress, and the Android host now loads a packaged compact-v2 manifest/PNG pack
+into that ingress. It still does not produce the authoritative viewport draw
+list or character/entity atlases. Visible map/entity rendering and the full
 player flow therefore remain follow-up work.
 
 Passwords, account names, session tokens and character state are not persisted.
@@ -193,6 +201,10 @@ On a Unix-like shell:
 ```bash
 ./build-android.sh
 MIR2_ANDROID_MODE=package ./build-android.sh
+MIR2_ANDROID_MODE=package \
+MIR2_ANDROID_UI_ASSET_ROOT=/approved/ui-root \
+MIR2_ANDROID_WORLD_ASSET_ROOT=/approved/generated-pack-root \
+./build-android.sh
 ```
 
 The first command runs an offline `cargo-ndk` target check. Package mode builds

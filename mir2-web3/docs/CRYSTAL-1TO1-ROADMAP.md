@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `15ec8e366`: the native host can now stage an approved
+> compact-v2 map-atlas pack into APK assets, validate its paths/counts/stats/
+> geometry/memory bounds, decode all PNG pages off the render thread, and send
+> the complete RGBA set through the existing bounded Bevy native ingress after
+> an accepted world snapshot. The local 49-page/2,111-source pack validates;
+> Android 99/99, Java 8/8, API31, and the focused runtime atlas test pass. A
+> debug APK was built and its 49 pages/manifest/native arm64 library were inspected.
+> The APK has no Gateway URL and was not installed; authoritative map draw-list,
+> character atlas, render-ready bootstrap, emulator gameplay and device gates
+> remain open. Evidence:
+> `docs/generated/player-qa/native-android-packaged-map-atlas-20260911/README.md`.
+
 > 2026-09-11 Android `31946256b`: the bounded native runtime queue now accepts
 > validated/coalesced raw RGBA map-atlas pages and the Bevy consumer installs
 > them in the real map-render registry, including scene/session reset semantics.
