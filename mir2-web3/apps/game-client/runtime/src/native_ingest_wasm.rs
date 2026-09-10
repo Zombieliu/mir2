@@ -44,6 +44,12 @@ pub(crate) enum NativeInboundMessage {
         height: u32,
         pixels: Vec<u8>,
     },
+    MapRenderAtlas {
+        key: String,
+        width: u32,
+        height: u32,
+        pixels: Vec<u8>,
+    },
 }
 
 #[derive(Resource, Default)]

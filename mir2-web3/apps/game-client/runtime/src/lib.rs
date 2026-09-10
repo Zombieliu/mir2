@@ -3479,6 +3479,7 @@ fn clear_effect_render_layers_for_scene_reset(
 fn ingest_pending_map_render_images(
     mut atlas_resource: ResMut<RuntimeMapRenderAtlases>,
     mut images: ResMut<Assets<Image>>,
+    native: Res<native_ingest::NativeInbound>,
 ) {
     PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| {
         for operation in pending.borrow_mut().drain(..) {
@@ -3509,6 +3510,46 @@ fn ingest_pending_map_render_images(
             atlas_resource.revision = atlas_resource.revision.wrapping_add(1);
         }
     });
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::MapRenderAtlas { .. }
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::MapRenderAtlas {
+                key,
+                width,
+                height,
+                pixels,
+            } = message
+            {
+                let expected_len = (width as usize)
+                    .checked_mul(height as usize)
+                    .and_then(|pixels| pixels.checked_mul(4));
+                if width == 0 || height == 0 || expected_len != Some(pixels.len()) {
+                    publish_status("map-render-atlas-error", "invalid native atlas pixels");
+                    return;
+                }
+                let image = Image::new(
+                    Extent3d {
+                        width,
+                        height,
+                        depth_or_array_layers: 1,
+                    },
+                    TextureDimension::D2,
+                    pixels,
+                    TextureFormat::Rgba8UnormSrgb,
+                    RenderAssetUsages::default(),
+                );
+                let handle = images.add(image);
+                atlas_resource.url_image_keys.remove(&key);
+                atlas_resource.images.insert(key, handle);
+                atlas_resource.revision = atlas_resource.revision.wrapping_add(1);
+            }
+        },
+    );
 }
 
 /// Stage 2 (unified y-sort) z scale. Map tiles and entities derive z from the
@@ -8204,6 +8245,7 @@ mod native_data_path_tests {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins)
             .init_resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+            .init_resource::<Assets<Image>>()
             .init_resource::<Assets<Mesh>>()
             .init_resource::<additive_material::CrystalAdditiveMaterialCache>()
             .insert_resource(mir2_client_bevy::read_model::UiReadModel::default())
@@ -8248,6 +8290,7 @@ mod native_data_path_tests {
                     apply_scene_reset_to_runtime,
                     apply_scene_reset_to_scene_models,
                     apply_session_reset_to_runtime_models,
+                    ingest_pending_map_render_images,
                     ingest_pending_ui_read_model,
                     ingest_pending_map_model,
                     ingest_pending_entity_model_set,
@@ -8277,6 +8320,45 @@ mod native_data_path_tests {
                     .after(ingest_pending_inventory_model),
             );
         app
+    }
+
+    #[test]
+    fn native_map_atlas_upload_reaches_the_render_registry() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        let pixels = vec![7, 8, 9, 255, 10, 11, 12, 255];
+
+        assert!(!native_ingest::push_native_map_render_atlas(
+            "map:bad".to_owned(),
+            2,
+            1,
+            vec![0; 7],
+        ));
+        assert!(native_ingest::push_native_map_render_atlas(
+            "map:page-0".to_owned(),
+            2,
+            1,
+            pixels.clone(),
+        ));
+        app.update();
+
+        let atlases = app.world().resource::<RuntimeMapRenderAtlases>();
+        assert_eq!(atlases.revision, 1);
+        assert_eq!(atlases.images.len(), 1);
+        assert!(!atlases.url_image_keys.contains("map:page-0"));
+        let handle = atlases
+            .images
+            .get("map:page-0")
+            .expect("native map page should be registered")
+            .clone();
+        let image = app
+            .world()
+            .resource::<Assets<Image>>()
+            .get(&handle)
+            .expect("native map page should own an image asset");
+        assert_eq!(image.texture_descriptor.size.width, 2);
+        assert_eq!(image.texture_descriptor.size.height, 1);
+        assert_eq!(image.data.as_deref(), Some(pixels.as_slice()));
     }
 
     #[test]

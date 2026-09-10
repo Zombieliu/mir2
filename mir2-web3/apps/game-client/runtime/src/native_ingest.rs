@@ -103,6 +103,12 @@ pub(crate) enum NativeInboundMessage {
         height: u32,
         pixels: Vec<u8>,
     },
+    MapRenderAtlas {
+        key: String,
+        width: u32,
+        height: u32,
+        pixels: Vec<u8>,
+    },
 }
 
 #[derive(Default)]
@@ -424,6 +430,7 @@ fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::HeroModel(_)
             | NativeInboundMessage::SkillModel(_)
             | NativeInboundMessage::EntityRenderAtlas { .. }
+            | NativeInboundMessage::MapRenderAtlas { .. }
     )
 }
 
@@ -456,6 +463,10 @@ fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessag
         (
             NativeInboundMessage::EntityRenderAtlas { key: left, .. },
             NativeInboundMessage::EntityRenderAtlas { key: right, .. },
+        ) => left == right,
+        (
+            NativeInboundMessage::MapRenderAtlas { key: left, .. },
+            NativeInboundMessage::MapRenderAtlas { key: right, .. },
         ) => left == right,
         _ => false,
     }
@@ -517,7 +528,8 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         | NativeInboundMessage::HeroModelReceipt(json)
         | NativeInboundMessage::SkillModelReceipt(json)
         | NativeInboundMessage::SocialModel(json) => json.capacity(),
-        NativeInboundMessage::EntityRenderAtlas { key, pixels, .. } => {
+        NativeInboundMessage::EntityRenderAtlas { key, pixels, .. }
+        | NativeInboundMessage::MapRenderAtlas { key, pixels, .. } => {
             key.capacity().saturating_add(pixels.capacity())
         }
         NativeInboundMessage::DataResetPreservingExactGameShopReceipt(receipt) => {
@@ -743,6 +755,25 @@ pub fn push_native_entity_render_atlas(
     })
 }
 
+/// Native-host entry point: push a raw RGBA map atlas image.
+///
+/// Mirrors the WASM `setMir2MapRenderAtlas(key, width, height, pixels)` path so
+/// Android can stage decoded map pages without routing them through JS/WASM.
+pub fn push_native_map_render_atlas(key: String, width: u32, height: u32, pixels: Vec<u8>) -> bool {
+    let expected_len = (width as usize)
+        .checked_mul(height as usize)
+        .and_then(|pixels| pixels.checked_mul(4));
+    if width == 0 || height == 0 || expected_len != Some(pixels.len()) {
+        return false;
+    }
+    send_native(NativeInboundMessage::MapRenderAtlas {
+        key,
+        width,
+        height,
+        pixels,
+    })
+}
+
 /// Bevy resource holding the consumer side of the native ingestion queue.
 /// The Bevy loop is single-threaded; the mutex is only contended against the
 /// background native producer.
@@ -860,6 +891,7 @@ fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
             | NativeInboundMessage::EntityRenderAtlas { .. }
+            | NativeInboundMessage::MapRenderAtlas { .. }
             | NativeInboundMessage::NpcShopService(_)
     )
 }
@@ -875,6 +907,7 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
             | NativeInboundMessage::EntityRenderAtlas { .. }
+            | NativeInboundMessage::MapRenderAtlas { .. }
             | NativeInboundMessage::UiReadModel(_)
             | NativeInboundMessage::WalletPatch(_)
             | NativeInboundMessage::InventoryModel(_)
@@ -1211,6 +1244,53 @@ mod tests {
             1,
             "old snapshot is evicted by byte pressure"
         );
+    }
+
+    #[test]
+    fn map_render_atlas_validates_and_coalesces_per_page() {
+        let _native_queue_guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+
+        assert!(!push_native_map_render_atlas(
+            "map:bad".to_owned(),
+            2,
+            1,
+            vec![0; 7],
+        ));
+        assert!(push_native_map_render_atlas(
+            "map:page-0".to_owned(),
+            1,
+            1,
+            vec![1; 4],
+        ));
+        assert!(push_native_map_render_atlas(
+            "map:page-0".to_owned(),
+            1,
+            1,
+            vec![2; 4],
+        ));
+        assert!(push_native_map_render_atlas(
+            "map:page-1".to_owned(),
+            1,
+            1,
+            vec![3; 4],
+        ));
+
+        let state = inbound
+            .buffer
+            .lock()
+            .expect("native inbound mutex should not be poisoned");
+        assert_eq!(state.pending.len(), 2);
+        assert!(state.pending.iter().any(|message| matches!(
+            message,
+            NativeInboundMessage::MapRenderAtlas { key, pixels, .. }
+                if key == "map:page-0" && pixels == &[2; 4]
+        )));
+        assert!(state.pending.iter().any(|message| matches!(
+            message,
+            NativeInboundMessage::MapRenderAtlas { key, pixels, .. }
+                if key == "map:page-1" && pixels == &[3; 4]
+        )));
     }
 
     #[test]
