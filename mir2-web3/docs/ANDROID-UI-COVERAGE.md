@@ -14,7 +14,16 @@ UI/input follows that playable flow; offline polish and memory diagnosis must
 not displace it. Physical-device purchase/testing is deferred, not a blocker
 to implementing the client. Approved live Gateway still required for live claims.
 
-2026-09-10 local tile build: `build-local-map-atlas.mjs` reuses the existing Web
+2026-09-10 keyed-map generation: recovered the exact handoff generator via the
+GitHub connector (blob matches local tree), executed an unmodified target-only
+mirror with full-pack network fallback disabled. Map0 parses as700x700; 4703
+entries emitted and verified byte-identical to local PNGs. Whole-map references
+7672 include2969 missing sources (existing generator budget, NOT completeness).
+A conservative offline65x111 region around302,634 has565 references/6 missing.
+No new runtime code/APK/render-ready. Evidence and exact six keys:
+`generated/player-qa/native-android-keyed-map-20260910/README.md`.
+
+Earlier 2026-09-10 local tile build: `build-local-map-atlas.mjs` reuses the existing Web
 shelf packer and writes only a fresh external output root. Generated 49 pages
 from 2111 exported raw-upload tile frames across 10 libraries (14785921 bytes).
 All output PNGs decode; hash-name prefixes, dimensions and rect bounds pass.
