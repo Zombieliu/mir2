@@ -14,7 +14,16 @@ UI/input follows that playable flow; offline polish and memory diagnosis must
 not displace it. Physical-device purchase/testing is deferred, not a blocker
 to implementing the client. Approved live Gateway still required for live claims.
 
-2026-09-10 resource follow-up located existing starter entity atlas pages and
+2026-09-10 local tile build: `build-local-map-atlas.mjs` reuses the existing Web
+shelf packer and writes only a fresh external output root. Generated 49 pages
+from 2111 exported raw-upload tile frames across 10 libraries (14785921 bytes).
+All output PNGs decode; hash-name prefixes, dimensions and rect bounds pass.
+Existing-output rejection passes; packer tests5 pass/1 absent-standard-manifest
+skip. Outputs remain under Android target/local-world-20260910, outside Git.
+Keyed objects, complete Bichon coverage, Android staging/rendering still open.
+Evidence: `generated/player-qa/native-android-local-map-atlas-20260910/README.md`.
+
+Earlier 2026-09-10 resource follow-up located existing starter entity atlas pages and
 Bichon raw map in the original checkout (read-only). The new Android
 `audit-world-assets.mjs` verifies 7 PNG page hashes/sizes/headers, 9650 rectangle
 bounds and `0.map.gz` decompression. UI-only input fails as expected. This is
