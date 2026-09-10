@@ -24,6 +24,7 @@ public class GatewaySessionTest {
     private OkHttpClient client;
     private final BlockingQueue<GatewaySession.View> views = new LinkedBlockingQueue<>();
     private final BlockingQueue<JSONObject> commands = new LinkedBlockingQueue<>();
+    private final BlockingQueue<String> receipts = new LinkedBlockingQueue<>();
     private volatile WebSocket peer;
 
     @Before public void setUp() throws Exception {
@@ -35,7 +36,7 @@ public class GatewaySessionTest {
         server.useHttps(serverTls.sslSocketFactory(), false);
         client = new OkHttpClient.Builder().sslSocketFactory(clientTls.sslSocketFactory(), clientTls.trustManager())
                 .connectTimeout(2, TimeUnit.SECONDS).build();
-        session = new GatewaySession(client, views::add);
+        session = new GatewaySession(client, views::add, receipts::add);
         server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
             @Override public void onOpen(WebSocket socket, Response response) { peer = socket; }
             @Override public void onMessage(WebSocket socket, String text) {
@@ -149,7 +150,7 @@ public class GatewaySessionTest {
         client.dispatcher().executorService().shutdownNow();
         client.connectionPool().evictAll();
         client = new OkHttpClient.Builder().connectTimeout(2, TimeUnit.SECONDS).build();
-        session = new GatewaySession(client, views::add);
+        session = new GatewaySession(client, views::add, receipts::add);
         views.clear();
         session.connect(server.url("/ws").toString().replace("https://", "wss://"));
         phase(GatewaySession.Phase.CONNECTING);
@@ -221,5 +222,15 @@ public class GatewaySessionTest {
         JSONObject command = commands.poll(3, TimeUnit.SECONDS);
         assertEquals("attack", command.getString("type"));
         assertEquals(99, command.getInt("objectId"));
+    }
+
+    @Test public void forwardsOnlyBoundedAuthoritativeTransactionReceipts() throws Exception {
+        connect();
+        peer.send("{\"type\":\"packet\",\"packet\":\"StoreItemV2\",\"payload\":{\"requestId\":\"st-1\",\"from\":3,\"to\":9,\"success\":true}}");
+        assertEquals("StoreItemV2", new JSONObject(receipts.poll(3, TimeUnit.SECONDS)).getString("packet"));
+        peer.send("{\"type\":\"gameShopReceipt\",\"protocol\":\"nativeGameShopReceiptV1\",\"requestId\":\"gs-1\",\"success\":true,\"gIndex\":31,\"quantity\":1,\"priceType\":1}");
+        assertEquals("gameShopReceipt", new JSONObject(receipts.poll(3, TimeUnit.SECONDS)).getString("type"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"ObjectChat\",\"payload\":{\"text\":\"not a receipt\"}}");
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
     }
 }

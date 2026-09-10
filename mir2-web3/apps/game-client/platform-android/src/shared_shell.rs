@@ -428,6 +428,30 @@ fn player_editor_bottom(field: Option<&str>, scale: f32) -> f32 {
     }
 }
 
+fn enqueue_gateway_receipt(
+    inbound: &mut crate::gateway_bridge::AndroidGatewayInboundQueue,
+    raw: &str,
+) -> bool {
+    let Ok(envelope) = serde_json::from_str::<Value>(raw) else {
+        return false;
+    };
+    match (
+        envelope.get("type").and_then(Value::as_str),
+        envelope.get("packet").and_then(Value::as_str),
+    ) {
+        (Some("gameShopReceipt"), _) => {
+            crate::gateway_bridge::enqueue_native_game_shop_receipt(inbound, raw).is_ok()
+        }
+        (Some("packet"), Some("StoreItemV2" | "TakeBackItemV2")) => {
+            crate::gateway_bridge::enqueue_native_storage_receipt(inbound, raw).is_ok()
+        }
+        (Some("packet"), Some("ChangePassword" | "ChangePasswordBanned")) => {
+            crate::gateway_bridge::enqueue_native_change_password_result(inbound, raw).is_ok()
+        }
+        _ => false,
+    }
+}
+
 fn receive(
     mut model: ResMut<NativeShellModel>,
     mut host: ResMut<HostState>,
@@ -438,6 +462,7 @@ fn receive(
     windows: Query<Entity, With<Window>>,
     mut forms: crate::form_input::FormInput,
     mut lifecycle_messages: Option<ResMut<Messages<crate::android_input::AndroidLifecycleMessage>>>,
+    mut gateway_inbound: Option<ResMut<crate::gateway_bridge::AndroidGatewayInboundQueue>>,
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
     #[cfg(target_os = "android")]
@@ -491,6 +516,14 @@ fn receive(
         .drain(..)
         .collect();
     for value in values {
+        if value["type"] == "gatewayReceipt" {
+            if let (Some(inbound), Some(raw)) =
+                (gateway_inbound.as_deref_mut(), value["envelope"].as_str())
+            {
+                let _ = enqueue_gateway_receipt(inbound, raw);
+            }
+            continue;
+        }
         if value["type"] == "lifecycle" {
             let event = match value["state"].as_str() {
                 Some("resume") => Some(crate::android_input::AndroidLifecycleEvent::Resume),
@@ -1051,6 +1084,25 @@ fn keyboard(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn gateway_receipt_bridge_accepts_only_supported_authoritative_results() {
+        let mut inbound = crate::gateway_bridge::AndroidGatewayInboundQueue::default();
+        for raw in [
+            r#"{"type":"gameShopReceipt","protocol":"nativeGameShopReceiptV1","requestId":"gs-1","success":true,"gIndex":31,"quantity":1,"priceType":1}"#,
+            r#"{"type":"packet","packet":"StoreItemV2","payload":{"requestId":"st-1","from":3,"to":9,"success":true}}"#,
+            r#"{"type":"packet","packet":"ChangePassword","payload":{"result":6}}"#,
+        ] {
+            assert!(super::enqueue_gateway_receipt(&mut inbound, raw));
+        }
+        assert_eq!(inbound.status().len, 3);
+        assert!(!super::enqueue_gateway_receipt(
+            &mut inbound,
+            r#"{"type":"packet","packet":"ObjectChat","payload":{}}"#,
+        ));
+        assert!(!super::enqueue_gateway_receipt(&mut inbound, "not-json"));
+        assert_eq!(inbound.status().len, 3);
+    }
+
     #[test]
     fn render_receipt_accepts_an_authoritative_camera_center_away_from_player_tile() {
         use mir2_bevy_runtime::native_render_receipt::NativeRenderReady;

@@ -65,6 +65,7 @@ final class GatewaySession implements AutoCloseable {
 
     private final OkHttpClient client;
     private final Consumer<View> observer;
+    private final Consumer<String> receiptObserver;
     private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> deadline;
     private ScheduledFuture<?> heartbeat;
@@ -80,8 +81,13 @@ final class GatewaySession implements AutoCloseable {
     private boolean closed;
 
     GatewaySession(OkHttpClient client, Consumer<View> observer) {
+        this(client, observer, ignored -> {});
+    }
+
+    GatewaySession(OkHttpClient client, Consumer<View> observer, Consumer<String> receiptObserver) {
         this.client = client;
         this.observer = observer;
+        this.receiptObserver = receiptObserver;
     }
 
     static HttpUrl endpoint(String input) {
@@ -182,6 +188,10 @@ final class GatewaySession implements AutoCloseable {
     private void receive(JSONObject envelope) throws JSONException {
         String type = envelope.getString("type");
         if (type.equals("error")) { disconnect("Gateway rejected request; reconnect and log in again"); return; }
+        if (type.equals("gameShopReceipt")) {
+            forwardReceipt(envelope);
+            return;
+        }
         if (type.equals("worldSnapshot")) {
             if (!worldPending()) return;
             JSONObject world = envelope.getJSONObject("payload");
@@ -207,6 +217,10 @@ final class GatewaySession implements AutoCloseable {
         }
         if (!type.equals("packet")) return;
         String packet = envelope.getString("packet");
+        if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
+                || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
+            forwardReceipt(envelope);
+        }
         JSONObject payload = envelope.optJSONObject("payload");
         if (payload == null) payload = new JSONObject();
         switch (packet) {
@@ -288,6 +302,14 @@ final class GatewaySession implements AutoCloseable {
                 break;
             default: break;
         }
+    }
+
+    private void forwardReceipt(JSONObject envelope) {
+        String raw = envelope.toString();
+        if (raw.getBytes(StandardCharsets.UTF_8).length > 16 * 1024) {
+            throw new IllegalArgumentException("receipt size limit");
+        }
+        receiptObserver.accept(raw);
     }
 
     private boolean worldPending() { return phase == Phase.STARTING || phase == Phase.IN_GAME; }
