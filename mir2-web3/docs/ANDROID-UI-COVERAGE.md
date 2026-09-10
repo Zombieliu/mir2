@@ -14,7 +14,17 @@ UI/input follows that playable flow; offline polish and memory diagnosis must
 not displace it. Physical-device purchase/testing is deferred, not a blocker
 to implementing the client. Approved live Gateway still required for live claims.
 
-2026-09-10 local `ced102ba9` feeds shared MapModel/EntityModelSet ingress from
+2026-09-10 resource follow-up located existing starter entity atlas pages and
+Bichon raw map in the original checkout (read-only). The new Android
+`audit-world-assets.mjs` verifies 7 PNG page hashes/sizes/headers, 9650 rectangle
+bounds and `0.map.gz` decompression. UI-only input fails as expected. This is
+local integrity, not resource release provenance or Android render acceptance.
+Derived map-atlas/keyed manifests remain absent. Current-branch Windows assets.rs
+was not cached and its automatic promisor fetch timed out; the older original
+checkout resolver was inspected only as a discovery hint, not substituted.
+Evidence: `generated/player-qa/native-android-local-assets-20260910/README.md`.
+
+Earlier 2026-09-10 local `ced102ba9` feeds shared MapModel/EntityModelSet ingress from
 the same validated snapshot. Shared serde validates terrain/entities; map center
 uses server sceneView or authoritative self position when the viewport is absent.
 Android94/preview97/API31 target check pass. No placeholder render plugins are
