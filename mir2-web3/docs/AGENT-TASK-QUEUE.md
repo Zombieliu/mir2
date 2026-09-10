@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `e66595d34`: the live TLS `GatewaySession` now returns
+> bounded authoritative GameShop, Storage V2, and password results to their
+> existing exact-request shared reducer adapters; unrelated packets are
+> excluded from this transaction path. Android 111/111, Java TLS 10/10,
+> arm64 API31 and normal APK package gates pass. APK SHA-256 is
+> `412fe084900bdb88ca05555e0f98a9f026033e5ee5642c76c3f8f046c7c85a90`.
+> Next Android code leaf is ordinary authoritative gameplay packet projection
+> for movement/combat/entities/inventory/NPC/chat/map updates. Approved live
+> login and physical-device gates remain open. Evidence:
+> `docs/generated/player-qa/native-android-transaction-receipts-20260911/README.md`.
+
 > 2026-09-11 Android `f1ee2148c`: the bounded shared gameplay-command queue
 > now drains through JNI only onto the current authenticated `IN_GAME` WSS
 > session, with exact lease reporting and fail-closed lifecycle/generation

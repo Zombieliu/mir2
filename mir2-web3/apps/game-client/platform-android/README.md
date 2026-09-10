@@ -126,20 +126,23 @@ instead of silently dropping it. Session-bootstrap/auth commands remain on
 the dedicated login state machine; the gameplay writer rejects them,
 including `passkeyLogin`.
 
-Inbound `gameShopReceipt` text now has a separate bounded
-`AndroidGatewayInboundQueue`. `AndroidShellPlugin` registers that resource and
-drains it on the real Bevy `Update` chain, applying an exact receipt to both
+Inbound `gameShopReceipt`, Storage V2 and password-result text now enters a
+separate bounded `AndroidGatewayInboundQueue` from the live
+`GatewaySession`. Java forwards only those recognized authoritative result
+shapes, with a 16 KiB UTF-8 limit; the Bevy update thread classifies them
+again before using the existing exact-request adapters. Unrelated gameplay
+packets do not enter this transaction queue. `AndroidShellPlugin` registers
+that resource and drains it on the real Bevy `Update` chain, applying an exact receipt to both
 `UiState` and outbound correlation state atomically. The public enqueue API is
-only a transport/JNI host handoff; it is not a WebSocket implementation.
-`enqueue_native_game_shop_receipt` is the sole public raw inbound mutation
-entrypoint and always passes through the fixed default queue limits and frozen
-qualification step. Raw message construction, custom queue limits, raw
-enqueue, drain, pending binding, the eligibility bit, and queued-message
-consumption are private to the `gateway_bridge` module—not merely
-`pub(crate)`. The Bevy system can only invoke an owner-level crate-private drain
-function with the bounded queue, `UiState`, and outbound model; it cannot see or
-construct messages or eligibility. The public receipt parser is a pure
-validator and cannot mutate or release a transaction.
+only a transport/JNI host handoff; it does not own the WebSocket. The three
+public raw inbound transaction entrypoints always pass through the fixed
+default queue limits and frozen qualification step. Raw message construction,
+custom queue limits, raw enqueue, drain, pending binding, the eligibility bit,
+and queued-message consumption are private to the `gateway_bridge` module—not
+merely `pub(crate)`. The Bevy system can only invoke an owner-level
+crate-private drain function with the bounded queue, `UiState`, and outbound
+model; it cannot see or construct messages or eligibility. The public receipt
+parsers are pure validators and cannot mutate or release a transaction.
 Each inbound JSON message is limited to 16 KiB and the queue has a 128 KiB
 total byte budget in addition to its 32-entry limit. Every inbound variant is
 charged by its UTF-8 byte length; oversize messages and byte/count overflow are
@@ -161,11 +164,11 @@ command. Non-gateway effects (`ApplyAudioSettings`,
 window, persistence, notices, and exit effects) remain in `AndroidUiEffects`
 for platform-side handling.
 
-This closes the reducer-to-live-socket outbound adaptation only. Most ordinary
-server gameplay packets and the transaction receipt variants are not yet fed
-back into all shared reducers, and no approved live account has exercised the
-path. This crate must not yet be described as a complete online-playable
-Android client.
+This closes the reducer-to-live-socket outbound adaptation and the existing
+transaction-result return adapters only. Most ordinary server gameplay
+packets are not yet fed back into shared runtime models, and no approved live
+account has exercised the path. This crate must not yet be described as a
+complete online-playable Android client.
 
 ## Native M0 host
 

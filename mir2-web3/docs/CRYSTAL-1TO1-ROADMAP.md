@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `e66595d34`: authoritative GameShop, Storage V2, and
+> password-result envelopes now return from the live TLS socket into the
+> existing bounded exact-request reducer adapters. Java selects and bounds the
+> known result shapes; Bevy classifies them again, while unrelated packets are
+> excluded. Android 111/111, Java TLS 10/10, API31 and normal APK package gates
+> pass. Ordinary gameplay packet projection, approved WSS/account journey and
+> physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-transaction-receipts-20260911/README.md`.
+
 > 2026-09-11 Android `f1ee2148c`: existing shared gameplay commands now use
 > the Activity's authenticated `IN_GAME` WSS socket through a bounded JNI
 > lease/sequence bridge. Lifecycle and connection generation changes close

@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `e66595d34`: bounded authoritative GameShop, Storage V2,
+> and password results now travel from the live TLS socket to their existing
+> exact-request shared reducers; unrelated gameplay packets are not treated as
+> receipts. Android 111, Java TLS 10, API31 and normal APK package gates pass.
+> Ordinary movement/combat/entity/inventory/NPC/chat/map packet projection,
+> approved online journey, physical-device and human visual acceptance remain
+> open. Evidence:
+> `docs/generated/player-qa/native-android-transaction-receipts-20260911/README.md`.
+
 > 2026-09-11 Android `f1ee2148c`: the shared reducer's bounded gameplay
 > commands now cross JNI to the current authenticated `IN_GAME` WSS socket,
 > with exact lease acknowledgement and fail-closed background/disconnect
