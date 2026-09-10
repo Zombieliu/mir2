@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-10 Android local `af5acf6ad`: complete server snapshot Java/JNI
+> forwarding and shared runtime world/HUD ingress, with bounded messages and
+> session/map resets. Java TLS8/Android92/preview95 pass. Map/entity render
+> producers and bootstrap acceptance remain open; no live player-loop claim.
+> `docs/generated/player-qa/native-android-snapshot-ingress-20260910/README.md`.
+
 > 2026-09-09 Android priority correction: playable login→StartGame→map/player
 > loop first, physical-device acceptance deferred. First typed server-position
 > Java/JNI/Rust bridge passes Java8/Android88/preview91. It is partial host

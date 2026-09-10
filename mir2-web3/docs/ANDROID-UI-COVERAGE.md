@@ -14,7 +14,18 @@ UI/input follows that playable flow; offline polish and memory diagnosis must
 not displace it. Physical-device purchase/testing is deferred, not a blocker
 to implementing the client. Approved live Gateway still required for live claims.
 
-First host-data bridge increment carries immutable server player/map/x/y in
+2026-09-10 local source `af5acf6ad` now retains the complete immutable Gateway
+world snapshot through Java/JNI and forwards a wire-shape projection to shared
+runtime world/HUD ingress. StartGame/self identity gates remain; pending snapshots
+are not exposed before acceptance or replayed by later position packets. Host
+event sizes/queue memory are bounded, and session/map boundaries request shared
+data/scene resets. Nullable wire scalars use shared HUD defaults. Java TLS8,
+Android92 and preview95 pass. This is **ingress**, not verified runtime bootstrap:
+map/entity asset producers, render-ready acknowledgement, incremental gameplay
+packet routing and the playable loop remain open. No live Gateway or device
+acceptance. Evidence: `generated/player-qa/native-android-snapshot-ingress-20260910/README.md`.
+
+Earlier host-data bridge increment carries immutable server player/map/x/y in
 GatewaySession.View and JNI JSON, validating into Rust HostState rather than
 parsing a notice. Non-world phases clear it. Java TLS fixtures8/8, Android88/88,
 preview91/91 pass. Initial direct Gradle invocation lacked ANDROID_HOME; rerun
