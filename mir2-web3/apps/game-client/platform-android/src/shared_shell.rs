@@ -364,11 +364,12 @@ fn minimap_edge_origin(width: f32, dpi: f32, scale: f32, safe_right: f32, safe_t
 fn player_editor_bottom(field: Option<&str>, scale: f32) -> f32 {
     match field {
         Some("guild-notice") => {
-            // Shared notice text starts at panel +61, in 9px type. Reserve
-            // 12px per permitted line plus a gutter, not the bottom HUD row.
+            // Shared notice text starts at panel +61, in 9px type. Keep the
+            // eight visible editor rows above the IME; the server-side notice
+            // limit is deliberately larger and must not expand this viewport.
             mir2_client_bevy::crystal_ui::overlays::CRYSTAL_GUILD_PANEL_RECT.top
                 + 61.0
-                + mir2_client_bevy::social::MAX_NOTICE_LINES as f32 * 12.0
+                + 8.0 * 12.0
                 + 8.0
         }
         Some("inventory-amount" | "guild-amount" | "trade-amount") => {
@@ -1257,6 +1258,8 @@ mod tests {
             {"index":7,"name":"Fixture","level":12,"className":"Wizard","genderName":"Female"}]}));
         app.update();
         let mut model = app.world_mut().resource_mut::<NativeShellModel>();
+        assert_eq!(model.screen, Screen::OpeningLogin);
+        model.advance_login_opening(std::time::Duration::from_millis(1800));
         assert_eq!(model.screen, Screen::CharacterSelect);
         assert_eq!(model.characters[0].class_name, "Wizard");
         assert_eq!(model.selected_character_index, Some(7));

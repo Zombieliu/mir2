@@ -1,4 +1,5 @@
 mod additive_material;
+pub mod capture_context;
 pub mod entity_animation;
 mod entity_animation_bridge;
 mod interpolation;
@@ -189,7 +190,10 @@ impl Plugin for Mir2NativeSessionBoundaryPlugin {
             .init_resource::<mir2_client_bevy::shop::ShopModel>()
             .init_resource::<mir2_client_bevy::game_shop::GameShopModel>()
             .init_resource::<mir2_client_bevy::storage::StorageModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
             .init_resource::<mir2_client_bevy::skill_model::SkillModel>()
+            .init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>()
             .init_resource::<mir2_client_bevy::social::SocialModel>()
             .init_resource::<PendingOperations>()
             .init_resource::<InventoryOperationFeedback>()
@@ -561,6 +565,8 @@ struct MirLightingComposite;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct WorldSnapshot {
+    #[serde(default)]
+    pub(crate) map_file_name: Option<String>,
     #[serde(default)]
     pub(crate) map_title: Option<String>,
     #[serde(default)]
@@ -1358,6 +1364,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(RuntimeMapRenderAtlases::default())
         .insert_resource(RuntimeEffectRenderState::default())
         .insert_resource(RuntimeLightingRenderState::default())
+        .init_resource::<capture_context::RenderedCaptureContext>()
         .insert_resource(RuntimeLightingSceneResetTracker::default())
         .insert_resource(RuntimeMapCameraOffset::default())
         .insert_resource(SceneRegistry::default())
@@ -1374,7 +1381,10 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(mir2_client_bevy::shop::ShopModel::default())
         .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
         .insert_resource(mir2_client_bevy::storage::StorageModel::default())
+        .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+        .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
         .insert_resource(mir2_client_bevy::skill_model::SkillModel::default())
+        .init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>()
         .insert_resource(mir2_client_bevy::social::SocialModel::default())
         .insert_resource(PendingOperations::default())
         .insert_resource(InventoryOperationFeedback::default())
@@ -1484,7 +1494,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 ingest_pending_storage_patch,
                 ingest_pending_storage_items,
                 ingest_pending_storage_model,
-                ingest_pending_skill_model,
+                (ingest_pending_hero_model, ingest_pending_skill_model).chain(),
                 ingest_pending_social_model,
                 ingest_pending_chat_line,
             )
@@ -1511,6 +1521,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 .chain()
                 .in_set(RuntimePresentationSet),
         );
+    app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(
         Update,
@@ -2038,15 +2049,24 @@ fn apply_session_reset_to_runtime_models(
     mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
     mut game_shop: ResMut<mir2_client_bevy::game_shop::GameShopModel>,
     mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
-    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+    skill_state: (
+        ResMut<mir2_client_bevy::skill_model::SkillModel>,
+        Option<ResMut<mir2_client_bevy::skill_model::SkillModelReceipts>>,
+        Option<ResMut<mir2_client_bevy::hero_model::HeroModel>>,
+        Option<ResMut<mir2_client_bevy::hero_model::HeroModelReceipts>>,
+    ),
     mut social: ResMut<mir2_client_bevy::social::SocialModel>,
     mut inventory_feedback: ResMut<InventoryOperationFeedback>,
     mut preservation: ResMut<SessionResetGameShopPreservation>,
 ) {
+    let (mut skills, mut receipts, mut hero, mut hero_receipts) = skill_state;
     if tracker.0 == reset.0 {
         return;
     }
     tracker.0 = reset.0;
+    if let Some(receipts) = receipts.as_deref_mut() {
+        receipts.0.clear();
+    }
     *ui = mir2_client_bevy::read_model::UiReadModel::default();
     surface_signals.npc_shop_open_requested = false;
     *map = mir2_client_bevy::map::MapModel::default();
@@ -2064,6 +2084,12 @@ fn apply_session_reset_to_runtime_models(
     }
     *storage = mir2_client_bevy::storage::StorageModel::default();
     *skills = mir2_client_bevy::skill_model::SkillModel::default();
+    if let Some(hero) = hero.as_deref_mut() {
+        *hero = Default::default();
+    }
+    if let Some(receipts) = hero_receipts.as_deref_mut() {
+        receipts.0.clear();
+    }
     social.clear_session();
     inventory_feedback.last = None;
 }
@@ -2537,16 +2563,61 @@ fn ingest_pending_storage_model(
     );
 }
 
-fn ingest_pending_skill_model(
-    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+fn ingest_pending_hero_model(
+    mut hero: ResMut<mir2_client_bevy::hero_model::HeroModel>,
+    mut receipts: ResMut<mir2_client_bevy::hero_model::HeroModelReceipts>,
     native: Res<native_ingest::NativeInbound>,
 ) {
     native.drain_matching(
-        |message| matches!(message, native_ingest::NativeInboundMessage::SkillModel(_)),
         |message| {
-            if let native_ingest::NativeInboundMessage::SkillModel(json) = message {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::HeroModel(_)
+                    | native_ingest::NativeInboundMessage::HeroModelReceipt(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::HeroModel(json)
+            | native_ingest::NativeInboundMessage::HeroModelReceipt(json) = message
+            {
+                match serde_json::from_str::<mir2_client_bevy::hero_model::HeroModel>(&json) {
+                    Ok(model) => {
+                        if model.skill_key_ack.is_some() {
+                            receipts.0.push_back(model.clone());
+                        }
+                        *hero = model;
+                    }
+                    Err(error) => eprintln!("[runtime] hero model decode error: {error}"),
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_skill_model(
+    mut skills: ResMut<mir2_client_bevy::skill_model::SkillModel>,
+    native: Res<native_ingest::NativeInbound>,
+    mut receipts: Option<ResMut<mir2_client_bevy::skill_model::SkillModelReceipts>>,
+) {
+    native.drain_matching(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::SkillModel(_)
+                    | native_ingest::NativeInboundMessage::SkillModelReceipt(_)
+            )
+        },
+        |message| {
+            if let native_ingest::NativeInboundMessage::SkillModel(json)
+            | native_ingest::NativeInboundMessage::SkillModelReceipt(json) = message
+            {
                 match serde_json::from_str::<mir2_client_bevy::skill_model::SkillModel>(&json) {
                     Ok(model) => {
+                        if model.skill_key_ack.is_some() {
+                            if let Some(receipts) = receipts.as_deref_mut() {
+                                receipts.0.push_back(model.clone());
+                            }
+                        }
                         *skills = model;
                     }
                     Err(error) => {
@@ -7927,6 +7998,7 @@ mod effect_mask_shadow_tests {
         app.world_mut()
             .resource_mut::<RuntimeLightingRenderState>()
             .snapshot = Some(lighting::LightingRenderState {
+            map_file_name: None,
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
@@ -8056,6 +8128,7 @@ mod effect_mask_shadow_tests {
     fn sync_lighting_stage_resize_rebuilds_without_leaking_old_targets() {
         let mut app = sync_test_app();
         let state = |width, height| lighting::LightingRenderState {
+            map_file_name: None,
             enabled: true,
             stage_width: width,
             stage_height: height,
@@ -8143,6 +8216,8 @@ mod native_data_path_tests {
             .insert_resource(mir2_client_bevy::shop::ShopModel::default())
             .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
             .insert_resource(mir2_client_bevy::storage::StorageModel::default())
+            .init_resource::<mir2_client_bevy::hero_model::HeroModel>()
+            .init_resource::<mir2_client_bevy::hero_model::HeroModelReceipts>()
             .insert_resource(mir2_client_bevy::skill_model::SkillModel::default())
             .insert_resource(mir2_client_bevy::social::SocialModel::default())
             .insert_resource(PendingOperations::default())
@@ -8202,6 +8277,28 @@ mod native_data_path_tests {
                     .after(ingest_pending_inventory_model),
             );
         app
+    }
+
+    #[test]
+    fn skill_ingest_keeps_full_receipt_when_newer_model_arrives_in_same_frame() {
+        let _guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.init_resource::<mir2_client_bevy::skill_model::SkillModelReceipts>();
+        assert!(native_ingest::push_native_skill_model(r#"{"authority":{"sessionEpoch":7,"snapshotSerial":9,"playerObjectId":3},"skillKeyAck":{"requestId":73,"spell":"FireBall","key":16,"oldKey":0,"accepted":true},"skills":[{"id":1,"name":"Fire Ball","hotkey":16}]}"#.into()));
+        assert!(native_ingest::push_native_skill_model(r#"{"authority":{"sessionEpoch":7,"snapshotSerial":10,"playerObjectId":3},"skills":[{"id":1,"name":"Fire Ball","hotkey":3}]}"#.into()));
+        app.update();
+        let latest = app
+            .world()
+            .resource::<mir2_client_bevy::skill_model::SkillModel>();
+        assert_eq!(latest.bindings[0].hotkey, Some(3));
+        assert!(latest.skill_key_ack.is_none());
+        let receipts = app
+            .world()
+            .resource::<mir2_client_bevy::skill_model::SkillModelReceipts>();
+        assert_eq!(receipts.0.len(), 1);
+        assert_eq!(receipts.0[0].bindings[0].hotkey, Some(16));
+        assert_eq!(receipts.0[0].authority.snapshot_serial, 9);
+        assert_eq!(receipts.0[0].skill_key_ack.as_ref().unwrap().request_id, 73);
     }
 
     #[test]

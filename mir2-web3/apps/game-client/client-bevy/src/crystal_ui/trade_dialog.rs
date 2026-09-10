@@ -1,8 +1,11 @@
 //! Crystal TradeDialogs.cs: two independent 204x152 windows and 2*x+y slots.
-//! Rendering / client-local controls only. Offers and wallet values stay in the
-//! server read models; a local lock indication is not a settlement receipt.
+//! Native controls send validated trade requests. Offers and wallet values stay
+//! in server read models; selection and local locks are not settlement receipts.
 use super::super::amount_input::CrystalAmountInput;
 use super::*;
+#[path = "trade_item_input.rs"]
+mod items;
+pub(super) use items::{draw_selection, process_items};
 
 pub(super) const OWN_RECT: CrystalRect = CrystalRect::new(298.0, 418.0, 204.0, 152.0);
 pub(super) const GUEST_RECT: CrystalRect = CrystalRect::new(522.0, 418.0, 204.0, 152.0);
@@ -43,8 +46,24 @@ pub struct TradeGoldPrompt {
     pub open_revision: u64,
     pub input: CrystalAmountInput,
 }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TradeMessage {
+    Invitation { partner: String, revision: u64 },
+    Cancelled { revision: u64 },
+}
+impl TradeMessage {
+    pub fn revision(&self) -> u64 {
+        match self {
+            Self::Invitation { revision, .. } | Self::Cancelled { revision } => *revision,
+        }
+    }
+}
 #[derive(Debug, Clone, PartialEq)]
 pub struct TradeDialogUi {
+    pub input_consumed: bool,
+    pub message: Option<TradeMessage>,
+    seen_invite_revision: u64,
+    seen_cancel_revision: u64,
     pub open: bool,
     pub positions: [Vec2; 2],
     pub front: TradeSide,
@@ -58,10 +77,15 @@ pub struct TradeDialogUi {
     closed_locally: bool,
     drag: Option<(TradeSide, Vec2)>,
     last_cursor: Option<Vec2>,
+    item_input: items::TradeItemInput,
 }
 impl Default for TradeDialogUi {
     fn default() -> Self {
         Self {
+            input_consumed: false,
+            message: None,
+            seen_invite_revision: 0,
+            seen_cancel_revision: 0,
             open: false,
             positions: [
                 Vec2::new(OWN_RECT.left, OWN_RECT.top),
@@ -78,6 +102,7 @@ impl Default for TradeDialogUi {
             closed_locally: false,
             drag: None,
             last_cursor: None,
+            item_input: Default::default(),
         }
     }
 }
@@ -87,13 +112,35 @@ impl TradeDialogUi {
     }
     pub fn hide(&mut self) {
         self.open = false;
+        self.item_input = Default::default();
         self.gold_prompt = None;
         self.drag = None;
         self.closed_locally = true;
         self.last_cursor = None;
     }
     pub(super) fn observe(&mut self, model: &crate::social::SocialModel) -> bool {
+        self.input_consumed = false;
         let trade = &model.trade;
+        if trade.state == "requested" && trade.invite_revision != self.seen_invite_revision {
+            self.message = trade
+                .partner
+                .clone()
+                .map(|partner| TradeMessage::Invitation {
+                    partner,
+                    revision: trade.invite_revision,
+                });
+        } else if trade.cancel_revision != 0 && trade.cancel_revision != self.seen_cancel_revision {
+            self.message = Some(TradeMessage::Cancelled {
+                revision: trade.cancel_revision,
+            });
+        } else if matches!(&self.message, Some(TradeMessage::Invitation { partner, revision })
+            if trade.state != "requested" || trade.partner.as_ref() != Some(partner) || trade.invite_revision != *revision)
+            || trade.state == "open"
+        {
+            self.message = None;
+        }
+        self.seen_invite_revision = trade.invite_revision;
+        self.seen_cancel_revision = trade.cancel_revision;
         let open = trade.state == "open" && trade.partner.is_some();
         let changed = self.seen_revision != Some(trade.event_revision);
         let unlocked =
@@ -115,6 +162,9 @@ impl TradeDialogUi {
         self.seen_unlock_revision = Some(trade.unlock_revision);
         self.seen_partner = trade.partner.clone();
         self.observed_open = open;
+        if !open || fresh_exchange {
+            self.item_input = Default::default();
+        }
         if !open {
             self.open = false;
             self.gold_prompt = None;
@@ -195,6 +245,113 @@ impl TradeDialogUi {
             self.positions[side.index()] = Vec2::new(p.x.clamp(0.0, 820.0), p.y.clamp(0.0, 616.0));
         }
     }
+}
+
+/// Dispose the original message box on either answer, but open trade windows
+/// only on S.TradeAccept. Rendered controls carry their invitation identity so
+/// an old click cannot reply to a replacement invitation.
+pub(super) fn answer_message(
+    state: &mut NativePlayerUiState,
+    model: &crate::social::SocialModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    revision: u64,
+    accept: bool,
+) -> bool {
+    let Some(message) = state.trade_dialog.message.as_ref() else {
+        return false;
+    };
+    if message.revision() != revision {
+        return false;
+    }
+    if let TradeMessage::Invitation { partner, .. } = message {
+        if model.trade.state != "requested"
+            || model.trade.invite_revision != revision
+            || model.trade.partner.as_ref() != Some(partner)
+        {
+            return false;
+        }
+        intents.push_transient_unique(NativePlayerUiIntent::TradeReply {
+            accept_invite: accept,
+        });
+    }
+    state.trade_dialog.message = None;
+    state.trade_dialog.input_consumed = true;
+    true
+}
+
+pub(super) fn render_message(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    message: &TradeMessage,
+) {
+    // MirMessageBox.cs: Prguse/360, centered 456x190 at 1024x768.
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(284.0),
+                top: Val::Px(289.0),
+                width: Val::Px(456.0),
+                height: Val::Px(190.0),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|dialog| {
+            let revision = message.revision();
+            if let Some(assets) = asset_server {
+                spawn_overlay_frame(dialog, assets, "original-ui/Prguse/360.png", 456.0, 190.0);
+                match message {
+                    TradeMessage::Invitation { .. } => {
+                        spawn_overlay_crystal_button(
+                            dialog,
+                            assets,
+                            "Title",
+                            206,
+                            207,
+                            208,
+                            CrystalRect::new(260.0, 157.0, 76.0, 25.0),
+                            OverlayButton::TradeAccept(revision),
+                        );
+                        spawn_overlay_crystal_button(
+                            dialog,
+                            assets,
+                            "Title",
+                            210,
+                            211,
+                            212,
+                            CrystalRect::new(360.0, 157.0, 76.0, 25.0),
+                            OverlayButton::TradeDecline(revision),
+                        );
+                    }
+                    TradeMessage::Cancelled { .. } => spawn_overlay_crystal_button(
+                        dialog,
+                        assets,
+                        "Title",
+                        200,
+                        201,
+                        202,
+                        CrystalRect::new(360.0, 157.0, 76.0, 25.0),
+                        OverlayButton::TradeMessageClose(revision),
+                    ),
+                }
+            }
+            let text = match message {
+                TradeMessage::Invitation { partner, .. } => {
+                    format!("Player {partner} has requested to trade with you.")
+                }
+                TradeMessage::Cancelled { .. } => {
+                    "Deal cancelled.\nTo deal correctly you must face the other party.".into()
+                }
+            };
+            overlay_text_at(
+                dialog,
+                &text,
+                CrystalRect::new(35.0, 35.0, 390.0, 110.0),
+                10.0,
+                TEXT,
+            );
+        });
 }
 
 #[derive(Component)]
@@ -348,9 +505,17 @@ pub(super) fn toggle_lock(
         || model.trade.state != "open"
         || model.trade.partner.is_none()
         || state.amount_modal_open()
+        || model.pending.iter().any(|p| {
+            matches!(
+                p,
+                crate::social::SocialPendingOperation::TradeDeposit { .. }
+                    | crate::social::SocialPendingOperation::TradeRetrieve { .. }
+            )
+        })
     {
         return false;
     }
+    state.trade_dialog.item_input = Default::default();
     let locked = !state.trade_dialog.locked(&model.trade);
     if !intents.push_transient_unique(NativePlayerUiIntent::TradeConfirm { locked }) {
         return false;
@@ -498,6 +663,17 @@ pub(super) fn render(
                     152.0,
                 );
                 let own = side == TradeSide::Own;
+                if own {
+                    if let Some(notice) = state.trade_dialog.item_input.notice {
+                        overlay_text_at(
+                            window,
+                            notice,
+                            CrystalRect::new(8.0, 105.0, 190.0, 12.0),
+                            9.0,
+                            TEXT,
+                        );
+                    }
+                }
                 label(
                     window,
                     if own { OWN_NAME } else { GUEST_NAME },
@@ -580,7 +756,24 @@ pub(super) fn render(
                         items.get(slot).and_then(Option::as_ref),
                         player,
                     );
+                    if own {
+                        draw_selection(window, state, false, slot, cell_rect(slot).unwrap());
+                    }
                 }
             });
     }
+}
+
+/// The current backend reserves an offered item in its original bag slot.
+/// Hide only confirmed own offers in presentation; never mutate InventoryModel.
+pub(super) fn offered_bag_item(social: &crate::social::SocialModel, item: &ItemModel) -> bool {
+    social.trade.state == "open"
+        && item.container == 0
+        && item.unique_id.is_some()
+        && social
+            .trade
+            .my_items
+            .iter()
+            .flatten()
+            .any(|offer| offer.unique_id == item.unique_id)
 }

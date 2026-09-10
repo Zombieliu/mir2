@@ -2966,6 +2966,7 @@ dependencies = [
  "mir2-ui-core",
  "serde",
  "serde_json",
+ "unicode-segmentation",
  "unicode-width",
 ]
 

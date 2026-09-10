@@ -129,6 +129,14 @@ struct PersistedOptions {
     skill_mode: bool,
     #[serde(default = "default_true")]
     skill_bar: bool,
+    #[serde(default = "mir2_ui_core::state::default_skill_bar_positions")]
+    skill_bar_positions: [[i32; 2]; 2],
+    #[serde(default)]
+    dura_view: bool,
+    #[serde(default = "default_true")]
+    expanded_buff_window: bool,
+    #[serde(default = "default_true")]
+    expanded_hero_buff_window: bool,
     #[serde(default = "default_true")]
     effect: bool,
     #[serde(default = "default_true")]
@@ -158,6 +166,11 @@ impl From<&UiOptions> for PersistedOptions {
             version: OPTIONS_SCHEMA_VERSION,
             skill_mode: options.skill_mode,
             skill_bar: options.skill_bar,
+            skill_bar_positions: options.skill_bar_positions,
+            dura_view: options.dura_view,
+            expanded_buff_window: options.expanded_buff_window,
+            // Crystal Settings.Save writes the player value under the Hero key.
+            expanded_hero_buff_window: options.expanded_buff_window,
             effect: options.effect,
             drop_view: options.drop_view,
             name_view: options.name_view,
@@ -190,6 +203,10 @@ impl TryFrom<PersistedOptions> for UiOptions {
         Ok(UiOptions {
             skill_mode: value.skill_mode,
             skill_bar: value.skill_bar,
+            skill_bar_positions: value.skill_bar_positions,
+            dura_view: value.dura_view,
+            expanded_buff_window: value.expanded_buff_window,
+            expanded_hero_buff_window: value.expanded_hero_buff_window,
             effect: value.effect,
             drop_view: value.drop_view,
             name_view: value.name_view,
@@ -485,6 +502,10 @@ mod tests {
         UiOptions {
             skill_mode: true,
             skill_bar: false,
+            skill_bar_positions: mir2_ui_core::state::default_skill_bar_positions(),
+            dura_view: false,
+            expanded_buff_window: true,
+            expanded_hero_buff_window: true,
             effect: false,
             drop_view: false,
             name_view: false,
@@ -677,7 +698,10 @@ mod tests {
             keys,
             vec![
                 "drop_view",
+                "dura_view",
                 "effect",
+                "expanded_buff_window",
+                "expanded_hero_buff_window",
                 "highlight_target",
                 "hp_view",
                 "music_enabled",
@@ -685,6 +709,7 @@ mod tests {
                 "name_view",
                 "new_move",
                 "skill_bar",
+                "skill_bar_positions",
                 "skill_mode",
                 "sound_enabled",
                 "sound_volume",
@@ -755,6 +780,7 @@ mod tests {
         for field in [
             "skill_mode",
             "skill_bar",
+            "skill_bar_positions",
             "effect",
             "drop_view",
             "name_view",
@@ -765,4 +791,14 @@ mod tests {
             assert!(payload.contains(field), "missing persisted field: {field}");
         }
     }
+}
+
+#[cfg(test)]
+mod hero_buff_source_preferences {
+ use super::*;
+ #[test]fn original_save_mirrors_player_expansion_under_hero_key_without_mutating_live_option(){
+ let mut options=UiOptions::default();options.expanded_buff_window=false;options.expanded_hero_buff_window=true;
+ let wire=PersistedOptions::from(&options);assert!(!wire.expanded_hero_buff_window);assert!(options.expanded_hero_buff_window);
+ let restored=UiOptions::try_from(wire).unwrap();assert!(!restored.expanded_buff_window);assert!(!restored.expanded_hero_buff_window);
+ }
 }

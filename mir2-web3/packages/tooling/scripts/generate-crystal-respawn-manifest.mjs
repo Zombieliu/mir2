@@ -117,8 +117,82 @@ function main() {
   }
 
   const maps = parseMaps(reader);
+  // Narrow map-rule repair: preserve existing generated content and timestamps.
+  if (process.env.MIR2_CRYSTAL_CREATURE_MAP_RULE_ONLY) {
+    const byIndex = new Map(maps.map((map) => [map.map_index, map]));
+    const repairs = [respawnOutputPath, webRespawnOutputPath].map((outputPath) => {
+      const original = readFileSync(outputPath, "utf8");
+      const manifest = JSON.parse(original);
+      if (manifest.crystal_db_version !== version || manifest.crystal_db_custom_version !== customVersion
+          || manifest.maps.length !== maps.length) {
+        throw new Error("Creature map-rule repair requires a matching complete map database");
+      }
+      for (const map of manifest.maps) {
+        const source = byIndex.get(map.map_index);
+        if (!source || source.map_file_name !== map.map_file_name || source.map_title !== map.map_title) {
+          throw new Error(`Map identity mismatch at ${map.map_index}`);
+        }
+      }
+      let cursor = 0;
+      const repaired = original.replace(/^\s*"no_intelligent_creatures": (true|false),\r?\n/gm, "")
+        .replace(/(^[ \t]*)"no_hero":/gm, (match, indent) => {
+          const source = byIndex.get(manifest.maps[cursor++].map_index);
+          return `${indent}"no_intelligent_creatures": ${source.no_intelligent_creatures},\n${match}`;
+        });
+      const stripRule = (text) => JSON.stringify(JSON.parse(text), (key, value) => key === "no_intelligent_creatures" ? undefined : value);
+      if (cursor !== maps.length || stripRule(repaired) !== stripRule(original)) {
+        throw new Error("Creature map-rule repair changed unrelated map content");
+      }
+      return { outputPath, repaired };
+    });
+    for (const { outputPath, repaired } of repairs) {
+      if (process.env.MIR2_CRYSTAL_CREATURE_MAP_RULE_ONLY !== "check") writeFileSync(outputPath, repaired);
+      const checked = JSON.parse(readFileSync(outputPath, "utf8"));
+      for (const map of checked.maps) {
+        if (map.no_intelligent_creatures !== byIndex.get(map.map_index).no_intelligent_creatures) {
+          throw new Error(`NoIntelligentCreatures mismatch for ${map.map_file_name}`);
+        }
+      }
+    }
+    console.log(`Verified ${maps.length} creature map rules in both manifests; forbidden=${maps.filter(map => map.no_intelligent_creatures).length}`);
+    return;
+  }
   const items = parseItems(reader);
   const monsterByIndex = parseMonsters(reader);
+  // Narrow repair/verification mode: read authoritative DB Stat.Accuracy without
+  // regenerating unrelated manifests, timestamps, or current content overrides.
+  if (process.env.MIR2_CRYSTAL_MONSTER_ACCURACY_ONLY) {
+    const original = readFileSync(monsterOutputPath, "utf8");
+    const manifest = JSON.parse(original);
+    if (manifest.crystal_db_version !== version || manifest.crystal_db_custom_version !== customVersion
+        || manifest.monsters.length !== monsterByIndex.size) {
+      throw new Error("Monster accuracy repair requires matching DB version and complete monster index set");
+    }
+    for (const monster of manifest.monsters) {
+      const source = monsterByIndex.get(monster.monster_index);
+      if (!source || source.name !== monster.name || source.ai !== monster.ai || source.image !== monster.image) {
+        throw new Error(`Monster identity mismatch at ${monster.monster_index}`);
+      }
+    }
+    if (process.env.MIR2_CRYSTAL_MONSTER_ACCURACY_ONLY !== "check") {
+      const repaired = original.replace(/^\s*"accuracy": -?\d+,\r?\n/gm, "")
+        .replace(/(\s*)"monster_index": (\d+),(\r?\n)/g, (match, space, index, newline) => {
+          const indent = space.slice(space.lastIndexOf("\n") + 1);
+          return `${space}"monster_index": ${index},${newline}${indent}"accuracy": ${monsterByIndex.get(Number(index)).accuracy},${newline}`;
+        });
+      const withoutAccuracy = (text) => JSON.stringify(JSON.parse(text), (key, value) => key === "accuracy" ? undefined : value);
+      if (withoutAccuracy(repaired) !== withoutAccuracy(original)) throw new Error("Unrelated monster content changed");
+      writeFileSync(monsterOutputPath, repaired);
+    }
+    const checked = JSON.parse(readFileSync(monsterOutputPath, "utf8"));
+    for (const monster of checked.monsters) {
+      if (monster.accuracy !== monsterByIndex.get(monster.monster_index).accuracy) {
+        throw new Error(`Stat 10 accuracy mismatch for ${monster.name}`);
+      }
+    }
+    console.log(`Verified ${checked.monsters.length} monster accuracies against Server.MirDB Stat 10; Shinsu=${checked.monsters.find(m => m.name === "Shinsu")?.accuracy}`);
+    return;
+  }
   const npcs = parseNpcs(reader, maps);
   const quests = parseQuests(reader, version, items, monsterByIndex, npcs, maps, settings);
   const recipes = parseRecipes(items);
@@ -170,6 +244,7 @@ function main() {
         no_drop_player: map.no_drop_player,
         no_drop_monster: map.no_drop_monster,
         no_mount: map.no_mount,
+        no_intelligent_creatures: map.no_intelligent_creatures,
         no_hero: map.no_hero,
         need_bridle: map.need_bridle,
         safe_zones: map.safe_zones,
@@ -415,7 +490,7 @@ function parseMaps(reader) {
     reader.readBoolean();
     reader.readBoolean();
     reader.readBoolean();
-    reader.readBoolean();
+    const no_intelligent_creatures = reader.readBoolean();
     const no_hero = reader.readBoolean();
     reader.readInt32();
     reader.readBoolean();
@@ -442,6 +517,7 @@ function parseMaps(reader) {
       no_drop_player,
       no_drop_monster,
       no_mount,
+      no_intelligent_creatures,
       no_hero,
       need_bridle,
       safe_zones,
@@ -571,6 +647,7 @@ function parseMonsters(reader) {
     const max_mc = stats.get(7) ?? 0;
     const min_sc = stats.get(8) ?? 0;
     const max_sc = stats.get(9) ?? 0;
+    const accuracy = stats.get(10) ?? 0;
     const agility = stats.get(11) ?? 0;
     const light = reader.readUInt8();
     const attack_speed = reader.readUInt16();
@@ -604,6 +681,7 @@ function parseMonsters(reader) {
       max_mc,
       min_sc,
       max_sc,
+      accuracy,
       agility,
       light,
       attack_speed,

@@ -94,6 +94,8 @@ impl TryFrom<i32> for CrystalLightSetting {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct LightingRenderState {
     #[serde(default)]
+    pub(crate) map_file_name: Option<String>,
+    #[serde(default)]
     pub(crate) enabled: bool,
     pub(crate) stage_width: f32,
     pub(crate) stage_height: f32,
@@ -431,6 +433,7 @@ mod tests {
 
     fn state(setting: i32) -> LightingRenderState {
         LightingRenderState {
+            map_file_name: None,
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,

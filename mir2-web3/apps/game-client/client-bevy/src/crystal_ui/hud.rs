@@ -365,7 +365,7 @@ impl Plugin for Mir2CrystalHudPlugin {
             .add_systems(Startup, spawn_crystal_hud)
             .add_systems(
                 Update,
-                update_hud_visibility.run_if(resource_changed::<NativeShellModel>),
+                update_hud_visibility.after(NativePlayerUiSet::Mutate),
             )
             .add_systems(
                 Update,
@@ -410,7 +410,8 @@ impl Plugin for Mir2CrystalHudPlugin {
                     sync_belt_presentation,
                 )
                     .chain()
-                    .in_set(NativePlayerUiSet::Mutate),
+                    .in_set(NativePlayerUiSet::Mutate)
+                    .after(super::overlays::process_overlay_keyboard),
             )
             .add_plugins(Mir2CrystalHintPlugin)
             .add_plugins(super::overlays::Mir2CrystalOverlayPlugin);
@@ -1175,12 +1176,15 @@ fn to_bevy_rect(rect: HudSourceRect) -> bevy::math::Rect {
 
 fn update_hud_visibility(
     shell: Res<NativeShellModel>,
+    state: Option<Res<NativePlayerUiState>>,
     mut roots: Query<&mut Node, With<CrystalHudRoot>>,
 ) {
     let Ok(mut root) = roots.single_mut() else {
         return;
     };
-    root.display = if shell.screen == NativeShellScreen::InGame {
+    root.display = if shell.screen == NativeShellScreen::InGame
+        && !state.as_deref().is_some_and(|s| s.local_keys.camera_hidden)
+    {
         Display::Flex
     } else {
         Display::None
@@ -1545,9 +1549,14 @@ fn consume_belt_control_actions(
         (Changed<Interaction>, With<Button>),
     >,
     shell: Res<NativeShellModel>,
+    player_ui: Option<Res<NativePlayerUiState>>,
     mut presentation: ResMut<CrystalBeltPresentation>,
 ) {
-    if shell.screen != NativeShellScreen::InGame {
+    if shell.screen != NativeShellScreen::InGame
+        || player_ui
+            .as_deref()
+            .is_some_and(NativePlayerUiState::amount_modal_open)
+    {
         return;
     }
     for (interaction, action) in &interactions {
@@ -1586,13 +1595,15 @@ fn toggle_belt_from_keyboard(
     {
         return;
     }
-    let control = keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
-    if !keys.just_pressed(KeyCode::KeyZ) {
-        return;
-    }
-    if control {
+    let defaults = super::overlays::keyboard_dialog::KeyboardDialogUi::default();
+    let bindings = player_ui
+        .as_deref()
+        .map(|u| &u.keyboard)
+        .unwrap_or(&defaults);
+    if super::overlays::keyboard_dialog::host::triggered(bindings, &keys, "BeltFlip") {
         presentation.vertical = !presentation.vertical;
-    } else {
+    }
+    if super::overlays::keyboard_dialog::host::triggered(bindings, &keys, "Belt") {
         presentation.visible = !presentation.visible;
     }
 }
@@ -2124,6 +2135,39 @@ mod tests {
     }
 
     #[test]
+    fn camera_mode_hides_actual_hud_root_and_restores_it() {
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<NativePlayerUiState>()
+        .add_systems(Update, update_hud_visibility);
+        let root = app
+            .world_mut()
+            .spawn((CrystalHudRoot, Node::default()))
+            .id();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .local_keys
+            .camera_hidden = true;
+        app.update();
+        assert_eq!(
+            app.world().get::<Node>(root).unwrap().display,
+            Display::None
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .local_keys
+            .camera_hidden = false;
+        app.update();
+        assert_eq!(
+            app.world().get::<Node>(root).unwrap().display,
+            Display::Flex
+        );
+    }
+
+    #[test]
     fn minimap_visibility_system_initializes_with_overlapping_node_markers() {
         let mut app = App::new();
         app.insert_resource(NativeShellModel {
@@ -2367,6 +2411,32 @@ mod tests {
         ));
         app.update();
         assert!(!app.world().resource::<CrystalBeltPresentation>().visible);
+    }
+
+    #[test]
+    fn trade_message_answer_frame_blocks_belt_controls() {
+        let mut app = App::new();
+        app.init_resource::<CrystalBeltPresentation>()
+            .init_resource::<NativePlayerUiState>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_systems(Update, consume_belt_control_actions);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .trade_dialog
+            .input_consumed = true;
+        let before = *app.world().resource::<CrystalBeltPresentation>();
+        for action in [
+            CrystalBeltControlAction::Rotate,
+            CrystalBeltControlAction::Close,
+        ] {
+            app.world_mut()
+                .spawn((Button, Interaction::Pressed, action));
+        }
+        app.update();
+        assert_eq!(*app.world().resource::<CrystalBeltPresentation>(), before);
     }
 
     #[test]

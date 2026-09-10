@@ -158,51 +158,212 @@ fn append_filtered(
     destination.len() != before
 }
 
-/// Reads and applies one Windows Ctrl+V operation. Bevy's system clipboard
-/// adapter uses CF_UNICODETEXT on Windows and reports unavailable/non-text
-/// content as an error, which this system intentionally ignores.
+#[derive(Default)]
+pub(crate) struct FriendClipboardPending(Option<(u64, bevy::clipboard::ClipboardRead)>);
+
+use mir2_client_bevy::crystal_ui::overlays::text_input::{
+    editor_mut, editor_owner, friend_clipboard_target, EditorOwner,
+};
+
+/// Clipboard operations require a focused field. Pending reads are bound to a
+/// globally unique editor instance and are cancelled on focus/modal/session changes.
 pub fn paste_system(
     mut keyboard_inputs: MessageReader<KeyboardInput>,
     mut shortcut: Local<ClipboardShortcutState>,
+    mut pending: Local<FriendClipboardPending>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut clipboard: Option<ResMut<bevy::clipboard::Clipboard>>,
     mut shell: Option<ResMut<NativeShellModel>>,
+    mut ui: Option<ResMut<mir2_client_bevy::crystal_ui::NativePlayerUiState>>,
 ) {
     if !windows.iter().any(|window| window.focused) {
-        // Windows can omit a modifier release when focus changes. Clear the
-        // host-side latch and drain this frame's events so a later plain `V`
-        // cannot be mistaken for a paste shortcut after focus returns.
         *shortcut = ClipboardShortcutState::default();
+        pending.0 = None;
         keyboard_inputs.read().for_each(drop);
         return;
     }
-    if !paste_shortcut_pressed(keyboard_inputs.read(), &mut shortcut) {
+    let mut actions = Vec::new();
+    for event in keyboard_inputs.read() {
+        let paste = shortcut.observe(event.key_code, event.state, event.repeat);
+        if paste {
+            actions.push(KeyCode::KeyV);
+        } else if event.state == ButtonState::Pressed
+            && !event.repeat
+            && (shortcut.control_left || shortcut.control_right)
+            && matches!(event.key_code, KeyCode::KeyC | KeyCode::KeyX)
+        {
+            actions.push(event.key_code);
+        }
+    }
+    let ingame = shell
+        .as_deref()
+        .is_some_and(|s| s.screen == NativeShellScreen::InGame);
+    if ingame {
+        let Some(ui) = ui.as_deref_mut() else {
+            pending.0 = None;
+            return;
+        };
+        ui.friends.sync_editor();
+        ui.creature.sync_input_editor();
+        ui.social_bonds.sync_editor();
+        if ui.ime_frame_consumed {
+            pending.0 = None;
+            return;
+        }
+        let Some(owner) = editor_owner(ui) else {
+            pending.0 = None;
+            return;
+        };
+        let editor = editor_mut(ui, owner);
+        let revision = editor.editor_revision;
+        if pending.0.as_ref().is_some_and(|(r, _)| *r != revision) {
+            pending.0 = None;
+        }
+        if let Some(clipboard) = clipboard.as_deref_mut() {
+            for action in actions {
+                editor.input_consumed = true;
+                match action {
+                    KeyCode::KeyV => pending.0 = Some((revision, clipboard.fetch_text())),
+                    KeyCode::KeyC | KeyCode::KeyX => {
+                        let selected = editor
+                            .editor
+                            .as_ref()
+                            .map(|e| e.selected_text().to_owned())
+                            .unwrap_or_default();
+                        if !selected.is_empty()
+                            && clipboard.set_text(selected).is_ok()
+                            && action == KeyCode::KeyX
+                        {
+                            let result = editor.editor.as_mut().unwrap().delete(false);
+                            editor.commit_editor(result);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        if let Some((_, read)) = pending.0.as_mut() {
+            if let Some(result) = read.poll_result() {
+                pending.0 = None;
+                if let Ok(text) = result {
+                    editor.paste(&text);
+                    editor.input_consumed = true;
+                }
+            }
+        }
+        match owner {
+            EditorOwner::GuildNotice => ui.guild_notice_draft = ui.guild_panel.notice_draft(),
+            EditorOwner::GuildRank => {
+                ui.guild_rank_name_draft = ui
+                    .guild_panel
+                    .rank_editor
+                    .editor
+                    .as_ref()
+                    .map(|e| e.text().to_owned())
+                    .unwrap_or_default()
+            }
+            EditorOwner::GuildRecruit => {
+                ui.guild_recruit_draft = ui
+                    .guild_panel
+                    .recruit_editor
+                    .editor
+                    .as_ref()
+                    .map(|e| e.text().to_owned())
+                    .unwrap_or_default()
+            }
+            EditorOwner::Creature => ui.creature.sync_input_draft(),
+            EditorOwner::Bond => ui.social_bonds.sync_draft(),
+            EditorOwner::Friend | EditorOwner::Group => {}
+        }
         return;
     }
-    if !shell.as_deref().is_some_and(|model| {
-        model.screen != NativeShellScreen::InGame && shell_has_clipboard_target(model)
-    }) {
+    pending.0 = None;
+    if !actions.contains(&KeyCode::KeyV) {
         return;
     }
-    let Some(mut clipboard) = clipboard.take() else {
+    if !shell.as_deref().is_some_and(shell_has_clipboard_target) {
+        return;
+    }
+    let Some(clipboard) = clipboard.as_deref_mut() else {
         return;
     };
     let mut read = clipboard.fetch_text();
-    let Some(Ok(clipboard)) = read.poll_result() else {
+    let Some(Ok(text)) = read.poll_result() else {
         return;
     };
-    let Some(shell) = shell.as_deref_mut() else {
-        return;
-    };
-    debug_assert!(shell.screen != NativeShellScreen::InGame);
-    debug_assert!(shell_has_clipboard_target(shell));
-    let _ = apply_shell_clipboard(shell, &clipboard);
+    if let Some(shell) = shell.as_deref_mut() {
+        apply_shell_clipboard(shell, &text);
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use mir2_client_bevy::native_shell::NativeShellScreen;
+
+    #[test]
+    fn group_invitation_blocks_covered_editor_and_session_reset_discards_it() {
+        let mut ui = mir2_client_bevy::crystal_ui::NativePlayerUiState::default();
+        ui.group_dialog
+            .show_input(false, &Default::default(), "Owner");
+        ui.group_dialog.editor.editor_focused = true;
+        assert!(matches!(editor_owner(&ui), Some(EditorOwner::Group)));
+        ui.group_dialog.invitation = Some(("Peer".into(), 1));
+        assert!(editor_owner(&ui).is_none());
+        ui.reset_session();
+        assert!(ui.group_dialog.invitation.is_none());
+        assert!(editor_owner(&ui).is_none());
+    }
+
+    #[test]
+    fn unified_clipboard_owner_respects_invitation_and_creature_notice_priority() {
+        use mir2_client_bevy::crystal_ui::overlays::{
+            creature_dialog::{CreatureInput, InputPurpose},
+            social_bond_dialog::{BondAction, BondPage},
+        };
+        let mut ui = mir2_client_bevy::crystal_ui::NativePlayerUiState::default();
+        ui.creature.input = Some(CreatureInput {
+            purpose: InputPurpose::Rename,
+            pet_type: 0,
+            name: "Pig".into(),
+            text: "Pig".into(),
+        });
+        ui.creature.sync_input_editor();
+        assert!(matches!(editor_owner(&ui), Some(EditorOwner::Creature)));
+        ui.creature.notice = Some("Validation".into());
+        assert!(editor_owner(&ui).is_none());
+        ui.creature.notice = None;
+        ui.social_bonds.show(BondPage::Mentor);
+        ui.social_bonds
+            .action(BondPage::Mentor, BondAction::AddMentor);
+        ui.social_bonds.sync_editor();
+        assert!(matches!(editor_owner(&ui), Some(EditorOwner::Bond)));
+        let old = ui.social_bonds.input.editor_revision;
+        ui.reset_session();
+        ui.social_bonds.show(BondPage::Mentor);
+        ui.social_bonds
+            .action(BondPage::Mentor, BondAction::AddMentor);
+        ui.social_bonds.sync_editor();
+        assert_ne!(old, ui.social_bonds.input.editor_revision);
+    }
+
+    #[test]
+    fn friend_clipboard_requires_focused_topmost_editor() {
+        use mir2_client_bevy::crystal_ui::overlays::friend_dialog::FriendAction;
+        let mut ui = mir2_client_bevy::crystal_ui::NativePlayerUiState::default();
+        ui.friends.open = true;
+        ui.friends.action(FriendAction::Add);
+        ui.friends.sync_editor();
+        assert!(friend_clipboard_target(&ui));
+        ui.keyboard.open = true;
+        assert!(!friend_clipboard_target(&ui));
+        ui.keyboard.open = false;
+        ui.friends.editor_focused = false;
+        assert!(!friend_clipboard_target(&ui));
+        ui.friends.editor_focused = true;
+        ui.friends.cancel_modal();
+        assert!(!friend_clipboard_target(&ui));
+    }
 
     #[test]
     fn login_account_paste_uses_existing_printable_and_length_rules() {

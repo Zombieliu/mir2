@@ -135,7 +135,7 @@ fn render_crystal_minimap(
         .is_some_and(|shell| shell.screen == NativeShellScreen::InGame);
     let minimap_visible = minimap_state
         .as_deref()
-        .map(|s| s.minimap_visible())
+        .map(|s| s.minimap_visible() && !s.local_keys.camera_hidden)
         .unwrap_or(true);
     let profile = mini_map_profile(ui_model.player.map_name.as_deref());
     let visible = in_game && minimap_visible && profile.is_some();

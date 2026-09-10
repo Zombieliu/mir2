@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "mir2.audit-validation.v1",
+  "passed": true,
+  "checks": [
+    "49 evidence references exist and line anchors are valid",
+    "content array counts, respawn sums and distinct monster classifications recomputed",
+    "current installed asset package inventory read and boundary counts confirmed",
+    "current development EXE SHA-256 matches entry-fix record",
+    "report reference IDs and CSV/JSON domain/finding totals agree; no global percentage claimed"
+  ],
+  "gameAcceptance": false,
+  "freshGameTestsRun": false
+}

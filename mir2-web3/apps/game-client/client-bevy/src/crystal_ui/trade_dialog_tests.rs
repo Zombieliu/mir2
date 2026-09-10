@@ -12,6 +12,201 @@ fn social() -> SocialModel {
     model
 }
 
+#[test]
+fn trade_invitation_replies_once_and_waits_for_server_accept() {
+    for accept in [true, false] {
+        let mut model = SocialModel::default();
+        model.apply_packet("TradeRequest", &json!({"name":"Guest"}));
+        let mut ui = NativePlayerUiState::default();
+        ui.trade_dialog.observe(&model);
+        let revision = model.trade.invite_revision;
+        let before = model.clone();
+        let mut queue = NativePlayerUiIntentQueue::default();
+        assert!(ui.blocks_world_action(false, false));
+        assert!(ui.blocks_gameplay_keys());
+        assert!(!ui.trade_dialog.open);
+        assert!(answer_message(
+            &mut ui, &model, &mut queue, revision, accept
+        ));
+        assert!(!answer_message(
+            &mut ui, &model, &mut queue, revision, accept
+        ));
+        assert_eq!(
+            queue.drain_intents(),
+            vec![NativePlayerUiIntent::TradeReply {
+                accept_invite: accept
+            }]
+        );
+        assert_eq!(model, before);
+        assert!(!ui.trade_dialog.open);
+        assert!(
+            ui.blocks_world_action(false, false),
+            "the answer frame remains consumed"
+        );
+        ui.trade_dialog.observe(&model);
+        assert!(
+            ui.trade_dialog.message.is_none(),
+            "same snapshot never resurrects disposed prompt"
+        );
+        assert!(!ui.blocks_world_action(false, false));
+        model.apply_packet("TradeAccept", &json!({"name":"Guest"}));
+        assert!(ui.trade_dialog.observe(&model));
+        assert!(ui.trade_dialog.open);
+    }
+}
+
+#[test]
+fn trade_invitation_button_frame_does_not_activate_covered_inventory_or_duplicate_reply() {
+    let mut app = overlay_tests::help_button_test_app();
+    app.init_resource::<UiReadModel>();
+    let mut model = SocialModel::default();
+    model.apply_packet("TradeRequest", &json!({"name":"Guest"}));
+    let mut ui = NativePlayerUiState::default();
+    ui.trade_dialog.observe(&model);
+    let revision = model.trade.invite_revision;
+    *app.world_mut().resource_mut::<NativePlayerUiState>() = ui;
+    *app.world_mut().resource_mut::<SocialModel>() = model;
+    for button in [
+        OverlayButton::ToggleInventory,
+        OverlayButton::TradeAccept(revision),
+        OverlayButton::TradeDecline(revision),
+        OverlayButton::ToggleInventory,
+    ] {
+        app.world_mut()
+            .spawn((Button, Interaction::Pressed, button));
+    }
+    app.update();
+    let replies = app
+        .world_mut()
+        .resource_mut::<NativePlayerUiIntentQueue>()
+        .drain_intents();
+    assert_eq!(replies.len(), 1);
+    assert!(matches!(
+        replies[0],
+        NativePlayerUiIntent::TradeReply { .. }
+    ));
+    assert!(!app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .inventory_open());
+}
+
+#[test]
+fn trade_invitation_stale_buttons_and_cancel_unlock_have_distinct_ownership() {
+    let mut model = SocialModel::default();
+    let mut ui = NativePlayerUiState::default();
+    let mut queue = NativePlayerUiIntentQueue::default();
+    model.apply_packet("TradeRequest", &json!({"name":"First"}));
+    ui.trade_dialog.observe(&model);
+    let old = model.trade.invite_revision;
+    model.apply_packet("TradeRequest", &json!({"name":"Second"}));
+    assert!(!answer_message(&mut ui, &model, &mut queue, old, true));
+    ui.trade_dialog.observe(&model);
+    assert!(!answer_message(&mut ui, &model, &mut queue, old, false));
+    assert!(queue.drain_intents().is_empty());
+    model.apply_packet("TradeAccept", &json!({"name":"Second"}));
+    model.apply_packet("TradeCancel", &json!({"unlock":true}));
+    ui.trade_dialog.observe(&model);
+    assert!(ui.trade_dialog.open);
+    assert!(ui.trade_dialog.message.is_none());
+    model.apply_packet("TradeCancel", &json!({"unlock":false}));
+    // Another family must not mask the cancellation before UI sync.
+    model.apply_packet("SwitchGroup", &json!({"allowGroup":true}));
+    ui.trade_dialog.observe(&model);
+    assert!(!ui.trade_dialog.open);
+    let revision = ui.trade_dialog.message.as_ref().unwrap().revision();
+    assert!(matches!(
+        ui.trade_dialog.message,
+        Some(TradeMessage::Cancelled { .. })
+    ));
+    assert!(answer_message(&mut ui, &model, &mut queue, revision, true));
+    assert!(
+        queue.drain_intents().is_empty(),
+        "OK is local disposal, not a trade reply"
+    );
+    ui.trade_dialog.observe(&model);
+    assert!(ui.trade_dialog.message.is_none());
+}
+
+#[test]
+fn trade_invitation_keyboard_uses_source_yes_no_and_consumes_extra_input() {
+    for (code, accept) in [
+        (KeyCode::Enter, true),
+        (KeyCode::NumpadEnter, true),
+        (KeyCode::Escape, false),
+    ] {
+        let mut app = keyboard_app();
+        let mut model = SocialModel::default();
+        model.apply_packet("TradeRequest", &json!({"name":"Guest"}));
+        let mut ui = NativePlayerUiState::default();
+        ui.trade_dialog.observe(&model);
+        *app.world_mut().resource_mut::<NativePlayerUiState>() = ui;
+        *app.world_mut().resource_mut::<SocialModel>() = model;
+        key(&mut app, code, None, ButtonState::Pressed);
+        key(&mut app, KeyCode::KeyI, Some("i"), ButtonState::Pressed);
+        key(&mut app, code, None, ButtonState::Pressed);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::TradeReply {
+                accept_invite: accept
+            }]
+        );
+        let ui = app.world().resource::<NativePlayerUiState>();
+        assert!(!ui.inventory_open());
+        assert!(!ui.menu_open());
+        assert!(ui.chat_draft.is_empty());
+        assert!(ui.trade_dialog.message.is_none());
+        assert!(!ui.trade_dialog.open);
+    }
+}
+
+#[test]
+fn trade_invitation_renders_original_modal_assets_and_resets_at_login() {
+    let mut app = app();
+    app.world_mut()
+        .resource_mut::<SocialModel>()
+        .apply_packet("TradeRequest", &json!({"name":"Guest"}));
+    app.world_mut().run_system_once(sync).unwrap();
+    app.update();
+    let world = app.world_mut();
+    let modal = world
+        .query_filtered::<(&Node, &GlobalZIndex, Option<&Button>), With<OverlayTradeGoldModal>>()
+        .single(world)
+        .unwrap();
+    assert_ne!(modal.0.display, Display::None);
+    assert!(modal.2.is_some());
+    for path in [
+        "original-ui/Prguse/360.png",
+        "original-ui/Title/206.png",
+        "original-ui/Title/210.png",
+    ] {
+        assert!(
+            world
+                .query::<&ImageNode>()
+                .iter(world)
+                .any(|i| i.image.path().is_some_and(|p| p.to_string() == path)),
+            "{path}"
+        );
+    }
+    assert!(world
+        .query::<&Node>()
+        .iter(world)
+        .any(|n| rect(n) == values(CrystalRect::new(284.0, 289.0, 456.0, 190.0))));
+    assert!(world
+        .query::<&Text>()
+        .iter(world)
+        .any(|t| t.0 == "Player Guest has requested to trade with you."));
+    world.resource_mut::<NativeShellModel>().screen = NativeShellScreen::Login;
+    world.run_system_once(sync).unwrap();
+    assert_eq!(
+        world.resource::<NativePlayerUiState>().trade_dialog,
+        TradeDialogUi::default()
+    );
+}
+
 fn state(model: &SocialModel) -> NativePlayerUiState {
     let mut state = NativePlayerUiState::default();
     assert!(state.trade_dialog.observe(model));

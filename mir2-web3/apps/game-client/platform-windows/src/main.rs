@@ -15,17 +15,23 @@ mod capture;
 mod clipboard;
 mod cursor;
 mod effects;
+mod entity_health;
 mod entity_overlays;
 mod entity_presentation;
+mod equipment_creature_wire;
 mod frame_sets;
 mod gameplay_bridge;
 mod gateway;
+mod hero_pointer_settings;
+mod hero_wire;
 mod input;
 mod map_parser;
 mod movement_trace;
 mod native_protocol;
 mod session_config;
 mod shell_bridge;
+mod social_bond_wire;
+mod timing;
 
 /// Whether an effect frame PNG (a web path like /original-effects/Magic/0.png)
 /// exists under the native asset root. Used by effects.rs so a missing asset
@@ -45,6 +51,7 @@ fn report_r2_progress_via_chat(
     time: bevy::prelude::Res<bevy::prelude::Time>,
     mut reporter: bevy::prelude::ResMut<R2ChatReporter>,
     mut chat: bevy::prelude::ResMut<mir2_client_bevy::chat::ChatModel>,
+    shell: Option<bevy::prelude::Res<mir2_client_bevy::native_shell::NativeShellModel>>,
 ) {
     // Bichon town batch: fire-and-forget every tick so the 30-page lattice
     // goes from per-page on-demand (首帧黑) to once批补 (首进城镇一次 30 并发).
@@ -61,6 +68,9 @@ fn report_r2_progress_via_chat(
         return;
     }
     let (local, r2) = assets::asset_hit_stats();
+    if local == reporter.last_local && r2 == reporter.last_r2 {
+        return;
+    }
     let cached_files = std::fs::read_dir(assets::r2_cache_dir())
         .map(|rd| rd.count())
         .unwrap_or(0);
@@ -81,15 +91,27 @@ fn report_r2_progress_via_chat(
             "[Assets] Remote {r2} / Local {local}, cache {cached_files} files -- streaming town"
         )
     };
-    chat.push(mir2_client_bevy::chat::ChatLine {
-        text: msg,
-        channel: "system".to_owned(),
-    });
+    eprintln!("{msg}");
+    // Asset diagnostics belong in the host log. Original game chat remains
+    // source-faithful unless a QA session explicitly opts into this overlay.
+    static QA_ASSET_CHAT: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    if *QA_ASSET_CHAT.get_or_init(|| std::env::var("MIR2_QA_ASSET_CHAT").as_deref() == Ok("1"))
+        && shell
+            .as_deref()
+            .is_some_and(|s| s.screen == mir2_client_bevy::native_shell::NativeShellScreen::InGame)
+    {
+        chat.push(mir2_client_bevy::chat::ChatLine {
+            text: msg,
+            channel: "system".to_owned(),
+        });
+    }
     reporter.last_local = local;
     reporter.last_r2 = r2;
 }
 
 fn main() {
+    timing::initialize();
+    let config_started = std::time::Instant::now();
     console_error_panic_hook::set_once();
     movement_trace::initialize();
 
@@ -99,6 +121,8 @@ fn main() {
             std::process::exit(2);
         });
 
+    timing::report("configuration", config_started);
+    let assets_started = std::time::Instant::now();
     // Cross-thread channels: Bevy owns visible UI state on the main thread; one
     // async task exclusively owns the WebSocket.
     let (command_tx, command_rx) = gateway::command_channel(256);
@@ -142,12 +166,15 @@ fn main() {
         "[platform-windows] gateway_url={} window={}x{}",
         session.gateway_url, session.window_width, session.window_height
     );
+    timing::report("asset_validation_and_map_decode", assets_started);
+    let app_started = std::time::Instant::now();
     let mut app = build_runtime_app(RuntimeWindowSpec {
         asset_root: asset_root.to_string_lossy().into_owned(),
         width: session.window_width,
         height: session.window_height,
         ..RuntimeWindowSpec::native("mir2-web3 (native)")
     });
+    timing::report("build_runtime_app", app_started);
     app.world_mut()
         .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()
         .set_native_consumer_enabled(true);
@@ -171,6 +198,8 @@ fn main() {
     // second copy on top of that scene.
     // A real Bevy UI shell (not DOM/WebView) owns login, character selection,
     // character creation, connection errors, and the transition into the game.
+    app.insert_resource(mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::KeyboardHost::from_environment());
+    app.insert_resource(hero_pointer_settings::load());
     app.add_plugins(mir2_client_bevy::native_shell_ui::Mir2NativeShellUiPlugin);
     // Native-only Crystal presentation consumes the existing authoritative
     // read models. It is registered only by this Windows host; Web/WASM keeps
@@ -200,6 +229,7 @@ fn main() {
     app.init_resource::<mir2_client_bevy::big_map::BigMapGatewayIntentQueue>();
     app.init_resource::<entity_presentation::NativeEntityPresentation>();
     app.init_resource::<entity_overlays::NativeEntityOverlays>();
+    app.init_resource::<entity_health::MonsterHealthState>();
     app.init_resource::<effects::NativeEffects>();
     app.init_resource::<input::WorldPointerMovementState>();
     app.insert_resource(shell_bridge::NativeAutoLoginFlow::from_config(
@@ -226,12 +256,19 @@ fn main() {
             .chain()
             .after(bevy::input::InputSystems),
     );
+    app.add_systems(
+        bevy::app::Update,
+        input::sync_native_equipment_pose
+            .before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
+    );
     // Ctrl+V is owned by the focused native text field. The host reads the
     // Windows Unicode clipboard only for that explicit shortcut; ordinary
     // key/text input remains owned by the shared shell/overlay systems.
     app.add_systems(
         bevy::app::Update,
-        clipboard::paste_system.before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
+        clipboard::paste_system
+            .after(mir2_client_bevy::crystal_ui::overlays::text_input::process_ime)
+            .before(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
     );
     app.add_systems(
         bevy::app::Update,
@@ -246,6 +283,8 @@ fn main() {
             input::keyboard_turn_system,
             input::keyboard_town_revive_system,
             input::keyboard_skill_system,
+            input::keyboard_hero_skill_system,
+            input::keyboard_world_actions_system,
         )
             .after(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
     );
@@ -254,6 +293,7 @@ fn main() {
         (
             entity_overlays::sync_native_entity_overlays
                 .after(mir2_bevy_runtime::RuntimePresentationSet),
+            entity_health::sync_native_monster_health,
             effects::tick_native_effects,
             mir2_client_bevy::audio::sync_native_gameplay_audio
                 .after(mir2_client_bevy::crystal_ui::NativePlayerUiSet::Mutate),
@@ -270,7 +310,16 @@ fn main() {
     app.insert_resource(R2ChatReporter::default());
     app.add_systems(bevy::app::Update, report_r2_progress_via_chat);
 
-    eprintln!("[platform-windows] native window opened; runtime running");
+    timing::milestone("host_configured");
+    app.add_systems(
+        bevy::app::Update,
+        |mut reported: bevy::prelude::Local<bool>| {
+            if !*reported {
+                timing::milestone("first_main_update");
+                *reported = true;
+            }
+        },
+    );
 
     let gateway_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
     let gateway_url = session.gateway_url;
@@ -292,6 +341,7 @@ fn main() {
     // Run the Bevy loop on the main thread; the gateway task runs on its own
     // tokio runtime in the background and pushes snapshots into the runtime
     // channel. The runtime handle stays alive until the window closes.
+    timing::milestone("enter_event_loop");
     app.run();
 
     // Best-effort: drop the gateway task after the window closes.

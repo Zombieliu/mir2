@@ -958,7 +958,12 @@ pub fn reconcile_inventory_refresh(
             });
             old_at_source && new_at_target
         }
-        PendingOperationKey::Merge { id_from, id_to, .. } => {
+        PendingOperationKey::Merge {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+        } if !grid_from.eq_ignore_ascii_case("Trade") && !grid_to.eq_ignore_ascii_case("Trade") => {
             if has_ambiguous_replacement_without_instance_id(old, new, *id_from)
                 || has_ambiguous_replacement_without_instance_id(old, new, *id_to)
             {
@@ -1688,6 +1693,71 @@ mod tests {
         }
         assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &new), 5);
         assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn trade_merge_inventory_deltas_never_substitute_for_matching_ack() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(20, 5, 0, 0), item(21, 3, 1, 0)],
+            ..Default::default()
+        };
+        let new = crate::inventory::InventoryModel {
+            items: vec![item(20, 2, 0, 0), item(21, 6, 1, 0)],
+            ..Default::default()
+        };
+        for (grid_from, grid_to) in [
+            ("Trade", "inventory"),
+            ("inventory", "tRaDe"),
+            ("TRADE", "Trade"),
+        ] {
+            for success in [true, false] {
+                let mut pending = PendingOperations::default();
+                let key = PendingOperationKey::Merge {
+                    grid_from: grid_from.into(),
+                    grid_to: grid_to.into(),
+                    id_from: 20,
+                    id_to: 21,
+                };
+                assert!(pending.try_begin(key.clone()));
+                assert_eq!(
+                    reconcile_inventory_refresh(&mut pending, &old, &new),
+                    0,
+                    "balanced quantities do not prove a trade receipt"
+                );
+                assert!(pending.contains(&key));
+                let mut feedback = InventoryOperationFeedback::default();
+                assert_eq!(
+                    apply_inventory_operation_ack(
+                        &mut pending,
+                        &mut feedback,
+                        InventoryOperationAck::Merge {
+                            grid_from: grid_from.into(),
+                            grid_to: grid_to.into(),
+                            id_from: 20,
+                            id_to: 99,
+                            success
+                        }
+                    ),
+                    0
+                );
+                assert!(pending.contains(&key));
+                assert_eq!(
+                    apply_inventory_operation_ack(
+                        &mut pending,
+                        &mut feedback,
+                        InventoryOperationAck::Merge {
+                            grid_from: grid_from.into(),
+                            grid_to: grid_to.into(),
+                            id_from: 20,
+                            id_to: 21,
+                            success
+                        }
+                    ),
+                    1
+                );
+                assert!(pending.is_empty());
+            }
+        }
     }
 
     #[test]

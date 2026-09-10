@@ -173,6 +173,9 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
+    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        self.runtime.supports_magic_key_assignment(spell,key,old_key)
+    }
     pub fn new(config: GatewayConfig) -> Self {
         Self::new_with_zone_registry(config, &ZoneRegistry::in_process())
     }
@@ -1035,25 +1038,31 @@ impl GatewaySession {
             default_zone_owner_command_client(&routed.zone_id, Some(&routed.owner_lease_authority));
         let mut target_runtime = routed.runtime;
         let prepare_result = (|| -> Result<(), String> {
-            target_client.execute(
-                &mut target_runtime,
-                ZoneOwnerCommandRequest::direct(
-                    routed.owner_lease.clone(),
-                    WorldCommand::PasskeyLogin {
-                        account_id: identity.account_id.clone(),
-                    },
-                ),
-            )?;
-            target_client.execute(
-                &mut target_runtime,
-                ZoneOwnerCommandRequest::direct(
-                    routed.owner_lease.clone(),
-                    WorldCommand::ClientPacket(ClientPacket::StartGame {
-                        character_index: identity.character_index,
-                    }),
-                ),
-            )?;
-            let target_identity = target_client.active_identity(&target_runtime)?;
+            target_client
+                .execute(
+                    &mut target_runtime,
+                    ZoneOwnerCommandRequest::direct(
+                        routed.owner_lease.clone(),
+                        WorldCommand::PasskeyLogin {
+                            account_id: identity.account_id.clone(),
+                        },
+                    ),
+                )
+                .map_err(|error| format!("target login: {error}"))?;
+            target_client
+                .execute(
+                    &mut target_runtime,
+                    ZoneOwnerCommandRequest::direct(
+                        routed.owner_lease.clone(),
+                        WorldCommand::ClientPacket(ClientPacket::StartGame {
+                            character_index: identity.character_index,
+                        }),
+                    ),
+                )
+                .map_err(|error| format!("target StartGame: {error}"))?;
+            let target_identity = target_client
+                .active_identity(&target_runtime)
+                .map_err(|error| format!("target identity read: {error}"))?;
             if target_identity.as_ref() != Some(&identity) {
                 return Err(format!(
                     "target identity mismatch: expected {identity:?}, got {target_identity:?}"
@@ -1066,9 +1075,11 @@ impl GatewaySession {
             // changes. This carries vitals, inventory, map and private systems
             // as one commitment.
             target_client
-                .restore_active_character_checkpoint(&mut target_runtime, &source_checkpoint)?;
+                .restore_active_character_checkpoint(&mut target_runtime, &source_checkpoint)
+                .map_err(|error| format!("target checkpoint restore: {error}"))?;
             let target_checkpoint = target_client
-                .active_character_checkpoint(&target_runtime)?
+                .active_character_checkpoint(&target_runtime)
+                .map_err(|error| format!("target checkpoint read: {error}"))?
                 .ok_or_else(|| {
                     "target returned no active character checkpoint after restore".to_string()
                 })?;

@@ -529,7 +529,7 @@ impl NativeLightingPublisher {
                     .unwrap_or_default();
                 let state = self.bridge.build_render_state(
                     payload,
-                    map.as_deref(),
+                    map.as_ref(),
                     &self.map_frame_offsets,
                     &native_lighting_default_motion(),
                     &self.assets,
@@ -762,6 +762,8 @@ struct WalletState {
 /// complete `UserInformation` values that were already delivered.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct NativeUiPlayerCursor {
+    npc_shop_uses_pearls: bool,
+    npc_shop_hide_added_stats: bool,
     hp: Option<i32>,
     max_hp: Option<i32>,
     mp: Option<i32>,
@@ -773,6 +775,7 @@ struct NativeUiPlayerCursor {
     experience: Option<i64>,
     max_experience: Option<i64>,
     current_weight: Option<u16>,
+    player_weights: Option<mir2_client_bevy::read_model::PlayerWeights>,
     max_weight: Option<u16>,
     name: Option<String>,
     class_name: Option<String>,
@@ -791,6 +794,10 @@ impl NativeUiPlayerCursor {
     }
 
     fn observe_world_snapshot(&mut self, payload: &Value) {
+        // Full world snapshots own this optional block; absent/null must clear old weights.
+        self.player_weights = payload
+            .get("playerWeights")
+            .and_then(|value| serde_json::from_value(value.clone()).ok());
         if let Some(value) = value_i32(payload.get("playerHp")) {
             self.hp = Some(value);
         }
@@ -1006,6 +1013,8 @@ impl NativeUiPlayerCursor {
                 "experience": self.experience.unwrap_or_default(),
                 "maxExperience": self.max_experience.unwrap_or_default(),
                 "currentWeight": self.current_weight.unwrap_or_default(),
+                "currentWeightKnown":self.current_weight.is_some(),
+                "weights":self.player_weights,
                 "maxWeight": self.max_weight.unwrap_or_default(),
                 "name": self.name,
                 "className": self.class_name,
@@ -1300,7 +1309,7 @@ struct SkillPacketPatch {
     /// Tick-less deltas may affect only one bounded snapshot serial. This
     /// prevents an event without an ordering tick from living forever.
     zero_tick_expires_at_snapshot_serial: Option<u64>,
-    cooldown_remaining_ticks: Option<u32>,
+    delay_ms: Option<u32>,
     level: Option<u8>,
     experience: Option<u16>,
     can_use: Option<bool>,
@@ -1327,8 +1336,19 @@ struct SkillRemovalPatch {
 /// tick at packet arrival is used as a bounded stale-snapshot fence: snapshots
 /// at or before that tick cannot overwrite the packet delta; a later snapshot
 /// is accepted as the new authority and retires the patch.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct SkillPacketCursor {
+    hero: mir2_client_bevy::hero_model::HeroModel,
+    pending_hero_model: Option<String>,
+    pending_hero_receipts: std::collections::VecDeque<String>,
+    pending_receipt_model: Option<String>,
+    pending_latest_model: Option<String>,
+    session_epoch: u64,
+    magic_icons: std::collections::HashMap<String, u8>,
+    magic_needs: std::collections::HashMap<String, [Option<u16>; 3]>,
+    magic_names: std::collections::HashMap<String, String>,
+    magic_casts: std::collections::HashMap<String, u64>,
+    next_magic_cast: u64,
     snapshot_serial: u64,
     patches: Vec<SkillPacketPatch>,
     removals: Vec<SkillRemovalPatch>,
@@ -1336,7 +1356,114 @@ struct SkillPacketCursor {
     player_object_id: Option<u32>,
 }
 
+impl Default for SkillPacketCursor {
+    fn default() -> Self {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        Self {
+            hero: Default::default(),
+            pending_hero_model: None,
+            pending_hero_receipts: Default::default(),
+            pending_receipt_model: None,
+            pending_latest_model: None,
+            session_epoch: NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+            snapshot_serial: 0,
+            magic_icons: Default::default(),
+            magic_needs: Default::default(),
+            magic_names: Default::default(),
+            magic_casts: Default::default(),
+            next_magic_cast: 0,
+            patches: vec![],
+            removals: vec![],
+            vitals: None,
+            player_object_id: None,
+        }
+    }
+}
 impl SkillPacketCursor {
+    fn observe_hero_packet(
+        &mut self,
+        packet: &str,
+        payload: &Value,
+        player: &NativeUiPlayerCursor,
+    ) -> Result<(), String> {
+        if self.hero.apply_packet(packet, payload) {
+            self.hero.session_epoch = self.session_epoch;
+            if let Some(info) = self.hero.info.as_ref() {
+                self.hero.inventory_view = hero_inventory_view(info, player);
+                self.hero.auto_pot_view = hero_auto_pot_view(info, player);
+            }
+            let json = serde_json::to_string(&self.hero).map_err(|e| e.to_string())?;
+            if self.hero.item_result_receipt {
+                self.pending_hero_receipts.push_back(json);
+                self.pending_hero_model = None;
+            } else {
+                self.pending_hero_model = Some(json);
+            }
+        }
+        self.flush_hero_model();
+        Ok(())
+    }
+    fn flush_hero_model(&mut self) {
+        self.flush_hero_models_with(mir2_bevy_runtime::native_ingest::push_native_hero_model);
+    }
+    fn flush_hero_models_with(&mut self, mut push: impl FnMut(String) -> bool) -> bool {
+        while let Some(json) = self.pending_hero_receipts.front() {
+            if !push(json.clone()) {
+                return false;
+            }
+            self.pending_hero_receipts.pop_front();
+        }
+        if let Some(json) = self.pending_hero_model.as_ref() {
+            if !push(json.clone()) {
+                return false;
+            }
+            self.pending_hero_model = None;
+        }
+        true
+    }
+
+    fn queue_skill_model(&mut self, payload: &Value) -> Result<bool, String> {
+        let mut model = transform_skill_model(payload);
+        // C.MagicKey routes to Hero if either key is in its 17..24 bank.
+        // 0/0 really routes to player; Hero observes its unchanged authority separately.
+        if model.get("skillKeyAck").is_some_and(|ack| {
+            ack["key"].as_u64().unwrap_or(0) > 16 || ack["oldKey"].as_u64().unwrap_or(0) > 16
+        }) {
+            model["skillKeyAck"] = Value::Null;
+        }
+        let is_receipt = model.get("skillKeyAck").is_some_and(|v| !v.is_null());
+        if is_receipt {
+            let ack: mir2_client_bevy::skill_model::SkillKeyAck =
+                serde_json::from_value(model["skillKeyAck"].clone()).map_err(|e| e.to_string())?;
+            if ack.request_id == 0 || ack.spell.is_empty() || ack.key > 16 || ack.old_key > 16 {
+                return Err("invalid player skill receipt".into());
+            }
+        }
+        let json = serde_json::to_string(&model).map_err(|e| e.to_string())?;
+        if is_receipt {
+            self.pending_receipt_model = Some(json);
+            self.pending_latest_model = None;
+        } else {
+            self.pending_latest_model = Some(json);
+        }
+        Ok(self.flush_skill_models_with(mir2_bevy_runtime::native_ingest::push_native_skill_model))
+    }
+    fn flush_skill_models_with(&mut self, mut push: impl FnMut(String) -> bool) -> bool {
+        if let Some(json) = self.pending_receipt_model.as_ref() {
+            if !push(json.clone()) {
+                return false;
+            }
+            self.pending_receipt_model = None;
+        }
+        if let Some(json) = self.pending_latest_model.as_ref() {
+            if !push(json.clone()) {
+                return false;
+            }
+            self.pending_latest_model = None;
+        }
+        true
+    }
+
     fn reset(&mut self) {
         *self = Self::default();
     }
@@ -1371,10 +1498,43 @@ impl SkillPacketCursor {
     }
 
     fn apply_active_patches(&self, payload: &mut Value, snapshot_tick: u64) {
+        payload["_nativeSkillAuthority"] = json!({"sessionEpoch":self.session_epoch,"snapshotSerial":self.snapshot_serial,"playerObjectId":self.player_object_id.unwrap_or(0)});
         if let Some(skills) = skill_array_mut(payload) {
             skills.truncate(MAX_LEARNED_SKILLS);
 
             for skill in skills.iter_mut() {
+                if let Some(name) = skill.get("spell").and_then(Value::as_str)
+                    .and_then(|spell| self.magic_names.get(&spell.to_ascii_lowercase())) {
+                    skill["magicName"] = json!(name);
+                }
+
+                if let Some(sequence) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_casts.get(&spell.to_ascii_lowercase()))
+                {
+                    skill["castSequence"] = json!(sequence);
+                }
+
+                if let Some(icon) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_icons.get(&spell.to_ascii_lowercase()))
+                    .copied()
+                {
+                    skill["icon"] = json!(icon);
+                }
+                if let Some(needs) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_needs.get(&spell.to_ascii_lowercase()))
+                {
+                    for (field, value) in ["need1", "need2", "need3"].into_iter().zip(needs) {
+                        if let Some(value) = value {
+                            skill[field] = json!(value);
+                        }
+                    }
+                }
                 if self.removals.iter().any(|removal| {
                     skill_hotkey(skill) == Some(removal.hotkey)
                         && Self::removal_is_active(removal, snapshot_tick, self.snapshot_serial)
@@ -1441,6 +1601,38 @@ impl SkillPacketCursor {
 
     fn apply_packet(&mut self, packet: &str, payload: &Value, base_snapshot_tick: u64) -> bool {
         match packet {
+            "NewMagic" => {
+                if payload.get("hero").and_then(Value::as_bool) != Some(false) {
+                    return false;
+                }
+                let Some(magic) = payload.get("magic") else {
+                    return false;
+                };
+                let Some(spell) = magic.get("spell").and_then(Value::as_str).filter(|v| !v.is_empty()) else {
+                    return false;
+                };
+                let known = self.magic_icons.keys().chain(self.magic_names.keys()).chain(self.magic_needs.keys())
+                    .any(|key| key.eq_ignore_ascii_case(spell));
+                let distinct = self.magic_icons.keys().chain(self.magic_names.keys()).chain(self.magic_needs.keys())
+                    .map(|key| key.to_ascii_lowercase()).collect::<std::collections::HashSet<_>>().len();
+                if !known && distinct >= MAX_LEARNED_SKILLS {
+                    return false;
+                }
+                if let Some(name) = magic.get("name").and_then(Value::as_str).filter(|v| !v.is_empty()) {
+                    self.magic_names.insert(spell.to_ascii_lowercase(), name.to_owned());
+                }
+                if let Some(icon) = value_u32(magic.get("icon")).and_then(|v| u8::try_from(v).ok()) {
+                    self.magic_icons.insert(spell.to_ascii_lowercase(), icon);
+                }
+                self.magic_needs.insert(
+                    spell.to_ascii_lowercase(),
+                    ["need1", "need2", "need3"].map(|field| {
+                        value_u32(magic.get(field)).and_then(|v| u16::try_from(v).ok())
+                    }),
+                );
+                true
+            }
+
             "UserInformation" => {
                 let Some(object_id) = value_u32(payload.get("objectId")) else {
                     return false;
@@ -1464,6 +1656,19 @@ impl SkillPacketCursor {
                 }
                 true
             }
+            "MagicCast" => {
+                let Some(identity) = packet_spell_identity(payload) else {
+                    return false;
+                };
+                if !self.magic_casts.contains_key(&identity)
+                    && self.magic_casts.len() >= MAX_LEARNED_SKILLS
+                {
+                    return false;
+                }
+                self.next_magic_cast = self.next_magic_cast.saturating_add(1);
+                self.magic_casts.insert(identity, self.next_magic_cast);
+                true
+            }
             "MagicDelay" => {
                 if !self.packet_targets_player(payload) {
                     return false;
@@ -1475,7 +1680,7 @@ impl SkillPacketCursor {
                     return false;
                 };
                 self.upsert_patch(identity, base_snapshot_tick, |patch| {
-                    patch.cooldown_remaining_ticks = Some(delay);
+                    patch.delay_ms = Some(delay);
                     if let Some(mp_cost) =
                         value_u32(payload.get("mpCost").or_else(|| payload.get("mp_cost")))
                     {
@@ -1634,8 +1839,8 @@ fn skill_matches_identity(skill: &Value, identity: &str) -> bool {
 }
 
 fn apply_skill_patch(skill: &mut Value, patch: &SkillPacketPatch) {
-    if let Some(cooldown) = patch.cooldown_remaining_ticks {
-        skill["cooldownRemainingTicks"] = json!(cooldown);
+    if let Some(delay) = patch.delay_ms {
+        skill["delayMs"] = json!(delay);
     }
     if let Some(level) = patch.level {
         skill["level"] = json!(level);
@@ -1765,6 +1970,8 @@ where
             resume_state.retry_attempt = resume_state.retry_attempt.saturating_add(1);
         }
 
+        crate::timing::reset_requests();
+        let connect_started = Instant::now();
         let mut socket = match connect_gateway_with_resume_controls(
             base_url,
             &mut commands,
@@ -1844,6 +2051,10 @@ where
         };
 
         generation = generation.wrapping_add(1);
+        crate::timing::report(
+            &format!("websocket_connected:generation{generation}"),
+            connect_started,
+        );
         eprintln!("[gateway-client] connected generation={generation} resume={attempting_resume}");
         let mut phase = if attempting_resume {
             ConnectionPhase::AwaitingResume
@@ -2644,6 +2855,7 @@ where
                 }
             }
             _ = input_poll.tick() => {
+                if *phase==ConnectionPhase::Normal {skill_cursor.flush_hero_model();skill_cursor.flush_skill_models_with(mir2_bevy_runtime::native_ingest::push_native_skill_model);}
                 for command in drain_command_batch(commands, reconnect_config.command_batch_limit) {
                     if *phase != ConnectionPhase::Normal {
                         if discard_correlated_before_socket_write(
@@ -2703,6 +2915,11 @@ where
                         let _ = mir2_bevy_runtime::native_ingest::push_native_data_reset();
                         continue;
                     }
+                    let timed_request = match &command {
+                        GatewayCommand::Wire(NativeOutboundCommand::Login { .. }) => Some("login"),
+                        GatewayCommand::Wire(NativeOutboundCommand::StartGame { .. }) => Some("start_game"),
+                        _ => None,
+                    };
                     let trace_player_command = matches!(&command, GatewayCommand::Player(_));
                     let payload = match command {
                         GatewayCommand::Connect => continue,
@@ -2730,6 +2947,7 @@ where
                         lighting_publisher.reset_session();
                         lighting_publisher.push_clear_state();
                     }
+                    let send_started = Instant::now();
                     if let Err(error) = socket
                         .send(Message::Text(payload.to_string().into()))
                         .await
@@ -2744,6 +2962,7 @@ where
                         }
                         return Err(format!("gateway command send failed: {error}"));
                     }
+                    crate::timing::sent(timed_request, send_started);
                     if let Some(request) = game_shop_request {
                         if !game_shop_receipt_gate.record_successful_send(request) {
                             game_shop_receipt_gate.clear_terminal();
@@ -3079,6 +3298,13 @@ where
         });
     }
 
+    // Bootstrap belongs to each successful world entry, not the socket's
+    // lifetime. Logout/character selection may reuse this connection.
+    if matches!(&parsed, InboundEvent::Packet(PacketEvent::StartGameAck(ack)) if ack.result == Some(4))
+    {
+        *connection_bootstrap_sent = false;
+    }
+
     let is_world_snapshot = text_kind(text).as_deref() == Some("worldSnapshot");
     let snapshot_ingest = handle_gateway_text_with_world_ingest(
         text,
@@ -3103,10 +3329,12 @@ where
             .map_err(|error| format!("invalid gateway payload: {error}"))?;
         let payload = value.get("payload").unwrap_or(&Value::Null);
         if !*connection_bootstrap_sent {
-            if let Some(character) = resumed_character_from_snapshot(
-                payload,
-                resume_state.character_index.or(context.character_index),
-            ) {
+            let character_index = if *phase == ConnectionPhase::Resumed {
+                resume_state.character_index.or(context.character_index)
+            } else {
+                context.character_index
+            };
+            if let Some(character) = resumed_character_from_snapshot(payload, character_index) {
                 let _ = shell_events.send(ShellGatewayEvent::PlayerBootstrapped { character });
                 *connection_bootstrap_sent = true;
             }
@@ -3289,7 +3517,121 @@ where
     };
 
     if let InboundEvent::Packet(PacketEvent::Other { packet, payload }) = &parsed {
-        if social_cursor.apply_packet(packet, payload) {
+        if packet == "PlayerInspect" {
+            if let Some(data) = native_player_inspect_readback(payload, ui_cursor) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.player_inspect = Some(data);
+                let _ = gameplay_events.send(snapshot);
+            }
+        }
+        if let Some(menu_packet) = crate::equipment_creature_wire::packet(packet, payload) {
+            let mut snapshot = gameplay_adapter.big_map_snapshot();
+            snapshot.equipment_owner_id = last_world_payload
+                .as_ref()
+                .and_then(|w| w.get("playerObjectId"))
+                .and_then(Value::as_u64)
+                .and_then(|id| u32::try_from(id).ok());
+            snapshot.equipment_creature_packet = Some(menu_packet);
+            let _ = gameplay_events.send(snapshot);
+        }
+        if let Some(buff) = mir2_client_bevy::crystal_ui::overlays::status_hud::BuffEvent::parse(
+            packet,
+            payload,
+            std::time::Instant::now(),
+        ) {
+            let mut snapshot = gameplay_adapter.big_map_snapshot();
+            if let Some(info) = skill_cursor.hero.info.as_ref() {
+                snapshot.hero_buff_event = Some(
+                    mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::Buff {
+                        identity: mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Identity {
+                            session_epoch: skill_cursor.session_epoch,
+                            hero_generation: skill_cursor.hero.hero_generation,
+                            object_id: info.object_id,
+                        },
+                        event: buff.clone(),
+                    },
+                );
+            }
+            snapshot.status_buff_event = Some((skill_cursor.player_object_id, buff));
+            let _ = gameplay_events.send(snapshot);
+        }
+        if packet == "GuildBuffList" {
+            if let Some(packet) = guild_buff_readback(payload) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.guild_buff_packet = Some(packet);
+                let _ = gameplay_events.send(snapshot);
+            }
+        }
+        if let Some(bond_packet) = crate::social_bond_wire::packet(packet, payload) {
+            let mut snapshot = gameplay_adapter.big_map_snapshot();
+            snapshot.social_bond_packet = Some(bond_packet);
+            let _ = gameplay_events.send(snapshot);
+        }
+        if packet == "FriendUpdate" {
+            if let Some(friend_packet) = native_friend_packet(payload) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.friend_packet = Some(friend_packet);
+                let _ = gameplay_events.send(snapshot);
+            }
+        }
+        if matches!(packet.as_str(), "ChangeAMode" | "ChangePMode") {
+            if let Some(mode) = value_u32(payload.get("mode")).and_then(|v| u8::try_from(v).ok()) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.combat_mode_packet = match packet.as_str() {
+                    "ChangeAMode" if mode < 6 => {
+                        Some(mir2_protocol::ServerPacket::ChangeAMode { mode })
+                    }
+                    "ChangePMode" if mode < 5 => {
+                        Some(mir2_protocol::ServerPacket::ChangePMode { mode })
+                    }
+                    _ => None,
+                };
+                if snapshot.combat_mode_packet.is_some() {
+                    let _ = gameplay_events.send(snapshot);
+                }
+            }
+        }
+        if packet == "Rankings" {
+            if let Some(ranking_packet) = native_ranking_packet(payload) {
+                let mut snapshot = gameplay_adapter.big_map_snapshot();
+                snapshot.ranking_packet = Some(ranking_packet);
+                let _ = gameplay_events.send(snapshot);
+            }
+        }
+        let previous_hero_revision = skill_cursor.hero.revision;
+        skill_cursor.observe_hero_packet(packet, payload, ui_cursor)?;
+        let hero_buff_event = if packet == "HeroInformation"
+            && skill_cursor.hero.revision != previous_hero_revision
+        {
+            skill_cursor.hero.info.as_ref().map(|info| {
+                mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::Information(
+                    mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Identity {
+                        session_epoch: skill_cursor.session_epoch,
+                        hero_generation: skill_cursor.hero.hero_generation,
+                        object_id: info.object_id,
+                    },
+                )
+            })
+        } else if packet == "UpdateHeroSpawnState" {
+            payload
+                .get("state")
+                .and_then(Value::as_u64)
+                .filter(|v| *v <= 3)
+                .map(|v| {
+                    mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::SpawnState(
+                        v as u8,
+                    )
+                })
+        } else {
+            None
+        };
+        if let Some(event) = hero_buff_event {
+            let mut snapshot = gameplay_adapter.big_map_snapshot();
+            snapshot.hero_buff_event = Some(event);
+            let _ = gameplay_events.send(snapshot);
+        }
+
+        if social_cursor.apply_network_packet(packet, payload) {
             let json = serde_json::to_string(social_cursor).map_err(|error| error.to_string())?;
             let _ = mir2_bevy_runtime::native_ingest::push_native_social_model(json);
         }
@@ -3306,6 +3648,23 @@ where
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
             gameplay_adapter.observe_world_snapshot(&payload);
             skill_cursor.observe_snapshot(&mut payload);
+            if skill_cursor.hero.observe_snapshot(&payload) {
+                skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+                let json = serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?;
+                if skill_cursor.hero.skill_key_ack.is_some() {
+                    skill_cursor.pending_hero_receipts.push_back(json);
+                    skill_cursor.pending_hero_model = None;
+                } else {
+                    skill_cursor.pending_hero_model = Some(json);
+                }
+            }
+            skill_cursor.flush_hero_model();
+            // Skill receipts use their own critical channel, before ECS/world
+            // ingestion. Keep the complete snapshot on retry, never just ACK.
+            let _ = skill_cursor.queue_skill_model(&payload)?;
+            if let Some(object) = payload.as_object_mut() {
+                object.remove("skillKeyAck");
+            }
             let _ = gameplay_events.send(gameplay_adapter.snapshot(&payload));
             strip_one_shot_quest_operation_ack(&mut payload);
             let runtime_snapshot = transform_world_snapshot(&payload);
@@ -3315,6 +3674,10 @@ where
                 // so the native console stays readable while the map renders.
                 *snapshot_log_counter += 1;
                 if *snapshot_log_counter <= 3 {
+                    crate::timing::milestone(&format!(
+                        "world_snapshot_forwarded:{}",
+                        *snapshot_log_counter
+                    ));
                     eprintln!(
                         "[gateway-client] forwarded world snapshot #{}",
                         *snapshot_log_counter
@@ -3372,7 +3735,6 @@ where
             // Keep it synchronized with every accepted authoritative snapshot;
             // otherwise NewMagic can be acknowledged in chat while the native
             // SPELLS page and F1-F8 resolver remain permanently empty.
-            let _ = push_native_skill_model_from_world(&payload)?;
 
             // These models are deliberately independent. NPCGoods populates
             // ShopModel, while the cash catalogue uses GameShopInfo/Stock.
@@ -3394,6 +3756,7 @@ where
         }
         "packet" => {
             let packet = event.packet.as_deref().unwrap_or("?");
+            crate::timing::reply(packet);
             match packet {
                 "LoginSuccess" => {
                     eprintln!("[gateway-client] LoginSuccess");
@@ -3452,9 +3815,9 @@ where
                         }
                     }
                 }
-                "NPCGoods" => {
+                "NPCGoods" | "NPCPearlGoods" => {
                     if let Some(payload) = event.payload.as_ref() {
-                        if let Some(shop) = try_transform_shop_model_from_packet(payload, ui_cursor)
+                        if let Some(shop) = transform_npc_catalog_packet(packet, payload, ui_cursor)
                         {
                             let shop_json =
                                 serde_json::to_string(&shop).map_err(|error| error.to_string())?;
@@ -3614,6 +3977,17 @@ where
                 if let Some(base_payload) = last_world_payload.as_ref() {
                     let mut payload = base_payload.clone();
                     gameplay_adapter.apply_authoritative_overlay(&mut payload);
+                    skill_cursor.apply_active_patches(
+                        &mut payload,
+                        world_payload_tick_from(Some(base_payload)),
+                    );
+                    let source = match &parsed {
+                        InboundEvent::Packet(packet) => Some(packet),
+                        _ => None,
+                    };
+                    if packet_first_world_needs_aux_models(source) {
+                        let _ = skill_cursor.queue_skill_model(&payload)?;
+                    }
                     forward_packet_first_world(
                         &payload,
                         gameplay_adapter,
@@ -3845,8 +4219,6 @@ fn forward_packet_first_world(
     if !packet_first_world_needs_aux_models(source_packet) {
         return Ok(());
     }
-
-    let _ = push_native_skill_model_from_world(payload)?;
 
     if let Some(mut mail) = try_transform_mail_model_from_snapshot(payload) {
         let _ = push_mail_model_with_feedback(&mut mail, pending_mail_feedback)?;
@@ -4209,6 +4581,7 @@ fn transform_world_snapshot(payload: &Value) -> Value {
 
     json!({
         "mapTitle": payload.get("mapTitle"),
+        "mapFileName": payload.get("mapFileName"),
         "playerObjectId": payload.get("playerObjectId").and_then(object_id_string),
         "selectedObjectId": payload.get("selectedObjectId").and_then(object_id_string),
         "sceneView": payload.get("sceneView"),
@@ -4228,6 +4601,7 @@ fn transform_world_snapshot(payload: &Value) -> Value {
             "experience": value_i64_or(payload.get("playerExperience"), 0),
             "maxExperience": value_i64_or(payload.get("playerMaxExperience"), 0),
             "currentWeight": value_u16_or(payload.get("currentWeight"), 0),
+            "currentWeightKnown":value_u32(payload.get("currentWeight")).is_some(),
             "maxWeight": value_u16_or(payload.get("maxWeight"), 0),
             "name": value_string(self_player.and_then(|entity| entity.get("name"))),
             "className": value_string(
@@ -4496,7 +4870,7 @@ fn npc_shop_service_from_packet(
 ) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal> {
     use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal};
     let signal = match packet {
-        "NPCGoods" => NpcShopServiceSignal {
+        "NPCGoods" | "NPCPearlGoods" => NpcShopServiceSignal {
             mode: NpcShopServiceMode::Buy,
             repair_rate: None,
         },
@@ -4546,7 +4920,7 @@ fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCurs
     json!({
         "goods": goods,
         "selected_id": Value::Null,
-        "hide_added_stats": shop_hide_added_stats(payload),
+        "hide_added_stats": if ["hideAddedStats", "hide_added_stats", "shopHideAddedStats", "shop_hide_added_stats"].iter().any(|key| payload.get(*key).is_some()) { shop_hide_added_stats(payload) } else { cursor.npc_shop_hide_added_stats },
         "selected_bag_slot_for_sell": Value::Null,
         "selected_bag_slot_for_repair": Value::Null,
     })
@@ -4595,6 +4969,7 @@ fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) 
     let icon_geometry = icon.and_then(item_frame_geometry);
     Some(json!({
         "unique_id": id,
+        "use_pearls": cursor.npc_shop_uses_pearls,
         "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
         "price": value_u32(item.get("price")).unwrap_or_default(),
         "count": u16::try_from(count).unwrap_or(1),
@@ -4621,6 +4996,32 @@ fn shop_hide_added_stats(payload: &Value) -> bool {
     .find_map(|key| payload.get(*key))
     .and_then(Value::as_bool)
     .unwrap_or(false)
+}
+
+/// The ordinary catalogue packet changes both goods and their currency atomically.
+/// Malformed catalogues must not change the currency of the previous visible shop.
+fn transform_npc_catalog_packet(
+    packet: &str,
+    payload: &Value,
+    cursor: &mut NativeUiPlayerCursor,
+) -> Option<Value> {
+    if !matches!(packet, "NPCGoods" | "NPCPearlGoods") {
+        return None;
+    }
+    let previous = cursor.npc_shop_uses_pearls;
+    cursor.npc_shop_uses_pearls = packet == "NPCPearlGoods";
+    let mut model = try_transform_shop_model_from_packet(payload, cursor);
+    if let Some(model) = model.as_mut() {
+        if packet == "NPCPearlGoods" {
+            // Original Pearl packet has no HideAddedStats and does not assign it.
+            model["hide_added_stats"] = json!(cursor.npc_shop_hide_added_stats);
+        } else {
+            cursor.npc_shop_hide_added_stats = shop_hide_added_stats(payload);
+        }
+    } else {
+        cursor.npc_shop_uses_pearls = previous;
+    }
+    model
 }
 
 fn try_transform_shop_model_from_packet(
@@ -4961,8 +5362,10 @@ fn transform_skill_model(payload: &Value) -> Value {
                     let id = value_u32(skill.get("id")).unwrap_or(idx as u32);
                     let key = skill.get("key").and_then(Value::as_str).map(str::to_owned);
                     let name = skill
-                        .get("name")
+                        .get("magicName")
                         .and_then(Value::as_str)
+                        .filter(|v| !v.is_empty())
+                        .or_else(|| skill.get("name").and_then(Value::as_str))
                         .unwrap_or_default()
                         .to_owned();
                     let level = value_u32(skill.get("level"))
@@ -4977,6 +5380,36 @@ fn transform_skill_model(payload: &Value) -> Value {
                     .unwrap_or(0);
                     let mut transformed = serde_json::Map::new();
                     transformed.insert("id".to_owned(), json!(id));
+                    transformed.insert(
+                        "castSequence".to_owned(),
+                        skill.get("castSequence").cloned().unwrap_or(json!(0)),
+                    );
+                    transformed.insert(
+                        "icon".to_owned(),
+                        value_u32(skill.get("icon"))
+                            .and_then(|v| u8::try_from(v).ok())
+                            .map(|v| json!(v))
+                            .unwrap_or(Value::Null),
+                    );
+                    let definition = skill
+                        .get("spell")
+                        .and_then(Value::as_str)
+                        .and_then(mir2_game_data::crystal_magic_by_spell);
+                    for (field, fallback) in [
+                        ("experience", None),
+                        ("need1", definition.as_ref().map(|v| v.need1)),
+                        ("need2", definition.as_ref().map(|v| v.need2)),
+                        ("need3", definition.as_ref().map(|v| v.need3)),
+                    ] {
+                        let value = skill
+                            .get(field)
+                            .map(|v| value_u32(Some(v)).and_then(|n| u16::try_from(n).ok()))
+                            .unwrap_or(fallback);
+                        transformed.insert(
+                            field.to_owned(),
+                            value.map(|v| json!(v)).unwrap_or(Value::Null),
+                        );
+                    }
                     transformed.insert("name".to_owned(), json!(name));
                     transformed.insert("level".to_owned(), json!(level));
                     transformed.insert("key".to_owned(), json!(key));
@@ -5039,7 +5472,7 @@ fn transform_skill_model(payload: &Value) -> Value {
                 .collect::<Vec<_>>()
         })
         .unwrap_or_default();
-    json!({ "skills": skills })
+    json!({ "skills": skills,"skillKeyAck":payload.get("skillKeyAck").cloned().unwrap_or(Value::Null), "authority":payload.get("_nativeSkillAuthority").cloned().unwrap_or(json!({"sessionEpoch":0,"snapshotSerial":0,"playerObjectId":0})) })
 }
 
 fn push_native_skill_model_from_world(payload: &Value) -> Result<bool, String> {
@@ -5217,6 +5650,166 @@ fn item_frame_geometry(index: u16) -> Option<ItemFrameGeometry> {
 ///
 /// Container mapping: Bag1/Bag2 → 0 (one logical 0..79 bag grid), belt → 1,
 /// equipment → 2, quest inventory → 3 (read-only Crystal third tab).
+fn native_friend_packet(payload: &Value) -> Option<mir2_protocol::ServerPacket> {
+    let friends = serde_json::from_value::<Vec<mir2_protocol::ClientFriend>>(
+        payload.get("friendRecords")?.clone(),
+    )
+    .ok()?;
+    Some(mir2_protocol::ServerPacket::FriendUpdate { friends })
+}
+fn native_ranking_packet(payload: &Value) -> Option<mir2_protocol::ServerPacket> {
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct Rankings {
+        rank_type: u8,
+        my_rank: i32,
+        listing_details: Vec<mir2_protocol::RankCharacterInfo>,
+        listings: Vec<i64>,
+        count: i32,
+    }
+    let p = serde_json::from_value::<Rankings>(payload.clone()).ok()?;
+    if p.rank_type >= 6 {
+        return None;
+    }
+    Some(mir2_protocol::ServerPacket::Rankings {
+        rank_type: p.rank_type,
+        my_rank: p.my_rank,
+        listing_details: p.listing_details,
+        listings: p.listings,
+        count: p.count,
+    })
+}
+
+/// Crystal Hero.HPItem/MPItem are catalogue preview UserItems, not carried custody.
+fn hero_auto_pot_view(
+    info: &mir2_protocol::HeroUserInformation,
+    player: &NativeUiPlayerCursor,
+) -> mir2_client_bevy::inventory::InventoryModel {
+    let mut preview = info.clone();
+    preview.equipment = None;
+    preview.inventory = Some(
+        [info.hp_item_index, info.mp_item_index]
+            .into_iter()
+            .map(|index| {
+                if index <= 0 {
+                    return None;
+                }
+                let item = CrystalUserItemModel {
+                    item_index: index,
+                    count: 1,
+                    ..Default::default()
+                };
+                serde_json::to_value(item)
+                    .ok()
+                    .and_then(|v| serde_json::from_value(v).ok())
+            })
+            .collect(),
+    );
+    hero_inventory_view(&preview, player)
+}
+
+fn hero_inventory_view(
+    info: &mir2_protocol::HeroUserInformation,
+    cursor: &NativeUiPlayerCursor,
+) -> mir2_client_bevy::inventory::InventoryModel {
+    let mut target = cursor.clone();
+    target.level = Some(u32::from(info.level));
+    target.class_name = Some(format!("{:?}", info.class));
+    target.gender = Some(format!("{:?}", info.gender));
+    let map_items = |items: Option<&Vec<Option<mir2_protocol::UserItem>>>| {
+        items
+            .into_iter()
+            .flatten()
+            .enumerate()
+            .filter_map(|(slot, item)| {
+                let item = item.as_ref()?;
+                let mut value = serde_json::to_value(item).ok()?;
+                value["slot"] = json!(slot);
+                if let Some(source) = crystal_tooltip_source_for_user_item(&value, &target) {
+                    value["name"] = json!(source.info.name);
+                    value["stateImage"] =
+                        json!(source.real_info.as_ref().unwrap_or(&source.info).image);
+                    value["tooltipSource"] = json!(source);
+                }
+                Some(value)
+            })
+            .collect::<Vec<_>>()
+    };
+    serde_json::from_value(transform_inventory_model(&json!({"inventoryItems":map_items(info.inventory.as_ref()),"equipmentItems":map_items(info.equipment.as_ref())}))).unwrap_or_default()
+}
+
+fn native_player_inspect_readback(
+    payload: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<
+    mir2_client_bevy::crystal_ui::overlays::ranking_dialog::player_inspect::PlayerInspectReadback,
+> {
+    let info =
+        serde_json::from_value::<mir2_protocol::PlayerInspectInfo>(payload.get("info")?.clone())
+            .ok()?;
+    let mut target = cursor.clone();
+    target.level = Some(u32::from(info.level));
+    target.class_name = Some(format!("{:?}", info.class));
+    target.gender = Some(format!("{:?}", info.gender));
+    let equipment = info
+        .equipment
+        .iter()
+        .enumerate()
+        .filter_map(|(slot, item)| {
+            let item = item.as_ref()?;
+            let mut value = serde_json::to_value(item).ok()?;
+            value["slot"] = json!(slot);
+            if let Some(source) = crystal_tooltip_source_for_user_item(&value, &target) {
+                value["name"] = json!(source.info.name);
+                value["stateImage"] =
+                    json!(source.real_info.as_ref().unwrap_or(&source.info).image);
+                value["tooltipSource"] = json!(source);
+            }
+            Some(value)
+        })
+        .collect::<Vec<_>>();
+    let inventory = serde_json::from_value(transform_inventory_model(
+        &json!({"equipmentItems":equipment}),
+    ))
+    .ok()?;
+    Some(mir2_client_bevy::crystal_ui::overlays::ranking_dialog::player_inspect::PlayerInspectReadback{info,inventory})
+}
+
+#[cfg(test)]
+mod ranking_projection_tests {
+    use super::*;
+    #[test]
+    fn friend_projection_preserves_blocked_identity_and_empty_memos() {
+        let payload = json!({"friends":[{"name":"Blade","online":true}],"blocked":[{"name":"Griefer"}],"friendRecords":[{"index":42,"name":"Blade","memo":"","blocked":false,"online":true},{"index":43,"name":"Griefer","memo":"ignored","blocked":true,"online":false}]});
+        let Some(mir2_protocol::ServerPacket::FriendUpdate { friends }) =
+            native_friend_packet(&payload)
+        else {
+            panic!("full server friend records must project");
+        };
+        assert_eq!(friends.len(), 2);
+        assert_eq!(friends[0].index, 42);
+        assert_eq!(friends[0].memo, "");
+        assert_eq!(friends[1].index, 43);
+        assert!(friends[1].blocked);
+        assert!(
+            native_friend_packet(&json!({"friends":[{"name":"Blade","online":true}]})).is_none()
+        );
+    }
+    #[test]
+    fn player_inspect_readback_keeps_named_subject_and_empty_slots_without_grants() {
+        let payload = json!({"info":{"name":"RankPeer","guildName":"Guild","guildRank":"Member","equipment":[null,null,null,null,null,null,null,null,null,null,null,null,null,null],"class":"Warrior","gender":"Male","hair":2,"level":30,"loverName":"","allowObserve":false,"isHero":false}});
+        let data = native_player_inspect_readback(&payload, &NativeUiPlayerCursor::default())
+            .expect("typed inspect payload");
+        assert_eq!(data.info.name, "RankPeer");
+        assert_eq!(data.info.equipment.len(), 14);
+        assert!(data.inventory.items.is_empty());
+        assert_eq!(data.inventory.gold, 0);
+        let mut bad = payload;
+        bad["info"]["equipment"] = json!("invalid");
+        assert!(native_player_inspect_readback(&bad, &NativeUiPlayerCursor::default()).is_none());
+    }
+}
+
 fn transform_inventory_model(payload: &Value) -> Value {
     let gold = value_u32_or(payload.get("gold"), 0);
     // Only an explicit Crystal-array length can unlock page two. Occupied
@@ -5461,6 +6054,7 @@ fn transform_ui_read_model(payload: &Value) -> Value {
             "experience": value_i64_or(payload.get("playerExperience"), 0),
             "maxExperience": value_i64_or(payload.get("playerMaxExperience"), 0),
             "currentWeight": value_u16_or(payload.get("currentWeight"), 0),
+            "currentWeightKnown":value_u32(payload.get("currentWeight")).is_some(),
             "maxWeight": value_u16_or(payload.get("maxWeight"), 0),
             "name": value_string(self_player.and_then(|entity| entity.get("name"))),
             "className": value_string(
@@ -5585,6 +6179,46 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn skill_experience_projection_uses_real_snapshot_and_catalog_needs() {
+        let def = mir2_game_data::crystal_magic_by_spell("FireBall").unwrap();
+        let payload = json!({"knownSkills":[
+            {"spell":"FireBall","experience":0,"need2":999},
+            {"spell":"Uncatalogued"},
+            {"spell":"FireBall"}
+        ]});
+        let model: mir2_client_bevy::skill_model::SkillModel =
+            serde_json::from_value(transform_skill_model(&payload)).unwrap();
+        assert_eq!(model.bindings[0].experience, Some(0));
+        assert_eq!(model.bindings[0].need1, Some(def.need1));
+        assert_eq!(model.bindings[0].need2, Some(999));
+        assert_eq!(model.bindings[0].need3, Some(def.need3));
+        assert_eq!(model.bindings[1].experience, None);
+        assert_eq!(model.bindings[1].need1, None);
+        assert_eq!(model.bindings[2].experience, None);
+    }
+
+    #[test]
+    fn skill_experience_new_magic_keeps_server_threshold_override_until_session_reset() {
+        let mut cursor = SkillPacketCursor::default();
+        assert!(cursor.apply_packet("NewMagic",&json!({"hero":false,"magic":{"spell":"FireBall","icon":0,"need1":17,"need2":0,"need3":29}}),0));
+        let mut payload = json!({"knownSkills":[{"spell":"FireBall","experience":9}]});
+        cursor.apply_active_patches(&mut payload, 1);
+        let model: mir2_client_bevy::skill_model::SkillModel =
+            serde_json::from_value(transform_skill_model(&payload)).unwrap();
+        assert_eq!(model.bindings[0].experience, Some(9));
+        assert_eq!(
+            (
+                model.bindings[0].need1,
+                model.bindings[0].need2,
+                model.bindings[0].need3
+            ),
+            (Some(17), Some(0), Some(29))
+        );
+        cursor.reset();
+        assert!(cursor.magic_needs.is_empty());
+    }
     use tokio::net::TcpListener;
     use tokio::sync::oneshot;
     use tokio::time::{sleep, timeout};
@@ -5707,6 +6341,62 @@ mod tests {
             json!(false)
         );
         assert!(publisher.last_pushed_json.is_none());
+    }
+
+    #[test]
+    fn player_weight_projection_preserves_u32_and_clears_null_missing_or_partial() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        cursor.observe_world_snapshot(&json!({"playerWeights":{"bag":70000,"wear":25,"hand":9}}));
+        let model: mir2_client_bevy::read_model::UiReadModel =
+            serde_json::from_value(cursor.to_read_model_json()).unwrap();
+        assert_eq!(model.player.weights.unwrap().bag, 70000);
+        assert_eq!(model.player.weights.unwrap().wear, 25);
+        assert_eq!(model.player.weights.unwrap().hand, 9);
+        for value in [
+            json!({"playerWeights":null}),
+            json!({}),
+            json!({"playerWeights":{"bag":1}}),
+        ] {
+            cursor.player_weights = model.player.weights;
+            cursor.observe_world_snapshot(&value);
+            assert!(cursor.player_weights.is_none());
+            assert!(cursor.to_read_model_json()["player"]["weights"].is_null());
+        }
+    }
+
+    #[test]
+    fn pearl_goods_currency_survives_snapshot_and_normal_catalogue_resets_it() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let payload =
+            json!({"list":[{"uniqueId":9,"name":"Potion","price":50,"count":1,"icon":7}]});
+        transform_npc_catalog_packet(
+            "NPCGoods",
+            &json!({"list":[],"hideAddedStats":true}),
+            &mut cursor,
+        )
+        .unwrap();
+        let pearl = transform_npc_catalog_packet("NPCPearlGoods", &payload, &mut cursor).unwrap();
+        assert_eq!(pearl["hide_added_stats"], true);
+        assert_eq!(pearl["goods"][0]["use_pearls"], true);
+        assert_eq!(pearl["goods"][0]["price"], 50);
+        assert_eq!(
+            npc_shop_service_from_packet("NPCPearlGoods", &payload)
+                .unwrap()
+                .mode,
+            mir2_client_bevy::shop::NpcShopServiceMode::Buy
+        );
+        let snapshot =
+            transform_shop_model_from_snapshot(&json!({"npc_goods":payload["list"]}), &cursor);
+        assert_eq!(snapshot["goods"][0]["use_pearls"], true);
+        assert!(
+            transform_npc_catalog_packet("NPCGoods", &json!({"list":[{}]}), &mut cursor).is_none()
+        );
+        assert!(cursor.npc_shop_uses_pearls);
+        let gold = transform_npc_catalog_packet("NPCGoods", &payload, &mut cursor).unwrap();
+        assert_eq!(gold["goods"][0]["use_pearls"], false);
+        cursor.npc_shop_uses_pearls = true;
+        cursor.reset();
+        assert!(!cursor.npc_shop_uses_pearls);
     }
 
     #[test]
@@ -8043,11 +8733,97 @@ mod tests {
 
         // The display-only entry remains learned, but never acquires a
         // protocol spell or an invented MP cost.
-        let display_only = model
-            .selection_for_shortcut(3)
-            .expect("F3 selected display-only skill");
-        assert_eq!(display_only.spell, None);
-        assert_eq!(display_only.mp_cost, None);
+        assert!(model.selection_for_shortcut(3).is_none());
+        assert_eq!(model.binding_for(0).spell, None);
+        assert_eq!(model.binding_for(0).mp_cost, None);
+    }
+
+    #[test]
+    fn hero_receipt_backpressure_preserves_all_processed_models_before_latest() {
+        let mut cursor = SkillPacketCursor::default();
+        cursor
+            .pending_hero_receipts
+            .extend(["first".into(), "second".into()]);
+        cursor.pending_hero_model = Some("latest".into());
+        assert!(!cursor.flush_hero_models_with(|_| false));
+        assert_eq!(cursor.pending_hero_receipts.len(), 2);
+        let mut sent = vec![];
+        assert!(cursor.flush_hero_models_with(|value| {
+            sent.push(value);
+            true
+        }));
+        assert_eq!(sent, vec!["first", "second", "latest"]);
+        cursor.pending_hero_receipts.push_back("old-session".into());
+        cursor.reset();
+        assert!(cursor.pending_hero_receipts.is_empty());
+    }
+
+    #[test]
+    fn skill_receipt_retry_keeps_its_own_keys_before_latest_snapshot() {
+        let mut cursor = SkillPacketCursor::default();
+        let receipt = serde_json::json!({"skillKeyAck":{"requestId":73,"spell":"FireBall","key":16,"oldKey":0,"accepted":true},"skills":[{"id":1,"hotkey":16}] }).to_string();
+        let newer = serde_json::json!({"skills":[{"id":1,"hotkey":3}]}).to_string();
+        cursor.pending_receipt_model = Some(receipt.clone());
+        cursor.pending_latest_model = Some(newer.clone());
+        assert!(!cursor.flush_skill_models_with(|_| false));
+        assert_eq!(cursor.pending_receipt_model.as_ref(), Some(&receipt));
+        let mut sent = vec![];
+        assert!(!cursor.flush_skill_models_with(|model| {
+            if sent.is_empty() {
+                sent.push(model);
+                true
+            } else {
+                false
+            }
+        }));
+        assert_eq!(sent, vec![receipt]);
+        assert!(cursor.pending_receipt_model.is_none());
+        assert_eq!(cursor.pending_latest_model.as_ref(), Some(&newer));
+        assert!(cursor.flush_skill_models_with(|model| {
+            sent.push(model);
+            true
+        }));
+        assert_eq!(sent[1], newer);
+        cursor.pending_latest_model = Some("stale".into());
+        cursor.reset();
+        assert!(cursor.pending_latest_model.is_none());
+        assert!(cursor.pending_receipt_model.is_none());
+    }
+
+    #[test]
+    fn real_magic_icons_override_catalog_snapshots_and_reset_at_session_boundary() {
+        let mut cursor = SkillPacketCursor::default();
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"FireBall","icon":0}}),
+            1
+        ));
+        assert!(!cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":true,"magic":{"spell":"FireBall","icon":99}}),
+            1
+        ));
+        let mut payload = json!({"tick":2,"knownSkills":[{"id":1,"spell":"FireBall","icon":44,"hotkey":16,"castKind":"target"}]});
+        cursor.observe_snapshot(&mut payload);
+        let model: mir2_client_bevy::skill_model::SkillModel =
+            serde_json::from_value(transform_skill_model(&payload)).unwrap();
+        assert_eq!(model.binding_for(1).icon, Some(0));
+        assert_eq!(model.skill_for_shortcut(16).unwrap().id, 1);
+        cursor.reset();
+        payload["knownSkills"][0]["icon"] = json!(44);
+        cursor.observe_snapshot(&mut payload);
+        assert_eq!(payload["knownSkills"][0]["icon"], 44);
+        let wire = NativeOutboundCommand::MagicKey {
+            request_id: 73,
+            spell: "FireBall".into(),
+            key: 16,
+            old_key: 1,
+        };
+        let value = serde_json::to_value(&wire).unwrap();
+        assert_eq!(
+            value,
+            json!({"type":"magicKey","requestId":73,"spell":"FireBall","key":16,"oldKey":1})
+        );
     }
 
     #[test]
@@ -8100,6 +8876,69 @@ mod tests {
     }
 
     #[test]
+    fn skill_cast_sequence_is_an_event_and_delay_is_milliseconds() {
+        let mut cursor = SkillPacketCursor::default();
+        let original = json!({"tick":100,"playerObjectId":1001,"knownSkills":[{"spell":"FireBall","hotkey":1,"cooldownRemainingTicks":3,"delayMs":200}]});
+        let mut snapshot = original.clone();
+        cursor.observe_snapshot(&mut snapshot);
+        assert!(cursor.apply_packet(
+            "MagicDelay",
+            &json!({"objectId":1001,"spell":"FireBall","delay":2200}),
+            100
+        ));
+        assert!(cursor.apply_packet("MagicCast", &json!({"spell":"FireBall"}), 100));
+        cursor.apply_active_patches(&mut snapshot, 100);
+        assert_eq!(snapshot["knownSkills"][0]["delayMs"], json!(2200));
+        assert_eq!(
+            snapshot["knownSkills"][0]["cooldownRemainingTicks"],
+            json!(3)
+        );
+        assert_eq!(snapshot["knownSkills"][0]["castSequence"], json!(1));
+        let mut repeated = original.clone();
+        cursor.observe_snapshot(&mut repeated);
+        assert_eq!(repeated["knownSkills"][0]["castSequence"], json!(1));
+        assert!(cursor.apply_packet("MagicCast", &json!({"spell":"FireBall"}), 100));
+        cursor.apply_active_patches(&mut repeated, 100);
+        assert_eq!(repeated["knownSkills"][0]["castSequence"], json!(2));
+        let transformed = transform_skill_model(&repeated);
+        let native: mir2_client_bevy::skill_model::SkillModel =
+            serde_json::from_value(transformed).unwrap();
+        assert_eq!(native.bindings[0].cast_sequence, 2);
+    }
+
+    #[test]
+    fn skill_name_metadata_cap_preserves_known_iconless_updates() {
+        let mut cursor = SkillPacketCursor::default();
+        for index in 0..MAX_LEARNED_SKILLS {
+            assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":format!("Spell{index}")}}),0));
+        }
+        assert!(!cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"overflow"}}),0));
+        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"spell0","name":"Updated"}}),0));
+        assert_eq!(cursor.magic_names.get("spell0").map(String::as_str),Some("Updated"));
+    }
+
+    #[test]
+    fn authoritative_skill_names_survive_alias_snapshots_and_reset() {
+        let mut cursor = SkillPacketCursor::default();
+        let base = json!({"knownSkills":[{"spell":"Fury","name":"Battle Focus","magicName":"Fury"},
+            {"spell":"Healing","name":"Minor Heal","magicName":"Healing"}]});
+        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"Fury","name":"定制怒气"}}), 0));
+        assert!(!cursor.apply_packet("NewMagic", &json!({"hero":true,"magic":{"spell":"Fury","name":"Hero name"}}), 0));
+        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"Fury","name":""}}), 0));
+        for _ in 0..3 {
+            let mut snapshot = base.clone();
+            cursor.observe_snapshot(&mut snapshot);
+            let model = transform_skill_model(&snapshot);
+            assert_eq!(model["skills"][0]["name"], "定制怒气");
+            assert_eq!(model["skills"][1]["name"], "Healing");
+        }
+        cursor.reset();
+        let mut snapshot = base;
+        cursor.observe_snapshot(&mut snapshot);
+        assert_eq!(transform_skill_model(&snapshot)["skills"][0]["name"], "Fury");
+    }
+
+    #[test]
     fn skill_packets_win_over_stale_snapshot_and_fresh_tick_retires_patch() {
         let mut cursor = SkillPacketCursor::default();
         let mut initial = json!({
@@ -8144,7 +8983,8 @@ mod tests {
         });
         cursor.observe_snapshot(&mut stale);
         assert_eq!(stale["playerMp"], json!(40));
-        assert_eq!(stale["knownSkills"][0]["cooldownRemainingTicks"], json!(12));
+        assert_eq!(stale["knownSkills"][0]["delayMs"], json!(12));
+        assert_eq!(stale["knownSkills"][0]["cooldownRemainingTicks"], json!(0));
 
         let mut fresh = json!({
             "tick": 101,
@@ -8202,7 +9042,8 @@ mod tests {
             }]
         });
         cursor.observe_snapshot(&mut next);
-        assert_eq!(next["knownSkills"][0]["cooldownRemainingTicks"], json!(12));
+        assert_eq!(next["knownSkills"][0]["delayMs"], json!(12));
+        assert_eq!(next["knownSkills"][0]["cooldownRemainingTicks"], json!(3));
         assert!(cursor.patches.is_empty());
         let mut later = json!({
             "tick": 0,
@@ -8409,7 +9250,8 @@ mod tests {
         ));
         let mut patched = initial;
         cursor.observe_snapshot(&mut patched);
-        assert_eq!(patched["knownSkills"][0]["cooldownRemainingTicks"], 12);
+        assert_eq!(patched["knownSkills"][0]["cooldownRemainingTicks"], 0);
+        assert_eq!(patched["knownSkills"][0]["delayMs"], 12);
         assert_eq!(patched["knownSkills"][0]["level"], 2);
         assert_eq!(patched["knownSkills"][0]["experience"], 7);
     }
@@ -9372,6 +10214,92 @@ mod tests {
             }
             other => panic!("unexpected event: {other:?}"),
         }
+
+        // A second successful StartGame on the same socket must re-arm
+        // bootstrap, while subsequent ordinary snapshots stay deduplicated.
+        let start_ack = r#"{"type":"packet","packet":"StartGame","payload":{"result":4}}"#;
+        handle_gateway_text_for_connection(
+            start_ack,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("second StartGame ACK");
+        assert!(matches!(
+            shell_receiver.try_recv(),
+            Ok(ShellGatewayEvent::StartGameAck { accepted: true, .. })
+        ));
+        assert!(!connection_bootstrap_sent);
+        handle_gateway_text_for_connection(
+            &snapshot,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("accepted opening snapshot");
+        assert!(matches!(
+            shell_receiver.try_recv(),
+            Ok(ShellGatewayEvent::PlayerBootstrapped { .. })
+        ));
+        handle_gateway_text_for_connection(
+            &snapshot,
+            &mut snapshot_log_counter,
+            &context,
+            &shell_sender,
+            &mut gameplay_adapter,
+            &gameplay_sender,
+            &mut last_world_payload,
+            &mut last_wallet,
+            &mut ui_cursor,
+            &mut in_flight_claim_mail_id,
+            &mut send_mail_in_flight,
+            &mut pending_mail_feedback,
+            &mut skill_cursor,
+            &mut social_cursor,
+            &mut phase,
+            &mut resume_state,
+            &mut resume_scene_reset_sent,
+            &mut connection_bootstrap_sent,
+            &mut game_shop_receipt_gate,
+            &mut push_world_state,
+        )
+        .expect("accepted opening snapshot");
+        assert!(
+            shell_receiver.try_recv().is_err(),
+            "ordinary snapshots must not repeat bootstrap"
+        );
     }
 
     #[test]
@@ -10534,5 +11462,54 @@ mod tests {
             .await
             .expect("loopback server must shut down")
             .expect("loopback server task must not panic");
+    }
+}
+
+fn guild_buff_readback(payload: &serde_json::Value) -> Option<mir2_protocol::ServerPacket> {
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct BuffReadback {
+        remove: u8,
+        active_buffs: Vec<mir2_protocol::GuildBuff>,
+        guild_buffs: Vec<mir2_protocol::GuildBuffInfo>,
+    }
+    let data = serde_json::from_value::<BuffReadback>(payload.clone()).ok()?;
+    Some(mir2_protocol::ServerPacket::GuildBuffList {
+        remove: data.remove,
+        active_buffs: data.active_buffs,
+        guild_buffs: data.guild_buffs,
+    })
+}
+#[cfg(test)]
+mod guild_wire_tests {
+    use super::*;
+    #[test]
+    fn guild_buff_delta_keeps_source_ids_stats_and_duration() {
+        let value = serde_json::json!({"remove":1,"activeBuffs":[{"id":42,"active":false,"active_time_remaining":17}],"guildBuffs":[{"id":42,"icon":3,"name":"Might","level_requirement":2,"points_requirement":1,"time_limit":60,"activation_cost":100,"stats":[{"stat":5,"value":3}]}]});
+        let Some(mir2_protocol::ServerPacket::GuildBuffList {
+            remove,
+            active_buffs,
+            guild_buffs,
+        }) = guild_buff_readback(&value)
+        else {
+            panic!("ordinary source readback");
+        };
+        assert_eq!(remove, 1);
+        assert_eq!(active_buffs[0].active_time_remaining, 17);
+        assert!(!active_buffs[0].active);
+        assert_eq!(guild_buffs[0].stats[0].stat, 5);
+        assert_eq!(guild_buffs[0].stats[0].value, 3);
+        assert!(guild_buff_readback(&serde_json::json!({"remove":0,"activeBuffs":[]})).is_none());
+    }
+    #[test]
+    fn guild_buff_requests_serialize_as_ordinary_browser_commands() {
+        for action in 0..=2 {
+            let command =
+                crate::native_protocol::NativeOutboundCommand::GuildBuffUpdate { action, id: 42 };
+            assert_eq!(
+                serde_json::to_value(command).unwrap(),
+                serde_json::json!({"type":"guildBuffUpdate","action":action,"id":42})
+            );
+        }
     }
 }

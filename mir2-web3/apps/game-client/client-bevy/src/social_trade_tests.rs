@@ -173,6 +173,11 @@ fn trade_completion_and_terminal_cancel_reset_both_sides_and_only_trade_pending(
             model.trade,
             TradeModel {
                 event_revision: revision + 1,
+                cancel_revision: if name == "TradeCancel" {
+                    revision + 1
+                } else {
+                    0
+                },
                 ..Default::default()
             }
         );

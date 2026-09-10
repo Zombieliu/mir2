@@ -8,11 +8,12 @@ mod provenance;
 use bevy::{
     input::ButtonInput,
     prelude::{
-        App, Image, KeyCode, On, Plugin, Query, Res, ResMut, Resource, Update, Window, With,
+        App, Image, KeyCode, On, Plugin, PostUpdate, Query, Res, ResMut, Resource, Window, With,
     },
     render::view::screenshot::{Screenshot, ScreenshotCaptured},
     window::PrimaryWindow,
 };
+use mir2_bevy_runtime::capture_context::RenderedCaptureContext;
 use mir2_client_bevy::crystal_ui::{
     notice::NoticeDialogState, overlays::CharacterPage, NativePlayerUiState,
 };
@@ -135,7 +136,24 @@ struct NativeCaptureRuntime {
 struct NativeAutoCaptureState {
     target: NativeCaptureTarget,
     countdown: Option<u32>,
+    identity: Option<(u64, String)>,
     done: bool,
+}
+
+impl NativeAutoCaptureState {
+    fn observe_rendered_identity(&mut self, rendered: Option<&RenderedCaptureContext>) -> bool {
+        if !is_world_scene(capture_target_slug(self.target)) {
+            return true;
+        }
+        let identity = rendered
+            .filter(|value| value.ready())
+            .and_then(|value| Some((value.epoch, value.map_file_name.clone()?)));
+        if self.identity != identity {
+            self.countdown = None;
+            self.identity = identity;
+        }
+        self.identity.is_some()
+    }
 }
 
 /// Snapshot taken when a screenshot is requested, before Bevy completes the
@@ -160,9 +178,9 @@ struct NativeCaptureWorld {
     map: Option<String>,
     x: Option<i32>,
     y: Option<i32>,
-    // Lighting is managed by the Windows host bridge and is not exposed as a
-    // capture resource. A missing light must remain explicit rather than be
-    // guessed from time, map, or a visual effect.
+    map_file_name: Option<String>,
+    epoch: Option<u64>,
+    // Populated only from the state consumed by runtime presentation.
     light: Option<String>,
 }
 
@@ -215,6 +233,8 @@ struct NativeCaptureV1Sidecar {
 #[serde(rename_all = "camelCase")]
 struct NativeCaptureV1World {
     map: String,
+    map_file_name: String,
+    epoch: u64,
     x: i32,
     y: i32,
     light: String,
@@ -279,6 +299,7 @@ impl Plugin for Mir2NativeScreenshotPlugin {
         if let Some(target) = config.auto_target {
             runtime.auto = Some(NativeAutoCaptureState {
                 target,
+                identity: None,
                 countdown: None,
                 done: false,
             });
@@ -286,7 +307,7 @@ impl Plugin for Mir2NativeScreenshotPlugin {
 
         app.insert_resource(config);
         app.insert_resource(runtime);
-        app.add_systems(Update, (manual_capture_system, auto_capture_system));
+        app.add_systems(PostUpdate, (manual_capture_system, auto_capture_system));
     }
 }
 
@@ -301,8 +322,23 @@ fn manual_capture_system(
     player_ui: Option<Res<NativePlayerUiState>>,
     quest_ui: Option<Res<QuestUiState>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    rendered: Option<Res<RenderedCaptureContext>>,
 ) {
-    if !keys.just_pressed(KeyCode::F12) {
+    // Ctrl+Shift+F12 remains the explicit QA evidence shortcut. Ordinary
+    // screenshots follow Crystal's configurable key-release binding.
+    let qa = keys.just_pressed(KeyCode::F12)
+        && (keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight))
+        && (keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight));
+    let bound = player_ui.as_deref().is_some_and(|u| {
+        !u.keyboard.open
+            && !u.keyboard.input_consumed
+            && mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::released(
+                &u.keyboard,
+                &keys,
+                "Screenshot",
+            )
+    });
+    if !qa && !bound {
         return;
     }
 
@@ -322,6 +358,7 @@ fn manual_capture_system(
             player_ui.as_deref(),
             quest_ui.as_deref(),
             primary_dpi_scale(&windows),
+            rendered.as_deref(),
         ),
     );
 }
@@ -340,6 +377,7 @@ fn auto_capture_system(
     inventory: Option<Res<InventoryModel>>,
     quest_ui: Option<Res<QuestUiState>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    rendered: Option<Res<RenderedCaptureContext>>,
 ) {
     let Some(shell) = shell.as_deref() else {
         return;
@@ -376,7 +414,7 @@ fn auto_capture_system(
             entities.as_deref(),
             player_ui.as_deref(),
             config.quest_index,
-        );
+        ) && auto.observe_rendered_identity(rendered.as_deref());
         if env::var_os("MIR2_NATIVE_TRACE_CAPTURE").is_some()
             && CAPTURE_TRACE_FRAME.fetch_add(1, Ordering::Relaxed) % 60 == 0
         {
@@ -438,6 +476,7 @@ fn auto_capture_system(
                 player_ui.as_deref(),
                 quest_ui.as_deref(),
                 primary_dpi_scale(&windows),
+                rendered.as_deref(),
             ),
         );
     }
@@ -465,15 +504,20 @@ fn capture_request(
     player_ui: Option<&NativePlayerUiState>,
     quest_ui: Option<&QuestUiState>,
     dpi_scale: Option<f32>,
+    rendered: Option<&RenderedCaptureContext>,
 ) -> NativeCaptureRequest {
     let is_world_scene = is_world_scene(scene);
     let map_name = is_world_scene
         .then(|| ui.and_then(|model| model.player.map_name.clone()))
         .flatten();
-    let world = NativeCaptureWorld {
-        light: map_name
-            .as_deref()
-            .and_then(crate::map_parser::lighting::capture_light_state_for_map),
+    let mut world = NativeCaptureWorld {
+        light: is_world_scene
+            .then(|| rendered.and_then(|v| v.light.clone()))
+            .flatten(),
+        map_file_name: is_world_scene
+            .then(|| rendered.and_then(|v| v.map_file_name.clone()))
+            .flatten(),
+        epoch: is_world_scene.then(|| rendered.map(|v| v.epoch)).flatten(),
         map: map_name,
         x: is_world_scene
             .then(|| self_player_position(entities).map(|position| position.0))
@@ -482,6 +526,13 @@ fn capture_request(
             .then(|| self_player_position(entities).map(|position| position.1))
             .flatten(),
     };
+    if is_world_scene {
+        if let Some(rendered) = rendered {
+            world.map = rendered.map_title.clone();
+            world.x = rendered.x;
+            world.y = rendered.y;
+        }
+    }
     let ui_state = safe_ui_state_slug(shell, player_ui, quest_ui);
     let sidecar_path = png_path.with_extension("json");
 
@@ -629,6 +680,8 @@ fn native_capture_v1_sidecar(
     let world = if is_world_scene(&request.scene) {
         Some(NativeCaptureV1World {
             map: request.world.map.clone()?,
+            map_file_name: request.world.map_file_name.clone()?,
+            epoch: request.world.epoch?,
             x: request.world.x?,
             y: request.world.y?,
             light: request.world.light.clone()?,
@@ -699,7 +752,9 @@ fn capture_acceptance_blockers(
         && (request.world.map.is_none()
             || request.world.x.is_none()
             || request.world.y.is_none()
-            || request.world.light.is_none())
+            || request.world.light.is_none()
+            || request.world.map_file_name.is_none()
+            || request.world.epoch.is_none())
     {
         blockers.push("authoritative-world-state-incomplete");
     }
@@ -984,6 +1039,7 @@ fn native_shell_screen_slug(screen: NativeShellScreen) -> &'static str {
         NativeShellScreen::Connecting => "connecting",
         NativeShellScreen::Login => "login",
         NativeShellScreen::Authenticating => "authenticating",
+        NativeShellScreen::OpeningLogin => "opening-login",
         NativeShellScreen::CharacterSelect => "character-select",
         NativeShellScreen::CharacterCreate => "character-create",
         NativeShellScreen::StartingGame => "starting-game",
@@ -1001,6 +1057,7 @@ fn parse_shell_screen_slug(raw: &str) -> Option<NativeShellScreen> {
         "connecting" => Some(NativeShellScreen::Connecting),
         "login" => Some(NativeShellScreen::Login),
         "authenticating" => Some(NativeShellScreen::Authenticating),
+        "opening-login" => Some(NativeShellScreen::OpeningLogin),
         "characterselect" => Some(NativeShellScreen::CharacterSelect),
         "character-select" | "character_select" => Some(NativeShellScreen::CharacterSelect),
         "charactercreate" => Some(NativeShellScreen::CharacterCreate),
@@ -1246,6 +1303,7 @@ mod tests {
             capture_index: 0,
             auto: Some(NativeAutoCaptureState {
                 target: NativeCaptureTarget::CharacterOpen,
+                identity: None,
                 countdown: None,
                 done: false,
             }),
@@ -1256,7 +1314,7 @@ mod tests {
         });
         app.insert_resource(NativePlayerUiState::default());
         app.insert_resource(NoticeDialogState::default());
-        app.add_systems(Update, auto_capture_system);
+        app.add_systems(PostUpdate, auto_capture_system);
         // With no authoritative UiReadModel yet, preparation opens the target
         // but must not queue a screenshot. Active preparation remains intact.
         app.update();
@@ -1561,6 +1619,7 @@ mod tests {
                 Some(&NativePlayerUiState::default()),
                 None,
                 Some(1.0),
+                None,
             );
             let blockers = capture_acceptance_blockers(&request, 1024, 768);
             assert!(is_world_scene(scene));
@@ -1628,6 +1687,7 @@ mod tests {
         let mut runtime = NativeCaptureRuntime::default();
         runtime.auto = Some(NativeAutoCaptureState {
             target: NativeCaptureTarget::Screen(NativeShellScreen::InGame),
+            identity: None,
             countdown: Some(2),
             done: false,
         });
@@ -1792,6 +1852,7 @@ mod tests {
             Some(&player_ui),
             Some(&quest_ui),
             Some(1.25),
+            None,
         );
         let sidecar: serde_json::Value = serde_json::from_slice(
             &serialize_capture_sidecar(&request, 1024, 768, "a".repeat(64)).expect("sidecar"),
@@ -1839,6 +1900,7 @@ mod tests {
             Some(&NativePlayerUiState::default()),
             None,
             Some(1.0),
+            None,
         );
         request.run_id = Some("pair-001".to_owned());
         request.build = NativeCaptureBuild {
@@ -1882,5 +1944,71 @@ mod tests {
         assert!(write_atomic_bytes(&path, b"second").is_err());
         assert_eq!(fs::read(&path).expect("preserved bytes"), b"first");
         let _ = fs::remove_file(path);
+    }
+    #[test]
+    fn world_auto_capture_waits_and_restarts_on_epoch_or_map_change() {
+        let mut auto = NativeAutoCaptureState {
+            target: NativeCaptureTarget::Screen(NativeShellScreen::InGame),
+            countdown: None,
+            identity: None,
+            done: false,
+        };
+        assert!(!auto.observe_rendered_identity(None));
+        let mut rendered = RenderedCaptureContext {
+            epoch: 1,
+            map_file_name: Some("0".into()),
+            map_title: Some("BichonProvince".into()),
+            x: Some(288),
+            y: Some(616),
+            light: None,
+        };
+        assert!(!auto.observe_rendered_identity(Some(&rendered)));
+        rendered.light = Some("setting=4;mapDarkLight=0".into());
+        assert!(auto.observe_rendered_identity(Some(&rendered)));
+        auto.countdown = Some(12);
+        assert!(auto.observe_rendered_identity(Some(&rendered)));
+        assert_eq!(auto.countdown, Some(12));
+        rendered.epoch = 2;
+        assert!(auto.observe_rendered_identity(Some(&rendered)));
+        assert_eq!(auto.countdown, None);
+        auto.countdown = Some(12);
+        rendered.map_file_name = Some("0141".into());
+        assert!(auto.observe_rendered_identity(Some(&rendered)));
+        assert_eq!(auto.countdown, None);
+    }
+
+    #[test]
+    fn manual_capture_serializes_consumed_identity_and_keeps_missing_light_ineligible() {
+        let mut rendered = RenderedCaptureContext {
+            epoch: 8,
+            map_file_name: Some("0".into()),
+            map_title: Some("BichonProvince".into()),
+            x: Some(288),
+            y: Some(616),
+            light: None,
+        };
+        let make = |value: &RenderedCaptureContext| {
+            capture_request(
+                PathBuf::from("capture.png"),
+                "in-game",
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some(1.0),
+                Some(value),
+            )
+        };
+        let draft = make(&rendered);
+        assert!(capture_acceptance_blockers(&draft, 1024, 768)
+            .contains(&"authoritative-world-state-incomplete"));
+        rendered.light = Some("setting=4;mapDarkLight=0".into());
+        let ready = make(&rendered);
+        assert!(!capture_acceptance_blockers(&ready, 1024, 768)
+            .contains(&"authoritative-world-state-incomplete"));
+        assert_eq!(ready.world.map_file_name.as_deref(), Some("0"));
+        assert_eq!(ready.world.epoch, Some(8));
+        assert_eq!(ready.world.map.as_deref(), Some("BichonProvince"));
     }
 }

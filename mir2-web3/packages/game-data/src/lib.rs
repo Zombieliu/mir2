@@ -3,9 +3,18 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
+mod crystal_guild_settings;
+mod crystal_creature_settings;
+mod crystal_hero_settings;
+pub use crystal_hero_settings::{crystal_hero_settings, calculate_crystal_hero_base_stat, CrystalHeroSettings, CrystalHeroSource, CrystalHeroRules};
+pub use crystal_creature_settings::{crystal_creature_settings, CrystalCreatureSettings};
 #[cfg(test)]
 mod crystal_item_image;
 pub mod crystal_map_events;
+pub use crystal_guild_settings::{
+    crystal_guild_buff_definitions, crystal_guild_settings, CrystalGuildCreationCost,
+    CrystalGuildSettings,
+};
 pub use mir2_protocol::crystal_user_item_image;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1876,6 +1885,8 @@ pub struct CrystalMonsterTemplate {
     pub min_sc: i32,
     pub max_sc: i32,
     #[serde(default)]
+    pub accuracy: i32,
+    #[serde(default)]
     pub agility: i32,
     pub light: u8,
     pub attack_speed: u16,
@@ -1998,6 +2009,8 @@ pub struct CrystalRespawnMap {
     pub no_drop_monster: bool,
     #[serde(default)]
     pub no_mount: bool,
+    #[serde(default)]
+    pub no_intelligent_creatures: bool,
     #[serde(default)]
     pub no_hero: bool,
     #[serde(default)]
@@ -3952,6 +3965,19 @@ mod tests {
         assert!(summary.commands.iter().any(|entry| {
             entry.command == "CONQUESTGUARD" && entry.runtime_status == "implemented"
         }));
+    }
+
+    #[test]
+    fn monster_accuracy_preserves_source_stat_and_legacy_manifest_compatibility() {
+        // Server.MirDB Stat 10, verified with the generator's accuracy-only
+        // check mode. This guards against dropping Accuracy during serde load.
+        let shinsu = crystal_monster_by_name("Shinsu").expect("Shinsu template");
+        assert_eq!(shinsu.accuracy, 25);
+        let mut legacy = serde_json::to_value(&shinsu).unwrap();
+        legacy.as_object_mut().unwrap().remove("accuracy");
+        let restored: super::CrystalMonsterTemplate = serde_json::from_value(legacy).unwrap();
+        assert_eq!(restored.accuracy, 0);
+        assert_eq!(restored.max_dc, shinsu.max_dc);
     }
 
     #[test]

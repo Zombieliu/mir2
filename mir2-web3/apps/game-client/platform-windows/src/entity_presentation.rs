@@ -108,6 +108,14 @@ impl NativeEntityPresentation {
         self.pending_payload = Some(payload);
     }
 
+    /// Admit packet actions in arrival order, even when several projections
+    /// arrive before the next render. Rendering still publishes only the final
+    /// scene, while the existing per-actor ActionFeed retains combat actions.
+    pub(crate) fn observe_packet_payload(&mut self, payload: Value, now_ms: u64) {
+        self.replace_payload(payload);
+        self.sync_pending_payload(now_ms, native_motion_clock_ms());
+    }
+
     pub(crate) fn hovered_object_id(&self) -> Option<&str> {
         self.hovered_object_id.as_deref()
     }
@@ -117,7 +125,13 @@ impl NativeEntityPresentation {
     }
 
     pub(crate) fn hovered_grid_position(&self) -> Option<(i32, i32)> {
-        let (cursor_x, cursor_y) = self.hover_cursor_stage?;
+        self.grid_position_for_stage(self.hover_cursor_stage?)
+    }
+
+    pub(crate) fn grid_position_for_stage(
+        &self,
+        (cursor_x, cursor_y): (f32, f32),
+    ) -> Option<(i32, i32)> {
         if !(0.0..1024.0).contains(&cursor_x) || !(0.0..768.0).contains(&cursor_y) {
             return None;
         }
@@ -140,6 +154,28 @@ impl NativeEntityPresentation {
         ))
     }
 
+    pub(crate) fn magic_target_flags(&self, object_id: &str) -> (bool, u32, u8) {
+        let entity = self
+            .latest_payload
+            .as_ref()
+            .and_then(|p| p.get("entities"))
+            .and_then(Value::as_array)
+            .and_then(|all| {
+                all.iter().find(|e| {
+                    e.get("objectId").and_then(value_object_id).as_deref() == Some(object_id)
+                })
+            });
+        entity
+            .map(|e| {
+                (
+                    e.get("dead").and_then(Value::as_bool) == Some(true),
+                    e.get("masterObjectId").and_then(Value::as_u64).unwrap_or(0) as u32,
+                    e.get("ai").and_then(Value::as_u64).unwrap_or(0) as u8,
+                )
+            })
+            .unwrap_or_default()
+    }
+
     pub(crate) fn hover_cursor_stage(&self) -> Option<(f32, f32)> {
         self.hover_cursor_stage
     }
@@ -152,6 +188,29 @@ impl NativeEntityPresentation {
     /// ordinary running remains two cells. This mirrors authoritative packet
     /// state strictly for presentation prediction—the Zone still validates the
     /// actual distance and corrects stale client state.
+    pub(crate) fn self_equipment_pose(&self, object_id: &str) -> Option<(bool, i16)> {
+        let standing = self
+            .world
+            .active_states()
+            .find(|(id, _)| *id == object_id)
+            .map(|(_, state)| state.pose().action == AnimationAction::Standing)?;
+        let entity = self
+            .latest_payload
+            .as_ref()?
+            .get("entities")?
+            .as_array()?
+            .iter()
+            .find(|e| e.get("objectId").and_then(value_object_id).as_deref() == Some(object_id))?;
+        Some((
+            standing,
+            entity
+                .get("transformType")
+                .and_then(Value::as_i64)
+                .and_then(|n| i16::try_from(n).ok())
+                .unwrap_or(-1),
+        ))
+    }
+
     pub(crate) fn self_run_distance(&self, object_id: &str) -> i32 {
         let Some(entity) = self
             .latest_payload
@@ -1265,6 +1324,15 @@ fn json_millis(value: &Value) -> Option<u64> {
 }
 
 fn is_stale_self_source_echo(entity: &Value, x: i32, y: i32, window: NativeMotionWindow) -> bool {
+    // An attack/struck packet at the predicted source tile is a real action,
+    // not a delayed movement echo. Keep it available to the ActionFeed.
+    if entity
+        .get("_nativeAnimationAction")
+        .and_then(Value::as_str)
+        .is_some_and(|action| !matches!(action, "standing" | "walking" | "running"))
+    {
+        return false;
+    }
     let source_distance = (x as f32 - window.from_x)
         .abs()
         .max((y as f32 - window.from_y).abs());
@@ -1619,6 +1687,86 @@ mod tests {
             .render_state_if_changed(200, true)
             .expect("continued frame");
         assert!(rendered_path(&third).ends_with("/58.png"));
+    }
+
+    #[test]
+    fn same_frame_packet_payloads_retain_attack_then_struck_in_action_feed() {
+        for kind in ["selfPlayer", "monster"] {
+            let mut presentation = NativeEntityPresentation::default();
+            let mut payload = player_payload(1);
+            payload["entities"][0]["kind"] = json!(kind);
+            if kind == "monster" {
+                payload["entities"][0]["sprite"]["bodyLibrary"] = json!("Monster/005");
+            }
+            payload["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+            presentation.observe_packet_payload(payload.clone(), 0);
+            payload["entities"][0]["_nativeAnimationAction"] = json!("struck");
+            payload["entities"][0]["_nativeAnimationSequence"] = json!(2);
+            presentation.observe_packet_payload(payload.clone(), 0);
+            // Repeated UI/health projections must not replay the same action.
+            presentation.observe_packet_payload(payload, 0);
+            let state = presentation.world.active_state("1").unwrap();
+            let actions = std::iter::once(state.pose().action)
+                .chain(state.queued_actions().map(|event| event.action))
+                .collect::<Vec<_>>();
+            assert!(
+                actions.contains(&AnimationAction::Attack1),
+                "{kind}: {actions:?}"
+            );
+            assert_eq!(
+                actions
+                    .iter()
+                    .filter(|action| **action == AnimationAction::Struck)
+                    .count(),
+                1
+            );
+            assert_eq!(state.last_enqueued_event_sequence(), Some(2));
+            let mut attack_frames = HashSet::new();
+            let mut struck_frames = HashSet::new();
+            let mut played_actions = Vec::new();
+            // Drive the real presentation tick and inspect the frame/action
+            // pair passed to the renderer, not merely queued event presence.
+            for now_ms in (0..=5_000).step_by(25) {
+                presentation.render_state_if_changed_with_clocks(
+                    now_ms,
+                    now_ms,
+                    true,
+                    |_, frames, _| {
+                        let (frame, action) = frames["1"];
+                        if matches!(action, AnimationAction::Attack1 | AnimationAction::Struck) {
+                            if played_actions.last() != Some(&action) {
+                                played_actions.push(action);
+                            }
+                            match action {
+                                AnimationAction::Attack1 => {
+                                    attack_frames.insert(frame);
+                                }
+                                AnimationAction::Struck => {
+                                    struck_frames.insert(frame);
+                                }
+                                _ => unreachable!(),
+                            }
+                        }
+                        Some(Value::Null)
+                    },
+                );
+            }
+            assert_eq!(
+                played_actions,
+                vec![AnimationAction::Attack1, AnimationAction::Struck],
+                "{kind}: actions were skipped, reordered or replayed"
+            );
+            assert!(
+                attack_frames.len() >= 2,
+                "{kind}: attack did not advance: {attack_frames:?}"
+            );
+            assert!(
+                struck_frames.len() >= 2,
+                "{kind}: struck did not advance: {struck_frames:?}"
+            );
+            presentation.reset_session();
+            assert!(presentation.world.active_state("1").is_none());
+        }
     }
 
     #[test]
@@ -2117,6 +2265,17 @@ mod tests {
             .expect("player animation state");
         assert_eq!(state.last_started_event_sequence(), Some(11));
         assert_eq!(state.queue_depth(), 0);
+
+        let mut struck = player_payload(13);
+        struck["entities"][0]["direction"] = json!("right");
+        struck["entities"][0]["_nativeAnimationAction"] = json!("struck");
+        presentation.replace_payload(struck);
+        presentation.sync_pending_payload(300, 1_300);
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.last_enqueued_event_sequence(), Some(13));
+        assert!(std::iter::once(state.pose().action)
+            .chain(state.queued_actions().map(|event| event.action))
+            .any(|action| action == AnimationAction::Struck));
     }
 
     #[test]
@@ -2563,7 +2722,7 @@ mod tests {
                 assert_eq!(highlight[field], normal[field], "redraw {role} {field}");
             }
             assert_eq!(highlight["opacity"], json!(0.3));
-            assert_eq!(highlight["additive"], json!(false));
+            assert_eq!(highlight["additive"], json!(true));
             assert!(highlight["z"].as_f64() > normal["z"].as_f64());
         }
         assert!(
@@ -2820,13 +2979,16 @@ mod tests {
             assert_eq!(normal["path"], json!(expected_body));
             assert_eq!(highlight["path"], normal["path"]);
             assert_eq!(highlight["opacity"], json!(0.3));
-            assert_eq!(highlight["additive"], json!(false));
+            assert_eq!(highlight["additive"], json!(true));
             assert!(normal["z"].as_f64().unwrap() < front_z);
             assert!(front_z < highlight["z"].as_f64().unwrap());
 
             let effects = layers
                 .iter()
-                .filter(|layer| layer["additive"].as_bool() == Some(true))
+                .filter(|layer| {
+                    layer["additive"].as_bool() == Some(true)
+                        && layer["key"] != json!("2005:target-highlight:body")
+                })
                 .collect::<Vec<_>>();
             assert_eq!(effects.len(), usize::from(expected_effect.is_some()));
             if let Some(expected_effect) = expected_effect {

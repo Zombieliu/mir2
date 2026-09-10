@@ -1,5 +1,16 @@
 //! Operable native player windows: bag, equipment, inspect, death, menu, chat, mail, bigmap, shop, storage.
 
+#[path = "character_stats.rs"]
+pub mod character_stats;
+#[path = "hero_dialog.rs"]
+pub mod hero_dialog;
+#[path = "local_keyboard_ui.rs"]
+pub mod local_keyboard_ui;
+#[path = "skill_bars.rs"]
+pub mod skill_bars;
+#[path = "skill_page.rs"]
+mod skill_page;
+
 use std::collections::VecDeque;
 
 use bevy::app::AppExit;
@@ -44,8 +55,9 @@ use crate::pending_operations::{
 use crate::quest_model::NpcDialogModel;
 use crate::read_model::{UiReadModel, UiSurfaceSignals};
 use crate::shop::{
-    shop_buy_enabled, shop_quantity_clamped, shop_quantity_dec, shop_quantity_inc,
-    shop_sell_enabled, NpcShopServiceMode, NpcShopServiceSignal, ShopGood, ShopModel,
+    shop_buy_enabled, shop_buy_enabled_with_pearls, shop_quantity_clamped, shop_quantity_dec,
+    shop_quantity_inc, shop_sell_enabled, NpcShopServiceMode, NpcShopServiceSignal, ShopGood,
+    ShopModel,
 };
 use crate::skill_binding_persistence::{
     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
@@ -94,6 +106,38 @@ mod guild_storage_tests;
 #[path = "primary_item_image_tests.rs"]
 mod primary_item_image_tests;
 
+#[path = "combat_mode_keys.rs"]
+pub mod combat_mode_keys;
+#[path = "creature_dialog.rs"]
+pub mod creature_dialog;
+#[path = "equipment_creature_host.rs"]
+pub mod equipment_creature_host;
+#[path = "friend_dialog.rs"]
+pub mod friend_dialog;
+#[path = "group_dialog.rs"]
+pub mod group_dialog;
+#[path = "guild_buff_dialog.rs"]
+pub mod guild_buff_dialog;
+#[path = "guild_panel.rs"]
+pub mod guild_panel;
+#[path = "keyboard_dialog.rs"]
+pub mod keyboard_dialog;
+#[path = "leave_game_dialog.rs"]
+pub mod leave_game_dialog;
+#[path = "mount_fishing_dialog.rs"]
+pub mod mount_fishing_dialog;
+#[path = "ranking_dialog.rs"]
+pub mod ranking_dialog;
+#[path = "skill_assign_dialog.rs"]
+pub mod skill_assign_dialog;
+#[path = "social_bond_dialog.rs"]
+pub mod social_bond_dialog;
+#[path = "text_input.rs"]
+pub mod text_input;
+#[path="status_hud.rs"]
+pub mod status_hud;
+#[path="hero_buff_hud.rs"]
+pub mod hero_buff_hud;
 #[path = "trade_dialog.rs"]
 mod trade_dialog;
 pub use trade_dialog::TradeDialogUi;
@@ -631,23 +675,14 @@ pub fn bigmap_zoom_out(zoom: f32) -> f32 {
     bigmap_zoom_clamped(zoom - BIGMAP_ZOOM_STEP)
 }
 
-fn guild_notice_lines(draft: &str) -> Option<Vec<String>> {
-    let mut lines = draft
+fn guild_notice_lines(draft: &str) -> Vec<String> {
+    if draft.is_empty() {
+        return Vec::new();
+    }
+    draft
         .split('\n')
-        .map(|line| line.trim_end_matches('\r').trim_end().to_owned())
-        .collect::<Vec<_>>();
-    while lines.last().is_some_and(String::is_empty) {
-        lines.pop();
-    }
-    if lines.len() > crate::social::MAX_NOTICE_LINES
-        || lines
-            .iter()
-            .any(|line| line.chars().count() > GUILD_NOTICE_MAX_CHARS_PER_LINE)
-    {
-        return None;
-    }
-    lines.retain(|line| !line.is_empty());
-    Some(lines)
+        .map(|line| line.trim_end_matches('\r').to_owned())
+        .collect()
 }
 
 pub fn push_guild_notice_text(draft: &mut String, text: &str) {
@@ -780,6 +815,26 @@ pub struct NativePlayerUiState {
     pub guild_recruit_focused: bool,
     pub guild_gold_prompt: Option<GuildGoldPrompt>,
     pub trade_dialog: TradeDialogUi,
+    pub menu_pointer_consumed: bool,
+    pub menu_hit_regions: Vec<CrystalRect>,
+    pub equipment_dialogs: mount_fishing_dialog::MountFishingUi,
+    pub creature: creature_dialog::CreatureUi,
+    pub ranking: ranking_dialog::RankingDialogUi,
+    pub friends: friend_dialog::FriendDialogUi,
+    pub guild_panel: guild_panel::GuildPanelUi,
+    pub group_dialog: group_dialog::GroupDialogUi,
+    pub skill_assign: skill_assign_dialog::SkillAssignUi,
+    pub local_keys: local_keyboard_ui::LocalKeyboardUi,
+    pub ime_frame_consumed: bool,
+    pub status_hud: status_hud::StatusHud,
+    pub hero_buffs: hero_buff_hud::HeroBuffHud,
+    pub skill_bars: skill_bars::SkillBarsUi,
+    pub hero: hero_dialog::HeroDialogModel,
+    pub combat_modes: combat_mode_keys::CombatModes,
+    pub skill_authority: skill_assign_dialog::SkillAuthorityUi,
+    pub leave_game: leave_game_dialog::LeaveGameDialog,
+    pub social_bonds: social_bond_dialog::SocialBondDialogs,
+    pub keyboard: keyboard_dialog::KeyboardDialogUi,
     pub guild_gold_ready_at_ms: u64,
     pub guild_storage: GuildStorageUi,
     pub selected_guild_rank: Option<u8>,
@@ -885,6 +940,26 @@ impl Default for NativePlayerUiState {
             guild_recruit_focused: false,
             guild_gold_prompt: None,
             trade_dialog: TradeDialogUi::default(),
+            menu_pointer_consumed: false,
+            menu_hit_regions: Vec::new(),
+            equipment_dialogs: Default::default(),
+            creature: Default::default(),
+            ranking: ranking_dialog::RankingDialogUi::default(),
+            friends: friend_dialog::FriendDialogUi::default(),
+            guild_panel: Default::default(),
+            group_dialog: Default::default(),
+            skill_assign: Default::default(),
+            local_keys: Default::default(),
+            ime_frame_consumed: false,
+            status_hud: Default::default(),
+            hero_buffs: Default::default(),
+            skill_bars: Default::default(),
+            hero: Default::default(),
+            combat_modes: Default::default(),
+            skill_authority: Default::default(),
+            leave_game: Default::default(),
+            social_bonds: Default::default(),
+            keyboard: Default::default(),
             guild_gold_ready_at_ms: 0,
             guild_storage: GuildStorageUi::default(),
             selected_guild_rank: None,
@@ -939,6 +1014,7 @@ impl NativePlayerUiState {
     }
     pub fn skill_open(&self) -> bool {
         self.core.skill_open()
+            || (self.equipment_open() && self.character_page == CharacterPage::Spells)
     }
     pub fn quest_open(&self) -> bool {
         self.core.quest_open()
@@ -1008,7 +1084,16 @@ impl NativePlayerUiState {
         self.apply(mir2_ui_core::action::UiAction::OpenMenu);
     }
     pub fn toggle_skill(&mut self) {
-        self.apply(mir2_ui_core::action::UiAction::OpenSkill);
+        // Crystal F11/Skills2 opens the CharacterDialog's SkillPage. It must
+        // retain the real header and working CHAR/STATS/SPELLS controls.
+        if self.equipment_open() && self.character_page == CharacterPage::Spells {
+            self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
+            return;
+        }
+        if !self.equipment_open() {
+            self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
+        }
+        self.character_page = CharacterPage::Spells;
     }
     pub fn toggle_quest(&mut self) {
         self.apply(mir2_ui_core::action::UiAction::OpenQuestLog);
@@ -1051,15 +1136,50 @@ impl NativePlayerUiState {
         });
     }
     pub fn blocks_gameplay_keys(&self) -> bool {
-        self.core.blocks_gameplay_keys() || self.amount_modal_open()
+        self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
+    }
+    pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
+        self.guild_panel.blocks()
+            || self.guild_panel.consumed
+            || self.skill_assign.open
+            || self.group_dialog.modal()
+            || self.group_dialog.consumed
+            || self.leave_game.blocks()
+            || self.social_bonds.prompt.is_some()
+            || equipment_creature_host::modal(self)
+            || self.core.blocks_gameplay_keys()
+            || self.amount_modal_open_except_hero()
+            || self.keyboard.open
+            || self.keyboard.input_consumed
+            || self.friends.modal.is_some()
     }
     pub fn blocks_world_click(&self) -> bool {
-        self.core.blocks_world_click()
+        self.guild_panel.blocks()
+            || self.guild_panel.consumed
+            || self.skill_assign.open
+            || self.hero.modal()
+            || self.hero.input_consumed
+            || self.group_dialog.modal()
+            || self.group_dialog.consumed
+            || self.leave_game.blocks()
+            || self.social_bonds.prompt.is_some()
+            || equipment_creature_host::modal(self)
+            || self.hero_buffs.rows.hovered
+            || self.status_hud.hovered
+            || self.menu_pointer_consumed
+            || self.equipment_dialogs.fishing
+            || self.core.blocks_world_click()
             || self.inspect.is_some()
             || self.inventory_delete_prompt.is_some()
             || self.guild_gold_prompt.is_some()
             || self.trade_dialog.open
+            || self.trade_dialog.message.is_some()
+            || self.trade_dialog.input_consumed
             || self.help.open
+            || self.keyboard.open
+            || self.friends.open
+            || self.ranking.open
+            || self.ranking.player_inspect.is_open()
     }
     pub fn blocks_world_action(&self, dialog_open: bool, dead: bool) -> bool {
         self.blocks_world_click() || dialog_open || dead
@@ -1080,6 +1200,7 @@ impl NativePlayerUiState {
         self.core.chat_focused()
     }
     pub fn close_windows(&mut self) {
+        self.skill_assign = Default::default();
         self.core.panel = mir2_ui_core::state::UiPanel::None;
         self.core.options_draft = None;
         self.core.chat_settings_draft = None;
@@ -1109,6 +1230,12 @@ impl NativePlayerUiState {
         self.guild_recruit_focused = false;
         self.guild_gold_prompt = None;
         self.trade_dialog.hide();
+        self.ranking.hide();
+        self.friends.hide();
+        self.social_bonds.hide(social_bond_dialog::BondPage::Mentor);
+        self.social_bonds
+            .hide(social_bond_dialog::BondPage::Relationship);
+        self.ranking.player_inspect.close();
         self.guild_storage.end_drag();
         self.selected_guild_rank = None;
         self.guild_rank_name_draft.clear();
@@ -1121,9 +1248,31 @@ impl NativePlayerUiState {
     }
 
     pub fn amount_modal_open(&self) -> bool {
-        self.inventory_delete_prompt.is_some()
+        self.hero.modal() || self.amount_modal_open_except_hero()
+    }
+    fn amount_modal_open_except_hero(&self) -> bool {
+        equipment_creature_host::modal(self)
+            || self.non_friend_amount_modal_open_except_hero()
+            || self.friends.modal.is_some()
+            || self.friends.input_consumed
+    }
+    pub fn non_friend_amount_modal_open(&self) -> bool {
+        self.hero.modal() || self.non_friend_amount_modal_open_except_hero()
+    }
+    fn non_friend_amount_modal_open_except_hero(&self) -> bool {
+        self.guild_panel.blocks()
+            || self.guild_panel.consumed
+            || self.skill_assign.open
+            || self.group_dialog.modal()
+            || self.group_dialog.consumed
+            || self.leave_game.blocks()
+            || self.social_bonds.prompt.is_some()
+            || self.social_bonds.input_consumed
+            || self.inventory_delete_prompt.is_some()
             || self.guild_gold_prompt.is_some()
             || self.trade_dialog.gold_prompt.is_some()
+            || self.trade_dialog.message.is_some()
+            || self.trade_dialog.input_consumed
     }
 
     /// Open the source-shaped delete prompt for one current carried-item
@@ -1157,6 +1306,7 @@ impl NativePlayerUiState {
         self.inspect = None;
     }
     pub fn close_all_windows(&mut self) {
+        self.keyboard.hide();
         self.close_windows();
         self.help.hide();
     }
@@ -1164,7 +1314,11 @@ impl NativePlayerUiState {
         let options = self.core.options.clone();
         let chat_settings = self.core.chat_settings;
         let game_shop_had_pending = self.core.game_shop_pending.is_some();
+        let mut keyboard = std::mem::take(&mut self.keyboard);
+        keyboard.spell_target_lock = false;
+        keyboard.hide();
         *self = Self::default();
+        self.keyboard = keyboard;
         // Options are application-scoped rather than character/session-scoped.
         // Keep the loaded/applied values when the shell leaves InGame so a
         // logout/re-login does not silently revert the user's local settings.
@@ -1178,7 +1332,11 @@ impl NativePlayerUiState {
     ) {
         let options = self.core.options.clone();
         let chat_settings = self.core.chat_settings;
+        let mut keyboard = std::mem::take(&mut self.keyboard);
+        keyboard.spell_target_lock = false;
+        keyboard.hide();
         *self = Self::default();
+        self.keyboard = keyboard;
         self.core.options = options;
         self.core.chat_settings = chat_settings;
         let _ = self.core.preserve_exact_game_shop_receipt_boundary(receipt);
@@ -1436,6 +1594,39 @@ pub fn z_for_modal(priority: OverlayModalPriority) -> i32 {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NativePlayerUiIntent {
+    MagicKey {
+        request_id: u64,
+        spell: String,
+        key: u8,
+        old_key: u8,
+    },
+    EquipmentCreaturePacket(mir2_protocol::ClientPacket),
+    HeroPacket(mir2_protocol::ClientPacket),
+    GuildBuffUpdate(guild_buff_dialog::GuildBuffRequest),
+    SocialBondPacket(mir2_protocol::ClientPacket),
+    RefreshFriends,
+    RemoveFriend {
+        character_index: i32,
+    },
+    AddFriendMemo {
+        character_index: i32,
+        memo: String,
+    },
+    AddFriend {
+        name: String,
+        blocked: bool,
+    },
+    ObservePlayer {
+        name: String,
+    },
+    GetRanking {
+        rank_type: u8,
+        rank_index: i32,
+        online_only: bool,
+    },
+    InspectRanking {
+        object_id: u32,
+    },
     UseItem {
         key: Option<String>,
         unique_id: Option<u64>,
@@ -1602,7 +1793,7 @@ pub enum NativePlayerUiIntent {
 }
 
 impl NativePlayerUiIntent {
-    fn pending_key(&self) -> Option<PendingOperationKey> {
+    pub fn pending_key(&self) -> Option<PendingOperationKey> {
         match self {
             Self::ReadMail { mail_id } => Some(PendingOperationKey::ReadMail(*mail_id)),
             Self::ClaimMail { mail_id } => Some(PendingOperationKey::ClaimMail(*mail_id)),
@@ -1721,10 +1912,22 @@ impl NativePlayerUiIntent {
             | Self::TradeRetrieveItem { .. }
             | Self::TradeConfirm { .. }
             | Self::TradeCancel => None,
-            Self::UseItem { .. }
+            Self::GuildBuffUpdate(_)
+            | Self::SocialBondPacket(_)
+            | Self::HeroPacket(_)
+            | Self::EquipmentCreaturePacket(_)
+            | Self::UseItem { .. }
             | Self::EquipItem { .. }
             | Self::RemoveItem { .. }
-            | Self::Chat { .. } => None,
+            | Self::Chat { .. }
+            | Self::GetRanking { .. }
+            | Self::InspectRanking { .. }
+            | Self::RefreshFriends
+            | Self::RemoveFriend { .. }
+            | Self::AddFriendMemo { .. }
+            | Self::AddFriend { .. }
+            | Self::ObservePlayer { .. }
+            | Self::MagicKey { .. } => None,
         }
     }
 }
@@ -1733,24 +1936,78 @@ impl NativePlayerUiIntent {
 pub struct NativePlayerUiIntentQueue {
     intents: VecDeque<NativePlayerUiIntent>,
     storage_request_ids: StorageRequestIdGenerator,
+    /// Crystal GameScene.UseItemTime is shared by player and Hero entry points.
+    use_item_until_ms: u64,
 }
 
 impl NativePlayerUiIntentQueue {
+    pub fn use_item_ready(&self, now: u64) -> bool {
+        now >= self.use_item_until_ms
+    }
+    pub fn commit_item_use(&mut self, now: u64, delay: u64) {
+        self.use_item_until_ms = now.saturating_add(delay);
+    }
     pub fn push_intent(&mut self, intent: NativePlayerUiIntent) -> bool {
+        self.push_intent_with_use_delay(intent, 300)
+    }
+    pub fn push_intent_with_use_delay(&mut self, intent: NativePlayerUiIntent, delay: u64) -> bool {
+        self.push_intent_at(intent, crate::hero_model::hero_clock_ms(), delay)
+    }
+    fn push_intent_at(&mut self, intent: NativePlayerUiIntent, now: u64, delay: u64) -> bool {
+        let uses_item = matches!(
+            &intent,
+            NativePlayerUiIntent::UseItem { .. }
+                | NativePlayerUiIntent::HeroPacket(mir2_protocol::ClientPacket::UseItem { .. })
+                | NativePlayerUiIntent::EquipmentCreaturePacket(
+                    mir2_protocol::ClientPacket::UseItem { .. }
+                )
+        );
+        if uses_item && !self.use_item_ready(now) {
+            return false;
+        }
         if self.intents.len() >= MAX_QUEUED {
-            if matches!(intent, NativePlayerUiIntent::GameShopBuy { .. }) {
+            if matches!(
+                intent,
+                NativePlayerUiIntent::MagicKey { .. }
+                    | NativePlayerUiIntent::GuildBuffUpdate(_)
+                    | NativePlayerUiIntent::SocialBondPacket(_)
+                    | NativePlayerUiIntent::HeroPacket(_)
+                    | NativePlayerUiIntent::EquipmentCreaturePacket(_)
+                    | NativePlayerUiIntent::GameShopBuy { .. }
+                    | NativePlayerUiIntent::GetRanking { .. }
+                    | NativePlayerUiIntent::InspectRanking { .. }
+                    | NativePlayerUiIntent::AddFriend { .. }
+                    | NativePlayerUiIntent::RemoveFriend { .. }
+                    | NativePlayerUiIntent::AddFriendMemo { .. }
+                    | NativePlayerUiIntent::RefreshFriends
+            ) {
                 return false;
             }
-            let Some(index) = self
-                .intents
-                .iter()
-                .position(|queued| !matches!(queued, NativePlayerUiIntent::GameShopBuy { .. }))
-            else {
+            let Some(index) = self.intents.iter().position(|queued| {
+                !matches!(
+                    queued,
+                    NativePlayerUiIntent::MagicKey { .. }
+                        | NativePlayerUiIntent::GuildBuffUpdate(_)
+                        | NativePlayerUiIntent::SocialBondPacket(_)
+                        | NativePlayerUiIntent::HeroPacket(_)
+                        | NativePlayerUiIntent::EquipmentCreaturePacket(_)
+                        | NativePlayerUiIntent::GameShopBuy { .. }
+                        | NativePlayerUiIntent::GetRanking { .. }
+                        | NativePlayerUiIntent::InspectRanking { .. }
+                        | NativePlayerUiIntent::AddFriend { .. }
+                        | NativePlayerUiIntent::RemoveFriend { .. }
+                        | NativePlayerUiIntent::AddFriendMemo { .. }
+                        | NativePlayerUiIntent::RefreshFriends
+                )
+            }) else {
                 return false;
             };
             self.intents.remove(index);
         }
         self.intents.push_back(intent);
+        if uses_item {
+            self.commit_item_use(now, delay);
+        }
         true
     }
 
@@ -2161,9 +2418,21 @@ struct OverlaySocial;
 
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
 enum OverlayButton {
+    CastSkillBar(u8),
+    RefreshSkillBar,
     ExitApplication,
+    LeaveConfirm,
+    LeaveCancel,
     CloseWindows,
     ToggleHelp,
+    ToggleMount,
+    ToggleFishing,
+    ToggleCreature,
+    ToggleRanking,
+    ToggleFriends,
+    ToggleMentor,
+    ToggleRelationship,
+    ToggleKeyboard,
     CloseHelp,
     HelpPrevious,
     HelpNext,
@@ -2194,6 +2463,23 @@ enum OverlayButton {
     GroupInviteDecline,
     GroupSwitch,
     GroupLeave,
+    SelectGuildRightBuff(bool),
+    GuildBuffActivate(u8),
+    GuildBuffScroll(i32),
+    GuildBuffThumb,
+    GuildNoticeScroll(i32),
+    GuildRankDropdown,
+    GuildCreateRank,
+    GuildMemberRankMenu(u8),
+    GuildMembersScroll(i32),
+    GuildShowOffline,
+    GuildMemberRankSelect(u8),
+    GuildMemberRankConfirm,
+    GuildCreateRankConfirm,
+    GuildRankScroll(i32),
+    GuildBuffErrorClose,
+    GroupInputConfirm,
+    GroupInputCancel,
     GroupAddSelected,
     GroupInviteNameFocus,
     GroupInviteNameSubmit,
@@ -2211,6 +2497,7 @@ enum OverlayButton {
     SelectGuildMember(u8),
     GuildKickMember(u8),
     GuildKickSelected,
+    GuildKickConfirm,
     GuildAssignPreviousRank,
     GuildAssignNextRank,
     GuildGoldDeposit,
@@ -2225,8 +2512,9 @@ enum OverlayButton {
     GuildRankNameSave,
     GuildRankTogglePermission(u8),
     TradeRequest,
-    TradeAccept,
-    TradeDecline,
+    TradeAccept(u64),
+    TradeDecline(u64),
+    TradeMessageClose(u64),
     TradeGoldOffer,
     TradeGoldConfirm,
     TradeGoldCancel,
@@ -2339,6 +2627,8 @@ pub(crate) struct OverlayKeyboardControls<'w> {
     surface_signals: Option<ResMut<'w, UiSurfaceSignals>>,
     ui_audio: ResMut<'w, crate::ui_audio::NativeUiAudioQueue>,
     ui: Option<Res<'w, UiReadModel>>,
+    effects: Option<ResMut<'w, UiEffectQueue>>,
+    belt: Option<ResMut<'w, super::hud::CrystalBeltPresentation>>,
 }
 
 #[derive(SystemParam)]
@@ -2387,6 +2677,12 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 .add_systems(Startup, load_character_wing_materials);
         }
         app.init_resource::<NativePlayerUiState>()
+            .init_resource::<keyboard_dialog::host::KeyboardHost>()
+            .init_resource::<equipment_creature_host::MenuHost>()
+            .init_resource::<social_bond_dialog::host::SocialHost>()
+            .init_resource::<group_dialog::GroupHost>()
+            .init_resource::<guild_panel::GuildHost>()
+            .init_resource::<friend_dialog::host::FriendHost>()
             .init_resource::<UiEffectQueue>()
             .init_resource::<NativePlayerUiIntentQueue>()
             .init_resource::<PendingOperations>()
@@ -2402,6 +2698,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<BigMapModel>()
             .init_resource::<BigMapGatewayIntentQueue>()
             .init_resource::<BigMapUiState>()
+            .init_resource::<crate::skill_model::SkillModelReceipts>()
             .init_resource::<SkillBindingUi>()
             .init_resource::<SkillBindingPersistenceRuntime>()
             .init_resource::<MailUiState>()
@@ -2415,12 +2712,26 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<ShopModel>()
             .init_resource::<GameShopModel>()
             .init_resource::<StorageModel>()
+            .init_resource::<crate::hero_model::HeroModel>()
+            .init_resource::<crate::hero_model::HeroModelReceipts>()
             .init_resource::<SkillModel>()
             .init_resource::<crate::social::SocialModel>()
             .init_resource::<crate::options_effects::OptionsRuntime>()
             .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<CursorMoved>()
             .add_message::<MouseWheel>()
+            .add_message::<bevy::window::Ime>()
+            .init_resource::<text_input::ImeState>()
+            .add_systems(
+                Update,
+                text_input::process_ime
+                    .after(PendingLifecycleSet::UiReset)
+                    .before(NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                PostUpdate,
+                text_input::position_ime.after(bevy::ui::UiSystems::Layout),
+            )
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(
                 Startup,
@@ -2453,6 +2764,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate)
+                    .before(consume_hud_buttons)
                     .before(process_overlay_keyboard),
             )
             .add_systems(
@@ -2461,6 +2773,25 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     consume_mail_operation_feedback,
                     consume_hud_buttons,
                     process_help_drag,
+                    keyboard_dialog::host::process,
+                    (
+                        equipment_creature_host::process,
+                        social_bond_dialog::host::process,
+                        leave_game_dialog::process,
+                        group_dialog::process,
+                        skill_assign_dialog::process,
+                        hero_dialog::host::observe,
+                        hero_dialog::cross::process,
+                        hero_dialog::host::process,
+                        skill_bars::host::process,
+                        status_hud::process,
+                        hero_buff_hud::process,
+                        guild_panel::process,
+                    )
+                        .chain(),
+                    friend_dialog::host::process,
+                    ranking_dialog::process,
+                    trade_dialog::process_items,
                     trade_dialog::process_drag,
                     process_inventory_drag,
                     process_inventory_delete_pointer,
@@ -2477,7 +2808,26 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             )
             .add_systems(
                 Update,
-                (render_overlays, layout_original_item_images)
+                (
+                    render_overlays,
+                    social_bond_dialog::host::render_system,
+                    leave_game_dialog::render,
+                    group_dialog::render,
+                    group_dialog::render_invitation,
+                    skill_assign_dialog::render,
+                    hero_dialog::cross::render_order,
+                    hero_dialog::render::render,
+                    hero_dialog::render::button_visuals,
+                    skill_bars::host::render,
+                    (status_hud::render, status_hud::render_hint, hero_buff_hud::render, hero_buff_hud::hint).chain(),
+                    guild_panel::render_error,
+                    guild_panel::render_buff_hint,
+                    equipment_creature_host::render_system,
+                    friend_dialog::host::render_system,
+                    ranking_dialog::render_system,
+                    keyboard_dialog::host::render_system,
+                    layout_original_item_images,
+                )
                     .chain()
                     .in_set(NativePlayerUiSet::Read),
             );
@@ -2551,6 +2901,7 @@ fn sync_local_panel_models(
     mut shop_ui: ResMut<ShopUiState>,
     mut skill_binding: ResMut<SkillBindingUi>,
     mut skills: ResMut<SkillModel>,
+    mut skill_receipts: Option<ResMut<crate::skill_model::SkillModelReceipts>>,
 ) {
     reconcile_inventory_capacity(&mut state, &inventory);
     if !state.inventory_open() {
@@ -2575,11 +2926,29 @@ fn sync_local_panel_models(
         .filter(|selection| storage.item_for_selection(*selection).is_some());
     shop_ui.start_index = shop_ui.start_index.min(shop.goods.len().saturating_sub(8));
 
-    skill_binding.refresh(&skills);
-    let merged = skill_binding.merge_skill_model(&skills);
-    if skills.skills != merged.skills || skills.bindings != merged.bindings {
-        *skills = merged;
+    // A transport callback and its server receipt can arrive in one frame.
+    // Keep receipts until process has established the exact pending request.
+    if !state.skill_assign.pending && state.skill_assign.result != Some(true) {
+        if let Some(receipts) = skill_receipts.as_deref_mut() {
+            for mut received in receipts.0.drain(..) {
+                if let Some(draft) = state.skill_authority.reconcile(&mut received) {
+                    if !state.skill_assign.open {
+                        skill_binding.select_skill(draft.skill_id, &received);
+                        skill_binding.set_assign_key(true);
+                        state.skill_assign = draft;
+                    }
+                }
+            }
+        }
     }
+    if let Some(draft) = state.skill_authority.reconcile(&mut skills) {
+        if !state.skill_assign.open {
+            skill_binding.select_skill(draft.skill_id, &skills);
+            skill_binding.set_assign_key(true);
+            state.skill_assign = draft;
+        }
+    }
+    skill_binding.refresh(&skills);
 
     if shell.screen != NativeShellScreen::InGame {
         mail_ui.cursor = MailPageCursor::default();
@@ -2587,6 +2956,8 @@ fn sync_local_panel_models(
         storage_ui.bag_selection = None;
         storage_ui.storage_selection = None;
         shop_ui.start_index = 0;
+        state.skill_authority = Default::default();
+        skill_binding.bindings.clear();
         skill_binding.clear_selection();
         skill_binding.set_assign_key(false);
     }
@@ -3344,12 +3715,20 @@ fn process_inventory_drag(
         };
         // The accepted trade pair is drawn above Inventory. Its child cells
         // and controls own the press too, not only its draggable background.
-        if state.trade_dialog.covers_cursor(start) {
+        if (state.hero.interactive
+            && hero_dialog::geometry::hit(&state.hero, [start.x, start.y], state.hero.front)
+                .0
+                .is_some())
+            || equipment_creature_host::covers(&state, start)
+            || state.trade_dialog.covers_cursor(start)
+            || state.ranking.covers_cursor(start)
+        {
             state.inventory_window.end_drag();
             state.inventory_window.remember_cursor(current_cursor);
             return;
         }
         if state.inventory_window.begin_drag(start.x, start.y) {
+            state.hero.cross.player_front = true;
             if let Some(end) = current_cursor {
                 state.inventory_window.drag_to(end.x, end.y);
             }
@@ -3446,8 +3825,8 @@ fn process_guild_storage_pointer(
         return;
     }
     let origin = Vec2::new(
-        CRYSTAL_GUILD_PANEL_RECT.left + guild_storage::PAGE.left,
-        CRYSTAL_GUILD_PANEL_RECT.top + guild_storage::PAGE.top,
+        state.guild_panel.rect().left + guild_storage::PAGE.left,
+        state.guild_panel.rect().top + guild_storage::PAGE.top,
     );
     let cursor_path = cursor_moves
         .read()
@@ -3545,6 +3924,10 @@ pub(crate) fn process_overlay_keyboard(
         // correlation after runtime receipt ingest.
         return;
     }
+    if state.ime_frame_consumed {
+        typed.clear();
+        return;
+    }
     let BigMapControls {
         model: mut big_map,
         intents: mut big_map_intents,
@@ -3558,8 +3941,178 @@ pub(crate) fn process_overlay_keyboard(
         mut surface_signals,
         mut ui_audio,
         ui,
+        mut effects,
+        mut belt,
     } = keyboard_controls;
 
+    if keys.just_pressed(KeyCode::F12)
+        && (keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight))
+        && (keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight))
+    {
+        typed.clear();
+        return;
+    }
+    if state.leave_game.blocks() {
+        for event in typed.read() {
+            if event.state == ButtonState::Pressed && !event.repeat {
+                match event.key_code {
+                    KeyCode::Enter | KeyCode::NumpadEnter => leave_game_dialog::finish(
+                        &mut state,
+                        &mut shell,
+                        &mut shell_intents,
+                        effects.as_deref_mut(),
+                        true,
+                    ),
+                    KeyCode::Escape => leave_game_dialog::finish(
+                        &mut state,
+                        &mut shell,
+                        &mut shell_intents,
+                        effects.as_deref_mut(),
+                        false,
+                    ),
+                    _ => {}
+                }
+            }
+        }
+        return;
+    }
+    if state.social_bonds.prompt.is_some() {
+        let events: Vec<_> = typed.read().cloned().collect();
+        social_bond_dialog::host::keyboard(&mut state, &mut intents, &events);
+        return;
+    }
+    if state.group_dialog.modal() || state.group_dialog.consumed {
+        let events: Vec<_> = typed.read().cloned().collect();
+        if let Some(social) = social.as_deref_mut() {
+            if state.group_dialog.invitation.is_some() {
+                for event in &events {
+                    if event.state == ButtonState::Pressed
+                        && !event.repeat
+                        && matches!(
+                            event.key_code,
+                            KeyCode::Enter | KeyCode::NumpadEnter | KeyCode::Escape
+                        )
+                    {
+                        group_dialog::answer_invitation(
+                            &mut state,
+                            social,
+                            &mut intents,
+                            event.key_code != KeyCode::Escape,
+                        );
+                        break;
+                    }
+                }
+            } else {
+                state.group_dialog.keyboard(&events, &mut intents, social);
+            }
+        }
+        return;
+    }
+    if state.guild_panel.blocks() {
+        for event in typed.read() {
+            if event.state == ButtonState::Pressed
+                && !event.repeat
+                && matches!(
+                    event.key_code,
+                    KeyCode::Enter | KeyCode::NumpadEnter | KeyCode::Escape
+                )
+            {
+                if state.guild_panel.invite.is_some() {
+                    if let Some(social) = social.as_deref_mut() {
+                        guild_panel::answer_invite(
+                            &mut state,
+                            social,
+                            &mut intents,
+                            event.key_code != KeyCode::Escape,
+                        );
+                    }
+                } else if state.guild_panel.kick_member.is_some()
+                    && event.key_code != KeyCode::Escape
+                {
+                    if let Some(social) = social.as_deref_mut() {
+                        guild_panel::confirm_kick(&mut state, social, &mut intents);
+                    }
+                } else if state.guild_panel.member_change.is_some()
+                    && event.key_code != KeyCode::Escape
+                {
+                    if let Some(social) = social.as_deref_mut() {
+                        guild_panel::confirm_member_rank(&mut state, social, &mut intents);
+                    }
+                } else if state.guild_panel.create_rank && event.key_code != KeyCode::Escape {
+                    if let Some(social) = social.as_deref_mut() {
+                        guild_panel::confirm_create_rank(&mut state, social, &mut intents);
+                    }
+                } else {
+                    state.guild_panel.close_error();
+                }
+            }
+        }
+        return;
+    }
+    if equipment_creature_host::modal(&state) {
+        let events: Vec<_> = typed.read().cloned().collect();
+        equipment_creature_host::keyboard(
+            &mut state,
+            &mut intents,
+            &events,
+            time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
+        );
+        typed.clear();
+        return;
+    }
+    if state.friends.modal.is_some()
+        && !state.non_friend_amount_modal_open()
+        && state.trade_dialog.message.is_none()
+        && !state.keyboard.open
+    {
+        let events: Vec<_> = typed.read().cloned().collect();
+        friend_dialog::host::keyboard(&mut state, &mut intents, &events);
+        typed.clear();
+        return;
+    }
+    if state.keyboard.input_consumed {
+        typed.clear();
+        return;
+    }
+    if state.keyboard.open {
+        typed.clear();
+        if state.keyboard.waiting.is_none()
+            && (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Keybind")
+                || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Closeall"))
+        {
+            state.keyboard.hide();
+        }
+        return;
+    }
+    if let Some(message) = state.trade_dialog.message.as_ref() {
+        let revision = message.revision();
+        let action = typed
+            .read()
+            .filter(|event| event.state == ButtonState::Pressed && !event.repeat)
+            .find_map(|event| match event.key_code {
+                KeyCode::Escape => Some(false),
+                KeyCode::Enter | KeyCode::NumpadEnter => Some(true),
+                _ => None,
+            })
+            .or_else(|| {
+                if keys.just_pressed(KeyCode::Escape) {
+                    Some(false)
+                } else if keys.just_pressed(KeyCode::Enter)
+                    || keys.just_pressed(KeyCode::NumpadEnter)
+                {
+                    Some(true)
+                } else {
+                    None
+                }
+            });
+        typed.clear();
+        if let Some(accept) = action {
+            if let Some(social) = social.as_deref() {
+                trade_dialog::answer_message(&mut state, social, &mut intents, revision, accept);
+            }
+        }
+        return;
+    }
     if state.guild_gold_prompt.is_some() {
         let events: Vec<_> = typed.read().cloned().collect();
         let action = state
@@ -3684,38 +4237,39 @@ pub(crate) fn process_overlay_keyboard(
             state.guild_recruit_draft.clear();
             return;
         }
-        if keys.just_pressed(KeyCode::Backspace) {
-            state.guild_recruit_draft.pop();
-        }
-        if keys.just_pressed(KeyCode::Enter) {
-            let name = state.guild_recruit_draft.trim().to_owned();
-            if valid_social_name(&name)
-                && social_has_permission(&social.guild, "recruit")
-                && intents.push_social_pending(
-                    social,
-                    NativePlayerUiIntent::GuildEditMember {
-                        change_type: 0,
-                        rank_index: 0,
-                        name,
-                        rank_name: String::new(),
-                    },
-                )
-            {
-                state.guild_recruit_focused = false;
-                state.guild_recruit_draft.clear();
-            }
-            return;
-        }
+        let draft = state.guild_recruit_draft.clone();
+        state.guild_panel.sync_recruit(&draft);
         for event in typed.read() {
-            if event.state == ButtonState::Pressed {
-                if let Some(text) = &event.text {
-                    push_social_name_text(&mut state.guild_recruit_draft, text);
-                }
-            }
+            friend_dialog::host::edit_key(&mut state.guild_panel.recruit_editor, event);
         }
+        state.guild_recruit_draft = state
+            .guild_panel
+            .recruit_editor
+            .editor
+            .as_ref()
+            .map(|e| e.text().to_owned())
+            .unwrap_or_default();
         return;
     }
 
+    if state.guild_open() && state.guild_left_page == GuildLeftPage::Members {
+        if let Some(social) = social.as_deref() {
+            let count = social
+                .guild
+                .members
+                .iter()
+                .filter(|m| !state.guild_panel.hide_offline || m.online)
+                .count();
+            let handled = keys
+                .get_just_pressed()
+                .copied()
+                .any(|key| state.guild_panel.member_page_key(key, count));
+            if handled {
+                typed.clear();
+                return;
+            }
+        }
+    }
     if state.guild_open()
         && state.guild_left_page == GuildLeftPage::Ranks
         && state.guild_rank_name_focused
@@ -3725,24 +4279,28 @@ pub(crate) fn process_overlay_keyboard(
             state.guild_rank_name_draft.clear();
             return;
         }
-        if keys.just_pressed(KeyCode::Backspace) {
-            state.guild_rank_name_draft.pop();
-        }
-        if keys.just_pressed(KeyCode::Enter) {
-            state.guild_rank_name_focused = false;
+        if keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::NumpadEnter) {
+            if let Some(social) = social.as_deref_mut() {
+                guild_panel::save_rank_name(&mut state, social, &mut intents);
+            }
+            typed.clear();
             return;
         }
+        let draft = state.guild_rank_name_draft.clone();
+        state.guild_panel.sync_rank(&draft);
         for event in typed.read() {
-            if event.state == ButtonState::Pressed {
-                if let Some(text) = &event.text {
-                    for ch in text.chars().filter(|ch| !ch.is_control()) {
-                        if state.guild_rank_name_draft.chars().count() < 20 {
-                            state.guild_rank_name_draft.push(ch);
-                        }
-                    }
-                }
+            if event.text.as_deref() == Some("\\") {
+                continue;
             }
+            friend_dialog::host::edit_key(&mut state.guild_panel.rank_editor, event);
         }
+        state.guild_rank_name_draft = state
+            .guild_panel
+            .rank_editor
+            .editor
+            .as_ref()
+            .map(|e| e.text().to_owned())
+            .unwrap_or_default();
         return;
     }
 
@@ -3760,20 +4318,12 @@ pub(crate) fn process_overlay_keyboard(
             state.guild_notice_draft.clear();
             return;
         }
-        if keys.just_pressed(KeyCode::Backspace) {
-            state.guild_notice_draft.pop();
-        }
-        if keys.just_pressed(KeyCode::Enter) {
-            push_guild_notice_text(&mut state.guild_notice_draft, "\n");
-        }
+        let draft = state.guild_notice_draft.clone();
+        state.guild_panel.sync_notice(&draft);
         for event in typed.read() {
-            if event.state != ButtonState::Pressed {
-                continue;
-            }
-            if let Some(text) = &event.text {
-                push_guild_notice_text(&mut state.guild_notice_draft, text);
-            }
+            friend_dialog::host::edit_key(&mut state.guild_panel.notice_editor, event);
         }
+        state.guild_notice_draft = state.guild_panel.notice_draft();
         return;
     }
 
@@ -3861,38 +4411,23 @@ pub(crate) fn process_overlay_keyboard(
         }
     }
 
-    if state.skill_open()
-        && skill_binding
-            .as_deref()
-            .is_some_and(SkillBindingUi::is_assign_key_enabled)
-    {
-        let pressed = [
-            KeyCode::F1,
-            KeyCode::F2,
-            KeyCode::F3,
-            KeyCode::F4,
-            KeyCode::F5,
-            KeyCode::F6,
-            KeyCode::F7,
-            KeyCode::F8,
-        ]
-        .into_iter()
-        .enumerate()
-        .find_map(|(index, key)| keys.just_pressed(key).then_some(index as u8 + 1));
-        if let Some(hotkey) = pressed {
-            if let (Some(skill_binding), Some(skills), Some(skill_persistence)) = (
-                skill_binding.as_deref_mut(),
-                skills.as_deref_mut(),
-                skill_persistence.as_deref_mut(),
-            ) {
-                if skill_binding.assign_selected_key(hotkey, skills) {
-                    skill_binding.apply_to_skill_model(skills);
-                    skill_persistence.mark_dirty();
-                    persist_skill_bindings_if_changed(skill_persistence, skill_binding);
-                }
-            }
-            return;
+    if state.hero.modal() {
+        if state.hero.assign.open
+            && keys.just_pressed(KeyCode::Escape)
+            && state.hero.assign.pending.is_none()
+        {
+            state.hero.assign = Default::default();
         }
+        return;
+    }
+    if state.skill_assign.open {
+        if keys.just_pressed(KeyCode::Escape) && !state.skill_assign.pending {
+            state.skill_assign = Default::default();
+            if let Some(binding) = skill_binding.as_deref_mut() {
+                binding.set_assign_key(false);
+            }
+        }
+        return;
     }
 
     if state.bigmap_open() && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused) {
@@ -4019,25 +4554,22 @@ pub(crate) fn process_overlay_keyboard(
     // Crystal's default Help binding is H with Ctrl and Shift explicitly
     // unpressed; Alt is a don't-care modifier. Ctrl+H remains available to
     // the attack-mode binding and Shift+H must not toggle Help.
-    let help_shortcut = keys.just_pressed(KeyCode::KeyH)
-        && !keys.pressed(KeyCode::ControlLeft)
-        && !keys.pressed(KeyCode::ControlRight)
-        && !keys.pressed(KeyCode::ShiftLeft)
-        && !keys.pressed(KeyCode::ShiftRight);
+    let help_shortcut = keyboard_dialog::host::triggered(&state.keyboard, &keys, "Help");
     if help_shortcut {
         state.help.toggle();
-        return;
     }
     // Quest/NPC surfaces own Escape. This system is ordered before the quest
     // input system so returning here preserves the pre-key modal state for the
     // dedicated handler and prevents the same key from opening Menu after it
     // closes Quest/Dialog later in this update.
-    if keys.just_pressed(KeyCode::Escape)
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Closeall")
         && (state.quest_open() || npc_dialog.as_deref().is_some_and(|dialog| dialog.is_open))
     {
         return;
     }
-    if keys.just_pressed(KeyCode::KeyI) {
+    if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+        || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+    {
         let was_open = state.inventory_open();
         state.toggle_inventory();
         if !state.inventory_open() {
@@ -4050,43 +4582,126 @@ pub(crate) fn process_overlay_keyboard(
             // already handled
         }
     }
-    if keys.just_pressed(KeyCode::KeyC) || keys.just_pressed(KeyCode::F10) {
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Skillbar")
+        && skills.as_deref().is_some_and(|skills| {
+            skill_bars::SkillBarsUi::has_skill(skills, 0)
+                || skill_bars::SkillBarsUi::has_skill(skills, 1)
+        })
+    {
+        state.core.options.skill_bar = !state.core.options.skill_bar;
+        if let Some(effects) = effects.as_deref_mut() {
+            effects.push(mir2_ui_core::effect::UiEffect::PersistOptions {
+                options: state.core.options.clone(),
+            });
+        }
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "DropView") {
+        state.local_keys.show_drops(std::time::Instant::now());
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Autorun") {
+        let on = !state.local_keys.auto_run;
+        state.local_keys.set_auto_run(on);
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Cameramode") {
+        state.local_keys.camera_hidden = !state.local_keys.camera_hidden;
+        if !state.local_keys.camera_hidden {
+            state.status_hud.restore_camera();
+            if !state.minimap_visible() {
+                state.toggle_minimap();
+            }
+            if let Some(belt) = belt.as_deref_mut() {
+                belt.visible = true;
+            }
+        }
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Equipment")
+        || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Equipment2")
+    {
         // Crystal's Equipment shortcut shares the CharacterButton page
         // state machine but does not invoke MirControl.OnMouseClick, so it is
         // intentionally silent.
         state.activate_character_hud_button();
     }
-    if keys.just_pressed(KeyCode::F11) {
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Skills")
+        || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Skills2")
+    {
         state.toggle_skill();
     }
-    if keys.just_pressed(KeyCode::KeyM) {
-        state.toggle_mail();
-    }
-    if keys.just_pressed(KeyCode::KeyB) {
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Bigmap") {
         state.toggle_bigmap();
     }
-    if keys.just_pressed(KeyCode::KeyN) {
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Minimap") {
         state.toggle_minimap();
     }
-    if keys.just_pressed(KeyCode::KeyO) {
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "GameShop") {
         state.toggle_shop();
         if !state.shop_open() {
             state.shop_quantity = 1;
         }
     }
-    if keys.just_pressed(KeyCode::KeyP) {
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Group") {
         // Crystal's default binding is P = Group. Help page one exposes this
         // binding, so the production route must not silently open Storage.
         state.toggle_group();
     }
-    if keys.just_pressed(KeyCode::Escape) {
+    for (function, page) in [
+        ("Mentor", social_bond_dialog::BondPage::Mentor),
+        ("Relationship", social_bond_dialog::BondPage::Relationship),
+    ] {
+        if keyboard_dialog::host::triggered(&state.keyboard, &keys, function) {
+            social_bond_dialog::host::toggle(&mut state, page);
+        }
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Friends") {
+        friend_dialog::host::toggle(&mut state, &mut intents);
+    }
+    for (function, page) in [("MountWindow", 0), ("Fishing", 1), ("Creature", 2)] {
+        if keyboard_dialog::host::triggered(&state.keyboard, &keys, function) {
+            equipment_creature_host::toggle(
+                &mut state,
+                &mut intents,
+                page,
+                time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
+            );
+        }
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Mount") {
+        if let Some(mount_fishing_dialog::EquipmentIntent::Packet(packet)) =
+            state.equipment_dialogs.action(
+                mount_fishing_dialog::EquipmentAction::Ride,
+                time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
+            )
+        {
+            equipment_creature_host::enqueue(&mut state, &mut intents, packet);
+        }
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Ranking") {
+        if state.ranking.open {
+            state.ranking.hide();
+        } else {
+            state.ranking.show(0);
+        }
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Closeall") {
         if state.core.panel != mir2_ui_core::state::UiPanel::None
             || state.inspect.is_some()
             || state.help_open()
+            || state.equipment_dialogs.mount_open
+            || state.equipment_dialogs.fishing_open
+            || state.equipment_dialogs.status_open
+            || state.creature.open
+            || state.friends.open
+            || state.ranking.open
+            || state.ranking.player_inspect.is_open()
             || state.trade_dialog.open
         {
             // GameScene.Closeall deliberately omits both TradeDialogs. Escape
             // closes Inventory/other general windows, not the active exchange.
+            equipment_creature_host::close_general(
+                &mut state,
+                &mut intents,
+                time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
+            );
             let trade = std::mem::take(&mut state.trade_dialog);
             state.close_all_windows();
             state.trade_dialog = trade;
@@ -4103,20 +4718,31 @@ pub(crate) fn process_overlay_keyboard(
         }
         return;
     }
-    if keys.just_pressed(KeyCode::KeyU) {
-        if let Some(intent) = inspected_use_intent(&state, &inventory) {
-            intents.push_intent(intent);
-        }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Keybind") {
+        state.keyboard.show();
     }
-    if keys.just_pressed(KeyCode::KeyG) {
-        if let Some(intent) = inspected_equip_intent(&state, &inventory) {
-            intents.push_intent(intent);
-        }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Guilds") {
+        state.toggle_guild();
     }
-    if keys.just_pressed(KeyCode::KeyL) && state.menu_open() {
-        let _ = shell.apply_ui_intent(NativeUiIntent::Logout);
-        shell_intents.push(NativeUiIntent::Logout);
-        state.close_all_windows();
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Options")
+        || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Options2")
+    {
+        state.toggle_options();
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Trade") {
+        intents.push_intent(NativePlayerUiIntent::TradeRequest);
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Logout") {
+        state.leave_game.request(
+            leave_game_dialog::LeaveKind::Logout,
+            std::time::Instant::now(),
+        );
+    }
+    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Exit") {
+        state.leave_game.request(
+            leave_game_dialog::LeaveKind::Exit,
+            std::time::Instant::now(),
+        );
     }
     // Cash GameShop quantity hotkeys use the cash model; NPC quantity stays
     // in the NPC-only state field.
@@ -4230,8 +4856,115 @@ fn process_overlay_buttons(
     let gold_modal_was_open = state.guild_gold_prompt.is_some();
     let trade_modal_was_open = state.trade_dialog.gold_prompt.is_some();
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
+    let message_was_open = state.trade_dialog.message.is_some();
     for (interaction, button) in buttons.iter() {
+        if state.hero.modal() {
+            continue;
+        }
+        if state.skill_assign.open
+            && !matches!(
+                button,
+                OverlayButton::AssignSkillKey(_)
+                    | OverlayButton::ClearSkillBinding
+                    | OverlayButton::CloseSkillAssign
+            )
+        {
+            continue;
+        }
         if *interaction != Interaction::Pressed {
+            continue;
+        }
+        if state.leave_game.blocks() {
+            match *button {
+                OverlayButton::LeaveConfirm => leave_game_dialog::finish(
+                    &mut state,
+                    &mut shell,
+                    &mut shell_intents,
+                    Some(&mut effects),
+                    true,
+                ),
+                OverlayButton::LeaveCancel => leave_game_dialog::finish(
+                    &mut state,
+                    &mut shell,
+                    &mut shell_intents,
+                    Some(&mut effects),
+                    false,
+                ),
+                _ => {}
+            }
+            continue;
+        }
+        if state.social_bonds.prompt.is_some() {
+            continue;
+        }
+        if state.group_dialog.modal() || state.group_dialog.consumed {
+            match *button {
+                OverlayButton::GroupInviteAccept | OverlayButton::GroupInviteDecline => {
+                    group_dialog::answer_invitation(
+                        &mut state,
+                        &mut social,
+                        &mut intents,
+                        *button == OverlayButton::GroupInviteAccept,
+                    )
+                }
+
+                OverlayButton::GroupInputConfirm => {
+                    state.group_dialog.submit(&mut intents, &mut social)
+                }
+                OverlayButton::GroupInputCancel => {
+                    state.group_dialog.editor.cancel_modal();
+                    state.group_dialog.consumed = true;
+                }
+                _ => {}
+            }
+            continue;
+        }
+        if state.guild_panel.blocks() {
+            if matches!(
+                *button,
+                OverlayButton::GuildInviteAccept | OverlayButton::GuildInviteDecline
+            ) {
+                guild_panel::answer_invite(
+                    &mut state,
+                    &mut social,
+                    &mut intents,
+                    *button == OverlayButton::GuildInviteAccept,
+                );
+            }
+            if matches!(*button, OverlayButton::GuildKickConfirm) {
+                guild_panel::confirm_kick(&mut state, &mut social, &mut intents);
+            }
+            if matches!(*button, OverlayButton::GuildMemberRankConfirm) {
+                guild_panel::confirm_member_rank(&mut state, &mut social, &mut intents);
+            }
+            if matches!(*button, OverlayButton::GuildCreateRankConfirm) {
+                guild_panel::confirm_create_rank(&mut state, &mut social, &mut intents);
+            }
+            if matches!(*button, OverlayButton::GuildBuffErrorClose) {
+                state.guild_panel.close_error();
+            }
+            continue;
+        }
+        if state.trade_dialog.input_consumed {
+            continue;
+        }
+        if message_was_open || state.trade_dialog.message.is_some() {
+            match *button {
+                OverlayButton::TradeAccept(revision) => {
+                    trade_dialog::answer_message(&mut state, &social, &mut intents, revision, true);
+                }
+                OverlayButton::TradeDecline(revision)
+                | OverlayButton::TradeMessageClose(revision) => {
+                    trade_dialog::answer_message(
+                        &mut state,
+                        &social,
+                        &mut intents,
+                        revision,
+                        false,
+                    );
+                }
+                _ => {}
+            }
             continue;
         }
         if (trade_modal_was_open || state.trade_dialog.gold_prompt.is_some())
@@ -4266,10 +4999,57 @@ fn process_overlay_buttons(
             // mutate another window in the same frame.
             continue;
         }
+        if (state.group_dialog.modal() || state.group_dialog.consumed)
+            && !matches!(
+                *button,
+                OverlayButton::GroupInputConfirm | OverlayButton::GroupInputCancel
+            )
+        {
+            continue;
+        }
+        if state.leave_game.blocks()
+            && !matches!(
+                *button,
+                OverlayButton::LeaveConfirm | OverlayButton::LeaveCancel
+            )
+        {
+            continue;
+        }
+        if (state.menu_pointer_consumed
+            || equipment_creature_host::modal(&state)
+            || state.friends.modal.is_some())
+            && !matches!(
+                *button,
+                OverlayButton::LeaveConfirm | OverlayButton::LeaveCancel
+            )
+        {
+            continue;
+        }
         match *button {
-            OverlayButton::ExitApplication => {
-                effects.push(mir2_ui_core::effect::UiEffect::ExitApplication);
+            OverlayButton::CastSkillBar(slot) => {
+                if state.core.options.skill_bar
+                    && skills
+                        .as_deref()
+                        .is_some_and(|skills| skills.skill_for_shortcut(slot).is_some())
+                {
+                    state.skill_bars.armed_slot = Some(slot);
+                }
             }
+            OverlayButton::RefreshSkillBar => {}
+
+            OverlayButton::ExitApplication => {
+                state.leave_game.request(
+                    leave_game_dialog::LeaveKind::Exit,
+                    std::time::Instant::now(),
+                );
+            }
+            OverlayButton::LeaveConfirm | OverlayButton::LeaveCancel => leave_game_dialog::finish(
+                &mut state,
+                &mut shell,
+                &mut shell_intents,
+                Some(&mut effects),
+                matches!(*button, OverlayButton::LeaveConfirm),
+            ),
             OverlayButton::CloseWindows | OverlayButton::CloseCharacter => {
                 if matches!(*button, OverlayButton::CloseCharacter) {
                     // Crystal CharacterDialog.CloseButton uses ButtonA. Keep
@@ -4277,6 +5057,11 @@ fn process_overlay_buttons(
                     // assigning sound to every generic CloseWindows caller.
                     ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
+                equipment_creature_host::close_general(
+                    &mut state,
+                    &mut intents,
+                    time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
+                );
                 state.close_windows();
                 state.shop_quantity = 1;
                 if let Some(skill_binding) = skill_binding.as_deref_mut() {
@@ -4286,6 +5071,49 @@ fn process_overlay_buttons(
             }
             OverlayButton::ToggleHelp => {
                 state.help.toggle();
+            }
+            OverlayButton::ToggleKeyboard => {
+                if state.keyboard.open {
+                    state.keyboard.hide();
+                } else {
+                    state.keyboard.show();
+                }
+            }
+            OverlayButton::ToggleMentor => {
+                social_bond_dialog::host::toggle(&mut state, social_bond_dialog::BondPage::Mentor)
+            }
+            OverlayButton::ToggleRelationship => social_bond_dialog::host::toggle(
+                &mut state,
+                social_bond_dialog::BondPage::Relationship,
+            ),
+            OverlayButton::ToggleFriends => {
+                friend_dialog::host::toggle(&mut state, &mut intents);
+            }
+            OverlayButton::ToggleMount
+            | OverlayButton::ToggleFishing
+            | OverlayButton::ToggleCreature => {
+                let page = match button {
+                    OverlayButton::ToggleMount => 0,
+                    OverlayButton::ToggleFishing => 1,
+                    _ => 2,
+                };
+                equipment_creature_host::toggle(
+                    &mut state,
+                    &mut intents,
+                    page,
+                    time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
+                );
+            }
+            OverlayButton::ToggleRanking => {
+                if state.ranking.open {
+                    state.ranking.hide();
+                } else {
+                    state.ranking.show(
+                        time.as_ref()
+                            .map(|time| time.elapsed().as_millis() as u64)
+                            .unwrap_or(0),
+                    );
+                }
             }
             OverlayButton::CloseHelp => {
                 ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
@@ -4473,19 +5301,24 @@ fn process_overlay_buttons(
                     );
                 }
             }
-            OverlayButton::GroupAddSelected => {
-                let Some(target) = combat_target
-                    .as_deref()
-                    .and_then(|model| model.target.as_ref())
-                    .filter(|target| target.is_player)
-                else {
-                    continue;
-                };
-                let name = target.name.trim();
-                if name.is_empty() || name.chars().count() > 32 {
-                    continue;
-                }
-                queue_group_invite_by_name(&mut intents, &mut social, name.to_owned());
+            OverlayButton::GroupAddSelected | OverlayButton::GroupRemoveSelected => {
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
+                let owner = ui
+                    .as_ref()
+                    .and_then(|u| u.player.name.as_deref())
+                    .unwrap_or("");
+                state.group_dialog.show_input(
+                    matches!(*button, OverlayButton::GroupRemoveSelected),
+                    &social.group,
+                    owner,
+                );
+            }
+            OverlayButton::GroupInputConfirm => {
+                state.group_dialog.submit(&mut intents, &mut social)
+            }
+            OverlayButton::GroupInputCancel => {
+                state.group_dialog.editor.cancel_modal();
+                state.group_dialog.consumed = true;
             }
             OverlayButton::GroupInviteNameFocus => {
                 state.group_invite_focused = true;
@@ -4502,22 +5335,106 @@ fn process_overlay_buttons(
             OverlayButton::SelectGroupMember(index) => {
                 state.selected_group_member = Some(index);
             }
-            OverlayButton::GroupRemoveSelected => {
-                let Some(index) = state.selected_group_member else {
-                    continue;
-                };
-                let Some(member) = social.group.members.get(usize::from(index)) else {
-                    continue;
-                };
-                if member.leader || member.name.trim().is_empty() {
-                    continue;
+            OverlayButton::SelectGuildRightBuff(buff) => {
+                state.guild_panel.right_buff = buff;
+                if buff {
+                    state.guild_recruit_focused = false;
+                    state.guild_panel.recruit_editor.editor_focused = false;
                 }
-                let name = member.name.clone();
-                intents.push_social_pending(
-                    &mut social,
-                    NativePlayerUiIntent::GroupRemoveMember { name },
-                );
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
             }
+            OverlayButton::GuildBuffActivate(row) => state.guild_panel.activate(
+                row,
+                &social.guild,
+                time.as_ref().map_or(0, |t| t.elapsed().as_millis() as u64),
+                &mut intents,
+            ),
+            OverlayButton::GuildBuffScroll(rows) => {
+                state.guild_panel.buffs.scroll(rows);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
+            }
+            OverlayButton::GuildBuffThumb => {}
+            OverlayButton::GuildNoticeScroll(delta) => {
+                let count = if state.guild_notice_editing {
+                    state.guild_notice_draft.lines().count()
+                } else {
+                    social.guild.notice.len()
+                };
+                state.guild_panel.notice_scroll = (state.guild_panel.notice_scroll as i32 + delta)
+                    .clamp(0, count.saturating_sub(25) as i32)
+                    as usize;
+                state.guild_panel.notice_editor.text_scroll[1] =
+                    state.guild_panel.notice_scroll as f32 * 13.;
+            }
+            OverlayButton::GuildShowOffline => {
+                state.guild_panel.hide_offline = !state.guild_panel.hide_offline;
+                state.guild_panel.member_scroll = 0;
+            }
+            OverlayButton::GuildMembersScroll(delta) => {
+                let count = social
+                    .guild
+                    .members
+                    .iter()
+                    .filter(|m| !state.guild_panel.hide_offline || m.online)
+                    .count();
+                state.guild_panel.member_scroll = (state.guild_panel.member_scroll as i32 + delta)
+                    .clamp(0, count.saturating_sub(18) as i32)
+                    as usize;
+                state.guild_panel.member_menu = None;
+            }
+            OverlayButton::GuildMemberRankMenu(index) => {
+                state.guild_panel.member_menu = Some(index);
+                state.guild_panel.rank_scroll = 0;
+            }
+            OverlayButton::GuildMemberRankConfirm => {
+                guild_panel::confirm_member_rank(&mut state, &mut social, &mut intents)
+            }
+            OverlayButton::GuildMemberRankSelect(index) => {
+                if let Some(member) = state
+                    .guild_panel
+                    .member_menu
+                    .and_then(|m| social.guild.members.get(m as usize))
+                {
+                    if let Some(rank) = social
+                        .guild
+                        .ranks
+                        .iter()
+                        .find(|r| r.index == i32::from(index))
+                    {
+                        if rank.index >= social.guild.my_rank_id
+                            && social_has_permission(&social.guild, "changeRank")
+                            && state.guild_panel.now_ms >= state.guild_panel.create_ready_ms
+                        {
+                            state.guild_panel.member_change =
+                                Some((member.name.clone(), index, rank.name.clone()));
+                        }
+                    }
+                }
+                state.guild_panel.member_menu = None;
+            }
+            OverlayButton::GuildCreateRank => {
+                state.guild_panel.rank_dropdown = false;
+                if social.guild.ranks.len() < 255
+                    && social_has_permission(&social.guild, "changeRank")
+                    && state.guild_panel.now_ms >= state.guild_panel.create_ready_ms
+                {
+                    state.guild_panel.create_rank = true;
+                }
+            }
+            OverlayButton::GuildCreateRankConfirm => {
+                guild_panel::confirm_create_rank(&mut state, &mut social, &mut intents)
+            }
+            OverlayButton::GuildRankDropdown => {
+                state.guild_panel.rank_dropdown = !state.guild_panel.rank_dropdown
+            }
+            OverlayButton::GuildRankScroll(delta) => {
+                state.guild_panel.rank_scroll = (state.guild_panel.rank_scroll as i32 + delta)
+                    .clamp(
+                        0,
+                        social.guild.ranks.len().saturating_add(1).saturating_sub(5) as i32,
+                    ) as usize;
+            }
+            OverlayButton::GuildBuffErrorClose => state.guild_panel.close_error(),
             OverlayButton::GuildRequestInfo => {
                 intents.push_social_pending(
                     &mut social,
@@ -4609,13 +5526,10 @@ fn process_overlay_buttons(
             OverlayButton::GuildPublishNotice => {
                 let can_edit =
                     social.guild.name.is_some() && social_has_permission(&social.guild, "notice");
-                let Some(notice) = guild_notice_lines(&state.guild_notice_draft) else {
-                    continue;
-                };
+                let notice = guild_notice_lines(&state.guild_notice_draft);
                 if can_edit
                     && state.guild_notice_editing
                     && state.guild_notice_submission.is_none()
-                    && notice != social.guild.notice
                     && intents.push_social_pending(
                         &mut social,
                         NativePlayerUiIntent::GuildEditNotice {
@@ -4623,6 +5537,7 @@ fn process_overlay_buttons(
                         },
                     )
                 {
+                    state.guild_panel.notice_editor.editor_focused = false;
                     state.guild_notice_submission = Some(notice);
                 }
             }
@@ -4636,24 +5551,20 @@ fn process_overlay_buttons(
                 state.selected_guild_member = Some(index);
             }
             OverlayButton::GuildKickMember(index) => {
-                let Some(member) = social.guild.members.get(usize::from(index)) else {
-                    continue;
-                };
-                if member.name.trim().is_empty() || !social_has_permission(&social.guild, "kick") {
-                    continue;
+                if let Some(member) = social.guild.members.get(usize::from(index)) {
+                    if social_has_permission(&social.guild, "kick")
+                        && member.name != state.guild_panel.owner_name
+                        && member
+                            .rank_index
+                            .is_some_and(|r| i32::from(r) >= social.guild.my_rank_id)
+                        && state.guild_panel.now_ms >= state.guild_panel.create_ready_ms
+                    {
+                        state.guild_panel.kick_member = Some(member.name.clone());
+                    }
                 }
-                state.selected_guild_member = Some(index);
-                let name = member.name.clone();
-                let rank_index = member.rank_index.unwrap_or(0);
-                intents.push_social_pending(
-                    &mut social,
-                    NativePlayerUiIntent::GuildEditMember {
-                        change_type: 1,
-                        rank_index,
-                        name,
-                        rank_name: String::new(),
-                    },
-                );
+            }
+            OverlayButton::GuildKickConfirm => {
+                guild_panel::confirm_kick(&mut state, &mut social, &mut intents)
             }
             OverlayButton::GuildKickSelected => {
                 let Some(index) = state.selected_guild_member else {
@@ -4775,6 +5686,8 @@ fn process_overlay_buttons(
                 else {
                     continue;
                 };
+                state.guild_panel.rank_dropdown = false;
+                state.guild_panel.rank_name_ready_ms = 0;
                 state.selected_guild_rank = Some(rank_index);
                 state.guild_rank_name_draft = rank.name.clone();
                 state.guild_rank_name_focused = false;
@@ -4787,32 +5700,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::GuildRankNameSave => {
-                let Some(rank_index) = state.selected_guild_rank else {
-                    continue;
-                };
-                let rank_name = state.guild_rank_name_draft.trim().to_owned();
-                let changed = social
-                    .guild
-                    .ranks
-                    .iter()
-                    .find(|rank| u8::try_from(rank.index).ok() == Some(rank_index))
-                    .is_some_and(|rank| rank.name != rank_name);
-                if changed
-                    && !rank_name.is_empty()
-                    && rank_name.chars().count() <= 20
-                    && social_has_permission(&social.guild, "changeRank")
-                    && intents.push_social_pending(
-                        &mut social,
-                        NativePlayerUiIntent::GuildEditMember {
-                            change_type: 2,
-                            rank_index,
-                            name: String::new(),
-                            rank_name,
-                        },
-                    )
-                {
-                    state.guild_rank_name_focused = false;
-                }
+                guild_panel::save_rank_name(&mut state, &mut social, &mut intents)
             }
             OverlayButton::GuildRankTogglePermission(option) => {
                 let Some(rank_index) = state.selected_guild_rank else {
@@ -4826,9 +5714,16 @@ fn process_overlay_buttons(
                 else {
                     continue;
                 };
-                if option > 7 || !social_has_permission(&social.guild, "changeRank") {
+                if option > 7
+                    || i32::from(rank_index) < social.guild.my_rank_id
+                    || !social_has_permission(&social.guild, "changeRank")
+                {
                     continue;
                 }
+                if state.guild_panel.now_ms < state.guild_panel.rank_option_ready_ms {
+                    continue;
+                }
+                state.guild_panel.rank_option_ready_ms = state.guild_panel.now_ms + 300;
                 let enabled = rank.options & (1_u8 << option) != 0;
                 intents.push_social_pending(
                     &mut social,
@@ -4841,22 +5736,17 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::TradeRequest => {
-                intents.push_social_pending(&mut social, NativePlayerUiIntent::TradeRequest);
+                // The inviter receives no request acknowledgement; refusal can
+                // be only a chat line. Never leave an unresolvable pending key.
+                intents.push_transient_unique(NativePlayerUiIntent::TradeRequest);
             }
-            OverlayButton::TradeAccept => {
-                intents.push_social_pending(
-                    &mut social,
-                    NativePlayerUiIntent::TradeReply {
-                        accept_invite: true,
-                    },
-                );
-            }
-            OverlayButton::TradeDecline => {
-                intents.push_transient_unique(NativePlayerUiIntent::TradeReply {
-                    accept_invite: false,
-                });
-            }
+            OverlayButton::TradeAccept(_)
+            | OverlayButton::TradeDecline(_)
+            | OverlayButton::TradeMessageClose(_) => {}
             OverlayButton::TradeGoldOffer => {
+                if !pending.is_empty() {
+                    continue;
+                }
                 trade_dialog::open_gold(&mut state, &social, gold);
             }
             OverlayButton::TradeGoldConfirm => {
@@ -4872,6 +5762,9 @@ fn process_overlay_buttons(
                 });
             }
             OverlayButton::TradeConfirm => {
+                if !pending.is_empty() {
+                    continue;
+                }
                 if trade_dialog::toggle_lock(&mut state, &social, &mut intents) {
                     ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
@@ -4882,9 +5775,10 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::Logout => {
-                let _ = shell.apply_ui_intent(NativeUiIntent::Logout);
-                shell_intents.push(NativeUiIntent::Logout);
-                state.close_all_windows();
+                state.leave_game.request(
+                    leave_game_dialog::LeaveKind::Logout,
+                    std::time::Instant::now(),
+                );
             }
             OverlayButton::UseInspected => {
                 if let Some(intent) = inspected_use_intent(&state, &inventory) {
@@ -5014,6 +5908,7 @@ fn process_overlay_buttons(
             OverlayButton::CancelInventoryOperation => {
                 state.inventory_operation = None;
             }
+            OverlayButton::InspectBag(_) if state.trade_dialog.open => {}
             OverlayButton::InspectBag(slot) if state.inventory_delete_mode => {
                 let _ = state.open_inventory_delete_for_slot(&inventory, slot);
             }
@@ -5105,44 +6000,13 @@ fn process_overlay_buttons(
                     if skill_binding.select_skill(skill_id, skills) {
                         state.selected_skill_id = Some(skill_id);
                         skill_binding.set_assign_key(true);
+                        state.skill_assign.show(skill_id, skills);
                     }
                 }
             }
-            OverlayButton::AssignSkillKey(hotkey) => {
-                if state.skill_open() {
-                    if let (Some(skill_binding), Some(skills), Some(skill_persistence)) = (
-                        skill_binding.as_deref_mut(),
-                        skills.as_deref_mut(),
-                        skill_persistence.as_deref_mut(),
-                    ) {
-                        if skill_binding.assign_selected_key(hotkey, skills) {
-                            skill_binding.apply_to_skill_model(skills);
-                            skill_persistence.mark_dirty();
-                            persist_skill_bindings_if_changed(skill_persistence, skill_binding);
-                        }
-                    }
-                }
-            }
-            OverlayButton::ClearSkillBinding => {
-                if let (Some(skill_binding), Some(skills), Some(skill_persistence)) = (
-                    skill_binding.as_deref_mut(),
-                    skills.as_deref_mut(),
-                    skill_persistence.as_deref_mut(),
-                ) {
-                    if let Some(skill_id) = skill_binding.selected_skill_id() {
-                        if skill_binding.unassign_skill(skill_id) {
-                            skill_binding.apply_to_skill_model(skills);
-                            skill_persistence.mark_dirty();
-                            persist_skill_bindings_if_changed(skill_persistence, skill_binding);
-                        }
-                    }
-                }
-            }
-            OverlayButton::CloseSkillAssign => {
-                if let Some(skill_binding) = skill_binding.as_deref_mut() {
-                    skill_binding.set_assign_key(false);
-                }
-            }
+            OverlayButton::AssignSkillKey(hotkey) => state.skill_assign.choose(hotkey),
+            OverlayButton::ClearSkillBinding => state.skill_assign.choose(0),
+            OverlayButton::CloseSkillAssign => state.skill_assign.save(&mut intents),
             OverlayButton::SelectCharacterPage(page) => {
                 // Crystal CharacterDialog page buttons inherit
                 // MirButton.Sound = SoundList.ButtonA. Keep the cue on the
@@ -5504,7 +6368,12 @@ fn process_overlay_buttons(
             OverlayButton::ShopBuy => {
                 if state.npc_shop_open()
                     && shop.allows_buy()
-                    && shop_buy_enabled(&shop, &inventory, state.shop_quantity)
+                    && shop_buy_enabled_with_pearls(
+                        &shop,
+                        &inventory,
+                        state.shop_quantity,
+                        state.creature.pearls.max(0) as u32,
+                    )
                 {
                     let id = shop.selected_id.unwrap();
                     intents.push_pending_intent(
@@ -5637,7 +6506,12 @@ fn process_overlay_buttons(
                         }
                     }
                 } else if shop.allows_buy()
-                    && shop_buy_enabled(&shop, &inventory, state.shop_quantity)
+                    && shop_buy_enabled_with_pearls(
+                        &shop,
+                        &inventory,
+                        state.shop_quantity,
+                        state.creature.pearls.max(0) as u32,
+                    )
                 {
                     let id = shop.selected_id.unwrap();
                     intents.push_pending_intent(
@@ -6229,10 +7103,7 @@ fn render_inventory_delete_modal(
                         .with_children(|input| {
                             input.spawn((
                                 Text::new(draft.clone()),
-                                TextFont {
-                                    font_size: FontSize::Px(10.0),
-                                    ..default()
-                                },
+                                crate::crystal_ui::typography::crystal_text_font(10.0),
                                 TextColor(TEXT),
                                 TextLayout::new(Justify::Left, LineBreak::NoWrap),
                             ));
@@ -6429,10 +7300,7 @@ fn render_gold_amount_modal(
             field.with_children(|field| {
                 field.spawn((
                     Text::new(input.draft.clone()),
-                    TextFont {
-                        font_size: FontSize::Px(10.0),
-                        ..default()
-                    },
+                    crate::crystal_ui::typography::crystal_text_font(10.0),
                     TextColor(Color::WHITE),
                     TextLayout::new(Justify::Left, LineBreak::NoWrap),
                 ));
@@ -6526,6 +7394,7 @@ fn render_overlays(
                     &ui,
                     &state,
                     &inventory_feedback,
+                    &social,
                 )
             },
         );
@@ -6548,15 +7417,15 @@ fn render_overlays(
         fill_panel(&mut commands, &mut all.p3(), state.menu_open(), |parent| {
             render_menu(parent, asset_server.as_deref())
         });
-        fill_panel(&mut commands, &mut all.p4(), state.skill_open(), |parent| {
-            render_skills(
+        fill_panel(&mut commands, &mut all.p4(), state.core.skill_open(), |parent| {
+            render_equipment(
                 parent,
                 asset_server.as_deref(),
-                &skills,
-                &skill_binding,
-                &skill_persistence,
-                &state,
+                wing_materials.as_deref(),
+                &inventory,
                 &ui,
+                &state,
+                &skills,
             )
         });
         fill_panel(
@@ -6662,7 +7531,14 @@ fn render_overlays(
             state.help.top,
             state.help.z_index(),
             state.help_open(),
-            |parent| render_help(parent, asset_server.as_deref(), state.help.page),
+            |parent| {
+                render_help(
+                    parent,
+                    asset_server.as_deref(),
+                    state.help.page,
+                    &state.keyboard,
+                )
+            },
         );
     }
     {
@@ -6678,9 +7554,11 @@ fn render_overlays(
         fill_panel(
             &mut commands,
             &mut delete_layers.p4(),
-            state.trade_dialog.gold_prompt.is_some(),
+            state.trade_dialog.gold_prompt.is_some() || state.trade_dialog.message.is_some(),
             |parent| {
-                if let Some(prompt) = &state.trade_dialog.gold_prompt {
+                if let Some(message) = &state.trade_dialog.message {
+                    trade_dialog::render_message(parent, asset_server.as_deref(), message);
+                } else if let Some(prompt) = &state.trade_dialog.gold_prompt {
                     render_gold_amount_modal(
                         parent,
                         asset_server.as_deref(),
@@ -6830,6 +7708,7 @@ fn render_inventory(
     ui: &UiReadModel,
     state: &NativePlayerUiState,
     feedback: &InventoryOperationFeedback,
+    social: &crate::social::SocialModel,
 ) {
     if let Some(asset_server) = asset_server {
         spawn_overlay_frame(
@@ -6961,7 +7840,13 @@ fn render_inventory(
                     if container == 0 && slot >= u32::from(inventory.bag_slot_capacity()) {
                         continue;
                     }
-                    let item = page_items.iter().copied().find(|item| item.slot == slot);
+                    let item = page_items
+                        .iter()
+                        .copied()
+                        .find(|item| item.slot == slot)
+                        .filter(|item| {
+                            container != 0 || !trade_dialog::offered_bag_item(social, item)
+                        });
                     let enabled = if container == 3 {
                         item.is_some()
                     } else {
@@ -7002,6 +7887,10 @@ fn render_inventory(
                         );
                     } else {
                         overlay_absolute_inventory_cell(grid, rect, button, enabled);
+                    }
+                    if container == 0 {
+                        trade_dialog::draw_selection(grid, state, true, slot as usize, rect);
+                        hero_dialog::cross::draw_player_selection(grid, state, slot, rect);
                     }
                 }
             });
@@ -7474,87 +8363,31 @@ fn render_equipment(
                 // CharacterPage.AfterDraw runs after its MirItemCell children.
                 render_character_paper_doll(parent, asset_server, wing_materials, inventory, ui);
             }
-            CharacterPage::Stats1 => {
-                for (text, top) in [
-                    (ui.player.hp_label(), 110.0),
-                    (ui.player.mp_label(), 128.0),
-                    (format!("0-{}", ui.player.current_weight), 146.0),
-                    (format!("{}%", ui.player.experience_percent_label()), 254.0),
-                ] {
+            CharacterPage::Stats1 | CharacterPage::Stats2 => {
+                let weights = ui
+                    .player
+                    .weights
+                    .map(|weights| character_stats::Weights {
+                        bag: Some(i64::from(weights.bag)),
+                        wear: Some(i64::from(weights.wear)),
+                        hand: Some(i64::from(weights.hand)),
+                    })
+                    .unwrap_or_default();
+                for (text, top) in character_stats::lines(
+                    &ui.player,
+                    state.character_page == CharacterPage::Stats2,
+                    weights,
+                ) {
                     overlay_text_at(
                         parent,
                         &text,
-                        CrystalRect::new(134.0, top, 105.0, 16.0),
-                        10.0,
+                        CrystalRect::new(134., top, 105., 16.),
+                        32. / 3.,
                         TEXT,
                     );
                 }
             }
-            CharacterPage::Stats2 => {
-                for (text, top) in [
-                    (ui.player.experience_percent_label(), 110.0),
-                    (
-                        format!("{}/{}", ui.player.current_weight, ui.player.max_weight),
-                        128.0,
-                    ),
-                    (ui.player.gold_label(), 146.0),
-                ] {
-                    overlay_text_at(
-                        parent,
-                        &text,
-                        CrystalRect::new(134.0, top, 105.0, 16.0),
-                        10.0,
-                        TEXT,
-                    );
-                }
-            }
-            CharacterPage::Spells => {
-                let start = state.skill_page * 7;
-                for (row, skill) in skills.skills.iter().skip(start).take(7).enumerate() {
-                    let binding = skills.binding_for(skill.id);
-                    let enabled = binding.can_use != Some(false)
-                        && binding.cast_kind.as_deref() != Some("passive")
-                        && binding
-                            .spell
-                            .as_deref()
-                            .is_some_and(|spell| !spell.is_empty());
-                    overlay_absolute_button(
-                        parent,
-                        &format!(
-                            "{} Lv{}",
-                            short_name(&skill.name, skill.key.as_deref().unwrap_or("")),
-                            skill.level
-                        ),
-                        CrystalRect::new(16.0, 98.0 + row as f32 * 33.0, 210.0, 28.0),
-                        OverlayButton::SelectSkill(skill.id),
-                        enabled,
-                    );
-                }
-                let has_previous = state.skill_page > 0;
-                let has_next = (state.skill_page + 1) * 7 < skills.skills.len();
-                spawn_overlay_crystal_button_enabled(
-                    parent,
-                    asset_server,
-                    "Prguse",
-                    398,
-                    399,
-                    399,
-                    CrystalRect::new(90.0, 340.0, 32.0, 24.0),
-                    OverlayButton::SkillPagePrev,
-                    has_previous,
-                );
-                spawn_overlay_crystal_button_enabled(
-                    parent,
-                    asset_server,
-                    "Prguse",
-                    396,
-                    397,
-                    397,
-                    CrystalRect::new(140.0, 340.0, 32.0, 24.0),
-                    OverlayButton::SkillPageNext,
-                    has_next,
-                );
-            }
+            CharacterPage::Spells => skill_page::render(parent, Some(asset_server), skills, state),
         }
         return;
     }
@@ -7686,10 +8519,7 @@ fn overlay_text_at(
             ..default()
         },
         Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(font_size),
-            ..default()
-        },
+        crate::crystal_ui::typography::crystal_text_font(font_size),
         TextColor(color),
         TextLayout::new(Justify::Left, LineBreak::NoWrap),
     ));
@@ -7720,10 +8550,7 @@ fn overlay_centered_text_at(
         .with_children(|container| {
             container.spawn((
                 Text::new(text.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(font_size),
-                    ..default()
-                },
+                crate::crystal_ui::typography::crystal_text_font(font_size),
                 TextColor(color),
                 TextLayout::new(Justify::Center, LineBreak::NoWrap),
             ));
@@ -7766,10 +8593,7 @@ fn overlay_absolute_button(
         entity.with_children(|button| {
             button.spawn((
                 Text::new(label.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(9.0),
-                    ..default()
-                },
+                crate::crystal_ui::typography::crystal_text_font(9.0),
                 TextColor(if enabled {
                     TEXT
                 } else {
@@ -7878,10 +8702,7 @@ fn overlay_inventory_count(
         .with_children(|label| {
             label.spawn((
                 Text::new(text.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(10.0),
-                    ..default()
-                },
+                crate::crystal_ui::typography::crystal_text_font(10.0),
                 TextColor(Color::srgb(1.0, 1.0, 0.0)),
                 TextLayout::new(Justify::Right, LineBreak::NoWrap),
             ));
@@ -7991,10 +8812,7 @@ fn overlay_absolute_shop_good_button(
                 ..default()
             },
             Text::new(good.name.clone()),
-            TextFont {
-                font_size: FontSize::Px(9.0),
-                ..default()
-            },
+            crate::crystal_ui::typography::crystal_text_font(9.0),
             TextColor(Color::WHITE),
             TextLayout::new(Justify::Left, LineBreak::NoWrap),
         ));
@@ -8006,11 +8824,8 @@ fn overlay_absolute_shop_good_button(
                 top: Val::Px(14.0),
                 ..default()
             },
-            Text::new(format!("Price: {} gold", good.price)),
-            TextFont {
-                font_size: FontSize::Px(9.0),
-                ..default()
-            },
+            Text::new(good.price_label()),
+            crate::crystal_ui::typography::crystal_text_font(9.0),
             TextColor(Color::WHITE),
             TextLayout::new(Justify::Left, LineBreak::NoWrap),
         ));
@@ -8024,10 +8839,7 @@ fn overlay_absolute_shop_good_button(
                     ..default()
                 },
                 Text::new(good.count.to_string()),
-                TextFont {
-                    font_size: FontSize::Px(9.0),
-                    ..default()
-                },
+                crate::crystal_ui::typography::crystal_text_font(9.0),
                 TextColor(Color::srgb(1.0, 1.0, 0.0)),
                 TextLayout::new(Justify::Left, LineBreak::NoWrap),
             ));
@@ -8113,10 +8925,7 @@ fn overlay_compact_item_button(
         }
         row.spawn((
             Text::new(label.to_owned()),
-            TextFont {
-                font_size: FontSize::Px(10.0),
-                ..default()
-            },
+            crate::crystal_ui::typography::crystal_text_font(10.0),
             TextColor(if enabled {
                 TEXT
             } else {
@@ -8336,6 +9145,103 @@ fn help_shortcut_rows(page: u8) -> Option<&'static [(&'static str, &'static str)
     }
 }
 
+fn help_bound_key(
+    page: u8,
+    row: usize,
+    fallback: &str,
+    keyboard: &keyboard_dialog::KeyboardDialogUi,
+) -> String {
+    const FIRST: [&str; 18] = [
+        "Exit",
+        "Logout",
+        "Bar1Skill1",
+        "Inventory",
+        "Equipment",
+        "Skills",
+        "Group",
+        "Trade",
+        "Friends",
+        "Minimap",
+        "Guilds",
+        "GameShop",
+        "Relationship",
+        "Belt",
+        "Options",
+        "Help",
+        "Mount",
+        "TargetSpellLockOn",
+    ];
+    const SECOND: [&str; 18] = [
+        "ChangePetmode",
+        "ChangeAttackmode",
+        "AttackmodePeace",
+        "AttackmodeGroup",
+        "AttackmodeGuild",
+        "AttackmodeRedbrown",
+        "AttackmodeAll",
+        "Bigmap",
+        "Skillbar",
+        "Autorun",
+        "Cameramode",
+        "Pickup",
+        "",
+        "Screenshot",
+        "Fishing",
+        "Mentor",
+        "CreaturePickup",
+        "CreatureAutoPickup",
+    ];
+    let function = match page {
+        0 => FIRST.get(row),
+        1 => SECOND.get(row),
+        _ => None,
+    };
+    let Some(function) = function.filter(|f| !f.is_empty()) else {
+        return fallback.into();
+    };
+    let key = |f: &str| {
+        keyboard
+            .bindings
+            .iter()
+            .find(|b| b.function == f)
+            .map(|b| b.display())
+            .unwrap_or_default()
+    };
+    if page == 0 && row == 2 {
+        format!("{}-{}", key(function), key("Bar1Skill8"))
+    } else {
+        key(function)
+    }
+}
+
+#[cfg(test)]
+#[test]
+fn help_shortcut_keys_follow_loaded_binding_and_clear_unbound() {
+    let mut keyboard = keyboard_dialog::KeyboardDialogUi::default();
+    let guild = keyboard
+        .bindings
+        .iter_mut()
+        .find(|b| b.function == "Guilds")
+        .unwrap();
+    guild.key = "F9".into();
+    guild.ctrl = 1;
+    guild.alt = 0;
+    guild.shift = 0;
+    guild.tilde = 0;
+    assert_eq!(help_bound_key(0, 10, "stale", &keyboard), "Ctrl + F9");
+    keyboard
+        .bindings
+        .iter_mut()
+        .find(|b| b.function == "Guilds")
+        .unwrap()
+        .key = "None".into();
+    assert_eq!(help_bound_key(0, 10, "stale", &keyboard), "");
+    assert_eq!(
+        help_bound_key(2, 0, "/(username)", &keyboard),
+        "/(username)"
+    );
+}
+
 fn help_image_dimensions(index: u8) -> (f32, f32) {
     match index {
         0..=28 => (512.0, 396.0),
@@ -8347,7 +9253,12 @@ fn help_image_dimensions(index: u8) -> (f32, f32) {
     }
 }
 
-fn render_help(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetServer>, page: u8) {
+fn render_help(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    page: u8,
+    keyboard: &keyboard_dialog::KeyboardDialogUi,
+) {
     let page = page.min(HELP_PAGE_COUNT - 1);
     let Some(asset_server) = asset_server else {
         return;
@@ -8430,9 +9341,10 @@ fn render_help(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetSer
             // All 18 shortcut rows must end inside the body (y < 475),
             // before the page label at y=480. Keep every original row.
             let top = 142.0 + row as f32 * 18.0;
+            let current_shortcut = help_bound_key(page, row, shortcut, keyboard);
             overlay_text_at(
                 parent,
-                shortcut,
+                &current_shortcut,
                 CrystalRect::new(30.0, top, 95.0, 18.0),
                 9.0,
                 GOLD,
@@ -8513,15 +9425,59 @@ fn render_menu(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetSer
         OverlayButton::ToggleHelp,
     );
 
-    for (library, normal, hover, pressed, top) in [
-        ("Prguse", 1973, 1974, 1975, 69.0),
-        ("Prguse", 2000, 2001, 2002, 88.0),
-        ("Prguse2", 431, 432, 433, 126.0),
-        ("Prguse", 1976, 1977, 1978, 145.0),
-        ("Prguse", 1979, 1980, 1981, 164.0),
-        ("Prguse", 1982, 1983, 1984, 183.0),
-        ("Prguse", 1985, 1986, 1987, 202.0),
-        ("Prguse", 1988, 1989, 1990, 221.0),
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse",
+        1973,
+        1974,
+        1975,
+        CrystalRect::new(3.0, 69.0, 32.0, 20.0),
+        OverlayButton::ToggleKeyboard,
+    );
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse",
+        1982,
+        1983,
+        1984,
+        CrystalRect::new(3.0, 183.0, 32.0, 20.0),
+        OverlayButton::ToggleFriends,
+    );
+    for (lib, normal, top, action) in [
+        ("Prguse2", 431, 126.0, OverlayButton::ToggleCreature),
+        ("Prguse", 1976, 145.0, OverlayButton::ToggleMount),
+        ("Prguse", 1979, 164.0, OverlayButton::ToggleFishing),
+    ] {
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            lib,
+            normal,
+            normal + 1,
+            normal + 2,
+            CrystalRect::new(3.0, top, 32.0, 20.0),
+            action,
+        );
+    }
+    for (library, normal, hover, pressed, top, action) in [
+        (
+            "Prguse",
+            1985,
+            1986,
+            1987,
+            202.0,
+            OverlayButton::ToggleMentor,
+        ),
+        (
+            "Prguse",
+            1988,
+            1989,
+            1990,
+            221.0,
+            OverlayButton::ToggleRelationship,
+        ),
     ] {
         spawn_overlay_crystal_button_enabled(
             parent,
@@ -8531,10 +9487,20 @@ fn render_menu(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetSer
             hover,
             pressed,
             CrystalRect::new(3.0, top, 32.0, 20.0),
-            OverlayButton::CloseWindows,
-            false,
+            action,
+            true,
         );
     }
+    spawn_overlay_crystal_button(
+        parent,
+        asset_server,
+        "Prguse",
+        2000,
+        2001,
+        2002,
+        CrystalRect::new(3.0, 88.0, 32.0, 20.0),
+        OverlayButton::ToggleRanking,
+    );
     spawn_overlay_crystal_button(
         parent,
         asset_server,
@@ -8567,7 +9533,14 @@ fn render_social(
     player: &crate::read_model::PlayerStats,
 ) {
     if state.group_open() {
-        render_group_panel(parent, asset_server, social, state, combat_target);
+        render_group_panel(
+            parent,
+            asset_server,
+            social,
+            state,
+            combat_target,
+            player.name.as_deref().unwrap_or(""),
+        );
     } else if state.guild_open() {
         render_guild_panel(parent, asset_server, social, state, player);
     } else {
@@ -8580,9 +9553,10 @@ fn render_group_panel(
     asset_server: Option<&AssetServer>,
     social: &crate::social::SocialModel,
     state: &NativePlayerUiState,
-    combat_target: Option<&crate::quest_model::CombatTargetModel>,
+    _combat_target: Option<&crate::quest_model::CombatTargetModel>,
+    owner: &str,
 ) {
-    let rect = CRYSTAL_GROUP_PANEL_RECT;
+    let rect = state.group_dialog.rect();
     let group = &social.group;
     let Some(asset_server) = asset_server else {
         return;
@@ -8617,61 +9591,35 @@ fn render_group_panel(
         .enumerate()
     {
         let (left, top) = group_member_position(index);
-        overlay_clickable_text_at(
-            parent,
-            &member.name,
-            CrystalRect::new(rect.left + left, rect.top + top, 96.0, 16.0),
-            OverlayButton::SelectGroupMember(index as u8),
-            state.selected_group_member == Some(index as u8),
-            member.online,
-        );
-    }
-
-    if let Some(inviter) = group.pending_invite_from.as_deref() {
-        overlay_text_at(
-            parent,
-            &format!("Invite: {inviter}"),
-            CrystalRect::new(rect.left + 16.0, rect.top + 192.0, 190.0, 16.0),
-            9.0,
-            GOLD,
-        );
-        overlay_absolute_button(
-            parent,
-            "Accept",
-            CrystalRect::new(rect.left + 16.0, rect.top + 207.0, 52.0, 18.0),
-            OverlayButton::GroupInviteAccept,
-            true,
-        );
-        overlay_absolute_button(
-            parent,
-            "Decline",
-            CrystalRect::new(rect.left + 72.0, rect.top + 207.0, 52.0, 18.0),
-            OverlayButton::GroupInviteDecline,
-            true,
-        );
-    } else {
-        let draft = if state.group_invite_focused {
-            format!("Name: {}|", state.group_invite_draft)
-        } else if state.group_invite_draft.is_empty() {
-            "Name: <invite player>".to_owned()
-        } else {
-            format!("Name: {}", state.group_invite_draft)
-        };
-        overlay_clickable_text_at(
-            parent,
-            &draft,
-            CrystalRect::new(rect.left + 16.0, rect.top + 191.0, 144.0, 18.0),
-            OverlayButton::GroupInviteNameFocus,
-            state.group_invite_focused,
-            true,
-        );
-        overlay_absolute_button(
-            parent,
-            "Invite",
-            CrystalRect::new(rect.left + 162.0, rect.top + 191.0, 48.0, 18.0),
-            OverlayButton::GroupInviteNameSubmit,
-            valid_social_name(state.group_invite_draft.trim()),
-        );
+        let hint = group
+            .member_maps
+            .get(&member.name)
+            .map(String::as_str)
+            .or(member.map.as_deref())
+            .unwrap_or("");
+        parent
+            .spawn((
+                Button,
+                OverlayButton::SelectGroupMember(index as u8),
+                crate::crystal_ui::widget::CrystalHint::new(hint),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(rect.left + left),
+                    top: Val::Px(rect.top + top),
+                    width: Val::Px(96.),
+                    height: Val::Px(16.),
+                    ..default()
+                },
+            ))
+            .with_children(|p| {
+                overlay_text_at(
+                    p,
+                    &member.name,
+                    CrystalRect::new(0., 0., 96., 16.),
+                    32. / 3.,
+                    Color::WHITE,
+                );
+            });
     }
 
     let switch_index = if group.allow_invites { 117 } else { 114 };
@@ -8685,10 +9633,10 @@ fn render_group_panel(
         CrystalRect::new(rect.left + 25.0, rect.top + 219.0, 28.0, 25.0),
         OverlayButton::GroupSwitch,
     );
-    let can_add_target = combat_target
-        .and_then(|model| model.target.as_ref())
-        .is_some_and(|target| target.is_player && !target.name.trim().is_empty());
-    let add_base = if group.active { 133 } else { 130 };
+    if !group_dialog::GroupDialogUi::can_manage(group, owner) {
+        return;
+    }
+    let add_base = if group.members.is_empty() { 130 } else { 133 };
     spawn_overlay_crystal_button_enabled(
         parent,
         asset_server,
@@ -8698,14 +9646,8 @@ fn render_group_panel(
         add_base + 2,
         CrystalRect::new(rect.left + 70.0, rect.top + 219.0, 60.0, 25.0),
         OverlayButton::GroupAddSelected,
-        can_add_target,
+        true,
     );
-    let can_remove = state.selected_group_member.is_some_and(|index| {
-        group
-            .members
-            .get(usize::from(index))
-            .is_some_and(|member| !member.leader)
-    });
     spawn_overlay_crystal_button_enabled(
         parent,
         asset_server,
@@ -8715,7 +9657,7 @@ fn render_group_panel(
         138,
         CrystalRect::new(rect.left + 140.0, rect.top + 219.0, 60.0, 25.0),
         OverlayButton::GroupRemoveSelected,
-        can_remove,
+        true,
     );
 }
 
@@ -8737,7 +9679,7 @@ fn render_guild_panel(
     state: &NativePlayerUiState,
     player: &crate::read_model::PlayerStats,
 ) {
-    let rect = CRYSTAL_GUILD_PANEL_RECT;
+    let rect = state.guild_panel.rect();
     let guild = &social.guild;
     let Some(asset_server) = asset_server else {
         return;
@@ -8808,12 +9750,28 @@ fn render_guild_panel(
             OverlayButton::SelectGuildLeftPage(GuildLeftPage::Ranks),
         );
     }
-    spawn_static_overlay_sprite(
+    spawn_guild_tab(
         parent,
         asset_server,
-        "original-ui/Title/104.png".to_owned(),
-        CrystalRect::new(rect.left + 501.0, rect.top + 38.0, 72.0, 24.0),
+        rect.left + 501.,
+        rect.top + 38.,
+        103,
+        104,
+        !state.guild_panel.right_buff,
+        OverlayButton::SelectGuildRightBuff(false),
     );
+    if guild.name.is_some() {
+        spawn_guild_tab(
+            parent,
+            asset_server,
+            rect.left + 430.,
+            rect.top + 38.,
+            95,
+            96,
+            state.guild_panel.right_buff,
+            OverlayButton::SelectGuildRightBuff(true),
+        );
+    }
 
     match state.guild_left_page {
         GuildLeftPage::Notice => render_guild_notice(parent, asset_server, guild, state, rect),
@@ -8821,9 +9779,13 @@ fn render_guild_panel(
         GuildLeftPage::Storage => {
             render_guild_storage(parent, asset_server, guild, state, rect, player)
         }
-        GuildLeftPage::Ranks => render_guild_ranks(parent, guild, state, rect),
+        GuildLeftPage::Ranks => render_guild_ranks(parent, asset_server, guild, state, rect),
     }
-    render_guild_status(parent, asset_server, guild, rect);
+    if state.guild_panel.right_buff {
+        guild_panel::render_buff(parent, asset_server, state, guild, rect);
+    } else {
+        render_guild_status(parent, asset_server, guild, state, rect);
+    }
 }
 
 fn spawn_guild_tab(
@@ -8856,25 +9818,59 @@ fn render_guild_notice(
     state: &NativePlayerUiState,
     rect: CrystalRect,
 ) {
-    let notice = if guild.name.is_none() {
-        "You are not in a guild.".to_owned()
-    } else if state.guild_notice_editing {
-        if state.guild_notice_draft.is_empty() {
-            "|".to_owned()
-        } else {
-            format!("{}|", state.guild_notice_draft)
-        }
-    } else if guild.notice.is_empty() {
-        String::new()
+    if state.guild_notice_editing {
+        friend_dialog::view::render_editor(
+            parent,
+            &state.guild_panel.notice_editor,
+            CrystalRect::new(rect.left + 13., rect.top + 61., 322., 330.),
+            true,
+        );
     } else {
-        guild.notice.join("\n")
+        let notice = guild
+            .notice
+            .iter()
+            .skip(state.guild_panel.notice_scroll)
+            .take(25)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join("\n");
+        overlay_text_at(
+            parent,
+            &notice,
+            CrystalRect::new(rect.left + 13., rect.top + 61., 322., 330.),
+            10.6667,
+            Color::WHITE,
+        );
+    }
+    for (top, frame, delta) in [(61., 197, -1), (378., 207, 1)] {
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Prguse2",
+            frame,
+            frame + 1,
+            frame + 2,
+            CrystalRect::new(rect.left + 337., rect.top + top, 12., 12.),
+            OverlayButton::GuildNoticeScroll(delta),
+            true,
+        );
+    }
+    let count = if state.guild_notice_editing {
+        state.guild_notice_draft.split('\n').count()
+    } else {
+        guild.notice.len()
     };
-    overlay_text_at(
+    let interval = 289usize.checked_div(count.saturating_sub(25)).unwrap_or(0);
+    spawn_static_overlay_sprite(
         parent,
-        &notice,
-        CrystalRect::new(rect.left + 13.0, rect.top + 61.0, 322.0, 330.0),
-        9.0,
-        TEXT,
+        asset_server,
+        "original-ui/Prguse2/206.png".into(),
+        CrystalRect::new(
+            rect.left + 337.,
+            rect.top + 60. + (16 + state.guild_panel.notice_scroll * interval).min(298) as f32,
+            12.,
+            18.,
+        ),
     );
     let can_edit = guild.name.is_some() && social_has_permission(guild, "notice");
     if can_edit && state.guild_notice_editing && state.guild_notice_submission.is_none() {
@@ -8899,61 +9895,17 @@ fn render_guild_notice(
         } else {
             OverlayButton::GuildBeginNoticeEdit
         };
-        let publish_enabled = !state.guild_notice_editing
-            || (state.guild_notice_submission.is_none()
-                && guild_notice_lines(&state.guild_notice_draft)
-                    .is_some_and(|notice| notice != guild.notice));
+        let publish_enabled = state.guild_notice_submission.is_none();
         spawn_overlay_crystal_button_enabled(
             parent,
             asset_server,
             "Prguse",
-            560,
-            561,
-            562,
+            if state.guild_notice_editing { 554 } else { 560 },
+            if state.guild_notice_editing { 555 } else { 561 },
+            if state.guild_notice_editing { 556 } else { 562 },
             CrystalRect::new(rect.left + 20.0, rect.top + 402.0, 28.0, 25.0),
             action,
             publish_enabled,
-        );
-        if state.guild_notice_editing {
-            overlay_absolute_button(
-                parent,
-                "Cancel",
-                CrystalRect::new(rect.left + 54.0, rect.top + 405.0, 58.0, 20.0),
-                OverlayButton::GuildCancelNoticeEdit,
-                state.guild_notice_submission.is_none(),
-            );
-        }
-    }
-    if state.guild_notice_submission.is_some() {
-        overlay_text_at(
-            parent,
-            "Waiting for authoritative notice receipt...",
-            CrystalRect::new(rect.left + 122.0, rect.top + 407.0, 260.0, 16.0),
-            9.0,
-            GOLD,
-        );
-    }
-    if let Some(inviter) = guild.pending_invite_from.as_deref() {
-        overlay_text_at(
-            parent,
-            &format!("Invite: {inviter}"),
-            CrystalRect::new(rect.left + 20.0, rect.top + 360.0, 230.0, 16.0),
-            9.0,
-            GOLD,
-        );
-        overlay_absolute_button(
-            parent,
-            "Accept",
-            CrystalRect::new(rect.left + 20.0, rect.top + 378.0, 52.0, 18.0),
-            OverlayButton::GuildInviteAccept,
-            true,
-        );
-        overlay_absolute_button(
-            parent,
-            "Decline",
-            CrystalRect::new(rect.left + 76.0, rect.top + 378.0, 52.0, 18.0),
-            OverlayButton::GuildInviteDecline,
-            true,
         );
     }
 }
@@ -8972,39 +9924,53 @@ fn render_guild_members(
         CrystalRect::new(rect.left + 13.0, rect.top + 61.0, 324.0, 332.0),
     );
     let can_kick = social_has_permission(guild, "kick");
-    for (index, member) in guild.members.iter().take(18).enumerate() {
-        let top = rect.top + 90.0 + index as f32 * 15.0;
-        overlay_clickable_text_at(
+    for (row, (index, member)) in guild
+        .members
+        .iter()
+        .enumerate()
+        .filter(|(_, m)| !state.guild_panel.hide_offline || m.online)
+        .skip(state.guild_panel.member_scroll)
+        .take(18)
+        .enumerate()
+    {
+        let top = rect.top + 90.0 + row as f32 * 15.0;
+        let shade = if row % 2 == 0 { 10 } else { 15 };
+        guild_panel::closed_dropdown(
             parent,
-            member.rank_name.as_deref().unwrap_or("-"),
-            CrystalRect::new(rect.left + 24.0, top, 100.0, 14.0),
-            OverlayButton::SelectGuildMember(index as u8),
-            state.selected_guild_member == Some(index as u8),
-            member.online,
+            asset_server,
+            member.rank_name.as_deref().unwrap_or(""),
+            CrystalRect::new(rect.left + 24., top, 100., 14.),
+            OverlayButton::GuildMemberRankMenu(index as u8),
+            social_has_permission(guild, "changeRank")
+                && member
+                    .rank_index
+                    .is_some_and(|r| i32::from(r) >= guild.my_rank_id),
+            shade,
         );
-        overlay_text_at(
+        guild_panel::member_text(
             parent,
             &member.name,
-            CrystalRect::new(rect.left + 125.0, top, 84.0, 14.0),
-            8.0,
-            if member.online {
-                TEXT
-            } else {
-                Color::srgb(0.5, 0.5, 0.5)
-            },
+            CrystalRect::new(rect.left + 125., top, 84., 14.),
+            Color::WHITE,
+            shade,
         );
-        overlay_text_at(
+        guild_panel::member_text(
             parent,
-            if member.online { "Online" } else { "Offline" },
-            CrystalRect::new(rect.left + 225.0, top, 96.0, 14.0),
-            8.0,
+            &guild_panel::member_status(member),
+            CrystalRect::new(rect.left + 225., top, 100., 14.),
             if member.online {
-                TEXT
+                Color::srgb_u8(50, 205, 50)
             } else {
-                Color::srgb(0.5, 0.5, 0.5)
+                Color::WHITE
             },
+            shade,
         );
-        if can_kick {
+        if can_kick
+            && member.name != state.guild_panel.owner_name
+            && member
+                .rank_index
+                .is_some_and(|r| i32::from(r) >= guild.my_rank_id)
+        {
             spawn_overlay_crystal_button(
                 parent,
                 asset_server,
@@ -9018,49 +9984,104 @@ fn render_guild_members(
         }
     }
 
-    let can_recruit = social_has_permission(guild, "recruit");
-    if can_recruit {
-        let draft = if state.guild_recruit_focused {
-            format!("Recruit: {}|", state.guild_recruit_draft)
-        } else if state.guild_recruit_draft.is_empty() {
-            "Recruit: <player name>".to_owned()
-        } else {
-            format!("Recruit: {}", state.guild_recruit_draft)
-        };
-        overlay_clickable_text_at(
+    for (top, frame, delta) in [(61., 197, -1), (378., 207, 1)] {
+        spawn_overlay_crystal_button_enabled(
             parent,
-            &draft,
-            CrystalRect::new(rect.left + 20.0, rect.top + 364.0, 220.0, 18.0),
-            OverlayButton::GuildRecruitNameFocus,
-            state.guild_recruit_focused,
+            asset_server,
+            "Prguse2",
+            frame,
+            frame + 1,
+            frame + 2,
+            CrystalRect::new(rect.left + 337., rect.top + top, 12., 12.),
+            OverlayButton::GuildMembersScroll(delta),
             true,
         );
-        overlay_absolute_button(
+    }
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        asset_server,
+        "Prguse",
+        1346,
+        1346,
+        1346,
+        CrystalRect::new(rect.left + 230., rect.top + 370., 12., 12.),
+        OverlayButton::GuildShowOffline,
+        true,
+    );
+    if !state.guild_panel.hide_offline {
+        spawn_static_overlay_sprite(
             parent,
-            "Add",
-            CrystalRect::new(rect.left + 244.0, rect.top + 364.0, 52.0, 18.0),
-            OverlayButton::GuildRecruitNameSubmit,
-            valid_social_name(state.guild_recruit_draft.trim()),
+            asset_server,
+            "original-ui/Prguse/1347.png".into(),
+            CrystalRect::new(rect.left + 230., rect.top + 370., 16., 12.),
         );
     }
-
-    let can_change_rank = social_has_permission(guild, "changeRank")
-        && state.selected_guild_member.is_some()
-        && guild.ranks.len() > 1;
-    overlay_absolute_button(
+    overlay_text_at(
         parent,
-        "Rank -",
-        CrystalRect::new(rect.left + 20.0, rect.top + 386.0, 58.0, 18.0),
-        OverlayButton::GuildAssignPreviousRank,
-        can_change_rank,
+        "Show Offline",
+        CrystalRect::new(rect.left + 245., rect.top + 369., 150., 12.),
+        28. / 3.,
+        Color::WHITE,
     );
-    overlay_absolute_button(
+    let count = guild
+        .members
+        .iter()
+        .filter(|m| !state.guild_panel.hide_offline || m.online)
+        .count();
+    let interval = 289usize.checked_div(count.saturating_sub(18)).unwrap_or(0);
+    spawn_static_overlay_sprite(
         parent,
-        "Rank +",
-        CrystalRect::new(rect.left + 82.0, rect.top + 386.0, 58.0, 18.0),
-        OverlayButton::GuildAssignNextRank,
-        can_change_rank,
+        asset_server,
+        "original-ui/Prguse2/206.png".into(),
+        CrystalRect::new(
+            rect.left + 337.,
+            rect.top + 60. + (16 + state.guild_panel.member_scroll * interval).min(298) as f32,
+            12.,
+            18.,
+        ),
     );
+    if let Some(member) = state.guild_panel.member_menu {
+        let row = guild
+            .members
+            .iter()
+            .enumerate()
+            .filter(|(_, m)| !state.guild_panel.hide_offline || m.online)
+            .position(|(i, _)| i == usize::from(member))
+            .unwrap_or(0)
+            .saturating_sub(state.guild_panel.member_scroll);
+        let top = rect.top + 90. + row as f32 * 15.;
+        for (row, rank) in guild
+            .ranks
+            .iter()
+            .filter(|r| r.index >= guild.my_rank_id)
+            .skip(state.guild_panel.rank_scroll)
+            .take(5)
+            .enumerate()
+        {
+            if let Ok(id) = u8::try_from(rank.index) {
+                guild_panel::dropdown_row(
+                    parent,
+                    &rank.name,
+                    CrystalRect::new(rect.left + 24., top + 15. + row as f32 * 13., 84., 16.),
+                    OverlayButton::GuildMemberRankSelect(id),
+                    (state.guild_panel.cursor, state.guild_panel.left_down),
+                );
+            }
+        }
+        for (dy, frame, delta) in [(14., 2021, -1), (74., 2024, 1)] {
+            spawn_overlay_crystal_button_enabled(
+                parent,
+                asset_server,
+                "Prguse",
+                frame,
+                frame + 1,
+                frame + 2,
+                CrystalRect::new(rect.left + 112., top + dy, 12., 6.),
+                OverlayButton::GuildRankScroll(delta),
+                true,
+            );
+        }
+    }
 }
 
 fn render_guild_storage(
@@ -9193,94 +10214,146 @@ fn render_guild_storage(
 
 fn render_guild_ranks(
     parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
     guild: &crate::social::GuildModel,
     state: &NativePlayerUiState,
     rect: CrystalRect,
 ) {
-    for (row, rank) in guild.ranks.iter().take(12).enumerate() {
-        let permissions = [
-            (0x01, "Rank"),
-            (0x02, "Recruit"),
-            (0x04, "Kick"),
-            (0x08, "Store"),
-            (0x10, "Take"),
-            (0x20, "Ally"),
-            (0x40, "Notice"),
-            (0x80, "Buff"),
-        ]
-        .into_iter()
-        .filter_map(|(bit, label)| (rank.options & bit != 0).then_some(label))
-        .collect::<Vec<_>>()
-        .join("/");
-        let Ok(rank_index) = u8::try_from(rank.index) else {
-            continue;
-        };
-        overlay_clickable_text_at(
+    let x = rect.left;
+    let y = rect.top + 60.;
+    for (text, left) in [("Edit rank", 42.), ("Select rank", 198.)] {
+        overlay_text_at(
             parent,
-            &format!("{}  {}  [{}]", rank.index, rank.name, permissions),
-            CrystalRect::new(
-                rect.left + 20.0,
-                rect.top + 75.0 + row as f32 * 19.0,
-                300.0,
-                18.0,
-            ),
-            OverlayButton::SelectGuildRank(rank_index),
-            state.selected_guild_rank == Some(rank_index),
-            true,
+            text,
+            CrystalRect::new(x + left, y + 18., 150., 20.),
+            10.6667,
+            Color::WHITE,
         );
     }
-
-    let can_change = social_has_permission(guild, "changeRank");
-    if let Some(rank_index) = state.selected_guild_rank {
-        let draft = if state.guild_rank_name_focused {
-            format!("Rank name: {}|", state.guild_rank_name_draft)
-        } else {
-            format!("Rank name: {}", state.guild_rank_name_draft)
-        };
-        overlay_clickable_text_at(
+    let selected = state
+        .selected_guild_rank
+        .and_then(|id| guild.ranks.iter().find(|r| r.index == i32::from(id)));
+    let can_change = selected.is_some_and(|r| r.index >= i32::from(guild.my_rank_id))
+        && social_has_permission(guild, "changeRank");
+    friend_dialog::view::render_editor_styled(
+        parent,
+        &state.guild_panel.rank_editor,
+        CrystalRect::new(x + 42., y + 36., 130., 16.),
+        false,
+        Color::srgb_u8(35, 35, 35),
+    );
+    guild_panel::closed_dropdown(
+        parent,
+        assets,
+        selected.map(|r| r.name.as_str()).unwrap_or(""),
+        CrystalRect::new(x + 198., y + 36., 130., 16.),
+        OverlayButton::GuildRankDropdown,
+        true,
+        25,
+    );
+    spawn_overlay_crystal_button_enabled(
+        parent,
+        assets,
+        "Title",
+        90,
+        91,
+        92,
+        CrystalRect::new(x + 155., y + 290., 40., 25.),
+        OverlayButton::GuildRankNameSave,
+        can_change,
+    );
+    for (i, label) in [
+        "Edit ranks",
+        "Recruit member",
+        "Kick member",
+        "Store item",
+        "Retrieve item",
+        "Alter alliance",
+        "Change notice",
+        "Activate Buff",
+    ]
+    .iter()
+    .enumerate()
+    {
+        let bx = x + if i % 2 == 0 { 42. } else { 202. };
+        let by = y + 120. + (i / 2) as f32 * 40.;
+        spawn_overlay_crystal_button_enabled(
             parent,
-            &draft,
-            CrystalRect::new(rect.left + 20.0, rect.top + 315.0, 205.0, 18.0),
-            OverlayButton::GuildRankNameFocus,
-            state.guild_rank_name_focused,
+            assets,
+            "Prguse",
+            1346,
+            1346,
+            1346,
+            CrystalRect::new(bx, by, 12., 12.),
+            OverlayButton::GuildRankTogglePermission(i as u8),
             can_change,
         );
-        let name_changed = guild
-            .ranks
-            .iter()
-            .find(|rank| u8::try_from(rank.index).ok() == Some(rank_index))
-            .is_some_and(|rank| rank.name != state.guild_rank_name_draft.trim());
-        overlay_absolute_button(
-            parent,
-            "Save",
-            CrystalRect::new(rect.left + 232.0, rect.top + 315.0, 52.0, 18.0),
-            OverlayButton::GuildRankNameSave,
-            can_change && name_changed && !state.guild_rank_name_draft.trim().is_empty(),
-        );
-        let rank_options = guild
-            .ranks
-            .iter()
-            .find(|rank| u8::try_from(rank.index).ok() == Some(rank_index))
-            .map(|rank| rank.options)
-            .unwrap_or(0);
-        for (option, label) in [
-            "Rank", "Recruit", "Kick", "Store", "Take", "Ally", "Notice", "Buff",
-        ]
-        .into_iter()
-        .enumerate()
-        {
-            let enabled = rank_options & (1_u8 << option) != 0;
-            overlay_absolute_button(
+        if selected.is_some_and(|r| r.options & (1 << i) != 0) {
+            spawn_static_overlay_sprite(
                 parent,
-                &format!("{} {}", if enabled { "[x]" } else { "[ ]" }, label),
-                CrystalRect::new(
-                    rect.left + 20.0 + (option % 4) as f32 * 72.0,
-                    rect.top + 340.0 + (option / 4) as f32 * 22.0,
-                    68.0,
-                    18.0,
-                ),
-                OverlayButton::GuildRankTogglePermission(option as u8),
-                can_change,
+                assets,
+                "original-ui/Prguse/1347.png".into(),
+                CrystalRect::new(bx, by, 16., 12.),
+            );
+        }
+        overlay_text_at(
+            parent,
+            label,
+            CrystalRect::new(bx + 17., by - 2., 135., 20.),
+            10.6667,
+            Color::WHITE,
+        );
+    }
+    if state.guild_panel.rank_dropdown {
+        for (offset, rank) in guild
+            .ranks
+            .iter()
+            .skip(state.guild_panel.rank_scroll)
+            .take(5)
+            .enumerate()
+        {
+            if let Ok(id) = u8::try_from(rank.index) {
+                guild_panel::dropdown_row(
+                    parent,
+                    &rank.name,
+                    CrystalRect::new(x + 198., y + 51. + offset as f32 * 13., 114., 16.),
+                    OverlayButton::SelectGuildRank(id),
+                    (state.guild_panel.cursor, state.guild_panel.left_down),
+                );
+            }
+        }
+        let new_row = guild
+            .ranks
+            .len()
+            .saturating_sub(state.guild_panel.rank_scroll);
+        if new_row < 5 {
+            guild_panel::dropdown_row(
+                parent,
+                "New Rank",
+                CrystalRect::new(x + 198., y + 51. + new_row as f32 * 13., 114., 16.),
+                OverlayButton::GuildCreateRank,
+                (state.guild_panel.cursor, state.guild_panel.left_down),
+            );
+        }
+        let thumb_y =
+            22. + state.guild_panel.rank_scroll as f32 * 52. / guild.ranks.len().max(1) as f32;
+        spawn_static_overlay_sprite(
+            parent,
+            assets,
+            "original-ui/Prguse/2015.png".into(),
+            CrystalRect::new(x + 317., y + 36. + thumb_y, 8., 14.),
+        );
+        for (dy, frame, delta) in [(50., 2021, -1), (110., 2024, 1)] {
+            spawn_overlay_crystal_button_enabled(
+                parent,
+                assets,
+                "Prguse",
+                frame,
+                frame + 1,
+                frame + 2,
+                CrystalRect::new(x + 316., y + dy, 12., 6.),
+                OverlayButton::GuildRankScroll(delta),
+                true,
             );
         }
     }
@@ -9290,6 +10363,7 @@ fn render_guild_status(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
     guild: &crate::social::GuildModel,
+    state: &NativePlayerUiState,
     rect: CrystalRect,
 ) {
     spawn_static_overlay_sprite(
@@ -9298,6 +10372,33 @@ fn render_guild_status(
         "original-ui/Prguse/1850.png".to_owned(),
         CrystalRect::new(rect.left + 365.0, rect.top + 62.0, 208.0, 316.0),
     );
+    if social_has_permission(guild, "recruit") {
+        overlay_text_at(
+            parent,
+            "Recruit Member",
+            CrystalRect::new(rect.left + 391., rect.top + 343., 150., 15.),
+            10.6667,
+            Color::WHITE,
+        );
+        friend_dialog::view::render_editor_styled(
+            parent,
+            &state.guild_panel.recruit_editor,
+            CrystalRect::new(rect.left + 395., rect.top + 360., 130., 21.),
+            false,
+            Color::srgb_u8(35, 35, 35),
+        );
+        spawn_overlay_crystal_button_enabled(
+            parent,
+            asset_server,
+            "Title",
+            356,
+            357,
+            358,
+            CrystalRect::new(rect.left + 525., rect.top + 358., 40., 25.),
+            OverlayButton::GuildRecruitNameSubmit,
+            true,
+        );
+    }
     for (label, value, top) in [
         ("Guild", guild.name.as_deref().unwrap_or(""), 107.0),
         ("Level", if guild.name.is_some() { "" } else { "" }, 133.0),
@@ -9331,68 +10432,64 @@ fn render_guild_status(
         overlay_text_at(
             parent,
             &format!(
-                "{}/{}",
-                guild.member_count.max(guild.members.len() as u16),
-                guild.max_members
+                "{}{}",
+                guild.member_count,
+                if guild.max_members == 0 {
+                    String::new()
+                } else {
+                    format!("/{}", guild.max_members)
+                }
             ),
             CrystalRect::new(rect.left + 437.0, rect.top + 159.0, 120.0, 14.0),
             9.0,
             TEXT,
         );
-        overlay_text_at(
-            parent,
-            "Rank",
-            CrystalRect::new(rect.left + 362.0, rect.top + 185.0, 75.0, 14.0),
-            9.0,
-            Color::srgb(0.55, 0.55, 0.55),
-        );
-        overlay_text_at(
-            parent,
-            guild.rank_name.as_deref().unwrap_or("-"),
-            CrystalRect::new(rect.left + 437.0, rect.top + 185.0, 120.0, 14.0),
-            9.0,
-            TEXT,
-        );
-        overlay_text_at(
-            parent,
-            "Gold",
-            CrystalRect::new(rect.left + 362.0, rect.top + 211.0, 75.0, 14.0),
-            9.0,
-            Color::srgb(0.55, 0.55, 0.55),
-        );
-        overlay_text_at(
-            parent,
-            &guild.gold.to_string(),
-            CrystalRect::new(rect.left + 437.0, rect.top + 211.0, 120.0, 14.0),
-            9.0,
-            GOLD,
-        );
-        overlay_text_at(
-            parent,
-            &format!("Rights: {}", guild.permissions.join("/")),
-            CrystalRect::new(rect.left + 362.0, rect.top + 237.0, 195.0, 52.0),
-            8.0,
-            TEXT,
-        );
     }
-    spawn_static_overlay_sprite(
-        parent,
-        asset_server,
-        "original-ui/Prguse2/423.png".to_owned(),
-        CrystalRect::new(rect.left + 322.0, rect.top + 403.0, 260.0, 22.0),
-    );
-    let percent = if guild.max_experience > 0 {
-        ((guild.experience.max(0) as f64 / guild.max_experience as f64) * 100.0).clamp(0.0, 100.0)
-    } else {
-        0.0
-    };
-    overlay_text_at(
-        parent,
-        &format!("{percent:.0}%"),
-        CrystalRect::new(rect.left + 322.0, rect.top + 405.0, 260.0, 15.0),
-        9.0,
-        TEXT,
-    );
+    if guild.max_experience > 0 {
+        let ratio = guild.experience as f64 / guild.max_experience as f64;
+        spawn_static_overlay_sprite(
+            parent,
+            asset_server,
+            "original-ui/Prguse2/424.png".into(),
+            CrystalRect::new(rect.left + 322., rect.top + 403., 260., 22.),
+        );
+        if ratio > 0. {
+            parent
+                .spawn(Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(rect.left + 322.),
+                    top: Val::Px(rect.top + 403.),
+                    width: Val::Px((257. * ratio.min(1.)) as f32),
+                    height: Val::Px(22.),
+                    overflow: Overflow::clip(),
+                    ..default()
+                })
+                .with_children(|p| {
+                    spawn_static_overlay_sprite(
+                        p,
+                        asset_server,
+                        "original-ui/Prguse2/423.png".into(),
+                        CrystalRect::new(0., 0., 260., 22.),
+                    );
+                });
+        }
+        let value = format!("{:.2}", ratio * 100.);
+        let label = format!("{}%", value.trim_end_matches('0').trim_end_matches('.'));
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(rect.left + 322.),
+                top: Val::Px(rect.top + 405.),
+                width: Val::Px(260.),
+                height: Val::Px(15.),
+                ..default()
+            },
+            Text::new(label),
+            crate::crystal_ui::typography::crystal_text_font(32. / 3.),
+            TextColor(Color::WHITE),
+            TextLayout::justify(Justify::Center),
+        ));
+    }
 }
 
 fn overlay_clickable_text_at(
@@ -9424,10 +10521,7 @@ fn overlay_clickable_text_at(
     row.with_children(|cell| {
         cell.spawn((
             Text::new(text.to_owned()),
-            TextFont {
-                font_size: FontSize::Px(9.0),
-                ..default()
-            },
+            crate::crystal_ui::typography::crystal_text_font(9.0),
             TextColor(if online {
                 TEXT
             } else {
@@ -9445,12 +10539,8 @@ fn render_trade_panel(
     _inventory: &InventoryModel,
     _player: &crate::read_model::PlayerStats,
 ) {
-    // Only the legacy invitation/idle surface remains here. Accepted offers
-    // belong exclusively to TradeDialog/GuestTradeDialog; do not retain the
-    // invented text rows, first-ten bag mapping or fixed 100-gold control.
-    // Original MirMessageBox invitation/cancellation geometry is a separate
-    // tracked leaf, not accepted by the new trade window geometry tests.
-    if social.trade.state == "open" {
+    // Invitations are independent modal MirMessageBoxes, not this panel.
+    if social.trade.state == "open" || social.trade.state == "requested" {
         return;
     }
     parent
@@ -9470,315 +10560,9 @@ fn render_trade_panel(
         ))
         .with_children(|dialog| {
             title(dialog, "Trade");
-            if social.trade.state == "requested" {
-                body(
-                    dialog,
-                    &format!(
-                        "Player {} has requested to trade with you.",
-                        social.trade.partner.as_deref().unwrap_or("")
-                    ),
-                );
-                overlay_button(dialog, "Accept trade", OverlayButton::TradeAccept, true);
-                overlay_button(dialog, "Decline trade", OverlayButton::TradeDecline, true);
-            } else {
-                overlay_button(dialog, "Request trade", OverlayButton::TradeRequest, true);
-            }
+            overlay_button(dialog, "Request trade", OverlayButton::TradeRequest, true);
             overlay_button(dialog, "Close", OverlayButton::CloseSocial, true);
         });
-}
-
-fn render_skills(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    skills: &SkillModel,
-    skill_binding: &SkillBindingUi,
-    skill_persistence: &SkillBindingPersistenceRuntime,
-    state: &NativePlayerUiState,
-    ui: &UiReadModel,
-) {
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(0.0),
-            top: Val::Px(0.0),
-            width: Val::Px(SKILL_PANEL_SIZE.width as f32),
-            height: Val::Px(SKILL_PANEL_SIZE.height as f32),
-            overflow: Overflow::clip(),
-            ..default()
-        },
-        BackgroundColor(PANEL_BG),
-    ));
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_frame(
-            parent,
-            asset_server,
-            "original-ui/Title/504.png",
-            SKILL_PANEL_SIZE.width as f32,
-            SKILL_PANEL_SIZE.height as f32,
-        );
-        spawn_static_overlay_sprite(
-            parent,
-            asset_server,
-            "original-ui/Title/508.png".to_owned(),
-            CrystalRect::new(8.0, 90.0, 248.0, 284.0),
-        );
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Prguse2",
-            360,
-            361,
-            362,
-            CrystalRect::new(241.0, 3.0, 24.0, 21.0),
-            OverlayButton::CloseWindows,
-        );
-    } else {
-        overlay_absolute_button(
-            parent,
-            "X",
-            CrystalRect::new(241.0, 3.0, 22.0, 20.0),
-            OverlayButton::CloseWindows,
-            true,
-        );
-    }
-
-    let page_count = native_skill_page_count(skills.skills.len());
-    let page = state.skill_page.min(page_count.saturating_sub(1));
-    parent
-        .spawn((
-            OverlaySkillListViewport,
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(8.0),
-                top: Val::Px(90.0),
-                width: Val::Px(248.0),
-                height: Val::Px(284.0),
-                overflow: Overflow::clip(),
-                ..default()
-            },
-            BackgroundColor(Color::NONE),
-        ))
-        .with_children(|viewport| {
-            if skills.skills.is_empty() {
-                overlay_text_at(
-                    viewport,
-                    "No skills learned",
-                    CrystalRect::new(18.0, 28.0, 212.0, 18.0),
-                    11.0,
-                    GOLD,
-                );
-                overlay_text_at(
-                    viewport,
-                    "Learn skills from a trainer.",
-                    CrystalRect::new(18.0, 52.0, 212.0, 16.0),
-                    9.0,
-                    TEXT,
-                );
-                return;
-            }
-
-            let start = page * SKILL_PAGE_SIZE;
-            for (row, skill) in skills
-                .skills
-                .iter()
-                .skip(start)
-                .take(SKILL_PAGE_SIZE)
-                .enumerate()
-            {
-                let binding = skills.binding_for(skill.id);
-                let shortcut = skill_binding
-                    .binding_for_skill(skill.id)
-                    .map(|binding| format!("F{}", binding.hotkey))
-                    .unwrap_or_else(|| "--".to_owned());
-                let status = if binding.can_use == Some(false) {
-                    "locked"
-                } else if binding.cooldown_remaining_ticks > 0 {
-                    "cooldown"
-                } else if binding.mp_cost.unwrap_or(skill.mp_cost) > ui.player.mp.max(0) as u32 {
-                    "low MP"
-                } else if binding.cast_kind.as_deref() == Some("passive") {
-                    "passive"
-                } else {
-                    "ready"
-                };
-                let selected = skill_binding.selected_skill_id() == Some(skill.id);
-                let label = format!(
-                    "{}{} Lv{}  {}  {}",
-                    if selected { "▶ " } else { "" },
-                    short_name(&skill.name, skill.key.as_deref().unwrap_or("")),
-                    skill.level,
-                    shortcut,
-                    status,
-                );
-                overlay_absolute_button(
-                    viewport,
-                    &label,
-                    CrystalRect::new(
-                        (SKILL_ROW_ORIGIN.x - 8) as f32,
-                        (SKILL_ROW_ORIGIN.y - 90 + row as i32 * SKILL_ROW_STEP_Y) as f32,
-                        SKILL_ROW_SIZE.width as f32,
-                        SKILL_ROW_SIZE.height as f32,
-                    ),
-                    OverlayButton::SelectSkill(skill.id),
-                    true,
-                );
-            }
-        });
-
-    let has_previous = page > 0;
-    let has_next = page + 1 < page_count;
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse",
-            398,
-            399,
-            399,
-            CrystalRect::new(90.0, 340.0, 32.0, 24.0),
-            OverlayButton::SkillPagePrev,
-            has_previous,
-        );
-        spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse",
-            396,
-            397,
-            397,
-            CrystalRect::new(140.0, 340.0, 32.0, 24.0),
-            OverlayButton::SkillPageNext,
-            has_next,
-        );
-    } else {
-        overlay_absolute_button(
-            parent,
-            "<",
-            CrystalRect::new(90.0, 340.0, 32.0, 24.0),
-            OverlayButton::SkillPagePrev,
-            has_previous,
-        );
-        overlay_absolute_button(
-            parent,
-            ">",
-            CrystalRect::new(140.0, 340.0, 32.0, 24.0),
-            OverlayButton::SkillPageNext,
-            has_next,
-        );
-    }
-    overlay_text_at(
-        parent,
-        &format!("{}/{}", page + 1, page_count),
-        CrystalRect::new(116.0, 343.0, 24.0, 14.0),
-        8.0,
-        TEXT,
-    );
-    if skill_binding.is_assign_key_enabled() {
-        parent
-            .spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(286.0),
-                    top: Val::Px(0.0),
-                    width: Val::Px(360.0),
-                    height: Val::Px(145.0),
-                    ..default()
-                },
-                BackgroundColor(Color::NONE),
-            ))
-            .with_children(|assign| {
-                if let Some(asset_server) = asset_server {
-                    spawn_overlay_frame(
-                        assign,
-                        asset_server,
-                        "original-ui/Prguse/710.png",
-                        360.0,
-                        145.0,
-                    );
-                }
-                let selected_name = skill_binding
-                    .selected_skill_id()
-                    .and_then(|id| skills.skills.iter().find(|skill| skill.id == id))
-                    .map(|skill| skill.name.as_str())
-                    .unwrap_or("No skill selected");
-                overlay_text_at(
-                    assign,
-                    selected_name,
-                    CrystalRect::new(16.0, 16.0, 250.0, 20.0),
-                    11.0,
-                    TEXT,
-                );
-                for hotkey in 1..=8_u8 {
-                    let selected = skill_binding.selected_skill_id().is_some()
-                        && skill_binding.skill_for_hotkey(hotkey)
-                            == skill_binding.selected_skill_id();
-                    let rect = CrystalRect::new(
-                        17.0 + 32.0 * f32::from(hotkey - 1) + 5.0 * f32::from((hotkey - 1) / 4),
-                        58.0,
-                        28.0,
-                        30.0,
-                    );
-                    if let Some(asset_server) = asset_server {
-                        spawn_overlay_crystal_button(
-                            assign,
-                            asset_server,
-                            "Prguse",
-                            if selected { 1658 } else { 1656 },
-                            1657,
-                            1658,
-                            rect,
-                            OverlayButton::AssignSkillKey(hotkey),
-                        );
-                    } else {
-                        overlay_absolute_button(
-                            assign,
-                            &format!("F{hotkey}"),
-                            rect,
-                            OverlayButton::AssignSkillKey(hotkey),
-                            true,
-                        );
-                    }
-                    overlay_text_at(
-                        assign,
-                        &format!("F{hotkey}"),
-                        CrystalRect::new(rect.left, rect.top + 8.0, rect.width, 12.0),
-                        8.0,
-                        if selected { GOLD } else { TEXT },
-                    );
-                }
-                if let Some(asset_server) = asset_server {
-                    spawn_overlay_crystal_button(
-                        assign,
-                        asset_server,
-                        "Title",
-                        287,
-                        288,
-                        289,
-                        CrystalRect::new(284.0, 64.0, 64.0, 28.0),
-                        OverlayButton::ClearSkillBinding,
-                    );
-                    spawn_overlay_crystal_button(
-                        assign,
-                        asset_server,
-                        "Title",
-                        156,
-                        157,
-                        158,
-                        CrystalRect::new(284.0, 101.0, 64.0, 28.0),
-                        OverlayButton::CloseSkillAssign,
-                    );
-                }
-                if skill_persistence.dirty {
-                    overlay_text_at(
-                        assign,
-                        "Session binding active; disk save failed",
-                        CrystalRect::new(16.0, 112.0, 260.0, 16.0),
-                        8.0,
-                        GOLD,
-                    );
-                }
-            });
-    }
 }
 
 fn render_inspect(
@@ -10469,10 +11253,7 @@ fn render_bigmap(
             ..default()
         },
         Text::new(map_name.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(12.0),
-            ..default()
-        },
+        crate::crystal_ui::typography::crystal_text_font(12.0),
         TextColor(Color::WHITE),
         TextLayout::justify(Justify::Center),
     ));
@@ -10526,10 +11307,7 @@ fn render_bigmap(
                         ..default()
                     },
                     Text::new("Loading map..."),
-                    TextFont {
-                        font_size: FontSize::Px(12.0),
-                        ..default()
-                    },
+                    crate::crystal_ui::typography::crystal_text_font(12.0),
                     TextColor(Color::srgb(0.82, 0.74, 0.55)),
                     TextLayout::justify(Justify::Center),
                 ));
@@ -10624,10 +11402,7 @@ fn render_bigmap(
             ..default()
         },
         Text::new(format!("[ {}, {} ]", location.x, location.y)),
-        TextFont {
-            font_size: FontSize::Px(11.0),
-            ..default()
-        },
+        crate::crystal_ui::typography::crystal_text_font(11.0),
         TextColor(Color::WHITE),
     ));
 
@@ -10763,7 +11538,12 @@ fn render_shop(
         render_npc_item_service(parent, asset_server, shop, inventory, state);
         return;
     }
-    let buy_enabled = shop_buy_enabled(shop, inventory, state.shop_quantity);
+    let buy_enabled = shop_buy_enabled_with_pearls(
+        shop,
+        inventory,
+        state.shop_quantity,
+        state.creature.pearls.max(0) as u32,
+    );
 
     if let Some(asset_server) = asset_server {
         // Crystal's NPCGoodsDialog frame is Prguse/1000.  The extracted
@@ -11975,10 +12755,7 @@ fn inventory_cell_stack_label(item: &ItemModel) -> String {
 fn title(parent: &mut ChildSpawnerCommands, text: &str) {
     parent.spawn((
         Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(14.0),
-            ..default()
-        },
+        crate::crystal_ui::typography::crystal_text_font(14.0),
         TextColor(GOLD),
     ));
 }
@@ -11986,10 +12763,7 @@ fn title(parent: &mut ChildSpawnerCommands, text: &str) {
 fn body(parent: &mut ChildSpawnerCommands, text: &str) {
     parent.spawn((
         Text::new(text.to_owned()),
-        TextFont {
-            font_size: FontSize::Px(11.0),
-            ..default()
-        },
+        crate::crystal_ui::typography::crystal_text_font(11.0),
         TextColor(TEXT),
     ));
 }
@@ -12021,10 +12795,7 @@ fn overlay_button(
     entity.with_children(|button| {
         button.spawn((
             Text::new(label.to_owned()),
-            TextFont {
-                font_size: FontSize::Px(10.0),
-                ..default()
-            },
+            crate::crystal_ui::typography::crystal_text_font(10.0),
             TextColor(if enabled {
                 TEXT
             } else {
@@ -12049,6 +12820,29 @@ fn is_text_input_action(action: OverlayButton) -> bool {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn item_use_time_is_shared_across_player_hero_and_survives_draining() {
+        let mut q = super::NativePlayerUiIntentQueue::default();
+        let player = super::NativePlayerUiIntent::UseItem {
+            key: None,
+            unique_id: Some(10),
+            slot: None,
+            grid: Some("inventory".into()),
+        };
+        let hero = super::NativePlayerUiIntent::HeroPacket(mir2_protocol::ClientPacket::UseItem {
+            grid: mir2_protocol::MirGridType::HeroInventory,
+            unique_id: 20,
+        });
+        assert!(q.push_intent_at(player.clone(), 1000, 300));
+        q.drain_intents();
+        assert!(!q.push_intent_at(hero.clone(), 1299, 300));
+        assert!(q.push_intent_at(hero.clone(), 1300, 100));
+        assert!(!q.push_intent_at(player.clone(), 1399, 300));
+        assert!(q.push_intent_at(player, 1400, 300));
+        assert!(!q.use_item_ready(1699));
+        assert!(q.use_item_ready(1700));
+    }
+
     use super::*;
     use crate::crystal_ui::widget::CrystalImageButton;
     use crate::inventory::{
@@ -13397,7 +14191,12 @@ mod tests {
             .init_resource::<StorageUiState>()
             .init_resource::<SkillModel>()
             .init_resource::<SkillBindingUi>()
-            .init_resource::<SkillBindingPersistenceRuntime>()
+            .insert_resource(SkillBindingPersistenceRuntime::with_config_path(
+                std::env::temp_dir().join(format!(
+                    "mir2-render-test-skill-bindings-{}.json",
+                    std::process::id()
+                )),
+            ))
             .init_resource::<crate::social::SocialModel>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
@@ -13406,6 +14205,33 @@ mod tests {
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(Update, render_overlays);
         app
+    }
+
+    #[test]
+    fn skill_shortcut_uses_one_real_character_dialog_with_all_four_tabs() {
+        let mut app = overlay_render_test_app();
+        app.world_mut().resource_mut::<UiReadModel>().player.name = Some("SkillTester".into());
+        app.world_mut().resource_mut::<NativePlayerUiState>().toggle_skill();
+        app.update();
+        let world = app.world_mut();
+        let state = world.resource::<NativePlayerUiState>();
+        assert!(state.equipment_open());
+        assert!(state.skill_open());
+        assert!(!state.core.skill_open(), "no separate placeholder window");
+        assert_eq!(state.character_page, CharacterPage::Spells);
+        assert_eq!(world.query::<&OverlayButton>().iter(world)
+            .filter(|action| matches!(action, OverlayButton::SelectCharacterPage(_))).count(), 4);
+        assert!(world.query::<&Text>().iter(world).any(|text| text.0 == "SkillTester"));
+        assert_eq!(world.query::<&ImageNode>().iter(world).filter(|image|
+            image.image.path().is_some_and(|path| path.to_string() == "original-ui/Title/504.png")
+        ).count(), 1);
+        let mut state = world.resource_mut::<NativePlayerUiState>();
+        state.character_page = CharacterPage::Stats1;
+        state.toggle_skill();
+        assert!(state.equipment_open(), "F11 from another tab keeps the dialog open");
+        assert_eq!(state.character_page, CharacterPage::Spells);
+        state.toggle_skill();
+        assert!(!state.equipment_open(), "F11 closes only the already-selected spells page");
     }
 
     fn mail_msg(id: u64, claimed: bool, locked: bool, gold: u32, items: Vec<&str>) -> MailMessage {
@@ -13504,11 +14330,13 @@ mod tests {
         assert_eq!(inventory_node.left, Val::Px(120.0));
         assert_eq!(inventory_node.top, Val::Px(90.0));
 
+        // Exercise the real F11/HUD entry, which now selects CharacterDialog's
+        // spells tab instead of constructing the removed placeholder panel.
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
-            .core
-            .panel = mir2_ui_core::state::UiPanel::Skill;
+            .toggle_skill();
         app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().equipment_open());
         let skill_viewports = app
             .world_mut()
             .query_filtered::<&Node, With<OverlaySkillListViewport>>()
@@ -13611,9 +14439,9 @@ mod tests {
         app.update();
         let guild_rows = app
             .world_mut()
-            .query::<&OverlayButton>()
+            .query::<&Text>()
             .iter(app.world())
-            .filter(|action| matches!(action, OverlayButton::SelectGuildMember(_)))
+            .filter(|text| text.0.starts_with("GuildMember"))
             .count();
         assert_eq!(guild_rows, 18);
     }
@@ -13667,23 +14495,14 @@ mod tests {
     }
 
     #[test]
-    fn guild_notice_draft_is_bounded_by_lines_and_characters() {
-        let mut draft = String::new();
-        push_guild_notice_text(&mut draft, &"x".repeat(40));
-        assert_eq!(draft.chars().count(), GUILD_NOTICE_MAX_CHARS_PER_LINE);
-        for _ in 0..20 {
-            push_guild_notice_text(&mut draft, "\nnext");
-        }
-        assert_eq!(draft.split('\n').count(), crate::social::MAX_NOTICE_LINES);
-        assert!(guild_notice_lines(&draft).is_some());
-        assert!(guild_notice_lines(&format!(
-            "{}\nextra",
-            (0..crate::social::MAX_NOTICE_LINES)
-                .map(|_| "line")
-                .collect::<Vec<_>>()
-                .join("\n")
-        ))
-        .is_none());
+    fn guild_notice_preserves_source_lines_and_leaves_200_line_rejection_to_server() {
+        let draft = format!("{}\n\nfinal  ", "x".repeat(100));
+        assert_eq!(
+            guild_notice_lines(&draft),
+            vec!["x".repeat(100), String::new(), "final  ".into()]
+        );
+        assert_eq!(guild_notice_lines(&vec!["a"; 200].join("\n")).len(), 200);
+        assert_eq!(guild_notice_lines(&vec!["a"; 201].join("\n")).len(), 201);
     }
 
     #[test]
@@ -15543,6 +16362,8 @@ mod tests {
             .init_resource::<StorageModel>()
             .init_resource::<crate::social::SocialModel>()
             .insert_resource(SkillModel {
+                authority: Default::default(),
+                skill_key_ack: None,
                 skills: vec![crate::skill_model::SkillEntry {
                     id: 17,
                     name: "Fire Ball".to_owned(),
@@ -15585,7 +16406,7 @@ mod tests {
     }
 
     #[test]
-    fn assigning_a_skill_key_persists_only_after_the_local_rebind_succeeds() {
+    fn assigning_a_skill_key_uses_server_command_without_rewriting_legacy_file() {
         let mut app = App::new();
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<MailComposeUi>()
@@ -15598,6 +16419,8 @@ mod tests {
             .init_resource::<StorageModel>()
             .init_resource::<crate::social::SocialModel>()
             .insert_resource(SkillModel {
+                authority: Default::default(),
+                skill_key_ack: None,
                 skills: vec![crate::skill_model::SkillEntry {
                     id: 17,
                     name: "Fire Ball".to_owned(),
@@ -15606,13 +16429,22 @@ mod tests {
                     cooldown_ms: 800,
                     mp_cost: 5,
                 }],
-                ..Default::default()
+                bindings: vec![crate::skill_model::SkillBinding {
+                    skill_id: 17,
+                    spell: Some("FireBall".into()),
+                    hotkey: Some(0),
+                    ..default()
+                }],
             })
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
             });
         init_overlay_button_test_resources(&mut app);
+        app.init_resource::<MailUiState>()
+            .init_resource::<StorageUiState>()
+            .init_resource::<ShopUiState>()
+            .init_resource::<crate::skill_model::SkillModelReceipts>();
         let path = app
             .world()
             .resource::<SkillBindingPersistenceRuntime>()
@@ -15625,11 +16457,20 @@ mod tests {
             .resource_mut::<NativePlayerUiState>()
             .core
             .panel = mir2_ui_core::state::UiPanel::Skill;
-        app.add_systems(Update, process_overlay_buttons);
+        app.add_systems(
+            Update,
+            (
+                sync_local_panel_models,
+                process_overlay_buttons,
+                skill_assign_dialog::process,
+            )
+                .chain(),
+        );
 
         for button in [
             OverlayButton::SelectSkill(17),
             OverlayButton::AssignSkillKey(3),
+            OverlayButton::CloseSkillAssign,
         ] {
             let entity = app
                 .world_mut()
@@ -15639,19 +16480,63 @@ mod tests {
             app.world_mut().despawn(entity);
         }
 
+        assert!(
+            app.world()
+                .resource::<SkillBindingUi>()
+                .skill_for_hotkey(3)
+                .is_none(),
+            "draft does not change cast binding before dispatch"
+        );
+        let request_id = app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .skill_assign
+            .request_id;
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::MagicKey {
+                request_id,
+                spell: "FireBall".into(),
+                key: 3,
+                old_key: 0
+            }]
+        );
+        let mut receipt = app.world().resource::<SkillModel>().clone();
+        receipt.bindings[0].hotkey = Some(3);
+        receipt.skill_key_ack = Some(crate::skill_model::SkillKeyAck {
+            request_id,
+            spell: "FireBall".into(),
+            key: 3,
+            old_key: 0,
+            accepted: true,
+        });
+        app.world_mut()
+            .resource_mut::<crate::skill_model::SkillModelReceipts>()
+            .0
+            .push_back(receipt);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .skill_assign
+            .dispatched(request_id, "FireBall", 3, 0, true);
+        app.update();
         assert_eq!(
             app.world().resource::<SkillBindingUi>().skill_for_hotkey(3),
             Some(17)
         );
-        let runtime = app.world().resource::<SkillBindingPersistenceRuntime>();
-        assert!(!runtime.dirty);
+        app.update(); // The complete receipt is consumed after dispatch establishes pending.
+        app.world_mut().resource_mut::<SkillModel>().bindings[0].hotkey = Some(0);
+        app.update();
         assert_eq!(
-            runtime.last_status,
-            crate::skill_binding_persistence::SkillBindingPersistStatus::Succeeded
+            app.world().resource::<SkillBindingUi>().skill_for_hotkey(3),
+            None,
+            "an exact receipt retired the optimistic overlay"
         );
-        let loaded = crate::skill_binding_persistence::load_skill_bindings_from_path(&path);
-        assert_eq!(loaded.bindings.skill_for_hotkey(3), Some(17));
-
+        assert!(
+            !path.exists(),
+            "server-owned bindings must not create/rewrite the legacy global file"
+        );
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(path.with_extension("json.bak"));
         let _ = std::fs::remove_file(path.with_extension("json.tmp"));

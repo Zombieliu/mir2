@@ -163,6 +163,14 @@ fn postgres_deleted_account_cannot_be_recreated_by_stale_save() {
         next_character_index: 1,
         game_shop_global_purchases: BTreeMap::new(),
         accounts,
+        shared_guilds: BTreeMap::new(),
+        shared_heroes: BTreeMap::new(),
+        hero_id_high_watermark: 0,
+        source_hero_versions: BTreeMap::new(),
+        source_hero_allocator_version: None,
+        guild_clock: None,
+        source_guild_clock_version: None,
+        source_guild_versions: BTreeMap::new(),
         source_account_versions: BTreeMap::new(),
         source_save_versions: BTreeMap::new(),
         source_game_shop_global_version: None,
@@ -204,6 +212,14 @@ fn authoritative_test_store(accounts: BTreeMap<String, AccountRecord>) -> Accoun
         next_character_index: 0,
         game_shop_global_purchases: BTreeMap::new(),
         accounts,
+        shared_guilds: BTreeMap::new(),
+        shared_heroes: BTreeMap::new(),
+        hero_id_high_watermark: 0,
+        source_hero_versions: BTreeMap::new(),
+        source_hero_allocator_version: None,
+        guild_clock: None,
+        source_guild_clock_version: None,
+        source_guild_versions: BTreeMap::new(),
         source_account_versions: BTreeMap::new(),
         source_save_versions: BTreeMap::new(),
         source_game_shop_global_version: None,
@@ -360,7 +376,7 @@ fn development_file_fixture_still_supplies_demo_account() {
         config.account_store_database_mode,
         AccountStoreDatabaseMode::Mirror
     );
-    assert_eq!(config.account_store_path.as_deref(), Some(path.as_path()));
+    assert_eq!(config.account_store_path.as_deref(), Some(std::fs::canonicalize(path.parent().unwrap()).unwrap().join(path.file_name().unwrap()).as_path()));
 }
 fn source_of_truth_test_config(accounts: BTreeMap<String, AccountRecord>) -> SimulationConfig {
     source_of_truth_test_config_with_store(authoritative_test_store(accounts))
@@ -378,6 +394,7 @@ fn source_of_truth_test_config_with_store(store: AccountStore) -> SimulationConf
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct AccountStoreAuditSnapshot {
     json: Vec<u8>,
+    source_guild_versions: BTreeMap<String, i64>,
     source_account_versions: BTreeMap<String, i64>,
     source_save_versions: BTreeMap<String, BTreeMap<i32, i64>>,
     source_game_shop_global_version: Option<i64>,
@@ -388,6 +405,7 @@ fn account_store_audit_snapshot(config: &SimulationConfig) -> AccountStoreAuditS
     let store = config.account_store.lock().unwrap();
     AccountStoreAuditSnapshot {
         json: serde_json::to_vec(&*store).unwrap(),
+        source_guild_versions: store.source_guild_versions.clone(),
         source_account_versions: store.source_account_versions.clone(),
         source_save_versions: store.source_save_versions.clone(),
         source_game_shop_global_version: store.source_game_shop_global_version,
@@ -855,6 +873,9 @@ fn alpha_repository_probe_outcome(
     global_version: Option<i64>,
 ) -> AccountStoreRepositorySave {
     AccountStoreRepositorySave {
+        clock: None,
+        guild_versions: BTreeMap::new(),
+        heroes: Default::default(),
         account_versions: BTreeMap::from([("alpha".to_string(), account_version)]),
         save_versions: BTreeMap::from([("alpha".to_string(), BTreeMap::from([(1, save_version)]))]),
         game_shop_global_version: global_version,
@@ -1010,7 +1031,7 @@ fn account_scoped_commit_rejects_scope_escape_before_any_file_write() {
     let original = versioned_two_account_store();
     let beta_password = original.accounts.get("beta").unwrap().password.clone();
     let mut config = SimulationConfig::default().with_account_store_path(path.clone());
-    config.account_store = Arc::new(Mutex::new(original));
+    *config.account_store.lock().unwrap() = original;
     config.account_store_database_mode = AccountStoreDatabaseMode::Mirror;
     config
         .save_account_store()

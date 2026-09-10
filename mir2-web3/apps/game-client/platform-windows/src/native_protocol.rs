@@ -32,6 +32,104 @@ fn valid_protocol_slot(slot: i32) -> bool {
 #[derive(Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum NativeOutboundCommand {
+    AllowMentor,
+    AddMentor {
+        name: String,
+    },
+    CancelMentor,
+    MentorReply {
+        #[serde(rename = "acceptInvite")]
+        accept_invite: bool,
+    },
+    ChangeMarriage,
+    MarriageRequest,
+    MarriageReply {
+        #[serde(rename = "acceptInvite")]
+        accept_invite: bool,
+    },
+    DivorceRequest,
+    DivorceReply {
+        #[serde(rename = "acceptInvite")]
+        accept_invite: bool,
+    },
+
+    EquipSlotItem {
+        grid: String,
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        to: i32,
+        #[serde(rename = "gridTo")]
+        grid_to: String,
+        #[serde(rename = "toUniqueId")]
+        to_unique_id: u64,
+    },
+    RemoveSlotItem {
+        grid: String,
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        to: i32,
+        #[serde(rename = "gridTo")]
+        grid_to: String,
+        #[serde(rename = "fromUniqueId")]
+        from_unique_id: u64,
+    },
+    FishingCast {
+        #[serde(rename = "castOut")]
+        cast_out: bool,
+    },
+    FishingChangeAutocast {
+        #[serde(rename = "autoCast")]
+        auto_cast: bool,
+    },
+    IntelligentCreaturePickup {
+        #[serde(rename = "mouseMode")]
+        mouse_mode: bool,
+        location: mir2_protocol::Point,
+    },
+    RequestIntelligentCreatureUpdates {
+        update: bool,
+    },
+    UpdateIntelligentCreature {
+        creature: mir2_protocol::ClientIntelligentCreature,
+        #[serde(rename = "summonMe")]
+        summon_me: bool,
+        #[serde(rename = "unsummonMe")]
+        unsummon_me: bool,
+        #[serde(rename = "releaseMe")]
+        release_me: bool,
+    },
+
+    RefreshFriends,
+    RemoveFriend {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+    },
+    AddMemo {
+        #[serde(rename = "characterIndex")]
+        character_index: i32,
+        memo: String,
+    },
+    AddFriend {
+        name: String,
+        blocked: bool,
+    },
+    Observe {
+        name: String,
+    },
+    GetRanking {
+        #[serde(rename = "rankType")]
+        rank_type: u8,
+        #[serde(rename = "rankIndex")]
+        rank_index: i32,
+        #[serde(rename = "onlineOnly")]
+        online_only: bool,
+    },
+    Inspect {
+        #[serde(rename = "objectId")]
+        object_id: u32,
+        ranking: bool,
+        hero: bool,
+    },
     ClientVersion,
     ClientCapabilities {
         capabilities: Vec<String>,
@@ -162,6 +260,30 @@ pub enum NativeOutboundCommand {
     },
     LogOut,
     Disconnect,
+    ChangeHero {
+        #[serde(rename = "listIndex")]
+        list_index: i32,
+    },
+    SetHeroBehaviour {
+        behaviour: u8,
+    },
+    SetAutoPotValue {
+        stat: u8,
+        value: u32,
+    },
+    SetAutoPotItem {
+        grid: String,
+        #[serde(rename = "itemIndex")]
+        item_index: i32,
+    },
+    TransferHeroItem {
+        from: i32,
+        to: i32,
+    },
+    TakeBackHeroItem {
+        from: i32,
+        to: i32,
+    },
     TownRevive,
     UseItem {
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -234,6 +356,20 @@ pub enum NativeOutboundCommand {
     },
     Chat {
         message: String,
+    },
+    ChangeAMode {
+        mode: u8,
+    },
+    ChangePMode {
+        mode: u8,
+    },
+    MagicKey {
+        #[serde(rename = "requestId")]
+        request_id: u64,
+        spell: String,
+        key: u8,
+        #[serde(rename = "oldKey")]
+        old_key: u8,
     },
     Magic {
         #[serde(rename = "objectId", default)]
@@ -345,6 +481,10 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "acceptInvite")]
         accept_invite: bool,
     },
+    GuildBuffUpdate {
+        action: u8,
+        id: i32,
+    },
     RequestGuildInfo {
         #[serde(rename = "infoType")]
         info_type: u8,
@@ -453,6 +593,29 @@ impl NativeOutboundCommand {
 
     pub fn command_type(&self) -> &'static str {
         match self {
+            Self::AllowMentor => "allowMentor",
+            Self::AddMentor { .. } => "addMentor",
+            Self::CancelMentor => "cancelMentor",
+            Self::MentorReply { .. } => "mentorReply",
+            Self::ChangeMarriage => "changeMarriage",
+            Self::MarriageRequest => "marriageRequest",
+            Self::MarriageReply { .. } => "marriageReply",
+            Self::DivorceRequest => "divorceRequest",
+            Self::DivorceReply { .. } => "divorceReply",
+            Self::EquipSlotItem { .. } => "equipSlotItem",
+            Self::RemoveSlotItem { .. } => "removeSlotItem",
+            Self::FishingCast { .. } => "fishingCast",
+            Self::FishingChangeAutocast { .. } => "fishingChangeAutocast",
+            Self::IntelligentCreaturePickup { .. } => "intelligentCreaturePickup",
+            Self::RequestIntelligentCreatureUpdates { .. } => "requestIntelligentCreatureUpdates",
+            Self::UpdateIntelligentCreature { .. } => "updateIntelligentCreature",
+            Self::GetRanking { .. } => "getRanking",
+            Self::RefreshFriends => "refreshFriends",
+            Self::RemoveFriend { .. } => "removeFriend",
+            Self::AddMemo { .. } => "addMemo",
+            Self::AddFriend { .. } => "addFriend",
+            Self::Observe { .. } => "observe",
+            Self::Inspect { .. } => "inspect",
             Self::ClientVersion => "clientVersion",
             Self::ClientCapabilities { .. } => "clientCapabilities",
             Self::ResumeSession { .. } => "resumeSession",
@@ -477,6 +640,12 @@ impl NativeOutboundCommand {
             Self::FinishQuest { .. } => "finishQuest",
             Self::AbandonQuest { .. } => "abandonQuest",
             Self::ShareQuest { .. } => "shareQuest",
+            Self::ChangeHero { .. } => "changeHero",
+            Self::SetHeroBehaviour { .. } => "setHeroBehaviour",
+            Self::SetAutoPotValue { .. } => "setAutoPotValue",
+            Self::SetAutoPotItem { .. } => "setAutoPotItem",
+            Self::TransferHeroItem { .. } => "transferHeroItem",
+            Self::TakeBackHeroItem { .. } => "takeBackHeroItem",
             Self::TownRevive => "townRevive",
             Self::UseItem { .. } => "useItem",
             Self::EquipItem { .. } => "equipItem",
@@ -492,6 +661,9 @@ impl NativeOutboundCommand {
             Self::Chat { .. } => "chat",
             Self::LogOut => "logOut",
             Self::Disconnect => "disconnect",
+            Self::ChangeAMode { .. } => "changeAMode",
+            Self::ChangePMode { .. } => "changePMode",
+            Self::MagicKey { .. } => "magicKey",
             Self::Magic { .. } => "magic",
             Self::SpellToggle { .. } => "spellToggle",
             Self::BuyItem { .. } => "buyItem",
@@ -512,6 +684,7 @@ impl NativeOutboundCommand {
             Self::AddMember { .. } => "addMember",
             Self::DelMember { .. } => "delMember",
             Self::GroupInvite { .. } => "groupInvite",
+            Self::GuildBuffUpdate { .. } => "guildBuffUpdate",
             Self::RequestGuildInfo { .. } => "requestGuildInfo",
             Self::GuildStorageGoldChange { .. } => "guildStorageGoldChange",
             Self::GuildStorageItemChange { .. } => "guildStorageItemChange",
@@ -1255,6 +1428,27 @@ fn coerce_u64(value: Option<&Value>) -> Option<u64> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn ranking_and_inspect_use_ordinary_exact_wire_commands() {
+        assert_eq!(
+            super::NativeOutboundCommand::GetRanking {
+                rank_type: 3,
+                rank_index: 17,
+                online_only: true
+            }
+            .to_wire_json(),
+            serde_json::json!({"type":"getRanking","rankType":3,"rankIndex":17,"onlineOnly":true})
+        );
+        assert_eq!(
+            super::NativeOutboundCommand::Inspect {
+                object_id: 42,
+                ranking: true,
+                hero: false
+            }
+            .to_wire_json(),
+            serde_json::json!({"type":"inspect","objectId":42,"ranking":true,"hero":false})
+        );
+    }
     use super::*;
 
     fn assert_serialized(command: NativeOutboundCommand, expected: Value) {
@@ -1489,7 +1683,7 @@ mod tests {
         );
         assert_serialized(
             NativeOutboundCommand::Magic {
-                object_id: 0,
+                object_id: 1000,
                 spell: "FireBall".into(),
                 direction: "down".into(),
                 target_id: 2001,
@@ -1499,7 +1693,7 @@ mod tests {
             },
             json!({
                 "type":"magic",
-                "objectId":0,
+                "objectId":1000,
                 "spell":"FireBall",
                 "direction":"down",
                 "targetId":2001,

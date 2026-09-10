@@ -306,6 +306,40 @@ enum NativeShellButton {
 
 pub struct Mir2NativeShellUiPlugin;
 
+#[derive(Component)]
+struct NativeLoginDoorBackground;
+
+#[derive(Resource)]
+struct NativeLoginDoorFrames(Vec<Handle<Image>>);
+
+fn animate_login_door(
+    time: Res<Time>,
+    mut shell: Option<ResMut<NativeShellModel>>,
+    frames: Option<Res<NativeLoginDoorFrames>>,
+    images: Res<Assets<Image>>,
+    mut backgrounds: Query<&mut ImageNode, With<NativeLoginDoorBackground>>,
+) {
+    let (Some(shell), Some(frames)) = (shell.as_deref_mut(), frames) else {
+        return;
+    };
+    // Keep the first frame visible until all frames are resident. Do not skip
+    // the opening sequence on a cold disk or flash missing image placeholders.
+    let ready = frames.0.iter().all(|frame| images.contains(frame.id()));
+    if ready {
+        shell.advance_login_opening(time.delta());
+    }
+    let frame = if ready {
+        shell.login_opening_frame() as usize
+    } else {
+        0
+    };
+    for mut image in &mut backgrounds {
+        if image.image != frames.0[frame] {
+            image.image = frames.0[frame].clone();
+        }
+    }
+}
+
 impl Plugin for Mir2NativeShellUiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<NativeUiIntentQueue>()
@@ -315,6 +349,7 @@ impl Plugin for Mir2NativeShellUiPlugin {
             .add_systems(
                 Update,
                 (
+                    animate_login_door,
                     update_root_visibility,
                     shell_keyboard_input,
                     shell_pointer_input,
@@ -335,6 +370,11 @@ impl Plugin for Mir2NativeShellUiPlugin {
 }
 
 fn spawn_shell_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(NativeLoginDoorFrames(
+        (0..19)
+            .map(|index| asset_server.load(format!("original-ui/ChrSel/{index}.png")))
+            .collect(),
+    ));
     commands
         .spawn((
             NativeShellRoot,
@@ -355,6 +395,7 @@ fn spawn_shell_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|root| {
             root.spawn((
+                NativeLoginDoorBackground,
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(0.0),
@@ -992,6 +1033,10 @@ fn render_shell_ui(
                 with_generic_panel(screen, |panel| {
                     info_block(panel, "Authenticating", "Authenticating account...");
                 });
+            }
+            NativeShellScreen::OpeningLogin => {
+                // The original login dialog is disposed before the door opens.
+                // No widgets or generic loading panel may obscure the frames.
             }
             NativeShellScreen::StartingGame => {
                 with_generic_panel(screen, |panel| {
@@ -1965,6 +2010,59 @@ fn body_font(size: f32) -> TextFont {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn door_waits_for_all_frames_then_updates_the_real_background_handle() {
+        use super::*;
+        let mut images = Assets::<Image>::default();
+        let frames = (0..19)
+            .map(|_| images.add(Image::default()))
+            .collect::<Vec<_>>();
+        let missing = images.remove(frames[18].id()).unwrap();
+        let mut app = App::new();
+        app.insert_resource(images);
+        app.insert_resource(NativeLoginDoorFrames(frames.clone()));
+        app.insert_resource(Time::<()>::default());
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::OpeningLogin;
+        app.insert_resource(model);
+        let background = app
+            .world_mut()
+            .spawn((NativeLoginDoorBackground, ImageNode::default()))
+            .id();
+        app.add_systems(Update, animate_login_door);
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(100));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .login_opening_elapsed,
+            std::time::Duration::ZERO
+        );
+        assert_eq!(
+            app.world().get::<ImageNode>(background).unwrap().image,
+            frames[0]
+        );
+        app.world_mut()
+            .resource_mut::<Assets<Image>>()
+            .insert(frames[18].id(), missing)
+            .unwrap();
+        app.update();
+        assert_eq!(
+            app.world().get::<ImageNode>(background).unwrap().image,
+            frames[2]
+        );
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(1700));
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            NativeShellScreen::CharacterSelect
+        );
+    }
+
     use super::*;
     use crate::native_shell::{CharacterSummary, NativeGatewayEvent};
 

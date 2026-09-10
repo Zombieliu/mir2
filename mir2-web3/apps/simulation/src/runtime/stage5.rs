@@ -184,6 +184,14 @@ pub(super) fn validate_stage5_guild_storage_item_carriers(
 pub(super) fn validate_stage5_systems_item_carriers(
     systems: &Stage5SystemsState,
 ) -> Result<(), String> {
+    if systems
+        .trade
+        .as_ref()
+        .is_some_and(|trade| trade.validated_held_gold().is_none())
+    {
+        return Err("invalid trade gold custody".to_string());
+    }
+    super::item_custody::reserved_ids(systems)?;
     validate_stage5_mail_item_carriers(&systems.mail)?;
     validate_stage5_guild_storage_item_carriers(&systems.guild)?;
     if systems.economy_projection_event_ids.iter().any(|event_id| {
@@ -3662,6 +3670,19 @@ impl SimulationSession {
     }
 
     fn stage5_trade_start(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
+        if self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade
+            .as_ref()
+            .is_some_and(|trade| {
+                trade.outgoing_escrow_debited() || trade.validated_held_gold() != Some(0)
+            })
+        {
+            return Vec::new();
+        }
         let partner = args
             .first()
             .cloned()
@@ -3677,6 +3698,7 @@ impl SimulationSession {
             offered_slots: BTreeMap::new(),
             offered_unique_ids: BTreeMap::new(),
             offered_gold: 0,
+            held_gold: None,
             offered_currency: CurrencyKind::Gold,
             accepted: false,
             locked: false,
@@ -3722,7 +3744,8 @@ impl SimulationSession {
                 "server.NotFound",
             ))];
         };
-        if trade.outgoing_escrow_debited() || trade.locked {
+        if trade.outgoing_escrow_debited() || trade.locked || trade.validated_held_gold() != Some(0)
+        {
             return vec![system_message(&localized_text_or_fallback(
                 language,
                 "server.NotFound",
@@ -3784,6 +3807,19 @@ impl SimulationSession {
     }
 
     fn stage5_trade_accept(&mut self) -> Vec<ServerPacket> {
+        if self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade
+            .as_ref()
+            .is_some_and(|trade| {
+                trade.outgoing_escrow_debited() || trade.validated_held_gold() != Some(0)
+            })
+        {
+            return Vec::new();
+        }
         let language = current_language(self.app.world());
         let Some((offered_gold, offered_currency, offered_items)) = self
             .app
@@ -3861,6 +3897,11 @@ impl SimulationSession {
             .as_mut()
         {
             trade.accepted = true;
+            trade.held_gold = Some(if trade.offered_currency == CurrencyKind::Gold {
+                trade.offered_gold
+            } else {
+                0
+            });
             trade.completed = true;
         }
         vec![system_message(&localized_text_or_fallback(
@@ -3871,12 +3912,7 @@ impl SimulationSession {
     }
 
     fn stage5_trade_cancel(&mut self) -> Vec<ServerPacket> {
-        self.app
-            .world_mut()
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .trade = None;
-        Vec::new()
+        super::packets::stage5_trade_cancel_packet(self.app.world_mut())
     }
 
     fn stage5_shop_buy(&mut self, args: Vec<String>) -> Vec<ServerPacket> {
@@ -4832,6 +4868,7 @@ impl SimulationSession {
             .unwrap_or(0)
             + 1;
         stage5.stage5_systems.auction.push(Stage5AuctionListing {
+            item_state_json: None,
             id,
             seller,
             item_key,
@@ -4853,6 +4890,21 @@ impl SimulationSession {
                 ["auction.buy".to_string()],
             ))];
         };
+        if self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .auction
+            .iter()
+            .any(|listing| listing.id == id && listing.item_state_json.is_some())
+        {
+            return super::packets::stage5_market_buy_packet(
+                self.app.world_mut(),
+                u64::from(id),
+                0,
+            );
+        }
         let language = current_language(self.app.world());
         let (index, price, currency, item_key, seller) = {
             let stage5 = self.app.world().resource::<Stage5SystemsResource>();
@@ -4950,6 +5002,21 @@ impl SimulationSession {
                 ["auction.cancel".to_string()],
             ))];
         };
+        if self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .auction
+            .iter()
+            .any(|listing| listing.id == id && listing.item_state_json.is_some())
+        {
+            return super::packets::stage5_market_get_back_packet(
+                self.app.world_mut(),
+                0,
+                u64::from(id),
+            );
+        }
         let mut stage5 = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
         if let Some(listing) = stage5
             .stage5_systems

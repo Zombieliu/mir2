@@ -1,0 +1,17 @@
+
+running 13 tests
+test routing::tests::trade_invitation_tests::bootstrap_failure_closes_pair_and_refunds_the_waiting_peer ... ok
+test routing::tests::trade_invitation_tests::disabled_trade_preference_rejects_invites ... ok
+test routing::tests::trade_invitation_tests::disconnected_inviter_cannot_be_accepted_and_new_invite_is_possible ... ok
+test routing::tests::trade_invitation_tests::editable_unlock_keeps_pair_and_private_edit_routing ... ok
+test routing::tests::trade_invitation_tests::gold_and_items_are_private_to_the_established_partner ... ok
+test routing::tests::trade_invitation_tests::invitation_requires_mutual_facing ... ok
+test routing::tests::trade_invitation_tests::only_recipient_receives_invitation_and_decline_notifies_only_inviter ... ok
+test routing::tests::trade_invitation_tests::pending_old_pair_cancellation_blocks_a_new_invitation_until_drained ... ok
+test routing::tests::trade_invitation_tests::prepared_unlock_cancels_and_refunds_both_sides_without_stale_open_pair ... ok
+test routing::tests::trade_invitation_tests::teardown_fenced_recipient_rejects_request_and_inviter_rejects_acceptance ... ok
+test routing::tests::trade_invitation_tests::unprepared_pair_cancel_closes_both_personal_states ... ok
+test routing::tests::trade_invitation_tests::unsolicited_reply_and_edits_cannot_create_a_trade ... ok
+test routing::tests::trade_invitation_tests::world_checkpoint_drops_all_online_trade_links ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 673 filtered out; finished in 74.61s

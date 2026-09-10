@@ -4,7 +4,9 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::combat::{apply_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state};
+use super::combat::{
+    apply_settled_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state,
+};
 use super::components::{
     entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
     MonsterAgent, MonsterVitals, PlayerVitals, Position, SpawnSlotRef,
@@ -187,6 +189,9 @@ pub enum SharedItemRentalDelivery {
 }
 
 impl SimulationSession {
+    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        super::skills::supports_magic_key_assignment(self.app.world(),spell,key,old_key)
+    }
     pub fn new(config: SimulationConfig) -> Self {
         let mut app = HeadlessRuntime::new();
         let initial_collision = runtime_map_collision_data(&config.map.file_name)
@@ -365,6 +370,17 @@ impl SimulationSession {
         self.finalize_packets(packets)
     }
 
+    pub fn shared_trade_allowed(&self) -> bool {
+        self.app
+            .world()
+            .resource::<super::resources::GmRuntimeResource>()
+            .allow_trade
+    }
+
+    pub fn shared_trade_refusal_message(&self, name: &str) -> ServerPacket {
+        system_message_key_args(self.app.world(), "server.PlayerRefusedTrade", [name])
+    }
+
     pub fn trade_request(&mut self, partner_name: &str) -> Vec<ServerPacket> {
         super::packets::stage5_trade_request_packet(
             self.app.world_mut(),
@@ -427,6 +443,64 @@ impl SimulationSession {
             .stage5_systems
             .trade
             .is_some()
+    }
+
+    /// Checks whether a finalized offer still belongs to the active custody.
+    pub fn shared_trade_offer_matches_active_escrow(
+        &self,
+        offer: &SharedTradeOffer,
+        rollback: bool,
+    ) -> bool {
+        shared_trade_offer_matches_active_escrow(self.app.world(), offer, rollback)
+    }
+
+    /// Read-only eligibility; the gateway must exclude active pairs and durable
+    /// or unknown outcomes before treating this custody as orphaned.
+    pub fn shared_trade_unprepared_held_gold(&self) -> Option<u32> {
+        let systems = self.app.world().resource::<Stage5SystemsResource>();
+        let trade = systems.stage5_systems.trade.as_ref()?;
+        if trade.outgoing_escrow_debited()
+            || trade.offered_currency != crate::config::CurrencyKind::Gold
+        {
+            return None;
+        }
+        trade.validated_held_gold()
+    }
+
+    /// Refund only editable gold custody. This does not resolve durable work
+    /// and deliberately never releases prepared/legacy-completed snapshots.
+    pub fn recover_unprepared_trade_gold(&mut self) -> Vec<ServerPacket> {
+        if !self
+            .shared_trade_unprepared_held_gold()
+            .is_some_and(|held| held > 0)
+        {
+            return Vec::new();
+        }
+        let gold_before = self.app.world().resource::<PlayerRuntimeResource>().gold;
+        let trade_before = self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade
+            .clone();
+        let packets = super::packets::stage5_trade_cancel_packet(self.app.world_mut());
+        if packets.is_empty() {
+            return packets;
+        }
+        if self.save_active_character().is_err() {
+            self.app
+                .world_mut()
+                .resource_mut::<PlayerRuntimeResource>()
+                .gold = gold_before;
+            self.app
+                .world_mut()
+                .resource_mut::<Stage5SystemsResource>()
+                .stage5_systems
+                .trade = trade_before;
+            return Vec::new();
+        }
+        self.finalize_packets(packets)
     }
 
     pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
@@ -626,10 +700,9 @@ impl SimulationSession {
             .world()
             .resource::<Stage5SystemsResource>()
             .stage5_systems
-            .intelligent_creatures
-            .iter()
-            .any(|creature| {
-                creature.pet_mode != 0
+            .active_intelligent_creature()
+            .is_some_and(|creature| {
+                creature.pet_mode == 0
                     && creature.creature_rules.auto_pickup_enabled
                     && creature.fullness >= creature.creature_rules.minimal_fullness.max(0)
                     && creature.creature_rules.auto_pickup_range > 0
@@ -720,8 +793,8 @@ impl SimulationSession {
         let stage5 = self.app.world().resource::<Stage5SystemsResource>();
         let permissions = self.app.world().resource::<PlayerPermissionResource>();
         let player_runtime = self.app.world().resource::<PlayerRuntimeResource>();
-        let guild_name = (!stage5.stage5_systems.guild.name.trim().is_empty())
-            .then(|| stage5.stage5_systems.guild.name.clone());
+        let guild_name = (!snapshot.stage5_systems.guild.name.trim().is_empty())
+            .then(|| snapshot.stage5_systems.guild.name.clone());
         let mentor_name = (!stage5.stage5_systems.mentor.name.trim().is_empty())
             .then(|| stage5.stage5_systems.mentor.name.clone());
         let relationship_name = (!stage5
@@ -752,7 +825,7 @@ impl SimulationSession {
             chat_profile: ZoneChatProfile {
                 group_members: stage5.stage5_systems.group.members.clone(),
                 guild_name,
-                active_guild_wars: stage5.stage5_systems.guild.active_wars.clone(),
+                active_guild_wars: snapshot.stage5_systems.guild.active_wars.clone(),
                 blocked_names: stage5.stage5_systems.social.blocked.clone(),
                 mentor_name,
                 relationship_name,
@@ -859,7 +932,10 @@ impl SimulationSession {
             return false;
         }
         let world = self.app.world_mut();
-        let outcome = apply_damage_to_current_player(world, damage, &mut Vec::new());
+        // The Zone already resolved this exact HP loss and owns Death/ObjectDied
+        // replication. Only mirror the settlement and report its first local
+        // alive->dead transition for the gateway's existing penalty path.
+        let outcome = apply_settled_damage_to_current_player(world, damage, &mut Vec::new());
         if outcome.applied {
             advance_runtime_tick(world);
         }
@@ -909,12 +985,20 @@ impl SimulationSession {
     }
 
     pub fn apply_zone_player_death_penalty(&mut self) -> Vec<ServerPacket> {
-        if !is_in_world(self.app.world()) {
+        if !is_in_world(self.app.world())
+            || !super::components::current_player_is_dead(self.app.world())
+        {
             return Vec::new();
         }
-        let packets = drop_player_death_penalty(self.app.world_mut());
+        let world = self.app.world_mut();
+        let mut packets = Vec::new();
+        // Match the existing personal death prelude immediately, before drop
+        // candidates are selected. Shared deaths must not wait for WorldTick
+        // to remove rented possessions and enqueue their return mail.
+        super::rental::return_rented_items_on_player_death(world, &mut packets);
+        packets.extend(drop_player_death_penalty(world));
         if !packets.is_empty() {
-            advance_runtime_tick(self.app.world_mut());
+            advance_runtime_tick(world);
         }
         packets
     }
@@ -1066,6 +1150,7 @@ impl SimulationSession {
         super::buffs::apply_or_refresh_buff(
             world,
             super::buffs::BuffState {
+                real_time_duration: None,
                 key: key.to_string(),
                 name,
                 description,
@@ -1205,6 +1290,7 @@ impl SimulationSession {
         let max_hp = vitals.max_hp.max(1);
 
         Some(ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id,
             name: name.clone(),
             name_colour_argb: -1,
@@ -1444,6 +1530,7 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     let stage5 = world.resource::<Stage5SystemsResource>();
     let trade = stage5.stage5_systems.trade.as_ref()?;
     if trade.outgoing_escrow_debited()
+        || trade.validated_held_gold().is_none()
         || trade.settlement_nonce.len() != 32
         || !trade
             .settlement_nonce
@@ -1501,7 +1588,7 @@ fn shared_trade_offer_matches_active_escrow(
     let Some(trade) = systems.stage5_systems.trade.as_ref() else {
         return false;
     };
-    if !trade.outgoing_escrow_debited() {
+    if !trade.outgoing_escrow_debited() || trade.validated_held_gold() != Some(trade.offered_gold) {
         return false;
     }
     if rollback {
@@ -1531,6 +1618,14 @@ fn apply_shared_trade_offer(
     if !is_in_world(world) {
         return Vec::new();
     }
+    let Some(final_gold) = world
+        .resource::<PlayerRuntimeResource>()
+        .gold
+        .checked_add(offer.gold)
+    else {
+        // Keep the custody record intact; a later retry/cancellation can recover.
+        return Vec::new();
+    };
     let mut packets = Vec::new();
 
     let mut staged_inventory = world
@@ -1573,7 +1668,7 @@ fn apply_shared_trade_offer(
 
     if offer.gold > 0 {
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
-        player.gold = player.gold.saturating_add(offer.gold);
+        player.gold = final_gold;
         packets.push(ServerPacket::GainedGold { gold: offer.gold });
     }
 
@@ -1661,7 +1756,7 @@ fn apply_shared_trade_settlement_projection(
         return Err("trade projection identity does not match the active character".to_string());
     }
 
-    let outgoing_already_debited = {
+    let (outgoing_items_debited, outgoing_gold_held) = {
         let systems = world.resource::<Stage5SystemsResource>();
         match systems.stage5_systems.trade.as_ref() {
             Some(trade)
@@ -1670,7 +1765,15 @@ fn apply_shared_trade_settlement_projection(
                         .partner
                         .eq_ignore_ascii_case(&incoming_offer.character_name) =>
             {
-                trade.outgoing_escrow_debited()
+                if trade.offered_currency != crate::config::CurrencyKind::Gold
+                    || (trade.outgoing_escrow_debited() && trade.offered_gold != own_offer.gold)
+                {
+                    return Err("trade projection conflicts with gold custody".to_string());
+                }
+                let held = trade
+                    .validated_held_gold()
+                    .ok_or_else(|| "invalid trade gold custody".to_string())?;
+                (trade.outgoing_escrow_debited(), held)
             }
             Some(_) => {
                 return Err(
@@ -1681,18 +1784,18 @@ fn apply_shared_trade_settlement_projection(
             // opened. Such a snapshot cannot contain the outgoing debit,
             // because debit and the matching prepared trade state are saved
             // atomically in one CharacterSaveRecord.
-            None => false,
+            None => (false, 0),
         }
     };
 
+    let outgoing_gold_due = own_offer
+        .gold
+        .checked_sub(outgoing_gold_held)
+        .ok_or_else(|| "trade projection held gold exceeds offer".to_string())?;
     let current_gold = world.resource::<PlayerRuntimeResource>().gold;
-    let gold_after_outgoing = if outgoing_already_debited {
-        current_gold
-    } else {
-        current_gold
-            .checked_sub(own_offer.gold)
-            .ok_or_else(|| "trade projection outgoing gold is unavailable".to_string())?
-    };
+    let gold_after_outgoing = current_gold
+        .checked_sub(outgoing_gold_due)
+        .ok_or_else(|| "trade projection outgoing gold is unavailable".to_string())?;
     let final_gold = gold_after_outgoing
         .checked_add(incoming_offer.gold)
         .ok_or_else(|| "trade projection incoming gold exceeds the character cap".to_string())?;
@@ -1703,7 +1806,7 @@ fn apply_shared_trade_settlement_projection(
         .clone();
     let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
     let mut outgoing_deleted_items = Vec::new();
-    if !outgoing_already_debited {
+    if !outgoing_items_debited {
         let mut outgoing_ids = BTreeSet::new();
         for offered_item in &own_offer.items {
             let item = staged_inventory
@@ -1762,9 +1865,9 @@ fn apply_shared_trade_settlement_projection(
         .trade = None;
 
     let mut packets = Vec::new();
-    if !outgoing_already_debited && own_offer.gold > 0 {
+    if outgoing_gold_due > 0 {
         packets.push(ServerPacket::LoseGold {
-            gold: own_offer.gold,
+            gold: outgoing_gold_due,
         });
     }
     packets.extend(
@@ -1789,16 +1892,10 @@ fn apply_shared_trade_settlement_projection(
     Ok(packets)
 }
 
-fn trade_offer_delivery_failed_packets(world: &mut World, rollback: bool) -> Vec<ServerPacket> {
-    let mut packets = vec![system_message_key(world, "server.YouCannotCarryAnymore")];
-    if rollback {
-        world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .trade = None;
-    }
-    packets.push(ServerPacket::TradeCancel { unlock: false });
-    packets
+fn trade_offer_delivery_failed_packets(world: &mut World, _rollback: bool) -> Vec<ServerPacket> {
+    // Materialization failure is retryable: retain custody and never publish
+    // a terminal packet before the items and gold have been restored.
+    vec![system_message_key(world, "server.YouCannotCarryAnymore")]
 }
 
 fn shared_rental_delivery_matches_active_state(

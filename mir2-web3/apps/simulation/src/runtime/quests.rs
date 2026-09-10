@@ -905,7 +905,8 @@ fn complete_crystal_quest(
     }
     // Crystal `GainExp`: quest experience rolls into levels via the shared curve;
     // the new level/exp/HP reach the client through the post-completion snapshot.
-    let _ = super::leveling::apply_experience_gain(world, i64::from(info.reward_exp));
+    let reward_exp = super::stats::crystal_apply_social_exp_rate(world, info.reward_exp);
+    let _ = super::leveling::apply_experience_gain(world, i64::from(reward_exp));
 
     for reward in fixed_rewards.iter().chain(selected_reward.iter()) {
         grant_crystal_quest_reward_item(world, reward);

@@ -267,6 +267,7 @@ fn decode_starter_entity_atlas_pages(
 ) -> Option<Vec<DecodedStarterAtlasPage>> {
     let mut decoded = Vec::new();
     for page in &index.pages {
+        let page_started = std::time::Instant::now();
         let path = assets::asset_path(&page.image_url)?;
         let bytes = fs::read(&path).ok()?;
         if page
@@ -302,6 +303,10 @@ fn decode_starter_entity_atlas_pages(
             );
             return None;
         }
+        crate::timing::report(
+            &format!("atlas_read_verify_decode:{}", page.key),
+            page_started,
+        );
         decoded.push((page.key.clone(), width, height, pixels, path));
     }
     Some(decoded)
@@ -325,6 +330,7 @@ fn rgb_to_rgba(rgb: &[u8]) -> Vec<u8> {
 /// Load every manifest page before publishing any of them, so a partial asset
 /// bundle cannot switch the renderer into an incomplete atlas state.
 pub fn load_starter_entity_atlas() -> bool {
+    let _timing = crate::timing::Span::new("starter_atlas_load_attempt");
     let Some(index) = starter_atlas_index() else {
         eprintln!("[atlas] no entity atlas manifest found; keeping colored fallback");
         return false;
@@ -473,11 +479,21 @@ fn is_player_sprite_library(library: &str) -> bool {
         )
 }
 
+fn is_pet_sprite_library(library: &str) -> bool {
+    let Some(index) = library.strip_prefix("Pet/") else {
+        return false;
+    };
+    index.len() == 2
+        && index.bytes().all(|b| b.is_ascii_digit())
+        && index.parse::<u8>().is_ok_and(|i| i <= 14)
+}
+
 fn player_frame_path_parts(frame_path: &str) -> Option<(String, i64, String)> {
     let relative = frame_path.trim().trim_start_matches('/').replace('\\', "/");
     let source_path = relative.strip_prefix("original-ui/")?;
     let (library, file_name) = source_path.rsplit_once('/')?;
-    if !is_player_sprite_library(library) {
+    if library != "DNItems" && !is_player_sprite_library(library) && !is_pet_sprite_library(library)
+    {
         return None;
     }
     let frame = file_name.strip_suffix(".png")?.parse::<i64>().ok()?;
@@ -1292,6 +1308,42 @@ fn build_entity_render_state_with_index(
         });
     }
 
+    // Crystal ItemObject draws DNItems independently of DropView (names).
+    // It centers GetTrueSize inside the tile and draws without library offsets.
+    for drop in payload
+        .get("groundDrops")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+    {
+        let (Some(object_id), Some(x), Some(y), Some(frame)) = (
+            normalized_object_id(drop.get("objectId")),
+            drop.get("x").and_then(Value::as_i64),
+            drop.get("y").and_then(Value::as_i64),
+            drop.get("image").and_then(Value::as_i64),
+        ) else {
+            continue;
+        };
+        let path = format!("/original-ui/DNItems/{frame}.png");
+        let Some(pixels) = original_frame_pixels(&path) else {
+            continue;
+        };
+        let Some((true_width, true_height)) = visible_pixel_size(&pixels) else {
+            continue;
+        };
+        entities.push(json!({
+            "objectId": object_id, "kind": "item", "isSelf": false,
+            "gridX": x, "gridY": y,
+            "layers": [{
+                "key": format!("{object_id}:ground-item"), "path": path,
+                "left": entity_origin_x + (x-center_x) as f32 * CELL_WIDTH + ((CELL_WIDTH as i32 - true_width as i32) / 2) as f32,
+                "top": entity_origin_y + (y-center_y) as f32 * CELL_HEIGHT + ((CELL_HEIGHT as i32 - true_height as i32) / 2) as f32,
+                "width": pixels.width, "height": pixels.height,
+                "z": entity_z_base(x,y),
+            }]
+        }));
+    }
+
     let atlases = index
         .pages
         .iter()
@@ -1425,6 +1477,22 @@ fn entity_z_base(x: i64, y: i64) -> f32 {
     y.saturating_mul(1_000).saturating_add(x.saturating_mul(10)) as f32 * ENTITY_DEPTH_GAIN
 }
 
+fn visible_pixel_size(pixels: &StarterAtlasPixelPage) -> Option<(u32, u32)> {
+    let mut bounds = (pixels.width, pixels.height, 0, 0);
+    for (i, pixel) in pixels.rgba.chunks_exact(4).enumerate() {
+        if pixel[3] == 0 {
+            continue;
+        }
+        let x = i as u32 % pixels.width;
+        let y = i as u32 / pixels.width;
+        bounds.0 = bounds.0.min(x);
+        bounds.1 = bounds.1.min(y);
+        bounds.2 = bounds.2.max(x + 1);
+        bounds.3 = bounds.3.max(y + 1);
+    }
+    (bounds.2 > bounds.0 && bounds.3 > bounds.1).then(|| (bounds.2 - bounds.0, bounds.3 - bounds.1))
+}
+
 fn normalized_object_id(value: Option<&Value>) -> Option<String> {
     match value? {
         Value::Number(number) => Some(number.to_string()),
@@ -1486,7 +1554,11 @@ fn append_actor_highlight(
             highlight["key"] = json!(format!("{object_id}:{name}:{role}"));
             highlight["z"] = json!(z);
             highlight["opacity"] = json!(TARGET_HIGHLIGHT_OPACITY);
-            highlight["additive"] = json!(false);
+            // Crystal MapObject.DrawBlend uses SetBlend(true, 0.3): the
+            // renderer must add this redraw to the already-drawn actor.
+            // Normal alpha compositing the same pixels over themselves is
+            // visually unchanged inside an opaque sprite.
+            highlight["additive"] = json!(true);
             Some(highlight)
         })
         .collect::<Option<Vec<_>>>();
@@ -2187,6 +2259,25 @@ mod tests {
     }
 
     #[test]
+    fn ground_item_renders_without_actor_or_name_and_disappears_when_removed() {
+        let mut payload = json!({"sceneView":{"center":{"x":10,"y":20}},
+            "entities":[], "groundDrops":[{"objectId":99,"image":0,"x":11,"y":20}]});
+        let render = build_entity_render_state_with_frames(&payload, &HashMap::new()).unwrap();
+        let item = &render["entities"][0];
+        assert_eq!(item["kind"], "item");
+        assert_eq!(item["layers"][0]["path"], "/original-ui/DNItems/0.png");
+        assert!(item["layers"][0]["width"].as_u64().unwrap() > 0);
+        assert!(render["hoveredObjectId"].is_null());
+        payload["groundDrops"] = json!([]);
+        assert!(
+            build_entity_render_state_with_frames(&payload, &HashMap::new()).unwrap()["entities"]
+                .as_array()
+                .unwrap()
+                .is_empty()
+        );
+    }
+
+    #[test]
     fn unpacked_player_frame_keeps_pixel_hit_and_atomic_highlight() {
         let index = starter_atlas_index().expect("starter atlas index");
         let layer = build_entity_layer(
@@ -2269,6 +2360,7 @@ mod tests {
         assert_eq!(layers[1]["key"], json!("player:target-highlight:body"));
         assert_eq!(layers[1]["path"], json!("/original-ui/CArmour/01/0.png"));
         assert_eq!(layers[1]["opacity"], json!(TARGET_HIGHLIGHT_OPACITY));
+        assert_eq!(layers[1]["additive"], json!(true));
         assert!(layers[1].get("atlasKey").is_none());
         assert!(layers[1].get("atlasRectKey").is_none());
     }
@@ -3181,6 +3273,7 @@ mod tests {
 
         let npc_payload = json!({
             "sceneView": {"center": {"x": 10, "y": 10}, "width": 19, "height": 15},
+            "selectedObjectId": 3001,
             "_nativeHighlightTarget": true,
             "_nativeHoverCursor": {"x": 482.2, "y": 353.2},
             "entities": [hover_fixture_entity(3001, "npc", 11, false)]
@@ -3195,6 +3288,18 @@ mod tests {
         .expect("npc bounds fallback state");
         assert_eq!(npc_state["hoveredObjectId"], json!("3001"));
         assert!(has_layer(&npc_state, "3001:hover-highlight:body"));
+        let npc_highlight = npc_state["entities"][0]["layers"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|layer| layer["key"] == "3001:hover-highlight:body")
+            .unwrap();
+        assert_eq!(npc_highlight["additive"], json!(true));
+        assert_eq!(npc_highlight["opacity"], json!(0.3));
+        assert!(
+            !has_layer(&npc_state, "3001:target-highlight:body"),
+            "NPC hover must not become a combat selection"
+        );
 
         let monster_payload = json!({
             "sceneView": {"center": {"x": 10, "y": 10}, "width": 19, "height": 15},
@@ -3249,6 +3354,34 @@ mod tests {
             .find(|layer| layer["key"] == "2002:target-highlight:body")
             .expect("selected redraw");
         assert!(hover["z"].as_f64() < selected["z"].as_f64());
+        for (entity_index, highlight) in [(0, hover), (1, selected)] {
+            assert_eq!(highlight["additive"], json!(true));
+            assert_eq!(highlight["opacity"], json!(0.3));
+            let body = state["entities"][entity_index]["layers"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|layer| {
+                    layer["key"].as_str().unwrap().ends_with(":body")
+                        && !layer["key"].as_str().unwrap().contains("highlight")
+                })
+                .unwrap();
+            for binding in [
+                "atlasKey",
+                "atlasRectKey",
+                "path",
+                "width",
+                "height",
+                "left",
+                "top",
+            ] {
+                assert_eq!(
+                    highlight[binding], body[binding],
+                    "redraw changed {binding}"
+                );
+            }
+            assert_ne!(body["additive"], json!(true), "base actor must stay normal");
+        }
 
         payload["selectedObjectId"] = json!(2001);
         let same = build_entity_render_state_with_manifest_and_pixels_for_test(
@@ -3274,5 +3407,37 @@ mod tests {
             rgb_to_rgba(&[1, 2, 3, 4, 5, 6]),
             vec![1, 2, 3, 255, 4, 5, 6, 255]
         );
+    }
+}
+
+#[cfg(test)]
+mod pet_path_tests {
+    use super::*;
+    #[test]
+    fn pet_world_frame_fallback_is_strict_and_preserves_real_geometry() {
+        for i in 0..=14 {
+            let path = format!("original-ui/Pet/{i:02}/0.png");
+            assert!(player_frame_path_parts(&path).is_some());
+            let geometry =
+                verified_player_frame_geometry(&path).expect("pet standing source geometry");
+            let pixels = original_frame_pixels(&path).expect("pet standing pixels");
+            assert_eq!(
+                (pixels.width, pixels.height),
+                (geometry.width, geometry.height)
+            );
+        }
+        for path in [
+            "original-ui/Pet/15/0.png",
+            "original-ui/Pet/1/0.png",
+            "original-ui/Pet/../0.png",
+            "original-ui/Pet/00/-1.png",
+            "original-ui/Pet/00/00.png",
+            "original-ui/Pets/00/0.png",
+        ] {
+            assert!(player_frame_path_parts(path).is_none(), "{path}");
+        }
+        let g = verified_player_frame_geometry("original-ui/Pet/08/280.png")
+            .expect("real exported flame frame");
+        assert_eq!((g.width, g.height), (56, 76));
     }
 }

@@ -1,0 +1,14 @@
+
+running 1 test
+
+thread 'routing::tests::trade_gold_tests::peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted_offer' (34996) panicked at apps\gateway\src\routing\tests\trade_gold_tests.rs:451:5:
+assertion failed: quoted(&retrieve).is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test routing::tests::trade_gold_tests::peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted_offer ... FAILED
+
+failures:
+
+failures:
+    routing::tests::trade_gold_tests::peer_preparation_rejects_item_retrieval_and_deposit_without_changing_accepted_offer
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 695 filtered out; finished in 6.70s

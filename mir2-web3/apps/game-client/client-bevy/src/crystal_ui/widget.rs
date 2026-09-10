@@ -81,34 +81,60 @@ struct CrystalHintOverlayLayoutState {
     last_window_scale_factor: Option<f32>,
 }
 
+#[derive(Resource, Default)]
+struct CapturedControlHint(Option<(Entity, CrystalHint)>);
+fn capture_control_hint(
+    hints: Query<(
+        Entity,
+        &Interaction,
+        &CrystalHint,
+        Option<&CrystalImageButton>,
+    )>,
+    mut captured: ResMut<CapturedControlHint>,
+) {
+    captured.0 = hints
+        .iter()
+        .filter(|(_, i, _, b)| **i == Interaction::Hovered && b.is_none_or(|b| b.enabled))
+        .min_by_key(|(e, _, _, _)| e.to_bits())
+        .map(|(e, _, h, _)| (e, h.clone()));
+}
 pub struct Mir2CrystalHintPlugin;
 
 impl Plugin for Mir2CrystalHintPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Startup,
-            (spawn_crystal_hint_overlay, spawn_crystal_item_hint_overlay),
-        )
-        .add_systems(
-            Update,
-            (sync_crystal_hint_overlay, sync_crystal_item_hint_overlay),
-        )
-        // Text measurement is refreshed in UiSystems::Content. Position the
-        // overlay before layout so the same frame's transform uses the new
-        // cursor position. A changed label remains hidden for one layout
-        // pass, preventing a stale-size flash when hints change length.
-        .add_systems(
-            PostUpdate,
-            position_crystal_hint_overlay
-                .after(UiSystems::Content)
-                .before(UiSystems::Layout),
-        )
-        .add_systems(
-            PostUpdate,
-            position_crystal_item_hint_overlay
-                .after(UiSystems::Content)
-                .before(UiSystems::Layout),
-        );
+        app.init_resource::<CapturedControlHint>()
+            .add_systems(PreUpdate, capture_control_hint.after(UiSystems::Focus))
+            .add_systems(
+                PostUpdate,
+                paint_rebuilt_crystal_buttons
+                    .after(UiSystems::Layout)
+                    .after(UiSystems::Stack)
+                    .after(bevy::camera::visibility::VisibilitySystems::VisibilityPropagate),
+            )
+            .add_systems(
+                Startup,
+                (spawn_crystal_hint_overlay, spawn_crystal_item_hint_overlay),
+            )
+            .add_systems(
+                Update,
+                (sync_crystal_hint_overlay, sync_crystal_item_hint_overlay),
+            )
+            // Text measurement is refreshed in UiSystems::Content. Position the
+            // overlay before layout so the same frame's transform uses the new
+            // cursor position. A changed label remains hidden for one layout
+            // pass, preventing a stale-size flash when hints change length.
+            .add_systems(
+                PostUpdate,
+                position_crystal_hint_overlay
+                    .after(UiSystems::Content)
+                    .before(UiSystems::Layout),
+            )
+            .add_systems(
+                PostUpdate,
+                position_crystal_item_hint_overlay
+                    .after(UiSystems::Content)
+                    .before(UiSystems::Layout),
+            );
     }
 }
 
@@ -413,6 +439,7 @@ fn crystal_item_tooltip_colour(colour: CrystalItemTooltipColour) -> Color {
 }
 
 fn sync_crystal_hint_overlay(
+    captured: Option<Res<CapturedControlHint>>,
     hints: Query<(
         Entity,
         &Interaction,
@@ -432,7 +459,7 @@ fn sync_crystal_hint_overlay(
     >,
     mut texts: Query<(&mut Text, &mut TextColor), With<CrystalHintOverlayText>>,
 ) {
-    let selected = hints
+    let fallback = hints
         .iter()
         .filter(|(_, interaction, _, image_button)| {
             **interaction == Interaction::Hovered
@@ -441,6 +468,9 @@ fn sync_crystal_hint_overlay(
         .min_by_key(|(entity, _, _, _)| entity.to_bits())
         .map(|(entity, _, hint, _)| (entity, hint));
 
+    let selected = captured
+        .as_ref()
+        .map_or(fallback, |capture| capture.0.as_ref().map(|(e, h)| (*e, h)));
     let Ok((mut root, mut background, mut border, mut overlay_style, mut target, mut visibility)) =
         roots.single_mut()
     else {
@@ -456,8 +486,7 @@ fn sync_crystal_hint_overlay(
         return;
     };
     if let Some((entity, selected)) = selected.filter(|(_, value)| !value.0.is_empty()) {
-        let content_changed =
-            target.0 != Some(entity) || text.0 != selected.0 || overlay_style.0 != selected.1;
+        let content_changed = text.0 != selected.0 || overlay_style.0 != selected.1;
         if text.0 != selected.0 {
             text.0.clone_from(&selected.0);
         }
@@ -717,6 +746,115 @@ pub fn sync_crystal_image_buttons(
                 continue;
             };
             node.image = image.clone();
+        }
+    }
+}
+
+// Match Bevy 0.19 focus clipping, whose helper is private to bevy_ui.
+fn crystal_clip_check(
+    point: Vec2,
+    entity: Entity,
+    clipping: &Query<(&ComputedNode, &bevy::ui::UiGlobalTransform, &Node)>,
+    parents: &Query<&ChildOf, Without<bevy::ui::OverrideClip>>,
+) -> bool {
+    if let Ok(parent) = parents.get(entity) {
+        if let Ok((computed, transform, node)) = clipping.get(parent.0) {
+            if !node.overflow.is_visible()
+                && transform.try_inverse().is_none_or(|inverse| {
+                    !computed
+                        .resolve_clip_rect(node.overflow, node.overflow_clip_margin)
+                        .contains(inverse.transform_point2(point))
+                })
+            {
+                return false;
+            }
+        }
+        return crystal_clip_check(point, parent.0, clipping, parents);
+    }
+    true
+}
+// Paint only: normal Bevy Focus remains the sole producer of click interactions.
+// Overlay rows are recreated in Update, so inspect their final geometry after layout.
+fn paint_rebuilt_crystal_buttons(
+    assets: Option<Res<AssetServer>>,
+    stack: Option<Res<bevy::ui::UiStack>>,
+    primary: Query<Entity, With<PrimaryWindow>>,
+    windows: Query<&Window>,
+    cameras: Query<(Entity, &Camera, &bevy::camera::RenderTarget)>,
+    mouse: Option<Res<ButtonInput<MouseButton>>>,
+    nodes: Query<(
+        &ComputedNode,
+        &bevy::ui::UiGlobalTransform,
+        &bevy::ui::ComputedUiTargetCamera,
+        Option<&InheritedVisibility>,
+        Option<&FocusPolicy>,
+    )>,
+    clipping: Query<(&ComputedNode, &bevy::ui::UiGlobalTransform, &Node)>,
+    parents: Query<&ChildOf, Without<bevy::ui::OverrideClip>>,
+    buttons: Query<(Entity, &CrystalImageButton, &Children)>,
+    mut sprites: Query<&mut ImageNode, With<CrystalImageButtonSprite>>,
+) {
+    let (Some(assets), Some(stack), Some(mouse)) = (assets, stack, mouse) else {
+        return;
+    };
+    let primary = primary.iter().next();
+    let pointers: std::collections::HashMap<_, _> = cameras
+        .iter()
+        .filter_map(|(e, c, t)| {
+            let bevy::camera::NormalizedRenderTarget::Window(w) = t.normalize(primary)? else {
+                return None;
+            };
+            let window = windows.get(w.entity()).ok()?;
+            Some((
+                e,
+                window.physical_cursor_position()?
+                    - c.physical_viewport_rect()
+                        .map(|r| r.min.as_vec2())
+                        .unwrap_or_default(),
+            ))
+        })
+        .collect();
+    let mut hovered = std::collections::HashSet::new();
+    'partitions: for range in stack.partition.iter().rev() {
+        for &entity in stack.uinodes[range.clone()].iter().rev() {
+            let Ok((node, transform, camera, visible, policy)) = nodes.get(entity) else {
+                continue;
+            };
+            if !visible.is_some_and(|v| v.get()) {
+                continue;
+            }
+            let Some(point) = camera.get().and_then(|c| pointers.get(&c)) else {
+                continue;
+            };
+            if !node.contains_point(*transform, *point)
+                || !crystal_clip_check(*point, entity, &clipping, &parents)
+            {
+                continue;
+            }
+            hovered.insert(entity);
+            if policy.is_none_or(|p| *p == FocusPolicy::Block) {
+                break 'partitions;
+            }
+        }
+    }
+    for (entity, button, children) in &buttons {
+        let interaction = if hovered.contains(&entity) {
+            if mouse.pressed(MouseButton::Left) {
+                Interaction::Pressed
+            } else {
+                Interaction::Hovered
+            }
+        } else {
+            Interaction::None
+        };
+        let state = resolve_button_visual_state(Some(interaction), button.focused, button.enabled);
+        let image = assets.load(state.asset_path(&button.assets).to_owned());
+        for child in children.iter() {
+            if let Ok(mut sprite) = sprites.get_mut(child) {
+                if sprite.image != image {
+                    sprite.image = image.clone();
+                }
+            }
         }
     }
 }
@@ -1111,6 +1249,99 @@ mod tests {
             assert_eq!(node.left, Val::Px(expected.x));
             assert_eq!(node.top, Val::Px(expected.y));
         }
+    }
+
+    #[test]
+    fn rebuilt_button_picking_honors_clipped_grandparent_and_override_clip() {
+        use bevy::ecs::system::RunSystemOnce;
+        let mut world = World::new();
+        let parent = world
+            .spawn((
+                Node {
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                ComputedNode {
+                    size: Vec2::splat(20.),
+                    ..default()
+                },
+                bevy::ui::UiGlobalTransform::default(),
+            ))
+            .id();
+        let middle = world
+            .spawn((
+                Node::default(),
+                ComputedNode::default(),
+                bevy::ui::UiGlobalTransform::default(),
+                ChildOf(parent),
+            ))
+            .id();
+        let target = world.spawn((Node::default(), ChildOf(middle))).id();
+        let query =
+            move |clipping: Query<(&ComputedNode, &bevy::ui::UiGlobalTransform, &Node)>,
+                  parents: Query<&ChildOf, Without<bevy::ui::OverrideClip>>| {
+                crystal_clip_check(Vec2::new(50., 0.), target, &clipping, &parents)
+            };
+        assert!(!world.run_system_once(query).unwrap());
+        world.entity_mut(target).insert(bevy::ui::OverrideClip);
+        assert!(world.run_system_once(query).unwrap());
+    }
+
+    #[test]
+    fn captured_hint_survives_rebuilt_target_without_rehiding_identical_text() {
+        let mut app = App::new();
+        app.init_resource::<CapturedControlHint>();
+        app.add_systems(PreUpdate, capture_control_hint);
+        app.add_systems(Update, sync_crystal_hint_overlay);
+        let root = app
+            .world_mut()
+            .spawn((
+                CrystalHintOverlayRoot,
+                CrystalHintOverlayStyle(CrystalHintStyle::Control),
+                CrystalHintOverlayTarget::default(),
+                Node::default(),
+                BackgroundColor(CRYSTAL_HINT_BACKGROUND),
+                BorderColor::all(CRYSTAL_HINT_BORDER),
+                Visibility::Hidden,
+            ))
+            .id();
+        app.world_mut().spawn((
+            CrystalHintOverlayText,
+            Text::new(""),
+            TextColor(CRYSTAL_HINT_TEXT),
+        ));
+        let first = app
+            .world_mut()
+            .spawn((Interaction::Hovered, CrystalHint::new("Map")))
+            .id();
+        app.update();
+        app.world_mut().entity_mut(root).insert(Visibility::Visible);
+        app.world_mut().despawn(first);
+        app.world_mut()
+            .spawn((Interaction::Hovered, CrystalHint::new("Map")));
+        app.update();
+        assert_eq!(
+            *app.world().get::<Visibility>(root).unwrap(),
+            Visibility::Visible
+        );
+        // Capture happens before Update rebuild: no dependency on the old Entity's lifetime.
+        let captured = app
+            .world()
+            .resource::<CapturedControlHint>()
+            .0
+            .as_ref()
+            .unwrap()
+            .clone();
+        app.world_mut().despawn(captured.0);
+        bevy::ecs::system::RunSystemOnce::run_system_once(
+            app.world_mut(),
+            sync_crystal_hint_overlay,
+        )
+        .unwrap();
+        assert_eq!(
+            *app.world().get::<Visibility>(root).unwrap(),
+            Visibility::Visible
+        );
     }
 
     #[test]

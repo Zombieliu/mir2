@@ -1977,7 +1977,12 @@ fn process_quest_ui_input(
 
     if is_modal {
         if keys.just_pressed(KeyCode::Escape)
-            || (quest_log_open && keys.just_pressed(KeyCode::KeyQ))
+            || (quest_log_open
+                && crate::crystal_ui::overlays::keyboard_dialog::host::triggered(
+                    &player_ui.keyboard,
+                    &keys,
+                    "Quests",
+                ))
         {
             if quest_log_open {
                 dispatch_ui_action(
@@ -2012,75 +2017,22 @@ fn process_quest_ui_input(
         return;
     }
 
-    // Normal gameplay shortcuts – only when no modal blocks them.
-    if keys.just_pressed(KeyCode::KeyT) {
-        if let Some(nearby) = &nearby {
-            if let Some(npc) = nearby.nearest() {
-                if !queue.push_intent(QuestUiIntent::InteractNpc {
-                    npc_object_id: npc.object_id,
-                }) {
-                    quest_state.set_feedback("Connection busy; try again", true);
-                }
-            }
-        }
-    }
-
-    if keys.just_pressed(KeyCode::KeyF) {
-        if let Some(target) = &target {
-            if let Some(target) = &target.target {
-                if !queue.push_intent(QuestUiIntent::AttackTarget {
-                    object_id: target.object_id,
-                }) {
-                    quest_state.set_feedback("Connection busy; try again", true);
-                }
-            }
-        }
-    }
-
-    if keys.just_pressed(KeyCode::KeyR) {
-        match pickups {
-            Some(pickups) => match pickups.recent.front() {
-                Some(pickup) => match pickup.object_id {
-                    Some(object_id) => {
-                        if queue.push_intent(QuestUiIntent::PickUpObject { object_id }) {
-                            quest_state.set_feedback(
-                                format!("Picking up {}", pickup.compact_label()),
-                                false,
-                            );
-                        } else {
-                            quest_state.set_feedback("Connection busy; pickup not queued", true);
-                        }
-                    }
-                    None => {
-                        if queue.push_intent(QuestUiIntent::PickUpTile) {
-                            quest_state
-                                .set_feedback("Checking the current tile for ground items", false);
-                        } else {
-                            quest_state.set_feedback("Connection busy; pickup not queued", true);
-                        }
-                    }
-                },
-                None => {
-                    if queue.push_intent(QuestUiIntent::PickUpTile) {
-                        quest_state
-                            .set_feedback("Checking the current tile for ground items", false);
-                    } else {
-                        quest_state.set_feedback("Connection busy; pickup not queued", true);
-                    }
-                }
-            },
-            None => {
-                if queue.push_intent(QuestUiIntent::PickUpTile) {
-                    quest_state.set_feedback("Checking the current tile for ground items", false);
-                } else {
-                    quest_state.set_feedback("Connection busy; pickup not queued", true);
-                }
-            }
-        }
+    // Native Crystal binding owns pickup; historical T/F/R prototype aliases
+    // conflict with Trade/Friends/Skillbar and must not emit unrelated actions.
+    if crate::crystal_ui::overlays::keyboard_dialog::host::triggered(
+        &player_ui.keyboard,
+        &keys,
+        "Pickup",
+    ) {
+        queue.push_intent(QuestUiIntent::PickUpTile);
     }
 
     // Toggle quest log with Q when not blocked by other modals.
-    if keys.just_pressed(KeyCode::KeyQ) {
+    if crate::crystal_ui::overlays::keyboard_dialog::host::triggered(
+        &player_ui.keyboard,
+        &keys,
+        "Quests",
+    ) {
         let now_open = is_quest_log_open_state(Some(&player_ui));
         if now_open {
             dispatch_ui_action(

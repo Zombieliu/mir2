@@ -1313,12 +1313,35 @@ fn absolute_without_parent_components(path: &Path) -> Result<PathBuf, String> {
     {
         return Err("save recovery paths must not contain parent-directory components".to_string());
     }
-    if path.is_absolute() {
-        Ok(path.to_path_buf())
-    } else {
-        std::env::current_dir()
-            .map(|current| current.join(path))
-            .map_err(|error| format!("resolve save recovery path: {error}"))
+    let absolute = std::path::absolute(path)
+        .map_err(|error| format!("resolve save recovery path: {error}"))?;
+    // FileAuthority uses canonical paths (including the Windows verbatim
+    // prefix). Compare the same physical spelling even before a new account
+    // file exists; comparing verbatim and ordinary PathBuf prefixes misses an
+    // overlapping directory. Keep nonexistent descendants without creating them.
+    let mut ancestor = absolute.as_path();
+    let mut descendants = Vec::new();
+    loop {
+        match fs::canonicalize(ancestor) {
+            Ok(mut resolved) => {
+                for component in descendants.iter().rev() {
+                    resolved.push(component);
+                }
+                return Ok(resolved);
+            }
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {
+                descendants.push(
+                    ancestor
+                        .file_name()
+                        .ok_or("save recovery path has no existing ancestor")?
+                        .to_os_string(),
+                );
+                ancestor = ancestor
+                    .parent()
+                    .ok_or("save recovery path has no existing parent")?;
+            }
+            Err(error) => return Err(format!("resolve save recovery ancestor: {error}")),
+        }
     }
 }
 
@@ -2329,18 +2352,33 @@ fn durable_rename(from: &Path, to: &Path, replace_existing: bool) -> io::Result<
 
 #[cfg(windows)]
 fn windows_extended_path(path: &Path) -> io::Result<Vec<u16>> {
-    use std::os::windows::ffi::OsStrExt;
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
 
-    let absolute = if path.is_absolute() {
-        path.to_path_buf()
-    } else {
-        std::env::current_dir()?.join(path)
-    };
+    let mut wide = path.as_os_str().encode_wide().collect::<Vec<_>>();
+    if wide.contains(&0) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "path contains NUL",
+        ));
+    }
+    // Verbatim paths already have explicit Win32 semantics. Preserve them,
+    // including their UTF-16 spelling, instead of normalizing their components.
+    if wide.starts_with(&[b'\\' as u16, b'\\' as u16, b'?' as u16, b'\\' as u16]) {
+        wide.push(0);
+        return Ok(wide);
+    }
+    // The extended prefix disables Win32 slash/dot normalization. Perform it
+    // before adding the prefix. `absolute` is lexical and also works for a
+    // rename destination that has not been created; canonicalize would not.
+    for unit in &mut wide {
+        if *unit == b'/' as u16 {
+            *unit = b'\\' as u16;
+        }
+    }
+    let normalized = std::ffi::OsString::from_wide(&wide);
+    let absolute = std::path::absolute(Path::new(&normalized))?;
     let wide = absolute.as_os_str().encode_wide().collect::<Vec<_>>();
-    let mut extended = if wide.starts_with(&[b'\\' as u16, b'\\' as u16, b'?' as u16, b'\\' as u16])
-    {
-        wide
-    } else if wide.starts_with(&[b'\\' as u16, b'\\' as u16]) {
+    let mut extended = if wide.starts_with(&[b'\\' as u16, b'\\' as u16]) {
         let mut value = "\\\\?\\UNC\\".encode_utf16().collect::<Vec<_>>();
         value.extend_from_slice(&wide[2..]);
         value
