@@ -156,6 +156,20 @@ fn host_world_position(value: &Value, screen: Screen) -> Option<HostWorldPositio
     Some(world)
 }
 
+fn begin_render_ready_scene_transition(model: &mut NativeShellModel) {
+    if model.screen != Screen::InGame {
+        return;
+    }
+    // Reuse the shared StartingGame surface as an input/render barrier. The
+    // authenticated character remains selected and personal models survive the
+    // scene reset; only the exact next map+entity NativeRenderReady receipt may
+    // return the shell to InGame.
+    model.screen = Screen::StartingGame;
+    model.notice = Some(ShellNotice::info(
+        "Loading authoritative map and character assets.",
+    ));
+}
+
 #[derive(Resource, Default)]
 struct EditorTouch(bool);
 
@@ -689,6 +703,7 @@ fn receive(
             crate::world_assets::cancel_packaged_map_atlas_load();
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
+            begin_render_ready_scene_transition(&mut model);
             host.pending_world_request = None;
             host.pending_render_request = None;
             host.render_load_active = false;
@@ -1170,6 +1185,33 @@ mod tests {
         assert!(!super::render_receipt_matches_player(
             &ready, None, &character
         ));
+    }
+
+    #[test]
+    fn map_transition_reuses_loading_barrier_without_reauthentication() {
+        let character = CharacterSummary::new(7, "Fixture", 12, "Wizard", "Female");
+        let mut model = NativeShellModel {
+            screen: Screen::InGame,
+            characters: vec![character.clone()],
+            selected_character_index: Some(character.index),
+            active_character: Some(character.clone()),
+            ..default()
+        };
+
+        super::begin_render_ready_scene_transition(&mut model);
+        assert_eq!(model.screen, Screen::StartingGame);
+        assert_eq!(model.selected_character_index, Some(character.index));
+        assert_eq!(model.active_character.as_ref(), Some(&character));
+        assert!(model.apply_gateway_event(Event::StartGameAck {
+            accepted: true,
+            reason: None,
+        }));
+        assert_eq!(model.screen, Screen::StartingGame);
+        assert!(model.apply_gateway_event(Event::PlayerBootstrapped {
+            character: character.clone(),
+        }));
+        assert_eq!(model.screen, Screen::InGame);
+        assert_eq!(model.active_character.as_ref(), Some(&character));
     }
 
     #[test]
@@ -1662,6 +1704,44 @@ mod tests {
             app.world().resource::<NativeShellModel>().screen,
             Screen::InGame
         );
+        let character = app.world().resource::<NativeShellModel>().characters[0].clone();
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeShellModel>()
+            .apply_gateway_event(Event::PlayerBootstrapped {
+                character: character.clone(),
+            }));
+        {
+            let mut host = app.world_mut().resource_mut::<HostState>();
+            host.phase = "IN_GAME".into();
+            host.world = Some(HostWorldPosition {
+                player_name: character.name.clone(),
+                map_file_name: "0".into(),
+                x: 300,
+                y: 630,
+            });
+        }
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(json!({"phase":"STARTING","message":"Waiting for destination snapshot"}));
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::StartingGame
+        );
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .active_character
+                .as_ref(),
+            Some(&character)
+        );
+        let host = app.world().resource::<HostState>();
+        assert_eq!(host.phase, "STARTING");
+        assert!(host.world.is_none());
+        assert!(host.pending_world_request.is_none());
+        assert!(host.pending_render_request.is_none());
         INBOX
             .lock()
             .unwrap()
