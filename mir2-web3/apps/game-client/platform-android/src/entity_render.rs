@@ -6,6 +6,7 @@
 
 use crate::{world_assets::WorldAssetError, world_projection::ProjectedScene};
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, HashSet},
     io::Cursor,
@@ -206,6 +207,7 @@ struct EntityDirectionState {
 #[serde(rename_all = "camelCase")]
 struct EntityDirectionEntry {
     object_id: String,
+    prototype: Value,
     direction_layers: BTreeMap<String, Vec<EntityRenderLayer>>,
 }
 
@@ -332,6 +334,36 @@ fn fallback_sprite(entity: &SnapshotEntity) -> Option<SnapshotSprite> {
         frame_count: 4,
         direction_stride: 4,
         mount_frame_offset: None,
+    })
+}
+
+fn prototype_descriptor(kind: &str, class_key: &str, dead: bool, sprite: &SnapshotSprite) -> Value {
+    let kind = match kind {
+        "selfPlayer" | "player" | "hero" => "player",
+        other => other,
+    };
+    json!({
+        "kind": kind,
+        "classKey": class_key,
+        "dead": dead,
+        "sprite": {
+            "bodyLibrary": sprite.body_library,
+            "hairLibrary": sprite.hair_library,
+            "weaponLibrary": sprite.weapon_library,
+            "weaponLibrarySecondary": sprite.weapon_library_secondary,
+            "altBodyLibrary": sprite.alt_body_library,
+            "altHairLibrary": sprite.alt_hair_library,
+            "altWeaponLibrary": sprite.alt_weapon_library,
+            "altWeaponLibrarySecondary": sprite.alt_weapon_library_secondary,
+            "mountLibrary": sprite.mount_library,
+            "frameBaseOffset": sprite.frame_base_offset,
+            "weaponFrameOffset": sprite.weapon_frame_offset,
+            "altFrameBaseOffset": sprite.alt_frame_base_offset,
+            "altWeaponFrameOffset": sprite.alt_weapon_frame_offset,
+            "frameCount": sprite.frame_count,
+            "directionStride": sprite.direction_stride,
+            "mountFrameOffset": sprite.mount_frame_offset,
+        },
     })
 }
 
@@ -717,6 +749,7 @@ where
         if !direction_layers.is_empty() {
             direction_entries.push(EntityDirectionEntry {
                 object_id: entity.object_id,
+                prototype: prototype_descriptor(&entity.kind, &class_key, entity.dead, &sprite),
                 direction_layers,
             });
         }
@@ -909,6 +942,12 @@ mod tests {
             live["entities"][0]["directionLayers"]["Right"][0]["atlasRectKey"],
             "/original-ui/CArmour/00/8.png|1x1"
         );
+        assert_eq!(
+            live["entities"][0]["prototype"]["sprite"]["bodyLibrary"],
+            "CArmour/00"
+        );
+        assert_eq!(live["entities"][0]["prototype"]["kind"], "player");
+        assert_eq!(live["entities"][0]["prototype"]["classKey"], "");
     }
 
     #[test]

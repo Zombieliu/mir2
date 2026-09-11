@@ -137,6 +137,12 @@ fn merge_direction_layers(render: &mut Value, sidecar: &Value) -> bool {
         else {
             return false;
         };
+        let Some(prototype) = entry.get("prototype").filter(|value| {
+            value.is_object()
+                && serde_json::to_string(value).is_ok_and(|encoded| encoded.len() <= 8 * 1024)
+        }) else {
+            return false;
+        };
         let Some(target) = render_entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(object_id))
@@ -147,6 +153,7 @@ fn merge_direction_layers(render: &mut Value, sidecar: &Value) -> bool {
             return false;
         }
         target["directionLayers"] = directions.clone();
+        target["prototype"] = prototype.clone();
     }
     true
 }
@@ -237,7 +244,15 @@ enum EntityMutation {
     MoveSelf((i32, i32), Option<String>),
     Move(u32, (i32, i32), Option<String>),
     Remove(u32),
-    Spawn(Value),
+    Spawn(EntitySpawn),
+}
+
+#[derive(Debug)]
+struct EntitySpawn {
+    model: Value,
+    prototype: Option<Value>,
+    position: (i32, i32),
+    direction: Option<String>,
 }
 
 fn coordinate(value: Option<&Value>) -> Option<i32> {
@@ -267,7 +282,7 @@ fn direction(payload: &serde_json::Map<String, Value>) -> Option<&str> {
         .filter(|value| !value.is_empty() && value.len() <= 16)
 }
 
-fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<Value> {
+fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntitySpawn> {
     let object_id = object_id(payload)?;
     let name = payload
         .get("name")?
@@ -284,8 +299,8 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<Value> 
         .get("level")
         .and_then(Value::as_u64)
         .and_then(|value| u32::try_from(value).ok());
-    let direction = direction(payload);
-    Some(json!({
+    let direction = direction(payload).map(str::to_owned);
+    let model = json!({
         "objectId": object_id.to_string(),
         "kind": kind,
         "name": name,
@@ -293,7 +308,87 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<Value> 
         "y": y,
         "level": level,
         "direction": direction,
+    });
+    Some(EntitySpawn {
+        model,
+        prototype: prototype_from_payload(payload, kind),
+        position: (x, y),
+        direction,
+    })
+}
+
+fn prototype_from_payload(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<Value> {
+    let sprite = payload.get("sprite")?.as_object()?;
+    let body_library = required_string(sprite, "bodyLibrary")?;
+    let class_key = payload
+        .get("classKey")
+        .or_else(|| payload.get("class"))
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+        .to_ascii_lowercase();
+    if class_key.len() > 32 {
+        return None;
+    }
+    Some(json!({
+        "kind": kind,
+        "classKey": class_key,
+        "dead": payload.get("dead").and_then(Value::as_bool).unwrap_or(false),
+        "sprite": {
+            "bodyLibrary": body_library,
+            "hairLibrary": optional_string(sprite, "hairLibrary")?,
+            "weaponLibrary": optional_string(sprite, "weaponLibrary")?,
+            "weaponLibrarySecondary": optional_string(sprite, "weaponLibrarySecondary")?,
+            "altBodyLibrary": optional_string(sprite, "altBodyLibrary")?,
+            "altHairLibrary": optional_string(sprite, "altHairLibrary")?,
+            "altWeaponLibrary": optional_string(sprite, "altWeaponLibrary")?,
+            "altWeaponLibrarySecondary": optional_string(sprite, "altWeaponLibrarySecondary")?,
+            "mountLibrary": optional_string(sprite, "mountLibrary")?,
+            "frameBaseOffset": integer_or_default(sprite, "frameBaseOffset", 0)?,
+            "weaponFrameOffset": optional_integer(sprite, "weaponFrameOffset")?,
+            "altFrameBaseOffset": optional_integer(sprite, "altFrameBaseOffset")?,
+            "altWeaponFrameOffset": optional_integer(sprite, "altWeaponFrameOffset")?,
+            "frameCount": integer_or_default(sprite, "frameCount", 4)?,
+            "directionStride": integer_or_default(sprite, "directionStride", 4)?,
+            "mountFrameOffset": optional_integer(sprite, "mountFrameOffset")?,
+        },
     }))
+}
+
+fn required_string(map: &serde_json::Map<String, Value>, key: &str) -> Option<String> {
+    map.get(key)?
+        .as_str()
+        .filter(|value| !value.is_empty() && value.len() <= 192)
+        .map(str::to_owned)
+}
+
+fn optional_string(map: &serde_json::Map<String, Value>, key: &str) -> Option<Value> {
+    match map.get(key) {
+        None | Some(Value::Null) => Some(Value::Null),
+        Some(Value::String(value)) if !value.is_empty() && value.len() <= 192 => {
+            Some(Value::String(value.clone()))
+        }
+        _ => None,
+    }
+}
+
+fn optional_integer(map: &serde_json::Map<String, Value>, key: &str) -> Option<Value> {
+    match map.get(key) {
+        None | Some(Value::Null) => Some(Value::Null),
+        Some(value) => i32::try_from(value.as_i64()?)
+            .ok()
+            .map(|value| json!(value)),
+    }
+}
+
+fn integer_or_default(
+    map: &serde_json::Map<String, Value>,
+    key: &str,
+    default: i32,
+) -> Option<i32> {
+    match map.get(key) {
+        None => Some(default),
+        Some(value) => i32::try_from(value.as_i64()?).ok(),
+    }
 }
 
 fn valid_models(value: &Value) -> bool {
@@ -364,6 +459,11 @@ fn valid_render(value: &Value) -> bool {
                         })
                 })
             })
+            && entity.get("prototype").is_none_or(|prototype| {
+                prototype.is_object()
+                    && serde_json::to_string(prototype)
+                        .is_ok_and(|encoded| encoded.len() <= 8 * 1024)
+            })
     })
 }
 
@@ -397,18 +497,37 @@ fn runtime_render_json(value: &mut Value) -> Option<String> {
             })
             .collect::<Vec<_>>()
     };
+    let prototypes = {
+        let entities = value.get_mut("entities")?.as_array_mut()?;
+        entities
+            .iter_mut()
+            .map(|entity| {
+                entity
+                    .as_object_mut()
+                    .expect("validated render entity")
+                    .remove("prototype")
+            })
+            .collect::<Vec<_>>()
+    };
     let encoded = value.to_string();
     for (entity, directions) in value
         .get_mut("entities")?
         .as_array_mut()?
         .iter_mut()
-        .zip(removed)
+        .zip(removed.into_iter().zip(prototypes))
     {
+        let (directions, prototype) = directions;
         if let Some(directions) = directions {
             entity
                 .as_object_mut()
                 .expect("validated render entity")
                 .insert("directionLayers".into(), directions);
+        }
+        if let Some(prototype) = prototype {
+            entity
+                .as_object_mut()
+                .expect("validated render entity")
+                .insert("prototype".into(), prototype);
         }
     }
     (encoded.len() <= MAX_RENDER_BYTES).then_some(encoded)
@@ -441,20 +560,20 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             entities.retain(|entity| entity_id(entity) != Some(*object_id));
             entities.len() != previous
         }
-        EntityMutation::Spawn(entity) => {
-            let object_id = entity_id(entity).expect("spawn was validated");
+        EntityMutation::Spawn(spawn) => {
+            let object_id = entity_id(&spawn.model).expect("spawn was validated");
             if let Some(existing) = entities
                 .iter_mut()
                 .find(|existing| entity_id(existing) == Some(object_id))
             {
                 let preserve_self =
                     existing.get("kind").and_then(Value::as_str) == Some("selfPlayer");
-                *existing = entity.clone();
+                *existing = spawn.model.clone();
                 if preserve_self {
                     existing["kind"] = json!("selfPlayer");
                 }
             } else if entities.len() < MAX_ENTITIES {
-                entities.push(entity.clone());
+                entities.push(spawn.model.clone());
             } else {
                 return false;
             }
@@ -485,6 +604,10 @@ fn patch_model_transform(
 }
 
 fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
+    let center = render
+        .get("centerX")
+        .and_then(|x| coordinate(Some(x)))
+        .zip(render.get("centerY").and_then(|y| coordinate(Some(y))));
     let Some(entities) = render.get_mut("entities").and_then(Value::as_array_mut) else {
         return false;
     };
@@ -501,8 +624,90 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             entities.retain(|entity| entity_id(entity) != Some(*object_id));
             true
         }
-        EntityMutation::Spawn(_) => true,
+        EntityMutation::Spawn(spawn) => {
+            if let Some(existing) = entities
+                .iter_mut()
+                .find(|entity| entity_id(entity) == entity_id(&spawn.model))
+            {
+                return patch_render_transform(
+                    existing,
+                    spawn.position,
+                    spawn.direction.as_deref(),
+                );
+            }
+            center.is_some_and(|center| spawn_render_from_prototype(entities, spawn, center))
+        }
     }
+}
+
+fn spawn_render_from_prototype(
+    entities: &mut Vec<Value>,
+    spawn: &EntitySpawn,
+    center: (i32, i32),
+) -> bool {
+    let Some(prototype) = spawn.prototype.as_ref() else {
+        return false;
+    };
+    if spawn.position.0.abs_diff(center.0) > 24 || spawn.position.1.abs_diff(center.1) > 32 {
+        return false;
+    }
+    let Some(object_id) = entity_id(&spawn.model) else {
+        return false;
+    };
+    let Some(mut rendered) = entities
+        .iter()
+        .find(|entity| entity.get("prototype") == Some(prototype))
+        .cloned()
+    else {
+        return false;
+    };
+    rendered["objectId"] = json!(object_id.to_string());
+    rendered["isSelf"] = json!(false);
+    if !rewrite_layer_keys(&mut rendered, object_id)
+        || !patch_render_transform(&mut rendered, spawn.position, spawn.direction.as_deref())
+        || entities.len() >= MAX_ENTITIES
+    {
+        return false;
+    }
+    entities.push(rendered);
+    true
+}
+
+fn rewrite_layer_keys(entity: &mut Value, object_id: u32) -> bool {
+    let Some(layers) = entity.get_mut("layers").and_then(Value::as_array_mut) else {
+        return false;
+    };
+    if !rewrite_keys(layers, object_id) {
+        return false;
+    }
+    if let Some(directions) = entity
+        .get_mut("directionLayers")
+        .and_then(Value::as_object_mut)
+    {
+        for layers in directions.values_mut() {
+            let Some(layers) = layers.as_array_mut() else {
+                return false;
+            };
+            if !rewrite_keys(layers, object_id) {
+                return false;
+            }
+        }
+    }
+    true
+}
+
+fn rewrite_keys(layers: &mut [Value], object_id: u32) -> bool {
+    for layer in layers {
+        let Some(suffix) = layer
+            .get("key")
+            .and_then(Value::as_str)
+            .and_then(|key| key.split_once(':').map(|(_, suffix)| suffix.to_owned()))
+        else {
+            return false;
+        };
+        layer["key"] = json!(format!("{object_id}:{suffix}"));
+    }
+    true
 }
 
 fn set_render_position(entity: &mut Value, (x, y): (i32, i32)) -> bool {
@@ -613,8 +818,8 @@ mod tests {
             9,
         ));
         assert!(install_render(
-            r#"{"_nativeWorldRequest":9,"enabled":true,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"left":480.0,"top":352.0}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"left"}]}]}"#,
-            r#"{"_nativeWorldRequest":9,"entities":[{"objectId":"43","directionLayers":{"Left":[{"left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"left"}],"DownRight":[{"left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"down-right"}]}}]}"#,
+            r#"{"_nativeWorldRequest":9,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"key":"42:body:0","left":480.0,"top":352.0}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"left"}]}]}"#,
+            r#"{"_nativeWorldRequest":9,"entities":[{"objectId":"43","prototype":{"kind":"monster","classKey":"","dead":false,"sprite":{"bodyLibrary":"Mon/01","hairLibrary":null,"weaponLibrary":null,"weaponLibrarySecondary":null,"altBodyLibrary":null,"altHairLibrary":null,"altWeaponLibrary":null,"altWeaponLibrarySecondary":null,"mountLibrary":null,"frameBaseOffset":0,"weaponFrameOffset":null,"altFrameBaseOffset":null,"altWeaponFrameOffset":null,"frameCount":4,"directionStride":4,"mountFrameOffset":null}},"directionLayers":{"Left":[{"key":"43:body:0","left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"left"}],"DownRight":[{"key":"43:body:0","left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"down-right"}]}}]}"#,
         ));
         let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
             r#"{"type":"packet","packet":"ObjectWalk","payload":{"objectId":43,"x":302,"y":631,"direction":"DownRight"}}"#,
@@ -635,6 +840,37 @@ mod tests {
             "down-right"
         );
         assert!(render["entities"][1].get("directionLayers").is_none());
+        assert!(render["entities"][1].get("prototype").is_none());
+
+        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+            r#"{"type":"packet","packet":"NewMonsterInfo","payload":{"info":{"objectId":78,"name":"Deer Two","location":{"x":299,"y":629},"direction":"Left","sprite":{"bodyLibrary":"Mon/01"}}}}"#,
+        ) else {
+            panic!("matching packet actor should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert!(models["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|entity| entity["objectId"] == "78"));
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        let actor = render["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"] == "78")
+            .expect("matching packet actor should be rendered");
+        assert_eq!(actor["isSelf"], false);
+        assert_eq!(actor["gridX"], 299);
+        assert_eq!(actor["gridY"], 629);
+        assert_eq!(actor["layers"][0]["key"], "78:body:0");
+        assert_eq!(actor["layers"][0]["atlasRectKey"], "left");
+        assert!(actor.get("directionLayers").is_none());
+        assert!(actor.get("prototype").is_none());
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectRemove","payload":{"objectId":78}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
 
         assert!(matches!(
             apply_packet(r#"{"type":"packet","packet":"ObjectRemove","payload":{"objectId":43}}"#),
