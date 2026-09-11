@@ -202,6 +202,12 @@ fn apply(world: &mut World) {
                  "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}},
                 {"objectId":"9002","kind":"monster","name":"Offline monster","x":304,"y":634,"direction":"Down",
                  "sprite":{"bodyLibrary":"Monster/003","frameBaseOffset":0,"directionStride":4}}
+            ],
+            "groundDrops":[
+                {"objectId":"9101","name":"Offline potion","nameColourArgb":-1,
+                 "x":301,"y":634,"image":0,"quantity":1,"dropKind":"item"},
+                {"objectId":"9102","name":"Gold","nameColourArgb":-1,
+                 "x":303,"y":635,"image":114,"quantity":250,"dropKind":"gold"}
             ]
         })
         .to_string();

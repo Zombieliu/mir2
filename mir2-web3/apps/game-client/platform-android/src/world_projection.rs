@@ -61,6 +61,49 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
             self_player = Some(entity);
         }
     }
+    let ground_drops = match world.get("groundDrops") {
+        None | Some(Value::Null) => &[][..],
+        Some(value) => value.as_array()?.as_slice(),
+    };
+    if entities.len().saturating_add(ground_drops.len()) > 8192 {
+        return None;
+    }
+    for drop in ground_drops {
+        let id = object_id(&drop["objectId"])?;
+        if !ids.insert(id) {
+            return None;
+        }
+        i32::try_from(drop["x"].as_u64()?).ok()?;
+        i32::try_from(drop["y"].as_u64()?).ok()?;
+        u16::try_from(drop["icon"].as_u64()?).ok()?;
+        let quantity = u32::try_from(drop["quantity"].as_u64()?).ok()?;
+        let name = drop["name"].as_str()?;
+        if quantity == 0 || name.is_empty() || name.chars().count() > 128 {
+            return None;
+        }
+        i32::try_from(drop["nameColourArgb"].as_i64()?).ok()?;
+        if drop.get("sourceMonster").is_some_and(|value| {
+            value
+                .as_str()
+                .is_none_or(|value| value.chars().count() > 128)
+        }) {
+            return None;
+        }
+        match drop.pointer("/loot/kind").and_then(Value::as_str)? {
+            "gold" => {
+                if drop
+                    .pointer("/loot/amount")
+                    .and_then(Value::as_u64)
+                    .and_then(|value| u32::try_from(value).ok())
+                    != Some(quantity)
+                {
+                    return None;
+                }
+            }
+            "inventoryItem" => {}
+            _ => return None,
+        }
+    }
     let player = self_player?;
     let mut stats = Map::new();
     for (wire, field) in [
@@ -114,6 +157,22 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
         entity["movementStartedMs"] = json!(started);
         entity["movementDurationMs"] = json!(duration);
     }
+    if world.get("groundDrops").is_none_or(Value::is_null) {
+        world["groundDrops"] = json!([]);
+    }
+    for drop in world["groundDrops"].as_array_mut()? {
+        let object_id = object_id(&drop["objectId"])?;
+        let quantity = u32::try_from(drop["quantity"].as_u64()?).ok()?;
+        let gold = drop.pointer("/loot/kind").and_then(Value::as_str) == Some("gold");
+        let image = if gold {
+            gold_ground_frame(quantity)
+        } else {
+            u16::try_from(drop["icon"].as_u64()?).ok()?
+        };
+        drop["objectId"] = json!(object_id.to_string());
+        drop["image"] = json!(image);
+        drop["dropKind"] = json!(if gold { "gold" } else { "item" });
+    }
     // Use the same renderer-neutral types consumed by native runtime. This does
     // not install the optional placeholder terrain/entity rendering plugins.
     let scene_view = world.get("sceneView").filter(|view| !view.is_null());
@@ -151,17 +210,31 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
         "timeOfDayLightSetting": world["lightSetting"].as_u64().filter(|v| *v <= 4),
     }))
     .ok()?;
-    let entity_model: mir2_client_bevy::entities::EntityModelSet =
-        serde_json::from_value(json!({"entities": world["entities"]})).ok()?;
+    let entity_models = json!({
+        "entities": world["entities"],
+        "groundDrops": world["groundDrops"],
+    });
+    let _entity_model: mir2_client_bevy::entities::EntityModelSet =
+        serde_json::from_value(entity_models.clone()).ok()?;
     let request_id = mir2_bevy_runtime::native_world_receipt::tag_world_request(&mut world)?;
     Some(Projection {
         request_id,
         world: world.to_string(),
         ui: json!({"player": stats}).to_string(),
         map: serde_json::to_string(&map_model).ok()?,
-        entities: serde_json::to_string(&entity_model).ok()?,
+        entities: entity_models.to_string(),
         scene,
     })
+}
+
+fn gold_ground_frame(quantity: u32) -> u16 {
+    match quantity {
+        0..=99 => 112,
+        100..=199 => 113,
+        200..=499 => 114,
+        500..=999 => 115,
+        _ => 116,
+    }
 }
 
 fn object_id(value: &Value) -> Option<u32> {
@@ -216,6 +289,36 @@ mod tests {
         assert_eq!(entities.entities.len(), 2);
         assert_eq!(entities.entities[1].object_id, "43");
         assert_eq!((entities.entities[1].x, entities.entities[1].y), (301, 630));
+    }
+
+    #[test]
+    fn validates_and_normalizes_authoritative_ground_drops() {
+        let mut source = snapshot();
+        source["groundDrops"] = json!([
+            {"objectId":50,"name":"Potion","nameColourArgb":-1,"icon":7,
+                "x":301,"y":630,"quantity":1,"sourceMonster":"Deer",
+                "loot":{"kind":"inventoryItem","key":"potion"}},
+            {"objectId":51,"name":"250 Gold","nameColourArgb":-1,"icon":0,
+                "x":300,"y":631,"quantity":250,"sourceMonster":"",
+                "loot":{"kind":"gold","amount":250}}
+        ]);
+        let projected = project(&source.to_string(), "0", "Fixture", 300, 630).unwrap();
+        let world: Value = serde_json::from_str(&projected.world).unwrap();
+        assert_eq!(world["groundDrops"][0]["objectId"], "50");
+        assert_eq!(world["groundDrops"][0]["image"], 7);
+        assert_eq!(world["groundDrops"][0]["dropKind"], "item");
+        assert_eq!(world["groundDrops"][1]["image"], 114);
+        assert_eq!(world["groundDrops"][1]["dropKind"], "gold");
+        let models: Value = serde_json::from_str(&projected.entities).unwrap();
+        assert_eq!(models["groundDrops"], world["groundDrops"]);
+
+        source["groundDrops"][0]["objectId"] = json!(42);
+        assert!(project(&source.to_string(), "0", "Fixture", 300, 630).is_none());
+        source = snapshot();
+        source["groundDrops"] = json!([{"objectId":50,"name":"Gold",
+            "nameColourArgb":-1,"icon":0,"x":300,"y":630,"quantity":2,
+            "sourceMonster":"","loot":{"kind":"gold","amount":1}}]);
+        assert!(project(&source.to_string(), "0", "Fixture", 300, 630).is_none());
     }
 
     #[test]

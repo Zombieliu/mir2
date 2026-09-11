@@ -337,6 +337,7 @@ final class GatewaySession implements AutoCloseable {
                 || packet.equals("ObjectRevived") || packet.equals("ObjectHide")
                 || packet.equals("ObjectShow") || packet.equals("ObjectRemove")
                 || packet.equals("ObjectTeleportOut") || packet.equals("ObjectTeleportIn")
+                || packet.equals("ObjectItem") || packet.equals("ObjectGold")
                 || packet.equals("ObjectPlayer") || packet.equals("ObjectHero")
                 || packet.equals("ObjectMonster") || packet.equals("NewMonsterInfo")
                 || packet.equals("ObjectNpc") || packet.equals("NewNpcInfo");

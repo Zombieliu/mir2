@@ -259,7 +259,9 @@ public class GatewaySessionTest {
                 "{\"type\":\"packet\",\"packet\":\"ObjectHide\",\"payload\":{\"objectId\":77}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectShow\",\"payload\":{\"objectId\":77}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectTeleportOut\",\"payload\":{\"objectId\":77,\"effectType\":1}}",
-                "{\"type\":\"packet\",\"packet\":\"ObjectTeleportIn\",\"payload\":{\"objectId\":77,\"effectType\":1}}"
+                "{\"type\":\"packet\",\"packet\":\"ObjectTeleportIn\",\"payload\":{\"objectId\":77,\"effectType\":1}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectItem\",\"payload\":{\"objectId\":90,\"name\":\"Potion\",\"nameColourArgb\":-1,\"location\":{\"x\":302,\"y\":634},\"image\":0,\"grade\":0}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectGold\",\"payload\":{\"objectId\":91,\"gold\":250,\"location\":{\"x\":302,\"y\":634}}}"
         };
         for (String packet : lifecycle) {
             peer.send(packet);

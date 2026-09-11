@@ -16,6 +16,7 @@ use std::{
 };
 
 pub(crate) const ENTITY_ATLAS_MANIFEST_ASSET: &str = "bevy-entity-atlases/manifest.json";
+const DNITEMS_META_ASSET: &str = "original-ui/DNItems/meta.json";
 const ENTITY_ATLAS_KIND: &str = "mir2-bevy-entity-atlas-manifest";
 const ENTITY_ATLAS_SCHEMA_VERSION: u32 = 2;
 const STAGE_WIDTH: f32 = 1024.0;
@@ -31,6 +32,8 @@ const MAX_PAGE_PNG_BYTES: usize = 8 * 1024 * 1024;
 const MAX_PAGE_PIXELS: usize = 4 * 1024 * 1024;
 const MAX_SELECTED_RGBA_BYTES: usize = 128 * 1024 * 1024;
 const MAX_RENDER_STATE_BYTES: usize = 64 * 1024 * 1024;
+const MAX_DNITEMS_META_BYTES: usize = 4 * 1024 * 1024;
+const MAX_DNITEM_FRAMES: usize = 6_000;
 const DIRECTIONS: [&str; 8] = [
     "Up",
     "UpRight",
@@ -89,6 +92,32 @@ struct EntityAtlasRect {
 struct Snapshot {
     player_object_id: String,
     entities: Vec<SnapshotEntity>,
+    #[serde(default)]
+    ground_drops: Vec<SnapshotGroundDrop>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct SnapshotGroundDrop {
+    object_id: String,
+    x: i32,
+    y: i32,
+    image: u16,
+}
+
+#[derive(Debug, Deserialize)]
+struct DnItemsMetadata {
+    version: u32,
+    count: usize,
+    frames: Vec<DnItemMetadataFrame>,
+}
+
+#[derive(Debug, Deserialize)]
+struct DnItemMetadataFrame {
+    index: u16,
+    width: u32,
+    height: u32,
+    path: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -204,6 +233,14 @@ struct EntityDirectionState {
     #[serde(rename = "_nativeWorldRequest")]
     native_world_request: u64,
     entities: Vec<EntityDirectionEntry>,
+    ground_item_frames: BTreeMap<u16, GroundItemFrame>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct GroundItemFrame {
+    width: u32,
+    height: u32,
 }
 
 #[derive(Debug, Serialize)]
@@ -227,8 +264,10 @@ struct EntityActionLayers {
 struct EntityRenderLayer {
     key: String,
     path: String,
-    atlas_key: String,
-    atlas_rect_key: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    atlas_key: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    atlas_rect_key: Option<String>,
     left: f32,
     top: f32,
     width: f32,
@@ -369,6 +408,49 @@ fn atlas_source_path(rect_key: &str) -> Option<&str> {
 
 fn frame_path(library: &str, frame: i32) -> String {
     format!("/original-ui/{library}/{frame}.png")
+}
+
+fn parse_ground_item_frames(
+    bytes: &[u8],
+) -> Result<BTreeMap<u16, GroundItemFrame>, WorldAssetError> {
+    if bytes.is_empty() || bytes.len() > MAX_DNITEMS_META_BYTES {
+        return Err(WorldAssetError::new(
+            "DNItems metadata byte count is out of bounds",
+        ));
+    }
+    let metadata: DnItemsMetadata = serde_json::from_slice(bytes)
+        .map_err(|error| WorldAssetError::new(format!("DNItems metadata rejected: {error}")))?;
+    if metadata.version != 3
+        || metadata.count != metadata.frames.len()
+        || metadata.frames.is_empty()
+        || metadata.frames.len() > MAX_DNITEM_FRAMES
+    {
+        return Err(WorldAssetError::new(
+            "DNItems metadata version or frame count is invalid",
+        ));
+    }
+    let mut frames = BTreeMap::new();
+    for frame in metadata.frames {
+        if frame.path != format!("/original-ui/DNItems/{}.png", frame.index)
+            || frame.width > 256
+            || frame.height > 256
+            || frames.contains_key(&frame.index)
+        {
+            return Err(WorldAssetError::new(
+                "DNItems metadata frame is invalid or duplicated",
+            ));
+        }
+        if frame.width != 0 && frame.height != 0 {
+            frames.insert(
+                frame.index,
+                GroundItemFrame {
+                    width: frame.width,
+                    height: frame.height,
+                },
+            );
+        }
+    }
+    Ok(frames)
 }
 
 fn fallback_sprite(entity: &SnapshotEntity) -> Option<SnapshotSprite> {
@@ -514,9 +596,15 @@ where
 {
     let snapshot: Snapshot = serde_json::from_str(snapshot_json)
         .map_err(|error| WorldAssetError::new(format!("entity snapshot rejected: {error}")))?;
-    if snapshot.entities.is_empty() || snapshot.entities.len() > 8192 {
+    if snapshot.entities.is_empty()
+        || snapshot
+            .entities
+            .len()
+            .checked_add(snapshot.ground_drops.len())
+            .is_none_or(|count| count > 8192)
+    {
         return Err(WorldAssetError::new(
-            "entity snapshot count is out of bounds",
+            "entity/drop snapshot count is out of bounds",
         ));
     }
     if !snapshot
@@ -528,6 +616,34 @@ where
             "entity snapshot does not contain its authoritative self player",
         ));
     }
+    let mut object_ids = HashSet::new();
+    if snapshot.entities.iter().any(|entity| {
+        entity
+            .object_id
+            .parse::<u32>()
+            .ok()
+            .filter(|id| *id != 0)
+            .is_none()
+            || entity.x < 0
+            || entity.y < 0
+            || !object_ids.insert(entity.object_id.clone())
+    }) || snapshot.ground_drops.iter().any(|drop| {
+        drop.object_id
+            .parse::<u32>()
+            .ok()
+            .filter(|id| *id != 0)
+            .is_none()
+            || drop.x < 0
+            || drop.y < 0
+            || !object_ids.insert(drop.object_id.clone())
+    }) {
+        return Err(WorldAssetError::new(
+            "entity/drop snapshot identity or position is invalid",
+        ));
+    }
+
+    let ground_item_meta = read_asset(DNITEMS_META_ASSET, MAX_DNITEMS_META_BYTES)?;
+    let ground_item_frames = parse_ground_item_frames(&ground_item_meta)?;
 
     let manifest_bytes = read_asset(ENTITY_ATLAS_MANIFEST_ASSET, MAX_MANIFEST_BYTES)?;
     if manifest_bytes.is_empty() || manifest_bytes.len() > MAX_MANIFEST_BYTES {
@@ -753,8 +869,8 @@ where
                 layers.push(EntityRenderLayer {
                     key: format!("{}:{role}:0", entity.object_id),
                     path,
-                    atlas_key: atlas_page_key,
-                    atlas_rect_key: rect.key.clone(),
+                    atlas_key: Some(atlas_page_key),
+                    atlas_rect_key: Some(rect.key.clone()),
                     left: root_left + rect.offset_x as f32,
                     top: root_top + rect.offset_y as f32,
                     width: rect.width as f32,
@@ -872,6 +988,43 @@ where
             });
         }
     }
+    for drop in snapshot.ground_drops {
+        let dx = drop.x.saturating_sub(scene.center_x);
+        let dy = drop.y.saturating_sub(scene.center_y);
+        if dx.abs() > 24 || dy.abs() > 32 {
+            continue;
+        }
+        let layers = ground_item_frames
+            .get(&drop.image)
+            .map(|frame| {
+                let root_left = ENTITY_LEFT_ORIGIN + dx as f32 * CELL_WIDTH;
+                let root_top = ENTITY_TOP_ORIGIN + dy as f32 * CELL_HEIGHT;
+                let depth = 4096 + dy * 128 + dx * 2 + 64;
+                vec![EntityRenderLayer {
+                    key: format!("{}:ground-item", drop.object_id),
+                    path: format!("/original-ui/DNItems/{}.png", drop.image),
+                    atlas_key: None,
+                    atlas_rect_key: None,
+                    left: root_left + (CELL_WIDTH - frame.width as f32) / 2.0,
+                    top: root_top + (CELL_HEIGHT - frame.height as f32) / 2.0,
+                    width: frame.width as f32,
+                    height: frame.height as f32,
+                    z: depth as f32 * 10.0,
+                    opacity: 1.0,
+                }]
+            })
+            .unwrap_or_default();
+        if layers.is_empty() {
+            unresolved_entity_count += 1;
+        }
+        entries.push(EntityRenderEntry {
+            object_id: drop.object_id,
+            is_self: false,
+            grid_x: drop.x,
+            grid_y: drop.y,
+            layers,
+        });
+    }
 
     let used_pages: BTreeSet<usize> = used_rects.keys().copied().collect();
     let mut render_atlases = Vec::with_capacity(used_pages.len());
@@ -896,7 +1049,7 @@ where
     }
 
     let mut pages = Vec::with_capacity(used_pages.len());
-    let mut compressed_bytes = 0usize;
+    let mut compressed_bytes = ground_item_meta.len();
     let mut rgba_bytes = 0usize;
     for page_index in used_pages {
         let page = &atlas.pages[page_index];
@@ -942,6 +1095,7 @@ where
     let live_directions_json = serde_json::to_string(&EntityDirectionState {
         native_world_request: request_id,
         entities: direction_entries,
+        ground_item_frames,
     })
     .map_err(|error| {
         WorldAssetError::new(format!(
@@ -987,6 +1141,19 @@ mod tests {
             .write_image_data(&[255, 0, 0, 255])
             .unwrap();
         bytes
+    }
+
+    fn dnitems_meta() -> Vec<u8> {
+        serde_json::json!({
+            "version": 3,
+            "count": 2,
+            "frames": [
+                {"index":0,"width":20,"height":13,"path":"/original-ui/DNItems/0.png"},
+                {"index":112,"width":16,"height":10,"path":"/original-ui/DNItems/112.png"}
+            ]
+        })
+        .to_string()
+        .into_bytes()
     }
 
     fn scene() -> ProjectedScene {
@@ -1035,6 +1202,7 @@ mod tests {
         })
         .to_string();
         let product = load_entity_render_state(&snapshot, &scene(), 17, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
             ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
             "bevy-entity-atlases/starter.png" => Ok(png.clone()),
             _ => Err(WorldAssetError::new("missing fixture")),
@@ -1066,6 +1234,57 @@ mod tests {
         );
         assert_eq!(live["entities"][0]["prototype"]["kind"], "player");
         assert_eq!(live["entities"][0]["prototype"]["classKey"], "");
+    }
+
+    #[test]
+    fn authoritative_ground_drops_use_exact_packaged_dnitems_frames() {
+        let png = rgba_png();
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[{"key":"starter","width":1,"height":1,
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
+                    "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":16,"pageIndex":0}]}]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{"objectId":"42","kind":"selfPlayer","x":300,"y":630,
+                "direction":"Down","sprite":{"bodyLibrary":"CArmour/00",
+                "frameBaseOffset":0,"directionStride":4}}],
+            "groundDrops":[
+                {"objectId":"50","name":"Potion","nameColourArgb":-1,
+                    "x":301,"y":630,"quantity":1,"image":0,"dropKind":"item"},
+                {"objectId":"51","name":"Gold","nameColourArgb":-1,
+                    "x":300,"y":631,"quantity":25,"image":112,"dropKind":"gold"}
+            ]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 28, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/starter.png" => Ok(png.clone()),
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap();
+        assert_eq!(product.entity_count, 3);
+        assert_eq!(product.layer_count, 3);
+        assert_eq!(product.unresolved_entity_count, 0);
+        let state: Value = serde_json::from_str(&product.json).unwrap();
+        let item = &state["entities"][1];
+        assert_eq!(item["layers"][0]["path"], "/original-ui/DNItems/0.png");
+        assert!(item["layers"][0].get("atlasKey").is_none());
+        assert_eq!(item["layers"][0]["left"], 542.0);
+        assert_eq!(item["layers"][0]["top"], 361.5);
+        let gold = &state["entities"][2];
+        assert_eq!(gold["layers"][0]["path"], "/original-ui/DNItems/112.png");
+        assert_eq!(gold["layers"][0]["left"], 496.0);
+        assert_eq!(gold["layers"][0]["top"], 395.0);
+        let live: Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        assert_eq!(live["groundItemFrames"]["0"]["width"], 20);
+        assert_eq!(live["groundItemFrames"]["112"]["height"], 10);
     }
 
     #[test]
@@ -1108,6 +1327,7 @@ mod tests {
         })
         .to_string();
         let product = load_entity_render_state(&snapshot, &scene(), 27, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
             ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
             "bevy-entity-atlases/starter.png" => Ok(png.clone()),
             _ => Err(WorldAssetError::new("missing fixture")),
@@ -1167,6 +1387,7 @@ mod tests {
         })
         .to_string();
         let product = load_entity_render_state(&snapshot, &scene(), 18, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
             ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
             "bevy-entity-atlases/starter.png" => Ok(png.clone()),
             _ => Err(WorldAssetError::new("missing fixture")),
@@ -1198,6 +1419,7 @@ mod tests {
         })
         .to_string();
         let product = load_entity_render_state(&snapshot, &scene(), 21, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
             ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
             "bevy-entity-atlases/starter.png" => Ok(png.clone()),
             _ => Err(WorldAssetError::new("missing fixture")),
@@ -1258,6 +1480,7 @@ mod tests {
         })
         .to_string();
         let product = load_entity_render_state(&snapshot, &scene(), 19, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
             ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
             "bevy-entity-atlases/starter.png" => Ok(png.clone()),
             _ => Err(WorldAssetError::new("missing fixture")),
@@ -1314,6 +1537,7 @@ mod tests {
         })
         .to_string();
         let product = load_entity_render_state(&snapshot, &scene(), 20, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
             ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
             "bevy-entity-atlases/starter.png" => Ok(png.clone()),
             _ => Err(WorldAssetError::new("missing fixture")),
@@ -1351,7 +1575,13 @@ mod tests {
         })
         .to_string();
         let product = load_entity_render_state(&snapshot, &scene(), 19, |asset, max_bytes| {
-            let bytes = std::fs::read(root.join(asset)).map_err(|error| {
+            let path = if asset == DNITEMS_META_ASSET {
+                std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                    .join("../../web/public/original-ui/DNItems/meta.json")
+            } else {
+                root.join(asset)
+            };
+            let bytes = std::fs::read(path).map_err(|error| {
                 WorldAssetError::new(format!(
                     "configured entity asset could not be read: {error}"
                 ))

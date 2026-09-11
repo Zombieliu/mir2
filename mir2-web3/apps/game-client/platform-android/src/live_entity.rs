@@ -15,6 +15,7 @@ const MAX_PACKET_BYTES: usize = 16 * 1024;
 const MAX_RENDER_BYTES: usize = 64 * 1024 * 1024;
 const MAX_ENTITIES: usize = 8192;
 const MAX_ACTION_POSES: usize = 128;
+const MAX_GROUND_ITEM_FRAMES: usize = 6_000;
 const CELL_WIDTH: f64 = 48.0;
 const CELL_HEIGHT: f64 = 32.0;
 
@@ -176,6 +177,11 @@ fn retain_visible_models(
         }
         !tombstones.contains(&object_id)
     });
+    if let Some(ground_drops) = value.get_mut("groundDrops").and_then(Value::as_array_mut) {
+        ground_drops.retain(|drop| {
+            entity_id(drop).is_none_or(|object_id| !tombstones.contains(&object_id))
+        });
+    }
 }
 
 fn retain_visible_render(
@@ -208,6 +214,11 @@ fn merge_direction_layers(render: &mut Value, sidecar: &Value) -> bool {
     if entries.len() > render_entities.len() || entries.len() > MAX_ENTITIES {
         return false;
     }
+    let ground_item_frames = match sidecar.get("groundItemFrames") {
+        None => json!({}),
+        Some(value) if valid_ground_item_frames(value) => value.clone(),
+        Some(_) => return false,
+    };
     let mut ids = HashSet::new();
     for entry in entries {
         let Some(object_id) = entity_id(entry) else {
@@ -244,7 +255,25 @@ fn merge_direction_layers(render: &mut Value, sidecar: &Value) -> bool {
             target["actionLayers"] = actions.clone();
         }
     }
+    render["_nativeGroundItemFrames"] = ground_item_frames;
     true
+}
+
+fn valid_ground_item_frames(value: &Value) -> bool {
+    value.as_object().is_some_and(|frames| {
+        frames.len() <= MAX_GROUND_ITEM_FRAMES
+            && frames.iter().all(|(key, frame)| {
+                key.parse::<u16>().is_ok()
+                    && frame
+                        .get("width")
+                        .and_then(Value::as_u64)
+                        .is_some_and(|width| (1..=256).contains(&width))
+                    && frame
+                        .get("height")
+                        .and_then(Value::as_u64)
+                        .is_some_and(|height| (1..=256).contains(&height))
+            })
+    })
 }
 
 fn valid_action_layers(value: &Value) -> bool {
@@ -373,6 +402,8 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
         "ObjectHide" | "ObjectTeleportOut" => object_id(body).map(EntityMutation::Hide),
         "ObjectShow" | "ObjectTeleportIn" => object_id(body).map(EntityMutation::Show),
         "ObjectRemove" => object_id(body).map(EntityMutation::Remove),
+        "ObjectItem" => ground_drop(body, false).map(EntityMutation::GroundDrop),
+        "ObjectGold" => ground_drop(body, true).map(EntityMutation::GroundDrop),
         "ObjectPlayer" | "ObjectHero" => spawn(body, "player").map(EntityMutation::Spawn),
         "ObjectMonster" | "NewMonsterInfo" => spawn(body, "monster").map(EntityMutation::Spawn),
         "ObjectNpc" | "NewNpcInfo" => spawn(body, "npc").map(EntityMutation::Spawn),
@@ -538,6 +569,7 @@ fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
         | EntityMutation::Action { object_id, .. } => Some(*object_id),
         EntityMutation::Move(object_id, ..) => Some(*object_id),
         EntityMutation::Spawn(spawn) => entity_id(&spawn.model),
+        EntityMutation::GroundDrop(drop) => entity_id(&drop.model),
         EntityMutation::MoveSelf(..) => None,
     }
 }
@@ -597,7 +629,8 @@ fn apply_cache_mutation(
         }
         EntityMutation::Remove(object_id) => {
             actions.remove(object_id);
-            let model_changed = take_entity(models, *object_id).is_some();
+            let model_changed = take_entity(models, *object_id).is_some()
+                | take_ground_drop(models, *object_id).is_some();
             let render_changed = render
                 .and_then(|value| take_entity(value, *object_id))
                 .is_some();
@@ -608,6 +641,15 @@ fn apply_cache_mutation(
         }
         EntityMutation::Spawn(spawn) => {
             let object_id = entity_id(&spawn.model).expect("spawn was validated");
+            actions.remove(&object_id);
+            tombstones.remove(&object_id);
+            hidden.remove(&object_id);
+            let model_changed = apply_models(models, mutation);
+            let render_changed = render.is_some_and(|value| apply_render(value, mutation));
+            (model_changed || render_changed, render_changed)
+        }
+        EntityMutation::GroundDrop(drop) => {
+            let object_id = entity_id(&drop.model).expect("ground drop was validated");
             actions.remove(&object_id);
             tombstones.remove(&object_id);
             hidden.remove(&object_id);
@@ -653,6 +695,14 @@ fn take_entity(value: &mut Value, object_id: u32) -> Option<Value> {
     Some(entities.remove(index))
 }
 
+fn take_ground_drop(value: &mut Value, object_id: u32) -> Option<Value> {
+    let drops = value.get_mut("groundDrops")?.as_array_mut()?;
+    let index = drops
+        .iter()
+        .position(|drop| entity_id(drop) == Some(object_id))?;
+    Some(drops.remove(index))
+}
+
 fn push_entity(value: &mut Value, entity: Value) -> bool {
     let Some(entities) = value.get_mut("entities").and_then(Value::as_array_mut) else {
         return false;
@@ -689,6 +739,7 @@ enum EntityMutation {
     Show(u32),
     Remove(u32),
     Spawn(EntitySpawn),
+    GroundDrop(GroundDropSpawn),
 }
 
 #[derive(Debug)]
@@ -697,6 +748,13 @@ struct EntitySpawn {
     prototype: Option<Value>,
     position: (i32, i32),
     direction: Option<String>,
+}
+
+#[derive(Debug)]
+struct GroundDropSpawn {
+    model: Value,
+    position: (i32, i32),
+    image: u16,
 }
 
 fn coordinate(value: Option<&Value>) -> Option<i32> {
@@ -730,6 +788,72 @@ fn percent(payload: &serde_json::Map<String, Value>) -> Option<u8> {
     u8::try_from(payload.get("percent")?.as_u64()?)
         .ok()
         .filter(|value| *value <= 100)
+}
+
+fn ground_drop(payload: &serde_json::Map<String, Value>, gold: bool) -> Option<GroundDropSpawn> {
+    let object_id = object_id(payload)?;
+    let position = location(payload)?;
+    let quantity = if gold {
+        u32::try_from(payload.get("gold")?.as_u64()?).ok()?
+    } else {
+        payload
+            .get("quantity")
+            .map(|value| u32::try_from(value.as_u64()?).ok())
+            .unwrap_or(Some(1))?
+    };
+    if quantity == 0 {
+        return None;
+    }
+    let image = if gold {
+        gold_ground_frame(quantity)
+    } else {
+        u16::try_from(payload.get("image")?.as_u64()?).ok()?
+    };
+    let name = if gold {
+        "Gold".to_owned()
+    } else {
+        let name = payload.get("name")?.as_str()?.trim();
+        if name.is_empty() || name.chars().count() > 128 {
+            return None;
+        }
+        name.to_owned()
+    };
+    let name_colour_argb = match payload.get("nameColourArgb") {
+        None if gold => -1,
+        Some(value) => i32::try_from(value.as_i64()?).ok()?,
+        None => return None,
+    };
+    let grade = match payload.get("grade") {
+        None if gold => 0,
+        Some(value) => u8::try_from(value.as_u64()?).ok()?,
+        None => return None,
+    };
+    let model = json!({
+        "objectId": object_id.to_string(),
+        "name": name,
+        "nameColourArgb": name_colour_argb,
+        "x": position.0,
+        "y": position.1,
+        "quantity": quantity,
+        "image": image,
+        "grade": grade,
+        "dropKind": if gold { "gold" } else { "item" },
+    });
+    Some(GroundDropSpawn {
+        model,
+        position,
+        image,
+    })
+}
+
+fn gold_ground_frame(quantity: u32) -> u16 {
+    match quantity {
+        0..=99 => 112,
+        100..=199 => 113,
+        200..=499 => 114,
+        500..=999 => 115,
+        _ => 116,
+    }
 }
 
 fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntitySpawn> {
@@ -845,7 +969,19 @@ fn valid_models(value: &Value) -> bool {
     let Some(entities) = value.get("entities").and_then(Value::as_array) else {
         return false;
     };
-    if entities.is_empty() || entities.len() > MAX_ENTITIES {
+    let ground_drops = match value.get("groundDrops") {
+        None => &[][..],
+        Some(value) => match value.as_array() {
+            Some(ground_drops) => ground_drops.as_slice(),
+            None => return false,
+        },
+    };
+    if entities.is_empty()
+        || entities
+            .len()
+            .checked_add(ground_drops.len())
+            .is_none_or(|count| count > MAX_ENTITIES)
+    {
         return false;
     }
     let mut ids = HashSet::new();
@@ -864,6 +1000,29 @@ fn valid_models(value: &Value) -> bool {
             && matches!(
                 entity.get("kind").and_then(Value::as_str),
                 Some("selfPlayer" | "player" | "monster" | "npc")
+            )
+    }) && ground_drops.iter().all(|drop| {
+        let Some(object_id) = entity_id(drop) else {
+            return false;
+        };
+        ids.insert(object_id)
+            && coordinate(drop.get("x")).is_some()
+            && coordinate(drop.get("y")).is_some()
+            && drop
+                .get("name")
+                .and_then(Value::as_str)
+                .is_some_and(|name| !name.is_empty() && name.chars().count() <= 128)
+            && drop
+                .get("quantity")
+                .and_then(Value::as_u64)
+                .is_some_and(|quantity| (1..=u64::from(u32::MAX)).contains(&quantity))
+            && drop
+                .get("image")
+                .and_then(Value::as_u64)
+                .is_some_and(|image| u16::try_from(image).is_ok())
+            && matches!(
+                drop.get("dropKind").and_then(Value::as_str),
+                Some("item" | "gold")
             )
     })
 }
@@ -936,6 +1095,7 @@ fn valid_layers(layers: &[Value]) -> bool {
 }
 
 fn runtime_render_json(value: &mut Value) -> Option<String> {
+    let ground_item_frames = value.as_object_mut()?.remove("_nativeGroundItemFrames");
     let removed = {
         let entities = value.get_mut("entities")?.as_array_mut()?;
         entities
@@ -999,6 +1159,11 @@ fn runtime_render_json(value: &mut Value) -> Option<String> {
                 .insert("actionLayers".into(), actions);
         }
     }
+    if let Some(ground_item_frames) = ground_item_frames {
+        value
+            .as_object_mut()?
+            .insert("_nativeGroundItemFrames".into(), ground_item_frames);
+    }
     (encoded.len() <= MAX_RENDER_BYTES).then_some(encoded)
 }
 
@@ -1012,6 +1177,14 @@ fn entity_id(entity: &Value) -> Option<u32> {
 }
 
 fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
+    if let EntityMutation::GroundDrop(drop) = mutation {
+        return upsert_ground_drop_model(models, drop);
+    }
+    if let EntityMutation::Spawn(spawn) = mutation {
+        if let Some(object_id) = entity_id(&spawn.model) {
+            take_ground_drop(models, object_id);
+        }
+    }
     let Some(entities) = models.get_mut("entities").and_then(Value::as_array_mut) else {
         return false;
     };
@@ -1072,8 +1245,41 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             }
             true
         }
-        EntityMutation::Hide(_) | EntityMutation::Show(_) | EntityMutation::Remove(_) => false,
+        EntityMutation::Hide(_)
+        | EntityMutation::Show(_)
+        | EntityMutation::Remove(_)
+        | EntityMutation::GroundDrop(_) => false,
     }
+}
+
+fn upsert_ground_drop_model(models: &mut Value, drop: &GroundDropSpawn) -> bool {
+    let object_id = entity_id(&drop.model).expect("ground drop was validated");
+    let actor_removed = take_entity(models, object_id).is_some();
+    if models.get("groundDrops").is_none() {
+        models["groundDrops"] = json!([]);
+    }
+    let entity_count = models
+        .get("entities")
+        .and_then(Value::as_array)
+        .map_or(0, Vec::len);
+    let Some(drops) = models.get_mut("groundDrops").and_then(Value::as_array_mut) else {
+        return false;
+    };
+    if let Some(existing) = drops
+        .iter_mut()
+        .find(|existing| entity_id(existing) == Some(object_id))
+    {
+        if *existing == drop.model {
+            return actor_removed;
+        }
+        *existing = drop.model.clone();
+        return true;
+    }
+    if entity_count.saturating_add(drops.len()) >= MAX_ENTITIES {
+        return actor_removed;
+    }
+    drops.push(drop.model.clone());
+    true
 }
 
 fn patch_model_health(entity: &mut Value, percent: u8) -> bool {
@@ -1110,6 +1316,9 @@ fn patch_model_transform(
 }
 
 fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
+    if let EntityMutation::GroundDrop(drop) = mutation {
+        return upsert_ground_drop_render(render, drop);
+    }
     let center = render
         .get("centerX")
         .and_then(|x| coordinate(Some(x)))
@@ -1158,16 +1367,85 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
                 .iter_mut()
                 .find(|entity| entity_id(entity) == entity_id(&spawn.model))
             {
-                return patch_render_transform(
-                    existing,
-                    spawn.position,
-                    spawn.direction.as_deref(),
-                );
+                let ground_item = existing
+                    .get("layers")
+                    .and_then(Value::as_array)
+                    .is_some_and(|layers| {
+                        layers.iter().any(|layer| {
+                            layer
+                                .get("key")
+                                .and_then(Value::as_str)
+                                .is_some_and(|key| key.ends_with(":ground-item"))
+                        })
+                    });
+                if !ground_item {
+                    return patch_render_transform(
+                        existing,
+                        spawn.position,
+                        spawn.direction.as_deref(),
+                    );
+                }
+                let object_id = entity_id(&spawn.model).expect("spawn was validated");
+                entities.retain(|entity| entity_id(entity) != Some(object_id));
             }
             center.is_some_and(|center| spawn_render_from_prototype(entities, spawn, center))
         }
-        EntityMutation::Hide(_) | EntityMutation::Show(_) | EntityMutation::Remove(_) => false,
+        EntityMutation::Hide(_)
+        | EntityMutation::Show(_)
+        | EntityMutation::Remove(_)
+        | EntityMutation::GroundDrop(_) => false,
     }
+}
+
+fn upsert_ground_drop_render(render: &mut Value, drop: &GroundDropSpawn) -> bool {
+    let object_id = entity_id(&drop.model).expect("ground drop was validated");
+    let center = render
+        .get("centerX")
+        .and_then(|x| coordinate(Some(x)))
+        .zip(render.get("centerY").and_then(|y| coordinate(Some(y))));
+    let dimensions = render
+        .get("_nativeGroundItemFrames")
+        .and_then(|frames| frames.get(drop.image.to_string()))
+        .and_then(|frame| {
+            Some((
+                u32::try_from(frame.get("width")?.as_u64()?).ok()?,
+                u32::try_from(frame.get("height")?.as_u64()?).ok()?,
+            ))
+        });
+    let Some(entities) = render.get_mut("entities").and_then(Value::as_array_mut) else {
+        return false;
+    };
+    let previous_len = entities.len();
+    entities.retain(|entity| entity_id(entity) != Some(object_id));
+    let removed = entities.len() != previous_len;
+    let Some(((center_x, center_y), (width, height))) = center.zip(dimensions) else {
+        return removed;
+    };
+    let dx = drop.position.0.saturating_sub(center_x);
+    let dy = drop.position.1.saturating_sub(center_y);
+    if dx.abs() > 24 || dy.abs() > 32 || entities.len() >= MAX_ENTITIES {
+        return removed;
+    }
+    let root_left = 480.0 + f64::from(dx) * CELL_WIDTH;
+    let root_top = 352.0 + f64::from(dy) * CELL_HEIGHT;
+    let depth = 4096 + dy * 128 + dx * 2 + 64;
+    entities.push(json!({
+        "objectId": object_id.to_string(),
+        "isSelf": false,
+        "gridX": drop.position.0,
+        "gridY": drop.position.1,
+        "layers": [{
+            "key": format!("{object_id}:ground-item"),
+            "path": format!("/original-ui/DNItems/{}.png", drop.image),
+            "left": root_left + (CELL_WIDTH - f64::from(width)) / 2.0,
+            "top": root_top + (CELL_HEIGHT - f64::from(height)) / 2.0,
+            "width": width,
+            "height": height,
+            "z": f64::from(depth) * 10.0,
+            "opacity": 1.0,
+        }]
+    }));
+    true
 }
 
 fn select_action_frame(
@@ -1544,6 +1822,13 @@ fn align_render_to_models(render: &mut Value, models: &Value) -> bool {
     };
     let positions = model_entities
         .iter()
+        .chain(
+            models
+                .get("groundDrops")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten(),
+        )
         .filter_map(|entity| {
             Some((
                 entity_id(entity)?,
@@ -1790,6 +2075,67 @@ mod tests {
             ),
             LiveEntityPacketOutcome::Rejected
         );
+        clear();
+    }
+
+    #[test]
+    fn ground_item_and_gold_packets_update_models_and_exact_dnitems_render() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"level":7,"direction":"Down"}],"groundDrops":[]}"#,
+            25,
+        ));
+        assert!(install_render(
+            r#"{"_nativeWorldRequest":25,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"key":"42:body:0","left":480.0,"top":352.0,"z":40960.0}]}]}"#,
+            r#"{"_nativeWorldRequest":25,"entities":[],"groundItemFrames":{"0":{"width":20,"height":13},"114":{"width":16,"height":10}}}"#,
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectItem","payload":{"objectId":50,"name":"Potion","nameColourArgb":-1,"location":{"x":301,"y":630},"image":0,"grade":0}}"#,
+        ) else {
+            panic!("item spawn should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["groundDrops"][0]["objectId"], "50");
+        assert_eq!(models["groundDrops"][0]["dropKind"], "item");
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(render["entities"][1]["objectId"], "50");
+        assert_eq!(
+            render["entities"][1]["layers"][0]["path"],
+            "/original-ui/DNItems/0.png"
+        );
+        assert_eq!(render["entities"][1]["layers"][0]["left"], 542.0);
+        assert!(render.get("_nativeGroundItemFrames").is_none());
+
+        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectGold","payload":{"objectId":51,"gold":250,"location":{"x":300,"y":631}}}"#,
+        ) else {
+            panic!("gold spawn should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["groundDrops"][1]["quantity"], 250);
+        assert_eq!(models["groundDrops"][1]["image"], 114);
+        assert_eq!(models["groundDrops"][1]["dropKind"], "gold");
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(
+            render["entities"][2]["layers"][0]["path"],
+            "/original-ui/DNItems/114.png"
+        );
+
+        let LiveEntityPacketOutcome::Applied { models, render } =
+            apply_packet(r#"{"type":"packet","packet":"ObjectRemove","payload":{"objectId":50}}"#)
+        else {
+            panic!("authoritative removal should clear the item");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["groundDrops"].as_array().unwrap().len(), 1);
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert!(render["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|entity| entity["objectId"] != "50"));
         clear();
     }
 
