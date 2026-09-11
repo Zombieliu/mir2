@@ -82,6 +82,13 @@ real hit may renew a five-second visibility window for the server percentage
 bar, but neither damage nor percentage is converted into invented exact HP.
 The damage tree is input-pass-through and is cleared at every scene/session
 boundary.
+Accepted remote `ObjectWalk`, `ObjectRun` and `ObjectBackStep` packets also
+feed the shared renderer's bounded presentation clock while the authoritative
+Android model remains fixed at the server endpoint. `ObjectTurn`, object
+removal and every scene/session reset terminate stale motion. Android queues
+these events across Bevy worker threads and drains them through main-thread
+runtime ingress; labels, guild names, health bars and damage floaters consume
+the exact renderer-owned pose with shared-stage scale compensation.
 Map/entity state is published before its bounded image batches so queue pressure
 cannot evict the state that owns those images. Only the same exact request
 remaining complete across two consecutive rendered frames, with a non-empty
@@ -125,9 +132,8 @@ On background, disconnect, timeout or transport failure, the socket and old
 roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
-generated per-library action variants, continuous locomotion/backstep
-interpolation, spell-specific effect behavior and complete gameplay remain
-subsequent work. The
+generated per-library class/equipment/mount/action variants, spell-specific
+effect behavior and complete gameplay remain subsequent work. The
 existing reducer command queue is connected to the authenticated in-game
 socket through the bounded JNI lease mailbox described below. Authoritative
 transaction receipts and the entity packet families described below return to

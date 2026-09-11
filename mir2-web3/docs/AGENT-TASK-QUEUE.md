@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-09-12 Android `3efa56d71`: remote walk/run/backstep packets now retain
+> server endpoints while the shared Bevy presentation clock supplies bounded
+> sub-tile motion. Android crosses parallel packet producers through a bounded
+> synchronized queue into main-thread renderer ingress; turn/remove and scene
+> resets stop motion. Actor labels, guild lines, health and damage overlays use
+> the exact renderer pose with UI-scale compensation. Android 142/142 and the
+> API31 package/install/cold-launch gate pass; the offline emulator records
+> active `(84,0)` and settled zero offsets with visible actor/overlay movement.
+> Next code leaf is generated per-library player/equipment/mount/action catalog
+> coverage. Approved WSS/account login, live packet flow, physical-device and
+> human acceptance remain external gates. Evidence:
+> `docs/generated/player-qa/native-android-remote-motion-20260912/README.md`.
+
 > 2026-09-11 Android `1ed32d776`: authoritative snapshot `groundDrops` and
 > post-`IN_GAME` `ObjectItem`/`ObjectGold` packets now materialize the exact
 > tracked Crystal `DNItems` frame with bounded identity/position/metadata,

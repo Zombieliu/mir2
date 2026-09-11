@@ -1,5 +1,19 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android `3efa56d71`: authoritative remote `ObjectWalk`,
+> `ObjectRun` and `ObjectBackStep` endpoints now use the shared renderer's
+> bounded presentation clock instead of tile snapping; turn/remove and every
+> scene/session boundary stop retained motion. A synchronized Android queue
+> crosses parallel Bevy producers into the runtime's main-thread ingress, and
+> names/guild/health/damage overlays consume the same renderer-owned pose with
+> UI-scale compensation. Consecutive API31 ARM64 offline frames visibly show a
+> player and overlay moving to the authoritative endpoint; diagnostics record
+> active `(84,0)` then settled zero with no decode/drop/mismatch. Android
+> 142/142, API31 package/install/cold-launch pass. Approved live login/packet
+> evidence, physical-device and human acceptance, plus generated class/mount/
+> action catalogs remain open. Evidence:
+> `docs/generated/player-qa/native-android-remote-motion-20260912/README.md`.
+
 > 2026-09-12 Android `b15a297b2`: the authenticated Java host now forwards
 > damage plus all five generic scene-effect packet families, and the Android
 > producer resolves cast/projectile/impact/return, attached, map and persistent
