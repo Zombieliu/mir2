@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `029dc5e3f`: the packaged entity-atlas producer now
+> pre-resolves every available standing direction for each render-ready actor
+> into a bounded Android-only sidecar. Packet-first movement/turn selects the
+> correct already-loaded Crystal facing and updates tile depth; runtime JSON
+> carries only the active layers. Android 112, real-atlas 1, Java TLS 11,
+> API31 and APK launch gates pass. New packet-only sprites, action animation,
+> other gameplay packet reducers, approved online journey and physical-device
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-facing-20260911/README.md`.
+
 > 2026-09-11 Android `ab43c1d28`: the authenticated `IN_GAME` TLS host now
 > forwards a bounded entity packet allowlist into an Android-only validated
 > packet-first cache. Shared entity models receive authoritative spawns,

@@ -170,8 +170,12 @@ packets after `IN_GAME`. `src/live_entity.rs` validates and folds spawn/refresh,
 movement/turn/action positions and removals over the last complete world model.
 Existing same-request Crystal sprite layers move/remove immediately and a later
 render product aligns to packet-fresh positions. Packet-only new actors enter
-the neutral object layer immediately, while their Crystal sprite resolution and
-direction/action animation still wait for a complete render snapshot.
+the neutral object layer immediately. Render-ready actors retain a bounded
+Android-private set of all available standing facings; movement/turn packets
+select the authoritative direction and update Crystal tile depth without
+decoding atlas pages again. The runtime payload contains only the active pose.
+Packet-only new actor Crystal sprites and walk/run/attack frame animation still
+wait for a complete render snapshot.
 
 This closes the reducer-to-live-socket outbound adaptation, existing
 transaction-result return adapters, and the bounded entity object-list/

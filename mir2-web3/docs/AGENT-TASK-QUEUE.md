@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `029dc5e3f`: visible authoritative actors now preload all
+> available Crystal standing facings into an Android-private bounded sidecar.
+> Packet-first movement/turn swaps the existing sprite facing and updates
+> Crystal y-sort depth without another decode or periodic snapshot. Android
+> 112/112, configured real-atlas 1/1, Java TLS 11/11, API31 and APK
+> build/install/cold-launch pass; APK SHA-256 is
+> `e26b09fc38df9e2d77e6a8c7d5b1da2bcf900aae743e3a2811ba4e4eabe926d0`.
+> Packet-only sprite creation, action animation, remaining reducers, approved
+> WSS/account and physical-device gates remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-facing-20260911/README.md`.
+
 > 2026-09-11 Android `ab43c1d28`: bounded entity packets now update the shared
 > renderer-neutral object layer immediately after `IN_GAME`, and existing
 > Crystal sprite layers track authoritative movement/removal without waiting

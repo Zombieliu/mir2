@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `029dc5e3f`: actors from the last complete render
+> snapshot now change to the authoritative Crystal standing facing and y-sort
+> depth packet-first, using bounded preloaded variants while keeping the Bevy
+> runtime payload active-pose-only. Android 112, configured atlas 1, Java TLS
+> 11, API31 and APK build/install/launch pass. Packet-only new actor sprites,
+> walk/run/attack animation, remaining gameplay reducers, approved online
+> journey, physical device and human visual acceptance stay open. Evidence:
+> `docs/generated/player-qa/native-android-entity-facing-20260911/README.md`.
+
 > 2026-09-11 Android `ab43c1d28`: authoritative player/monster/NPC spawn
 > aliases, movement/turn/action positions and removals now enter the shared
 > object model packet-first after `IN_GAME`; existing native Crystal sprite
