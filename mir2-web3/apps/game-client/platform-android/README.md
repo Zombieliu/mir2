@@ -67,6 +67,14 @@ resolves every visible server actor and ground drop into the shared entity
 render contract. Ground items use the server `image` index; gold amounts select
 Crystal `DNItems` frames 112 through 116 using the same quantity bands as the
 native client. Missing frames stay unresolved and block the strict receipt.
+The Android-private presentation layer also projects bounded actor names,
+player guild lines and health bars from that same validated object model. It
+retains signed server `nameColourArgb`, Crystal name/corpse/pet anchors and
+NPC/monster underscore line breaks. The local player's bar uses exact shared
+`hp` / `maxHp`; monster bars use only `ObjectHealth` percentage and expiry, with
+packet revision renewing the timer even when the percentage repeats. It never
+infers exact monster HP from a percentage. Shared `NameView` hides names and
+guilds but not health feedback, and every overlay node passes input through.
 Map/entity state is published before its bounded image batches so queue pressure
 cannot evict the state that owns those images. Only the same exact request
 remaining complete across two consecutive rendered frames, with a non-empty
@@ -101,8 +109,9 @@ On background, disconnect, timeout or transport failure, the socket and old
 roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
-generated per-library action variants, locomotion interpolation and complete
-gameplay remain subsequent work. The
+generated per-library action variants, continuous locomotion/backstep
+interpolation, damage/effect presentation and complete gameplay remain
+subsequent work. The
 existing reducer command queue is connected to the authenticated in-game
 socket through the bounded JNI lease mailbox described below. Authoritative
 transaction receipts and the entity packet families described below return to

@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `f81ae8415`: native actor overlays now project bounded,
+> input-pass-through names, guild lines and health bars from the same validated
+> authoritative object model as actor sprites. Signed server name colours,
+> Crystal anchors/corpse offsets and NPC/monster line splitting are retained.
+> Self health uses exact `hp/maxHp`; monster bars use only the server health
+> percentage and expiry/revision, never invented exact HP. The API31 offline
+> specimen visibly shows both actor labels and health bars with zero unresolved
+> map/entity draws. Android 134/134, Java 11/11, API31 target and both APK
+> package gates pass. Approved live login/packets and physical-device/human
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-actor-overlays-20260911/README.md`.
+
 > 2026-09-11 Android `1d2e2abc5`: native world rendering now adds bounded,
 > input-pass-through drop labels from the same authoritative `groundDrops` as
 > sprites and pickup UI. Labels retain server object identity, quantity and
