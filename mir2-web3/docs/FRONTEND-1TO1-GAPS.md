@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `c17bd7e6d`: generic actors now render exact Crystal
+> death-to-corpse, harvested skeleton and revive-to-standing lifecycle
+> sequences instead of using opacity alone. The normal API31 APK was rebuilt,
+> installed and cold-launched without fatal/ANR/native-load errors, but no
+> approved Gateway/account was configured, so this is not live packet visual
+> evidence. Generated class/mount catalogs, effects, drops, physical-device
+> and human visual acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-death-lifecycle-animation-20260911/README.md`.
+
 > 2026-09-11 Android `843f94593`: post-`IN_GAME` `ObjectWalk`/`ObjectRun`
 > updates now select exact packaged walking/running sprites and advance them on
 > the existing native monotonic presentation clock, without changing server

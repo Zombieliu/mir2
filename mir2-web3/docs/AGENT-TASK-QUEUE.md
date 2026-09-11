@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `c17bd7e6d`: generic render-ready actors now play exact
+> packaged Crystal `die -> dead`, terminal `skeleton`, and
+> `revive -> standing` sequences from authoritative lifecycle packets. Missing
+> exact catalogs retain the explicit opacity/standing fallback; no packet can
+> name or decode an atlas frame. Android 117/117, configured real-atlas 1/1,
+> Java TLS 11/11, API31 and normal APK build/install/cold-launch pass; APK
+> SHA-256 is
+> `3698111654ce2d0cb77085906c38be0546a4d407ad25bd8a9711b2904693d565`.
+> Generated class/mount catalogs, effects, ground drops, interpolation,
+> approved online login and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-death-lifecycle-animation-20260911/README.md`.
+
 > 2026-09-11 Android `843f94593`: authoritative `ObjectWalk` and `ObjectRun`
 > packets now enter the same bounded native action clock as combat, using exact
 > packaged Crystal walking/running frames at the packet position and last known

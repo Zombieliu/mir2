@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `c17bd7e6d`: authoritative death/harvest/revive lifecycle
+> packets now drive the exact packaged Crystal `die`, `dead`, `skeleton` and
+> `revive` poses for generic render-ready actors. The monotonic presentation
+> clock settles death into the corpse pose, holds skeletons and restores
+> standing after revive; missing exact catalogs fail back visibly without
+> client-owned state. Android 117, real-atlas 1, Java TLS 11, API31 and APK
+> launch gates pass. Generated variants, effects/drops, approved online journey
+> and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-death-lifecycle-animation-20260911/README.md`.
+
 > 2026-09-11 Android `843f94593`: generic render-ready actors now animate
 > authoritative Walk/Run packets from the shared Crystal default catalogs.
 > Packet coordinates remain authoritative and no speculative step is created;

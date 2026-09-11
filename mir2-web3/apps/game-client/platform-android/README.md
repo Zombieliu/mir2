@@ -196,6 +196,11 @@ Android-private bounded action-frame sidecar. `ObjectWalk`, `ObjectRun`,
 `ObjectHarvest`, `ObjectAttack`, `ObjectRangeAttack`, `ObjectStruck`, and
 `ObjectDashAttack` select the matching walking/running/harvest/melee/range/
 struck/dash frame sequence at the packet's authoritative position and facing.
+`Death`/`ObjectDied` play the exact `die` sequence and settle on the packaged
+`dead` pose; `ObjectHarvested` holds the packaged `skeleton` pose; and
+`Revived`/`ObjectRevived` play `revive` before returning to standing. If an
+exact lifecycle catalog is unavailable, the renderer retains its explicit
+dead-opacity/standing fallback instead of inventing an atlas frame.
 If the packet omits direction, the last authoritative object facing is used. A
 monotonic presentation clock advances the exact pre-resolved frames and
 restores the standing facing after completion without waiting for another
@@ -205,10 +210,9 @@ removed from runtime JSON, which still carries only the active layers.
 
 This action leaf deliberately does not claim the generated class/library
 catalogs needed by Archer, Assassin, mounted and other alternate actors.
-Continuous movement interpolation/backstep, `ObjectHarvested` skeleton motion,
-die/revive sequences, spell effects, health feedback and ground drops also
-remain separate work. No atlas name from a packet is resolved or decoded on the
-live packet path.
+Continuous movement interpolation/backstep, spell effects, health feedback and
+ground drops also remain separate work. No atlas name from a packet is resolved
+or decoded on the live packet path.
 
 The post-`IN_GAME` allowlist also carries health/death/revive and
 hide/show/teleport lifecycle packets. The private cache applies death position,
@@ -217,8 +221,8 @@ actor from both visible models while retaining its exact bounded record;
 show/teleport-in restores only that record. Remove creates a bounded tombstone
 that later periodic snapshots cannot resurrect, while a new authoritative
 spawn clears it. These lifecycle rules do not synthesize health-bar effects or
-missing actors; death/revive still use the lifecycle opacity path rather than
-the new action sequence clock.
+missing actors; exact death/revive/skeleton frames are limited to the generic
+catalog coverage described above.
 
 This closes the reducer-to-live-socket outbound adaptation, existing
 transaction-result return adapters, and the bounded entity object-list/
