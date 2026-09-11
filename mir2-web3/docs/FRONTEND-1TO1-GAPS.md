@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android `b15a297b2`: the authenticated Java host now forwards
+> damage plus all five generic scene-effect packet families, and the Android
+> producer resolves cast/projectile/impact/return, attached, map and persistent
+> effects from 2,067 tracked Crystal frames into the shared Bevy renderer. A
+> bounded active-frame warm set fixes Android packaged-asset churn without
+> hidden sprites or synthetic fallbacks. The API31 ARM64 offline specimen
+> visibly shows FireWall and an attached barrier over the 849-draw Bichon scene;
+> runtime 233/233, Android 141/141, Java 11/11, target/package/install/cold-launch
+> gates pass. Approved live login/packets, physical-device and human acceptance,
+> and spell-specific sound/light/prediction remain open. Evidence:
+> `docs/generated/player-qa/native-android-scene-effects-20260912/README.md`.
+
 > 2026-09-11 Android `1d6c0a2b3`: authenticated post-`IN_GAME`
 > `DamageIndicator` packets now retain exact object/damage/type fields in a
 > bounded Android event queue and render Crystal-style hit, miss, critical and

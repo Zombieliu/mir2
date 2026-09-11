@@ -1,0 +1,6 @@
+09-12 00:09:52.362 16244 16276 I event src/ui_preview.rs:286: ANDROID_UI_PREVIEW_READY scene=world-render
+09-12 00:09:52.362 16244 16275 I RustStdoutStderr: [2m2026-09-11T16:09:52.362243Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_UI_PREVIEW_READY scene=world-render
+09-12 00:09:54.454 16244 16280 I event src/ui_preview.rs:103: ANDROID_WORLD_RENDER_READYrequest_id = 18446744073709551615; center_x = 302; center_y = 634; map_tiles = 849; entities = 4; entity_layers = 4;
+09-12 00:09:54.454 16244 16275 I RustStdoutStderr: [2m2026-09-11T16:09:54.454254Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_WORLD_RENDER_READY [3mrequest_id[0m[2m=[0m18446744073709551615 [3mcenter_x[0m[2m=[0m302 [3mcenter_y[0m[2m=[0m634 [3mmap_tiles[0m[2m=[0m849 [3mentities[0m[2m=[0m4 [3mentity_layers[0m[2m=[0m4
+09-12 00:09:54.781 16244 16279 I event src/shared_shell.rs:1049: ANDROID_EFFECT_RENDER_STATE_READYeffect_count = 2;
+09-12 00:09:54.782 16244 16275 I RustStdoutStderr: [2m2026-09-11T16:09:54.781878Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m ANDROID_EFFECT_RENDER_STATE_READY [3meffect_count[0m[2m=[0m2
