@@ -224,11 +224,20 @@ periodic snapshot cannot resurrect a removed drop. The private frame-dimension
 catalog is stripped before runtime publication; live packets may select only a
 prevalidated numeric frame and never an arbitrary path.
 
+Authoritative `groundDrops` are also projected into the existing shared
+`GroundPickupModel`: at most the four nearest objects are exposed, ordered by
+Chebyshev tile distance and server object ID. The shared pickup panel and the
+Android 48-logical-pixel `Pick Up` rail action enqueue the exact
+`PickUpObject`; the Android host translates it into the existing authenticated
+`GatewayCommand::PickUp`. The client does not remove the object optimistically:
+only a later server packet or replacement snapshot can change the model.
+
 This action leaf deliberately does not claim the generated class/library
 catalogs needed by Archer, Assassin, mounted and other alternate actors.
 Continuous movement interpolation/backstep, spell effects, health feedback,
-ground-drop name labels and pickup interaction acceptance remain separate work.
-No atlas name from a packet is resolved or decoded on the live packet path.
+in-world colour-coded ground-drop name labels and live pickup acceptance remain
+separate work. No atlas name from a packet is resolved or decoded on the live
+packet path.
 
 The post-`IN_GAME` allowlist also carries health/death/revive and
 hide/show/teleport lifecycle packets. The private cache applies death position,

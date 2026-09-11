@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `8b39367ae`: complete and live authoritative ground-drop
+> models now populate the shared bounded pickup panel, and the mobile `Pick Up`
+> action preserves the exact server object ID through shared `PickUpObject` into
+> the authenticated Android Gateway queue. The client never deletes a drop
+> optimistically. API31 ARM64 offline evidence visibly shows both rendered drops,
+> the shared list and the 48px mobile action; a tap records `object_id=9101` while
+> retaining the object because no server is connected. Android 124/124, Java
+> 11/11, API31 target and both APK package gates pass. In-world colour labels,
+> approved live pickup/login and physical-device/human acceptance remain open.
+> Evidence:
+> `docs/generated/player-qa/native-android-ground-pickup-20260911/README.md`.
+
 > 2026-09-11 Android `1ed32d776`: ground items and gold now render from the
 > exact tracked Crystal `DNItems` frames in both complete snapshots and bounded
 > live packets, with authoritative removal and no fake marker/path injection.
