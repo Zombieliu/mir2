@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `35f12e4d3`: native actor visibility no longer reverts to
+> stale full-snapshot state after authoritative hide, teleport-out or remove;
+> show/teleport-in restores only a retained hidden actor, and server spawn
+> clears removal tombstones. Health/death/revive update the shared object state
+> and dead/live sprite opacity. Android 114/114, real-atlas 1/1, Java TLS 11/11
+> and API31 APK gates pass. Crystal death/combat animation, effects, drops and
+> live/device visual acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-lifecycle-20260911/README.md`.
+
 > 2026-09-11 Android `32e7b9b66`: map changes no longer leave the shared
 > gameplay HUD interactive over a cleared/loading native scene. The host reuses
 > `StartingGame`, preserves authenticated personal state, and returns to

@@ -189,6 +189,15 @@ inside the current viewport, and selects its authoritative standing direction
 without another atlas decode. Unmatched actors still wait for a complete render
 snapshot. Walk/run/attack frame animation is not implemented by this path.
 
+The post-`IN_GAME` allowlist also carries health/death/revive and
+hide/show/teleport lifecycle packets. The private cache applies death position,
+life state and dead/live opacity immediately. Hide and teleport-out remove an
+actor from both visible models while retaining its exact bounded record;
+show/teleport-in restores only that record. Remove creates a bounded tombstone
+that later periodic snapshots cannot resurrect, while a new authoritative
+spawn clears it. These lifecycle rules do not synthesize action frames,
+health-bar effects, or missing actors.
+
 This closes the reducer-to-live-socket outbound adaptation, existing
 transaction-result return adapters, and the bounded entity object-list/
 transform ingestion leaf only. Other ordinary server gameplay packets are not

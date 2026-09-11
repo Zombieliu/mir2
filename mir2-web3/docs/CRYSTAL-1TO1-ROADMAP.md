@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `35f12e4d3`: the native object cache now folds bounded
+> authoritative health/death, revive, hide/show, teleport and remove packets
+> after real transport world entry. Packet visibility survives later full
+> snapshots without stale resurrection, while a fresh spawn can reuse a
+> tombstoned id. Android 114, real-atlas 1, Java TLS 11, API31 and normal APK
+> launch gates pass. This is lifecycle projection, not action animation or a
+> real-account result; effects, drops, remaining reducers, approved online
+> journey and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-lifecycle-20260911/README.md`.
+
 > 2026-09-11 Android `32e7b9b66`: a changed authoritative map or live
 > `IN_GAME -> STARTING` transport boundary now returns the native client to the
 > shared `StartingGame` shell before scene reset. The authenticated character

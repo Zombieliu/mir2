@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `35f12e4d3`: post-`IN_GAME` entity lifecycle packets now
+> preserve authoritative health/death state and hide/show/teleport/remove
+> visibility across periodic snapshots. Hidden actors can be restored only from
+> their bounded retained record; removed actors remain tombstoned until a fresh
+> server spawn. Android 114/114, configured real-atlas 1/1, Java TLS 11/11,
+> API31 and normal APK build/install/cold-launch pass; APK SHA-256 is
+> `4b05008b022643c70f2213f5abf7938b53f43e16926ef73400c2ec7fc5f416a9`.
+> Action animation/effects, drops, remaining reducers, approved online login
+> and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-lifecycle-20260911/README.md`.
+
 > 2026-09-11 Android `32e7b9b66`: authoritative map boundaries now enter the
 > existing shared `StartingGame` presentation barrier before clearing the old
 > native scene. Authentication and personal models survive, but gameplay input
