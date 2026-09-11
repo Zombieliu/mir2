@@ -5,7 +5,10 @@
 //! to the exact native entity-render state built from the same snapshot.
 
 use serde_json::{json, Value};
-use std::{collections::HashSet, sync::Mutex};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::{LazyLock, Mutex},
+};
 
 const MAX_PACKET_BYTES: usize = 16 * 1024;
 const MAX_RENDER_BYTES: usize = 64 * 1024 * 1024;
@@ -19,14 +22,20 @@ struct LiveEntityCache {
     models: Option<Value>,
     render_request_id: u64,
     render: Option<Value>,
+    hidden: HashMap<u32, HiddenEntity>,
+    tombstones: HashSet<u32>,
 }
 
-static LIVE_ENTITIES: Mutex<LiveEntityCache> = Mutex::new(LiveEntityCache {
-    request_id: 0,
-    models: None,
-    render_request_id: 0,
-    render: None,
-});
+#[derive(Default)]
+struct HiddenEntity {
+    model: Option<Value>,
+    render: Option<Value>,
+}
+
+static LIVE_ENTITIES: LazyLock<Mutex<LiveEntityCache>> =
+    LazyLock::new(|| Mutex::new(LiveEntityCache::default()));
+#[cfg(test)]
+static LIVE_ENTITY_TEST_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum LiveEntityPacketOutcome {
@@ -48,7 +57,7 @@ pub(crate) fn install_models(json_text: &str, request_id: u64) -> bool {
     if request_id == 0 {
         return false;
     }
-    let Ok(value) = serde_json::from_str::<Value>(json_text) else {
+    let Ok(mut value) = serde_json::from_str::<Value>(json_text) else {
         return false;
     };
     if !valid_models(&value) {
@@ -57,6 +66,10 @@ pub(crate) fn install_models(json_text: &str, request_id: u64) -> bool {
     let mut cache = LIVE_ENTITIES
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let LiveEntityCache {
+        hidden, tombstones, ..
+    } = &mut *cache;
+    retain_visible_models(&mut value, hidden, tombstones);
     cache.request_id = request_id;
     cache.models = Some(value);
     if cache.render_request_id != request_id {
@@ -103,6 +116,10 @@ pub(crate) fn install_render(json_text: &str, directions_text: &str) -> bool {
     let mut cache = LIVE_ENTITIES
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let LiveEntityCache {
+        hidden, tombstones, ..
+    } = &mut *cache;
+    retain_visible_render(&mut value, hidden, tombstones);
     if cache.request_id == request_id {
         let Some(models) = cache.models.as_ref() else {
             return false;
@@ -114,6 +131,46 @@ pub(crate) fn install_render(json_text: &str, directions_text: &str) -> bool {
     cache.render_request_id = request_id;
     cache.render = Some(value);
     true
+}
+
+fn retain_visible_models(
+    value: &mut Value,
+    hidden: &mut HashMap<u32, HiddenEntity>,
+    tombstones: &HashSet<u32>,
+) {
+    let Some(entities) = value.get_mut("entities").and_then(Value::as_array_mut) else {
+        return;
+    };
+    entities.retain(|entity| {
+        let Some(object_id) = entity_id(entity) else {
+            return true;
+        };
+        if let Some(entry) = hidden.get_mut(&object_id) {
+            entry.model = Some(entity.clone());
+            return false;
+        }
+        !tombstones.contains(&object_id)
+    });
+}
+
+fn retain_visible_render(
+    value: &mut Value,
+    hidden: &mut HashMap<u32, HiddenEntity>,
+    tombstones: &HashSet<u32>,
+) {
+    let Some(entities) = value.get_mut("entities").and_then(Value::as_array_mut) else {
+        return;
+    };
+    entities.retain(|entity| {
+        let Some(object_id) = entity_id(entity) else {
+            return true;
+        };
+        if let Some(entry) = hidden.get_mut(&object_id) {
+            entry.render = Some(entity.clone());
+            return false;
+        }
+        !tombstones.contains(&object_id)
+    });
 }
 
 fn merge_direction_layers(render: &mut Value, sidecar: &Value) -> bool {
@@ -194,12 +251,32 @@ pub(crate) fn apply_packet(json_text: &str) -> LiveEntityPacketOutcome {
             .map(|(object_id, position)| {
                 EntityMutation::Move(object_id, position, direction(body).map(str::to_owned))
             }),
-        "ObjectAttack" | "ObjectStruck" | "ObjectDashAttack" => object_id(body)
+        "ObjectAttack" | "ObjectRangeAttack" | "ObjectStruck" | "ObjectDashAttack" => {
+            object_id(body)
+                .zip(location(body))
+                .map(|(object_id, position)| {
+                    EntityMutation::Move(object_id, position, direction(body).map(str::to_owned))
+                })
+        }
+        "ObjectHealth" => object_id(body)
+            .zip(percent(body))
+            .map(|(object_id, percent)| EntityMutation::Health { object_id, percent }),
+        "Death" => location(body).map(|position| EntityMutation::DeathSelf {
+            position,
+            direction: direction(body).map(str::to_owned),
+        }),
+        "ObjectDied" => object_id(body)
             .zip(location(body))
-            .map(|(object_id, position)| {
-                EntityMutation::Move(object_id, position, direction(body).map(str::to_owned))
+            .map(|(object_id, position)| EntityMutation::Death {
+                object_id,
+                position,
+                direction: direction(body).map(str::to_owned),
             }),
-        "ObjectRemove" | "ObjectTeleportOut" => object_id(body).map(EntityMutation::Remove),
+        "Revived" => Some(EntityMutation::ReviveSelf),
+        "ObjectRevived" => object_id(body).map(EntityMutation::Revive),
+        "ObjectHide" | "ObjectTeleportOut" => object_id(body).map(EntityMutation::Hide),
+        "ObjectShow" | "ObjectTeleportIn" => object_id(body).map(EntityMutation::Show),
+        "ObjectRemove" => object_id(body).map(EntityMutation::Remove),
         "ObjectPlayer" | "ObjectHero" => spawn(body, "player").map(EntityMutation::Spawn),
         "ObjectMonster" | "NewMonsterInfo" => spawn(body, "monster").map(EntityMutation::Spawn),
         "ObjectNpc" | "NewNpcInfo" => spawn(body, "npc").map(EntityMutation::Spawn),
@@ -212,25 +289,44 @@ pub(crate) fn apply_packet(json_text: &str) -> LiveEntityPacketOutcome {
         cache.models = Some(models);
         return LiveEntityPacketOutcome::Rejected;
     };
-    let changed = apply_models(&mut models, &mutation);
+    if matches!(
+        mutation,
+        EntityMutation::Hide(_) | EntityMutation::Remove(_)
+    ) && mutation_object_id(&mutation).is_some_and(|object_id| {
+        !cache.tombstones.contains(&object_id) && cache.tombstones.len() >= MAX_ENTITIES
+    }) {
+        cache.models = Some(models);
+        return LiveEntityPacketOutcome::Rejected;
+    }
+    let mut render_value = (cache.render_request_id == request_id)
+        .then(|| cache.render.take())
+        .flatten();
+    let (changed, render_changed) = {
+        let LiveEntityCache {
+            hidden, tombstones, ..
+        } = &mut *cache;
+        apply_cache_mutation(
+            &mut models,
+            render_value.as_mut(),
+            &mutation,
+            hidden,
+            tombstones,
+        )
+    };
     if !changed {
+        if cache.render_request_id == request_id {
+            cache.render = render_value;
+        }
         cache.models = Some(models);
         return LiveEntityPacketOutcome::Ignored;
     }
 
-    let render = if cache.render_request_id == request_id {
-        if let Some(mut value) = cache.render.take() {
-            let encoded = apply_render(&mut value, &mutation)
-                .then(|| runtime_render_json(&mut value))
-                .flatten();
-            cache.render = Some(value);
-            encoded
-        } else {
-            None
-        }
-    } else {
-        None
-    };
+    let render = render_changed
+        .then(|| render_value.as_mut().and_then(runtime_render_json))
+        .flatten();
+    if cache.render_request_id == request_id {
+        cache.render = render_value;
+    }
     let encoded_models = models.to_string();
     cache.models = Some(models);
     LiveEntityPacketOutcome::Applied {
@@ -239,10 +335,138 @@ pub(crate) fn apply_packet(json_text: &str) -> LiveEntityPacketOutcome {
     }
 }
 
+fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
+    match mutation {
+        EntityMutation::Hide(object_id)
+        | EntityMutation::Show(object_id)
+        | EntityMutation::Remove(object_id)
+        | EntityMutation::Revive(object_id)
+        | EntityMutation::Health { object_id, .. }
+        | EntityMutation::Death { object_id, .. } => Some(*object_id),
+        EntityMutation::Move(object_id, ..) => Some(*object_id),
+        EntityMutation::Spawn(spawn) => entity_id(&spawn.model),
+        EntityMutation::MoveSelf(..)
+        | EntityMutation::DeathSelf { .. }
+        | EntityMutation::ReviveSelf => None,
+    }
+}
+
+fn apply_cache_mutation(
+    models: &mut Value,
+    render: Option<&mut Value>,
+    mutation: &EntityMutation,
+    hidden: &mut HashMap<u32, HiddenEntity>,
+    tombstones: &mut HashSet<u32>,
+) -> (bool, bool) {
+    match mutation {
+        EntityMutation::Hide(object_id) => {
+            let model = take_entity(models, *object_id);
+            let rendered = render.and_then(|value| take_entity(value, *object_id));
+            let visible_changed = model.is_some() || rendered.is_some();
+            if visible_changed {
+                let entry = hidden.entry(*object_id).or_default();
+                if model.is_some() {
+                    entry.model = model;
+                }
+                if rendered.is_some() {
+                    entry.render = rendered;
+                }
+            }
+            let changed = tombstones.insert(*object_id) || visible_changed;
+            (changed, visible_changed)
+        }
+        EntityMutation::Show(object_id) => {
+            let Some(mut entry) = hidden.remove(object_id) else {
+                return (false, false);
+            };
+            let model_changed = entry
+                .model
+                .take()
+                .is_some_and(|entity| push_entity(models, entity));
+            let render_changed = entry
+                .render
+                .take()
+                .zip(render)
+                .is_some_and(|(entity, value)| push_entity(value, entity));
+            if model_changed || render_changed {
+                tombstones.remove(object_id);
+                (true, render_changed)
+            } else {
+                hidden.insert(*object_id, entry);
+                (false, false)
+            }
+        }
+        EntityMutation::Remove(object_id) => {
+            let model_changed = take_entity(models, *object_id).is_some();
+            let render_changed = render
+                .and_then(|value| take_entity(value, *object_id))
+                .is_some();
+            let hidden_changed = hidden.remove(object_id).is_some();
+            let changed =
+                tombstones.insert(*object_id) || model_changed || render_changed || hidden_changed;
+            (changed, render_changed)
+        }
+        EntityMutation::Spawn(spawn) => {
+            let object_id = entity_id(&spawn.model).expect("spawn was validated");
+            tombstones.remove(&object_id);
+            hidden.remove(&object_id);
+            let model_changed = apply_models(models, mutation);
+            let render_changed = render.is_some_and(|value| apply_render(value, mutation));
+            (model_changed || render_changed, render_changed)
+        }
+        _ => {
+            let model_changed = apply_models(models, mutation);
+            let render_changed = render.is_some_and(|value| apply_render(value, mutation));
+            (model_changed || render_changed, render_changed)
+        }
+    }
+}
+
+fn take_entity(value: &mut Value, object_id: u32) -> Option<Value> {
+    let entities = value.get_mut("entities")?.as_array_mut()?;
+    let index = entities
+        .iter()
+        .position(|entity| entity_id(entity) == Some(object_id))?;
+    Some(entities.remove(index))
+}
+
+fn push_entity(value: &mut Value, entity: Value) -> bool {
+    let Some(entities) = value.get_mut("entities").and_then(Value::as_array_mut) else {
+        return false;
+    };
+    if entities.len() >= MAX_ENTITIES
+        || entity_id(&entity).is_none()
+        || entities
+            .iter()
+            .any(|existing| entity_id(existing) == entity_id(&entity))
+    {
+        return false;
+    }
+    entities.push(entity);
+    true
+}
+
 #[derive(Debug)]
 enum EntityMutation {
     MoveSelf((i32, i32), Option<String>),
     Move(u32, (i32, i32), Option<String>),
+    Health {
+        object_id: u32,
+        percent: u8,
+    },
+    DeathSelf {
+        position: (i32, i32),
+        direction: Option<String>,
+    },
+    Death {
+        object_id: u32,
+        position: (i32, i32),
+        direction: Option<String>,
+    },
+    ReviveSelf,
+    Revive(u32),
+    Hide(u32),
+    Show(u32),
     Remove(u32),
     Spawn(EntitySpawn),
 }
@@ -280,6 +504,12 @@ fn direction(payload: &serde_json::Map<String, Value>) -> Option<&str> {
         .get("direction")
         .and_then(Value::as_str)
         .filter(|value| !value.is_empty() && value.len() <= 16)
+}
+
+fn percent(payload: &serde_json::Map<String, Value>) -> Option<u8> {
+    u8::try_from(payload.get("percent")?.as_u64()?)
+        .ok()
+        .filter(|value| *value <= 100)
 }
 
 fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntitySpawn> {
@@ -555,11 +785,39 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_model_transform(entity, *position, direction.as_deref())),
-        EntityMutation::Remove(object_id) => {
-            let previous = entities.len();
-            entities.retain(|entity| entity_id(entity) != Some(*object_id));
-            entities.len() != previous
-        }
+        EntityMutation::Health { object_id, percent } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_model_health(entity, *percent)),
+        EntityMutation::DeathSelf {
+            position,
+            direction,
+        } => entities
+            .iter_mut()
+            .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
+            .is_some_and(|entity| {
+                patch_model_transform(entity, *position, direction.as_deref())
+                    | patch_model_dead(entity, true)
+            }),
+        EntityMutation::Death {
+            object_id,
+            position,
+            direction,
+        } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| {
+                patch_model_transform(entity, *position, direction.as_deref())
+                    | patch_model_dead(entity, true)
+            }),
+        EntityMutation::ReviveSelf => entities
+            .iter_mut()
+            .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
+            .is_some_and(|entity| patch_model_dead(entity, false)),
+        EntityMutation::Revive(object_id) => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_model_dead(entity, false)),
         EntityMutation::Spawn(spawn) => {
             let object_id = entity_id(&spawn.model).expect("spawn was validated");
             if let Some(existing) = entities
@@ -579,7 +837,20 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             }
             true
         }
+        EntityMutation::Hide(_) | EntityMutation::Show(_) | EntityMutation::Remove(_) => false,
     }
+}
+
+fn patch_model_health(entity: &mut Value, percent: u8) -> bool {
+    let changed = entity.get("hpPercent").and_then(Value::as_u64) != Some(u64::from(percent));
+    entity["hpPercent"] = json!(percent);
+    patch_model_dead(entity, percent == 0) | changed
+}
+
+fn patch_model_dead(entity: &mut Value, dead: bool) -> bool {
+    let changed = entity.get("dead").and_then(Value::as_bool) != Some(dead);
+    entity["dead"] = json!(dead);
+    changed
 }
 
 fn set_model_position(entity: &mut Value, (x, y): (i32, i32)) -> bool {
@@ -620,10 +891,39 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_transform(entity, *position, direction.as_deref())),
-        EntityMutation::Remove(object_id) => {
-            entities.retain(|entity| entity_id(entity) != Some(*object_id));
-            true
-        }
+        EntityMutation::Health { object_id, percent } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_render_dead(entity, *percent == 0)),
+        EntityMutation::DeathSelf {
+            position,
+            direction,
+        } => entities
+            .iter_mut()
+            .find(|entity| entity.get("isSelf").and_then(Value::as_bool) == Some(true))
+            .is_some_and(|entity| {
+                patch_render_transform(entity, *position, direction.as_deref())
+                    | patch_render_dead(entity, true)
+            }),
+        EntityMutation::Death {
+            object_id,
+            position,
+            direction,
+        } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| {
+                patch_render_transform(entity, *position, direction.as_deref())
+                    | patch_render_dead(entity, true)
+            }),
+        EntityMutation::ReviveSelf => entities
+            .iter_mut()
+            .find(|entity| entity.get("isSelf").and_then(Value::as_bool) == Some(true))
+            .is_some_and(|entity| patch_render_dead(entity, false)),
+        EntityMutation::Revive(object_id) => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_render_dead(entity, false)),
         EntityMutation::Spawn(spawn) => {
             if let Some(existing) = entities
                 .iter_mut()
@@ -637,7 +937,34 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             }
             center.is_some_and(|center| spawn_render_from_prototype(entities, spawn, center))
         }
+        EntityMutation::Hide(_) | EntityMutation::Show(_) | EntityMutation::Remove(_) => false,
     }
+}
+
+fn patch_render_dead(entity: &mut Value, dead: bool) -> bool {
+    let opacity = if dead { 0.45 } else { 1.0 };
+    let mut changed = false;
+    if let Some(layers) = entity.get_mut("layers").and_then(Value::as_array_mut) {
+        changed |= patch_layers_opacity(layers, opacity);
+    }
+    if let Some(directions) = entity
+        .get_mut("directionLayers")
+        .and_then(Value::as_object_mut)
+    {
+        for layers in directions.values_mut().filter_map(Value::as_array_mut) {
+            changed |= patch_layers_opacity(layers, opacity);
+        }
+    }
+    changed
+}
+
+fn patch_layers_opacity(layers: &mut [Value], opacity: f64) -> bool {
+    let mut changed = false;
+    for layer in layers {
+        changed |= layer.get("opacity").and_then(Value::as_f64) != Some(opacity);
+        layer["opacity"] = json!(opacity);
+    }
+    changed
 }
 
 fn spawn_render_from_prototype(
@@ -812,6 +1139,7 @@ mod tests {
 
     #[test]
     fn authoritative_packets_patch_exact_models_and_render_without_prediction() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
         clear();
         assert!(install_models(
             r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"level":7,"direction":"Down"},{"objectId":"43","kind":"monster","name":"Deer","x":301,"y":630,"level":null,"direction":"Left"}]}"#,
@@ -908,6 +1236,130 @@ mod tests {
         assert_eq!(models["entities"][0]["kind"], "selfPlayer");
         assert_eq!(models["entities"][0]["direction"], "Right");
         assert_eq!(apply_packet("not-json"), LiveEntityPacketOutcome::Rejected);
+        clear();
+    }
+
+    #[test]
+    fn lifecycle_packets_keep_hidden_and_removed_objects_authoritative() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"level":7,"direction":"Down"},{"objectId":"43","kind":"monster","name":"Deer","x":301,"y":630,"level":null,"direction":"Left"}]}"#,
+            19,
+        ));
+        assert!(install_render(
+            r#"{"_nativeWorldRequest":19,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"key":"42:body:0","left":480.0,"top":352.0,"opacity":1.0}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]}]}"#,
+            r#"{"_nativeWorldRequest":19,"entities":[{"objectId":"43","prototype":{"kind":"monster","classKey":"","dead":false,"sprite":{"bodyLibrary":"Mon/01","hairLibrary":null,"weaponLibrary":null,"weaponLibrarySecondary":null,"altBodyLibrary":null,"altHairLibrary":null,"altWeaponLibrary":null,"altWeaponLibrarySecondary":null,"mountLibrary":null,"frameBaseOffset":0,"weaponFrameOffset":null,"altFrameBaseOffset":null,"altWeaponFrameOffset":null,"frameCount":4,"directionStride":4,"mountFrameOffset":null}},"directionLayers":{"Left":[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]}}]}"#,
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectHealth","payload":{"objectId":43,"percent":0,"expire":0}}"#,
+        ) else {
+            panic!("health should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["hpPercent"], 0);
+        assert_eq!(models["entities"][1]["dead"], true);
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(render["entities"][1]["layers"][0]["opacity"], 0.45);
+
+        let LiveEntityPacketOutcome::Applied { models, render } =
+            apply_packet(r#"{"type":"packet","packet":"ObjectHide","payload":{"objectId":43}}"#)
+        else {
+            panic!("hide should apply");
+        };
+        assert_eq!(
+            serde_json::from_str::<Value>(&models).unwrap()["entities"]
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
+        assert_eq!(
+            serde_json::from_str::<Value>(render.as_deref().unwrap()).unwrap()["entities"]
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
+
+        // A later periodic snapshot cannot resurrect a hidden packet object.
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"level":7,"direction":"Down"},{"objectId":"43","kind":"monster","name":"Deer refreshed","x":302,"y":631,"level":null,"direction":"Right"}]}"#,
+            20,
+        ));
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectShow","payload":{"objectId":43}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectDied","payload":{"objectId":43,"location":{"x":303,"y":632},"direction":"Up"}}"#,
+        ) else {
+            panic!("death should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["name"], "Deer refreshed");
+        assert_eq!(models["entities"][1]["x"], 303);
+        assert_eq!(models["entities"][1]["dead"], true);
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectRevived","payload":{"objectId":43,"effect":true}}"#,
+        ) else {
+            panic!("revive should apply");
+        };
+        assert_eq!(
+            serde_json::from_str::<Value>(&models).unwrap()["entities"][1]["dead"],
+            false
+        );
+
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectTeleportOut","payload":{"objectId":43,"effectType":1}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectTeleportIn","payload":{"objectId":43,"effectType":1}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectRemove","payload":{"objectId":43}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert_eq!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectShow","payload":{"objectId":43}}"#),
+            LiveEntityPacketOutcome::Ignored
+        );
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"level":7,"direction":"Down"},{"objectId":"43","kind":"monster","name":"Stale Deer","x":304,"y":633,"level":null,"direction":"Right"}]}"#,
+            21,
+        ));
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"NewMonsterInfo","payload":{"objectId":43,"name":"Fresh Deer","location":{"x":305,"y":634},"direction":"Down"}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"Death","payload":{"location":{"x":299,"y":629},"direction":"Left"}}"#,
+        ) else {
+            panic!("self death should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][0]["dead"], true);
+        assert_eq!(models["entities"][0]["x"], 299);
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"Revived","payload":{}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectHealth","payload":{"objectId":43,"percent":101}}"#
+            ),
+            LiveEntityPacketOutcome::Rejected
+        );
         clear();
     }
 }

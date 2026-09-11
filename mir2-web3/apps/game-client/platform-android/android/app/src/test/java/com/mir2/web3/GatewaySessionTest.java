@@ -249,6 +249,24 @@ public class GatewaySessionTest {
         assertEquals("ObjectWalk", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
         peer.send("{\"type\":\"packet\",\"packet\":\"NewMonsterInfo\",\"payload\":{\"objectId\":77,\"name\":\"Hen\",\"location\":{\"x\":299,\"y\":629}}}");
         assertEquals("NewMonsterInfo", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
+        String[] lifecycle = new String[] {
+                "{\"type\":\"packet\",\"packet\":\"ObjectHealth\",\"payload\":{\"objectId\":77,\"percent\":0,\"expire\":0}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectRangeAttack\",\"payload\":{\"objectId\":77,\"location\":{\"x\":299,\"y\":629},\"direction\":\"Left\"}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectDied\",\"payload\":{\"objectId\":77,\"location\":{\"x\":299,\"y\":629},\"direction\":\"Left\"}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectRevived\",\"payload\":{\"objectId\":77,\"effect\":true}}",
+                "{\"type\":\"packet\",\"packet\":\"Death\",\"payload\":{\"location\":{\"x\":302,\"y\":634},\"direction\":\"Down\"}}",
+                "{\"type\":\"packet\",\"packet\":\"Revived\",\"payload\":{}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectHide\",\"payload\":{\"objectId\":77}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectShow\",\"payload\":{\"objectId\":77}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectTeleportOut\",\"payload\":{\"objectId\":77,\"effectType\":1}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectTeleportIn\",\"payload\":{\"objectId\":77,\"effectType\":1}}"
+        };
+        for (String packet : lifecycle) {
+            peer.send(packet);
+            JSONObject expected = new JSONObject(packet);
+            JSONObject forwarded = new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS));
+            assertEquals(expected.getString("packet"), forwarded.getString("packet"));
+        }
         peer.send("{\"type\":\"packet\",\"packet\":\"ObjectChat\",\"payload\":{\"text\":\"not an entity transform\"}}");
         assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
     }
