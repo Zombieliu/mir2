@@ -29,7 +29,7 @@ mod scene_effects;
 #[cfg(any(target_os = "android", test))]
 mod shared_shell;
 mod text_input;
-#[cfg(feature = "ui-preview")]
+#[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
 mod ui_preview;
 #[cfg(any(target_os = "android", test))]
 mod world_assets;

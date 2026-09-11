@@ -23,7 +23,11 @@ Optionally set `MIR2_ANDROID_WORLD_ASSET_ROOT` to an approved generated asset
 root containing `generated/map-atlas/manifest.json`, its PNG pages, and the
 bounded raw map `generated/crystal-map-pack/0.map`, plus
 `generated/native-map-keyed/manifest.json` and its content-addressed pages.
-Gradle also stages the tracked shared `bevy-entity-atlases` manifest/pages. On
+Gradle normally stages the tracked shared `bevy-entity-atlases`
+manifest/pages. For bounded local licensed-asset QA, set
+`MIR2_ANDROID_ENTITY_ASSET_ROOT` to a generated asset root containing
+`bevy-entity-atlases/manifest.json` and its PNG pages; Gradle stages that pack
+only into generated APK assets and does not modify or commit the Web release. On
 each accepted Bichon world snapshot, the Android host validates schema, counts,
 geometry, paths and memory limits; decodes the packaged map atlas and the
 entity/keyed pages used by that view off the render thread; parses the Crystal
@@ -283,11 +287,14 @@ The renderer falls back to the common body only when an alternate library is
 not packaged, never to a packet-selected or fabricated frame.
 
 The tracked atlas currently contains the Assassin A* roots but not
-`ARArmour`/`ARWeapon` or `Mount`, so only Assassin alternate layers have real
-atlas and API31 visual evidence; Archer alternate and mounted paths are exact
-fixture-tested asset-closure work, not visually accepted variants. Android
-146/146, tracked-atlas 2/2, API31 target/package/install/cold-launch pass.
-Evidence: `docs/generated/player-qa/native-android-entity-catalog-20260912/README.md`.
+`ARArmour`/`ARWeapon` or `Mount`. An explicit local build-only override has now
+proved `ARArmour/00`, `ARWeapon/00 S`, and `Mount/00` on the API31 emulator
+without changing that tracked Web release. The bounded proof pack and APK stay
+ignored; regular `ARWeapon/00` is excluded because its PNGs 808 through 831
+lack frame metadata, so the proof does not claim a standing Archer bow.
+Android `ui-preview` 147/147, forced real-pack 1/1, and API31
+package/install/cold-launch pass. Evidence:
+`docs/generated/player-qa/native-android-archer-mount-atlas-20260912/README.md`.
 Approved live damage/pickup/login acceptance and physical-device input remain
 separate gates. No atlas name from a packet is resolved or decoded on the live
 packet path.

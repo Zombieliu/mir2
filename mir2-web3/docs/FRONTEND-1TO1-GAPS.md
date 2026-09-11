@@ -1,6 +1,19 @@
 # Frontend 1:1 Gaps
 
-> 2026-09-12 Android current change: action-specific player-library selection
+> 2026-09-12 Android current change: an explicit local entity-atlas build input
+> now lets licensed QA packs enter generated APK assets without mutating the
+> tracked Web release. A bounded 7,120-frame, five-page pack proved real
+> `ARArmour/00`, `ARWeapon/00 S`, and `Mount/00` layers on the API31 ARM64
+> emulator: Bichon reached render-ready with seven objects/eleven layers, zero
+> unresolved draws, and accepted Archer range plus mounted attack through the
+> production packet-presentation path. Android `ui-preview` tests are 147/147;
+> the forced real-pack lookup and package/install/cold-launch gates pass. The
+> normal shared atlas is unchanged, `ARWeapon/00` frames 808-831 lack metadata,
+> and this remains offline evidence rather than real login, live map switching,
+> physical-device, or human acceptance. Evidence:
+> `docs/generated/player-qa/native-android-archer-mount-atlas-20260912/README.md`.
+
+> 2026-09-12 Android `8c1826bcd`: action-specific player-library selection
 > now resolves the tracked Assassin `AArmour`/`AHair`/dual-`AWeapon` layers,
 > including `%20` space canonicalization and direction-dependent weapon depth.
 > Bounded Archer compact and mounted action/lifecycle catalogs are implemented;

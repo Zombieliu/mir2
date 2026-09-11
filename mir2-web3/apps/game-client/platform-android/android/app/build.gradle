@@ -39,9 +39,14 @@ def prepareWorldAssets = tasks.register('prepareWorldAssets', Sync) {
 }
 
 // The entity atlas is generated from the same approved Crystal source pack as
-// the Web renderer and is checked in as an immutable, content-addressed build
-// input. Android decodes only the pages referenced by the current snapshot.
-def entityAtlasRoot = file("${projectDir}/../../../../web/public/bevy-entity-atlases")
+// the Web renderer. Normal builds use the immutable tracked atlas; an explicit
+// local override lets Android QA exercise a bounded licensed pack without
+// committing that pack or changing the Web release. Android still validates
+// the manifest, page integrity and selected-page memory budget at runtime.
+def entityAtlasOverride = System.getenv('MIR2_ANDROID_ENTITY_ASSET_ROOT')
+def entityAtlasRoot = entityAtlasOverride
+        ? file("${entityAtlasOverride}/bevy-entity-atlases")
+        : file("${projectDir}/../../../../web/public/bevy-entity-atlases")
 def prepareEntityAssets = tasks.register('prepareEntityAssets', Sync) {
     from(entityAtlasRoot) {
         include 'manifest.json', '*.png'
@@ -50,7 +55,9 @@ def prepareEntityAssets = tasks.register('prepareEntityAssets', Sync) {
     into layout.buildDirectory.dir('generated/entity-assets')
     doFirst {
         if (!file("${entityAtlasRoot}/manifest.json").isFile()) {
-            throw new GradleException('The shared Bevy entity-atlas manifest is missing')
+            throw new GradleException(entityAtlasOverride
+                    ? 'MIR2_ANDROID_ENTITY_ASSET_ROOT does not contain bevy-entity-atlases/manifest.json'
+                    : 'The shared Bevy entity-atlas manifest is missing')
         }
     }
 }

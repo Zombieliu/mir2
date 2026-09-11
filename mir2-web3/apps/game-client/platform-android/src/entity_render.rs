@@ -2006,4 +2006,116 @@ mod tests {
         assert_eq!(frames[0][0]["path"], "/original-ui/AWeapon/00 L/160.png");
         assert_eq!(frames[5][3]["path"], "/original-ui/AWeapon/00 R/165.png");
     }
+
+    #[test]
+    fn configured_extended_atlas_resolves_real_archer_and_mount_when_present() {
+        let Ok(root) = std::env::var("MIR2_ANDROID_ENTITY_ASSET_ROOT") else {
+            return;
+        };
+        let root = std::path::PathBuf::from(root);
+        let manifest_bytes = std::fs::read(root.join(ENTITY_ATLAS_MANIFEST_ASSET))
+            .expect("configured entity atlas manifest");
+        let manifest: Value =
+            serde_json::from_slice(&manifest_bytes).expect("configured entity atlas JSON");
+        let roots = manifest["atlases"][0]["roots"]
+            .as_array()
+            .expect("configured entity atlas roots");
+        let has_extended_roots = ["ARArmour/00", "ARWeapon/00 S", "Mount/00"]
+            .into_iter()
+            .all(|required| roots.iter().any(|root| root.as_str() == Some(required)));
+        if !has_extended_roots {
+            assert!(
+                std::env::var_os("MIR2_ANDROID_REQUIRE_EXTENDED_ENTITY_ATLAS").is_none(),
+                "configured entity atlas is missing the required Archer/mount roots"
+            );
+            return;
+        }
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[
+                {
+                    "objectId":"42","kind":"selfPlayer","classKey":"archer",
+                    "x":300,"y":630,"direction":"Right",
+                    "sprite":{
+                        "bodyLibrary":"CArmour/00",
+                        "altBodyLibrary":"ARArmour/00","altWeaponLibrary":"ARWeapon/00 S",
+                        "frameBaseOffset":0,"weaponFrameOffset":0,
+                        "altFrameBaseOffset":0,"altWeaponFrameOffset":0,
+                        "frameCount":4,"directionStride":4
+                    }
+                },
+                {
+                    "objectId":"43","kind":"player","classKey":"warrior",
+                    "x":301,"y":630,"direction":"Down",
+                    "sprite":{
+                        "bodyLibrary":"CArmour/00","mountLibrary":"Mount/00",
+                        "frameBaseOffset":0,"mountFrameOffset":0,
+                        "frameCount":4,"directionStride":4
+                    }
+                }
+            ]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 35, |asset, max_bytes| {
+            let path = if asset == DNITEMS_META_ASSET {
+                std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                    .join("../../web/public/original-ui/DNItems/meta.json")
+            } else {
+                root.join(asset)
+            };
+            let bytes = std::fs::read(path).map_err(|error| {
+                WorldAssetError::new(format!(
+                    "configured entity asset could not be read: {error}"
+                ))
+            })?;
+            if bytes.is_empty() || bytes.len() > max_bytes {
+                return Err(WorldAssetError::new(
+                    "configured entity asset has an invalid byte count",
+                ));
+            }
+            Ok(bytes)
+        })
+        .unwrap();
+        assert_eq!(product.entity_count, 2);
+        assert_eq!(product.layer_count, 3);
+        assert_eq!(product.unresolved_entity_count, 0);
+        assert!(product.rgba_bytes <= MAX_SELECTED_RGBA_BYTES);
+        let live: Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        let archer = live["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"] == "42")
+            .unwrap();
+        let archer_range = archer["actionLayers"]["attackRange1:Right"]["frames"]
+            .as_array()
+            .unwrap();
+        assert_eq!(archer_range.len(), 8);
+        assert_eq!(
+            archer_range[0][0]["path"],
+            "/original-ui/ARArmour/00/112.png"
+        );
+        assert_eq!(
+            archer_range[0][1]["path"],
+            "/original-ui/ARWeapon/00 S/112.png"
+        );
+        let mounted = live["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"] == "43")
+            .unwrap();
+        let mounted_attack = mounted["actionLayers"]["attack1:Down"]["frames"]
+            .as_array()
+            .unwrap();
+        assert_eq!(mounted_attack.len(), 6);
+        assert_eq!(
+            mounted_attack[0][0]["path"],
+            "/original-ui/Mount/00/192.png"
+        );
+        assert_eq!(
+            mounted_attack[0][1]["path"],
+            "/original-ui/CArmour/00/608.png"
+        );
+    }
 }

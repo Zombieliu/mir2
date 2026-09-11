@@ -102,27 +102,49 @@ fn start_world_render_motion_specimen(
         }
     })
     .to_string();
-    match crate::live_entity::apply_packet(&attack) {
+    if apply_offline_entity_packet(&attack) {
+        info!("ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED");
+    } else {
+        warn!("offline Assassin action was not accepted by the native renderer");
+    }
+    let archer = serde_json::json!({
+        "type":"packet", "packet":"ObjectRangeAttack", "payload":{
+            "objectId":9004, "x":301, "y":631, "direction":"Right"
+        }
+    })
+    .to_string();
+    if apply_offline_entity_packet(&archer) {
+        info!("ANDROID_ARCHER_RANGE_PRESENTATION_STARTED");
+    } else {
+        warn!("offline Archer action was not accepted by the native renderer");
+    }
+    let mounted = serde_json::json!({
+        "type":"packet", "packet":"ObjectAttack", "payload":{
+            "objectId":9005, "x":304, "y":631, "direction":"Down"
+        }
+    })
+    .to_string();
+    if apply_offline_entity_packet(&mounted) {
+        info!("ANDROID_MOUNTED_ATTACK_PRESENTATION_STARTED");
+    } else {
+        warn!("offline mounted action was not accepted by the native renderer");
+    }
+    *started = true;
+}
+
+fn apply_offline_entity_packet(packet: &str) -> bool {
+    match crate::live_entity::apply_packet(packet) {
         crate::live_entity::LiveEntityPacketOutcome::Applied { models, render, .. } => {
             let models_ready =
                 mir2_bevy_runtime::native_ingest::push_native_entity_model_set(models);
             let render_ready = render
                 .map(mir2_bevy_runtime::native_ingest::push_native_entity_render_state)
                 .unwrap_or(false);
-            if models_ready && render_ready {
-                info!("ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED");
-            } else {
-                warn!("offline Assassin action was not accepted by the native renderer");
-            }
+            models_ready && render_ready
         }
-        crate::live_entity::LiveEntityPacketOutcome::Ignored => {
-            warn!("offline Assassin action was ignored by the installed entity model")
-        }
-        crate::live_entity::LiveEntityPacketOutcome::Rejected => {
-            warn!("offline Assassin action packet was rejected")
-        }
+        crate::live_entity::LiveEntityPacketOutcome::Ignored
+        | crate::live_entity::LiveEntityPacketOutcome::Rejected => false,
     }
-    *started = true;
 }
 
 fn report_world_render_motion_pose(
@@ -340,7 +362,14 @@ fn apply(world: &mut World) {
                 {"objectId":"9002","kind":"monster","name":"Offline_monster","nameColourArgb":-65536,"x":304,"y":634,"direction":"Right","_healthPercent":65,"_healthExpireSeconds":90,"_healthGeneration":1,"_healthRevision":1,
                  "sprite":{"bodyLibrary":"Monster/003","frameBaseOffset":0,"directionStride":4}},
                 {"objectId":"9003","kind":"player","name":"Motion witness","guildName":"BACKSTEP","nameColourArgb":-16711681,"x":299,"y":634,"direction":"Right",
-                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}}
+                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}},
+                {"objectId":"9004","kind":"player","classKey":"archer","name":"Offline archer","guildName":"RANGE","nameColourArgb":-16711681,"x":301,"y":631,"direction":"Right",
+                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4,
+                    "altBodyLibrary":"ARArmour/00","altWeaponLibrary":"ARWeapon/00 S",
+                    "altFrameBaseOffset":0,"altWeaponFrameOffset":0}},
+                {"objectId":"9005","kind":"player","classKey":"warrior","name":"Offline rider","guildName":"MOUNT","nameColourArgb":-23296,"x":304,"y":631,"direction":"Down",
+                 "sprite":{"bodyLibrary":"CArmour/00","mountLibrary":"Mount/00",
+                    "frameBaseOffset":0,"mountFrameOffset":0,"directionStride":4}}
             ],
             "groundDrops":[
                 {"objectId":"9101","name":"Offline potion","nameColourArgb":-10040065,
