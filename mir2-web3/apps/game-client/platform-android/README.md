@@ -75,6 +75,13 @@ NPC/monster underscore line breaks. The local player's bar uses exact shared
 packet revision renewing the timer even when the percentage repeats. It never
 infers exact monster HP from a percentage. Shared `NameView` hides names and
 guilds but not health feedback, and every overlay node passes input through.
+Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
+event queue and rendered only over the exact authoritative object. Hit, miss,
+critical and heal variants use the Windows Crystal rise/fade presentation; a
+real hit may renew a five-second visibility window for the server percentage
+bar, but neither damage nor percentage is converted into invented exact HP.
+The damage tree is input-pass-through and is cleared at every scene/session
+boundary.
 Map/entity state is published before its bounded image batches so queue pressure
 cannot evict the state that owns those images. Only the same exact request
 remaining complete across two consecutive rendered frames, with a non-empty
@@ -110,7 +117,7 @@ roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
 generated per-library action variants, continuous locomotion/backstep
-interpolation, damage/effect presentation and complete gameplay remain
+interpolation, spell/projectile/impact effects and complete gameplay remain
 subsequent work. The
 existing reducer command queue is connected to the authenticated in-game
 socket through the bounded JNI lease mailbox described below. Authoritative
@@ -251,9 +258,10 @@ an object pickable or remove it.
 
 This action leaf deliberately does not claim the generated class/library
 catalogs needed by Archer, Assassin, mounted and other alternate actors.
-Continuous movement interpolation/backstep, spell effects, health feedback,
-live pickup acceptance and physical-device input remain separate work. No atlas
-name from a packet is resolved or decoded on the live packet path.
+Continuous movement interpolation/backstep, spell/projectile/impact effects,
+approved live damage/pickup acceptance and physical-device input remain
+separate work. No atlas name from a packet is resolved or decoded on the live
+packet path.
 
 The post-`IN_GAME` allowlist also carries health/death/revive and
 hide/show/teleport lifecycle packets. The private cache applies death position,
@@ -261,9 +269,9 @@ life state and dead/live opacity immediately. Hide and teleport-out remove an
 actor from both visible models while retaining its exact bounded record;
 show/teleport-in restores only that record. Remove creates a bounded tombstone
 that later periodic snapshots cannot resurrect, while a new authoritative
-spawn clears it. These lifecycle rules do not synthesize health-bar effects or
-missing actors; exact death/revive/skeleton frames are limited to the generic
-catalog coverage described above.
+spawn clears it. These lifecycle rules do not synthesize missing actors or
+exact monster HP; exact death/revive/skeleton frames are limited to the
+generic catalog coverage described above.
 
 This closes the reducer-to-live-socket outbound adaptation, existing
 transaction-result return adapters, and the bounded entity object-list/

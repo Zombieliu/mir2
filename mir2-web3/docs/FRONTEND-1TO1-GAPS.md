@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `1d6c0a2b3`: authenticated post-`IN_GAME`
+> `DamageIndicator` packets now retain exact object/damage/type fields in a
+> bounded Android event queue and render Crystal-style hit, miss, critical and
+> heal floaters only over the matching authoritative actor. Real hits can
+> renew a five-second view of the existing server percentage bar without
+> inventing exact monster HP. The API31 offline specimen visibly places `128`
+> over its fixture monster alongside the packaged map, actors, names, health
+> bars and drops. Android 137/137, Java 11/11, API31 target and both APK package
+> gates pass. Approved live packet/login and physical-device/human acceptance
+> remain open. Evidence:
+> `docs/generated/player-qa/native-android-damage-feedback-20260911/README.md`.
+
 > 2026-09-11 Android `f81ae8415`: native actor overlays now project bounded,
 > input-pass-through names, guild lines and health bars from the same validated
 > authoritative object model as actor sprites. Signed server name colours,
