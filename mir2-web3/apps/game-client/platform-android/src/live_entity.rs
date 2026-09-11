@@ -6,7 +6,7 @@
 
 use serde_json::{json, Value};
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, VecDeque},
     sync::{LazyLock, Mutex},
     time::Instant,
 };
@@ -15,6 +15,7 @@ const MAX_PACKET_BYTES: usize = 16 * 1024;
 const MAX_RENDER_BYTES: usize = 64 * 1024 * 1024;
 const MAX_ENTITIES: usize = 8192;
 const MAX_ACTION_POSES: usize = 128;
+const MAX_DAMAGE_EVENTS: usize = 48;
 const MAX_GROUND_ITEM_FRAMES: usize = 6_000;
 const CELL_WIDTH: f64 = 48.0;
 const CELL_HEIGHT: f64 = 32.0;
@@ -30,6 +31,8 @@ struct LiveEntityCache {
     actions: HashMap<u32, ActiveAction>,
     health_generation: u64,
     health_revision: u64,
+    damage_sequence: u64,
+    damage_events: VecDeque<LiveDamageEvent>,
 }
 
 #[derive(Default)]
@@ -72,10 +75,27 @@ pub(crate) enum LiveEntityPacketOutcome {
     Rejected,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct LiveDamageEvent {
+    pub(crate) sequence: u64,
+    pub(crate) object_id: u32,
+    pub(crate) damage: i32,
+    pub(crate) damage_type: u8,
+}
+
 pub(crate) fn clear() {
     *LIVE_ENTITIES
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner()) = LiveEntityCache::default();
+}
+
+pub(crate) fn drain_damage_events() -> Vec<LiveDamageEvent> {
+    LIVE_ENTITIES
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .damage_events
+        .drain(..)
+        .collect()
 }
 
 pub(crate) fn install_models(json_text: &str, request_id: u64) -> bool {
@@ -360,6 +380,18 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 started_ms: now_ms,
                 life_state: None,
             }),
+        "DamageIndicator" => object_id(body)
+            .zip(damage(body))
+            .zip(damage_type(body))
+            .map(|((object_id, damage), damage_type)| {
+                cache.damage_sequence = cache.damage_sequence.saturating_add(1);
+                EntityMutation::Damage(LiveDamageEvent {
+                    sequence: cache.damage_sequence,
+                    object_id,
+                    damage,
+                    damage_type,
+                })
+            }),
         "ObjectHealth" => object_id(body).zip(percent(body)).zip(expire(body)).map(
             |((object_id, percent), expire)| {
                 cache.health_revision = cache.health_revision.wrapping_add(1).max(1);
@@ -463,6 +495,12 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
         }
         cache.models = Some(models);
         return LiveEntityPacketOutcome::Ignored;
+    }
+    if let EntityMutation::Damage(event) = mutation {
+        while cache.damage_events.len() >= MAX_DAMAGE_EVENTS {
+            cache.damage_events.pop_front();
+        }
+        cache.damage_events.push_back(event);
     }
 
     let render = render_changed
@@ -580,6 +618,7 @@ fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
         | EntityMutation::Remove(object_id)
         | EntityMutation::Health { object_id, .. }
         | EntityMutation::Action { object_id, .. } => Some(*object_id),
+        EntityMutation::Damage(event) => Some(event.object_id),
         EntityMutation::Move(object_id, ..) => Some(*object_id),
         EntityMutation::Spawn(spawn) => entity_id(&spawn.model),
         EntityMutation::GroundDrop(drop) => entity_id(&drop.model),
@@ -751,6 +790,7 @@ enum EntityMutation {
         generation: u64,
         revision: u64,
     },
+    Damage(LiveDamageEvent),
     Hide(u32),
     Show(u32),
     Remove(u32),
@@ -808,6 +848,14 @@ fn percent(payload: &serde_json::Map<String, Value>) -> Option<u8> {
 
 fn expire(payload: &serde_json::Map<String, Value>) -> Option<u8> {
     u8::try_from(payload.get("expire")?.as_u64()?).ok()
+}
+
+fn damage(payload: &serde_json::Map<String, Value>) -> Option<i32> {
+    i32::try_from(payload.get("damage")?.as_i64()?).ok()
+}
+
+fn damage_type(payload: &serde_json::Map<String, Value>) -> Option<u8> {
+    u8::try_from(payload.get("damageType")?.as_u64()?).ok()
 }
 
 fn ground_drop(payload: &serde_json::Map<String, Value>, gold: bool) -> Option<GroundDropSpawn> {
@@ -1280,6 +1328,15 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             .is_some_and(|entity| {
                 patch_model_health(entity, *percent, *expire, *generation, *revision)
             }),
+        EntityMutation::Damage(event) => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(event.object_id))
+            .is_some_and(|entity| {
+                if event.damage > 0 && matches!(event.damage_type, 0 | 2) {
+                    entity["_healthHitRevision"] = json!(event.sequence);
+                }
+                true
+            }),
         EntityMutation::Spawn(spawn) => {
             let object_id = entity_id(&spawn.model).expect("spawn was validated");
             if let Some(existing) = entities
@@ -1430,6 +1487,7 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_dead(entity, *percent == 0)),
+        EntityMutation::Damage(_) => false,
         EntityMutation::Spawn(spawn) => {
             if let Some(existing) = entities
                 .iter_mut()
@@ -2147,6 +2205,58 @@ mod tests {
             ),
             LiveEntityPacketOutcome::Rejected
         );
+        clear();
+    }
+
+    #[test]
+    fn damage_indicator_retains_exact_event_and_only_real_hits_extend_health() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630},{"objectId":"43","kind":"monster","name":"Deer","x":301,"y":630}]}"#,
+            23,
+        ));
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectHealth","payload":{"objectId":43,"percent":73,"expire":0}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+            r#"{"type":"packet","packet":"DamageIndicator","payload":{"damage":12,"damageType":2,"objectId":43,"typed":true}}"#,
+        ) else {
+            panic!("critical damage should apply");
+        };
+        assert!(render.is_none());
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["_healthHitRevision"], 1);
+        assert_eq!(
+            drain_damage_events(),
+            vec![LiveDamageEvent {
+                sequence: 1,
+                object_id: 43,
+                damage: 12,
+                damage_type: 2,
+            }]
+        );
+
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"DamageIndicator","payload":{"damage":0,"damageType":1,"objectId":43}}"#,
+        ) else {
+            panic!("miss should remain visible feedback");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["_healthHitRevision"], 1);
+        assert_eq!(drain_damage_events()[0].damage_type, 1);
+
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"DamageIndicator","payload":{"damage":9,"objectId":43}}"#
+            ),
+            LiveEntityPacketOutcome::Rejected
+        );
+        assert!(drain_damage_events().is_empty());
         clear();
     }
 

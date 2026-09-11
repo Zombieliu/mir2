@@ -14,7 +14,7 @@ use mir2_client_bevy::{
     read_model::UiReadModel,
 };
 use serde_json::Value;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 const STAGE_WIDTH: f32 = 1024.0;
 const STAGE_HEIGHT: f32 = 768.0;
@@ -35,15 +35,23 @@ const OVERLAY_Z_INDEX: i32 = 850;
 const MAX_MODEL_BYTES: usize = 2 * 1024 * 1024;
 const MAX_WORLD_OBJECTS: usize = 8192;
 const MAX_VISIBLE_ACTORS: usize = 256;
+const MAX_DAMAGE_FLOATERS: usize = 48;
+const MAX_DAMAGE_FLOATERS_PER_ACTOR: usize = 10;
 
 #[derive(Component)]
 pub(crate) struct ActorOverlayRoot;
+
+#[derive(Component)]
+pub(crate) struct DamageOverlayRoot;
 
 #[derive(Component)]
 struct ActorNameLine;
 
 #[derive(Component)]
 struct ActorHealthBar;
+
+#[derive(Component)]
+struct DamageFloaterNode(u64);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum ActorKind {
@@ -73,6 +81,7 @@ struct HealthPacket {
     expire_seconds: u8,
     generation: u64,
     revision: u64,
+    hit_revision: Option<u64>,
 }
 
 #[derive(Resource, Debug, Default)]
@@ -80,6 +89,8 @@ pub(crate) struct ActorOverlayModel {
     center: Option<(i32, i32)>,
     actors: Vec<ActorOverlay>,
     revision: u64,
+    active_floaters: VecDeque<ActiveDamageFloater>,
+    last_damage_sequence: u64,
 }
 
 impl ActorOverlayModel {
@@ -97,13 +108,110 @@ impl ActorOverlayModel {
     }
 
     pub(crate) fn reset(&mut self) {
-        if self.center.is_none() && self.actors.is_empty() {
+        if self.center.is_none()
+            && self.actors.is_empty()
+            && self.active_floaters.is_empty()
+            && self.last_damage_sequence == 0
+        {
             return;
         }
         self.center = None;
         self.actors.clear();
+        self.active_floaters.clear();
+        self.last_damage_sequence = 0;
         self.revision = self.revision.wrapping_add(1);
     }
+
+    pub(crate) fn observe_damage_events(
+        &mut self,
+        events: impl IntoIterator<Item = crate::live_entity::LiveDamageEvent>,
+        now_ms: u64,
+    ) {
+        self.active_floaters
+            .retain(|floater| floater.expires_at_ms > now_ms);
+        for event in events {
+            if event.sequence <= self.last_damage_sequence {
+                continue;
+            }
+            self.last_damage_sequence = event.sequence;
+            let variant = if event.damage_type == 1 {
+                DamageVariant::Miss
+            } else if event.damage_type == 2 {
+                DamageVariant::Critical
+            } else if event.damage_type != 0 && event.damage > 0 {
+                DamageVariant::Heal
+            } else {
+                DamageVariant::Hit
+            };
+            let text = match variant {
+                DamageVariant::Miss => "Miss".to_owned(),
+                DamageVariant::Critical if event.damage == 0 => "Crit".to_owned(),
+                DamageVariant::Heal => format!("+{}", event.damage),
+                DamageVariant::Hit | DamageVariant::Critical => {
+                    event.damage.unsigned_abs().to_string()
+                }
+            };
+            while self
+                .active_floaters
+                .iter()
+                .filter(|floater| floater.object_id == event.object_id)
+                .count()
+                >= MAX_DAMAGE_FLOATERS_PER_ACTOR
+            {
+                if let Some(index) = self
+                    .active_floaters
+                    .iter()
+                    .position(|floater| floater.object_id == event.object_id)
+                {
+                    self.active_floaters.remove(index);
+                }
+            }
+            while self.active_floaters.len() >= MAX_DAMAGE_FLOATERS {
+                self.active_floaters.pop_front();
+            }
+            let duration_ms = if variant == DamageVariant::Miss {
+                1_600
+            } else {
+                1_800
+            };
+            self.active_floaters.push_back(ActiveDamageFloater {
+                sequence: event.sequence,
+                object_id: event.object_id,
+                text,
+                variant,
+                started_at_ms: now_ms,
+                expires_at_ms: now_ms.saturating_add(duration_ms),
+            });
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum DamageVariant {
+    Hit,
+    Miss,
+    Critical,
+    Heal,
+}
+
+#[derive(Clone, Debug)]
+struct ActiveDamageFloater {
+    sequence: u64,
+    object_id: u32,
+    text: String,
+    variant: DamageVariant,
+    started_at_ms: u64,
+    expires_at_ms: u64,
+}
+
+#[derive(Clone, Debug)]
+struct DamageFloaterEntry {
+    sequence: u64,
+    text: String,
+    color: Color,
+    left: f32,
+    top: f32,
+    font_size: f32,
 }
 
 #[derive(Debug)]
@@ -260,6 +368,10 @@ fn health_packet(entity: &Value) -> Option<Option<HealthPacket>> {
         expire_seconds: u8::try_from(values[1]?.as_u64()?).ok()?,
         generation: values[2]?.as_u64()?,
         revision: values[3]?.as_u64()?.max(1),
+        hit_revision: match entity.get("_healthHitRevision") {
+            None | Some(Value::Null) => None,
+            Some(value) => Some(value.as_u64()?.max(1)),
+        },
     }))
 }
 
@@ -268,6 +380,8 @@ struct HealthWindow {
     generation: u64,
     revision: u64,
     expires_at_ms: u64,
+    hit_revision: u64,
+    hit_expires_at_ms: u64,
 }
 
 #[derive(Default)]
@@ -283,7 +397,7 @@ struct RenderKey {
 
 pub(crate) fn install(app: &mut App) {
     app.init_resource::<ActorOverlayModel>()
-        .add_systems(Update, sync);
+        .add_systems(Update, (sync, sync_damage).chain());
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -313,13 +427,25 @@ fn sync(
             continue;
         };
         let window = health_windows.0.entry(actor.object_id).or_default();
+        if window.generation != packet.generation {
+            *window = HealthWindow::default();
+        }
         if window.generation != packet.generation || window.revision != packet.revision {
             window.generation = packet.generation;
             window.revision = packet.revision;
             window.expires_at_ms =
                 now_ms.saturating_add(u64::from(packet.expire_seconds).saturating_mul(1000));
         }
-        if !actor.dead && packet.percent > 0 && now_ms < window.expires_at_ms {
+        if let Some(hit_revision) = packet.hit_revision {
+            if window.hit_revision != hit_revision {
+                window.hit_revision = hit_revision;
+                window.hit_expires_at_ms = now_ms.saturating_add(5_000);
+            }
+        }
+        if !actor.dead
+            && packet.percent > 0
+            && now_ms < window.expires_at_ms.max(window.hit_expires_at_ms)
+        {
             visible_health.push((actor.object_id, packet.percent));
         }
     }
@@ -429,6 +555,145 @@ fn sync(
                 }
             }
         });
+}
+
+fn sync_damage(
+    mut commands: Commands,
+    shell: Res<NativeShellModel>,
+    time: Res<Time>,
+    mut model: ResMut<ActorOverlayModel>,
+    roots: Query<Entity, With<DamageOverlayRoot>>,
+    mut nodes: Query<(Entity, &DamageFloaterNode, &mut Node, &mut TextColor)>,
+) {
+    let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    let in_game = shell.screen == NativeShellScreen::InGame && model.center.is_some();
+    if !in_game {
+        model.active_floaters.clear();
+        for root in &roots {
+            commands.entity(root).despawn();
+        }
+        return;
+    }
+    model
+        .active_floaters
+        .retain(|floater| floater.expires_at_ms > now_ms);
+    let mut desired = damage_floater_entries(&model, now_ms)
+        .into_iter()
+        .map(|entry| (entry.sequence, entry))
+        .collect::<HashMap<_, _>>();
+    if desired.is_empty() {
+        for root in &roots {
+            commands.entity(root).despawn();
+        }
+        return;
+    }
+
+    let mut roots = roots.iter();
+    let root = roots.next().unwrap_or_else(|| {
+        commands
+            .spawn((
+                DamageOverlayRoot,
+                FocusPolicy::Pass,
+                Node {
+                    position_type: PositionType::Absolute,
+                    width: px(STAGE_WIDTH),
+                    height: px(STAGE_HEIGHT),
+                    ..default()
+                },
+                GlobalZIndex(OVERLAY_Z_INDEX + 1),
+            ))
+            .id()
+    });
+    for duplicate in roots {
+        commands.entity(duplicate).despawn();
+    }
+    for (entity, marker, mut node, mut color) in &mut nodes {
+        let Some(entry) = desired.remove(&marker.0) else {
+            commands.entity(entity).despawn();
+            continue;
+        };
+        node.left = px(entry.left);
+        node.top = px(entry.top);
+        color.0 = entry.color;
+    }
+    for entry in desired.into_values() {
+        commands.entity(root).with_children(|root| {
+            root.spawn((
+                Name::new(format!("AndroidDamageFloater:{}", entry.sequence)),
+                DamageFloaterNode(entry.sequence),
+                FocusPolicy::Pass,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(entry.left),
+                    top: px(entry.top),
+                    width: px(80.0),
+                    min_width: px(80.0),
+                    ..default()
+                },
+                Text::new(entry.text),
+                crystal_text_font(entry.font_size),
+                TextColor(entry.color),
+                TextLayout::justify(Justify::Center),
+                TextShadow {
+                    offset: Vec2::splat(1.0),
+                    color: Color::BLACK,
+                },
+            ));
+        });
+    }
+}
+
+fn damage_floater_entries(model: &ActorOverlayModel, now_ms: u64) -> Vec<DamageFloaterEntry> {
+    let Some((center_x, center_y)) = model.center else {
+        return Vec::new();
+    };
+    let mut entries = model
+        .active_floaters
+        .iter()
+        .filter_map(|floater| {
+            let actor = model
+                .actors
+                .iter()
+                .find(|actor| actor.object_id == floater.object_id)?;
+            let life_ms = floater
+                .expires_at_ms
+                .saturating_sub(floater.started_at_ms)
+                .max(1);
+            let progress =
+                now_ms.saturating_sub(floater.started_at_ms).min(life_ms) as f32 / life_ms as f32;
+            let eased = 1.0 - (1.0 - progress) * (1.0 - progress);
+            let rise = 6.0 - 36.0 * eased;
+            let opacity = if progress < 0.16 {
+                progress / 0.16
+            } else if progress < 0.30 {
+                1.0
+            } else {
+                ((1.0 - progress) / 0.70).clamp(0.0, 1.0)
+            };
+            let is_player = matches!(actor.kind, ActorKind::SelfPlayer | ActorKind::Player);
+            let (red, green, blue, font_size) = match (floater.variant, is_player) {
+                (DamageVariant::Miss, true) => (0xff, 0x9d, 0x92, 13.0),
+                (DamageVariant::Miss, false) => (0xcf, 0xcf, 0xcf, 13.0),
+                (DamageVariant::Critical, _) => (0xff, 0x3b, 0x2f, 18.0),
+                (DamageVariant::Heal, _) => (0x6b, 0xff, 0x7a, 15.0),
+                (DamageVariant::Hit, true) => (0xff, 0x5a, 0x4d, 15.0),
+                (DamageVariant::Hit, false) => (0xf4, 0xf4, 0xf4, 15.0),
+            };
+            Some(DamageFloaterEntry {
+                sequence: floater.sequence,
+                text: floater.text.clone(),
+                color: Color::srgba_u8(red, green, blue, (opacity * 255.0).round() as u8),
+                left: ENTITY_LEFT_ORIGIN + actor.x.saturating_sub(center_x) as f32 * CELL_WIDTH
+                    - 16.0,
+                top: ENTITY_TOP_ORIGIN + actor.y.saturating_sub(center_y) as f32 * CELL_HEIGHT
+                    - 65.0
+                    + rise,
+                font_size,
+            })
+        })
+        .collect::<Vec<_>>();
+    entries.sort_by_key(|entry| entry.sequence);
+    entries
 }
 
 fn spawn_health_bar(root: &mut ChildSpawnerCommands, left: f32, top: f32, ratio: f32) {
@@ -559,6 +824,87 @@ mod tests {
     }
 
     #[test]
+    fn authoritative_damage_floaters_are_deduplicated_capped_and_animated() {
+        let mut model = ActorOverlayModel::default();
+        model.replace(project(&fixture(), 10, 20).unwrap());
+        let critical = crate::live_entity::LiveDamageEvent {
+            sequence: 1,
+            object_id: 9,
+            damage: 12,
+            damage_type: 2,
+        };
+        model.observe_damage_events([critical], 1_000);
+        model.observe_damage_events([critical], 1_100);
+        assert_eq!(model.active_floaters.len(), 1);
+        assert_eq!(model.active_floaters[0].text, "12");
+        assert_eq!(model.active_floaters[0].variant, DamageVariant::Critical);
+        let entries = damage_floater_entries(&model, 1_900);
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].left, 560.0);
+        assert!(entries[0].top < 293.0);
+        assert_eq!(entries[0].font_size, 18.0);
+
+        for sequence in 2..=60 {
+            model.observe_damage_events(
+                [crate::live_entity::LiveDamageEvent {
+                    sequence,
+                    object_id: 9,
+                    damage: sequence as i32,
+                    damage_type: 0,
+                }],
+                1_100,
+            );
+        }
+        assert_eq!(model.active_floaters.len(), MAX_DAMAGE_FLOATERS_PER_ACTOR);
+        assert_eq!(model.active_floaters.front().unwrap().sequence, 51);
+        model.reset();
+        assert!(model.active_floaters.is_empty());
+        assert_eq!(model.last_damage_sequence, 0);
+    }
+
+    #[test]
+    fn confirmed_hit_reveals_zero_expiry_health_without_inventing_exact_hp() {
+        let snapshot = serde_json::json!({
+            "entities": [{
+                "objectId":"9", "kind":"monster", "name":"Deer", "x":10, "y":20,
+                "_healthPercent":73, "_healthExpireSeconds":0,
+                "_healthGeneration":1, "_healthRevision":1, "_healthHitRevision":1
+            }],
+            "groundDrops": []
+        })
+        .to_string();
+        let mut app = App::new();
+        app.init_resource::<Time>();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        let mut model = ActorOverlayModel::default();
+        model.replace(project(&snapshot, 10, 20).unwrap());
+        app.insert_resource(model);
+        app.add_systems(Update, sync);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<Entity, With<ActorHealthBar>>()
+                .iter(app.world())
+                .count(),
+            1
+        );
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_secs(5));
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<Entity, With<ActorHealthBar>>()
+                .iter(app.world())
+                .count(),
+            0
+        );
+    }
+
+    #[test]
     fn names_follow_name_view_but_exact_self_and_timed_monster_bars_do_not() {
         let mut app = App::new();
         app.init_resource::<Time>();
@@ -575,8 +921,17 @@ mod tests {
         app.insert_resource(read);
         let mut model = ActorOverlayModel::default();
         model.replace(project(&fixture(), 10, 20).unwrap());
+        model.observe_damage_events(
+            [crate::live_entity::LiveDamageEvent {
+                sequence: 1,
+                object_id: 9,
+                damage: 12,
+                damage_type: 2,
+            }],
+            0,
+        );
         app.insert_resource(model);
-        app.add_systems(Update, sync);
+        app.add_systems(Update, (sync, sync_damage).chain());
         app.update();
         assert_eq!(
             app.world_mut()
@@ -592,6 +947,13 @@ mod tests {
                 .count(),
             2
         );
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<Entity, With<DamageFloaterNode>>()
+                .iter(app.world())
+                .count(),
+            1
+        );
         app.world_mut()
             .resource_mut::<Time>()
             .advance_by(std::time::Duration::from_secs(3));
@@ -602,6 +964,13 @@ mod tests {
                 .iter(app.world())
                 .count(),
             1
+        );
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<Entity, With<DamageFloaterNode>>()
+                .iter(app.world())
+                .count(),
+            0
         );
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()

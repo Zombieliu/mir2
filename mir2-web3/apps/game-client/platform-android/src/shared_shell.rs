@@ -267,6 +267,7 @@ fn fit_stage(
                 With<mir2_client_bevy::crystal_ui::overlays::OverlayRoot>,
                 With<mir2_client_bevy::quest_ui::QuestUiRoot>,
                 With<crate::entity_overlays::ActorOverlayRoot>,
+                With<crate::entity_overlays::DamageOverlayRoot>,
                 With<crate::ground_labels::GroundDropLabelRoot>,
             )>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
@@ -474,6 +475,7 @@ fn enqueue_gateway_receipt(
 fn receive(
     mut model: ResMut<NativeShellModel>,
     mut host: ResMut<HostState>,
+    #[cfg_attr(not(target_os = "android"), allow(unused_variables))] time: Option<Res<Time>>,
     mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
     mut intents: ResMut<NativeUiIntentQueue>,
     mut player: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
@@ -547,7 +549,15 @@ fn receive(
             if let Some(raw) = value["envelope"].as_str() {
                 match crate::live_entity::apply_packet(raw) {
                     crate::live_entity::LiveEntityPacketOutcome::Applied { models, render } => {
+                        let damage_events = crate::live_entity::drain_damage_events();
                         if let Some(overlays) = actor_overlays.as_deref_mut() {
+                            let now_ms = time
+                                .as_deref()
+                                .map(|time| {
+                                    u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX)
+                                })
+                                .unwrap_or_default();
+                            overlays.observe_damage_events(damage_events, now_ms);
                             let projected = overlays.center().and_then(|(center_x, center_y)| {
                                 crate::entity_overlays::project(&models, center_x, center_y)
                             });

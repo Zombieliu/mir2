@@ -58,12 +58,27 @@ pub fn install(app: &mut App) {
 
 fn report_world_render_ready(
     receipt: Res<mir2_bevy_runtime::native_render_receipt::NativeRenderReceipt>,
+    time: Res<Time>,
+    mut overlays: ResMut<crate::entity_overlays::ActorOverlayModel>,
     mut reported: Local<bool>,
 ) {
     if *reported {
         return;
     }
     if let Some(ready) = receipt.ready_for(u64::MAX) {
+        // Start the offline-only damage specimen after the packaged world is
+        // render-ready. Atlas decoding can otherwise consume the complete
+        // production-length floater lifetime before the first visible frame.
+        let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+        overlays.observe_damage_events(
+            [crate::live_entity::LiveDamageEvent {
+                sequence: 1,
+                object_id: 9002,
+                damage: 128,
+                damage_type: 2,
+            }],
+            now_ms,
+        );
         info!(
             request_id = ready.request_id,
             center_x = ready.center_x,
