@@ -480,6 +480,10 @@ fn receive(
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
     #[cfg(target_os = "android")]
+    if let Some(render) = crate::live_entity::poll_action_frame() {
+        let _ = mir2_bevy_runtime::native_ingest::push_native_entity_render_state(render);
+    }
+    #[cfg(target_os = "android")]
     if let Some(event) = crate::world_assets::poll_packaged_map_atlas_load() {
         host.render_load_active = false;
         match event {

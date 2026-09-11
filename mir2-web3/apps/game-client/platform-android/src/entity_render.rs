@@ -5,6 +5,9 @@
 //! against the same immutable entity atlas used by the Web client.
 
 use crate::{world_assets::WorldAssetError, world_projection::ProjectedScene};
+use mir2_bevy_runtime::entity_animation::{
+    AnimationAction, AnimationCatalog, Direction, EntityKind,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
@@ -209,6 +212,14 @@ struct EntityDirectionEntry {
     object_id: String,
     prototype: Value,
     direction_layers: BTreeMap<String, Vec<EntityRenderLayer>>,
+    action_layers: BTreeMap<String, EntityActionLayers>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct EntityActionLayers {
+    interval_ms: u64,
+    frames: Vec<Vec<EntityRenderLayer>>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -297,6 +308,46 @@ fn direction_index(direction: Option<&str>) -> i32 {
         Some("Left") => 6,
         Some("UpLeft") => 7,
         _ => 4,
+    }
+}
+
+fn animation_direction(direction: &str) -> Direction {
+    match direction {
+        "Up" => Direction::Up,
+        "UpRight" => Direction::UpRight,
+        "Right" => Direction::Right,
+        "DownRight" => Direction::DownRight,
+        "DownLeft" => Direction::DownLeft,
+        "Left" => Direction::Left,
+        "UpLeft" => Direction::UpLeft,
+        _ => Direction::Down,
+    }
+}
+
+fn animation_kind(kind: &str) -> Option<EntityKind> {
+    match kind {
+        "selfPlayer" | "player" | "hero" => Some(EntityKind::Player),
+        "monster" => Some(EntityKind::Monster),
+        "npc" => Some(EntityKind::Npc),
+        _ => None,
+    }
+}
+
+fn animation_action_name(action: AnimationAction) -> &'static str {
+    match action {
+        AnimationAction::Harvest => "harvest",
+        AnimationAction::Attack1 => "attack1",
+        AnimationAction::Attack2 => "attack2",
+        AnimationAction::Attack3 => "attack3",
+        AnimationAction::Attack4 => "attack4",
+        AnimationAction::AttackRange1 => "attackRange1",
+        AnimationAction::AttackRange2 => "attackRange2",
+        AnimationAction::DashAttack => "dashAttack",
+        AnimationAction::Spell => "spell",
+        AnimationAction::Struck => "struck",
+        AnimationAction::Die => "die",
+        AnimationAction::Revive => "revive",
+        _ => "",
     }
 }
 
@@ -642,12 +693,8 @@ where
         let root_top = ENTITY_TOP_ORIGIN + dy as f32 * CELL_HEIGHT;
         let depth = 4096 + dy * 128 + dx * 2 + 64;
 
-        let requested_for_direction = |direction_name: &str| {
+        let requested_for_frame = |direction_name: &str, relative_frame: i32| {
             let direction = direction_index(Some(direction_name));
-            let relative_frame =
-                direction
-                    .saturating_mul(stride)
-                    .saturating_add(if mounted { 416 } else { 0 });
             let body_frame = frame_base_offset.saturating_add(relative_frame);
             let weapon_frame =
                 weapon_frame_offset.map(|offset| offset.saturating_add(relative_frame));
@@ -720,8 +767,14 @@ where
             .filter(|direction| DIRECTIONS.contains(direction))
             .unwrap_or("Down");
         let mut direction_layers = BTreeMap::new();
-        let (selected_layers, selected_missing_body) =
-            resolve_direction_layers(requested_for_direction(selected_direction));
+        let standing_frame = |direction_name: &str| {
+            direction_index(Some(direction_name))
+                .saturating_mul(stride)
+                .saturating_add(if mounted { 416 } else { 0 })
+        };
+        let (selected_layers, selected_missing_body) = resolve_direction_layers(
+            requested_for_frame(selected_direction, standing_frame(selected_direction)),
+        );
         let selected_ready = !selected_missing_body && !selected_layers.is_empty();
         if selected_ready {
             direction_layers.insert(selected_direction.to_owned(), selected_layers.clone());
@@ -729,10 +782,66 @@ where
                 .into_iter()
                 .filter(|direction| *direction != selected_direction)
             {
-                let (layers, missing_body) =
-                    resolve_direction_layers(requested_for_direction(direction));
+                let (layers, missing_body) = resolve_direction_layers(requested_for_frame(
+                    direction,
+                    standing_frame(direction),
+                ));
                 if !missing_body && !layers.is_empty() {
                     direction_layers.insert(direction.to_owned(), layers);
+                }
+            }
+        }
+        let mut action_layers = BTreeMap::new();
+        // The packet path owns the action clock, but it must never resolve
+        // untrusted asset names. Precompute only Crystal default frames whose
+        // exact rects are present in the immutable packaged atlas. Mounted and
+        // Archer/Assassin alternates require their generated per-library
+        // catalogs and deliberately stay on the standing pose for now.
+        if selected_ready && !mounted && !matches!(class_key.as_str(), "archer" | "assassin") {
+            if let Some(kind) = animation_kind(&entity.kind) {
+                let catalog = AnimationCatalog::crystal_default(kind);
+                for action in [
+                    AnimationAction::Harvest,
+                    AnimationAction::Attack1,
+                    AnimationAction::Attack2,
+                    AnimationAction::Attack3,
+                    AnimationAction::Attack4,
+                    AnimationAction::AttackRange1,
+                    AnimationAction::AttackRange2,
+                    AnimationAction::DashAttack,
+                    AnimationAction::Spell,
+                    AnimationAction::Struck,
+                    AnimationAction::Die,
+                    AnimationAction::Revive,
+                ] {
+                    let Some(descriptor) = catalog.descriptor(action).copied() else {
+                        continue;
+                    };
+                    for direction in DIRECTIONS {
+                        let mut frames = Vec::with_capacity(usize::from(descriptor.frame_count));
+                        let mut complete = true;
+                        for phase in 0..descriptor.frame_count {
+                            let relative_frame =
+                                descriptor.draw_frame(animation_direction(direction), phase);
+                            let (layers, missing_body) = resolve_direction_layers(
+                                requested_for_frame(direction, relative_frame),
+                            );
+                            if missing_body || layers.is_empty() {
+                                complete = false;
+                                break;
+                            }
+                            frames.push(layers);
+                        }
+                        if complete {
+                            action_layers.insert(
+                                format!("{}:{direction}", animation_action_name(action)),
+                                EntityActionLayers {
+                                    interval_ms: descriptor.frame_interval_ms,
+                                    frames,
+                                },
+                            );
+                        }
+                    }
                 }
             }
         }
@@ -751,6 +860,7 @@ where
                 object_id: entity.object_id,
                 prototype: prototype_descriptor(&entity.kind, &class_key, entity.dead, &sprite),
                 direction_layers,
+                action_layers,
             });
         }
     }
@@ -948,6 +1058,61 @@ mod tests {
         );
         assert_eq!(live["entities"][0]["prototype"]["kind"], "player");
         assert_eq!(live["entities"][0]["prototype"]["classKey"], "");
+    }
+
+    #[test]
+    fn packaged_atlas_precomputes_bounded_packet_action_frames() {
+        let png = rgba_png();
+        let mut rects = vec![serde_json::json!({
+            "key":"/original-ui/CArmour/00/16.png|1x1",
+            "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+            "frameIndex":16,"pageIndex":0
+        })];
+        rects.extend((160..=165).map(|frame| {
+            serde_json::json!({
+                "key":format!("/original-ui/CArmour/00/{frame}.png|1x1"),
+                "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                "frameIndex":frame,"pageIndex":0
+            })
+        }));
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[{"key":"starter","width":1,"height":1,
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "rects":rects}]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{"objectId":"42","kind":"selfPlayer","x":300,"y":630,
+                "direction":"Down","class":"Warrior",
+                "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}}]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 27, |path, _| match path {
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/starter.png" => Ok(png.clone()),
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap();
+        let live: Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        assert_eq!(
+            live["entities"][0]["actionLayers"]["attack1:Down"]["intervalMs"],
+            100
+        );
+        let frames = live["entities"][0]["actionLayers"]["attack1:Down"]["frames"]
+            .as_array()
+            .unwrap();
+        assert_eq!(frames.len(), 6);
+        assert_eq!(
+            frames[0][0]["atlasRectKey"],
+            "/original-ui/CArmour/00/160.png|1x1"
+        );
+        assert_eq!(
+            frames[5][0]["atlasRectKey"],
+            "/original-ui/CArmour/00/165.png|1x1"
+        );
     }
 
     #[test]
@@ -1171,7 +1336,7 @@ mod tests {
         assert_eq!(product.entity_count, 1);
         assert_eq!(product.layer_count, 1);
         assert_eq!(product.unresolved_entity_count, 0);
-        assert!((1..=2).contains(&product.pages.len()));
+        assert!((1..=7).contains(&product.pages.len()));
         assert!(product.compressed_bytes > 1_000_000);
         assert_eq!(product.rgba_bytes, product.pages.len() * 2048 * 2048 * 4);
         let live: serde_json::Value = serde_json::from_str(&product.live_directions_json).unwrap();
@@ -1180,6 +1345,12 @@ mod tests {
                 .as_object()
                 .map(serde_json::Map::len),
             Some(8)
+        );
+        assert_eq!(
+            live["entities"][0]["actionLayers"]["attack1:Down"]["frames"]
+                .as_array()
+                .map(Vec::len),
+            Some(6)
         );
     }
 }
