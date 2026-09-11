@@ -5,12 +5,15 @@ use mir2_client_bevy::{
         dispatch_ui_action, NativePlayerUiSet, NativePlayerUiState, UiEffectQueue,
     },
     native_shell::{NativeShellModel, NativeShellScreen},
+    quest_model::GroundPickupModel,
+    quest_ui::{QuestUiIntent, QuestUiIntentQueue},
     read_model::UiReadModel,
 };
 
 #[derive(Component, Clone, Copy)]
 enum Action {
     Panels,
+    Pickup,
     Revive,
     Bag,
     Character,
@@ -151,6 +154,7 @@ fn spawn(mut commands: Commands) {
         .with_children(|rail| {
             for (label, action) in [
                 ("Panels", Action::Panels),
+                ("Pick Up", Action::Pickup),
                 ("Revive", Action::Revive),
                 ("Bag", Action::Bag),
                 ("Char", Action::Character),
@@ -194,6 +198,7 @@ fn visibility(
     shell: Res<NativeShellModel>,
     state: Res<NativePlayerUiState>,
     ui: Option<Res<UiReadModel>>,
+    pickups: Option<Res<GroundPickupModel>>,
     scale: Res<UiScale>,
     host: Option<Res<crate::shared_shell::HostState>>,
     windows: Query<&Window>,
@@ -213,6 +218,11 @@ fn visibility(
         state.minimap_visible(),
         ui.as_ref().and_then(|ui| ui.player.map_name.as_deref()),
     );
+    let pickup_available = pickups
+        .as_deref()
+        .and_then(|pickups| pickups.recent.front())
+        .and_then(|pickup| pickup.object_id)
+        .is_some();
     let map_bottom = mir2_client_bevy::crystal_ui::hud::minimap_footer_top(expanded_map) + 20.0;
     if shell.screen != NativeShellScreen::InGame {
         rail.expanded = false;
@@ -232,7 +242,9 @@ fn visibility(
     for (action, mut node) in &mut buttons {
         node.width = px(64.0 * unit);
         node.height = px(48.0 * unit);
-        let visible = if matches!(action, Action::Revive) {
+        let visible = if matches!(action, Action::Pickup) {
+            pickup_available
+        } else if matches!(action, Action::Revive) {
             can_request_revive(&shell, &state, ui.as_deref())
         } else {
             rail.expanded || matches!(action, Action::Panels)
@@ -250,6 +262,8 @@ fn visibility(
 fn buttons(
     shell: Res<NativeShellModel>,
     ui: Option<Res<UiReadModel>>,
+    pickups: Option<Res<GroundPickupModel>>,
+    mut quest_intents: Option<ResMut<QuestUiIntentQueue>>,
     mut effects: Option<ResMut<UiEffectQueue>>,
     mut state: ResMut<NativePlayerUiState>,
     mut rail: ResMut<RailState>,
@@ -269,6 +283,21 @@ fn buttons(
             continue;
         }
         match action {
+            Action::Pickup => {
+                if let (Some(object_id), Some(queue)) = (
+                    pickups
+                        .as_deref()
+                        .and_then(|pickups| pickups.recent.front())
+                        .and_then(|pickup| pickup.object_id),
+                    quest_intents.as_deref_mut(),
+                ) {
+                    let _ = queue.push_intent(QuestUiIntent::PickUpObject { object_id });
+                    #[cfg(feature = "ui-preview")]
+                    info!(
+                        "ANDROID_UI_PREVIEW_INTENT pickUp object_id={object_id} (queued only, no server)"
+                    );
+                }
+            }
             Action::Revive => {
                 if can_request_revive(&shell, &state, ui.as_deref()) {
                     if let Some(effects) = effects.as_deref_mut() {
@@ -378,6 +407,48 @@ mod tests {
             vec![UiEffect::GatewayCommand(GatewayCommand::TownRevive)]
         );
         assert_eq!(app.world().resource::<UiReadModel>().player.hp, 0);
+    }
+
+    #[test]
+    fn pickup_touch_queues_exact_shared_object_without_local_removal() {
+        use mir2_client_bevy::quest_model::RecentPickup;
+        let mut pickups = GroundPickupModel::default();
+        pickups.upsert(RecentPickup {
+            object_id: Some(44),
+            key: "object:44".into(),
+            label: "Red Potion".into(),
+            amount: 2,
+            from_npc: Some("Deer".into()),
+        });
+        let mut state = NativePlayerUiState::default();
+        state.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        })
+        .insert_resource(state)
+        .insert_resource(pickups)
+        .init_resource::<UiEffectQueue>()
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<RailState>()
+        .add_systems(Update, buttons);
+        app.world_mut().spawn((
+            Interaction::Pressed,
+            Action::Pickup,
+            BackgroundColor(Color::NONE),
+        ));
+        app.update();
+        app.update(); // A held Bevy interaction cannot enqueue twice.
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
+            vec![QuestUiIntent::PickUpObject { object_id: 44 }]
+        );
+        let pickups = app.world().resource::<GroundPickupModel>();
+        assert_eq!(pickups.recent.len(), 1);
+        assert_eq!(pickups.recent[0].object_id, Some(44));
     }
 
     #[test]

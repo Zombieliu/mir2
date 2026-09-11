@@ -211,6 +211,9 @@ fn apply(world: &mut World) {
             ]
         })
         .to_string();
+        if let Some(pickups) = crate::ground_pickups::project(&snapshot) {
+            world.insert_resource(pickups);
+        }
         if !crate::world_assets::request_packaged_map_atlas_load(scene, snapshot, u64::MAX) {
             warn!("offline world-render preview asset request was not accepted");
         }

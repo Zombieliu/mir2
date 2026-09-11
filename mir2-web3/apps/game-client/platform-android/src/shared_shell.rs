@@ -229,6 +229,7 @@ impl Plugin for AndroidSharedShellPlugin {
                     fit_stage.in_set(AndroidStageFit),
                     fit_mail_composer,
                     forward_intents,
+                    forward_quest_ui_intents,
                     discard_inactive_player_commands,
                     keyboard,
                 )
@@ -477,6 +478,7 @@ fn receive(
     mut forms: crate::form_input::FormInput,
     mut lifecycle_messages: Option<ResMut<Messages<crate::android_input::AndroidLifecycleMessage>>>,
     mut gateway_inbound: Option<ResMut<crate::gateway_bridge::AndroidGatewayInboundQueue>>,
+    mut ground_pickups: Option<ResMut<mir2_client_bevy::quest_model::GroundPickupModel>>,
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
     #[cfg(target_os = "android")]
@@ -539,6 +541,9 @@ fn receive(
             if let Some(raw) = value["envelope"].as_str() {
                 match crate::live_entity::apply_packet(raw) {
                     crate::live_entity::LiveEntityPacketOutcome::Applied { models, render } => {
+                        if let Some(pickups) = ground_pickups.as_deref_mut() {
+                            *pickups = crate::ground_pickups::project(&models).unwrap_or_default();
+                        }
                         let _ =
                             mir2_bevy_runtime::native_ingest::push_native_entity_model_set(models);
                         if let Some(render) = render {
@@ -551,6 +556,9 @@ fn receive(
                     crate::live_entity::LiveEntityPacketOutcome::Ignored => {}
                     crate::live_entity::LiveEntityPacketOutcome::Rejected => {
                         crate::live_entity::clear();
+                        if let Some(pickups) = ground_pickups.as_deref_mut() {
+                            pickups.reset();
+                        }
                         mir2_bevy_runtime::native_ingest::push_native_data_reset();
                         model.apply_gateway_event(Event::Disconnect {
                             reason: Some("Invalid authoritative entity packet; reconnect".into()),
@@ -705,6 +713,9 @@ fn receive(
             host.deferred_render_load = None;
             #[cfg(target_os = "android")]
             crate::world_assets::cancel_packaged_map_atlas_load();
+            if let Some(pickups) = ground_pickups.as_deref_mut() {
+                pickups.reset();
+            }
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
             begin_render_ready_scene_transition(&mut model);
@@ -714,6 +725,9 @@ fn receive(
             host.deferred_render_load = None;
             #[cfg(target_os = "android")]
             crate::world_assets::cancel_packaged_map_atlas_load();
+            if let Some(pickups) = ground_pickups.as_deref_mut() {
+                pickups.reset();
+            }
             mir2_bevy_runtime::native_ingest::push_native_scene_reset();
         }
         if let (Some(world), Some(raw)) = (&host.world, value["worldSnapshot"].as_str()) {
@@ -734,6 +748,7 @@ fn receive(
                     entities,
                     scene,
                 } = projection;
+                let projected_pickups = crate::ground_pickups::project(&entities);
                 let world_snapshot = world.clone();
                 host.pending_world_request = Some(request_id);
                 host.pending_render_request = Some(request_id);
@@ -741,12 +756,18 @@ fn receive(
                 let live_models_ready = crate::live_entity::install_models(&entities, request_id);
                 #[cfg(not(target_os = "android"))]
                 let live_models_ready = true;
-                let queued = live_models_ready
+                let queued = projected_pickups.is_some()
+                    && live_models_ready
                     && mir2_bevy_runtime::native_ingest::push_native_world_state(world)
                     && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui)
                     && mir2_bevy_runtime::native_ingest::push_native_map_model(map)
                     && mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entities);
                 if queued {
+                    if let (Some(pickups), Some(projected_pickups)) =
+                        (ground_pickups.as_deref_mut(), projected_pickups)
+                    {
+                        *pickups = projected_pickups;
+                    }
                     projected_scene = Some((scene, world_snapshot, request_id));
                 }
                 queued
@@ -754,6 +775,9 @@ fn receive(
             if !queued {
                 #[cfg(target_os = "android")]
                 crate::world_assets::cancel_packaged_map_atlas_load();
+                if let Some(pickups) = ground_pickups.as_deref_mut() {
+                    pickups.reset();
+                }
                 mir2_bevy_runtime::native_ingest::push_native_data_reset();
                 host.world = None;
                 host.pending_world_request = None;
@@ -1039,6 +1063,134 @@ fn forward_intents(
     }
 }
 
+/// Drain shared quest/object intents into Android's authenticated Gateway
+/// producer. The authoritative snapshot remains unchanged until a server
+/// packet or replacement snapshot arrives.
+fn forward_quest_ui_intents(
+    shell: Res<NativeShellModel>,
+    windows: Query<&Window>,
+    player: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    dialog: Option<Res<mir2_client_bevy::quest_model::NpcDialogModel>>,
+    read_model: Option<Res<mir2_client_bevy::read_model::UiReadModel>>,
+    notice: Option<Res<mir2_client_bevy::crystal_ui::notice::NoticeDialogState>>,
+    pickups: Option<Res<mir2_client_bevy::quest_model::GroundPickupModel>>,
+    mut pending_operations: Option<ResMut<mir2_client_bevy::pending_operations::PendingOperations>>,
+    mut quest_state: Option<ResMut<mir2_client_bevy::quest_ui::QuestUiState>>,
+    mut intents: ResMut<mir2_client_bevy::quest_ui::QuestUiIntentQueue>,
+    mut gateway: Option<ResMut<crate::gateway_bridge::AndroidGatewayOutboundQueue>>,
+) {
+    use mir2_client_bevy::quest_ui::QuestUiIntent;
+    use mir2_ui_core::effect::GatewayCommand;
+
+    let drained = intents.drain_intents();
+    if drained.is_empty() {
+        return;
+    }
+    let active =
+        shell.screen == Screen::InGame && windows.single().is_ok_and(|window| window.focused);
+    let dialog_open = dialog.as_deref().is_some_and(|dialog| dialog.is_open);
+    let dead = read_model
+        .as_deref()
+        .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
+    let world_actions_blocked = notice.as_deref().is_some_and(|notice| notice.is_open())
+        || player
+            .as_deref()
+            .map(|player| player.blocks_world_action(dialog_open, dead))
+            .unwrap_or(dialog_open || dead);
+    let mut retry = Vec::new();
+
+    for intent in drained {
+        if !active {
+            if let (Some(pending), Some(key)) =
+                (pending_operations.as_deref_mut(), intent.pending_key())
+            {
+                pending.release(&key);
+            }
+            continue;
+        }
+        let command = match &intent {
+            QuestUiIntent::InteractNpc { npc_object_id } if !world_actions_blocked => {
+                Some(GatewayCommand::InteractNpc {
+                    object_id: *npc_object_id,
+                })
+            }
+            QuestUiIntent::SelectNpcDialog { target } => Some(GatewayCommand::SelectNpcDialog {
+                target: target.clone(),
+            }),
+            QuestUiIntent::AcceptQuest {
+                npc_index,
+                quest_index,
+            } => Some(GatewayCommand::AcceptQuest {
+                npc_index: *npc_index,
+                quest_index: *quest_index,
+            }),
+            QuestUiIntent::FinishQuest {
+                quest_index,
+                selected_item_index,
+            } => Some(GatewayCommand::FinishQuest {
+                quest_index: *quest_index,
+                selected_item_index: *selected_item_index,
+            }),
+            QuestUiIntent::AbandonQuest { quest_index } => Some(GatewayCommand::AbandonQuest {
+                quest_index: *quest_index,
+            }),
+            QuestUiIntent::AttackTarget { object_id } if !world_actions_blocked => {
+                Some(GatewayCommand::AttackTarget {
+                    object_id: *object_id,
+                })
+            }
+            QuestUiIntent::PickUpObject { object_id }
+                if !world_actions_blocked
+                    && pickups.as_deref().is_some_and(|pickups| {
+                        pickups
+                            .recent
+                            .iter()
+                            .any(|pickup| pickup.object_id == Some(*object_id))
+                    }) =>
+            {
+                Some(GatewayCommand::PickUp {
+                    object_id: *object_id,
+                })
+            }
+            QuestUiIntent::InteractNpc { .. }
+            | QuestUiIntent::AttackTarget { .. }
+            | QuestUiIntent::PickUpObject { .. } => None,
+            QuestUiIntent::ShareQuest { .. } | QuestUiIntent::PickUpTile => {
+                if let Some(quest_state) = quest_state.as_deref_mut() {
+                    quest_state.set_feedback(
+                        "This Android host action has no authenticated Gateway command yet",
+                        true,
+                    );
+                }
+                None
+            }
+        };
+        let Some(command) = command else {
+            if let (Some(pending), Some(key)) =
+                (pending_operations.as_deref_mut(), intent.pending_key())
+            {
+                pending.release(&key);
+            }
+            continue;
+        };
+        let accepted = gateway
+            .as_deref_mut()
+            .is_some_and(|gateway| gateway.enqueue(command).is_ok());
+        if !accepted {
+            retry.push(intent);
+        }
+    }
+
+    let dropped = intents.retain_failed_intents(retry);
+    for intent in dropped {
+        if let (Some(pending), Some(key)) =
+            (pending_operations.as_deref_mut(), intent.pending_key())
+        {
+            pending.release(&key);
+        }
+    }
+}
+
 // Only unsent shared Gateway effects are invalidated. Local option persistence
 // and application effects must survive; this is not a server rollback/receipt.
 fn discard_player_commands(effects: &mut mir2_client_bevy::crystal_ui::overlays::UiEffectQueue) {
@@ -1189,6 +1341,69 @@ mod tests {
         assert!(!super::render_receipt_matches_player(
             &ready, None, &character
         ));
+    }
+
+    #[test]
+    fn authoritative_pickup_intent_reaches_android_gateway_without_local_removal() {
+        use crate::{
+            android_input::{AndroidLifecycle, AndroidNetwork, AndroidShellState},
+            gateway_bridge::AndroidGatewayOutboundQueue,
+        };
+        use mir2_client_bevy::{
+            crystal_ui::overlays::NativePlayerUiState,
+            quest_model::{GroundPickupModel, RecentPickup},
+            quest_ui::{QuestUiIntent, QuestUiIntentQueue},
+        };
+
+        let mut pickups = GroundPickupModel::default();
+        pickups.upsert(RecentPickup {
+            object_id: Some(44),
+            key: "object:44".into(),
+            label: "Red Potion".into(),
+            amount: 2,
+            from_npc: None,
+        });
+        let mut player = NativePlayerUiState::default();
+        player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        let mut intents = QuestUiIntentQueue::default();
+        assert!(intents.push_intent(QuestUiIntent::PickUpObject { object_id: 44 }));
+
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: Screen::InGame,
+            ..default()
+        })
+        .insert_resource(player)
+        .insert_resource(pickups)
+        .insert_resource(intents)
+        .init_resource::<AndroidGatewayOutboundQueue>()
+        .add_systems(Update, forward_quest_ui_intents);
+        app.world_mut().spawn(Window {
+            focused: true,
+            ..default()
+        });
+        app.update();
+
+        let mut transport = AndroidShellState::default();
+        transport.lifecycle = AndroidLifecycle::Foreground;
+        transport.network = AndroidNetwork::Available;
+        let entries = app
+            .world_mut()
+            .resource_mut::<AndroidGatewayOutboundQueue>()
+            .drain_ready(&transport, 1);
+        assert_eq!(entries.len(), 1);
+        assert_eq!(
+            serde_json::from_str::<Value>(&entries[0].json).unwrap(),
+            json!({"type":"pickUp","objectId":44})
+        );
+        assert_eq!(
+            app.world()
+                .resource::<GroundPickupModel>()
+                .recent
+                .front()
+                .and_then(|pickup| pickup.object_id),
+            Some(44)
+        );
     }
 
     #[test]
