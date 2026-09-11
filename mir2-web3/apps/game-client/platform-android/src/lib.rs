@@ -11,6 +11,8 @@ mod entity_render;
 mod form_input;
 pub mod gateway_bridge;
 #[cfg(any(target_os = "android", test))]
+mod live_entity;
+#[cfg(any(target_os = "android", test))]
 mod map_objects;
 #[cfg(any(target_os = "android", test))]
 mod map_render;

@@ -66,6 +66,7 @@ final class GatewaySession implements AutoCloseable {
     private final OkHttpClient client;
     private final Consumer<View> observer;
     private final Consumer<String> receiptObserver;
+    private final Consumer<String> gameplayObserver;
     private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> deadline;
     private ScheduledFuture<?> heartbeat;
@@ -81,13 +82,19 @@ final class GatewaySession implements AutoCloseable {
     private boolean closed;
 
     GatewaySession(OkHttpClient client, Consumer<View> observer) {
-        this(client, observer, ignored -> {});
+        this(client, observer, ignored -> {}, ignored -> {});
     }
 
     GatewaySession(OkHttpClient client, Consumer<View> observer, Consumer<String> receiptObserver) {
+        this(client, observer, receiptObserver, ignored -> {});
+    }
+
+    GatewaySession(OkHttpClient client, Consumer<View> observer, Consumer<String> receiptObserver,
+            Consumer<String> gameplayObserver) {
         this.client = client;
         this.observer = observer;
         this.receiptObserver = receiptObserver;
+        this.gameplayObserver = gameplayObserver;
     }
 
     static HttpUrl endpoint(String input) {
@@ -217,6 +224,7 @@ final class GatewaySession implements AutoCloseable {
         }
         if (!type.equals("packet")) return;
         String packet = envelope.getString("packet");
+        boolean forwardGameplay = phase == Phase.IN_GAME && isEntityGameplayPacket(packet);
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -302,14 +310,31 @@ final class GatewaySession implements AutoCloseable {
                 break;
             default: break;
         }
+        if (forwardGameplay && phase == Phase.IN_GAME) forwardBounded(envelope, gameplayObserver);
     }
 
     private void forwardReceipt(JSONObject envelope) {
+        forwardBounded(envelope, receiptObserver);
+    }
+
+    private static void forwardBounded(JSONObject envelope, Consumer<String> target) {
         String raw = envelope.toString();
         if (raw.getBytes(StandardCharsets.UTF_8).length > 16 * 1024) {
-            throw new IllegalArgumentException("receipt size limit");
+            throw new IllegalArgumentException("inbound packet size limit");
         }
-        receiptObserver.accept(raw);
+        target.accept(raw);
+    }
+
+    private static boolean isEntityGameplayPacket(String packet) {
+        return packet.equals("UserLocation") || packet.equals("ObjectWalk")
+                || packet.equals("ObjectRun") || packet.equals("ObjectBackStep")
+                || packet.equals("ObjectTurn") || packet.equals("ObjectHarvest")
+                || packet.equals("ObjectHarvested") || packet.equals("ObjectAttack")
+                || packet.equals("ObjectStruck") || packet.equals("ObjectDashAttack")
+                || packet.equals("ObjectRemove") || packet.equals("ObjectTeleportOut")
+                || packet.equals("ObjectPlayer") || packet.equals("ObjectHero")
+                || packet.equals("ObjectMonster") || packet.equals("NewMonsterInfo")
+                || packet.equals("ObjectNpc") || packet.equals("NewNpcInfo");
     }
 
     private boolean worldPending() { return phase == Phase.STARTING || phase == Phase.IN_GAME; }

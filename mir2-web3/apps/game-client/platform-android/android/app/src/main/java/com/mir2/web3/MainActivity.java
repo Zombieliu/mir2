@@ -109,7 +109,9 @@ public final class MainActivity extends GameActivity {
                 gatewayHostActive = false;
             }
         }, receipt -> nativeEvent(GatewaySession.object(
-                "type", "gatewayReceipt", "envelope", receipt).toString()));
+                "type", "gatewayReceipt", "envelope", receipt).toString()),
+                packet -> nativeEvent(GatewaySession.object(
+                        "type", "gatewayGameplayPacket", "envelope", packet).toString()));
         connect();
         hideSystemUi();
     }

@@ -25,6 +25,7 @@ public class GatewaySessionTest {
     private final BlockingQueue<GatewaySession.View> views = new LinkedBlockingQueue<>();
     private final BlockingQueue<JSONObject> commands = new LinkedBlockingQueue<>();
     private final BlockingQueue<String> receipts = new LinkedBlockingQueue<>();
+    private final BlockingQueue<String> gameplayPackets = new LinkedBlockingQueue<>();
     private volatile WebSocket peer;
 
     @Before public void setUp() throws Exception {
@@ -36,7 +37,7 @@ public class GatewaySessionTest {
         server.useHttps(serverTls.sslSocketFactory(), false);
         client = new OkHttpClient.Builder().sslSocketFactory(clientTls.sslSocketFactory(), clientTls.trustManager())
                 .connectTimeout(2, TimeUnit.SECONDS).build();
-        session = new GatewaySession(client, views::add, receipts::add);
+        session = new GatewaySession(client, views::add, receipts::add, gameplayPackets::add);
         server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
             @Override public void onOpen(WebSocket socket, Response response) { peer = socket; }
             @Override public void onMessage(WebSocket socket, String text) {
@@ -150,7 +151,7 @@ public class GatewaySessionTest {
         client.dispatcher().executorService().shutdownNow();
         client.connectionPool().evictAll();
         client = new OkHttpClient.Builder().connectTimeout(2, TimeUnit.SECONDS).build();
-        session = new GatewaySession(client, views::add, receipts::add);
+        session = new GatewaySession(client, views::add, receipts::add, gameplayPackets::add);
         views.clear();
         session.connect(server.url("/ws").toString().replace("https://", "wss://"));
         phase(GatewaySession.Phase.CONNECTING);
@@ -232,5 +233,23 @@ public class GatewaySessionTest {
         assertEquals("gameShopReceipt", new JSONObject(receipts.poll(3, TimeUnit.SECONDS)).getString("type"));
         peer.send("{\"type\":\"packet\",\"packet\":\"ObjectChat\",\"payload\":{\"text\":\"not a receipt\"}}");
         assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void entityPacketsForwardOnlyAfterAuthoritativeWorldEntry() throws Exception {
+        connect();
+        peer.send("{\"type\":\"packet\",\"packet\":\"ObjectWalk\",\"payload\":{\"objectId\":43,\"x\":302,\"y\":631,\"direction\":\"DownRight\"}}");
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapInformation\",\"payload\":{\"fileName\":\"0\"}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserInformation\",\"payload\":{\"name\":\"Fixture\"}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":302,\"y\":634}}");
+        phase(GatewaySession.Phase.IN_GAME);
+        peer.send("{\"type\":\"packet\",\"packet\":\"ObjectWalk\",\"payload\":{\"objectId\":43,\"x\":302,\"y\":631,\"direction\":\"DownRight\"}}");
+        assertEquals("ObjectWalk", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"NewMonsterInfo\",\"payload\":{\"objectId\":77,\"name\":\"Hen\",\"location\":{\"x\":299,\"y\":629}}}");
+        assertEquals("NewMonsterInfo", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"ObjectChat\",\"payload\":{\"text\":\"not an entity transform\"}}");
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
     }
 }

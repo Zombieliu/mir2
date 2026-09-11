@@ -516,6 +516,35 @@ fn receive(
         .drain(..)
         .collect();
     for value in values {
+        if value["type"] == "gatewayGameplayPacket" {
+            #[cfg(target_os = "android")]
+            if let Some(raw) = value["envelope"].as_str() {
+                match crate::live_entity::apply_packet(raw) {
+                    crate::live_entity::LiveEntityPacketOutcome::Applied { models, render } => {
+                        let _ =
+                            mir2_bevy_runtime::native_ingest::push_native_entity_model_set(models);
+                        if let Some(render) = render {
+                            let _ =
+                                mir2_bevy_runtime::native_ingest::push_native_entity_render_state(
+                                    render,
+                                );
+                        }
+                    }
+                    crate::live_entity::LiveEntityPacketOutcome::Ignored => {}
+                    crate::live_entity::LiveEntityPacketOutcome::Rejected => {
+                        crate::live_entity::clear();
+                        mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                        model.apply_gateway_event(Event::Disconnect {
+                            reason: Some("Invalid authoritative entity packet; reconnect".into()),
+                        });
+                        intents.drain().for_each(drop);
+                        OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+                        send(json!({"type":"disconnect"}));
+                    }
+                }
+            }
+            continue;
+        }
         if value["type"] == "gatewayReceipt" {
             if let (Some(inbound), Some(raw)) =
                 (gateway_inbound.as_deref_mut(), value["envelope"].as_str())
@@ -689,7 +718,12 @@ fn receive(
                 let world_snapshot = world.clone();
                 host.pending_world_request = Some(request_id);
                 host.pending_render_request = Some(request_id);
-                let queued = mir2_bevy_runtime::native_ingest::push_native_world_state(world)
+                #[cfg(target_os = "android")]
+                let live_models_ready = crate::live_entity::install_models(&entities, request_id);
+                #[cfg(not(target_os = "android"))]
+                let live_models_ready = true;
+                let queued = live_models_ready
+                    && mir2_bevy_runtime::native_ingest::push_native_world_state(world)
                     && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui)
                     && mir2_bevy_runtime::native_ingest::push_native_map_model(map)
                     && mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entities);
