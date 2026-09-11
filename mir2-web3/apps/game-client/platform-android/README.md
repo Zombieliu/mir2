@@ -68,6 +68,14 @@ releases the StartGame transition. New snapshots received while
 an asset load is active replace one deferred frame; stale receipts cannot
 release the latest transition or scene update.
 
+The same barrier now covers authoritative map changes. When the transport
+leaves `IN_GAME` for `STARTING`, or a complete snapshot changes the map name,
+the host returns the shared shell to `StartingGame` before clearing native
+scene presentation. It preserves authenticated character/personal models but
+drops unsent gameplay effects while the shell is non-interactive. Only the
+matching two-frame `NativeRenderReady` receipt restores `InGame`; a partial or
+stale map/entity load cannot expose the HUD over an incomplete scene.
+
 The checked local Bichon `(302,634)` viewport renders 607 atlas draws and 242
 keyed/additive standalone draws (849 total) with zero unresolved visible draws,
 plus the fixture self player and monster. The available Mac source export is

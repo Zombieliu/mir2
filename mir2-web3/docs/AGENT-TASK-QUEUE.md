@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `32e7b9b66`: authoritative map boundaries now enter the
+> existing shared `StartingGame` presentation barrier before clearing the old
+> native scene. Authentication and personal models survive, but gameplay input
+> stays gated until the exact map+entity render receipt is complete for two
+> consecutive frames. Android 113/113, configured real-atlas 1/1, Java TLS
+> 11/11, API31 check and both APK launch gates pass. The API31 transition image
+> is an explicitly labelled offline UI Preview, not a live map-switch result.
+> Approved Gateway/account, complete gameplay reducers/action animation and
+> physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-render-ready-transition-20260911/README.md`.
+
 > 2026-09-11 Android `ed045fcfb`: packet-only actors whose canonical
 > kind/class/dead/sprite contract exactly matches an already decoded visible
 > actor now materialize immediately as native Crystal standing sprites. The

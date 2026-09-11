@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `32e7b9b66`: a changed authoritative map or live
+> `IN_GAME -> STARTING` transport boundary now returns the native client to the
+> shared `StartingGame` shell before scene reset. The authenticated character
+> and personal state remain available, while old presentation and unsent
+> gameplay effects are cleared. Only the same exact map/entity request staying
+> render-complete for two frames restores `InGame`. Android 113, real-atlas 1,
+> Java TLS 11, API31 and normal/offline-preview APK gates pass. The emulator
+> image proves the offline loading surface only; real login/StartGame/map
+> transition and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-render-ready-transition-20260911/README.md`.
+
 > 2026-09-11 Android `ed045fcfb`: a new authoritative player/hero/monster/NPC
 > packet can now obtain a native Crystal standing sprite immediately when its
 > normalized render contract exactly matches one already decoded in the

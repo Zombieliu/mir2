@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `32e7b9b66`: map changes no longer leave the shared
+> gameplay HUD interactive over a cleared/loading native scene. The host reuses
+> `StartingGame`, preserves authenticated personal state, and returns to
+> `InGame` only after the exact two-frame map+entity render-ready receipt. The
+> API31 screenshot is a labelled offline preview of that loading surface, not
+> live Gateway evidence. Android 113/113, real-atlas 1/1, Java TLS 11/11 and
+> API31 APK gates pass. Online map-switch and physical-device visual/input
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-render-ready-transition-20260911/README.md`.
+
 > 2026-09-11 Android `ed045fcfb`: a packet-only actor with an exact match to an
 > already decoded canonical sprite contract now appears immediately as a
 > native Crystal standing sprite, with authoritative object id, position,
