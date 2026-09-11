@@ -28,6 +28,8 @@ struct LiveEntityCache {
     hidden: HashMap<u32, HiddenEntity>,
     tombstones: HashSet<u32>,
     actions: HashMap<u32, ActiveAction>,
+    health_generation: u64,
+    health_revision: u64,
 }
 
 #[derive(Default)]
@@ -91,6 +93,8 @@ pub(crate) fn install_models(json_text: &str, request_id: u64) -> bool {
         .unwrap_or_else(|poisoned| poisoned.into_inner());
     if cache.request_id != request_id {
         cache.actions.clear();
+        cache.health_generation = cache.health_generation.wrapping_add(1).max(1);
+        cache.health_revision = 0;
     }
     let LiveEntityCache {
         hidden, tombstones, ..
@@ -356,9 +360,18 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 started_ms: now_ms,
                 life_state: None,
             }),
-        "ObjectHealth" => object_id(body)
-            .zip(percent(body))
-            .map(|(object_id, percent)| EntityMutation::Health { object_id, percent }),
+        "ObjectHealth" => object_id(body).zip(percent(body)).zip(expire(body)).map(
+            |((object_id, percent), expire)| {
+                cache.health_revision = cache.health_revision.wrapping_add(1).max(1);
+                EntityMutation::Health {
+                    object_id,
+                    percent,
+                    expire,
+                    generation: cache.health_generation,
+                    revision: cache.health_revision,
+                }
+            },
+        ),
         "Death" => self_object_id(&models)
             .zip(location(body))
             .map(|(object_id, position)| EntityMutation::Action {
@@ -734,6 +747,9 @@ enum EntityMutation {
     Health {
         object_id: u32,
         percent: u8,
+        expire: u8,
+        generation: u64,
+        revision: u64,
     },
     Hide(u32),
     Show(u32),
@@ -788,6 +804,10 @@ fn percent(payload: &serde_json::Map<String, Value>) -> Option<u8> {
     u8::try_from(payload.get("percent")?.as_u64()?)
         .ok()
         .filter(|value| *value <= 100)
+}
+
+fn expire(payload: &serde_json::Map<String, Value>) -> Option<u8> {
+    u8::try_from(payload.get("expire")?.as_u64()?).ok()
 }
 
 fn ground_drop(payload: &serde_json::Map<String, Value>, gold: bool) -> Option<GroundDropSpawn> {
@@ -874,6 +894,28 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         .and_then(Value::as_u64)
         .and_then(|value| u32::try_from(value).ok());
     let direction = direction(payload).map(str::to_owned);
+    let name_colour_argb = match payload.get("nameColourArgb") {
+        None | Some(Value::Null) => None,
+        Some(value) => Some(i32::try_from(value.as_i64()?).ok()?),
+    };
+    let guild_name = match payload.get("guildName") {
+        None | Some(Value::Null) => None,
+        Some(value) => {
+            let value = value.as_str()?.trim();
+            if value.chars().count() > 128 {
+                return None;
+            }
+            (!value.is_empty()).then(|| value.to_owned())
+        }
+    };
+    let image = match payload.get("image") {
+        None | Some(Value::Null) => None,
+        Some(value) => Some(u16::try_from(value.as_u64()?).ok()?),
+    };
+    let dead = match payload.get("dead") {
+        None | Some(Value::Null) => false,
+        Some(value) => value.as_bool()?,
+    };
     let model = json!({
         "objectId": object_id.to_string(),
         "kind": kind,
@@ -882,6 +924,10 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         "y": y,
         "level": level,
         "direction": direction,
+        "nameColourArgb": name_colour_argb,
+        "guildName": guild_name,
+        "image": image,
+        "dead": dead,
     });
     Some(EntitySpawn {
         model,
@@ -1222,10 +1268,18 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
                 }
                 changed
             }),
-        EntityMutation::Health { object_id, percent } => entities
+        EntityMutation::Health {
+            object_id,
+            percent,
+            expire,
+            generation,
+            revision,
+        } => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
-            .is_some_and(|entity| patch_model_health(entity, *percent)),
+            .is_some_and(|entity| {
+                patch_model_health(entity, *percent, *expire, *generation, *revision)
+            }),
         EntityMutation::Spawn(spawn) => {
             let object_id = entity_id(&spawn.model).expect("spawn was validated");
             if let Some(existing) = entities
@@ -1282,10 +1336,22 @@ fn upsert_ground_drop_model(models: &mut Value, drop: &GroundDropSpawn) -> bool 
     true
 }
 
-fn patch_model_health(entity: &mut Value, percent: u8) -> bool {
-    let changed = entity.get("hpPercent").and_then(Value::as_u64) != Some(u64::from(percent));
+fn patch_model_health(
+    entity: &mut Value,
+    percent: u8,
+    expire: u8,
+    generation: u64,
+    revision: u64,
+) -> bool {
     entity["hpPercent"] = json!(percent);
-    patch_model_dead(entity, percent == 0) | changed
+    entity["_healthPercent"] = json!(percent);
+    entity["_healthExpireSeconds"] = json!(expire);
+    entity["_healthGeneration"] = json!(generation);
+    entity["_healthRevision"] = json!(revision);
+    patch_model_dead(entity, percent == 0);
+    // Every valid packet advances the server-driven visibility revision even
+    // when its percentage repeats, so the presentation deadline is renewed.
+    true
 }
 
 fn patch_model_dead(entity: &mut Value, dead: bool) -> bool {
@@ -1358,7 +1424,9 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_transform(entity, *position, direction.as_deref())),
-        EntityMutation::Health { object_id, percent } => entities
+        EntityMutation::Health {
+            object_id, percent, ..
+        } => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_dead(entity, *percent == 0)),
@@ -1974,6 +2042,10 @@ mod tests {
         };
         let models: Value = serde_json::from_str(&models).unwrap();
         assert_eq!(models["entities"][1]["hpPercent"], 0);
+        assert_eq!(models["entities"][1]["_healthPercent"], 0);
+        assert_eq!(models["entities"][1]["_healthExpireSeconds"], 0);
+        assert_eq!(models["entities"][1]["_healthGeneration"], 1);
+        assert_eq!(models["entities"][1]["_healthRevision"], 1);
         assert_eq!(models["entities"][1]["dead"], true);
         let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
         assert_eq!(render["entities"][1]["layers"][0]["opacity"], 0.45);

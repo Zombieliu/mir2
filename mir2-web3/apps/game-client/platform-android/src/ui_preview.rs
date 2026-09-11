@@ -198,19 +198,26 @@ fn apply(world: &mut World) {
         let snapshot = serde_json::json!({
             "playerObjectId":"9001",
             "entities":[
-                {"objectId":"9001","kind":"selfPlayer","name":"OFFLINE UI FIXTURE","x":302,"y":634,"direction":"Down",
+                {"objectId":"9001","kind":"selfPlayer","name":"OFFLINE UI FIXTURE","guildName":"CODEX","nameColourArgb":-256,"x":302,"y":634,"direction":"Down",
                  "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}},
-                {"objectId":"9002","kind":"monster","name":"Offline monster","x":304,"y":634,"direction":"Down",
+                {"objectId":"9002","kind":"monster","name":"Offline_monster","nameColourArgb":-65536,"x":304,"y":634,"direction":"Down","_healthPercent":65,"_healthExpireSeconds":90,"_healthGeneration":1,"_healthRevision":1,
                  "sprite":{"bodyLibrary":"Monster/003","frameBaseOffset":0,"directionStride":4}}
             ],
             "groundDrops":[
                 {"objectId":"9101","name":"Offline potion","nameColourArgb":-10040065,
-                 "x":301,"y":634,"image":0,"quantity":1,"dropKind":"item"},
+                 "x":300,"y":635,"image":0,"quantity":1,"dropKind":"item"},
                 {"objectId":"9102","name":"Gold","nameColourArgb":-256,
-                 "x":303,"y":635,"image":114,"quantity":250,"dropKind":"gold"}
+                 "x":304,"y":636,"image":114,"quantity":250,"dropKind":"gold"}
             ]
         })
         .to_string();
+        if let Some(overlays) =
+            crate::entity_overlays::project(&snapshot, scene.center_x, scene.center_y)
+        {
+            world
+                .resource_mut::<crate::entity_overlays::ActorOverlayModel>()
+                .replace(overlays);
+        }
         if let Some(labels) =
             crate::ground_labels::project(&snapshot, scene.center_x, scene.center_y)
         {

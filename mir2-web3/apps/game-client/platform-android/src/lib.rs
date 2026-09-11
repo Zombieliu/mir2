@@ -6,6 +6,8 @@
 
 pub mod android_input;
 #[cfg(any(target_os = "android", test))]
+mod entity_overlays;
+#[cfg(any(target_os = "android", test))]
 mod entity_render;
 #[cfg(any(target_os = "android", test))]
 mod form_input;
