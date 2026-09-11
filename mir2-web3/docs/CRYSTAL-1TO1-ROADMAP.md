@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `843f94593`: generic render-ready actors now animate
+> authoritative Walk/Run packets from the shared Crystal default catalogs.
+> Packet coordinates remain authoritative and no speculative step is created;
+> a deterministic clock advances exact packaged frames and settles to standing.
+> Android 116, real-atlas 1, Java TLS 11, API31 and APK launch gates pass.
+> Interpolation/backstep, generated per-library/mounted variants, remaining
+> object/reducer families, approved online journey and physical-device
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-locomotion-animation-20260911/README.md`.
+
 > 2026-09-11 Android `73119525e`: the native object cache now drives a bounded
 > packet action clock over exact packaged Crystal frames for harvest, attack
 > variants, range attack, dash attack and struck. Missing direction falls back

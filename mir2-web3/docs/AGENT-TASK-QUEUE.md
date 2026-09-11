@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `843f94593`: authoritative `ObjectWalk` and `ObjectRun`
+> packets now enter the same bounded native action clock as combat, using exact
+> packaged Crystal walking/running frames at the packet position and last known
+> server facing, then returning to standing. No movement prediction or client
+> authority was added. Android 116/116, configured real-atlas 1/1, Java TLS
+> 11/11, API31 and normal APK build/install/cold-launch pass; APK SHA-256 is
+> `21bb63449af1e454d38e67b68fc01c6df1105591db07c3fbac439522017e6a39`.
+> Continuous interpolation/backstep, generated class/mount catalogs, remaining
+> object families, approved online login and physical-device acceptance remain
+> open. Evidence:
+> `docs/generated/player-qa/native-android-locomotion-animation-20260911/README.md`.
+
 > 2026-09-11 Android `73119525e`: bounded post-`IN_GAME` actor packets now
 > select and advance exact immutable Crystal atlas frames for harvest, melee
 > attack variants, range attack, dash attack and struck, then settle to the

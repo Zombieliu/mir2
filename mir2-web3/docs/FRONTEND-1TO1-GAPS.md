@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `843f94593`: post-`IN_GAME` `ObjectWalk`/`ObjectRun`
+> updates now select exact packaged walking/running sprites and advance them on
+> the existing native monotonic presentation clock, without changing server
+> movement authority. API31 build/install/launch passes, but the unconfigured
+> normal APK cannot produce live locomotion visual evidence. Continuous motion,
+> alternate catalogs, real login and physical-device/human acceptance remain
+> open. Evidence:
+> `docs/generated/player-qa/native-android-locomotion-animation-20260911/README.md`.
+
 > 2026-09-11 Android `73119525e`: existing render-ready generic actors now
 > animate authoritative harvest/attack/range/dash/struck packets from exact
 > packaged Crystal frames and return to standing on a monotonic client-side
