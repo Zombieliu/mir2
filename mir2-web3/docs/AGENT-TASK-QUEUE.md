@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `ed045fcfb`: packet-only actors whose canonical
+> kind/class/dead/sprite contract exactly matches an already decoded visible
+> actor now materialize immediately as native Crystal standing sprites. The
+> cache keeps the prototype private, enforces the current render viewport,
+> rewrites every layer key to the authoritative object id, and performs no new
+> image decode. Android 112/112, configured real-atlas 1/1, Java TLS 11/11,
+> API31 and APK build/install/cold-launch pass; APK SHA-256 is
+> `cc98939cdb676e56ec86f0d3edfc58f84265819606d859d68dc2168ee3166ca9`.
+> Unmatched packet actors, action animation, render-ready map switching,
+> approved online login and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-packet-actor-render-20260911/README.md`.
+
 > 2026-09-11 Android `029dc5e3f`: visible authoritative actors now preload all
 > available Crystal standing facings into an Android-private bounded sidecar.
 > Packet-first movement/turn swaps the existing sprite facing and updates

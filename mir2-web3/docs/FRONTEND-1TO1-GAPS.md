@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `ed045fcfb`: a packet-only actor with an exact match to an
+> already decoded canonical sprite contract now appears immediately as a
+> native Crystal standing sprite, with authoritative object id, position,
+> facing and y-sort depth. No atlas image is decoded on the packet path and the
+> prototype sidecar never enters runtime JSON. Android 112, configured atlas
+> 1, Java TLS 11, API31 and APK build/install/launch pass. Unmatched packet
+> actors, walk/run/attack animation, render-ready map changes, approved online
+> journey, physical device and human visual acceptance stay open. Evidence:
+> `docs/generated/player-qa/native-android-packet-actor-render-20260911/README.md`.
+
 > 2026-09-11 Android `029dc5e3f`: actors from the last complete render
 > snapshot now change to the authoritative Crystal standing facing and y-sort
 > depth packet-first, using bounded preloaded variants while keeping the Bevy

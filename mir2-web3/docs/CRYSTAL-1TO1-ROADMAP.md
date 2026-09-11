@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `ed045fcfb`: a new authoritative player/hero/monster/NPC
+> packet can now obtain a native Crystal standing sprite immediately when its
+> normalized render contract exactly matches one already decoded in the
+> current viewport. The Android-private prototype is bounded, object/layer
+> identity is rewritten to the server id, and runtime JSON still exposes only
+> active layers. Android 112, real-atlas 1, Java TLS 11, API31 and APK launch
+> gates pass. Unmatched actor resolution, action animation, render-ready map
+> changes, approved online journey and physical-device acceptance remain open.
+> Evidence:
+> `docs/generated/player-qa/native-android-packet-actor-render-20260911/README.md`.
+
 > 2026-09-11 Android `029dc5e3f`: the packaged entity-atlas producer now
 > pre-resolves every available standing direction for each render-ready actor
 > into a bounded Android-only sidecar. Packet-first movement/turn selects the

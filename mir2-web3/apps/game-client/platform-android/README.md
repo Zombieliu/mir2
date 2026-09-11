@@ -174,8 +174,12 @@ the neutral object layer immediately. Render-ready actors retain a bounded
 Android-private set of all available standing facings; movement/turn packets
 select the authoritative direction and update Crystal tile depth without
 decoding atlas pages again. The runtime payload contains only the active pose.
-Packet-only new actor Crystal sprites and walk/run/attack frame animation still
-wait for a complete render snapshot.
+When a packet-only actor has the exact same canonical kind/class/dead/sprite
+contract as an already decoded render-ready actor, the host now clones that
+bounded prototype, rewrites every layer key to the server object id, places it
+inside the current viewport, and selects its authoritative standing direction
+without another atlas decode. Unmatched actors still wait for a complete render
+snapshot. Walk/run/attack frame animation is not implemented by this path.
 
 This closes the reducer-to-live-socket outbound adaptation, existing
 transaction-result return adapters, and the bounded entity object-list/
