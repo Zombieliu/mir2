@@ -589,11 +589,17 @@ fn apply_queued_ui_actions(
 }
 
 pub fn build_android_runtime_app() -> App {
+    #[cfg(target_os = "android")]
+    mir2_bevy_runtime::set_mir2_remote_motion_presentation_enabled(true);
     let mut app = build_runtime_app(RuntimeWindowSpec {
         width: 1280,
         height: 720,
         ..RuntimeWindowSpec::native("mir2-web3 (android)")
     });
+    #[cfg(target_os = "android")]
+    app.world_mut()
+        .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()
+        .set_native_consumer_enabled(true);
     app.add_plugins(AndroidShellPlugin);
     #[cfg(target_os = "android")]
     app.insert_resource(ClearColor(Color::srgb(0.015, 0.035, 0.075)))

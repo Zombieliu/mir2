@@ -53,7 +53,79 @@ pub struct PreviewRequest {
 pub fn install(app: &mut App) {
     app.init_resource::<PreviewRequest>()
         .add_systems(Update, report_world_render_ready)
+        .add_systems(Update, start_world_render_motion_specimen)
+        .add_systems(Update, report_world_render_motion_pose)
         .add_systems(PostUpdate, apply);
+}
+
+fn start_world_render_motion_specimen(
+    receipt: Res<mir2_bevy_runtime::native_render_receipt::NativeRenderReceipt>,
+    time: Res<Time>,
+    mut ready_since_ms: Local<Option<u64>>,
+    mut started: Local<bool>,
+) {
+    if *started || receipt.ready_for(u64::MAX).is_none() {
+        return;
+    }
+    let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    let Some(ready_ms) = *ready_since_ms else {
+        *ready_since_ms = Some(now_ms);
+        return;
+    };
+    if now_ms.saturating_sub(ready_ms) < 1_500 {
+        return;
+    }
+    // Exercise the production packet-presentation path after both the packed
+    // scene and its actor atlases have had time to become visible. The
+    // authoritative snapshot already owns the target tile; this offline event
+    // contributes only a temporary screen-space glide from the prior tile.
+    crate::shared_shell::enqueue_presentation_event(
+        serde_json::json!({
+            "type": "remoteMotion",
+            "atMs": now_ms,
+            "packet": "ObjectBackStep",
+            "objectId": "9003",
+            "fromX": 301,
+            "fromY": 634,
+            "toX": 299,
+            "toY": 634,
+            "direction": "Right",
+            "mode": "backstep",
+            "phaseCount": 8
+        })
+        .to_string(),
+    );
+    info!("ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED");
+    *started = true;
+}
+
+fn report_world_render_motion_pose(
+    poses: Res<mir2_bevy_runtime::PresentationPoseBuffer>,
+    time: Res<Time>,
+    _main_thread: NonSend<crate::shared_shell::AndroidPresentationMainThread>,
+    mut saw_active: Local<bool>,
+    mut saw_settled: Local<bool>,
+    mut reported_diagnostics: Local<bool>,
+) {
+    if !*reported_diagnostics && time.elapsed().as_millis() >= 4_500 {
+        let diagnostics = mir2_bevy_runtime::get_mir2_remote_motion_presentation_diagnostics();
+        info!(%diagnostics, "ANDROID_REMOTE_BACKSTEP_DIAGNOSTICS");
+        *reported_diagnostics = true;
+    }
+    let Some((x, y)) = poses.native_overlay_entity_offset("9003") else {
+        return;
+    };
+    if !*saw_active && (x.abs() > f32::EPSILON || y.abs() > f32::EPSILON) {
+        info!(
+            offset_x = x,
+            offset_y = y,
+            "ANDROID_REMOTE_BACKSTEP_POSE_ACTIVE"
+        );
+        *saw_active = true;
+    } else if *saw_active && !*saw_settled && x.abs() <= f32::EPSILON && y.abs() <= f32::EPSILON {
+        info!("ANDROID_REMOTE_BACKSTEP_POSE_SETTLED");
+        *saw_settled = true;
+    }
 }
 
 fn report_world_render_ready(
@@ -236,8 +308,10 @@ fn apply(world: &mut World) {
             "entities":[
                 {"objectId":"9001","kind":"selfPlayer","name":"OFFLINE UI FIXTURE","guildName":"CODEX","nameColourArgb":-256,"x":302,"y":634,"direction":"Down",
                  "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}},
-                {"objectId":"9002","kind":"monster","name":"Offline_monster","nameColourArgb":-65536,"x":304,"y":634,"direction":"Down","_healthPercent":65,"_healthExpireSeconds":90,"_healthGeneration":1,"_healthRevision":1,
-                 "sprite":{"bodyLibrary":"Monster/003","frameBaseOffset":0,"directionStride":4}}
+                {"objectId":"9002","kind":"monster","name":"Offline_monster","nameColourArgb":-65536,"x":304,"y":634,"direction":"Right","_healthPercent":65,"_healthExpireSeconds":90,"_healthGeneration":1,"_healthRevision":1,
+                 "sprite":{"bodyLibrary":"Monster/003","frameBaseOffset":0,"directionStride":4}},
+                {"objectId":"9003","kind":"player","name":"Motion witness","guildName":"BACKSTEP","nameColourArgb":-16711681,"x":299,"y":634,"direction":"Right",
+                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}}
             ],
             "groundDrops":[
                 {"objectId":"9101","name":"Offline potion","nameColourArgb":-10040065,

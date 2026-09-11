@@ -70,6 +70,7 @@ pub(crate) enum LiveEntityPacketOutcome {
     Applied {
         models: String,
         render: Option<String>,
+        presentation_event: Option<String>,
     },
     Ignored,
     Rejected,
@@ -87,6 +88,14 @@ pub(crate) fn clear() {
     *LIVE_ENTITIES
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner()) = LiveEntityCache::default();
+}
+
+#[cfg(target_os = "android")]
+pub(crate) fn clear_with_presentation_reset() {
+    clear();
+    crate::shared_shell::enqueue_presentation_event(
+        json!({"type": "clear", "atMs": live_now_ms()}).to_string(),
+    );
 }
 
 pub(crate) fn drain_damage_events() -> Vec<LiveDamageEvent> {
@@ -463,6 +472,7 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
         cache.models = Some(models);
         return LiveEntityPacketOutcome::Rejected;
     };
+    let presentation_event = presentation_event(packet, &models, &mutation, now_ms);
     if matches!(
         mutation,
         EntityMutation::Hide(_) | EntityMutation::Remove(_)
@@ -516,6 +526,85 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
     LiveEntityPacketOutcome::Applied {
         models: encoded_models,
         render,
+        presentation_event,
+    }
+}
+
+/// Mirror authoritative remote-object movement into the shared Bevy
+/// presentation clock. The event changes only the render offset: the packed
+/// model has already moved to the server-provided endpoint and remains the
+/// sole gameplay state used by Android.
+fn presentation_event(
+    packet: &str,
+    models: &Value,
+    mutation: &EntityMutation,
+    now_ms: u64,
+) -> Option<String> {
+    let remote_motion =
+        |object_id: u32, to: (i32, i32), packet_direction: Option<&str>, mode: &str| {
+            if self_object_id(models) == Some(object_id) {
+                return None;
+            }
+            let (from, previous_direction) = model_pose(models, object_id)?;
+            Some(
+                json!({
+                    "type": "remoteMotion",
+                    "atMs": now_ms,
+                    "packet": packet,
+                    "objectId": object_id.to_string(),
+                    "fromX": from.0,
+                    "fromY": from.1,
+                    "toX": to.0,
+                    "toY": to.1,
+                    "direction": packet_direction
+                        .map(str::to_owned)
+                        .or(previous_direction)
+                        .unwrap_or_else(|| "Down".to_owned()),
+                    "mode": mode,
+                })
+                .to_string(),
+            )
+        };
+
+    match (packet, mutation) {
+        (
+            "ObjectWalk" | "ObjectRun",
+            EntityMutation::Action {
+                object_id,
+                position,
+                direction,
+                ..
+            },
+        ) => remote_motion(
+            *object_id,
+            *position,
+            direction.as_deref(),
+            if packet == "ObjectRun" { "run" } else { "walk" },
+        ),
+        ("ObjectBackStep" | "ObjectTurn", EntityMutation::Move(object_id, position, direction)) => {
+            remote_motion(
+                *object_id,
+                *position,
+                direction.as_deref(),
+                if packet == "ObjectTurn" {
+                    "turn"
+                } else {
+                    "backstep"
+                },
+            )
+        }
+        (
+            "ObjectHide" | "ObjectTeleportOut" | "ObjectRemove",
+            EntityMutation::Hide(object_id) | EntityMutation::Remove(object_id),
+        ) => (self_object_id(models) != Some(*object_id)).then(|| {
+            json!({
+                "type": "remoteRemove",
+                "atMs": now_ms,
+                "objectId": object_id.to_string(),
+            })
+            .to_string()
+        }),
+        _ => None,
     }
 }
 
@@ -1993,11 +2082,28 @@ mod tests {
             r#"{"_nativeWorldRequest":9,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"key":"42:body:0","left":480.0,"top":352.0}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"left"}]}]}"#,
             r#"{"_nativeWorldRequest":9,"entities":[{"objectId":"43","prototype":{"kind":"monster","classKey":"","dead":false,"sprite":{"bodyLibrary":"Mon/01","hairLibrary":null,"weaponLibrary":null,"weaponLibrarySecondary":null,"altBodyLibrary":null,"altHairLibrary":null,"altWeaponLibrary":null,"altWeaponLibrarySecondary":null,"mountLibrary":null,"frameBaseOffset":0,"weaponFrameOffset":null,"altFrameBaseOffset":null,"altWeaponFrameOffset":null,"frameCount":4,"directionStride":4,"mountFrameOffset":null}},"directionLayers":{"Left":[{"key":"43:body:0","left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"left"}],"DownRight":[{"key":"43:body:0","left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"down-right"}]}}]}"#,
         ));
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+        let LiveEntityPacketOutcome::Applied {
+            models,
+            render,
+            presentation_event,
+        } = apply_packet(
             r#"{"type":"packet","packet":"ObjectWalk","payload":{"objectId":43,"x":302,"y":631,"direction":"DownRight"}}"#,
-        ) else {
+        )
+        else {
             panic!("movement should apply");
         };
+        let presentation: Value =
+            serde_json::from_str(presentation_event.as_deref().expect("remote motion event"))
+                .unwrap();
+        assert_eq!(presentation["type"], "remoteMotion");
+        assert_eq!(presentation["packet"], "ObjectWalk");
+        assert_eq!(presentation["objectId"], "43");
+        assert_eq!(presentation["fromX"], 301);
+        assert_eq!(presentation["fromY"], 630);
+        assert_eq!(presentation["toX"], 302);
+        assert_eq!(presentation["toY"], 631);
+        assert_eq!(presentation["direction"], "DownRight");
+        assert_eq!(presentation["mode"], "walk");
         let models: Value = serde_json::from_str(&models).unwrap();
         assert_eq!(models["entities"][1]["x"], 302);
         assert_eq!(models["entities"][1]["y"], 631);
@@ -2014,7 +2120,7 @@ mod tests {
         assert!(render["entities"][1].get("directionLayers").is_none());
         assert!(render["entities"][1].get("prototype").is_none());
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
             r#"{"type":"packet","packet":"NewMonsterInfo","payload":{"info":{"objectId":78,"name":"Deer Two","location":{"x":299,"y":629},"direction":"Left","sprite":{"bodyLibrary":"Mon/01"}}}}"#,
         ) else {
             panic!("matching packet actor should apply");
@@ -2084,6 +2190,90 @@ mod tests {
     }
 
     #[test]
+    fn remote_run_backstep_turn_and_remove_emit_authoritative_presentation_events() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"direction":"Down"},{"objectId":"43","kind":"monster","name":"Deer","x":301,"y":630,"direction":"Right"}]}"#,
+            10,
+        ));
+
+        let LiveEntityPacketOutcome::Applied {
+            presentation_event: Some(run),
+            ..
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectRun","payload":{"objectId":43,"x":303,"y":630,"direction":"Right"}}"#,
+            100,
+        )
+        else {
+            panic!("run should apply");
+        };
+        let run: Value = serde_json::from_str(&run).unwrap();
+        assert_eq!(run["atMs"], 100);
+        assert_eq!(run["fromX"], 301);
+        assert_eq!(run["toX"], 303);
+        assert_eq!(run["mode"], "run");
+
+        let LiveEntityPacketOutcome::Applied {
+            presentation_event: Some(backstep),
+            ..
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectBackStep","payload":{"objectId":43,"x":302,"y":630,"direction":"Right","distance":1}}"#,
+            200,
+        )
+        else {
+            panic!("backstep should apply");
+        };
+        let backstep: Value = serde_json::from_str(&backstep).unwrap();
+        assert_eq!(backstep["packet"], "ObjectBackStep");
+        assert_eq!(backstep["fromX"], 303);
+        assert_eq!(backstep["toX"], 302);
+        assert_eq!(backstep["mode"], "backstep");
+
+        let LiveEntityPacketOutcome::Applied {
+            presentation_event: Some(turn),
+            ..
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectTurn","payload":{"objectId":43,"x":302,"y":630,"direction":"Up"}}"#,
+            250,
+        )
+        else {
+            panic!("turn should apply");
+        };
+        let turn: Value = serde_json::from_str(&turn).unwrap();
+        assert_eq!(turn["fromX"], 302);
+        assert_eq!(turn["toX"], 302);
+        assert_eq!(turn["direction"], "Up");
+        assert_eq!(turn["mode"], "turn");
+
+        let LiveEntityPacketOutcome::Applied {
+            presentation_event: Some(remove),
+            ..
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectRemove","payload":{"objectId":43}}"#,
+            300,
+        )
+        else {
+            panic!("remove should apply");
+        };
+        let remove: Value = serde_json::from_str(&remove).unwrap();
+        assert_eq!(remove["type"], "remoteRemove");
+        assert_eq!(remove["objectId"], "43");
+
+        let LiveEntityPacketOutcome::Applied {
+            presentation_event, ..
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectWalk","payload":{"objectId":42,"x":301,"y":630,"direction":"Right"}}"#,
+            400,
+        )
+        else {
+            panic!("self movement model update should apply");
+        };
+        assert!(presentation_event.is_none());
+        clear();
+    }
+
+    #[test]
     fn lifecycle_packets_keep_hidden_and_removed_objects_authoritative() {
         let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
         clear();
@@ -2096,7 +2286,7 @@ mod tests {
             r#"{"_nativeWorldRequest":19,"entities":[{"objectId":"43","prototype":{"kind":"monster","classKey":"","dead":false,"sprite":{"bodyLibrary":"Mon/01","hairLibrary":null,"weaponLibrary":null,"weaponLibrarySecondary":null,"altBodyLibrary":null,"altHairLibrary":null,"altWeaponLibrary":null,"altWeaponLibrarySecondary":null,"mountLibrary":null,"frameBaseOffset":0,"weaponFrameOffset":null,"altFrameBaseOffset":null,"altWeaponFrameOffset":null,"frameCount":4,"directionStride":4,"mountFrameOffset":null}},"directionLayers":{"Left":[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]}}]}"#,
         ));
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
             r#"{"type":"packet","packet":"ObjectHealth","payload":{"objectId":43,"percent":0,"expire":0}}"#,
         ) else {
             panic!("health should apply");
@@ -2111,7 +2301,7 @@ mod tests {
         let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
         assert_eq!(render["entities"][1]["layers"][0]["opacity"], 0.45);
 
-        let LiveEntityPacketOutcome::Applied { models, render } =
+        let LiveEntityPacketOutcome::Applied { models, render, .. } =
             apply_packet(r#"{"type":"packet","packet":"ObjectHide","payload":{"objectId":43}}"#)
         else {
             panic!("hide should apply");
@@ -2226,7 +2416,7 @@ mod tests {
             LiveEntityPacketOutcome::Applied { .. }
         ));
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
             r#"{"type":"packet","packet":"DamageIndicator","payload":{"damage":12,"damageType":2,"objectId":43,"typed":true}}"#,
         ) else {
             panic!("critical damage should apply");
@@ -2276,7 +2466,7 @@ mod tests {
             r#"{"_nativeWorldRequest":25,"entities":[],"groundItemFrames":{"0":{"width":20,"height":13},"114":{"width":16,"height":10}}}"#,
         ));
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
             r#"{"type":"packet","packet":"ObjectItem","payload":{"objectId":50,"name":"Potion","nameColourArgb":-1,"location":{"x":301,"y":630},"image":0,"grade":0}}"#,
         ) else {
             panic!("item spawn should apply");
@@ -2293,7 +2483,7 @@ mod tests {
         assert_eq!(render["entities"][1]["layers"][0]["left"], 542.0);
         assert!(render.get("_nativeGroundItemFrames").is_none());
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
             r#"{"type":"packet","packet":"ObjectGold","payload":{"objectId":51,"gold":250,"location":{"x":300,"y":631}}}"#,
         ) else {
             panic!("gold spawn should apply");
@@ -2308,7 +2498,7 @@ mod tests {
             "/original-ui/DNItems/114.png"
         );
 
-        let LiveEntityPacketOutcome::Applied { models, render } =
+        let LiveEntityPacketOutcome::Applied { models, render, .. } =
             apply_packet(r#"{"type":"packet","packet":"ObjectRemove","payload":{"objectId":50}}"#)
         else {
             panic!("authoritative removal should clear the item");
@@ -2351,7 +2541,7 @@ mod tests {
             r#"{"_nativeWorldRequest":29,"entities":[{"objectId":"43","prototype":{},"directionLayers":{"Down":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing"}]},"actionLayers":{"attack2:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"attack-0"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"attack-1"}]]},"walking:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"walk-0"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"walk-1"}]]}}}]}"#,
         ));
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet_at(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet_at(
             r#"{"type":"packet","packet":"ObjectAttack","payload":{"objectId":43,"x":301,"y":630,"attackType":1}}"#,
             1_000,
         ) else {
@@ -2381,7 +2571,7 @@ mod tests {
             "standing"
         );
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet_at(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet_at(
             r#"{"type":"packet","packet":"ObjectWalk","payload":{"objectId":43,"x":302,"y":631}}"#,
             1_300,
         ) else {
@@ -2455,7 +2645,7 @@ mod tests {
         });
         assert!(install_render(&render.to_string(), &sidecar.to_string()));
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet_at(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet_at(
             r#"{"type":"packet","packet":"ObjectDied","payload":{"objectId":43,"location":{"x":302,"y":631}}}"#,
             1_000,
         ) else {
@@ -2487,7 +2677,7 @@ mod tests {
         );
         assert!(poll_action_frame_at(2_400).is_none());
 
-        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet_at(
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet_at(
             r#"{"type":"packet","packet":"ObjectRevived","payload":{"objectId":43}}"#,
             2_500,
         ) else {

@@ -45,10 +45,18 @@ pub(crate) struct ActorOverlayRoot;
 pub(crate) struct DamageOverlayRoot;
 
 #[derive(Component)]
-struct ActorNameLine;
+struct ActorNameLine {
+    object_id: u32,
+    base_left: f32,
+    base_top: f32,
+}
 
 #[derive(Component)]
-struct ActorHealthBar;
+struct ActorHealthBar {
+    object_id: u32,
+    base_left: f32,
+    base_top: f32,
+}
 
 #[derive(Component)]
 struct DamageFloaterNode(u64);
@@ -214,6 +222,7 @@ struct ActiveDamageFloater {
 #[derive(Clone, Debug)]
 struct DamageFloaterEntry {
     sequence: u64,
+    object_id: u32,
     text: String,
     color: Color,
     left: f32,
@@ -416,6 +425,10 @@ fn sync(
     read_model: Option<Res<UiReadModel>>,
     time: Res<Time>,
     roots: Query<Entity, With<ActorOverlayRoot>>,
+    mut name_nodes: Query<(&ActorNameLine, &mut Node), Without<ActorHealthBar>>,
+    mut health_nodes: Query<(&ActorHealthBar, &mut Node), Without<ActorNameLine>>,
+    presentation_poses: Option<Res<mir2_bevy_runtime::PresentationPoseBuffer>>,
+    ui_scale: Option<Res<UiScale>>,
     mut health_windows: Local<HealthWindows>,
     mut rendered: Local<Option<RenderKey>>,
 ) {
@@ -425,6 +438,34 @@ fn sync(
     let exact_self_hp = read_model.as_deref().and_then(|model| {
         (model.player.max_hp > 0).then_some((model.player.hp, model.player.max_hp))
     });
+    let overlay_motion = |object_id: u32| {
+        let Some(presentation_poses) = presentation_poses.as_deref() else {
+            return (0.0, 0.0);
+        };
+        if !presentation_poses.native_overlay_active()
+            || presentation_poses.native_overlay_center() != model.center
+        {
+            return (0.0, 0.0);
+        }
+        let camera = presentation_poses.native_overlay_camera_offset();
+        let entity = presentation_poses
+            .native_overlay_entity_offset(&object_id.to_string())
+            .unwrap_or((0.0, 0.0));
+        let scale = ui_scale
+            .as_deref()
+            .map_or(1.0, |scale| scale.0.max(f32::EPSILON));
+        ((camera.0 + entity.0) / scale, (camera.1 + entity.1) / scale)
+    };
+    for (marker, mut node) in &mut name_nodes {
+        let offset = overlay_motion(marker.object_id);
+        node.left = px(marker.base_left + offset.0);
+        node.top = px(marker.base_top + offset.1);
+    }
+    for (marker, mut node) in &mut health_nodes {
+        let offset = overlay_motion(marker.object_id);
+        node.left = px(marker.base_left + offset.0);
+        node.top = px(marker.base_top + offset.1);
+    }
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let mut present = HashSet::new();
     let mut visible_health = Vec::new();
@@ -496,10 +537,22 @@ fn sync(
                 let top = ENTITY_TOP_ORIGIN + actor.y.saturating_sub(center.1) as f32 * CELL_HEIGHT;
                 if actor.kind == ActorKind::SelfPlayer && !actor.dead {
                     if let Some((hp, max_hp)) = exact_self_hp {
-                        spawn_health_bar(root, left, top, hp as f32 / max_hp as f32);
+                        spawn_health_bar(
+                            root,
+                            actor.object_id,
+                            left,
+                            top,
+                            hp as f32 / max_hp as f32,
+                        );
                     }
                 } else if let Some(percent) = visible_health.get(&actor.object_id) {
-                    spawn_health_bar(root, left, top, f32::from(*percent) / 100.0);
+                    spawn_health_bar(
+                        root,
+                        actor.object_id,
+                        left,
+                        top,
+                        f32::from(*percent) / 100.0,
+                    );
                 }
                 if !names_visible {
                     continue;
@@ -509,6 +562,7 @@ fn sync(
                     if let Some(guild) = actor.guild_name.as_deref() {
                         spawn_name_line(
                             root,
+                            actor.object_id,
                             guild,
                             actor.color,
                             left,
@@ -518,6 +572,7 @@ fn sync(
                     }
                     spawn_name_line(
                         root,
+                        actor.object_id,
                         &actor.name,
                         actor.color,
                         left,
@@ -549,6 +604,7 @@ fn sync(
                     };
                     spawn_name_line(
                         root,
+                        actor.object_id,
                         line,
                         color,
                         left,
@@ -569,6 +625,8 @@ fn sync_damage(
     shell: Res<NativeShellModel>,
     time: Res<Time>,
     mut model: ResMut<ActorOverlayModel>,
+    presentation_poses: Option<Res<mir2_bevy_runtime::PresentationPoseBuffer>>,
+    ui_scale: Option<Res<UiScale>>,
     roots: Query<Entity, With<DamageOverlayRoot>>,
     mut nodes: Query<(Entity, &DamageFloaterNode, &mut Node, &mut TextColor)>,
 ) {
@@ -584,9 +642,32 @@ fn sync_damage(
     model
         .active_floaters
         .retain(|floater| floater.expires_at_ms > now_ms);
+    let overlay_motion = |object_id: u32| {
+        let Some(presentation_poses) = presentation_poses.as_deref() else {
+            return (0.0, 0.0);
+        };
+        if !presentation_poses.native_overlay_active()
+            || presentation_poses.native_overlay_center() != model.center
+        {
+            return (0.0, 0.0);
+        }
+        let camera = presentation_poses.native_overlay_camera_offset();
+        let entity = presentation_poses
+            .native_overlay_entity_offset(&object_id.to_string())
+            .unwrap_or((0.0, 0.0));
+        let scale = ui_scale
+            .as_deref()
+            .map_or(1.0, |scale| scale.0.max(f32::EPSILON));
+        ((camera.0 + entity.0) / scale, (camera.1 + entity.1) / scale)
+    };
     let mut desired = damage_floater_entries(&model, now_ms)
         .into_iter()
-        .map(|entry| (entry.sequence, entry))
+        .map(|mut entry| {
+            let offset = overlay_motion(entry.object_id);
+            entry.left += offset.0;
+            entry.top += offset.1;
+            (entry.sequence, entry)
+        })
         .collect::<HashMap<_, _>>();
     if desired.is_empty() {
         for root in &roots {
@@ -688,6 +769,7 @@ fn damage_floater_entries(model: &ActorOverlayModel, now_ms: u64) -> Vec<DamageF
             };
             Some(DamageFloaterEntry {
                 sequence: floater.sequence,
+                object_id: floater.object_id,
                 text: floater.text.clone(),
                 color: Color::srgba_u8(red, green, blue, (opacity * 255.0).round() as u8),
                 left: ENTITY_LEFT_ORIGIN + actor.x.saturating_sub(center_x) as f32 * CELL_WIDTH
@@ -703,14 +785,26 @@ fn damage_floater_entries(model: &ActorOverlayModel, now_ms: u64) -> Vec<DamageF
     entries
 }
 
-fn spawn_health_bar(root: &mut ChildSpawnerCommands, left: f32, top: f32, ratio: f32) {
+fn spawn_health_bar(
+    root: &mut ChildSpawnerCommands,
+    object_id: u32,
+    left: f32,
+    top: f32,
+    ratio: f32,
+) {
+    let base_left = left + HEALTH_LEFT;
+    let base_top = top + HEALTH_TOP;
     root.spawn((
-        ActorHealthBar,
+        ActorHealthBar {
+            object_id,
+            base_left,
+            base_top,
+        },
         FocusPolicy::Pass,
         Node {
             position_type: PositionType::Absolute,
-            left: px(left + HEALTH_LEFT),
-            top: px(top + HEALTH_TOP),
+            left: px(base_left),
+            top: px(base_top),
             width: px(HEALTH_WIDTH),
             height: px(HEALTH_HEIGHT),
             border: UiRect::all(px(1.0)),
@@ -734,6 +828,7 @@ fn spawn_health_bar(root: &mut ChildSpawnerCommands, left: f32, top: f32, ratio:
 
 fn spawn_name_line(
     root: &mut ChildSpawnerCommands,
+    object_id: u32,
     text: &str,
     color: [u8; 4],
     left: f32,
@@ -748,13 +843,19 @@ fn spawn_name_line(
             Color::srgba_u8(color[0], color[1], color[2], color[3]),
         )))
     {
+        let base_left = left + offset.x;
+        let base_top = top + offset.y;
         root.spawn((
-            ActorNameLine,
+            ActorNameLine {
+                object_id,
+                base_left,
+                base_top,
+            },
             FocusPolicy::Pass,
             Node {
                 position_type: PositionType::Absolute,
-                left: px(left + offset.x),
-                top: px(top + offset.y),
+                left: px(base_left),
+                top: px(base_top),
                 width: px(width),
                 justify_content: JustifyContent::Center,
                 ..default()

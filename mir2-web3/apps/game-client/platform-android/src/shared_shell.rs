@@ -13,6 +13,37 @@ use std::{collections::VecDeque, sync::Mutex};
 
 static INBOX: Mutex<VecDeque<Value>> = Mutex::new(VecDeque::new());
 static OUTBOX: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
+static PRESENTATION_OUTBOX: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
+const MAX_PRESENTATION_EVENTS: usize = 64;
+
+pub(crate) fn enqueue_presentation_event(event: String) {
+    let mut queue = PRESENTATION_OUTBOX
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    if queue.len() >= MAX_PRESENTATION_EVENTS {
+        queue.clear();
+        queue.push_back(json!({"type":"clear", "atMs":0}).to_string());
+    }
+    queue.push_back(event);
+}
+
+#[derive(Default)]
+pub(crate) struct AndroidPresentationMainThread;
+
+fn flush_presentation_events(_main_thread: NonSend<AndroidPresentationMainThread>) {
+    // The shared runtime's movement bridge is thread-local for the WASM host.
+    // Drain Android's synchronized host queue from a NonSend system so both
+    // enablement and packets reach the renderer's main-thread consumer.
+    mir2_bevy_runtime::set_mir2_remote_motion_presentation_enabled(true);
+    let events = PRESENTATION_OUTBOX
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .drain(..)
+        .collect::<Vec<_>>();
+    for event in events {
+        mir2_bevy_runtime::push_mir2_movement_shadow_event(event);
+    }
+}
 
 fn enqueue_host_event(queue: &mut VecDeque<Value>, text: &str) {
     // Snapshot JSON is escaped once inside the host envelope. Retain the small
@@ -201,6 +232,7 @@ impl Plugin for AndroidSharedShellPlugin {
             "Configure an approved test Gateway before connecting.",
         ));
         app.insert_resource(model)
+            .insert_non_send(AndroidPresentationMainThread)
             .init_resource::<HostState>()
             .init_resource::<EditorTouch>()
             .add_plugins(Mir2NativeShellUiPlugin)
@@ -221,6 +253,7 @@ impl Plugin for AndroidSharedShellPlugin {
                     .chain()
                     .before(bevy::input::InputSystems),
             )
+            .add_systems(PreUpdate, flush_presentation_events.after(receive))
             .add_systems(
                 PreUpdate,
                 remember_editor_touch.after(bevy::ui::UiSystems::Focus),
@@ -566,7 +599,7 @@ fn receive(
                         == crate::scene_effects::EffectPacketOutcome::Rejected
                 });
                 if effect_rejected {
-                    crate::live_entity::clear();
+                    crate::live_entity::clear_with_presentation_reset();
                     if let Some(effects) = scene_effects.as_deref_mut() {
                         effects.clear();
                     }
@@ -589,7 +622,14 @@ fn receive(
                     continue;
                 }
                 match crate::live_entity::apply_packet(raw) {
-                    crate::live_entity::LiveEntityPacketOutcome::Applied { models, render } => {
+                    crate::live_entity::LiveEntityPacketOutcome::Applied {
+                        models,
+                        render,
+                        presentation_event,
+                    } => {
+                        if let Some(event) = presentation_event {
+                            enqueue_presentation_event(event);
+                        }
                         let damage_events = crate::live_entity::drain_damage_events();
                         if let Some(overlays) = actor_overlays.as_deref_mut() {
                             let now_ms = time
@@ -632,7 +672,7 @@ fn receive(
                     }
                     crate::live_entity::LiveEntityPacketOutcome::Ignored => {}
                     crate::live_entity::LiveEntityPacketOutcome::Rejected => {
-                        crate::live_entity::clear();
+                        crate::live_entity::clear_with_presentation_reset();
                         if let Some(effects) = scene_effects.as_deref_mut() {
                             effects.clear();
                         }

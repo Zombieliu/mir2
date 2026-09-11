@@ -640,7 +640,7 @@ pub(crate) fn request_packaged_map_atlas_load(
                 } else {
                     // This also removes already-consumed pages if the bounded
                     // queue ever rejects the tail of a pack.
-                    crate::live_entity::clear();
+                    crate::live_entity::clear_with_presentation_reset();
                     mir2_bevy_runtime::native_ingest::push_native_scene_reset();
                     state.active = false;
                     state.event = Some(PackagedMapAtlasLoadEvent::Failed(
@@ -665,7 +665,7 @@ pub(crate) fn request_packaged_map_atlas_load(
 
 #[cfg(target_os = "android")]
 pub(crate) fn cancel_packaged_map_atlas_load() {
-    crate::live_entity::clear();
+    crate::live_entity::clear_with_presentation_reset();
     let mut state = ANDROID_MAP_ATLAS_LOAD
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner());
