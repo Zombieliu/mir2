@@ -8,6 +8,7 @@ use serde_json::{json, Value};
 use std::{collections::HashSet, sync::Mutex};
 
 const MAX_PACKET_BYTES: usize = 16 * 1024;
+const MAX_RENDER_BYTES: usize = 64 * 1024 * 1024;
 const MAX_ENTITIES: usize = 8192;
 const CELL_WIDTH: f64 = 48.0;
 const CELL_HEIGHT: f64 = 32.0;
@@ -65,7 +66,16 @@ pub(crate) fn install_models(json_text: &str, request_id: u64) -> bool {
     true
 }
 
-pub(crate) fn install_render(json_text: &str) -> bool {
+pub(crate) fn install_render(json_text: &str, directions_text: &str) -> bool {
+    if json_text.is_empty()
+        || directions_text.is_empty()
+        || json_text
+            .len()
+            .checked_add(directions_text.len())
+            .is_none_or(|bytes| bytes > MAX_RENDER_BYTES)
+    {
+        return false;
+    }
     let Ok(mut value) = serde_json::from_str::<Value>(json_text) else {
         return false;
     };
@@ -76,6 +86,17 @@ pub(crate) fn install_render(json_text: &str) -> bool {
     else {
         return false;
     };
+    let Ok(directions) = serde_json::from_str::<Value>(directions_text) else {
+        return false;
+    };
+    if directions
+        .get("_nativeWorldRequest")
+        .and_then(Value::as_u64)
+        != Some(request_id)
+        || !merge_direction_layers(&mut value, &directions)
+    {
+        return false;
+    }
     if !valid_render(&value) {
         return false;
     }
@@ -92,6 +113,41 @@ pub(crate) fn install_render(json_text: &str) -> bool {
     }
     cache.render_request_id = request_id;
     cache.render = Some(value);
+    true
+}
+
+fn merge_direction_layers(render: &mut Value, sidecar: &Value) -> bool {
+    let Some(render_entities) = render.get_mut("entities").and_then(Value::as_array_mut) else {
+        return false;
+    };
+    let Some(entries) = sidecar.get("entities").and_then(Value::as_array) else {
+        return false;
+    };
+    if entries.len() > render_entities.len() || entries.len() > MAX_ENTITIES {
+        return false;
+    }
+    let mut ids = HashSet::new();
+    for entry in entries {
+        let Some(object_id) = entity_id(entry) else {
+            return false;
+        };
+        let Some(directions) = entry
+            .get("directionLayers")
+            .filter(|value| value.is_object())
+        else {
+            return false;
+        };
+        let Some(target) = render_entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(object_id))
+        else {
+            return false;
+        };
+        if !ids.insert(object_id) || target.get("directionLayers").is_some() {
+            return false;
+        }
+        target["directionLayers"] = directions.clone();
+    }
     true
 }
 
@@ -157,7 +213,9 @@ pub(crate) fn apply_packet(json_text: &str) -> LiveEntityPacketOutcome {
 
     let render = if cache.render_request_id == request_id {
         if let Some(mut value) = cache.render.take() {
-            let encoded = apply_render(&mut value, &mutation).then(|| value.to_string());
+            let encoded = apply_render(&mut value, &mutation)
+                .then(|| runtime_render_json(&mut value))
+                .flatten();
             cache.render = Some(value);
             encoded
         } else {
@@ -288,19 +346,72 @@ fn valid_render(value: &Value) -> bool {
             && entity
                 .get("layers")
                 .and_then(Value::as_array)
-                .is_some_and(|layers| {
-                    layers.iter().all(|layer| {
-                        layer
-                            .get("left")
-                            .and_then(Value::as_f64)
-                            .is_some_and(f64::is_finite)
-                            && layer
-                                .get("top")
-                                .and_then(Value::as_f64)
-                                .is_some_and(f64::is_finite)
-                    })
+                .is_some_and(|layers| valid_layers(layers))
+            && entity.get("directionLayers").is_none_or(|directions| {
+                directions.as_object().is_some_and(|directions| {
+                    directions.len() <= 8
+                        && directions.iter().all(|(direction, layers)| {
+                            matches!(
+                                direction.as_str(),
+                                "Up" | "UpRight"
+                                    | "Right"
+                                    | "DownRight"
+                                    | "Down"
+                                    | "DownLeft"
+                                    | "Left"
+                                    | "UpLeft"
+                            ) && layers.as_array().is_some_and(|layers| valid_layers(layers))
+                        })
                 })
+            })
     })
+}
+
+fn valid_layers(layers: &[Value]) -> bool {
+    layers.len() <= 8
+        && layers.iter().all(|layer| {
+            layer
+                .get("left")
+                .and_then(Value::as_f64)
+                .is_some_and(f64::is_finite)
+                && layer
+                    .get("top")
+                    .and_then(Value::as_f64)
+                    .is_some_and(f64::is_finite)
+                && layer
+                    .get("z")
+                    .is_none_or(|z| z.as_f64().is_some_and(f64::is_finite))
+        })
+}
+
+fn runtime_render_json(value: &mut Value) -> Option<String> {
+    let removed = {
+        let entities = value.get_mut("entities")?.as_array_mut()?;
+        entities
+            .iter_mut()
+            .map(|entity| {
+                entity
+                    .as_object_mut()
+                    .expect("validated render entity")
+                    .remove("directionLayers")
+            })
+            .collect::<Vec<_>>()
+    };
+    let encoded = value.to_string();
+    for (entity, directions) in value
+        .get_mut("entities")?
+        .as_array_mut()?
+        .iter_mut()
+        .zip(removed)
+    {
+        if let Some(directions) = directions {
+            entity
+                .as_object_mut()
+                .expect("validated render entity")
+                .insert("directionLayers".into(), directions);
+        }
+    }
+    (encoded.len() <= MAX_RENDER_BYTES).then_some(encoded)
 }
 
 fn entity_id(entity: &Value) -> Option<u32> {
@@ -336,7 +447,12 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
                 .iter_mut()
                 .find(|existing| entity_id(existing) == Some(object_id))
             {
+                let preserve_self =
+                    existing.get("kind").and_then(Value::as_str) == Some("selfPlayer");
                 *existing = entity.clone();
+                if preserve_self {
+                    existing["kind"] = json!("selfPlayer");
+                }
             } else if entities.len() < MAX_ENTITIES {
                 entities.push(entity.clone());
             } else {
@@ -373,14 +489,14 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
         return false;
     };
     match mutation {
-        EntityMutation::MoveSelf(position, _) => entities
+        EntityMutation::MoveSelf(position, direction) => entities
             .iter_mut()
             .find(|entity| entity.get("isSelf").and_then(Value::as_bool) == Some(true))
-            .is_some_and(|entity| set_render_position(entity, *position)),
-        EntityMutation::Move(object_id, position, _) => entities
+            .is_some_and(|entity| patch_render_transform(entity, *position, direction.as_deref())),
+        EntityMutation::Move(object_id, position, direction) => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
-            .is_some_and(|entity| set_render_position(entity, *position)),
+            .is_some_and(|entity| patch_render_transform(entity, *position, direction.as_deref())),
         EntityMutation::Remove(object_id) => {
             entities.retain(|entity| entity_id(entity) != Some(*object_id));
             true
@@ -398,11 +514,32 @@ fn set_render_position(entity: &mut Value, (x, y): (i32, i32)) -> bool {
     };
     let dx = f64::from(x - old_x) * CELL_WIDTH;
     let dy = f64::from(y - old_y) * CELL_HEIGHT;
+    let dz = (f64::from(y - old_y) * 128.0 + f64::from(x - old_x) * 2.0) * 10.0;
     entity["gridX"] = json!(x);
     entity["gridY"] = json!(y);
     let Some(layers) = entity.get_mut("layers").and_then(Value::as_array_mut) else {
         return false;
     };
+    if !shift_layers(layers, dx, dy, dz) {
+        return false;
+    }
+    if let Some(directions) = entity
+        .get_mut("directionLayers")
+        .and_then(Value::as_object_mut)
+    {
+        for layers in directions.values_mut() {
+            let Some(layers) = layers.as_array_mut() else {
+                return false;
+            };
+            if !shift_layers(layers, dx, dy, dz) {
+                return false;
+            }
+        }
+    }
+    true
+}
+
+fn shift_layers(layers: &mut [Value], dx: f64, dy: f64, dz: f64) -> bool {
     for layer in layers {
         let Some(left) = layer.get("left").and_then(Value::as_f64) else {
             return false;
@@ -412,6 +549,29 @@ fn set_render_position(entity: &mut Value, (x, y): (i32, i32)) -> bool {
         };
         layer["left"] = json!(left + dx);
         layer["top"] = json!(top + dy);
+        if let Some(z) = layer.get("z").and_then(Value::as_f64) {
+            layer["z"] = json!(z + dz);
+        }
+    }
+    true
+}
+
+fn patch_render_transform(
+    entity: &mut Value,
+    position: (i32, i32),
+    direction: Option<&str>,
+) -> bool {
+    if !set_render_position(entity, position) {
+        return false;
+    }
+    if let Some(layers) = direction.and_then(|direction| {
+        entity
+            .get("directionLayers")
+            .and_then(|directions| directions.get(direction))
+            .and_then(Value::as_array)
+            .cloned()
+    }) {
+        entity["layers"] = Value::Array(layers);
     }
     true
 }
@@ -453,7 +613,8 @@ mod tests {
             9,
         ));
         assert!(install_render(
-            r#"{"_nativeWorldRequest":9,"enabled":true,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"left":480.0,"top":352.0}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"left":528.0,"top":352.0}]}]}"#,
+            r#"{"_nativeWorldRequest":9,"enabled":true,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"left":480.0,"top":352.0}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"left"}]}]}"#,
+            r#"{"_nativeWorldRequest":9,"entities":[{"objectId":"43","directionLayers":{"Left":[{"left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"left"}],"DownRight":[{"left":528.0,"top":352.0,"z":1000.0,"atlasRectKey":"down-right"}]}}]}"#,
         ));
         let LiveEntityPacketOutcome::Applied { models, render } = apply_packet(
             r#"{"type":"packet","packet":"ObjectWalk","payload":{"objectId":43,"x":302,"y":631,"direction":"DownRight"}}"#,
@@ -468,6 +629,12 @@ mod tests {
         assert_eq!(render["entities"][1]["gridX"], 302);
         assert_eq!(render["entities"][1]["layers"][0]["left"], 576.0);
         assert_eq!(render["entities"][1]["layers"][0]["top"], 384.0);
+        assert_eq!(render["entities"][1]["layers"][0]["z"], 2300.0);
+        assert_eq!(
+            render["entities"][1]["layers"][0]["atlasRectKey"],
+            "down-right"
+        );
+        assert!(render["entities"][1].get("directionLayers").is_none());
 
         assert!(matches!(
             apply_packet(r#"{"type":"packet","packet":"ObjectRemove","payload":{"objectId":43}}"#),
@@ -479,17 +646,6 @@ mod tests {
             ),
             LiveEntityPacketOutcome::Ignored
         );
-        assert_eq!(apply_packet("not-json"), LiveEntityPacketOutcome::Rejected);
-        clear();
-    }
-
-    #[test]
-    fn authoritative_spawn_aliases_and_turn_update_the_neutral_object_layer() {
-        clear();
-        assert!(install_models(
-            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"level":7,"direction":"Down"}]}"#,
-            10,
-        ));
         let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
             r#"{"type":"packet","packet":"NewMonsterInfo","payload":{"info":{"objectId":77,"name":"Hen","location":{"x":299,"y":629},"direction":"Left"}}}"#,
         ) else {
@@ -506,6 +662,16 @@ mod tests {
         };
         let models: Value = serde_json::from_str(&models).unwrap();
         assert_eq!(models["entities"][1]["direction"], "Up");
+
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectPlayer","payload":{"objectId":42,"name":"Self Refresh","location":{"x":301,"y":630},"direction":"Right"}}"#,
+        ) else {
+            panic!("self refresh should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][0]["kind"], "selfPlayer");
+        assert_eq!(models["entities"][0]["direction"], "Right");
+        assert_eq!(apply_packet("not-json"), LiveEntityPacketOutcome::Rejected);
         clear();
     }
 }

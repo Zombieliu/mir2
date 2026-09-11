@@ -585,7 +585,11 @@ pub(crate) fn request_packaged_map_atlas_load(
                 if state.generation != generation {
                     return;
                 }
-                let states_accepted = crate::live_entity::install_render(&entity_render.json)
+                let live_render_accepted = crate::live_entity::install_render(
+                    &entity_render.json,
+                    &entity_render.live_directions_json,
+                );
+                let states_accepted = live_render_accepted
                     && mir2_bevy_runtime::native_ingest::push_native_map_render_state(
                         map_render.json,
                     )

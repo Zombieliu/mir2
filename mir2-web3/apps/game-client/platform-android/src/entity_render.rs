@@ -26,6 +26,17 @@ const MAX_RECT_COUNT: usize = 100_000;
 const MAX_PAGE_PNG_BYTES: usize = 8 * 1024 * 1024;
 const MAX_PAGE_PIXELS: usize = 4 * 1024 * 1024;
 const MAX_SELECTED_RGBA_BYTES: usize = 128 * 1024 * 1024;
+const MAX_RENDER_STATE_BYTES: usize = 64 * 1024 * 1024;
+const DIRECTIONS: [&str; 8] = [
+    "Up",
+    "UpRight",
+    "Right",
+    "DownRight",
+    "Down",
+    "DownLeft",
+    "Left",
+    "UpLeft",
+];
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -185,6 +196,21 @@ struct EntityRenderEntry {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+struct EntityDirectionState {
+    #[serde(rename = "_nativeWorldRequest")]
+    native_world_request: u64,
+    entities: Vec<EntityDirectionEntry>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct EntityDirectionEntry {
+    object_id: String,
+    direction_layers: BTreeMap<String, Vec<EntityRenderLayer>>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct EntityRenderLayer {
     key: String,
     path: String,
@@ -209,6 +235,7 @@ pub(crate) struct DecodedEntityAtlasPage {
 #[derive(Debug)]
 pub(crate) struct EntityRenderProduct {
     pub(crate) json: String,
+    pub(crate) live_directions_json: String,
     pub(crate) pages: Vec<DecodedEntityAtlasPage>,
     pub(crate) entity_count: usize,
     pub(crate) layer_count: usize,
@@ -498,6 +525,7 @@ where
 
     let mut used_rects: BTreeMap<usize, BTreeMap<String, EntityAtlasRect>> = BTreeMap::new();
     let mut entries = Vec::new();
+    let mut direction_entries = Vec::new();
     let mut unresolved_entity_count = 0usize;
     for entity in snapshot.entities {
         let dx = entity.x.saturating_sub(scene.center_x);
@@ -576,87 +604,122 @@ where
                 weapon_frame_offset = sprite.alt_weapon_frame_offset.or(weapon_frame_offset);
             }
         }
-        let direction = direction_index(entity.direction.as_deref());
         let stride = sprite.direction_stride;
         let mounted = sprite.mount_library.is_some();
-        let relative_frame =
-            direction
-                .saturating_mul(stride)
-                .saturating_add(if mounted { 416 } else { 0 });
-        let body_frame = frame_base_offset.saturating_add(relative_frame);
-        let weapon_frame = weapon_frame_offset.map(|offset| offset.saturating_add(relative_frame));
-        let mut requested = Vec::<(&str, String, i32)>::new();
-        if let Some(mount) = sprite.mount_library.as_deref().and_then(normalize_library) {
-            requested.push((
-                "mount",
-                mount,
-                sprite
-                    .mount_frame_offset
-                    .unwrap_or_default()
-                    .saturating_add(direction.saturating_mul(stride)),
-            ));
-        }
-        let mut weapons = Vec::new();
-        if let (Some(library), Some(frame)) = (weapon_library, weapon_frame) {
-            weapons.push(("weapon", library, frame));
-        }
-        if let (Some(library), Some(frame)) = (weapon_library_secondary, weapon_frame) {
-            weapons.push(("weaponSecondary", library, frame));
-        }
-        if !mounted && weapon_is_rear(entity.direction.as_deref()) {
-            requested.extend(weapons.iter().cloned());
-        }
-        requested.push(("body", body_library, body_frame));
-        if let Some(hair) = hair_library {
-            requested.push(("hair", hair, body_frame));
-        }
-        if !mounted && !weapon_is_rear(entity.direction.as_deref()) {
-            requested.extend(weapons);
-        }
-
         let root_left = ENTITY_LEFT_ORIGIN + dx as f32 * CELL_WIDTH;
         let root_top = ENTITY_TOP_ORIGIN + dy as f32 * CELL_HEIGHT;
         let depth = 4096 + dy * 128 + dx * 2 + 64;
-        let mut layers = Vec::new();
-        let mut missing_body = false;
-        for (order, (role, library, frame)) in requested.into_iter().enumerate() {
-            let Some(rect) = resolve_rect(&rect_by_path, &library, frame) else {
-                if role == "body" {
-                    missing_body = true;
+
+        let requested_for_direction = |direction_name: &str| {
+            let direction = direction_index(Some(direction_name));
+            let relative_frame =
+                direction
+                    .saturating_mul(stride)
+                    .saturating_add(if mounted { 416 } else { 0 });
+            let body_frame = frame_base_offset.saturating_add(relative_frame);
+            let weapon_frame =
+                weapon_frame_offset.map(|offset| offset.saturating_add(relative_frame));
+            let mut requested = Vec::<(&str, String, i32)>::new();
+            if let Some(mount) = sprite.mount_library.as_deref().and_then(normalize_library) {
+                requested.push((
+                    "mount",
+                    mount,
+                    sprite
+                        .mount_frame_offset
+                        .unwrap_or_default()
+                        .saturating_add(direction.saturating_mul(stride)),
+                ));
+            }
+            let mut weapons = Vec::new();
+            if let (Some(library), Some(frame)) = (weapon_library.clone(), weapon_frame) {
+                weapons.push(("weapon", library, frame));
+            }
+            if let (Some(library), Some(frame)) = (weapon_library_secondary.clone(), weapon_frame) {
+                weapons.push(("weaponSecondary", library, frame));
+            }
+            if !mounted && weapon_is_rear(Some(direction_name)) {
+                requested.extend(weapons.iter().cloned());
+            }
+            requested.push(("body", body_library.clone(), body_frame));
+            if let Some(hair) = hair_library.clone() {
+                requested.push(("hair", hair, body_frame));
+            }
+            if !mounted && !weapon_is_rear(Some(direction_name)) {
+                requested.extend(weapons);
+            }
+            requested
+        };
+        let mut resolve_direction_layers = |requested: Vec<(&str, String, i32)>| {
+            let mut layers = Vec::new();
+            let mut missing_body = false;
+            for (order, (role, library, frame)) in requested.into_iter().enumerate() {
+                let Some(rect) = resolve_rect(&rect_by_path, &library, frame) else {
+                    if role == "body" {
+                        missing_body = true;
+                    }
+                    continue;
+                };
+                let path = atlas_source_path(&rect.key)
+                    .expect("validated rect path")
+                    .to_owned();
+                let atlas_page_key = page_key(&atlas.key, rect.page_index);
+                used_rects
+                    .entry(rect.page_index)
+                    .or_default()
+                    .insert(rect.key.clone(), rect.clone());
+                layers.push(EntityRenderLayer {
+                    key: format!("{}:{role}:0", entity.object_id),
+                    path,
+                    atlas_key: atlas_page_key,
+                    atlas_rect_key: rect.key.clone(),
+                    left: root_left + rect.offset_x as f32,
+                    top: root_top + rect.offset_y as f32,
+                    width: rect.width as f32,
+                    height: rect.height as f32,
+                    z: depth as f32 * 10.0 + order as f32,
+                    opacity: if entity.dead { 0.45 } else { 1.0 },
+                });
+            }
+            (layers, missing_body)
+        };
+        let selected_direction = entity
+            .direction
+            .as_deref()
+            .filter(|direction| DIRECTIONS.contains(direction))
+            .unwrap_or("Down");
+        let mut direction_layers = BTreeMap::new();
+        let (selected_layers, selected_missing_body) =
+            resolve_direction_layers(requested_for_direction(selected_direction));
+        let selected_ready = !selected_missing_body && !selected_layers.is_empty();
+        if selected_ready {
+            direction_layers.insert(selected_direction.to_owned(), selected_layers.clone());
+            for direction in DIRECTIONS
+                .into_iter()
+                .filter(|direction| *direction != selected_direction)
+            {
+                let (layers, missing_body) =
+                    resolve_direction_layers(requested_for_direction(direction));
+                if !missing_body && !layers.is_empty() {
+                    direction_layers.insert(direction.to_owned(), layers);
                 }
-                continue;
-            };
-            let path = atlas_source_path(&rect.key)
-                .expect("validated rect path")
-                .to_owned();
-            let atlas_page_key = page_key(&atlas.key, rect.page_index);
-            used_rects
-                .entry(rect.page_index)
-                .or_default()
-                .insert(rect.key.clone(), rect.clone());
-            layers.push(EntityRenderLayer {
-                key: format!("{}:{role}:0", entity.object_id),
-                path,
-                atlas_key: atlas_page_key,
-                atlas_rect_key: rect.key.clone(),
-                left: root_left + rect.offset_x as f32,
-                top: root_top + rect.offset_y as f32,
-                width: rect.width as f32,
-                height: rect.height as f32,
-                z: depth as f32 * 10.0 + order as f32,
-                opacity: if entity.dead { 0.45 } else { 1.0 },
-            });
+            }
         }
-        if missing_body || layers.is_empty() {
+        if !selected_ready {
             unresolved_entity_count += 1;
         }
         entries.push(EntityRenderEntry {
             is_self: entity.object_id == snapshot.player_object_id,
-            object_id: entity.object_id,
+            object_id: entity.object_id.clone(),
             grid_x: entity.x,
             grid_y: entity.y,
-            layers,
+            layers: selected_layers,
         });
+        if !direction_layers.is_empty() {
+            direction_entries.push(EntityDirectionEntry {
+                object_id: entity.object_id,
+                direction_layers,
+            });
+        }
     }
 
     let used_pages: BTreeSet<usize> = used_rects.keys().copied().collect();
@@ -725,10 +788,30 @@ where
         atlases: render_atlases,
         entities: entries,
     };
+    let live_directions_json = serde_json::to_string(&EntityDirectionState {
+        native_world_request: request_id,
+        entities: direction_entries,
+    })
+    .map_err(|error| {
+        WorldAssetError::new(format!(
+            "entity direction sidecar could not be encoded: {error}"
+        ))
+    })?;
+    let json = serde_json::to_string(&state).map_err(|error| {
+        WorldAssetError::new(format!("entity render state could not be encoded: {error}"))
+    })?;
+    if json
+        .len()
+        .checked_add(live_directions_json.len())
+        .is_none_or(|bytes| bytes > MAX_RENDER_STATE_BYTES)
+    {
+        return Err(WorldAssetError::new(
+            "entity render state exceeds the native message budget",
+        ));
+    }
     Ok(EntityRenderProduct {
-        json: serde_json::to_string(&state).map_err(|error| {
-            WorldAssetError::new(format!("entity render state could not be encoded: {error}"))
-        })?,
+        json,
+        live_directions_json,
         pages,
         entity_count: state.entities.len(),
         layer_count,
@@ -776,11 +859,18 @@ mod tests {
                 "width": 1,
                 "height": 1,
                 "pages": [{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
-                "rects": [{
-                    "key":"/original-ui/CArmour/00/16.png|1x1",
-                    "x":0,"y":0,"width":1,"height":1,"offsetX":8,"offsetY":-48,
-                    "frameIndex":16,"pageIndex":0
-                }]
+                "rects": [
+                    {
+                        "key":"/original-ui/CArmour/00/16.png|1x1",
+                        "x":0,"y":0,"width":1,"height":1,"offsetX":8,"offsetY":-48,
+                        "frameIndex":16,"pageIndex":0
+                    },
+                    {
+                        "key":"/original-ui/CArmour/00/8.png|1x1",
+                        "x":0,"y":0,"width":1,"height":1,"offsetX":7,"offsetY":-47,
+                        "frameIndex":8,"pageIndex":0
+                    }
+                ]
             }]
         })
         .to_string()
@@ -809,6 +899,16 @@ mod tests {
         assert_eq!(state["entities"][0]["layers"][0]["left"], 488.0);
         assert_eq!(state["entities"][0]["layers"][0]["top"], 304.0);
         assert_eq!(state["entities"][0]["layers"][0]["atlasKey"], "starter");
+        assert!(state["entities"][0].get("directionLayers").is_none());
+        let live: serde_json::Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        assert_eq!(
+            live["entities"][0]["directionLayers"]["Down"][0]["atlasRectKey"],
+            "/original-ui/CArmour/00/16.png|1x1"
+        );
+        assert_eq!(
+            live["entities"][0]["directionLayers"]["Right"][0]["atlasRectKey"],
+            "/original-ui/CArmour/00/8.png|1x1"
+        );
     }
 
     #[test]
@@ -1032,8 +1132,15 @@ mod tests {
         assert_eq!(product.entity_count, 1);
         assert_eq!(product.layer_count, 1);
         assert_eq!(product.unresolved_entity_count, 0);
-        assert_eq!(product.pages.len(), 1);
+        assert!((1..=2).contains(&product.pages.len()));
         assert!(product.compressed_bytes > 1_000_000);
-        assert_eq!(product.rgba_bytes, 2048 * 2048 * 4);
+        assert_eq!(product.rgba_bytes, product.pages.len() * 2048 * 2048 * 4);
+        let live: serde_json::Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        assert_eq!(
+            live["entities"][0]["directionLayers"]
+                .as_object()
+                .map(serde_json::Map::len),
+            Some(8)
+        );
     }
 }
