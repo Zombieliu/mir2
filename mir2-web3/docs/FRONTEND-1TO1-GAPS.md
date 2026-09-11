@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `73119525e`: existing render-ready generic actors now
+> animate authoritative harvest/attack/range/dash/struck packets from exact
+> packaged Crystal frames and return to standing on a monotonic client-side
+> presentation clock. The normal API31 APK launches the real shared login UI
+> and survives Home/resume, but no approved Gateway was configured, so this is
+> not live packet visual evidence. Mounted actors, Archer/Assassin generated
+> catalogs, walk/run, death/skeleton sequences, effects, ground drops, real
+> login and physical-device/human visual acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-packet-action-animation-20260911/README.md`.
+
 > 2026-09-11 Android `35f12e4d3`: native actor visibility no longer reverts to
 > stale full-snapshot state after authoritative hide, teleport-out or remove;
 > show/teleport-in restores only a retained hidden actor, and server spawn

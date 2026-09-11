@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `73119525e`: bounded post-`IN_GAME` actor packets now
+> select and advance exact immutable Crystal atlas frames for harvest, melee
+> attack variants, range attack, dash attack and struck, then settle to the
+> authoritative standing facing without waiting for another snapshot. The
+> Android-private frame sidecar never enters runtime JSON. Android 116/116,
+> configured real-atlas 1/1, Java TLS 11/11, API31 and normal APK
+> build/install/cold-launch plus same-process Home/resume pass; APK SHA-256 is
+> `d4289ec0597c4b663eef3c9f5daef3cc921eb8ad9c7213dfd35672a2a305b269`.
+> This leaf covers generic unmounted non-Archer/non-Assassin actors only;
+> walk/run, generated per-library/mounted catalogs, death/skeleton motion,
+> effects, drops, remaining reducers, approved online login and physical-device
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-packet-action-animation-20260911/README.md`.
+
 > 2026-09-11 Android `35f12e4d3`: post-`IN_GAME` entity lifecycle packets now
 > preserve authoritative health/death state and hide/show/teleport/remove
 > visibility across periodic snapshots. Hidden actors can be restored only from

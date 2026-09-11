@@ -94,7 +94,8 @@ On background, disconnect, timeout or transport failure, the socket and old
 roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
-direction/action animation and complete gameplay remain subsequent work. The
+walk/run and generated per-library action animation, and complete gameplay
+remain subsequent work. The
 existing reducer command queue is connected to the authenticated in-game
 socket through the bounded JNI lease mailbox described below. Authoritative
 transaction receipts and the entity packet families described below return to
@@ -187,7 +188,25 @@ contract as an already decoded render-ready actor, the host now clones that
 bounded prototype, rewrites every layer key to the server object id, places it
 inside the current viewport, and selects its authoritative standing direction
 without another atlas decode. Unmatched actors still wait for a complete render
-snapshot. Walk/run/attack frame animation is not implemented by this path.
+snapshot.
+
+For generic unmounted actors whose default Crystal catalog exactly resolves
+inside the immutable packaged atlas, the render producer now also retains an
+Android-private bounded action-frame sidecar. `ObjectHarvest`, `ObjectAttack`,
+`ObjectRangeAttack`, `ObjectStruck`, and `ObjectDashAttack` select the matching
+harvest/melee/range/struck/dash frame sequence at the packet's authoritative
+position and facing. If the packet omits direction, the last authoritative
+object facing is used. A monotonic presentation clock advances the exact
+pre-resolved frames and restores the standing facing after completion without
+waiting for another snapshot; movement, lifecycle replacement, removal and a
+new world request cancel stale action state. The sidecar is validated and
+removed from runtime JSON, which still carries only the active layers.
+
+This action leaf deliberately does not claim the generated class/library
+catalogs needed by Archer, Assassin, mounted and other alternate actors.
+Walk/run, `ObjectHarvested` skeleton motion, die/revive sequences, spell
+effects, health feedback and ground drops also remain separate work. No atlas
+name from a packet is resolved or decoded on the live packet path.
 
 The post-`IN_GAME` allowlist also carries health/death/revive and
 hide/show/teleport lifecycle packets. The private cache applies death position,
@@ -195,8 +214,9 @@ life state and dead/live opacity immediately. Hide and teleport-out remove an
 actor from both visible models while retaining its exact bounded record;
 show/teleport-in restores only that record. Remove creates a bounded tombstone
 that later periodic snapshots cannot resurrect, while a new authoritative
-spawn clears it. These lifecycle rules do not synthesize action frames,
-health-bar effects, or missing actors.
+spawn clears it. These lifecycle rules do not synthesize health-bar effects or
+missing actors; death/revive still use the lifecycle opacity path rather than
+the new action sequence clock.
 
 This closes the reducer-to-live-socket outbound adaptation, existing
 transaction-result return adapters, and the bounded entity object-list/

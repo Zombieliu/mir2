@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `73119525e`: the native object cache now drives a bounded
+> packet action clock over exact packaged Crystal frames for harvest, attack
+> variants, range attack, dash attack and struck. Missing direction falls back
+> to the actor's last authoritative facing, movement/lifecycle interrupts stale
+> actions, and completion restores standing without another world snapshot.
+> Android 116, real-atlas 1, Java TLS 11, API31 and normal APK launch/resume
+> gates pass. This is a generic unmounted actor baseline, not complete animation
+> or online acceptance; walk/run, generated class/mount catalogs, death and
+> skeleton motion, effects/drops, approved real login and physical-device
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-packet-action-animation-20260911/README.md`.
+
 > 2026-09-11 Android `35f12e4d3`: the native object cache now folds bounded
 > authoritative health/death, revive, hide/show, teleport and remove packets
 > after real transport world entry. Packet visibility survives later full
