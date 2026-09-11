@@ -1,0 +1,25 @@
+{
+  "atlasKey": "android-archer-mount-bow-proof",
+  "contentHash": "8502dd9c7ae3c340e46da732304fbb24a3df0234b77265e9cfaf418083ce6daa",
+  "roots": [
+    "CArmour/00",
+    "AArmour/00",
+    "AHair/00",
+    "AWeapon/00 L",
+    "AWeapon/00 R",
+    "Monster/003",
+    "ARArmour/00",
+    "ARWeapon/00",
+    "ARWeapon/00 S",
+    "Mount/00"
+  ],
+  "pageSize": 2048,
+  "pageCount": 5,
+  "sourceCount": 7848,
+  "indexedRectCount": 7824,
+  "unindexedRectCount": 24,
+  "imageBytes": 8779443,
+  "rgbaBytes": 83886080,
+  "packCommitted": false,
+  "trackedSharedAtlasChanged": false
+}

@@ -553,6 +553,7 @@ fn receive(
                     entities = summary.entity_count,
                     entity_layers = summary.entity_layer_count,
                     unresolved_entities = summary.unresolved_entity_count,
+                    entity_unindexed_rects = summary.entity_unindexed_rect_count,
                     entity_compressed_bytes = summary.entity_compressed_bytes,
                     entity_rgba_bytes = summary.entity_rgba_bytes,
                     "packaged Android world frame queued"

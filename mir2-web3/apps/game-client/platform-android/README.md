@@ -36,6 +36,12 @@ shared `MapRenderState` and `EntityRenderState`. It publishes state before
 bounded raw-RGBA batches through the native runtime queue. Disconnect, map
 change or a newer world generation cancels stale background work. A missing or
 rejected pack remains a visible loading error; there is no synthetic fallback.
+Fully metadata-free entity rects are retained only as counted atlas occupants
+and excluded from sprite lookup; they cannot supply a frame or placement.
+Partially present metadata, negative frame indices and unsafe/duplicate rects
+still reject the manifest. This allows a valid indexed subset to render without
+inventing offsets for orphan source PNGs, and exposes the omitted count as
+`entity_unindexed_rects` in the Android world-frame diagnostic.
 Set `MIR2_GATEWAY_WS_URL` explicitly at build time for approved online tests.
 Neither an exported Activity intent nor old endpoint preferences override it.
 With no endpoint the actual shared login screen shows a configuration notice;

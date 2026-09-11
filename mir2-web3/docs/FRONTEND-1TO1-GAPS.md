@@ -1,5 +1,18 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: the Android-private entity loader now
+> retains fully metadata-free atlas occupants as explicit unindexed rects
+> instead of rejecting 7,824 otherwise usable frames; it still rejects partial
+> metadata and never fabricates placement. A five-page local proof pack adds
+> regular `ARWeapon/00`: the API31 ARM64 emulator visibly reached full-screen
+> Bichon render-ready with seven objects/twelve layers, an indexed standing bow,
+> zero unresolved draws, and `entity_unindexed_rects=24` for source frames
+> 808-831. Android `ui-preview` is 149/149; forced real-pack and
+> package/install/cold-launch gates pass. The shared Web atlas remains unchanged
+> and the proof pack remains ignored. Approved WSS/account login, live map
+> switching, physical-device, and human acceptance are still open. Evidence:
+> `docs/generated/player-qa/native-android-archer-regular-bow-20260912/README.md`.
+
 > 2026-09-12 Android current change: an explicit local entity-atlas build input
 > now lets licensed QA packs enter generated APK assets without mutating the
 > tracked Web release. A bounded 7,120-frame, five-page pack proved real

@@ -80,10 +80,25 @@ struct EntityAtlasRect {
     y: u32,
     width: u32,
     height: u32,
+    #[serde(default)]
+    offset_x: Option<i32>,
+    #[serde(default)]
+    offset_y: Option<i32>,
+    #[serde(default)]
+    frame_index: Option<i32>,
+    #[serde(default)]
+    page_index: usize,
+}
+
+#[derive(Debug, Clone)]
+struct IndexedEntityAtlasRect {
+    key: String,
+    x: u32,
+    y: u32,
+    width: u32,
+    height: u32,
     offset_x: i32,
     offset_y: i32,
-    frame_index: i32,
-    #[serde(default)]
     page_index: usize,
 }
 
@@ -292,6 +307,7 @@ pub(crate) struct EntityRenderProduct {
     pub(crate) entity_count: usize,
     pub(crate) layer_count: usize,
     pub(crate) unresolved_entity_count: usize,
+    pub(crate) unindexed_rect_count: usize,
     pub(crate) compressed_bytes: usize,
     pub(crate) rgba_bytes: usize,
 }
@@ -627,10 +643,10 @@ fn prototype_descriptor(kind: &str, class_key: &str, dead: bool, sprite: &Snapsh
 }
 
 fn resolve_rect<'a>(
-    rect_by_path: &'a HashMap<String, EntityAtlasRect>,
+    rect_by_path: &'a HashMap<String, IndexedEntityAtlasRect>,
     library: &str,
     frame: i32,
-) -> Option<&'a EntityAtlasRect> {
+) -> Option<&'a IndexedEntityAtlasRect> {
     // A strict render receipt must describe the requested authoritative pose,
     // not silently replace a missing direction/frame with library frame zero.
     rect_by_path.get(&frame_path(library, frame))
@@ -817,12 +833,15 @@ where
     }
 
     let mut rect_keys = HashSet::new();
+    let mut rect_paths = HashSet::new();
     let mut rect_by_path = HashMap::with_capacity(atlas.rects.len());
     let mut available_libraries = HashSet::new();
+    let mut unindexed_rect_count = 0usize;
     for rect in &atlas.rects {
         let source_path = atlas_source_path(&rect.key)
             .ok_or_else(|| WorldAssetError::new("entity-atlas rect key is invalid"))?;
         if !rect_keys.insert(rect.key.clone())
+            || !rect_paths.insert(source_path.clone())
             || rect.page_index >= atlas.pages.len()
             || rect.width == 0
             || rect.height == 0
@@ -834,21 +853,48 @@ where
                 .y
                 .checked_add(rect.height)
                 .is_none_or(|bottom| bottom > atlas.height)
-            || rect.frame_index < 0
-            || rect_by_path
-                .insert(source_path.clone(), rect.clone())
-                .is_some()
         {
             return Err(WorldAssetError::new(
                 "entity-atlas rect descriptor is invalid or duplicated",
             ));
         }
+        let (offset_x, offset_y) = match (rect.offset_x, rect.offset_y, rect.frame_index) {
+            (Some(offset_x), Some(offset_y), Some(frame_index)) if frame_index >= 0 => {
+                (offset_x, offset_y)
+            }
+            (None, None, None) => {
+                // The shared packer retains source PNGs that have no Crystal
+                // metadata. They are valid atlas occupants but cannot be used
+                // for authoritative placement, so keep them unavailable
+                // rather than inventing an offset or frame index.
+                unindexed_rect_count += 1;
+                continue;
+            }
+            _ => {
+                return Err(WorldAssetError::new(
+                    "entity-atlas rect metadata is incomplete or invalid",
+                ));
+            }
+        };
+        rect_by_path.insert(
+            source_path.clone(),
+            IndexedEntityAtlasRect {
+                key: rect.key.clone(),
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+                offset_x,
+                offset_y,
+                page_index: rect.page_index,
+            },
+        );
         if let Some((library, _)) = source_path.rsplit_once('/') {
             available_libraries.insert(library.trim_start_matches("/original-ui/").to_owned());
         }
     }
 
-    let mut used_rects: BTreeMap<usize, BTreeMap<String, EntityAtlasRect>> = BTreeMap::new();
+    let mut used_rects: BTreeMap<usize, BTreeMap<String, IndexedEntityAtlasRect>> = BTreeMap::new();
     let mut entries = Vec::new();
     let mut direction_entries = Vec::new();
     let mut unresolved_entity_count = 0usize;
@@ -1305,6 +1351,7 @@ where
         entity_count: state.entities.len(),
         layer_count,
         unresolved_entity_count,
+        unindexed_rect_count,
         compressed_bytes,
         rgba_bytes,
     })
@@ -1418,6 +1465,83 @@ mod tests {
         );
         assert_eq!(live["entities"][0]["prototype"]["kind"], "player");
         assert_eq!(live["entities"][0]["prototype"]["classKey"], "");
+    }
+
+    #[test]
+    fn fully_unindexed_atlas_rects_are_reported_and_never_used_for_placement() {
+        let png = rgba_png();
+        let manifest = serde_json::json!({
+            "schemaVersion": 2,
+            "kind": ENTITY_ATLAS_KIND,
+            "atlases": [{
+                "key":"starter","width":1,"height":1,
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "rects":[
+                    {"key":"/original-ui/CArmour/00/16.png|1x1",
+                     "x":0,"y":0,"width":1,"height":1,
+                     "offsetX":8,"offsetY":-48,"frameIndex":16,"pageIndex":0},
+                    {"key":"/original-ui/ARWeapon/00/808.png|1x1",
+                     "x":0,"y":0,"width":1,"height":1,"pageIndex":0}
+                ]
+            }]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{"objectId":"42","kind":"selfPlayer","x":300,"y":630,
+                "direction":"Down","sprite":{"bodyLibrary":"CArmour/00",
+                "frameBaseOffset":0,"directionStride":4}}]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 36, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/starter.png" => Ok(png.clone()),
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap();
+        assert_eq!(product.layer_count, 1);
+        assert_eq!(product.unresolved_entity_count, 0);
+        assert_eq!(product.unindexed_rect_count, 1);
+        let state: Value = serde_json::from_str(&product.json).unwrap();
+        assert_eq!(
+            state["entities"][0]["layers"][0]["path"],
+            "/original-ui/CArmour/00/16.png"
+        );
+        assert!(!product.json.contains("ARWeapon/00/808.png"));
+    }
+
+    #[test]
+    fn partially_indexed_atlas_rects_remain_rejected() {
+        let png = rgba_png();
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[{"key":"starter","width":1,"height":1,
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
+                    "x":0,"y":0,"width":1,"height":1,
+                    "offsetX":0,"frameIndex":16,"pageIndex":0}]}]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{"objectId":"42","kind":"selfPlayer","x":300,"y":630,
+                "direction":"Down","sprite":{"bodyLibrary":"CArmour/00",
+                "frameBaseOffset":0,"directionStride":4}}]
+        })
+        .to_string();
+        let error = load_entity_render_state(&snapshot, &scene(), 37, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/starter.png" => Ok(png.clone()),
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap_err();
+        assert!(error
+            .to_string()
+            .contains("rect metadata is incomplete or invalid"));
     }
 
     #[test]
@@ -2020,7 +2144,7 @@ mod tests {
         let roots = manifest["atlases"][0]["roots"]
             .as_array()
             .expect("configured entity atlas roots");
-        let has_extended_roots = ["ARArmour/00", "ARWeapon/00 S", "Mount/00"]
+        let has_extended_roots = ["ARArmour/00", "ARWeapon/00", "ARWeapon/00 S", "Mount/00"]
             .into_iter()
             .all(|required| roots.iter().any(|root| root.as_str() == Some(required)));
         if !has_extended_roots {
@@ -2037,7 +2161,7 @@ mod tests {
                     "objectId":"42","kind":"selfPlayer","classKey":"archer",
                     "x":300,"y":630,"direction":"Right",
                     "sprite":{
-                        "bodyLibrary":"CArmour/00",
+                        "bodyLibrary":"CArmour/00","weaponLibrary":"ARWeapon/00",
                         "altBodyLibrary":"ARArmour/00","altWeaponLibrary":"ARWeapon/00 S",
                         "frameBaseOffset":0,"weaponFrameOffset":0,
                         "altFrameBaseOffset":0,"altWeaponFrameOffset":0,
@@ -2077,9 +2201,25 @@ mod tests {
         })
         .unwrap();
         assert_eq!(product.entity_count, 2);
-        assert_eq!(product.layer_count, 3);
+        assert_eq!(product.layer_count, 4);
         assert_eq!(product.unresolved_entity_count, 0);
+        assert_eq!(product.unindexed_rect_count, 24);
         assert!(product.rgba_bytes <= MAX_SELECTED_RGBA_BYTES);
+        let state: Value = serde_json::from_str(&product.json).unwrap();
+        let archer_standing = state["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"] == "42")
+            .unwrap()["layers"]
+            .as_array()
+            .unwrap();
+        assert!(archer_standing
+            .iter()
+            .any(|layer| layer["path"] == "/original-ui/CArmour/00/8.png"));
+        assert!(archer_standing
+            .iter()
+            .any(|layer| layer["path"] == "/original-ui/ARWeapon/00/8.png"));
         let live: Value = serde_json::from_str(&product.live_directions_json).unwrap();
         let archer = live["entities"]
             .as_array()

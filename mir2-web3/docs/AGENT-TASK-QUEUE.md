@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-09-12 Android current change: regular `ARWeapon/00` now participates in
+> the bounded local proof pack without inventing metadata for its 24 orphan PNGs.
+> Android counts fully unindexed rects and excludes them from lookup while
+> rejecting partially indexed or otherwise unsafe descriptors. Android
+> `ui-preview` is 149/149; the exact real-pack, API31 package/install/cold-launch,
+> and visible full-screen render gates pass with seven objects/twelve layers and
+> zero unresolved draws. Next asset work is an approved broader shared release
+> and remaining class/equipment/mount roots; do not commit the local pack or
+> silently manufacture offsets for frames 808-831. Approved WSS/account real
+> login, live render-ready map transitions, physical-device, and human
+> acceptance remain external gates. Evidence:
+> `docs/generated/player-qa/native-android-archer-regular-bow-20260912/README.md`.
+
 > 2026-09-12 Android current change: a bounded licensed-asset pack has now
 > visually closed the first `ARArmour/00`, `ARWeapon/00 S`, and `Mount/00`
 > slice on the API31 ARM64 emulator without changing the tracked Web atlas.

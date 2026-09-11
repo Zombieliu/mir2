@@ -124,6 +124,7 @@ pub(crate) struct PackagedMapAtlasSummary {
     pub(crate) entity_count: usize,
     pub(crate) entity_layer_count: usize,
     pub(crate) unresolved_entity_count: usize,
+    pub(crate) entity_unindexed_rect_count: usize,
     pub(crate) entity_compressed_bytes: usize,
     pub(crate) entity_rgba_bytes: usize,
 }
@@ -568,6 +569,7 @@ pub(crate) fn request_packaged_map_atlas_load(
                     entity_count: entity_render.entity_count,
                     entity_layer_count: entity_render.layer_count,
                     unresolved_entity_count: entity_render.unresolved_entity_count,
+                    entity_unindexed_rect_count: entity_render.unindexed_rect_count,
                     entity_compressed_bytes: entity_render.compressed_bytes,
                     entity_rgba_bytes: entity_render.rgba_bytes,
                 };

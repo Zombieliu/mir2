@@ -1,0 +1,6 @@
+  1538284  assets/bevy-entity-atlases/android-archer-mount-bow-proof.png
+  1603948  assets/bevy-entity-atlases/android-archer-mount-bow-proof-p1.png
+  1782536  assets/bevy-entity-atlases/android-archer-mount-bow-proof-p2.png
+  2103731  assets/bevy-entity-atlases/android-archer-mount-bow-proof-p3.png
+  1750944  assets/bevy-entity-atlases/android-archer-mount-bow-proof-p4.png
+  2506377  assets/bevy-entity-atlases/manifest.json
