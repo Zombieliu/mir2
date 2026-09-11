@@ -370,16 +370,18 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 })
         }
         "ObjectWalk" | "ObjectRun" | "ObjectHarvest" | "ObjectHarvested" | "ObjectAttack"
-        | "ObjectRangeAttack" | "ObjectStruck" | "ObjectDashAttack" => object_id(body)
-            .zip(location(body))
-            .map(|(object_id, position)| EntityMutation::Action {
-                object_id,
-                position,
-                direction: action_direction(body, &models, object_id),
-                action: packet_action(packet, body, &models, object_id),
-                started_ms: now_ms,
-                life_state: None,
-            }),
+        | "ObjectRangeAttack" | "ObjectStruck" | "ObjectDashAttack" | "ObjectMagic" => {
+            object_id(body)
+                .zip(location(body))
+                .map(|(object_id, position)| EntityMutation::Action {
+                    object_id,
+                    position,
+                    direction: action_direction(body, &models, object_id),
+                    action: packet_action(packet, body, &models, object_id),
+                    started_ms: now_ms,
+                    life_state: None,
+                })
+        }
         "DamageIndicator" => object_id(body)
             .zip(damage(body))
             .zip(damage_type(body))
@@ -529,6 +531,7 @@ fn packet_action(
         "ObjectHarvest" => "harvest",
         "ObjectHarvested" => "skeleton",
         "ObjectRangeAttack" => "attackRange1",
+        "ObjectMagic" => "spell",
         "ObjectStruck" => "struck",
         "ObjectDashAttack" => "dashAttack",
         "ObjectAttack" => {

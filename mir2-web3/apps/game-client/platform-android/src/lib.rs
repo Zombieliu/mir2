@@ -25,6 +25,8 @@ mod map_render;
 #[cfg(any(target_os = "android", test))]
 mod mobile_ui;
 #[cfg(any(target_os = "android", test))]
+mod scene_effects;
+#[cfg(any(target_os = "android", test))]
 mod shared_shell;
 mod text_input;
 #[cfg(feature = "ui-preview")]

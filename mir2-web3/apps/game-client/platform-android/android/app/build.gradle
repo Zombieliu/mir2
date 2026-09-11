@@ -72,9 +72,34 @@ def prepareGroundItemAssets = tasks.register('prepareGroundItemAssets', Sync) {
         }
     }
 }
+
+// Scene effects are the tracked immutable Crystal export used by
+// ObjectMagic/ObjectProjectile/ObjectEffect/MapEffect/ObjectSpell. Stage the
+// manifest, frame metadata and exact PNGs; the native producer never draws a
+// synthetic fallback when a packet cannot be resolved from this catalog.
+def effectAssetsRoot = file("${projectDir}/../../../../web/public/original-effects")
+def prepareEffectAssets = tasks.register('prepareEffectAssets', Sync) {
+    from(effectAssetsRoot) {
+        include 'effects.generated.json', '**/meta.json', '**/*.png'
+        into 'original-effects'
+    }
+    into layout.buildDirectory.dir('generated/effect-assets')
+    doFirst {
+        def coreFrameCount = ['Effect', 'Magic', 'Magic2', 'Magic3'].sum { library ->
+            def meta = file("${effectAssetsRoot}/${library}/meta.json")
+            if (!meta.isFile()) {
+                throw new GradleException("The tracked Crystal ${library} effect metadata is missing")
+            }
+            fileTree(file("${effectAssetsRoot}/${library}")).matching { include '*.png' }.files.size()
+        }
+        if (!file("${effectAssetsRoot}/effects.generated.json").isFile() || coreFrameCount != 2067) {
+            throw new GradleException('The tracked Crystal scene-effect export is incomplete')
+        }
+    }
+}
 tasks.configureEach { task ->
     if (task.name == 'mergeDebugAssets' || task.name == 'mergeReleaseAssets' || task.name == 'mergeUiPreviewAssets') {
-        task.dependsOn prepareSharedUi, prepareWorldAssets, prepareEntityAssets, prepareGroundItemAssets
+        task.dependsOn prepareSharedUi, prepareWorldAssets, prepareEntityAssets, prepareGroundItemAssets, prepareEffectAssets
         task.doFirst {
             if (!uiRoot || !file("${uiRoot}/original-ui/ChrSel/0.png").isFile()
                     || !file("${uiRoot}/original-ui/Title/30.png").isFile()
@@ -138,6 +163,7 @@ android {
             assets.srcDir layout.buildDirectory.dir('generated/world-assets')
             assets.srcDir layout.buildDirectory.dir('generated/entity-assets')
             assets.srcDir layout.buildDirectory.dir('generated/ground-item-assets')
+            assets.srcDir layout.buildDirectory.dir('generated/effect-assets')
         }
     }
 }

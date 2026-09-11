@@ -60,6 +60,7 @@ fn report_world_render_ready(
     receipt: Res<mir2_bevy_runtime::native_render_receipt::NativeRenderReceipt>,
     time: Res<Time>,
     mut overlays: ResMut<crate::entity_overlays::ActorOverlayModel>,
+    mut scene_effects: ResMut<crate::scene_effects::SceneEffects>,
     mut reported: Local<bool>,
 ) {
     if *reported {
@@ -79,6 +80,26 @@ fn report_world_render_ready(
             }],
             now_ms,
         );
+        let positions = overlays.actor_positions();
+        // Offline-only exact-frame specimens. These enter the same bounded
+        // packet projection and shared runtime renderer as live packets, but
+        // are never evidence of a Gateway, account, or combat result.
+        let barrier = serde_json::json!({
+            "type":"packet", "packet":"ObjectEffect", "payload":{
+                "objectId":9002, "effect":13, "effectType":0,
+                "delayTime":0, "time":0
+            }
+        })
+        .to_string();
+        let fire_wall = serde_json::json!({
+            "type":"packet", "packet":"ObjectSpell", "payload":{
+                "objectId":9201, "location":{"x":300,"y":633},
+                "spell":39, "direction":"Down", "param":0
+            }
+        })
+        .to_string();
+        let _ = scene_effects.observe_packet(&barrier, now_ms, &positions);
+        let _ = scene_effects.observe_packet(&fire_wall, now_ms, &positions);
         info!(
             request_id = ready.request_id,
             center_x = ready.center_x,

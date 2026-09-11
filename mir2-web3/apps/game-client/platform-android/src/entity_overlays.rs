@@ -98,6 +98,13 @@ impl ActorOverlayModel {
         self.center
     }
 
+    pub(crate) fn actor_positions(&self) -> HashMap<u32, (i32, i32)> {
+        self.actors
+            .iter()
+            .map(|actor| (actor.object_id, (actor.x, actor.y)))
+            .collect()
+    }
+
     pub(crate) fn replace(&mut self, projected: ProjectedActorOverlays) {
         if self.center == Some(projected.center) && self.actors == projected.actors {
             return;

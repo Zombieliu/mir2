@@ -958,6 +958,11 @@ struct EffectRenderState {
     enabled: bool,
     stage_width: f32,
     stage_height: f32,
+    /// Optional active-animation frame URLs to keep warm while packaged asset
+    /// I/O catches up. These do not create sprites; the renderer still draws
+    /// only `effects`. The runtime independently caps the list before loading.
+    #[serde(default)]
+    preload_image_urls: Vec<String>,
     #[serde(default)]
     effects: Vec<EffectRenderEntry>,
 }
@@ -1004,10 +1009,12 @@ struct EffectRenderEntry {
     shadow_y: Option<f32>,
 }
 
+const MAX_EFFECT_PRELOAD_IMAGES: usize = 512;
+
 /// Active image keys for an effect snapshot (URL-loaded standalone frames,
-/// including mask frames).
+/// including mask frames and a bounded producer-supplied warm set).
 fn effect_render_active_image_keys(snapshot: &EffectRenderState) -> HashSet<String> {
-    snapshot
+    let mut keys = snapshot
         .effects
         .iter()
         .flat_map(|effect| {
@@ -1020,7 +1027,15 @@ fn effect_render_active_image_keys(snapshot: &EffectRenderState) -> HashSet<Stri
             }
             keys
         })
-        .collect()
+        .collect::<HashSet<_>>();
+    keys.extend(
+        snapshot
+            .preload_image_urls
+            .iter()
+            .take(MAX_EFFECT_PRELOAD_IMAGES)
+            .map(|url| browser_asset_path(url)),
+    );
+    keys
 }
 
 struct PendingMapRenderAtlasImage {
@@ -3087,7 +3102,12 @@ fn sync_effect_render(
     }
 
     let mut alive = HashSet::new();
-    let mut stale_images: HashSet<String> = registry.effect_render_images.keys().cloned().collect();
+    let mut stale_images: HashSet<String> = registry
+        .effect_render_images
+        .keys()
+        .filter(|key| !active_image_keys.contains(*key))
+        .cloned()
+        .collect();
     for effect in &snapshot.effects {
         alive.insert(effect.key.clone());
         let opacity = effect.opacity.unwrap_or(1.0).clamp(0.0, 1.0);
@@ -7476,6 +7496,7 @@ mod entity_atlas_tests {
                 "enabled": true,
                 "stageWidth": 1024,
                 "stageHeight": 768,
+                "preloadImageUrls": ["/original-effects/Magic/1.png"],
                 "effects": [{
                     "key": "fx-cast-1",
                     "imageUrl": "/original-effects/Magic/0.png",
@@ -7504,7 +7525,9 @@ mod entity_atlas_tests {
             entry.mask_image_url.as_deref(),
             Some("/original-effects/Magic/0.png")
         );
-        assert!(effect_render_active_image_keys(&state).contains("original-effects/Magic/0.png"));
+        let active = effect_render_active_image_keys(&state);
+        assert!(active.contains("original-effects/Magic/0.png"));
+        assert!(active.contains("original-effects/Magic/1.png"));
     }
 
     #[test]
@@ -7545,6 +7568,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-1".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7713,6 +7737,42 @@ mod effect_mask_shadow_tests {
     }
 
     #[test]
+    fn sync_effect_render_keeps_bounded_preload_images_until_snapshot_releases_them() {
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            preload_image_urls: vec!["/original-effects/Magic/1.png".to_owned()],
+            effects: vec![],
+        });
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_images
+            .contains_key("original-effects/Magic/1.png"));
+
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            preload_image_urls: Vec::new(),
+            effects: vec![],
+        });
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_images
+            .is_empty());
+    }
+
+    #[test]
     fn sync_effect_render_spawns_primary_mask_and_shadow_and_cleans_up() {
         // Run the real ECS sync_effect_render system and verify the layer
         // lifecycle: spawn, update, despawn, and asset recycling.
@@ -7724,6 +7784,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-e2e".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7866,6 +7927,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![],
         });
         app.update();
@@ -7907,6 +7969,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-noshadow".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7945,6 +8008,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-zero-axis".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -8003,6 +8067,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![],
         });
         app.update();
@@ -8060,6 +8125,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-maskzero".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -8107,6 +8173,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-dis".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -8143,6 +8210,7 @@ mod effect_mask_shadow_tests {
             enabled: false,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![],
         });
         app.update();

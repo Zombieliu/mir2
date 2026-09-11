@@ -106,6 +106,15 @@ are absent outside that viewport. Missing assets remain explicit and block a
 strict render receipt when encountered. They are not replaced with synthetic
 terrain or silently called complete.
 
+Authoritative `ObjectMagic`, `ObjectProjectile`, `ObjectEffect`, `MapEffect`
+and `ObjectSpell` packets resolve through the tracked Crystal effect manifest
+into the shared Bevy effect renderer. Cast, projectile, impact, return,
+object-attached, map and persistent world phases use exact exported frames;
+unknown entries remain invisible and malformed recognized packets fail the
+active scene closed. This is the bounded generic packet presentation path, not
+proof that every spell-specific Crystal branch, sound, light or local cast
+prediction is at parity.
+
 Passwords, account names, session tokens and character state are not persisted.
 Editor state saving and autofill are disabled. Passwords are cleared after
 submission/backgrounding. Logs omit credentials and raw messages. Empty login
@@ -117,7 +126,7 @@ roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
 generated per-library action variants, continuous locomotion/backstep
-interpolation, spell/projectile/impact effects and complete gameplay remain
+interpolation, spell-specific effect behavior and complete gameplay remain
 subsequent work. The
 existing reducer command queue is connected to the authenticated in-game
 socket through the bounded JNI lease mailbox described below. Authoritative

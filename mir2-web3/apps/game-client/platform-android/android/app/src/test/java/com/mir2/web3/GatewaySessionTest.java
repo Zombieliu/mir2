@@ -261,7 +261,13 @@ public class GatewaySessionTest {
                 "{\"type\":\"packet\",\"packet\":\"ObjectTeleportOut\",\"payload\":{\"objectId\":77,\"effectType\":1}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectTeleportIn\",\"payload\":{\"objectId\":77,\"effectType\":1}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectItem\",\"payload\":{\"objectId\":90,\"name\":\"Potion\",\"nameColourArgb\":-1,\"location\":{\"x\":302,\"y\":634},\"image\":0,\"grade\":0}}",
-                "{\"type\":\"packet\",\"packet\":\"ObjectGold\",\"payload\":{\"objectId\":91,\"gold\":250,\"location\":{\"x\":302,\"y\":634}}}"
+                "{\"type\":\"packet\",\"packet\":\"ObjectGold\",\"payload\":{\"objectId\":91,\"gold\":250,\"location\":{\"x\":302,\"y\":634}}}",
+                "{\"type\":\"packet\",\"packet\":\"DamageIndicator\",\"payload\":{\"objectId\":77,\"damage\":12,\"damageType\":2}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectMagic\",\"payload\":{\"objectId\":42,\"location\":{\"x\":302,\"y\":634},\"direction\":\"Down\",\"spell\":\"FireBall\",\"targetId\":77,\"target\":{\"x\":299,\"y\":629},\"cast\":true,\"level\":1,\"selfBroadcast\":false,\"secondaryTargetIds\":[]}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectProjectile\",\"payload\":{\"spell\":\"FireBall\",\"sourceId\":42,\"destinationId\":77}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectEffect\",\"payload\":{\"objectId\":77,\"effect\":3,\"effectType\":0,\"delayTime\":0,\"time\":0}}",
+                "{\"type\":\"packet\",\"packet\":\"MapEffect\",\"payload\":{\"location\":{\"x\":302,\"y\":634},\"effect\":12,\"value\":0}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectSpell\",\"payload\":{\"objectId\":501,\"location\":{\"x\":302,\"y\":634},\"spell\":39,\"direction\":\"Down\",\"param\":0}}"
         };
         for (String packet : lifecycle) {
             peer.send(packet);

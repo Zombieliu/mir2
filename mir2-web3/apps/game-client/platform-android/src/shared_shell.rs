@@ -213,7 +213,11 @@ impl Plugin for AndroidSharedShellPlugin {
             ))
             .add_systems(
                 PreUpdate,
-                (receive, discard_inactive_player_commands)
+                (
+                    receive,
+                    tick_scene_effects,
+                    discard_inactive_player_commands,
+                )
                     .chain()
                     .before(bevy::input::InputSystems),
             )
@@ -241,6 +245,7 @@ impl Plugin for AndroidSharedShellPlugin {
         crate::entity_overlays::install(app);
         crate::ground_labels::install(app);
         crate::mobile_ui::install(app);
+        crate::scene_effects::install(app);
     }
 }
 
@@ -486,6 +491,7 @@ fn receive(
     mut gateway_inbound: Option<ResMut<crate::gateway_bridge::AndroidGatewayInboundQueue>>,
     mut ground_labels: Option<ResMut<crate::ground_labels::GroundDropLabelModel>>,
     mut actor_overlays: Option<ResMut<crate::entity_overlays::ActorOverlayModel>>,
+    mut scene_effects: Option<ResMut<crate::scene_effects::SceneEffects>>,
     mut ground_pickups: Option<ResMut<mir2_client_bevy::quest_model::GroundPickupModel>>,
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
@@ -547,6 +553,41 @@ fn receive(
         if value["type"] == "gatewayGameplayPacket" {
             #[cfg(target_os = "android")]
             if let Some(raw) = value["envelope"].as_str() {
+                let now_ms = time
+                    .as_deref()
+                    .map(|time| u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX))
+                    .unwrap_or_default();
+                let actor_positions = actor_overlays
+                    .as_deref()
+                    .map(crate::entity_overlays::ActorOverlayModel::actor_positions)
+                    .unwrap_or_default();
+                let effect_rejected = scene_effects.as_deref_mut().is_some_and(|effects| {
+                    effects.observe_packet(raw, now_ms, &actor_positions)
+                        == crate::scene_effects::EffectPacketOutcome::Rejected
+                });
+                if effect_rejected {
+                    crate::live_entity::clear();
+                    if let Some(effects) = scene_effects.as_deref_mut() {
+                        effects.clear();
+                    }
+                    if let Some(overlays) = actor_overlays.as_deref_mut() {
+                        overlays.reset();
+                    }
+                    if let Some(labels) = ground_labels.as_deref_mut() {
+                        labels.reset();
+                    }
+                    if let Some(pickups) = ground_pickups.as_deref_mut() {
+                        pickups.reset();
+                    }
+                    mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                    model.apply_gateway_event(Event::Disconnect {
+                        reason: Some("Invalid authoritative scene-effect packet; reconnect".into()),
+                    });
+                    intents.drain().for_each(drop);
+                    OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+                    send(json!({"type":"disconnect"}));
+                    continue;
+                }
                 match crate::live_entity::apply_packet(raw) {
                     crate::live_entity::LiveEntityPacketOutcome::Applied { models, render } => {
                         let damage_events = crate::live_entity::drain_damage_events();
@@ -592,6 +633,9 @@ fn receive(
                     crate::live_entity::LiveEntityPacketOutcome::Ignored => {}
                     crate::live_entity::LiveEntityPacketOutcome::Rejected => {
                         crate::live_entity::clear();
+                        if let Some(effects) = scene_effects.as_deref_mut() {
+                            effects.clear();
+                        }
                         if let Some(overlays) = actor_overlays.as_deref_mut() {
                             overlays.reset();
                         }
@@ -758,6 +802,9 @@ fn receive(
             if let Some(overlays) = actor_overlays.as_deref_mut() {
                 overlays.reset();
             }
+            if let Some(effects) = scene_effects.as_deref_mut() {
+                effects.clear();
+            }
             if let Some(labels) = ground_labels.as_deref_mut() {
                 labels.reset();
             }
@@ -775,6 +822,9 @@ fn receive(
             crate::world_assets::cancel_packaged_map_atlas_load();
             if let Some(overlays) = actor_overlays.as_deref_mut() {
                 overlays.reset();
+            }
+            if let Some(effects) = scene_effects.as_deref_mut() {
+                effects.clear();
             }
             if let Some(labels) = ground_labels.as_deref_mut() {
                 labels.reset();
@@ -847,6 +897,9 @@ fn receive(
                 crate::world_assets::cancel_packaged_map_atlas_load();
                 if let Some(overlays) = actor_overlays.as_deref_mut() {
                     overlays.reset();
+                }
+                if let Some(effects) = scene_effects.as_deref_mut() {
+                    effects.clear();
                 }
                 if let Some(labels) = ground_labels.as_deref_mut() {
                     labels.reset();
@@ -958,6 +1011,47 @@ fn receive(
     start_deferred_render_load(&mut host);
 }
 
+fn tick_scene_effects(
+    time: Option<Res<Time>>,
+    shell: Res<NativeShellModel>,
+    player: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    overlays: Option<Res<crate::entity_overlays::ActorOverlayModel>>,
+    mut effects: Option<ResMut<crate::scene_effects::SceneEffects>>,
+    #[cfg(feature = "ui-preview")] mut preview_effect_reported: Local<bool>,
+) {
+    let Some(effects) = effects.as_deref_mut() else {
+        return;
+    };
+    let now_ms = time
+        .as_deref()
+        .map(|time| u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX))
+        .unwrap_or_default();
+    let center = overlays.as_deref().and_then(|overlays| overlays.center());
+    let positions = overlays
+        .as_deref()
+        .map(crate::entity_overlays::ActorOverlayModel::actor_positions)
+        .unwrap_or_default();
+    let visible = shell.screen == Screen::InGame
+        && player
+            .as_deref()
+            .is_none_or(|player| player.core.options.effect);
+    if let Some(state) = effects.tick(now_ms, center, &positions, visible) {
+        #[cfg(feature = "ui-preview")]
+        let effect_count = serde_json::from_str::<Value>(&state)
+            .ok()
+            .and_then(|state| state["effects"].as_array().map(Vec::len))
+            .unwrap_or_default();
+        let accepted = mir2_bevy_runtime::native_ingest::push_native_effect_render_state(state);
+        #[cfg(not(feature = "ui-preview"))]
+        let _ = accepted;
+        #[cfg(feature = "ui-preview")]
+        if accepted && effect_count > 0 && !*preview_effect_reported {
+            info!(effect_count, "ANDROID_EFFECT_RENDER_STATE_READY");
+            *preview_effect_reported = true;
+        }
+    }
+}
+
 fn matching_world_receipt(
     pending: Option<u64>,
     receipt: &mir2_bevy_runtime::native_world_receipt::NativeWorldReceipt,
@@ -1038,6 +1132,7 @@ fn observe_world_receipt(
     receipt: Option<Res<mir2_bevy_runtime::native_world_receipt::NativeWorldReceipt>>,
     mut intents: ResMut<NativeUiIntentQueue>,
     mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
+    mut scene_effects: Option<ResMut<crate::scene_effects::SceneEffects>>,
 ) {
     use mir2_bevy_runtime::native_world_receipt::WorldApplyOutcome;
     let Some(outcome) = receipt
@@ -1067,6 +1162,9 @@ fn observe_world_receipt(
             });
             #[cfg(target_os = "android")]
             crate::world_assets::cancel_packaged_map_atlas_load();
+            if let Some(scene_effects) = scene_effects.as_deref_mut() {
+                scene_effects.clear();
+            }
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
             intents.drain().for_each(drop);
             if let Some(effects) = effects.as_deref_mut() {
