@@ -11,6 +11,8 @@ mod entity_render;
 mod form_input;
 pub mod gateway_bridge;
 #[cfg(any(target_os = "android", test))]
+mod ground_labels;
+#[cfg(any(target_os = "android", test))]
 mod ground_pickups;
 #[cfg(any(target_os = "android", test))]
 mod live_entity;

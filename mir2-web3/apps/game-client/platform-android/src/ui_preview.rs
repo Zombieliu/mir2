@@ -204,13 +204,20 @@ fn apply(world: &mut World) {
                  "sprite":{"bodyLibrary":"Monster/003","frameBaseOffset":0,"directionStride":4}}
             ],
             "groundDrops":[
-                {"objectId":"9101","name":"Offline potion","nameColourArgb":-1,
+                {"objectId":"9101","name":"Offline potion","nameColourArgb":-10040065,
                  "x":301,"y":634,"image":0,"quantity":1,"dropKind":"item"},
-                {"objectId":"9102","name":"Gold","nameColourArgb":-1,
+                {"objectId":"9102","name":"Gold","nameColourArgb":-256,
                  "x":303,"y":635,"image":114,"quantity":250,"dropKind":"gold"}
             ]
         })
         .to_string();
+        if let Some(labels) =
+            crate::ground_labels::project(&snapshot, scene.center_x, scene.center_y)
+        {
+            world
+                .resource_mut::<crate::ground_labels::GroundDropLabelModel>()
+                .replace(labels);
+        }
         if let Some(pickups) = crate::ground_pickups::project(&snapshot) {
             world.insert_resource(pickups);
         }

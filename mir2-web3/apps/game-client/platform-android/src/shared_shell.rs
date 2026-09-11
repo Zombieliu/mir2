@@ -238,6 +238,7 @@ impl Plugin for AndroidSharedShellPlugin {
             );
         #[cfg(feature = "ui-preview")]
         crate::ui_preview::install(app);
+        crate::ground_labels::install(app);
         crate::mobile_ui::install(app);
     }
 }
@@ -264,6 +265,7 @@ fn fit_stage(
                 With<mir2_client_bevy::crystal_ui::minimap::CrystalMiniMapRoot>,
                 With<mir2_client_bevy::crystal_ui::overlays::OverlayRoot>,
                 With<mir2_client_bevy::quest_ui::QuestUiRoot>,
+                With<crate::ground_labels::GroundDropLabelRoot>,
             )>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
@@ -478,6 +480,7 @@ fn receive(
     mut forms: crate::form_input::FormInput,
     mut lifecycle_messages: Option<ResMut<Messages<crate::android_input::AndroidLifecycleMessage>>>,
     mut gateway_inbound: Option<ResMut<crate::gateway_bridge::AndroidGatewayInboundQueue>>,
+    mut ground_labels: Option<ResMut<crate::ground_labels::GroundDropLabelModel>>,
     mut ground_pickups: Option<ResMut<mir2_client_bevy::quest_model::GroundPickupModel>>,
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
@@ -541,6 +544,16 @@ fn receive(
             if let Some(raw) = value["envelope"].as_str() {
                 match crate::live_entity::apply_packet(raw) {
                     crate::live_entity::LiveEntityPacketOutcome::Applied { models, render } => {
+                        if let Some(labels) = ground_labels.as_deref_mut() {
+                            let projected = labels.center().and_then(|(center_x, center_y)| {
+                                crate::ground_labels::project(&models, center_x, center_y)
+                            });
+                            if let Some(projected) = projected {
+                                labels.replace(projected);
+                            } else {
+                                labels.reset();
+                            }
+                        }
                         if let Some(pickups) = ground_pickups.as_deref_mut() {
                             *pickups = crate::ground_pickups::project(&models).unwrap_or_default();
                         }
@@ -556,6 +569,9 @@ fn receive(
                     crate::live_entity::LiveEntityPacketOutcome::Ignored => {}
                     crate::live_entity::LiveEntityPacketOutcome::Rejected => {
                         crate::live_entity::clear();
+                        if let Some(labels) = ground_labels.as_deref_mut() {
+                            labels.reset();
+                        }
                         if let Some(pickups) = ground_pickups.as_deref_mut() {
                             pickups.reset();
                         }
@@ -713,6 +729,9 @@ fn receive(
             host.deferred_render_load = None;
             #[cfg(target_os = "android")]
             crate::world_assets::cancel_packaged_map_atlas_load();
+            if let Some(labels) = ground_labels.as_deref_mut() {
+                labels.reset();
+            }
             if let Some(pickups) = ground_pickups.as_deref_mut() {
                 pickups.reset();
             }
@@ -725,6 +744,9 @@ fn receive(
             host.deferred_render_load = None;
             #[cfg(target_os = "android")]
             crate::world_assets::cancel_packaged_map_atlas_load();
+            if let Some(labels) = ground_labels.as_deref_mut() {
+                labels.reset();
+            }
             if let Some(pickups) = ground_pickups.as_deref_mut() {
                 pickups.reset();
             }
@@ -748,6 +770,8 @@ fn receive(
                     entities,
                     scene,
                 } = projection;
+                let projected_labels =
+                    crate::ground_labels::project(&entities, scene.center_x, scene.center_y);
                 let projected_pickups = crate::ground_pickups::project(&entities);
                 let world_snapshot = world.clone();
                 host.pending_world_request = Some(request_id);
@@ -756,13 +780,19 @@ fn receive(
                 let live_models_ready = crate::live_entity::install_models(&entities, request_id);
                 #[cfg(not(target_os = "android"))]
                 let live_models_ready = true;
-                let queued = projected_pickups.is_some()
+                let queued = projected_labels.is_some()
+                    && projected_pickups.is_some()
                     && live_models_ready
                     && mir2_bevy_runtime::native_ingest::push_native_world_state(world)
                     && mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui)
                     && mir2_bevy_runtime::native_ingest::push_native_map_model(map)
                     && mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entities);
                 if queued {
+                    if let (Some(labels), Some(projected_labels)) =
+                        (ground_labels.as_deref_mut(), projected_labels)
+                    {
+                        labels.replace(projected_labels);
+                    }
                     if let (Some(pickups), Some(projected_pickups)) =
                         (ground_pickups.as_deref_mut(), projected_pickups)
                     {
@@ -775,6 +805,9 @@ fn receive(
             if !queued {
                 #[cfg(target_os = "android")]
                 crate::world_assets::cancel_packaged_map_atlas_load();
+                if let Some(labels) = ground_labels.as_deref_mut() {
+                    labels.reset();
+                }
                 if let Some(pickups) = ground_pickups.as_deref_mut() {
                     pickups.reset();
                 }
