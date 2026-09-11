@@ -14,6 +14,7 @@ use std::{
 const MAX_PACKET_BYTES: usize = 16 * 1024;
 const MAX_RENDER_BYTES: usize = 64 * 1024 * 1024;
 const MAX_ENTITIES: usize = 8192;
+const MAX_ACTION_POSES: usize = 128;
 const CELL_WIDTH: f64 = 48.0;
 const CELL_HEIGHT: f64 = 32.0;
 
@@ -240,7 +241,7 @@ fn merge_direction_layers(render: &mut Value, sidecar: &Value) -> bool {
 
 fn valid_action_layers(value: &Value) -> bool {
     value.as_object().is_some_and(|actions| {
-        actions.len() <= 96
+        actions.len() <= MAX_ACTION_POSES
             && actions.iter().all(|(key, action)| {
                 !key.is_empty()
                     && key.len() <= 48
@@ -300,23 +301,23 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
     let mutation = match packet {
         "UserLocation" => location(body)
             .map(|position| EntityMutation::MoveSelf(position, direction(body).map(str::to_owned))),
-        "ObjectWalk" | "ObjectRun" | "ObjectBackStep" | "ObjectTurn" => object_id(body)
-            .zip(location(body))
-            .map(|(object_id, position)| {
-                EntityMutation::Move(object_id, position, direction(body).map(str::to_owned))
-            }),
-        "ObjectHarvest" | "ObjectHarvested" | "ObjectAttack" | "ObjectRangeAttack"
-        | "ObjectStruck" | "ObjectDashAttack" => {
+        "ObjectBackStep" | "ObjectTurn" => {
             object_id(body)
                 .zip(location(body))
-                .map(|(object_id, position)| EntityMutation::Action {
-                    object_id,
-                    position,
-                    direction: action_direction(body, &models, object_id),
-                    action: packet_action(packet, body, &models, object_id),
-                    started_ms: now_ms,
+                .map(|(object_id, position)| {
+                    EntityMutation::Move(object_id, position, direction(body).map(str::to_owned))
                 })
         }
+        "ObjectWalk" | "ObjectRun" | "ObjectHarvest" | "ObjectHarvested" | "ObjectAttack"
+        | "ObjectRangeAttack" | "ObjectStruck" | "ObjectDashAttack" => object_id(body)
+            .zip(location(body))
+            .map(|(object_id, position)| EntityMutation::Action {
+                object_id,
+                position,
+                direction: action_direction(body, &models, object_id),
+                action: packet_action(packet, body, &models, object_id),
+                started_ms: now_ms,
+            }),
         "ObjectHealth" => object_id(body)
             .zip(percent(body))
             .map(|(object_id, percent)| EntityMutation::Health { object_id, percent }),
@@ -405,6 +406,8 @@ fn packet_action(
     object_id: u32,
 ) -> String {
     match packet {
+        "ObjectWalk" => "walking",
+        "ObjectRun" => "running",
         "ObjectHarvest" => "harvest",
         "ObjectHarvested" => "skeleton",
         "ObjectRangeAttack" => "attackRange1",
@@ -1793,7 +1796,7 @@ mod tests {
         ));
         assert!(install_render(
             r#"{"_nativeWorldRequest":29,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"self-standing"}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing"}]}]}"#,
-            r#"{"_nativeWorldRequest":29,"entities":[{"objectId":"43","prototype":{},"directionLayers":{"Down":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing"}]},"actionLayers":{"attack2:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"attack-0"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"attack-1"}]]}}}]}"#,
+            r#"{"_nativeWorldRequest":29,"entities":[{"objectId":"43","prototype":{},"directionLayers":{"Down":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing"}]},"actionLayers":{"attack2:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"attack-0"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"attack-1"}]]},"walking:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"walk-0"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"walk-1"}]]}}}]}"#,
         ));
 
         let LiveEntityPacketOutcome::Applied { models, render } = apply_packet_at(
@@ -1825,7 +1828,29 @@ mod tests {
             settled["entities"][1]["layers"][0]["atlasRectKey"],
             "standing"
         );
-        assert!(poll_action_frame_at(1_300).is_none());
+
+        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectWalk","payload":{"objectId":43,"x":302,"y":631}}"#,
+            1_300,
+        ) else {
+            panic!("walk should use the last authoritative direction");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["_nativeAnimationAction"], "walking");
+        assert_eq!(models["entities"][1]["x"], 302);
+        assert_eq!(models["entities"][1]["y"], 631);
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(render["entities"][1]["layers"][0]["atlasRectKey"], "walk-0");
+        let frame: Value =
+            serde_json::from_str(&poll_action_frame_at(1_400).expect("second walk frame")).unwrap();
+        assert_eq!(frame["entities"][1]["layers"][0]["atlasRectKey"], "walk-1");
+        let settled: Value =
+            serde_json::from_str(&poll_action_frame_at(1_500).expect("walk settle")).unwrap();
+        assert_eq!(
+            settled["entities"][1]["layers"][0]["atlasRectKey"],
+            "standing"
+        );
+        assert!(poll_action_frame_at(1_600).is_none());
         clear();
     }
 }

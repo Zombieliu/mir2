@@ -335,6 +335,8 @@ fn animation_kind(kind: &str) -> Option<EntityKind> {
 
 fn animation_action_name(action: AnimationAction) -> &'static str {
     match action {
+        AnimationAction::Walking => "walking",
+        AnimationAction::Running => "running",
         AnimationAction::Harvest => "harvest",
         AnimationAction::Attack1 => "attack1",
         AnimationAction::Attack2 => "attack2",
@@ -801,6 +803,8 @@ where
             if let Some(kind) = animation_kind(&entity.kind) {
                 let catalog = AnimationCatalog::crystal_default(kind);
                 for action in [
+                    AnimationAction::Walking,
+                    AnimationAction::Running,
                     AnimationAction::Harvest,
                     AnimationAction::Attack1,
                     AnimationAction::Attack2,
@@ -1075,6 +1079,15 @@ mod tests {
                 "frameIndex":frame,"pageIndex":0
             })
         }));
+        for range in [56..=61, 104..=109] {
+            rects.extend(range.map(|frame| {
+                serde_json::json!({
+                    "key":format!("/original-ui/CArmour/00/{frame}.png|1x1"),
+                    "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":frame,"pageIndex":0
+                })
+            }));
+        }
         let manifest = serde_json::json!({
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[{"key":"starter","width":1,"height":1,
@@ -1113,6 +1126,20 @@ mod tests {
             frames[5][0]["atlasRectKey"],
             "/original-ui/CArmour/00/165.png|1x1"
         );
+        for (action, first, last) in [("walking", 56, 61), ("running", 104, 109)] {
+            let frames = live["entities"][0]["actionLayers"][format!("{action}:Down")]["frames"]
+                .as_array()
+                .unwrap();
+            assert_eq!(frames.len(), 6);
+            assert_eq!(
+                frames[0][0]["atlasRectKey"],
+                format!("/original-ui/CArmour/00/{first}.png|1x1")
+            );
+            assert_eq!(
+                frames[5][0]["atlasRectKey"],
+                format!("/original-ui/CArmour/00/{last}.png|1x1")
+            );
+        }
     }
 
     #[test]
