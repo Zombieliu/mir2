@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `1ed32d776`: complete world snapshots and live item/gold
+> object packets now share one bounded ground-drop cache and exact packaged
+> `DNItems` presentation. Gold quantity selects frames 112-116; item packets
+> retain the server image index; removal and periodic-snapshot tombstones stay
+> authoritative. Android 120, real-atlas 1, Java TLS 11, API31 and normal/offline
+> preview APK gates pass. The labelled offline emulator scene visibly resolves
+> self, monster, item and gold as four objects/four layers with zero unresolved
+> entries. Labels/pickup, effects, alternate actor catalogs, approved online
+> journey and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-ground-drops-20260911/README.md`.
+
 > 2026-09-11 Android `c17bd7e6d`: authoritative death/harvest/revive lifecycle
 > packets now drive the exact packaged Crystal `die`, `dead`, `skeleton` and
 > `revive` poses for generic render-ready actors. The monotonic presentation

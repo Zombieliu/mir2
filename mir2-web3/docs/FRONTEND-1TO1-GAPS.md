@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `1ed32d776`: ground items and gold now render from the
+> exact tracked Crystal `DNItems` frames in both complete snapshots and bounded
+> live packets, with authoritative removal and no fake marker/path injection.
+> The API31 ARM64 offline world specimen visibly resolves a red item and gold
+> pile alongside the player/monster (`entities=4`, `entity_layers=4`, zero
+> unresolved); this is not live-drop evidence. Android 120/120, real-atlas 1/1,
+> Java TLS 11/11 and package/install/cold-launch gates pass. Ground labels,
+> pickup interaction, real login and physical-device/human acceptance remain
+> open. Evidence:
+> `docs/generated/player-qa/native-android-ground-drops-20260911/README.md`.
+
 > 2026-09-11 Android `c17bd7e6d`: generic actors now render exact Crystal
 > death-to-corpse, harvested skeleton and revive-to-standing lifecycle
 > sequences instead of using opacity alone. The normal API31 APK was rebuilt,

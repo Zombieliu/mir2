@@ -15,6 +15,10 @@ while typing it pans upward to keep the login panel readable above the IME.
 Package with `MIR2_ANDROID_UI_ASSET_ROOT` pointing to a local approved asset
 root containing `original-ui/{ChrSel,Prguse,Prguse2,Title,Items,Help,MMap,StateItem}/*.png`. Gradle stages
 only those images in generated build output. The files are not committed.
+Every APK also stages the repository-tracked `original-ui/DNItems` export: its
+version-3 metadata and exactly 5,280 PNG frames are the immutable presentation
+source for authoritative ground-item and gold objects. An incomplete export
+fails packaging instead of producing markers or blank substitutes.
 Optionally set `MIR2_ANDROID_WORLD_ASSET_ROOT` to an approved generated asset
 root containing `generated/map-atlas/manifest.json`, its PNG pages, and the
 bounded raw map `generated/crystal-map-pack/0.map`, plus
@@ -59,7 +63,10 @@ JNI delivers host events to the shared model and shared intents back to the
 host. An accepted complete world snapshot is projected into the shared world,
 HUD, map and entity read models. Android then parses the packaged raw Crystal
 map, resolves ordinary atlas draws plus keyed/additive standalone objects, and
-resolves every visible server entity into the shared entity-atlas contract.
+resolves every visible server actor and ground drop into the shared entity
+render contract. Ground items use the server `image` index; gold amounts select
+Crystal `DNItems` frames 112 through 116 using the same quantity bands as the
+native client. Missing frames stay unresolved and block the strict receipt.
 Map/entity state is published before its bounded image batches so queue pressure
 cannot evict the state that owns those images. Only the same exact request
 remaining complete across two consecutive rendered frames, with a non-empty
@@ -208,11 +215,20 @@ snapshot; a replacement movement/action, lifecycle replacement, removal and a
 new world request cancel stale action state. The sidecar is validated and
 removed from runtime JSON, which still carries only the active layers.
 
+`ObjectItem` and `ObjectGold` now enter the same bounded post-`IN_GAME`
+allowlist. The Android cache validates authoritative identity, position,
+name/colour/grade and quantity fields, materializes the exact packaged
+`DNItems` sprite with viewport bounds and Crystal y-sort depth, and removes it
+on `ObjectRemove`. Actor and drop identities are mutually exclusive, and a
+periodic snapshot cannot resurrect a removed drop. The private frame-dimension
+catalog is stripped before runtime publication; live packets may select only a
+prevalidated numeric frame and never an arbitrary path.
+
 This action leaf deliberately does not claim the generated class/library
 catalogs needed by Archer, Assassin, mounted and other alternate actors.
-Continuous movement interpolation/backstep, spell effects, health feedback and
-ground drops also remain separate work. No atlas name from a packet is resolved
-or decoded on the live packet path.
+Continuous movement interpolation/backstep, spell effects, health feedback,
+ground-drop name labels and pickup interaction acceptance remain separate work.
+No atlas name from a packet is resolved or decoded on the live packet path.
 
 The post-`IN_GAME` allowlist also carries health/death/revive and
 hide/show/teleport lifecycle packets. The private cache applies death position,

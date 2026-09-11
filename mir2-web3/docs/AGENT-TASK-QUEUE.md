@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `1ed32d776`: authoritative snapshot `groundDrops` and
+> post-`IN_GAME` `ObjectItem`/`ObjectGold` packets now materialize the exact
+> tracked Crystal `DNItems` frame with bounded identity/position/metadata,
+> shared viewport geometry and y-sort depth; `ObjectRemove` clears the model
+> and render entry. Gradle requires all 5,280 frames plus version-3 metadata.
+> Android 120/120, configured real-atlas 1/1, Java TLS 11/11, API31 and both APK
+> package gates pass. API31 ARM64 offline `world-render` visibly produced four
+> objects/four layers with zero unresolved entries. Normal APK SHA-256 is
+> `8f100a8ca74a418285a818e3b47fabca683c9fd57054c1fbbddbc8c135a5b5fe`.
+> Ground labels/pickup acceptance, effects, generated class/mount catalogs,
+> approved online login and physical-device acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-ground-drops-20260911/README.md`.
+
 > 2026-09-11 Android `c17bd7e6d`: generic render-ready actors now play exact
 > packaged Crystal `die -> dead`, terminal `skeleton`, and
 > `revive -> standing` sequences from authoritative lifecycle packets. Missing
