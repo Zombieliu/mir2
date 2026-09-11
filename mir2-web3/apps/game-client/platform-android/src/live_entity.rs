@@ -2136,6 +2136,20 @@ mod tests {
             .unwrap()
             .iter()
             .all(|entity| entity["objectId"] != "50"));
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"level":7,"direction":"Down"}],"groundDrops":[{"objectId":"50","name":"Stale potion","nameColourArgb":-1,"x":301,"y":630,"quantity":1,"image":0,"dropKind":"item"},{"objectId":"51","name":"Gold","nameColourArgb":-1,"x":300,"y":631,"quantity":250,"image":114,"dropKind":"gold"}]}"#,
+            26,
+        ));
+        let cache = LIVE_ENTITIES
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        assert!(cache
+            .models
+            .as_ref()
+            .is_some_and(|models| models["groundDrops"]
+                .as_array()
+                .is_some_and(|drops| drops.len() == 1 && drops[0]["objectId"] == "51")));
+        drop(cache);
         clear();
     }
 
