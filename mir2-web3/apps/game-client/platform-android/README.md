@@ -132,8 +132,8 @@ On background, disconnect, timeout or transport failure, the socket and old
 roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
-generated per-library class/equipment/mount/action variants, spell-specific
-effect behavior and complete gameplay remain subsequent work. The
+unpackaged player/equipment/mount variants, spell-specific effect behavior and
+complete gameplay remain subsequent work. The
 existing reducer command queue is connected to the authenticated in-game
 socket through the bounded JNI lease mailbox described below. Authoritative
 transaction receipts and the entity packet families described below return to
@@ -271,11 +271,25 @@ shared `DropView` option and every node is input-pass-through. Snapshot/live
 replacement and removal rebuild labels from authority; this layer cannot make
 an object pickable or remove it.
 
-This action leaf deliberately does not claim the generated class/library
-catalogs needed by Archer, Assassin, mounted and other alternate actors.
-Continuous movement interpolation/backstep, spell/projectile/impact effects,
-approved live damage/pickup acceptance and physical-device input remain
-separate work. No atlas name from a packet is resolved or decoded on the live
+Action-specific player resolution now matches the bounded Windows tables for
+the covered branches. Assassin standing, movement, melee/dash/spell, struck and
+death can select the tracked `AArmour`/`AHair`/dual-`AWeapon` libraries, including
+space-bearing weapon paths encoded as `%20`; the two weapons swap front/back
+depth by direction. Archer compact walk/run/range catalogs and mounted
+standing/movement/combat/lifecycle bands are also explicit, with mount frames
+aligned to the mounted body base and weapons suppressed while mounted. A
+required missing mount fails the actor closed instead of drawing a body alone.
+The renderer falls back to the common body only when an alternate library is
+not packaged, never to a packet-selected or fabricated frame.
+
+The tracked atlas currently contains the Assassin A* roots but not
+`ARArmour`/`ARWeapon` or `Mount`, so only Assassin alternate layers have real
+atlas and API31 visual evidence; Archer alternate and mounted paths are exact
+fixture-tested asset-closure work, not visually accepted variants. Android
+146/146, tracked-atlas 2/2, API31 target/package/install/cold-launch pass.
+Evidence: `docs/generated/player-qa/native-android-entity-catalog-20260912/README.md`.
+Approved live damage/pickup/login acceptance and physical-device input remain
+separate gates. No atlas name from a packet is resolved or decoded on the live
 packet path.
 
 The post-`IN_GAME` allowlist also carries health/death/revive and

@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-09-12 Android current change: tracked Assassin alternate body/hair/dual
+> weapon libraries now resolve for their bounded action families, including
+> `%20` weapon paths and Crystal direction-dependent layer depth. Archer compact
+> and mounted catalogs are implemented with strict frame lookup and fail-closed
+> required mounts. Android 146/146, tracked-atlas 2/2 and API31 ARM64
+> target/package/install/cold-launch pass; the offline emulator visibly reached
+> render-ready with five entities/eight layers and started the Assassin attack
+> packet presentation. The next asset leaf is generating bounded
+> `ARArmour`/`ARWeapon` and `Mount` atlas pages from an approved licensed source;
+> those roots are absent from the tracked atlas today. Approved WSS/account live
+> login, physical-device and human acceptance remain external gates. Evidence:
+> `docs/generated/player-qa/native-android-entity-catalog-20260912/README.md`.
+
 > 2026-09-12 Android `3efa56d71`: remote walk/run/backstep packets now retain
 > server endpoints while the shared Bevy presentation clock supplies bounded
 > sub-tile motion. Android crosses parallel packet producers through a bounded

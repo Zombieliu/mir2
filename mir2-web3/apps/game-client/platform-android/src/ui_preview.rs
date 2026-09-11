@@ -96,6 +96,32 @@ fn start_world_render_motion_specimen(
         .to_string(),
     );
     info!("ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED");
+    let attack = serde_json::json!({
+        "type":"packet", "packet":"ObjectAttack", "payload":{
+            "objectId":9001, "x":302, "y":634, "direction":"Down"
+        }
+    })
+    .to_string();
+    match crate::live_entity::apply_packet(&attack) {
+        crate::live_entity::LiveEntityPacketOutcome::Applied { models, render, .. } => {
+            let models_ready =
+                mir2_bevy_runtime::native_ingest::push_native_entity_model_set(models);
+            let render_ready = render
+                .map(mir2_bevy_runtime::native_ingest::push_native_entity_render_state)
+                .unwrap_or(false);
+            if models_ready && render_ready {
+                info!("ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED");
+            } else {
+                warn!("offline Assassin action was not accepted by the native renderer");
+            }
+        }
+        crate::live_entity::LiveEntityPacketOutcome::Ignored => {
+            warn!("offline Assassin action was ignored by the installed entity model")
+        }
+        crate::live_entity::LiveEntityPacketOutcome::Rejected => {
+            warn!("offline Assassin action packet was rejected")
+        }
+    }
     *started = true;
 }
 
@@ -306,8 +332,11 @@ fn apply(world: &mut World) {
         let snapshot = serde_json::json!({
             "playerObjectId":"9001",
             "entities":[
-                {"objectId":"9001","kind":"selfPlayer","name":"OFFLINE UI FIXTURE","guildName":"CODEX","nameColourArgb":-256,"x":302,"y":634,"direction":"Down",
-                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}},
+                {"objectId":"9001","kind":"selfPlayer","classKey":"assassin","name":"OFFLINE UI FIXTURE","guildName":"CODEX","nameColourArgb":-256,"x":302,"y":634,"direction":"Down",
+                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4,
+                    "altBodyLibrary":"AArmour/00","altHairLibrary":"AHair/00",
+                    "altWeaponLibrary":"AWeapon/00 R","altWeaponLibrarySecondary":"AWeapon/00 L",
+                    "altFrameBaseOffset":0,"altWeaponFrameOffset":0}},
                 {"objectId":"9002","kind":"monster","name":"Offline_monster","nameColourArgb":-65536,"x":304,"y":634,"direction":"Right","_healthPercent":65,"_healthExpireSeconds":90,"_healthGeneration":1,"_healthRevision":1,
                  "sprite":{"bodyLibrary":"Monster/003","frameBaseOffset":0,"directionStride":4}},
                 {"objectId":"9003","kind":"player","name":"Motion witness","guildName":"BACKSTEP","nameColourArgb":-16711681,"x":299,"y":634,"direction":"Right",
@@ -337,6 +366,9 @@ fn apply(world: &mut World) {
         }
         if let Some(pickups) = crate::ground_pickups::project(&snapshot) {
             world.insert_resource(pickups);
+        }
+        if !crate::live_entity::install_models(&snapshot, u64::MAX) {
+            warn!("offline world-render preview entity model was not accepted");
         }
         if !crate::world_assets::request_packaged_map_atlas_load(scene, snapshot, u64::MAX) {
             warn!("offline world-render preview asset request was not accepted");

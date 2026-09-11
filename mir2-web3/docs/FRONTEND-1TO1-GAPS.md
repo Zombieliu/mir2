@@ -1,5 +1,19 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: action-specific player-library selection
+> now resolves the tracked Assassin `AArmour`/`AHair`/dual-`AWeapon` layers,
+> including `%20` space canonicalization and direction-dependent weapon depth.
+> Bounded Archer compact and mounted action/lifecycle catalogs are implemented;
+> missing required mounts fail closed. Android 146/146, tracked-atlas 2/2 and
+> API31 ARM64 target/package/install/cold-launch pass. The offline emulator
+> visibly reached render-ready with five entities/eight layers and exercised an
+> Assassin attack through the production packet-action path. APK SHA-256 is
+> `5a8ddade998f92488f9b15d7070228aaf098c8586dc3622fd0758bd2cd25a2d3`.
+> The tracked atlas still lacks `ARArmour`/`ARWeapon` and `Mount` roots, so those
+> variants have fixture rather than visual evidence. Approved WSS/account live
+> login, physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-catalog-20260912/README.md`.
+
 > 2026-09-12 Android `3efa56d71`: authoritative remote `ObjectWalk`,
 > `ObjectRun` and `ObjectBackStep` endpoints now use the shared renderer's
 > bounded presentation clock instead of tile snapping; turn/remove and every

@@ -6,7 +6,7 @@
 
 use crate::{world_assets::WorldAssetError, world_projection::ProjectedScene};
 use mir2_bevy_runtime::entity_animation::{
-    AnimationAction, AnimationCatalog, Direction, EntityKind,
+    AnimationAction, AnimationCatalog, Direction, EntityKind, FrameDescriptor,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -394,13 +394,135 @@ fn animation_action_name(action: AnimationAction) -> &'static str {
     }
 }
 
+fn uses_archer_alt(action: AnimationAction) -> bool {
+    matches!(
+        action,
+        AnimationAction::Walking
+            | AnimationAction::Running
+            | AnimationAction::AttackRange1
+            | AnimationAction::AttackRange2
+    )
+}
+
+fn uses_assassin_alt(action: AnimationAction) -> bool {
+    matches!(
+        action,
+        AnimationAction::Standing
+            | AnimationAction::Walking
+            | AnimationAction::Running
+            | AnimationAction::Attack1
+            | AnimationAction::Attack2
+            | AnimationAction::Attack3
+            | AnimationAction::Attack4
+            | AnimationAction::DashAttack
+            | AnimationAction::Spell
+            | AnimationAction::Struck
+            | AnimationAction::Die
+    )
+}
+
+fn archer_player_catalog() -> AnimationCatalog {
+    let mut catalog = AnimationCatalog::crystal_player();
+    for (action, descriptor) in [
+        (
+            AnimationAction::Walking,
+            FrameDescriptor::from_crystal(0, 6, 0, 100, false),
+        ),
+        (
+            AnimationAction::Running,
+            FrameDescriptor::from_crystal(48, 6, 0, 100, false),
+        ),
+        (
+            AnimationAction::AttackRange2,
+            FrameDescriptor::from_crystal(160, 8, 0, 100, false),
+        ),
+    ] {
+        catalog
+            .insert(action, descriptor)
+            .expect("bounded Crystal archer descriptor");
+    }
+    catalog
+}
+
+fn mounted_player_catalog() -> AnimationCatalog {
+    let mut catalog = AnimationCatalog::new();
+    for (action, descriptor) in [
+        (
+            AnimationAction::Standing,
+            FrameDescriptor::from_crystal(416, 4, 0, 500, false),
+        ),
+        (
+            AnimationAction::Harvest,
+            FrameDescriptor::from_crystal(416, 4, 0, 500, false),
+        ),
+        (
+            AnimationAction::Walking,
+            FrameDescriptor::from_crystal(448, 8, 0, 100, false),
+        ),
+        (
+            AnimationAction::Running,
+            FrameDescriptor::from_crystal(512, 6, 0, 100, false),
+        ),
+        (
+            AnimationAction::Struck,
+            FrameDescriptor::from_crystal(560, 3, 0, 100, false),
+        ),
+        (
+            AnimationAction::Die,
+            FrameDescriptor::from_crystal(384, 4, 0, 100, false),
+        ),
+        (
+            AnimationAction::Dead,
+            FrameDescriptor::from_crystal(387, 1, 3, 1000, false),
+        ),
+        (
+            AnimationAction::Revive,
+            FrameDescriptor::from_crystal(384, 4, 0, 100, true),
+        ),
+    ] {
+        catalog
+            .insert(action, descriptor)
+            .expect("bounded Crystal mounted descriptor");
+    }
+    let attack = FrameDescriptor::from_crystal(584, 6, 0, 100, false);
+    for action in [
+        AnimationAction::Attack1,
+        AnimationAction::Attack2,
+        AnimationAction::Attack3,
+        AnimationAction::Attack4,
+        AnimationAction::AttackRange1,
+        AnimationAction::AttackRange2,
+        AnimationAction::Spell,
+    ] {
+        catalog
+            .insert(action, attack)
+            .expect("bounded Crystal mounted attack descriptor");
+    }
+    catalog
+}
+
 fn weapon_is_rear(direction: Option<&str>) -> bool {
     matches!(direction, Some("Left" | "Up" | "UpLeft" | "DownLeft"))
 }
 
-fn atlas_source_path(rect_key: &str) -> Option<&str> {
+fn assassin_primary_is_front(direction: &str) -> bool {
+    matches!(direction, "UpRight" | "Right" | "DownRight" | "Down")
+}
+
+fn atlas_source_path(rect_key: &str) -> Option<String> {
     let (path, dimensions) = rect_key.split_once('|')?;
-    if !path.starts_with("/original-ui/") || !path.ends_with(".png") || !dimensions.contains('x') {
+    let path = path.replace("%20", " ");
+    let relative = path.strip_prefix("/original-ui/")?;
+    let (library, frame_file) = relative.rsplit_once('/')?;
+    if path.contains('%')
+        || !safe_component_path(library)
+        || frame_file
+            .strip_suffix(".png")
+            .and_then(|frame| frame.parse::<i32>().ok())
+            .filter(|frame| *frame >= 0)
+            .is_none()
+        || !dimensions.contains('x')
+    {
         return None;
     }
     Some(path)
@@ -714,7 +836,7 @@ where
                 .is_none_or(|bottom| bottom > atlas.height)
             || rect.frame_index < 0
             || rect_by_path
-                .insert(source_path.to_owned(), rect.clone())
+                .insert(source_path.clone(), rect.clone())
                 .is_some()
         {
             return Err(WorldAssetError::new(
@@ -752,115 +874,161 @@ where
                 "entity sprite frame metadata is out of bounds",
             ));
         }
-        let Some(mut body_library) = normalize_library(&sprite.body_library) else {
+        let Some(body_library) = normalize_library(&sprite.body_library) else {
             return Err(WorldAssetError::new(
                 "entity sprite body library is invalid",
             ));
         };
-        let mut hair_library = sprite.hair_library.as_deref().and_then(normalize_library);
-        let mut weapon_library = sprite.weapon_library.as_deref().and_then(normalize_library);
-        let mut weapon_library_secondary = sprite
+        let hair_library = sprite.hair_library.as_deref().and_then(normalize_library);
+        let weapon_library = sprite.weapon_library.as_deref().and_then(normalize_library);
+        let weapon_library_secondary = sprite
             .weapon_library_secondary
             .as_deref()
             .and_then(normalize_library);
-        let mut frame_base_offset = sprite.frame_base_offset;
-        let mut weapon_frame_offset = sprite.weapon_frame_offset;
+        let frame_base_offset = sprite.frame_base_offset;
+        let weapon_frame_offset = sprite.weapon_frame_offset;
         let class_key = entity
             .class_key
             .as_deref()
             .or(entity.class_name.as_deref())
             .unwrap_or_default()
             .to_ascii_lowercase();
-        // Match the shared Windows resolver: an unmounted Assassin uses the
-        // authoritative A* standing libraries, while Archer standing remains
-        // on the common body and switches only for moving/ranged actions.
-        if matches!(entity.kind.as_str(), "selfPlayer" | "player" | "hero")
-            && sprite.mount_library.is_none()
-            && class_key == "assassin"
-        {
-            if let Some(library) = sprite
-                .alt_body_library
-                .as_deref()
-                .and_then(normalize_library)
-                .filter(|library| available_libraries.contains(library))
-            {
-                body_library = library;
-                hair_library = sprite
-                    .alt_hair_library
-                    .as_deref()
-                    .and_then(normalize_library)
-                    .filter(|library| available_libraries.contains(library))
-                    .or(hair_library);
-                weapon_library = sprite
-                    .alt_weapon_library
-                    .as_deref()
-                    .and_then(normalize_library)
-                    .filter(|library| available_libraries.contains(library))
-                    .or(weapon_library);
-                weapon_library_secondary = sprite
-                    .alt_weapon_library_secondary
-                    .as_deref()
-                    .and_then(normalize_library)
-                    .filter(|library| available_libraries.contains(library))
-                    .or(weapon_library_secondary);
-                frame_base_offset = sprite.alt_frame_base_offset.unwrap_or(frame_base_offset);
-                weapon_frame_offset = sprite.alt_weapon_frame_offset.or(weapon_frame_offset);
-            }
-        }
         let stride = sprite.direction_stride;
         let mounted = sprite.mount_library.is_some();
         let root_left = ENTITY_LEFT_ORIGIN + dx as f32 * CELL_WIDTH;
         let root_top = ENTITY_TOP_ORIGIN + dy as f32 * CELL_HEIGHT;
         let depth = 4096 + dy * 128 + dx * 2 + 64;
 
-        let requested_for_frame = |direction_name: &str, relative_frame: i32| {
-            let direction = direction_index(Some(direction_name));
-            let body_frame = frame_base_offset.saturating_add(relative_frame);
-            let weapon_frame =
-                weapon_frame_offset.map(|offset| offset.saturating_add(relative_frame));
-            let mut requested = Vec::<(&str, String, i32)>::new();
-            if let Some(mount) = sprite.mount_library.as_deref().and_then(normalize_library) {
-                requested.push((
-                    "mount",
-                    mount,
+        let requested_for_frame =
+            |direction_name: &str, relative_frame: i32, action: AnimationAction| {
+                let is_player = matches!(entity.kind.as_str(), "selfPlayer" | "player" | "hero");
+                let use_alt = is_player
+                    && !mounted
+                    && ((class_key == "assassin" && uses_assassin_alt(action))
+                        || (class_key == "archer" && uses_archer_alt(action)));
+                let alt_body = sprite
+                    .alt_body_library
+                    .as_deref()
+                    .and_then(normalize_library)
+                    .filter(|library| available_libraries.contains(library));
+                let use_alt = use_alt && alt_body.is_some();
+                let resolved_body = if use_alt {
+                    alt_body.unwrap_or_else(|| body_library.clone())
+                } else {
+                    body_library.clone()
+                };
+                let resolved_hair = if use_alt {
                     sprite
-                        .mount_frame_offset
-                        .unwrap_or_default()
-                        .saturating_add(direction.saturating_mul(stride)),
-                ));
-            }
-            let mut weapons = Vec::new();
-            if let (Some(library), Some(frame)) = (weapon_library.clone(), weapon_frame) {
-                weapons.push(("weapon", library, frame));
-            }
-            if let (Some(library), Some(frame)) = (weapon_library_secondary.clone(), weapon_frame) {
-                weapons.push(("weaponSecondary", library, frame));
-            }
-            if !mounted && weapon_is_rear(Some(direction_name)) {
-                requested.extend(weapons.iter().cloned());
-            }
-            requested.push(("body", body_library.clone(), body_frame));
-            if let Some(hair) = hair_library.clone() {
-                requested.push(("hair", hair, body_frame));
-            }
-            if !mounted && !weapon_is_rear(Some(direction_name)) {
-                requested.extend(weapons);
-            }
-            requested
-        };
+                        .alt_hair_library
+                        .as_deref()
+                        .and_then(normalize_library)
+                        .filter(|library| available_libraries.contains(library))
+                        .or_else(|| hair_library.clone())
+                } else {
+                    hair_library.clone()
+                };
+                let resolved_weapon = if use_alt {
+                    sprite
+                        .alt_weapon_library
+                        .as_deref()
+                        .and_then(normalize_library)
+                        .filter(|library| available_libraries.contains(library))
+                        .or_else(|| weapon_library.clone())
+                } else {
+                    weapon_library.clone()
+                };
+                let resolved_weapon_secondary = if use_alt {
+                    sprite
+                        .alt_weapon_library_secondary
+                        .as_deref()
+                        .and_then(normalize_library)
+                        .filter(|library| available_libraries.contains(library))
+                        .or_else(|| weapon_library_secondary.clone())
+                } else {
+                    weapon_library_secondary.clone()
+                };
+                let resolved_body_offset = if use_alt {
+                    sprite.alt_frame_base_offset.unwrap_or(frame_base_offset)
+                } else {
+                    frame_base_offset
+                };
+                let resolved_weapon_offset = if use_alt {
+                    sprite.alt_weapon_frame_offset.or(weapon_frame_offset)
+                } else {
+                    weapon_frame_offset
+                };
+                let body_frame = resolved_body_offset.saturating_add(relative_frame);
+                let weapon_frame =
+                    resolved_weapon_offset.map(|offset| offset.saturating_add(relative_frame));
+                let mut requested = Vec::<(&str, String, i32)>::new();
+                if let Some(mount) = sprite.mount_library.as_deref().and_then(normalize_library) {
+                    if let Some(mount_relative_frame) = relative_frame.checked_sub(416) {
+                        requested.push((
+                            "mount",
+                            mount,
+                            sprite
+                                .mount_frame_offset
+                                .unwrap_or_default()
+                                .saturating_add(mount_relative_frame),
+                        ));
+                    }
+                }
+                let mut weapons = Vec::new();
+                if let (Some(library), Some(frame)) = (resolved_weapon, weapon_frame) {
+                    weapons.push(("weapon", library, frame));
+                }
+                if let (Some(library), Some(frame)) = (resolved_weapon_secondary, weapon_frame) {
+                    weapons.push(("weaponSecondary", library, frame));
+                }
+                let dual_weapon = weapons.len() == 2;
+                if !mounted {
+                    requested.extend(
+                        weapons
+                            .iter()
+                            .filter(|(role, _, _)| {
+                                if dual_weapon {
+                                    if *role == "weapon" {
+                                        !assassin_primary_is_front(direction_name)
+                                    } else {
+                                        assassin_primary_is_front(direction_name)
+                                    }
+                                } else {
+                                    weapon_is_rear(Some(direction_name))
+                                }
+                            })
+                            .cloned(),
+                    );
+                }
+                requested.push(("body", resolved_body, body_frame));
+                if let Some(hair) = resolved_hair {
+                    requested.push(("hair", hair, body_frame));
+                }
+                if !mounted {
+                    requested.extend(weapons.into_iter().filter(|(role, _, _)| {
+                        if dual_weapon {
+                            if *role == "weapon" {
+                                assassin_primary_is_front(direction_name)
+                            } else {
+                                !assassin_primary_is_front(direction_name)
+                            }
+                        } else {
+                            !weapon_is_rear(Some(direction_name))
+                        }
+                    }));
+                }
+                requested
+            };
         let mut resolve_direction_layers = |requested: Vec<(&str, String, i32)>| {
             let mut layers = Vec::new();
             let mut missing_body = false;
             for (order, (role, library, frame)) in requested.into_iter().enumerate() {
                 let Some(rect) = resolve_rect(&rect_by_path, &library, frame) else {
-                    if role == "body" {
+                    if matches!(role, "body" | "mount") {
                         missing_body = true;
                     }
                     continue;
                 };
-                let path = atlas_source_path(&rect.key)
-                    .expect("validated rect path")
-                    .to_owned();
+                let path = atlas_source_path(&rect.key).expect("validated rect path");
                 let atlas_page_key = page_key(&atlas.key, rect.page_index);
                 used_rects
                     .entry(rect.page_index)
@@ -892,9 +1060,12 @@ where
                 .saturating_mul(stride)
                 .saturating_add(if mounted { 416 } else { 0 })
         };
-        let (selected_layers, selected_missing_body) = resolve_direction_layers(
-            requested_for_frame(selected_direction, standing_frame(selected_direction)),
-        );
+        let (selected_layers, selected_missing_body) =
+            resolve_direction_layers(requested_for_frame(
+                selected_direction,
+                standing_frame(selected_direction),
+                AnimationAction::Standing,
+            ));
         let selected_ready = !selected_missing_body && !selected_layers.is_empty();
         if selected_ready {
             direction_layers.insert(selected_direction.to_owned(), selected_layers.clone());
@@ -905,6 +1076,7 @@ where
                 let (layers, missing_body) = resolve_direction_layers(requested_for_frame(
                     direction,
                     standing_frame(direction),
+                    AnimationAction::Standing,
                 ));
                 if !missing_body && !layers.is_empty() {
                     direction_layers.insert(direction.to_owned(), layers);
@@ -913,13 +1085,25 @@ where
         }
         let mut action_layers = BTreeMap::new();
         // The packet path owns the action clock, but it must never resolve
-        // untrusted asset names. Precompute only Crystal default frames whose
-        // exact rects are present in the immutable packaged atlas. Mounted and
-        // Archer/Assassin alternates require their generated per-library
-        // catalogs and deliberately stay on the standing pose for now.
-        if selected_ready && !mounted && !matches!(class_key.as_str(), "archer" | "assassin") {
+        // untrusted asset names. Precompute only exact rects present in the
+        // immutable packaged atlas. Player catalogs match the shared Windows
+        // mounted and Archer tables; Assassin actions use the ordinary Crystal
+        // player timings with their authoritative alternate layer set.
+        if selected_ready {
             if let Some(kind) = animation_kind(&entity.kind) {
-                let catalog = AnimationCatalog::crystal_default(kind);
+                let alt_body_available = sprite
+                    .alt_body_library
+                    .as_deref()
+                    .and_then(normalize_library)
+                    .is_some_and(|library| available_libraries.contains(&library));
+                let catalog = if kind == EntityKind::Player && mounted {
+                    mounted_player_catalog()
+                } else if kind == EntityKind::Player && class_key == "archer" && alt_body_available
+                {
+                    archer_player_catalog()
+                } else {
+                    AnimationCatalog::crystal_default(kind)
+                };
                 for action in [
                     AnimationAction::Walking,
                     AnimationAction::Running,
@@ -948,7 +1132,7 @@ where
                             let relative_frame =
                                 descriptor.draw_frame(animation_direction(direction), phase);
                             let (layers, missing_body) = resolve_direction_layers(
-                                requested_for_frame(direction, relative_frame),
+                                requested_for_frame(direction, relative_frame, action),
                             );
                             if missing_body || layers.is_empty() {
                                 complete = false;
@@ -1498,12 +1682,122 @@ mod tests {
         assert_eq!(
             paths,
             [
+                "/original-ui/AWeapon/00 L/16.png",
                 "/original-ui/AArmour/00/16.png",
                 "/original-ui/AHair/00/16.png",
                 "/original-ui/AWeapon/00 R/16.png",
-                "/original-ui/AWeapon/00 L/16.png",
             ]
         );
+    }
+
+    #[test]
+    fn assassin_actions_use_alt_catalog_layers_and_decode_space_paths() {
+        let png = rgba_png();
+        let mut rects = Vec::new();
+        for frame in std::iter::once(16).chain(160..=165) {
+            for library in ["AArmour/00", "AHair/00", "AWeapon/00%20R", "AWeapon/00%20L"] {
+                rects.push(serde_json::json!({
+                    "key":format!("/original-ui/{library}/{frame}.png|1x1"),
+                    "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":frame,"pageIndex":0
+                }));
+            }
+        }
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[{"key":"starter","width":1,"height":1,
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "rects":rects}]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{
+                "objectId":"42","kind":"selfPlayer","classKey":"assassin",
+                "x":300,"y":630,"direction":"Down",
+                "sprite":{
+                    "bodyLibrary":"CArmour/00","frameBaseOffset":0,
+                    "altBodyLibrary":"AArmour/00","altHairLibrary":"AHair/00",
+                    "altWeaponLibrary":"AWeapon/00 R",
+                    "altWeaponLibrarySecondary":"AWeapon/00 L",
+                    "altFrameBaseOffset":0,"altWeaponFrameOffset":0,
+                    "frameCount":4,"directionStride":4
+                }
+            }]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 31, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/starter.png" => Ok(png.clone()),
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap();
+        let live: Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        let frames = live["entities"][0]["actionLayers"]["attack1:Down"]["frames"]
+            .as_array()
+            .unwrap();
+        assert_eq!(frames.len(), 6);
+        assert_eq!(frames[0].as_array().map(Vec::len), Some(4));
+        assert_eq!(frames[0][0]["path"], "/original-ui/AWeapon/00 L/160.png");
+        assert_eq!(frames[5][3]["path"], "/original-ui/AWeapon/00 R/165.png");
+    }
+
+    #[test]
+    fn archer_walk_uses_compact_alt_catalog_when_library_is_packaged() {
+        let png = rgba_png();
+        let mut rects = vec![serde_json::json!({
+            "key":"/original-ui/CArmour/00/16.png|1x1",
+            "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+            "frameIndex":16,"pageIndex":0
+        })];
+        for frame in 24..=29 {
+            for library in ["ARArmour/00", "ARWeapon/00%20S"] {
+                rects.push(serde_json::json!({
+                    "key":format!("/original-ui/{library}/{frame}.png|1x1"),
+                    "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":frame,"pageIndex":0
+                }));
+            }
+        }
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[{"key":"starter","width":1,"height":1,
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "rects":rects}]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{
+                "objectId":"42","kind":"selfPlayer","classKey":"archer",
+                "x":300,"y":630,"direction":"Down",
+                "sprite":{
+                    "bodyLibrary":"CArmour/00","frameBaseOffset":0,
+                    "altBodyLibrary":"ARArmour/00",
+                    "altWeaponLibrary":"ARWeapon/00 S",
+                    "altFrameBaseOffset":0,"altWeaponFrameOffset":0,
+                    "frameCount":4,"directionStride":4
+                }
+            }]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 32, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/starter.png" => Ok(png.clone()),
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap();
+        let live: Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        let frames = live["entities"][0]["actionLayers"]["walking:Down"]["frames"]
+            .as_array()
+            .unwrap();
+        assert_eq!(frames.len(), 6);
+        assert_eq!(frames[0][0]["path"], "/original-ui/ARArmour/00/24.png");
+        assert_eq!(frames[5][1]["path"], "/original-ui/ARWeapon/00 S/29.png");
     }
 
     #[test]
@@ -1561,6 +1855,52 @@ mod tests {
     }
 
     #[test]
+    fn mounted_walk_uses_exact_body_and_mount_action_bands() {
+        let png = rgba_png();
+        let mut rects = vec![
+            serde_json::json!({"key":"/original-ui/CArmour/00/432.png|1x1","x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,"frameIndex":432}),
+            serde_json::json!({"key":"/original-ui/Mount/00/16.png|1x1","x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,"frameIndex":16}),
+        ];
+        for (body, mount) in (480..=487).zip(64..=71) {
+            rects.push(serde_json::json!({"key":format!("/original-ui/CArmour/00/{body}.png|1x1"),"x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,"frameIndex":body}));
+            rects.push(serde_json::json!({"key":format!("/original-ui/Mount/00/{mount}.png|1x1"),"x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,"frameIndex":mount}));
+        }
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[{"key":"starter","width":1,"height":1,
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "rects":rects}]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{
+                "objectId":"42","kind":"selfPlayer","x":300,"y":630,"direction":"Down",
+                "sprite":{"bodyLibrary":"CArmour/00","mountLibrary":"Mount/00",
+                    "frameBaseOffset":0,"mountFrameOffset":0,"frameCount":4,"directionStride":4}
+            }]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 33, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/starter.png" => Ok(png.clone()),
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap();
+        let live: Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        let frames = live["entities"][0]["actionLayers"]["walking:Down"]["frames"]
+            .as_array()
+            .unwrap();
+        assert_eq!(frames.len(), 8);
+        assert_eq!(frames[0][0]["path"], "/original-ui/Mount/00/64.png");
+        assert_eq!(frames[0][1]["path"], "/original-ui/CArmour/00/480.png");
+        assert_eq!(frames[7][0]["path"], "/original-ui/Mount/00/71.png");
+        assert_eq!(frames[7][1]["path"], "/original-ui/CArmour/00/487.png");
+    }
+
+    #[test]
     fn configured_shared_atlas_resolves_real_player_frame_when_present() {
         let Ok(root) = std::env::var("MIR2_ANDROID_ENTITY_ASSET_ROOT") else {
             return;
@@ -1613,5 +1953,57 @@ mod tests {
                 .map(Vec::len),
             Some(6)
         );
+    }
+
+    #[test]
+    fn configured_shared_atlas_resolves_real_assassin_layers_when_present() {
+        let Ok(root) = std::env::var("MIR2_ANDROID_ENTITY_ASSET_ROOT") else {
+            return;
+        };
+        let root = std::path::PathBuf::from(root);
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{
+                "objectId":"42","kind":"selfPlayer","classKey":"assassin",
+                "x":300,"y":630,"direction":"Down",
+                "sprite":{
+                    "bodyLibrary":"CArmour/00","frameBaseOffset":0,
+                    "altBodyLibrary":"AArmour/00","altHairLibrary":"AHair/00",
+                    "altWeaponLibrary":"AWeapon/00 R",
+                    "altWeaponLibrarySecondary":"AWeapon/00 L",
+                    "altFrameBaseOffset":0,"altWeaponFrameOffset":0,
+                    "frameCount":4,"directionStride":4
+                }
+            }]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 34, |asset, max_bytes| {
+            let path = if asset == DNITEMS_META_ASSET {
+                std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                    .join("../../web/public/original-ui/DNItems/meta.json")
+            } else {
+                root.join(asset)
+            };
+            let bytes = std::fs::read(path).map_err(|error| {
+                WorldAssetError::new(format!(
+                    "configured entity asset could not be read: {error}"
+                ))
+            })?;
+            if bytes.is_empty() || bytes.len() > max_bytes {
+                return Err(WorldAssetError::new(
+                    "configured entity asset has an invalid byte count",
+                ));
+            }
+            Ok(bytes)
+        })
+        .unwrap();
+        assert_eq!(product.unresolved_entity_count, 0);
+        let live: Value = serde_json::from_str(&product.live_directions_json).unwrap();
+        let frames = live["entities"][0]["actionLayers"]["attack1:Down"]["frames"]
+            .as_array()
+            .unwrap();
+        assert_eq!(frames.len(), 6);
+        assert_eq!(frames[0][0]["path"], "/original-ui/AWeapon/00 L/160.png");
+        assert_eq!(frames[5][3]["path"], "/original-ui/AWeapon/00 R/165.png");
     }
 }
