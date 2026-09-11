@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `1d2e2abc5`: native world rendering now adds bounded,
+> input-pass-through drop labels from the same authoritative `groundDrops` as
+> sprites and pickup UI. Labels retain server object identity, quantity and
+> `nameColourArgb`, and use the Crystal stage/tile anchor, centered 80px line
+> and four-pixel black outline. The API31 offline specimen visibly shows cyan
+> potion and yellow `Gold x250` labels aligned to their objects; shared pickup
+> touch still emits the exact `object_id=9101`. Android 128/128, Java 11/11,
+> API31 target and both APK package gates pass. Approved live packet/login and
+> physical-device/human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-ground-labels-20260911/README.md`.
+
 > 2026-09-11 Android `8b39367ae`: complete and live authoritative ground-drop
 > models now populate the shared bounded pickup panel, and the mobile `Pick Up`
 > action preserves the exact server object ID through shared `PickUpObject` into

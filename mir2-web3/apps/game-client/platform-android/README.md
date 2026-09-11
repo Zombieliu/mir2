@@ -232,12 +232,19 @@ Android 48-logical-pixel `Pick Up` rail action enqueue the exact
 `GatewayCommand::PickUp`. The client does not remove the object optimistically:
 only a later server packet or replacement snapshot can change the model.
 
+The same validated drop set feeds an Android-private, bounded world-label
+presentation. It uses the native 1024 x 768 stage and Crystal 48 x 32 tile
+anchor, an 80px centered no-wrap line, the four-pixel Crystal black outline,
+quantity text and the server `nameColourArgb`. The label tree follows the
+shared `DropView` option and every node is input-pass-through. Snapshot/live
+replacement and removal rebuild labels from authority; this layer cannot make
+an object pickable or remove it.
+
 This action leaf deliberately does not claim the generated class/library
 catalogs needed by Archer, Assassin, mounted and other alternate actors.
 Continuous movement interpolation/backstep, spell effects, health feedback,
-in-world colour-coded ground-drop name labels and live pickup acceptance remain
-separate work. No atlas name from a packet is resolved or decoded on the live
-packet path.
+live pickup acceptance and physical-device input remain separate work. No atlas
+name from a packet is resolved or decoded on the live packet path.
 
 The post-`IN_GAME` allowlist also carries health/death/revive and
 hide/show/teleport lifecycle packets. The private cache applies death position,
