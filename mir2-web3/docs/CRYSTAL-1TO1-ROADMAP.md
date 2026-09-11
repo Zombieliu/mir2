@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-11 Android `ab43c1d28`: the authenticated `IN_GAME` TLS host now
+> forwards a bounded entity packet allowlist into an Android-only validated
+> packet-first cache. Shared entity models receive authoritative spawns,
+> transforms, turns and removals immediately; same-request Crystal sprite
+> layers receive movement/removal and align to packet-fresh positions before
+> publication. Android 113, Java TLS 11, API31 and APK launch gates pass.
+> Packet-only sprite creation, direction/action animation, non-entity gameplay
+> reducers, approved online login/journey and physical-device acceptance remain
+> open. Evidence:
+> `docs/generated/player-qa/native-android-entity-packets-20260911/README.md`.
+
 > 2026-09-11 Android `e66595d34`: authoritative GameShop, Storage V2, and
 > password-result envelopes now return from the live TLS socket into the
 > existing bounded exact-request reducer adapters. Java selects and bounds the

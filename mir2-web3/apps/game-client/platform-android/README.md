@@ -86,13 +86,14 @@ On background, disconnect, timeout or transport failure, the socket and old
 roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
 credential-based resume, process-death session persistence, character creation,
-movement packet presentation and complete gameplay remain subsequent work. The
-existing reducer command queue is now connected to the authenticated in-game
+direction/action animation and complete gameplay remain subsequent work. The
+existing reducer command queue is connected to the authenticated in-game
 socket through the bounded JNI lease mailbox described below. Authoritative
-gameplay packet/receipt ingestion is still incomplete, so this is not an online
-player-loop acceptance. MockWebServer verifies the TLS/protocol state machine
-but is not real account acceptance; an approved WSS endpoint and test account
-are required for that gate.
+transaction receipts and the entity packet families described below return to
+shared read models, but the remaining gameplay packet/reducer surface is still
+incomplete, so this is not an online player-loop acceptance. MockWebServer
+verifies the TLS/protocol state machine but is not real account acceptance; an
+approved WSS endpoint and test account are required for that gate.
 
 Host TLS/protocol tests (test certificates are generated only in JVM memory):
 
@@ -164,11 +165,20 @@ command. Non-gateway effects (`ApplyAudioSettings`,
 window, persistence, notices, and exit effects) remain in `AndroidUiEffects`
 for platform-side handling.
 
-This closes the reducer-to-live-socket outbound adaptation and the existing
-transaction-result return adapters only. Most ordinary server gameplay
-packets are not yet fed back into shared runtime models, and no approved live
-account has exercised the path. This crate must not yet be described as a
-complete online-playable Android client.
+The same live host now forwards a bounded allowlist of authoritative entity
+packets after `IN_GAME`. `src/live_entity.rs` validates and folds spawn/refresh,
+movement/turn/action positions and removals over the last complete world model.
+Existing same-request Crystal sprite layers move/remove immediately and a later
+render product aligns to packet-fresh positions. Packet-only new actors enter
+the neutral object layer immediately, while their Crystal sprite resolution and
+direction/action animation still wait for a complete render snapshot.
+
+This closes the reducer-to-live-socket outbound adaptation, existing
+transaction-result return adapters, and the bounded entity object-list/
+transform ingestion leaf only. Other ordinary server gameplay packets are not
+yet fed into every shared reducer, and no approved live account has exercised
+the path. This crate must not yet be described as a complete online-playable
+Android client.
 
 ## Native M0 host
 

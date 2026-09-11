@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-11 Android `ab43c1d28`: authoritative player/monster/NPC spawn
+> aliases, movement/turn/action positions and removals now enter the shared
+> object model packet-first after `IN_GAME`; existing native Crystal sprite
+> layers move/remove with that authority. Android 113, Java TLS 11, API31 and
+> normal APK build/install/launch gates pass. A packet-only new actor still
+> waits for the next complete snapshot to resolve its Crystal sprite, and
+> direction/action animation, remaining gameplay packet families, approved
+> online journey, physical device and human visual acceptance remain open.
+> Evidence:
+> `docs/generated/player-qa/native-android-entity-packets-20260911/README.md`.
+
 > 2026-09-11 Android `e66595d34`: bounded authoritative GameShop, Storage V2,
 > and password results now travel from the live TLS socket to their existing
 > exact-request shared reducers; unrelated gameplay packets are not treated as

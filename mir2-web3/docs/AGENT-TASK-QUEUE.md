@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-11 Android `ab43c1d28`: bounded entity packets now update the shared
+> renderer-neutral object layer immediately after `IN_GAME`, and existing
+> Crystal sprite layers track authoritative movement/removal without waiting
+> for a periodic snapshot. Android 113/113, Java TLS 11/11, arm64 API31 and
+> normal APK build/install/cold-launch gates pass; APK SHA-256 is
+> `cc5a6d1cca28820c57ac458ff6804f86e77e266301bc9ff662d1faa61f5d9ad0`.
+> New packet-only sprite resolution, direction/action animation, remaining
+> gameplay reducers, approved WSS/account and physical-device gates stay open.
+> Evidence:
+> `docs/generated/player-qa/native-android-entity-packets-20260911/README.md`.
+
 > 2026-09-11 Android `e66595d34`: the live TLS `GatewaySession` now returns
 > bounded authoritative GameShop, Storage V2, and password results to their
 > existing exact-request shared reducer adapters; unrelated packets are
