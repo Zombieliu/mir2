@@ -43,6 +43,14 @@ struct ActiveAction {
     frame_count: usize,
     last_frame: usize,
     direction: String,
+    completion: ActionCompletion,
+}
+
+#[derive(Clone, Copy, Debug)]
+enum ActionCompletion {
+    Standing,
+    Pose(&'static str),
+    Hold,
 }
 
 static LIVE_ENTITIES: LazyLock<Mutex<LiveEntityCache>> =
@@ -317,23 +325,51 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 direction: action_direction(body, &models, object_id),
                 action: packet_action(packet, body, &models, object_id),
                 started_ms: now_ms,
+                life_state: None,
             }),
         "ObjectHealth" => object_id(body)
             .zip(percent(body))
             .map(|(object_id, percent)| EntityMutation::Health { object_id, percent }),
-        "Death" => location(body).map(|position| EntityMutation::DeathSelf {
-            position,
-            direction: direction(body).map(str::to_owned),
-        }),
-        "ObjectDied" => object_id(body)
+        "Death" => self_object_id(&models)
             .zip(location(body))
-            .map(|(object_id, position)| EntityMutation::Death {
+            .map(|(object_id, position)| EntityMutation::Action {
                 object_id,
                 position,
-                direction: direction(body).map(str::to_owned),
+                direction: action_direction(body, &models, object_id),
+                action: "die".to_owned(),
+                started_ms: now_ms,
+                life_state: Some(true),
             }),
-        "Revived" => Some(EntityMutation::ReviveSelf),
-        "ObjectRevived" => object_id(body).map(EntityMutation::Revive),
+        "ObjectDied" => object_id(body)
+            .zip(location(body))
+            .map(|(object_id, position)| EntityMutation::Action {
+                object_id,
+                position,
+                direction: action_direction(body, &models, object_id),
+                action: "die".to_owned(),
+                started_ms: now_ms,
+                life_state: Some(true),
+            }),
+        "Revived" => self_object_id(&models).and_then(|object_id| {
+            model_pose(&models, object_id).map(|(position, direction)| EntityMutation::Action {
+                object_id,
+                position,
+                direction,
+                action: "revive".to_owned(),
+                started_ms: now_ms,
+                life_state: Some(false),
+            })
+        }),
+        "ObjectRevived" => object_id(body).and_then(|object_id| {
+            model_pose(&models, object_id).map(|(position, direction)| EntityMutation::Action {
+                object_id,
+                position,
+                direction,
+                action: "revive".to_owned(),
+                started_ms: now_ms,
+                life_state: Some(false),
+            })
+        }),
         "ObjectHide" | "ObjectTeleportOut" => object_id(body).map(EntityMutation::Hide),
         "ObjectShow" | "ObjectTeleportIn" => object_id(body).map(EntityMutation::Show),
         "ObjectRemove" => object_id(body).map(EntityMutation::Remove),
@@ -467,20 +503,42 @@ fn action_direction(
         .map(str::to_owned)
 }
 
+fn self_object_id(models: &Value) -> Option<u32> {
+    models
+        .get("entities")
+        .and_then(Value::as_array)
+        .and_then(|entities| {
+            entities
+                .iter()
+                .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
+        })
+        .and_then(entity_id)
+}
+
+fn model_pose(models: &Value, object_id: u32) -> Option<((i32, i32), Option<String>)> {
+    let entity = models
+        .get("entities")
+        .and_then(Value::as_array)?
+        .iter()
+        .find(|entity| entity_id(entity) == Some(object_id))?;
+    let position = (coordinate(entity.get("x"))?, coordinate(entity.get("y"))?);
+    let direction = entity
+        .get("direction")
+        .and_then(Value::as_str)
+        .map(str::to_owned);
+    Some((position, direction))
+}
+
 fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
     match mutation {
         EntityMutation::Hide(object_id)
         | EntityMutation::Show(object_id)
         | EntityMutation::Remove(object_id)
-        | EntityMutation::Revive(object_id)
         | EntityMutation::Health { object_id, .. }
-        | EntityMutation::Death { object_id, .. }
         | EntityMutation::Action { object_id, .. } => Some(*object_id),
         EntityMutation::Move(object_id, ..) => Some(*object_id),
         EntityMutation::Spawn(spawn) => entity_id(&spawn.model),
-        EntityMutation::MoveSelf(..)
-        | EntityMutation::DeathSelf { .. }
-        | EntityMutation::ReviveSelf => None,
+        EntityMutation::MoveSelf(..) => None,
     }
 }
 
@@ -493,24 +551,8 @@ fn apply_cache_mutation(
     actions: &mut HashMap<u32, ActiveAction>,
 ) -> (bool, bool) {
     match mutation {
-        EntityMutation::Move(object_id, ..)
-        | EntityMutation::Death { object_id, .. }
-        | EntityMutation::Revive(object_id) => {
+        EntityMutation::Move(object_id, ..) => {
             actions.remove(object_id);
-        }
-        EntityMutation::DeathSelf { .. } | EntityMutation::ReviveSelf => {
-            if let Some(object_id) = models
-                .get("entities")
-                .and_then(Value::as_array)
-                .and_then(|entities| {
-                    entities.iter().find(|entity| {
-                        entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
-                    })
-                })
-                .and_then(entity_id)
-            {
-                actions.remove(&object_id);
-            }
         }
         _ => {}
     }
@@ -583,16 +625,14 @@ fn apply_cache_mutation(
             let model_changed = apply_models(models, mutation);
             let render_changed = render.is_some_and(|value| {
                 let changed = apply_render(value, mutation);
-                if changed {
-                    start_render_action(
-                        value,
-                        *object_id,
-                        action,
-                        direction.as_deref(),
-                        *started_ms,
-                        actions,
-                    );
-                }
+                start_render_action(
+                    value,
+                    *object_id,
+                    action,
+                    direction.as_deref(),
+                    *started_ms,
+                    actions,
+                );
                 changed
             });
             (model_changed || render_changed, render_changed)
@@ -639,22 +679,12 @@ enum EntityMutation {
         direction: Option<String>,
         action: String,
         started_ms: u64,
+        life_state: Option<bool>,
     },
     Health {
         object_id: u32,
         percent: u8,
     },
-    DeathSelf {
-        position: (i32, i32),
-        direction: Option<String>,
-    },
-    Death {
-        object_id: u32,
-        position: (i32, i32),
-        direction: Option<String>,
-    },
-    ReviveSelf,
-    Revive(u32),
     Hide(u32),
     Show(u32),
     Remove(u32),
@@ -1000,6 +1030,7 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             direction,
             action,
             started_ms,
+            life_state,
         } => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
@@ -1013,41 +1044,15 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
                     != Some(*started_ms);
                 entity["_nativeAnimationAction"] = json!(action);
                 entity["_nativeAnimationStartedMs"] = json!(started_ms);
+                if let Some(dead) = life_state {
+                    changed |= patch_model_dead(entity, *dead);
+                }
                 changed
             }),
         EntityMutation::Health { object_id, percent } => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_model_health(entity, *percent)),
-        EntityMutation::DeathSelf {
-            position,
-            direction,
-        } => entities
-            .iter_mut()
-            .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
-            .is_some_and(|entity| {
-                patch_model_transform(entity, *position, direction.as_deref())
-                    | patch_model_dead(entity, true)
-            }),
-        EntityMutation::Death {
-            object_id,
-            position,
-            direction,
-        } => entities
-            .iter_mut()
-            .find(|entity| entity_id(entity) == Some(*object_id))
-            .is_some_and(|entity| {
-                patch_model_transform(entity, *position, direction.as_deref())
-                    | patch_model_dead(entity, true)
-            }),
-        EntityMutation::ReviveSelf => entities
-            .iter_mut()
-            .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
-            .is_some_and(|entity| patch_model_dead(entity, false)),
-        EntityMutation::Revive(object_id) => entities
-            .iter_mut()
-            .find(|entity| entity_id(entity) == Some(*object_id))
-            .is_some_and(|entity| patch_model_dead(entity, false)),
         EntityMutation::Spawn(spawn) => {
             let object_id = entity_id(&spawn.model).expect("spawn was validated");
             if let Some(existing) = entities
@@ -1122,14 +1127,23 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             position,
             direction,
             action,
+            life_state,
             ..
         } => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| {
                 let transformed = patch_render_transform(entity, *position, direction.as_deref());
+                let mut appearance = life_state.is_some() && patch_render_dead(entity, false);
                 let posed = select_action_frame(entity, action, direction.as_deref(), 0);
-                transformed | posed
+                if !posed {
+                    if *life_state == Some(true) {
+                        appearance |= patch_render_dead(entity, true);
+                    } else if action == "revive" {
+                        appearance |= select_standing_frame(entity, direction.as_deref());
+                    }
+                }
+                transformed | appearance | posed
             }),
         EntityMutation::Move(object_id, position, direction) => entities
             .iter_mut()
@@ -1139,35 +1153,6 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_dead(entity, *percent == 0)),
-        EntityMutation::DeathSelf {
-            position,
-            direction,
-        } => entities
-            .iter_mut()
-            .find(|entity| entity.get("isSelf").and_then(Value::as_bool) == Some(true))
-            .is_some_and(|entity| {
-                patch_render_transform(entity, *position, direction.as_deref())
-                    | patch_render_dead(entity, true)
-            }),
-        EntityMutation::Death {
-            object_id,
-            position,
-            direction,
-        } => entities
-            .iter_mut()
-            .find(|entity| entity_id(entity) == Some(*object_id))
-            .is_some_and(|entity| {
-                patch_render_transform(entity, *position, direction.as_deref())
-                    | patch_render_dead(entity, true)
-            }),
-        EntityMutation::ReviveSelf => entities
-            .iter_mut()
-            .find(|entity| entity.get("isSelf").and_then(Value::as_bool) == Some(true))
-            .is_some_and(|entity| patch_render_dead(entity, false)),
-        EntityMutation::Revive(object_id) => entities
-            .iter_mut()
-            .find(|entity| entity_id(entity) == Some(*object_id))
-            .is_some_and(|entity| patch_render_dead(entity, false)),
         EntityMutation::Spawn(spawn) => {
             if let Some(existing) = entities
                 .iter_mut()
@@ -1199,6 +1184,23 @@ fn select_action_frame(
         .and_then(|descriptor| descriptor.get("frames"))
         .and_then(Value::as_array)
         .and_then(|frames| frames.get(frame_index))
+        .and_then(Value::as_array)
+        .cloned()
+    else {
+        return false;
+    };
+    if entity.get("layers").and_then(Value::as_array) == Some(&layers) {
+        return false;
+    }
+    entity["layers"] = Value::Array(layers);
+    true
+}
+
+fn select_standing_frame(entity: &mut Value, direction: Option<&str>) -> bool {
+    let direction = direction.unwrap_or("Down");
+    let Some(layers) = entity
+        .get("directionLayers")
+        .and_then(|directions| directions.get(direction))
         .and_then(Value::as_array)
         .cloned()
     else {
@@ -1257,6 +1259,11 @@ fn start_render_action(
             frame_count,
             last_frame: 0,
             direction: direction.to_owned(),
+            completion: match action {
+                "die" => ActionCompletion::Pose("dead"),
+                "dead" | "skeleton" => ActionCompletion::Hold,
+                _ => ActionCompletion::Standing,
+            },
         },
     );
 }
@@ -1291,14 +1298,14 @@ fn poll_action_frame_at(now_ms: u64) -> Option<String> {
             continue;
         };
         if phase >= action.frame_count {
-            if let Some(layers) = entity
-                .get("directionLayers")
-                .and_then(|directions| directions.get(&action.direction))
-                .and_then(Value::as_array)
-                .cloned()
-            {
-                changed |= entity.get("layers").and_then(Value::as_array) != Some(&layers);
-                entity["layers"] = Value::Array(layers);
+            match action.completion {
+                ActionCompletion::Standing => {
+                    changed |= select_standing_frame(entity, Some(&action.direction));
+                }
+                ActionCompletion::Pose(pose) => {
+                    changed |= select_action_frame(entity, pose, Some(&action.direction), 0);
+                }
+                ActionCompletion::Hold => {}
             }
             completed.push(*object_id);
             continue;
@@ -1851,6 +1858,118 @@ mod tests {
             "standing"
         );
         assert!(poll_action_frame_at(1_600).is_none());
+        clear();
+    }
+
+    #[test]
+    fn death_skeleton_and_revive_use_terminal_packet_poses() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"level":7,"direction":"Down"},{"objectId":"43","kind":"monster","name":"Deer","x":301,"y":630,"level":null,"direction":"Down"}]}"#,
+            31,
+        ));
+        let render = json!({
+            "_nativeWorldRequest": 31,
+            "enabled": true,
+            "centerX": 300,
+            "centerY": 630,
+            "entities": [{
+                "objectId": "43",
+                "isSelf": false,
+                "gridX": 301,
+                "gridY": 630,
+                "layers": [{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing","opacity":1.0}]
+            }]
+        });
+        let sidecar = json!({
+            "_nativeWorldRequest": 31,
+            "entities": [{
+                "objectId": "43",
+                "prototype": {},
+                "directionLayers": {
+                    "Down": [{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing","opacity":1.0}]
+                },
+                "actionLayers": {
+                    "die:Down": {"intervalMs":100,"frames":[
+                        [{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"die-0","opacity":1.0}],
+                        [{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"die-1","opacity":1.0}]
+                    ]},
+                    "dead:Down": {"intervalMs":1000,"frames":[
+                        [{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"dead","opacity":1.0}]
+                    ]},
+                    "skeleton:Down": {"intervalMs":1000,"frames":[
+                        [{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"skeleton","opacity":1.0}]
+                    ]},
+                    "revive:Down": {"intervalMs":100,"frames":[
+                        [{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"revive-0","opacity":0.45}],
+                        [{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"revive-1","opacity":0.45}]
+                    ]}
+                }
+            }]
+        });
+        assert!(install_render(&render.to_string(), &sidecar.to_string()));
+
+        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectDied","payload":{"objectId":43,"location":{"x":302,"y":631}}}"#,
+            1_000,
+        ) else {
+            panic!("death should start the exact die sequence");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["dead"], true);
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(render["entities"][0]["layers"][0]["atlasRectKey"], "die-0");
+        let frame: Value =
+            serde_json::from_str(&poll_action_frame_at(1_100).expect("second die frame")).unwrap();
+        assert_eq!(frame["entities"][0]["layers"][0]["atlasRectKey"], "die-1");
+        let corpse: Value =
+            serde_json::from_str(&poll_action_frame_at(1_200).expect("dead terminal pose"))
+                .unwrap();
+        assert_eq!(corpse["entities"][0]["layers"][0]["atlasRectKey"], "dead");
+        assert!(poll_action_frame_at(1_300).is_none());
+
+        let LiveEntityPacketOutcome::Applied { render, .. } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectHarvested","payload":{"objectId":43,"location":{"x":302,"y":631}}}"#,
+            1_400,
+        ) else {
+            panic!("harvested corpse should enter its skeleton pose");
+        };
+        let skeleton: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(
+            skeleton["entities"][0]["layers"][0]["atlasRectKey"],
+            "skeleton"
+        );
+        assert!(poll_action_frame_at(2_400).is_none());
+
+        let LiveEntityPacketOutcome::Applied { models, render } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectRevived","payload":{"objectId":43}}"#,
+            2_500,
+        ) else {
+            panic!("revive should start from the retained authoritative pose");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["dead"], false);
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(
+            render["entities"][0]["layers"][0]["atlasRectKey"],
+            "revive-0"
+        );
+        assert_eq!(render["entities"][0]["layers"][0]["opacity"], 1.0);
+        let frame: Value =
+            serde_json::from_str(&poll_action_frame_at(2_600).expect("second revive frame"))
+                .unwrap();
+        assert_eq!(
+            frame["entities"][0]["layers"][0]["atlasRectKey"],
+            "revive-1"
+        );
+        let standing: Value =
+            serde_json::from_str(&poll_action_frame_at(2_700).expect("revive settle")).unwrap();
+        assert_eq!(
+            standing["entities"][0]["layers"][0]["atlasRectKey"],
+            "standing"
+        );
+        assert!(poll_action_frame_at(2_800).is_none());
         clear();
     }
 }

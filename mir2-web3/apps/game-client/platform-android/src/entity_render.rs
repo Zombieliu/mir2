@@ -348,6 +348,8 @@ fn animation_action_name(action: AnimationAction) -> &'static str {
         AnimationAction::Spell => "spell",
         AnimationAction::Struck => "struck",
         AnimationAction::Die => "die",
+        AnimationAction::Dead => "dead",
+        AnimationAction::Skeleton => "skeleton",
         AnimationAction::Revive => "revive",
         _ => "",
     }
@@ -816,6 +818,8 @@ where
                     AnimationAction::Spell,
                     AnimationAction::Struck,
                     AnimationAction::Die,
+                    AnimationAction::Dead,
+                    AnimationAction::Skeleton,
                     AnimationAction::Revive,
                 ] {
                     let Some(descriptor) = catalog.descriptor(action).copied() else {
