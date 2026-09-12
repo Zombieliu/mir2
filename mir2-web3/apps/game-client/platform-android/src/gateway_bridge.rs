@@ -24,7 +24,10 @@ use mir2_ui_core::state::UiState;
 use mir2_ui_core::storage::{StorageOperation, StorageReceipt, StorageRequest};
 use serde_json::{json, Value};
 
-use crate::android_input::{AndroidLifecycle, AndroidNetwork, AndroidShellState};
+use crate::android_input::{
+    AndroidDirection, AndroidLifecycle, AndroidMotionIntent, AndroidMoveMode, AndroidNetwork,
+    AndroidShellState,
+};
 
 pub const ANDROID_GATEWAY_QUEUE_CAPACITY: usize = 256;
 pub const ANDROID_GATEWAY_INBOUND_CAPACITY: usize = 32;
@@ -275,6 +278,7 @@ impl AndroidGatewayHostAdapter {
         ui_state: &mut UiState,
     ) {
         self.leased_sequences.clear();
+        queue.clear_motion();
         queue.mark_game_shop_unknown();
         queue.mark_storage_unknown();
         ui_state.mark_game_shop_unknown();
@@ -1471,6 +1475,40 @@ impl AndroidGatewayOutboundQueue {
         Ok(())
     }
 
+    /// Retain only the newest unsent movement intent. Movement is ephemeral:
+    /// reconnecting must never replay an old joystick direction after the
+    /// authoritative server state has already moved on.
+    pub fn enqueue_motion(
+        &mut self,
+        intent: AndroidMotionIntent,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        self.clear_motion();
+        let command_type = motion_type(intent.mode).to_owned();
+        if self.entries.len() >= self.capacity {
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidGatewayEnqueueError::Full {
+                capacity: self.capacity,
+                command_type,
+            });
+        }
+
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound {
+            sequence,
+            kind: AndroidGatewayOutboundKind::Wire,
+            json: serde_json::to_string(&motion_to_wire(intent))
+                .expect("wire JSON values are serializable"),
+        });
+        Ok(())
+    }
+
+    /// Drop all movement that has not yet reached the Android host.
+    pub fn clear_motion(&mut self) {
+        self.entries.retain(|entry| !outbound_is_motion(entry));
+    }
+
     /// Compatibility helper for Android hosts that still call the adapter
     /// directly. The actual UI path uses the shared typed GatewayCommand.
     pub fn enqueue_guild_storage_gold_change(
@@ -1645,6 +1683,40 @@ fn outbound_is_change_password(entry: &AndroidGatewayOutbound) -> bool {
         .and_then(|value| value.get("type").and_then(Value::as_str).map(str::to_owned))
         .as_deref()
         == Some("changePassword")
+}
+
+fn outbound_is_motion(entry: &AndroidGatewayOutbound) -> bool {
+    serde_json::from_str::<Value>(&entry.json)
+        .ok()
+        .and_then(|value| value.get("type").and_then(Value::as_str).map(str::to_owned))
+        .is_some_and(|kind| matches!(kind.as_str(), "walk" | "run" | "turn"))
+}
+
+fn motion_type(mode: AndroidMoveMode) -> &'static str {
+    match mode {
+        AndroidMoveMode::Walk => "walk",
+        AndroidMoveMode::Run => "run",
+    }
+}
+
+fn motion_direction(direction: AndroidDirection) -> &'static str {
+    match direction {
+        AndroidDirection::Up => "Up",
+        AndroidDirection::UpRight => "UpRight",
+        AndroidDirection::Right => "Right",
+        AndroidDirection::DownRight => "DownRight",
+        AndroidDirection::Down => "Down",
+        AndroidDirection::DownLeft => "DownLeft",
+        AndroidDirection::Left => "Left",
+        AndroidDirection::UpLeft => "UpLeft",
+    }
+}
+
+fn motion_to_wire(intent: AndroidMotionIntent) -> Value {
+    json!({
+        "type": motion_type(intent.mode),
+        "direction": motion_direction(intent.direction),
+    })
 }
 
 fn outbound_matches_game_shop_request(entry: &AndroidGatewayOutbound, request_id: &str) -> bool {
@@ -3180,6 +3252,82 @@ mod tests {
             )[0]
             .sequence,
             1
+        );
+    }
+
+    #[test]
+    fn motion_uses_browser_command_shape_and_coalesces_unsent_intents() {
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(3);
+        queue.enqueue(GatewayCommand::TownRevive).unwrap();
+        queue
+            .enqueue_motion(AndroidMotionIntent {
+                direction: AndroidDirection::Up,
+                mode: AndroidMoveMode::Walk,
+            })
+            .unwrap();
+        queue
+            .enqueue_motion(AndroidMotionIntent {
+                direction: AndroidDirection::DownRight,
+                mode: AndroidMoveMode::Run,
+            })
+            .unwrap();
+
+        let entries = queue.drain_ready(
+            &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+            3,
+        );
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].sequence, 1);
+        assert_eq!(entries[1].sequence, 3);
+        assert_eq!(
+            serde_json::from_str::<Value>(&entries[1].json).unwrap(),
+            json!({"type":"run","direction":"DownRight"})
+        );
+    }
+
+    #[test]
+    fn motion_cannot_evict_non_motion_when_queue_is_full() {
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(1);
+        queue.enqueue(GatewayCommand::TownRevive).unwrap();
+        assert_eq!(
+            queue
+                .enqueue_motion(AndroidMotionIntent {
+                    direction: AndroidDirection::Left,
+                    mode: AndroidMoveMode::Walk,
+                })
+                .unwrap_err(),
+            AndroidGatewayEnqueueError::Full {
+                capacity: 1,
+                command_type: "walk".into(),
+            }
+        );
+        assert_eq!(queue.status().overflow_count, 1);
+        assert_eq!(queue.status().last_overflow_type.as_deref(), Some("walk"));
+        assert_eq!(queue.len(), 1);
+    }
+
+    #[test]
+    fn connection_loss_discards_queued_ephemeral_motion() {
+        let mut queue = AndroidGatewayOutboundQueue::default();
+        queue.enqueue(GatewayCommand::TownRevive).unwrap();
+        queue
+            .enqueue_motion(AndroidMotionIntent {
+                direction: AndroidDirection::UpLeft,
+                mode: AndroidMoveMode::Run,
+            })
+            .unwrap();
+        let mut adapter = AndroidGatewayHostAdapter::default();
+        let mut ui_state = UiState::default();
+        adapter.on_connection_lost(&mut queue, &mut ui_state);
+
+        let entries = queue.drain_ready(
+            &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+            2,
+        );
+        assert_eq!(entries.len(), 1);
+        assert_eq!(
+            serde_json::from_str::<Value>(&entries[0].json).unwrap(),
+            json!({"type":"townRevive"})
         );
     }
 }

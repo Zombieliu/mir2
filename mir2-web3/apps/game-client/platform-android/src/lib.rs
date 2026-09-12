@@ -50,7 +50,12 @@ use gateway_bridge::{
     AndroidGatewayInboundQueue, AndroidGatewayOutboundLease, AndroidGatewayOutboundQueue,
 };
 use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
-use mir2_ui_core::{effect::UiEffect, reducer::reduce, state::UiState};
+use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+use mir2_ui_core::{
+    effect::UiEffect,
+    reducer::reduce,
+    state::{UiScreen, UiState},
+};
 use serde_json::json;
 use std::collections::{BTreeMap, VecDeque};
 use std::sync::{Mutex, OnceLock};
@@ -132,6 +137,7 @@ impl Plugin for AndroidShellPlugin {
                     drive_android_gateway_host_transport,
                     drain_android_gateway_inbound,
                     route_android_input_messages,
+                    enqueue_latest_android_motion,
                     apply_queued_ui_actions,
                 )
                     .chain(),
@@ -465,6 +471,33 @@ fn drain_android_gateway_inbound(
     drain_bounded_inbound_into_models(&mut inbound, &mut ui_state, &mut outbound);
 }
 
+fn enqueue_latest_android_motion(
+    shell: Res<AndroidShellState>,
+    native_shell: Option<Res<NativeShellModel>>,
+    ui_state: Res<UiState>,
+    mut motions: ResMut<AndroidMotionQueue>,
+    mut gateway: ResMut<AndroidGatewayOutboundQueue>,
+) {
+    let in_game = native_shell
+        .as_deref()
+        .map(|model| model.screen == NativeShellScreen::InGame)
+        .unwrap_or(ui_state.screen == UiScreen::InGame);
+    let ready = shell.lifecycle == android_input::AndroidLifecycle::Foreground
+        && shell.network == AndroidNetwork::Available
+        && in_game;
+    if !ready {
+        motions.0.clear();
+        gateway.clear_motion();
+        return;
+    }
+
+    let latest = motions.0.pop();
+    motions.0.clear();
+    if let Some(intent) = latest {
+        let _ = gateway.enqueue_motion(intent);
+    }
+}
+
 fn apply_queued_ui_actions(
     mut ui_state: ResMut<UiState>,
     mut queue: ResMut<AndroidUiActionQueue>,
@@ -621,7 +654,8 @@ pub fn main() {
 mod tests {
     use super::*;
     use crate::android_input::{
-        AndroidInputEvent, AndroidLifecycle, AndroidLifecycleEvent, AndroidNetwork, AndroidUiTarget,
+        AndroidDirection, AndroidInputEvent, AndroidLifecycle, AndroidLifecycleEvent,
+        AndroidMotionIntent, AndroidMoveMode, AndroidNetwork, AndroidUiTarget,
     };
     use mir2_ui_core::{
         action::UiAction,
@@ -683,6 +717,78 @@ mod tests {
             .resource::<gateway_bridge::AndroidGatewayOutboundQueue>();
         assert_eq!(queue.len(), 1);
         assert_eq!(queue.status().overflow_count, 0);
+    }
+
+    #[test]
+    fn foreground_in_game_joystick_reaches_exact_authenticated_wire_queue() {
+        let mut app = in_game_app();
+        make_host_ready(&mut app);
+        send(
+            &mut app,
+            AndroidInputEvent::VirtualJoystick {
+                x: 0.8,
+                y: -0.8,
+                run: true,
+            },
+        );
+
+        assert!(app.world().resource::<AndroidMotionQueue>().0.is_empty());
+        let outbound = app
+            .world_mut()
+            .resource_mut::<AndroidGatewayOutboundQueue>()
+            .drain_ready(
+                &AndroidShellState {
+                    lifecycle: AndroidLifecycle::Foreground,
+                    network: AndroidNetwork::Available,
+                    ..default()
+                },
+                1,
+            );
+        assert_eq!(outbound.len(), 1);
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&outbound[0].json).unwrap(),
+            json!({"type":"run","direction":"UpRight"})
+        );
+    }
+
+    #[test]
+    fn inactive_screen_or_transport_drops_motion_instead_of_replaying_it() {
+        let mut app = in_game_app();
+        app.world_mut()
+            .resource_mut::<AndroidMotionQueue>()
+            .0
+            .push(AndroidMotionIntent {
+                direction: AndroidDirection::Left,
+                mode: AndroidMoveMode::Walk,
+            });
+        app.world_mut()
+            .resource_mut::<AndroidGatewayOutboundQueue>()
+            .enqueue_motion(AndroidMotionIntent {
+                direction: AndroidDirection::Right,
+                mode: AndroidMoveMode::Run,
+            })
+            .unwrap();
+        app.update();
+        assert!(app.world().resource::<AndroidMotionQueue>().0.is_empty());
+        assert!(app
+            .world()
+            .resource::<AndroidGatewayOutboundQueue>()
+            .is_empty());
+
+        make_host_ready(&mut app);
+        app.world_mut().resource_mut::<UiState>().screen = UiScreen::Login;
+        send(
+            &mut app,
+            AndroidInputEvent::VirtualJoystick {
+                x: -1.0,
+                y: 0.0,
+                run: false,
+            },
+        );
+        assert!(app
+            .world()
+            .resource::<AndroidGatewayOutboundQueue>()
+            .is_empty());
     }
 
     #[test]
