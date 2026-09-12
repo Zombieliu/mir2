@@ -981,6 +981,108 @@ mod tests {
     }
 
     #[test]
+    fn production_ffi_generation_loss_closes_shop_and_storage_before_recovery() {
+        let _ffi_guard = ANDROID_GATEWAY_FFI_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        reset_android_gateway_ffi_for_test();
+        let mut app = in_game_app();
+        app.world_mut()
+            .resource_mut::<AndroidGatewayTransportEnabled>()
+            .0 = true;
+        app.world_mut().resource_mut::<UiState>().panel = UiPanel::GameShop;
+        make_host_ready(&mut app);
+        mir2_android_gateway_host_start();
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::GameShopBuy {
+                g_index: 31,
+                quantity: 2,
+                price_type: 1,
+            }),
+        );
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 3, to: 9 }),
+        );
+        app.update();
+        let (first_shop_id, first_storage_id) = {
+            let state = app.world().resource::<UiState>();
+            (
+                state
+                    .game_shop_pending
+                    .as_ref()
+                    .expect("shop request is pending")
+                    .request_id
+                    .clone(),
+                state
+                    .storage_pending
+                    .as_ref()
+                    .expect("storage request is pending")
+                    .request_id
+                    .clone(),
+            )
+        };
+
+        // Map replacement and network recovery both replace the transport
+        // generation. Even if the host restarts before ECS observes the loss,
+        // neither mutation may be replayed into the replacement session.
+        mir2_android_gateway_connection_lost();
+        mir2_android_gateway_host_start();
+        app.update();
+        let state = app.world().resource::<UiState>();
+        assert!(state.game_shop_pending.is_none());
+        assert!(state.storage_pending.is_none());
+        assert!(state.game_shop_unknown);
+        assert!(state.storage_unknown);
+        let queue = app
+            .world()
+            .resource::<gateway_bridge::AndroidGatewayOutboundQueue>();
+        assert!(queue.game_shop_pending().is_none());
+        assert!(queue.storage_pending().is_none());
+        assert!(queue.is_empty());
+        assert_eq!(
+            unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) },
+            0,
+            "replacement generation cannot expose old shop or storage commands"
+        );
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::GameShopBuy {
+                g_index: 31,
+                quantity: 2,
+                price_type: 1,
+            }),
+        );
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 3, to: 9 }),
+        );
+        app.update();
+        let state = app.world().resource::<UiState>();
+        let second_shop_id = state
+            .game_shop_pending
+            .as_ref()
+            .expect("fresh shop request is allowed")
+            .request_id
+            .clone();
+        let second_storage_id = state
+            .storage_pending
+            .as_ref()
+            .expect("fresh storage request is allowed")
+            .request_id
+            .clone();
+        assert_ne!(first_shop_id, second_shop_id);
+        assert_ne!(first_storage_id, second_storage_id);
+        assert!(unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) } > 0);
+
+        mir2_android_gateway_host_stop();
+        app.update();
+    }
+
+    #[test]
     fn production_ffi_rejects_leases_drained_before_generation_change() {
         let _ffi_guard = ANDROID_GATEWAY_FFI_TEST_LOCK
             .lock()

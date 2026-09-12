@@ -278,11 +278,25 @@ impl AndroidGatewayHostAdapter {
         ui_state: &mut UiState,
     ) {
         self.leased_sequences.clear();
-        queue.clear_motion();
-        queue.mark_game_shop_unknown();
-        queue.mark_storage_unknown();
+        let change_password_pending =
+            queue.change_password_in_flight() && ui_state.security.change_password_pending;
+        // A replacement generation is not the old authenticated session.
+        // Drop every unsent old-generation command, not only movement, so a
+        // map transition or reconnect cannot replay an action against a new
+        // map, character, or account. Correlated mutations become unknown.
+        queue.mark_terminal_reset();
         ui_state.mark_game_shop_unknown();
         ui_state.mark_storage_unknown();
+        if change_password_pending {
+            *ui_state = reduce(
+                ui_state,
+                UiAction::ChangePasswordResult {
+                    success: false,
+                    message: "Password change response was not received.".to_owned(),
+                },
+            )
+            .state;
+        }
     }
 }
 
@@ -2294,6 +2308,67 @@ mod tests {
     }
 
     #[test]
+    fn connection_loss_closes_change_password_and_rejects_late_result() {
+        use mir2_ui_core::state::{UiScreen, UiSecurityPanel};
+
+        let mut state = UiState::default();
+        state.screen = UiScreen::Login;
+        state = reduce(&state, UiAction::ChangePassword).state;
+        assert_eq!(state.security.panel, UiSecurityPanel::ChangePassword);
+        let transition = reduce(
+            &state,
+            UiAction::SubmitChangePassword {
+                account: "demo".to_owned(),
+                old_password: mir2_ui_core::effect::SecretText::new("old-secret"),
+                new_password: mir2_ui_core::effect::SecretText::new("new-secret"),
+                confirm_password: mir2_ui_core::effect::SecretText::new("new-secret"),
+            },
+        );
+        let request = match transition.effects.into_iter().next() {
+            Some(UiEffect::SecurityRequest(request)) => request,
+            other => panic!("expected security request, got {other:?}"),
+        };
+        state = transition.state;
+
+        let mut outbound = AndroidGatewayOutboundQueue::default();
+        let mut inbound = AndroidGatewayInboundQueue::default();
+        enqueue_security_request(&mut outbound, &mut inbound, request).unwrap();
+        let mut adapter = AndroidGatewayHostAdapter::default();
+        let lease = adapter
+            .drain_ready(
+                &mut outbound,
+                &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+                1,
+            )
+            .pop()
+            .expect("host leases the change-password request");
+        assert!(state.security.change_password_pending);
+
+        adapter.on_connection_lost(&mut outbound, &mut state);
+        assert!(!state.security.change_password_pending);
+        assert!(!outbound.change_password_in_flight());
+        assert!(outbound.is_empty());
+
+        assert_eq!(
+            adapter.on_host_write_result(
+                &mut outbound,
+                &mut state,
+                lease,
+                AndroidGatewayHostWriteResult::Sent,
+            ),
+            AndroidGatewayHostWriteOutcome::UnknownLease
+        );
+        enqueue_native_change_password_result(
+            &mut inbound,
+            r#"{"type":"packet","packet":"ChangePassword","payload":{"result":6}}"#,
+        )
+        .unwrap();
+        drain_bounded_inbound_into_models(&mut inbound, &mut state, &mut outbound);
+        assert!(!state.security.change_password_pending);
+        assert_eq!(inbound.status().unmatched_count, 1);
+    }
+
+    #[test]
     fn change_password_result_parser_preserves_codes_and_bounds_banned_notice() {
         let parsed = parse_native_change_password_result(
             r#"{"type":"packet","packet":"ChangePassword","payload":{"result":5}}"#,
@@ -3307,7 +3382,7 @@ mod tests {
     }
 
     #[test]
-    fn connection_loss_discards_queued_ephemeral_motion() {
+    fn connection_loss_discards_all_old_generation_commands() {
         let mut queue = AndroidGatewayOutboundQueue::default();
         queue.enqueue(GatewayCommand::TownRevive).unwrap();
         queue
@@ -3324,10 +3399,6 @@ mod tests {
             &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
             2,
         );
-        assert_eq!(entries.len(), 1);
-        assert_eq!(
-            serde_json::from_str::<Value>(&entries[0].json).unwrap(),
-            json!({"type":"townRevive"})
-        );
+        assert!(entries.is_empty());
     }
 }

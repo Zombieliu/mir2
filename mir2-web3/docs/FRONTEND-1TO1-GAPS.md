@@ -1,5 +1,22 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: replacing the native Gateway host
+> generation now drops every old unsent command instead of retaining non-motion
+> gameplay actions across a map or account boundary. Lost Game Shop, Storage and
+> change-password operations close fail-safe; late callbacks/results cannot
+> complete a replacement transaction, and fresh shop/storage requests receive
+> new correlation IDs. A continuous Java policy test covers authoritative
+> snapshot -> `MapChanged` -> destination snapshot -> disconnect -> reconnect ->
+> recovered snapshot without starting a host early. Android Rust passes 166/166,
+> Java Debug and UI Preview pass 23/23 each, arm64-v8a API31 build and both APK
+> packages pass, and UI Preview installs/cold-launches visibly on the API31 ARM64
+> emulator. UI Preview APK SHA-256 is
+> `0e928cc7b8265ea0716faf994ffb50779eca99330f4ee43bc787e5b66d252d73`.
+> Evidence:
+> `docs/generated/player-qa/native-android-generation-boundary-20260913/README.md`.
+> This remains deterministic/offline-emulator evidence; approved-WSS login,
+> live-server transition/recovery and physical-device acceptance remain open.
+
 > 2026-09-12 Android current change: blocking shared panels now hide the
 > gameplay joystick/action pad and prevent the invisible joystick recognizer
 > from claiming their touches; the duplicate collapsed `Panels` rail is no

@@ -45,4 +45,33 @@ public class GatewayHostPolicyTest {
         policy.reset();
         assertFalse(policy.active());
     }
+
+    @Test public void mapChangeThenNetworkLossNeedsAFreshRecoveredSnapshot() {
+        GatewayHostPolicy policy = new GatewayHostPolicy();
+
+        assertEquals(GatewayHostPolicy.Action.START,
+                policy.observe(GatewaySession.Phase.IN_GAME, true));
+        assertEquals(GatewayHostPolicy.Action.INVALIDATE,
+                policy.observe(GatewaySession.Phase.STARTING, false));
+        assertEquals(GatewayHostPolicy.Action.NONE,
+                policy.observe(GatewaySession.Phase.STARTING, false));
+        assertEquals(GatewayHostPolicy.Action.NONE,
+                policy.observe(GatewaySession.Phase.IN_GAME, false));
+        assertEquals(GatewayHostPolicy.Action.START,
+                policy.observe(GatewaySession.Phase.IN_GAME, true));
+
+        assertEquals(GatewayHostPolicy.Action.INVALIDATE,
+                policy.observe(GatewaySession.Phase.DISCONNECTED, false));
+        assertEquals(GatewayHostPolicy.Action.NONE,
+                policy.observe(GatewaySession.Phase.CONNECTING, false));
+        assertEquals(GatewayHostPolicy.Action.NONE,
+                policy.observe(GatewaySession.Phase.READY, false));
+        assertEquals(GatewayHostPolicy.Action.NONE,
+                policy.observe(GatewaySession.Phase.LOGIN, false));
+        assertEquals(GatewayHostPolicy.Action.NONE,
+                policy.observe(GatewaySession.Phase.IN_GAME, false));
+        assertEquals(GatewayHostPolicy.Action.START,
+                policy.observe(GatewaySession.Phase.IN_GAME, true));
+        assertTrue(policy.active());
+    }
 }
