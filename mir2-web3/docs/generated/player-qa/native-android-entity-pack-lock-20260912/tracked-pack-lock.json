@@ -1,0 +1,12 @@
+{
+    "schemaVersion": 1,
+    "kind": "mir2-android-entity-pack-lock",
+    "packId": "tracked-2ae6fb0dfe626bc9",
+    "sourceMode": "tracked-shared",
+    "manifestSha256": "2ae6fb0dfe626bc90b41caac027a1fa219aaa11471ac27e42cc9980c286f48bd",
+    "manifestBytes": 3347237,
+    "atlasCount": 1,
+    "pageCount": 7,
+    "rectCount": 10482,
+    "pageBytes": 13249890
+}

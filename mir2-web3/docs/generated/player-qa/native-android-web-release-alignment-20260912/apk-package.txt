@@ -1,0 +1,2 @@
+apk_bytes=375663860
+f420968ea3ec633649bc0dd940594eb7fedeb12f5463af7c7bd2f1f8da20e10b  apps/game-client/platform-android/android/app/build/outputs/apk/uiPreview/app-uiPreview.apk

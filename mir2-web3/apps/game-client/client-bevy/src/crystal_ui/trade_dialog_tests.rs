@@ -709,6 +709,17 @@ fn trade_gold_modal_ecs_uses_original_amount_box_and_hides_ok_for_invalid_input(
     ));
     app.update();
     let world = app.world_mut();
+    assert_eq!(
+        world
+            .query_filtered::<Entity, (
+                With<OverlayTradeGoldInput>,
+                With<Button>,
+                With<NativeTextInputTarget>
+            )>()
+            .iter(world)
+            .count(),
+        1
+    );
     let modal = world
         .query_filtered::<(&Node, &GlobalZIndex, Option<&Button>), With<OverlayTradeGoldModal>>()
         .single(world)

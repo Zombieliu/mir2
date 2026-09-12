@@ -1,0 +1,6 @@
+/tmp/android-chat-final-debug-build.log:BUILD SUCCESSFUL in 8s
+/tmp/android-chat-final-debug-build.log:[platform-android] SHA-256: 88d5ff454fc61c6591d08ca44fe7f2679033d74132f3483838c92c708de3bb48
+/tmp/android-chat-final-debug-build.log:[platform-android] package gate passed
+/tmp/android-chat-final-preview-build.log:BUILD SUCCESSFUL in 10s
+/tmp/android-chat-final-preview-build.log:[platform-android] SHA-256: e4e0c8617be47e13db3e26e77ab27d5b0f1a24674431a8987dd0e8d11a498de5
+/tmp/android-chat-final-preview-build.log:[platform-android] package gate passed

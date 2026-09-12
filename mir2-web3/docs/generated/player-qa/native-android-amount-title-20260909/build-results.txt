@@ -1,0 +1,6 @@
+/tmp/android-amount-debug-build.log:BUILD SUCCESSFUL in 9s
+/tmp/android-amount-debug-build.log:[platform-android] SHA-256: c9f8906e92a473b0006c5d2683decd54e8c5417a05d50ab400682e879af2ff77
+/tmp/android-amount-debug-build.log:[platform-android] package gate passed
+/tmp/android-amount-build.log:BUILD SUCCESSFUL in 11s
+/tmp/android-amount-build.log:[platform-android] SHA-256: bc63364467af19c1b5e72ce61ebc5fbe3cbf15899c89ee6884db22bc8c28b299
+/tmp/android-amount-build.log:[platform-android] package gate passed

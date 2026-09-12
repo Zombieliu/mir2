@@ -1,0 +1,8 @@
+/tmp/android-edge-normal.log:test result: ok. 84 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+/tmp/android-edge-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-edge-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-edge-preview.log:test result: ok. 86 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+/tmp/android-edge-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-edge-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-edge-shared.log:test result: ok. 579 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+/tmp/android-edge-shared.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

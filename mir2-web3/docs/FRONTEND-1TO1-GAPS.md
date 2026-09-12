@@ -1,5 +1,459 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: the exact shared 259x354 Crystal Options
+> panel now uses the same interaction-safe Android focus transform as Chat,
+> Inventory and Storage. The complete panel stays inside safe edges, while
+> drawing and Bevy picking remain one transformed tree. Real ADB taps change
+> `SKILL BAR` from ON to OFF at 2340x1080, 1920x1080 and 1600x720. Android UI
+> Preview passes 170/170, Java Debug/UI Preview tests, arm64-v8a API31 release,
+> full licensed-asset package and streamed install pass. The 516,875,947-byte
+> APK SHA-256 is
+> `f7a8f3411c0986bf21408b3ab3aabe2dc00a1978be19a1cd2b1056dfd349f074`.
+> Evidence:
+> `docs/generated/player-qa/native-android-options-focus-20260913/README.md`.
+> Compact NPC/Shop focus remains open, as do approved-WSS and physical-device
+> acceptance.
+
+> 2026-09-13 Android current change: the exact shared Inventory and Storage
+> roots now receive the same interaction-safe phone focus treatment as Chat
+> Settings, up to 3.2x within safe edges. Drawing and Bevy picking share one
+> transform; Inventory touch drag owns only its starting finger and no longer
+> competes with a held joystick finger. API31 taps switch Inventory categories
+> and Storage pages at 2340x1080, 1920x1080 and 1600x720; a real ADB swipe moves
+> Inventory without a focus-offset jump, and locked Storage stays visible above
+> the IME under `FLAG_SECURE`. Android UI Preview passes 170/170, Java tests,
+> arm64-v8a API31 release, full licensed-asset package and streamed install
+> pass. The 516,868,403-byte APK SHA-256 is
+> `21e75e3763d481ff81f1cb28319cb3d1e6d51f753104eb89a49411d0ab61f8b1`.
+> Evidence:
+> `docs/generated/player-qa/native-android-inventory-storage-focus-20260913/README.md`.
+> Compact NPC/Shop focus remains open, as do approved-WSS and
+> physical-device acceptance.
+
+> 2026-09-13 Android current change: the first interaction-safe phone focus
+> treatment now enlarges the exact shared 224x180 Chat Settings panel up to
+> 3.2x inside Android safe edges. It uses Bevy `UiTransform`, so drawing and
+> button picking share one transformed geometry; no Android-only dialog or
+> coordinate rewrite was introduced. API31 captures and real tab taps pass at
+> 2340x1080, 1920x1080 and 1600x720; Android UI Preview passes 168/168,
+> arm64-v8a API31 release, full licensed-asset package and streamed install.
+> The 393,653,075-byte UI Preview APK SHA-256 is
+> `fff3ffcd64de5caa0c02026ff4b0433cda5670aceb00e8a0eb2644530741d4a8`.
+> Evidence:
+> `docs/generated/player-qa/native-android-chat-focus-20260913/README.md`.
+> Compact NPC/Shop focus remains open, as do
+> approved-WSS and physical-device acceptance.
+
+> 2026-09-13 Android current change: native packaging now rejects a
+> self-referential/stale Gradle UI output and validates the complete licensed
+> shared-UI manifest plus every referenced frame before Sync. A 34-scene API31
+> audit exposed that the earlier four-sentinel gate could package only 3,160 UI
+> PNGs; the corrected build stages 12,781 and restores the complete Chat
+> Settings frame/controls. The self-source negative gate fails before mutation;
+> full-pack Debug/UI Preview assembly, Java 23/23 in both variants, streamed
+> install and visible Bichon 849-draw/7-entity/12-layer render pass. UI Preview
+> APK SHA-256 is
+> `71f0a881b65d9d2f286a5bd5d527aa6611300661e4308ca95fc9b58dac96f65b`.
+> Evidence:
+> `docs/generated/player-qa/native-android-ui-pack-closure-20260913/README.md`.
+> The original desktop-canvas panel scale is still too small for several phone
+> dialogs; approved-WSS and physical-device acceptance remain open.
+
+> 2026-09-13 Android current change: replacing the native Gateway host
+> generation now drops every old unsent command instead of retaining non-motion
+> gameplay actions across a map or account boundary. Lost Game Shop, Storage and
+> change-password operations close fail-safe; late callbacks/results cannot
+> complete a replacement transaction, and fresh shop/storage requests receive
+> new correlation IDs. A continuous Java policy test covers authoritative
+> snapshot -> `MapChanged` -> destination snapshot -> disconnect -> reconnect ->
+> recovered snapshot without starting a host early. Android Rust passes 166/166,
+> Java Debug and UI Preview pass 23/23 each, arm64-v8a API31 build and both APK
+> packages pass, and UI Preview installs/cold-launches visibly on the API31 ARM64
+> emulator. UI Preview APK SHA-256 is
+> `0e928cc7b8265ea0716faf994ffb50779eca99330f4ee43bc787e5b66d252d73`.
+> Evidence:
+> `docs/generated/player-qa/native-android-generation-boundary-20260913/README.md`.
+> This remains deterministic/offline-emulator evidence; approved-WSS login,
+> live-server transition/recovery and physical-device acceptance remain open.
+
+> 2026-09-12 Android current change: blocking shared panels now hide the
+> gameplay joystick/action pad and prevent the invisible joystick recognizer
+> from claiming their touches; the duplicate collapsed `Panels` rail is no
+> longer drawn. API31 captures pass at 1600x720, 1920x1080 and the emulator's
+> unoverridden 2340x1080 cutout profile. Launcher re-entry also no longer creates
+> a second `GameActivity`: single-task reuse retained the same PID, restored the
+> visible full-screen world frame and emitted zero destroyed-activity, panic or
+> fatal-exception errors. Android Rust passes 164/164, focused controls 15/15,
+> Java host/policy tests 22/22 in both variants, arm64-v8a API31 release build,
+> Debug/UI Preview packaging and streamed install all pass. UI Preview APK
+> SHA-256 is
+> `c4965f07b0452f462ebef2b0f5b9ae169cfa006be3297343dd2bab580c66f757`.
+> Evidence:
+> `docs/generated/player-qa/native-android-small-landscape-controls-20260912/README.md`.
+> This remains offline emulator evidence; approved-WSS login/map transitions
+> and physical-device acceptance remain open.
+
+> 2026-09-12 Android current change: the production Activity now observes the
+> real Android default network instead of inferring connectivity from its own
+> WebSocket phase. A foreground network loss disconnects and invalidates the
+> authenticated host once; recovery reconnects once, while background recovery
+> waits until both foreground and network are available. Default-network
+> handoff rechecks the active network so losing the old Wi-Fi does not invent
+> an offline edge after cellular has taken over. UI Preview never starts or
+> stops transport from these callbacks. Java tests pass 22/22 in both variants,
+> Android Rust remains 163/163, both APKs package, and API31 grants the new
+> `ACCESS_NETWORK_STATE` permission. Airplane on/off retained the same preview
+> PID and visible 849-tile/7-entity/12-layer frame. UI Preview APK SHA-256 is
+> `003332ab72731c96ee18ad90ae7577f19917141686748b6dc34a39d01d4e2834`.
+> This is lifecycle/emulator evidence; real WSS reconnection and physical-device
+> switching remain open.
+
+> 2026-09-12 Android current change: production Gateway writes now stay
+> disabled until StartGame or a destination map transition actually delivers
+> its authoritative world snapshot. Position-only `IN_GAME` publications keep
+> the existing 20-second render deadline armed, and leaving a rendered scene
+> invalidates the prior native host generation before any old queued gameplay
+> write can cross the transition. The destination snapshot starts one fresh
+> generation; ordinary in-map updates do not churn it. Java transport/policy
+> tests pass 19/19 in both Debug and UI Preview, Android Rust remains 163/163,
+> both APK variants package, and the UI Preview APK installs on API31. This is
+> deterministic transport/emulator evidence; its SHA-256 is
+> `3f430f6ee69718f037161dfd291ec833055818023f02097d8b40d34ff74cc7ef`.
+> No approved WSS account or
+> physical-device acceptance is claimed.
+
+> 2026-09-12 Android current change: render-ready receipts now retain the
+> authenticated-character boundary on both StartGame and in-map refreshes.
+> A matching request for a missing or different active character fails closed,
+> clears the render transition and queued UI intents, resets native render data,
+> and asks the Java host to disconnect instead of leaving an indefinite loading
+> barrier or accepting another player's frame. Android `ui-preview` is 163/163;
+> targeted receipt tests and Rust formatting pass. This is local contract
+> evidence, not approved-WSS login, live StartGame/map switching, physical-device,
+> or human acceptance.
+
+> 2026-09-12 Android current change: the shared Bevy overlay renderer now
+> retains unchanged heavyweight panel entity trees. API31 emulator samples for
+> Inventory, Game Shop, Storage, Guild, Trade, Help and Mail Compose no longer
+> show the prior hundreds-of-MiB five-second growth; a 30-second Game Shop soak
+> stayed at `178544/267567 -> 178540/267762` KiB native heap/total PSS. Android
+> 162/162, retained-tree tests, API31 arm64 release build, package and install
+> pass. Evidence:
+> `docs/generated/player-qa/native-android-overlay-retention-20260912/README.md`.
+> This remains offline emulator evidence, not live login or physical-device
+> acceptance.
+
+> 2026-09-12 Android current change: the API31 ARM64 emulator has a visible,
+> stable GLES rendering baseline. A target-scoped runtime selects OpenGL ES,
+> WebGL2-compatible limits, `Msaa::Off` and no unused OIT startup; a vendored
+> Bevy 0.19 compatibility patch capability-gates alternate sRGB views and
+> invalidates Android surfaces across lifecycle changes. A three-frame camera
+> gate plus ordered Android rendering prevents the old target phase from racing
+> the replacement EGL surface. Emulator 37.1.11 visibly reaches full-screen
+> Bichon render-ready with 849 map draws, seven objects/twelve layers and shared
+> Crystal UI. Home/resume retains the same process and a 300-second post-resume
+> soak records zero wgpu errors, panics, exits, GLES errors or incomplete
+> framebuffers. Android tests remain 154/154 and API31/aligned package gates
+> pass. The labelled `uiPreview` has networking disabled, so real login,
+> live-world transition/reconnect, public Web release alignment, physical-device
+> and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-gles-emulator-20260912/README.md`.
+
+> 2026-09-12 Android current change: packaged world-load events are correlated
+> to the authoritative render request. Stale ready/failure events cannot unlock
+> or tear down a newer scene; a matching failure atomically clears pending
+> world/render state and Android presentation caches, drains client intents,
+> requests a disconnect and returns through the authenticated reconnect flow.
+> This closes the indefinite loading-screen failure mode without inventing a
+> render-ready receipt. Android `ui-preview` is 154/154; API31 target, the exact
+> local 35-atlas release-alignment package and streamed emulator install pass.
+> Emulator 31.3.10 emitted preview-ready but then hit the same SwiftShader
+> `DeviceLost`, producing a black capture, so visible-frame and soak acceptance
+> are explicitly withheld. Real login, current public asset alignment,
+> physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-render-failure-recovery-20260912/README.md`.
+
+> 2026-09-12 Android current change: both Android package scripts now have an
+> opt-in fail-closed Web release-alignment gate. It extracts the completed APK's
+> embedded lock and compares it with exact local or public-HTTPS manifest bytes
+> before package success is reported; matching counts without a matching SHA-256
+> are rejected.
+> Verifier tests are 6/6, Android remains 153/153, shell syntax passes and the
+> API31 package passes against the exact local 35-atlas manifest. The previous
+> head's GitHub Android lane passed. Two read-only public reads agreed that
+> `https://mir2.obelisk.build/bevy-entity-atlases/manifest.json` currently has
+> SHA-256 `254b0e2cd422dd6e6b1ce37ecce2a25cbca060b7fc69698cc51583f7816ef1fa`
+> with 9,650 rects/13,164,823 page bytes, while this checkout's tracked input is
+> `2ae6fb0dfe626bc90b41caac027a1fa219aaa11471ac27e42cc9980c286f48bd`
+> with 10,482 rects/13,249,890 page bytes. Therefore deployed Web/Android asset
+> parity is explicitly not accepted. No production state was changed. Evidence:
+> `docs/generated/player-qa/native-android-web-release-alignment-20260912/README.md`.
+
+> 2026-09-12 Android current change: entity release provenance is now
+> fail-closed at both packaging and selected-page decode. Gradle requires an
+> immutable `MIR2_ANDROID_ENTITY_ASSET_PACK_ID` for an override, verifies the
+> complete manifest/page closure plus every PNG byte count, dimensions and
+> SHA-256, and embeds a machine-readable pack lock in the APK. The native
+> loader independently rejects a selected page whose SHA-256 differs and emits
+> the manifest SHA-256 with the packaged world-frame diagnostic. Android
+> `ui-preview` is 153/153; tracked-pack, missing-ID negative, 35-atlas override,
+> forced real-pack and API31 package gates pass. The 375,663,860-byte APK has
+> SHA-256 `f420968ea3ec633649bc0dd940594eb7fedeb12f5463af7c7bd2f1f8da20e10b`
+> and embeds pack `local-player-shards-20260912`, manifest
+> `0a7f57e99e4f1fa508e807be20ec3c957d9ecd1b598b468fc6905c8a394181e7`
+> and all 102 pages. The old API31 SwiftShader emulator again hit `DeviceLost`
+> before a new render-ready frame, so the prior visible frame was not upgraded
+> to a soak claim. Approved Web/Android release alignment, WSS/account login,
+> physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-pack-lock-20260912/README.md`.
+
+> 2026-09-12 Android current change: the Android-private entity loader now
+> accepts up to 64 immutable atlases / 128 pages with global key/path
+> uniqueness, exact partial-page bounds and a 128 MiB selected-RGBA cap. A
+> local 35-root proof pack spans the available player/equipment/mount roots plus
+> `Monster/003`: 102 pages, 23,224 rects and 48 explicitly unusable unindexed
+> occupants. The API31 ARM64 emulator visibly reached full-screen Bichon
+> render-ready with 849 draws, seven entities/twelve layers and zero unresolved
+> entries while decoding only 25 selected pages (90,177,536 RGBA bytes).
+> Android `ui-preview` is 152/152 and the exact sharded-pack/package/install
+> gates pass. The old Emulator 31.3.10 software renderer later raised
+> `DeviceLost`, so no soak claim is made. The pack remains ignored, the tracked
+> Web atlas is unchanged, and approved release alignment, WSS/account login,
+> physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-sharded-player-atlas-20260912/README.md`.
+
+> 2026-09-12 Android current change: the Android-private entity loader now
+> retains fully metadata-free atlas occupants as explicit unindexed rects
+> instead of rejecting 7,824 otherwise usable frames; it still rejects partial
+> metadata and never fabricates placement. A five-page local proof pack adds
+> regular `ARWeapon/00`: the API31 ARM64 emulator visibly reached full-screen
+> Bichon render-ready with seven objects/twelve layers, an indexed standing bow,
+> zero unresolved draws, and `entity_unindexed_rects=24` for source frames
+> 808-831. Android `ui-preview` is 149/149; forced real-pack and
+> package/install/cold-launch gates pass. The shared Web atlas remains unchanged
+> and the proof pack remains ignored. Approved WSS/account login, live map
+> switching, physical-device, and human acceptance are still open. Evidence:
+> `docs/generated/player-qa/native-android-archer-regular-bow-20260912/README.md`.
+
+> 2026-09-12 Android current change: an explicit local entity-atlas build input
+> now lets licensed QA packs enter generated APK assets without mutating the
+> tracked Web release. A bounded 7,120-frame, five-page pack proved real
+> `ARArmour/00`, `ARWeapon/00 S`, and `Mount/00` layers on the API31 ARM64
+> emulator: Bichon reached render-ready with seven objects/eleven layers, zero
+> unresolved draws, and accepted Archer range plus mounted attack through the
+> production packet-presentation path. Android `ui-preview` tests are 147/147;
+> the forced real-pack lookup and package/install/cold-launch gates pass. The
+> normal shared atlas is unchanged, `ARWeapon/00` frames 808-831 lack metadata,
+> and this remains offline evidence rather than real login, live map switching,
+> physical-device, or human acceptance. Evidence:
+> `docs/generated/player-qa/native-android-archer-mount-atlas-20260912/README.md`.
+
+> 2026-09-12 Android `8c1826bcd`: action-specific player-library selection
+> now resolves the tracked Assassin `AArmour`/`AHair`/dual-`AWeapon` layers,
+> including `%20` space canonicalization and direction-dependent weapon depth.
+> Bounded Archer compact and mounted action/lifecycle catalogs are implemented;
+> missing required mounts fail closed. Android 146/146, tracked-atlas 2/2 and
+> API31 ARM64 target/package/install/cold-launch pass. The offline emulator
+> visibly reached render-ready with five entities/eight layers and exercised an
+> Assassin attack through the production packet-action path. APK SHA-256 is
+> `5a8ddade998f92488f9b15d7070228aaf098c8586dc3622fd0758bd2cd25a2d3`.
+> The tracked atlas still lacks `ARArmour`/`ARWeapon` and `Mount` roots, so those
+> variants have fixture rather than visual evidence. Approved WSS/account live
+> login, physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-catalog-20260912/README.md`.
+
+> 2026-09-12 Android `3efa56d71`: authoritative remote `ObjectWalk`,
+> `ObjectRun` and `ObjectBackStep` endpoints now use the shared renderer's
+> bounded presentation clock instead of tile snapping; turn/remove and every
+> scene/session boundary stop retained motion. A synchronized Android queue
+> crosses parallel Bevy producers into the runtime's main-thread ingress, and
+> names/guild/health/damage overlays consume the same renderer-owned pose with
+> UI-scale compensation. Consecutive API31 ARM64 offline frames visibly show a
+> player and overlay moving to the authoritative endpoint; diagnostics record
+> active `(84,0)` then settled zero with no decode/drop/mismatch. Android
+> 142/142, API31 package/install/cold-launch pass. Approved live login/packet
+> evidence, physical-device and human acceptance, plus generated class/mount/
+> action catalogs remain open. Evidence:
+> `docs/generated/player-qa/native-android-remote-motion-20260912/README.md`.
+
+> 2026-09-12 Android `b15a297b2`: the authenticated Java host now forwards
+> damage plus all five generic scene-effect packet families, and the Android
+> producer resolves cast/projectile/impact/return, attached, map and persistent
+> effects from 2,067 tracked Crystal frames into the shared Bevy renderer. A
+> bounded active-frame warm set fixes Android packaged-asset churn without
+> hidden sprites or synthetic fallbacks. The API31 ARM64 offline specimen
+> visibly shows FireWall and an attached barrier over the 849-draw Bichon scene;
+> runtime 233/233, Android 141/141, Java 11/11, target/package/install/cold-launch
+> gates pass. Approved live login/packets, physical-device and human acceptance,
+> and spell-specific sound/light/prediction remain open. Evidence:
+> `docs/generated/player-qa/native-android-scene-effects-20260912/README.md`.
+
+> 2026-09-11 Android `1d6c0a2b3`: authenticated post-`IN_GAME`
+> `DamageIndicator` packets now retain exact object/damage/type fields in a
+> bounded Android event queue and render Crystal-style hit, miss, critical and
+> heal floaters only over the matching authoritative actor. Real hits can
+> renew a five-second view of the existing server percentage bar without
+> inventing exact monster HP. The API31 offline specimen visibly places `128`
+> over its fixture monster alongside the packaged map, actors, names, health
+> bars and drops. Android 137/137, Java 11/11, API31 target and both APK package
+> gates pass. Approved live packet/login and physical-device/human acceptance
+> remain open. Evidence:
+> `docs/generated/player-qa/native-android-damage-feedback-20260911/README.md`.
+
+> 2026-09-11 Android `f81ae8415`: native actor overlays now project bounded,
+> input-pass-through names, guild lines and health bars from the same validated
+> authoritative object model as actor sprites. Signed server name colours,
+> Crystal anchors/corpse offsets and NPC/monster line splitting are retained.
+> Self health uses exact `hp/maxHp`; monster bars use only the server health
+> percentage and expiry/revision, never invented exact HP. The API31 offline
+> specimen visibly shows both actor labels and health bars with zero unresolved
+> map/entity draws. Android 134/134, Java 11/11, API31 target and both APK
+> package gates pass. Approved live login/packets and physical-device/human
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-actor-overlays-20260911/README.md`.
+
+> 2026-09-11 Android `1d2e2abc5`: native world rendering now adds bounded,
+> input-pass-through drop labels from the same authoritative `groundDrops` as
+> sprites and pickup UI. Labels retain server object identity, quantity and
+> `nameColourArgb`, and use the Crystal stage/tile anchor, centered 80px line
+> and four-pixel black outline. The API31 offline specimen visibly shows cyan
+> potion and yellow `Gold x250` labels aligned to their objects; shared pickup
+> touch still emits the exact `object_id=9101`. Android 128/128, Java 11/11,
+> API31 target and both APK package gates pass. Approved live packet/login and
+> physical-device/human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-ground-labels-20260911/README.md`.
+
+> 2026-09-11 Android `8b39367ae`: complete and live authoritative ground-drop
+> models now populate the shared bounded pickup panel, and the mobile `Pick Up`
+> action preserves the exact server object ID through shared `PickUpObject` into
+> the authenticated Android Gateway queue. The client never deletes a drop
+> optimistically. API31 ARM64 offline evidence visibly shows both rendered drops,
+> the shared list and the 48px mobile action; a tap records `object_id=9101` while
+> retaining the object because no server is connected. Android 124/124, Java
+> 11/11, API31 target and both APK package gates pass. In-world colour labels,
+> approved live pickup/login and physical-device/human acceptance remain open.
+> Evidence:
+> `docs/generated/player-qa/native-android-ground-pickup-20260911/README.md`.
+
+> 2026-09-11 Android `1ed32d776`: ground items and gold now render from the
+> exact tracked Crystal `DNItems` frames in both complete snapshots and bounded
+> live packets, with authoritative removal and no fake marker/path injection.
+> The API31 ARM64 offline world specimen visibly resolves a red item and gold
+> pile alongside the player/monster (`entities=4`, `entity_layers=4`, zero
+> unresolved); this is not live-drop evidence. Android 120/120, real-atlas 1/1,
+> Java TLS 11/11 and package/install/cold-launch gates pass. Ground labels,
+> pickup interaction, real login and physical-device/human acceptance remain
+> open. Evidence:
+> `docs/generated/player-qa/native-android-ground-drops-20260911/README.md`.
+
+> 2026-09-11 Android `c17bd7e6d`: generic actors now render exact Crystal
+> death-to-corpse, harvested skeleton and revive-to-standing lifecycle
+> sequences instead of using opacity alone. The normal API31 APK was rebuilt,
+> installed and cold-launched without fatal/ANR/native-load errors, but no
+> approved Gateway/account was configured, so this is not live packet visual
+> evidence. Generated class/mount catalogs, effects, drops, physical-device
+> and human visual acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-death-lifecycle-animation-20260911/README.md`.
+
+> 2026-09-11 Android `843f94593`: post-`IN_GAME` `ObjectWalk`/`ObjectRun`
+> updates now select exact packaged walking/running sprites and advance them on
+> the existing native monotonic presentation clock, without changing server
+> movement authority. API31 build/install/launch passes, but the unconfigured
+> normal APK cannot produce live locomotion visual evidence. Continuous motion,
+> alternate catalogs, real login and physical-device/human acceptance remain
+> open. Evidence:
+> `docs/generated/player-qa/native-android-locomotion-animation-20260911/README.md`.
+
+> 2026-09-11 Android `73119525e`: existing render-ready generic actors now
+> animate authoritative harvest/attack/range/dash/struck packets from exact
+> packaged Crystal frames and return to standing on a monotonic client-side
+> presentation clock. The normal API31 APK launches the real shared login UI
+> and survives Home/resume, but no approved Gateway was configured, so this is
+> not live packet visual evidence. Mounted actors, Archer/Assassin generated
+> catalogs, walk/run, death/skeleton sequences, effects, ground drops, real
+> login and physical-device/human visual acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-packet-action-animation-20260911/README.md`.
+
+> 2026-09-11 Android `35f12e4d3`: native actor visibility no longer reverts to
+> stale full-snapshot state after authoritative hide, teleport-out or remove;
+> show/teleport-in restores only a retained hidden actor, and server spawn
+> clears removal tombstones. Health/death/revive update the shared object state
+> and dead/live sprite opacity. Android 114/114, real-atlas 1/1, Java TLS 11/11
+> and API31 APK gates pass. Crystal death/combat animation, effects, drops and
+> live/device visual acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-lifecycle-20260911/README.md`.
+
+> 2026-09-11 Android `32e7b9b66`: map changes no longer leave the shared
+> gameplay HUD interactive over a cleared/loading native scene. The host reuses
+> `StartingGame`, preserves authenticated personal state, and returns to
+> `InGame` only after the exact two-frame map+entity render-ready receipt. The
+> API31 screenshot is a labelled offline preview of that loading surface, not
+> live Gateway evidence. Android 113/113, real-atlas 1/1, Java TLS 11/11 and
+> API31 APK gates pass. Online map-switch and physical-device visual/input
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-render-ready-transition-20260911/README.md`.
+
+> 2026-09-11 Android `ed045fcfb`: a packet-only actor with an exact match to an
+> already decoded canonical sprite contract now appears immediately as a
+> native Crystal standing sprite, with authoritative object id, position,
+> facing and y-sort depth. No atlas image is decoded on the packet path and the
+> prototype sidecar never enters runtime JSON. Android 112, configured atlas
+> 1, Java TLS 11, API31 and APK build/install/launch pass. Unmatched packet
+> actors, walk/run/attack animation, render-ready map changes, approved online
+> journey, physical device and human visual acceptance stay open. Evidence:
+> `docs/generated/player-qa/native-android-packet-actor-render-20260911/README.md`.
+
+> 2026-09-11 Android `029dc5e3f`: actors from the last complete render
+> snapshot now change to the authoritative Crystal standing facing and y-sort
+> depth packet-first, using bounded preloaded variants while keeping the Bevy
+> runtime payload active-pose-only. Android 112, configured atlas 1, Java TLS
+> 11, API31 and APK build/install/launch pass. Packet-only new actor sprites,
+> walk/run/attack animation, remaining gameplay reducers, approved online
+> journey, physical device and human visual acceptance stay open. Evidence:
+> `docs/generated/player-qa/native-android-entity-facing-20260911/README.md`.
+
+> 2026-09-11 Android `ab43c1d28`: authoritative player/monster/NPC spawn
+> aliases, movement/turn/action positions and removals now enter the shared
+> object model packet-first after `IN_GAME`; existing native Crystal sprite
+> layers move/remove with that authority. Android 113, Java TLS 11, API31 and
+> normal APK build/install/launch gates pass. A packet-only new actor still
+> waits for the next complete snapshot to resolve its Crystal sprite, and
+> direction/action animation, remaining gameplay packet families, approved
+> online journey, physical device and human visual acceptance remain open.
+> Evidence:
+> `docs/generated/player-qa/native-android-entity-packets-20260911/README.md`.
+
+> 2026-09-11 Android `e66595d34`: bounded authoritative GameShop, Storage V2,
+> and password results now travel from the live TLS socket to their existing
+> exact-request shared reducers; unrelated gameplay packets are not treated as
+> receipts. Android 111, Java TLS 10, API31 and normal APK package gates pass.
+> Ordinary movement/combat/entity/inventory/NPC/chat/map packet projection,
+> approved online journey, physical-device and human visual acceptance remain
+> open. Evidence:
+> `docs/generated/player-qa/native-android-transaction-receipts-20260911/README.md`.
+
+> 2026-09-11 Android `f1ee2148c`: the shared reducer's bounded gameplay
+> commands now cross JNI to the current authenticated `IN_GAME` WSS socket,
+> with exact lease acknowledgement and fail-closed background/disconnect
+> handling. Auth/bootstrap commands remain isolated. Android 110, Java TLS 9,
+> arm64 API31 and normal APK build/launch gates pass. The launch used no
+> Gateway URL and is not live-login evidence. Complete authoritative inbound
+> packet/receipt projection, approved online journey, real-device input/network
+> acceptance and human visual acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-gameplay-socket-20260911/README.md`.
+
+> 2026-09-11 Android `75d0eac46`: the native shared renderer now consumes
+> authoritative map center/object/entity snapshots, resolves the checked
+> Bichon viewport to 849 map draws plus visible self/monster layers, and delays
+> StartGame/map-change completion until the exact scene is complete across two
+> rendered frames. API31 emulator cold-start and same-process Home/resume are
+> visibly verified with an explicitly offline fixture. The normal APK safely
+> stops at the shared login screen because no Gateway URL was supplied.
+> Real WSS/account login, all gameplay queue-to-socket wiring, missing map
+> sources/other maps, physical-device touch/IME/network/soak and human visual
+> acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-world-render-20260911/README.md`.
+
 > 2026-09-10 native Keyboard menu: Crystal Title119 editor is connected to
 > actual key capture, strict/relaxed modifiers, Delete unbind, full reset,
 > grouped scrolling, movable window, and application-scoped atomic JSON save/load.

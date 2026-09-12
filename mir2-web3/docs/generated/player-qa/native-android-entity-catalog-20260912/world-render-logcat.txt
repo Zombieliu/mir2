@@ -1,0 +1,387 @@
+--------- beginning of main
+09-12 04:48:09.547  1270  1270 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) }
+09-12 04:48:09.549  1270  1270 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) }
+09-12 04:48:09.550   842   842 D ImsResolver: maybeAddedImsService, packageName: com.mir2.web3.uipreview
+09-12 04:48:09.570   707   742 I ndroid.systemu: Background concurrent copying GC freed 23662(1129KB) AllocSpace objects, 5(100KB) LOS objects, 49% free, 9266KB/18MB, paused 26us,35us total 145.494ms
+09-12 04:48:09.572   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1d933c000 0x1d9ce0000]
+09-12 04:48:09.573   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1d9ce0000 0x1da684000]
+09-12 04:48:09.574   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1da684000 0x1db028000]
+09-12 04:48:09.578   842   842 D CarrierSvcBindHelper: No carrier app for: 0
+09-12 04:48:09.579   842   842 D CarrierConfigLoader: mHandler: EVENT_PACKAGE_CHANGED phoneId: 0
+--------- beginning of system
+09-12 04:48:09.580   524   572 E VerityUtils: Failed to measure fs-verity, errno 1: /data/app/~~xqfQfNsyYaCL5j2EFGVjfw==/com.mir2.web3.uipreview-QKYc2jHNyhIGztx2wYb6tQ==/base.apk
+09-12 04:48:09.583   524  1774 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras)} from uid 2000
+09-12 04:48:09.587  1341 20348 I PackageIntentOperation: Feature flags not enabled, skipping. [CONTEXT service_id=258 ]
+09-12 04:48:09.596   524  1774 W ActivityTaskManager: Can't find TaskDisplayArea to determine support for multi window. Task id=329 attached=false
+09-12 04:48:09.597   524  1774 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10147; state: DISABLED
+09-12 04:48:09.597   524  1774 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10147; state: DISABLED
+09-12 04:48:09.597   524  1774 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10147; state: DISABLED
+09-12 04:48:09.597   524  1774 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10147; state: DISABLED
+09-12 04:48:09.597   524  1774 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10147; state: DISABLED
+09-12 04:48:09.600  1341 20340 W SQLiteLog: (28) double-quoted string literal: "com.mir2.web3.uipreview"
+09-12 04:48:09.602 11450 11450 V threaded_app: Pause: 0xb400007745439550
+09-12 04:48:09.606  1341 20350 I Auth    : [SupervisedAccountIntentOperation] onHandleIntent(): android.intent.action.PACKAGE_ADDED
+09-12 04:48:09.606  1341 20340 I PackageIntentOperation: Feature flags not enabled, skipping. [CONTEXT service_id=258 ]
+09-12 04:48:09.608   707   904 D PhoneStartingWindowTypeAlgorithm: preferredStartingWindowType newTask:true taskSwitch:true processRunning:false allowTaskSnapshot:true activityCreated:false useEmptySplashScreen:true legacySplashScreen:false topIsHome:false
+09-12 04:48:09.608   707   904 D StartingSurfaceDrawer: addSplashScreen com.mir2.web3.uipreview theme=7f0d010a task=329 suggestType=3
+09-12 04:48:09.622  1341  1341 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+09-12 04:48:09.622  1341  1341 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+09-12 04:48:09.623   707   905 D StartingSurfaceDrawer: window attributes color: 0 icon null duration 0 brandImage null
+09-12 04:48:09.623   707   905 W StartingSurfaceDrawer: Window background does not exist, using android.graphics.drawable.ColorDrawable@f36498f
+09-12 04:48:09.626   707   905 D SplashScreenView: Build android.window.SplashScreenView{3de4825 V.E...... ......ID 0,0-0,0}
+09-12 04:48:09.626   707   905 D SplashScreenView: Icon: view: null drawable: null size: 0
+09-12 04:48:09.626   707   905 D SplashScreenView: Branding: view: android.view.View{13e2dfa G.ED..... ......I. 0,0-0,0 #10204a6 android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+09-12 04:48:09.626   707   905 D StartingSurfaceDrawer: fillViewWithIcon surfaceWindowView android.window.SplashScreenView{3de4825 V.E...... ......ID 0,0-0,0}
+09-12 04:48:09.634  1341  1341 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+09-12 04:48:09.637   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1db028000 0x1db9cc000]
+09-12 04:48:09.645  1429  1736 W SearchServiceCore: Abort, client detached.
+09-12 04:48:09.645  1429  1736 W SearchServiceCore: Abort, client detached.
+09-12 04:48:09.659  1429  1736 W SearchServiceCore: Abort, client detached.
+09-12 04:48:09.717   524   546 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10147; state: DISABLED
+09-12 04:48:09.717   524   546 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10147; state: DISABLED
+09-12 04:48:09.717   524   546 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10147; state: DISABLED
+09-12 04:48:09.717   524   546 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10147; state: ENABLED
+09-12 04:48:09.727   524   555 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10147; state: ENABLED
+09-12 04:48:09.739   322   322 D Zygote  : Forked child process 20364
+09-12 04:48:09.739   524   555 I ActivityManager: Start proc 20364:com.mir2.web3.uipreview/u0a147 for pre-top-activity {com.mir2.web3.uipreview/com.mir2.web3.MainActivity}
+09-12 04:48:09.743  1040 20347 I FontLog : Package com.mir2.web3.uipreview has no metadata [CONTEXT service_id=132 ]
+09-12 04:48:09.760   524   534 I system_server: Background concurrent copying GC freed 121910(6840KB) AllocSpace objects, 30(2624KB) LOS objects, 50% free, 21MB/42MB, paused 611us,19us total 339.176ms
+09-12 04:48:09.761 20364 20364 I .web3.uiprevie: Late-enabling -Xcheck:jni
+09-12 04:48:09.773  1040 20347 I Fitness : FitCleanupIntentOperation received Intent android.intent.action.PACKAGE_REMOVED [CONTEXT service_id=17 ]
+09-12 04:48:09.774  1341  2229 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=AppsCorpus serviceId=36
+09-12 04:48:09.776  1341  1341 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+09-12 04:48:09.776  1341  1341 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+09-12 04:48:09.781   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1dd968000 0x1de30c000]
+09-12 04:48:09.782  1040  1175 W ChimeraUtils: Module com.google.android.gms.nearby_en has empty metadata display_name_string_id
+09-12 04:48:09.782  1040  1175 W ChimeraUtils: Module com.google.android.gms.nearby_en has empty metadata display_name_string_id
+09-12 04:48:09.785   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1de30c000 0x1decb0000]
+09-12 04:48:09.797   397   436 I adbd    : jdwp connection from 20364
+09-12 04:48:09.830  1341  2190 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=null serviceId=30
+09-12 04:48:09.853  1341 19782 I Icing   : Usage reports ok 1, Failed Usage reports 0, indexed 0, rejected 0
+09-12 04:48:09.921  1341 19782 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0
+09-12 04:48:09.937 20364 20364 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+09-12 04:48:09.958  1341 19782 I Icing   : Indexing com.google.android.gms-apps from com.google.android.gms
+09-12 04:48:09.986 11450 11473 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-12 04:48:09.986 11450 11472 I RustStdoutStderr: [2m2026-09-11T20:48:09.986854Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-12 04:48:09.998  1341 19782 I Icing   : Indexing done com.google.android.gms-apps
+09-12 04:48:10.021   347   347 E android.hardware.power.stats@1.0-service-mock: Failed to getEnergyData
+09-12 04:48:10.034 20364 20364 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3.uipreview' set to: 'default'
+09-12 04:48:10.034 20364 20364 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-12 04:48:10.035 20364 20364 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-12 04:48:10.036 20364 20364 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-12 04:48:10.098   524   546 W ActivityTaskManager: Activity pause timeout for ActivityRecord{7c87509 u0 com.mir2.web3/.MainActivity t299}
+09-12 04:48:10.103   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1decb0000 0x1df2dc000]
+09-12 04:48:10.193 11450 11473 V threaded_app: activityState=14
+09-12 04:48:10.205 20364 20387 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+09-12 04:48:10.206 20364 20387 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+09-12 04:48:10.208 20364 20387 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+09-12 04:48:10.412   524   547 W system_server: Long monitor contention with owner android.display (546) at void com.android.server.wm.TaskChangeNotificationController.forAllLocalListeners(com.android.server.wm.TaskChangeNotificationController$TaskStackConsumer, android.os.Message)(TaskChangeNotificationController.java:342) waiters=1 in void com.android.server.wm.InputMonitor$UpdateInputWindows.run() for 309ms
+09-12 04:48:10.416   524  1510 W system_server: Long monitor contention with owner android.display (546) at void com.android.server.wm.WindowManagerService$H.handleMessage(android.os.Message)(WindowManagerService.java:5307) waiters=3 in float com.android.server.wm.WindowManagerService.getCurrentAnimatorScale() for 292ms
+09-12 04:48:10.416   524  1497 W system_server: Long monitor contention with owner android.display (546) at void com.android.server.wm.WindowManagerService$H.handleMessage(android.os.Message)(WindowManagerService.java:5307) waiters=2 in int com.android.server.wm.ActivityTaskManagerService.getLastResumedActivityUserId() for 310ms
+09-12 04:48:10.418   524  1776 W system_server: Long monitor contention with owner android.display (546) at void com.android.server.wm.WindowManagerService$H.handleMessage(android.os.Message)(WindowManagerService.java:5307) waiters=4 in void com.android.server.wm.ActivityClientController.activityPaused(android.os.IBinder) for 224ms
+09-12 04:48:10.425 11450 11450 V threaded_app: NativeWindowDestroyed: 0xb400007745439550 -- 0xb4000077d560a3d0
+09-12 04:48:10.425 11450 11450 V threaded_app: android_app_set_window called
+09-12 04:48:10.425 11450 11473 V threaded_app: APP_CMD_TERM_WINDOW
+09-12 04:48:10.439   707   923 D EGL_emulation: app_time_stats: avg=10320.09ms min=10320.09ms max=10320.09ms count=1
+09-12 04:48:10.439 11450 11473 V threaded_app: APP_CMD_TERM_WINDOW
+09-12 04:48:10.444   707   923 D EGL_emulation: app_time_stats: avg=60641.54ms min=180.09ms max=121102.99ms count=2
+09-12 04:48:10.445 11450 11450 V threaded_app: WindowFocusChanged: 0xb400007745439550 -- 0
+09-12 04:48:10.519 20364 20364 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+09-12 04:48:10.531 20364 20364 D gti.InputConnection: InputConnection created
+09-12 04:48:10.536 20364 20364 D gti.InputConnection: setEditorInfo
+09-12 04:48:10.541 20364 20364 W .web3.uiprevie: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+09-12 04:48:10.542 20364 20364 I GameActivity: Looking for library libmir2_platform_android.so
+09-12 04:48:10.543 20364 20364 I GameActivity: Found library libmir2_platform_android.so. Loading...
+09-12 04:48:10.548 20364 20364 D GameActivity: GameActivity_register
+09-12 04:48:10.549 20364 20364 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+09-12 04:48:10.549 20364 20364 D GameActivity: SDK version: 31
+09-12 04:48:10.549 20364 20364 I android-activity: Creating: Activity = 0x16a6, saved state size = 0
+09-12 04:48:10.553 20364 20364 V threaded_app: Creating: 0xb400007745437f70
+09-12 04:48:10.553 20364 20364 V threaded_app: Callbacks set: 0xb400007745437fc0
+09-12 04:48:10.553 20364 20364 V threaded_app: Launching android_app_entry in a thread
+09-12 04:48:10.553 20364 20390 V threaded_app: android_app_entry called
+09-12 04:48:10.553 20364 20390 V threaded_app: android_app = 0xb40000772544b110
+09-12 04:48:10.553 20364 20390 V threaded_app: config = 0xb40000769544eb60
+09-12 04:48:10.553 20364 20390 V threaded_app: activity = 0xb400007745437f70
+09-12 04:48:10.553 20364 20390 V threaded_app: assetmanager = 0xb40000774543ab30
+09-12 04:48:10.553 20364 20390 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+09-12 04:48:10.578 20364 20390 D HostConnection: createUnique: call
+09-12 04:48:10.579 20364 20390 D HostConnection: HostConnection::get() New Host Connection established 0xb4000076e5439610, tid 20390
+09-12 04:48:10.580 20364 20390 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:10.586 20364 20390 D vulkan  : searching for layers in '/data/app/~~xqfQfNsyYaCL5j2EFGVjfw==/com.mir2.web3.uipreview-QKYc2jHNyhIGztx2wYb6tQ==/lib/arm64'
+09-12 04:48:10.588 20364 20390 D vulkan  : searching for layers in '/data/app/~~xqfQfNsyYaCL5j2EFGVjfw==/com.mir2.web3.uipreview-QKYc2jHNyhIGztx2wYb6tQ==/base.apk!/lib/arm64-v8a'
+09-12 04:48:10.598   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+09-12 04:48:10.599 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.599 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.599 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.599 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.603 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:10.603556Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "SwiftShader Device (LLVM 10.0.0)", vendor: 6880, device: 49374, device_type: Cpu, device_pci_bus_id: "", driver: "?", driver_info: "?", backend: Vulkan, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-12 04:48:10.603 20364 20390 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_render-0.19.0/AdapterInfo { name: "SwiftShader Device (LLVM 10.0.0)", vendor: 6880, device: 49374, device_type: Cpu, device_pci_bus_id: "", driver: "?", driver_info: "?", backend: Vulkan, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-12 04:48:10.603 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:10.603675Z[0m [33m WARN[0m [2mbevy_render::renderer[0m[2m:[0m The selected adapter is using a driver that only supports software rendering. This is likely to be very slow. See https://bevy.org/learn/errors/b0006/
+09-12 04:48:10.603 20364 20390 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_render-0.19.0/The selected adapter is using a driver that only supports software rendering. This is likely to be very slow. See https://bevy.org/learn/errors/b0006/
+09-12 04:48:10.603 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.603 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.604 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.604 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.604 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.604 20364 20390 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-12 04:48:10.633 20364 20364 V GameActivity: onStart_native
+09-12 04:48:10.633 20364 20364 V threaded_app: Start: 0xb400007745437f70
+09-12 04:48:10.673 20364 20390 D goldfish-address-space: allocate: Ask for block of size 0x4000000
+09-12 04:48:10.673 20364 20390 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1dfff4000 size 0x4004000
+09-12 04:48:10.678   524   572 E VerityUtils: Failed to measure fs-verity, errno 1: /data/app/~~xqfQfNsyYaCL5j2EFGVjfw==/com.mir2.web3.uipreview-QKYc2jHNyhIGztx2wYb6tQ==/base.apk
+09-12 04:48:10.847   524  6934 D HostConnection: createUnique: call
+09-12 04:48:10.848   524  6934 D HostConnection: HostConnection::get() New Host Connection established 0xb4000076e54894d0, tid 6934
+09-12 04:48:10.849   524  6934 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:10.852   524  6934 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-12 04:48:10.853   524  6934 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-12 04:48:10.853   524  6934 D EGL_emulation: eglCreateContext: 0xb4000076e54ad050: maj 3 min 0 rcv 3
+09-12 04:48:10.856   524  6934 D EGL_emulation: eglMakeCurrent: 0xb4000076e54ad050: ver 3 0 (tinfo 0x78f3ef2180) (first time)
+09-12 04:48:10.863 20364 20390 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_render-0.19.0/Some GPU preprocessing are limited on this device.
+09-12 04:48:10.868 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:10.863385Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m Some GPU preprocessing are limited on this device.
+09-12 04:48:10.883 20364 20390 V threaded_app: activityState=11
+09-12 04:48:10.887 20364 20390 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+09-12 04:48:10.887 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:10.887419Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+09-12 04:48:10.892 20364 20394 D HostConnection: createUnique: call
+09-12 04:48:10.893 20364 20394 D HostConnection: HostConnection::get() New Host Connection established 0xb4000076e543ac90, tid 20394
+09-12 04:48:10.895 20364 20394 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:10.897 20364 20364 V threaded_app: Resume: 0xb400007745437f70
+09-12 04:48:10.897 20364 20390 V threaded_app: activityState=12
+09-12 04:48:10.920 20364 20392 D HostConnection: createUnique: call
+09-12 04:48:10.921 20364 20392 D HostConnection: HostConnection::get() New Host Connection established 0xb4000076e544cd50, tid 20392
+09-12 04:48:10.922 20364 20392 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:10.953 20364 20400 D HostConnection: createUnique: call
+09-12 04:48:10.954 20364 20400 D HostConnection: HostConnection::get() New Host Connection established 0xb4000076e5450350, tid 20400
+09-12 04:48:10.955 20364 20400 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:10.965   524  1776 W WindowManager: Failed looking up window session=Session{b5c7376 20364:u0a10147} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5599 com.android.server.wm.Session.insetsModified:629 android.view.IWindowSession$Stub.onTransact:1151
+09-12 04:48:10.993 20364 20364 V GameActivity: onImeInsetsChanged from Text Listener
+09-12 04:48:10.994 20364 20364 V threaded_app: WindowInsetsChanged: 0xb400007745437f70
+09-12 04:48:10.995 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:10.995265Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-12 04:48:10.995 20364 20390 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-12 04:48:11.008 20364 20364 V GameActivity: onImeInsetsChanged from Text Listener
+09-12 04:48:11.008 20364 20364 V threaded_app: WindowInsetsChanged: 0xb400007745437f70
+09-12 04:48:11.009 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:11.009192Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-12 04:48:11.009 20364 20390 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-12 04:48:11.009 20364 20386 D HostConnection: createUnique: call
+09-12 04:48:11.009 20364 20386 D HostConnection: HostConnection::get() New Host Connection established 0xb4000076e5451250, tid 20386
+09-12 04:48:11.010 20364 20364 V threaded_app: ContentRectChanged: 0xb400007745437f70 -- (0 0) (2340 1080)
+09-12 04:48:11.011   524   547 D CompatibilityChangeReporter: Compat change id reported: 158002302; UID 10147; state: ENABLED
+09-12 04:48:11.011 20364 20386 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:11.011 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:11.011915Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+09-12 04:48:11.011 20364 20390 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+09-12 04:48:11.015 20364 20386 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-12 04:48:11.015 20364 20386 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-12 04:48:11.015 20364 20386 D EGL_emulation: eglCreateContext: 0xb4000076e5450050: maj 3 min 0 rcv 3
+09-12 04:48:11.017 20364 20386 D EGL_emulation: eglMakeCurrent: 0xb4000076e5450050: ver 3 0 (tinfo 0x790aa1a280) (first time)
+09-12 04:48:11.017 20364 20364 V GameActivity: onSurfaceCreated_native
+09-12 04:48:11.017 20364 20364 V threaded_app: NativeWindowCreated: 0xb400007745437f70 -- 0xb4000077d55e1ca0
+09-12 04:48:11.017 20364 20364 V threaded_app: android_app_set_window called
+09-12 04:48:11.018 20364 20390 V threaded_app: APP_CMD_INIT_WINDOW
+09-12 04:48:11.018 20364 20364 V threaded_app: NativeWindowResized: 0xb400007745437f70 -- 0xb4000077d55e1ca0 ( 2340 x 1080 )
+09-12 04:48:11.018 20364 20364 V threaded_app: NativeWindowRedrawNeeded: 0xb400007745437f70 -- 0xb4000077d55e1ca0
+09-12 04:48:11.018 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:11.018741Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (105v0)
+09-12 04:48:11.018 20364 20390 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (105v0)
+09-12 04:48:11.031   361   621 E HWComposer: getSupportedContentTypes: getSupportedContentTypes failed for display 4619827259835644672: Unsupported (8)
+09-12 04:48:11.033   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+09-12 04:48:11.033 20364 20386 I Gralloc4: mapper 4.x is not supported
+09-12 04:48:11.036 20364 20386 D HostConnection: createUnique: call
+09-12 04:48:11.036 20364 20386 D HostConnection: HostConnection::get() New Host Connection established 0xb4000076e54519d0, tid 20386
+09-12 04:48:11.037 20364 20386 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-12 04:48:11.037 20364 20386 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1d7fec000 size 0x8000
+09-12 04:48:11.045   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.allocator@4.0::IAllocator/default in either framework or device VINTF manifest.
+09-12 04:48:11.045 20364 20386 W Gralloc4: allocator 4.x is not supported
+09-12 04:48:11.046   338   489 D goldfish-address-space: claimShared: Ask to claim region [0x1d8998000 0x1d933c000]
+09-12 04:48:11.048 20364 20386 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:11.058   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1d933c000 0x1d9ce0000]
+09-12 04:48:11.067   707   904 D StartingSurfaceDrawer: Task start finish, remove starting surface for task 329
+09-12 04:48:11.067   707   904 V StartingSurfaceDrawer: Removing splash screen window for task: 329
+09-12 04:48:11.082 20364 20364 V threaded_app: WindowFocusChanged: 0xb400007745437f70 -- 1
+09-12 04:48:11.097  1234  1234 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3420
+09-12 04:48:11.101  1234  1234 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-12 04:48:11.106 11450 11450 V threaded_app: Stop: 0xb400007745439550
+09-12 04:48:11.106   524   543 I ActivityTaskManager: Displayed com.mir2.web3.uipreview/com.mir2.web3.MainActivity: +1s483ms
+09-12 04:48:11.107  1234  1234 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-12 04:48:11.107 11450 11473 V threaded_app: activityState=15
+09-12 04:48:11.108 20364 20364 V GameActivity: onImeInsetsChanged from Text Listener
+09-12 04:48:11.110 11450 11473 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStop notification to application
+09-12 04:48:11.110 20364 20364 V threaded_app: WindowInsetsChanged: 0xb400007745437f70
+09-12 04:48:11.111 11450 11450 V threaded_app: SaveInstanceState: 0xb400007745439550
+09-12 04:48:11.111 11450 11473 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward saveState notification to application
+09-12 04:48:11.111 11450 11473 V threaded_app: APP_CMD_SAVE_STATE
+09-12 04:48:11.112 11450 11472 I RustStdoutStderr: [2m2026-09-11T20:48:11.109275Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStop notification to application
+09-12 04:48:11.112 11450 11472 I RustStdoutStderr: [2m2026-09-11T20:48:11.111341Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward saveState notification to application
+09-12 04:48:11.118   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1d9ce0000 0x1da684000]
+09-12 04:48:11.122 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:11.122165Z[0m [33m WARN[0m [2mbevy_time[0m[2m:[0m time_system did not receive the time from the render world! Calculations depending on the time may be incorrect.
+09-12 04:48:11.122 20364 20400 W log event: time_system did not receive the time from the render world! Calculations depending on the time may be incorrect.log.target = "bevy_time"; log.module_path = "bevy_time"; log.file = "/Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_time-0.19.0/src/lib.rs"; log.line = 164;
+09-12 04:48:11.124 11450 11450 V threaded_app: TrimMemory: 0xb400007745439550 20
+--------- beginning of kernel
+09-12 04:48:11.137   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20407 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:11.158   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1da684000 0x1db028000]
+09-12 04:48:11.159   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1df2dc000 0x1dfc80000]
+09-12 04:48:11.160   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1d7ff4000 0x1d8998000]
+09-12 04:48:11.166 20364 20393 D HostConnection: createUnique: call
+09-12 04:48:11.166 20364 20393 D HostConnection: HostConnection::get() New Host Connection established 0xb4000076e5451f10, tid 20393
+09-12 04:48:11.169 20364 20393 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:11.280   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20411 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:11.417   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20414 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:11.514  1040  1917 I FontLog : Received query Noto Color Emoji Compat, URI content://com.google.android.gms.fonts [CONTEXT service_id=132 ]
+09-12 04:48:11.521   524  1776 W InputManager-JNI: Input channel object '82d485a Splash Screen com.mir2.web3.uipreview (client)' was disposed without first being removed with the input manager!
+09-12 04:48:11.527 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:11.527403Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_UI_PREVIEW_READY scene=world-render
+09-12 04:48:11.530 20364 20390 I event src/ui_preview.rs:392: ANDROID_UI_PREVIEW_READY scene=world-render
+09-12 04:48:11.533  1040  1917 I FontLog : Query [emojicompat-emoji-font] resolved to {Noto Color Emoji Compat, wdth 100.0, wght 400, ital 0.0, bestEffort false} [CONTEXT service_id=132 ]
+09-12 04:48:11.547   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20419 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:11.557  1040  1917 I FontLog : Fetch {Noto Color Emoji Compat, wdth 100.0, wght 400, ital 0.0, bestEffort false} end status Status{statusCode=SUCCESS, resolution=null} [CONTEXT service_id=132 ]
+09-12 04:48:11.572  1040  2125 I FontLog : Pulling font file for id = 85, cache size = 4 [CONTEXT service_id=132 ]
+09-12 04:48:11.595  1040  2125 I FontLog : Pulling font file for id = 85, cache size = 4 [CONTEXT service_id=132 ]
+09-12 04:48:11.684   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20422 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:11.707   707   923 D EGL_emulation: app_time_stats: avg=139.07ms min=10.53ms max=1129.63ms count=9
+09-12 04:48:11.709   707   923 D EGL_emulation: app_time_stats: avg=140.27ms min=6.86ms max=1128.97ms count=9
+09-12 04:48:11.713 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:11.713247Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-12 04:48:11.713 20364 20390 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-12 04:48:11.832   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20425 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:11.910 20364 20378 I .web3.uiprevie: Background young concurrent copying GC freed 18469(1804KB) AllocSpace objects, 3(60KB) LOS objects, 88% free, 3052KB/26MB, paused 413us,12us total 115.213ms
+09-12 04:48:11.966   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20428 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:12.101   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20431 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:12.244   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20434 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:12.387   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20437 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:12.520   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20440 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:12.594 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:12.594 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.594070Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:12.594 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AArmour/00/16.png
+09-12 04:48:12.594 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AHair/00/16.png
+09-12 04:48:12.594 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:12.595 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.594899Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AArmour/00/16.png
+09-12 04:48:12.595 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.594920Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AHair/00/16.png
+09-12 04:48:12.595 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.594925Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:12.596 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/Monster/003/8.png
+09-12 04:48:12.596 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/CArmour/00/8.png
+09-12 04:48:12.596 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.595871Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/Monster/003/8.png
+09-12 04:48:12.596 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.596040Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/CArmour/00/8.png
+09-12 04:48:12.600 20364 20389 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=34 entity_live=true entity_self_visible=true entity_layers=8
+09-12 04:48:12.647   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20443 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:12.781   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20446 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:12.782 20364 20389 I RustStdoutStderr: [runtime-map] waiting-standalone missing=[native-map-keyed:aa9aaaf2b454da86f830df83051919b78591eccd79b0d652e2c946c1e479d891,native-map-keyed:65b87ccadfc93885daa0b0dc990e0208dce85008de840713258d72b4b63bd1c0,native-map-keyed:90ca75cb64ab17a25798af4e6c4d4555b9be4e2a51d4b7e792537d4bde7f7822,native-map-keyed:b9860402c1e352eb7590276c0d8bbce87098b178f121a7b64740ff18a6317329,native-map-keyed:ba760433cd7414e24e51f6ea75d660b5222f55ad8d7851f50b45bf06ad6bfb15,native-map-keyed:26aa612a5755ef95b03c2bfb8c32208b7b862aa4abbf134fa4f9741e95aa173b,native-map-keyed:e8411c39eebac124a550dc010f60bc9ca0133f45ecef561d421b7c05b25fadb4,native-map-keyed:f99ca06f005fa6de70041288a4f604e48b4dca6a9e06d962f27975c16ad4b78d,native-map-keyed:b2312a0f6a633ad59cbf1224fa97c5ccd96e6f1d40bab2c56278c7675a7fec16,native-map-keyed:8e12f616e3e9ba73d162821f0e3d9fe525e24a06d336c22e8bafd227b546a216,native-map-keyed:d201f992ba0b2ca87100e052805d6aef9ef5e4a605b39a0696a039d087b8bd71,native-map-keyed:3833a31d0270eb65c74ff8a8b3334f035838c35031c48908ec6586f4ed1d0e53,native-map-keyed:a3bbae3aa38ae2487c395ec573335305a7f5a04bba0bfb829207f359c31df81c,native-map-keyed:c0fb45e9956765f71d9a59c67240104aa3b57a7e447fd45d68147e8876a26baa,native-map-keyed:232bfc461f055784e7d90e5e0378d3cea8317eb078c4bf66e7afe999812ff902,native-map-keyed:d40064aedb300a0c590d9fa3f3204b91021a61499c08f9d0716cc0f36620b6a9,native-map-keyed:43ec2c30ef193e5c996b16008cfb05b9f11fbf8dd2949b49c06ea4e5de4befbd,native-map-keyed:ffc093f86a65f8e00a03c2f443f7ef262a448b6e60f25eabe63582f03c04c313,native-map-keyed:357ae499cdc01c6fb8e7f6a351f31e453a56bc0be6a8b044a7d5b03d97e69edc,native-map-keyed:fc858961ab49b6744d95b643f4286f3aae93febfa3d52f62d18afcf258a9a342,native-map-keyed:d1bd1ece243fe2a29604f31a4d0f638bee60543ead0de466166a000c46a11617,native-map-keyed:6ba897f8b82efa0a41f233589ef528ceb6822f487542ac6cc926797af456e5ab,native-map-keyed:c60c7238cc4b5e882db07db460ffca6bebf61f020fced87785c279c17334092c,native-map-keyed:04f2f6406275680ee10c2bb613e324d59e0dea10befb67479d5db488f1e5e9bf,native-map-keyed:80b981fe9eace4f6c8fa494e0a3c4cc1c707ebfecc40d9a4434c5789e3052e1b,native-map-keyed:6ef860ce7467e486f22d5dd1745ad76623a2c321a0104fc346a8aa09e671e707,native-map-keyed:a87dbfa37b42f082b27d4ddbc51291b9c1574e745af424c13649911269324824,native-map-keyed:37709d68b8604ed7f6347c1a061a887ab60c06d4a241460107a11861aab3a484,native-map-keyed:e00b4c4d2b781f2a9182fa8923db3f219d9dc2301bf6803e1b58fd51d01be1cd,native-map-keyed:d2a6feb956b426eb88640e39bcfaaf5b7eb53c2ae46903ed06ac54db9675c3be,native-map-keyed:55d52696ef087177ceeeadbcc9497188994ad6423bd844b5711ef3f86f8dfdf7,native-map-keyed:60593053797e508260c66f2dccb2147fab3fd0583aebd36139637b2191310d19,native-map-keyed:58ba917565b84b2d1ccba0b6fc186abc6d44127eb4519d53924ab018c54447cf,native-map-keyed:02fcf4c4c475d1c1002d45563f34bf90aabc5d57865a90a9c1d738eea292c519,native-map-keyed:226a0bac665d1bf713b8baf39ecf7ae61be856189d1cf823921ed0e53a5c29fe,native-map-keyed:4994bb7eb67876e03625726b9c449243db24f41e661e82d6a174a9f607afc3a4,native-map-keyed:b537b5735e33470456a6462cd0dc84814bf925c377afb556a58c95fbac788b11,native-map-keyed:c5aedaadc41e9474fd79125972e0f4bc1e30f8c7142d7d934d6df890f3be78e2,native-map-keyed:2c76f7575f3d1661681533a2ed2893f96c1f4b914bcfd60ae32c207561eb263b,native-map-keyed:2cd7444281094e689c5fe7c22a994aa527766e0665fc32b2cec42cbdc9978ab4,native-map-keyed:daac139b8048bd2ca0ae710ce274fdced5abd65987ebc71a4fd0150b8162198f,native-map-keyed:751001c28e3ef669ffa96b3633f386939502bef3dd3529e72ee16051cc4b59e4,native-map-keyed:9193eb213fa563a95c340cb2a2ffc65d0aaaf61ae51c73664d2cde2edf4c4281,native-map-keyed:d9c8ff59b2a56ad01e23464985cbc57ac906ab954db069085708e3d95149efcd,native-map-keyed:6ad43bea0b7c50814b20d3e8a86d0b3c036dd87667a57a46d0540ea871ca535e,native-map-keyed:69d2b1d711ea28062395eaf1824dfe56230c50f8f55e47e6ba4f299ebae306ec,native-map-keyed:fae1e51ea06cb7c62fc1e1a144e6a1adce22184b6613ffa4c1ce99c1a67336f8,native-map-keyed:e019d8061f69ee3aa36bc28199851ebd30cc3e15c9ba60661260484256048e35,native-map-keyed:eb0860d3f49ccd4daae782
+09-12 04:48:12.782 20364 20389 I RustStdoutStderr:
+09-12 04:48:12.787 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:12.787 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.787078Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:12.788 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AArmour/00/16.png
+09-12 04:48:12.788 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AHair/00/16.png
+09-12 04:48:12.788 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:12.788 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/Monster/003/8.png
+09-12 04:48:12.788 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/CArmour/00/8.png
+09-12 04:48:12.788 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.788442Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AArmour/00/16.png
+09-12 04:48:12.788 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.788596Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AHair/00/16.png
+09-12 04:48:12.788 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.788607Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:12.788 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.788613Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/Monster/003/8.png
+09-12 04:48:12.788 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.788617Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/CArmour/00/8.png
+09-12 04:48:12.788 20364 20389 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=211 entity_live=true entity_self_visible=true entity_layers=8
+09-12 04:48:12.910   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20449 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:12.989 20364 20389 I RustStdoutStderr: [runtime-map] waiting-standalone missing=[native-map-keyed:ba760433cd7414e24e51f6ea75d660b5222f55ad8d7851f50b45bf06ad6bfb15,native-map-keyed:f99ca06f005fa6de70041288a4f604e48b4dca6a9e06d962f27975c16ad4b78d,native-map-keyed:60593053797e508260c66f2dccb2147fab3fd0583aebd36139637b2191310d19,native-map-keyed:751001c28e3ef669ffa96b3633f386939502bef3dd3529e72ee16051cc4b59e4,native-map-keyed:9193eb213fa563a95c340cb2a2ffc65d0aaaf61ae51c73664d2cde2edf4c4281,native-map-keyed:13645e18038cb14276656008c43fc00eb92b94607d7eb9a04a64a6f66232d045,native-map-keyed:5922e70ff794873e94f90eb873adb8a37456f33ea7758639949e572df4299459,native-map-keyed:dbb40d1865ec01ea2d386f6835f43f6e2490c16051a94ffd08a0825272f5008c,native-map-keyed:1a9940adbeeef6d18f251666fccf2028a616a92cc7a402f3ac04181f56823124,native-map-keyed:d654082fcbec81fdfef1dbb28816c5dd0394d02104383cd10da13c6f6861f1e7,native-map-keyed:c35db680af9281cf6650bc5947663124b49df25de4fa6235e57f975bdd46ab1d,native-map-keyed:b784d765df5c8350acfb8cf0caa73c95b97777b959f9fd83a02104444baa1537,native-map-keyed:987b56912cfa525d19def14f06ec189653e64f2036bf18106ca177ab05470bf5,native-map-keyed:2a7228b716f29f6fb29a9b41ed3f1ce17ec6cdbfd89b69ca7c38b6c8b5b5d72a,native-map-keyed:e9dd462fc074a92c26c83c7b4a454297692d018514df07416b374da71fb48af4,native-map-keyed:9d44df96116d410453f470ce2c5cfc2da78eabb52dc3cbf40384de2b9acb30f3,native-map-keyed:5a3f3287b599f8b60d5a2ad16f4aa4aeed98a433e09d7932fb8dd57e61c46776]
+09-12 04:48:12.991 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:12.991 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.991352Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:12.991 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AArmour/00/16.png
+09-12 04:48:12.991 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.991391Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AArmour/00/16.png
+09-12 04:48:12.991 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AHair/00/16.png
+09-12 04:48:12.991 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.991410Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AHair/00/16.png
+09-12 04:48:12.991 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:12.991 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.991429Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:12.991 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/Monster/003/8.png
+09-12 04:48:12.991 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.991470Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/Monster/003/8.png
+09-12 04:48:12.991 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/CArmour/00/8.png
+09-12 04:48:12.991 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:12.991488Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/CArmour/00/8.png
+09-12 04:48:12.991 20364 20389 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=228 entity_live=true entity_self_visible=true entity_layers=8
+09-12 04:48:13.038   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20452 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:13.164   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20455 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:13.295   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20458 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:13.329 20364 20389 I RustStdoutStderr: [runtime-map] synced center=Some(PresentationGridCenter { x: 302, y: 634 }) tiles=607 standalone=242 live=849 missingBindings=0 sample=[]
+09-12 04:48:13.333 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:13.333 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AArmour/00/16.png
+09-12 04:48:13.333 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AHair/00/16.png
+09-12 04:48:13.334 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:13.334 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/Monster/003/8.png
+09-12 04:48:13.334 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/CArmour/00/8.png
+09-12 04:48:13.334 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.333365Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:13.334 20364 20389 I RustStdoutStderr: [android-world-render] map_current=true map_live=849 map_missing=0 map_image_revision=228 entity_live=true entity_self_visible=true entity_layers=8
+09-12 04:48:13.334 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.333729Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AArmour/00/16.png
+09-12 04:48:13.334 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.333836Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AHair/00/16.png
+09-12 04:48:13.334 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.334040Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:13.334 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.334067Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/Monster/003/8.png
+09-12 04:48:13.334 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.334080Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/CArmour/00/8.png
+09-12 04:48:13.424   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20461 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:13.531 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:13.531 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AArmour/00/16.png
+09-12 04:48:13.531 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AHair/00/16.png
+09-12 04:48:13.531 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:13.531 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/Monster/003/8.png
+09-12 04:48:13.531 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/CArmour/00/8.png
+09-12 04:48:13.531 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.531131Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:13.531 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.531229Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AArmour/00/16.png
+09-12 04:48:13.531 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.531237Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AHair/00/16.png
+09-12 04:48:13.531 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.531241Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:13.531 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.531345Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/Monster/003/8.png
+09-12 04:48:13.531 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.531354Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/CArmour/00/8.png
+09-12 04:48:13.557   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20464 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:13.688   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20467 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:13.774 20364 20394 I event src/ui_preview.rs:201: ANDROID_WORLD_RENDER_READYrequest_id = 18446744073709551615; center_x = 302; center_y = 634; map_tiles = 849; entities = 5; entity_layers = 8;
+09-12 04:48:13.774 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.773992Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_WORLD_RENDER_READY [3mrequest_id[0m[2m=[0m18446744073709551615 [3mcenter_x[0m[2m=[0m302 [3mcenter_y[0m[2m=[0m634 [3mmap_tiles[0m[2m=[0m849 [3mentities[0m[2m=[0m5 [3mentity_layers[0m[2m=[0m8
+09-12 04:48:13.777 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:13.777 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AHair/00/16.png
+09-12 04:48:13.777 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:13.777 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/Monster/003/8.png
+09-12 04:48:13.777 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.777383Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:13.777 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.777475Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AHair/00/16.png
+09-12 04:48:13.777 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.777488Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:13.777 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.777498Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/Monster/003/8.png
+09-12 04:48:13.820   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20470 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:13.947   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20473 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:14.084   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20476 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:14.104 20364 20393 I event src/shared_shell.rs:1089: ANDROID_EFFECT_RENDER_STATE_READYeffect_count = 2;
+09-12 04:48:14.104 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:14.104287Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m ANDROID_EFFECT_RENDER_STATE_READY [3meffect_count[0m[2m=[0m2
+09-12 04:48:14.108 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:14.108 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AHair/00/16.png
+09-12 04:48:14.108 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:14.108 20364 20391 E event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_asset-0.19.0/sPath not found: original-ui/Monster/003/8.png
+09-12 04:48:14.108 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:14.108324Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 L/16.png
+09-12 04:48:14.108 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:14.108372Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AHair/00/16.png
+09-12 04:48:14.108 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:14.108382Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/AWeapon/00 R/16.png
+09-12 04:48:14.108 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:14.108388Z[0m [31mERROR[0m [2mbevy_asset::server[0m[2m:[0m Path not found: original-ui/Monster/003/8.png
+09-12 04:48:14.216   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20479 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:14.344   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20482 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:14.482   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20485 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:14.532 20364 20394 I event src/shared_shell.rs:540: packaged Android world frame queuedpages = 7; sprites = 2111; compressed_bytes = 14785921; rgba_bytes = 7340032; map_object_rgba_bytes = 10489920; map_width = 700; map_height = 700; map_atlases = 7; map_tiles = 607; map_standalone_tiles = 242; unresolved_draws = 0; entity_pages = 7; entities = 5; entity_layers = 8; unresolved_entities = 0; entity_compressed_bytes = 15679644; entity_rgba_bytes = 117440512;
+09-12 04:48:14.532 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:14.532353Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m packaged Android world frame queued [3mpages[0m[2m=[0m7 [3msprites[0m[2m=[0m2111 [3mcompressed_bytes[0m[2m=[0m14785921 [3mrgba_bytes[0m[2m=[0m7340032 [3mmap_object_rgba_bytes[0m[2m=[0m10489920 [3mmap_width[0m[2m=[0m700 [3mmap_height[0m[2m=[0m700 [3mmap_atlases[0m[2m=[0m7 [3mmap_tiles[0m[2m=[0m607 [3mmap_standalone_tiles[0m[2m=[0m242 [3munresolved_draws[0m[2m=[0m0 [3mentity_pages[0m[2m=[0m7 [3mentities[0m[2m=[0m5 [3mentity_layers[0m[2m=[0m8 [3munresolved_entities[0m[2m=[0m0 [3mentity_compressed_bytes[0m[2m=[0m15679644 [3mentity_rgba_bytes[0m[2m=[0m117440512
+09-12 04:48:14.613   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20488 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:14.746   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20491 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:14.878   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20494 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:15.008   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20497 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:15.131   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20500 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:15.260   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20503 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:15.391 20364 20506 D ProfileInstaller: Installing profile for com.mir2.web3.uipreview
+09-12 04:48:15.391   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20507 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:15.485 20364 20393 I event src/ui_preview.rs:98: ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-12 04:48:15.485 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:15.485334Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-12 04:48:15.487 20364 20393 I event src/ui_preview.rs:113: ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-12 04:48:15.487 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:15.487329Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-12 04:48:15.527   189   189 I logd    : logdr: UID=2000 GID=2000 PID=20510 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-12 04:48:15.703 20364 20390 I event src/ui_preview.rs:138: ANDROID_REMOTE_BACKSTEP_DIAGNOSTICSdiagnostics = {"enabled":true,"nowMs":1789159695700.4321,"moveClockPulseId":21,"moveClockNextPulseMs":1789159695800.4321,"entryCount":0,"activeEntryCount":0,"processedEventCount":0,"remoteMotionEventCount":0,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":0,"offsetMatchCount":0,"targetMismatchCount":0,"inactiveFallbackCount":0,"entries":[]};
+09-12 04:48:15.703 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:15.703552Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_DIAGNOSTICS [3mdiagnostics[0m[2m=[0m{"enabled":true,"nowMs":1789159695700.4321,"moveClockPulseId":21,"moveClockNextPulseMs":1789159695800.4321,"entryCount":0,"activeEntryCount":0,"processedEventCount":0,"remoteMotionEventCount":0,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":0,"offsetMatchCount":0,"targetMismatchCount":0,"inactiveFallbackCount":0,"entries":[]}
+09-12 04:48:15.763   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1db028000 0x1db9cc000]
+09-12 04:48:15.941   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+09-12 04:48:15.941 20515 20516 I Gralloc4: mapper 4.x is not supported
+09-12 04:48:15.979 20515 20516 D HostConnection: createUnique: call
+09-12 04:48:15.980 20515 20516 D HostConnection: HostConnection::get() New Host Connection established 0xb40000775668e4d0, tid 20516
+09-12 04:48:15.980 20515 20516 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-12 04:48:15.980 20515 20516 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1d7fec000 size 0x8000
+09-12 04:48:15.982 20515 20516 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-12 04:48:16.144 20364 20390 I event src/ui_preview.rs:145: ANDROID_REMOTE_BACKSTEP_POSE_ACTIVEoffset_x = 84.0; offset_y = 0.0;
+09-12 04:48:16.145 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:16.144111Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_ACTIVE [3moffset_x[0m[2m=[0m84.0 [3moffset_y[0m[2m=[0m0.0
+09-12 04:48:17.482   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1dd968000 0x1de30c000]
+09-12 04:48:17.631 20364 20390 I event src/ui_preview.rs:152: ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-12 04:48:17.635 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:17.631594Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-12 04:48:17.636   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+09-12 04:48:17.636 20519 20520 I Gralloc4: mapper 4.x is not supported
+09-12 04:48:17.640 20519 20520 D HostConnection: createUnique: call
+09-12 04:48:17.640 20519 20520 D HostConnection: HostConnection::get() New Host Connection established 0xb40000779465d5d0, tid 20520
+09-12 04:48:17.640 20519 20520 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-12 04:48:17.640 20519 20520 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1d7fec000 size 0x8000
+09-12 04:48:17.643 20519 20520 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0

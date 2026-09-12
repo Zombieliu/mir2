@@ -1,0 +1,301 @@
+[platform-android] package aarch64-linux-android with Rust 1.95.0, NDK /Users/henryliu/Library/Android/sdk/ndk/26.1.10909125, API 31
+    Building arm64-v8a (aarch64-linux-android)
+warning: multiple variants are never constructed
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:2184:5
+     |
+2163 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+2184 |     ToggleInventory,
+     |     ^^^^^^^^^^^^^^^
+2185 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+2186 |     ToggleShop,
+     |     ^^^^^^^^^^
+2187 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+2188 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+2191 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+2196 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+2202 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+2213 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+2301 |     ShopConfirm,
+     |     ^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `render_chat_draft` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:9883:4
+     |
+9883 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+     |    ^^^^^^^^^^^^^^^^^
+
+warning: fields `side` and `slot` are never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:202:9
+    |
+201 | pub(super) struct TradeCell {
+    |                   --------- fields in this struct
+202 |     pub side: TradeSide,
+    |         ^^^^
+203 |     pub slot: usize,
+    |         ^^^^
+
+warning: field `0` is never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:206:29
+    |
+206 | pub(super) struct TradeName(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: field `0` is never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:208:29
+    |
+208 | pub(super) struct TradeGold(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: function `preview_rect` is never used
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/select.rs:433:4
+    |
+433 | fn preview_rect(frame: PreviewFrame) -> CrystalRect {
+    |    ^^^^^^^^^^^^
+
+warning: constant `BUTTON_BG` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:35:7
+   |
+35 | const BUTTON_BG: Color = Color::srgba(0.29, 0.19, 0.11, 1.0);
+   |       ^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:37:7
+   |
+37 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:292:5
+    |
+286 | enum NativeShellButton {
+    |      ----------------- variants in this enum
+...
+292 |     CycleClass,
+    |     ^^^^^^^^^^
+293 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+299 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+300 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `character_preview_asset` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1631:4
+     |
+1631 | fn character_preview_asset(class_name: &str, gender_name: &str) -> String {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_text_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1810:4
+     |
+1810 | fn spawn_aux_text_button(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1863:4
+     |
+1863 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1899:4
+     |
+1899 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1936:4
+     |
+1936 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:44:7
+   |
+44 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:841:5
+    |
+815 | enum QuestUiButton {
+    |      ------------- variants in this enum
+...
+841 |     SelectQuestFilter {
+    |     ^^^^^^^^^^^^^^^^^
+...
+844 |     QuestHelp,
+    |     ^^^^^^^^^
+845 |     QuestPagePrevious,
+    |     ^^^^^^^^^^^^^^^^^
+846 |     QuestPageNext,
+    |     ^^^^^^^^^^^^^
+    |
+    = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `quest_log_text_button_at` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:4272:4
+     |
+4272 | fn quest_log_text_button_at(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:4473:4
+     |
+4473 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:4663:4
+     |
+4663 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:4802:4
+     |
+4802 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `file_name` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/ui_audio.rs:26:19
+   |
+25 | impl NativeUiSound {
+   | ------------------ method in this implementation
+26 |     pub(crate) fn file_name(self) -> &'static str {
+   |                   ^^^^^^^^^
+
+warning: methods `drain_bounded` and `clear_pending` are never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/ui_audio.rs:50:19
+   |
+42 | impl NativeUiAudioQueue {
+   | ----------------------- methods in this implementation
+...
+50 |     pub(crate) fn drain_bounded(&mut self, max: usize) -> Vec<NativeUiSound> {
+   |                   ^^^^^^^^^^^^^
+...
+55 |     pub(crate) fn clear_pending(&mut self) {
+   |                   ^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3553:9
+     |
+3553 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3554:9
+     |
+3554 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3555:9
+     |
+3555 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:4171:17
+     |
+4171 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:4172:17
+     |
+4172 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:4173:17
+     |
+4173 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: `mir2-client-bevy` (lib) generated 28 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 6 suggestions)
+   Compiling mir2-platform-android v0.1.0 (/Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/platform-android)
+    Finished `release` profile [optimized] target(s) in 6.80s
+     Copying libraries to /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/platform-android/target/android-jni
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preUiPreviewBuild UP-TO-DATE
+> Task :app:mergeUiPreviewNativeDebugMetadata NO-SOURCE
+> Task :app:generateUiPreviewBuildConfig UP-TO-DATE
+> Task :app:javaPreCompileUiPreview UP-TO-DATE
+> Task :app:checkUiPreviewAarMetadata UP-TO-DATE
+> Task :app:generateUiPreviewResValues UP-TO-DATE
+> Task :app:mapUiPreviewSourceSetPaths UP-TO-DATE
+> Task :app:generateUiPreviewResources UP-TO-DATE
+> Task :app:mergeUiPreviewResources UP-TO-DATE
+> Task :app:packageUiPreviewResources UP-TO-DATE
+> Task :app:parseUiPreviewLocalResources UP-TO-DATE
+> Task :app:createUiPreviewCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksUiPreview UP-TO-DATE
+> Task :app:processUiPreviewMainManifest UP-TO-DATE
+> Task :app:processUiPreviewManifest UP-TO-DATE
+> Task :app:processUiPreviewManifestForPackage UP-TO-DATE
+> Task :app:processUiPreviewResources UP-TO-DATE
+> Task :app:compileUiPreviewJavaWithJavac UP-TO-DATE
+> Task :app:mergeUiPreviewShaders UP-TO-DATE
+> Task :app:compileUiPreviewShaders NO-SOURCE
+> Task :app:generateUiPreviewAssets UP-TO-DATE
+> Task :app:prepareSharedUi UP-TO-DATE
+> Task :app:mergeUiPreviewAssets UP-TO-DATE
+> Task :app:compressUiPreviewAssets UP-TO-DATE
+> Task :app:checkUiPreviewDuplicateClasses UP-TO-DATE
+> Task :app:desugarUiPreviewFileDependencies UP-TO-DATE
+> Task :app:mergeExtDexUiPreview UP-TO-DATE
+> Task :app:mergeLibDexUiPreview UP-TO-DATE
+> Task :app:dexBuilderUiPreview UP-TO-DATE
+> Task :app:mergeProjectDexUiPreview UP-TO-DATE
+> Task :app:mergeUiPreviewGlobalSynthetics UP-TO-DATE
+> Task :app:processUiPreviewJavaRes NO-SOURCE
+> Task :app:mergeUiPreviewJavaResource UP-TO-DATE
+> Task :app:mergeUiPreviewJniLibFolders
+> Task :app:validateSigningUiPreview UP-TO-DATE
+> Task :app:writeUiPreviewAppMetadata UP-TO-DATE
+> Task :app:writeUiPreviewSigningConfigVersions UP-TO-DATE
+> Task :app:mergeUiPreviewNativeLibs
+
+> Task :app:stripUiPreviewDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libmir2_platform_android.so.
+
+> Task :app:packageUiPreview
+> Task :app:createUiPreviewApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleUiPreview
+
+BUILD SUCCESSFUL in 10s
+36 actionable tasks: 4 executed, 32 up-to-date
+[platform-android] APK: /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/platform-android/android/app/build/outputs/apk/uiPreview/app-uiPreview.apk
+[platform-android] SHA-256: 459eaa76a524f0b67bfdf1c7d48ce29045d97afc097f8a9014a0a43de4aa3cf6
+[platform-android] package gate passed

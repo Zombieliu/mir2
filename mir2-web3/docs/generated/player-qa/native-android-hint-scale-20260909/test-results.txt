@@ -1,0 +1,11 @@
+/tmp/android-hint-before.log:  left: Px(1200.0)
+/tmp/android-hint-before.log: right: Px(2400.0)
+/tmp/android-hint-before.log:test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 579 filtered out; finished in 0.01s
+/tmp/android-hint-preview.log:test result: ok. 86 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+/tmp/android-hint-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-hint-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-hint-normal.log:test result: ok. 84 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+/tmp/android-hint-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-hint-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-hint-shared.log:test result: ok. 581 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+/tmp/android-hint-shared.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

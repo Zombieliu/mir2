@@ -757,7 +757,7 @@ impl NpcDialogNav {
 }
 
 #[derive(Component)]
-struct QuestUiRoot;
+pub struct QuestUiRoot;
 
 #[derive(Component)]
 struct QuestTrackerPanel;
@@ -6083,7 +6083,7 @@ mod tests {
             .init_resource::<crate::shop::ShopModel>()
             .init_resource::<crate::storage::StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<bevy::input::keyboard::KeyboardInput>()
             .add_systems(
                 Update,

@@ -1,0 +1,110 @@
+[platform-android] package aarch64-linux-android with Rust 1.95.0, NDK /Users/henryliu/Library/Android/sdk/ndk/26.1.10909125, API 31
+    Building arm64-v8a (aarch64-linux-android)
+warning: constant `BUTTON_BG` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:35:7
+   |
+35 | const BUTTON_BG: Color = Color::srgba(0.29, 0.19, 0.11, 1.0);
+   |       ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:37:7
+   |
+37 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:292:5
+    |
+286 | enum NativeShellButton {
+    |      ----------------- variants in this enum
+...
+292 |     CycleClass,
+    |     ^^^^^^^^^^
+293 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+299 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+300 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_text_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1812:4
+     |
+1812 | fn spawn_aux_text_button(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1865:4
+     |
+1865 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1901:4
+     |
+1901 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1938:4
+     |
+1938 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib) generated 7 warnings
+    Finished `release` profile [optimized] target(s) in 0.77s
+     Copying libraries to /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/platform-android/target/android-jni
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:prepareSharedUi
+> Task :app:mergeDebugAssets
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:dexBuilderDebug UP-TO-DATE
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:compressDebugAssets
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeProjectDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug
+
+BUILD SUCCESSFUL in 14s
+36 actionable tasks: 4 executed, 32 up-to-date
+[platform-android] APK: /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/platform-android/android/app/build/outputs/apk/debug/app-debug.apk
+[platform-android] SHA-256: 3ee643ae4df13a6dd3b022618c12b90b90e8df078e0105e2b7383b149381f167
+[platform-android] package gate passed

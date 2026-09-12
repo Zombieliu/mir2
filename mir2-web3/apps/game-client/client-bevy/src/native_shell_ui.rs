@@ -67,7 +67,7 @@ const NEW_CHARACTER_CREATE: spec::CrystalRect = spec::CrystalRect::new(378.0, 57
 const NEW_CHARACTER_CANCEL: spec::CrystalRect = spec::CrystalRect::new(643.0, 579.0, 100.0, 25.0);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Component)]
-enum NativeShellField {
+pub enum NativeShellField {
     CharacterName,
     ChangePassword(ChangePasswordFocus),
 }
@@ -276,7 +276,8 @@ pub fn cycle_change_password_focus(
 }
 
 #[derive(Component)]
-struct NativeShellRoot;
+/// Platform hosts may fit the shared 1024x768 stage to their safe viewport.
+pub struct NativeShellRoot;
 
 #[derive(Component)]
 struct NativeShellContent;
@@ -960,7 +961,7 @@ fn pop_editable_tail(text: &mut String, count: usize) {
     }
 }
 
-fn append_editable_field(text: &mut String, c: char, max: usize) {
+pub fn append_editable_field(text: &mut String, c: char, max: usize) {
     if !is_printable_char(c) {
         return;
     }
@@ -970,7 +971,7 @@ fn append_editable_field(text: &mut String, c: char, max: usize) {
     text.push(c);
 }
 
-fn append_name_field(text: &mut String, c: char, max: usize) {
+pub fn append_name_field(text: &mut String, c: char, max: usize) {
     if !is_printable_char(c) || c.is_whitespace() {
         return;
     }
@@ -980,7 +981,7 @@ fn append_name_field(text: &mut String, c: char, max: usize) {
     text.push(c);
 }
 
-fn append_alphanumeric_field(text: &mut String, c: char, max: usize) {
+pub fn append_alphanumeric_field(text: &mut String, c: char, max: usize) {
     if !c.is_ascii_alphanumeric() {
         return;
     }
@@ -1131,14 +1132,12 @@ fn render_character_create(
         "original-ui/Title/20.png",
         NEW_CHARACTER_TITLE,
     );
-    spawn_native_image(
+    crate::crystal_ui::select::spawn_creation_preview(
         parent,
         asset_server,
-        character_preview_asset(
-            &model.character_create.class_name,
-            &model.character_create.gender_name,
-        ),
-        NEW_CHARACTER_PREVIEW,
+        &model.character_create.class_name,
+        &model.character_create.gender_name,
+        (NEW_CHARACTER_PREVIEW.left, NEW_CHARACTER_PREVIEW.top),
     );
     spawn_aux_text(
         parent,

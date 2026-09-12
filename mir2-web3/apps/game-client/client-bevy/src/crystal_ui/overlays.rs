@@ -11,7 +11,9 @@ pub mod skill_bars;
 #[path = "skill_page.rs"]
 mod skill_page;
 
-use std::collections::VecDeque;
+use std::collections::{hash_map::DefaultHasher, VecDeque};
+use std::fmt::Write as _;
+use std::hash::Hasher;
 
 use bevy::app::AppExit;
 use bevy::asset::{load_internal_asset, uuid_handle};
@@ -227,6 +229,7 @@ const BUTTON_BG: Color = Color::srgba(0.28, 0.18, 0.08, 0.95);
 const BUTTON_DISABLED: Color = Color::srgba(0.30, 0.24, 0.16, 0.45);
 const MAX_QUEUED: usize = 24;
 const BAG_SLOTS: u32 = 46;
+const GUILD_NOTICE_MAX_CHARS_PER_LINE: usize = 32;
 pub const HELP_PAGE_COUNT: u8 = 45;
 
 /// Pages exposed by Crystal's CharacterDialog.  The page is local UI state;
@@ -275,6 +278,7 @@ pub struct InventoryDialogUi {
     drag_offset_x: f32,
     drag_offset_y: f32,
     last_cursor: Option<Vec2>,
+    drag_touch_id: Option<u64>,
 }
 
 impl Default for InventoryDialogUi {
@@ -286,6 +290,7 @@ impl Default for InventoryDialogUi {
             drag_offset_x: 0.0,
             drag_offset_y: 0.0,
             last_cursor: None,
+            drag_touch_id: None,
         }
     }
 }
@@ -305,6 +310,27 @@ impl InventoryDialogUi {
         true
     }
 
+    fn begin_focused_drag(
+        &mut self,
+        hit_cursor: Vec2,
+        drag_cursor: Vec2,
+        focus_translation: Vec2,
+    ) -> bool {
+        if !self.begin_drag(hit_cursor.x, hit_cursor.y) {
+            return false;
+        }
+        // Materialize the platform's safe-edge translation into the shared
+        // window position before dragging. The transformed panel does not
+        // jump when the host subsequently reduces that translation to zero,
+        // while the raw stage-space cursor can keep driving one-to-one motion.
+        self.left = (self.left + focus_translation.x).clamp(0.0, INVENTORY_MAX_LEFT);
+        self.top = (self.top + focus_translation.y).clamp(0.0, INVENTORY_MAX_TOP);
+        self.dragging = true;
+        self.drag_offset_x = drag_cursor.x - self.left;
+        self.drag_offset_y = drag_cursor.y - self.top;
+        true
+    }
+
     fn drag_to(&mut self, cursor_x: f32, cursor_y: f32) {
         if !self.dragging {
             return;
@@ -317,6 +343,7 @@ impl InventoryDialogUi {
         self.dragging = false;
         self.drag_offset_x = 0.0;
         self.drag_offset_y = 0.0;
+        self.drag_touch_id = None;
     }
 
     fn remember_cursor(&mut self, cursor: Option<Vec2>) {
@@ -427,6 +454,7 @@ pub const BIGMAP_HEIGHT: f32 = 380.0;
 pub const CRYSTAL_MENU_PANEL_RECT: CrystalRect = CrystalRect::new(988.0, 349.0, 36.0, 282.0);
 pub const CRYSTAL_OPTIONS_PANEL_RECT: CrystalRect = CrystalRect::new(382.0, 207.0, 259.0, 354.0);
 pub const CRYSTAL_BIGMAP_PANEL_RECT: CrystalRect = CrystalRect::new(132.0, 134.0, 760.0, 500.0);
+pub const CRYSTAL_STORAGE_PANEL_RECT: CrystalRect = CrystalRect::new(150.0, 100.0, 640.0, 344.0);
 pub const CRYSTAL_GROUP_PANEL_RECT: CrystalRect = CrystalRect::new(396.0, 259.0, 232.0, 249.0);
 pub const CRYSTAL_GUILD_PANEL_RECT: CrystalRect = CrystalRect::new(217.0, 168.0, 590.0, 432.0);
 pub const CRYSTAL_HELP_PANEL_RECT: CrystalRect = CrystalRect::new(244.0, 129.0, 536.0, 509.0);
@@ -593,6 +621,34 @@ fn cursor_logical(window: &Window, cursor: Vec2) -> Vec2 {
     Vec2::new(x, y)
 }
 
+fn focused_panel_cursor(
+    cursor: Vec2,
+    origin: Vec2,
+    size: Vec2,
+    transform: Option<&UiTransform>,
+) -> Option<Vec2> {
+    let transform = transform.copied().unwrap_or_default();
+    if transform.scale.x <= f32::EPSILON || transform.scale.y <= f32::EPSILON {
+        return None;
+    }
+    let translation = match (transform.translation.x, transform.translation.y) {
+        (Val::Px(x), Val::Px(y)) => Vec2::new(x, y),
+        (Val::Auto, Val::Auto) => Vec2::ZERO,
+        _ => return None,
+    };
+    let center = origin + size * 0.5;
+    Some(center + (cursor - center - translation) / transform.scale)
+}
+
+fn focused_panel_translation(transform: Option<&UiTransform>) -> Option<Vec2> {
+    let transform = transform.copied().unwrap_or_default();
+    match (transform.translation.x, transform.translation.y) {
+        (Val::Px(x), Val::Px(y)) => Some(Vec2::new(x, y)),
+        (Val::Auto, Val::Auto) => Some(Vec2::ZERO),
+        _ => None,
+    }
+}
+
 // Re-export shop/storage constants for external consumers that import via overlays.
 pub use crate::shop::{SHOP_QUANTITY_MAX, SHOP_QUANTITY_MIN, SHOP_QUANTITY_STEP};
 pub use crate::storage::{STORAGE_BASE_SIZE, STORAGE_EXPANDED_SIZE, STORAGE_EXPAND_COST};
@@ -684,6 +740,26 @@ fn guild_notice_lines(draft: &str) -> Vec<String> {
         .collect()
 }
 
+pub fn push_guild_notice_text(draft: &mut String, text: &str) {
+    for ch in text.chars() {
+        if ch == '\n' {
+            if draft.split('\n').count() < crate::social::MAX_NOTICE_LINES {
+                draft.push('\n');
+            }
+        } else if !ch.is_control()
+            && draft
+                .rsplit('\n')
+                .next()
+                .map(str::chars)
+                .map(Iterator::count)
+                .unwrap_or_default()
+                < GUILD_NOTICE_MAX_CHARS_PER_LINE
+        {
+            draft.push(ch);
+        }
+    }
+}
+
 fn valid_social_name(name: &str) -> bool {
     let trimmed = name.trim();
     !trimmed.is_empty()
@@ -692,7 +768,7 @@ fn valid_social_name(name: &str) -> bool {
         && trimmed.chars().all(|ch| !ch.is_control())
 }
 
-fn push_social_name_text(draft: &mut String, text: &str) {
+pub fn push_social_name_text(draft: &mut String, text: &str) {
     for ch in text.chars() {
         if !ch.is_control() && draft.chars().count() < 32 {
             draft.push(ch);
@@ -840,6 +916,7 @@ pub enum MailComposeFocus {
 pub struct MailComposeUi {
     pub focus: MailComposeFocus,
     pub last_notice: Option<String>,
+    pub attachment_page: usize,
 }
 
 /// Renderer-only state for the Crystal BigMap search field. Authoritative map,
@@ -1497,7 +1574,7 @@ pub const OVERLAY_SHELL_Z: i32 = 1000;
 
 /// `MirAmountBox` / `MirMessageBox` use integer centering at Crystal's fixed
 /// 1024x768 stage. Their dimensions come from Prguse frames 238 and 360.
-const CRYSTAL_DELETE_AMOUNT_RECT: CrystalRect = CrystalRect::new(410.0, 329.0, 204.0, 109.0);
+pub const CRYSTAL_DELETE_AMOUNT_RECT: CrystalRect = CrystalRect::new(410.0, 329.0, 204.0, 109.0);
 const CRYSTAL_DELETE_CONFIRM_RECT: CrystalRect = CrystalRect::new(284.0, 289.0, 456.0, 190.0);
 const CRYSTAL_DELETE_CURSOR_SIZE: (f32, f32) = (16.0, 15.0);
 
@@ -2245,10 +2322,10 @@ impl NativePlayerUiIntentQueue {
 }
 
 #[derive(Component)]
-struct OverlayRoot;
+pub struct OverlayRoot;
 
 #[derive(Component)]
-struct OverlayInventory;
+pub struct OverlayInventory;
 
 #[derive(Component)]
 struct OverlayInventoryDeleteModal;
@@ -2285,6 +2362,11 @@ struct OverlayInventoryDeleteDialog;
 
 #[derive(Component)]
 struct OverlayInventoryDeleteAmountInput;
+
+/// Platform IME activation target. Hosts observe presses but all field edits
+/// and actions still go through the shared model and its validators.
+#[derive(Component)]
+pub struct NativeTextInputTarget;
 
 #[derive(Component)]
 struct OverlayEquipment;
@@ -2381,10 +2463,10 @@ struct OverlayNpcShopGoodSelectionDivider;
 struct OverlayNpcShopGoodNewIcon;
 
 #[derive(Component)]
-struct OverlayStorage;
+pub struct OverlayStorage;
 
 #[derive(Component)]
-struct OverlayOptions;
+pub struct OverlayOptions;
 
 #[derive(Component)]
 struct OverlaySocial;
@@ -2530,6 +2612,8 @@ enum OverlayButton {
     DeleteMail(u64),
     OpenMailCompose,
     MailRecipientFocus,
+    MailAttachmentPagePrev,
+    MailAttachmentPageNext,
     MailMessageFocus,
     MailGoldInc,
     MailGoldDec,
@@ -2589,14 +2673,14 @@ struct OverlayButtonControls<'w, 's> {
     mail_ui: ResMut<'w, MailUiState>,
     storage_ui: ResMut<'w, StorageUiState>,
     shop_ui: ResMut<'w, ShopUiState>,
-    ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
+    ui_audio: ResMut<'w, crate::ui_audio::NativeUiAudioQueue>,
     buttons: Query<'w, 's, (&'static Interaction, &'static OverlayButton), Changed<Interaction>>,
 }
 
 #[derive(SystemParam)]
 pub(crate) struct OverlayKeyboardControls<'w> {
     surface_signals: Option<ResMut<'w, UiSurfaceSignals>>,
-    ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
+    ui_audio: ResMut<'w, crate::ui_audio::NativeUiAudioQueue>,
     ui: Option<Res<'w, UiReadModel>>,
     effects: Option<ResMut<'w, UiEffectQueue>>,
     belt: Option<ResMut<'w, super::hud::CrystalBeltPresentation>>,
@@ -2612,6 +2696,7 @@ struct OverlayRenderModels<'w> {
     inventory_feedback: Res<'w, InventoryOperationFeedback>,
     mail: Res<'w, MailModel>,
     mail_ui: Res<'w, MailUiState>,
+    mail_compose_ui: Option<Res<'w, MailComposeUi>>,
     big_map: Res<'w, BigMapModel>,
     big_map_ui: Res<'w, BigMapUiState>,
     ui: Res<'w, UiReadModel>,
@@ -2687,9 +2772,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<SkillModel>()
             .init_resource::<crate::social::SocialModel>()
             .init_resource::<crate::options_effects::OptionsRuntime>()
-            .init_resource::<crate::audio::NativeAudioRuntime>()
-            .init_resource::<crate::audio::NativeGameplayAudioQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<CursorMoved>()
             .add_message::<MouseWheel>()
             .add_message::<bevy::window::Ime>()
@@ -2710,7 +2793,6 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     crate::skill_binding_persistence::load_persisted_skill_bindings,
                     crate::options_effects::load_persisted_options,
-                    crate::audio::initialize_native_audio,
                 )
                     .chain(),
             )
@@ -2771,12 +2853,10 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     process_guild_storage_pointer,
                     process_overlay_keyboard,
                     process_overlay_buttons,
-                    crate::audio::sync_native_ui_audio,
                     consume_exit_application,
                     crate::pending_operations::observe_native_session_boundary,
                     reconcile_native_game_shop_ui_state,
                     crate::options_effects::consume_options_effects,
-                    crate::audio::sync_native_audio,
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate),
@@ -2805,6 +2885,25 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Read),
+            );
+        #[cfg(feature = "native-ui")]
+        app.init_resource::<crate::audio::NativeAudioRuntime>()
+            .init_resource::<crate::audio::NativeGameplayAudioQueue>()
+            .add_systems(
+                Startup,
+                crate::audio::initialize_native_audio
+                    .after(crate::options_effects::load_persisted_options),
+            )
+            .add_systems(
+                Update,
+                (
+                    crate::audio::sync_native_ui_audio
+                        .after(process_overlay_buttons)
+                        .before(consume_exit_application),
+                    crate::audio::sync_native_audio
+                        .after(crate::options_effects::consume_options_effects),
+                )
+                    .in_set(NativePlayerUiSet::Mutate),
             );
     }
 }
@@ -3171,6 +3270,7 @@ fn spawn_overlay_root(mut commands: Commands) {
         .with_children(|root| {
             root.spawn((
                 OverlayInventory,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(INVENTORY_PANEL_ORIGIN.x as f32),
@@ -3413,12 +3513,13 @@ fn spawn_overlay_root(mut commands: Commands) {
             ));
             root.spawn((
                 OverlayStorage,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(150.0),
-                    top: Val::Px(100.0),
-                    width: Val::Px(640.0),
-                    height: Val::Px(344.0),
+                    left: Val::Px(CRYSTAL_STORAGE_PANEL_RECT.left),
+                    top: Val::Px(CRYSTAL_STORAGE_PANEL_RECT.top),
+                    width: Val::Px(CRYSTAL_STORAGE_PANEL_RECT.width),
+                    height: Val::Px(CRYSTAL_STORAGE_PANEL_RECT.height),
                     display: Display::None,
                     flex_direction: FlexDirection::Column,
                     padding: UiRect::all(Val::Px(10.0)),
@@ -3429,6 +3530,7 @@ fn spawn_overlay_root(mut commands: Commands) {
             ));
             root.spawn((
                 OverlayOptions,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(CRYSTAL_OPTIONS_PANEL_RECT.left),
@@ -3465,7 +3567,7 @@ fn consume_hud_buttons(
     shell: Option<Res<NativeShellModel>>,
     inventory: Res<InventoryModel>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
-    mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
+    mut ui_audio: ResMut<crate::ui_audio::NativeUiAudioQueue>,
 ) {
     if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame)
         || state.amount_modal_open()
@@ -3534,7 +3636,7 @@ fn consume_hud_buttons(
     }
 }
 
-fn hud_pointer_sound(action: CrystalHudAction) -> Option<crate::audio::NativeUiSound> {
+fn hud_pointer_sound(action: CrystalHudAction) -> Option<crate::ui_audio::NativeUiSound> {
     match action {
         // Crystal `MainDialog` assigns ButtonA to the five small lower-right
         // HUD buttons. Keep this bounded to source-audited controls.
@@ -3542,11 +3644,11 @@ fn hud_pointer_sound(action: CrystalHudAction) -> Option<crate::audio::NativeUiS
         | CrystalHudAction::Character
         | CrystalHudAction::Skill
         | CrystalHudAction::Quest
-        | CrystalHudAction::Option => Some(crate::audio::NativeUiSound::ButtonA),
+        | CrystalHudAction::Option => Some(crate::ui_audio::NativeUiSound::ButtonA),
         // Crystal `MenuButton` and `GameShopButton` use the distinct
         // `SoundList.ButtonC` local UI cue.
         CrystalHudAction::Menu | CrystalHudAction::GameShop => {
-            Some(crate::audio::NativeUiSound::ButtonC)
+            Some(crate::ui_audio::NativeUiSound::ButtonC)
         }
         _ => None,
     }
@@ -3621,7 +3723,9 @@ fn process_help_drag(
 fn process_inventory_drag(
     mut state: ResMut<NativePlayerUiState>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
+    touches: Option<Res<Touches>>,
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
+    panels: Query<&UiTransform, With<OverlayInventory>>,
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
     if !state.inventory_open() || state.amount_modal_open() {
@@ -3629,10 +3733,10 @@ fn process_inventory_drag(
         state.inventory_window.clear_cursor();
         return;
     }
-    let Some(mouse) = mouse else {
+    if mouse.is_none() && touches.is_none() {
         state.inventory_window.end_drag();
         return;
-    };
+    }
     let Ok((window_entity, window)) = windows.single() else {
         state.inventory_window.end_drag();
         return;
@@ -3646,57 +3750,171 @@ fn process_inventory_drag(
         .filter(|event| event.window == window_entity)
         .map(|event| cursor_logical(window, event.position))
         .collect::<Vec<_>>();
-    let current_cursor = cursor_path
+    let mouse_cursor = cursor_path
         .last()
         .copied()
         .or_else(|| help_cursor_logical(window));
+    let panel_transform = panels.single().ok();
+    let panel_origin = Vec2::new(state.inventory_window.left, state.inventory_window.top);
+    let panel_size = Vec2::new(
+        INVENTORY_PANEL_SIZE.width as f32,
+        INVENTORY_PANEL_SIZE.height as f32,
+    );
+    let focused_cursor =
+        |cursor| focused_panel_cursor(cursor, panel_origin, panel_size, panel_transform);
+
+    let active_touch_id = state.inventory_window.drag_touch_id;
+    let active_touch_cursor = active_touch_id.and_then(|id| {
+        touches.as_deref().and_then(|touches| {
+            touches
+                .get_pressed(id)
+                .map(|touch| cursor_logical(window, touch.position()))
+                .or_else(|| {
+                    touches
+                        .iter_just_released()
+                        .chain(touches.iter_just_canceled())
+                        .find(|touch| touch.id() == id)
+                        .map(|touch| cursor_logical(window, touch.position()))
+                })
+        })
+    });
+    let active_touch_ended = active_touch_id.is_some_and(|id| {
+        touches.as_deref().is_some_and(|touches| {
+            touches
+                .iter_just_released()
+                .chain(touches.iter_just_canceled())
+                .any(|touch| touch.id() == id)
+        })
+    });
+    let current_cursor = if active_touch_id.is_some() {
+        active_touch_cursor
+    } else {
+        mouse_cursor
+    };
+    let mouse_pressed = mouse
+        .as_deref()
+        .is_some_and(|mouse| mouse.pressed(MouseButton::Left));
+    let mouse_just_pressed = mouse
+        .as_deref()
+        .is_some_and(|mouse| mouse.just_pressed(MouseButton::Left));
+    let mouse_just_released = mouse
+        .as_deref()
+        .is_some_and(|mouse| mouse.just_released(MouseButton::Left));
+
+    let covered_by_higher_window = |cursor: Vec2| {
+        (state.hero.interactive
+            && hero_dialog::geometry::hit(&state.hero, [cursor.x, cursor.y], state.hero.front)
+                .0
+                .is_some())
+            || equipment_creature_host::covers(&state, cursor)
+            || state.trade_dialog.covers_cursor(cursor)
+            || state.ranking.covers_cursor(cursor)
+    };
+    let touch_start = if active_touch_id.is_none() && !mouse_just_pressed {
+        touches.as_deref().and_then(|touches| {
+            touches.iter_just_pressed().find_map(|touch| {
+                let cursor = cursor_logical(window, touch.position());
+                let hit = focused_cursor(cursor)?;
+                (inventory_drag_surface_contains(&state.inventory_window, hit.x, hit.y)
+                    && !covered_by_higher_window(cursor))
+                .then_some((touch.id(), cursor))
+            })
+        })
+    } else {
+        None
+    };
 
     // SendInput and high-polling mice can deliver press, motion and release in
     // one Bevy frame. SendInput can also move to the press point one frame
     // before the press edge and expose only the destination CursorMoved event
     // in the pressed frame. Preserve the prior cursor as the anchor whenever
     // it owns the InventoryDialog's exposed drag surface.
-    if mouse.just_pressed(MouseButton::Left) {
-        let observed_start = cursor_path.first().copied().or(current_cursor);
-        let previous_start = state.inventory_window.last_cursor.filter(|previous| {
-            inventory_drag_surface_contains(&state.inventory_window, previous.x, previous.y)
-                && observed_start.is_some_and(|observed| previous.distance(observed) > 2.0)
-        });
-        let Some(start) = previous_start
-            .or(observed_start)
-            .or(state.inventory_window.last_cursor)
-        else {
+    if mouse_just_pressed || touch_start.is_some() {
+        let (touch_id, start) = if mouse_just_pressed {
+            let observed_start = cursor_path.first().copied().or(current_cursor);
+            let previous_start = state.inventory_window.last_cursor.filter(|previous| {
+                focused_cursor(*previous).is_some_and(|hit| {
+                    inventory_drag_surface_contains(&state.inventory_window, hit.x, hit.y)
+                }) && observed_start.is_some_and(|observed| previous.distance(observed) > 2.0)
+            });
+            let Some(start) = previous_start
+                .or(observed_start)
+                .or(state.inventory_window.last_cursor)
+            else {
+                state.inventory_window.end_drag();
+                return;
+            };
+            (None, start)
+        } else {
+            let (touch_id, start) = touch_start.expect("touch start was checked");
+            (Some(touch_id), start)
+        };
+        let Some(hit_start) = focused_cursor(start) else {
             state.inventory_window.end_drag();
+            state.inventory_window.remember_cursor(current_cursor);
             return;
         };
         // The accepted trade pair is drawn above Inventory. Its child cells
         // and controls own the press too, not only its draggable background.
-        if (state.hero.interactive
-            && hero_dialog::geometry::hit(&state.hero, [start.x, start.y], state.hero.front)
-                .0
-                .is_some())
-            || equipment_creature_host::covers(&state, start)
-            || state.trade_dialog.covers_cursor(start)
-            || state.ranking.covers_cursor(start)
-        {
+        if covered_by_higher_window(start) {
             state.inventory_window.end_drag();
             state.inventory_window.remember_cursor(current_cursor);
             return;
         }
-        if state.inventory_window.begin_drag(start.x, start.y) {
+        let focus_translation = focused_panel_translation(panel_transform).unwrap_or_default();
+        if state
+            .inventory_window
+            .begin_focused_drag(hit_start, start, focus_translation)
+        {
+            state.inventory_window.drag_touch_id = touch_id;
             state.hero.cross.player_front = true;
-            if let Some(end) = current_cursor {
+            let touch_cursor = touch_id.and_then(|id| {
+                touches.as_deref().and_then(|touches| {
+                    touches
+                        .get_pressed(id)
+                        .map(|touch| cursor_logical(window, touch.position()))
+                        .or_else(|| {
+                            touches
+                                .iter_just_released()
+                                .chain(touches.iter_just_canceled())
+                                .find(|touch| touch.id() == id)
+                                .map(|touch| cursor_logical(window, touch.position()))
+                        })
+                })
+            });
+            if let Some(end) = touch_cursor.or(current_cursor).or(Some(start)) {
                 state.inventory_window.drag_to(end.x, end.y);
             }
         }
-        if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
+        let touch_finished = touch_id.is_some_and(|id| {
+            touches.as_deref().is_none_or(|touches| {
+                touches.get_pressed(id).is_none()
+                    || touches
+                        .iter_just_released()
+                        .chain(touches.iter_just_canceled())
+                        .any(|touch| touch.id() == id)
+            })
+        });
+        if touch_finished || (touch_id.is_none() && (mouse_just_released || !mouse_pressed)) {
             state.inventory_window.end_drag();
         }
-        state.inventory_window.remember_cursor(current_cursor);
+        state
+            .inventory_window
+            .remember_cursor(current_cursor.or(Some(start)));
         return;
     }
 
-    if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
+    let pointer_pressed = active_touch_id
+        .and_then(|id| {
+            touches
+                .as_deref()
+                .map(|touches| touches.get_pressed(id).is_some())
+        })
+        .unwrap_or(mouse_pressed);
+    if active_touch_ended || mouse_just_released || !pointer_pressed {
+        if let Some(cursor) = current_cursor {
+            state.inventory_window.drag_to(cursor.x, cursor.y);
+        }
         state.inventory_window.end_drag();
         state.inventory_window.remember_cursor(current_cursor);
         return;
@@ -3716,7 +3934,8 @@ fn process_inventory_delete_pointer(
     mut state: ResMut<NativePlayerUiState>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
+    panels: Query<&UiTransform, With<OverlayInventory>>,
+    mut ui_audio: ResMut<crate::ui_audio::NativeUiAudioQueue>,
 ) {
     if !state.inventory_open()
         || !state.inventory_delete_mode
@@ -3731,7 +3950,15 @@ fn process_inventory_delete_pointer(
     if !window.focused {
         return;
     }
-    let Some(cursor) = help_cursor_logical(window) else {
+    let Some(raw_cursor) = help_cursor_logical(window) else {
+        return;
+    };
+    let origin = Vec2::new(state.inventory_window.left, state.inventory_window.top);
+    let size = Vec2::new(
+        INVENTORY_PANEL_SIZE.width as f32,
+        INVENTORY_PANEL_SIZE.height as f32,
+    );
+    let Some(cursor) = focused_panel_cursor(raw_cursor, origin, size, panels.single().ok()) else {
         return;
     };
     let panel = CrystalRect::new(
@@ -3742,7 +3969,7 @@ fn process_inventory_delete_pointer(
     );
     if panel.contains(cursor.x, cursor.y) {
         state.cancel_inventory_delete();
-        ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+        ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
     }
 }
 
@@ -4132,12 +4359,12 @@ pub(crate) fn process_overlay_keyboard(
     if state.inventory_delete_prompt.is_some() {
         if keys.just_pressed(KeyCode::Escape) {
             state.cancel_inventory_delete();
-            ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+            ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
             return;
         }
         if keys.just_pressed(KeyCode::Enter) {
             if confirm_inventory_delete(&mut state, &inventory, &mut intents, &mut pending) {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
             }
             return;
         }
@@ -5011,7 +5238,7 @@ fn process_overlay_buttons(
                     // Crystal CharacterDialog.CloseButton uses ButtonA. Keep
                     // the source-audited cue local to this control rather than
                     // assigning sound to every generic CloseWindows caller.
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
                 equipment_creature_host::close_general(
                     &mut state,
@@ -5072,15 +5299,15 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::CloseHelp => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 state.help.hide();
             }
             OverlayButton::HelpPrevious => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 state.help.previous_page();
             }
             OverlayButton::HelpNext => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 state.help.next_page();
             }
             OverlayButton::CloseInspect => {
@@ -5258,7 +5485,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::GroupAddSelected | OverlayButton::GroupRemoveSelected => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 let owner = ui
                     .as_ref()
                     .and_then(|u| u.player.name.as_deref())
@@ -5297,7 +5524,7 @@ fn process_overlay_buttons(
                     state.guild_recruit_focused = false;
                     state.guild_panel.recruit_editor.editor_focused = false;
                 }
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
             }
             OverlayButton::GuildBuffActivate(row) => state.guild_panel.activate(
                 row,
@@ -5307,7 +5534,7 @@ fn process_overlay_buttons(
             ),
             OverlayButton::GuildBuffScroll(rows) => {
                 state.guild_panel.buffs.scroll(rows);
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
             }
             OverlayButton::GuildBuffThumb => {}
             OverlayButton::GuildNoticeScroll(delta) => {
@@ -5408,7 +5635,7 @@ fn process_overlay_buttons(
                 state.guild_recruit_focused = false;
                 state.guild_gold_prompt = None;
                 state.guild_storage.end_drag();
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 if page != GuildLeftPage::Ranks {
                     state.selected_guild_rank = None;
                     state.guild_rank_name_draft.clear();
@@ -5586,7 +5813,7 @@ fn process_overlay_buttons(
             OverlayButton::GuildGoldDeposit | OverlayButton::GuildGoldWithdraw => {
                 // MirButton defaults to ButtonB, including a click rejected
                 // by StorageAddGold/StorageRemoveGold's send cooldown.
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
                 let action = if *button == OverlayButton::GuildGoldDeposit {
                     GuildGoldAction::Deposit
                 } else {
@@ -5603,7 +5830,7 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::GuildGoldConfirm => {
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
                 confirm_guild_gold(
                     &mut state,
                     &mut social,
@@ -5617,16 +5844,16 @@ fn process_overlay_buttons(
             OverlayButton::GuildGoldCancel | OverlayButton::GuildGoldClose => {
                 state.guild_gold_prompt = None;
                 ui_audio.push(if *button == OverlayButton::GuildGoldClose {
-                    crate::audio::NativeUiSound::ButtonA
+                    crate::ui_audio::NativeUiSound::ButtonA
                 } else {
-                    crate::audio::NativeUiSound::ButtonB
+                    crate::ui_audio::NativeUiSound::ButtonB
                 });
             }
             OverlayButton::GuildStoragePreviousRow | OverlayButton::GuildStorageNextRow => {
                 if !state.guild_open() || state.guild_left_page != GuildLeftPage::Storage {
                     continue;
                 }
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 if *button == OverlayButton::GuildStoragePreviousRow {
                     state.guild_storage.previous_row();
                 } else {
@@ -5707,14 +5934,14 @@ fn process_overlay_buttons(
             }
             OverlayButton::TradeGoldConfirm => {
                 trade_dialog::confirm_gold(&mut state, &mut social, gold, &mut intents);
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
             }
             OverlayButton::TradeGoldCancel | OverlayButton::TradeGoldClose => {
                 state.trade_dialog.gold_prompt = None;
                 ui_audio.push(if *button == OverlayButton::TradeGoldClose {
-                    crate::audio::NativeUiSound::ButtonA
+                    crate::ui_audio::NativeUiSound::ButtonA
                 } else {
-                    crate::audio::NativeUiSound::ButtonB
+                    crate::ui_audio::NativeUiSound::ButtonB
                 });
             }
             OverlayButton::TradeConfirm => {
@@ -5722,12 +5949,12 @@ fn process_overlay_buttons(
                     continue;
                 }
                 if trade_dialog::toggle_lock(&mut state, &social, &mut intents) {
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
             }
             OverlayButton::TradeCancel => {
                 if trade_dialog::cancel(&mut state, &mut social, &mut intents) {
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
             }
             OverlayButton::Logout => {
@@ -5757,26 +5984,26 @@ fn process_overlay_buttons(
                 {
                     // DelItemButton itself owns ButtonA even when an existing
                     // selected cell opens the prompt without toggling mode.
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                     let _ = state.open_inventory_delete_for_slot(&inventory, slot);
                 } else {
                     state.inventory_delete_mode = !state.inventory_delete_mode;
                     state.inventory_delete_prompt = None;
                     ui_audio.push(if state.inventory_delete_mode {
-                        crate::audio::NativeUiSound::ButtonA
+                        crate::ui_audio::NativeUiSound::ButtonA
                     } else {
-                        crate::audio::NativeUiSound::ButtonB
+                        crate::ui_audio::NativeUiSound::ButtonB
                     });
                 }
             }
             OverlayButton::InventoryDeleteConfirm => {
                 if confirm_inventory_delete(&mut state, &inventory, &mut intents, &mut pending) {
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
                 }
             }
             OverlayButton::InventoryDeleteCancel => {
                 state.cancel_inventory_delete();
-                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonB);
             }
             OverlayButton::InventoryDeleteAmountClose => {
                 if matches!(
@@ -5788,7 +6015,7 @@ fn process_overlay_buttons(
                     // CancelDelete callback, so delete mode remains active.
                     state.inventory_delete_prompt = None;
                     state.inspect = None;
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 }
             }
             OverlayButton::DropInspected => {
@@ -5968,7 +6195,7 @@ fn process_overlay_buttons(
                 // MirButton.Sound = SoundList.ButtonA. Keep the cue on the
                 // local Changed<Interaction> press edge; switching pages must
                 // never manufacture a gateway intent.
-                ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                 state.character_page = page;
                 state.inspect = None;
             }
@@ -5978,7 +6205,7 @@ fn process_overlay_buttons(
                     // locked second tab still clicks (Crystal opens an
                     // expansion prompt), but it must never expose a phantom
                     // empty page while expansion authority is unavailable.
-                    ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    ui_audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                     if page != 1 || inventory.second_bag_unlocked() {
                         state.inventory_page = page;
                         state.inspect = None;
@@ -6051,6 +6278,17 @@ fn process_overlay_buttons(
                 );
                 compose_ui.focus = MailComposeFocus::Recipient;
                 compose_ui.last_notice = None;
+                compose_ui.attachment_page = 0;
+            }
+            OverlayButton::MailAttachmentPagePrev | OverlayButton::MailAttachmentPageNext => {
+                let (_, pages) = mail_attachment_page(&inventory, compose_ui.attachment_page);
+                let page = compose_ui.attachment_page.min(pages - 1);
+                compose_ui.attachment_page =
+                    if matches!(*button, OverlayButton::MailAttachmentPagePrev) {
+                        page.saturating_sub(1)
+                    } else {
+                        (page + 1).min(pages - 1)
+                    };
             }
             OverlayButton::MailRecipientFocus => {
                 compose_ui.focus = MailComposeFocus::Recipient;
@@ -6779,7 +7017,7 @@ fn delete_amount_backspace(state: &mut NativePlayerUiState) {
     }
 }
 
-fn push_delete_amount_text(state: &mut NativePlayerUiState, text: &str) {
+pub fn push_delete_amount_text(state: &mut NativePlayerUiState, text: &str) {
     let Some(InventoryDeletePrompt::Amount {
         target,
         draft,
@@ -6996,13 +7234,26 @@ fn render_inventory_delete_modal(
                             OverlayButton::InventoryDeleteCancel,
                         );
                     }
-                    overlay_text_at(
-                        dialog,
-                        &format!("Delete how many '{name}'?", name = target.name),
-                        CrystalRect::new(19.0, 8.0, 158.0, 14.0),
-                        10.0,
-                        TEXT,
-                    );
+                    // Two title lines fit above the item at y=34, without
+                    // painting the item name underneath the close button.
+                    dialog.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: px(19.0),
+                            top: px(4.0),
+                            width: px(158.0),
+                            height: px(28.0),
+                            overflow: Overflow::clip(),
+                            ..default()
+                        },
+                        Text::new(format!("Delete how many '{name}'?", name = target.name)),
+                        TextFont {
+                            font_size: FontSize::Px(10.0),
+                            ..default()
+                        },
+                        TextColor(TEXT),
+                        TextLayout::new(Justify::Left, LineBreak::WordBoundary),
+                    ));
 
                     let parsed = draft.parse::<u32>().ok();
                     let border = match parsed {
@@ -7015,6 +7266,8 @@ fn render_inventory_delete_modal(
                     dialog
                         .spawn((
                             OverlayInventoryDeleteAmountInput,
+                            Button,
+                            NativeTextInputTarget,
                             Node {
                                 position_type: PositionType::Absolute,
                                 left: Val::Px(58.0),
@@ -7223,9 +7476,9 @@ fn render_gold_amount_modal(
                 BorderColor::all(border),
             ));
             if actions[0] == OverlayButton::TradeGoldConfirm {
-                field.insert(OverlayTradeGoldInput);
+                field.insert((Button, NativeTextInputTarget, OverlayTradeGoldInput));
             } else {
-                field.insert(OverlayGuildGoldInput);
+                field.insert((Button, NativeTextInputTarget, OverlayGuildGoldInput));
             }
             field.with_children(|field| {
                 field.spawn((
@@ -7271,7 +7524,22 @@ fn render_overlays(
         )>,
     )>,
     mut commands: Commands,
+    mut overlay_render_cache: Local<Option<[u64; 22]>>,
 ) {
+    let cursor = (models.state.inventory_open() && models.state.inventory_delete_mode)
+        .then(|| {
+            windows
+                .single()
+                .ok()
+                .and_then(|window| window.cursor_position())
+        })
+        .flatten();
+    let render_fingerprints = overlay_render_fingerprints(&models, cursor);
+    if *overlay_render_cache == Some(render_fingerprints) {
+        return;
+    }
+    *overlay_render_cache = Some(render_fingerprints);
+
     let OverlayRenderModels {
         asset_server,
         wing_materials,
@@ -7281,6 +7549,7 @@ fn render_overlays(
         inventory_feedback,
         mail,
         mail_ui,
+        mail_compose_ui,
         big_map,
         big_map_ui,
         ui,
@@ -7381,6 +7650,7 @@ fn render_overlays(
                     &mail_ui,
                     &inventory,
                     &state,
+                    &mail_compose_ui.as_deref().cloned().unwrap_or_default(),
                 )
             },
         );
@@ -7557,6 +7827,68 @@ fn render_overlays(
             },
         );
     }
+}
+
+struct OverlayFingerprintWriter(DefaultHasher);
+
+impl std::fmt::Write for OverlayFingerprintWriter {
+    fn write_str(&mut self, value: &str) -> std::fmt::Result {
+        self.0.write(value.as_bytes());
+        Ok(())
+    }
+}
+
+/// Bevy change ticks are deliberately insufficient here: several interaction
+/// systems take mutable resources every frame even when their logical values
+/// stay equal. Hash the actual render inputs without allocating a debug String
+/// so all desktop-derived overlay trees remain retained between real changes.
+fn debug_fingerprint(value: &impl std::fmt::Debug) -> u64 {
+    let mut fingerprint = OverlayFingerprintWriter(DefaultHasher::new());
+    write!(&mut fingerprint, "{value:?}").expect("hashing overlay render models cannot fail");
+    fingerprint.0.finish()
+}
+
+fn overlay_render_fingerprints(
+    models: &OverlayRenderModels<'_>,
+    cursor: Option<Vec2>,
+) -> [u64; 22] {
+    let mut state = (*models.state).clone();
+    // These fields belong to input routing or separately retained HUD
+    // renderers. Their fade clocks and per-frame consumption markers must not
+    // invalidate every heavyweight window in `render_overlays`.
+    state.menu_pointer_consumed = false;
+    state.menu_hit_regions.clear();
+    state.ime_frame_consumed = false;
+    state.status_hud = Default::default();
+    state.hero_buffs = Default::default();
+    state.guild_panel.now_ms = 0;
+    state.guild_panel.cursor = None;
+    state.guild_panel.left_down = false;
+
+    [
+        debug_fingerprint(&models.asset_server.is_some()),
+        debug_fingerprint(&models.wing_materials.is_some()),
+        debug_fingerprint(&models.shell.as_deref()),
+        debug_fingerprint(&state),
+        debug_fingerprint(&*models.inventory),
+        debug_fingerprint(&*models.inventory_feedback),
+        debug_fingerprint(&*models.mail),
+        debug_fingerprint(&*models.mail_ui),
+        debug_fingerprint(&models.mail_compose_ui.as_deref()),
+        debug_fingerprint(&*models.big_map),
+        debug_fingerprint(&*models.big_map_ui),
+        debug_fingerprint(&*models.ui),
+        debug_fingerprint(&*models.shop),
+        debug_fingerprint(&*models.shop_ui),
+        debug_fingerprint(&*models.game_shop),
+        debug_fingerprint(&*models.storage),
+        debug_fingerprint(&*models.storage_ui),
+        debug_fingerprint(&*models.skills),
+        debug_fingerprint(&*models.skill_binding),
+        debug_fingerprint(&*models.social),
+        debug_fingerprint(&models.combat_target.as_deref()),
+        debug_fingerprint(&cursor),
+    ]
 }
 
 fn fill_panel<C: Component>(
@@ -8513,6 +8845,9 @@ fn overlay_absolute_button(
     ));
     if enabled {
         entity.insert((Button, action));
+        if is_text_input_action(action) {
+            entity.insert(NativeTextInputTarget);
+        }
     }
     if !label.is_empty() {
         entity.with_children(|button| {
@@ -9263,19 +9598,21 @@ fn render_help(
             TEXT,
         );
         for (row, (shortcut, information)) in rows.iter().enumerate() {
-            let top = 142.0 + row as f32 * 20.0;
+            // All 18 shortcut rows must end inside the body (y < 475),
+            // before the page label at y=480. Keep every original row.
+            let top = 142.0 + row as f32 * 18.0;
             let current_shortcut = help_bound_key(page, row, shortcut, keyboard);
             overlay_text_at(
                 parent,
                 &current_shortcut,
-                CrystalRect::new(30.0, top, 95.0, 23.0),
+                CrystalRect::new(30.0, top, 95.0, 18.0),
                 9.0,
                 GOLD,
             );
             overlay_text_at(
                 parent,
                 information,
-                CrystalRect::new(131.0, top, 400.0, 23.0),
+                CrystalRect::new(131.0, top, 400.0, 18.0),
                 9.0,
                 TEXT,
             );
@@ -9796,6 +10133,22 @@ fn render_guild_notice(
         ),
     );
     let can_edit = guild.name.is_some() && social_has_permission(guild, "notice");
+    if can_edit && state.guild_notice_editing && state.guild_notice_submission.is_none() {
+        // Transparent input hit surface only: Android can reopen its IME
+        // without invoking BeginEdit again (which would replace the draft).
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: px(rect.left + 13.0),
+                top: px(rect.top + 61.0),
+                width: px(322.0),
+                height: px(330.0),
+                ..default()
+            },
+            Button,
+            NativeTextInputTarget,
+        ));
+    }
     if can_edit {
         let action = if state.guild_notice_editing {
             OverlayButton::GuildPublishNotice
@@ -10641,6 +10994,7 @@ fn render_mail(
     mail_ui: &MailUiState,
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
+    compose_ui: &MailComposeUi,
 ) {
     if let Some(asset_server) = asset_server {
         spawn_overlay_frame(
@@ -10675,8 +11029,7 @@ fn render_mail(
         );
     }
     if let Some(compose) = state.core.mail_compose.as_ref() {
-        render_mail_compose(parent, compose, inventory);
-        overlay_button(parent, "Cancel", OverlayButton::CancelMailCompose, true);
+        render_mail_compose(parent, compose, inventory, compose_ui);
         return;
     }
     let page = mail.page(mail_ui.cursor.page);
@@ -10805,18 +11158,31 @@ fn render_mail(
     }
 }
 
+/// Presentation groups let mobile hosts reflow the same shared mail actions.
+#[derive(Component)]
+pub struct MailComposeDetails;
+#[derive(Component)]
+pub struct MailComposeFooter;
+
 fn render_mail_compose(
     parent: &mut ChildSpawnerCommands,
     draft: &mir2_ui_core::state::MailComposeDraft,
     inventory: &InventoryModel,
+    ui: &MailComposeUi,
 ) {
-    body(parent, "Write mail (Tab switches field; Esc cancels)");
+    overlay_text_at(
+        parent,
+        "Write mail",
+        CrystalRect::new(10.0, 8.0, 235.0, 18.0),
+        11.0,
+        TEXT,
+    );
     let message_label = if draft.message.is_empty() {
         "<type>".to_owned()
     } else {
         short_name(&draft.message, "<type>")
     };
-    overlay_button(
+    overlay_absolute_button(
         parent,
         &format!(
             "Recipient: {}",
@@ -10826,79 +11192,283 @@ fn render_mail_compose(
                 &draft.recipient
             }
         ),
+        CrystalRect::new(10.0, 32.0, 290.0, 26.0),
         OverlayButton::MailRecipientFocus,
         true,
     );
-    overlay_button(
+    overlay_absolute_button(
         parent,
         &format!("Message: {message_label}"),
+        CrystalRect::new(10.0, 62.0, 290.0, 26.0),
         OverlayButton::MailMessageFocus,
         true,
     );
     parent
-        .spawn(Node {
-            display: Display::Flex,
-            flex_direction: FlexDirection::Row,
-            column_gap: Val::Px(4.0),
-            ..default()
-        })
-        .with_children(|row| {
-            body(row, &format!("Gold: {}", draft.gold));
-            overlay_button(row, "-100", OverlayButton::MailGoldDec, draft.gold >= 100);
-            overlay_button(row, "+100", OverlayButton::MailGoldInc, true);
+        .spawn((
+            MailComposeDetails,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Px(312.0),
+                height: Val::Px(444.0),
+                ..default()
+            },
+            FocusPolicy::Pass,
+        ))
+        .with_children(|parent| {
+            overlay_text_at(
+                parent,
+                &format!("Gold: {}", draft.gold),
+                CrystalRect::new(10.0, 98.0, 170.0, 18.0),
+                10.0,
+                TEXT,
+            );
+            overlay_absolute_button(
+                parent,
+                "-100",
+                CrystalRect::new(185.0, 92.0, 54.0, 26.0),
+                OverlayButton::MailGoldDec,
+                draft.gold >= 100,
+            );
+            overlay_absolute_button(
+                parent,
+                "+100",
+                CrystalRect::new(245.0, 92.0, 54.0, 26.0),
+                OverlayButton::MailGoldInc,
+                true,
+            );
+            overlay_text_at(
+                parent,
+                &format!("Attachments: {}/5", draft.attachment_unique_ids.len()),
+                CrystalRect::new(10.0, 126.0, 290.0, 18.0),
+                10.0,
+                TEXT,
+            );
+            let (items, pages) = mail_attachment_page(inventory, ui.attachment_page);
+            for (row, item) in items.into_iter().enumerate() {
+                let id = item
+                    .unique_id
+                    .expect("attachment page filters missing identity");
+                let selected = draft.attachment_unique_ids.contains(&id);
+                overlay_absolute_button(
+                    parent,
+                    &format!(
+                        "{} {} ×{} (slot {})",
+                        if selected { "Remove" } else { "Attach" },
+                        short_name(&item.name, &item.key),
+                        item.quantity,
+                        item.slot
+                    ),
+                    CrystalRect::new(10.0, 150.0 + row as f32 * 32.0, 290.0, 28.0),
+                    if selected {
+                        OverlayButton::RemoveMailAttachment(id)
+                    } else {
+                        OverlayButton::AddMailAttachment(id)
+                    },
+                    selected || draft.attachment_unique_ids.len() < MAX_MAIL_ATTACHMENTS,
+                );
+            }
+            let page = ui.attachment_page.min(pages - 1);
+            overlay_absolute_button(
+                parent,
+                "<",
+                CrystalRect::new(10.0, 350.0, 54.0, 28.0),
+                OverlayButton::MailAttachmentPagePrev,
+                page > 0,
+            );
+            overlay_text_at(
+                parent,
+                &format!("{}/{}", page + 1, pages),
+                CrystalRect::new(125.0, 357.0, 72.0, 18.0),
+                10.0,
+                TEXT,
+            );
+            overlay_absolute_button(
+                parent,
+                ">",
+                CrystalRect::new(246.0, 350.0, 54.0, 28.0),
+                OverlayButton::MailAttachmentPageNext,
+                page + 1 < pages,
+            );
         });
-    body(
-        parent,
-        &format!("Attachments: {}/5", draft.attachment_unique_ids.len()),
-    );
-    for id in &draft.attachment_unique_ids {
-        if let Some(item) = inventory
-            .items
-            .iter()
-            .find(|item| item.container == 0 && item.unique_id == Some(*id))
-        {
-            parent
-                .spawn(Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(4.0),
+    parent
+        .spawn((
+            MailComposeFooter,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Px(312.0),
+                height: Val::Px(444.0),
+                ..default()
+            },
+            FocusPolicy::Pass,
+        ))
+        .with_children(|parent| {
+            overlay_absolute_button(
+                parent,
+                "Send",
+                CrystalRect::new(10.0, 408.0, 138.0, 28.0),
+                OverlayButton::SubmitMail,
+                !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty(),
+            );
+            overlay_absolute_button(
+                parent,
+                "Cancel",
+                CrystalRect::new(162.0, 408.0, 138.0, 28.0),
+                OverlayButton::CancelMailCompose,
+                true,
+            );
+        });
+}
+
+// Presentation-only paging. Shared reducers still enforce attachment count and
+// the server validates every identity. No inventory item is changed here.
+fn mail_attachment_page(inventory: &InventoryModel, requested: usize) -> (Vec<&ItemModel>, usize) {
+    let items: Vec<_> = inventory
+        .items_in(0)
+        .into_iter()
+        .filter(|item| item.unique_id.is_some())
+        .collect();
+    let pages = items.len().div_ceil(6).max(1);
+    let start = requested.min(pages - 1) * 6;
+    (items.into_iter().skip(start).take(6).collect(), pages)
+}
+
+#[cfg(test)]
+mod mail_compose_paging_tests {
+    use super::*;
+
+    #[test]
+    fn compose_footer_can_move_without_moving_fields_or_attachment_controls() {
+        let mut world = World::new();
+        world
+            .commands()
+            .spawn(Node::default())
+            .with_children(|parent| {
+                render_mail_compose(parent, &default(), &default(), &default());
+            });
+        world.flush();
+        let footer = world
+            .query_filtered::<Entity, With<MailComposeFooter>>()
+            .single(&world)
+            .expect("shared footer presentation group");
+        let details = world
+            .query_filtered::<Entity, With<MailComposeDetails>>()
+            .single(&world)
+            .expect("shared attachment presentation group");
+        for (action, parent) in world.query::<(&OverlayButton, &ChildOf)>().iter(&world) {
+            match action {
+                OverlayButton::SubmitMail | OverlayButton::CancelMailCompose => {
+                    assert_eq!(parent.parent(), footer)
+                }
+                OverlayButton::MailGoldInc | OverlayButton::MailGoldDec => {
+                    assert_eq!(parent.parent(), details)
+                }
+                OverlayButton::MailRecipientFocus | OverlayButton::MailMessageFocus => {
+                    assert_ne!(parent.parent(), footer);
+                    assert_ne!(parent.parent(), details);
+                }
+                _ => {}
+            }
+        }
+    }
+
+    #[test]
+    fn populated_compose_controls_stay_inside_mail_frame() {
+        let inventory = InventoryModel {
+            items: (0..40)
+                .map(|slot| ItemModel {
+                    container: 0,
+                    slot,
+                    unique_id: Some(u64::from(slot) + 1),
                     ..default()
                 })
-                .with_children(|row| {
-                    body(row, &format!("{} ×{}", item.name, item.quantity));
-                    overlay_button(
-                        row,
-                        "Remove",
-                        OverlayButton::RemoveMailAttachment(*id),
-                        true,
-                    );
-                });
+                .collect(),
+            ..default()
+        };
+        let mut world = World::new();
+        world
+            .commands()
+            .spawn(Node::default())
+            .with_children(|parent| {
+                render_mail_compose(parent, &default(), &inventory, &default());
+            });
+        world.flush();
+        let mut buttons = 0;
+        for (node, button) in world
+            .query::<(&Node, Option<&OverlayButton>)>()
+            .iter(&world)
+        {
+            if let (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) =
+                (node.left, node.top, node.width, node.height)
+            {
+                assert!(
+                    left >= 0.0 && top >= 0.0 && left + width <= 312.0 && top + height <= 444.0
+                );
+            }
+            if matches!(button, Some(OverlayButton::AddMailAttachment(_))) {
+                buttons += 1;
+            }
         }
+        assert_eq!(buttons, 6);
     }
-    for item in inventory.items_in(0) {
-        let Some(id) = item.unique_id else { continue };
-        if draft.attachment_unique_ids.contains(&id) {
-            continue;
+
+    #[test]
+    fn all_eligible_items_remain_reachable_and_stale_pages_clamp() {
+        let inventory = InventoryModel {
+            items: (0..13)
+                .map(|slot| ItemModel {
+                    container: 0,
+                    slot,
+                    unique_id: Some(u64::from(slot) + 1),
+                    ..default()
+                })
+                .collect(),
+            ..default()
+        };
+        let mut seen = Vec::new();
+        for page in 0..3 {
+            let (items, pages) = mail_attachment_page(&inventory, page);
+            assert_eq!(pages, 3);
+            assert!(items.len() <= 6);
+            seen.extend(items.into_iter().map(|item| item.slot));
         }
-        if draft.attachment_unique_ids.len() >= MAX_MAIL_ATTACHMENTS {
-            break;
-        }
-        overlay_button(
-            parent,
-            &format!(
-                "Attach {} ×{} (slot {})",
-                item.name, item.quantity, item.slot
-            ),
-            OverlayButton::AddMailAttachment(id),
-            true,
-        );
+        assert_eq!(seen, (0..13).collect::<Vec<_>>());
+        assert_eq!(mail_attachment_page(&inventory, usize::MAX).0[0].slot, 12);
+        let empty = InventoryModel::default();
+        assert_eq!(mail_attachment_page(&empty, usize::MAX).1, 1);
+        assert!(mail_attachment_page(&empty, 0).0.is_empty());
     }
-    overlay_button(
-        parent,
-        "Send",
-        OverlayButton::SubmitMail,
-        !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty(),
-    );
+
+    #[test]
+    fn unaddressable_or_other_container_items_do_not_create_rows() {
+        let inventory = InventoryModel {
+            items: vec![
+                ItemModel {
+                    container: 0,
+                    unique_id: None,
+                    ..default()
+                },
+                ItemModel {
+                    container: 2,
+                    unique_id: Some(2),
+                    ..default()
+                },
+                ItemModel {
+                    container: 0,
+                    unique_id: Some(3),
+                    ..default()
+                },
+            ],
+            ..default()
+        };
+        let (items, pages) = mail_attachment_page(&inventory, 0);
+        assert_eq!(pages, 1);
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].unique_id, Some(3));
+    }
 }
 
 fn big_map_view_position(point: BigMapPoint, width: i32, height: i32) -> (f32, f32) {
@@ -12478,6 +13048,9 @@ fn overlay_button(
     ));
     if enabled {
         entity.insert((Button, action));
+        if is_text_input_action(action) {
+            entity.insert(NativeTextInputTarget);
+        }
     }
     entity.with_children(|button| {
         button.spawn((
@@ -12491,6 +13064,18 @@ fn overlay_button(
             TextLayout::new(Justify::Left, LineBreak::NoWrap),
         ));
     });
+}
+
+fn is_text_input_action(action: OverlayButton) -> bool {
+    matches!(
+        action,
+        OverlayButton::GroupInviteNameFocus
+            | OverlayButton::GuildRecruitNameFocus
+            | OverlayButton::GuildRankNameFocus
+            | OverlayButton::MailRecipientFocus
+            | OverlayButton::MailMessageFocus
+            | OverlayButton::BigMapSearchFocus
+    )
 }
 
 #[cfg(test)]
@@ -12534,7 +13119,7 @@ mod tests {
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .init_resource::<NativePlayerUiIntentQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
@@ -12552,7 +13137,7 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -12567,7 +13152,7 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
@@ -12580,15 +13165,15 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
 
         app.world_mut().entity_mut(button).insert(Interaction::None);
@@ -12603,12 +13188,12 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
         app.world_mut()
-            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
             .drain_bounded(8);
 
         // A stale press outside InGame is neither a click nor a sound.
@@ -12625,7 +13210,7 @@ mod tests {
             .inventory_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -12637,7 +13222,7 @@ mod tests {
             .toggle_inventory();
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -12932,7 +13517,7 @@ mod tests {
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .init_resource::<NativePlayerUiIntentQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
@@ -12970,7 +13555,7 @@ mod tests {
         assert_eq!(state.character_page, CharacterPage::Character);
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
@@ -12988,12 +13573,12 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
         app.world_mut()
-            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
             .drain_bounded(8);
 
         // A second edge closes the already-visible CharacterPage and plays
@@ -13010,12 +13595,12 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             1
         );
         app.world_mut()
-            .resource_mut::<crate::audio::NativeUiAudioQueue>()
+            .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
             .drain_bounded(8);
 
         // Disabled image buttons are not valid clicks even if a synthetic
@@ -13037,7 +13622,7 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -13053,7 +13638,7 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -13091,7 +13676,7 @@ mod tests {
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .init_resource::<NativePlayerUiIntentQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
@@ -13111,9 +13696,9 @@ mod tests {
         assert!(app.world().resource::<NativePlayerUiState>().menu_open());
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonC]
+            vec![crate::ui_audio::NativeUiSound::ButtonC]
         );
         assert!(app
             .world()
@@ -13135,7 +13720,7 @@ mod tests {
             app.init_resource::<NativePlayerUiState>()
                 .init_resource::<InventoryModel>()
                 .init_resource::<NativePlayerUiIntentQueue>()
-                .init_resource::<crate::audio::NativeUiAudioQueue>()
+                .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .insert_resource(NativeShellModel {
                     screen: NativeShellScreen::InGame,
                     ..Default::default()
@@ -13150,9 +13735,9 @@ mod tests {
             app.update();
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA],
+                vec![crate::ui_audio::NativeUiSound::ButtonA],
                 "{action:?} must emit exactly one Crystal ButtonA edge"
             );
             assert!(app
@@ -13169,7 +13754,7 @@ mod tests {
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .init_resource::<NativePlayerUiIntentQueue>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
                 ..Default::default()
@@ -13197,9 +13782,9 @@ mod tests {
         }
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonC]
+            vec![crate::ui_audio::NativeUiSound::ButtonC]
         );
 
         app.world_mut().entity_mut(button).insert(Interaction::None);
@@ -13215,9 +13800,9 @@ mod tests {
         }
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonC]
+            vec![crate::ui_audio::NativeUiSound::ButtonC]
         );
         assert!(app
             .world()
@@ -13646,7 +14231,6 @@ mod tests {
         let mut app = App::new();
         app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
             .init_asset::<Image>()
-            .init_asset::<bevy::audio::AudioSource>()
             .init_resource::<ButtonInput<KeyCode>>()
             .add_message::<KeyboardInput>()
             .insert_resource(NativeShellModel {
@@ -13659,6 +14243,8 @@ mod tests {
             ));
 
         // Startup creates the actual HUD/Quest/Options entities.
+        #[cfg(feature = "native-ui")]
+        app.init_asset::<bevy::audio::AudioSource>();
         app.update();
 
         let option_button = {
@@ -13835,7 +14421,7 @@ mod tests {
         app.init_resource::<MailUiState>()
             .init_resource::<StorageUiState>()
             .init_resource::<ShopUiState>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .init_resource::<BigMapModel>()
             .init_resource::<BigMapGatewayIntentQueue>()
             .init_resource::<BigMapUiState>()
@@ -13879,6 +14465,103 @@ mod tests {
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(Update, render_overlays);
         app
+    }
+
+    fn mail_root_children(app: &mut App) -> Vec<Entity> {
+        let world = app.world_mut();
+        let root = world
+            .query_filtered::<Entity, With<OverlayMail>>()
+            .single(world)
+            .expect("mail overlay root");
+        world
+            .get::<Children>(root)
+            .map(|children| children.iter().collect())
+            .unwrap_or_default()
+    }
+
+    fn all_entities(app: &mut App) -> Vec<Entity> {
+        let world = app.world_mut();
+        world.query::<Entity>().iter(world).collect()
+    }
+
+    #[test]
+    fn unchanged_large_overlay_scenes_keep_their_complete_entity_sets() {
+        for panel in [
+            mir2_ui_core::state::UiPanel::Inventory,
+            mir2_ui_core::state::UiPanel::Character,
+            mir2_ui_core::state::UiPanel::Skill,
+            mir2_ui_core::state::UiPanel::GameShop,
+            mir2_ui_core::state::UiPanel::BigMap,
+            mir2_ui_core::state::UiPanel::Storage,
+            mir2_ui_core::state::UiPanel::Guild,
+            mir2_ui_core::state::UiPanel::Trade,
+        ] {
+            let mut app = overlay_render_test_app();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .panel = panel;
+            app.update();
+            let initial = all_entities(&mut app);
+            assert!(initial.len() > 20, "{panel:?} must render a real panel tree");
+            for _ in 0..20 {
+                app.update();
+            }
+            assert_eq!(
+                all_entities(&mut app),
+                initial,
+                "{panel:?} must not rebuild an unchanged retained tree"
+            );
+        }
+    }
+
+    #[test]
+    fn unchanged_mail_compose_keeps_retained_entities_and_draft_change_rerenders() {
+        let mut app = overlay_render_test_app();
+        app.init_resource::<MailComposeUi>();
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+            state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+                recipient: "tester".to_owned(),
+                message: "first".to_owned(),
+                ..Default::default()
+            });
+        }
+
+        app.update();
+        let initial = mail_root_children(&mut app);
+        assert!(!initial.is_empty(), "visible compose must render once");
+
+        for _ in 0..120 {
+            app.update();
+        }
+        assert_eq!(
+            mail_root_children(&mut app),
+            initial,
+            "unchanged compose must not despawn and rebuild its entity tree"
+        );
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_mut()
+            .expect("compose draft")
+            .message
+            .push_str(" second");
+        app.update();
+        assert_ne!(
+            mail_root_children(&mut app),
+            initial,
+            "a visible draft change must rebuild the mail panel"
+        );
+        let world = app.world_mut();
+        let expected = format!("Message: {}", short_name("first second", "<type>"));
+        assert!(world
+            .query::<&Text>()
+            .iter(world)
+            .any(|text| text.0 == expected));
     }
 
     #[test]
@@ -14180,6 +14863,61 @@ mod tests {
     }
 
     #[test]
+    fn guild_notice_touch_target_exists_only_for_editable_draft() {
+        for (editing, pending, permission, expected) in [
+            (true, false, true, 1),
+            (false, false, true, 0),
+            (true, true, true, 0),
+            (true, false, false, 0),
+        ] {
+            let mut app = App::new();
+            app.add_plugins((MinimalPlugins, AssetPlugin::default()))
+                .init_asset::<Image>();
+            let server = app.world().resource::<AssetServer>().clone();
+            let guild = crate::social::GuildModel {
+                name: Some("Offline".into()),
+                permissions: if permission {
+                    vec!["notice".into()]
+                } else {
+                    vec![]
+                },
+                ..default()
+            };
+            let state = NativePlayerUiState {
+                guild_notice_editing: editing,
+                guild_notice_submission: pending.then(|| vec!["Pending".into()]),
+                ..default()
+            };
+            let world = app.world_mut();
+            world
+                .commands()
+                .spawn(Node::default())
+                .with_children(|parent| {
+                    render_guild_notice(parent, &server, &guild, &state, CRYSTAL_GUILD_PANEL_RECT);
+                });
+            world.flush();
+            let targets: Vec<_> = world
+                .query_filtered::<
+                    (&Node, Option<&OverlayButton>),
+                    (With<Button>, With<NativeTextInputTarget>),
+                >()
+                .iter(world)
+                .collect();
+            assert_eq!(
+                targets.len(), expected,
+                "editing={editing} pending={pending} permission={permission}"
+            );
+            for (node, action) in targets {
+                assert!(action.is_none(), "retapping must not publish the notice");
+                assert_eq!(node.left, px(CRYSTAL_GUILD_PANEL_RECT.left + 13.0));
+                assert_eq!(node.top, px(CRYSTAL_GUILD_PANEL_RECT.top + 61.0));
+                assert_eq!(node.width, px(322.0));
+                assert_eq!(node.height, px(330.0));
+            }
+        }
+    }
+
+    #[test]
     fn guild_notice_editor_consumes_real_keyboard_messages_before_chat() {
         let mut app = App::new();
         app.init_resource::<NativePlayerUiState>()
@@ -14190,7 +14928,7 @@ mod tests {
             .init_resource::<InventoryModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
@@ -14440,7 +15178,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .configure_sets(
                 Update,
@@ -14472,7 +15210,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .add_systems(Update, process_overlay_keyboard);
         let mut shell = NativeShellModel::default();
@@ -14542,7 +15280,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .add_systems(Update, process_overlay_keyboard);
         let mut shell = NativeShellModel::default();
@@ -14573,7 +15311,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .add_systems(Update, process_overlay_keyboard);
         app.insert_resource(NativeShellModel {
@@ -14612,7 +15350,7 @@ mod tests {
                 .init_resource::<ShopModel>()
                 .init_resource::<StorageModel>()
                 .init_resource::<ButtonInput<KeyCode>>()
-                .init_resource::<crate::audio::NativeUiAudioQueue>()
+                .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .add_message::<KeyboardInput>()
                 .add_systems(Update, process_overlay_keyboard);
             app.insert_resource(NativeShellModel {
@@ -14657,7 +15395,7 @@ mod tests {
             assert_eq!(state.character_page, CharacterPage::Character);
             assert_eq!(
                 app.world()
-                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .resource::<crate::ui_audio::NativeUiAudioQueue>()
                     .len(),
                 0
             );
@@ -16202,16 +16940,16 @@ mod tests {
             );
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA]
+                vec![crate::ui_audio::NativeUiSound::ButtonA]
             );
 
             // A held button is not another Crystal click edge.
             app.update();
             assert_eq!(
                 app.world()
-                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .resource::<crate::ui_audio::NativeUiAudioQueue>()
                     .len(),
                 0
             );
@@ -16221,7 +16959,7 @@ mod tests {
             app.update();
             assert_eq!(
                 app.world()
-                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .resource::<crate::ui_audio::NativeUiAudioQueue>()
                     .len(),
                 0
             );
@@ -16231,9 +16969,9 @@ mod tests {
             app.update();
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA]
+                vec![crate::ui_audio::NativeUiSound::ButtonA]
             );
             app.world_mut().despawn(entity);
         }
@@ -16265,16 +17003,16 @@ mod tests {
             );
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA]
+                vec![crate::ui_audio::NativeUiSound::ButtonA]
             );
 
             // A held close control is not a second Crystal click edge.
             app.update();
             assert_eq!(
                 app.world()
-                    .resource::<crate::audio::NativeUiAudioQueue>()
+                    .resource::<crate::ui_audio::NativeUiAudioQueue>()
                     .len(),
                 0
             );
@@ -16295,9 +17033,9 @@ mod tests {
                 .equipment_open());
             assert_eq!(
                 app.world_mut()
-                    .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                    .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                     .drain_bounded(8),
-                vec![crate::audio::NativeUiSound::ButtonA]
+                vec![crate::ui_audio::NativeUiSound::ButtonA]
             );
             app.world_mut().despawn(entity);
         }
@@ -16319,7 +17057,7 @@ mod tests {
             .equipment_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -16349,9 +17087,9 @@ mod tests {
         );
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA],
+            vec![crate::ui_audio::NativeUiSound::ButtonA],
             "Crystal's locked MirButton still emits its click cue"
         );
         app.world_mut().resource_mut::<InventoryModel>().capacity = 54;
@@ -16363,9 +17101,9 @@ mod tests {
         );
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
         press(&mut app, OverlayButton::SkillPageNext);
         assert_eq!(
@@ -16465,6 +17203,125 @@ mod tests {
         let stopped = (window.left, window.top);
         window.drag_to(200.0, 200.0);
         assert_eq!((window.left, window.top), stopped);
+    }
+
+    #[test]
+    fn focused_inventory_pointer_round_trips_and_drag_materializes_safe_translation() {
+        let mut window = InventoryDialogUi::default();
+        let transform = UiTransform {
+            translation: Val2::px(25.0, 250.0),
+            scale: Vec2::splat(3.0),
+            ..default()
+        };
+        let local_hit = Vec2::new(182.0, 217.0);
+        let center = Vec2::new(
+            INVENTORY_PANEL_SIZE.width as f32 * 0.5,
+            INVENTORY_PANEL_SIZE.height as f32 * 0.5,
+        );
+        let raw_cursor = center + Vec2::new(25.0, 250.0) + (local_hit - center) * transform.scale;
+        assert_eq!(
+            focused_panel_cursor(
+                raw_cursor,
+                Vec2::ZERO,
+                Vec2::new(
+                    INVENTORY_PANEL_SIZE.width as f32,
+                    INVENTORY_PANEL_SIZE.height as f32,
+                ),
+                Some(&transform),
+            ),
+            Some(local_hit)
+        );
+        assert!(window.begin_focused_drag(
+            local_hit,
+            raw_cursor,
+            focused_panel_translation(Some(&transform)).unwrap(),
+        ));
+        assert_eq!((window.left, window.top), (25.0, 250.0));
+        window.drag_to(raw_cursor.x + 40.0, raw_cursor.y + 30.0);
+        assert_eq!((window.left, window.top), (65.0, 280.0));
+    }
+
+    #[test]
+    fn inventory_drag_tracks_one_touch_without_stealing_other_fingers() {
+        let mut app = App::new();
+        let mut primary = Window::default();
+        primary.resolution.set(1024.0, 768.0);
+        let window = app.world_mut().spawn((primary, PrimaryWindow)).id();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<Touches>()
+            .add_message::<bevy::input::touch::TouchInput>()
+            .add_message::<CursorMoved>()
+            .add_systems(PreUpdate, bevy::input::touch::touch_screen_input_system)
+            .add_systems(Update, process_inventory_drag);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_inventory();
+
+        let touch = |phase, id, position| bevy::input::touch::TouchInput {
+            phase,
+            position,
+            window,
+            force: None,
+            id,
+        };
+        // Finger 1 represents an already-held joystick. Finger 2 starts on the
+        // exposed Inventory frame and must become the only drag owner.
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Started,
+            1,
+            Vec2::new(900.0, 700.0),
+        ));
+        app.update();
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Started,
+            2,
+            Vec2::new(225.0, 10.0),
+        ));
+        app.update();
+        {
+            let inventory = &app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .inventory_window;
+            assert!(inventory.dragging());
+            assert_eq!(inventory.drag_touch_id, Some(2));
+        }
+
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Moved,
+            1,
+            Vec2::new(950.0, 700.0),
+        ));
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Moved,
+            2,
+            Vec2::new(500.0, 300.0),
+        ));
+        app.update();
+        assert_eq!(
+            {
+                let inventory = &app
+                    .world()
+                    .resource::<NativePlayerUiState>()
+                    .inventory_window;
+                (inventory.left, inventory.top)
+            },
+            (275.0, 290.0)
+        );
+
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Ended,
+            2,
+            Vec2::new(500.0, 300.0),
+        ));
+        app.update();
+        let inventory = &app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_window;
+        assert!(!inventory.dragging());
+        assert_eq!(inventory.drag_touch_id, None);
+        assert_eq!((inventory.left, inventory.top), (275.0, 290.0));
     }
 
     #[test]
@@ -17415,7 +18272,7 @@ mod tests {
             .init_resource::<ShopModel>()
             .init_resource::<StorageModel>()
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
             .add_message::<KeyboardInput>()
             .insert_resource(NativeShellModel {
                 screen: NativeShellScreen::InGame,
@@ -17733,7 +18590,7 @@ mod tests {
         assert!(app.world().resource::<NativePlayerUiState>().help_open());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0
         );
@@ -17742,27 +18599,27 @@ mod tests {
         assert_eq!(app.world().resource::<NativePlayerUiState>().help.page, 44);
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
 
         press_help_button(&mut app, OverlayButton::HelpNext);
         assert_eq!(app.world().resource::<NativePlayerUiState>().help.page, 0);
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
 
         press_help_button(&mut app, OverlayButton::CloseHelp);
         assert!(!app.world().resource::<NativePlayerUiState>().help_open());
         assert_eq!(
             app.world_mut()
-                .resource_mut::<crate::audio::NativeUiAudioQueue>()
+                .resource_mut::<crate::ui_audio::NativeUiAudioQueue>()
                 .drain_bounded(8),
-            vec![crate::audio::NativeUiSound::ButtonA]
+            vec![crate::ui_audio::NativeUiSound::ButtonA]
         );
         assert!(app
             .world()
@@ -17770,6 +18627,68 @@ mod tests {
             .intents
             .is_empty());
         assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
+    }
+
+    #[test]
+    fn delete_amount_title_reserves_two_lines_before_item_and_input() {
+        let mut app = overlay_render_test_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .inventory_delete_prompt = Some(InventoryDeletePrompt::Amount {
+            target: InventoryDeleteTarget {
+                unique_id: 42,
+                slot: 0,
+                key: "specimen".into(),
+                name: "UI specimen 12".into(),
+                max_count: 12,
+            },
+            draft: "12".into(),
+            select_all: true,
+        });
+        app.update();
+        let world = app.world_mut();
+        let mut query = world.query::<(&Text, &Node, &TextLayout)>();
+        let (_, node, layout) = query
+            .iter(world)
+            .find(|(text, _, _)| text.0 == "Delete how many 'UI specimen 12'?")
+            .expect("full item name stays in the prompt");
+        assert_eq!(layout.linebreak, LineBreak::WordBoundary);
+        assert_eq!(node.top, Val::Px(4.0));
+        assert_eq!(node.height, Val::Px(28.0));
+        assert_eq!(node.width, Val::Px(158.0));
+    }
+
+    #[test]
+    fn help_shortcut_rows_stay_inside_body_without_losing_content() {
+        let mut app = overlay_render_test_app();
+        for page in 0..3 {
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .help
+                .display_page(page);
+            app.update();
+            let world = app.world_mut();
+            for (_, information) in help_shortcut_rows(page as u8).unwrap() {
+                let nodes = world
+                    .query::<(&Text, &Node)>()
+                    .iter(world)
+                    .filter(|(text, _)| text.0 == *information)
+                    .map(|(_, node)| node.clone())
+                    .collect::<Vec<_>>();
+                assert_eq!(nodes.len(), 1, "page {page}: {information}");
+                let Val::Px(top) = nodes[0].top else {
+                    panic!("pixel top")
+                };
+                let Val::Px(height) = nodes[0].height else {
+                    panic!("pixel height")
+                };
+                assert!(
+                    top >= 142.0 && top + height <= 475.0,
+                    "page {page}: {information} extends to {}",
+                    top + height
+                );
+            }
+        }
     }
 
     #[test]

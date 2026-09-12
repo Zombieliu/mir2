@@ -35,6 +35,17 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 wasm-bindgen = "0.2.95"
 
+[target.'cfg(target_os = "android")'.dependencies]
+# The Android runtime deliberately selects wgpu's GLES backend. Keeping the
+# feature target-scoped avoids adding the native GL backend to desktop/WASM.
+bevy_render = { version = "0.19.0", default-features = false, features = ["gles"] }
+
+[patch.crates-io]
+# Bevy 0.19 assumes every native surface supports alternate sRGB views. Some
+# Android GLES adapters do not advertise SURFACE_VIEW_FORMATS, so use the
+# local narrow compatibility patch until the upstream surface path handles it.
+bevy_render = { path = "../../../third_party/bevy_render" }
+
 [profile.wasm-release]
 inherits = "release"
 opt-level = "z"

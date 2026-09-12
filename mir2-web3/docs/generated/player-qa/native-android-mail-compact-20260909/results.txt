@@ -1,0 +1,17 @@
+/tmp/android-mail-preview.log:test result: ok. 90 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+/tmp/android-mail-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-mail-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-mail-normal.log:test result: ok. 87 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+/tmp/android-mail-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-mail-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-mail-debug-build.log:BUILD SUCCESSFUL in 10s
+/tmp/android-mail-debug-build.log:[platform-android] SHA-256: 687a6736563c2bd2f2b32d2931a4cecf65455be0923f775c5acbc6a31a3c4925
+/tmp/android-mail-debug-build.log:[platform-android] package gate passed
+/tmp/android-mail-preview-build.log:BUILD SUCCESSFUL in 10s
+/tmp/android-mail-preview-build.log:[platform-android] SHA-256: 87a507d2de5280ec45ea0faa61e74d99c37e20a4ab9100c829e1d376313a3423
+/tmp/android-mail-preview-build.log:[platform-android] package gate passed
+/tmp/android-mail-layout-green.log:test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 584 filtered out; finished in 0.01s
+/tmp/android-mail-layout-red.log:shared footer presentation group: NoEntities("<Enable the debug feature to see the name>")
+/tmp/android-mail-layout-red.log:test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 584 filtered out; finished in 0.01s
+/tmp/android-mail-shared.log:test result: ok. 585 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+/tmp/android-mail-shared.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

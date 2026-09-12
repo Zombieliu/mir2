@@ -508,7 +508,7 @@ pub(super) fn process(
     mut wheel: MessageReader<MouseWheel>,
     time: Option<Res<Time>>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
-    mut audio: Option<ResMut<crate::audio::NativeUiAudioQueue>>,
+    mut audio: Option<ResMut<crate::ui_audio::NativeUiAudioQueue>>,
     mut chat: Option<ResMut<crate::chat::ChatModel>>,
 ) {
     let now = time
@@ -536,7 +536,7 @@ pub(super) fn process(
                         }
                         if mouse.just_pressed(MouseButton::Left) {
                             if let Some(audio) = audio.as_deref_mut() {
-                                audio.push(crate::audio::NativeUiSound::ButtonA);
+                                audio.push(crate::ui_audio::NativeUiSound::ButtonA);
                             }
                         }
                         wheel.clear();
@@ -598,7 +598,7 @@ pub(super) fn process(
             .copied()
         {
             if let Some(audio) = audio.as_deref_mut() {
-                audio.push(crate::audio::NativeUiSound::ButtonA);
+                audio.push(crate::ui_audio::NativeUiSound::ButtonA);
             }
             let mut cooldown = model.inspect_ready_ms;
             let packet = model.action(action, now, &mut cooldown);

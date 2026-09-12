@@ -1102,7 +1102,7 @@ pub fn reconcile_storage_refresh(
 }
 
 /// Release quest submissions only when that exact quest changes lifecycle.
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 pub fn reconcile_quest_refresh(
     pending: &mut PendingOperations,
     old: &crate::quest_model::QuestTracker,
@@ -1187,7 +1187,7 @@ pub fn request_session_reset_preserving_exact_game_shop_receipt(
     true
 }
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 mod native_ui {
     use bevy::prelude::*;
 
@@ -1307,7 +1307,7 @@ mod native_ui {
     }
 }
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 pub use native_ui::{
     apply_overlay_session_reset, apply_quest_session_reset, observe_native_session_boundary,
     NativeSessionBoundaryTracker, OverlayResetTracker, QuestResetTracker,
@@ -2164,7 +2164,7 @@ mod tests {
         assert!(pending.contains(&PendingOperationKey::StorageRemovePassword));
     }
 
-    #[cfg(feature = "native-ui")]
+    #[cfg(feature = "native-player-ui")]
     #[test]
     fn quest_ack_and_nack_release_only_the_exact_submission() {
         let mut pending = PendingOperations::default();
@@ -2243,7 +2243,7 @@ mod tests {
         assert!(pending.release_exact_quest_request(&unrelated, &unrelated_request_id));
     }
 
-    #[cfg(feature = "native-ui")]
+    #[cfg(feature = "native-player-ui")]
     #[test]
     fn quest_refresh_releases_only_the_quest_with_a_proven_lifecycle_change() {
         let quest = |quest_index, status| crate::quest_model::Quest {
@@ -2292,7 +2292,7 @@ mod tests {
         assert!(pending.contains(&unrelated));
     }
 
-    #[cfg(feature = "native-ui")]
+    #[cfg(feature = "native-player-ui")]
     #[test]
     fn quest_refresh_releases_abandon_only_after_authoritative_lifecycle_change() {
         let quest = |status| crate::quest_model::Quest {
@@ -2398,7 +2398,7 @@ mod tests {
     }
 }
 
-#[cfg(all(test, feature = "native-ui"))]
+#[cfg(all(test, feature = "native-player-ui"))]
 mod native_ui_tests {
     use bevy::prelude::*;
 

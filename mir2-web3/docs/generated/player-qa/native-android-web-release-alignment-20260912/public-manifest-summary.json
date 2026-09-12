@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 2,
+  "kind": "mir2-bevy-entity-atlas-manifest",
+  "generatedAt": "2026-08-18T13:52:05.070Z",
+  "atlasCount": 1,
+  "pageCount": 7,
+  "rectCount": 9650,
+  "pageBytes": 13164823
+}
