@@ -34,3 +34,6 @@ sha2 = "=0.11.0"
 
 [target.'cfg(target_os = "android")'.dependencies]
 jni = "=0.22.4"
+
+[patch.crates-io]
+bevy_render = { path = "../../../third_party/bevy_render" }

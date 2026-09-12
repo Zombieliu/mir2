@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-12 Android current change: the native player now has a stable visible
+> API31 emulator baseline on Bevy/wgpu GLES. The renderer capability-gates
+> downlevel surface and texture view formats, tears down Android surfaces at
+> lifecycle boundaries, pauses the camera while the replacement settles and
+> keeps the Android render path ordered. Emulator 37.1.11 renders the labelled
+> offline Bichon fixture with 849 map draws, seven entities/twelve layers and
+> shared Crystal UI, then survives Home/resume and a 300-second same-process
+> soak with zero render/GLES failures. Android 154/154, API31 target and exact
+> local-manifest package gates pass. This closes the emulator renderer blocker,
+> not the online or device milestones: approved WSS/account real login,
+> `StartGame`/render-ready live transitions, public asset-release alignment,
+> physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-gles-emulator-20260912/README.md`.
+
 > 2026-09-12 Android current change: render-load completion is now bound to its
 > exact authoritative request ID. Stale background completions are ignored for
 > transition state, while failure of the current map/entity frame resets the

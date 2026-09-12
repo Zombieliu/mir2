@@ -1384,7 +1384,154 @@ impl RuntimeWindowSpec {
 /// The WASM `boot_mir2_runtime` entry and every native host (Windows, macOS,
 /// later Android) call this with their own [`RuntimeWindowSpec`]. No DOM, canvas
 /// selector or wasm API is assumed here.
+fn runtime_default_plugins(spec: &RuntimeWindowSpec) -> bevy::app::PluginGroupBuilder {
+    let plugins = DefaultPlugins
+        .set(AssetPlugin {
+            file_path: spec.asset_root.clone(),
+            meta_check: AssetMetaCheck::Never,
+            ..default()
+        })
+        .set(ImagePlugin::default_nearest())
+        .set(WindowPlugin {
+            primary_window: Some(Window {
+                canvas: spec.canvas_selector.clone(),
+                composite_alpha_mode: spec.composite_alpha_mode,
+                fit_canvas_to_parent: spec.fit_canvas_to_parent,
+                prevent_default_event_handling: spec.prevent_default_event_handling,
+                resolution: WindowResolution::new(spec.width, spec.height),
+                title: spec.title.clone(),
+                transparent: spec.transparent,
+                ..default()
+            }),
+            ..default()
+        });
+    #[cfg(target_os = "android")]
+    // The pipelined renderer can submit work for the Activity's previous EGL
+    // surface while the main thread is rebuilding it. Keep Android extraction
+    // and rendering ordered on one thread; desktop and WASM retain Bevy's
+    // default pipelined path.
+    let plugins = plugins
+        .set(android_render_plugin())
+        .disable::<bevy::render::pipelined_rendering::PipelinedRenderingPlugin>();
+    plugins
+}
+
+#[cfg(target_os = "android")]
+fn android_render_plugin() -> bevy::render::RenderPlugin {
+    use bevy::render::{
+        settings::{Backends, RenderCreation, WgpuLimits, WgpuSettings, WgpuSettingsPriority},
+        RenderPlugin,
+    };
+
+    let mut settings = WgpuSettings::default();
+    // Mir2's Android scene is entirely 2D. Prefer the GLES backend that the
+    // package already carries instead of the emulator's Vulkan bridge: recent
+    // API-31 images can advertise Vulkan storage-buffer support while exposing
+    // a zero maximum buffer size, which makes Bevy's unused 3D OIT startup
+    // allocation panic before the first shared-UI frame.
+    settings.backends = Some(Backends::GL);
+    settings.priority = WgpuSettingsPriority::WebGL2;
+    // `WgpuSettings::default()` calculates its limits before callers can
+    // change `priority`. Reapply the matching downlevel profile explicitly;
+    // otherwise the GLES adapter is asked for WebGPU compute limits that it
+    // correctly reports as unsupported.
+    settings.limits =
+        WgpuLimits::downlevel_webgl2_defaults().using_resolution(WgpuLimits::default());
+    RenderPlugin {
+        render_creation: RenderCreation::Automatic(Box::new(settings)),
+        ..default()
+    }
+}
+
+#[cfg(target_os = "android")]
+#[derive(Resource)]
+struct AndroidSurfaceResumeGate {
+    suspended: bool,
+    settle_frames: u8,
+}
+
+#[cfg(target_os = "android")]
+impl Default for AndroidSurfaceResumeGate {
+    fn default() -> Self {
+        Self {
+            suspended: false,
+            settle_frames: 3,
+        }
+    }
+}
+
+#[cfg(target_os = "android")]
+fn gate_android_camera_while_surface_rebuilds(
+    mut lifecycle: MessageReader<bevy::window::AppLifecycle>,
+    mut gate: ResMut<AndroidSurfaceResumeGate>,
+    mut cameras: Query<&mut Camera, With<MainCamera>>,
+) {
+    for state in lifecycle.read() {
+        match state {
+            bevy::window::AppLifecycle::Idle
+            | bevy::window::AppLifecycle::WillSuspend
+            | bevy::window::AppLifecycle::Suspended => {
+                gate.suspended = true;
+                gate.settle_frames = 0;
+            }
+            bevy::window::AppLifecycle::WillResume | bevy::window::AppLifecycle::Running => {
+                gate.suspended = false;
+                // Leave the camera absent from the render world while winit,
+                // wgpu and EGL replace the Activity surface. This also clears
+                // phase items specialized for the previous target format.
+                gate.settle_frames = 3;
+            }
+        }
+    }
+
+    let camera_active = !gate.suspended && gate.settle_frames == 0;
+    for mut camera in &mut cameras {
+        camera.is_active = camera_active;
+    }
+    if !gate.suspended && gate.settle_frames > 0 {
+        gate.settle_frames -= 1;
+    }
+}
+
+#[cfg(target_os = "android")]
+fn remove_unsupported_android_oit_systems(app: &mut App) {
+    use bevy::{
+        core_pipeline::oit::{init_oit_buffers, prepare_oit_buffers},
+        ecs::schedule::{ScheduleCleanupPolicy, Schedules},
+        render::{Render, RenderApp, RenderStartup},
+    };
+
+    let render_app = app
+        .get_sub_app_mut(RenderApp)
+        .expect("Android renderer must initialize the RenderApp");
+    render_app
+        .world_mut()
+        .resource_scope(|world, mut schedules: Mut<Schedules>| {
+            schedules
+                .remove_systems_in_set(
+                    RenderStartup,
+                    init_oit_buffers,
+                    world,
+                    ScheduleCleanupPolicy::RemoveSystemsOnly,
+                )
+                .expect("Bevy OIT startup system must be present");
+            schedules
+                .remove_systems_in_set(
+                    Render,
+                    prepare_oit_buffers,
+                    world,
+                    ScheduleCleanupPolicy::RemoveSystemsOnly,
+                )
+                .expect("Bevy OIT prepare system must be present");
+        });
+}
+
 pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
+    #[cfg(target_os = "android")]
+    // Wgpu also consults this process-local override while enumerating an
+    // adapter. Set it before any Bevy render plugin is constructed so Android
+    // cannot silently select the broken emulator Vulkan bridge.
+    std::env::set_var("WGPU_BACKEND", "gl");
     let mut app = App::new();
     app.insert_resource(ClearColor(FLOOR_COLOR))
         .init_resource::<native_world_receipt::NativeWorldReceipt>()
@@ -1429,28 +1576,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(RuntimeSceneModelResetTracker::default())
         .insert_resource(RuntimeEffectShadowCleanupTracker::default())
         .insert_resource(native_ingest::NativeInbound::new())
-        .add_plugins(
-            DefaultPlugins
-                .set(AssetPlugin {
-                    file_path: spec.asset_root.clone(),
-                    meta_check: AssetMetaCheck::Never,
-                    ..default()
-                })
-                .set(ImagePlugin::default_nearest())
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        canvas: spec.canvas_selector.clone(),
-                        composite_alpha_mode: spec.composite_alpha_mode,
-                        fit_canvas_to_parent: spec.fit_canvas_to_parent,
-                        prevent_default_event_handling: spec.prevent_default_event_handling,
-                        resolution: WindowResolution::new(spec.width, spec.height),
-                        title: spec.title,
-                        transparent: spec.transparent,
-                        ..default()
-                    }),
-                    ..default()
-                }),
-        )
+        .add_plugins(runtime_default_plugins(&spec))
         .add_plugins((
             Mir2NativeSessionBoundaryPlugin,
             additive_material::CrystalAdditiveMaterialPlugin,
@@ -1554,12 +1680,17 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 .chain()
                 .in_set(RuntimePresentationSet),
         );
+    #[cfg(target_os = "android")]
+    app.insert_resource(AndroidSurfaceResumeGate::default())
+        .add_systems(First, gate_android_camera_while_surface_rebuilds);
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(
         Update,
         emit_native_soak_metrics.after(publish_presentation_pose_frame),
     );
+    #[cfg(target_os = "android")]
+    remove_unsupported_android_oit_systems(&mut app);
     app
 }
 
@@ -1576,6 +1707,10 @@ pub fn boot_mir2_runtime() {
 }
 
 fn setup_scene(mut commands: Commands) {
+    #[cfg(target_os = "android")]
+    commands.spawn((Camera2d, MainCamera, Msaa::Off));
+
+    #[cfg(not(target_os = "android"))]
     commands.spawn((Camera2d, MainCamera));
     publish_status("scene-ready", "Camera ready");
 }

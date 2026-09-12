@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> 2026-09-12 Android current change: emulator rendering is no longer blocked by
+> the old API31 SwiftShader/Vulkan failure. Android now selects wgpu GLES with
+> downlevel limits, removes unused unsupported OIT startup, uses one-sample 2D
+> rendering and carries a narrow Bevy 0.19 surface/view-format lifecycle patch.
+> The camera is absent while the Activity surface settles, so Home/resume no
+> longer submits an sRGB phase to the replacement linear attachment. Emulator
+> 37.1.11 visibly renders the full-screen offline Bichon fixture at 849 map
+> draws, seven entities/twelve layers, and the same process survives Home/resume
+> plus a 300-second soak with zero render/GLES errors or panics. Android
+> `ui-preview` is 154/154; API31 target and the exact local 35-atlas aligned APK
+> pass. This is offline emulator evidence only: approved WSS/account login,
+> live `StartGame`/map transitions, public release alignment, physical-device
+> and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-gles-emulator-20260912/README.md`.
+
 > 2026-09-12 Android current change: asynchronous map/entity load results now
 > carry their authoritative request ID. A stale completion cannot change the
 > current frame notice or recover a newer transition; failure of the exact

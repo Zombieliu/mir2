@@ -1,0 +1,10 @@
+runtime_cargo_fmt=pass
+platform_android_cargo_fmt=pass
+platform_android_ui_preview_tests=154/154 pass
+android_target=aarch64-linux-android
+android_api=31
+android_target_check=pass
+android_variant=uiPreview
+android_release_alignment=pass local-manifest-only
+android_package=pass
+git_diff_check=pass

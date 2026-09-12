@@ -1,5 +1,21 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: the API31 ARM64 emulator has a visible,
+> stable GLES rendering baseline. A target-scoped runtime selects OpenGL ES,
+> WebGL2-compatible limits, `Msaa::Off` and no unused OIT startup; a vendored
+> Bevy 0.19 compatibility patch capability-gates alternate sRGB views and
+> invalidates Android surfaces across lifecycle changes. A three-frame camera
+> gate plus ordered Android rendering prevents the old target phase from racing
+> the replacement EGL surface. Emulator 37.1.11 visibly reaches full-screen
+> Bichon render-ready with 849 map draws, seven objects/twelve layers and shared
+> Crystal UI. Home/resume retains the same process and a 300-second post-resume
+> soak records zero wgpu errors, panics, exits, GLES errors or incomplete
+> framebuffers. Android tests remain 154/154 and API31/aligned package gates
+> pass. The labelled `uiPreview` has networking disabled, so real login,
+> live-world transition/reconnect, public Web release alignment, physical-device
+> and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-gles-emulator-20260912/README.md`.
+
 > 2026-09-12 Android current change: packaged world-load events are correlated
 > to the authoritative render request. Stale ready/failure events cannot unlock
 > or tear down a newer scene; a matching failure atomically clears pending
