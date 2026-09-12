@@ -128,6 +128,7 @@ fn joystick_touch(
     touches: Option<Res<Touches>>,
     time: Option<Res<Time>>,
     shell: Res<NativeShellModel>,
+    state: Res<NativePlayerUiState>,
     android: Option<Res<AndroidShellState>>,
     windows: Query<&Window>,
     mut joystick: ResMut<JoystickState>,
@@ -138,7 +139,7 @@ fn joystick_touch(
         joystick.release();
         return;
     };
-    if shell.screen != NativeShellScreen::InGame || !window.focused {
+    if shell.screen != NativeShellScreen::InGame || state.blocks_world_click() || !window.focused {
         joystick.release();
         return;
     }
@@ -501,13 +502,14 @@ fn visibility(
         rail.expanded = false;
     }
     let in_game = shell.screen == NativeShellScreen::InGame;
+    let world_controls_visible = in_game && !state.blocks_world_click();
     for mut node in &mut rail_roots {
         node.width = px(if rail.expanded { 132.0 } else { 64.0 } * unit);
         node.top = px((safe_top + 16.0 + map_bottom * scale.0).max(48.0) * unit);
         node.right = px((safe_right + 8.0) * unit);
         node.row_gap = px(4.0 * unit);
         node.column_gap = px(4.0 * unit);
-        node.display = if in_game {
+        node.display = if in_game && rail.expanded {
             Display::Flex
         } else {
             Display::None
@@ -535,7 +537,7 @@ fn visibility(
         node.bottom = px((safe_bottom + JOYSTICK_BOTTOM) * unit);
         node.row_gap = px(8.0 * unit);
         node.column_gap = px(8.0 * unit);
-        node.display = if in_game {
+        node.display = if world_controls_visible {
             Display::Flex
         } else {
             Display::None
@@ -552,7 +554,7 @@ fn visibility(
         node.left = px((safe_left + JOYSTICK_LEFT) * unit);
         node.bottom = px((safe_bottom + JOYSTICK_BOTTOM) * unit);
         node.border = UiRect::all(px(2.0 * unit));
-        node.display = if in_game {
+        node.display = if world_controls_visible {
             Display::Flex
         } else {
             Display::None
@@ -968,6 +970,7 @@ mod tests {
                 screen: NativeShellScreen::InGame,
                 ..default()
             })
+            .init_resource::<NativePlayerUiState>()
             .insert_resource(ui)
             .init_resource::<AndroidShellState>()
             .init_resource::<JoystickState>()
@@ -1011,6 +1014,25 @@ mod tests {
                 mode: crate::android_input::AndroidMoveMode::Run,
             }]
         );
+    }
+
+    #[test]
+    fn blocking_shared_panel_disables_the_world_joystick_gesture() {
+        let (mut app, window) = joystick_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Inventory;
+        let center = joystick_center(app.world().get::<Window>(window).unwrap(), 0.0, 0.0);
+        touch_at(&mut app, window, 7, TouchPhase::Started, center);
+        app.update();
+
+        assert_eq!(app.world().resource::<JoystickState>().owner, None);
+        assert!(app
+            .world()
+            .resource::<crate::android_input::AndroidMotionQueue>()
+            .0
+            .is_empty());
     }
 
     #[test]
@@ -1147,6 +1169,21 @@ mod tests {
             .init_resource::<NativePlayerUiState>();
         install(&mut app);
         app.update();
+        {
+            let world = app.world_mut();
+            let mut rail = world.query_filtered::<&Node, With<TouchRail>>();
+            assert_eq!(rail.single(world).unwrap().display, Display::None);
+        }
+        {
+            let world = app.world_mut();
+            let mut pad = world.query_filtered::<&Node, With<ActionPad>>();
+            assert_eq!(pad.single(world).unwrap().display, Display::Flex);
+        }
+        {
+            let world = app.world_mut();
+            let mut joystick = world.query_filtered::<&Node, With<JoystickRoot>>();
+            assert_eq!(joystick.single(world).unwrap().display, Display::Flex);
+        }
         let mut query = app.world_mut().query::<(
             &Action,
             &Node,
@@ -1169,6 +1206,25 @@ mod tests {
         }
         assert_eq!(visible_rail, 1, "rail is collapsed by default");
         assert_eq!(visible_pad, 4, "combat pad stays directly reachable");
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Inventory;
+        app.update();
+        {
+            let world = app.world_mut();
+            let mut pad = world.query_filtered::<&Node, With<ActionPad>>();
+            assert_eq!(pad.single(world).unwrap().display, Display::None);
+        }
+        {
+            let world = app.world_mut();
+            let mut joystick = world.query_filtered::<&Node, With<JoystickRoot>>();
+            assert_eq!(joystick.single(world).unwrap().display, Display::None);
+        }
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::None;
         let mut ui = UiReadModel::default();
         ui.player.hp = 0;
         ui.player.max_hp = 200;

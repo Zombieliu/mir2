@@ -1,5 +1,22 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: blocking shared panels now hide the
+> gameplay joystick/action pad and prevent the invisible joystick recognizer
+> from claiming their touches; the duplicate collapsed `Panels` rail is no
+> longer drawn. API31 captures pass at 1600x720, 1920x1080 and the emulator's
+> unoverridden 2340x1080 cutout profile. Launcher re-entry also no longer creates
+> a second `GameActivity`: single-task reuse retained the same PID, restored the
+> visible full-screen world frame and emitted zero destroyed-activity, panic or
+> fatal-exception errors. Android Rust passes 164/164, focused controls 15/15,
+> Java host/policy tests 22/22 in both variants, arm64-v8a API31 release build,
+> Debug/UI Preview packaging and streamed install all pass. UI Preview APK
+> SHA-256 is
+> `c4965f07b0452f462ebef2b0f5b9ae169cfa006be3297343dd2bab580c66f757`.
+> Evidence:
+> `docs/generated/player-qa/native-android-small-landscape-controls-20260912/README.md`.
+> This remains offline emulator evidence; approved-WSS login/map transitions
+> and physical-device acceptance remain open.
+
 > 2026-09-12 Android current change: the production Activity now observes the
 > real Android default network instead of inferring connectivity from its own
 > WebSocket phase. A foreground network loss disconnects and invalidates the
