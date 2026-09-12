@@ -338,6 +338,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -350,6 +351,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -361,6 +363,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -372,6 +375,7 @@ fn fit_stage(
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Has<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
         Or<(
@@ -379,6 +383,7 @@ fn fit_stage(
             With<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             With<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         )>,
     >,
@@ -460,6 +465,7 @@ fn fit_stage(
         is_inventory,
         is_storage,
         is_options,
+        is_npc_shop,
         is_npc_dialog,
     ) in &mut focus_panels
     {
@@ -471,9 +477,16 @@ fn fit_stage(
             || (is_inventory && player.inventory_open())
             || (is_storage && player.storage_open())
             || (is_options && player.options_open())
+            || (is_npc_shop && player.npc_shop_open())
             || (is_npc_dialog && npc_dialog.is_open);
         *transform = if enabled {
-            let max_scale = if is_npc_dialog { 2.2 } else { 3.2 };
+            let max_scale = if is_npc_shop {
+                1.8
+            } else if is_npc_dialog {
+                2.2
+            } else {
+                3.2
+            };
             mobile_focus_transform(
                 fit,
                 origin,
@@ -2128,8 +2141,19 @@ mod tests {
                 (Vec2::ZERO, Vec2::new(316.0, 236.0)),
                 (Vec2::new(150.0, 100.0), Vec2::new(640.0, 344.0)),
                 (Vec2::new(382.0, 207.0), Vec2::new(259.0, 354.0)),
+                (Vec2::new(0.0, 224.0), Vec2::new(242.0, 330.0)),
+                (Vec2::new(0.0, 224.0), Vec2::new(360.0, 360.0)),
                 (Vec2::ZERO, Vec2::new(440.0, 224.0)),
             ] {
+                let is_npc_shop = size == Vec2::new(242.0, 330.0)
+                    || size == Vec2::new(360.0, 360.0);
+                let max_scale = if is_npc_shop {
+                    1.8
+                } else if size == Vec2::new(440.0, 224.0) {
+                    2.2
+                } else {
+                    3.2
+                };
                 let transform = mobile_focus_transform(
                     fit,
                     origin,
@@ -2137,11 +2161,7 @@ mod tests {
                     Vec2::new(width, height),
                     Vec4::ZERO,
                     root_top,
-                    if size == Vec2::new(440.0, 224.0) {
-                        2.2
-                    } else {
-                        3.2
-                    },
+                    max_scale,
                 );
                 let (Val::Px(dx), Val::Px(dy)) = (transform.translation.x, transform.translation.y)
                 else {
@@ -2164,6 +2184,9 @@ mod tests {
                 if size == Vec2::new(440.0, 224.0) {
                     assert!(transform.scale.x <= 2.2);
                     assert!(28.0 * fit.scale * transform.scale.y * 2.625 >= 55.0);
+                } else if max_scale == 1.8 {
+                    assert!(transform.scale.x <= 1.8);
+                    assert!(32.0 * fit.scale * transform.scale.y * 2.625 >= 48.0);
                 }
             }
         }

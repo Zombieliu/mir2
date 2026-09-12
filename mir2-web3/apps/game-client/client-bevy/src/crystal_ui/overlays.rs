@@ -2427,7 +2427,10 @@ struct BigMapNpcRowEntity {
 }
 
 #[derive(Component)]
-struct OverlayShop;
+pub struct OverlayShop;
+
+const NPC_SHOP_BUY_PANEL_SIZE: Vec2 = Vec2::new(242.0, 330.0);
+const NPC_SHOP_SERVICE_PANEL_SIZE: Vec2 = Vec2::new(360.0, 360.0);
 
 #[derive(Component)]
 struct OverlayGameShop;
@@ -3486,12 +3489,13 @@ fn spawn_overlay_root(mut commands: Commands) {
             ));
             root.spawn((
                 OverlayShop,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(0.0),
                     top: Val::Px(224.0),
-                    width: Val::Px(620.0),
-                    height: Val::Px(344.0),
+                    width: Val::Px(NPC_SHOP_BUY_PANEL_SIZE.x),
+                    height: Val::Px(NPC_SHOP_BUY_PANEL_SIZE.y),
                     display: Display::None,
                     ..default()
                 },
@@ -7660,9 +7664,11 @@ fn render_overlays(
             state.bigmap_open(),
             |parent| render_bigmap(parent, asset_server.as_deref(), &big_map, &big_map_ui, &ui),
         );
-        fill_panel(
+        let npc_shop_size = npc_shop_panel_size(&shop, &state);
+        fill_sized_panel(
             &mut commands,
             &mut secondary.p2(),
+            npc_shop_size,
             state.npc_shop_open(),
             |parent| {
                 render_shop(
@@ -7900,6 +7906,29 @@ fn fill_panel<C: Component>(
     let Some((entity, mut node)) = query.iter_mut().next() else {
         return;
     };
+    node.display = if visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    commands.entity(entity).despawn_children();
+    if visible {
+        commands.entity(entity).with_children(render);
+    }
+}
+
+fn fill_sized_panel<C: Component>(
+    commands: &mut Commands,
+    query: &mut Query<(Entity, &mut Node), With<C>>,
+    size: Vec2,
+    visible: bool,
+    render: impl FnOnce(&mut ChildSpawnerCommands),
+) {
+    let Some((entity, mut node)) = query.iter_mut().next() else {
+        return;
+    };
+    node.width = Val::Px(size.x);
+    node.height = Val::Px(size.y);
     node.display = if visible {
         Display::Flex
     } else {
@@ -11793,7 +11822,7 @@ fn render_shop(
     state: &NativePlayerUiState,
     player: &crate::read_model::PlayerStats,
 ) {
-    let show_buy = shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab);
+    let show_buy = npc_shop_buy_mode(shop, state);
     if !show_buy {
         render_npc_item_service(parent, asset_server, shop, inventory, state);
         return;
@@ -11969,6 +11998,18 @@ fn render_shop(
             OverlayButton::ShopShowSell,
             true,
         );
+    }
+}
+
+fn npc_shop_buy_mode(shop: &ShopModel, state: &NativePlayerUiState) -> bool {
+    shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab)
+}
+
+fn npc_shop_panel_size(shop: &ShopModel, state: &NativePlayerUiState) -> Vec2 {
+    if npc_shop_buy_mode(shop, state) {
+        NPC_SHOP_BUY_PANEL_SIZE
+    } else {
+        NPC_SHOP_SERVICE_PANEL_SIZE
     }
 }
 
@@ -15942,6 +15983,32 @@ mod tests {
                 _ => {}
             }
         }
+    }
+
+    #[test]
+    fn npc_shop_root_uses_the_rendered_buy_or_service_bounds() {
+        let mut shop = ShopModel {
+            service_mode: NpcShopServiceMode::Buy,
+            supports_buy: true,
+            ..default()
+        };
+        let mut state = NativePlayerUiState::default();
+        assert_eq!(npc_shop_panel_size(&shop, &state), NPC_SHOP_BUY_PANEL_SIZE);
+
+        shop.supports_sell = true;
+        state.npc_shop_buy_tab = false;
+        assert_eq!(
+            npc_shop_panel_size(&shop, &state),
+            NPC_SHOP_SERVICE_PANEL_SIZE
+        );
+
+        shop.service_mode = NpcShopServiceMode::Repair;
+        shop.supports_buy = false;
+        shop.supports_sell = false;
+        assert_eq!(
+            npc_shop_panel_size(&shop, &state),
+            NPC_SHOP_SERVICE_PANEL_SIZE
+        );
     }
 
     #[test]
