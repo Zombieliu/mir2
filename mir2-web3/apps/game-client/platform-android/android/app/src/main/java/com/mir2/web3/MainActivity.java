@@ -3,6 +3,8 @@ package com.mir2.web3;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -34,12 +36,15 @@ public final class MainActivity extends GameActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ForegroundRecoveryPolicy recoveryPolicy = new ForegroundRecoveryPolicy();
     private final GatewayHostPolicy gatewayHostPolicy = new GatewayHostPolicy();
+    private final NetworkRecoveryPolicy networkRecoveryPolicy = new NetworkRecoveryPolicy();
+    private ConnectivityManager connectivity;
+    private ConnectivityManager.NetworkCallback networkCallback;
     private GatewaySession session;
     private OkHttpClient client;
     private EditText ime;
     private String editing = "";
     private boolean updating, foreground, sensitiveEditor, imeWasVisible, multilineEditor;
-    private volatile boolean networkReportedAvailable;
+    private Boolean networkReportedAvailable;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -96,13 +101,6 @@ public final class MainActivity extends GameActivity {
             nativeEvent(GatewaySession.object("phase", view.phase.name(), "message", view.message,
                     "characters", roster, "world", view.world == null ? JSONObject.NULL : view.world.toJson(),
                     "worldSnapshot", view.worldSnapshot == null ? JSONObject.NULL : view.worldSnapshot).toString());
-            boolean networkAvailable = view.phase != GatewaySession.Phase.DISCONNECTED
-                    && view.phase != GatewaySession.Phase.CONNECTING;
-            if (networkAvailable != networkReportedAvailable) {
-                networkReportedAvailable = networkAvailable;
-                nativeEvent(GatewaySession.object("type", "lifecycle", "state",
-                        networkAvailable ? "networkAvailable" : "networkUnavailable").toString());
-            }
             GatewayHostPolicy.Action hostAction = gatewayHostPolicy.observe(
                     view.phase, view.worldSnapshot != null);
             if (hostAction == GatewayHostPolicy.Action.START) {
@@ -114,6 +112,19 @@ public final class MainActivity extends GameActivity {
                 "type", "gatewayReceipt", "envelope", receipt).toString()),
                 packet -> nativeEvent(GatewaySession.object(
                         "type", "gatewayGameplayPacket", "envelope", packet).toString()));
+        connectivity = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+        networkCallback = new ConnectivityManager.NetworkCallback() {
+            @Override public void onAvailable(Network network) {
+                handler.post(() -> updateNetworkState(true));
+            }
+            @Override public void onLost(Network network) {
+                // A Wi-Fi to cellular handoff may report the old network lost
+                // after the replacement became default. Query the current
+                // default instead of inventing a transient offline edge.
+                handler.post(() -> updateNetworkState(connectivity.getActiveNetwork() != null));
+            }
+        };
+        connectivity.registerDefaultNetworkCallback(networkCallback);
         connect();
         hideSystemUi();
     }
@@ -133,6 +144,20 @@ public final class MainActivity extends GameActivity {
         try { session.connect(BuildConfig.MIR2_GATEWAY_URL); }
         catch (IllegalArgumentException error) {
             nativeEvent(GatewaySession.object("phase", "UNCONFIGURED", "message", "Invalid approved WSS endpoint configuration").toString());
+        }
+    }
+
+    private void updateNetworkState(boolean available) {
+        if (networkReportedAvailable != null && networkReportedAvailable == available) return;
+        networkReportedAvailable = available;
+        nativeEvent(GatewaySession.object("type", "lifecycle", "state",
+                available ? "networkAvailable" : "networkUnavailable").toString());
+        NetworkRecoveryPolicy.Action action = networkRecoveryPolicy.onNetworkChanged(
+                available, foreground, BuildConfig.UI_PREVIEW);
+        if (action == NetworkRecoveryPolicy.Action.DISCONNECT) {
+            session.disconnect("Network unavailable. Reconnecting securely when it returns.");
+        } else if (action == NetworkRecoveryPolicy.Action.CONNECT) {
+            connect();
         }
     }
 
@@ -241,7 +266,8 @@ public final class MainActivity extends GameActivity {
         foreground = true;
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "resume").toString());
         handler.post(pump);
-        if (recoveryPolicy.takeReconnectOnStart()) connect();
+        if (networkRecoveryPolicy.onForeground(recoveryPolicy.takeReconnectOnStart(),
+                BuildConfig.UI_PREVIEW) == NetworkRecoveryPolicy.Action.CONNECT) connect();
     }
     @Override protected void onStop() {
         foreground = false;
@@ -260,6 +286,10 @@ public final class MainActivity extends GameActivity {
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "destroy").toString());
         nativeGatewayHostStop();
         gatewayHostPolicy.reset();
+        if (connectivity != null && networkCallback != null) {
+            connectivity.unregisterNetworkCallback(networkCallback);
+            networkCallback = null;
+        }
         session.close();
         client.dispatcher().executorService().shutdown();
         client.connectionPool().evictAll();

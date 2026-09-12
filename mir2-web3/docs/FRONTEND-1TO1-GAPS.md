@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: the production Activity now observes the
+> real Android default network instead of inferring connectivity from its own
+> WebSocket phase. A foreground network loss disconnects and invalidates the
+> authenticated host once; recovery reconnects once, while background recovery
+> waits until both foreground and network are available. Default-network
+> handoff rechecks the active network so losing the old Wi-Fi does not invent
+> an offline edge after cellular has taken over. UI Preview never starts or
+> stops transport from these callbacks. Java tests pass 22/22 in both variants,
+> Android Rust remains 163/163, both APKs package, and API31 grants the new
+> `ACCESS_NETWORK_STATE` permission. Airplane on/off retained the same preview
+> PID and visible 849-tile/7-entity/12-layer frame. UI Preview APK SHA-256 is
+> `003332ab72731c96ee18ad90ae7577f19917141686748b6dc34a39d01d4e2834`.
+> This is lifecycle/emulator evidence; real WSS reconnection and physical-device
+> switching remain open.
+
 > 2026-09-12 Android current change: production Gateway writes now stay
 > disabled until StartGame or a destination map transition actually delivers
 > its authoritative world snapshot. Position-only `IN_GAME` publications keep
