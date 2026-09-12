@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: native packaging now rejects a
+> self-referential/stale Gradle UI output and validates the complete licensed
+> shared-UI manifest plus every referenced frame before Sync. A 34-scene API31
+> audit exposed that the earlier four-sentinel gate could package only 3,160 UI
+> PNGs; the corrected build stages 12,781 and restores the complete Chat
+> Settings frame/controls. The self-source negative gate fails before mutation;
+> full-pack Debug/UI Preview assembly, Java 23/23 in both variants, streamed
+> install and visible Bichon 849-draw/7-entity/12-layer render pass. UI Preview
+> APK SHA-256 is
+> `71f0a881b65d9d2f286a5bd5d527aa6611300661e4308ca95fc9b58dac96f65b`.
+> Evidence:
+> `docs/generated/player-qa/native-android-ui-pack-closure-20260913/README.md`.
+> The original desktop-canvas panel scale is still too small for several phone
+> dialogs; approved-WSS and physical-device acceptance remain open.
+
 > 2026-09-13 Android current change: replacing the native Gateway host
 > generation now drops every old unsent command instead of retaining non-motion
 > gameplay actions across a map or account boundary. Lost Game Shop, Storage and

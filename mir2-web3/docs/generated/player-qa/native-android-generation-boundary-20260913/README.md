@@ -1,5 +1,12 @@
 # Native Android replacement-generation boundary evidence — 2026-09-13
 
+> Packaging correction: the APK hashes originally recorded below were produced
+> from a stale self-referential Gradle UI output containing only 3,160 shared UI
+> PNGs. They remain evidence of the transport tests but must not be used as the
+> current UI APK. The replacement full-pack artifact and screenshots are
+> recorded in
+> `docs/generated/player-qa/native-android-ui-pack-closure-20260913/README.md`.
+
 ## Scope
 
 This proof covers Android's command/pending-operation boundary when a
