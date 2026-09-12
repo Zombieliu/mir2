@@ -1,5 +1,23 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: entity release provenance is now
+> fail-closed at both packaging and selected-page decode. Gradle requires an
+> immutable `MIR2_ANDROID_ENTITY_ASSET_PACK_ID` for an override, verifies the
+> complete manifest/page closure plus every PNG byte count, dimensions and
+> SHA-256, and embeds a machine-readable pack lock in the APK. The native
+> loader independently rejects a selected page whose SHA-256 differs and emits
+> the manifest SHA-256 with the packaged world-frame diagnostic. Android
+> `ui-preview` is 153/153; tracked-pack, missing-ID negative, 35-atlas override,
+> forced real-pack and API31 package gates pass. The 375,663,860-byte APK has
+> SHA-256 `f420968ea3ec633649bc0dd940594eb7fedeb12f5463af7c7bd2f1f8da20e10b`
+> and embeds pack `local-player-shards-20260912`, manifest
+> `0a7f57e99e4f1fa508e807be20ec3c957d9ecd1b598b468fc6905c8a394181e7`
+> and all 102 pages. The old API31 SwiftShader emulator again hit `DeviceLost`
+> before a new render-ready frame, so the prior visible frame was not upgraded
+> to a soak claim. Approved Web/Android release alignment, WSS/account login,
+> physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-entity-pack-lock-20260912/README.md`.
+
 > 2026-09-12 Android current change: the Android-private entity loader now
 > accepts up to 64 immutable atlases / 128 pages with global key/path
 > uniqueness, exact partial-page bounds and a 128 MiB selected-RGBA cap. A

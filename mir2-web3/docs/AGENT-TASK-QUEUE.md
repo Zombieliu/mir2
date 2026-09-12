@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-09-12 Android current change: local proof packs can no longer enter an
+> APK without an explicit immutable pack ID and exact content validation.
+> Packaging verifies the complete 35-atlas/102-page override (including every
+> declared page SHA-256) and embeds its pack ID, manifest SHA-256 and aggregate
+> counts; the native selected-page path verifies SHA-256 again before decode.
+> Android `ui-preview` is 153/153 and tracked, missing-ID negative, override,
+> forced real-pack and API31 package gates pass. Next release work is to publish
+> an approved shared pack and compare its deployed Web manifest hash to the APK
+> lock before online acceptance. The old API31 SwiftShader renderer again hit
+> `DeviceLost` before a new ready frame. Approved WSS/account real login, live
+> render-ready map transitions, updated-renderer/physical-device runs and human
+> acceptance remain external gates. Evidence:
+> `docs/generated/player-qa/native-android-entity-pack-lock-20260912/README.md`.
+
 > 2026-09-12 Android current change: monolithic entity-atlas loading has been
 > replaced by bounded multi-atlas selection. A local 35-root/102-page proof pack
 > exercises 23,224 rects and 48 unindexed occupants; only the 25 pages required

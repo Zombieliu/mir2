@@ -556,6 +556,7 @@ fn receive(
                     entity_unindexed_rects = summary.entity_unindexed_rect_count,
                     entity_compressed_bytes = summary.entity_compressed_bytes,
                     entity_rgba_bytes = summary.entity_rgba_bytes,
+                    entity_manifest_sha256 = summary.entity_manifest_sha256,
                     "packaged Android world frame queued"
                 );
                 if matches!(model.screen, Screen::StartingGame | Screen::InGame) {

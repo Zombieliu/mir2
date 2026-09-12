@@ -26,8 +26,18 @@ bounded raw map `generated/crystal-map-pack/0.map`, plus
 Gradle normally stages the tracked shared `bevy-entity-atlases`
 manifest/pages. For bounded local licensed-asset QA, set
 `MIR2_ANDROID_ENTITY_ASSET_ROOT` to a generated asset root containing
-`bevy-entity-atlases/manifest.json` and its PNG pages; Gradle stages that pack
-only into generated APK assets and does not modify or commit the Web release. On
+`bevy-entity-atlases/manifest.json` and its PNG pages, and set
+`MIR2_ANDROID_ENTITY_ASSET_PACK_ID` to the approved immutable release/version
+identifier. Gradle stages that pack only into generated APK assets and does not
+modify or commit the Web release. Override packs without a bounded stable ID
+fail packaging. Tracked packs derive an ID from the complete manifest hash.
+Before staging, Gradle checks every manifest page's declared byte count,
+dimensions and SHA-256 and rejects missing, extra or duplicate PNGs. It writes
+`assets/bevy-entity-atlases/pack-lock.json` into the APK with the source mode,
+pack ID, manifest SHA-256 and exact atlas/page/rect/byte totals. The native
+loader independently checks the canonical SHA-256 of every selected page before
+decoding and includes the manifest SHA-256 in the packaged world-frame
+diagnostic. On
 each accepted Bichon world snapshot, the Android host validates schema, counts,
 geometry, paths and memory limits; decodes the packaged map atlas and the
 entity/keyed pages used by that view off the render thread; parses the Crystal

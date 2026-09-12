@@ -10,6 +10,7 @@ use mir2_bevy_runtime::entity_animation::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, HashSet},
     io::Cursor,
@@ -72,6 +73,7 @@ struct EntityAtlasPage {
     width: u32,
     height: u32,
     image_bytes: usize,
+    sha256: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -313,6 +315,25 @@ pub(crate) struct EntityRenderProduct {
     pub(crate) unindexed_rect_count: usize,
     pub(crate) compressed_bytes: usize,
     pub(crate) rgba_bytes: usize,
+    pub(crate) manifest_sha256: String,
+}
+
+fn sha256_hex(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let digest = Sha256::digest(bytes);
+    let mut output = String::with_capacity(64);
+    for byte in digest {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
+}
+
+fn valid_sha256(value: &str) -> bool {
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || matches!(byte, b'a'..=b'f'))
 }
 
 fn safe_component_path(value: &str) -> bool {
@@ -792,6 +813,7 @@ where
             "entity-atlas manifest byte count is out of bounds",
         ));
     }
+    let manifest_sha256 = sha256_hex(&manifest_bytes);
     let manifest: EntityAtlasManifest =
         serde_json::from_slice(&manifest_bytes).map_err(|error| {
             WorldAssetError::new(format!("entity-atlas manifest rejected: {error}"))
@@ -852,6 +874,7 @@ where
                 || page.height > atlas.height
                 || page.image_bytes == 0
                 || page.image_bytes > MAX_PAGE_PNG_BYTES
+                || !valid_sha256(&page.sha256)
             {
                 return Err(WorldAssetError::new(
                     "entity-atlas page descriptor is invalid or duplicated",
@@ -1319,6 +1342,11 @@ where
                 "entity-atlas PNG byte count does not match the manifest",
             ));
         }
+        if sha256_hex(&bytes) != page.sha256 {
+            return Err(WorldAssetError::new(
+                "entity-atlas PNG SHA-256 does not match the manifest",
+            ));
+        }
         let rgba = decode_page(&bytes, page.width, page.height)?;
         compressed_bytes = compressed_bytes
             .checked_add(bytes.len())
@@ -1383,6 +1411,7 @@ where
         unindexed_rect_count,
         compressed_bytes,
         rgba_bytes,
+        manifest_sha256,
     })
 }
 
@@ -1436,7 +1465,7 @@ mod tests {
                 "key": "starter",
                 "width": 1,
                 "height": 1,
-                "pages": [{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages": [{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects": [
                     {
                         "key":"/original-ui/CArmour/00/16.png|1x1",
@@ -1472,6 +1501,7 @@ mod tests {
         assert_eq!(product.layer_count, 1);
         assert_eq!(product.unresolved_entity_count, 0);
         assert_eq!(product.pages.len(), 1);
+        assert_eq!(product.manifest_sha256, sha256_hex(&manifest));
         let state: serde_json::Value = serde_json::from_str(&product.json).unwrap();
         assert_eq!(state["_nativeWorldRequest"], 17);
         assert_eq!(state["entities"][0]["isSelf"], true);
@@ -1504,7 +1534,7 @@ mod tests {
             "kind": ENTITY_ATLAS_KIND,
             "atlases": [{
                 "key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":[
                     {"key":"/original-ui/CArmour/00/16.png|1x1",
                      "x":0,"y":0,"width":1,"height":1,
@@ -1548,17 +1578,17 @@ mod tests {
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[
                 {"key":"body-atlas","width":1,"height":1,
-                 "pages":[{"imageFile":"body.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "pages":[{"imageFile":"body.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                  "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
                     "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
                     "frameIndex":16,"pageIndex":0}]},
                 {"key":"weapon-atlas","width":1,"height":1,
-                 "pages":[{"imageFile":"weapon.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "pages":[{"imageFile":"weapon.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                  "rects":[{"key":"/original-ui/CWeapon/00/16.png|1x1",
                     "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
                     "frameIndex":16,"pageIndex":0}]},
                 {"key":"unused-atlas","width":2,"height":2,
-                 "pages":[{"imageFile":"unused.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "pages":[{"imageFile":"unused.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                  "rects":[{"key":"/original-ui/CArmour/01/16.png|1x1",
                     "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
                     "frameIndex":16,"pageIndex":0}]}
@@ -1612,10 +1642,10 @@ mod tests {
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[
                 {"key":"first","width":1,"height":1,
-                 "pages":[{"imageFile":"first.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "pages":[{"imageFile":"first.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                  "rects":[rect.clone()]},
                 {"key":"second","width":1,"height":1,
-                 "pages":[{"imageFile":"second.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "pages":[{"imageFile":"second.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                  "rects":[rect]}
             ]
         })
@@ -1647,7 +1677,7 @@ mod tests {
         let manifest = serde_json::json!({
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[{"key":"partial","width":2,"height":2,
-                "pages":[{"imageFile":"partial.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"partial.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
                     "x":1,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
                     "frameIndex":16,"pageIndex":0}]}]
@@ -1675,12 +1705,43 @@ mod tests {
     }
 
     #[test]
+    fn selected_atlas_page_must_match_its_manifest_sha256() {
+        let png = rgba_png();
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[{"key":"starter","width":1,"height":1,
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,
+                    "imageBytes":png.len(),"sha256":"0".repeat(64)}],
+                "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
+                    "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":16,"pageIndex":0}]}]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{"objectId":"42","kind":"selfPlayer","x":300,"y":630,
+                "direction":"Down","sprite":{"bodyLibrary":"CArmour/00",
+                "frameBaseOffset":0,"directionStride":4}}]
+        })
+        .to_string();
+        let error = load_entity_render_state(&snapshot, &scene(), 41, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/starter.png" => Ok(png.clone()),
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap_err();
+        assert!(error.to_string().contains("PNG SHA-256"));
+    }
+
+    #[test]
     fn partially_indexed_atlas_rects_remain_rejected() {
         let png = rgba_png();
         let manifest = serde_json::json!({
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[{"key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
                     "x":0,"y":0,"width":1,"height":1,
                     "offsetX":0,"frameIndex":16,"pageIndex":0}]}]
@@ -1712,7 +1773,7 @@ mod tests {
         let manifest = serde_json::json!({
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[{"key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
                     "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
                     "frameIndex":16,"pageIndex":0}]}]
@@ -1784,7 +1845,7 @@ mod tests {
         let manifest = serde_json::json!({
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[{"key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":rects}]
         })
         .to_string()
@@ -1844,7 +1905,7 @@ mod tests {
             "kind": ENTITY_ATLAS_KIND,
             "atlases": [{
                 "key": "starter", "width":1, "height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1","x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,"frameIndex":16}]
             }]
         }).to_string().into_bytes();
@@ -1876,7 +1937,7 @@ mod tests {
             "kind": ENTITY_ATLAS_KIND,
             "atlases": [{
                 "key": "starter", "width":1, "height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":[{"key":"/original-ui/CArmour/00/0.png|1x1","x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,"frameIndex":0}]
             }]
         }).to_string().into_bytes();
@@ -1927,7 +1988,7 @@ mod tests {
             "kind": ENTITY_ATLAS_KIND,
             "atlases": [{
                 "key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":rects
             }]
         })
@@ -1992,7 +2053,7 @@ mod tests {
         let manifest = serde_json::json!({
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[{"key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":rects}]
         })
         .to_string()
@@ -2050,7 +2111,7 @@ mod tests {
         let manifest = serde_json::json!({
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[{"key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":rects}]
         })
         .to_string()
@@ -2094,7 +2155,7 @@ mod tests {
             "kind": ENTITY_ATLAS_KIND,
             "atlases": [{
                 "key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":[
                     {"key":"/original-ui/CArmour/00/432.png|1x1","x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,"frameIndex":432},
                     {"key":"/original-ui/Mount/00/16.png|1x1","x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,"frameIndex":16},
@@ -2154,7 +2215,7 @@ mod tests {
         let manifest = serde_json::json!({
             "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
             "atlases":[{"key":"starter","width":1,"height":1,
-                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len()}],
+                "pages":[{"imageFile":"starter.png","width":1,"height":1,"imageBytes":png.len(),"sha256":sha256_hex(&png)}],
                 "rects":rects}]
         })
         .to_string()

@@ -127,6 +127,7 @@ pub(crate) struct PackagedMapAtlasSummary {
     pub(crate) entity_unindexed_rect_count: usize,
     pub(crate) entity_compressed_bytes: usize,
     pub(crate) entity_rgba_bytes: usize,
+    pub(crate) entity_manifest_sha256: String,
 }
 
 #[cfg(target_os = "android")]
@@ -572,6 +573,7 @@ pub(crate) fn request_packaged_map_atlas_load(
                     entity_unindexed_rect_count: entity_render.unindexed_rect_count,
                     entity_compressed_bytes: entity_render.compressed_bytes,
                     entity_rgba_bytes: entity_render.rgba_bytes,
+                    entity_manifest_sha256: entity_render.manifest_sha256,
                 };
                 // Publish the render-state pair before its image batch. The
                 // runtime deliberately clears map images while no active map

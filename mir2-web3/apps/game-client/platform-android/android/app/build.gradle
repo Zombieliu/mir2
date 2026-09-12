@@ -44,21 +44,145 @@ def prepareWorldAssets = tasks.register('prepareWorldAssets', Sync) {
 // committing that pack or changing the Web release. Android still validates
 // the manifest, page integrity and selected-page memory budget at runtime.
 def entityAtlasOverride = System.getenv('MIR2_ANDROID_ENTITY_ASSET_ROOT')
+def entityAtlasPackIdOverride = System.getenv('MIR2_ANDROID_ENTITY_ASSET_PACK_ID')
 def entityAtlasRoot = entityAtlasOverride
         ? file("${entityAtlasOverride}/bevy-entity-atlases")
         : file("${projectDir}/../../../../web/public/bevy-entity-atlases")
+def entityAssetOutput = layout.buildDirectory.dir('generated/entity-assets')
+def verifiedEntityPack = [:]
+def entitySha256 = { File source ->
+    def digest = java.security.MessageDigest.getInstance('SHA-256')
+    source.withInputStream { stream ->
+        byte[] buffer = new byte[64 * 1024]
+        for (int count = stream.read(buffer); count >= 0; count = stream.read(buffer)) {
+            if (count > 0) digest.update(buffer, 0, count)
+        }
+    }
+    digest.digest().collect { String.format('%02x', it & 0xff) }.join()
+}
+def verifyEntityPack = { File root ->
+    def manifestFile = new File(root, 'manifest.json')
+    if (!manifestFile.isFile()) {
+        throw new GradleException(entityAtlasOverride
+                ? 'MIR2_ANDROID_ENTITY_ASSET_ROOT does not contain bevy-entity-atlases/manifest.json'
+                : 'The shared Bevy entity-atlas manifest is missing')
+    }
+    if (manifestFile.length() <= 0 || manifestFile.length() > 16 * 1024 * 1024) {
+        throw new GradleException('The entity-atlas manifest byte count is out of bounds')
+    }
+    def manifest
+    try {
+        manifest = new groovy.json.JsonSlurper().parse(manifestFile)
+    } catch (Exception error) {
+        throw new GradleException('The entity-atlas manifest is invalid JSON', error)
+    }
+    if (manifest.schemaVersion != 2 || manifest.kind != 'mir2-bevy-entity-atlas-manifest'
+            || !(manifest.atlases instanceof List) || manifest.atlases.isEmpty()
+            || manifest.atlases.size() > 64) {
+        throw new GradleException('The entity-atlas manifest schema or atlas count is unsupported')
+    }
+
+    def atlasKeys = new LinkedHashSet<String>()
+    def pageFiles = new LinkedHashSet<String>()
+    long totalPageBytes = 0
+    int totalPages = 0
+    int totalRects = 0
+    manifest.atlases.each { atlas ->
+        def atlasKey = atlas.key as String
+        if (!atlasKey || atlasKey.length() > 128 || !atlasKeys.add(atlasKey)
+                || !(atlas.pages instanceof List) || atlas.pages.isEmpty()
+                || atlas.pages.size() > 32 || !(atlas.rects instanceof List)
+                || atlas.rects.isEmpty()) {
+            throw new GradleException("The entity atlas '${atlasKey}' has invalid or duplicate metadata")
+        }
+        int atlasWidth = (atlas.width as Number).intValue()
+        int atlasHeight = (atlas.height as Number).intValue()
+        if (atlasWidth <= 0 || atlasHeight <= 0 || atlasWidth * (long) atlasHeight > 4 * 1024 * 1024) {
+            throw new GradleException("The entity atlas '${atlasKey}' dimensions are out of bounds")
+        }
+        totalPages += atlas.pages.size()
+        totalRects += atlas.rects.size()
+        atlas.pages.each { page ->
+            def imageFile = page.imageFile as String
+            if (!(imageFile ==~ /[A-Za-z0-9._-]+\.png/) || !pageFiles.add(imageFile)) {
+                throw new GradleException("The entity-atlas page name is unsafe or duplicated: ${imageFile}")
+            }
+            def pageFile = new File(root, imageFile)
+            long declaredBytes = (page.imageBytes as Number).longValue()
+            int pageWidth = (page.width as Number).intValue()
+            int pageHeight = (page.height as Number).intValue()
+            def declaredHash = page.sha256 as String
+            if (!pageFile.isFile() || declaredBytes <= 0 || declaredBytes > 8 * 1024 * 1024
+                    || pageFile.length() != declaredBytes || pageWidth <= 0 || pageHeight <= 0
+                    || pageWidth > atlasWidth || pageHeight > atlasHeight
+                    || !(declaredHash ==~ /[0-9a-f]{64}/)) {
+                throw new GradleException("The entity-atlas page descriptor is invalid: ${imageFile}")
+            }
+            def image = javax.imageio.ImageIO.read(pageFile)
+            if (image == null || image.width != pageWidth || image.height != pageHeight) {
+                throw new GradleException("The entity-atlas PNG dimensions do not match: ${imageFile}")
+            }
+            image.flush()
+            def actualHash = entitySha256(pageFile)
+            if (actualHash != declaredHash) {
+                throw new GradleException("The entity-atlas PNG SHA-256 does not match: ${imageFile}")
+            }
+            totalPageBytes += declaredBytes
+        }
+        atlas.rects.each { rect ->
+            def pageIndex = rect.containsKey('pageIndex') ? rect.pageIndex : 0
+            if (!(pageIndex instanceof Number)
+                    || pageIndex.intValue() < 0
+                    || pageIndex.intValue() >= atlas.pages.size()) {
+                throw new GradleException("The entity atlas '${atlasKey}' has an invalid rect page index")
+            }
+        }
+    }
+    if (totalPages > 128 || totalRects > 100000) {
+        throw new GradleException('The entity-atlas page or rect total exceeds the Android budget')
+    }
+    def actualPages = fileTree(root).matching { include '*.png' }.files.collect { it.name }.toSet()
+    if (actualPages != pageFiles) {
+        throw new GradleException('The entity-atlas directory has missing or unreferenced PNG pages')
+    }
+    def manifestHash = entitySha256(manifestFile)
+    def packId = entityAtlasOverride ? entityAtlasPackIdOverride : "tracked-${manifestHash.substring(0, 16)}"
+    if (!(packId ==~ /[A-Za-z0-9._-]{1,96}/)) {
+        throw new GradleException(entityAtlasOverride
+                ? 'Set MIR2_ANDROID_ENTITY_ASSET_PACK_ID to a stable version identifier for the override pack'
+                : 'The derived tracked entity-atlas pack ID is invalid')
+    }
+    return [packId: packId, sourceMode: entityAtlasOverride ? 'override' : 'tracked-shared',
+            manifestSha256: manifestHash, manifestBytes: manifestFile.length(),
+            atlasCount: manifest.atlases.size(), pageCount: totalPages,
+            rectCount: totalRects, pageBytes: totalPageBytes]
+}
 def prepareEntityAssets = tasks.register('prepareEntityAssets', Sync) {
     from(entityAtlasRoot) {
         include 'manifest.json', '*.png'
         into 'bevy-entity-atlases'
     }
-    into layout.buildDirectory.dir('generated/entity-assets')
+    into entityAssetOutput
+    inputs.property('entityAtlasPackId', entityAtlasPackIdOverride ?: '')
     doFirst {
-        if (!file("${entityAtlasRoot}/manifest.json").isFile()) {
-            throw new GradleException(entityAtlasOverride
-                    ? 'MIR2_ANDROID_ENTITY_ASSET_ROOT does not contain bevy-entity-atlases/manifest.json'
-                    : 'The shared Bevy entity-atlas manifest is missing')
-        }
+        verifiedEntityPack.clear()
+        verifiedEntityPack.putAll(verifyEntityPack(entityAtlasRoot))
+    }
+    doLast {
+        def lockFile = entityAssetOutput.get().file('bevy-entity-atlases/pack-lock.json').asFile
+        lockFile.parentFile.mkdirs()
+        lockFile.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
+                schemaVersion: 1,
+                kind: 'mir2-android-entity-pack-lock',
+                packId: verifiedEntityPack.packId,
+                sourceMode: verifiedEntityPack.sourceMode,
+                manifestSha256: verifiedEntityPack.manifestSha256,
+                manifestBytes: verifiedEntityPack.manifestBytes,
+                atlasCount: verifiedEntityPack.atlasCount,
+                pageCount: verifiedEntityPack.pageCount,
+                rectCount: verifiedEntityPack.rectCount,
+                pageBytes: verifiedEntityPack.pageBytes
+        ])) + System.lineSeparator(), 'UTF-8')
     }
 }
 
