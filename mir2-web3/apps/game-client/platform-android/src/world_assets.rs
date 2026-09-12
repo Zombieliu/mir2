@@ -133,8 +133,14 @@ pub(crate) struct PackagedMapAtlasSummary {
 #[cfg(target_os = "android")]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum PackagedMapAtlasLoadEvent {
-    Ready(PackagedMapAtlasSummary),
-    Failed(String),
+    Ready {
+        request_id: u64,
+        summary: PackagedMapAtlasSummary,
+    },
+    Failed {
+        request_id: u64,
+        message: String,
+    },
 }
 
 fn safe_library_name(name: &str) -> bool {
@@ -639,7 +645,10 @@ pub(crate) fn request_packaged_map_atlas_load(
                 }
                 if queue_ready {
                     state.active = false;
-                    state.event = Some(PackagedMapAtlasLoadEvent::Ready(summary));
+                    state.event = Some(PackagedMapAtlasLoadEvent::Ready {
+                        request_id,
+                        summary,
+                    });
                     return;
                 } else {
                     // This also removes already-consumed pages if the bounded
@@ -647,13 +656,17 @@ pub(crate) fn request_packaged_map_atlas_load(
                     crate::live_entity::clear_with_presentation_reset();
                     mir2_bevy_runtime::native_ingest::push_native_scene_reset();
                     state.active = false;
-                    state.event = Some(PackagedMapAtlasLoadEvent::Failed(
-                        "Bevy rejected the packaged map-atlas or draw-state batch".into(),
-                    ));
+                    state.event = Some(PackagedMapAtlasLoadEvent::Failed {
+                        request_id,
+                        message: "Bevy rejected the packaged map-atlas or draw-state batch".into(),
+                    });
                     return;
                 }
             }
-            Err(error) => PackagedMapAtlasLoadEvent::Failed(error.to_string()),
+            Err(error) => PackagedMapAtlasLoadEvent::Failed {
+                request_id,
+                message: error.to_string(),
+            },
         };
         let mut state = ANDROID_MAP_ATLAS_LOAD
             .lock()

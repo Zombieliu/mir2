@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> 2026-09-12 Android current change: asynchronous map/entity load results now
+> carry their authoritative request ID. A stale completion cannot change the
+> current frame notice or recover a newer transition; failure of the exact
+> pending frame clears world/render state, UI intents and presentation caches,
+> requests a host disconnect and returns to the normal reconnect path instead
+> of leaving the player trapped on `StartingGame`. Android `ui-preview` is
+> 154/154, API31 target and the exact 35-atlas aligned package pass, and streamed
+> emulator install succeeds. The old Emulator 31.3.10 SwiftShader driver again
+> became `DeviceLost` after the preview-ready signal, so this run intentionally
+> adds no visible-frame or soak acceptance. The previous head's GitHub Android
+> lane passed. Approved WSS/account login, public asset alignment, an
+> updated-renderer run and physical-device/human acceptance remain open.
+> Evidence:
+> `docs/generated/player-qa/native-android-render-failure-recovery-20260912/README.md`.
+
 > 2026-09-12 Android current change: Android package success can now be bound
 > to the exact Web entity manifest through
 > `MIR2_ANDROID_ENTITY_RELEASE_MANIFEST`. The bounded verifier accepts a local

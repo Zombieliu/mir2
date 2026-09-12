@@ -201,6 +201,29 @@ fn begin_render_ready_scene_transition(model: &mut NativeShellModel) {
     ));
 }
 
+fn fail_current_render_load(
+    host: &mut HostState,
+    model: &mut NativeShellModel,
+    request_id: u64,
+    message: &str,
+) -> bool {
+    if host.pending_render_request != Some(request_id) {
+        return false;
+    }
+    host.world = None;
+    host.pending_world_request = None;
+    host.pending_render_request = None;
+    host.render_load_active = false;
+    host.deferred_render_load = None;
+    host.phase = "DISCONNECTED".into();
+    model.apply_gateway_event(Event::Disconnect {
+        reason: Some(format!(
+            "World assets could not be loaded: {message}; reconnect"
+        )),
+    });
+    true
+}
+
 #[derive(Resource, Default)]
 struct EditorTouch(bool);
 
@@ -536,8 +559,12 @@ fn receive(
     if let Some(event) = crate::world_assets::poll_packaged_map_atlas_load() {
         host.render_load_active = false;
         match event {
-            crate::world_assets::PackagedMapAtlasLoadEvent::Ready(summary) => {
+            crate::world_assets::PackagedMapAtlasLoadEvent::Ready {
+                request_id,
+                summary,
+            } => {
                 info!(
+                    request_id,
                     pages = summary.page_count,
                     sprites = summary.source_count,
                     compressed_bytes = summary.compressed_bytes,
@@ -559,7 +586,9 @@ fn receive(
                     entity_manifest_sha256 = summary.entity_manifest_sha256,
                     "packaged Android world frame queued"
                 );
-                if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
+                if host.pending_render_request == Some(request_id)
+                    && matches!(model.screen, Screen::StartingGame | Screen::InGame)
+                {
                     model.notice = Some(ShellNotice::info(format!(
                         "World frame queued: {} map tiles and {} entity layers ({} unresolved map draws, {} unresolved entities).",
                         summary.map_tile_count + summary.map_standalone_tile_count,
@@ -569,12 +598,32 @@ fn receive(
                     )));
                 }
             }
-            crate::world_assets::PackagedMapAtlasLoadEvent::Failed(message) => {
-                warn!(%message, "packaged Android map atlas load failed");
-                if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
-                    model.notice = Some(ShellNotice::error(format!(
-                        "Packaged map atlas unavailable: {message}"
-                    )));
+            crate::world_assets::PackagedMapAtlasLoadEvent::Failed {
+                request_id,
+                message,
+            } => {
+                warn!(request_id, %message, "packaged Android map atlas load failed");
+                if fail_current_render_load(&mut host, &mut model, request_id, &message) {
+                    crate::world_assets::cancel_packaged_map_atlas_load();
+                    if let Some(overlays) = actor_overlays.as_deref_mut() {
+                        overlays.reset();
+                    }
+                    if let Some(effects) = scene_effects.as_deref_mut() {
+                        effects.clear();
+                    }
+                    if let Some(labels) = ground_labels.as_deref_mut() {
+                        labels.reset();
+                    }
+                    if let Some(pickups) = ground_pickups.as_deref_mut() {
+                        pickups.reset();
+                    }
+                    mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                    intents.drain().for_each(drop);
+                    if let Some(effects) = effects.as_deref_mut() {
+                        discard_player_commands(effects);
+                    }
+                    OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+                    send(json!({"type":"disconnect"}));
                 }
             }
         }
@@ -1647,6 +1696,54 @@ mod tests {
         }));
         assert_eq!(model.screen, Screen::InGame);
         assert_eq!(model.active_character.as_ref(), Some(&character));
+    }
+
+    #[test]
+    fn render_load_failure_recovers_only_the_matching_authoritative_frame() {
+        let character = CharacterSummary::new(7, "Fixture", 12, "Wizard", "Female");
+        let mut model = NativeShellModel {
+            screen: Screen::InGame,
+            characters: vec![character.clone()],
+            selected_character_index: Some(character.index),
+            active_character: Some(character),
+            ..default()
+        };
+        let mut host = HostState {
+            phase: "IN_GAME".into(),
+            world: Some(HostWorldPosition {
+                player_name: "Fixture".into(),
+                map_file_name: "0".into(),
+                x: 302,
+                y: 634,
+            }),
+            pending_world_request: Some(42),
+            pending_render_request: Some(42),
+            render_load_active: true,
+            ..default()
+        };
+
+        assert!(!super::fail_current_render_load(
+            &mut host,
+            &mut model,
+            41,
+            "stale frame failed"
+        ));
+        assert_eq!(host.pending_render_request, Some(42));
+        assert_eq!(model.screen, Screen::InGame);
+
+        assert!(super::fail_current_render_load(
+            &mut host,
+            &mut model,
+            42,
+            "missing atlas"
+        ));
+        assert_eq!(host.phase, "DISCONNECTED");
+        assert!(host.world.is_none());
+        assert!(host.pending_world_request.is_none());
+        assert!(host.pending_render_request.is_none());
+        assert!(!host.render_load_active);
+        assert!(host.deferred_render_load.is_none());
+        assert_ne!(model.screen, Screen::InGame);
     }
 
     #[test]

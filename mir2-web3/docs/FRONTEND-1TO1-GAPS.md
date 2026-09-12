@@ -1,5 +1,19 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: packaged world-load events are correlated
+> to the authoritative render request. Stale ready/failure events cannot unlock
+> or tear down a newer scene; a matching failure atomically clears pending
+> world/render state and Android presentation caches, drains client intents,
+> requests a disconnect and returns through the authenticated reconnect flow.
+> This closes the indefinite loading-screen failure mode without inventing a
+> render-ready receipt. Android `ui-preview` is 154/154; API31 target, the exact
+> local 35-atlas release-alignment package and streamed emulator install pass.
+> Emulator 31.3.10 emitted preview-ready but then hit the same SwiftShader
+> `DeviceLost`, producing a black capture, so visible-frame and soak acceptance
+> are explicitly withheld. Real login, current public asset alignment,
+> physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-render-failure-recovery-20260912/README.md`.
+
 > 2026-09-12 Android current change: both Android package scripts now have an
 > opt-in fail-closed Web release-alignment gate. It extracts the completed APK's
 > embedded lock and compares it with exact local or public-HTTPS manifest bytes

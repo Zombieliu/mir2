@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-12 Android current change: render-load completion is now bound to its
+> exact authoritative request ID. Stale background completions are ignored for
+> transition state, while failure of the current map/entity frame resets the
+> partial presentation and follows a clean disconnect/reconnect path instead
+> of hanging on the loading screen. Android 154/154, API31 target, aligned
+> 35-atlas package and streamed install pass. The old SwiftShader emulator
+> reached preview-ready but then reproduced `DeviceLost`; no new visible-frame,
+> soak, live-login or physical-device acceptance is claimed. Evidence:
+> `docs/generated/player-qa/native-android-render-failure-recovery-20260912/README.md`.
+
 > 2026-09-12 Android current change: package success now has an opt-in exact
 > Web entity-release gate. The completed APK's embedded pack lock is extracted
 > and compared with a local or credential-free HTTPS manifest by pack ID,
