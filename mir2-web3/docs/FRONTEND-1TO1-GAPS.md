@@ -1,5 +1,19 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: production Gateway writes now stay
+> disabled until StartGame or a destination map transition actually delivers
+> its authoritative world snapshot. Position-only `IN_GAME` publications keep
+> the existing 20-second render deadline armed, and leaving a rendered scene
+> invalidates the prior native host generation before any old queued gameplay
+> write can cross the transition. The destination snapshot starts one fresh
+> generation; ordinary in-map updates do not churn it. Java transport/policy
+> tests pass 19/19 in both Debug and UI Preview, Android Rust remains 163/163,
+> both APK variants package, and the UI Preview APK installs on API31. This is
+> deterministic transport/emulator evidence; its SHA-256 is
+> `3f430f6ee69718f037161dfd291ec833055818023f02097d8b40d34ff74cc7ef`.
+> No approved WSS account or
+> physical-device acceptance is claimed.
+
 > 2026-09-12 Android current change: render-ready receipts now retain the
 > authenticated-character boundary on both StartGame and in-map refreshes.
 > A matching request for a missing or different active character fails closed,

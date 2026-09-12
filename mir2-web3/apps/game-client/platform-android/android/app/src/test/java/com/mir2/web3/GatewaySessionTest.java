@@ -200,6 +200,39 @@ public class GatewaySessionTest {
         assertEquals(2, new JSONObject(accepted.worldSnapshot).getJSONArray("entities").length());
     }
 
+    @Test public void renderDeadlineRemainsArmedUntilAWorldSnapshotIsDelivered() throws Exception {
+        connect(); roster(); session.start(7);
+        commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapInformation\",\"payload\":{\"fileName\":\"0\"}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserInformation\",\"payload\":{\"name\":\"Fixture\"}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":302,\"y\":634}}");
+        GatewaySession.View coordinates = phase(GatewaySession.Phase.IN_GAME);
+        assertNotNull(coordinates.world);
+        assertNull(coordinates.worldSnapshot);
+        assertTrue(session.awaitingRenderSnapshot());
+
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        GatewaySession.View rendered = phase(GatewaySession.Phase.IN_GAME);
+        assertNotNull(rendered.worldSnapshot);
+        assertFalse(session.awaitingRenderSnapshot());
+
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":50,\"y\":60}}");
+        GatewaySession.View destinationCoordinates = phase(GatewaySession.Phase.IN_GAME);
+        assertEquals("1", destinationCoordinates.world.mapFileName);
+        assertNull(destinationCoordinates.worldSnapshot);
+        assertTrue(session.awaitingRenderSnapshot());
+
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"1\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":50,\"y\":60}]}}");
+        GatewaySession.View destinationRendered = phase(GatewaySession.Phase.IN_GAME);
+        assertNotNull(destinationRendered.worldSnapshot);
+        assertFalse(session.awaitingRenderSnapshot());
+    }
+
     @Test public void malformedPositionInvalidatesSession() throws Exception {
         connect(); roster(); session.start(7);
         commands.poll(3, TimeUnit.SECONDS);

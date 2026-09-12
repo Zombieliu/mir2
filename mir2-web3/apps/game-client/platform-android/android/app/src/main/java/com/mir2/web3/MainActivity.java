@@ -33,12 +33,13 @@ public final class MainActivity extends GameActivity {
     static { System.loadLibrary("mir2_platform_android"); }
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ForegroundRecoveryPolicy recoveryPolicy = new ForegroundRecoveryPolicy();
+    private final GatewayHostPolicy gatewayHostPolicy = new GatewayHostPolicy();
     private GatewaySession session;
     private OkHttpClient client;
     private EditText ime;
     private String editing = "";
     private boolean updating, foreground, sensitiveEditor, imeWasVisible, multilineEditor;
-    private volatile boolean gatewayHostActive, networkReportedAvailable;
+    private volatile boolean networkReportedAvailable;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -102,12 +103,12 @@ public final class MainActivity extends GameActivity {
                 nativeEvent(GatewaySession.object("type", "lifecycle", "state",
                         networkAvailable ? "networkAvailable" : "networkUnavailable").toString());
             }
-            if (view.phase == GatewaySession.Phase.IN_GAME && !gatewayHostActive) {
+            GatewayHostPolicy.Action hostAction = gatewayHostPolicy.observe(
+                    view.phase, view.worldSnapshot != null);
+            if (hostAction == GatewayHostPolicy.Action.START) {
                 nativeGatewayHostStart();
-                gatewayHostActive = true;
-            } else if (view.phase == GatewaySession.Phase.DISCONNECTED && gatewayHostActive) {
+            } else if (hostAction == GatewayHostPolicy.Action.INVALIDATE) {
                 nativeGatewayConnectionLost();
-                gatewayHostActive = false;
             }
         }, receipt -> nativeEvent(GatewaySession.object(
                 "type", "gatewayReceipt", "envelope", receipt).toString()),
@@ -178,7 +179,7 @@ public final class MainActivity extends GameActivity {
                     session.disconnect("Host command failed; reconnect");
                 }
             }
-            if (!BuildConfig.UI_PREVIEW && gatewayHostActive) {
+            if (!BuildConfig.UI_PREVIEW && gatewayHostPolicy.active()) {
                 for (int i = 0; i < 16; i++) {
                     String raw = nativeGatewayPoll();
                     if (raw.isEmpty()) break;
@@ -258,7 +259,7 @@ public final class MainActivity extends GameActivity {
     @Override protected void onDestroy() {
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "destroy").toString());
         nativeGatewayHostStop();
-        gatewayHostActive = false;
+        gatewayHostPolicy.reset();
         session.close();
         client.dispatcher().executorService().shutdown();
         client.connectionPool().evictAll();

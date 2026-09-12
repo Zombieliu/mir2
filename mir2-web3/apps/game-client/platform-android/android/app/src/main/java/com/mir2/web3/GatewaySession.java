@@ -348,6 +348,11 @@ final class GatewaySession implements AutoCloseable {
     }
 
     private boolean worldPending() { return phase == Phase.STARTING || phase == Phase.IN_GAME; }
+    /** True while authentication has a position but the native render barrier still lacks a scene. */
+    synchronized boolean awaitingRenderSnapshot() {
+        return phase == Phase.IN_GAME && startAccepted && pendingSnapshot == null
+                && deadline != null && !deadline.isDone();
+    }
     private void readPosition(JSONObject value) throws JSONException {
         x = integer(value, "x"); y = integer(value, "y");
         if (x < 0 || y < 0) throw new IllegalArgumentException("negative position");
@@ -358,7 +363,12 @@ final class GatewaySession implements AutoCloseable {
             return;
         }
         phase = Phase.IN_GAME;
-        cancelDeadline();
+        // Position packets can precede the authoritative world snapshot. They
+        // may publish the bootstrap coordinates, but cannot cancel the
+        // StartGame/map-transition deadline: without a snapshot Rust has no
+        // map/entity request and can never produce NativeRenderReady. Keep the
+        // deadline armed until this publication actually carries that frame.
+        if (pendingSnapshot != null) cancelDeadline();
         publish("Character: " + player + "\nMap: " + map + "\nServer position: (" + x + ", " + y + ")");
     }
     private void resetWorld() {
