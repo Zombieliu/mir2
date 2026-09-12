@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: the exact shared 440x224 Crystal NPC
+> dialog now receives a bounded 2.2x phone focus while it is open. A rejected
+> 3.2x emulator build established that the general compact-panel ceiling was
+> too large for this frame. The frame's visible red X is now the real shared
+> close control with a 40x40 logical hit target; the duplicate text Close row
+> that could fall behind the footer is gone. Real ADB taps close the dialog at
+> 2340x1080, 1920x1080 and 1600x720. Android UI Preview passes 170/170, Java
+> Debug/UI Preview tests, arm64-v8a API31 release, full licensed-asset package
+> and streamed install pass. The 516,883,059-byte APK SHA-256 is
+> `a60e26c27c030e333d77a1d927a3631044809fb9d1f8982d5b1b650e0251ee47`.
+> Evidence:
+> `docs/generated/player-qa/native-android-npc-dialog-focus-20260913/README.md`.
+> NPC Shop focus remains open, as do approved-WSS and physical-device
+> acceptance.
+
 > 2026-09-13 Android current change: the exact shared 259x354 Crystal Options
 > panel now uses the same interaction-safe Android focus transform as Chat,
 > Inventory and Storage. The complete panel stays inside safe edges, while
@@ -11,7 +26,7 @@
 > `f7a8f3411c0986bf21408b3ab3aabe2dc00a1978be19a1cd2b1056dfd349f074`.
 > Evidence:
 > `docs/generated/player-qa/native-android-options-focus-20260913/README.md`.
-> Compact NPC/Shop focus remains open, as do approved-WSS and physical-device
+> NPC Shop focus remains open, as do approved-WSS and physical-device
 > acceptance.
 
 > 2026-09-13 Android current change: the exact shared Inventory and Storage
@@ -27,7 +42,7 @@
 > `21e75e3763d481ff81f1cb28319cb3d1e6d51f753104eb89a49411d0ab61f8b1`.
 > Evidence:
 > `docs/generated/player-qa/native-android-inventory-storage-focus-20260913/README.md`.
-> Compact NPC/Shop focus remains open, as do approved-WSS and
+> NPC Shop focus remains open, as do approved-WSS and
 > physical-device acceptance.
 
 > 2026-09-13 Android current change: the first interaction-safe phone focus
@@ -41,7 +56,7 @@
 > `fff3ffcd64de5caa0c02026ff4b0433cda5670aceb00e8a0eb2644530741d4a8`.
 > Evidence:
 > `docs/generated/player-qa/native-android-chat-focus-20260913/README.md`.
-> Compact NPC/Shop focus remains open, as do
+> NPC Shop focus remains open, as do
 > approved-WSS and physical-device acceptance.
 
 > 2026-09-13 Android current change: native packaging now rejects a

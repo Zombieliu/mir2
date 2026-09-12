@@ -763,7 +763,7 @@ pub struct QuestUiRoot;
 struct QuestTrackerPanel;
 
 #[derive(Component)]
-struct NpcDialogPanel;
+pub struct NpcDialogPanel;
 
 #[derive(Component)]
 struct CombatTargetPanel;
@@ -1219,6 +1219,7 @@ fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetS
 
             let mut dialog_panel = root.spawn((
                 NpcDialogPanel,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(0.0),
@@ -2485,7 +2486,10 @@ fn render_dialog_panel(
         );
     }
 
-    // Service navigation: Return and Close.
+    // Service navigation: Return and the close glyph already painted by the
+    // Crystal panel skin. Keep the close hit target absolute so it neither
+    // consumes the final flex row nor leaves a text button clipped behind the
+    // lower frame decoration on compact screens.
     // Return is disabled when no history.
     action_button(
         parent,
@@ -2493,7 +2497,7 @@ fn render_dialog_panel(
         QuestUiButton::ReturnNpcService,
         nav.can_return(),
     );
-    action_button(parent, "Close", QuestUiButton::CloseNpcDialog, true);
+    npc_dialog_close_button(parent);
 }
 
 fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
@@ -4733,6 +4737,23 @@ fn action_button(
             },
         ));
     });
+}
+
+fn npc_dialog_close_button(parent: &mut ChildSpawnerCommands) {
+    parent.spawn((
+        Button,
+        QuestUiButton::CloseNpcDialog,
+        Node {
+            position_type: PositionType::Absolute,
+            top: Val::Px(0.0),
+            right: Val::Px(0.0),
+            width: Val::Px(40.0),
+            height: Val::Px(40.0),
+            ..default()
+        },
+        BackgroundColor(Color::NONE),
+        FocusPolicy::Block,
+    ));
 }
 
 fn sync_quest_ui_button_visuals(

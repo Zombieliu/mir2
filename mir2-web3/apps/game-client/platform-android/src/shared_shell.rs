@@ -310,6 +310,7 @@ fn fit_stage(
     host: Res<HostState>,
     model: Res<NativeShellModel>,
     player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
+    npc_dialog: Res<mir2_client_bevy::quest_model::NpcDialogModel>,
     forms: crate::form_input::FormInput,
     mut scale: ResMut<UiScale>,
     belt: Res<mir2_client_bevy::crystal_ui::hud::CrystalBeltPresentation>,
@@ -337,6 +338,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
     mut minimap_layers: Query<
@@ -348,6 +350,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
     mut belt_layers: Query<
@@ -358,6 +361,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
     mut focus_panels: Query<
@@ -368,12 +372,14 @@ fn fit_stage(
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            Has<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
         Or<(
             With<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
+            With<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         )>,
     >,
 ) {
@@ -447,8 +453,15 @@ fn fit_stage(
         host.safe_right / window.scale_factor(),
         (host.safe_bottom + host.ime_bottom) / window.scale_factor(),
     );
-    for (node, mut transform, is_chat_settings, is_inventory, is_storage, is_options) in
-        &mut focus_panels
+    for (
+        node,
+        mut transform,
+        is_chat_settings,
+        is_inventory,
+        is_storage,
+        is_options,
+        is_npc_dialog,
+    ) in &mut focus_panels
     {
         let Some((origin, size)) = focus_panel_rect(node) else {
             *transform = UiTransform::default();
@@ -457,8 +470,10 @@ fn fit_stage(
         let enabled = is_chat_settings
             || (is_inventory && player.inventory_open())
             || (is_storage && player.storage_open())
-            || (is_options && player.options_open());
+            || (is_options && player.options_open())
+            || (is_npc_dialog && npc_dialog.is_open);
         *transform = if enabled {
+            let max_scale = if is_npc_dialog { 2.2 } else { 3.2 };
             mobile_focus_transform(
                 fit,
                 origin,
@@ -466,6 +481,7 @@ fn fit_stage(
                 Vec2::new(window.width(), window.height()),
                 safe_edges,
                 top,
+                max_scale,
             )
         } else {
             UiTransform::default()
@@ -481,16 +497,16 @@ fn mobile_focus_scale(
     panel_size: Vec2,
     safe_width: f32,
     safe_height: f32,
+    max_scale: f32,
 ) -> f32 {
     const EDGE_GUTTER: f32 = 16.0;
-    const MAX_FOCUS_SCALE: f32 = 3.2;
     let available_width = (safe_width - EDGE_GUTTER * 2.0).max(1.0);
     let available_height = (safe_height - EDGE_GUTTER * 2.0).max(1.0);
     let fitted_width = (panel_size.x * fit.scale).max(f32::EPSILON);
     let fitted_height = (panel_size.y * fit.scale).max(f32::EPSILON);
     (available_width / fitted_width)
         .min(available_height / fitted_height)
-        .clamp(1.0, MAX_FOCUS_SCALE)
+        .clamp(1.0, max_scale.max(1.0))
 }
 
 fn focus_panel_rect(node: &Node) -> Option<(Vec2, Vec2)> {
@@ -509,11 +525,12 @@ fn mobile_focus_transform(
     viewport: Vec2,
     safe_edges: Vec4,
     root_top: f32,
+    max_scale: f32,
 ) -> UiTransform {
     const EDGE_GUTTER: f32 = 16.0;
     let safe_width = (viewport.x - safe_edges.x - safe_edges.z).max(1.0);
     let safe_height = (viewport.y - safe_edges.y - safe_edges.w).max(1.0);
-    let scale = mobile_focus_scale(fit, size, safe_width, safe_height);
+    let scale = mobile_focus_scale(fit, size, safe_width, safe_height, max_scale);
     let min = Vec2::new(
         (safe_edges.x + EDGE_GUTTER - fit.offset_x) / fit.scale,
         (safe_edges.y + EDGE_GUTTER) / fit.scale - root_top,
@@ -2079,7 +2096,7 @@ mod tests {
     fn compact_chat_settings_gets_a_bounded_touch_scale_on_phone_viewports() {
         for (width, height) in [(891.0, 411.0), (731.0, 411.0), (610.0, 274.0)] {
             let fit = CrystalStageTransform::fit(width, height);
-            let focus = mobile_focus_scale(fit, Vec2::new(224.0, 180.0), width, height);
+            let focus = mobile_focus_scale(fit, Vec2::new(224.0, 180.0), width, height, 3.2);
             assert!((focus - 3.2).abs() < 0.001, "{width}x{height}: {focus}");
             assert!(224.0 * fit.scale * focus <= width - 32.0 + 0.001);
             assert!(180.0 * fit.scale * focus <= height - 32.0 + 0.001);
@@ -2089,13 +2106,14 @@ mod tests {
     #[test]
     fn focus_scale_respects_safe_edges_and_never_shrinks_dialogs() {
         let phone = CrystalStageTransform::fit(891.0, 411.0);
-        let focus = mobile_focus_scale(phone, Vec2::new(224.0, 180.0), 760.0, 360.0);
+        let focus = mobile_focus_scale(phone, Vec2::new(224.0, 180.0), 760.0, 360.0, 3.2);
         assert!(focus > 1.0 && focus <= 3.2);
         assert!(224.0 * phone.scale * focus <= 760.0 - 32.0 + 0.001);
         assert!(180.0 * phone.scale * focus <= 360.0 - 32.0 + 0.001);
 
         let desktop = CrystalStageTransform::fit(1024.0, 768.0);
-        let desktop_focus = mobile_focus_scale(desktop, Vec2::new(900.0, 700.0), 1024.0, 768.0);
+        let desktop_focus =
+            mobile_focus_scale(desktop, Vec2::new(900.0, 700.0), 1024.0, 768.0, 3.2);
         assert!(desktop_focus >= 1.0);
         assert!(900.0 * desktop_focus <= 1024.0 - 32.0 + 0.001);
         assert!(700.0 * desktop_focus <= 768.0 - 32.0 + 0.001);
@@ -2110,6 +2128,7 @@ mod tests {
                 (Vec2::ZERO, Vec2::new(316.0, 236.0)),
                 (Vec2::new(150.0, 100.0), Vec2::new(640.0, 344.0)),
                 (Vec2::new(382.0, 207.0), Vec2::new(259.0, 354.0)),
+                (Vec2::ZERO, Vec2::new(440.0, 224.0)),
             ] {
                 let transform = mobile_focus_transform(
                     fit,
@@ -2118,6 +2137,11 @@ mod tests {
                     Vec2::new(width, height),
                     Vec4::ZERO,
                     root_top,
+                    if size == Vec2::new(440.0, 224.0) {
+                        2.2
+                    } else {
+                        3.2
+                    },
                 );
                 let (Val::Px(dx), Val::Px(dy)) = (transform.translation.x, transform.translation.y)
                 else {
@@ -2137,6 +2161,10 @@ mod tests {
                 assert!(screen_min.y >= 16.0 - 0.001, "{height} {origin:?}");
                 assert!(screen_max.x <= width - 16.0 + 0.001, "{width} {origin:?}");
                 assert!(screen_max.y <= height - 16.0 + 0.001, "{height} {origin:?}");
+                if size == Vec2::new(440.0, 224.0) {
+                    assert!(transform.scale.x <= 2.2);
+                    assert!(28.0 * fit.scale * transform.scale.y * 2.625 >= 55.0);
+                }
             }
         }
     }
