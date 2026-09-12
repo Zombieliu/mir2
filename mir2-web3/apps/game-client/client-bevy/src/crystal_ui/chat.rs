@@ -327,8 +327,13 @@ struct CrystalChatSettingsButton {
     library: CrystalChatAssetLibrary,
 }
 
+/// Marker for the shared 224x180 Crystal settings panel.
+///
+/// Native hosts may use this marker to apply a platform presentation
+/// transform. The panel remains the shared implementation, and Bevy applies
+/// the same [`UiTransform`] to rendering and button hit testing.
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
-struct CrystalChatSettingsModal;
+pub struct CrystalChatSettingsModal;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CrystalChatColors {
@@ -945,6 +950,7 @@ fn spawn_chat_settings_panel(
             CrystalChatElement,
             CrystalChatSettingsModal,
             Button,
+            UiTransform::default(),
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(panel_left),

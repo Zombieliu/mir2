@@ -343,6 +343,10 @@ fn fit_stage(
         ),
     >,
     mut belt_layers: Query<&mut Node, With<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>>,
+    mut chat_settings: Query<
+        &mut UiTransform,
+        With<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
+    >,
 ) {
     let Ok(window) = windows.single() else {
         return;
@@ -408,6 +412,34 @@ fn fit_stage(
             Display::Flex
         };
     }
+    let safe_width =
+        (window.width() - (host.safe_left + host.safe_right) / window.scale_factor()).max(1.0);
+    let safe_height =
+        (window.height() - (host.safe_top + host.safe_bottom) / window.scale_factor()).max(1.0);
+    let settings_scale = mobile_focus_scale(fit, Vec2::new(224.0, 180.0), safe_width, safe_height);
+    for mut transform in &mut chat_settings {
+        transform.scale = Vec2::splat(settings_scale);
+    }
+}
+
+/// Grow compact shared dialogs inside the Android safe viewport while leaving
+/// their authored 1024x768 coordinates intact. `UiTransform` is applied to the
+/// real shared panel, so Bevy picking follows the exact same geometry.
+fn mobile_focus_scale(
+    fit: CrystalStageTransform,
+    panel_size: Vec2,
+    safe_width: f32,
+    safe_height: f32,
+) -> f32 {
+    const EDGE_GUTTER: f32 = 16.0;
+    const MAX_FOCUS_SCALE: f32 = 3.2;
+    let available_width = (safe_width - EDGE_GUTTER * 2.0).max(1.0);
+    let available_height = (safe_height - EDGE_GUTTER * 2.0).max(1.0);
+    let fitted_width = (panel_size.x * fit.scale).max(f32::EPSILON);
+    let fitted_height = (panel_size.y * fit.scale).max(f32::EPSILON);
+    (available_width / fitted_width)
+        .min(available_height / fitted_height)
+        .clamp(1.0, MAX_FOCUS_SCALE)
 }
 
 // Keep the two text fields visible while IME is open. Temporarily collapse
@@ -1937,6 +1969,32 @@ mod tests {
                 assert!((dialog_top + group_top - origin.y).abs() < 0.001);
             }
         }
+    }
+
+    #[test]
+    fn compact_chat_settings_gets_a_bounded_touch_scale_on_phone_viewports() {
+        for (width, height) in [(891.0, 411.0), (731.0, 411.0), (610.0, 274.0)] {
+            let fit = CrystalStageTransform::fit(width, height);
+            let focus = mobile_focus_scale(fit, Vec2::new(224.0, 180.0), width, height);
+            assert!((focus - 3.2).abs() < 0.001, "{width}x{height}: {focus}");
+            assert!(224.0 * fit.scale * focus <= width - 32.0 + 0.001);
+            assert!(180.0 * fit.scale * focus <= height - 32.0 + 0.001);
+        }
+    }
+
+    #[test]
+    fn focus_scale_respects_safe_edges_and_never_shrinks_dialogs() {
+        let phone = CrystalStageTransform::fit(891.0, 411.0);
+        let focus = mobile_focus_scale(phone, Vec2::new(224.0, 180.0), 760.0, 360.0);
+        assert!(focus > 1.0 && focus <= 3.2);
+        assert!(224.0 * phone.scale * focus <= 760.0 - 32.0 + 0.001);
+        assert!(180.0 * phone.scale * focus <= 360.0 - 32.0 + 0.001);
+
+        let desktop = CrystalStageTransform::fit(1024.0, 768.0);
+        let desktop_focus = mobile_focus_scale(desktop, Vec2::new(900.0, 700.0), 1024.0, 768.0);
+        assert!(desktop_focus >= 1.0);
+        assert!(900.0 * desktop_focus <= 1024.0 - 32.0 + 0.001);
+        assert!(700.0 * desktop_focus <= 768.0 - 32.0 + 0.001);
     }
 
     #[test]
