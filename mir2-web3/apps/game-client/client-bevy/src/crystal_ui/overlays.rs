@@ -12,7 +12,8 @@ pub mod skill_bars;
 mod skill_page;
 
 use std::collections::{hash_map::DefaultHasher, VecDeque};
-use std::hash::{Hash, Hasher};
+use std::fmt::Write as _;
+use std::hash::Hasher;
 
 use bevy::app::AppExit;
 use bevy::asset::{load_internal_asset, uuid_handle};
@@ -7342,8 +7343,22 @@ fn render_overlays(
         )>,
     )>,
     mut commands: Commands,
-    mut mail_render_cache: Local<Option<(Entity, u64)>>,
+    mut overlay_render_cache: Local<Option<[u64; 22]>>,
 ) {
+    let cursor = (models.state.inventory_open() && models.state.inventory_delete_mode)
+        .then(|| {
+            windows
+                .single()
+                .ok()
+                .and_then(|window| window.cursor_position())
+        })
+        .flatten();
+    let render_fingerprints = overlay_render_fingerprints(&models, cursor);
+    if *overlay_render_cache == Some(render_fingerprints) {
+        return;
+    }
+    *overlay_render_cache = Some(render_fingerprints);
+
     let OverlayRenderModels {
         asset_server,
         wing_materials,
@@ -7442,21 +7457,10 @@ fn render_overlays(
     }
     {
         let mut secondary = panels.p1();
-        let mail_visible = state.mail_open();
-        let mail_fingerprint = mail_panel_fingerprint(
-            mail_visible,
-            &mail,
-            &mail_ui,
-            &inventory,
-            &state,
-            mail_compose_ui.as_deref(),
-        );
-        fill_cached_panel(
+        fill_panel(
             &mut commands,
             &mut secondary.p0(),
-            mail_visible,
-            mail_fingerprint,
-            &mut mail_render_cache,
+            state.mail_open(),
             |parent| {
                 render_mail(
                     parent,
@@ -7644,87 +7648,66 @@ fn render_overlays(
     }
 }
 
-/// Hash only the server and renderer state that is visible inside the mail
-/// panel. This keeps the retained Bevy entity tree stable between meaningful
-/// updates instead of rebuilding dozens of text/image nodes every frame.
-fn mail_panel_fingerprint(
-    visible: bool,
-    mail: &MailModel,
-    mail_ui: &MailUiState,
-    inventory: &InventoryModel,
-    state: &NativePlayerUiState,
-    compose_ui: Option<&MailComposeUi>,
-) -> u64 {
-    let mut fingerprint = DefaultHasher::new();
-    visible.hash(&mut fingerprint);
-    if !visible {
-        return fingerprint.finish();
-    }
+struct OverlayFingerprintWriter(DefaultHasher);
 
-    if let Some(draft) = state.core.mail_compose.as_ref() {
-        "compose".hash(&mut fingerprint);
-        draft.recipient.hash(&mut fingerprint);
-        draft.message.hash(&mut fingerprint);
-        draft.gold.hash(&mut fingerprint);
-        draft.attachment_unique_ids.hash(&mut fingerprint);
-        compose_ui
-            .map(|ui| ui.attachment_page)
-            .unwrap_or_default()
-            .hash(&mut fingerprint);
-        for item in inventory
-            .items
-            .iter()
-            .filter(|item| item.container == 0 && item.unique_id.is_some())
-        {
-            item.unique_id.hash(&mut fingerprint);
-            item.key.hash(&mut fingerprint);
-            item.name.hash(&mut fingerprint);
-            item.quantity.hash(&mut fingerprint);
-            item.slot.hash(&mut fingerprint);
-        }
-    } else {
-        "inbox".hash(&mut fingerprint);
-        mail.selected_id.hash(&mut fingerprint);
-        mail_ui.cursor.page.hash(&mut fingerprint);
-        for message in &mail.mails {
-            message.id.hash(&mut fingerprint);
-            message.sender.hash(&mut fingerprint);
-            message.subject.hash(&mut fingerprint);
-            message.gold.hash(&mut fingerprint);
-            message.items.len().hash(&mut fingerprint);
-            message.operation.is_none().hash(&mut fingerprint);
-            message.claimed.hash(&mut fingerprint);
-            message.locked.hash(&mut fingerprint);
-            message.read.hash(&mut fingerprint);
-        }
+impl std::fmt::Write for OverlayFingerprintWriter {
+    fn write_str(&mut self, value: &str) -> std::fmt::Result {
+        self.0.write(value.as_bytes());
+        Ok(())
     }
-    fingerprint.finish()
 }
 
-fn fill_cached_panel<C: Component>(
-    commands: &mut Commands,
-    query: &mut Query<(Entity, &mut Node), With<C>>,
-    visible: bool,
-    fingerprint: u64,
-    cache: &mut Option<(Entity, u64)>,
-    render: impl FnOnce(&mut ChildSpawnerCommands),
-) {
-    let Some((entity, mut node)) = query.iter_mut().next() else {
-        return;
-    };
-    node.display = if visible {
-        Display::Flex
-    } else {
-        Display::None
-    };
-    if *cache == Some((entity, fingerprint)) {
-        return;
-    }
-    *cache = Some((entity, fingerprint));
-    commands.entity(entity).despawn_children();
-    if visible {
-        commands.entity(entity).with_children(render);
-    }
+/// Bevy change ticks are deliberately insufficient here: several interaction
+/// systems take mutable resources every frame even when their logical values
+/// stay equal. Hash the actual render inputs without allocating a debug String
+/// so all desktop-derived overlay trees remain retained between real changes.
+fn debug_fingerprint(value: &impl std::fmt::Debug) -> u64 {
+    let mut fingerprint = OverlayFingerprintWriter(DefaultHasher::new());
+    write!(&mut fingerprint, "{value:?}").expect("hashing overlay render models cannot fail");
+    fingerprint.0.finish()
+}
+
+fn overlay_render_fingerprints(
+    models: &OverlayRenderModels<'_>,
+    cursor: Option<Vec2>,
+) -> [u64; 22] {
+    let mut state = (*models.state).clone();
+    // These fields belong to input routing or separately retained HUD
+    // renderers. Their fade clocks and per-frame consumption markers must not
+    // invalidate every heavyweight window in `render_overlays`.
+    state.menu_pointer_consumed = false;
+    state.menu_hit_regions.clear();
+    state.ime_frame_consumed = false;
+    state.status_hud = Default::default();
+    state.hero_buffs = Default::default();
+    state.guild_panel.now_ms = 0;
+    state.guild_panel.cursor = None;
+    state.guild_panel.left_down = false;
+
+    [
+        debug_fingerprint(&models.asset_server.is_some()),
+        debug_fingerprint(&models.wing_materials.is_some()),
+        debug_fingerprint(&models.shell.as_deref()),
+        debug_fingerprint(&state),
+        debug_fingerprint(&*models.inventory),
+        debug_fingerprint(&*models.inventory_feedback),
+        debug_fingerprint(&*models.mail),
+        debug_fingerprint(&*models.mail_ui),
+        debug_fingerprint(&models.mail_compose_ui.as_deref()),
+        debug_fingerprint(&*models.big_map),
+        debug_fingerprint(&*models.big_map_ui),
+        debug_fingerprint(&*models.ui),
+        debug_fingerprint(&*models.shop),
+        debug_fingerprint(&*models.shop_ui),
+        debug_fingerprint(&*models.game_shop),
+        debug_fingerprint(&*models.storage),
+        debug_fingerprint(&*models.storage_ui),
+        debug_fingerprint(&*models.skills),
+        debug_fingerprint(&*models.skill_binding),
+        debug_fingerprint(&*models.social),
+        debug_fingerprint(&models.combat_target.as_deref()),
+        debug_fingerprint(&cursor),
+    ]
 }
 
 fn fill_panel<C: Component>(
@@ -14313,6 +14296,42 @@ mod tests {
             .get::<Children>(root)
             .map(|children| children.iter().collect())
             .unwrap_or_default()
+    }
+
+    fn all_entities(app: &mut App) -> Vec<Entity> {
+        let world = app.world_mut();
+        world.query::<Entity>().iter(world).collect()
+    }
+
+    #[test]
+    fn unchanged_large_overlay_scenes_keep_their_complete_entity_sets() {
+        for panel in [
+            mir2_ui_core::state::UiPanel::Inventory,
+            mir2_ui_core::state::UiPanel::Character,
+            mir2_ui_core::state::UiPanel::Skill,
+            mir2_ui_core::state::UiPanel::GameShop,
+            mir2_ui_core::state::UiPanel::BigMap,
+            mir2_ui_core::state::UiPanel::Storage,
+            mir2_ui_core::state::UiPanel::Guild,
+            mir2_ui_core::state::UiPanel::Trade,
+        ] {
+            let mut app = overlay_render_test_app();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .panel = panel;
+            app.update();
+            let initial = all_entities(&mut app);
+            assert!(initial.len() > 20, "{panel:?} must render a real panel tree");
+            for _ in 0..20 {
+                app.update();
+            }
+            assert_eq!(
+                all_entities(&mut app),
+                initial,
+                "{panel:?} must not rebuild an unchanged retained tree"
+            );
+        }
     }
 
     #[test]
