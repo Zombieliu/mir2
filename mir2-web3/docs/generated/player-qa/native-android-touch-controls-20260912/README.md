@@ -45,15 +45,21 @@ position, combat, or inventory locally.
 - World render: center `(302, 634)`, 849 map tiles, 7 entities, 12 entity layers
 - Fatal exception, ANR, render-device-loss, and incomplete-framebuffer scan: none found
 - Visible frame: [emulator-touch-controls.png](./emulator-touch-controls.png)
+- Held joystick frame: [emulator-joystick-held.png](./emulator-joystick-held.png)
+- Run-lock toggled off: [emulator-run-toggle-off.png](./emulator-run-toggle-off.png)
 
 The visible frame proves the native full-screen world, layered entities,
 joystick, action pad, minimap, HUD, and panel rail render together. It is
 intentionally labelled `OFFLINE UI PREVIEW - NOT LIVE GAMEPLAY`.
 
-An ADB synthetic swipe was also attempted, but it did not produce a trustworthy
-held-knob displacement frame, so it is not counted as emulator touch acceptance.
-Touch behavior is currently backed by the Rust input tests above; interactive
-emulator and physical-touch evidence remain separate acceptance items.
+The original long-running `adb shell input swipe` capture was a false-negative
+test procedure: the separate capture transport did not preserve an observable
+mid-swipe hold. Repeating the check with explicit touchscreen `DOWN`, `MOVE`,
+capture, and `UP` events visibly moved the knob up-right while the full world
+remained rendered. A separate `DOWN` / `UP` on the Run button changed its
+highlighted state off, proving the action pad received the emulator touch too.
+These frames count as synthetic emulator interaction evidence, not physical
+finger or multi-touch acceptance.
 
 ## Remaining acceptance gates
 
