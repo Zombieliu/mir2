@@ -2431,6 +2431,7 @@ pub struct OverlayShop;
 
 const NPC_SHOP_BUY_PANEL_SIZE: Vec2 = Vec2::new(242.0, 330.0);
 const NPC_SHOP_SERVICE_PANEL_SIZE: Vec2 = Vec2::new(360.0, 360.0);
+const NPC_SHOP_SERVICE_ACTION_TOP: f32 = 326.0;
 
 #[derive(Component)]
 struct OverlayGameShop;
@@ -12034,139 +12035,193 @@ fn render_npc_item_service(
     let sell_enabled = sell_mode && shop_sell_enabled(inventory, shop.selected_bag_slot_for_sell);
     let repair_enabled = repair_mode && repair_selection_enabled(state, inventory);
 
-    parent
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(0.0),
-                top: Val::Px(0.0),
-                width: Val::Px(360.0),
-                height: Val::Px(360.0),
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                padding: UiRect::all(Val::Px(8.0)),
-                row_gap: Val::Px(3.0),
-                overflow: Overflow::clip(),
-                ..default()
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(0.0),
+            top: Val::Px(0.0),
+            width: Val::Px(NPC_SHOP_SERVICE_PANEL_SIZE.x),
+            height: Val::Px(NPC_SHOP_SERVICE_PANEL_SIZE.y),
+            border: UiRect::all(Val::Px(1.0)),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        BackgroundColor(Color::srgba(0.025, 0.018, 0.010, 0.97)),
+        BorderColor::all(Color::srgba(0.58, 0.40, 0.13, 0.95)),
+    ));
+    overlay_text_at(
+        parent,
+        title,
+        CrystalRect::new(10.0, 8.0, 210.0, 20.0),
+        13.0,
+        GOLD,
+    );
+    overlay_text_at(
+        parent,
+        &format!("Gold {}", inventory.gold),
+        CrystalRect::new(10.0, 31.0, 150.0, 17.0),
+        10.0,
+        TEXT,
+    );
+    if let Some(rate) = shop.repair_rate.filter(|_| repair_mode) {
+        overlay_text_at(
+            parent,
+            &format!("Rate x{rate:.2}"),
+            CrystalRect::new(178.0, 31.0, 100.0, 17.0),
+            10.0,
+            TEXT,
+        );
+    }
+    if shop.allows_buy() && shop.allows_sell() {
+        overlay_absolute_button(
+            parent,
+            "Buy",
+            CrystalRect::new(250.0, 7.0, 48.0, 25.0),
+            OverlayButton::ShopShowBuy,
+            true,
+        );
+    }
+    overlay_absolute_button(
+        parent,
+        "Close",
+        CrystalRect::new(302.0, 7.0, 48.0, 25.0),
+        OverlayButton::ShopCancel,
+        true,
+    );
+
+    overlay_text_at(
+        parent,
+        "Backpack",
+        CrystalRect::new(10.0, 51.0, 160.0, 16.0),
+        10.0,
+        GOLD,
+    );
+    for (index, item) in inventory.items_in(0).into_iter().take(10).enumerate() {
+        let selected = if sell_mode {
+            shop.selected_bag_slot_for_sell == Some(item.slot)
+        } else {
+            state.shop_repair_container == 0 && state.shop_repair_slot == Some(item.slot)
+        };
+        let rect = npc_shop_service_bag_rect(index, repair_mode);
+        overlay_absolute_button(
+            parent,
+            &format!(
+                "{}{} x{}",
+                if selected { "> " } else { "" },
+                short_name(&item.name, &item.key),
+                item.quantity
+            ),
+            rect,
+            if sell_mode {
+                OverlayButton::SelectBagForSell(item.slot)
+            } else {
+                OverlayButton::SelectBagForRepair(item.slot)
             },
-            BackgroundColor(PANEL_BG),
-        ))
-        .with_children(|panel| {
-            panel
-                .spawn(Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    ..default()
-                })
-                .with_children(|header| {
-                    body(header, title);
-                    if shop.allows_buy() && shop.allows_sell() {
-                        overlay_button(header, "Buy", OverlayButton::ShopShowBuy, true);
-                    }
-                    overlay_button(header, "Close", OverlayButton::ShopCancel, true);
-                });
+            sell_mode || repair_mode,
+        );
+    }
 
-            if let Some(rate) = shop.repair_rate.filter(|_| repair_mode) {
-                body(panel, &format!("Repair rate x{rate:.2}"));
-            }
+    if repair_mode {
+        overlay_text_at(
+            parent,
+            "Equipment",
+            CrystalRect::new(184.0, 51.0, 166.0, 16.0),
+            10.0,
+            GOLD,
+        );
+        for slot in 0..14 {
+            let item = inventory
+                .items_in(2)
+                .into_iter()
+                .find(|item| item.slot == slot);
+            let selected = state.shop_repair_container == 2
+                && state.shop_repair_slot == Some(slot);
+            overlay_absolute_button(
+                parent,
+                &format!(
+                    "{}{}",
+                    if selected { "> " } else { "" },
+                    equipment_slot_name(slot)
+                ),
+                npc_shop_service_equipment_rect(slot),
+                OverlayButton::SelectEquipForRepair(slot),
+                item.is_some(),
+            );
+        }
+    }
 
-            for item in inventory.items_in(0).into_iter().take(10) {
-                let selected = if sell_mode {
-                    shop.selected_bag_slot_for_sell == Some(item.slot)
-                } else {
-                    state.shop_repair_container == 0 && state.shop_repair_slot == Some(item.slot)
-                };
-                overlay_button(
-                    panel,
-                    &format!(
-                        "{}{} x{}",
-                        if selected { "▶ " } else { "" },
-                        short_name(&item.name, &item.key),
-                        item.quantity
-                    ),
-                    if sell_mode {
-                        OverlayButton::SelectBagForSell(item.slot)
-                    } else {
-                        OverlayButton::SelectBagForRepair(item.slot)
-                    },
-                    sell_mode || repair_mode,
-                );
-            }
+    if sell_mode {
+        overlay_absolute_button(
+            parent,
+            "-",
+            CrystalRect::new(10.0, NPC_SHOP_SERVICE_ACTION_TOP, 30.0, 25.0),
+            OverlayButton::ShopQuantityDec,
+            state.shop_quantity > SHOP_QUANTITY_MIN,
+        );
+        overlay_centered_text_at(
+            parent,
+            &format!("x{}", state.shop_quantity),
+            CrystalRect::new(43.0, NPC_SHOP_SERVICE_ACTION_TOP, 44.0, 25.0),
+            10.0,
+            TEXT,
+        );
+        overlay_absolute_button(
+            parent,
+            "+",
+            CrystalRect::new(90.0, NPC_SHOP_SERVICE_ACTION_TOP, 30.0, 25.0),
+            OverlayButton::ShopQuantityInc,
+            state.shop_quantity < SHOP_QUANTITY_MAX,
+        );
+        overlay_absolute_button(
+            parent,
+            "Sell",
+            CrystalRect::new(126.0, NPC_SHOP_SERVICE_ACTION_TOP, 96.0, 25.0),
+            OverlayButton::ShopSell,
+            sell_enabled,
+        );
+    } else if shop.allows_repair() {
+        overlay_absolute_button(
+            parent,
+            "Repair",
+            CrystalRect::new(10.0, NPC_SHOP_SERVICE_ACTION_TOP, 116.0, 25.0),
+            OverlayButton::ShopRepair,
+            repair_enabled,
+        );
+    } else if shop.allows_special_repair() {
+        overlay_absolute_button(
+            parent,
+            "Special repair",
+            CrystalRect::new(10.0, NPC_SHOP_SERVICE_ACTION_TOP, 150.0, 25.0),
+            OverlayButton::ShopSRepair,
+            repair_enabled,
+        );
+    }
+}
 
-            if repair_mode {
-                body(panel, "Equipment");
-                panel
-                    .spawn(Node {
-                        display: Display::Flex,
-                        flex_direction: FlexDirection::Row,
-                        flex_wrap: bevy::ui::FlexWrap::Wrap,
-                        column_gap: Val::Px(2.0),
-                        row_gap: Val::Px(2.0),
-                        ..default()
-                    })
-                    .with_children(|grid| {
-                        for slot in 0..14 {
-                            let item = inventory
-                                .items_in(2)
-                                .into_iter()
-                                .find(|item| item.slot == slot);
-                            let selected = state.shop_repair_container == 2
-                                && state.shop_repair_slot == Some(slot);
-                            overlay_button(
-                                grid,
-                                &format!(
-                                    "{}{}",
-                                    if selected { "▶" } else { "" },
-                                    equipment_slot_name(slot)
-                                ),
-                                OverlayButton::SelectEquipForRepair(slot),
-                                item.is_some(),
-                            );
-                        }
-                    });
-            }
+fn npc_shop_service_bag_rect(index: usize, repair_mode: bool) -> CrystalRect {
+    if repair_mode {
+        CrystalRect::new(10.0, 69.0 + index as f32 * 24.0, 164.0, 21.0)
+    } else {
+        let column = index / 5;
+        let row = index % 5;
+        CrystalRect::new(
+            10.0 + column as f32 * 172.0,
+            69.0 + row as f32 * 48.0,
+            164.0,
+            38.0,
+        )
+    }
+}
 
-            panel
-                .spawn(Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(4.0),
-                    ..default()
-                })
-                .with_children(|actions| {
-                    if sell_mode {
-                        overlay_button(
-                            actions,
-                            "−",
-                            OverlayButton::ShopQuantityDec,
-                            state.shop_quantity > SHOP_QUANTITY_MIN,
-                        );
-                        body(actions, &format!("x{}", state.shop_quantity));
-                        overlay_button(
-                            actions,
-                            "+",
-                            OverlayButton::ShopQuantityInc,
-                            state.shop_quantity < SHOP_QUANTITY_MAX,
-                        );
-                        overlay_button(actions, "Sell", OverlayButton::ShopSell, sell_enabled);
-                    } else if shop.allows_repair() {
-                        overlay_button(
-                            actions,
-                            "Repair",
-                            OverlayButton::ShopRepair,
-                            repair_enabled,
-                        );
-                    } else if shop.allows_special_repair() {
-                        overlay_button(
-                            actions,
-                            "Special repair",
-                            OverlayButton::ShopSRepair,
-                            repair_enabled,
-                        );
-                    }
-                });
-        });
+fn npc_shop_service_equipment_rect(slot: u32) -> CrystalRect {
+    let column = slot / 7;
+    let row = slot % 7;
+    CrystalRect::new(
+        184.0 + column as f32 * 84.0,
+        69.0 + row as f32 * 36.0,
+        80.0,
+        28.0,
+    )
 }
 
 fn native_skill_page_count(item_count: usize) -> usize {
@@ -16009,6 +16064,23 @@ mod tests {
             npc_shop_panel_size(&shop, &state),
             NPC_SHOP_SERVICE_PANEL_SIZE
         );
+    }
+
+    #[test]
+    fn npc_shop_service_controls_are_bounded_and_keep_the_action_row_clear() {
+        for repair_mode in [false, true] {
+            for index in 0..10 {
+                let rect = npc_shop_service_bag_rect(index, repair_mode);
+                assert!(rect.left >= 0.0 && rect.top >= 0.0);
+                assert!(rect.left + rect.width <= NPC_SHOP_SERVICE_PANEL_SIZE.x);
+                assert!(rect.top + rect.height < NPC_SHOP_SERVICE_ACTION_TOP);
+            }
+        }
+        for slot in 0..14 {
+            let rect = npc_shop_service_equipment_rect(slot);
+            assert!(rect.left + rect.width <= NPC_SHOP_SERVICE_PANEL_SIZE.x);
+            assert!(rect.top + rect.height < NPC_SHOP_SERVICE_ACTION_TOP);
+        }
     }
 
     #[test]

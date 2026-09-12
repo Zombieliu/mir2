@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: the shared NPC Sell, Repair and Special
+> Repair surface no longer collapses its text and controls inside a shrinkable
+> Flex column. One bounded 360x360 shared layout now exposes the title,
+> gold/rate, ten backpack targets, fourteen equipment targets and fixed action
+> row. Real ADB taps select backpack/equipped items, increment sell quantity
+> and close the panel at 2340x1080, 1920x1080 and 1600x720. Android UI Preview
+> passes 171/171, focused shared tests pass 3/3, Gradle Debug/UI Preview tests,
+> arm64-v8a API31 release, full licensed-asset package and streamed install
+> pass. The 516,864,011-byte APK SHA-256 is
+> `7298d156a13a0d97c63525d3a6932699e28224c6c00ccce852f8a923583b976a`.
+> Evidence:
+> `docs/generated/player-qa/native-android-npc-service-focus-20260913/README.md`.
+> No transaction authority is claimed; approved-WSS and physical-device
+> acceptance remain open.
+
 > 2026-09-13 Android current change: the exact shared Crystal NPC Shop buy
 > page now receives a bounded 1.8x phone focus. Its root follows the rendered
 > 242x330 buy bounds instead of the stale 620x344 node; drawing and Bevy picking
@@ -12,8 +27,7 @@
 > `c232da9277ab73f4db2a422f5cde58c3ea26c1a1fba7d672c780fa525a09b781`.
 > Evidence:
 > `docs/generated/player-qa/native-android-npc-shop-buy-focus-20260913/README.md`.
-> Generic NPC sell/repair service visuals remain open, as do approved-WSS and
-> physical-device acceptance.
+> Approved-WSS and physical-device acceptance remain open.
 
 > 2026-09-13 Android current change: the exact shared 440x224 Crystal NPC
 > dialog now receives a bounded 2.2x phone focus while it is open. A rejected
@@ -27,8 +41,7 @@
 > `a60e26c27c030e333d77a1d927a3631044809fb9d1f8982d5b1b650e0251ee47`.
 > Evidence:
 > `docs/generated/player-qa/native-android-npc-dialog-focus-20260913/README.md`.
-> Generic NPC sell/repair service visuals remain open, as do approved-WSS and
-> physical-device acceptance.
+> Approved-WSS and physical-device acceptance remain open.
 
 > 2026-09-13 Android current change: the exact shared 259x354 Crystal Options
 > panel now uses the same interaction-safe Android focus transform as Chat,
@@ -41,8 +54,7 @@
 > `f7a8f3411c0986bf21408b3ab3aabe2dc00a1978be19a1cd2b1056dfd349f074`.
 > Evidence:
 > `docs/generated/player-qa/native-android-options-focus-20260913/README.md`.
-> Generic NPC sell/repair service visuals remain open, as do approved-WSS and
-> physical-device acceptance.
+> Approved-WSS and physical-device acceptance remain open.
 
 > 2026-09-13 Android current change: the exact shared Inventory and Storage
 > roots now receive the same interaction-safe phone focus treatment as Chat
@@ -57,8 +69,7 @@
 > `21e75e3763d481ff81f1cb28319cb3d1e6d51f753104eb89a49411d0ab61f8b1`.
 > Evidence:
 > `docs/generated/player-qa/native-android-inventory-storage-focus-20260913/README.md`.
-> Generic NPC sell/repair service visuals remain open, as do approved-WSS and
-> physical-device acceptance.
+> Approved-WSS and physical-device acceptance remain open.
 
 > 2026-09-13 Android current change: the first interaction-safe phone focus
 > treatment now enlarges the exact shared 224x180 Chat Settings panel up to
@@ -71,8 +82,7 @@
 > `fff3ffcd64de5caa0c02026ff4b0433cda5670aceb00e8a0eb2644530741d4a8`.
 > Evidence:
 > `docs/generated/player-qa/native-android-chat-focus-20260913/README.md`.
-> Generic NPC sell/repair service visuals remain open, as do approved-WSS and
-> physical-device acceptance.
+> Approved-WSS and physical-device acceptance remain open.
 
 > 2026-09-13 Android current change: native packaging now rejects a
 > self-referential/stale Gradle UI output and validates the complete licensed

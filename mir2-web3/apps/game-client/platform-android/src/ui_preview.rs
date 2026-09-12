@@ -29,6 +29,9 @@ pub const SCENES: &[&str] = &[
     "menu",
     "gameshop",
     "npcshop",
+    "npcshop-sell",
+    "npcshop-repair",
+    "npcshop-srepair",
     "mail",
     "bigmap",
     "storage",
@@ -304,7 +307,9 @@ fn apply(world: &mut World) {
         "platform" => UiPanel::PlatformSettings,
         "menu" => UiPanel::Menu,
         "gameshop" => UiPanel::GameShop,
-        "npcshop" => UiPanel::NpcShop,
+        "npcshop" | "npcshop-sell" | "npcshop-repair" | "npcshop-srepair" => {
+            UiPanel::NpcShop
+        }
         "mail" | "mail-compose" => UiPanel::Mail,
         "bigmap" => UiPanel::BigMap,
         "storage" | "storage-locked" => UiPanel::Storage,
@@ -471,9 +476,25 @@ fn populate_specimens(world: &mut World, scene: &str) {
             unknown_text: None,
         }],
     });
+    let service_mode = match scene {
+        "npcshop-sell" => NpcShopServiceMode::Sell,
+        "npcshop-repair" => NpcShopServiceMode::Repair,
+        "npcshop-srepair" => NpcShopServiceMode::SpecialRepair,
+        _ => NpcShopServiceMode::Buy,
+    };
     world.insert_resource(ShopModel {
-        service_mode: NpcShopServiceMode::Buy,
-        supports_buy: true,
+        service_mode,
+        supports_buy: scene == "npcshop",
+        supports_sell: scene == "npcshop-sell",
+        repair_rate: matches!(
+            service_mode,
+            NpcShopServiceMode::Repair | NpcShopServiceMode::SpecialRepair
+        )
+        .then_some(if service_mode == NpcShopServiceMode::SpecialRepair {
+            2.0
+        } else {
+            1.0
+        }),
         goods: (0..8)
             .map(|index| ShopGood {
                 unique_id: 5000 + index,
@@ -494,7 +515,7 @@ fn populate_specimens(world: &mut World, scene: &str) {
         social::SocialModel,
         storage::StorageModel,
     };
-    let items: Vec<ItemModel> = (0..12)
+    let mut items: Vec<ItemModel> = (0..12)
         .map(|slot| {
             serde_json::from_value(serde_json::json!({
         "uniqueId":9000+slot, "key":format!("ui-only-{slot}"), "name":format!("UI specimen {slot}"),
@@ -503,6 +524,16 @@ fn populate_specimens(world: &mut World, scene: &str) {
     })).expect("static UI item specimen")
         })
         .collect();
+    for (slot, name) in [(0, "Equipped sword"), (1, "Equipped armour")] {
+        let mut item = items[slot as usize].clone();
+        item.unique_id = Some(9_100 + u64::from(slot));
+        item.key = format!("ui-equipped-{slot}");
+        item.name = name.into();
+        item.quantity = 1;
+        item.slot = slot;
+        item.container = 2;
+        items.push(item);
+    }
     let storage_items = items
         .iter()
         .cloned()
@@ -569,6 +600,8 @@ fn populate_specimens(world: &mut World, scene: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use mir2_client_bevy::shop::{NpcShopServiceMode, ShopModel};
+
     #[test]
     fn chat_settings_preview_opens_with_an_applicable_draft() {
         let mut state = mir2_ui_core::state::UiState::default();
@@ -610,6 +643,25 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 35);
+        assert_eq!(SCENES.len(), 38);
+    }
+
+    #[test]
+    fn npc_service_preview_scenes_expose_each_authoritative_service_mode() {
+        for (scene, expected) in [
+            ("npcshop-sell", NpcShopServiceMode::Sell),
+            ("npcshop-repair", NpcShopServiceMode::Repair),
+            ("npcshop-srepair", NpcShopServiceMode::SpecialRepair),
+        ] {
+            let mut world = World::new();
+            world.init_resource::<mir2_client_bevy::social::SocialModel>();
+            populate_specimens(&mut world, scene);
+            let shop = world.resource::<ShopModel>();
+            assert_eq!(shop.service_mode, expected);
+            assert_eq!(
+                shop.repair_rate.is_some(),
+                expected != NpcShopServiceMode::Sell
+            );
+        }
     }
 }
