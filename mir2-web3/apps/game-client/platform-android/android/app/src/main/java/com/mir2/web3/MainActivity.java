@@ -32,6 +32,7 @@ public final class MainActivity extends GameActivity {
     private static native boolean nativeGatewayReport(long sequence, boolean sent);
     static { System.loadLibrary("mir2_platform_android"); }
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private final ForegroundRecoveryPolicy recoveryPolicy = new ForegroundRecoveryPolicy();
     private GatewaySession session;
     private OkHttpClient client;
     private EditText ime;
@@ -239,13 +240,19 @@ public final class MainActivity extends GameActivity {
         foreground = true;
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "resume").toString());
         handler.post(pump);
+        if (recoveryPolicy.takeReconnectOnStart()) connect();
     }
     @Override protected void onStop() {
         foreground = false;
         handler.removeCallbacks(pump);
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "pause").toString());
         hideKeyboard();
-        session.disconnect("Backgrounded. Reconnect and log in to refresh server state.");
+        if (recoveryPolicy.markStoppedAndShouldDisconnect(BuildConfig.UI_PREVIEW)) {
+            // Never retain or replay credentials. Foreground recovery only
+            // re-establishes the approved WSS transport; the player logs in
+            // again through the normal shared form.
+            session.disconnect("Backgrounded. Reconnecting securely; log in again to refresh server state.");
+        }
         super.onStop();
     }
     @Override protected void onDestroy() {

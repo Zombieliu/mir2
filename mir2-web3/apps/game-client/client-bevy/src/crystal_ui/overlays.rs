@@ -11,7 +11,8 @@ pub mod skill_bars;
 #[path = "skill_page.rs"]
 mod skill_page;
 
-use std::collections::VecDeque;
+use std::collections::{hash_map::DefaultHasher, VecDeque};
+use std::hash::{Hash, Hasher};
 
 use bevy::app::AppExit;
 use bevy::asset::{load_internal_asset, uuid_handle};
@@ -7341,6 +7342,7 @@ fn render_overlays(
         )>,
     )>,
     mut commands: Commands,
+    mut mail_render_cache: Local<Option<(Entity, u64)>>,
 ) {
     let OverlayRenderModels {
         asset_server,
@@ -7440,10 +7442,21 @@ fn render_overlays(
     }
     {
         let mut secondary = panels.p1();
-        fill_panel(
+        let mail_visible = state.mail_open();
+        let mail_fingerprint = mail_panel_fingerprint(
+            mail_visible,
+            &mail,
+            &mail_ui,
+            &inventory,
+            &state,
+            mail_compose_ui.as_deref(),
+        );
+        fill_cached_panel(
             &mut commands,
             &mut secondary.p0(),
-            state.mail_open(),
+            mail_visible,
+            mail_fingerprint,
+            &mut mail_render_cache,
             |parent| {
                 render_mail(
                     parent,
@@ -7628,6 +7641,89 @@ fn render_overlays(
                 }
             },
         );
+    }
+}
+
+/// Hash only the server and renderer state that is visible inside the mail
+/// panel. This keeps the retained Bevy entity tree stable between meaningful
+/// updates instead of rebuilding dozens of text/image nodes every frame.
+fn mail_panel_fingerprint(
+    visible: bool,
+    mail: &MailModel,
+    mail_ui: &MailUiState,
+    inventory: &InventoryModel,
+    state: &NativePlayerUiState,
+    compose_ui: Option<&MailComposeUi>,
+) -> u64 {
+    let mut fingerprint = DefaultHasher::new();
+    visible.hash(&mut fingerprint);
+    if !visible {
+        return fingerprint.finish();
+    }
+
+    if let Some(draft) = state.core.mail_compose.as_ref() {
+        "compose".hash(&mut fingerprint);
+        draft.recipient.hash(&mut fingerprint);
+        draft.message.hash(&mut fingerprint);
+        draft.gold.hash(&mut fingerprint);
+        draft.attachment_unique_ids.hash(&mut fingerprint);
+        compose_ui
+            .map(|ui| ui.attachment_page)
+            .unwrap_or_default()
+            .hash(&mut fingerprint);
+        for item in inventory
+            .items
+            .iter()
+            .filter(|item| item.container == 0 && item.unique_id.is_some())
+        {
+            item.unique_id.hash(&mut fingerprint);
+            item.key.hash(&mut fingerprint);
+            item.name.hash(&mut fingerprint);
+            item.quantity.hash(&mut fingerprint);
+            item.slot.hash(&mut fingerprint);
+        }
+    } else {
+        "inbox".hash(&mut fingerprint);
+        mail.selected_id.hash(&mut fingerprint);
+        mail_ui.cursor.page.hash(&mut fingerprint);
+        for message in &mail.mails {
+            message.id.hash(&mut fingerprint);
+            message.sender.hash(&mut fingerprint);
+            message.subject.hash(&mut fingerprint);
+            message.gold.hash(&mut fingerprint);
+            message.items.len().hash(&mut fingerprint);
+            message.operation.is_none().hash(&mut fingerprint);
+            message.claimed.hash(&mut fingerprint);
+            message.locked.hash(&mut fingerprint);
+            message.read.hash(&mut fingerprint);
+        }
+    }
+    fingerprint.finish()
+}
+
+fn fill_cached_panel<C: Component>(
+    commands: &mut Commands,
+    query: &mut Query<(Entity, &mut Node), With<C>>,
+    visible: bool,
+    fingerprint: u64,
+    cache: &mut Option<(Entity, u64)>,
+    render: impl FnOnce(&mut ChildSpawnerCommands),
+) {
+    let Some((entity, mut node)) = query.iter_mut().next() else {
+        return;
+    };
+    node.display = if visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    if *cache == Some((entity, fingerprint)) {
+        return;
+    }
+    *cache = Some((entity, fingerprint));
+    commands.entity(entity).despawn_children();
+    if visible {
+        commands.entity(entity).with_children(render);
     }
 }
 
@@ -14205,6 +14301,67 @@ mod tests {
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(Update, render_overlays);
         app
+    }
+
+    fn mail_root_children(app: &mut App) -> Vec<Entity> {
+        let world = app.world_mut();
+        let root = world
+            .query_filtered::<Entity, With<OverlayMail>>()
+            .single(world)
+            .expect("mail overlay root");
+        world
+            .get::<Children>(root)
+            .map(|children| children.iter().collect())
+            .unwrap_or_default()
+    }
+
+    #[test]
+    fn unchanged_mail_compose_keeps_retained_entities_and_draft_change_rerenders() {
+        let mut app = overlay_render_test_app();
+        app.init_resource::<MailComposeUi>();
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+            state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+                recipient: "tester".to_owned(),
+                message: "first".to_owned(),
+                ..Default::default()
+            });
+        }
+
+        app.update();
+        let initial = mail_root_children(&mut app);
+        assert!(!initial.is_empty(), "visible compose must render once");
+
+        for _ in 0..120 {
+            app.update();
+        }
+        assert_eq!(
+            mail_root_children(&mut app),
+            initial,
+            "unchanged compose must not despawn and rebuild its entity tree"
+        );
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_mut()
+            .expect("compose draft")
+            .message
+            .push_str(" second");
+        app.update();
+        assert_ne!(
+            mail_root_children(&mut app),
+            initial,
+            "a visible draft change must rebuild the mail panel"
+        );
+        let world = app.world_mut();
+        let expected = format!("Message: {}", short_name("first second", "<type>"));
+        assert!(world
+            .query::<&Text>()
+            .iter(world)
+            .any(|text| text.0 == expected));
     }
 
     #[test]
