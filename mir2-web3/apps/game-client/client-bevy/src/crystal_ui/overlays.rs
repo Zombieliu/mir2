@@ -2466,7 +2466,7 @@ struct OverlayNpcShopGoodNewIcon;
 pub struct OverlayStorage;
 
 #[derive(Component)]
-struct OverlayOptions;
+pub struct OverlayOptions;
 
 #[derive(Component)]
 struct OverlaySocial;
@@ -3530,6 +3530,7 @@ fn spawn_overlay_root(mut commands: Commands) {
             ));
             root.spawn((
                 OverlayOptions,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(CRYSTAL_OPTIONS_PANEL_RECT.left),

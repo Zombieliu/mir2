@@ -336,6 +336,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
         ),
     >,
     mut minimap_layers: Query<
@@ -346,6 +347,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
         ),
     >,
     mut belt_layers: Query<
@@ -355,6 +357,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
         ),
     >,
     mut focus_panels: Query<
@@ -364,11 +367,13 @@ fn fit_stage(
             Has<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
         ),
         Or<(
             With<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
         )>,
     >,
 ) {
@@ -442,14 +447,17 @@ fn fit_stage(
         host.safe_right / window.scale_factor(),
         (host.safe_bottom + host.ime_bottom) / window.scale_factor(),
     );
-    for (node, mut transform, is_chat_settings, is_inventory, is_storage) in &mut focus_panels {
+    for (node, mut transform, is_chat_settings, is_inventory, is_storage, is_options) in
+        &mut focus_panels
+    {
         let Some((origin, size)) = focus_panel_rect(node) else {
             *transform = UiTransform::default();
             continue;
         };
         let enabled = is_chat_settings
             || (is_inventory && player.inventory_open())
-            || (is_storage && player.storage_open());
+            || (is_storage && player.storage_open())
+            || (is_options && player.options_open());
         *transform = if enabled {
             mobile_focus_transform(
                 fit,
@@ -2094,13 +2102,14 @@ mod tests {
     }
 
     #[test]
-    fn inventory_and_storage_focus_bounds_stay_inside_phone_safe_viewports() {
+    fn focused_panel_bounds_stay_inside_phone_safe_viewports() {
         for (width, height) in [(891.0, 411.0), (731.0, 411.0), (610.0, 274.0)] {
             let fit = CrystalStageTransform::fit(width, height);
             let root_top = fit.offset_y / fit.scale;
             for (origin, size) in [
                 (Vec2::ZERO, Vec2::new(316.0, 236.0)),
                 (Vec2::new(150.0, 100.0), Vec2::new(640.0, 344.0)),
+                (Vec2::new(382.0, 207.0), Vec2::new(259.0, 354.0)),
             ] {
                 let transform = mobile_focus_transform(
                     fit,
