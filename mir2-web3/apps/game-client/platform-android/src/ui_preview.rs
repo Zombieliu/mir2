@@ -32,6 +32,7 @@ pub const SCENES: &[&str] = &[
     "mail",
     "bigmap",
     "storage",
+    "storage-locked",
     "group",
     "guild",
     "trade",
@@ -306,7 +307,7 @@ fn apply(world: &mut World) {
         "npcshop" => UiPanel::NpcShop,
         "mail" | "mail-compose" => UiPanel::Mail,
         "bigmap" => UiPanel::BigMap,
-        "storage" => UiPanel::Storage,
+        "storage" | "storage-locked" => UiPanel::Storage,
         "group" => UiPanel::Group,
         "guild" => UiPanel::Guild,
         "trade" => UiPanel::Trade,
@@ -502,15 +503,25 @@ fn populate_specimens(world: &mut World, scene: &str) {
     })).expect("static UI item specimen")
         })
         .collect();
+    let storage_items = items
+        .iter()
+        .cloned()
+        .map(|mut item| {
+            item.container = 4;
+            item
+        })
+        .collect();
     world.insert_resource(InventoryModel {
-        items: items.clone(),
+        items,
         gold: 12345,
         ..default()
     });
     world.insert_resource(StorageModel {
-        items,
+        items: storage_items,
         size: 80,
-        unlocked: true,
+        has_expanded: true,
+        has_password: scene == "storage-locked",
+        unlocked: scene != "storage-locked",
         ..default()
     });
     world.insert_resource(MailModel {
@@ -579,13 +590,26 @@ mod tests {
         populate_specimens(&mut world, "inventory-amount");
         let inventory = world.resource::<mir2_client_bevy::inventory::InventoryModel>();
         assert_eq!(inventory.items[11].unique_id, Some(9011));
+        let storage = world.resource::<mir2_client_bevy::storage::StorageModel>();
+        assert!(storage.has_expanded);
+        assert!(storage.items.iter().all(|item| item.container == 4));
         let mut state = NativePlayerUiState::default();
         assert!(state.open_inventory_delete_for_slot(inventory, 11));
+    }
+    #[test]
+    fn locked_storage_scene_exposes_only_a_secure_local_draft() {
+        let mut world = World::new();
+        world.init_resource::<mir2_client_bevy::social::SocialModel>();
+        populate_specimens(&mut world, "storage-locked");
+        let storage = world.resource::<mir2_client_bevy::storage::StorageModel>();
+        assert!(storage.has_password);
+        assert!(!storage.unlocked);
+        assert!(storage.password_draft.is_empty());
     }
     #[test]
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 34);
+        assert_eq!(SCENES.len(), 35);
     }
 }

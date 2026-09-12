@@ -278,6 +278,7 @@ pub struct InventoryDialogUi {
     drag_offset_x: f32,
     drag_offset_y: f32,
     last_cursor: Option<Vec2>,
+    drag_touch_id: Option<u64>,
 }
 
 impl Default for InventoryDialogUi {
@@ -289,6 +290,7 @@ impl Default for InventoryDialogUi {
             drag_offset_x: 0.0,
             drag_offset_y: 0.0,
             last_cursor: None,
+            drag_touch_id: None,
         }
     }
 }
@@ -308,6 +310,27 @@ impl InventoryDialogUi {
         true
     }
 
+    fn begin_focused_drag(
+        &mut self,
+        hit_cursor: Vec2,
+        drag_cursor: Vec2,
+        focus_translation: Vec2,
+    ) -> bool {
+        if !self.begin_drag(hit_cursor.x, hit_cursor.y) {
+            return false;
+        }
+        // Materialize the platform's safe-edge translation into the shared
+        // window position before dragging. The transformed panel does not
+        // jump when the host subsequently reduces that translation to zero,
+        // while the raw stage-space cursor can keep driving one-to-one motion.
+        self.left = (self.left + focus_translation.x).clamp(0.0, INVENTORY_MAX_LEFT);
+        self.top = (self.top + focus_translation.y).clamp(0.0, INVENTORY_MAX_TOP);
+        self.dragging = true;
+        self.drag_offset_x = drag_cursor.x - self.left;
+        self.drag_offset_y = drag_cursor.y - self.top;
+        true
+    }
+
     fn drag_to(&mut self, cursor_x: f32, cursor_y: f32) {
         if !self.dragging {
             return;
@@ -320,6 +343,7 @@ impl InventoryDialogUi {
         self.dragging = false;
         self.drag_offset_x = 0.0;
         self.drag_offset_y = 0.0;
+        self.drag_touch_id = None;
     }
 
     fn remember_cursor(&mut self, cursor: Option<Vec2>) {
@@ -430,6 +454,7 @@ pub const BIGMAP_HEIGHT: f32 = 380.0;
 pub const CRYSTAL_MENU_PANEL_RECT: CrystalRect = CrystalRect::new(988.0, 349.0, 36.0, 282.0);
 pub const CRYSTAL_OPTIONS_PANEL_RECT: CrystalRect = CrystalRect::new(382.0, 207.0, 259.0, 354.0);
 pub const CRYSTAL_BIGMAP_PANEL_RECT: CrystalRect = CrystalRect::new(132.0, 134.0, 760.0, 500.0);
+pub const CRYSTAL_STORAGE_PANEL_RECT: CrystalRect = CrystalRect::new(150.0, 100.0, 640.0, 344.0);
 pub const CRYSTAL_GROUP_PANEL_RECT: CrystalRect = CrystalRect::new(396.0, 259.0, 232.0, 249.0);
 pub const CRYSTAL_GUILD_PANEL_RECT: CrystalRect = CrystalRect::new(217.0, 168.0, 590.0, 432.0);
 pub const CRYSTAL_HELP_PANEL_RECT: CrystalRect = CrystalRect::new(244.0, 129.0, 536.0, 509.0);
@@ -594,6 +619,34 @@ fn cursor_logical(window: &Window, cursor: Vec2) -> Vec2 {
     );
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
     Vec2::new(x, y)
+}
+
+fn focused_panel_cursor(
+    cursor: Vec2,
+    origin: Vec2,
+    size: Vec2,
+    transform: Option<&UiTransform>,
+) -> Option<Vec2> {
+    let transform = transform.copied().unwrap_or_default();
+    if transform.scale.x <= f32::EPSILON || transform.scale.y <= f32::EPSILON {
+        return None;
+    }
+    let translation = match (transform.translation.x, transform.translation.y) {
+        (Val::Px(x), Val::Px(y)) => Vec2::new(x, y),
+        (Val::Auto, Val::Auto) => Vec2::ZERO,
+        _ => return None,
+    };
+    let center = origin + size * 0.5;
+    Some(center + (cursor - center - translation) / transform.scale)
+}
+
+fn focused_panel_translation(transform: Option<&UiTransform>) -> Option<Vec2> {
+    let transform = transform.copied().unwrap_or_default();
+    match (transform.translation.x, transform.translation.y) {
+        (Val::Px(x), Val::Px(y)) => Some(Vec2::new(x, y)),
+        (Val::Auto, Val::Auto) => Some(Vec2::ZERO),
+        _ => None,
+    }
 }
 
 // Re-export shop/storage constants for external consumers that import via overlays.
@@ -2272,7 +2325,7 @@ impl NativePlayerUiIntentQueue {
 pub struct OverlayRoot;
 
 #[derive(Component)]
-struct OverlayInventory;
+pub struct OverlayInventory;
 
 #[derive(Component)]
 struct OverlayInventoryDeleteModal;
@@ -2410,7 +2463,7 @@ struct OverlayNpcShopGoodSelectionDivider;
 struct OverlayNpcShopGoodNewIcon;
 
 #[derive(Component)]
-struct OverlayStorage;
+pub struct OverlayStorage;
 
 #[derive(Component)]
 struct OverlayOptions;
@@ -3217,6 +3270,7 @@ fn spawn_overlay_root(mut commands: Commands) {
         .with_children(|root| {
             root.spawn((
                 OverlayInventory,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(INVENTORY_PANEL_ORIGIN.x as f32),
@@ -3459,12 +3513,13 @@ fn spawn_overlay_root(mut commands: Commands) {
             ));
             root.spawn((
                 OverlayStorage,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(150.0),
-                    top: Val::Px(100.0),
-                    width: Val::Px(640.0),
-                    height: Val::Px(344.0),
+                    left: Val::Px(CRYSTAL_STORAGE_PANEL_RECT.left),
+                    top: Val::Px(CRYSTAL_STORAGE_PANEL_RECT.top),
+                    width: Val::Px(CRYSTAL_STORAGE_PANEL_RECT.width),
+                    height: Val::Px(CRYSTAL_STORAGE_PANEL_RECT.height),
                     display: Display::None,
                     flex_direction: FlexDirection::Column,
                     padding: UiRect::all(Val::Px(10.0)),
@@ -3667,7 +3722,9 @@ fn process_help_drag(
 fn process_inventory_drag(
     mut state: ResMut<NativePlayerUiState>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
+    touches: Option<Res<Touches>>,
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
+    panels: Query<&UiTransform, With<OverlayInventory>>,
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
     if !state.inventory_open() || state.amount_modal_open() {
@@ -3675,10 +3732,10 @@ fn process_inventory_drag(
         state.inventory_window.clear_cursor();
         return;
     }
-    let Some(mouse) = mouse else {
+    if mouse.is_none() && touches.is_none() {
         state.inventory_window.end_drag();
         return;
-    };
+    }
     let Ok((window_entity, window)) = windows.single() else {
         state.inventory_window.end_drag();
         return;
@@ -3692,57 +3749,171 @@ fn process_inventory_drag(
         .filter(|event| event.window == window_entity)
         .map(|event| cursor_logical(window, event.position))
         .collect::<Vec<_>>();
-    let current_cursor = cursor_path
+    let mouse_cursor = cursor_path
         .last()
         .copied()
         .or_else(|| help_cursor_logical(window));
+    let panel_transform = panels.single().ok();
+    let panel_origin = Vec2::new(state.inventory_window.left, state.inventory_window.top);
+    let panel_size = Vec2::new(
+        INVENTORY_PANEL_SIZE.width as f32,
+        INVENTORY_PANEL_SIZE.height as f32,
+    );
+    let focused_cursor =
+        |cursor| focused_panel_cursor(cursor, panel_origin, panel_size, panel_transform);
+
+    let active_touch_id = state.inventory_window.drag_touch_id;
+    let active_touch_cursor = active_touch_id.and_then(|id| {
+        touches.as_deref().and_then(|touches| {
+            touches
+                .get_pressed(id)
+                .map(|touch| cursor_logical(window, touch.position()))
+                .or_else(|| {
+                    touches
+                        .iter_just_released()
+                        .chain(touches.iter_just_canceled())
+                        .find(|touch| touch.id() == id)
+                        .map(|touch| cursor_logical(window, touch.position()))
+                })
+        })
+    });
+    let active_touch_ended = active_touch_id.is_some_and(|id| {
+        touches.as_deref().is_some_and(|touches| {
+            touches
+                .iter_just_released()
+                .chain(touches.iter_just_canceled())
+                .any(|touch| touch.id() == id)
+        })
+    });
+    let current_cursor = if active_touch_id.is_some() {
+        active_touch_cursor
+    } else {
+        mouse_cursor
+    };
+    let mouse_pressed = mouse
+        .as_deref()
+        .is_some_and(|mouse| mouse.pressed(MouseButton::Left));
+    let mouse_just_pressed = mouse
+        .as_deref()
+        .is_some_and(|mouse| mouse.just_pressed(MouseButton::Left));
+    let mouse_just_released = mouse
+        .as_deref()
+        .is_some_and(|mouse| mouse.just_released(MouseButton::Left));
+
+    let covered_by_higher_window = |cursor: Vec2| {
+        (state.hero.interactive
+            && hero_dialog::geometry::hit(&state.hero, [cursor.x, cursor.y], state.hero.front)
+                .0
+                .is_some())
+            || equipment_creature_host::covers(&state, cursor)
+            || state.trade_dialog.covers_cursor(cursor)
+            || state.ranking.covers_cursor(cursor)
+    };
+    let touch_start = if active_touch_id.is_none() && !mouse_just_pressed {
+        touches.as_deref().and_then(|touches| {
+            touches.iter_just_pressed().find_map(|touch| {
+                let cursor = cursor_logical(window, touch.position());
+                let hit = focused_cursor(cursor)?;
+                (inventory_drag_surface_contains(&state.inventory_window, hit.x, hit.y)
+                    && !covered_by_higher_window(cursor))
+                .then_some((touch.id(), cursor))
+            })
+        })
+    } else {
+        None
+    };
 
     // SendInput and high-polling mice can deliver press, motion and release in
     // one Bevy frame. SendInput can also move to the press point one frame
     // before the press edge and expose only the destination CursorMoved event
     // in the pressed frame. Preserve the prior cursor as the anchor whenever
     // it owns the InventoryDialog's exposed drag surface.
-    if mouse.just_pressed(MouseButton::Left) {
-        let observed_start = cursor_path.first().copied().or(current_cursor);
-        let previous_start = state.inventory_window.last_cursor.filter(|previous| {
-            inventory_drag_surface_contains(&state.inventory_window, previous.x, previous.y)
-                && observed_start.is_some_and(|observed| previous.distance(observed) > 2.0)
-        });
-        let Some(start) = previous_start
-            .or(observed_start)
-            .or(state.inventory_window.last_cursor)
-        else {
+    if mouse_just_pressed || touch_start.is_some() {
+        let (touch_id, start) = if mouse_just_pressed {
+            let observed_start = cursor_path.first().copied().or(current_cursor);
+            let previous_start = state.inventory_window.last_cursor.filter(|previous| {
+                focused_cursor(*previous).is_some_and(|hit| {
+                    inventory_drag_surface_contains(&state.inventory_window, hit.x, hit.y)
+                }) && observed_start.is_some_and(|observed| previous.distance(observed) > 2.0)
+            });
+            let Some(start) = previous_start
+                .or(observed_start)
+                .or(state.inventory_window.last_cursor)
+            else {
+                state.inventory_window.end_drag();
+                return;
+            };
+            (None, start)
+        } else {
+            let (touch_id, start) = touch_start.expect("touch start was checked");
+            (Some(touch_id), start)
+        };
+        let Some(hit_start) = focused_cursor(start) else {
             state.inventory_window.end_drag();
+            state.inventory_window.remember_cursor(current_cursor);
             return;
         };
         // The accepted trade pair is drawn above Inventory. Its child cells
         // and controls own the press too, not only its draggable background.
-        if (state.hero.interactive
-            && hero_dialog::geometry::hit(&state.hero, [start.x, start.y], state.hero.front)
-                .0
-                .is_some())
-            || equipment_creature_host::covers(&state, start)
-            || state.trade_dialog.covers_cursor(start)
-            || state.ranking.covers_cursor(start)
-        {
+        if covered_by_higher_window(start) {
             state.inventory_window.end_drag();
             state.inventory_window.remember_cursor(current_cursor);
             return;
         }
-        if state.inventory_window.begin_drag(start.x, start.y) {
+        let focus_translation = focused_panel_translation(panel_transform).unwrap_or_default();
+        if state
+            .inventory_window
+            .begin_focused_drag(hit_start, start, focus_translation)
+        {
+            state.inventory_window.drag_touch_id = touch_id;
             state.hero.cross.player_front = true;
-            if let Some(end) = current_cursor {
+            let touch_cursor = touch_id.and_then(|id| {
+                touches.as_deref().and_then(|touches| {
+                    touches
+                        .get_pressed(id)
+                        .map(|touch| cursor_logical(window, touch.position()))
+                        .or_else(|| {
+                            touches
+                                .iter_just_released()
+                                .chain(touches.iter_just_canceled())
+                                .find(|touch| touch.id() == id)
+                                .map(|touch| cursor_logical(window, touch.position()))
+                        })
+                })
+            });
+            if let Some(end) = touch_cursor.or(current_cursor).or(Some(start)) {
                 state.inventory_window.drag_to(end.x, end.y);
             }
         }
-        if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
+        let touch_finished = touch_id.is_some_and(|id| {
+            touches.as_deref().is_none_or(|touches| {
+                touches.get_pressed(id).is_none()
+                    || touches
+                        .iter_just_released()
+                        .chain(touches.iter_just_canceled())
+                        .any(|touch| touch.id() == id)
+            })
+        });
+        if touch_finished || (touch_id.is_none() && (mouse_just_released || !mouse_pressed)) {
             state.inventory_window.end_drag();
         }
-        state.inventory_window.remember_cursor(current_cursor);
+        state
+            .inventory_window
+            .remember_cursor(current_cursor.or(Some(start)));
         return;
     }
 
-    if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
+    let pointer_pressed = active_touch_id
+        .and_then(|id| {
+            touches
+                .as_deref()
+                .map(|touches| touches.get_pressed(id).is_some())
+        })
+        .unwrap_or(mouse_pressed);
+    if active_touch_ended || mouse_just_released || !pointer_pressed {
+        if let Some(cursor) = current_cursor {
+            state.inventory_window.drag_to(cursor.x, cursor.y);
+        }
         state.inventory_window.end_drag();
         state.inventory_window.remember_cursor(current_cursor);
         return;
@@ -3762,6 +3933,7 @@ fn process_inventory_delete_pointer(
     mut state: ResMut<NativePlayerUiState>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<&Window, With<PrimaryWindow>>,
+    panels: Query<&UiTransform, With<OverlayInventory>>,
     mut ui_audio: ResMut<crate::ui_audio::NativeUiAudioQueue>,
 ) {
     if !state.inventory_open()
@@ -3777,7 +3949,15 @@ fn process_inventory_delete_pointer(
     if !window.focused {
         return;
     }
-    let Some(cursor) = help_cursor_logical(window) else {
+    let Some(raw_cursor) = help_cursor_logical(window) else {
+        return;
+    };
+    let origin = Vec2::new(state.inventory_window.left, state.inventory_window.top);
+    let size = Vec2::new(
+        INVENTORY_PANEL_SIZE.width as f32,
+        INVENTORY_PANEL_SIZE.height as f32,
+    );
+    let Some(cursor) = focused_panel_cursor(raw_cursor, origin, size, panels.single().ok()) else {
         return;
     };
     let panel = CrystalRect::new(
@@ -17022,6 +17202,125 @@ mod tests {
         let stopped = (window.left, window.top);
         window.drag_to(200.0, 200.0);
         assert_eq!((window.left, window.top), stopped);
+    }
+
+    #[test]
+    fn focused_inventory_pointer_round_trips_and_drag_materializes_safe_translation() {
+        let mut window = InventoryDialogUi::default();
+        let transform = UiTransform {
+            translation: Val2::px(25.0, 250.0),
+            scale: Vec2::splat(3.0),
+            ..default()
+        };
+        let local_hit = Vec2::new(182.0, 217.0);
+        let center = Vec2::new(
+            INVENTORY_PANEL_SIZE.width as f32 * 0.5,
+            INVENTORY_PANEL_SIZE.height as f32 * 0.5,
+        );
+        let raw_cursor = center + Vec2::new(25.0, 250.0) + (local_hit - center) * transform.scale;
+        assert_eq!(
+            focused_panel_cursor(
+                raw_cursor,
+                Vec2::ZERO,
+                Vec2::new(
+                    INVENTORY_PANEL_SIZE.width as f32,
+                    INVENTORY_PANEL_SIZE.height as f32,
+                ),
+                Some(&transform),
+            ),
+            Some(local_hit)
+        );
+        assert!(window.begin_focused_drag(
+            local_hit,
+            raw_cursor,
+            focused_panel_translation(Some(&transform)).unwrap(),
+        ));
+        assert_eq!((window.left, window.top), (25.0, 250.0));
+        window.drag_to(raw_cursor.x + 40.0, raw_cursor.y + 30.0);
+        assert_eq!((window.left, window.top), (65.0, 280.0));
+    }
+
+    #[test]
+    fn inventory_drag_tracks_one_touch_without_stealing_other_fingers() {
+        let mut app = App::new();
+        let mut primary = Window::default();
+        primary.resolution.set(1024.0, 768.0);
+        let window = app.world_mut().spawn((primary, PrimaryWindow)).id();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<Touches>()
+            .add_message::<bevy::input::touch::TouchInput>()
+            .add_message::<CursorMoved>()
+            .add_systems(PreUpdate, bevy::input::touch::touch_screen_input_system)
+            .add_systems(Update, process_inventory_drag);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_inventory();
+
+        let touch = |phase, id, position| bevy::input::touch::TouchInput {
+            phase,
+            position,
+            window,
+            force: None,
+            id,
+        };
+        // Finger 1 represents an already-held joystick. Finger 2 starts on the
+        // exposed Inventory frame and must become the only drag owner.
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Started,
+            1,
+            Vec2::new(900.0, 700.0),
+        ));
+        app.update();
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Started,
+            2,
+            Vec2::new(225.0, 10.0),
+        ));
+        app.update();
+        {
+            let inventory = &app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .inventory_window;
+            assert!(inventory.dragging());
+            assert_eq!(inventory.drag_touch_id, Some(2));
+        }
+
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Moved,
+            1,
+            Vec2::new(950.0, 700.0),
+        ));
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Moved,
+            2,
+            Vec2::new(500.0, 300.0),
+        ));
+        app.update();
+        assert_eq!(
+            {
+                let inventory = &app
+                    .world()
+                    .resource::<NativePlayerUiState>()
+                    .inventory_window;
+                (inventory.left, inventory.top)
+            },
+            (275.0, 290.0)
+        );
+
+        app.world_mut().write_message(touch(
+            bevy::input::touch::TouchPhase::Ended,
+            2,
+            Vec2::new(500.0, 300.0),
+        ));
+        app.update();
+        let inventory = &app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_window;
+        assert!(!inventory.dragging());
+        assert_eq!(inventory.drag_touch_id, None);
+        assert_eq!((inventory.left, inventory.top), (275.0, 290.0));
     }
 
     #[test]

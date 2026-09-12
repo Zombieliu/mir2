@@ -333,6 +333,9 @@ fn fit_stage(
             )>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
+            Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
         ),
     >,
     mut minimap_layers: Query<
@@ -340,12 +343,33 @@ fn fit_stage(
         (
             With<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
+            Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
         ),
     >,
-    mut belt_layers: Query<&mut Node, With<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>>,
-    mut chat_settings: Query<
-        &mut UiTransform,
-        With<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
+    mut belt_layers: Query<
+        &mut Node,
+        (
+            With<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
+            Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
+        ),
+    >,
+    mut focus_panels: Query<
+        (
+            &Node,
+            &mut UiTransform,
+            Has<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
+        ),
+        Or<(
+            With<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
+        )>,
     >,
 ) {
     let Ok(window) = windows.single() else {
@@ -412,13 +436,32 @@ fn fit_stage(
             Display::Flex
         };
     }
-    let safe_width =
-        (window.width() - (host.safe_left + host.safe_right) / window.scale_factor()).max(1.0);
-    let safe_height =
-        (window.height() - (host.safe_top + host.safe_bottom) / window.scale_factor()).max(1.0);
-    let settings_scale = mobile_focus_scale(fit, Vec2::new(224.0, 180.0), safe_width, safe_height);
-    for mut transform in &mut chat_settings {
-        transform.scale = Vec2::splat(settings_scale);
+    let safe_edges = Vec4::new(
+        host.safe_left / window.scale_factor(),
+        host.safe_top / window.scale_factor(),
+        host.safe_right / window.scale_factor(),
+        (host.safe_bottom + host.ime_bottom) / window.scale_factor(),
+    );
+    for (node, mut transform, is_chat_settings, is_inventory, is_storage) in &mut focus_panels {
+        let Some((origin, size)) = focus_panel_rect(node) else {
+            *transform = UiTransform::default();
+            continue;
+        };
+        let enabled = is_chat_settings
+            || (is_inventory && player.inventory_open())
+            || (is_storage && player.storage_open());
+        *transform = if enabled {
+            mobile_focus_transform(
+                fit,
+                origin,
+                size,
+                Vec2::new(window.width(), window.height()),
+                safe_edges,
+                top,
+            )
+        } else {
+            UiTransform::default()
+        };
     }
 }
 
@@ -440,6 +483,55 @@ fn mobile_focus_scale(
     (available_width / fitted_width)
         .min(available_height / fitted_height)
         .clamp(1.0, MAX_FOCUS_SCALE)
+}
+
+fn focus_panel_rect(node: &Node) -> Option<(Vec2, Vec2)> {
+    let (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) =
+        (node.left, node.top, node.width, node.height)
+    else {
+        return None;
+    };
+    (width > 0.0 && height > 0.0).then_some((Vec2::new(left, top), Vec2::new(width, height)))
+}
+
+fn mobile_focus_transform(
+    fit: CrystalStageTransform,
+    origin: Vec2,
+    size: Vec2,
+    viewport: Vec2,
+    safe_edges: Vec4,
+    root_top: f32,
+) -> UiTransform {
+    const EDGE_GUTTER: f32 = 16.0;
+    let safe_width = (viewport.x - safe_edges.x - safe_edges.z).max(1.0);
+    let safe_height = (viewport.y - safe_edges.y - safe_edges.w).max(1.0);
+    let scale = mobile_focus_scale(fit, size, safe_width, safe_height);
+    let min = Vec2::new(
+        (safe_edges.x + EDGE_GUTTER - fit.offset_x) / fit.scale,
+        (safe_edges.y + EDGE_GUTTER) / fit.scale - root_top,
+    );
+    let max = Vec2::new(
+        (viewport.x - safe_edges.z - EDGE_GUTTER - fit.offset_x) / fit.scale,
+        (viewport.y - safe_edges.w - EDGE_GUTTER) / fit.scale - root_top,
+    );
+    let half = size * scale * 0.5;
+    let center = origin + size * 0.5;
+    let clamp_center = |value: f32, lower: f32, upper: f32| {
+        if lower <= upper {
+            value.clamp(lower, upper)
+        } else {
+            (lower + upper) * 0.5
+        }
+    };
+    let target = Vec2::new(
+        clamp_center(center.x, min.x + half.x, max.x - half.x),
+        clamp_center(center.y, min.y + half.y, max.y - half.y),
+    );
+    UiTransform {
+        translation: Val2::px(target.x - center.x, target.y - center.y),
+        scale: Vec2::splat(scale),
+        ..default()
+    }
 }
 
 // Keep the two text fields visible while IME is open. Temporarily collapse
@@ -536,6 +628,10 @@ fn player_editor_bottom(field: Option<&str>, scale: f32) -> f32 {
         // Mail panel top + compact footer top + touch target + IME gutter.
         Some("mail-recipient" | "mail-message") => {
             5.0 + 110.0 + (44.0 / scale.max(0.01)).max(28.0) + 8.0 / scale.max(0.01)
+        }
+        Some("storage-password") => {
+            let rect = mir2_client_bevy::crystal_ui::overlays::CRYSTAL_STORAGE_PANEL_RECT;
+            rect.top + rect.height + 8.0
         }
         _ => 750.0,
     }
@@ -1998,6 +2094,45 @@ mod tests {
     }
 
     #[test]
+    fn inventory_and_storage_focus_bounds_stay_inside_phone_safe_viewports() {
+        for (width, height) in [(891.0, 411.0), (731.0, 411.0), (610.0, 274.0)] {
+            let fit = CrystalStageTransform::fit(width, height);
+            let root_top = fit.offset_y / fit.scale;
+            for (origin, size) in [
+                (Vec2::ZERO, Vec2::new(316.0, 236.0)),
+                (Vec2::new(150.0, 100.0), Vec2::new(640.0, 344.0)),
+            ] {
+                let transform = mobile_focus_transform(
+                    fit,
+                    origin,
+                    size,
+                    Vec2::new(width, height),
+                    Vec4::ZERO,
+                    root_top,
+                );
+                let (Val::Px(dx), Val::Px(dy)) = (transform.translation.x, transform.translation.y)
+                else {
+                    panic!("focus translation must stay in logical pixels")
+                };
+                let center = origin + size * 0.5 + Vec2::new(dx, dy);
+                let half = size * transform.scale * 0.5;
+                let screen_min = Vec2::new(
+                    fit.offset_x + (center.x - half.x) * fit.scale,
+                    (root_top + center.y - half.y) * fit.scale,
+                );
+                let screen_max = Vec2::new(
+                    fit.offset_x + (center.x + half.x) * fit.scale,
+                    (root_top + center.y + half.y) * fit.scale,
+                );
+                assert!(screen_min.x >= 16.0 - 0.001, "{width} {origin:?}");
+                assert!(screen_min.y >= 16.0 - 0.001, "{height} {origin:?}");
+                assert!(screen_max.x <= width - 16.0 + 0.001, "{width} {origin:?}");
+                assert!(screen_max.y <= height - 16.0 + 0.001, "{height} {origin:?}");
+            }
+        }
+    }
+
+    #[test]
     fn shared_session_reset_clears_android_player_intents_without_reusing_storage_ids() {
         use mir2_client_bevy::{
             crystal_ui::overlays::{
@@ -2181,6 +2316,7 @@ mod tests {
             assert_eq!(player_editor_bottom(Some(field), 1.0), 446.0);
         }
         assert_eq!(player_editor_bottom(Some("chat"), 1.0), 750.0);
+        assert_eq!(player_editor_bottom(Some("storage-password"), 1.0), 452.0);
     }
 
     #[test]

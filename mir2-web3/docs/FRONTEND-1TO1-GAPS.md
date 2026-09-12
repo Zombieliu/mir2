@@ -1,5 +1,21 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: the exact shared Inventory and Storage
+> roots now receive the same interaction-safe phone focus treatment as Chat
+> Settings, up to 3.2x within safe edges. Drawing and Bevy picking share one
+> transform; Inventory touch drag owns only its starting finger and no longer
+> competes with a held joystick finger. API31 taps switch Inventory categories
+> and Storage pages at 2340x1080, 1920x1080 and 1600x720; a real ADB swipe moves
+> Inventory without a focus-offset jump, and locked Storage stays visible above
+> the IME under `FLAG_SECURE`. Android UI Preview passes 170/170, Java tests,
+> arm64-v8a API31 release, full licensed-asset package and streamed install
+> pass. The 516,868,403-byte APK SHA-256 is
+> `21e75e3763d481ff81f1cb28319cb3d1e6d51f753104eb89a49411d0ab61f8b1`.
+> Evidence:
+> `docs/generated/player-qa/native-android-inventory-storage-focus-20260913/README.md`.
+> Options and compact NPC/Shop focus remain open, as do approved-WSS and
+> physical-device acceptance.
+
 > 2026-09-13 Android current change: the first interaction-safe phone focus
 > treatment now enlarges the exact shared 224x180 Chat Settings panel up to
 > 3.2x inside Android safe edges. It uses Bevy `UiTransform`, so drawing and
@@ -11,7 +27,7 @@
 > `fff3ffcd64de5caa0c02026ff4b0433cda5670aceb00e8a0eb2644530741d4a8`.
 > Evidence:
 > `docs/generated/player-qa/native-android-chat-focus-20260913/README.md`.
-> Inventory/Storage, Options and compact NPC/Shop focus remain open, as do
+> Options and compact NPC/Shop focus remain open, as do
 > approved-WSS and physical-device acceptance.
 
 > 2026-09-13 Android current change: native packaging now rejects a

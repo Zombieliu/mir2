@@ -209,10 +209,11 @@ fn touch_pointer(
     touches: Option<Res<Touches>>,
     joystick: Option<Res<JoystickState>>,
     mut pointer: ResMut<TouchPointer>,
-    mut windows: Query<&mut Window>,
+    mut windows: Query<(Entity, &mut Window)>,
     mut mouse: Option<ResMut<ButtonInput<MouseButton>>>,
+    mut cursor_moves: Option<MessageWriter<bevy::window::CursorMoved>>,
 ) {
-    let (Some(touches), Some(mouse), Ok(mut window)) =
+    let (Some(touches), Some(mouse), Ok((window_entity, mut window))) =
         (touches, mouse.as_deref_mut(), windows.single_mut())
     else {
         return;
@@ -222,7 +223,7 @@ fn touch_pointer(
             mouse.release(MouseButton::Left);
         }
         pointer.wait_for_release = true;
-        window.set_cursor_position(None);
+        clear_touch_cursor(&mut window);
         return;
     }
     if pointer.wait_for_release {
@@ -235,10 +236,20 @@ fn touch_pointer(
     }
     if let Some(owner) = pointer.owner {
         if let Some(touch) = touches.get_pressed(owner) {
-            window.set_cursor_position(Some(touch.position()));
+            publish_touch_cursor(
+                window_entity,
+                &mut window,
+                touch.position(),
+                &mut cursor_moves,
+            );
         } else {
             if let Some(touch) = touches.get_released(owner) {
-                window.set_cursor_position(Some(touch.position()));
+                publish_touch_cursor(
+                    window_entity,
+                    &mut window,
+                    touch.position(),
+                    &mut cursor_moves,
+                );
             }
             mouse.release(MouseButton::Left);
             pointer.owner = None;
@@ -258,7 +269,12 @@ fn touch_pointer(
         .min_by_key(|touch| touch.id())
     {
         pointer.owner = Some(touch.id());
-        window.set_cursor_position(Some(touch.position()));
+        publish_touch_cursor(
+            window_entity,
+            &mut window,
+            touch.position(),
+            &mut cursor_moves,
+        );
         mouse.press(MouseButton::Left);
         // A quick tap can start and end within one frame. Keep both edges for
         // the shared handlers, without synthesizing an extra frame of holding.
@@ -272,6 +288,37 @@ fn touch_pointer(
             });
         }
     }
+}
+
+fn publish_touch_cursor(
+    window_entity: Entity,
+    window: &mut Window,
+    position: Vec2,
+    cursor_moves: &mut Option<MessageWriter<bevy::window::CursorMoved>>,
+) {
+    #[cfg(target_os = "android")]
+    {
+        let _ = window;
+        if let Some(cursor_moves) = cursor_moves.as_mut() {
+            cursor_moves.write(bevy::window::CursorMoved {
+                window: window_entity,
+                position,
+                delta: None,
+            });
+        }
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = (window_entity, cursor_moves);
+        window.set_cursor_position(Some(position));
+    }
+}
+
+fn clear_touch_cursor(window: &mut Window) {
+    #[cfg(target_os = "android")]
+    let _ = window;
+    #[cfg(not(target_os = "android"))]
+    window.set_cursor_position(None);
 }
 
 fn keep_drag_handles_reachable(
