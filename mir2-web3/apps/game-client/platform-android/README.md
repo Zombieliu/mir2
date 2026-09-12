@@ -408,6 +408,26 @@ MIR2_ANDROID_WORLD_ASSET_ROOT=/approved/generated-pack-root \
 ./build-android.sh
 ```
 
+For an approved Web/Android entity release, make package success conditional on
+the exact published Web manifest bytes:
+
+```bash
+MIR2_ANDROID_MODE=package \
+MIR2_ANDROID_ENTITY_ASSET_ROOT=/approved/entity-pack-root \
+MIR2_ANDROID_ENTITY_ASSET_PACK_ID=release-20260912 \
+MIR2_ANDROID_ENTITY_RELEASE_MANIFEST=https://approved.example/bevy-entity-atlases/manifest.json \
+./build-android.sh
+```
+
+`MIR2_ANDROID_ENTITY_RELEASE_MANIFEST` accepts either a local manifest file or
+a public HTTPS URL without credentials, query data, fragments or redirects.
+When set, both build scripts extract the embedded lock from the completed APK
+and run `verify-entity-release-alignment.mjs` before reporting the package gate
+passed. The verifier checks the APK lock's pack ID, exact manifest SHA-256/byte
+count and atlas/page/rect/page-byte totals. It downloads no atlas pages and
+does not publish or approve a release. A mismatch fails the build even if an
+APK file exists; that file must not be reported as release-aligned.
+
 The first command runs an offline `cargo-ndk` target check. Package mode builds
 an optimized Rust library inside a debug-signed APK by default and writes it
 to:

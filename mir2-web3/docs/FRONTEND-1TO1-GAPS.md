@@ -1,5 +1,21 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: both Android package scripts now have an
+> opt-in fail-closed Web release-alignment gate. It extracts the completed APK's
+> embedded lock and compares it with exact local or public-HTTPS manifest bytes
+> before package success is reported; matching counts without a matching SHA-256
+> are rejected.
+> Verifier tests are 6/6, Android remains 153/153, shell syntax passes and the
+> API31 package passes against the exact local 35-atlas manifest. The previous
+> head's GitHub Android lane passed. Two read-only public reads agreed that
+> `https://mir2.obelisk.build/bevy-entity-atlases/manifest.json` currently has
+> SHA-256 `254b0e2cd422dd6e6b1ce37ecce2a25cbca060b7fc69698cc51583f7816ef1fa`
+> with 9,650 rects/13,164,823 page bytes, while this checkout's tracked input is
+> `2ae6fb0dfe626bc90b41caac027a1fa219aaa11471ac27e42cc9980c286f48bd`
+> with 10,482 rects/13,249,890 page bytes. Therefore deployed Web/Android asset
+> parity is explicitly not accepted. No production state was changed. Evidence:
+> `docs/generated/player-qa/native-android-web-release-alignment-20260912/README.md`.
+
 > 2026-09-12 Android current change: entity release provenance is now
 > fail-closed at both packaging and selected-page decode. Gradle requires an
 > immutable `MIR2_ANDROID_ENTITY_ASSET_PACK_ID` for an override, verifies the

@@ -1,5 +1,24 @@
 # Agent Task Queue
 
+> 2026-09-12 Android current change: Android package success can now be bound
+> to the exact Web entity manifest through
+> `MIR2_ANDROID_ENTITY_RELEASE_MANIFEST`. The bounded verifier accepts a local
+> file or credential-free, query-free HTTPS URL; after extracting the lock from
+> the completed APK, it compares pack ID, exact manifest bytes/SHA-256 and
+> aggregate atlas/page/rect/page-byte counts without
+> downloading pages or approving a release. Unit negatives cover same-count
+> content drift, count drift, pack-ID drift and unsafe remote inputs (6/6).
+> Android 153/153, shell syntax and an API31 package with the 35-atlas local
+> alignment input pass; the previous head's GitHub Android lane also passed.
+> A repeated read-only check found the current public Web manifest
+> (`254b0e2c…`, 9,650 rects) does not equal the tracked Android input
+> (`2ae6fb0d…`, 10,482 rects), so no public release-alignment claim is made and
+> no deployment was changed. Next release action belongs to the asset-release
+> owner: identify or publish the approved immutable manifest, then rerun this
+> exact gate. WSS/account login, live render-ready transitions, updated
+> emulator/physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-web-release-alignment-20260912/README.md`.
+
 > 2026-09-12 Android current change: local proof packs can no longer enter an
 > APK without an explicit immutable pack ID and exact content validation.
 > Packaging verifies the complete 35-atlas/102-page override (including every

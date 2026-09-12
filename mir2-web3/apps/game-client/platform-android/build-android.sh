@@ -129,6 +129,27 @@ cp "${staged_lib}" "${native_lib}"
 )
 
 [[ -f "${apk_path}" ]] || fail "Gradle did not produce '${apk_path}'"
+
+release_manifest="${MIR2_ANDROID_ENTITY_RELEASE_MANIFEST:-}"
+if [[ -n "${release_manifest}" ]]; then
+  require_command node
+  require_command unzip
+  entity_lock="${NDK_OUTPUT}/apk-entity-pack-lock.json"
+  unzip -p "${apk_path}" assets/bevy-entity-atlases/pack-lock.json > "${entity_lock}" \
+    || fail "APK does not contain a readable Android entity pack lock"
+  [[ -s "${entity_lock}" ]] || fail "APK contains an empty Android entity pack lock"
+  alignment_args=(
+    "${SCRIPT_DIR}/verify-entity-release-alignment.mjs"
+    "${entity_lock}"
+    "${release_manifest}"
+  )
+  if [[ -n "${MIR2_ANDROID_ENTITY_ASSET_PACK_ID:-}" ]]; then
+    alignment_args+=("${MIR2_ANDROID_ENTITY_ASSET_PACK_ID}")
+  fi
+  node "${alignment_args[@]}"
+  echo "[platform-android] Android/Web entity release alignment passed"
+fi
+
 if command -v shasum >/dev/null 2>&1; then
   apk_sha="$(shasum -a 256 "${apk_path}" | awk '{print $1}')"
 else

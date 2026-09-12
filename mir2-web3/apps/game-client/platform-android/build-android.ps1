@@ -108,6 +108,40 @@ try {
 }
 
 if (-not (Test-Path -LiteralPath $apkPath)) { Fail "Gradle did not produce '$apkPath'" }
+
+if ($env:MIR2_ANDROID_ENTITY_RELEASE_MANIFEST) {
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) { Fail "required command 'node' is not on PATH" }
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $entityLock = Join-Path $ndkOutput 'apk-entity-pack-lock.json'
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($apkPath)
+    try {
+        $entry = $archive.GetEntry('assets/bevy-entity-atlases/pack-lock.json')
+        if (-not $entry) { Fail 'APK does not contain the Android entity pack lock' }
+        if ($entry.Length -le 0 -or $entry.Length -gt 16777216) {
+            Fail 'APK entity pack lock byte count is out of bounds'
+        }
+        $source = $entry.Open()
+        $destination = [System.IO.File]::Create($entityLock)
+        try {
+            $source.CopyTo($destination)
+        } finally {
+            $destination.Dispose()
+            $source.Dispose()
+        }
+    } finally {
+        $archive.Dispose()
+    }
+    if ((Get-Item -LiteralPath $entityLock).Length -le 0) { Fail 'APK contains an empty Android entity pack lock' }
+    $alignmentScript = Join-Path $scriptDir 'verify-entity-release-alignment.mjs'
+    $alignmentArgs = @($alignmentScript, $entityLock, $env:MIR2_ANDROID_ENTITY_RELEASE_MANIFEST)
+    if ($env:MIR2_ANDROID_ENTITY_ASSET_PACK_ID) {
+        $alignmentArgs += $env:MIR2_ANDROID_ENTITY_ASSET_PACK_ID
+    }
+    & node @alignmentArgs
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    Write-Host '[platform-android] Android/Web entity release alignment passed'
+}
+
 $apkSha = (Get-FileHash -Algorithm SHA256 -LiteralPath $apkPath).Hash.ToLowerInvariant()
 Write-Host "[platform-android] APK: $apkPath"
 Write-Host "[platform-android] SHA-256: $apkSha"

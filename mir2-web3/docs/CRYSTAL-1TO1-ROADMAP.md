@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-12 Android current change: package success now has an opt-in exact
+> Web entity-release gate. The completed APK's embedded pack lock is extracted
+> and compared with a local or credential-free HTTPS manifest by pack ID,
+> bytes, SHA-256 and aggregate counts; matching counts cannot hide content
+> drift. Verifier 6/6, Android 153/153 and the API31 local-aligned package pass.
+> The previous head's GitHub Android lane passed. The current public Web
+> manifest is `254b0e2c…` / 9,650 rects while the tracked Android input is
+> `2ae6fb0d…` / 10,482 rects, so shared release alignment remains open and no
+> production change or acceptance is claimed. Evidence:
+> `docs/generated/player-qa/native-android-web-release-alignment-20260912/README.md`.
+
 > 2026-09-11 Android `1ed32d776`: complete world snapshots and live item/gold
 > object packets now share one bounded ground-drop cache and exact packaged
 > `DNItems` presentation. Gold quantity selects frames 112-116; item packets
