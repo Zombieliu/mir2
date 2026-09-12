@@ -1,5 +1,26 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-12 Android current change: render-ready receipts now retain the
+> authenticated-character boundary on both StartGame and in-map refreshes.
+> A matching request for a missing or different active character fails closed,
+> clears the render transition and queued UI intents, resets native render data,
+> and asks the Java host to disconnect instead of leaving an indefinite loading
+> barrier or accepting another player's frame. Android `ui-preview` is 163/163;
+> targeted receipt tests and Rust formatting pass. This is local contract
+> evidence, not approved-WSS login, live StartGame/map switching, physical-device,
+> or human acceptance.
+
+> 2026-09-12 Android current change: the shared Bevy overlay renderer now
+> retains unchanged heavyweight panel entity trees. API31 emulator samples for
+> Inventory, Game Shop, Storage, Guild, Trade, Help and Mail Compose no longer
+> show the prior hundreds-of-MiB five-second growth; a 30-second Game Shop soak
+> stayed at `178544/267567 -> 178540/267762` KiB native heap/total PSS. Android
+> 162/162, retained-tree tests, API31 arm64 release build, package and install
+> pass. Evidence:
+> `docs/generated/player-qa/native-android-overlay-retention-20260912/README.md`.
+> This remains offline emulator evidence, not live login or physical-device
+> acceptance.
+
 > 2026-09-12 Android current change: the API31 ARM64 emulator has a visible,
 > stable GLES rendering baseline. A target-scoped runtime selects OpenGL ES,
 > WebGL2-compatible limits, `Msaa::Off` and no unused OIT startup; a vendored

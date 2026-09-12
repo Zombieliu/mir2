@@ -1163,10 +1163,46 @@ fn render_receipt_matches_player(
     ready.request_id != 0 && world.is_some_and(|world| world.player_name == character.name)
 }
 
+fn authenticated_render_character(model: &NativeShellModel) -> Option<CharacterSummary> {
+    match model.screen {
+        Screen::StartingGame => model
+            .selected_character_index
+            .and_then(|selected| {
+                model
+                    .characters
+                    .iter()
+                    .find(|character| character.index == selected)
+            })
+            .cloned(),
+        Screen::InGame => model.active_character.clone(),
+        _ => None,
+    }
+}
+
+fn reject_current_render_receipt(
+    host: &mut HostState,
+    model: &mut NativeShellModel,
+    request_id: u64,
+    message: &str,
+    intents: &mut NativeUiIntentQueue,
+) -> bool {
+    if !fail_current_render_load(host, model, request_id, message) {
+        return false;
+    }
+    #[cfg(target_os = "android")]
+    crate::world_assets::cancel_packaged_map_atlas_load();
+    mir2_bevy_runtime::native_ingest::push_native_data_reset();
+    intents.drain().for_each(drop);
+    OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+    send(json!({"type":"disconnect"}));
+    true
+}
+
 fn observe_render_receipt(
     mut host: ResMut<HostState>,
     mut model: ResMut<NativeShellModel>,
     receipt: Option<Res<mir2_bevy_runtime::native_render_receipt::NativeRenderReceipt>>,
+    mut intents: ResMut<NativeUiIntentQueue>,
 ) {
     let Some(request_id) = host.pending_render_request else {
         return;
@@ -1177,35 +1213,32 @@ fn observe_render_receipt(
     else {
         return;
     };
-    if model.screen == Screen::InGame {
-        // Normal in-map snapshots refresh the renderer without replaying the
-        // StartGame transition. Exact request matching above still prevents a
-        // stale frame from clearing the newest pending update.
-        host.pending_render_request = None;
-        return;
-    }
-    if model.screen != Screen::StartingGame {
-        return;
-    }
-    let Some(character) = model
-        .selected_character_index
-        .and_then(|selected| {
-            model
-                .characters
-                .iter()
-                .find(|character| character.index == selected)
-        })
-        .cloned()
-    else {
-        model.notice = Some(ShellNotice::error(
-            "Render completed without a selected authenticated character.",
-        ));
+    let character = authenticated_render_character(&model);
+    let Some(character) = character else {
+        reject_current_render_receipt(
+            &mut host,
+            &mut model,
+            request_id,
+            "render completed without an authenticated character",
+            &mut intents,
+        );
         return;
     };
     if !render_receipt_matches_player(&ready, host.world.as_ref(), &character) {
-        model.notice = Some(ShellNotice::error(
-            "Render receipt does not match the authenticated player.",
-        ));
+        reject_current_render_receipt(
+            &mut host,
+            &mut model,
+            request_id,
+            "render receipt does not match the authenticated player",
+            &mut intents,
+        );
+        return;
+    }
+    if model.screen == Screen::InGame {
+        // Normal in-map snapshots refresh the renderer without replaying the
+        // StartGame transition. They still have to match the active
+        // authenticated character before the newest barrier is cleared.
+        host.pending_render_request = None;
         return;
     }
     if model.apply_gateway_event(Event::PlayerBootstrapped { character }) {
@@ -1606,6 +1639,33 @@ mod tests {
         assert!(!super::render_receipt_matches_player(
             &ready, None, &character
         ));
+    }
+
+    #[test]
+    fn render_receipt_uses_only_the_authenticated_character_for_each_barrier() {
+        let character = CharacterSummary::new(7, "Fixture", 12, "Wizard", "Female");
+        let mut model = NativeShellModel {
+            screen: Screen::StartingGame,
+            characters: vec![character.clone()],
+            selected_character_index: Some(character.index),
+            ..default()
+        };
+        assert_eq!(
+            super::authenticated_render_character(&model),
+            Some(character.clone())
+        );
+
+        model.selected_character_index = Some(99);
+        assert!(super::authenticated_render_character(&model).is_none());
+        model.screen = Screen::InGame;
+        assert!(super::authenticated_render_character(&model).is_none());
+        model.active_character = Some(character.clone());
+        assert_eq!(
+            super::authenticated_render_character(&model),
+            Some(character)
+        );
+        model.screen = Screen::ConnectionLost;
+        assert!(super::authenticated_render_character(&model).is_none());
     }
 
     #[test]
