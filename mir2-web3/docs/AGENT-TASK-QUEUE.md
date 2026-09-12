@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-09-12 Android current change: monolithic entity-atlas loading has been
+> replaced by bounded multi-atlas selection. A local 35-root/102-page proof pack
+> exercises 23,224 rects and 48 unindexed occupants; only the 25 pages required
+> by the seven-entity/twelve-layer Bichon specimen decode, staying at 90,177,536
+> RGBA bytes and zero unresolved entries. Android `ui-preview` is 152/152; the
+> exact sharded pack, API31 package, streamed install and visible render/action
+> gates pass. The old Emulator 31.3.10 software renderer later hit
+> `DeviceLost`, so sustained rendering is still open. Next asset work is to turn
+> this ignored local proof into an approved version-aligned shared release,
+> then repeat with an updated emulator renderer and a physical device. Approved
+> WSS/account real login, live render-ready map transitions and human acceptance
+> remain external gates. Evidence:
+> `docs/generated/player-qa/native-android-sharded-player-atlas-20260912/README.md`.
+
 > 2026-09-12 Android current change: regular `ARWeapon/00` now participates in
 > the bounded local proof pack without inventing metadata for its 24 orphan PNGs.
 > Android counts fully unindexed rects and excludes them from lookup while

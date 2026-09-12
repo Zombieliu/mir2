@@ -42,6 +42,15 @@ Partially present metadata, negative frame indices and unsafe/duplicate rects
 still reject the manifest. This allows a valid indexed subset to render without
 inventing offsets for orphan source PNGs, and exposes the omitted count as
 `entity_unindexed_rects` in the Android world-frame diagnostic.
+The Android-private loader also accepts a bounded sharded manifest: at most 64
+atlases, 32 pages per atlas, 128 pages and 100,000 rects in total. Atlas keys,
+page files, render page keys, rect keys and canonical source paths are globally
+unique. A final page may be smaller than its atlas maximum, but rect bounds are
+checked against that page's exact dimensions. Only pages referenced by the
+current authoritative scene are decoded, and their combined RGBA allocation
+must stay within 128 MiB. This supports per-library release shards without
+loading a monolithic player/equipment/mount atlas into every scene; it does not
+make a local proof pack an approved shared release.
 Set `MIR2_GATEWAY_WS_URL` explicitly at build time for approved online tests.
 Neither an exported Activity intent nor old endpoint preferences override it.
 With no endpoint the actual shared login screen shows a configuration notice;

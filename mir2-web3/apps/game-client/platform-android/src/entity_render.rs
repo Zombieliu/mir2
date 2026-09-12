@@ -26,7 +26,9 @@ const CELL_HEIGHT: f32 = 32.0;
 const ENTITY_LEFT_ORIGIN: f32 = 480.0;
 const ENTITY_TOP_ORIGIN: f32 = 352.0;
 const MAX_MANIFEST_BYTES: usize = 16 * 1024 * 1024;
-const MAX_PAGE_COUNT: usize = 16;
+const MAX_ATLAS_COUNT: usize = 64;
+const MAX_ATLAS_PAGE_COUNT: usize = 32;
+const MAX_TOTAL_PAGE_COUNT: usize = 128;
 const MAX_RECT_COUNT: usize = 100_000;
 const MAX_PAGE_PNG_BYTES: usize = 8 * 1024 * 1024;
 const MAX_PAGE_PIXELS: usize = 4 * 1024 * 1024;
@@ -92,6 +94,7 @@ struct EntityAtlasRect {
 
 #[derive(Debug, Clone)]
 struct IndexedEntityAtlasRect {
+    atlas_index: usize,
     key: String,
     x: u32,
     y: u32,
@@ -795,106 +798,130 @@ where
         })?;
     if manifest.schema_version != ENTITY_ATLAS_SCHEMA_VERSION
         || manifest.kind != ENTITY_ATLAS_KIND
-        || manifest.atlases.len() != 1
+        || manifest.atlases.is_empty()
+        || manifest.atlases.len() > MAX_ATLAS_COUNT
     {
         return Err(WorldAssetError::new(
             "unsupported entity-atlas manifest schema",
         ));
     }
-    let atlas = manifest
-        .atlases
-        .into_iter()
-        .next()
-        .expect("validated atlas");
-    if atlas.key.is_empty()
-        || atlas.key.len() > 128
-        || atlas.pages.is_empty()
-        || atlas.pages.len() > MAX_PAGE_COUNT
-        || atlas.rects.is_empty()
-        || atlas.rects.len() > MAX_RECT_COUNT
-        || atlas.width == 0
-        || atlas.height == 0
+    let atlases = manifest.atlases;
+    let total_page_count = atlases
+        .iter()
+        .try_fold(0usize, |total, atlas| total.checked_add(atlas.pages.len()));
+    let total_rect_count = atlases
+        .iter()
+        .try_fold(0usize, |total, atlas| total.checked_add(atlas.rects.len()));
+    if total_page_count.is_none_or(|count| count > MAX_TOTAL_PAGE_COUNT)
+        || total_rect_count.is_none_or(|count| count > MAX_RECT_COUNT)
     {
         return Err(WorldAssetError::new(
             "entity-atlas dimensions or entry count are out of bounds",
         ));
     }
-    for page in &atlas.pages {
-        if !safe_page_file(&page.image_file)
-            || page.width != atlas.width
-            || page.height != atlas.height
-            || page.image_bytes == 0
-            || page.image_bytes > MAX_PAGE_PNG_BYTES
-        {
-            return Err(WorldAssetError::new(
-                "entity-atlas page descriptor is invalid",
-            ));
-        }
-    }
 
+    let mut atlas_keys = HashSet::new();
+    let mut page_files = HashSet::new();
+    let mut render_page_keys = HashSet::new();
     let mut rect_keys = HashSet::new();
     let mut rect_paths = HashSet::new();
-    let mut rect_by_path = HashMap::with_capacity(atlas.rects.len());
+    let mut rect_by_path = HashMap::with_capacity(total_rect_count.unwrap_or_default());
     let mut available_libraries = HashSet::new();
     let mut unindexed_rect_count = 0usize;
-    for rect in &atlas.rects {
-        let source_path = atlas_source_path(&rect.key)
-            .ok_or_else(|| WorldAssetError::new("entity-atlas rect key is invalid"))?;
-        if !rect_keys.insert(rect.key.clone())
-            || !rect_paths.insert(source_path.clone())
-            || rect.page_index >= atlas.pages.len()
-            || rect.width == 0
-            || rect.height == 0
-            || rect
-                .x
-                .checked_add(rect.width)
-                .is_none_or(|right| right > atlas.width)
-            || rect
-                .y
-                .checked_add(rect.height)
-                .is_none_or(|bottom| bottom > atlas.height)
+    for (atlas_index, atlas) in atlases.iter().enumerate() {
+        if atlas.key.is_empty()
+            || atlas.key.len() > 128
+            || !atlas_keys.insert(atlas.key.clone())
+            || atlas.pages.is_empty()
+            || atlas.pages.len() > MAX_ATLAS_PAGE_COUNT
+            || atlas.rects.is_empty()
+            || atlas.width == 0
+            || atlas.height == 0
         {
             return Err(WorldAssetError::new(
-                "entity-atlas rect descriptor is invalid or duplicated",
+                "entity-atlas dimensions or entry count are out of bounds",
             ));
         }
-        let (offset_x, offset_y) = match (rect.offset_x, rect.offset_y, rect.frame_index) {
-            (Some(offset_x), Some(offset_y), Some(frame_index)) if frame_index >= 0 => {
-                (offset_x, offset_y)
-            }
-            (None, None, None) => {
-                // The shared packer retains source PNGs that have no Crystal
-                // metadata. They are valid atlas occupants but cannot be used
-                // for authoritative placement, so keep them unavailable
-                // rather than inventing an offset or frame index.
-                unindexed_rect_count += 1;
-                continue;
-            }
-            _ => {
+        for (page_index, page) in atlas.pages.iter().enumerate() {
+            if !safe_page_file(&page.image_file)
+                || !page_files.insert(page.image_file.clone())
+                || !render_page_keys.insert(page_key(&atlas.key, page_index))
+                || page.width == 0
+                || page.height == 0
+                || page.width > atlas.width
+                || page.height > atlas.height
+                || page.image_bytes == 0
+                || page.image_bytes > MAX_PAGE_PNG_BYTES
+            {
                 return Err(WorldAssetError::new(
-                    "entity-atlas rect metadata is incomplete or invalid",
+                    "entity-atlas page descriptor is invalid or duplicated",
                 ));
             }
-        };
-        rect_by_path.insert(
-            source_path.clone(),
-            IndexedEntityAtlasRect {
-                key: rect.key.clone(),
-                x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height,
-                offset_x,
-                offset_y,
-                page_index: rect.page_index,
-            },
-        );
-        if let Some((library, _)) = source_path.rsplit_once('/') {
-            available_libraries.insert(library.trim_start_matches("/original-ui/").to_owned());
+        }
+        for rect in &atlas.rects {
+            let page = atlas
+                .pages
+                .get(rect.page_index)
+                .ok_or_else(|| WorldAssetError::new("entity-atlas rect page index is invalid"))?;
+            let source_path = atlas_source_path(&rect.key)
+                .ok_or_else(|| WorldAssetError::new("entity-atlas rect key is invalid"))?;
+            if !rect_keys.insert(rect.key.clone())
+                || !rect_paths.insert(source_path.clone())
+                || rect.width == 0
+                || rect.height == 0
+                || rect
+                    .x
+                    .checked_add(rect.width)
+                    .is_none_or(|right| right > page.width)
+                || rect
+                    .y
+                    .checked_add(rect.height)
+                    .is_none_or(|bottom| bottom > page.height)
+            {
+                return Err(WorldAssetError::new(
+                    "entity-atlas rect descriptor is invalid or duplicated",
+                ));
+            }
+            let (offset_x, offset_y) = match (rect.offset_x, rect.offset_y, rect.frame_index) {
+                (Some(offset_x), Some(offset_y), Some(frame_index)) if frame_index >= 0 => {
+                    (offset_x, offset_y)
+                }
+                (None, None, None) => {
+                    // The shared packer retains source PNGs that have no Crystal
+                    // metadata. They are valid atlas occupants but cannot be used
+                    // for authoritative placement, so keep them unavailable
+                    // rather than inventing an offset or frame index.
+                    unindexed_rect_count += 1;
+                    continue;
+                }
+                _ => {
+                    return Err(WorldAssetError::new(
+                        "entity-atlas rect metadata is incomplete or invalid",
+                    ));
+                }
+            };
+            rect_by_path.insert(
+                source_path.clone(),
+                IndexedEntityAtlasRect {
+                    atlas_index,
+                    key: rect.key.clone(),
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height,
+                    offset_x,
+                    offset_y,
+                    page_index: rect.page_index,
+                },
+            );
+            if let Some((library, _)) = source_path.rsplit_once('/') {
+                available_libraries.insert(library.trim_start_matches("/original-ui/").to_owned());
+            }
         }
     }
 
-    let mut used_rects: BTreeMap<usize, BTreeMap<String, IndexedEntityAtlasRect>> = BTreeMap::new();
+    let mut used_rects: BTreeMap<(usize, usize), BTreeMap<String, IndexedEntityAtlasRect>> =
+        BTreeMap::new();
     let mut entries = Vec::new();
     let mut direction_entries = Vec::new();
     let mut unresolved_entity_count = 0usize;
@@ -1075,9 +1102,9 @@ where
                     continue;
                 };
                 let path = atlas_source_path(&rect.key).expect("validated rect path");
-                let atlas_page_key = page_key(&atlas.key, rect.page_index);
+                let atlas_page_key = page_key(&atlases[rect.atlas_index].key, rect.page_index);
                 used_rects
-                    .entry(rect.page_index)
+                    .entry((rect.atlas_index, rect.page_index))
                     .or_default()
                     .insert(rect.key.clone(), rect.clone());
                 layers.push(EntityRenderLayer {
@@ -1256,11 +1283,12 @@ where
         });
     }
 
-    let used_pages: BTreeSet<usize> = used_rects.keys().copied().collect();
+    let used_pages: BTreeSet<(usize, usize)> = used_rects.keys().copied().collect();
     let mut render_atlases = Vec::with_capacity(used_pages.len());
-    for page_index in &used_pages {
+    for (atlas_index, page_index) in &used_pages {
+        let atlas = &atlases[*atlas_index];
         let page = &atlas.pages[*page_index];
-        let rects = used_rects[page_index]
+        let rects = used_rects[&(*atlas_index, *page_index)]
             .values()
             .map(|rect| EntityRenderAtlasRect {
                 key: rect.key.clone(),
@@ -1281,7 +1309,8 @@ where
     let mut pages = Vec::with_capacity(used_pages.len());
     let mut compressed_bytes = ground_item_meta.len();
     let mut rgba_bytes = 0usize;
-    for page_index in used_pages {
+    for (atlas_index, page_index) in used_pages {
+        let atlas = &atlases[atlas_index];
         let page = &atlas.pages[page_index];
         let asset_path = format!("bevy-entity-atlases/{}", page.image_file);
         let bytes = read_asset(&asset_path, page.image_bytes)?;
@@ -1510,6 +1539,139 @@ mod tests {
             "/original-ui/CArmour/00/16.png"
         );
         assert!(!product.json.contains("ARWeapon/00/808.png"));
+    }
+
+    #[test]
+    fn sharded_atlases_resolve_one_authoritative_entity_without_loading_unused_pages() {
+        let png = rgba_png();
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[
+                {"key":"body-atlas","width":1,"height":1,
+                 "pages":[{"imageFile":"body.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
+                    "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":16,"pageIndex":0}]},
+                {"key":"weapon-atlas","width":1,"height":1,
+                 "pages":[{"imageFile":"weapon.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "rects":[{"key":"/original-ui/CWeapon/00/16.png|1x1",
+                    "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":16,"pageIndex":0}]},
+                {"key":"unused-atlas","width":2,"height":2,
+                 "pages":[{"imageFile":"unused.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "rects":[{"key":"/original-ui/CArmour/01/16.png|1x1",
+                    "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":16,"pageIndex":0}]}
+            ]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{"objectId":"42","kind":"selfPlayer","x":300,"y":630,
+                "direction":"Down","sprite":{"bodyLibrary":"CArmour/00",
+                "weaponLibrary":"CWeapon/00","frameBaseOffset":0,
+                "weaponFrameOffset":0,"directionStride":4}}]
+        })
+        .to_string();
+        let product = load_entity_render_state(&snapshot, &scene(), 38, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            "bevy-entity-atlases/body.png" | "bevy-entity-atlases/weapon.png" => Ok(png.clone()),
+            "bevy-entity-atlases/unused.png" => {
+                Err(WorldAssetError::new("unused page must stay lazy"))
+            }
+            _ => Err(WorldAssetError::new("missing fixture")),
+        })
+        .unwrap();
+        assert_eq!(product.layer_count, 2);
+        assert_eq!(product.pages.len(), 2);
+        assert_eq!(
+            product
+                .pages
+                .iter()
+                .map(|page| page.key.as_str())
+                .collect::<Vec<_>>(),
+            ["body-atlas", "weapon-atlas"]
+        );
+        let state: Value = serde_json::from_str(&product.json).unwrap();
+        assert_eq!(state["atlases"].as_array().unwrap().len(), 2);
+        assert_eq!(state["atlases"][0]["key"], "body-atlas");
+        assert_eq!(state["atlases"][1]["key"], "weapon-atlas");
+    }
+
+    #[test]
+    fn sharded_atlases_reject_duplicate_source_paths_globally() {
+        let png = rgba_png();
+        let rect = serde_json::json!({
+            "key":"/original-ui/CArmour/00/16.png|1x1",
+            "x":0,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+            "frameIndex":16,"pageIndex":0
+        });
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[
+                {"key":"first","width":1,"height":1,
+                 "pages":[{"imageFile":"first.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "rects":[rect.clone()]},
+                {"key":"second","width":1,"height":1,
+                 "pages":[{"imageFile":"second.png","width":1,"height":1,"imageBytes":png.len()}],
+                 "rects":[rect]}
+            ]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{"objectId":"42","kind":"selfPlayer","x":300,"y":630,
+                "direction":"Down","sprite":{"bodyLibrary":"CArmour/00",
+                "frameBaseOffset":0,"directionStride":4}}]
+        })
+        .to_string();
+        let error = load_entity_render_state(&snapshot, &scene(), 39, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            _ => Err(WorldAssetError::new(
+                "duplicate must reject before PNG read",
+            )),
+        })
+        .unwrap_err();
+        assert!(error
+            .to_string()
+            .contains("rect descriptor is invalid or duplicated"));
+    }
+
+    #[test]
+    fn partial_atlas_pages_reject_rects_outside_their_exact_page() {
+        let png = rgba_png();
+        let manifest = serde_json::json!({
+            "schemaVersion":2,"kind":ENTITY_ATLAS_KIND,
+            "atlases":[{"key":"partial","width":2,"height":2,
+                "pages":[{"imageFile":"partial.png","width":1,"height":1,"imageBytes":png.len()}],
+                "rects":[{"key":"/original-ui/CArmour/00/16.png|1x1",
+                    "x":1,"y":0,"width":1,"height":1,"offsetX":0,"offsetY":0,
+                    "frameIndex":16,"pageIndex":0}]}]
+        })
+        .to_string()
+        .into_bytes();
+        let snapshot = serde_json::json!({
+            "playerObjectId":"42",
+            "entities":[{"objectId":"42","kind":"selfPlayer","x":300,"y":630,
+                "direction":"Down","sprite":{"bodyLibrary":"CArmour/00",
+                "frameBaseOffset":0,"directionStride":4}}]
+        })
+        .to_string();
+        let error = load_entity_render_state(&snapshot, &scene(), 40, |path, _| match path {
+            DNITEMS_META_ASSET => Ok(dnitems_meta()),
+            ENTITY_ATLAS_MANIFEST_ASSET => Ok(manifest.clone()),
+            _ => Err(WorldAssetError::new(
+                "invalid rect must reject before PNG read",
+            )),
+        })
+        .unwrap_err();
+        assert!(error
+            .to_string()
+            .contains("rect descriptor is invalid or duplicated"));
     }
 
     #[test]
@@ -2141,18 +2303,85 @@ mod tests {
             .expect("configured entity atlas manifest");
         let manifest: Value =
             serde_json::from_slice(&manifest_bytes).expect("configured entity atlas JSON");
-        let roots = manifest["atlases"][0]["roots"]
+        let atlases = manifest["atlases"]
             .as_array()
-            .expect("configured entity atlas roots");
+            .expect("configured entity atlases");
+        let roots: Vec<_> = atlases
+            .iter()
+            .flat_map(|atlas| {
+                atlas["roots"]
+                    .as_array()
+                    .into_iter()
+                    .flatten()
+                    .filter_map(Value::as_str)
+            })
+            .collect();
         let has_extended_roots = ["ARArmour/00", "ARWeapon/00", "ARWeapon/00 S", "Mount/00"]
             .into_iter()
-            .all(|required| roots.iter().any(|root| root.as_str() == Some(required)));
+            .all(|required| roots.contains(&required));
         if !has_extended_roots {
             assert!(
                 std::env::var_os("MIR2_ANDROID_REQUIRE_EXTENDED_ENTITY_ATLAS").is_none(),
                 "configured entity atlas is missing the required Archer/mount roots"
             );
             return;
+        }
+        let require_sharded =
+            std::env::var_os("MIR2_ANDROID_REQUIRE_SHARDED_ENTITY_ATLAS").is_some();
+        if require_sharded {
+            let required_roots = [
+                "CArmour/00",
+                "CArmour/01",
+                "CHair/00",
+                "CHair/01",
+                "CWeapon/00",
+                "CWeapon/01",
+                "AArmour/00",
+                "AArmour/01",
+                "AHair/00",
+                "AHair/01",
+                "AWeapon/00 L",
+                "AWeapon/00 R",
+                "AWeapon/01 L",
+                "AWeapon/01 R",
+                "ARArmour/00",
+                "ARArmour/01",
+                "ARHair/00",
+                "ARHair/01",
+                "ARWeapon/00",
+                "ARWeapon/00 S",
+                "ARWeapon/01",
+                "ARWeapon/01 S",
+                "Mount/00",
+                "Mount/01",
+                "Mount/02",
+                "Mount/03",
+                "Mount/04",
+                "Mount/05",
+                "Mount/06",
+                "Mount/07",
+                "Mount/08",
+                "Mount/09",
+                "Mount/10",
+                "Mount/11",
+                "Monster/003",
+            ];
+            assert_eq!(atlases.len(), required_roots.len());
+            assert!(required_roots
+                .into_iter()
+                .all(|required| roots.contains(&required)));
+            assert_eq!(
+                atlases
+                    .iter()
+                    .map(|atlas| atlas["pages"].as_array().unwrap().len())
+                    .sum::<usize>(),
+                102
+            );
+            assert!(atlases.iter().all(|atlas| {
+                atlas["roots"]
+                    .as_array()
+                    .is_some_and(|roots| roots.len() == 1)
+            }));
         }
         let snapshot = serde_json::json!({
             "playerObjectId":"42",
@@ -2203,7 +2432,20 @@ mod tests {
         assert_eq!(product.entity_count, 2);
         assert_eq!(product.layer_count, 4);
         assert_eq!(product.unresolved_entity_count, 0);
-        assert_eq!(product.unindexed_rect_count, 24);
+        let manifest_unindexed_rect_count = atlases
+            .iter()
+            .flat_map(|atlas| atlas["rects"].as_array().into_iter().flatten())
+            .filter(|rect| {
+                rect.get("offsetX").is_none()
+                    && rect.get("offsetY").is_none()
+                    && rect.get("frameIndex").is_none()
+            })
+            .count();
+        assert_eq!(product.unindexed_rect_count, manifest_unindexed_rect_count);
+        assert!(product.unindexed_rect_count >= 24);
+        if require_sharded {
+            assert_eq!(product.unindexed_rect_count, 48);
+        }
         assert!(product.rgba_bytes <= MAX_SELECTED_RGBA_BYTES);
         let state: Value = serde_json::from_str(&product.json).unwrap();
         let archer_standing = state["entities"]

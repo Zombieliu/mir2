@@ -1,6 +1,21 @@
 # Frontend 1:1 Gaps
 
 > 2026-09-12 Android current change: the Android-private entity loader now
+> accepts up to 64 immutable atlases / 128 pages with global key/path
+> uniqueness, exact partial-page bounds and a 128 MiB selected-RGBA cap. A
+> local 35-root proof pack spans the available player/equipment/mount roots plus
+> `Monster/003`: 102 pages, 23,224 rects and 48 explicitly unusable unindexed
+> occupants. The API31 ARM64 emulator visibly reached full-screen Bichon
+> render-ready with 849 draws, seven entities/twelve layers and zero unresolved
+> entries while decoding only 25 selected pages (90,177,536 RGBA bytes).
+> Android `ui-preview` is 152/152 and the exact sharded-pack/package/install
+> gates pass. The old Emulator 31.3.10 software renderer later raised
+> `DeviceLost`, so no soak claim is made. The pack remains ignored, the tracked
+> Web atlas is unchanged, and approved release alignment, WSS/account login,
+> physical-device and human acceptance remain open. Evidence:
+> `docs/generated/player-qa/native-android-sharded-player-atlas-20260912/README.md`.
+
+> 2026-09-12 Android current change: the Android-private entity loader now
 > retains fully metadata-free atlas occupants as explicit unindexed rects
 > instead of rejecting 7,824 otherwise usable frames; it still rejects partial
 > metadata and never fabricates placement. A five-page local proof pack adds
