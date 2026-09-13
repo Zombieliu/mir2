@@ -1,5 +1,60 @@
 # Protocol newcomer journey acceptance
 
+## R35 critical-navigation and funded escape checkpoint
+
+R33 proved that the shared-Zone transform fix remains stable across two
+consecutive public `UseItem` escapes. Warrior q62 moved inside D2042 from
+`(58,199)` to `(146,203)`, then from `(158,191)` to `(155,104)`. Both uses
+returned successful acknowledgements and persisted in following snapshots.
+The player nevertheless died 16 seconds after the second escape because it
+had only 19/224 HP and the recovery loop resumed movement near another group.
+Wizard q54 exposed the adjacent case outside that loop: two zombies trapped
+ordinary navigation at 17/68 HP and killed it before navigation returned an
+error.
+
+The navigator now checks authoritative HP and visible hostile distance before
+each movement intent. During an active q54/q62 expedition it can consume a
+normal Merchant Ruben RandomTeleport, requires a changed authoritative
+position, clears its stale path, and replans from the new location. Expedition
+stock is four scrolls. Cash-poor saved characters include the 400-gold scroll
+reserve in their ordinary Deer/Venison funding target before returning to the
+dungeon.
+
+R35 Warrior live trace `Warrior.2026-09-13T17-19-39-951Z.trace.jsonl` proves
+the new stock target through public shop traffic: one retained scroll plus a
+fresh three-item Ruben purchase produced four authoritative RandomTeleport
+items. The complete quest-agent suite passes 503/503. R35 three-class routes
+remain active; full q54/q62 completion and native UI/animation acceptance are
+still open.
+
+## R32 authoritative emergency-teleport checkpoint
+
+R32 runs the optimized Gateway on `127.0.0.1:17810` from executable SHA-256
+`7CDBA4C8AAAB1C7FD1D83683942167A5259B1CC5EA7A63814C55AAFA3736DCEE` and keeps
+the existing account store. RandomTeleport now samples the requested map-scale
+radius before its exhaustive fallback instead of accepting the first adjacent
+cell. A successful item use that emits `UserLocation` also commits the private
+transform into the shared Zone before the tail snapshot, preventing the old
+Zone position from pulling the player back.
+
+Live Warrior trace `Warrior.2026-09-13T16-51-09-473Z.trace.jsonl` proves the
+complete public-protocol chain on q62. At 119/224 HP and authoritative position
+`D2041 (54,210)`, `criticalPackPressure` selected inventory item 717. The server
+returned successful `UseItem`, `MapInformation` and `UserLocation (38,110)`;
+the next two authoritative world snapshots retained `(38,110)` and reduced the
+scroll reserve from two to one. The runner recorded `emergencyEscapeSuccess`
+and resumed movement from the new position. This closes the previously observed
+one-cell teleport and immediate Zone rollback defects.
+
+The q54/q62 caster pressure trigger now treats three hostiles within three tiles
+plus a proven recent attacker as a surround even if only one is adjacent. The
+long expedition still targets 80 HP/MP drugs when affordable, but a saved q54 or
+q62 caster may depart town at a 64-drug safety floor instead of repeatedly
+hunting contested funding targets for the exact final units. Focused shared-Zone
+teleport and simulation teleport tests pass, and the complete quest-agent suite
+passes 500/500. R32 three-class live routes are still running; complete 1-30 and
+native UI/animation acceptance remain open.
+
 ## R31 public emergency-scroll expedition checkpoint
 
 The q54/q62 runner now buys an opt-in two-scroll `RandomTeleport` reserve from
@@ -16,9 +71,12 @@ after its HP, MP and Amulet purchases. Warrior advanced q62 to 4/16 before this
 run; Wizard remains q54 15/25 and Taoist q54 8/25. The first escape policy was
 too narrow: Wizard could briefly walk out from three adjacent attackers at
 38/68 HP, then was surrounded again during recovery without reaching the
-no-step-only trigger. Low-health retreat now uses the configured scroll when at
-least two recent authoritative attackers are still adjacent, while preserving
-the no-step trigger and bounded combat fallback.
+no-step-only trigger. A later Warrior replay narrowed the safe trigger further:
+at 128/224 HP, two hostiles were adjacent but only one had a still-current hit
+record; the pack caught the ordinary retreat and killed the player with both
+scrolls unused. Low-health retreat now uses the configured scroll when at least
+one recent attacker plus a second authoritative adjacent hostile prove the
+surround, while preserving the no-step trigger and bounded combat fallback.
 
 The first replay exposed a liquidation error before combat: Wizard and Taoist
 attempted to sell their emergency scroll to Material Dealer Reece, which the
