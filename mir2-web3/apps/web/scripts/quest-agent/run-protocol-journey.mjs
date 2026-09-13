@@ -10,9 +10,9 @@ import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { prepareLoadout, combatAction, combatApproachRange, startEmergencyHpRecovery, useClassRecovery, useSupplies } from './protocol-loadout.mjs';
 import {
   restockInVillage,
+  createRandomTeleportEmergencyEscape,
   equipHeldAmulet,
   randomTeleportCount,
-  useRandomTeleport,
   warriorWeaponFundingGold,
 } from './protocol-supplies.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
@@ -122,13 +122,14 @@ try {
   report.bootstrapPassed = true;
   if (process.env.MIR2_JOURNEY_PLAY === '1') {
     const route = JSON.parse(await fs.readFile(new URL(`../../../../docs/generated/quest-agent/${className.toLowerCase()}-1-30-newcomer-v1.json`, import.meta.url), 'utf8'));
+    const emergencyTeleport = createRandomTeleportEmergencyEscape();
     const navigate = createNavigator(client, {
       emergencyEscape: async owner => {
         const hasEmergencyExpedition = (owner.snapshot?.questLog ?? []).some(quest =>
           [54, 62].includes(Number(quest?.questId)) &&
           String(quest?.stage ?? '').toLowerCase() === 'inprogress');
         if (!hasEmergencyExpedition || randomTeleportCount(owner.snapshot) <= 0) return false;
-        return useRandomTeleport(owner);
+        return emergencyTeleport(owner);
       },
       emergencyEscapeHpRatio: 0.65,
       emergencyEscapeDangerDistance: 6,
@@ -720,8 +721,8 @@ try {
             emergencyEscapeHpRatio: [54, 62].includes(id) ? 0.65 : 0,
             emergencyEscape: [54, 62].includes(id)
               ? async owner => {
-                  await useRandomTeleport(owner);
-                  return true;
+                  const result = await emergencyTeleport(owner);
+                  return result?.deferred === true ? result : true;
                 }
               : undefined,
             harvestBeforeClearingAggressors: id === 30,
@@ -759,7 +760,7 @@ try {
                   maxEvasiveMoves: [54, 62].includes(id) ? 8 : 4,
                   biasPosition: snapshot => questRetreatBiasPosition(id, snapshot),
                   emergencyEscape: [54, 62].includes(id)
-                    ? async current => useRandomTeleport(current)
+                    ? async current => emergencyTeleport(current)
                     : undefined,
                   emergencyEscapeHpRatio: [54, 62].includes(id) ? 0.65 : 0,
                   maxEmergencyEscapes: 1,

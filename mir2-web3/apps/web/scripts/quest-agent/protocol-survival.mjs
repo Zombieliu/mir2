@@ -354,6 +354,18 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
       });
       try {
         const result = await emergencyEscape(client, { current: before, adjacent, withinThree });
+        if (result?.deferred === true) {
+          emergencyEscapeFailed = true;
+          recordSurvivalDiagnostic(client, {
+            type: 'recoveryEmergencyEscapeDeferred',
+            hpRatio: healthRatio(client.snapshot),
+            adjacent,
+            withinThree,
+            from: before,
+            retryAfterMs: Number(result.retryAfterMs ?? 0),
+          });
+          continue recovery;
+        }
         const after = snapshotPlayer(client.snapshot);
         if ((result === true || result?.success === true || result?.to != null) && after &&
             (Number(after.x) !== before.x || Number(after.y) !== before.y)) {

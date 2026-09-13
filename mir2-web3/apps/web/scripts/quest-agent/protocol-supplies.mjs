@@ -417,6 +417,41 @@ export async function useRandomTeleport(client, options = {}) {
   };
 }
 
+/**
+ * Share one cooldown across navigation, combat retreat, and recovery loops.
+ * Crystal can relocate a player into another hostile pack, so immediately
+ * spending the next scroll is usually wasteful. A shorter critical cooldown
+ * still permits a genuinely dying player to make another bounded attempt.
+ */
+export function createRandomTeleportEmergencyEscape({
+  cooldownMs = 12_000,
+  criticalCooldownMs = 3_000,
+  criticalHpRatio = 0.25,
+  now = Date.now,
+  teleport = useRandomTeleport,
+} = {}) {
+  let lastUsedAt = Number.NEGATIVE_INFINITY;
+  return async function emergencyEscape(client) {
+    const hp = Number(client?.snapshot?.playerHp ?? 0);
+    const maxHp = Math.max(1, Number(client?.snapshot?.playerMaxHp ?? 0));
+    const hpRatio = hp / maxHp;
+    const requiredCooldown = hpRatio <= criticalHpRatio
+      ? Math.max(0, Number(criticalCooldownMs) || 0)
+      : Math.max(0, Number(cooldownMs) || 0);
+    const elapsedMs = now() - lastUsedAt;
+    if (elapsedMs < requiredCooldown) {
+      return {
+        deferred: true,
+        retryAfterMs: Math.ceil(requiredCooldown - elapsedMs),
+        hpRatio,
+      };
+    }
+    const result = await teleport(client);
+    if (result !== false) lastUsedAt = now();
+    return result;
+  };
+}
+
 /** Count usable public-protocol emergency scrolls in bag and belt. */
 export function randomTeleportCount(snapshot) {
   return randomTeleportStock(snapshot);

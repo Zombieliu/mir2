@@ -1515,6 +1515,15 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
     });
     try {
       const escaped = await settings.emergencyEscape(client, { current, reason, settings });
+      if (escaped?.deferred === true) {
+        recordSearchDiagnostic(client, {
+          type: 'emergencyEscapeDeferred',
+          reason,
+          hpRatio,
+          retryAfterMs: Number(escaped.retryAfterMs ?? 0),
+        });
+        return false;
+      }
       if (escaped === true || escaped?.success === true) {
         const relocated = selectPlayer(client.snapshot);
         recordSearchDiagnostic(client, {

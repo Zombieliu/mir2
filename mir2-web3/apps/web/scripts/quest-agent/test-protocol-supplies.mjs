@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  createRandomTeleportEmergencyEscape,
   equipHeldAmulet,
   randomTeleportCount,
   restockInVillage,
@@ -424,6 +425,32 @@ test('RandomTeleport use fails closed on a rejected ack', async () => {
   state.inventoryItems.push(item(RANDOM_TELEPORT, 1, 'RandomTeleport', 717002));
   const client = new FakeClient(state, { rejectUse: true });
   await assert.rejects(() => useRandomTeleport(client), /UseItem was rejected/);
+});
+
+test('shared emergency escape cooldown conserves scrolls across independent loops', async () => {
+  let timestamp = 10_000;
+  let uses = 0;
+  const escape = createRandomTeleportEmergencyEscape({
+    now: () => timestamp,
+    cooldownMs: 12_000,
+    criticalCooldownMs: 3_000,
+    teleport: async () => ({ to: { x: ++uses, y: uses } }),
+  });
+  const client = { snapshot: { playerHp: 60, playerMaxHp: 100 } };
+
+  assert.deepEqual(await escape(client), { to: { x: 1, y: 1 } });
+  timestamp += 2_000;
+  assert.deepEqual(await escape(client), {
+    deferred: true,
+    retryAfterMs: 10_000,
+    hpRatio: 0.6,
+  });
+  assert.equal(uses, 1);
+
+  client.snapshot.playerHp = 20;
+  timestamp += 1_000;
+  assert.deepEqual(await escape(client), { to: { x: 2, y: 2 } });
+  assert.equal(uses, 2);
 });
 
 test('insufficient funds preserves the 100 gold reserve and sends no command', async () => {

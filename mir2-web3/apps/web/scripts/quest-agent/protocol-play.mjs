@@ -276,37 +276,48 @@ export function createNavigator(client, dependencies = {}) {
         });
         try {
           const result = await emergencyEscape(client, { current: before, nearbyHostiles });
-          const after = selfPlayer(client);
-          const changed = after && (String(client.snapshot.mapFileName) !== mapId ||
-            Number(after.x) !== before.x || Number(after.y) !== before.y);
-          if (result !== false && changed) {
-            emergencyEscapes += 1;
-            failures = 0;
-            rejected.length = 0;
-            remaining = [];
+          if (result?.deferred === true) {
+            emergencyEscapeFailed = true;
             client.record('diagnostic', {
-              type: 'navigationEmergencyEscapeSuccess',
-              hpRatio: Number(client.snapshot.playerHp) /
-                Math.max(1, Number(client.snapshot.playerMaxHp)),
+              type: 'navigationEmergencyEscapeDeferred',
+              hpRatio,
               nearby: nearbyHostiles.length,
               from: before,
-              to: {
-                mapFileName: String(client.snapshot.mapFileName),
-                x: Number(after.x),
-                y: Number(after.y),
-              },
+              retryAfterMs: Number(result.retryAfterMs ?? 0),
             });
-            if (client.snapshot.mapFileName !== mapId) return { reached: false, successfulSteps };
-            continue;
+          } else {
+            const after = selfPlayer(client);
+            const changed = after && (String(client.snapshot.mapFileName) !== mapId ||
+              Number(after.x) !== before.x || Number(after.y) !== before.y);
+            if (result !== false && changed) {
+              emergencyEscapes += 1;
+              failures = 0;
+              rejected.length = 0;
+              remaining = [];
+              client.record('diagnostic', {
+                type: 'navigationEmergencyEscapeSuccess',
+                hpRatio: Number(client.snapshot.playerHp) /
+                  Math.max(1, Number(client.snapshot.playerMaxHp)),
+                nearby: nearbyHostiles.length,
+                from: before,
+                to: {
+                  mapFileName: String(client.snapshot.mapFileName),
+                  x: Number(after.x),
+                  y: Number(after.y),
+                },
+              });
+              if (client.snapshot.mapFileName !== mapId) return { reached: false, successfulSteps };
+              continue;
+            }
+            emergencyEscapeFailed = true;
+            client.record('diagnostic', {
+              type: 'navigationEmergencyEscapeFailure',
+              hpRatio,
+              nearby: nearbyHostiles.length,
+              from: before,
+              message: 'Emergency escape did not change the authoritative player position',
+            });
           }
-          emergencyEscapeFailed = true;
-          client.record('diagnostic', {
-            type: 'navigationEmergencyEscapeFailure',
-            hpRatio,
-            nearby: nearbyHostiles.length,
-            from: before,
-            message: 'Emergency escape did not change the authoritative player position',
-          });
         } catch (error) {
           emergencyEscapeFailed = true;
           client.record('diagnostic', {
