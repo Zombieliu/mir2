@@ -69,6 +69,10 @@ export function questPostRetreatRecoveryRatio(questId, className) {
     : 0.75;
 }
 
+export function questEmergencyEscapeHpRatio(questId) {
+  return [54, 62].includes(Number(questId)) ? 0.35 : 0;
+}
+
 const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62]);
 const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62]);
 
@@ -93,11 +97,11 @@ export function questRetreatProfile(questId, className = '') {
     // normal low-health interrupt below, but let every stocked q54 class keep
     // moving while it remains above that class's retreat threshold.
     continueTravelWhileHealthy: [54, 62].includes(id),
-    // R37 showed that repeated evasion in D2041 spends the random-teleport
-    // reserve and eventually gives back the entire crossing. q62 carries a
-    // large proven potion stock, so clear an attacker that has actually hit
-    // the player before retrying the route to D2042.
-    preferTravelAggressorCombat: id === 62,
+    // R37-R42 showed that repeated evasion spends the random-teleport reserve
+    // without crossing D401/D2041. These expeditions carry large proven
+    // potion stocks, so clear a monster that actually hit the player before
+    // retrying the route. RandomTeleport remains available at critical HP.
+    preferTravelAggressorCombat: [54, 62].includes(id),
     maxTravelThreatEvasionsPerEdge: id === 62 ? 3 : 1,
     // R26 proved that a Taoist can be boxed into D401 by one CaveMaggot plus
     // adjacent quest zombies after the first breakout kill. Healing and the

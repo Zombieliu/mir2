@@ -16,6 +16,7 @@ import {
   journeyResumeDisposition,
   journeyMpRestockTargetForQuest,
   questCombatMpUseThresholdForQuest,
+  questEmergencyEscapeHpRatio,
   questPostRetreatRecoveryRatio,
   minimumJourneyMpStockForQuest,
   questRetreatBiasPosition,
@@ -51,6 +52,9 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questPostRetreatRecoveryRatio(54, 'Taoist'), 0.65);
   assert.equal(questPostRetreatRecoveryRatio(54, 'Warrior'), 0.75);
   assert.equal(questPostRetreatRecoveryRatio(62, 'Warrior'), 0.75);
+  assert.equal(questEmergencyEscapeHpRatio(54), 0.35);
+  assert.equal(questEmergencyEscapeHpRatio(62), 0.35);
+  assert.equal(questEmergencyEscapeHpRatio(49), 0);
 });
 
 test('only a living exact evasive recovery timeout is retryable', () => {
@@ -760,7 +764,7 @@ test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bound
   assert.deepEqual(questRetreatProfile(54, 'Warrior'), {
     allowLowHealthFollowerRecovery: true,
     continueTravelWhileHealthy: true,
-    preferTravelAggressorCombat: false,
+    preferTravelAggressorCombat: true,
     maxTravelThreatEvasionsPerEdge: 1,
     maxRetreatBreakoutKills: 3,
     multiAggressorRetreatRatio: 0.55,
@@ -771,6 +775,7 @@ test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bound
   for (const className of ['Wizard', 'Taoist']) {
     const profile = questRetreatProfile(54, className);
     assert.equal(profile.continueTravelWhileHealthy, true);
+    assert.equal(profile.preferTravelAggressorCombat, true);
     assert.equal(profile.maxRetreatBreakoutKills, className === 'Taoist' ? 3 : 1);
     assert.equal(profile.multiAggressorRetreatRatio, 0.75);
     assert.equal(profile.retreatAtActiveAggressorCount, 1);
