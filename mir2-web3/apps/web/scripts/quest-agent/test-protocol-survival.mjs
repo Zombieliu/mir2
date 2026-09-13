@@ -794,6 +794,18 @@ test('q54 finishes available D401 zombies before preferring the D406 source', ()
   }), false);
   assert.equal(shouldPreferObjectiveMapOverCurrent(54, {
     objectives: [
+      { label: 'Kill Zombie5', current: 0, required: 5 },
+      { label: 'Kill Zombie1', current: 0, required: 5 },
+    ],
+  }, 'Wizard'), true);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(54, {
+    objectives: [
+      { label: 'Kill Zombie3', current: 3, required: 5 },
+      { label: 'Kill Zombie1', current: 0, required: 5 },
+    ],
+  }, 'Taoist'), true);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(54, {
+    objectives: [
       { label: 'Kill Zombie5', current: 5, required: 5 },
       { label: 'Kill Zombie2', current: 5, required: 5 },
       { label: 'Kill Zombie3', current: 5, required: 5 },

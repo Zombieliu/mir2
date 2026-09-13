@@ -134,16 +134,23 @@ export function questRetreatBiasPosition(questId, snapshot) {
   })[mapFileName] ?? null;
 }
 
-export function shouldPreferObjectiveMapOverCurrent(questId, questState = null) {
+export function shouldPreferObjectiveMapOverCurrent(questId, questState = null, className = '') {
   const id = Number(questId);
   // q49's Natural Cave source is intentionally safer than its current-map Oma
   // alternative.
   if (id === 49) return true;
   if (id !== 54) return false;
 
+  // R27 and R45 showed both caster classes repeatedly spending their D406 MP
+  // and escape reserves on dense, reward-poor D401 packs. They can complete
+  // every q54 zombie variant in D406, so treat D401 as a transit layer for
+  // Wizard and Taoist while the durable Warrior may still clear it directly.
+  const normalizedClass = String(className).trim().toLowerCase();
+  if (questState && ['wizard', 'taoist'].includes(normalizedClass)) return true;
+
   // D401 is useful while q54 still needs its Zombie2/3/4/5 population, so an
   // unconditional D406 preference would create a long reward-free crossing.
-  // Once Zombie1 is the sole unfinished objective, however, R46 proved that
+  // Once Zombie1 is the sole unfinished objective for any class, however, R46 proved that
   // returning from D406 to D401 exposes the player to a dense shared pack and
   // can consume the entire escape reserve without progress. Finish that tail
   // in the configured D406 source instead.

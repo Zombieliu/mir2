@@ -721,7 +721,7 @@ try {
             // of 358. Use that lower-density level-14 field rather than
             // spending one life per crowded Oma pull.
             preferredObjectiveMaps: id === 54 ? ['D406'] : (id === 49 ? ['D011'] : []),
-            preferObjectiveMapOverCurrent: shouldPreferObjectiveMapOverCurrent(id, state),
+            preferObjectiveMapOverCurrent: shouldPreferObjectiveMapOverCurrent(id, state, className),
             preferTravelAggressorCombat: retreatProfile.preferTravelAggressorCombat,
             continueTravelWhileHealthy: retreatProfile.continueTravelWhileHealthy,
             maxTravelThreatEvasionsPerEdge: retreatProfile.maxTravelThreatEvasionsPerEdge,
