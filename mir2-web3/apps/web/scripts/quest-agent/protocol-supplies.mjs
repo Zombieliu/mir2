@@ -9,7 +9,12 @@ const SUPPLIES = Object.freeze({
   mp: Object.freeze({ itemIndex: 659, name: '(MP)DrugSmall', target: 6, catalogPrice: 40, stackSize: 20 }),
   amulet: Object.freeze({ itemIndex: 712, name: 'Amulet', target: 6, catalogPrice: 25, stackSize: 100 }),
 });
-const RANDOM_TELEPORT = Object.freeze({ itemIndex: 717, name: 'RandomTeleport', stackSize: 20 });
+const RANDOM_TELEPORT = Object.freeze({
+  itemIndex: 717,
+  name: 'RandomTeleport',
+  catalogPrice: 100,
+  stackSize: 20,
+});
 const LOW_STOCK = 3;
 const GOLD_RESERVE = 100;
 const WAIT_MS = 12_000;
@@ -106,7 +111,9 @@ export async function restockInVillage(client, navigateNear, options = {}) {
 
   const desiredSpendable = preferredWeaponCost + needed.reduce((total, kind) =>
     total + Math.max(0, targets[kind] - stock(client.snapshot)[kind]) *
-      SUPPLIES[kind].catalogPrice, 0);
+      SUPPLIES[kind].catalogPrice, 0) +
+    Math.max(0, emergencyTeleportCount - randomTeleportStock(client.snapshot)) *
+      RANDOM_TELEPORT.catalogPrice;
   const sales = [];
   if (spendableGold < desiredSpendable && liquidationCandidates.length > 0) {
     const groups = [

@@ -194,6 +194,10 @@ export function createNavigator(client, dependencies = {}) {
     ? dependencies.emergencyEscape
     : null;
   const defaultEmergencyEscapeHpRatio = ratioOption(dependencies.emergencyEscapeHpRatio, 0);
+  const defaultEmergencyEscapeCriticalHpRatio = ratioOption(
+    dependencies.emergencyEscapeCriticalHpRatio,
+    0.25,
+  );
   const defaultEmergencyEscapeDangerDistance = nonnegativeIntegerOption(
     dependencies.emergencyEscapeDangerDistance,
     3,
@@ -226,6 +230,10 @@ export function createNavigator(client, dependencies = {}) {
       options.emergencyEscapeHpRatio,
       defaultEmergencyEscapeHpRatio,
     );
+    const emergencyEscapeCriticalHpRatio = ratioOption(
+      options.emergencyEscapeCriticalHpRatio,
+      defaultEmergencyEscapeCriticalHpRatio,
+    );
     const emergencyEscapeDangerDistance = nonnegativeIntegerOption(
       options.emergencyEscapeDangerDistance,
       defaultEmergencyEscapeDangerDistance,
@@ -254,8 +262,10 @@ export function createNavigator(client, dependencies = {}) {
         entity?.disposition !== 'friendly' && distance(self, entity) <= emergencyEscapeDangerDistance);
       const hpRatio = Number(client.snapshot.playerHp) /
         Math.max(1, Number(client.snapshot.playerMaxHp));
+      const shouldEmergencyEscape = nearbyHostiles.length >= 2 ||
+        (nearbyHostiles.length > 0 && hpRatio <= emergencyEscapeCriticalHpRatio);
       if (emergencyEscape && !emergencyEscapeFailed && emergencyEscapes < maxEmergencyEscapes &&
-          hpRatio <= emergencyEscapeHpRatio && nearbyHostiles.length > 0) {
+          hpRatio <= emergencyEscapeHpRatio && shouldEmergencyEscape) {
         const before = { mapFileName: mapId, x: Number(self.x), y: Number(self.y) };
         client.record('diagnostic', {
           type: 'navigationEmergencyEscapeAttempt',

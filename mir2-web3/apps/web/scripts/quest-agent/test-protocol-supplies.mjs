@@ -363,6 +363,31 @@ test('explicit emergency reserve buys exact Merchant Ruben RandomTeleport rows a
   assert.equal(client.sent.at(-1).itemIndex, 71701);
 });
 
+test('emergency reserve liquidates Venison until all requested RandomTeleport scrolls are affordable', async () => {
+  const state = snapshot({ gold: 0, hp: 6 });
+  state.inventoryItems.push(
+    { name: 'Venison', uniqueId: 718001, quantity: 1, container: 'bag1', sellValue: 211 },
+    { name: 'Venison', uniqueId: 718002, quantity: 1, container: 'bag1', sellValue: 201 },
+  );
+  const client = new FakeClient(state, { goods: emergencyGoods() });
+  const navigations = [];
+
+  const result = await restockInVillage(client, async (...args) => navigations.push(args), {
+    emergencyTeleportCount: 4,
+    reserveGold: 0,
+    liquidateObsoleteMaterials: true,
+  });
+
+  assert.equal(result.status, 'restocked');
+  assert.deepEqual(result.sales.map(sale => sale.name), ['Venison', 'Venison']);
+  assert.equal(randomTeleportCount(client.snapshot), 4);
+  assert.equal(result.after.gold, 12);
+  assert.deepEqual(navigations, [
+    [{ x: 292, y: 603 }, 1],
+    [{ x: 288, y: 608 }, 1],
+  ]);
+});
+
 test('emergency reserve is a target and does not repurchase an existing full stock', async () => {
   const state = snapshot({ gold: 500, hp: 6 });
   state.inventoryItems.push(item(RANDOM_TELEPORT, 2, 'RandomTeleport', 717000));

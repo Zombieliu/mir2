@@ -240,6 +240,39 @@ test('critical navigation escapes an adjacent pack before sending another moveme
   assert.ok(client.sent.every(command => command.type === 'walk' || command.type === 'run'));
 });
 
+test('moderate navigation damage preserves an escape scroll against one nearby hostile', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 60;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push({
+    objectId: 9,
+    kind: 'monster',
+    disposition: 'hostile',
+    x: 2,
+    y: 1,
+    hp: 20,
+    dead: false,
+  });
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 3,
+    maxEmergencyEscapesPerNavigation: 2,
+    emergencyEscape: async () => {
+      escapeCalls += 1;
+      return { success: true };
+    },
+  });
+  const result = await navigateNear({ x: 3, y: 1 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 0);
+  assert.equal(client.diagnostics.length, 0);
+});
+
 test('navigator optional attempt cap fails without an unbounded movement retry', async () => {
   const client = navigationClient();
   client.wait = async () => { throw new Error('movement timeout'); };
