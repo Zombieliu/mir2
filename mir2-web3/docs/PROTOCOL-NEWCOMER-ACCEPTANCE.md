@@ -719,3 +719,20 @@ after 3.444 seconds, beyond the harness's 3-second limit. KeepAlive remained
 responsive; this was delayed, not missing, output. The callback now allows six
 seconds and still requires a post-request worldSnapshot. Its eventual HP0 result
 will enter ordinary revive handling. Full routes, pacing and visuals remain open.
+
+Gateway r44 is running on localhost:17810 from release executable
+`mir2-gateway-snapshot-r44-release.exe` (SHA-256
+`03B68E192DFEE9E4F5DB7DE26AB672A9A439A5B7CD079075DC6793C1777B037A`).
+The shared-session potion bridge now commits personal health/mana tick output
+back into Zone vitals before the next shared tick. Focused Gateway coverage
+passes 1/1 for a normal MP potion tick and 2/2 for the related shared item
+teleport module. Taoist live snapshots retained MP 40/102 across later Zone
+ticks, then funded and bought 64 MP drugs, 12 equipped Amulets and four
+RandomTeleport scrolls through ordinary shop, sale, move and equip commands.
+
+All three r44 public-protocol resumptions remain alive. Warrior carried 80 HP
+drugs and four RandomTeleport scrolls into D2041 for q62. Wizard carried 79 HP,
+64 MP and four scrolls through D401 to D406, sent ordinary magic commands and
+advanced q54 from 18/25 to 19/25. Taoist left town for the mine after completing
+its funded expedition stock. These are live route checkpoints; q54/q62, later
+quests, all three full level-30 routes and native visual acceptance remain open.
