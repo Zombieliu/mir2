@@ -169,8 +169,8 @@ presentation clock before settling to standing. `ObjectDashFail` cancels any
 active dash immediately, restores the authoritative standing facing and emits
 a one-phase correction so stale screen motion cannot survive. Self IDs,
 unknown/removed actors, ground drops, missing locations and non-Crystal
-directions fail closed. This does not implement the separate local `UserDash`
-/ `UserDashFail` path or exact mounted dash artwork.
+directions fail closed. Exact mounted dash artwork remains open; the separate
+local `UserDash` / `UserDashFail` path is covered below.
 The separate local `UserDash` / `UserDashFail` packets now also cross the
 authenticated host boundary. Android binds them only to the existing
 `selfPlayer`, preserves Crystal's exact-position/exact-direction no-op, and
@@ -179,6 +179,17 @@ the server transform, cancels the active dash and restores the standing
 facing. This slice establishes authoritative local entity state and exact
 unmounted action frames; Crystal-equivalent input-gate timing and sub-tile
 camera motion remain separate work.
+The remaining Crystal self-transform results `Pushed`, `UserBackStep`,
+`UserDashAttack` and `UserAttackMove` now cross that same post-`IN_GAME`
+boundary. The Gateway JSON projection now includes the previously missing
+typed `UserBackStep` event alongside the three existing projections. Android
+always queues the self push, preserves Crystal's exact-pose
+acknowledgement no-op for the other three packets, selects the retained
+`pushed`, `jump` and `dashAttack` catalogs, and makes attack-move cancel the
+active action at the authoritative standing endpoint. The packets cannot
+target or synthesize another actor. This closes their self entity/action
+reduction only; the local input-delay/`NextAction` gate, sub-tile world-camera
+motion and mounted exact art remain open.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a

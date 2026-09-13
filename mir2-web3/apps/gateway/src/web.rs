@@ -10254,6 +10254,17 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "payload": payload
             })
         }
+        ServerPacket::UserBackStep {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "UserBackStep",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
         ServerPacket::ObjectSitDown { movement, sitting } => {
             let mut payload = movement_json(
                 movement.object_id,
@@ -19630,6 +19641,26 @@ mod tests {
         assert_eq!(
             super::server_packet_to_event(&ordinary),
             fixture["compatibilityCases"]["ordinaryAttack"]["event"]
+        );
+    }
+
+    #[test]
+    fn user_back_step_packet_projects_exact_gateway_event() {
+        let packet = ServerPacket::UserBackStep {
+            location: Point { x: 299, y: 630 },
+            direction: MirDirection::Left,
+        };
+
+        assert_eq!(
+            super::server_packet_to_event(&packet),
+            json!({
+                "type": "packet",
+                "packet": "UserBackStep",
+                "payload": {
+                    "location": {"x": 299, "y": 630},
+                    "direction": "Left"
+                }
+            })
         );
     }
 

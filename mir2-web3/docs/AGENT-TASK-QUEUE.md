@@ -1,5 +1,24 @@
 # Agent Task Queue
 
+> 2026-09-14 Android current change: the remaining Crystal self-transform
+> result packets `Pushed`, `UserBackStep`, `UserDashAttack` and
+> `UserAttackMove` now cross the authenticated post-`IN_GAME` host boundary
+> into the retained self entity. The bounded shared Gateway projection now
+> emits the previously missing typed `UserBackStep` JSON event, with an exact
+> 1/1 focused Gateway regression. Tests lock push-always-queues, the other three
+> exact-pose no-ops, authoritative endpoint/facing, `pushed` / `jump` /
+> `dashAttack` selection, attack-move standing cancellation, malformed-input
+> rejection and remote-actor isolation. Android 186/186 and UI Preview 194/194,
+> Gradle 25/25 per variant, API31 target/package, streamed install, host-GPU
+> active/settled logs and a 2340x1080 visible specimen pass. APK bytes
+> `444535592`, SHA-256
+> `2f6ed1d128c04c274133c8bb367709e00def24af4a56846da8ba26e5592bbb99`.
+> Evidence:
+> `docs/generated/player-qa/native-android-local-movement-skills-20260914/README.md`.
+> Input-delay/`NextAction`, sub-tile self/camera motion, mounted exact art,
+> approved-WSS real login, online StartGame/map transitions, public asset
+> alignment and physical-device/human acceptance remain open.
+
 > 2026-09-14 Android current change: local `UserDash` / `UserDashFail` now
 > cross the authenticated post-`IN_GAME` boundary and mutate only the retained
 > `selfPlayer`. Crystal's same-transform acknowledgement stays a no-op;

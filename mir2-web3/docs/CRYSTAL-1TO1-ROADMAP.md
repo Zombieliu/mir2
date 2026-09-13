@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-14 Android current change: `Pushed`, `UserBackStep`,
+> `UserDashAttack` and `UserAttackMove` now complete their bounded native
+> self-entity/action reduction. The implementation follows Crystal commit
+> `0e315fe327192afe52c3d7357ddd1f5b7e26c5b8`: push always queues; the other
+> three exact-pose echoes are acknowledgements; accepted results apply the
+> authoritative transform and exact available action catalog, with
+> attack-move settling to standing. The Gateway's previously missing typed
+> `UserBackStep` JSON projection is also locked by an exact 1/1 regression. Android
+> 186/186, UI Preview 194/194, Java
+> 25/25 in both variants, API31 target/package and a focused 2340x1080
+> active/settled emulator run pass. Evidence:
+> `docs/generated/player-qa/native-android-local-movement-skills-20260914/README.md`.
+> This does not close the separate input gate, sub-tile camera motion, mounted
+> exact art, approved-WSS login, online render-ready map change, public asset
+> alignment, physical-device behavior or human acceptance.
+
 > 2026-09-14 Android current change: local `UserDash` / `UserDashFail` now
 > drive the authoritative retained self entity after `IN_GAME`. The no-op echo,
 > endpoint/facing, `DashL` / `DashR` alternation, exact three-frame Running

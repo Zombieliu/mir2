@@ -123,6 +123,50 @@ fn start_world_render_motion_specimen(
     } else {
         warn!("offline UserDash specimen was not accepted by the native renderer");
     }
+    for (packet, marker) in [
+        (
+            serde_json::json!({
+                "type":"packet", "packet":"Pushed", "payload":{
+                    "location":{"x":302,"y":634}, "direction":"Right"
+                }
+            })
+            .to_string(),
+            "ANDROID_LOCAL_PUSHED_PRESENTATION_APPLIED",
+        ),
+        (
+            serde_json::json!({
+                "type":"packet", "packet":"UserBackStep", "payload":{
+                    "location":{"x":300,"y":634}, "direction":"Left"
+                }
+            })
+            .to_string(),
+            "ANDROID_LOCAL_BACKSTEP_PRESENTATION_APPLIED",
+        ),
+        (
+            serde_json::json!({
+                "type":"packet", "packet":"UserAttackMove", "payload":{
+                    "location":{"x":301,"y":634}, "direction":"Right"
+                }
+            })
+            .to_string(),
+            "ANDROID_LOCAL_ATTACK_MOVE_PRESENTATION_APPLIED",
+        ),
+        (
+            serde_json::json!({
+                "type":"packet", "packet":"UserDashAttack", "payload":{
+                    "location":{"x":302,"y":634}, "direction":"Right"
+                }
+            })
+            .to_string(),
+            "ANDROID_LOCAL_DASH_ATTACK_PRESENTATION_APPLIED",
+        ),
+    ] {
+        if apply_offline_entity_packet(&packet) {
+            info!("{marker}");
+        } else {
+            warn!(%marker, "offline local movement-skill specimen was rejected");
+        }
+    }
     let archer = serde_json::json!({
         "type":"packet", "packet":"ObjectRangeAttack", "payload":{
             "objectId":9004, "x":301, "y":631, "direction":"Right"
@@ -320,8 +364,8 @@ fn report_world_render_motion_pose(
     mut saw_pushed_settled: Local<bool>,
     mut saw_dash_active: Local<bool>,
     mut saw_dash_settled: Local<bool>,
-    mut saw_user_dash_active: Local<bool>,
-    mut saw_user_dash_settled: Local<bool>,
+    mut saw_local_skill_active: Local<bool>,
+    mut saw_local_skill_settled: Local<bool>,
     mut reported_diagnostics: Local<bool>,
 ) {
     if !*reported_diagnostics && time.elapsed().as_millis() >= 4_500 {
@@ -377,15 +421,14 @@ fn report_world_render_motion_pose(
             *saw_dash_settled = true;
         }
     }
-    let user_dash_active = crate::live_entity::active_action_name(9001)
-        .as_deref()
-        .is_some_and(|action| matches!(action, "dashL" | "dashR"));
-    if user_dash_active && !*saw_user_dash_active {
-        info!("ANDROID_USER_DASH_ACTION_ACTIVE");
-        *saw_user_dash_active = true;
-    } else if *saw_user_dash_active && !user_dash_active && !*saw_user_dash_settled {
-        info!("ANDROID_USER_DASH_ACTION_SETTLED");
-        *saw_user_dash_settled = true;
+    let local_skill_active =
+        crate::live_entity::active_action_name(9001).as_deref() == Some("dashAttack");
+    if local_skill_active && !*saw_local_skill_active {
+        info!("ANDROID_LOCAL_MOVEMENT_SKILL_ACTION_ACTIVE");
+        *saw_local_skill_active = true;
+    } else if *saw_local_skill_active && !local_skill_active && !*saw_local_skill_settled {
+        info!("ANDROID_LOCAL_MOVEMENT_SKILL_ACTION_SETTLED");
+        *saw_local_skill_settled = true;
     }
 }
 

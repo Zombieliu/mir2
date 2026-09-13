@@ -1,5 +1,23 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-14 Android current change: all four remaining local movement-skill
+> result packets now enter the exact retained self actor: `Pushed`,
+> `UserBackStep`, `UserDashAttack` and `UserAttackMove`. Deterministic tests
+> cover Crystal's queue/no-op distinction, server endpoint/facing, retained
+> `pushed` / `jump` / `dashAttack` action frames, attack-move standing settle,
+> malformed payload rejection and remote-actor isolation. A focused Gateway
+> 1/1 regression locks the newly completed typed `UserBackStep` JSON projection.
+> Android default
+> 186/186, UI Preview 194/194, Gradle Debug/UI Preview 25/25 each, API31 arm64
+> target/package, streamed install and a host-GPU 2340x1080 render pass. The
+> 444,535,592-byte APK SHA-256 is
+> `2f6ed1d128c04c274133c8bb367709e00def24af4a56846da8ba26e5592bbb99`.
+> Evidence:
+> `docs/generated/player-qa/native-android-local-movement-skills-20260914/README.md`.
+> Input-gate timing, self/world-camera interpolation, mounted exact art,
+> approved-WSS real login, online StartGame/map transition, public asset
+> alignment, physical-device and final human acceptance remain open.
+
 > 2026-09-14 Android current change: local `UserDash` / `UserDashFail` now
 > reach the retained self entity and exact unmounted action catalog. Tests lock
 > Crystal's same-transform no-op, server endpoint/direction, `DashL` / `DashR`

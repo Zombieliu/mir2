@@ -380,18 +380,19 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
         cache.models = Some(models);
         return LiveEntityPacketOutcome::Ignored;
     }
-    // Crystal treats an exact UserDash echo as acknowledgement-only: it clears
-    // its input gate but does not queue another dash pose. Android owns no
-    // speculative NextAction here, so retaining the current authoritative pose
-    // is the corresponding no-op.
-    if packet == "UserDash"
-        && self_object_id(&models)
-            .and_then(|object_id| model_pose(&models, object_id))
-            .zip(location(body))
-            .zip(mir_direction(body))
-            .is_some_and(|(((position, previous_direction), target), direction)| {
-                position == target && previous_direction.as_deref() == Some(direction)
-            })
+    // Crystal treats exact local movement-skill echoes as
+    // acknowledgement-only. Android owns no speculative NextAction here, so
+    // retaining the current authoritative pose is the corresponding no-op.
+    if matches!(
+        packet,
+        "UserDash" | "UserBackStep" | "UserDashAttack" | "UserAttackMove"
+    ) && self_object_id(&models)
+        .and_then(|object_id| model_pose(&models, object_id))
+        .zip(location(body))
+        .zip(mir_direction(body))
+        .is_some_and(|(((position, previous_direction), target), direction)| {
+            position == target && previous_direction.as_deref() == Some(direction)
+        })
     {
         cache.models = Some(models);
         return LiveEntityPacketOutcome::Ignored;
@@ -420,6 +421,19 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 })
         }
         "ObjectPushed" => object_id(body)
+            .zip(location(body))
+            .zip(mir_direction(body))
+            .map(
+                |((object_id, position), direction)| EntityMutation::Action {
+                    object_id,
+                    position,
+                    direction: Some(direction.to_owned()),
+                    action: "pushed".to_owned(),
+                    started_ms: now_ms,
+                    life_state: None,
+                },
+            ),
+        "Pushed" => self_object_id(&models)
             .zip(location(body))
             .zip(mir_direction(body))
             .map(
@@ -473,6 +487,45 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                     position,
                     direction: Some(direction.to_owned()),
                     action: "dashFail".to_owned(),
+                    started_ms: now_ms,
+                    life_state: None,
+                },
+            ),
+        "UserBackStep" => self_object_id(&models)
+            .zip(location(body))
+            .zip(mir_direction(body))
+            .map(
+                |((object_id, position), direction)| EntityMutation::Action {
+                    object_id,
+                    position,
+                    direction: Some(direction.to_owned()),
+                    action: "jump".to_owned(),
+                    started_ms: now_ms,
+                    life_state: None,
+                },
+            ),
+        "UserDashAttack" => self_object_id(&models)
+            .zip(location(body))
+            .zip(mir_direction(body))
+            .map(
+                |((object_id, position), direction)| EntityMutation::Action {
+                    object_id,
+                    position,
+                    direction: Some(direction.to_owned()),
+                    action: "dashAttack".to_owned(),
+                    started_ms: now_ms,
+                    life_state: None,
+                },
+            ),
+        "UserAttackMove" => self_object_id(&models)
+            .zip(location(body))
+            .zip(mir_direction(body))
+            .map(
+                |((object_id, position), direction)| EntityMutation::Action {
+                    object_id,
+                    position,
+                    direction: Some(direction.to_owned()),
+                    action: "standing".to_owned(),
                     started_ms: now_ms,
                     life_state: None,
                 },
@@ -3905,6 +3958,137 @@ mod tests {
         for packet in [
             r#"{"type":"packet","packet":"UserDash","payload":{"direction":"Right"}}"#,
             r#"{"type":"packet","packet":"UserDashFail","payload":{"location":{"x":302,"y":630},"direction":"North"}}"#,
+        ] {
+            assert_eq!(
+                apply_packet_at(packet, 1_300),
+                LiveEntityPacketOutcome::Rejected
+            );
+        }
+        clear();
+    }
+
+    #[test]
+    fn local_movement_skill_packets_drive_only_the_self_actor() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"direction":"Down"},{"objectId":"43","kind":"player","name":"Remote","x":301,"y":630,"direction":"Right"}]}"#,
+            34,
+        ));
+        assert!(install_render(
+            r#"{"_nativeWorldRequest":34,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"standing-down"}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"remote-standing"}]}]}"#,
+            r#"{"_nativeWorldRequest":34,"entities":[{"objectId":"42","prototype":{},"directionLayers":{"Down":[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"standing-down"}],"Left":[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"standing-left"}],"Right":[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"standing-right"}]},"actionLayers":{"pushed:Down":{"intervalMs":100,"frames":[[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"push-0"}],[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"push-1"}]]},"jump:Left":{"intervalMs":100,"frames":[[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"jump-0"}],[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"jump-1"}]]},"dashAttack:Right":{"intervalMs":100,"frames":[[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"dash-attack-0"}],[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"dash-attack-1"}]]}}}]}"#,
+        ));
+
+        let LiveEntityPacketOutcome::Applied {
+            models,
+            render: Some(render),
+            presentation_event,
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"Pushed","payload":{"location":{"x":300,"y":630},"direction":"Down"}}"#,
+            1_000,
+        )
+        else {
+            panic!("Pushed should queue even at the current transform");
+        };
+        assert!(presentation_event.is_none());
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][0]["_nativeAnimationAction"], "pushed");
+        let render: Value = serde_json::from_str(&render).unwrap();
+        assert_eq!(render["entities"][0]["layers"][0]["atlasRectKey"], "push-0");
+
+        assert_eq!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"UserBackStep","payload":{"location":{"x":300,"y":630},"direction":"Down"}}"#,
+                1_025,
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+        let LiveEntityPacketOutcome::Applied {
+            models,
+            render: Some(render),
+            presentation_event,
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"UserBackStep","payload":{"location":{"x":299,"y":630},"direction":"Left"}}"#,
+            1_050,
+        )
+        else {
+            panic!("UserBackStep should apply to self");
+        };
+        assert!(presentation_event.is_none());
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][0]["x"], 299);
+        assert_eq!(models["entities"][0]["direction"], "Left");
+        assert_eq!(models["entities"][0]["_nativeAnimationAction"], "jump");
+        let render: Value = serde_json::from_str(&render).unwrap();
+        assert_eq!(render["entities"][0]["layers"][0]["atlasRectKey"], "jump-0");
+
+        assert_eq!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"UserDashAttack","payload":{"location":{"x":299,"y":630},"direction":"Left"}}"#,
+                1_075,
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+        let LiveEntityPacketOutcome::Applied {
+            models,
+            render: Some(render),
+            presentation_event,
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"UserDashAttack","payload":{"location":{"x":301,"y":630},"direction":"Right"}}"#,
+            1_100,
+        )
+        else {
+            panic!("UserDashAttack should apply to self");
+        };
+        assert!(presentation_event.is_none());
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][0]["x"], 301);
+        assert_eq!(
+            models["entities"][0]["_nativeAnimationAction"],
+            "dashAttack"
+        );
+        let render: Value = serde_json::from_str(&render).unwrap();
+        assert_eq!(
+            render["entities"][0]["layers"][0]["atlasRectKey"],
+            "dash-attack-0"
+        );
+
+        assert_eq!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"UserAttackMove","payload":{"location":{"x":301,"y":630},"direction":"Right"}}"#,
+                1_125,
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+        let LiveEntityPacketOutcome::Applied {
+            models,
+            render: Some(render),
+            presentation_event,
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"UserAttackMove","payload":{"location":{"x":302,"y":630},"direction":"Right"}}"#,
+            1_150,
+        )
+        else {
+            panic!("UserAttackMove should snap self to standing");
+        };
+        assert!(presentation_event.is_none());
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][0]["x"], 302);
+        assert_eq!(models["entities"][0]["_nativeAnimationAction"], "standing");
+        assert_eq!(models["entities"][1]["x"], 301);
+        let render: Value = serde_json::from_str(&render).unwrap();
+        assert_eq!(
+            render["entities"][0]["layers"][0]["atlasRectKey"],
+            "standing-right"
+        );
+        assert!(poll_action_frame_at(1_250).is_none());
+
+        for packet in [
+            r#"{"type":"packet","packet":"Pushed","payload":{"direction":"Right"}}"#,
+            r#"{"type":"packet","packet":"UserBackStep","payload":{"location":{"x":302,"y":630},"direction":"North"}}"#,
+            r#"{"type":"packet","packet":"UserDashAttack","payload":{"location":{"x":302,"y":630}}}"#,
+            r#"{"type":"packet","packet":"UserAttackMove","payload":{"location":{"x":302,"y":630},"direction":"North"}}"#,
         ] {
             assert_eq!(
                 apply_packet_at(packet, 1_300),
