@@ -129,6 +129,29 @@ test('authoritative partial retreat progress continues the bounded ranged fight'
     entry.type === 'wizardKiteFallback' && entry.reason === 'partialRetreatProgress'));
 });
 
+test('target leaving AOI after a successful retreat refreshes the encounter', async () => {
+  const owner = player();
+  const target = monster(20, 7, 5);
+  const client = clientFixture([owner, target]);
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let acted = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { acted += 1; return { kind: 'magic' }; },
+    async destination => {
+      Object.assign(owner, destination);
+      client.snapshot.entities = [owner];
+      return { reached: true, successfulSteps: 1 };
+    },
+    { loadCollisionMap: async () => openMap(), maxRetreatSteps: 1 },
+  );
+
+  assert.deepEqual(await wrapped(client, target), { kind: 'retreated', targetId: 20 });
+  assert.equal(acted, 0);
+  assert.ok(diagnostics.some(entry =>
+    entry.type === 'wizardKiteFallback' && entry.reason === 'targetLeftSnapshotAfterRetreat'));
+});
+
 test('authoritative displacement wins when the navigator reports stale extra steps', async () => {
   const owner = player();
   const target = monster(20, 7, 5);

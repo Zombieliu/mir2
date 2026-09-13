@@ -91,7 +91,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       }
       const blockedTarget = entityById(client.snapshot, targetId);
       if (!blockedTarget) {
-        throw new Error(`target ${targetId} left the authoritative snapshot during Wizard retreat`);
+        return targetLeftAfterRetreat(client, targetId);
       }
       if (boundedProgress) {
         navigation = { reached: false, successfulSteps: null };
@@ -120,7 +120,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         recordFallback(client, targetId, 'retreatNavigationStalled');
         const stalledTarget = entityById(client.snapshot, targetId);
         if (!stalledTarget) {
-          throw new Error(`target ${targetId} left the authoritative snapshot during Wizard retreat`);
+          return targetLeftAfterRetreat(client, targetId);
         }
         return baseAction(client, stalledTarget);
       }
@@ -137,12 +137,20 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
     encounterRetreatedCells += moved;
 
     const refreshed = entityById(client.snapshot, targetId);
-    if (!refreshed) throw new Error(`target ${targetId} left the authoritative snapshot during Wizard retreat`);
+    if (!refreshed) return targetLeftAfterRetreat(client, targetId);
     if (refreshed.dead === true || Number(refreshed.hp) <= 0) {
       return { kind: 'retreated', targetId };
     }
     return baseAction(client, refreshed);
   };
+}
+
+function targetLeftAfterRetreat(client, targetId) {
+  // A successful retreat can move the selected monster outside the client's
+  // authoritative AOI. The encounter loop must refresh and choose a visible
+  // target instead of treating that successful separation as a fatal error.
+  recordFallback(client, targetId, 'targetLeftSnapshotAfterRetreat');
+  return { kind: 'retreated', targetId };
 }
 
 function recordFallback(client, targetId, reason, details = {}) {
