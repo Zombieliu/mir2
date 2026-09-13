@@ -9,8 +9,14 @@ Windows `native-ui` still enables this shell plus its existing gameplay/audio
 features. No fork of the login/select layout was made. Java's visible login
 form and the Bevy debug-text screen were removed. The only Java editor is a
 transparent 1-pixel OS IME input connection; visible fields and actions belong
-to the shared Crystal shell. The 1024x768 stage fits uniformly with letterboxing;
-while typing it pans upward to keep the login panel readable above the IME.
+to the shared Crystal shell. The interactive 1024x768 stage still fits
+uniformly, while Android mirrors narrow non-interactive edge strips from the
+same `ChrSel` background into any remaining gutters. It also opts the native
+window into short-edge display-cutout drawing, while interactive controls keep
+using the reported safe insets. This fills wide phones without stretching the
+shared UI or changing its hit-test transform. In game, the decoration is hidden
+because the native world renderer already owns the full viewport. While typing,
+the shared stage pans upward to keep the login panel readable above the IME.
 
 Package with `MIR2_ANDROID_UI_ASSET_ROOT` pointing to a local approved asset
 root containing `original-ui/{ChrSel,Prguse,Prguse2,Title,Items,Help,MMap,StateItem}/*.png`. Gradle stages

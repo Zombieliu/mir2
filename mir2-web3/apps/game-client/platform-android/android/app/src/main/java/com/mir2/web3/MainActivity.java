@@ -306,6 +306,13 @@ public final class MainActivity extends GameActivity {
         if (focused) hideSystemUi();
     }
     private void hideSystemUi() {
+        WindowManager.LayoutParams windowAttributes = getWindow().getAttributes();
+        if (windowAttributes.layoutInDisplayCutoutMode
+                != WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES) {
+            windowAttributes.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(windowAttributes);
+        }
         getWindow().setDecorFitsSystemWindows(false);
         WindowInsetsController controller = getWindow().getInsetsController();
         if (controller != null) {

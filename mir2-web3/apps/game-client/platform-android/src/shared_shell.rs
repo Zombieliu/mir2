@@ -1,5 +1,6 @@
 //! Android adapter for the SAME Crystal shell used by the Windows host.
 use bevy::prelude::*;
+use bevy::ui::FocusPolicy;
 use mir2_client_bevy::{
     crystal_ui::{login::CrystalLoginAction, CrystalStageTransform},
     native_shell::{
@@ -288,6 +289,143 @@ fn remember_editor_touch(
 }
 
 pub struct AndroidSharedShellPlugin;
+
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
+enum AndroidShellBleedEdge {
+    Left,
+    Right,
+    Top,
+    Bottom,
+}
+
+#[derive(Component)]
+struct AndroidShellBleed(AndroidShellBleedEdge);
+
+const SHELL_STAGE_WIDTH: f32 = 1024.0;
+const SHELL_STAGE_HEIGHT: f32 = 768.0;
+const SHELL_SIDE_BLEED_SOURCE_WIDTH: f32 = 160.0;
+const SHELL_VERTICAL_BLEED_SOURCE_HEIGHT: f32 = 96.0;
+
+fn spawn_android_shell_bleed(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let background = asset_server.load("original-ui/ChrSel/0.png");
+    for edge in [
+        AndroidShellBleedEdge::Left,
+        AndroidShellBleedEdge::Right,
+        AndroidShellBleedEdge::Top,
+        AndroidShellBleedEdge::Bottom,
+    ] {
+        let (rect, flip_x, flip_y) = match edge {
+            AndroidShellBleedEdge::Left => (
+                Rect::new(0.0, 0.0, SHELL_SIDE_BLEED_SOURCE_WIDTH, SHELL_STAGE_HEIGHT),
+                true,
+                false,
+            ),
+            AndroidShellBleedEdge::Right => (
+                Rect::new(
+                    SHELL_STAGE_WIDTH - SHELL_SIDE_BLEED_SOURCE_WIDTH,
+                    0.0,
+                    SHELL_STAGE_WIDTH,
+                    SHELL_STAGE_HEIGHT,
+                ),
+                true,
+                false,
+            ),
+            AndroidShellBleedEdge::Top => (
+                Rect::new(
+                    0.0,
+                    0.0,
+                    SHELL_STAGE_WIDTH,
+                    SHELL_VERTICAL_BLEED_SOURCE_HEIGHT,
+                ),
+                false,
+                true,
+            ),
+            AndroidShellBleedEdge::Bottom => (
+                Rect::new(
+                    0.0,
+                    SHELL_STAGE_HEIGHT - SHELL_VERTICAL_BLEED_SOURCE_HEIGHT,
+                    SHELL_STAGE_WIDTH,
+                    SHELL_STAGE_HEIGHT,
+                ),
+                false,
+                true,
+            ),
+        };
+        commands.spawn((
+            AndroidShellBleed(edge),
+            Node {
+                position_type: PositionType::Absolute,
+                display: Display::None,
+                ..default()
+            },
+            ImageNode {
+                image: background.clone(),
+                rect: Some(rect),
+                flip_x,
+                flip_y,
+                image_mode: NodeImageMode::Stretch,
+                ..default()
+            },
+            FocusPolicy::Pass,
+            GlobalZIndex(999),
+        ));
+    }
+}
+
+fn shell_bleed_node(
+    edge: AndroidShellBleedEdge,
+    fit: CrystalStageTransform,
+    shell_visible: bool,
+) -> Node {
+    let logical_width = fit.viewport_width / fit.scale;
+    let logical_height = fit.viewport_height / fit.scale;
+    let side_gutter = fit.offset_x / fit.scale;
+    let vertical_gutter = fit.offset_y / fit.scale;
+    let (left, top, width, height) = match edge {
+        AndroidShellBleedEdge::Left => (0.0, 0.0, side_gutter, logical_height),
+        AndroidShellBleedEdge::Right => (
+            side_gutter + SHELL_STAGE_WIDTH,
+            0.0,
+            side_gutter,
+            logical_height,
+        ),
+        AndroidShellBleedEdge::Top => (0.0, 0.0, logical_width, vertical_gutter),
+        AndroidShellBleedEdge::Bottom => (
+            0.0,
+            vertical_gutter + SHELL_STAGE_HEIGHT,
+            logical_width,
+            vertical_gutter,
+        ),
+    };
+    Node {
+        position_type: PositionType::Absolute,
+        left: px(left),
+        top: px(top),
+        width: px(width),
+        height: px(height),
+        display: if shell_visible && width > 0.01 && height > 0.01 {
+            Display::Flex
+        } else {
+            Display::None
+        },
+        ..default()
+    }
+}
+
+fn fit_shell_bleed(
+    windows: Query<&Window>,
+    model: Res<NativeShellModel>,
+    mut shell_bleed: Query<(&AndroidShellBleed, &mut Node)>,
+) {
+    let Ok(window) = windows.single() else {
+        return;
+    };
+    let fit = CrystalStageTransform::fit(window.width(), window.height());
+    for (edge, mut node) in &mut shell_bleed {
+        *node = shell_bleed_node(edge.0, fit, model.screen != Screen::InGame);
+    }
+}
+
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct AndroidStageFit;
 impl Plugin for AndroidSharedShellPlugin {
@@ -302,6 +440,7 @@ impl Plugin for AndroidSharedShellPlugin {
             .init_resource::<HostState>()
             .init_resource::<EditorTouch>()
             .add_plugins(Mir2NativeShellUiPlugin)
+            .add_systems(Startup, spawn_android_shell_bleed)
             .add_plugins((
                 mir2_client_bevy::crystal_ui::minimap::Mir2CrystalMiniMapPlugin,
                 mir2_client_bevy::crystal_ui::hud::Mir2CrystalHudPlugin,
@@ -329,6 +468,7 @@ impl Plugin for AndroidSharedShellPlugin {
                 (
                     observe_world_receipt,
                     observe_render_receipt,
+                    fit_shell_bleed,
                     fit_stage.in_set(AndroidStageFit),
                     fit_mail_composer,
                     forward_intents,
@@ -2340,6 +2480,66 @@ mod tests {
         )
         .is_none());
         assert!(belt_edge_origin(fit, 411.0, 100.0, 0.0, false).is_none());
+    }
+
+    fn node_rect(node: &Node) -> (f32, f32, f32, f32) {
+        let (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) =
+            (node.left, node.top, node.width, node.height)
+        else {
+            panic!("shell bleed geometry must stay in logical pixels")
+        };
+        (left, top, width, height)
+    }
+
+    #[test]
+    fn wide_phone_shell_bleed_fills_only_noninteractive_side_gutters() {
+        let fit = CrystalStageTransform::fit(2340.0, 1080.0);
+        let left = shell_bleed_node(AndroidShellBleedEdge::Left, fit, true);
+        let right = shell_bleed_node(AndroidShellBleedEdge::Right, fit, true);
+        let top = shell_bleed_node(AndroidShellBleedEdge::Top, fit, true);
+        let bottom = shell_bleed_node(AndroidShellBleedEdge::Bottom, fit, true);
+
+        assert_eq!(node_rect(&left), (0.0, 0.0, 320.0, 768.0));
+        assert_eq!(node_rect(&right), (1344.0, 0.0, 320.0, 768.0));
+        assert_eq!(left.display, Display::Flex);
+        assert_eq!(right.display, Display::Flex);
+        assert_eq!(top.display, Display::None);
+        assert_eq!(bottom.display, Display::None);
+
+        for edge in [
+            AndroidShellBleedEdge::Left,
+            AndroidShellBleedEdge::Right,
+            AndroidShellBleedEdge::Top,
+            AndroidShellBleedEdge::Bottom,
+        ] {
+            assert_eq!(
+                shell_bleed_node(edge, fit, false).display,
+                Display::None,
+                "the world renderer owns the full viewport after StartGame"
+            );
+        }
+    }
+
+    #[test]
+    fn tall_shell_bleed_fills_vertical_gutters_without_resizing_the_stage() {
+        let fit = CrystalStageTransform::fit(768.0, 1024.0);
+        let top = shell_bleed_node(AndroidShellBleedEdge::Top, fit, true);
+        let bottom = shell_bleed_node(AndroidShellBleedEdge::Bottom, fit, true);
+        let (_, top_y, top_width, top_height) = node_rect(&top);
+        let (_, bottom_y, bottom_width, bottom_height) = node_rect(&bottom);
+
+        assert!((top_y - 0.0).abs() < 0.001);
+        assert!((top_width - 1024.0).abs() < 0.001);
+        assert!((top_height - 298.666_66).abs() < 0.001);
+        assert!((bottom_y - 1066.666_6).abs() < 0.001);
+        assert!((bottom_width - 1024.0).abs() < 0.001);
+        assert!((bottom_height - 298.666_66).abs() < 0.001);
+        assert_eq!(top.display, Display::Flex);
+        assert_eq!(bottom.display, Display::Flex);
+        assert_eq!(
+            shell_bleed_node(AndroidShellBleedEdge::Left, fit, true).display,
+            Display::None
+        );
     }
 
     #[test]

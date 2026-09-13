@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-13 Android current change: the shared account/character shell now
+> composes across the full 2340x1080 API31 viewport. The Android-only background
+> bleed mirrors narrow ChrSel edge strips outside the unchanged 1024x768
+> interactive stage, passes picking through, draws under short-edge display
+> cutouts and hides when the already-full-width native world becomes render
+> ready. Android 184/184, Java 25/25 in both variants, full package, streamed
+> install and Login/Roster/Create/Delete/Starting/World screenshots pass.
+> Evidence:
+> `docs/generated/player-qa/native-android-wide-shell-20260913/README.md`.
+> Approved-WSS real login, online render-ready transition, public asset-release
+> alignment and physical-device acceptance remain open.
+
 > 2026-09-12 Android current change: the native player now has a stable visible
 > API31 emulator baseline on Bevy/wgpu GLES. The renderer capability-gates
 > downlevel surface and texture view formats, tears down Android surfaces at

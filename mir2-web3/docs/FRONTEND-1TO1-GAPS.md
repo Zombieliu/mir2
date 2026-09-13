@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: wide-phone black gutters are removed from
+> the shared Login, Character Select, New/Delete Character and StartingGame
+> surfaces without stretching the 1024x768 interactive stage. Android mirrors
+> non-pickable edge strips from the same ChrSel background below the shared UI,
+> requests short-edge cutout drawing, and keeps the real safe insets for
+> controls. The decoration hides at `InGame`, where the native world renderer
+> already fills 2340x1080. Android Rust passes 184/184, Gradle Debug/UI Preview
+> pass 25/25 each, full local-asset packaging, streamed install and six API31
+> screenshots pass. The 444,422,784-byte UI Preview APK SHA-256 is
+> `d0dd80dcbaa2be964ddc42575ec21e657d353aff6bd899ef5849fb71a4c09602`.
+> Evidence:
+> `docs/generated/player-qa/native-android-wide-shell-20260913/README.md`.
+> This closes the emulator wide-shell composition gap, not approved-WSS real
+> login, online StartGame, public asset alignment or physical-device acceptance.
+
 > 2026-09-13 Android current change: the shared Crystal New Character and
 > Delete Character surfaces now reach Android's dedicated authenticated roster
 > state machine. Create/delete are serialized against StartGame, use the exact
