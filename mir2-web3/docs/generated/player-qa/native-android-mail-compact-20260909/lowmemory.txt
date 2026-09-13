@@ -1,0 +1,13 @@
+09-09 22:14:50.657   184   184 I lowmemorykiller: Kill 'com.google.android.apps.nexuslauncher' (8627), uid 10134, oom_score_adj 100 to free 62060kB rss, 0kB swap; reason: low watermark is breached and thrashing (1833%)
+09-09 22:14:50.875   518  3582 I ActivityManager: Process com.google.android.apps.nexuslauncher (pid 8627) has died: vis BFGS
+09-09 22:14:50.995   184   184 I lowmemorykiller: Kill 'com.google.android.googlequicksearchbox:search' (8741), uid 10103, oom_score_adj 100 to free 49916kB rss, 0kB swap; reason: low watermark is breached and thrashing (330%)
+09-09 22:14:51.040   184   184 W lowmemorykiller: Failed to open /proc/8741/oom_score_adj; errno=2: process 8741 might have been killed
+09-09 22:14:51.136   518  4582 I ActivityManager: Process com.google.android.googlequicksearchbox:search (pid 8741) has died: cch+5 CEM
+09-09 22:14:51.789   184   184 I lowmemorykiller: Kill 'com.google.android.inputmethod.latin' (8646), uid 10115, oom_score_adj 200 to free 89432kB rss, 0kB swap; reason: low watermark is breached and thrashing (623%)
+09-09 22:14:51.805   518   534 I ActivityManager: Process com.google.android.inputmethod.latin (pid 8646) has died: prcp IMPB
+09-09 22:14:53.167   184   184 I lowmemorykiller: Kill 'com.mir2.web3.uipreview' (7962), uid 10147, oom_score_adj 0 to free 1206148kB rss, 0kB swap; reason: low watermark is breached and thrashing (738%)
+09-09 22:14:53.231   518   534 I ActivityManager: Process com.mir2.web3.uipreview (pid 7962) has died: fg  TOP
+09-09 22:14:53.250   518  4582 I WindowManager: WIN DEATH: Window{713bd40 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity}
+09-09 22:14:53.252   518  4582 W InputManager-JNI: Input channel object '713bd40 com.mir2.web3.uipreview/com.mir2.web3.MainActivity (client)' was disposed without first being removed with the input manager!
+09-09 22:14:53.289   518   534 W ActivityTaskManager: Force removing ActivityRecord{76e1f79 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t231}: app died, no saved state
+09-09 22:14:53.551   518   518 W ContentSuggestionsPerUserService: remote content suggestions service died

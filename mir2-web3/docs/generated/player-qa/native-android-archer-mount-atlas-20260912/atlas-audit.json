@@ -1,0 +1,106 @@
+{
+  "kind": "mir2-bevy-entity-atlas-manifest",
+  "schemaVersion": 2,
+  "pipeline": {
+    "version": "0.3.0",
+    "category": "entities",
+    "padding": 1,
+    "maxSize": 4096,
+    "pageSize": 2048,
+    "dryRun": false,
+    "roots": [
+      "CArmour/00",
+      "AArmour/00",
+      "AHair/00",
+      "AWeapon/00 L",
+      "AWeapon/00 R",
+      "Monster/003",
+      "ARArmour/00",
+      "ARWeapon/00 S",
+      "Mount/00"
+    ]
+  },
+  "stats": {
+    "sourceCount": 7120,
+    "roots": [
+      "CArmour/00",
+      "AArmour/00",
+      "AHair/00",
+      "AWeapon/00 L",
+      "AWeapon/00 R",
+      "Monster/003",
+      "ARArmour/00",
+      "ARWeapon/00 S",
+      "Mount/00"
+    ],
+    "imageBytes": 8497933,
+    "rgbaBytes": 83886080,
+    "pageCount": 5,
+    "durationMs": 17504
+  },
+  "atlas": {
+    "key": "android-archer-mount-proof",
+    "contentHash": "9d4939a75e4c476e36c347d2e41830fe9b95a434143d5b30e1712b857cdaefb6",
+    "roots": [
+      "CArmour/00",
+      "AArmour/00",
+      "AHair/00",
+      "AWeapon/00 L",
+      "AWeapon/00 R",
+      "Monster/003",
+      "ARArmour/00",
+      "ARWeapon/00 S",
+      "Mount/00"
+    ],
+    "sourceCount": 7120,
+    "pageCount": 5,
+    "rectCount": 7120,
+    "pages": [
+      {
+        "imageFile": "android-archer-mount-proof.png",
+        "imageUrl": "/bevy-entity-atlases/android-archer-mount-proof.png",
+        "width": 2048,
+        "height": 2048,
+        "sha256": "0350926d8d92f2639da15754602a95098f24591625901f53976d7387a997ac0b",
+        "imageBytes": 1538284,
+        "rgbaBytes": 16777216
+      },
+      {
+        "imageFile": "android-archer-mount-proof-p1.png",
+        "imageUrl": "/bevy-entity-atlases/android-archer-mount-proof-p1.png",
+        "width": 2048,
+        "height": 2048,
+        "sha256": "aad382803e8df9d638b4f07d560cd61f35dac76b2b394e2eabc5ad137fe7eab2",
+        "imageBytes": 1603948,
+        "rgbaBytes": 16777216
+      },
+      {
+        "imageFile": "android-archer-mount-proof-p2.png",
+        "imageUrl": "/bevy-entity-atlases/android-archer-mount-proof-p2.png",
+        "width": 2048,
+        "height": 2048,
+        "sha256": "20a53eb0089bafbd5900e97e3566c6e1571a42b71247805f907317f05bf68cf2",
+        "imageBytes": 1782536,
+        "rgbaBytes": 16777216
+      },
+      {
+        "imageFile": "android-archer-mount-proof-p3.png",
+        "imageUrl": "/bevy-entity-atlases/android-archer-mount-proof-p3.png",
+        "width": 2048,
+        "height": 2048,
+        "sha256": "ec68ae4584f45ecead3f0fba60d4b04627d4baee25fd1c7e7ce63d4bbebdb257",
+        "imageBytes": 2104006,
+        "rgbaBytes": 16777216
+      },
+      {
+        "imageFile": "android-archer-mount-proof-p4.png",
+        "imageUrl": "/bevy-entity-atlases/android-archer-mount-proof-p4.png",
+        "width": 2048,
+        "height": 2048,
+        "sha256": "a5b7876db7caca57ff188d9a1cf1997926d8c78e56b5a3fb43297d4940f6705c",
+        "imageBytes": 1469159,
+        "rgbaBytes": 16777216
+      }
+    ]
+  }
+}

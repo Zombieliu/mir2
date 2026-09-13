@@ -1,0 +1,6 @@
+ M apps/game-client/platform-android/Cargo.lock
+ M apps/game-client/platform-android/Cargo.toml
+ M apps/game-client/platform-android/android/app/build.gradle
+ M apps/game-client/platform-android/src/entity_render.rs
+ M apps/game-client/platform-android/src/shared_shell.rs
+ M apps/game-client/platform-android/src/world_assets.rs

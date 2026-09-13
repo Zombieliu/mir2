@@ -12,6 +12,8 @@ pub mod native_ingest;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
+pub mod native_render_receipt;
+pub mod native_world_receipt;
 mod presentation_pose;
 mod remote_motion;
 
@@ -26,6 +28,13 @@ use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
 use bevy::math::{Rect, URect, UVec2};
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+
+// Native scene packs can contain hundreds of independently-addressable map
+// objects plus multi-megabyte actor atlas pages. Limit each typed image
+// consumer so Android does not turn the entire batch into GPU assets during a
+// single frame. One oversized atlas page is still consumed to guarantee
+// forward progress.
+const NATIVE_RENDER_IMAGE_INGEST_BYTES_PER_FRAME: usize = 8 * 1024 * 1024;
 use bevy::window::{CompositeAlphaMode, WindowResolution};
 use js_sys::Function;
 use mir2_client_bevy::pending_operations::{
@@ -681,6 +690,8 @@ struct MineNode {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EntityRenderState {
+    #[serde(default, rename = "_nativeWorldRequest")]
+    native_world_request: u64,
     enabled: bool,
     stage_width: f32,
     stage_height: f32,
@@ -688,6 +699,8 @@ struct EntityRenderState {
     center_x: Option<i32>,
     #[serde(default)]
     center_y: Option<i32>,
+    #[serde(default)]
+    unresolved_entity_count: usize,
     #[serde(default)]
     atlases: Vec<EntityRenderAtlas>,
     #[serde(default)]
@@ -770,6 +783,10 @@ struct EntityRenderLayer {
     z: f32,
     #[serde(default)]
     opacity: Option<f32>,
+    /// Optional signed ARGB actor tint. Android emits Crystal's authoritative
+    /// PoisonType DrawColour; absence keeps the historical opaque-white path.
+    #[serde(default)]
+    tint_argb: Option<i32>,
     #[serde(default)]
     additive: bool,
 }
@@ -791,6 +808,8 @@ enum EntityKind {
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct MapRenderState {
+    #[serde(default, rename = "_nativeWorldRequest")]
+    native_world_request: u64,
     enabled: bool,
     stage_width: f32,
     stage_height: f32,
@@ -802,6 +821,8 @@ struct MapRenderState {
     center_x: Option<i32>,
     #[serde(default)]
     center_y: Option<i32>,
+    #[serde(default)]
+    unresolved_draw_count: usize,
     /// Atlas page descriptors (key + page dims + the source rects within the
     /// page). Carries the rect geometry the per-tile `atlas_rect_key` indexes
     /// into; mirrors `EntityRenderState.atlases` so the same layout-building
@@ -941,6 +962,11 @@ struct EffectRenderState {
     enabled: bool,
     stage_width: f32,
     stage_height: f32,
+    /// Optional active-animation frame URLs to keep warm while packaged asset
+    /// I/O catches up. These do not create sprites; the renderer still draws
+    /// only `effects`. The runtime independently caps the list before loading.
+    #[serde(default)]
+    preload_image_urls: Vec<String>,
     #[serde(default)]
     effects: Vec<EffectRenderEntry>,
 }
@@ -987,10 +1013,12 @@ struct EffectRenderEntry {
     shadow_y: Option<f32>,
 }
 
+const MAX_EFFECT_PRELOAD_IMAGES: usize = 512;
+
 /// Active image keys for an effect snapshot (URL-loaded standalone frames,
-/// including mask frames).
+/// including mask frames and a bounded producer-supplied warm set).
 fn effect_render_active_image_keys(snapshot: &EffectRenderState) -> HashSet<String> {
-    snapshot
+    let mut keys = snapshot
         .effects
         .iter()
         .flat_map(|effect| {
@@ -1003,7 +1031,15 @@ fn effect_render_active_image_keys(snapshot: &EffectRenderState) -> HashSet<Stri
             }
             keys
         })
-        .collect()
+        .collect::<HashSet<_>>();
+    keys.extend(
+        snapshot
+            .preload_image_urls
+            .iter()
+            .take(MAX_EFFECT_PRELOAD_IMAGES)
+            .map(|url| browser_asset_path(url)),
+    );
+    keys
 }
 
 struct PendingMapRenderAtlasImage {
@@ -1352,9 +1388,158 @@ impl RuntimeWindowSpec {
 /// The WASM `boot_mir2_runtime` entry and every native host (Windows, macOS,
 /// later Android) call this with their own [`RuntimeWindowSpec`]. No DOM, canvas
 /// selector or wasm API is assumed here.
+fn runtime_default_plugins(spec: &RuntimeWindowSpec) -> bevy::app::PluginGroupBuilder {
+    let plugins = DefaultPlugins
+        .set(AssetPlugin {
+            file_path: spec.asset_root.clone(),
+            meta_check: AssetMetaCheck::Never,
+            ..default()
+        })
+        .set(ImagePlugin::default_nearest())
+        .set(WindowPlugin {
+            primary_window: Some(Window {
+                canvas: spec.canvas_selector.clone(),
+                composite_alpha_mode: spec.composite_alpha_mode,
+                fit_canvas_to_parent: spec.fit_canvas_to_parent,
+                prevent_default_event_handling: spec.prevent_default_event_handling,
+                resolution: WindowResolution::new(spec.width, spec.height),
+                title: spec.title.clone(),
+                transparent: spec.transparent,
+                ..default()
+            }),
+            ..default()
+        });
+    #[cfg(target_os = "android")]
+    // The pipelined renderer can submit work for the Activity's previous EGL
+    // surface while the main thread is rebuilding it. Keep Android extraction
+    // and rendering ordered on one thread; desktop and WASM retain Bevy's
+    // default pipelined path.
+    let plugins = plugins
+        .set(android_render_plugin())
+        .disable::<bevy::render::pipelined_rendering::PipelinedRenderingPlugin>();
+    plugins
+}
+
+#[cfg(target_os = "android")]
+fn android_render_plugin() -> bevy::render::RenderPlugin {
+    use bevy::render::{
+        settings::{Backends, RenderCreation, WgpuLimits, WgpuSettings, WgpuSettingsPriority},
+        RenderPlugin,
+    };
+
+    let mut settings = WgpuSettings::default();
+    // Mir2's Android scene is entirely 2D. Prefer the GLES backend that the
+    // package already carries instead of the emulator's Vulkan bridge: recent
+    // API-31 images can advertise Vulkan storage-buffer support while exposing
+    // a zero maximum buffer size, which makes Bevy's unused 3D OIT startup
+    // allocation panic before the first shared-UI frame.
+    settings.backends = Some(Backends::GL);
+    settings.priority = WgpuSettingsPriority::WebGL2;
+    // `WgpuSettings::default()` calculates its limits before callers can
+    // change `priority`. Reapply the matching downlevel profile explicitly;
+    // otherwise the GLES adapter is asked for WebGPU compute limits that it
+    // correctly reports as unsupported.
+    settings.limits =
+        WgpuLimits::downlevel_webgl2_defaults().using_resolution(WgpuLimits::default());
+    RenderPlugin {
+        render_creation: RenderCreation::Automatic(Box::new(settings)),
+        ..default()
+    }
+}
+
+#[cfg(target_os = "android")]
+#[derive(Resource)]
+struct AndroidSurfaceResumeGate {
+    suspended: bool,
+    settle_frames: u8,
+}
+
+#[cfg(target_os = "android")]
+impl Default for AndroidSurfaceResumeGate {
+    fn default() -> Self {
+        Self {
+            suspended: false,
+            settle_frames: 3,
+        }
+    }
+}
+
+#[cfg(target_os = "android")]
+fn gate_android_camera_while_surface_rebuilds(
+    mut lifecycle: MessageReader<bevy::window::AppLifecycle>,
+    mut gate: ResMut<AndroidSurfaceResumeGate>,
+    mut cameras: Query<&mut Camera, With<MainCamera>>,
+) {
+    for state in lifecycle.read() {
+        match state {
+            bevy::window::AppLifecycle::Idle
+            | bevy::window::AppLifecycle::WillSuspend
+            | bevy::window::AppLifecycle::Suspended => {
+                gate.suspended = true;
+                gate.settle_frames = 0;
+            }
+            bevy::window::AppLifecycle::WillResume | bevy::window::AppLifecycle::Running => {
+                gate.suspended = false;
+                // Leave the camera absent from the render world while winit,
+                // wgpu and EGL replace the Activity surface. This also clears
+                // phase items specialized for the previous target format.
+                gate.settle_frames = 3;
+            }
+        }
+    }
+
+    let camera_active = !gate.suspended && gate.settle_frames == 0;
+    for mut camera in &mut cameras {
+        camera.is_active = camera_active;
+    }
+    if !gate.suspended && gate.settle_frames > 0 {
+        gate.settle_frames -= 1;
+    }
+}
+
+#[cfg(target_os = "android")]
+fn remove_unsupported_android_oit_systems(app: &mut App) {
+    use bevy::{
+        core_pipeline::oit::{init_oit_buffers, prepare_oit_buffers},
+        ecs::schedule::{ScheduleCleanupPolicy, Schedules},
+        render::{Render, RenderApp, RenderStartup},
+    };
+
+    let render_app = app
+        .get_sub_app_mut(RenderApp)
+        .expect("Android renderer must initialize the RenderApp");
+    render_app
+        .world_mut()
+        .resource_scope(|world, mut schedules: Mut<Schedules>| {
+            schedules
+                .remove_systems_in_set(
+                    RenderStartup,
+                    init_oit_buffers,
+                    world,
+                    ScheduleCleanupPolicy::RemoveSystemsOnly,
+                )
+                .expect("Bevy OIT startup system must be present");
+            schedules
+                .remove_systems_in_set(
+                    Render,
+                    prepare_oit_buffers,
+                    world,
+                    ScheduleCleanupPolicy::RemoveSystemsOnly,
+                )
+                .expect("Bevy OIT prepare system must be present");
+        });
+}
+
 pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
+    #[cfg(target_os = "android")]
+    // Wgpu also consults this process-local override while enumerating an
+    // adapter. Set it before any Bevy render plugin is constructed so Android
+    // cannot silently select the broken emulator Vulkan bridge.
+    std::env::set_var("WGPU_BACKEND", "gl");
     let mut app = App::new();
     app.insert_resource(ClearColor(FLOOR_COLOR))
+        .init_resource::<native_world_receipt::NativeWorldReceipt>()
+        .init_resource::<native_render_receipt::NativeRenderReceipt>()
         .insert_resource(RuntimeWorldState::default())
         .insert_resource(RuntimeEntityRenderState::default())
         .insert_resource(RuntimeEntityRenderAtlases::default())
@@ -1395,28 +1580,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(RuntimeSceneModelResetTracker::default())
         .insert_resource(RuntimeEffectShadowCleanupTracker::default())
         .insert_resource(native_ingest::NativeInbound::new())
-        .add_plugins(
-            DefaultPlugins
-                .set(AssetPlugin {
-                    file_path: spec.asset_root.clone(),
-                    meta_check: AssetMetaCheck::Never,
-                    ..default()
-                })
-                .set(ImagePlugin::default_nearest())
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        canvas: spec.canvas_selector.clone(),
-                        composite_alpha_mode: spec.composite_alpha_mode,
-                        fit_canvas_to_parent: spec.fit_canvas_to_parent,
-                        prevent_default_event_handling: spec.prevent_default_event_handling,
-                        resolution: WindowResolution::new(spec.width, spec.height),
-                        title: spec.title,
-                        transparent: spec.transparent,
-                        ..default()
-                    }),
-                    ..default()
-                }),
-        )
+        .add_plugins(runtime_default_plugins(&spec))
         .add_plugins((
             Mir2NativeSessionBoundaryPlugin,
             additive_material::CrystalAdditiveMaterialPlugin,
@@ -1512,6 +1676,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 sync_mine_nodes,
                 begin_presentation_pose_frame,
                 sync_entity_render_layers,
+                publish_native_render_receipt,
                 follow_player,
                 follow_lighting_camera,
                 publish_presentation_pose_frame,
@@ -1519,12 +1684,17 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 .chain()
                 .in_set(RuntimePresentationSet),
         );
+    #[cfg(target_os = "android")]
+    app.insert_resource(AndroidSurfaceResumeGate::default())
+        .add_systems(First, gate_android_camera_while_surface_rebuilds);
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(
         Update,
         emit_native_soak_metrics.after(publish_presentation_pose_frame),
     );
+    #[cfg(target_os = "android")]
+    remove_unsupported_android_oit_systems(&mut app);
     app
 }
 
@@ -1541,6 +1711,10 @@ pub fn boot_mir2_runtime() {
 }
 
 fn setup_scene(mut commands: Commands) {
+    #[cfg(target_os = "android")]
+    commands.spawn((Camera2d, MainCamera, Msaa::Off));
+
+    #[cfg(not(target_os = "android"))]
     commands.spawn((Camera2d, MainCamera));
     publish_status("scene-ready", "Camera ready");
 }
@@ -1550,6 +1724,7 @@ fn ingest_pending_world_state(
     mut snap_buf: ResMut<interpolation::SnapshotBuffer>,
     time: Res<Time>,
     native: Res<native_ingest::NativeInbound>,
+    mut receipt: Option<ResMut<native_world_receipt::NativeWorldReceipt>>,
 ) {
     // WASM path: thread-local cells written by the JS host.
     PENDING_WORLD_STATE.with(|pending| {
@@ -1562,14 +1737,13 @@ fn ingest_pending_world_state(
         |message| matches!(message, native_ingest::NativeInboundMessage::WorldState(_)),
         |message| {
             if let native_ingest::NativeInboundMessage::WorldState(json) = message {
-                if let Ok(snapshot) = serde_json::from_str::<WorldSnapshot>(&json) {
-                    apply_world_snapshot(
-                        &mut state,
-                        &mut snap_buf,
-                        time.elapsed_secs_f64(),
-                        snapshot,
-                    );
-                } else {
+                if !native_world_receipt::apply(
+                    &json,
+                    &mut state,
+                    &mut snap_buf,
+                    time.elapsed_secs_f64(),
+                    receipt.as_deref_mut(),
+                ) {
                     publish_status("native-decode-error", "invalid native world snapshot");
                 }
             }
@@ -1654,13 +1828,14 @@ fn ingest_pending_entity_render_atlases(
             atlas_resource.images.insert(atlas.key, handle);
         }
     });
-    native.drain_matching(
+    native.drain_matching_bounded_bytes(
         |message| {
             matches!(
                 message,
                 native_ingest::NativeInboundMessage::EntityRenderAtlas { .. }
             )
         },
+        NATIVE_RENDER_IMAGE_INGEST_BYTES_PER_FRAME,
         |message| {
             if let native_ingest::NativeInboundMessage::EntityRenderAtlas {
                 key,
@@ -3066,7 +3241,12 @@ fn sync_effect_render(
     }
 
     let mut alive = HashSet::new();
-    let mut stale_images: HashSet<String> = registry.effect_render_images.keys().cloned().collect();
+    let mut stale_images: HashSet<String> = registry
+        .effect_render_images
+        .keys()
+        .filter(|key| !active_image_keys.contains(*key))
+        .cloned()
+        .collect();
     for effect in &snapshot.effects {
         alive.insert(effect.key.clone());
         let opacity = effect.opacity.unwrap_or(1.0).clamp(0.0, 1.0);
@@ -3481,6 +3661,7 @@ fn clear_effect_render_layers_for_scene_reset(
 fn ingest_pending_map_render_images(
     mut atlas_resource: ResMut<RuntimeMapRenderAtlases>,
     mut images: ResMut<Assets<Image>>,
+    native: Res<native_ingest::NativeInbound>,
 ) {
     PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| {
         for operation in pending.borrow_mut().drain(..) {
@@ -3511,6 +3692,47 @@ fn ingest_pending_map_render_images(
             atlas_resource.revision = atlas_resource.revision.wrapping_add(1);
         }
     });
+    native.drain_matching_bounded_bytes(
+        |message| {
+            matches!(
+                message,
+                native_ingest::NativeInboundMessage::MapRenderAtlas { .. }
+            )
+        },
+        NATIVE_RENDER_IMAGE_INGEST_BYTES_PER_FRAME,
+        |message| {
+            if let native_ingest::NativeInboundMessage::MapRenderAtlas {
+                key,
+                width,
+                height,
+                pixels,
+            } = message
+            {
+                let expected_len = (width as usize)
+                    .checked_mul(height as usize)
+                    .and_then(|pixels| pixels.checked_mul(4));
+                if width == 0 || height == 0 || expected_len != Some(pixels.len()) {
+                    publish_status("map-render-atlas-error", "invalid native atlas pixels");
+                    return;
+                }
+                let image = Image::new(
+                    Extent3d {
+                        width,
+                        height,
+                        depth_or_array_layers: 1,
+                    },
+                    TextureDimension::D2,
+                    pixels,
+                    TextureFormat::Rgba8UnormSrgb,
+                    RenderAssetUsages::default(),
+                );
+                let handle = images.add(image);
+                atlas_resource.url_image_keys.remove(&key);
+                atlas_resource.images.insert(key, handle);
+                atlas_resource.revision = atlas_resource.revision.wrapping_add(1);
+            }
+        },
+    );
 }
 
 /// Stage 2 (unified y-sort) z scale. Map tiles and entities derive z from the
@@ -3887,6 +4109,7 @@ fn sync_map_render(
                     if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
                         sprite.image = image;
                         sprite.texture_atlas = Some(texture_atlas);
+                        sprite.rect = None;
                     }
                 }
             }
@@ -4125,7 +4348,8 @@ fn sync_map_render(
 fn trace_native_map_state(last: &mut Option<String>, message: String) {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        if (std::env::var_os("MIR2_NATIVE_TRACE_MAP").is_some()
+        if (cfg!(target_os = "android")
+            || std::env::var_os("MIR2_NATIVE_TRACE_MAP").is_some()
             || std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some())
             && last.as_ref() != Some(&message)
         {
@@ -4694,6 +4918,15 @@ fn sync_entity_render_layers(
                 .filter(|layer| entity_render_layer_is_actor(entity, layer))
             {
                 let layer_key = entity_render_layer_key(entity, layer);
+                if entity_render_layer_waits_for_declared_atlas(layer, &atlas_assets, &registry) {
+                    // Native state and RGBA atlas batches are intentionally
+                    // transported as separate messages. The layer path is
+                    // diagnostic provenance, not a standalone fallback while
+                    // its atlas is in flight.
+                    registry.entity_render_pending_images.remove(&layer_key);
+                    defer_actor_composite = true;
+                    continue;
+                }
                 let image_binding =
                     entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
                 let image_source_changed = registry
@@ -4758,7 +4991,21 @@ fn sync_entity_render_layers(
             if actor_layer && defer_actor_composite {
                 continue;
             }
+            if entity_render_layer_waits_for_declared_atlas(layer, &atlas_assets, &registry) {
+                // Preserve an existing decoration/effect layer in place and
+                // defer first spawn until its native atlas image is available.
+                // In particular, never issue an AssetServer request for the
+                // source-frame provenance path.
+                if let Some(handle) = registry.entity_render_layers.get(&layer_key) {
+                    if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                        transform.translation = position;
+                    }
+                }
+                registry.entity_render_pending_images.remove(&layer_key);
+                continue;
+            }
             let opacity = layer.opacity.unwrap_or(1.0);
+            let layer_color = entity_render_layer_color(layer);
             let image_binding =
                 entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
 
@@ -4837,7 +5084,7 @@ fn sync_entity_render_layers(
                     if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
                         sprite.custom_size =
                             Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0)));
-                        sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
+                        sprite.color = layer_color;
                         sprite.texture_atlas = None;
                         sprite.rect = image_binding.image_rect;
                     }
@@ -4886,7 +5133,7 @@ fn sync_entity_render_layers(
                                 layer.height.max(1.0),
                             )),
                             rect: image_binding.image_rect,
-                            color: Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0)),
+                            color: layer_color,
                             ..default()
                         },
                         Transform::from_translation(position),
@@ -4933,6 +5180,124 @@ fn sync_entity_render_layers(
         .retain(|object_id, _| alive_actor_objects.contains(object_id));
 
     presentation_poses.set_applied_entity_center(entity_center);
+}
+
+fn entity_render_layer_color(layer: &EntityRenderLayer) -> Color {
+    let argb = layer.tint_argb.unwrap_or(-1) as u32;
+    let tint_alpha = ((argb >> 24) & 0xff) as f32 / 255.0;
+    let opacity = layer.opacity.unwrap_or(1.0).clamp(0.0, 1.0);
+    Color::srgba_u8(
+        ((argb >> 16) & 0xff) as u8,
+        ((argb >> 8) & 0xff) as u8,
+        (argb & 0xff) as u8,
+        (tint_alpha * opacity * 255.0).round() as u8,
+    )
+}
+
+fn publish_native_render_receipt(
+    map_state: Res<RuntimeMapRenderState>,
+    entity_state: Res<RuntimeEntityRenderState>,
+    map_atlases: Res<RuntimeMapRenderAtlases>,
+    registry: Res<SceneRegistry>,
+    mut receipt: ResMut<native_render_receipt::NativeRenderReceipt>,
+    mut preview_trace: Local<Option<String>>,
+) {
+    let mut map_current = false;
+    let mut map_missing = 0usize;
+    if let Some(snapshot) = map_state
+        .snapshot
+        .as_ref()
+        .filter(|snapshot| snapshot.enabled)
+    {
+        let applied = registry.map_render.applied.as_ref();
+        let current = applied.is_some_and(|applied| {
+            applied.producer_revision == snapshot.revision
+                && applied.image_revision == map_atlases.revision
+        });
+        map_current = current;
+        if current {
+            map_missing = map_render_missing_bindings(snapshot, &map_atlases).len();
+            receipt.mark_map(
+                snapshot.native_world_request,
+                snapshot.center_x.zip(snapshot.center_y),
+                registry.map_render.tiles.len(),
+                snapshot.unresolved_draw_count.saturating_add(map_missing),
+            );
+        } else {
+            receipt.clear_map();
+        }
+    } else {
+        receipt.clear_map();
+    }
+
+    let mut entity_all_layers_live = false;
+    let mut entity_self_visible = false;
+    if let Some(snapshot) = entity_state
+        .snapshot
+        .as_ref()
+        .filter(|snapshot| snapshot.enabled)
+    {
+        let expected_layer_count = snapshot
+            .entities
+            .iter()
+            .map(|entity| entity.layers.len())
+            .sum::<usize>();
+        let all_layers_live = registry.entity_render_pending_images.is_empty()
+            && snapshot.entities.iter().all(|entity| {
+                entity.layers.iter().all(|layer| {
+                    registry
+                        .entity_render_layers
+                        .contains_key(&entity_render_layer_key(entity, layer))
+                })
+            });
+        let self_visible = all_layers_live
+            && snapshot.entities.iter().any(|entity| {
+                entity.is_self
+                    && !entity.layers.is_empty()
+                    && entity.layers.iter().all(|layer| {
+                        registry
+                            .entity_render_layers
+                            .contains_key(&entity_render_layer_key(entity, layer))
+                    })
+            });
+        entity_all_layers_live = all_layers_live;
+        entity_self_visible = self_visible;
+        receipt.mark_entities(
+            snapshot.native_world_request,
+            snapshot.center_x.zip(snapshot.center_y),
+            snapshot.entities.len(),
+            expected_layer_count,
+            snapshot.unresolved_entity_count,
+            self_visible,
+        );
+    } else {
+        receipt.clear_entities();
+    }
+    receipt.finish_frame();
+
+    let preview_request = map_state
+        .snapshot
+        .as_ref()
+        .map(|snapshot| snapshot.native_world_request)
+        .or_else(|| {
+            entity_state
+                .snapshot
+                .as_ref()
+                .map(|snapshot| snapshot.native_world_request)
+        });
+    if preview_request == Some(u64::MAX) {
+        let message = format!(
+            "map_current={map_current} map_live={} map_missing={map_missing} map_image_revision={} entity_live={} entity_self_visible={entity_self_visible} entity_layers={}",
+            registry.map_render.tiles.len(),
+            map_atlases.revision,
+            entity_all_layers_live,
+            registry.entity_render_layers.len(),
+        );
+        if preview_trace.as_ref() != Some(&message) {
+            eprintln!("[android-world-render] {message}");
+            *preview_trace = Some(message);
+        }
+    }
 }
 
 struct EntityRenderImageBinding {
@@ -5074,6 +5439,23 @@ fn entity_render_atlas_contains_rects(
     incoming: &[EntityRenderAtlasRect],
 ) -> bool {
     incoming.iter().all(|rect| existing.contains_key(&rect.key))
+}
+
+fn entity_render_layer_waits_for_declared_atlas(
+    layer: &EntityRenderLayer,
+    atlas_assets: &RuntimeEntityRenderAtlases,
+    registry: &SceneRegistry,
+) -> bool {
+    let (Some(atlas_key), Some(rect_key)) = (&layer.atlas_key, &layer.atlas_rect_key) else {
+        return false;
+    };
+    !registry
+        .entity_render_atlases
+        .get(atlas_key)
+        .is_some_and(|atlas| {
+            atlas.rects.contains_key(rect_key)
+                && (atlas.image.is_some() || atlas_assets.images.contains_key(atlas_key))
+        })
 }
 
 fn entity_render_image_binding(
@@ -6379,6 +6761,70 @@ mod entity_atlas_tests {
     }
 
     #[test]
+    fn native_atlas_layer_waits_for_uploaded_image_without_loading_debug_path() {
+        let mut app = entity_sync_test_app();
+        let snapshot: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true,
+            "stageWidth": 1024,
+            "stageHeight": 768,
+            "atlases": [{
+                "key": "native:p0",
+                "width": 64,
+                "height": 64,
+                "rects": [{
+                    "key": "standing-0",
+                    "x": 0,
+                    "y": 0,
+                    "width": 32,
+                    "height": 48
+                }]
+            }],
+            "entities": [{
+                "objectId": "1001",
+                "layers": [{
+                    "key": "1001:body",
+                    "path": "/original-ui/CArmour/00/debug-only.png",
+                    "atlasKey": "native:p0",
+                    "atlasRectKey": "standing-0",
+                    "left": 480,
+                    "top": 352,
+                    "width": 32,
+                    "height": 48,
+                    "z": 50005
+                }]
+            }]
+        }))
+        .expect("native atlas-backed entity state");
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot);
+        app.update();
+
+        {
+            let registry = app.world().resource::<SceneRegistry>();
+            assert!(registry.entity_render_layers.is_empty());
+            assert_eq!(registry.entity_render_atlases["native:p0"].image, None);
+        }
+
+        let uploaded = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderAtlases>()
+            .images
+            .insert("native:p0".to_owned(), uploaded);
+        app.update();
+
+        let registry = app.world().resource::<SceneRegistry>();
+        let layer = &registry.entity_render_layers["1001:body"];
+        assert_eq!(layer.image_key, "atlas:native:p0");
+        assert_eq!(layer.atlas_key.as_deref(), Some("native:p0"));
+        assert_eq!(layer.atlas_rect_key.as_deref(), Some("standing-0"));
+    }
+
+    #[test]
     fn animation_frames_extend_one_stable_atlas_layout() {
         let mut app = entity_sync_test_app();
         let state = |rect_key: &str| {
@@ -6553,6 +6999,74 @@ mod entity_atlas_tests {
             .expect("retained body sprite");
         assert!(second.texture_atlas.is_none());
         assert_eq!(second.rect, Some(Rect::new(50.0, 20.0, 82.0, 68.0)));
+    }
+
+    #[test]
+    fn authoritative_actor_tint_updates_and_clears_on_one_retained_sprite() {
+        let mut app = entity_sync_test_app();
+        let state = |tint_argb: Option<i32>| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "entities": [{
+                    "objectId": "1001",
+                    "layers": [{
+                        "key": "1001:body",
+                        "path": "/original-ui/CArmour/00/standing.png",
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50005,
+                        "opacity": 0.5,
+                        "tintArgb": tint_argb
+                    }]
+                }]
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(None));
+        app.update();
+        let entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        assert_eq!(
+            app.world()
+                .get::<Sprite>(entity)
+                .expect("body sprite")
+                .color,
+            Color::srgba_u8(255, 255, 255, 128)
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(Some(0xFF00_00FF_u32 as i32)));
+        app.update();
+        let retained =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        assert_eq!(retained, entity);
+        assert_eq!(
+            app.world()
+                .get::<Sprite>(retained)
+                .expect("tinted body sprite")
+                .color,
+            Color::srgba_u8(0, 0, 255, 128)
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(None));
+        app.update();
+        assert_eq!(
+            app.world()
+                .get::<Sprite>(retained)
+                .expect("cleared body sprite")
+                .color,
+            Color::srgba_u8(255, 255, 255, 128)
+        );
     }
 
     #[test]
@@ -6783,9 +7297,13 @@ mod entity_atlas_tests {
             assert!(
                 registry
                     .entity_render_pending_images
-                    .get("1001:hair")
+                    .get("1001:body")
                     .is_some_and(Handle::is_strong),
-                "the unready replacement must keep a strong handle across deferred ticks"
+                "the ready replacement must keep a strong handle across deferred ticks"
+            );
+            assert!(
+                !registry.entity_render_pending_images.contains_key("1001:hair"),
+                "an atlas-backed layer must not load its debug path while native pixels are pending"
             );
 
             for (index, entity) in initial_entities.iter().copied().enumerate() {
@@ -7305,6 +7823,7 @@ mod entity_atlas_tests {
                 "enabled": true,
                 "stageWidth": 1024,
                 "stageHeight": 768,
+                "preloadImageUrls": ["/original-effects/Magic/1.png"],
                 "effects": [{
                     "key": "fx-cast-1",
                     "imageUrl": "/original-effects/Magic/0.png",
@@ -7333,7 +7852,9 @@ mod entity_atlas_tests {
             entry.mask_image_url.as_deref(),
             Some("/original-effects/Magic/0.png")
         );
-        assert!(effect_render_active_image_keys(&state).contains("original-effects/Magic/0.png"));
+        let active = effect_render_active_image_keys(&state);
+        assert!(active.contains("original-effects/Magic/0.png"));
+        assert!(active.contains("original-effects/Magic/1.png"));
     }
 
     #[test]
@@ -7374,6 +7895,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-1".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7542,6 +8064,42 @@ mod effect_mask_shadow_tests {
     }
 
     #[test]
+    fn sync_effect_render_keeps_bounded_preload_images_until_snapshot_releases_them() {
+        let mut app = sync_test_app();
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            preload_image_urls: vec!["/original-effects/Magic/1.png".to_owned()],
+            effects: vec![],
+        });
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_images
+            .contains_key("original-effects/Magic/1.png"));
+
+        app.world_mut()
+            .resource_mut::<RuntimeEffectRenderState>()
+            .snapshot = Some(EffectRenderState {
+            enabled: true,
+            stage_width: 1024.0,
+            stage_height: 768.0,
+            preload_image_urls: Vec::new(),
+            effects: vec![],
+        });
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .effect_render_images
+            .is_empty());
+    }
+
+    #[test]
     fn sync_effect_render_spawns_primary_mask_and_shadow_and_cleans_up() {
         // Run the real ECS sync_effect_render system and verify the layer
         // lifecycle: spawn, update, despawn, and asset recycling.
@@ -7553,6 +8111,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-e2e".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7695,6 +8254,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![],
         });
         app.update();
@@ -7736,6 +8296,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-noshadow".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7774,6 +8335,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-zero-axis".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7832,6 +8394,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![],
         });
         app.update();
@@ -7889,6 +8452,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-maskzero".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7936,6 +8500,7 @@ mod effect_mask_shadow_tests {
             enabled: true,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![EffectRenderEntry {
                 key: "fx-dis".to_owned(),
                 image_url: Some("/original-effects/Magic/0.png".to_owned()),
@@ -7972,6 +8537,7 @@ mod effect_mask_shadow_tests {
             enabled: false,
             stage_width: 1024.0,
             stage_height: 768.0,
+            preload_image_urls: Vec::new(),
             effects: vec![],
         });
         app.update();
@@ -8206,6 +8772,7 @@ mod native_data_path_tests {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins)
             .init_resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+            .init_resource::<Assets<Image>>()
             .init_resource::<Assets<Mesh>>()
             .init_resource::<additive_material::CrystalAdditiveMaterialCache>()
             .insert_resource(mir2_client_bevy::read_model::UiReadModel::default())
@@ -8250,6 +8817,7 @@ mod native_data_path_tests {
                     apply_scene_reset_to_runtime,
                     apply_scene_reset_to_scene_models,
                     apply_session_reset_to_runtime_models,
+                    ingest_pending_map_render_images,
                     ingest_pending_ui_read_model,
                     ingest_pending_map_model,
                     ingest_pending_entity_model_set,
@@ -8279,6 +8847,45 @@ mod native_data_path_tests {
                     .after(ingest_pending_inventory_model),
             );
         app
+    }
+
+    #[test]
+    fn native_map_atlas_upload_reaches_the_render_registry() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        let pixels = vec![7, 8, 9, 255, 10, 11, 12, 255];
+
+        assert!(!native_ingest::push_native_map_render_atlas(
+            "map:bad".to_owned(),
+            2,
+            1,
+            vec![0; 7],
+        ));
+        assert!(native_ingest::push_native_map_render_atlas(
+            "map:page-0".to_owned(),
+            2,
+            1,
+            pixels.clone(),
+        ));
+        app.update();
+
+        let atlases = app.world().resource::<RuntimeMapRenderAtlases>();
+        assert_eq!(atlases.revision, 1);
+        assert_eq!(atlases.images.len(), 1);
+        assert!(!atlases.url_image_keys.contains("map:page-0"));
+        let handle = atlases
+            .images
+            .get("map:page-0")
+            .expect("native map page should be registered")
+            .clone();
+        let image = app
+            .world()
+            .resource::<Assets<Image>>()
+            .get(&handle)
+            .expect("native map page should own an image asset");
+        assert_eq!(image.texture_descriptor.size.width, 2);
+        assert_eq!(image.texture_descriptor.size.height, 1);
+        assert_eq!(image.data.as_deref(), Some(pixels.as_slice()));
     }
 
     #[test]

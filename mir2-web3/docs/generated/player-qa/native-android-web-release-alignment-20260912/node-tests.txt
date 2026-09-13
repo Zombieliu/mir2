@@ -1,0 +1,14 @@
+✔ accepts the exact published manifest named by the Android lock (1.197792ms)
+✔ rejects a different manifest even when its aggregate counts match (0.308125ms)
+✔ rejects lock aggregate drift after the manifest hash matches (0.163333ms)
+✔ rejects a release label that does not match the APK lock (0.150584ms)
+✔ rejects non-HTTPS remote sources before any request (0.125625ms)
+✔ rejects credential-like query data before any request (0.121958ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 48.44125

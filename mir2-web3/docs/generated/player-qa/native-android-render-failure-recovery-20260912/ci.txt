@@ -1,0 +1,6 @@
+sourceHead=5d96c7698369e93efc6219974790f1baf1f7635b
+workflow=Cross-platform client
+run=34666077382
+job=Android Capacitor and native Bevy
+jobId=103478159101
+conclusion=success

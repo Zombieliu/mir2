@@ -709,6 +709,17 @@ fn trade_gold_modal_ecs_uses_original_amount_box_and_hides_ok_for_invalid_input(
     ));
     app.update();
     let world = app.world_mut();
+    assert_eq!(
+        world
+            .query_filtered::<Entity, (
+                With<OverlayTradeGoldInput>,
+                With<Button>,
+                With<NativeTextInputTarget>
+            )>()
+            .iter(world)
+            .count(),
+        1
+    );
     let modal = world
         .query_filtered::<(&Node, &GlobalZIndex, Option<&Button>), With<OverlayTradeGoldModal>>()
         .single(world)
@@ -957,5 +968,19 @@ fn trade_dialog_sync_leaves_session_without_leaking_positions_or_prompt() {
     assert_eq!(
         app.world().resource::<NativePlayerUiState>().trade_dialog,
         TradeDialogUi::default()
+    );
+}
+
+#[test]
+fn trade_focus_rect_tracks_both_draggable_windows() {
+    let mut dialog = TradeDialogUi::default();
+    assert_eq!(
+        dialog.focus_rect(),
+        CrystalRect::new(298.0, 418.0, 428.0, 152.0)
+    );
+    dialog.positions = [Vec2::new(700.0, 100.0), Vec2::new(50.0, 500.0)];
+    assert_eq!(
+        dialog.focus_rect(),
+        CrystalRect::new(50.0, 100.0, 854.0, 552.0)
     );
 }

@@ -1,0 +1,7 @@
+Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }
+Status: ok
+LaunchState: COLD
+Activity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity
+TotalTime: 776
+WaitTime: 777
+Complete

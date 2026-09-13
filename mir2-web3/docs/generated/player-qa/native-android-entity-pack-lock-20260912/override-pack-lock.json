@@ -1,0 +1,12 @@
+{
+    "schemaVersion": 1,
+    "kind": "mir2-android-entity-pack-lock",
+    "packId": "local-player-shards-20260912",
+    "sourceMode": "override",
+    "manifestSha256": "0a7f57e99e4f1fa508e807be20ec3c957d9ecd1b598b468fc6905c8a394181e7",
+    "manifestBytes": 7028198,
+    "atlasCount": 35,
+    "pageCount": 102,
+    "rectCount": 23224,
+    "pageBytes": 40312262
+}

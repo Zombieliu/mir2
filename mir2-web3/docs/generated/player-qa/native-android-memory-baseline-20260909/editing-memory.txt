@@ -1,0 +1,1019 @@
+Applications Memory Usage (in Kilobytes):
+Uptime: 8536907 Realtime: 8536907
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   355552   355456        0        0   358292   383504   373093     2651
+  Dalvik Heap     2458     2128        0        0    10540     6179     3090     3089
+ Dalvik Other     2525     2188        0        0     4204
+        Stack      916      916        0        0      928
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6827      260     1756        0    43780
+    .jar mmap     4744        0     1300        0    30372
+    .apk mmap    61559     4540    56144        0    64780
+    .ttf mmap      754        0      180        0     2072
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   442720   371992    59416        0   540712   389683   376183     5740
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8216                          30400
+         Native Heap:   355456                         358292
+                Code:    64184                         144848
+               Stack:      916                            928
+            Graphics:        0                              0
+       Private Other:     2636
+              System:    11312
+             Unknown:                                    6244
+
+           TOTAL PSS:   442720            TOTAL RSS:   540712      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      103
+       Parcel memory:        6         Parcel count:       24
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8539583 Realtime: 8539583
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   371224   371128        0        0   373964   398776   388102     2665
+  Dalvik Heap     2526     2196        0        0    10608     6192     3096     3096
+ Dalvik Other     2697     2192        0        0     4544
+        Stack      944      944        0        0      956
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6827      260     1756        0    43780
+    .jar mmap     4764        0     1300        0    30432
+    .apk mmap    61559     4540    56144        0    64780
+    .ttf mmap      754        0      180        0     2072
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   458680   387764    59416        0   556880   404968   391198     5761
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8284                          30468
+         Native Heap:   371128                         373964
+                Code:    64184                         145244
+               Stack:      944                            956
+            Graphics:        0                              0
+       Private Other:     2640
+              System:    11500
+             Unknown:                                    6248
+
+           TOTAL PSS:   458680            TOTAL RSS:   556880      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      114
+       Parcel memory:        6         Parcel count:       26
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8542838 Realtime: 8542838
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   388648   388552        0        0   391388   417924   406644     2713
+  Dalvik Heap     2570     2240        0        0    10652     6231     3116     3115
+ Dalvik Other     2801     2204        0        0     4740
+        Stack      944      944        0        0      956
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6827      260     1756        0    43780
+    .jar mmap     4768        0     1304        0    30436
+    .apk mmap    61559     4540    56144        0    64780
+    .ttf mmap      754        0      180        0     2072
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   476256   405244    59420        0   574548   424155   409760     5828
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8328                          30512
+         Native Heap:   388552                         391388
+                Code:    64204                         145448
+               Stack:      944                            956
+            Graphics:        0                              0
+       Private Other:     2636
+              System:    11592
+             Unknown:                                    6244
+
+           TOTAL PSS:   476256            TOTAL RSS:   574548      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      114
+       Parcel memory:        6         Parcel count:       26
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8546042 Realtime: 8546042
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   407548   407452        0        0   410288   437072   425635     2642
+  Dalvik Heap     2630     2300        0        0    10712     6214     3107     3107
+ Dalvik Other     2941     2220        0        0     5004
+        Stack      968      968        0        0      980
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6827      260     1756        0    43780
+    .jar mmap     4768        0     1304        0    30436
+    .apk mmap    54415     4540    49000        0    57636
+    .ttf mmap      758        0      196        0     2072
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   488240   424244    52292        0   586652   443286   428742     5749
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8388                          30572
+         Native Heap:   407452                         410288
+                Code:    57080                         138556
+               Stack:      968                            980
+            Graphics:        0                              0
+       Private Other:     2648
+              System:    11704
+             Unknown:                                    6256
+
+           TOTAL PSS:   488240            TOTAL RSS:   586652      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      114
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8549091 Realtime: 8549091
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   424864   424768        0        0   427604   454416   442546     2975
+  Dalvik Heap     2678     2348        0        0    10760     6220     3110     3110
+ Dalvik Other     3017     2208        0        0     5168
+        Stack      972      972        0        0      984
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6685      260     1756        0    43188
+    .jar mmap     4772        0     1308        0    30440
+    .apk mmap    45563     4540    40148        0    48784
+    .ttf mmap      758        0      196        0     2072
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   496694   441600    43444        0   594744   460636   445656     6085
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8436                          30620
+         Native Heap:   424768                         427604
+                Code:    48232                         129292
+               Stack:      972                            984
+            Graphics:        0                              0
+       Private Other:     2636
+              System:    11650
+             Unknown:                                    6244
+
+           TOTAL PSS:   496694            TOTAL RSS:   594744      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      114
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8552314 Realtime: 8552314
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   443504   443408        0        0   446244   473564   460244     3806
+  Dalvik Heap     2722     2392        0        0    10804     6229     3115     3114
+ Dalvik Other     3109     2188        0        0     5372
+        Stack      972      972        0        0      984
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6685      260     1756        0    43188
+    .jar mmap     4772        0     1308        0    30440
+    .apk mmap    45563     4540    40148        0    48784
+    .ttf mmap      758        0      196        0     2072
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   515470   460264    43444        0   613632   479793   463359     6920
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8480                          30664
+         Native Heap:   443408                         446244
+                Code:    48212                         129496
+               Stack:      972                            984
+            Graphics:        0                              0
+       Private Other:     2636
+              System:    11762
+             Unknown:                                    6244
+
+           TOTAL PSS:   515470            TOTAL RSS:   613632      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      111
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8555525 Realtime: 8555525
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   461448   461352        0        0   464188   492712   477962     4955
+  Dalvik Heap     2762     2432        0        0    10844     6236     3118     3118
+ Dalvik Other     3141     2196        0        0     5428
+        Stack      972      972        0        0      984
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6685      260     1756        0    43188
+    .jar mmap     4772        0     1308        0    30440
+    .apk mmap    45883     4540    40468        0    49104
+    .ttf mmap      758        0      196        0     2072
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   533806   478256    43764        0   631992   498948   481080     8073
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8520                          30704
+         Native Heap:   461352                         464188
+                Code:    48544                         129876
+               Stack:      972                            984
+            Graphics:        0                              0
+       Private Other:     2632
+              System:    11786
+             Unknown:                                    6240
+
+           TOTAL PSS:   533806            TOTAL RSS:   631992      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      112
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8558343 Realtime: 8558343
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   477832   477736        0        0   480572   510044   493756     6552
+  Dalvik Heap     2802     2472        0        0    10884     6248     3124     3124
+ Dalvik Other     3193     2200        0        0     5528
+        Stack      972      972        0        0      984
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6416      260     1748        0    42140
+    .jar mmap     2507        0      736        0    19808
+    .apk mmap    44768     4540    39636        0    46788
+    .ttf mmap      756        0      196        0     2064
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   546631   494684    42352        0   634512   516292   496880     9676
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8560                          30744
+         Native Heap:   477736                         480572
+                Code:    47132                         115968
+               Stack:      972                            984
+            Graphics:        0                              0
+       Private Other:     2636
+              System:     9595
+             Unknown:                                    6244
+
+           TOTAL PSS:   546631            TOTAL RSS:   634512      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      105
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8561956 Realtime: 8561956
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   497136   497040        0        0   499876   530240   513349     6686
+  Dalvik Heap     2850     2520        0        0    10932     6253     3127     3126
+ Dalvik Other     3241     2208        0        0     5616
+        Stack      972      972        0        0      984
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6320      260     1740        0    41576
+    .jar mmap     1753        0      408        0    16932
+    .apk mmap    44618     4540    39488        0    46624
+    .ttf mmap      694        0      140        0     1996
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   564969   514044    41812        0   650280   536493   516476     9812
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8608                          30792
+         Native Heap:   497040                         499876
+                Code:    46604                         112388
+               Stack:      972                            984
+            Graphics:        0                              0
+       Private Other:     2632
+              System:     9113
+             Unknown:                                    6240
+
+           TOTAL PSS:   564969            TOTAL RSS:   650280      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      117
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8565542 Realtime: 8565542
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   517660   517564        0        0   520400   552672   533870     8563
+  Dalvik Heap     2898     2568        0        0    10980     6255     3128     3127
+ Dalvik Other     3293     2212        0        0     5716
+        Stack      972      972        0        0      984
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6320      260     1740        0    41576
+    .jar mmap     1769        0      424        0    16948
+    .apk mmap    44618     4540    39488        0    46624
+    .ttf mmap      694        0      140        0     1996
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   585609   534620    41828        0   670968   558927   536998    11690
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8656                          30840
+         Native Heap:   517564                         520400
+                Code:    46620                         112500
+               Stack:      972                            984
+            Graphics:        0                              0
+       Private Other:     2636
+              System:     9161
+             Unknown:                                    6244
+
+           TOTAL PSS:   585609            TOTAL RSS:   670968      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      117
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8568389 Realtime: 8568389
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   533032   532936        0        0   535772   568212   549296     8609
+  Dalvik Heap     2962     2632        0        0    11044     6264     3132     3132
+ Dalvik Other     3305     2212        0        0     5740
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6320      260     1740        0    41576
+    .jar mmap     1809        0      476        0    16960
+    .apk mmap    44618     4540    39488        0    46624
+    .ttf mmap      694        0      140        0     1996
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   601101   550060    41880        0   686444   574476   552428    11741
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8720                          30904
+         Native Heap:   532936                         535772
+                Code:    46672                         112536
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2636
+              System:     9161
+             Unknown:                                    6244
+
+           TOTAL PSS:   601101            TOTAL RSS:   686444      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      106
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8571583 Realtime: 8571583
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   551196   551100        0        0   553936   586592   567074     8925
+  Dalvik Heap     3006     2676        0        0    11088     6267     3134     3133
+ Dalvik Other     3341     2228        0        0     5796
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6320      260     1740        0    41576
+    .jar mmap     1849        0      516        0    17000
+    .apk mmap    44618     4540    39488        0    46624
+    .ttf mmap      694        0      140        0     1996
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   619385   568284    41920        0   704748   592859   570208    12058
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8764                          30948
+         Native Heap:   551100                         553936
+                Code:    46728                         112632
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2636
+              System:     9181
+             Unknown:                                    6244
+
+           TOTAL PSS:   619385            TOTAL RSS:   704748      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      117
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8575373 Realtime: 8575373
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   572704   572608        0        0   575444   611152   588486    11839
+  Dalvik Heap     3046     2716        0        0    11128     6268     3134     3134
+ Dalvik Other     3233     2068        0        0     5740
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6320      260     1740        0    41576
+    .jar mmap     1849        0      516        0    17000
+    .apk mmap    44618     4540    39488        0    46624
+    .ttf mmap      694        0      140        0     1996
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   640825   589672    41920        0   726240   617420   591620    14973
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8804                          30988
+         Native Heap:   572608                         575444
+                Code:    46712                         112720
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2492
+              System:     9233
+             Unknown:                                    6100
+
+           TOTAL PSS:   640825            TOTAL RSS:   726240      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      117
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8578779 Realtime: 8578779
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   591432   591336        0        0   594172   630164   607224    11771
+  Dalvik Heap     3086     2756        0        0    11168     6273     3137     3136
+ Dalvik Other     3237     2068        0        0     5748
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6319      260     1740        0    41560
+    .jar mmap     1881        0      548        0    17032
+    .apk mmap    44618     4540    39488        0    46624
+    .ttf mmap      694        0      140        0     1996
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   659628   608440    41952        0   745032   636437   610361    14907
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8844                          31028
+         Native Heap:   591336                         594172
+                Code:    46744                         112744
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2492
+              System:     9236
+             Unknown:                                    6100
+
+           TOTAL PSS:   659628            TOTAL RSS:   745032      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:       33
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8582416 Realtime: 8582416
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   610980   610884        0        0   613720   649848   626654    11843
+  Dalvik Heap     3126     2796        0        0    11208     6274     3137     3137
+ Dalvik Other     3277     2076        0        0     5820
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6319      260     1740        0    41560
+    .jar mmap     1993        0      676        0    17064
+    .apk mmap    44618     4540    39488        0    46624
+    .ttf mmap      694        0      140        0     1996
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       77        8        0        0      912
+      Unknown      451      436        0        0      988
+        TOTAL   679368   628036    42080        0   764724   656122   629791    14980
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8884                          31068
+         Native Heap:   610884                         613720
+                Code:    46880                         112848
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2492
+              System:     9252
+             Unknown:                                    6100
+
+           TOTAL PSS:   679368            TOTAL RSS:   764724      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      114
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8586003 Realtime: 8586003
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   630556   630460        0        0   633296   670044   646263    11776
+  Dalvik Heap     3182     2852        0        0    11264     6303     3152     3151
+ Dalvik Other     3285     2080        0        0     5832
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6314      260     1740        0    41532
+    .jar mmap     2141        0      856        0    17108
+    .apk mmap    44618     4540    39488        0    46624
+    .ttf mmap      694        0      140        0     1996
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       60        8        0        0      724
+      Unknown      451      436        0        0      988
+        TOTAL   699134   647672    42260        0   784196   676347   649415    14927
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8940                          31124
+         Native Heap:   630460                         633296
+                Code:    47060                         112872
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2496
+              System:     9202
+             Unknown:                                    5916
+
+           TOTAL PSS:   699134            TOTAL RSS:   784196      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      114
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8589584 Realtime: 8589584
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   652152   652056        0        0   654892   695104   667265    15599
+  Dalvik Heap     3206     2876        0        0    11288     6302     3151     3151
+ Dalvik Other     3309     2072        0        0     5888
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6264      260     1732        0    41276
+    .jar mmap     2110        0      856        0    17008
+    .apk mmap    44071     4540    39464        0    44508
+    .ttf mmap      682        0      128        0     1984
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       19        8        0        0      616
+      Unknown      451      436        0        0      988
+        TOTAL   720097   669284    42216        0   803280   701406   670416    18750
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     8964                          31148
+         Native Heap:   652056                         654892
+                Code:    47012                         110448
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2492
+              System:     8597
+             Unknown:                                    5804
+
+           TOTAL PSS:   720097            TOTAL RSS:   803280      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      112
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8592250 Realtime: 8592250
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   666656   666560        0        0   669396   709608   681751    15547
+  Dalvik Heap     3242     2912        0        0    11324     6302     3151     3151
+ Dalvik Other     3317     2072        0        0     5904
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        9        0        8        0      272
+     .so mmap     6264      260     1732        0    41276
+    .jar mmap     2110        0      856        0    17008
+    .apk mmap    44071     4540    39464        0    44508
+    .ttf mmap      682        0      128        0     1984
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       19        8        0        0      616
+      Unknown      451      436        0        0      988
+        TOTAL   734645   683824    42216        0   817836   715910   684902    18698
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     9000                          31184
+         Native Heap:   666560                         669396
+                Code:    47012                         110464
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2492
+              System:     8605
+             Unknown:                                    5804
+
+           TOTAL PSS:   734645            TOTAL RSS:   817836      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      106
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8595672 Realtime: 8595672
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   685204   685108        0        0   687944   728256   700205    15544
+  Dalvik Heap     3290     2960        0        0    11372     6303     3168     3135
+ Dalvik Other     3317     2068        0        0     5908
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        5        0        4        0      268
+     .so mmap     6264      260     1732        0    41276
+    .jar mmap     2166        0      912        0    17064
+    .apk mmap    36975     4540    32368        0    37412
+    .ttf mmap      447        0       52        0     1416
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       19        8        0        0      616
+      Unknown      451      436        0        0      988
+        TOTAL   745962   702416    35096        0   828824   734559   703373    18679
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     9048                          31232
+         Native Heap:   685108                         687944
+                Code:    39896                         102864
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2484
+              System:     8450
+             Unknown:                                    5796
+
+           TOTAL PSS:   745962            TOTAL RSS:   828824      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:       33
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+
+Applications Memory Usage (in Kilobytes):
+Uptime: 8599304 Realtime: 8599304
+
+** MEMINFO in pid 13032 [com.mir2.web3.uipreview] **
+                   Pss  Private  Private     Swap      Rss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty    Total     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------   ------
+  Native Heap   704844   704748        0        0   707584   747940   719754    15494
+  Dalvik Heap     3322     2992        0        0    11404     6304     3152     3152
+ Dalvik Other     3321     2072        0        0     5912
+        Stack      976      976        0        0      988
+       Ashmem       24        0        0        0      540
+    Other dev        5        0        4        0      268
+     .so mmap     6239      260     1728        0    41164
+    .jar mmap     2166        0      912        0    17064
+    .apk mmap    28363     4540    23756        0    28800
+    .ttf mmap      447        0       52        0     1416
+    .dex mmap       16        0        0        0      392
+    .oat mmap      173        0        0        0     2780
+    .art mmap     6635     6060       28        0    19860
+   Other mmap       18        8        0        0      612
+      Unknown      451      436        0        0      988
+        TOTAL   757000   722092    26480        0   839772   754244   722906    18646
+
+ App Summary
+                       Pss(KB)                        Rss(KB)
+                        ------                         ------
+           Java Heap:     9080                          31264
+         Native Heap:   704748                         707584
+                Code:    31280                          94140
+               Stack:      976                            988
+            Graphics:        0                              0
+       Private Other:     2488
+              System:     8428
+             Unknown:                                    5796
+
+           TOTAL PSS:   757000            TOTAL RSS:   839772      TOTAL SWAP (KB):        0
+
+ Objects
+               Views:       10         ViewRootImpl:        1
+         AppContexts:        6           Activities:        1
+              Assets:       14        AssetManagers:        0
+       Local Binders:       18        Proxy Binders:      112
+       Parcel memory:        7         Parcel count:       28
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0

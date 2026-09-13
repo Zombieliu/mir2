@@ -1,0 +1,16 @@
+Environment:
+Rust 1.95.0
+Android NDK 26.1.10909125
+Android API 31
+JDK 17.0.18
+MIR2_ANDROID_VARIANT=uiPreview
+MIR2_ANDROID_UI_ASSET_ROOT=target/ui-assets-head-20260912
+MIR2_ANDROID_WORLD_ASSET_ROOT=target/local-world-20260911-objects
+MIR2_ANDROID_ENTITY_ASSET_ROOT=target/entity-proof-assets-with-archer-bow-20260912
+
+Result:
+Finished release profile
+Gradle :app:assembleUiPreview BUILD SUCCESSFUL
+APK size: 375667506 bytes
+APK SHA-256: 31fa876356d0e152efdeba937c0dcf4cf81e7453e22e100d0182a4ba3485c9a3
+package gate passed

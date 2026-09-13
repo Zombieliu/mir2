@@ -5,7 +5,36 @@
 //! Winit/asset loading, then enters this same app construction path.
 
 pub mod android_input;
+#[cfg(any(target_os = "android", test))]
+mod entity_overlays;
+#[cfg(any(target_os = "android", test))]
+mod entity_render;
+#[cfg(any(target_os = "android", test))]
+mod form_input;
 pub mod gateway_bridge;
+#[cfg(any(target_os = "android", test))]
+mod ground_labels;
+#[cfg(any(target_os = "android", test))]
+mod ground_pickups;
+#[cfg(any(target_os = "android", test))]
+mod live_entity;
+#[cfg(any(target_os = "android", test))]
+mod map_objects;
+#[cfg(any(target_os = "android", test))]
+mod map_render;
+#[cfg(any(target_os = "android", test))]
+mod mobile_ui;
+#[cfg(any(target_os = "android", test))]
+mod scene_effects;
+#[cfg(any(target_os = "android", test))]
+mod shared_shell;
+mod text_input;
+#[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
+mod ui_preview;
+#[cfg(any(target_os = "android", test))]
+mod world_assets;
+#[cfg(any(target_os = "android", test))]
+mod world_projection;
 
 use android_input::{
     apply_android_lifecycle_messages, collect_android_back_key, route_android_input_messages,
@@ -21,7 +50,12 @@ use gateway_bridge::{
     AndroidGatewayInboundQueue, AndroidGatewayOutboundLease, AndroidGatewayOutboundQueue,
 };
 use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
-use mir2_ui_core::{effect::UiEffect, reducer::reduce, state::UiState};
+use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+use mir2_ui_core::{
+    effect::UiEffect,
+    reducer::reduce,
+    state::{UiScreen, UiState},
+};
 use serde_json::json;
 use std::collections::{BTreeMap, VecDeque};
 use std::sync::{Mutex, OnceLock};
@@ -103,6 +137,7 @@ impl Plugin for AndroidShellPlugin {
                     drive_android_gateway_host_transport,
                     drain_android_gateway_inbound,
                     route_android_input_messages,
+                    enqueue_latest_android_motion,
                     apply_queued_ui_actions,
                 )
                     .chain(),
@@ -288,6 +323,77 @@ pub extern "C" fn mir2_android_gateway_report_write_result(sequence: u64, sent: 
     true
 }
 
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayHostStart<'a>(
+    _: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+) {
+    mir2_android_gateway_host_start();
+}
+
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayHostStop<'a>(
+    _: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+) {
+    mir2_android_gateway_host_stop();
+}
+
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayConnectionLost<'a>(
+    _: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+) {
+    mir2_android_gateway_connection_lost();
+}
+
+/// JNI string wrapper around the bounded native gateway mailbox. The JSON is
+/// already produced from a closed Rust enum; Java only writes it to the live
+/// authenticated socket and returns the exact sequence result.
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayPoll<'a>(
+    mut env: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+) -> jni::sys::jstring {
+    env.with_env(|env| -> Result<_, jni::errors::Error> {
+        let required = unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) };
+        if required <= 0 || required as usize > 64 * 1024 {
+            if required < 0 || required as usize > 64 * 1024 {
+                mir2_android_gateway_connection_lost();
+            }
+            return Ok(env.new_string("")?.into_raw());
+        }
+        let mut bytes = vec![0_u8; required as usize];
+        let copied =
+            unsafe { mir2_android_gateway_copy_next_outbound(bytes.as_mut_ptr(), bytes.len()) };
+        if copied != required {
+            mir2_android_gateway_connection_lost();
+            return Ok(env.new_string("")?.into_raw());
+        }
+        let envelope = String::from_utf8(bytes).unwrap_or_else(|_| {
+            mir2_android_gateway_connection_lost();
+            String::new()
+        });
+        Ok(env.new_string(envelope)?.into_raw())
+    })
+    .resolve::<jni::errors::ThrowRuntimeExAndDefault>()
+}
+
+#[cfg(target_os = "android")]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeGatewayReport<'a>(
+    _: jni::EnvUnowned<'a>,
+    _: jni::objects::JClass<'a>,
+    sequence: jni::sys::jlong,
+    sent: jni::sys::jboolean,
+) -> jni::sys::jboolean {
+    sequence > 0 && mir2_android_gateway_report_write_result(sequence as u64, sent)
+}
+
 fn drive_android_gateway_host_transport(
     enabled: Res<AndroidGatewayTransportEnabled>,
     shell: Res<AndroidShellState>,
@@ -363,6 +469,33 @@ fn drain_android_gateway_inbound(
     mut inbound: ResMut<AndroidGatewayInboundQueue>,
 ) {
     drain_bounded_inbound_into_models(&mut inbound, &mut ui_state, &mut outbound);
+}
+
+fn enqueue_latest_android_motion(
+    shell: Res<AndroidShellState>,
+    native_shell: Option<Res<NativeShellModel>>,
+    ui_state: Res<UiState>,
+    mut motions: ResMut<AndroidMotionQueue>,
+    mut gateway: ResMut<AndroidGatewayOutboundQueue>,
+) {
+    let in_game = native_shell
+        .as_deref()
+        .map(|model| model.screen == NativeShellScreen::InGame)
+        .unwrap_or(ui_state.screen == UiScreen::InGame);
+    let ready = shell.lifecycle == android_input::AndroidLifecycle::Foreground
+        && shell.network == AndroidNetwork::Available
+        && in_game;
+    if !ready {
+        motions.0.clear();
+        gateway.clear_motion();
+        return;
+    }
+
+    let latest = motions.0.pop();
+    motions.0.clear();
+    if let Some(intent) = latest {
+        let _ = gateway.enqueue_motion(intent);
+    }
 }
 
 fn apply_queued_ui_actions(
@@ -489,12 +622,22 @@ fn apply_queued_ui_actions(
 }
 
 pub fn build_android_runtime_app() -> App {
+    #[cfg(target_os = "android")]
+    mir2_bevy_runtime::set_mir2_remote_motion_presentation_enabled(true);
     let mut app = build_runtime_app(RuntimeWindowSpec {
         width: 1280,
         height: 720,
         ..RuntimeWindowSpec::native("mir2-web3 (android)")
     });
+    #[cfg(target_os = "android")]
+    app.world_mut()
+        .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()
+        .set_native_consumer_enabled(true);
     app.add_plugins(AndroidShellPlugin);
+    #[cfg(target_os = "android")]
+    app.insert_resource(ClearColor(Color::srgb(0.015, 0.035, 0.075)))
+        .insert_resource(bevy::winit::WinitSettings::mobile())
+        .add_plugins(shared_shell::AndroidSharedShellPlugin);
     app
 }
 
@@ -511,7 +654,8 @@ pub fn main() {
 mod tests {
     use super::*;
     use crate::android_input::{
-        AndroidInputEvent, AndroidLifecycle, AndroidLifecycleEvent, AndroidNetwork, AndroidUiTarget,
+        AndroidDirection, AndroidInputEvent, AndroidLifecycle, AndroidLifecycleEvent,
+        AndroidMotionIntent, AndroidMoveMode, AndroidNetwork, AndroidUiTarget,
     };
     use mir2_ui_core::{
         action::UiAction,
@@ -573,6 +717,78 @@ mod tests {
             .resource::<gateway_bridge::AndroidGatewayOutboundQueue>();
         assert_eq!(queue.len(), 1);
         assert_eq!(queue.status().overflow_count, 0);
+    }
+
+    #[test]
+    fn foreground_in_game_joystick_reaches_exact_authenticated_wire_queue() {
+        let mut app = in_game_app();
+        make_host_ready(&mut app);
+        send(
+            &mut app,
+            AndroidInputEvent::VirtualJoystick {
+                x: 0.8,
+                y: -0.8,
+                run: true,
+            },
+        );
+
+        assert!(app.world().resource::<AndroidMotionQueue>().0.is_empty());
+        let outbound = app
+            .world_mut()
+            .resource_mut::<AndroidGatewayOutboundQueue>()
+            .drain_ready(
+                &AndroidShellState {
+                    lifecycle: AndroidLifecycle::Foreground,
+                    network: AndroidNetwork::Available,
+                    ..default()
+                },
+                1,
+            );
+        assert_eq!(outbound.len(), 1);
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&outbound[0].json).unwrap(),
+            json!({"type":"run","direction":"UpRight"})
+        );
+    }
+
+    #[test]
+    fn inactive_screen_or_transport_drops_motion_instead_of_replaying_it() {
+        let mut app = in_game_app();
+        app.world_mut()
+            .resource_mut::<AndroidMotionQueue>()
+            .0
+            .push(AndroidMotionIntent {
+                direction: AndroidDirection::Left,
+                mode: AndroidMoveMode::Walk,
+            });
+        app.world_mut()
+            .resource_mut::<AndroidGatewayOutboundQueue>()
+            .enqueue_motion(AndroidMotionIntent {
+                direction: AndroidDirection::Right,
+                mode: AndroidMoveMode::Run,
+            })
+            .unwrap();
+        app.update();
+        assert!(app.world().resource::<AndroidMotionQueue>().0.is_empty());
+        assert!(app
+            .world()
+            .resource::<AndroidGatewayOutboundQueue>()
+            .is_empty());
+
+        make_host_ready(&mut app);
+        app.world_mut().resource_mut::<UiState>().screen = UiScreen::Login;
+        send(
+            &mut app,
+            AndroidInputEvent::VirtualJoystick {
+                x: -1.0,
+                y: 0.0,
+                run: false,
+            },
+        );
+        assert!(app
+            .world()
+            .resource::<AndroidGatewayOutboundQueue>()
+            .is_empty());
     }
 
     #[test]
@@ -759,6 +975,108 @@ mod tests {
         app.update();
         assert!(app.world().resource::<UiState>().storage_pending.is_none());
         assert!(app.world().resource::<UiState>().storage_unknown);
+
+        mir2_android_gateway_host_stop();
+        app.update();
+    }
+
+    #[test]
+    fn production_ffi_generation_loss_closes_shop_and_storage_before_recovery() {
+        let _ffi_guard = ANDROID_GATEWAY_FFI_TEST_LOCK
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        reset_android_gateway_ffi_for_test();
+        let mut app = in_game_app();
+        app.world_mut()
+            .resource_mut::<AndroidGatewayTransportEnabled>()
+            .0 = true;
+        app.world_mut().resource_mut::<UiState>().panel = UiPanel::GameShop;
+        make_host_ready(&mut app);
+        mir2_android_gateway_host_start();
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::GameShopBuy {
+                g_index: 31,
+                quantity: 2,
+                price_type: 1,
+            }),
+        );
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 3, to: 9 }),
+        );
+        app.update();
+        let (first_shop_id, first_storage_id) = {
+            let state = app.world().resource::<UiState>();
+            (
+                state
+                    .game_shop_pending
+                    .as_ref()
+                    .expect("shop request is pending")
+                    .request_id
+                    .clone(),
+                state
+                    .storage_pending
+                    .as_ref()
+                    .expect("storage request is pending")
+                    .request_id
+                    .clone(),
+            )
+        };
+
+        // Map replacement and network recovery both replace the transport
+        // generation. Even if the host restarts before ECS observes the loss,
+        // neither mutation may be replayed into the replacement session.
+        mir2_android_gateway_connection_lost();
+        mir2_android_gateway_host_start();
+        app.update();
+        let state = app.world().resource::<UiState>();
+        assert!(state.game_shop_pending.is_none());
+        assert!(state.storage_pending.is_none());
+        assert!(state.game_shop_unknown);
+        assert!(state.storage_unknown);
+        let queue = app
+            .world()
+            .resource::<gateway_bridge::AndroidGatewayOutboundQueue>();
+        assert!(queue.game_shop_pending().is_none());
+        assert!(queue.storage_pending().is_none());
+        assert!(queue.is_empty());
+        assert_eq!(
+            unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) },
+            0,
+            "replacement generation cannot expose old shop or storage commands"
+        );
+
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::GameShopBuy {
+                g_index: 31,
+                quantity: 2,
+                price_type: 1,
+            }),
+        );
+        send(
+            &mut app,
+            AndroidInputEvent::Semantic(UiAction::StoreItem { from: 3, to: 9 }),
+        );
+        app.update();
+        let state = app.world().resource::<UiState>();
+        let second_shop_id = state
+            .game_shop_pending
+            .as_ref()
+            .expect("fresh shop request is allowed")
+            .request_id
+            .clone();
+        let second_storage_id = state
+            .storage_pending
+            .as_ref()
+            .expect("fresh storage request is allowed")
+            .request_id
+            .clone();
+        assert_ne!(first_shop_id, second_shop_id);
+        assert_ne!(first_storage_id, second_storage_id);
+        assert!(unsafe { mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(), 0) } > 0);
 
         mir2_android_gateway_host_stop();
         app.update();

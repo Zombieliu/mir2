@@ -1,0 +1,10 @@
+09-12 14:05:56.845 AdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl }
+09-12 14:05:58.423 ANDROID_WORLD_RENDER_READY request_id=18446744073709551615 center_x=302 center_y=634 map_tiles=849 entities=7 entity_layers=12
+
+Post-resume 300-second soak summary:
+same_process_pid=7001
+Caught rendering error=0
+Quitting or stopping rendering=0
+panicked=0
+GL error=0
+checkFramebufferCompleteness=0

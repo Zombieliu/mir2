@@ -1,0 +1,5 @@
+google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys
+sdk_gphone64_arm64
+31
+Physical size: 1080x2340
+Physical density: 440

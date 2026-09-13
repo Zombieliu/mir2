@@ -1,0 +1,12 @@
+variant=uiPreview
+package=com.mir2.web3.uipreview
+apk=apps/game-client/platform-android/android/app/build/outputs/apk/uiPreview/app-uiPreview.apk
+bytes=376766188
+sha256=728822742c5ccc6de29cd414e74d899d5c5baa148187ae9f829be4f8128257fa
+entity_pack_id=local-player-shards-20260912
+entity_manifest_sha256=0a7f57e99e4f1fa508e807be20ec3c957d9ecd1b598b468fc6905c8a394181e7
+entity_atlases=35
+entity_pages=102
+entity_rects=23224
+apk_committed=false
+asset_packs_committed=false

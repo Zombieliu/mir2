@@ -1,0 +1,10 @@
+Performing Streamed Install
+Success
+Stopping: com.mir2.web3.uipreview
+Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }
+Status: ok
+LaunchState: COLD
+Activity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity
+TotalTime: 1631
+WaitTime: 1653
+Complete

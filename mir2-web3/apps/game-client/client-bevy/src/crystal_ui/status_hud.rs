@@ -313,7 +313,7 @@ pub fn process(
     windows: Query<&Window, With<PrimaryWindow>>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     mut effects: Option<ResMut<UiEffectQueue>>,
-    mut audio: Option<ResMut<crate::audio::NativeUiAudioQueue>>,
+    mut audio: Option<ResMut<crate::ui_audio::NativeUiAudioQueue>>,
     skills: Option<Res<SkillModel>>,
 ) {
     state.status_hud.hovered = false;
@@ -386,7 +386,7 @@ pub fn process(
             .filter(|b| Some(*b) == button_at(&state, p))
         {
             if let Some(audio) = audio.as_deref_mut() {
-                audio.push(crate::audio::NativeUiSound::ButtonA);
+                audio.push(crate::ui_audio::NativeUiSound::ButtonA);
             }
             if button == 0 {
                 state.core.options.dura_view =

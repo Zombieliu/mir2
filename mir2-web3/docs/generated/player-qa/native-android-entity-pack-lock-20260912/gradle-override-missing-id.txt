@@ -1,0 +1,19 @@
+> Task :app:prepareEntityAssets FAILED
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/platform-android/android/app/build.gradle' line: 151
+
+* What went wrong:
+Execution failed for task ':app:prepareEntityAssets'.
+> Set MIR2_ANDROID_ENTITY_ASSET_PACK_ID to a stable version identifier for the override pack
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2s
+1 actionable task: 1 executed

@@ -1,0 +1,11 @@
+/tmp/android-amount-preview.log:test result: ok. 85 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+/tmp/android-amount-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-amount-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-amount-normal.log:test result: ok. 83 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+/tmp/android-amount-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-amount-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-amount-before.log:  left: NoWrap
+/tmp/android-amount-before.log: right: WordBoundary
+/tmp/android-amount-before.log:test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 577 filtered out; finished in 0.02s
+/tmp/android-amount-shared.log:test result: ok. 578 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+/tmp/android-amount-shared.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

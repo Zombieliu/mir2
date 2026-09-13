@@ -143,6 +143,15 @@ pub enum CrystalHudAction {
 #[derive(Component, Debug)]
 pub struct CrystalHudRoot;
 
+/// Presentation-only group for host-specific edge anchoring. Its children
+/// retain Crystal coordinates and Bevy's normal button hit testing.
+#[derive(Component, Debug)]
+pub struct CrystalHudMiniMapLayer;
+
+/// Independent presentation layer; slots and controls keep shared actions.
+#[derive(Component, Debug)]
+pub struct CrystalHudBeltLayer;
+
 #[derive(Component, Debug)]
 pub struct CrystalHudHpOrb;
 
@@ -570,62 +579,77 @@ fn spawn_crystal_hud(
             );
 
             root.spawn((
-                CrystalHudBeltFrame,
-                absolute_node(BELT_FRAME),
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse/1932.png"),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
-            root.spawn((
-                CrystalHudBeltTint,
-                absolute_node(BELT_FRAME),
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse/1933.png"),
-                    color: Color::srgba(1.0, 1.0, 1.0, 0.5),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
-            for slot in 0..BELT_SLOT_COUNT {
-                spawn_belt_slot(root, &asset_server, &inventory, slot);
-            }
-            spawn_belt_controls(root, &asset_server);
-
-            spawn_minimap_frame(root, &asset_server);
-            spawn_vertical_centered_text_with_container(
-                root,
-                CrystalHudMapTitleContainer,
-                CrystalHudMapTitle,
-                ui_model.player.map_name.as_deref().unwrap_or(""),
-                MAP_TITLE_RECT,
-                CRYSTAL_DEFAULT_FONT_SIZE_PX,
-                WHITE,
-                Justify::Center,
-            );
-            spawn_vertical_centered_text_with_container(
-                root,
-                CrystalHudMapCoordinateContainer,
-                CrystalHudMapCoordinate,
-                &format!("{}, {}", map_model.center_x, map_model.center_y),
-                MAP_COORDINATE_RECT,
-                CRYSTAL_DEFAULT_FONT_SIZE_PX,
-                WHITE,
-                Justify::Center,
-            );
-
-            spawn_hud_buttons(root, &asset_server, map_model.time_of_day_light_setting);
-            root.spawn((
-                CrystalHudNewMail,
-                absolute_node(NEW_MAIL_RECT),
+                CrystalHudBeltLayer,
+                absolute_node(CrystalRect::new(0.0, 0.0, 1024.0, 768.0)),
                 FocusPolicy::Pass,
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse/544.png"),
-                    image_mode: NodeImageMode::Stretch,
-                    ..default()
-                },
-            ));
+            ))
+            .with_children(|root| {
+                root.spawn((
+                    CrystalHudBeltFrame,
+                    absolute_node(BELT_FRAME),
+                    ImageNode {
+                        image: asset_server.load("original-ui/Prguse/1932.png"),
+                        image_mode: NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
+                root.spawn((
+                    CrystalHudBeltTint,
+                    absolute_node(BELT_FRAME),
+                    ImageNode {
+                        image: asset_server.load("original-ui/Prguse/1933.png"),
+                        color: Color::srgba(1.0, 1.0, 1.0, 0.5),
+                        image_mode: NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
+                for slot in 0..BELT_SLOT_COUNT {
+                    spawn_belt_slot(root, &asset_server, &inventory, slot);
+                }
+                spawn_belt_controls(root, &asset_server);
+            });
+
+            spawn_hud_buttons(root, &asset_server);
+            root.spawn((
+                CrystalHudMiniMapLayer,
+                absolute_node(CrystalRect::new(0.0, 0.0, 1024.0, 768.0)),
+                FocusPolicy::Pass,
+            ))
+            .with_children(|root| {
+                spawn_minimap_frame(root, &asset_server);
+                spawn_vertical_centered_text_with_container(
+                    root,
+                    CrystalHudMapTitleContainer,
+                    CrystalHudMapTitle,
+                    ui_model.player.map_name.as_deref().unwrap_or(""),
+                    MAP_TITLE_RECT,
+                    CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                    WHITE,
+                    Justify::Center,
+                );
+                spawn_vertical_centered_text_with_container(
+                    root,
+                    CrystalHudMapCoordinateContainer,
+                    CrystalHudMapCoordinate,
+                    &format!("{}, {}", map_model.center_x, map_model.center_y),
+                    MAP_COORDINATE_RECT,
+                    CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                    WHITE,
+                    Justify::Center,
+                );
+
+                spawn_minimap_buttons(root, &asset_server, map_model.time_of_day_light_setting);
+                root.spawn((
+                    CrystalHudNewMail,
+                    absolute_node(NEW_MAIL_RECT),
+                    FocusPolicy::Pass,
+                    ImageNode {
+                        image: asset_server.load("original-ui/Prguse/544.png"),
+                        image_mode: NodeImageMode::Stretch,
+                        ..default()
+                    },
+                ));
+            });
         });
 }
 
@@ -783,11 +807,7 @@ fn weight_bar_asset(ratio: f32) -> (&'static str, u16) {
     }
 }
 
-fn spawn_hud_buttons(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    time_of_day_light_setting: Option<u8>,
-) {
+fn spawn_hud_buttons(parent: &mut ChildSpawnerCommands, asset_server: &AssetServer) {
     spawn_hud_button(
         parent,
         asset_server,
@@ -810,6 +830,13 @@ fn spawn_hud_buttons(
         spec::GAME_SHOP,
         CrystalHudAction::GameShop,
     );
+}
+
+fn spawn_minimap_buttons(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    time_of_day_light_setting: Option<u8>,
+) {
     spawn_hud_button(parent, asset_server, spec::MAIL, CrystalHudAction::Mail);
     spawn_hud_button(
         parent,
@@ -1922,6 +1949,63 @@ pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn minimap_controls_share_one_identity_layer_without_moving_bottom_hud() {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
+            .init_asset::<Image>()
+            .init_resource::<NativeShellModel>()
+            .init_resource::<UiReadModel>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MapModel>()
+            .add_systems(Startup, spawn_crystal_hud);
+        app.update();
+        let world = app.world_mut();
+        let (layer, node) = world
+            .query_filtered::<(Entity, &Node), With<CrystalHudMiniMapLayer>>()
+            .single(world)
+            .unwrap();
+        assert_eq!(node.left, Val::Px(0.0));
+        assert_eq!(node.top, Val::Px(0.0));
+        for (action, parent) in world.query::<(&CrystalHudAction, &ChildOf)>().iter(world) {
+            let map_action = matches!(
+                action,
+                CrystalHudAction::Mail | CrystalHudAction::BigMap | CrystalHudAction::MinimapToggle
+            );
+            assert_eq!(parent.parent() == layer, map_action, "{action:?}");
+        }
+        for parent in world
+            .query_filtered::<&ChildOf, Or<(
+                With<CrystalHudMinimap>,
+                With<CrystalHudMinimapCollapsed>,
+                With<CrystalHudMapTitleContainer>,
+                With<CrystalHudMapCoordinateContainer>,
+                With<CrystalHudLightSetting>,
+                With<CrystalHudNewMail>,
+            )>>()
+            .iter(world)
+        {
+            assert_eq!(parent.parent(), layer);
+        }
+        let (belt_layer, belt_node) = world
+            .query_filtered::<(Entity, &Node), With<CrystalHudBeltLayer>>()
+            .single(world)
+            .unwrap();
+        assert_eq!(belt_node.left, Val::Px(0.0));
+        assert_eq!(belt_node.top, Val::Px(0.0));
+        let parents = world
+            .query_filtered::<&ChildOf, Or<(
+                With<CrystalHudBeltFrame>,
+                With<CrystalHudBeltTint>,
+                With<CrystalHudBeltHitTarget>,
+                With<CrystalBeltControlAction>,
+            )>>()
+            .iter(world)
+            .collect::<Vec<_>>();
+        assert_eq!(parents.len(), 10); // 2 frames, 6 item targets, 2 controls.
+        assert!(parents.iter().all(|parent| parent.parent() == belt_layer));
+    }
     use crate::inventory::{
         CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel, ItemModel,
     };

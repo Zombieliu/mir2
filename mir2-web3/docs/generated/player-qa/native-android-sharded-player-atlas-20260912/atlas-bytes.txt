@@ -1,0 +1,3 @@
+manifest_bytes=7028198
+png_bytes=40312262
+png_pages=102

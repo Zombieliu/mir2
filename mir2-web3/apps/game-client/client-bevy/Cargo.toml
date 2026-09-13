@@ -17,13 +17,17 @@ path = "src/lib.rs"
 [features]
 default = []
 native-ui = [
+  "native-player-ui",
+  "bevy/audio",
+  "bevy/wav",
+]
+native-player-ui = ["native-shell-ui"]
+native-shell-ui = [
   "bevy/bevy_ui",
   "bevy/bevy_text",
   "bevy/bevy_ui_render",
   "bevy/default_font",
   "system-font-discovery",
-  "bevy/audio",
-  "bevy/wav",
 ]
 system-font-discovery = ["bevy/system_font_discovery"]
 

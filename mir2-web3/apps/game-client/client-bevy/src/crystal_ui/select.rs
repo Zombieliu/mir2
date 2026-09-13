@@ -38,6 +38,7 @@ pub enum CrystalSelectAction {
 
 #[derive(Component, Debug)]
 pub struct CrystalCharacterPreview {
+    anchor: (f32, f32),
     frame_set_base: u16,
     frame: usize,
     /// Only the base layer owns the clock. Optional Crystal overlays follow
@@ -53,6 +54,7 @@ pub struct CrystalCharacterPreview {
 impl CrystalCharacterPreview {
     fn new(asset_server: &AssetServer, frame_set_base: u16, drives_clock: bool) -> Self {
         Self {
+            anchor: spec::PREVIEW_ANCHOR,
             frame_set_base,
             frame: 0,
             animation: drives_clock.then(|| {
@@ -314,7 +316,27 @@ fn spawn_character_preview(
 ) {
     let base = preview_base_index(&character.class_name, &character.gender_name);
     for (frame_set_base, frame, drives_clock) in preview_layer_specs(base) {
-        spawn_preview_layer(parent, asset_server, frame_set_base, frame, drives_clock);
+        spawn_preview_layer(
+            parent,
+            asset_server,
+            frame_set_base,
+            frame,
+            drives_clock,
+            spec::PREVIEW_ANCHOR,
+        );
+    }
+}
+
+/// NewCharacterDialog uses the same 16-frame, offset-aware renderer.
+pub fn spawn_creation_preview(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    class: &str,
+    gender: &str,
+    anchor: (f32, f32),
+) {
+    for (base, frame, drives_clock) in preview_layer_specs(preview_base_index(class, gender)) {
+        spawn_preview_layer(parent, asset_server, base, frame, drives_clock, anchor);
     }
 }
 
@@ -335,9 +357,11 @@ fn spawn_preview_layer(
     frame_set_base: u16,
     frame: PreviewFrame,
     drives_clock: bool,
+    anchor: (f32, f32),
 ) {
-    let rect = preview_rect(frame);
-    let preview = CrystalCharacterPreview::new(asset_server, frame_set_base, drives_clock);
+    let rect = preview_rect_at(frame, anchor);
+    let mut preview = CrystalCharacterPreview::new(asset_server, frame_set_base, drives_clock);
+    preview.anchor = anchor;
     let first_frame = preview.frame_images[0].clone();
     parent.spawn((
         preview,
@@ -388,7 +412,7 @@ pub fn animate_character_previews(
 
     for (preview, mut node, _) in layers {
         let frame = frame_for_set(preview.frame_set_base, preview.frame);
-        let rect = preview_rect(frame);
+        let rect = preview_rect_at(frame, preview.anchor);
         node.left = Val::Px(rect.left);
         node.top = Val::Px(rect.top);
         node.width = Val::Px(rect.width);
@@ -407,12 +431,31 @@ fn frame_for_set(frame_set_base: u16, frame: usize) -> PreviewFrame {
 }
 
 fn preview_rect(frame: PreviewFrame) -> CrystalRect {
+    preview_rect_at(frame, spec::PREVIEW_ANCHOR)
+}
+
+fn preview_rect_at(frame: PreviewFrame, anchor: (f32, f32)) -> CrystalRect {
     CrystalRect::new(
-        spec::PREVIEW_ANCHOR.0 + frame.x,
-        spec::PREVIEW_ANCHOR.1 + frame.y,
+        anchor.0 + frame.x,
+        anchor.1 + frame.y,
         frame.width,
         frame.height,
     )
+}
+
+#[cfg(test)]
+#[test]
+fn creation_preview_uses_source_offset_and_stays_above_buttons() {
+    for base in [20, 300, 40, 320, 60, 340] {
+        for frame in preview_frames(base).unwrap() {
+            let rect = preview_rect_at(*frame, (338.0, 404.0));
+            assert!(
+                rect.top + rect.height <= 579.0,
+                "base {base} covers Create button"
+            );
+            assert_eq!(rect.left, 338.0 + frame.x);
+        }
+    }
 }
 
 fn format_last_access(binary_datetime: i64) -> String {

@@ -1,0 +1,113 @@
+--------- beginning of main
+09-08 23:24:52.428 16161 16161 I .web3.uiprevie: Late-enabling -Xcheck:jni
+09-08 23:24:52.498 16161 16161 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+09-08 23:24:52.532 16161 16161 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3.uipreview' set to: 'default'
+09-08 23:24:52.532 16161 16161 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-08 23:24:52.532 16161 16161 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-08 23:24:52.533 16161 16161 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-08 23:24:52.751 16161 16181 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+09-08 23:24:52.752 16161 16181 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+09-08 23:24:52.753 16161 16181 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+09-08 23:24:52.863 16161 16161 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+09-08 23:24:52.881 16161 16161 D gti.InputConnection: InputConnection created
+09-08 23:24:52.885 16161 16161 D gti.InputConnection: setEditorInfo
+09-08 23:24:52.889 16161 16161 W .web3.uiprevie: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+09-08 23:24:52.890 16161 16161 I GameActivity: Looking for library libmir2_platform_android.so
+09-08 23:24:52.890 16161 16161 I GameActivity: Found library libmir2_platform_android.so. Loading...
+09-08 23:24:52.892 16161 16161 D GameActivity: GameActivity_register
+09-08 23:24:52.892 16161 16161 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+09-08 23:24:52.892 16161 16161 D GameActivity: SDK version: 31
+09-08 23:24:52.892 16161 16161 I android-activity: Creating: Activity = 0x16a6, saved state size = 0
+09-08 23:24:52.894 16161 16161 V threaded_app: Creating: 0xb400006f4a21f170
+09-08 23:24:52.894 16161 16161 V threaded_app: Callbacks set: 0xb400006f4a21f1c0
+09-08 23:24:52.894 16161 16161 V threaded_app: Launching android_app_entry in a thread
+09-08 23:24:52.894 16161 16183 V threaded_app: android_app_entry called
+09-08 23:24:52.894 16161 16183 V threaded_app: android_app = 0xb400006f2a2283d0
+09-08 23:24:52.894 16161 16183 V threaded_app: config = 0xb400006e9a23ad60
+09-08 23:24:52.894 16161 16183 V threaded_app: activity = 0xb400006f4a21f170
+09-08 23:24:52.894 16161 16183 V threaded_app: assetmanager = 0xb400006f4a215530
+09-08 23:24:52.894 16161 16183 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+09-08 23:24:52.907 16161 16183 D HostConnection: createUnique: call
+09-08 23:24:52.907 16161 16183 D HostConnection: HostConnection::get() New Host Connection established 0xb400006eea223f90, tid 16183
+09-08 23:24:52.908 16161 16183 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-08 23:24:52.911 16161 16183 D vulkan  : searching for layers in '/data/app/~~m4Hpsd5aTGaYAUVVToakuA==/com.mir2.web3.uipreview-_YIcz50slD2lQ-SNzrfLGA==/lib/arm64'
+09-08 23:24:52.912 16161 16183 D vulkan  : searching for layers in '/data/app/~~m4Hpsd5aTGaYAUVVToakuA==/com.mir2.web3.uipreview-_YIcz50slD2lQ-SNzrfLGA==/base.apk!/lib/arm64-v8a'
+09-08 23:24:52.917 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.917 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.917 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.918 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.925 16161 16183 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_render-0.19.0/AdapterInfo { name: "SwiftShader Device (LLVM 10.0.0)", vendor: 6880, device: 49374, device_type: Cpu, device_pci_bus_id: "", driver: "?", driver_info: "?", backend: Vulkan, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-08 23:24:52.925 16161 16183 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_render-0.19.0/The selected adapter is using a driver that only supports software rendering. This is likely to be very slow. See https://bevy.org/learn/errors/b0006/
+09-08 23:24:52.925 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:52.925478Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "SwiftShader Device (LLVM 10.0.0)", vendor: 6880, device: 49374, device_type: Cpu, device_pci_bus_id: "", driver: "?", driver_info: "?", backend: Vulkan, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-08 23:24:52.925 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:52.925568Z[0m [33m WARN[0m [2mbevy_render::renderer[0m[2m:[0m The selected adapter is using a driver that only supports software rendering. This is likely to be very slow. See https://bevy.org/learn/errors/b0006/
+09-08 23:24:52.925 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.926 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.926 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.926 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.927 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.927 16161 16183 D goldfish_vulkan: on_vkEnumerateDeviceExtensionProperties: host has ext semaphore? win32 0 posix 0
+09-08 23:24:52.942 16161 16161 V GameActivity: onStart_native
+09-08 23:24:52.942 16161 16161 V threaded_app: Start: 0xb400006f4a21f170
+09-08 23:24:53.001 16161 16183 D goldfish-address-space: allocate: Ask for block of size 0x4000000
+09-08 23:24:53.002 16161 16183 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1e3ff8000 size 0x4004000
+09-08 23:24:53.103 16161 16183 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_render-0.19.0/Some GPU preprocessing are limited on this device.
+09-08 23:24:53.103 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:53.103041Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m Some GPU preprocessing are limited on this device.
+09-08 23:24:53.110 16161 16183 V threaded_app: activityState=11
+09-08 23:24:53.110 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:53.110159Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+09-08 23:24:53.110 16161 16183 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+09-08 23:24:53.111 16161 16161 V threaded_app: Resume: 0xb400006f4a21f170
+09-08 23:24:53.111 16161 16183 V threaded_app: activityState=12
+09-08 23:24:53.113 16161 16186 D HostConnection: createUnique: call
+09-08 23:24:53.113 16161 16186 D HostConnection: HostConnection::get() New Host Connection established 0xb400006eea2358d0, tid 16186
+09-08 23:24:53.115 16161 16186 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-08 23:24:53.115 16161 16187 D HostConnection: createUnique: call
+09-08 23:24:53.115 16161 16187 D HostConnection: HostConnection::get() New Host Connection established 0xb400006eea2367d0, tid 16187
+09-08 23:24:53.117 16161 16187 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-08 23:24:53.127 16161 16193 D HostConnection: createUnique: call
+09-08 23:24:53.127 16161 16193 D HostConnection: HostConnection::get() New Host Connection established 0xb400006eea239dd0, tid 16193
+09-08 23:24:53.129 16161 16193 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-08 23:24:53.131 16161 16185 D HostConnection: createUnique: call
+09-08 23:24:53.131 16161 16185 D HostConnection: HostConnection::get() New Host Connection established 0xb400006eea23a550, tid 16185
+09-08 23:24:53.132 16161 16185 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-08 23:24:53.139 16161 16161 V GameActivity: onImeInsetsChanged from Text Listener
+09-08 23:24:53.139 16161 16161 V threaded_app: WindowInsetsChanged: 0xb400006f4a21f170
+09-08 23:24:53.140 16161 16183 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-08 23:24:53.140 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:53.139800Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-08 23:24:53.146 16161 16161 V GameActivity: onImeInsetsChanged from Text Listener
+09-08 23:24:53.146 16161 16161 V threaded_app: WindowInsetsChanged: 0xb400006f4a21f170
+09-08 23:24:53.146 16161 16183 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-08 23:24:53.146 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:53.146220Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-08 23:24:53.146 16161 16179 D HostConnection: createUnique: call
+09-08 23:24:53.147 16161 16179 D HostConnection: HostConnection::get() New Host Connection established 0xb400006eea23a3d0, tid 16179
+09-08 23:24:53.148 16161 16179 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-08 23:24:53.149 16161 16179 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-08 23:24:53.149 16161 16179 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-08 23:24:53.149 16161 16161 V threaded_app: ContentRectChanged: 0xb400006f4a21f170 -- (0 0) (2340 1080)
+09-08 23:24:53.149 16161 16183 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+09-08 23:24:53.149 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:53.149617Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+09-08 23:24:53.150 16161 16179 D EGL_emulation: eglCreateContext: 0xb400006eea239410: maj 3 min 0 rcv 3
+09-08 23:24:53.151 16161 16161 V GameActivity: onSurfaceCreated_native
+09-08 23:24:53.151 16161 16161 V threaded_app: NativeWindowCreated: 0xb400006f4a21f170 -- 0xb400006fda3b7a90
+09-08 23:24:53.151 16161 16161 V threaded_app: android_app_set_window called
+09-08 23:24:53.151 16161 16183 V threaded_app: APP_CMD_INIT_WINDOW
+09-08 23:24:53.151 16161 16183 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (99v0)
+09-08 23:24:53.151 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:53.151442Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (99v0)
+09-08 23:24:53.151 16161 16161 V threaded_app: NativeWindowResized: 0xb400006f4a21f170 -- 0xb400006fda3b7a90 ( 2340 x 1080 )
+09-08 23:24:53.151 16161 16161 V threaded_app: NativeWindowRedrawNeeded: 0xb400006f4a21f170 -- 0xb400006fda3b7a90
+09-08 23:24:53.151 16161 16179 D EGL_emulation: eglMakeCurrent: 0xb400006eea239410: ver 3 0 (tinfo 0x7113bf6300) (first time)
+09-08 23:24:53.160 16161 16179 I Gralloc4: mapper 4.x is not supported
+09-08 23:24:53.160 16161 16179 D HostConnection: createUnique: call
+09-08 23:24:53.161 16161 16179 D HostConnection: HostConnection::get() New Host Connection established 0xb400006eea23dfd0, tid 16179
+09-08 23:24:53.161 16161 16179 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-08 23:24:53.161 16161 16179 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1e3ff0000 size 0x8000
+09-08 23:24:53.163 16161 16179 W Gralloc4: allocator 4.x is not supported
+09-08 23:24:53.167 16161 16179 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_read_color_buffer_dma GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object GL_KHR_texture_compression_astc_ldr ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-08 23:24:53.186 16161 16187 W log event: time_system did not receive the time from the render world! Calculations depending on the time may be incorrect.log.target = "bevy_time"; log.module_path = "bevy_time"; log.file = "/Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_time-0.19.0/src/lib.rs"; log.line = 164;
+09-08 23:24:53.190 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:53.186851Z[0m [33m WARN[0m [2mbevy_time[0m[2m:[0m time_system did not receive the time from the render world! Calculations depending on the time may be incorrect.
+09-08 23:24:53.204 16161 16161 V threaded_app: WindowFocusChanged: 0xb400006f4a21f170 -- 1
+09-08 23:24:53.218 16161 16161 V GameActivity: onImeInsetsChanged from Text Listener
+09-08 23:24:53.218 16161 16161 V threaded_app: WindowInsetsChanged: 0xb400006f4a21f170
+09-08 23:24:54.007 16161 16183 I event src/ui_preview.rs:171: ANDROID_UI_PREVIEW_READY scene=roster
+09-08 23:24:54.007 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:54.007259Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_UI_PREVIEW_READY scene=roster
+09-08 23:24:54.289 16161 16183 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-08 23:24:54.289 16161 16182 I RustStdoutStderr: [2m2026-09-08T15:24:54.289168Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification

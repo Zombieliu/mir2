@@ -1,0 +1,357 @@
+plugins {
+    id 'com.android.application'
+}
+
+// External licensed Crystal UI files, staged into generated build output only.
+// Never silently ship a blank shell when the original image pack is missing.
+def uiRoot = System.getenv('MIR2_ANDROID_UI_ASSET_ROOT')
+def sharedUiOutput = layout.buildDirectory.dir('generated/shared-ui-assets')
+def requiredSharedUiLibraries = [
+        ChrSel: 1146,
+        Help: 42,
+        MMap: 450,
+        Prguse: 2447,
+        Prguse2: 1602,
+        StateItem: 5192,
+        Title: 899,
+]
+def verifySharedUiRoot = {
+    if (!uiRoot) {
+        throw new GradleException('Set MIR2_ANDROID_UI_ASSET_ROOT to the approved shared Crystal UI asset root')
+    }
+    def sourceRoot = file(uiRoot).canonicalFile
+    def outputRoot = sharedUiOutput.get().asFile.canonicalFile
+    if (sourceRoot == outputRoot) {
+        throw new GradleException('MIR2_ANDROID_UI_ASSET_ROOT must be a source pack, not Gradle generated/shared-ui-assets')
+    }
+    def manifestFile = new File(sourceRoot, 'original-ui/manifest.generated.json')
+    if (!manifestFile.isFile()) {
+        throw new GradleException('The approved shared Crystal UI asset root is missing original-ui/manifest.generated.json')
+    }
+    def manifest = new groovy.json.JsonSlurper().parse(manifestFile)
+    requiredSharedUiLibraries.each { library, minimumCount ->
+        def entry = manifest.libraries?."${library}"
+        def frames = entry?.frames
+        if (!(entry?.count instanceof Number) || entry.count < minimumCount
+                || !(frames instanceof List) || frames.size() < minimumCount) {
+            throw new GradleException("The approved shared Crystal UI ${library} export is incomplete")
+        }
+        frames.each { frame ->
+            def assetPath = frame?.path
+            def requiredPrefix = "/original-ui/${library}/"
+            if (!(assetPath instanceof String) || !assetPath.startsWith(requiredPrefix)
+                    || assetPath.contains('..') || !new File(sourceRoot, assetPath.substring(1)).isFile()) {
+                throw new GradleException("The approved shared Crystal UI ${library} manifest has a missing or unsafe frame")
+            }
+        }
+    }
+    def itemCount = fileTree(new File(sourceRoot, 'original-ui/Items')).matching {
+        include '*.png'
+    }.files.size()
+    if (itemCount < 1003) {
+        throw new GradleException('The approved shared Crystal UI Items export is incomplete')
+    }
+}
+def prepareSharedUi = tasks.register('prepareSharedUi', Sync) {
+    doFirst { verifySharedUiRoot() }
+    if (uiRoot) from(uiRoot) {
+        include 'original-ui/ChrSel/*.png', 'original-ui/Prguse/*.png', 'original-ui/Prguse2/*.png', 'original-ui/Title/*.png',
+                'original-ui/Items/*.png', 'original-ui/Help/*.png', 'original-ui/MMap/*.png', 'original-ui/StateItem/*.png'
+    }
+    into sharedUiOutput
+}
+
+// Generated map atlases are licensed build inputs, not Git content. When an
+// approved pack is supplied, stage only its versioned manifest and PNG pages
+// into APK assets. CI may still build the network/UI shell without this input;
+// the native client reports the missing pack instead of drawing fake terrain.
+def worldAssetRoot = System.getenv('MIR2_ANDROID_WORLD_ASSET_ROOT')
+def prepareWorldAssets = tasks.register('prepareWorldAssets', Sync) {
+    if (worldAssetRoot) from(worldAssetRoot) {
+        include 'generated/map-atlas/manifest.json', 'generated/map-atlas/**/*.png',
+                'generated/crystal-map-pack/0.map',
+                'generated/native-map-keyed/manifest.json', 'generated/native-map-keyed/pages/*.png'
+    }
+    into layout.buildDirectory.dir('generated/world-assets')
+    doFirst {
+        if (worldAssetRoot && !file("${worldAssetRoot}/generated/map-atlas/manifest.json").isFile()) {
+            throw new GradleException('MIR2_ANDROID_WORLD_ASSET_ROOT does not contain generated/map-atlas/manifest.json')
+        }
+        if (worldAssetRoot && !file("${worldAssetRoot}/generated/crystal-map-pack/0.map").isFile()) {
+            throw new GradleException('MIR2_ANDROID_WORLD_ASSET_ROOT does not contain generated/crystal-map-pack/0.map')
+        }
+        if (worldAssetRoot && !file("${worldAssetRoot}/generated/native-map-keyed/manifest.json").isFile()) {
+            throw new GradleException('MIR2_ANDROID_WORLD_ASSET_ROOT does not contain generated/native-map-keyed/manifest.json')
+        }
+    }
+}
+
+// The entity atlas is generated from the same approved Crystal source pack as
+// the Web renderer. Normal builds use the immutable tracked atlas; an explicit
+// local override lets Android QA exercise a bounded licensed pack without
+// committing that pack or changing the Web release. Android still validates
+// the manifest, page integrity and selected-page memory budget at runtime.
+def entityAtlasOverride = System.getenv('MIR2_ANDROID_ENTITY_ASSET_ROOT')
+def entityAtlasPackIdOverride = System.getenv('MIR2_ANDROID_ENTITY_ASSET_PACK_ID')
+def entityAtlasRoot = entityAtlasOverride
+        ? file("${entityAtlasOverride}/bevy-entity-atlases")
+        : file("${projectDir}/../../../../web/public/bevy-entity-atlases")
+def entityAssetOutput = layout.buildDirectory.dir('generated/entity-assets')
+def verifiedEntityPack = [:]
+def entitySha256 = { File source ->
+    def digest = java.security.MessageDigest.getInstance('SHA-256')
+    source.withInputStream { stream ->
+        byte[] buffer = new byte[64 * 1024]
+        for (int count = stream.read(buffer); count >= 0; count = stream.read(buffer)) {
+            if (count > 0) digest.update(buffer, 0, count)
+        }
+    }
+    digest.digest().collect { String.format('%02x', it & 0xff) }.join()
+}
+def verifyEntityPack = { File root ->
+    def manifestFile = new File(root, 'manifest.json')
+    if (!manifestFile.isFile()) {
+        throw new GradleException(entityAtlasOverride
+                ? 'MIR2_ANDROID_ENTITY_ASSET_ROOT does not contain bevy-entity-atlases/manifest.json'
+                : 'The shared Bevy entity-atlas manifest is missing')
+    }
+    if (manifestFile.length() <= 0 || manifestFile.length() > 16 * 1024 * 1024) {
+        throw new GradleException('The entity-atlas manifest byte count is out of bounds')
+    }
+    def manifest
+    try {
+        manifest = new groovy.json.JsonSlurper().parse(manifestFile)
+    } catch (Exception error) {
+        throw new GradleException('The entity-atlas manifest is invalid JSON', error)
+    }
+    if (manifest.schemaVersion != 2 || manifest.kind != 'mir2-bevy-entity-atlas-manifest'
+            || !(manifest.atlases instanceof List) || manifest.atlases.isEmpty()
+            || manifest.atlases.size() > 64) {
+        throw new GradleException('The entity-atlas manifest schema or atlas count is unsupported')
+    }
+
+    def atlasKeys = new LinkedHashSet<String>()
+    def pageFiles = new LinkedHashSet<String>()
+    long totalPageBytes = 0
+    int totalPages = 0
+    int totalRects = 0
+    manifest.atlases.each { atlas ->
+        def atlasKey = atlas.key as String
+        if (!atlasKey || atlasKey.length() > 128 || !atlasKeys.add(atlasKey)
+                || !(atlas.pages instanceof List) || atlas.pages.isEmpty()
+                || atlas.pages.size() > 32 || !(atlas.rects instanceof List)
+                || atlas.rects.isEmpty()) {
+            throw new GradleException("The entity atlas '${atlasKey}' has invalid or duplicate metadata")
+        }
+        int atlasWidth = (atlas.width as Number).intValue()
+        int atlasHeight = (atlas.height as Number).intValue()
+        if (atlasWidth <= 0 || atlasHeight <= 0 || atlasWidth * (long) atlasHeight > 4 * 1024 * 1024) {
+            throw new GradleException("The entity atlas '${atlasKey}' dimensions are out of bounds")
+        }
+        totalPages += atlas.pages.size()
+        totalRects += atlas.rects.size()
+        atlas.pages.each { page ->
+            def imageFile = page.imageFile as String
+            if (!(imageFile ==~ /[A-Za-z0-9._-]+\.png/) || !pageFiles.add(imageFile)) {
+                throw new GradleException("The entity-atlas page name is unsafe or duplicated: ${imageFile}")
+            }
+            def pageFile = new File(root, imageFile)
+            long declaredBytes = (page.imageBytes as Number).longValue()
+            int pageWidth = (page.width as Number).intValue()
+            int pageHeight = (page.height as Number).intValue()
+            def declaredHash = page.sha256 as String
+            if (!pageFile.isFile() || declaredBytes <= 0 || declaredBytes > 8 * 1024 * 1024
+                    || pageFile.length() != declaredBytes || pageWidth <= 0 || pageHeight <= 0
+                    || pageWidth > atlasWidth || pageHeight > atlasHeight
+                    || !(declaredHash ==~ /[0-9a-f]{64}/)) {
+                throw new GradleException("The entity-atlas page descriptor is invalid: ${imageFile}")
+            }
+            def image = javax.imageio.ImageIO.read(pageFile)
+            if (image == null || image.width != pageWidth || image.height != pageHeight) {
+                throw new GradleException("The entity-atlas PNG dimensions do not match: ${imageFile}")
+            }
+            image.flush()
+            def actualHash = entitySha256(pageFile)
+            if (actualHash != declaredHash) {
+                throw new GradleException("The entity-atlas PNG SHA-256 does not match: ${imageFile}")
+            }
+            totalPageBytes += declaredBytes
+        }
+        atlas.rects.each { rect ->
+            def pageIndex = rect.containsKey('pageIndex') ? rect.pageIndex : 0
+            if (!(pageIndex instanceof Number)
+                    || pageIndex.intValue() < 0
+                    || pageIndex.intValue() >= atlas.pages.size()) {
+                throw new GradleException("The entity atlas '${atlasKey}' has an invalid rect page index")
+            }
+        }
+    }
+    if (totalPages > 128 || totalRects > 100000) {
+        throw new GradleException('The entity-atlas page or rect total exceeds the Android budget')
+    }
+    def actualPages = fileTree(root).matching { include '*.png' }.files.collect { it.name }.toSet()
+    if (actualPages != pageFiles) {
+        throw new GradleException('The entity-atlas directory has missing or unreferenced PNG pages')
+    }
+    def manifestHash = entitySha256(manifestFile)
+    def packId = entityAtlasOverride ? entityAtlasPackIdOverride : "tracked-${manifestHash.substring(0, 16)}"
+    if (!(packId ==~ /[A-Za-z0-9._-]{1,96}/)) {
+        throw new GradleException(entityAtlasOverride
+                ? 'Set MIR2_ANDROID_ENTITY_ASSET_PACK_ID to a stable version identifier for the override pack'
+                : 'The derived tracked entity-atlas pack ID is invalid')
+    }
+    return [packId: packId, sourceMode: entityAtlasOverride ? 'override' : 'tracked-shared',
+            manifestSha256: manifestHash, manifestBytes: manifestFile.length(),
+            atlasCount: manifest.atlases.size(), pageCount: totalPages,
+            rectCount: totalRects, pageBytes: totalPageBytes]
+}
+def prepareEntityAssets = tasks.register('prepareEntityAssets', Sync) {
+    from(entityAtlasRoot) {
+        include 'manifest.json', '*.png'
+        into 'bevy-entity-atlases'
+    }
+    into entityAssetOutput
+    inputs.property('entityAtlasPackId', entityAtlasPackIdOverride ?: '')
+    doFirst {
+        verifiedEntityPack.clear()
+        verifiedEntityPack.putAll(verifyEntityPack(entityAtlasRoot))
+    }
+    doLast {
+        def lockFile = entityAssetOutput.get().file('bevy-entity-atlases/pack-lock.json').asFile
+        lockFile.parentFile.mkdirs()
+        lockFile.setText(groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
+                schemaVersion: 1,
+                kind: 'mir2-android-entity-pack-lock',
+                packId: verifiedEntityPack.packId,
+                sourceMode: verifiedEntityPack.sourceMode,
+                manifestSha256: verifiedEntityPack.manifestSha256,
+                manifestBytes: verifiedEntityPack.manifestBytes,
+                atlasCount: verifiedEntityPack.atlasCount,
+                pageCount: verifiedEntityPack.pageCount,
+                rectCount: verifiedEntityPack.rectCount,
+                pageBytes: verifiedEntityPack.pageBytes
+        ])) + System.lineSeparator(), 'UTF-8')
+    }
+}
+
+// DNItems is a small tracked Crystal export used by authoritative ground-item
+// and gold packets. Keep it separate from the external full UI/world packs so
+// packet rendering is reproducible in CI and cannot fall back to fake markers.
+def groundItemsRoot = file("${projectDir}/../../../../web/public/original-ui/DNItems")
+def prepareGroundItemAssets = tasks.register('prepareGroundItemAssets', Sync) {
+    from(groundItemsRoot) {
+        include '*.png', 'meta.json'
+        into 'original-ui/DNItems'
+    }
+    into layout.buildDirectory.dir('generated/ground-item-assets')
+    doFirst {
+        if (!file("${groundItemsRoot}/meta.json").isFile()
+                || fileTree(groundItemsRoot).matching { include '*.png' }.files.size() != 5280) {
+            throw new GradleException('The tracked Crystal DNItems export is incomplete')
+        }
+    }
+}
+
+// Scene effects are the tracked immutable Crystal export used by
+// ObjectMagic/ObjectProjectile/ObjectEffect/MapEffect/ObjectSpell. Stage the
+// manifest, frame metadata and exact PNGs; the native producer never draws a
+// synthetic fallback when a packet cannot be resolved from this catalog.
+def effectAssetsRoot = file("${projectDir}/../../../../web/public/original-effects")
+def prepareEffectAssets = tasks.register('prepareEffectAssets', Sync) {
+    from(effectAssetsRoot) {
+        include 'effects.generated.json', '**/meta.json', '**/*.png'
+        into 'original-effects'
+    }
+    into layout.buildDirectory.dir('generated/effect-assets')
+    doFirst {
+        def coreFrameCount = ['Effect', 'Magic', 'Magic2', 'Magic3'].sum { library ->
+            def meta = file("${effectAssetsRoot}/${library}/meta.json")
+            if (!meta.isFile()) {
+                throw new GradleException("The tracked Crystal ${library} effect metadata is missing")
+            }
+            fileTree(file("${effectAssetsRoot}/${library}")).matching { include '*.png' }.files.size()
+        }
+        if (!file("${effectAssetsRoot}/effects.generated.json").isFile() || coreFrameCount != 2067) {
+            throw new GradleException('The tracked Crystal scene-effect export is incomplete')
+        }
+    }
+}
+tasks.configureEach { task ->
+    if (task.name == 'mergeDebugAssets' || task.name == 'mergeReleaseAssets' || task.name == 'mergeUiPreviewAssets') {
+        task.dependsOn prepareSharedUi, prepareWorldAssets, prepareEntityAssets, prepareGroundItemAssets, prepareEffectAssets
+    }
+}
+
+android {
+    namespace 'com.mir2.web3'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.mir2.web3'
+        minSdk 31
+        targetSdk 35
+        versionCode 3
+        versionName '0.1.0-shared-ui'
+        buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
+
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    buildTypes {
+        uiPreview {
+            initWith debug
+            applicationIdSuffix '.uipreview'
+            matchingFallbacks = ['debug']
+            buildConfigField 'boolean', 'UI_PREVIEW', 'true'
+        }
+        debug {
+            debuggable true
+            buildConfigField 'boolean', 'UI_PREVIEW', 'false'
+        }
+        release {
+            buildConfigField 'boolean', 'UI_PREVIEW', 'false'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        prefab true
+        buildConfig true
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+            assets.srcDir layout.buildDirectory.dir('generated/shared-ui-assets')
+            assets.srcDir layout.buildDirectory.dir('generated/world-assets')
+            assets.srcDir layout.buildDirectory.dir('generated/entity-assets')
+            assets.srcDir layout.buildDirectory.dir('generated/ground-item-assets')
+            assets.srcDir layout.buildDirectory.dir('generated/effect-assets')
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation 'com.squareup.okhttp3:okhttp-tls:4.12.0'
+    // Align the legacy jdk7/jdk8 artifacts pulled by AndroidX with the merged
+    // Kotlin stdlib so Gradle packages one class owner for each symbol.
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.9.25')
+    // Keep this aligned with Bevy 0.19 / android-activity 0.6.1.
+    implementation 'androidx.games:games-activity:4.4.0'
+    // games-activity 4.4.0 publishes an empty POM even though its Java API
+    // extends AppCompatActivity and implements AndroidX Core listener types.
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.core:core:1.15.0'
+}

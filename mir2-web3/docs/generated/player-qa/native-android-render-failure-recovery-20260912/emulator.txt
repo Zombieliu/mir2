@@ -1,0 +1,14 @@
+avd=Pixel_5_API_31
+fingerprint=google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys
+emulatorVersion=31.3.10.0
+renderer=swiftshader_indirect
+finalApkInstall=Performing Streamed Install / Success
+preFinalCapturePreviewReady=ANDROID_UI_PREVIEW_READY scene=world-render
+visibleFrameAccepted=false
+reason=DeviceLost after preview-ready; captured frame is black
+previewReadyAt=2026-09-12T02:46:55Z
+deviceLostAt=2026-09-12T02:47:26Z
+deviceLostLog=Caught DeviceLost error: Unknown Unexpected error variant (driver implementation is at fault)
+renderExitLog=Quitting the application due to DeviceLost RenderError
+finalApkLoginReadyWithinBoundedWindow=false
+finalApkReplacementCapture=false

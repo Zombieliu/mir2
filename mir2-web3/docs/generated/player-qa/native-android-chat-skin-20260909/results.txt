@@ -1,0 +1,19 @@
+/tmp/android-chat-skin-debug-build.log:BUILD SUCCESSFUL in 10s
+/tmp/android-chat-skin-debug-build.log:[platform-android] SHA-256: 1caaa85747157526fec86677126d4a4d9afd7372a57771372cc8b86edd2d62ac
+/tmp/android-chat-skin-debug-build.log:[platform-android] package gate passed
+/tmp/android-chat-skin-label-red.log:  left: 463
+/tmp/android-chat-skin-label-red.log: right: 465
+/tmp/android-chat-skin-label-red.log:test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 583 filtered out; finished in 0.02s
+/tmp/android-chat-skin-preview.log:test result: ok. 89 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+/tmp/android-chat-skin-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-skin-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-skin-normal.log:test result: ok. 86 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+/tmp/android-chat-skin-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-skin-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-skin-red.log:assertion `left == right` failed: wrong settings background for Chat
+/tmp/android-chat-skin-red.log:test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 583 filtered out; finished in 0.03s
+/tmp/android-chat-skin-preview-build.log:BUILD SUCCESSFUL in 10s
+/tmp/android-chat-skin-preview-build.log:[platform-android] SHA-256: 76faaa67f74495c0a5501652914b7d83b1be43e728aa5017076c2fdec1ec43b2
+/tmp/android-chat-skin-preview-build.log:[platform-android] package gate passed
+/tmp/android-chat-skin-shared.log:test result: ok. 584 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+/tmp/android-chat-skin-shared.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

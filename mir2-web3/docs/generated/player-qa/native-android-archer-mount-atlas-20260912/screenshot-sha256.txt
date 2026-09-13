@@ -1,0 +1,2 @@
+abbfbd3aaf5f83a01f7ba1821f43a14a4b0dca258e741ce7047ff9b8567e1b90  /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/docs/generated/player-qa/native-android-archer-mount-atlas-20260912/world-render-action.png
+8f8c01cffef9dd8ab1ded18c9a0faa89edc3b2518f1862b62ed295839384ebec  /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/docs/generated/player-qa/native-android-archer-mount-atlas-20260912/world-render-settled.png

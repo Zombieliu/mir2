@@ -494,7 +494,10 @@ pub fn route_android_input_messages(
         for route in route_input(message.0.clone(), &state) {
             match route {
                 AndroidInputRoute::UiAction(action) => actions.0.push(action),
-                AndroidInputRoute::Motion(intent) => motions.0.push(intent),
+                AndroidInputRoute::Motion(intent) => {
+                    motions.0.clear();
+                    motions.0.push(intent);
+                }
             }
         }
     }
@@ -505,12 +508,23 @@ pub fn apply_android_lifecycle_messages(
     mut shell: ResMut<AndroidShellState>,
     mut effects: ResMut<AndroidLifecycleEffects>,
     mut actions: ResMut<AndroidUiActionQueue>,
+    mut motions: ResMut<AndroidMotionQueue>,
     mut gateway: ResMut<AndroidGatewayOutboundQueue>,
     mut ui_state: ResMut<UiState>,
 ) {
     for message in reader.read() {
+        let drops_ephemeral_motion = matches!(
+            message.0,
+            AndroidLifecycleEvent::Pause
+                | AndroidLifecycleEvent::Destroy
+                | AndroidLifecycleEvent::NetworkUnavailable
+        );
         let terminal = matches!(message.0, AndroidLifecycleEvent::Destroy);
         let next = shell.apply_lifecycle(message.0.clone());
+        if drops_ephemeral_motion {
+            motions.0.clear();
+            gateway.clear_motion();
+        }
         if terminal {
             gateway.mark_terminal_reset();
             ui_state.mark_game_shop_unknown();
