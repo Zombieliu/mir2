@@ -783,6 +783,10 @@ struct EntityRenderLayer {
     z: f32,
     #[serde(default)]
     opacity: Option<f32>,
+    /// Optional signed ARGB actor tint. Android emits Crystal's authoritative
+    /// PoisonType DrawColour; absence keeps the historical opaque-white path.
+    #[serde(default)]
+    tint_argb: Option<i32>,
     #[serde(default)]
     additive: bool,
 }
@@ -5001,6 +5005,7 @@ fn sync_entity_render_layers(
                 continue;
             }
             let opacity = layer.opacity.unwrap_or(1.0);
+            let layer_color = entity_render_layer_color(layer);
             let image_binding =
                 entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
 
@@ -5079,7 +5084,7 @@ fn sync_entity_render_layers(
                     if let Ok(mut sprite) = sprite_query.get_mut(handle.entity) {
                         sprite.custom_size =
                             Some(Vec2::new(layer.width.max(1.0), layer.height.max(1.0)));
-                        sprite.color = Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
+                        sprite.color = layer_color;
                         sprite.texture_atlas = None;
                         sprite.rect = image_binding.image_rect;
                     }
@@ -5128,7 +5133,7 @@ fn sync_entity_render_layers(
                                 layer.height.max(1.0),
                             )),
                             rect: image_binding.image_rect,
-                            color: Color::srgba(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0)),
+                            color: layer_color,
                             ..default()
                         },
                         Transform::from_translation(position),
@@ -5175,6 +5180,18 @@ fn sync_entity_render_layers(
         .retain(|object_id, _| alive_actor_objects.contains(object_id));
 
     presentation_poses.set_applied_entity_center(entity_center);
+}
+
+fn entity_render_layer_color(layer: &EntityRenderLayer) -> Color {
+    let argb = layer.tint_argb.unwrap_or(-1) as u32;
+    let tint_alpha = ((argb >> 24) & 0xff) as f32 / 255.0;
+    let opacity = layer.opacity.unwrap_or(1.0).clamp(0.0, 1.0);
+    Color::srgba_u8(
+        ((argb >> 16) & 0xff) as u8,
+        ((argb >> 8) & 0xff) as u8,
+        (argb & 0xff) as u8,
+        (tint_alpha * opacity * 255.0).round() as u8,
+    )
 }
 
 fn publish_native_render_receipt(
@@ -6982,6 +6999,74 @@ mod entity_atlas_tests {
             .expect("retained body sprite");
         assert!(second.texture_atlas.is_none());
         assert_eq!(second.rect, Some(Rect::new(50.0, 20.0, 82.0, 68.0)));
+    }
+
+    #[test]
+    fn authoritative_actor_tint_updates_and_clears_on_one_retained_sprite() {
+        let mut app = entity_sync_test_app();
+        let state = |tint_argb: Option<i32>| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled": true,
+                "stageWidth": 1024,
+                "stageHeight": 768,
+                "entities": [{
+                    "objectId": "1001",
+                    "layers": [{
+                        "key": "1001:body",
+                        "path": "/original-ui/CArmour/00/standing.png",
+                        "left": 480,
+                        "top": 352,
+                        "width": 32,
+                        "height": 48,
+                        "z": 50005,
+                        "opacity": 0.5,
+                        "tintArgb": tint_argb
+                    }]
+                }]
+            }))
+            .expect("entity render state")
+        };
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(None));
+        app.update();
+        let entity =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        assert_eq!(
+            app.world()
+                .get::<Sprite>(entity)
+                .expect("body sprite")
+                .color,
+            Color::srgba_u8(255, 255, 255, 128)
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(Some(0xFF00_00FF_u32 as i32)));
+        app.update();
+        let retained =
+            app.world().resource::<SceneRegistry>().entity_render_layers["1001:body"].entity;
+        assert_eq!(retained, entity);
+        assert_eq!(
+            app.world()
+                .get::<Sprite>(retained)
+                .expect("tinted body sprite")
+                .color,
+            Color::srgba_u8(0, 0, 255, 128)
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(None));
+        app.update();
+        assert_eq!(
+            app.world()
+                .get::<Sprite>(retained)
+                .expect("cleared body sprite")
+                .color,
+            Color::srgba_u8(255, 255, 255, 128)
+        );
     }
 
     #[test]

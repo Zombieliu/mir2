@@ -124,6 +124,16 @@ objects remain ignored. Native entity state and uploaded atlas pixels arrive
 in separate bounded messages; an atlas-backed layer now waits for its declared
 image while retaining the last complete composite instead of asking Bevy to
 load the source-frame provenance path as a standalone Android asset.
+Post-`IN_GAME` `ObjectPoisoned` now follows that same bounded authoritative
+object stream. Initial spawn poison and later unsigned 16-bit updates are
+retained across visible/hidden actor lifecycle, and current, direction and
+action render layers receive Crystal's exact actor-wide DrawColour precedence.
+The shared runtime composes that signed ARGB tint with the existing layer
+opacity on the retained Sprite; clearing poison restores white without
+rebuilding the entity. Unknown/removed identities and malformed bitfields fail
+closed. This closes the visible status tint only. Crystal Slow animation
+cadence and resource-backed `ObjectLevelEffects` animations remain open; no
+placeholder effect is drawn.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a

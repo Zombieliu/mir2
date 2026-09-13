@@ -203,6 +203,38 @@ fn apply_offline_object_metadata_specimen(
     true
 }
 
+fn apply_offline_object_poison_specimen(
+    overlays: &mut crate::entity_overlays::ActorOverlayModel,
+) -> bool {
+    let packet = serde_json::json!({
+        "type": "packet", "packet": "ObjectPoisoned", "payload": {
+            "objectId": 9003, "poison": 8
+        }
+    })
+    .to_string();
+    let crate::live_entity::LiveEntityPacketOutcome::Applied {
+        models,
+        render: Some(render),
+        ..
+    } = crate::live_entity::apply_packet(&packet)
+    else {
+        return false;
+    };
+    let Some((center_x, center_y)) = overlays.center() else {
+        return false;
+    };
+    let Some(projected) = crate::entity_overlays::project(&models, center_x, center_y) else {
+        return false;
+    };
+    if !mir2_bevy_runtime::native_ingest::push_native_entity_model_set(models)
+        || !mir2_bevy_runtime::native_ingest::push_native_entity_render_state(render)
+    {
+        return false;
+    }
+    overlays.replace(projected);
+    true
+}
+
 fn report_world_render_motion_pose(
     poses: Res<mir2_bevy_runtime::PresentationPoseBuffer>,
     time: Res<Time>,
@@ -251,6 +283,11 @@ fn report_world_render_ready(
             info!("ANDROID_OBJECT_METADATA_PRESENTATION_APPLIED");
         } else {
             warn!("offline object metadata specimen was not accepted");
+        }
+        if apply_offline_object_poison_specimen(&mut overlays) {
+            info!("ANDROID_OBJECT_POISON_PRESENTATION_APPLIED");
+        } else {
+            warn!("offline object poison specimen was not accepted");
         }
         overlays.observe_damage_events(
             [crate::live_entity::LiveDamageEvent {

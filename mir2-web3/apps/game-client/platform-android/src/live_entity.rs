@@ -435,6 +435,9 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 object_id,
                 update: EntityMetadata::GuildName(guild_name),
             }),
+        "ObjectPoisoned" => object_id(body)
+            .zip(unsigned_u16(body, "poison"))
+            .map(|(object_id, poison)| EntityMutation::Poison { object_id, poison }),
         "Death" => self_object_id(&models)
             .zip(location(body))
             .map(|(object_id, position)| EntityMutation::Action {
@@ -730,6 +733,7 @@ fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
         | EntityMutation::Remove(object_id)
         | EntityMutation::Health { object_id, .. }
         | EntityMutation::Metadata { object_id, .. }
+        | EntityMutation::Poison { object_id, .. }
         | EntityMutation::Action { object_id, .. } => Some(*object_id),
         EntityMutation::Damage(event) => Some(event.object_id),
         EntityMutation::Move(object_id, ..) => Some(*object_id),
@@ -830,6 +834,34 @@ fn apply_cache_mutation(
                 .is_some_and(|entity| patch_model_metadata(entity, update));
             (model_changed || hidden_changed, false)
         }
+        EntityMutation::Poison { object_id, poison } => {
+            let model_changed = apply_models(models, mutation);
+            let visible_actor = models
+                .get("entities")
+                .and_then(Value::as_array)
+                .is_some_and(|entities| {
+                    entities
+                        .iter()
+                        .any(|entity| entity_id(entity) == Some(*object_id))
+                });
+            let render_changed =
+                visible_actor && render.is_some_and(|value| apply_render(value, mutation));
+            let hidden_changed = hidden.get_mut(object_id).is_some_and(|entry| {
+                let model_changed = entry
+                    .model
+                    .as_mut()
+                    .is_some_and(|entity| patch_model_poison(entity, *poison));
+                let render_changed = entry
+                    .render
+                    .as_mut()
+                    .is_some_and(|entity| patch_render_poison(entity, *poison));
+                model_changed || render_changed
+            });
+            (
+                model_changed || render_changed || hidden_changed,
+                render_changed,
+            )
+        }
         EntityMutation::Action {
             object_id,
             action,
@@ -915,6 +947,10 @@ enum EntityMutation {
         object_id: u32,
         update: EntityMetadata,
     },
+    Poison {
+        object_id: u32,
+        poison: u16,
+    },
     Damage(LiveDamageEvent),
     Hide(u32),
     Show(u32),
@@ -992,6 +1028,10 @@ fn damage_type(payload: &serde_json::Map<String, Value>) -> Option<u8> {
 
 fn signed_i32(payload: &serde_json::Map<String, Value>, key: &str) -> Option<i32> {
     i32::try_from(payload.get(key)?.as_i64()?).ok()
+}
+
+fn unsigned_u16(payload: &serde_json::Map<String, Value>, key: &str) -> Option<u16> {
+    u16::try_from(payload.get(key)?.as_u64()?).ok()
 }
 
 fn bounded_text(
@@ -1112,6 +1152,10 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         None | Some(Value::Null) => false,
         Some(value) => value.as_bool()?,
     };
+    let poison = match payload.get("poison") {
+        None | Some(Value::Null) => 0,
+        Some(value) => u16::try_from(value.as_u64()?).ok()?,
+    };
     let model = json!({
         "objectId": object_id.to_string(),
         "kind": kind,
@@ -1124,6 +1168,7 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         "guildName": guild_name,
         "image": image,
         "dead": dead,
+        "poison": poison,
     });
     Some(EntitySpawn {
         model,
@@ -1480,6 +1525,10 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_model_metadata(entity, update)),
+        EntityMutation::Poison { object_id, poison } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_model_poison(entity, *poison)),
         EntityMutation::Damage(event) => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(event.object_id))
@@ -1541,6 +1590,12 @@ fn patch_model_metadata(entity: &mut Value, update: &EntityMetadata) -> bool {
             changed
         }
     }
+}
+
+fn patch_model_poison(entity: &mut Value, poison: u16) -> bool {
+    let changed = entity.get("poison").and_then(Value::as_u64) != Some(u64::from(poison));
+    entity["poison"] = json!(poison);
+    changed
 }
 
 fn upsert_ground_drop_model(models: &mut Value, drop: &GroundDropSpawn) -> bool {
@@ -1668,6 +1723,10 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_dead(entity, *percent == 0)),
         EntityMutation::Metadata { .. } => false,
+        EntityMutation::Poison { object_id, poison } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_render_poison(entity, *poison)),
         EntityMutation::Damage(_) => false,
         EntityMutation::Spawn(spawn) => {
             if let Some(existing) = entities
@@ -1690,6 +1749,13 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
                         existing,
                         spawn.position,
                         spawn.direction.as_deref(),
+                    ) | patch_render_poison(
+                        existing,
+                        spawn
+                            .model
+                            .get("poison")
+                            .and_then(Value::as_u64)
+                            .unwrap_or_default() as u16,
                     );
                 }
                 let object_id = entity_id(&spawn.model).expect("spawn was validated");
@@ -1937,6 +2003,90 @@ fn patch_render_dead(entity: &mut Value, dead: bool) -> bool {
     changed
 }
 
+/// Crystal computes one actor-wide DrawColour from the PoisonType flags. Keep
+/// its precedence exact and omit white so older/native producers remain byte
+/// compatible when no status tint is active.
+pub(crate) fn poison_tint_argb(poison: u16) -> Option<i32> {
+    const GREEN: u16 = 1;
+    const RED: u16 = 2;
+    const SLOW: u16 = 4;
+    const FROZEN: u16 = 8;
+    const STUN: u16 = 16;
+    const PARALYSIS: u16 = 32;
+    const DELAYED_EXPLOSION: u16 = 64;
+    const BLEEDING: u16 = 128;
+    const LR_PARALYSIS: u16 = 256;
+    const BLINDNESS: u16 = 512;
+    const DAZED: u16 = 1024;
+
+    let argb = if poison & DELAYED_EXPLOSION != 0 {
+        0xFFFF_A500_u32
+    } else if poison & (PARALYSIS | LR_PARALYSIS) != 0 {
+        0xFF80_8080_u32
+    } else if poison & FROZEN != 0 {
+        0xFF00_00FF_u32
+    } else if poison & BLINDNESS != 0 {
+        0xFFC7_1585_u32
+    } else if poison & (STUN | DAZED) != 0 {
+        0xFFFF_FF00_u32
+    } else if poison & SLOW != 0 {
+        0xFF80_0080_u32
+    } else if poison & BLEEDING != 0 {
+        0xFF8B_0000_u32
+    } else if poison & RED != 0 {
+        0xFFFF_0000_u32
+    } else if poison & GREEN != 0 {
+        0xFF00_8000_u32
+    } else {
+        return None;
+    };
+    Some(argb as i32)
+}
+
+fn patch_render_poison(entity: &mut Value, poison: u16) -> bool {
+    let tint = poison_tint_argb(poison);
+    let mut changed = entity.get("poison").and_then(Value::as_u64) != Some(u64::from(poison));
+    entity["poison"] = json!(poison);
+    if let Some(layers) = entity.get_mut("layers").and_then(Value::as_array_mut) {
+        changed |= patch_layers_tint(layers, tint);
+    }
+    if let Some(directions) = entity
+        .get_mut("directionLayers")
+        .and_then(Value::as_object_mut)
+    {
+        for layers in directions.values_mut().filter_map(Value::as_array_mut) {
+            changed |= patch_layers_tint(layers, tint);
+        }
+    }
+    if let Some(actions) = entity
+        .get_mut("actionLayers")
+        .and_then(Value::as_object_mut)
+    {
+        for descriptor in actions.values_mut() {
+            if let Some(frames) = descriptor.get_mut("frames").and_then(Value::as_array_mut) {
+                for layers in frames.iter_mut().filter_map(Value::as_array_mut) {
+                    changed |= patch_layers_tint(layers, tint);
+                }
+            }
+        }
+    }
+    changed
+}
+
+fn patch_layers_tint(layers: &mut [Value], tint: Option<i32>) -> bool {
+    let mut changed = false;
+    for layer in layers {
+        let previous = layer.get("tintArgb").and_then(Value::as_i64);
+        changed |= previous != tint.map(i64::from);
+        if let Some(tint) = tint {
+            layer["tintArgb"] = json!(tint);
+        } else if let Some(layer) = layer.as_object_mut() {
+            layer.remove("tintArgb");
+        }
+    }
+    changed
+}
+
 fn patch_layers_opacity(layers: &mut [Value], opacity: f64) -> bool {
     let mut changed = false;
     for layer in layers {
@@ -1975,6 +2125,14 @@ fn spawn_render_from_prototype(
     {
         return false;
     }
+    patch_render_poison(
+        &mut rendered,
+        spawn
+            .model
+            .get("poison")
+            .and_then(Value::as_u64)
+            .unwrap_or_default() as u16,
+    );
     entities.push(rendered);
     true
 }
@@ -2434,6 +2592,129 @@ mod tests {
             LiveEntityPacketOutcome::Ignored
         );
         clear();
+    }
+
+    #[test]
+    fn authoritative_poison_updates_visible_hidden_and_future_actor_layers() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630},{"objectId":"43","kind":"player","name":"Remote","x":301,"y":630,"poison":0}],"groundDrops":[{"objectId":"50","name":"Potion","x":302,"y":630,"quantity":1,"image":0,"dropKind":"item"}]}"#,
+            13,
+        ));
+        assert!(install_render(
+            r#"{"_nativeWorldRequest":13,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]},{"objectId":"50","isSelf":false,"gridX":302,"gridY":630,"layers":[{"key":"50:ground-item","left":576.0,"top":352.0,"opacity":1.0}]}]}"#,
+            r#"{"_nativeWorldRequest":13,"entities":[{"objectId":"43","prototype":{"kind":"player","classKey":"warrior","dead":false,"sprite":{"bodyLibrary":"CArmour/00"}},"directionLayers":{"Down":[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]},"actionLayers":{"attack1:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]]}}}]}"#,
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":8}}"#,
+        ) else {
+            panic!("poison should apply");
+        };
+        assert_eq!(
+            serde_json::from_str::<Value>(&models).unwrap()["entities"][1]["poison"],
+            8
+        );
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(
+            render["entities"][1]["layers"][0]["tintArgb"],
+            0xFF00_00FF_u32 as i32
+        );
+
+        let LiveEntityPacketOutcome::Applied { render, .. } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectAttack","payload":{"objectId":43,"x":301,"y":630,"direction":"Down"}}"#,
+            100,
+        ) else {
+            panic!("future action pose should apply");
+        };
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(
+            render["entities"][1]["layers"][0]["tintArgb"],
+            0xFF00_00FF_u32 as i32
+        );
+
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectHide","payload":{"objectId":43}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":64}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { render: None, .. }
+        ));
+        let LiveEntityPacketOutcome::Applied { models, render, .. } =
+            apply_packet(r#"{"type":"packet","packet":"ObjectShow","payload":{"objectId":43}}"#)
+        else {
+            panic!("hidden poisoned actor should restore");
+        };
+        assert_eq!(
+            serde_json::from_str::<Value>(&models).unwrap()["entities"][1]["poison"],
+            64
+        );
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(
+            render["entities"][2]["layers"][0]["tintArgb"],
+            0xFFFF_A500_u32 as i32
+        );
+
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":0}}"#,
+        ) else {
+            panic!("poison clear should apply");
+        };
+        assert_eq!(
+            serde_json::from_str::<Value>(&models).unwrap()["entities"][1]["poison"],
+            0
+        );
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert!(render["entities"][2]["layers"][0].get("tintArgb").is_none());
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":0}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+        for invalid in [
+            r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":-1}}"#,
+            r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":65536}}"#,
+        ] {
+            assert_eq!(apply_packet(invalid), LiveEntityPacketOutcome::Rejected);
+        }
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":99,"poison":8}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":50,"poison":8}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored,
+            "actor status packets must not mutate a same-id ground-render entry"
+        );
+        clear();
+    }
+
+    #[test]
+    fn crystal_poison_draw_colour_precedence_is_exact() {
+        for (poison, expected) in [
+            (0, None),
+            (1, Some(0xFF00_8000_u32 as i32)),
+            (2, Some(0xFFFF_0000_u32 as i32)),
+            (128, Some(0xFF8B_0000_u32 as i32)),
+            (4, Some(0xFF80_0080_u32 as i32)),
+            (16 | 1024, Some(0xFFFF_FF00_u32 as i32)),
+            (512 | 16, Some(0xFFC7_1585_u32 as i32)),
+            (8 | 512, Some(0xFF00_00FF_u32 as i32)),
+            (32 | 8, Some(0xFF80_8080_u32 as i32)),
+            (256 | 32, Some(0xFF80_8080_u32 as i32)),
+            (64 | 32, Some(0xFFFF_A500_u32 as i32)),
+        ] {
+            assert_eq!(poison_tint_argb(poison), expected, "poison={poison}");
+        }
     }
 
     #[test]

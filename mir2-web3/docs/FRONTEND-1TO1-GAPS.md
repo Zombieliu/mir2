@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: authoritative `ObjectPoisoned` now reaches
+> the Android object cache and retained shared Bevy actor layers after
+> `IN_GAME`. Initial spawn state, visible/hidden lifecycle, standing/action
+> layers, Crystal's exact poison-colour precedence, opacity composition and
+> no-respawn clear are covered. Android default 179/179 and UI Preview 187/187,
+> shared runtime 235/235, Gradle Debug/UI Preview 25/25 each, API31 check,
+> release packaging, streamed install and a 2340x1080 visible frozen-blue actor
+> pass. The 444,414,488-byte APK SHA-256 is
+> `ec6e398d4728cccd43cf5a7818ab965892709c5016b1ecba3990c952d9d9c0d0`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-poison-20260913/README.md`.
+> Slow cadence, resource-backed `ObjectLevelEffects`, approved-WSS real login,
+> online StartGame, public asset alignment and physical-device acceptance are
+> still open.
+
 > 2026-09-13 Android current change: authoritative object rename, signed name
 > colour and guild-name packets now reach the Android object reducer and the
 > existing shared-stage overlay for visible and hidden cached actors. A native

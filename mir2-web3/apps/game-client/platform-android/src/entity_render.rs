@@ -152,6 +152,8 @@ struct SnapshotEntity {
     #[serde(default)]
     dead: bool,
     #[serde(default)]
+    poison: u16,
+    #[serde(default)]
     class_key: Option<String>,
     #[serde(default, rename = "class")]
     class_name: Option<String>,
@@ -294,6 +296,8 @@ struct EntityRenderLayer {
     height: f32,
     z: f32,
     opacity: f32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tint_argb: Option<i32>,
 }
 
 #[derive(Debug)]
@@ -1141,6 +1145,7 @@ where
                     height: rect.height as f32,
                     z: depth as f32 * 10.0 + order as f32,
                     opacity: if entity.dead { 0.45 } else { 1.0 },
+                    tint_argb: crate::live_entity::poison_tint_argb(entity.poison),
                 });
             }
             (layers, missing_body)
@@ -1291,6 +1296,7 @@ where
                     height: frame.height as f32,
                     z: depth as f32 * 10.0,
                     opacity: 1.0,
+                    tint_argb: None,
                 }]
             })
             .unwrap_or_default();
@@ -1485,7 +1491,7 @@ mod tests {
         let snapshot = serde_json::json!({
             "playerObjectId":"42",
             "entities":[{
-                "objectId":"42","kind":"selfPlayer","x":300,"y":630,"direction":"Down",
+                "objectId":"42","kind":"selfPlayer","x":300,"y":630,"direction":"Down","poison":8,
                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}
             }]
         })
@@ -1508,6 +1514,10 @@ mod tests {
         assert_eq!(state["entities"][0]["layers"][0]["left"], 488.0);
         assert_eq!(state["entities"][0]["layers"][0]["top"], 304.0);
         assert_eq!(state["entities"][0]["layers"][0]["atlasKey"], "starter");
+        assert_eq!(
+            state["entities"][0]["layers"][0]["tintArgb"],
+            0xFF00_00FF_u32 as i32
+        );
         assert!(state["entities"][0].get("directionLayers").is_none());
         let live: serde_json::Value = serde_json::from_str(&product.live_directions_json).unwrap();
         assert_eq!(
@@ -1517,6 +1527,10 @@ mod tests {
         assert_eq!(
             live["entities"][0]["directionLayers"]["Right"][0]["atlasRectKey"],
             "/original-ui/CArmour/00/8.png|1x1"
+        );
+        assert_eq!(
+            live["entities"][0]["directionLayers"]["Right"][0]["tintArgb"],
+            0xFF00_00FF_u32 as i32
         );
         assert_eq!(
             live["entities"][0]["prototype"]["sprite"]["bodyLibrary"],

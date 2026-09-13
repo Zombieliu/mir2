@@ -357,6 +357,7 @@ public class GatewaySessionTest {
                 "{\"type\":\"packet\",\"packet\":\"ObjectName\",\"payload\":{\"objectId\":77,\"name\":\"Hen renamed\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectColourChanged\",\"payload\":{\"objectId\":77,\"nameColourArgb\":-65281}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectGuildNameChanged\",\"payload\":{\"objectId\":77,\"guildName\":\"AUTHORITATIVE\"}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectPoisoned\",\"payload\":{\"objectId\":77,\"poison\":8}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectRangeAttack\",\"payload\":{\"objectId\":77,\"location\":{\"x\":299,\"y\":629},\"direction\":\"Left\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectDied\",\"payload\":{\"objectId\":77,\"location\":{\"x\":299,\"y\":629},\"direction\":\"Left\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectRevived\",\"payload\":{\"objectId\":77,\"effect\":true}}",

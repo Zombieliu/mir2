@@ -1,0 +1,780 @@
+--------- beginning of main
+09-13 21:21:52.347  1262  1262 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.mir2.web3.uipreview. Reason: package android.intent.action.PACKAGE_REMOVED
+09-13 21:21:52.357   691   691 V MediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_REMOVED
+--------- beginning of system
+09-13 21:21:52.359   520   539 D CompanionDeviceManagerService: onPackageModified(packageName = com.mir2.web3.uipreview)
+09-13 21:21:52.360  1262  1262 I MediaProvider: Invalidating LocalCallingIdentity cache for package com.mir2.web3.uipreview. Reason: package android.intent.action.PACKAGE_ADDED
+09-13 21:21:52.368  1488  1488 I A       : onApplyWindowInsets: systemWindowInsets=Insets{left=0, top=145, right=0, bottom=132}
+09-13 21:21:52.368  1488  1488 I A       : onApplyWindowInsets: Adjusting for display cutouts. Safe insets: left=0, top=136, right=0, bottom=0
+09-13 21:21:52.368  1488  1488 I A       : onApplyWindowInsets: systemWindowInsets=Insets{left=0, top=145, right=0, bottom=132}
+09-13 21:21:52.369   520   609 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS |
+09-13 21:21:52.375  1279  1279 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) }
+09-13 21:21:52.377   691   691 V MediaPlayerList: mPackageChangedBroadcastReceiver: action: android.intent.action.PACKAGE_ADDED
+09-13 21:21:52.377   691   691 D MediaPlayerList: Name of package changed: com.mir2.web3.uipreview
+09-13 21:21:52.378  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3420
+09-13 21:21:52.379  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-13 21:21:52.380  1221  1221 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-13 21:21:52.381   520   609 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS |
+09-13 21:21:52.397   520   609 I InputReader: Reconfiguring input devices, changes=KEYBOARD_LAYOUTS |
+09-13 21:21:52.415   840   840 D CarrierSvcBindHelper: No carrier app for: 0
+09-13 21:21:52.415   840   840 D CarrierSvcBindHelper: No carrier app for: 0
+09-13 21:21:52.418   840   840 D ImsResolver: maybeAddedImsService, packageName: com.mir2.web3.uipreview
+09-13 21:21:52.430   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+09-13 21:21:52.430   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+09-13 21:21:52.430   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REMOVED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+09-13 21:21:52.435   840   840 D CarrierConfigLoader: mHandler: EVENT_PACKAGE_CHANGED phoneId: 0
+09-13 21:21:52.436   520   532 I system_server: Background young concurrent copying GC freed 165167(7799KB) AllocSpace objects, 7(216KB) LOS objects, 18% free, 25MB/31MB, paused 158us,19us total 190.269ms
+09-13 21:21:52.436   520   520 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 1000; state: DISABLED
+09-13 21:21:52.436   520   520 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 1000; state: DISABLED
+09-13 21:21:52.436   520   520 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 1000; state: DISABLED
+09-13 21:21:52.436   520   520 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 1000; state: ENABLED
+09-13 21:21:52.437   520   536 I ActivityManager: Force stopping com.mir2.web3.uipreview appid=10146 user=0: from pid 5261
+09-13 21:21:52.459   321   434 I netd    : trafficSetNetPermForUids(4, [10146]) <0.02ms>
+09-13 21:21:52.460   520   520 I Telecom : CarModeTracker: Package com.mir2.web3.uipreview is not tracked.: SSH.oR@AHY
+09-13 21:21:52.460   520   520 I Telecom : InCallController: updateCarModeForConnections: car mode apps: : SSH.oR@AHY
+09-13 21:21:52.461   321   434 I netd    : trafficSetNetPermForUids(4, [10146]) <0.01ms>
+09-13 21:21:52.464   520   520 I Telecom : DefaultDialerCache: Refreshing default dialer for user 0: now com.android.dialer: DDC.oR@AHc
+09-13 21:21:52.466   322   322 D Zygote  : Forked child process 5264
+09-13 21:21:52.466   520  2877 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-13 21:21:52.466   520  2877 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-13 21:21:52.467   520   520 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@92fd25a
+09-13 21:21:52.469  1279  1279 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) }
+09-13 21:21:52.480   520   537 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10099; state: DISABLED
+09-13 21:21:52.482  1279  1279 I GsaVoiceInteractionSrv: O received Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) }
+09-13 21:21:52.484   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.packageinstaller/com.android.packageinstaller.PackageInstalledReceiver
+09-13 21:21:52.484   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.gms/.games.chimera.GamesSystemBroadcastReceiverProxy
+09-13 21:21:52.484   520   551 I ActivityManager: Start proc 5264:com.android.keychain/1000 for service {com.android.keychain/com.android.keychain.KeyChainService}
+09-13 21:21:52.484   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+09-13 21:21:52.484   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+09-13 21:21:52.484   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+09-13 21:21:52.484   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver
+09-13 21:21:52.484   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+09-13 21:21:52.484   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package:com.mir2.web3.uipreview flg=0x4000010 (has extras) } to com.google.android.googlequicksearchbox/com.google.android.apps.gsa.googlequicksearchbox.GelStubAppWatcher
+09-13 21:21:52.486   840   840 D CarrierSvcBindHelper: No carrier app for: 0
+09-13 21:21:52.488   520   539 D ActivityManager: pid 1569 com.google.android.permissioncontroller  received async transactions while frozen
+09-13 21:21:52.489   520   539 D ActivityManager: sync unfroze 1569 com.google.android.permissioncontroller
+09-13 21:21:52.508   520   541 I DropBoxManagerService: add tag=system_app_strictmode isTagEnabled=true flags=0x2
+09-13 21:21:52.511  1569  2948 I PermissionControllerServiceImpl: Updating user sensitive for uid 10146
+09-13 21:21:52.512  1279  1279 I GsaVoiceInteractionSrv: Handling ACTION_START_HOTWORD
+09-13 21:21:52.521  1279  1279 I GsaVoiceInteractionSrv: disregardVoiceMatch: false
+09-13 21:21:52.522  1279  1279 I GsaVoiceInteractionSrv: Cannot start hotword, hotword has been explicitly disabled.
+09-13 21:21:52.542   520  2877 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-13 21:21:52.542   520  2877 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-13 21:21:52.555   520   520 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@36cda4f
+09-13 21:21:52.567  1445  1528 W gle.android.gm: Couldn't lock the profile file /data/misc/profiles/cur/0/com.google.android.gms/primary.prof: Failed to lock file '/data/misc/profiles/cur/0/com.google.android.gms/primary.prof': Try again
+09-13 21:21:52.567  1445  1528 W gle.android.gm: Could not forcefully load profile /data/misc/profiles/cur/0/com.google.android.gms/primary.prof
+09-13 21:21:52.582   520   569 E VerityUtils: Failed to measure fs-verity, errno 1: /data/app/~~N2x3T3RknumVw8UkTCpOPg==/com.mir2.web3.uipreview-Xpv23bSYxDZthzSbi7qJOA==/base.apk
+09-13 21:21:52.604  1488  1911 W SearchServiceCore: Abort, client detached.
+09-13 21:21:52.604  1488  1911 W SearchServiceCore: Abort, client detached.
+09-13 21:21:52.628   520   592 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras)} from uid 2000
+09-13 21:21:52.654   520   592 W ActivityTaskManager: Can't find TaskDisplayArea to determine support for multi window. Task id=398 attached=false
+09-13 21:21:52.656   520   592 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10146; state: DISABLED
+09-13 21:21:52.658   520   592 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10146; state: DISABLED
+09-13 21:21:52.658   520   592 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10146; state: DISABLED
+09-13 21:21:52.661   699   778 W Looper  : Slow dispatch took 35ms wmshell.main h=android.os.Handler c=com.android.wm.shell.common.DisplayChangeController$DisplayWindowRotationControllerImpl$$ExternalSyntheticLambda0@aa8dcd5 m=0
+09-13 21:21:52.663  1488  1911 W SearchServiceCore: Abort, client detached.
+09-13 21:21:52.666   520   542 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10146; state: DISABLED
+09-13 21:21:52.666   520   542 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10146; state: DISABLED
+09-13 21:21:52.667   699   898 D PhoneStartingWindowTypeAlgorithm: preferredStartingWindowType newTask:true taskSwitch:true processRunning:false allowTaskSnapshot:true activityCreated:false useEmptySplashScreen:true legacySplashScreen:false topIsHome:false
+09-13 21:21:52.667   699   898 D StartingSurfaceDrawer: addSplashScreen com.mir2.web3.uipreview theme=7f0d010a task=398 suggestType=3
+09-13 21:21:52.670   520   542 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10146; state: DISABLED
+09-13 21:21:52.670   520   542 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10146; state: ENABLED
+09-13 21:21:52.672   520   551 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10146; state: ENABLED
+09-13 21:21:52.673   520   542 I ActivityTaskManager: Config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 136 - 1080, 2208) mMaxBounds=Rect(0, 0 - 1080, 2340) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.100 fontWeightAdjustment=0}
+09-13 21:21:52.677   322   322 D Zygote  : Forked child process 5288
+09-13 21:21:52.678   520   542 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.100 fontWeightAdjustment=0} unchanged for IME proc com.google.android.inputmethod.latin
+09-13 21:21:52.678   520   542 I WindowManager: Override config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 136 - 1080, 2208) mMaxBounds=Rect(0, 0 - 1080, 2340) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.100 fontWeightAdjustment=0} for displayId=0
+09-13 21:21:52.678   520   542 V ActivityTaskManager: Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 136 - 1080, 2208) mMaxBounds=Rect(0, 0 - 1080, 2340) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.100 fontWeightAdjustment=0}
+09-13 21:21:52.686   699   898 D StartingSurfaceDrawer: addSplashScreen: creating context based on task Configuration {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_90} s.1 fontWeightAdjustment=0} for splash screen
+09-13 21:21:52.687  5288  5288 I .web3.uiprevie: Late-enabling -Xcheck:jni
+09-13 21:21:52.698  1221  1221 W GoogleInputMethodService: GoogleInputMethodService.onConfigurationChanged():1661 onConfigurationChanged() : NewConfig = {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 136 - 1080, 2208) mMaxBounds=Rect(0, 0 - 1080, 2340) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.132 fontWeightAdjustment=0}
+09-13 21:21:52.700  1221  1221 I NormalModeController: NormalModeController.getKeyboardBodyViewHolderPaddingBottom():109 currentPrimeKeyboardType:SOFT systemPaddingBottom:-1
+09-13 21:21:52.701  1221  1221 I NormalModeController: NormalModeController.getKeyboardBodyViewHolderPaddingBottom():109 currentPrimeKeyboardType:SOFT systemPaddingBottom:-1
+09-13 21:21:52.702   699   900 D StartingSurfaceDrawer: window attributes color: 0 icon null duration 0 brandImage null
+09-13 21:21:52.702   699   900 W StartingSurfaceDrawer: Window background does not exist, using android.graphics.drawable.ColorDrawable@eed1cea
+09-13 21:21:52.703   699   900 D SplashScreenView: Build android.window.SplashScreenView{695b678 V.E...... ......ID 0,0-0,0}
+09-13 21:21:52.703   699   900 D SplashScreenView: Icon: view: null drawable: null size: 0
+09-13 21:21:52.703   699   900 D SplashScreenView: Branding: view: android.view.View{4277151 G.ED..... ......I. 0,0-0,0 #10204a6 android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+09-13 21:21:52.703   699   900 D StartingSurfaceDrawer: fillViewWithIcon surfaceWindowView android.window.SplashScreenView{695b678 V.E...... ......ID 0,0-0,0}
+09-13 21:21:52.711  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.initializeKeyboardTheme():1399 Apply keyboard theme: theme_border_bottom4dp_keyboard4dp_stylesheet_googleblue_materiallight_builtin_google_blue_light.binarypb_port
+09-13 21:21:52.727  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.727  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.727  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.727  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.727  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.727  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.727  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.727  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.727   398   457 I adbd    : jdwp connection from 5264
+09-13 21:21:52.728  1221  1729 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.728  1221  1729 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.732   398   457 I adbd    : jdwp connection from 5288
+09-13 21:21:52.734  5264  5264 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 1000; state: ENABLED
+09-13 21:21:52.735  1221  1730 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.735  1221  1730 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.745  5264  5264 V GraphicsEnvironment: ANGLE Developer option for 'com.android.keychain' set to: 'default'
+09-13 21:21:52.746  5264  5264 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-13 21:21:52.746  1221  1221 I KeyboardViewUtil: KeyboardViewUtil.getKeyboardHeightRatio():166 systemKeyboardHeightRatio:1.000000; userKeyboardHeightRatio:1.000000.
+09-13 21:21:52.748  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-13 21:21:52.748  1445  5274 I PackageIntentOperation: Feature flags not enabled, skipping. [CONTEXT service_id=258 ]
+09-13 21:21:52.748  1221  1221 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-13 21:21:52.748  1221  1221 W SessionManager: SessionManager.beginSession():53 Try to begin an already begun session [INPUT_SESSION], end it first
+09-13 21:21:52.749  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.749  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:52.750  5264  5264 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-13 21:21:52.750  5264  5264 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-13 21:21:52.752   699   699 D StatusBar: disable<e i a s b h r c s > disable2<q i n >
+09-13 21:21:52.754   520   551 W ActivityManager: Slow operation: 88ms so far, now at startProcess: done updating battery stats
+09-13 21:21:52.754   520   551 W ActivityManager: Slow operation: 88ms so far, now at startProcess: building log message
+09-13 21:21:52.754   520   551 I ActivityManager: Start proc 5288:com.mir2.web3.uipreview/u0a146 for pre-top-activity {com.mir2.web3.uipreview/com.mir2.web3.MainActivity}
+09-13 21:21:52.754   520   551 W ActivityManager: Slow operation: 88ms so far, now at startProcess: starting to update pids map
+09-13 21:21:52.754   520   551 W ActivityManager: Slow operation: 88ms so far, now at startProcess: done updating pids map
+09-13 21:21:52.756   699   778 W Looper  : Slow delivery took 40ms wmshell.main h=android.view.Choreographer$FrameHandler c=android.view.Choreographer$FrameDisplayEventReceiver@e4de69c m=0
+09-13 21:21:52.799  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1105 update screenHeightWithoutNaviBar to: 2340
+09-13 21:21:52.799  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1112 update max height when insets changes
+09-13 21:21:52.867  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1105 update screenHeightWithoutNaviBar to: 2208
+09-13 21:21:52.867  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1112 update max height when insets changes
+09-13 21:21:52.868  1221  1221 I DictionarySuperpacksManager: DictionarySuperpacksManager$1.onEnabledInputMethodEntriesChanged():60 onEnabledInputMethodEntriesChanged
+09-13 21:21:52.869   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f6678000 0x1f66f8000]
+09-13 21:21:52.886  1279  1279 I GsaVoiceInteractionSrv: Handling ACTION_STOP_HOTWORD
+09-13 21:21:52.886  1279  1279 E HwDetectorWithState: a: 3
+09-13 21:21:52.895   520   542 I InputManager-JNI: Viewport [0] to add: local:4619827259835644672, isActive: true
+09-13 21:21:52.908   520   609 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO |
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_10' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_6' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_11' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_4' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Device reconfigured: id=8, name='virtio_input_multi_touch_1', size 1080x2340, orientation 0, mode 1, display id 0
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_7' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_2' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_9' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_5' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_3' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.908   520   609 I InputReader: Touch device 'virtio_input_multi_touch_8' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:52.920   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f8140000 0x1f8ae4000]
+09-13 21:21:52.921   699   778 W Looper  : Drained
+09-13 21:21:52.921   699   778 W Looper  : Slow dispatch took 121ms wmshell.main h=android.view.Choreographer$FrameHandler c=android.view.Choreographer$FrameDisplayEventReceiver@e4de69c m=0
+09-13 21:21:52.921   699   778 W Looper  : Slow delivery took 53ms wmshell.main h=android.os.Handler c=com.android.wm.shell.bubbles.BubbleController$BubblesImpl$$ExternalSyntheticLambda19@e1fada8 m=0
+09-13 21:21:52.922   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f8ae4000 0x1f9488000]
+09-13 21:21:52.922   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f9488000 0x1f9e2c000]
+09-13 21:21:52.926   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f66f8000 0x1f6784000]
+09-13 21:21:52.927   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fac000 0x1f7fb4000]
+09-13 21:21:52.928   840  1107 D TelephonyProvider: subIdString = 1 subId = 1
+09-13 21:21:52.928   840  1107 D TelephonyProvider: subIdString = 1 subId = 1
+09-13 21:21:52.931   699  1155 D HostConnection: createUnique: call
+09-13 21:21:52.933   699  1155 D HostConnection: HostConnection::get() New Host Connection established 0xb400007bb484e190, tid 1155
+09-13 21:21:52.933   699   778 W Looper  : Drained
+09-13 21:21:52.947  5288  5288 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10146; state: ENABLED
+09-13 21:21:52.958   699  1155 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-13 21:21:53.001   699  1155 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-13 21:21:53.003   699  1155 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-13 21:21:53.008  1445  5274 I Auth    : [SupervisedAccountIntentOperation] onHandleIntent(): android.intent.action.PACKAGE_ADDED
+09-13 21:21:53.009  1445  5314 I PackageIntentOperation: Feature flags not enabled, skipping. [CONTEXT service_id=258 ]
+09-13 21:21:53.026   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d48000 0x1f7dc8000]
+09-13 21:21:53.051  1445  5313 W SQLiteLog: (28) double-quoted string literal: "com.mir2.web3.uipreview"
+09-13 21:21:53.060  5288  5288 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3.uipreview' set to: 'default'
+09-13 21:21:53.060  5288  5288 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-13 21:21:53.062   699  1155 D EGL_emulation: eglCreateContext: 0xb400007bb484e610: maj 3 min 1 rcv 4
+09-13 21:21:53.062  5288  5288 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-13 21:21:53.063  5288  5288 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-13 21:21:53.084  1445  1445 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+09-13 21:21:53.084  1445  1445 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+09-13 21:21:53.092  1012  5279 I Fitness : FitCleanupIntentOperation received Intent android.intent.action.PACKAGE_REMOVED [CONTEXT service_id=17 ]
+09-13 21:21:53.096  1012  5321 I FontLog : Package com.mir2.web3.uipreview has no metadata [CONTEXT service_id=132 ]
+09-13 21:21:53.102   699  1155 D EGL_emulation: eglMakeCurrent: 0xb400007bb484e610: ver 3 1 (tinfo 0x7dce463200) (first time)
+09-13 21:21:53.128   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7b00000 0x1f7ba0000]
+09-13 21:21:53.138   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fb4000 0x1f7fbc000]
+09-13 21:21:53.177  1445  1445 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+09-13 21:21:53.177   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fbc000 0x1f7fc4000]
+09-13 21:21:53.206  5288  5336 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+09-13 21:21:53.213  1445  2263 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=AppsCorpus serviceId=36
+09-13 21:21:53.219   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f6784000 0x1f6824000]
+09-13 21:21:53.223  5288  5336 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+09-13 21:21:53.240   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d48000 0x1f7de8000]
+09-13 21:21:53.242  1012  1144 W ChimeraUtils: Module com.google.android.gms.nearby_en has empty metadata display_name_string_id
+09-13 21:21:53.242  1012  1144 W ChimeraUtils: Module com.google.android.gms.nearby_en has empty metadata display_name_string_id
+09-13 21:21:53.248  1445  1445 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+09-13 21:21:53.248  1445  1445 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+09-13 21:21:53.254  5288  5336 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+09-13 21:21:53.261   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fc4000 0x1f7fcc000]
+09-13 21:21:53.275  5288  5288 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+09-13 21:21:53.314  5288  5288 D gti.InputConnection: InputConnection created
+09-13 21:21:53.322  1445  1734 I Icing   : Usage reports ok 1, Failed Usage reports 0, indexed 0, rejected 0
+09-13 21:21:53.325   520   542 I ActivityTaskManager: Config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.133 fontWeightAdjustment=0}
+09-13 21:21:53.331   520   542 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 136 - 1080, 2208) mMaxBounds=Rect(0, 0 - 1080, 2340) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.133 fontWeightAdjustment=0} unchanged for IME proc com.google.android.inputmethod.latin
+09-13 21:21:53.331   520   542 I WindowManager: Override config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.133 fontWeightAdjustment=0} for displayId=0
+09-13 21:21:53.333   520   542 V ActivityTaskManager: Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.133 fontWeightAdjustment=0}
+09-13 21:21:53.334  1221  1221 W GoogleInputMethodService: GoogleInputMethodService.onConfigurationChanged():1661 onConfigurationChanged() : NewConfig = {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.165 fontWeightAdjustment=0}
+09-13 21:21:53.334  1221  1221 I NormalModeController: NormalModeController.getKeyboardBodyViewHolderPaddingBottom():109 currentPrimeKeyboardType:SOFT systemPaddingBottom:-1
+09-13 21:21:53.335  1221  1221 I NormalModeController: NormalModeController.getKeyboardBodyViewHolderPaddingBottom():109 currentPrimeKeyboardType:SOFT systemPaddingBottom:-1
+09-13 21:21:53.336  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.initializeKeyboardTheme():1399 Apply keyboard theme: theme_border_stylesheet_googleblue_materiallight_builtin_google_blue_light.binarypb_land
+09-13 21:21:53.337  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.337  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.337   520   542 I InputManager-JNI: Viewport [0] to add: local:4619827259835644672, isActive: true
+09-13 21:21:53.337  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.337  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.337  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.337  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.337  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.337  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.337   520   609 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO |
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_10' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_6' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_11' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_4' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Device reconfigured: id=8, name='virtio_input_multi_touch_1', size 1080x2340, orientation 1, mode 1, display id 0
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_7' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_2' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_9' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_5' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_3' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.337   520   609 I InputReader: Touch device 'virtio_input_multi_touch_8' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 21:21:53.338  1221  1729 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.338  1221  1729 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.344   840  1932 D TelephonyProvider: subIdString = 1 subId = 1
+09-13 21:21:53.344   840  1932 D TelephonyProvider: subIdString = 1 subId = 1
+09-13 21:21:53.344  5288  5288 D gti.InputConnection: setEditorInfo
+09-13 21:21:53.346  1221  1221 I KeyboardViewUtil: KeyboardViewUtil.getKeyboardHeightRatio():166 systemKeyboardHeightRatio:1.000000; userKeyboardHeightRatio:1.000000.
+09-13 21:21:53.350  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-13 21:21:53.351  1221  1221 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-13 21:21:53.351  1221  1221 W SessionManager: SessionManager.beginSession():53 Try to begin an already begun session [INPUT_SESSION], end it first
+09-13 21:21:53.351  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.351  1221  1221 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.355  1221  1730 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.355  1221  1730 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 21:21:53.356  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1105 update screenHeightWithoutNaviBar to: 948
+09-13 21:21:53.356   699   778 W Looper  : Slow dispatch took 54ms wmshell.main h=android.os.Handler c=com.android.wm.shell.common.DisplayChangeController$DisplayWindowRotationControllerImpl$$ExternalSyntheticLambda0@25650c1 m=0
+09-13 21:21:53.356  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1112 update max height when insets changes
+09-13 21:21:53.358   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f6824000 0x1f68c4000]
+09-13 21:21:53.365   520  2877 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-13 21:21:53.365   520  2877 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-13 21:21:53.368  5288  5288 W .web3.uiprevie: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+09-13 21:21:53.368   520   520 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@12ecfac
+09-13 21:21:53.378  5288  5288 I GameActivity: Looking for library libmir2_platform_android.so
+09-13 21:21:53.378  5288  5288 I GameActivity: Found library libmir2_platform_android.so. Loading...
+09-13 21:21:53.385  5288  5288 D GameActivity: GameActivity_register
+09-13 21:21:53.385  5288  5288 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+09-13 21:21:53.386  5288  5288 D GameActivity: SDK version: 31
+09-13 21:21:53.386  5288  5288 I android-activity: Creating: Activity = 0x1696, saved state size = 0
+09-13 21:21:53.388  1488  1488 I A       : onApplyWindowInsets: systemWindowInsets=Insets{left=0, top=145, right=0, bottom=132}
+09-13 21:21:53.388  1488  1488 I A       : onApplyWindowInsets: Adjusting for display cutouts. Safe insets: left=0, top=136, right=0, bottom=0
+09-13 21:21:53.388  1488  1488 I A       : onApplyWindowInsets: systemWindowInsets=Insets{left=0, top=145, right=0, bottom=132}
+09-13 21:21:53.400   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f70ac000 0x1f7a50000]
+09-13 21:21:53.402  5288  5288 V threaded_app: Creating: 0xb400007c14841910
+09-13 21:21:53.402  5288  5288 V threaded_app: Callbacks set: 0xb400007c14841960
+09-13 21:21:53.402  5288  5288 V threaded_app: Launching android_app_entry in a thread
+09-13 21:21:53.402  5288  5339 V threaded_app: android_app_entry called
+09-13 21:21:53.402  5288  5339 V threaded_app: android_app = 0xb400007bf4855d10
+09-13 21:21:53.402  5288  5339 V threaded_app: config = 0xb400007b64852520
+09-13 21:21:53.402  5288  5339 V threaded_app: activity = 0xb400007c14841910
+09-13 21:21:53.402  5288  5339 V threaded_app: assetmanager = 0xb400007c1484bb90
+09-13 21:21:53.402  5288  5339 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+09-13 21:21:53.426  1445  1734 I Icing   : Indexing com.google.android.gms-apps from com.google.android.gms
+09-13 21:21:53.431  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1105 update screenHeightWithoutNaviBar to: 1080
+09-13 21:21:53.432  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1112 update max height when insets changes
+09-13 21:21:53.432  1221  1221 I DictionarySuperpacksManager: DictionarySuperpacksManager$1.onEnabledInputMethodEntriesChanged():60 onEnabledInputMethodEntriesChanged
+09-13 21:21:53.467   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f5cd4000 0x1f6678000]
+09-13 21:21:53.502  1445  1734 I Icing   : Indexing done com.google.android.gms-apps
+09-13 21:21:53.517  5288  5339 D HostConnection: createUnique: call
+09-13 21:21:53.526  5288  5339 D HostConnection: HostConnection::get() New Host Connection established 0xb400007bb48453d0, tid 5339
+09-13 21:21:53.529  5288  5339 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-13 21:21:53.534   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+09-13 21:21:53.535  5288  5339 D EGL_emulation: eglCreateContext: 0xb400007bb4844ad0: maj 3 min 1 rcv 4
+09-13 21:21:53.536  5288  5339 D EGL_emulation: eglMakeCurrent: 0xb400007bb4844ad0: ver 3 1 (tinfo 0x7dd9000080) (first time)
+09-13 21:21:53.542  1445  1455 I gle.android.gm: Background young concurrent copying GC freed 57602(2896KB) AllocSpace objects, 22(1016KB) LOS objects, 48% free, 12MB/24MB, paused 24us,15us total 109.678ms
+09-13 21:21:53.550   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f68c4000 0x1f6950000]
+09-13 21:21:53.553  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:53.553877Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0))", vendor: 0, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.1 git hash: fbf66f49c7cc))", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-13 21:21:53.553  5288  5339 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bAdapterInfo { name: "Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0))", vendor: 0, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.1 git hash: fbf66f49c7cc))", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-13 21:21:53.554  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:53.553992Z[0m [33m WARN[0m [2mbevy_render::renderer[0m[2m:[0m The selected adapter is using a driver that only supports software rendering. This is likely to be very slow. See https://bevy.org/learn/errors/b0006/
+09-13 21:21:53.554  5288  5339 W event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bThe selected adapter is using a driver that only supports software rendering. This is likely to be very slow. See https://bevy.org/learn/errors/b0006/
+09-13 21:21:53.557   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f6950000 0x1f6aac000]
+09-13 21:21:53.557   520  2877 D ConnectivityService: requestNetwork for uid/pid:10146/5288 activeRequest: null callbackRequest: 151 [NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]] callback flags: 0 priority: 2147483647
+09-13 21:21:53.558   520   632 D ConnectivityService: NetReassign [152 : null → 101]
+09-13 21:21:53.559   520   625 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-13 21:21:53.559   520   625 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-13 21:21:53.559   520   625 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=152, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-13 21:21:53.564  5288  5288 V GameActivity: onStart_native
+09-13 21:21:53.564  5288  5288 V threaded_app: Start: 0xb400007c14841910
+09-13 21:21:53.585   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7de8000 0x1f7e24000]
+09-13 21:21:53.600  1445  1734 I Icing   : Indexing com.google.android.gms-apps from com.google.android.gms
+09-13 21:21:53.601  1445  1734 I Icing   : Indexing done com.google.android.gms-apps
+09-13 21:21:53.603  1445  2331 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=null serviceId=30
+09-13 21:21:53.606   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7cb8000 0x1f7cf4000]
+09-13 21:21:53.608   520   532 I system_server: Background concurrent copying GC freed 210163(11MB) AllocSpace objects, 31(1600KB) LOS objects, 49% free, 19MB/39MB, paused 41us,22us total 507.732ms
+09-13 21:21:53.619   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f6aac000 0x1f6bf8000]
+09-13 21:21:53.625  1445  1734 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0
+--------- beginning of kernel
+09-13 21:21:53.620   533   533 I binder  : 520:533 DecRefs 0 refcount change on invalid ref 1439 ret -22
+09-13 21:21:53.620   533   533 I binder  : 520:533 DecRefs 0 refcount change on invalid ref 1440 ret -22
+09-13 21:21:53.647   533   533 I binder  : 520:533 DecRefs 0 refcount change on invalid ref 1598 ret -22
+09-13 21:21:53.647   533   533 I binder  : 520:533 DecRefs 0 refcount change on invalid ref 1597 ret -22
+09-13 21:21:53.707  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:53.707461Z[0m [33m WARN[0m [2mbevy_ecs::world[0m[2m:[0m Resource `<Enable the debug feature to see the name>` was inserted during a call to World::resource_scope: the inserted value will be overwritten.
+09-13 21:21:53.707  5288  5339 W log event: Resource `<Enable the debug feature to see the name>` was inserted during a call to World::resource_scope: the inserted value will be overwritten.log.target = "bevy_ecs::world"; log.module_path = "bevy_ecs::world"; log.file = "/Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_ecs-0.19.0/src/world/mod.rs"; log.line = 2931;
+09-13 21:21:53.721  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:53.721731Z[0m [32m INFO[0m [2mbevy_render::render_resource::sparse_buffer_vec[0m[2m:[0m Sparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+09-13 21:21:53.721  5288  5339 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bSparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+09-13 21:21:53.721  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:53.721847Z[0m [33m WARN[0m [2mbevy_core_pipeline::oit::resolve[0m[2m:[0m OrderIndependentTransparencyPlugin not loaded. RenderDevice lacks support: max_storage_buffers_per_shader_stage < OIT_REQUIRED_STORAGE_BUFFERS. [3mmax_storage_buffers_per_shader_stage[0m[2m=[0m0 [3mOIT_REQUIRED_STORAGE_BUFFERS[0m[2m=[0m3
+09-13 21:21:53.721  5288  5339 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-OrderIndependentTransparencyPlugin not loaded. RenderDevice lacks support: max_storage_buffers_per_shader_stage < OIT_REQUIRED_STORAGE_BUFFERS.max_storage_buffers_per_shader_stage = 0; OIT_REQUIRED_STORAGE_BUFFERS = 3;
+09-13 21:21:53.725   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f6bf8000 0x1f6d44000]
+09-13 21:21:53.726   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7cf4000 0x1f7d30000]
+09-13 21:21:53.765   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7efc000 0x1f7f38000]
+09-13 21:21:53.799   699   699 I OpaEnabledReceiver: Dispatching OPA eligble = false; AGSA = true; OPA enabled = false
+09-13 21:21:53.801   699   699 I OpaLayout: Setting opa enabled to false
+09-13 21:21:53.801   699   699 I OpaLayout: Setting opa enabled to false
+09-13 21:21:53.813   699   699 I Choreographer: Skipped 52 frames!  The application may be doing too much work on its main thread.
+09-13 21:21:53.818   699   699 D StatusBar: disable<e i a s b h r c s > disable2<q i n >
+09-13 21:21:53.861   520   569 E VerityUtils: Failed to measure fs-verity, errno 1: /data/app/~~N2x3T3RknumVw8UkTCpOPg==/com.mir2.web3.uipreview-Xpv23bSYxDZthzSbi7qJOA==/base.apk
+09-13 21:21:53.864   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7efc000 0x1f7f38000]
+09-13 21:21:53.887   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7f38000 0x1f7f74000]
+09-13 21:21:53.888   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7a50000 0x1f7b00000]
+09-13 21:21:53.902  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:53.902184Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m GPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+09-13 21:21:53.902  5288  5339 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bGPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+09-13 21:21:53.910   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7b00000 0x1f7bb0000]
+09-13 21:21:53.913   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7bb0000 0x1f7c60000]
+09-13 21:21:53.916   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f6bf8000 0x1f6c84000]
+09-13 21:21:53.918   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fcc000 0x1f7fd4000]
+09-13 21:21:53.955   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fd4000 0x1f7fdc000]
+09-13 21:21:53.956   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fdc000 0x1f7fe4000]
+09-13 21:21:53.957   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fe4000 0x1f7fec000]
+09-13 21:21:53.963   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f7e24000 0x1f7eb0000]
+09-13 21:21:53.967  5288  5342 D HostConnection: createUnique: call
+09-13 21:21:53.967  5288  5342 D HostConnection: HostConnection::get() New Host Connection established 0xb400007bb4857c10, tid 5342
+09-13 21:21:53.969  5288  5342 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-13 21:21:53.969  5288  5342 D EGL_emulation: eglMakeCurrent: 0xb400007bb4844ad0: ver 3 1 (tinfo 0x7dd9000100) (first time)
+09-13 21:21:53.969  5288  5343 D HostConnection: createUnique: call
+09-13 21:21:53.970  5288  5343 D HostConnection: HostConnection::get() New Host Connection established 0xb400007bb4843d50, tid 5343
+09-13 21:21:53.971  5288  5343 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-13 21:21:53.972  5288  5343 D EGL_emulation: eglMakeCurrent: 0xb400007bb4844ad0: ver 3 1 (tinfo 0x7dd9000180) (first time)
+09-13 21:21:54.011  5288  5339 V threaded_app: activityState=11
+09-13 21:21:54.011  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:54.011456Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+09-13 21:21:54.011  5288  5339 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+09-13 21:21:54.012  5288  5288 V threaded_app: Resume: 0xb400007c14841910
+09-13 21:21:54.012  5288  5339 V threaded_app: activityState=12
+09-13 21:21:54.019   520   682 W WindowManager: Failed looking up window session=Session{55b7bdc 5288:u0a10146} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5599 com.android.server.wm.Session.insetsModified:629 android.view.IWindowSession$Stub.onTransact:1151
+09-13 21:21:54.019   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f6c84000 0x1f6d10000]
+09-13 21:21:54.022  5288  5288 I Choreographer: Skipped 54 frames!  The application may be doing too much work on its main thread.
+09-13 21:21:54.024  5288  5288 V GameActivity: onImeInsetsChanged from Text Listener
+09-13 21:21:54.025  5288  5288 V threaded_app: WindowInsetsChanged: 0xb400007c14841910
+09-13 21:21:54.026  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:54.026676Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-13 21:21:54.027  5288  5339 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-13 21:21:54.028   520   543 D CompatibilityChangeReporter: Compat change id reported: 158002302; UID 10146; state: ENABLED
+09-13 21:21:54.030  5288  5288 V GameActivity: onImeInsetsChanged from Text Listener
+09-13 21:21:54.030  5288  5288 V threaded_app: WindowInsetsChanged: 0xb400007c14841910
+09-13 21:21:54.031  5288  5339 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-13 21:21:54.031  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:54.030991Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-13 21:21:54.031  5288  5334 D HostConnection: createUnique: call
+09-13 21:21:54.031  5288  5334 D HostConnection: HostConnection::get() New Host Connection established 0xb400007bb485a010, tid 5334
+09-13 21:21:54.031  5288  5288 V threaded_app: ContentRectChanged: 0xb400007c14841910 -- (0 0) (2340 1080)
+09-13 21:21:54.032  5288  5339 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+09-13 21:21:54.032  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:54.032046Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+09-13 21:21:54.033  5288  5334 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-13 21:21:54.033  5288  5334 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-13 21:21:54.034  5288  5334 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-13 21:21:54.045  5288  5288 V GameActivity: onSurfaceCreated_native
+09-13 21:21:54.045  5288  5288 V threaded_app: NativeWindowCreated: 0xb400007c14841910 -- 0xb400007ca49cec20
+09-13 21:21:54.045  5288  5288 V threaded_app: android_app_set_window called
+09-13 21:21:54.045  5288  5339 V threaded_app: APP_CMD_INIT_WINDOW
+09-13 21:21:54.045  5288  5339 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (105v0)
+09-13 21:21:54.045  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:54.045266Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (105v0)
+09-13 21:21:54.045  5288  5288 V threaded_app: NativeWindowResized: 0xb400007c14841910 -- 0xb400007ca49cec20 ( 2340 x 1080 )
+09-13 21:21:54.045  5288  5288 V threaded_app: NativeWindowRedrawNeeded: 0xb400007c14841910 -- 0xb400007ca49cec20
+09-13 21:21:54.052  5288  5334 D EGL_emulation: eglCreateContext: 0xb400007bb485dd90: maj 3 min 1 rcv 4
+09-13 21:21:54.054  5288  5334 D EGL_emulation: eglMakeCurrent: 0xb400007bb485dd90: ver 3 1 (tinfo 0x7dd9000200) (first time)
+09-13 21:21:54.095   363   436 E HWComposer: getSupportedContentTypes: getSupportedContentTypes failed for display 4619827259835644672: Unsupported (8)
+09-13 21:21:54.099   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+09-13 21:21:54.104  5288  5334 I Gralloc4: mapper 4.x is not supported
+09-13 21:21:54.105  5288  5334 D HostConnection: createUnique: call
+09-13 21:21:54.105  5288  5334 D HostConnection: HostConnection::get() New Host Connection established 0xb400007bb485c4d0, tid 5334
+09-13 21:21:54.105  5288  5334 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-13 21:21:54.106  5288  5334 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1f3ff8000 size 0x8000
+09-13 21:21:54.107   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.allocator@4.0::IAllocator/default in either framework or device VINTF manifest.
+09-13 21:21:54.108  5288  5334 W Gralloc4: allocator 4.x is not supported
+09-13 21:21:54.114   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f4000000 0x1f49a4000]
+09-13 21:21:54.116  5288  5334 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-13 21:21:54.128   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1fa8b0000 0x1fb254000]
+09-13 21:21:54.142   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f8ae4000 0x1f9488000]
+09-13 21:21:54.146   699   898 D StartingSurfaceDrawer: Task start finish, remove starting surface for task 398
+09-13 21:21:54.146   699   898 V StartingSurfaceDrawer: Removing splash screen window for task: 398
+09-13 21:21:54.147   520   539 I ActivityTaskManager: Displayed com.mir2.web3.uipreview/com.mir2.web3.MainActivity: +1s518ms
+09-13 21:21:54.151  5288  5288 V threaded_app: WindowFocusChanged: 0xb400007c14841910 -- 1
+09-13 21:21:54.179   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f9488000 0x1f9e2c000]
+09-13 21:21:54.182  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3420
+09-13 21:21:54.183  1221  1221 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-13 21:21:54.183  1221  1221 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-13 21:21:54.184  5288  5288 V GameActivity: onImeInsetsChanged from Text Listener
+09-13 21:21:54.184  5288  5288 V threaded_app: WindowInsetsChanged: 0xb400007c14841910
+09-13 21:21:54.195   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1fdcec000 0x1fe690000]
+09-13 21:21:54.222   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1fb25c000 0x1fbc00000]
+09-13 21:21:54.497   520  1840 W InputManager-JNI: Input channel object '92f69b3 Splash Screen com.mir2.web3.uipreview (client)' was disposed without first being removed with the input manager!
+09-13 21:21:54.510   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+09-13 21:21:54.510   520   550 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+09-13 21:21:54.525  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:54.525454Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_UI_PREVIEW_READY scene=world-render
+09-13 21:21:54.525  5288  5339 I event src/ui_preview.rs:521: ANDROID_UI_PREVIEW_READY scene=world-render
+09-13 21:21:54.538  1012  1908 I FontLog : Received query Noto Color Emoji Compat, URI content://com.google.android.gms.fonts [CONTEXT service_id=132 ]
+09-13 21:21:54.539  1012  1908 I FontLog : Query [emojicompat-emoji-font] resolved to {Noto Color Emoji Compat, wdth 100.0, wght 400, ital 0.0, bestEffort false} [CONTEXT service_id=132 ]
+09-13 21:21:54.540  1012  1908 I FontLog : Fetch {Noto Color Emoji Compat, wdth 100.0, wght 400, ital 0.0, bestEffort false} end status Status{statusCode=SUCCESS, resolution=null} [CONTEXT service_id=132 ]
+09-13 21:21:54.547  1012  1415 I FontLog : Pulling font file for id = 15, cache size = 8 [CONTEXT service_id=132 ]
+09-13 21:21:54.555  1012  1415 I FontLog : Pulling font file for id = 15, cache size = 8 [CONTEXT service_id=132 ]
+09-13 21:21:54.760  5288  5341 D HostConnection: createUnique: call
+09-13 21:21:54.760  5288  5341 D HostConnection: HostConnection::get() New Host Connection established 0xb400007bb4860c10, tid 5341
+09-13 21:21:54.762  5288  5341 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-13 21:21:54.762  5288  5341 D EGL_emulation: eglMakeCurrent: 0xb400007bb4844ad0: ver 3 1 (tinfo 0x7dd9000280) (first time)
+09-13 21:21:54.812  5288  5339 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-13 21:21:54.812  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:54.812754Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.890  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.890  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-13 21:21:54.891  5288  5339 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-13 21:21:54.891  5288  5339 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-13 21:21:54.906   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f70ac000 0x1f7a50000]
+09-13 21:21:55.083  5288  5338 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=28 entity_live=false entity_self_visible=false entity_layers=2
+09-13 21:21:55.114  5288  5338 I RustStdoutStderr: [runtime-map] waiting-standalone missing=[native-map-keyed:aa9aaaf2b454da86f830df83051919b78591eccd79b0d652e2c946c1e479d891,native-map-keyed:65b87ccadfc93885daa0b0dc990e0208dce85008de840713258d72b4b63bd1c0,native-map-keyed:fe408a39dddb5e957c2c1fc1ec81cd7c943783361055ff8db9047d66c8dfc464,native-map-keyed:90ca75cb64ab17a25798af4e6c4d4555b9be4e2a51d4b7e792537d4bde7f7822,native-map-keyed:ba760433cd7414e24e51f6ea75d660b5222f55ad8d7851f50b45bf06ad6bfb15,native-map-keyed:26aa612a5755ef95b03c2bfb8c32208b7b862aa4abbf134fa4f9741e95aa173b,native-map-keyed:e8411c39eebac124a550dc010f60bc9ca0133f45ecef561d421b7c05b25fadb4,native-map-keyed:5b989e10335bf3eab5150333209b45050a280e234a8be2cefa3bed4eca0fb430,native-map-keyed:f99ca06f005fa6de70041288a4f604e48b4dca6a9e06d962f27975c16ad4b78d,native-map-keyed:b2312a0f6a633ad59cbf1224fa97c5ccd96e6f1d40bab2c56278c7675a7fec16,native-map-keyed:8e12f616e3e9ba73d162821f0e3d9fe525e24a06d336c22e8bafd227b546a216,native-map-keyed:d201f992ba0b2ca87100e052805d6aef9ef5e4a605b39a0696a039d087b8bd71,native-map-keyed:a3bbae3aa38ae2487c395ec573335305a7f5a04bba0bfb829207f359c31df81c,native-map-keyed:c0fb45e9956765f71d9a59c67240104aa3b57a7e447fd45d68147e8876a26baa,native-map-keyed:232bfc461f055784e7d90e5e0378d3cea8317eb078c4bf66e7afe999812ff902,native-map-keyed:d40064aedb300a0c590d9fa3f3204b91021a61499c08f9d0716cc0f36620b6a9,native-map-keyed:43ec2c30ef193e5c996b16008cfb05b9f11fbf8dd2949b49c06ea4e5de4befbd,native-map-keyed:ffc093f86a65f8e00a03c2f443f7ef262a448b6e60f25eabe63582f03c04c313,native-map-keyed:357ae499cdc01c6fb8e7f6a351f31e453a56bc0be6a8b044a7d5b03d97e69edc,native-map-keyed:142960f1af1b8faa165eb1b55b57fc14db26156287a4c5ca23e035daf9f10e33,native-map-keyed:fc858961ab49b6744d95b643f4286f3aae93febfa3d52f62d18afcf258a9a342,native-map-keyed:d1bd1ece243fe2a29604f31a4d0f638bee60543ead0de466166a000c46a11617,native-map-keyed:6ba897f8b82efa0a41f233589ef528ceb6822f487542ac6cc926797af456e5ab,native-map-keyed:04f2f6406275680ee10c2bb613e324d59e0dea10befb67479d5db488f1e5e9bf,native-map-keyed:80b981fe9eace4f6c8fa494e0a3c4cc1c707ebfecc40d9a4434c5789e3052e1b,native-map-keyed:6ef860ce7467e486f22d5dd1745ad76623a2c321a0104fc346a8aa09e671e707,native-map-keyed:a87dbfa37b42f082b27d4ddbc51291b9c1574e745af424c13649911269324824,native-map-keyed:37709d68b8604ed7f6347c1a061a887ab60c06d4a241460107a11861aab3a484,native-map-keyed:e00b4c4d2b781f2a9182fa8923db3f219d9dc2301bf6803e1b58fd51d01be1cd,native-map-keyed:d2a6feb956b426eb88640e39bcfaaf5b7eb53c2ae46903ed06ac54db9675c3be,native-map-keyed:55d52696ef087177ceeeadbcc9497188994ad6423bd844b5711ef3f86f8dfdf7,native-map-keyed:02fcf4c4c475d1c1002d45563f34bf90aabc5d57865a90a9c1d738eea292c519,native-map-keyed:226a0bac665d1bf713b8baf39ecf7ae61be856189d1cf823921ed0e53a5c29fe,native-map-keyed:4994bb7eb67876e03625726b9c449243db24f41e661e82d6a174a9f607afc3a4,native-map-keyed:b537b5735e33470456a6462cd0dc84814bf925c377afb556a58c95fbac788b11,native-map-keyed:c5aedaadc41e9474fd79125972e0f4bc1e30f8c7142d7d934d6df890f3be78e2,native-map-keyed:2c76f7575f3d1661681533a2ed2893f96c1f4b914bcfd60ae32c207561eb263b,native-map-keyed:2cd7444281094e689c5fe7c22a994aa527766e0665fc32b2cec42cbdc9978ab4,native-map-keyed:6a778aa0f93b323c9102b3ec389ed4c65d65644552e32a1c32ed487603dce9a0,native-map-keyed:daac139b8048bd2ca0ae710ce274fdced5abd65987ebc71a4fd0150b8162198f,native-map-keyed:6a331d64448423171c9bd195276a89f11bc868c7f5bcfecd8d7c4d01d7aa77f4,native-map-keyed:751001c28e3ef669ffa96b3633f386939502bef3dd3529e72ee16051cc4b59e4,native-map-keyed:9193eb213fa563a95c340cb2a2ffc65d0aaaf61ae51c73664d2cde2edf4c4281,native-map-keyed:d9c8ff59b2a56ad01e23464985cbc57ac906ab954db069085708e3d95149efcd,native-map-keyed:0446dc96478c6a6426006d4ebcd9b473422254a4a3b87d13e6513a4664cc1674,native-map-keyed:6ad43bea0b7c50814b20d3e8a86d0b3c036dd87667a57a46d0540ea871ca535e,native-map-keyed:69d2b1d711ea28062395eaf1824dfe56230c50f8f55e47e6ba4f299ebae306ec,native-map-keyed:fae1e51ea06cb7c62fc1e1a144e6a1adce22184b6613ffa4c1ce99c1a67336f8,native-map-keyed:e019d8061f69ee3aa36bc2
+09-13 21:21:55.114  5288  5338 I RustStdoutStderr:
+09-13 21:21:55.131  5288  5338 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=204 entity_live=false entity_self_visible=false entity_layers=3
+09-13 21:21:55.203  5288  5338 I RustStdoutStderr: [runtime-map] waiting-standalone missing=[native-map-keyed:90ca75cb64ab17a25798af4e6c4d4555b9be4e2a51d4b7e792537d4bde7f7822,native-map-keyed:357ae499cdc01c6fb8e7f6a351f31e453a56bc0be6a8b044a7d5b03d97e69edc,native-map-keyed:04f2f6406275680ee10c2bb613e324d59e0dea10befb67479d5db488f1e5e9bf,native-map-keyed:6ef860ce7467e486f22d5dd1745ad76623a2c321a0104fc346a8aa09e671e707,native-map-keyed:9193eb213fa563a95c340cb2a2ffc65d0aaaf61ae51c73664d2cde2edf4c4281,native-map-keyed:fae1e51ea06cb7c62fc1e1a144e6a1adce22184b6613ffa4c1ce99c1a67336f8,native-map-keyed:79e30490e7e56bf2f9cad61c1bdf4da436514883303f6c51b33fefa9a8de7309,native-map-keyed:d56e8db5e769743a299529020584e8d4b042a887d1028db32138152d3cd862eb,native-map-keyed:bcf1c31800d3ab1fc065376015b5b65f5c7e0265e2af04f77d50d120fb5fdee1,native-map-keyed:cdac9a2bda10d9ed68b6f3d4eb6e9b47ee1cd8d745ee24ef0fddeac3fbdd6c12,native-map-keyed:4f1ee19fbeed87cf6f9d7cd54f905972e5f65011b71da7262d73a09354d3958a,native-map-keyed:cdac9a2bda10d9ed68b6f3d4eb6e9b47ee1cd8d745ee24ef0fddeac3fbdd6c12,native-map-keyed:deacfb9fd76215077a031e013406b68fff63b6cad2b0efc6545151365d689725,native-map-keyed:36d63c7f1656dfe307f7c74e1344f112471ac6f3bf269adec6ec27e2f3096b61,native-map-keyed:811f61ee4fa05ca4eb498839e541ad17789d4ab44ad65c895960e476652b0878,native-map-keyed:83fe69b285e2c48039f45287661717e3d7ab55e747ff43c05212d3221f41f2c3,native-map-keyed:ece18ec765d9abef6af7033ec7b3b7c35bbaab1475856f99823ec6d6fce5b823,native-map-keyed:4ce4cd7ea8579897c860a6c09d588428bf8f25adb8ff244d816cdcbbec3c017d,native-map-keyed:f8ff655891c4a831f8e86aa641c4e3be70082cd41c98f5c7fac405ab327104ff,native-map-keyed:cdac9a2bda10d9ed68b6f3d4eb6e9b47ee1cd8d745ee24ef0fddeac3fbdd6c12,native-map-keyed:987b56912cfa525d19def14f06ec189653e64f2036bf18106ca177ab05470bf5,native-map-keyed:354a710bc4fda3d19397bf717ca33f56979dd060b1538402c6dcd8a12eb31a81,native-map-keyed:be5e37d27005566676fcd25fc67e8f87e9fa5f0ef1ead1a158ef0567aa3f1425,native-map-keyed:24ec1f87eb0856b5498709b2be2776f9a3627519b839633e9db0a690a7d9b980,native-map-keyed:555a55224e440cf4d874ff8733b3df9fc0eb0497e2db6523c7edfa84a39a335b,native-map-keyed:e2de69453391d9ecd79f3f211762d8c3e9e03c61ad14a6542ee72d189dee2331]
+09-13 21:21:55.205  5288  5338 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=228 entity_live=false entity_self_visible=false entity_layers=3
+09-13 21:21:55.265  5288  5338 I RustStdoutStderr: [runtime-map] synced center=Some(PresentationGridCenter { x: 302, y: 634 }) tiles=607 standalone=242 live=849 missingBindings=0 sample=[]
+09-13 21:21:55.284  5288  5338 I RustStdoutStderr: [android-world-render] map_current=true map_live=849 map_missing=0 map_image_revision=228 entity_live=false entity_self_visible=false entity_layers=6
+09-13 21:21:55.474  5288  5338 I RustStdoutStderr: [android-world-render] map_current=true map_live=849 map_missing=0 map_image_revision=228 entity_live=true entity_self_visible=true entity_layers=12
+09-13 21:21:55.536  5288  5343 I event src/shared_shell.rs:1089: packaged Android world frame queuedrequest_id = 18446744073709551615; pages = 7; sprites = 2111; compressed_bytes = 14785921; rgba_bytes = 7340032; map_object_rgba_bytes = 10489920; map_width = 700; map_height = 700; map_atlases = 7; map_tiles = 607; map_standalone_tiles = 242; unresolved_draws = 0; entity_pages = 5; entities = 7; entity_layers = 12; unresolved_entities = 0; entity_unindexed_rects = 24; entity_compressed_bytes = 11209197; entity_rgba_bytes = 83886080; entity_manifest_sha256 = "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9";
+09-13 21:21:55.536  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:55.536471Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m packaged Android world frame queued [3mrequest_id[0m[2m=[0m18446744073709551615 [3mpages[0m[2m=[0m7 [3msprites[0m[2m=[0m2111 [3mcompressed_bytes[0m[2m=[0m14785921 [3mrgba_bytes[0m[2m=[0m7340032 [3mmap_object_rgba_bytes[0m[2m=[0m10489920 [3mmap_width[0m[2m=[0m700 [3mmap_height[0m[2m=[0m700 [3mmap_atlases[0m[2m=[0m7 [3mmap_tiles[0m[2m=[0m607 [3mmap_standalone_tiles[0m[2m=[0m242 [3munresolved_draws[0m[2m=[0m0 [3mentity_pages[0m[2m=[0m5 [3mentities[0m[2m=[0m7 [3mentity_layers[0m[2m=[0m12 [3munresolved_entities[0m[2m=[0m0 [3mentity_unindexed_rects[0m[2m=[0m24 [3mentity_compressed_bytes[0m[2m=[0m11209197 [3mentity_rgba_bytes[0m[2m=[0m83886080 [3mentity_manifest_sha256[0m[2m=[0m"929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9"
+09-13 21:21:55.596  5288  5342 I event src/ui_preview.rs:283: ANDROID_OBJECT_METADATA_PRESENTATION_APPLIED
+09-13 21:21:55.596  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:55.596267Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_METADATA_PRESENTATION_APPLIED
+09-13 21:21:55.597  5288  5342 I event src/ui_preview.rs:288: ANDROID_OBJECT_POISON_PRESENTATION_APPLIED
+09-13 21:21:55.597  5288  5342 I event src/ui_preview.rs:321: ANDROID_WORLD_RENDER_READYrequest_id = 18446744073709551615; center_x = 302; center_y = 634; map_tiles = 849; entities = 7; entity_layers = 12;
+09-13 21:21:55.598  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:55.597814Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_POISON_PRESENTATION_APPLIED
+09-13 21:21:55.598  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:55.597876Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_WORLD_RENDER_READY [3mrequest_id[0m[2m=[0m18446744073709551615 [3mcenter_x[0m[2m=[0m302 [3mcenter_y[0m[2m=[0m634 [3mmap_tiles[0m[2m=[0m849 [3mentities[0m[2m=[0m7 [3mentity_layers[0m[2m=[0m12
+09-13 21:21:55.659  5288  5342 I event src/shared_shell.rs:1666: ANDROID_EFFECT_RENDER_STATE_READYeffect_count = 2;
+09-13 21:21:55.659  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:55.659798Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m ANDROID_EFFECT_RENDER_STATE_READY [3meffect_count[0m[2m=[0m2
+09-13 21:21:55.935  5288  5339 D EGL_emulation: app_time_stats: avg=108.68ms min=39.91ms max=711.12ms count=16
+09-13 21:21:56.976  5288  5339 D EGL_emulation: app_time_stats: avg=52.91ms min=40.92ms max=62.72ms count=19
+09-13 21:21:57.102  5288  5343 I event src/ui_preview.rs:103: ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-13 21:21:57.102  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:57.102479Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-13 21:21:57.104  5288  5343 I event src/ui_preview.rs:111: ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-13 21:21:57.105  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:57.104908Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-13 21:21:57.106  5288  5343 I event src/ui_preview.rs:122: ANDROID_ARCHER_RANGE_PRESENTATION_STARTED
+09-13 21:21:57.106  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:57.106728Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_ARCHER_RANGE_PRESENTATION_STARTED
+09-13 21:21:57.108  5288  5343 I event src/ui_preview.rs:133: ANDROID_MOUNTED_ATTACK_PRESENTATION_STARTED
+09-13 21:21:57.108  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:57.108457Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_MOUNTED_ATTACK_PRESENTATION_STARTED
+09-13 21:21:57.229  5288  5339 I event src/ui_preview.rs:255: ANDROID_REMOTE_BACKSTEP_POSE_ACTIVEoffset_x = 84.0; offset_y = 0.0;
+09-13 21:21:57.230  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:57.229918Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_ACTIVE [3moffset_x[0m[2m=[0m84.0 [3moffset_y[0m[2m=[0m0.0
+09-13 21:21:57.977  5288  5339 D EGL_emulation: app_time_stats: avg=56.09ms min=41.62ms max=75.85ms count=17
+09-13 21:21:58.033  5288  5339 I event src/ui_preview.rs:262: ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-13 21:21:58.033  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:58.033317Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-13 21:21:58.170   685   685 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS
+09-13 21:21:58.486  5288  5339 I event src/ui_preview.rs:248: ANDROID_REMOTE_BACKSTEP_DIAGNOSTICSdiagnostics = {"enabled":true,"nowMs":1789305718485.6504,"moveClockPulseId":34,"moveClockNextPulseMs":1789305718529.8345,"entryCount":1,"activeEntryCount":0,"processedEventCount":1,"remoteMotionEventCount":1,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":23,"offsetMatchCount":16,"targetMismatchCount":0,"inactiveFallbackCount":7,"entries":[{"atMs":3168.0,"packet":"ObjectBackStep","objectId":"9003","fromX":301.0,"fromY":634.0,"toX":299.0,"toY":634.0,"direction":"Right","mode":"backstep","phaseCount":8,"startedMs":1789305717167.2969,"startedPulseId":23,"expiresMs":1789305718485.6504,"phaseIndex":7,"nextPhaseMs":1789305718529.8345,"completed":true}]};
+09-13 21:21:58.486  5288  5338 I RustStdoutStderr: [2m2026-09-13T13:21:58.486542Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_DIAGNOSTICS [3mdiagnostics[0m[2m=[0m{"enabled":true,"nowMs":1789305718485.6504,"moveClockPulseId":34,"moveClockNextPulseMs":1789305718529.8345,"entryCount":1,"activeEntryCount":0,"processedEventCount":1,"remoteMotionEventCount":1,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":23,"offsetMatchCount":16,"targetMismatchCount":0,"inactiveFallbackCount":7,"entries":[{"atMs":3168.0,"packet":"ObjectBackStep","objectId":"9003","fromX":301.0,"fromY":634.0,"toX":299.0,"toY":634.0,"direction":"Right","mode":"backstep","phaseCount":8,"startedMs":1789305717167.2969,"startedPulseId":23,"expiresMs":1789305718485.6504,"phaseIndex":7,"nextPhaseMs":1789305718529.8345,"completed":true}]}
+09-13 21:21:58.981  5288  5339 D EGL_emulation: app_time_stats: avg=53.29ms min=39.90ms max=66.82ms count=18
+09-13 21:22:00.013  5288  5356 D ProfileInstaller: Installing profile for com.mir2.web3.uipreview
+09-13 21:22:00.022  5288  5339 D EGL_emulation: app_time_stats: avg=54.10ms min=45.52ms max=58.91ms count=19
+09-13 21:22:00.024   699   909 D EGL_emulation: app_time_stats: avg=551.24ms min=2.55ms max=5189.71ms count=11
+09-13 21:22:01.075  5288  5339 D EGL_emulation: app_time_stats: avg=53.74ms min=40.11ms max=59.03ms count=19
+09-13 21:22:02.083  5288  5339 D EGL_emulation: app_time_stats: avg=59.29ms min=51.69ms max=63.45ms count=17
+09-13 21:22:03.098  5288  5339 D EGL_emulation: app_time_stats: avg=52.83ms min=40.74ms max=62.67ms count=18
+09-13 21:22:04.127  5288  5339 D EGL_emulation: app_time_stats: avg=54.61ms min=42.50ms max=66.20ms count=18
+09-13 21:22:05.148  5288  5339 D EGL_emulation: app_time_stats: avg=58.11ms min=43.92ms max=65.53ms count=17
+09-13 21:22:05.200   189   189 I logd    : logdr: UID=2000 GID=2000 PID=5357 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-13 21:22:06.109   685   685 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS
+09-13 21:22:06.171  5288  5339 D EGL_emulation: app_time_stats: avg=58.25ms min=44.59ms max=65.88ms count=17
+09-13 21:22:07.192  5288  5339 D EGL_emulation: app_time_stats: avg=55.40ms min=42.88ms max=63.41ms count=18
+09-13 21:22:08.206  5288  5339 D EGL_emulation: app_time_stats: avg=56.37ms min=50.48ms max=61.08ms count=18
+09-13 21:22:08.615  1445  1445 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+09-13 21:22:09.233  5288  5339 D EGL_emulation: app_time_stats: avg=53.22ms min=40.80ms max=59.28ms count=19
+09-13 21:22:10.259  5288  5339 D EGL_emulation: app_time_stats: avg=50.85ms min=40.82ms max=58.54ms count=19
+09-13 21:22:11.275  5288  5339 D EGL_emulation: app_time_stats: avg=51.10ms min=40.32ms max=56.44ms count=19
+09-13 21:22:12.281  5288  5339 D EGL_emulation: app_time_stats: avg=55.06ms min=51.25ms max=60.69ms count=18
+09-13 21:22:13.321  5288  5339 D EGL_emulation: app_time_stats: avg=52.38ms min=40.54ms max=59.77ms count=19
+09-13 21:22:14.042   685   685 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS
+09-13 21:22:14.340  5288  5339 D EGL_emulation: app_time_stats: avg=55.79ms min=41.79ms max=66.48ms count=18
+09-13 21:22:15.362  5288  5339 D EGL_emulation: app_time_stats: avg=59.19ms min=42.27ms max=74.69ms count=17
+09-13 21:22:16.411  5288  5339 D EGL_emulation: app_time_stats: avg=52.26ms min=39.88ms max=59.41ms count=19
+09-13 21:22:17.411  5288  5339 D EGL_emulation: app_time_stats: avg=56.85ms min=44.16ms max=63.08ms count=17
+09-13 21:22:18.418  5288  5339 D EGL_emulation: app_time_stats: avg=51.70ms min=39.63ms max=60.68ms count=18
+09-13 21:22:19.461  5288  5339 D EGL_emulation: app_time_stats: avg=51.67ms min=40.00ms max=63.53ms count=19
+09-13 21:22:20.483  5288  5339 D EGL_emulation: app_time_stats: avg=56.40ms min=48.08ms max=70.39ms count=18
+09-13 21:22:21.506  5288  5339 D EGL_emulation: app_time_stats: avg=51.55ms min=40.12ms max=57.83ms count=19
+09-13 21:22:22.234   685   685 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS
+09-13 21:22:22.509  5288  5339 D EGL_emulation: app_time_stats: avg=51.79ms min=41.38ms max=61.77ms count=18
+09-13 21:22:23.518  5288  5339 D EGL_emulation: app_time_stats: avg=53.54ms min=40.14ms max=66.75ms count=18
+09-13 21:22:24.546  5288  5339 D EGL_emulation: app_time_stats: avg=55.46ms min=40.79ms max=64.47ms count=18
+09-13 21:22:25.340  1262  4629 W MediaProvider: isAppCloneUserPair for user 0: false
+09-13 21:22:25.345   335   471 D goldfish-address-space: claimShared: Ask to claim region [0x1f5330000 0x1f5cd4000]
+09-13 21:22:25.359   186   186 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+09-13 21:22:25.359  5362  5364 I Gralloc4: mapper 4.x is not supported
+09-13 21:22:25.374  5362  5364 D HostConnection: createUnique: call
+09-13 21:22:25.374  5362  5364 D HostConnection: HostConnection::get() New Host Connection established 0xb400007d2e039010, tid 5364
+09-13 21:22:25.374  5362  5364 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-13 21:22:25.375  5362  5364 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1f3ff8000 size 0x8000
+09-13 21:22:25.376  5362  5364 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-13 21:22:25.393  1012  5333 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService started execution. cause:9 exec_start_elapsed_seconds: 921 [CONTEXT service_id=218 ]
+09-13 21:22:25.396  1012  1012 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.scheduler.ACTION_PROXY_SCHEDULE cmp=com.google.android.gms/.chimera.PersistentInternalBoundBrokerService }
+09-13 21:22:25.397  1012  1012 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.scheduler.ACTION_PROXY_SCHEDULE cmp=com.google.android.gms/.chimera.PersistentInternalBoundBrokerService }
+09-13 21:22:25.402  1012  5332 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.ipa.base.IpaGcmTaskService finished executing. cause:9 result: 1 elapsed_millis: 28 uptime_millis: 28 exec_start_elapsed_seconds: 921 [CONTEXT service_id=218 ]
+09-13 21:22:25.578  5288  5339 D EGL_emulation: app_time_stats: avg=60.68ms min=51.17ms max=70.48ms count=17
+09-13 21:22:25.973  1262  1761 I MediaProvider: Begin Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/world-render-poison-v2.png flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+09-13 21:22:25.999  1262  1761 I MediaProvider: End Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///sdcard/Download/world-render-poison-v2.png flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaService }
+09-13 21:22:26.006  1262  1468 W MediaProvider: isAppCloneUserPair for user 0: false
