@@ -452,6 +452,9 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 level_effects,
             },
         ),
+        "ObjectHidden" => object_id(body)
+            .zip(boolean(body, "hidden"))
+            .map(|(object_id, hidden)| EntityMutation::Hidden { object_id, hidden }),
         "Death" => self_object_id(&models)
             .zip(location(body))
             .map(|(object_id, position)| EntityMutation::Action {
@@ -749,6 +752,7 @@ fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
         | EntityMutation::Metadata { object_id, .. }
         | EntityMutation::Poison { object_id, .. }
         | EntityMutation::LevelEffects { object_id, .. }
+        | EntityMutation::Hidden { object_id, .. }
         | EntityMutation::Action { object_id, .. } => Some(*object_id),
         EntityMutation::Damage(event) => Some(event.object_id),
         EntityMutation::Move(object_id, ..) => Some(*object_id),
@@ -895,6 +899,37 @@ fn apply_cache_mutation(
                 .is_some_and(|entity| patch_model_level_effects(entity, *level_effects));
             (model_changed || hidden_changed, false)
         }
+        EntityMutation::Hidden {
+            object_id,
+            hidden: actor_hidden,
+        } => {
+            let visible_actor = models
+                .get("entities")
+                .and_then(Value::as_array)
+                .is_some_and(|entities| {
+                    entities
+                        .iter()
+                        .any(|entity| entity_id(entity) == Some(*object_id))
+                });
+            let model_changed = apply_models(models, mutation);
+            let render_changed =
+                visible_actor && render.is_some_and(|value| apply_render(value, mutation));
+            let hidden_changed = hidden.get_mut(object_id).is_some_and(|entry| {
+                let model_changed = entry
+                    .model
+                    .as_mut()
+                    .is_some_and(|entity| patch_model_hidden(entity, *actor_hidden));
+                let render_changed = entry
+                    .render
+                    .as_mut()
+                    .is_some_and(|entity| patch_render_hidden(entity, *actor_hidden));
+                model_changed || render_changed
+            });
+            (
+                model_changed || render_changed || hidden_changed,
+                render_changed,
+            )
+        }
         EntityMutation::Action {
             object_id,
             action,
@@ -989,6 +1024,10 @@ enum EntityMutation {
         object_id: u32,
         level_effects: u16,
     },
+    Hidden {
+        object_id: u32,
+        hidden: bool,
+    },
     Damage(LiveDamageEvent),
     Hide(u32),
     Show(u32),
@@ -1070,6 +1109,10 @@ fn signed_i32(payload: &serde_json::Map<String, Value>, key: &str) -> Option<i32
 
 fn unsigned_u16(payload: &serde_json::Map<String, Value>, key: &str) -> Option<u16> {
     u16::try_from(payload.get(key)?.as_u64()?).ok()
+}
+
+fn boolean(payload: &serde_json::Map<String, Value>, key: &str) -> Option<bool> {
+    payload.get(key)?.as_bool()
 }
 
 fn bounded_text(
@@ -1190,6 +1233,10 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         None | Some(Value::Null) => false,
         Some(value) => value.as_bool()?,
     };
+    let hidden = match payload.get("hidden") {
+        None | Some(Value::Null) => false,
+        Some(value) => value.as_bool()?,
+    };
     let poison = match payload.get("poison") {
         None | Some(Value::Null) => 0,
         Some(value) => u16::try_from(value.as_u64()?).ok()?,
@@ -1210,6 +1257,7 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         "guildName": guild_name,
         "image": image,
         "dead": dead,
+        "hidden": hidden,
         "poison": poison,
         "levelEffects": level_effects,
     });
@@ -1336,6 +1384,7 @@ fn valid_models(value: &Value) -> bool {
                     .as_u64()
                     .is_some_and(|value| u16::try_from(value).is_ok())
             })
+            && entity.get("hidden").is_none_or(Value::is_boolean)
     }) && ground_drops.iter().all(|drop| {
         let Some(object_id) = entity_id(drop) else {
             return false;
@@ -1586,6 +1635,10 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_model_level_effects(entity, *level_effects)),
+        EntityMutation::Hidden { object_id, hidden } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_model_hidden(entity, *hidden)),
         EntityMutation::Damage(event) => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(event.object_id))
@@ -1659,6 +1712,12 @@ fn patch_model_level_effects(entity: &mut Value, level_effects: u16) -> bool {
     let changed =
         entity.get("levelEffects").and_then(Value::as_u64) != Some(u64::from(level_effects));
     entity["levelEffects"] = json!(level_effects);
+    changed
+}
+
+fn patch_model_hidden(entity: &mut Value, hidden: bool) -> bool {
+    let changed = entity.get("hidden").and_then(Value::as_bool) != Some(hidden);
+    entity["hidden"] = json!(hidden);
     changed
 }
 
@@ -1794,6 +1853,10 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_poison(entity, *poison)),
         EntityMutation::LevelEffects { .. } => false,
+        EntityMutation::Hidden { object_id, hidden } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_render_hidden(entity, *hidden)),
         EntityMutation::Damage(_) => false,
         EntityMutation::Spawn(spawn) => {
             if let Some(existing) = entities
@@ -1812,11 +1875,28 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
                         })
                     });
                 if !ground_item {
-                    return patch_render_transform(
+                    let mut changed = patch_render_transform(
                         existing,
                         spawn.position,
                         spawn.direction.as_deref(),
-                    ) | patch_render_poison(
+                    );
+                    changed |= patch_render_dead(
+                        existing,
+                        spawn
+                            .model
+                            .get("dead")
+                            .and_then(Value::as_bool)
+                            .unwrap_or(false),
+                    );
+                    changed |= patch_render_hidden(
+                        existing,
+                        spawn
+                            .model
+                            .get("hidden")
+                            .and_then(Value::as_bool)
+                            .unwrap_or(false),
+                    );
+                    changed |= patch_render_poison(
                         existing,
                         spawn
                             .model
@@ -1824,6 +1904,7 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
                             .and_then(Value::as_u64)
                             .unwrap_or_default() as u16,
                     );
+                    return changed;
                 }
                 let object_id = entity_id(&spawn.model).expect("spawn was validated");
                 entities.retain(|entity| entity_id(entity) != Some(object_id));
@@ -2080,7 +2161,25 @@ fn poll_action_frame_at(now_ms: u64) -> Option<String> {
 }
 
 fn patch_render_dead(entity: &mut Value, dead: bool) -> bool {
-    let opacity = if dead { 0.45 } else { 1.0 };
+    let changed = entity.get("dead").and_then(Value::as_bool) != Some(dead);
+    entity["dead"] = json!(dead);
+    changed | patch_render_actor_opacity(entity)
+}
+
+fn patch_render_hidden(entity: &mut Value, hidden: bool) -> bool {
+    let changed = entity.get("hidden").and_then(Value::as_bool) != Some(hidden);
+    entity["hidden"] = json!(hidden);
+    changed | patch_render_actor_opacity(entity)
+}
+
+fn patch_render_actor_opacity(entity: &mut Value) -> bool {
+    let opacity = if entity.get("hidden").and_then(Value::as_bool) == Some(true) {
+        0.5
+    } else if entity.get("dead").and_then(Value::as_bool) == Some(true) {
+        0.45
+    } else {
+        1.0
+    };
     let mut changed = false;
     if let Some(layers) = entity.get_mut("layers").and_then(Value::as_array_mut) {
         changed |= patch_layers_opacity(layers, opacity);
@@ -2236,6 +2335,22 @@ fn spawn_render_from_prototype(
             .get("poison")
             .and_then(Value::as_u64)
             .unwrap_or_default() as u16,
+    );
+    patch_render_dead(
+        &mut rendered,
+        spawn
+            .model
+            .get("dead")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
+    );
+    patch_render_hidden(
+        &mut rendered,
+        spawn
+            .model
+            .get("hidden")
+            .and_then(Value::as_bool)
+            .unwrap_or(false),
     );
     entities.push(rendered);
     true
@@ -2899,6 +3014,115 @@ mod tests {
             .unwrap()
             .iter()
             .any(|entity| entity["objectId"] == "44" && entity["levelEffects"] == 8));
+        clear();
+    }
+
+    #[test]
+    fn object_hidden_keeps_actor_present_and_applies_crystal_half_opacity() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630},{"objectId":"43","kind":"player","name":"Remote","x":301,"y":630,"dead":false,"hidden":false}],"groundDrops":[{"objectId":"50","name":"Potion","x":302,"y":630,"quantity":1,"image":0,"dropKind":"item"}]}"#,
+            18,
+        ));
+        assert!(install_render(
+            r#"{"_nativeWorldRequest":18,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[]},{"objectId":"43","isSelf":false,"dead":false,"hidden":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]},{"objectId":"50","isSelf":false,"gridX":302,"gridY":630,"layers":[{"key":"50:ground-item","left":576.0,"top":352.0,"opacity":1.0}]}]}"#,
+            r#"{"_nativeWorldRequest":18,"entities":[{"objectId":"43","prototype":{"kind":"player","classKey":"warrior","dead":false,"sprite":{"bodyLibrary":"CArmour/00"}},"directionLayers":{"Down":[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]},"actionLayers":{"attack1:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"opacity":1.0}]]}}}]}"#,
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectHidden","payload":{"objectId":43,"hidden":true}}"#,
+        ) else {
+            panic!("ObjectHidden should apply to the retained actor");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["hidden"], true);
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(render["entities"][1]["hidden"], true);
+        assert_eq!(render["entities"][1]["layers"][0]["opacity"], 0.5);
+
+        let LiveEntityPacketOutcome::Applied { render, .. } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectAttack","payload":{"objectId":43,"x":301,"y":630,"direction":"Down","attackType":1}}"#,
+            100,
+        ) else {
+            panic!("ObjectAttack should keep ObjectHidden opacity on action layers");
+        };
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(render["entities"][1]["layers"][0]["opacity"], 0.5);
+
+        let LiveEntityPacketOutcome::Applied { render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectHealth","payload":{"objectId":43,"percent":0,"expire":0}}"#,
+        ) else {
+            panic!("dead state should compose while the actor remains hidden");
+        };
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(render["entities"][1]["layers"][0]["opacity"], 0.5);
+
+        let LiveEntityPacketOutcome::Applied { render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectHidden","payload":{"objectId":43,"hidden":false}}"#,
+        ) else {
+            panic!("clearing ObjectHidden should restore the existing death fallback");
+        };
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        assert_eq!(render["entities"][1]["hidden"], false);
+        assert_eq!(render["entities"][1]["layers"][0]["opacity"], 0.45);
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectHidden","payload":{"objectId":43,"hidden":false}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectHide","payload":{"objectId":43}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectHidden","payload":{"objectId":43,"hidden":true}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { render: None, .. }
+        ));
+        let LiveEntityPacketOutcome::Applied { models, render, .. } =
+            apply_packet(r#"{"type":"packet","packet":"ObjectShow","payload":{"objectId":43}}"#)
+        else {
+            panic!("ObjectShow should restore the lifecycle-hidden actor");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["hidden"], true);
+        let render: Value = serde_json::from_str(render.as_deref().unwrap()).unwrap();
+        let restored = render["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"] == "43")
+            .unwrap();
+        assert_eq!(restored["layers"][0]["opacity"], 0.5);
+
+        for ignored in [
+            r#"{"type":"packet","packet":"ObjectHidden","payload":{"objectId":99,"hidden":true}}"#,
+            r#"{"type":"packet","packet":"ObjectHidden","payload":{"objectId":50,"hidden":true}}"#,
+        ] {
+            assert_eq!(apply_packet(ignored), LiveEntityPacketOutcome::Ignored);
+        }
+        for invalid in [
+            r#"{"type":"packet","packet":"ObjectHidden","payload":{"objectId":43}}"#,
+            r#"{"type":"packet","packet":"ObjectHidden","payload":{"objectId":43,"hidden":1}}"#,
+        ] {
+            assert_eq!(apply_packet(invalid), LiveEntityPacketOutcome::Rejected);
+        }
+
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectPlayer","payload":{"objectId":44,"name":"Hidden spawn","location":{"x":302,"y":630},"hidden":true}}"#,
+        ) else {
+            panic!("spawn should retain its initial ObjectHidden state");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert!(models["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|entity| entity["objectId"] == "44" && entity["hidden"] == true));
         clear();
     }
 

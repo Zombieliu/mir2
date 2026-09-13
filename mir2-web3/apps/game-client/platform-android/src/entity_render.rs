@@ -152,6 +152,8 @@ struct SnapshotEntity {
     #[serde(default)]
     dead: bool,
     #[serde(default)]
+    hidden: bool,
+    #[serde(default)]
     poison: u16,
     #[serde(default)]
     class_key: Option<String>,
@@ -244,6 +246,8 @@ struct EntityRenderAtlasRect {
 struct EntityRenderEntry {
     object_id: String,
     is_self: bool,
+    dead: bool,
+    hidden: bool,
     grid_x: i32,
     grid_y: i32,
     layers: Vec<EntityRenderLayer>,
@@ -963,6 +967,8 @@ where
             entries.push(EntityRenderEntry {
                 object_id: entity.object_id,
                 is_self: false,
+                dead: entity.dead,
+                hidden: entity.hidden,
                 grid_x: entity.x,
                 grid_y: entity.y,
                 layers: Vec::new(),
@@ -1144,7 +1150,13 @@ where
                     width: rect.width as f32,
                     height: rect.height as f32,
                     z: depth as f32 * 10.0 + order as f32,
-                    opacity: if entity.dead { 0.45 } else { 1.0 },
+                    opacity: if entity.hidden {
+                        0.5
+                    } else if entity.dead {
+                        0.45
+                    } else {
+                        1.0
+                    },
                     tint_argb: crate::live_entity::poison_tint_argb(entity.poison),
                 });
             }
@@ -1260,6 +1272,8 @@ where
         entries.push(EntityRenderEntry {
             is_self: entity.object_id == snapshot.player_object_id,
             object_id: entity.object_id.clone(),
+            dead: entity.dead,
+            hidden: entity.hidden,
             grid_x: entity.x,
             grid_y: entity.y,
             layers: selected_layers,
@@ -1306,6 +1320,8 @@ where
         entries.push(EntityRenderEntry {
             object_id: drop.object_id,
             is_self: false,
+            dead: false,
+            hidden: false,
             grid_x: drop.x,
             grid_y: drop.y,
             layers,
@@ -1491,7 +1507,7 @@ mod tests {
         let snapshot = serde_json::json!({
             "playerObjectId":"42",
             "entities":[{
-                "objectId":"42","kind":"selfPlayer","x":300,"y":630,"direction":"Down","poison":8,
+                "objectId":"42","kind":"selfPlayer","x":300,"y":630,"direction":"Down","hidden":true,"poison":8,
                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}
             }]
         })
@@ -1511,6 +1527,8 @@ mod tests {
         let state: serde_json::Value = serde_json::from_str(&product.json).unwrap();
         assert_eq!(state["_nativeWorldRequest"], 17);
         assert_eq!(state["entities"][0]["isSelf"], true);
+        assert_eq!(state["entities"][0]["hidden"], true);
+        assert_eq!(state["entities"][0]["layers"][0]["opacity"], 0.5);
         assert_eq!(state["entities"][0]["layers"][0]["left"], 488.0);
         assert_eq!(state["entities"][0]["layers"][0]["top"], 304.0);
         assert_eq!(state["entities"][0]["layers"][0]["atlasKey"], "starter");
@@ -1531,6 +1549,10 @@ mod tests {
         assert_eq!(
             live["entities"][0]["directionLayers"]["Right"][0]["tintArgb"],
             0xFF00_00FF_u32 as i32
+        );
+        assert_eq!(
+            live["entities"][0]["directionLayers"]["Right"][0]["opacity"],
+            0.5
         );
         assert_eq!(
             live["entities"][0]["prototype"]["sprite"]["bodyLibrary"],

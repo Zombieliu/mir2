@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> 2026-09-13 Android current change: authoritative `ObjectHidden` now crosses
+> the authenticated post-`IN_GAME` host boundary and updates the exact retained
+> actor without confusing status alpha with `ObjectHide` lifecycle removal.
+> Current, directional and action layers use Crystal's `0.5` Hidden opacity;
+> clear restores normal alpha or Android's existing explicit corpse fallback.
+> Unknown, removed and ground-drop IDs cannot be created or resurrected.
+> Android 182/182 and UI Preview 190/190, Gradle 25/25 per variant, API31
+> target/package, streamed install and a full-screen 2340x1080 visible specimen
+> pass. The 444,440,200-byte APK SHA-256 is
+> `2c97bbdd21ec3d75a9af965ca7f8f99344b4bf3146d392db47132f47e406c99e`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-hidden-20260913/README.md`.
+> Approved-WSS real login, online StartGame/render-ready transitions, public
+> asset alignment and physical-device/human acceptance remain open.
+
 > 2026-09-13 Android current change: the authoritative object pipeline now
 > forwards and reduces `ObjectName`, `ObjectColourChanged` and
 > `ObjectGuildNameChanged` after real world entry. Exact bounded values update

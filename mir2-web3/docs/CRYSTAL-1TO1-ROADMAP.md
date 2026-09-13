@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-13 Android current change: typed `ObjectHidden` packets now reach the
+> retained native actor model after real world entry and update every loaded
+> current/directional/action layer with Crystal's `0.5` Hidden opacity. Status
+> retention survives `ObjectHide` / `ObjectShow` without treating invisibility
+> as removal or allowing a stale identity to respawn. Android 182/182 and UI
+> Preview 190/190, Java 25/25 in both variants, API31 target/package, streamed
+> emulator install and a 2340x1080 visible offline Bichon frame pass. Evidence:
+> `docs/generated/player-qa/native-android-object-hidden-20260913/README.md`.
+> This closes one bounded authoritative object-status presentation leaf, not
+> approved-WSS login, online StartGame/render-ready map changes, public asset
+> alignment, physical-device behavior or human acceptance.
+
 > 2026-09-13 Android current change: live `ObjectName`,
 > `ObjectColourChanged` and `ObjectGuildNameChanged` packets now cross the
 > post-`IN_GAME` host allowlist and update both visible and temporarily hidden

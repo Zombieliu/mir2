@@ -1,5 +1,19 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: `ObjectHidden` now remains an actor status,
+> not a lifecycle delete. The post-`IN_GAME` packet updates the exact cached
+> actor and patches current, directional and active-action layers to Crystal's
+> `0.5` opacity; clear, death fallback, temporary `ObjectHide` retention,
+> duplicate/invalid input and tombstone isolation are deterministic tests.
+> Android default 182/182, UI Preview 190/190, Gradle Debug/UI Preview 25/25
+> each, API31 arm64 target/package, streamed install and a 2340x1080
+> render-ready smoke pass. The 444,440,200-byte APK SHA-256 is
+> `2c97bbdd21ec3d75a9af965ca7f8f99344b4bf3146d392db47132f47e406c99e`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-hidden-20260913/README.md`.
+> Approved-WSS real login, online StartGame/map transition, public asset
+> alignment, physical-device and final human acceptance remain open.
+
 > 2026-09-13 Android current change: Crystal Slow poison now halves the native
 > Android retained movement-animation cadence for walking, running and dash
 > attack only. Mid-action apply/clear preserves fractional frame progress, so

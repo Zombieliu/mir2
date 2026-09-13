@@ -144,6 +144,13 @@ stream. Initial spawn and later unsigned 16-bit flags are retained for visible
 and temporarily hidden authoritative actors; unknown, removed and ground-drop
 IDs remain ignored. This completes transport and object-state retention, not
 the missing visual sequences.
+Post-`IN_GAME` `ObjectHidden` also enters that exact actor stream. It validates
+the boolean payload, retains the status across temporary `ObjectHide` /
+`ObjectShow`, and applies Crystal's `0.5` opacity to current, directional and
+active-action layers without removing or respawning the actor. Clearing the
+status restores normal opacity or the existing explicit Android corpse
+fallback. Unknown, removed and ground-drop identities remain ignored, and
+malformed payloads fail closed.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a
