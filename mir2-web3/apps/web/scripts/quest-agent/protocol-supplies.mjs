@@ -426,7 +426,7 @@ export async function useRandomTeleport(client, options = {}) {
 export function createRandomTeleportEmergencyEscape({
   cooldownMs = 12_000,
   criticalCooldownMs = 3_000,
-  criticalHpRatio = 0.25,
+  criticalHpRatio = 0.35,
   now = Date.now,
   teleport = useRandomTeleport,
 } = {}) {

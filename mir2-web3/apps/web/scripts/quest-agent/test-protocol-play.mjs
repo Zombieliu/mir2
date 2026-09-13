@@ -240,6 +240,46 @@ test('critical navigation escapes an adjacent pack before sending another moveme
   assert.ok(client.sent.every(command => command.type === 'walk' || command.type === 'run'));
 });
 
+test('a deferred emergency escape becomes eligible again inside the same navigation', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 30;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push(
+    { objectId: 8, kind: 'monster', disposition: 'hostile', x: 1, y: 2, hp: 20, dead: false },
+    { objectId: 9, kind: 'monster', disposition: 'hostile', x: 2, y: 1, hp: 20, dead: false },
+  );
+  let timestamp = 0;
+  let escapeCalls = 0;
+  client.wait = async predicate => {
+    timestamp += 1_000;
+    const command = client.sent.at(-1);
+    const [dx, dy] = directionDelta[command.direction];
+    client.snapshot.entities[0].x += dx;
+    client.snapshot.entities[0].y += dy;
+    assert.ok(predicate());
+  };
+
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    now: () => timestamp,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 3,
+    emergencyEscape: async owner => {
+      escapeCalls += 1;
+      if (escapeCalls === 1) return { deferred: true, retryAfterMs: 1_000 };
+      Object.assign(owner.snapshot.entities[0], { x: 6, y: 1 });
+      owner.snapshot.entities.splice(1);
+      return { success: true };
+    },
+  });
+
+  const result = await navigateNear({ x: 7, y: 1 }, 0);
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 2);
+  assert.ok(client.diagnostics.some(entry => entry.type === 'navigationEmergencyEscapeDeferred'));
+  assert.ok(client.diagnostics.some(entry => entry.type === 'navigationEmergencyEscapeSuccess'));
+});
+
 test('moderate navigation damage preserves an escape scroll against one nearby hostile', async () => {
   const client = navigationClient();
   client.snapshot.playerHp = 60;

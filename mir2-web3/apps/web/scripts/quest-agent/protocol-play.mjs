@@ -247,6 +247,7 @@ export function createNavigator(client, dependencies = {}) {
     let successfulSteps = 0;
     let emergencyEscapes = 0;
     let emergencyEscapeFailed = false;
+    let emergencyEscapeRetryAt = Number.NEGATIVE_INFINITY;
     let bestDistance = distance(selfPlayer(client), target);
     let nonImprovingSteps = 0;
     let positionsSinceImprovement = new Set([`${selfPlayer(client).x},${selfPlayer(client).y}`]);
@@ -264,7 +265,8 @@ export function createNavigator(client, dependencies = {}) {
         Math.max(1, Number(client.snapshot.playerMaxHp));
       const shouldEmergencyEscape = nearbyHostiles.length >= 2 ||
         (nearbyHostiles.length > 0 && hpRatio <= emergencyEscapeCriticalHpRatio);
-      if (emergencyEscape && !emergencyEscapeFailed && emergencyEscapes < maxEmergencyEscapes &&
+      if (emergencyEscape && !emergencyEscapeFailed && now() >= emergencyEscapeRetryAt &&
+          emergencyEscapes < maxEmergencyEscapes &&
           hpRatio <= emergencyEscapeHpRatio && shouldEmergencyEscape) {
         const before = { mapFileName: mapId, x: Number(self.x), y: Number(self.y) };
         client.record('diagnostic', {
@@ -277,7 +279,7 @@ export function createNavigator(client, dependencies = {}) {
         try {
           const result = await emergencyEscape(client, { current: before, nearbyHostiles });
           if (result?.deferred === true) {
-            emergencyEscapeFailed = true;
+            emergencyEscapeRetryAt = now() + Math.max(1, Number(result.retryAfterMs) || 1);
             client.record('diagnostic', {
               type: 'navigationEmergencyEscapeDeferred',
               hpRatio,

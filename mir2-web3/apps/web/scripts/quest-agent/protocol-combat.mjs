@@ -1501,8 +1501,9 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
   ];
   let lastError = null;
   let emergencyEscapeAttempted = false;
+  let emergencyEscapeRetryAt = Number.NEGATIVE_INFINITY;
   const tryEmergencyEscape = async (reason, current) => {
-    if (!settings.emergencyEscape || emergencyEscapeAttempted) return false;
+    if (!settings.emergencyEscape || emergencyEscapeAttempted || settings.now() < emergencyEscapeRetryAt) return false;
     const hpRatio = playerHealthRatio(client);
     if (hpRatio > settings.emergencyEscapeHpRatio) return false;
     emergencyEscapeAttempted = true;
@@ -1516,6 +1517,8 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
     try {
       const escaped = await settings.emergencyEscape(client, { current, reason, settings });
       if (escaped?.deferred === true) {
+        emergencyEscapeAttempted = false;
+        emergencyEscapeRetryAt = settings.now() + Math.max(1, Number(escaped.retryAfterMs) || 1);
         recordSearchDiagnostic(client, {
           type: 'emergencyEscapeDeferred',
           reason,

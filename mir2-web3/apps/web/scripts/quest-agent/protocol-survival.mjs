@@ -326,6 +326,7 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
   let candidateRotation = 0;
   let emergencyEscapes = 0;
   let emergencyEscapeFailed = false;
+  let emergencyEscapeRetryAt = Number.NEGATIVE_INFINITY;
   let lastSustainAt = Number.NEGATIVE_INFINITY;
 
   recovery: while (healthRatio(client.snapshot) < requiredRatio) {
@@ -341,6 +342,7 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
     const adjacent = dangerous.filter(entity => chebyshev(actor, entity) <= 1).length;
     const withinThree = dangerous.filter(entity => chebyshev(actor, entity) <= 3).length;
     if (typeof emergencyEscape === 'function' && !emergencyEscapeFailed &&
+        now() >= emergencyEscapeRetryAt &&
         emergencyEscapes < Math.max(0, Number(maxEmergencyEscapes) || 0) &&
         healthRatio(client.snapshot) <= Math.max(0, Number(emergencyEscapeHpRatio) || 0) &&
         (adjacent >= 2 || withinThree >= 3)) {
@@ -355,7 +357,7 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
       try {
         const result = await emergencyEscape(client, { current: before, adjacent, withinThree });
         if (result?.deferred === true) {
-          emergencyEscapeFailed = true;
+          emergencyEscapeRetryAt = now() + Math.max(1, Number(result.retryAfterMs) || 1);
           recordSurvivalDiagnostic(client, {
             type: 'recoveryEmergencyEscapeDeferred',
             hpRatio: healthRatio(client.snapshot),
@@ -364,23 +366,23 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
             from: before,
             retryAfterMs: Number(result.retryAfterMs ?? 0),
           });
-          continue recovery;
+        } else {
+          const after = snapshotPlayer(client.snapshot);
+          if ((result === true || result?.success === true || result?.to != null) && after &&
+              (Number(after.x) !== before.x || Number(after.y) !== before.y)) {
+            emergencyEscapes += 1;
+            recordSurvivalDiagnostic(client, {
+              type: 'recoveryEmergencyEscapeSuccess',
+              hpRatio: healthRatio(client.snapshot),
+              adjacent,
+              withinThree,
+              from: before,
+              to: { x: Number(after.x), y: Number(after.y) },
+            });
+            continue recovery;
+          }
+          emergencyEscapeFailed = true;
         }
-        const after = snapshotPlayer(client.snapshot);
-        if ((result === true || result?.success === true || result?.to != null) && after &&
-            (Number(after.x) !== before.x || Number(after.y) !== before.y)) {
-          emergencyEscapes += 1;
-          recordSurvivalDiagnostic(client, {
-            type: 'recoveryEmergencyEscapeSuccess',
-            hpRatio: healthRatio(client.snapshot),
-            adjacent,
-            withinThree,
-            from: before,
-            to: { x: Number(after.x), y: Number(after.y) },
-          });
-          continue recovery;
-        }
-        emergencyEscapeFailed = true;
       } catch (error) {
         emergencyEscapeFailed = true;
         recordSurvivalDiagnostic(client, {
