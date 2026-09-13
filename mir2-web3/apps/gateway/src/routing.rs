@@ -12676,6 +12676,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             &command,
             WorldCommand::ClientPacket(ClientPacket::TownRevive)
         );
+        let is_item_use = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::UseItem { .. })
+        );
         // The browser can already have received the private Crystal death while
         // the shared Zone still retains its native-combat 1 HP floor. Snapshot
         // that presented death before any Zone reconciliation: TownRevive must
@@ -13147,6 +13151,10 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             self.inner.execute(command)?
         };
+        let item_use_relocated_player = is_item_use
+            && command_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::UserLocation { .. }));
         let clock_generation = self.inner.shared_mentor_config().map_or(0, |config| config.shared_guild_clock_generation());
         let social_signature = self.shared_social_generation.load(Ordering::Acquire).wrapping_add(clock_generation);
         let force_social = command_packets.iter().any(|p| {
@@ -13310,6 +13318,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             || is_authoritative_move_to
             || is_handoff_transform
             || applies_native_state
+            || item_use_relocated_player
         {
             self.force_next_zone_transform_sync = true;
             self.owner_dead_entity_ids.clear();
@@ -13890,6 +13899,8 @@ mod tests {
     mod ordered_economy_replay_tests;
     #[path = "owner_attack_animation_tests.rs"]
     mod owner_attack_animation_tests;
+    #[path = "shared_item_teleport_tests.rs"]
+    mod shared_item_teleport_tests;
     #[path = "shared_drop_aoi_tests.rs"]
     mod shared_drop_aoi_tests;
     #[path = "trade_completion_tests.rs"]
