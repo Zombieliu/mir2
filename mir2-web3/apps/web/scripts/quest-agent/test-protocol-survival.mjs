@@ -56,6 +56,8 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questPostRetreatRecoveryRatio(62, 'Warrior'), 0.75);
   assert.equal(questEmergencyEscapeHpRatio(54), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(60), 0.35);
+  assert.equal(questEmergencyEscapeHpRatio(60, 'Wizard'), 0.65);
+  assert.equal(questEmergencyEscapeHpRatio(60, 'Taoist'), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(62), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(49), 0);
 });

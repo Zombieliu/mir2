@@ -138,7 +138,7 @@ try {
         if (!hasEmergencyExpedition || randomTeleportCount(owner.snapshot) <= 0) return false;
         return emergencyTeleport(owner);
       },
-      emergencyEscapeHpRatio: 0.35,
+      emergencyEscapeHpRatio: className === 'Wizard' ? 0.65 : 0.35,
       emergencyEscapeDangerDistance: 6,
       maxEmergencyEscapesPerNavigation: 2,
     });
@@ -770,7 +770,7 @@ try {
             // RandomTeleport is bought and consumed through the same public
             // NPCGoods/UseItem packets as a player. It is reserved for the
             // observed no-step cave trap and never replaces ordinary retreat.
-            emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id),
+            emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id, className),
             emergencyEscape: [54, 60, 62].includes(id)
               ? async owner => {
                   const result = await emergencyTeleport(owner);
@@ -815,7 +815,7 @@ try {
                   emergencyEscape: [54, 60, 62].includes(id)
                     ? async current => emergencyTeleport(current)
                     : undefined,
-                  emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id),
+                  emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id, className),
                   maxEmergencyEscapes: 1,
                   sustain: async current => {
                     const classRecovery = await useClassRecovery(current, { hpThreshold: 0.9 });

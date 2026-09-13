@@ -69,8 +69,15 @@ export function questPostRetreatRecoveryRatio(questId, className) {
     : 0.75;
 }
 
-export function questEmergencyEscapeHpRatio(questId) {
-  return [54, 60, 62].includes(Number(questId)) ? 0.35 : 0;
+export function questEmergencyEscapeHpRatio(questId, className = '') {
+  const id = Number(questId);
+  const normalizedClass = String(className).trim().toLowerCase();
+  // The live q60 Wizard lost 24 of its 72 HP across two consecutive shared
+  // snapshots while eight monsters had closed to six tiles. At the generic
+  // 35% threshold the UseItem request began at 7 HP and lost the race with
+  // the next hit. Escape before that measured two-hit window.
+  if (id === 60 && normalizedClass === 'wizard') return 0.65;
+  return [54, 60, 62].includes(id) ? 0.35 : 0;
 }
 
 /** Keep the public escape reserve usable until a dangerous expedition is handed in. */
