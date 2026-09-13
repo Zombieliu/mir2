@@ -11,6 +11,7 @@ import {
   hpDrugCount,
   mpDrugCount,
   hpRestockTargetForActiveQuests,
+  journeyExpeditionDepartureFloorForQuest,
   journeyResumeDisposition,
   journeyMpRestockTargetForQuest,
   questCombatMpUseThresholdForQuest,
@@ -43,6 +44,14 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Taoist'), 0.75);
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Warrior'), 0.3);
   assert.equal(questCombatMpUseThresholdForQuest(49, 'Wizard', { fallback: 0.4 }), 0.4);
+});
+
+test('long expeditions accept a partial but still conservative funded departure stock', () => {
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(54, 'Wizard'), { hp: 64, mp: 64 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(54, 'Taoist'), { hp: 64, mp: 64 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(54, 'Warrior'), { hp: 64, mp: 0 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(62, 'Warrior'), { hp: 64, mp: 0 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(49, 'Wizard'), { hp: 0, mp: 0 });
 });
 
 test('a stocked Warrior resumes q54 combat instead of attempting passive field recovery', () => {

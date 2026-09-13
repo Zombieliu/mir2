@@ -26,6 +26,7 @@ import {
   evasiveRecoveryTimeoutMsForQuest,
   hpRestockTargetForActiveQuests,
   hpDrugCount,
+  journeyExpeditionDepartureFloorForQuest,
   journeyMpRestockTargetForQuest,
   minimumJourneyMpStockForQuest,
   mpDrugCount,
@@ -231,17 +232,8 @@ try {
     };
     const supplyGateCallOptions = (owner, questId, requiredHpStock) => {
       const q54Expedition = Number(questId) === 54;
-      const q54TargetHp = 80;
-      const q54Caster = q54Expedition && ['wizard', 'taoist'].includes(
-        String(className).trim().toLowerCase(),
-      );
-      const q54TargetMp = q54Caster
-        ? journeyMpRestockTargetForQuest(questId, className, {
-            fallback: journeySupplyOptions.targetMp,
-          })
-        : 0;
       const q62Expedition = Number(questId) === 62;
-      const q62TargetHp = 80;
+      const departureFloor = journeyExpeditionDepartureFloorForQuest(questId, className);
       const emergencyTeleportTarget = q54Expedition || q62Expedition ? 2 : 0;
       const q42WizardExpedition = Number(questId) === 42 &&
         String(className).trim().toLowerCase() === 'wizard';
@@ -250,20 +242,20 @@ try {
         minimumMpStock: minimumJourneyMpStockForQuest(questId, className),
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
           randomTeleportCount(owner.snapshot) < emergencyTeleportTarget ||
-          ([q54Expedition && (hpDrugCount(owner.snapshot) < q54TargetHp ||
-              mpDrugCount(owner.snapshot) < q54TargetMp),
-            q62Expedition && hpDrugCount(owner.snapshot) < q62TargetHp]
+          ([q54Expedition && (hpDrugCount(owner.snapshot) < departureFloor.hp ||
+              mpDrugCount(owner.snapshot) < departureFloor.mp),
+            q62Expedition && hpDrugCount(owner.snapshot) < departureFloor.hp]
             .some(Boolean) && String(owner.snapshot?.mapFileName ?? '') === '0'),
         ...(q54Expedition ? {
-          requiredAfterRestockHpStock: q54TargetHp,
-          requiredAfterRestockMpStock: q54TargetMp,
+          requiredAfterRestockHpStock: departureFloor.hp,
+          requiredAfterRestockMpStock: departureFloor.mp,
           // Stay in town after the shop. The quest loop owns the return trip
           // because it carries the class-aware aggressor interrupt/retreat
           // policy; the generic supply traveler does not.
           returnMapFileName: '',
         } : {}),
         ...(q62Expedition ? {
-          requiredAfterRestockHpStock: q62TargetHp,
+          requiredAfterRestockHpStock: departureFloor.hp,
           returnMapFileName: '',
         } : {}),
         ...(q42WizardExpedition ? { requiredAfterRestockMpStock: 32 } : {}),

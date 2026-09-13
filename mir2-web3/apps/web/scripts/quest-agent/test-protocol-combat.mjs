@@ -2308,10 +2308,10 @@ test("low-health no-step retreat uses the optional emergency escape before break
     searchVisits += 1;
     if (searchVisits === 1) {
       Object.assign(actor, { x: 20, y: 20 });
-      blockers.forEach((blocker, index) => Object.assign(blocker, {
-        x: 20 + (index % 3) - 1,
-        y: 20 + Math.floor(index / 3) - 1,
-      }));
+      // Keep this fixture below the separate dense-pack trigger so it proves
+      // the no-authoritative-step fallback specifically.
+      const pressure = [[20, 19], [16, 16], [20, 16], [24, 16], [24, 20], [24, 24], [20, 24], [16, 24]];
+      blockers.forEach((blocker, index) => Object.assign(blocker, { x: pressure[index][0], y: pressure[index][1] }));
       client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
       assert.equal(stopWhen(), true);
       return { reached: false };

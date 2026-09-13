@@ -36,6 +36,22 @@ export function journeyMpRestockTargetForQuest(questId, className, {
   return nonnegativeInteger(fallback, 'fallback MP target');
 }
 
+/**
+ * Minimum useful stock after a partial village shop pass. The full targets
+ * remain 80 so a funded character still buys the preferred reserve, while a
+ * nearly stocked character does not enter a fragile funding loop for the last
+ * few bottles.
+ */
+export function journeyExpeditionDepartureFloorForQuest(questId, className) {
+  const id = Number(questId);
+  const normalizedClass = String(className ?? '').trim().toLowerCase();
+  const expedition = id === 54 || id === 62;
+  return {
+    hp: expedition ? 64 : 0,
+    mp: id === 54 && ['wizard', 'taoist'].includes(normalizedClass) ? 64 : 0,
+  };
+}
+
 /** Begin drinking before a long caster objective can exhaust the active pool. */
 export function questCombatMpUseThresholdForQuest(questId, className, {
   fallback = 0.3,

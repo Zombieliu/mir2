@@ -15,12 +15,13 @@ use super::map::{
 };
 use super::map_events::map_coordinate_hint_packets_for_path;
 use super::monster_ai::advance_world;
+use super::monsters::deterministic_roll;
 use super::npc::dismiss_dialog;
 use super::packets::{object_health_info_for_entity, object_revived_info_for_entity};
 use super::pathfind;
 use super::resources::{
-    crystal_player_can_run, is_in_world, mark_crystal_player_move, MapRuntimeResource,
-    PlayerRuntimeResource, RuntimeConfigResource,
+    crystal_player_can_run, is_in_world, mark_crystal_player_move, runtime_tick,
+    MapRuntimeResource, PlayerRuntimeResource, RuntimeConfigResource,
 };
 use super::session::SimulationSession;
 
@@ -296,7 +297,44 @@ pub(super) fn crystal_random_same_map_teleport_packets(
     let direction = world.resource::<PlayerRuntimeResource>().player_direction;
     let map_info = world.resource::<MapRuntimeResource>().current_map.clone();
 
-    for radius in 1..=max_radius.max(1) {
+    // Crystal chooses a random valid point inside the requested radius. The
+    // old deterministic stand-in scanned from radius one upward, which made a
+    // 200-cell RandomTeleport move only one tile and left the player inside
+    // the same attacking pack. Sample the full square first, while avoiding
+    // the statistically exceptional near-origin band. A descending exhaustive
+    // fallback keeps tiny or heavily blocked maps functional.
+    let radius_limit = max_radius.max(1);
+    let minimum_distance = (radius_limit / 4).max(1);
+    let span = u64::try_from(radius_limit.saturating_mul(2).saturating_add(1)).ok()?;
+    let tick = runtime_tick(world);
+    let actor_seed = usize::try_from(current_player_object_id(world).unwrap_or_default())
+        .unwrap_or_default()
+        ^ usize::try_from(start.x.unsigned_abs())
+            .unwrap_or_default()
+            .rotate_left(7)
+        ^ usize::try_from(start.y.unsigned_abs())
+            .unwrap_or_default()
+            .rotate_left(13);
+    for attempt in 0..512_usize {
+        let dx = i32::try_from(deterministic_roll(tick, actor_seed, attempt * 2, span)).ok()?
+            - radius_limit;
+        let dy = i32::try_from(deterministic_roll(tick, actor_seed, attempt * 2 + 1, span)).ok()?
+            - radius_limit;
+        if dx.abs().max(dy.abs()) < minimum_distance {
+            continue;
+        }
+        let candidate = Point {
+            x: start.x.saturating_add(dx),
+            y: start.y.saturating_add(dy),
+        };
+        if can_occupy(world, candidate.clone(), Some(player)) {
+            return Some(relocate_player_to_map(
+                world, map_info, candidate, direction, None,
+            ));
+        }
+    }
+
+    for radius in (minimum_distance..=radius_limit).rev() {
         for dx in -radius..=radius {
             for dy in -radius..=radius {
                 if dx.abs().max(dy.abs()) != radius {
@@ -309,6 +347,25 @@ pub(super) fn crystal_random_same_map_teleport_packets(
                 if candidate == start {
                     continue;
                 }
+                if can_occupy(world, candidate.clone(), Some(player)) {
+                    return Some(relocate_player_to_map(
+                        world, map_info, candidate, direction, None,
+                    ));
+                }
+            }
+        }
+    }
+
+    for radius in 1..minimum_distance {
+        for dx in -radius..=radius {
+            for dy in -radius..=radius {
+                if dx.abs().max(dy.abs()) != radius {
+                    continue;
+                }
+                let candidate = Point {
+                    x: start.x.saturating_add(dx),
+                    y: start.y.saturating_add(dy),
+                };
                 if can_occupy(world, candidate.clone(), Some(player)) {
                     return Some(relocate_player_to_map(
                         world, map_info, candidate, direction, None,

@@ -1537,11 +1537,15 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
     }
     return false;
   };
-  // R31 proved that a low-health caster can still find a momentarily open
-  // local step while two or more confirmed attackers are already converging.
+  // R31 proved that a low-health player can still find a momentarily open
+  // local step while one confirmed attacker and another adjacent hostile are
+  // already converging. Requiring both monsters to land a recent hit misses
+  // that narrow interval even though their authoritative positions prove the
+  // immediate surround.
   // Walking that short path merely postpones the same surround until recovery.
   // Use the opt-in public scroll before the pursuit closes again.
-  if (provenAggressors(client, null, settings).length >= 2 &&
+  if ((originExposure.adjacent >= 2 || originExposure.withinThree >= 3) &&
+      provenAggressors(client, null, settings).length >= 1 &&
       await tryEmergencyEscape('criticalPackPressure', origin)) return;
   const attemptEmergencyEscape = async () => {
     // Recompute after every authoritative movement. A long A* route that was

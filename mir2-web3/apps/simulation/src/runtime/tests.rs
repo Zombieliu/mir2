@@ -37908,6 +37908,13 @@ fn use_item_packet_dynamic_crystal_random_teleport_teleports_same_map() {
     let next_position = player_position(&session);
 
     assert_ne!(next_position, Point { x: 330, y: 270 });
+    assert!(
+        (next_position.x - 330)
+            .abs()
+            .max((next_position.y - 270).abs())
+            >= 50,
+        "RandomTeleport should sample the map-scale radius, got {next_position:?}"
+    );
     assert!(packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::UseItem {
