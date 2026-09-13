@@ -786,6 +786,21 @@ test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bound
 
 test('q54 finishes available D401 zombies before preferring the D406 source', () => {
   assert.equal(shouldPreferObjectiveMapOverCurrent(54), false);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(54, {
+    objectives: [
+      { label: 'Kill Zombie5', current: 4, required: 5 },
+      { label: 'Kill Zombie1', current: 0, required: 5 },
+    ],
+  }), false);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(54, {
+    objectives: [
+      { label: 'Kill Zombie5', current: 5, required: 5 },
+      { label: 'Kill Zombie2', current: 5, required: 5 },
+      { label: 'Kill Zombie3', current: 5, required: 5 },
+      { label: 'Kill Zombie4', current: 5, required: 5 },
+      { label: 'Kill Zombie1', current: 2, required: 5 },
+    ],
+  }), true);
   assert.equal(shouldPreferObjectiveMapOverCurrent(49), true);
   assert.equal(shouldPreferObjectiveMapOverCurrent(62), false);
 });

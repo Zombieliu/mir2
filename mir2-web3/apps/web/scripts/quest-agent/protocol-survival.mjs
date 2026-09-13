@@ -134,11 +134,25 @@ export function questRetreatBiasPosition(questId, snapshot) {
   })[mapFileName] ?? null;
 }
 
-export function shouldPreferObjectiveMapOverCurrent(questId) {
+export function shouldPreferObjectiveMapOverCurrent(questId, questState = null) {
+  const id = Number(questId);
   // q49's Natural Cave source is intentionally safer than its current-map Oma
-  // alternative. q54 is different: D401 already contains required Zombie2/3
-  // targets, so forcing D406 first creates a long, reward-free mine crossing.
-  return Number(questId) === 49;
+  // alternative.
+  if (id === 49) return true;
+  if (id !== 54) return false;
+
+  // D401 is useful while q54 still needs its Zombie2/3/4/5 population, so an
+  // unconditional D406 preference would create a long reward-free crossing.
+  // Once Zombie1 is the sole unfinished objective, however, R46 proved that
+  // returning from D406 to D401 exposes the player to a dense shared pack and
+  // can consume the entire escape reserve without progress. Finish that tail
+  // in the configured D406 source instead.
+  const pending = (questState?.objectives ?? []).filter(objective => {
+    const current = Number(objective?.current ?? 0);
+    const required = Number(objective?.required ?? 0);
+    return required > 0 && current < required;
+  });
+  return pending.length === 1 && String(pending[0]?.label ?? '').trim().toLowerCase() === 'kill zombie1';
 }
 
 export function createPostEngagementSupplyGate({
