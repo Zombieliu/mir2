@@ -20,7 +20,9 @@ name = "mir2-platform-android"
 path = "src/main.rs"
 
 [features]
-ui-preview = []
+# Keep scheduler/system names in the emulator-only preview so render failures
+# identify the exact Bevy system instead of the generic debug-disabled label.
+ui-preview = ["bevy/debug"]
 
 [dependencies]
 mir2-bevy-runtime = { path = "../runtime" }

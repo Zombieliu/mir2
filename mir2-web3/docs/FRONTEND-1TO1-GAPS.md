@@ -1,5 +1,26 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-14 Android current change: native Android now retains a distinct
+> authoritative `hero` object from `ObjectHero`, including bounded owner/class/
+> level identity, and applies `ObjectMana` without creating unknown or removed
+> actors. The shared Bevy `EntityModelSet` and minimap accept the hero kind,
+> while Android overlays expose the local owner's Crystal-gated HP/MP bars.
+> Android-specific synchronous pipeline compilation,
+> Render/RenderGraph/Core2d/Core3d serialization and an 8 MiB-per-frame
+> render-asset ingestion budget removed the reproduced API31 emulator GLES
+> panic across three cold launches and four same-process Home/resume cycles.
+> Shared Bevy is 155/155, Android default 189/189, UI Preview 197/197, Gradle
+> Debug/UI Preview 25/25 each, API31 arm64 check/package/install pass. The
+> 447,588,528-byte APK SHA-256 is
+> `3ac955bd5bb8e3ab7d884a29d8d57aeb86ee8519e58475847fdcbfcb3cbf60aa`.
+> The visible offline 2340x1080 frame has 849 map tiles, eight objects,
+> thirteen entity layers, two effects and one owned-hero mana bar, with no
+> final decode/panic/fatal match. Evidence:
+> `docs/generated/player-qa/native-android-object-hero-20260914/README.md`.
+> Approved-WSS real login, online StartGame/render-ready map change, public
+> asset alignment, physical-device behavior and final human acceptance remain
+> open; this is not a complete native-player-loop claim.
+
 > 2026-09-14 Android current change: all four remaining local movement-skill
 > result packets now enter the exact retained self actor: `Pushed`,
 > `UserBackStep`, `UserDashAttack` and `UserAttackMove`. Deterministic tests

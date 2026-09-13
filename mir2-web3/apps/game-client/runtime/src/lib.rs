@@ -1443,6 +1443,13 @@ fn android_render_plugin() -> bevy::render::RenderPlugin {
         WgpuLimits::downlevel_webgl2_defaults().using_resolution(WgpuLimits::default());
     RenderPlugin {
         render_creation: RenderCreation::Automatic(Box::new(settings)),
+        // wgpu's GLES backend owns one EGL context. Bevy normally compiles
+        // pipelines on AsyncComputeTaskPool, which can keep that context while
+        // the render thread reaches surface present. API-31's host GLES bridge
+        // then trips wgpu-hal's context-lock watchdog. Compile Android's small
+        // 2D pipeline set on the render thread so submit/present cannot race a
+        // background pipeline compiler.
+        synchronous_pipeline_compilation: true,
         ..default()
     }
 }
@@ -1528,6 +1535,44 @@ fn remove_unsupported_android_oit_systems(app: &mut App) {
                 )
                 .expect("Bevy OIT prepare system must be present");
         });
+}
+
+#[cfg(target_os = "android")]
+fn serialize_android_gles_render_schedule(app: &mut App) {
+    use bevy::{
+        core_pipeline::{Core2d, Core3d},
+        ecs::schedule::SingleThreadedExecutor,
+        render::{renderer::RenderGraph, Render, RenderApp},
+    };
+
+    // Disabling Bevy's pipelined renderer keeps extraction and rendering on
+    // the Activity thread, but the Render schedule itself is still parallel
+    // by default, as are its nested render-graph and per-camera schedules.
+    // On the API31 emulator, parallel outer and nested GPU schedules coincided
+    // with a repeatable wgpu-hal GLES context-lock panic while a large
+    // map/entity pack became resident. Run only Android's GPU schedules
+    // serially; the main app schedule and desktop/WASM renderers retain their
+    // executor. The emulator gate validates the combined mitigation without
+    // claiming which Bevy subsystem was the sole cause.
+    let render_app = app
+        .get_sub_app_mut(RenderApp)
+        .expect("Android renderer must initialize the RenderApp");
+    render_app
+        .get_schedule_mut(Render)
+        .expect("Android renderer must initialize the Render schedule")
+        .set_executor(SingleThreadedExecutor::new());
+    render_app
+        .get_schedule_mut(RenderGraph)
+        .expect("Android renderer must initialize the RenderGraph schedule")
+        .set_executor(SingleThreadedExecutor::new());
+    render_app
+        .get_schedule_mut(Core2d)
+        .expect("Android renderer must initialize the Core2d schedule")
+        .set_executor(SingleThreadedExecutor::new());
+    render_app
+        .get_schedule_mut(Core3d)
+        .expect("Android renderer must initialize the Core3d schedule")
+        .set_executor(SingleThreadedExecutor::new());
 }
 
 pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
@@ -1694,7 +1739,16 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         emit_native_soak_metrics.after(publish_presentation_pose_frame),
     );
     #[cfg(target_os = "android")]
-    remove_unsupported_android_oit_systems(&mut app);
+    {
+        // Five-page player/equipment packs use 2048x2048 RGBA pages. Bevy's
+        // limiter is soft, so one 16 MiB page still progresses each frame, but
+        // it cannot share that frame with the map and UI image backlog.
+        app.insert_resource(bevy::render::render_asset::RenderAssetBytesPerFrame::new(
+            NATIVE_RENDER_IMAGE_INGEST_BYTES_PER_FRAME,
+        ));
+        remove_unsupported_android_oit_systems(&mut app);
+        serialize_android_gles_render_schedule(&mut app);
+    }
     app
 }
 

@@ -1,0 +1,7 @@
+cold_start_1_pid=7713
+cold_start_2_pid=7847
+cold_start_3_pid=7988
+home_resume_cycle_1_pid_sequence=7713,7713,7713
+home_resume_cycles_2_to_4_pid_sequence=7988,7988,7988
+final_resumed_activity=com.mir2.web3.uipreview/com.mir2.web3.MainActivity
+final_post_resume_failure_log_matches=0

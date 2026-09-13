@@ -190,6 +190,27 @@ active action at the authoritative standing endpoint. The packets cannot
 target or synthesize another actor. This closes their self entity/action
 reduction only; the local input-delay/`NextAction` gate, sub-tile world-camera
 motion and mounted exact art remain open.
+Post-`IN_GAME` `ObjectHero` and `ObjectMana` now complete the bounded hero
+identity/vitals path. A hero remains a distinct `hero` object with a required
+bounded owner name, optional normalized class key and level; it is not folded
+into a remote player. Mana updates only an existing authoritative identity and
+survives temporary hide/show, while unknown, removed and ground-drop IDs remain
+ignored. The shared renderer-neutral `EntityModelSet` and minimap accept the
+hero kind as player-shaped presentation. Android overlays keep hero owner,
+class, level and mana, and show persistent HP plus the original Crystal
+class/level-gated MP bar only for the local player's own hero. This is object
+state and presentation, not autonomous hero AI, combat or persistence logic.
+
+On Android, Bevy disables pipelined rendering, compiles render pipelines
+synchronously, uses a single-threaded executor for Render, RenderGraph, Core2d
+and Core3d, and limits render-asset ingestion to 8 MiB per frame. A diagnostic
+APK identified the remaining reproducible panic in `render_system`: Bevy's
+default asynchronous pipeline compiler was contending with surface present for
+wgpu's single GLES/EGL context. The final APK passed three API31 host-GPU cold
+launches and four same-process Home/resume cycles. This is a bounded emulator
+mitigation, not proof for every physical Android GPU/driver. Current evidence
+is in
+`docs/generated/player-qa/native-android-object-hero-20260914/README.md`.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a

@@ -1,5 +1,23 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-14 Android current change: the native object layer now recognizes a
+> Crystal hero as its own authoritative entity rather than a generic player.
+> `ObjectHero` retains owner/class/level identity, `ObjectMana` updates only
+> that exact retained actor, the shared Bevy `EntityModelSet`/minimap accept
+> `hero`, and the local owner's overlay shows Crystal-gated HP/MP bars. The
+> 2340x1080 offline Bichon specimen renders eight objects/thirteen layers, 849
+> map tiles and two effects. Android-specific synchronous pipeline compilation,
+> nested render-schedule serialization and bounded render-asset ingestion
+> passed three API31 host-GPU cold launches and four same-process Home/resume
+> cycles with no final shared-model, GLES/panic or fatal match. Shared Bevy
+> 155/155, Android 189/189, UI Preview
+> 197/197, Java 25/25 per variant and API31 target/package/install pass.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-hero-20260914/README.md`.
+> This closes a bounded hero/object-presentation milestone only; approved-WSS
+> authentication, online roster/StartGame/render-ready map change, public asset
+> alignment, physical-device and human acceptance remain separate gates.
+
 > 2026-09-14 Android current change: `Pushed`, `UserBackStep`,
 > `UserDashAttack` and `UserAttackMove` now complete their bounded native
 > self-entity/action reduction. The implementation follows Crystal commit

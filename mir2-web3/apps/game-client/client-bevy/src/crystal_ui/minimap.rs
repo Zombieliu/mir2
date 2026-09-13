@@ -97,7 +97,7 @@ pub fn marker_color(kind: EntityKind) -> Color {
         EntityKind::SelfPlayer => Color::WHITE,
         EntityKind::Npc => Color::srgb(0.0, 1.0, 0.0),
         EntityKind::Monster => Color::srgb(1.0, 0.0, 0.0),
-        EntityKind::Player => Color::srgb(0.2, 0.45, 1.0),
+        EntityKind::Player | EntityKind::Hero => Color::srgb(0.2, 0.45, 1.0),
     }
 }
 
@@ -264,5 +264,9 @@ mod tests {
         );
         assert_eq!(marker_position(profile, crop, 0, 0), None);
         assert_eq!(marker_color(EntityKind::SelfPlayer), Color::WHITE);
+        assert_eq!(
+            marker_color(EntityKind::Hero),
+            marker_color(EntityKind::Player)
+        );
     }
 }

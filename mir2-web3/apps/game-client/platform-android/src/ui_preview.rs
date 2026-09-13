@@ -58,9 +58,23 @@ pub struct PreviewRequest {
 pub fn install(app: &mut App) {
     app.init_resource::<PreviewRequest>()
         .add_systems(Update, report_world_render_ready)
+        .add_systems(Update, report_owned_hero_mana_visible)
         .add_systems(Update, start_world_render_motion_specimen)
         .add_systems(Update, report_world_render_motion_pose)
         .add_systems(PostUpdate, apply);
+}
+
+fn report_owned_hero_mana_visible(
+    bars: Query<Entity, With<crate::entity_overlays::ActorManaBar>>,
+    mut reported: Local<bool>,
+) {
+    if !*reported && !bars.is_empty() {
+        info!(
+            count = bars.iter().count(),
+            "ANDROID_OWNED_HERO_MANA_VISIBLE"
+        );
+        *reported = true;
+    }
 }
 
 fn start_world_render_motion_specimen(
@@ -354,6 +368,56 @@ fn apply_offline_object_hidden_specimen(
     true
 }
 
+fn apply_offline_owned_hero_vitals_specimen(
+    overlays: &mut crate::entity_overlays::ActorOverlayModel,
+) -> bool {
+    let packets = [
+        serde_json::json!({
+            "type": "packet", "packet": "ObjectHealth", "payload": {
+                "objectId": 9006, "percent": 82, "expire": 0
+            }
+        })
+        .to_string(),
+        serde_json::json!({
+            "type": "packet", "packet": "ObjectMana", "payload": {
+                "objectId": 9006, "percent": 64
+            }
+        })
+        .to_string(),
+    ];
+    let mut latest_models = None;
+    for packet in packets {
+        let crate::live_entity::LiveEntityPacketOutcome::Applied {
+            models,
+            render,
+            presentation_event: _,
+        } = crate::live_entity::apply_packet(&packet)
+        else {
+            return false;
+        };
+        if !mir2_bevy_runtime::native_ingest::push_native_entity_model_set(models.clone()) {
+            return false;
+        }
+        if render.is_some_and(|render| {
+            !mir2_bevy_runtime::native_ingest::push_native_entity_render_state(render)
+        }) {
+            return false;
+        }
+        latest_models = Some(models);
+    }
+    let Some(models) = latest_models else {
+        return false;
+    };
+    let Some((center_x, center_y)) = overlays.center() else {
+        return false;
+    };
+    let Some(projected) = crate::entity_overlays::project(&models, center_x, center_y) else {
+        return false;
+    };
+    overlays.replace(projected);
+    true
+}
+
 fn report_world_render_motion_pose(
     poses: Res<mir2_bevy_runtime::PresentationPoseBuffer>,
     time: Res<Time>,
@@ -461,6 +525,11 @@ fn report_world_render_ready(
             info!("ANDROID_OBJECT_HIDDEN_PRESENTATION_APPLIED");
         } else {
             warn!("offline ObjectHidden specimen was not accepted");
+        }
+        if apply_offline_owned_hero_vitals_specimen(&mut overlays) {
+            info!("ANDROID_OWNED_HERO_VITALS_APPLIED");
+        } else {
+            warn!("offline owned-Hero health/mana specimen was not accepted");
         }
         overlays.observe_damage_events(
             [crate::live_entity::LiveDamageEvent {
@@ -643,6 +712,8 @@ fn apply(world: &mut World) {
                 {"objectId":"9005","kind":"player","classKey":"warrior","name":"Offline rider","guildName":"MOUNT","nameColourArgb":-23296,"x":304,"y":631,"direction":"Down",
                  "sprite":{"bodyLibrary":"CArmour/00","mountLibrary":"Mount/00",
                     "frameBaseOffset":0,"mountFrameOffset":0,"directionStride":4}}
+                ,{"objectId":"9006","kind":"hero","classKey":"taoist","level":12,"name":"Owned hero","ownerName":"OFFLINE UI FIXTURE","nameColourArgb":-16711936,"x":300,"y":632,"direction":"Down",
+                 "sprite":{"bodyLibrary":"CArmour/00","frameBaseOffset":0,"directionStride":4}}
             ],
             "groundDrops":[
                 {"objectId":"9101","name":"Offline potion","nameColourArgb":-10040065,

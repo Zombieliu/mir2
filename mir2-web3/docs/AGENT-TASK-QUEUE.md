@@ -1,5 +1,26 @@
 # Agent Task Queue
 
+> 2026-09-14 Android current change: `ObjectHero` / `ObjectMana` now cross the
+> authenticated post-`IN_GAME` host boundary into a distinct retained hero
+> object. Owner/class/level/mana validation, hide/show retention, unknown/drop/
+> tombstone isolation and the local-owner Crystal mana-bar gate have
+> deterministic tests. The shared Bevy object model and minimap also accept
+> `hero`, closing the render-ready model decode failure found by the emulator.
+> Android-only synchronous pipeline compilation, serialization of Render,
+> RenderGraph, Core2d and Core3d, plus an 8 MiB render-asset ingestion budget
+> passed three API31 host-GPU cold launches and four same-process Home/resume
+> cycles after the default async pipeline compiler was caught racing GLES
+> surface present. Shared Bevy 155/155, Android 189/189 and UI Preview 197/197,
+> Gradle 25/25 per variant, API31 target/package/install pass. APK bytes
+> `447588528`, SHA-256
+> `3ac955bd5bb8e3ab7d884a29d8d57aeb86ee8519e58475847fdcbfcb3cbf60aa`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-hero-20260914/README.md`.
+> The externally gated queue remains approved-WSS account login through online
+> StartGame/render-ready map transition, approved public asset alignment and a
+> physical-device/human run. Do not upgrade this offline emulator result to
+> real-login or true-device acceptance.
+
 > 2026-09-14 Android current change: the remaining Crystal self-transform
 > result packets `Pushed`, `UserBackStep`, `UserDashAttack` and
 > `UserAttackMove` now cross the authenticated post-`IN_GAME` host boundary

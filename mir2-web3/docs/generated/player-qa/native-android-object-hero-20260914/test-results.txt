@@ -1,0 +1,46 @@
+2026-09-14 native Android hero/object slice
+
+PASS  cargo +1.95.0 test --manifest-path apps/game-client/client-bevy/Cargo.toml
+      155 passed; 0 failed
+
+PASS  cargo +1.95.0 test --manifest-path apps/game-client/platform-android/Cargo.toml
+      189 passed; 0 failed
+
+PASS  cargo +1.95.0 test --manifest-path apps/game-client/platform-android/Cargo.toml --features ui-preview
+      197 passed; 0 failed
+
+PASS  JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+      ANDROID_SDK_ROOT=/Users/henryliu/Library/Android/sdk
+      ./gradlew --no-daemon testDebugUnitTest testUiPreviewUnitTest --rerun-tasks
+      Debug: 25 passed; UI Preview: 25 passed; 0 failures/errors
+
+PASS  MIR2_ANDROID_MODE=check MIR2_ANDROID_API_LEVEL=31 ./build-android.sh
+      aarch64-linux-android / arm64-v8a; Rust 1.95.0; cargo-ndk 4.1.2
+
+PASS  MIR2_ANDROID_MODE=package MIR2_ANDROID_VARIANT=uiPreview
+      MIR2_ANDROID_API_LEVEL=31
+      MIR2_ANDROID_UI_ASSET_ROOT=target/shared-ui-assets
+      MIR2_ANDROID_WORLD_ASSET_ROOT=target/local-world-20260911-objects
+      MIR2_ANDROID_ENTITY_ASSET_ROOT=target/entity-proof-assets-with-archer-bow-20260912
+      MIR2_ANDROID_ENTITY_ASSET_PACK_ID=android-archer-mount-bow-proof-20260912
+      ./build-android.sh
+
+PASS  adb install -r app-uiPreview.apk
+PASS  three cold world-render launches beyond the prior failure window
+PASS  four same-process Home/resume cycles; final three retained PID 7988
+PASS  final log failure-pattern scan returned zero matches
+
+The pre-fix final APK reached render-ready but panicked in
+bevy_render::renderer::render_system while the default asynchronous pipeline
+compiler held the GLES context. Its failure log is retained. The final APK
+enables synchronous pipeline compilation on Android and passed the bounded
+reruns above.
+
+The first Gradle invocation inherited Java 8 and the next lacked an explicit
+SDK root; both stopped during configuration before tests. The recorded passing
+run explicitly used JDK 17 and the installed Android SDK. Neither failed
+configuration is a product-test failure.
+
+Boundary: offline API31 emulator and local proof assets only. No approved WSS
+login, online StartGame/map transition, public release alignment or physical
+device was exercised.

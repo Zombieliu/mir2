@@ -42,14 +42,37 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
         for key in ["x", "y"] {
             i32::try_from(entity[key].as_u64()?).ok()?;
         }
-        if !matches!(
-            entity["kind"].as_str()?,
-            "selfPlayer" | "player" | "monster" | "npc"
-        ) {
+        let kind = entity["kind"].as_str()?;
+        if !matches!(kind, "selfPlayer" | "player" | "hero" | "monster" | "npc") {
             return None;
         }
         entity["name"].as_str()?;
-        if entity["kind"] == "selfPlayer" {
+        if kind == "hero"
+            && !entity
+                .get("ownerName")
+                .and_then(Value::as_str)
+                .is_some_and(|owner| {
+                    let owner = owner.trim();
+                    !owner.is_empty() && owner.chars().count() <= 128
+                })
+        {
+            return None;
+        }
+        let valid_class_key = match entity.get("classKey") {
+            None | Some(Value::Null) => true,
+            Some(value) => value.as_str().is_some_and(|class_key| {
+                let class_key = class_key.trim();
+                !class_key.is_empty() && class_key.len() <= 32
+            }),
+        };
+        let valid_mana = match entity.get("_manaPercent") {
+            None | Some(Value::Null) => true,
+            Some(value) => value.as_u64().is_some_and(|percent| percent <= 100),
+        };
+        if !valid_class_key || !valid_mana {
+            return None;
+        }
+        if kind == "selfPlayer" {
             if self_player.is_some()
                 || id != owner
                 || entity["name"] != name
@@ -289,6 +312,40 @@ mod tests {
         assert_eq!(entities.entities.len(), 2);
         assert_eq!(entities.entities[1].object_id, "43");
         assert_eq!((entities.entities[1].x, entities.entities[1].y), (301, 630));
+    }
+
+    #[test]
+    fn accepts_hero_in_shared_entity_projection() {
+        let mut source = snapshot();
+        source["entities"]
+            .as_array_mut()
+            .expect("entity fixture array")
+            .push(json!({
+                "objectId": 9006,
+                "kind": "hero",
+                "name": "Spirit",
+                "ownerName": "Fixture",
+                "classKey": "taoist",
+                "x": 302,
+                "y": 634,
+                "level": 12,
+                "_manaPercent": 64,
+                "direction": "up"
+            }));
+
+        let projected = project(&source.to_string(), "0", "Fixture", 300, 630)
+            .expect("hero should not reject an otherwise render-ready projection");
+        let entities: mir2_client_bevy::entities::EntityModelSet =
+            serde_json::from_str(&projected.entities).unwrap();
+        assert_eq!(entities.entities.len(), 3);
+        assert_eq!(
+            entities.entities[2].kind,
+            mir2_client_bevy::entities::EntityKind::Hero
+        );
+
+        source["entities"][2]["classKey"] = Value::Null;
+        source["entities"][2]["_manaPercent"] = Value::Null;
+        assert!(project(&source.to_string(), "0", "Fixture", 300, 630).is_some());
     }
 
     #[test]

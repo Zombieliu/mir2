@@ -554,6 +554,9 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 }
             },
         ),
+        "ObjectMana" => object_id(body)
+            .zip(percent(body))
+            .map(|(object_id, percent)| EntityMutation::Mana { object_id, percent }),
         "ObjectName" => {
             object_id(body)
                 .zip(bounded_text(body, "name", false))
@@ -637,7 +640,8 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
         "ObjectRemove" => object_id(body).map(EntityMutation::Remove),
         "ObjectItem" => ground_drop(body, false).map(EntityMutation::GroundDrop),
         "ObjectGold" => ground_drop(body, true).map(EntityMutation::GroundDrop),
-        "ObjectPlayer" | "ObjectHero" => spawn(body, "player").map(EntityMutation::Spawn),
+        "ObjectPlayer" => spawn(body, "player").map(EntityMutation::Spawn),
+        "ObjectHero" => spawn(body, "hero").map(EntityMutation::Spawn),
         "ObjectMonster" | "NewMonsterInfo" => spawn(body, "monster").map(EntityMutation::Spawn),
         "ObjectNpc" | "NewNpcInfo" => spawn(body, "npc").map(EntityMutation::Spawn),
         _ => {
@@ -849,7 +853,7 @@ fn packet_action(
                 })
                 .and_then(|entity| entity.get("kind"))
                 .and_then(Value::as_str)
-                .is_some_and(|kind| matches!(kind, "selfPlayer" | "player"));
+                .is_some_and(|kind| matches!(kind, "selfPlayer" | "player" | "hero"));
             if is_player {
                 "attack1"
             } else {
@@ -945,6 +949,7 @@ fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
         | EntityMutation::Show(object_id)
         | EntityMutation::Remove(object_id)
         | EntityMutation::Health { object_id, .. }
+        | EntityMutation::Mana { object_id, .. }
         | EntityMutation::Metadata { object_id, .. }
         | EntityMutation::Poison { object_id, .. }
         | EntityMutation::LevelEffects { object_id, .. }
@@ -1045,6 +1050,14 @@ fn apply_cache_mutation(
                 .get_mut(object_id)
                 .and_then(|entry| entry.model.as_mut())
                 .is_some_and(|entity| patch_model_metadata(entity, update));
+            (model_changed || hidden_changed, false)
+        }
+        EntityMutation::Mana { object_id, percent } => {
+            let model_changed = apply_models(models, mutation);
+            let hidden_changed = hidden
+                .get_mut(object_id)
+                .and_then(|entry| entry.model.as_mut())
+                .is_some_and(|entity| patch_model_mana(entity, *percent));
             (model_changed || hidden_changed, false)
         }
         EntityMutation::Poison {
@@ -1207,6 +1220,10 @@ enum EntityMutation {
         expire: u8,
         generation: u64,
         revision: u64,
+    },
+    Mana {
+        object_id: u32,
+        percent: u8,
     },
     Metadata {
         object_id: u32,
@@ -1416,6 +1433,21 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         .get("level")
         .and_then(Value::as_u64)
         .and_then(|value| u32::try_from(value).ok());
+    let owner_name = if kind == "hero" {
+        bounded_text(payload, "ownerName", false)?
+    } else {
+        None
+    };
+    let class_key = match payload.get("classKey") {
+        None | Some(Value::Null) => None,
+        Some(value) => {
+            let value = value.as_str()?.trim().to_ascii_lowercase();
+            if value.is_empty() || value.len() > 32 {
+                return None;
+            }
+            Some(value)
+        }
+    };
     let direction = direction(payload).map(str::to_owned);
     let name_colour_argb = match payload.get("nameColourArgb") {
         None | Some(Value::Null) => None,
@@ -1458,6 +1490,8 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         "x": x,
         "y": y,
         "level": level,
+        "ownerName": owner_name,
+        "classKey": class_key,
         "direction": direction,
         "nameColourArgb": name_colour_argb,
         "guildName": guild_name,
@@ -1583,8 +1617,32 @@ fn valid_models(value: &Value) -> bool {
             && coordinate(entity.get("y")).is_some()
             && matches!(
                 entity.get("kind").and_then(Value::as_str),
-                Some("selfPlayer" | "player" | "monster" | "npc")
+                Some("selfPlayer" | "player" | "hero" | "monster" | "npc")
             )
+            && entity
+                .get("kind")
+                .and_then(Value::as_str)
+                .is_none_or(|kind| {
+                    kind != "hero"
+                        || entity
+                            .get("ownerName")
+                            .and_then(Value::as_str)
+                            .is_some_and(|owner| {
+                                let owner = owner.trim();
+                                !owner.is_empty() && owner.chars().count() <= 128
+                            })
+                })
+            && match entity.get("classKey") {
+                None | Some(Value::Null) => true,
+                Some(value) => value.as_str().is_some_and(|class_key| {
+                    let class_key = class_key.trim();
+                    !class_key.is_empty() && class_key.len() <= 32
+                }),
+            }
+            && match entity.get("_manaPercent") {
+                None | Some(Value::Null) => true,
+                Some(value) => value.as_u64().is_some_and(|percent| percent <= 100),
+            }
             && entity.get("levelEffects").is_none_or(|value| {
                 value
                     .as_u64()
@@ -1824,6 +1882,10 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             .is_some_and(|entity| {
                 patch_model_health(entity, *percent, *expire, *generation, *revision)
             }),
+        EntityMutation::Mana { object_id, percent } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_model_mana(entity, *percent)),
         EntityMutation::Metadata { object_id, update } => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
@@ -1906,6 +1968,12 @@ fn patch_model_metadata(entity: &mut Value, update: &EntityMetadata) -> bool {
             changed
         }
     }
+}
+
+fn patch_model_mana(entity: &mut Value, percent: u8) -> bool {
+    let changed = entity.get("_manaPercent").and_then(Value::as_u64) != Some(u64::from(percent));
+    entity["_manaPercent"] = json!(percent);
+    changed
 }
 
 fn patch_model_poison(entity: &mut Value, poison: u16) -> bool {
@@ -2051,7 +2119,7 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_dead(entity, *percent == 0)),
-        EntityMutation::Metadata { .. } => false,
+        EntityMutation::Metadata { .. } | EntityMutation::Mana { .. } => false,
         EntityMutation::Poison {
             object_id, poison, ..
         } => entities
@@ -3220,6 +3288,109 @@ mod tests {
             .unwrap()
             .iter()
             .any(|entity| entity["objectId"] == "44" && entity["levelEffects"] == 8));
+        clear();
+    }
+
+    #[test]
+    fn object_hero_identity_and_mana_follow_only_the_authoritative_actor() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630},{"objectId":"43","kind":"player","name":"Remote","x":301,"y":630},{"objectId":"41","kind":"hero","name":"Existing Hero","ownerName":"Self","classKey":"taoist","level":12,"x":299,"y":630,"_manaPercent":50}],"groundDrops":[{"objectId":"50","name":"Potion","x":302,"y":630,"quantity":1,"image":0,"dropKind":"item"}]}"#,
+            21,
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectHero","payload":{"objectId":44,"name":"Companion","ownerName":"Self","classKey":"Taoist","level":12,"location":{"x":302,"y":631},"direction":"Up"}}"#,
+        ) else {
+            panic!("typed ObjectHero should retain its own identity");
+        };
+        assert!(render.is_none());
+        let models: Value = serde_json::from_str(&models).unwrap();
+        let hero = models["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"] == "44")
+            .unwrap();
+        assert_eq!(hero["kind"], "hero");
+        assert_eq!(hero["ownerName"], "Self");
+        assert_eq!(hero["classKey"], "taoist");
+        assert_eq!(hero["level"], 12);
+
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectHero","payload":{"objectId":45,"name":"Class pending","ownerName":"Self","location":{"x":303,"y":631},"direction":"Up"}}"#,
+        ) else {
+            panic!("hero class metadata is optional until the server supplies it");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert!(models["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|entity| entity["objectId"] == "45")
+            .unwrap()["classKey"]
+            .is_null());
+
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectMana","payload":{"objectId":44,"percent":64}}"#,
+        ) else {
+            panic!("ObjectMana should update the retained hero");
+        };
+        assert!(
+            render.is_none(),
+            "mana is an overlay field, not a sprite mutation"
+        );
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(
+            models["entities"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|entity| entity["objectId"] == "44")
+                .unwrap()["_manaPercent"],
+            64
+        );
+
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectHide","payload":{"objectId":44}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectMana","payload":{"objectId":44,"percent":73}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { render: None, .. }
+        ));
+        let LiveEntityPacketOutcome::Applied { models, .. } =
+            apply_packet(r#"{"type":"packet","packet":"ObjectShow","payload":{"objectId":44}}"#)
+        else {
+            panic!("hidden hero should restore with packet-fresh mana");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(
+            models["entities"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .find(|entity| entity["objectId"] == "44")
+                .unwrap()["_manaPercent"],
+            73
+        );
+
+        for invalid in [
+            r#"{"type":"packet","packet":"ObjectMana","payload":{"objectId":44,"percent":-1}}"#,
+            r#"{"type":"packet","packet":"ObjectMana","payload":{"objectId":44,"percent":101}}"#,
+            r#"{"type":"packet","packet":"ObjectHero","payload":{"objectId":46,"name":"No owner","location":{"x":302,"y":631}}}"#,
+        ] {
+            assert_eq!(apply_packet(invalid), LiveEntityPacketOutcome::Rejected);
+        }
+        for ignored in [
+            r#"{"type":"packet","packet":"ObjectMana","payload":{"objectId":99,"percent":50}}"#,
+            r#"{"type":"packet","packet":"ObjectMana","payload":{"objectId":50,"percent":50}}"#,
+        ] {
+            assert_eq!(apply_packet(ignored), LiveEntityPacketOutcome::Ignored);
+        }
         clear();
     }
 

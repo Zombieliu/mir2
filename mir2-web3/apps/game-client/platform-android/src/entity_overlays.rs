@@ -31,6 +31,7 @@ const HEALTH_LEFT: f32 = 8.0;
 const HEALTH_TOP: f32 = -64.0;
 const HEALTH_WIDTH: f32 = 32.0;
 const HEALTH_HEIGHT: f32 = 4.0;
+const MANA_TOP: f32 = -60.0;
 const OVERLAY_Z_INDEX: i32 = 850;
 const MAX_MODEL_BYTES: usize = 2 * 1024 * 1024;
 const MAX_WORLD_OBJECTS: usize = 8192;
@@ -59,12 +60,20 @@ struct ActorHealthBar {
 }
 
 #[derive(Component)]
+pub(crate) struct ActorManaBar {
+    object_id: u32,
+    base_left: f32,
+    base_top: f32,
+}
+
+#[derive(Component)]
 struct DamageFloaterNode(u64);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum ActorKind {
     SelfPlayer,
     Player,
+    Hero,
     Monster,
     Npc,
 }
@@ -75,12 +84,16 @@ struct ActorOverlay {
     kind: ActorKind,
     name: String,
     guild_name: Option<String>,
+    owner_name: Option<String>,
+    class_key: Option<String>,
+    level: Option<u32>,
     color: [u8; 4],
     x: i32,
     y: i32,
     image: Option<u16>,
     dead: bool,
     health: Option<HealthPacket>,
+    mana_percent: Option<u8>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -267,6 +280,7 @@ pub(crate) fn project(
         let kind = match entity.get("kind")?.as_str()? {
             "selfPlayer" => ActorKind::SelfPlayer,
             "player" => ActorKind::Player,
+            "hero" => ActorKind::Hero,
             "monster" => ActorKind::Monster,
             "npc" => ActorKind::Npc,
             _ => return None,
@@ -282,6 +296,12 @@ pub(crate) fn project(
                 (!value.is_empty()).then(|| value.to_owned())
             }
         };
+        let owner_name = optional_bounded_text(entity.get("ownerName"))?;
+        let class_key = optional_class_key(entity.get("classKey"))?;
+        let level = match entity.get("level") {
+            None | Some(Value::Null) => None,
+            Some(value) => Some(u32::try_from(value.as_u64()?).ok()?),
+        };
         let name_color = match entity.get("nameColourArgb") {
             None | Some(Value::Null) => None,
             Some(value) => Some(i32::try_from(value.as_i64()?).ok()?),
@@ -295,6 +315,10 @@ pub(crate) fn project(
             Some(value) => value.as_bool()?,
         };
         let health = health_packet(entity)?;
+        let mana_percent = optional_percent(entity.get("_manaPercent"))?;
+        if kind == ActorKind::Hero && owner_name.is_none() {
+            return None;
+        }
         if !ids.insert(object_id) {
             return None;
         }
@@ -313,12 +337,16 @@ pub(crate) fn project(
             kind,
             name,
             guild_name,
+            owner_name,
+            class_key,
+            level,
             color: name_color.and_then(argb).unwrap_or(fallback),
             x,
             y,
             image,
             dead,
             health,
+            mana_percent,
         });
     }
     for drop in drops {
@@ -353,6 +381,32 @@ fn coordinate(value: &Value) -> Option<i32> {
 fn bounded_text(value: &Value) -> Option<String> {
     let text = value.as_str()?.trim();
     (!text.is_empty() && text.chars().count() <= 128).then(|| text.to_owned())
+}
+
+fn optional_bounded_text(value: Option<&Value>) -> Option<Option<String>> {
+    match value {
+        None | Some(Value::Null) => Some(None),
+        Some(value) => Some(Some(bounded_text(value)?)),
+    }
+}
+
+fn optional_class_key(value: Option<&Value>) -> Option<Option<String>> {
+    let value = optional_bounded_text(value)?;
+    let Some(value) = value else {
+        return Some(None);
+    };
+    let value = value.to_ascii_lowercase();
+    (value.len() <= 32).then_some(Some(value))
+}
+
+fn optional_percent(value: Option<&Value>) -> Option<Option<u8>> {
+    match value {
+        None | Some(Value::Null) => Some(None),
+        Some(value) => {
+            let value = u8::try_from(value.as_u64()?).ok()?;
+            (value <= 100).then_some(Some(value))
+        }
+    }
 }
 
 fn argb(value: i32) -> Option<[u8; 4]> {
@@ -409,6 +463,7 @@ struct RenderKey {
     names_visible: bool,
     exact_self_hp: Option<(i32, i32)>,
     visible_health: Vec<(u32, u8)>,
+    visible_mana: Vec<(u32, u8)>,
 }
 
 pub(crate) fn install(app: &mut App) {
@@ -425,8 +480,18 @@ fn sync(
     read_model: Option<Res<UiReadModel>>,
     time: Res<Time>,
     roots: Query<Entity, With<ActorOverlayRoot>>,
-    mut name_nodes: Query<(&ActorNameLine, &mut Node), Without<ActorHealthBar>>,
-    mut health_nodes: Query<(&ActorHealthBar, &mut Node), Without<ActorNameLine>>,
+    mut name_nodes: Query<
+        (&ActorNameLine, &mut Node),
+        (Without<ActorHealthBar>, Without<ActorManaBar>),
+    >,
+    mut health_nodes: Query<
+        (&ActorHealthBar, &mut Node),
+        (Without<ActorNameLine>, Without<ActorManaBar>),
+    >,
+    mut mana_nodes: Query<
+        (&ActorManaBar, &mut Node),
+        (Without<ActorNameLine>, Without<ActorHealthBar>),
+    >,
     presentation_poses: Option<Res<mir2_bevy_runtime::PresentationPoseBuffer>>,
     ui_scale: Option<Res<UiScale>>,
     mut health_windows: Local<HealthWindows>,
@@ -466,14 +531,45 @@ fn sync(
         node.left = px(marker.base_left + offset.0);
         node.top = px(marker.base_top + offset.1);
     }
+    for (marker, mut node) in &mut mana_nodes {
+        let offset = overlay_motion(marker.object_id);
+        node.left = px(marker.base_left + offset.0);
+        node.top = px(marker.base_top + offset.1);
+    }
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let mut present = HashSet::new();
     let mut visible_health = Vec::new();
+    let mut visible_mana = Vec::new();
+    let self_name = model
+        .actors
+        .iter()
+        .find(|actor| actor.kind == ActorKind::SelfPlayer)
+        .map(|actor| actor.name.as_str());
     for actor in &model.actors {
         present.insert(actor.object_id);
-        let Some(packet) = actor.health.filter(|_| actor.kind == ActorKind::Monster) else {
+        let own_hero = actor.kind == ActorKind::Hero
+            && actor
+                .owner_name
+                .as_deref()
+                .zip(self_name)
+                .is_some_and(|(owner, name)| owner == name);
+        if own_hero && !actor.dead && hero_can_draw_mana(actor.class_key.as_deref(), actor.level) {
+            if let Some(percent) = actor.mana_percent {
+                visible_mana.push((actor.object_id, percent));
+            }
+        }
+        let Some(packet) = actor
+            .health
+            .filter(|_| actor.kind == ActorKind::Monster || own_hero)
+        else {
             continue;
         };
+        if own_hero {
+            if !actor.dead && packet.percent > 0 {
+                visible_health.push((actor.object_id, packet.percent));
+            }
+            continue;
+        }
         let window = health_windows.0.entry(actor.object_id).or_default();
         if window.generation != packet.generation {
             *window = HealthWindow::default();
@@ -499,11 +595,13 @@ fn sync(
     }
     health_windows.0.retain(|id, _| present.contains(id));
     visible_health.sort_unstable();
+    visible_mana.sort_unstable();
     let key = RenderKey {
         revision: model.revision,
         names_visible,
         exact_self_hp,
         visible_health: visible_health.clone(),
+        visible_mana: visible_mana.clone(),
     };
     let in_game = shell.screen == NativeShellScreen::InGame && model.center.is_some();
     if in_game && rendered.as_ref() == Some(&key) {
@@ -518,6 +616,7 @@ fn sync(
     }
     let center = model.center.expect("checked above");
     let visible_health = visible_health.into_iter().collect::<HashMap<_, _>>();
+    let visible_mana = visible_mana.into_iter().collect::<HashMap<_, _>>();
     commands
         .spawn((
             ActorOverlayRoot,
@@ -554,11 +653,23 @@ fn sync(
                         f32::from(*percent) / 100.0,
                     );
                 }
+                if let Some(percent) = visible_mana.get(&actor.object_id) {
+                    spawn_mana_bar(
+                        root,
+                        actor.object_id,
+                        left,
+                        top,
+                        f32::from(*percent) / 100.0,
+                    );
+                }
                 if !names_visible {
                     continue;
                 }
                 let corpse_shift = if actor.dead { CORPSE_NAME_SHIFT } else { 0.0 };
-                if matches!(actor.kind, ActorKind::SelfPlayer | ActorKind::Player) {
+                if matches!(
+                    actor.kind,
+                    ActorKind::SelfPlayer | ActorKind::Player | ActorKind::Hero
+                ) {
                     if let Some(guild) = actor.guild_name.as_deref() {
                         spawn_name_line(
                             root,
@@ -758,7 +869,10 @@ fn damage_floater_entries(model: &ActorOverlayModel, now_ms: u64) -> Vec<DamageF
             } else {
                 ((1.0 - progress) / 0.70).clamp(0.0, 1.0)
             };
-            let is_player = matches!(actor.kind, ActorKind::SelfPlayer | ActorKind::Player);
+            let is_player = matches!(
+                actor.kind,
+                ActorKind::SelfPlayer | ActorKind::Player | ActorKind::Hero
+            );
             let (red, green, blue, font_size) = match (floater.variant, is_player) {
                 (DamageVariant::Miss, true) => (0xff, 0x9d, 0x92, 13.0),
                 (DamageVariant::Miss, false) => (0xcf, 0xcf, 0xcf, 13.0),
@@ -822,6 +936,57 @@ fn spawn_health_bar(
                 ..default()
             },
             BackgroundColor(Color::srgb_u8(0x00, 0xc0, 0x00)),
+        ));
+    });
+}
+
+fn hero_can_draw_mana(class_key: Option<&str>, level: Option<u32>) -> bool {
+    class_key.zip(level).is_some_and(|(class_key, level)| {
+        if class_key.eq_ignore_ascii_case("warrior") {
+            level > 25
+        } else {
+            level > 7
+        }
+    })
+}
+
+fn spawn_mana_bar(
+    root: &mut ChildSpawnerCommands,
+    object_id: u32,
+    left: f32,
+    top: f32,
+    ratio: f32,
+) {
+    let base_left = left + HEALTH_LEFT;
+    let base_top = top + MANA_TOP;
+    root.spawn((
+        ActorManaBar {
+            object_id,
+            base_left,
+            base_top,
+        },
+        FocusPolicy::Pass,
+        Node {
+            position_type: PositionType::Absolute,
+            left: px(base_left),
+            top: px(base_top),
+            width: px(HEALTH_WIDTH),
+            height: px(HEALTH_HEIGHT),
+            border: UiRect::all(px(1.0)),
+            ..default()
+        },
+        BackgroundColor(Color::srgb_u8(0x00, 0x00, 0x27)),
+        BorderColor::all(Color::srgb_u8(0x10, 0x10, 0x10)),
+    ))
+    .with_children(|bar| {
+        bar.spawn((
+            FocusPolicy::Pass,
+            Node {
+                width: percent((ratio.clamp(0.0, 1.0) * 100.0).floor()),
+                height: percent(100.0),
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(0x36, 0x66, 0xff)),
         ));
     });
 }
@@ -896,7 +1061,8 @@ mod tests {
             "entities": [
                 {"objectId":"7","kind":"selfPlayer","name":"Hero","guildName":"Codex","nameColourArgb":-256,"x":10,"y":20,"dead":false},
                 {"objectId":"8","kind":"npc","name":"Weapon_Smith","guildName":"","x":11,"y":20},
-                {"objectId":"9","kind":"monster","name":"Scarecrow","nameColourArgb":-65536,"x":12,"y":20,"image":3,"_healthPercent":73,"_healthExpireSeconds":3,"_healthGeneration":1,"_healthRevision":2}
+                {"objectId":"9","kind":"monster","name":"Scarecrow","nameColourArgb":-65536,"x":12,"y":20,"image":3,"_healthPercent":73,"_healthExpireSeconds":3,"_healthGeneration":1,"_healthRevision":2},
+                {"objectId":"10","kind":"hero","name":"Companion","ownerName":"Hero","classKey":"taoist","level":12,"x":9,"y":20,"dead":false,"_manaPercent":64}
             ],
             "groundDrops": []
         }).to_string()
@@ -906,12 +1072,15 @@ mod tests {
     fn projection_keeps_crystal_actor_fields_and_server_health_percent() {
         let projection = project(&fixture(), 10, 20).unwrap();
         assert_eq!(projection.center, (10, 20));
-        assert_eq!(projection.actors.len(), 3);
+        assert_eq!(projection.actors.len(), 4);
         assert_eq!(projection.actors[0].kind, ActorKind::SelfPlayer);
         assert_eq!(projection.actors[0].guild_name.as_deref(), Some("Codex"));
         assert_eq!(projection.actors[0].color, [255, 255, 0, 255]);
         assert_eq!(projection.actors[1].color, [0, 255, 0, 255]);
         assert_eq!(projection.actors[2].health.unwrap().percent, 73);
+        assert_eq!(projection.actors[3].kind, ActorKind::Hero);
+        assert_eq!(projection.actors[3].owner_name.as_deref(), Some("Hero"));
+        assert_eq!(projection.actors[3].mana_percent, Some(64));
     }
 
     #[test]
@@ -925,6 +1094,12 @@ mod tests {
         .is_none());
         assert!(project(
             r#"{"entities":[{"objectId":"1","kind":"monster","name":"A","x":0,"y":0,"_healthPercent":50}],"groundDrops":[]}"#,
+            0,
+            0
+        )
+        .is_none());
+        assert!(project(
+            r#"{"entities":[{"objectId":"1","kind":"hero","name":"A","ownerName":"Self","x":0,"y":0,"_manaPercent":101}],"groundDrops":[]}"#,
             0,
             0
         )
@@ -1057,6 +1232,13 @@ mod tests {
         );
         assert_eq!(
             app.world_mut()
+                .query_filtered::<Entity, With<ActorManaBar>>()
+                .iter(app.world())
+                .count(),
+            1
+        );
+        assert_eq!(
+            app.world_mut()
                 .query_filtered::<Entity, With<DamageFloaterNode>>()
                 .iter(app.world())
                 .count(),
@@ -1091,10 +1273,39 @@ mod tests {
                 .query_filtered::<Entity, With<ActorNameLine>>()
                 .iter(app.world())
                 .count(),
-            25
+            30
         );
         for policy in app.world_mut().query::<&FocusPolicy>().iter(app.world()) {
             assert_eq!(*policy, FocusPolicy::Pass);
         }
+    }
+
+    #[test]
+    fn hero_mana_requires_the_local_owner_and_crystal_class_level_gate() {
+        assert!(!hero_can_draw_mana(Some("taoist"), Some(7)));
+        assert!(hero_can_draw_mana(Some("taoist"), Some(8)));
+        assert!(!hero_can_draw_mana(Some("warrior"), Some(25)));
+        assert!(hero_can_draw_mana(Some("warrior"), Some(26)));
+        assert!(!hero_can_draw_mana(None, Some(30)));
+
+        let foreign = fixture().replace("\"ownerName\":\"Hero\"", "\"ownerName\":\"Other\"");
+        let mut app = App::new();
+        app.init_resource::<Time>();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        let mut model = ActorOverlayModel::default();
+        model.replace(project(&foreign, 10, 20).unwrap());
+        app.insert_resource(model);
+        app.add_systems(Update, sync);
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<Entity, With<ActorManaBar>>()
+                .iter(app.world())
+                .count(),
+            0
+        );
     }
 }
