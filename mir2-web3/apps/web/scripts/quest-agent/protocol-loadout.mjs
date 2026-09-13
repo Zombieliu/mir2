@@ -1,3 +1,5 @@
+import { equipHeldAmulet } from './protocol-supplies.mjs';
+
 const CLASS_MASK = Object.freeze({ warrior: 1, wizard: 2, taoist: 4 });
 const CLASS_ATTACK_STATS = Object.freeze({ warrior: [4, 5], wizard: [6, 7], taoist: [8, 9] });
 const SLOT_INDEX = Object.freeze({
@@ -96,7 +98,7 @@ export function combatApproachRange(client, _target) {
   const className = normalized(actor?.class);
   if (className === "wizard") return preferredWizardSkill(snapshot) ? 6 : 1;
   if (className === "taoist") {
-    return affordableSkill(snapshot, "SoulFireBall") && equippedAmuletQuantity(snapshot) >= 1 ? 6 : 1;
+    return affordableSkill(snapshot, "SoulFireBall") && heldAmuletQuantity(snapshot) >= 1 ? 6 : 1;
   }
   return 1;
 }
@@ -133,8 +135,19 @@ export async function combatAction(client, target) {
     }
   }
 
-  if (className === "taoist" && tileDistance(actor, target) <= 9 && equippedAmuletQuantity(snapshot) >= 1) {
-    const soulFireBall = affordableSkill(snapshot, "SoulFireBall");
+  if (className === "taoist" && tileDistance(actor, target) <= 9 &&
+      affordableSkill(snapshot, "SoulFireBall") && heldAmuletQuantity(snapshot) >= 1) {
+    if (equippedAmuletQuantity(snapshot) < 1) await equipHeldAmulet(client);
+    const liveSnapshot = client.snapshot;
+    const liveActor = player(liveSnapshot);
+    const liveTarget = (liveSnapshot?.entities ?? []).find(entity =>
+      Number(entity?.objectId) === Number(target.objectId));
+    if (!liveActor || !liveTarget || liveTarget.dead === true || Number(liveTarget.hp) <= 0) {
+      return { kind: "wait", spell: "SoulFireBall", targetId: Number(target.objectId), delayMs: 1 };
+    }
+    const soulFireBall = equippedAmuletQuantity(liveSnapshot) >= 1
+      ? affordableSkill(liveSnapshot, "SoulFireBall")
+      : null;
     if (soulFireBall && Number(soulFireBall.cooldownRemainingTicks ?? 0) > 0) {
       return {
         kind: "wait", spell: soulFireBall.spell,
@@ -142,9 +155,9 @@ export async function combatAction(client, target) {
       };
     }
     if (soulFireBall) {
-      const command = magicCommand(actor, target, soulFireBall.spell);
+      const command = magicCommand(liveActor, liveTarget, soulFireBall.spell);
       client.send(command);
-      return { kind: "magic", spell: soulFireBall.spell, targetId: target.objectId, command };
+      return { kind: "magic", spell: soulFireBall.spell, targetId: liveTarget.objectId, command };
     }
   }
 
@@ -460,6 +473,14 @@ function equippedAmuletQuantity(snapshot) {
     const exactAmulet = templateIndex(item) === AMULET_ITEM_INDEX || normalized(item?.name) === "amulet";
     return exactAmulet ? total + Math.max(0, Number(item?.quantity ?? 1)) : total;
   }, 0);
+}
+
+function heldAmuletQuantity(snapshot) {
+  return ['equipmentItems', 'inventoryItems', 'beltItems'].reduce((total, key) =>
+    total + (snapshot?.[key] ?? []).reduce((subtotal, item) => {
+      const exactAmulet = templateIndex(item) === AMULET_ITEM_INDEX || normalized(item?.name) === "amulet";
+      return exactAmulet ? subtotal + Math.max(0, Number(item?.quantity ?? 1)) : subtotal;
+    }, 0), 0);
 }
 
 function usableSkill(snapshot, exactSpell) {

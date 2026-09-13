@@ -591,6 +591,7 @@ test("Taoist uses SoulFireBall only with a real equipped standard Amulet", async
   state.knownSkills.push({ spell: "SoulFireBall", cooldownRemainingTicks: 0, mpCost: 4 });
   state.equipmentItems.push({ name: "Amulet", uniqueId: 0, quantity: 2, slot: "amulet", tooltipSource: { info: { item_index: 712 } } });
   const target = { objectId: 99, x: 14, y: 8, dead: false };
+  state.entities.push(target);
   const client = mockClient(state);
   assert.equal(combatApproachRange(client, target), 6);
   const result = await combatAction(client, target);
@@ -601,6 +602,38 @@ test("Taoist uses SoulFireBall only with a real equipped standard Amulet", async
   const without = mockClient(state);
   assert.equal(combatApproachRange(without, target), 1);
   assert.equal((await combatAction(without, target)).kind, "attack");
+});
+
+test("Taoist reloads a consumed equipped Amulet stack before the next SoulFireBall", async () => {
+  const state = snapshot("Taoist", 19);
+  state.maxBagSlots = 40;
+  state.playerMp = 12;
+  state.knownSkills.push({ spell: "SoulFireBall", cooldownRemainingTicks: 0, mpCost: 4 });
+  state.beltItems.push({
+    name: "Amulet", uniqueId: 7120, quantity: 11, slot: 4, container: "belt",
+    tooltipSource: { info: { item_index: 712, requiredClass: 4, requiredType: 0, requiredAmount: 18 } },
+  });
+  const target = { objectId: 99, kind: "monster", x: 14, y: 8, hp: 185, dead: false };
+  state.entities.push(target);
+  const client = mockClient(state, (current, command) => {
+    if (command.type === "moveItem") {
+      const amulet = current.snapshot.beltItems.shift();
+      current.snapshot.inventoryItems.push({ ...amulet, container: "bag1", slot: 0 });
+    } else if (command.type === "equipItem") {
+      const amulet = current.snapshot.inventoryItems.shift();
+      current.snapshot.equipmentItems.push({ ...amulet, container: "equipment", slot: "amulet" });
+    }
+  });
+
+  assert.equal(combatApproachRange(client, target), 6);
+  const result = await combatAction(client, target);
+
+  assert.equal(result.spell, "SoulFireBall");
+  assert.deepEqual(client.sent, [
+    { type: "moveItem", grid: "belt", from: 4, to: 6 },
+    { type: "equipItem", grid: "inventory", uniqueId: 7120, to: 9 },
+    { type: "magic", objectId: 10, spell: "SoulFireBall", direction: "UpRight", targetId: 99, x: 14, y: 8, spellTargetLock: true },
+  ]);
 });
 
 test("Warrior passive and unknown skills never produce a magic cast", async () => {
