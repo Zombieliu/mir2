@@ -30,6 +30,7 @@ import {
   isLivingEvasiveRecoveryTimeout,
   isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
+  journeyNavigationEmergencyEscapeBudget,
   journeyMpRestockTargetForQuest,
   minimumJourneyMpStockForQuest,
   mpDrugCount,
@@ -141,7 +142,7 @@ try {
       },
       emergencyEscapeHpRatio: className === 'Wizard' ? 0.65 : 0.35,
       emergencyEscapeDangerDistance: 6,
-      maxEmergencyEscapesPerNavigation: 2,
+      maxEmergencyEscapesPerNavigation: journeyNavigationEmergencyEscapeBudget(className),
     });
     report.revivals = [];
     let revival = await reviveInTown(client);

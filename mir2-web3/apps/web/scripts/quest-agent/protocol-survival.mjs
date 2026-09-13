@@ -89,6 +89,14 @@ export function questEmergencyEscapeHpRatio(questId, className = '') {
   return [54, 60, 62].includes(id) ? 0.35 : 0;
 }
 
+export function journeyNavigationEmergencyEscapeBudget(className = '') {
+  // A 72 HP q60 Wizard can still land inside another live pack. The R63 trace
+  // exhausted the generic two-relocation cap, then died with one ordinary
+  // RandomTeleport still in inventory. Let the fragile class consume the full
+  // four-scroll departure reserve when successive authoritative landings stay unsafe.
+  return String(className).trim().toLowerCase() === 'wizard' ? 4 : 2;
+}
+
 /** Keep the public escape reserve usable until a dangerous expedition is handed in. */
 export function hasJourneyEmergencyEscapeQuest(snapshot) {
   return (snapshot?.questLog ?? []).some(quest =>
