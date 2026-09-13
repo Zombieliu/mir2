@@ -1284,7 +1284,7 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
     if (!target) {
       const completed = completedMissingTarget(initialTarget);
       if (completed) return completed;
-      throw new Error(`target ${objectId} left the authoritative snapshot before death was confirmed`);
+      throw new LostCombatTarget(objectId, initialTarget);
     }
     throwIfLowHealthTargetPressure(client, target, pending, settings);
     let approachRange = await combatApproachRange(settings, client, target);

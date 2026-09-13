@@ -4103,16 +4103,19 @@ test("target removal waits three seconds so a delayed authoritative player death
   assert.equal(removalSettleTimeout, 3_000);
 });
 
-test("a living player still fails when the exact removed target stays absent after settlement", async () => {
+test("a living player defers an exact removed target but still fails without quest progress", async () => {
   const quest = { questId: 6, stage: "InProgress", objectives: [objective("Kill HookingCat", 0, 1)] };
   const client = new FakeClient(snapshot(quest, [monster(60, "HookingCat")]), (owner, command) => {
     if (command.type === "attack") owner.receive("ObjectRemove", state => {
       state.entities = state.entities.filter(entry => entry.objectId !== 60);
     }, { objectId: 60 });
   });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
   await assert.rejects(() => completeQuestObjectives(client, {
     questId: 6, objectives: { kill: [{ monsterName: "HookingCat", spawnCandidates: [spawn("HookingCat")] }], item: [] },
-  }, async () => {}, settings), /target 60 left the authoritative snapshot before death was confirmed/);
+  }, async () => {}, settings), /without live HookingCat/);
+  assert.ok(diagnostics.some(entry => entry.type === "lostCombatTarget" && entry.objectId === 60));
 });
 
 test("authoritative quest progress accepts a target removed before its death packet settles", async () => {
