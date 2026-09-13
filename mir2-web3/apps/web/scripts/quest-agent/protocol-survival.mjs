@@ -184,6 +184,7 @@ export function createPostEngagementSupplyGate({
     requiredAfterRestockHpStock = requestedHp,
     requiredAfterRestockMpStock = requestedMp,
     requiredAfterRestockEmergencyTeleportStock: requestedEmergencyTeleport = 0,
+    minimumEmergencyTeleportStock: requestedEmergencyTeleportTrigger = requestedEmergencyTeleport,
     returnMapFileName = null,
     forceRestock = false,
   } = {}) {
@@ -196,11 +197,15 @@ export function createPostEngagementSupplyGate({
       requestedEmergencyTeleport,
       'requiredAfterRestockEmergencyTeleportStock',
     );
+    const triggerEmergencyTeleport = nonnegativeInteger(
+      requestedEmergencyTeleportTrigger,
+      'minimumEmergencyTeleportStock',
+    );
     let hp = hpDrugCount(client.snapshot);
     let mp = mpDrugCount(client.snapshot);
     let emergencyTeleport = emergencyTeleportStock(client.snapshot);
     if (!forceRestock && hp >= triggerHp && mp >= triggerMp &&
-        emergencyTeleport >= departureEmergencyTeleport) {
+        emergencyTeleport >= triggerEmergencyTeleport) {
       return { status: 'sufficient', hp, mp, restockCount };
     }
     if (restockCount >= restockLimit) {

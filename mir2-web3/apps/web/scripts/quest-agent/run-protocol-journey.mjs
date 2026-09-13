@@ -246,19 +246,28 @@ try {
         6_000,
       );
     };
-    const supplyGateCallOptions = (owner, questId, requiredHpStock) => {
+    const supplyGateCallOptions = (owner, questId, requiredHpStock, {
+      replenishEscapeReserve = false,
+    } = {}) => {
       const q54Expedition = Number(questId) === 54;
       const q62Expedition = Number(questId) === 62;
       const departureFloor = journeyExpeditionDepartureFloorForQuest(questId, className);
       const emergencyTeleportTarget = q54Expedition || q62Expedition ? 4 : 0;
+      const inVillage = String(owner.snapshot?.mapFileName ?? '') === '0';
+      const shouldReplenishEscapeReserve = emergencyTeleportTarget > 0 &&
+        (inVillage || replenishEscapeReserve);
       const q42WizardExpedition = Number(questId) === 42 &&
         String(className).trim().toLowerCase() === 'wizard';
       return {
         minimumHpStock: requiredHpStock,
         minimumMpStock: minimumJourneyMpStockForQuest(questId, className),
+        // Four scrolls are a departure target, not a field invariant. A
+        // successful emergency escape must not make a healthy expedition turn
+        // around solely to replace that one scroll.
+        minimumEmergencyTeleportStock: shouldReplenishEscapeReserve ? emergencyTeleportTarget : 0,
         requiredAfterRestockEmergencyTeleportStock: emergencyTeleportTarget,
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
-          randomTeleportCount(owner.snapshot) < emergencyTeleportTarget ||
+          (shouldReplenishEscapeReserve && randomTeleportCount(owner.snapshot) < emergencyTeleportTarget) ||
           ([q54Expedition && (hpDrugCount(owner.snapshot) < departureFloor.hp ||
               mpDrugCount(owner.snapshot) < departureFloor.mp),
             q62Expedition && hpDrugCount(owner.snapshot) < departureFloor.hp]
@@ -354,7 +363,7 @@ try {
         throw error;
       }
     };
-    const supplyGateForQuest = async (owner, questId = null) => {
+    const supplyGateForQuest = async (owner, questId = null, options = {}) => {
       const q42ReducedStockFinish = Number(questId) === 42 &&
         canFinishNearCompleteKillQuestWithReducedHpStock(owner.snapshot, questId);
       const requiredHpStock = q42ReducedStockFinish
@@ -382,7 +391,7 @@ try {
         return recoverEmergencyFunding(owner, requiredHpStock, questId);
       }
       try {
-        return await supplyGate(owner, supplyGateCallOptions(owner, questId, requiredHpStock));
+        return await supplyGate(owner, supplyGateCallOptions(owner, questId, requiredHpStock, options));
       } catch (error) {
         if (playerIsDead(owner.snapshot) && report.revivals.length < maxJourneyRevivals) {
           // A resumed cave expedition may have enough restorative to move but
@@ -439,7 +448,9 @@ try {
       return String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress';
     });
     if (requiresExpeditionEscapeRestock(client.snapshot, activeResumeExpeditionId)) {
-      const resumeSupply = await supplyGateForQuest(client, activeResumeExpeditionId);
+      const resumeSupply = await supplyGateForQuest(client, activeResumeExpeditionId, {
+        replenishEscapeReserve: true,
+      });
       if (resumeSupply.status === 'restocked') {
         recordSupplyRetreat(report, activeResumeExpeditionId, resumeSupply);
       }

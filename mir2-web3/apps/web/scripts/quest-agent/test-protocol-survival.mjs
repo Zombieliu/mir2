@@ -308,6 +308,34 @@ test('an expedition refill can require a full departure stock without raising it
   assert.equal(client.snapshot.mapFileName, '0');
 });
 
+test('a field expedition does not turn around solely to replace one used escape scroll', async () => {
+  const client = clientAt('D2041', 51);
+  client.snapshot.inventoryItems.push({
+    name: 'RandomTeleport',
+    quantity: 3,
+    container: 'bag1',
+    tooltipSource: { info: { item_index: 717 } },
+  });
+  const calls = [];
+  const gate = createPostEngagementSupplyGate({
+    minimumHpStock: 24,
+    travel: async map => calls.push(['travel', map]),
+    navigateNear: async () => {},
+    restock: async () => calls.push(['restock']),
+  });
+
+  const result = await gate(client, {
+    minimumHpStock: 24,
+    minimumEmergencyTeleportStock: 0,
+    requiredAfterRestockHpStock: 64,
+    requiredAfterRestockEmergencyTeleportStock: 4,
+  });
+
+  assert.equal(result.status, 'sufficient');
+  assert.equal(result.hp, 51);
+  assert.deepEqual(calls, []);
+});
+
 test('an expedition refill fails closed when its emergency scroll reserve was not funded', async () => {
   const client = clientAt('D401', 80);
   const calls = [];
