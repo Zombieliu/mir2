@@ -681,6 +681,13 @@ try {
             // q60 to path adjacent to a passive blocker without ever stepping
             // onto its occupied cell.
             combatHostileClearanceFallback: [30, 60].includes(id) ? 0 : ([33, 36].includes(id) ? 2 : 1),
+            // D2041 has a one-cell entrance corridor. R58 proved that a
+            // passive KekTal standing three cells from the player can occupy
+            // the only route to a visible SpiderFrog even with zero avoidance
+            // clearance. Clear at most one nearby doorway occupant per q60
+            // progress step, then retry the objective target.
+            maxApproachBlockerClears: id === 60 ? 1 : 0,
+            approachBlockerSearchRadius: 6,
             unsafeTargetObservationTimeout: id === 30 ? 45_000 : 3_000,
             // Q42 deliberately sends a level-13+ player into the dense Serpent
             // Valley fields for twenty ordinary snakes. The R10 Taoist trace

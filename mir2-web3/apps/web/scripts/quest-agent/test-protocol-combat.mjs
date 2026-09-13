@@ -3975,6 +3975,49 @@ test("a stationary target is retried after its temporary corridor blocker can mo
   assert.deepEqual(client.sent, [{ type: "attack", objectId: 60 }]);
 });
 
+test("an opted-in objective clears one nearby monster occupying its only approach", async () => {
+  const quest = { questId: 60, stage: "InProgress", objectives: [objective("Kill SpiderFrog", 0, 1)] };
+  const target = monster(60, "SpiderFrog", 24, 10, { disposition: "hostile" });
+  const blocker = monster(61, "KekTal", 13, 10, { disposition: "hostile" });
+  const client = new FakeClient(snapshot(quest, [target, blocker]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), {
+        dead: true,
+        hp: 0,
+      });
+      if (command.objectId === 60) {
+        state.questLog[0].objectives[0] = objective("Kill SpiderFrog", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    }, { objectId: command.objectId });
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  const navigate = async current => {
+    const liveBlocker = client.snapshot.entities.some(entry => entry.objectId === 61 && !entry.dead);
+    if (current.objectId === 60 && liveBlocker) {
+      throw new Error("No walk path on D2041 from 10,10 to 24,10");
+    }
+    Object.assign(client.snapshot.entities[0], { x: current.x - 1, y: current.y });
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 60,
+    objectives: { kill: [{ monsterName: "SpiderFrog", spawnCandidates: [spawn("SpiderFrog", 24, 10)] }], item: [] },
+  }, navigate, {
+    ...settings,
+    maxApproachBlockerClears: 1,
+    approachBlockerSearchRadius: 6,
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(command => command.objectId), [61, 60]);
+  assert.ok(diagnostics.some(entry =>
+    entry.type === "objectiveApproachBlockerCombat" &&
+    entry.objectId === 60 && entry.blockerObjectId === 61));
+});
+
 test("spawn search retries the same cave waypoint with bounded hostile clearance", async () => {
   const quest = { questId: 49, stage: "InProgress", objectives: [objective("Kill Skeleton", 0, 1)] };
   const client = new FakeClient(snapshot(quest), (owner, command) => {

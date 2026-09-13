@@ -64,6 +64,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
   const travelThreatEvasions = new Map();
   let spawnRespawnWaits = 0;
   let spawnRespawnProgressKey = null;
+  let approachBlockerClears = 0;
 
   for (; engagements < settings.maxEngagements; engagements += 1) {
     assertPlayerAlive(client);
@@ -86,6 +87,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
     if (currentProgressKey !== spawnRespawnProgressKey) {
       spawnRespawnProgressKey = currentProgressKey;
       spawnRespawnWaits = 0;
+      approachBlockerClears = 0;
     }
 
     let targetPlan = selectTargetPlan(client.snapshot, pending);
@@ -377,6 +379,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
     let corpse;
     let unsafeTarget = null;
     let unreachableTarget = null;
+    let approachBlockerCleared = false;
     let focusedTargetRetreated = false;
     while (true) {
       try {
@@ -389,6 +392,41 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
         if (error instanceof UnreachableCombatTarget ||
             error instanceof UnresponsiveCombatTarget ||
             error instanceof LostCombatTarget) {
+          const blocker = error instanceof UnreachableCombatTarget &&
+            approachBlockerClears < settings.maxApproachBlockerClears
+            ? nearestObjectiveApproachBlocker(
+              client.snapshot,
+              target,
+              settings.approachBlockerSearchRadius,
+            )
+            : null;
+          if (blocker) {
+            recordSearchDiagnostic(client, {
+              type: 'objectiveApproachBlockerCombat',
+              questId,
+              target: pending.name,
+              objectId: Number(target.objectId),
+              blockerObjectId: Number(blocker.objectId),
+              blockerName: String(blocker.name ?? ''),
+              blockerPosition: { x: Number(blocker.x), y: Number(blocker.y) },
+            });
+            try {
+              await killExactMonster(
+                client, blocker, pending, navigateNear, settings, false,
+              );
+              approachBlockerClears += 1;
+              approachBlockerCleared = true;
+              break;
+            } catch (blockerError) {
+              recordSearchDiagnostic(client, {
+                type: 'objectiveApproachBlockerCombatFailed',
+                questId,
+                objectId: Number(target.objectId),
+                blockerObjectId: Number(blocker.objectId),
+                reason: String(blockerError?.message ?? blockerError),
+              });
+            }
+          }
           unreachableTarget = error;
           recordDeferredCombatTarget(client, questId, pending, error);
           deferUnreachableTarget(error, settings);
@@ -456,6 +494,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
       await retreatAndRecover(client, navigateNear, settings);
       continue;
     }
+    if (approachBlockerCleared) continue;
     if (focusedTargetRetreated) continue;
     if (unreachableTarget) continue;
     if (objectiveAdvanced(client.snapshot, questId, pending, before)) {
@@ -665,6 +704,21 @@ function nearestApproachBlockingMonster(snapshot, target, excludedObjectIds) {
       Number(left.objectId) - Number(right.objectId))[0] ?? null;
 }
 
+function nearestObjectiveApproachBlocker(snapshot, target, maximumDistance) {
+  const player = selectPlayer(snapshot);
+  if (!player || !validPoint(player) || !validPoint(target)) return null;
+  const targetDistance = distance(player, target);
+  return (snapshot?.entities ?? [])
+    .filter(entity => isLiveMonster(entity) &&
+      Number(entity.objectId) !== Number(target.objectId) &&
+      distance(player, entity) <= maximumDistance &&
+      distance(player, entity) < targetDistance)
+    .sort((left, right) =>
+      distance(player, left) - distance(player, right) ||
+      threatHealth(left) - threatHealth(right) ||
+      Number(left.objectId) - Number(right.objectId))[0] ?? null;
+}
+
 export function harvestDirection(player, corpse) {
   const dx = Math.sign(Number(corpse?.x) - Number(player?.x));
   const dy = Math.sign(Number(corpse?.y) - Number(player?.y));
@@ -712,6 +766,8 @@ function combatSettings(options) {
       options.combatHostileClearanceFallback,
       nonnegativeInteger(options.combatHostileClearance, 0),
     ),
+    maxApproachBlockerClears: nonnegativeInteger(options.maxApproachBlockerClears, 0),
+    approachBlockerSearchRadius: positiveInteger(options.approachBlockerSearchRadius, 6),
     maxTargetAdjacent: riskLimit(options.maxTargetAdjacent),
     maxTargetNearby: riskLimit(options.maxTargetNearby),
     retreatAtActiveAggressorCount: riskLimit(options.retreatAtActiveAggressorCount),
