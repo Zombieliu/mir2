@@ -188,7 +188,7 @@ try {
         // existing supply plan unchanged.
         emergencyTeleportCount: (owner.snapshot?.questLog ?? []).some(quest =>
           [54, 62].includes(Number(quest?.questId)) &&
-          String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress') ? 2 : 0,
+          String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress') ? 4 : 0,
         // The first D421 -> D422 round trip consumed 24 bottles before the
         // objective map was reached. Carry an evidence-based expedition
         // stock while q54 remains active instead of repeating town loops.
@@ -304,12 +304,18 @@ try {
           0,
           activeQuestMpTarget - mpDrugCount(owner.snapshot),
         );
+        const emergencyTeleportTarget = [54, 62].includes(Number(questId)) ? 4 : 0;
+        const emergencyTeleportFunding = Math.max(
+          0,
+          emergencyTeleportTarget - randomTeleportCount(owner.snapshot),
+        ) * 100;
         const requiredFundingCount = safeFundingVenisonTargetCount(fundingHpDeficit, {
           className: selfPlayer(owner)?.class,
           requiredMpStock: fundingMpDeficit,
           additionalGold: Math.max(
             0,
-            warriorWeaponFundingGold(owner.snapshot) - Number(owner.snapshot?.gold ?? 0),
+            warriorWeaponFundingGold(owner.snapshot) + emergencyTeleportFunding -
+              Number(owner.snapshot?.gold ?? 0),
           ),
         });
         const funding = await collectSafeFundingVenison(owner, {
