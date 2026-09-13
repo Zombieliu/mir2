@@ -263,6 +263,11 @@ export function isLivingEvasiveRecoveryTimeout(snapshot, error) {
     String(error?.message ?? error) === 'Evasive HP recovery timed out';
 }
 
+export function isLivingUnsafePackRetreatFailure(snapshot, error) {
+  return healthRatio(snapshot) > 0 &&
+    String(error?.message ?? error).startsWith('unsafe hostile pack retreat failed from ');
+}
+
 export function requiresExpeditionEscapeRestock(snapshot, questId, target = 4) {
   return [54, 62].includes(Number(questId)) &&
     emergencyTeleportStock(snapshot) < nonnegativeInteger(target, 'emergency teleport target');

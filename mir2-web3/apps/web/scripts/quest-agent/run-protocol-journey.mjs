@@ -27,6 +27,7 @@ import {
   hpRestockTargetForActiveQuests,
   hpDrugCount,
   isLivingEvasiveRecoveryTimeout,
+  isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
   journeyMpRestockTargetForQuest,
   minimumJourneyMpStockForQuest,
@@ -845,9 +846,13 @@ try {
           index--;
           continue;
         }
-        if (isLivingEvasiveRecoveryTimeout(client.snapshot, error)) {
+        const livingEvasiveTimeout = isLivingEvasiveRecoveryTimeout(client.snapshot, error);
+        const livingUnsafeRetreatFailure = isLivingUnsafePackRetreatFailure(client.snapshot, error);
+        if (livingEvasiveTimeout || livingUnsafeRetreatFailure) {
           client.record('diagnostic', {
-            type: 'livingEvasiveRecoveryTimeoutRetry',
+            type: livingUnsafeRetreatFailure
+              ? 'livingUnsafePackRetreatRetry'
+              : 'livingEvasiveRecoveryTimeoutRetry',
             questId: id,
             hp: Number(client.snapshot?.playerHp ?? 0),
             maxHp: Number(client.snapshot?.playerMaxHp ?? 0),

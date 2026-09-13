@@ -10,6 +10,7 @@ import {
   evasiveRecoveryTimeoutMsForQuest,
   hpDrugCount,
   isLivingEvasiveRecoveryTimeout,
+  isLivingUnsafePackRetreatFailure,
   mpDrugCount,
   hpRestockTargetForActiveQuests,
   journeyExpeditionDepartureFloorForQuest,
@@ -68,6 +69,21 @@ test('only a living exact evasive recovery timeout is retryable', () => {
   ), false);
   assert.equal(isLivingEvasiveRecoveryTimeout(
     { playerHp: 102, playerMaxHp: 224 },
+    new Error('No walk path'),
+  ), false);
+});
+
+test('a living partial unsafe-pack retreat can replan without discarding field progress', () => {
+  assert.equal(isLivingUnsafePackRetreatFailure(
+    { playerHp: 110, playerMaxHp: 224 },
+    new Error('unsafe hostile pack retreat failed from 145,103'),
+  ), true);
+  assert.equal(isLivingUnsafePackRetreatFailure(
+    { playerHp: 0, playerMaxHp: 224 },
+    new Error('unsafe hostile pack retreat failed from 145,103'),
+  ), false);
+  assert.equal(isLivingUnsafePackRetreatFailure(
+    { playerHp: 110, playerMaxHp: 224 },
     new Error('No walk path'),
   ), false);
 });
