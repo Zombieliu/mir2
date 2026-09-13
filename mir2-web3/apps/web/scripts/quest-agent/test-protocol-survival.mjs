@@ -9,12 +9,14 @@ import {
   evasiveRecoveryDangerDistanceForQuest,
   evasiveRecoveryTimeoutMsForQuest,
   hpDrugCount,
+  isLivingEvasiveRecoveryTimeout,
   mpDrugCount,
   hpRestockTargetForActiveQuests,
   journeyExpeditionDepartureFloorForQuest,
   journeyResumeDisposition,
   journeyMpRestockTargetForQuest,
   questCombatMpUseThresholdForQuest,
+  questPostRetreatRecoveryRatio,
   minimumJourneyMpStockForQuest,
   questRetreatBiasPosition,
   questRetreatProfile,
@@ -44,6 +46,25 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Taoist'), 0.75);
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Warrior'), 0.3);
   assert.equal(questCombatMpUseThresholdForQuest(49, 'Wizard', { fallback: 0.4 }), 0.4);
+  assert.equal(questPostRetreatRecoveryRatio(54, 'Wizard'), 0.65);
+  assert.equal(questPostRetreatRecoveryRatio(54, 'Taoist'), 0.65);
+  assert.equal(questPostRetreatRecoveryRatio(54, 'Warrior'), 0.75);
+  assert.equal(questPostRetreatRecoveryRatio(62, 'Warrior'), 0.75);
+});
+
+test('only a living exact evasive recovery timeout is retryable', () => {
+  assert.equal(isLivingEvasiveRecoveryTimeout(
+    { playerHp: 102, playerMaxHp: 224 },
+    new Error('Evasive HP recovery timed out'),
+  ), true);
+  assert.equal(isLivingEvasiveRecoveryTimeout(
+    { playerHp: 0, playerMaxHp: 224 },
+    new Error('Evasive HP recovery timed out'),
+  ), false);
+  assert.equal(isLivingEvasiveRecoveryTimeout(
+    { playerHp: 102, playerMaxHp: 224 },
+    new Error('No walk path'),
+  ), false);
 });
 
 test('long expeditions accept a partial but still conservative funded departure stock', () => {

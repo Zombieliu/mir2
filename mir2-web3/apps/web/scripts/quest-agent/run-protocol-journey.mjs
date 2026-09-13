@@ -26,6 +26,7 @@ import {
   evasiveRecoveryTimeoutMsForQuest,
   hpRestockTargetForActiveQuests,
   hpDrugCount,
+  isLivingEvasiveRecoveryTimeout,
   journeyExpeditionDepartureFloorForQuest,
   journeyMpRestockTargetForQuest,
   minimumJourneyMpStockForQuest,
@@ -34,6 +35,7 @@ import {
   questRetreatBiasPosition,
   questRetreatProfile,
   questCombatMpUseThresholdForQuest,
+  questPostRetreatRecoveryRatio,
   questNeedsPostRetreatRecovery,
   shouldPreferObjectiveMapOverCurrent,
   recoverHealthWhileEvading,
@@ -747,13 +749,14 @@ try {
               }
               let hp = Number(owner.snapshot?.playerHp ?? 0);
               let maxHp = Number(owner.snapshot?.playerMaxHp ?? 0);
-              if (maxHp > 0 && hp / maxHp < 0.75) {
+              const recoveryRatio = questPostRetreatRecoveryRatio(id, className);
+              if (maxHp > 0 && hp / maxHp < recoveryRatio) {
                 // A lone Crystal pursuer often matches player speed, so a
                 // larger geometric gap may never open. Keep moving while
                 // Healing and the first potion tick, refreshing in short
                 // bounded batches until departure health is restored.
                 await recoverHealthWhileEvading(owner, navigateNear, {
-                  requiredRatio: 0.75,
+                  requiredRatio: recoveryRatio,
                   timeoutMs: evasiveRecoveryTimeoutMsForQuest(id),
                   dangerDistance: evasiveRecoveryDangerDistanceForQuest(id),
                   retreatSteps: [54, 62].includes(id) ? 12 : 6,
@@ -783,9 +786,9 @@ try {
               }
               hp = Number(owner.snapshot?.playerHp ?? 0);
               maxHp = Number(owner.snapshot?.playerMaxHp ?? 0);
-              if (maxHp > 0 && hp / maxHp < 0.75) {
+              if (maxHp > 0 && hp / maxHp < recoveryRatio) {
                 await recoverHealthWhileEvading(owner, navigateNear, {
-                  requiredRatio: 0.75,
+                  requiredRatio: recoveryRatio,
                   timeoutMs: evasiveRecoveryTimeoutMsForQuest(id),
                   dangerDistance: evasiveRecoveryDangerDistanceForQuest(id),
                   retreatSteps: id === 54 ? 12 : 6,
@@ -793,7 +796,7 @@ try {
               }
               const recoveredHp = Number(owner.snapshot?.playerHp ?? 0);
               const recoveredMaxHp = Number(owner.snapshot?.playerMaxHp ?? 0);
-              if (!(recoveredMaxHp > 0) || recoveredHp / recoveredMaxHp < 0.75) {
+              if (!(recoveredMaxHp > 0) || recoveredHp / recoveredMaxHp < recoveryRatio) {
                 throw new Error(`unsafe-pack recovery stopped below departure health (${recoveredHp}/${recoveredMaxHp})`);
               }
               const supply = await supplyGateForQuest(owner, id);
@@ -808,6 +811,19 @@ try {
         if ((selfPlayer(client)?.dead || client.snapshot.playerHp <= 0) && report.revivals.length < maxJourneyRevivals) {
           if (report.quests.length) report.quests.at(-1).failure = error.message;
           report.revivals.push(await reviveInTown(client));
+          report.restock = await supplyGateForQuest(client, id);
+          if (report.restock.status === 'restocked') recordSupplyRetreat(report, id, report.restock);
+          index--;
+          continue;
+        }
+        if (isLivingEvasiveRecoveryTimeout(client.snapshot, error)) {
+          client.record('diagnostic', {
+            type: 'livingEvasiveRecoveryTimeoutRetry',
+            questId: id,
+            hp: Number(client.snapshot?.playerHp ?? 0),
+            maxHp: Number(client.snapshot?.playerMaxHp ?? 0),
+            mapFileName: String(client.snapshot?.mapFileName ?? ''),
+          });
           report.restock = await supplyGateForQuest(client, id);
           if (report.restock.status === 'restocked') recordSupplyRetreat(report, id, report.restock);
           index--;

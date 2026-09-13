@@ -62,6 +62,13 @@ export function questCombatMpUseThresholdForQuest(questId, className, {
   return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.3;
 }
 
+export function questPostRetreatRecoveryRatio(questId, className) {
+  const normalizedClass = String(className ?? '').trim().toLowerCase();
+  return Number(questId) === 54 && ['wizard', 'taoist'].includes(normalizedClass)
+    ? 0.65
+    : 0.75;
+}
+
 const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62]);
 const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62]);
 
@@ -219,6 +226,11 @@ export function createPostEngagementSupplyGate({
 
 export function hpDrugCount(snapshot) {
   return itemQuantity(snapshot, item => /^\(HP\)Drug/i.test(String(item?.name ?? item?.key ?? '')));
+}
+
+export function isLivingEvasiveRecoveryTimeout(snapshot, error) {
+  return healthRatio(snapshot) > 0 &&
+    String(error?.message ?? error) === 'Evasive HP recovery timed out';
 }
 
 export function mpDrugCount(snapshot) {
