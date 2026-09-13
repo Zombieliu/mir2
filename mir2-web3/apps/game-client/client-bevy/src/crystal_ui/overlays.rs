@@ -2395,7 +2395,7 @@ struct OverlayDeath;
 struct OverlayChatDraft;
 
 #[derive(Component)]
-struct OverlayMail;
+pub struct OverlayMail;
 
 #[derive(Component)]
 struct OverlayBigMap;

@@ -339,6 +339,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -352,6 +353,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -364,6 +366,7 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -376,6 +379,7 @@ fn fit_stage(
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             Has<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
         Or<(
@@ -384,6 +388,7 @@ fn fit_stage(
             With<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             With<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         )>,
     >,
@@ -466,6 +471,7 @@ fn fit_stage(
         is_storage,
         is_options,
         is_npc_shop,
+        is_mail,
         is_npc_dialog,
     ) in &mut focus_panels
     {
@@ -478,6 +484,7 @@ fn fit_stage(
             || (is_storage && player.storage_open())
             || (is_options && player.options_open())
             || (is_npc_shop && player.npc_shop_open())
+            || (is_mail && player.mail_open())
             || (is_npc_dialog && npc_dialog.is_open);
         *transform = if enabled {
             let max_scale = if is_npc_shop {
@@ -487,10 +494,15 @@ fn fit_stage(
             } else {
                 3.2
             };
+            let focus_size = mail_editor_focus_size(
+                size,
+                is_mail && host.ime_bottom > 0.0 && player.core.mail_compose.is_some(),
+                fit.scale,
+            );
             mobile_focus_transform(
                 fit,
                 origin,
-                size,
+                focus_size,
                 Vec2::new(window.width(), window.height()),
                 safe_edges,
                 top,
@@ -529,6 +541,17 @@ fn focus_panel_rect(node: &Node) -> Option<(Vec2, Vec2)> {
         return None;
     };
     (width > 0.0 && height > 0.0).then_some((Vec2::new(left, top), Vec2::new(width, height)))
+}
+
+fn mail_editor_focus_size(panel_size: Vec2, editing: bool, scale: f32) -> Vec2 {
+    if !editing {
+        return panel_size;
+    }
+    let scale = scale.max(0.01);
+    Vec2::new(
+        panel_size.x,
+        110.0 + (44.0 / scale).max(28.0) + 8.0 / scale,
+    )
 }
 
 fn mobile_focus_transform(
@@ -2133,6 +2156,20 @@ mod tests {
     }
 
     #[test]
+    fn mail_ime_focus_uses_only_visible_fields_and_reflowed_footer() {
+        let panel = Vec2::new(312.0, 444.0);
+        assert_eq!(mail_editor_focus_size(panel, false, 1.0), panel);
+        assert_eq!(
+            mail_editor_focus_size(panel, true, 1.0),
+            Vec2::new(312.0, 162.0)
+        );
+        assert_eq!(
+            mail_editor_focus_size(panel, true, 0.5),
+            Vec2::new(312.0, 214.0)
+        );
+    }
+
+    #[test]
     fn focused_panel_bounds_stay_inside_phone_safe_viewports() {
         for (width, height) in [(891.0, 411.0), (731.0, 411.0), (610.0, 274.0)] {
             let fit = CrystalStageTransform::fit(width, height);
@@ -2144,6 +2181,7 @@ mod tests {
                 (Vec2::new(0.0, 224.0), Vec2::new(242.0, 330.0)),
                 (Vec2::new(0.0, 224.0), Vec2::new(360.0, 360.0)),
                 (Vec2::ZERO, Vec2::new(440.0, 224.0)),
+                (Vec2::new(562.0, 5.0), Vec2::new(312.0, 444.0)),
             ] {
                 let is_npc_shop = size == Vec2::new(242.0, 330.0)
                     || size == Vec2::new(360.0, 360.0);

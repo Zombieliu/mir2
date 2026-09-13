@@ -4451,3 +4451,20 @@ touch/IME evidence are archived in
 [native Android HUD/chat scale](generated/player-qa/native-android-hud-chat-scale-20260913/README.md).
 This remains offline emulator evidence; approved-WSS gameplay, authoritative
 chat/movement, physical-device behavior and human acceptance remain open.
+
+## 2026-09-13 native Android shared Mail phone focus
+
+The real shared Crystal Mail root now participates in Android phone-focus
+scaling instead of remaining a small desktop-positioned window. Inbox,
+pagination, compose, Read/Delete/Claim and close controls are enlarged and
+clamped inside three landscape phone viewports. During compose, Android sizes
+the focus bounds from the visible recipient/message fields and reflowed shared
+footer while the IME is open; Back restores the same attachment/gold controls,
+and close/reopen retains the draft. No parallel Android Mail UI or mail rule was
+added. Android Rust 173/173, the focused shared Read/Claim/Delete intent test,
+Gradle unit tasks, API31 arm64 packaging and streamed install passed. Three-size
+screenshots and actual ADB compose/IME/close/reopen evidence are archived in
+[native Android Mail focus](generated/player-qa/native-android-mail-focus-20260913/README.md).
+This remains offline emulator evidence: Read/Claim/Delete server results,
+approved-WSS gameplay, physical-device behavior and human acceptance remain
+open.

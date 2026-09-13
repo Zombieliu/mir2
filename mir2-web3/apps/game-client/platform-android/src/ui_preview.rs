@@ -561,6 +561,7 @@ fn populate_specimens(world: &mut World, scene: &str) {
             sender: "UI fixture".into(),
             subject: "Offline specimen".into(),
             body: "This is an offline UI layout sample, not delivered mail.".into(),
+            gold: 100,
             ..default()
         }],
         selected_id: Some(1),
