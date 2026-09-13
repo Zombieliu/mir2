@@ -674,7 +674,13 @@ try {
             // hit still interrupts navigation and enters bounded combat.
             spawnSearchHostileClearanceFallback: id === 30 ? 2 : (id === 54 ? 0 : 1),
             combatHostileClearance: id === 30 ? 3 : ([33, 36].includes(id) ? 2 : 1),
-            combatHostileClearanceFallback: id === 30 ? 0 : ([33, 36].includes(id) ? 2 : 1),
+            // R57 resumed q60 inside D2041's entrance pocket with the only
+            // live SpiderFrog fourteen cells away. One passive KekTal's
+            // one-cell halo disconnected that otherwise valid corridor on
+            // every timed retry. Keep the first buffered attempt, then allow
+            // q60 to path adjacent to a passive blocker without ever stepping
+            // onto its occupied cell.
+            combatHostileClearanceFallback: [30, 60].includes(id) ? 0 : ([33, 36].includes(id) ? 2 : 1),
             unsafeTargetObservationTimeout: id === 30 ? 45_000 : 3_000,
             // Q42 deliberately sends a level-13+ player into the dense Serpent
             // Valley fields for twenty ordinary snakes. The R10 Taoist trace
