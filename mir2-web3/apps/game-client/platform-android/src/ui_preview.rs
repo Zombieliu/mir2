@@ -134,18 +134,39 @@ fn start_world_render_motion_specimen(
     } else {
         warn!("offline mounted action was not accepted by the native renderer");
     }
+    let pushed = serde_json::json!({
+        "type":"packet", "packet":"ObjectPushed", "payload":{
+            "objectId":9002, "location":{"x":303,"y":634}, "direction":"Left"
+        }
+    })
+    .to_string();
+    if apply_offline_entity_packet(&pushed) {
+        info!("ANDROID_OBJECT_PUSHED_PRESENTATION_APPLIED");
+    } else {
+        warn!("offline ObjectPushed specimen was not accepted by the native renderer");
+    }
     *started = true;
 }
 
 fn apply_offline_entity_packet(packet: &str) -> bool {
     match crate::live_entity::apply_packet(packet) {
-        crate::live_entity::LiveEntityPacketOutcome::Applied { models, render, .. } => {
+        crate::live_entity::LiveEntityPacketOutcome::Applied {
+            models,
+            render,
+            presentation_event,
+        } => {
             let models_ready =
                 mir2_bevy_runtime::native_ingest::push_native_entity_model_set(models);
             let render_ready = render
                 .map(mir2_bevy_runtime::native_ingest::push_native_entity_render_state)
                 .unwrap_or(false);
-            models_ready && render_ready
+            let ready = models_ready && render_ready;
+            if ready {
+                if let Some(event) = presentation_event {
+                    crate::shared_shell::enqueue_presentation_event(event);
+                }
+            }
+            ready
         }
         crate::live_entity::LiveEntityPacketOutcome::Ignored
         | crate::live_entity::LiveEntityPacketOutcome::Rejected => false,
@@ -273,6 +294,8 @@ fn report_world_render_motion_pose(
     _main_thread: NonSend<crate::shared_shell::AndroidPresentationMainThread>,
     mut saw_active: Local<bool>,
     mut saw_settled: Local<bool>,
+    mut saw_pushed_active: Local<bool>,
+    mut saw_pushed_settled: Local<bool>,
     mut reported_diagnostics: Local<bool>,
 ) {
     if !*reported_diagnostics && time.elapsed().as_millis() >= 4_500 {
@@ -280,19 +303,36 @@ fn report_world_render_motion_pose(
         info!(%diagnostics, "ANDROID_REMOTE_BACKSTEP_DIAGNOSTICS");
         *reported_diagnostics = true;
     }
-    let Some((x, y)) = poses.native_overlay_entity_offset("9003") else {
-        return;
-    };
-    if !*saw_active && (x.abs() > f32::EPSILON || y.abs() > f32::EPSILON) {
-        info!(
-            offset_x = x,
-            offset_y = y,
-            "ANDROID_REMOTE_BACKSTEP_POSE_ACTIVE"
-        );
-        *saw_active = true;
-    } else if *saw_active && !*saw_settled && x.abs() <= f32::EPSILON && y.abs() <= f32::EPSILON {
-        info!("ANDROID_REMOTE_BACKSTEP_POSE_SETTLED");
-        *saw_settled = true;
+    if let Some((x, y)) = poses.native_overlay_entity_offset("9003") {
+        if !*saw_active && (x.abs() > f32::EPSILON || y.abs() > f32::EPSILON) {
+            info!(
+                offset_x = x,
+                offset_y = y,
+                "ANDROID_REMOTE_BACKSTEP_POSE_ACTIVE"
+            );
+            *saw_active = true;
+        } else if *saw_active && !*saw_settled && x.abs() <= f32::EPSILON && y.abs() <= f32::EPSILON
+        {
+            info!("ANDROID_REMOTE_BACKSTEP_POSE_SETTLED");
+            *saw_settled = true;
+        }
+    }
+    if let Some((x, y)) = poses.native_overlay_entity_offset("9002") {
+        if !*saw_pushed_active && (x.abs() > f32::EPSILON || y.abs() > f32::EPSILON) {
+            info!(
+                offset_x = x,
+                offset_y = y,
+                "ANDROID_OBJECT_PUSHED_POSE_ACTIVE"
+            );
+            *saw_pushed_active = true;
+        } else if *saw_pushed_active
+            && !*saw_pushed_settled
+            && x.abs() <= f32::EPSILON
+            && y.abs() <= f32::EPSILON
+        {
+            info!("ANDROID_OBJECT_PUSHED_POSE_SETTLED");
+            *saw_pushed_settled = true;
+        }
     }
 }
 

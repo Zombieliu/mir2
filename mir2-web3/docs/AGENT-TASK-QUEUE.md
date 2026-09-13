@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> 2026-09-14 Android current change: authenticated post-`IN_GAME`
+> `ObjectPushed` now updates the exact remote actor to the server endpoint and
+> drives the shared Bevy presentation clock. Unmounted actors reuse only their
+> validated walking atlas in Crystal's reverse step-two order (frames 5/3/1
+> for the six-frame catalog), then return to standing. Local-player IDs,
+> unknown/removed actors, ground drops and malformed directions fail closed.
+> Android 183/183 and UI Preview 191/191, Gradle 25/25 per variant, API31
+> target/package, streamed install, active/settled motion logs and a full-screen
+> 2340x1080 visible specimen pass. The 444,442,200-byte APK SHA-256 is
+> `7a45b1dd99a6eefd15d39ae6498bb14a616c6fa3f284c0f73eaff183f80ee99e`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-pushed-20260914/README.md`.
+> Local `Pushed`, exact mounted push artwork, dash/deco/level-effect depth,
+> approved-WSS real login, online StartGame/map transitions, public asset
+> alignment and physical-device/human acceptance remain open.
+
 > 2026-09-13 Android current change: authoritative `ObjectHidden` now crosses
 > the authenticated post-`IN_GAME` host boundary and updates the exact retained
 > actor without confusing status alpha with `ObjectHide` lifecycle removal.

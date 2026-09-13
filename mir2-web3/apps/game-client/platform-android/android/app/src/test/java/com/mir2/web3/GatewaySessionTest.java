@@ -360,6 +360,7 @@ public class GatewaySessionTest {
                 "{\"type\":\"packet\",\"packet\":\"ObjectPoisoned\",\"payload\":{\"objectId\":77,\"poison\":8}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectLevelEffects\",\"payload\":{\"objectId\":77,\"levelEffects\":4}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectHidden\",\"payload\":{\"objectId\":77,\"hidden\":true}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectPushed\",\"payload\":{\"objectId\":77,\"location\":{\"x\":300,\"y\":629},\"direction\":\"Right\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectRangeAttack\",\"payload\":{\"objectId\":77,\"location\":{\"x\":299,\"y\":629},\"direction\":\"Left\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectDied\",\"payload\":{\"objectId\":77,\"location\":{\"x\":299,\"y\":629},\"direction\":\"Left\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectRevived\",\"payload\":{\"objectId\":77,\"effect\":true}}",

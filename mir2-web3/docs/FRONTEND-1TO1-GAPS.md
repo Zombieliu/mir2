@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-14 Android current change: remote `ObjectPushed` now reaches the
+> retained native object and shared presentation layers after `IN_GAME`.
+> Exact endpoint ownership, strict direction validation, Crystal reverse
+> Walking frames 5/3/1, three-phase screen motion, standing settle, local-self
+> exclusion and stale/drop identity isolation are deterministic tests. Android
+> default 183/183, UI Preview 191/191, Gradle Debug/UI Preview 25/25 each,
+> API31 arm64 target/package, streamed install and a 2340x1080 render-ready
+> smoke pass. The 444,442,200-byte APK SHA-256 is
+> `7a45b1dd99a6eefd15d39ae6498bb14a616c6fa3f284c0f73eaff183f80ee99e`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-pushed-20260914/README.md`.
+> Local-player `Pushed`, mounted push artwork, remaining dash/deco/effect depth,
+> approved-WSS real login, online StartGame/map transition, public asset
+> alignment, physical-device and final human acceptance remain open.
+
 > 2026-09-13 Android current change: `ObjectHidden` now remains an actor status,
 > not a lifecycle delete. The post-`IN_GAME` packet updates the exact cached
 > actor and patches current, directional and active-action layers to Crystal's

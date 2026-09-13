@@ -405,6 +405,7 @@ final class GatewaySession implements AutoCloseable {
     private static boolean isEntityGameplayPacket(String packet) {
         return packet.equals("UserLocation") || packet.equals("ObjectWalk")
                 || packet.equals("ObjectRun") || packet.equals("ObjectBackStep")
+                || packet.equals("ObjectPushed")
                 || packet.equals("ObjectTurn") || packet.equals("ObjectHarvest")
                 || packet.equals("ObjectHarvested") || packet.equals("ObjectAttack")
                 || packet.equals("ObjectRangeAttack") || packet.equals("ObjectStruck")

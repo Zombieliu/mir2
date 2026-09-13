@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-14 Android current change: remote `ObjectPushed` is now a bounded
+> authoritative object-layer action. The Android model lands immediately on
+> the server position while the shared presentation layer interpolates three
+> phases; unmounted sprite poses reuse verified Walking frames in Crystal's
+> reverse step-two sequence and settle to standing. The reducer ignores the
+> local player because Crystal reserves the separate `Pushed` packet for that
+> path, and it cannot materialize unknown, removed or ground-drop IDs. Android
+> 183/183, UI Preview 191/191, Java 25/25 in both variants, API31 target/package,
+> streamed install and a 2340x1080 offline Bichon render pass with active and
+> settled motion markers pass. Evidence:
+> `docs/generated/player-qa/native-android-object-pushed-20260914/README.md`.
+> This closes one remote/unmounted object-action leaf, not local `Pushed`, exact
+> mounted push artwork, approved-WSS login, online StartGame/render-ready map
+> changes, public asset alignment, physical-device behavior or human acceptance.
+
 > 2026-09-13 Android current change: typed `ObjectHidden` packets now reach the
 > retained native actor model after real world entry and update every loaded
 > current/directional/action layer with Crystal's `0.5` Hidden opacity. Status

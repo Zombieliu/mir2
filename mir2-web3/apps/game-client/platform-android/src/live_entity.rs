@@ -14,7 +14,9 @@ use std::{
 const MAX_PACKET_BYTES: usize = 16 * 1024;
 const MAX_RENDER_BYTES: usize = 64 * 1024 * 1024;
 const MAX_ENTITIES: usize = 8192;
-const MAX_ACTION_POSES: usize = 128;
+// Seventeen bounded action families (including derived Pushed) across the
+// eight Crystal directions.
+const MAX_ACTION_POSES: usize = 17 * 8;
 const MAX_DAMAGE_EVENTS: usize = 48;
 const MAX_GROUND_ITEM_FRAMES: usize = 6_000;
 const CELL_WIDTH: f64 = 48.0;
@@ -370,6 +372,14 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
     let Some(mut models) = cache.models.take() else {
         return LiveEntityPacketOutcome::Ignored;
     };
+    // Crystal ignores ObjectPushed for the local player; its own Pushed packet
+    // has separate camera/input semantics and must not be inferred here.
+    if packet == "ObjectPushed"
+        && object_id(body).is_some_and(|object_id| self_object_id(&models) == Some(object_id))
+    {
+        cache.models = Some(models);
+        return LiveEntityPacketOutcome::Ignored;
+    }
     let mutation = match packet {
         "UserLocation" => location(body)
             .map(|position| EntityMutation::MoveSelf(position, direction(body).map(str::to_owned))),
@@ -393,6 +403,19 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                     life_state: None,
                 })
         }
+        "ObjectPushed" => object_id(body)
+            .zip(location(body))
+            .zip(mir_direction(body))
+            .map(
+                |((object_id, position), direction)| EntityMutation::Action {
+                    object_id,
+                    position,
+                    direction: Some(direction.to_owned()),
+                    action: "pushed".to_owned(),
+                    started_ms: now_ms,
+                    life_state: None,
+                },
+            ),
         "DamageIndicator" => object_id(body)
             .zip(damage(body))
             .zip(damage_type(body))
@@ -580,31 +603,35 @@ fn presentation_event(
     mutation: &EntityMutation,
     now_ms: u64,
 ) -> Option<String> {
-    let remote_motion =
-        |object_id: u32, to: (i32, i32), packet_direction: Option<&str>, mode: &str| {
-            if self_object_id(models) == Some(object_id) {
-                return None;
-            }
-            let (from, previous_direction) = model_pose(models, object_id)?;
-            Some(
-                json!({
-                    "type": "remoteMotion",
-                    "atMs": now_ms,
-                    "packet": packet,
-                    "objectId": object_id.to_string(),
-                    "fromX": from.0,
-                    "fromY": from.1,
-                    "toX": to.0,
-                    "toY": to.1,
-                    "direction": packet_direction
-                        .map(str::to_owned)
-                        .or(previous_direction)
-                        .unwrap_or_else(|| "Down".to_owned()),
-                    "mode": mode,
-                })
-                .to_string(),
-            )
-        };
+    let remote_motion = |object_id: u32,
+                         to: (i32, i32),
+                         packet_direction: Option<&str>,
+                         mode: &str,
+                         phase_count: Option<u8>| {
+        if self_object_id(models) == Some(object_id) {
+            return None;
+        }
+        let (from, previous_direction) = model_pose(models, object_id)?;
+        let mut event = json!({
+            "type": "remoteMotion",
+            "atMs": now_ms,
+            "packet": packet,
+            "objectId": object_id.to_string(),
+            "fromX": from.0,
+            "fromY": from.1,
+            "toX": to.0,
+            "toY": to.1,
+            "direction": packet_direction
+                .map(str::to_owned)
+                .or(previous_direction)
+                .unwrap_or_else(|| "Down".to_owned()),
+            "mode": mode,
+        });
+        if let Some(phase_count) = phase_count {
+            event["phaseCount"] = json!(phase_count);
+        }
+        Some(event.to_string())
+    };
 
     match (packet, mutation) {
         (
@@ -620,6 +647,7 @@ fn presentation_event(
             *position,
             direction.as_deref(),
             if packet == "ObjectRun" { "run" } else { "walk" },
+            None,
         ),
         ("ObjectBackStep" | "ObjectTurn", EntityMutation::Move(object_id, position, direction)) => {
             remote_motion(
@@ -631,8 +659,24 @@ fn presentation_event(
                 } else {
                     "backstep"
                 },
+                None,
             )
         }
+        (
+            "ObjectPushed",
+            EntityMutation::Action {
+                object_id,
+                position,
+                direction,
+                ..
+            },
+        ) => remote_motion(
+            *object_id,
+            *position,
+            direction.as_deref(),
+            "pushed",
+            Some(3),
+        ),
         (
             "ObjectHide" | "ObjectTeleportOut" | "ObjectRemove",
             EntityMutation::Hide(object_id) | EntityMutation::Remove(object_id),
@@ -1083,6 +1127,15 @@ fn direction(payload: &serde_json::Map<String, Value>) -> Option<&str> {
         .get("direction")
         .and_then(Value::as_str)
         .filter(|value| !value.is_empty() && value.len() <= 16)
+}
+
+fn mir_direction(payload: &serde_json::Map<String, Value>) -> Option<&str> {
+    direction(payload).filter(|direction| {
+        matches!(
+            *direction,
+            "Up" | "UpRight" | "Right" | "DownRight" | "Down" | "DownLeft" | "Left" | "UpLeft"
+        )
+    })
 }
 
 fn percent(payload: &serde_json::Map<String, Value>) -> Option<u8> {
@@ -3446,6 +3499,104 @@ mod tests {
             "standing"
         );
         assert!(poll_action_frame_at(1_600).is_none());
+        clear();
+    }
+
+    #[test]
+    fn remote_object_pushed_uses_authoritative_endpoint_and_crystal_reverse_walk_pose() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"direction":"Down"},{"objectId":"43","kind":"player","name":"Remote","x":301,"y":630,"direction":"Right"}],"groundDrops":[{"objectId":"50","name":"Potion","x":302,"y":630,"image":0,"quantity":1,"dropKind":"item"}]}"#,
+            31,
+        ));
+        assert!(install_render(
+            r#"{"_nativeWorldRequest":31,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"self-standing"}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing-right"}]}]}"#,
+            r#"{"_nativeWorldRequest":31,"entities":[{"objectId":"43","prototype":{},"directionLayers":{"Right":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing-right"}]},"actionLayers":{"pushed:Right":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"push-5"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"push-3"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"push-1"}]]}}}],"groundItemFrames":{"0":{"width":20,"height":13}}}"#,
+        ));
+
+        let LiveEntityPacketOutcome::Applied {
+            models,
+            render: Some(render),
+            presentation_event: Some(presentation),
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectPushed","payload":{"objectId":43,"location":{"x":300,"y":630},"direction":"Right"}}"#,
+            1_000,
+        )
+        else {
+            panic!("remote push should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["x"], 300);
+        assert_eq!(models["entities"][1]["y"], 630);
+        assert_eq!(models["entities"][1]["direction"], "Right");
+        assert_eq!(models["entities"][1]["_nativeAnimationAction"], "pushed");
+        let render: Value = serde_json::from_str(&render).unwrap();
+        assert_eq!(render["entities"][1]["gridX"], 300);
+        assert_eq!(render["entities"][1]["layers"][0]["atlasRectKey"], "push-5");
+        let presentation: Value = serde_json::from_str(&presentation).unwrap();
+        assert_eq!(presentation["packet"], "ObjectPushed");
+        assert_eq!(presentation["fromX"], 301);
+        assert_eq!(presentation["toX"], 300);
+        assert_eq!(presentation["mode"], "pushed");
+        assert_eq!(presentation["phaseCount"], 3);
+
+        let second: Value =
+            serde_json::from_str(&poll_action_frame_at(1_100).expect("second pushed frame"))
+                .unwrap();
+        assert_eq!(second["entities"][1]["layers"][0]["atlasRectKey"], "push-3");
+        let third: Value =
+            serde_json::from_str(&poll_action_frame_at(1_200).expect("third pushed frame"))
+                .unwrap();
+        assert_eq!(third["entities"][1]["layers"][0]["atlasRectKey"], "push-1");
+        let settled: Value =
+            serde_json::from_str(&poll_action_frame_at(1_300).expect("pushed settle")).unwrap();
+        assert_eq!(
+            settled["entities"][1]["layers"][0]["atlasRectKey"],
+            "standing-right"
+        );
+
+        assert_eq!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"ObjectPushed","payload":{"objectId":42,"location":{"x":299,"y":630},"direction":"Left"}}"#,
+                1_400,
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+        {
+            let cache = LIVE_ENTITIES
+                .lock()
+                .unwrap_or_else(|poisoned| poisoned.into_inner());
+            let models = cache.models.as_ref().unwrap();
+            assert_eq!(models["entities"][0]["x"], 300);
+            assert_eq!(models["entities"][0]["direction"], "Down");
+        }
+        assert!(matches!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"ObjectRemove","payload":{"objectId":43}}"#,
+                1_450,
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        for packet in [
+            r#"{"type":"packet","packet":"ObjectPushed","payload":{"objectId":43,"location":{"x":299,"y":630},"direction":"Left"}}"#,
+            r#"{"type":"packet","packet":"ObjectPushed","payload":{"objectId":99,"location":{"x":299,"y":630},"direction":"Left"}}"#,
+            r#"{"type":"packet","packet":"ObjectPushed","payload":{"objectId":50,"location":{"x":299,"y":630},"direction":"Left"}}"#,
+        ] {
+            assert_eq!(
+                apply_packet_at(packet, 1_500),
+                LiveEntityPacketOutcome::Ignored
+            );
+        }
+        for packet in [
+            r#"{"type":"packet","packet":"ObjectPushed","payload":{"objectId":43,"direction":"Left"}}"#,
+            r#"{"type":"packet","packet":"ObjectPushed","payload":{"objectId":43,"location":{"x":299,"y":630},"direction":"North"}}"#,
+        ] {
+            assert_eq!(
+                apply_packet_at(packet, 1_600),
+                LiveEntityPacketOutcome::Rejected
+            );
+        }
         clear();
     }
 

@@ -151,6 +151,16 @@ active-action layers without removing or respawning the actor. Clearing the
 status restores normal opacity or the existing explicit Android corpse
 fallback. Unknown, removed and ground-drop identities remain ignored, and
 malformed payloads fail closed.
+Post-`IN_GAME` remote `ObjectPushed` now uses the same authoritative object
+path. Android moves only the exact existing remote actor to the server endpoint,
+requires one of Crystal's eight directions, and emits a three-phase shared
+presentation glide without changing the endpoint model. For unmounted actors,
+the packed action atlas derives Crystal's push pose from the already-validated
+walking sequence in reverse steps of two (six-frame catalogs therefore render
+frames 5, 3 and 1) before settling to standing. Self IDs are ignored because
+Crystal uses the separate `Pushed` packet for the local player; unknown,
+removed and ground-drop identities cannot be created. Exact mounted push
+artwork and the local-player `Pushed` camera/input path remain open.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a

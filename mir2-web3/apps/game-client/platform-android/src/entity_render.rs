@@ -278,7 +278,7 @@ struct EntityDirectionEntry {
     action_layers: BTreeMap<String, EntityActionLayers>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct EntityActionLayers {
     interval_ms: u64,
@@ -1264,6 +1264,37 @@ where
                         }
                     }
                 }
+                // Crystal's unmounted Pushed action reuses Walking artwork,
+                // beginning at the final walking frame and stepping backward
+                // by two frames per motion tick. Derive that bounded pose only
+                // from already-verified packaged walking rects; mounted push
+                // remains out of scope until its exact library contract is
+                // established.
+                if !mounted {
+                    let pushed_layers = DIRECTIONS
+                        .into_iter()
+                        .filter_map(|direction| {
+                            let walking = action_layers.get(&format!("walking:{direction}"))?;
+                            let frames = walking
+                                .frames
+                                .iter()
+                                .rev()
+                                .step_by(2)
+                                .cloned()
+                                .collect::<Vec<_>>();
+                            (!frames.is_empty()).then(|| {
+                                (
+                                    format!("pushed:{direction}"),
+                                    EntityActionLayers {
+                                        interval_ms: walking.interval_ms,
+                                        frames,
+                                    },
+                                )
+                            })
+                        })
+                        .collect::<Vec<_>>();
+                    action_layers.extend(pushed_layers);
+                }
             }
         }
         if !selected_ready {
@@ -1929,6 +1960,18 @@ mod tests {
             assert_eq!(
                 frames[5][0]["atlasRectKey"],
                 format!("/original-ui/CArmour/00/{last}.png|1x1")
+            );
+        }
+        let pushed = live["entities"][0]["actionLayers"]["pushed:Down"]
+            .as_object()
+            .unwrap();
+        assert_eq!(pushed["intervalMs"], 100);
+        let frames = pushed["frames"].as_array().unwrap();
+        assert_eq!(frames.len(), 3);
+        for (frame, expected) in frames.iter().zip([61, 59, 57]) {
+            assert_eq!(
+                frame[0]["atlasRectKey"],
+                format!("/original-ui/CArmour/00/{expected}.png|1x1")
             );
         }
     }
