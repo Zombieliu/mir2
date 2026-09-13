@@ -1,5 +1,168 @@
 # Agent Task Queue
 
+> Active r25 checkpoint: compile/build passed at SHA-256
+> `5EFB51A48211897F8B1559E793AEDC9E28B24A68FEC89CC41F99FD7C84908A87`.
+> Five simulation tests, four Gateway cadence tests and all 129 Node protocol
+> tests pass. The selected-character ECS position getter narrows pending
+> transform reads; candidate travel selects the nearest graph route while
+> retaining its fallback, and search/approach interruption stays bounded to a
+> proven aggressor. r24's failure came from selecting map 3 before the nearer
+> map 2 candidate, not from the interruption path. r24 exited 0 with writer
+> count 0. Survival/kiting protocol tests pass 143/143 and all quest-agent tests
+> pass 344/344. Ordinary post-objective restocking is bounded, HP supply checks
+> cover all Drug types, and Wizard retreats retain collision, range, hostile,
+> death and map-change guards. The final Wizard run cast six FireBalls, then
+> stopped alive at 45/45 with no collision-safe local retreat. Server 26160
+> exited 0 with writer lock 0; persisted revision 697 matches map 2 position
+> 471,409, HP 45 and MP 105. All three are paused at level 12, 15/53 core quests
+> and 0/4 milestones; Warrior q33 is 7/16 and the others are 0/16. Next: safe
+> escape/target selection beyond the strict local three-cell range. Kiting,
+> latency, one-day pacing, full routes and visuals remain unaccepted.
+
+> r17 build checkpoint: scheduled harvest lifecycle 2/2 and Gateway private
+> projection suppression 2/2 now pass. Both ObjectHarvested conversion and result
+> anchoring are corrected; legitimate scheduled revival remains visible. Resume
+> normal saved players after this build. Concurrent harvest reward custody is
+> still a separate open gate; whole-route and visual acceptance remain open.
+
+> 2026-09-12 latest checkpoint: all three are level 10; Warrior 14/53 core,
+> Wizard/Taoist 12/53. r16 live verified distant SpittingSpider activation and
+> post-relogin FireBall use. All runners ended and isolated r16 is stopped.
+> Next: finish scheduled-corpse projection regression, build r17, resume saved
+> characters with authoritative damage-triggered vitals refresh and paired-slot
+> equipment handling. Newcomer class milestone rewards pass 4 focused tests;
+> full newcomer module 11/11 and protocol suite 118/118 pass. Complete routes
+> additionally require four Board reward claims. No one-day/visual acceptance.
+
+> Latest active checkpoint: Warrior/Taoist reached level 10 and completed q25
+> (12/53 each); Wizard remains level 9, q25 2/4 (11/53). All runners are paused.
+> r15 live proved Fencing progression and harvesting, then exposed missing
+> asynchronous-movement monster hydration (q26) and relogin absolute skill
+> cooldown persistence. Fixes and final focused/adjacent tests are in progress;
+> isolated r15 is stopped, r16 has not been built. Resume normal saved characters
+> after verified r16. Protocol suite 104/104; no whole-route/visual acceptance.
+
+> Active protocol checkpoint: Warrior and Wizard have 11/53 mandatory quests
+> completed at level 9; Taoist has 8/53 at level 6. Actual MapInformation handling
+> is implemented and the combined harness suite passes 100 tests. Runners are
+> paused for the confirmed TownRevive/queued-monster visibility defect. The first
+> focused AOI regression failed at fixture initial spawn; independent review also
+> identified the pre-revival queue-drain ordering gap. Fix and retest before
+> rebuilding the isolated Gateway and resuming ordinary saved characters.
+> Full routes, one-day pacing and visual acceptance remain unverified.
+
+> 2026-09-12 current next step: recognize actual Gateway MapInformation packets
+> in the protocol observer/traveler, fetch fresh destination state, then resume
+> Wizard q11 and the other classes' full-spread searches. Isolated r14 fixed the
+> delayed shared-cadence exit (4 focused + 2 adjacent tests, live MapInformation
+> to map0). Full 53-task routes, pacing and visual acceptance remain open.
+
+> 2026-09-11 active protocol journey: rebuild isolated QA Gateway with the tested
+> dialogue-quest restore fix, reconnect normally, verify Wizard q10/Taoist q13,
+> then continue all 53 mandatory tasks per class. Warrior reached q22 after eight
+> authoritative completions. Do not seed progress or treat 76 passing harness
+> tests as complete route/visual acceptance. Evidence:
+> `docs/PROTOCOL-NEWCOMER-ACCEPTANCE.md`.
+
+> 2026-09-11 active: continue three normal protocol-player newcomer journeys.
+> All classes passed normal account/character/bootstrap and q1–q3. Server Diary
+> correction passes five focused and two adjacent tests; new QA Gateway build
+> and Native Diary tests are pending. No desktop takeover or visual acceptance
+> is claimed. See PROTOCOL-NEWCOMER-ACCEPTANCE.md for evidence and limitations.
+
+> 2026-09-11 newcomer 1–30 implementation checkpoint: opt-in `newcomer-v1`
+> now has six chapters and 53 mandatory quests per class. Quest-only XP covers
+> every route level gate through 30; q4 harvesting and q84 thread collection
+> are optional. Material hints name real sources. Data checks pass 10/10;
+> simulation journey tests pass 7/7, progression 8/8, recurrence 9/9 and four
+> adjacent drop/harvest cases pass. Next: finish native tests and package,
+> then natural Warrior/Wizard/Taoist play to calibrate the one-day target.
+> Time-to-30 and visual acceptance remain unverified. See NEWCOMER-1-30-DESIGN.md.
+> `formalCandidate=false`, `accepted=false`, `visualAccepted=false`.
+
+> 2026-09-11 NPC-dialog usability checkpoint: the native Board at (335,259)
+> renders clean labels without raw markup, pages to ReviveHero/SealHero/Use,
+> follows Use to the server shop list, reaches Hairdresser/Close on its last
+> page, opens a separate five-item quest list, and closes dialog plus quest list
+> from the top-right X. Real Board parser and feature-enabled native pagination
+> tests pass 1/1 each; Gateway and native builds pass. Only QA position changed;
+> quest progress did not. Hero business actions were not exercised, and inline
+> coloured/large-button Crystal layout plus duplicate fallback footer entries
+> remain open. The related native UI regression set passes 4/4, including the
+> focused pagination case; it is one overlapping set, not five tests.
+> `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 combat-fix partial native checkpoint: a persisted HP=0 character
+> revived with V to Bichon (288,616) at 224/224. A separate position-only seed
+> at map 1 (278,180), with quest counts left untouched, produced one natural
+> ForestYeti kill: 0/8→1/8 and EXP 14.29%→14.31%. A respawned Yeti's live HUD
+> descended 137/224→106→63→27→0 instead of jumping from full health to death.
+> Relog returned safely to Bichon (288,616) at 224/224 and retained Yeti 1/8,
+> 14.31% and stored experience 20036.
+> Gateway owner ObjectHealth-ID normalization and native dead-V/default-Minimap
+> conflict tests pass 1/1 each; both builds pass. Eight natural Yeti kills, a
+> natural Oma kill, full route/balance coverage and all three classes remain
+> open. Tree/night occlusion and difficult attack operation also leave animation
+> acceptance open. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 partial native quest checkpoint: the real Board UI verified the
+> two-choice cap, abandon-and-replace flow, corrected single-count objective,
+> hidden old choice after replacement, and level-15/20 milestone payouts with
+> relog/no-reclaim. An explicitly `QA-progress-seeded` continuation verified
+> two ordinary hand-ins, bonus 0/2→1/2→2/2, 26,000 final gold, 20,000 quest EXP,
+> and relog/no-reclaim; natural monster-kill progression remains open. Focused
+> newcomer tests pass 8/8. The BaseDress equipment-slot fix was also worn live.
+> `formalCandidate=false`, `accepted=false`, `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 internal QA package ready: fresh optimized-dev client/Gateway, 50,400
+> asset hashes verified. Isolated level-20 Board fixture and protocol smoke pass
+> (10 definitions, 6 eligible quests). Desktop takeover awaits user pause while
+> DeltaForce runs. No native visual acceptance or signed Release claim. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+
+> 2026-09-11 newcomer progression follow-up implemented: 1–40 guidance (138
+> quests per class / 144 source IDs), three daily choices with a two-quest cap,
+> current-day 2/2 claimable bonus, and one-time gold milestones at 15/20/25/30/35/40.
+> Ten independent IDs are server newcomer-v1 only; default Crystal is preserved.
+> Exact Board binding, distinct claims, persistence/profile isolation and daily
+> high-watermark checks pass. Gateway now sends changed quest snapshots even on
+> Tick/KeepAlive without expanding ordinary movement snapshots. Verification:
+> Node193, Bevy88, Windows1, simulation68, store6, Gateway29 pass. No package or
+> live visual/three-class balance acceptance. This is optional content, not a
+> new Crystal parity percentage. Next: matched package and live Board/Diary/
+> reward/relogin acceptance. Details: QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 first progression/cadence slice delivered: 1–25 guidance, actual
+> daily141/repeatable142, optional weekly140 and exact Gateway Finish ACK.
+> Checks pass: Node193/native88/simulation61/store3/Gateway28. Next: matched
+> package/visual quest flow, normal class progression timings, then 26–40 guidance
+> and level-appropriate alternative daily tasks/two-of-three milestone rewards.
+> Current board level ranges are retained; this is not all-level daily coverage.
+> Evidence: QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 optional newcomer guidance implemented and source-tested:
+> 22 recommended / 15 optional / 4 challenge / 1 deferred per class;
+> native list/diary/detail integration and zero-fixed-reward presentation.
+> Rust quest 87/87 and Node 192/192 pass. Next: package with the explicit
+> newcomer-v1 profile and verify screenshots, then normal three-class level-15
+> timings/supplies/deaths before changing balance. Crystal default is preserved.
+> Evidence and live checklist: QUEST-NEWCOMER-ACCEPTANCE.md.
+
+> 2026-09-11 level 1–15 quest closeout: generated class-specific 42-quest
+> route manifests (39 shared + 3 instructor quests per class). Fixed route
+> segment bounds, exact Oma kill matching for q8/q11/q14 and zero-count reward
+> handling for source q37/q41. Current-source checks pass: route 15, policy 139,
+> Rust new 2 + adjacent 2 + full bag 1 + progress restoration 1. No game launch,
+> package, continuous three-class playthrough or paired visual acceptance.
+> Evidence: generated/player-qa/quest-level15-20260911/README.md.
+
+
 > 2026-09-10 menu parity is in progress. Shared Ranking presence now uses
 > stable account/character identity across local factory Zones, excluding
 > replicas and leaving players (simulation 3/3, Gateway integration 1/1).

@@ -1,0 +1,1692 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v1",
+  "maxLevel": 30,
+  "description": "Opt-in newcomer journey. Earn progression through ordinary quest completion; no daily wait or mandatory rare boss. Crystal mode retains its original values.",
+  "chapters": [
+    {
+      "id": "village",
+      "title": "Your first adventure",
+      "minLevel": 1,
+      "maxLevel": 5,
+      "exitLevel": 6,
+      "questIds": [
+        1,
+        2,
+        3,
+        5,
+        6
+      ],
+      "classQuestIds": {
+        "Warrior": [
+          7,
+          8,
+          9
+        ],
+        "Wizard": [
+          10,
+          11,
+          12
+        ],
+        "Taoist": [
+          13,
+          14,
+          15
+        ]
+      },
+      "goal": "Meet the village, equip your rewards, and earn your first skill book.",
+      "rewardSummary": "Starter weapon, jewellery and your class skill book.",
+      "classHints": {
+        "Warrior": "Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.",
+        "Wizard": "Learn FireBall from the book when eligible and bind it to a spell key. Keep distance and carry enough mana potions.",
+        "Taoist": "Learn Healing from the book when eligible and bind it to a spell key. Practise healing yourself and balancing health with mana."
+      },
+      "questExperienceBudget": 1600
+    },
+    {
+      "id": "bichon",
+      "title": "Beyond the village",
+      "minLevel": 6,
+      "maxLevel": 10,
+      "exitLevel": 11,
+      "questIds": [
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        29,
+        30,
+        35,
+        36,
+        37
+      ],
+      "classQuestIds": {
+        "Warrior": [],
+        "Wizard": [],
+        "Taoist": []
+      },
+      "goal": "Follow the guide to Bichon and learn how to prepare for a new map.",
+      "rewardSummary": "Weapon upgrades and armour; short, guaranteed quest-material hunts.",
+      "classHints": {
+        "Warrior": "Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.",
+        "Wizard": "Learn FireBall from the book when eligible and bind it to a spell key. Keep distance and carry enough mana potions.",
+        "Taoist": "Learn Healing from the book when eligible and bind it to a spell key. Practise healing yourself and balancing health with mana."
+      },
+      "questExperienceBudget": 49558
+    },
+    {
+      "id": "frontier",
+      "title": "Ready for the caves",
+      "minLevel": 11,
+      "maxLevel": 15,
+      "exitLevel": 16,
+      "questIds": [
+        33,
+        49,
+        39,
+        40,
+        41,
+        42
+      ],
+      "classQuestIds": {
+        "Warrior": [],
+        "Wizard": [],
+        "Taoist": []
+      },
+      "goal": "Finish the snake-wine story and prove yourself against ordinary cave enemies.",
+      "rewardSummary": "A helmet plus a level-15 class weapon and core combat book.",
+      "classHints": {
+        "Warrior": "Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.",
+        "Wizard": "Learn FireBall from the book when eligible and bind it to a spell key. Keep distance and carry enough mana potions.",
+        "Taoist": "Learn Healing from the book when eligible and bind it to a spell key. Practise healing yourself and balancing health with mana."
+      },
+      "questExperienceBudget": 65742
+    },
+    {
+      "id": "mines",
+      "title": "Mines and rescue",
+      "minLevel": 16,
+      "maxLevel": 20,
+      "exitLevel": 21,
+      "questIds": [
+        51,
+        52,
+        53,
+        54,
+        60,
+        61,
+        62,
+        65
+      ],
+      "classQuestIds": {
+        "Warrior": [],
+        "Wizard": [],
+        "Taoist": []
+      },
+      "goal": "Prepare supplies, clear the mines, and help the woodland expedition.",
+      "rewardSummary": "Belt and necklace choices plus a level-20 class weapon.",
+      "classHints": {
+        "Warrior": "Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.",
+        "Wizard": "Learn FireBall from the book when eligible and bind it to a spell key. Keep distance and carry enough mana potions.",
+        "Taoist": "Learn Healing from the book when eligible and bind it to a spell key. Practise healing yourself and balancing health with mana."
+      },
+      "questExperienceBudget": 480000
+    },
+    {
+      "id": "expedition",
+      "title": "Lead an expedition",
+      "minLevel": 21,
+      "maxLevel": 25,
+      "exitLevel": 26,
+      "questIds": [
+        83,
+        86,
+        87,
+        88,
+        89,
+        97,
+        98,
+        99,
+        102,
+        103,
+        110,
+        111,
+        112
+      ],
+      "classQuestIds": {
+        "Warrior": [],
+        "Wizard": [],
+        "Taoist": []
+      },
+      "goal": "Investigate the missing carriage, scout Wooma, and uncover the secret path.",
+      "rewardSummary": "The secret path plus level-25 class armour and a level-26 weapon.",
+      "classHints": {
+        "Warrior": "Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.",
+        "Wizard": "Learn FireBall from the book when eligible and bind it to a spell key. Keep distance and carry enough mana potions.",
+        "Taoist": "Learn Healing from the book when eligible and bind it to a spell key. Practise healing yourself and balancing health with mana."
+      },
+      "questExperienceBudget": 1800000
+    },
+    {
+      "id": "island",
+      "title": "A new horizon",
+      "minLevel": 26,
+      "maxLevel": 30,
+      "exitLevel": 30,
+      "questIds": [
+        113,
+        114,
+        117,
+        118,
+        119,
+        121,
+        124,
+        122,
+        123
+      ],
+      "classQuestIds": {
+        "Warrior": [],
+        "Wizard": [],
+        "Taoist": []
+      },
+      "goal": "Secure the supply route and complete your first Prajna Island expedition.",
+      "rewardSummary": "A bangle upgrade and the level-30 growth reward.",
+      "classHints": {
+        "Warrior": "Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.",
+        "Wizard": "Learn FireBall from the book when eligible and bind it to a spell key. Keep distance and carry enough mana potions.",
+        "Taoist": "Learn Healing from the book when eligible and bind it to a spell key. Practise healing yourself and balancing health with mana."
+      },
+      "questExperienceBudget": 4900000
+    }
+  ],
+  "milestoneRewards": [
+    {
+      "level": 15,
+      "classRewards": {
+        "Warrior": [
+          {
+            "item": "SharpSword",
+            "count": 1
+          },
+          {
+            "item": "Slaying",
+            "count": 1
+          }
+        ],
+        "Wizard": [
+          {
+            "item": "SharpTrident",
+            "count": 1
+          },
+          {
+            "item": "GreatFireBall",
+            "count": 1
+          }
+        ],
+        "Taoist": [
+          {
+            "item": "SharpScimitar",
+            "count": 1
+          },
+          {
+            "item": "SoulFireBall",
+            "count": 1
+          },
+          {
+            "item": "Amulet",
+            "count": 100
+          }
+        ]
+      }
+    },
+    {
+      "level": 20,
+      "classRewards": {
+        "Warrior": [
+          {
+            "item": "MartialSabre",
+            "count": 1
+          }
+        ],
+        "Wizard": [
+          {
+            "item": "SpearWithHook",
+            "count": 1
+          }
+        ],
+        "Taoist": [
+          {
+            "item": "KeenKrissSword",
+            "count": 1
+          }
+        ]
+      }
+    },
+    {
+      "level": 25,
+      "classRewards": {
+        "Warrior": [
+          {
+            "maleItem": "ThickArmour(M)",
+            "femaleItem": "ThickArmour(F)",
+            "count": 1
+          },
+          {
+            "item": "SolidGreatAxe",
+            "count": 1
+          }
+        ],
+        "Wizard": [
+          {
+            "maleItem": "FireMagicRobe(M)",
+            "femaleItem": "FireMagicRobe(F)",
+            "count": 1
+          },
+          {
+            "item": "SolidBronzeStaff",
+            "count": 1
+          }
+        ],
+        "Taoist": [
+          {
+            "maleItem": "TaoArmour(M)",
+            "femaleItem": "TaoArmour(F)",
+            "count": 1
+          },
+          {
+            "item": "SolidSerpentSword",
+            "count": 1
+          }
+        ]
+      }
+    }
+  ],
+  "questOverrides": [
+    {
+      "questId": 1,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Assistant Jane",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 284,
+        "y": 606
+      },
+      "finishNpc": {
+        "name": "CraftsLady Jude",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 294,
+        "y": 619
+      }
+    },
+    {
+      "questId": 2,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "GingerTea"
+      ],
+      "taskDescription": [
+        "Collect 1 GingerTea from Scarecrow. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "CraftsLady Jude",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 294,
+        "y": 619
+      },
+      "finishNpc": {
+        "name": "Assistant Jane",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 284,
+        "y": 606
+      }
+    },
+    {
+      "questId": 3,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Assistant Jane",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 284,
+        "y": 606
+      },
+      "finishNpc": {
+        "name": "Merchant John",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 292,
+        "y": 603
+      }
+    },
+    {
+      "questId": 5,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 5 Deer.",
+        "Defeat 5 Scarecrow."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Blacksmith Smith",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 296,
+        "y": 613
+      },
+      "finishNpc": {
+        "name": "Blacksmith Smith",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 296,
+        "y": 613
+      }
+    },
+    {
+      "questId": 6,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 5 HookingCat."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Blacksmith Smith",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 296,
+        "y": 613
+      },
+      "finishNpc": {
+        "name": "Blacksmith Smith",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 296,
+        "y": 613
+      }
+    },
+    {
+      "questId": 7,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Assistant Jane",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 284,
+        "y": 606
+      },
+      "finishNpc": {
+        "name": "Master Wa",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 110,
+        "y": 317
+      }
+    },
+    {
+      "questId": 10,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Assistant Jane",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 284,
+        "y": 606
+      },
+      "finishNpc": {
+        "name": "MasterMage Don",
+        "mapName": "MageHouse",
+        "mapFileName": "0115",
+        "x": 8,
+        "y": 11
+      }
+    },
+    {
+      "questId": 13,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Assistant Jane",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 284,
+        "y": 606
+      },
+      "finishNpc": {
+        "name": "HighPriest Jude",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 429,
+        "y": 475
+      }
+    },
+    {
+      "questId": 8,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 5 Oma.",
+        "Defeat 5 RakingCat."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Master Wa",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 110,
+        "y": 317
+      },
+      "finishNpc": {
+        "name": "Master Wa",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 110,
+        "y": 317
+      }
+    },
+    {
+      "questId": 11,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 5 Oma.",
+        "Defeat 5 RakingCat."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "MasterMage Don",
+        "mapName": "MageHouse",
+        "mapFileName": "0115",
+        "x": 8,
+        "y": 11
+      },
+      "finishNpc": {
+        "name": "MasterMage Don",
+        "mapName": "MageHouse",
+        "mapFileName": "0115",
+        "x": 8,
+        "y": 11
+      }
+    },
+    {
+      "questId": 14,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 5 Oma.",
+        "Defeat 5 RakingCat."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "HighPriest Jude",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 429,
+        "y": 475
+      },
+      "finishNpc": {
+        "name": "HighPriest Jude",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 429,
+        "y": 475
+      }
+    },
+    {
+      "questId": 9,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Master Wa",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 110,
+        "y": 317
+      },
+      "finishNpc": {
+        "name": "MirGuide Peter",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 328,
+        "y": 258
+      }
+    },
+    {
+      "questId": 12,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "MasterMage Don",
+        "mapName": "MageHouse",
+        "mapFileName": "0115",
+        "x": 8,
+        "y": 11
+      },
+      "finishNpc": {
+        "name": "MirGuide Peter",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 328,
+        "y": 258
+      }
+    },
+    {
+      "questId": 15,
+      "rewardExperience": 200,
+      "killCountCap": 5,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "HighPriest Jude",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 429,
+        "y": 475
+      },
+      "finishNpc": {
+        "name": "MirGuide Peter",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 328,
+        "y": 258
+      }
+    },
+    {
+      "questId": 22,
+      "rewardExperience": 1366,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 5 ForestYeti."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 23,
+      "rewardExperience": 1367,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "OmaTeeth"
+      ],
+      "taskDescription": [
+        "Collect 2 OmaTeeth from Oma. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 24,
+      "rewardExperience": 1367,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 25,
+      "rewardExperience": 1366,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "CannibalStem",
+        "CannibalLeaf"
+      ],
+      "taskDescription": [
+        "Collect 2 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
+        "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 26,
+      "rewardExperience": 1367,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "PoisonSack"
+      ],
+      "taskDescription": [
+        "Collect 2 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": true,
+      "finishInDiary": false,
+      "startNpc": null,
+      "finishNpc": {
+        "name": "MirGuide Peter",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 328,
+        "y": 258
+      }
+    },
+    {
+      "questId": 27,
+      "rewardExperience": 1367,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "startInDiary": true,
+      "finishInDiary": false,
+      "startNpc": null,
+      "finishNpc": {
+        "name": "MongchonScout Brian",
+        "mapName": "Kitchen",
+        "mapFileName": "0100",
+        "x": 4,
+        "y": 10
+      }
+    },
+    {
+      "questId": 29,
+      "rewardExperience": 1366,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Blacksmith Bill",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 302,
+        "y": 221
+      },
+      "finishNpc": {
+        "name": "Merchant Bradley",
+        "mapName": "Blacksmith",
+        "mapFileName": "0120",
+        "x": 7,
+        "y": 8
+      }
+    },
+    {
+      "questId": 30,
+      "rewardExperience": 1367,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "JadeRing"
+      ],
+      "taskDescription": [
+        "Collect 1 JadeRing from Currish corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Bradley",
+        "mapName": "Blacksmith",
+        "mapFileName": "0120",
+        "x": 7,
+        "y": 8
+      },
+      "finishNpc": {
+        "name": "Merchant Bradley",
+        "mapName": "Blacksmith",
+        "mapFileName": "0120",
+        "x": 7,
+        "y": 8
+      }
+    },
+    {
+      "questId": 33,
+      "rewardExperience": 1367,
+      "killCountCap": 3,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 3 TigerSnake.",
+        "Defeat 3 RedSnake."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Robert",
+        "mapName": "SerpentValley",
+        "mapFileName": "2",
+        "x": 505,
+        "y": 479
+      },
+      "finishNpc": {
+        "name": "Merchant Robert",
+        "mapName": "SerpentValley",
+        "mapFileName": "2",
+        "x": 505,
+        "y": 479
+      }
+    },
+    {
+      "questId": 35,
+      "rewardExperience": 12875,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "MongchonScout Brian",
+        "mapName": "Kitchen",
+        "mapFileName": "0100",
+        "x": 4,
+        "y": 10
+      },
+      "finishNpc": {
+        "name": "MongchonScout Brian",
+        "mapName": "Kitchen",
+        "mapFileName": "0100",
+        "x": 4,
+        "y": 10
+      }
+    },
+    {
+      "questId": 36,
+      "rewardExperience": 12875,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "SnakeBody"
+      ],
+      "taskDescription": [
+        "Collect 2 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 37,
+      "rewardExperience": 12875,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": true,
+      "finishInDiary": false,
+      "startNpc": null,
+      "finishNpc": {
+        "name": "MongchonScout Brian",
+        "mapName": "Kitchen",
+        "mapFileName": "0100",
+        "x": 4,
+        "y": 10
+      }
+    },
+    {
+      "questId": 39,
+      "rewardExperience": 12875,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Melissa",
+        "mapName": "SerpentValley",
+        "mapFileName": "2",
+        "x": 517,
+        "y": 477
+      },
+      "finishNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      }
+    },
+    {
+      "questId": 40,
+      "rewardExperience": 12875,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 OmaFighter."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      },
+      "finishNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      }
+    },
+    {
+      "questId": 41,
+      "rewardExperience": 12875,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      },
+      "finishNpc": {
+        "name": "Merchant Sarah",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 313,
+        "y": 271
+      }
+    },
+    {
+      "questId": 42,
+      "rewardExperience": 12875,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 RedViper.",
+        "Defeat 10 TigerViper."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Bradley",
+        "mapName": "Blacksmith",
+        "mapFileName": "0120",
+        "x": 7,
+        "y": 8
+      },
+      "finishNpc": {
+        "name": "Merchant Bruce",
+        "mapName": "Blacksmith",
+        "mapFileName": "0159",
+        "x": 5,
+        "y": 9
+      }
+    },
+    {
+      "questId": 49,
+      "rewardExperience": 12875,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 Skeleton."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Teleport Jason",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 292,
+        "y": 216
+      },
+      "finishNpc": {
+        "name": "Teleport Jason",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 292,
+        "y": 216
+      }
+    },
+    {
+      "questId": 51,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "startInDiary": true,
+      "finishInDiary": false,
+      "startNpc": null,
+      "finishNpc": {
+        "name": "CraftsLady Alice",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 321,
+        "y": 265
+      }
+    },
+    {
+      "questId": 52,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "CannibalLeaf",
+        "CannibalSeed"
+      ],
+      "taskDescription": [
+        "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
+        "Collect 2 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "CraftsLady Alice",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 321,
+        "y": 265
+      },
+      "finishNpc": {
+        "name": "CraftsLady Alice",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 321,
+        "y": 265
+      }
+    },
+    {
+      "questId": 53,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "CraftsLady Alice",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 321,
+        "y": 265
+      },
+      "finishNpc": {
+        "name": "CraftsLady Alice",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 321,
+        "y": 265
+      }
+    },
+    {
+      "questId": 54,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 5 Zombie5.",
+        "Defeat 5 Zombie2.",
+        "Defeat 5 Zombie3.",
+        "Defeat 5 Zombie4.",
+        "Defeat 5 Zombie1."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Blacksmith Bill",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 302,
+        "y": 221
+      },
+      "finishNpc": {
+        "name": "Blacksmith Bill",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 302,
+        "y": 221
+      }
+    },
+    {
+      "questId": 60,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 8 SpiderFrog."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Examiner Tony",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 340,
+        "y": 257
+      },
+      "finishNpc": {
+        "name": "Examiner Tony",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 340,
+        "y": 257
+      }
+    },
+    {
+      "questId": 61,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "requiredQuestId": 54,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Teleport Kyle",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 371,
+        "y": 314
+      },
+      "finishNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      }
+    },
+    {
+      "questId": 62,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 8 KekTal.",
+        "Defeat 8 VioletKekTal."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      },
+      "finishNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      }
+    },
+    {
+      "questId": 65,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 8 Zombie1."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 83,
+      "rewardExperience": 250000,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Melissa",
+        "mapName": "SerpentValley",
+        "mapFileName": "2",
+        "x": 517,
+        "y": 477
+      },
+      "finishNpc": {
+        "name": "Merchant Sam",
+        "mapName": "Laundry",
+        "mapFileName": "1003",
+        "x": 13,
+        "y": 16
+      }
+    },
+    {
+      "questId": 86,
+      "rewardExperience": 26923,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "LeadTrainer Harry",
+        "mapName": "Rev.Tao_Office",
+        "mapFileName": "1002",
+        "x": 11,
+        "y": 8
+      },
+      "finishNpc": {
+        "name": "Merchant Anne",
+        "mapName": "DrapersStore",
+        "mapFileName": "0106",
+        "x": 19,
+        "y": 6
+      }
+    },
+    {
+      "questId": 87,
+      "rewardExperience": 138461,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Anne",
+        "mapName": "DrapersStore",
+        "mapFileName": "0106",
+        "x": 19,
+        "y": 6
+      },
+      "finishNpc": {
+        "name": "BrokenCarriage",
+        "mapName": "WoomyonWoods(N)",
+        "mapFileName": "11",
+        "x": 103,
+        "y": 391
+      }
+    },
+    {
+      "questId": 88,
+      "rewardExperience": 138462,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "BrokenCarriage",
+        "mapName": "WoomyonWoods(N)",
+        "mapFileName": "11",
+        "x": 103,
+        "y": 391
+      },
+      "finishNpc": {
+        "name": "LeadTrainer Harry",
+        "mapName": "Rev.Tao_Office",
+        "mapFileName": "1002",
+        "x": 11,
+        "y": 8
+      }
+    },
+    {
+      "questId": 89,
+      "rewardExperience": 138461,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 CursedPriest.",
+        "Defeat 10 ShiZombie.",
+        "Defeat 10 CursedZombie."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "LeadTrainer Harry",
+        "mapName": "Rev.Tao_Office",
+        "mapFileName": "1002",
+        "x": 11,
+        "y": 8
+      },
+      "finishNpc": {
+        "name": "LeadTrainer Harry",
+        "mapName": "Rev.Tao_Office",
+        "mapFileName": "1002",
+        "x": 11,
+        "y": 8
+      }
+    },
+    {
+      "questId": 97,
+      "rewardExperience": 138462,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": true,
+      "finishInDiary": false,
+      "startNpc": null,
+      "finishNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      }
+    },
+    {
+      "questId": 98,
+      "rewardExperience": 138461,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 Dung.",
+        "Defeat 10 WoomaSoldier."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      },
+      "finishNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      }
+    },
+    {
+      "questId": 99,
+      "rewardExperience": 138462,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 FlamingWooma.",
+        "Defeat 10 WoomaFighter."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      },
+      "finishNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      }
+    },
+    {
+      "questId": 102,
+      "rewardExperience": 138461,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Teleport Harrison",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 291,
+        "y": 296
+      },
+      "finishNpc": {
+        "name": "Transport Edwin",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 365,
+        "y": 340
+      }
+    },
+    {
+      "questId": 103,
+      "rewardExperience": 138462,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "BugSpecimen"
+      ],
+      "taskDescription": [
+        "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Daniel",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 361,
+        "y": 335
+      },
+      "finishNpc": {
+        "name": "Merchant Daniel",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 361,
+        "y": 335
+      }
+    },
+    {
+      "questId": 110,
+      "rewardExperience": 138461,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "MirGuide James",
+        "mapName": "SerpentValley",
+        "mapFileName": "2",
+        "x": 505,
+        "y": 483
+      },
+      "finishNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      }
+    },
+    {
+      "questId": 111,
+      "rewardExperience": 138462,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      },
+      "finishNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      }
+    },
+    {
+      "questId": 112,
+      "rewardExperience": 138462,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 CrawlerZombie."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      },
+      "finishNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      }
+    },
+    {
+      "questId": 113,
+      "rewardExperience": 544444,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 BlackMaggot.",
+        "Defeat 10 WedgeMoth."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 114,
+      "rewardExperience": 544444,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 12 BlackBoar.",
+        "Defeat 12 RedBoar."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "MongchonDelegate Michael",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 330,
+        "y": 332
+      },
+      "finishNpc": {
+        "name": "MongchonDelegate Michael",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 330,
+        "y": 332
+      }
+    },
+    {
+      "questId": 117,
+      "rewardExperience": 544445,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Examiner Tony",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 340,
+        "y": 257
+      },
+      "finishNpc": {
+        "name": "CaveGuide Paddy",
+        "mapName": "WoomyonWoods(N)",
+        "mapFileName": "11",
+        "x": 119,
+        "y": 293
+      }
+    },
+    {
+      "questId": 118,
+      "rewardExperience": 544444,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 12 CursedZombie.",
+        "Defeat 12 ShiZombie.",
+        "Defeat 12 HungryZombie."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "CaveGuide Paddy",
+        "mapName": "WoomyonWoods(N)",
+        "mapFileName": "11",
+        "x": 119,
+        "y": 293
+      },
+      "finishNpc": {
+        "name": "CaveGuide Paddy",
+        "mapName": "WoomyonWoods(N)",
+        "mapFileName": "11",
+        "x": 119,
+        "y": 293
+      }
+    },
+    {
+      "questId": 119,
+      "rewardExperience": 544445,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "CaveGuide Paddy",
+        "mapName": "WoomyonWoods(N)",
+        "mapFileName": "11",
+        "x": 119,
+        "y": 293
+      },
+      "finishNpc": {
+        "name": "Examiner Tony",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 340,
+        "y": 257
+      }
+    },
+    {
+      "questId": 121,
+      "rewardExperience": 544444,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 12 ToxicGhoul.",
+        "Defeat 10 RoninGhoul."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Inspector Peter",
+        "mapName": "PrajnaIsland",
+        "mapFileName": "5",
+        "x": 140,
+        "y": 332
+      },
+      "finishNpc": {
+        "name": "Inspector Peter",
+        "mapName": "PrajnaIsland",
+        "mapFileName": "5",
+        "x": 140,
+        "y": 332
+      }
+    },
+    {
+      "questId": 124,
+      "rewardExperience": 544445,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "CleanSkull"
+      ],
+      "taskDescription": [
+        "Collect 2 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "TravellingMerchant Damian",
+        "mapName": "WhiteValley",
+        "mapFileName": "WhiteVillage",
+        "x": 296,
+        "y": 251
+      },
+      "finishNpc": {
+        "name": "TravellingMerchant Damian",
+        "mapName": "WhiteValley",
+        "mapFileName": "WhiteVillage",
+        "x": 296,
+        "y": 251
+      }
+    },
+    {
+      "questId": 122,
+      "rewardExperience": 544444,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 12 BoneArcher.",
+        "Defeat 12 BoneSpearman."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 123,
+      "rewardExperience": 544445,
+      "killCountCap": 12,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 12 BoneBlademan."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
+      "questId": 4,
+      "rewardExperience": 80,
+      "itemCountCap": 1,
+      "guaranteedQuestDrops": [
+        "DeerMeat"
+      ],
+      "taskDescription": [
+        "Optional harvest lesson: collect 1 DeerMeat from a Deer corpse.",
+        "Complete the skinning actions with Alt + left mouse. The needed task meat is guaranteed."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant John",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 292,
+        "y": 603
+      },
+      "finishNpc": {
+        "name": "Merchant John",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 292,
+        "y": 603
+      }
+    }
+  ]
+}

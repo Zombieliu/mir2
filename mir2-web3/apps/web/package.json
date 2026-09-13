@@ -176,7 +176,7 @@
     "test:tutorial-flow": "node ./scripts/test-tutorial-flow.mjs",
     "test:onboarding-guidance": "node ./scripts/test-onboarding-guidance.mjs",
     "test:quest-localization": "node ./scripts/test-quest-localization.mjs",
-    "test:quest-agent": "node --test ./scripts/quest-agent/test-policy.mjs ./scripts/quest-agent/test-route-manifest.mjs ./scripts/quest-agent/test-autonomous-policy.mjs",
+    "test:quest-agent": "node --test ./scripts/quest-agent/test-policy.mjs ./scripts/quest-agent/test-route-manifest.mjs ./scripts/quest-agent/test-autonomous-policy.mjs ./scripts/quest-agent/test-newcomer-guidance.mjs",
     "test:quest-entity-binding": "node ./scripts/test-quest-entity-binding.mjs",
     "test:system-menu-quest-button": "node ./scripts/test-system-menu-quest-button.mjs",
     "test:crystal-dialog-markup": "node ./scripts/test-crystal-dialog-markup.mjs",

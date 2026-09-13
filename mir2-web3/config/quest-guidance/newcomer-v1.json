@@ -1,0 +1,872 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v1",
+  "description": "Optional guidance through level 40. The separate newcomer journey profile supplies opt-in 1-30 task pacing; Crystal mode is unchanged.",
+  "quests": [
+    {
+      "id": 1,
+      "category": "recommended",
+      "order": 10,
+      "hint": "Start with Jane's request. Keep the requested leaves for hand-in."
+    },
+    {
+      "id": 2,
+      "category": "recommended",
+      "order": 20,
+      "hint": "Collect 1 GingerTea from Scarecrow. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 3,
+      "category": "recommended",
+      "order": 30,
+      "hint": "Visit the butcher. Check the reward weapon's class and level requirements."
+    },
+    {
+      "id": 4,
+      "category": "optional",
+      "order": 620,
+      "hint": "Optional harvest lesson: collect 1 DeerMeat from a Deer corpse. Complete the skinning actions with Alt + left mouse. The needed task meat is guaranteed."
+    },
+    {
+      "id": 5,
+      "category": "recommended",
+      "order": 40,
+      "hint": "Defeat 5 Deer. Defeat 5 Scarecrow."
+    },
+    {
+      "id": 6,
+      "category": "recommended",
+      "order": 50,
+      "hint": "Defeat 5 HookingCat."
+    },
+    {
+      "id": 7,
+      "category": "recommended",
+      "order": 60,
+      "hint": "Warrior training: visit Master Wa after reaching the required level."
+    },
+    {
+      "id": 8,
+      "category": "recommended",
+      "order": 70,
+      "hint": "Defeat 5 Oma. Defeat 5 RakingCat."
+    },
+    {
+      "id": 9,
+      "category": "recommended",
+      "order": 80,
+      "hint": "Before travelling, learn Fencing when eligible. It improves ordinary melee attacks; it is passive."
+    },
+    {
+      "id": 10,
+      "category": "recommended",
+      "order": 90,
+      "hint": "Wizard training: visit Master Mage Don after reaching the required level."
+    },
+    {
+      "id": 11,
+      "category": "recommended",
+      "order": 100,
+      "hint": "Defeat 5 Oma. Defeat 5 RakingCat."
+    },
+    {
+      "id": 12,
+      "category": "recommended",
+      "order": 110,
+      "hint": "When eligible, learn FireBall, bind it in Spells and try it on a target. Pack MP potions before travelling."
+    },
+    {
+      "id": 13,
+      "category": "recommended",
+      "order": 120,
+      "hint": "Taoist training: visit High Priest Jude after reaching the required level."
+    },
+    {
+      "id": 14,
+      "category": "recommended",
+      "order": 130,
+      "hint": "Defeat 5 Oma. Defeat 5 RakingCat."
+    },
+    {
+      "id": 15,
+      "category": "recommended",
+      "order": 140,
+      "hint": "When eligible, learn Healing and bind it in Spells. Use it to restore health; use ordinary attacks to hunt."
+    },
+    {
+      "id": 22,
+      "category": "recommended",
+      "order": 150,
+      "hint": "Defeat 5 ForestYeti."
+    },
+    {
+      "id": 23,
+      "category": "recommended",
+      "order": 160,
+      "hint": "Collect 2 OmaTeeth from Oma. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 24,
+      "category": "recommended",
+      "order": 170,
+      "hint": "Continue the forest chain through the Quest Diary before starting the next collection."
+    },
+    {
+      "id": 25,
+      "category": "recommended",
+      "order": 180,
+      "hint": "Collect 2 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 26,
+      "category": "recommended",
+      "order": 190,
+      "hint": "Collect 2 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 27,
+      "category": "recommended",
+      "order": 200,
+      "hint": "This delivery leads to the Serpent Valley chain. Restock before travelling to Brian."
+    },
+    {
+      "id": 28,
+      "category": "optional",
+      "order": 640,
+      "hint": "Optional collection: gather webs while already hunting in the area."
+    },
+    {
+      "id": 29,
+      "category": "recommended",
+      "order": 210,
+      "hint": "Optional delivery chain. Carry both repair oils to Bradley; several follow-up journeys remain."
+    },
+    {
+      "id": 30,
+      "category": "recommended",
+      "order": 220,
+      "hint": "Collect 1 JadeRing from Currish corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 31,
+      "category": "optional",
+      "order": 650,
+      "hint": "Keep the ring for Melissa. Combine this trip with other tasks in the same area."
+    },
+    {
+      "id": 32,
+      "category": "optional",
+      "order": 660,
+      "hint": "Return the BluePill to Bradley to finish the delivery chain. Check the selectable reward."
+    },
+    {
+      "id": 33,
+      "category": "recommended",
+      "order": 260,
+      "hint": "Defeat 3 TigerSnake. Defeat 3 RedSnake."
+    },
+    {
+      "id": 34,
+      "category": "optional",
+      "order": 670,
+      "hint": "Optional cross-map delivery. Carry both recipes and combine the trip with other errands."
+    },
+    {
+      "id": 35,
+      "category": "recommended",
+      "order": 230,
+      "hint": "Requires Brian's earlier errand. Continue the Serpent Valley chain once level requirements are met."
+    },
+    {
+      "id": 36,
+      "category": "recommended",
+      "order": 240,
+      "hint": "Collect 2 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 37,
+      "category": "recommended",
+      "order": 250,
+      "hint": "Deliver both wines to Brian. This task pays gold and experience; there is no sword item reward."
+    },
+    {
+      "id": 38,
+      "category": "optional",
+      "order": 680,
+      "hint": "Optional fruit collection. Use the Quest Diary to accept and finish it."
+    },
+    {
+      "id": 140,
+      "category": "optional",
+      "order": 690,
+      "hint": "Optional board request, available at levels 10-20. Collect five GoldChestnuts when convenient."
+    },
+    {
+      "id": 152,
+      "category": "challenge",
+      "order": 700,
+      "hint": "Optional cavern challenge. The level-10 unlock does not guarantee an easy fight; prepare supplies first."
+    },
+    {
+      "id": 153,
+      "category": "challenge",
+      "order": 710,
+      "hint": "Continue only after the first cavern task. This requires special cavern events, not ordinary kill counts."
+    },
+    {
+      "id": 39,
+      "category": "recommended",
+      "order": 280,
+      "hint": "Finish Cure the Insomnia first, then visit Master Shok at level 12 or above."
+    },
+    {
+      "id": 40,
+      "category": "recommended",
+      "order": 290,
+      "hint": "Defeat 10 OmaFighter."
+    },
+    {
+      "id": 41,
+      "category": "recommended",
+      "order": 300,
+      "hint": "Finish the old man's chain by visiting Sarah. This pays gold and experience; there is no shoe item reward."
+    },
+    {
+      "id": 42,
+      "category": "recommended",
+      "order": 310,
+      "hint": "Defeat 10 RedViper. Defeat 10 TigerViper."
+    },
+    {
+      "id": 43,
+      "category": "optional",
+      "order": 720,
+      "hint": "Optional errand chain: start through the Quest Diary and visit Robert."
+    },
+    {
+      "id": 44,
+      "category": "optional",
+      "order": 730,
+      "hint": "Continue Robert's errand by visiting Sandford. Combine nearby errands where possible."
+    },
+    {
+      "id": 45,
+      "category": "optional",
+      "order": 740,
+      "hint": "Find a RedSnakeTooth and return to Robert to finish this errand chain."
+    },
+    {
+      "id": 46,
+      "category": "challenge",
+      "order": 750,
+      "hint": "Optional skeleton hunt. Collect bones alongside Dangerous Skeleton, then finish through the diary."
+    },
+    {
+      "id": 47,
+      "category": "optional",
+      "order": 760,
+      "hint": "Optional ring search. Keep Olivia's ring until the diary hand-in."
+    },
+    {
+      "id": 48,
+      "category": "optional",
+      "order": 770,
+      "hint": "Optional supply task. Keep all ten Relics for Ruben."
+    },
+    {
+      "id": 49,
+      "category": "recommended",
+      "order": 270,
+      "hint": "Defeat 10 Skeleton."
+    },
+    {
+      "id": 141,
+      "category": "optional",
+      "order": 780,
+      "hint": "Board request for levels 15-22. Hand-in consumes bones; check remaining quantities for other bone tasks."
+    },
+    {
+      "id": 154,
+      "category": "deferred",
+      "order": 630,
+      "hint": "Low priority: this long journey has no listed objective or reward. Choose another task for early progression."
+    },
+    {
+      "id": 50,
+      "category": "optional",
+      "order": 790,
+      "hint": "Accept through the Quest Diary. Keep the delivery items for hand-in; combine nearby errands before travelling. Finish through the Quest Diary."
+    },
+    {
+      "id": 51,
+      "category": "recommended",
+      "order": 320,
+      "hint": "Accept through the Quest Diary. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 52,
+      "category": "recommended",
+      "order": 330,
+      "hint": "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 2 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 53,
+      "category": "recommended",
+      "order": 340,
+      "hint": "Continue after Ingredients for CanniTea. Keep the delivery items for hand-in; combine nearby errands before travelling."
+    },
+    {
+      "id": 54,
+      "category": "recommended",
+      "order": 350,
+      "hint": "Defeat 5 Zombie5. Defeat 5 Zombie2. Defeat 5 Zombie3. Defeat 5 Zombie4. Defeat 5 Zombie1."
+    },
+    {
+      "id": 55,
+      "category": "optional",
+      "order": 800,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 56,
+      "category": "optional",
+      "order": 810,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 58,
+      "category": "challenge",
+      "order": 820,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 59,
+      "category": "optional",
+      "order": 830,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 60,
+      "category": "recommended",
+      "order": 360,
+      "hint": "Defeat 8 SpiderFrog."
+    },
+    {
+      "id": 61,
+      "category": "recommended",
+      "order": 370,
+      "hint": "Continue after Danger in the Cave. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 62,
+      "category": "recommended",
+      "order": 380,
+      "hint": "Defeat 8 KekTal. Defeat 8 VioletKekTal."
+    },
+    {
+      "id": 63,
+      "category": "optional",
+      "order": 840,
+      "hint": "Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 64,
+      "category": "optional",
+      "order": 850,
+      "hint": "Continue after Finding a Friend's Remains. Keep the delivery items for hand-in; combine nearby errands before travelling. Compare the equipment choices with your class before claiming."
+    },
+    {
+      "id": 65,
+      "category": "recommended",
+      "order": 390,
+      "hint": "Defeat 8 Zombie1."
+    },
+    {
+      "id": 66,
+      "category": "optional",
+      "order": 860,
+      "hint": "Continue after Exterminate. Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 67,
+      "category": "optional",
+      "order": 870,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 68,
+      "category": "optional",
+      "order": 880,
+      "hint": "Continue after Medicine Research. Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 69,
+      "category": "optional",
+      "order": 890,
+      "hint": "Continue after Finding a Lost Item. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 70,
+      "category": "optional",
+      "order": 900,
+      "hint": "Continue after Find my Friend. Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 71,
+      "category": "optional",
+      "order": 910,
+      "hint": "Continue after Poisoned Friend. Collect the requested items, not just kills. Keep enough bag space for the reward. Compare the equipment choices with your class before claiming."
+    },
+    {
+      "id": 72,
+      "category": "optional",
+      "order": 920,
+      "hint": "Continue after Lost Item. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 73,
+      "category": "optional",
+      "order": 930,
+      "hint": "Continue after News from a Friend. Keep the delivery items for hand-in; combine nearby errands before travelling."
+    },
+    {
+      "id": 75,
+      "category": "challenge",
+      "order": 940,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Accept through the Quest Diary. Check every listed monster target. Restock between hunting trips. Finish through the Quest Diary."
+    },
+    {
+      "id": 76,
+      "category": "optional",
+      "order": 950,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 77,
+      "category": "optional",
+      "order": 960,
+      "hint": "Accept through the Quest Diary. Keep the delivery items for hand-in; combine nearby errands before travelling."
+    },
+    {
+      "id": 78,
+      "category": "optional",
+      "order": 970,
+      "hint": "Continue after Call from the Dead. Collect the requested items, not just kills. Keep enough bag space for the reward. Compare the equipment choices with your class before claiming."
+    },
+    {
+      "id": 79,
+      "category": "challenge",
+      "order": 980,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 80,
+      "category": "challenge",
+      "order": 990,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Continue after Darkness from the Mines. Keep the delivery items for hand-in; combine nearby errands before travelling."
+    },
+    {
+      "id": 81,
+      "category": "challenge",
+      "order": 1000,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Continue after Secret of the Skull. Collect the requested items, not just kills. Keep enough bag space for the reward. Compare the equipment choices with your class before claiming."
+    },
+    {
+      "id": 82,
+      "category": "challenge",
+      "order": 1010,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Check every listed monster target. Restock between hunting trips."
+    },
+    {
+      "id": 83,
+      "category": "recommended",
+      "order": 400,
+      "hint": "Keep the delivery items for hand-in; combine nearby errands before travelling."
+    },
+    {
+      "id": 84,
+      "category": "optional",
+      "order": 1020,
+      "hint": "Optional thread collection: the original quantities and drop rates apply. Return with stronger equipment; this task is not required for the level-30 journey."
+    },
+    {
+      "id": 85,
+      "category": "optional",
+      "order": 1030,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 86,
+      "category": "recommended",
+      "order": 410,
+      "hint": "Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 87,
+      "category": "recommended",
+      "order": 420,
+      "hint": "Continue after Uniform Order Status. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 88,
+      "category": "recommended",
+      "order": 430,
+      "hint": "Continue after Locate the Carriage. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 89,
+      "category": "recommended",
+      "order": 440,
+      "hint": "Defeat 10 CursedPriest. Defeat 10 ShiZombie. Defeat 10 CursedZombie."
+    },
+    {
+      "id": 90,
+      "category": "optional",
+      "order": 1040,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 91,
+      "category": "challenge",
+      "order": 1050,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Accept through the Quest Diary. Collect the requested items, not just kills. Keep enough bag space for the reward. Finish through the Quest Diary."
+    },
+    {
+      "id": 92,
+      "category": "challenge",
+      "order": 1060,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Accept through the Quest Diary. Check every listed monster target. Restock between hunting trips. Finish through the Quest Diary. Compare the equipment choices with your class before claiming."
+    },
+    {
+      "id": 93,
+      "category": "optional",
+      "order": 1070,
+      "hint": "Accept through the Quest Diary. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 94,
+      "category": "optional",
+      "order": 1080,
+      "hint": "Continue after Runaway Student. Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 142,
+      "category": "optional",
+      "order": 1090,
+      "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward. Board task for levels 22-32; it requires 75 BoarTeeth and is not a mandatory daily goal."
+    },
+    {
+      "id": 95,
+      "category": "optional",
+      "order": 1100,
+      "hint": "Keep the delivery items for hand-in; combine nearby errands before travelling."
+    },
+    {
+      "id": 96,
+      "category": "optional",
+      "order": 1110,
+      "hint": "Accept through the Quest Diary. Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 97,
+      "category": "recommended",
+      "order": 450,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Accept through the Quest Diary. Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 98,
+      "category": "recommended",
+      "order": 460,
+      "hint": "Defeat 10 Dung. Defeat 10 WoomaSoldier."
+    },
+    {
+      "id": 99,
+      "category": "recommended",
+      "order": 470,
+      "hint": "Defeat 10 FlamingWooma. Defeat 10 WoomaFighter."
+    },
+    {
+      "id": 100,
+      "category": "challenge",
+      "order": 1120,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Continue after Boss Mob Hunt. Collect the requested items, not just kills. Keep enough bag space for the reward. Compare the equipment choices with your class before claiming."
+    },
+    {
+      "id": 101,
+      "category": "challenge",
+      "order": 1130,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Check every listed monster target. Restock between hunting trips."
+    },
+    {
+      "id": 102,
+      "category": "recommended",
+      "order": 480,
+      "hint": "Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 103,
+      "category": "recommended",
+      "order": 490,
+      "hint": "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 104,
+      "category": "challenge",
+      "order": 1140,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Accept through the Quest Diary. Collect the requested items, not just kills. Keep enough bag space for the reward. Finish through the Quest Diary."
+    },
+    {
+      "id": 105,
+      "category": "challenge",
+      "order": 1150,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Follow the local event clues; ordinary kills alone do not complete this task."
+    },
+    {
+      "id": 106,
+      "category": "challenge",
+      "order": 1160,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Continue after Lost Soul. Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 107,
+      "category": "challenge",
+      "order": 1170,
+      "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Continue after Lost Soul's Remains. Keep the delivery items for hand-in; combine nearby errands before travelling. Compare the equipment choices with your class before claiming."
+    },
+    {
+      "id": 110,
+      "category": "recommended",
+      "order": 500,
+      "hint": "Visit the stated destination before moving on to the next chapter."
+    },
+    {
+      "id": 111,
+      "category": "recommended",
+      "order": 510,
+      "hint": "Continue after Meet with Mr.Wang. Follow the local event clues; ordinary kills alone do not complete this task."
+    },
+    {
+      "id": 108,
+      "category": "optional",
+      "order": 1180,
+      "hint": "Continue after Secret Path. Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 109,
+      "category": "optional",
+      "order": 1190,
+      "hint": "Continue after Antique Book. Collect the requested items, not just kills. Keep enough bag space for the reward."
+    },
+    {
+      "id": 112,
+      "category": "recommended",
+      "order": 520,
+      "hint": "Defeat 10 CrawlerZombie."
+    },
+    {
+      "id": 113,
+      "category": "recommended",
+      "order": 530,
+      "hint": "Defeat 10 BlackMaggot. Defeat 10 WedgeMoth."
+    },
+    {
+      "id": 114,
+      "category": "recommended",
+      "order": 540,
+      "hint": "Defeat 12 BlackBoar. Defeat 12 RedBoar."
+    },
+    {
+      "id": 115,
+      "category": "challenge",
+      "order": 1200,
+      "hint": "Continue after Threats to Mongchon. Defeat the listed WhiteBoar, then return to Michael."
+    },
+    {
+      "id": 116,
+      "category": "challenge",
+      "order": 1210,
+      "hint": "Finish the Mongchon chain with Michael. Compare the selectable weapon reward with your class before claiming."
+    },
+    {
+      "id": 117,
+      "category": "recommended",
+      "order": 550,
+      "hint": "Growth route: visit Tony, then follow the supply path to Paddy before starting the zombie hunt."
+    },
+    {
+      "id": 118,
+      "category": "recommended",
+      "order": 560,
+      "hint": "Defeat 12 CursedZombie. Defeat 12 ShiZombie. Defeat 12 HungryZombie."
+    },
+    {
+      "id": 119,
+      "category": "recommended",
+      "order": 570,
+      "hint": "Return to Tony after the mineral mine task. Check the BlackIronBangle reward before leaving."
+    },
+    {
+      "id": 120,
+      "category": "optional",
+      "order": 1220,
+      "hint": "Optional collection at Samuel: gather ten CorpsFlowers and keep them for hand-in."
+    },
+    {
+      "id": 121,
+      "category": "recommended",
+      "order": 580,
+      "hint": "Defeat 12 ToxicGhoul. Defeat 10 RoninGhoul."
+    },
+    {
+      "id": 122,
+      "category": "recommended",
+      "order": 600,
+      "hint": "Defeat 12 BoneArcher. Defeat 12 BoneSpearman."
+    },
+    {
+      "id": 123,
+      "category": "recommended",
+      "order": 610,
+      "hint": "Defeat 12 BoneBlademan."
+    },
+    {
+      "id": 124,
+      "category": "recommended",
+      "order": 590,
+      "hint": "Collect 2 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
+    },
+    {
+      "id": 125,
+      "category": "recommended",
+      "order": 1230,
+      "hint": "Growth route: accept through the Quest Diary and travel to VillageChief Andrew."
+    },
+    {
+      "id": 126,
+      "category": "recommended",
+      "order": 1240,
+      "hint": "Continue after visiting the VillageChief. Deliver the request to Lead Trainer Harry before hunting for the book."
+    },
+    {
+      "id": 127,
+      "category": "recommended",
+      "order": 1250,
+      "hint": "Continue after The VillageChief's Request. Collect PrajnaHistory and keep it for the return delivery."
+    },
+    {
+      "id": 128,
+      "category": "recommended",
+      "order": 1260,
+      "hint": "Return PrajnaHistory to the VillageChief. Compare the selectable armour with your class and gender before claiming."
+    },
+    {
+      "id": 129,
+      "category": "optional",
+      "order": 1270,
+      "hint": "Optional collection at Janey: gather twenty BatPoison items and keep them for hand-in."
+    },
+    {
+      "id": 130,
+      "category": "challenge",
+      "order": 1280,
+      "hint": "Optional boss challenge: defeat the listed EvilBigApex target after preparing supplies."
+    },
+    {
+      "id": 131,
+      "category": "challenge",
+      "order": 1290,
+      "hint": "Optional ancient-mob challenge at Peter: defeat thirty Minotaurs before finishing."
+    },
+    {
+      "id": 143,
+      "category": "challenge",
+      "order": 1300,
+      "hint": "Optional Holy Sword chain: accept through the Quest Diary and follow the local NPC clues and event route to Perry."
+    },
+    {
+      "id": 144,
+      "category": "challenge",
+      "order": 1310,
+      "hint": "Continue after the Holy Sword opening. Defeat the listed RootSpider before proceeding."
+    },
+    {
+      "id": 145,
+      "category": "challenge",
+      "order": 1320,
+      "hint": "Continue the Holy Sword chain through the local NPC dialogue and event objective; ordinary kills alone do not finish it."
+    },
+    {
+      "id": 146,
+      "category": "challenge",
+      "order": 1330,
+      "hint": "Continue after the previous Holy Sword step. Collect JadeCrystal and follow the local NPC dialogue and event objective."
+    },
+    {
+      "id": 147,
+      "category": "challenge",
+      "order": 1340,
+      "hint": "Continue the Holy Sword chain at BigTaoist and follow the next local NPC dialogue and event objective."
+    },
+    {
+      "id": 148,
+      "category": "challenge",
+      "order": 1350,
+      "hint": "Continue the Holy Sword chain at BigTaoist and collect RedMoonChip."
+    },
+    {
+      "id": 149,
+      "category": "challenge",
+      "order": 1360,
+      "hint": "Continue the Holy Sword chain at BigTaoist and collect EvilApeOil."
+    },
+    {
+      "id": 150,
+      "category": "challenge",
+      "order": 1370,
+      "hint": "Continue the Holy Sword chain after the EvilApeOil step and follow BigTaoist's dialogue."
+    },
+    {
+      "id": 151,
+      "category": "challenge",
+      "order": 1380,
+      "hint": "Finish the Holy Sword chain with the RedMoonEvil fight and the listed carry items. Compare the selectable RedMoon weapon with your class."
+    },
+    {
+      "id": 132,
+      "category": "challenge",
+      "order": 1390,
+      "hint": "Optional Prajna combat challenge: defeat all three listed Minotaur variants."
+    },
+    {
+      "id": 133,
+      "category": "challenge",
+      "order": 1400,
+      "hint": "Continue after Mobs from Prajna. Defeat both listed guard groups at the VillageChief."
+    },
+    {
+      "id": 134,
+      "category": "recommended",
+      "order": 1410,
+      "hint": "Growth delivery: carry both Algae items from Kimberly to Louise when the level-37 route opens."
+    },
+    {
+      "id": 135,
+      "category": "challenge",
+      "order": 1420,
+      "hint": "Optional ruins route: follow Michael's local event clues to open the passage and review the StoneHeart reward."
+    },
+    {
+      "id": 136,
+      "category": "challenge",
+      "order": 1430,
+      "hint": "Continue after Find Passage to Ruins. Collect twenty RelicRocks for the travelling merchant."
+    },
+    {
+      "id": 137,
+      "category": "optional",
+      "order": 1440,
+      "hint": "Optional collection at Kevin: gather seventeen BloodPills and keep them for hand-in."
+    }
+  ],
+  "maxLevel": 40
+}

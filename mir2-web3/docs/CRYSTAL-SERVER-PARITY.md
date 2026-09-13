@@ -1,5 +1,277 @@
 # Crystal Server Parity
 
+> 2026-09-13 R31 acceptance-controller follow-up: the normal client route now
+> handles Crystal Blacksmith's combined `@BuySell` service, full q54 caster MP
+> funding, Taoist ranged kiting, quest-owned dangerous departures, and both
+> dense-corridor interruption transitions found by live replay. Partial cave
+> escapes with improved exposure and no proven pursuer also replan safely.
+> Cave corners defer after bounded breakout leaves no proven attacker, q54
+> finishes current-map D401 targets before D406, and q62 retreat preserves
+> progress toward the real D2042 transfer. Focused combat passes 96/96,
+> survival 34/34, supplies 26/26 and the complete quest-agent suite passes
+> 490/490; bounded trace retries cover transient
+> Windows scanner locks. Live checkpoints are Warrior level 20 q62 3/16, Wizard level
+> 18 q54 8/25 and Taoist level 18 q54 4/25. These are route automation and
+> acceptance corrections; they do not raise the Crystal server parity score,
+> and complete three-class/native acceptance remains open.
+
+> 2026-09-13 R31 route-runner follow-up: public-protocol attempts now use
+> isolated traces and bounded 64 MiB route-memory reads instead of rescanning
+> 430-925 MiB shared files on every restart. The automation treats
+> no-path spawn search as an active survival phase, and its q54 mine behavior
+> separates Warrior thresholds from the lower-HP Wizard/Taoist thresholds.
+> Focused combat passes 92/92, survival passes 31/31 and the complete runner
+> suite passes 481/481. The runner also tolerates an omitted `UserInformation`
+> packet when the exact personal snapshot proves StartGame, q62 carries an
+> 80-drug departure stock, and q54 casters target 80 HP plus 80 MP drugs. Live
+> Wizard has proved q42 turn-in, q51-q53 and four q54 kills through
+> ordinary packets. These are route automation and acceptance fixes; they do
+> not raise the Crystal server parity score, and complete three-class/native
+> acceptance is still open.
+
+> 2026-09-13 R31 route-support checkpoint: optimized Gateway SHA-256
+> `141E565F4325DF6503A518F170396BCAD4A44975AA3290D63FC2EB71444334FF` is live.
+> Quest endpoint identity now follows the loaded Crystal NPC object before its
+> database-index fallback. q51/q52 bind only to CraftsLady object 33 in 2/2
+> focused tests, and the newcomer catalog gate passes 1/1. Quest-agent tests
+> pass 471/471 after adding delayed-replacement target quarantine and q62's
+> bounded multi-breakout retreat. Live Wizard q42 reached 20/20 on R31. These
+> are correctness and custom newcomer-route support changes; they do not raise
+> the Crystal parity score or close complete route and visual acceptance.
+
+> 2026-09-13 R30 route-support checkpoint: optimized Gateway SHA-256
+> `FF7DF42B82131DBEB4377F8FA981B444782B462716133428B98808900CE0B80F` is live and
+> reduced initial slow-stage observations from the debug build's roughly one
+> second average / 19-second peak to about 0.1-0.45 seconds. Public-protocol q42
+> now interrupts on the first proven extra aggressor; live Taoist evidence shows
+> a 29-ms recognition, retreat command 1 ms later, exposure 2/2 to 0/0 and q42
+> progress to 8/20. q60 recovery and unreachable-breakout fallback also pass the
+> harness; live Warrior recovered above 75%, completed and turned in q60, then
+> accepted and completed q61 through normal travel and NPC interaction. Wizard
+> q42 now refills to 32 MP drugs after its real four-drug field threshold fires.
+> The q42 runner may also finish its last two kills from a measured reduced HP
+> stock while healthy. Quest-agent tests pass 469/469. These are custom newcomer route-support fixes,
+> not a Crystal parity-score increase; full routes and visuals remain open.
+> Live follow-up confirms Wizard's ordinary shop refill from two to 32 MP drugs
+> and Taoist's complete q42 target/return/turn-in flow followed by q51 acceptance.
+
+> 2026-09-13 R29 route-support checkpoint: broad-area monster placement keeps
+> its Crystal manifest counts but excludes an eight-tile ring around configured
+> map arrivals. Live D401 entry proved no initial hostile in that ring and no
+> portal death; this is a product safety correction around imported content,
+> not a Crystal parity-score increase. The public-protocol harness also fixed a
+> safe-gap recovery timeout and live Taoist q42 proved continued cadence-limited
+> sustain and full recovery. Quest-agent 463/463, respawn integration 3/3 and
+> Gateway check/build pass; running R29 SHA-256 is
+> `07D9D24B86ED44F54064FC072A249A5F524088633499F0277B35F503F18EA269`.
+> Three-class 1–30 and visual acceptance remain open.
+
+> Latest r25 server checkpoint: compile/build passed at SHA-256
+> `5EFB51A48211897F8B1559E793AEDC9E28B24A68FEC89CC41F99FD7C84908A87`.
+> Five simulation tests, four Gateway cadence tests and the full 129/129 Node
+> protocol suite pass. The selected-character ECS position getter narrows
+> pending-transform reads. Candidate travel now chooses the nearest graph route
+> while preserving its fallback, and proven-aggressor interruption remains
+> bounded. This corrects r24's root cause: first-candidate selection sent the
+> route through map 2 toward map 3 despite a map 2 TigerSnake source. r24 exited
+> 0 with writer count 0; r25 server 71092 is ready on port 17810 and three new
+> normal runners have started at level 12, 15/53 core quests and 0/4 milestones.
+> No live latency resolution or Crystal parity increase is claimed; full routes,
+> one-day pacing and visuals remain open.
+
+> Latest r17 lifecycle gate: ObjectHarvested now survives shared conversion and
+> receives its corpse delivery anchor. Shared lifecycle 2/2 and Gateway scheduled
+> projection 2/2 pass, including no premature revival and legitimate scheduled
+> revival. Concurrent reward custody remains open. r17 build/live verification
+> and full routes are the next gates.
+
+> 2026-09-12 latest: r16 live confirmed the hydration/cooldown fixes below.
+> Opt-in newcomer class milestone rewards pass 4 focused / 11 module tests;
+> these are product-specific progression, not a claim about unchanged Crystal
+> quest parity. Default profile remains gated. Shared scheduled-corpse ghost
+> projection verification and full three-class routes remain open; no global
+> percentage or visual acceptance is inferred.
+
+> Latest: normal asynchronous movement now reconciles final-map monster
+> activation on pending-transform drain (1 focused + 4 cadence adjacent pass).
+> Skill save/load rebases remaining cooldown with offline elapsed time, expires
+> legacy unmarked absolute clocks, and preserves transaction rollback timing
+> (5 focused + 1 atomic-save adjacent pass). No full-game percentage is inferred;
+> rebuilt live verification and complete three-class routes remain open.
+
+> Current protocol checkpoint: TownRevive queue-order fix passes one focused and
+> one adjacent test; accepted shared melee passive progression passes two focused
+> and one adjacent test. Combat-stat refresh after skill level-up remains under
+> implementation before rollout. CannibalPlant distance-four invisibility was
+> expected AI5 behavior; only the far-town stale projection is a confirmed bug.
+> Full class routes and visual parity remain open.
+
+> 2026-09-12: deferred shared movement no longer misses coordinate-map transfer
+> checks. Actual pending position change is used instead of a packet-presence
+> proxy; idle portal spawn does not bounce. Four focused + two adjacent tests
+> pass; isolated r14 live Wizard exit emitted MapInformation=0 and (315,476).
+> Protocol observation compatibility and full-route/visual acceptance remain open.
+
+> 2026-09-11: corrected accepted dialogue/carry-only quest readiness during
+> effective-state restore. Live q10 had regressed to 0/1 after relogin; two
+> focused tests now pass for persistence and preservation of unfinished kill
+> objectives. This is a restore defect fix, not evidence of full route or visual
+> parity. Rebuilt Gateway live verification remains pending.
+
+> 2026-09-11 newcomer Diary correction is a custom-profile product fix, not
+> a default Crystal parity claim. Crystal's client exposes Diary requests while
+> the supplied server source still requires a live NPC. Only newcomer-v1 gains
+> the explicit zero-NPC route; normal level, prerequisite, item, selection and
+> repeated-reward checks stay in force. Five focused and two adjacent tests
+> pass. Full protocol journeys, new runtime deployment and visual gates remain
+> open; see PROTOCOL-NEWCOMER-ACCEPTANCE.md.
+
+> 2026-09-11 custom newcomer profile checkpoint: the 1–30 journey changes
+> task counts, fixed quest XP, one prerequisite and needed material drops only
+> under `newcomer-v1`. Baseline Crystal task data and level curve are retained.
+> Final simulation journey 7/7, progression 8/8, recurrence 9/9 plus four
+> adjacent drop/harvest tests pass. These are automated custom-profile checks,
+> not an additional Crystal parity closure or natural playthrough acceptance.
+> See NEWCOMER-1-30-DESIGN.md; time-to-30 and exact-package UI remain open.
+
+> 2026-09-11 hold-harvest client/server checkpoint: installed r8 Native has
+> 5/5 focused hold/release/cancellation, animation and corpse-selection tests;
+> Alt+NPC behavior passes its separate 1/1 regression. Gateway remains XP r7.
+> The 2500ms retry is only a conservative bound based on original `NextAction`,
+> not a claim of exact Harvest ACK timing. Pre-r8 live chat confirms one
+> DeerMeat acquisition, and a later Diary check confirms q4 1/5, In Progress,
+> at (290,586). Sustained r8 hold still has no full repeat/stop visual
+> acceptance. q4 remains incomplete and no parity gate
+> changes. `formalCandidate=false`, `accepted=false`, `visualAccepted=false`;
+> evidence: NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 XP snapshot authority checkpoint: low-latency actions now preserve
+> the packet-only fast path when unchanged and publish an authoritative snapshot
+> for XP-only kills or level-up. The focused set passes 3/3 and the existing
+> quest-calendar snapshot behavior passes its 1/1 regression. Gateway `dev`
+> build SHA
+> `15858950D43503E2CF9C83BD39C101A49394C7BDC9BA5BAE90DA9D0D56F759F0`
+> is installed. The relaunched r6 Native retained EXP 57%; a single ordinary
+> click selected Deer 206514, automatic combat killed it, and the next
+> read-only screenshot showed 61.5% without further user click/move/harvest
+> input. XP-only live propagation passes. Exact millisecond latency and a live
+> level-up boundary are not established; no final parity gate changes.
+> `formalCandidate=false`,
+> `accepted=false`, `visualAccepted=false`; evidence:
+> NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 Deer harvest authority checkpoint: shared-zone Deer death now
+> suppresses harvest-family materialization until personal authoritative
+> harvest, preventing death plus harvest from rolling Venison twice. Relevant
+> focused tests pass 14/14 across Zone death drops, original q4 personal harvest
+> and shared corpse lifecycle. Gateway SHA
+> `D94195DD5B8B3B88863C34AD2CFCBB677DE3AA2954DACA354A8934B52DA66163`
+> is built but not installed. A full Q1→Q4 test was stopped due to the helper's
+> very large theoretical walking workload and is not a pass. JWarrior has
+> naturally completed q5 and accepted q6 through a fresh NPC dialog, while
+> q4 harvest and the stale Back-dialog fix still require matched-build live
+> acceptance. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`; evidence: NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 level-vitals authority checkpoint: Gateway synchronizes refreshed
+> personal HP/max-HP/MP to shared Zone authority only after a trusted
+> `LevelChanged` reward. Three focused regressions pass 3/3, including a real
+> `95 + 5` test award transition to level 2 with 24 HP on both sides and guards
+> showing empty/non-level rewards preserve Zone damage. The installed Gateway
+> SHA is `D818552C6780FDD66B78079FF8842D84D991510B56AD99AA73DE6A2F8696EDAF`.
+> JWarrior relogged at level 2, EXP 23%, HP 24/24 with belt contents preserved,
+> but the next live level-up still must prove immediate HUD refresh. Natural
+> Deer kills do not yet prove q5 UI credit, and q4 harvest remains blocked.
+> `formalCandidate=false`, `accepted=false`, `visualAccepted=false`; evidence:
+> NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 belt compatibility checkpoint: r2 bridges Crystal's unified
+> `MoveItem(grid=Belt)` raw slot layout (belt 0..5, bag offset by 6) to the
+> server's separate bag/belt state without changing normal Inventory indexing.
+> Focused native runs pass 6/6, 1/1 and 1/1, and the optimized-code `dev` native
+> build passes. Live native play moved a potion stack x2 from bag slot 2 into
+> empty belt slot 0 after r1 had failed both drag and Move-menu attempts. Only
+> drag is accepted: menu transport remains untested. The same journey is at
+> Warrior level 2, and HP incorrectly stayed 18/18 at level-up until relog
+> restored 24/24, so server/client vital refresh and three-class 1–40 acceptance
+> remain open. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`; evidence: NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 NPC-script/UI bridge checkpoint: real Board coloured markup now
+> yields Create Hero, ReviveHero and SealHero labels with their intended targets;
+> inline Use routes to the server shop section. Parser and feature-enabled native
+> paging regressions pass 1/1 each; the related native UI set is 4/4 including
+> the pagination case, and Gateway/native builds pass. The live
+> fixed-size panel exposed all tested paged services, its five-item QUEST list,
+> and joint X close behavior. No Hero service action was exercised. Crystal
+> inline colour/large-button placement and duplicate fallback footer cleanup
+> remain open. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 combat-fix partial live checkpoint: the Gateway owner ObjectHealth
+> identity regression passes 1/1 and its build passes. Native dead-V revival no
+> longer conflicts with the default Minimap binding; its regression and build
+> pass. An HP=0 persisted character revived at Bichon (288,616), 224/224. With
+> position alone seeded to map 1 (278,180), natural combat advanced ForestYeti
+> 0/8→1/8 and EXP 14.29%→14.31%; respawned target health visibly stepped
+> 137/224→106→63→27→0. This verifies one natural Yeti credit and live health
+> updates. Relog returned to Bichon (288,616), 224/224 and retained Yeti 1/8,
+> 14.31% and stored experience 20036. It does not verify eight kills, natural
+> Oma progress, the complete route, balance, three classes, or unobscured
+> animation. Seeded hand-in evidence
+> remains classified separately. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 optional newcomer-v1 live checkpoint: native Board and Diary flows
+> confirm the two-choice cap, abandon/replace presentation, milestone persistence,
+> and seeded ordinary hand-in/bonus/no-reclaim lifecycle. Focused newcomer tests
+> pass 8/8. Because the daily fixture seeded objective progress and natural kills
+> remain pending, this does not close combat progression or increase Crystal
+> parity. `formalCandidate=false`, `accepted=false`, `visualAccepted=false`.
+> Evidence: generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 newcomer progression follow-up implemented: 1–40 guidance (138
+> quests per class / 144 source IDs), three daily choices with a two-quest cap,
+> current-day 2/2 claimable bonus, and one-time gold milestones at 15/20/25/30/35/40.
+> Ten independent IDs are server newcomer-v1 only; default Crystal is preserved.
+> Exact Board binding, distinct claims, persistence/profile isolation and daily
+> high-watermark checks pass. Gateway now sends changed quest snapshots even on
+> Tick/KeepAlive without expanding ordinary movement snapshots. Verification:
+> Node193, Bevy88, Windows1, simulation68, store6, Gateway29 pass. No package or
+> live visual/three-class balance acceptance. This is optional content, not a
+> new Crystal parity percentage. Next: matched package and live Board/Diary/
+> reward/relogin acceptance. Details: QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 bounded Daily/Repeatable lifecycle repair: source Daily q141 and
+> Repeatable q142 no longer remain permanently locked after completion. Server
+> calendar is explicitly UTC+8; old completed saves conservatively consume the
+> current period. Active progress is preserved. Weekly q140 is an intentional
+> optional newcomer profile, not Crystal parity. Final simulation61/store3/Gateway28
+> checks pass, including exact repeatable completion ACK. Default quest UI copy
+> stays source-bound. See QUEST-PROGRESSION-CADENCE.md; live acceptance remains open.
+
+> 2026-09-11 level 1–15 quest closeout: generated class-specific 42-quest
+> route manifests (39 shared + 3 instructor quests per class). Fixed route
+> segment bounds, exact Oma kill matching for q8/q11/q14 and zero-count reward
+> handling for source q37/q41. Current-source checks pass: route 15, policy 139,
+> Rust new 2 + adjacent 2 + full bag 1 + progress restoration 1. No game launch,
+> package, continuous three-class playthrough or paired visual acceptance.
+> Evidence: generated/player-qa/quest-level15-20260911/README.md.
+
+
+> 2026-09-10 MagicShield follow-up: owner-facing Buff/ObjectEffect IDs now normalize
+> to local SelfPlayer; shared expiry/death emit Down; native persistent effects
+> handle repeated Up, Down and late-AOI recovery with stale-snapshot protection.
+> Isolated e7fd008b + patch checks: simulation 2/2, Windows 2/2, Gateway 1/1.
+> Patch applied cleanly to the main workspace after 41a310192; this integrated
+> workspace has not been rebuilt or visually accepted. Snapshot HUD bootstrap,
+> no-tile Up recovery, MP penalties and all66 paired acceptance remain open.
+> Evidence: generated/player-qa/native-keyboard-20260910/shield-fix-notes.md;
+> per-skill ledger: generated/player-qa/native-keyboard-20260910/three-class-66-acceptance.md.
+
+
 > 2026-09-10 resumed three-class QA: R3 live testing exposed missing FireBang
 > ground completion, frame-final modifier matching and self-spell cursor rejection.
 > R4 bounded fixes additionally close shared TwinDrake atomic mana payment and
