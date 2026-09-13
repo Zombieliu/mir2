@@ -1,0 +1,661 @@
+--------- beginning of main
+09-14 06:31:11.020  8345  8345 I com.mir2.web3: Late-enabling -Xcheck:jni
+09-14 06:31:14.961  8345  8360 I com.mir2.web3: Background young concurrent copying GC freed 2683(157KB) AllocSpace objects, 0(0B) LOS objects, 92% free, 1881KB/25MB, paused 38.791ms,10us total 398.365ms
+09-14 06:31:15.719  8345  8345 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+09-14 06:31:16.530  8345  8345 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3' set to: 'default'
+09-14 06:31:16.530  8345  8345 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-14 06:31:16.548  8345  8345 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-14 06:31:16.617  8345  8345 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-14 06:31:17.537  8345  8370 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+09-14 06:31:17.546  8345  8370 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+09-14 06:31:17.548  8345  8370 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+09-14 06:31:18.381  8345  8345 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+09-14 06:31:18.604  8345  8345 D gti.InputConnection: InputConnection created
+09-14 06:31:18.639  8345  8345 D gti.InputConnection: setEditorInfo
+09-14 06:31:18.720  8345  8345 W com.mir2.web3: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+09-14 06:31:18.733  8345  8345 I GameActivity: Looking for library libmir2_platform_android.so
+09-14 06:31:18.737  8345  8345 I GameActivity: Found library libmir2_platform_android.so. Loading...
+09-14 06:31:18.876  8345  8345 D GameActivity: GameActivity_register
+09-14 06:31:18.903  8345  8345 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+09-14 06:31:18.904  8345  8345 D GameActivity: SDK version: 31
+09-14 06:31:18.907  8345  8345 I android-activity: Creating: Activity = 0x1696, saved state size = 0
+09-14 06:31:19.192  8345  8345 V threaded_app: Creating: 0xb400007365258d90
+09-14 06:31:19.192  8345  8345 V threaded_app: Callbacks set: 0xb400007365258de0
+09-14 06:31:19.192  8345  8345 V threaded_app: Launching android_app_entry in a thread
+09-14 06:31:19.193  8345  8378 V threaded_app: android_app_entry called
+09-14 06:31:19.193  8345  8378 V threaded_app: android_app = 0xb400007345267e90
+09-14 06:31:19.193  8345  8378 V threaded_app: config = 0xb4000072b5260d30
+09-14 06:31:19.193  8345  8378 V threaded_app: activity = 0xb400007365258d90
+09-14 06:31:19.193  8345  8378 V threaded_app: assetmanager = 0xb400007365252670
+09-14 06:31:19.193  8345  8378 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+09-14 06:31:19.361  8345  8345 W com.mir2.web3: Verification of androidx.activity.result.contract.ActivityResultContract$SynchronousResult androidx.activity.result.contract.ActivityResultContracts$RequestMultiplePermissions.getSynchronousResult(android.content.Context, java.lang.String[]) took 127.805ms (1009.35 bytecodes/s) (4760B approximate peak alloc)
+09-14 06:31:19.566  8345  8378 D HostConnection: createUnique: call
+09-14 06:31:19.623  8345  8378 D HostConnection: HostConnection::get() New Host Connection established 0xb400007305254810, tid 8378
+09-14 06:31:19.656  8345  8378 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-14 06:31:19.722  8345  8378 D EGL_emulation: eglCreateContext: 0xb400007305256010: maj 3 min 0 rcv 3
+09-14 06:31:19.744  8345  8378 D EGL_emulation: eglMakeCurrent: 0xb400007305256010: ver 3 0 (tinfo 0x751db2b080) (first time)
+09-14 06:31:20.006  8345  8360 W com.mir2.web3: Suspending all threads took: 32.389ms
+09-14 06:31:20.407  8345  8345 V GameActivity: onStart_native
+09-14 06:31:20.407  8345  8345 V threaded_app: Start: 0xb400007365258d90
+09-14 06:31:20.971  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:20.971469Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-14 06:31:20.971  8345  8378 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bAdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-14 06:31:22.415  8345  8345 E threaded_app: android_app_set_activity_state timed out waiting for cmd 11
+09-14 06:31:22.471  8345  8345 V threaded_app: Resume: 0xb400007365258d90
+09-14 06:31:23.096  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:23.095897Z[0m [33m WARN[0m [2mbevy_ecs::world[0m[2m:[0m Resource `<Enable the debug feature to see the name>` was inserted during a call to World::resource_scope: the inserted value will be overwritten.
+09-14 06:31:23.096  8345  8378 W log event: Resource `<Enable the debug feature to see the name>` was inserted during a call to World::resource_scope: the inserted value will be overwritten.log.target = "bevy_ecs::world"; log.module_path = "bevy_ecs::world"; log.file = "/Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_ecs-0.19.0/src/world/mod.rs"; log.line = 2931;
+09-14 06:31:23.359  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:23.358998Z[0m [32m INFO[0m [2mbevy_render::render_resource::sparse_buffer_vec[0m[2m:[0m Sparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+09-14 06:31:23.359  8345  8378 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bSparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+09-14 06:31:23.359  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:23.359463Z[0m [33m WARN[0m [2mbevy_core_pipeline::oit::resolve[0m[2m:[0m OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+09-14 06:31:23.359  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+09-14 06:31:23.359  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:23.359535Z[0m [33m WARN[0m [2mbevy_core_pipeline::prepass::background_motion_vectors[0m[2m:[0m BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+09-14 06:31:23.359  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+09-14 06:31:24.478  8345  8345 E threaded_app: android_app_set_activity_state timed out waiting for cmd 12
+09-14 06:31:24.949  8345  8345 I Choreographer: Skipped 474 frames!  The application may be doing too much work on its main thread.
+09-14 06:31:25.170  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:31:25.171  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:31:25.581  8345  8378 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bGPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+09-14 06:31:25.584  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:25.581447Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m GPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+09-14 06:31:25.736  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:31:25.770  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:31:25.771  8345  8369 D HostConnection: createUnique: call
+09-14 06:31:25.771  8345  8369 D HostConnection: HostConnection::get() New Host Connection established 0xb400007305264350, tid 8369
+09-14 06:31:25.799  8345  8369 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-14 06:31:25.839  8345  8369 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-14 06:31:25.853  8345  8369 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-14 06:31:25.855  8345  8369 D EGL_emulation: eglCreateContext: 0xb400007305263d50: maj 3 min 0 rcv 3
+09-14 06:31:25.864  8345  8369 D EGL_emulation: eglMakeCurrent: 0xb400007305263d50: ver 3 0 (tinfo 0x751db2b100) (first time)
+09-14 06:31:26.010  8345  8345 V threaded_app: ContentRectChanged: 0xb400007365258d90 -- (0 0) (2340 1080)
+09-14 06:31:26.136  8345  8345 V GameActivity: onSurfaceCreated_native
+09-14 06:31:26.136  8345  8345 V threaded_app: NativeWindowCreated: 0xb400007365258d90 -- 0xb4000073f53c1910
+09-14 06:31:26.136  8345  8345 V threaded_app: android_app_set_window called
+09-14 06:31:26.235  8345  8369 I Gralloc4: mapper 4.x is not supported
+09-14 06:31:26.294  8345  8360 I com.mir2.web3: NativeAlloc concurrent copying GC freed 879(120KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2587KB/5175KB, paused 92.270ms,14us total 1.316s
+09-14 06:31:26.357  8345  8369 D HostConnection: createUnique: call
+09-14 06:31:26.359  8345  8369 D HostConnection: HostConnection::get() New Host Connection established 0xb4000073052647d0, tid 8369
+09-14 06:31:26.359  8345  8369 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-14 06:31:26.359  8345  8369 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1efff8000 size 0x8000
+09-14 06:31:26.387  8345  8369 W Gralloc4: allocator 4.x is not supported
+09-14 06:31:26.442  8345  8369 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-14 06:31:26.809  8345  8378 V threaded_app: activityState=11
+09-14 06:31:26.810  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:26.810004Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+09-14 06:31:26.810  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+09-14 06:31:26.810  8345  8378 V threaded_app: activityState=12
+09-14 06:31:26.810  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:26.810163Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:31:26.810  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:31:26.810  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:26.810196Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:31:26.810  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:31:26.810  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:26.810226Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+09-14 06:31:26.810  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+09-14 06:31:26.810  8345  8378 V threaded_app: APP_CMD_INIT_WINDOW
+09-14 06:31:26.810  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:26.810338Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (105v0)
+09-14 06:31:26.810  8345  8378 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (105v0)
+09-14 06:31:26.811  8345  8345 V threaded_app: NativeWindowResized: 0xb400007365258d90 -- 0xb4000073f53c1910 ( 2340 x 1080 )
+09-14 06:31:26.811  8345  8345 V threaded_app: NativeWindowRedrawNeeded: 0xb400007365258d90 -- 0xb4000073f53c1910
+09-14 06:31:27.004  8345  8345 I Choreographer: Skipped 121 frames!  The application may be doing too much work on its main thread.
+09-14 06:31:27.245  8345  8345 V threaded_app: WindowFocusChanged: 0xb400007365258d90 -- 1
+09-14 06:31:27.281  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:31:27.282  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:31:28.832  8345  8401 I Choreographer: Skipped 35 frames!  The application may be doing too much work on its main thread.
+09-14 06:31:30.367  8345  8404 D ProfileInstaller: Installing profile for com.mir2.web3
+09-14 06:31:30.584  8345  8404 W com.mir2.web3: Verification of androidx.profileinstaller.DeviceProfileWriter androidx.profileinstaller.DeviceProfileWriter.addMetadata(androidx.profileinstaller.DexProfileData[], byte[]) took 216.028ms (356.43 bytecodes/s) (3464B approximate peak alloc)
+09-14 06:31:30.741  8345  8404 W com.mir2.web3: Verification of boolean androidx.profileinstaller.DeviceProfileWriter.write() took 157.020ms (541.33 bytecodes/s) (3944B approximate peak alloc)
+09-14 06:31:31.060  8345  8360 I com.mir2.web3: NativeAlloc concurrent copying GC freed 1535(184KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2836KB/5673KB, paused 18.215ms,3.992ms total 3.088s
+09-14 06:31:31.620  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:31:31.620699Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:31:31.621  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:31:32.979  8345  8378 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+09-14 06:31:32.979  8345  8378 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+09-14 06:31:32.980  8345  8378 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+09-14 06:31:34.160  8345  8378 D EGL_emulation: app_time_stats: avg=1155.66ms min=132.39ms max=2413.92ms count=3
+09-14 06:31:35.242  8345  8378 D EGL_emulation: app_time_stats: avg=541.00ms min=465.81ms max=616.19ms count=2
+09-14 06:31:36.446  8345  8378 D EGL_emulation: app_time_stats: avg=300.93ms min=214.09ms max=339.54ms count=4
+09-14 06:31:37.557  8345  8378 D EGL_emulation: app_time_stats: avg=277.26ms min=170.28ms max=429.55ms count=4
+09-14 06:31:38.564  8345  8378 D EGL_emulation: app_time_stats: avg=251.46ms min=91.44ms max=448.27ms count=4
+09-14 06:31:39.638  8345  8378 D EGL_emulation: app_time_stats: avg=357.61ms min=288.19ms max=490.74ms count=3
+09-14 06:31:40.886  8345  8378 D EGL_emulation: app_time_stats: avg=207.86ms min=56.55ms max=365.21ms count=6
+09-14 06:31:42.017  8345  8378 D EGL_emulation: app_time_stats: avg=282.56ms min=222.02ms max=341.99ms count=4
+09-14 06:31:43.017  8345  8378 D EGL_emulation: app_time_stats: avg=333.37ms min=246.89ms max=489.44ms count=3
+09-14 06:31:44.057  8345  8378 D EGL_emulation: app_time_stats: avg=259.96ms min=155.47ms max=327.28ms count=4
+09-14 06:31:45.137  8345  8378 D EGL_emulation: app_time_stats: avg=119.74ms min=48.97ms max=210.94ms count=9
+09-14 06:31:46.146  8345  8378 D EGL_emulation: app_time_stats: avg=168.07ms min=61.99ms max=569.64ms count=6
+09-14 06:31:47.555  8345  8378 D EGL_emulation: app_time_stats: avg=234.79ms min=80.51ms max=440.85ms count=6
+09-14 06:31:48.726  8345  8378 D EGL_emulation: app_time_stats: avg=195.13ms min=126.59ms max=266.04ms count=6
+09-14 06:31:49.734  8345  8378 D EGL_emulation: app_time_stats: avg=201.52ms min=113.24ms max=278.37ms count=5
+09-14 06:31:50.906  8345  8378 D EGL_emulation: app_time_stats: avg=292.83ms min=260.83ms max=315.70ms count=4
+09-14 06:31:52.064  8345  8378 D EGL_emulation: app_time_stats: avg=385.79ms min=148.32ms max=843.34ms count=3
+09-14 06:31:53.168  8345  8378 D EGL_emulation: app_time_stats: avg=220.90ms min=163.73ms max=333.71ms count=5
+09-14 06:31:54.172  8345  8378 D EGL_emulation: app_time_stats: avg=143.29ms min=35.39ms max=258.01ms count=7
+09-14 06:31:55.423  8345  8378 D EGL_emulation: app_time_stats: avg=250.04ms min=190.42ms max=281.21ms count=5
+09-14 06:31:56.777  8345  8378 D EGL_emulation: app_time_stats: avg=270.92ms min=171.62ms max=600.14ms count=5
+09-14 06:31:57.934  8345  8378 D EGL_emulation: app_time_stats: avg=229.65ms min=123.24ms max=283.57ms count=5
+09-14 06:31:59.035  8345  8378 D EGL_emulation: app_time_stats: avg=220.04ms min=77.89ms max=303.86ms count=5
+09-14 06:32:00.130  8345  8378 D EGL_emulation: app_time_stats: avg=156.39ms min=35.16ms max=287.64ms count=7
+09-14 06:32:01.285  8345  8378 D EGL_emulation: app_time_stats: avg=165.03ms min=43.79ms max=342.78ms count=7
+09-14 06:32:02.564  8345  8378 D EGL_emulation: app_time_stats: avg=318.67ms min=184.63ms max=528.24ms count=4
+09-14 06:32:03.583  8345  8378 D EGL_emulation: app_time_stats: avg=203.58ms min=122.45ms max=422.31ms count=5
+09-14 06:32:04.772  8345  8378 D EGL_emulation: app_time_stats: avg=593.08ms min=532.22ms max=653.94ms count=2
+09-14 06:32:06.101  8345  8378 D EGL_emulation: app_time_stats: avg=441.33ms min=413.86ms max=496.25ms count=3
+09-14 06:32:07.441  8345  8378 D EGL_emulation: app_time_stats: avg=446.57ms min=225.31ms max=710.46ms count=3
+09-14 06:32:08.550  8345  8378 D EGL_emulation: app_time_stats: avg=275.83ms min=222.73ms max=314.35ms count=4
+09-14 06:32:09.564  8345  8378 D EGL_emulation: app_time_stats: avg=336.84ms min=258.09ms max=452.73ms count=3
+09-14 06:32:10.760  8345  8378 D EGL_emulation: app_time_stats: avg=299.03ms min=223.67ms max=372.80ms count=4
+09-14 06:32:12.004  8345  8378 D EGL_emulation: app_time_stats: avg=138.13ms min=50.83ms max=320.94ms count=9
+09-14 06:32:13.046  8345  8378 D EGL_emulation: app_time_stats: avg=173.55ms min=41.63ms max=319.70ms count=6
+09-14 06:32:14.054  8345  8378 D EGL_emulation: app_time_stats: avg=201.66ms min=106.49ms max=407.62ms count=5
+09-14 06:32:15.152  8345  8378 D EGL_emulation: app_time_stats: avg=137.02ms min=73.06ms max=283.33ms count=8
+09-14 06:32:16.193  8345  8378 D EGL_emulation: app_time_stats: avg=173.38ms min=34.36ms max=269.89ms count=6
+09-14 06:32:17.439  8345  8378 D EGL_emulation: app_time_stats: avg=207.50ms min=141.24ms max=297.29ms count=6
+09-14 06:32:18.625  8345  8378 D EGL_emulation: app_time_stats: avg=131.76ms min=41.42ms max=289.96ms count=9
+09-14 06:32:19.686  8345  8378 D EGL_emulation: app_time_stats: avg=176.53ms min=79.62ms max=292.13ms count=6
+09-14 06:32:21.012  8345  8378 D EGL_emulation: app_time_stats: avg=331.63ms min=107.85ms max=714.44ms count=4
+09-14 06:32:22.897  8345  8378 D EGL_emulation: app_time_stats: avg=942.20ms min=360.65ms max=1523.75ms count=2
+09-14 06:32:24.156  8345  8378 D EGL_emulation: app_time_stats: avg=1258.44ms min=1258.44ms max=1258.44ms count=1
+09-14 06:32:25.325  8345  8378 D EGL_emulation: app_time_stats: avg=194.92ms min=76.28ms max=440.06ms count=6
+09-14 06:32:26.328  8345  8378 D EGL_emulation: app_time_stats: avg=200.42ms min=112.55ms max=340.63ms count=5
+09-14 06:32:27.354  8345  8378 D EGL_emulation: app_time_stats: avg=205.14ms min=29.49ms max=367.90ms count=5
+09-14 06:32:28.742  8345  8378 D EGL_emulation: app_time_stats: avg=346.97ms min=212.68ms max=637.29ms count=4
+09-14 06:32:29.953  8345  8378 D EGL_emulation: app_time_stats: avg=151.20ms min=35.84ms max=270.61ms count=8
+09-14 06:32:30.957  8345  8378 D EGL_emulation: app_time_stats: avg=200.74ms min=78.31ms max=331.73ms count=5
+09-14 06:32:32.093  8345  8378 D EGL_emulation: app_time_stats: avg=126.18ms min=43.74ms max=191.88ms count=9
+09-14 06:32:33.130  8345  8378 D EGL_emulation: app_time_stats: avg=345.87ms min=244.60ms max=484.87ms count=3
+09-14 06:32:34.209  8345  8378 D EGL_emulation: app_time_stats: avg=134.79ms min=37.77ms max=313.53ms count=8
+09-14 06:32:35.379  8345  8378 D EGL_emulation: app_time_stats: avg=116.91ms min=59.99ms max=248.43ms count=10
+09-14 06:32:36.588  8345  8378 D EGL_emulation: app_time_stats: avg=201.53ms min=112.02ms max=344.41ms count=6
+09-14 06:32:37.910  8345  8378 D EGL_emulation: app_time_stats: avg=440.43ms min=271.09ms max=725.71ms count=3
+09-14 06:32:39.214  8345  8378 D EGL_emulation: app_time_stats: avg=186.17ms min=31.91ms max=364.18ms count=7
+09-14 06:32:40.394  8345  8378 D EGL_emulation: app_time_stats: avg=236.04ms min=89.35ms max=495.42ms count=5
+09-14 06:32:41.680  8345  8378 D EGL_emulation: app_time_stats: avg=257.06ms min=92.31ms max=466.14ms count=5
+09-14 06:32:42.681  8345  8378 D EGL_emulation: app_time_stats: avg=166.79ms min=67.21ms max=259.18ms count=6
+09-14 06:32:43.866  8345  8378 D EGL_emulation: app_time_stats: avg=197.19ms min=106.21ms max=277.19ms count=6
+09-14 06:32:44.902  8345  8378 D EGL_emulation: app_time_stats: avg=147.86ms min=33.46ms max=397.94ms count=7
+09-14 06:32:45.914  8345  8378 D EGL_emulation: app_time_stats: avg=126.50ms min=65.35ms max=313.56ms count=8
+09-14 06:32:46.984  8345  8378 D EGL_emulation: app_time_stats: avg=118.85ms min=37.01ms max=263.34ms count=9
+09-14 06:32:48.125  8345  8378 D EGL_emulation: app_time_stats: avg=228.10ms min=133.07ms max=432.06ms count=5
+09-14 06:32:49.175  8345  8378 D EGL_emulation: app_time_stats: avg=209.97ms min=55.79ms max=375.24ms count=5
+09-14 06:32:50.579  8345  8378 D EGL_emulation: app_time_stats: avg=350.82ms min=166.80ms max=437.29ms count=4
+09-14 06:32:51.621  8345  8378 D EGL_emulation: app_time_stats: avg=208.23ms min=105.70ms max=275.88ms count=5
+09-14 06:32:52.642  8345  8378 D EGL_emulation: app_time_stats: avg=204.12ms min=128.05ms max=251.70ms count=5
+09-14 06:32:53.687  8345  8378 D EGL_emulation: app_time_stats: avg=149.36ms min=64.56ms max=363.83ms count=7
+09-14 06:32:54.693  8345  8378 D EGL_emulation: app_time_stats: avg=100.56ms min=40.84ms max=241.93ms count=10
+09-14 06:32:55.804  8345  8378 D EGL_emulation: app_time_stats: avg=100.92ms min=38.05ms max=223.23ms count=11
+09-14 06:32:56.854  8345  8378 D EGL_emulation: app_time_stats: avg=131.30ms min=42.26ms max=267.83ms count=8
+09-14 06:32:57.945  8345  8378 D EGL_emulation: app_time_stats: avg=217.67ms min=59.97ms max=342.35ms count=5
+09-14 06:32:59.003  8345  8378 D EGL_emulation: app_time_stats: avg=211.43ms min=68.00ms max=342.12ms count=5
+09-14 06:33:00.681  8345  8378 D EGL_emulation: app_time_stats: avg=279.62ms min=76.90ms max=779.61ms count=6
+09-14 06:33:01.935  8345  8378 D EGL_emulation: app_time_stats: avg=138.54ms min=64.05ms max=375.11ms count=9
+09-14 06:33:02.963  8345  8378 D EGL_emulation: app_time_stats: avg=205.39ms min=70.92ms max=408.09ms count=5
+09-14 06:33:03.963  8345  8378 D EGL_emulation: app_time_stats: avg=250.10ms min=81.58ms max=430.73ms count=4
+09-14 06:33:04.974  8345  8378 D EGL_emulation: app_time_stats: avg=144.41ms min=44.64ms max=283.48ms count=7
+09-14 06:33:06.039  8345  8378 D EGL_emulation: app_time_stats: avg=266.06ms min=86.07ms max=513.89ms count=4
+09-14 06:33:07.179  8345  8378 D EGL_emulation: app_time_stats: avg=227.94ms min=182.20ms max=324.89ms count=5
+09-14 06:33:08.276  8345  8378 D EGL_emulation: app_time_stats: avg=365.20ms min=322.79ms max=442.13ms count=3
+09-14 06:33:09.338  8345  8378 D EGL_emulation: app_time_stats: avg=353.94ms min=163.67ms max=619.49ms count=3
+09-14 06:33:10.433  8345  8378 D EGL_emulation: app_time_stats: avg=156.39ms min=33.30ms max=323.84ms count=7
+09-14 06:33:11.555  8345  8378 D EGL_emulation: app_time_stats: avg=186.88ms min=75.09ms max=310.10ms count=6
+09-14 06:33:12.987  8345  8378 D EGL_emulation: app_time_stats: avg=204.52ms min=32.86ms max=536.76ms count=7
+09-14 06:33:32.596  8345  8378 D EGL_emulation: app_time_stats: avg=19547.02ms min=19547.02ms max=19547.02ms count=1
+09-14 06:33:34.175  8345  8378 D EGL_emulation: app_time_stats: avg=315.61ms min=75.17ms max=683.43ms count=5
+09-14 06:33:35.258  8345  8378 D EGL_emulation: app_time_stats: avg=180.53ms min=32.64ms max=347.29ms count=6
+09-14 06:33:36.634  8345  8378 D EGL_emulation: app_time_stats: avg=194.46ms min=65.78ms max=436.41ms count=7
+09-14 06:33:37.937  8345  8378 D EGL_emulation: app_time_stats: avg=431.22ms min=237.39ms max=773.26ms count=3
+09-14 06:33:39.021  8345  8378 D EGL_emulation: app_time_stats: avg=216.70ms min=100.50ms max=270.64ms count=5
+09-14 06:33:40.092  8345  8378 D EGL_emulation: app_time_stats: avg=133.60ms min=36.20ms max=201.52ms count=8
+09-14 06:33:41.118  8345  8378 D EGL_emulation: app_time_stats: avg=78.89ms min=38.76ms max=156.59ms count=13
+09-14 06:33:42.185  8345  8378 D EGL_emulation: app_time_stats: avg=81.98ms min=39.92ms max=220.06ms count=13
+09-14 06:33:43.282  8345  8378 D EGL_emulation: app_time_stats: avg=78.38ms min=32.54ms max=348.32ms count=14
+09-14 06:33:44.396  8345  8378 D EGL_emulation: app_time_stats: avg=111.33ms min=45.14ms max=248.51ms count=10
+09-14 06:33:45.483  8345  8378 D EGL_emulation: app_time_stats: avg=83.56ms min=34.99ms max=202.73ms count=13
+09-14 06:33:46.502  8345  8378 D EGL_emulation: app_time_stats: avg=101.92ms min=31.34ms max=198.81ms count=10
+09-14 06:33:47.538  8345  8378 D EGL_emulation: app_time_stats: avg=172.51ms min=65.64ms max=353.85ms count=6
+09-14 06:33:48.898  8345  8378 D EGL_emulation: app_time_stats: avg=339.84ms min=158.88ms max=593.36ms count=4
+09-14 06:33:50.031  8345  8378 D EGL_emulation: app_time_stats: avg=140.54ms min=55.47ms max=285.33ms count=8
+09-14 06:33:51.115  8345  8378 D EGL_emulation: app_time_stats: avg=180.44ms min=71.03ms max=501.77ms count=6
+09-14 06:33:52.165  8345  8378 D EGL_emulation: app_time_stats: avg=262.05ms min=132.31ms max=395.90ms count=4
+09-14 06:33:53.367  8345  8378 D EGL_emulation: app_time_stats: avg=171.68ms min=36.15ms max=308.36ms count=7
+09-14 06:33:54.862  8345  8378 D EGL_emulation: app_time_stats: avg=298.94ms min=134.23ms max=515.10ms count=5
+09-14 06:33:55.965  8345  8378 D EGL_emulation: app_time_stats: avg=137.82ms min=34.29ms max=285.60ms count=8
+09-14 06:33:56.995  8345  8378 D EGL_emulation: app_time_stats: avg=114.35ms min=34.00ms max=220.66ms count=9
+09-14 06:33:58.094  8345  8378 D EGL_emulation: app_time_stats: avg=109.88ms min=28.61ms max=225.53ms count=10
+09-14 06:33:59.163  8345  8378 D EGL_emulation: app_time_stats: avg=106.79ms min=38.16ms max=226.67ms count=10
+09-14 06:34:00.255  8345  8378 D EGL_emulation: app_time_stats: avg=99.29ms min=33.13ms max=266.31ms count=11
+09-14 06:34:01.417  8345  8378 D EGL_emulation: app_time_stats: avg=89.33ms min=32.96ms max=247.32ms count=13
+09-14 06:34:02.484  8345  8378 D EGL_emulation: app_time_stats: avg=263.25ms min=126.78ms max=370.47ms count=4
+09-14 06:34:03.586  8345  8378 D EGL_emulation: app_time_stats: avg=122.51ms min=38.76ms max=248.36ms count=9
+09-14 06:34:04.969  8345  8378 D EGL_emulation: app_time_stats: avg=230.44ms min=60.13ms max=751.54ms count=6
+09-14 06:34:06.078  8345  8378 D EGL_emulation: app_time_stats: avg=277.16ms min=202.67ms max=315.63ms count=4
+09-14 06:34:07.084  8345  8378 D EGL_emulation: app_time_stats: avg=167.48ms min=75.41ms max=377.63ms count=6
+09-14 06:34:08.217  8345  8378 D EGL_emulation: app_time_stats: avg=125.88ms min=35.89ms max=378.43ms count=9
+09-14 06:34:09.548  8345  8378 D EGL_emulation: app_time_stats: avg=266.13ms min=132.60ms max=371.35ms count=5
+09-14 06:34:10.585  8345  8378 D EGL_emulation: app_time_stats: avg=172.88ms min=77.04ms max=310.88ms count=6
+09-14 06:34:11.586  8345  8378 D EGL_emulation: app_time_stats: avg=90.95ms min=32.82ms max=153.85ms count=11
+09-14 06:34:12.819  8345  8378 D EGL_emulation: app_time_stats: avg=176.05ms min=65.61ms max=307.81ms count=7
+09-14 06:34:13.914  8345  8378 D EGL_emulation: app_time_stats: avg=218.83ms min=107.82ms max=291.03ms count=5
+09-14 06:34:15.169  8345  8378 D EGL_emulation: app_time_stats: avg=156.84ms min=85.42ms max=293.12ms count=8
+09-14 06:34:16.339  8345  8378 D EGL_emulation: app_time_stats: avg=167.08ms min=34.07ms max=271.08ms count=7
+09-14 06:34:17.646  8345  8378 D EGL_emulation: app_time_stats: avg=217.64ms min=89.50ms max=469.29ms count=6
+09-14 06:34:18.848  8345  8378 D EGL_emulation: app_time_stats: avg=240.45ms min=163.90ms max=395.34ms count=5
+09-14 06:34:19.888  8345  8378 D EGL_emulation: app_time_stats: avg=129.94ms min=47.00ms max=270.31ms count=8
+09-14 06:34:21.009  8345  8378 D EGL_emulation: app_time_stats: avg=224.06ms min=99.39ms max=456.88ms count=5
+09-14 06:34:22.051  8345  8378 D EGL_emulation: app_time_stats: avg=208.27ms min=162.55ms max=310.83ms count=5
+09-14 06:34:23.151  8345  8378 D EGL_emulation: app_time_stats: avg=219.91ms min=111.34ms max=463.16ms count=5
+09-14 06:34:24.170  8345  8378 D EGL_emulation: app_time_stats: avg=113.18ms min=28.49ms max=190.86ms count=9
+09-14 06:34:25.228  8345  8378 D EGL_emulation: app_time_stats: avg=105.81ms min=33.45ms max=168.77ms count=10
+09-14 06:34:26.231  8345  8378 D EGL_emulation: app_time_stats: avg=334.33ms min=195.19ms max=557.56ms count=3
+09-14 06:34:27.431  8345  8378 D EGL_emulation: app_time_stats: avg=199.51ms min=125.60ms max=267.21ms count=6
+09-14 06:34:28.527  8345  8378 D EGL_emulation: app_time_stats: avg=156.10ms min=44.00ms max=350.85ms count=7
+09-14 06:34:29.732  8345  8378 D EGL_emulation: app_time_stats: avg=200.59ms min=160.45ms max=293.79ms count=6
+09-14 06:34:30.745  8345  8378 D EGL_emulation: app_time_stats: avg=144.63ms min=40.54ms max=314.25ms count=7
+09-14 06:34:31.867  8345  8378 D EGL_emulation: app_time_stats: avg=124.65ms min=33.81ms max=295.96ms count=9
+09-14 06:34:32.869  8345  8378 D EGL_emulation: app_time_stats: avg=250.35ms min=139.55ms max=440.46ms count=4
+09-14 06:34:34.152  8345  8378 D EGL_emulation: app_time_stats: avg=213.81ms min=49.73ms max=481.99ms count=6
+09-14 06:34:35.216  8345  8378 D EGL_emulation: app_time_stats: avg=177.23ms min=49.73ms max=375.05ms count=6
+09-14 06:34:36.220  8345  8378 D EGL_emulation: app_time_stats: avg=251.08ms min=121.58ms max=364.84ms count=4
+09-14 06:34:37.283  8345  8378 D EGL_emulation: app_time_stats: avg=265.54ms min=148.01ms max=386.85ms count=4
+09-14 06:34:38.372  8345  8378 D EGL_emulation: app_time_stats: avg=362.99ms min=204.33ms max=598.74ms count=3
+09-14 06:34:39.404  8345  8378 D EGL_emulation: app_time_stats: avg=206.28ms min=33.87ms max=324.94ms count=5
+09-14 06:34:40.513  8345  8378 D EGL_emulation: app_time_stats: avg=221.78ms min=147.55ms max=306.02ms count=5
+09-14 06:34:41.634  8345  8378 D EGL_emulation: app_time_stats: avg=186.68ms min=94.63ms max=263.05ms count=6
+09-14 06:34:43.000  8345  8378 D EGL_emulation: app_time_stats: avg=194.94ms min=37.24ms max=671.72ms count=7
+09-14 06:34:44.028  8345  8378 D EGL_emulation: app_time_stats: avg=205.41ms min=116.74ms max=345.86ms count=5
+09-14 06:34:45.355  8345  8378 D EGL_emulation: app_time_stats: avg=165.83ms min=77.13ms max=426.60ms count=8
+09-14 06:34:46.816  8345  8378 D EGL_emulation: app_time_stats: avg=486.94ms min=291.72ms max=827.96ms count=3
+09-14 06:34:48.164  8345  8378 D EGL_emulation: app_time_stats: avg=673.71ms min=355.31ms max=992.11ms count=2
+09-14 06:34:49.281  8345  8378 D EGL_emulation: app_time_stats: avg=549.83ms min=140.64ms max=959.03ms count=2
+09-14 06:34:50.933  8345  8378 D EGL_emulation: app_time_stats: avg=825.89ms min=714.79ms max=936.98ms count=2
+09-14 06:34:52.654  8345  8378 D EGL_emulation: app_time_stats: avg=1720.62ms min=1720.62ms max=1720.62ms count=1
+09-14 06:34:54.734  8345  8378 D EGL_emulation: app_time_stats: avg=1039.52ms min=772.39ms max=1306.66ms count=2
+09-14 06:34:55.930  8345  8378 D EGL_emulation: app_time_stats: avg=1195.51ms min=1195.51ms max=1195.51ms count=1
+09-14 06:34:57.196  8345  8378 D EGL_emulation: app_time_stats: avg=421.91ms min=194.90ms max=547.72ms count=3
+09-14 06:34:58.375  8345  8378 D EGL_emulation: app_time_stats: avg=589.64ms min=407.52ms max=771.76ms count=2
+09-14 06:34:59.800  8345  8378 D EGL_emulation: app_time_stats: avg=237.36ms min=51.26ms max=580.08ms count=6
+09-14 06:35:00.860  8345  8378 D EGL_emulation: app_time_stats: avg=530.24ms min=352.79ms max=707.69ms count=2
+09-14 06:35:01.887  8345  8378 D EGL_emulation: app_time_stats: avg=102.67ms min=37.92ms max=197.77ms count=10
+09-14 06:35:02.932  8345  8378 D EGL_emulation: app_time_stats: avg=104.42ms min=29.66ms max=201.31ms count=10
+09-14 06:35:04.251  8345  8378 D EGL_emulation: app_time_stats: avg=329.69ms min=35.85ms max=583.85ms count=4
+09-14 06:35:05.274  8345  8378 D EGL_emulation: app_time_stats: avg=255.48ms min=149.50ms max=402.02ms count=4
+09-14 06:35:06.363  8345  8378 D EGL_emulation: app_time_stats: avg=155.59ms min=36.30ms max=300.50ms count=7
+09-14 06:35:07.495  8345  8378 D EGL_emulation: app_time_stats: avg=161.68ms min=64.21ms max=276.75ms count=7
+09-14 06:35:08.638  8345  8378 D EGL_emulation: app_time_stats: avg=285.62ms min=206.06ms max=384.94ms count=4
+09-14 06:35:09.839  8345  8378 D EGL_emulation: app_time_stats: avg=171.35ms min=46.42ms max=325.27ms count=7
+09-14 06:35:10.860  8345  8378 D EGL_emulation: app_time_stats: avg=255.25ms min=216.64ms max=285.68ms count=4
+09-14 06:35:11.903  8345  8378 D EGL_emulation: app_time_stats: avg=208.43ms min=36.88ms max=314.45ms count=5
+09-14 06:35:12.952  8345  8378 D EGL_emulation: app_time_stats: avg=262.31ms min=178.46ms max=435.13ms count=4
+09-14 06:35:14.026  8345  8378 D EGL_emulation: app_time_stats: avg=178.95ms min=63.17ms max=466.84ms count=6
+09-14 06:35:15.106  8345  8378 D EGL_emulation: app_time_stats: avg=119.92ms min=37.65ms max=224.01ms count=9
+09-14 06:35:16.200  8345  8378 D EGL_emulation: app_time_stats: avg=109.34ms min=50.51ms max=246.02ms count=10
+09-14 06:35:17.220  8345  8378 D EGL_emulation: app_time_stats: avg=204.13ms min=97.72ms max=394.05ms count=5
+09-14 06:35:18.263  8345  8378 D EGL_emulation: app_time_stats: avg=86.82ms min=39.04ms max=158.96ms count=12
+09-14 06:35:19.384  8345  8378 D EGL_emulation: app_time_stats: avg=160.21ms min=48.50ms max=448.84ms count=7
+09-14 06:35:20.547  8345  8378 D EGL_emulation: app_time_stats: avg=232.42ms min=102.07ms max=292.31ms count=5
+09-14 06:35:21.601  8345  8378 D EGL_emulation: app_time_stats: avg=175.72ms min=89.11ms max=282.39ms count=6
+09-14 06:35:22.791  8345  8378 D EGL_emulation: app_time_stats: avg=297.42ms min=169.87ms max=551.77ms count=4
+09-14 06:35:23.892  8345  8378 D EGL_emulation: app_time_stats: avg=183.31ms min=110.92ms max=487.74ms count=6
+09-14 06:35:24.949  8345  8378 D EGL_emulation: app_time_stats: avg=528.30ms min=215.66ms max=840.95ms count=2
+09-14 06:35:26.011  8345  8378 D EGL_emulation: app_time_stats: avg=352.83ms min=198.76ms max=449.89ms count=3
+09-14 06:35:27.031  8345  8378 D EGL_emulation: app_time_stats: avg=170.03ms min=50.53ms max=295.58ms count=6
+09-14 06:35:28.162  8345  8378 D EGL_emulation: app_time_stats: avg=141.32ms min=45.32ms max=305.98ms count=8
+09-14 06:35:29.184  8345  8378 D EGL_emulation: app_time_stats: avg=255.45ms min=99.76ms max=466.82ms count=4
+09-14 06:35:30.293  8345  8378 D EGL_emulation: app_time_stats: avg=184.70ms min=37.89ms max=477.11ms count=6
+09-14 06:35:31.314  8345  8378 D EGL_emulation: app_time_stats: avg=113.45ms min=32.99ms max=217.19ms count=9
+09-14 06:35:32.426  8345  8378 D EGL_emulation: app_time_stats: avg=158.72ms min=70.97ms max=313.41ms count=7
+09-14 06:35:33.587  8345  8378 D EGL_emulation: app_time_stats: avg=193.54ms min=138.73ms max=290.70ms count=6
+09-14 06:35:34.624  8345  8378 D EGL_emulation: app_time_stats: avg=115.17ms min=62.77ms max=257.58ms count=9
+09-14 06:35:35.748  8345  8378 D EGL_emulation: app_time_stats: avg=160.01ms min=29.08ms max=395.18ms count=7
+09-14 06:35:36.861  8345  8378 D EGL_emulation: app_time_stats: avg=222.61ms min=99.45ms max=352.43ms count=5
+09-14 06:35:37.936  8345  8378 D EGL_emulation: app_time_stats: avg=215.00ms min=179.03ms max=296.68ms count=5
+09-14 06:35:39.038  8345  8378 D EGL_emulation: app_time_stats: avg=157.26ms min=71.26ms max=267.02ms count=7
+09-14 06:35:40.671  8345  8378 D EGL_emulation: app_time_stats: avg=326.55ms min=88.75ms max=699.15ms count=5
+09-14 06:35:41.864  8345  8378 D EGL_emulation: app_time_stats: avg=297.88ms min=140.95ms max=455.43ms count=4
+09-14 06:35:42.885  8345  8378 D EGL_emulation: app_time_stats: avg=255.33ms min=107.15ms max=337.45ms count=4
+09-14 06:35:44.089  8345  8378 D EGL_emulation: app_time_stats: avg=171.90ms min=40.71ms max=315.66ms count=7
+09-14 06:35:45.137  8345  8378 D EGL_emulation: app_time_stats: avg=116.36ms min=37.20ms max=281.58ms count=9
+09-14 06:35:46.231  8345  8378 D EGL_emulation: app_time_stats: avg=181.98ms min=63.60ms max=376.10ms count=6
+09-14 06:35:47.709  8345  8378 D EGL_emulation: app_time_stats: avg=246.32ms min=172.34ms max=485.56ms count=6
+09-14 06:35:48.759  8345  8378 D EGL_emulation: app_time_stats: avg=209.95ms min=141.37ms max=365.13ms count=5
+09-14 06:35:49.862  8345  8378 D EGL_emulation: app_time_stats: avg=367.41ms min=165.09ms max=692.07ms count=3
+09-14 06:35:50.869  8345  8378 D EGL_emulation: app_time_stats: avg=143.88ms min=38.16ms max=249.97ms count=7
+09-14 06:35:51.895  8345  8378 D EGL_emulation: app_time_stats: avg=341.16ms min=178.29ms max=438.59ms count=3
+09-14 06:35:52.970  8345  8378 D EGL_emulation: app_time_stats: avg=214.91ms min=42.82ms max=634.28ms count=5
+09-14 06:35:54.022  8345  8378 D EGL_emulation: app_time_stats: avg=116.87ms min=50.07ms max=178.28ms count=9
+09-14 06:35:55.122  8345  8378 D EGL_emulation: app_time_stats: avg=99.89ms min=30.64ms max=204.89ms count=11
+09-14 06:35:56.144  8345  8378 D EGL_emulation: app_time_stats: avg=102.16ms min=37.70ms max=216.16ms count=10
+09-14 06:35:57.337  8345  8378 D EGL_emulation: app_time_stats: avg=298.17ms min=146.99ms max=442.79ms count=4
+09-14 06:35:58.528  8345  8378 D EGL_emulation: app_time_stats: avg=170.19ms min=29.70ms max=359.05ms count=7
+09-14 06:35:59.631  8345  8378 D EGL_emulation: app_time_stats: avg=220.47ms min=169.18ms max=262.65ms count=5
+09-14 06:36:00.649  8345  8378 D EGL_emulation: app_time_stats: avg=254.33ms min=135.25ms max=422.76ms count=4
+09-14 06:36:02.027  8345  8378 D EGL_emulation: app_time_stats: avg=137.79ms min=36.43ms max=429.35ms count=10
+09-14 06:36:03.054  8345  8378 D EGL_emulation: app_time_stats: avg=205.39ms min=124.32ms max=282.61ms count=5
+09-14 06:36:04.141  8345  8378 D EGL_emulation: app_time_stats: avg=215.80ms min=123.91ms max=324.39ms count=5
+09-14 06:36:05.380  8345  8378 D EGL_emulation: app_time_stats: avg=176.14ms min=43.60ms max=328.34ms count=7
+09-14 06:36:06.582  8345  8378 D EGL_emulation: app_time_stats: avg=200.13ms min=63.52ms max=290.70ms count=6
+09-14 06:36:07.849  8345  8378 D EGL_emulation: app_time_stats: avg=316.74ms min=283.01ms max=364.11ms count=4
+09-14 06:36:09.006  8345  8378 D EGL_emulation: app_time_stats: avg=144.67ms min=47.32ms max=333.18ms count=8
+09-14 06:36:10.096  8345  8378 D EGL_emulation: app_time_stats: avg=155.40ms min=44.08ms max=356.60ms count=7
+09-14 06:36:11.245  8345  8378 D EGL_emulation: app_time_stats: avg=191.41ms min=106.14ms max=278.00ms count=6
+09-14 06:36:13.071  8345  8378 D EGL_emulation: app_time_stats: avg=228.28ms min=41.42ms max=1200.66ms count=8
+09-14 06:36:14.106  8345  8378 D EGL_emulation: app_time_stats: avg=206.92ms min=142.59ms max=345.99ms count=5
+09-14 06:36:15.138  8345  8378 D EGL_emulation: app_time_stats: avg=128.85ms min=31.09ms max=238.43ms count=8
+09-14 06:36:16.145  8345  8378 D EGL_emulation: app_time_stats: avg=91.57ms min=32.61ms max=158.65ms count=11
+09-14 06:36:17.216  8345  8378 D EGL_emulation: app_time_stats: avg=97.30ms min=38.90ms max=183.70ms count=11
+09-14 06:36:18.253  8345  8378 D EGL_emulation: app_time_stats: avg=114.31ms min=35.14ms max=378.07ms count=9
+09-14 06:36:19.322  8345  8378 D EGL_emulation: app_time_stats: avg=97.18ms min=29.71ms max=170.13ms count=11
+09-14 06:36:20.402  8345  8378 D EGL_emulation: app_time_stats: avg=98.11ms min=30.18ms max=159.35ms count=11
+09-14 06:36:21.533  8345  8378 D EGL_emulation: app_time_stats: avg=226.24ms min=87.64ms max=490.32ms count=5
+09-14 06:36:22.563  8345  8378 D EGL_emulation: app_time_stats: avg=171.65ms min=52.88ms max=293.93ms count=6
+09-14 06:36:24.016  8345  8378 D EGL_emulation: app_time_stats: avg=290.45ms min=46.91ms max=672.45ms count=5
+09-14 06:36:25.160  8345  8378 D EGL_emulation: app_time_stats: avg=228.59ms min=91.52ms max=339.14ms count=5
+09-14 06:36:26.403  8345  8378 D EGL_emulation: app_time_stats: avg=207.18ms min=60.41ms max=343.90ms count=6
+09-14 06:36:27.777  8345  8378 D EGL_emulation: app_time_stats: avg=196.17ms min=66.59ms max=437.65ms count=7
+09-14 06:36:28.786  8345  8378 D EGL_emulation: app_time_stats: avg=504.00ms min=228.91ms max=779.09ms count=2
+09-14 06:36:29.897  8345  8378 D EGL_emulation: app_time_stats: avg=158.70ms min=39.91ms max=354.10ms count=7
+09-14 06:36:30.997  8345  8378 D EGL_emulation: app_time_stats: avg=157.12ms min=72.70ms max=241.92ms count=7
+09-14 06:36:32.028  8345  8378 D EGL_emulation: app_time_stats: avg=114.54ms min=34.74ms max=288.78ms count=9
+09-14 06:36:33.150  8345  8378 D EGL_emulation: app_time_stats: avg=140.15ms min=59.78ms max=292.85ms count=8
+09-14 06:36:34.287  8345  8378 D EGL_emulation: app_time_stats: avg=227.54ms min=93.10ms max=591.26ms count=5
+09-14 06:36:35.360  8345  8378 D EGL_emulation: app_time_stats: avg=134.03ms min=34.38ms max=313.42ms count=8
+09-14 06:36:36.452  8345  8378 D EGL_emulation: app_time_stats: avg=99.27ms min=34.95ms max=155.92ms count=11
+09-14 06:36:37.505  8345  8378 D EGL_emulation: app_time_stats: avg=87.69ms min=51.10ms max=143.18ms count=12
+09-14 06:36:38.603  8345  8378 D EGL_emulation: app_time_stats: avg=109.74ms min=44.06ms max=172.39ms count=10
+09-14 06:36:39.661  8345  8378 D EGL_emulation: app_time_stats: avg=105.75ms min=48.21ms max=233.08ms count=10
+09-14 06:36:40.773  8345  8378 D EGL_emulation: app_time_stats: avg=185.42ms min=82.61ms max=593.98ms count=6
+09-14 06:36:41.877  8345  8378 D EGL_emulation: app_time_stats: avg=110.32ms min=31.82ms max=201.42ms count=10
+09-14 06:36:43.087  8345  8378 D EGL_emulation: app_time_stats: avg=302.42ms min=156.50ms max=493.97ms count=4
+09-14 06:36:44.163  8345  8378 D EGL_emulation: app_time_stats: avg=179.37ms min=42.26ms max=348.05ms count=6
+09-14 06:36:45.247  8345  8378 D EGL_emulation: app_time_stats: avg=135.41ms min=41.42ms max=332.41ms count=8
+09-14 06:36:46.406  8345  8378 D EGL_emulation: app_time_stats: avg=231.73ms min=137.44ms max=392.18ms count=5
+09-14 06:36:47.429  8345  8378 D EGL_emulation: app_time_stats: avg=204.61ms min=68.60ms max=350.47ms count=5
+09-14 06:36:48.587  8345  8378 D EGL_emulation: app_time_stats: avg=165.37ms min=75.85ms max=322.22ms count=7
+09-14 06:36:49.924  8345  8378 D EGL_emulation: app_time_stats: avg=334.13ms min=172.06ms max=545.33ms count=4
+09-14 06:36:51.148  8345  8378 D EGL_emulation: app_time_stats: avg=244.72ms min=38.19ms max=449.50ms count=5
+09-14 06:36:52.401  8345  8378 D EGL_emulation: app_time_stats: avg=139.04ms min=74.51ms max=281.11ms count=9
+09-14 06:36:53.668  8345  8378 D EGL_emulation: app_time_stats: avg=252.54ms min=226.28ms max=296.72ms count=5
+09-14 06:36:54.821  8345  8378 D EGL_emulation: app_time_stats: avg=192.09ms min=71.59ms max=317.58ms count=6
+09-14 06:36:56.107  8345  8378 D EGL_emulation: app_time_stats: avg=214.23ms min=41.79ms max=461.77ms count=6
+09-14 06:36:57.263  8345  8378 D EGL_emulation: app_time_stats: avg=115.48ms min=31.51ms max=282.57ms count=10
+09-14 06:36:58.419  8345  8378 D EGL_emulation: app_time_stats: avg=115.47ms min=41.17ms max=213.28ms count=10
+09-14 06:36:59.662  8345  8378 D EGL_emulation: app_time_stats: avg=207.26ms min=96.17ms max=312.44ms count=6
+09-14 06:37:00.667  8345  8378 D EGL_emulation: app_time_stats: avg=249.48ms min=66.28ms max=516.29ms count=4
+09-14 06:37:01.963  8345  8378 D EGL_emulation: app_time_stats: avg=129.55ms min=35.74ms max=338.76ms count=10
+09-14 06:37:02.997  8345  8378 D EGL_emulation: app_time_stats: avg=206.83ms min=108.05ms max=296.38ms count=5
+09-14 06:37:04.364  8345  8378 D EGL_emulation: app_time_stats: avg=273.35ms min=34.66ms max=933.09ms count=5
+09-14 06:37:05.382  8345  8378 D EGL_emulation: app_time_stats: avg=254.37ms min=204.36ms max=286.32ms count=4
+09-14 06:37:06.400  8345  8378 D EGL_emulation: app_time_stats: avg=203.58ms min=29.96ms max=540.43ms count=5
+09-14 06:37:07.415  8345  8378 D EGL_emulation: app_time_stats: avg=202.87ms min=125.21ms max=265.56ms count=5
+09-14 06:37:08.536  8345  8378 D EGL_emulation: app_time_stats: avg=186.90ms min=40.28ms max=290.06ms count=6
+09-14 06:37:09.679  8345  8378 D EGL_emulation: app_time_stats: avg=163.13ms min=67.13ms max=415.66ms count=7
+09-14 06:37:10.689  8345  8378 D EGL_emulation: app_time_stats: avg=252.52ms min=205.57ms max=306.22ms count=4
+09-14 06:37:11.745  8345  8378 D EGL_emulation: app_time_stats: avg=263.85ms min=209.54ms max=373.93ms count=4
+09-14 06:37:12.851  8345  8378 D EGL_emulation: app_time_stats: avg=221.24ms min=112.07ms max=295.61ms count=5
+09-14 06:37:13.952  8345  8378 D EGL_emulation: app_time_stats: avg=183.23ms min=49.93ms max=385.57ms count=6
+09-14 06:37:15.028  8345  8378 D EGL_emulation: app_time_stats: avg=134.54ms min=41.53ms max=304.63ms count=8
+09-14 06:37:16.118  8345  8378 D EGL_emulation: app_time_stats: avg=136.18ms min=81.57ms max=347.22ms count=8
+09-14 06:37:17.275  8345  8378 D EGL_emulation: app_time_stats: avg=231.35ms min=86.78ms max=401.31ms count=5
+09-14 06:37:18.307  8345  8378 D EGL_emulation: app_time_stats: avg=206.30ms min=113.19ms max=284.95ms count=5
+09-14 06:37:19.446  8345  8378 D EGL_emulation: app_time_stats: avg=126.44ms min=33.64ms max=290.23ms count=9
+09-14 06:37:20.453  8345  8378 D EGL_emulation: app_time_stats: avg=201.33ms min=92.56ms max=289.29ms count=5
+09-14 06:37:21.469  8345  8378 D EGL_emulation: app_time_stats: avg=168.72ms min=57.97ms max=243.15ms count=6
+09-14 06:37:22.606  8345  8378 D EGL_emulation: app_time_stats: avg=189.34ms min=58.77ms max=439.25ms count=6
+09-14 06:37:23.636  8345  8378 D EGL_emulation: app_time_stats: avg=114.42ms min=72.06ms max=194.44ms count=9
+09-14 06:37:24.761  8345  8378 D EGL_emulation: app_time_stats: avg=281.33ms min=243.40ms max=365.00ms count=4
+09-14 06:37:25.836  8345  8378 D EGL_emulation: app_time_stats: avg=133.87ms min=33.60ms max=282.65ms count=8
+09-14 06:37:27.272  8345  8378 D EGL_emulation: app_time_stats: avg=204.97ms min=61.82ms max=494.35ms count=7
+09-14 06:37:28.396  8345  8378 D EGL_emulation: app_time_stats: avg=224.81ms min=143.93ms max=346.85ms count=5
+09-14 06:37:29.639  8345  8378 D EGL_emulation: app_time_stats: avg=248.46ms min=107.01ms max=381.34ms count=5
+09-14 06:37:30.647  8345  8378 D EGL_emulation: app_time_stats: avg=201.57ms min=40.47ms max=360.59ms count=5
+09-14 06:37:31.774  8345  8378 D EGL_emulation: app_time_stats: avg=125.12ms min=57.49ms max=205.53ms count=9
+09-14 06:37:33.040  8345  8378 D EGL_emulation: app_time_stats: avg=316.46ms min=74.39ms max=722.82ms count=4
+09-14 06:37:34.063  8345  8378 D EGL_emulation: app_time_stats: avg=170.53ms min=31.42ms max=344.09ms count=6
+09-14 06:37:35.216  8345  8378 D EGL_emulation: app_time_stats: avg=128.03ms min=53.16ms max=280.27ms count=9
+09-14 06:37:36.243  8345  8378 D EGL_emulation: app_time_stats: avg=171.20ms min=42.64ms max=269.35ms count=6
+09-14 06:37:37.568  8345  8378 D EGL_emulation: app_time_stats: avg=331.05ms min=168.53ms max=596.71ms count=4
+09-14 06:37:38.632  8345  8378 D EGL_emulation: app_time_stats: avg=246.87ms min=105.88ms max=371.21ms count=4
+09-14 06:37:39.827  8345  8378 D EGL_emulation: app_time_stats: avg=170.63ms min=44.06ms max=285.27ms count=7
+09-14 06:37:40.933  8345  8378 D EGL_emulation: app_time_stats: avg=158.00ms min=31.97ms max=409.88ms count=7
+09-14 06:37:41.941  8345  8378 D EGL_emulation: app_time_stats: avg=201.44ms min=32.90ms max=323.51ms count=5
+09-14 06:37:43.202  8345  8378 D EGL_emulation: app_time_stats: avg=252.12ms min=109.52ms max=438.56ms count=5
+09-14 06:37:44.248  8345  8378 D EGL_emulation: app_time_stats: avg=209.15ms min=79.56ms max=515.15ms count=5
+09-14 06:37:45.296  8345  8378 D EGL_emulation: app_time_stats: avg=116.39ms min=68.14ms max=197.26ms count=9
+09-14 06:37:46.337  8345  8378 D EGL_emulation: app_time_stats: avg=208.19ms min=143.41ms max=258.99ms count=5
+09-14 06:37:47.419  8345  8378 D EGL_emulation: app_time_stats: avg=154.49ms min=61.01ms max=232.24ms count=7
+09-14 06:37:48.506  8345  8378 D EGL_emulation: app_time_stats: avg=271.50ms min=151.32ms max=390.79ms count=4
+09-14 06:37:49.554  8345  8378 D EGL_emulation: app_time_stats: avg=174.67ms min=37.17ms max=272.93ms count=6
+09-14 06:37:50.695  8345  8378 D EGL_emulation: app_time_stats: avg=162.87ms min=39.84ms max=322.31ms count=7
+09-14 06:37:51.822  8345  8378 D EGL_emulation: app_time_stats: avg=225.44ms min=181.04ms max=272.21ms count=5
+09-14 06:37:52.838  8345  8378 D EGL_emulation: app_time_stats: avg=169.30ms min=54.25ms max=365.02ms count=6
+09-14 06:37:53.973  8345  8378 D EGL_emulation: app_time_stats: avg=226.77ms min=132.80ms max=384.55ms count=5
+09-14 06:37:55.156  8345  8378 D EGL_emulation: app_time_stats: avg=169.02ms min=48.26ms max=487.95ms count=7
+09-14 06:37:56.396  8345  8378 D EGL_emulation: app_time_stats: avg=177.03ms min=28.31ms max=358.92ms count=7
+09-14 06:37:57.485  8345  8378 D EGL_emulation: app_time_stats: avg=217.78ms min=142.67ms max=308.08ms count=5
+09-14 06:37:58.654  8345  8378 D EGL_emulation: app_time_stats: avg=194.68ms min=70.64ms max=406.23ms count=6
+09-14 06:37:59.667  8345  8378 D EGL_emulation: app_time_stats: avg=253.25ms min=111.61ms max=422.48ms count=4
+09-14 06:38:00.712  8345  8378 D EGL_emulation: app_time_stats: avg=174.11ms min=43.62ms max=411.98ms count=6
+09-14 06:38:01.960  8345  8378 D EGL_emulation: app_time_stats: avg=138.64ms min=41.17ms max=396.92ms count=9
+09-14 06:38:03.059  8345  8378 D EGL_emulation: app_time_stats: avg=274.60ms min=157.75ms max=482.07ms count=4
+09-14 06:38:04.118  8345  8378 D EGL_emulation: app_time_stats: avg=264.73ms min=154.94ms max=503.57ms count=4
+09-14 06:38:05.226  8345  8378 D EGL_emulation: app_time_stats: avg=276.89ms min=52.97ms max=644.16ms count=4
+09-14 06:38:06.415  8345  8378 D EGL_emulation: app_time_stats: avg=237.71ms min=103.49ms max=395.51ms count=5
+09-14 06:38:07.553  8345  8378 D EGL_emulation: app_time_stats: avg=189.52ms min=38.64ms max=383.57ms count=6
+09-14 06:38:08.599  8345  8378 D EGL_emulation: app_time_stats: avg=174.21ms min=110.03ms max=255.15ms count=6
+09-14 06:38:09.879  8345  8378 D EGL_emulation: app_time_stats: avg=213.19ms min=96.99ms max=491.17ms count=6
+09-14 06:38:10.935  8345  8378 D EGL_emulation: app_time_stats: avg=175.86ms min=40.86ms max=280.83ms count=6
+09-14 06:38:12.130  8345  8378 D EGL_emulation: app_time_stats: avg=239.01ms min=138.19ms max=479.98ms count=5
+09-14 06:38:13.259  8345  8378 D EGL_emulation: app_time_stats: avg=161.00ms min=52.19ms max=223.82ms count=7
+09-14 06:38:14.489  8345  8378 D EGL_emulation: app_time_stats: avg=175.45ms min=64.38ms max=301.33ms count=7
+09-14 06:38:15.566  8345  8378 D EGL_emulation: app_time_stats: avg=119.63ms min=40.51ms max=288.31ms count=9
+09-14 06:38:16.645  8345  8378 D EGL_emulation: app_time_stats: avg=215.77ms min=125.61ms max=306.14ms count=5
+09-14 06:38:17.821  8345  8378 D EGL_emulation: app_time_stats: avg=147.00ms min=40.87ms max=316.66ms count=8
+09-14 06:38:18.896  8345  8378 D EGL_emulation: app_time_stats: avg=214.97ms min=66.27ms max=271.58ms count=5
+09-14 06:38:20.001  8345  8378 D EGL_emulation: app_time_stats: avg=122.66ms min=36.43ms max=219.55ms count=9
+09-14 06:38:21.073  8345  8378 D EGL_emulation: app_time_stats: avg=133.98ms min=73.09ms max=245.63ms count=8
+09-14 06:38:22.228  8345  8378 D EGL_emulation: app_time_stats: avg=192.47ms min=136.46ms max=228.24ms count=6
+09-14 06:38:23.384  8345  8378 D EGL_emulation: app_time_stats: avg=231.14ms min=181.84ms max=277.48ms count=5
+09-14 06:38:24.394  8345  8378 D EGL_emulation: app_time_stats: avg=168.21ms min=39.81ms max=294.75ms count=6
+09-14 06:38:25.395  8345  8378 D EGL_emulation: app_time_stats: avg=250.12ms min=206.99ms max=344.98ms count=4
+09-14 06:38:26.428  8345  8378 D EGL_emulation: app_time_stats: avg=258.22ms min=83.40ms max=540.36ms count=4
+09-14 06:38:27.545  8345  8378 D EGL_emulation: app_time_stats: avg=279.06ms min=181.75ms max=423.11ms count=4
+09-14 06:38:28.554  8345  8378 D EGL_emulation: app_time_stats: avg=168.14ms min=60.69ms max=348.79ms count=6
+09-14 06:38:29.651  8345  8378 D EGL_emulation: app_time_stats: avg=219.24ms min=100.67ms max=333.68ms count=5
+09-14 06:38:30.754  8345  8378 D EGL_emulation: app_time_stats: avg=137.85ms min=34.83ms max=247.79ms count=8
+09-14 06:38:31.842  8345  8378 D EGL_emulation: app_time_stats: avg=120.84ms min=32.81ms max=274.00ms count=9
+09-14 06:38:32.894  8345  8378 D EGL_emulation: app_time_stats: avg=150.27ms min=35.91ms max=321.66ms count=7
+09-14 06:38:33.958  8345  8378 D EGL_emulation: app_time_stats: avg=151.98ms min=68.76ms max=336.51ms count=7
+09-14 06:38:35.143  8345  8378 D EGL_emulation: app_time_stats: avg=169.15ms min=40.98ms max=286.50ms count=7
+09-14 06:38:36.234  8345  8378 D EGL_emulation: app_time_stats: avg=181.83ms min=70.79ms max=417.87ms count=6
+09-14 06:38:37.288  8345  8378 D EGL_emulation: app_time_stats: avg=81.05ms min=32.90ms max=237.64ms count=13
+09-14 06:38:38.309  8345  8378 D EGL_emulation: app_time_stats: avg=92.77ms min=36.00ms max=215.60ms count=11
+09-14 06:38:39.394  8345  8378 D EGL_emulation: app_time_stats: avg=83.44ms min=32.21ms max=182.64ms count=13
+09-14 06:38:40.484  8345  8378 D EGL_emulation: app_time_stats: avg=77.82ms min=38.76ms max=162.09ms count=14
+09-14 06:38:41.574  8345  8378 D EGL_emulation: app_time_stats: avg=155.61ms min=45.37ms max=391.23ms count=7
+09-14 06:38:42.585  8345  8378 D EGL_emulation: app_time_stats: avg=252.82ms min=165.78ms max=393.66ms count=4
+09-14 06:38:43.842  8345  8378 D EGL_emulation: app_time_stats: avg=179.47ms min=68.97ms max=342.91ms count=7
+09-14 06:38:44.910  8345  8378 D EGL_emulation: app_time_stats: avg=118.70ms min=49.44ms max=217.49ms count=9
+09-14 06:38:45.929  8345  8378 D EGL_emulation: app_time_stats: avg=169.64ms min=79.67ms max=319.67ms count=6
+09-14 06:38:47.083  8345  8378 D EGL_emulation: app_time_stats: avg=230.77ms min=69.02ms max=511.38ms count=5
+09-14 06:38:48.104  8345  8378 D EGL_emulation: app_time_stats: avg=204.28ms min=60.57ms max=364.15ms count=5
+09-14 06:38:49.112  8345  8378 D EGL_emulation: app_time_stats: avg=143.93ms min=28.97ms max=359.93ms count=7
+09-14 06:38:50.186  8345  8378 D EGL_emulation: app_time_stats: avg=89.43ms min=31.30ms max=164.03ms count=12
+09-14 06:38:51.340  8345  8378 D EGL_emulation: app_time_stats: avg=96.09ms min=39.00ms max=193.80ms count=12
+09-14 06:38:52.457  8345  8378 D EGL_emulation: app_time_stats: avg=111.64ms min=36.15ms max=223.75ms count=10
+09-14 06:38:53.474  8345  8378 D EGL_emulation: app_time_stats: avg=78.18ms min=38.49ms max=131.81ms count=13
+09-14 06:38:54.533  8345  8378 D EGL_emulation: app_time_stats: avg=132.30ms min=33.90ms max=272.53ms count=8
+09-14 06:38:55.615  8345  8378 D EGL_emulation: app_time_stats: avg=216.35ms min=126.08ms max=306.43ms count=5
+09-14 06:38:56.649  8345  8378 D EGL_emulation: app_time_stats: avg=172.36ms min=44.00ms max=414.82ms count=6
+09-14 06:38:57.738  8345  8378 D EGL_emulation: app_time_stats: avg=217.58ms min=123.42ms max=329.65ms count=5
+09-14 06:38:58.781  8345  8378 D EGL_emulation: app_time_stats: avg=86.94ms min=59.81ms max=145.18ms count=12
+09-14 06:38:59.929  8345  8378 D EGL_emulation: app_time_stats: avg=163.77ms min=66.87ms max=284.31ms count=7
+09-14 06:39:00.964  8345  8378 D EGL_emulation: app_time_stats: avg=206.96ms min=60.24ms max=478.73ms count=5
+09-14 06:39:02.008  8345  8378 D EGL_emulation: app_time_stats: avg=104.38ms min=41.27ms max=250.74ms count=10
+09-14 06:39:03.136  8345  8378 D EGL_emulation: app_time_stats: avg=225.62ms min=133.06ms max=396.72ms count=5
+09-14 06:39:04.376  8345  8378 D EGL_emulation: app_time_stats: avg=247.98ms min=33.13ms max=774.72ms count=5
+09-14 06:39:05.544  8345  8378 D EGL_emulation: app_time_stats: avg=194.51ms min=51.08ms max=306.01ms count=6
+09-14 06:39:06.770  8345  8378 D EGL_emulation: app_time_stats: avg=245.19ms min=115.44ms max=364.06ms count=5
+09-14 06:39:07.993  8345  8378 D EGL_emulation: app_time_stats: avg=174.63ms min=54.85ms max=307.89ms count=7
+09-14 06:39:09.186  8345  8378 D EGL_emulation: app_time_stats: avg=238.65ms min=88.27ms max=433.92ms count=5
+09-14 06:39:10.302  8345  8378 D EGL_emulation: app_time_stats: avg=223.13ms min=83.22ms max=413.35ms count=5
+09-14 06:39:11.366  8345  8378 D EGL_emulation: app_time_stats: avg=265.85ms min=89.92ms max=417.44ms count=4
+09-14 06:39:12.560  8345  8378 D EGL_emulation: app_time_stats: avg=198.89ms min=88.50ms max=416.32ms count=6
+09-14 06:39:13.809  8345  8378 D EGL_emulation: app_time_stats: avg=124.84ms min=34.58ms max=337.38ms count=10
+09-14 06:39:14.840  8345  8378 D EGL_emulation: app_time_stats: avg=114.43ms min=39.14ms max=213.56ms count=9
+09-14 06:39:15.909  8345  8378 D EGL_emulation: app_time_stats: avg=178.17ms min=82.44ms max=360.18ms count=6
+09-14 06:39:16.919  8345  8378 D EGL_emulation: app_time_stats: avg=144.23ms min=50.42ms max=247.34ms count=7
+09-14 06:39:18.144  8345  8378 D EGL_emulation: app_time_stats: avg=203.94ms min=148.40ms max=279.39ms count=6
+09-14 06:39:19.364  8345  8378 D EGL_emulation: app_time_stats: avg=304.89ms min=143.59ms max=515.57ms count=4
+09-14 06:39:20.411  8345  8378 D EGL_emulation: app_time_stats: avg=174.41ms min=50.44ms max=301.60ms count=6
+09-14 06:39:21.437  8345  8378 D EGL_emulation: app_time_stats: avg=146.52ms min=78.94ms max=286.79ms count=7
+09-14 06:39:22.619  8345  8378 D EGL_emulation: app_time_stats: avg=236.31ms min=153.72ms max=434.32ms count=5
+09-14 06:39:23.749  8345  8378 D EGL_emulation: app_time_stats: avg=188.21ms min=64.40ms max=282.17ms count=6
+09-14 06:39:24.837  8345  8378 D EGL_emulation: app_time_stats: avg=272.00ms min=168.86ms max=515.81ms count=4
+09-14 06:39:25.923  8345  8378 D EGL_emulation: app_time_stats: avg=181.03ms min=84.84ms max=422.47ms count=6
+09-14 06:39:26.988  8345  8378 D EGL_emulation: app_time_stats: avg=265.97ms min=147.67ms max=529.47ms count=4
+09-14 06:39:28.045  8345  8378 D EGL_emulation: app_time_stats: avg=151.04ms min=28.41ms max=395.07ms count=7
+09-14 06:39:29.153  8345  8378 D EGL_emulation: app_time_stats: avg=221.59ms min=75.79ms max=355.39ms count=5
+09-14 06:39:30.278  8345  8378 D EGL_emulation: app_time_stats: avg=224.85ms min=45.20ms max=480.93ms count=5
+09-14 06:39:31.392  8345  8378 D EGL_emulation: app_time_stats: avg=123.73ms min=54.83ms max=252.44ms count=9
+09-14 06:39:32.451  8345  8378 D EGL_emulation: app_time_stats: avg=151.27ms min=34.66ms max=304.91ms count=7
+09-14 06:39:33.483  8345  8378 D EGL_emulation: app_time_stats: avg=93.81ms min=31.36ms max=155.99ms count=11
+09-14 06:39:34.561  8345  8378 D EGL_emulation: app_time_stats: avg=269.39ms min=90.75ms max=547.68ms count=4
+09-14 06:39:35.603  8345  8378 D EGL_emulation: app_time_stats: avg=260.61ms min=55.80ms max=437.52ms count=4
+09-14 06:39:36.689  8345  8378 D EGL_emulation: app_time_stats: avg=271.24ms min=182.86ms max=417.62ms count=4
+09-14 06:39:37.799  8345  8378 D EGL_emulation: app_time_stats: avg=185.04ms min=43.43ms max=290.54ms count=6
+09-14 06:39:38.832  8345  8378 D EGL_emulation: app_time_stats: avg=206.47ms min=54.23ms max=320.28ms count=5
+09-14 06:39:40.035  8345  8378 D EGL_emulation: app_time_stats: avg=171.79ms min=47.50ms max=397.87ms count=7
+09-14 06:39:41.094  8345  8378 D EGL_emulation: app_time_stats: avg=353.01ms min=185.89ms max=544.25ms count=3
+09-14 06:39:42.181  8345  8378 D EGL_emulation: app_time_stats: avg=217.15ms min=84.79ms max=324.27ms count=5
+09-14 06:39:43.263  8345  8378 D EGL_emulation: app_time_stats: avg=180.35ms min=66.94ms max=287.99ms count=6
+09-14 06:39:44.445  8345  8378 D EGL_emulation: app_time_stats: avg=236.26ms min=94.93ms max=343.74ms count=5
+09-14 06:39:45.533  8345  8378 D EGL_emulation: app_time_stats: avg=120.87ms min=39.51ms max=178.43ms count=9
+09-14 06:39:46.552  8345  8378 D EGL_emulation: app_time_stats: avg=126.84ms min=45.38ms max=372.32ms count=8
+09-14 06:39:47.718  8345  8378 D EGL_emulation: app_time_stats: avg=194.22ms min=104.92ms max=270.91ms count=6
+09-14 06:39:48.936  8345  8378 D EGL_emulation: app_time_stats: avg=135.26ms min=31.67ms max=412.01ms count=9
+09-14 06:39:50.080  8345  8378 D EGL_emulation: app_time_stats: avg=190.65ms min=72.36ms max=411.40ms count=6
+09-14 06:39:51.115  8345  8378 D EGL_emulation: app_time_stats: avg=115.05ms min=30.27ms max=262.65ms count=9
+09-14 06:39:52.184  8345  8378 D EGL_emulation: app_time_stats: avg=133.52ms min=28.52ms max=353.17ms count=8
+09-14 06:39:53.339  8345  8378 D EGL_emulation: app_time_stats: avg=231.03ms min=155.76ms max=403.10ms count=5
+09-14 06:39:54.388  8345  8378 D EGL_emulation: app_time_stats: avg=209.75ms min=176.11ms max=265.75ms count=5
+09-14 06:39:55.410  8345  8378 D EGL_emulation: app_time_stats: avg=254.38ms min=157.70ms max=396.57ms count=4
+09-14 06:39:56.867  8345  8378 D EGL_emulation: app_time_stats: avg=291.16ms min=102.21ms max=668.92ms count=5
+09-14 06:39:58.029  8345  8378 D EGL_emulation: app_time_stats: avg=165.95ms min=101.43ms max=233.06ms count=7
+09-14 06:39:59.100  8345  8378 D EGL_emulation: app_time_stats: avg=213.80ms min=124.78ms max=260.35ms count=5
+09-14 06:40:00.305  8345  8378 D EGL_emulation: app_time_stats: avg=200.80ms min=44.05ms max=379.26ms count=6
+09-14 06:40:01.387  8345  8378 D EGL_emulation: app_time_stats: avg=108.18ms min=35.07ms max=228.78ms count=10
+09-14 06:40:02.642  8345  8378 D EGL_emulation: app_time_stats: avg=251.08ms min=95.82ms max=380.25ms count=5
+09-14 06:40:03.891  8345  8378 D EGL_emulation: app_time_stats: avg=104.04ms min=31.23ms max=276.86ms count=12
+09-14 06:40:04.892  8345  8378 D EGL_emulation: app_time_stats: avg=90.91ms min=33.20ms max=168.13ms count=11
+09-14 06:40:05.963  8345  8378 D EGL_emulation: app_time_stats: avg=267.91ms min=235.94ms max=343.60ms count=4
+09-14 06:40:07.180  8345  8378 D EGL_emulation: app_time_stats: avg=202.63ms min=83.73ms max=326.35ms count=6
+09-14 06:40:08.257  8345  8378 D EGL_emulation: app_time_stats: avg=215.16ms min=81.99ms max=326.94ms count=5
+09-14 06:40:09.372  8345  8378 D EGL_emulation: app_time_stats: avg=222.81ms min=147.13ms max=337.85ms count=5
+09-14 06:40:10.424  8345  8378 D EGL_emulation: app_time_stats: avg=150.31ms min=44.84ms max=247.67ms count=7
+09-14 06:40:11.472  8345  8378 D EGL_emulation: app_time_stats: avg=209.40ms min=68.00ms max=308.43ms count=5
+09-14 06:40:12.554  8345  8378 D EGL_emulation: app_time_stats: avg=268.44ms min=104.43ms max=419.40ms count=4
+09-14 06:40:13.564  8345  8378 D EGL_emulation: app_time_stats: avg=168.35ms min=35.03ms max=257.72ms count=6
+09-14 06:40:14.591  8345  8378 D EGL_emulation: app_time_stats: avg=171.07ms min=55.20ms max=353.03ms count=6
+09-14 06:40:15.687  8345  8378 D EGL_emulation: app_time_stats: avg=121.78ms min=33.51ms max=270.94ms count=9
+09-14 06:40:16.780  8345  8378 D EGL_emulation: app_time_stats: avg=182.14ms min=76.06ms max=294.20ms count=6
+09-14 06:40:17.796  8345  8378 D EGL_emulation: app_time_stats: avg=253.84ms min=127.27ms max=541.72ms count=4
+09-14 06:40:18.914  8345  8378 D EGL_emulation: app_time_stats: avg=185.74ms min=48.13ms max=326.69ms count=6
+09-14 06:40:19.958  8345  8378 D EGL_emulation: app_time_stats: avg=115.91ms min=30.24ms max=210.71ms count=9
+09-14 06:40:21.012  8345  8378 D EGL_emulation: app_time_stats: avg=95.80ms min=37.37ms max=134.23ms count=11
+09-14 06:40:22.139  8345  8378 D EGL_emulation: app_time_stats: avg=281.51ms min=191.04ms max=396.72ms count=4
+09-14 06:40:23.159  8345  8378 D EGL_emulation: app_time_stats: avg=204.03ms min=30.56ms max=472.05ms count=5
+09-14 06:40:24.215  8345  8378 D EGL_emulation: app_time_stats: avg=210.93ms min=86.16ms max=285.35ms count=5
+09-14 06:40:25.347  8345  8378 D EGL_emulation: app_time_stats: avg=188.49ms min=44.35ms max=373.42ms count=6
+09-14 06:40:26.420  8345  8378 D EGL_emulation: app_time_stats: avg=178.79ms min=51.79ms max=334.34ms count=6
+09-14 06:40:27.586  8345  8378 D EGL_emulation: app_time_stats: avg=230.47ms min=118.63ms max=351.13ms count=5
+09-14 06:40:28.665  8345  8378 D EGL_emulation: app_time_stats: avg=215.80ms min=64.37ms max=483.91ms count=5
+09-14 06:40:29.733  8345  8378 D EGL_emulation: app_time_stats: avg=267.02ms min=173.82ms max=300.75ms count=4
+09-14 06:40:30.763  8345  8378 D EGL_emulation: app_time_stats: avg=146.98ms min=69.74ms max=352.97ms count=7
+09-14 06:40:31.898  8345  8378 D EGL_emulation: app_time_stats: avg=113.46ms min=33.18ms max=188.31ms count=10
+09-14 06:40:32.948  8345  8378 D EGL_emulation: app_time_stats: avg=210.08ms min=114.89ms max=351.95ms count=5
+09-14 06:40:34.135  8345  8378 D EGL_emulation: app_time_stats: avg=296.74ms min=138.26ms max=617.80ms count=4
+09-14 06:40:35.139  8345  8378 D EGL_emulation: app_time_stats: avg=125.35ms min=41.17ms max=387.50ms count=8
+09-14 06:40:36.183  8345  8378 D EGL_emulation: app_time_stats: avg=174.05ms min=43.21ms max=402.80ms count=6
+09-14 06:40:37.287  8345  8378 D EGL_emulation: app_time_stats: avg=220.74ms min=139.47ms max=287.89ms count=5
+09-14 06:40:38.428  8345  8378 D EGL_emulation: app_time_stats: avg=162.88ms min=70.19ms max=275.35ms count=7
+09-14 06:40:39.464  8345  8378 D EGL_emulation: app_time_stats: avg=207.20ms min=32.42ms max=497.70ms count=5
+09-14 06:40:40.509  8345  8378 D EGL_emulation: app_time_stats: avg=208.82ms min=47.40ms max=310.66ms count=5
+09-14 06:40:42.038  8345  8378 D EGL_emulation: app_time_stats: avg=218.39ms min=31.47ms max=742.83ms count=7
+09-14 06:40:42.446  8345  8345 V threaded_app: Pause: 0xb400007365258d90
+09-14 06:40:43.275  8345  8378 D EGL_emulation: app_time_stats: avg=309.22ms min=87.43ms max=959.27ms count=4
+09-14 06:40:43.312  8345  8378 V threaded_app: activityState=14
+09-14 06:40:43.345  8345  8345 V threaded_app: WindowFocusChanged: 0xb400007365258d90 -- 0
+09-14 06:40:45.681  8345  8345 V threaded_app: Resume: 0xb400007365258d90
+09-14 06:40:45.681  8345  8378 V threaded_app: activityState=12
+09-14 06:40:46.619  8345  8378 D EGL_emulation: app_time_stats: avg=3343.62ms min=3343.62ms max=3343.62ms count=1
+09-14 06:40:47.431  8345  8345 V threaded_app: WindowFocusChanged: 0xb400007365258d90 -- 1
+09-14 06:40:48.143  8345  8345 I Choreographer: Skipped 37 frames!  The application may be doing too much work on its main thread.
+09-14 06:40:48.144  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:40:48.144  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:40:48.200  8345  8369 D EGL_emulation: app_time_stats: avg=280542.66ms min=543.38ms max=560541.94ms count=2
+09-14 06:40:48.265  8345  8378 D EGL_emulation: app_time_stats: avg=816.05ms min=754.24ms max=877.85ms count=2
+09-14 06:40:48.279  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:40:48.279103Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:40:48.279  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:40:50.120  8345  8378 D EGL_emulation: app_time_stats: avg=308.99ms min=42.29ms max=1019.97ms count=6
+09-14 06:40:50.469  8345  8345 V threaded_app: Pause: 0xb400007365258d90
+09-14 06:40:50.688  8345  8378 V threaded_app: activityState=14
+09-14 06:40:50.696  8345  8345 V threaded_app: WindowFocusChanged: 0xb400007365258d90 -- 0
+09-14 06:40:52.493  8345  8345 V threaded_app: NativeWindowDestroyed: 0xb400007365258d90 -- 0xb4000073f53c1910
+09-14 06:40:52.493  8345  8345 V threaded_app: android_app_set_window called
+09-14 06:40:52.493  8345  8378 V threaded_app: APP_CMD_TERM_WINDOW
+09-14 06:40:52.599  8345  8382 D HostConnection: createUnique: call
+09-14 06:40:52.600  8345  8382 D HostConnection: HostConnection::get() New Host Connection established 0xb40000730526bcd0, tid 8382
+09-14 06:40:52.614  8345  8382 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-14 06:40:52.619  8345  8382 D EGL_emulation: eglMakeCurrent: 0xb400007305256010: ver 3 0 (tinfo 0x751db2b180) (first time)
+09-14 06:40:52.678  8345  8378 V threaded_app: APP_CMD_TERM_WINDOW
+09-14 06:40:53.200  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:40:53.200  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:40:53.212  8345  8345 V threaded_app: TrimMemory: 0xb400007365258d90 20
+09-14 06:40:53.242  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:40:53.243  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:40:53.242728Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:40:53.269  8345  8345 V threaded_app: Stop: 0xb400007365258d90
+09-14 06:40:53.282  8345  8378 V threaded_app: activityState=15
+09-14 06:40:53.282  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStop notification to application
+09-14 06:40:53.284  8345  8345 V threaded_app: SaveInstanceState: 0xb400007365258d90
+09-14 06:40:53.284  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward saveState notification to application
+09-14 06:40:53.285  8345  8378 V threaded_app: APP_CMD_SAVE_STATE
+09-14 06:40:53.285  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:40:53.282804Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStop notification to application
+09-14 06:40:53.285  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:40:53.284972Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward saveState notification to application
+09-14 06:40:54.219  8345  8345 V GameActivity: onStart_native
+09-14 06:40:54.219  8345  8345 V threaded_app: Start: 0xb400007365258d90
+09-14 06:40:54.219  8345  8378 V threaded_app: activityState=11
+09-14 06:40:54.219  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+09-14 06:40:54.219  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:40:54.219368Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+09-14 06:40:54.235  8345  8345 V threaded_app: Resume: 0xb400007365258d90
+09-14 06:40:54.235  8345  8378 V threaded_app: activityState=12
+09-14 06:40:56.029  8345  8345 V GameActivity: onSurfaceCreated_native
+09-14 06:40:56.051  8345  8345 V threaded_app: NativeWindowCreated: 0xb400007365258d90 -- 0xb4000073f53c1910
+09-14 06:40:56.051  8345  8345 V threaded_app: android_app_set_window called
+09-14 06:40:56.051  8345  8378 V threaded_app: APP_CMD_INIT_WINDOW
+09-14 06:40:56.055  8345  8345 V threaded_app: NativeWindowRedrawNeeded: 0xb400007365258d90 -- 0xb4000073f53c1910
+09-14 06:40:57.437  8345  8345 I Choreographer: Skipped 73 frames!  The application may be doing too much work on its main thread.
+09-14 06:40:57.508  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:40:57.508  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:40:57.961  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:40:58.108  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:40:58.243  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:40:58.243058Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:40:58.243  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:40:58.251  8345  8345 V threaded_app: WindowFocusChanged: 0xb400007365258d90 -- 1
+09-14 06:40:58.876  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:40:58.876397Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:40:58.876  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:40:58.889  8345  8345 I Choreographer: Skipped 56 frames!  The application may be doing too much work on its main thread.
+09-14 06:40:58.900  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:40:58.900  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:40:59.673  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:40:59.678  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:40:59.672943Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:40:59.830  8345  8345 V threaded_app: Pause: 0xb400007365258d90
+09-14 06:41:00.996  8345  8378 D EGL_emulation: app_time_stats: avg=1709.64ms min=1325.65ms max=2093.63ms count=2
+09-14 06:41:01.002  8345  8378 V threaded_app: activityState=14
+09-14 06:41:01.046  8345  8345 V threaded_app: WindowFocusChanged: 0xb400007365258d90 -- 0
+09-14 06:41:03.273  8345  8345 V threaded_app: Resume: 0xb400007365258d90
+09-14 06:41:03.275  8345  8378 V threaded_app: activityState=12
+09-14 06:41:04.786  8345  8378 D EGL_emulation: app_time_stats: avg=3789.65ms min=3789.65ms max=3789.65ms count=1
+09-14 06:41:05.413  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:41:05.413  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:41:06.032  8345  8345 V threaded_app: WindowFocusChanged: 0xb400007365258d90 -- 1
+09-14 06:41:06.306  8345  8345 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 06:41:06.306  8345  8345 V threaded_app: WindowInsetsChanged: 0xb400007365258d90
+09-14 06:41:06.613  8345  8378 D EGL_emulation: app_time_stats: avg=1826.53ms min=1826.53ms max=1826.53ms count=1
+09-14 06:41:06.810  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:41:06.810227Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:41:06.810  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:41:07.262  8345  8378 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 06:41:07.264  8345  8377 I RustStdoutStderr: [2m2026-09-13T22:41:07.262100Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 06:41:08.110  8345  8378 D EGL_emulation: app_time_stats: avg=748.49ms min=618.06ms max=878.93ms count=2

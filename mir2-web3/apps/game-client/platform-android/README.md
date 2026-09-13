@@ -71,6 +71,12 @@ Set `MIR2_GATEWAY_WS_URL` explicitly at build time for approved online tests.
 Neither an exported Activity intent nor old endpoint preferences override it.
 With no endpoint the actual shared login screen shows a configuration notice;
 it does not fabricate a connection or a selectable test character.
+The 2026-09-14 network Debug package revalidated that fail-closed path on the
+API 31 ARM64 emulator with the shared full-screen login surface visible; see
+`docs/generated/player-qa/native-android-network-debug-20260914/README.md`.
+That pack is build/install/render evidence only. No approved WSS account or
+physical Android device was available, so it does not close either external
+gate.
 
 ## Login transport
 
