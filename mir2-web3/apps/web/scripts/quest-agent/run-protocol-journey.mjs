@@ -596,6 +596,12 @@ try {
             action: playerCombatAction,
             maxAttackAttempts,
             approachRange: combatApproachRange,
+            // Shared-zone projectile resolution and the authoritative quest
+            // award can arrive more than seven seconds after the cast. R45
+            // observed the death/progress packet at 7.18s, just after the old
+            // six-second harness deadline, so keep this acceptance wait above
+            // that measured delivery window.
+            questSettleTimeout: 12_000,
             sustain: async (owner, context = {}) => {
               const carving = context.phase === 'harvest';
               const retreating = context.phase === 'retreat';
