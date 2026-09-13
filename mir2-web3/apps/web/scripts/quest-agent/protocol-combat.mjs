@@ -885,6 +885,18 @@ function nextPendingObjective(snapshot, stateQuest, descriptors) {
   // any objective with an authoritative source on the current map before
   // crossing another full map. Besides reducing backtracking, this lets normal
   // quest combat clear the monsters physically occupying a required corridor.
+  // When several pending objectives share the map, consume a visible source
+  // before sweeping the static footprint of a sparse or respawning source.
+  // This keeps productive quest combat moving while preserving the authored
+  // objective order as the fallback when no required monster is in the AOI.
+  const visible = (snapshot?.entities ?? []).filter(entity => isLiveMonster(entity));
+  const visiblePending = pending.find(descriptor => {
+    const monsterNames = descriptor.kind === "kill"
+      ? [descriptor.route.monsterName]
+      : (descriptor.route.sources ?? []).map(source => source.monsterName);
+    return visible.some(entity => monsterNames.some(name => sameName(entity.name, name)));
+  });
+  if (visiblePending) return visiblePending;
   return pending.find(descriptor => selectTargetPlan(snapshot, descriptor)) ?? pending[0] ?? null;
 }
 

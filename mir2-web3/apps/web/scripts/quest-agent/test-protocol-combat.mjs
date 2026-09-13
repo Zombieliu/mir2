@@ -124,6 +124,39 @@ test("q5 completes Deer and Scarecrow kill objectives without treating monster l
   assert.deepEqual(client.sent.map(entry => entry.objectId), [30, 39]);
 });
 
+test("a multi-objective hunt clears a visible later target while the first target is respawning", async () => {
+  const quest = {
+    questId: 98,
+    stage: "InProgress",
+    objectives: [objective("Kill Dung", 0, 1), objective("Kill WoomaSoldier", 0, 1)],
+  };
+  const client = new FakeClient(snapshot(quest, [monster(98, "WoomaSoldier")]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      const target = state.entities.find(entry => entry.objectId === command.objectId);
+      Object.assign(target, { hp: 0, dead: true });
+      if (target.name === "WoomaSoldier") {
+        state.questLog[0].objectives[1] = objective("Kill WoomaSoldier", 1, 1);
+        state.entities.push(monster(99, "Dung"));
+      } else {
+        state.questLog[0].objectives[0] = objective("Kill Dung", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    });
+  });
+
+  const result = await completeQuestObjectives(client, {
+    questId: 98,
+    objectives: { kill: [
+      { monsterName: "Dung", spawnCandidates: [spawn("Dung")] },
+      { monsterName: "WoomaSoldier", spawnCandidates: [spawn("WoomaSoldier")] },
+    ], item: [] },
+  }, navigateClientNear(client), settings);
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [98, 99]);
+});
+
 test("a multi-map quest clears an incomplete same-map objective before crossing to the first listed source", async () => {
   const quest = {
     questId: 54,
