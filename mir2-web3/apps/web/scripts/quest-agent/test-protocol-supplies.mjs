@@ -2,13 +2,16 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   equipHeldAmulet,
+  randomTeleportCount,
   restockInVillage,
+  useRandomTeleport,
   warriorWeaponFundingGold,
 } from './protocol-supplies.mjs';
 
 const HP = 658;
 const MP = 659;
 const AMULET = 712;
+const RANDOM_TELEPORT = 717;
 
 function item(itemIndex, quantity, name = itemIndex === HP ? '(HP)DrugSmall' : itemIndex === MP ? '(MP)DrugSmall' : 'Amulet', uniqueId = itemIndex) {
   return { name, uniqueId, quantity, container: 'bag1', tooltipSource: { info: {
@@ -140,6 +143,21 @@ class FakeClient {
       }
       return { packet, payload: { success: true } };
     }
+    if (packet === 'UseItem') {
+      this.sent.push(structuredClone(command));
+      if (this.options.rejectUse) return { packet, payload: { success: false } };
+      const next = structuredClone(this.snapshot);
+      const items = command.grid === 'belt' ? next.beltItems : command.grid === 'equipment' ? next.equipmentItems : next.inventoryItems;
+      const index = items.findIndex(entry => Number(entry.uniqueId) === Number(command.uniqueId));
+      if (index < 0) return { packet, payload: { success: false } };
+      if (Number(items[index].quantity ?? 1) > 1) items[index].quantity -= 1;
+      else items.splice(index, 1);
+      const actor = next.entities.find(entry => Number(entry.objectId) === Number(next.playerObjectId));
+      actor.x += 7;
+      actor.y += 3;
+      this.receive(next);
+      return { packet, payload: { success: true } };
+    }
     const after = this.sequence;
     this.send(command);
     if (packet === 'NPCGoods' && !this.options.noGoods) {
@@ -174,6 +192,10 @@ function goods() {
     { id: 72, uniqueId: 72, itemIndex: MP, name: '(MP)DrugSmall', price: 40, count: 1 },
     { id: 73, uniqueId: 73, itemIndex: AMULET, name: 'Amulet', price: 25, count: 1 },
   ];
+}
+
+function emergencyGoods() {
+  return [...goods(), { id: 71701, uniqueId: 71701, itemIndex: RANDOM_TELEPORT, name: 'RandomTeleport', price: 100, count: 1 }];
 }
 
 function weaponGoods() {
@@ -312,6 +334,72 @@ test('does nothing outside map 0 or when relevant stock is sufficient', async ()
   assert.deepEqual([...outside.sent, ...stocked.sent], []);
 });
 
+test('ordinary restock does not buy RandomTeleport unless explicitly requested', async () => {
+  const client = new FakeClient(snapshot({ gold: 1000, hp: 3 }), { goods: emergencyGoods() });
+  const result = await restockInVillage(client, async () => {});
+  assert.equal(result.status, 'sufficient');
+  assert.equal(client.sent.some(entry => entry.type === 'buyItem' && entry.itemIndex === 71701), false);
+  assert.equal(client.snapshot.inventoryItems.some(entry => Number(entry.tooltipSource?.info?.item_index) === RANDOM_TELEPORT), false);
+});
+
+test('explicit emergency reserve buys exact Merchant Ruben RandomTeleport rows and proves deltas', async () => {
+  const client = new FakeClient(snapshot({ gold: 500, hp: 6 }), { goods: emergencyGoods() });
+  const result = await restockInVillage(client, async () => {}, {
+    emergencyTeleportCount: 2,
+    reserveGold: 0,
+  });
+  assert.equal(result.status, 'restocked');
+  assert.deepEqual(result.purchases, [{
+    itemIndex: RANDOM_TELEPORT,
+    name: 'RandomTeleport',
+    shopItemId: 71701,
+    quantity: 2,
+    unitPrice: 100,
+    cost: 200,
+  }]);
+  assert.equal(result.after.gold, 300);
+  assert.equal(result.after.hp, 6);
+  assert.equal(client.sent.at(-1).itemIndex, 71701);
+});
+
+test('emergency reserve is a target and does not repurchase an existing full stock', async () => {
+  const state = snapshot({ gold: 500, hp: 6 });
+  state.inventoryItems.push(item(RANDOM_TELEPORT, 2, 'RandomTeleport', 717000));
+  const client = new FakeClient(state, { goods: emergencyGoods() });
+  const result = await restockInVillage(client, async () => {}, {
+    emergencyTeleportCount: 2,
+    reserveGold: 0,
+  });
+  assert.equal(result.status, 'sufficient');
+  assert.equal(client.snapshot.gold, 500);
+  assert.deepEqual(client.sent, []);
+});
+
+test('RandomTeleport use requires an ack, a fresh quantity decrease, and changed position', async () => {
+  const state = snapshot({ gold: 500, hp: 6 });
+  state.inventoryItems.push(item(RANDOM_TELEPORT, 2, 'RandomTeleport', 717001));
+  const client = new FakeClient(state);
+  const result = await useRandomTeleport(client);
+  assert.deepEqual(result, {
+    uniqueId: 717001,
+    grid: 'inventory',
+    quantityBefore: 2,
+    quantityAfter: 1,
+    from: { x: 290, y: 608 },
+    to: { x: 297, y: 611 },
+  });
+  assert.deepEqual(client.sent.at(-2), { type: 'useItem', uniqueId: 717001, grid: 'inventory' });
+  assert.deepEqual(client.sent.at(-1), { type: 'clientVersion' });
+  assert.equal(randomTeleportCount(client.snapshot), 1);
+});
+
+test('RandomTeleport use fails closed on a rejected ack', async () => {
+  const state = snapshot({ gold: 500, hp: 6 });
+  state.inventoryItems.push(item(RANDOM_TELEPORT, 1, 'RandomTeleport', 717002));
+  const client = new FakeClient(state, { rejectUse: true });
+  await assert.rejects(() => useRandomTeleport(client), /UseItem was rejected/);
+});
+
 test('insufficient funds preserves the 100 gold reserve and sends no command', async () => {
   const client = new FakeClient(snapshot({ gold: 139, hp: 0 }));
   let navigated = false;
@@ -411,6 +499,7 @@ test('journey recovery sells obsolete materials but preserves an active quest it
     { name: 'CannibalLeaf', uniqueId: 910, quantity: 2, container: 'bag1', sellValue: 50 },
     { name: 'SpiderTeeth', uniqueId: 911, quantity: 2, container: 'bag1', sellValue: 50 },
     { name: 'JadeRing', uniqueId: 912, quantity: 1, container: 'bag1', sellValue: 400 },
+    { name: 'RandomTeleport', uniqueId: 913, quantity: 2, container: 'bag1', sellValue: 50 },
   );
   const client = new FakeClient(state);
   const navigations = [];
@@ -427,6 +516,7 @@ test('journey recovery sells obsolete materials but preserves an active quest it
   assert.equal(result.after.hp, 5);
   assert.equal(result.after.gold, 27);
   assert.ok(client.snapshot.inventoryItems.some(entry => entry.name === 'JadeRing'));
+  assert.ok(client.snapshot.inventoryItems.some(entry => entry.name === 'RandomTeleport'));
   assert.deepEqual(navigations, [
     [{ x: 295, y: 605 }, 1],
     [{ x: 288, y: 608 }, 1],

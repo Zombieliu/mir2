@@ -2274,6 +2274,222 @@ test("a fully occupied retreat cuts down one proven adjacent attacker to open an
   assert.equal(diagnostics.filter(entry => entry.type === "unsafePackBreakoutCombat").length, 1);
 });
 
+test("low-health no-step retreat uses the optional emergency escape before breaking out", async () => {
+  const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
+  const blockers = Array.from({ length: 8 }, (_, index) =>
+    monster(61 + index, index % 2 ? "TigerViper" : "TigerSnake", 100 + index, 100, { disposition: "hostile" }));
+  const client = new FakeClient(snapshot(quest, blockers), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { dead: true, hp: 0 });
+      if (command.objectId === 60) {
+        state.questLog[0].objectives[0] = objective("Kill RedSnake", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    }, { objectId: command.objectId });
+  });
+  client.snapshot.playerHp = 10;
+  client.snapshot.entities[0].hp = 10;
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let searchVisits = 0;
+  let emergencyCalls = 0;
+  let noStepCalls = 0;
+  const navigate = async (target, _range, stopWhen, options = {}) => {
+    const actor = client.snapshot.entities[0];
+    if (target.objectId === 60) {
+      Object.assign(actor, { x: target.x - 1, y: target.y });
+      return { reached: true };
+    }
+    if (options.allowedHostileObjectIds) {
+      noStepCalls += 1;
+      return { reached: false, successfulSteps: 0 };
+    }
+    searchVisits += 1;
+    if (searchVisits === 1) {
+      Object.assign(actor, { x: 20, y: 20 });
+      blockers.forEach((blocker, index) => Object.assign(blocker, {
+        x: 20 + (index % 3) - 1,
+        y: 20 + Math.floor(index / 3) - 1,
+      }));
+      client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+      assert.equal(stopWhen(), true);
+      return { reached: false };
+    }
+    client.snapshot.entities.push(monster(60, "RedSnake", 30, 30, { disposition: "hostile" }));
+    assert.equal(stopWhen(), true);
+    return { reached: false };
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 33,
+    objectives: { kill: [{ monsterName: "RedSnake", spawnCandidates: [spawn("RedSnake", 30, 30)] }], item: [] },
+  }, navigate, {
+    ...settings,
+    maxEngagements: 6,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 0,
+    unsafeRetreatSteps: 8,
+    emergencyEscapeHpRatio: 0.3,
+    emergencyEscape: async (owner) => {
+      emergencyCalls += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 50, y: 50 });
+      return true;
+    },
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(emergencyCalls, 1);
+  assert.ok(noStepCalls > 0);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [60]);
+  assert.ok(diagnostics.some(entry => entry.type === "emergencyEscapeSuccess"));
+  assert.equal(diagnostics.some(entry => entry.type === "unsafePackBreakoutCombat"), false);
+});
+
+test("low-health multi-aggressor pressure uses emergency escape before a temporary walk route", async () => {
+  const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
+  const attackers = [
+    monster(61, "TigerSnake", 20, 19, { disposition: "hostile" }),
+    monster(62, "TigerViper", 21, 20, { disposition: "hostile" }),
+  ];
+  const client = new FakeClient(snapshot(quest, attackers), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { dead: true, hp: 0 });
+      if (command.objectId === 60) {
+        state.questLog[0].objectives[0] = objective("Kill RedSnake", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    }, { objectId: command.objectId });
+  });
+  Object.assign(client.snapshot, { playerHp: 20, playerMaxHp: 40 });
+  Object.assign(client.snapshot.entities[0], { x: 20, y: 20, hp: 20, maxHp: 40 });
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 62 });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let emergencyCalls = 0;
+  let retreatMoves = 0;
+  let searchVisits = 0;
+  const navigate = async (target, _range, stopWhen, options = {}) => {
+    const actor = client.snapshot.entities[0];
+    if (target.objectId === 60) {
+      Object.assign(actor, { x: target.x - 1, y: target.y });
+      return { reached: true };
+    }
+    if (options.allowedHostileObjectIds) {
+      retreatMoves += 1;
+      Object.assign(actor, target);
+      return { reached: true, successfulSteps: 2 };
+    }
+    searchVisits += 1;
+    if (searchVisits === 1) {
+      assert.equal(stopWhen(), true);
+      return { reached: false };
+    }
+    client.snapshot.entities.push(monster(60, "RedSnake", 30, 30, { disposition: "hostile" }));
+    assert.equal(stopWhen(), true);
+    return { reached: false };
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 33,
+    objectives: { kill: [{ monsterName: "RedSnake", spawnCandidates: [spawn("RedSnake", 30, 30)] }], item: [] },
+  }, navigate, {
+    ...settings,
+    maxEngagements: 6,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 0,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscape: async owner => {
+      emergencyCalls += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 50, y: 50 });
+      attackers.forEach(entry => Object.assign(entry, { x: 10, y: 10 }));
+      return true;
+    },
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(emergencyCalls, 1);
+  assert.equal(retreatMoves, 0);
+  assert.ok(diagnostics.some(entry => entry.type === "emergencyEscapeSuccess" && entry.reason === "criticalPackPressure"));
+});
+
+test("a failed low-health emergency escape falls back to bounded hostile breakout", async () => {
+  const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
+  const blocker = monster(61, "TigerSnake", 100, 100, { disposition: "hostile", hp: 3 });
+  const client = new FakeClient(snapshot(quest, [
+    blocker,
+    ...Array.from({ length: 7 }, (_, index) => monster(62 + index, "TigerViper", 100 + index, 101, { disposition: "hostile" })),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { dead: true, hp: 0 });
+      if (command.objectId === 60) {
+        state.questLog[0].objectives[0] = objective("Kill RedSnake", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    }, { objectId: command.objectId });
+  });
+  client.snapshot.playerHp = 10;
+  client.snapshot.entities[0].hp = 10;
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let searchVisits = 0;
+  let emergencyCalls = 0;
+  const navigate = async (target, _range, stopWhen, options = {}) => {
+    const actor = client.snapshot.entities[0];
+    if (target.objectId === 61) return { reached: false };
+    if (target.objectId === 60) {
+      Object.assign(actor, { x: target.x - 1, y: target.y });
+      return { reached: true };
+    }
+    if (options.allowedHostileObjectIds) {
+      Object.assign(actor, target);
+      for (const hostile of client.snapshot.entities.filter(entry => entry.kind === "monster" && !entry.dead)) {
+        Object.assign(hostile, { x: target.x + 30, y: target.y + 30 });
+      }
+      assert.equal(stopWhen(), true);
+      return { reached: false, successfulSteps: 2 };
+    }
+    searchVisits += 1;
+    if (searchVisits === 1) {
+      Object.assign(actor, { x: 20, y: 20 });
+      const occupied = [[20, 19], [21, 19], [21, 20], [21, 21], [20, 21], [19, 21], [19, 20], [19, 19]];
+      client.snapshot.entities.slice(1).forEach((hostile, index) => Object.assign(hostile, { x: occupied[index][0], y: occupied[index][1] }));
+      client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+      assert.equal(stopWhen(), true);
+      return { reached: false };
+    }
+    client.snapshot.entities.push(monster(60, "RedSnake", 30, 30, { disposition: "hostile" }));
+    assert.equal(stopWhen(), true);
+    return { reached: false };
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 33,
+    objectives: { kill: [{ monsterName: "RedSnake", spawnCandidates: [spawn("RedSnake", 30, 30)] }], item: [] },
+  }, navigate, {
+    ...settings,
+    maxEngagements: 6,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 0,
+    unsafeRetreatSteps: 8,
+    emergencyEscapeHpRatio: 0.3,
+    emergencyEscape: async () => {
+      emergencyCalls += 1;
+      return false;
+    },
+    recoverAfterUnsafeRetreat: async () => {},
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(emergencyCalls, 1);
+  assert.ok(diagnostics.some(entry => entry.type === "emergencyEscapeAttempt"));
+  assert.ok(diagnostics.some(entry => entry.type === "unsafePackBreakoutCombat"));
+  assert.ok(client.sent.some(entry => entry.objectId === 61));
+});
+
 test("a multi-kill breakout continues through a second proven attacker before escaping", async () => {
   const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
   const blockers = [

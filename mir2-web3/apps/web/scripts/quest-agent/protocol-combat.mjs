@@ -720,6 +720,11 @@ function combatSettings(options) {
     unsafeRetreatBiasPosition: typeof options.unsafeRetreatBiasPosition === 'function'
       ? options.unsafeRetreatBiasPosition
       : null,
+    // Optional public-protocol emergency escape (for example RandomTeleport).
+    // It is deliberately disabled unless both a callback and an explicit HP
+    // threshold are supplied by the journey policy.
+    emergencyEscape: typeof options.emergencyEscape === 'function' ? options.emergencyEscape : null,
+    emergencyEscapeHpRatio: boundedRatio(options.emergencyEscapeHpRatio, 0),
     lowHealthTargetRetreatRatio: Number.isFinite(requestedLowHealthRetreat) &&
       requestedLowHealthRetreat >= 0 && requestedLowHealthRetreat <= 1
       ? requestedLowHealthRetreat
@@ -1495,6 +1500,49 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
     [0, 1], [-1, 1], [-1, 0], [-1, -1],
   ];
   let lastError = null;
+  let emergencyEscapeAttempted = false;
+  const tryEmergencyEscape = async (reason, current) => {
+    if (!settings.emergencyEscape || emergencyEscapeAttempted) return false;
+    const hpRatio = playerHealthRatio(client);
+    if (hpRatio > settings.emergencyEscapeHpRatio) return false;
+    emergencyEscapeAttempted = true;
+    recordSearchDiagnostic(client, {
+      type: 'emergencyEscapeAttempt',
+      reason,
+      hpRatio,
+      threshold: settings.emergencyEscapeHpRatio,
+      from: current,
+    });
+    try {
+      const escaped = await settings.emergencyEscape(client, { current, reason, settings });
+      if (escaped === true || escaped?.success === true) {
+        const relocated = selectPlayer(client.snapshot);
+        recordSearchDiagnostic(client, {
+          type: 'emergencyEscapeSuccess',
+          reason,
+          hpRatio,
+          from: current,
+          to: relocated ? { x: Number(relocated.x), y: Number(relocated.y) } : null,
+        });
+        return true;
+      }
+    } catch (error) {
+      lastError = error;
+      recordSearchDiagnostic(client, {
+        type: 'emergencyEscapeFailure',
+        reason,
+        hpRatio,
+        message: String(error?.message ?? error),
+      });
+    }
+    return false;
+  };
+  // R31 proved that a low-health caster can still find a momentarily open
+  // local step while two or more confirmed attackers are already converging.
+  // Walking that short path merely postpones the same surround until recovery.
+  // Use the opt-in public scroll before the pursuit closes again.
+  if (provenAggressors(client, null, settings).length >= 2 &&
+      await tryEmergencyEscape('criticalPackPressure', origin)) return;
   const attemptEmergencyEscape = async () => {
     // Recompute after every authoritative movement. A long A* route that was
     // safest at its old endpoint can become dangerous as monsters converge,
@@ -1635,6 +1683,7 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
         // is rejected by authoritative collision, a real player must cut down
         // one of the monsters already striking them before an escape tile can
         // exist. Keep this bounded and target only a proven adjacent attacker.
+        if (await tryEmergencyEscape('noAuthoritativeEscapeStep', current)) return true;
         if (!await breakOut(current, 'noAuthoritativeEscapeStep')) return false;
         continue;
       }
@@ -2315,4 +2364,9 @@ function finiteNumber(value) { const number = Number(value); return Number.isFin
 function finiteHp(value) { if (value == null) return null; const hp = Number(value); return Number.isFinite(hp) ? hp : null; }
 function positiveInteger(value, fallback) { const parsed = Math.trunc(Number(value)); return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback; }
 function nonnegativeInteger(value, fallback) { const parsed = Math.trunc(Number(value)); return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback; }
+function boundedRatio(value, fallback) {
+  if (value == null) return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 && parsed <= 1 ? parsed : fallback;
+}
 function riskLimit(value) { return value == null ? Number.POSITIVE_INFINITY : nonnegativeInteger(value, Number.POSITIVE_INFINITY); }

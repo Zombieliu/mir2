@@ -1,5 +1,5 @@
 import { createReadStream } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile, stat } from 'node:fs/promises';
 import readline from 'node:readline';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -82,6 +82,34 @@ async function relevantFailureReport(outputRoot, className, sessionStartAt, trac
   };
 }
 
+export async function latestProtocolTracePath(outputRoot, className) {
+  const resolvedRoot = path.resolve(outputRoot);
+  const legacyName = `${className}.trace.jsonl`;
+  const prefix = `${className}.`;
+  let entries;
+  try {
+    entries = await readdir(resolvedRoot, { withFileTypes: true });
+  } catch (error) {
+    if (error?.code === 'ENOENT') return path.join(resolvedRoot, legacyName);
+    throw error;
+  }
+  const candidates = await Promise.all(entries
+    .filter(entry => entry.isFile() && (
+      entry.name === legacyName ||
+      (entry.name.startsWith(prefix) && entry.name.endsWith('.trace.jsonl'))
+    ))
+    .map(async entry => ({
+      name: entry.name,
+      path: path.join(resolvedRoot, entry.name),
+      modifiedAt: (await stat(path.join(resolvedRoot, entry.name))).mtimeMs,
+    })));
+  candidates.sort((left, right) =>
+    right.modifiedAt - left.modifiedAt ||
+    Number(left.name === legacyName) - Number(right.name === legacyName) ||
+    right.name.localeCompare(left.name));
+  return candidates[0]?.path ?? path.join(resolvedRoot, legacyName);
+}
+
 /** Stream one public trace and summarize only its observed, server-authored state. */
 export async function summarizeProtocolClass({ outputRoot, className, profile = null }) {
   if (!CLASSES.includes(className)) throw new Error(`Invalid class: ${className}`);
@@ -89,7 +117,7 @@ export async function summarizeProtocolClass({ outputRoot, className, profile = 
   const activeProfile = profile ?? JSON.parse(await readFile(DEFAULT_PROFILE, 'utf8'));
   const ids = mandatoryIds(activeProfile, className);
   const mandatory = new Set(ids);
-  const tracePath = path.join(resolvedRoot, `${className}.trace.jsonl`);
+  const tracePath = await latestProtocolTracePath(resolvedRoot, className);
   let snapshot = null;
   let firstAt = null;
   let lastAt = null;
@@ -150,6 +178,7 @@ export async function summarizeProtocolClass({ outputRoot, className, profile = 
 
   return {
     className,
+    traceFile: path.basename(tracePath),
     level: finiteNumber(self?.level),
     map: snapshot?.mapFileName == null ? null : String(snapshot.mapFileName),
     hp: {

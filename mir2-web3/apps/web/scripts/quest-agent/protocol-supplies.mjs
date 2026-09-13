@@ -9,6 +9,7 @@ const SUPPLIES = Object.freeze({
   mp: Object.freeze({ itemIndex: 659, name: '(MP)DrugSmall', target: 6, catalogPrice: 40, stackSize: 20 }),
   amulet: Object.freeze({ itemIndex: 712, name: 'Amulet', target: 6, catalogPrice: 25, stackSize: 100 }),
 });
+const RANDOM_TELEPORT = Object.freeze({ itemIndex: 717, name: 'RandomTeleport', stackSize: 20 });
 const LOW_STOCK = 3;
 const GOLD_RESERVE = 100;
 const WAIT_MS = 12_000;
@@ -67,19 +68,24 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     : className === 'wizard' ? ['hp', 'mp'] : ['hp'];
   const beforeStock = stock(initial);
   const needed = relevant.filter(kind => beforeStock[kind] < lowStockByKind[kind]);
+  // This is an opt-in emergency reserve. Ordinary village restocking never
+  // opens the shop for RandomTeleport and therefore keeps its old behavior.
+  const emergencyTeleportCount = emergencyTeleportOption(options.emergencyTeleportCount);
+  const needEmergencyTeleport = randomTeleportStock(initial) < emergencyTeleportCount;
   const initialGold = integer(initial.gold, 'snapshot.gold');
-  if (needed.length === 0 && !weaponNeeded) {
+  if (needed.length === 0 && !weaponNeeded && !needEmergencyTeleport) {
     const equippedAmulet = className === 'taoist' ? await equipHeldAmulet(client) : null;
     return { status: 'sufficient', stock: stock(client.snapshot), gold: initialGold, equippedAmulet };
   }
 
   let spendableGold = spendable(initialGold, reserveGold);
-  const cheapestNeeded = Math.min(
+  const cheapestCandidates = [
     ...needed.map(kind => SUPPLIES[kind].catalogPrice),
     ...(weaponNeeded ? [weaponRequirement.allowFallback
       ? WARRIOR_WEAPONS.at(-1).catalogPrice
       : weaponRequirement.preferred.catalogPrice] : []),
-  );
+  ];
+  const cheapestNeeded = cheapestCandidates.length > 0 ? Math.min(...cheapestCandidates) : 0;
   const gearCandidates = options.liquidateSuperseded === true
     ? supersededProgressionGearForSale(initial, options.progressionCandidates)
         .filter(item => normalized(item?.equipSlot) === 'weapon')
@@ -93,7 +99,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   const meatCandidates = materialCandidates.filter(item => normalized(item?.name) === 'venison');
   const generalMaterialCandidates = materialCandidates.filter(item => normalized(item?.name) !== 'venison');
   const liquidationCandidates = [...materialCandidates, ...gearCandidates];
-  if (spendableGold < cheapestNeeded && liquidationCandidates.length === 0) {
+  if (spendableGold < cheapestNeeded && liquidationCandidates.length === 0 && !needEmergencyTeleport) {
     return needsFunds(beforeStock, initialGold, spendableGold, reserveGold);
   }
   if (typeof navigateNear !== 'function') throw new Error('navigateNear is required to reach Merchant Ruben');
@@ -254,7 +260,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     spendableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
   }
 
-  if (needed.length === 0) {
+  if (needed.length === 0 && !needEmergencyTeleport) {
     return {
       status: 'restocked',
       before: { gold: initialGold, ...beforeStock },
@@ -281,6 +287,10 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   for (const kind of purchaseKinds) {
     if (!rows[kind]) throw new Error(`Merchant Ruben shop is missing ${SUPPLIES[kind].name}`);
   }
+  const emergencyRow = needEmergencyTeleport ? supplyRow(goods.list, RANDOM_TELEPORT) : null;
+  if (needEmergencyTeleport && !emergencyRow) {
+    throw new Error(`Merchant Ruben shop is missing ${RANDOM_TELEPORT.name} (${RANDOM_TELEPORT.itemIndex})`);
+  }
 
   // Calculate the full plan once so it always preserves the emergency gold
   // reserve. HP is intentionally first because every class depends on it.
@@ -301,6 +311,18 @@ export async function restockInVillage(client, navigateNear, options = {}) {
       budget -= quantity * unitPrice;
     }
   }
+  if (needEmergencyTeleport) {
+    const unitPrice = positiveInteger(emergencyRow.price, `${RANDOM_TELEPORT.name} price`);
+    const existing = randomTeleportStock(client.snapshot);
+    const quantity = Math.min(
+      Math.max(0, emergencyTeleportCount - existing),
+      Math.max(0, Math.floor(budget / unitPrice)),
+    );
+    if (quantity > 0) {
+      plan.push({ kind: 'randomTeleport', row: emergencyRow, quantity, unitPrice, cost: quantity * unitPrice, beforeQuantity: existing });
+      budget -= quantity * unitPrice;
+    }
+  }
   if (plan.length === 0) {
     return needsFunds(beforeStock, initialGold, spendableGold, reserveGold);
   }
@@ -312,7 +334,9 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   const purchases = [];
   for (const purchase of plan) {
     const beforeGold = integer(client.snapshot.gold, 'snapshot.gold');
-    const beforeQuantity = stock(client.snapshot)[purchase.kind];
+    const beforeQuantity = purchase.kind === 'randomTeleport'
+      ? randomTeleportStock(client.snapshot)
+      : stock(client.snapshot)[purchase.kind];
     const afterCommand = client.sequence;
     client.send({
       type: 'buyItem',
@@ -323,19 +347,15 @@ export async function restockInVillage(client, navigateNear, options = {}) {
       panelType: 0,
     });
     await client.wait(
-      () => hasFreshPurchaseProof(
-        client,
-        afterCommand,
-        purchase.kind,
-        beforeGold - purchase.cost,
-        beforeQuantity + purchase.quantity,
-      ),
-      `authoritative purchase of ${SUPPLIES[purchase.kind].name}`,
+      () => purchase.kind === 'randomTeleport'
+        ? hasFreshRandomTeleportPurchaseProof(client, afterCommand, beforeGold - purchase.cost, beforeQuantity + purchase.quantity)
+        : hasFreshPurchaseProof(client, afterCommand, purchase.kind, beforeGold - purchase.cost, beforeQuantity + purchase.quantity),
+      `authoritative purchase of ${purchase.kind === 'randomTeleport' ? RANDOM_TELEPORT.name : SUPPLIES[purchase.kind].name}`,
       WAIT_MS,
     );
     purchases.push({
-      itemIndex: SUPPLIES[purchase.kind].itemIndex,
-      name: SUPPLIES[purchase.kind].name,
+      itemIndex: purchase.kind === 'randomTeleport' ? RANDOM_TELEPORT.itemIndex : SUPPLIES[purchase.kind].itemIndex,
+      name: purchase.kind === 'randomTeleport' ? RANDOM_TELEPORT.name : SUPPLIES[purchase.kind].name,
       shopItemId: shopRowId(purchase.row),
       quantity: purchase.quantity,
       unitPrice: purchase.unitPrice,
@@ -354,6 +374,45 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     weaponPurchase,
     equippedAmulet,
   };
+}
+
+/**
+ * Use one authoritative RandomTeleport stack through the normal public
+ * useItem command. Success requires both a fresh quantity decrease and a
+ * fresh authoritative player-coordinate change; an ack alone is insufficient.
+ */
+export async function useRandomTeleport(client, options = {}) {
+  const item = findRandomTeleport(client?.snapshot, options.uniqueId);
+  if (!item) throw new Error('No authoritative RandomTeleport item is available');
+  const grid = options.grid ?? randomTeleportGrid(client.snapshot, item);
+  const beforeQuantity = randomTeleportStock(client.snapshot);
+  const beforePlayer = playerPosition(client.snapshot);
+  if (!beforePlayer) throw new Error('RandomTeleport requires an authoritative player position');
+  const afterCommand = Number(client.sequence ?? 0);
+  const ack = await client.request({ type: 'useItem', uniqueId: item.uniqueId, grid }, 'UseItem', WAIT_MS);
+  if (ack?.payload?.success !== true) throw new Error('RandomTeleport UseItem was rejected');
+  // UseItem receipts and UserLocation can arrive independently. Request one
+  // bounded authoritative snapshot so item consumption and relocation are
+  // proven together rather than inferred from either packet alone.
+  client.send({ type: 'clientVersion' });
+  await client.wait(
+    () => hasFreshRandomTeleportUseProof(client, afterCommand, beforeQuantity, beforePlayer),
+    'authoritative RandomTeleport use',
+    WAIT_MS,
+  );
+  const after = playerPosition(client.snapshot);
+  return {
+    uniqueId: Number(item.uniqueId), grid,
+    quantityBefore: beforeQuantity,
+    quantityAfter: randomTeleportStock(client.snapshot),
+    from: beforePlayer,
+    to: after,
+  };
+}
+
+/** Count usable public-protocol emergency scrolls in bag and belt. */
+export function randomTeleportCount(snapshot) {
+  return randomTeleportStock(snapshot);
 }
 
 function liveRuben(snapshot) {
@@ -542,6 +601,26 @@ function hasFreshPurchaseProof(client, afterSequence, kind, expectedGold, expect
   );
 }
 
+function hasFreshRandomTeleportPurchaseProof(client, afterSequence, expectedGold, expectedQuantity) {
+  return client.events.some(event =>
+    event?.sequence > afterSequence &&
+    event?.direction === 'received' &&
+    event?.type === 'worldSnapshot' &&
+    Number(event?.payload?.gold) === expectedGold &&
+    randomTeleportStock(event?.payload) === expectedQuantity
+  );
+}
+
+function hasFreshRandomTeleportUseProof(client, afterSequence, beforeQuantity, beforePlayer) {
+  return client.events.some(event => {
+    if (event?.sequence <= afterSequence || event?.direction !== 'received' || event?.type !== 'worldSnapshot') return false;
+    const payload = event.payload;
+    const afterPlayer = playerPosition(payload);
+    return randomTeleportStock(payload) < beforeQuantity &&
+      afterPlayer && (afterPlayer.x !== beforePlayer.x || afterPlayer.y !== beforePlayer.y);
+  });
+}
+
 function hasFreshWeaponPurchaseProof(client, afterSequence, expectedGold, expectedItemIndex) {
   return client.events.some(event =>
     event?.sequence > afterSequence &&
@@ -577,6 +656,34 @@ function stock(snapshot) {
     if (kind) result[kind] += Math.max(0, Number(item?.quantity ?? 1));
   }
   return result;
+}
+
+function randomTeleportStock(snapshot) {
+  return [...(snapshot?.inventoryItems ?? []), ...(snapshot?.beltItems ?? [])]
+    .filter(item => templateIndex(item) === RANDOM_TELEPORT.itemIndex &&
+      normalized(item?.name) === normalized(RANDOM_TELEPORT.name))
+    .reduce((total, item) => total + Math.max(0, Number(item?.quantity ?? 1)), 0);
+}
+
+function findRandomTeleport(snapshot, uniqueId = null) {
+  const items = [...(snapshot?.inventoryItems ?? []), ...(snapshot?.beltItems ?? [])]
+    .filter(item => templateIndex(item) === RANDOM_TELEPORT.itemIndex &&
+      normalized(item?.name) === normalized(RANDOM_TELEPORT.name) && heldQuantity(item) !== null && validUniqueId(item?.uniqueId));
+  return uniqueId == null ? items[0] ?? null : items.find(item => Number(item.uniqueId) === Number(uniqueId)) ?? null;
+}
+
+function randomTeleportGrid(snapshot, item) {
+  if ((snapshot?.beltItems ?? []).some(entry => Number(entry?.uniqueId) === Number(item?.uniqueId))) return 'belt';
+  return 'inventory';
+}
+
+function playerPosition(snapshot) {
+  const player = (snapshot?.entities ?? []).find(entry => String(entry?.objectId) === String(snapshot?.playerObjectId));
+  return validPoint(player) ? { x: Number(player.x), y: Number(player.y) } : null;
+}
+
+function validPoint(value) {
+  return Number.isFinite(Number(value?.x)) && Number.isFinite(Number(value?.y));
 }
 
 function purchaseChunks(snapshot, kind, requested) {
@@ -735,6 +842,7 @@ function obsoleteMaterialsForSale(snapshot, { progressionCandidates = [], protec
     ...progressionCandidates.map(candidate => candidate?.name),
     ...protectedItemNames,
     ...Object.values(SUPPLIES).map(supply => supply.name),
+    RANDOM_TELEPORT.name,
   ].map(normalized).filter(Boolean));
   return (snapshot?.inventoryItems ?? []).filter(item => {
     const name = normalized(item?.name);
@@ -815,6 +923,15 @@ function nonnegativeOption(value, fallback, label) {
   if (value == null) return fallback;
   const parsed = Number(value);
   if (!Number.isSafeInteger(parsed) || parsed < 0) throw new TypeError(`${label} must be a non-negative integer`);
+  return parsed;
+}
+
+function emergencyTeleportOption(value) {
+  if (value == null) return 0;
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0 || parsed > 2) {
+    throw new TypeError('emergencyTeleportCount must be an integer from 0 to 2');
+  }
   return parsed;
 }
 

@@ -1,5 +1,33 @@
 # Protocol newcomer journey acceptance
 
+## R31 public emergency-scroll expedition checkpoint
+
+The q54/q62 runner now buys an opt-in two-scroll `RandomTeleport` reserve from
+Merchant Ruben through the ordinary `NPCGoods` and `buyItem` protocol. It
+requires an exact item 717 shop row and proves the gold and inventory deltas.
+Use goes through public `useItem` and is accepted only when a fresh
+authoritative snapshot proves both a lower total scroll count and a changed
+player coordinate. Normal quests retain the previous supply plan.
+
+Live traces `Warrior.2026-09-13T16-04-13-788Z.trace.jsonl` and
+`Wizard.2026-09-13T16-04-13-796Z.trace.jsonl` each prove a two-scroll purchase;
+`Taoist.2026-09-13T16-04-13-799Z.trace.jsonl` proves the one scroll affordable
+after its HP, MP and Amulet purchases. Warrior advanced q62 to 4/16 before this
+run; Wizard remains q54 15/25 and Taoist q54 8/25. The first escape policy was
+too narrow: Wizard could briefly walk out from three adjacent attackers at
+38/68 HP, then was surrounded again during recovery without reaching the
+no-step-only trigger. Low-health retreat now uses the configured scroll when at
+least two recent authoritative attackers are still adjacent, while preserving
+the no-step trigger and bounded combat fallback.
+
+The first replay exposed a liquidation error before combat: Wizard and Taoist
+attempted to sell their emergency scroll to Material Dealer Reece, which the
+server correctly rejected. `RandomTeleport` is now always protected from
+obsolete-material liquidation and both classes have restarted from unchanged
+saved progress. Focused escape/supply checks pass 167/167 and the complete
+quest-agent suite passes 499/499. A successful live emergency use, complete
+three-class 1-30 routes and native UI/animation acceptance remain open.
+
 ## R31 dense-route control follow-up
 
 The ordinary Blacksmith dialog exposes Crystal's combined `@BuySell` entry,

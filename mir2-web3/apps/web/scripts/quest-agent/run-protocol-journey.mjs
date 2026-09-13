@@ -11,6 +11,8 @@ import { prepareLoadout, combatAction, combatApproachRange, startEmergencyHpReco
 import {
   restockInVillage,
   equipHeldAmulet,
+  randomTeleportCount,
+  useRandomTeleport,
   warriorWeaponFundingGold,
 } from './protocol-supplies.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
@@ -30,6 +32,7 @@ import {
   journeyResumeDisposition,
   questRetreatBiasPosition,
   questRetreatProfile,
+  questCombatMpUseThresholdForQuest,
   questNeedsPostRetreatRecovery,
   shouldPreferObjectiveMapOverCurrent,
   recoverHealthWhileEvading,
@@ -167,6 +170,13 @@ try {
       return restockInVillage(owner, navigateNear, {
         ...journeySupplyOptions,
         ...requestedSupplyOptions,
+        // q54/q62 repeatedly proved that a dense one-tile cave corridor can
+        // occupy every legal first step. Carry the ordinary Ruben shop scroll
+        // a human player uses for that exact emergency; other quests keep the
+        // existing supply plan unchanged.
+        emergencyTeleportCount: (owner.snapshot?.questLog ?? []).some(quest =>
+          [54, 62].includes(Number(quest?.questId)) &&
+          String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress') ? 2 : 0,
         // The first D421 -> D422 round trip consumed 24 bottles before the
         // objective map was reached. Carry an evidence-based expedition
         // stock while q54 remains active instead of repeating town loops.
@@ -232,12 +242,14 @@ try {
         : 0;
       const q62Expedition = Number(questId) === 62;
       const q62TargetHp = 80;
+      const emergencyTeleportTarget = q54Expedition || q62Expedition ? 2 : 0;
       const q42WizardExpedition = Number(questId) === 42 &&
         String(className).trim().toLowerCase() === 'wizard';
       return {
         minimumHpStock: requiredHpStock,
         minimumMpStock: minimumJourneyMpStockForQuest(questId, className),
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
+          randomTeleportCount(owner.snapshot) < emergencyTeleportTarget ||
           ([q54Expedition && (hpDrugCount(owner.snapshot) < q54TargetHp ||
               mpDrugCount(owner.snapshot) < q54TargetMp),
             q62Expedition && hpDrugCount(owner.snapshot) < q62TargetHp]
@@ -577,6 +589,11 @@ try {
                 // safety margin. Begin recovery before the combat-only
                 // threshold in both phases.
                 hpThreshold: defensive ? 0.85 : 0.6,
+                // R27 reached D406 with dozens of MP bottles but only 1-9
+                // active MP because spell expenditure outran the late 30%
+                // trigger. Start q54 caster recovery while the active pool can
+                // still sustain the current target and its escape window.
+                mpThreshold: questCombatMpUseThresholdForQuest(id, className),
               });
               const classRecovery = defensive
                 ? await useClassRecovery(owner, { hpThreshold: 0.85 })
@@ -686,6 +703,16 @@ try {
             // survivable, keep emergency steps moving toward the D422 transfer
             // instead of giving back the entire corridor after every pull.
             unsafeRetreatBiasPosition: snapshot => questRetreatBiasPosition(id, snapshot),
+            // RandomTeleport is bought and consumed through the same public
+            // NPCGoods/UseItem packets as a player. It is reserved for the
+            // observed no-step cave trap and never replaces ordinary retreat.
+            emergencyEscapeHpRatio: [54, 62].includes(id) ? 0.65 : 0,
+            emergencyEscape: [54, 62].includes(id)
+              ? async owner => {
+                  await useRandomTeleport(owner);
+                  return true;
+                }
+              : undefined,
             harvestBeforeClearingAggressors: id === 30,
             unsafeRetreatSteps: retreatProfile.unsafeRetreatSteps,
             unsafeRetreatSafeDistance: retreatProfile.unsafeRetreatSafeDistance,

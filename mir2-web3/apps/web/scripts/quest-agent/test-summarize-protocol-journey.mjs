@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, rm, utimes, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -121,6 +121,36 @@ test('includes only whitelisted fields from a failure report overlapping the lat
       finishedAt: '2026-09-11T12:00:06.000Z',
       error: 'No walk path',
     });
+  } finally {
+    await rm(outputRoot, { recursive: true, force: true });
+  }
+});
+
+test('summarizes the newest isolated runner trace instead of the stale legacy aggregate', async () => {
+  const outputRoot = await mkdtemp(path.join(os.tmpdir(), 'protocol-summary-isolated-'));
+  try {
+    const legacyPath = path.join(outputRoot, 'Taoist.trace.jsonl');
+    const isolatedPath = path.join(outputRoot, 'Taoist.2026-09-13T15-37-18-000Z.trace.jsonl');
+    await writeFile(legacyPath, line({
+      direction: 'received',
+      type: 'worldSnapshot',
+      payload: snapshot({ level: 12 }),
+      at: '2026-09-12T10:00:00.000Z',
+    }));
+    await writeFile(isolatedPath, line({
+      direction: 'received',
+      type: 'worldSnapshot',
+      payload: snapshot({ level: 18, position: { x: 44, y: 174 } }),
+      at: '2026-09-13T15:37:18.000Z',
+    }));
+    await utimes(legacyPath, new Date('2026-09-12T10:00:00.000Z'), new Date('2026-09-12T10:00:00.000Z'));
+    await utimes(isolatedPath, new Date('2026-09-13T15:37:18.000Z'), new Date('2026-09-13T15:37:18.000Z'));
+
+    const result = await summarizeProtocolClass({ outputRoot, className: 'Taoist' });
+    assert.equal(result.traceFile, path.basename(isolatedPath));
+    assert.equal(result.level, 18);
+    assert.deepEqual(result.selfPosition, { x: 44, y: 174 });
+    assert.equal(result.lastTimestamp, '2026-09-13T15:37:18.000Z');
   } finally {
     await rm(outputRoot, { recursive: true, force: true });
   }

@@ -36,6 +36,16 @@ export function journeyMpRestockTargetForQuest(questId, className, {
   return nonnegativeInteger(fallback, 'fallback MP target');
 }
 
+/** Begin drinking before a long caster objective can exhaust the active pool. */
+export function questCombatMpUseThresholdForQuest(questId, className, {
+  fallback = 0.3,
+} = {}) {
+  const normalizedClass = String(className ?? '').trim().toLowerCase();
+  if (Number(questId) === 54 && ['wizard', 'taoist'].includes(normalizedClass)) return 0.75;
+  const value = Number(fallback);
+  return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.3;
+}
+
 const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62]);
 const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62]);
 
@@ -51,11 +61,23 @@ export function questRetreatProfile(questId, className = '') {
   const id = Number(questId);
   const normalizedClass = String(className).trim().toLowerCase();
   const fragileQ54Expedition = id === 54 && ['wizard', 'taoist'].includes(normalizedClass);
+  const healingQ54Expedition = id === 54 && normalizedClass === 'taoist';
   return {
     allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62].includes(id),
-    continueTravelWhileHealthy: [54, 62].includes(id) && !fragileQ54Expedition,
+    // R27 showed that stopping a stocked q54 caster on the first glancing hit
+    // turns the D401 crossing into an unrewarded fight: the surrounding pack
+    // converges while Wizard/Taoist spend the MP reserved for D406. Keep the
+    // normal low-health interrupt below, but let every stocked q54 class keep
+    // moving while it remains above that class's retreat threshold.
+    continueTravelWhileHealthy: [54, 62].includes(id),
     maxTravelThreatEvasionsPerEdge: id === 62 ? 3 : 1,
-    maxRetreatBreakoutKills: [54, 62].includes(id) && !fragileQ54Expedition ? 3 : 1,
+    // R26 proved that a Taoist can be boxed into D401 by one CaveMaggot plus
+    // adjacent quest zombies after the first breakout kill. Healing and the
+    // expedition potion reserve make two further bounded kills safer than
+    // aborting a living route in that sealed pocket. Keep the lower Wizard
+    // limit because the same trace band showed its much smaller HP pool can
+    // die during a single corridor breakout.
+    maxRetreatBreakoutKills: ([54, 62].includes(id) && !fragileQ54Expedition) || healingQ54Expedition ? 3 : 1,
     multiAggressorRetreatRatio: id === 54 ? (fragileQ54Expedition ? 0.75 : 0.55) : undefined,
     retreatAtActiveAggressorCount: id === 54 ? (fragileQ54Expedition ? 1 : 3) : undefined,
     unsafeRetreatSteps: id === 62 || fragileQ54Expedition ? 24 :

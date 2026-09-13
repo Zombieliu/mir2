@@ -13,6 +13,7 @@ import {
   hpRestockTargetForActiveQuests,
   journeyResumeDisposition,
   journeyMpRestockTargetForQuest,
+  questCombatMpUseThresholdForQuest,
   minimumJourneyMpStockForQuest,
   questRetreatBiasPosition,
   questRetreatProfile,
@@ -38,6 +39,10 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(journeyMpRestockTargetForQuest(49, 'Taoist'), 12);
   assert.equal(journeyMpRestockTargetForQuest(54, 'Warrior'), 0);
   assert.equal(journeyMpRestockTargetForQuest(49, 'Wizard', { fallback: 18 }), 18);
+  assert.equal(questCombatMpUseThresholdForQuest(54, 'Wizard'), 0.75);
+  assert.equal(questCombatMpUseThresholdForQuest(54, 'Taoist'), 0.75);
+  assert.equal(questCombatMpUseThresholdForQuest(54, 'Warrior'), 0.3);
+  assert.equal(questCombatMpUseThresholdForQuest(49, 'Wizard', { fallback: 0.4 }), 0.4);
 });
 
 test('a stocked Warrior resumes q54 combat instead of attempting passive field recovery', () => {
@@ -680,7 +685,7 @@ test('q62 leaves D2041 packs toward the real D2042 transfer', () => {
   assert.equal(questRetreatBiasPosition(62, { mapFileName: 'D2042' }), null);
 });
 
-test('q54 keeps the Warrior mine thresholds but makes caster travel retreat on its first aggressor', () => {
+test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {
   assert.deepEqual(questRetreatProfile(54, 'Warrior'), {
     allowLowHealthFollowerRecovery: true,
     continueTravelWhileHealthy: true,
@@ -693,8 +698,8 @@ test('q54 keeps the Warrior mine thresholds but makes caster travel retreat on i
   });
   for (const className of ['Wizard', 'Taoist']) {
     const profile = questRetreatProfile(54, className);
-    assert.equal(profile.continueTravelWhileHealthy, false);
-    assert.equal(profile.maxRetreatBreakoutKills, 1);
+    assert.equal(profile.continueTravelWhileHealthy, true);
+    assert.equal(profile.maxRetreatBreakoutKills, className === 'Taoist' ? 3 : 1);
     assert.equal(profile.multiAggressorRetreatRatio, 0.75);
     assert.equal(profile.retreatAtActiveAggressorCount, 1);
     assert.equal(profile.unsafeRetreatSteps, 24);
