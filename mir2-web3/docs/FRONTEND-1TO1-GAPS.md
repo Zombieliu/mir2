@@ -1,5 +1,22 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: Crystal Slow poison now halves the native
+> Android retained movement-animation cadence for walking, running and dash
+> attack only. Mid-action apply/clear preserves fractional frame progress, so
+> the authoritative status packet cannot jump or restart the actor; unrelated
+> attack/spell/harvest/struck/lifecycle action clocks remain unchanged.
+> `ObjectLevelEffects` now also crosses the post-`IN_GAME` host boundary and is
+> retained on exact visible/hidden actor identities without drawing a fake
+> effect. Android default 181/181, UI Preview 189/189, Gradle Debug/UI Preview
+> 25/25 each, API31 arm64 target check, release UI Preview packaging, streamed
+> install and 2340x1080 render-ready smoke pass. The 444,412,912-byte APK
+> SHA-256 is
+> `d0dbbcb4e46a8dc2c6b2ff260238478732b1edba809f07d49c3b344c080490aa`.
+> Evidence:
+> `docs/generated/player-qa/native-android-poison-slow-20260913/README.md`.
+> Resource-backed level-effect presentation, approved-WSS real login, online
+> StartGame, public asset alignment and physical-device acceptance remain open.
+
 > 2026-09-13 Android current change: authoritative `ObjectPoisoned` now reaches
 > the Android object cache and retained shared Bevy actor layers after
 > `IN_GAME`. Initial spawn state, visible/hidden lifecycle, standing/action

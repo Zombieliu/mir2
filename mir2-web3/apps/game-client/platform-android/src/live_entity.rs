@@ -19,6 +19,7 @@ const MAX_DAMAGE_EVENTS: usize = 48;
 const MAX_GROUND_ITEM_FRAMES: usize = 6_000;
 const CELL_WIDTH: f64 = 48.0;
 const CELL_HEIGHT: f64 = 32.0;
+const POISON_SLOW: u16 = 4;
 
 #[derive(Default)]
 struct LiveEntityCache {
@@ -46,6 +47,7 @@ struct ActiveAction {
     action: String,
     started_ms: u64,
     interval_ms: u64,
+    slowed: bool,
     frame_count: usize,
     last_frame: usize,
     direction: String,
@@ -435,9 +437,21 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 object_id,
                 update: EntityMetadata::GuildName(guild_name),
             }),
-        "ObjectPoisoned" => object_id(body)
-            .zip(unsigned_u16(body, "poison"))
-            .map(|(object_id, poison)| EntityMutation::Poison { object_id, poison }),
+        "ObjectPoisoned" => {
+            object_id(body)
+                .zip(unsigned_u16(body, "poison"))
+                .map(|(object_id, poison)| EntityMutation::Poison {
+                    object_id,
+                    poison,
+                    at_ms: now_ms,
+                })
+        }
+        "ObjectLevelEffects" => object_id(body).zip(unsigned_u16(body, "levelEffects")).map(
+            |(object_id, level_effects)| EntityMutation::LevelEffects {
+                object_id,
+                level_effects,
+            },
+        ),
         "Death" => self_object_id(&models)
             .zip(location(body))
             .map(|(object_id, position)| EntityMutation::Action {
@@ -734,6 +748,7 @@ fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
         | EntityMutation::Health { object_id, .. }
         | EntityMutation::Metadata { object_id, .. }
         | EntityMutation::Poison { object_id, .. }
+        | EntityMutation::LevelEffects { object_id, .. }
         | EntityMutation::Action { object_id, .. } => Some(*object_id),
         EntityMutation::Damage(event) => Some(event.object_id),
         EntityMutation::Move(object_id, ..) => Some(*object_id),
@@ -834,7 +849,11 @@ fn apply_cache_mutation(
                 .is_some_and(|entity| patch_model_metadata(entity, update));
             (model_changed || hidden_changed, false)
         }
-        EntityMutation::Poison { object_id, poison } => {
+        EntityMutation::Poison {
+            object_id,
+            poison,
+            at_ms,
+        } => {
             let model_changed = apply_models(models, mutation);
             let visible_actor = models
                 .get("entities")
@@ -857,10 +876,24 @@ fn apply_cache_mutation(
                     .is_some_and(|entity| patch_render_poison(entity, *poison));
                 model_changed || render_changed
             });
+            if let Some(action) = actions.get_mut(object_id) {
+                update_action_slow(action, poison & POISON_SLOW != 0, *at_ms);
+            }
             (
                 model_changed || render_changed || hidden_changed,
                 render_changed,
             )
+        }
+        EntityMutation::LevelEffects {
+            object_id,
+            level_effects,
+        } => {
+            let model_changed = apply_models(models, mutation);
+            let hidden_changed = hidden
+                .get_mut(object_id)
+                .and_then(|entry| entry.model.as_mut())
+                .is_some_and(|entity| patch_model_level_effects(entity, *level_effects));
+            (model_changed || hidden_changed, false)
         }
         EntityMutation::Action {
             object_id,
@@ -950,6 +983,11 @@ enum EntityMutation {
     Poison {
         object_id: u32,
         poison: u16,
+        at_ms: u64,
+    },
+    LevelEffects {
+        object_id: u32,
+        level_effects: u16,
     },
     Damage(LiveDamageEvent),
     Hide(u32),
@@ -1156,6 +1194,10 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         None | Some(Value::Null) => 0,
         Some(value) => u16::try_from(value.as_u64()?).ok()?,
     };
+    let level_effects = match payload.get("levelEffects") {
+        None | Some(Value::Null) => 0,
+        Some(value) => u16::try_from(value.as_u64()?).ok()?,
+    };
     let model = json!({
         "objectId": object_id.to_string(),
         "kind": kind,
@@ -1169,6 +1211,7 @@ fn spawn(payload: &serde_json::Map<String, Value>, kind: &str) -> Option<EntityS
         "image": image,
         "dead": dead,
         "poison": poison,
+        "levelEffects": level_effects,
     });
     Some(EntitySpawn {
         model,
@@ -1288,6 +1331,11 @@ fn valid_models(value: &Value) -> bool {
                 entity.get("kind").and_then(Value::as_str),
                 Some("selfPlayer" | "player" | "monster" | "npc")
             )
+            && entity.get("levelEffects").is_none_or(|value| {
+                value
+                    .as_u64()
+                    .is_some_and(|value| u16::try_from(value).is_ok())
+            })
     }) && ground_drops.iter().all(|drop| {
         let Some(object_id) = entity_id(drop) else {
             return false;
@@ -1525,10 +1573,19 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_model_metadata(entity, update)),
-        EntityMutation::Poison { object_id, poison } => entities
+        EntityMutation::Poison {
+            object_id, poison, ..
+        } => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_model_poison(entity, *poison)),
+        EntityMutation::LevelEffects {
+            object_id,
+            level_effects,
+        } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_model_level_effects(entity, *level_effects)),
         EntityMutation::Damage(event) => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(event.object_id))
@@ -1595,6 +1652,13 @@ fn patch_model_metadata(entity: &mut Value, update: &EntityMetadata) -> bool {
 fn patch_model_poison(entity: &mut Value, poison: u16) -> bool {
     let changed = entity.get("poison").and_then(Value::as_u64) != Some(u64::from(poison));
     entity["poison"] = json!(poison);
+    changed
+}
+
+fn patch_model_level_effects(entity: &mut Value, level_effects: u16) -> bool {
+    let changed =
+        entity.get("levelEffects").and_then(Value::as_u64) != Some(u64::from(level_effects));
+    entity["levelEffects"] = json!(level_effects);
     changed
 }
 
@@ -1723,10 +1787,13 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_dead(entity, *percent == 0)),
         EntityMutation::Metadata { .. } => false,
-        EntityMutation::Poison { object_id, poison } => entities
+        EntityMutation::Poison {
+            object_id, poison, ..
+        } => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_poison(entity, *poison)),
+        EntityMutation::LevelEffects { .. } => false,
         EntityMutation::Damage(_) => false,
         EntityMutation::Spawn(spawn) => {
             if let Some(existing) = entities
@@ -1874,7 +1941,7 @@ fn start_render_action(
 ) {
     let direction = direction.unwrap_or("Down");
     let pose_key = format!("{action}:{direction}");
-    let Some(descriptor) = render
+    let Some(entity) = render
         .get("entities")
         .and_then(Value::as_array)
         .and_then(|entities| {
@@ -1882,7 +1949,12 @@ fn start_render_action(
                 .iter()
                 .find(|entity| entity_id(entity) == Some(object_id))
         })
-        .and_then(|entity| entity.get("actionLayers"))
+    else {
+        actions.remove(&object_id);
+        return;
+    };
+    let Some(descriptor) = entity
+        .get("actionLayers")
         .and_then(|action_layers| action_layers.get(&pose_key))
     else {
         actions.remove(&object_id);
@@ -1907,6 +1979,11 @@ fn start_render_action(
             action: action.to_owned(),
             started_ms,
             interval_ms,
+            slowed: movement_action_uses_slow(action)
+                && entity
+                    .get("poison")
+                    .and_then(Value::as_u64)
+                    .is_some_and(|poison| poison & u64::from(POISON_SLOW) != 0),
             frame_count,
             last_frame: 0,
             direction: direction.to_owned(),
@@ -1917,6 +1994,33 @@ fn start_render_action(
             },
         },
     );
+}
+
+fn movement_action_uses_slow(action: &str) -> bool {
+    matches!(action, "walking" | "running" | "dashAttack")
+}
+
+fn action_frame_interval_ms(action: &ActiveAction) -> u64 {
+    action
+        .interval_ms
+        .saturating_mul(if action.slowed { 2 } else { 1 })
+        .max(1)
+}
+
+fn update_action_slow(action: &mut ActiveAction, slowed: bool, now_ms: u64) {
+    if !movement_action_uses_slow(&action.action) || action.slowed == slowed {
+        return;
+    }
+    let previous_interval = action_frame_interval_ms(action);
+    let elapsed = now_ms.saturating_sub(action.started_ms);
+    let phase = elapsed / previous_interval;
+    let remainder = elapsed % previous_interval;
+    action.slowed = slowed;
+    let next_interval = action_frame_interval_ms(action);
+    let rebased_elapsed = phase
+        .saturating_mul(next_interval)
+        .saturating_add(remainder.saturating_mul(next_interval) / previous_interval);
+    action.started_ms = now_ms.saturating_sub(rebased_elapsed);
 }
 
 pub(crate) fn poll_action_frame() -> Option<String> {
@@ -1935,7 +2039,8 @@ fn poll_action_frame_at(now_ms: u64) -> Option<String> {
     let mut completed = Vec::new();
     for (object_id, action) in &mut cache.actions {
         let elapsed = now_ms.saturating_sub(action.started_ms);
-        let phase = usize::try_from(elapsed / action.interval_ms).unwrap_or(usize::MAX);
+        let phase =
+            usize::try_from(elapsed / action_frame_interval_ms(action)).unwrap_or(usize::MAX);
         let Some(entity) = render
             .get_mut("entities")
             .and_then(Value::as_array_mut)
@@ -2009,7 +2114,6 @@ fn patch_render_dead(entity: &mut Value, dead: bool) -> bool {
 pub(crate) fn poison_tint_argb(poison: u16) -> Option<i32> {
     const GREEN: u16 = 1;
     const RED: u16 = 2;
-    const SLOW: u16 = 4;
     const FROZEN: u16 = 8;
     const STUN: u16 = 16;
     const PARALYSIS: u16 = 32;
@@ -2029,7 +2133,7 @@ pub(crate) fn poison_tint_argb(poison: u16) -> Option<i32> {
         0xFFC7_1585_u32
     } else if poison & (STUN | DAZED) != 0 {
         0xFFFF_FF00_u32
-    } else if poison & SLOW != 0 {
+    } else if poison & POISON_SLOW != 0 {
         0xFF80_0080_u32
     } else if poison & BLEEDING != 0 {
         0xFF8B_0000_u32
@@ -2718,6 +2822,87 @@ mod tests {
     }
 
     #[test]
+    fn authoritative_level_effect_flags_follow_existing_actor_identity_without_placeholders() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630},{"objectId":"43","kind":"player","name":"Remote","x":301,"y":630,"levelEffects":0}],"groundDrops":[{"objectId":"50","name":"Potion","x":302,"y":630,"quantity":1,"image":0,"dropKind":"item"}]}"#,
+            14,
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectLevelEffects","payload":{"objectId":43,"levelEffects":4}}"#,
+        ) else {
+            panic!("level effect flags should update an existing actor");
+        };
+        assert!(
+            render.is_none(),
+            "missing licensed frames must not draw a placeholder"
+        );
+        assert_eq!(
+            serde_json::from_str::<Value>(&models).unwrap()["entities"][1]["levelEffects"],
+            4
+        );
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectHide","payload":{"objectId":43}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectLevelEffects","payload":{"objectId":43,"levelEffects":256}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { render: None, .. }
+        ));
+        let LiveEntityPacketOutcome::Applied { models, .. } =
+            apply_packet(r#"{"type":"packet","packet":"ObjectShow","payload":{"objectId":43}}"#)
+        else {
+            panic!("hidden actor should restore with packet-fresh flags");
+        };
+        assert_eq!(
+            serde_json::from_str::<Value>(&models).unwrap()["entities"][1]["levelEffects"],
+            256
+        );
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectLevelEffects","payload":{"objectId":43,"levelEffects":256}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+        for invalid in [
+            r#"{"type":"packet","packet":"ObjectLevelEffects","payload":{"objectId":43,"levelEffects":-1}}"#,
+            r#"{"type":"packet","packet":"ObjectLevelEffects","payload":{"objectId":43,"levelEffects":65536}}"#,
+        ] {
+            assert_eq!(apply_packet(invalid), LiveEntityPacketOutcome::Rejected);
+        }
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectLevelEffects","payload":{"objectId":99,"levelEffects":1}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectLevelEffects","payload":{"objectId":50,"levelEffects":1}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+
+        let spawn_outcome = apply_packet(
+            r#"{"type":"packet","packet":"ObjectPlayer","payload":{"objectId":44,"name":"Spawned","location":{"x":302,"y":630},"levelEffects":8}}"#,
+        );
+        let LiveEntityPacketOutcome::Applied { models, .. } = spawn_outcome else {
+            panic!("spawn should retain the authoritative initial flags: {spawn_outcome:?}");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert!(models["entities"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|entity| entity["objectId"] == "44" && entity["levelEffects"] == 8));
+        clear();
+    }
+
+    #[test]
     fn lifecycle_packets_keep_hidden_and_removed_objects_authoritative() {
         let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
         clear();
@@ -3037,6 +3222,96 @@ mod tests {
             "standing"
         );
         assert!(poll_action_frame_at(1_600).is_none());
+        clear();
+    }
+
+    #[test]
+    fn crystal_slow_halves_only_movement_action_cadence_and_rebases_mid_frame() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630},{"objectId":"43","kind":"player","name":"Remote","x":301,"y":630,"direction":"Down","poison":0}]}"#,
+            30,
+        ));
+        assert!(install_render(
+            r#"{"_nativeWorldRequest":30,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing"}]}]}"#,
+            r#"{"_nativeWorldRequest":30,"entities":[{"objectId":"43","prototype":{},"directionLayers":{"Down":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing"}]},"actionLayers":{"walking:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"walk-0"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"walk-1"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"walk-2"}]]},"attack1:Down":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"attack-0"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"attack-1"}]]}}}]}"#,
+        ));
+
+        assert!(matches!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"ObjectWalk","payload":{"objectId":43,"x":302,"y":630,"direction":"Down"}}"#,
+                1_000,
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(poll_action_frame_at(1_049).is_none());
+        assert!(matches!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":4}}"#,
+                1_050,
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(poll_action_frame_at(1_149).is_none());
+        let slowed: Value =
+            serde_json::from_str(&poll_action_frame_at(1_150).expect("slowed second frame"))
+                .unwrap();
+        assert_eq!(slowed["entities"][0]["layers"][0]["atlasRectKey"], "walk-1");
+
+        assert!(matches!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":0}}"#,
+                1_200,
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(poll_action_frame_at(1_274).is_none());
+        let restored: Value =
+            serde_json::from_str(&poll_action_frame_at(1_275).expect("restored third frame"))
+                .unwrap();
+        assert_eq!(
+            restored["entities"][0]["layers"][0]["atlasRectKey"],
+            "walk-2"
+        );
+
+        assert!(matches!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"ObjectPoisoned","payload":{"objectId":43,"poison":4}}"#,
+                1_400,
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(matches!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"ObjectAttack","payload":{"objectId":43,"x":302,"y":630,"direction":"Down"}}"#,
+                1_500,
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        let attack: Value =
+            serde_json::from_str(&poll_action_frame_at(1_600).expect("attack stays full speed"))
+                .unwrap();
+        assert_eq!(
+            attack["entities"][0]["layers"][0]["atlasRectKey"],
+            "attack-1"
+        );
+        assert!(matches!(
+            apply_packet_at(
+                r#"{"type":"packet","packet":"ObjectWalk","payload":{"objectId":43,"x":303,"y":630,"direction":"Down"}}"#,
+                1_800,
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(poll_action_frame_at(1_999).is_none());
+        let slow_from_start: Value = serde_json::from_str(
+            &poll_action_frame_at(2_000).expect("existing slow status halves new movement"),
+        )
+        .unwrap();
+        assert_eq!(
+            slow_from_start["entities"][0]["layers"][0]["atlasRectKey"],
+            "walk-1"
+        );
         clear();
     }
 

@@ -132,8 +132,18 @@ The shared runtime composes that signed ARGB tint with the existing layer
 opacity on the retained Sprite; clearing poison restores white without
 rebuilding the entity. Unknown/removed identities and malformed bitfields fail
 closed. This closes the visible status tint only. Crystal Slow animation
-cadence and resource-backed `ObjectLevelEffects` animations remain open; no
-placeholder effect is drawn.
+cadence is now applied to the retained walking, running and dash-attack action
+clock as well: each movement frame lasts twice as long, while attack, spell,
+harvest, struck and lifecycle actions keep their original cadence. A poison
+change during movement rebases the current frame instead of jumping forward or
+restarting the actor. Resource-backed `ObjectLevelEffects` animations remain
+open; the checked-in Effect/Magic3 manifests do not contain Crystal's required
+frame ranges, so no placeholder effect is drawn.
+Post-`IN_GAME` `ObjectLevelEffects` does now enter the same bounded actor
+stream. Initial spawn and later unsigned 16-bit flags are retained for visible
+and temporarily hidden authoritative actors; unknown, removed and ground-drop
+IDs remain ignored. This completes transport and object-state retention, not
+the missing visual sequences.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a
