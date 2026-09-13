@@ -717,6 +717,7 @@ function combatSettings(options) {
     retreatAtActiveAggressorCount: riskLimit(options.retreatAtActiveAggressorCount),
     unsafeTargetMarks: new Map(),
     unreachableTargetMarks: new Map(),
+    unreachableTargetRetryMs: positiveInteger(options.unreachableTargetRetryMs, 30_000),
     unsafeTargetRetryEventGap: positiveInteger(options.unsafeTargetRetryEventGap, 128),
     unsafeRetreatSteps,
     unsafeRetreatMaxSteps,
@@ -1962,7 +1963,10 @@ function isDeferredCombatTargetError(error) {
 function deferUnreachableTarget(error, settings) {
   const objectId = Number(error?.objectId);
   if (!Number.isFinite(objectId)) return;
-  settings.unreachableTargetMarks.set(objectId, error.target);
+  settings.unreachableTargetMarks.set(objectId, {
+    location: error.target,
+    markedAtMs: settings.now(),
+  });
 }
 
 async function combatApproachRange(settings, client, target) {
@@ -2300,11 +2304,16 @@ function nearestAvailableLiveMonster(client, monsterNames, unavailableCorpses, s
 function unreachableTargetDeferred(entity, settings) {
   const objectId = Number(entity?.objectId);
   if (!settings.unreachableTargetMarks.has(objectId)) return false;
-  const markedLocation = settings.unreachableTargetMarks.get(objectId);
+  const mark = settings.unreachableTargetMarks.get(objectId);
+  const markedLocation = mark?.location ?? mark;
   // A moving monster can make a previously disconnected approach reachable.
-  // Keep a stationary target quarantined so one bad actor cannot abort or
-  // monopolise the whole objective search.
-  if (!validPoint(markedLocation) || distance(entity, markedLocation) >= 1) {
+  // A stationary target can also become reachable when a temporary corridor
+  // blocker moves. Retry it after one bounded world interval so a single bad
+  // actor cannot monopolise the objective, while a newly opened route is not
+  // misreported as a missing spawn for the rest of the session.
+  const retryDue = Number.isFinite(Number(mark?.markedAtMs)) &&
+    settings.now() - Number(mark.markedAtMs) >= settings.unreachableTargetRetryMs;
+  if (!validPoint(markedLocation) || distance(entity, markedLocation) >= 1 || retryDue) {
     settings.unreachableTargetMarks.delete(objectId);
     return false;
   }

@@ -3933,6 +3933,48 @@ test("an unreachable live monster is quarantined while combat continues with ano
     entry.location.x === 15 && entry.location.y === 10));
 });
 
+test("a stationary target is retried after its temporary corridor blocker can move", async () => {
+  const quest = { questId: 60, stage: "InProgress", objectives: [objective("Kill SpiderFrog", 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(60, "SpiderFrog", 20, 10, { disposition: "hostile" }),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { dead: true, hp: 0 });
+      state.questLog[0].objectives[0] = objective("Kill SpiderFrog", 1, 1);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: command.objectId });
+  });
+  let clock = 0;
+  let targetApproaches = 0;
+  const navigate = async target => {
+    if (target.objectId === 60) {
+      targetApproaches += 1;
+      if (targetApproaches === 1) throw new Error("No walk path on D2041 from 10,10 to 20,10");
+      Object.assign(client.snapshot.entities[0], { x: target.x - 1, y: target.y });
+    }
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 60,
+    objectives: { kill: [{
+      monsterName: "SpiderFrog",
+      spawnCandidates: [{ ...spawn("SpiderFrog", 20, 10), spread: 0 }],
+    }], item: [] },
+  }, navigate, {
+    ...settings,
+    now: () => clock,
+    unreachableTargetRetryMs: 30_000,
+    spawnRespawnWaitMs: 30_000,
+    sleep: async milliseconds => { clock += milliseconds; },
+    refreshWhileWaiting: async () => {},
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(targetApproaches, 2);
+  assert.deepEqual(client.sent, [{ type: "attack", objectId: 60 }]);
+});
+
 test("spawn search retries the same cave waypoint with bounded hostile clearance", async () => {
   const quest = { questId: 49, stage: "InProgress", objectives: [objective("Kill Skeleton", 0, 1)] };
   const client = new FakeClient(snapshot(quest), (owner, command) => {
