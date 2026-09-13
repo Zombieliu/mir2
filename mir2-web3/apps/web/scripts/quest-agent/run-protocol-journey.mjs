@@ -25,6 +25,7 @@ import {
   evasiveRecoveryDangerDistanceForQuest,
   evasiveRecoveryTimeoutMsForQuest,
   hpRestockTargetForActiveQuests,
+  hasJourneyEmergencyEscapeQuest,
   hpDrugCount,
   isLivingEvasiveRecoveryTimeout,
   isLivingUnsafePackRetreatFailure,
@@ -130,9 +131,10 @@ try {
     const emergencyTeleport = createRandomTeleportEmergencyEscape();
     const navigate = createNavigator(client, {
       emergencyEscape: async owner => {
-        const hasEmergencyExpedition = (owner.snapshot?.questLog ?? []).some(quest =>
-          [54, 60, 62].includes(Number(quest?.questId)) &&
-          String(quest?.stage ?? '').toLowerCase() === 'inprogress');
+        // The cave remains dangerous after the last objective dies. Preserve
+        // the same ordinary RandomTeleport escape until the reward NPC has
+        // actually accepted the ready quest.
+        const hasEmergencyExpedition = hasJourneyEmergencyEscapeQuest(owner.snapshot);
         if (!hasEmergencyExpedition || randomTeleportCount(owner.snapshot) <= 0) return false;
         return emergencyTeleport(owner);
       },

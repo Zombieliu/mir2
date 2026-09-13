@@ -73,6 +73,13 @@ export function questEmergencyEscapeHpRatio(questId) {
   return [54, 60, 62].includes(Number(questId)) ? 0.35 : 0;
 }
 
+/** Keep the public escape reserve usable until a dangerous expedition is handed in. */
+export function hasJourneyEmergencyEscapeQuest(snapshot) {
+  return (snapshot?.questLog ?? []).some(quest =>
+    [54, 60, 62].includes(Number(quest?.questId)) &&
+    ['inprogress', 'readytoturnin'].includes(normalizedStage(quest?.stage)));
+}
+
 const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62]);
 const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62]);
 

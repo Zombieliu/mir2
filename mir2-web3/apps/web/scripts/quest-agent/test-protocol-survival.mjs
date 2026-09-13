@@ -9,6 +9,7 @@ import {
   evasiveRecoveryDangerDistanceForQuest,
   evasiveRecoveryTimeoutMsForQuest,
   hpDrugCount,
+  hasJourneyEmergencyEscapeQuest,
   isLivingEvasiveRecoveryTimeout,
   isLivingUnsafePackRetreatFailure,
   mpDrugCount,
@@ -57,6 +58,21 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questEmergencyEscapeHpRatio(60), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(62), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(49), 0);
+});
+
+test('dangerous expedition escape remains armed for the completed cave return', () => {
+  assert.equal(hasJourneyEmergencyEscapeQuest({
+    questLog: [{ questId: 60, stage: 'inProgress' }],
+  }), true);
+  assert.equal(hasJourneyEmergencyEscapeQuest({
+    questLog: [{ questId: 62, stage: 'readyToTurnIn' }],
+  }), true);
+  assert.equal(hasJourneyEmergencyEscapeQuest({
+    questLog: [{ questId: 54, stage: 'completed' }],
+  }), false);
+  assert.equal(hasJourneyEmergencyEscapeQuest({
+    questLog: [{ questId: 49, stage: 'readyToTurnIn' }],
+  }), false);
 });
 
 test('only a living exact evasive recovery timeout is retryable', () => {
