@@ -647,6 +647,33 @@ fn populate_specimens(world: &mut World, scene: &str) {
         });
     }
     let mut social = world.resource_mut::<SocialModel>();
+    if scene == "group" {
+        social.group.active = true;
+        social.group.allow_invites = true;
+        social.group.leader_name = Some("OFFLINE UI FIXTURE".into());
+        social.group.members = (0..9)
+            .map(|index| mir2_client_bevy::social::GroupMemberModel {
+                name: if index == 0 {
+                    "OFFLINE UI FIXTURE".into()
+                } else {
+                    format!("UI member {index}")
+                },
+                leader: index == 0,
+                online: index != 8,
+                level: Some(22u16.saturating_sub(index as u16)),
+                class: Some((index % 3) as u8),
+                hp: Some(140 - index as i32 * 7),
+                max_hp: Some(160),
+                map: Some(if index % 2 == 0 { "0" } else { "1" }.into()),
+            })
+            .collect();
+        social.group.member_maps = social
+            .group
+            .members
+            .iter()
+            .map(|member| (member.name.clone(), member.map.clone().unwrap_or_default()))
+            .collect();
+    }
     if scene == "trade" {
         social.trade.state = "open".into();
         social.trade.partner = Some("UI partner".into());
@@ -659,6 +686,20 @@ fn populate_specimens(world: &mut World, scene: &str) {
         social.guild.max_members = 50;
         // Offline permission specimen only; the preview host cannot send requests.
         social.guild.permissions = vec!["notice".into()];
+        social.guild.members = vec![mir2_client_bevy::social::GuildMemberModel {
+            name: "OFFLINE UI FIXTURE".into(),
+            id: 1,
+            online: true,
+            rank_name: Some("Guild Master".into()),
+            rank_index: Some(0),
+            ..default()
+        }];
+        social.guild.ranks = vec![mir2_client_bevy::social::GuildRankModel {
+            name: "Guild Master".into(),
+            index: 0,
+            options: 0,
+            members: social.guild.members.clone(),
+        }];
     }
 }
 
@@ -748,5 +789,33 @@ mod tests {
                 expected != NpcShopServiceMode::Sell
             );
         }
+    }
+
+    #[test]
+    fn social_preview_scenes_expose_bounded_offline_models() {
+        let mut world = World::new();
+        world.init_resource::<mir2_client_bevy::social::SocialModel>();
+
+        populate_specimens(&mut world, "group");
+        let social = world.resource::<mir2_client_bevy::social::SocialModel>();
+        assert!(social.group.active);
+        assert_eq!(
+            social.group.leader_name.as_deref(),
+            Some("OFFLINE UI FIXTURE")
+        );
+        assert_eq!(social.group.members.len(), 9);
+        assert_eq!(social.group.member_maps.len(), 9);
+
+        populate_specimens(&mut world, "guild");
+        let social = world.resource::<mir2_client_bevy::social::SocialModel>();
+        assert_eq!(social.guild.name.as_deref(), Some("OFFLINE UI GUILD"));
+        assert_eq!(social.guild.members.len(), 1);
+        assert_eq!(social.guild.ranks.len(), 1);
+
+        populate_specimens(&mut world, "trade");
+        let social = world.resource::<mir2_client_bevy::social::SocialModel>();
+        assert_eq!(social.trade.state, "open");
+        assert_eq!(social.trade.partner.as_deref(), Some("UI partner"));
+        assert_eq!(social.trade.open_revision, 1);
     }
 }

@@ -1,5 +1,23 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: the retained shared Crystal Group, Guild
+> and Trade panels now receive bounded phone focus without an Android-only
+> renderer. Group/Guild focus their exact authored window; Trade derives one
+> focus rectangle from both draggable windows, inverse-maps input through the
+> transform, and leaves the shared inventory at authored size. Blocking social
+> panels occlude the bottom HUD/chat and world controls until close. Real ADB
+> taps cover Group close, Guild Members-tab selection and opening the shared
+> Trade gold amount modal at 2340x1080, 1920x1080 and 1600x720. Android UI
+> Preview passes 177/177, the two focused renderer tests, Gradle Debug/UI
+> Preview tests, arm64-v8a API31 compile, full shared-UI package and streamed
+> install pass. The 443,597,408-byte APK SHA-256 is
+> `a7c3ccd1640962e4419905d63e4e9701e1ca2a5ea1cc0b9bcd55b96cafc9180e`.
+> Evidence:
+> `docs/generated/player-qa/native-android-social-panels-focus-20260913/README.md`.
+> Models are offline fixtures and no transaction was sent; approved-WSS, real
+> account login, online social state and physical-device acceptance remain
+> open.
+
 > 2026-09-13 Android current change: the real shared Crystal GameShop and
 > BigMap roots now receive bounded phone focus and temporarily occlude the
 > desktop HUD/chat tree while open. GameShop no longer clips its transformed

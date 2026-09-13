@@ -970,3 +970,17 @@ fn trade_dialog_sync_leaves_session_without_leaking_positions_or_prompt() {
         TradeDialogUi::default()
     );
 }
+
+#[test]
+fn trade_focus_rect_tracks_both_draggable_windows() {
+    let mut dialog = TradeDialogUi::default();
+    assert_eq!(
+        dialog.focus_rect(),
+        CrystalRect::new(298.0, 418.0, 428.0, 152.0)
+    );
+    dialog.positions = [Vec2::new(700.0, 100.0), Vec2::new(50.0, 500.0)];
+    assert_eq!(
+        dialog.focus_rect(),
+        CrystalRect::new(50.0, 100.0, 854.0, 552.0)
+    );
+}

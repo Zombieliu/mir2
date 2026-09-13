@@ -457,6 +457,10 @@ pub const CRYSTAL_BIGMAP_PANEL_RECT: CrystalRect = CrystalRect::new(132.0, 134.0
 pub const CRYSTAL_STORAGE_PANEL_RECT: CrystalRect = CrystalRect::new(150.0, 100.0, 640.0, 344.0);
 pub const CRYSTAL_GROUP_PANEL_RECT: CrystalRect = CrystalRect::new(396.0, 259.0, 232.0, 249.0);
 pub const CRYSTAL_GUILD_PANEL_RECT: CrystalRect = CrystalRect::new(217.0, 168.0, 590.0, 432.0);
+/// Bounding box around Crystal's two independent 204x152 trade windows.
+/// Android uses this only to focus the existing shared render tree; the two
+/// windows and all of their controls retain their authored coordinates.
+pub const CRYSTAL_TRADE_FOCUS_RECT: CrystalRect = CrystalRect::new(298.0, 418.0, 428.0, 152.0);
 pub const CRYSTAL_HELP_PANEL_RECT: CrystalRect = CrystalRect::new(244.0, 129.0, 536.0, 509.0);
 /// `CharacterDialog.Location = (ScreenWidth - 264, 0)` at Crystal's fixed
 /// 1024x768 stage.
@@ -2337,7 +2341,7 @@ struct OverlayGuildGoldModal;
 struct OverlayGuildGoldInput;
 
 #[derive(Component)]
-struct OverlayTrade;
+pub struct OverlayTrade;
 
 #[derive(Component)]
 struct OverlayTradeGoldModal;
@@ -2473,7 +2477,13 @@ pub struct OverlayStorage;
 pub struct OverlayOptions;
 
 #[derive(Component)]
-struct OverlaySocial;
+pub struct OverlaySocial;
+
+/// Exact group/guild window inside the full-stage social overlay. Android
+/// focuses this bounded node instead of transforming the 1024x768 parent,
+/// which keeps Bevy image layout and clipping local to the real panel.
+#[derive(Component)]
+pub struct OverlaySocialFocus;
 
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
 enum OverlayButton {
@@ -3335,10 +3345,13 @@ fn spawn_overlay_root(mut commands: Commands) {
             ));
             root.spawn((
                 OverlayTrade,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
-                    width: Val::Px(1024.0),
-                    height: Val::Px(768.0),
+                    left: Val::Px(CRYSTAL_TRADE_FOCUS_RECT.left),
+                    top: Val::Px(CRYSTAL_TRADE_FOCUS_RECT.top),
+                    width: Val::Px(CRYSTAL_TRADE_FOCUS_RECT.width),
+                    height: Val::Px(CRYSTAL_TRADE_FOCUS_RECT.height),
                     display: Display::None,
                     ..default()
                 },
@@ -3548,6 +3561,7 @@ fn spawn_overlay_root(mut commands: Commands) {
             ));
             root.spawn((
                 OverlaySocial,
+                UiTransform::default(),
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(0.0),
@@ -7747,12 +7761,21 @@ fn render_overlays(
     }
     {
         let mut delete_layers = panels.p2();
-        fill_panel(
+        let trade_rect = state.trade_dialog.focus_rect();
+        fill_rect_panel(
             &mut commands,
             &mut delete_layers.p3(),
+            trade_rect,
             state.trade_dialog.open,
             |parent| {
-                trade_dialog::render(parent, asset_server.as_deref(), &social, &state, &ui.player);
+                trade_dialog::render(
+                    parent,
+                    asset_server.as_deref(),
+                    &social,
+                    &state,
+                    &ui.player,
+                    Vec2::new(trade_rect.left, trade_rect.top),
+                );
             },
         );
         fill_panel(
@@ -7906,6 +7929,31 @@ fn fill_panel<C: Component>(
     let Some((entity, mut node)) = query.iter_mut().next() else {
         return;
     };
+    node.display = if visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    commands.entity(entity).despawn_children();
+    if visible {
+        commands.entity(entity).with_children(render);
+    }
+}
+
+fn fill_rect_panel<C: Component>(
+    commands: &mut Commands,
+    query: &mut Query<(Entity, &mut Node), With<C>>,
+    rect: CrystalRect,
+    visible: bool,
+    render: impl FnOnce(&mut ChildSpawnerCommands),
+) {
+    let Some((entity, mut node)) = query.iter_mut().next() else {
+        return;
+    };
+    node.left = Val::Px(rect.left);
+    node.top = Val::Px(rect.top);
+    node.width = Val::Px(rect.width);
+    node.height = Val::Px(rect.height);
     node.display = if visible {
         Display::Flex
     } else {
@@ -9822,30 +9870,74 @@ fn render_social(
     player: &crate::read_model::PlayerStats,
 ) {
     if state.group_open() {
-        render_group_panel(
-            parent,
-            asset_server,
-            social,
-            state,
-            combat_target,
-            player.name.as_deref().unwrap_or(""),
-        );
+        spawn_social_focus(parent, CRYSTAL_GROUP_PANEL_RECT, |panel| {
+            render_group_panel(
+                panel,
+                asset_server,
+                social,
+                state,
+                combat_target,
+                player.name.as_deref().unwrap_or(""),
+                CrystalRect::new(
+                    0.0,
+                    0.0,
+                    CRYSTAL_GROUP_PANEL_RECT.width,
+                    CRYSTAL_GROUP_PANEL_RECT.height,
+                ),
+            );
+        });
     } else if state.guild_open() {
-        render_guild_panel(parent, asset_server, social, state, player);
+        spawn_social_focus(parent, CRYSTAL_GUILD_PANEL_RECT, |panel| {
+            render_guild_panel(
+                panel,
+                asset_server,
+                social,
+                state,
+                player,
+                CrystalRect::new(
+                    0.0,
+                    0.0,
+                    CRYSTAL_GUILD_PANEL_RECT.width,
+                    CRYSTAL_GUILD_PANEL_RECT.height,
+                ),
+            );
+        });
     } else {
         render_trade_panel(parent, asset_server, social, inventory, player);
     }
+}
+
+fn spawn_social_focus(
+    parent: &mut ChildSpawnerCommands,
+    rect: CrystalRect,
+    render: impl FnOnce(&mut ChildSpawnerCommands),
+) {
+    parent
+        .spawn((
+            OverlaySocialFocus,
+            UiTransform::default(),
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(rect.left),
+                top: Val::Px(rect.top),
+                width: Val::Px(rect.width),
+                height: Val::Px(rect.height),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(render);
 }
 
 fn render_group_panel(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
     social: &crate::social::SocialModel,
-    state: &NativePlayerUiState,
+    _state: &NativePlayerUiState,
     _combat_target: Option<&crate::quest_model::CombatTargetModel>,
     owner: &str,
+    rect: CrystalRect,
 ) {
-    let rect = state.group_dialog.rect();
     let group = &social.group;
     let Some(asset_server) = asset_server else {
         return;
@@ -9967,8 +10059,8 @@ fn render_guild_panel(
     social: &crate::social::SocialModel,
     state: &NativePlayerUiState,
     player: &crate::read_model::PlayerStats,
+    rect: CrystalRect,
 ) {
-    let rect = state.guild_panel.rect();
     let guild = &social.guild;
     let Some(asset_server) = asset_server else {
         return;
@@ -14863,13 +14955,28 @@ mod tests {
             .collect();
         app.update();
 
-        let social_node = app
+        let (social_node, social_transform) = app
             .world_mut()
-            .query_filtered::<&Node, With<OverlaySocial>>()
+            .query_filtered::<(&Node, &UiTransform), With<OverlaySocial>>()
             .single(app.world())
             .expect("social root");
         assert_eq!(social_node.width, Val::Px(1024.0));
         assert_eq!(social_node.height, Val::Px(768.0));
+        assert_eq!(*social_transform, UiTransform::default());
+        let focus_node = app
+            .world_mut()
+            .query_filtered::<&Node, With<OverlaySocialFocus>>()
+            .single(app.world())
+            .expect("bounded group focus node");
+        assert_eq!(focus_node.left, Val::Px(CRYSTAL_GROUP_PANEL_RECT.left));
+        assert_eq!(focus_node.top, Val::Px(CRYSTAL_GROUP_PANEL_RECT.top));
+        assert_eq!(focus_node.width, Val::Px(CRYSTAL_GROUP_PANEL_RECT.width));
+        assert_eq!(focus_node.height, Val::Px(CRYSTAL_GROUP_PANEL_RECT.height));
+        assert!(app
+            .world_mut()
+            .query_filtered::<&UiTransform, With<OverlayTrade>>()
+            .single(app.world())
+            .is_ok());
         let group_rows = app
             .world_mut()
             .query::<&OverlayButton>()
@@ -14894,6 +15001,15 @@ mod tests {
             })
             .collect();
         app.update();
+        let focus_node = app
+            .world_mut()
+            .query_filtered::<&Node, With<OverlaySocialFocus>>()
+            .single(app.world())
+            .expect("bounded guild focus node");
+        assert_eq!(focus_node.left, Val::Px(CRYSTAL_GUILD_PANEL_RECT.left));
+        assert_eq!(focus_node.top, Val::Px(CRYSTAL_GUILD_PANEL_RECT.top));
+        assert_eq!(focus_node.width, Val::Px(CRYSTAL_GUILD_PANEL_RECT.width));
+        assert_eq!(focus_node.height, Val::Px(CRYSTAL_GUILD_PANEL_RECT.height));
         let guild_rows = app
             .world_mut()
             .query::<&Text>()

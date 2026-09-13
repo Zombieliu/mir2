@@ -298,10 +298,45 @@ impl Plugin for AndroidSharedShellPlugin {
             );
         #[cfg(feature = "ui-preview")]
         crate::ui_preview::install(app);
+        #[cfg(feature = "ui-preview")]
+        app.add_systems(
+            PostUpdate,
+            report_preview_social_layout.after(bevy::ui::UiSystems::Layout),
+        );
         crate::entity_overlays::install(app);
         crate::ground_labels::install(app);
         crate::mobile_ui::install(app);
         crate::scene_effects::install(app);
+    }
+}
+
+#[cfg(feature = "ui-preview")]
+fn report_preview_social_layout(
+    roots: Query<
+        (&UiTransform, &UiGlobalTransform, &Children),
+        Or<(
+            With<mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayTrade>,
+        )>,
+    >,
+    globals: Query<&UiGlobalTransform>,
+    mut logged: Local<bool>,
+) {
+    if *logged {
+        return;
+    }
+    for (transform, global, children) in &roots {
+        if *transform == UiTransform::default() || children.is_empty() {
+            continue;
+        }
+        info!(
+            ?transform,
+            ?global,
+            first_child_global = ?globals.get(children[0]).ok(),
+            "ANDROID_SOCIAL_LAYOUT_COMPUTED"
+        );
+        *logged = true;
+        break;
     }
 }
 
@@ -314,6 +349,7 @@ fn fit_stage(
     forms: crate::form_input::FormInput,
     mut scale: ResMut<UiScale>,
     belt: Res<mir2_client_bevy::crystal_ui::hud::CrystalBeltPresentation>,
+    #[cfg(feature = "ui-preview")] mut preview_focus_logged: Local<u8>,
     mut roots: Query<
         (
             &mut Node,
@@ -344,6 +380,9 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocial>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayTrade>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -360,6 +399,9 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocial>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayTrade>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -375,6 +417,9 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocial>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayTrade>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -390,6 +435,8 @@ fn fit_stage(
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayTrade>,
             Has<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
         Or<(
@@ -401,6 +448,8 @@ fn fit_stage(
             With<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayTrade>,
             With<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         )>,
     >,
@@ -433,7 +482,11 @@ fn fit_stage(
         host.safe_right,
         host.safe_top,
     );
-    let occlude_world_chrome = player.shop_open() || player.bigmap_open();
+    let occlude_world_chrome = player.shop_open()
+        || player.bigmap_open()
+        || player.group_open()
+        || player.guild_open()
+        || player.trade_open();
     for (mut root, is_map_image, is_hud, is_chat) in &mut roots {
         root.left = px(if is_map_image {
             map_origin.x
@@ -504,30 +557,36 @@ fn fit_stage(
         is_mail,
         is_game_shop,
         is_bigmap,
+        is_social,
+        is_trade,
         is_npc_dialog,
     ) in &mut focus_panels
     {
-        let Some((origin, size)) = focus_panel_rect(node) else {
+        let geometry = focus_panel_rect(node);
+        let Some((origin, size)) = geometry else {
             *transform = UiTransform::default();
             continue;
         };
         let enabled = is_chat_settings
-            || (is_inventory && player.inventory_open())
+            || (is_inventory && player.inventory_open() && !player.trade_dialog.open)
             || (is_storage && player.storage_open())
             || (is_options && player.options_open())
             || (is_npc_shop && player.npc_shop_open())
             || (is_mail && player.mail_open())
             || (is_game_shop && player.shop_open())
             || (is_bigmap && player.bigmap_open())
+            || (is_social && (player.group_open() || player.guild_open()))
+            || (is_trade && player.trade_dialog.open)
             || (is_npc_dialog && npc_dialog.is_open);
         *transform = if enabled {
-            let max_scale = if is_npc_shop || is_game_shop || is_bigmap {
-                1.8
-            } else if is_npc_dialog {
-                2.2
-            } else {
-                3.2
-            };
+            let max_scale =
+                if is_npc_shop || is_game_shop || is_bigmap || (is_social && player.guild_open()) {
+                    1.8
+                } else if is_npc_dialog || is_trade {
+                    2.2
+                } else {
+                    3.2
+                };
             let focus_size = mail_editor_focus_size(
                 size,
                 is_mail && host.ime_bottom > 0.0 && player.core.mail_compose.is_some(),
@@ -559,6 +618,28 @@ fn fit_stage(
         } else {
             UiTransform::default()
         };
+        #[cfg(feature = "ui-preview")]
+        if enabled && (is_social || is_trade) {
+            let bit = if is_trade {
+                4
+            } else if player.guild_open() {
+                2
+            } else {
+                1
+            };
+            if *preview_focus_logged & bit == 0 {
+                info!(
+                    group = player.group_open(),
+                    guild = player.guild_open(),
+                    trade = player.trade_dialog.open,
+                    ?origin,
+                    ?size,
+                    transform = ?*transform,
+                    "ANDROID_SOCIAL_FOCUS_APPLIED"
+                );
+                *preview_focus_logged |= bit;
+            }
+        }
     }
 }
 
@@ -2328,6 +2409,53 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn fit_stage_applies_group_focus_to_the_bounded_shared_social_panel() {
+        let mut app = App::new();
+        let mut shell = NativeShellModel::default();
+        shell.screen = Screen::InGame;
+        let mut player = mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState::default();
+        player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        player.core.panel = mir2_ui_core::state::UiPanel::Group;
+        app.insert_resource(HostState::default())
+            .insert_resource(shell)
+            .insert_resource(player)
+            .insert_resource(mir2_client_bevy::quest_model::NpcDialogModel::default())
+            .insert_resource(UiScale(1.0))
+            .insert_resource(mir2_client_bevy::crystal_ui::hud::CrystalBeltPresentation::default())
+            .add_systems(Update, fit_stage);
+        app.world_mut().spawn(Window {
+            resolution: bevy::window::WindowResolution::new(1600, 720),
+            ..default()
+        });
+        let social = app
+            .world_mut()
+            .spawn((
+                mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus,
+                UiTransform::default(),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(mir2_client_bevy::crystal_ui::overlays::CRYSTAL_GROUP_PANEL_RECT.left),
+                    top: px(mir2_client_bevy::crystal_ui::overlays::CRYSTAL_GROUP_PANEL_RECT.top),
+                    width: px(
+                        mir2_client_bevy::crystal_ui::overlays::CRYSTAL_GROUP_PANEL_RECT.width,
+                    ),
+                    height: px(
+                        mir2_client_bevy::crystal_ui::overlays::CRYSTAL_GROUP_PANEL_RECT.height,
+                    ),
+                    display: Display::Flex,
+                    ..default()
+                },
+            ))
+            .id();
+
+        app.update();
+
+        let transform = app.world().get::<UiTransform>(social).unwrap();
+        assert!(transform.scale.x > 1.0, "{transform:?}");
+        assert_ne!(transform.translation, Val2::ZERO);
     }
 
     #[test]
