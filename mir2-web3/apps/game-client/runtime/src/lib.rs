@@ -4914,6 +4914,15 @@ fn sync_entity_render_layers(
                 .filter(|layer| entity_render_layer_is_actor(entity, layer))
             {
                 let layer_key = entity_render_layer_key(entity, layer);
+                if entity_render_layer_waits_for_declared_atlas(layer, &atlas_assets, &registry) {
+                    // Native state and RGBA atlas batches are intentionally
+                    // transported as separate messages. The layer path is
+                    // diagnostic provenance, not a standalone fallback while
+                    // its atlas is in flight.
+                    registry.entity_render_pending_images.remove(&layer_key);
+                    defer_actor_composite = true;
+                    continue;
+                }
                 let image_binding =
                     entity_render_image_binding(layer, &asset_server, &atlas_assets, &registry);
                 let image_source_changed = registry
@@ -4976,6 +4985,19 @@ fn sync_entity_render_layers(
             let position = entity_render_layer_position(snapshot, layer, motion_offset);
             let actor_layer = entity_render_layer_is_actor(entity, layer);
             if actor_layer && defer_actor_composite {
+                continue;
+            }
+            if entity_render_layer_waits_for_declared_atlas(layer, &atlas_assets, &registry) {
+                // Preserve an existing decoration/effect layer in place and
+                // defer first spawn until its native atlas image is available.
+                // In particular, never issue an AssetServer request for the
+                // source-frame provenance path.
+                if let Some(handle) = registry.entity_render_layers.get(&layer_key) {
+                    if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                        transform.translation = position;
+                    }
+                }
+                registry.entity_render_pending_images.remove(&layer_key);
                 continue;
             }
             let opacity = layer.opacity.unwrap_or(1.0);
@@ -5400,6 +5422,23 @@ fn entity_render_atlas_contains_rects(
     incoming: &[EntityRenderAtlasRect],
 ) -> bool {
     incoming.iter().all(|rect| existing.contains_key(&rect.key))
+}
+
+fn entity_render_layer_waits_for_declared_atlas(
+    layer: &EntityRenderLayer,
+    atlas_assets: &RuntimeEntityRenderAtlases,
+    registry: &SceneRegistry,
+) -> bool {
+    let (Some(atlas_key), Some(rect_key)) = (&layer.atlas_key, &layer.atlas_rect_key) else {
+        return false;
+    };
+    !registry
+        .entity_render_atlases
+        .get(atlas_key)
+        .is_some_and(|atlas| {
+            atlas.rects.contains_key(rect_key)
+                && (atlas.image.is_some() || atlas_assets.images.contains_key(atlas_key))
+        })
 }
 
 fn entity_render_image_binding(
@@ -6705,6 +6744,70 @@ mod entity_atlas_tests {
     }
 
     #[test]
+    fn native_atlas_layer_waits_for_uploaded_image_without_loading_debug_path() {
+        let mut app = entity_sync_test_app();
+        let snapshot: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true,
+            "stageWidth": 1024,
+            "stageHeight": 768,
+            "atlases": [{
+                "key": "native:p0",
+                "width": 64,
+                "height": 64,
+                "rects": [{
+                    "key": "standing-0",
+                    "x": 0,
+                    "y": 0,
+                    "width": 32,
+                    "height": 48
+                }]
+            }],
+            "entities": [{
+                "objectId": "1001",
+                "layers": [{
+                    "key": "1001:body",
+                    "path": "/original-ui/CArmour/00/debug-only.png",
+                    "atlasKey": "native:p0",
+                    "atlasRectKey": "standing-0",
+                    "left": 480,
+                    "top": 352,
+                    "width": 32,
+                    "height": 48,
+                    "z": 50005
+                }]
+            }]
+        }))
+        .expect("native atlas-backed entity state");
+
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(snapshot);
+        app.update();
+
+        {
+            let registry = app.world().resource::<SceneRegistry>();
+            assert!(registry.entity_render_layers.is_empty());
+            assert_eq!(registry.entity_render_atlases["native:p0"].image, None);
+        }
+
+        let uploaded = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderAtlases>()
+            .images
+            .insert("native:p0".to_owned(), uploaded);
+        app.update();
+
+        let registry = app.world().resource::<SceneRegistry>();
+        let layer = &registry.entity_render_layers["1001:body"];
+        assert_eq!(layer.image_key, "atlas:native:p0");
+        assert_eq!(layer.atlas_key.as_deref(), Some("native:p0"));
+        assert_eq!(layer.atlas_rect_key.as_deref(), Some("standing-0"));
+    }
+
+    #[test]
     fn animation_frames_extend_one_stable_atlas_layout() {
         let mut app = entity_sync_test_app();
         let state = |rect_key: &str| {
@@ -7109,9 +7212,13 @@ mod entity_atlas_tests {
             assert!(
                 registry
                     .entity_render_pending_images
-                    .get("1001:hair")
+                    .get("1001:body")
                     .is_some_and(Handle::is_strong),
-                "the unready replacement must keep a strong handle across deferred ticks"
+                "the ready replacement must keep a strong handle across deferred ticks"
+            );
+            assert!(
+                !registry.entity_render_pending_images.contains_key("1001:hair"),
+                "an atlas-backed layer must not load its debug path while native pixels are pending"
             );
 
             for (index, entity) in initial_entities.iter().copied().enumerate() {

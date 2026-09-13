@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> 2026-09-13 Android current change: the authoritative object pipeline now
+> forwards and reduces `ObjectName`, `ObjectColourChanged` and
+> `ObjectGuildNameChanged` after real world entry. Exact bounded values update
+> visible or hidden cached actors and flow into the existing name/guild overlay;
+> unknown and tombstoned objects cannot be resurrected. The shared renderer now
+> waits for separately uploaded native atlas pixels rather than treating an
+> atlas layer's provenance path as a standalone asset. Android 177/177 and UI
+> Preview 185/185, runtime 234/234, Java 25/25 per variant, API31 package and
+> streamed install pass. A 2340x1080 offline specimen visibly shows the packet
+> rename, guild and colour over seven objects/twelve layers, with no missing
+> path, panic or fatal log match. Evidence:
+> `docs/generated/player-qa/native-android-object-metadata-20260913/README.md`.
+> Next externally gated milestone is approved-WSS account login through online
+> StartGame/render-ready plus a physical-device run. Without those inputs, keep
+> remaining packet/object work bounded and independently verifiable; do not
+> claim live or device acceptance.
+
 > 2026-09-12 Android current change: emulator rendering is no longer blocked by
 > the old API31 SwiftShader/Vulkan failure. Android now selects wgpu GLES with
 > downlevel limits, removes unused unsupported OIT startup, uses one-sample 2D

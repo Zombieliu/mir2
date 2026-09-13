@@ -114,6 +114,16 @@ NPC/monster underscore line breaks. The local player's bar uses exact shared
 packet revision renewing the timer even when the percentage repeats. It never
 infers exact monster HP from a percentage. Shared `NameView` hides names and
 guilds but not health feedback, and every overlay node passes input through.
+Post-`IN_GAME` `ObjectName`, `ObjectColourChanged` and
+`ObjectGuildNameChanged` packets are forwarded through the same bounded object
+stream. The reducer validates their exact object identity and field bounds,
+updates visible and temporarily hidden authoritative actors, and lets the
+existing overlay projection render the new name, signed ARGB colour and guild
+without rebuilding sprites or predicting client state. Unknown and removed
+objects remain ignored. Native entity state and uploaded atlas pixels arrive
+in separate bounded messages; an atlas-backed layer now waits for its declared
+image while retaining the last complete composite instead of asking Bevy to
+load the source-frame provenance path as a standalone Android asset.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a

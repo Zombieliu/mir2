@@ -415,6 +415,26 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                 }
             },
         ),
+        "ObjectName" => {
+            object_id(body)
+                .zip(bounded_text(body, "name", false))
+                .map(|(object_id, name)| EntityMutation::Metadata {
+                    object_id,
+                    update: EntityMetadata::Name(name.expect("non-empty name")),
+                })
+        }
+        "ObjectColourChanged" => object_id(body).zip(signed_i32(body, "nameColourArgb")).map(
+            |(object_id, name_colour_argb)| EntityMutation::Metadata {
+                object_id,
+                update: EntityMetadata::NameColour(name_colour_argb),
+            },
+        ),
+        "ObjectGuildNameChanged" => object_id(body)
+            .zip(bounded_text(body, "guildName", true))
+            .map(|(object_id, guild_name)| EntityMutation::Metadata {
+                object_id,
+                update: EntityMetadata::GuildName(guild_name),
+            }),
         "Death" => self_object_id(&models)
             .zip(location(body))
             .map(|(object_id, position)| EntityMutation::Action {
@@ -709,6 +729,7 @@ fn mutation_object_id(mutation: &EntityMutation) -> Option<u32> {
         | EntityMutation::Show(object_id)
         | EntityMutation::Remove(object_id)
         | EntityMutation::Health { object_id, .. }
+        | EntityMutation::Metadata { object_id, .. }
         | EntityMutation::Action { object_id, .. } => Some(*object_id),
         EntityMutation::Damage(event) => Some(event.object_id),
         EntityMutation::Move(object_id, ..) => Some(*object_id),
@@ -801,6 +822,14 @@ fn apply_cache_mutation(
             let render_changed = render.is_some_and(|value| apply_render(value, mutation));
             (model_changed || render_changed, render_changed)
         }
+        EntityMutation::Metadata { object_id, update } => {
+            let model_changed = apply_models(models, mutation);
+            let hidden_changed = hidden
+                .get_mut(object_id)
+                .and_then(|entry| entry.model.as_mut())
+                .is_some_and(|entity| patch_model_metadata(entity, update));
+            (model_changed || hidden_changed, false)
+        }
         EntityMutation::Action {
             object_id,
             action,
@@ -882,12 +911,23 @@ enum EntityMutation {
         generation: u64,
         revision: u64,
     },
+    Metadata {
+        object_id: u32,
+        update: EntityMetadata,
+    },
     Damage(LiveDamageEvent),
     Hide(u32),
     Show(u32),
     Remove(u32),
     Spawn(EntitySpawn),
     GroundDrop(GroundDropSpawn),
+}
+
+#[derive(Debug)]
+enum EntityMetadata {
+    Name(String),
+    NameColour(i32),
+    GuildName(Option<String>),
 }
 
 #[derive(Debug)]
@@ -948,6 +988,22 @@ fn damage(payload: &serde_json::Map<String, Value>) -> Option<i32> {
 
 fn damage_type(payload: &serde_json::Map<String, Value>) -> Option<u8> {
     u8::try_from(payload.get("damageType")?.as_u64()?).ok()
+}
+
+fn signed_i32(payload: &serde_json::Map<String, Value>, key: &str) -> Option<i32> {
+    i32::try_from(payload.get(key)?.as_i64()?).ok()
+}
+
+fn bounded_text(
+    payload: &serde_json::Map<String, Value>,
+    key: &str,
+    empty_is_none: bool,
+) -> Option<Option<String>> {
+    let value = payload.get(key)?.as_str()?.trim();
+    if value.chars().count() > 128 || (!empty_is_none && value.is_empty()) {
+        return None;
+    }
+    Some((!value.is_empty()).then(|| value.to_owned()))
 }
 
 fn ground_drop(payload: &serde_json::Map<String, Value>, gold: bool) -> Option<GroundDropSpawn> {
@@ -1420,6 +1476,10 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
             .is_some_and(|entity| {
                 patch_model_health(entity, *percent, *expire, *generation, *revision)
             }),
+        EntityMutation::Metadata { object_id, update } => entities
+            .iter_mut()
+            .find(|entity| entity_id(entity) == Some(*object_id))
+            .is_some_and(|entity| patch_model_metadata(entity, update)),
         EntityMutation::Damage(event) => entities
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(event.object_id))
@@ -1452,6 +1512,34 @@ fn apply_models(models: &mut Value, mutation: &EntityMutation) -> bool {
         | EntityMutation::Show(_)
         | EntityMutation::Remove(_)
         | EntityMutation::GroundDrop(_) => false,
+    }
+}
+
+fn patch_model_metadata(entity: &mut Value, update: &EntityMetadata) -> bool {
+    match update {
+        EntityMetadata::Name(name) => {
+            let changed = entity.get("name").and_then(Value::as_str) != Some(name);
+            entity["name"] = json!(name);
+            changed
+        }
+        EntityMetadata::NameColour(name_colour_argb) => {
+            let changed = entity.get("nameColourArgb").and_then(Value::as_i64)
+                != Some(i64::from(*name_colour_argb));
+            entity["nameColourArgb"] = json!(name_colour_argb);
+            changed
+        }
+        EntityMetadata::GuildName(guild_name) => {
+            let next = guild_name.as_deref();
+            let changed = entity.get("guildName").and_then(Value::as_str) != next
+                || (next.is_none()
+                    && entity
+                        .get("guildName")
+                        .is_some_and(|value| !value.is_null()));
+            entity["guildName"] = guild_name
+                .as_ref()
+                .map_or(Value::Null, |value| json!(value));
+            changed
+        }
     }
 }
 
@@ -1579,6 +1667,7 @@ fn apply_render(render: &mut Value, mutation: &EntityMutation) -> bool {
             .iter_mut()
             .find(|entity| entity_id(entity) == Some(*object_id))
             .is_some_and(|entity| patch_render_dead(entity, *percent == 0)),
+        EntityMutation::Metadata { .. } => false,
         EntityMutation::Damage(_) => false,
         EntityMutation::Spawn(spawn) => {
             if let Some(existing) = entities
@@ -2270,6 +2359,80 @@ mod tests {
             panic!("self movement model update should apply");
         };
         assert!(presentation_event.is_none());
+        clear();
+    }
+
+    #[test]
+    fn authoritative_identity_packets_update_visible_and_hidden_actor_metadata() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630},{"objectId":"43","kind":"player","name":"Old name","guildName":"Old guild","nameColourArgb":-1,"x":301,"y":630}]}"#,
+            12,
+        ));
+
+        let LiveEntityPacketOutcome::Applied { models, render, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectName","payload":{"objectId":43,"name":"Renamed by server"}}"#,
+        ) else {
+            panic!("name update should apply");
+        };
+        assert!(render.is_none());
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["name"], "Renamed by server");
+
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectColourChanged","payload":{"objectId":43,"nameColourArgb":-65281}}"#,
+        ) else {
+            panic!("name-colour update should apply");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["nameColourArgb"], -65281);
+
+        assert!(matches!(
+            apply_packet(r#"{"type":"packet","packet":"ObjectHide","payload":{"objectId":43}}"#),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        assert!(matches!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectGuildNameChanged","payload":{"objectId":43,"guildName":"Hidden update"}}"#
+            ),
+            LiveEntityPacketOutcome::Applied { .. }
+        ));
+        let LiveEntityPacketOutcome::Applied { models, .. } =
+            apply_packet(r#"{"type":"packet","packet":"ObjectShow","payload":{"objectId":43}}"#)
+        else {
+            panic!("hidden actor should restore");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["guildName"], "Hidden update");
+
+        let LiveEntityPacketOutcome::Applied { models, .. } = apply_packet(
+            r#"{"type":"packet","packet":"ObjectGuildNameChanged","payload":{"objectId":43,"guildName":""}}"#,
+        ) else {
+            panic!("empty authoritative guild should clear the guild line");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert!(models["entities"][1]["guildName"].is_null());
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectGuildNameChanged","payload":{"objectId":43,"guildName":""}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
+
+        for invalid in [
+            r#"{"type":"packet","packet":"ObjectName","payload":{"objectId":43,"name":""}}"#,
+            r#"{"type":"packet","packet":"ObjectColourChanged","payload":{"objectId":43,"nameColourArgb":2147483648}}"#,
+            r#"{"type":"packet","packet":"ObjectGuildNameChanged","payload":{"objectId":43}}"#,
+        ] {
+            assert_eq!(apply_packet(invalid), LiveEntityPacketOutcome::Rejected);
+        }
+        assert_eq!(
+            apply_packet(
+                r#"{"type":"packet","packet":"ObjectName","payload":{"objectId":99,"name":"Unknown"}}"#
+            ),
+            LiveEntityPacketOutcome::Ignored
+        );
         clear();
     }
 

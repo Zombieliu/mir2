@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-13 Android current change: live `ObjectName`,
+> `ObjectColourChanged` and `ObjectGuildNameChanged` packets now cross the
+> post-`IN_GAME` host allowlist and update both visible and temporarily hidden
+> authoritative actor models. The existing object overlay renders the exact
+> server name, signed colour and guild without sprite reconstruction or local
+> prediction. Split native state/atlas delivery also retains the previous
+> complete entity composite instead of issuing bogus standalone loads for
+> atlas source-frame paths. Android 177/177 and UI Preview 185/185, shared
+> runtime 234/234, Java 25/25 in both variants, API31 package/install and a
+> full-screen 2340x1080 visible specimen pass with zero missing-path, panic or
+> fatal log matches. Evidence:
+> `docs/generated/player-qa/native-android-object-metadata-20260913/README.md`.
+> This is deterministic offline emulator evidence; approved-WSS real login,
+> online StartGame/render-ready, public asset alignment and physical-device
+> acceptance remain open.
+
 > 2026-09-13 Android current change: the shared account/character shell now
 > composes across the full 2340x1080 API31 viewport. The Android-only background
 > bleed mirrors narrow ChrSel edge strips outside the unchanged 1024x768

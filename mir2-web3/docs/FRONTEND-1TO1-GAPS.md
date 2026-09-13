@@ -1,5 +1,19 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: authoritative object rename, signed name
+> colour and guild-name packets now reach the Android object reducer and the
+> existing shared-stage overlay for visible and hidden cached actors. A native
+> atlas upload race no longer produces speculative `original-ui/...` file
+> loads or partial actor composites. Android 177/177 and UI Preview 185/185,
+> shared runtime 234/234, Gradle Debug/UI Preview 25/25 each, API31 packaging,
+> streamed install and a 2340x1080 visible frame pass. The 444,430,024-byte UI
+> Preview APK SHA-256 is
+> `2bc3bf6d4eef2bcab97e40cb8cbfa694ed4ada25900e353814256895da18020c`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-metadata-20260913/README.md`.
+> This closes this bounded object-metadata/emulator race, not approved-WSS real
+> login, online StartGame, public asset alignment or physical-device acceptance.
+
 > 2026-09-13 Android current change: wide-phone black gutters are removed from
 > the shared Login, Character Select, New/Delete Character and StartingGame
 > surfaces without stretching the 1024x768 interactive stage. Android mirrors

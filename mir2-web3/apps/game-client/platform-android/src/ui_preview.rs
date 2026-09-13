@@ -152,6 +152,57 @@ fn apply_offline_entity_packet(packet: &str) -> bool {
     }
 }
 
+fn apply_offline_object_metadata_specimen(
+    overlays: &mut crate::entity_overlays::ActorOverlayModel,
+) -> bool {
+    let packets = [
+        serde_json::json!({
+            "type": "packet", "packet": "ObjectName", "payload": {
+                "objectId": 9003, "name": "Packet renamed player"
+            }
+        })
+        .to_string(),
+        serde_json::json!({
+            "type": "packet", "packet": "ObjectColourChanged", "payload": {
+                "objectId": 9003, "nameColourArgb": -65281
+            }
+        })
+        .to_string(),
+        serde_json::json!({
+            "type": "packet", "packet": "ObjectGuildNameChanged", "payload": {
+                "objectId": 9003, "guildName": "AUTHORITATIVE"
+            }
+        })
+        .to_string(),
+    ];
+    let mut models = None;
+    for packet in packets {
+        let crate::live_entity::LiveEntityPacketOutcome::Applied {
+            models: next,
+            render: None,
+            ..
+        } = crate::live_entity::apply_packet(&packet)
+        else {
+            return false;
+        };
+        models = Some(next);
+    }
+    let Some(models) = models else {
+        return false;
+    };
+    let Some((center_x, center_y)) = overlays.center() else {
+        return false;
+    };
+    let Some(projected) = crate::entity_overlays::project(&models, center_x, center_y) else {
+        return false;
+    };
+    if !mir2_bevy_runtime::native_ingest::push_native_entity_model_set(models) {
+        return false;
+    }
+    overlays.replace(projected);
+    true
+}
+
 fn report_world_render_motion_pose(
     poses: Res<mir2_bevy_runtime::PresentationPoseBuffer>,
     time: Res<Time>,
@@ -196,6 +247,11 @@ fn report_world_render_ready(
         // render-ready. Atlas decoding can otherwise consume the complete
         // production-length floater lifetime before the first visible frame.
         let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+        if apply_offline_object_metadata_specimen(&mut overlays) {
+            info!("ANDROID_OBJECT_METADATA_PRESENTATION_APPLIED");
+        } else {
+            warn!("offline object metadata specimen was not accepted");
+        }
         overlays.observe_damage_events(
             [crate::live_entity::LiveDamageEvent {
                 sequence: 1,

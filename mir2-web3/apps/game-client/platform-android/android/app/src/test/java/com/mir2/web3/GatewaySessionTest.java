@@ -354,6 +354,9 @@ public class GatewaySessionTest {
         assertEquals("NewMonsterInfo", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
         String[] lifecycle = new String[] {
                 "{\"type\":\"packet\",\"packet\":\"ObjectHealth\",\"payload\":{\"objectId\":77,\"percent\":0,\"expire\":0}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectName\",\"payload\":{\"objectId\":77,\"name\":\"Hen renamed\"}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectColourChanged\",\"payload\":{\"objectId\":77,\"nameColourArgb\":-65281}}",
+                "{\"type\":\"packet\",\"packet\":\"ObjectGuildNameChanged\",\"payload\":{\"objectId\":77,\"guildName\":\"AUTHORITATIVE\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectRangeAttack\",\"payload\":{\"objectId\":77,\"location\":{\"x\":299,\"y\":629},\"direction\":\"Left\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectDied\",\"payload\":{\"objectId\":77,\"location\":{\"x\":299,\"y\":629},\"direction\":\"Left\"}}",
                 "{\"type\":\"packet\",\"packet\":\"ObjectRevived\",\"payload\":{\"objectId\":77,\"effect\":true}}",
