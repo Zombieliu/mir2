@@ -331,7 +331,7 @@ test('safe funding retries a Deer contested by another player within the hunt bu
     entry.type === 'safeSupplyFundingTargetContested' && entry.objectId === 20));
 });
 
-test('safe funding quarantines a same-speed Deer and selects another live target', async () => {
+test('safe funding quarantines moving Deer that stall or become unreachable', async () => {
   const diagnostics = [];
   const owner = {
     sequence: 0,
@@ -342,6 +342,7 @@ test('safe funding quarantines a same-speed Deer and selects another live target
         { objectId: 1, kind: 'selfPlayer', x: 5, y: 5, hp: 60, dead: false },
         { objectId: 20, kind: 'monster', name: 'Deer', x: 6, y: 5, hp: 25, dead: false },
         { objectId: 21, kind: 'monster', name: 'Deer', x: 7, y: 5, hp: 25, dead: false },
+        { objectId: 22, kind: 'monster', name: 'Deer', x: 8, y: 5, hp: 25, dead: false },
       ],
     },
     send(command) {
@@ -374,6 +375,9 @@ test('safe funding quarantines a same-speed Deer and selects another live target
       if (Number(target.objectId) === 20) {
         throw new Error('target 20 made no authoritative combat progress after 12 attacks');
       }
+      if (Number(target.objectId) === 21) {
+        throw new Error('target 21 has no walk path from the current map region');
+      }
       Object.assign(target, { dead: true, hp: 0 });
       owner.events.push({
         sequence: ++owner.sequence, direction: 'received', packet: 'ObjectDied',
@@ -382,14 +386,16 @@ test('safe funding quarantines a same-speed Deer and selects another live target
       return { objectId: Number(target.objectId), cleared: true };
     },
     requiredCount: 1,
-    maxHunts: 2,
+    maxHunts: 3,
     sleep: async () => {},
   });
 
-  assert.deepEqual(cleared, [20, 21]);
+  assert.deepEqual(cleared, [20, 21, 22]);
   assert.equal(result.collected, 1);
   assert.ok(diagnostics.some(entry =>
     entry.type === 'safeSupplyFundingTargetContested' && entry.objectId === 20));
+  assert.ok(diagnostics.some(entry =>
+    entry.type === 'safeSupplyFundingTargetContested' && entry.objectId === 21));
 });
 
 test('safe funding waits for the exact ObjectDied before harvesting a snapshot-dead Deer', async () => {

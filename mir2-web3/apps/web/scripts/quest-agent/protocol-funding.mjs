@@ -328,6 +328,7 @@ async function physicalFundingAttack(client, target) {
 function recoverableFundingTargetLoss(error) {
   const message = String(error?.message ?? '');
   return /^target \d+ left the authoritative snapshot before (?:attack|death was confirmed)$/i.test(message) ||
+    /^target \d+ has no walk path from the current map region$/i.test(message) ||
     /^target \d+ made no authoritative combat progress after \d+ attacks$/i.test(message);
 }
 
