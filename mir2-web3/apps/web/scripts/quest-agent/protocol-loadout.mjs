@@ -464,7 +464,11 @@ function affordableSkill(snapshot, exactSpell) {
 }
 
 function preferredWizardSkill(snapshot) {
-  return affordableSkill(snapshot, "GreatFireBall") ?? affordableSkill(snapshot, "FireBall");
+  const greatFireBall = affordableSkill(snapshot, "GreatFireBall");
+  const fireBall = affordableSkill(snapshot, "FireBall");
+  return [greatFireBall, fireBall].find(skill => Number(skill?.cooldownRemainingTicks ?? 0) <= 0)
+    ?? greatFireBall
+    ?? fireBall;
 }
 
 function equippedAmuletQuantity(snapshot) {

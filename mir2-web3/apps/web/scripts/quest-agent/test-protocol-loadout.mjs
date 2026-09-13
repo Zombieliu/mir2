@@ -479,7 +479,7 @@ test("Wizard casts exact known FireBall at a target in range", async () => {
   assert.deepEqual(client.sent[0], { type: "magic", objectId: 10, spell: "FireBall", direction: "UpRight", targetId: 99, x: 14, y: 8, spellTargetLock: true });
 });
 
-test("Wizard prefers affordable GreatFireBall and waits on its real cooldown", async () => {
+test("Wizard prefers ready GreatFireBall and falls back while it cools down", async () => {
   const state = snapshot("Wizard", 16);
   state.playerMp = 20;
   state.knownSkills.push(
@@ -495,10 +495,17 @@ test("Wizard prefers affordable GreatFireBall and waits on its real cooldown", a
 
   state.knownSkills[1].cooldownRemainingTicks = 2;
   const cooling = mockClient(state);
-  assert.deepEqual(await combatAction(cooling, target), {
+  const fallback = await combatAction(cooling, target);
+  assert.equal(fallback.kind, "magic");
+  assert.equal(fallback.spell, "FireBall");
+  assert.equal(cooling.sent[0].spell, "FireBall");
+
+  state.knownSkills[0].cooldownRemainingTicks = 1;
+  const allCooling = mockClient(state);
+  assert.deepEqual(await combatAction(allCooling, target), {
     kind: "wait", spell: "GreatFireBall", targetId: 99, delayMs: 650,
   });
-  assert.deepEqual(cooling.sent, []);
+  assert.deepEqual(allCooling.sent, []);
 });
 
 test("Wizard falls back to affordable FireBall when GreatFireBall lacks MP", async () => {
