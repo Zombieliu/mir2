@@ -765,3 +765,18 @@ occupant with ordinary GreatFireBall casts, opened the collision route, killed
 the exact SpiderFrog, and received ChangeQuest 2/8. Quest Agent coverage is
 517/517 after the corridor regression. These remain functional protocol
 checkpoints; the three level-30 routes and native visual acceptance are open.
+
+r54/r55/r62/r58 continuation on gateway r44: the bounded q62 target-density
+policy admitted the live 0/2 and 1/1 KekTal candidates and Warrior completed
+q62 at 16/16. Its first completed-objective return exposed that the global
+navigation escape filter stopped recognizing a cave quest after it changed to
+ready-to-turn-in; Warrior died in D2041, used ordinary TownRevive, and retained
+all objective progress. Emergency RandomTeleport protection now remains armed
+until q54/q60/q62 is handed in. The new ready-return regression and the complete
+Quest Agent suite pass at 518/518. A fresh r55 session then travelled normally
+from Bichon to Master_Shok, handed in q62, advanced mandatory completion from
+31/55 to 32/55, and entered q65 without another death. Wizard advanced q60 from
+4/8 to 5/8 and Taoist from 2/8 to 4/8 in D2041 after both funded 80 HP drugs and
+four RandomTeleport scrolls through public combat, harvest, sale and shop
+packets. Their q60 completion and the corrected ready-return escape remain live
+acceptance gates; later quests and native visual acceptance remain open.
