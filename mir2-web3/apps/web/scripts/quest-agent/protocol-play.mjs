@@ -190,6 +190,18 @@ export function createNavigator(client, dependencies = {}) {
   const loadCollisionMap = dependencies.loadCollisionMap ?? loadProtocolCollisionMap;
   const sleep = dependencies.delay ?? delay;
   const now = dependencies.now ?? Date.now;
+  const defaultEmergencyEscape = typeof dependencies.emergencyEscape === 'function'
+    ? dependencies.emergencyEscape
+    : null;
+  const defaultEmergencyEscapeHpRatio = ratioOption(dependencies.emergencyEscapeHpRatio, 0);
+  const defaultEmergencyEscapeDangerDistance = nonnegativeIntegerOption(
+    dependencies.emergencyEscapeDangerDistance,
+    3,
+  );
+  const defaultMaxEmergencyEscapes = nonnegativeIntegerOption(
+    dependencies.maxEmergencyEscapesPerNavigation,
+    defaultEmergencyEscape ? 1 : 0,
+  );
   const hostileMemoryDurationMs = positiveIntegerOption(dependencies.hostileMemoryDurationMs, 20_000);
   const exactHostileMemoryDurationMs = positiveIntegerOption(
     dependencies.exactHostileMemoryDurationMs,
@@ -207,9 +219,26 @@ export function createNavigator(client, dependencies = {}) {
     const maxNonImprovingSteps = options.maxNonImprovingSteps == null
       ? 0
       : positiveIntegerOption(options.maxNonImprovingSteps, 0);
+    const emergencyEscape = typeof options.emergencyEscape === 'function'
+      ? options.emergencyEscape
+      : defaultEmergencyEscape;
+    const emergencyEscapeHpRatio = ratioOption(
+      options.emergencyEscapeHpRatio,
+      defaultEmergencyEscapeHpRatio,
+    );
+    const emergencyEscapeDangerDistance = nonnegativeIntegerOption(
+      options.emergencyEscapeDangerDistance,
+      defaultEmergencyEscapeDangerDistance,
+    );
+    const maxEmergencyEscapes = nonnegativeIntegerOption(
+      options.maxEmergencyEscapesPerNavigation,
+      defaultMaxEmergencyEscapes,
+    );
     const rejected = [];
     let failures = 0;
     let successfulSteps = 0;
+    let emergencyEscapes = 0;
+    let emergencyEscapeFailed = false;
     let bestDistance = distance(selfPlayer(client), target);
     let nonImprovingSteps = 0;
     let positionsSinceImprovement = new Set([`${selfPlayer(client).x},${selfPlayer(client).y}`]);
@@ -220,6 +249,65 @@ export function createNavigator(client, dependencies = {}) {
       if (stopWhen()) return { reached: false, successfulSteps };
       const self = selfPlayer(client);
       if (self.dead || client.snapshot.playerHp <= 0) throw new Error('Player died during navigation');
+      const nearbyHostiles = (client.snapshot?.entities ?? []).filter(entity =>
+        entity?.kind === 'monster' && entity?.dead !== true && Number(entity?.hp ?? 1) > 0 &&
+        entity?.disposition !== 'friendly' && distance(self, entity) <= emergencyEscapeDangerDistance);
+      const hpRatio = Number(client.snapshot.playerHp) /
+        Math.max(1, Number(client.snapshot.playerMaxHp));
+      if (emergencyEscape && !emergencyEscapeFailed && emergencyEscapes < maxEmergencyEscapes &&
+          hpRatio <= emergencyEscapeHpRatio && nearbyHostiles.length > 0) {
+        const before = { mapFileName: mapId, x: Number(self.x), y: Number(self.y) };
+        client.record('diagnostic', {
+          type: 'navigationEmergencyEscapeAttempt',
+          hpRatio,
+          nearby: nearbyHostiles.length,
+          dangerDistance: emergencyEscapeDangerDistance,
+          from: before,
+        });
+        try {
+          const result = await emergencyEscape(client, { current: before, nearbyHostiles });
+          const after = selfPlayer(client);
+          const changed = after && (String(client.snapshot.mapFileName) !== mapId ||
+            Number(after.x) !== before.x || Number(after.y) !== before.y);
+          if (result !== false && changed) {
+            emergencyEscapes += 1;
+            failures = 0;
+            rejected.length = 0;
+            remaining = [];
+            client.record('diagnostic', {
+              type: 'navigationEmergencyEscapeSuccess',
+              hpRatio: Number(client.snapshot.playerHp) /
+                Math.max(1, Number(client.snapshot.playerMaxHp)),
+              nearby: nearbyHostiles.length,
+              from: before,
+              to: {
+                mapFileName: String(client.snapshot.mapFileName),
+                x: Number(after.x),
+                y: Number(after.y),
+              },
+            });
+            if (client.snapshot.mapFileName !== mapId) return { reached: false, successfulSteps };
+            continue;
+          }
+          emergencyEscapeFailed = true;
+          client.record('diagnostic', {
+            type: 'navigationEmergencyEscapeFailure',
+            hpRatio,
+            nearby: nearbyHostiles.length,
+            from: before,
+            message: 'Emergency escape did not change the authoritative player position',
+          });
+        } catch (error) {
+          emergencyEscapeFailed = true;
+          client.record('diagnostic', {
+            type: 'navigationEmergencyEscapeFailure',
+            hpRatio,
+            nearby: nearbyHostiles.length,
+            from: before,
+            message: String(error?.message ?? error),
+          });
+        }
+      }
       if (options.autoUseSupplies !== false &&
           client.snapshot.playerHp < client.snapshot.playerMaxHp * 0.6 &&
           now() - (client.lastTravelSupplyAt ?? 0) >= 2000) {
@@ -339,5 +427,14 @@ function nonnegativeIntegerOption(value, fallback) {
   if (value == null) return fallback;
   const parsed = Math.trunc(Number(value));
   if (!Number.isFinite(parsed) || parsed < 0) throw new TypeError('Navigation clearance must be a nonnegative integer');
+  return parsed;
+}
+
+function ratioOption(value, fallback) {
+  if (value == null) return fallback;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1) {
+    throw new TypeError('Navigation ratio must be a number from 0 to 1');
+  }
   return parsed;
 }

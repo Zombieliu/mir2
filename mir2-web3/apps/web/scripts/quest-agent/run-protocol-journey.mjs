@@ -122,7 +122,18 @@ try {
   report.bootstrapPassed = true;
   if (process.env.MIR2_JOURNEY_PLAY === '1') {
     const route = JSON.parse(await fs.readFile(new URL(`../../../../docs/generated/quest-agent/${className.toLowerCase()}-1-30-newcomer-v1.json`, import.meta.url), 'utf8'));
-    const navigate = createNavigator(client);
+    const navigate = createNavigator(client, {
+      emergencyEscape: async owner => {
+        const hasEmergencyExpedition = (owner.snapshot?.questLog ?? []).some(quest =>
+          [54, 62].includes(Number(quest?.questId)) &&
+          String(quest?.stage ?? '').toLowerCase() === 'inprogress');
+        if (!hasEmergencyExpedition || randomTeleportCount(owner.snapshot) <= 0) return false;
+        return useRandomTeleport(owner);
+      },
+      emergencyEscapeHpRatio: 0.65,
+      emergencyEscapeDangerDistance: 6,
+      maxEmergencyEscapesPerNavigation: 2,
+    });
     report.revivals = [];
     let revival = await reviveInTown(client);
     if (!revival && criticalStrandedPlayer(client.snapshot)) {
@@ -234,7 +245,7 @@ try {
       const q54Expedition = Number(questId) === 54;
       const q62Expedition = Number(questId) === 62;
       const departureFloor = journeyExpeditionDepartureFloorForQuest(questId, className);
-      const emergencyTeleportTarget = q54Expedition || q62Expedition ? 2 : 0;
+      const emergencyTeleportTarget = q54Expedition || q62Expedition ? 4 : 0;
       const q42WizardExpedition = Number(questId) === 42 &&
         String(className).trim().toLowerCase() === 'wizard';
       return {

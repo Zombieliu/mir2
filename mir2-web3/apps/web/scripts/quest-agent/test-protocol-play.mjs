@@ -202,6 +202,44 @@ test('ordinary navigation can recover HP without spending MP before combat', asy
   assert.equal(client.sent.some(command => command.type === 'useItem' && command.uniqueId === 21), false);
 });
 
+test('critical navigation escapes an adjacent pack before sending another movement intent', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 20;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push({
+    objectId: 9,
+    kind: 'monster',
+    disposition: 'hostile',
+    x: 2,
+    y: 1,
+    hp: 20,
+    dead: false,
+  });
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 3,
+    maxEmergencyEscapesPerNavigation: 2,
+    emergencyEscape: async owner => {
+      escapeCalls += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 4, y: 4 });
+      owner.snapshot.entities.splice(1);
+      owner.snapshot.playerHp = 80;
+      return { success: true };
+    },
+  });
+  const result = await navigateNear({ x: 6, y: 4 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 1);
+  assert.equal(client.diagnostics[0].type, 'navigationEmergencyEscapeAttempt');
+  assert.equal(client.diagnostics[1].type, 'navigationEmergencyEscapeSuccess');
+  assert.ok(client.sent.every(command => command.type === 'walk' || command.type === 'run'));
+});
+
 test('navigator optional attempt cap fails without an unbounded movement retry', async () => {
   const client = navigationClient();
   client.wait = async () => { throw new Error('movement timeout'); };
