@@ -13151,6 +13151,24 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         } else {
             self.inner.execute(command)?
         };
+        if is_world_tick {
+            let owner_object_id = self.local_self_object_id();
+            let restored_owner_vitals = owner_object_id.is_some_and(|owner_object_id| {
+                command_packets.iter().any(|packet| match packet {
+                    ServerPacket::ObjectHealth { info } => info.object_id == owner_object_id,
+                    ServerPacket::ObjectMana { info } => info.object_id == owner_object_id,
+                    _ => false,
+                })
+            });
+            if restored_owner_vitals {
+                // Normal HP/MP drugs restore their queued amount during the
+                // personal compatibility tick. Commit that trusted mutation
+                // to the shared Zone immediately; the next request otherwise
+                // copies the Zone's older vitals back into the personal
+                // session and silently discards this recovery tick.
+                self.sync_current_zone_vitals_from_inner();
+            }
+        }
         let item_use_relocated_player = is_item_use
             && command_packets
                 .iter()
