@@ -736,8 +736,14 @@ try {
                   requiredRatio: 0.75,
                   timeoutMs: evasiveRecoveryTimeoutMsForQuest(id),
                   dangerDistance: evasiveRecoveryDangerDistanceForQuest(id),
-                  retreatSteps: id === 54 ? 12 : 6,
-                  maxEvasiveMoves: id === 54 ? 8 : 4,
+                  retreatSteps: [54, 62].includes(id) ? 12 : 6,
+                  maxEvasiveMoves: [54, 62].includes(id) ? 8 : 4,
+                  biasPosition: snapshot => questRetreatBiasPosition(id, snapshot),
+                  emergencyEscape: [54, 62].includes(id)
+                    ? async current => useRandomTeleport(current)
+                    : undefined,
+                  emergencyEscapeHpRatio: [54, 62].includes(id) ? 0.65 : 0,
+                  maxEmergencyEscapes: 1,
                   sustain: async current => {
                     const classRecovery = await useClassRecovery(current, { hpThreshold: 0.9 });
                     const consumed = startEmergencyHpRecovery(current, { hpThreshold: 0.9 });

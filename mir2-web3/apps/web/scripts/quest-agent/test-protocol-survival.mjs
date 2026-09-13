@@ -850,6 +850,85 @@ test('evasive recovery keeps kiting a same-speed follower across bounded refresh
   assert.equal(clock, 2);
 });
 
+test('evasive recovery spends a remaining emergency scroll when a dense pack closes again', async () => {
+  const client = clientAt('D2041', 0);
+  Object.assign(client.snapshot, {
+    playerHp: 55,
+    playerMaxHp: 100,
+    playerObjectId: 1,
+    entities: [
+      { objectId: 1, kind: 'player', x: 38, y: 98 },
+      { objectId: 61, kind: 'monster', x: 39, y: 98, hp: 48 },
+      { objectId: 62, kind: 'monster', x: 39, y: 99, hp: 48 },
+      { objectId: 63, kind: 'monster', x: 40, y: 98, hp: 48 },
+    ],
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let escapeCalls = 0;
+
+  const result = await recoverHealthWhileEvading(client, async () => {
+    throw new Error('movement should not run before the dense-pack escape');
+  }, {
+    requiredRatio: 0.75,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscape: async owner => {
+      escapeCalls += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 170, y: 40 });
+      owner.snapshot.playerHp = 80;
+      owner.snapshot.entities.splice(1);
+      return { to: { x: 170, y: 40 } };
+    },
+  });
+
+  assert.equal(escapeCalls, 1);
+  assert.equal(result.hp, 80);
+  assert.ok(diagnostics.some(entry => entry.type === 'recoveryEmergencyEscapeAttempt'));
+  assert.ok(diagnostics.some(entry => entry.type === 'recoveryEmergencyEscapeSuccess'));
+});
+
+test('evasive recovery bias keeps a dungeon retreat moving toward its transfer', async () => {
+  const client = clientAt('D2041', 0);
+  Object.assign(client.snapshot, {
+    playerHp: 60,
+    playerMaxHp: 100,
+    playerObjectId: 1,
+    entities: [
+      { objectId: 1, kind: 'player', x: 38, y: 110 },
+      { objectId: 61, kind: 'monster', x: 38, y: 113, hp: 48 },
+    ],
+  });
+  let clock = 0;
+  client.send = function send(command) {
+    this.sent.push(command);
+    if (command.type !== 'clientVersion') return;
+    this.snapshot.playerHp = 80;
+    this.sequence += 1;
+    this.events.push({
+      sequence: this.sequence,
+      direction: 'received',
+      type: 'worldSnapshot',
+      payload: structuredClone(this.snapshot),
+    });
+  };
+  const moves = [];
+
+  await recoverHealthWhileEvading(client, async target => {
+    moves.push({ ...target });
+    Object.assign(client.snapshot.entities[0], target);
+  }, {
+    requiredRatio: 0.75,
+    pollMs: 1_000,
+    dangerDistance: 8,
+    retreatSteps: 12,
+    biasPosition: { x: 262, y: 13 },
+    sleep: async milliseconds => { clock += milliseconds; },
+    now: () => clock,
+  });
+
+  assert.deepEqual(moves, [{ x: 50, y: 98 }]);
+});
+
 test('blocked evasive poll refreshes authoritative recovery instead of failing immediately', async () => {
   const client = clientAt('D421', 0);
   Object.assign(client.snapshot, {

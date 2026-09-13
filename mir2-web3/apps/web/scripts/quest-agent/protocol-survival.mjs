@@ -289,6 +289,10 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
   retreatSteps = 6,
   dangerDistance = 7,
   maxEvasiveMoves = 4,
+  emergencyEscape = null,
+  emergencyEscapeHpRatio = 0,
+  maxEmergencyEscapes = 1,
+  biasPosition = null,
   sustainCadenceMs = 6_000,
   sustain = null,
   sleep = defaultSleep,
@@ -300,6 +304,8 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
   let refreshes = 0;
   let evasiveMoves = 0;
   let candidateRotation = 0;
+  let emergencyEscapes = 0;
+  let emergencyEscapeFailed = false;
   let lastSustainAt = Number.NEGATIVE_INFINITY;
 
   recovery: while (healthRatio(client.snapshot) < requiredRatio) {
@@ -312,8 +318,67 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
       .sort((left, right) => chebyshev(actor, left) - chebyshev(actor, right) ||
         Number(left?.objectId ?? 0) - Number(right?.objectId ?? 0));
 
+    const adjacent = dangerous.filter(entity => chebyshev(actor, entity) <= 1).length;
+    const withinThree = dangerous.filter(entity => chebyshev(actor, entity) <= 3).length;
+    if (typeof emergencyEscape === 'function' && !emergencyEscapeFailed &&
+        emergencyEscapes < Math.max(0, Number(maxEmergencyEscapes) || 0) &&
+        healthRatio(client.snapshot) <= Math.max(0, Number(emergencyEscapeHpRatio) || 0) &&
+        (adjacent >= 2 || withinThree >= 3)) {
+      const before = { x: Number(actor.x), y: Number(actor.y) };
+      recordSurvivalDiagnostic(client, {
+        type: 'recoveryEmergencyEscapeAttempt',
+        hpRatio: healthRatio(client.snapshot),
+        adjacent,
+        withinThree,
+        from: before,
+      });
+      try {
+        const result = await emergencyEscape(client, { current: before, adjacent, withinThree });
+        const after = snapshotPlayer(client.snapshot);
+        if ((result === true || result?.success === true || result?.to != null) && after &&
+            (Number(after.x) !== before.x || Number(after.y) !== before.y)) {
+          emergencyEscapes += 1;
+          recordSurvivalDiagnostic(client, {
+            type: 'recoveryEmergencyEscapeSuccess',
+            hpRatio: healthRatio(client.snapshot),
+            adjacent,
+            withinThree,
+            from: before,
+            to: { x: Number(after.x), y: Number(after.y) },
+          });
+          continue recovery;
+        }
+        emergencyEscapeFailed = true;
+      } catch (error) {
+        emergencyEscapeFailed = true;
+        recordSurvivalDiagnostic(client, {
+          type: 'recoveryEmergencyEscapeFailure',
+          hpRatio: healthRatio(client.snapshot),
+          adjacent,
+          withinThree,
+          from: before,
+          message: String(error?.message ?? error),
+        });
+      }
+    }
+
     if (dangerous.length > 0) {
+      const requestedBias = typeof biasPosition === 'function'
+        ? biasPosition(client.snapshot)
+        : biasPosition;
+      const hasBias = requestedBias && Number.isFinite(Number(requestedBias.x)) &&
+        Number.isFinite(Number(requestedBias.y));
       const offsets = retreatOffsets(retreatSteps);
+      if (hasBias) {
+        offsets.sort((left, right) => {
+          const leftTarget = { x: Number(actor.x) + left.x, y: Number(actor.y) + left.y };
+          const rightTarget = { x: Number(actor.x) + right.x, y: Number(actor.y) + right.y };
+          const leftClearance = Math.min(...dangerous.map(entity => chebyshev(leftTarget, entity)));
+          const rightClearance = Math.min(...dangerous.map(entity => chebyshev(rightTarget, entity)));
+          return rightClearance - leftClearance ||
+            chebyshev(leftTarget, requestedBias) - chebyshev(rightTarget, requestedBias);
+        });
+      }
       const allowedHostileObjectIds = dangerous.map(entity => Number(entity.objectId))
         .filter(Number.isSafeInteger);
       let successfulMovesThisPoll = 0;
@@ -359,6 +424,10 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
 
   const { hp, maxHp } = health(client.snapshot);
   return { status: 'recovered', hp, maxHp, refreshes, evasiveMoves };
+}
+
+function recordSurvivalDiagnostic(client, payload) {
+  if (typeof client?.record === 'function') client.record('diagnostic', payload);
 }
 
 function assertLivingPlayer(snapshot) {
