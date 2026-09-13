@@ -3177,6 +3177,42 @@ test("full-spread exhaustion waits for a bounded respawn and resumes the active 
   });
 });
 
+test("profiled respawn delay extends the default bounded wait window", async () => {
+  const quest = { questId: 60, stage: "InProgress", objectives: [objective("Kill SpiderFrog", 0, 1)] };
+  const client = new FakeClient(snapshot(quest), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 81), { hp: 0, dead: true });
+      state.questLog[0].objectives[0] = objective("Kill SpiderFrog", 1, 1);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 81 });
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let respawnWaits = 0;
+  const result = await completeQuestObjectives(client, {
+    questId: 60,
+    objectives: { kill: [{
+      monsterName: "SpiderFrog",
+      spawnCandidates: [{ ...spawn("SpiderFrog", 20, 20), spread: 0, delayMinutes: 4 }],
+    }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    spawnRespawnWaitMs: 30_000,
+    sleep: async milliseconds => {
+      if (milliseconds !== 30_000) return;
+      respawnWaits += 1;
+      if (respawnWaits === 8) client.snapshot.entities.push(monster(81, "SpiderFrog", 20, 20));
+    },
+    refreshWhileWaiting: async () => {},
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(respawnWaits, 8);
+  assert.deepEqual(client.sent, [{ type: "attack", objectId: 81 }]);
+  assert.equal(diagnostics.filter(entry => entry.type === "spawnRespawnWait").at(-1)?.limit, 8);
+});
+
 test("full-spread grid covers the observed CannibalPlant offset beyond the old 48-tile ring", async () => {
   const quest = { questId: 25, stage: "InProgress", objectives: [objective("Collect CannibalStem", 0, 1)] };
   const client = new FakeClient(snapshot(quest), (owner, command) => {

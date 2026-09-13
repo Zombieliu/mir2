@@ -304,8 +304,9 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
           client, targetPlan, navigateNear, settings, unavailableCorpses,
         );
       } catch (error) {
+        const respawnWaitLimit = spawnRespawnWaitLimit(targetPlan, settings);
         if (error instanceof SpawnSearchExhausted &&
-            spawnRespawnWaits < settings.maxSpawnRespawnWaits) {
+            spawnRespawnWaits < respawnWaitLimit) {
           spawnRespawnWaits += 1;
           recordSearchDiagnostic(client, {
             type: 'spawnRespawnWait',
@@ -313,7 +314,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
             target: pending.name,
             mapFileName: String(client.snapshot?.mapFileName ?? ''),
             wait: spawnRespawnWaits,
-            limit: settings.maxSpawnRespawnWaits,
+            limit: respawnWaitLimit,
             waitMs: settings.spawnRespawnWaitMs,
           });
           await settings.sleep(settings.spawnRespawnWaitMs);
@@ -693,6 +694,11 @@ function combatSettings(options) {
     maxSpawnWaypoints: positiveInteger(options.maxSpawnWaypoints, 10_000),
     spawnSearchTimeoutMs: positiveInteger(options.spawnSearchTimeoutMs, 10 * 60_000),
     maxSpawnRespawnWaits: nonnegativeInteger(options.maxSpawnRespawnWaits, 3),
+    profileAwareSpawnRespawnWaits: options.maxSpawnRespawnWaits == null,
+    maxProfileSpawnRespawnWaitMs: positiveInteger(
+      options.maxProfileSpawnRespawnWaitMs,
+      6 * 60_000,
+    ),
     spawnRespawnWaitMs: positiveInteger(options.spawnRespawnWaitMs, 30_000),
     spawnSearchMaxNonImprovingSteps: positiveInteger(options.spawnSearchMaxNonImprovingSteps, 96),
     unsafeTargetObservationTimeout: positiveInteger(options.unsafeTargetObservationTimeout, 3_000),
@@ -778,6 +784,20 @@ function combatSettings(options) {
     harvestBeforeClearingAggressors: options.harvestBeforeClearingAggressors === true,
     now: typeof options.now === 'function' ? options.now : Date.now,
   };
+}
+
+function spawnRespawnWaitLimit(targetPlan, settings) {
+  if (!settings.profileAwareSpawnRespawnWaits) return settings.maxSpawnRespawnWaits;
+  const delayMs = (targetPlan?.spawns ?? [])
+    .map(spawn => Number(spawn?.delayMinutes) * 60_000)
+    .filter(value => Number.isFinite(value) && value > 0)
+    .sort((left, right) => left - right)[0];
+  if (!Number.isFinite(delayMs)) return settings.maxSpawnRespawnWaits;
+  const profiledWaits = Math.ceil(
+    Math.min(delayMs, settings.maxProfileSpawnRespawnWaitMs) /
+      settings.spawnRespawnWaitMs,
+  );
+  return Math.max(settings.maxSpawnRespawnWaits, profiledWaits);
 }
 
 function validateInputs(client, routeQuest, navigateNear) {
