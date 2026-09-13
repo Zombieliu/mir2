@@ -86,6 +86,11 @@ export function questRetreatProfile(questId, className = '') {
     // normal low-health interrupt below, but let every stocked q54 class keep
     // moving while it remains above that class's retreat threshold.
     continueTravelWhileHealthy: [54, 62].includes(id),
+    // R37 showed that repeated evasion in D2041 spends the random-teleport
+    // reserve and eventually gives back the entire crossing. q62 carries a
+    // large proven potion stock, so clear an attacker that has actually hit
+    // the player before retrying the route to D2042.
+    preferTravelAggressorCombat: id === 62,
     maxTravelThreatEvasionsPerEdge: id === 62 ? 3 : 1,
     // R26 proved that a Taoist can be boxed into D401 by one CaveMaggot plus
     // adjacent quest zombies after the first breakout kill. Healing and the

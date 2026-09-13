@@ -709,6 +709,7 @@ test('q62 leaves D2041 packs toward the real D2042 transfer', () => {
   assert.deepEqual(questRetreatProfile(62), {
     allowLowHealthFollowerRecovery: true,
     continueTravelWhileHealthy: true,
+    preferTravelAggressorCombat: true,
     maxTravelThreatEvasionsPerEdge: 3,
     maxRetreatBreakoutKills: 3,
     multiAggressorRetreatRatio: undefined,
@@ -724,6 +725,7 @@ test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bound
   assert.deepEqual(questRetreatProfile(54, 'Warrior'), {
     allowLowHealthFollowerRecovery: true,
     continueTravelWhileHealthy: true,
+    preferTravelAggressorCombat: false,
     maxTravelThreatEvasionsPerEdge: 1,
     maxRetreatBreakoutKills: 3,
     multiAggressorRetreatRatio: 0.55,

@@ -701,6 +701,7 @@ try {
             // spending one life per crowded Oma pull.
             preferredObjectiveMaps: id === 54 ? ['D406'] : (id === 49 ? ['D011'] : []),
             preferObjectiveMapOverCurrent: shouldPreferObjectiveMapOverCurrent(id),
+            preferTravelAggressorCombat: retreatProfile.preferTravelAggressorCombat,
             continueTravelWhileHealthy: retreatProfile.continueTravelWhileHealthy,
             maxTravelThreatEvasionsPerEdge: retreatProfile.maxTravelThreatEvasionsPerEdge,
             // q60 entered D2041 at 58/207 HP with 76 bottles and two adjacent
