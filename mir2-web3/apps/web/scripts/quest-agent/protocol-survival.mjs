@@ -233,6 +233,11 @@ export function isLivingEvasiveRecoveryTimeout(snapshot, error) {
     String(error?.message ?? error) === 'Evasive HP recovery timed out';
 }
 
+export function requiresExpeditionEscapeRestock(snapshot, questId, target = 4) {
+  return [54, 62].includes(Number(questId)) &&
+    emergencyTeleportStock(snapshot) < nonnegativeInteger(target, 'emergency teleport target');
+}
+
 export function mpDrugCount(snapshot) {
   return itemQuantity(snapshot, item => /^\(MP\)Drug/i.test(String(item?.name ?? item?.key ?? '')));
 }

@@ -37,6 +37,7 @@ import {
   questCombatMpUseThresholdForQuest,
   questPostRetreatRecoveryRatio,
   questNeedsPostRetreatRecovery,
+  requiresExpeditionEscapeRestock,
   shouldPreferObjectiveMapOverCurrent,
   recoverHealthWhileEvading,
   waitForPassiveHealthRecovery,
@@ -432,6 +433,16 @@ try {
         throw error;
       }
     };
+    const activeResumeExpeditionId = ids.find(id => {
+      const quest = client.snapshot?.questLog?.find(entry => Number(entry?.questId) === Number(id));
+      return String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress';
+    });
+    if (requiresExpeditionEscapeRestock(client.snapshot, activeResumeExpeditionId)) {
+      const resumeSupply = await supplyGateForQuest(client, activeResumeExpeditionId);
+      if (resumeSupply.status === 'restocked') {
+        recordSupplyRetreat(report, activeResumeExpeditionId, resumeSupply);
+      }
+    }
     const resumeRecovery = await stabilizeJourneyResume(client, navigate, {
       ensureHpSupply: owner => {
         const activeQuestId = ids.find(id => {

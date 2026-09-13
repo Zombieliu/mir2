@@ -23,6 +23,7 @@ import {
   questNeedsPostRetreatRecovery,
   shouldPreferObjectiveMapOverCurrent,
   recoverHealthWhileEvading,
+  requiresExpeditionEscapeRestock,
   waitForPassiveHealthRecovery,
 } from './protocol-survival.mjs';
 
@@ -65,6 +66,19 @@ test('only a living exact evasive recovery timeout is retryable', () => {
     { playerHp: 102, playerMaxHp: 224 },
     new Error('No walk path'),
   ), false);
+});
+
+test('a resumed expedition replaces its missing public escape reserve before field recovery', () => {
+  const scroll = quantity => ({
+    name: 'RandomTeleport',
+    quantity,
+    container: 'bag1',
+    tooltipSource: { info: { item_index: 717 } },
+  });
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 62), true);
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(3)] }, 54), true);
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(4)] }, 54), false);
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 49), false);
 });
 
 test('long expeditions accept a partial but still conservative funded departure stock', () => {
