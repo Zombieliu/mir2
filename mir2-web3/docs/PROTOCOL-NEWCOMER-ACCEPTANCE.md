@@ -1,5 +1,32 @@
 # Protocol newcomer journey acceptance
 
+## R40 paced emergency-escape checkpoint
+
+R37 proved that funded cave departures now work through ordinary public
+packets. Wizard and Taoist each acquired four Merchant Ruben
+`RandomTeleport` items after the supply plan accounted for their full purchase
+cost. The Taoist's cash recovery also exposed and closed a public-combat error:
+safe Deer funding now uses a range-one physical attack instead of sending
+`SoulFireBall` at a neutral animal. R39 then supplied live proof of that exact
+physical attack path.
+
+R39 Wizard reached the preferred D406 mine route and advanced q54 from 16/25
+to 18/25 with normal `GreatFireBall` combat. Its first escape moved from
+`(32,27)` to `(136,47)`; a second request 0.7 seconds later was deferred, and
+the next successful use occurred about 18.5 seconds after the first. This
+proved the shared cooldown conserved the reserve across independent navigation,
+combat-retreat and recovery callers. The same run also found that a deferred
+request disabled later attempts for the remainder of one long navigation, so
+the Wizard eventually died while scrolls remained.
+
+Deferred escape state now records a retry deadline rather than a permanent
+per-navigation failure. Navigation, combat retreat and evasive recovery may
+retry after that deadline, while a player below 35% HP uses the shorter
+critical cooldown. Focused checks pass 189/189 and the complete quest-agent
+suite passes 508/508. R40 three-class public-protocol runs are active; complete
+q54/q62, all 55 mandatory tasks plus four milestones per class, and native
+UI/animation acceptance remain open.
+
 ## R35 critical-navigation and funded escape checkpoint
 
 R33 proved that the shared-Zone transform fix remains stable across two
