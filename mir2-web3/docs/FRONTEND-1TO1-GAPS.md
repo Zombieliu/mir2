@@ -1,5 +1,24 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: gameplay touch ownership now supports a
+> held joystick finger plus an independent action finger. Bevy 0.19 only uses
+> its first pressed touch for UI focus, so Android now hit-tests later touch
+> IDs against the existing action-pad/panel-rail geometry after UI focus and
+> emits one bounded interaction edge. Panel, modal, IME, screen, focus and
+> lifecycle changes cancel the appropriate owners and require release before
+> reacquisition. API31 Protocol-B emulator input proves concurrent joystick +
+> exact offline Attack `731`, Pick `44`, Run toggle and Skills open; Home while
+> held cancels motion and resume does not replay it. Android UI Preview passes
+> 182/182, Gradle Debug/UI Preview tests, arm64-v8a API31 check, full package,
+> streamed install and visible screenshots pass. The 443,647,280-byte APK
+> SHA-256 is
+> `d733c3f3fb1b423c3c4be81b38af6d31a60880f1e75e5239a4ce6f281f25013e`.
+> Evidence:
+> `docs/generated/player-qa/native-android-multitouch-20260913/README.md`.
+> This is an offline userdebug-emulator baseline; approved-WSS login, online
+> authority and physical-device multitouch/IME/background acceptance remain
+> open.
+
 > 2026-09-13 Android current change: the retained shared Crystal Group, Guild
 > and Trade panels now receive bounded phone focus without an Android-only
 > renderer. Group/Guild focus their exact authored window; Trade derives one

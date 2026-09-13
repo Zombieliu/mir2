@@ -10,7 +10,9 @@ use mir2_client_bevy::{
     read_model::UiReadModel,
 };
 
-use crate::android_input::{AndroidInputEvent, AndroidInputMessage, AndroidShellState};
+use crate::android_input::{
+    AndroidInputEvent, AndroidInputMessage, AndroidLifecycle, AndroidShellState,
+};
 
 const JOYSTICK_DIAMETER: f32 = 144.0;
 const JOYSTICK_KNOB_DIAMETER: f32 = 56.0;
@@ -73,6 +75,26 @@ struct RailState {
 struct TouchPointer {
     owner: Option<u64>,
     wait_for_release: bool,
+    context: Option<TouchContext>,
+}
+
+#[derive(Resource, Default)]
+struct SecondaryTouchInteractions {
+    pressed: Vec<Entity>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct TouchContext {
+    shell_screen: NativeShellScreen,
+    panel: mir2_ui_core::state::UiPanel,
+    security_panel: mir2_ui_core::state::UiSecurityPanel,
+    chat_focused: bool,
+    amount_modal_open: bool,
+    keyboard_open: bool,
+    help_open: bool,
+    trade_dialog_open: bool,
+    lifecycle: Option<AndroidLifecycle>,
+    window_focused: bool,
 }
 #[derive(Resource)]
 struct JoystickState {
@@ -111,6 +133,7 @@ pub fn install(app: &mut App) {
     app.init_resource::<RailState>()
         .init_resource::<UiEffectQueue>()
         .init_resource::<TouchPointer>()
+        .init_resource::<SecondaryTouchInteractions>()
         .init_resource::<JoystickState>()
         .add_systems(Startup, spawn)
         .add_systems(
@@ -126,6 +149,10 @@ pub fn install(app: &mut App) {
                 .chain()
                 .after(bevy::input::InputSystems)
                 .before(bevy::ui::UiSystems::Focus),
+        )
+        .add_systems(
+            PreUpdate,
+            secondary_touch_buttons.after(bevy::ui::UiSystems::Focus),
         )
         .add_systems(
             PostUpdate,
@@ -154,7 +181,24 @@ fn joystick_touch(
         joystick.release();
         return;
     };
-    if shell.screen != NativeShellScreen::InGame || state.blocks_world_click() || !window.focused {
+    if shell.screen != NativeShellScreen::InGame
+        || state.blocks_world_click()
+        || !window.focused
+        || android
+            .as_deref()
+            .is_some_and(|state| state.lifecycle != AndroidLifecycle::Foreground)
+    {
+        #[cfg(feature = "ui-preview")]
+        if let Some(owner) = joystick.owner {
+            info!(
+                owner,
+                screen = ?shell.screen,
+                blocked = state.blocks_world_click(),
+                focused = window.focused,
+                lifecycle = ?android.as_deref().map(|state| state.lifecycle),
+                "ANDROID_UI_PREVIEW_TOUCH_CANCEL joystick"
+            );
+        }
         joystick.release();
         return;
     }
@@ -209,6 +253,13 @@ fn joystick_touch(
                 y: joystick.vector.y,
                 run: joystick.run_lock,
             }));
+            #[cfg(feature = "ui-preview")]
+            info!(
+                x = joystick.vector.x,
+                y = joystick.vector.y,
+                run = joystick.run_lock,
+                "ANDROID_UI_PREVIEW_INTENT move (queued only, no server)"
+            );
         }
         joystick.last_emit_at = Some(now);
     }
@@ -260,6 +311,9 @@ fn joystick_center(window: &Window, safe_left: f32, safe_bottom: f32, control_sc
 fn touch_pointer(
     touches: Option<Res<Touches>>,
     joystick: Option<Res<JoystickState>>,
+    shell: Option<Res<NativeShellModel>>,
+    state: Option<Res<NativePlayerUiState>>,
+    android: Option<Res<AndroidShellState>>,
     mut pointer: ResMut<TouchPointer>,
     mut windows: Query<(Entity, &mut Window)>,
     mut mouse: Option<ResMut<ButtonInput<MouseButton>>>,
@@ -270,8 +324,50 @@ fn touch_pointer(
     else {
         return;
     };
-    if !window.focused {
-        if pointer.owner.take().is_some() {
+    let context = TouchContext {
+        shell_screen: shell
+            .as_deref()
+            .map(|shell| shell.screen)
+            .unwrap_or_default(),
+        panel: state
+            .as_deref()
+            .map(|state| state.core.panel)
+            .unwrap_or_default(),
+        security_panel: state
+            .as_deref()
+            .map(|state| state.core.security.panel)
+            .unwrap_or_default(),
+        chat_focused: state.as_deref().is_some_and(|state| state.chat_focused()),
+        amount_modal_open: state
+            .as_deref()
+            .is_some_and(|state| state.amount_modal_open()),
+        keyboard_open: state.as_deref().is_some_and(|state| state.keyboard.open),
+        help_open: state.as_deref().is_some_and(|state| state.help_open()),
+        trade_dialog_open: state
+            .as_deref()
+            .is_some_and(|state| state.trade_dialog.open),
+        lifecycle: android.as_deref().map(|state| state.lifecycle),
+        window_focused: window.focused,
+    };
+    let context_changed = pointer
+        .context
+        .replace(context)
+        .is_some_and(|previous| previous != context);
+    let inactive = !window.focused
+        || context
+            .lifecycle
+            .is_some_and(|lifecycle| lifecycle != AndroidLifecycle::Foreground);
+    if inactive || context_changed {
+        #[cfg(feature = "ui-preview")]
+        if pointer.owner.is_some() || mouse.pressed(MouseButton::Left) {
+            info!(
+                owner = ?pointer.owner,
+                inactive,
+                context_changed,
+                "ANDROID_UI_PREVIEW_TOUCH_CANCEL pointer"
+            );
+        }
+        if pointer.owner.take().is_some() || mouse.pressed(MouseButton::Left) {
             mouse.release(MouseButton::Left);
         }
         pointer.wait_for_release = true;
@@ -338,6 +434,53 @@ fn touch_pointer(
                     .as_deref()
                     .is_some_and(|state| state.claims(touch.id()))
             });
+        }
+    }
+}
+
+// Bevy 0.19 UI resolves touch hover from `first_pressed_position`, so the
+// joystick owner otherwise masks every later finger.  Activate only Android's
+// own action buttons here; shared Crystal windows continue through the single
+// pointer bridge above so their drag/click ownership remains serialized.
+fn secondary_touch_buttons(
+    touches: Option<Res<Touches>>,
+    joystick: Res<JoystickState>,
+    windows: Query<&Window>,
+    mut state: ResMut<SecondaryTouchInteractions>,
+    mut buttons: Query<
+        (
+            Entity,
+            &ComputedNode,
+            &UiGlobalTransform,
+            Option<&InheritedVisibility>,
+            &mut Interaction,
+        ),
+        (With<Action>, Or<(With<ActionPadButton>, With<RailButton>)>),
+    >,
+) {
+    for entity in std::mem::take(&mut state.pressed) {
+        if let Ok((_, _, _, _, mut interaction)) = buttons.get_mut(entity) {
+            interaction.set_if_neq(Interaction::None);
+        }
+    }
+    let (Some(touches), Some(_), Ok(window)) = (touches, joystick.owner, windows.single()) else {
+        return;
+    };
+    let scale_factor = window.scale_factor();
+    for touch in touches
+        .iter_just_pressed()
+        .filter(|touch| !joystick.claims(touch.id()))
+    {
+        let point = touch.position() * scale_factor;
+        for (entity, node, transform, visibility, mut interaction) in &mut buttons {
+            if visibility.is_some_and(|visibility| !visibility.get())
+                || !node.contains_point(*transform, point)
+            {
+                continue;
+            }
+            interaction.set_if_neq(Interaction::Pressed);
+            state.pressed.push(entity);
+            break;
         }
     }
 }
@@ -747,6 +890,11 @@ fn buttons(
                     } else {
                         Color::srgba(0.10, 0.08, 0.04, 0.95)
                     };
+                    #[cfg(feature = "ui-preview")]
+                    info!(
+                        run = joystick.run_lock,
+                        "ANDROID_UI_PREVIEW_INTENT runMode (local control only)"
+                    );
                 }
             }
             Action::Pickup => {
@@ -783,7 +931,11 @@ fn buttons(
             }
             Action::Bag => state.toggle_inventory(),
             Action::Character => state.toggle_equipment(),
-            Action::Skills => state.toggle_skill(),
+            Action::Skills => {
+                state.toggle_skill();
+                #[cfg(feature = "ui-preview")]
+                info!("ANDROID_UI_PREVIEW_ACTION skills (local panel only)");
+            }
             Action::Quests => state.toggle_quest(),
             Action::Mail => state.toggle_mail(),
             Action::Options => state.toggle_options(),
@@ -918,8 +1070,9 @@ mod tests {
     }
 
     #[test]
-    fn action_pad_attacks_only_the_authoritative_target_and_toggles_run_lock() {
+    fn secondary_actions_keep_exact_targets_while_the_joystick_is_owned() {
         use mir2_client_bevy::quest_model::CombatTargetUpdate;
+        use mir2_client_bevy::quest_model::RecentPickup;
         let mut state = NativePlayerUiState::default();
         state.core.screen = mir2_ui_core::state::UiScreen::InGame;
         let mut target = CombatTargetModel::default();
@@ -930,6 +1083,18 @@ mod tests {
             max_hp: 9,
             is_player: false,
         });
+        let mut pickups = GroundPickupModel::default();
+        pickups.upsert(RecentPickup {
+            object_id: Some(44),
+            key: "object:44".into(),
+            label: "Red Potion".into(),
+            amount: 2,
+            from_npc: Some("Hen".into()),
+        });
+        let joystick = JoystickState {
+            owner: Some(17),
+            ..default()
+        };
         let mut app = App::new();
         app.insert_resource(NativeShellModel {
             screen: NativeShellScreen::InGame,
@@ -937,9 +1102,10 @@ mod tests {
         })
         .insert_resource(state)
         .insert_resource(target)
+        .insert_resource(pickups)
         .init_resource::<QuestUiIntentQueue>()
         .init_resource::<RailState>()
-        .init_resource::<JoystickState>()
+        .insert_resource(joystick)
         .add_systems(Update, buttons);
         app.world_mut().spawn((
             Interaction::Pressed,
@@ -948,7 +1114,17 @@ mod tests {
         ));
         app.world_mut().spawn((
             Interaction::Pressed,
+            Action::Pickup,
+            BackgroundColor(Color::NONE),
+        ));
+        app.world_mut().spawn((
+            Interaction::Pressed,
             Action::RunToggle,
+            BackgroundColor(Color::NONE),
+        ));
+        app.world_mut().spawn((
+            Interaction::Pressed,
+            Action::Skills,
             BackgroundColor(Color::NONE),
         ));
         app.update();
@@ -958,9 +1134,15 @@ mod tests {
             app.world_mut()
                 .resource_mut::<QuestUiIntentQueue>()
                 .drain_intents(),
-            vec![QuestUiIntent::AttackTarget { object_id: 731 }]
+            vec![
+                QuestUiIntent::AttackTarget { object_id: 731 },
+                QuestUiIntent::PickUpObject { object_id: 44 },
+            ]
         );
-        assert!(!app.world().resource::<JoystickState>().run_lock);
+        let joystick = app.world().resource::<JoystickState>();
+        assert_eq!(joystick.owner, Some(17));
+        assert!(!joystick.run_lock);
+        assert!(app.world().resource::<NativePlayerUiState>().skill_open());
     }
 
     #[test]
@@ -1084,15 +1266,19 @@ mod tests {
             })
             .init_resource::<NativePlayerUiState>()
             .insert_resource(ui)
-            .init_resource::<AndroidShellState>()
+            .insert_resource(AndroidShellState {
+                lifecycle: AndroidLifecycle::Foreground,
+                ..default()
+            })
             .init_resource::<JoystickState>()
             .init_resource::<TouchPointer>()
+            .init_resource::<SecondaryTouchInteractions>()
             .init_resource::<crate::android_input::AndroidUiActionQueue>()
             .init_resource::<crate::android_input::AndroidMotionQueue>()
             .add_message::<AndroidInputMessage>()
             .add_systems(
                 PreUpdate,
-                (joystick_touch, touch_pointer)
+                (joystick_touch, touch_pointer, secondary_touch_buttons)
                     .chain()
                     .after(bevy::input::InputSystems),
             )
@@ -1186,6 +1372,171 @@ mod tests {
             .world()
             .resource::<ButtonInput<MouseButton>>()
             .pressed(MouseButton::Left));
+    }
+
+    #[test]
+    fn secondary_action_finger_activates_the_button_while_joystick_is_owned() {
+        let (mut app, window) = joystick_app();
+        let window_ref = app.world().get::<Window>(window).unwrap();
+        let center = joystick_center(
+            window_ref,
+            0.0,
+            0.0,
+            gameplay_control_metrics(window_ref.height()).joystick_scale,
+        );
+        let button = app
+            .world_mut()
+            .spawn((
+                ActionPadButton,
+                Action::Attack,
+                Interaction::None,
+                ComputedNode {
+                    size: Vec2::splat(80.0),
+                    inverse_scale_factor: 1.0,
+                    ..default()
+                },
+                UiGlobalTransform::from_xy(600.0, 100.0),
+            ))
+            .id();
+
+        touch_at(&mut app, window, 1, TouchPhase::Started, center);
+        app.update();
+        touch_at(
+            &mut app,
+            window,
+            2,
+            TouchPhase::Started,
+            Vec2::new(600.0, 100.0),
+        );
+        app.update();
+
+        assert_eq!(app.world().resource::<JoystickState>().owner, Some(1));
+        assert_eq!(
+            *app.world().get::<Interaction>(button).unwrap(),
+            Interaction::Pressed
+        );
+        app.update();
+        assert_eq!(
+            *app.world().get::<Interaction>(button).unwrap(),
+            Interaction::None
+        );
+    }
+
+    #[test]
+    fn panel_transition_cancels_both_touch_owners_without_a_ghost_press() {
+        let (mut app, window) = joystick_app();
+        let window_ref = app.world().get::<Window>(window).unwrap();
+        let center = joystick_center(
+            window_ref,
+            0.0,
+            0.0,
+            gameplay_control_metrics(window_ref.height()).joystick_scale,
+        );
+        touch_at(&mut app, window, 1, TouchPhase::Started, center);
+        app.update();
+        touch_at(
+            &mut app,
+            window,
+            2,
+            TouchPhase::Started,
+            Vec2::new(700.0, 120.0),
+        );
+        app.update();
+        assert_eq!(app.world().resource::<JoystickState>().owner, Some(1));
+        assert_eq!(app.world().resource::<TouchPointer>().owner, Some(2));
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Inventory;
+        app.update();
+
+        assert_eq!(app.world().resource::<JoystickState>().owner, None);
+        let pointer = app.world().resource::<TouchPointer>();
+        assert_eq!(pointer.owner, None);
+        assert!(pointer.wait_for_release);
+        assert!(
+            !app.world()
+                .resource::<ButtonInput<MouseButton>>()
+                .pressed(MouseButton::Left)
+        );
+    }
+
+    #[test]
+    fn background_cancels_touch_owners_and_resume_does_not_reclaim_held_fingers() {
+        let (mut app, window) = joystick_app();
+        let window_ref = app.world().get::<Window>(window).unwrap();
+        let center = joystick_center(
+            window_ref,
+            0.0,
+            0.0,
+            gameplay_control_metrics(window_ref.height()).joystick_scale,
+        );
+        touch_at(
+            &mut app,
+            window,
+            1,
+            TouchPhase::Started,
+            center + Vec2::new(20.0, -20.0),
+        );
+        app.update();
+        touch_at(
+            &mut app,
+            window,
+            2,
+            TouchPhase::Started,
+            Vec2::new(700.0, 120.0),
+        );
+        app.update();
+
+        app.world_mut()
+            .resource_mut::<AndroidShellState>()
+            .lifecycle = AndroidLifecycle::Background;
+        app.update();
+        assert_eq!(app.world().resource::<JoystickState>().owner, None);
+        assert_eq!(app.world().resource::<TouchPointer>().owner, None);
+        assert!(
+            !app.world()
+                .resource::<ButtonInput<MouseButton>>()
+                .pressed(MouseButton::Left)
+        );
+
+        app.world_mut()
+            .resource_mut::<AndroidShellState>()
+            .lifecycle = AndroidLifecycle::Foreground;
+        app.update();
+        assert_eq!(app.world().resource::<JoystickState>().owner, None);
+        assert_eq!(app.world().resource::<TouchPointer>().owner, None);
+        assert!(app.world().resource::<TouchPointer>().wait_for_release);
+    }
+
+    #[test]
+    fn ime_context_change_releases_the_pointer_until_the_touch_ends() {
+        let (mut app, window) = joystick_app();
+        touch_at(
+            &mut app,
+            window,
+            2,
+            TouchPhase::Started,
+            Vec2::new(700.0, 120.0),
+        );
+        app.update();
+        assert_eq!(app.world().resource::<TouchPointer>().owner, Some(2));
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .keyboard
+            .open = true;
+        app.update();
+
+        let pointer = app.world().resource::<TouchPointer>();
+        assert_eq!(pointer.owner, None);
+        assert!(pointer.wait_for_release);
+        assert!(
+            !app.world()
+                .resource::<ButtonInput<MouseButton>>()
+                .pressed(MouseButton::Left)
+        );
     }
 
     #[test]

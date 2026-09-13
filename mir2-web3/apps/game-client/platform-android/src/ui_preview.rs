@@ -19,6 +19,7 @@ pub const SCENES: &[&str] = &[
     "starting",
     "disconnected",
     "hud",
+    "multitouch",
     "world-render",
     "inventory",
     "character",
@@ -337,12 +338,12 @@ fn apply(world: &mut World) {
     model.player.max_weight = 100;
     model.player.gold = 12345;
     model.player.credit = 500;
-    if matches!(scene.as_str(), "hud" | "world-render") {
+    if matches!(scene.as_str(), "hud" | "multitouch" | "world-render") {
         // Offline presentation specimen only, never a Gateway bootstrap.
         model.player.map_name = Some("BichonProvince".into());
     }
     drop(model);
-    if matches!(scene.as_str(), "hud" | "world-render") {
+    if matches!(scene.as_str(), "hud" | "multitouch" | "world-render") {
         let mut map = world.resource_mut::<mir2_client_bevy::map::MapModel>();
         map.center_x = if scene == "world-render" { 302 } else { 320 };
         map.center_y = if scene == "world-render" { 634 } else { 43 };
@@ -444,7 +445,10 @@ fn populate_specimens(world: &mut World, scene: &str) {
     use mir2_client_bevy::{
         big_map::{BigMapInfo, BigMapModel, BigMapNpc, BigMapPoint, BigMapWorldIcon},
         game_shop::{GameShopEntry, GameShopModel},
-        quest_model::{Quest, QuestStatus, QuestTracker},
+        quest_model::{
+            CombatTargetModel, CombatTargetUpdate, GroundPickupModel, Quest, QuestStatus,
+            QuestTracker, RecentPickup,
+        },
         shop::{NpcShopServiceMode, ShopGood, ShopModel},
         skill_model::{SkillEntry, SkillModel},
     };
@@ -477,6 +481,26 @@ fn populate_specimens(world: &mut World, scene: &str) {
             unknown_text: None,
         }],
     });
+    if scene == "multitouch" {
+        let mut target = CombatTargetModel::default();
+        target.apply(CombatTargetUpdate {
+            object_id: 731,
+            name: "OFFLINE TARGET".into(),
+            hp: 9,
+            max_hp: 9,
+            is_player: false,
+        });
+        world.insert_resource(target);
+        let mut pickups = GroundPickupModel::default();
+        pickups.upsert(RecentPickup {
+            object_id: Some(44),
+            key: "object:44".into(),
+            label: "OFFLINE PICKUP".into(),
+            amount: 2,
+            from_npc: Some("OFFLINE TARGET".into()),
+        });
+        world.insert_resource(pickups);
+    }
     let service_mode = match scene {
         "npcshop-sell" => NpcShopServiceMode::Sell,
         "npcshop-repair" => NpcShopServiceMode::Repair,
@@ -769,7 +793,24 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 38);
+        assert_eq!(SCENES.len(), 39);
+    }
+
+    #[test]
+    fn multitouch_scene_exposes_exact_offline_action_targets() {
+        let mut world = World::new();
+        world.init_resource::<mir2_client_bevy::social::SocialModel>();
+        populate_specimens(&mut world, "multitouch");
+        let target = world.resource::<mir2_client_bevy::quest_model::CombatTargetModel>();
+        assert_eq!(
+            target.target.as_ref().map(|target| target.object_id),
+            Some(731)
+        );
+        let pickups = world.resource::<mir2_client_bevy::quest_model::GroundPickupModel>();
+        assert_eq!(
+            pickups.recent.front().and_then(|pickup| pickup.object_id),
+            Some(44)
+        );
     }
 
     #[test]
