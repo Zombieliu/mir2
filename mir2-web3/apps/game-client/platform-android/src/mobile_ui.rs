@@ -18,6 +18,21 @@ const JOYSTICK_TRAVEL: f32 = 42.0;
 const JOYSTICK_LEFT: f32 = 24.0;
 const JOYSTICK_BOTTOM: f32 = 88.0;
 const JOYSTICK_EMIT_SECONDS: f64 = 0.1;
+const CONTROL_SHORT_EDGE_FRACTION: f32 = 0.16;
+const JOYSTICK_MIN_DIAMETER: f32 = 48.0;
+const CONTROL_MIN_BUTTON_HEIGHT: f32 = 48.0;
+const COMPACT_ACTION_PAD_MAX_HEIGHT: f32 = 320.0;
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct GameplayControlMetrics {
+    joystick_scale: f32,
+    rail_width: f32,
+    rail_button_width: f32,
+    action_pad_width: f32,
+    button_width: f32,
+    button_height: f32,
+    gap: f32,
+}
 
 #[derive(Component, Clone, Copy)]
 enum Action {
@@ -153,11 +168,15 @@ fn joystick_touch(
         .as_deref()
         .map(|state| state.safe_area.bottom / dpi)
         .unwrap_or(0.0);
-    let center = joystick_center(window, safe_left, safe_bottom);
+    let metrics = gameplay_control_metrics(window.height());
+    let center = joystick_center(window, safe_left, safe_bottom, metrics.joystick_scale);
     if joystick.owner.is_none() {
         joystick.owner = touches
             .iter_just_pressed()
-            .filter(|touch| touch.position().distance(center) <= JOYSTICK_DIAMETER * 0.62)
+            .filter(|touch| {
+                touch.position().distance(center)
+                    <= JOYSTICK_DIAMETER * metrics.joystick_scale * 0.62
+            })
             .min_by_key(|touch| touch.id())
             .map(|touch| touch.id());
     }
@@ -176,7 +195,8 @@ fn joystick_touch(
         joystick.release();
         return;
     };
-    joystick.vector = ((position - center) / JOYSTICK_TRAVEL).clamp_length_max(1.0);
+    joystick.vector =
+        ((position - center) / (JOYSTICK_TRAVEL * metrics.joystick_scale)).clamp_length_max(1.0);
     let now = time.as_deref().map(Time::elapsed_secs_f64).unwrap_or(0.0);
     let should_emit = joystick.vector.length_squared() >= 0.15 * 0.15
         && joystick
@@ -198,10 +218,42 @@ fn joystick_touch(
     }
 }
 
-fn joystick_center(window: &Window, safe_left: f32, safe_bottom: f32) -> Vec2 {
+fn gameplay_control_metrics(viewport_height: f32) -> GameplayControlMetrics {
+    let joystick_diameter = (viewport_height * CONTROL_SHORT_EDGE_FRACTION)
+        .clamp(JOYSTICK_MIN_DIAMETER, JOYSTICK_DIAMETER);
+    if viewport_height < COMPACT_ACTION_PAD_MAX_HEIGHT {
+        let button_width = 48.0;
+        let gap = 6.0;
+        GameplayControlMetrics {
+            joystick_scale: joystick_diameter / JOYSTICK_DIAMETER,
+            rail_width: 204.0,
+            rail_button_width: 48.0,
+            action_pad_width: button_width * 4.0 + gap * 3.0,
+            button_width,
+            button_height: CONTROL_MIN_BUTTON_HEIGHT,
+            gap,
+        }
+    } else {
+        let button_scale = (viewport_height / 480.0).clamp(0.8, 1.0);
+        let button_width = 68.0 * button_scale;
+        let gap = 8.0 * button_scale;
+        GameplayControlMetrics {
+            joystick_scale: joystick_diameter / JOYSTICK_DIAMETER,
+            rail_width: 132.0,
+            rail_button_width: 64.0,
+            action_pad_width: button_width * 2.0 + gap,
+            button_width,
+            button_height: (56.0 * button_scale).max(CONTROL_MIN_BUTTON_HEIGHT),
+            gap,
+        }
+    }
+}
+
+fn joystick_center(window: &Window, safe_left: f32, safe_bottom: f32, control_scale: f32) -> Vec2 {
+    let diameter = JOYSTICK_DIAMETER * control_scale;
     Vec2::new(
-        safe_left + JOYSTICK_LEFT + JOYSTICK_DIAMETER * 0.5,
-        window.height() - safe_bottom - JOYSTICK_BOTTOM - JOYSTICK_DIAMETER * 0.5,
+        safe_left + JOYSTICK_LEFT + diameter * 0.5,
+        window.height() - safe_bottom - JOYSTICK_BOTTOM - diameter * 0.5,
     )
 }
 
@@ -521,6 +573,10 @@ fn visibility(
     mut labels: Query<&mut TextFont, With<RailLabel>>,
 ) {
     let unit = 1.0 / scale.0.max(0.01);
+    let metrics = windows
+        .single()
+        .map(|window| gameplay_control_metrics(window.height()))
+        .unwrap_or_else(|_| gameplay_control_metrics(1_080.0));
     let dpi = windows
         .single()
         .map(|window| window.scale_factor())
@@ -549,9 +605,13 @@ fn visibility(
         rail.expanded = false;
     }
     let in_game = shell.screen == NativeShellScreen::InGame;
-    let world_controls_visible = in_game && !state.blocks_world_click();
+    let world_controls_visible = in_game && !state.blocks_world_click() && !rail.expanded;
     for mut node in &mut rail_roots {
-        node.width = px(if rail.expanded { 132.0 } else { 64.0 } * unit);
+        node.width = px(if rail.expanded {
+            metrics.rail_width
+        } else {
+            metrics.rail_button_width
+        } * unit);
         node.top = px((safe_top + 16.0 + map_bottom * scale.0).max(48.0) * unit);
         node.right = px((safe_right + 8.0) * unit);
         node.row_gap = px(4.0 * unit);
@@ -563,7 +623,7 @@ fn visibility(
         };
     }
     for (action, mut node) in &mut rail_buttons {
-        node.width = px(64.0 * unit);
+        node.width = px(metrics.rail_button_width * unit);
         node.height = px(48.0 * unit);
         let visible = if matches!(action, Action::Pickup) {
             pickup_available
@@ -579,11 +639,11 @@ fn visibility(
         };
     }
     for mut node in &mut pad_roots {
-        node.width = px(144.0 * unit);
+        node.width = px(metrics.action_pad_width * unit);
         node.right = px((safe_right + 20.0) * unit);
         node.bottom = px((safe_bottom + JOYSTICK_BOTTOM) * unit);
-        node.row_gap = px(8.0 * unit);
-        node.column_gap = px(8.0 * unit);
+        node.row_gap = px(metrics.gap * unit);
+        node.column_gap = px(metrics.gap * unit);
         node.display = if world_controls_visible {
             Display::Flex
         } else {
@@ -591,13 +651,13 @@ fn visibility(
         };
     }
     for mut node in &mut pad_buttons {
-        node.width = px(68.0 * unit);
-        node.height = px(56.0 * unit);
+        node.width = px(metrics.button_width * unit);
+        node.height = px(metrics.button_height * unit);
         node.display = Display::Flex;
     }
     for mut node in &mut joystick_roots {
-        node.width = px(JOYSTICK_DIAMETER * unit);
-        node.height = px(JOYSTICK_DIAMETER * unit);
+        node.width = px(JOYSTICK_DIAMETER * metrics.joystick_scale * unit);
+        node.height = px(JOYSTICK_DIAMETER * metrics.joystick_scale * unit);
         node.left = px((safe_left + JOYSTICK_LEFT) * unit);
         node.bottom = px((safe_bottom + JOYSTICK_BOTTOM) * unit);
         node.border = UiRect::all(px(2.0 * unit));
@@ -615,14 +675,19 @@ fn visibility(
 fn joystick_visual(
     scale: Res<UiScale>,
     joystick: Res<JoystickState>,
+    windows: Query<&Window>,
     mut knobs: Query<&mut Node, With<JoystickKnob>>,
 ) {
     let unit = 1.0 / scale.0.max(0.01);
-    let offset = joystick.vector * JOYSTICK_TRAVEL;
-    let centered = (JOYSTICK_DIAMETER - JOYSTICK_KNOB_DIAMETER) * 0.5;
+    let control_scale = windows
+        .single()
+        .map(|window| gameplay_control_metrics(window.height()).joystick_scale)
+        .unwrap_or(1.0);
+    let offset = joystick.vector * JOYSTICK_TRAVEL * control_scale;
+    let centered = (JOYSTICK_DIAMETER - JOYSTICK_KNOB_DIAMETER) * control_scale * 0.5;
     for mut node in &mut knobs {
-        node.width = px(JOYSTICK_KNOB_DIAMETER * unit);
-        node.height = px(JOYSTICK_KNOB_DIAMETER * unit);
+        node.width = px(JOYSTICK_KNOB_DIAMETER * control_scale * unit);
+        node.height = px(JOYSTICK_KNOB_DIAMETER * control_scale * unit);
         node.left = px((centered + offset.x) * unit);
         node.top = px((centered + offset.y) * unit);
         node.border = UiRect::all(px(2.0 * unit));
@@ -1039,7 +1104,13 @@ mod tests {
     #[test]
     fn joystick_claims_a_same_frame_touch_without_a_ghost_ui_click() {
         let (mut app, window) = joystick_app();
-        let center = joystick_center(app.world().get::<Window>(window).unwrap(), 0.0, 0.0);
+        let window_ref = app.world().get::<Window>(window).unwrap();
+        let center = joystick_center(
+            window_ref,
+            0.0,
+            0.0,
+            gameplay_control_metrics(window_ref.height()).joystick_scale,
+        );
         let position = center + Vec2::new(30.0, -30.0);
         touch_at(&mut app, window, 7, TouchPhase::Started, position);
         touch_at(&mut app, window, 7, TouchPhase::Ended, position);
@@ -1070,7 +1141,13 @@ mod tests {
             .resource_mut::<NativePlayerUiState>()
             .core
             .panel = mir2_ui_core::state::UiPanel::Inventory;
-        let center = joystick_center(app.world().get::<Window>(window).unwrap(), 0.0, 0.0);
+        let window_ref = app.world().get::<Window>(window).unwrap();
+        let center = joystick_center(
+            window_ref,
+            0.0,
+            0.0,
+            gameplay_control_metrics(window_ref.height()).joystick_scale,
+        );
         touch_at(&mut app, window, 7, TouchPhase::Started, center);
         app.update();
 
@@ -1085,7 +1162,13 @@ mod tests {
     #[test]
     fn joystick_owner_does_not_block_a_secondary_action_finger() {
         let (mut app, window) = joystick_app();
-        let center = joystick_center(app.world().get::<Window>(window).unwrap(), 0.0, 0.0);
+        let window_ref = app.world().get::<Window>(window).unwrap();
+        let center = joystick_center(
+            window_ref,
+            0.0,
+            0.0,
+            gameplay_control_metrics(window_ref.height()).joystick_scale,
+        );
         touch_at(&mut app, window, 1, TouchPhase::Started, center);
         app.update();
         touch_at(
@@ -1253,6 +1336,18 @@ mod tests {
         }
         assert_eq!(visible_rail, 1, "rail is collapsed by default");
         assert_eq!(visible_pad, 4, "combat pad stays directly reachable");
+        app.world_mut().resource_mut::<RailState>().expanded = true;
+        app.update();
+        {
+            let world = app.world_mut();
+            let mut rail = world.query_filtered::<&Node, With<TouchRail>>();
+            assert_eq!(rail.single(world).unwrap().display, Display::Flex);
+            let mut pad = world.query_filtered::<&Node, With<ActionPad>>();
+            assert_eq!(pad.single(world).unwrap().display, Display::None);
+            let mut joystick = world.query_filtered::<&Node, With<JoystickRoot>>();
+            assert_eq!(joystick.single(world).unwrap().display, Display::None);
+        }
+        app.world_mut().resource_mut::<RailState>().expanded = false;
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .core
@@ -1291,5 +1386,28 @@ mod tests {
         assert_eq!(revive.display, Display::Flex);
         assert_eq!(revive.height, px(96));
         assert_eq!(revive.width, px(128));
+    }
+
+    #[test]
+    fn gameplay_controls_follow_short_edge_and_keep_button_height() {
+        let normal_phone = gameplay_control_metrics(393.0);
+        assert!(((normal_phone.joystick_scale * JOYSTICK_DIAMETER) - 62.88).abs() < 0.001);
+        assert_eq!(normal_phone.button_height, CONTROL_MIN_BUTTON_HEIGHT);
+        assert!(normal_phone.action_pad_width < 120.0);
+
+        let compact_phone = gameplay_control_metrics(262.0);
+        assert_eq!(
+            compact_phone.joystick_scale * JOYSTICK_DIAMETER,
+            JOYSTICK_MIN_DIAMETER
+        );
+        assert_eq!(compact_phone.action_pad_width, 210.0);
+        assert_eq!(compact_phone.button_width, 48.0);
+        assert_eq!(compact_phone.button_height, CONTROL_MIN_BUTTON_HEIGHT);
+        assert_eq!(compact_phone.rail_width, 204.0);
+        assert_eq!(compact_phone.rail_button_width, 48.0);
+
+        let tablet = gameplay_control_metrics(1_080.0);
+        assert_eq!(tablet.joystick_scale, 1.0);
+        assert_eq!(tablet.action_pad_width, 144.0);
     }
 }

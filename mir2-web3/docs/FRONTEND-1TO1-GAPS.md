@@ -4433,3 +4433,21 @@ Human acceptance is still required for:
 ## 2026-09-09 native trade drag fix
 
 The intermittent item drag is fixed by replaying ordered Winit/Bevy WindowEvent input and retaining a preselected source until release. Pointer tracking survives pending/modal gesture cancellation. Native UI 624/624 and Windows host 561/561 serial pass. Exact signed EXE B62330DFA03EB8A2A5976C0662A327D95A2E65A4721C0B3E2D0ECC3F9DE75599 passed seven native drag operations: deposit, occupied swap, preselected-source move, retrieve, redeposit and partial merge, with matching ACKs. This supersedes the prior drag-open finding only; full-game acceptance remains false. Evidence: [drag fix](generated/player-qa/native-trade-drag-fix-20260909/README.md).
+
+## 2026-09-13 native Android HUD and chat phone scaling
+
+The Android-private gameplay controls now scale from the landscape short edge
+instead of retaining oversized fixed dimensions above the shared Crystal HUD.
+The joystick is bounded to 16 percent of the short edge, ordinary phone
+viewports keep a two-column pad, and extremely short viewports use a four-key
+row while retaining 48 logical-pixel action heights. The expanded panel rail
+also becomes four columns on those short viewports and suppresses the world
+controls, closing the overlap and vertical clipping exposed by a real ADB tap.
+The shared bottom HUD and chat renderer were not forked. Existing chat/IME
+focus already suppresses world controls and was verified with actual ADB text
+input. Android Rust 172/172, focused mobile UI 16/16, Gradle unit tasks, API31
+arm64 packaging and streamed install passed. Three-resolution screenshots and
+touch/IME evidence are archived in
+[native Android HUD/chat scale](generated/player-qa/native-android-hud-chat-scale-20260913/README.md).
+This remains offline emulator evidence; approved-WSS gameplay, authoritative
+chat/movement, physical-device behavior and human acceptance remain open.
