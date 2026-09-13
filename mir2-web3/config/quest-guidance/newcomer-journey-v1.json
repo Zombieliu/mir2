@@ -115,10 +115,10 @@
         52,
         53,
         54,
-        60,
         61,
-        62,
-        65
+        65,
+        60,
+        62
       ],
       "classQuestIds": {
         "Warrior": [],
@@ -145,15 +145,15 @@
         86,
         87,
         88,
-        89,
         97,
-        98,
-        99,
         102,
         103,
         110,
         111,
-        112
+        112,
+        98,
+        89,
+        99
       ],
       "classQuestIds": {
         "Warrior": [],
@@ -1080,6 +1080,42 @@
       }
     },
     {
+      "questId": 61,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "requiredQuestId": 54,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Teleport Kyle",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 371,
+        "y": 314
+      },
+      "finishNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      }
+    },
+    {
+      "questId": 65,
+      "rewardExperience": 60000,
+      "killCountCap": 8,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 8 Zombie1."
+      ],
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
       "questId": 60,
       "rewardExperience": 60000,
       "killCountCap": 8,
@@ -1102,29 +1138,6 @@
         "mapFileName": "0",
         "x": 340,
         "y": 257
-      }
-    },
-    {
-      "questId": 61,
-      "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
-      "requiredQuestId": 54,
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "Teleport Kyle",
-        "mapName": "BichonProvince",
-        "mapFileName": "0",
-        "x": 371,
-        "y": 314
-      },
-      "finishNpc": {
-        "name": "Master Shok",
-        "mapName": "WoomyonWoods(S)",
-        "mapFileName": "1",
-        "x": 312,
-        "y": 73
       }
     },
     {
@@ -1152,19 +1165,6 @@
         "x": 312,
         "y": 73
       }
-    },
-    {
-      "questId": 65,
-      "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
-      "taskDescription": [
-        "Defeat 8 Zombie1."
-      ],
-      "startInDiary": true,
-      "finishInDiary": true,
-      "startNpc": null,
-      "finishNpc": null
     },
     {
       "questId": 83,
@@ -1255,35 +1255,8 @@
       }
     },
     {
-      "questId": 89,
-      "rewardExperience": 138461,
-      "killCountCap": 10,
-      "itemCountCap": 2,
-      "taskDescription": [
-        "Defeat 10 CursedPriest.",
-        "Defeat 10 ShiZombie.",
-        "Defeat 10 CursedZombie."
-      ],
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "LeadTrainer Harry",
-        "mapName": "Rev.Tao_Office",
-        "mapFileName": "1002",
-        "x": 11,
-        "y": 8
-      },
-      "finishNpc": {
-        "name": "LeadTrainer Harry",
-        "mapName": "Rev.Tao_Office",
-        "mapFileName": "1002",
-        "x": 11,
-        "y": 8
-      }
-    },
-    {
       "questId": 97,
-      "rewardExperience": 138462,
+      "rewardExperience": 346154,
       "killCountCap": 10,
       "itemCountCap": 2,
       "startInDiary": true,
@@ -1295,6 +1268,125 @@
         "mapFileName": "1",
         "x": 317,
         "y": 71
+      }
+    },
+    {
+      "questId": 102,
+      "rewardExperience": 0,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Teleport Harrison",
+        "mapName": "BichonProvince",
+        "mapFileName": "0",
+        "x": 291,
+        "y": 296
+      },
+      "finishNpc": {
+        "name": "Transport Edwin",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 365,
+        "y": 340
+      }
+    },
+    {
+      "questId": 103,
+      "rewardExperience": 400000,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "guaranteedQuestDrops": [
+        "BugSpecimen"
+      ],
+      "taskDescription": [
+        "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Daniel",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 361,
+        "y": 335
+      },
+      "finishNpc": {
+        "name": "Merchant Daniel",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 361,
+        "y": 335
+      }
+    },
+    {
+      "questId": 110,
+      "rewardExperience": 0,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "MirGuide James",
+        "mapName": "SerpentValley",
+        "mapFileName": "2",
+        "x": 505,
+        "y": 483
+      },
+      "finishNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      }
+    },
+    {
+      "questId": 111,
+      "rewardExperience": 0,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      },
+      "finishNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      }
+    },
+    {
+      "questId": 112,
+      "rewardExperience": 84615,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 CrawlerZombie."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
+      },
+      "finishNpc": {
+        "name": "Merchant Mr.Wang",
+        "mapName": "MongchonProvince",
+        "mapFileName": "3",
+        "x": 663,
+        "y": 304
       }
     },
     {
@@ -1324,6 +1416,33 @@
       }
     },
     {
+      "questId": 89,
+      "rewardExperience": 138462,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 CursedPriest.",
+        "Defeat 10 ShiZombie.",
+        "Defeat 10 CursedZombie."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "LeadTrainer Harry",
+        "mapName": "Rev.Tao_Office",
+        "mapFileName": "1002",
+        "x": 11,
+        "y": 8
+      },
+      "finishNpc": {
+        "name": "LeadTrainer Harry",
+        "mapName": "Rev.Tao_Office",
+        "mapFileName": "1002",
+        "x": 11,
+        "y": 8
+      }
+    },
+    {
       "questId": 99,
       "rewardExperience": 138462,
       "killCountCap": 10,
@@ -1347,125 +1466,6 @@
         "mapFileName": "1",
         "x": 317,
         "y": 71
-      }
-    },
-    {
-      "questId": 102,
-      "rewardExperience": 138461,
-      "killCountCap": 10,
-      "itemCountCap": 2,
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "Teleport Harrison",
-        "mapName": "BichonProvince",
-        "mapFileName": "0",
-        "x": 291,
-        "y": 296
-      },
-      "finishNpc": {
-        "name": "Transport Edwin",
-        "mapName": "MongchonProvince",
-        "mapFileName": "3",
-        "x": 365,
-        "y": 340
-      }
-    },
-    {
-      "questId": 103,
-      "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
-      "guaranteedQuestDrops": [
-        "BugSpecimen"
-      ],
-      "taskDescription": [
-        "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
-      ],
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "Merchant Daniel",
-        "mapName": "MongchonProvince",
-        "mapFileName": "3",
-        "x": 361,
-        "y": 335
-      },
-      "finishNpc": {
-        "name": "Merchant Daniel",
-        "mapName": "MongchonProvince",
-        "mapFileName": "3",
-        "x": 361,
-        "y": 335
-      }
-    },
-    {
-      "questId": 110,
-      "rewardExperience": 138461,
-      "killCountCap": 10,
-      "itemCountCap": 2,
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "MirGuide James",
-        "mapName": "SerpentValley",
-        "mapFileName": "2",
-        "x": 505,
-        "y": 483
-      },
-      "finishNpc": {
-        "name": "Merchant Mr.Wang",
-        "mapName": "MongchonProvince",
-        "mapFileName": "3",
-        "x": 663,
-        "y": 304
-      }
-    },
-    {
-      "questId": 111,
-      "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "Merchant Mr.Wang",
-        "mapName": "MongchonProvince",
-        "mapFileName": "3",
-        "x": 663,
-        "y": 304
-      },
-      "finishNpc": {
-        "name": "Merchant Mr.Wang",
-        "mapName": "MongchonProvince",
-        "mapFileName": "3",
-        "x": 663,
-        "y": 304
-      }
-    },
-    {
-      "questId": 112,
-      "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
-      "taskDescription": [
-        "Defeat 10 CrawlerZombie."
-      ],
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "Merchant Mr.Wang",
-        "mapName": "MongchonProvince",
-        "mapFileName": "3",
-        "x": 663,
-        "y": 304
-      },
-      "finishNpc": {
-        "name": "Merchant Mr.Wang",
-        "mapName": "MongchonProvince",
-        "mapFileName": "3",
-        "x": 663,
-        "y": 304
       }
     },
     {

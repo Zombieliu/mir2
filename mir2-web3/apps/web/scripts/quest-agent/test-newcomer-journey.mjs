@@ -105,6 +105,13 @@ test('the shortened snake hunt follows the funding quests within a deterministic
   assert.ok(bichon.questIds.indexOf(30) < bichon.questIds.indexOf(35));
   assert.ok([35,36,37].every(questId=>!frontier.questIds.includes(questId)));
   assert.deepEqual(frontier.questIds,[33,49,39,40,41,42]);
+  const mines=config.chapters.find(chapter=>chapter.id==='mines');
+  assert.ok(mines.questIds.indexOf(54)<mines.questIds.indexOf(61));
+  assert.ok(mines.questIds.indexOf(61)<mines.questIds.indexOf(65));
+  assert.ok(mines.questIds.indexOf(65)<mines.questIds.indexOf(60));
+  const expedition=config.chapters.find(chapter=>chapter.id==='expedition');
+  assert.deepEqual(expedition.questIds,[83,86,87,88,97,102,103,110,111,112,98,89,99]);
+  assert.ok(expedition.questIds.indexOf(112)<expedition.questIds.indexOf(89));
   assert.equal(bichon.questExperienceBudget,49558);
   assert.equal(frontier.questExperienceBudget,65742);
 
