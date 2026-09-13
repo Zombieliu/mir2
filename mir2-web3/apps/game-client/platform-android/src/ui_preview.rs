@@ -112,6 +112,17 @@ fn start_world_render_motion_specimen(
     } else {
         warn!("offline Assassin action was not accepted by the native renderer");
     }
+    let user_dash = serde_json::json!({
+        "type":"packet", "packet":"UserDash", "payload":{
+            "location":{"x":302,"y":634}, "direction":"Right"
+        }
+    })
+    .to_string();
+    if apply_offline_entity_packet(&user_dash) {
+        info!("ANDROID_USER_DASH_PRESENTATION_APPLIED");
+    } else {
+        warn!("offline UserDash specimen was not accepted by the native renderer");
+    }
     let archer = serde_json::json!({
         "type":"packet", "packet":"ObjectRangeAttack", "payload":{
             "objectId":9004, "x":301, "y":631, "direction":"Right"
@@ -309,6 +320,8 @@ fn report_world_render_motion_pose(
     mut saw_pushed_settled: Local<bool>,
     mut saw_dash_active: Local<bool>,
     mut saw_dash_settled: Local<bool>,
+    mut saw_user_dash_active: Local<bool>,
+    mut saw_user_dash_settled: Local<bool>,
     mut reported_diagnostics: Local<bool>,
 ) {
     if !*reported_diagnostics && time.elapsed().as_millis() >= 4_500 {
@@ -363,6 +376,16 @@ fn report_world_render_motion_pose(
             info!("ANDROID_OBJECT_DASH_POSE_SETTLED");
             *saw_dash_settled = true;
         }
+    }
+    let user_dash_active = crate::live_entity::active_action_name(9001)
+        .as_deref()
+        .is_some_and(|action| matches!(action, "dashL" | "dashR"));
+    if user_dash_active && !*saw_user_dash_active {
+        info!("ANDROID_USER_DASH_ACTION_ACTIVE");
+        *saw_user_dash_active = true;
+    } else if *saw_user_dash_active && !user_dash_active && !*saw_user_dash_settled {
+        info!("ANDROID_USER_DASH_ACTION_SETTLED");
+        *saw_user_dash_settled = true;
     }
 }
 

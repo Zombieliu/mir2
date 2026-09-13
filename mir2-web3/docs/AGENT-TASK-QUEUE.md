@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> 2026-09-14 Android current change: local `UserDash` / `UserDashFail` now
+> cross the authenticated post-`IN_GAME` boundary and mutate only the retained
+> `selfPlayer`. Crystal's same-transform acknowledgement stays a no-op;
+> accepted dashes alternate exact `DashL` / `DashR` Running halves, while fail
+> applies the server transform, cancels the action and returns to standing.
+> Android 185/185 and UI Preview 193/193, Gradle 25/25 per variant, API31
+> target/package, streamed install, active/settled action logs and a full-screen
+> 2340x1080 visible specimen pass. The 444,502,784-byte APK SHA-256 is
+> `68ae05c0c26f1ca1505d4feba7d1afaa77c7d68c067d4398c63bec65381f7bfe`.
+> Evidence:
+> `docs/generated/player-qa/native-android-user-dash-20260914/README.md`.
+> Local input-gate/camera interpolation, exact mounted dash art,
+> approved-WSS real login, online StartGame/map transitions, public asset
+> alignment and physical-device/human acceptance remain open.
+
 > 2026-09-14 Android current change: authenticated post-`IN_GAME` remote
 > `ObjectDash` / `ObjectDashFail` now update the exact existing actor at the
 > server endpoint. An unmounted player with a validated Running catalog
@@ -12,7 +27,7 @@
 > `566b27a7a78b8994523a5f30f816a04944bb995346f21a30009e4c3a9579e5ff`.
 > Evidence:
 > `docs/generated/player-qa/native-android-object-dash-20260914/README.md`.
-> Local `UserDash` / `UserDashFail`, exact mounted dash artwork,
+> Exact mounted dash artwork,
 > approved-WSS real login, online StartGame/map transitions, public asset
 > alignment and physical-device/human acceptance remain open.
 

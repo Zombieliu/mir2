@@ -406,6 +406,7 @@ final class GatewaySession implements AutoCloseable {
         return packet.equals("UserLocation") || packet.equals("ObjectWalk")
                 || packet.equals("ObjectRun") || packet.equals("ObjectBackStep")
                 || packet.equals("ObjectPushed")
+                || packet.equals("UserDash") || packet.equals("UserDashFail")
                 || packet.equals("ObjectDash") || packet.equals("ObjectDashFail")
                 || packet.equals("ObjectTurn") || packet.equals("ObjectHarvest")
                 || packet.equals("ObjectHarvested") || packet.equals("ObjectAttack")

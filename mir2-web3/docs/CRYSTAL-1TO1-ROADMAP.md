@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-14 Android current change: local `UserDash` / `UserDashFail` now
+> drive the authoritative retained self entity after `IN_GAME`. The no-op echo,
+> endpoint/facing, `DashL` / `DashR` alternation, exact three-frame Running
+> halves, standing settle and fail cancellation are deterministic tests.
+> Android 185/185, UI Preview 193/193, Java 25/25 in both variants, API31
+> target/package, streamed install and a 2340x1080 offline Bichon render with
+> self-action active/settled markers pass. Evidence:
+> `docs/generated/player-qa/native-android-user-dash-20260914/README.md`.
+> This closes self entity/action reduction, not Crystal input-gate timing,
+> sub-tile camera motion, mounted exact art, approved-WSS login, online
+> StartGame/render-ready map changes, public asset alignment, physical-device
+> behavior or human acceptance.
+
 > 2026-09-14 Android current change: remote `ObjectDash` is now a bounded
 > authoritative object-layer action. The model lands immediately on the server
 > endpoint; an unmounted player with the exact catalog alternates Crystal's
@@ -9,8 +22,8 @@
 > both variants, API31 target/package, streamed install and a 2340x1080 offline
 > Bichon render with active/settled markers pass. Evidence:
 > `docs/generated/player-qa/native-android-object-dash-20260914/README.md`.
-> This closes only the remote unmounted branch; local `UserDash` /
-> `UserDashFail`, mounted exact art, approved-WSS login, online
+> This closes only the remote unmounted branch; mounted exact art,
+> approved-WSS login, online
 > StartGame/render-ready map changes, public asset alignment, physical-device
 > behavior and human acceptance remain open.
 

@@ -171,6 +171,14 @@ a one-phase correction so stale screen motion cannot survive. Self IDs,
 unknown/removed actors, ground drops, missing locations and non-Crystal
 directions fail closed. This does not implement the separate local `UserDash`
 / `UserDashFail` path or exact mounted dash artwork.
+The separate local `UserDash` / `UserDashFail` packets now also cross the
+authenticated host boundary. Android binds them only to the existing
+`selfPlayer`, preserves Crystal's exact-position/exact-direction no-op, and
+alternates the same validated `DashL` / `DashR` halves. A fail packet applies
+the server transform, cancels the active dash and restores the standing
+facing. This slice establishes authoritative local entity state and exact
+unmounted action frames; Crystal-equivalent input-gate timing and sub-tile
+camera motion remain separate work.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a
