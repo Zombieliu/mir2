@@ -65,6 +65,7 @@ const bootstrapTimeoutMs = 60_000;
 // quest instead of becoming permanently stuck in town.
 const minimumJourneyHpStock = 4;
 const maxJourneyRevivals = Number(process.env.MIR2_JOURNEY_MAX_REVIVALS ?? 30);
+const dangerousExpeditionQuestIds = new Set([54, 60, 62, 65]);
 const journeySupplyOptions = Object.freeze({
   targetHp: 24,
   targetMp: 12,
@@ -187,7 +188,7 @@ try {
         .flatMap(quest => quest.objectives?.item?.map(item => item.itemName) ?? []);
       const activeQuestHpTarget = hpRestockTargetForActiveQuests(owner.snapshot, {
         fallback: journeySupplyOptions.targetHp,
-        targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80 },
+        targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80, 65: 80 },
       });
       return restockInVillage(owner, navigateNear, {
         ...journeySupplyOptions,
@@ -197,7 +198,7 @@ try {
         // a human player uses for that exact emergency; other quests keep the
         // existing supply plan unchanged.
         emergencyTeleportCount: (owner.snapshot?.questLog ?? []).some(quest =>
-          [54, 60, 62].includes(Number(quest?.questId)) &&
+          dangerousExpeditionQuestIds.has(Number(quest?.questId)) &&
           String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress') ? 4 : 0,
         // The first D421 -> D422 round trip consumed 24 bottles before the
         // objective map was reached. Carry an evidence-based expedition
@@ -258,7 +259,8 @@ try {
       const q60Expedition = Number(questId) === 60;
       const q62Expedition = Number(questId) === 62;
       const departureFloor = journeyExpeditionDepartureFloorForQuest(questId, className);
-      const emergencyTeleportTarget = q54Expedition || q60Expedition || q62Expedition ? 4 : 0;
+      const q65Expedition = Number(questId) === 65;
+      const emergencyTeleportTarget = q54Expedition || q60Expedition || q62Expedition || q65Expedition ? 4 : 0;
       const inVillage = String(owner.snapshot?.mapFileName ?? '') === '0';
       const shouldReplenishEscapeReserve = emergencyTeleportTarget > 0 &&
         (inVillage || replenishEscapeReserve);
@@ -275,11 +277,11 @@ try {
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
           requiresTaoistAmuletRestock(owner.snapshot, questId, className, 4) ||
           (shouldReplenishEscapeReserve && randomTeleportCount(owner.snapshot) < emergencyTeleportTarget) ||
-          ([q54Expedition && (hpDrugCount(owner.snapshot) < departureFloor.hp ||
+          ([(q54Expedition || q65Expedition) && (hpDrugCount(owner.snapshot) < departureFloor.hp ||
               mpDrugCount(owner.snapshot) < departureFloor.mp),
             (q60Expedition || q62Expedition) && hpDrugCount(owner.snapshot) < departureFloor.hp]
             .some(Boolean) && String(owner.snapshot?.mapFileName ?? '') === '0'),
-        ...(q54Expedition ? {
+        ...(q54Expedition || q65Expedition ? {
           requiredAfterRestockHpStock: departureFloor.hp,
           requiredAfterRestockMpStock: departureFloor.mp,
           // Stay in town after the shop. The quest loop owns the return trip
@@ -311,7 +313,7 @@ try {
         // funding only 24 bottles caused repeated under-stocked returns.
         const activeQuestHpTarget = hpRestockTargetForActiveQuests(owner.snapshot, {
           fallback: journeySupplyOptions.targetHp,
-          targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80 },
+          targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80, 65: 80 },
         });
         const fundingHpDeficit = Math.max(
           1,
@@ -326,7 +328,7 @@ try {
           0,
           activeQuestMpTarget - mpDrugCount(owner.snapshot),
         );
-        const emergencyTeleportTarget = [54, 60, 62].includes(Number(questId)) ? 4 : 0;
+        const emergencyTeleportTarget = dangerousExpeditionQuestIds.has(Number(questId)) ? 4 : 0;
         const emergencyTeleportFunding = Math.max(
           0,
           emergencyTeleportTarget - randomTeleportCount(owner.snapshot),
@@ -782,7 +784,7 @@ try {
             // NPCGoods/UseItem packets as a player. It is reserved for the
             // observed no-step cave trap and never replaces ordinary retreat.
             emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id, className),
-            emergencyEscape: [54, 60, 62].includes(id)
+            emergencyEscape: dangerousExpeditionQuestIds.has(id)
               ? async owner => {
                   const result = await emergencyTeleport(owner);
                   return result?.deferred === true ? result : true;
@@ -820,10 +822,10 @@ try {
                   requiredRatio: recoveryRatio,
                   timeoutMs: evasiveRecoveryTimeoutMsForQuest(id),
                   dangerDistance: evasiveRecoveryDangerDistanceForQuest(id),
-                  retreatSteps: [54, 60, 62].includes(id) ? 12 : 6,
-                  maxEvasiveMoves: [54, 60, 62].includes(id) ? 8 : 4,
+                  retreatSteps: dangerousExpeditionQuestIds.has(id) ? 12 : 6,
+                  maxEvasiveMoves: dangerousExpeditionQuestIds.has(id) ? 8 : 4,
                   biasPosition: snapshot => questRetreatBiasPosition(id, snapshot),
-                  emergencyEscape: [54, 60, 62].includes(id)
+                  emergencyEscape: dangerousExpeditionQuestIds.has(id)
                     ? async current => emergencyTeleport(current)
                     : undefined,
                   emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id, className),
@@ -979,7 +981,7 @@ function livingHealthRatio(snapshot) {
 }
 
 function minimumJourneyHpStockForQuest(questId) {
-  if ([54, 60, 62].includes(Number(questId))) return 24;
+  if (dangerousExpeditionQuestIds.has(Number(questId))) return 24;
   if ([42, 49].includes(Number(questId))) return 12;
   return minimumJourneyHpStock;
 }

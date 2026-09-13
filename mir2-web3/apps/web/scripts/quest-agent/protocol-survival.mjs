@@ -2,6 +2,7 @@ const DEFAULT_MAX_RESTOCKS = 32;
 const DEFAULT_MINIMUM_HP_STOCK = 1;
 const REFRESH_TIMEOUT_MS = 12_000;
 const PASSIVE_RECOVERY_POLL_MS = 3_100;
+const DANGEROUS_EXPEDITION_QUEST_IDS = new Set([54, 60, 62, 65]);
 
 export function hpRestockTargetForActiveQuests(snapshot, {
   fallback = 24,
@@ -28,7 +29,7 @@ export function minimumJourneyMpStockForQuest(questId, className) {
 /** A Taoist should not resume a dangerous kill expedition without spell fuel. */
 export function requiresTaoistAmuletRestock(snapshot, questId, className, minimum = 1) {
   const normalizedClass = String(className ?? '').trim().toLowerCase();
-  if (normalizedClass !== 'taoist' || ![54, 60, 62].includes(Number(questId))) return false;
+  if (normalizedClass !== 'taoist' || !DANGEROUS_EXPEDITION_QUEST_IDS.has(Number(questId))) return false;
   if (!(snapshot?.knownSkills ?? []).some(skill => String(skill?.spell ?? '') === 'SoulFireBall')) return false;
   const required = nonnegativeInteger(minimum, 'minimum Amulet stock');
   return amuletStock(snapshot) < required;
@@ -40,7 +41,7 @@ export function journeyMpRestockTargetForQuest(questId, className, {
 } = {}) {
   const normalizedClass = String(className ?? '').trim().toLowerCase();
   if (!['wizard', 'taoist'].includes(normalizedClass)) return 0;
-  if (Number(questId) === 54) return 80;
+  if ([54, 65].includes(Number(questId))) return 80;
   if (Number(questId) === 42 && normalizedClass === 'wizard') return 32;
   return nonnegativeInteger(fallback, 'fallback MP target');
 }
@@ -54,10 +55,10 @@ export function journeyMpRestockTargetForQuest(questId, className, {
 export function journeyExpeditionDepartureFloorForQuest(questId, className) {
   const id = Number(questId);
   const normalizedClass = String(className ?? '').trim().toLowerCase();
-  const expedition = [54, 60, 62].includes(id);
+  const expedition = DANGEROUS_EXPEDITION_QUEST_IDS.has(id);
   return {
     hp: expedition ? 64 : 0,
-    mp: id === 54 && ['wizard', 'taoist'].includes(normalizedClass) ? 64 : 0,
+    mp: [54, 65].includes(id) && ['wizard', 'taoist'].includes(normalizedClass) ? 64 : 0,
   };
 }
 
@@ -66,14 +67,14 @@ export function questCombatMpUseThresholdForQuest(questId, className, {
   fallback = 0.3,
 } = {}) {
   const normalizedClass = String(className ?? '').trim().toLowerCase();
-  if (Number(questId) === 54 && ['wizard', 'taoist'].includes(normalizedClass)) return 0.75;
+  if ([54, 65].includes(Number(questId)) && ['wizard', 'taoist'].includes(normalizedClass)) return 0.75;
   const value = Number(fallback);
   return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.3;
 }
 
 export function questPostRetreatRecoveryRatio(questId, className) {
   const normalizedClass = String(className ?? '').trim().toLowerCase();
-  return Number(questId) === 54 && ['wizard', 'taoist'].includes(normalizedClass)
+  return [54, 65].includes(Number(questId)) && ['wizard', 'taoist'].includes(normalizedClass)
     ? 0.65
     : 0.75;
 }
@@ -85,8 +86,8 @@ export function questEmergencyEscapeHpRatio(questId, className = '') {
   // snapshots while eight monsters had closed to six tiles. At the generic
   // 35% threshold the UseItem request began at 7 HP and lost the race with
   // the next hit. Escape before that measured two-hit window.
-  if (id === 60 && normalizedClass === 'wizard') return 0.65;
-  return [54, 60, 62].includes(id) ? 0.35 : 0;
+  if ([60, 65].includes(id) && normalizedClass === 'wizard') return 0.65;
+  return DANGEROUS_EXPEDITION_QUEST_IDS.has(id) ? 0.35 : 0;
 }
 
 export function journeyNavigationEmergencyEscapeBudget(className = '') {
@@ -100,12 +101,12 @@ export function journeyNavigationEmergencyEscapeBudget(className = '') {
 /** Keep the public escape reserve usable until a dangerous expedition is handed in. */
 export function hasJourneyEmergencyEscapeQuest(snapshot) {
   return (snapshot?.questLog ?? []).some(quest =>
-    [54, 60, 62].includes(Number(quest?.questId)) &&
+    DANGEROUS_EXPEDITION_QUEST_IDS.has(Number(quest?.questId)) &&
     ['inprogress', 'readytoturnin'].includes(normalizedStage(quest?.stage)));
 }
 
-const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62]);
-const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62]);
+const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62, 65]);
+const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62, 65]);
 
 export function evasiveRecoveryTimeoutMsForQuest(questId) {
   return LONG_EVASIVE_RECOVERY_QUESTS.has(Number(questId)) ? 90_000 : 45_000;
@@ -118,34 +119,34 @@ export function evasiveRecoveryDangerDistanceForQuest(questId) {
 export function questRetreatProfile(questId, className = '') {
   const id = Number(questId);
   const normalizedClass = String(className).trim().toLowerCase();
-  const fragileQ54Expedition = id === 54 && ['wizard', 'taoist'].includes(normalizedClass);
-  const healingQ54Expedition = id === 54 && normalizedClass === 'taoist';
+  const fragileMineExpedition = [54, 65].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
+  const healingMineExpedition = [54, 65].includes(id) && normalizedClass === 'taoist';
   return {
-    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62].includes(id),
+    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
     // turns the D401 crossing into an unrewarded fight: the surrounding pack
     // converges while Wizard/Taoist spend the MP reserved for D406. Keep the
     // normal low-health interrupt below, but let every stocked q54 class keep
     // moving while it remains above that class's retreat threshold.
-    continueTravelWhileHealthy: [54, 62].includes(id),
+    continueTravelWhileHealthy: [54, 62, 65].includes(id),
     // R37-R42 showed that repeated evasion spends the random-teleport reserve
     // without crossing D401/D2041. These expeditions carry large proven
     // potion stocks, so clear a monster that actually hit the player before
     // retrying the route. RandomTeleport remains available at critical HP.
-    preferTravelAggressorCombat: [54, 62].includes(id),
-    maxTravelThreatEvasionsPerEdge: id === 62 ? 3 : 1,
+    preferTravelAggressorCombat: [54, 62, 65].includes(id),
+    maxTravelThreatEvasionsPerEdge: [62, 65].includes(id) ? 3 : 1,
     // R26 proved that a Taoist can be boxed into D401 by one CaveMaggot plus
     // adjacent quest zombies after the first breakout kill. Healing and the
     // expedition potion reserve make two further bounded kills safer than
     // aborting a living route in that sealed pocket. Keep the lower Wizard
     // limit because the same trace band showed its much smaller HP pool can
     // die during a single corridor breakout.
-    maxRetreatBreakoutKills: ([54, 62].includes(id) && !fragileQ54Expedition) || healingQ54Expedition ? 3 : 1,
-    multiAggressorRetreatRatio: id === 54 ? (fragileQ54Expedition ? 0.75 : 0.55) : undefined,
-    retreatAtActiveAggressorCount: id === 54 ? (fragileQ54Expedition ? 1 : 3) : undefined,
-    unsafeRetreatSteps: id === 62 || fragileQ54Expedition ? 24 :
+    maxRetreatBreakoutKills: ([54, 62, 65].includes(id) && !fragileMineExpedition) || healingMineExpedition ? 3 : 1,
+    multiAggressorRetreatRatio: [54, 65].includes(id) ? (fragileMineExpedition ? 0.75 : 0.55) : undefined,
+    retreatAtActiveAggressorCount: [54, 65].includes(id) ? (fragileMineExpedition ? 1 : 3) : undefined,
+    unsafeRetreatSteps: id === 62 || fragileMineExpedition ? 24 :
       ([30, 33, 36].includes(id) ? 16 : 12),
-    unsafeRetreatSafeDistance: id === 62 || fragileQ54Expedition ? 8 :
+    unsafeRetreatSafeDistance: id === 62 || fragileMineExpedition ? 8 :
       ([30, 33, 36].includes(id) ? 10 : 6),
   };
 }
@@ -304,7 +305,7 @@ export function isLivingUnsafePackRetreatFailure(snapshot, error) {
 }
 
 export function requiresExpeditionEscapeRestock(snapshot, questId, minimum = 1) {
-  return [54, 60, 62].includes(Number(questId)) &&
+  return DANGEROUS_EXPEDITION_QUEST_IDS.has(Number(questId)) &&
     emergencyTeleportStock(snapshot) < nonnegativeInteger(minimum, 'emergency teleport minimum');
 }
 

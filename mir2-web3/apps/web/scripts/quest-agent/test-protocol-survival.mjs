@@ -44,16 +44,19 @@ test('level-15 Taoist snake hunting does not require MP-only town trips', () => 
 test('caster expedition restock targets stay separate from their field triggers', () => {
   assert.equal(journeyMpRestockTargetForQuest(54, 'Wizard'), 80);
   assert.equal(journeyMpRestockTargetForQuest(54, 'Taoist'), 80);
+  assert.equal(journeyMpRestockTargetForQuest(65, 'Taoist'), 80);
   assert.equal(journeyMpRestockTargetForQuest(42, 'Wizard'), 32);
   assert.equal(journeyMpRestockTargetForQuest(49, 'Taoist'), 12);
   assert.equal(journeyMpRestockTargetForQuest(54, 'Warrior'), 0);
   assert.equal(journeyMpRestockTargetForQuest(49, 'Wizard', { fallback: 18 }), 18);
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Wizard'), 0.75);
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Taoist'), 0.75);
+  assert.equal(questCombatMpUseThresholdForQuest(65, 'Taoist'), 0.75);
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Warrior'), 0.3);
   assert.equal(questCombatMpUseThresholdForQuest(49, 'Wizard', { fallback: 0.4 }), 0.4);
   assert.equal(questPostRetreatRecoveryRatio(54, 'Wizard'), 0.65);
   assert.equal(questPostRetreatRecoveryRatio(54, 'Taoist'), 0.65);
+  assert.equal(questPostRetreatRecoveryRatio(65, 'Wizard'), 0.65);
   assert.equal(questPostRetreatRecoveryRatio(54, 'Warrior'), 0.75);
   assert.equal(questPostRetreatRecoveryRatio(62, 'Warrior'), 0.75);
   assert.equal(questEmergencyEscapeHpRatio(54), 0.35);
@@ -61,6 +64,8 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questEmergencyEscapeHpRatio(60, 'Wizard'), 0.65);
   assert.equal(questEmergencyEscapeHpRatio(60, 'Taoist'), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(62), 0.35);
+  assert.equal(questEmergencyEscapeHpRatio(65, 'Wizard'), 0.65);
+  assert.equal(questEmergencyEscapeHpRatio(65, 'Taoist'), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(49), 0);
   assert.equal(journeyNavigationEmergencyEscapeBudget('Wizard'), 4);
   assert.equal(journeyNavigationEmergencyEscapeBudget('Taoist'), 2);
@@ -73,6 +78,9 @@ test('dangerous expedition escape remains armed for the completed cave return', 
   }), true);
   assert.equal(hasJourneyEmergencyEscapeQuest({
     questLog: [{ questId: 62, stage: 'readyToTurnIn' }],
+  }), true);
+  assert.equal(hasJourneyEmergencyEscapeQuest({
+    questLog: [{ questId: 65, stage: 'inProgress' }],
   }), true);
   assert.equal(hasJourneyEmergencyEscapeQuest({
     questLog: [{ questId: 54, stage: 'completed' }],
@@ -88,6 +96,7 @@ test('dangerous Taoist expeditions restock missing equipped or carried Amulets',
     knownSkills: [{ spell: 'SoulFireBall' }],
   };
   assert.equal(requiresTaoistAmuletRestock(empty, 60, 'Taoist'), true);
+  assert.equal(requiresTaoistAmuletRestock(empty, 65, 'Taoist'), true);
   assert.equal(requiresTaoistAmuletRestock(empty, 49, 'Taoist'), false);
   assert.equal(requiresTaoistAmuletRestock(empty, 60, 'Wizard'), false);
   assert.equal(requiresTaoistAmuletRestock({ ...empty, knownSkills: [] }, 60, 'Taoist'), false);
@@ -138,6 +147,7 @@ test('a resumed expedition preserves field progress while it still has a public 
   });
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 62), true);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 60), true);
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 65), true);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(1)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(3)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(4)] }, 54), false);
@@ -150,6 +160,8 @@ test('long expeditions accept a partial but still conservative funded departure 
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(54, 'Warrior'), { hp: 64, mp: 0 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(62, 'Warrior'), { hp: 64, mp: 0 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(60, 'Wizard'), { hp: 64, mp: 0 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(65, 'Wizard'), { hp: 64, mp: 64 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(65, 'Taoist'), { hp: 64, mp: 64 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(49, 'Wizard'), { hp: 0, mp: 0 });
 });
 
@@ -852,6 +864,17 @@ test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
   assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }), { x: 361, y: 19 });
   assert.equal(questRetreatBiasPosition(65, { mapFileName: 'D422' }), null);
   assert.equal(questRetreatBiasPosition(65, { mapFileName: '0' }), null);
+  assert.deepEqual(questRetreatProfile(65, 'Taoist'), {
+    allowLowHealthFollowerRecovery: true,
+    continueTravelWhileHealthy: true,
+    preferTravelAggressorCombat: true,
+    maxTravelThreatEvasionsPerEdge: 3,
+    maxRetreatBreakoutKills: 3,
+    multiAggressorRetreatRatio: 0.75,
+    retreatAtActiveAggressorCount: 1,
+    unsafeRetreatSteps: 24,
+    unsafeRetreatSafeDistance: 8,
+  });
 });
 
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {
