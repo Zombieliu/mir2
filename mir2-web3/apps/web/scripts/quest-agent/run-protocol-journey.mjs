@@ -251,6 +251,7 @@ try {
       return {
         minimumHpStock: requiredHpStock,
         minimumMpStock: minimumJourneyMpStockForQuest(questId, className),
+        requiredAfterRestockEmergencyTeleportStock: emergencyTeleportTarget,
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
           randomTeleportCount(owner.snapshot) < emergencyTeleportTarget ||
           ([q54Expedition && (hpDrugCount(owner.snapshot) < departureFloor.hp ||

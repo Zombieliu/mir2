@@ -269,6 +269,32 @@ test('an expedition refill can require a full departure stock without raising it
   assert.equal(client.snapshot.mapFileName, '0');
 });
 
+test('an expedition refill fails closed when its emergency scroll reserve was not funded', async () => {
+  const client = clientAt('D401', 80);
+  const calls = [];
+  const gate = createPostEngagementSupplyGate({
+    minimumHpStock: 24,
+    travel: async map => {
+      calls.push(['travel', map]);
+      client.snapshot = { ...client.snapshot, mapFileName: map };
+    },
+    navigateNear: async () => {},
+    restock: async owner => {
+      calls.push(['restock', owner.snapshot.mapFileName]);
+      return { status: 'needsFunds', gold: 83 };
+    },
+  });
+
+  await assert.rejects(() => gate(client, {
+    forceRestock: true,
+    requiredAfterRestockHpStock: 80,
+    requiredAfterRestockEmergencyTeleportStock: 4,
+    returnMapFileName: '',
+  }), /needsFunds: unable to restock supplies to RandomTeleport 4/);
+  assert.deepEqual(calls, [['travel', '0'], ['restock', '0']]);
+  assert.equal(client.snapshot.mapFileName, '0');
+});
+
 test('empty HP stock travels to village, proves restock, returns and refreshes quest state', async () => {
   const client = clientAt('3', 0);
   const calls = [];

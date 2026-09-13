@@ -146,6 +146,7 @@ export function createPostEngagementSupplyGate({
     minimumMpStock: requestedMp = defaultMp,
     requiredAfterRestockHpStock = requestedHp,
     requiredAfterRestockMpStock = requestedMp,
+    requiredAfterRestockEmergencyTeleportStock: requestedEmergencyTeleport = 0,
     returnMapFileName = null,
     forceRestock = false,
   } = {}) {
@@ -154,9 +155,15 @@ export function createPostEngagementSupplyGate({
     const triggerMp = nonnegativeInteger(requestedMp, 'minimumMpStock');
     const departureHp = nonnegativeInteger(requiredAfterRestockHpStock, 'requiredAfterRestockHpStock');
     const departureMp = nonnegativeInteger(requiredAfterRestockMpStock, 'requiredAfterRestockMpStock');
+    const departureEmergencyTeleport = nonnegativeInteger(
+      requestedEmergencyTeleport,
+      'requiredAfterRestockEmergencyTeleportStock',
+    );
     let hp = hpDrugCount(client.snapshot);
     let mp = mpDrugCount(client.snapshot);
-    if (!forceRestock && hp >= triggerHp && mp >= triggerMp) {
+    let emergencyTeleport = emergencyTeleportStock(client.snapshot);
+    if (!forceRestock && hp >= triggerHp && mp >= triggerMp &&
+        emergencyTeleport >= departureEmergencyTeleport) {
       return { status: 'sufficient', hp, mp, restockCount };
     }
     if (restockCount >= restockLimit) {
@@ -176,8 +183,16 @@ export function createPostEngagementSupplyGate({
 
     hp = hpDrugCount(client.snapshot);
     mp = mpDrugCount(client.snapshot);
-    if (hp < departureHp || mp < departureMp) {
-      const details = [hp < departureHp ? `HP ${departureHp}` : null, mp < departureMp ? `MP ${departureMp}` : null]
+    emergencyTeleport = emergencyTeleportStock(client.snapshot);
+    if (hp < departureHp || mp < departureMp ||
+        emergencyTeleport < departureEmergencyTeleport) {
+      const details = [
+        hp < departureHp ? `HP ${departureHp}` : null,
+        mp < departureMp ? `MP ${departureMp}` : null,
+        emergencyTeleport < departureEmergencyTeleport
+          ? `RandomTeleport ${departureEmergencyTeleport}`
+          : null,
+      ]
         .filter(Boolean).join(' and ');
       throw new Error(`needsFunds: unable to restock supplies to ${details}`);
     }
@@ -492,6 +507,12 @@ function itemQuantity(snapshot, predicate) {
     if (Number.isFinite(quantity) && quantity > 0) total += quantity;
   }
   return total;
+}
+
+function emergencyTeleportStock(snapshot) {
+  return itemQuantity(snapshot, item =>
+    String(item?.name ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'randomteleport' ||
+    String(item?.key ?? '').toLowerCase() === 'crystal-item-717');
 }
 
 function snapshotPlayer(snapshot) {
