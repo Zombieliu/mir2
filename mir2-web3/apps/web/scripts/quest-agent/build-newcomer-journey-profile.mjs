@@ -14,7 +14,7 @@ const definitions = [
   ['bichon','Beyond the village',6,10,11,[22,23,24,25,26,27,29,30,33],8,'Follow the guide to Bichon and learn how to prepare for a new map.','Weapon upgrades and armour; short, guaranteed quest-material hunts.'],
   ['frontier','Ready for the caves',11,15,16,[35,36,37,39,40,41,42,49],10,'Finish the snake-wine story and prove yourself against ordinary cave enemies.','A helmet plus a level-15 class weapon and core combat book.'],
   ['mines','Mines and rescue',16,20,21,[51,52,53,54,61,65,60,62],8,'Prepare supplies, clear the mines, and help the woodland expedition.','Belt and necklace choices plus a level-20 class weapon.'],
-  ['expedition','Lead an expedition',21,25,26,[83,86,87,88,97,102,103,110,111,112,98,89,99],10,'Investigate the missing carriage, scout Wooma, and uncover the secret path.','The secret path plus level-25 class armour and a level-26 weapon.'],
+  ['expedition','Lead an expedition',21,25,26,[83,86,87,88,97,98,102,103,110,111,112,89,99],10,'Investigate the missing carriage, scout Wooma, and uncover the secret path.','The secret path plus level-25 class armour and a level-26 weapon.'],
   ['island','A new horizon',26,30,30,[113,114,117,118,119,121,124,122,123],12,'Secure the supply route and complete your first Prajna Island expedition.','A bangle upgrade and the level-30 growth reward.'],
 ];
 const hints = {

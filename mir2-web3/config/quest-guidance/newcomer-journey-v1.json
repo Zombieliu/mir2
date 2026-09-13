@@ -146,12 +146,12 @@
         87,
         88,
         97,
+        98,
         102,
         103,
         110,
         111,
         112,
-        98,
         89,
         99
       ],
@@ -1256,7 +1256,7 @@
     },
     {
       "questId": 97,
-      "rewardExperience": 346154,
+      "rewardExperience": 138461,
       "killCountCap": 10,
       "itemCountCap": 2,
       "startInDiary": true,
@@ -1271,8 +1271,34 @@
       }
     },
     {
+      "questId": 98,
+      "rewardExperience": 207693,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 Dung.",
+        "Defeat 10 WoomaSoldier."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      },
+      "finishNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      }
+    },
+    {
       "questId": 102,
-      "rewardExperience": 0,
+      "rewardExperience": 69230,
       "killCountCap": 10,
       "itemCountCap": 2,
       "startInDiary": false,
@@ -1294,7 +1320,7 @@
     },
     {
       "questId": 103,
-      "rewardExperience": 400000,
+      "rewardExperience": 330770,
       "killCountCap": 10,
       "itemCountCap": 2,
       "guaranteedQuestDrops": [
@@ -1344,7 +1370,7 @@
     },
     {
       "questId": 111,
-      "rewardExperience": 0,
+      "rewardExperience": 84615,
       "killCountCap": 10,
       "itemCountCap": 2,
       "startInDiary": false,
@@ -1366,7 +1392,7 @@
     },
     {
       "questId": 112,
-      "rewardExperience": 84615,
+      "rewardExperience": 138461,
       "killCountCap": 10,
       "itemCountCap": 2,
       "taskDescription": [
@@ -1387,32 +1413,6 @@
         "mapFileName": "3",
         "x": 663,
         "y": 304
-      }
-    },
-    {
-      "questId": 98,
-      "rewardExperience": 138461,
-      "killCountCap": 10,
-      "itemCountCap": 2,
-      "taskDescription": [
-        "Defeat 10 Dung.",
-        "Defeat 10 WoomaSoldier."
-      ],
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "SubjugationLead Eric",
-        "mapName": "WoomyonWoods(S)",
-        "mapFileName": "1",
-        "x": 317,
-        "y": 71
-      },
-      "finishNpc": {
-        "name": "SubjugationLead Eric",
-        "mapName": "WoomyonWoods(S)",
-        "mapFileName": "1",
-        "x": 317,
-        "y": 71
       }
     },
     {
