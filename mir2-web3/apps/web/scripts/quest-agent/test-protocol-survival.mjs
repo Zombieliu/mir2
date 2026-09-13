@@ -848,6 +848,12 @@ test('q62 leaves D2041 packs toward the real D2042 transfer', () => {
   assert.equal(questRetreatBiasPosition(62, { mapFileName: 'D2042' }), null);
 });
 
+test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
+  assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }), { x: 361, y: 19 });
+  assert.equal(questRetreatBiasPosition(65, { mapFileName: 'D422' }), null);
+  assert.equal(questRetreatBiasPosition(65, { mapFileName: '0' }), null);
+});
+
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {
   assert.deepEqual(questRetreatProfile(54, 'Warrior'), {
     allowLowHealthFollowerRecovery: true,

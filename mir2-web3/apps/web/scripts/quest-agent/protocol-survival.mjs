@@ -157,6 +157,10 @@ export function questRetreatBiasPosition(questId, snapshot) {
   // Retreating toward the D2041 entrance erased the entire crossing after
   // every pack. Preserve safe forward progress toward the real 2F transfer.
   if (id === 62 && mapFileName === 'D2041') return { x: 262, y: 13 };
+  // q65 reaches its only practical low-level Zombie1 field through the same
+  // long D421 diagonal proven by q54. Keep equal-safety retreat steps biased
+  // toward the D422 transfer instead of repeatedly returning to the entrance.
+  if (id === 65 && mapFileName === 'D421') return { x: 361, y: 19 };
   if (id !== 54) return null;
   return ({
     D401: { x: 76, y: 15 },
