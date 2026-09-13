@@ -644,21 +644,6 @@ level 10. Taoist is also level 10 on q26. This verifies ordinary distant monster
 activation and usable post-relogin magic in the isolated protocol runtime.
 Full 53-task routes, pacing and native visuals remain unverified.
 
-r45-r54 live follow-up on gateway r44: the expedition settlement window now
-waits for the observed delayed shared kill award, q54 casters prefer the D406
-Zombie source, and resumed q54/q62 players keep their field position while at
-least one RandomTeleport remains. The 23-file Quest Agent suite passes after
-these changes. Warrior resumed in D2041 with three scrolls without returning to
-town, reached D2042, and advanced q62 from 5/16 to 6/16. After an ordinary death
-it used TownRevive, harvested six Deer through the public multi-pass Harvest
-flow, sold the Venison, restored HP stock to 80 and RandomTeleport to four, and
-kept q62 progress. Wizard reached D406, completed and turned in q54, reached
-level 19, and accepted q60. Taoist reached D406 without a debug transfer and
-advanced q54 from 9/25 to 16/25 without dying. Current mandatory completion is
-Warrior 31/55, Wizard 29/55, and Taoist 28/55. Later quests and native visual
-acceptance remain open; these observations are functional public-protocol
-evidence only.
-
 The hydration fix runs after actual pending movement and after any map transfer,
 using the final map's normal dormant-monster activation. Its first regression
 incorrectly required an immediate Walk acknowledgement; it now permits the real
@@ -751,3 +736,18 @@ drugs and four RandomTeleport scrolls into D2041 for q62. Wizard carried 79 HP,
 advanced q54 from 18/25 to 19/25. Taoist left town for the mine after completing
 its funded expedition stock. These are live route checkpoints; q54/q62, later
 quests, all three full level-30 routes and native visual acceptance remain open.
+
+r45-r54 live follow-up on gateway r44: the expedition settlement window now
+waits for the observed delayed shared kill award, q54 casters prefer the D406
+Zombie source, and resumed q54/q62 players keep their field position while at
+least one RandomTeleport remains. The 23-file Quest Agent suite passes after
+these changes. Warrior resumed in D2041 with three scrolls without returning to
+town, reached D2042, and advanced q62 from 5/16 to 6/16. After an ordinary death
+it used TownRevive, harvested six Deer through the public multi-pass Harvest
+flow, sold the Venison, restored HP stock to 80 and RandomTeleport to four, and
+kept q62 progress. Wizard reached D406, completed and turned in q54, reached
+level 19, and accepted q60. Taoist reached D406 without a debug transfer and
+advanced q54 from 9/25 to 16/25 without dying. Current mandatory completion is
+Warrior 31/55, Wizard 29/55, and Taoist 28/55. Later quests and native visual
+acceptance remain open; these observations are functional public-protocol
+evidence only.
