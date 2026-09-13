@@ -751,3 +751,17 @@ advanced q54 from 9/25 to 16/25 without dying. Current mandatory completion is
 Warrior 31/55, Wizard 29/55, and Taoist 28/55. Later quests and native visual
 acceptance remain open; these observations are functional public-protocol
 evidence only.
+
+r53/r56/r60 continuation on gateway r44: Warrior advanced q62 to 13/16,
+retreated through the physical D2042 -> D2041 -> map1 -> map0 route while alive,
+and retained its authoritative objective progress. It is currently using the
+ordinary Deer harvest/sale funding loop because its 18 gold cannot buy another
+RandomTeleport. Taoist's D406 run completed every q54 component (Zombie5,
+Zombie2, Zombie3, Zombie4 and Zombie1 all 5/5) and received the authoritative
+25/25 ready-to-turn-in state; it is physically returning through D411 to
+Blacksmith_Bill. Wizard q60 exposed a D2041 one-cell corridor occupied by a
+passive KekTal. The bounded q60 policy cleared that single nearby doorway
+occupant with ordinary GreatFireBall casts, opened the collision route, killed
+the exact SpiderFrog, and received ChangeQuest 2/8. Quest Agent coverage is
+517/517 after the corridor regression. These remain functional protocol
+checkpoints; the three level-30 routes and native visual acceptance are open.
