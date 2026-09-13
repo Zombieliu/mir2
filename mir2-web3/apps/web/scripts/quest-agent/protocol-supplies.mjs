@@ -490,9 +490,9 @@ function liveMaterialDealer(snapshot) {
 }
 
 async function navigateSupplyService(client, navigateNear, target, clearBlockingMonster) {
+  const destination = { x: Number(target.x), y: Number(target.y) };
   for (let attempt = 0; attempt < 4; attempt += 1) {
     try {
-      const destination = { x: Number(target.x), y: Number(target.y) };
       const actor = (client.snapshot?.entities ?? []).find(entity =>
         Number(entity?.objectId) === Number(client.snapshot?.playerObjectId));
       const travelDistance = actor && Number.isFinite(Number(actor.x)) && Number.isFinite(Number(actor.y))
@@ -515,10 +515,12 @@ async function navigateSupplyService(client, navigateNear, target, clearBlocking
       const blocker = (client.snapshot?.entities ?? [])
         .filter(entity => normalized(entity?.kind) === 'monster' &&
           normalized(entity?.disposition) === 'hostile' && entity?.dead !== true &&
-          Number(entity?.hp) > 0 && actor &&
-          Math.max(Math.abs(Number(entity.x) - Number(actor.x)),
-            Math.abs(Number(entity.y) - Number(actor.y))) <= 1)
-        .sort((left, right) => Number(left.hp ?? 0) - Number(right.hp ?? 0) ||
+          Number(entity?.hp) > 0 && actor && (
+            tileDistance(entity, actor) <= 1 || tileDistance(entity, destination) <= 2
+          ))
+        .sort((left, right) => Number(tileDistance(left, actor) > 1) - Number(tileDistance(right, actor) > 1) ||
+          Number(left.hp ?? 0) - Number(right.hp ?? 0) ||
+          tileDistance(left, destination) - tileDistance(right, destination) ||
           Number(left.objectId) - Number(right.objectId))[0];
       if (!blocker) throw error;
       if (typeof client.record === 'function') {
@@ -533,6 +535,13 @@ async function navigateSupplyService(client, navigateNear, target, clearBlocking
     }
   }
   throw new Error(`Unable to reach supply service at ${target.x},${target.y}`);
+}
+
+function tileDistance(left, right) {
+  return Math.max(
+    Math.abs(Number(left?.x) - Number(right?.x)),
+    Math.abs(Number(left?.y) - Number(right?.y)),
+  );
 }
 
 async function openBuySellService(client, findNpc, label) {

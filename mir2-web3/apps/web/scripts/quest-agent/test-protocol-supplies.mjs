@@ -658,6 +658,33 @@ test('restock clears an adjacent hostile that seals the supply service approach'
     entry.type === 'supplyServiceBlockerCombat' && entry.objectId === 200));
 });
 
+test('restock clears a distant hostile that seals every final service approach', async () => {
+  const state = snapshot({ gold: 1000, hp: 0 });
+  Object.assign(state.entities.find(entry => entry.objectId === 1), { x: 288, y: 616 });
+  state.entities.push(
+    { objectId: 201, kind: 'monster', name: 'Scarecrow', disposition: 'hostile', x: 287, y: 609, hp: 4, dead: false },
+    { objectId: 202, kind: 'monster', name: 'Scarecrow', disposition: 'hostile', x: 288, y: 609, hp: 20, dead: false },
+    { objectId: 203, kind: 'monster', name: 'Scarecrow', disposition: 'hostile', x: 289, y: 609, hp: 20, dead: false },
+  );
+  const client = new FakeClient(state, { goods: goods() });
+  const navigations = [];
+  const cleared = [];
+
+  const result = await restockInVillage(client, async (...args) => {
+    navigations.push(args);
+    if (navigations.length === 1) throw new Error('No walk path on 0 from 288,616 to 288,608');
+  }, {
+    clearBlockingMonster: async (_owner, blocker) => {
+      cleared.push(Number(blocker.objectId));
+      Object.assign(blocker, { hp: 0, dead: true });
+    },
+  });
+
+  assert.equal(result.status, 'restocked');
+  assert.equal(navigations.length, 2);
+  assert.deepEqual(cleared, [201]);
+});
+
 test('a distant village service receives a route budget derived from authoritative distance', async () => {
   const state = snapshot({ className: 'Warrior', gold: 1000, hp: 0 });
   Object.assign(state.entities.find(entry => entry.objectId === 1), { x: 43, y: 111 });
