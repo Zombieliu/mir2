@@ -1295,6 +1295,40 @@ where
                         .collect::<Vec<_>>();
                     action_layers.extend(pushed_layers);
                 }
+                // Crystal alternates remote player DashL/DashR. Both use the
+                // ordinary Running descriptor: DashL consumes frames 0..2
+                // and DashR consumes 3..5. Keep this exact derivation bounded
+                // to unmounted players until mounted dash composition is
+                // independently established.
+                if kind == EntityKind::Player && !mounted {
+                    let dash_layers = DIRECTIONS
+                        .into_iter()
+                        .filter_map(|direction| {
+                            let running = action_layers.get(&format!("running:{direction}"))?;
+                            (running.frames.len() >= 6).then(|| {
+                                let interval_ms = running.interval_ms;
+                                [
+                                    (
+                                        format!("dashL:{direction}"),
+                                        EntityActionLayers {
+                                            interval_ms,
+                                            frames: running.frames[..3].to_vec(),
+                                        },
+                                    ),
+                                    (
+                                        format!("dashR:{direction}"),
+                                        EntityActionLayers {
+                                            interval_ms,
+                                            frames: running.frames[3..6].to_vec(),
+                                        },
+                                    ),
+                                ]
+                            })
+                        })
+                        .flatten()
+                        .collect::<Vec<_>>();
+                    action_layers.extend(dash_layers);
+                }
             }
         }
         if !selected_ready {
@@ -1973,6 +2007,20 @@ mod tests {
                 frame[0]["atlasRectKey"],
                 format!("/original-ui/CArmour/00/{expected}.png|1x1")
             );
+        }
+        for (action, expected) in [("dashL", [104, 105, 106]), ("dashR", [107, 108, 109])] {
+            let descriptor = live["entities"][0]["actionLayers"][format!("{action}:Down")]
+                .as_object()
+                .unwrap();
+            assert_eq!(descriptor["intervalMs"], 100);
+            let frames = descriptor["frames"].as_array().unwrap();
+            assert_eq!(frames.len(), 3);
+            for (frame, expected) in frames.iter().zip(expected) {
+                assert_eq!(
+                    frame[0]["atlasRectKey"],
+                    format!("/original-ui/CArmour/00/{expected}.png|1x1")
+                );
+            }
         }
     }
 

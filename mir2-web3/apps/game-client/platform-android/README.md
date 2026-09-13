@@ -161,6 +161,16 @@ frames 5, 3 and 1) before settling to standing. Self IDs are ignored because
 Crystal uses the separate `Pushed` packet for the local player; unknown,
 removed and ground-drop identities cannot be created. Exact mounted push
 artwork and the local-player `Pushed` camera/input path remain open.
+Remote `ObjectDash` and `ObjectDashFail` now follow the same bounded path. Each
+accepted packet moves the exact existing remote actor to the server endpoint.
+An unmounted player with the validated six-frame Running catalog alternates
+Crystal's `DashL` / `DashR` halves; the three selected frames feed the shared
+presentation clock before settling to standing. `ObjectDashFail` cancels any
+active dash immediately, restores the authoritative standing facing and emits
+a one-phase correction so stale screen motion cannot survive. Self IDs,
+unknown/removed actors, ground drops, missing locations and non-Crystal
+directions fail closed. This does not implement the separate local `UserDash`
+/ `UserDashFail` path or exact mounted dash artwork.
 Post-`IN_GAME` `DamageIndicator` packets are retained as a separate bounded
 event queue and rendered only over the exact authoritative object. Hit, miss,
 critical and heal variants use the Windows Crystal rise/fade presentation; a
@@ -320,6 +330,8 @@ Android-private bounded action-frame sidecar. `ObjectWalk`, `ObjectRun`,
 `ObjectHarvest`, `ObjectAttack`, `ObjectRangeAttack`, `ObjectStruck`, and
 `ObjectDashAttack` select the matching walking/running/harvest/melee/range/
 struck/dash frame sequence at the packet's authoritative position and facing.
+Remote player `ObjectDash` alternates the left and right three-frame halves of
+the same validated Running catalog.
 `Death`/`ObjectDied` play the exact `die` sequence and settle on the packaged
 `dead` pose; `ObjectHarvested` holds the packaged `skeleton` pose; and
 `Revived`/`ObjectRevived` play `revive` before returning to standing. If an

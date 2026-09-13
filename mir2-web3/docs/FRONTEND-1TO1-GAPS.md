@@ -1,5 +1,21 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-14 Android current change: remote `ObjectDash` /
+> `ObjectDashFail` now cross the post-`IN_GAME` allowlist into the retained
+> object and shared presentation layers. Unmounted-player tests cover exact
+> server endpoints, `DashL` / `DashR` alternation, Running frames 0-2 / 3-5,
+> three-phase settle, immediate fail-to-standing, self exclusion and strict
+> stale/drop/input isolation. Android default 184/184, UI Preview 192/192,
+> Gradle Debug/UI Preview 25/25 each, API31 arm64 target/package, streamed
+> install and a 2340x1080 render-ready smoke pass. The 444,493,960-byte APK
+> SHA-256 is
+> `566b27a7a78b8994523a5f30f816a04944bb995346f21a30009e4c3a9579e5ff`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-dash-20260914/README.md`.
+> Local `UserDash` / `UserDashFail`, mounted exact dash artwork,
+> approved-WSS real login, online StartGame/map transition, public asset
+> alignment, physical-device and final human acceptance remain open.
+
 > 2026-09-14 Android current change: remote `ObjectPushed` now reaches the
 > retained native object and shared presentation layers after `IN_GAME`.
 > Exact endpoint ownership, strict direction validation, Crystal reverse

@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> 2026-09-14 Android current change: authenticated post-`IN_GAME` remote
+> `ObjectDash` / `ObjectDashFail` now update the exact existing actor at the
+> server endpoint. An unmounted player with a validated Running catalog
+> alternates Crystal `DashL` / `DashR` halves and drives three presentation
+> phases; failure cancels the active dash, restores standing and zeros motion.
+> Self, unknown/removed/drop identities and malformed directions fail closed.
+> Android 184/184 and UI Preview 192/192, Gradle 25/25 per variant, API31
+> target/package, streamed install, active/settled logs and a full-screen
+> 2340x1080 visible specimen pass. The 444,493,960-byte APK SHA-256 is
+> `566b27a7a78b8994523a5f30f816a04944bb995346f21a30009e4c3a9579e5ff`.
+> Evidence:
+> `docs/generated/player-qa/native-android-object-dash-20260914/README.md`.
+> Local `UserDash` / `UserDashFail`, exact mounted dash artwork,
+> approved-WSS real login, online StartGame/map transitions, public asset
+> alignment and physical-device/human acceptance remain open.
+
 > 2026-09-14 Android current change: authenticated post-`IN_GAME`
 > `ObjectPushed` now updates the exact remote actor to the server endpoint and
 > drives the shared Bevy presentation clock. Unmounted actors reuse only their

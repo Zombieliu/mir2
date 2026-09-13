@@ -123,6 +123,17 @@ fn start_world_render_motion_specimen(
     } else {
         warn!("offline Archer action was not accepted by the native renderer");
     }
+    let dash = serde_json::json!({
+        "type":"packet", "packet":"ObjectDash", "payload":{
+            "objectId":9004, "location":{"x":302,"y":631}, "direction":"Right"
+        }
+    })
+    .to_string();
+    if apply_offline_entity_packet(&dash) {
+        info!("ANDROID_OBJECT_DASH_PRESENTATION_APPLIED");
+    } else {
+        warn!("offline ObjectDash specimen was not accepted by the native renderer");
+    }
     let mounted = serde_json::json!({
         "type":"packet", "packet":"ObjectAttack", "payload":{
             "objectId":9005, "x":304, "y":631, "direction":"Down"
@@ -296,6 +307,8 @@ fn report_world_render_motion_pose(
     mut saw_settled: Local<bool>,
     mut saw_pushed_active: Local<bool>,
     mut saw_pushed_settled: Local<bool>,
+    mut saw_dash_active: Local<bool>,
+    mut saw_dash_settled: Local<bool>,
     mut reported_diagnostics: Local<bool>,
 ) {
     if !*reported_diagnostics && time.elapsed().as_millis() >= 4_500 {
@@ -332,6 +345,23 @@ fn report_world_render_motion_pose(
         {
             info!("ANDROID_OBJECT_PUSHED_POSE_SETTLED");
             *saw_pushed_settled = true;
+        }
+    }
+    if let Some((x, y)) = poses.native_overlay_entity_offset("9004") {
+        if !*saw_dash_active && (x.abs() > f32::EPSILON || y.abs() > f32::EPSILON) {
+            info!(
+                offset_x = x,
+                offset_y = y,
+                "ANDROID_OBJECT_DASH_POSE_ACTIVE"
+            );
+            *saw_dash_active = true;
+        } else if *saw_dash_active
+            && !*saw_dash_settled
+            && x.abs() <= f32::EPSILON
+            && y.abs() <= f32::EPSILON
+        {
+            info!("ANDROID_OBJECT_DASH_POSE_SETTLED");
+            *saw_dash_settled = true;
         }
     }
 }

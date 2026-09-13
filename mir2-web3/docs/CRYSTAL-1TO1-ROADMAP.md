@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-14 Android current change: remote `ObjectDash` is now a bounded
+> authoritative object-layer action. The model lands immediately on the server
+> endpoint; an unmounted player with the exact catalog alternates Crystal's
+> three-frame `DashL` / `DashR` Running halves and then settles to standing.
+> `ObjectDashFail` cancels the active action and screen motion at the
+> authoritative transform. Android 184/184, UI Preview 192/192, Java 25/25 in
+> both variants, API31 target/package, streamed install and a 2340x1080 offline
+> Bichon render with active/settled markers pass. Evidence:
+> `docs/generated/player-qa/native-android-object-dash-20260914/README.md`.
+> This closes only the remote unmounted branch; local `UserDash` /
+> `UserDashFail`, mounted exact art, approved-WSS login, online
+> StartGame/render-ready map changes, public asset alignment, physical-device
+> behavior and human acceptance remain open.
+
 > 2026-09-14 Android current change: remote `ObjectPushed` is now a bounded
 > authoritative object-layer action. The Android model lands immediately on
 > the server position while the shared presentation layer interpolates three

@@ -14,9 +14,9 @@ use std::{
 const MAX_PACKET_BYTES: usize = 16 * 1024;
 const MAX_RENDER_BYTES: usize = 64 * 1024 * 1024;
 const MAX_ENTITIES: usize = 8192;
-// Seventeen bounded action families (including derived Pushed) across the
-// eight Crystal directions.
-const MAX_ACTION_POSES: usize = 17 * 8;
+// Nineteen bounded action families (including derived Pushed, DashL and DashR)
+// across the eight Crystal directions.
+const MAX_ACTION_POSES: usize = 19 * 8;
 const MAX_DAMAGE_EVENTS: usize = 48;
 const MAX_GROUND_ITEM_FRAMES: usize = 6_000;
 const CELL_WIDTH: f64 = 48.0;
@@ -374,7 +374,7 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
     };
     // Crystal ignores ObjectPushed for the local player; its own Pushed packet
     // has separate camera/input semantics and must not be inferred here.
-    if packet == "ObjectPushed"
+    if matches!(packet, "ObjectPushed" | "ObjectDash" | "ObjectDashFail")
         && object_id(body).is_some_and(|object_id| self_object_id(&models) == Some(object_id))
     {
         cache.models = Some(models);
@@ -416,6 +416,25 @@ fn apply_packet_at(json_text: &str, now_ms: u64) -> LiveEntityPacketOutcome {
                     life_state: None,
                 },
             ),
+        "ObjectDash" => object_id(body)
+            .zip(location(body))
+            .zip(mir_direction(body))
+            .map(
+                |((object_id, position), direction)| EntityMutation::Action {
+                    object_id,
+                    position,
+                    direction: Some(direction.to_owned()),
+                    action: remote_dash_action(&cache.actions, object_id).to_owned(),
+                    started_ms: now_ms,
+                    life_state: None,
+                },
+            ),
+        "ObjectDashFail" => object_id(body)
+            .zip(location(body))
+            .zip(mir_direction(body))
+            .map(|((object_id, position), direction)| {
+                EntityMutation::Move(object_id, position, Some(direction.to_owned()))
+            }),
         "DamageIndicator" => object_id(body)
             .zip(damage(body))
             .zip(damage_type(body))
@@ -678,6 +697,23 @@ fn presentation_event(
             Some(3),
         ),
         (
+            "ObjectDash",
+            EntityMutation::Action {
+                object_id,
+                position,
+                direction,
+                action,
+                ..
+            },
+        ) => remote_motion(*object_id, *position, direction.as_deref(), action, Some(3)),
+        ("ObjectDashFail", EntityMutation::Move(object_id, position, direction)) => remote_motion(
+            *object_id,
+            *position,
+            direction.as_deref(),
+            "dashFail",
+            Some(1),
+        ),
+        (
             "ObjectHide" | "ObjectTeleportOut" | "ObjectRemove",
             EntityMutation::Hide(object_id) | EntityMutation::Remove(object_id),
         ) => (self_object_id(models) != Some(*object_id)).then(|| {
@@ -761,6 +797,17 @@ fn action_direction(
         .map(str::to_owned)
 }
 
+fn remote_dash_action(actions: &HashMap<u32, ActiveAction>, object_id: u32) -> &'static str {
+    if actions
+        .get(&object_id)
+        .is_some_and(|action| action.action == "dashL")
+    {
+        "dashR"
+    } else {
+        "dashL"
+    }
+}
+
 fn self_object_id(models: &Value) -> Option<u32> {
     models
         .get("entities")
@@ -814,12 +861,10 @@ fn apply_cache_mutation(
     tombstones: &mut HashSet<u32>,
     actions: &mut HashMap<u32, ActiveAction>,
 ) -> (bool, bool) {
-    match mutation {
-        EntityMutation::Move(object_id, ..) => {
-            actions.remove(object_id);
-        }
-        _ => {}
-    }
+    let action_cancelled = match mutation {
+        EntityMutation::Move(object_id, ..) => actions.remove(object_id).is_some(),
+        _ => false,
+    };
     match mutation {
         EntityMutation::Hide(object_id) => {
             actions.remove(object_id);
@@ -999,7 +1044,10 @@ fn apply_cache_mutation(
         _ => {
             let model_changed = apply_models(models, mutation);
             let render_changed = render.is_some_and(|value| apply_render(value, mutation));
-            (model_changed || render_changed, render_changed)
+            (
+                model_changed || render_changed || action_cancelled,
+                render_changed,
+            )
         }
     }
 }
@@ -3594,6 +3642,132 @@ mod tests {
         ] {
             assert_eq!(
                 apply_packet_at(packet, 1_600),
+                LiveEntityPacketOutcome::Rejected
+            );
+        }
+        clear();
+    }
+
+    #[test]
+    fn remote_object_dash_alternates_running_halves_and_fail_cancels_motion() {
+        let _guard = LIVE_ENTITY_TEST_LOCK.lock().unwrap();
+        clear();
+        assert!(install_models(
+            r#"{"entities":[{"objectId":"42","kind":"selfPlayer","name":"Self","x":300,"y":630,"direction":"Down"},{"objectId":"43","kind":"player","name":"Remote","x":301,"y":630,"direction":"Right"}]}"#,
+            32,
+        ));
+        assert!(install_render(
+            r#"{"_nativeWorldRequest":32,"enabled":true,"centerX":300,"centerY":630,"entities":[{"objectId":"42","isSelf":true,"gridX":300,"gridY":630,"layers":[{"key":"42:body:0","left":480.0,"top":352.0,"atlasRectKey":"self-standing"}]},{"objectId":"43","isSelf":false,"gridX":301,"gridY":630,"layers":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing-right"}]}]}"#,
+            r#"{"_nativeWorldRequest":32,"entities":[{"objectId":"43","prototype":{},"directionLayers":{"Right":[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"standing-right"}]},"actionLayers":{"dashL:Right":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"run-0"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"run-1"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"run-2"}]]},"dashR:Right":{"intervalMs":100,"frames":[[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"run-3"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"run-4"}],[{"key":"43:body:0","left":528.0,"top":352.0,"atlasRectKey":"run-5"}]]}}}]}"#,
+        ));
+
+        let LiveEntityPacketOutcome::Applied {
+            render: Some(render),
+            presentation_event: Some(first),
+            ..
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectDash","payload":{"objectId":43,"location":{"x":302,"y":630},"direction":"Right"}}"#,
+            1_000,
+        )
+        else {
+            panic!("first remote dash should apply");
+        };
+        let render: Value = serde_json::from_str(&render).unwrap();
+        assert_eq!(render["entities"][1]["layers"][0]["atlasRectKey"], "run-0");
+        let first: Value = serde_json::from_str(&first).unwrap();
+        assert_eq!(first["fromX"], 301);
+        assert_eq!(first["toX"], 302);
+        assert_eq!(first["mode"], "dashL");
+        assert_eq!(first["phaseCount"], 3);
+
+        let LiveEntityPacketOutcome::Applied {
+            models,
+            render: Some(render),
+            presentation_event: Some(second),
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectDash","payload":{"objectId":43,"location":{"x":303,"y":630},"direction":"Right"}}"#,
+            1_050,
+        )
+        else {
+            panic!("queued remote dash should alternate");
+        };
+        let models: Value = serde_json::from_str(&models).unwrap();
+        assert_eq!(models["entities"][1]["x"], 303);
+        assert_eq!(models["entities"][1]["_nativeAnimationAction"], "dashR");
+        let render: Value = serde_json::from_str(&render).unwrap();
+        assert_eq!(render["entities"][1]["layers"][0]["atlasRectKey"], "run-3");
+        let second: Value = serde_json::from_str(&second).unwrap();
+        assert_eq!(second["fromX"], 302);
+        assert_eq!(second["toX"], 303);
+        assert_eq!(second["mode"], "dashR");
+
+        let frame: Value =
+            serde_json::from_str(&poll_action_frame_at(1_150).expect("dashR middle frame"))
+                .unwrap();
+        assert_eq!(frame["entities"][1]["layers"][0]["atlasRectKey"], "run-4");
+        let frame: Value =
+            serde_json::from_str(&poll_action_frame_at(1_250).expect("dashR final frame")).unwrap();
+        assert_eq!(frame["entities"][1]["layers"][0]["atlasRectKey"], "run-5");
+        let settled: Value =
+            serde_json::from_str(&poll_action_frame_at(1_350).expect("dash standing settle"))
+                .unwrap();
+        assert_eq!(
+            settled["entities"][1]["layers"][0]["atlasRectKey"],
+            "standing-right"
+        );
+
+        let LiveEntityPacketOutcome::Applied {
+            presentation_event: Some(third),
+            ..
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectDash","payload":{"objectId":43,"location":{"x":304,"y":630},"direction":"Right"}}"#,
+            1_400,
+        )
+        else {
+            panic!("dash after settle should restart with DashL");
+        };
+        assert_eq!(
+            serde_json::from_str::<Value>(&third).unwrap()["mode"],
+            "dashL"
+        );
+        let LiveEntityPacketOutcome::Applied {
+            render,
+            presentation_event: Some(failed),
+            ..
+        } = apply_packet_at(
+            r#"{"type":"packet","packet":"ObjectDashFail","payload":{"objectId":43,"location":{"x":304,"y":630},"direction":"Right"}}"#,
+            1_450,
+        )
+        else {
+            panic!("dash failure should cancel an active dash even at the same endpoint");
+        };
+        let render: Value = serde_json::from_str(&render.expect("dash fail standing render"))
+            .expect("valid render json");
+        let remote = render["entities"]
+            .as_array()
+            .and_then(|entities| entities.iter().find(|entity| entity_id(entity) == Some(43)))
+            .expect("remote player render");
+        assert_eq!(remote["layers"][0]["atlasRectKey"], "standing-right");
+        let failed: Value = serde_json::from_str(&failed).unwrap();
+        assert_eq!(failed["mode"], "dashFail");
+        assert_eq!(failed["phaseCount"], 1);
+        assert!(poll_action_frame_at(1_500).is_none());
+
+        for packet in [
+            r#"{"type":"packet","packet":"ObjectDash","payload":{"objectId":42,"location":{"x":301,"y":630},"direction":"Right"}}"#,
+            r#"{"type":"packet","packet":"ObjectDashFail","payload":{"objectId":42,"location":{"x":300,"y":630},"direction":"Down"}}"#,
+        ] {
+            assert_eq!(
+                apply_packet_at(packet, 1_600),
+                LiveEntityPacketOutcome::Ignored
+            );
+        }
+        for packet in [
+            r#"{"type":"packet","packet":"ObjectDash","payload":{"objectId":43,"direction":"Right"}}"#,
+            r#"{"type":"packet","packet":"ObjectDashFail","payload":{"objectId":43,"location":{"x":304,"y":630},"direction":"North"}}"#,
+        ] {
+            assert_eq!(
+                apply_packet_at(packet, 1_700),
                 LiveEntityPacketOutcome::Rejected
             );
         }
