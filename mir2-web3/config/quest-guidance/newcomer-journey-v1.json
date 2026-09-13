@@ -147,13 +147,13 @@
         88,
         97,
         98,
+        99,
         102,
         103,
         110,
         111,
         112,
-        89,
-        99
+        89
       ],
       "classQuestIds": {
         "Warrior": [],
@@ -1272,7 +1272,7 @@
     },
     {
       "questId": 98,
-      "rewardExperience": 207693,
+      "rewardExperience": 138462,
       "killCountCap": 10,
       "itemCountCap": 2,
       "taskDescription": [
@@ -1297,8 +1297,34 @@
       }
     },
     {
+      "questId": 99,
+      "rewardExperience": 138461,
+      "killCountCap": 10,
+      "itemCountCap": 2,
+      "taskDescription": [
+        "Defeat 10 FlamingWooma.",
+        "Defeat 10 WoomaFighter."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      },
+      "finishNpc": {
+        "name": "SubjugationLead Eric",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 317,
+        "y": 71
+      }
+    },
+    {
       "questId": 102,
-      "rewardExperience": 69230,
+      "rewardExperience": 138462,
       "killCountCap": 10,
       "itemCountCap": 2,
       "startInDiary": false,
@@ -1320,7 +1346,7 @@
     },
     {
       "questId": 103,
-      "rewardExperience": 330770,
+      "rewardExperience": 192308,
       "killCountCap": 10,
       "itemCountCap": 2,
       "guaranteedQuestDrops": [
@@ -1348,7 +1374,7 @@
     },
     {
       "questId": 110,
-      "rewardExperience": 0,
+      "rewardExperience": 84615,
       "killCountCap": 10,
       "itemCountCap": 2,
       "startInDiary": false,
@@ -1370,7 +1396,7 @@
     },
     {
       "questId": 111,
-      "rewardExperience": 84615,
+      "rewardExperience": 138461,
       "killCountCap": 10,
       "itemCountCap": 2,
       "startInDiary": false,
@@ -1392,7 +1418,7 @@
     },
     {
       "questId": 112,
-      "rewardExperience": 138461,
+      "rewardExperience": 138462,
       "killCountCap": 10,
       "itemCountCap": 2,
       "taskDescription": [
@@ -1440,32 +1466,6 @@
         "mapFileName": "1002",
         "x": 11,
         "y": 8
-      }
-    },
-    {
-      "questId": 99,
-      "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
-      "taskDescription": [
-        "Defeat 10 FlamingWooma.",
-        "Defeat 10 WoomaFighter."
-      ],
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "SubjugationLead Eric",
-        "mapName": "WoomyonWoods(S)",
-        "mapFileName": "1",
-        "x": 317,
-        "y": 71
-      },
-      "finishNpc": {
-        "name": "SubjugationLead Eric",
-        "mapName": "WoomyonWoods(S)",
-        "mapFileName": "1",
-        "x": 317,
-        "y": 71
       }
     },
     {
