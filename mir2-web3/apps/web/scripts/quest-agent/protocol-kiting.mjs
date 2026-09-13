@@ -77,7 +77,10 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       });
     } catch (error) {
       const navigationBlocked = /^No walk path\b/.test(String(error?.message ?? ''));
-      if (!fightWhenBlocked || !navigationBlocked) throw error;
+      const boundedProgress = /^Navigation successful step budget exceeded\b/.test(
+        String(error?.message ?? ''),
+      );
+      if (!fightWhenBlocked || (!navigationBlocked && !boundedProgress)) throw error;
       const blockedActor = selfPlayer(client);
       if (String(client.snapshot?.mapFileName ?? '') !== mapId) {
         throw new Error(`Wizard retreat changed map before combat action (${mapId})`);
@@ -90,8 +93,12 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       if (!blockedTarget) {
         throw new Error(`target ${targetId} left the authoritative snapshot during Wizard retreat`);
       }
-      recordFallback(client, targetId, 'retreatNavigationNoPath');
-      return baseAction(client, blockedTarget);
+      if (boundedProgress) {
+        navigation = { reached: false, successfulSteps: null };
+      } else {
+        recordFallback(client, targetId, 'retreatNavigationNoPath');
+        return baseAction(client, blockedTarget);
+      }
     }
     const after = selfPlayer(client);
     if (String(client.snapshot?.mapFileName ?? '') !== mapId) {

@@ -1261,6 +1261,17 @@ function spawnHasMatchingCorpse(snapshot, spawn, monsterNames) {
 async function killExactMonster(client, initialTarget, pending, navigateNear, settings, aggressorInterruptPolicy = true) {
   const objectId = Number(initialTarget.objectId);
   if (!Number.isSafeInteger(objectId) || objectId <= 0) throw new Error(`q${questIdFor(pending)} target has no valid objectId`);
+  const startingProgress = objectiveFingerprint(
+    client.snapshot,
+    questIdFor(pending),
+    pending,
+  );
+  const completedMissingTarget = fallback => objectiveAdvanced(
+    client.snapshot,
+    questIdFor(pending),
+    pending,
+    startingProgress,
+  ) ? { ...fallback, objectId, dead: true, hp: 0 } : null;
   let noResponse = 0;
   let cooldownWaitMs = 0;
   let cooldownWaitSinceRefreshMs = 0;
@@ -1270,7 +1281,11 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
     let target = entityById(client.snapshot, objectId);
     if (target?.dead === true || Number(target?.hp) <= 0) return target;
     if (!target) target = await settleMissingTarget(client, objectId, settings);
-    if (!target) throw new Error(`target ${objectId} left the authoritative snapshot before death was confirmed`);
+    if (!target) {
+      const completed = completedMissingTarget(initialTarget);
+      if (completed) return completed;
+      throw new Error(`target ${objectId} left the authoritative snapshot before death was confirmed`);
+    }
     throwIfLowHealthTargetPressure(client, target, pending, settings);
     let approachRange = await combatApproachRange(settings, client, target);
     await approachCombatTarget(
@@ -1278,14 +1293,22 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
     );
     let refreshed = entityById(client.snapshot, objectId);
     if (!refreshed) refreshed = await settleMissingTarget(client, objectId, settings);
-    if (!refreshed) throw new LostCombatTarget(objectId, target);
+    if (!refreshed) {
+      const completed = completedMissingTarget(target);
+      if (completed) return completed;
+      throw new LostCombatTarget(objectId, target);
+    }
     if (refreshed.dead === true || Number(refreshed.hp) <= 0) return refreshed;
     if (distance(playerFromSnapshot(client.snapshot), refreshed) > approachRange) continue;
     throwIfUnsafeTargetPack(client, refreshed, settings);
     await sustainIfDue(client, settings, 'attack', objectId);
     assertPlayerAlive(client);
     let actionable = entityById(client.snapshot, objectId);
-    if (!actionable) throw new LostCombatTarget(objectId, refreshed);
+    if (!actionable) {
+      const completed = completedMissingTarget(refreshed);
+      if (completed) return completed;
+      throw new LostCombatTarget(objectId, refreshed);
+    }
     if (actionable.dead === true || Number(actionable.hp) <= 0) return actionable;
     throwIfLowHealthTargetPressure(client, actionable, pending, settings);
     approachRange = await combatApproachRange(settings, client, actionable);
@@ -1294,7 +1317,11 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
         client, actionable, approachRange, objectId, navigateNear, settings, aggressorInterruptPolicy,
       );
       actionable = entityById(client.snapshot, objectId);
-      if (!actionable) throw new LostCombatTarget(objectId, refreshed);
+      if (!actionable) {
+        const completed = completedMissingTarget(refreshed);
+        if (completed) return completed;
+        throw new LostCombatTarget(objectId, refreshed);
+      }
       if (actionable.dead === true || Number(actionable.hp) <= 0) return actionable;
     }
     if (distance(playerFromSnapshot(client.snapshot), actionable) > approachRange) continue;

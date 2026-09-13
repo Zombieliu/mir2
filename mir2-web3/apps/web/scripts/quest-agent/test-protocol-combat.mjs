@@ -4115,6 +4115,35 @@ test("a living player still fails when the exact removed target stays absent aft
   }, async () => {}, settings), /target 60 left the authoritative snapshot before death was confirmed/);
 });
 
+test("authoritative quest progress accepts a target removed before its death packet settles", async () => {
+  const quest = { questId: 62, stage: "InProgress", objectives: [objective("Kill VioletKekTal", 0, 2)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(60, "VioletKekTal"), monster(61, "VioletKekTal", 12, 10),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    if (command.objectId === 60) {
+      owner.receive("ObjectRemove", state => {
+        state.entities = state.entities.filter(entry => entry.objectId !== 60);
+        state.questLog[0].objectives[0] = objective("Kill VioletKekTal", 1, 2);
+      }, { objectId: 60 });
+      return;
+    }
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 61), { hp: 0, dead: true });
+      state.questLog[0].objectives[0] = objective("Kill VioletKekTal", 2, 2);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 61 });
+  });
+
+  const result = await completeQuestObjectives(client, {
+    questId: 62,
+    objectives: { kill: [{ monsterName: "VioletKekTal", spawnCandidates: [spawn("VioletKekTal")] }], item: [] },
+  }, navigateClientNear(client), settings);
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [60, 61]);
+});
+
 test("proven remote-player last blow is recorded and retries without claiming quest credit", async () => {
   const quest = { questId: 22, stage: "InProgress", objectives: [objective("Kill ForestYeti", 0, 1)] };
   const client = new FakeClient(snapshot(quest, [
