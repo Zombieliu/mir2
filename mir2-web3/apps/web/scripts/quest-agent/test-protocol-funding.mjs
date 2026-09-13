@@ -167,6 +167,13 @@ test('bankrupt newcomer hunts and harvests passive Deer through normal protocol 
     navigate: async target => { calls.push(['navigate', target.objectId ?? target.x, target.y]); },
     clearMonster: async (_owner, target, _navigate, options) => {
       currentCorpseId = Number(target.objectId);
+      assert.equal(options.approachRange, 1);
+      const attack = await options.action(owner, target);
+      assert.deepEqual(attack, {
+        kind: 'attack',
+        targetId: currentCorpseId,
+        command: { type: 'attack', objectId: currentCorpseId },
+      });
       Object.assign(target, { dead: true, hp: 0 });
       owner.events.push({
         sequence: ++owner.sequence, direction: 'received', packet: 'ObjectDied',
@@ -176,6 +183,8 @@ test('bankrupt newcomer hunts and harvests passive Deer through normal protocol 
       calls.push(['clear', currentCorpseId]);
       return { objectId: currentCorpseId, cleared: true };
     },
+    action: async () => { throw new Error('generic class magic must not be used for passive Deer'); },
+    approachRange: 9,
     refreshWhileWaiting,
     requiredCount: 2,
     sleep: async () => {},

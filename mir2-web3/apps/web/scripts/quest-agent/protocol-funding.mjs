@@ -245,8 +245,11 @@ export async function collectSafeFundingVenison(owner, {
     huntAttempts += 1;
     try {
       await clearMonster(owner, target, navigate, {
-        action,
-        approachRange,
+        // Crystal treats passive Deer as huntable neutral creatures: melee
+        // can hit them, while hostile-only Wizard/Taoist magic is rejected.
+        // Keep the funding loop on the public attack command for every class.
+        action: physicalFundingAttack,
+        approachRange: 1,
         sustain,
         attackCadenceMs: 650,
         combatHostileClearance: 0,
@@ -310,6 +313,16 @@ export async function collectSafeFundingVenison(owner, {
     });
   }
   return { method: 'DeerVenison', collected, hunts, beforeCount, afterCount };
+}
+
+async function physicalFundingAttack(client, target) {
+  const objectId = Number(target?.objectId);
+  if (!Number.isSafeInteger(objectId) || objectId <= 0) {
+    throw new Error('safe Deer funding requires an authoritative target objectId');
+  }
+  const command = { type: 'attack', objectId };
+  client.send(command);
+  return { kind: 'attack', targetId: objectId, command };
 }
 
 function recoverableFundingTargetLoss(error) {
