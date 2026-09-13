@@ -721,14 +721,16 @@ try {
             // corridors still require clearing one paired zombie before the
             // player has room to move.
             // Q30 keeps its unique harvest-specific limits.
-            maxTargetAdjacent: id === 30 ? 2 : (id === 42 ? 1 : (id === 49 ? 1 : ([54, 62].includes(id) ? 1 :
-              (id === 33 && className === 'Wizard' ? 1 : 0)))),
+            maxTargetAdjacent: retreatProfile.maxTargetAdjacent ??
+              (id === 30 ? 2 : (id === 42 ? 1 : (id === 49 ? 1 : ([54, 62].includes(id) ? 1 :
+              (id === 33 && className === 'Wizard' ? 1 : 0))))),
             // The remaining q62 KekTal field presented several viable 0/2
             // and 1/1 candidates but no ordinary 0/1 isolation for more than
             // two minutes. Admit the same bounded target density already
             // proven in q54; actual extra attackers still interrupt combat.
-            maxTargetNearby: id === 30 ? 4 : (id === 42 ? 3 : (id === 49 ? 4 : ([54, 62].includes(id) ? 4 :
-              (id === 33 && className === 'Wizard' ? 4 : 1)))),
+            maxTargetNearby: retreatProfile.maxTargetNearby ??
+              (id === 30 ? 4 : (id === 42 ? 3 : (id === 49 ? 4 : ([54, 62].includes(id) ? 4 :
+              (id === 33 && className === 'Wizard' ? 4 : 1))))),
             // A Taoist can lose two snake hits between consecutive snapshots.
             // Begin q33 disengagement with enough HP for the mandatory
             // standstill-to-walk first movement before full-speed running.

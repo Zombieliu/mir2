@@ -860,6 +860,16 @@ test('q62 leaves D2041 packs toward the real D2042 transfer', () => {
   assert.equal(questRetreatBiasPosition(62, { mapFileName: 'D2042' }), null);
 });
 
+test('q60 ranged classes admit the measured D2041 SpiderFrog spawn density', () => {
+  for (const className of ['Wizard', 'Taoist']) {
+    const profile = questRetreatProfile(60, className);
+    assert.equal(profile.maxTargetAdjacent, 1);
+    assert.equal(profile.maxTargetNearby, 4);
+  }
+  assert.equal(questRetreatProfile(60, 'Warrior').maxTargetAdjacent, undefined);
+  assert.equal(questRetreatProfile(60, 'Warrior').maxTargetNearby, undefined);
+});
+
 test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
   assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }), { x: 361, y: 19 });
   assert.equal(questRetreatBiasPosition(65, { mapFileName: 'D422' }), null);
