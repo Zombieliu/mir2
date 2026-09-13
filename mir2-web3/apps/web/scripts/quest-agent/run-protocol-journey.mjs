@@ -273,7 +273,7 @@ try {
         minimumEmergencyTeleportStock: shouldReplenishEscapeReserve ? emergencyTeleportTarget : 0,
         requiredAfterRestockEmergencyTeleportStock: emergencyTeleportTarget,
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
-          requiresTaoistAmuletRestock(owner.snapshot, questId, className) ||
+          requiresTaoistAmuletRestock(owner.snapshot, questId, className, 4) ||
           (shouldReplenishEscapeReserve && randomTeleportCount(owner.snapshot) < emergencyTeleportTarget) ||
           ([q54Expedition && (hpDrugCount(owner.snapshot) < departureFloor.hp ||
               mpDrugCount(owner.snapshot) < departureFloor.mp),
