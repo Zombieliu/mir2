@@ -25,6 +25,15 @@ export function minimumJourneyMpStockForQuest(questId, className) {
   return 4;
 }
 
+/** A Taoist should not resume a dangerous kill expedition without spell fuel. */
+export function requiresTaoistAmuletRestock(snapshot, questId, className, minimum = 1) {
+  const normalizedClass = String(className ?? '').trim().toLowerCase();
+  if (normalizedClass !== 'taoist' || ![54, 60, 62].includes(Number(questId))) return false;
+  if (!(snapshot?.knownSkills ?? []).some(skill => String(skill?.spell ?? '') === 'SoulFireBall')) return false;
+  const required = nonnegativeInteger(minimum, 'minimum Amulet stock');
+  return amuletStock(snapshot) < required;
+}
+
 /** Full village departure stock; intentionally separate from the field trigger above. */
 export function journeyMpRestockTargetForQuest(questId, className, {
   fallback = 12,
@@ -289,6 +298,13 @@ export function requiresExpeditionEscapeRestock(snapshot, questId, minimum = 1) 
 
 export function mpDrugCount(snapshot) {
   return itemQuantity(snapshot, item => /^\(MP\)Drug/i.test(String(item?.name ?? item?.key ?? '')));
+}
+
+export function amuletStock(snapshot) {
+  return itemQuantity(snapshot, item =>
+    String(item?.name ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'amulet' ||
+    String(item?.key ?? '').toLowerCase() === 'crystal-item-712',
+  { includeEquipment: true });
 }
 
 export function canResumeStockedCombatExpedition(snapshot) {
@@ -584,9 +600,14 @@ function retreatOffsets(distance) {
   ];
 }
 
-function itemQuantity(snapshot, predicate) {
+function itemQuantity(snapshot, predicate, { includeEquipment = false } = {}) {
   let total = 0;
-  for (const item of [...(snapshot?.inventoryItems ?? []), ...(snapshot?.beltItems ?? [])]) {
+  const items = [
+    ...(snapshot?.inventoryItems ?? []),
+    ...(snapshot?.beltItems ?? []),
+    ...(includeEquipment ? (snapshot?.equipmentItems ?? []) : []),
+  ];
+  for (const item of items) {
     if (!predicate(item)) continue;
     const quantity = Number(item?.quantity ?? item?.count ?? 1);
     if (Number.isFinite(quantity) && quantity > 0) total += quantity;

@@ -24,6 +24,7 @@ import {
   questRetreatBiasPosition,
   questRetreatProfile,
   questNeedsPostRetreatRecovery,
+  requiresTaoistAmuletRestock,
   shouldPreferObjectiveMapOverCurrent,
   recoverHealthWhileEvading,
   requiresExpeditionEscapeRestock,
@@ -75,6 +76,23 @@ test('dangerous expedition escape remains armed for the completed cave return', 
   assert.equal(hasJourneyEmergencyEscapeQuest({
     questLog: [{ questId: 49, stage: 'readyToTurnIn' }],
   }), false);
+});
+
+test('dangerous Taoist expeditions restock missing equipped or carried Amulets', () => {
+  const empty = {
+    inventoryItems: [], beltItems: [], equipmentItems: [],
+    knownSkills: [{ spell: 'SoulFireBall' }],
+  };
+  assert.equal(requiresTaoistAmuletRestock(empty, 60, 'Taoist'), true);
+  assert.equal(requiresTaoistAmuletRestock(empty, 49, 'Taoist'), false);
+  assert.equal(requiresTaoistAmuletRestock(empty, 60, 'Wizard'), false);
+  assert.equal(requiresTaoistAmuletRestock({ ...empty, knownSkills: [] }, 60, 'Taoist'), false);
+  assert.equal(requiresTaoistAmuletRestock({
+    inventoryItems: [{ name: 'Amulet', quantity: 2 }],
+    beltItems: [{ key: 'crystal-item-712', count: 2 }],
+    equipmentItems: [{ name: 'Amulet', quantity: 3 }],
+    knownSkills: [{ spell: 'SoulFireBall' }],
+  }, 60, 'Taoist', 7), false);
 });
 
 test('only a living exact evasive recovery timeout is retryable', () => {
