@@ -462,6 +462,46 @@ test('walking travel rotates to another live transfer cell after an unblocked no
     event.direction === 'diagnostic' && event.payload.type === 'alternateLiveTransfer'));
 });
 
+test('walking travel can relocate from a statically disconnected map component', async () => {
+  const source = walkingSnapshot(ordinaryEdge);
+  source.entities = [selfPlayer({ x: 5, y: 4 })];
+  source.mapTransfers[0].bounds = { minX: 8, maxX: 8, minY: 4, maxY: 4 };
+  const client = new FakeClient(source);
+  client.record = (_direction, payload) => client.events.push({
+    sequence: ++client.sequence,
+    direction: 'diagnostic',
+    payload,
+  });
+  const width = 12;
+  const height = 12;
+  const blocked = new Uint8Array(width * height);
+  for (let y = 0; y < height; y += 1) blocked[y * width + 6] = 1;
+  let relocationCalls = 0;
+  let navigationCalls = 0;
+  const travel = createMapTraveler(client, async () => {
+    navigationCalls += 1;
+    const actor = client.snapshot.entities[0];
+    if (actor.x === 5) throw new Error('No walk path on disconnected map');
+    client.receive({
+      type: 'worldSnapshot',
+      payload: { ...client.snapshot, mapFileName: ordinaryEdge.toMapFileName, mapTransfers: [] },
+    });
+  }, {
+    loadCollisionMap: async () => ({ width, height, blocked }),
+    relocateDisconnectedRegion: async owner => {
+      relocationCalls += 1;
+      owner.snapshot.entities[0].x = 7;
+      return { from: { x: 5, y: 4 }, to: { x: 7, y: 4 } };
+    },
+  });
+
+  await travel(ordinaryEdge.toMapFileName);
+  assert.equal(relocationCalls, 1);
+  assert.equal(navigationCalls, 2);
+  assert.ok(client.events.some(event =>
+    event.direction === 'diagnostic' && event.payload.type === 'disconnectedRegionRelocation'));
+});
+
 test('steps off and re-enters the real MageHouse exit when already standing on its source', async () => {
   const transfer = {
     key: 'crystal-move:0115:17:21:1:315:476',

@@ -482,16 +482,25 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
   if (!client || typeof client.wait !== 'function') throw new Error('A protocol client is required');
   if (typeof navigateNear !== 'function') throw new Error('navigateNear is required');
   const collisionMaps = new Map();
+  const loadCollisionMap = typeof dependencies.loadCollisionMap === 'function'
+    ? dependencies.loadCollisionMap
+    : loadProtocolCollisionMap;
   const resolveBlockingMonster = typeof dependencies.resolveBlockingMonster === 'function'
     ? dependencies.resolveBlockingMonster
     : null;
+  const relocateDisconnectedRegion = typeof dependencies.relocateDisconnectedRegion === 'function'
+    ? dependencies.relocateDisconnectedRegion
+    : null;
+  const maxDisconnectedRegionRelocations = Number.isSafeInteger(Number(dependencies.maxDisconnectedRegionRelocations))
+    ? Math.max(1, Number(dependencies.maxDisconnectedRegionRelocations))
+    : 4;
   const maxBlockingMonsterClears = Number.isSafeInteger(Number(dependencies.maxBlockingMonsterClears))
     ? Math.max(1, Number(dependencies.maxBlockingMonsterClears))
     : 8;
 
   const collisionMapFor = async mapFileName => {
     const key = String(mapFileName);
-    if (!collisionMaps.has(key)) collisionMaps.set(key, loadProtocolCollisionMap(key));
+    if (!collisionMaps.has(key)) collisionMaps.set(key, loadCollisionMap(key));
     return collisionMaps.get(key);
   };
 
@@ -535,6 +544,7 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
 
       const beforeTransfer = client.sequence;
       const rejectedTransferKeys = new Set();
+      let disconnectedRegionRelocations = 0;
       const currentPlayer = player(client.snapshot);
       if (pointInBounds(currentPlayer, live.transfer.bounds)) {
         const exit = findProtocolTransferExitStep({
@@ -592,7 +602,43 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
                 !rejectedTransferKeys.has(String(candidate.transfer.key)) &&
                 (!pointEquals(candidate.target, live.target) ||
                   String(candidate.transfer.key) !== String(live.transfer.key)));
-              if (!alternative) throw error;
+              if (!alternative) {
+                const origin = player(client.snapshot);
+                const staticPath = origin ? findProtocolWalkPath({
+                  map: await collisionMapFor(current),
+                  start: origin,
+                  target: live.target,
+                  staticWalkableOverrides: [live.target],
+                }) : null;
+                if (!staticPath?.length && relocateDisconnectedRegion &&
+                    disconnectedRegionRelocations < maxDisconnectedRegionRelocations) {
+                  const before = origin ? { x: Number(origin.x), y: Number(origin.y) } : null;
+                  const relocation = await relocateDisconnectedRegion(client, {
+                    fromMapFileName: current,
+                    toMapFileName: String(edge.toMapFileName),
+                    target: { ...live.target },
+                    cause: error,
+                  });
+                  if (relocation && relocation.deferred !== true) {
+                    disconnectedRegionRelocations += 1;
+                    rejectedTransferKeys.clear();
+                    live = chooseLiveTransfer(client.snapshot, edge) ?? live;
+                    if (typeof client.record === 'function') {
+                      const after = player(client.snapshot);
+                      client.record('diagnostic', {
+                        type: 'disconnectedRegionRelocation',
+                        fromMapFileName: current,
+                        toMapFileName: String(edge.toMapFileName),
+                        before,
+                        after: after ? { x: Number(after.x), y: Number(after.y) } : null,
+                        attempt: disconnectedRegionRelocations,
+                      });
+                    }
+                    continue;
+                  }
+                }
+                throw error;
+              }
               const previous = live;
               live = alternative;
               if (typeof client.record === 'function') {
