@@ -88,7 +88,7 @@ test('a living partial unsafe-pack retreat can replan without discarding field p
   ), false);
 });
 
-test('a resumed expedition replaces its missing public escape reserve before field recovery', () => {
+test('a resumed expedition preserves field progress while it still has a public escape reserve', () => {
   const scroll = quantity => ({
     name: 'RandomTeleport',
     quantity,
@@ -96,7 +96,8 @@ test('a resumed expedition replaces its missing public escape reserve before fie
     tooltipSource: { info: { item_index: 717 } },
   });
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 62), true);
-  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(3)] }, 54), true);
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(1)] }, 54), false);
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(3)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(4)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 49), false);
 });

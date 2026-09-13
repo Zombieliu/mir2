@@ -268,9 +268,9 @@ export function isLivingUnsafePackRetreatFailure(snapshot, error) {
     String(error?.message ?? error).startsWith('unsafe hostile pack retreat failed from ');
 }
 
-export function requiresExpeditionEscapeRestock(snapshot, questId, target = 4) {
+export function requiresExpeditionEscapeRestock(snapshot, questId, minimum = 1) {
   return [54, 62].includes(Number(questId)) &&
-    emergencyTeleportStock(snapshot) < nonnegativeInteger(target, 'emergency teleport target');
+    emergencyTeleportStock(snapshot) < nonnegativeInteger(minimum, 'emergency teleport minimum');
 }
 
 export function mpDrugCount(snapshot) {
