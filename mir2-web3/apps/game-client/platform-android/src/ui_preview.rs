@@ -307,9 +307,7 @@ fn apply(world: &mut World) {
         "platform" => UiPanel::PlatformSettings,
         "menu" => UiPanel::Menu,
         "gameshop" => UiPanel::GameShop,
-        "npcshop" | "npcshop-sell" | "npcshop-repair" | "npcshop-srepair" => {
-            UiPanel::NpcShop
-        }
+        "npcshop" | "npcshop-sell" | "npcshop-repair" | "npcshop-srepair" => UiPanel::NpcShop,
         "mail" | "mail-compose" => UiPanel::Mail,
         "bigmap" => UiPanel::BigMap,
         "storage" | "storage-locked" => UiPanel::Storage,
@@ -338,6 +336,7 @@ fn apply(world: &mut World) {
     model.player.max_mp = 100;
     model.player.max_weight = 100;
     model.player.gold = 12345;
+    model.player.credit = 500;
     if matches!(scene.as_str(), "hud" | "world-render") {
         // Offline presentation specimen only, never a Gateway bootstrap.
         model.player.map_name = Some("BichonProvince".into());
@@ -443,6 +442,8 @@ fn initialize_panel(state: &mut mir2_ui_core::state::UiState, panel: UiPanel) {
 
 fn populate_specimens(world: &mut World, scene: &str) {
     use mir2_client_bevy::{
+        big_map::{BigMapInfo, BigMapModel, BigMapNpc, BigMapPoint, BigMapWorldIcon},
+        game_shop::{GameShopEntry, GameShopModel},
         quest_model::{Quest, QuestStatus, QuestTracker},
         shop::{NpcShopServiceMode, ShopGood, ShopModel},
         skill_model::{SkillEntry, SkillModel},
@@ -508,6 +509,69 @@ fn populate_specimens(world: &mut World, scene: &str) {
             .collect(),
         ..default()
     });
+    world.insert_resource(GameShopModel {
+        items: (0..12)
+            .map(|index| GameShopEntry {
+                item_index: 1_000 + index,
+                game_shop_index: 2_000 + index,
+                item_name: format!("Offline product {}", index + 1),
+                image: 100 + index as u32,
+                gold_price: 100 + index as u32 * 10,
+                credit_price: 10 + index as u32,
+                category: "UI fixture".into(),
+                stock: 20,
+                stock_level: 20 - index,
+                can_buy_credit: true,
+                can_buy_gold: true,
+                ..default()
+            })
+            .collect(),
+        selected_game_shop_index: Some(2_000),
+        ..default()
+    });
+    let mut big_map = BigMapModel::default();
+    big_map.set_current_map(1);
+    big_map.set_player_location(Some(1), BigMapPoint { x: 330, y: 270 });
+    big_map.apply_world_map_setup(
+        true,
+        vec![BigMapWorldIcon {
+            image_index: 1,
+            title: "Offline world fixture".into(),
+            map_index: 1,
+        }],
+        3_000,
+    );
+    big_map.apply_new_map_info(
+        1,
+        BigMapInfo {
+            title: "Offline Bichon map fixture".into(),
+            width: 700,
+            height: 700,
+            big_map: 412,
+            movements: Vec::new(),
+            npcs: (0..22)
+                .map(|index| BigMapNpc {
+                    index,
+                    file_name: "NPC/00".into(),
+                    name: format!("Offline NPC {}", index + 1),
+                    map_index: 1,
+                    location: BigMapPoint {
+                        x: 120 + index * 17,
+                        y: 180 + index * 11,
+                    },
+                    image: 0,
+                    rate: 0,
+                    show_on_big_map: true,
+                    big_map_icon: 0,
+                    object_id: 10_000 + index as u32,
+                    icon: 0,
+                    can_teleport_to: index == 0,
+                })
+                .collect(),
+        },
+    );
+    let _ = big_map.select_npc(10_000);
+    world.insert_resource(big_map);
     use mir2_client_bevy::{
         inventory::{InventoryModel, ItemModel},
         mail::{MailMessage, MailModel},
@@ -639,6 +703,26 @@ mod tests {
         assert!(storage.has_password);
         assert!(!storage.unlocked);
         assert!(storage.password_draft.is_empty());
+    }
+    #[test]
+    fn game_shop_and_big_map_scenes_have_navigable_offline_fixtures() {
+        let mut world = World::new();
+        world.init_resource::<mir2_client_bevy::social::SocialModel>();
+        populate_specimens(&mut world, "gameshop");
+        let game_shop = world.resource::<mir2_client_bevy::game_shop::GameShopModel>();
+        assert_eq!(game_shop.items.len(), 12);
+        assert_eq!(game_shop.selected_game_shop_index, Some(2_000));
+        assert!(game_shop.selected().is_some());
+
+        let big_map = world.resource::<mir2_client_bevy::big_map::BigMapModel>();
+        let rendered = big_map.render_snapshot();
+        assert_eq!(
+            rendered.map_image_url.as_deref(),
+            Some("original-ui/MMap/412.png")
+        );
+        assert_eq!(rendered.npcs.len(), 18);
+        assert!(big_map.selected_teleport_intent().is_some());
+        assert!(big_map.world.enabled);
     }
     #[test]
     fn scene_inventory_is_unique_and_bounded() {

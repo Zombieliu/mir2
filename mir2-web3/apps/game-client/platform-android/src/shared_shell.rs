@@ -318,6 +318,8 @@ fn fit_stage(
         (
             &mut Node,
             Has<mir2_client_bevy::crystal_ui::minimap::CrystalMiniMapRoot>,
+            Has<mir2_client_bevy::crystal_ui::hud::CrystalHudRoot>,
+            Has<mir2_client_bevy::crystal_ui::chat::CrystalChatRoot>,
         ),
         (
             Or<(
@@ -340,6 +342,8 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -354,6 +358,8 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -367,6 +373,8 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
+            Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             Without<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
     >,
@@ -380,6 +388,8 @@ fn fit_stage(
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             Has<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         ),
         Or<(
@@ -389,6 +399,8 @@ fn fit_stage(
             With<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             With<mir2_client_bevy::quest_ui::NpcDialogPanel>,
         )>,
     >,
@@ -397,15 +409,15 @@ fn fit_stage(
         return;
     };
     let fit = CrystalStageTransform::fit(window.width(), window.height());
+    let focused_field = forms.field(&player).map(|field| field.0);
     // Keep field/button size stable while typing. Pan the shared stage to keep
     // its login panel above the keyboard instead of shrinking it to a thumbnail.
     let available = (window.height() - host.ime_bottom / window.scale_factor()).max(1.0);
     let panel = mir2_client_bevy::crystal_ui::spec::login::PANEL.rect;
     let top = if host.ime_bottom > 0.0 && model.screen == Screen::InGame {
-        let field = forms
-            .field(&player)
-            .or_else(|| crate::text_input::player_field(&player));
-        let editor_bottom = player_editor_bottom(field.map(|field| field.0), fit.scale);
+        let field =
+            focused_field.or_else(|| crate::text_input::player_field(&player).map(|field| field.0));
+        let editor_bottom = player_editor_bottom(field, fit.scale);
         (available / fit.scale - editor_bottom).min(fit.offset_y / fit.scale)
     } else if host.ime_bottom > 0.0 {
         (available / (2.0 * fit.scale) - panel.top - panel.height * 0.5)
@@ -421,13 +433,31 @@ fn fit_stage(
         host.safe_right,
         host.safe_top,
     );
-    for (mut root, is_map_image) in &mut roots {
+    let occlude_world_chrome = player.shop_open() || player.bigmap_open();
+    for (mut root, is_map_image, is_hud, is_chat) in &mut roots {
         root.left = px(if is_map_image {
             map_origin.x
         } else {
             fit.offset_x / fit.scale
         });
         root.top = px(if is_map_image { map_origin.y } else { top });
+        if is_hud {
+            root.display = if model.screen == Screen::InGame && !occlude_world_chrome {
+                Display::Flex
+            } else {
+                Display::None
+            };
+        } else if is_chat {
+            // GameShop and BigMap become near-full-height blocking panels on a
+            // phone. Do not leave the desktop chat canvas visible or pickable
+            // through their transparent Crystal artwork; closing the panel
+            // restores the same shared chat tree on the next frame.
+            root.display = if occlude_world_chrome {
+                Display::None
+            } else {
+                Display::Flex
+            };
+        }
     }
     // The frame/actions are children of the centered HUD; the map image is
     // a separate root. Compensate the parent transform so they stay aligned,
@@ -472,6 +502,8 @@ fn fit_stage(
         is_options,
         is_npc_shop,
         is_mail,
+        is_game_shop,
+        is_bigmap,
         is_npc_dialog,
     ) in &mut focus_panels
     {
@@ -485,9 +517,11 @@ fn fit_stage(
             || (is_options && player.options_open())
             || (is_npc_shop && player.npc_shop_open())
             || (is_mail && player.mail_open())
+            || (is_game_shop && player.shop_open())
+            || (is_bigmap && player.bigmap_open())
             || (is_npc_dialog && npc_dialog.is_open);
         *transform = if enabled {
-            let max_scale = if is_npc_shop {
+            let max_scale = if is_npc_shop || is_game_shop || is_bigmap {
                 1.8
             } else if is_npc_dialog {
                 2.2
@@ -499,7 +533,7 @@ fn fit_stage(
                 is_mail && host.ime_bottom > 0.0 && player.core.mail_compose.is_some(),
                 fit.scale,
             );
-            mobile_focus_transform(
+            let focused = mobile_focus_transform(
                 fit,
                 origin,
                 focus_size,
@@ -507,7 +541,21 @@ fn fit_stage(
                 safe_edges,
                 top,
                 max_scale,
-            )
+            );
+            if is_bigmap && host.ime_bottom > 0.0 && focused_field == Some("map-search") {
+                keep_local_y_above_ime(
+                    focused,
+                    origin,
+                    size,
+                    488.0,
+                    fit,
+                    Vec2::new(window.width(), window.height()),
+                    safe_edges,
+                    top,
+                )
+            } else {
+                focused
+            }
         } else {
             UiTransform::default()
         };
@@ -548,10 +596,7 @@ fn mail_editor_focus_size(panel_size: Vec2, editing: bool, scale: f32) -> Vec2 {
         return panel_size;
     }
     let scale = scale.max(0.01);
-    Vec2::new(
-        panel_size.x,
-        110.0 + (44.0 / scale).max(28.0) + 8.0 / scale,
-    )
+    Vec2::new(panel_size.x, 110.0 + (44.0 / scale).max(28.0) + 8.0 / scale)
 }
 
 fn mobile_focus_transform(
@@ -593,6 +638,31 @@ fn mobile_focus_transform(
         scale: Vec2::splat(scale),
         ..default()
     }
+}
+
+/// When a full-height panel cannot fit above a landscape IME, prioritize the
+/// actual edited control rather than centering the whole panel behind it.
+fn keep_local_y_above_ime(
+    mut transform: UiTransform,
+    origin: Vec2,
+    panel_size: Vec2,
+    local_y: f32,
+    fit: CrystalStageTransform,
+    viewport: Vec2,
+    safe_edges: Vec4,
+    root_top: f32,
+) -> UiTransform {
+    const IME_GUTTER: f32 = 8.0;
+    let (Val::Px(dx), Val::Px(dy)) = (transform.translation.x, transform.translation.y) else {
+        return transform;
+    };
+    let center = origin + panel_size * 0.5;
+    let current_y = center.y + dy + transform.scale.y * (origin.y + local_y - center.y);
+    let target_y = (viewport.y - safe_edges.w - IME_GUTTER) / fit.scale.max(0.01) - root_top;
+    if current_y > target_y {
+        transform.translation = Val2::px(dx, dy + target_y - current_y);
+    }
+    transform
 }
 
 // Keep the two text fields visible while IME is open. Temporarily collapse
@@ -2170,6 +2240,32 @@ mod tests {
     }
 
     #[test]
+    fn big_map_search_stays_above_landscape_ime() {
+        let viewport = Vec2::new(1600.0, 720.0);
+        let fit = CrystalStageTransform::fit(viewport.x, viewport.y);
+        let origin = Vec2::new(132.0, 134.0);
+        let size = Vec2::new(760.0, 500.0);
+        let safe_edges = Vec4::new(0.0, 0.0, 0.0, 417.0);
+        let root_top = fit.offset_y / fit.scale;
+        let centered =
+            mobile_focus_transform(fit, origin, size, viewport, safe_edges, root_top, 1.8);
+        let focused = keep_local_y_above_ime(
+            centered, origin, size, 488.0, fit, viewport, safe_edges, root_top,
+        );
+        let (Val::Px(centered_y), Val::Px(focused_y)) =
+            (centered.translation.y, focused.translation.y)
+        else {
+            panic!("focus translation must stay in logical pixels")
+        };
+        assert!(focused_y < centered_y);
+        let center = origin + size * 0.5;
+        let search_bottom =
+            (root_top + center.y + focused_y + focused.scale.y * (origin.y + 488.0 - center.y))
+                * fit.scale;
+        assert!(search_bottom <= viewport.y - safe_edges.w - 8.0 + 0.001);
+    }
+
+    #[test]
     fn focused_panel_bounds_stay_inside_phone_safe_viewports() {
         for (width, height) in [(891.0, 411.0), (731.0, 411.0), (610.0, 274.0)] {
             let fit = CrystalStageTransform::fit(width, height);
@@ -2182,10 +2278,14 @@ mod tests {
                 (Vec2::new(0.0, 224.0), Vec2::new(360.0, 360.0)),
                 (Vec2::ZERO, Vec2::new(440.0, 224.0)),
                 (Vec2::new(562.0, 5.0), Vec2::new(312.0, 444.0)),
+                (Vec2::new(164.0, 146.0), Vec2::new(696.0, 476.0)),
+                (Vec2::new(132.0, 134.0), Vec2::new(760.0, 500.0)),
             ] {
-                let is_npc_shop = size == Vec2::new(242.0, 330.0)
-                    || size == Vec2::new(360.0, 360.0);
-                let max_scale = if is_npc_shop {
+                let is_bounded_large_panel = size == Vec2::new(242.0, 330.0)
+                    || size == Vec2::new(360.0, 360.0)
+                    || size == Vec2::new(696.0, 476.0)
+                    || size == Vec2::new(760.0, 500.0);
+                let max_scale = if is_bounded_large_panel {
                     1.8
                 } else if size == Vec2::new(440.0, 224.0) {
                     2.2
@@ -2222,7 +2322,7 @@ mod tests {
                 if size == Vec2::new(440.0, 224.0) {
                     assert!(transform.scale.x <= 2.2);
                     assert!(28.0 * fit.scale * transform.scale.y * 2.625 >= 55.0);
-                } else if max_scale == 1.8 {
+                } else if size == Vec2::new(242.0, 330.0) || size == Vec2::new(360.0, 360.0) {
                     assert!(transform.scale.x <= 1.8);
                     assert!(32.0 * fit.scale * transform.scale.y * 2.625 >= 48.0);
                 }

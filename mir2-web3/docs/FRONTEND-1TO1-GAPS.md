@@ -1,5 +1,22 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: the real shared Crystal GameShop and
+> BigMap roots now receive bounded phone focus and temporarily occlude the
+> desktop HUD/chat tree while open. GameShop no longer clips its transformed
+> product grid/footer; BigMap keeps its search control above the landscape IME.
+> Real ADB taps cover GameShop selection, quantity, 8+4 paging and close, plus
+> BigMap NPC selection/scroll, packaged world/local artwork, search filtering
+> and close at 2340x1080, 1920x1080 and 1600x720. Android UI Preview passes
+> 175/175, Gradle Debug/UI Preview tests, arm64-v8a API31 release, full
+> licensed-asset package and streamed install pass. The 516,903,659-byte APK
+> SHA-256 is
+> `ca1f5b625cdb896c3d32576c13739bbf5eb822a2df517ea435de8cc9c0f8db2e`.
+> Evidence:
+> `docs/generated/player-qa/native-android-gameshop-bigmap-focus-20260913/README.md`.
+> Catalog/player/NPC state is an offline fixture; Buy and Go To were not
+> tapped. Approved-WSS, live transaction/transition and physical-device
+> acceptance remain open.
+
 > 2026-09-13 Android current change: the shared NPC Sell, Repair and Special
 > Repair surface no longer collapses its text and controls inside a shrinkable
 > Flex column. One bounded 360x360 shared layout now exposes the title,

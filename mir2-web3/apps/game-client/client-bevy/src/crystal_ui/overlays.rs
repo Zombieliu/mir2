@@ -2398,7 +2398,7 @@ struct OverlayChatDraft;
 pub struct OverlayMail;
 
 #[derive(Component)]
-struct OverlayBigMap;
+pub struct OverlayBigMap;
 
 /// Testable ECS provenance markers for the Big Map-only render tree. They
 /// intentionally retain the authoritative renderer projection rather than
@@ -2434,7 +2434,7 @@ const NPC_SHOP_SERVICE_PANEL_SIZE: Vec2 = Vec2::new(360.0, 360.0);
 const NPC_SHOP_SERVICE_ACTION_TOP: f32 = 326.0;
 
 #[derive(Component)]
-struct OverlayGameShop;
+pub struct OverlayGameShop;
 
 #[derive(Component)]
 struct OverlayInventoryGridViewport;
@@ -3511,7 +3511,6 @@ fn spawn_overlay_root(mut commands: Commands) {
                     width: Val::Px(GAME_SHOP_PANEL_SIZE.width as f32),
                     height: Val::Px(GAME_SHOP_PANEL_SIZE.height as f32),
                     display: Display::None,
-                    overflow: Overflow::clip(),
                     ..default()
                 },
                 BackgroundColor(Color::NONE),
@@ -12267,18 +12266,23 @@ fn render_game_shop(
     ui: &UiReadModel,
     state: &NativePlayerUiState,
 ) {
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(0.0),
-            top: Val::Px(0.0),
-            width: Val::Px(GAME_SHOP_PANEL_SIZE.width as f32),
-            height: Val::Px(GAME_SHOP_PANEL_SIZE.height as f32),
-            overflow: Overflow::clip(),
-            ..default()
-        },
-        BackgroundColor(PANEL_BG),
-    ));
+    // The real Title/749 artwork already supplies the complete opaque frame.
+    // Keep a plain fallback only for renderer-less tests; placing PANEL_BG in
+    // front of the image makes the Crystal border and footer almost black.
+    if asset_server.is_none() {
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(0.0),
+                top: Val::Px(0.0),
+                width: Val::Px(GAME_SHOP_PANEL_SIZE.width as f32),
+                height: Val::Px(GAME_SHOP_PANEL_SIZE.height as f32),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ));
+    }
     if let Some(asset_server) = asset_server {
         spawn_overlay_frame(
             parent,
