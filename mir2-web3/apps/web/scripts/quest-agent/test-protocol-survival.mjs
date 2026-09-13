@@ -54,6 +54,7 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questPostRetreatRecoveryRatio(54, 'Warrior'), 0.75);
   assert.equal(questPostRetreatRecoveryRatio(62, 'Warrior'), 0.75);
   assert.equal(questEmergencyEscapeHpRatio(54), 0.35);
+  assert.equal(questEmergencyEscapeHpRatio(60), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(62), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(49), 0);
 });
@@ -96,6 +97,7 @@ test('a resumed expedition preserves field progress while it still has a public 
     tooltipSource: { info: { item_index: 717 } },
   });
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 62), true);
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 60), true);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(1)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(3)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(4)] }, 54), false);
@@ -107,6 +109,7 @@ test('long expeditions accept a partial but still conservative funded departure 
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(54, 'Taoist'), { hp: 64, mp: 64 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(54, 'Warrior'), { hp: 64, mp: 0 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(62, 'Warrior'), { hp: 64, mp: 0 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(60, 'Wizard'), { hp: 64, mp: 0 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(49, 'Wizard'), { hp: 0, mp: 0 });
 });
 

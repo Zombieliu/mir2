@@ -45,7 +45,7 @@ export function journeyMpRestockTargetForQuest(questId, className, {
 export function journeyExpeditionDepartureFloorForQuest(questId, className) {
   const id = Number(questId);
   const normalizedClass = String(className ?? '').trim().toLowerCase();
-  const expedition = id === 54 || id === 62;
+  const expedition = [54, 60, 62].includes(id);
   return {
     hp: expedition ? 64 : 0,
     mp: id === 54 && ['wizard', 'taoist'].includes(normalizedClass) ? 64 : 0,
@@ -70,7 +70,7 @@ export function questPostRetreatRecoveryRatio(questId, className) {
 }
 
 export function questEmergencyEscapeHpRatio(questId) {
-  return [54, 62].includes(Number(questId)) ? 0.35 : 0;
+  return [54, 60, 62].includes(Number(questId)) ? 0.35 : 0;
 }
 
 const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62]);
@@ -269,7 +269,7 @@ export function isLivingUnsafePackRetreatFailure(snapshot, error) {
 }
 
 export function requiresExpeditionEscapeRestock(snapshot, questId, minimum = 1) {
-  return [54, 62].includes(Number(questId)) &&
+  return [54, 60, 62].includes(Number(questId)) &&
     emergencyTeleportStock(snapshot) < nonnegativeInteger(minimum, 'emergency teleport minimum');
 }
 
