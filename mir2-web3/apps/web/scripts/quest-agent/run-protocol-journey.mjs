@@ -55,7 +55,11 @@ import {
   finishReadySupplyFundingQuest,
   safeFundingVenisonTargetCount,
 } from './protocol-funding.mjs';
-import { cofarmFollowers, shouldDeferCofarmQuest } from './protocol-quest-scheduling.mjs';
+import {
+  cofarmFollowers,
+  prioritizeNearCompleteActiveQuests,
+  shouldDeferCofarmQuest,
+} from './protocol-quest-scheduling.mjs';
 
 const output = path.resolve(process.env.MIR2_JOURNEY_OUTPUT ?? 'output/protocol-journey');
 const maxAttackAttempts = 120;
@@ -182,7 +186,8 @@ try {
       ),
     });
     const profile = JSON.parse(await fs.readFile(new URL('../../../../config/quest-guidance/newcomer-journey-v1.json', import.meta.url), 'utf8'));
-    const ids = profile.chapters.flatMap(c => [...c.questIds, ...(c.classQuestIds?.[className] ?? [])]);
+    const routeIds = profile.chapters.flatMap(c => [...c.questIds, ...(c.classQuestIds?.[className] ?? [])]);
+    const ids = prioritizeNearCompleteActiveQuests(routeIds, client.snapshot?.questLog);
     const progressionCandidates = route.quests.flatMap(quest =>
       [...(quest.rewards?.fixedItems ?? []), ...(quest.rewards?.selectableItems ?? [])]
         .map(item => ({ name: item.itemName, questId: quest.questId })));
