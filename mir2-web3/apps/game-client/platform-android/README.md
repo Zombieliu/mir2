@@ -83,8 +83,12 @@ at build time; there is no default production endpoint. Cleartext, embedded
 credentials, query credentials and redirects are rejected.
 
 The shared shell's intents send the existing BrowserCommand `clientVersion`,
-`login {accountId,password}`, `startGame {characterIndex}` and `keepAlive`
-shapes (see Windows `native_protocol.rs` and Android `gateway_bridge.rs`).
+`login {accountId,password}`, `newCharacter {name,class,gender}`,
+`deleteCharacter {characterIndex}`, `startGame {characterIndex}` and
+`keepAlive` shapes (see Windows `native_protocol.rs` and Android
+`gateway_bridge.rs`). Character create/delete stay in the dedicated
+authenticated roster state machine. They are serialized against StartGame,
+and only validated success packets update the shared selectable roster.
 An account ID is only a username paired with a password, never an authenticated
 identity assertion. It does not send PasskeyLogin or invent authentication.
 LoginSuccess supplies the shared selectable roster including class/gender/level.
@@ -160,9 +164,9 @@ surfaces enable FLAG_SECURE. No genuine credentials were entered during UI QA.
 On background, disconnect, timeout or transport failure, the socket and old
 roster/position are discarded. Reconnect requires an explicit button and fresh
 login. No command is replayed and nativeResumeV1 is not advertised. Automatic
-credential-based resume, process-death session persistence, character creation,
-unpackaged player/equipment/mount variants, spell-specific effect behavior and
-complete gameplay remain subsequent work. The
+credential-based resume, process-death session persistence, unpackaged
+player/equipment/mount variants, spell-specific effect behavior and complete
+gameplay remain subsequent work. The
 existing reducer command queue is connected to the authenticated in-game
 socket through the bounded JNI lease mailbox described below. Authoritative
 transaction receipts and the entity packet families described below return to

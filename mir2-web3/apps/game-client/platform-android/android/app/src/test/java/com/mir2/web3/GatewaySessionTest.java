@@ -69,6 +69,16 @@ public class GatewaySessionTest {
         throw new AssertionError("Missing phase " + expected);
     }
 
+    private GatewaySession.View accountEvent(String expected) throws Exception {
+        long until = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (System.nanoTime() < until) {
+            GatewaySession.View view = views.poll(100, TimeUnit.MILLISECONDS);
+            if (view != null && view.accountEvent != null
+                    && expected.equals(view.accountEvent.optString("type"))) return view;
+        }
+        throw new AssertionError("Missing account event " + expected);
+    }
+
     private void connect() throws Exception {
         session.connect(server.url("/ws").toString().replace("https://", "wss://"));
         phase(GatewaySession.Phase.READY);
@@ -119,6 +129,62 @@ public class GatewaySessionTest {
         roster();
         session.start(999);
         assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void characterCreateAndDeleteUseDedicatedRosterPhaseCommands() throws Exception {
+        connect(); roster();
+        session.createCharacter(" NewHero ", "Wizard", "Female");
+        JSONObject create = commands.poll(3, TimeUnit.SECONDS);
+        assertEquals("newCharacter", create.getString("type"));
+        assertEquals("NewHero", create.getString("name"));
+        assertEquals("Wizard", create.getString("class"));
+        assertEquals("Female", create.getString("gender"));
+        assertEquals(4, create.length());
+        session.start(7);
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+
+        peer.send("{\"type\":\"packet\",\"packet\":\"NewCharacterSuccess\",\"payload\":{\"character\":{\"index\":9,\"name\":\"NewHero\",\"level\":1,\"class\":\"Wizard\",\"gender\":\"Female\"}}}");
+        GatewaySession.View created = accountEvent("characterCreated");
+        assertEquals(GatewaySession.Phase.CHARACTERS, created.phase);
+        assertEquals(2, created.characters.size());
+        assertEquals(9, created.characters.get(0).index);
+        assertEquals("NewHero", created.accountEvent.getJSONObject("character").getString("name"));
+
+        session.deleteCharacter(9);
+        JSONObject delete = commands.poll(3, TimeUnit.SECONDS);
+        assertEquals("deleteCharacter", delete.getString("type"));
+        assertEquals(9, delete.getInt("characterIndex"));
+        assertEquals(2, delete.length());
+        peer.send("{\"type\":\"packet\",\"packet\":\"DeleteCharacterSuccess\",\"payload\":{\"characterIndex\":9}}");
+        GatewaySession.View deleted = accountEvent("characterDeleted");
+        assertEquals(9, deleted.accountEvent.getInt("characterIndex"));
+        assertEquals(1, deleted.characters.size());
+        assertEquals(7, deleted.characters.get(0).index);
+    }
+
+    @Test public void characterOperationFailuresAreBoundedAndRetryable() throws Exception {
+        connect(); roster();
+        session.createCharacter("", "Wizard", "Female");
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        GatewaySession.View invalid = phase(GatewaySession.Phase.CHARACTERS);
+        assertNull(invalid.accountEvent);
+
+        session.createCharacter("NewHero", "Wizard", "Female");
+        assertEquals("newCharacter", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"NewCharacter\",\"payload\":{\"result\":1}}");
+        GatewaySession.View rejectedCreate = accountEvent("operationFailure");
+        assertTrue(rejectedCreate.accountEvent.getString("message").contains("creation"));
+        assertEquals(1, rejectedCreate.characters.size());
+
+        session.deleteCharacter(7);
+        assertEquals("deleteCharacter", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"DeleteCharacter\",\"payload\":{\"result\":1}}");
+        GatewaySession.View rejectedDelete = accountEvent("operationFailure");
+        assertTrue(rejectedDelete.accountEvent.getString("message").contains("deletion"));
+        assertEquals(1, rejectedDelete.characters.size());
+
+        session.start(7);
+        assertEquals("startGame", commands.poll(3, TimeUnit.SECONDS).getString("type"));
     }
 
     @Test public void rejectedLoginNeverEntersCharacterSelection() throws Exception {
@@ -252,6 +318,10 @@ public class GatewaySessionTest {
         peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":302,\"y\":634}}");
         phase(GatewaySession.Phase.IN_GAME);
         assertFalse(session.sendAuthenticated(GatewaySession.object("type", "login", "accountId", "forged")));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "newCharacter",
+                "name", "Forged", "class", "Warrior", "gender", "Male")));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "deleteCharacter",
+                "characterIndex", 7)));
         assertTrue(session.sendAuthenticated(GatewaySession.object("type", "attack", "objectId", 99)));
         JSONObject command = commands.poll(3, TimeUnit.SECONDS);
         assertEquals("attack", command.getString("type"));

@@ -22,6 +22,7 @@ import org.json.JSONObject;
 /** Android transport for the existing BrowserCommand protocol. No gameplay rules. */
 final class GatewaySession implements AutoCloseable {
     enum Phase { DISCONNECTED, CONNECTING, READY, LOGIN, CHARACTERS, STARTING, IN_GAME }
+    private enum AccountOperation { NONE, CREATE, DELETE }
 
     static final class Character {
         final int index;
@@ -41,12 +42,15 @@ final class GatewaySession implements AutoCloseable {
         final List<Character> characters;
         final WorldPosition world;
         final String worldSnapshot;
-        View(Phase phase, String message, List<Character> characters, WorldPosition world, String worldSnapshot) {
+        final JSONObject accountEvent;
+        View(Phase phase, String message, List<Character> characters, WorldPosition world,
+                String worldSnapshot, JSONObject accountEvent) {
             this.phase = phase;
             this.message = message;
             this.characters = Collections.unmodifiableList(new ArrayList<>(characters));
             this.world = world;
             this.worldSnapshot = worldSnapshot;
+            this.accountEvent = accountEvent;
         }
     }
 
@@ -79,6 +83,9 @@ final class GatewaySession implements AutoCloseable {
     private Integer x, y;
     private boolean startAccepted;
     private String pendingSnapshot;
+    private AccountOperation accountOperation = AccountOperation.NONE;
+    private Integer pendingDeleteIndex;
+    private JSONObject pendingAccountEvent;
     private boolean closed;
 
     GatewaySession(OkHttpClient client, Consumer<View> observer) {
@@ -172,11 +179,41 @@ final class GatewaySession implements AutoCloseable {
     }
 
     synchronized void start(int index) {
-        if (phase != Phase.CHARACTERS || characters.stream().noneMatch(c -> c.index == index)) return;
+        if (phase != Phase.CHARACTERS || accountOperation != AccountOperation.NONE
+                || characters.stream().noneMatch(c -> c.index == index)) return;
         resetWorld();
         phase = Phase.STARTING;
         armDeadline(generation);
         if (send(object("type", "startGame", "characterIndex", index))) publish("Entering world…");
+    }
+
+    synchronized void createCharacter(String name, String className, String genderName) {
+        if (phase != Phase.CHARACTERS || accountOperation != AccountOperation.NONE) return;
+        String trimmed = name.trim();
+        int nameLength = trimmed.codePointCount(0, trimmed.length());
+        if (nameLength < 1 || nameLength > 18
+                || !(className.equals("Warrior") || className.equals("Wizard") || className.equals("Taoist"))
+                || !(genderName.equals("Male") || genderName.equals("Female"))) {
+            publish("Enter a valid character name, class and gender");
+            return;
+        }
+        accountOperation = AccountOperation.CREATE;
+        armDeadline(generation);
+        if (send(object("type", "newCharacter", "name", trimmed,
+                "class", className, "gender", genderName))) {
+            publish("Creating character…");
+        }
+    }
+
+    synchronized void deleteCharacter(int index) {
+        if (phase != Phase.CHARACTERS || accountOperation != AccountOperation.NONE
+                || characters.stream().noneMatch(c -> c.index == index)) return;
+        accountOperation = AccountOperation.DELETE;
+        pendingDeleteIndex = index;
+        armDeadline(generation);
+        if (send(object("type", "deleteCharacter", "characterIndex", index))) {
+            publish("Deleting character…");
+        }
     }
 
     /** Write one Rust-produced gameplay BrowserCommand on this authenticated session. */
@@ -186,6 +223,7 @@ final class GatewaySession implements AutoCloseable {
         if (type.isEmpty() || type.length() > 64
                 || type.equals("clientVersion") || type.equals("keepAlive")
                 || type.equals("login") || type.equals("newAccount")
+                || type.equals("newCharacter") || type.equals("deleteCharacter")
                 || type.equals("startGame") || type.equals("passkeyLogin")) {
             return false;
         }
@@ -258,6 +296,45 @@ final class GatewaySession implements AutoCloseable {
                 cancelDeadline();
                 publish(next.isEmpty() ? "Login accepted. No characters on this account."
                         : "Login accepted. Select a character.");
+                break;
+            case "NewCharacterSuccess":
+                if (phase != Phase.CHARACTERS || accountOperation != AccountOperation.CREATE) return;
+                Character created = parseCharacter(payload.getJSONObject("character"));
+                if (characters.stream().anyMatch(c -> c.index == created.index)) {
+                    throw new IllegalArgumentException("duplicate character index");
+                }
+                characters = new ArrayList<>(characters);
+                characters.add(0, created);
+                accountOperation = AccountOperation.NONE;
+                cancelDeadline();
+                pendingAccountEvent = object("type", "characterCreated",
+                        "character", characterJson(created));
+                publish("Character created. Select a character.");
+                break;
+            case "NewCharacter":
+                if (phase == Phase.CHARACTERS && accountOperation == AccountOperation.CREATE) {
+                    failAccountOperation("Character creation was rejected.");
+                }
+                break;
+            case "DeleteCharacterSuccess":
+                if (phase != Phase.CHARACTERS || accountOperation != AccountOperation.DELETE) return;
+                int deletedIndex = integer(payload, "characterIndex");
+                if (pendingDeleteIndex == null || pendingDeleteIndex != deletedIndex
+                        || characters.stream().noneMatch(c -> c.index == deletedIndex)) {
+                    throw new IllegalArgumentException("delete character index");
+                }
+                characters = new ArrayList<>(characters);
+                characters.removeIf(c -> c.index == deletedIndex);
+                accountOperation = AccountOperation.NONE;
+                pendingDeleteIndex = null;
+                cancelDeadline();
+                pendingAccountEvent = object("type", "characterDeleted", "characterIndex", deletedIndex);
+                publish("Character deleted.");
+                break;
+            case "DeleteCharacter":
+                if (phase == Phase.CHARACTERS && accountOperation == AccountOperation.DELETE) {
+                    failAccountOperation("Character deletion was rejected.");
+                }
                 break;
             case "Login": case "LoginBanned":
                 if (phase == Phase.LOGIN) {
@@ -374,6 +451,18 @@ final class GatewaySession implements AutoCloseable {
     private void resetWorld() {
         player = map = ""; x = y = null; startAccepted = false; pendingSnapshot = null;
     }
+    private void resetAccountOperation() {
+        accountOperation = AccountOperation.NONE;
+        pendingDeleteIndex = null;
+        pendingAccountEvent = null;
+    }
+    private void failAccountOperation(String message) {
+        accountOperation = AccountOperation.NONE;
+        pendingDeleteIndex = null;
+        cancelDeadline();
+        pendingAccountEvent = object("type", "operationFailure", "message", message);
+        publish(message);
+    }
     synchronized void disconnect(String reason) {
         generation++;
         cancelDeadline();
@@ -383,6 +472,7 @@ final class GatewaySession implements AutoCloseable {
         phase = Phase.DISCONNECTED;
         characters.clear();
         resetWorld();
+        resetAccountOperation();
         if (old != null) old.cancel();
         publish(reason);
     }
@@ -412,7 +502,19 @@ final class GatewaySession implements AutoCloseable {
                 ? new WorldPosition(player, map, x, y) : null;
         String snapshot = world == null ? null : pendingSnapshot;
         if (snapshot != null) pendingSnapshot = null; // Deliver once, never replay on a later packet.
-        observer.accept(new View(phase, text, characters, world, snapshot));
+        JSONObject accountEvent = pendingAccountEvent;
+        pendingAccountEvent = null;
+        observer.accept(new View(phase, text, characters, world, snapshot, accountEvent));
+    }
+    private static Character parseCharacter(JSONObject row) throws JSONException {
+        int index = integer(row, "index");
+        if (index < 0) throw new IllegalArgumentException("character index");
+        return new Character(index, bounded(row.getString("name")), row.optInt("level", 0),
+                row.optString("class", "Unknown"), row.optString("gender", "Unknown"));
+    }
+    private static JSONObject characterJson(Character character) {
+        return object("index", character.index, "name", character.name, "level", character.level,
+                "className", character.className, "genderName", character.genderName);
     }
     private static String bounded(String value) {
         if (value.isBlank() || value.length() > 128) throw new IllegalArgumentException("text limit");

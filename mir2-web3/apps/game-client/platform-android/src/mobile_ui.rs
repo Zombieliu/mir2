@@ -1455,11 +1455,10 @@ mod tests {
         let pointer = app.world().resource::<TouchPointer>();
         assert_eq!(pointer.owner, None);
         assert!(pointer.wait_for_release);
-        assert!(
-            !app.world()
-                .resource::<ButtonInput<MouseButton>>()
-                .pressed(MouseButton::Left)
-        );
+        assert!(!app
+            .world()
+            .resource::<ButtonInput<MouseButton>>()
+            .pressed(MouseButton::Left));
     }
 
     #[test]
@@ -1495,11 +1494,10 @@ mod tests {
         app.update();
         assert_eq!(app.world().resource::<JoystickState>().owner, None);
         assert_eq!(app.world().resource::<TouchPointer>().owner, None);
-        assert!(
-            !app.world()
-                .resource::<ButtonInput<MouseButton>>()
-                .pressed(MouseButton::Left)
-        );
+        assert!(!app
+            .world()
+            .resource::<ButtonInput<MouseButton>>()
+            .pressed(MouseButton::Left));
 
         app.world_mut()
             .resource_mut::<AndroidShellState>()
@@ -1532,11 +1530,10 @@ mod tests {
         let pointer = app.world().resource::<TouchPointer>();
         assert_eq!(pointer.owner, None);
         assert!(pointer.wait_for_release);
-        assert!(
-            !app.world()
-                .resource::<ButtonInput<MouseButton>>()
-                .pressed(MouseButton::Left)
-        );
+        assert!(!app
+            .world()
+            .resource::<ButtonInput<MouseButton>>()
+            .pressed(MouseButton::Left));
     }
 
     #[test]

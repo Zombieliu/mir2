@@ -100,7 +100,8 @@ public final class MainActivity extends GameActivity {
             }
             nativeEvent(GatewaySession.object("phase", view.phase.name(), "message", view.message,
                     "characters", roster, "world", view.world == null ? JSONObject.NULL : view.world.toJson(),
-                    "worldSnapshot", view.worldSnapshot == null ? JSONObject.NULL : view.worldSnapshot).toString());
+                    "worldSnapshot", view.worldSnapshot == null ? JSONObject.NULL : view.worldSnapshot,
+                    "accountEvent", view.accountEvent == null ? JSONObject.NULL : view.accountEvent).toString());
             GatewayHostPolicy.Action hostAction = gatewayHostPolicy.observe(
                     view.phase, view.worldSnapshot != null);
             if (hostAction == GatewayHostPolicy.Action.START) {
@@ -172,6 +173,11 @@ public final class MainActivity extends GameActivity {
                     switch (command.getString("type")) {
                         case "connect": connect(); break;
                         case "login": if (!BuildConfig.UI_PREVIEW) session.login(command.getString("account"), command.getString("password")); break;
+                        case "createCharacter": if (!BuildConfig.UI_PREVIEW) session.createCharacter(
+                                command.getString("name"), command.getString("className"),
+                                command.getString("genderName")); break;
+                        case "deleteCharacter": if (!BuildConfig.UI_PREVIEW) session.deleteCharacter(
+                                command.getInt("index")); break;
                         case "start": if (!BuildConfig.UI_PREVIEW) session.start(command.getInt("index")); break;
                         case "disconnect": session.disconnect("Disconnected. Reconnect to refresh server state."); break;
                         case "keyboard":

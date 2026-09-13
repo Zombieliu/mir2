@@ -1,5 +1,22 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-13 Android current change: the shared Crystal New Character and
+> Delete Character surfaces now reach Android's dedicated authenticated roster
+> state machine. Create/delete are serialized against StartGame, use the exact
+> existing BrowserCommand fields, and change the shared roster only after
+> validated `NewCharacterSuccess` / `DeleteCharacterSuccess`; failure is
+> retryable without optimistic roster mutation. Local selection/modal intents
+> no longer receive the Android adapter's generic unwired-operation error.
+> Android Rust passes 182/182, MockWebServer passes 14/14 in both Debug and UI
+> Preview, arm64-v8a API31 check/package/streamed install pass. The
+> 444,365,736-byte UI Preview APK SHA-256 is
+> `1afade922df0bbd4a802f2be7289832d31c95c27154b4a267319f71ca1c1241b`.
+> API31 screenshots show both labelled offline shared surfaces. Evidence:
+> `docs/generated/player-qa/native-android-character-operations-20260913/README.md`.
+> No live account was mutated: approved-WSS real login/StartGame, public asset
+> alignment, wide-phone pillarbox acceptance and physical-device acceptance
+> remain open.
+
 > 2026-09-13 Android current change: gameplay touch ownership now supports a
 > held joystick finger plus an independent action finger. Bevy 0.19 only uses
 > its first pressed touch for UI focus, so Android now hit-tests later touch

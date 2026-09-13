@@ -187,6 +187,49 @@ fn host_world_position(value: &Value, screen: Screen) -> Option<HostWorldPositio
     Some(world)
 }
 
+fn host_account_event(value: &Value) -> Option<Event> {
+    let event = value.get("accountEvent")?.as_object()?;
+    match event.get("type")?.as_str()? {
+        "characterCreated" => {
+            let character = event.get("character")?.as_object()?;
+            let index = i32::try_from(character.get("index")?.as_i64()?).ok()?;
+            let name = character.get("name")?.as_str()?;
+            let class_name = character.get("className")?.as_str()?;
+            let gender_name = character.get("genderName")?.as_str()?;
+            if index < 0
+                || [name, class_name, gender_name]
+                    .iter()
+                    .any(|text| text.trim().is_empty() || text.chars().count() > 128)
+            {
+                return None;
+            }
+            Some(Event::CharacterCreated {
+                character: CharacterSummary::new(
+                    index,
+                    name,
+                    character
+                        .get("level")
+                        .and_then(Value::as_u64)
+                        .unwrap_or(0)
+                        .min(u16::MAX as u64) as u16,
+                    class_name,
+                    gender_name,
+                ),
+            })
+        }
+        "characterDeleted" => Some(Event::CharacterDeleted {
+            character_index: i32::try_from(event.get("characterIndex")?.as_i64()?).ok()?,
+        }),
+        "operationFailure" => {
+            let message = event.get("message")?.as_str()?;
+            (message.chars().count() <= 256).then(|| Event::OperationFailure {
+                message: message.to_owned(),
+            })
+        }
+        _ => None,
+    }
+}
+
 fn begin_render_ready_scene_transition(model: &mut NativeShellModel) {
     if model.screen != Screen::InGame {
         return;
@@ -1376,6 +1419,9 @@ fn receive(
             .as_str()
             .unwrap_or("Connection unavailable")
             .to_owned();
+        if let Some(event) = host_account_event(&value) {
+            model.apply_gateway_event(event);
+        }
         match phase {
             "UNCONFIGURED" => {
                 model.apply_gateway_event(Event::Disconnect { reason: None });
@@ -1665,6 +1711,7 @@ fn forward_intents(
     mut intents: ResMut<NativeUiIntentQueue>,
     mut effects: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::UiEffectQueue>>,
 ) {
+    let mut create_character_command_sent = false;
     for intent in intents.drain() {
         match intent {
             Intent::Login | Intent::SafeKeyEnter if host.phase == "READY" => {
@@ -1679,6 +1726,28 @@ fn forward_intents(
                 });
                 model.login.clear_password();
             }
+            Intent::CreateCharacter {
+                name,
+                class_name,
+                gender_name,
+            } if host.phase == "CHARACTERS"
+                && model.create_character_request_in_flight
+                && !create_character_command_sent =>
+            {
+                create_character_command_sent = true;
+                send(json!({
+                    "type":"createCharacter",
+                    "name":name.trim(),
+                    "className":class_name,
+                    "genderName":gender_name,
+                }));
+            }
+            Intent::ConfirmDeleteCharacter if host.phase == "CHARACTERS" => {
+                if let Some(index) = model.delete_command_pending() {
+                    model.mark_delete_command_sent();
+                    send(json!({"type":"deleteCharacter","index":index}));
+                }
+            }
             Intent::StartGame => {
                 if let Some(index) = model.selected_character_index {
                     send(json!({"type":"start","index":index}));
@@ -1691,12 +1760,29 @@ fn forward_intents(
                 }
                 send(json!({"type":"disconnect"}));
             }
-            _ => {
+            Intent::RegisterAccount
+            | Intent::SubmitChangePassword { .. }
+            | Intent::CreateCharacter { .. }
+            | Intent::ConfirmDeleteCharacter => {
                 model.apply_gateway_event(Event::OperationFailure {
                     message: "This account operation is not wired in the Android UI milestone."
                         .into(),
                 });
             }
+            Intent::OpenChangePassword
+            | Intent::CancelChangePassword
+            | Intent::OpenSafeKey
+            | Intent::CloseSafeKey
+            | Intent::SafeKeyFocusAccount
+            | Intent::SafeKeyFocusPassword
+            | Intent::SafeKeyPress { .. }
+            | Intent::SafeKeyDelete
+            | Intent::SafeKeyRandom
+            | Intent::OpenCharacterCreate
+            | Intent::CancelCharacterCreate
+            | Intent::DeleteCharacter { .. }
+            | Intent::CancelDeleteCharacter
+            | Intent::SelectCharacter { .. } => {}
         }
     }
 }
@@ -2800,6 +2886,94 @@ mod tests {
         assert_eq!(model.screen, Screen::CharacterSelect);
         assert_eq!(model.characters[0].class_name, "Wizard");
         assert_eq!(model.selected_character_index, Some(7));
+        assert!(model.apply_ui_intent(Intent::OpenCharacterCreate));
+        app.world_mut()
+            .resource_mut::<NativeUiIntentQueue>()
+            .push(Intent::OpenCharacterCreate);
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::CharacterCreate
+        );
+        assert!(OUTBOX.lock().unwrap().is_empty());
+        let create = Intent::CreateCharacter {
+            name: "NewHero".into(),
+            class_name: "Taoist".into(),
+            gender_name: "Female".into(),
+        };
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeShellModel>()
+            .apply_ui_intent(create.clone()));
+        app.world_mut()
+            .resource_mut::<NativeUiIntentQueue>()
+            .push(create);
+        app.update();
+        let command: Value =
+            serde_json::from_str(&OUTBOX.lock().unwrap().pop_front().unwrap()).unwrap();
+        assert_eq!(
+            command,
+            json!({"type":"createCharacter","name":"NewHero","className":"Taoist","genderName":"Female"})
+        );
+        INBOX.lock().unwrap().push_back(json!({
+            "phase":"CHARACTERS",
+            "message":"Character created. Select a character.",
+            "characters":[
+                {"index":9,"name":"NewHero","level":1,"className":"Taoist","genderName":"Female"},
+                {"index":7,"name":"Fixture","level":12,"className":"Wizard","genderName":"Female"}
+            ],
+            "accountEvent":{
+                "type":"characterCreated",
+                "character":{"index":9,"name":"NewHero","level":1,"className":"Taoist","genderName":"Female"}
+            }
+        }));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .selected_character_index,
+            Some(9)
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeShellModel>()
+            .apply_ui_intent(Intent::DeleteCharacter { character_index: 9 }));
+        app.world_mut()
+            .resource_mut::<NativeUiIntentQueue>()
+            .push(Intent::DeleteCharacter { character_index: 9 });
+        app.update();
+        assert!(OUTBOX.lock().unwrap().is_empty());
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativeShellModel>()
+            .apply_ui_intent(Intent::ConfirmDeleteCharacter));
+        app.world_mut()
+            .resource_mut::<NativeUiIntentQueue>()
+            .push(Intent::ConfirmDeleteCharacter);
+        app.update();
+        let command: Value =
+            serde_json::from_str(&OUTBOX.lock().unwrap().pop_front().unwrap()).unwrap();
+        assert_eq!(command, json!({"type":"deleteCharacter","index":9}));
+        INBOX.lock().unwrap().push_back(json!({
+            "phase":"CHARACTERS",
+            "message":"Character deleted.",
+            "characters":[
+                {"index":7,"name":"Fixture","level":12,"className":"Wizard","genderName":"Female"}
+            ],
+            "accountEvent":{"type":"characterDeleted","characterIndex":9}
+        }));
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().characters.len(),
+            1
+        );
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .selected_character_index,
+            Some(7)
+        );
+        let mut model = app.world_mut().resource_mut::<NativeShellModel>();
         assert!(model.apply_ui_intent(Intent::StartGame));
         app.world_mut()
             .resource_mut::<NativeUiIntentQueue>()
