@@ -49,14 +49,19 @@ export async function travelToQuestNpc(client, quest, phase, { travel, navigate 
   // ordinary western secret-gate tile. When arriving from another province,
   // use Crystal's paid transporter first: it lands at 361,342 and avoids the
   // southern walking entrance and the ArcherGuard corridor.
-  if (String(client.snapshot.mapFileName ?? '') !== SABUK_MAP) {
-    await travel(SABUK_MAP, { preferDirectScriptedEdge: true });
+  const currentMap = String(client.snapshot.mapFileName ?? '');
+  if (currentMap === SABUK_SECRET_GATE) {
+    await travel(SABUK_MAP, { preferredTransferSource: SABUK_INNER_EXIT });
+  } else {
+    if (currentMap !== SABUK_MAP) {
+      await travel(SABUK_MAP, { preferDirectScriptedEdge: true });
+    }
+    await travel(SABUK_SECRET_GATE, { preferredTransferSource: SABUK_SAFE_OUTER_ENTRANCE });
+    // Let the map traveler own the whole inner crossing as well. D701 contains
+    // ordinary Zombies that can seal its narrow corridor; the traveler can
+    // clear a proven blocker and retry, whereas a bare navigation call cannot.
+    await travel(SABUK_MAP, { preferredTransferSource: SABUK_INNER_EXIT });
   }
-  await travel(SABUK_SECRET_GATE, { preferredTransferSource: SABUK_SAFE_OUTER_ENTRANCE });
-  // Let the map traveler own the whole inner crossing as well. D701 contains
-  // ordinary Zombies that can seal its narrow corridor; the traveler can
-  // clear a proven blocker and retry, whereas a bare navigation call cannot.
-  await travel(SABUK_MAP, { preferredTransferSource: SABUK_INNER_EXIT });
   if (!isInsideSabukMerchantGate(client.snapshot)) {
     throw new Error(
       `q${Number(quest?.questId)} ${phase} secret-gate route did not enter the Sabuk merchant quarter`,

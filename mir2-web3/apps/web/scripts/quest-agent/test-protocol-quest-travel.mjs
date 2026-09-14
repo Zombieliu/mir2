@@ -76,6 +76,23 @@ test('q111 and q112 stay inside the Sabuk merchant quarter once the detour lande
   }
 });
 
+test('a resumed q110 inside D701 continues toward the inner exit without portal ping-pong', async () => {
+  const client = clientAt('D701', 28, 22);
+  const calls = [];
+  const result = await travelToQuestNpc(client, q110, 'finish', {
+    travel: async (mapFileName, options) => {
+      calls.push(['travel', mapFileName, options]);
+      client.snapshot.mapFileName = mapFileName;
+      Object.assign(client.snapshot.entities[0], { x: 660, y: 276 });
+    },
+    navigate: async () => assert.fail('resumed crossing stays inside map travel'),
+  });
+  assert.equal(result.status, 'sabukSecretGate');
+  assert.deepEqual(calls, [[
+    'travel', '3', { preferredTransferSource: SABUK_QUEST_TRAVEL.innerExit },
+  ]]);
+});
+
 test('Sabuk detour fails closed when the authoritative landing is outside the wall', async () => {
   const client = clientAt('2', 505, 483);
   await assert.rejects(() => travelToQuestNpc(client, q110, 'finish', {
