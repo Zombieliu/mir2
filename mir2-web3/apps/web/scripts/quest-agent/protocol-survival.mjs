@@ -90,6 +90,10 @@ export function questEmergencyEscapeHpRatio(questId, className = '') {
   // policy polls. Start the escape after the first effective hit so an unlucky
   // random landing still leaves enough HP to survive the item cooldown.
   if (id === 98 && normalizedClass === 'wizard') return 0.9;
+  // R76 repeatedly found only 0/2 and 1/1 Dung groups in D022. The Taoist can
+  // take those measured pulls with Healing, but must escape before the pack
+  // reaches the generic one-third-health floor.
+  if (id === 98 && normalizedClass === 'taoist') return 0.65;
   if ([60, 65, 113].includes(id) && normalizedClass === 'wizard') return 0.65;
   return DANGEROUS_EXPEDITION_QUEST_IDS.has(id) ? 0.35 : 0;
 }
@@ -126,6 +130,7 @@ export function questRetreatProfile(questId, className = '') {
   const fragileMineExpedition = [54, 65].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
   const healingMineExpedition = [54, 65].includes(id) && normalizedClass === 'taoist';
   const rangedInsectExpedition = [60, 113].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
+  const rangedWoomaExpedition = id === 98 && ['wizard', 'taoist'].includes(normalizedClass);
   const rangedMinePassage = id === 65 && fragileMineExpedition;
   const warriorWoomaHunt = id === 99 && normalizedClass === 'warrior';
   return {
@@ -166,7 +171,7 @@ export function questRetreatProfile(questId, className = '') {
     // no spells and only consumed escape scrolls. Admit the already proven 1/4
     // density for both ranged passages; the proven-aggressor and health gates
     // still interrupt an unsafe engagement.
-    ...((rangedInsectExpedition || rangedMinePassage) ? {
+    ...((rangedInsectExpedition || rangedWoomaExpedition || rangedMinePassage) ? {
       maxTargetAdjacent: 1,
       maxTargetNearby: 4,
     } : warriorWoomaHunt ? {
