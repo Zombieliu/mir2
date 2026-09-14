@@ -96,6 +96,9 @@ const SABUK_MAP = '3';
 const SABUK_SECRET_GATE = 'D701';
 const SABUK_INNER_ENTRANCE = Object.freeze({ x: 661, y: 277 });
 const SABUK_OUTER_EXIT = Object.freeze({ x: 27, y: 23 });
+const BUG_CAVE_CROSSROADS = 'D611';
+const BUG_CAVE_DEEP_ROUTE = 'D612';
+const BUG_CAVE_COMPONENT_DETOUR = Object.freeze(['D603', 'D608', 'D604', 'D611']);
 
 function isInsideSabukMerchantQuarter(snapshot) {
   if (String(snapshot?.mapFileName ?? '') !== SABUK_MAP) return false;
@@ -604,6 +607,38 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
       : findMapTravelRoute(graph, current, target);
     if (!route?.length) {
       throw new Error(`No normal-player map route from ${current} to ${target}`);
+    }
+
+    // D611 reuses one map image for two disconnected passages. A player
+    // arriving from D602 can physically reach only the D603 exit; the D612
+    // exit belongs to the other component reached through D603 -> D608 ->
+    // D604 -> D611. The topology graph cannot express components, so prove
+    // the direct portal is unreachable before taking Crystal's physical loop.
+    if (options._skipBugCaveComponentDetour !== true &&
+        current === BUG_CAVE_CROSSROADS &&
+        String(route[0]?.toMapFileName) === BUG_CAVE_DEEP_ROUTE) {
+      const direct = chooseLiveTransfer(client.snapshot, route[0], options);
+      const origin = player(client.snapshot);
+      const directPath = direct && origin ? findProtocolWalkPath({
+        map: await collisionMapFor(current),
+        start: origin,
+        target: direct.target,
+        staticWalkableOverrides: [direct.target],
+      }) : null;
+      if (!directPath?.length) {
+        const traversed = [];
+        for (const waypoint of BUG_CAVE_COMPONENT_DETOUR) {
+          traversed.push(...await travelToMap(waypoint, {
+            ...options,
+            _skipBugCaveComponentDetour: true,
+          }));
+        }
+        traversed.push(...await travelToMap(target, {
+          ...options,
+          _skipBugCaveComponentDetour: true,
+        }));
+        return traversed;
+      }
     }
 
     const traversed = [];

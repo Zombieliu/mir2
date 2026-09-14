@@ -646,6 +646,45 @@ test('walking travel can relocate from a statically disconnected map component',
     event.direction === 'diagnostic' && event.payload.type === 'disconnectedRegionRelocation'));
 });
 
+test('D611 reaches its deep component through the physical Crystal cave loop', async () => {
+  const transfersForMap = mapFileName => graph.edges
+    .filter(edge => edge.kind === 'map-movement' && edge.fromMapFileName === mapFileName)
+    .flatMap(edge => edge.portals.map((portal, index) => ({
+      key: `test:${mapFileName}:${edge.toMapFileName}:${index}`,
+      mapFileName,
+      toMapFileName: edge.toMapFileName,
+      bounds: {
+        minX: portal.source.x,
+        maxX: portal.source.x,
+        minY: portal.source.y,
+        maxY: portal.source.y,
+      },
+      toPosition: portal.destination,
+    })));
+  const snapshotForMap = (mapFileName, position) => ({
+    mapFileName,
+    mapSnapshotPending: false,
+    playerObjectId: 1,
+    entities: [selfPlayer(position)],
+    mapTransfers: transfersForMap(mapFileName),
+  });
+  const visited = [];
+  const client = new FakeClient(snapshotForMap('D611', { x: 32, y: 41 }));
+  const travel = createMapTraveler(client, async (_target, _distance, _stopWhen, options) => {
+    const transfer = client.snapshot.mapTransfers.find(candidate =>
+      candidate.key === options.liveTransferKey);
+    assert.ok(transfer, `missing transfer ${options.liveTransferKey}`);
+    visited.push(transfer.toMapFileName);
+    client.receive({
+      type: 'worldSnapshot',
+      payload: snapshotForMap(transfer.toMapFileName, transfer.toPosition),
+    });
+  });
+
+  await travel('D612');
+  assert.deepEqual(visited, ['D603', 'D608', 'D604', 'D611', 'D612']);
+});
+
 test('steps off and re-enters the real MageHouse exit when already standing on its source', async () => {
   const transfer = {
     key: 'crystal-move:0115:17:21:1:315:476',
