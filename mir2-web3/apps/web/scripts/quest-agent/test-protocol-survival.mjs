@@ -243,10 +243,10 @@ test('a dangerous expedition keeps partial field scrolls but restocks once the r
   }, 98), 0);
 });
 
-test('the Wooma route carries one navigation budget plus one combat escape reserve', () => {
+test('Wooma and Stone Tomb carry navigation plus combat escape reserves', () => {
   assert.equal(journeyEmergencyTeleportDepartureTarget(98), 8);
+  assert.equal(journeyEmergencyTeleportDepartureTarget(114), 8);
   assert.equal(journeyEmergencyTeleportDepartureTarget(113), 4);
-  assert.equal(journeyEmergencyTeleportDepartureTarget(114), 4);
   assert.equal(journeyEmergencyTeleportDepartureTarget(49), 0);
 });
 
