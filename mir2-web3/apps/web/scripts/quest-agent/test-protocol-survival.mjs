@@ -863,9 +863,11 @@ test('q62 leaves D2041 packs toward the real D2042 transfer', () => {
 test('q60 ranged classes admit the measured D2041 SpiderFrog spawn density', () => {
   for (const className of ['Wizard', 'Taoist']) {
     const profile = questRetreatProfile(60, className);
+    assert.equal(profile.continueTravelWhileHealthy, true);
     assert.equal(profile.maxTargetAdjacent, 1);
     assert.equal(profile.maxTargetNearby, 4);
   }
+  assert.equal(questRetreatProfile(60, 'Warrior').continueTravelWhileHealthy, false);
   assert.equal(questRetreatProfile(60, 'Warrior').maxTargetAdjacent, undefined);
   assert.equal(questRetreatProfile(60, 'Warrior').maxTargetNearby, undefined);
 });

@@ -129,7 +129,10 @@ export function questRetreatProfile(questId, className = '') {
     // converges while Wizard/Taoist spend the MP reserved for D406. Keep the
     // normal low-health interrupt below, but let every stocked q54 class keep
     // moving while it remains above that class's retreat threshold.
-    continueTravelWhileHealthy: [54, 62, 65].includes(id),
+    // The map1 approach to D2041 is also long enough for incidental Omas to
+    // trail a ranged q60 player. Stopping at full health to evade that weak
+    // field pack repeatedly returned the Taoist to the start of the same edge.
+    continueTravelWhileHealthy: [54, 62, 65].includes(id) || rangedInsectExpedition,
     // R37-R42 showed that repeated evasion spends the random-teleport reserve
     // without crossing D401/D2041. These expeditions carry large proven
     // potion stocks, so clear a monster that actually hit the player before
