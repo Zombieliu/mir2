@@ -152,7 +152,13 @@ export class ProtocolClient {
     }
     if (this.stopHandler) { process.removeListener('SIGINT', this.stopHandler); process.removeListener('SIGTERM', this.stopHandler); }
     if (this.ws?.readyState === WebSocket.OPEN) {
+      // SIGINT/SIGTERM deliberately interrupts the active journey through
+      // `failure`, but that same failure must not prevent the final LogOut
+      // request from waiting for its acknowledgement and authoritative save.
+      const journeyFailure = this.failure;
+      this.failure = null;
       try { await this.request({ type: 'logOut' }, 'LogOutSuccess', 5000); } catch { /* Trace preserves failed logout; disconnect still saves normally. */ }
+      finally { this.failure ??= journeyFailure; }
       this.ws.close();
     }
     await this.writeQueue;

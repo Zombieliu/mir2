@@ -177,3 +177,33 @@ test('ordinary merchant sale is allowed while QA and direct-state commands remai
     await fs.rmdir(directory);
   }
 });
+
+test('signal interruption still waits for LogOutSuccess before closing the socket', async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'mir2-signal-logout-'));
+  const output = path.join(directory, 'trace.jsonl');
+  const wire = [];
+  let socketClosed = false;
+  const client = new ProtocolClient('ws://127.0.0.1:17810/ws', output);
+  client.ws = {
+    readyState: WebSocket.OPEN,
+    send: value => {
+      const command = JSON.parse(value);
+      wire.push(command);
+      if (command.type === 'logOut') {
+        client.observeGatewayMessage({ type: 'packet', packet: 'LogOutSuccess', payload: {} });
+      }
+    },
+    close: () => { socketClosed = true; },
+  };
+  client.failure = new Error('Journey stopped; progress will save on disconnect');
+  try {
+    await client.close();
+    assert.deepEqual(wire, [{ type: 'logOut' }]);
+    assert.equal(client.events.some(event => event.packet === 'LogOutSuccess'), true);
+    assert.equal(socketClosed, true);
+    assert.match(client.failure.message, /Journey stopped/);
+  } finally {
+    await fs.unlink(output).catch(error => { if (error.code !== 'ENOENT') throw error; });
+    await fs.rmdir(directory);
+  }
+});
