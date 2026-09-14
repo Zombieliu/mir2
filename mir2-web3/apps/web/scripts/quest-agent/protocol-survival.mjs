@@ -176,17 +176,21 @@ export function questRetreatProfile(questId, className = '') {
   };
 }
 
-export function questRetreatBiasPosition(questId, snapshot) {
+export function questRetreatBiasPosition(questId, snapshot, className = '') {
   const id = Number(questId);
   const mapFileName = String(snapshot?.mapFileName ?? '');
   // q62 has no objective source on D2041; its reachable source is D2042.
   // Retreating toward the D2041 entrance erased the entire crossing after
   // every pack. Preserve safe forward progress toward the real 2F transfer.
   if (id === 62 && mapFileName === 'D2041') return { x: 262, y: 13 };
-  // q65 reaches its only practical low-level Zombie1 field through the same
-  // long D421 diagonal proven by q54. Keep equal-safety retreat steps biased
-  // toward the D422 transfer instead of repeatedly returning to the entrance.
-  if (id === 65 && mapFileName === 'D421') return { x: 361, y: 19 };
+  // The fragile ranged classes use their already proven D406 q54 route for
+  // q65. If they resume inside D421, move equal-safety retreats toward the
+  // map-2 entrance; the durable Warrior still continues to D422.
+  if (id === 65 && mapFileName === 'D421') {
+    return ['wizard', 'taoist'].includes(String(className).trim().toLowerCase())
+      ? { x: 30, y: 374 }
+      : { x: 361, y: 19 };
+  }
   if (id !== 54) return null;
   return ({
     D401: { x: 76, y: 15 },
@@ -197,16 +201,20 @@ export function questRetreatBiasPosition(questId, snapshot) {
 
 export function shouldPreferObjectiveMapOverCurrent(questId, questState = null, className = '') {
   const id = Number(questId);
+  const normalizedClass = String(className).trim().toLowerCase();
   // q49's Natural Cave source is intentionally safer than its current-map Oma
   // alternative.
   if (id === 49) return true;
+  // R75/R76 spent two long D421 crossings clearing passage zombies and still
+  // did not reach D422; the same Wizard already completed q54 through D406,
+  // which contains thirty authoritative Zombie1 spawns.
+  if (id === 65) return ['wizard', 'taoist'].includes(normalizedClass);
   if (id !== 54) return false;
 
   // R27 and R45 showed both caster classes repeatedly spending their D406 MP
   // and escape reserves on dense, reward-poor D401 packs. They can complete
   // every q54 zombie variant in D406, so treat D401 as a transit layer for
   // Wizard and Taoist while the durable Warrior may still clear it directly.
-  const normalizedClass = String(className).trim().toLowerCase();
   if (questState && ['wizard', 'taoist'].includes(normalizedClass)) return true;
 
   // D401 is useful while q54 still needs its Zombie2/3/4/5 population, so an
@@ -221,6 +229,16 @@ export function shouldPreferObjectiveMapOverCurrent(questId, questState = null, 
     return required > 0 && current < required;
   });
   return pending.length === 1 && String(pending[0]?.label ?? '').trim().toLowerCase() === 'kill zombie1';
+}
+
+export function preferredObjectiveMapsForQuest(questId, className = '') {
+  const id = Number(questId);
+  if (id === 49) return ['D011'];
+  if (id === 54) return ['D406'];
+  if (id === 65 && ['wizard', 'taoist'].includes(String(className).trim().toLowerCase())) {
+    return ['D406'];
+  }
+  return [];
 }
 
 export function createPostEngagementSupplyGate({

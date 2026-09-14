@@ -43,6 +43,7 @@ import {
   questEmergencyEscapeHpRatio,
   questPostRetreatRecoveryRatio,
   questNeedsPostRetreatRecovery,
+  preferredObjectiveMapsForQuest,
   requiresTaoistAmuletRestock,
   requiresExpeditionEscapeRestock,
   shouldPreferObjectiveMapOverCurrent,
@@ -796,7 +797,7 @@ try {
             // Skeleton source as Oma Cave 1F, with 264 total respawns instead
             // of 358. Use that lower-density level-14 field rather than
             // spending one life per crowded Oma pull.
-            preferredObjectiveMaps: id === 54 ? ['D406'] : (id === 49 ? ['D011'] : []),
+            preferredObjectiveMaps: preferredObjectiveMapsForQuest(id, className),
             preferObjectiveMapOverCurrent: shouldPreferObjectiveMapOverCurrent(id, state, className),
             preferTravelAggressorCombat: retreatProfile.preferTravelAggressorCombat,
             continueTravelWhileHealthy: retreatProfile.continueTravelWhileHealthy,
@@ -810,7 +811,7 @@ try {
             // D421 is a long diagonal mine crossing. When exposure is equally
             // survivable, keep emergency steps moving toward the D422 transfer
             // instead of giving back the entire corridor after every pull.
-            unsafeRetreatBiasPosition: snapshot => questRetreatBiasPosition(id, snapshot),
+            unsafeRetreatBiasPosition: snapshot => questRetreatBiasPosition(id, snapshot, className),
             // RandomTeleport is bought and consumed through the same public
             // NPCGoods/UseItem packets as a player. It is reserved for the
             // observed no-step cave trap and never replaces ordinary retreat.
@@ -855,7 +856,7 @@ try {
                   dangerDistance: evasiveRecoveryDangerDistanceForQuest(id),
                   retreatSteps: dangerousExpeditionQuestIds.has(id) ? 12 : 6,
                   maxEvasiveMoves: dangerousExpeditionQuestIds.has(id) ? 8 : 4,
-                  biasPosition: snapshot => questRetreatBiasPosition(id, snapshot),
+                  biasPosition: snapshot => questRetreatBiasPosition(id, snapshot, className),
                   emergencyEscape: dangerousExpeditionQuestIds.has(id)
                     ? async current => emergencyTeleport(current)
                     : undefined,

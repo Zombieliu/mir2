@@ -22,6 +22,7 @@ import {
   questCombatMpUseThresholdForQuest,
   questEmergencyEscapeHpRatio,
   questPostRetreatRecoveryRatio,
+  preferredObjectiveMapsForQuest,
   minimumJourneyMpStockForQuest,
   questRetreatBiasPosition,
   questRetreatProfile,
@@ -956,9 +957,17 @@ test('q60 ranged classes admit the measured D2041 SpiderFrog spawn density', () 
 });
 
 test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
-  assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }), { x: 361, y: 19 });
+  assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }, 'Warrior'), { x: 361, y: 19 });
+  assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }, 'Wizard'), { x: 30, y: 374 });
+  assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }, 'Taoist'), { x: 30, y: 374 });
   assert.equal(questRetreatBiasPosition(65, { mapFileName: 'D422' }), null);
   assert.equal(questRetreatBiasPosition(65, { mapFileName: '0' }), null);
+  assert.deepEqual(preferredObjectiveMapsForQuest(65, 'Wizard'), ['D406']);
+  assert.deepEqual(preferredObjectiveMapsForQuest(65, 'Taoist'), ['D406']);
+  assert.deepEqual(preferredObjectiveMapsForQuest(65, 'Warrior'), []);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(65, {}, 'Wizard'), true);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(65, {}, 'Taoist'), true);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(65, {}, 'Warrior'), false);
   assert.deepEqual(questRetreatProfile(65, 'Taoist'), {
     allowLowHealthFollowerRecovery: true,
     continueTravelWhileHealthy: true,
