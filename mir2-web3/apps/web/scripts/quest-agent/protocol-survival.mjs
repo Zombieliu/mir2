@@ -86,7 +86,11 @@ export function questEmergencyEscapeHpRatio(questId, className = '') {
   // snapshots while eight monsters had closed to six tiles. At the generic
   // 35% threshold the UseItem request began at 7 HP and lost the race with
   // the next hit. Escape before that measured two-hit window.
-  if ([60, 65, 98, 113].includes(id) && normalizedClass === 'wizard') return 0.65;
+  // R85 measured q98 collapsing from 83/90 to 26/90 between two navigation
+  // policy polls. Start the escape after the first effective hit so an unlucky
+  // random landing still leaves enough HP to survive the item cooldown.
+  if (id === 98 && normalizedClass === 'wizard') return 0.9;
+  if ([60, 65, 113].includes(id) && normalizedClass === 'wizard') return 0.65;
   return DANGEROUS_EXPEDITION_QUEST_IDS.has(id) ? 0.35 : 0;
 }
 
