@@ -99,6 +99,9 @@ const SABUK_OUTER_EXIT = Object.freeze({ x: 27, y: 23 });
 const BUG_CAVE_CROSSROADS = 'D611';
 const BUG_CAVE_DEEP_ROUTE = 'D612';
 const BUG_CAVE_COMPONENT_DETOUR = Object.freeze(['D603', 'D608', 'D604', 'D611']);
+const BUG_CAVE_ENTRANCE = 'D601';
+const BUG_CAVE_PROVINCE = '3';
+const BUG_CAVE_RETURN_DETOUR = Object.freeze(['D610', 'D603', 'D611', 'D602', 'D607', 'D601']);
 
 function isInsideSabukMerchantQuarter(snapshot) {
   if (String(snapshot?.mapFileName ?? '') !== SABUK_MAP) return false;
@@ -636,6 +639,37 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
         traversed.push(...await travelToMap(target, {
           ...options,
           _skipBugCaveComponentDetour: true,
+        }));
+        return traversed;
+      }
+    }
+
+    // D601 has the same reused-map shape. The D610 landing is isolated from
+    // the province exit, while the D607 landing shares the walkable component
+    // with that exit. Return through the real cave ring instead of requiring a
+    // random teleport or failing a normal player's journey.
+    if (options._skipBugCaveReturnDetour !== true &&
+        current === BUG_CAVE_ENTRANCE &&
+        String(route[0]?.toMapFileName) === BUG_CAVE_PROVINCE) {
+      const direct = chooseLiveTransfer(client.snapshot, route[0], options);
+      const origin = player(client.snapshot);
+      const directPath = direct && origin ? findProtocolWalkPath({
+        map: await collisionMapFor(current),
+        start: origin,
+        target: direct.target,
+        staticWalkableOverrides: [direct.target],
+      }) : null;
+      if (!directPath?.length) {
+        const traversed = [];
+        for (const waypoint of BUG_CAVE_RETURN_DETOUR) {
+          traversed.push(...await travelToMap(waypoint, {
+            ...options,
+            _skipBugCaveReturnDetour: true,
+          }));
+        }
+        traversed.push(...await travelToMap(target, {
+          ...options,
+          _skipBugCaveReturnDetour: true,
         }));
         return traversed;
       }
