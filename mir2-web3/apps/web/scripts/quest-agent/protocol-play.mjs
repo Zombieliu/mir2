@@ -4,6 +4,11 @@ import { useSupplies } from './protocol-loadout.mjs';
 
 export const selfPlayer = client => client.snapshot?.entities.find(e => e.objectId === client.snapshot.playerObjectId);
 export const distance = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+const MOVEMENT_BLOCKING_POISON_MASK = 8 | 16 | 32 | 256;
+function selfMovementBlockMask(client) {
+  const self = selfPlayer(client);
+  return Number(self?.poison ?? client.snapshot?.playerPoison ?? 0) & MOVEMENT_BLOCKING_POISON_MASK;
+}
 export class NavigationStalled extends Error {
   constructor({ reason, mapId, position, target, bestDistance, successfulSteps }) {
     super(`Navigation stalled (${reason}) on ${mapId} at ${position.x},${position.y} toward ${target.x},${target.y}`);
@@ -258,6 +263,7 @@ export function createNavigator(client, dependencies = {}) {
     let emergencyEscapeRetryAt = Number.NEGATIVE_INFINITY;
     let bestDistance = distance(selfPlayer(client), target);
     let nonImprovingSteps = 0;
+    let lastMovementBlockMask = 0;
     let positionsSinceImprovement = new Set([`${selfPlayer(client).x},${selfPlayer(client).y}`]);
     let remaining = [];
     for (let count = 0; count < maxAttempts; count++) {
@@ -266,6 +272,23 @@ export function createNavigator(client, dependencies = {}) {
       if (stopWhen()) return { reached: false, successfulSteps };
       const self = selfPlayer(client);
       if (self.dead || client.snapshot.playerHp <= 0) throw new Error('Player died during navigation');
+      const movementBlockMask = selfMovementBlockMask(client);
+      if (movementBlockMask !== 0) {
+        remaining = [];
+        if (movementBlockMask !== lastMovementBlockMask) {
+          client.record('diagnostic', {
+            type: 'navigationMovementControlBlocked',
+            mapId,
+            position: { x: Number(self.x), y: Number(self.y) },
+            poison: Number(self.poison ?? client.snapshot?.playerPoison ?? 0),
+            movementBlockMask,
+          });
+        }
+        lastMovementBlockMask = movementBlockMask;
+        await sleep(250);
+        continue;
+      }
+      lastMovementBlockMask = 0;
       const nearbyHostiles = (client.snapshot?.entities ?? []).filter(entity =>
         entity?.kind === 'monster' && entity?.dead !== true && Number(entity?.hp ?? 1) > 0 &&
         entity?.disposition !== 'friendly' && distance(self, entity) <= emergencyEscapeDangerDistance);
@@ -449,6 +472,22 @@ export function createNavigator(client, dependencies = {}) {
           if (consumed >= 0) remaining.splice(0, consumed + 1); else remaining = [];
           failures = 0;
         } else {
+          const correctionBlockMask = selfMovementBlockMask(client);
+          if (correctionBlockMask !== 0) {
+            remaining = [];
+            if (correctionBlockMask !== lastMovementBlockMask) {
+              client.record('diagnostic', {
+                type: 'navigationMovementControlBlocked',
+                mapId,
+                position: before,
+                poison: Number(selfPlayer(client)?.poison ?? client.snapshot?.playerPoison ?? 0),
+                movementBlockMask: correctionBlockMask,
+              });
+            }
+            lastMovementBlockMask = correctionBlockMask;
+            await sleep(250);
+            continue;
+          }
           // An unchanged UserLocation is an authoritative collision
           // correction. Only this response is allowed to poison the cell.
           rejected.push(step.to);

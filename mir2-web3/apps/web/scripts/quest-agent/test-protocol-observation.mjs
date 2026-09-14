@@ -118,6 +118,16 @@ test('ObjectHealth keeps percent separate from absolute hp', () => {
   assert.equal(deer.healthExpire, 3_000);
 });
 
+test('poison packets keep the current self movement-control mask observable', () => {
+  const state = observedWorld();
+  applyProtocolObservation(state, packet('ObjectPoisoned', { objectId: 1001, poison: 32 }));
+  assert.equal(state.playerPoison, 32);
+  assert.equal(state.entities[0].poison, 32);
+  applyProtocolObservation(state, packet('Poisoned', { poison: 0 }));
+  assert.equal(state.playerPoison, 0);
+  assert.equal(state.entities[0].poison, 0);
+});
+
 test('death retains a harvestable corpse and revive restores its lifecycle flag', () => {
   const state = observedWorld();
   applyProtocolObservation(state, packet('ObjectDied', {

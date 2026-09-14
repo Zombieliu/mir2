@@ -157,6 +157,47 @@ test('navigator rejects a cell only after an unchanged authoritative UserLocatio
     entry.type === 'navigationMovementResponseTimeout'), false);
 });
 
+test('navigator waits out paralysis without poisoning a valid route cell', async () => {
+  const client = navigationClient();
+  let waits = 0;
+  let blockedSleeps = 0;
+  client.wait = async predicate => {
+    waits += 1;
+    if (waits === 1) {
+      client.snapshot.entities[0].poison = 32;
+      client.events.push({
+        sequence: client.sequence + 1,
+        direction: 'received',
+        packet: 'UserLocation',
+        payload: { x: 1, y: 1 },
+      });
+      assert.ok(predicate());
+      return;
+    }
+    Object.assign(client.snapshot.entities[0], { x: 4, y: 1 });
+    assert.ok(predicate());
+  };
+
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    delay: async () => {
+      if (client.snapshot.entities[0].poison === 32) {
+        blockedSleeps += 1;
+        client.snapshot.entities[0].poison = 0;
+      }
+    },
+  });
+  await navigateNear({ x: 5, y: 1 }, 1);
+
+  assert.equal(waits, 2);
+  assert.equal(blockedSleeps, 1);
+  assert.deepEqual(client.sent[1], client.sent[0], 'the corrected tile remains a valid next step');
+  assert.equal(
+    client.diagnostics.filter(entry => entry.type === 'navigationMovementControlBlocked').length,
+    1,
+  );
+});
+
 test('navigator optional successful-step cap prevents Run from exceeding the bounded route', async () => {
   const client = navigationClient();
   client.wait = async predicate => {

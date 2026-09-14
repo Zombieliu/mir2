@@ -214,6 +214,22 @@ export function applyProtocolObservation(snapshot, message) {
       }
       break;
     }
+    case 'ObjectPoisoned': {
+      const entity = entityById(snapshot, payload.objectId);
+      const poison = finiteNumber(payload.poison);
+      if (entity && poison != null) entity.poison = poison;
+      if (objectIdOf(payload.objectId) === objectIdOf(snapshot.playerObjectId) && poison != null) {
+        snapshot.playerPoison = poison;
+      }
+      break;
+    }
+    case 'Poisoned': {
+      const poison = finiteNumber(payload.poison);
+      const entity = selfEntity(snapshot);
+      if (entity && poison != null) entity.poison = poison;
+      if (poison != null) snapshot.playerPoison = poison;
+      break;
+    }
     case 'ObjectDied': {
       const entity = updateEntity(snapshot, payload.objectId, payload);
       if (entity) Object.assign(entity, { dead: true, hp: 0, healthPercent: 0 });
