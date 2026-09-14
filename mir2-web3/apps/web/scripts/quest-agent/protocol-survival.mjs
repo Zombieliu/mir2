@@ -103,7 +103,11 @@ export function journeyNavigationEmergencyEscapeBudget(className = '') {
   // exhausted the generic two-relocation cap, then died with one ordinary
   // RandomTeleport still in inventory. Let the fragile class consume the full
   // four-scroll departure reserve when successive authoritative landings stay unsafe.
-  return String(className).trim().toLowerCase() === 'wizard' ? 4 : 2;
+  // R79 completed q114, then died with six scrolls still carried because two
+  // successive random landings both remained inside dense D715 packs and the
+  // old non-Wizard navigation cap refused a third use. Four stays bounded and
+  // preserves half of the eight-scroll expedition stock for combat recovery.
+  return 4;
 }
 
 /** Public-shop departure reserve measured for each dangerous route. */

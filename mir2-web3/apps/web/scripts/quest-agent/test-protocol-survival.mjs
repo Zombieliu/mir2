@@ -80,8 +80,8 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questEmergencyEscapeHpRatio(113, 'Taoist'), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(49), 0);
   assert.equal(journeyNavigationEmergencyEscapeBudget('Wizard'), 4);
-  assert.equal(journeyNavigationEmergencyEscapeBudget('Taoist'), 2);
-  assert.equal(journeyNavigationEmergencyEscapeBudget('Warrior'), 2);
+  assert.equal(journeyNavigationEmergencyEscapeBudget('Taoist'), 4);
+  assert.equal(journeyNavigationEmergencyEscapeBudget('Warrior'), 4);
 });
 
 test('dangerous expedition escape remains armed for the completed cave return', () => {
