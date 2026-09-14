@@ -2,7 +2,7 @@ const DEFAULT_MAX_RESTOCKS = 32;
 const DEFAULT_MINIMUM_HP_STOCK = 1;
 const REFRESH_TIMEOUT_MS = 12_000;
 const PASSIVE_RECOVERY_POLL_MS = 3_100;
-const DANGEROUS_EXPEDITION_QUEST_IDS = new Set([54, 60, 62, 65, 98, 113, 114]);
+const DANGEROUS_EXPEDITION_QUEST_IDS = new Set([54, 60, 62, 65, 98, 99, 113, 114]);
 
 export function hpRestockTargetForActiveQuests(snapshot, {
   fallback = 24,
@@ -89,11 +89,11 @@ export function questEmergencyEscapeHpRatio(questId, className = '') {
   // R85 measured q98 collapsing from 83/90 to 26/90 between two navigation
   // policy polls. Start the escape after the first effective hit so an unlucky
   // random landing still leaves enough HP to survive the item cooldown.
-  if (id === 98 && normalizedClass === 'wizard') return 0.9;
+  if ([98, 99].includes(id) && normalizedClass === 'wizard') return 0.9;
   // R76 repeatedly found only 0/2 and 1/1 Dung groups in D022. The Taoist can
   // take those measured pulls with Healing, but must escape before the pack
   // reaches the generic one-third-health floor.
-  if (id === 98 && normalizedClass === 'taoist') return 0.65;
+  if ([98, 99].includes(id) && normalizedClass === 'taoist') return 0.65;
   if ([60, 65, 113].includes(id) && normalizedClass === 'wizard') return 0.65;
   return DANGEROUS_EXPEDITION_QUEST_IDS.has(id) ? 0.35 : 0;
 }
@@ -114,7 +114,7 @@ export function journeyEmergencyTeleportDepartureTarget(questId) {
   // before D022. R78 then consumed all four in successive unsafe Stone Tomb
   // landings while q114 still had one kill left. Eight preserves the bounded
   // navigation budget plus a complete combat escape reserve after arrival.
-  return [98, 114].includes(id) ? 8 : 4;
+  return [98, 99, 114].includes(id) ? 8 : 4;
 }
 
 /** Keep the public escape reserve usable until a dangerous expedition is handed in. */
@@ -124,8 +124,8 @@ export function hasJourneyEmergencyEscapeQuest(snapshot) {
     ['inprogress', 'readytoturnin'].includes(normalizedStage(quest?.stage)));
 }
 
-const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62, 65, 98, 113, 114]);
-const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62, 65, 98, 113, 114]);
+const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62, 65, 98, 99, 113, 114]);
+const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62, 65, 98, 99, 113, 114]);
 
 export function evasiveRecoveryTimeoutMsForQuest(questId) {
   return LONG_EVASIVE_RECOVERY_QUESTS.has(Number(questId)) ? 90_000 : 45_000;
@@ -141,11 +141,11 @@ export function questRetreatProfile(questId, className = '') {
   const fragileMineExpedition = [54, 65].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
   const healingMineExpedition = [54, 65].includes(id) && normalizedClass === 'taoist';
   const rangedInsectExpedition = [60, 113].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
-  const rangedWoomaExpedition = id === 98 && ['wizard', 'taoist'].includes(normalizedClass);
+  const rangedWoomaExpedition = [98, 99].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
   const rangedMinePassage = id === 65 && fragileMineExpedition;
   const warriorWoomaHunt = id === 99 && normalizedClass === 'warrior';
   return {
-    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 98, 113, 114].includes(id),
+    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 98, 99, 113, 114].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
     // turns the D401 crossing into an unrewarded fight: the surrounding pack
     // converges while Wizard/Taoist spend the MP reserved for D406. Keep the

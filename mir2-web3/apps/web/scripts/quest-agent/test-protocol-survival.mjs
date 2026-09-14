@@ -74,6 +74,8 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questEmergencyEscapeHpRatio(65, 'Taoist'), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(98, 'Wizard'), 0.9);
   assert.equal(questEmergencyEscapeHpRatio(98, 'Taoist'), 0.65);
+  assert.equal(questEmergencyEscapeHpRatio(99, 'Wizard'), 0.9);
+  assert.equal(questEmergencyEscapeHpRatio(99, 'Taoist'), 0.65);
   assert.equal(questEmergencyEscapeHpRatio(113, 'Wizard'), 0.65);
   assert.equal(questEmergencyEscapeHpRatio(113, 'Taoist'), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(49), 0);
@@ -245,6 +247,7 @@ test('a dangerous expedition keeps partial field scrolls but restocks once the r
 
 test('Wooma and Stone Tomb carry navigation plus combat escape reserves', () => {
   assert.equal(journeyEmergencyTeleportDepartureTarget(98), 8);
+  assert.equal(journeyEmergencyTeleportDepartureTarget(99), 8);
   assert.equal(journeyEmergencyTeleportDepartureTarget(114), 8);
   assert.equal(journeyEmergencyTeleportDepartureTarget(113), 4);
   assert.equal(journeyEmergencyTeleportDepartureTarget(49), 0);
@@ -1082,8 +1085,8 @@ test('q99 Warrior admits the measured final WoomaFighter spawn group', () => {
   const warrior = questRetreatProfile(99, 'Warrior');
   assert.equal(warrior.maxTargetAdjacent, 2);
   assert.equal(warrior.maxTargetNearby, 3);
-  assert.equal(questRetreatProfile(99, 'Wizard').maxTargetAdjacent, undefined);
-  assert.equal(questRetreatProfile(99, 'Taoist').maxTargetNearby, undefined);
+  assert.equal(questRetreatProfile(99, 'Wizard').maxTargetAdjacent, 1);
+  assert.equal(questRetreatProfile(99, 'Taoist').maxTargetNearby, 4);
 });
 
 test('q98 Wooma expedition keeps long wide recovery armed for ranged classes', () => {
@@ -1096,6 +1099,18 @@ test('q98 Wooma expedition keeps long wide recovery armed for ranged classes', (
   assert.equal(questRetreatProfile(98, 'Warrior').maxTargetAdjacent, undefined);
   assert.equal(evasiveRecoveryTimeoutMsForQuest(98), 90_000);
   assert.equal(evasiveRecoveryDangerDistanceForQuest(98), 8);
+});
+
+test('q99 keeps the same Wooma expedition recovery and supplies as q98', () => {
+  for (const className of ['Wizard', 'Taoist']) {
+    const profile = questRetreatProfile(99, className);
+    assert.equal(profile.allowLowHealthFollowerRecovery, true);
+    assert.equal(profile.maxTargetAdjacent, 1);
+    assert.equal(profile.maxTargetNearby, 4);
+  }
+  assert.equal(evasiveRecoveryTimeoutMsForQuest(99), 90_000);
+  assert.equal(evasiveRecoveryDangerDistanceForQuest(99), 8);
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(99, 'Wizard'), { hp: 64, mp: 0 });
 });
 
 test('q113 deep Bug Cave hunt uses expedition recovery and ranged density limits', () => {
