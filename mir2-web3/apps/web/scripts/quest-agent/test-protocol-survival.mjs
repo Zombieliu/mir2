@@ -160,6 +160,11 @@ test('only living dangerous expeditions replan transient no-walk-path failures',
   ), true);
   assert.equal(isLivingExpeditionNoWalkPath(
     alive,
+    99,
+    new Error('Travel from D021 to 1 is blocked by monster 293711'),
+  ), true);
+  assert.equal(isLivingExpeditionNoWalkPath(
+    alive,
     49,
     new Error('No walk path on D011'),
   ), false);

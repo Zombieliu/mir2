@@ -20,6 +20,7 @@ import {
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
 import { claimAvailableMilestones, JOURNEY_MILESTONES } from './protocol-milestones.mjs';
 import {
+  amuletStock,
   canFinishNearCompleteKillQuestWithoutHpStock,
   canFinishNearCompleteKillQuestWithReducedHpStock,
   canResumeStockedCombatExpedition,
@@ -284,6 +285,7 @@ try {
     };
     const supplyGateCallOptions = (owner, questId, requiredHpStock, {
       replenishEscapeReserve = false,
+      forceRestock = false,
     } = {}) => {
       const expeditionSupplyActive = journeyExpeditionSupplyActive(owner.snapshot, questId);
       const departureFloor = journeyExpeditionDepartureFloorForQuest(questId, className);
@@ -318,12 +320,14 @@ try {
         // around solely to replace that one scroll.
         minimumEmergencyTeleportStock: emergencyTeleportRestockTarget,
         requiredAfterRestockEmergencyTeleportStock: emergencyTeleportTarget,
-        forceRestock: journeyWeaponFundingGold(owner.snapshot) > 0 ||
+        forceRestock: forceRestock || journeyWeaponFundingGold(owner.snapshot) > 0 ||
           requiresTaoistAmuletRestock(owner.snapshot, questId, className, amuletTrigger) ||
           (shouldReplenishEscapeReserve && randomTeleportCount(owner.snapshot) < emergencyTeleportTarget) ||
           (expeditionSupplyActive &&
             (hpDrugCount(owner.snapshot) < departureFloor.hp ||
-              mpDrugCount(owner.snapshot) < departureFloor.mp) &&
+              mpDrugCount(owner.snapshot) < departureFloor.mp ||
+              (taoistAmuletExpedition &&
+                amuletStock(owner.snapshot) < amuletDepartureTarget)) &&
             String(owner.snapshot?.mapFileName ?? '') === '0'),
         ...(expeditionSupplyActive ? {
           requiredAfterRestockHpStock: departureFloor.hp,
@@ -397,7 +401,16 @@ try {
           requiredCount: requiredFundingCount,
           maxHunts: Math.max(8, requiredFundingCount + 4),
         });
-        const restocked = await supplyGate(owner, supplyGateCallOptions(owner, questId, requiredHpStock));
+        // Funding ends in the nearby field. Force the follow-up shop pass even
+        // when a partial Amulet stack is above the lower field trigger; the
+        // journey must actually sell the Venison and reach the 32-Amulet
+        // departure reserve before walking back to the cave.
+        const restocked = await supplyGate(owner, supplyGateCallOptions(
+          owner,
+          questId,
+          requiredHpStock,
+          { forceRestock: true },
+        ));
         return { ...restocked, funding };
       } catch (error) {
         if (playerIsDead(owner.snapshot) && report.revivals.length < maxJourneyRevivals) {

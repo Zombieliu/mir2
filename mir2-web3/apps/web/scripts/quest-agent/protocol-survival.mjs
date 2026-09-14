@@ -456,9 +456,11 @@ export function isLivingLostCombatTarget(snapshot, error) {
 
 /** Dense expedition occupants are transient; keep the authoritative field position and replan. */
 export function isLivingExpeditionNoWalkPath(snapshot, questId, error) {
+  const message = String(error?.message ?? error);
   return healthRatio(snapshot) > 0 &&
     DANGEROUS_EXPEDITION_QUEST_IDS.has(Number(questId)) &&
-    String(error?.message ?? error).startsWith('No walk path');
+    (message.startsWith('No walk path') ||
+      /^Travel from \S+ to \S+ is blocked by monster \d+$/.test(message));
 }
 
 export function requiresExpeditionEscapeRestock(snapshot, questId, minimum = 1) {
