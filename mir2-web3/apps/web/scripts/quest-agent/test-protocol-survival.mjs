@@ -16,6 +16,7 @@ import {
   mpDrugCount,
   hpRestockTargetForActiveQuests,
   journeyExpeditionDepartureFloorForQuest,
+  journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
   journeyResumeDisposition,
   journeyMpRestockTargetForQuest,
@@ -183,6 +184,21 @@ test('a resumed expedition preserves field progress while it still has a public 
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(3)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(4)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 49), false);
+});
+
+test('completed expedition objectives stop requiring departure supplies before turn-in', () => {
+  assert.equal(journeyExpeditionSupplyActive({
+    questLog: [{ questId: 60, stage: 'inProgress' }],
+  }, 60), true);
+  assert.equal(journeyExpeditionSupplyActive({
+    questLog: [{ questId: 60, stage: 'readyToTurnIn' }],
+  }, 60), false);
+  assert.equal(journeyExpeditionSupplyActive({
+    questLog: [{ questId: 60, stage: 'completed' }],
+  }, 60), false);
+  assert.equal(journeyExpeditionSupplyActive({
+    questLog: [{ questId: 49, stage: 'inProgress' }],
+  }, 49), false);
 });
 
 test('long expeditions accept a partial but still conservative funded departure stock', () => {

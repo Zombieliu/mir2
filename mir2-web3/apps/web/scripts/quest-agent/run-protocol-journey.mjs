@@ -32,6 +32,7 @@ import {
   isLivingExpeditionNoWalkPath,
   isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
+  journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
   journeyMpRestockTargetForQuest,
   minimumJourneyMpStockForQuest,
@@ -270,14 +271,15 @@ try {
     const supplyGateCallOptions = (owner, questId, requiredHpStock, {
       replenishEscapeReserve = false,
     } = {}) => {
-      const q54Expedition = Number(questId) === 54;
-      const q60Expedition = Number(questId) === 60;
-      const q62Expedition = Number(questId) === 62;
+      const expeditionSupplyActive = journeyExpeditionSupplyActive(owner.snapshot, questId);
+      const q54Expedition = expeditionSupplyActive && Number(questId) === 54;
+      const q60Expedition = expeditionSupplyActive && Number(questId) === 60;
+      const q62Expedition = expeditionSupplyActive && Number(questId) === 62;
       const departureFloor = journeyExpeditionDepartureFloorForQuest(questId, className);
-      const q65Expedition = Number(questId) === 65;
+      const q65Expedition = expeditionSupplyActive && Number(questId) === 65;
       const taoistAmuletExpedition =
         String(className).trim().toLowerCase() === 'taoist' &&
-        dangerousExpeditionQuestIds.has(Number(questId)) &&
+        expeditionSupplyActive &&
         (owner.snapshot?.knownSkills ?? []).some(skill => String(skill?.spell ?? '') === 'SoulFireBall');
       // R68 exhausted the 12-Amulet village target during one D2041 pack,
       // fell back to melee, and died at q60 6/8. Keep a lower field trigger
@@ -402,7 +404,9 @@ try {
     const supplyGateForQuest = async (owner, questId = null, options = {}) => {
       const q42ReducedStockFinish = Number(questId) === 42 &&
         canFinishNearCompleteKillQuestWithReducedHpStock(owner.snapshot, questId);
-      const requiredHpStock = q42ReducedStockFinish
+      const completedExpeditionObjective = dangerousExpeditionQuestIds.has(Number(questId)) &&
+        !journeyExpeditionSupplyActive(owner.snapshot, questId);
+      const requiredHpStock = q42ReducedStockFinish || completedExpeditionObjective
         ? 1
         : minimumJourneyHpStockForQuest(questId);
       let stock = hpDrugCount(owner.snapshot);

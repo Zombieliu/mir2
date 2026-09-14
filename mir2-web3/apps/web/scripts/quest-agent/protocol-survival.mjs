@@ -381,6 +381,14 @@ export function requiresExpeditionEscapeRestock(snapshot, questId, minimum = 1) 
     emergencyTeleportStock(snapshot) < nonnegativeInteger(minimum, 'emergency teleport minimum');
 }
 
+/** Departure-only stock must not block a completed objective that is already safe to turn in. */
+export function journeyExpeditionSupplyActive(snapshot, questId) {
+  if (!DANGEROUS_EXPEDITION_QUEST_IDS.has(Number(questId))) return false;
+  const quest = (snapshot?.questLog ?? []).find(entry =>
+    Number(entry?.questId) === Number(questId));
+  return normalizedStage(quest?.stage) === 'inprogress';
+}
+
 export function mpDrugCount(snapshot) {
   return itemQuantity(snapshot, item => /^\(MP\)Drug/i.test(String(item?.name ?? item?.key ?? '')));
 }
