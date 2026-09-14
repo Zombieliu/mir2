@@ -194,6 +194,10 @@ test('a living target lost at the AOI edge is retryable but death and unrelated 
     new Error('target 293721 left the authoritative snapshot before death was confirmed'),
   ), true);
   assert.equal(isLivingLostCombatTarget(
+    living,
+    new Error('target 293711 has no walk path from the current map region'),
+  ), true);
+  assert.equal(isLivingLostCombatTarget(
     { playerHp: 0, playerMaxHp: 80 },
     new Error('target 293721 left the authoritative snapshot before attack'),
   ), false);

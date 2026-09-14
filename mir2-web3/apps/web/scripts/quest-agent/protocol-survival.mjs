@@ -394,10 +394,10 @@ export function isLivingUnsafePackRetreatFailure(snapshot, error) {
     String(error?.message ?? error).startsWith('unsafe hostile pack retreat failed from ');
 }
 
-/** A live AOI target disappearing is a normal world race; select a fresh actor. */
+/** A live AOI target disappearing or being stranded by an escape is a normal world race. */
 export function isLivingLostCombatTarget(snapshot, error) {
   return healthRatio(snapshot) > 0 &&
-    /^target \d+ left the authoritative snapshot before (?:attack|death was confirmed)$/i
+    /^target \d+ (?:left the authoritative snapshot before (?:attack|death was confirmed)|has no walk path from the current map region)$/i
       .test(String(error?.message ?? error));
 }
 
