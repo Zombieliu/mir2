@@ -159,6 +159,7 @@ export function questRetreatProfile(questId, className = '') {
   const rangedWoomaExpedition = [98, 99].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
   const rangedMinePassage = id === 65 && fragileMineExpedition;
   const warriorWoomaHunt = id === 99 && normalizedClass === 'warrior';
+  const warriorMineralMineHunt = id === 118 && normalizedClass === 'warrior';
   return {
     allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 98, 99, 113, 114].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
@@ -213,6 +214,23 @@ export function questRetreatProfile(questId, className = '') {
       // admit the measured closing pack long enough to land the final blows.
       maxTargetAdjacent: 2,
       maxTargetNearby: 3,
+    } : warriorMineralMineHunt ? {
+      // R79 completed the isolated HungryZombie pulls, then every remaining
+      // CursedZombie source settled into the same measured 2-adjacent/5-nearby
+      // D2031 pack. The level-28 Warrior remained above 80% HP while repeatedly
+      // retreating from those candidates. Admit that exact density so the
+      // normal proven-aggressor clearing loop can open the pack.
+      maxTargetAdjacent: 2,
+      maxTargetNearby: 5,
+    } : {}),
+    ...(rangedWoomaExpedition ? {
+      // R97 reached a FlamingWooma through the zero-clearance corridor and
+      // reduced it to one percent before a joining pack forced target loss.
+      // A healthy ranged character should land the bounded final cast rather
+      // than discard all of that public-protocol combat progress.
+      focusTargetThroughAggressors: true,
+      finishableTargetHealthRatio: 0.1,
+      finishableTargetMinimumPlayerHpRatio: 0.7,
     } : {}),
   };
 }

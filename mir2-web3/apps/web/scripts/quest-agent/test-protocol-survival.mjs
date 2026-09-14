@@ -1126,6 +1126,24 @@ test('q99 keeps the same Wooma expedition recovery and supplies as q98', () => {
   assert.equal(questSpawnSearchHostileClearanceFallback(42), 1);
 });
 
+test('ranged Wooma hunts finish a nearly dead target only while the caster is healthy', () => {
+  for (const questId of [98, 99]) {
+    for (const className of ['Wizard', 'Taoist']) {
+      const profile = questRetreatProfile(questId, className);
+      assert.equal(profile.focusTargetThroughAggressors, true);
+      assert.equal(profile.finishableTargetHealthRatio, 0.1);
+      assert.equal(profile.finishableTargetMinimumPlayerHpRatio, 0.7);
+    }
+  }
+});
+
+test('q118 Warrior admits the measured Mineral Mine pack for ordinary aggressor clearing', () => {
+  const profile = questRetreatProfile(118, 'Warrior');
+  assert.equal(profile.maxTargetAdjacent, 2);
+  assert.equal(profile.maxTargetNearby, 5);
+  assert.equal(profile.focusTargetThroughAggressors, undefined);
+});
+
 test('q113 deep Bug Cave hunt uses expedition recovery and ranged density limits', () => {
   for (const className of ['Wizard', 'Taoist']) {
     const profile = questRetreatProfile(113, className);

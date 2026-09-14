@@ -810,19 +810,23 @@ try {
             // retreat. Keep the isolated target as the bounded focus for both
             // ranged classes; the shared low-health and multi-aggressor gates
             // still disengage unless the objective is already finishable.
-            focusTargetThroughAggressors: [30, 42, 49].includes(id) || id === 33 ||
+            focusTargetThroughAggressors: retreatProfile.focusTargetThroughAggressors ??
+              ([30, 42, 49].includes(id) || id === 33 ||
               (id === 99 && className === 'Warrior') ||
-              (id === 60 && ['Wizard', 'Taoist'].includes(className)),
+              (id === 60 && ['Wizard', 'Taoist'].includes(className))),
             // A q33 Taoist can leave a RedSnake at one ordinary strike after
             // a new TigerSnake joins. Above the critical survival floor, land
             // that bounded final blow before disengaging so the nearly dead
             // objective does not chase the player out of AOI and get lost.
-            finishableTargetHealthRatio: id === 99 && className === 'Warrior' ? 0.7 :
+            finishableTargetHealthRatio: retreatProfile.finishableTargetHealthRatio ??
+              (id === 99 && className === 'Warrior' ? 0.7 :
               (id === 33 && className === 'Taoist' ? 0.25 :
-              (id === 60 && ['Wizard', 'Taoist'].includes(className) ? 0.5 : undefined)),
-            finishableTargetMinimumPlayerHpRatio: id === 99 && className === 'Warrior' ? 0.7 :
+              (id === 60 && ['Wizard', 'Taoist'].includes(className) ? 0.5 : undefined))),
+            finishableTargetMinimumPlayerHpRatio:
+              retreatProfile.finishableTargetMinimumPlayerHpRatio ??
+              (id === 99 && className === 'Warrior' ? 0.7 :
               (id === 33 && className === 'Taoist' ? 0.4 :
-              (id === 60 && ['Wizard', 'Taoist'].includes(className) ? 0.6 : undefined)),
+              (id === 60 && ['Wizard', 'Taoist'].includes(className) ? 0.6 : undefined))),
             // Bill's Bichon mine quest can source both remaining Zombie5 and
             // Zombie1 in D406. Prefer that ordinary Bichon-mine route over the
             // equally short but much denser D421 crossing into D422.
