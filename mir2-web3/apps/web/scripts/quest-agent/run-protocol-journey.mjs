@@ -5,6 +5,7 @@ import { ProtocolClient, delay, startGameBootstrapEvidence } from './protocol-cl
 import { createNavigator, selfPlayer, equipStarterGear, reviveInTown, collectNearbyGold } from './protocol-play.mjs';
 import { interactQuest } from './protocol-quest-actions.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
+import { travelToQuestNpc } from './protocol-quest-travel.mjs';
 import { clearTravelBlockingMonster } from './protocol-combat.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { prepareLoadout, combatAction, combatApproachRange, startEmergencyHpRecovery, useClassRecovery, useSupplies } from './protocol-loadout.mjs';
@@ -552,7 +553,9 @@ try {
         experience: client.snapshot.playerExperience,
         gold: client.snapshot.gold,
       };
-      if (q.finishNpc) await travel(q.finishNpc.mapFileName);
+      if (q.finishNpc) {
+        record.finishTravel = await travelToQuestNpc(client, q, 'finish', { travel, navigate });
+      }
       const beforeItems = structuredClone(client.snapshot);
       record.finish = await interactQuest(
         client,
@@ -610,7 +613,9 @@ try {
       console.log(JSON.stringify({ className, questId: id, stage: state?.stage, level: selfPlayer(client).level }));
       if (!state) throw new Error(`q${id} unavailable at level ${selfPlayer(client).level}`);
       if (state.stage === 'available') {
-        if (q.startNpc) await travel(q.startNpc.mapFileName);
+        if (q.startNpc) {
+          record.startTravel = await travelToQuestNpc(client, q, 'start', { travel, navigate });
+        }
         record.accept = await interactQuest(client, q, 'accept', navigate);
       }
       state = client.snapshot.questLog.find(q => q.questId === id);
