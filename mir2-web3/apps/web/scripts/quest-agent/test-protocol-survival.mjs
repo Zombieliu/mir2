@@ -602,6 +602,59 @@ test('a caster expedition refills its departure MP stock without raising the fie
   ]);
 });
 
+test('a Taoist expedition refills a full Amulet reserve at its lower field trigger', async () => {
+  const taoist = clientAt('D2041', 24);
+  taoist.snapshot.beltItems.push({ name: 'Amulet', quantity: 11 });
+  const calls = [];
+  const gate = createPostEngagementSupplyGate({
+    travel: async map => {
+      calls.push(['travel', map]);
+      taoist.snapshot = { ...taoist.snapshot, mapFileName: map };
+    },
+    navigateNear: async () => {},
+    restock: async (owner, _navigateNear, options) => {
+      calls.push(['restock', options]);
+      owner.snapshot.beltItems = owner.snapshot.beltItems
+        .filter(item => String(item?.name ?? '') !== 'Amulet');
+      owner.snapshot.beltItems.push({ name: 'Amulet', quantity: 32 });
+      return { status: 'restocked' };
+    },
+  });
+
+  const result = await gate(taoist, {
+    minimumHpStock: 4,
+    minimumAmuletStock: 12,
+    requiredAfterRestockAmuletStock: 32,
+  });
+  assert.equal(result.status, 'restocked');
+  assert.equal(result.amulet, 32);
+  assert.deepEqual(calls, [
+    ['travel', '0'],
+    ['restock', {
+      targetHp: 4,
+      targetAmulet: 32,
+      lowStockHp: 4,
+      lowStockAmulet: 32,
+    }],
+    ['travel', 'D2041'],
+  ]);
+});
+
+test('a Taoist expedition rejects an underfilled Amulet departure reserve', async () => {
+  const taoist = clientAt('0', 24);
+  taoist.snapshot.beltItems.push({ name: 'Amulet', quantity: 3 });
+  const gate = createPostEngagementSupplyGate({
+    travel: async () => {},
+    navigateNear: async () => {},
+    restock: async () => ({ status: 'needsFunds' }),
+  });
+
+  await assert.rejects(() => gate(taoist, {
+    minimumAmuletStock: 12,
+    requiredAfterRestockAmuletStock: 32,
+  }), /needsFunds: unable to restock supplies to Amulet 32/);
+});
+
 test('only a healthy near-complete kill quest may make a cash-poor no-stock finish attempt', () => {
   const state = snapshot('0', 0, 37);
   Object.assign(state, { playerHp: 130, playerMaxHp: 135 });

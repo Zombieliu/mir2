@@ -221,6 +221,7 @@ export function createPostEngagementSupplyGate({
   restock,
   minimumHpStock = DEFAULT_MINIMUM_HP_STOCK,
   minimumMpStock = 0,
+  minimumAmuletStock = 0,
   maxRestocks = DEFAULT_MAX_RESTOCKS,
 } = {}) {
   if (typeof travel !== 'function') throw new TypeError('travel must be a function');
@@ -228,14 +229,17 @@ export function createPostEngagementSupplyGate({
   if (typeof restock !== 'function') throw new TypeError('restock must be a function');
   const defaultHp = nonnegativeInteger(minimumHpStock, 'minimumHpStock');
   const defaultMp = nonnegativeInteger(minimumMpStock, 'minimumMpStock');
+  const defaultAmulet = nonnegativeInteger(minimumAmuletStock, 'minimumAmuletStock');
   const restockLimit = positiveInteger(maxRestocks, 'maxRestocks');
   let restockCount = 0;
 
   return async function ensureSupplies(client, {
     minimumHpStock: requestedHp = defaultHp,
     minimumMpStock: requestedMp = defaultMp,
+    minimumAmuletStock: requestedAmulet = defaultAmulet,
     requiredAfterRestockHpStock = requestedHp,
     requiredAfterRestockMpStock = requestedMp,
+    requiredAfterRestockAmuletStock = requestedAmulet,
     requiredAfterRestockEmergencyTeleportStock: requestedEmergencyTeleport = 0,
     minimumEmergencyTeleportStock: requestedEmergencyTeleportTrigger = requestedEmergencyTeleport,
     returnMapFileName = null,
@@ -244,8 +248,13 @@ export function createPostEngagementSupplyGate({
     requireSnapshot(client);
     const triggerHp = nonnegativeInteger(requestedHp, 'minimumHpStock');
     const triggerMp = nonnegativeInteger(requestedMp, 'minimumMpStock');
+    const triggerAmulet = nonnegativeInteger(requestedAmulet, 'minimumAmuletStock');
     const departureHp = nonnegativeInteger(requiredAfterRestockHpStock, 'requiredAfterRestockHpStock');
     const departureMp = nonnegativeInteger(requiredAfterRestockMpStock, 'requiredAfterRestockMpStock');
+    const departureAmulet = nonnegativeInteger(
+      requiredAfterRestockAmuletStock,
+      'requiredAfterRestockAmuletStock',
+    );
     const departureEmergencyTeleport = nonnegativeInteger(
       requestedEmergencyTeleport,
       'requiredAfterRestockEmergencyTeleportStock',
@@ -256,10 +265,17 @@ export function createPostEngagementSupplyGate({
     );
     let hp = hpDrugCount(client.snapshot);
     let mp = mpDrugCount(client.snapshot);
+    let amulet = amuletStock(client.snapshot);
     let emergencyTeleport = emergencyTeleportStock(client.snapshot);
-    if (!forceRestock && hp >= triggerHp && mp >= triggerMp &&
+    if (!forceRestock && hp >= triggerHp && mp >= triggerMp && amulet >= triggerAmulet &&
         emergencyTeleport >= triggerEmergencyTeleport) {
-      return { status: 'sufficient', hp, mp, restockCount };
+      return {
+        status: 'sufficient',
+        hp,
+        mp,
+        ...(triggerAmulet > 0 ? { amulet } : {}),
+        restockCount,
+      };
     }
     if (restockCount >= restockLimit) {
       throw new Error(`restock limit exceeded (${restockCount}/${restockLimit})`);
@@ -270,20 +286,25 @@ export function createPostEngagementSupplyGate({
     restockCount += 1;
     const targetHp = Math.max(triggerHp, departureHp);
     const targetMp = Math.max(triggerMp, departureMp);
+    const targetAmulet = Math.max(triggerAmulet, departureAmulet);
     const supplyOptions = { targetHp };
     if (targetMp > 0) supplyOptions.targetMp = targetMp;
+    if (targetAmulet > 0) supplyOptions.targetAmulet = targetAmulet;
     supplyOptions.lowStockHp = targetHp;
     if (targetMp > 0) supplyOptions.lowStockMp = targetMp;
+    if (targetAmulet > 0) supplyOptions.lowStockAmulet = targetAmulet;
     const restockResult = await restock(client, navigateNear, supplyOptions);
 
     hp = hpDrugCount(client.snapshot);
     mp = mpDrugCount(client.snapshot);
+    amulet = amuletStock(client.snapshot);
     emergencyTeleport = emergencyTeleportStock(client.snapshot);
-    if (hp < departureHp || mp < departureMp ||
+    if (hp < departureHp || mp < departureMp || amulet < departureAmulet ||
         emergencyTeleport < departureEmergencyTeleport) {
       const details = [
         hp < departureHp ? `HP ${departureHp}` : null,
         mp < departureMp ? `MP ${departureMp}` : null,
+        amulet < departureAmulet ? `Amulet ${departureAmulet}` : null,
         emergencyTeleport < departureEmergencyTeleport
           ? `RandomTeleport ${departureEmergencyTeleport}`
           : null,
@@ -301,6 +322,7 @@ export function createPostEngagementSupplyGate({
       status: 'restocked',
       hp: hpDrugCount(client.snapshot),
       mp: mpDrugCount(client.snapshot),
+      ...(targetAmulet > 0 ? { amulet: amuletStock(client.snapshot) } : {}),
       restockCount,
       ...(returnMap && returnMap !== '0' ? { returnMap } : {}),
     };

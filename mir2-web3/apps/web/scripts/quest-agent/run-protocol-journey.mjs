@@ -273,6 +273,16 @@ try {
       const q62Expedition = Number(questId) === 62;
       const departureFloor = journeyExpeditionDepartureFloorForQuest(questId, className);
       const q65Expedition = Number(questId) === 65;
+      const taoistAmuletExpedition =
+        String(className).trim().toLowerCase() === 'taoist' &&
+        dangerousExpeditionQuestIds.has(Number(questId)) &&
+        (owner.snapshot?.knownSkills ?? []).some(skill => String(skill?.spell ?? '') === 'SoulFireBall');
+      // R68 exhausted the 12-Amulet village target during one D2041 pack,
+      // fell back to melee, and died at q60 6/8. Keep a lower field trigger
+      // than the full departure target so a partly used stack can finish an
+      // engagement without sending every cast back to town.
+      const amuletTrigger = taoistAmuletExpedition ? 12 : 0;
+      const amuletDepartureTarget = taoistAmuletExpedition ? 32 : 0;
       const emergencyTeleportTarget = q54Expedition || q60Expedition || q62Expedition || q65Expedition ? 4 : 0;
       const inVillage = String(owner.snapshot?.mapFileName ?? '') === '0';
       const shouldReplenishEscapeReserve = emergencyTeleportTarget > 0 &&
@@ -282,13 +292,15 @@ try {
       return {
         minimumHpStock: requiredHpStock,
         minimumMpStock: minimumJourneyMpStockForQuest(questId, className),
+        minimumAmuletStock: amuletTrigger,
+        requiredAfterRestockAmuletStock: amuletDepartureTarget,
         // Four scrolls are a departure target, not a field invariant. A
         // successful emergency escape must not make a healthy expedition turn
         // around solely to replace that one scroll.
         minimumEmergencyTeleportStock: shouldReplenishEscapeReserve ? emergencyTeleportTarget : 0,
         requiredAfterRestockEmergencyTeleportStock: emergencyTeleportTarget,
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
-          requiresTaoistAmuletRestock(owner.snapshot, questId, className, 4) ||
+          requiresTaoistAmuletRestock(owner.snapshot, questId, className, amuletTrigger) ||
           (shouldReplenishEscapeReserve && randomTeleportCount(owner.snapshot) < emergencyTeleportTarget) ||
           ([(q54Expedition || q65Expedition) && (hpDrugCount(owner.snapshot) < departureFloor.hp ||
               mpDrugCount(owner.snapshot) < departureFloor.mp),
