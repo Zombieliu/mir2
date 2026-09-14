@@ -74,7 +74,7 @@ const bootstrapTimeoutMs = 60_000;
 // quest instead of becoming permanently stuck in town.
 const minimumJourneyHpStock = 4;
 const maxJourneyRevivals = Number(process.env.MIR2_JOURNEY_MAX_REVIVALS ?? 30);
-const dangerousExpeditionQuestIds = new Set([54, 60, 62, 65, 98]);
+const dangerousExpeditionQuestIds = new Set([54, 60, 62, 65, 98, 113]);
 const journeySupplyOptions = Object.freeze({
   targetHp: 24,
   targetMp: 12,
@@ -205,7 +205,7 @@ try {
         .flatMap(quest => quest.objectives?.item?.map(item => item.itemName) ?? []);
       const activeQuestHpTarget = hpRestockTargetForActiveQuests(owner.snapshot, {
         fallback: journeySupplyOptions.targetHp,
-        targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80, 65: 80, 98: 80 },
+        targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80, 65: 80, 98: 80, 113: 80 },
       });
       return restockInVillage(owner, navigateNear, {
         ...journeySupplyOptions,
@@ -335,7 +335,7 @@ try {
         // funding only 24 bottles caused repeated under-stocked returns.
         const activeQuestHpTarget = hpRestockTargetForActiveQuests(owner.snapshot, {
           fallback: journeySupplyOptions.targetHp,
-          targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80, 65: 80, 98: 80 },
+          targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80, 65: 80, 98: 80, 113: 80 },
         });
         const fundingHpDeficit = Math.max(
           1,
