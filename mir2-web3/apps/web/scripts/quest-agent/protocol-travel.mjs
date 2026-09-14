@@ -546,6 +546,26 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
     let current = mapName(client.snapshot?.mapFileName);
     if (current === target) return [];
 
+    // A threat can interrupt the long walk from Sabuk's inner D701 landing to
+    // its western exit. The next objective retry therefore starts in D701,
+    // outside the merchant-quarter predicate above. Keep that retry pinned to
+    // the western exit; choosing the nearest D701 -> 3 transfer would send the
+    // player straight back into the enclosed quarter.
+    if (options._skipSabukSafeDeparture !== true &&
+        current === SABUK_SECRET_GATE &&
+        target !== SABUK_MAP && target !== SABUK_SECRET_GATE) {
+      const outer = await travelToMap(SABUK_MAP, {
+        ...options,
+        _skipSabukSafeDeparture: true,
+        preferredTransferSource: SABUK_OUTER_EXIT,
+      });
+      const onward = await travelToMap(target, {
+        ...options,
+        _skipSabukSafeDeparture: false,
+      });
+      return [...outer, ...onward];
+    }
+
     // Sabuk's merchant quarter is enclosed by invulnerable ArcherGuards. Any
     // generic objective or supply trip that leaves it must cross D701 back to
     // the west side before following the normal topology route.
@@ -564,7 +584,10 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
       });
       const onward = await travelToMap(target, {
         ...options,
-        _skipSabukSafeDeparture: true,
+        // Recheck the landing. If an incidental movement entered a different
+        // D701 return portal, this must run the safe departure again instead
+        // of walking through Sabuk's invulnerable guard line.
+        _skipSabukSafeDeparture: false,
       });
       return [...inner, ...outer, ...onward];
     }

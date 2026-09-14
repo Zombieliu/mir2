@@ -367,6 +367,42 @@ test('generic travel leaves the Sabuk merchant quarter through D701 before conti
   ]);
 });
 
+test('generic travel resumes an interrupted Sabuk departure through the western D701 exit', async () => {
+  const innerExit = {
+    key: 'sabuk-inner-exit', mapFileName: 'D701', toMapFileName: '3',
+    bounds: { minX: 171, maxX: 171, minY: 133, maxY: 133 },
+  };
+  const outerExit = {
+    key: 'sabuk-outer-exit', mapFileName: 'D701', toMapFileName: '3',
+    bounds: { minX: 27, maxX: 27, minY: 23, maxY: 23 },
+  };
+  const serpentExit = {
+    key: 'mongchon-serpent-exit', mapFileName: '3', toMapFileName: '2',
+    bounds: { minX: 272, maxX: 272, minY: 751, maxY: 751 },
+  };
+  const snapshot = (mapFileName, position, mapTransfers) => ({
+    mapFileName, mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer(position)], mapTransfers,
+  });
+  const client = new FakeClient(snapshot('D701', { x: 137, y: 129 }, [innerExit, outerExit]));
+  const calls = [];
+  const travel = createMapTraveler(client, async (target, distance, _stopWhen, options) => {
+    calls.push([target, distance, options]);
+    if (options.liveTransferKey === outerExit.key) {
+      client.receive({ type: 'worldSnapshot', payload: snapshot('3', { x: 563, y: 286 }, [serpentExit]) });
+    } else if (options.liveTransferKey === serpentExit.key) {
+      client.receive({ type: 'worldSnapshot', payload: snapshot('2', { x: 295, y: 59 }, []) });
+    } else {
+      throw new Error(`selected unsafe D701 transfer ${options.liveTransferKey}`);
+    }
+  });
+
+  const traversed = await travel('2');
+
+  assert.deepEqual(traversed.map(hop => hop.transferKey), [outerExit.key, serpentExit.key]);
+  assert.deepEqual(calls.map(call => call[2].liveTransferKey), [outerExit.key, serpentExit.key]);
+});
+
 test('a proven threat can interrupt ordinary transfer travel before the client enters the portal', async () => {
   const client = new FakeClient(walkingSnapshot(ordinaryEdge));
   let navigationCalls = 0;
