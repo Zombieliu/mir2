@@ -797,3 +797,19 @@ then claimed q2100020, received exactly Gold 10000 and SpearWithHook x1, equippe
 the weapon, and raised milestone completion from 1/4 to 2/4. Current mandatory
 completion remains Warrior 39/55, Wizard 31/55 and Taoist 31/55; the remaining
 level-30 routes and native visual acceptance remain open.
+
+r61-r63/r69 continuation on gateway r44: the q99 Warrior repeatedly reached
+the same final WoomaFighter as its live spawn group closed from one adjacent
+and two nearby monsters to two adjacent and three nearby. The bounded q99
+focus policy admitted that measured closing group, killed the remaining
+53/150-HP WoomaFighter, completed the exact 10/10 FlamingWooma plus 10/10
+WoomaFighter objective, and advanced Warrior mandatory completion to 40/55 at
+level 24 without another death. Taoist's funded 32-Amulet departure completed
+another D2041 SpiderFrog and advanced q60 from 6/8 to 7/8; one ordinary death
+and TownRevive followed, and the saved objective progress remained intact.
+Wizard's first q65 D421 crossing cast GreatFireBall/FireBall through a measured
+two-monster passage and killed the blocking Zombie3, then exited only when a
+later transient no-walk-path result escaped the quest loop. Living no-walk-path
+failures are now retried only for q54/q60/q62/q65 while preserving the
+authoritative field position. Quest Agent coverage passes 532/532. Taoist q60,
+Wizard q65, the later routes and native visual acceptance remain open.
