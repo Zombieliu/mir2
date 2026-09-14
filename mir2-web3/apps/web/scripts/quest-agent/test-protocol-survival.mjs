@@ -18,6 +18,7 @@ import {
   hpRestockTargetForActiveQuests,
   journeyExpeditionDepartureFloorForQuest,
   journeyEmergencyEscapeRestockTarget,
+  journeyEmergencyTeleportDepartureTarget,
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
   journeyResumeDisposition,
@@ -236,6 +237,12 @@ test('a dangerous expedition keeps partial field scrolls but restocks once the r
   assert.equal(journeyEmergencyEscapeRestockTarget({
     ...active(0), questLog: [{ questId: 98, stage: 'readyToTurnIn' }],
   }, 98), 0);
+});
+
+test('the Wooma route carries one navigation budget plus one combat escape reserve', () => {
+  assert.equal(journeyEmergencyTeleportDepartureTarget(98), 8);
+  assert.equal(journeyEmergencyTeleportDepartureTarget(113), 4);
+  assert.equal(journeyEmergencyTeleportDepartureTarget(49), 0);
 });
 
 test('completed expedition objectives stop requiring departure supplies before turn-in', () => {

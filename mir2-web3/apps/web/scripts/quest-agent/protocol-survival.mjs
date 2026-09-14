@@ -106,6 +106,16 @@ export function journeyNavigationEmergencyEscapeBudget(className = '') {
   return String(className).trim().toLowerCase() === 'wizard' ? 4 : 2;
 }
 
+/** Public-shop departure reserve measured for each dangerous route. */
+export function journeyEmergencyTeleportDepartureTarget(questId) {
+  const id = Number(questId);
+  if (!DANGEROUS_EXPEDITION_QUEST_IDS.has(id)) return 0;
+  // The R89 Wooma crossing consumed the full generic four-scroll reserve
+  // before D022. Eight preserves the bounded four-scroll navigation budget
+  // plus one complete combat escape reserve after arrival.
+  return id === 98 ? 8 : 4;
+}
+
 /** Keep the public escape reserve usable until a dangerous expedition is handed in. */
 export function hasJourneyEmergencyEscapeQuest(snapshot) {
   return (snapshot?.questLog ?? []).some(quest =>

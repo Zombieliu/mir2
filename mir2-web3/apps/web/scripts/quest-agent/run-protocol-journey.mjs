@@ -35,6 +35,7 @@ import {
   isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
   journeyEmergencyEscapeRestockTarget,
+  journeyEmergencyTeleportDepartureTarget,
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
   journeyMpRestockTargetForQuest,
@@ -216,9 +217,9 @@ try {
         // occupy every legal first step. Carry the ordinary Ruben shop scroll
         // a human player uses for that exact emergency; other quests keep the
         // existing supply plan unchanged.
-        emergencyTeleportCount: (owner.snapshot?.questLog ?? []).some(quest =>
-          dangerousExpeditionQuestIds.has(Number(quest?.questId)) &&
-          String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress') ? 4 : 0,
+        emergencyTeleportCount: Math.max(0, ...(owner.snapshot?.questLog ?? [])
+          .filter(quest => String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress')
+          .map(quest => journeyEmergencyTeleportDepartureTarget(quest?.questId))),
         // The first D421 -> D422 round trip consumed 24 bottles before the
         // objective map was reached. Carry an evidence-based expedition
         // stock while q54 remains active instead of repeating town loops.
@@ -286,7 +287,9 @@ try {
       // engagement without sending every cast back to town.
       const amuletTrigger = taoistAmuletExpedition ? 12 : 0;
       const amuletDepartureTarget = taoistAmuletExpedition ? 32 : 0;
-      const emergencyTeleportTarget = expeditionSupplyActive ? 4 : 0;
+      const emergencyTeleportTarget = expeditionSupplyActive
+        ? journeyEmergencyTeleportDepartureTarget(questId)
+        : 0;
       const emergencyTeleportRestockTarget = journeyEmergencyEscapeRestockTarget(
         owner.snapshot,
         questId,
@@ -355,7 +358,7 @@ try {
           0,
           activeQuestMpTarget - mpDrugCount(owner.snapshot),
         );
-        const emergencyTeleportTarget = dangerousExpeditionQuestIds.has(Number(questId)) ? 4 : 0;
+        const emergencyTeleportTarget = journeyEmergencyTeleportDepartureTarget(questId);
         const emergencyTeleportFunding = Math.max(
           0,
           emergencyTeleportTarget - randomTeleportCount(owner.snapshot),
