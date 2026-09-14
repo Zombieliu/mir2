@@ -242,6 +242,7 @@ test('a dangerous expedition keeps partial field scrolls but restocks once the r
 test('the Wooma route carries one navigation budget plus one combat escape reserve', () => {
   assert.equal(journeyEmergencyTeleportDepartureTarget(98), 8);
   assert.equal(journeyEmergencyTeleportDepartureTarget(113), 4);
+  assert.equal(journeyEmergencyTeleportDepartureTarget(114), 4);
   assert.equal(journeyEmergencyTeleportDepartureTarget(49), 0);
 });
 
@@ -1103,6 +1104,14 @@ test('q113 deep Bug Cave hunt uses expedition recovery and ranged density limits
   }
   assert.equal(evasiveRecoveryTimeoutMsForQuest(113), 90_000);
   assert.equal(evasiveRecoveryDangerDistanceForQuest(113), 8);
+});
+
+test('q114 Stone Tomb boars keep expedition supplies and wide recovery armed', () => {
+  const profile = questRetreatProfile(114, 'Warrior');
+  assert.equal(profile.allowLowHealthFollowerRecovery, true);
+  assert.equal(evasiveRecoveryTimeoutMsForQuest(114), 90_000);
+  assert.equal(evasiveRecoveryDangerDistanceForQuest(114), 8);
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(114, 'Warrior'), { hp: 64, mp: 0 });
 });
 
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {

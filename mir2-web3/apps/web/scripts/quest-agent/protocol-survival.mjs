@@ -2,7 +2,7 @@ const DEFAULT_MAX_RESTOCKS = 32;
 const DEFAULT_MINIMUM_HP_STOCK = 1;
 const REFRESH_TIMEOUT_MS = 12_000;
 const PASSIVE_RECOVERY_POLL_MS = 3_100;
-const DANGEROUS_EXPEDITION_QUEST_IDS = new Set([54, 60, 62, 65, 98, 113]);
+const DANGEROUS_EXPEDITION_QUEST_IDS = new Set([54, 60, 62, 65, 98, 113, 114]);
 
 export function hpRestockTargetForActiveQuests(snapshot, {
   fallback = 24,
@@ -123,8 +123,8 @@ export function hasJourneyEmergencyEscapeQuest(snapshot) {
     ['inprogress', 'readytoturnin'].includes(normalizedStage(quest?.stage)));
 }
 
-const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62, 65, 98, 113]);
-const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62, 65, 98, 113]);
+const LONG_EVASIVE_RECOVERY_QUESTS = new Set([30, 33, 36, 42, 49, 54, 60, 62, 65, 98, 113, 114]);
+const WIDE_DANGER_RECOVERY_QUESTS = new Set([42, 60, 62, 65, 98, 113, 114]);
 
 export function evasiveRecoveryTimeoutMsForQuest(questId) {
   return LONG_EVASIVE_RECOVERY_QUESTS.has(Number(questId)) ? 90_000 : 45_000;
@@ -144,7 +144,7 @@ export function questRetreatProfile(questId, className = '') {
   const rangedMinePassage = id === 65 && fragileMineExpedition;
   const warriorWoomaHunt = id === 99 && normalizedClass === 'warrior';
   return {
-    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 98, 113].includes(id),
+    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 98, 113, 114].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
     // turns the D401 crossing into an unrewarded fight: the surrounding pack
     // converges while Wizard/Taoist spend the MP reserved for D406. Keep the
