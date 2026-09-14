@@ -187,6 +187,11 @@ try {
           approachRange: combatApproachRange,
           sustain: useSupplies,
           attackCadenceMs: 650,
+          // Shared-zone cooldown counters advance authoritatively, but ordinary
+          // movement traffic does not include a fresh personal skill snapshot.
+          // A ranged blocker can therefore remain at cooldown=1 forever unless
+          // this travel-only combat path requests the same refresh as quests.
+          refreshWhileWaiting: current => refreshCombatCooldown(current),
           combatHostileClearance: 0,
           combatHostileClearanceFallback: 0,
         },
@@ -246,6 +251,7 @@ try {
             approachRange: combatApproachRange,
             sustain: useSupplies,
             attackCadenceMs: 650,
+            refreshWhileWaiting: current => refreshCombatCooldown(current),
             combatHostileClearance: 0,
             combatHostileClearanceFallback: 0,
             maxMovingTargetNoProgressMs: 20_000,
