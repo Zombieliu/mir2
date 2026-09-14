@@ -110,6 +110,17 @@ export function journeyNavigationEmergencyEscapeBudget(className = '') {
   return 4;
 }
 
+/** HP band where a fragile caster may reuse a public escape after 3 seconds. */
+export function journeyEmergencyTeleportCriticalHpRatio(className = '') {
+  const normalizedClass = String(className).trim().toLowerCase();
+  // R94 reached 52/90 HP after one Wooma exchange, but the shared 12-second
+  // cooldown deferred escape until 17/90. Two already-scheduled Crystal melee
+  // hits then landed after the relocation and killed the player. Crystal keeps
+  // those delayed same-map hits valid, so fragile casters must leave before
+  // their remaining HP falls below the measured queued-damage window.
+  return ['wizard', 'taoist'].includes(normalizedClass) ? 0.65 : 0.35;
+}
+
 /** Public-shop departure reserve measured for each dangerous route. */
 export function journeyEmergencyTeleportDepartureTarget(questId) {
   const id = Number(questId);

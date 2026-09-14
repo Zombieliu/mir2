@@ -35,6 +35,7 @@ import {
   isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
   journeyEmergencyEscapeRestockTarget,
+  journeyEmergencyTeleportCriticalHpRatio,
   journeyEmergencyTeleportDepartureTarget,
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
@@ -143,7 +144,9 @@ try {
   report.bootstrapPassed = true;
   if (process.env.MIR2_JOURNEY_PLAY === '1') {
     const route = JSON.parse(await fs.readFile(new URL(`../../../../docs/generated/quest-agent/${className.toLowerCase()}-1-30-newcomer-v1.json`, import.meta.url), 'utf8'));
-    const emergencyTeleport = createRandomTeleportEmergencyEscape();
+    const emergencyTeleport = createRandomTeleportEmergencyEscape({
+      criticalHpRatio: journeyEmergencyTeleportCriticalHpRatio(className),
+    });
     const navigate = createNavigator(client, {
       emergencyEscape: async owner => {
         // The cave remains dangerous after the last objective dies. Preserve

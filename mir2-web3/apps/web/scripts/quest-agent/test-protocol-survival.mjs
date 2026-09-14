@@ -21,6 +21,7 @@ import {
   journeyEmergencyTeleportDepartureTarget,
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
+  journeyEmergencyTeleportCriticalHpRatio,
   journeyResumeDisposition,
   journeyMpRestockTargetForQuest,
   questCombatMpUseThresholdForQuest,
@@ -82,6 +83,9 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(journeyNavigationEmergencyEscapeBudget('Wizard'), 4);
   assert.equal(journeyNavigationEmergencyEscapeBudget('Taoist'), 4);
   assert.equal(journeyNavigationEmergencyEscapeBudget('Warrior'), 4);
+  assert.equal(journeyEmergencyTeleportCriticalHpRatio('Wizard'), 0.65);
+  assert.equal(journeyEmergencyTeleportCriticalHpRatio('Taoist'), 0.65);
+  assert.equal(journeyEmergencyTeleportCriticalHpRatio('Warrior'), 0.35);
 });
 
 test('dangerous expedition escape remains armed for the completed cave return', () => {
