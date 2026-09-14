@@ -109,6 +109,29 @@ test('does not create funding by accepting, advancing, or turning in an unavaila
   assert.equal(called, false);
 });
 
+test('does not let a ready optional legacy quest take over mandatory journey recovery', async () => {
+  const owner = {
+    snapshot: {
+      mapFileName: 'D2041', gold: 27,
+      questLog: [{ questId: 62, stage: 'ReadyToTurnIn' }],
+      inventoryItems: [], beltItems: [], equipmentItems: [],
+    },
+  };
+  let called = false;
+  const result = await finishReadySupplyFundingQuest(owner, {
+    route: {
+      classMask: 1,
+      quests: [{ questId: 62, finishNpc: { mapFileName: '0' }, rewards: { gold: 800 } }],
+    },
+    questIds: [50, 61, 65, 60],
+    travel: async () => { called = true; },
+    navigate: async () => { called = true; },
+    interact: async () => { called = true; },
+  });
+  assert.equal(result, null);
+  assert.equal(called, false);
+});
+
 test('ready q110 funding turn-in keeps the guarded Sabuk endpoint on its quest-safe route', async () => {
   const actor = { objectId: 1, kind: 'selfPlayer', x: 505, y: 483 };
   const owner = {

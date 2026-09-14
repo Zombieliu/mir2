@@ -521,6 +521,7 @@ try {
       route,
       travel,
       navigate,
+      questIds: ids,
     });
     const readyResumeQuestId = ids.find(id => {
       const quest = client.snapshot.questLog.find(entry => Number(entry?.questId) === Number(id));

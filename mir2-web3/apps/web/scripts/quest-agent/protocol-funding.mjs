@@ -59,6 +59,7 @@ export async function finishReadySupplyFundingQuest(owner, {
   travel,
   navigate,
   interact = interactQuest,
+  questIds = null,
 } = {}) {
   if (!owner?.snapshot) throw new TypeError('owner must provide an authoritative snapshot');
   if (!route || !Array.isArray(route.quests)) throw new TypeError('route must provide quests');
@@ -69,7 +70,9 @@ export async function finishReadySupplyFundingQuest(owner, {
   const readyIds = new Set((owner.snapshot.questLog ?? [])
     .filter(quest => normalized(quest?.stage) === 'readytoturnin')
     .map(quest => Number(quest.questId)));
+  const eligibleIds = questIds == null ? null : new Set(questIds.map(Number));
   const quest = route.quests.find(candidate =>
+    (eligibleIds == null || eligibleIds.has(Number(candidate?.questId))) &&
     readyIds.has(Number(candidate?.questId)) && candidate?.finishNpc &&
     Number(candidate?.rewards?.gold ?? 0) > 0);
   if (!quest) return null;
