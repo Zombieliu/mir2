@@ -343,10 +343,10 @@ test('ordinary restock does not buy RandomTeleport unless explicitly requested',
   assert.equal(client.snapshot.inventoryItems.some(entry => Number(entry.tooltipSource?.info?.item_index) === RANDOM_TELEPORT), false);
 });
 
-test('explicit emergency reserve buys exact Merchant Ruben RandomTeleport rows and proves deltas', async () => {
-  const client = new FakeClient(snapshot({ gold: 700, hp: 6 }), { goods: emergencyGoods() });
+test('explicit eight-scroll route reserve buys exact Merchant Ruben rows and proves deltas', async () => {
+  const client = new FakeClient(snapshot({ gold: 1100, hp: 6 }), { goods: emergencyGoods() });
   const result = await restockInVillage(client, async () => {}, {
-    emergencyTeleportCount: 4,
+    emergencyTeleportCount: 8,
     reserveGold: 0,
   });
   assert.equal(result.status, 'restocked');
@@ -354,13 +354,13 @@ test('explicit emergency reserve buys exact Merchant Ruben RandomTeleport rows a
     itemIndex: RANDOM_TELEPORT,
     name: 'RandomTeleport',
     shopItemId: 71701,
-    quantity: 4,
+    quantity: 8,
     unitPrice: 100,
-    cost: 400,
+    cost: 800,
   }]);
   assert.equal(result.after.gold, 300);
   assert.equal(result.after.hp, 6);
-  assert.equal(randomTeleportCount(client.snapshot), 4);
+  assert.equal(randomTeleportCount(client.snapshot), 8);
   assert.equal(client.sent.at(-1).itemIndex, 71701);
 });
 

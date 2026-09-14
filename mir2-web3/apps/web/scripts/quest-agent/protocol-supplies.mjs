@@ -980,8 +980,8 @@ function nonnegativeOption(value, fallback, label) {
 function emergencyTeleportOption(value) {
   if (value == null) return 0;
   const parsed = Number(value);
-  if (!Number.isSafeInteger(parsed) || parsed < 0 || parsed > 6) {
-    throw new TypeError('emergencyTeleportCount must be an integer from 0 to 6');
+  if (!Number.isSafeInteger(parsed) || parsed < 0 || parsed > 8) {
+    throw new TypeError('emergencyTeleportCount must be an integer from 0 to 8');
   }
   return parsed;
 }
