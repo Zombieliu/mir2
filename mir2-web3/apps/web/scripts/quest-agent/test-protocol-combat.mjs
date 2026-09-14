@@ -243,6 +243,56 @@ test("an expedition can prefer its configured objective map over a denser same-m
   assert.deepEqual(client.sent.map(entry => entry.objectId), [64]);
 });
 
+test("a post-travel supply checkpoint can leave and replan before objective combat", async () => {
+  const quest = {
+    questId: 113,
+    stage: "InProgress",
+    objectives: [objective("Kill WedgeMoth", 0, 1)],
+  };
+  const client = new FakeClient(snapshot(quest), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { hp: 0, dead: true });
+      state.questLog[0].objectives = [objective("Kill WedgeMoth", 1, 1)];
+      state.questLog[0].stage = "ReadyToTurnIn";
+    });
+  });
+  const travelled = [];
+  const travel = async mapFileName => {
+    travelled.push(mapFileName);
+    client.snapshot.mapFileName = mapFileName;
+    client.snapshot.entities = [self(), monster(113, "WedgeMoth")];
+  };
+  travel.canReach = async () => true;
+  let checkpoints = 0;
+
+  const result = await completeQuestObjectives(client, {
+    questId: 113,
+    objectives: {
+      kill: [{
+        monsterName: "WedgeMoth",
+        spawnCandidates: [{ ...spawn("WedgeMoth"), mapFileName: "D607" }],
+      }],
+      item: [],
+    },
+  }, navigateClientNear(client), {
+    ...settings,
+    travel,
+    afterTravel: async owner => {
+      checkpoints += 1;
+      if (checkpoints !== 1) return false;
+      owner.snapshot.mapFileName = "0";
+      owner.snapshot.entities = [self()];
+      return true;
+    },
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(travelled, ["D607", "D607"]);
+  assert.equal(checkpoints, 2);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [113]);
+});
+
 test("multi-map travel evades a proven adjacent aggressor before retrying the ordinary route", async () => {
   const quest = {
     questId: 54,

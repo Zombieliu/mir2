@@ -688,6 +688,12 @@ try {
               return { consumed, classRecovery };
             },
             travel,
+            afterTravel: async owner => {
+              const supply = await supplyGateForQuest(owner, id);
+              if (supply.status !== 'restocked') return false;
+              recordSupplyRetreat(report, id, supply);
+              return true;
+            },
             afterEngagement: async (owner, navigateNear) => {
               const currentQuest = owner.snapshot.questLog.find(entry => Number(entry?.questId) === id);
               const currentStage = String(currentQuest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase();

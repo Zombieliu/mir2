@@ -140,6 +140,12 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
             resolveBlockingMonster: false,
           });
           travelThreatEvasions.clear();
+          // A long physical route can consume the last escape scroll or cross
+          // a supply threshold after the loop's initial prepare pass. Let the
+          // journey policy service that state before target search begins. A
+          // truthy result means the checkpoint moved away from the objective
+          // map, so restart planning from the new authoritative location.
+          if (settings.afterTravel && await settings.afterTravel(client)) continue;
         } catch (error) {
           if (error instanceof TravelBlockedByMonster) {
             const blocker = entityById(client.snapshot, error.objectId);
@@ -835,6 +841,7 @@ function combatSettings(options) {
     lastSustainAt: Number.NEGATIVE_INFINITY,
     action: options.action,
     travel: options.travel,
+    afterTravel: typeof options.afterTravel === 'function' ? options.afterTravel : null,
     afterEngagement: options.afterEngagement,
     recoverAfterUnsafeRetreat: typeof options.recoverAfterUnsafeRetreat === 'function'
       ? options.recoverAfterUnsafeRetreat
