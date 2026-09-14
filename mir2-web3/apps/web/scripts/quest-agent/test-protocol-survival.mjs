@@ -976,6 +976,9 @@ test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
   assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }, 'Warrior'), { x: 361, y: 19 });
   assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }, 'Wizard'), { x: 30, y: 374 });
   assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D421' }, 'Taoist'), { x: 30, y: 374 });
+  assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D401' }, 'Wizard'), { x: 76, y: 15 });
+  assert.deepEqual(questRetreatBiasPosition(65, { mapFileName: 'D411' }, 'Taoist'), { x: 95, y: 49 });
+  assert.equal(questRetreatBiasPosition(65, { mapFileName: 'D401' }, 'Warrior'), null);
   assert.equal(questRetreatBiasPosition(65, { mapFileName: 'D422' }), null);
   assert.equal(questRetreatBiasPosition(65, { mapFileName: '0' }), null);
   assert.deepEqual(preferredObjectiveMapsForQuest(65, 'Wizard'), ['D406']);

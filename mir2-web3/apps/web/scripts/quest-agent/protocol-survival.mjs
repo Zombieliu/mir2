@@ -191,6 +191,12 @@ export function questRetreatBiasPosition(questId, snapshot, className = '') {
       ? { x: 30, y: 374 }
       : { x: 361, y: 19 };
   }
+  if (id === 65 && ['wizard', 'taoist'].includes(String(className).trim().toLowerCase())) {
+    return ({
+      D401: { x: 76, y: 15 },
+      D411: { x: 95, y: 49 },
+    })[mapFileName] ?? null;
+  }
   if (id !== 54) return null;
   return ({
     D401: { x: 76, y: 15 },
