@@ -350,6 +350,34 @@ test('ordinary navigation detours around a live transfer source', async () => {
   assert.ok(!visited.some(point => point.x === 3 && point.y === 1));
 });
 
+test('dispatch recheck blocks a newly observed transfer across both Run cells', async () => {
+  const client = navigationClient();
+  const visited = [];
+  client.wait = acknowledgeUnitMovement(client, visited);
+  let exposed = false;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    delay: async () => {
+      if (exposed) return;
+      exposed = true;
+      client.snapshot.mapTransfers = [{
+        key: 'late-door',
+        mapFileName: 'test',
+        toMapFileName: 'other',
+        bounds: { minX: 3, maxX: 3, minY: 1, maxY: 1 },
+      }];
+    },
+  });
+
+  const result = await navigateNear({ x: 6, y: 1 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.ok(!visited.some(point => point.x === 3 && point.y === 1));
+  assert.ok(client.diagnostics.some(entry =>
+    entry.type === 'navigationTransferDispatchGuard' &&
+    entry.movementType === 'run' && entry.transferCell.x === 3));
+});
+
 test('selected live transfer remains an allowed navigation destination', async () => {
   const client = navigationClient();
   client.snapshot.mapTransfers = [{

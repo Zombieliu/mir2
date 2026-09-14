@@ -392,6 +392,37 @@ export function createNavigator(client, dependencies = {}) {
         remaining.length >= 2 && remaining[1].direction === step.direction &&
         !obstacleKeys.has(`${Number(remaining[1].to.x)},${Number(remaining[1].to.y)}`);
       await sleep(Math.max(0, 650 - (now() - (client.lastWalkAt ?? 0))));
+      // A fresh world update can expose a transfer after this route was
+      // planned. Recheck every physical cell immediately before dispatch,
+      // including the intermediate and destination cells of a two-tile Run.
+      // This closes the R87 race where a normal combat route ran from
+      // D022(338,356) through the live 338,355/338,354 exit and left the cave.
+      const dispatchTransferKeys = new Set(
+        liveTransferObstacles(client.snapshot, staticWalkableOverrides)
+          .map(point => `${Number(point.x)},${Number(point.y)}`),
+      );
+      const liveSelf = selfPlayer(client);
+      const dx = Math.sign(Number(step.to.x) - Number(before.x));
+      const dy = Math.sign(Number(step.to.y) - Number(before.y));
+      const dispatchSteps = running ? 2 : 1;
+      const protectedStep = Array.from({ length: dispatchSteps }, (_, index) => ({
+        x: Number(liveSelf.x) + dx * (index + 1),
+        y: Number(liveSelf.y) + dy * (index + 1),
+      })).find(point => dispatchTransferKeys.has(`${point.x},${point.y}`));
+      if (protectedStep) {
+        rejected.push(protectedStep);
+        remaining = [];
+        client.record('diagnostic', {
+          type: 'navigationTransferDispatchGuard',
+          mapId,
+          movementType: running ? 'run' : 'walk',
+          transferCell: protectedStep,
+        });
+        if (++failures > maxNoPathRefreshes) {
+          throw new Error(`No walk path on ${mapId} from ${liveSelf.x},${liveSelf.y} to ${target.x},${target.y}`);
+        }
+        continue;
+      }
       client.lastWalkAt = now();
       client.send({ type: running ? 'run' : 'walk', direction: directionNames[step.direction] });
       let movedDistance = 0;
