@@ -780,3 +780,20 @@ from Bichon to Master_Shok, handed in q62, advanced mandatory completion from
 four RandomTeleport scrolls through public combat, harvest, sale and shop
 packets. Their q60 completion and the corrected ready-return escape remain live
 acceptance gates; later quests and native visual acceptance remain open.
+
+r60/r67/r73/r74 continuation on gateway r44: Warrior completed q99's
+FlamingWooma component at 10/10, restocked through ordinary harvest, sale and
+shop packets after one TownRevive, returned to D022 and advanced WoomaFighter
+to 4/10 while retaining q89 and q99 progress. The revised ranged q60 density
+policy admitted the natural D2041 SpiderFrog packs: Wizard advanced 7/8 to 8/8,
+returned through the physical cave route, handed q60 in and reached level 20;
+Taoist advanced 5/8 to 6/8 without a death. Wizard's same-session level-up then
+exposed an absent q2100020 definition cache entry even though the authoritative
+Board dialog and quest snapshot offered the exact reward. Milestone validation
+now accepts that narrowly bounded source only when the live Board operation link
+and the complete generated reward preview exactly match the expected class
+reward. Quest Agent coverage passes 528/528. A fresh ordinary-protocol session
+then claimed q2100020, received exactly Gold 10000 and SpearWithHook x1, equipped
+the weapon, and raised milestone completion from 1/4 to 2/4. Current mandatory
+completion remains Warrior 39/55, Wizard 31/55 and Taoist 31/55; the remaining
+level-30 routes and native visual acceptance remain open.
