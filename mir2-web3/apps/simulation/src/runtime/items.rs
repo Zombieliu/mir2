@@ -45,7 +45,9 @@ use super::map::{
     current_map_disallows_town_teleport,
 };
 use super::monsters::deterministic_roll;
-use super::movement::{crystal_random_same_map_teleport_packets, town_teleport_packets};
+use super::movement::{
+    crystal_dungeon_escape_packets, crystal_random_same_map_teleport_packets, town_teleport_packets,
+};
 use super::npc::crystal_sell_value_for_item;
 use super::npc_script::gain_credit;
 use super::packets::{
@@ -2829,7 +2831,7 @@ pub(super) fn use_dynamic_crystal_template_item(
                     packets,
                 ));
             }
-            let Some(teleport_packets) = crystal_random_same_map_teleport_packets(world, 20) else {
+            let Some(teleport_packets) = crystal_dungeon_escape_packets(world) else {
                 return Some(prepend_optional_packet(
                     use_item_ack(packet_ack, false),
                     packets,
