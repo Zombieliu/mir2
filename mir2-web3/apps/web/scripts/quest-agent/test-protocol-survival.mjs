@@ -947,6 +947,14 @@ test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
   assert.equal(questRetreatProfile(65, 'Warrior').maxTargetAdjacent, undefined);
 });
 
+test('q99 Warrior admits the measured final WoomaFighter spawn group', () => {
+  const warrior = questRetreatProfile(99, 'Warrior');
+  assert.equal(warrior.maxTargetAdjacent, 1);
+  assert.equal(warrior.maxTargetNearby, 2);
+  assert.equal(questRetreatProfile(99, 'Wizard').maxTargetAdjacent, undefined);
+  assert.equal(questRetreatProfile(99, 'Taoist').maxTargetNearby, undefined);
+});
+
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {
   assert.deepEqual(questRetreatProfile(54, 'Warrior'), {
     allowLowHealthFollowerRecovery: true,

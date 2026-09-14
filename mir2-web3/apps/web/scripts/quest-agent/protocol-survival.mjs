@@ -123,6 +123,7 @@ export function questRetreatProfile(questId, className = '') {
   const healingMineExpedition = [54, 65].includes(id) && normalizedClass === 'taoist';
   const rangedInsectExpedition = id === 60 && ['wizard', 'taoist'].includes(normalizedClass);
   const rangedMinePassage = id === 65 && fragileMineExpedition;
+  const warriorWoomaHunt = id === 99 && normalizedClass === 'warrior';
   return {
     allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
@@ -164,6 +165,13 @@ export function questRetreatProfile(questId, className = '') {
     ...((rangedInsectExpedition || rangedMinePassage) ? {
       maxTargetAdjacent: 1,
       maxTargetNearby: 4,
+    } : warriorWoomaHunt ? {
+      // R60 reached q99 19/20 with full supplies, but the last live
+      // WoomaFighter repeatedly remained in its stable 1-adjacent/2-nearby
+      // spawn group. The Warrior already keeps this objective as its bounded
+      // focus through one joining aggressor, so admit that measured target.
+      maxTargetAdjacent: 1,
+      maxTargetNearby: 2,
     } : {}),
   };
 }
