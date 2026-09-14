@@ -69,6 +69,8 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questEmergencyEscapeHpRatio(62), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(65, 'Wizard'), 0.65);
   assert.equal(questEmergencyEscapeHpRatio(65, 'Taoist'), 0.35);
+  assert.equal(questEmergencyEscapeHpRatio(98, 'Wizard'), 0.65);
+  assert.equal(questEmergencyEscapeHpRatio(98, 'Taoist'), 0.35);
   assert.equal(questEmergencyEscapeHpRatio(49), 0);
   assert.equal(journeyNavigationEmergencyEscapeBudget('Wizard'), 4);
   assert.equal(journeyNavigationEmergencyEscapeBudget('Taoist'), 2);
@@ -84,6 +86,9 @@ test('dangerous expedition escape remains armed for the completed cave return', 
   }), true);
   assert.equal(hasJourneyEmergencyEscapeQuest({
     questLog: [{ questId: 65, stage: 'inProgress' }],
+  }), true);
+  assert.equal(hasJourneyEmergencyEscapeQuest({
+    questLog: [{ questId: 98, stage: 'inProgress' }],
   }), true);
   assert.equal(hasJourneyEmergencyEscapeQuest({
     questLog: [{ questId: 54, stage: 'completed' }],
@@ -180,6 +185,7 @@ test('a resumed expedition preserves field progress while it still has a public 
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 62), true);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 60), true);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 65), true);
+  assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 98), true);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(1)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(3)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(4)] }, 54), false);
@@ -197,6 +203,9 @@ test('completed expedition objectives stop requiring departure supplies before t
     questLog: [{ questId: 60, stage: 'completed' }],
   }, 60), false);
   assert.equal(journeyExpeditionSupplyActive({
+    questLog: [{ questId: 98, stage: 'inProgress' }],
+  }, 98), true);
+  assert.equal(journeyExpeditionSupplyActive({
     questLog: [{ questId: 49, stage: 'inProgress' }],
   }, 49), false);
 });
@@ -209,6 +218,8 @@ test('long expeditions accept a partial but still conservative funded departure 
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(60, 'Wizard'), { hp: 64, mp: 0 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(65, 'Wizard'), { hp: 64, mp: 64 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(65, 'Taoist'), { hp: 64, mp: 64 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(98, 'Wizard'), { hp: 64, mp: 0 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(98, 'Taoist'), { hp: 64, mp: 0 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(49, 'Wizard'), { hp: 0, mp: 0 });
 });
 
@@ -1011,6 +1022,15 @@ test('q99 Warrior admits the measured final WoomaFighter spawn group', () => {
   assert.equal(warrior.maxTargetNearby, 3);
   assert.equal(questRetreatProfile(99, 'Wizard').maxTargetAdjacent, undefined);
   assert.equal(questRetreatProfile(99, 'Taoist').maxTargetNearby, undefined);
+});
+
+test('q98 Wooma expedition keeps long wide recovery armed for ranged classes', () => {
+  for (const className of ['Wizard', 'Taoist']) {
+    const profile = questRetreatProfile(98, className);
+    assert.equal(profile.allowLowHealthFollowerRecovery, true);
+  }
+  assert.equal(evasiveRecoveryTimeoutMsForQuest(98), 90_000);
+  assert.equal(evasiveRecoveryDangerDistanceForQuest(98), 8);
 });
 
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {
