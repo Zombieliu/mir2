@@ -92,22 +92,43 @@ function liveDynamicObstacles(snapshot) {
   );
 }
 
-function chooseLiveTransfer(snapshot, edge) {
-  return liveTransferChoices(snapshot, edge)[0] ?? null;
+function nearestDirectScriptedEdge(graph, current, target, snapshot) {
+  const origin = player(snapshot);
+  const distance = edge => origin
+    ? Math.max(
+      Math.abs(Number(origin.x) - Number(edge.npc?.position?.x)),
+      Math.abs(Number(origin.y) - Number(edge.npc?.position?.y)),
+    )
+    : Number.POSITIVE_INFINITY;
+  return graph.edges
+    .filter(edge => edge.kind === 'npc-script' &&
+      String(edge.fromMapFileName) === current &&
+      String(edge.toMapFileName) === target)
+    .sort((left, right) => distance(left) - distance(right) ||
+      String(left.scriptKey).localeCompare(String(right.scriptKey)))[0] ?? null;
 }
 
-function liveTransferChoices(snapshot, edge) {
+function chooseLiveTransfer(snapshot, edge, options) {
+  return liveTransferChoices(snapshot, edge, options)[0] ?? null;
+}
+
+function liveTransferChoices(snapshot, edge, options) {
   const origin = player(snapshot);
   const candidates = liveTransferCandidates(snapshot, String(edge.toMapFileName));
+  const preferredSource = options?.preferredTransferSource;
   return candidates
     .map(transfer => {
       const target = nearestPointInBounds(origin, transfer.bounds);
       const distance = origin
         ? Math.max(Math.abs(Number(origin.x) - target.x), Math.abs(Number(origin.y) - target.y))
         : Number.POSITIVE_INFINITY;
-      return { transfer, target, distance };
+      const preferred = Number.isFinite(Number(preferredSource?.x)) &&
+        Number.isFinite(Number(preferredSource?.y)) &&
+        pointInBounds(preferredSource, transfer.bounds);
+      return { transfer, target, distance, preferred };
     })
-    .sort((left, right) => left.distance - right.distance ||
+    .sort((left, right) => Number(right.preferred) - Number(left.preferred) ||
+      left.distance - right.distance ||
       String(left.transfer.key).localeCompare(String(right.transfer.key)));
 }
 
@@ -515,7 +536,15 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
     if (current === target) return [];
 
     const graph = await travelGraphPromise;
-    const route = findMapTravelRoute(graph, current, target);
+    // Some quest endpoints have a physically shorter topology route that is
+    // unsafe for a normal player. Callers may prefer an ordinary, direct NPC
+    // transporter while retaining the normal route as a fallback.
+    const directScriptedEdge = options.preferDirectScriptedEdge === true
+      ? nearestDirectScriptedEdge(graph, current, target, client.snapshot)
+      : null;
+    const route = directScriptedEdge
+      ? [directScriptedEdge]
+      : findMapTravelRoute(graph, current, target);
     if (!route?.length) {
       throw new Error(`No normal-player map route from ${current} to ${target}`);
     }
@@ -534,7 +563,7 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
       if (edge.kind !== 'map-movement') {
         throw new Error(`Unsupported map edge kind ${edge.kind} from ${current} to ${edge.toMapFileName}`);
       }
-      let live = chooseLiveTransfer(client.snapshot, edge);
+      let live = chooseLiveTransfer(client.snapshot, edge, options);
       if (!live) {
         throw new Error(`No live walking transfer from ${current} to ${edge.toMapFileName}`);
       }
@@ -598,7 +627,7 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
               localBlockingMonster(client.snapshot);
             if (!blocker) {
               rejectedTransferKeys.add(String(live.transfer.key));
-              const alternative = liveTransferChoices(client.snapshot, edge).find(candidate =>
+              const alternative = liveTransferChoices(client.snapshot, edge, options).find(candidate =>
                 !rejectedTransferKeys.has(String(candidate.transfer.key)) &&
                 (!pointEquals(candidate.target, live.target) ||
                   String(candidate.transfer.key) !== String(live.transfer.key)));
@@ -622,7 +651,7 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
                   if (relocation && relocation.deferred !== true) {
                     disconnectedRegionRelocations += 1;
                     rejectedTransferKeys.clear();
-                    live = chooseLiveTransfer(client.snapshot, edge) ?? live;
+                    live = chooseLiveTransfer(client.snapshot, edge, options) ?? live;
                     if (typeof client.record === 'function') {
                       const after = player(client.snapshot);
                       client.record('diagnostic', {

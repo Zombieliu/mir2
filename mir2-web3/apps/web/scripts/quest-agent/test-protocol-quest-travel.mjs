@@ -21,11 +21,14 @@ const q110 = {
 test('q110 finish uses the D701 walking-transfer detour into the Sabuk merchant quarter', async () => {
   const client = clientAt('2', 505, 483);
   const calls = [];
-  const travel = async mapFileName => {
-    calls.push(['travel', mapFileName]);
+  const travel = async (mapFileName, options) => {
+    calls.push(['travel', mapFileName, options]);
     client.snapshot.mapFileName = mapFileName;
     if (mapFileName === 'D701') Object.assign(client.snapshot.entities[0], { x: 28, y: 22 });
-    if (mapFileName === '3') Object.assign(client.snapshot.entities[0], { x: 660, y: 276 });
+    if (mapFileName === '3') Object.assign(
+      client.snapshot.entities[0],
+      options?.preferDirectScriptedEdge ? { x: 361, y: 342 } : { x: 660, y: 276 },
+    );
   };
   const navigate = async (target, desiredDistance) => {
     calls.push(['navigate', target, desiredDistance]);
@@ -36,9 +39,10 @@ test('q110 finish uses the D701 walking-transfer detour into the Sabuk merchant 
 
   assert.equal(result.status, 'sabukSecretGate');
   assert.deepEqual(calls, [
-    ['travel', 'D701'],
+    ['travel', '3', { preferDirectScriptedEdge: true }],
+    ['travel', 'D701', { preferredTransferSource: SABUK_QUEST_TRAVEL.safeOuterEntrance }],
     ['navigate', SABUK_QUEST_TRAVEL.innerExit, 1],
-    ['travel', '3'],
+    ['travel', '3', undefined],
   ]);
 });
 
@@ -83,7 +87,9 @@ test('Sabuk detour fails closed when the authoritative landing is outside the wa
       client.snapshot.mapFileName = mapFileName;
       Object.assign(client.snapshot.entities[0], mapFileName === 'D701'
         ? { x: 171, y: 132 }
-        : { x: 516, y: 778 });
+        : mapFileName === '3'
+          ? { x: 361, y: 342 }
+          : { x: 516, y: 778 });
     },
     navigate: async target => Object.assign(client.snapshot.entities[0], target),
   }), /did not enter the Sabuk merchant quarter/);

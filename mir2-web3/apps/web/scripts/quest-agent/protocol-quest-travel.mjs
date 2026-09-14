@@ -1,6 +1,7 @@
 const SABUK_MERCHANT_QUEST_IDS = new Set([110, 111, 112]);
 const SABUK_MAP = '3';
 const SABUK_SECRET_GATE = 'D701';
+const SABUK_SAFE_OUTER_ENTRANCE = Object.freeze({ x: 564, y: 287 });
 const SABUK_INNER_EXIT = Object.freeze({ x: 171, y: 132 });
 
 function player(snapshot) {
@@ -43,7 +44,15 @@ export async function travelToQuestNpc(client, quest, phase, { travel, navigate 
     return { status: 'direct', questId: Number(quest?.questId), phase };
   }
 
-  await travel(SABUK_SECRET_GATE);
+  // D701 has three entrances on map 3. Choosing only by tile distance can
+  // select the eastern entrance behind Sabuk's ArcherGuard line. Pin the
+  // ordinary western secret-gate tile. When arriving from another province,
+  // use Crystal's paid transporter first: it lands at 361,342 and avoids the
+  // southern walking entrance and the ArcherGuard corridor.
+  if (String(client.snapshot.mapFileName ?? '') !== SABUK_MAP) {
+    await travel(SABUK_MAP, { preferDirectScriptedEdge: true });
+  }
+  await travel(SABUK_SECRET_GATE, { preferredTransferSource: SABUK_SAFE_OUTER_ENTRANCE });
   await navigate(SABUK_INNER_EXIT, 1);
   await travel(SABUK_MAP);
   if (!isInsideSabukMerchantGate(client.snapshot)) {
@@ -62,5 +71,6 @@ export async function travelToQuestNpc(client, quest, phase, { travel, navigate 
 export const SABUK_QUEST_TRAVEL = Object.freeze({
   mapFileName: SABUK_MAP,
   secretGateMapFileName: SABUK_SECRET_GATE,
+  safeOuterEntrance: SABUK_SAFE_OUTER_ENTRANCE,
   innerExit: SABUK_INNER_EXIT,
 });

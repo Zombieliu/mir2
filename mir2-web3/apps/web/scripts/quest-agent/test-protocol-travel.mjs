@@ -26,7 +26,11 @@ const raymondWhiteValley = graph.edges.find(edge =>
 const stoneHeartPassage = graph.edges.find(edge =>
   edge.kind === 'npc-script' && edge.fromMapFileName === 'D715' && edge.toMapFileName === 'D710A'
 );
-if (!ordinaryEdge || !mageHouseExit || !rupertPrajna || !raymondWhiteValley || !stoneHeartPassage) {
+const serpentMudWall = graph.edges.find(edge =>
+  edge.kind === 'npc-script' && edge.fromMapFileName === '2' && edge.toMapFileName === '3'
+);
+if (!ordinaryEdge || !mageHouseExit || !rupertPrajna || !raymondWhiteValley ||
+    !stoneHeartPassage || !serpentMudWall) {
   throw new Error('Crystal route manifest lacks a required travel test edge');
 }
 
@@ -145,6 +149,7 @@ function successfulScriptClient(edge, beforeGold, {
   refreshOnClientVersion = false,
   mapPacket = 'MapChanged',
 } = {}) {
+  let targetIndex = 0;
   return new FakeClient(scriptedSnapshot(edge, beforeGold), (command, client) => {
     if (command.type === 'interact') {
       client.receive({
@@ -153,13 +158,28 @@ function successfulScriptClient(edge, beforeGold, {
           ...client.snapshot,
           activeNpcDialog: {
             npcObjectId: edge.npc.objectId,
-            links: edge.targetSequence.map(target => ({ label: target, target })),
+            links: [{ label: edge.targetSequence[0], target: edge.targetSequence[0] }],
           },
         },
       });
       return;
     }
     if (command.type === 'selectNpcDialog') {
+      if (targetIndex < edge.targetSequence.length - 1) {
+        targetIndex += 1;
+        const nextTarget = edge.targetSequence[targetIndex];
+        client.receive({
+          type: 'worldSnapshot',
+          payload: {
+            ...client.snapshot,
+            activeNpcDialog: {
+              npcObjectId: edge.npc.objectId,
+              links: [{ label: nextTarget, target: nextTarget }],
+            },
+          },
+        });
+        return;
+      }
       if (mapPacket === 'MapInformation') {
         client.receive({
           type: 'packet',
@@ -257,6 +277,54 @@ test('travels through an authoritative live walking transfer at distance zero', 
     transferKey: 'live-transfer',
     position: { x: 8, y: 4 },
   }]);
+});
+
+test('a caller can prefer a safe authoritative transfer source over the nearest portal', async () => {
+  const sabukEdge = graph.edges.find(edge =>
+    edge.kind === 'map-movement' && edge.fromMapFileName === '3' && edge.toMapFileName === 'D701'
+  );
+  assert.ok(sabukEdge, 'Crystal topology must expose the Sabuk secret gate');
+  const source = {
+    mapFileName: '3',
+    mapSnapshotPending: false,
+    playerObjectId: 1,
+    entities: [selfPlayer({ x: 558, y: 392 })],
+    mapTransfers: [
+      { key: 'guarded-nearest', mapFileName: '3', toMapFileName: 'D701', bounds: { minX: 578, maxX: 578, minY: 296, maxY: 296 } },
+      { key: 'safe-west', mapFileName: '3', toMapFileName: 'D701', bounds: { minX: 564, maxX: 564, minY: 287, maxY: 287 } },
+    ],
+  };
+  const client = new FakeClient(source);
+  const calls = [];
+  const travel = createMapTraveler(client, async (target, distance, _stopWhen, options) => {
+    calls.push([target, distance, options]);
+    client.receive({
+      type: 'worldSnapshot',
+      payload: { ...client.snapshot, mapFileName: 'D701', mapTransfers: [] },
+    });
+  });
+
+  await travel('D701', { preferredTransferSource: { x: 564, y: 287 } });
+
+  assert.deepEqual(calls, [[
+    { x: 564, y: 287 },
+    0,
+    { liveTransferKey: 'safe-west' },
+  ]]);
+});
+
+test('a caller can prefer the nearest direct Crystal transporter over a shorter walking route', async () => {
+  const client = successfulScriptClient(serpentMudWall, 5000);
+  const navigation = [];
+  const travel = createMapTraveler(client, async (target, distance) => navigation.push([target, distance]));
+
+  const traversed = await travel('3', { preferDirectScriptedEdge: true });
+
+  assert.equal(traversed.length, 1);
+  assert.equal(traversed[0].scriptKey, serpentMudWall.scriptKey);
+  assert.deepEqual(traversed[0].position, { x: 361, y: 342 });
+  assert.deepEqual(navigation, [[serpentMudWall.npc.position, 1]]);
+  assert.equal(client.snapshot.gold, 3000);
 });
 
 test('a proven threat can interrupt ordinary transfer travel before the client enters the portal', async () => {
