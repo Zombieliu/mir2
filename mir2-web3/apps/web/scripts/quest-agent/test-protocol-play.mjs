@@ -94,25 +94,37 @@ test('navigator propagates an existing failure before a tactical stop predicate 
   assert.deepEqual(client.sent, []);
 });
 
-test('navigator retries an unacknowledged movement without poisoning the valid tile', async () => {
+test('navigator waits sixty seconds for one authoritative movement response', async () => {
   const client = navigationClient();
-  let waits = 0;
   const timeouts = [];
   client.wait = async (predicate, _label, timeout) => {
     timeouts.push(timeout);
-    waits += 1;
-    if (waits === 1) throw new Error('Timeout waiting for authoritative movement response');
     Object.assign(client.snapshot.entities[0], { x: 4, y: 1 });
     assert.ok(predicate());
   };
 
   const navigateNear = createNavigator(client, dependencies);
   await navigateNear({ x: 5, y: 1 }, 1);
-  assert.equal(client.sent.length, 2);
-  assert.deepEqual(client.sent[1], client.sent[0]);
-  assert.deepEqual(timeouts, [20_000, 20_000]);
-  assert.equal(client.diagnostics[0].type, 'navigationMovementResponseTimeout');
+  assert.equal(client.sent.length, 1);
+  assert.deepEqual(timeouts, [60_000]);
+  assert.equal(client.diagnostics.length, 0);
   assert.equal(client.failure, undefined);
+});
+
+test('navigator never resends an unacknowledged movement with an unknown result', async () => {
+  const client = navigationClient();
+  client.wait = async () => {
+    throw new Error('Timeout waiting for authoritative movement response');
+  };
+
+  const navigateNear = createNavigator(client, dependencies);
+  await assert.rejects(
+    navigateNear({ x: 5, y: 1 }, 1),
+    /movement response/,
+  );
+  assert.equal(client.sent.length, 1);
+  assert.equal(client.diagnostics[0].type, 'navigationMovementResponseTimeout');
+  assert.equal(client.diagnostics[0].timeoutMs, 60_000);
 });
 
 test('navigator rejects a cell only after an unchanged authoritative UserLocation', async () => {
@@ -356,9 +368,9 @@ test('navigator optional attempt cap fails without an unbounded movement retry',
     navigateNear({ x: 6, y: 1 }, 0, () => false, { maxSuccessfulSteps: 3, maxAttempts: 2 }),
     /movement timeout/,
   );
-  assert.equal(client.sent.length, 2);
+  assert.equal(client.sent.length, 1);
   assert.equal(client.diagnostics.filter(entry =>
-    entry.type === 'navigationMovementResponseTimeout').length, 2);
+    entry.type === 'navigationMovementResponseTimeout').length, 1);
 });
 
 test('ordinary navigation detours around a live transfer source', async () => {

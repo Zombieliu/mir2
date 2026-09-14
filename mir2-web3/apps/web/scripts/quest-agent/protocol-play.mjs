@@ -217,7 +217,7 @@ export function createNavigator(client, dependencies = {}) {
   // owner response instead of turning a local timer expiry into collision.
   const movementResponseTimeoutMs = positiveIntegerOption(
     dependencies.movementResponseTimeoutMs,
-    20_000,
+    60_000,
   );
   const maps = new Map();
   const hostileMemory = new Map();
@@ -258,7 +258,6 @@ export function createNavigator(client, dependencies = {}) {
     let emergencyEscapeRetryAt = Number.NEGATIVE_INFINITY;
     let bestDistance = distance(selfPlayer(client), target);
     let nonImprovingSteps = 0;
-    let unacknowledgedMovements = 0;
     let positionsSinceImprovement = new Set([`${selfPlayer(client).x},${selfPlayer(client).y}`]);
     let remaining = [];
     for (let count = 0; count < maxAttempts; count++) {
@@ -444,7 +443,6 @@ export function createNavigator(client, dependencies = {}) {
             event.packet === 'UserLocation');
         }, 'authoritative movement response', movementResponseTimeoutMs);
         movedDistance = distance(selfPlayer(client), before);
-        unacknowledgedMovements = 0;
         if (movedDistance > 0) {
           successfulSteps += movedDistance;
           const consumed = remaining.findIndex(s => distance(s.to, selfPlayer(client)) === 0);
@@ -462,20 +460,19 @@ export function createNavigator(client, dependencies = {}) {
       } catch (error) {
         if (client.failure) throw client.failure;
         if (client.closed) throw error;
-        // No owner response proves congestion or a lost connection, not a
-        // blocked tile. Retrying without adding `step.to` prevents delayed
-        // acknowledgements from carving a false wall across a valid route.
+        // A local WebSocket is ordered and reliable. When the authoritative
+        // result is unknown, resending can execute both the delayed original
+        // and the retry and move two run segments at once. End this runner so
+        // its normal reconnect resumes from the saved authoritative transform.
         remaining = [];
-        unacknowledgedMovements += 1;
         client.record('diagnostic', {
           type: 'navigationMovementResponseTimeout',
           mapId,
           position: before,
           target: step.to,
           timeoutMs: movementResponseTimeoutMs,
-          consecutiveTimeouts: unacknowledgedMovements,
         });
-        if (unacknowledgedMovements >= 2) throw error;
+        throw error;
       }
       if (movedDistance > 0 && (detectPositionCycles || maxNonImprovingSteps > 0)) {
         const current = selfPlayer(client);
