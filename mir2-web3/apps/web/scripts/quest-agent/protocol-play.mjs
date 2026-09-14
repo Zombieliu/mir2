@@ -211,6 +211,14 @@ export function createNavigator(client, dependencies = {}) {
     dependencies.exactHostileMemoryDurationMs,
     120_000,
   );
+  // Shared-Zone movement is serialized behind the authoritative world writer.
+  // A three-client acceptance run can therefore take several seconds to
+  // return UserLocation even though the move is valid. Wait for the actual
+  // owner response instead of turning a local timer expiry into collision.
+  const movementResponseTimeoutMs = positiveIntegerOption(
+    dependencies.movementResponseTimeoutMs,
+    20_000,
+  );
   const maps = new Map();
   const hostileMemory = new Map();
   return async function navigateNear(target, desiredDistance = 1, stopWhen = () => false, options = {}) {
@@ -250,6 +258,7 @@ export function createNavigator(client, dependencies = {}) {
     let emergencyEscapeRetryAt = Number.NEGATIVE_INFINITY;
     let bestDistance = distance(selfPlayer(client), target);
     let nonImprovingSteps = 0;
+    let unacknowledgedMovements = 0;
     let positionsSinceImprovement = new Set([`${selfPlayer(client).x},${selfPlayer(client).y}`]);
     let remaining = [];
     for (let count = 0; count < maxAttempts; count++) {
@@ -424,21 +433,49 @@ export function createNavigator(client, dependencies = {}) {
         continue;
       }
       client.lastWalkAt = now();
+      const movementResponseAfter = client.sequence;
       client.send({ type: running ? 'run' : 'walk', direction: directionNames[step.direction] });
       let movedDistance = 0;
       try {
-        await client.wait(() => distance(selfPlayer(client), before) > 0, 'authoritative movement', 2500);
+        await client.wait(() => {
+          if (distance(selfPlayer(client), before) > 0) return true;
+          return client.events.some(event =>
+            event.sequence > movementResponseAfter && event.direction === 'received' &&
+            event.packet === 'UserLocation');
+        }, 'authoritative movement response', movementResponseTimeoutMs);
         movedDistance = distance(selfPlayer(client), before);
-        successfulSteps += movedDistance;
-        const consumed = remaining.findIndex(s => distance(s.to, selfPlayer(client)) === 0);
-        if (consumed >= 0) remaining.splice(0, consumed + 1); else remaining = [];
-        failures = 0;
+        unacknowledgedMovements = 0;
+        if (movedDistance > 0) {
+          successfulSteps += movedDistance;
+          const consumed = remaining.findIndex(s => distance(s.to, selfPlayer(client)) === 0);
+          if (consumed >= 0) remaining.splice(0, consumed + 1); else remaining = [];
+          failures = 0;
+        } else {
+          // An unchanged UserLocation is an authoritative collision
+          // correction. Only this response is allowed to poison the cell.
+          rejected.push(step.to);
+          remaining = [];
+          if (++failures >= 8) {
+            throw new Error(`Authoritative movement rejected repeatedly on ${mapId}`);
+          }
+        }
       } catch (error) {
         if (client.failure) throw client.failure;
         if (client.closed) throw error;
-        rejected.push(step.to);
+        // No owner response proves congestion or a lost connection, not a
+        // blocked tile. Retrying without adding `step.to` prevents delayed
+        // acknowledgements from carving a false wall across a valid route.
         remaining = [];
-        if (++failures >= 8) throw error;
+        unacknowledgedMovements += 1;
+        client.record('diagnostic', {
+          type: 'navigationMovementResponseTimeout',
+          mapId,
+          position: before,
+          target: step.to,
+          timeoutMs: movementResponseTimeoutMs,
+          consecutiveTimeouts: unacknowledgedMovements,
+        });
+        if (unacknowledgedMovements >= 2) throw error;
       }
       if (movedDistance > 0 && (detectPositionCycles || maxNonImprovingSteps > 0)) {
         const current = selfPlayer(client);
