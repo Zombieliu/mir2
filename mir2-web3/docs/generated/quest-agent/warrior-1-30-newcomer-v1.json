@@ -321,8 +321,8 @@
       "newcomerOverride": {
         "questId": 1,
         "rewardExperience": 200,
-        "killCountCap": 5,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -674,8 +674,8 @@
       "newcomerOverride": {
         "questId": 2,
         "rewardExperience": 200,
-        "killCountCap": 5,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "GingerTea"
         ],
@@ -836,8 +836,8 @@
       "newcomerOverride": {
         "questId": 3,
         "rewardExperience": 200,
-        "killCountCap": 5,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -1436,8 +1436,8 @@
           "Can you help me?"
         ],
         "task": [
-          "Defeat 5 Deer.",
-          "Defeat 5 Scarecrow."
+          "Defeat 3 Deer.",
+          "Defeat 3 Scarecrow."
         ],
         "return": [],
         "completion": []
@@ -1465,7 +1465,7 @@
           {
             "monsterIndex": 30,
             "monsterName": "Deer",
-            "count": 5,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -1758,7 +1758,7 @@
           {
             "monsterIndex": 39,
             "monsterName": "Scarecrow",
-            "count": 5,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -1948,11 +1948,11 @@
       "newcomerOverride": {
         "questId": 5,
         "rewardExperience": 200,
-        "killCountCap": 5,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 5 Deer.",
-          "Defeat 5 Scarecrow."
+          "Defeat 3 Deer.",
+          "Defeat 3 Scarecrow."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -1975,7 +1975,7 @@
         "id": 5,
         "category": "recommended",
         "order": 40,
-        "hint": "Defeat 5 Deer. Defeat 5 Scarecrow."
+        "hint": "Defeat 3 Deer. Defeat 3 Scarecrow."
       }
     },
     {
@@ -2057,7 +2057,7 @@
           "Can you do a another favour for me?"
         ],
         "task": [
-          "Defeat 5 HookingCat."
+          "Defeat 3 HookingCat."
         ],
         "return": [],
         "completion": []
@@ -2103,7 +2103,7 @@
           {
             "monsterIndex": 42,
             "monsterName": "HookingCat",
-            "count": 5,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -2294,10 +2294,10 @@
       "newcomerOverride": {
         "questId": 6,
         "rewardExperience": 200,
-        "killCountCap": 5,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 5 HookingCat."
+          "Defeat 3 HookingCat."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -2320,7 +2320,7 @@
         "id": 6,
         "category": "recommended",
         "order": 50,
-        "hint": "Defeat 5 HookingCat."
+        "hint": "Defeat 3 HookingCat."
       }
     },
     {
@@ -2527,8 +2527,8 @@
       "newcomerOverride": {
         "questId": 7,
         "rewardExperience": 200,
-        "killCountCap": 5,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -2618,8 +2618,8 @@
           "You will have to pass my test."
         ],
         "task": [
-          "Defeat 5 Oma.",
-          "Defeat 5 RakingCat."
+          "Defeat 3 Oma.",
+          "Defeat 3 RakingCat."
         ],
         "return": [],
         "completion": []
@@ -2656,7 +2656,7 @@
           {
             "monsterIndex": 48,
             "monsterName": "Oma",
-            "count": 5,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -2968,7 +2968,7 @@
           {
             "monsterIndex": 44,
             "monsterName": "RakingCat",
-            "count": 5,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -3140,11 +3140,11 @@
       "newcomerOverride": {
         "questId": 8,
         "rewardExperience": 200,
-        "killCountCap": 5,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 5 Oma.",
-          "Defeat 5 RakingCat."
+          "Defeat 3 Oma.",
+          "Defeat 3 RakingCat."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -3167,7 +3167,7 @@
         "id": 8,
         "category": "recommended",
         "order": 70,
-        "hint": "Defeat 5 Oma. Defeat 5 RakingCat."
+        "hint": "Defeat 3 Oma. Defeat 3 RakingCat."
       }
     },
     {
@@ -3373,8 +3373,8 @@
       "newcomerOverride": {
         "questId": 9,
         "rewardExperience": 200,
-        "killCountCap": 5,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -3423,7 +3423,7 @@
           "Do you think you can help?"
         ],
         "task": [
-          "Defeat 5 ForestYeti."
+          "Defeat 3 ForestYeti."
         ],
         "return": [],
         "completion": []
@@ -3451,7 +3451,7 @@
           {
             "monsterIndex": 55,
             "monsterName": "ForestYeti",
-            "count": 5,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -3643,10 +3643,10 @@
       "newcomerOverride": {
         "questId": 22,
         "rewardExperience": 1366,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 5 ForestYeti."
+          "Defeat 3 ForestYeti."
         ],
         "startInDiary": true,
         "finishInDiary": true,
@@ -3657,7 +3657,7 @@
         "id": 22,
         "category": "recommended",
         "order": 150,
-        "hint": "Defeat 5 ForestYeti."
+        "hint": "Defeat 3 ForestYeti."
       }
     },
     {
@@ -3686,7 +3686,7 @@
           "be able to help us eliminate the danager?"
         ],
         "task": [
-          "Collect 2 OmaTeeth from Oma. Needed quest materials are guaranteed."
+          "Collect 1 OmaTeeth from Oma. Needed quest materials are guaranteed."
         ],
         "return": [],
         "completion": []
@@ -3733,7 +3733,7 @@
           {
             "itemIndex": 1113,
             "itemName": "OmaTeeth",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -4145,13 +4145,13 @@
       "newcomerOverride": {
         "questId": 23,
         "rewardExperience": 1367,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "OmaTeeth"
         ],
         "taskDescription": [
-          "Collect 2 OmaTeeth from Oma. Needed quest materials are guaranteed."
+          "Collect 1 OmaTeeth from Oma. Needed quest materials are guaranteed."
         ],
         "startInDiary": true,
         "finishInDiary": true,
@@ -4162,7 +4162,7 @@
         "id": 23,
         "category": "recommended",
         "order": 160,
-        "hint": "Collect 2 OmaTeeth from Oma. Needed quest materials are guaranteed."
+        "hint": "Collect 1 OmaTeeth from Oma. Needed quest materials are guaranteed."
       }
     },
     {
@@ -4221,8 +4221,8 @@
       "newcomerOverride": {
         "questId": 24,
         "rewardExperience": 1367,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": true,
         "finishInDiary": true,
         "startNpc": null,
@@ -4263,8 +4263,8 @@
           "from dangerous attacks."
         ],
         "task": [
-          "Collect 2 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
-          "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+          "Collect 1 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
+          "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
         ],
         "return": [],
         "completion": []
@@ -4293,7 +4293,7 @@
           {
             "itemIndex": 1114,
             "itemName": "CannibalStem",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -4487,7 +4487,7 @@
           {
             "itemIndex": 866,
             "itemName": "CannibalLeaf",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -4693,15 +4693,15 @@
       "newcomerOverride": {
         "questId": 25,
         "rewardExperience": 1366,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "CannibalStem",
           "CannibalLeaf"
         ],
         "taskDescription": [
-          "Collect 2 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
-          "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+          "Collect 1 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
+          "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
         ],
         "startInDiary": true,
         "finishInDiary": true,
@@ -4712,7 +4712,7 @@
         "id": 25,
         "category": "recommended",
         "order": 180,
-        "hint": "Collect 2 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+        "hint": "Collect 1 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
       }
     },
     {
@@ -4870,7 +4870,7 @@
           "from the {PoisonSack/LightSteelBlue}."
         ],
         "task": [
-          "Collect 2 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+          "Collect 1 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
         ],
         "return": [],
         "completion": []
@@ -4899,7 +4899,7 @@
           {
             "itemIndex": 1115,
             "itemName": "PoisonSack",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -5239,13 +5239,13 @@
       "newcomerOverride": {
         "questId": 26,
         "rewardExperience": 1367,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "PoisonSack"
         ],
         "taskDescription": [
-          "Collect 2 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+          "Collect 1 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
         ],
         "startInDiary": true,
         "finishInDiary": false,
@@ -5262,7 +5262,7 @@
         "id": 26,
         "category": "recommended",
         "order": 190,
-        "hint": "Collect 2 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+        "hint": "Collect 1 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
       }
     },
     {
@@ -5342,8 +5342,8 @@
       "newcomerOverride": {
         "questId": 27,
         "rewardExperience": 1367,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": true,
         "finishInDiary": false,
         "startNpc": null,
@@ -5920,8 +5920,8 @@
       "newcomerOverride": {
         "questId": 29,
         "rewardExperience": 1366,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -6134,8 +6134,8 @@
       "newcomerOverride": {
         "questId": 30,
         "rewardExperience": 1367,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "JadeRing"
         ],
@@ -7145,7 +7145,7 @@
         "questId": 33,
         "rewardExperience": 1367,
         "killCountCap": 3,
-        "itemCountCap": 2,
+        "itemCountCap": 1,
         "taskDescription": [
           "Defeat 3 TigerSnake.",
           "Defeat 3 RedSnake."
@@ -7388,8 +7388,8 @@
       "newcomerOverride": {
         "questId": 35,
         "rewardExperience": 12875,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -7438,7 +7438,7 @@
           "me the ingredients."
         ],
         "task": [
-          "Collect 2 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
+          "Collect 1 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
         ],
         "return": [],
         "completion": []
@@ -7457,7 +7457,7 @@
           {
             "itemIndex": 1120,
             "itemName": "SnakeBody",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -8184,13 +8184,13 @@
       "newcomerOverride": {
         "questId": 36,
         "rewardExperience": 12875,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "SnakeBody"
         ],
         "taskDescription": [
-          "Collect 2 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
+          "Collect 1 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
         ],
         "startInDiary": true,
         "finishInDiary": true,
@@ -8201,7 +8201,7 @@
         "id": 36,
         "category": "recommended",
         "order": 240,
-        "hint": "Collect 2 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
+        "hint": "Collect 1 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
       }
     },
     {
@@ -8298,8 +8298,8 @@
       "newcomerOverride": {
         "questId": 37,
         "rewardExperience": 12875,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": true,
         "finishInDiary": false,
         "startNpc": null,
@@ -16834,8 +16834,8 @@
       "newcomerOverride": {
         "questId": 39,
         "rewardExperience": 12875,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -16926,7 +16926,7 @@
           "out of my house."
         ],
         "task": [
-          "Defeat 10 OmaFighter."
+          "Defeat 3 OmaFighter."
         ],
         "return": [],
         "completion": []
@@ -16944,7 +16944,7 @@
           {
             "monsterIndex": 50,
             "monsterName": "OmaFighter",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -17154,10 +17154,10 @@
       "newcomerOverride": {
         "questId": 40,
         "rewardExperience": 12875,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 10 OmaFighter."
+          "Defeat 3 OmaFighter."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -17180,7 +17180,7 @@
         "id": 40,
         "category": "recommended",
         "order": 290,
-        "hint": "Defeat 10 OmaFighter."
+        "hint": "Defeat 3 OmaFighter."
       }
     },
     {
@@ -17297,8 +17297,8 @@
       "newcomerOverride": {
         "questId": 41,
         "rewardExperience": 12875,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -17405,8 +17405,8 @@
           "snakes?"
         ],
         "task": [
-          "Defeat 10 RedViper.",
-          "Defeat 10 TigerViper."
+          "Defeat 3 RedViper.",
+          "Defeat 3 TigerViper."
         ],
         "return": [],
         "completion": []
@@ -17434,7 +17434,7 @@
           {
             "monsterIndex": 66,
             "monsterName": "RedViper",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -17480,7 +17480,7 @@
           {
             "monsterIndex": 69,
             "monsterName": "TigerViper",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -17538,11 +17538,11 @@
       "newcomerOverride": {
         "questId": 42,
         "rewardExperience": 12875,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 10 RedViper.",
-          "Defeat 10 TigerViper."
+          "Defeat 3 RedViper.",
+          "Defeat 3 TigerViper."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -17565,7 +17565,7 @@
         "id": 42,
         "category": "recommended",
         "order": 310,
-        "hint": "Defeat 10 RedViper. Defeat 10 TigerViper."
+        "hint": "Defeat 3 RedViper. Defeat 3 TigerViper."
       }
     },
     {
@@ -20547,7 +20547,7 @@
           "safety of {Bichon/Yellow}."
         ],
         "task": [
-          "Defeat 10 Skeleton."
+          "Defeat 3 Skeleton."
         ],
         "return": [],
         "completion": []
@@ -20575,7 +20575,7 @@
           {
             "monsterIndex": 85,
             "monsterName": "Skeleton",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -20803,10 +20803,10 @@
       "newcomerOverride": {
         "questId": 49,
         "rewardExperience": 12875,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 10 Skeleton."
+          "Defeat 3 Skeleton."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -20829,7 +20829,7 @@
         "id": 49,
         "category": "recommended",
         "order": 270,
-        "hint": "Defeat 10 Skeleton."
+        "hint": "Defeat 3 Skeleton."
       }
     },
     {
@@ -22660,8 +22660,8 @@
       "newcomerOverride": {
         "questId": 51,
         "rewardExperience": 60000,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 2,
+        "itemCountCap": 1,
         "startInDiary": true,
         "finishInDiary": false,
         "startNpc": null,
@@ -22750,8 +22750,8 @@
           "get me 10 {CannibalLeaf/LightSteelBlue} and 10 {CannibalSeed/LightSteelBlue}?"
         ],
         "task": [
-          "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
-          "Collect 2 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+          "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
+          "Collect 1 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
         ],
         "return": [],
         "completion": []
@@ -22770,7 +22770,7 @@
           {
             "itemIndex": 866,
             "itemName": "CannibalLeaf",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -22962,7 +22962,7 @@
           {
             "itemIndex": 1127,
             "itemName": "CannibalSeed",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -23168,15 +23168,15 @@
       "newcomerOverride": {
         "questId": 52,
         "rewardExperience": 60000,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 2,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "CannibalLeaf",
           "CannibalSeed"
         ],
         "taskDescription": [
-          "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
-          "Collect 2 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+          "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
+          "Collect 1 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -23199,7 +23199,7 @@
         "id": 52,
         "category": "recommended",
         "order": 330,
-        "hint": "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 2 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+        "hint": "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 1 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
       }
     },
     {
@@ -23318,8 +23318,8 @@
       "newcomerOverride": {
         "questId": 53,
         "rewardExperience": 60000,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 2,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -23418,11 +23418,11 @@
           "is infested with {Zombies/Crimson}. "
         ],
         "task": [
-          "Defeat 5 Zombie5.",
-          "Defeat 5 Zombie2.",
-          "Defeat 5 Zombie3.",
-          "Defeat 5 Zombie4.",
-          "Defeat 5 Zombie1."
+          "Defeat 2 Zombie5.",
+          "Defeat 2 Zombie2.",
+          "Defeat 2 Zombie3.",
+          "Defeat 2 Zombie4.",
+          "Defeat 2 Zombie1."
         ],
         "return": [],
         "completion": []
@@ -23468,7 +23468,7 @@
           {
             "monsterIndex": 116,
             "monsterName": "Zombie5",
-            "count": 5,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -23780,7 +23780,7 @@
           {
             "monsterIndex": 110,
             "monsterName": "Zombie2",
-            "count": 5,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -24092,7 +24092,7 @@
           {
             "monsterIndex": 112,
             "monsterName": "Zombie3",
-            "count": 5,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -24385,7 +24385,7 @@
           {
             "monsterIndex": 114,
             "monsterName": "Zombie4",
-            "count": 5,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -24697,7 +24697,7 @@
           {
             "monsterIndex": 108,
             "monsterName": "Zombie1",
-            "count": 5,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -24982,14 +24982,14 @@
       "newcomerOverride": {
         "questId": 54,
         "rewardExperience": 60000,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 2,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 5 Zombie5.",
-          "Defeat 5 Zombie2.",
-          "Defeat 5 Zombie3.",
-          "Defeat 5 Zombie4.",
-          "Defeat 5 Zombie1."
+          "Defeat 2 Zombie5.",
+          "Defeat 2 Zombie2.",
+          "Defeat 2 Zombie3.",
+          "Defeat 2 Zombie4.",
+          "Defeat 2 Zombie1."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -25012,7 +25012,7 @@
         "id": 54,
         "category": "recommended",
         "order": 350,
-        "hint": "Defeat 5 Zombie5. Defeat 5 Zombie2. Defeat 5 Zombie3. Defeat 5 Zombie4. Defeat 5 Zombie1."
+        "hint": "Defeat 2 Zombie5. Defeat 2 Zombie2. Defeat 2 Zombie3. Defeat 2 Zombie4. Defeat 2 Zombie1."
       }
     },
     {
@@ -36158,7 +36158,7 @@
           "Could you hunt them in {InsectCave/Yellow} for me?"
         ],
         "task": [
-          "Defeat 8 SpiderFrog."
+          "Defeat 2 SpiderFrog."
         ],
         "return": [],
         "completion": []
@@ -36176,7 +36176,7 @@
           {
             "monsterIndex": 229,
             "monsterName": "SpiderFrog",
-            "count": 8,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -36499,10 +36499,10 @@
       "newcomerOverride": {
         "questId": 60,
         "rewardExperience": 60000,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 2,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 8 SpiderFrog."
+          "Defeat 2 SpiderFrog."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -36524,8 +36524,8 @@
       "guidance": {
         "id": 60,
         "category": "recommended",
-        "order": 360,
-        "hint": "Defeat 8 SpiderFrog."
+        "order": 380,
+        "hint": "Defeat 2 SpiderFrog."
       }
     },
     {
@@ -36635,8 +36635,8 @@
       "newcomerOverride": {
         "questId": 61,
         "rewardExperience": 60000,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 2,
+        "itemCountCap": 1,
         "requiredQuestId": 54,
         "startInDiary": false,
         "finishInDiary": false,
@@ -36658,7 +36658,7 @@
       "guidance": {
         "id": 61,
         "category": "recommended",
-        "order": 370,
+        "order": 360,
         "hint": "Continue after Danger in the Cave. Visit the stated destination before moving on to the next chapter."
       }
     },
@@ -36727,8 +36727,8 @@
           "you help me."
         ],
         "task": [
-          "Defeat 8 KekTal.",
-          "Defeat 8 VioletKekTal."
+          "Defeat 2 KekTal.",
+          "Defeat 2 VioletKekTal."
         ],
         "return": [],
         "completion": []
@@ -36756,7 +36756,7 @@
           {
             "monsterIndex": 235,
             "monsterName": "KekTal",
-            "count": 8,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -37068,7 +37068,7 @@
           {
             "monsterIndex": 237,
             "monsterName": "VioletKekTal",
-            "count": 8,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -37392,11 +37392,11 @@
       "newcomerOverride": {
         "questId": 62,
         "rewardExperience": 60000,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 2,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 8 KekTal.",
-          "Defeat 8 VioletKekTal."
+          "Defeat 2 KekTal.",
+          "Defeat 2 VioletKekTal."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -37418,8 +37418,8 @@
       "guidance": {
         "id": 62,
         "category": "recommended",
-        "order": 380,
-        "hint": "Defeat 8 KekTal. Defeat 8 VioletKekTal."
+        "order": 390,
+        "hint": "Defeat 2 KekTal. Defeat 2 VioletKekTal."
       }
     },
     {
@@ -37707,7 +37707,7 @@
           "revenge on the {Zombies/Crimson}!"
         ],
         "task": [
-          "Defeat 8 Zombie1."
+          "Defeat 2 Zombie1."
         ],
         "return": [],
         "completion": []
@@ -37725,7 +37725,7 @@
           {
             "monsterIndex": 108,
             "monsterName": "Zombie1",
-            "count": 8,
+            "count": 2,
             "message": "",
             "spawnCandidates": [
               {
@@ -38012,10 +38012,10 @@
       "newcomerOverride": {
         "questId": 65,
         "rewardExperience": 60000,
-        "killCountCap": 8,
-        "itemCountCap": 2,
+        "killCountCap": 2,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 8 Zombie1."
+          "Defeat 2 Zombie1."
         ],
         "startInDiary": true,
         "finishInDiary": true,
@@ -38025,8 +38025,8 @@
       "guidance": {
         "id": 65,
         "category": "recommended",
-        "order": 390,
-        "hint": "Defeat 8 Zombie1."
+        "order": 370,
+        "hint": "Defeat 2 Zombie1."
       }
     },
     {
@@ -51578,8 +51578,8 @@
       "newcomerOverride": {
         "questId": 83,
         "rewardExperience": 250000,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -62375,8 +62375,8 @@
       "newcomerOverride": {
         "questId": 86,
         "rewardExperience": 26923,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -62510,8 +62510,8 @@
       "newcomerOverride": {
         "questId": 87,
         "rewardExperience": 138461,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -62631,8 +62631,8 @@
       "newcomerOverride": {
         "questId": 88,
         "rewardExperience": 138462,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -62727,16 +62727,16 @@
           " "
         ],
         "task": [
-          "Defeat 10 CursedPriest.",
-          "Defeat 10 ShiZombie.",
-          "Defeat 10 CursedZombie."
+          "Defeat 3 CursedPriest.",
+          "Defeat 3 ShiZombie.",
+          "Defeat 3 CursedZombie."
         ],
         "return": [],
         "completion": []
       },
       "rewards": {
         "gold": 6600,
-        "experience": 138461,
+        "experience": 138462,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -62747,7 +62747,7 @@
           {
             "monsterIndex": 290,
             "monsterName": "CursedPriest",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -63040,7 +63040,7 @@
           {
             "monsterIndex": 296,
             "monsterName": "ShiZombie",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -63352,7 +63352,7 @@
           {
             "monsterIndex": 292,
             "monsterName": "CursedZombie",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -63675,13 +63675,13 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 89,
-        "rewardExperience": 138461,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "rewardExperience": 138462,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 10 CursedPriest.",
-          "Defeat 10 ShiZombie.",
-          "Defeat 10 CursedZombie."
+          "Defeat 3 CursedPriest.",
+          "Defeat 3 ShiZombie.",
+          "Defeat 3 CursedZombie."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -63703,8 +63703,8 @@
       "guidance": {
         "id": 89,
         "category": "recommended",
-        "order": 440,
-        "hint": "Defeat 10 CursedPriest. Defeat 10 ShiZombie. Defeat 10 CursedZombie."
+        "order": 520,
+        "hint": "Defeat 3 CursedPriest. Defeat 3 ShiZombie. Defeat 3 CursedZombie."
       }
     },
     {
@@ -67174,7 +67174,7 @@
       },
       "rewards": {
         "gold": 2563,
-        "experience": 138462,
+        "experience": 138461,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -67195,9 +67195,9 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 97,
-        "rewardExperience": 138462,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "rewardExperience": 138461,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": true,
         "finishInDiary": false,
         "startNpc": null,
@@ -67212,7 +67212,7 @@
       "guidance": {
         "id": 97,
         "category": "recommended",
-        "order": 450,
+        "order": 440,
         "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Accept through the Quest Diary. Visit the stated destination before moving on to the next chapter."
       }
     },
@@ -67280,8 +67280,8 @@
           "it's resolve."
         ],
         "task": [
-          "Defeat 10 Dung.",
-          "Defeat 10 WoomaSoldier."
+          "Defeat 3 Dung.",
+          "Defeat 3 WoomaSoldier."
         ],
         "return": [],
         "completion": [
@@ -67290,7 +67290,7 @@
       },
       "rewards": {
         "gold": 8200,
-        "experience": 138461,
+        "experience": 138462,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -67301,7 +67301,7 @@
           {
             "monsterIndex": 242,
             "monsterName": "Dung",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -67347,7 +67347,7 @@
           {
             "monsterIndex": 244,
             "monsterName": "WoomaSoldier",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -67404,12 +67404,12 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 98,
-        "rewardExperience": 138461,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "rewardExperience": 138462,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 10 Dung.",
-          "Defeat 10 WoomaSoldier."
+          "Defeat 3 Dung.",
+          "Defeat 3 WoomaSoldier."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -67431,8 +67431,8 @@
       "guidance": {
         "id": 98,
         "category": "recommended",
-        "order": 460,
-        "hint": "Defeat 10 Dung. Defeat 10 WoomaSoldier."
+        "order": 450,
+        "hint": "Defeat 3 Dung. Defeat 3 WoomaSoldier."
       }
     },
     {
@@ -67499,15 +67499,15 @@
           "should send these creatures a message."
         ],
         "task": [
-          "Defeat 10 FlamingWooma.",
-          "Defeat 10 WoomaFighter."
+          "Defeat 3 FlamingWooma.",
+          "Defeat 3 WoomaFighter."
         ],
         "return": [],
         "completion": []
       },
       "rewards": {
         "gold": 8300,
-        "experience": 138462,
+        "experience": 138461,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -67518,7 +67518,7 @@
           {
             "monsterIndex": 250,
             "monsterName": "FlamingWooma",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -67735,7 +67735,7 @@
           {
             "monsterIndex": 246,
             "monsterName": "WoomaFighter",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -67963,12 +67963,12 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 99,
-        "rewardExperience": 138462,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "rewardExperience": 138461,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 10 FlamingWooma.",
-          "Defeat 10 WoomaFighter."
+          "Defeat 3 FlamingWooma.",
+          "Defeat 3 WoomaFighter."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -67990,8 +67990,8 @@
       "guidance": {
         "id": 99,
         "category": "recommended",
-        "order": 470,
-        "hint": "Defeat 10 FlamingWooma. Defeat 10 WoomaFighter."
+        "order": 460,
+        "hint": "Defeat 3 FlamingWooma. Defeat 3 WoomaFighter."
       }
     },
     {
@@ -68864,7 +68864,7 @@
       },
       "rewards": {
         "gold": 4750,
-        "experience": 138461,
+        "experience": 138462,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -68885,9 +68885,9 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 102,
-        "rewardExperience": 138461,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "rewardExperience": 138462,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -68908,7 +68908,7 @@
       "guidance": {
         "id": 102,
         "category": "recommended",
-        "order": 480,
+        "order": 470,
         "hint": "Visit the stated destination before moving on to the next chapter."
       }
     },
@@ -68993,14 +68993,14 @@
           "I was attacked by them. "
         ],
         "task": [
-          "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
+          "Collect 1 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
         ],
         "return": [],
         "completion": []
       },
       "rewards": {
         "gold": 8800,
-        "experience": 138462,
+        "experience": 192308,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -69012,7 +69012,7 @@
           {
             "itemIndex": 1157,
             "itemName": "BugSpecimen",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -69629,14 +69629,14 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 103,
-        "rewardExperience": 138462,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "rewardExperience": 192308,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "BugSpecimen"
         ],
         "taskDescription": [
-          "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
+          "Collect 1 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -69658,8 +69658,8 @@
       "guidance": {
         "id": 103,
         "category": "recommended",
-        "order": 490,
-        "hint": "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
+        "order": 480,
+        "hint": "Collect 1 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
       }
     },
     {
@@ -71788,7 +71788,7 @@
       },
       "rewards": {
         "gold": 3300,
-        "experience": 138461,
+        "experience": 84615,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -71809,9 +71809,9 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 110,
-        "rewardExperience": 138461,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "rewardExperience": 84615,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -71832,7 +71832,7 @@
       "guidance": {
         "id": 110,
         "category": "recommended",
-        "order": 500,
+        "order": 490,
         "hint": "Visit the stated destination before moving on to the next chapter."
       }
     },
@@ -71935,7 +71935,7 @@
       },
       "rewards": {
         "gold": 5500,
-        "experience": 138462,
+        "experience": 138461,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -72056,9 +72056,9 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 111,
-        "rewardExperience": 138462,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "rewardExperience": 138461,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -72079,7 +72079,7 @@
       "guidance": {
         "id": 111,
         "category": "recommended",
-        "order": 510,
+        "order": 500,
         "hint": "Continue after Meet with Mr.Wang. Follow the local event clues; ordinary kills alone do not complete this task."
       }
     },
@@ -72173,7 +72173,7 @@
           " "
         ],
         "task": [
-          "Defeat 10 CrawlerZombie."
+          "Defeat 3 CrawlerZombie."
         ],
         "return": [],
         "completion": []
@@ -72201,7 +72201,7 @@
           {
             "monsterIndex": 128,
             "monsterName": "CrawlerZombie",
-            "count": 10,
+            "count": 3,
             "message": "Eliminate some CrawlerZombies",
             "spawnCandidates": [
               {
@@ -72240,10 +72240,10 @@
       "newcomerOverride": {
         "questId": 112,
         "rewardExperience": 138462,
-        "killCountCap": 10,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 10 CrawlerZombie."
+          "Defeat 3 CrawlerZombie."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -72265,8 +72265,8 @@
       "guidance": {
         "id": 112,
         "category": "recommended",
-        "order": 520,
-        "hint": "Defeat 10 CrawlerZombie."
+        "order": 510,
+        "hint": "Defeat 3 CrawlerZombie."
       }
     },
     {
@@ -72294,8 +72294,8 @@
           "hunt these insects?"
         ],
         "task": [
-          "Defeat 10 BlackMaggot.",
-          "Defeat 10 WedgeMoth."
+          "Defeat 3 BlackMaggot.",
+          "Defeat 3 WedgeMoth."
         ],
         "return": [],
         "completion": []
@@ -72313,7 +72313,7 @@
           {
             "monsterIndex": 150,
             "monsterName": "BlackMaggot",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -72625,7 +72625,7 @@
           {
             "monsterIndex": 165,
             "monsterName": "WedgeMoth",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -72950,11 +72950,11 @@
       "newcomerOverride": {
         "questId": 113,
         "rewardExperience": 544444,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 10 BlackMaggot.",
-          "Defeat 10 WedgeMoth."
+          "Defeat 3 BlackMaggot.",
+          "Defeat 3 WedgeMoth."
         ],
         "startInDiary": true,
         "finishInDiary": true,
@@ -72965,7 +72965,7 @@
         "id": 113,
         "category": "recommended",
         "order": 530,
-        "hint": "Defeat 10 BlackMaggot. Defeat 10 WedgeMoth."
+        "hint": "Defeat 3 BlackMaggot. Defeat 3 WedgeMoth."
       }
     },
     {
@@ -73040,8 +73040,8 @@
           "go there and eliminate the monsters?"
         ],
         "task": [
-          "Defeat 12 BlackBoar.",
-          "Defeat 12 RedBoar."
+          "Defeat 3 BlackBoar.",
+          "Defeat 3 RedBoar."
         ],
         "return": [],
         "completion": []
@@ -73059,7 +73059,7 @@
           {
             "monsterIndex": 171,
             "monsterName": "BlackBoar",
-            "count": 12,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -73371,7 +73371,7 @@
           {
             "monsterIndex": 168,
             "monsterName": "RedBoar",
-            "count": 12,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -73694,11 +73694,11 @@
       "newcomerOverride": {
         "questId": 114,
         "rewardExperience": 544444,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 12 BlackBoar.",
-          "Defeat 12 RedBoar."
+          "Defeat 3 BlackBoar.",
+          "Defeat 3 RedBoar."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -73721,7 +73721,7 @@
         "id": 114,
         "category": "recommended",
         "order": 540,
-        "hint": "Defeat 12 BlackBoar. Defeat 12 RedBoar."
+        "hint": "Defeat 3 BlackBoar. Defeat 3 RedBoar."
       }
     },
     {
@@ -74176,8 +74176,8 @@
       "newcomerOverride": {
         "questId": 117,
         "rewardExperience": 544445,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -74266,9 +74266,9 @@
           " "
         ],
         "task": [
-          "Defeat 12 CursedZombie.",
-          "Defeat 12 ShiZombie.",
-          "Defeat 12 HungryZombie."
+          "Defeat 3 CursedZombie.",
+          "Defeat 3 ShiZombie.",
+          "Defeat 3 HungryZombie."
         ],
         "return": [],
         "completion": []
@@ -74286,7 +74286,7 @@
           {
             "monsterIndex": 292,
             "monsterName": "CursedZombie",
-            "count": 12,
+            "count": 3,
             "message": "Eliminate the CursedZombie Threat",
             "spawnCandidates": [
               {
@@ -74598,7 +74598,7 @@
           {
             "monsterIndex": 296,
             "monsterName": "ShiZombie",
-            "count": 12,
+            "count": 3,
             "message": "Reduce the ShiZombie's",
             "spawnCandidates": [
               {
@@ -74910,7 +74910,7 @@
           {
             "monsterIndex": 294,
             "monsterName": "HungryZombie",
-            "count": 12,
+            "count": 3,
             "message": "Eliminate the HungryZombie Threat",
             "spawnCandidates": [
               {
@@ -75234,12 +75234,12 @@
       "newcomerOverride": {
         "questId": 118,
         "rewardExperience": 544444,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 12 CursedZombie.",
-          "Defeat 12 ShiZombie.",
-          "Defeat 12 HungryZombie."
+          "Defeat 3 CursedZombie.",
+          "Defeat 3 ShiZombie.",
+          "Defeat 3 HungryZombie."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -75262,7 +75262,7 @@
         "id": 118,
         "category": "recommended",
         "order": 560,
-        "hint": "Defeat 12 CursedZombie. Defeat 12 ShiZombie. Defeat 12 HungryZombie."
+        "hint": "Defeat 3 CursedZombie. Defeat 3 ShiZombie. Defeat 3 HungryZombie."
       }
     },
     {
@@ -75373,8 +75373,8 @@
       "newcomerOverride": {
         "questId": 119,
         "rewardExperience": 544445,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "startInDiary": false,
         "finishInDiary": false,
         "startNpc": {
@@ -76102,8 +76102,8 @@
           "Do you think you can eliminate the threat? "
         ],
         "task": [
-          "Defeat 12 ToxicGhoul.",
-          "Defeat 10 RoninGhoul."
+          "Defeat 3 ToxicGhoul.",
+          "Defeat 3 RoninGhoul."
         ],
         "return": [],
         "completion": []
@@ -76121,7 +76121,7 @@
           {
             "monsterIndex": 341,
             "monsterName": "ToxicGhoul",
-            "count": 12,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -76433,7 +76433,7 @@
           {
             "monsterIndex": 343,
             "monsterName": "RoninGhoul",
-            "count": 10,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -76756,11 +76756,11 @@
       "newcomerOverride": {
         "questId": 121,
         "rewardExperience": 544444,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 12 ToxicGhoul.",
-          "Defeat 10 RoninGhoul."
+          "Defeat 3 ToxicGhoul.",
+          "Defeat 3 RoninGhoul."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -76783,7 +76783,7 @@
         "id": 121,
         "category": "recommended",
         "order": 580,
-        "hint": "Defeat 12 ToxicGhoul. Defeat 10 RoninGhoul."
+        "hint": "Defeat 3 ToxicGhoul. Defeat 3 RoninGhoul."
       }
     },
     {
@@ -76813,8 +76813,8 @@
           "Please help Eliminate them."
         ],
         "task": [
-          "Defeat 12 BoneArcher.",
-          "Defeat 12 BoneSpearman."
+          "Defeat 3 BoneArcher.",
+          "Defeat 3 BoneSpearman."
         ],
         "return": [],
         "completion": []
@@ -76832,7 +76832,7 @@
           {
             "monsterIndex": 345,
             "monsterName": "BoneArcher",
-            "count": 12,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -77144,7 +77144,7 @@
           {
             "monsterIndex": 349,
             "monsterName": "BoneSpearman",
-            "count": 12,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -77470,11 +77470,11 @@
       "newcomerOverride": {
         "questId": 122,
         "rewardExperience": 544444,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 12 BoneArcher.",
-          "Defeat 12 BoneSpearman."
+          "Defeat 3 BoneArcher.",
+          "Defeat 3 BoneSpearman."
         ],
         "startInDiary": true,
         "finishInDiary": true,
@@ -77485,7 +77485,7 @@
         "id": 122,
         "category": "recommended",
         "order": 600,
-        "hint": "Defeat 12 BoneArcher. Defeat 12 BoneSpearman."
+        "hint": "Defeat 3 BoneArcher. Defeat 3 BoneSpearman."
       }
     },
     {
@@ -77512,7 +77512,7 @@
           "monsters. Please eliminate these monsters."
         ],
         "task": [
-          "Defeat 12 BoneBlademan."
+          "Defeat 3 BoneBlademan."
         ],
         "return": [],
         "completion": []
@@ -77530,7 +77530,7 @@
           {
             "monsterIndex": 347,
             "monsterName": "BoneBlademan",
-            "count": 12,
+            "count": 3,
             "message": "",
             "spawnCandidates": [
               {
@@ -77856,10 +77856,10 @@
       "newcomerOverride": {
         "questId": 123,
         "rewardExperience": 544445,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 12 BoneBlademan."
+          "Defeat 3 BoneBlademan."
         ],
         "startInDiary": true,
         "finishInDiary": true,
@@ -77870,7 +77870,7 @@
         "id": 123,
         "category": "recommended",
         "order": 610,
-        "hint": "Defeat 12 BoneBlademan."
+        "hint": "Defeat 3 BoneBlademan."
       }
     },
     {
@@ -77947,7 +77947,7 @@
           "{CleanSkull's/LightSteelBlue}."
         ],
         "task": [
-          "Collect 2 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
+          "Collect 1 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
         ],
         "return": [],
         "completion": []
@@ -77966,7 +77966,7 @@
           {
             "itemIndex": 1163,
             "itemName": "CleanSkull",
-            "count": 2,
+            "count": 1,
             "message": "",
             "sources": [
               {
@@ -79404,13 +79404,13 @@
       "newcomerOverride": {
         "questId": 124,
         "rewardExperience": 544445,
-        "killCountCap": 12,
-        "itemCountCap": 2,
+        "killCountCap": 3,
+        "itemCountCap": 1,
         "guaranteedQuestDrops": [
           "CleanSkull"
         ],
         "taskDescription": [
-          "Collect 2 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
+          "Collect 1 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -79433,7 +79433,7 @@
         "id": 124,
         "category": "recommended",
         "order": 590,
-        "hint": "Collect 2 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
+        "hint": "Collect 1 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
       }
     }
   ],
@@ -79446,6 +79446,7 @@
       "minLevel": 1,
       "maxLevel": 5,
       "exitLevel": 6,
+      "targetMinutes": 20,
       "questIds": [
         1,
         2,
@@ -79485,6 +79486,7 @@
       "minLevel": 6,
       "maxLevel": 10,
       "exitLevel": 11,
+      "targetMinutes": 25,
       "questIds": [
         22,
         23,
@@ -79518,6 +79520,7 @@
       "minLevel": 11,
       "maxLevel": 15,
       "exitLevel": 16,
+      "targetMinutes": 60,
       "questIds": [
         33,
         49,
@@ -79546,15 +79549,16 @@
       "minLevel": 16,
       "maxLevel": 20,
       "exitLevel": 21,
+      "targetMinutes": 75,
       "questIds": [
         51,
         52,
         53,
         54,
-        60,
         61,
-        62,
-        65
+        65,
+        60,
+        62
       ],
       "classQuestIds": {
         "Warrior": [],
@@ -79576,12 +79580,12 @@
       "minLevel": 21,
       "maxLevel": 25,
       "exitLevel": 26,
+      "targetMinutes": 90,
       "questIds": [
         83,
         86,
         87,
         88,
-        89,
         97,
         98,
         99,
@@ -79589,7 +79593,8 @@
         103,
         110,
         111,
-        112
+        112,
+        89
       ],
       "classQuestIds": {
         "Warrior": [],
@@ -79611,6 +79616,7 @@
       "minLevel": 26,
       "maxLevel": 30,
       "exitLevel": 30,
+      "targetMinutes": 105,
       "questIds": [
         113,
         114,
