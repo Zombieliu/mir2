@@ -6,6 +6,7 @@ import {
   randomTeleportCount,
   restockInVillage,
   useRandomTeleport,
+  journeyWeaponFundingGold,
   warriorWeaponFundingGold,
 } from './protocol-supplies.mjs';
 
@@ -201,6 +202,10 @@ function emergencyGoods() {
 
 function weaponGoods() {
   return [
+    { id: 25401, uniqueId: 25401, itemIndex: 254, name: 'Trident', price: 4000,
+      count: 1, equipSlot: 'weapon', itemType: 1, requiredLevel: 15, requiredClass: 7 },
+    { id: 26801, uniqueId: 26801, itemIndex: 268, name: 'Scimitar', price: 4000,
+      count: 1, equipSlot: 'weapon', itemType: 1, requiredLevel: 15, requiredClass: 7 },
     { id: 22701, uniqueId: 22701, itemIndex: 227, name: 'BronzeAxe', price: 1500,
       count: 1, equipSlot: 'weapon', itemType: 1, requiredLevel: 13, requiredClass: 7 },
     { id: 22401, uniqueId: 22401, itemIndex: 224, name: 'BronzeSword', price: 900,
@@ -218,6 +223,22 @@ test('reports preferred weapon funding for an unarmed or under-geared Warrior', 
   unarmed.equipmentItems = [{ ...item(227, 1, 'BronzeAxe', 992), slot: 'weapon' }];
   assert.equal(warriorWeaponFundingGold(unarmed), 0);
   assert.equal(warriorWeaponFundingGold(snapshot({ className: 'Wizard', level: 18, hp: 6 })), 0);
+});
+
+test('reports and buys the live class weapon when a caster lost every weapon', async () => {
+  assert.equal(journeyWeaponFundingGold(snapshot({ className: 'Wizard', level: 23 })), 4000);
+  assert.equal(journeyWeaponFundingGold(snapshot({ className: 'Taoist', level: 23 })), 4000);
+  const state = snapshot({ className: 'Taoist', level: 23, gold: 5000, hp: 6, mp: 6 });
+  const client = new FakeClient(state, { goods: weaponGoods() });
+  const result = await restockInVillage(client, async () => {}, {
+    ensureClassWeapon: true,
+    reserveGold: 0,
+  });
+  assert.equal(result.status, 'restocked');
+  assert.equal(result.weaponPurchase.name, 'Scimitar');
+  assert.ok(client.snapshot.equipmentItems.some(entry =>
+    entry.name === 'Scimitar' && entry.slot === 'weapon'));
+  assert.equal(journeyWeaponFundingGold(client.snapshot), 0);
 });
 
 test('under-geared Warrior upgrades Dagger to the preferred BronzeAxe without a lower-tier fallback', async () => {

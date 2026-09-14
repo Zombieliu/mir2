@@ -29,10 +29,29 @@ const WARRIOR_WEAPONS = Object.freeze([
   Object.freeze({ itemIndex: 222, name: 'Dagger', catalogPrice: 500, requiredLevel: 2 }),
   Object.freeze({ itemIndex: 221, name: 'WoodenSword', catalogPrice: 50, requiredLevel: 1 }),
 ]);
+const CLASS_WEAPONS = Object.freeze({
+  warrior: WARRIOR_WEAPONS,
+  wizard: Object.freeze([
+    Object.freeze({ itemIndex: 254, name: 'Trident', catalogPrice: 4000, requiredLevel: 15 }),
+    Object.freeze({ itemIndex: 223, name: 'EbonySword', catalogPrice: 4000, requiredLevel: 4 }),
+    Object.freeze({ itemIndex: 226, name: 'IronSword', catalogPrice: 1100, requiredLevel: 10 }),
+    Object.freeze({ itemIndex: 221, name: 'WoodenSword', catalogPrice: 50, requiredLevel: 1 }),
+  ]),
+  taoist: Object.freeze([
+    Object.freeze({ itemIndex: 268, name: 'Scimitar', catalogPrice: 4000, requiredLevel: 15 }),
+    Object.freeze({ itemIndex: 226, name: 'IronSword', catalogPrice: 1100, requiredLevel: 10 }),
+    Object.freeze({ itemIndex: 221, name: 'WoodenSword', catalogPrice: 50, requiredLevel: 1 }),
+  ]),
+});
 
 /** Gold needed for the preferred ordinary replacement when a Warrior is unarmed or under-geared. */
 export function warriorWeaponFundingGold(snapshot) {
   return warriorWeaponRequirement(snapshot)?.preferred.catalogPrice ?? 0;
+}
+
+/** Gold needed to replace an unarmed journey character through the live weapon shop. */
+export function journeyWeaponFundingGold(snapshot) {
+  return classWeaponRequirement(snapshot)?.preferred.catalogPrice ?? 0;
 }
 
 /**
@@ -64,9 +83,11 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     amulet: positiveOption(options.lowStockAmulet, lowStock, 'lowStockAmulet'),
   };
   const reserveGold = nonnegativeOption(options.reserveGold, GOLD_RESERVE, 'reserveGold');
-  const weaponRequirement = options.ensureWarriorWeapon === true
-    ? warriorWeaponRequirement(initial)
-    : null;
+  const weaponRequirement = options.ensureClassWeapon === true
+    ? classWeaponRequirement(initial)
+    : options.ensureWarriorWeapon === true
+      ? warriorWeaponRequirement(initial)
+      : null;
   const weaponNeeded = weaponRequirement != null;
   const preferredWeaponCost = weaponRequirement?.preferred.catalogPrice ?? 0;
   const relevant = className === 'taoist' ? ['hp', 'mp', ...(canUseSoulFireBall(initial) ? ['amulet'] : [])]
@@ -87,7 +108,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   const cheapestCandidates = [
     ...needed.map(kind => SUPPLIES[kind].catalogPrice),
     ...(weaponNeeded ? [weaponRequirement.allowFallback
-      ? WARRIOR_WEAPONS.at(-1).catalogPrice
+      ? weaponRequirement.catalog.at(-1).catalogPrice
       : weaponRequirement.preferred.catalogPrice] : []),
   ];
   const cheapestNeeded = cheapestCandidates.length > 0 ? Math.min(...cheapestCandidates) : 0;
@@ -191,10 +212,11 @@ export async function restockInVillage(client, navigateNear, options = {}) {
       throw new Error('Blacksmith Smith returned an invalid buy goods panel');
     }
     const affordableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
-    const weapon = affordableWarriorWeapon(
+    const weapon = affordableClassWeapon(
       goods.list,
       playerLevel(client.snapshot),
       affordableGold,
+      weaponRequirement.catalog,
       { exactItemIndex: weaponRequirement.allowFallback ? null : weaponRequirement.preferred.itemIndex },
     );
     if (!weapon) {
@@ -627,8 +649,8 @@ function supplyRow(list, supply) {
     .sort((a, b) => Number(a?.count ?? 1) - Number(b?.count ?? 1))[0] ?? null;
 }
 
-function affordableWarriorWeapon(list, level, availableGold, { exactItemIndex = null } = {}) {
-  for (const candidate of WARRIOR_WEAPONS) {
+function affordableClassWeapon(list, level, availableGold, catalog, { exactItemIndex = null } = {}) {
+  for (const candidate of catalog) {
     if (level < candidate.requiredLevel) continue;
     if (exactItemIndex != null && candidate.itemIndex !== exactItemIndex) continue;
     const row = list.find(item =>
@@ -928,8 +950,15 @@ function hasHeldWeapon(snapshot) {
 
 function warriorWeaponRequirement(snapshot) {
   if (playerClass(snapshot) !== 'warrior') return null;
+  return classWeaponRequirement(snapshot);
+}
+
+function classWeaponRequirement(snapshot) {
+  const className = playerClass(snapshot);
+  const catalog = CLASS_WEAPONS[className];
+  if (!catalog) return null;
   const level = playerLevel(snapshot);
-  const preferredIndex = WARRIOR_WEAPONS.findIndex(weapon => level >= weapon.requiredLevel);
+  const preferredIndex = catalog.findIndex(weapon => level >= weapon.requiredLevel);
   if (preferredIndex < 0) return null;
   const heldWeapons = [...(snapshot?.inventoryItems ?? []), ...(snapshot?.equipmentItems ?? [])]
     .filter(item => normalized(item?.slot ?? item?.equipSlot) === 'weapon' ||
@@ -938,20 +967,20 @@ function warriorWeaponRequirement(snapshot) {
         item?.tooltipSource?.info?.item_type ??
         item?.tooltipSource?.info?.itemType) === 1);
   if (heldWeapons.length === 0) {
-    return { preferred: WARRIOR_WEAPONS[preferredIndex], allowFallback: true };
+    return { preferred: catalog[preferredIndex], allowFallback: true, catalog };
   }
 
   // Known ordinary shop weapons follow the explicit tier order above. An
   // unknown quest/reward weapon is preserved because its progression tier
   // cannot safely be inferred from its display name or randomized attack.
-  let bestOrdinaryIndex = WARRIOR_WEAPONS.length;
+  let bestOrdinaryIndex = catalog.length;
   for (const item of heldWeapons) {
-    const ordinaryIndex = WARRIOR_WEAPONS.findIndex(weapon => weapon.itemIndex === templateIndex(item));
+    const ordinaryIndex = catalog.findIndex(weapon => weapon.itemIndex === templateIndex(item));
     if (ordinaryIndex < 0) return null;
     bestOrdinaryIndex = Math.min(bestOrdinaryIndex, ordinaryIndex);
   }
   return bestOrdinaryIndex > preferredIndex
-    ? { preferred: WARRIOR_WEAPONS[preferredIndex], allowFallback: false }
+    ? { preferred: catalog[preferredIndex], allowFallback: false, catalog }
     : null;
 }
 

@@ -15,7 +15,7 @@ import {
   equipHeldAmulet,
   randomTeleportCount,
   useRandomTeleport,
-  warriorWeaponFundingGold,
+  journeyWeaponFundingGold,
 } from './protocol-supplies.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
 import { claimAvailableMilestones, JOURNEY_MILESTONES } from './protocol-milestones.mjs';
@@ -245,7 +245,7 @@ try {
         ),
         liquidateSuperseded: true,
         liquidateObsoleteMaterials: true,
-        ensureWarriorWeapon: true,
+        ensureClassWeapon: true,
         clearBlockingMonster: (current, blocker) => clearTravelBlockingMonster(
           current,
           blocker,
@@ -318,7 +318,7 @@ try {
         // around solely to replace that one scroll.
         minimumEmergencyTeleportStock: emergencyTeleportRestockTarget,
         requiredAfterRestockEmergencyTeleportStock: emergencyTeleportTarget,
-        forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
+        forceRestock: journeyWeaponFundingGold(owner.snapshot) > 0 ||
           requiresTaoistAmuletRestock(owner.snapshot, questId, className, amuletTrigger) ||
           (shouldReplenishEscapeReserve && randomTeleportCount(owner.snapshot) < emergencyTeleportTarget) ||
           (expeditionSupplyActive &&
@@ -378,7 +378,7 @@ try {
           requiredMpStock: fundingMpDeficit,
           additionalGold: Math.max(
             0,
-            warriorWeaponFundingGold(owner.snapshot) + emergencyTeleportFunding -
+            journeyWeaponFundingGold(owner.snapshot) + emergencyTeleportFunding -
               Number(owner.snapshot?.gold ?? 0),
           ),
         });
