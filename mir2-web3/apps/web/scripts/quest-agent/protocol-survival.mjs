@@ -122,6 +122,7 @@ export function questRetreatProfile(questId, className = '') {
   const fragileMineExpedition = [54, 65].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
   const healingMineExpedition = [54, 65].includes(id) && normalizedClass === 'taoist';
   const rangedInsectExpedition = id === 60 && ['wizard', 'taoist'].includes(normalizedClass);
+  const rangedMinePassage = id === 65 && fragileMineExpedition;
   return {
     allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
@@ -155,9 +156,12 @@ export function questRetreatProfile(questId, className = '') {
     // Live D2041 snapshots consistently expose SpiderFrog candidates with one
     // adjacent and up to four nearby passive monsters. Rejecting every such
     // candidate made both ranged classes clear unrelated monsters and leave
-    // the cave without quest credit. Admit that measured spawn density; the
-    // proven-aggressor and health gates still interrupt an unsafe engagement.
-    ...(rangedInsectExpedition ? {
+    // the cave without quest credit. R74 then measured the same bounded 1/2
+    // shape around q65's D421 passage blockers; its strict 0/1 limit produced
+    // no spells and only consumed escape scrolls. Admit the already proven 1/4
+    // density for both ranged passages; the proven-aggressor and health gates
+    // still interrupt an unsafe engagement.
+    ...((rangedInsectExpedition || rangedMinePassage) ? {
       maxTargetAdjacent: 1,
       maxTargetNearby: 4,
     } : {}),

@@ -886,7 +886,12 @@ test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
     retreatAtActiveAggressorCount: 1,
     unsafeRetreatSteps: 24,
     unsafeRetreatSafeDistance: 8,
+    maxTargetAdjacent: 1,
+    maxTargetNearby: 4,
   });
+  assert.equal(questRetreatProfile(65, 'Wizard').maxTargetAdjacent, 1);
+  assert.equal(questRetreatProfile(65, 'Wizard').maxTargetNearby, 4);
+  assert.equal(questRetreatProfile(65, 'Warrior').maxTargetAdjacent, undefined);
 });
 
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {
