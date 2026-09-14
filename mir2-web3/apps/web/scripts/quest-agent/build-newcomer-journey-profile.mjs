@@ -17,7 +17,7 @@ const definitions = [
   ['village','Your first adventure',1,5,6,[1,2,3,5,6],3,20,'Meet the village, equip your rewards, and earn your first skill book.','Starter weapon, jewellery and your class skill book.'],
   ['bichon','Beyond the village',6,10,11,[22,23,24,25,26,27,29,30,33],3,25,'Follow the guide to Bichon and learn how to prepare for a new map.','Weapon upgrades and armour; short, guaranteed quest-material hunts.'],
   ['frontier','Ready for the caves',11,15,16,[35,36,37,39,40,41,42,49],3,60,'Finish the snake-wine story and prove yourself against ordinary cave enemies.','A helmet plus a level-15 class weapon and core combat book.'],
-  ['mines','Mines and rescue',16,20,21,[51,52,53,54,61,65,60,62],2,75,'Prepare supplies, clear the mines, and help the woodland expedition.','Belt and necklace choices plus a level-20 class weapon.'],
+  ['mines','Mines and rescue',16,20,21,[50,51,52,53,54,61,65,60],2,75,'Deliver the cook book, prepare supplies, clear the mines, and help the woodland expedition.','Belt and necklace choices plus a level-20 class weapon.'],
   ['expedition','Lead an expedition',21,25,26,[83,86,87,88,97,98,99,102,103,110,111,112,89],3,90,'Investigate the missing carriage, scout Wooma, and uncover the secret path.','The secret path plus level-25 class armour and a level-26 weapon.'],
   ['island','A new horizon',26,30,30,[113,114,117,118,119,121,124,122,123],3,105,'Secure the supply route and complete your first Prajna Island expedition.','A bangle upgrade and the level-30 growth reward.'],
 ];
@@ -123,6 +123,20 @@ snakeHuntOverride.killCountCap=3;
 snakeHuntOverride.taskDescription=['Defeat 3 TigerSnake.','Defeat 3 RedSnake.'];
 overrides.push({questId:4,rewardExperience:80,itemCountCap:1,guaranteedQuestDrops:['DeerMeat'],taskDescription:['Optional harvest lesson: collect 1 DeerMeat from a Deer corpse.','Complete the skinning actions with Alt + left mouse. The needed task meat is guaranteed.']});
 const allQuests = new Map(routes.flatMap(r=>r.quests).map(q=>[q.questId,q]));
+// Exterminate sends a level-18 newcomer through the densest Insect Cave floor
+// and dominated live acceptance time with repeated corpse runs. Keep it as a
+// short optional challenge for characters that already accepted it, while the
+// mandatory chapter teaches the same cross-map hand-off through q50/q61 and
+// retains q60's bounded two-kill cave sample.
+const optionalExterminate=allQuests.get(62);
+if(!optionalExterminate)throw new Error('Missing optional Exterminate quest 62');
+overrides.push({
+  questId:62,
+  rewardExperience:optionalExterminate.rewards.experience,
+  killCountCap:1,
+  itemCountCap:1,
+  taskDescription:['Optional cave challenge: defeat 1 KekTal.','Defeat 1 VioletKekTal.'],
+});
 const respawns=JSON.parse(await fs.readFile(new URL('packages/game-data/data/generated/crystal_respawn_manifest.json',root),'utf8'));
 const mapNames=new Map(respawns.maps.map(map=>[map.map_file_name,map.map_title]));
 const npcLocation=npc=>{

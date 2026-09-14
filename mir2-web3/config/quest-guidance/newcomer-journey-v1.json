@@ -116,21 +116,21 @@
       "exitLevel": 21,
       "targetMinutes": 75,
       "questIds": [
+        50,
         51,
         52,
         53,
         54,
         61,
         65,
-        60,
-        62
+        60
       ],
       "classQuestIds": {
         "Warrior": [],
         "Wizard": [],
         "Taoist": []
       },
-      "goal": "Prepare supplies, clear the mines, and help the woodland expedition.",
+      "goal": "Deliver the cook book, prepare supplies, clear the mines, and help the woodland expedition.",
       "rewardSummary": "Belt and necklace choices plus a level-20 class weapon.",
       "classHints": {
         "Warrior": "Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.",
@@ -990,6 +990,16 @@
       }
     },
     {
+      "questId": 50,
+      "rewardExperience": 60000,
+      "killCountCap": 2,
+      "itemCountCap": 1,
+      "startInDiary": true,
+      "finishInDiary": true,
+      "startNpc": null,
+      "finishNpc": null
+    },
+    {
       "questId": 51,
       "rewardExperience": 60000,
       "killCountCap": 2,
@@ -1145,32 +1155,6 @@
         "mapFileName": "0",
         "x": 340,
         "y": 257
-      }
-    },
-    {
-      "questId": 62,
-      "rewardExperience": 60000,
-      "killCountCap": 2,
-      "itemCountCap": 1,
-      "taskDescription": [
-        "Defeat 2 KekTal.",
-        "Defeat 2 VioletKekTal."
-      ],
-      "startInDiary": false,
-      "finishInDiary": false,
-      "startNpc": {
-        "name": "Master Shok",
-        "mapName": "WoomyonWoods(S)",
-        "mapFileName": "1",
-        "x": 312,
-        "y": 73
-      },
-      "finishNpc": {
-        "name": "Master Shok",
-        "mapName": "WoomyonWoods(S)",
-        "mapFileName": "1",
-        "x": 312,
-        "y": 73
       }
     },
     {
@@ -1693,6 +1677,32 @@
         "mapFileName": "0",
         "x": 292,
         "y": 603
+      }
+    },
+    {
+      "questId": 62,
+      "rewardExperience": 3000,
+      "killCountCap": 1,
+      "itemCountCap": 1,
+      "taskDescription": [
+        "Optional cave challenge: defeat 1 KekTal.",
+        "Defeat 1 VioletKekTal."
+      ],
+      "startInDiary": false,
+      "finishInDiary": false,
+      "startNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
+      },
+      "finishNpc": {
+        "name": "Master Shok",
+        "mapName": "WoomyonWoods(S)",
+        "mapFileName": "1",
+        "x": 312,
+        "y": 73
       }
     }
   ]

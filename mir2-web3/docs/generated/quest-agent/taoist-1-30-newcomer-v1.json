@@ -22551,7 +22551,7 @@
       },
       "rewards": {
         "gold": 3480,
-        "experience": 2634,
+        "experience": 60000,
         "credit": 0,
         "fixedItems": [],
         "selectableItems": [],
@@ -22579,10 +22579,20 @@
       "contentBlockers": [],
       "runtimeBlockers": [],
       "blockers": [],
+      "newcomerOverride": {
+        "questId": 50,
+        "rewardExperience": 60000,
+        "killCountCap": 2,
+        "itemCountCap": 1,
+        "startInDiary": true,
+        "finishInDiary": true,
+        "startNpc": null,
+        "finishNpc": null
+      },
       "guidance": {
         "id": 50,
-        "category": "optional",
-        "order": 790,
+        "category": "recommended",
+        "order": 320,
         "hint": "Accept through the Quest Diary. Keep the delivery items for hand-in; combine nearby errands before travelling. Finish through the Quest Diary."
       }
     },
@@ -22678,7 +22688,7 @@
       "guidance": {
         "id": 51,
         "category": "recommended",
-        "order": 320,
+        "order": 330,
         "hint": "Accept through the Quest Diary. Visit the stated destination before moving on to the next chapter."
       }
     },
@@ -23200,7 +23210,7 @@
       "guidance": {
         "id": 52,
         "category": "recommended",
-        "order": 330,
+        "order": 340,
         "hint": "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 1 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
       }
     },
@@ -23342,7 +23352,7 @@
       "guidance": {
         "id": 53,
         "category": "recommended",
-        "order": 340,
+        "order": 350,
         "hint": "Continue after Ingredients for CanniTea. Keep the delivery items for hand-in; combine nearby errands before travelling."
       }
     },
@@ -25013,7 +25023,7 @@
       "guidance": {
         "id": 54,
         "category": "recommended",
-        "order": 350,
+        "order": 360,
         "hint": "Defeat 2 Zombie5. Defeat 2 Zombie2. Defeat 2 Zombie3. Defeat 2 Zombie4. Defeat 2 Zombie1."
       }
     },
@@ -31068,7 +31078,7 @@
       "guidance": {
         "id": 55,
         "category": "optional",
-        "order": 800,
+        "order": 790,
         "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
       }
     },
@@ -31709,7 +31719,7 @@
       "guidance": {
         "id": 56,
         "category": "optional",
-        "order": 810,
+        "order": 800,
         "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
       }
     },
@@ -32034,7 +32044,7 @@
       "guidance": {
         "id": 58,
         "category": "challenge",
-        "order": 820,
+        "order": 810,
         "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
       }
     },
@@ -36079,7 +36089,7 @@
       "guidance": {
         "id": 59,
         "category": "optional",
-        "order": 830,
+        "order": 820,
         "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
       }
     },
@@ -36526,7 +36536,7 @@
       "guidance": {
         "id": 60,
         "category": "recommended",
-        "order": 380,
+        "order": 390,
         "hint": "Defeat 2 SpiderFrog."
       }
     },
@@ -36660,7 +36670,7 @@
       "guidance": {
         "id": 61,
         "category": "recommended",
-        "order": 360,
+        "order": 370,
         "hint": "Continue after Danger in the Cave. Visit the stated destination before moving on to the next chapter."
       }
     },
@@ -36729,15 +36739,15 @@
           "you help me."
         ],
         "task": [
-          "Defeat 2 KekTal.",
-          "Defeat 2 VioletKekTal."
+          "Optional cave challenge: defeat 1 KekTal.",
+          "Defeat 1 VioletKekTal."
         ],
         "return": [],
         "completion": []
       },
       "rewards": {
         "gold": 750,
-        "experience": 60000,
+        "experience": 3000,
         "credit": 0,
         "fixedItems": [
           {
@@ -36758,7 +36768,7 @@
           {
             "monsterIndex": 235,
             "monsterName": "KekTal",
-            "count": 2,
+            "count": 1,
             "message": "",
             "spawnCandidates": [
               {
@@ -37070,7 +37080,7 @@
           {
             "monsterIndex": 237,
             "monsterName": "VioletKekTal",
-            "count": 2,
+            "count": 1,
             "message": "",
             "spawnCandidates": [
               {
@@ -37393,12 +37403,12 @@
       "blockers": [],
       "newcomerOverride": {
         "questId": 62,
-        "rewardExperience": 60000,
-        "killCountCap": 2,
+        "rewardExperience": 3000,
+        "killCountCap": 1,
         "itemCountCap": 1,
         "taskDescription": [
-          "Defeat 2 KekTal.",
-          "Defeat 2 VioletKekTal."
+          "Optional cave challenge: defeat 1 KekTal.",
+          "Defeat 1 VioletKekTal."
         ],
         "startInDiary": false,
         "finishInDiary": false,
@@ -37419,9 +37429,9 @@
       },
       "guidance": {
         "id": 62,
-        "category": "recommended",
-        "order": 390,
-        "hint": "Defeat 2 KekTal. Defeat 2 VioletKekTal."
+        "category": "optional",
+        "order": 830,
+        "hint": "Optional cave challenge: defeat 1 KekTal. Defeat 1 VioletKekTal."
       }
     },
     {
@@ -38027,7 +38037,7 @@
       "guidance": {
         "id": 65,
         "category": "recommended",
-        "order": 370,
+        "order": 380,
         "hint": "Defeat 2 Zombie1."
       }
     },
@@ -79553,21 +79563,21 @@
       "exitLevel": 21,
       "targetMinutes": 75,
       "questIds": [
+        50,
         51,
         52,
         53,
         54,
         61,
         65,
-        60,
-        62
+        60
       ],
       "classQuestIds": {
         "Warrior": [],
         "Wizard": [],
         "Taoist": []
       },
-      "goal": "Prepare supplies, clear the mines, and help the woodland expedition.",
+      "goal": "Deliver the cook book, prepare supplies, clear the mines, and help the woodland expedition.",
       "rewardSummary": "Belt and necklace choices plus a level-20 class weapon.",
       "classHints": {
         "Warrior": "Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.",

@@ -114,9 +114,11 @@ test('the shortened snake hunt follows the funding quests within a deterministic
   assert.ok([35,36,37].every(questId=>!frontier.questIds.includes(questId)));
   assert.deepEqual(frontier.questIds,[33,49,39,40,41,42]);
   const mines=config.chapters.find(chapter=>chapter.id==='mines');
+  assert.equal(mines.questIds[0],50);
   assert.ok(mines.questIds.indexOf(54)<mines.questIds.indexOf(61));
   assert.ok(mines.questIds.indexOf(61)<mines.questIds.indexOf(65));
   assert.ok(mines.questIds.indexOf(65)<mines.questIds.indexOf(60));
+  assert.ok(!mines.questIds.includes(62));
   const expedition=config.chapters.find(chapter=>chapter.id==='expedition');
   assert.deepEqual(expedition.questIds,[83,86,87,88,97,98,99,102,103,110,111,112,89]);
   assert.ok(expedition.questIds.indexOf(98)<expedition.questIds.indexOf(102));
@@ -181,7 +183,7 @@ test('caps and guarantees reference real objectives while preserving the baselin
 });
 
 test('the full route has a bounded and class-neutral action budget',()=>{
-  const expectedKills=[15,3,18,18,24,36];
+  const expectedKills=[15,3,18,14,24,36];
   const expectedItems=[1,6,0,2,1,1];
   for(const className of ['Warrior','Wizard','Taoist']){
     const route=annotateNewcomerRoute(buildClassQuestRoute(sources,{className,maxLevel:40}),guidance,config);
@@ -195,9 +197,9 @@ test('the full route has a bounded and class-neutral action budget',()=>{
     });
     assert.deepEqual(totals.map(total=>total.kills),expectedKills,`${className} kill budget`);
     assert.deepEqual(totals.map(total=>total.items),expectedItems,`${className} material budget`);
-    assert.equal(totals.reduce((sum,total)=>sum+total.kills,0),114);
+    assert.equal(totals.reduce((sum,total)=>sum+total.kills,0),110);
     assert.equal(totals.reduce((sum,total)=>sum+total.items,0),11);
-    assert.deepEqual(byId.get(62).objectives.kill.map(task=>task.count),[2,2]);
+    assert.deepEqual(byId.get(62).objectives.kill.map(task=>task.count),[1,1]);
     assert.deepEqual(byId.get(89).objectives.kill.map(task=>task.count),[3,3,3]);
   }
 });

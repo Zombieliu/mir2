@@ -293,75 +293,75 @@
     },
     {
       "id": 50,
-      "category": "optional",
-      "order": 790,
+      "category": "recommended",
+      "order": 320,
       "hint": "Accept through the Quest Diary. Keep the delivery items for hand-in; combine nearby errands before travelling. Finish through the Quest Diary."
     },
     {
       "id": 51,
       "category": "recommended",
-      "order": 320,
+      "order": 330,
       "hint": "Accept through the Quest Diary. Visit the stated destination before moving on to the next chapter."
     },
     {
       "id": 52,
       "category": "recommended",
-      "order": 330,
+      "order": 340,
       "hint": "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 1 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
     },
     {
       "id": 53,
       "category": "recommended",
-      "order": 340,
+      "order": 350,
       "hint": "Continue after Ingredients for CanniTea. Keep the delivery items for hand-in; combine nearby errands before travelling."
     },
     {
       "id": 54,
       "category": "recommended",
-      "order": 350,
+      "order": 360,
       "hint": "Defeat 2 Zombie5. Defeat 2 Zombie2. Defeat 2 Zombie3. Defeat 2 Zombie4. Defeat 2 Zombie1."
     },
     {
       "id": 55,
       "category": "optional",
-      "order": 800,
+      "order": 790,
       "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
     },
     {
       "id": 56,
       "category": "optional",
-      "order": 810,
+      "order": 800,
       "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
     },
     {
       "id": 58,
       "category": "challenge",
-      "order": 820,
+      "order": 810,
       "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
     },
     {
       "id": 59,
       "category": "optional",
-      "order": 830,
+      "order": 820,
       "hint": "Collect the requested items, not just kills. Keep enough bag space for the reward."
     },
     {
       "id": 60,
       "category": "recommended",
-      "order": 380,
+      "order": 390,
       "hint": "Defeat 2 SpiderFrog."
     },
     {
       "id": 61,
       "category": "recommended",
-      "order": 360,
+      "order": 370,
       "hint": "Continue after Danger in the Cave. Visit the stated destination before moving on to the next chapter."
     },
     {
       "id": 62,
-      "category": "recommended",
-      "order": 390,
-      "hint": "Defeat 2 KekTal. Defeat 2 VioletKekTal."
+      "category": "optional",
+      "order": 830,
+      "hint": "Optional cave challenge: defeat 1 KekTal. Defeat 1 VioletKekTal."
     },
     {
       "id": 63,
@@ -378,7 +378,7 @@
     {
       "id": 65,
       "category": "recommended",
-      "order": 370,
+      "order": 380,
       "hint": "Defeat 2 Zombie1."
     },
     {
