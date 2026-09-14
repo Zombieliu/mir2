@@ -1,5 +1,31 @@
 # Protocol newcomer journey acceptance
 
+## R47 six-hour route and Sabuk checkpoint
+
+The opt-in 1-30 newcomer route now targets 375 minutes (6 hours 15 minutes),
+with chapter budgets of 20, 25, 60, 75, 90 and 105 minutes. Its mandatory
+three-class route contains 55 quests, 110 bounded kills and 11 bounded quest
+items. q50 Cook Book Delivery replaces q62 Exterminate in the required
+level-16-20 chapter. q62 remains available as a short optional challenge with
+one KekTal and one VioletKekTal, so existing character progress is retained
+without forcing a dense Insect Cave corpse run.
+
+R47 runs on `127.0.0.1:17810` from executable SHA-256
+`9E2670A8A7A529A4D5EDB43A9A31B47E9213612261E1399D9CF7F958D1AD96E7` and
+keeps the existing account store. Warrior trace
+`Warrior.2026-09-14T08-15-09-779Z.trace.jsonl` proves the resumed q110 route:
+the character crossed D701 from `(28,22)` to its inner exit, entered the Sabuk
+merchant quarter, completed q110 with zero deaths, and advanced the mandatory
+count from 41/55 to 43/55 after also completing newly required q50. The same
+run accepted q111 and completed all three physical pillar interactions.
+
+Legacy migration is also live-proven. Wizard's already-complete q62 reconciled
+to the new 1+1 optional objective, revived in town, skipped its optional
+turn-in and completed q50 to reach level 21 and 33/55. Taoist left D2041
+without advancing optional q62 and resumed the required route. Rust newcomer
+journey checks pass 7/7 and the complete quest-agent suite passes 544/544.
+Three-class completion and native UI/animation acceptance remain open.
+
 ## R40 paced emergency-escape checkpoint
 
 R37 proved that funded cave departures now work through ordinary public
