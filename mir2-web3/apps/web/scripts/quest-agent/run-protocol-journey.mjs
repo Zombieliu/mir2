@@ -273,11 +273,7 @@ try {
       replenishEscapeReserve = false,
     } = {}) => {
       const expeditionSupplyActive = journeyExpeditionSupplyActive(owner.snapshot, questId);
-      const q54Expedition = expeditionSupplyActive && Number(questId) === 54;
-      const q60Expedition = expeditionSupplyActive && Number(questId) === 60;
-      const q62Expedition = expeditionSupplyActive && Number(questId) === 62;
       const departureFloor = journeyExpeditionDepartureFloorForQuest(questId, className);
-      const q65Expedition = expeditionSupplyActive && Number(questId) === 65;
       const taoistAmuletExpedition =
         String(className).trim().toLowerCase() === 'taoist' &&
         expeditionSupplyActive &&
@@ -288,7 +284,7 @@ try {
       // engagement without sending every cast back to town.
       const amuletTrigger = taoistAmuletExpedition ? 12 : 0;
       const amuletDepartureTarget = taoistAmuletExpedition ? 32 : 0;
-      const emergencyTeleportTarget = q54Expedition || q60Expedition || q62Expedition || q65Expedition ? 4 : 0;
+      const emergencyTeleportTarget = expeditionSupplyActive ? 4 : 0;
       const inVillage = String(owner.snapshot?.mapFileName ?? '') === '0';
       const shouldReplenishEscapeReserve = emergencyTeleportTarget > 0 &&
         (inVillage || replenishEscapeReserve);
@@ -307,20 +303,16 @@ try {
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
           requiresTaoistAmuletRestock(owner.snapshot, questId, className, amuletTrigger) ||
           (shouldReplenishEscapeReserve && randomTeleportCount(owner.snapshot) < emergencyTeleportTarget) ||
-          ([(q54Expedition || q65Expedition) && (hpDrugCount(owner.snapshot) < departureFloor.hp ||
-              mpDrugCount(owner.snapshot) < departureFloor.mp),
-            (q60Expedition || q62Expedition) && hpDrugCount(owner.snapshot) < departureFloor.hp]
-            .some(Boolean) && String(owner.snapshot?.mapFileName ?? '') === '0'),
-        ...(q54Expedition || q65Expedition ? {
+          (expeditionSupplyActive &&
+            (hpDrugCount(owner.snapshot) < departureFloor.hp ||
+              mpDrugCount(owner.snapshot) < departureFloor.mp) &&
+            String(owner.snapshot?.mapFileName ?? '') === '0'),
+        ...(expeditionSupplyActive ? {
           requiredAfterRestockHpStock: departureFloor.hp,
-          requiredAfterRestockMpStock: departureFloor.mp,
+          ...(departureFloor.mp > 0 ? { requiredAfterRestockMpStock: departureFloor.mp } : {}),
           // Stay in town after the shop. The quest loop owns the return trip
           // because it carries the class-aware aggressor interrupt/retreat
           // policy; the generic supply traveler does not.
-          returnMapFileName: '',
-        } : {}),
-        ...(q60Expedition || q62Expedition ? {
-          requiredAfterRestockHpStock: departureFloor.hp,
           returnMapFileName: '',
         } : {}),
         ...(q42WizardExpedition ? { requiredAfterRestockMpStock: 32 } : {}),
@@ -485,6 +477,7 @@ try {
       }
     };
     const activeResumeExpeditionId = ids.find(id => {
+      if (!dangerousExpeditionQuestIds.has(Number(id))) return false;
       const quest = client.snapshot?.questLog?.find(entry => Number(entry?.questId) === Number(id));
       return String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress';
     });
