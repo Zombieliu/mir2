@@ -379,6 +379,13 @@ export function isLivingUnsafePackRetreatFailure(snapshot, error) {
     String(error?.message ?? error).startsWith('unsafe hostile pack retreat failed from ');
 }
 
+/** A live AOI target disappearing is a normal world race; select a fresh actor. */
+export function isLivingLostCombatTarget(snapshot, error) {
+  return healthRatio(snapshot) > 0 &&
+    /^target \d+ left the authoritative snapshot before (?:attack|death was confirmed)$/i
+      .test(String(error?.message ?? error));
+}
+
 /** Dense expedition occupants are transient; keep the authoritative field position and replan. */
 export function isLivingExpeditionNoWalkPath(snapshot, questId, error) {
   return healthRatio(snapshot) > 0 &&

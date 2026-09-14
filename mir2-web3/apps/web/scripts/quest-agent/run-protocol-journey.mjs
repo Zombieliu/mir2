@@ -31,6 +31,7 @@ import {
   hpDrugCount,
   isLivingEvasiveRecoveryTimeout,
   isLivingExpeditionNoWalkPath,
+  isLivingLostCombatTarget,
   isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
   journeyExpeditionSupplyActive,
@@ -539,6 +540,7 @@ try {
     report.quests = [];
     report.milestones = [];
     const deferredQuests = new Map();
+    const lostTargetRetries = new Map();
     const finishJourneyQuest = async (q, record) => {
       const reward = q.rewards.selectableItems.find(i =>
         i.count > 0 && (i.requiredClass & route.classMask) && (i.requiredGender & 1));
@@ -917,6 +919,20 @@ try {
         const livingEvasiveTimeout = isLivingEvasiveRecoveryTimeout(client.snapshot, error);
         const livingExpeditionNoPath = isLivingExpeditionNoWalkPath(client.snapshot, id, error);
         const livingUnsafeRetreatFailure = isLivingUnsafePackRetreatFailure(client.snapshot, error);
+        const livingLostTarget = isLivingLostCombatTarget(client.snapshot, error);
+        const lostTargetRetry = livingLostTarget ? (lostTargetRetries.get(id) ?? 0) + 1 : 0;
+        if (livingLostTarget) lostTargetRetries.set(id, lostTargetRetry);
+        if (livingLostTarget && lostTargetRetry <= 8) {
+          client.record('diagnostic', {
+            type: 'livingLostCombatTargetRetry',
+            questId: id,
+            retry: lostTargetRetry,
+            mapFileName: String(client.snapshot?.mapFileName ?? ''),
+            reason: String(error?.message ?? error),
+          });
+          index--;
+          continue;
+        }
         if (livingEvasiveTimeout || livingExpeditionNoPath || livingUnsafeRetreatFailure) {
           client.record('diagnostic', {
             type: livingUnsafeRetreatFailure ? 'livingUnsafePackRetreatRetry' :

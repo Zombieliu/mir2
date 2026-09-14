@@ -12,6 +12,7 @@ import {
   hasJourneyEmergencyEscapeQuest,
   isLivingEvasiveRecoveryTimeout,
   isLivingExpeditionNoWalkPath,
+  isLivingLostCombatTarget,
   isLivingUnsafePackRetreatFailure,
   mpDrugCount,
   hpRestockTargetForActiveQuests,
@@ -178,6 +179,23 @@ test('a living partial unsafe-pack retreat can replan without discarding field p
     { playerHp: 110, playerMaxHp: 224 },
     new Error('No walk path'),
   ), false);
+});
+
+test('a living target lost at the AOI edge is retryable but death and unrelated errors are not', () => {
+  const living = { playerHp: 40, playerMaxHp: 80 };
+  assert.equal(isLivingLostCombatTarget(
+    living,
+    new Error('target 293721 left the authoritative snapshot before attack'),
+  ), true);
+  assert.equal(isLivingLostCombatTarget(
+    living,
+    new Error('target 293721 left the authoritative snapshot before death was confirmed'),
+  ), true);
+  assert.equal(isLivingLostCombatTarget(
+    { playerHp: 0, playerMaxHp: 80 },
+    new Error('target 293721 left the authoritative snapshot before attack'),
+  ), false);
+  assert.equal(isLivingLostCombatTarget(living, new Error('target 293721 made no progress')), false);
 });
 
 test('a resumed expedition preserves field progress while it still has a public escape reserve', () => {
