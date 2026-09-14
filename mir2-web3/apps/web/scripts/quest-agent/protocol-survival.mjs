@@ -158,7 +158,13 @@ export function questRetreatProfile(questId, className = '') {
     // The map1 approach to D2041 is also long enough for incidental Omas to
     // trail a ranged q60 player. Stopping at full health to evade that weak
     // field pack repeatedly returned the Taoist to the start of the same edge.
-    continueTravelWhileHealthy: [54, 62, 65].includes(id) || rangedInsectExpedition,
+    // q98/q99 use the same long map1 approach as the insect expeditions. R83
+    // returned to town before reaching D021 after stopping for ordinary field
+    // mobs even though it remained healthy and fully supplied. Keep crossing
+    // the approach while healthy; the existing cave target-density and
+    // low-health escape gates still take over after arrival.
+    continueTravelWhileHealthy: [54, 62, 65].includes(id) ||
+      rangedInsectExpedition || rangedWoomaExpedition,
     // R37-R42 showed that repeated evasion spends the random-teleport reserve
     // without crossing D401/D2041. These expeditions carry large proven
     // potion stocks, so clear a monster that actually hit the player before

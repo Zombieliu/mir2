@@ -1093,9 +1093,11 @@ test('q98 Wooma expedition keeps long wide recovery armed for ranged classes', (
   for (const className of ['Wizard', 'Taoist']) {
     const profile = questRetreatProfile(98, className);
     assert.equal(profile.allowLowHealthFollowerRecovery, true);
+    assert.equal(profile.continueTravelWhileHealthy, true);
     assert.equal(profile.maxTargetAdjacent, 1);
     assert.equal(profile.maxTargetNearby, 4);
   }
+  assert.equal(questRetreatProfile(98, 'Warrior').continueTravelWhileHealthy, false);
   assert.equal(questRetreatProfile(98, 'Warrior').maxTargetAdjacent, undefined);
   assert.equal(evasiveRecoveryTimeoutMsForQuest(98), 90_000);
   assert.equal(evasiveRecoveryDangerDistanceForQuest(98), 8);
@@ -1105,6 +1107,7 @@ test('q99 keeps the same Wooma expedition recovery and supplies as q98', () => {
   for (const className of ['Wizard', 'Taoist']) {
     const profile = questRetreatProfile(99, className);
     assert.equal(profile.allowLowHealthFollowerRecovery, true);
+    assert.equal(profile.continueTravelWhileHealthy, true);
     assert.equal(profile.maxTargetAdjacent, 1);
     assert.equal(profile.maxTargetNearby, 4);
   }
