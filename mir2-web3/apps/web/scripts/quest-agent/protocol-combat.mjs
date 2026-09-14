@@ -319,9 +319,19 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
             limit: respawnWaitLimit,
             waitMs: settings.spawnRespawnWaitMs,
           });
-          await settings.sleep(settings.spawnRespawnWaitMs);
-          if (settings.refreshWhileWaiting) await settings.refreshWhileWaiting(client);
-          continue;
+          const waitThreat = await waitForRespawnOrAggressor(client, settings);
+          if (!waitThreat) {
+            if (settings.refreshWhileWaiting) await settings.refreshWhileWaiting(client);
+            continue;
+          }
+          // Reuse the normal proven-aggressor branch below. A respawn wait is
+          // idle time only while the player is safe; once a visible monster
+          // starts striking, standing still for the remainder of the 30-second
+          // timer can turn a healthy character into an avoidable death.
+          error = new ThreatenedNavigation(
+            `respawn wait interrupted by monster ${Number(waitThreat.objectId)}`,
+            Number(waitThreat.objectId),
+          );
         }
         if (!(error instanceof ThreatenedNavigation)) throw error;
         let cleared;
@@ -855,6 +865,20 @@ function spawnRespawnWaitLimit(targetPlan, settings) {
       settings.spawnRespawnWaitMs,
   );
   return Math.max(settings.maxSpawnRespawnWaits, profiledWaits);
+}
+
+async function waitForRespawnOrAggressor(client, settings) {
+  let remainingMs = settings.spawnRespawnWaitMs;
+  const pollMs = Math.min(500, remainingMs);
+  while (remainingMs > 0) {
+    const sliceMs = Math.min(pollMs, remainingMs);
+    await settings.sleep(sliceMs);
+    remainingMs -= sliceMs;
+    assertPlayerAlive(client);
+    const threat = provenAggressors(client, null, settings)[0];
+    if (threat) return threat;
+  }
+  return null;
 }
 
 function validateInputs(client, routeQuest, navigateNear) {

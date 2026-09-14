@@ -3222,6 +3222,7 @@ test("profiled respawn delay extends the default bounded wait window", async () 
   });
   const diagnostics = [];
   client.record = (_direction, payload) => diagnostics.push(payload);
+  let waitedMs = 0;
   let respawnWaits = 0;
   const result = await completeQuestObjectives(client, {
     questId: 60,
@@ -3233,8 +3234,10 @@ test("profiled respawn delay extends the default bounded wait window", async () 
     ...settings,
     spawnRespawnWaitMs: 30_000,
     sleep: async milliseconds => {
-      if (milliseconds !== 30_000) return;
-      respawnWaits += 1;
+      waitedMs += milliseconds;
+      const completedWaits = Math.floor(waitedMs / 30_000);
+      if (completedWaits <= respawnWaits) return;
+      respawnWaits = completedWaits;
       if (respawnWaits === 8) client.snapshot.entities.push(monster(81, "SpiderFrog", 20, 20));
     },
     refreshWhileWaiting: async () => {},
@@ -3244,6 +3247,52 @@ test("profiled respawn delay extends the default bounded wait window", async () 
   assert.equal(respawnWaits, 8);
   assert.deepEqual(client.sent, [{ type: "attack", objectId: 81 }]);
   assert.equal(diagnostics.filter(entry => entry.type === "spawnRespawnWait").at(-1)?.limit, 8);
+});
+
+test("a proven adjacent attack interrupts a respawn wait and is cleared before waiting again", async () => {
+  const quest = { questId: 98, stage: "InProgress", objectives: [objective("Kill Dung", 0, 1)] };
+  const client = new FakeClient(snapshot(quest), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      const target = state.entities.find(entry => entry.objectId === command.objectId);
+      Object.assign(target, { hp: 0, dead: true });
+      if (command.objectId === 82) {
+        const actor = state.entities[0];
+        state.entities.push(monster(83, "Dung", actor.x + 1, actor.y));
+      } else if (command.objectId === 83) {
+        state.questLog[0].objectives[0] = objective("Kill Dung", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    }, { objectId: command.objectId });
+  });
+  let sleepCalls = 0;
+
+  const result = await completeQuestObjectives(client, {
+    questId: 98,
+    objectives: { kill: [{
+      monsterName: "Dung",
+      spawnCandidates: [{ ...spawn("Dung", 20, 20), spread: 0 }],
+    }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    maxSpawnRespawnWaits: 1,
+    spawnRespawnWaitMs: 30_000,
+    sleep: async () => {
+      sleepCalls += 1;
+      if (sleepCalls !== 1) return;
+      const actor = client.snapshot.entities[0];
+      client.snapshot.entities.push(monster(82, "WoomaSoldier", actor.x + 1, actor.y));
+      client.receive("ObjectStruck", () => {}, {
+        objectId: client.snapshot.playerObjectId,
+        attackerId: 82,
+      });
+    },
+    refreshWhileWaiting: async () => {},
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [82, 83]);
+  assert.ok(sleepCalls < 60);
 });
 
 test("full-spread grid covers the observed CannibalPlant offset beyond the old 48-tile ring", async () => {
