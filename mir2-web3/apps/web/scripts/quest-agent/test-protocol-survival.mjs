@@ -11,6 +11,7 @@ import {
   hpDrugCount,
   hasJourneyEmergencyEscapeQuest,
   isLivingEvasiveRecoveryTimeout,
+  isLivingExpeditionNoWalkPath,
   isLivingUnsafePackRetreatFailure,
   mpDrugCount,
   hpRestockTargetForActiveQuests,
@@ -120,6 +121,35 @@ test('only a living exact evasive recovery timeout is retryable', () => {
   assert.equal(isLivingEvasiveRecoveryTimeout(
     { playerHp: 102, playerMaxHp: 224 },
     new Error('No walk path'),
+  ), false);
+});
+
+test('only living dangerous expeditions replan transient no-walk-path failures', () => {
+  const alive = { playerHp: 51, playerMaxHp: 76 };
+  assert.equal(isLivingExpeditionNoWalkPath(
+    alive,
+    65,
+    new Error('No walk path on D421 from 106,149 to 361,19'),
+  ), true);
+  assert.equal(isLivingExpeditionNoWalkPath(
+    alive,
+    60,
+    new Error('No walk path to visible SpiderFrog'),
+  ), true);
+  assert.equal(isLivingExpeditionNoWalkPath(
+    alive,
+    49,
+    new Error('No walk path on D011'),
+  ), false);
+  assert.equal(isLivingExpeditionNoWalkPath(
+    { playerHp: 0, playerMaxHp: 76 },
+    65,
+    new Error('No walk path on D421'),
+  ), false);
+  assert.equal(isLivingExpeditionNoWalkPath(
+    alive,
+    65,
+    new Error('Map transfer timed out'),
   ), false);
 });
 
@@ -949,8 +979,8 @@ test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
 
 test('q99 Warrior admits the measured final WoomaFighter spawn group', () => {
   const warrior = questRetreatProfile(99, 'Warrior');
-  assert.equal(warrior.maxTargetAdjacent, 1);
-  assert.equal(warrior.maxTargetNearby, 2);
+  assert.equal(warrior.maxTargetAdjacent, 2);
+  assert.equal(warrior.maxTargetNearby, 3);
   assert.equal(questRetreatProfile(99, 'Wizard').maxTargetAdjacent, undefined);
   assert.equal(questRetreatProfile(99, 'Taoist').maxTargetNearby, undefined);
 });

@@ -166,12 +166,12 @@ export function questRetreatProfile(questId, className = '') {
       maxTargetAdjacent: 1,
       maxTargetNearby: 4,
     } : warriorWoomaHunt ? {
-      // R60 reached q99 19/20 with full supplies, but the last live
-      // WoomaFighter repeatedly remained in its stable 1-adjacent/2-nearby
-      // spawn group. The Warrior already keeps this objective as its bounded
-      // focus through one joining aggressor, so admit that measured target.
-      maxTargetAdjacent: 1,
-      maxTargetNearby: 2,
+      // R61 proved the same final WoomaFighter closes from 1/2 to 2/3 while
+      // the full-health Warrior approaches. The target was already down to
+      // 53/150 HP and q99's bounded focus policy keeps that exact target, so
+      // admit the measured closing pack long enough to land the final blows.
+      maxTargetAdjacent: 2,
+      maxTargetNearby: 3,
     } : {}),
   };
 }
@@ -349,6 +349,13 @@ export function isLivingEvasiveRecoveryTimeout(snapshot, error) {
 export function isLivingUnsafePackRetreatFailure(snapshot, error) {
   return healthRatio(snapshot) > 0 &&
     String(error?.message ?? error).startsWith('unsafe hostile pack retreat failed from ');
+}
+
+/** Dense expedition occupants are transient; keep the authoritative field position and replan. */
+export function isLivingExpeditionNoWalkPath(snapshot, questId, error) {
+  return healthRatio(snapshot) > 0 &&
+    DANGEROUS_EXPEDITION_QUEST_IDS.has(Number(questId)) &&
+    String(error?.message ?? error).startsWith('No walk path');
 }
 
 export function requiresExpeditionEscapeRestock(snapshot, questId, minimum = 1) {

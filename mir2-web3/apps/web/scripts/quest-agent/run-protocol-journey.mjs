@@ -29,6 +29,7 @@ import {
   hasJourneyEmergencyEscapeQuest,
   hpDrugCount,
   isLivingEvasiveRecoveryTimeout,
+  isLivingExpeditionNoWalkPath,
   isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
   journeyNavigationEmergencyEscapeBudget,
@@ -910,12 +911,13 @@ try {
           continue;
         }
         const livingEvasiveTimeout = isLivingEvasiveRecoveryTimeout(client.snapshot, error);
+        const livingExpeditionNoPath = isLivingExpeditionNoWalkPath(client.snapshot, id, error);
         const livingUnsafeRetreatFailure = isLivingUnsafePackRetreatFailure(client.snapshot, error);
-        if (livingEvasiveTimeout || livingUnsafeRetreatFailure) {
+        if (livingEvasiveTimeout || livingExpeditionNoPath || livingUnsafeRetreatFailure) {
           client.record('diagnostic', {
-            type: livingUnsafeRetreatFailure
-              ? 'livingUnsafePackRetreatRetry'
-              : 'livingEvasiveRecoveryTimeoutRetry',
+            type: livingUnsafeRetreatFailure ? 'livingUnsafePackRetreatRetry' :
+              (livingExpeditionNoPath ? 'livingExpeditionNoWalkPathRetry' :
+                'livingEvasiveRecoveryTimeoutRetry'),
             questId: id,
             hp: Number(client.snapshot?.playerHp ?? 0),
             maxHp: Number(client.snapshot?.playerMaxHp ?? 0),
