@@ -654,6 +654,10 @@ try {
             },
             action: playerCombatAction,
             maxAttackAttempts,
+            // A moving monster can keep invalidating the authoritative cast
+            // window without ever taking damage. Quarantine that exact actor
+            // after twenty seconds and select another live quest target.
+            maxMovingTargetNoProgressMs: 20_000,
             approachRange: combatApproachRange,
             // Shared-zone projectile resolution and the authoritative quest
             // award can arrive more than seven seconds after the cast. R45
