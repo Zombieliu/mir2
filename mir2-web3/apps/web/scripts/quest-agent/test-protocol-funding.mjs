@@ -109,6 +109,54 @@ test('does not create funding by accepting, advancing, or turning in an unavaila
   assert.equal(called, false);
 });
 
+test('ready q110 funding turn-in keeps the guarded Sabuk endpoint on its quest-safe route', async () => {
+  const actor = { objectId: 1, kind: 'selfPlayer', x: 505, y: 483 };
+  const owner = {
+    snapshot: {
+      mapFileName: '2', playerObjectId: 1, entities: [actor], gold: 5000,
+      questLog: [{ questId: 110, stage: 'ReadyToTurnIn' }],
+      inventoryItems: [], beltItems: [], equipmentItems: [],
+    },
+  };
+  const calls = [];
+  const result = await finishReadySupplyFundingQuest(owner, {
+    route: {
+      classMask: 1,
+      quests: [{
+        questId: 110,
+        finishNpc: { mapFileName: '3' },
+        rewards: { gold: 1000, fixedItems: [], selectableItems: [] },
+      }],
+    },
+    travel: async (mapFileName, options) => {
+      calls.push(['travel', mapFileName, options]);
+      owner.snapshot.mapFileName = mapFileName;
+      Object.assign(actor, mapFileName === 'D701'
+        ? { x: 28, y: 22 }
+        : options?.preferDirectScriptedEdge
+          ? { x: 361, y: 342 }
+          : { x: 660, y: 276 });
+    },
+    navigate: async (target, distance) => {
+      calls.push(['navigate', target, distance]);
+      Object.assign(actor, target);
+    },
+    interact: async () => {
+      owner.snapshot.gold += 1000;
+      owner.snapshot.questLog[0].stage = 'Completed';
+      return { accepted: true };
+    },
+  });
+
+  assert.equal(result.questId, 110);
+  assert.deepEqual(calls, [
+    ['travel', '3', { preferDirectScriptedEdge: true }],
+    ['travel', 'D701', { preferredTransferSource: { x: 564, y: 287 } }],
+    ['navigate', { x: 171, y: 132 }, 1],
+    ['travel', '3', undefined],
+  ]);
+});
+
 test('bankrupt newcomer hunts and harvests passive Deer through normal protocol commands', async () => {
   const owner = {
     sequence: 0,

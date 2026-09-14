@@ -3,6 +3,7 @@ import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { clearTravelBlockingMonster, harvestDirection } from './protocol-combat.mjs';
 import { delay } from './protocol-client.mjs';
 import { distance, selfPlayer } from './protocol-play.mjs';
+import { travelToQuestNpc } from './protocol-quest-travel.mjs';
 
 const VILLAGE_FUNDING_ANCHOR = Object.freeze({ x: 288, y: 608 });
 const VILLAGE_FUNDING_RADIUS = 120;
@@ -77,7 +78,7 @@ export async function finishReadySupplyFundingQuest(owner, {
     gold: Number(owner.snapshot.gold),
     mapFileName: String(owner.snapshot.mapFileName),
   };
-  await travel(quest.finishNpc.mapFileName);
+  await travelToQuestNpc(owner, quest, 'finish', { travel, navigate });
   const turnInBefore = {
     gold: Number(owner.snapshot.gold),
     mapFileName: String(owner.snapshot.mapFileName),
