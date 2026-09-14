@@ -92,6 +92,17 @@ function liveDynamicObstacles(snapshot) {
   );
 }
 
+const SABUK_MAP = '3';
+const SABUK_SECRET_GATE = 'D701';
+const SABUK_INNER_ENTRANCE = Object.freeze({ x: 661, y: 277 });
+const SABUK_OUTER_EXIT = Object.freeze({ x: 27, y: 23 });
+
+function isInsideSabukMerchantQuarter(snapshot) {
+  if (String(snapshot?.mapFileName ?? '') !== SABUK_MAP) return false;
+  const actor = player(snapshot);
+  return actor != null && Number(actor.x) >= 640 && Number(actor.y) <= 330;
+}
+
 function nearestDirectScriptedEdge(graph, current, target, snapshot) {
   const origin = player(snapshot);
   const distance = edge => origin
@@ -534,6 +545,29 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
         : resolveBlockingMonster;
     let current = mapName(client.snapshot?.mapFileName);
     if (current === target) return [];
+
+    // Sabuk's merchant quarter is enclosed by invulnerable ArcherGuards. Any
+    // generic objective or supply trip that leaves it must cross D701 back to
+    // the west side before following the normal topology route.
+    if (options._skipSabukSafeDeparture !== true &&
+        isInsideSabukMerchantQuarter(client.snapshot) &&
+        target !== SABUK_MAP && target !== SABUK_SECRET_GATE) {
+      const inner = await travelToMap(SABUK_SECRET_GATE, {
+        ...options,
+        _skipSabukSafeDeparture: true,
+        preferredTransferSource: SABUK_INNER_ENTRANCE,
+      });
+      const outer = await travelToMap(SABUK_MAP, {
+        ...options,
+        _skipSabukSafeDeparture: true,
+        preferredTransferSource: SABUK_OUTER_EXIT,
+      });
+      const onward = await travelToMap(target, {
+        ...options,
+        _skipSabukSafeDeparture: true,
+      });
+      return [...inner, ...outer, ...onward];
+    }
 
     const graph = await travelGraphPromise;
     // Some quest endpoints have a physically shorter topology route that is

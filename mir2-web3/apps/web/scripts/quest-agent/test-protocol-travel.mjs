@@ -327,6 +327,46 @@ test('a caller can prefer the nearest direct Crystal transporter over a shorter 
   assert.equal(client.snapshot.gold, 3000);
 });
 
+test('generic travel leaves the Sabuk merchant quarter through D701 before continuing', async () => {
+  const insideGate = {
+    key: 'sabuk-inner-gate', mapFileName: '3', toMapFileName: 'D701',
+    bounds: { minX: 661, maxX: 661, minY: 277, maxY: 277 },
+  };
+  const outerExit = {
+    key: 'sabuk-outer-exit', mapFileName: 'D701', toMapFileName: '3',
+    bounds: { minX: 27, maxX: 27, minY: 23, maxY: 23 },
+  };
+  const serpentExit = {
+    key: 'mongchon-serpent-exit', mapFileName: '3', toMapFileName: '2',
+    bounds: { minX: 272, maxX: 272, minY: 751, maxY: 751 },
+  };
+  const snapshot = (mapFileName, position, mapTransfers) => ({
+    mapFileName, mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer(position)], mapTransfers,
+  });
+  const client = new FakeClient(snapshot('3', { x: 670, y: 329 }, [insideGate, serpentExit]));
+  const calls = [];
+  const travel = createMapTraveler(client, async (target, distance, _stopWhen, options) => {
+    calls.push([target, distance, options]);
+    if (options.liveTransferKey === insideGate.key) {
+      client.receive({ type: 'worldSnapshot', payload: snapshot('D701', { x: 169, y: 136 }, [outerExit]) });
+    } else if (options.liveTransferKey === outerExit.key) {
+      client.receive({ type: 'worldSnapshot', payload: snapshot('3', { x: 563, y: 286 }, [serpentExit]) });
+    } else if (options.liveTransferKey === serpentExit.key) {
+      client.receive({ type: 'worldSnapshot', payload: snapshot('2', { x: 295, y: 59 }, []) });
+    }
+  });
+
+  const traversed = await travel('2');
+
+  assert.deepEqual(traversed.map(hop => hop.transferKey), [
+    insideGate.key, outerExit.key, serpentExit.key,
+  ]);
+  assert.deepEqual(calls.map(call => call[2].liveTransferKey), [
+    insideGate.key, outerExit.key, serpentExit.key,
+  ]);
+});
+
 test('a proven threat can interrupt ordinary transfer travel before the client enters the portal', async () => {
   const client = new FakeClient(walkingSnapshot(ordinaryEdge));
   let navigationCalls = 0;
