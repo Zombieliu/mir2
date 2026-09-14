@@ -1481,7 +1481,11 @@ pub fn dispatch_ui_action(
 // ---------------------------------------------------------------------------
 
 pub const OVERLAY_HUD_Z: i32 = 950;
-pub const OVERLAY_MINIMAP_Z: i32 = 905;
+// The map image occupies only the transparent 120x108 opening in the HUD
+// frame. Keep that content one layer above the frame so the retained night
+// lighting composite cannot clear it while the frame/title/footer remain
+// untouched. Dialogs and chat still sort above both layers.
+pub const OVERLAY_MINIMAP_Z: i32 = OVERLAY_HUD_Z + 1;
 pub const OVERLAY_QUEST_Z: i32 = 900;
 pub const OVERLAY_CHAT_Z: i32 = 975;
 pub const OVERLAY_NPC_DIALOG_Z: i32 = 980;
@@ -1503,8 +1507,10 @@ const CRYSTAL_DELETE_CURSOR_SIZE: (f32, f32) = (16.0, 15.0);
 
 /// Verify HUD < Chat < NPC < Death < Menu < Shell ordering.
 pub fn is_overlay_z_order_correct() -> bool {
-    // Note: quest/minimap are below HUD; main ordering under test is HUD/chat/dialog/death/menu/shell.
-    OVERLAY_HUD_Z < OVERLAY_CHAT_Z
+    // The quest tracker remains below HUD. The minimap content is clipped to
+    // the frame opening and sits immediately above the HUD skin.
+    OVERLAY_HUD_Z < OVERLAY_MINIMAP_Z
+        && OVERLAY_MINIMAP_Z < OVERLAY_CHAT_Z
         && OVERLAY_CHAT_Z < OVERLAY_NPC_DIALOG_Z
         && OVERLAY_NPC_DIALOG_Z < OVERLAY_DEATH_Z
         && OVERLAY_DEATH_Z < OVERLAY_MENU_Z

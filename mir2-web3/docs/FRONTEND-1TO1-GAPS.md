@@ -1,5 +1,25 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-14 Windows-native R15 minimap/attack-facing repair: the Bichon
+> minimap source and the `(252,520)` crop were both non-black, locating the
+> reported dark-scene failure in UI composition rather than asset export or
+> coordinate mapping. The 120x108 minimap content is now rendered immediately
+> above the HUD skin and below chat/dialog layers, so the HUD's transparent map
+> opening remains readable while the retained darkness/light pass is active.
+> Four focused native-UI minimap tests and the 87-test gameplay-bridge suite
+> pass; the optimized Release build is packaged as
+> `mir2-platform-windows-facing-minimap-r15.exe` (SHA-256
+> `2964731EDE4C06698694A02BCDD3DEB5EF7695F31AEA0BCA477218A54348EC07`).
+> A 1024x768 GPU capture at Bichon `(285,585)` with darkness active
+> (`setting=1`, `mapDarkLight=0`) shows the terrain and entity markers inside
+> the minimap; image SHA-256 is
+> `7fe91c637c2edf3d19ae5cda8b41f006e56333181bbfcb2e26687ec3838e4383`.
+> The same running build acquired the adjacent Deer target and faced the actor
+> toward it without moving the authoritative camera centre. This closes these
+> two reported rendering leaves; package-wide Crystal parity and final human
+> acceptance remain open. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`.
+
 > 2026-09-10 native Keyboard menu: Crystal Title119 editor is connected to
 > actual key capture, strict/relaxed modifiers, Delete unbind, full reset,
 > grouped scrolling, movable window, and application-scoped atomic JSON save/load.

@@ -1341,6 +1341,19 @@ impl NativeGameplayAdapter {
         let Some(object_id) = packet_object_id(payload) else {
             return false;
         };
+        // The owner transform is deliberately applied after cached object
+        // overlays so an old action location cannot pull the camera/player
+        // back after movement. Its direction must still advance with the
+        // authoritative action packet, otherwise that final overlay replaces
+        // a correct melee/cast facing with the direction of the previous walk.
+        if self.latest_player_object_id == Some(object_id) {
+            if let (Some(direction), Some(transform)) = (
+                body.get("direction").and_then(Value::as_str),
+                self.authoritative_player_transform.as_mut(),
+            ) {
+                transform.direction = Some(direction.to_owned());
+            }
+        }
         let hint = self.next_animation_hint(action);
         let overlay = self.zone_entities.entry(object_id).or_default();
         overlay.insert("objectId".to_owned(), Value::from(object_id));
@@ -5259,6 +5272,44 @@ mod tests {
             assert_eq!(payload["sceneView"]["center"]["x"], json!(x));
             assert_eq!(payload["sceneView"]["center"]["y"], json!(y));
         }
+    }
+
+    #[test]
+    fn self_attack_uses_action_direction_without_replaying_action_location() {
+        let mut adapter = NativeGameplayAdapter::default();
+        let mut base = gameplay_payload();
+        let object_id = base["entities"][0]["objectId"].clone();
+        base["playerObjectId"] = object_id.clone();
+        adapter.observe_world_snapshot(&base);
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "UserLocation".to_owned(),
+            payload: json!({"x":286,"y":622,"direction":"Right"}),
+        });
+
+        adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectAttack".to_owned(),
+            // The action can carry a retained launch location. The latest
+            // owner position remains authoritative, while its facing must
+            // follow this accepted attack.
+            payload: json!({
+                "objectId":object_id,
+                "location":{"x":285,"y":622},
+                "direction":"Down",
+                "type":0
+            }),
+        });
+
+        let mut rendered = base;
+        adapter.apply_authoritative_overlay(&mut rendered);
+        assert_eq!(rendered["entities"][0]["x"], json!(286));
+        assert_eq!(rendered["entities"][0]["y"], json!(622));
+        assert_eq!(rendered["sceneView"]["center"]["x"], json!(286));
+        assert_eq!(rendered["sceneView"]["center"]["y"], json!(622));
+        assert_eq!(rendered["entities"][0]["direction"], json!("Down"));
+        assert_eq!(
+            rendered["entities"][0]["_nativeAnimationAction"],
+            json!("attack1")
+        );
     }
 
     #[test]

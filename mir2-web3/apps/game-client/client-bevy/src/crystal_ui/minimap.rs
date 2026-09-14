@@ -8,7 +8,7 @@
 use bevy::prelude::*;
 use bevy::ui::{widget::NodeImageMode, Display, Node, PositionType, Val};
 
-use crate::crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState};
+use crate::crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState, OVERLAY_MINIMAP_Z};
 use crate::entities::{EntityKind, EntityModel, EntityModelSet};
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
@@ -113,7 +113,7 @@ fn spawn_crystal_minimap(mut commands: Commands) {
             display: Display::None,
             ..default()
         },
-        GlobalZIndex(905),
+        GlobalZIndex(OVERLAY_MINIMAP_Z),
     ));
 }
 
@@ -264,5 +264,13 @@ mod tests {
         );
         assert_eq!(marker_position(profile, crop, 0, 0), None);
         assert_eq!(marker_color(EntityKind::SelfPlayer), Color::WHITE);
+    }
+
+    #[test]
+    fn minimap_content_stays_above_the_hud_skin_during_night_lighting() {
+        use crate::crystal_ui::overlays::{OVERLAY_CHAT_Z, OVERLAY_HUD_Z};
+
+        assert_eq!(OVERLAY_MINIMAP_Z, OVERLAY_HUD_Z + 1);
+        assert!(OVERLAY_MINIMAP_Z < OVERLAY_CHAT_Z);
     }
 }
