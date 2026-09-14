@@ -53,8 +53,10 @@ export async function travelToQuestNpc(client, quest, phase, { travel, navigate 
     await travel(SABUK_MAP, { preferDirectScriptedEdge: true });
   }
   await travel(SABUK_SECRET_GATE, { preferredTransferSource: SABUK_SAFE_OUTER_ENTRANCE });
-  await navigate(SABUK_INNER_EXIT, 1);
-  await travel(SABUK_MAP);
+  // Let the map traveler own the whole inner crossing as well. D701 contains
+  // ordinary Zombies that can seal its narrow corridor; the traveler can
+  // clear a proven blocker and retry, whereas a bare navigation call cannot.
+  await travel(SABUK_MAP, { preferredTransferSource: SABUK_INNER_EXIT });
   if (!isInsideSabukMerchantGate(client.snapshot)) {
     throw new Error(
       `q${Number(quest?.questId)} ${phase} secret-gate route did not enter the Sabuk merchant quarter`,

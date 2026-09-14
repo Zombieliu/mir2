@@ -30,10 +30,7 @@ test('q110 finish uses the D701 walking-transfer detour into the Sabuk merchant 
       options?.preferDirectScriptedEdge ? { x: 361, y: 342 } : { x: 660, y: 276 },
     );
   };
-  const navigate = async (target, desiredDistance) => {
-    calls.push(['navigate', target, desiredDistance]);
-    Object.assign(client.snapshot.entities[0], target);
-  };
+  const navigate = async () => assert.fail('the map traveler owns both portal approaches');
 
   const result = await travelToQuestNpc(client, q110, 'finish', { travel, navigate });
 
@@ -41,8 +38,7 @@ test('q110 finish uses the D701 walking-transfer detour into the Sabuk merchant 
   assert.deepEqual(calls, [
     ['travel', '3', { preferDirectScriptedEdge: true }],
     ['travel', 'D701', { preferredTransferSource: SABUK_QUEST_TRAVEL.safeOuterEntrance }],
-    ['navigate', SABUK_QUEST_TRAVEL.innerExit, 1],
-    ['travel', '3', undefined],
+    ['travel', '3', { preferredTransferSource: SABUK_QUEST_TRAVEL.innerExit }],
   ]);
 });
 
@@ -91,6 +87,6 @@ test('Sabuk detour fails closed when the authoritative landing is outside the wa
           ? { x: 361, y: 342 }
           : { x: 516, y: 778 });
     },
-    navigate: async target => Object.assign(client.snapshot.entities[0], target),
+    navigate: async () => {},
   }), /did not enter the Sabuk merchant quarter/);
 });

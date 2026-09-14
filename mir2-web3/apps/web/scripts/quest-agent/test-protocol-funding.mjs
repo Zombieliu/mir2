@@ -152,8 +152,7 @@ test('ready q110 funding turn-in keeps the guarded Sabuk endpoint on its quest-s
   assert.deepEqual(calls, [
     ['travel', '3', { preferDirectScriptedEdge: true }],
     ['travel', 'D701', { preferredTransferSource: { x: 564, y: 287 } }],
-    ['navigate', { x: 171, y: 132 }, 1],
-    ['travel', '3', undefined],
+    ['travel', '3', { preferredTransferSource: { x: 171, y: 132 } }],
   ]);
 });
 
