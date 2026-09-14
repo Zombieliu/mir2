@@ -17,6 +17,7 @@ pub mod notice;
 pub mod overlays;
 pub mod panel_layouts;
 pub mod preview_data;
+pub mod quest_targets;
 pub mod select;
 pub mod spec;
 pub mod typography;

@@ -10,6 +10,7 @@ use bevy::text::LineBreak;
 use mir2_bevy_runtime::entity_animation::AnimationAction;
 use mir2_bevy_runtime::PresentationPoseBuffer;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
+use mir2_client_bevy::crystal_ui::quest_targets::tracker_targets_monster;
 use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{QuestStatus, QuestTracker};
@@ -855,7 +856,10 @@ fn overlay_entries_with_motion_at_center(
                         .as_deref()
                         .is_some_and(|object_id| hovered_object_id == Some(object_id))
                 };
-                let show_name = visibility.name_view || hovered;
+                let quest_target = kind == "monster"
+                    && !dead
+                    && quest_tracker.is_some_and(|tracker| tracker_targets_monster(tracker, name));
+                let show_name = visibility.name_view || hovered || quest_target;
                 let guild_name = matches!(kind, "selfPlayer" | "player")
                     .then(|| entity.get("guildName").and_then(Value::as_str))
                     .flatten()
@@ -887,17 +891,21 @@ fn overlay_entries_with_motion_at_center(
                 } else {
                     0.0
                 };
-                let color = entity
-                    .get("nameColourArgb")
-                    .and_then(value_i64)
-                    .and_then(argb_color)
-                    .unwrap_or_else(|| {
-                        if kind == "npc" {
-                            Color::srgb_u8(0x00, 0xff, 0x00)
-                        } else {
-                            Color::WHITE
-                        }
-                    });
+                let color = if quest_target {
+                    Color::srgb_u8(0xff, 0xe6, 0x58)
+                } else {
+                    entity
+                        .get("nameColourArgb")
+                        .and_then(value_i64)
+                        .and_then(argb_color)
+                        .unwrap_or_else(|| {
+                            if kind == "npc" {
+                                Color::srgb_u8(0x00, 0xff, 0x00)
+                            } else {
+                                Color::WHITE
+                            }
+                        })
+                };
                 let left = origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x;
                 let top = origin_y + (y - center_y) as f32 * CELL_HEIGHT + motion_y;
                 let width = if matches!(kind, "npc" | "monster") {
@@ -906,6 +914,23 @@ fn overlay_entries_with_motion_at_center(
                     50.0
                 };
                 let mut entity_entries = Vec::with_capacity(lines.len().saturating_add(2));
+                if quest_target {
+                    // Keep the marker static. It remains readable with NameView
+                    // disabled and avoids the rapid flashing reported for the
+                    // animated NPC question/exclamation assets.
+                    entity_entries.push(OverlayEntry {
+                        name: Some("◆".to_owned()),
+                        quest_marker: None,
+                        marker_object_id: None,
+                        color: Color::srgb_u8(0xff, 0xe6, 0x58),
+                        left,
+                        top: top + CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX - 13.0,
+                        width,
+                        font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                        self_health_ratio: None,
+                        follows_camera: true,
+                    });
+                }
                 if kind == "npc" {
                     if let Some(marker) = quest_marker_for_entity(entity, quest_tracker) {
                         let (marker_left, marker_top) =
@@ -1882,6 +1907,57 @@ mod tests {
             Some(QuestMarkerKind::QuestionGreen),
             "authoritative questIcon must not depend on a client tracker"
         );
+    }
+
+    #[test]
+    fn active_quest_monster_keeps_a_stable_marker_when_names_are_hidden() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "entities": [
+                {"objectId": 10, "kind": "monster", "name": "Deer", "x": 11, "y": 20, "dead": false},
+                {"objectId": 11, "kind": "monster", "name": "Scarecrow", "x": 12, "y": 20, "dead": false},
+                {"objectId": 12, "kind": "monster", "name": "Deer", "x": 13, "y": 20, "dead": true}
+            ]
+        });
+        let tracker = QuestTracker {
+            active_quests: vec![mir2_client_bevy::quest_model::Quest {
+                quest_index: 5,
+                accept_npc_index: Some(5),
+                finish_npc_index: Some(5),
+                title: "The Smith's Test".to_owned(),
+                npc_name: Some("Smith".to_owned()),
+                group: Some("BichonProvince".to_owned()),
+                min_level_needed: 1,
+                detail: Default::default(),
+                status: QuestStatus::InProgress,
+                objectives: vec![mir2_client_bevy::quest_model::QuestObjective {
+                    objective_id: "5:0".to_owned(),
+                    text: "Kill Deer".to_owned(),
+                    current: 0,
+                    target: 3,
+                }],
+                rewards: vec![],
+                unknown_text: None,
+            }],
+        };
+
+        let entries = overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: false,
+                drop_view: false,
+            },
+            None,
+            false,
+            Some(&tracker),
+        );
+
+        assert_eq!(entry_names(&entries), ["◆", "Deer"]);
+        assert!(quest_markers(&entries).is_empty());
+        assert!(entries
+            .iter()
+            .filter(|entry| entry.name.is_some())
+            .all(|entry| entry.color == Color::srgb_u8(0xff, 0xe6, 0x58)));
     }
 
     #[test]
