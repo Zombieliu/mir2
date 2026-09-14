@@ -28,10 +28,31 @@ export function verifyMilestoneOffer(client, questId, expected, gold, boardId) {
     : client.questDefinitions?.get?.(questId);
   const event = cached ? null : [...client.events].reverse().find(e => e.direction === 'received' && e.packet === 'NewQuestInfo' && Number(e.payload?.info?.index) === questId);
   const info = cached ?? event?.payload?.info;
-  if (!info || info.npc_index !== boardId || info.finish_npc_index !== boardId || info.reward_gold !== gold) throw new Error(`q${questId} milestone definition is absent or mismatched`);
   const normalized = rows => rows.map(row => `${row.itemIndex}:${row.count}`).sort();
-  const offered = (info.rewards_fixed_item ?? []).filter(row => row.count > 0).map(row => ({ itemIndex: row.item.index, count: row.count }));
-  if ((info.rewards_select_item ?? []).some(row => row.count > 0) || JSON.stringify(normalized(offered)) !== JSON.stringify(normalized(expected))) throw new Error(`q${questId} server milestone rewards differ from the class progression profile`);
+  if (info) {
+    if (Number(info.npc_index) !== Number(boardId) || Number(info.finish_npc_index) !== Number(boardId) || Number(info.reward_gold) !== Number(gold)) throw new Error(`q${questId} milestone definition is absent or mismatched`);
+    const offered = (info.rewards_fixed_item ?? []).filter(row => row.count > 0).map(row => ({ itemIndex: row.item.index, count: row.count }));
+    if ((info.rewards_select_item ?? []).some(row => row.count > 0) || JSON.stringify(normalized(offered)) !== JSON.stringify(normalized(expected))) throw new Error(`q${questId} server milestone rewards differ from the class progression profile`);
+    return;
+  }
+
+  // A milestone unlocked by the quest that just raised the player can appear
+  // before this web session receives its static NewQuestInfo packet. The world
+  // snapshot reward preview is generated from that same effective server
+  // definition. Accept it only while the authoritative Board dialog exposes
+  // the quest, and only when every promised reward matches exactly.
+  const quest = client.snapshot?.questLog?.find(row => Number(row?.questId) === questId);
+  const dialog = client.snapshot?.activeNpcDialog;
+  const authorized = Number(dialog?.npcObjectId) === Number(boardId) &&
+    (dialog?.links ?? []).some(link => {
+      const target = String(link?.target ?? '').trim().toLowerCase();
+      return target === `@quest:accept:${questId}` || target === `@quest:finish:${questId}`;
+    });
+  const offeredPreview = String(quest?.rewardPreview ?? '').split(',').map(value => value.trim()).filter(Boolean).sort();
+  const expectedPreview = [`Gold ${gold}`, ...expected.map(row => `${row.itemName} x${row.count}`)].sort();
+  if (!quest || !authorized || JSON.stringify(offeredPreview) !== JSON.stringify(expectedPreview)) {
+    throw new Error(`q${questId} milestone definition is absent or mismatched`);
+  }
 }
 
 /** Claim only reached, one-time growth rewards through the ordinary Board UI protocol. */

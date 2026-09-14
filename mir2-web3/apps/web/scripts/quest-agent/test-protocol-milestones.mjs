@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { claimAvailableMilestones, milestoneRewardsFor } from './protocol-milestones.mjs';
+import { claimAvailableMilestones, milestoneRewardsFor, verifyMilestoneOffer } from './protocol-milestones.mjs';
 
 const board = { objectId: 24, name: 'BichonWall_Board', mapFileName: '0', position: { x: 334, y: 259 }, scriptKey: 'BichonProvince/BichonWall/Board' };
 const items = [{ item_index: 41, name: 'Staff' }, { item_index: 42, name: 'SpellBook' }, { item_index: 43, name: 'Robe(M)' }, { item_index: 44, name: 'Robe(F)' }];
@@ -72,6 +72,30 @@ test('milestone verification uses the session definition cache after event histo
 
   assert.equal(result[0].questId, 2100015);
   assert.equal(client.events.some(event => event.packet === 'NewQuestInfo'), false);
+});
+
+test('newly unlocked milestone verifies the exact authoritative Board preview before its definition packet arrives', () => {
+  const { client } = fixture(20);
+  client.events = [];
+  client.questDefinitions.clear();
+  client.snapshot.questLog = [{
+    questId: 2100020,
+    stage: 'available',
+    rewardPreview: 'Gold 10000, SpearWithHook x1',
+  }];
+  client.snapshot.activeNpcDialog = {
+    npcObjectId: 24,
+    links: [{ text: 'Accept Level 20 Growth Reward', target: '@quest:accept:2100020' }],
+  };
+
+  const expected = [{ itemIndex: 1217, itemName: 'SpearWithHook', count: 1 }];
+  assert.doesNotThrow(() => verifyMilestoneOffer(client, 2100020, expected, 10000, 24));
+
+  client.snapshot.questLog[0].rewardPreview = 'Gold 10000';
+  assert.throws(
+    () => verifyMilestoneOffer(client, 2100020, expected, 10000, 24),
+    /definition is absent or mismatched/,
+  );
 });
 
 test('milestone claim follows the real Board dialog links through interactQuest', async () => {
