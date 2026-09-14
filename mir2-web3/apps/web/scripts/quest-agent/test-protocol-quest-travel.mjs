@@ -93,6 +93,32 @@ test('a resumed q110 inside D701 continues toward the inner exit without portal 
   ]]);
 });
 
+test('an outside quest endpoint leaves the Sabuk quarter through D701 instead of crossing guards', async () => {
+  const client = clientAt('3', 670, 329);
+  const calls = [];
+  const result = await travelToQuestNpc(client, {
+    questId: 89,
+    finishNpc: { mapFileName: '1002' },
+  }, 'finish', {
+    travel: async (mapFileName, options) => {
+      calls.push(['travel', mapFileName, options]);
+      client.snapshot.mapFileName = mapFileName;
+      Object.assign(client.snapshot.entities[0], mapFileName === 'D701'
+        ? { x: 169, y: 136 }
+        : mapFileName === '3'
+          ? { x: 563, y: 286 }
+          : { x: 11, y: 8 });
+    },
+    navigate: async () => assert.fail('the map traveler owns the safe exit crossing'),
+  });
+  assert.equal(result.status, 'sabukSecretGateExit');
+  assert.deepEqual(calls, [
+    ['travel', 'D701', { preferredTransferSource: SABUK_QUEST_TRAVEL.safeInnerEntrance }],
+    ['travel', '3', { preferredTransferSource: SABUK_QUEST_TRAVEL.outerExit }],
+    ['travel', '1002', undefined],
+  ]);
+});
+
 test('Sabuk detour fails closed when the authoritative landing is outside the wall', async () => {
   const client = clientAt('2', 505, 483);
   await assert.rejects(() => travelToQuestNpc(client, q110, 'finish', {

@@ -2,7 +2,9 @@ const SABUK_MERCHANT_QUEST_IDS = new Set([110, 111, 112]);
 const SABUK_MAP = '3';
 const SABUK_SECRET_GATE = 'D701';
 const SABUK_SAFE_OUTER_ENTRANCE = Object.freeze({ x: 564, y: 287 });
+const SABUK_SAFE_INNER_ENTRANCE = Object.freeze({ x: 661, y: 277 });
 const SABUK_INNER_EXIT = Object.freeze({ x: 171, y: 132 });
+const SABUK_OUTER_EXIT = Object.freeze({ x: 27, y: 23 });
 
 function player(snapshot) {
   const objectId = Number(snapshot?.playerObjectId);
@@ -39,8 +41,21 @@ export async function travelToQuestNpc(client, quest, phase, { travel, navigate 
 
   const npc = phase === 'start' ? quest?.startNpc : quest?.finishNpc;
   if (!npc?.mapFileName) return { status: 'noNpc', questId: Number(quest?.questId), phase };
+  const targetMap = String(npc.mapFileName);
+  if (isInsideSabukMerchantGate(client.snapshot) &&
+      targetMap !== SABUK_MAP && targetMap !== SABUK_SECRET_GATE) {
+    await travel(SABUK_SECRET_GATE, { preferredTransferSource: SABUK_SAFE_INNER_ENTRANCE });
+    await travel(SABUK_MAP, { preferredTransferSource: SABUK_OUTER_EXIT });
+    await travel(targetMap);
+    return {
+      status: 'sabukSecretGateExit',
+      questId: Number(quest?.questId),
+      phase,
+      via: SABUK_SECRET_GATE,
+    };
+  }
   if (!needsSabukMerchantRoute(quest, phase) || isInsideSabukMerchantGate(client.snapshot)) {
-    await travel(String(npc.mapFileName));
+    await travel(targetMap);
     return { status: 'direct', questId: Number(quest?.questId), phase };
   }
 
@@ -79,5 +94,7 @@ export const SABUK_QUEST_TRAVEL = Object.freeze({
   mapFileName: SABUK_MAP,
   secretGateMapFileName: SABUK_SECRET_GATE,
   safeOuterEntrance: SABUK_SAFE_OUTER_ENTRANCE,
+  safeInnerEntrance: SABUK_SAFE_INNER_ENTRANCE,
   innerExit: SABUK_INNER_EXIT,
+  outerExit: SABUK_OUTER_EXIT,
 });
