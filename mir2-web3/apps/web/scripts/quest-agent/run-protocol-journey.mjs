@@ -45,6 +45,7 @@ import {
   journeyResumeDisposition,
   questRetreatBiasPosition,
   questRetreatProfile,
+  questSpawnSearchHostileClearanceFallback,
   questCombatMpUseThresholdForQuest,
   questEmergencyEscapeHpRatio,
   questPostRetreatRecoveryRatio,
@@ -738,7 +739,8 @@ try {
             // points even while the player remains near the entrance. Q54 may
             // therefore make a zero-clearance path attempt; the first proven
             // hit still interrupts navigation and enters bounded combat.
-            spawnSearchHostileClearanceFallback: id === 30 ? 2 : (id === 54 ? 0 : 1),
+            spawnSearchHostileClearanceFallback:
+              questSpawnSearchHostileClearanceFallback(id),
             combatHostileClearance: id === 30 ? 3 : ([33, 36].includes(id) ? 2 : 1),
             // R57 resumed q60 inside D2041's entrance pocket with the only
             // live SpiderFrog fourteen cells away. One passive KekTal's

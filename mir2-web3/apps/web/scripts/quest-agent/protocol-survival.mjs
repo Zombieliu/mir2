@@ -217,6 +217,19 @@ export function questRetreatProfile(questId, className = '') {
   };
 }
 
+/** Minimum passive-monster clearance for the second spawn-search path. */
+export function questSpawnSearchHostileClearanceFallback(questId) {
+  const id = Number(questId);
+  if (id === 30) return 2;
+  // R95 enumerated all 677 D022 FlamingWooma waypoints from the entrance and
+  // rejected every one because a one-cell passive-monster halo disconnected
+  // the cave. Target density is checked separately and a proven hit interrupts
+  // navigation, so a zero-clearance fallback permits the ordinary corridor
+  // without weakening combat survival limits.
+  if ([54, 98, 99].includes(id)) return 0;
+  return 1;
+}
+
 export function questRetreatBiasPosition(questId, snapshot, className = '') {
   const id = Number(questId);
   const mapFileName = String(snapshot?.mapFileName ?? '');

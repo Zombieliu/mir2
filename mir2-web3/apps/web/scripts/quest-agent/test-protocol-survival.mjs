@@ -31,6 +31,7 @@ import {
   minimumJourneyMpStockForQuest,
   questRetreatBiasPosition,
   questRetreatProfile,
+  questSpawnSearchHostileClearanceFallback,
   questNeedsPostRetreatRecovery,
   requiresTaoistAmuletRestock,
   shouldPreferObjectiveMapOverCurrent,
@@ -1118,6 +1119,11 @@ test('q99 keeps the same Wooma expedition recovery and supplies as q98', () => {
   assert.equal(evasiveRecoveryTimeoutMsForQuest(99), 90_000);
   assert.equal(evasiveRecoveryDangerDistanceForQuest(99), 8);
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(99, 'Wizard'), { hp: 64, mp: 0 });
+  assert.equal(questSpawnSearchHostileClearanceFallback(98), 0);
+  assert.equal(questSpawnSearchHostileClearanceFallback(99), 0);
+  assert.equal(questSpawnSearchHostileClearanceFallback(54), 0);
+  assert.equal(questSpawnSearchHostileClearanceFallback(30), 2);
+  assert.equal(questSpawnSearchHostileClearanceFallback(42), 1);
 });
 
 test('q113 deep Bug Cave hunt uses expedition recovery and ranged density limits', () => {
