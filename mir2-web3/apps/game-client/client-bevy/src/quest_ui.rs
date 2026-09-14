@@ -22,7 +22,9 @@ use crate::crystal_ui::item_tooltip::crystal_item_tooltip_document_from_source;
 use crate::crystal_ui::overlays::{
     dispatch_ui_action, NativePlayerUiSet, NativePlayerUiState, UiEffectQueue,
 };
+use crate::crystal_ui::quest_targets::nearest_quest_monster;
 use crate::crystal_ui::widget::CrystalItemHint;
+use crate::entities::{EntityKind, EntityModelSet};
 use crate::inventory::{InventoryModel, ItemModel};
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use crate::pending_operations::{
@@ -831,6 +833,9 @@ enum QuestUiButton {
     AttackTarget {
         object_id: u32,
     },
+    AttackQuestTarget {
+        object_id: u32,
+    },
     PickUpObject {
         object_id: u32,
     },
@@ -1098,6 +1103,7 @@ pub struct Mir2QuestUiPlugin;
 impl Plugin for Mir2QuestUiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<QuestTracker>()
+            .init_resource::<EntityModelSet>()
             .init_resource::<NpcDialogModel>()
             .init_resource::<NearbyNpcModel>()
             .init_resource::<CombatTargetModel>()
@@ -1928,6 +1934,13 @@ fn process_quest_ui_input(
                     quest_state.set_feedback("Target is no longer attackable", true);
                 }
             }
+            QuestUiButton::AttackQuestTarget { object_id } => {
+                if queue.push_intent(QuestUiIntent::AttackTarget { object_id }) {
+                    quest_state.set_feedback("Finding quest target", false);
+                } else {
+                    quest_state.set_feedback("Connection busy; try again", true);
+                }
+            }
             QuestUiButton::PickUpObject { object_id } => {
                 if let Some(label) = pickup_label(pickups.as_deref(), object_id) {
                     if queue.push_intent(QuestUiIntent::PickUpObject { object_id }) {
@@ -2062,6 +2075,7 @@ fn render_quest_ui(
     shell: Option<Res<NativeShellModel>>,
     asset_server: Option<Res<AssetServer>>,
     tracker: Res<QuestTracker>,
+    entities: Res<EntityModelSet>,
     dialog: Res<NpcDialogModel>,
     nearby: Res<NearbyNpcModel>,
     target: Res<CombatTargetModel>,
@@ -2135,6 +2149,7 @@ fn render_quest_ui(
 
     // Avoid churn: only re-render when relevant state changed or quest log toggled.
     if !tracker.is_changed()
+        && !entities.is_changed()
         && !dialog.is_changed()
         && !nearby.is_changed()
         && !target.is_changed()
@@ -2195,7 +2210,7 @@ fn render_quest_ui(
 
         commands.entity(panel_entity).with_children(|panel| {
             if is_tracker.is_some() {
-                render_quest_tracker_panel(panel, &tracker, &quest_state);
+                render_quest_tracker_panel(panel, &tracker, &quest_state, &entities);
             } else if is_dialog.is_some() {
                 render_dialog_panel(
                     panel,
@@ -2362,12 +2377,18 @@ fn render_quest_tracker_panel(
     parent: &mut ChildSpawnerCommands,
     tracker: &QuestTracker,
     state: &QuestUiState,
+    entities: &EntityModelSet,
 ) {
     let quests = visible_tracker_quests(tracker, state);
     if quests.is_empty() {
         return;
     }
 
+    let player_position = entities
+        .entities
+        .iter()
+        .find(|entity| entity.kind == EntityKind::SelfPlayer)
+        .map(|entity| (entity.x, entity.y));
     let mut y = 0.0;
     for quest in quests {
         quest_log_text_at(
@@ -2387,6 +2408,33 @@ fn render_quest_tracker_panel(
                 8.0,
                 Color::WHITE,
                 Justify::Left,
+            );
+        }
+        if let Some(target) = player_position.and_then(|(center_x, center_y)| {
+            nearest_quest_monster(
+                tracker,
+                Some(quest.quest_index),
+                entities,
+                center_x,
+                center_y,
+            )
+        }) {
+            let object_id = target
+                .entity
+                .object_id
+                .parse::<u32>()
+                .expect("nearest quest target ids are validated");
+            y += 20.0;
+            quest_log_text_button_at(
+                parent,
+                QuestLogRect::new(25.0, 20.0 + y, 205.0, 18.0),
+                &format!(
+                    "▶ {} · {} tiles",
+                    truncate_chars(&target.entity.name, 21),
+                    target.distance
+                ),
+                QuestUiButton::AttackQuestTarget { object_id },
+                true,
             );
         }
         y += 30.0;
@@ -4759,6 +4807,9 @@ fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
         QuestUiButton::AttackTarget { object_id } => Some(QuestUiIntent::AttackTarget {
             object_id: *object_id,
         }),
+        QuestUiButton::AttackQuestTarget { object_id } => Some(QuestUiIntent::AttackTarget {
+            object_id: *object_id,
+        }),
         QuestUiButton::PickUpObject { object_id } => Some(QuestUiIntent::PickUpObject {
             object_id: *object_id,
         }),
@@ -5117,6 +5168,10 @@ mod tests {
         assert_eq!(
             intent_from_button(&QuestUiButton::ShareQuest { quest_index: 42 }),
             Some(QuestUiIntent::ShareQuest { quest_index: 42 })
+        );
+        assert_eq!(
+            intent_from_button(&QuestUiButton::AttackQuestTarget { object_id: 77 }),
+            Some(QuestUiIntent::AttackTarget { object_id: 77 })
         );
     }
 

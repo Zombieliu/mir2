@@ -36,7 +36,7 @@ use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
 use serde_json::Value;
 
 use crate::gateway::GatewayCommand;
-use crate::input::GatewayCommands;
+use crate::input::{GatewayCommands, WorldPointerMovementState};
 use crate::native_protocol::{NativeOutboundCommand, PacketEvent};
 use mir2_client_bevy::crystal_ui::notice::{NoticeDialogState, NoticePacketUpdate};
 use mir2_client_bevy::crystal_ui::overlays::{
@@ -2092,14 +2092,20 @@ fn trade_item_pending_operation(intent: &NativePlayerUiIntent) -> Option<SocialP
 
 /// Convert presentation intents into exact Gateway commands. The shell state
 /// gate prevents stale button events from crossing login/character screens.
+#[derive(SystemParam)]
+pub struct NativeQuestWorldInput<'w> {
+    entities: Option<Res<'w, EntityModelSet>>,
+    click_state: Option<Res<'w, NativeWorldClickState>>,
+    movement: Option<ResMut<'w, WorldPointerMovementState>>,
+}
+
 pub fn forward_quest_ui_intents(
     shell: Res<NativeShellModel>,
     mut intents: ResMut<QuestUiIntentQueue>,
     player_ui_intents: Option<ResMut<NativePlayerUiIntentQueue>>,
     commands: Res<GatewayCommands>,
     keys: Option<Res<ButtonInput<KeyCode>>>,
-    entities: Option<Res<EntityModelSet>>,
-    click_state: Option<Res<NativeWorldClickState>>,
+    world: NativeQuestWorldInput,
     mut player_ui_state: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     mut game_shop: Option<ResMut<GameShopModel>>,
@@ -2110,6 +2116,11 @@ pub fn forward_quest_ui_intents(
     inventory: Option<Res<InventoryModel>>,
     mut social: Option<ResMut<SocialModel>>,
 ) {
+    let NativeQuestWorldInput {
+        entities,
+        click_state,
+        mut movement,
+    } = world;
     let pending = intents.drain_intents();
     let player_pending = player_ui_intents
         .map(|mut queue| queue.drain_intents())
@@ -2258,6 +2269,9 @@ pub fn forward_quest_ui_intents(
             QuestUiIntent::AttackTarget { object_id } => {
                 if world_actions_blocked {
                     continue;
+                }
+                if let Some(movement) = movement.as_deref_mut() {
+                    movement.pursue_attack_target(object_id);
                 }
                 let alt = keys.as_deref().is_some_and(|keys| {
                     keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight)

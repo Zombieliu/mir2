@@ -154,6 +154,20 @@ pub struct WorldPointerMovementState {
 }
 
 impl WorldPointerMovementState {
+    /// Arm the same target pursuit used by an ordinary unmodified monster
+    /// click. Quest UI buttons call this through the host bridge so they keep
+    /// following a moving monster until it is in attack range.
+    pub(crate) fn pursue_attack_target(&mut self, object_id: u32) {
+        if self.attack_target == Some(object_id) {
+            return;
+        }
+        self.active = None;
+        self.auto_path_destination = None;
+        self.attack_target = Some(object_id);
+        self.next_attack_request_at_ms = 0.0;
+        self.last_plan_block_trace_at_ms = None;
+    }
+
     fn begin(&mut self, mode: WorldPointerMovementMode, at_ms: f64) {
         if self.active != Some(mode) {
             crate::movement_trace::record(serde_json::json!({
@@ -2348,6 +2362,22 @@ mod tests {
     use bevy::prelude::IntoScheduleConfigs;
     use mir2_client_bevy::entities::{EntityKind, EntityModel, EntityModelSet};
     use mir2_client_bevy::read_model::UiReadModel;
+
+    #[test]
+    fn quest_target_action_arms_the_normal_moving_target_pursuit() {
+        let mut state = WorldPointerMovementState {
+            active: Some(WorldPointerMovementMode::Run),
+            auto_path_destination: Some((40, 50)),
+            ..Default::default()
+        };
+
+        state.pursue_attack_target(77);
+
+        assert_eq!(state.attack_target, Some(77));
+        assert_eq!(state.active, None);
+        assert_eq!(state.auto_path_destination, None);
+        assert_eq!(state.next_attack_request_at_ms, 0.0);
+    }
 
     pub(super) fn input_app() -> (
         bevy::prelude::App,
