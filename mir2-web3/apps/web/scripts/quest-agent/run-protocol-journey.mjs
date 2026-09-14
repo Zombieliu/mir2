@@ -34,6 +34,7 @@ import {
   isLivingLostCombatTarget,
   isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
+  journeyEmergencyEscapeRestockTarget,
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
   journeyMpRestockTargetForQuest,
@@ -286,9 +287,12 @@ try {
       const amuletTrigger = taoistAmuletExpedition ? 12 : 0;
       const amuletDepartureTarget = taoistAmuletExpedition ? 32 : 0;
       const emergencyTeleportTarget = expeditionSupplyActive ? 4 : 0;
-      const inVillage = String(owner.snapshot?.mapFileName ?? '') === '0';
-      const shouldReplenishEscapeReserve = emergencyTeleportTarget > 0 &&
-        (inVillage || replenishEscapeReserve);
+      const emergencyTeleportRestockTarget = journeyEmergencyEscapeRestockTarget(
+        owner.snapshot,
+        questId,
+        { force: replenishEscapeReserve, target: emergencyTeleportTarget },
+      );
+      const shouldReplenishEscapeReserve = emergencyTeleportRestockTarget > 0;
       const q42WizardExpedition = Number(questId) === 42 &&
         String(className).trim().toLowerCase() === 'wizard';
       return {
@@ -299,7 +303,7 @@ try {
         // Four scrolls are a departure target, not a field invariant. A
         // successful emergency escape must not make a healthy expedition turn
         // around solely to replace that one scroll.
-        minimumEmergencyTeleportStock: shouldReplenishEscapeReserve ? emergencyTeleportTarget : 0,
+        minimumEmergencyTeleportStock: emergencyTeleportRestockTarget,
         requiredAfterRestockEmergencyTeleportStock: emergencyTeleportTarget,
         forceRestock: warriorWeaponFundingGold(owner.snapshot) > 0 ||
           requiresTaoistAmuletRestock(owner.snapshot, questId, className, amuletTrigger) ||

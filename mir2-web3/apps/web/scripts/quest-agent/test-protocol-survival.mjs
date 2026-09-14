@@ -17,6 +17,7 @@ import {
   mpDrugCount,
   hpRestockTargetForActiveQuests,
   journeyExpeditionDepartureFloorForQuest,
+  journeyEmergencyEscapeRestockTarget,
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
   journeyResumeDisposition,
@@ -214,6 +215,27 @@ test('a resumed expedition preserves field progress while it still has a public 
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(3)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [scroll(4)] }, 54), false);
   assert.equal(requiresExpeditionEscapeRestock({ inventoryItems: [] }, 49), false);
+});
+
+test('a dangerous expedition keeps partial field scrolls but restocks once the reserve is empty', () => {
+  const scroll = quantity => ({
+    name: 'RandomTeleport',
+    quantity,
+    container: 'bag1',
+    tooltipSource: { info: { item_index: 717 } },
+  });
+  const active = quantity => ({
+    mapFileName: 'D022',
+    questLog: [{ questId: 98, stage: 'inProgress' }],
+    inventoryItems: quantity > 0 ? [scroll(quantity)] : [],
+  });
+  assert.equal(journeyEmergencyEscapeRestockTarget(active(3), 98), 0);
+  assert.equal(journeyEmergencyEscapeRestockTarget(active(0), 98), 4);
+  assert.equal(journeyEmergencyEscapeRestockTarget(active(3), 98, { force: true }), 4);
+  assert.equal(journeyEmergencyEscapeRestockTarget({ ...active(3), mapFileName: '0' }, 98), 4);
+  assert.equal(journeyEmergencyEscapeRestockTarget({
+    ...active(0), questLog: [{ questId: 98, stage: 'readyToTurnIn' }],
+  }, 98), 0);
 });
 
 test('completed expedition objectives stop requiring departure supplies before turn-in', () => {

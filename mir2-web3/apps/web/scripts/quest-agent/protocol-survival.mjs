@@ -406,6 +406,18 @@ export function journeyExpeditionSupplyActive(snapshot, questId) {
   return normalizedStage(quest?.stage) === 'inprogress';
 }
 
+/** Keep a partly used field reserve, but leave for town once no escape remains. */
+export function journeyEmergencyEscapeRestockTarget(snapshot, questId, {
+  force = false,
+  target = 4,
+} = {}) {
+  if (!journeyExpeditionSupplyActive(snapshot, questId)) return 0;
+  const required = nonnegativeInteger(target, 'emergency teleport target');
+  return force || String(snapshot?.mapFileName ?? '') === '0' || emergencyTeleportStock(snapshot) === 0
+    ? required
+    : 0;
+}
+
 export function mpDrugCount(snapshot) {
   return itemQuantity(snapshot, item => /^\(MP\)Drug/i.test(String(item?.name ?? item?.key ?? '')));
 }
