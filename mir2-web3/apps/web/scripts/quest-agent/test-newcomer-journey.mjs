@@ -64,6 +64,14 @@ test('authoring reproduces deterministic milestone rewards and updated chapter s
   execFileSync(process.execPath,[fileURLToPath(new URL('./build-newcomer-journey-profile.mjs',import.meta.url)),'--check']);
 });
 
+test('chapter budgets encode the reviewed 5-7 hour first-day cadence',()=>{
+  assert.equal(config.targetPlayMinutes,375);
+  assert.deepEqual(config.chapters.map(chapter=>chapter.targetMinutes),[20,25,60,75,90,105]);
+  assert.equal(config.chapters.slice(0,2).reduce((sum,chapter)=>sum+chapter.targetMinutes,0),45);
+  assert.equal(config.chapters.slice(0,3).reduce((sum,chapter)=>sum+chapter.targetMinutes,0),105);
+  assert.equal(config.chapters.slice(3,5).reduce((sum,chapter)=>sum+chapter.targetMinutes,0),165);
+});
+
 test('all three routes reach every next level gate without repeatables, daily waits or optional harvest',()=>{
   const totals=[];
   for(const className of ['Warrior','Wizard','Taoist']){
@@ -160,8 +168,8 @@ test('caps and guarantees reference real objectives while preserving the baselin
     for(const q of route.quests){
       const override=q.newcomerOverride;if(!override)continue;
       for(const name of override.guaranteedQuestDrops??[])assert.ok(q.objectives.item.some(t=>t.itemName===name),`unrelated guarantee ${q.questId}/${name}`);
-      assert.ok(q.objectives.item.every(t=>t.count>0&&t.count<=2));
-      assert.ok(q.objectives.kill.every(t=>t.count>0&&t.count<=12));
+      assert.ok(q.objectives.item.every(t=>t.count>0&&t.count<=1));
+      assert.ok(q.objectives.kill.every(t=>t.count>0&&t.count<=3));
     }
     const meat=route.quests.find(q=>q.questId===4);
     assert.equal(meat.objectives.item[0].count,1);
@@ -169,6 +177,28 @@ test('caps and guarantees reference real objectives while preserving the baselin
     assert.equal(source.quests.find(q=>q.questId===4).objectives.item[0].count,5);
     assert.equal(source.quests.find(q=>q.questId===61).eligibility.requiredQuestId,58);
     assert.equal(route.quests.find(q=>q.questId===61).eligibility.requiredQuestId,54);
+  }
+});
+
+test('the full route has a bounded and class-neutral action budget',()=>{
+  const expectedKills=[15,3,18,18,24,36];
+  const expectedItems=[1,6,0,2,1,1];
+  for(const className of ['Warrior','Wizard','Taoist']){
+    const route=annotateNewcomerRoute(buildClassQuestRoute(sources,{className,maxLevel:40}),guidance,config);
+    const byId=new Map(route.quests.map(quest=>[quest.questId,quest]));
+    const totals=config.chapters.map(chapter=>{
+      const quests=[...chapter.questIds,...chapter.classQuestIds[className]].map(id=>byId.get(id));
+      return {
+        kills:quests.reduce((sum,quest)=>sum+quest.objectives.kill.reduce((subtotal,task)=>subtotal+task.count,0),0),
+        items:quests.reduce((sum,quest)=>sum+quest.objectives.item.reduce((subtotal,task)=>subtotal+task.count,0),0),
+      };
+    });
+    assert.deepEqual(totals.map(total=>total.kills),expectedKills,`${className} kill budget`);
+    assert.deepEqual(totals.map(total=>total.items),expectedItems,`${className} material budget`);
+    assert.equal(totals.reduce((sum,total)=>sum+total.kills,0),114);
+    assert.equal(totals.reduce((sum,total)=>sum+total.items,0),11);
+    assert.deepEqual(byId.get(62).objectives.kill.map(task=>task.count),[2,2]);
+    assert.deepEqual(byId.get(89).objectives.kill.map(task=>task.count),[3,3,3]);
   }
 });
 

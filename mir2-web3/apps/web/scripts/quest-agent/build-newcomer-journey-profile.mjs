@@ -9,13 +9,17 @@ const quests = new Map(route.quests.map(q => [q.questId, q]));
 const profile = JSON.parse(await fs.readFile(new URL('packages/game-data/data/content_profiles/platinum_176.json',root),'utf8'));
 const curve = profile.experienceCurve.filter(row => row.level < 30).map(row => row.requiredExperience);
 const threshold = level => curve.slice(0, level - 1).reduce((a,b) => a+b, 0);
+// The first ten levels fit a 45-minute first session, level 15 is the
+// two-hour chapter graduation, and the complete route targets 5-7 hours.
+// Caps apply per objective, so multi-family hunts still teach target switching
+// without turning one quest into a thirty-monster wall.
 const definitions = [
-  ['village','Your first adventure',1,5,6,[1,2,3,5,6],5,'Meet the village, equip your rewards, and earn your first skill book.','Starter weapon, jewellery and your class skill book.'],
-  ['bichon','Beyond the village',6,10,11,[22,23,24,25,26,27,29,30,33],8,'Follow the guide to Bichon and learn how to prepare for a new map.','Weapon upgrades and armour; short, guaranteed quest-material hunts.'],
-  ['frontier','Ready for the caves',11,15,16,[35,36,37,39,40,41,42,49],10,'Finish the snake-wine story and prove yourself against ordinary cave enemies.','A helmet plus a level-15 class weapon and core combat book.'],
-  ['mines','Mines and rescue',16,20,21,[51,52,53,54,61,65,60,62],8,'Prepare supplies, clear the mines, and help the woodland expedition.','Belt and necklace choices plus a level-20 class weapon.'],
-  ['expedition','Lead an expedition',21,25,26,[83,86,87,88,97,98,99,102,103,110,111,112,89],10,'Investigate the missing carriage, scout Wooma, and uncover the secret path.','The secret path plus level-25 class armour and a level-26 weapon.'],
-  ['island','A new horizon',26,30,30,[113,114,117,118,119,121,124,122,123],12,'Secure the supply route and complete your first Prajna Island expedition.','A bangle upgrade and the level-30 growth reward.'],
+  ['village','Your first adventure',1,5,6,[1,2,3,5,6],3,20,'Meet the village, equip your rewards, and earn your first skill book.','Starter weapon, jewellery and your class skill book.'],
+  ['bichon','Beyond the village',6,10,11,[22,23,24,25,26,27,29,30,33],3,25,'Follow the guide to Bichon and learn how to prepare for a new map.','Weapon upgrades and armour; short, guaranteed quest-material hunts.'],
+  ['frontier','Ready for the caves',11,15,16,[35,36,37,39,40,41,42,49],3,60,'Finish the snake-wine story and prove yourself against ordinary cave enemies.','A helmet plus a level-15 class weapon and core combat book.'],
+  ['mines','Mines and rescue',16,20,21,[51,52,53,54,61,65,60,62],2,75,'Prepare supplies, clear the mines, and help the woodland expedition.','Belt and necklace choices plus a level-20 class weapon.'],
+  ['expedition','Lead an expedition',21,25,26,[83,86,87,88,97,98,99,102,103,110,111,112,89],3,90,'Investigate the missing carriage, scout Wooma, and uncover the secret path.','The secret path plus level-25 class armour and a level-26 weapon.'],
+  ['island','A new horizon',26,30,30,[113,114,117,118,119,121,124,122,123],3,105,'Secure the supply route and complete your first Prajna Island expedition.','A bangle upgrade and the level-30 growth reward.'],
 ];
 const hints = {
   Warrior:'Equip a suitable weapon. Learn Fencing from the book when eligible; practise approaching one enemy and watch your health.',
@@ -50,7 +54,7 @@ const milestoneRewards = [
 ];
 let cumulative = 0;
 const overrides = [];
-const chapters = definitions.map(([id,title,minLevel,maxLevel,exitLevel,ids,cap,goal,rewardSummary], index) => {
+const chapters = definitions.map(([id,title,minLevel,maxLevel,exitLevel,ids,cap,targetMinutes,goal,rewardSummary], index) => {
   const classQuestIds = index === 0 ? {Warrior:[7,8,9],Wizard:[10,11,12],Taoist:[13,14,15]} : {Warrior:[],Wizard:[],Taoist:[]};
   const order = [...ids,...classQuestIds.Warrior];
   const start = cumulative;
@@ -72,9 +76,9 @@ const chapters = definitions.map(([id,title,minLevel,maxLevel,exitLevel,ids,cap,
       // Prefer canonical display names over duplicate numbered drop tables.
       const names = sourceNames.filter(name => !sourceNames.includes(name.replace(/\d+$/, '')) || !/\d+$/.test(name));
       const harvest = task.sources.some(source => source.requiresHarvest);
-      tasks.push(`Collect ${Math.min(task.count,2)} ${task.itemName} from ${names.join(' or ')}${harvest ? ' corpses; finish harvesting with Alt + left mouse' : ''}. Needed quest materials are guaranteed.`);
+      tasks.push(`Collect ${Math.min(task.count,1)} ${task.itemName} from ${names.join(' or ')}${harvest ? ' corpses; finish harvesting with Alt + left mouse' : ''}. Needed quest materials are guaranteed.`);
     }
-    const entry = {questId,rewardExperience,killCountCap:cap,itemCountCap:2};
+    const entry = {questId,rewardExperience,killCountCap:cap,itemCountCap:1};
     if (q.objectives.item.length) entry.guaranteedQuestDrops=q.objectives.item.map(t=>t.itemName);
     if (tasks.length) entry.taskDescription=tasks;
     if (questId===61) entry.requiredQuestId=54;
@@ -83,7 +87,7 @@ const chapters = definitions.map(([id,title,minLevel,maxLevel,exitLevel,ids,cap,
       for (const offset of [3,6]) overrides.push({...entry,questId:questId+offset});
     }
   });
-  return {id,title,minLevel,maxLevel,exitLevel,questIds:ids,classQuestIds,goal,rewardSummary,classHints:hints,questExperienceBudget:end-start};
+  return {id,title,minLevel,maxLevel,exitLevel,targetMinutes,questIds:ids,classQuestIds,goal,rewardSummary,classHints:hints,questExperienceBudget:end-start};
 });
 // Present the low-count snake-wine preparation before the frontier chapter,
 // then finish the shortened snake hunt before entering the denser Skeleton
@@ -132,7 +136,8 @@ for(const entry of overrides){
   entry.startNpc=entry.startInDiary?null:npcLocation(q.startNpc);
   entry.finishNpc=entry.finishInDiary?null:npcLocation(q.finishNpc);
 }
-const config={schema:1,profile:'newcomer-v1',maxLevel:30,description:'Opt-in newcomer journey. Earn progression through ordinary quest completion; no daily wait or mandatory rare boss. Crystal mode retains its original values.',chapters,milestoneRewards,questOverrides:overrides};
+const targetPlayMinutes=chapters.reduce((total,chapter)=>total+chapter.targetMinutes,0);
+const config={schema:1,profile:'newcomer-v1',maxLevel:30,targetPlayMinutes,description:'Opt-in 5-7 hour newcomer journey. Earn progression through ordinary quest completion; no daily wait or mandatory rare boss. Crystal mode retains its original values.',chapters,milestoneRewards,questOverrides:overrides};
 const configPath = new URL('config/quest-guidance/newcomer-journey-v1.json',root);
 const renderedConfig = JSON.stringify(config,null,2)+'\n';
 if(checkOnly){
@@ -145,7 +150,7 @@ if(checkOnly){
 if(!checkOnly){
 const guidancePath = new URL('config/quest-guidance/newcomer-v1.json',root);
 const guidance = JSON.parse(await fs.readFile(guidancePath,'utf8'));
-guidance.description = 'Optional guidance through level 40. The separate newcomer journey profile supplies opt-in 1-30 task pacing; Crystal mode is unchanged.';
+guidance.description = 'Optional guidance through level 40. The separate newcomer journey profile supplies an opt-in 5-7 hour level 1-30 route; Crystal mode is unchanged.';
 const mainOrder = chapters.flatMap(c=>[...c.questIds,...c.classQuestIds.Warrior,...c.classQuestIds.Wizard,...c.classQuestIds.Taoist]);
 const main = new Set(mainOrder);
 const overridesById = new Map(overrides.map(row=>[row.questId,row]));

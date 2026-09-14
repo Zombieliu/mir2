@@ -2,7 +2,8 @@
   "schema": 1,
   "profile": "newcomer-v1",
   "maxLevel": 30,
-  "description": "Opt-in newcomer journey. Earn progression through ordinary quest completion; no daily wait or mandatory rare boss. Crystal mode retains its original values.",
+  "targetPlayMinutes": 375,
+  "description": "Opt-in 5-7 hour newcomer journey. Earn progression through ordinary quest completion; no daily wait or mandatory rare boss. Crystal mode retains its original values.",
   "chapters": [
     {
       "id": "village",
@@ -10,6 +11,7 @@
       "minLevel": 1,
       "maxLevel": 5,
       "exitLevel": 6,
+      "targetMinutes": 20,
       "questIds": [
         1,
         2,
@@ -49,6 +51,7 @@
       "minLevel": 6,
       "maxLevel": 10,
       "exitLevel": 11,
+      "targetMinutes": 25,
       "questIds": [
         22,
         23,
@@ -82,6 +85,7 @@
       "minLevel": 11,
       "maxLevel": 15,
       "exitLevel": 16,
+      "targetMinutes": 60,
       "questIds": [
         33,
         49,
@@ -110,6 +114,7 @@
       "minLevel": 16,
       "maxLevel": 20,
       "exitLevel": 21,
+      "targetMinutes": 75,
       "questIds": [
         51,
         52,
@@ -140,6 +145,7 @@
       "minLevel": 21,
       "maxLevel": 25,
       "exitLevel": 26,
+      "targetMinutes": 90,
       "questIds": [
         83,
         86,
@@ -175,6 +181,7 @@
       "minLevel": 26,
       "maxLevel": 30,
       "exitLevel": 30,
+      "targetMinutes": 105,
       "questIds": [
         113,
         114,
@@ -307,8 +314,8 @@
     {
       "questId": 1,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -329,8 +336,8 @@
     {
       "questId": 2,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "GingerTea"
       ],
@@ -357,8 +364,8 @@
     {
       "questId": 3,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -379,11 +386,11 @@
     {
       "questId": 5,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 5 Deer.",
-        "Defeat 5 Scarecrow."
+        "Defeat 3 Deer.",
+        "Defeat 3 Scarecrow."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -405,10 +412,10 @@
     {
       "questId": 6,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 5 HookingCat."
+        "Defeat 3 HookingCat."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -430,8 +437,8 @@
     {
       "questId": 7,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -452,8 +459,8 @@
     {
       "questId": 10,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -474,8 +481,8 @@
     {
       "questId": 13,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -496,11 +503,11 @@
     {
       "questId": 8,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 5 Oma.",
-        "Defeat 5 RakingCat."
+        "Defeat 3 Oma.",
+        "Defeat 3 RakingCat."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -522,11 +529,11 @@
     {
       "questId": 11,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 5 Oma.",
-        "Defeat 5 RakingCat."
+        "Defeat 3 Oma.",
+        "Defeat 3 RakingCat."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -548,11 +555,11 @@
     {
       "questId": 14,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 5 Oma.",
-        "Defeat 5 RakingCat."
+        "Defeat 3 Oma.",
+        "Defeat 3 RakingCat."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -574,8 +581,8 @@
     {
       "questId": 9,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -596,8 +603,8 @@
     {
       "questId": 12,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -618,8 +625,8 @@
     {
       "questId": 15,
       "rewardExperience": 200,
-      "killCountCap": 5,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -640,10 +647,10 @@
     {
       "questId": 22,
       "rewardExperience": 1366,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 5 ForestYeti."
+        "Defeat 3 ForestYeti."
       ],
       "startInDiary": true,
       "finishInDiary": true,
@@ -653,13 +660,13 @@
     {
       "questId": 23,
       "rewardExperience": 1367,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "OmaTeeth"
       ],
       "taskDescription": [
-        "Collect 2 OmaTeeth from Oma. Needed quest materials are guaranteed."
+        "Collect 1 OmaTeeth from Oma. Needed quest materials are guaranteed."
       ],
       "startInDiary": true,
       "finishInDiary": true,
@@ -669,8 +676,8 @@
     {
       "questId": 24,
       "rewardExperience": 1367,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": true,
       "finishInDiary": true,
       "startNpc": null,
@@ -679,15 +686,15 @@
     {
       "questId": 25,
       "rewardExperience": 1366,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "CannibalStem",
         "CannibalLeaf"
       ],
       "taskDescription": [
-        "Collect 2 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
-        "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+        "Collect 1 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
+        "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
       ],
       "startInDiary": true,
       "finishInDiary": true,
@@ -697,13 +704,13 @@
     {
       "questId": 26,
       "rewardExperience": 1367,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "PoisonSack"
       ],
       "taskDescription": [
-        "Collect 2 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+        "Collect 1 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
       ],
       "startInDiary": true,
       "finishInDiary": false,
@@ -719,8 +726,8 @@
     {
       "questId": 27,
       "rewardExperience": 1367,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": true,
       "finishInDiary": false,
       "startNpc": null,
@@ -735,8 +742,8 @@
     {
       "questId": 29,
       "rewardExperience": 1366,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -757,8 +764,8 @@
     {
       "questId": 30,
       "rewardExperience": 1367,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "JadeRing"
       ],
@@ -786,7 +793,7 @@
       "questId": 33,
       "rewardExperience": 1367,
       "killCountCap": 3,
-      "itemCountCap": 2,
+      "itemCountCap": 1,
       "taskDescription": [
         "Defeat 3 TigerSnake.",
         "Defeat 3 RedSnake."
@@ -811,8 +818,8 @@
     {
       "questId": 35,
       "rewardExperience": 12875,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -833,13 +840,13 @@
     {
       "questId": 36,
       "rewardExperience": 12875,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "SnakeBody"
       ],
       "taskDescription": [
-        "Collect 2 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
+        "Collect 1 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
       ],
       "startInDiary": true,
       "finishInDiary": true,
@@ -849,8 +856,8 @@
     {
       "questId": 37,
       "rewardExperience": 12875,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": true,
       "finishInDiary": false,
       "startNpc": null,
@@ -865,8 +872,8 @@
     {
       "questId": 39,
       "rewardExperience": 12875,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -887,10 +894,10 @@
     {
       "questId": 40,
       "rewardExperience": 12875,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 10 OmaFighter."
+        "Defeat 3 OmaFighter."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -912,8 +919,8 @@
     {
       "questId": 41,
       "rewardExperience": 12875,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -934,11 +941,11 @@
     {
       "questId": 42,
       "rewardExperience": 12875,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 10 RedViper.",
-        "Defeat 10 TigerViper."
+        "Defeat 3 RedViper.",
+        "Defeat 3 TigerViper."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -960,10 +967,10 @@
     {
       "questId": 49,
       "rewardExperience": 12875,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 10 Skeleton."
+        "Defeat 3 Skeleton."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -985,8 +992,8 @@
     {
       "questId": 51,
       "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 2,
+      "itemCountCap": 1,
       "startInDiary": true,
       "finishInDiary": false,
       "startNpc": null,
@@ -1001,15 +1008,15 @@
     {
       "questId": 52,
       "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 2,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "CannibalLeaf",
         "CannibalSeed"
       ],
       "taskDescription": [
-        "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
-        "Collect 2 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+        "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed.",
+        "Collect 1 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1031,8 +1038,8 @@
     {
       "questId": 53,
       "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 2,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1053,14 +1060,14 @@
     {
       "questId": 54,
       "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 2,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 5 Zombie5.",
-        "Defeat 5 Zombie2.",
-        "Defeat 5 Zombie3.",
-        "Defeat 5 Zombie4.",
-        "Defeat 5 Zombie1."
+        "Defeat 2 Zombie5.",
+        "Defeat 2 Zombie2.",
+        "Defeat 2 Zombie3.",
+        "Defeat 2 Zombie4.",
+        "Defeat 2 Zombie1."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1082,8 +1089,8 @@
     {
       "questId": 61,
       "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 2,
+      "itemCountCap": 1,
       "requiredQuestId": 54,
       "startInDiary": false,
       "finishInDiary": false,
@@ -1105,10 +1112,10 @@
     {
       "questId": 65,
       "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 2,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 8 Zombie1."
+        "Defeat 2 Zombie1."
       ],
       "startInDiary": true,
       "finishInDiary": true,
@@ -1118,10 +1125,10 @@
     {
       "questId": 60,
       "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 2,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 8 SpiderFrog."
+        "Defeat 2 SpiderFrog."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1143,11 +1150,11 @@
     {
       "questId": 62,
       "rewardExperience": 60000,
-      "killCountCap": 8,
-      "itemCountCap": 2,
+      "killCountCap": 2,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 8 KekTal.",
-        "Defeat 8 VioletKekTal."
+        "Defeat 2 KekTal.",
+        "Defeat 2 VioletKekTal."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1169,8 +1176,8 @@
     {
       "questId": 83,
       "rewardExperience": 250000,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1191,8 +1198,8 @@
     {
       "questId": 86,
       "rewardExperience": 26923,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1213,8 +1220,8 @@
     {
       "questId": 87,
       "rewardExperience": 138461,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1235,8 +1242,8 @@
     {
       "questId": 88,
       "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1257,8 +1264,8 @@
     {
       "questId": 97,
       "rewardExperience": 138461,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": true,
       "finishInDiary": false,
       "startNpc": null,
@@ -1273,11 +1280,11 @@
     {
       "questId": 98,
       "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 10 Dung.",
-        "Defeat 10 WoomaSoldier."
+        "Defeat 3 Dung.",
+        "Defeat 3 WoomaSoldier."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1299,11 +1306,11 @@
     {
       "questId": 99,
       "rewardExperience": 138461,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 10 FlamingWooma.",
-        "Defeat 10 WoomaFighter."
+        "Defeat 3 FlamingWooma.",
+        "Defeat 3 WoomaFighter."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1325,8 +1332,8 @@
     {
       "questId": 102,
       "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1347,13 +1354,13 @@
     {
       "questId": 103,
       "rewardExperience": 192308,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "BugSpecimen"
       ],
       "taskDescription": [
-        "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
+        "Collect 1 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1375,8 +1382,8 @@
     {
       "questId": 110,
       "rewardExperience": 84615,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1397,8 +1404,8 @@
     {
       "questId": 111,
       "rewardExperience": 138461,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1419,10 +1426,10 @@
     {
       "questId": 112,
       "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 10 CrawlerZombie."
+        "Defeat 3 CrawlerZombie."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1444,12 +1451,12 @@
     {
       "questId": 89,
       "rewardExperience": 138462,
-      "killCountCap": 10,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 10 CursedPriest.",
-        "Defeat 10 ShiZombie.",
-        "Defeat 10 CursedZombie."
+        "Defeat 3 CursedPriest.",
+        "Defeat 3 ShiZombie.",
+        "Defeat 3 CursedZombie."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1471,11 +1478,11 @@
     {
       "questId": 113,
       "rewardExperience": 544444,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 10 BlackMaggot.",
-        "Defeat 10 WedgeMoth."
+        "Defeat 3 BlackMaggot.",
+        "Defeat 3 WedgeMoth."
       ],
       "startInDiary": true,
       "finishInDiary": true,
@@ -1485,11 +1492,11 @@
     {
       "questId": 114,
       "rewardExperience": 544444,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 12 BlackBoar.",
-        "Defeat 12 RedBoar."
+        "Defeat 3 BlackBoar.",
+        "Defeat 3 RedBoar."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1511,8 +1518,8 @@
     {
       "questId": 117,
       "rewardExperience": 544445,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1533,12 +1540,12 @@
     {
       "questId": 118,
       "rewardExperience": 544444,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 12 CursedZombie.",
-        "Defeat 12 ShiZombie.",
-        "Defeat 12 HungryZombie."
+        "Defeat 3 CursedZombie.",
+        "Defeat 3 ShiZombie.",
+        "Defeat 3 HungryZombie."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1560,8 +1567,8 @@
     {
       "questId": 119,
       "rewardExperience": 544445,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "startInDiary": false,
       "finishInDiary": false,
       "startNpc": {
@@ -1582,11 +1589,11 @@
     {
       "questId": 121,
       "rewardExperience": 544444,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 12 ToxicGhoul.",
-        "Defeat 10 RoninGhoul."
+        "Defeat 3 ToxicGhoul.",
+        "Defeat 3 RoninGhoul."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1608,13 +1615,13 @@
     {
       "questId": 124,
       "rewardExperience": 544445,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "guaranteedQuestDrops": [
         "CleanSkull"
       ],
       "taskDescription": [
-        "Collect 2 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
+        "Collect 1 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
       ],
       "startInDiary": false,
       "finishInDiary": false,
@@ -1636,11 +1643,11 @@
     {
       "questId": 122,
       "rewardExperience": 544444,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 12 BoneArcher.",
-        "Defeat 12 BoneSpearman."
+        "Defeat 3 BoneArcher.",
+        "Defeat 3 BoneSpearman."
       ],
       "startInDiary": true,
       "finishInDiary": true,
@@ -1650,10 +1657,10 @@
     {
       "questId": 123,
       "rewardExperience": 544445,
-      "killCountCap": 12,
-      "itemCountCap": 2,
+      "killCountCap": 3,
+      "itemCountCap": 1,
       "taskDescription": [
-        "Defeat 12 BoneBlademan."
+        "Defeat 3 BoneBlademan."
       ],
       "startInDiary": true,
       "finishInDiary": true,

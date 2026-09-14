@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "profile": "newcomer-v1",
-  "description": "Optional guidance through level 40. The separate newcomer journey profile supplies opt-in 1-30 task pacing; Crystal mode is unchanged.",
+  "description": "Optional guidance through level 40. The separate newcomer journey profile supplies an opt-in 5-7 hour level 1-30 route; Crystal mode is unchanged.",
   "quests": [
     {
       "id": 1,
@@ -31,13 +31,13 @@
       "id": 5,
       "category": "recommended",
       "order": 40,
-      "hint": "Defeat 5 Deer. Defeat 5 Scarecrow."
+      "hint": "Defeat 3 Deer. Defeat 3 Scarecrow."
     },
     {
       "id": 6,
       "category": "recommended",
       "order": 50,
-      "hint": "Defeat 5 HookingCat."
+      "hint": "Defeat 3 HookingCat."
     },
     {
       "id": 7,
@@ -49,7 +49,7 @@
       "id": 8,
       "category": "recommended",
       "order": 70,
-      "hint": "Defeat 5 Oma. Defeat 5 RakingCat."
+      "hint": "Defeat 3 Oma. Defeat 3 RakingCat."
     },
     {
       "id": 9,
@@ -67,7 +67,7 @@
       "id": 11,
       "category": "recommended",
       "order": 100,
-      "hint": "Defeat 5 Oma. Defeat 5 RakingCat."
+      "hint": "Defeat 3 Oma. Defeat 3 RakingCat."
     },
     {
       "id": 12,
@@ -85,7 +85,7 @@
       "id": 14,
       "category": "recommended",
       "order": 130,
-      "hint": "Defeat 5 Oma. Defeat 5 RakingCat."
+      "hint": "Defeat 3 Oma. Defeat 3 RakingCat."
     },
     {
       "id": 15,
@@ -97,13 +97,13 @@
       "id": 22,
       "category": "recommended",
       "order": 150,
-      "hint": "Defeat 5 ForestYeti."
+      "hint": "Defeat 3 ForestYeti."
     },
     {
       "id": 23,
       "category": "recommended",
       "order": 160,
-      "hint": "Collect 2 OmaTeeth from Oma. Needed quest materials are guaranteed."
+      "hint": "Collect 1 OmaTeeth from Oma. Needed quest materials are guaranteed."
     },
     {
       "id": 24,
@@ -115,13 +115,13 @@
       "id": 25,
       "category": "recommended",
       "order": 180,
-      "hint": "Collect 2 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+      "hint": "Collect 1 CannibalStem from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
     },
     {
       "id": 26,
       "category": "recommended",
       "order": 190,
-      "hint": "Collect 2 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+      "hint": "Collect 1 PoisonSack from SpittingSpider corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
     },
     {
       "id": 27,
@@ -181,7 +181,7 @@
       "id": 36,
       "category": "recommended",
       "order": 240,
-      "hint": "Collect 2 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
+      "hint": "Collect 1 SnakeBody from RedSnake or TigerSnake. Needed quest materials are guaranteed."
     },
     {
       "id": 37,
@@ -223,7 +223,7 @@
       "id": 40,
       "category": "recommended",
       "order": 290,
-      "hint": "Defeat 10 OmaFighter."
+      "hint": "Defeat 3 OmaFighter."
     },
     {
       "id": 41,
@@ -235,7 +235,7 @@
       "id": 42,
       "category": "recommended",
       "order": 310,
-      "hint": "Defeat 10 RedViper. Defeat 10 TigerViper."
+      "hint": "Defeat 3 RedViper. Defeat 3 TigerViper."
     },
     {
       "id": 43,
@@ -277,7 +277,7 @@
       "id": 49,
       "category": "recommended",
       "order": 270,
-      "hint": "Defeat 10 Skeleton."
+      "hint": "Defeat 3 Skeleton."
     },
     {
       "id": 141,
@@ -307,7 +307,7 @@
       "id": 52,
       "category": "recommended",
       "order": 330,
-      "hint": "Collect 2 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 2 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
+      "hint": "Collect 1 CannibalLeaf from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed. Collect 1 CannibalSeed from CannibalPlant corpses; finish harvesting with Alt + left mouse. Needed quest materials are guaranteed."
     },
     {
       "id": 53,
@@ -319,7 +319,7 @@
       "id": 54,
       "category": "recommended",
       "order": 350,
-      "hint": "Defeat 5 Zombie5. Defeat 5 Zombie2. Defeat 5 Zombie3. Defeat 5 Zombie4. Defeat 5 Zombie1."
+      "hint": "Defeat 2 Zombie5. Defeat 2 Zombie2. Defeat 2 Zombie3. Defeat 2 Zombie4. Defeat 2 Zombie1."
     },
     {
       "id": 55,
@@ -348,20 +348,20 @@
     {
       "id": 60,
       "category": "recommended",
-      "order": 360,
-      "hint": "Defeat 8 SpiderFrog."
+      "order": 380,
+      "hint": "Defeat 2 SpiderFrog."
     },
     {
       "id": 61,
       "category": "recommended",
-      "order": 370,
+      "order": 360,
       "hint": "Continue after Danger in the Cave. Visit the stated destination before moving on to the next chapter."
     },
     {
       "id": 62,
       "category": "recommended",
-      "order": 380,
-      "hint": "Defeat 8 KekTal. Defeat 8 VioletKekTal."
+      "order": 390,
+      "hint": "Defeat 2 KekTal. Defeat 2 VioletKekTal."
     },
     {
       "id": 63,
@@ -378,8 +378,8 @@
     {
       "id": 65,
       "category": "recommended",
-      "order": 390,
-      "hint": "Defeat 8 Zombie1."
+      "order": 370,
+      "hint": "Defeat 2 Zombie1."
     },
     {
       "id": 66,
@@ -516,8 +516,8 @@
     {
       "id": 89,
       "category": "recommended",
-      "order": 440,
-      "hint": "Defeat 10 CursedPriest. Defeat 10 ShiZombie. Defeat 10 CursedZombie."
+      "order": 520,
+      "hint": "Defeat 3 CursedPriest. Defeat 3 ShiZombie. Defeat 3 CursedZombie."
     },
     {
       "id": 90,
@@ -570,20 +570,20 @@
     {
       "id": 97,
       "category": "recommended",
-      "order": 450,
+      "order": 440,
       "hint": "Optional challenge: prepare supplies and retreat if the fight is too hard. Accept through the Quest Diary. Visit the stated destination before moving on to the next chapter."
     },
     {
       "id": 98,
       "category": "recommended",
-      "order": 460,
-      "hint": "Defeat 10 Dung. Defeat 10 WoomaSoldier."
+      "order": 450,
+      "hint": "Defeat 3 Dung. Defeat 3 WoomaSoldier."
     },
     {
       "id": 99,
       "category": "recommended",
-      "order": 470,
-      "hint": "Defeat 10 FlamingWooma. Defeat 10 WoomaFighter."
+      "order": 460,
+      "hint": "Defeat 3 FlamingWooma. Defeat 3 WoomaFighter."
     },
     {
       "id": 100,
@@ -600,14 +600,14 @@
     {
       "id": 102,
       "category": "recommended",
-      "order": 480,
+      "order": 470,
       "hint": "Visit the stated destination before moving on to the next chapter."
     },
     {
       "id": 103,
       "category": "recommended",
-      "order": 490,
-      "hint": "Collect 2 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
+      "order": 480,
+      "hint": "Collect 1 BugSpecimen from WhimperingBee. Needed quest materials are guaranteed."
     },
     {
       "id": 104,
@@ -636,13 +636,13 @@
     {
       "id": 110,
       "category": "recommended",
-      "order": 500,
+      "order": 490,
       "hint": "Visit the stated destination before moving on to the next chapter."
     },
     {
       "id": 111,
       "category": "recommended",
-      "order": 510,
+      "order": 500,
       "hint": "Continue after Meet with Mr.Wang. Follow the local event clues; ordinary kills alone do not complete this task."
     },
     {
@@ -660,20 +660,20 @@
     {
       "id": 112,
       "category": "recommended",
-      "order": 520,
-      "hint": "Defeat 10 CrawlerZombie."
+      "order": 510,
+      "hint": "Defeat 3 CrawlerZombie."
     },
     {
       "id": 113,
       "category": "recommended",
       "order": 530,
-      "hint": "Defeat 10 BlackMaggot. Defeat 10 WedgeMoth."
+      "hint": "Defeat 3 BlackMaggot. Defeat 3 WedgeMoth."
     },
     {
       "id": 114,
       "category": "recommended",
       "order": 540,
-      "hint": "Defeat 12 BlackBoar. Defeat 12 RedBoar."
+      "hint": "Defeat 3 BlackBoar. Defeat 3 RedBoar."
     },
     {
       "id": 115,
@@ -697,7 +697,7 @@
       "id": 118,
       "category": "recommended",
       "order": 560,
-      "hint": "Defeat 12 CursedZombie. Defeat 12 ShiZombie. Defeat 12 HungryZombie."
+      "hint": "Defeat 3 CursedZombie. Defeat 3 ShiZombie. Defeat 3 HungryZombie."
     },
     {
       "id": 119,
@@ -715,25 +715,25 @@
       "id": 121,
       "category": "recommended",
       "order": 580,
-      "hint": "Defeat 12 ToxicGhoul. Defeat 10 RoninGhoul."
+      "hint": "Defeat 3 ToxicGhoul. Defeat 3 RoninGhoul."
     },
     {
       "id": 122,
       "category": "recommended",
       "order": 600,
-      "hint": "Defeat 12 BoneArcher. Defeat 12 BoneSpearman."
+      "hint": "Defeat 3 BoneArcher. Defeat 3 BoneSpearman."
     },
     {
       "id": 123,
       "category": "recommended",
       "order": 610,
-      "hint": "Defeat 12 BoneBlademan."
+      "hint": "Defeat 3 BoneBlademan."
     },
     {
       "id": 124,
       "category": "recommended",
       "order": 590,
-      "hint": "Collect 2 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
+      "hint": "Collect 1 CleanSkull from BoneSpearman or BoneBlademan or BoneArcher. Needed quest materials are guaranteed."
     },
     {
       "id": 125,
