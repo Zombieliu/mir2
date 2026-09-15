@@ -34,7 +34,7 @@ use mir2_simulation::{
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
     ZoneBossRewardAudit, ZoneCommand, ZoneKey, ZoneManager, ZoneMonsterDefense,
     ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound,
-    ZoneRuntimeHandle, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneRuntimeHandle, ZoneSoulFirePracticeReceipt, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -2453,6 +2453,13 @@ struct ZoneVitalReceiptProgress {
     penalized_death_generations: BTreeSet<u64>,
 }
 
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+struct ZoneSoulFirePracticeProgress {
+    object_id: u32,
+    life_generation: u64,
+    highest_cast_at_ms: Option<u64>,
+}
+
 #[derive(Debug)]
 struct SharedInProcessZoneState {
     next_zone_object_id: u32,
@@ -2474,6 +2481,8 @@ struct SharedInProcessZoneState {
     pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<QueuedZoneVitalDelta>>,
     pending_zone_player_heals: BTreeMap<ZonePresenceKey, Vec<i32>>,
     vital_receipt_progress: BTreeMap<ZonePresenceKey, ZoneVitalReceiptProgress>,
+    pending_zone_soulfire_practice: BTreeMap<ZonePresenceKey, Vec<ZoneSoulFirePracticeReceipt>>,
+    soulfire_practice_progress: BTreeMap<ZonePresenceKey, ZoneSoulFirePracticeProgress>,
     teardown_fences: BTreeSet<ZonePresenceKey>,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
     players: BTreeMap<ZonePresenceKey, ZonePlayerPresence>,
@@ -2534,6 +2543,10 @@ struct SharedInProcessZoneStateCheckpoint {
     pending_zone_player_heals: Vec<(ZonePresenceKey, Vec<i32>)>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     vital_receipt_progress: Vec<(ZonePresenceKey, ZoneVitalReceiptProgress)>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pending_zone_soulfire_practice: Vec<(ZonePresenceKey, Vec<ZoneSoulFirePracticeReceipt>)>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    soulfire_practice_progress: Vec<(ZonePresenceKey, ZoneSoulFirePracticeProgress)>,
     #[serde(default)]
     teardown_fences: Vec<ZonePresenceKey>,
     players: Vec<(ZonePresenceKey, ZonePlayerPresence)>,
@@ -2677,6 +2690,8 @@ impl SharedInProcessZoneStateCheckpoint {
         self.pending_zone_player_damages.clear();
         self.pending_zone_player_heals.clear();
         self.vital_receipt_progress.clear();
+        self.pending_zone_soulfire_practice.clear();
+        self.soulfire_practice_progress.clear();
         self.teardown_fences.clear();
         self.players.clear();
         self.trade_links = SharedTradeLinks::default();
@@ -2752,6 +2767,8 @@ impl SharedInProcessZoneState {
             pending_zone_player_damages: BTreeMap::new(),
             pending_zone_player_heals: BTreeMap::new(),
             vital_receipt_progress: BTreeMap::new(),
+            pending_zone_soulfire_practice: BTreeMap::new(),
+            soulfire_practice_progress: BTreeMap::new(),
             teardown_fences: BTreeSet::new(),
             live_zone_outbounds: BTreeMap::new(),
             players: BTreeMap::new(),
@@ -2825,6 +2842,16 @@ impl SharedInProcessZoneState {
                 .collect(),
             pending_zone_player_heals: self.pending_zone_player_heals.clone().into_iter().collect(),
             vital_receipt_progress: self.vital_receipt_progress.clone().into_iter().collect(),
+            pending_zone_soulfire_practice: self
+                .pending_zone_soulfire_practice
+                .clone()
+                .into_iter()
+                .collect(),
+            soulfire_practice_progress: self
+                .soulfire_practice_progress
+                .clone()
+                .into_iter()
+                .collect(),
             teardown_fences: self.teardown_fences.clone().into_iter().collect(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
@@ -2869,6 +2896,8 @@ impl SharedInProcessZoneState {
             pending_zone_player_damages: Vec::new(),
             pending_zone_player_heals: Vec::new(),
             vital_receipt_progress: Vec::new(),
+            pending_zone_soulfire_practice: Vec::new(),
+            soulfire_practice_progress: Vec::new(),
             teardown_fences: Vec::new(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
@@ -3132,6 +3161,14 @@ impl SharedInProcessZoneState {
             },
             pending_zone_player_heals: BTreeMap::new(),
             vital_receipt_progress: checkpoint.vital_receipt_progress.into_iter().collect(),
+            pending_zone_soulfire_practice: checkpoint
+                .pending_zone_soulfire_practice
+                .into_iter()
+                .collect(),
+            soulfire_practice_progress: checkpoint
+                .soulfire_practice_progress
+                .into_iter()
+                .collect(),
             teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
             live_zone_outbounds: BTreeMap::new(),
             players,
@@ -3238,6 +3275,26 @@ impl SharedInProcessZoneState {
         self.zone_manager.handle(ZoneCommand::Leave { session_id })
     }
 
+    fn soulfire_practice_owner_is_current(
+        &self,
+        key: &ZonePresenceKey,
+        receipt: &ZoneSoulFirePracticeReceipt,
+    ) -> bool {
+        receipt.damage > 0
+            && receipt.target_object_id != 0
+            && key.account_id == receipt.account_id
+            && key.character_index == receipt.character_index
+            && self.zone_sessions.get(key) == Some(&receipt.session_id)
+            && self.players.get(key).is_some_and(|player| {
+                player.zone_object_id == receipt.object_id
+                    && ZoneKey::for_map(&player.map_file_name) == receipt.zone_key
+            })
+            && self
+                .zone_manager
+                .player_life_generation(&receipt.session_id)
+                == Some(receipt.life_generation)
+    }
+
     fn forget_zone_session(&mut self, key: &ZonePresenceKey) {
         if let Some(session_id) = self.zone_sessions.remove(key) {
             self.zone_session_keys.remove(&session_id);
@@ -3250,6 +3307,8 @@ impl SharedInProcessZoneState {
         self.pending_zone_player_damages.remove(key);
         self.pending_zone_player_heals.remove(key);
         self.vital_receipt_progress.remove(key);
+        self.pending_zone_soulfire_practice.remove(key);
+        self.soulfire_practice_progress.remove(key);
         self.teardown_fences.remove(key);
         self.live_zone_outbounds.remove(key);
     }
@@ -3999,6 +4058,26 @@ impl SharedInProcessZoneState {
                         current_monster_kill_awards.push(award);
                     } else {
                         self.queue_zone_monster_kill_award(key, award);
+                    }
+                }
+                ZoneOutbound::SoulFirePractice { receipt } => {
+                    let Some(key) = self.zone_session_keys.get(&receipt.session_id).cloned() else {
+                        continue;
+                    };
+                    // New side effects cannot cross a logout fence. Previously
+                    // resolved receipts are drained before the final save.
+                    if self.teardown_fenced(&key)
+                        || !self.soulfire_practice_owner_is_current(&key, &receipt)
+                    {
+                        continue;
+                    }
+                    let pending = self.pending_zone_soulfire_practice.entry(key).or_default();
+                    if !pending.iter().any(|queued| {
+                        queued.object_id == receipt.object_id
+                            && queued.life_generation == receipt.life_generation
+                            && queued.cast_at_ms == receipt.cast_at_ms
+                    }) {
+                        pending.push(receipt);
                     }
                 }
                 ZoneOutbound::PlayerDamaged {
@@ -9332,6 +9411,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
+        packets.extend(self.apply_pending_zone_soulfire_practice(false));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9421,6 +9501,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         self.apply_zone_monster_kill_awards_checked(&key, monster_kill_awards)?;
+        packets.extend(self.apply_pending_zone_soulfire_practice(true));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9489,6 +9570,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
+        packets.extend(self.apply_pending_zone_soulfire_practice(false));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9719,6 +9801,60 @@ impl SharedInProcessZoneSessionRuntime {
                     }
                 }
             }
+        }
+        packets
+    }
+
+    fn apply_pending_zone_soulfire_practice(
+        &mut self,
+        allow_fenced_current: bool,
+    ) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+        let receipts = {
+            let mut state = self
+                .zone_state
+                .lock()
+                .expect("shared Zone state should lock");
+            let queued = state
+                .pending_zone_soulfire_practice
+                .remove(&key)
+                .unwrap_or_default();
+            let mut accepted = Vec::new();
+            for receipt in queued {
+                if (state.teardown_fenced(&key) && !allow_fenced_current)
+                    || !state.soulfire_practice_owner_is_current(&key, &receipt)
+                {
+                    continue;
+                }
+                let progress = state
+                    .soulfire_practice_progress
+                    .entry(key.clone())
+                    .or_default();
+                if progress.object_id != receipt.object_id
+                    || progress.life_generation != receipt.life_generation
+                {
+                    *progress = ZoneSoulFirePracticeProgress {
+                        object_id: receipt.object_id,
+                        life_generation: receipt.life_generation,
+                        highest_cast_at_ms: None,
+                    };
+                }
+                if progress
+                    .highest_cast_at_ms
+                    .is_some_and(|previous| receipt.cast_at_ms <= previous)
+                {
+                    continue;
+                }
+                progress.highest_cast_at_ms = Some(receipt.cast_at_ms);
+                accepted.push(receipt);
+            }
+            accepted
+        };
+        let mut packets = Vec::new();
+        for receipt in receipts {
+            packets.extend(self.inner.commit_zone_soulfire_practice(&receipt));
         }
         packets
     }
@@ -14398,6 +14534,8 @@ mod tests {
     mod personal_monster_projection_tests;
     #[path = "zone_melee_passive_progression_tests.rs"]
     mod zone_melee_passive_progression_tests;
+    #[path = "zone_soulfire_practice_tests.rs"]
+    mod zone_soulfire_practice_tests;
     #[path = "shared_session_hot_path_tests.rs"]
     mod shared_session_hot_path_tests;
 

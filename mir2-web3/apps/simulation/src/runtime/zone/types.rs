@@ -764,6 +764,9 @@ pub enum ZoneOutbound {
         session_id: SessionId,
         award: ZoneMonsterKillAward,
     },
+    SoulFirePractice {
+        receipt: ZoneSoulFirePracticeReceipt,
+    },
     PlayerDamaged {
         session_id: SessionId,
         damage: i32,
@@ -774,6 +777,24 @@ pub enum ZoneOutbound {
         amount: i32,
         settlement: Option<ZoneVitalSettlement>,
     },
+}
+
+/// Owner-bound evidence of one positive, resolved SoulFireBall hit. The cast
+/// timestamp is unique within an online incarnation because accepted casts
+/// obey the authoritative spell cooldown. This is never a launch reward.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneSoulFirePracticeReceipt {
+    pub session_id: SessionId,
+    pub account_id: String,
+    pub character_index: i32,
+    pub object_id: u32,
+    pub life_generation: u64,
+    pub zone_key: ZoneKey,
+    pub cast_at_ms: u64,
+    pub target_object_id: u32,
+    pub target_location: Point,
+    pub damage: i32,
 }
 
 /// A receipt stamped by the single Zone writer at the HP mutation, before a

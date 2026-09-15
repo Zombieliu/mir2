@@ -1133,6 +1133,43 @@ impl SimulationSession {
         advance_runtime_tick(world);
     }
 
+    /// Trusted owner bridge; the gateway validates the Zone incarnation and
+    /// deduplicates resolved receipts before entering personal progression.
+    pub fn commit_zone_soulfire_practice(
+        &mut self,
+        receipt: &super::zone::ZoneSoulFirePracticeReceipt,
+    ) -> Vec<ServerPacket> {
+        if receipt.damage <= 0 || receipt.target_object_id == 0 || !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        let Some(identity) = self.active_identity() else {
+            return Vec::new();
+        };
+        if identity.account_id != receipt.account_id
+            || identity.character_index != receipt.character_index
+        {
+            return Vec::new();
+        }
+        let Some(magic) = crystal_magic_for_skill_key("soulfireball") else {
+            return Vec::new();
+        };
+        let world = self.app.world_mut();
+        let Some(index) = world
+            .resource::<SkillResource>()
+            .skills
+            .iter()
+            .position(|skill| skill.key == "soulfireball")
+        else {
+            return Vec::new();
+        };
+        let tick = runtime_tick(world);
+        let packets = advance_magic_progression(world, index, Spell::SoulFireBall, &magic, tick);
+        if !packets.is_empty() {
+            advance_runtime_tick(world);
+        }
+        packets
+    }
+
     pub fn apply_zone_player_buff_packets(
         &mut self,
         packets: &[ServerPacket],

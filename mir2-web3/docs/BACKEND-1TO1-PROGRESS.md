@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> 2026-09-15 shared SoulFireBall practice fix: the authoritative Zone now emits
+> one owner-bound receipt after actual positive monster damage. Gateway validates
+> session/account/character/object/map/life, deduplicates casts, and drains resolved
+> practice before the normal final save. Existing Crystal 1–3 XP, multiplier and
+> level gates are reused; launch, zero damage, observers and stale incarnations
+> receive no award. Coordinator review and focused tests pass: simulation 6/6,
+> Gateway 8/8 and skill-gain multiplier 1/1. Tests prove hit → level 1 → ordinary
+> logout/reload → next public cast at level 1. Live R53 progression/save evidence
+> remains open. See `docs/generated/player-qa/shared-soulfire-practice-20260915/README.md`.
+> Three-class newcomer checkpoint: Warrior level 30, 55/55 mandatory + 4/4
+> milestones; Wizard level 25, 45/55 + 3/4; Taoist level 23, 39/55 + 2/4.
+> These partial journey results do not establish complete native visual acceptance
+> or change the Crystal parity percentage.
+
+
 > 2026-09-13 R31 route-controller follow-up: ordinary equipment liquidation
 > recognizes Crystal Blacksmith's combined `@BuySell` service and still waits
 > for `NPCSell` authority. q54 caster supply funding now reaches 80 MP; dangerous

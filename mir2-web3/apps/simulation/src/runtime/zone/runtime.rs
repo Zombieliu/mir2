@@ -94,6 +94,7 @@ use super::aoi_grid::AoiGrid;
 use super::collision::ZoneCollision;
 use super::ecs::ZoneEcs;
 use super::movement::{movement_delay_ms, offset_point, ZONE_RUN_GRACE_MS, ZONE_TURN_DELAY_MS};
+use super::types::ZoneSoulFirePracticeReceipt;
 use super::packets::{
     apply_observer_action_state, apply_retained_zone_object_packet, chat_packet,
     object_chat_packet, object_chat_packet_with_text, object_player_packets, object_run_packet,
@@ -329,6 +330,8 @@ struct PendingNativeMonsterHit {
     damage: i32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     fire_bounce: Option<PendingNativeFireBounce>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    soulfire_practice: Option<ZoneSoulFirePracticeReceipt>,
 }
 
 type NativeMonsterDamageResult = (
@@ -3595,6 +3598,7 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: resolved_damage,
+                soulfire_practice: None,
                 fire_bounce: None,
             });
             if attack_spell == Spell::TwinDrakeBlade {
@@ -3604,6 +3608,7 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id,
                     damage: resolved_damage,
+                    soulfire_practice: None,
                     fire_bounce: None,
                 });
                 if let Some(target) = self.native_monsters.get_mut(&object_id) {
@@ -3673,6 +3678,7 @@ impl ZoneRuntime {
                         } else {
                             hit_damage
                         },
+                        soulfire_practice: None,
                         fire_bounce: None,
                     });
                 }
@@ -4086,6 +4092,7 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: resolved_damage,
+                soulfire_practice: None,
                 fire_bounce: None,
             });
         }
@@ -4563,6 +4570,19 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id: hit_object_id,
                     damage: hit_damage,
+                    soulfire_practice: (spell == Spell::SoulFireBall && hit_object_id == object_id)
+                        .then(|| ZoneSoulFirePracticeReceipt {
+                            session_id: session_id.clone(),
+                            account_id: player.account_id.clone(),
+                            character_index: player.character_index,
+                            object_id: player.object_id,
+                            life_generation: player.life_generation,
+                            zone_key: self.key.clone(),
+                            cast_at_ms: now_ms,
+                            target_object_id: hit_object_id,
+                            target_location: hit_monster.position.clone(),
+                            damage: 0,
+                        }),
                     fire_bounce: None,
                 });
             }
@@ -6372,6 +6392,7 @@ impl ZoneRuntime {
             attacker_object_id: player_object_id,
             object_id: primary_object_id,
             damage,
+            soulfire_practice: None,
             fire_bounce: Some(PendingNativeFireBounce {
                 remaining_bounces: level.saturating_add(2),
                 target_location: primary_monster.position,
@@ -7096,6 +7117,7 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: hit_damage,
+                soulfire_practice: None,
                 fire_bounce: None,
             });
         }
@@ -7199,6 +7221,7 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: damage.max(1),
+                soulfire_practice: None,
                 fire_bounce: None,
             });
         }
@@ -7796,6 +7819,7 @@ impl ZoneRuntime {
                         attacker_object_id: caster.object_id,
                         object_id,
                         damage: hit_damage,
+                        soulfire_practice: None,
                         fire_bounce: None,
                     },
                     now_ms,
@@ -8086,6 +8110,7 @@ impl ZoneRuntime {
                     attacker_object_id: caster.object_id,
                     object_id,
                     damage: hit_damage,
+                    soulfire_practice: None,
                     fire_bounce: None,
                 },
                 now_ms,
@@ -8811,6 +8836,7 @@ impl ZoneRuntime {
                                 attacker_object_id: action.caster_object_id,
                                 object_id,
                                 damage: hit_damage,
+                                soulfire_practice: None,
                                 fire_bounce: None,
                             },
                             now_ms,
@@ -8923,6 +8949,24 @@ impl ZoneRuntime {
         if !self.players.contains_key(&hit.session_id) {
             return Vec::new();
         }
+
+        let practice_owner_is_current = hit.soulfire_practice.as_ref().is_some_and(|receipt| {
+            self.players.get(&hit.session_id).is_some_and(|player| {
+                receipt.session_id == hit.session_id
+                    && receipt.account_id == player.account_id
+                    && receipt.character_index == player.character_index
+                    && receipt.object_id == player.object_id
+                    && receipt.object_id == hit.attacker_object_id
+                    && receipt.life_generation == player.life_generation
+                    && receipt.zone_key == self.key
+                    && receipt.target_object_id == hit.object_id
+            }) && self.native_monsters.get(&hit.object_id).is_some_and(|target| {
+                !target.dead
+                    && target.hp > 0
+                    && monster_visibility_is_attackable(target)
+                    && zone_tile_distance(&target.position, &receipt.target_location) <= 2
+            })
+        });
 
         if self.native_monsters.contains_key(&hit.attacker_object_id)
             && self
@@ -9054,6 +9098,15 @@ impl ZoneRuntime {
         }
         let (should_bleed, mut outbounds) =
             self.apply_native_vampire_spider_master_vampire(hit.attacker_object_id, damage, now_ms);
+        // Crystal levels SoulFireBall on a positive resolved hit, including
+        // lawful projectiles whose caster died after launch. A changed online
+        // incarnation or revived life must never receive an old projectile's XP.
+        if damage > 0 && practice_owner_is_current {
+            if let Some(mut receipt) = hit.soulfire_practice.clone() {
+                receipt.damage = damage;
+                outbounds.push(ZoneOutbound::SoulFirePractice { receipt });
+            }
+        }
         if should_bleed {
             packets.push(ServerPacket::ObjectEffect {
                 info: ObjectEffectInfo {
@@ -9195,6 +9248,7 @@ impl ZoneRuntime {
             attacker_object_id: hit.attacker_object_id,
             object_id: target_object_id,
             damage: hit.damage,
+            soulfire_practice: None,
             fire_bounce: Some(PendingNativeFireBounce {
                 remaining_bounces: fire_bounce.remaining_bounces.saturating_sub(1),
                 target_location: target_position,
@@ -9578,6 +9632,7 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id: attacker_object_id,
                     damage,
+                    soulfire_practice: None,
                     fire_bounce: None,
                 });
             }
@@ -10212,6 +10267,7 @@ impl ZoneRuntime {
                     attacker_object_id: object_id,
                     object_id: target_object_id,
                     damage,
+                    soulfire_practice: None,
                     fire_bounce: None,
                 },
                 now_ms,
@@ -10921,6 +10977,7 @@ impl ZoneRuntime {
             attacker_object_id: object_id,
             object_id: target.object_id,
             damage,
+            soulfire_practice: None,
             fire_bounce: None,
         });
         let packet = ServerPacket::ObjectAttack {
@@ -10995,6 +11052,7 @@ impl ZoneRuntime {
                 attacker_object_id: object_id,
                 object_id: target.object_id,
                 damage,
+                soulfire_practice: None,
                 fire_bounce: None,
             });
         }
@@ -16644,3 +16702,6 @@ mod reward_rate_tests;
 
 #[cfg(test)]
 mod shared_harvest_tests;
+
+#[cfg(test)]
+mod soulfire_practice_tests;
