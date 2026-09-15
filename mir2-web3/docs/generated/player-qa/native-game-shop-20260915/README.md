@@ -142,6 +142,10 @@ six Mediums were subsequently exhausted and ordinary town escape triggered.
 The remaining CursedPriest objective is not complete.
 R123 full controller regression passes 643/643. Its live attempt preserved the
 Shaman clearance but exhausted 391 bounded search waypoints without invoking
-combat; it saved/logged out with the CursedPriest objective still 2/3. A scoped
-search-blocker follow-up is under development. This is not route success.
+combat; it saved/logged out with the CursedPriest objective still 2/3.
+R124 search-blocker follow-up passes 645/645 controller tests and corrected
+independent review. The normal R54 run cleared two live Shaman blockers and
+advanced its search position, but q89 remains incomplete at this observation.
+Taoist R104 has stopped with its saved checkpoint retained. This is not route success.
+See [controller evidence](../protocol-journey-20260915/q89-range-and-blocker-r122-r124.md).
 Full three-class Lv30 native/animation/paired acceptance is open.

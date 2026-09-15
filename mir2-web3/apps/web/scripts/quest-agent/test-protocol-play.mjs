@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createNavigator, NavigationStalled } from './protocol-play.mjs';
+import { startEmergencyHpRecovery } from './protocol-loadout.mjs';
+import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
+import { q89WizardFreshCursedShamanRecoveryOptions } from './protocol-survival.mjs';
 
 function openMap() {
   return {
@@ -606,6 +609,112 @@ test('q89 proven-aggressor navigation continues at 53 percent through one Shaman
   assert.equal(client.diagnostics.some(entry => entry.type === 'navigationEmergencyEscapeAttempt'), false);
 });
 
+test('q89 Wizard drinks one Medium immediately after the first fresh CursedShaman hit', async () => {
+  const client = navigationClient();
+  client.snapshot.beltItems = [{ name: '(HP)DrugMedium', uniqueId: 74, quantity: 4, container: 'belt' }];
+  client.snapshot.questLog = [{ questId: 89, stage: 'inProgress' }];
+  client.snapshot.entities[0].class = 'Wizard';
+  client.snapshot.entities.push({
+    objectId: 9, kind: 'monster', name: 'CursedShaman', disposition: 'hostile',
+    x: 5, y: 1, hp: 205, dead: false,
+  });
+  client.events.push({
+    packet: 'MapInformation', direction: 'received', sequence: 1,
+    payload: { fileName: 'test' }, at: '1970-01-01T00:00:05.000Z',
+  });
+  const damageAtUse = [];
+  const acknowledgeMovement = acknowledgeUnitMovement(client);
+  let hits = 0;
+  client.send = function send(command) {
+    this.sent.push(command);
+    this.sequence += 1;
+    if (command.type === 'useItem') damageAtUse.push(this.snapshot.playerHp);
+  };
+  client.wait = async predicate => {
+    await acknowledgeMovement(predicate);
+    if (hits >= 5) return true;
+    hits += 1;
+    client.snapshot.playerHp = 100 - hits * 15;
+    client.events.push({
+      packet: 'ObjectStruck', direction: 'received', sequence: hits + 1,
+      payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:09.900Z',
+    });
+    return true;
+  };
+  const navigateNear = createNavigator(client, {
+    loadCollisionMap: async () => ({ ...openMap(), width: 32, height: 8, blocked: new Uint8Array(256) }),
+    delay: async () => {}, now: () => 10_000,
+  });
+
+  const result = await navigateNear({ x: 12, y: 1 }, 0, () => false, {
+    emergencyEscapeRequiresProvenAggressors: true,
+    onFreshDirectHit: (owner, { attacker }) => {
+      const options = q89WizardFreshCursedShamanRecoveryOptions(owner.snapshot, attacker, 'Wizard');
+      if (options) startEmergencyHpRecovery(owner, options);
+    },
+  });
+
+  assert.equal(result.reached, true);
+  assert.equal(hits, 5);
+  assert.deepEqual(damageAtUse, [85]);
+  assert.equal(client.sent.filter(command => command.type === 'useItem' && command.uniqueId === 74).length, 1);
+});
+
+test('fresh-hit recovery does not redrink a receipt revisited during navigation', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 85;
+  client.snapshot.beltItems = [{ name: '(HP)DrugMedium', uniqueId: 74, quantity: 4, container: 'belt' }];
+  client.snapshot.questLog = [{ questId: 89, stage: 'inProgress' }];
+  client.snapshot.entities.push({
+    objectId: 9, kind: 'monster', name: 'CursedShaman', disposition: 'hostile',
+    x: 5, y: 1, hp: 205, dead: false,
+  });
+  client.events.push(
+    { packet: 'MapInformation', direction: 'received', sequence: 1, payload: { fileName: 'test' }, at: '1970-01-01T00:00:05.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 2, payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:09.900Z' },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    loadCollisionMap: async () => ({ ...openMap(), width: 32, height: 8, blocked: new Uint8Array(256) }),
+  });
+
+  const result = await navigateNear({ x: 12, y: 1 }, 0, () => false, {
+    onFreshDirectHit: (owner, { attacker }) => {
+      const options = q89WizardFreshCursedShamanRecoveryOptions(owner.snapshot, attacker, 'Wizard');
+      if (options) startEmergencyHpRecovery(owner, options);
+    },
+  });
+
+  assert.equal(result.reached, true);
+  assert.equal(client.sent.filter(command => command.type === 'useItem' && command.uniqueId === 74).length, 1);
+});
+
+test('fresh-hit recovery rejects prior-map and wrong-owner receipts', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 85;
+  client.snapshot.entities.push({
+    objectId: 9, kind: 'monster', name: 'CursedShaman', disposition: 'hostile',
+    x: 5, y: 1, hp: 205, dead: false,
+  });
+  client.events.push(
+    { packet: 'MapInformation', direction: 'received', sequence: 1, payload: { fileName: 'old-map' }, at: '1970-01-01T00:00:05.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 2, payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:09.900Z' },
+    { packet: 'MapInformation', direction: 'received', sequence: 3, payload: { fileName: 'test' }, at: '1970-01-01T00:00:09.910Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 4, payload: { objectId: 99, attackerId: 9 }, at: '1970-01-01T00:00:09.920Z' },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  let recoveryCalls = 0;
+  const navigateNear = createNavigator(client, dependencies);
+
+  const result = await navigateNear({ x: 3, y: 1 }, 0, () => false, {
+    onFreshDirectHit: () => { recoveryCalls += 1; },
+  });
+
+  assert.equal(result.reached, true);
+  assert.equal(recoveryCalls, 0);
+});
+
 test('q89 proven-aggressor navigation escapes at 65 percent only after two fresh direct hits', async () => {
   const client = navigationClient();
   client.snapshot.playerHp = 53;
@@ -948,6 +1057,57 @@ test('hostile clearance keeps spawn-search movement outside visible aggro cells'
 
   assert.equal(result.reached, true);
   assert.ok(visited.every(point => Math.max(Math.abs(point.x - 3), Math.abs(point.y - 2)) > 1));
+});
+
+test('named hostile clearance protects the Shaman band without widening a zombie route', async () => {
+  const client = navigationClient();
+  Object.assign(client.snapshot.entities[0], { x: 1, y: 5 });
+  client.snapshot.entities.push(
+    { objectId: 9, kind: 'monster', name: 'CursedShaman', x: 3, y: 2, hp: 20, dead: false },
+    { objectId: 10, kind: 'monster', name: 'CursedZombie', x: 3, y: 5, hp: 20, dead: false },
+  );
+  const visited = [];
+  client.wait = acknowledgeUnitMovement(client, visited);
+
+  const navigateNear = createNavigator(client, dependencies);
+  const result = await navigateNear({ x: 7, y: 3 }, 0, () => false, {
+    hostileAvoidanceRadius: 0,
+    hostileAvoidanceByName: { CursedShaman: 2 },
+  });
+
+  assert.equal(result.reached, true);
+  assert.ok(visited.every(point => Math.max(Math.abs(point.x - 3), Math.abs(point.y - 2)) > 2));
+  assert.ok(visited.some(point => Math.max(Math.abs(point.x - 3), Math.abs(point.y - 5)) === 1));
+});
+
+test('the q89 D2031 entry navigator refuses a waypoint sealed by both Shaman footprints', async () => {
+  const client = navigationClient();
+  client.snapshot.mapFileName = 'D2031';
+  Object.assign(client.snapshot.entities[0], { x: 278, y: 284 });
+  client.snapshot.entities.push(
+    {
+      objectId: 341100, kind: 'monster', name: 'CursedShaman',
+      x: 263, y: 273, hp: 100, dead: false, disposition: 'hostile',
+    },
+    {
+      objectId: 341105, kind: 'monster', name: 'CursedShaman0',
+      x: 275, y: 270, hp: 100, dead: false, disposition: 'hostile',
+    },
+  );
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    loadCollisionMap: loadProtocolCollisionMap,
+  });
+
+  await assert.rejects(
+    navigateNear({ x: 250, y: 270 }, 4, () => false, {
+      hostileAvoidanceRadius: 1,
+      hostileAvoidanceByName: { CursedShaman: 6, CursedShaman0: 6 },
+      maxNoPathRefreshes: 0,
+    }),
+    /No walk path on D2031 from 278,284 to 250,270/,
+  );
+  assert.deepEqual(client.sent, []);
 });
 
 test('navigator replans before a newly revealed hostile intersects the remaining route', async () => {

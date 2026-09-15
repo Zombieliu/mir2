@@ -12,12 +12,16 @@
 > replacement and RedTiger preview rotation. Original paired acceptance is open.
 > Wizard R122 uses existing Medium potions after a fresh direct Shaman hit at
 > 85% HP; controller 634/634. Quest/monster values and escape guards are unchanged.
-> Taoist R104 remains active. Natural completed units remain 155/177; partial
+> Taoist R104 has stopped; its saved Lv25 checkpoint is retained. Natural completed units remain 155/177; partial
 > kills and these UI leaves do not increase full-route/global acceptance.
 > R35 source alignment/preview asset repair builds; native-ui 853/853 passes.
 > Real original screenshots are retained; repaired paired visual pass remains
 > pending. R123 live search exhausted391 waypoints without q89 advancement;
-> scoped protected-blocker follow-up is under development.
+> R124 protected-blocker follow-up is wired only for q89 Wizard. Full controller
+> regression passes 645/645; real D2031 collision tests cover every travelled cell
+> and blocker-specific death proof. The normal R54 live run has cleared two
+> Shaman blockers and advanced its search position; q89 completion remains open.
+> See generated/player-qa/protocol-journey-20260915/q89-range-and-blocker-r122-r124.md.
 > Evidence: generated/player-qa/native-game-shop-20260915/README.md.
 
 > Historical controller checkpoint follows; R122 supersedes the active Wizard run.

@@ -3,6 +3,16 @@ import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-nav
 import { combatApproachRange } from './protocol-loadout.mjs';
 import { distance, selfPlayer } from './protocol-play.mjs';
 
+/** A safe ranged firing band could not be reached from authoritative state. */
+export class RangedSafetyBandUnavailable extends Error {
+  constructor(objectId, target, mapFileName) {
+    super(`target ${objectId} has no collision-safe Wizard ranged band on ${mapFileName}`);
+    this.objectId = Number(objectId);
+    this.target = validPoint(target) ? { x: Number(target.x), y: Number(target.y) } : null;
+    this.mapFileName = String(mapFileName ?? '');
+  }
+}
+
 /**
  * Wrap an ordinary ranged combat action with a bounded caster retreat. Every
  * chosen cell is proven by the same Crystal collision planner used by normal
@@ -20,6 +30,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
   const maxExpanded = positiveInteger(options.maxExpanded, 256);
   const fightWhenBlocked = options.fightWhenBlocked === true;
   const approachRange = options.approachRange ?? combatApproachRange;
+  const rangedSafetyBand = rangedSafetyBandOptions(options.rangedSafetyBand, maxTargetDistance);
   const maps = new Map();
   let encounterKey = null;
   let encounterRetreatedCells = 0;
@@ -34,7 +45,13 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
     // without a usable ranged loadout remain at range one and never kite.
     const rangedReady = approachRange(client, target) > 1;
     const closeThreat = hostiles.some(entity => distance(actor, entity) <= triggerDistance);
-    if (!rangedReady || !closeThreat) return baseAction(client, target);
+    const safetyBandRequired = rangedSafetyBandRequired(actor, target, hostiles, rangedSafetyBand);
+    if (safetyBandRequired && !rangedReady) {
+      const mapId = String(client.snapshot?.mapFileName ?? '');
+      recordFallback(client, Number(target?.objectId), 'rangedSafetyBandNoRangedAction');
+      throw new RangedSafetyBandUnavailable(target?.objectId, target, mapId);
+    }
+    if (!rangedReady || (!closeThreat && !safetyBandRequired)) return baseAction(client, target);
     if (!Number.isSafeInteger(targetId) || targetId <= 0) {
       throw new Error('Wizard kite target has no valid objectId');
     }
@@ -48,13 +65,22 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
 
     const remainingBudget = maxRetreatCellsPerTarget - encounterRetreatedCells;
     if (remainingBudget <= 0) {
+      if (safetyBandRequired) {
+        recordFallback(client, targetId, 'rangedSafetyBandRetreatCellBudgetExceeded', {
+          maximumRetreatCellsPerTarget: maxRetreatCellsPerTarget,
+        });
+        throw new RangedSafetyBandUnavailable(targetId, target, mapId);
+      }
       if (fightWhenBlocked) {
         recordFallback(client, targetId, 'retreatCellBudgetExceeded');
         return baseAction(client, target);
       }
       throw new Error(`Wizard retreat cell budget exceeded for target ${targetId} (${maxRetreatCellsPerTarget})`);
     }
-    const stepBudget = Math.min(maxRetreatSteps, remainingBudget);
+    const stepBudget = Math.min(
+      safetyBandRequired ? rangedSafetyBand.maxRetreatSteps : maxRetreatSteps,
+      remainingBudget,
+    );
     if (!maps.has(mapId)) maps.set(mapId, await loadCollisionMap(mapId));
     const transferHazards = liveTransferPoints(client.snapshot, mapId);
     const plan = chooseRetreatPlan({
@@ -65,8 +91,16 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         ...transferHazards,
       ],
       stepBudget, maxTargetDistance, maxExpanded,
+      ...(safetyBandRequired ? { rangedSafetyBand } : {}),
     });
     if (!plan) {
+      if (safetyBandRequired) {
+        recordFallback(client, targetId, 'rangedSafetyBandUnavailable', {
+          minimumTargetDistance: rangedSafetyBand.minimumTargetDistance,
+          unsafeShamanDistance: rangedSafetyBand.unsafeShamanDistance,
+        });
+        throw new RangedSafetyBandUnavailable(targetId, target, mapId);
+      }
       if (fightWhenBlocked) {
         recordFallback(client, targetId, 'noCollisionSafeRetreat');
         return baseAction(client, target);
@@ -102,6 +136,10 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       if (!blockedTarget) {
         return targetLeftAfterRetreat(client, targetId);
       }
+      if (safetyBandRequired) {
+        recordFallback(client, targetId, 'rangedSafetyBandNavigationBlocked');
+        throw new RangedSafetyBandUnavailable(targetId, blockedTarget, mapId);
+      }
       if (boundedProgress) {
         navigation = { reached: false, successfulSteps: null };
       } else {
@@ -127,6 +165,12 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       ? Number(navigation.successfulSteps)
       : null;
     if (moved <= 0 || moved > stepBudget) {
+      if (safetyBandRequired && moved <= 0) {
+        const stalledTarget = entityById(client.snapshot, targetId);
+        if (!stalledTarget) return targetLeftAfterRetreat(client, targetId);
+        recordFallback(client, targetId, 'rangedSafetyBandNavigationStalled');
+        throw new RangedSafetyBandUnavailable(targetId, stalledTarget, mapId);
+      }
       if (fightWhenBlocked && moved <= 0) {
         recordFallback(client, targetId, 'retreatNavigationStalled');
         const stalledTarget = entityById(client.snapshot, targetId);
@@ -159,6 +203,13 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
     if (!refreshed) return targetLeftAfterRetreat(client, targetId);
     if (refreshed.dead === true || Number(refreshed.hp) <= 0) {
       return { kind: 'retreated', targetId };
+    }
+    if (safetyBandRequired && !rangedSafetyBandSatisfied(after, refreshed, visibleHostileMonsters(client?.snapshot), rangedSafetyBand)) {
+      recordFallback(client, targetId, 'rangedSafetyBandInvalidAfterNavigation', {
+        minimumTargetDistance: rangedSafetyBand.minimumTargetDistance,
+        unsafeShamanDistance: rangedSafetyBand.unsafeShamanDistance,
+      });
+      throw new RangedSafetyBandUnavailable(targetId, refreshed, mapId);
     }
     return baseAction(client, refreshed);
   };
@@ -207,13 +258,24 @@ export function visibleHostileMonsters(snapshot) {
 
 function chooseRetreatPlan({
   map, actor, target, hostiles, dynamicObstacles, stepBudget, maxTargetDistance, maxExpanded,
+  rangedSafetyBand = null,
 }) {
-  const initialSafety = minimumDistance(actor, hostiles);
+  // A ranged safety band may deliberately approach its protected target from
+  // outside its attack footprint. Keep the ordinary monotonic retreat rule
+  // for every other hostile, while the protected monsters are governed by the
+  // stronger per-step footprint check below.
+  const monotonicHostiles = rangedSafetyBand
+    ? hostiles.filter(entity => !protectedMonster(entity, rangedSafetyBand))
+    : hostiles;
+  const initialSafety = monotonicHostiles.length > 0
+    ? minimumDistance(actor, monotonicHostiles)
+    : null;
   const candidates = [];
   for (let y = Number(actor.y) - stepBudget; y <= Number(actor.y) + stepBudget; y += 1) {
     for (let x = Number(actor.x) - stepBudget; x <= Number(actor.x) + stepBudget; x += 1) {
       const destination = { x, y };
       if (distance(actor, destination) === 0 || distance(target, destination) > maxTargetDistance) continue;
+      if (rangedSafetyBand && !rangedSafetyBandSatisfied(destination, target, hostiles, rangedSafetyBand)) continue;
       const plan = planProtocolNavigation({
         map,
         start: actor,
@@ -223,18 +285,22 @@ function chooseRetreatPlan({
         maxExpanded,
       });
       if (!plan || plan.steps.length === 0 || plan.steps.length > stepBudget) continue;
+      if (rangedSafetyBand && plan.path.slice(1).some(point =>
+        !outsideProtectedFootprints(point, hostiles, rangedSafetyBand))) continue;
       let previousSafety = initialSafety;
       let monotonic = true;
-      for (const point of plan.path.slice(1)) {
-        const safety = minimumDistance(point, hostiles);
-        if (safety < previousSafety) { monotonic = false; break; }
-        previousSafety = safety;
+      if (previousSafety != null) {
+        for (const point of plan.path.slice(1)) {
+          const safety = minimumDistance(point, monotonicHostiles);
+          if (safety < previousSafety) { monotonic = false; break; }
+          previousSafety = safety;
+        }
+        if (!monotonic || previousSafety <= initialSafety) continue;
       }
-      if (!monotonic || previousSafety <= initialSafety) continue;
       candidates.push({
         destination,
         steps: plan.steps.length,
-        safety: previousSafety,
+        safety: previousSafety ?? Number.POSITIVE_INFINITY,
         targetDistance: distance(target, destination),
       });
     }
@@ -243,6 +309,53 @@ function chooseRetreatPlan({
     right.safety - left.safety || left.steps - right.steps ||
     left.targetDistance - right.targetDistance ||
     left.destination.y - right.destination.y || left.destination.x - right.destination.x)[0] ?? null;
+}
+
+function rangedSafetyBandOptions(value, maximumTargetDistance) {
+  if (!value || typeof value !== 'object') return null;
+  const protectedNames = new Set((value.protectedMonsterNames ?? [])
+    .map(normalized)
+    .filter(Boolean));
+  if (protectedNames.size === 0) return null;
+  const minimumTargetDistance = positiveInteger(value.minimumTargetDistance, 7);
+  const maximumDistance = Math.min(
+    maximumTargetDistance,
+    positiveInteger(value.maximumTargetDistance, maximumTargetDistance),
+  );
+  if (minimumTargetDistance > maximumDistance) return null;
+  const unsafeShamanDistance = Math.min(
+    minimumTargetDistance - 1,
+    positiveInteger(value.unsafeShamanDistance, minimumTargetDistance - 1),
+  );
+  return {
+    protectedNames,
+    minimumTargetDistance,
+    maximumTargetDistance: maximumDistance,
+    unsafeShamanDistance,
+    maxRetreatSteps: positiveInteger(value.maxRetreatSteps, 6),
+  };
+}
+
+function rangedSafetyBandRequired(actor, target, hostiles, rangedSafetyBand) {
+  if (!rangedSafetyBand || !protectedMonster(target, rangedSafetyBand)) return false;
+  return !rangedSafetyBandSatisfied(actor, target, hostiles, rangedSafetyBand);
+}
+
+function rangedSafetyBandSatisfied(point, target, hostiles, rangedSafetyBand) {
+  const targetDistance = distance(point, target);
+  return targetDistance >= rangedSafetyBand.minimumTargetDistance &&
+    targetDistance <= rangedSafetyBand.maximumTargetDistance &&
+    outsideProtectedFootprints(point, hostiles, rangedSafetyBand);
+}
+
+function outsideProtectedFootprints(point, hostiles, rangedSafetyBand) {
+  return hostiles.every(entity => !protectedMonster(entity, rangedSafetyBand) ||
+    distance(point, entity) > rangedSafetyBand.unsafeShamanDistance);
+}
+
+function protectedMonster(entity, rangedSafetyBand) {
+  return normalized(entity?.kind) === 'monster' &&
+    rangedSafetyBand.protectedNames.has(normalized(entity?.name));
 }
 
 function minimumDistance(point, entities) {

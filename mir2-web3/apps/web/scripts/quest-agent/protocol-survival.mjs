@@ -575,6 +575,22 @@ export function hpMediumDrugCount(snapshot) {
   return itemQuantity(snapshot, item => /^\(HP\)DrugMedium/i.test(String(item?.name ?? item?.key ?? '')));
 }
 
+/**
+ * The Wizard's q89 entrance has a measured five-hit CursedShaman volley.
+ * This is deliberately a narrow policy selector: callers still require a
+ * fresh direct packet and use the ordinary held-item recovery mechanism.
+ */
+export function q89WizardFreshCursedShamanRecoveryOptions(snapshot, attacker, className) {
+  if (String(className ?? '').trim().toLowerCase() !== 'wizard') return null;
+  const activeQ89 = (snapshot?.questLog ?? []).some(entry =>
+    Number(entry?.questId) === 89 && normalizedStage(entry?.stage) === 'inprogress');
+  if (!activeQ89 || String(attacker?.name ?? '').trim().toLowerCase() !== 'cursedshaman') return null;
+  const maximum = Number(snapshot?.playerMaxHp ?? 0);
+  const hp = observedPlayerHp(snapshot);
+  if (!(maximum > 0) || hp <= 0 || hp / maximum > 0.85 || hpMediumDrugCount(snapshot) <= 0) return null;
+  return { hpThreshold: 0.85, preferredHpPotion: 'medium', restorativeReuseDelayMs: 2_500 };
+}
+
 export function isLivingEvasiveRecoveryTimeout(snapshot, error) {
   return healthRatio(snapshot) > 0 &&
     String(error?.message ?? error) === 'Evasive HP recovery timed out';

@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createWizardKitingAction } from './protocol-kiting.mjs';
+import { createWizardKitingAction, RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
+import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
 
 function openMap(width = 15, height = 15, blockedPoints = []) {
   const blocked = new Uint8Array(width * height);
@@ -73,6 +74,129 @@ test('Wizard retreats on a collision-planned path before using the ranged action
     Math.max(Math.abs(owner.x - secondThreat.x), Math.abs(owner.y - secondThreat.y)),
   ) > 1);
   assert.equal(actionCalls[0], target);
+});
+
+test('q89 Wizard moves a close CursedShaman into the 7-9 projectile band outside every visible Shaman footprint', async () => {
+  const owner = player({ x: 5, y: 5 });
+  const target = monster(20, 5, 11, { name: 'CursedShaman' });
+  const secondShaman = monster(21, 11, 5, { name: 'CursedShaman0' });
+  const client = clientFixture([owner, target, secondShaman]);
+  const navigationCalls = [];
+  navigationCalls.client = client;
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async (_client, refreshedTarget) => {
+      actions += 1;
+      return { kind: 'magic', targetId: refreshedTarget.objectId };
+    },
+    directNavigator(navigationCalls),
+    {
+      loadCollisionMap: async () => openMap(20, 20),
+      fightWhenBlocked: true,
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7,
+        maximumTargetDistance: 9,
+        unsafeShamanDistance: 6,
+        maxRetreatSteps: 6,
+      },
+    },
+  );
+
+  assert.deepEqual(await wrapped(client, target), { kind: 'magic', targetId: 20 });
+  assert.equal(actions, 1);
+  assert.equal(navigationCalls.length, 1);
+  assert.ok(navigationCalls[0].options.maxSuccessfulSteps <= 6);
+  assert.ok(Math.max(Math.abs(owner.x - target.x), Math.abs(owner.y - target.y)) >= 7);
+  assert.ok(Math.max(Math.abs(owner.x - target.x), Math.abs(owner.y - target.y)) <= 9);
+  for (const shaman of [target, secondShaman]) {
+    assert.ok(Math.max(Math.abs(owner.x - shaman.x), Math.abs(owner.y - shaman.y)) > 6);
+  }
+});
+
+test('q89 Wizard never falls back to a close CursedShaman cast when no collision-safe ranged band exists', async () => {
+  const owner = player({ x: 2, y: 2 });
+  const target = monster(20, 3, 2, { name: 'CursedShaman' });
+  const client = clientFixture([owner, target]);
+  const blocked = [];
+  for (let y = 0; y < 5; y += 1) {
+    for (let x = 0; x < 5; x += 1) {
+      if (x !== 2 || y !== 2) blocked.push({ x, y });
+    }
+  }
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actions += 1; return { kind: 'magic', targetId: target.objectId }; },
+    async () => { throw new Error('ranged-band fallback must not navigate'); },
+    {
+      loadCollisionMap: async () => openMap(5, 5, blocked),
+      maxExpanded: 25,
+      fightWhenBlocked: true,
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman'],
+        minimumTargetDistance: 7,
+        maximumTargetDistance: 9,
+        unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  await assert.rejects(wrapped(client, target), /no collision-safe Wizard ranged band/i);
+  assert.equal(actions, 0);
+});
+
+test('D2031 entry has a collision-valid nine-tile CursedShaman firing position', async () => {
+  const map = await loadProtocolCollisionMap('D2031');
+  const shaman = { x: 263, y: 273 };
+  const plan = planProtocolNavigation({
+    map,
+    start: { x: 278, y: 284 },
+    target: shaman,
+    desiredDistance: 9,
+    dynamicObstacles: [{ x: 275, y: 270 }],
+  });
+
+  assert.ok(plan);
+  assert.deepEqual(plan.path.at(-1), { x: 272, y: 282 });
+  assert.equal(plan.steps.length, 6);
+  assert.equal(Math.max(Math.abs(272 - shaman.x), Math.abs(282 - shaman.y)), 9);
+  assert.equal(Math.max(Math.abs(272 - 275), Math.abs(282 - 270)) > 6, true);
+});
+
+test('q89 Wizard wrapper reaches the live D2031 entry band before casting', async () => {
+  const owner = player({ x: 278, y: 284 });
+  const target = monster(341100, 263, 273, { name: 'CursedShaman', hp: 205 });
+  const secondShaman = monster(341105, 275, 270, { name: 'CursedShaman0', hp: 205 });
+  const client = clientFixture([owner, target, secondShaman], { mapFileName: 'D2031' });
+  const navigationCalls = [];
+  navigationCalls.client = client;
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async (_client, refreshedTarget) => {
+      actions += 1;
+      return { kind: 'magic', targetId: refreshedTarget.objectId };
+    },
+    directNavigator(navigationCalls),
+    {
+      loadCollisionMap: loadProtocolCollisionMap,
+      fightWhenBlocked: true,
+      maxExpanded: 256,
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7,
+        maximumTargetDistance: 9,
+        unsafeShamanDistance: 6,
+        maxRetreatSteps: 6,
+      },
+    },
+  );
+
+  assert.deepEqual(await wrapped(client, target), { kind: 'magic', targetId: 341100 });
+  assert.equal(actions, 1);
+  assert.equal(navigationCalls.length, 1);
+  assert.ok(navigationCalls[0].options.maxSuccessfulSteps <= 6);
+  assert.equal(Math.max(Math.abs(owner.x - target.x), Math.abs(owner.y - target.y)), 9);
+  assert.equal(Math.max(Math.abs(owner.x - secondShaman.x), Math.abs(owner.y - secondShaman.y)) > 6, true);
 });
 
 test('Taoist SoulFireBall uses the same bounded ranged retreat with an equipped Amulet', async () => {
@@ -377,6 +501,70 @@ test('per-target retreat cell budget stops repeated kiting without another move'
   await wrapped(client, target);
   Object.assign(owner, { x: 5, y: 5 });
   await assert.rejects(wrapped(client, target), /Wizard retreat cell budget exceeded/);
+  assert.equal(navigationCalls.length, 1);
+});
+
+test('q89 exhausted retreat budget never falls through to a close Shaman cast', async () => {
+  const owner = player();
+  const target = monster(20, 12, 5, { name: 'CursedShaman' });
+  const closeZombie = monster(21, 6, 5, { name: 'CursedZombie' });
+  const client = clientFixture([owner, target, closeZombie]);
+  const navigationCalls = [];
+  navigationCalls.client = client;
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async (_client, refreshedTarget) => {
+      actions += 1;
+      // The authoritative target can step inward between cadence actions.
+      // Preserve the object id so this is the same exhausted engagement.
+      if (actions === 1) Object.assign(refreshedTarget, { x: owner.x + 6, y: owner.y });
+      return { kind: 'magic', targetId: refreshedTarget.objectId };
+    },
+    directNavigator(navigationCalls),
+    {
+      loadCollisionMap: async () => openMap(),
+      maxRetreatSteps: 1,
+      maxRetreatCellsPerTarget: 1,
+      fightWhenBlocked: true,
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7,
+        maximumTargetDistance: 9,
+        unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  await wrapped(client, target);
+  await assert.rejects(
+    wrapped(client, target),
+    error => error instanceof RangedSafetyBandUnavailable,
+  );
+  assert.equal(actions, 1);
+  assert.equal(navigationCalls.length, 1);
+});
+
+test('generic exhausted retreat budget retains its journey combat fallback', async () => {
+  const owner = player();
+  const target = monster(20, 7, 5);
+  const client = clientFixture([owner, target]);
+  const navigationCalls = [];
+  navigationCalls.client = client;
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async () => ({ kind: 'magic', call: ++actions }),
+    directNavigator(navigationCalls),
+    {
+      loadCollisionMap: async () => openMap(),
+      maxRetreatSteps: 1,
+      maxRetreatCellsPerTarget: 1,
+      fightWhenBlocked: true,
+    },
+  );
+
+  await wrapped(client, target);
+  Object.assign(owner, { x: 5, y: 5 });
+  assert.deepEqual(await wrapped(client, target), { kind: 'magic', call: 2 });
   assert.equal(navigationCalls.length, 1);
 });
 

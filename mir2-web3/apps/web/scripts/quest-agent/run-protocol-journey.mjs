@@ -52,6 +52,7 @@ import {
   journeyResumeDisposition,
   questRetreatBiasPosition,
   questRetreatProfile,
+  q89WizardFreshCursedShamanRecoveryOptions,
   questSpawnSearchHostileClearanceFallback,
   questCombatMpUseThresholdForQuest,
   questEmergencyEscapeHpRatio,
@@ -179,6 +180,15 @@ try {
       ...options,
       ...q89WizardPotionOptions(owner),
     });
+    const recoverFromFreshQ89CursedShamanHit = (owner, { attacker }) => {
+      const recoveryOptions = q89WizardFreshCursedShamanRecoveryOptions(
+        owner?.snapshot,
+        attacker,
+        className,
+      );
+      if (!recoveryOptions) return [];
+      return startJourneyEmergencyHpRecovery(owner, recoveryOptions);
+    };
     const emergencyTeleport = createRandomTeleportEmergencyEscape({
       criticalHpRatio: journeyEmergencyTeleportCriticalHpRatio(className),
       teleport: async owner => {
@@ -238,6 +248,9 @@ try {
         ...options,
         ...(retreatProfile?.emergencyEscapeRequiresProvenAggressors === true
           ? { emergencyEscapeRequiresProvenAggressors: true }
+          : {}),
+        ...(isWizardQ89Expedition(client.snapshot)
+          ? { onFreshDirectHit: recoverFromFreshQ89CursedShamanHit }
           : {}),
       });
     };
@@ -788,6 +801,23 @@ try {
             maxRetreatCellsPerTarget: maxAttackAttempts * maxRetreatSteps,
             fightWhenBlocked: true,
             approachRange: objectiveApproachRange,
+            // The D2031 entrance can reveal a CursedShaman before the q89
+            // objective is in AOI. Its source attack band ends at six while
+            // the Wizard projectile band ends at nine. Do not convert that
+            // theoretical advantage into an immunity claim: require a live,
+            // collision-planned 7-9 tile firing position outside every
+            // visible Shaman footprint before this q89 Wizard casts one.
+            // Existing proven-aggressor and critical-escape gates run before
+            // this action and remain the authority for a second attacker.
+            ...(id === 89 && className === 'Wizard' ? {
+              rangedSafetyBand: {
+                protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+                minimumTargetDistance: 7,
+                maximumTargetDistance: 9,
+                unsafeShamanDistance: 6,
+                maxRetreatSteps: 6,
+              },
+            } : {}),
           });
           record.objectives = await completeQuestObjectives(client, q, navigate, {
             prepare: async owner => {
@@ -865,6 +895,27 @@ try {
             // aggro contact while allowing a running player to weave through
             // the field; the denser q33/q36 hunts keep the wider buffer.
             spawnSearchHostileClearance: id === 30 ? 2 : 4,
+            // The q89 Wizard reaches CursedShaman at range nine, but its
+            // ordinary spawn-search waypoint must never spend the initial
+            // approach inside the measured six-tile Shaman footprint. Keep
+            // the existing generic clearance (and its cave fallback) for
+            // zombies; only these two Shaman names retain this wider buffer.
+            spawnSearchProtectedHostileClearance: id === 89 && className === 'Wizard'
+              ? { CursedShaman: 6, CursedShaman0: 6 }
+              : {},
+            // When that protected search cannot reach a required spawn, a
+            // Wizard may remove at most two visible Shaman blockers through
+            // the normal collision-checked seven-to-nine-tile firing band.
+            // The combat helper leaves every other quest and class inert.
+            spawnStallProtectedBlocker: id === 89 && className === 'Wizard'
+              ? {
+                monsterNames: ['CursedShaman', 'CursedShaman0'],
+                minimumApproachDistance: 7,
+                maximumApproachDistance: 9,
+                clearance: 6,
+                maxBlockers: 2,
+              }
+              : null,
             // Narrow Crystal cave corridors are often sealed by one monster's
             // four-cell avoidance halo. Retry the same search waypoint with a
             // one-cell buffer; proven attacks still interrupt navigation and

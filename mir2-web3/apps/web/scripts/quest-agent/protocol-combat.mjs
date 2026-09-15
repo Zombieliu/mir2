@@ -1,5 +1,6 @@
 import { observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
 import { delay as realDelay } from "./protocol-client.mjs";
+import { RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
 import { distance, NavigationStalled } from "./protocol-play.mjs";
 import { selfActionBlockMask } from "./protocol-status.mjs";
 import { TravelBlockedByMonster, TravelInterrupted } from "./protocol-travel.mjs";
@@ -48,6 +49,7 @@ class UnsafeTargetCluster extends Error {
   }
 }
 class SpawnSearchExhausted extends Error {}
+class SpawnStallRecovered extends Error {}
 
 /**
  * Complete the kill and monster-item objectives of one already-active quest.
@@ -401,8 +403,10 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
           descriptors.filter(descriptor => descriptor.kind === 'kill' &&
             !objectiveDone(snapshotObjective(questEntry(client.snapshot, questId), descriptor)))
             .map(descriptor => descriptor.route.monsterName),
+          pending,
         );
       } catch (error) {
+        if (error instanceof SpawnStallRecovered) continue;
         const respawnWaitLimit = spawnRespawnWaitLimit(targetPlan, settings);
         if (error instanceof SpawnSearchExhausted &&
             spawnRespawnWaits < respawnWaitLimit) {
@@ -523,7 +527,8 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
       } catch (error) {
         if (error instanceof UnreachableCombatTarget ||
             error instanceof UnresponsiveCombatTarget ||
-            error instanceof LostCombatTarget) {
+            error instanceof LostCombatTarget ||
+            error instanceof RangedSafetyBandUnavailable) {
           const blocker = error instanceof UnreachableCombatTarget &&
             approachBlockerClears < settings.maxApproachBlockerClears
             ? nearestObjectiveApproachBlocker(
@@ -644,6 +649,12 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
           client, questId, questProgressKey, objectiveMapFallbackState, settings,
           'focusedTargetLost',
         );
+      }
+      if (unreachableTarget instanceof RangedSafetyBandUnavailable) {
+        // A close Shaman is not an ordinary cast fallback. Leave through the
+        // same guarded recovery path used by every other unsafe pull, then
+        // let the deferred-object policy re-evaluate its live position.
+        await retreatAndRecover(client, navigateNear, settings);
       }
       continue;
     }
@@ -911,6 +922,10 @@ function combatSettings(options) {
       options.spawnSearchHostileClearanceFallback,
       nonnegativeInteger(options.spawnSearchHostileClearance, 0),
     ),
+    spawnSearchProtectedHostileClearance: namedHostileClearanceOption(
+      options.spawnSearchProtectedHostileClearance,
+    ),
+    spawnStallProtectedBlocker: protectedSpawnBlockerOption(options.spawnStallProtectedBlocker),
     combatHostileClearance: nonnegativeInteger(options.combatHostileClearance, 0),
     combatHostileClearanceFallback: nonnegativeInteger(
       options.combatHostileClearanceFallback,
@@ -1159,7 +1174,7 @@ function sourceSearchEffort(snapshot, spawns) {
 }
 
 async function searchSpawnCandidates(
-  client, targetPlan, navigateNear, settings, unavailableCorpses = new Map(), alternativeMonsterNames = [],
+  client, targetPlan, navigateNear, settings, unavailableCorpses = new Map(), alternativeMonsterNames = [], pending = null,
 ) {
   const origin = playerFromSnapshot(client.snapshot);
   const candidates = [...new Map(targetPlan.spawns.map(spawn => [spawnKey(spawn), spawn])).values()]
@@ -1203,6 +1218,7 @@ async function searchSpawnCandidates(
   const startedAt = settings.now();
   let visited = 0;
   let sawUnsafeTarget = false;
+  let protectedBlockersCleared = 0;
   const searchMonsterNames = [...new Set([...targetPlan.monsterNames, ...alternativeMonsterNames])];
   const observeSafeTarget = () => {
     const safeTarget = nearestAvailableLiveMonster(
@@ -1245,6 +1261,7 @@ async function searchSpawnCandidates(
       stopSearchNavigation,
       {
         hostileAvoidanceRadius,
+        hostileAvoidanceByName: settings.spawnSearchProtectedHostileClearance,
         // A fresh snapshot cannot open a route blocked by the same visible
         // hostile buffer quickly enough to justify three one-second retries.
         // The bounded fallback below is the deliberate second attempt.
@@ -1263,6 +1280,16 @@ async function searchSpawnCandidates(
       assertPlayerAlive(client);
       if (!isRecoverableSearchNavigationError(error)) throw error;
       await interruptThreatenedSearchAfterNavigationFailure(client, targetPlan, settings);
+      const protectedBlocker = await resolveProtectedSpawnStallBlocker(
+        client, pending, navigateNear, settings, protectedBlockersCleared,
+      );
+      if (protectedBlocker?.recovered) throw new SpawnStallRecovered();
+      if (protectedBlocker?.cleared) {
+        protectedBlockersCleared += 1;
+        const seenAfterBlocker = observeSafeTarget();
+        if (seenAfterBlocker) return seenAfterBlocker;
+        continue;
+      }
       const fallback = Math.min(
         settings.spawnSearchHostileClearance,
         settings.spawnSearchHostileClearanceFallback,
@@ -1361,6 +1388,79 @@ async function searchSpawnCandidates(
     throw new Error(`bounded full-spread spawn search waypoint budget exhausted (${waypoints.length}/${allWaypoints.length}) for ${targetPlan.monsterNames.join(" or ")}`);
   }
   throw new SpawnSearchExhausted(`bounded full-spread spawn search exhausted ${waypoints.length} waypoints across ${candidates.length} candidates without live ${targetPlan.monsterNames.join(" or ")}`);
+}
+
+async function resolveProtectedSpawnStallBlocker(client, pending, navigateNear, settings, cleared) {
+  const policy = settings.spawnStallProtectedBlocker;
+  if (!policy || cleared >= policy.maxBlockers || !pending) return null;
+  const mapFileName = String(client.snapshot?.mapFileName ?? '');
+  const player = playerFromSnapshot(client.snapshot);
+  const blocker = (client.snapshot?.entities ?? [])
+    .filter(entity => isLiveMonster(entity) && policy.names.has(normalizeName(entity?.name)) &&
+      !unreachableTargetDeferred(entity, settings) && !unsafeTargetDeferred(client, entity.objectId, settings))
+    .sort((left, right) => distance(player, left) - distance(player, right) ||
+      Number(left.objectId) - Number(right.objectId))[0] ?? null;
+  if (!blocker) return null;
+
+  recordSearchDiagnostic(client, {
+    type: 'spawnStallProtectedBlockerAttempt',
+    objectId: Number(blocker.objectId),
+    name: String(blocker.name ?? ''),
+    mapFileName,
+    minimumApproachDistance: policy.minimumApproachDistance,
+    maximumApproachDistance: policy.maximumApproachDistance,
+    clearance: policy.clearance,
+  });
+  const attemptBoundary = Number(client.sequence ?? 0);
+  try {
+    await killExactMonster(
+      client,
+      blocker,
+      { questId: questIdFor(pending), kind: 'spawnBlocker', name: String(blocker.name ?? '') },
+      navigateNear,
+      settings,
+      false,
+    );
+    if (String(client.snapshot?.mapFileName ?? '') !== mapFileName) {
+      throw new Error(`protected spawn blocker ${Number(blocker.objectId)} changed map during approach`);
+    }
+    const authoritativeBlocker = entityById(client.snapshot, blocker.objectId);
+    const killedInCurrentSnapshot = authoritativeBlocker?.dead === true ||
+      Number(authoritativeBlocker?.hp) <= 0;
+    const killedByFreshReceipt = receivedPacketAfter(
+      client, attemptBoundary, 'ObjectDied', Number(blocker.objectId),
+    );
+    // `killExactMonster` can correctly synthesize a completed objective when
+    // its target leaves AOI while quest progress advances. That is enough for
+    // an objective monster, but it is not proof this optional corridor
+    // blocker died. Only its current-map corpse state or its own fresh death
+    // receipt lets the spawn search treat the protected Shaman as cleared.
+    if (!killedInCurrentSnapshot && !killedByFreshReceipt) {
+      throw new LostCombatTarget(Number(blocker.objectId), blocker);
+    }
+    recordSearchDiagnostic(client, {
+      type: 'spawnStallProtectedBlockerCleared',
+      objectId: Number(blocker.objectId),
+      name: String(blocker.name ?? ''),
+      mapFileName,
+      dead: true,
+      receiptConfirmed: killedByFreshReceipt,
+    });
+    return { cleared: true };
+  } catch (error) {
+    if (!(isDeferredCombatTargetError(error) || error instanceof UnsafeTargetCluster)) throw error;
+    if (error instanceof UnsafeTargetCluster) deferUnsafeTarget(client, error, settings);
+    else deferUnreachableTarget(error, settings);
+    recordSearchDiagnostic(client, {
+      type: 'spawnStallProtectedBlockerDeferred',
+      objectId: Number(blocker.objectId),
+      name: String(blocker.name ?? ''),
+      mapFileName,
+      reason: String(error?.message ?? error),
+    });
+    await retreatAndRecover(client, navigateNear, settings);
+    return { recovered: true };
+  }
 }
 
 async function interruptThreatenedSearchAfterNavigationFailure(client, targetPlan, settings) {
@@ -1563,7 +1663,9 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
       throw new LostCombatTarget(objectId, initialTarget);
     }
     throwIfLowHealthTargetPressure(client, target, pending, settings);
-    let approachRange = await combatApproachRange(settings, client, target);
+    let approachRange = protectedSpawnBlockerForTarget(target, settings)
+      ? protectedSpawnBlockerApproachRange(target, settings, await combatApproachRange(settings, client, target))
+      : await combatApproachRange(settings, client, target);
     await approachCombatTarget(
       client, target, approachRange, objectId, navigateNear, settings, aggressorInterruptPolicy,
     );
@@ -1587,7 +1689,9 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
     }
     if (actionable.dead === true || Number(actionable.hp) <= 0) return actionable;
     throwIfLowHealthTargetPressure(client, actionable, pending, settings);
-    approachRange = await combatApproachRange(settings, client, actionable);
+    approachRange = protectedSpawnBlockerForTarget(actionable, settings)
+      ? protectedSpawnBlockerApproachRange(actionable, settings, await combatApproachRange(settings, client, actionable))
+      : await combatApproachRange(settings, client, actionable);
     if (distance(playerFromSnapshot(client.snapshot), actionable) > approachRange) {
       await approachCombatTarget(
         client, actionable, approachRange, objectId, navigateNear, settings, aggressorInterruptPolicy,
@@ -1751,7 +1855,15 @@ async function approachCombatTarget(
     target,
     approachRange,
     stopWhen,
-    { hostileAvoidanceRadius, allowedHostileObjectIds: [objectId] },
+    {
+      hostileAvoidanceRadius,
+      ...(protectedSpawnBlockerForTarget(target, settings) ? {
+        // A protected Shaman remains an obstacle too: exempting its object id
+        // would punch a close-cast hole through the q89 safety band.
+        hostileAvoidanceByName: settings.spawnStallProtectedBlocker.namedClearance,
+        allowedHostileObjectIds: [],
+      } : { allowedHostileObjectIds: [objectId] }),
+    },
   );
   try {
     await navigateWithClearance(settings.combatHostileClearance);
@@ -2238,7 +2350,12 @@ function isRecoverableSearchNavigationError(error) {
 function isDeferredCombatTargetError(error) {
   return error instanceof UnreachableCombatTarget ||
     error instanceof UnresponsiveCombatTarget ||
-    error instanceof LostCombatTarget;
+    error instanceof LostCombatTarget ||
+    // A q89 Wizard refuses to cast from a Shaman footprint. Treat an
+    // unreachable safe band exactly like the existing ordinary unreachable
+    // target path: defer that actor and use the established retreat/recovery
+    // sequence instead of leaking a controller-fatal generic error.
+    error instanceof RangedSafetyBandUnavailable;
 }
 
 function deferUnreachableTarget(error, settings) {
@@ -2844,6 +2961,62 @@ function finiteNumber(value) { const number = Number(value); return Number.isFin
 function finiteHp(value) { if (value == null) return null; const hp = Number(value); return Number.isFinite(hp) ? hp : null; }
 function positiveInteger(value, fallback) { const parsed = Math.trunc(Number(value)); return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback; }
 function nonnegativeInteger(value, fallback) { const parsed = Math.trunc(Number(value)); return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback; }
+
+function namedHostileClearanceOption(value) {
+  if (value == null) return {};
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Named hostile clearance must be an object');
+  }
+  return Object.fromEntries(Object.entries(value)
+    .filter(([name]) => String(name).replace(/[^a-z0-9]/gi, '').length > 0)
+    .map(([name, radius]) => [String(name), nonnegativeInteger(radius, 0)]));
+}
+
+function protectedSpawnBlockerOption(value) {
+  if (value == null) return null;
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Protected spawn blocker must be an object');
+  }
+  const names = new Set((value.monsterNames ?? [])
+    .map(normalizeName)
+    .filter(Boolean));
+  if (names.size === 0) return null;
+  const minimumApproachDistance = positiveInteger(value.minimumApproachDistance, 7);
+  const maximumApproachDistance = positiveInteger(value.maximumApproachDistance, 9);
+  if (minimumApproachDistance > maximumApproachDistance) {
+    throw new TypeError('Protected spawn blocker approach band is invalid');
+  }
+  const clearance = nonnegativeInteger(value.clearance, minimumApproachDistance - 1);
+  if (clearance >= minimumApproachDistance) {
+    throw new TypeError('Protected spawn blocker clearance must remain below its approach band');
+  }
+  return {
+    names,
+    namedClearance: Object.fromEntries([...names].map(name => [name, clearance])),
+    minimumApproachDistance,
+    maximumApproachDistance,
+    clearance,
+    maxBlockers: positiveInteger(value.maxBlockers, 1),
+  };
+}
+
+function protectedSpawnBlockerForTarget(target, settings) {
+  const policy = settings.spawnStallProtectedBlocker;
+  return policy?.names.has(normalizeName(target?.name)) ? policy : null;
+}
+
+function protectedSpawnBlockerApproachRange(target, settings, ordinaryRange) {
+  const policy = protectedSpawnBlockerForTarget(target, settings);
+  if (!policy) return ordinaryRange;
+  if (ordinaryRange < policy.minimumApproachDistance) {
+    throw new UnreachableCombatTarget(
+      Number(target?.objectId), target,
+      new Error(`protected spawn blocker requires range ${policy.minimumApproachDistance}`),
+    );
+  }
+  return Math.min(ordinaryRange, policy.maximumApproachDistance);
+}
+
 function boundedRatio(value, fallback) {
   if (value == null) return fallback;
   const parsed = Number(value);

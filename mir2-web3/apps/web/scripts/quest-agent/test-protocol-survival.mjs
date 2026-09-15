@@ -68,6 +68,7 @@ import {
   questCombatMpUseThresholdForQuest,
   questEmergencyEscapeHpRatio,
   questPostRetreatRecoveryRatio,
+  q89WizardFreshCursedShamanRecoveryOptions,
   preferredObjectiveMapsForQuest,
   minimumJourneyMpStockForQuest,
   questRetreatBiasPosition,
@@ -837,6 +838,23 @@ test('a q89 field pass can keep Small HP without a standalone Medium town loop',
   assert.equal(result.status, 'sufficient');
   assert.deepEqual(calls, []);
   assert.equal(hpMediumDrugCount(client.snapshot), 0);
+});
+
+test('q89 Wizard fresh CursedShaman recovery is limited to an injured Medium-equipped Wizard', () => {
+  const snapshot = {
+    playerHp: 85, playerMaxHp: 100,
+    beltItems: [{ name: '(HP)DrugMedium', uniqueId: 74, quantity: 1 }],
+    questLog: [{ questId: 89, stage: 'inProgress' }],
+  };
+  const shaman = { kind: 'monster', name: 'CursedShaman' };
+  assert.deepEqual(q89WizardFreshCursedShamanRecoveryOptions(snapshot, shaman, 'Wizard'), {
+    hpThreshold: 0.85, preferredHpPotion: 'medium', restorativeReuseDelayMs: 2_500,
+  });
+  assert.equal(q89WizardFreshCursedShamanRecoveryOptions(snapshot, shaman, 'Taoist'), null);
+  assert.equal(q89WizardFreshCursedShamanRecoveryOptions(snapshot, { ...shaman, name: 'CursedZombie' }, 'Wizard'), null);
+  assert.equal(q89WizardFreshCursedShamanRecoveryOptions({ ...snapshot, playerHp: 86 }, shaman, 'Wizard'), null);
+  assert.equal(q89WizardFreshCursedShamanRecoveryOptions({ ...snapshot, beltItems: [] }, shaman, 'Wizard'), null);
+  assert.equal(q89WizardFreshCursedShamanRecoveryOptions({ ...snapshot, questLog: [] }, shaman, 'Wizard'), null);
 });
 
 test('caster supply gate requires MP independently while Warrior HP remains sufficient', async () => {

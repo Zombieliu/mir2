@@ -124,8 +124,34 @@ function explicitForbiddenPoints(options) {
     .map(point => ({ x: Number(point.x), y: Number(point.y) }));
 }
 
+function normalizedHostileName(value) {
+  return String(value ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+}
+
+function namedHostileClearance(options) {
+  const requested = options?.hostileAvoidanceByName;
+  if (!requested || typeof requested !== 'object' || Array.isArray(requested)) return new Map();
+  const clearance = new Map();
+  for (const [name, radius] of Object.entries(requested)) {
+    const normalized = normalizedHostileName(name);
+    if (!normalized) continue;
+    clearance.set(normalized, nonnegativeIntegerOption(radius, 0));
+  }
+  return clearance;
+}
+
+function clearanceRadiusForHostile(entity, defaultRadius, namedClearance) {
+  return Math.max(defaultRadius, namedClearance.get(normalizedHostileName(entity?.name)) ?? 0);
+}
+
+function hasRequestedHostileClearance(options) {
+  return nonnegativeIntegerOption(options?.hostileAvoidanceRadius, 0) > 0 ||
+    [...namedHostileClearance(options).values()].some(radius => radius > 0);
+}
+
 function hostileClearanceObstacles(snapshot, options, memory, observedAt, memoryDurationMs) {
-  const radius = nonnegativeIntegerOption(options?.hostileAvoidanceRadius, 0);
+  const defaultRadius = nonnegativeIntegerOption(options?.hostileAvoidanceRadius, 0);
+  const namedClearance = namedHostileClearance(options);
   const allowed = new Set((options?.allowedHostileObjectIds ?? []).map(Number));
   const mapFileName = String(snapshot?.mapFileName ?? '');
   for (const [key, remembered] of memory) {
@@ -152,7 +178,7 @@ function hostileClearanceObstacles(snapshot, options, memory, observedAt, memory
       // monster instead of its whole movement trail. Exact-tile memory is for
       // AOI stability; turning a moving monster's trail into a wall would make
       // narrow maps falsely unreachable.
-      if (radius === 0) {
+      if (clearanceRadiusForHostile(entity, defaultRadius, namedClearance) === 0) {
         for (const key of memory.keys()) {
           if (key.startsWith(keyPrefix)) memory.delete(key);
         }
@@ -163,6 +189,7 @@ function hostileClearanceObstacles(snapshot, options, memory, observedAt, memory
         objectId,
         x: Number(entity.x),
         y: Number(entity.y),
+        name: normalizedHostileName(entity.name),
         expiresAt: observedAt + memoryDurationMs,
       });
     }
@@ -176,6 +203,7 @@ function hostileClearanceObstacles(snapshot, options, memory, observedAt, memory
     Number(entity?.objectId) === Number(snapshot?.playerObjectId)) ?? null;
   for (const entity of memory.values()) {
     if (entity.mapFileName !== mapFileName || allowed.has(entity.objectId)) continue;
+    const radius = Math.max(defaultRadius, namedClearance.get(entity.name) ?? 0);
     const playerDistance = player && Number.isFinite(Number(player?.x)) && Number.isFinite(Number(player?.y))
       ? Math.max(Math.abs(Number(player.x) - entity.x), Math.abs(Number(player.y) - entity.y))
       : Number.POSITIVE_INFINITY;
@@ -259,6 +287,31 @@ function provenNearbyEmergencyAggressors(client, nearbyHostiles, mapId, nowMs, w
   return nearbyHostiles.filter(entity => attackers.has(Number(entity?.objectId)));
 }
 
+function freshDirectMonsterHits(client, mapId, nowMs, withinMs, afterSequence) {
+  const playerObjectId = Number(client?.snapshot?.playerObjectId);
+  if (!Number.isFinite(playerObjectId) || !Number.isFinite(nowMs)) return [];
+  const boundary = Math.max(
+    Number(afterSequence) || 0,
+    currentMapReceiptBoundary(client, mapId),
+    currentPlayerLifeReceiptBoundary(client, playerObjectId),
+  );
+  const liveMonsters = new Map((client?.snapshot?.entities ?? [])
+    .filter(entity => entity?.kind === 'monster' && entity?.dead !== true && Number(entity?.hp ?? 1) > 0)
+    .map(entity => [Number(entity?.objectId), entity])
+    .filter(([objectId]) => Number.isFinite(objectId)));
+  const hits = [];
+  for (const event of client?.events ?? []) {
+    const sequence = Number(event?.sequence) || 0;
+    if (event?.direction !== 'received' || event?.packet !== 'ObjectStruck' ||
+        sequence <= boundary || Number(event?.payload?.objectId) !== playerObjectId) continue;
+    const eventAt = Date.parse(String(event?.at ?? ''));
+    if (!Number.isFinite(eventAt) || eventAt > nowMs || nowMs - eventAt > withinMs) continue;
+    const attacker = liveMonsters.get(Number(event?.payload?.attackerId));
+    if (attacker) hits.push({ event, attacker, sequence });
+  }
+  return hits;
+}
+
 export function createNavigator(client, dependencies = {}) {
   const loadCollisionMap = dependencies.loadCollisionMap ?? loadProtocolCollisionMap;
   const sleep = dependencies.delay ?? delay;
@@ -333,6 +386,9 @@ export function createNavigator(client, dependencies = {}) {
       options.emergencyEscapeAggressorEvidenceWindowMs,
       defaultEmergencyEscapeAggressorEvidenceWindowMs,
     );
+    const onFreshDirectHit = typeof options.onFreshDirectHit === 'function'
+      ? options.onFreshDirectHit
+      : null;
     const maxEmergencyEscapes = nonnegativeIntegerOption(
       options.maxEmergencyEscapesPerNavigation,
       defaultMaxEmergencyEscapes,
@@ -343,6 +399,7 @@ export function createNavigator(client, dependencies = {}) {
     let emergencyEscapes = 0;
     let emergencyEscapeFailed = false;
     let emergencyEscapeRetryAt = Number.NEGATIVE_INFINITY;
+    let lastFreshDirectHitSequence = 0;
     let bestDistance = distance(selfPlayer(client), target);
     let nonImprovingSteps = 0;
     let lastMovementBlockMask = 0;
@@ -379,6 +436,35 @@ export function createNavigator(client, dependencies = {}) {
         distance(self, entity) <= emergencyEscapeDangerDistance);
       const hpRatio = observedPlayerHp(client.snapshot) /
         Math.max(1, Number(client.snapshot.playerMaxHp));
+      // A caller can opt into a nonblocking reaction to a real current-life,
+      // current-map hit. The callback never supplies evidence to the escape
+      // decision and is not awaited, so it cannot delay movement or weaken the
+      // normal proven-aggressor and critical-health guards.
+      if (onFreshDirectHit) {
+        const freshHits = freshDirectMonsterHits(
+          client,
+          String(client.snapshot?.mapFileName ?? mapId),
+          Number(now()),
+          emergencyEscapeAggressorEvidenceWindowMs,
+          lastFreshDirectHitSequence,
+        );
+        for (const hit of freshHits) {
+          lastFreshDirectHitSequence = Math.max(lastFreshDirectHitSequence, hit.sequence);
+          try {
+            onFreshDirectHit(client, {
+              attacker: hit.attacker,
+              receipt: hit.event,
+              hpRatio,
+              mapFileName: String(client.snapshot?.mapFileName ?? mapId),
+            });
+          } catch (error) {
+            client.record('diagnostic', {
+              type: 'navigationFreshDirectHitRecoveryFailure',
+              message: String(error?.message ?? error),
+            });
+          }
+        }
+      }
       const safeZoneAttackReceipt = inSafeZone && !safeZoneEscapeBlocked;
       const provenNearbyHostiles = emergencyEscapeRequiresProvenAggressors
         ? provenNearbyEmergencyAggressors(
@@ -486,7 +572,7 @@ export function createNavigator(client, dependencies = {}) {
           options,
           hostileMemory,
           now(),
-          nonnegativeIntegerOption(options?.hostileAvoidanceRadius, 0) === 0
+          !hasRequestedHostileClearance(options)
             ? exactHostileMemoryDurationMs
             : hostileMemoryDurationMs,
         ),

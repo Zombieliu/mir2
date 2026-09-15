@@ -18,6 +18,10 @@
 > R35 follow-up: real original screenshots exposed remaining text alignment and
 > missing preview close assets. Source repairs/build and native-ui 853/853 pass;
 > R35 paired visual checks remain pending. R123 route search did not advance q89.
+> R124 controller regression passes 645/645, with actual q89 Wizard runner wiring,
+> collision-checked Shaman approach and blocker-specific death confirmation.
+> The normal R54 live run cleared two blockers; the quest remains incomplete.
+> Taoist R104 has stopped with its saved Lv25 checkpoint retained.
 > See [Game Shop QA](generated/player-qa/native-game-shop-20260915/README.md).
 
 > 2026-09-15 shared primary-hit practice follow-up: the owner-bound receipt
