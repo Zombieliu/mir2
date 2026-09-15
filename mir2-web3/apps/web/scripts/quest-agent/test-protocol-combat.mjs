@@ -12,7 +12,7 @@ import {
   unsafeRetreatIsSafe,
 } from "./protocol-combat.mjs";
 import { createWizardKitingAction, RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
-import { createNavigator, NavigationStalled } from "./protocol-play.mjs";
+import { createNavigator, NavigationStalled, NavigationStepGuarded } from "./protocol-play.mjs";
 import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
 
 test("explicit objective map preference resolves equal-length dungeon routes", async () => {
@@ -288,6 +288,318 @@ test('q89 spawn-stall clearing reaches a certified Shaman band before its ordina
   assert.equal(actionPositions[1].targetId, 341200);
 });
 
+test('q89 Wizard guards the real D2031-to-D2032 transit before a Run crosses the entrance Shaman halo', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
+  const owner = self({ kind: 'selfPlayer', x: 278, y: 284, hp: 100, maxHp: 100 });
+  const firstShaman = monster(341100, 'CursedShaman', 263, 273, { hp: 205, maxHp: 205, disposition: 'hostile' });
+  const secondShaman = monster(341105, 'CursedShaman0', 275, 270, { hp: 205, maxHp: 205, disposition: 'hostile' });
+  const shiZombie = monster(340903, 'ShiZombie', 268, 268, { hp: 230, maxHp: 230, disposition: 'hostile' });
+  const transfer = {
+    key: 'crystal-move:d2031:198:34:117:184:267', mapFileName: 'D2031', toMapFileName: 'D2032',
+    bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 }, toPosition: { x: 184, y: 267 },
+  };
+  const deltas = {
+    Up: [0, -1], UpRight: [1, -1], Right: [1, 0], DownRight: [1, 1],
+    Down: [0, 1], DownLeft: [-1, 1], Left: [-1, 0], UpLeft: [-1, -1],
+  };
+  const physicalCells = [];
+  const actions = [];
+  const diagnostics = [];
+  const client = new FakeClient({
+    playerObjectId: 1, playerHp: 100, playerMaxHp: 100, playerMp: 145, playerMaxMp: 398,
+    mapFileName: 'D2031', mapTransfers: [transfer], entities: [owner, firstShaman, secondShaman, shiZombie],
+    groundDrops: [], questLog: [quest],
+  }, (actor, command) => {
+    if (command.type !== 'walk' && command.type !== 'run') return;
+    const [dx, dy] = deltas[command.direction];
+    for (let step = 0; step < (command.type === 'run' ? 2 : 1); step += 1) {
+      owner.x += dx;
+      owner.y += dy;
+      physicalCells.push({
+        point: { x: owner.x, y: owner.y },
+        liveShamans: actor.snapshot.entities
+          .filter(entity => !entity.dead && ['CursedShaman', 'CursedShaman0'].includes(entity.name))
+          .map(entity => ({ objectId: entity.objectId, x: entity.x, y: entity.y })),
+      });
+      if (owner.x === transfer.bounds.minX && owner.y === transfer.bounds.minY) {
+        Object.assign(owner, transfer.toPosition);
+        const priest = monster(341200, 'CursedPriest', 184, 262, { disposition: 'hostile' });
+        Object.assign(actor.snapshot, { mapFileName: 'D2032', mapTransfers: [], entities: [owner, priest] });
+        actor.receive('MapChanged', () => {}, { fileName: 'D2032' });
+        break;
+      }
+    }
+    actor.receive('UserLocation', () => {}, { objectId: 1, location: { x: owner.x, y: owner.y } });
+  });
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  client.wait = async predicate => assert.equal(predicate(), true, 'navigator must observe each movement receipt');
+  const rawNavigate = createNavigator(client, {
+    loadCollisionMap: loadProtocolCollisionMap,
+    delay: async () => {},
+    now: () => 10_000,
+  });
+  const action = createWizardKitingAction(async (actor, target) => {
+    actions.push({
+      targetId: target.objectId,
+      position: { x: owner.x, y: owner.y },
+      liveShamans: actor.snapshot.entities.filter(entity => !entity.dead &&
+        ['CursedShaman', 'CursedShaman0'].includes(entity.name)),
+    });
+    Object.assign(target, { dead: true, hp: 0 });
+    actor.receive('ObjectDied', state => {
+      if (target.name === 'CursedPriest') {
+        state.questLog[0].objectives[0] = objective('Kill CursedPriest', 3, 3);
+        state.questLog[0].stage = 'ReadyToTurnIn';
+      }
+    }, { objectId: target.objectId });
+    return { kind: 'magic', targetId: target.objectId };
+  }, rawNavigate, {
+    approachRange: () => 9,
+    fightWhenBlocked: true,
+    rangedSafetyBand: {
+      protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumTargetDistance: 7,
+      maximumTargetDistance: 9,
+      unsafeShamanDistance: 6,
+      maxRetreatSteps: 6,
+    },
+  });
+  const travel = async (mapFileName, options = {}) => {
+    assert.equal(mapFileName, 'D2032');
+    await rawNavigate({ x: 198, y: 34 }, 0, () => false, {
+      liveTransferKey: transfer.key,
+      ...(options.navigationOptions ?? {}),
+    });
+  };
+  travel.routeLength = async () => 1;
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: {
+      kill: [{ monsterName: 'CursedPriest', spawnCandidates: [
+        { monsterName: 'CursedPriest', mapFileName: 'D2032', position: { x: 184, y: 267 }, spread: 8, respawnIndex: 1 },
+      ] }],
+      item: [],
+    },
+  }, rawNavigate, {
+    ...settings,
+    travel,
+    preferObjectiveMapOverCurrent: true,
+    preferredObjectiveMaps: ['D2032'],
+    approachRange: () => 9,
+    action,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 2,
+    spawnStallProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 2,
+    },
+    transitProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 2,
+    },
+  });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.ok(diagnostics.some(entry => entry.type === 'protectedTransitBlockerIntercepted' && entry.blockerObjectId === 341105));
+  assert.ok(physicalCells.length > 0);
+  assert.ok(physicalCells.every(entry => entry.liveShamans.every(shaman =>
+    Math.max(Math.abs(entry.point.x - shaman.x), Math.abs(entry.point.y - shaman.y)) > 6,
+  )), 'no physical transit cell may enter a live protected Shaman halo');
+  assert.ok(!physicalCells.some(entry => entry.point.x === shiZombie.x && entry.point.y === shiZombie.y));
+  for (const actionAt of actions.filter(entry => entry.liveShamans.some(shaman => shaman.objectId === entry.targetId))) {
+    const target = actionAt.liveShamans.find(shaman => shaman.objectId === actionAt.targetId);
+    assert.ok(Math.max(Math.abs(actionAt.position.x - target.x), Math.abs(actionAt.position.y - target.y)) >= 7);
+    assert.ok(Math.max(Math.abs(actionAt.position.x - target.x), Math.abs(actionAt.position.y - target.y)) <= 9);
+    assert.ok(actionAt.liveShamans.filter(shaman => shaman.objectId !== target.objectId).every(shaman =>
+      Math.max(Math.abs(actionAt.position.x - shaman.x), Math.abs(actionAt.position.y - shaman.y)) > 6,
+    ));
+  }
+});
+
+test('q89 transit clearance aborts when a Shaman moves into its fresh cadence cells without recursive clearing', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
+  const owner = self({ kind: 'selfPlayer', x: 10, y: 10, hp: 100, maxHp: 100 });
+  const blocker = monster(71, 'CursedShaman', 20, 10, { hp: 205, maxHp: 205, disposition: 'hostile' });
+  const movingShaman = monster(72, 'CursedShaman0', 35, 10, { hp: 205, maxHp: 205, disposition: 'hostile' });
+  let movedDuringCadence = false;
+  let baseActions = 0;
+  let recoveries = 0;
+  const client = new FakeClient({
+    playerObjectId: 1, playerHp: 100, playerMaxHp: 100, mapFileName: 'D2031',
+    entities: [owner, blocker, movingShaman], groundDrops: [], questLog: [quest],
+  }, (actor, command) => {
+    if (command.type !== 'walk' && command.type !== 'run') return;
+    assert.fail(`fresh clearance guard must block before ${command.type}`);
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  const rawNavigate = createNavigator(client, {
+    loadCollisionMap: async () => ({ mapFileName: 'D2031', sourcePath: 'test', width: 40, height: 20, blocked: new Uint8Array(800) }),
+    delay: async () => {
+      if (!movedDuringCadence) {
+        movedDuringCadence = true;
+        Object.assign(movingShaman, { x: 17, y: 10 });
+      }
+    },
+    now: () => 10_000,
+  });
+  const action = createWizardKitingAction(async () => {
+    baseActions += 1;
+    return { kind: 'magic', targetId: blocker.objectId };
+  }, rawNavigate, {
+    approachRange: () => 9,
+    fightWhenBlocked: true,
+    rangedSafetyBand: {
+      protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumTargetDistance: 7, maximumTargetDistance: 9, unsafeShamanDistance: 6, maxRetreatSteps: 6,
+    },
+  });
+  const travel = async () => {
+    throw new NavigationStepGuarded({
+      type: 'protectedTransitShamanHalo', blockerObjectId: blocker.objectId, blockerName: blocker.name,
+      mapId: 'D2031', from: { x: 10, y: 10 }, physicalCells: [{ x: 11, y: 10 }],
+    });
+  };
+  travel.routeLength = async () => 1;
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [
+      { monsterName: 'CursedPriest', mapFileName: 'D2032', position: { x: 1, y: 1 }, spread: 1, respawnIndex: 1 },
+    ] }], item: [] },
+  }, rawNavigate, {
+    ...settings,
+    travel,
+    preferObjectiveMapOverCurrent: true,
+    preferredObjectiveMaps: ['D2032'],
+    approachRange: () => 9,
+    action,
+    spawnStallProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 2,
+    },
+    transitProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 2,
+    },
+    recoverAfterUnsafeRetreat: async current => {
+      recoveries += 1;
+      current.snapshot.questLog[0].stage = 'ReadyToTurnIn';
+    },
+  });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.equal(movedDuringCadence, true);
+  assert.equal(baseActions, 0, 'no cast is allowed after the fresh cell becomes unsafe');
+  assert.equal(recoveries, 1);
+  assert.equal(client.sent.filter(command => command.type === 'walk' || command.type === 'run').length, 0);
+  assert.equal(diagnostics.filter(entry => entry.type === 'protectedTransitBlockerIntercepted').length, 1);
+  assert.equal(diagnostics.filter(entry => entry.type === 'protectedTransitClearanceMovementBlocked').length, 1);
+});
+
+test('q89 transit blocker cap performs one recovery then terminates a still-live next halo', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
+  const first = monster(71, 'CursedShaman', 19, 10, { disposition: 'hostile' });
+  const second = monster(72, 'CursedShaman0', 20, 10, { disposition: 'hostile' });
+  const client = new FakeClient(snapshot(quest, [first, second]));
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let travelCalls = 0;
+  const travel = async () => {
+    travelCalls += 1;
+    const blocker = travelCalls === 1 ? first : second;
+    throw new NavigationStepGuarded({
+      type: 'protectedTransitShamanHalo', blockerObjectId: blocker.objectId, blockerName: blocker.name,
+      mapId: '0', from: { x: 10, y: 10 }, physicalCells: [{ x: 11, y: 10 }],
+    });
+  };
+  travel.routeLength = async () => 1;
+  let actions = 0;
+  let recoveries = 0;
+  await assert.rejects(completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [
+      { monsterName: 'CursedPriest', mapFileName: 'D2032', position: { x: 1, y: 1 }, spread: 1, respawnIndex: 1 },
+    ] }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    travel,
+    preferObjectiveMapOverCurrent: true,
+    preferredObjectiveMaps: ['D2032'],
+    maxEngagements: 4,
+    approachRange: () => 9,
+    action: async (owner, target) => {
+      actions += 1;
+      Object.assign(owner.snapshot.entities.find(entity => entity.objectId === target.objectId), { dead: true, hp: 0 });
+      owner.receive('ObjectDied', () => {}, { objectId: target.objectId });
+      return { kind: 'magic', targetId: target.objectId };
+    },
+    transitProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 1,
+    },
+    recoverAfterUnsafeRetreat: async () => { recoveries += 1; },
+  }), /protected transit blocker 72 remains live without physical recovery.*blockerBudgetExhausted/i);
+
+  // The first recovery made a real bounded retreat, so the per-stall guard
+  // permits one fresh route attempt. The next unchanged live halo terminates.
+  assert.equal(travelCalls, 3, 'the cap must not keep replaying the same guarded step');
+  assert.equal(actions, 1);
+  assert.equal(recoveries, 2);
+  assert.equal(diagnostics.filter(entry => entry.type === 'protectedTransitBlockerRecoveredProgress').length, 1);
+  assert.equal(diagnostics.filter(entry => entry.type === 'protectedTransitBlockerTerminated').length, 1);
+});
+
+test('q89 deferred live transit blocker does not replan the same guarded step forever', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
+  const blocker = monster(71, 'CursedShaman', 19, 10, { disposition: 'hostile' });
+  const client = new FakeClient(snapshot(quest, [blocker]));
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let travelCalls = 0;
+  const travel = async () => {
+    travelCalls += 1;
+    throw new NavigationStepGuarded({
+      type: 'protectedTransitShamanHalo', blockerObjectId: blocker.objectId, blockerName: blocker.name,
+      mapId: '0', from: { x: 10, y: 10 }, physicalCells: [{ x: 11, y: 10 }],
+    });
+  };
+  travel.routeLength = async () => 1;
+  let actions = 0;
+  let recoveries = 0;
+  await assert.rejects(completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [
+      { monsterName: 'CursedPriest', mapFileName: 'D2032', position: { x: 1, y: 1 }, spread: 1, respawnIndex: 1 },
+    ] }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    travel,
+    preferObjectiveMapOverCurrent: true,
+    preferredObjectiveMaps: ['D2032'],
+    maxEngagements: 4,
+    approachRange: () => 9,
+    action: async (_owner, target) => {
+      actions += 1;
+      throw new RangedSafetyBandUnavailable(target.objectId, target, '0');
+    },
+    transitProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 2,
+    },
+    recoverAfterUnsafeRetreat: async () => { recoveries += 1; },
+  }), /protected transit blocker 71 remains live without physical recovery.*liveDeferredWithoutPhysicalProgress/i);
+
+  // The resolver's own ordinary retreat changed the physical state once;
+  // only the following same-live-halo intercept is terminated.
+  assert.equal(travelCalls, 2);
+  assert.equal(actions, 1);
+  assert.equal(recoveries, 2);
+  assert.equal(diagnostics.filter(entry => entry.type === 'protectedTransitBlockerRecoveredProgress').length, 1);
+  assert.equal(diagnostics.filter(entry => entry.type === 'protectedTransitBlockerTerminated').length, 1);
+});
+
 test('q89 spawn-stall blocker defers when independent quest progress removes it without a death receipt', async () => {
   const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
   const blocker = monster(341105, 'CursedShaman0', 19, 10, { disposition: 'hostile' });
@@ -317,9 +629,14 @@ test('q89 spawn-stall blocker defers when independent quest progress removes it 
       maxBlockers: 2,
     },
     action: async (owner, target) => {
-      owner.snapshot.entities = owner.snapshot.entities.filter(entity => entity.objectId !== target.objectId);
+      Object.assign(owner.snapshot.entities.find(entity => entity.objectId === target.objectId), {
+        // A missing exact HP value is not a corpse. This used to be coerced
+        // through Number(null) and could falsely clear the corridor blocker.
+        hp: null,
+        dead: false,
+      });
       // This independent authoritative objective update is deliberately not a
-      // death packet for the removed Shaman.
+      // death packet for the still-live Shaman.
       owner.receive('ObjectHealth', state => {
         state.questLog[0].objectives[0] = objective('Kill CursedPriest', 3, 3);
         state.questLog[0].stage = 'ReadyToTurnIn';

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createNavigator, NavigationStalled, reviveInTown } from './protocol-play.mjs';
+import { createNavigator, NavigationStalled, NavigationStepGuarded, reviveInTown } from './protocol-play.mjs';
 import { applyProtocolObservation } from './protocol-observation.mjs';
 import { startEmergencyHpRecovery } from './protocol-loadout.mjs';
 import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
@@ -125,6 +125,40 @@ test('navigator propagates a Gateway failure without rejecting a valid tile or s
   await assert.rejects(navigateNear({ x: 5, y: 1 }, 1), error => error === gatewayFailure);
   assert.equal(client.sent.length, 1);
   assert.equal(client.diagnostics.length, 0);
+});
+
+test('before-movement guard rechecks fresh AOI after cadence and blocks both physical Run cells', async () => {
+  const client = navigationClient();
+  let guardCall = null;
+  const navigate = createNavigator(client, {
+    loadCollisionMap: async () => openMap(),
+    // The planner has already selected the two-cell Run. The newly rendered
+    // hostile arrives during cadence, so only the dispatch-time guard can
+    // prevent the second physical cell from entering its halo.
+    delay: async () => {
+      client.snapshot.entities.push({
+        objectId: 71, kind: 'monster', name: 'CursedShaman', x: 3, y: 1,
+        hp: 205, dead: false, disposition: 'hostile',
+      });
+    },
+    now: () => 10_000,
+  });
+
+  await assert.rejects(
+    () => navigate({ x: 6, y: 1 }, 0, () => false, {
+      beforeMovement: context => {
+        guardCall = context;
+        const offending = context.physicalCells.find(cell => cell.x === 3 && cell.y === 1);
+        return offending ? { type: 'protectedTransitShamanHalo', blockerObjectId: 71 } : null;
+      },
+    }),
+    error => error instanceof NavigationStepGuarded && error.hazard.blockerObjectId === 71,
+  );
+  assert.deepEqual(guardCall.physicalCells, [{ x: 2, y: 1 }, { x: 3, y: 1 }]);
+  assert.equal(guardCall.movementType, 'run');
+  assert.deepEqual(client.sent, [], 'guard fires before the Run packet is emitted');
+  assert.equal(client.snapshot.entities[0].x, 1);
+  assert.equal(client.snapshot.entities[0].y, 1);
 });
 
 test('navigator propagates an existing failure before a tactical stop predicate can mask it', async () => {

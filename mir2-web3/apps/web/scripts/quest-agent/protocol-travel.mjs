@@ -749,6 +749,7 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
           0,
           () => observedMapChange(client, beforeTransfer, String(edge.toMapFileName)) ||
             travelShouldInterrupt(options),
+          options.navigationOptions,
         );
         if (!observedMapChange(client, beforeTransfer, String(edge.toMapFileName))) {
           throwIfTravelInterrupted(options, current, edge.toMapFileName);
@@ -763,6 +764,7 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
           try {
             await navigateNear(live.target, 0, () => travelShouldInterrupt(options), {
               liveTransferKey: String(live.transfer.key ?? ''),
+              ...(options.navigationOptions ?? {}),
             });
             break;
           } catch (error) {

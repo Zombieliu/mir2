@@ -916,6 +916,19 @@ try {
                 maxBlockers: 2,
               }
               : null,
+            // The live D2031 -> D2032 route crosses the entrance Shaman
+            // pair. Guard every physical transit cell and clear only from
+            // the same collision-certified band used by stalled spawn
+            // searches; this option is inert outside q89 Wizard travel.
+            transitProtectedBlocker: id === 89 && className === 'Wizard'
+              ? {
+                monsterNames: ['CursedShaman', 'CursedShaman0'],
+                minimumApproachDistance: 7,
+                maximumApproachDistance: 9,
+                clearance: 6,
+                maxBlockers: 2,
+              }
+              : null,
             // Narrow Crystal cave corridors are often sealed by one monster's
             // four-cell avoidance halo. Retry the same search waypoint with a
             // one-cell buffer; proven attacks still interrupt navigation and

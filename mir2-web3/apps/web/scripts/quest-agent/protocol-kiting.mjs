@@ -1,7 +1,7 @@
 import { observedPlayerHp } from './protocol-observation.mjs';
 import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
 import { combatApproachRange } from './protocol-loadout.mjs';
-import { distance, selfPlayer } from './protocol-play.mjs';
+import { distance, NavigationStepGuarded, selfPlayer } from './protocol-play.mjs';
 
 /** A safe ranged firing band could not be reached from authoritative state. */
 export class RangedSafetyBandUnavailable extends Error {
@@ -115,8 +115,28 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         maxSuccessfulSteps: stepBudget,
         maxAttempts: maxNavigationAttempts,
         ...(transferHazards.length ? { forbiddenPoints: transferHazards } : {}),
+        // The collision plan was made before navigator cadence. Recheck the
+        // complete physical Run/Walk cells against the latest protected
+        // monster AOI immediately before dispatch. This is intentionally part
+        // of the action itself: combat callers capture this navigator before
+        // any outer transit resolver can wrap it.
+        ...(safetyBandRequired ? {
+          beforeMovement: context => rangedSafetyBandMovementHazard(
+            client.snapshot,
+            context,
+            rangedSafetyBand,
+          ),
+        } : {}),
       });
     } catch (error) {
+      if (error instanceof NavigationStepGuarded &&
+          error.hazard?.type === 'rangedSafetyBandFootprint') {
+        recordFallback(client, targetId, 'rangedSafetyBandMovementGuarded', {
+          blockerObjectId: Number(error.hazard?.blockerObjectId),
+          physicalCells: error.hazard?.physicalCells ?? [],
+        });
+        throw new RangedSafetyBandUnavailable(targetId, target, mapId);
+      }
       const navigationBlocked = /^No walk path\b/.test(String(error?.message ?? ''));
       const boundedProgress = /^Navigation successful step budget exceeded\b/.test(
         String(error?.message ?? ''),
@@ -346,6 +366,33 @@ function rangedSafetyBandSatisfied(point, target, hostiles, rangedSafetyBand) {
   return targetDistance >= rangedSafetyBand.minimumTargetDistance &&
     targetDistance <= rangedSafetyBand.maximumTargetDistance &&
     outsideProtectedFootprints(point, hostiles, rangedSafetyBand);
+}
+
+function rangedSafetyBandMovementHazard(snapshot, context, rangedSafetyBand) {
+  const mapId = String(context?.mapId ?? '');
+  if (!mapId || String(snapshot?.mapFileName ?? '') !== mapId) return null;
+  const cells = Array.isArray(context?.physicalCells) ? context.physicalCells : [];
+  const collisions = [];
+  for (const cell of cells) {
+    for (const hostile of visibleHostileMonsters(snapshot)) {
+      if (!protectedMonster(hostile, rangedSafetyBand) ||
+          distance(cell, hostile) > rangedSafetyBand.unsafeShamanDistance) continue;
+      collisions.push({ cell, hostile });
+    }
+  }
+  if (collisions.length === 0) return null;
+  collisions.sort((left, right) =>
+    distance(context.from, left.hostile) - distance(context.from, right.hostile) ||
+    Number(left.hostile.objectId) - Number(right.hostile.objectId));
+  const { cell, hostile } = collisions[0];
+  return {
+    type: 'rangedSafetyBandFootprint',
+    blockerObjectId: Number(hostile.objectId),
+    blockerName: String(hostile.name ?? ''),
+    blockerPosition: { x: Number(hostile.x), y: Number(hostile.y) },
+    blockedCell: { x: Number(cell.x), y: Number(cell.y) },
+    clearance: rangedSafetyBand.unsafeShamanDistance,
+  };
 }
 
 function outsideProtectedFootprints(point, hostiles, rangedSafetyBand) {

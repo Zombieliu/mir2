@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> 2026-09-16 R126/R127 route continuation: q89 Wizard transit/action movement
+> uses a fresh physical-cell guard and bounded unresolved-blocker recovery;
+> Taoist q89 funds 100 Amulet normally with a field minimum of32.
+> Joint controller655/655 passes. Both casters resumed on natural R54.
+> Warrior freshly proves public login/logout and matching revision7447 at
+> Lv30,55/55+4/4. Completed units remain155/177; global parity/UI/animation
+> acceptance is unchanged. [Evidence](generated/player-qa/protocol-journey-20260915/q89-transit-and-resupply-r126-r127.md).
+
 > 2026-09-16 Game Shop Candidate checkpoint: source cards/categories/quantities,
 > payment confirmation, retained authenticated metadata replay and committed
 > mailbox projection are implemented. Native R30 visually proves two restored

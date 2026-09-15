@@ -71,6 +71,7 @@ import {
   q89WizardFreshCursedShamanRecoveryOptions,
   preferredObjectiveMapsForQuest,
   minimumJourneyMpStockForQuest,
+  amuletStock,
   questRetreatBiasPosition,
   questRetreatProfile,
   questSpawnSearchHostileClearanceFallback,
@@ -98,6 +99,21 @@ test('Taoist Wooma departure funds enough SoulFireBall casts for a full-health p
   assert.deepEqual(journeyAmuletSupplyPolicyForQuest(60, 'Taoist'), { minimum: 12, departure: 32 });
   assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Wizard'), { minimum: 0, departure: 0 });
   assert.deepEqual(journeyAmuletSupplyPolicyForQuest(42, 'Taoist'), { minimum: 0, departure: 0 });
+});
+
+test('q89 Taoist reserves 100 Amulet while other class and quest policies stay unchanged', () => {
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(89, 'Taoist'), { minimum: 32, departure: 100 });
+  assert.equal(amuletStock({ beltItems: [{ name: 'Amulet', quantity: 31 }] }), 31);
+  assert.equal(requiresTaoistAmuletRestock({
+    beltItems: [{ name: 'Amulet', quantity: 31 }],
+    knownSkills: [{ spell: 'SoulFireBall' }],
+  }, 89, 'Taoist', 32), true);
+  assert.equal(requiresTaoistAmuletRestock({
+    beltItems: [{ name: 'Amulet', quantity: 32 }],
+    knownSkills: [{ spell: 'SoulFireBall' }],
+  }, 89, 'Taoist', 32), false);
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(89, 'Wizard'), { minimum: 0, departure: 0 });
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(60, 'Taoist'), { minimum: 12, departure: 32 });
 });
 
 test('caster expedition restock targets stay separate from their field triggers', () => {

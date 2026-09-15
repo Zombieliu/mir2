@@ -1,6 +1,16 @@
 # Agent Task Queue
 
-> Latest acceptance checkpoint, 2026-09-16 R34/R122: native Game Shop/mail
+> 2026-09-16 R126/R127 active continuation: q89 Wizard checks fresh AOI before
+> both Run cells/Walk dispatch, including action-owned kiting; unresolved live
+> blocker recovery is bounded. Taoist q89 normally buys a 100-Amulet departure
+> reserve with field minimum 32. Joint controller 655/655 passes. Both ordinary
+> casters resumed on natural R54; no new completed unit is claimed yet.
+> Warrior's fresh completed-route public login/logout verifies revision7447,
+> Lv30, 55/55 +4/4, map0 (334,270), HP419/MP116 against persisted state.
+> Full route remains 155/177; native UI/animation and Crystal pairing remain open.
+> See [R126/R127 evidence](generated/player-qa/protocol-journey-20260915/q89-transit-and-resupply-r126-r127.md).
+
+> Earlier acceptance checkpoint, 2026-09-16 R34/R122: native Game Shop/mail
 > Candidate behavior has real restored-mail/read/collect/backpack proof; the
 > observed Mail image-growth regression is bounded after tree retention.
 > Gateway 778 passed / 8 ignored, Windows 655/655 with complete C assets,

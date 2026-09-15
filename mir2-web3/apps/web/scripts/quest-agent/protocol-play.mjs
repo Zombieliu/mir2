@@ -20,6 +20,17 @@ export class NavigationStalled extends Error {
     this.successfulSteps = Number(successfulSteps);
   }
 }
+// A caller-scoped movement guard can stop a planned physical step after the
+// cadence wait has supplied the latest AOI.  It deliberately carries no
+// recovery behaviour: the owning combat loop decides whether the returned
+// live blocker can be cleared or whether ordinary retreat is required.
+export class NavigationStepGuarded extends Error {
+  constructor(hazard) {
+    super(`Navigation step guarded on ${String(hazard?.mapId ?? 'unknown')}`);
+    this.name = 'NavigationStepGuarded';
+    this.hazard = hazard ?? null;
+  }
+}
 export async function reviveInTown(client) {
   const before = { map: client.snapshot.mapFileName, ...selfPlayer(client) };
   if (!hasAuthoritativePlayerDeath(client.snapshot)) return null;
@@ -659,6 +670,44 @@ export function createNavigator(client, dependencies = {}) {
           throw new Error(`No walk path on ${mapId} from ${liveSelf.x},${liveSelf.y} to ${target.x},${target.y}`);
         }
         continue;
+      }
+      // Evaluate caller-owned physical safety only after cadence and the
+      // current-transform check.  A Run contains two server cells, both of
+      // which must be admitted against the fresh AOI before its packet is
+      // sent. Callers decide whether the guard covers ordinary transit,
+      // combat movement, or both; a guarded caller must map its own hazard to
+      // a bounded recovery path rather than recursively re-entering a route
+      // resolver.
+      if (typeof options.beforeMovement === 'function') {
+        const physicalCells = Array.from({ length: dispatchSteps }, (_, index) => ({
+          x: Number(liveSelf.x) + dx * (index + 1),
+          y: Number(liveSelf.y) + dy * (index + 1),
+        }));
+        const hazard = options.beforeMovement({
+          client,
+          mapId,
+          from: before,
+          physicalCells,
+          movementType: running ? 'run' : 'walk',
+          target: { x: Number(target.x), y: Number(target.y) },
+        });
+        if (hazard) {
+          client.record('diagnostic', {
+            type: 'navigationBeforeMovementGuard',
+            mapId,
+            from: before,
+            physicalCells,
+            movementType: running ? 'run' : 'walk',
+            ...(typeof hazard === 'object' ? hazard : {}),
+          });
+          throw new NavigationStepGuarded({
+            ...(typeof hazard === 'object' ? hazard : {}),
+            mapId,
+            from: before,
+            physicalCells,
+            movementType: running ? 'run' : 'walk',
+          });
+        }
       }
       client.lastWalkAt = now();
       const movementResponseAfter = client.sequence;

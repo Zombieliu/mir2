@@ -1,6 +1,16 @@
 # Protocol newcomer journey acceptance
 
-> Current checkpoint, 2026-09-15: isolated Gateway R54 is active at
+> 2026-09-16 R126/R127: Warrior has freshly revalidated ordinary completed-route
+> login/LogOutSuccess and persisted revision7447: Lv30, 55/55 mandatory +4/4
+> milestones, map0 (334,270), HP419/MP116. Final proof uses owner state before
+> outbound logout, excluding the empty postlogout character-selection snapshot.
+> Wizard/Taoist resumed normally on R54 with q89 transit safety/Taoist ordinary
+> Amulet resupply corrections; both retain Lv25, 45/55 +3/4 at launch.
+> Joint controller 655/655 passes; completed route units remain 155/177.
+> These functional checks do not accept native UI, animation, Crystal paired
+> visuals or complete active-play duration. See [evidence](generated/player-qa/protocol-journey-20260915/q89-transit-and-resupply-r126-r127.md).
+
+> Historical checkpoint, 2026-09-15: isolated Gateway R54 is active at
 > localhost 17800/17810. Independent saved-state validation confirms Warrior
 > Lv30, 55/55 mandatory + 4/4 milestones; Wizard Lv25, 45/55 + 3/4, q89 6/9;
 > Taoist Lv23, 39/55 + 2/4, q99 3/6. This is 148/177 quest/milestone units

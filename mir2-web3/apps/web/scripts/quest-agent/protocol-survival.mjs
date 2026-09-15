@@ -68,6 +68,10 @@ export function journeyAmuletSupplyPolicyForQuest(questId, className, snapshot =
   // Thirty-two casts cannot complete that full-health pull. Reserve forty-
   // eight before acquisition and leave town with one hundred for misses and
   // the next two short encounters; other expeditions retain their proven budget.
+  // R125's q89 Taoist field run consumed 24 Amulet from a 32-item departure
+  // stack before returning through town. Keep q89's lower field trigger at
+  // 32 and fund the same 100-item departure reserve used by q98/q99.
+  if (id === 89) return { minimum: 32, departure: 100 };
   if (![98, 99].includes(id)) return { minimum: 12, departure: 32 };
   let minimum = 48;
   // Do not abandon q98's final measured WoomaSoldier after a reconnect when

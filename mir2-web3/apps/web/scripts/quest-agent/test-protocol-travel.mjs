@@ -303,6 +303,33 @@ test('armed q89 live doorway travels through the real traveler when profile rout
   assert.equal(navigated.at(-1).options.liveTransferKey, key);
 });
 
+test('map travel forwards an opt-in transit movement guard only to the selected live transfer', async () => {
+  const transfer = {
+    key: 'guarded-d2031-d2032', mapFileName: 'D2031', toMapFileName: 'D2032',
+    bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 }, toPosition: { x: 184, y: 267 },
+  };
+  const client = new FakeClient({
+    mapFileName: 'D2031', mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer({ x: 278, y: 284 })], mapTransfers: [transfer],
+  });
+  const guard = () => null;
+  const calls = [];
+  const travel = createMapTraveler(client, async (target, distance, _stopWhen, options) => {
+    calls.push({ target, distance, options });
+    client.receive({ type: 'worldSnapshot', payload: {
+      ...client.snapshot, mapFileName: 'D2032', entities: [selfPlayer(transfer.toPosition)], mapTransfers: [],
+    } });
+  }, { loadCollisionMap: async () => ({ width: 400, height: 400, blocked: new Uint8Array(160000) }) });
+
+  await travel('D2032', {
+    preferredTransferKey: transfer.key,
+    navigationOptions: { beforeMovement: guard },
+  });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].options.liveTransferKey, transfer.key);
+  assert.equal(calls[0].options.beforeMovement, guard);
+});
+
 test('armed q89 live doorway refuses a wrong or stale destination key before navigation', async () => {
   const client = new FakeClient({
     mapFileName: 'D2031', mapSnapshotPending: false, playerObjectId: 1,

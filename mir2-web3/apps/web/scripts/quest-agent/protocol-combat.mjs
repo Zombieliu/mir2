@@ -1,7 +1,7 @@
 import { hasAuthoritativePlayerDeath, observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
 import { delay as realDelay } from "./protocol-client.mjs";
 import { RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
-import { distance, NavigationStalled } from "./protocol-play.mjs";
+import { distance, NavigationStalled, NavigationStepGuarded } from "./protocol-play.mjs";
 import { selfActionBlockMask } from "./protocol-status.mjs";
 import { TravelBlockedByMonster, TravelInterrupted } from "./protocol-travel.mjs";
 
@@ -50,6 +50,14 @@ class UnsafeTargetCluster extends Error {
 }
 class SpawnSearchExhausted extends Error {}
 class SpawnStallRecovered extends Error {}
+class ProtectedTransitBlockerUnresolved extends Error {
+  constructor(objectId, mapFileName, reason) {
+    super(`protected transit blocker ${objectId} remains live without physical recovery on ${mapFileName} (${reason})`);
+    this.objectId = Number(objectId);
+    this.mapFileName = String(mapFileName ?? '');
+    this.reason = String(reason ?? 'unresolved');
+  }
+}
 
 /**
  * Complete the kill and monster-item objectives of one already-active quest.
@@ -69,6 +77,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
   let spawnRespawnWaits = 0;
   let spawnRespawnProgressKey = null;
   let approachBlockerClears = 0;
+  let transitBlockerClears = 0;
   // This state belongs to one normal `completeQuestObjectives` call. It is
   // intentionally not saved: an authoritative quest increment resets it, and
   // a reconnect must prove its current live transfer again before preferring a
@@ -109,6 +118,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
       spawnRespawnProgressKey = currentProgressKey;
       spawnRespawnWaits = 0;
       approachBlockerClears = 0;
+      transitBlockerClears = 0;
     }
 
     let targetPlan = selectTargetPlan(client.snapshot, pending);
@@ -200,6 +210,15 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
               preferredTransferSource: objectiveMapFallbackState.transfer.source,
               preferredTransferKey: objectiveMapFallbackState.transfer.key,
             } : {}),
+            ...(settings.transitProtectedBlocker ? {
+              navigationOptions: {
+                beforeMovement: context => protectedTransitHazard(
+                  client.snapshot,
+                  context,
+                  settings.transitProtectedBlocker,
+                ),
+              },
+            } : {}),
           });
           if (returnToFallbackSource) {
             if (String(client.snapshot?.mapFileName ?? '') !== fallback.fromMapFileName) {
@@ -237,6 +256,88 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
           // map, so restart planning from the new authoritative location.
           if (settings.afterTravel && await settings.afterTravel(client)) continue;
         } catch (error) {
+          if (error instanceof NavigationStepGuarded &&
+              error.hazard?.type === 'protectedTransitShamanHalo') {
+            const policy = settings.transitProtectedBlocker;
+            const blockerObjectId = Number(error.hazard?.blockerObjectId);
+            recordSearchDiagnostic(client, {
+              type: 'protectedTransitBlockerIntercepted',
+              questId,
+              target: pending.name,
+              mapFileName: String(client.snapshot?.mapFileName ?? ''),
+              blockerObjectId,
+              blockerName: String(error.hazard?.blockerName ?? ''),
+              from: error.hazard?.from ?? null,
+              physicalCells: error.hazard?.physicalCells ?? [],
+            });
+            const beforeRecovery = physicalPlayerTransform(client.snapshot);
+            const resolution = await resolveProtectedSpawnStallBlocker(
+              client,
+              pending,
+              navigateNear,
+              settings,
+              transitBlockerClears,
+              blockerObjectId,
+              policy,
+            );
+            if (resolution?.cleared) {
+              transitBlockerClears += 1;
+              engagements += 1;
+              continue;
+            }
+            const currentBlocker = liveProtectedBlocker(
+              client.snapshot,
+              blockerObjectId,
+              policy,
+            );
+            // A current-map corpse or AOI disappearance makes the old physical
+            // cell harmless. Replan, but never use the stale guarded route.
+            if (!currentBlocker) continue;
+            // A cap is a live unresolved blocker too. It has not taken the
+            // resolver's deferred-target recovery branch, so give ordinary
+            // recovery exactly one chance to create a new physical state.
+            if (!resolution?.recovered) {
+              recordSearchDiagnostic(client, {
+                type: 'protectedTransitBlockerRecovery',
+                questId,
+                target: pending.name,
+                objectId: Number(currentBlocker.objectId),
+                reason: resolution?.budgetExhausted ? 'blockerBudgetExhausted' : 'liveUnresolved',
+              });
+              await retreatAndRecover(client, navigateNear, settings);
+            }
+            // Recovery can complete the active objective through ordinary
+            // downstream protocol handling (for example a late quest update).
+            // Let the normal outer stage check observe that authoritative
+            // completion instead of reporting a corridor stall that no longer
+            // controls the quest.
+            if (READY_STAGES.has(normalized(questEntry(client.snapshot, questId)?.stage))) continue;
+            if (!physicalPlayerProgressed(beforeRecovery, physicalPlayerTransform(client.snapshot))) {
+              recordSearchDiagnostic(client, {
+                type: 'protectedTransitBlockerTerminated',
+                questId,
+                target: pending.name,
+                objectId: Number(currentBlocker.objectId),
+                mapFileName: String(client.snapshot?.mapFileName ?? ''),
+                reason: resolution?.budgetExhausted ? 'blockerBudgetExhausted' : 'liveDeferredWithoutPhysicalProgress',
+              });
+              throw new ProtectedTransitBlockerUnresolved(
+                currentBlocker.objectId,
+                client.snapshot?.mapFileName,
+                resolution?.budgetExhausted ? 'blockerBudgetExhausted' : 'liveDeferredWithoutPhysicalProgress',
+              );
+            }
+            // A real ordinary recovery step or authoritative map change has
+            // invalidated the old route. Replan from that new state; do not
+            // reset the global clear/engagement budget.
+            recordSearchDiagnostic(client, {
+              type: 'protectedTransitBlockerRecoveredProgress',
+              questId,
+              target: pending.name,
+              objectId: Number(currentBlocker.objectId),
+            });
+            continue;
+          }
           if (error instanceof TravelBlockedByMonster) {
             const blocker = entityById(client.snapshot, error.objectId);
             if (!blocker) continue;
@@ -926,6 +1027,7 @@ function combatSettings(options) {
       options.spawnSearchProtectedHostileClearance,
     ),
     spawnStallProtectedBlocker: protectedSpawnBlockerOption(options.spawnStallProtectedBlocker),
+    transitProtectedBlocker: protectedSpawnBlockerOption(options.transitProtectedBlocker),
     combatHostileClearance: nonnegativeInteger(options.combatHostileClearance, 0),
     combatHostileClearanceFallback: nonnegativeInteger(
       options.combatHostileClearanceFallback,
@@ -1390,17 +1492,36 @@ async function searchSpawnCandidates(
   throw new SpawnSearchExhausted(`bounded full-spread spawn search exhausted ${waypoints.length} waypoints across ${candidates.length} candidates without live ${targetPlan.monsterNames.join(" or ")}`);
 }
 
-async function resolveProtectedSpawnStallBlocker(client, pending, navigateNear, settings, cleared) {
-  const policy = settings.spawnStallProtectedBlocker;
-  if (!policy || cleared >= policy.maxBlockers || !pending) return null;
+async function resolveProtectedSpawnStallBlocker(
+  client,
+  pending,
+  navigateNear,
+  settings,
+  cleared,
+  requestedBlockerObjectId = null,
+  policyOverride = null,
+) {
+  const policy = policyOverride ?? settings.spawnStallProtectedBlocker;
+  if (!policy || !pending) return { unavailable: true };
+  if (cleared >= policy.maxBlockers) return { budgetExhausted: true };
   const mapFileName = String(client.snapshot?.mapFileName ?? '');
   const player = playerFromSnapshot(client.snapshot);
-  const blocker = (client.snapshot?.entities ?? [])
+  const candidates = (client.snapshot?.entities ?? [])
     .filter(entity => isLiveMonster(entity) && policy.names.has(normalizeName(entity?.name)) &&
-      !unreachableTargetDeferred(entity, settings) && !unsafeTargetDeferred(client, entity.objectId, settings))
-    .sort((left, right) => distance(player, left) - distance(player, right) ||
+      !unreachableTargetDeferred(entity, settings) && !unsafeTargetDeferred(client, entity.objectId, settings));
+  const requestedId = Number(requestedBlockerObjectId);
+  const hasRequestedId = requestedBlockerObjectId != null && Number.isSafeInteger(requestedId);
+  const requestedLive = hasRequestedId
+    ? liveProtectedBlocker(client.snapshot, requestedId, policy)
+    : null;
+  const blocker = hasRequestedId
+    ? candidates.find(entity => Number(entity.objectId) === requestedId) ?? null
+    : candidates.sort((left, right) => distance(player, left) - distance(player, right) ||
       Number(left.objectId) - Number(right.objectId))[0] ?? null;
-  if (!blocker) return null;
+  // A previously deferred current blocker is still physically dangerous even
+  // though target-selection filters it out. Let the caller perform bounded
+  // recovery/termination instead of misclassifying it as a vanished actor.
+  if (!blocker) return requestedLive ? { deferred: true } : { vanished: true };
 
   recordSearchDiagnostic(client, {
     type: 'spawnStallProtectedBlockerAttempt',
@@ -1413,11 +1534,14 @@ async function resolveProtectedSpawnStallBlocker(client, pending, navigateNear, 
   });
   const attemptBoundary = Number(client.sequence ?? 0);
   try {
+    const clearanceNavigate = settings.transitProtectedBlocker
+      ? protectedTransitClearanceNavigator(client, navigateNear, settings.transitProtectedBlocker)
+      : navigateNear;
     await killExactMonster(
       client,
       blocker,
       { questId: questIdFor(pending), kind: 'spawnBlocker', name: String(blocker.name ?? '') },
-      navigateNear,
+      clearanceNavigate,
       settings,
       false,
     );
@@ -1425,8 +1549,9 @@ async function resolveProtectedSpawnStallBlocker(client, pending, navigateNear, 
       throw new Error(`protected spawn blocker ${Number(blocker.objectId)} changed map during approach`);
     }
     const authoritativeBlocker = entityById(client.snapshot, blocker.objectId);
+    const authoritativeHp = finiteHp(authoritativeBlocker?.hp);
     const killedInCurrentSnapshot = authoritativeBlocker?.dead === true ||
-      Number(authoritativeBlocker?.hp) <= 0;
+      (authoritativeHp != null && authoritativeHp <= 0);
     const killedByFreshReceipt = receivedPacketAfter(
       client, attemptBoundary, 'ObjectDied', Number(blocker.objectId),
     );
@@ -3015,6 +3140,84 @@ function protectedSpawnBlockerApproachRange(target, settings, ordinaryRange) {
     );
   }
   return Math.min(ordinaryRange, policy.maximumApproachDistance);
+}
+
+function protectedTransitHazard(snapshot, context, policy) {
+  const mapFileName = String(snapshot?.mapFileName ?? '');
+  if (mapFileName === '' || mapFileName !== String(context?.mapId ?? '')) return null;
+  const physicalCells = Array.isArray(context?.physicalCells) ? context.physicalCells : [];
+  const collisions = [];
+  for (const cell of physicalCells) {
+    for (const entity of snapshot?.entities ?? []) {
+      if (!isLiveMonster(entity) || !policy.names.has(normalizeName(entity?.name))) continue;
+      if (distance(cell, entity) > policy.clearance) continue;
+      collisions.push({ cell: { x: Number(cell.x), y: Number(cell.y) }, entity });
+    }
+  }
+  if (collisions.length === 0) return null;
+  collisions.sort((left, right) =>
+    distance(context.from, left.entity) - distance(context.from, right.entity) ||
+    Number(left.entity.objectId) - Number(right.entity.objectId));
+  const { cell, entity } = collisions[0];
+  return {
+    type: 'protectedTransitShamanHalo',
+    blockerObjectId: Number(entity.objectId),
+    blockerName: String(entity.name ?? ''),
+    blockerPosition: { x: Number(entity.x), y: Number(entity.y) },
+    blockedCell: cell,
+    clearance: policy.clearance,
+  };
+}
+
+function liveProtectedBlocker(snapshot, objectId, policy) {
+  if (!policy || !Number.isSafeInteger(Number(objectId))) return null;
+  const entity = entityById(snapshot, objectId);
+  return entity && isLiveMonster(entity) && policy.names.has(normalizeName(entity?.name))
+    ? entity
+    : null;
+}
+
+function physicalPlayerTransform(snapshot) {
+  const player = playerFromSnapshot(snapshot);
+  const x = Number(player?.x);
+  const y = Number(player?.y);
+  return Number.isFinite(x) && Number.isFinite(y)
+    ? { mapFileName: String(snapshot?.mapFileName ?? ''), x, y }
+    : null;
+}
+
+function physicalPlayerProgressed(before, after) {
+  if (!before || !after) return false;
+  return before.mapFileName !== after.mapFileName || before.x !== after.x || before.y !== after.y;
+}
+
+function protectedTransitClearanceNavigator(client, navigateNear, policy) {
+  return async (target, desiredDistance, stopWhen, options = {}) => {
+    try {
+      return await navigateNear(target, desiredDistance, stopWhen, {
+        ...options,
+        beforeMovement: context => protectedTransitHazard(client.snapshot, context, policy),
+      });
+    } catch (error) {
+      if (!(error instanceof NavigationStepGuarded) ||
+          error.hazard?.type !== 'protectedTransitShamanHalo') throw error;
+      // This is the resolver's own approach, so it must not recursively
+      // select another corridor blocker. The fresh-cell guard has proved the
+      // current band invalid; represent that fact as the existing typed
+      // unavailable-band result and let the caller defer/recover normally.
+      recordSearchDiagnostic(client, {
+        type: 'protectedTransitClearanceMovementBlocked',
+        targetObjectId: Number(target?.objectId),
+        blockerObjectId: Number(error.hazard?.blockerObjectId),
+        physicalCells: error.hazard?.physicalCells ?? [],
+      });
+      throw new RangedSafetyBandUnavailable(
+        Number(target?.objectId),
+        target,
+        String(client.snapshot?.mapFileName ?? ''),
+      );
+    }
+  };
 }
 
 function boundedRatio(value, fallback) {

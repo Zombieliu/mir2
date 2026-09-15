@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import { createWizardKitingAction, RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
 import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
+import { createNavigator } from './protocol-play.mjs';
 
 function openMap(width = 15, height = 15, blockedPoints = []) {
   const blocked = new Uint8Array(width * height);
@@ -143,6 +144,56 @@ test('q89 Wizard never falls back to a close CursedShaman cast when no collision
 
   await assert.rejects(wrapped(client, target), /no collision-safe Wizard ranged band/i);
   assert.equal(actions, 0);
+});
+
+test('q89 action-owned reposition rechecks a Shaman that moves during navigator cadence', async () => {
+  const owner = player({ x: 5, y: 5 });
+  const target = monster(20, 5, 11, { name: 'CursedShaman', hp: 205, maxHp: 205 });
+  const client = clientFixture([owner, target]);
+  const diagnostics = [];
+  const sent = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  client.sent = sent;
+  client.events = [];
+  client.sequence = 0;
+  client.send = command => sent.push(command);
+  client.wait = async () => assert.fail('the fresh kiting guard must reject before a movement receipt');
+  let movedDuringCadence = false;
+  const navigator = createNavigator(client, {
+    loadCollisionMap: async () => openMap(20, 20),
+    delay: async () => {
+      if (!movedDuringCadence) {
+        movedDuringCadence = true;
+        // Planning saw the Shaman at (5,11); cadence reveals it now standing
+        // on the player, so every proposed physical cell is in its footprint.
+        Object.assign(target, { x: 5, y: 5 });
+      }
+    },
+    now: () => 10_000,
+  });
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actions += 1; return { kind: 'magic', targetId: target.objectId }; },
+    navigator,
+    {
+      loadCollisionMap: async () => openMap(20, 20),
+      fightWhenBlocked: true,
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7,
+        maximumTargetDistance: 9,
+        unsafeShamanDistance: 6,
+        maxRetreatSteps: 6,
+      },
+    },
+  );
+
+  await assert.rejects(wrapped(client, target), /no collision-safe Wizard ranged band/i);
+  assert.equal(movedDuringCadence, true);
+  assert.equal(actions, 0);
+  assert.equal(sent.length, 0);
+  assert.ok(diagnostics.some(entry =>
+    entry.type === 'wizardKiteFallback' && entry.reason === 'rangedSafetyBandMovementGuarded'));
 });
 
 test('D2031 entry has a collision-valid nine-tile CursedShaman firing position', async () => {
