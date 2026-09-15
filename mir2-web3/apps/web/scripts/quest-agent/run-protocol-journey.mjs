@@ -681,7 +681,9 @@ try {
       route,
       travel,
       navigate,
-      questIds: ids,
+      // Already-earned co-farming rewards can fund supplies too. This helper
+      // only turns in authoritative ReadyToTurnIn quests; the mandatory route
+      // denominator remains the chapter IDs below.
     });
     const readyResumeQuestId = ids.find(id => {
       const quest = client.snapshot.questLog.find(entry => Number(entry?.questId) === Number(id));
@@ -1143,7 +1145,10 @@ try {
                   emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id, className),
                   maxEmergencyEscapes: 1,
                   sustain: async current => {
-                    const classRecovery = await useClassRecovery(current, { hpThreshold: 0.9 });
+                    const classRecovery = await useClassRecovery(current, {
+                      hpThreshold: 0.9,
+                      restoreMpIfNeeded: id === 89 && className === 'Taoist',
+                    });
                     const consumed = startJourneyEmergencyHpRecovery(current, { hpThreshold: 0.9 });
                     return { consumed, classRecovery };
                   },
@@ -1167,6 +1172,16 @@ try {
                   timeoutMs: evasiveRecoveryTimeoutMsForQuest(id),
                   dangerDistance: evasiveRecoveryDangerDistanceForQuest(id),
                   retreatSteps: id === 54 ? 12 : 6,
+                  ...(id === 89 && className === 'Taoist' ? {
+                    sustain: async current => {
+                      const classRecovery = await useClassRecovery(current, {
+                        hpThreshold: 0.9,
+                        restoreMpIfNeeded: true,
+                      });
+                      const consumed = startJourneyEmergencyHpRecovery(current, { hpThreshold: 0.9 });
+                      return { consumed, classRecovery };
+                    },
+                  } : {}),
                 });
               }
               const recoveredHp = observedPlayerHp(owner.snapshot);

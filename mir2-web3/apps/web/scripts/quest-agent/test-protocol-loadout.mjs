@@ -740,6 +740,69 @@ test("Taoist class recovery can heal during a non-combat interaction", async () 
   assert.deepEqual(client.sent[0], { type: "magic", objectId: 10, spell: "Healing", direction: "Down", targetId: 10, x: 10, y: 10, spellTargetLock: true });
 });
 
+test('opt-in Taoist recovery restores exact MP once, refreshes, then heals without an offense', async () => {
+  const state = snapshot('Taoist', 25);
+  state.playerHp = 56; state.playerMaxHp = 180; state.playerMp = 1; state.playerMaxMp = 20;
+  state.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 1, container: 'bag1' });
+  state.knownSkills.push({ spell: 'Healing', cooldownRemainingTicks: 0, mpCost: 3 });
+  const client = mpRefreshClient(state, [], 4, (current, command) => {
+    if (command.type !== 'useItem') return;
+    current.snapshot.inventoryItems[0].quantity -= 1;
+  });
+
+  const result = await useClassRecovery(client, { hpThreshold: 0.9, restoreMpIfNeeded: true });
+
+  assert.equal(result?.spell, 'Healing');
+  assert.deepEqual(client.sent, [
+    { type: 'useItem', uniqueId: 31, grid: 'inventory' },
+    { type: 'clientVersion' },
+    { type: 'magic', objectId: 10, spell: 'Healing', direction: 'Down', targetId: 10, x: 10, y: 10, spellTargetLock: true },
+  ]);
+  assert.equal(client.sent.some(command => command.type === 'attack'), false);
+});
+
+test('MP restoration for class recovery remains opt-in and rejects unavailable Healing evidence', async () => {
+  const cases = [
+    { label: 'default disabled' },
+    { label: 'unlearned', restoreMpIfNeeded: true, skill: null },
+    { label: 'cooling', restoreMpIfNeeded: true, cooldownRemainingTicks: 1 },
+    { label: 'no MP stock', restoreMpIfNeeded: true, stock: false },
+  ];
+  for (const scenario of cases) {
+    const state = snapshot('Taoist', 25);
+    state.playerHp = 56; state.playerMaxHp = 180; state.playerMp = 1; state.playerMaxMp = 20;
+    if (scenario.stock !== false) state.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 1, container: 'bag1' });
+    if (scenario.skill !== null) state.knownSkills.push({
+      spell: 'Healing', cooldownRemainingTicks: scenario.cooldownRemainingTicks ?? 0, mpCost: 3,
+    });
+    const client = mpRefreshClient(state, [], 4, current => { current.snapshot.inventoryItems[0].quantity -= 1; });
+    assert.equal(await useClassRecovery(client, { hpThreshold: 0.9, restoreMpIfNeeded: scenario.restoreMpIfNeeded }), null, scenario.label);
+    assert.deepEqual(client.sent, [], scenario.label);
+  }
+
+  const warrior = snapshot('Warrior', 25);
+  warrior.playerHp = 56; warrior.playerMaxHp = 180; warrior.playerMp = 1; warrior.playerMaxMp = 20;
+  warrior.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 1, container: 'bag1' });
+  warrior.knownSkills.push({ spell: 'Healing', cooldownRemainingTicks: 0, mpCost: 3 });
+  const otherClass = mpRefreshClient(warrior, [], 4, current => { current.snapshot.inventoryItems[0].quantity -= 1; });
+  assert.equal(await useClassRecovery(otherClass, { hpThreshold: 0.9, restoreMpIfNeeded: true }), null);
+  assert.deepEqual(otherClass.sent, []);
+});
+
+test('delayed MP restoration never claims Healing until a fresh exact snapshot can afford it', async () => {
+  const state = snapshot('Taoist', 25);
+  state.playerHp = 56; state.playerMaxHp = 180; state.playerMp = 1; state.playerMaxMp = 20;
+  state.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 1, container: 'bag1' });
+  state.knownSkills.push({ spell: 'Healing', cooldownRemainingTicks: 0, mpCost: 3 });
+  const client = mpRefreshClient(state, [], 1, current => { current.snapshot.inventoryItems[0].quantity -= 1; });
+
+  assert.equal(await useClassRecovery(client, { hpThreshold: 0.9, restoreMpIfNeeded: true }), null);
+  assert.deepEqual(client.sent, [
+    { type: 'useItem', uniqueId: 31, grid: 'inventory' },
+    { type: 'clientVersion' },
+  ]);
+});
+
 test("class recovery emits no action for Warrior or a Taoist without affordable Healing", async () => {
   const warrior = mockClient(snapshot("Warrior", 12));
   assert.equal(await useClassRecovery(warrior, { hpThreshold: 1 }), null);

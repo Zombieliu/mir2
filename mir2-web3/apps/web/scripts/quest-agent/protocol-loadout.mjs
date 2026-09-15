@@ -78,12 +78,29 @@ export function startEmergencyHpRecovery(client, options = {}) {
  * an offensive spell or replace ordinary combat targeting.
  */
 export async function useClassRecovery(client, options = {}) {
-  const snapshot = client?.snapshot;
+  let snapshot = client?.snapshot;
   if (playerDead(snapshot)) return null;
-  const actor = player(snapshot);
+  let actor = player(snapshot);
   if (normalized(actor?.class) !== "taoist") return null;
   if (healthRatio(snapshot) > ratioThreshold(options.hpThreshold, 0.6)) return null;
-  const healing = usableSkill(snapshot, "Healing");
+  let healing = usableSkill(snapshot, "Healing");
+  if (!healing && options.restoreMpIfNeeded === true && canRestoreMpForHealing(snapshot)) {
+    const restored = [];
+    const cost = Number(knownHealing(snapshot)?.mpCost);
+    const maximum = Number(snapshot?.playerMaxMp);
+    await useRestorative(client, 'mp', restored, cost / maximum, options);
+    if (!restored.length) return null;
+    // A UseItem acknowledgement may precede the gradual mana ticks. Re-read
+    // the public exact snapshot before treating the dose as enough for
+    // Healing; ObjectMana percentages are intentionally not converted here.
+    await refreshCombatWorldSnapshot(client);
+    snapshot = client?.snapshot;
+    if (playerDead(snapshot)) return null;
+    actor = player(snapshot);
+    if (normalized(actor?.class) !== 'taoist' ||
+        healthRatio(snapshot) > ratioThreshold(options.hpThreshold, 0.6)) return null;
+    healing = usableSkill(snapshot, 'Healing');
+  }
   if (!healing) return null;
   const command = magicCommand(actor, actor, healing.spell);
   client.send(command);
@@ -344,6 +361,21 @@ function knownObjectId(value) {
 function knownExactMp(value) {
   if (value == null || (typeof value === 'string' && value.trim() === '')) return false;
   return Number.isFinite(Number(value));
+}
+
+function knownHealing(snapshot) {
+  return (snapshot?.knownSkills ?? []).find(skill => String(skill?.spell) === 'Healing') ?? null;
+}
+
+function canRestoreMpForHealing(snapshot) {
+  const healing = knownHealing(snapshot);
+  const cost = Number(healing?.mpCost);
+  const maximum = Number(snapshot?.playerMaxMp);
+  const current = Number(snapshot?.playerMp);
+  if (!healing || Number(healing?.cooldownRemainingTicks ?? 0) > 0 ||
+      !knownExactMp(snapshot?.playerMp) || !knownExactMp(snapshot?.playerMaxMp) ||
+      !(cost > 0) || cost > maximum || !(current < cost)) return false;
+  return Boolean(restorativeItem(snapshot, 'mp'));
 }
 
 function restorativeUsePending(client, pool, now, options) {

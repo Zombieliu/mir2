@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> 2026-09-16 R134/R135 controller 668/668 passes: q89 Taoist post-retreat
+> recovery can restore held MP before affordable self-Healing using fresh exact
+> values. Bootstrap can turn in already-earned optional ready quests for ordinary
+> supplies, preserving the 55+4 denominator. Both same-account casters restarted
+> on natural R54; completed units remain 155/177. Final logout/save and separate
+> visual gates remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-recovery-and-earned-funding-r134-r135.md).
+
 > 2026-09-16 R131–R133 controller668/668 passes: q89 Taoist admits measured
 > 0-adjacent/2-nearby Priest targets. A newer own Mana receipt prompts one exact
 > snapshot before another low-MP potion; escape Town scrolls are protected from
