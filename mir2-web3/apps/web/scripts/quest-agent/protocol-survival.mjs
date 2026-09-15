@@ -410,6 +410,8 @@ export function createPostEngagementSupplyGate({
     requiredAfterRestockAmuletStock = requestedAmulet,
     requiredAfterRestockEmergencyTeleportStock: requestedEmergencyTeleport = 0,
     minimumEmergencyTeleportStock: requestedEmergencyTeleportTrigger = requestedEmergencyTeleport,
+    requiredAfterRestockEmergencyTownTeleportStock: requestedEmergencyTownTeleport = 0,
+    minimumEmergencyTownTeleportStock: requestedEmergencyTownTeleportTrigger = requestedEmergencyTownTeleport,
     returnMapFileName = null,
     forceRestock = false,
   } = {}) {
@@ -431,12 +433,22 @@ export function createPostEngagementSupplyGate({
       requestedEmergencyTeleportTrigger,
       'minimumEmergencyTeleportStock',
     );
+    const departureEmergencyTownTeleport = nonnegativeInteger(
+      requestedEmergencyTownTeleport,
+      'requiredAfterRestockEmergencyTownTeleportStock',
+    );
+    const triggerEmergencyTownTeleport = nonnegativeInteger(
+      requestedEmergencyTownTeleportTrigger,
+      'minimumEmergencyTownTeleportStock',
+    );
     let hp = hpDrugCount(client.snapshot);
     let mp = mpDrugCount(client.snapshot);
     let amulet = amuletStock(client.snapshot);
     let emergencyTeleport = emergencyTeleportStock(client.snapshot);
+    let emergencyTownTeleport = townTeleportStock(client.snapshot);
     if (!forceRestock && hp >= triggerHp && mp >= triggerMp && amulet >= triggerAmulet &&
-        emergencyTeleport >= triggerEmergencyTeleport) {
+        emergencyTeleport >= triggerEmergencyTeleport &&
+        emergencyTownTeleport >= triggerEmergencyTownTeleport) {
       return {
         status: 'sufficient',
         hp,
@@ -458,6 +470,9 @@ export function createPostEngagementSupplyGate({
     const supplyOptions = { targetHp };
     if (targetMp > 0) supplyOptions.targetMp = targetMp;
     if (targetAmulet > 0) supplyOptions.targetAmulet = targetAmulet;
+    if (departureEmergencyTownTeleport > 0) {
+      supplyOptions.emergencyTownTeleportCount = departureEmergencyTownTeleport;
+    }
     supplyOptions.lowStockHp = targetHp;
     if (targetMp > 0) supplyOptions.lowStockMp = targetMp;
     if (targetAmulet > 0) supplyOptions.lowStockAmulet = targetAmulet;
@@ -467,14 +482,19 @@ export function createPostEngagementSupplyGate({
     mp = mpDrugCount(client.snapshot);
     amulet = amuletStock(client.snapshot);
     emergencyTeleport = emergencyTeleportStock(client.snapshot);
+    emergencyTownTeleport = townTeleportStock(client.snapshot);
     if (hp < departureHp || mp < departureMp || amulet < departureAmulet ||
-        emergencyTeleport < departureEmergencyTeleport) {
+        emergencyTeleport < departureEmergencyTeleport ||
+        emergencyTownTeleport < departureEmergencyTownTeleport) {
       const details = [
         hp < departureHp ? `HP ${departureHp}` : null,
         mp < departureMp ? `MP ${departureMp}` : null,
         amulet < departureAmulet ? `Amulet ${departureAmulet}` : null,
         emergencyTeleport < departureEmergencyTeleport
           ? `RandomTeleport ${departureEmergencyTeleport}`
+          : null,
+        emergencyTownTeleport < departureEmergencyTownTeleport
+          ? `TownTeleport ${departureEmergencyTownTeleport}`
           : null,
       ]
         .filter(Boolean).join(' and ');
@@ -552,6 +572,17 @@ export function journeyEmergencyEscapeRestockTarget(snapshot, questId, {
     : 0;
 }
 
+/** q89 Wizard's TownTeleport reserve is a departure check, never a field floor. */
+export function journeyEmergencyTownTeleportRestockTarget(snapshot, questId, className, {
+  force = false,
+  target = 2,
+} = {}) {
+  if (String(className ?? '').trim().toLowerCase() !== 'wizard' ||
+      Number(questId) !== 89 || !journeyExpeditionSupplyActive(snapshot, questId)) return 0;
+  const required = nonnegativeInteger(target, 'emergency TownTeleport target');
+  return force || String(snapshot?.mapFileName ?? '') === '0' ? required : 0;
+}
+
 export function mpDrugCount(snapshot) {
   return itemQuantity(snapshot, item => /^\(MP\)Drug/i.test(String(item?.name ?? item?.key ?? '')));
 }
@@ -561,6 +592,13 @@ export function amuletStock(snapshot) {
     String(item?.name ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'amulet' ||
     String(item?.key ?? '').toLowerCase() === 'crystal-item-712',
   { includeEquipment: true });
+}
+
+function townTeleportStock(snapshot) {
+  return itemQuantity(snapshot, item =>
+    String(item?.name ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'townteleport' ||
+    String(item?.key ?? '').toLowerCase() === 'crystal-item-719',
+  );
 }
 
 export function canResumeStockedCombatExpedition(snapshot) {

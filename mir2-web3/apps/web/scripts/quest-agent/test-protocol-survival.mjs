@@ -56,6 +56,7 @@ import {
   hpRestockTargetForActiveQuests,
   journeyExpeditionDepartureFloorForQuest,
   journeyEmergencyEscapeRestockTarget,
+  journeyEmergencyTownTeleportRestockTarget,
   journeyEmergencyTeleportDepartureTarget,
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
@@ -303,6 +304,60 @@ test('a dangerous expedition keeps partial field scrolls but restocks once the r
   assert.equal(journeyEmergencyEscapeRestockTarget({
     ...active(0), questLog: [{ questId: 98, stage: 'readyToTurnIn' }],
   }, 98), 0);
+});
+
+test('q89 Wizard TownTeleport reserve is departure-only and map-0 gated', () => {
+  const active = (mapFileName, stage = 'inProgress') => ({
+    mapFileName,
+    questLog: [{ questId: 89, stage }],
+  });
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('D022'), 89, 'Wizard'), 0);
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0'), 89, 'Wizard'), 2);
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('D022'), 89, 'Wizard', { force: true }), 2);
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0'), 89, 'Taoist'), 0);
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0', 'readyToTurnIn'), 89, 'Wizard'), 0);
+});
+
+test('TownTeleport departure proof triggers Scott reserve when map-0 stock is missing', async () => {
+  const client = clientAt('0', 24);
+  const calls = [];
+  const gate = createPostEngagementSupplyGate({
+    minimumHpStock: 4,
+    travel: async map => calls.push(['travel', map]),
+    navigateNear: async () => {},
+    restock: async (owner, _navigateNear, options) => {
+      calls.push(['restock', options]);
+      owner.snapshot.inventoryItems.push({ name: 'TownTeleport', quantity: 2 });
+      return { status: 'restocked' };
+    },
+  });
+
+  const result = await gate(client, {
+    minimumHpStock: 4,
+    minimumEmergencyTownTeleportStock: 2,
+    requiredAfterRestockEmergencyTownTeleportStock: 2,
+    returnMapFileName: '',
+  });
+  assert.equal(result.status, 'restocked');
+  assert.deepEqual(calls, [
+    ['restock', { targetHp: 4, emergencyTownTeleportCount: 2, lowStockHp: 4 }],
+  ]);
+});
+
+test('TownTeleport departure proof fails closed when Scott purchase did not increase stock', async () => {
+  const client = clientAt('0', 24);
+  const gate = createPostEngagementSupplyGate({
+    minimumHpStock: 4,
+    travel: async () => {},
+    navigateNear: async () => {},
+    restock: async () => ({ status: 'restocked' }),
+  });
+  await assert.rejects(() => gate(client, {
+    minimumHpStock: 4,
+    minimumEmergencyTownTeleportStock: 2,
+    requiredAfterRestockEmergencyTownTeleportStock: 2,
+    returnMapFileName: '',
+  }), /needsFunds: unable to restock supplies to TownTeleport 2/);
 });
 
 test('Wooma and Stone Tomb carry navigation plus combat escape reserves', () => {

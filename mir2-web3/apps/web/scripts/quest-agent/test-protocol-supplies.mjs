@@ -5,6 +5,8 @@ import {
   equipHeldAmulet,
   randomTeleportCount,
   restockInVillage,
+  townTeleportCount,
+  useTownTeleport,
   useRandomTeleport,
   journeyWeaponFundingGold,
   warriorWeaponFundingGold,
@@ -14,6 +16,7 @@ const HP = 658;
 const MP = 659;
 const AMULET = 712;
 const RANDOM_TELEPORT = 717;
+const TOWN_TELEPORT = 719;
 
 function item(itemIndex, quantity, name = itemIndex === HP ? '(HP)DrugSmall' : itemIndex === MP ? '(MP)DrugSmall' : 'Amulet', uniqueId = itemIndex) {
   return { name, uniqueId, quantity, container: 'bag1', tooltipSource: { info: {
@@ -31,6 +34,7 @@ function snapshot({ className = 'Warrior', level = 20, gold = 1000, hp = 0, mp =
       { objectId: 1, kind: 'player', class: className, level, x: 290, y: 608 },
       ...(npc ? [
         { objectId: 88, kind: 'npc', name: 'Merchant_Ruben', x: 288, y: 608 },
+        { objectId: 42, kind: 'npc', name: 'Merchant_Scott', x: 291, y: 610 },
         { objectId: 5, kind: 'npc', name: 'Blacksmith_Smith', x: 296, y: 613 },
         { objectId: 6, kind: 'npc', name: 'Merchant_John', x: 292, y: 603 },
         { objectId: 43, kind: 'npc', name: 'MaterialDealer_Reece', x: 295, y: 605 },
@@ -74,7 +78,9 @@ class FakeClient {
       } });
     }
     if (command.type === 'buyItem' && !this.options.rejectBuy) {
-      const row = (this.options.goods ?? goods()).find(entry => String(entry.id) === String(command.itemIndex));
+      const objectId = this.snapshot?.activeNpcDialog?.npcObjectId;
+      const availableGoods = this.options.goodsByNpc?.[String(objectId)] ?? this.options.goods ?? goods();
+      const row = availableGoods.find(entry => String(entry.id) === String(command.itemIndex));
       const index = Number(row?.itemIndex);
       const quantity = Number(command.count);
       const next = structuredClone(this.snapshot);
@@ -147,24 +153,31 @@ class FakeClient {
     }
     if (packet === 'UseItem') {
       this.sent.push(structuredClone(command));
-      if (this.options.rejectUse) return { packet, payload: { success: false } };
+      if (this.options.rejectUse || this.options.falseAckNoConsume) return { packet, payload: { success: false } };
       const next = structuredClone(this.snapshot);
       const items = command.grid === 'belt' ? next.beltItems : command.grid === 'equipment' ? next.equipmentItems : next.inventoryItems;
       const index = items.findIndex(entry => Number(entry.uniqueId) === Number(command.uniqueId));
       if (index < 0) return { packet, payload: { success: false } };
+      const itemIndex = Number(items[index]?.tooltipSource?.info?.item_index);
       if (Number(items[index].quantity ?? 1) > 1) items[index].quantity -= 1;
       else items.splice(index, 1);
       const actor = next.entities.find(entry => Number(entry.objectId) === Number(next.playerObjectId));
-      actor.x += 7;
-      actor.y += 3;
+      if (itemIndex === TOWN_TELEPORT && this.options.townTeleportMap != null) {
+        next.mapFileName = String(this.options.townTeleportMap);
+      }
+      if (!(itemIndex === TOWN_TELEPORT && this.options.townTeleportSamePosition === true)) {
+        actor.x += 7;
+        actor.y += 3;
+      }
       this.receive(next);
       return { packet, payload: { success: true } };
     }
     const after = this.sequence;
     this.send(command);
     if (packet === 'NPCGoods' && !this.options.noGoods) {
+      const objectId = this.snapshot?.activeNpcDialog?.npcObjectId;
       this.packet('NPCGoods', {
-        list: this.options.goods ?? goods(),
+        list: this.options.goodsByNpc?.[String(objectId)] ?? this.options.goods ?? goods(),
         panelType: this.options.panelType ?? 0,
         rate: 1,
       });
@@ -198,6 +211,10 @@ function goods() {
 
 function emergencyGoods() {
   return [...goods(), { id: 71701, uniqueId: 71701, itemIndex: RANDOM_TELEPORT, name: 'RandomTeleport', price: 100, count: 1 }];
+}
+
+function townEmergencyGoods() {
+  return [...emergencyGoods(), { id: 71901, uniqueId: 71901, itemIndex: TOWN_TELEPORT, name: 'TownTeleport', price: 1000, count: 1 }];
 }
 
 function weaponGoods() {
@@ -364,6 +381,58 @@ test('ordinary restock does not buy RandomTeleport unless explicitly requested',
   assert.equal(client.snapshot.inventoryItems.some(entry => Number(entry.tooltipSource?.info?.item_index) === RANDOM_TELEPORT), false);
 });
 
+test('ordinary restock does not buy TownTeleport unless explicitly requested', async () => {
+  const client = new FakeClient(snapshot({ gold: 1100, hp: 6 }), {
+    goodsByNpc: { '8': emergencyGoods(), '42': townEmergencyGoods() },
+  });
+  const result = await restockInVillage(client, async () => {});
+  assert.equal(result.status, 'sufficient');
+  assert.equal(client.sent.some(entry => entry.type === 'interact' && entry.objectId === 42), false);
+  assert.equal(client.sent.some(entry => entry.type === 'buyItem' && entry.itemIndex === 71901), false);
+  assert.equal(townTeleportCount(client.snapshot), 0);
+});
+
+test('opt-in TownTeleport reserve uses Scott goods when Ruben lacks TownTeleport', async () => {
+  const client = new FakeClient(snapshot({ gold: 1100, hp: 6 }), {
+    goodsByNpc: { '8': emergencyGoods(), '42': townEmergencyGoods() },
+  });
+  const result = await restockInVillage(client, async () => {}, {
+    emergencyTownTeleportCount: 1,
+    reserveGold: 0,
+  });
+  assert.equal(result.status, 'restocked');
+  assert.deepEqual(result.purchases, [{
+    itemIndex: TOWN_TELEPORT,
+    name: 'TownTeleport',
+    shopItemId: 71901,
+    quantity: 1,
+    unitPrice: 1000,
+    cost: 1000,
+  }]);
+  assert.equal(result.after.gold, 100);
+  assert.equal(townTeleportCount(client.snapshot), 1);
+  assert.equal(client.sent.some(entry => entry.type === 'interact' && entry.objectId === 42), true);
+  assert.deepEqual(client.sent.at(-1), { type: 'buyItem', itemIndex: 71901, count: 1, panelType: 0 });
+});
+
+test('TownTeleport funding shortfall reports needsFunds after Ruben potions without visiting Scott', async () => {
+  const client = new FakeClient(snapshot({ className: 'Wizard', gold: 200, hp: 0, mp: 0 }), {
+    goodsByNpc: { '88': goods(), '42': townEmergencyGoods() },
+  });
+  const result = await restockInVillage(client, async () => {}, {
+    targetHp: 1,
+    targetMp: 1,
+    lowStockHp: 1,
+    lowStockMp: 1,
+    emergencyTownTeleportCount: 1,
+    reserveGold: 0,
+  });
+  assert.equal(result.status, 'needsFunds');
+  assert.deepEqual(result.purchases.map(entry => entry.itemIndex), [HP, MP]);
+  assert.equal(client.sent.some(entry => entry.type === 'interact' && entry.objectId === 42), false);
+  assert.equal(townTeleportCount(client.snapshot), 0);
+});
+
 test('explicit eight-scroll route reserve buys exact Merchant Ruben rows and proves deltas', async () => {
   const client = new FakeClient(snapshot({ gold: 1100, hp: 6 }), { goods: emergencyGoods() });
   const result = await restockInVillage(client, async () => {}, {
@@ -446,6 +515,42 @@ test('RandomTeleport use fails closed on a rejected ack', async () => {
   state.inventoryItems.push(item(RANDOM_TELEPORT, 1, 'RandomTeleport', 717002));
   const client = new FakeClient(state, { rejectUse: true });
   await assert.rejects(() => useRandomTeleport(client), /UseItem was rejected/);
+});
+
+test('TownTeleport use proves consumption and accepts a map change with unchanged coordinates', async () => {
+  const state = snapshot({ gold: 500, hp: 6, mapFileName: '5' });
+  state.inventoryItems.push(item(TOWN_TELEPORT, 1, 'TownTeleport', 719001));
+  const client = new FakeClient(state, { townTeleportMap: '0', townTeleportSamePosition: true });
+  const result = await useTownTeleport(client);
+  assert.deepEqual(result, {
+    uniqueId: 719001,
+    grid: 'inventory',
+    quantityBefore: 1,
+    quantityAfter: 0,
+    from: { x: 290, y: 608 },
+    to: { x: 290, y: 608 },
+    fromMapFileName: '5',
+    toMapFileName: '0',
+  });
+  assert.deepEqual(client.sent.at(-2), { type: 'useItem', uniqueId: 719001, grid: 'inventory' });
+  assert.deepEqual(client.sent.at(-1), { type: 'clientVersion' });
+  assert.equal(townTeleportCount(client.snapshot), 0);
+});
+
+test('TownTeleport UseItem rejection leaves the authoritative item unconsumed', async () => {
+  const state = snapshot({ gold: 500, hp: 6 });
+  state.inventoryItems.push(item(TOWN_TELEPORT, 1, 'TownTeleport', 719002));
+  const client = new FakeClient(state, { rejectUse: true });
+  await assert.rejects(() => useTownTeleport(client), /UseItem was rejected/);
+  assert.equal(townTeleportCount(client.snapshot), 1);
+});
+
+test('TownTeleport false ack cannot be treated as consumption', async () => {
+  const state = snapshot({ gold: 500, hp: 6 });
+  state.inventoryItems.push(item(TOWN_TELEPORT, 1, 'TownTeleport', 719003));
+  const client = new FakeClient(state, { falseAckNoConsume: true });
+  await assert.rejects(() => useTownTeleport(client), /UseItem was rejected/);
+  assert.equal(townTeleportCount(client.snapshot), 1);
 });
 
 test('shared emergency escape cooldown conserves scrolls across independent loops', async () => {

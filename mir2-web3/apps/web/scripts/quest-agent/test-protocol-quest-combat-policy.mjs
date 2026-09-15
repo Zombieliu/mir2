@@ -53,3 +53,24 @@ test('Taoist Wooma expedition still casts at an objective monster', () => {
   assert.equal(shouldPreserveTaoistObjectiveAmmo(owner, routeQuest, target), false);
   assert.equal(questCombatApproachRange(owner, routeQuest, target), 6);
 });
+
+test('q99 keeps the same melee blocker rule while preserving ranged objective combat', async () => {
+  const owner = client();
+  const q99 = {
+    questId: 99,
+    objectives: {
+      kill: [{ monsterName: 'WoomaFighter' }],
+      item: [],
+    },
+  };
+  const blocker = { kind: 'monster', objectId: 4, name: 'CaveBat', x: 11, y: 10, hp: 20, dead: false };
+  assert.equal(shouldPreserveTaoistObjectiveAmmo(owner, q99, blocker), true);
+  assert.equal(questCombatApproachRange(owner, q99, blocker), 1);
+  assert.deepEqual(await questCombatAction(owner, q99, blocker), {
+    kind: 'attack', targetId: 4, command: { type: 'attack', objectId: 4 },
+  });
+
+  const objective = { kind: 'monster', objectId: 5, name: 'WoomaFighter', x: 14, y: 10, hp: 285, dead: false };
+  assert.equal(shouldPreserveTaoistObjectiveAmmo(owner, q99, objective), false);
+  assert.equal(questCombatApproachRange(owner, q99, objective), 6);
+});

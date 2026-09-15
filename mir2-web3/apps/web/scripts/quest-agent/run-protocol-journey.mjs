@@ -16,6 +16,8 @@ import {
   createRandomTeleportEmergencyEscape,
   equipHeldAmulet,
   randomTeleportCount,
+  townTeleportCount,
+  useTownTeleport,
   useRandomTeleport,
   journeyWeaponFundingGold,
 } from './protocol-supplies.mjs';
@@ -38,6 +40,7 @@ import {
   isLivingUnsafePackRetreatFailure,
   journeyExpeditionDepartureFloorForQuest,
   journeyEmergencyEscapeRestockTarget,
+  journeyEmergencyTownTeleportRestockTarget,
   journeyEmergencyTeleportCriticalHpRatio,
   journeyEmergencyTeleportDepartureTarget,
   journeyExpeditionSupplyActive,
@@ -150,17 +153,65 @@ try {
   report.bootstrapPassed = true;
   if (process.env.MIR2_JOURNEY_PLAY === '1') {
     const route = JSON.parse(await fs.readFile(new URL(`../../../../docs/generated/quest-agent/${className.toLowerCase()}-1-30-newcomer-v1.json`, import.meta.url), 'utf8'));
+    const activeWoomaQuest = owner => {
+      const activeIds = (owner?.snapshot?.questLog ?? [])
+        .filter(entry => [98, 99].includes(Number(entry?.questId)) &&
+          ['inprogress', 'readytoturnin'].includes(
+            String(entry?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase(),
+          ))
+        .map(entry => Number(entry.questId));
+      return activeIds
+        .map(questId => route.quests.find(quest => Number(quest?.questId) === questId))
+        .find(Boolean) ?? null;
+    };
+    const isWizardQ89Expedition = snapshot => className === 'Wizard' &&
+      (snapshot?.questLog ?? []).some(entry => Number(entry?.questId) === 89 &&
+        String(entry?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress');
     const emergencyTeleport = createRandomTeleportEmergencyEscape({
       criticalHpRatio: journeyEmergencyTeleportCriticalHpRatio(className),
+      teleport: async owner => {
+        const maxHp = Math.max(1, Number(owner?.snapshot?.playerMaxHp ?? 0));
+        const hpRatio = observedPlayerHp(owner?.snapshot) / maxHp;
+        if (isWizardQ89Expedition(owner?.snapshot) &&
+            hpRatio <= journeyEmergencyTeleportCriticalHpRatio(className) &&
+            townTeleportCount(owner.snapshot) > 0) {
+          try {
+            return await useTownTeleport(owner);
+          } catch {
+            // A failed authoritative TownTeleport proof falls through to the
+            // same factory-managed RandomTeleport attempt.
+          }
+        }
+        return useRandomTeleport(owner);
+      },
     });
+    const journeyCombatAction = (owner, target) => {
+      const quest = activeWoomaQuest(owner);
+      return quest ? questCombatAction(owner, quest, target) : combatAction(owner, target);
+    };
+    const journeyCombatApproachRange = (owner, target) => {
+      const quest = activeWoomaQuest(owner);
+      return quest ? questCombatApproachRange(owner, quest, target) : combatApproachRange(owner, target);
+    };
+    const emergencyEscapeForJourney = async owner => {
+      if (isWizardQ89Expedition(owner?.snapshot) &&
+          townTeleportCount(owner.snapshot) <= 0 &&
+          randomTeleportCount(owner.snapshot) <= 0) return false;
+      if (!isWizardQ89Expedition(owner?.snapshot) && randomTeleportCount(owner.snapshot) <= 0) return false;
+      const result = await emergencyTeleport(owner);
+      if (result?.deferred === true || result === false || result === true) return result;
+      return result && typeof result === 'object'
+        ? { ...result, success: true }
+        : result;
+    };
     const navigate = createNavigator(client, {
       emergencyEscape: async owner => {
         // The cave remains dangerous after the last objective dies. Preserve
         // the same ordinary RandomTeleport escape until the reward NPC has
         // actually accepted the ready quest.
         const hasEmergencyExpedition = hasJourneyEmergencyEscapeQuest(owner.snapshot);
-        if (!hasEmergencyExpedition || randomTeleportCount(owner.snapshot) <= 0) return false;
-        return emergencyTeleport(owner);
+        if (!hasEmergencyExpedition) return false;
+        return emergencyEscapeForJourney(owner);
       },
       emergencyEscapeHpRatio: className === 'Wizard' ? 0.65 : 0.35,
       emergencyEscapeDangerDistance: 6,
@@ -192,8 +243,8 @@ try {
         blocker,
         navigate,
         {
-          action: combatAction,
-          approachRange: combatApproachRange,
+          action: journeyCombatAction,
+          approachRange: journeyCombatApproachRange,
           sustain: useSupplies,
           attackCadenceMs: 650,
           // Shared-zone cooldown counters advance authoritatively, but ordinary
@@ -234,6 +285,14 @@ try {
         emergencyTeleportCount: Math.max(0, ...(owner.snapshot?.questLog ?? [])
           .filter(quest => String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress')
           .map(quest => journeyEmergencyTeleportDepartureTarget(quest?.questId))),
+        // q89 Wizard keeps two TownTeleport scrolls as the first critical
+        // escape reserve. Other classes and quests preserve the ordinary
+        // zero-default supply plan.
+        emergencyTownTeleportCount: isWizardQ89Expedition(owner.snapshot) &&
+          (String(owner.snapshot?.mapFileName ?? '') === '0' ||
+            Number(requestedSupplyOptions.emergencyTownTeleportCount ?? 0) > 0)
+          ? 2
+          : 0,
         // The first D421 -> D422 round trip consumed 24 bottles before the
         // objective map was reached. Carry an evidence-based expedition
         // stock while q54 remains active instead of repeating town loops.
@@ -256,8 +315,8 @@ try {
           blocker,
           navigate,
           {
-            action: combatAction,
-            approachRange: combatApproachRange,
+            action: journeyCombatAction,
+            approachRange: journeyCombatApproachRange,
             sustain: useSupplies,
             attackCadenceMs: 650,
             refreshWhileWaiting: current => refreshCombatCooldown(current),
@@ -304,6 +363,14 @@ try {
         { force: replenishEscapeReserve, target: emergencyTeleportTarget },
       );
       const shouldReplenishEscapeReserve = emergencyTeleportRestockTarget > 0;
+      const emergencyTownTeleportTarget = journeyEmergencyTownTeleportRestockTarget(
+        owner.snapshot,
+        questId,
+        className,
+        { force: replenishEscapeReserve, target: 2 },
+      );
+      const shouldReplenishTownEscapeReserve = emergencyTownTeleportTarget > 0 &&
+        townTeleportCount(owner.snapshot) < emergencyTownTeleportTarget;
       const q42WizardExpedition = Number(questId) === 42 &&
         String(className).trim().toLowerCase() === 'wizard';
       return {
@@ -316,9 +383,12 @@ try {
         // around solely to replace that one scroll.
         minimumEmergencyTeleportStock: emergencyTeleportRestockTarget,
         requiredAfterRestockEmergencyTeleportStock: emergencyTeleportTarget,
+        minimumEmergencyTownTeleportStock: emergencyTownTeleportTarget,
+        requiredAfterRestockEmergencyTownTeleportStock: emergencyTownTeleportTarget,
         forceRestock: forceRestock || journeyWeaponFundingGold(owner.snapshot) > 0 ||
           requiresTaoistAmuletRestock(owner.snapshot, questId, className, amuletTrigger) ||
           (shouldReplenishEscapeReserve && randomTeleportCount(owner.snapshot) < emergencyTeleportTarget) ||
+          shouldReplenishTownEscapeReserve ||
           (expeditionSupplyActive &&
             (hpDrugCount(owner.snapshot) < departureFloor.hp ||
               mpDrugCount(owner.snapshot) < departureFloor.mp ||
@@ -373,6 +443,16 @@ try {
           0,
           emergencyTeleportTarget - randomTeleportCount(owner.snapshot),
         ) * 100;
+        const emergencyTownTeleportTarget = journeyEmergencyTownTeleportRestockTarget(
+          owner.snapshot,
+          questId,
+          className,
+          { force: true, target: 2 },
+        );
+        const emergencyTownTeleportFunding = Math.max(
+          0,
+          emergencyTownTeleportTarget - townTeleportCount(owner.snapshot),
+        ) * 1000;
         const fundingAmuletDeficit = String(selfPlayer(owner)?.class ?? '').trim().toLowerCase() === 'taoist' &&
           journeyExpeditionSupplyActive(owner.snapshot, questId)
           ? Math.max(0, journeyAmuletSupplyPolicyForQuest(questId, selfPlayer(owner)?.class).departure - amuletStock(owner.snapshot))
@@ -383,7 +463,8 @@ try {
           requiredAmuletStock: fundingAmuletDeficit,
           additionalGold: Math.max(
             0,
-            journeyWeaponFundingGold(owner.snapshot) + emergencyTeleportFunding -
+            journeyWeaponFundingGold(owner.snapshot) + emergencyTeleportFunding +
+              emergencyTownTeleportFunding -
               Number(owner.snapshot?.gold ?? 0),
           ),
         });
@@ -391,8 +472,8 @@ try {
           route,
           travel,
           navigate,
-          action: combatAction,
-          approachRange: combatApproachRange,
+          action: journeyCombatAction,
+          approachRange: journeyCombatApproachRange,
           sustain: async current => {
             const classRecovery = await useClassRecovery(current, { hpThreshold: 0.9 });
             const consumed = startEmergencyHpRecovery(current, { hpThreshold: 0.9 });
@@ -872,10 +953,7 @@ try {
             // observed no-step cave trap and never replaces ordinary retreat.
             emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id, className),
             emergencyEscape: dangerousExpeditionQuestIds.has(id)
-              ? async owner => {
-                  const result = await emergencyTeleport(owner);
-                  return result?.deferred === true ? result : true;
-                }
+              ? emergencyEscapeForJourney
               : undefined,
             harvestBeforeClearingAggressors: id === 30,
             unsafeRetreatSteps: retreatProfile.unsafeRetreatSteps,
@@ -913,7 +991,7 @@ try {
                   maxEvasiveMoves: dangerousExpeditionQuestIds.has(id) ? 8 : 4,
                   biasPosition: snapshot => questRetreatBiasPosition(id, snapshot, className),
                   emergencyEscape: dangerousExpeditionQuestIds.has(id)
-                    ? async current => emergencyTeleport(current)
+                    ? emergencyEscapeForJourney
                     : undefined,
                   emergencyEscapeHpRatio: questEmergencyEscapeHpRatio(id, className),
                   maxEmergencyEscapes: 1,

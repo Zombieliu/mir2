@@ -2,6 +2,7 @@ import { observedPlayerHp } from './protocol-observation.mjs';
 import { supersededProgressionGearForSale } from './policy.mjs';
 
 const RUBEN = Object.freeze({ name: 'Merchant_Ruben', x: 288, y: 608 });
+const SCOTT = Object.freeze({ name: 'Merchant_Scott', x: 291, y: 610 });
 const BLACKSMITH = Object.freeze({ name: 'Blacksmith_Smith', x: 296, y: 613 });
 const BUTCHER = Object.freeze({ name: 'Merchant_John', x: 292, y: 603 });
 const MATERIAL_DEALER = Object.freeze({ name: 'MaterialDealer_Reece', x: 295, y: 605 });
@@ -14,6 +15,16 @@ const RANDOM_TELEPORT = Object.freeze({
   itemIndex: 717,
   name: 'RandomTeleport',
   catalogPrice: 100,
+  stackSize: 20,
+});
+// crystal_item_manifest.json: item_index 719, price 1000, stack_size 20.
+// Merchant Ruben's original Grocery trade list does not include this drop-only
+// scroll, so restocking it is deliberately opt-in and still requires a live
+// NPC goods row before sending BuyItem.
+const TOWN_TELEPORT = Object.freeze({
+  itemIndex: 719,
+  name: 'TownTeleport',
+  catalogPrice: 1000,
   stackSize: 20,
 });
 const LOW_STOCK = 3;
@@ -99,8 +110,10 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   // opens the shop for RandomTeleport and therefore keeps its old behavior.
   const emergencyTeleportCount = emergencyTeleportOption(options.emergencyTeleportCount);
   const needEmergencyTeleport = randomTeleportStock(initial) < emergencyTeleportCount;
+  const emergencyTownTeleportCount = emergencyTownTeleportOption(options.emergencyTownTeleportCount);
+  const needEmergencyTownTeleport = townTeleportStock(initial) < emergencyTownTeleportCount;
   const initialGold = integer(initial.gold, 'snapshot.gold');
-  if (needed.length === 0 && !weaponNeeded && !needEmergencyTeleport) {
+  if (needed.length === 0 && !weaponNeeded && !needEmergencyTeleport && !needEmergencyTownTeleport) {
     const equippedAmulet = className === 'taoist' ? await equipHeldAmulet(client) : null;
     return { status: 'sufficient', stock: stock(client.snapshot), gold: initialGold, equippedAmulet };
   }
@@ -111,6 +124,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     ...(weaponNeeded ? [weaponRequirement.allowFallback
       ? weaponRequirement.catalog.at(-1).catalogPrice
       : weaponRequirement.preferred.catalogPrice] : []),
+    ...(needEmergencyTownTeleport ? [TOWN_TELEPORT.catalogPrice] : []),
   ];
   const cheapestNeeded = cheapestCandidates.length > 0 ? Math.min(...cheapestCandidates) : 0;
   const gearCandidates = options.liquidateSuperseded === true
@@ -126,7 +140,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   const meatCandidates = materialCandidates.filter(item => normalized(item?.name) === 'venison');
   const generalMaterialCandidates = materialCandidates.filter(item => normalized(item?.name) !== 'venison');
   const liquidationCandidates = [...materialCandidates, ...gearCandidates];
-  if (spendableGold < cheapestNeeded && liquidationCandidates.length === 0 && !needEmergencyTeleport) {
+  if (spendableGold < cheapestNeeded && liquidationCandidates.length === 0 && !needEmergencyTeleport && !needEmergencyTownTeleport) {
     return needsFunds(beforeStock, initialGold, spendableGold, reserveGold);
   }
   if (typeof navigateNear !== 'function') throw new Error('navigateNear is required to reach Merchant Ruben');
@@ -135,7 +149,9 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     total + Math.max(0, targets[kind] - stock(client.snapshot)[kind]) *
       SUPPLIES[kind].catalogPrice, 0) +
     Math.max(0, emergencyTeleportCount - randomTeleportStock(client.snapshot)) *
-      RANDOM_TELEPORT.catalogPrice;
+      RANDOM_TELEPORT.catalogPrice +
+    Math.max(0, emergencyTownTeleportCount - townTeleportStock(client.snapshot)) *
+      TOWN_TELEPORT.catalogPrice;
   const sales = [];
   if (spendableGold < desiredSpendable && liquidationCandidates.length > 0) {
     const groups = [
@@ -290,7 +306,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     spendableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
   }
 
-  if (needed.length === 0 && !needEmergencyTeleport) {
+  if (needed.length === 0 && !needEmergencyTeleport && !needEmergencyTownTeleport) {
     return {
       status: 'restocked',
       before: { gold: initialGold, ...beforeStock },
@@ -299,6 +315,31 @@ export async function restockInVillage(client, navigateNear, options = {}) {
       sales,
       weaponPurchase,
       equippedAmulet: null,
+    };
+  }
+
+  if (needed.length === 0 && !needEmergencyTeleport && needEmergencyTownTeleport) {
+    const townPurchase = await purchaseEmergencyTownTeleport(
+      client,
+      navigateNear,
+      emergencyTownTeleportCount,
+      reserveGold,
+      options.clearBlockingMonster,
+    );
+    if (!townPurchase.purchase) {
+      const currentGold = integer(client.snapshot.gold, 'snapshot.gold');
+      return needsFunds(stock(client.snapshot), currentGold, spendable(currentGold, reserveGold), reserveGold);
+    }
+    const equippedAmulet = className === 'taoist' ? await equipHeldAmulet(client) : null;
+    return {
+      status: 'restocked',
+      merchant: { objectId: townPurchase.npc.objectId, name: townPurchase.npc.name, x: Number(townPurchase.npc.x), y: Number(townPurchase.npc.y) },
+      before: { gold: initialGold, ...beforeStock },
+      after: { gold: integer(client.snapshot.gold, 'snapshot.gold'), ...stock(client.snapshot) },
+      purchases: [townPurchase.purchase],
+      sales,
+      weaponPurchase,
+      equippedAmulet,
     };
   }
 
@@ -393,6 +434,25 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     });
   }
 
+  if (needEmergencyTownTeleport) {
+    const townPurchase = await purchaseEmergencyTownTeleport(
+      client,
+      navigateNear,
+      emergencyTownTeleportCount,
+      reserveGold,
+      options.clearBlockingMonster,
+    );
+    if (!townPurchase.purchase) {
+      return {
+        ...needsFunds(stock(client.snapshot), integer(client.snapshot.gold, 'snapshot.gold'), spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold), reserveGold),
+        sales,
+        purchases,
+        weaponPurchase,
+      };
+    }
+    purchases.push(townPurchase.purchase);
+  }
+
   const equippedAmulet = className === 'taoist' ? await equipHeldAmulet(client) : null;
   return {
     status: 'restocked',
@@ -441,6 +501,40 @@ export async function useRandomTeleport(client, options = {}) {
 }
 
 /**
+ * Use one authoritative TownTeleport stack through the normal public
+ * useItem command. Success requires fresh consumption plus an authoritative
+ * coordinate or map change; an ack alone is insufficient.
+ */
+export async function useTownTeleport(client, options = {}) {
+  const item = findTownTeleport(client?.snapshot, options.uniqueId);
+  if (!item) throw new Error('No authoritative TownTeleport item is available');
+  const grid = options.grid ?? townTeleportGrid(client.snapshot, item);
+  const beforeQuantity = townTeleportStock(client.snapshot);
+  const beforePlayer = playerPosition(client.snapshot);
+  if (!beforePlayer) throw new Error('TownTeleport requires an authoritative player position');
+  const beforeMapFileName = String(client.snapshot?.mapFileName ?? '');
+  const afterCommand = Number(client.sequence ?? 0);
+  const ack = await client.request({ type: 'useItem', uniqueId: item.uniqueId, grid }, 'UseItem', WAIT_MS);
+  if (ack?.payload?.success !== true) throw new Error('TownTeleport UseItem was rejected');
+  client.send({ type: 'clientVersion' });
+  await client.wait(
+    () => hasFreshTownTeleportUseProof(client, afterCommand, beforeQuantity, beforePlayer, beforeMapFileName),
+    'authoritative TownTeleport use',
+    WAIT_MS,
+  );
+  const after = playerPosition(client.snapshot);
+  return {
+    uniqueId: Number(item.uniqueId), grid,
+    quantityBefore: beforeQuantity,
+    quantityAfter: townTeleportStock(client.snapshot),
+    from: beforePlayer,
+    to: after,
+    fromMapFileName: beforeMapFileName,
+    toMapFileName: String(client.snapshot?.mapFileName ?? ''),
+  };
+}
+
+/**
  * Share one cooldown across navigation, combat retreat, and recovery loops.
  * Crystal can relocate a player into another hostile pack, so immediately
  * spending the next scroll is usually wasteful. A shorter critical cooldown
@@ -480,11 +574,24 @@ export function randomTeleportCount(snapshot) {
   return randomTeleportStock(snapshot);
 }
 
+/** Count usable public-protocol TownTeleport scrolls in bag and belt. */
+export function townTeleportCount(snapshot) {
+  return townTeleportStock(snapshot);
+}
+
 function liveRuben(snapshot) {
   return (snapshot?.entities ?? []).find(entity =>
     String(entity?.kind ?? '').toLowerCase() === 'npc' &&
     normalized(entity?.name) === normalized(RUBEN.name) &&
     Number(entity?.x) === RUBEN.x && Number(entity?.y) === RUBEN.y
+  ) ?? null;
+}
+
+function liveScott(snapshot) {
+  return (snapshot?.entities ?? []).find(entity =>
+    String(entity?.kind ?? '').toLowerCase() === 'npc' &&
+    normalized(entity?.name) === normalized(SCOTT.name) &&
+    Number(entity?.x) === SCOTT.x && Number(entity?.y) === SCOTT.y
   ) ?? null;
 }
 
@@ -558,6 +665,55 @@ async function navigateSupplyService(client, navigateNear, target, clearBlocking
     }
   }
   throw new Error(`Unable to reach supply service at ${target.x},${target.y}`);
+}
+
+async function purchaseEmergencyTownTeleport(client, navigateNear, targetCount, reserveGold, clearBlockingMonster) {
+  const existing = townTeleportStock(client.snapshot);
+  if (existing >= targetCount) return { purchase: null, npc: null };
+  const beforeGold = integer(client.snapshot.gold, 'snapshot.gold');
+  const availableGold = spendable(beforeGold, reserveGold);
+  if (availableGold < TOWN_TELEPORT.catalogPrice) return { purchase: null, npc: null };
+
+  await navigateSupplyService(client, navigateNear, SCOTT, clearBlockingMonster);
+  const { npc, goodsEvent } = await openBuySellService(client, liveScott, 'Merchant Scott');
+  const goods = goodsEvent?.payload;
+  if (!goods || Number(goods.panelType) !== 0 || !Array.isArray(goods.list)) {
+    throw new Error('Merchant Scott returned an invalid buy goods panel');
+  }
+  const row = supplyRow(goods.list, TOWN_TELEPORT);
+  if (!row) throw new Error(`Merchant Scott shop is missing ${TOWN_TELEPORT.name} (${TOWN_TELEPORT.itemIndex})`);
+  const unitPrice = positiveInteger(row.price, `${TOWN_TELEPORT.name} price`);
+  const quantity = Math.min(
+    Math.max(0, targetCount - townTeleportStock(client.snapshot)),
+    Math.max(0, Math.floor(availableGold / unitPrice)),
+  );
+  if (quantity <= 0) return { purchase: null, npc };
+
+  const currentGold = integer(client.snapshot.gold, 'snapshot.gold');
+  const beforeQuantity = townTeleportStock(client.snapshot);
+  const afterCommand = client.sequence;
+  client.send({
+    type: 'buyItem',
+    itemIndex: shopRowId(row),
+    count: quantity,
+    panelType: 0,
+  });
+  await client.wait(
+    () => hasFreshTownTeleportPurchaseProof(client, afterCommand, currentGold - quantity * unitPrice, beforeQuantity + quantity),
+    `authoritative purchase of ${TOWN_TELEPORT.name}`,
+    WAIT_MS,
+  );
+  return {
+    npc,
+    purchase: {
+      itemIndex: TOWN_TELEPORT.itemIndex,
+      name: TOWN_TELEPORT.name,
+      shopItemId: shopRowId(row),
+      quantity,
+      unitPrice,
+      cost: quantity * unitPrice,
+    },
+  };
 }
 
 function tileDistance(left, right) {
@@ -685,6 +841,16 @@ function hasFreshRandomTeleportPurchaseProof(client, afterSequence, expectedGold
   );
 }
 
+function hasFreshTownTeleportPurchaseProof(client, afterSequence, expectedGold, expectedQuantity) {
+  return client.events.some(event =>
+    event?.sequence > afterSequence &&
+    event?.direction === 'received' &&
+    event?.type === 'worldSnapshot' &&
+    Number(event?.payload?.gold) === expectedGold &&
+    townTeleportStock(event?.payload) === expectedQuantity
+  );
+}
+
 function hasFreshRandomTeleportUseProof(client, afterSequence, beforeQuantity, beforePlayer) {
   return client.events.some(event => {
     if (event?.sequence <= afterSequence || event?.direction !== 'received' || event?.type !== 'worldSnapshot') return false;
@@ -692,6 +858,17 @@ function hasFreshRandomTeleportUseProof(client, afterSequence, beforeQuantity, b
     const afterPlayer = playerPosition(payload);
     return randomTeleportStock(payload) < beforeQuantity &&
       afterPlayer && (afterPlayer.x !== beforePlayer.x || afterPlayer.y !== beforePlayer.y);
+  });
+}
+
+function hasFreshTownTeleportUseProof(client, afterSequence, beforeQuantity, beforePlayer, beforeMapFileName) {
+  return client.events.some(event => {
+    if (event?.sequence <= afterSequence || event?.direction !== 'received' || event?.type !== 'worldSnapshot') return false;
+    const payload = event.payload;
+    const afterPlayer = playerPosition(payload);
+    const afterMapFileName = String(payload?.mapFileName ?? '');
+    return townTeleportStock(payload) < beforeQuantity &&
+      afterPlayer && (afterMapFileName !== beforeMapFileName || afterPlayer.x !== beforePlayer.x || afterPlayer.y !== beforePlayer.y);
   });
 }
 
@@ -739,6 +916,13 @@ function randomTeleportStock(snapshot) {
     .reduce((total, item) => total + Math.max(0, Number(item?.quantity ?? 1)), 0);
 }
 
+function townTeleportStock(snapshot) {
+  return [...(snapshot?.inventoryItems ?? []), ...(snapshot?.beltItems ?? [])]
+    .filter(item => templateIndex(item) === TOWN_TELEPORT.itemIndex &&
+      normalized(item?.name) === normalized(TOWN_TELEPORT.name))
+    .reduce((total, item) => total + Math.max(0, Number(item?.quantity ?? 1)), 0);
+}
+
 function findRandomTeleport(snapshot, uniqueId = null) {
   const items = [...(snapshot?.inventoryItems ?? []), ...(snapshot?.beltItems ?? [])]
     .filter(item => templateIndex(item) === RANDOM_TELEPORT.itemIndex &&
@@ -746,7 +930,19 @@ function findRandomTeleport(snapshot, uniqueId = null) {
   return uniqueId == null ? items[0] ?? null : items.find(item => Number(item.uniqueId) === Number(uniqueId)) ?? null;
 }
 
+function findTownTeleport(snapshot, uniqueId = null) {
+  const items = [...(snapshot?.inventoryItems ?? []), ...(snapshot?.beltItems ?? [])]
+    .filter(item => templateIndex(item) === TOWN_TELEPORT.itemIndex &&
+      normalized(item?.name) === normalized(TOWN_TELEPORT.name) && heldQuantity(item) !== null && validUniqueId(item?.uniqueId));
+  return uniqueId == null ? items[0] ?? null : items.find(item => Number(item.uniqueId) === Number(uniqueId)) ?? null;
+}
+
 function randomTeleportGrid(snapshot, item) {
+  if ((snapshot?.beltItems ?? []).some(entry => Number(entry?.uniqueId) === Number(item?.uniqueId))) return 'belt';
+  return 'inventory';
+}
+
+function townTeleportGrid(snapshot, item) {
   if ((snapshot?.beltItems ?? []).some(entry => Number(entry?.uniqueId) === Number(item?.uniqueId))) return 'belt';
   return 'inventory';
 }
@@ -1012,6 +1208,15 @@ function emergencyTeleportOption(value) {
   const parsed = Number(value);
   if (!Number.isSafeInteger(parsed) || parsed < 0 || parsed > 8) {
     throw new TypeError('emergencyTeleportCount must be an integer from 0 to 8');
+  }
+  return parsed;
+}
+
+function emergencyTownTeleportOption(value) {
+  if (value == null) return 0;
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0 || parsed > TOWN_TELEPORT.stackSize) {
+    throw new TypeError(`emergencyTownTeleportCount must be an integer from 0 to ${TOWN_TELEPORT.stackSize}`);
   }
   return parsed;
 }
