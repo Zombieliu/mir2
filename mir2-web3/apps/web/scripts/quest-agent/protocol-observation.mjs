@@ -179,7 +179,25 @@ function applySelfVitals(snapshot, payload) {
 export function applyProtocolObservation(snapshot, message) {
   if (message?.type === 'worldSnapshot') {
     const authoritative = structuredClone(message.payload);
-    if (authoritative && typeof authoritative === 'object') authoritative.mapSnapshotPending = false;
+    if (authoritative && typeof authoritative === 'object') {
+      authoritative.mapSnapshotPending = false;
+      const previousSelf = snapshot && selfEntity(snapshot);
+      const currentSelf = selfEntity(authoritative);
+      const samePlayer = previousSelf && currentSelf &&
+        objectIdOf(previousSelf.objectId) === objectIdOf(currentSelf.objectId) &&
+        previousSelf.name === currentSelf.name;
+      // Personal snapshots may omit transient Zone poison entirely. Absence
+      // is not a clear packet; keep the public status for the same living
+      // character until explicit zero/Revived or a snapshot carrying poison.
+      if (samePlayer && currentSelf.dead !== true &&
+          authoritative.playerPoison == null && currentSelf.poison == null) {
+        const poison = finiteNumber(snapshot.playerPoison ?? previousSelf.poison);
+        if (poison != null) {
+          authoritative.playerPoison = poison;
+          currentSelf.poison = poison;
+        }
+      }
+    }
     return authoritative;
   }
   if (!snapshot || typeof snapshot !== 'object' || !message?.packet) return snapshot;
@@ -295,11 +313,13 @@ export function applyProtocolObservation(snapshot, message) {
         delete entity.hp;
         delete entity.healthPercent;
         delete entity.healthExpire;
+        entity.poison = 0;
       }
       delete snapshot.playerHp;
       delete snapshot.playerHealthPercent;
       delete snapshot.playerHealthExpire;
       delete snapshot.playerHealthObservation;
+      snapshot.playerPoison = 0;
       break;
     }
     case 'ObjectHide': {

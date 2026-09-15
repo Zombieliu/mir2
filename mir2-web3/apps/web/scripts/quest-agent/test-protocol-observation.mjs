@@ -165,6 +165,31 @@ test('poison packets keep the current self movement-control mask observable', ()
   assert.equal(state.entities[0].poison, 0);
 });
 
+test('an omitted snapshot poison field does not clear current paralysis', () => {
+  let state = observedWorld();
+  applyProtocolObservation(state, packet('ObjectPoisoned', { objectId: 1001, poison: 32 }));
+  state = applyProtocolObservation(state, { type: 'worldSnapshot', payload: observedWorld() });
+  assert.equal(state.playerPoison, 32);
+  assert.equal(state.entities[0].poison, 32);
+  applyProtocolObservation(state, packet('Poisoned', { poison: 0 }));
+  assert.equal(state.playerPoison, 0);
+  applyProtocolObservation(state, packet('Poisoned', { poison: 32 }));
+  const clear = observedWorld();
+  clear.playerPoison = 0;
+  state = applyProtocolObservation(state, { type: 'worldSnapshot', payload: clear });
+  assert.equal(state.playerPoison, 0, 'an explicit snapshot zero is respected');
+  applyProtocolObservation(state, packet('Poisoned', { poison: 32 }));
+  const other = observedWorld();
+  other.entities[0].name = 'OtherCharacter';
+  state = applyProtocolObservation(state, { type: 'worldSnapshot', payload: other });
+  assert.equal(state.playerPoison, undefined, 'the next character cannot inherit a poison mask');
+  applyProtocolObservation(state, packet('Poisoned', { poison: 32 }));
+  applyProtocolObservation(state, packet('Death'));
+  applyProtocolObservation(state, packet('Revived'));
+  assert.equal(state.playerPoison, 0);
+  assert.equal(state.entities[0].poison, 0);
+});
+
 test('death retains a harvestable corpse and revive restores its lifecycle flag', () => {
   const state = observedWorld();
   applyProtocolObservation(state, packet('ObjectDied', {
