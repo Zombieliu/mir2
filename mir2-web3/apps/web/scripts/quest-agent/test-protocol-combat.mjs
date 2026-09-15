@@ -2193,6 +2193,81 @@ test("q89 Wizard arms the exact live D2031 doorway after a stalled full Priest s
   assert.equal(diagnostics.some(entry => entry.type === "spawnRespawnWait"), false);
 });
 
+test("q89 Taoist rejects an unsafe D2031 Priest then uses the exact live doorway for a normal D2032 completion", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedPriest", 2, 3)] };
+  const state = snapshot(quest);
+  Object.assign(state.entities[0], { class: "Taoist" });
+  const unsafePriest = monster(70, "CursedPriest", 11, 10, { disposition: "hostile" });
+  const adjacentZombie = monster(71, "ShiZombie", 12, 10, { disposition: "hostile" });
+  const nearbyZombie = monster(73, "CursedZombie", 13, 10, { disposition: "hostile" });
+  const doorway = {
+    key: "crystal-move:d2031:198:34:117:184:267",
+    mapFileName: "D2031", toMapFileName: "D2032",
+    bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+  };
+  Object.assign(state, {
+    mapFileName: "D2031",
+    mapTransfers: [doorway],
+    entities: [state.entities[0], unsafePriest, adjacentZombie, nearbyZombie],
+  });
+  const client = new FakeClient(state, (owner, command) => {
+    if (command.type !== "attack" || command.objectId !== 72) return;
+    owner.receive("ObjectDied", current => {
+      Object.assign(current.entities.find(entry => entry.objectId === 72), { dead: true, hp: 0 });
+      current.questLog[0].objectives[0] = objective("Kill CursedPriest", 3, 3);
+      current.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 72 });
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  const travelled = [];
+  const travel = async (mapFileName, options) => {
+    travelled.push({ mapFileName, options });
+    assert.equal(mapFileName, "D2032");
+    assert.deepEqual(options.preferredTransferSource, { x: 198, y: 34 });
+    assert.equal(options.preferredTransferKey, doorway.key);
+    Object.assign(client.snapshot, { mapFileName: "D2032", mapTransfers: [] });
+    Object.assign(client.snapshot.entities[0], { x: 184, y: 267 });
+    client.snapshot.entities = [client.snapshot.entities[0], monster(72, "CursedPriest", 185, 267)];
+  };
+  travel.routeLength = async () => null;
+  const navigate = async target => {
+    if (client.snapshot.mapFileName === "D2031") {
+      throw new Error(`No walk path on D2031 to ${target.x},${target.y}`);
+    }
+    Object.assign(client.snapshot.entities[0], { x: target.x - 1, y: target.y });
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedPriest", spawnCandidates: [
+      { ...spawn("CursedPriest", 250, 250), mapFileName: "D2031", spread: 0 },
+      { ...spawn("CursedPriest", 185, 267), mapFileName: "D2032", spread: 0, respawnIndex: 999 },
+    ] }], item: [] },
+  }, navigate, {
+    ...settings,
+    travel,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 2,
+    maxSpawnRespawnWaits: 0,
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{ key: doorway.key, source: { x: 198, y: 34 } }],
+    },
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(travelled.map(entry => entry.mapFileName), ["D2032"]);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [72]);
+  assert.equal(client.snapshot.questLog[0].objectives[0].current, 3);
+  assert.ok(!client.sent.some(entry => entry.objectId === unsafePriest.objectId),
+    "the 1-adjacent/2-nearby D2031 Priest must remain rejected");
+  assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackArmed" &&
+    entry.reason === "stalledFullSpreadWithoutPhysicalProgress"));
+  assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackEntered"));
+  assert.equal(diagnostics.some(entry => entry.type === "spawnRespawnWait"), false);
+});
+
 test("a q89 Priest full-spread pass with physical progress does not arm the D2032 fallback", async () => {
   const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedPriest", 2, 3)] };
   const doorway = {

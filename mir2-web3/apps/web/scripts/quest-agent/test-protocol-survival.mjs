@@ -928,6 +928,48 @@ test('a caster expedition refills its departure MP stock without raising the fie
   ]);
 });
 
+test('q89 casters retain four MP doses in the field but replenish twelve before leaving town', async () => {
+  for (const className of ['Wizard', 'Taoist']) {
+    const floor = journeyExpeditionDepartureFloorForQuest(89, className);
+    const trigger = minimumJourneyMpStockForQuest(89, className);
+    assert.deepEqual(floor, { hp: 64, mp: 12 });
+    assert.equal(trigger, 4);
+    const caster = clientAt('D2031', floor.hp);
+    caster.snapshot.beltItems.push({ name: '(MP)DrugSmall', uniqueId: 900, quantity: 4 });
+    const calls = [];
+    const gate = createPostEngagementSupplyGate({
+      travel: async map => calls.push(['travel', map]),
+      navigateNear: async () => {},
+      restock: async (owner, _navigateNear, options) => {
+        calls.push(['restock', options]);
+        owner.snapshot.beltItems.find(item => item.uniqueId === 900).quantity = 12;
+        return { status: 'restocked' };
+      },
+    });
+    const options = {
+      minimumHpStock: 24,
+      minimumMpStock: trigger,
+      requiredAfterRestockHpStock: floor.hp,
+      requiredAfterRestockMpStock: floor.mp,
+      returnMapFileName: '',
+    };
+    assert.equal((await gate(caster, options)).status, 'sufficient');
+    assert.deepEqual(calls, []);
+    caster.snapshot.mapFileName = '0';
+    const result = await gate(caster, {
+      ...options,
+      forceRestock: mpDrugCount(caster.snapshot) < floor.mp,
+    });
+    assert.equal(result.status, 'restocked');
+    assert.equal(result.mp, 12);
+    assert.equal(caster.snapshot.mapFileName, '0');
+    assert.deepEqual(calls, [['restock', {
+      targetHp: 64, targetMp: 12, lowStockHp: 64, lowStockMp: 12,
+    }]]);
+  }
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(89, 'Warrior'), { hp: 64, mp: 0 });
+});
+
 test('a Taoist expedition refills a full Amulet reserve at its lower field trigger', async () => {
   const taoist = clientAt('D2041', 24);
   taoist.snapshot.beltItems.push({ name: 'Amulet', quantity: 11 });

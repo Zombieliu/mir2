@@ -1,5 +1,12 @@
 # Protocol newcomer journey acceptance
 
+> 2026-09-16 R137/R138 controller 678/678 passes: q89 Taoist may use
+> the existing normal D2031→D2032 fallback after an unsafe/stalled search.
+> Both casters replenish twelve MP doses before town departure while retaining
+> the four-dose field trigger. Ordinary route units remain 155/177; actual
+> fallback landing, final logout/save and separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-caster-fallback-departure-r137-r138.md).
+
 > 2026-09-16 R136 controller 676/676 passes: configured q89 Wizard approaches
 > and action movement recheck fresh named-Shaman physical cells; existing halos
 > permit strict outward escape. Captured actions use the fresh live target.

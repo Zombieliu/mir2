@@ -16,3 +16,6 @@ q89-taoist-healing-mp-r134-focused.log -text whitespace=cr-at-eol,-blank-at-eof
 q89-caster-r134-r135-full.log -text whitespace=cr-at-eol,-blank-at-eof
 q89-wizard-shaman-halo-r136-focused.log -text whitespace=cr-at-eol,-blank-at-eof
 q89-wizard-shaman-halo-r136-final-full.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-taoist-fallback-r137-focused.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-departure-mp-r138-focused.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-caster-r137-r138-final-full.log -text whitespace=cr-at-eol,-blank-at-eof

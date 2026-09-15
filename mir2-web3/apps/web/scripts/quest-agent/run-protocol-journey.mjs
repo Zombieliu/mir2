@@ -1058,14 +1058,16 @@ try {
             // spending one life per crowded Oma pull.
             preferredObjectiveMaps: preferredObjectiveMapsForQuest(id, className),
             preferObjectiveMapOverCurrent: shouldPreferObjectiveMapOverCurrent(id, state, className),
-            // R117 exhausted one q89 Wizard pass in D2031 without an
-            // objective increment, then returned to the same source on every
-            // replan. The combat controller may make one D2032 preference
-            // only after that zero-progress failure and only while this exact
-            // rendered doorway is live. Browser snapshots expose the live
+            // A q89 caster can exhaust D2031 with no safe CursedPriest pull,
+            // then return to that same source on every replan. The combat
+            // controller may make one D2032 preference only after that
+            // zero-progress failure and only while this exact rendered
+            // doorway is live. Browser snapshots expose the live
             // key/source/target map; createMapTraveler retains its normal
-            // authoritative map-landing validation.
-            objectiveMapFallback: id === 89 && className === 'Wizard' ? {
+            // authoritative map-landing validation. This is deliberately a
+            // route choice only: Taoist keeps its own density and survival
+            // profile and does not inherit Wizard Shaman-band settings.
+            objectiveMapFallback: id === 89 && ['Wizard', 'Taoist'].includes(className) ? {
               fromMapFileName: 'D2031',
               toMapFileName: 'D2032',
               transferCandidates: [

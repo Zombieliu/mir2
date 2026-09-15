@@ -126,6 +126,7 @@ export function journeyExpeditionDepartureFloorForQuest(questId, className) {
   return {
     hp: expedition ? 64 : 0,
     mp: [54, 65].includes(id) && ['wizard', 'taoist'].includes(normalizedClass) ? 64 :
+      id === 89 && ['wizard', 'taoist'].includes(normalizedClass) ? 12 :
       [98, 99].includes(id) && normalizedClass === 'taoist' ? 12 : 0,
   };
 }
