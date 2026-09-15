@@ -2008,23 +2008,44 @@ async function approachCombatTarget(
     threatened = interruptingAggressor(client, objectId, settings, aggressorInterruptPolicy);
     return Boolean(threatened);
   };
+  const protectedHaloPolicy = settings.spawnStallProtectedBlocker;
+  const protectedTarget = protectedSpawnBlockerForTarget(target, settings);
   const navigateWithClearance = hostileAvoidanceRadius => navigateNear(
     target,
     approachRange,
     stopWhen,
     {
       hostileAvoidanceRadius,
-      ...(protectedSpawnBlockerForTarget(target, settings) ? {
-        // A protected Shaman remains an obstacle too: exempting its object id
-        // would punch a close-cast hole through the q89 safety band.
-        hostileAvoidanceByName: settings.spawnStallProtectedBlocker.namedClearance,
-        allowedHostileObjectIds: [],
+      ...(protectedHaloPolicy ? {
+        // This q89-only policy protects ordinary Priest/Zombie approaches too.
+        // Their own id stays traversable, while every live named Shaman remains
+        // a six-cell obstacle and is rechecked immediately before each packet.
+        hostileAvoidanceByName: protectedHaloPolicy.namedClearance,
+        allowedHostileObjectIds: protectedTarget ? [] : [objectId],
+        beforeMovement: context => protectedCombatApproachHazard(
+          client.snapshot,
+          context,
+          protectedHaloPolicy,
+        ),
       } : { allowedHostileObjectIds: [objectId] }),
     },
   );
+  const guardedApproachError = error => {
+    if (!(error instanceof NavigationStepGuarded) ||
+        error.hazard?.type !== 'protectedCombatApproachShamanHalo') return null;
+    recordSearchDiagnostic(client, {
+      type: 'protectedCombatApproachMovementBlocked',
+      targetObjectId: objectId,
+      blockerObjectId: Number(error.hazard?.blockerObjectId),
+      physicalCells: error.hazard?.physicalCells ?? [],
+    });
+    return new RangedSafetyBandUnavailable(objectId, target, String(client.snapshot?.mapFileName ?? ''));
+  };
   try {
     await navigateWithClearance(settings.combatHostileClearance);
   } catch (error) {
+    const guarded = guardedApproachError(error);
+    if (guarded) throw guarded;
     if (!String(error?.message ?? '').startsWith('No walk path')) throw error;
     const fallback = Math.min(
       settings.combatHostileClearance,
@@ -2042,6 +2063,8 @@ async function approachCombatTarget(
     try {
       await navigateWithClearance(fallback);
     } catch (fallbackError) {
+      const guarded = guardedApproachError(fallbackError);
+      if (guarded) throw guarded;
       if (!String(fallbackError?.message ?? '').startsWith('No walk path')) throw fallbackError;
       throw new UnreachableCombatTarget(objectId, target, fallbackError);
     }
@@ -3256,24 +3279,43 @@ function protectedSpawnBlockerApproachRange(target, settings, ordinaryRange) {
 }
 
 function protectedTransitHazard(snapshot, context, policy) {
+  return protectedNamedShamanHazard(
+    snapshot, context, policy, 'protectedTransitShamanHalo', false,
+  );
+}
+
+function protectedCombatApproachHazard(snapshot, context, policy) {
+  // An old position may already be inside a halo when an emergency recovery
+  // resumes. It may only move strictly outward from every such live Shaman;
+  // a normal approach can never enter or deepen a footprint.
+  return protectedNamedShamanHazard(
+    snapshot, context, policy, 'protectedCombatApproachShamanHalo', true,
+  );
+}
+
+function protectedNamedShamanHazard(snapshot, context, policy, type, allowOutwardExit) {
   const mapFileName = String(snapshot?.mapFileName ?? '');
   if (mapFileName === '' || mapFileName !== String(context?.mapId ?? '')) return null;
+  const from = context?.from;
   const physicalCells = Array.isArray(context?.physicalCells) ? context.physicalCells : [];
   const collisions = [];
   for (const cell of physicalCells) {
     for (const entity of snapshot?.entities ?? []) {
       if (!isLiveMonster(entity) || !policy.names.has(normalizeName(entity?.name))) continue;
-      if (distance(cell, entity) > policy.clearance) continue;
+      const cellDistance = distance(cell, entity);
+      if (cellDistance > policy.clearance) continue;
+      const fromDistance = distance(from, entity);
+      if (allowOutwardExit && fromDistance <= policy.clearance && cellDistance > fromDistance) continue;
       collisions.push({ cell: { x: Number(cell.x), y: Number(cell.y) }, entity });
     }
   }
   if (collisions.length === 0) return null;
   collisions.sort((left, right) =>
-    distance(context.from, left.entity) - distance(context.from, right.entity) ||
+    distance(from, left.entity) - distance(from, right.entity) ||
     Number(left.entity.objectId) - Number(right.entity.objectId));
   const { cell, entity } = collisions[0];
   return {
-    type: 'protectedTransitShamanHalo',
+    type,
     blockerObjectId: Number(entity.objectId),
     blockerName: String(entity.name ?? ''),
     blockerPosition: { x: Number(entity.x), y: Number(entity.y) },

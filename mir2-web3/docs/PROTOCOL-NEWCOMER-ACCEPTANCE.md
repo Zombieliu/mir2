@@ -1,5 +1,12 @@
 # Protocol newcomer journey acceptance
 
+> 2026-09-16 R136 controller 676/676 passes: configured q89 Wizard approaches
+> and action movement recheck fresh named-Shaman physical cells; existing halos
+> permit strict outward escape. Captured actions use the fresh live target.
+> R134 Taoist MP restoration and self-Healing now have actual ordinary receipts.
+> Completed units remain 155/177; final logout/save and separate visual gates
+> remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-fresh-shaman-escape-r136.md).
+
 > 2026-09-16 R134/R135 controller 668/668 passes: q89 Taoist post-retreat
 > recovery can restore held MP before affordable self-Healing using fresh exact
 > values. Bootstrap can turn in already-earned optional ready quests for ordinary

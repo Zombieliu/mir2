@@ -39,7 +39,31 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
   return async function wizardKitingAction(client, target) {
     const invokeBaseAction = async currentTarget => {
       const prevented = beforeBaseAction ? await beforeBaseAction(client, currentTarget) : null;
-      return prevented ?? baseAction(client, currentTarget);
+      if (prevented != null) return prevented;
+      // The action closure can outlive a navigator cadence. Re-read the live
+      // player, target, and Shaman AOI immediately before every cast so a
+      // newly arrived footprint never falls through a no-movement branch.
+      if (rangedSafetyBand) {
+        const targetId = Number(currentTarget?.objectId);
+        const latestActor = selfPlayer(client);
+        const latestHostiles = visibleHostileMonsters(client?.snapshot);
+        const latestTarget = entityById(client.snapshot, targetId);
+        if (!latestTarget) return targetLeftAfterRetreat(client, targetId);
+        if (latestTarget.dead === true || Number(latestTarget.hp) <= 0) {
+          return { kind: 'retreated', targetId };
+        }
+        const targetBandUnsafe = latestActor &&
+          rangedSafetyBandRequired(latestActor, latestTarget, latestHostiles, rangedSafetyBand);
+        const currentHaloUnsafe = latestActor && hasProtectedMonster(latestHostiles, rangedSafetyBand) &&
+          !outsideProtectedFootprints(latestActor, latestHostiles, rangedSafetyBand);
+        if (targetBandUnsafe || currentHaloUnsafe) {
+          const mapId = String(client.snapshot?.mapFileName ?? '');
+          recordFallback(client, targetId, 'rangedSafetyBandFreshBeforeAction');
+          throw new RangedSafetyBandUnavailable(targetId, latestTarget, mapId);
+        }
+        return baseAction(client, latestTarget);
+      }
+      return baseAction(client, currentTarget);
     };
     const actor = selfPlayer(client);
     if (!actor) throw new Error('Cannot kite without the authoritative player entity');
@@ -51,12 +75,22 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
     const rangedReady = approachRange(client, target) > 1;
     const closeThreat = hostiles.some(entity => distance(actor, entity) <= triggerDistance);
     const safetyBandRequired = rangedSafetyBandRequired(actor, target, hostiles, rangedSafetyBand);
+    const namedHaloGuardRequired = hasProtectedMonster(hostiles, rangedSafetyBand);
+    const insideProtectedHalo = namedHaloGuardRequired &&
+      !outsideProtectedFootprints(actor, hostiles, rangedSafetyBand);
     if (safetyBandRequired && !rangedReady) {
       const mapId = String(client.snapshot?.mapFileName ?? '');
       recordFallback(client, Number(target?.objectId), 'rangedSafetyBandNoRangedAction');
       throw new RangedSafetyBandUnavailable(target?.objectId, target, mapId);
     }
-    if (!rangedReady || (!closeThreat && !safetyBandRequired)) return invokeBaseAction(target);
+    if (!rangedReady || (!closeThreat && !safetyBandRequired)) {
+      if (insideProtectedHalo) {
+        const mapId = String(client.snapshot?.mapFileName ?? '');
+        recordFallback(client, Number(target?.objectId), 'rangedSafetyBandExistingHalo');
+        throw new RangedSafetyBandUnavailable(target?.objectId, target, mapId);
+      }
+      return invokeBaseAction(target);
+    }
     if (!Number.isSafeInteger(targetId) || targetId <= 0) {
       throw new Error('Wizard kite target has no valid objectId');
     }
@@ -70,7 +104,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
 
     const remainingBudget = maxRetreatCellsPerTarget - encounterRetreatedCells;
     if (remainingBudget <= 0) {
-      if (safetyBandRequired) {
+      if (safetyBandRequired || insideProtectedHalo) {
         recordFallback(client, targetId, 'rangedSafetyBandRetreatCellBudgetExceeded', {
           maximumRetreatCellsPerTarget: maxRetreatCellsPerTarget,
         });
@@ -99,7 +133,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       ...(safetyBandRequired ? { rangedSafetyBand } : {}),
     });
     if (!plan) {
-      if (safetyBandRequired) {
+      if (safetyBandRequired || insideProtectedHalo) {
         recordFallback(client, targetId, 'rangedSafetyBandUnavailable', {
           minimumTargetDistance: rangedSafetyBand.minimumTargetDistance,
           unsafeShamanDistance: rangedSafetyBand.unsafeShamanDistance,
@@ -125,7 +159,10 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         // monster AOI immediately before dispatch. This is intentionally part
         // of the action itself: combat callers capture this navigator before
         // any outer transit resolver can wrap it.
-        ...(safetyBandRequired ? {
+        // Install this only for the q89 Wizard policy, even when its
+        // original planning snapshot had no Shaman. A new AOI actor can arrive
+        // during load/navigation cadence before this Run is dispatched.
+        ...(rangedSafetyBand ? {
           beforeMovement: context => rangedSafetyBandMovementHazard(
             client.snapshot,
             context,
@@ -161,7 +198,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       if (!blockedTarget) {
         return targetLeftAfterRetreat(client, targetId);
       }
-      if (safetyBandRequired) {
+      if (safetyBandRequired || insideProtectedHalo) {
         recordFallback(client, targetId, 'rangedSafetyBandNavigationBlocked');
         throw new RangedSafetyBandUnavailable(targetId, blockedTarget, mapId);
       }
@@ -190,7 +227,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       ? Number(navigation.successfulSteps)
       : null;
     if (moved <= 0 || moved > stepBudget) {
-      if (safetyBandRequired && moved <= 0) {
+      if ((safetyBandRequired || insideProtectedHalo) && moved <= 0) {
         const stalledTarget = entityById(client.snapshot, targetId);
         if (!stalledTarget) return targetLeftAfterRetreat(client, targetId);
         recordFallback(client, targetId, 'rangedSafetyBandNavigationStalled');
@@ -380,8 +417,13 @@ function rangedSafetyBandMovementHazard(snapshot, context, rangedSafetyBand) {
   const collisions = [];
   for (const cell of cells) {
     for (const hostile of visibleHostileMonsters(snapshot)) {
-      if (!protectedMonster(hostile, rangedSafetyBand) ||
-          distance(cell, hostile) > rangedSafetyBand.unsafeShamanDistance) continue;
+      if (!protectedMonster(hostile, rangedSafetyBand)) continue;
+      const cellDistance = distance(cell, hostile);
+      if (cellDistance > rangedSafetyBand.unsafeShamanDistance) continue;
+      const fromDistance = distance(context?.from, hostile);
+      // Recovery may begin from an already unsafe historical position. It can
+      // leave that halo but cannot linger, deepen it, or enter any other one.
+      if (fromDistance <= rangedSafetyBand.unsafeShamanDistance && cellDistance > fromDistance) continue;
       collisions.push({ cell, hostile });
     }
   }
@@ -398,6 +440,10 @@ function rangedSafetyBandMovementHazard(snapshot, context, rangedSafetyBand) {
     blockedCell: { x: Number(cell.x), y: Number(cell.y) },
     clearance: rangedSafetyBand.unsafeShamanDistance,
   };
+}
+
+function hasProtectedMonster(hostiles, rangedSafetyBand) {
+  return Boolean(rangedSafetyBand) && hostiles.some(entity => protectedMonster(entity, rangedSafetyBand));
 }
 
 function outsideProtectedFootprints(point, hostiles, rangedSafetyBand) {

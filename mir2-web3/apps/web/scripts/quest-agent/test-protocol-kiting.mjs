@@ -4,7 +4,7 @@ import test from 'node:test';
 import { createWizardKitingAction, RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
 import { criticalProvenAggressorOffenseGuardActive } from './protocol-combat.mjs';
 import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
-import { createNavigator } from './protocol-play.mjs';
+import { createNavigator, NavigationStepGuarded } from './protocol-play.mjs';
 
 function openMap(width = 15, height = 15, blockedPoints = []) {
   const blocked = new Uint8Array(width * height);
@@ -153,12 +153,22 @@ test('q89 action-owned reposition rechecks a Shaman that moves during navigator 
   const client = clientFixture([owner, target]);
   const diagnostics = [];
   const sent = [];
+  const physicalDistances = [];
   client.record = (_direction, payload) => diagnostics.push(payload);
   client.sent = sent;
   client.events = [];
   client.sequence = 0;
-  client.send = command => sent.push(command);
-  client.wait = async () => assert.fail('the fresh kiting guard must reject before a movement receipt');
+  client.send = command => {
+    sent.push(command);
+    const deltas = { Up: [0, -1], UpRight: [1, -1], Right: [1, 0], DownRight: [1, 1], Down: [0, 1], DownLeft: [-1, 1], Left: [-1, 0], UpLeft: [-1, -1] };
+    const [dx, dy] = deltas[command.direction];
+    for (let step = 0; step < (command.type === 'run' ? 2 : 1); step += 1) {
+      owner.x += dx;
+      owner.y += dy;
+      physicalDistances.push(Math.max(Math.abs(owner.x - target.x), Math.abs(owner.y - target.y)));
+    }
+  };
+  client.wait = async () => true;
   let movedDuringCadence = false;
   const navigator = createNavigator(client, {
     loadCollisionMap: async () => openMap(20, 20),
@@ -192,9 +202,13 @@ test('q89 action-owned reposition rechecks a Shaman that moves during navigator 
   await assert.rejects(wrapped(client, target), /no collision-safe Wizard ranged band/i);
   assert.equal(movedDuringCadence, true);
   assert.equal(actions, 0);
-  assert.equal(sent.length, 0);
+  assert.ok(sent.length > 0, 'a player already in the new footprint may only move outward');
+  assert.ok(physicalDistances.every((value, index) => index === 0
+    ? value > 0
+    : value > physicalDistances[index - 1]), 'every dispatched physical cell must increase Shaman distance');
+  assert.equal(actions, 0);
   assert.ok(diagnostics.some(entry =>
-    entry.type === 'wizardKiteFallback' && entry.reason === 'rangedSafetyBandMovementGuarded'));
+    entry.type === 'wizardKiteFallback' && entry.reason === 'rangedSafetyBandInvalidAfterNavigation'));
 });
 
 test('D2031 entry has a collision-valid nine-tile CursedShaman firing position', async () => {
@@ -279,6 +293,8 @@ test('Taoist SoulFireBall uses the same bounded ranged retreat with an equipped 
   assert.deepEqual(result, { kind: 'magic', targetId: 30 });
   assert.equal(actions, 1);
   assert.equal(navigationCalls.length, 1);
+  assert.equal(navigationCalls[0].options.beforeMovement, undefined,
+    'classes without the q89 Wizard policy retain their ordinary kiting navigator');
   assert.ok(Math.max(Math.abs(owner.x - 5), Math.abs(owner.y - 5)) <= 3);
 });
 
@@ -827,4 +843,201 @@ test('player death during retreat fails closed without issuing the combat action
 
   await assert.rejects(wrapped(client, target), /Player died during Wizard retreat/);
   assert.equal(acted, false);
+});
+
+
+test('q89 kiting installs the physical halo guard before a Shaman exists in the planning AOI', async () => {
+  const owner = player({ x: 5, y: 5 });
+  const priest = monster(20, 9, 5, { name: 'CursedPriest' });
+  const closeZombie = monster(21, 5, 6, { name: 'HungryZombie' });
+  const client = clientFixture([owner, priest, closeZombie]);
+  let actions = 0;
+  let navigations = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actions += 1; return { kind: 'magic', targetId: priest.objectId }; },
+    async (_destination, _distance, _stopWhen, options) => {
+      navigations += 1;
+      assert.equal(typeof options.beforeMovement, 'function', 'the policy must not depend on initial AOI names');
+      // Simulate a Shaman revealed after collision planning, at navigator
+      // cadence immediately before a two-cell Run would be sent.
+      const freshShaman = monster(22, 6, 5, { name: 'CursedShaman' });
+      client.snapshot.entities.push(freshShaman);
+      const hazard = options.beforeMovement({
+        mapId: 'test', from: { x: 5, y: 5 },
+        physicalCells: [{ x: 6, y: 5 }, { x: 7, y: 5 }], movementType: 'run',
+      });
+      assert.ok(hazard);
+      throw new NavigationStepGuarded(hazard);
+    },
+    {
+      loadCollisionMap: async () => openMap(),
+      fightWhenBlocked: true,
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7, maximumTargetDistance: 9, unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  await assert.rejects(() => wrapped(client, priest), RangedSafetyBandUnavailable);
+  assert.equal(navigations, 1);
+  assert.equal(actions, 0, 'no physical Run or ordinary-target cast may follow the fresh halo');
+});
+
+test('q89 named Shaman guard blocks a fresh footprint during non-Shaman kiting without casting', async () => {
+  const owner = player({ x: 5, y: 5 });
+  const priest = monster(20, 9, 5, { name: 'CursedPriest' });
+  const closeZombie = monster(21, 5, 6, { name: 'HungryZombie' });
+  const movingShaman = monster(22, 20, 5, { name: 'CursedShaman' });
+  const client = clientFixture([owner, priest, closeZombie, movingShaman]);
+  let actions = 0;
+  let navigations = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actions += 1; return { kind: 'magic', targetId: priest.objectId }; },
+    async (_destination, _distance, _stopWhen, options) => {
+      navigations += 1;
+      assert.equal(typeof options.beforeMovement, 'function');
+      // This AOI change occurs after the retreat was planned and before the
+      // movement packet; both physical Run cells must be rejected.
+      Object.assign(movingShaman, { x: 6, y: 5 });
+      const hazard = options.beforeMovement({
+        mapId: 'test', from: { x: 5, y: 5 },
+        physicalCells: [{ x: 6, y: 5 }, { x: 7, y: 5 }], movementType: 'run',
+      });
+      assert.ok(hazard);
+      throw new NavigationStepGuarded(hazard);
+    },
+    {
+      loadCollisionMap: async () => openMap(),
+      fightWhenBlocked: true,
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7, maximumTargetDistance: 9, unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  await assert.rejects(() => wrapped(client, priest), RangedSafetyBandUnavailable);
+  assert.equal(navigations, 1);
+  assert.equal(actions, 0, 'the guarded fresh physical cell must prevent the ordinary Priest cast');
+});
+
+test('q89 named Shaman guard permits only an outward escape from a pre-existing halo', async () => {
+  const owner = player({ x: 7, y: 5 });
+  const shaman = monster(20, 13, 5, { name: 'CursedShaman' });
+  const client = clientFixture([owner, shaman]);
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actions += 1; return { kind: 'magic', targetId: shaman.objectId }; },
+    async (_destination, _distance, _stopWhen, options) => {
+      assert.equal(typeof options.beforeMovement, 'function');
+      assert.equal(options.beforeMovement({
+        mapId: 'test', from: { x: 7, y: 5 },
+        physicalCells: [{ x: 6, y: 5 }, { x: 5, y: 5 }, { x: 4, y: 5 }], movementType: 'run',
+      }), null, 'distance six to seven to eight to nine is a strictly outward recovery');
+      Object.assign(owner, { x: 4, y: 5 });
+      return { reached: true, successfulSteps: 3 };
+    },
+    {
+      loadCollisionMap: async () => openMap(40, 40),
+      fightWhenBlocked: true,
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7, maximumTargetDistance: 9, unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  assert.deepEqual(await wrapped(client, shaman), { kind: 'magic', targetId: shaman.objectId });
+  assert.equal(actions, 1);
+});
+
+test('q89 no-motion base action rechecks a newly adjacent Shaman before casting', async () => {
+  const owner = player({ x: 5, y: 5 });
+  const priest = monster(20, 10, 5, { name: 'CursedPriest' });
+  const shaman = monster(21, 20, 5, { name: 'CursedShaman' });
+  const client = clientFixture([owner, priest, shaman]);
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actions += 1; return { kind: 'magic', targetId: priest.objectId }; },
+    async () => { throw new Error('no close threat must not navigate'); },
+    {
+      beforeBaseAction: async () => { Object.assign(shaman, { x: 9, y: 5 }); },
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7, maximumTargetDistance: 9, unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  await assert.rejects(() => wrapped(client, priest), RangedSafetyBandUnavailable);
+  assert.equal(actions, 0);
+});
+
+
+test('q89 policy action uses the target object refreshed after its asynchronous pre-action callback', async () => {
+  const owner = player({ x: 5, y: 5 });
+  const stalePriest = monster(20, 10, 5, { name: 'CursedPriest' });
+  const client = clientFixture([owner, stalePriest]);
+  const replacement = monster(20, 13, 7, { name: 'CursedPriest', hp: 19 });
+  let received = null;
+  const wrapped = createWizardKitingAction(
+    async (_client, target) => { received = target; return { kind: 'magic', targetId: target.objectId }; },
+    async () => { throw new Error('no close threat must not navigate'); },
+    {
+      beforeBaseAction: async () => {
+        client.snapshot.entities = [owner, replacement];
+      },
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7, maximumTargetDistance: 9, unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  assert.deepEqual(await wrapped(client, stalePriest), { kind: 'magic', targetId: 20 });
+  assert.equal(received, replacement, 'the cast must receive the current same-id target object');
+  assert.deepEqual({ x: received.x, y: received.y, hp: received.hp }, { x: 13, y: 7, hp: 19 });
+});
+
+test('q89 policy action returns safely without casting when its target leaves after the pre-action callback', async () => {
+  const owner = player({ x: 5, y: 5 });
+  const priest = monster(20, 10, 5, { name: 'CursedPriest' });
+  const client = clientFixture([owner, priest]);
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actions += 1; return { kind: 'magic', targetId: priest.objectId }; },
+    async () => { throw new Error('no close threat must not navigate'); },
+    {
+      beforeBaseAction: async () => { client.snapshot.entities = [owner]; },
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7, maximumTargetDistance: 9, unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  assert.deepEqual(await wrapped(client, priest), { kind: 'retreated', targetId: 20 });
+  assert.equal(actions, 0);
+});
+
+test('q89 policy action does not cast a target confirmed dead after the pre-action callback', async () => {
+  const owner = player({ x: 5, y: 5 });
+  const priest = monster(20, 10, 5, { name: 'CursedPriest' });
+  const client = clientFixture([owner, priest]);
+  let actions = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actions += 1; return { kind: 'magic', targetId: priest.objectId }; },
+    async () => { throw new Error('no close threat must not navigate'); },
+    {
+      beforeBaseAction: async () => { Object.assign(priest, { dead: true, hp: 0 }); },
+      rangedSafetyBand: {
+        protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
+        minimumTargetDistance: 7, maximumTargetDistance: 9, unsafeShamanDistance: 6,
+      },
+    },
+  );
+
+  assert.deepEqual(await wrapped(client, priest), { kind: 'retreated', targetId: 20 });
+  assert.equal(actions, 0);
 });

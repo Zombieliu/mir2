@@ -5994,3 +5994,49 @@ test("picks up a visible non-harvest quest drop and requires objective confirmat
 test("same-tile harvest preserves a valid authoritative facing", () => {
   assert.equal(harvestDirection({ x: 4, y: 4, direction: "Left" }, { x: 4, y: 4 }), "Left");
 });
+
+
+test('q89 ordinary Priest approach maps a fresh named Shaman halo to bounded recovery', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 0, 1)] };
+  const owner = self({ kind: 'selfPlayer', x: 10, y: 10 });
+  const priest = monster(89, 'CursedPriest', 18, 10, { disposition: 'hostile' });
+  const shaman = monster(90, 'CursedShaman', 30, 10, { disposition: 'hostile' });
+  const client = new FakeClient({
+    playerObjectId: 1, playerHp: 40, playerMaxHp: 40, mapFileName: '0',
+    entities: [owner, priest, shaman], groundDrops: [], questLog: [quest],
+  });
+  let actions = 0;
+  let recoveries = 0;
+  const navigate = async (_target, _distance, _stopWhen, options) => {
+    assert.equal(typeof options.beforeMovement, 'function');
+    Object.assign(shaman, { x: 12, y: 10 });
+    const hazard = options.beforeMovement({
+      mapId: '0', from: { x: 10, y: 10 },
+      physicalCells: [{ x: 11, y: 10 }, { x: 12, y: 10 }], movementType: 'run',
+    });
+    assert.ok(hazard);
+    throw new NavigationStepGuarded(hazard);
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [spawn('CursedPriest')] }], item: [] },
+  }, navigate, {
+    ...settings,
+    approachRange: () => 9,
+    maxEngagements: 2,
+    action: async () => { actions += 1; return { kind: 'magic' }; },
+    spawnStallProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 2,
+    },
+    recoverAfterUnsafeRetreat: async current => {
+      recoveries += 1;
+      current.snapshot.questLog[0].stage = 'ReadyToTurnIn';
+    },
+  });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.equal(actions, 0);
+  assert.equal(recoveries, 1);
+});
