@@ -1,3 +1,4 @@
+import { observedPlayerHp } from './protocol-observation.mjs';
 import { equipHeldAmulet } from './protocol-supplies.mjs';
 import { selfActionBlockMask } from './protocol-status.mjs';
 
@@ -56,7 +57,7 @@ export async function useSupplies(client, options = {}) {
 export function startEmergencyHpRecovery(client, options = {}) {
   const snapshot = client?.snapshot;
   if (playerDead(snapshot)) return [];
-  const current = Number(snapshot?.playerHp ?? 0);
+  const current = observedPlayerHp(snapshot);
   const maximum = Number(snapshot?.playerMaxHp ?? 0);
   if (!(maximum > 0) || current / maximum > ratioThreshold(options.hpThreshold, 0.85)) return [];
   const now = restorativeNow(options);
@@ -249,7 +250,7 @@ async function learnApprovedBooks(client, actor, className, learned) {
 
 async function useRestorative(client, pool, consumed, threshold, options) {
   const snapshot = client.snapshot;
-  const current = Number(snapshot?.[`player${pool === "hp" ? "Hp" : "Mp"}`]);
+  const current = pool === 'hp' ? observedPlayerHp(snapshot) : Number(snapshot?.playerMp);
   const maximum = Number(snapshot?.[`playerMax${pool === "hp" ? "Hp" : "Mp"}`]);
   if (!(threshold > 0) || !(maximum > 0) || current / maximum > threshold) return;
   const now = restorativeNow(options);
@@ -290,7 +291,7 @@ async function useRestorative(client, pool, consumed, threshold, options) {
   }
   await client.wait(() => {
     const next = client.snapshot;
-    const nextValue = Number(next?.[`player${pool === "hp" ? "Hp" : "Mp"}`]);
+    const nextValue = pool === 'hp' ? observedPlayerHp(next) : Number(next?.playerMp);
     const remaining = [...(next?.beltItems ?? []), ...(next?.inventoryItems ?? [])].find(candidate => Number(candidate.uniqueId) === Number(item.uniqueId));
     return nextValue > current || !remaining || Number(remaining.quantity ?? 0) < beforeQuantity;
   }, `${pool.toUpperCase()} restorative ${item.name}`);
@@ -337,7 +338,7 @@ function ratioThreshold(value, fallback) {
 function playerDead(snapshot) {
   const actor = player(snapshot);
   return !actor || actor.dead === true || Number(actor.hp) <= 0 ||
-    Number(snapshot?.playerHp) <= 0;
+    observedPlayerHp(snapshot) <= 0;
 }
 
 function itemEligible(item, actor, snapshot, className) {
@@ -536,7 +537,7 @@ function validDirection(value) {
 
 function healthRatio(snapshot) {
   const maximum = Number(snapshot?.playerMaxHp ?? 0);
-  return maximum > 0 ? Number(snapshot?.playerHp ?? 0) / maximum : 1;
+  return maximum > 0 ? observedPlayerHp(snapshot) / maximum : 1;
 }
 
 function tileDistance(a, b) { return Math.max(Math.abs(Number(a.x) - Number(b.x)), Math.abs(Number(a.y) - Number(b.y))); }

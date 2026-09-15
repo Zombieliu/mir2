@@ -1,3 +1,4 @@
+import { observedPlayerHp } from './protocol-observation.mjs';
 import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
 import { combatApproachRange } from './protocol-loadout.mjs';
 import { distance, selfPlayer } from './protocol-play.mjs';
@@ -92,7 +93,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         throw new Error(`Wizard retreat changed map before combat action (${mapId})`);
       }
       if (!blockedActor || blockedActor.dead === true || Number(blockedActor.hp) <= 0 ||
-          Number(client.snapshot?.playerHp) <= 0) {
+          observedPlayerHp(client.snapshot) <= 0) {
         throw new Error('Player died during Wizard retreat');
       }
       const blockedTarget = entityById(client.snapshot, targetId);
@@ -110,7 +111,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
     if (String(client.snapshot?.mapFileName ?? '') !== mapId) {
       throw new Error(`Wizard retreat changed map before combat action (${mapId})`);
     }
-    if (!after || after.dead === true || Number(after.hp) <= 0 || Number(client.snapshot?.playerHp) <= 0) {
+    if (!after || after.dead === true || Number(after.hp) <= 0 || observedPlayerHp(client.snapshot) <= 0) {
       throw new Error('Player died during Wizard retreat');
     }
     const displacement = after ? distance(before, after) : 0;

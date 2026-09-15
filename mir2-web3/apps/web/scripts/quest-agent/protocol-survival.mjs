@@ -1,3 +1,4 @@
+import { observedPlayerHp } from './protocol-observation.mjs';
 const DEFAULT_MAX_RESTOCKS = 32;
 const DEFAULT_MINIMUM_HP_STOCK = 1;
 const REFRESH_TIMEOUT_MS = 12_000;
@@ -143,7 +144,9 @@ export function journeyEmergencyTeleportDepartureTarget(questId) {
   // before D022. R78 then consumed all four in successive unsafe Stone Tomb
   // landings while q114 still had one kill left. Eight preserves the bounded
   // navigation budget plus a complete combat escape reserve after arrival.
-  return [98, 99, 114].includes(id) ? 8 : 4;
+  // R110 consumed all four q89 scrolls before its objective search resumed.
+  // Preserve four combat/recovery uses after the bounded navigation allowance.
+  return [89, 98, 99, 114].includes(id) ? 8 : 4;
 }
 
 /** Keep the public escape reserve usable until a dangerous expedition is handed in. */
@@ -785,7 +788,7 @@ function recordSurvivalDiagnostic(client, payload) {
 
 function assertLivingPlayer(snapshot) {
   const actor = snapshotPlayer(snapshot);
-  if (!actor || actor.dead === true || Number(actor.hp) <= 0 || Number(snapshot?.playerHp) <= 0) {
+  if (!actor || actor.dead === true || Number(actor.hp) <= 0 || observedPlayerHp(snapshot) <= 0) {
     throw new Error('Player died during quest combat');
   }
   return actor;
@@ -878,7 +881,7 @@ function chebyshev(left, right) {
 function health(snapshot) {
   const actor = snapshotPlayer(snapshot);
   return {
-    hp: Number(snapshot?.playerHp ?? actor?.hp ?? 0),
+    hp: observedPlayerHp(snapshot),
     maxHp: Number(snapshot?.playerMaxHp ?? actor?.maxHp ?? 0),
   };
 }

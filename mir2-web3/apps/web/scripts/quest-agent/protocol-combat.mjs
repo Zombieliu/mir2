@@ -1,3 +1,4 @@
+import { observedPlayerHp } from './protocol-observation.mjs';
 import { delay as realDelay } from "./protocol-client.mjs";
 import { distance, NavigationStalled } from "./protocol-play.mjs";
 import { selfActionBlockMask } from "./protocol-status.mjs";
@@ -1676,7 +1677,7 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
       safeDistance: settings.unsafeRetreatSafeDistance,
       minimumRetreatProgress,
       originExposure,
-      playerHp: client.snapshot?.playerHp,
+      playerHp: observedPlayerHp(client.snapshot),
       playerMaxHp: client.snapshot?.playerMaxHp,
       allowLowHealthFollowerRecovery: settings.allowLowHealthFollowerRecovery,
     });
@@ -2068,7 +2069,7 @@ function throwIfLowHealthTargetPressure(client, target, pending, settings) {
   if (shouldFinishLowHealthTarget(client, target, settings)) return;
   const player = selectPlayer(client.snapshot);
   if (!player || distance(player, target) > 1) return;
-  const hp = Number(client.snapshot?.playerHp ?? player.hp ?? 0);
+  const hp = observedPlayerHp(client.snapshot);
   const maxHp = Number(client.snapshot?.playerMaxHp ?? player.maxHp ?? 0);
   if (!(maxHp > 0) || hp / maxHp > settings.lowHealthTargetRetreatRatio) return;
   if (!provenAggressors(client, null, settings).some(entity =>
@@ -2172,7 +2173,7 @@ async function clearProvenAggressors(client, excludedObjectId, pending, navigate
 
 function lowHealthUnderMultipleAggressors(client, excludedObjectId, settings) {
   const player = selectPlayer(client.snapshot);
-  const hp = Number(client.snapshot?.playerHp ?? player?.hp ?? 0);
+  const hp = observedPlayerHp(client.snapshot);
   const maxHp = Number(client.snapshot?.playerMaxHp ?? player?.maxHp ?? 0);
   const aggressorCount = provenAggressors(client, excludedObjectId, settings).length;
   return aggressorCount >= settings.retreatAtActiveAggressorCount ||
@@ -2181,7 +2182,7 @@ function lowHealthUnderMultipleAggressors(client, excludedObjectId, settings) {
 
 function playerHealthRatio(client) {
   const player = selectPlayer(client.snapshot);
-  const hp = Number(client.snapshot?.playerHp ?? player?.hp ?? 0);
+  const hp = observedPlayerHp(client.snapshot);
   const maxHp = Number(client.snapshot?.playerMaxHp ?? player?.maxHp ?? 0);
   return maxHp > 0 ? hp / maxHp : 0;
 }
@@ -2204,7 +2205,7 @@ function focusedTargetAggressorPolicy(client, excludedObjectId, settings) {
     const target = entityById(client.snapshot, excludedObjectId);
     if (target && shouldFinishLowHealthTarget(client, target, settings)) return false;
     const player = selectPlayer(client.snapshot);
-    const hp = Number(client.snapshot?.playerHp ?? player?.hp ?? 0);
+    const hp = observedPlayerHp(client.snapshot);
     const maxHp = Number(client.snapshot?.playerMaxHp ?? player?.maxHp ?? 0);
     const lowHealth = maxHp > 0 && hp / maxHp <= settings.multiAggressorRetreatRatio;
     const aggressorCount = provenAggressors(client, excludedObjectId, settings).length;
@@ -2267,7 +2268,7 @@ function shouldFinishLowHealthTarget(client, target, settings) {
   const targetRatio = targetRemainingHealthRatio(target);
   if (targetRatio > settings.finishableTargetHealthRatio) return false;
   const player = selectPlayer(client.snapshot);
-  const playerHp = Number(client.snapshot?.playerHp ?? player?.hp ?? 0);
+  const playerHp = observedPlayerHp(client.snapshot);
   const playerMaxHp = Number(client.snapshot?.playerMaxHp ?? player?.maxHp ?? 0);
   return playerMaxHp > 0 && playerHp / playerMaxHp >= settings.finishableTargetMinimumPlayerHpRatio;
 }
@@ -2298,7 +2299,7 @@ async function settleMissingTarget(client, objectId, settings) {
 
 function playerIsDead(client) {
   const player = selectPlayer(client.snapshot);
-  return !player || player.dead === true || Number(player.hp) <= 0 || Number(client.snapshot?.playerHp) <= 0;
+  return !player || player.dead === true || Number(player.hp) <= 0 || observedPlayerHp(client.snapshot) <= 0;
 }
 
 function contestedLethalByRemotePlayer(client, objectId, afterSequence) {
@@ -2420,7 +2421,7 @@ function playerFromSnapshot(snapshot) {
 
 function assertPlayerAlive(client) {
   const player = selectPlayer(client.snapshot);
-  if (!player || player.dead === true || Number(player.hp) <= 0 || Number(client.snapshot?.playerHp) <= 0) {
+  if (!player || player.dead === true || Number(player.hp) <= 0 || observedPlayerHp(client.snapshot) <= 0) {
     throw new Error("Player died during quest combat");
   }
 }

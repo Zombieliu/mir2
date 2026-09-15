@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { applyProtocolObservation } from './protocol-observation.mjs';
+import { applyProtocolObservation, observedPlayerHp } from './protocol-observation.mjs';
 
 const packet = (name, payload = {}) => ({ type: 'packet', packet: name, payload });
 
@@ -116,6 +116,39 @@ test('ObjectHealth keeps percent separate from absolute hp', () => {
   assert.equal(deer.maxHp, 224);
   assert.equal(deer.healthPercent, 47);
   assert.equal(deer.healthExpire, 3_000);
+});
+
+test('fresh self percentages drive control without altering exact HP evidence', () => {
+  let state = observedWorld();
+  state.playerHp = 65;
+  state.playerMaxHp = 100;
+  state.entities[0].hp = 65;
+  for (const percent of [69, 73, 77, 81, 85, 89, 93, 97, 100]) {
+    applyProtocolObservation(state, packet('ObjectHealth', { objectId: 1001, percent, expire: 0 }));
+    assert.equal(observedPlayerHp(state), percent);
+  }
+  assert.equal(state.playerHp, 65, 'raw exact snapshot remains available for evidence');
+  assert.equal(state.entities[0].hp, 65);
+  applyProtocolObservation(state, packet('HealthChanged', { hp: 74, mp: 37 }));
+  assert.equal(observedPlayerHp(state), 74, 'a newer exact packet supersedes the percentage');
+  applyProtocolObservation(state, packet('ObjectHealth', { objectId: 1001, percent: 20 }));
+  assert.equal(observedPlayerHp(state), 20, 'new damage also supersedes exact HP');
+  state = applyProtocolObservation(state, { type: 'worldSnapshot', payload: observedWorld() });
+  assert.equal(observedPlayerHp(state), 224, 'a new full snapshot replaces the observation marker');
+});
+
+test('percentage HP estimates stay conservative and do not revive a dead self', () => {
+  const state = observedWorld();
+  applyProtocolObservation(state, packet('ObjectHealth', { objectId: 1001, percent: 47 }));
+  assert.equal(observedPlayerHp(state), 105);
+  applyProtocolObservation(state, packet('Death'));
+  applyProtocolObservation(state, packet('ObjectHealth', { objectId: 1001, percent: 100 }));
+  assert.equal(observedPlayerHp(state), 0, 'late health cannot override Death');
+  applyProtocolObservation(state, packet('Revived'));
+  assert.equal(observedPlayerHp(state), 0, 'revival alone carries no health replacement');
+  applyProtocolObservation(state, packet('ObjectHealth', { objectId: 1001, percent: 100 }));
+  assert.equal(observedPlayerHp(state), 224);
+  assert.equal(state.playerHp, undefined, 'percentage estimate is kept separate from exact HP');
 });
 
 test('poison packets keep the current self movement-control mask observable', () => {

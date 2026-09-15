@@ -112,6 +112,23 @@ function finiteNumber(value) {
   return Number.isFinite(number) ? number : null;
 }
 
+/**
+ * Best current HP for control decisions. A newer ObjectHealth carries only an
+ * integer percentage, so use a conservative estimate without rewriting the
+ * exact playerHp or entity.hp evidence. A snapshot/HealthChanged supersedes it.
+ */
+export function observedPlayerHp(snapshot) {
+  const player = snapshot && selfEntity(snapshot);
+  if (player?.dead === true) return 0;
+  const maximum = finiteNumber(snapshot?.playerMaxHp ?? player?.maxHp);
+  const percent = finiteNumber(snapshot?.playerHealthPercent);
+  if (snapshot?.playerHealthObservation === 'percent' && maximum > 0 && percent != null) {
+    const clamped = Math.max(0, Math.min(100, percent));
+    return clamped > 0 ? Math.max(1, Math.floor(maximum * clamped / 100)) : 0;
+  }
+  return finiteNumber(snapshot?.playerHp ?? player?.hp) ?? 0;
+}
+
 function applySelfVitals(snapshot, payload) {
   const player = selfEntity(snapshot);
   const hp = finiteNumber(payload?.hp);
@@ -121,6 +138,7 @@ function applySelfVitals(snapshot, payload) {
   if (hp != null) {
     const current = Math.max(0, hp);
     snapshot.playerHp = current;
+    snapshot.playerHealthObservation = 'exact';
     if (player) {
       player.hp = current;
       if (current > 0) player.dead = false;
@@ -208,9 +226,11 @@ export function applyProtocolObservation(snapshot, message) {
         entity.healthPercent = payload.percent;
         entity.healthExpire = payload.expire;
       }
-      if (objectIdOf(payload.objectId) === objectIdOf(snapshot.playerObjectId)) {
+      if (objectIdOf(payload.objectId) === objectIdOf(snapshot.playerObjectId) &&
+          finiteNumber(payload.percent) != null) {
         snapshot.playerHealthPercent = payload.percent;
         snapshot.playerHealthExpire = payload.expire;
+        snapshot.playerHealthObservation = 'percent';
       }
       break;
     }
@@ -240,6 +260,7 @@ export function applyProtocolObservation(snapshot, message) {
       if (entity) Object.assign(entity, positionFields(payload), { dead: true, hp: 0, healthPercent: 0 });
       snapshot.playerHp = 0;
       snapshot.playerHealthPercent = 0;
+      snapshot.playerHealthObservation = 'exact';
       break;
     }
     case 'ObjectRevived': {
@@ -263,6 +284,7 @@ export function applyProtocolObservation(snapshot, message) {
       delete snapshot.playerHp;
       delete snapshot.playerHealthPercent;
       delete snapshot.playerHealthExpire;
+      delete snapshot.playerHealthObservation;
       break;
     }
     case 'ObjectHide': {

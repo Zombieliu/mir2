@@ -1,3 +1,4 @@
+import { observedPlayerHp } from './protocol-observation.mjs';
 import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
 import { delay } from './protocol-client.mjs';
 import { useSupplies } from './protocol-loadout.mjs';
@@ -20,11 +21,11 @@ export class NavigationStalled extends Error {
 }
 export async function reviveInTown(client) {
   const before = { map: client.snapshot.mapFileName, ...selfPlayer(client) };
-  if (!before.dead && client.snapshot.playerHp > 0) return null;
+  if (!before.dead && observedPlayerHp(client.snapshot) > 0) return null;
   await client.request({ type: 'townRevive' }, 'Revived');
   const after = client.sequence;
   client.send({ type: 'clientVersion' });
-  await client.wait(() => client.events.some(e => e.sequence > after && e.type === 'worldSnapshot') && client.snapshot.playerHp > 0 && !selfPlayer(client).dead, 'town revival snapshot');
+  await client.wait(() => client.events.some(e => e.sequence > after && e.type === 'worldSnapshot') && observedPlayerHp(client.snapshot) > 0 && !selfPlayer(client).dead, 'town revival snapshot');
   return { at: new Date().toISOString(), before, after: { map: client.snapshot.mapFileName, ...selfPlayer(client) } };
 }
 const directionNames = { up: 'Up', 'up+right': 'UpRight', right: 'Right', 'down+right': 'DownRight', down: 'Down', 'down+left': 'DownLeft', left: 'Left', 'up+left': 'UpLeft' };
@@ -273,7 +274,7 @@ export function createNavigator(client, dependencies = {}) {
       if (client.closed) throw new Error('Protocol client closed during navigation');
       if (stopWhen()) return { reached: false, successfulSteps };
       const self = selfPlayer(client);
-      if (self.dead || client.snapshot.playerHp <= 0) throw new Error('Player died during navigation');
+      if (self.dead || observedPlayerHp(client.snapshot) <= 0) throw new Error('Player died during navigation');
       const movementBlockMask = selfActionBlockMask(client);
       if (movementBlockMask !== 0) {
         remaining = [];
@@ -294,7 +295,7 @@ export function createNavigator(client, dependencies = {}) {
       const nearbyHostiles = (client.snapshot?.entities ?? []).filter(entity =>
         entity?.kind === 'monster' && entity?.dead !== true && Number(entity?.hp ?? 1) > 0 &&
         entity?.disposition !== 'friendly' && distance(self, entity) <= emergencyEscapeDangerDistance);
-      const hpRatio = Number(client.snapshot.playerHp) /
+      const hpRatio = observedPlayerHp(client.snapshot) /
         Math.max(1, Number(client.snapshot.playerMaxHp));
       const shouldEmergencyEscape = nearbyHostiles.length >= 2 ||
         (nearbyHostiles.length > 0 && hpRatio <= emergencyEscapeCriticalHpRatio);
@@ -331,7 +332,7 @@ export function createNavigator(client, dependencies = {}) {
               remaining = [];
               client.record('diagnostic', {
                 type: 'navigationEmergencyEscapeSuccess',
-                hpRatio: Number(client.snapshot.playerHp) /
+                hpRatio: observedPlayerHp(client.snapshot) /
                   Math.max(1, Number(client.snapshot.playerMaxHp)),
                 nearby: nearbyHostiles.length,
                 from: before,
@@ -365,7 +366,7 @@ export function createNavigator(client, dependencies = {}) {
         }
       }
       if (options.autoUseSupplies !== false &&
-          client.snapshot.playerHp < client.snapshot.playerMaxHp * 0.6 &&
+          observedPlayerHp(client.snapshot) < client.snapshot.playerMaxHp * 0.6 &&
           now() - (client.lastTravelSupplyAt ?? 0) >= 2000) {
         client.lastTravelSupplyAt = now();
         // Route movement can need HP recovery, but spending MP while no spell
@@ -472,7 +473,7 @@ export function createNavigator(client, dependencies = {}) {
       let movedDistance = 0;
       const movementInterruptedByDeath = () => {
         const currentSelf = selfPlayer(client);
-        if (currentSelf?.dead === true || Number(client.snapshot.playerHp) <= 0) return true;
+        if (currentSelf?.dead === true || observedPlayerHp(client.snapshot) <= 0) return true;
         return client.events.some(event =>
           event.sequence > movementResponseAfter && event.direction === 'received' &&
           event.packet === 'Death');

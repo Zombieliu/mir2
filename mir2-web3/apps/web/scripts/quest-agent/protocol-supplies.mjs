@@ -1,3 +1,4 @@
+import { observedPlayerHp } from './protocol-observation.mjs';
 import { supersededProgressionGearForSale } from './policy.mjs';
 
 const RUBEN = Object.freeze({ name: 'Merchant_Ruben', x: 288, y: 608 });
@@ -454,7 +455,7 @@ export function createRandomTeleportEmergencyEscape({
 } = {}) {
   let lastUsedAt = Number.NEGATIVE_INFINITY;
   return async function emergencyEscape(client) {
-    const hp = Number(client?.snapshot?.playerHp ?? 0);
+    const hp = observedPlayerHp(client?.snapshot);
     const maxHp = Math.max(1, Number(client?.snapshot?.playerMaxHp ?? 0));
     const hpRatio = hp / maxHp;
     const requiredCooldown = hpRatio <= criticalHpRatio

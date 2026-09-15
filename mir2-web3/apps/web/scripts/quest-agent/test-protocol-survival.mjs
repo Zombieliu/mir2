@@ -1,5 +1,20 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { applyProtocolObservation } from './protocol-observation.mjs';
+
+test('evasive recovery stops on fresh full-health packets without another retreat', async () => {
+  const snapshot = {
+    playerObjectId: 1000, playerHp: 65, playerMaxHp: 100,
+    entities: [{ objectId: 1000, kind: 'selfPlayer', hp: 65, maxHp: 100, dead: false, x: 129, y: 251 }],
+  };
+  applyProtocolObservation(snapshot, { type: 'packet', packet: 'ObjectHealth', payload: { objectId: 1000, percent: 100 } });
+  const client = { snapshot };
+  const result = await recoverHealthWhileEvading(client, async () => {
+    assert.fail('a full-health player should resume its objective instead of retreating again');
+  }, { requiredRatio: 0.75 });
+  assert.deepEqual(result, { status: 'recovered', hp: 100, maxHp: 100, refreshes: 0, evasiveMoves: 0 });
+  assert.equal(snapshot.playerHp, 65, 'control estimates do not overwrite exact snapshot evidence');
+});
 
 import {
   canFinishNearCompleteKillQuestWithoutHpStock,
@@ -75,6 +90,8 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(questPostRetreatRecoveryRatio(54, 'Wizard'), 0.65);
   assert.equal(questPostRetreatRecoveryRatio(54, 'Taoist'), 0.65);
   assert.equal(questPostRetreatRecoveryRatio(65, 'Wizard'), 0.65);
+  assert.equal(questPostRetreatRecoveryRatio(89, 'Wizard'), 0.75);
+  assert.equal(questPostRetreatRecoveryRatio(89, 'Taoist'), 0.75);
   assert.equal(questPostRetreatRecoveryRatio(54, 'Warrior'), 0.75);
   assert.equal(questPostRetreatRecoveryRatio(62, 'Warrior'), 0.75);
   assert.equal(questEmergencyEscapeHpRatio(54), 0.35);
@@ -1120,7 +1137,7 @@ test('q89 Wizard carries an escape reserve and detects ranged mine attackers', (
   assert.equal(profile.focusTargetThroughAggressors, true);
   assert.equal(profile.finishableTargetHealthRatio, 0.25);
   assert.equal(profile.finishableTargetMinimumPlayerHpRatio, 0.7);
-  assert.equal(journeyEmergencyTeleportDepartureTarget(89), 4);
+  assert.equal(journeyEmergencyTeleportDepartureTarget(89), 8);
   assert.equal(questEmergencyEscapeHpRatio(89, 'Wizard'), 0.65);
 });
 

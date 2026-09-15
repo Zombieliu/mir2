@@ -1,3 +1,4 @@
+import { observedPlayerHp } from './protocol-observation.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -904,7 +905,7 @@ try {
                 if (supply.status === 'restocked') recordSupplyRetreat(report, id, supply);
                 return;
               }
-              let hp = Number(owner.snapshot?.playerHp ?? 0);
+              let hp = observedPlayerHp(owner.snapshot);
               let maxHp = Number(owner.snapshot?.playerMaxHp ?? 0);
               const recoveryRatio = questPostRetreatRecoveryRatio(id, className);
               if (maxHp > 0 && hp / maxHp < recoveryRatio) {
@@ -935,13 +936,13 @@ try {
               // cover the escape window; repeatedly consuming six before the
               // regeneration ticks wastes an entire stack during one retreat.
               for (let attempt = 0; attempt < 2; attempt += 1) {
-                hp = Number(owner.snapshot?.playerHp ?? 0);
+                hp = observedPlayerHp(owner.snapshot);
                 maxHp = Number(owner.snapshot?.playerMaxHp ?? 0);
                 if (maxHp > 0 && hp / maxHp >= 0.9) break;
                 const consumed = await useSupplies(owner, { hpThreshold: 0.9, mpThreshold: 0 });
                 if (!consumed.length) break;
               }
-              hp = Number(owner.snapshot?.playerHp ?? 0);
+              hp = observedPlayerHp(owner.snapshot);
               maxHp = Number(owner.snapshot?.playerMaxHp ?? 0);
               if (maxHp > 0 && hp / maxHp < recoveryRatio) {
                 await recoverHealthWhileEvading(owner, navigateNear, {
@@ -951,7 +952,7 @@ try {
                   retreatSteps: id === 54 ? 12 : 6,
                 });
               }
-              const recoveredHp = Number(owner.snapshot?.playerHp ?? 0);
+              const recoveredHp = observedPlayerHp(owner.snapshot);
               const recoveredMaxHp = Number(owner.snapshot?.playerMaxHp ?? 0);
               if (!(recoveredMaxHp > 0) || recoveredHp / recoveredMaxHp < recoveryRatio) {
                 throw new Error(`unsafe-pack recovery stopped below departure health (${recoveredHp}/${recoveredMaxHp})`);
@@ -965,7 +966,7 @@ try {
       await finishJourneyQuest(q, record);
       await finishReadyDeferredQuests();
       } catch (error) {
-        if ((selfPlayer(client)?.dead || client.snapshot.playerHp <= 0) && report.revivals.length < maxJourneyRevivals) {
+        if ((selfPlayer(client)?.dead || observedPlayerHp(client.snapshot) <= 0) && report.revivals.length < maxJourneyRevivals) {
           if (report.quests.length) report.quests.at(-1).failure = error.message;
           report.revivals.push(await reviveInTown(client));
           report.restock = await supplyGateForQuest(client, id);
@@ -996,7 +997,7 @@ try {
               (livingExpeditionNoPath ? 'livingExpeditionNoWalkPathRetry' :
                 'livingEvasiveRecoveryTimeoutRetry'),
             questId: id,
-            hp: Number(client.snapshot?.playerHp ?? 0),
+            hp: observedPlayerHp(client.snapshot),
             maxHp: Number(client.snapshot?.playerMaxHp ?? 0),
             mapFileName: String(client.snapshot?.mapFileName ?? ''),
           });
@@ -1039,11 +1040,11 @@ function recordSupplyRetreat(report, questId, supply) {
 function playerIsDead(snapshot) {
   const actor = (snapshot?.entities ?? []).find(entity =>
     Number(entity?.objectId) === Number(snapshot?.playerObjectId));
-  return actor?.dead === true || Number(actor?.hp ?? snapshot?.playerHp ?? 0) <= 0;
+  return actor?.dead === true || observedPlayerHp(snapshot) <= 0;
 }
 
 function criticalStrandedPlayer(snapshot) {
-  const hp = Number(snapshot?.playerHp ?? 0);
+  const hp = observedPlayerHp(snapshot);
   const maxHp = Number(snapshot?.playerMaxHp ?? 0);
   const actor = (snapshot?.entities ?? []).find(entity =>
     Number(entity?.objectId) === Number(snapshot?.playerObjectId));
@@ -1084,7 +1085,7 @@ function activeEmergencyFundingQuest(owner, questId) {
 }
 
 function livingHealthRatio(snapshot) {
-  const hp = Number(snapshot?.playerHp ?? 0);
+  const hp = observedPlayerHp(snapshot);
   const maxHp = Number(snapshot?.playerMaxHp ?? 0);
   return hp > 0 && maxHp > 0 ? hp / maxHp : 0;
 }
