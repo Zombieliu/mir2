@@ -906,8 +906,29 @@ impl EffectCatalog {
         direction: u32,
     ) -> Option<Animation> {
         let entry = self.spell_by_name.get(spell)?;
-        let sub = entry.projectile.as_ref()?;
-        self.resolve_sub(sub, spell, "projectile", direction)
+        if let Some(sub) = entry.projectile.as_ref() {
+            return self.resolve_sub(sub, spell, "projectile", direction);
+        }
+
+        // The current generated manifest predates `groundTalisman` exporting
+        // its nested launch phase. Crystal's six point-ground talismans still
+        // have their exact launch data in the legacy top-level projectile
+        // entry: Magic 1160, three frames, 30 ms, Direction16 stride 10.
+        // Keep this compatibility read tightly closed to that proven source
+        // shape; ordinary projectiles remain nested-phase only.
+        if ground_talisman(spell).is_none()
+            || entry.kind.as_deref() != Some("projectile")
+            || entry.library != "Magic"
+            || entry.base != 1160
+            || entry.count != 3
+            || entry.interval != 30
+        {
+            return None;
+        }
+        let mut legacy_projectile = entry.clone();
+        legacy_projectile.direction_count = Some(16);
+        legacy_projectile.direction_stride = Some(10);
+        self.resolve_animation(&legacy_projectile, direction, 0)
     }
 
     pub(crate) fn spell_impact_animation(&self, spell: &str) -> Option<Animation> {

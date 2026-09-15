@@ -150,6 +150,65 @@ fn focus_loss_or_exact_keyboard_capture_disables_ime_and_rejects_commit() {
     assert!(editor_owner(app.world().resource::<NativePlayerUiState>()).is_none());
     assert!(!app.world().get::<Window>(w).unwrap().ime_enabled);
 }
+
+#[test]
+fn game_shop_search_has_a_unique_topmost_ime_lease_and_commits_to_filter() {
+    let mut ui = NativePlayerUiState::default();
+    ui.core.panel = mir2_ui_core::state::UiPanel::GameShop;
+    ui.game_shop_page = 3;
+    ui.game_shop_dialog.search_focused = true;
+    ui.game_shop_dialog.sync_search_editor();
+    let first_revision = ui.game_shop_dialog.search_input.editor_revision;
+    assert_eq!(editor_owner(&ui), Some(EditorOwner::GameShop));
+
+    let mut app = App::new();
+    app.insert_resource(ui)
+        .insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<ImeState>()
+        .init_resource::<ButtonInput<KeyCode>>()
+        .init_resource::<ButtonInput<MouseButton>>()
+        .add_message::<Ime>()
+        .add_systems(Update, process_ime);
+    let mut window = Window::default();
+    window.focused = true;
+    let w = app.world_mut().spawn((window, PrimaryWindow)).id();
+    app.update();
+    app.update();
+    app.world_mut().write_message(Ime::Enabled { window: w });
+    app.update();
+    send(
+        &mut app,
+        Ime::Commit {
+            window: w,
+            value: "RedTiger".into(),
+        },
+    );
+    let ui = app.world().resource::<NativePlayerUiState>();
+    assert_eq!(ui.game_shop_dialog.search, "RedTiger");
+    assert_eq!(ui.game_shop_page, 0);
+
+    let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+    ui.game_shop_dialog.blur_search();
+    assert_eq!(editor_owner(&ui), None);
+    ui.game_shop_dialog.search_focused = true;
+    ui.game_shop_dialog.sync_search_editor();
+    assert_ne!(
+        ui.game_shop_dialog.search_input.editor_revision,
+        first_revision
+    );
+    ui.game_shop_dialog.confirmation = Some(game_shop_dialog::PurchasePrompt {
+        index: 1,
+        name: "RedTiger".into(),
+        quantity: 1,
+        count: 1,
+        payment: crate::game_shop::GameShopPaymentType::Gold,
+        total: 1,
+    });
+    assert_eq!(editor_owner(&ui), None);
+}
 #[test]
 fn committed_chinese_obeys_real_name_utf16_limit_and_memo_multiline_policy() {
     let (mut app, w) = app();

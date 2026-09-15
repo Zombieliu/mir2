@@ -206,6 +206,16 @@ fn main() {
     // character creation, connection errors, and the transition into the game.
     app.insert_resource(mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::KeyboardHost::from_environment());
     app.insert_resource(hero_pointer_settings::load());
+    app.insert_resource(mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PreviewGeometry(
+        |library, frame| atlas::native_frame_geometry(library, i64::from(frame)).map(|frame| {
+            mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PreviewFrame {
+                width: frame.width as f32,
+                height: frame.height as f32,
+                x: frame.offset_x as f32,
+                y: frame.offset_y as f32,
+            }
+        }),
+    ));
     app.add_plugins(mir2_client_bevy::native_shell_ui::Mir2NativeShellUiPlugin);
     // Native-only Crystal presentation consumes the existing authoritative
     // read models. It is registered only by this Windows host; Web/WASM keeps

@@ -25,17 +25,21 @@ pub(crate) struct ClipboardShortcutState {
 }
 
 impl ClipboardShortcutState {
-    fn observe(&mut self, key_code: KeyCode, state: ButtonState, repeat: bool) -> bool {
+    fn action(&mut self, key_code: KeyCode, state: ButtonState, repeat: bool) -> Option<KeyCode> {
         let pressed = state == ButtonState::Pressed;
         match key_code {
             KeyCode::ControlLeft => self.control_left = pressed,
             KeyCode::ControlRight => self.control_right = pressed,
-            KeyCode::KeyV => {
-                return pressed && !repeat && (self.control_left || self.control_right);
-            }
             _ => {}
         }
-        false
+        (pressed
+            && !repeat
+            && (self.control_left || self.control_right)
+            && matches!(
+                key_code,
+                KeyCode::KeyV | KeyCode::KeyC | KeyCode::KeyX | KeyCode::KeyA
+            ))
+        .then_some(key_code)
     }
 }
 
@@ -49,7 +53,10 @@ fn paste_shortcut_pressed<'a>(
     // keys released even though a valid paste chord occurred.
     let mut paste = false;
     for event in events {
-        paste |= shortcut.observe(event.key_code, event.state, event.repeat);
+        paste |= matches!(
+            shortcut.action(event.key_code, event.state, event.repeat),
+            Some(KeyCode::KeyV)
+        );
     }
     paste
 }
@@ -162,7 +169,7 @@ fn append_filtered(
 pub(crate) struct FriendClipboardPending(Option<(u64, bevy::clipboard::ClipboardRead)>);
 
 use mir2_client_bevy::crystal_ui::overlays::text_input::{
-    editor_mut, editor_owner, friend_clipboard_target, EditorOwner,
+    editor_mut, editor_owner, friend_clipboard_target, sync_draft, EditorOwner,
 };
 
 /// Clipboard operations require a focused field. Pending reads are bound to a
@@ -184,15 +191,8 @@ pub fn paste_system(
     }
     let mut actions = Vec::new();
     for event in keyboard_inputs.read() {
-        let paste = shortcut.observe(event.key_code, event.state, event.repeat);
-        if paste {
-            actions.push(KeyCode::KeyV);
-        } else if event.state == ButtonState::Pressed
-            && !event.repeat
-            && (shortcut.control_left || shortcut.control_right)
-            && matches!(event.key_code, KeyCode::KeyC | KeyCode::KeyX)
-        {
-            actions.push(event.key_code);
+        if let Some(action) = shortcut.action(event.key_code, event.state, event.repeat) {
+            actions.push(action);
         }
     }
     let ingame = shell
@@ -206,6 +206,7 @@ pub fn paste_system(
         ui.friends.sync_editor();
         ui.creature.sync_input_editor();
         ui.social_bonds.sync_editor();
+        ui.game_shop_dialog.sync_search_editor();
         if ui.ime_frame_consumed {
             pending.0 = None;
             return;
@@ -219,12 +220,23 @@ pub fn paste_system(
         if pending.0.as_ref().is_some_and(|(r, _)| *r != revision) {
             pending.0 = None;
         }
-        if let Some(clipboard) = clipboard.as_deref_mut() {
-            for action in actions {
-                editor.input_consumed = true;
-                match action {
-                    KeyCode::KeyV => pending.0 = Some((revision, clipboard.fetch_text())),
-                    KeyCode::KeyC | KeyCode::KeyX => {
+        for action in actions {
+            // Shortcut literals are emitted by Windows as normal text input;
+            // consume them even when the host clipboard is unavailable.
+            editor.input_consumed = true;
+            match action {
+                KeyCode::KeyA => {
+                    if let Some(editor) = editor.editor.as_mut() {
+                        editor.select_all();
+                    }
+                }
+                KeyCode::KeyV => {
+                    if let Some(clipboard) = clipboard.as_deref_mut() {
+                        pending.0 = Some((revision, clipboard.fetch_text()));
+                    }
+                }
+                KeyCode::KeyC | KeyCode::KeyX => {
+                    if let Some(clipboard) = clipboard.as_deref_mut() {
                         let selected = editor
                             .editor
                             .as_ref()
@@ -238,8 +250,8 @@ pub fn paste_system(
                             editor.commit_editor(result);
                         }
                     }
-                    _ => {}
                 }
+                _ => {}
             }
         }
         if let Some((_, read)) = pending.0.as_mut() {
@@ -251,30 +263,7 @@ pub fn paste_system(
                 }
             }
         }
-        match owner {
-            EditorOwner::GuildNotice => ui.guild_notice_draft = ui.guild_panel.notice_draft(),
-            EditorOwner::GuildRank => {
-                ui.guild_rank_name_draft = ui
-                    .guild_panel
-                    .rank_editor
-                    .editor
-                    .as_ref()
-                    .map(|e| e.text().to_owned())
-                    .unwrap_or_default()
-            }
-            EditorOwner::GuildRecruit => {
-                ui.guild_recruit_draft = ui
-                    .guild_panel
-                    .recruit_editor
-                    .editor
-                    .as_ref()
-                    .map(|e| e.text().to_owned())
-                    .unwrap_or_default()
-            }
-            EditorOwner::Creature => ui.creature.sync_input_draft(),
-            EditorOwner::Bond => ui.social_bonds.sync_draft(),
-            EditorOwner::Friend | EditorOwner::Group => {}
-        }
+        sync_draft(ui, owner);
         return;
     }
     pending.0 = None;
@@ -366,6 +355,40 @@ mod tests {
     }
 
     #[test]
+    fn game_shop_clipboard_owner_is_focus_and_revision_bound() {
+        let mut ui = mir2_client_bevy::crystal_ui::NativePlayerUiState::default();
+        ui.core.panel = mir2_ui_core::state::UiPanel::GameShop;
+        ui.game_shop_page = 6;
+        ui.game_shop_dialog.search_focused = true;
+        ui.game_shop_dialog.sync_search_editor();
+        let revision = ui.game_shop_dialog.search_input.editor_revision;
+        assert_eq!(editor_owner(&ui), Some(EditorOwner::GameShop));
+
+        let editor = editor_mut(&mut ui, EditorOwner::GameShop);
+        editor.paste("RedTiger");
+        sync_draft(&mut ui, EditorOwner::GameShop);
+        assert_eq!(ui.game_shop_dialog.search, "RedTiger");
+        assert_eq!(ui.game_shop_page, 0);
+
+        ui.game_shop_dialog.blur_search();
+        assert_eq!(editor_owner(&ui), None);
+        ui.game_shop_dialog.search_focused = true;
+        ui.game_shop_dialog.sync_search_editor();
+        assert_ne!(ui.game_shop_dialog.search_input.editor_revision, revision);
+        ui.game_shop_dialog.confirmation = Some(
+            mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PurchasePrompt {
+                index: 1,
+                name: "RedTiger".into(),
+                quantity: 1,
+                count: 1,
+                payment: mir2_client_bevy::game_shop::GameShopPaymentType::Gold,
+                total: 1,
+            },
+        );
+        assert_eq!(editor_owner(&ui), None);
+    }
+
+    #[test]
     fn login_account_paste_uses_existing_printable_and_length_rules() {
         let mut shell = NativeShellModel {
             screen: NativeShellScreen::Login,
@@ -423,19 +446,58 @@ mod tests {
     #[test]
     fn ctrl_v_is_detected_when_the_complete_chord_arrives_in_one_frame() {
         let mut shortcut = ClipboardShortcutState::default();
-        assert!(!shortcut.observe(KeyCode::ControlLeft, ButtonState::Pressed, false));
-        assert!(shortcut.observe(KeyCode::KeyV, ButtonState::Pressed, false));
-        assert!(!shortcut.observe(KeyCode::KeyV, ButtonState::Released, false));
-        assert!(!shortcut.observe(KeyCode::ControlLeft, ButtonState::Released, false));
+        assert_eq!(
+            shortcut.action(KeyCode::ControlLeft, ButtonState::Pressed, false),
+            None
+        );
+        assert_eq!(
+            shortcut.action(KeyCode::KeyV, ButtonState::Pressed, false),
+            Some(KeyCode::KeyV)
+        );
+        assert_eq!(
+            shortcut.action(KeyCode::KeyV, ButtonState::Released, false),
+            None
+        );
+        assert_eq!(
+            shortcut.action(KeyCode::ControlLeft, ButtonState::Released, false),
+            None
+        );
         assert!(!shortcut.control_left);
         assert!(!shortcut.control_right);
     }
 
     #[test]
+    fn ctrl_a_is_an_ordered_editor_action_and_not_a_text_literal() {
+        let mut shortcut = ClipboardShortcutState::default();
+        assert_eq!(
+            shortcut.action(KeyCode::ControlRight, ButtonState::Pressed, false),
+            None
+        );
+        assert_eq!(
+            shortcut.action(KeyCode::KeyA, ButtonState::Pressed, false),
+            Some(KeyCode::KeyA)
+        );
+        assert_eq!(
+            shortcut.action(KeyCode::KeyA, ButtonState::Released, false),
+            None
+        );
+        assert_eq!(
+            shortcut.action(KeyCode::ControlRight, ButtonState::Released, false),
+            None
+        );
+    }
+
+    #[test]
     fn focus_loss_clears_any_latched_control_modifier() {
         let mut shortcut = ClipboardShortcutState::default();
-        assert!(!shortcut.observe(KeyCode::ControlLeft, ButtonState::Pressed, false));
+        assert_eq!(
+            shortcut.action(KeyCode::ControlLeft, ButtonState::Pressed, false),
+            None
+        );
         shortcut = ClipboardShortcutState::default();
-        assert!(!shortcut.observe(KeyCode::KeyV, ButtonState::Pressed, false));
+        assert_eq!(
+            shortcut.action(KeyCode::KeyV, ButtonState::Pressed, false),
+            None
+        );
     }
 }

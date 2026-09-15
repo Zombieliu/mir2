@@ -14,6 +14,7 @@ pub fn friend_clipboard_target(ui: &NativePlayerUiState) -> bool {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EditorOwner {
+    GameShop,
     Friend,
     Creature,
     Bond,
@@ -66,6 +67,13 @@ pub fn editor_owner(ui: &NativePlayerUiState) -> Option<EditorOwner> {
     {
         return None;
     }
+    if ui.shop_open()
+        && ui.game_shop_dialog.search_focused
+        && ui.game_shop_dialog.confirmation.is_none()
+        && ui.game_shop_dialog.search_input.editor_focused
+    {
+        return Some(EditorOwner::GameShop);
+    }
     if ui.friends.modal.is_none()
         && ui.guild_open()
         && ui.guild_notice_editing
@@ -95,6 +103,7 @@ pub fn editor_mut(
     owner: EditorOwner,
 ) -> &mut friend_dialog::FriendDialogUi {
     match owner {
+        EditorOwner::GameShop => &mut ui.game_shop_dialog.search_input,
         EditorOwner::Friend => &mut ui.friends,
         EditorOwner::Creature => &mut ui.creature.text_input,
         EditorOwner::Bond => &mut ui.social_bonds.input,
@@ -107,6 +116,11 @@ pub fn editor_mut(
 
 pub fn sync_draft(ui: &mut NativePlayerUiState, owner: EditorOwner) {
     match owner {
+        EditorOwner::GameShop => {
+            if ui.game_shop_dialog.sync_search_draft() {
+                ui.game_shop_page = 0;
+            }
+        }
         EditorOwner::GuildNotice => ui.guild_notice_draft = ui.guild_panel.notice_draft(),
         EditorOwner::GuildRank => {
             ui.guild_rank_name_draft = ui
@@ -156,6 +170,7 @@ pub fn process_ime(
     ui.friends.sync_editor();
     ui.creature.sync_input_editor();
     ui.social_bonds.sync_editor();
+    ui.game_shop_dialog.sync_search_editor();
     let Ok((window_id, mut window)) = windows.single_mut() else {
         return;
     };
@@ -246,6 +261,7 @@ pub fn position_ime(
         return;
     }
     let model = match owner {
+        EditorOwner::GameShop => &ui.game_shop_dialog.search_input,
         EditorOwner::Friend => &ui.friends,
         EditorOwner::Creature => &ui.creature.text_input,
         EditorOwner::Bond => &ui.social_bonds.input,

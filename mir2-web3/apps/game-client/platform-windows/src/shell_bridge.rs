@@ -74,6 +74,7 @@ pub fn drain_gateway_events(
     mut auto_login: ResMut<NativeAutoLoginFlow>,
 ) {
     for event in inbox.drain() {
+        let previous_screen = shell.screen;
         // A password response is correlated to the one in-flight request in
         // NativeShellModel.  Never let a delayed response mutate a later
         // Login/Character/InGame state after the request was already closed.
@@ -118,6 +119,9 @@ pub fn drain_gateway_events(
         } else {
             shell.apply_gateway_event(event);
         }
+        if shell.screen != previous_screen && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+            eprintln!("[native-shell] transition {previous_screen:?} -> {:?}", shell.screen);
+        }
 
         if connected
             && auto_login.enabled
@@ -141,6 +145,9 @@ pub fn drain_gateway_events(
     // including frames with no new Gateway event, before starting a character.
     if shell.screen == NativeShellScreen::CharacterSelect {
         if let Some(character_index) = auto_login.desired_character_index.take() {
+            if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+                eprintln!("[native-shell] auto_start_attempt character_index={character_index}");
+            }
             if shell.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index })
                 && shell.apply_ui_intent(NativeUiIntent::StartGame)
             {

@@ -394,6 +394,9 @@ pub struct NativeShellModel {
     pub delete_request_in_flight: bool,
     pub delete_command_sent: bool,
     pub start_game_request_in_flight: bool,
+    /// A normal world snapshot may only enter the game after its own accepted
+    /// StartGame response. This fact is consumed by PlayerBootstrapped.
+    pub start_game_acknowledged: bool,
     pub retry_request_in_flight: bool,
     pub logout_request_in_flight: bool,
     pub notice: Option<ShellNotice>,
@@ -428,6 +431,7 @@ impl fmt::Debug for NativeShellModel {
                 "start_game_request_in_flight",
                 &self.start_game_request_in_flight,
             )
+            .field("start_game_acknowledged", &self.start_game_acknowledged)
             .field("retry_request_in_flight", &self.retry_request_in_flight)
             .field("logout_request_in_flight", &self.logout_request_in_flight)
             .field("notice", &self.notice)
@@ -477,6 +481,7 @@ impl NativeShellModel {
         self.register_request_in_flight = false;
         self.create_character_request_in_flight = false;
         self.start_game_request_in_flight = false;
+        self.start_game_acknowledged = false;
         self.retry_request_in_flight = false;
         self.logout_request_in_flight = false;
         self.notice = None;
@@ -794,6 +799,7 @@ impl NativeShellModel {
                     Some(index) if self.has_character_index(index) => {
                         self.screen = NativeShellScreen::StartingGame;
                         self.start_game_request_in_flight = true;
+                        self.start_game_acknowledged = false;
                         self.notice = None;
                         true
                     }
@@ -990,6 +996,7 @@ impl NativeShellModel {
                 self.screen = NativeShellScreen::Login;
                 self.selected_character_index = None;
                 self.active_character = None;
+                self.start_game_acknowledged = false;
                 self.logout_request_in_flight = true;
                 self.notice = None;
                 self.login.clear_password();
@@ -1102,6 +1109,7 @@ impl NativeShellModel {
                 },
             ) => {
                 self.start_game_request_in_flight = false;
+                self.start_game_acknowledged = false;
                 self.screen = NativeShellScreen::CharacterSelect;
                 self.set_error(reason.unwrap_or_else(|| "start game rejected".to_owned()));
                 true
@@ -1111,14 +1119,16 @@ impl NativeShellModel {
                 NativeGatewayEvent::StartGameAck { accepted: true, .. },
             ) => {
                 self.start_game_request_in_flight = false;
+                self.start_game_acknowledged = true;
                 self.set_info("start game acknowledged");
                 true
             }
             (
                 NativeShellScreen::StartingGame,
                 NativeGatewayEvent::PlayerBootstrapped { character },
-            ) => {
+            ) if self.start_game_acknowledged => {
                 self.start_game_request_in_flight = false;
+                self.start_game_acknowledged = false;
                 self.screen = NativeShellScreen::InGame;
                 self.active_character = Some(character);
                 self.set_info("entered game");
@@ -1198,6 +1208,7 @@ impl NativeShellModel {
                     }
                     NativeShellScreen::StartingGame => {
                         self.start_game_request_in_flight = false;
+                        self.start_game_acknowledged = false;
                         self.screen = NativeShellScreen::CharacterSelect;
                     }
                     NativeShellScreen::ChangePassword => {
@@ -1221,6 +1232,7 @@ impl NativeShellModel {
                 self.register_request_in_flight = false;
                 self.create_character_request_in_flight = false;
                 self.start_game_request_in_flight = false;
+                self.start_game_acknowledged = false;
                 self.retry_request_in_flight = false;
                 self.logout_request_in_flight = false;
                 self.change_password_request_in_flight = false;
@@ -1652,14 +1664,17 @@ mod tests {
     fn start_game_ack_does_not_enter_game() {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::StartingGame;
+        model.start_game_request_in_flight = true;
 
         assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
             accepted: false,
             reason: Some("blocked".to_owned()),
         }));
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert!(!model.start_game_acknowledged);
 
         model.screen = NativeShellScreen::StartingGame;
+        model.start_game_request_in_flight = true;
 
         assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
             accepted: true,
@@ -1670,14 +1685,30 @@ mod tests {
             model.notice.as_ref().map(|notice| notice.message.as_str()),
             Some("start game acknowledged")
         );
+        assert!(model.start_game_acknowledged);
     }
 
     #[test]
-    fn player_bootstrap_enters_game() {
+    fn ordinary_player_bootstrap_requires_accepted_start_game_ack() {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::StartingGame;
+        model.start_game_request_in_flight = true;
         let character = CharacterSummary::new(1, "Warrior", 11, "Warrior", "Female");
 
+        assert!(
+            !model.apply_gateway_event(NativeGatewayEvent::PlayerBootstrapped {
+                character: character.clone(),
+            })
+        );
+        assert_eq!(model.screen, NativeShellScreen::StartingGame);
+        assert!(model.active_character.is_none());
+        assert!(!model.start_game_acknowledged);
+
+        assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
+            accepted: true,
+            reason: None,
+        }));
+        assert!(model.start_game_acknowledged);
         assert!(
             model.apply_gateway_event(NativeGatewayEvent::PlayerBootstrapped {
                 character: character.clone(),
@@ -1685,10 +1716,38 @@ mod tests {
         );
         assert_eq!(model.screen, NativeShellScreen::InGame);
         assert_eq!(model.active_character.as_ref(), Some(&character));
+        assert!(!model.start_game_acknowledged);
         assert_eq!(
             model.notice.as_ref().map(|notice| notice.message.as_str()),
             Some("entered game")
         );
+    }
+
+    #[test]
+    fn start_game_ack_fact_is_reset_for_new_entry_logout_and_disconnect() {
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterSelect;
+        model.characters = starter_characters();
+        model.selected_character_index = Some(1);
+        model.start_game_acknowledged = true;
+        assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+        assert!(!model.start_game_acknowledged);
+
+        assert!(model.apply_gateway_event(NativeGatewayEvent::StartGameAck {
+            accepted: false,
+            reason: None,
+        }));
+        assert!(!model.start_game_acknowledged);
+
+        model.screen = NativeShellScreen::InGame;
+        model.start_game_acknowledged = true;
+        assert!(model.apply_ui_intent(NativeUiIntent::Logout));
+        assert!(!model.start_game_acknowledged);
+
+        model.screen = NativeShellScreen::StartingGame;
+        model.start_game_acknowledged = true;
+        assert!(model.apply_gateway_event(NativeGatewayEvent::Disconnect { reason: None }));
+        assert!(!model.start_game_acknowledged);
     }
 
     #[test]

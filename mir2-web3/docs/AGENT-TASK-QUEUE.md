@@ -1,14 +1,15 @@
 # Agent Task Queue
 
-> Latest acceptance checkpoint, 2026-09-16 R30/R122: native Game Shop/mail
+> Latest acceptance checkpoint, 2026-09-16 R34/R122: native Game Shop/mail
 > Candidate behavior has real restored-mail/read/collect/backpack proof; the
 > observed Mail image-growth regression is bounded after tree retention.
 > Gateway 778 passed / 8 ignored, Windows 655/655 with complete C assets,
-> native-ui 849/849 plus one new retained-shop lifecycle regression. All five
+> native-ui R34 852/852, including retained-shop/raw-navigation regressions. All five
 > initial simulation fixture failures pass focused reruns; a final full-suite
 > rerun is not claimed. R30 new purchase immediately updates mail total 2 → 3;
 > normal relogin preserves claimed status/two bag items without duplication.
-> R31 Ctrl+A visual highlight passes; Home/End/arrow events remain under repair.
+> R34 visually passes Ctrl+A, Home/End, Left, Backspace/Delete, selection
+> replacement and RedTiger preview rotation. Original paired acceptance is open.
 > Wizard R122 uses existing Medium potions after a fresh direct Shaman hit at
 > 85% HP; controller 634/634. Quest/monster values and escape guards are unchanged.
 > Taoist R104 remains active. Natural completed units remain 155/177; partial

@@ -26,10 +26,18 @@ type CrystalGameShopEntry = {
   gold_price: number;
   credit_price: number;
   count: number;
+  item_shape: number;
+  item_stack_size: number;
   class: string;
   category: string;
   stock: number;
   stock_level: number;
+  individual_stock: boolean;
+  deal: boolean;
+  top_item: boolean;
+  date_binary_datetime: string;
+  can_buy_credit: boolean;
+  can_buy_gold: boolean;
 };
 
 type CrystalItemEntry = {
@@ -88,9 +96,7 @@ export function GameShopWindow({
   const categories = useMemo(
     () => [
       "Show All",
-      ...Array.from(new Set(searchedItems.map((item) => item.category))).sort((left, right) =>
-        left.localeCompare(right),
-      ),
+      ...Array.from(new Set(searchedItems.map((item) => item.category))),
     ],
     [searchedItems],
   );
@@ -127,9 +133,10 @@ export function GameShopWindow({
   }, [page, pageCount]);
 
   const setQuantity = (gameShopIndex: number, nextQuantity: number) => {
+    const item = CRYSTAL_GAME_SHOP_ITEMS.find((candidate) => candidate.game_shop_index === gameShopIndex);
     setQuantities((current) => ({
       ...current,
-      [gameShopIndex]: Math.max(1, Math.min(99, nextQuantity)),
+      [gameShopIndex]: item ? clampGameShopQuantity(item, nextQuantity) : Math.max(1, Math.min(99, nextQuantity)),
     }));
   };
 
@@ -203,9 +210,9 @@ export function GameShopWindow({
             key={item.game_shop_index}
             item={item}
             index={index}
-            quantity={quantities[item.game_shop_index] ?? 1}
+            quantity={clampGameShopQuantity(item, quantities[item.game_shop_index] ?? 1)}
             onQuantityChange={(nextQuantity) => setQuantity(item.game_shop_index, nextQuantity)}
-            onBuy={() => onBuy(item.game_shop_index, quantities[item.game_shop_index] ?? 1, paymentType)}
+            onBuy={() => onBuy(item.game_shop_index, clampGameShopQuantity(item, quantities[item.game_shop_index] ?? 1), paymentType)}
             onPreview={(cellLeft) => showPreview(item, cellLeft)}
             t={t}
           />
@@ -220,8 +227,8 @@ export function GameShopWindow({
           onClose={() => setPreview(null)}
         />
       ) : null}
-      <div className="game-shop-total credits">{credits}</div>
-      <div className="game-shop-total gold">{gold}</div>
+      <div className="game-shop-total credits">{formatGameShopPrice(credits)}</div>
+      <div className="game-shop-total gold">{formatGameShopPrice(gold)}</div>
       <button type="button" className="game-shop-payment gold" onClick={() => setPaymentType("gold")}>
         <img src={paymentType === "gold" ? ORIGINAL_UI.gameShop.paymentBox.checked : ORIGINAL_UI.gameShop.paymentBox.unchecked} alt="" draggable={false} />
         <span>Gold</span>
@@ -287,8 +294,8 @@ function GameShopCell({
         />
       ) : null}
       <div className="game-shop-cell-stock-label">STOCK:</div>
-      <div className="game-shop-cell-stock-value">{formatGameShopStock(item.stock)}</div>
-      <div className="game-shop-cell-count">{item.count > 1 ? item.count : ""}</div>
+      <div className="game-shop-cell-stock-value">{formatGameShopStock(item.stock, item.stock_level)}</div>
+      <div className="game-shop-cell-count">{item.count}</div>
       <div className="game-shop-cell-quantity-down">
         <SpriteButton sprite={ORIGINAL_UI.gameShop.previousButton} label={t("ui.down", [], "Down")} onClick={() => onQuantityChange(quantity - 1)} />
       </div>
@@ -296,8 +303,8 @@ function GameShopCell({
       <div className="game-shop-cell-quantity-up">
         <SpriteButton sprite={ORIGINAL_UI.gameShop.nextButton} label={t("ui.up", [], "Up")} onClick={() => onQuantityChange(quantity + 1)} />
       </div>
-      <div className="game-shop-cell-credit-price">{item.credit_price * quantity}</div>
-      <div className="game-shop-cell-gold-price">{item.gold_price * quantity}</div>
+      <div className="game-shop-cell-credit-price">{item.can_buy_credit ? formatGameShopPrice(item.credit_price * quantity) : ""}</div>
+      <div className="game-shop-cell-gold-price">{item.can_buy_gold ? formatGameShopPrice(item.gold_price * quantity) : ""}</div>
       {hasPreview ? (
         <div className="game-shop-cell-preview">
           <SpriteButton sprite={ORIGINAL_UI.gameShop.previewButton} label={t("ui.preview", [], "Preview")} onClick={() => onPreview(left)} />
@@ -376,11 +383,11 @@ function GameShopViewer({
 function applyGameShopSectionFilter(items: readonly CrystalGameShopEntry[], section: GameShopSectionFilter) {
   switch (section) {
     case "top":
-      return items.slice(0, 24);
+      return items.filter((item) => item.top_item);
     case "deals":
-      return items.filter((item) => item.gold_price > 0 && item.credit_price > 0);
+      return items.filter((item) => item.deal);
     case "new":
-      return [];
+      return items.filter((item) => isNewGameShopItem(item.date_binary_datetime));
     case "all":
     default:
       return items;
@@ -400,13 +407,38 @@ function compareGameShopItems(left: CrystalGameShopEntry, right: CrystalGameShop
 }
 
 function truncateGameShopName(name: string) {
-  return name.length > 17 ? `${name.slice(0, 17)}...` : name;
+  return name.length > 17 ? name.slice(0, 17) : name;
 }
 
-function formatGameShopStock(stock: number) {
-  if (stock <= 0) return "\u221e";
-  if (stock >= 99) return "99+";
-  return String(stock);
+function formatGameShopPrice(value: number) {
+  return value.toLocaleString("en-US");
+}
+
+function gameShopMaxQuantity(item: Pick<CrystalGameShopEntry, "count" | "item_stack_size">) {
+  return Math.max(1, Math.min(99, Math.floor((5 * Math.max(1, item.item_stack_size)) / Math.max(1, item.count))));
+}
+
+function clampGameShopQuantity(item: Pick<CrystalGameShopEntry, "count" | "item_stack_size">, quantity: number) {
+  return Math.max(1, Math.min(gameShopMaxQuantity(item), Math.floor(quantity)));
+}
+
+function formatGameShopStock(stock: number, stockLevel: number) {
+  if (stock === 0) return "\u221e";
+  if (stockLevel >= 99) return "99+";
+  return String(Math.max(0, stockLevel));
+}
+
+function isNewGameShopItem(dateBinary: string) {
+  try {
+    const raw = BigInt(dateBinary);
+    if (raw === 0n) return false;
+    const unsigned = BigInt.asUintN(64, raw);
+    const ticks = unsigned & 0x3fffffffffffffffn;
+    const nowTicks = BigInt(Date.now()) * 10000n + 621355968000000000n;
+    return ticks > nowTicks - 7n * 24n * 60n * 60n * 10_000_000n;
+  } catch {
+    return false;
+  }
 }
 
 /* ========================================================================= */

@@ -654,7 +654,7 @@ mod tests {
             .iter()
             .flat_map(|chapter| chapter.quest_ids_for_class(Some("Warrior")))
             .collect::<BTreeSet<_>>();
-        assert_eq!(all_ids.len(), 53);
+        assert_eq!(all_ids.len(), 55);
         let mut completed = CompletedQuestTracker::default();
         completed.replace_authoritative(all_ids);
 

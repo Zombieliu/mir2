@@ -4749,6 +4749,22 @@
       "maskPath": null
     },
     {
+      "index": 785,
+      "width": 260,
+      "height": 308,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "d9846f24cca7a1462e572f0a118b63d5e9e3b19322e7c6507d836a0d94425e26",
+      "pngSha256": "9c9cfac0d33e6a1ee0e0efb7f25885b2e0b8019e235599769b7b62870141bc54",
+      "path": "/original-ui/Title/785.png",
+      "maskPath": null
+    },
+    {
       "index": 820,
       "width": 760,
       "height": 500,

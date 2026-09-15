@@ -2,6 +2,8 @@
 
 #[path = "character_stats.rs"]
 pub mod character_stats;
+#[path = "game_shop_dialog.rs"]
+pub mod game_shop_dialog;
 #[path = "hero_dialog.rs"]
 pub mod hero_dialog;
 #[path = "local_keyboard_ui.rs"]
@@ -793,6 +795,7 @@ pub struct NativePlayerUiState {
     /// Bounded cash-shop page; keeps the native panel usable while every
     /// server catalog row remains reachable.
     pub game_shop_page: usize,
+    pub game_shop_dialog: game_shop_dialog::GameShopDialogUi,
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
     pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
@@ -926,6 +929,7 @@ impl Default for NativePlayerUiState {
             shop_repair_container: 0,
             shop_repair_slot: None,
             game_shop_page: 0,
+            game_shop_dialog: Default::default(),
             split_count: 1,
             inventory_operation: None,
             inventory_item_drag: None,
@@ -1144,7 +1148,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
-        self.guild_panel.blocks()
+        self.game_shop_dialog.confirmation.is_some()
+            || (self.shop_open() && self.game_shop_dialog.search_focused)
+            || self.guild_panel.blocks()
             || self.guild_panel.consumed
             || self.skill_assign.open
             || self.group_dialog.modal()
@@ -1159,7 +1165,8 @@ impl NativePlayerUiState {
             || self.friends.modal.is_some()
     }
     pub fn blocks_world_click(&self) -> bool {
-        self.guild_panel.blocks()
+        self.game_shop_dialog.confirmation.is_some()
+            || self.guild_panel.blocks()
             || self.guild_panel.consumed
             || self.skill_assign.open
             || self.hero.modal()
@@ -1227,6 +1234,7 @@ impl NativePlayerUiState {
         self.shop_repair_container = 0;
         self.shop_repair_slot = None;
         self.game_shop_page = 0;
+        self.game_shop_dialog = Default::default();
         self.split_count = 1;
         self.selected_group_member = None;
         self.group_invite_draft.clear();
@@ -2605,6 +2613,7 @@ enum OverlayButton {
     GameShopQuantityDec,
     GameShopPagePrev,
     GameShopPageNext,
+    GameShopControl(game_shop_dialog::GameShopAction),
     // Storage
     SelectBagForStore(u32),
     SelectStorage(u32),
@@ -2640,6 +2649,7 @@ pub(crate) struct OverlayKeyboardControls<'w> {
 struct OverlayRenderModels<'w> {
     asset_server: Option<Res<'w, AssetServer>>,
     wing_materials: Option<Res<'w, CrystalCharacterWingMaterials>>,
+    game_shop_geometry: Option<Res<'w, game_shop_dialog::PreviewGeometry>>,
     shell: Option<Res<'w, NativeShellModel>>,
     state: Res<'w, NativePlayerUiState>,
     inventory: Res<'w, InventoryModel>,
@@ -2801,7 +2811,12 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     ranking_dialog::process,
                     trade_dialog::process_items,
                     trade_dialog::process_drag,
-                    (process_inventory_item_drag, process_inventory_drag).chain(),
+                    (
+                        process_inventory_item_drag,
+                        process_inventory_drag,
+                        game_shop_dialog::process_pointer,
+                    )
+                        .chain(),
                     process_inventory_delete_pointer,
                     process_guild_storage_pointer,
                     process_overlay_keyboard,
@@ -2809,7 +2824,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     crate::audio::sync_native_ui_audio,
                     consume_exit_application,
                     crate::pending_operations::observe_native_session_boundary,
-                    reconcile_native_game_shop_ui_state,
+                    (reconcile_native_game_shop_ui_state, game_shop_dialog::sync).chain(),
                     crate::options_effects::consume_options_effects,
                     crate::audio::sync_native_audio,
                 )
@@ -2819,7 +2834,11 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .add_systems(
                 Update,
                 (
-                    render_overlays,
+                    (
+                        render_overlays,
+                        game_shop_dialog::render_confirmation_system,
+                    )
+                        .chain(),
                     social_bond_dialog::host::render_system,
                     leave_game_dialog::render,
                     group_dialog::render,
@@ -4714,6 +4733,9 @@ pub(crate) fn process_overlay_keyboard(
         return;
     }
 
+    if game_shop_dialog::keyboard(&mut state, &keys, &mut typed) {
+        return;
+    }
     if state.bigmap_open() && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused) {
         let (Some(big_map), Some(big_map_intents), Some(big_map_ui)) = (
             big_map.as_deref_mut(),
@@ -5036,9 +5058,27 @@ pub(crate) fn process_overlay_keyboard(
         };
         if keys.just_pressed(KeyCode::BracketRight) || keys.just_pressed(KeyCode::Equal) {
             game_shop.quantity_inc();
+            if let Some(item) = game_shop.selected() {
+                let quantity = game_shop
+                    .quantity
+                    .min(game_shop_dialog::quantity_limit(item).max(1));
+                state
+                    .game_shop_dialog
+                    .quantities
+                    .insert(item.game_shop_index, quantity);
+            }
         }
         if keys.just_pressed(KeyCode::BracketLeft) || keys.just_pressed(KeyCode::Minus) {
             game_shop.quantity_dec();
+            if let Some(item) = game_shop.selected() {
+                let quantity = game_shop
+                    .quantity
+                    .min(game_shop_dialog::quantity_limit(item).max(1));
+                state
+                    .game_shop_dialog
+                    .quantities
+                    .insert(item.game_shop_index, quantity);
+            }
         }
     } else if state.npc_shop_open() {
         if keys.just_pressed(KeyCode::BracketRight) || keys.just_pressed(KeyCode::Equal) {
@@ -5141,6 +5181,7 @@ fn process_overlay_buttons(
     let trade_modal_was_open = state.trade_dialog.gold_prompt.is_some();
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
     let message_was_open = state.trade_dialog.message.is_some();
+    let game_shop_modal_was_open = state.game_shop_dialog.confirmation.is_some();
     for (interaction, button) in buttons.iter() {
         if state.hero.modal() {
             continue;
@@ -5156,6 +5197,17 @@ fn process_overlay_buttons(
             continue;
         }
         if *interaction != Interaction::Pressed {
+            continue;
+        }
+        if (game_shop_modal_was_open || state.game_shop_dialog.confirmation.is_some())
+            && !matches!(
+                button,
+                OverlayButton::GameShopControl(
+                    game_shop_dialog::GameShopAction::Confirm
+                        | game_shop_dialog::GameShopAction::Cancel
+                )
+            )
+        {
             continue;
         }
         if state.leave_game.blocks() {
@@ -6547,6 +6599,20 @@ fn process_overlay_buttons(
                 }
             }
             // Shop
+            OverlayButton::GameShopControl(action) => {
+                if let Some(model) = game_shop.as_deref_mut() {
+                    game_shop_dialog::action(
+                        &mut state,
+                        model,
+                        action,
+                        &player_class,
+                        gold,
+                        credit,
+                        &mut intents,
+                        &mut pending,
+                    );
+                }
+            }
             OverlayButton::SelectGameShopGood(id) => {
                 if state.shop_open() {
                     let Some(game_shop) = game_shop.as_deref_mut() else {
@@ -6593,16 +6659,31 @@ fn process_overlay_buttons(
             OverlayButton::GameShopPagePrev => {
                 if state.shop_open() {
                     state.game_shop_page = state.game_shop_page.saturating_sub(1);
+                    state.game_shop_dialog.preview = None;
+                    state.game_shop_dialog.quantities.clear();
                 }
             }
             OverlayButton::GameShopPageNext => {
                 if state.shop_open() {
                     let page_count = game_shop
                         .as_deref()
-                        .map(|model| native_game_shop_page_count(model.items.len()))
+                        .map(|model| {
+                            native_game_shop_page_count(
+                                state
+                                    .game_shop_dialog
+                                    .entries(
+                                        model,
+                                        &player_class,
+                                        game_shop_dialog::current_ticks(),
+                                    )
+                                    .len(),
+                            )
+                        })
                         .unwrap_or(1);
                     state.game_shop_page =
                         (state.game_shop_page + 1).min(page_count.saturating_sub(1));
+                    state.game_shop_dialog.preview = None;
+                    state.game_shop_dialog.quantities.clear();
                 }
             }
             OverlayButton::GameShopBuy => {
@@ -7605,10 +7686,13 @@ fn render_overlays(
         )>,
     )>,
     mut commands: Commands,
+    mut mail_cache: Local<MailRenderCache>,
+    mut game_shop_cache: Local<GameShopRenderCache>,
 ) {
     let OverlayRenderModels {
         asset_server,
         wing_materials,
+        game_shop_geometry,
         shell,
         state,
         inventory,
@@ -7640,6 +7724,8 @@ fn render_overlays(
             };
         }
         if !in_game {
+            mail_cache.key = None;
+            game_shop_cache.key = None;
             return;
         }
 
@@ -7708,10 +7794,15 @@ fn render_overlays(
     }
     {
         let mut secondary = panels.p1();
-        fill_panel(
+        fill_mail_panel(
             &mut commands,
             &mut secondary.p0(),
             state.mail_open(),
+            &mail,
+            &mail_ui,
+            state.core.mail_compose.as_ref(),
+            &inventory,
+            &mut mail_cache,
             |parent| {
                 render_mail(
                     parent,
@@ -7745,11 +7836,34 @@ fn render_overlays(
                 )
             },
         );
-        fill_panel(
+        for (_, mut node) in &mut secondary.p3() {
+            let position = state
+                .game_shop_dialog
+                .position
+                .unwrap_or(Vec2::new(164.0, 146.0));
+            node.left = Val::Px(position.x);
+            node.top = Val::Px(position.y);
+        }
+        fill_game_shop_panel(
             &mut commands,
             &mut secondary.p3(),
             state.shop_open(),
-            |parent| render_game_shop(parent, asset_server.as_deref(), &game_shop, &ui, &state),
+            &game_shop,
+            &state.game_shop_dialog,
+            &ui,
+            &inventory,
+            &mut game_shop_cache,
+            |parent| {
+                game_shop_dialog::render(
+                    parent,
+                    asset_server.as_deref(),
+                    &game_shop,
+                    &ui,
+                    &state,
+                    &inventory,
+                    game_shop_geometry.as_deref(),
+                )
+            },
         );
         fill_panel(
             &mut commands,
@@ -7916,6 +8030,156 @@ fn fill_panel<C: Component>(
     if visible {
         commands.entity(entity).with_children(render);
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct MailRenderKey {
+    root: Entity,
+    model: MailModel,
+    ui: MailUiState,
+    compose: Option<mir2_ui_core::state::MailComposeDraft>,
+    compose_inventory: Option<String>,
+}
+
+#[derive(Default)]
+struct MailRenderCache {
+    key: Option<MailRenderKey>,
+}
+
+fn fill_mail_panel(
+    commands: &mut Commands,
+    query: &mut Query<(Entity, &mut Node), With<OverlayMail>>,
+    visible: bool,
+    mail: &MailModel,
+    mail_ui: &MailUiState,
+    compose: Option<&mir2_ui_core::state::MailComposeDraft>,
+    inventory: &InventoryModel,
+    cache: &mut MailRenderCache,
+    render: impl FnOnce(&mut ChildSpawnerCommands),
+) {
+    let Some((entity, mut node)) = query.iter_mut().next() else {
+        cache.key = None;
+        return;
+    };
+    node.display = if visible { Display::Flex } else { Display::None };
+    if !visible {
+        if cache.key.take().is_some() {
+            commands.entity(entity).despawn_children();
+        }
+        return;
+    }
+    let compose = compose.cloned();
+    let key = MailRenderKey {
+        root: entity,
+        model: mail.clone(),
+        ui: mail_ui.clone(),
+        compose: compose.clone(),
+        compose_inventory: compose
+            .as_ref()
+            .and_then(|_| serde_json::to_string(inventory).ok()),
+    };
+    if cache.key.as_ref() == Some(&key) {
+        return;
+    }
+    commands.entity(entity).despawn_children();
+    commands.entity(entity).with_children(render);
+    cache.key = Some(key);
+}
+
+struct GameShopRenderKey {
+    root: Entity,
+    model: GameShopModel,
+    dialog: String,
+    player: String,
+    inventory: String,
+}
+
+#[derive(Default)]
+struct GameShopRenderCache {
+    key: Option<GameShopRenderKey>,
+}
+
+impl PartialEq for GameShopRenderKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.root == other.root
+            && self.model == other.model
+            && self.dialog == other.dialog
+            && self.player == other.player
+            && self.inventory == other.inventory
+    }
+}
+
+fn fill_game_shop_panel(
+    commands: &mut Commands,
+    query: &mut Query<(Entity, &mut Node), With<OverlayGameShop>>,
+    visible: bool,
+    model: &GameShopModel,
+    dialog: &game_shop_dialog::GameShopDialogUi,
+    ui: &UiReadModel,
+    inventory: &InventoryModel,
+    cache: &mut GameShopRenderCache,
+    render: impl FnOnce(&mut ChildSpawnerCommands),
+) {
+    let Some((entity, mut node)) = query.iter_mut().next() else {
+        cache.key = None;
+        return;
+    };
+    node.display = if visible { Display::Flex } else { Display::None };
+    if !visible {
+        if cache.key.take().is_some() {
+            commands.entity(entity).despawn_children();
+        }
+        return;
+    }
+
+    // Keep the editor's actual child tree alive while caret/selection layout is
+    // being captured. The preview frame is the only per-frame value here so an
+    // open paper-doll keeps animating without rebuilding an active editor.
+    let editor = dialog.search_input.display_editor();
+    let dialog_key = format!(
+        "{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}|{:?}",
+        dialog.class,
+        dialog.section,
+        dialog.new_visible,
+        &dialog.category,
+        dialog.category_start,
+        &dialog.search,
+        dialog.search_focused,
+        &dialog.search_input.modal,
+        dialog.search_input.editor_revision,
+        editor,
+        &dialog.quantities,
+        &dialog.confirmation,
+        dialog.preview,
+        dialog.preview_left,
+        dialog.direction,
+        dialog.shift,
+        dialog.preview.map(|_| dialog.frame_ms / 150),
+    );
+    let player_key = format!(
+        "{:?}",
+        (
+            ui.player.class_name.as_deref(),
+            ui.player.gender.as_deref(),
+            ui.player.gold,
+            ui.player.credit,
+        )
+    );
+    let inventory_key = serde_json::to_string(inventory)
+        .unwrap_or_else(|_| format!("{inventory:?}"));
+    let key = GameShopRenderKey {
+        root: entity,
+        model: model.clone(),
+        dialog: dialog_key,
+        player: player_key,
+        inventory: inventory_key,
+    };
+    if cache.key.as_ref() == Some(&key) {
+        return;
+    }
+    commands.entity(entity).despawn_children();
+    commands.entity(entity).with_children(render);
+    cache.key = Some(key);
 }
 
 fn fill_positioned_unindexed_panel<C: Component>(
@@ -11933,352 +12197,6 @@ fn native_game_shop_page_entries(
     game_shop.items.get(start..end).unwrap_or(&[])
 }
 
-fn render_game_shop(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    game_shop: &GameShopModel,
-    ui: &UiReadModel,
-    state: &NativePlayerUiState,
-) {
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(0.0),
-            top: Val::Px(0.0),
-            width: Val::Px(GAME_SHOP_PANEL_SIZE.width as f32),
-            height: Val::Px(GAME_SHOP_PANEL_SIZE.height as f32),
-            overflow: Overflow::clip(),
-            ..default()
-        },
-        BackgroundColor(PANEL_BG),
-    ));
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_frame(
-            parent,
-            asset_server,
-            "original-ui/Title/749.png",
-            GAME_SHOP_PANEL_SIZE.width as f32,
-            GAME_SHOP_PANEL_SIZE.height as f32,
-        );
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Prguse2",
-            360,
-            361,
-            362,
-            CrystalRect::new(671.0, 4.0, 24.0, 21.0),
-            OverlayButton::CloseGameShop,
-        );
-    } else {
-        overlay_absolute_button(
-            parent,
-            "X",
-            CrystalRect::new(671.0, 4.0, 24.0, 21.0),
-            OverlayButton::CloseGameShop,
-            true,
-        );
-    }
-
-    let page_count = native_game_shop_page_count(game_shop.items.len());
-    let page = state.game_shop_page.min(page_count.saturating_sub(1));
-    overlay_text_at(
-        parent,
-        "Game Shop",
-        CrystalRect::new(18.0, 9.0, 180.0, 18.0),
-        12.0,
-        GOLD,
-    );
-    overlay_text_at(
-        parent,
-        &format!("Products: {}", game_shop.items.len()),
-        CrystalRect::new(15.0, 72.0, 120.0, 16.0),
-        9.0,
-        TEXT,
-    );
-    overlay_text_at(
-        parent,
-        &format!("Page {}/{}", page + 1, page_count),
-        CrystalRect::new(15.0, 88.0, 120.0, 16.0),
-        9.0,
-        TEXT,
-    );
-    if game_shop.pending_purchase.is_some() {
-        overlay_text_at(
-            parent,
-            "Purchase pending; waiting for authoritative receipt.",
-            CrystalRect::new(152.0, 92.0, 510.0, 16.0),
-            9.0,
-            GOLD,
-        );
-    } else if game_shop.purchase_unknown {
-        overlay_text_at(
-            parent,
-            "Purchase status unknown; refresh wallet, mail and stock before retry.",
-            CrystalRect::new(152.0, 92.0, 510.0, 16.0),
-            9.0,
-            GOLD,
-        );
-    }
-
-    let class = ui.player.class_name.as_deref().unwrap_or("");
-    for (offset, entry) in native_game_shop_page_entries(game_shop, page)
-        .iter()
-        .enumerate()
-    {
-        let column = offset % GAME_SHOP_PAGE_COLUMNS;
-        let row = offset / GAME_SHOP_PAGE_COLUMNS;
-        let rect = CrystalRect::new(
-            (GAME_SHOP_GRID_ORIGIN.x + column as i32 * GAME_SHOP_COLUMN_STEP) as f32,
-            (GAME_SHOP_GRID_ORIGIN.y + row as i32 * GAME_SHOP_ROW_STEP) as f32,
-            GAME_SHOP_CELL_SIZE.width as f32,
-            GAME_SHOP_CELL_SIZE.height as f32,
-        );
-        spawn_game_shop_product(
-            parent,
-            asset_server,
-            entry,
-            rect,
-            game_shop.selected_game_shop_index == Some(entry.game_shop_index),
-            entry.visible_for_class(class),
-            &ui.player,
-        );
-    }
-
-    let selected = game_shop.selected();
-    if let Some(entry) = selected {
-        let payment = match game_shop.payment {
-            GameShopPaymentType::Credit => "Credit",
-            GameShopPaymentType::Gold => "Gold",
-        };
-        let price = entry
-            .total_price(game_shop.payment, game_shop.quantity)
-            .map(|value| value.to_string())
-            .unwrap_or_else(|| "disabled".to_owned());
-        overlay_text_at(
-            parent,
-            "Selected",
-            CrystalRect::new(15.0, 122.0, 120.0, 15.0),
-            9.0,
-            GOLD,
-        );
-        overlay_text_at(
-            parent,
-            &short_name(&entry.item_name, &entry.item_index.to_string()),
-            CrystalRect::new(15.0, 140.0, 120.0, 15.0),
-            9.0,
-            TEXT,
-        );
-        overlay_text_at(
-            parent,
-            &format!("{payment} {price}"),
-            CrystalRect::new(15.0, 158.0, 120.0, 15.0),
-            9.0,
-            TEXT,
-        );
-        overlay_text_at(
-            parent,
-            &format!("Stock {}", entry.stock_label()),
-            CrystalRect::new(15.0, 176.0, 120.0, 15.0),
-            9.0,
-            TEXT,
-        );
-    } else {
-        overlay_text_at(
-            parent,
-            "Select a product",
-            CrystalRect::new(15.0, 122.0, 120.0, 15.0),
-            9.0,
-            TEXT,
-        );
-    }
-
-    overlay_text_at(
-        parent,
-        &format!("Credit {}", ui.player.credit),
-        CrystalRect::new(5.0, 449.0, 110.0, 18.0),
-        9.0,
-        TEXT,
-    );
-    overlay_text_at(
-        parent,
-        &format!("Gold {}", ui.player.gold),
-        CrystalRect::new(123.0, 449.0, 105.0, 18.0),
-        9.0,
-        TEXT,
-    );
-    overlay_absolute_button(
-        parent,
-        "Credit",
-        CrystalRect::new(250.0, 446.0, 78.0, 22.0),
-        OverlayButton::GameShopPaymentCredit,
-        game_shop.payment != GameShopPaymentType::Credit,
-    );
-    overlay_absolute_button(
-        parent,
-        "Gold",
-        CrystalRect::new(332.0, 446.0, 68.0, 22.0),
-        OverlayButton::GameShopPaymentGold,
-        game_shop.payment != GameShopPaymentType::Gold,
-    );
-    overlay_absolute_button(
-        parent,
-        "-",
-        CrystalRect::new(404.0, 446.0, 22.0, 22.0),
-        OverlayButton::GameShopQuantityDec,
-        game_shop.quantity > GAME_SHOP_QUANTITY_MIN,
-    );
-    overlay_text_at(
-        parent,
-        &format!("x{}", game_shop.quantity),
-        CrystalRect::new(429.0, 450.0, 32.0, 14.0),
-        9.0,
-        TEXT,
-    );
-    overlay_absolute_button(
-        parent,
-        "+",
-        CrystalRect::new(464.0, 446.0, 22.0, 22.0),
-        OverlayButton::GameShopQuantityInc,
-        game_shop.quantity < GAME_SHOP_QUANTITY_MAX,
-    );
-
-    let buy_enabled = game_shop.buy_enabled(ui.player.gold, ui.player.credit, class);
-    overlay_absolute_button(
-        parent,
-        "Buy",
-        CrystalRect::new(492.0, 446.0, 82.0, 22.0),
-        OverlayButton::GameShopBuy,
-        buy_enabled,
-    );
-    if let Some(reason) = game_shop.buy_disabled_reason(ui.player.gold, ui.player.credit, class) {
-        overlay_text_at(
-            parent,
-            &format!("Buy: {reason}"),
-            CrystalRect::new(15.0, 198.0, 120.0, 32.0),
-            8.0,
-            Color::srgba(0.85, 0.65, 0.35, 1.0),
-        );
-    }
-    overlay_absolute_button(
-        parent,
-        "<",
-        CrystalRect::new(600.0, 446.0, 24.0, 22.0),
-        OverlayButton::GameShopPagePrev,
-        page > 0,
-    );
-    overlay_text_at(
-        parent,
-        &format!("{}/{}", page + 1, page_count),
-        CrystalRect::new(626.0, 450.0, 32.0, 14.0),
-        8.0,
-        TEXT,
-    );
-    overlay_absolute_button(
-        parent,
-        ">",
-        CrystalRect::new(660.0, 446.0, 24.0, 22.0),
-        OverlayButton::GameShopPageNext,
-        page + 1 < page_count,
-    );
-}
-
-fn spawn_game_shop_product(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    entry: &crate::game_shop::GameShopEntry,
-    rect: CrystalRect,
-    selected: bool,
-    enabled: bool,
-    player: &crate::read_model::PlayerStats,
-) {
-    let mut card = parent.spawn((
-        OverlayGameShopProduct,
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(rect.left),
-            top: Val::Px(rect.top),
-            width: Val::Px(rect.width),
-            height: Val::Px(rect.height),
-            overflow: Overflow::clip(),
-            ..default()
-        },
-        BackgroundColor(if selected {
-            Color::srgba(0.42, 0.28, 0.08, 0.92)
-        } else if enabled {
-            Color::srgba(0.12, 0.08, 0.04, 0.86)
-        } else {
-            BUTTON_DISABLED
-        }),
-    ));
-    if enabled {
-        card.insert((
-            Button,
-            OverlayButton::SelectGameShopGood(entry.game_shop_index),
-        ));
-    } else {
-        card.insert((Interaction::None, FocusPolicy::Block));
-    }
-    if let Some(document) = crystal_item_tooltip_document_from_source(
-        &entry.item_name,
-        u16::try_from(entry.image).unwrap_or_default(),
-        u32::from(entry.count),
-        entry.tooltip_source.as_ref(),
-        player,
-    ) {
-        card.insert(CrystalItemHint(document));
-    }
-    card.with_children(|cell| {
-        overlay_text_at(
-            cell,
-            &short_name(&entry.item_name, &entry.item_index.to_string()),
-            CrystalRect::new(5.0, 5.0, 115.0, 15.0),
-            9.0,
-            if selected { GOLD } else { TEXT },
-        );
-        if let (Some(asset_server), Ok(icon)) = (asset_server, u16::try_from(entry.image)) {
-            if let Some(path) = item_icon_path(icon) {
-                spawn_static_overlay_sprite(
-                    cell,
-                    asset_server,
-                    path,
-                    CrystalRect::new(42.0, 27.0, 40.0, 40.0),
-                );
-            }
-        }
-        overlay_text_at(
-            cell,
-            &format!("Gold {}", entry.gold_price),
-            CrystalRect::new(6.0, 78.0, 113.0, 14.0),
-            8.0,
-            TEXT,
-        );
-        overlay_text_at(
-            cell,
-            &format!("Credit {}", entry.credit_price),
-            CrystalRect::new(6.0, 94.0, 113.0, 14.0),
-            8.0,
-            TEXT,
-        );
-        overlay_text_at(
-            cell,
-            &format!("Stock {}  x{}", entry.stock_label(), entry.count.max(1)),
-            CrystalRect::new(6.0, 110.0, 113.0, 14.0),
-            8.0,
-            TEXT,
-        );
-        if selected {
-            overlay_text_at(
-                cell,
-                "SELECTED",
-                CrystalRect::new(6.0, 128.0, 113.0, 13.0),
-                8.0,
-                GOLD,
-            );
-        }
-    });
-}
-
 fn render_storage(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
@@ -14255,6 +14173,92 @@ mod tests {
         app
     }
 
+    fn game_shop_child_ids(app: &mut App) -> Vec<Entity> {
+        let world = app.world_mut();
+        let root = world
+            .query_filtered::<Entity, With<OverlayGameShop>>()
+            .single(world)
+            .expect("game shop root");
+        world
+            .entity(root)
+            .get::<Children>()
+            .map(|children| children.iter().collect())
+            .unwrap_or_default()
+    }
+
+    #[test]
+    fn game_shop_editor_tree_is_retained_until_editor_or_preview_changes() {
+        let mut app = overlay_render_test_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::GameShop;
+        app.update();
+        let first = game_shop_child_ids(&mut app);
+        assert!(!first.is_empty(), "the open shop must have rendered children");
+
+        app.update();
+        assert_eq!(game_shop_child_ids(&mut app), first);
+
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.game_shop_dialog.search_focused = true;
+            state.game_shop_dialog.search_input.modal =
+                Some(friend_dialog::FriendModal::Add { blocked: false, text: "Potion".into() });
+            state.game_shop_dialog.search_input.sync_editor();
+        }
+        app.update();
+        let editor = game_shop_child_ids(&mut app);
+        assert_ne!(editor, first, "opening the editor must rebuild the shop tree once");
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .game_shop_dialog
+            .search_input
+            .editor
+            .as_mut()
+            .expect("search editor")
+            .select_all();
+        app.update();
+        let selected = game_shop_child_ids(&mut app);
+        assert_ne!(selected, editor, "caret/selection changes must rebuild the editor tree");
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::None;
+        app.update();
+        assert!(game_shop_child_ids(&mut app).is_empty());
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::GameShop;
+        app.update();
+        assert_ne!(game_shop_child_ids(&mut app), selected, "reopen must invalidate the retained tree");
+
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.game_shop_dialog.search_focused = false;
+            state.game_shop_dialog.search_input.modal = None;
+            state.game_shop_dialog.search_input.editor = None;
+            state.game_shop_dialog.preview = Some(1);
+            state.game_shop_dialog.frame_ms = 0;
+        }
+        app.update();
+        let preview_frame_a = game_shop_child_ids(&mut app);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .game_shop_dialog
+            .frame_ms = 150;
+        app.update();
+        assert_ne!(
+            game_shop_child_ids(&mut app),
+            preview_frame_a,
+            "preview animation bucket changes must rebuild the preview"
+        );
+    }
+
     #[test]
     fn skill_shortcut_uses_one_real_character_dialog_with_all_four_tabs() {
         let mut app = overlay_render_test_app();
@@ -15204,6 +15208,75 @@ mod tests {
             mir2_ui_core::action::UiAction::ToggleMinimap,
         );
         assert!(!t3.state.minimap_visible);
+    }
+
+    #[test]
+    fn mail_panel_cache_keeps_children_until_mail_inputs_change() {
+        #[derive(Resource)]
+        struct MailOpen(bool);
+
+        fn render_test_mail(
+            mut commands: Commands,
+            mut panels: Query<(Entity, &mut Node), With<OverlayMail>>,
+            mut cache: Local<MailRenderCache>,
+            open: Res<MailOpen>,
+            mail: Res<MailModel>,
+            mail_ui: Res<MailUiState>,
+            state: Res<NativePlayerUiState>,
+            inventory: Res<InventoryModel>,
+        ) {
+            fill_mail_panel(
+                &mut commands,
+                &mut panels,
+                open.0,
+                &mail,
+                &mail_ui,
+                state.core.mail_compose.as_ref(),
+                &inventory,
+                &mut cache,
+                |parent| {
+                    parent.spawn(Node::default());
+                },
+            );
+        }
+
+        fn child_ids(world: &mut World) -> Vec<Entity> {
+            let mut query = world.query_filtered::<&Children, With<OverlayMail>>();
+            query
+                .single(world)
+                .map(|children| children.iter().collect())
+                .unwrap_or_default()
+        }
+
+        let mut app = App::new();
+        app.insert_resource(MailOpen(true))
+            .init_resource::<MailModel>()
+            .init_resource::<MailUiState>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .add_systems(Update, render_test_mail);
+        app.world_mut().spawn((OverlayMail, Node::default()));
+
+        app.update();
+        let first = child_ids(app.world_mut());
+        assert_eq!(first.len(), 1);
+        app.update();
+        assert_eq!(child_ids(app.world_mut()), first);
+
+        app.world_mut().resource_mut::<MailModel>().selected_id = Some(9);
+        app.update();
+        let refreshed = child_ids(app.world_mut());
+        assert_eq!(refreshed.len(), 1);
+        assert_ne!(refreshed, first);
+
+        app.world_mut().resource_mut::<MailOpen>().0 = false;
+        app.update();
+        assert!(child_ids(app.world_mut()).is_empty());
+        app.world_mut().resource_mut::<MailOpen>().0 = true;
+        app.update();
+        let reopened = child_ids(app.world_mut());
+        assert_eq!(reopened.len(), 1);
+        assert_ne!(reopened, refreshed);
     }
 
     #[test]

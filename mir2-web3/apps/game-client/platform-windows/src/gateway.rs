@@ -3886,8 +3886,12 @@ where
                         if let Some(item) = transform_game_shop_info_from_packet(payload, ui_cursor)
                         {
                             let json = serde_json::to_string(&item).map_err(|e| e.to_string())?;
-                            let _ =
-                                mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
+                            let enqueued = mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
+                            if item.get("gameShopIndex").and_then(Value::as_i64) == Some(31)
+                                && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some()
+                            {
+                                eprintln!("[native-game-shop] catalog_sample g_index=31 enqueued={enqueued}");
+                            }
                         }
                     }
                 }
@@ -3932,9 +3936,23 @@ where
                 }
                 "ReceiveMail" => {
                     if let Some(payload) = event.payload.as_ref() {
+                        let row_count = payload
+                            .get("mail")
+                            .and_then(Value::as_array)
+                            .map_or(0, Vec::len);
+                        let mut converted = false;
+                        let mut enqueued = false;
                         if let Some(mut model) = try_transform_mail_model_from_packet(payload) {
-                            let _ =
-                                push_mail_model_with_feedback(&mut model, pending_mail_feedback)?;
+                            converted = true;
+                            enqueued = push_mail_model_with_feedback(
+                                &mut model,
+                                pending_mail_feedback,
+                            )?;
+                        }
+                        if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+                            eprintln!(
+                                "[native-mail] receive_rows={row_count} converted={converted} enqueued={enqueued}"
+                            );
                         }
                     }
                 }
@@ -5084,7 +5102,13 @@ fn mail_source(payload: &Value) -> Option<&Value> {
 }
 
 fn try_transform_mail_model_from_snapshot(payload: &Value) -> Option<Value> {
-    mail_model_from_entries(mail_source(payload)?.as_array()?)
+    let entries = mail_source(payload)?.as_array()?;
+    let visible = entries
+        .iter()
+        .filter(|mail| !mail.get("deleted").and_then(Value::as_bool).unwrap_or(false))
+        .cloned()
+        .collect::<Vec<_>>();
+    mail_model_from_entries(&visible)
 }
 
 fn try_transform_mail_model_from_packet(payload: &Value) -> Option<Value> {
@@ -5100,11 +5124,22 @@ fn mail_model_from_entries(entries: &[Value]) -> Option<Value> {
 }
 
 fn mail_message_json(mail: &Value) -> Option<Value> {
-    let id = value_u64(mail.get("mailId").or_else(|| mail.get("mail_id")))?;
-    let message = mail
-        .get("message")
-        .and_then(Value::as_str)
-        .unwrap_or_default();
+    let id = value_u64(
+        mail.get("mailId")
+            .or_else(|| mail.get("mail_id"))
+            .or_else(|| mail.get("id")),
+    )?;
+    let subject = value_string(mail.get("subject")).unwrap_or_default();
+    let body = value_string(mail.get("body")).unwrap_or_default();
+    let message = value_string(mail.get("message")).unwrap_or_else(|| {
+        if subject.is_empty() {
+            body.clone()
+        } else if body.is_empty() {
+            subject.clone()
+        } else {
+            format!("{subject}\n{body}")
+        }
+    });
     let items = mail
         .get("items")?
         .as_array()?
@@ -5113,8 +5148,8 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
         .collect::<Option<Vec<_>>>()?;
     Some(json!({
         "id": id,
-        "sender": mail.get("senderName").or_else(|| mail.get("sender")).and_then(Value::as_str).unwrap_or("System"),
-        "subject": message.lines().next().unwrap_or("Mail"),
+        "sender": mail.get("senderName").or_else(|| mail.get("sender")).or_else(|| mail.get("from")).and_then(Value::as_str).unwrap_or("System"),
+        "subject": if subject.is_empty() { message.lines().next().unwrap_or("Mail") } else { &subject },
         "body": message,
         "gold": value_u32(mail.get("gold")).unwrap_or_default(),
         "items": items,
@@ -6496,6 +6531,48 @@ mod tests {
             pending.is_empty(),
             "accepted delivery consumes exactly one ACK"
         );
+    }
+
+    #[test]
+    fn snapshot_mail_accepts_stage5_shape_and_hides_deleted_rows() {
+        let model = try_transform_mail_model_from_snapshot(&json!({
+            "stage5Systems": { "mail": [
+                { "id": 41, "from": "Gameshop", "subject": "Purchase", "body": "Parcel",
+                  "items": [{ "item_index": 1268, "count": 1 }], "deleted": false },
+                { "id": 42, "from": "ledger", "subject": "hidden", "body": "hidden",
+                  "items": [], "deleted": true }
+            ] }
+        }))
+        .expect("stage5 snapshot mail");
+        let mail = serde_json::from_value::<mir2_client_bevy::mail::MailModel>(model)
+            .expect("native mail model");
+        assert_eq!(mail.mails.len(), 1);
+        assert_eq!(mail.mails[0].id, 41);
+        assert_eq!(mail.mails[0].sender, "Gameshop");
+        assert_eq!(mail.mails[0].subject, "Purchase");
+        assert_eq!(mail.mails[0].body, "Purchase\nParcel");
+        assert_eq!(mail.mails[0].items.len(), 1);
+        assert_eq!(mail.mails[0].items[0].item_index, Some(1268));
+    }
+
+    #[test]
+    fn receive_mail_packet_accepts_concrete_client_mail_shape() {
+        let model = try_transform_mail_model_from_packet(&json!({
+            "mail": [{
+                "mailId": 77,
+                "senderName": "Gameshop",
+                "message": "Purchase\nParcel",
+                "opened": false,
+                "collected": false,
+                "items": [{ "item_index": 1268, "count": 1 }]
+            }]
+        }))
+        .expect("ReceiveMail payload");
+        let mail = serde_json::from_value::<mir2_client_bevy::mail::MailModel>(model)
+            .expect("native mail model");
+        assert_eq!(mail.mails.len(), 1);
+        assert_eq!(mail.mails[0].id, 77);
+        assert_eq!(mail.mails[0].items[0].item_index, Some(1268));
     }
 
     #[test]

@@ -16,6 +16,7 @@
     "generate:crystal-pack-catalog": "node ./scripts/asset-pipeline/pack-catalog.mjs",
     "generate:original-asset-manifest": "node ./scripts/generate-original-asset-manifest.mjs",
     "generate:crystal-map-runtime": "node ./scripts/generate-crystal-map-runtime-data.mjs",
+    "generate:crystal-game-shop-data": "node ./scripts/generate-crystal-game-shop-data.mjs",
     "assets:prepare": "npm run generate:crystal-source-snapshot && npm run generate:crystal-pack-catalog && npm run generate:crystal-asset-index && npm run export:crystal-sounds && npm run export:crystal-magic-effects && npm run export:crystal-weather && npm run export:crystal-ui && npm run export:crystal-map && npm run generate:present-sounds && npm run generate:login-background && npm run generate:original-asset-manifest",
     "assets:prepare:offline": "npm run generate:present-sounds && npm run generate:crystal-map-blend && npm run generate:original-asset-manifest",
     "assets:verify": "npm run generate:crystal-asset-index && npm run generate:original-asset-manifest && npm run smoke:crystal-minimap-assets && npm run audit:crystal-map-coverage && npm run audit:crystal-map-gameplay",

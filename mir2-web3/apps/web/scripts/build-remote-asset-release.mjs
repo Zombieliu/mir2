@@ -67,6 +67,7 @@ const EXTRA_ORIGINAL_ASSET_PATHS = [
   "/original-ui/Prguse/940.png",
   "/original-ui/Title/40.png",
   "/original-ui/Title/57.png",
+  "/original-ui/Title/785.png",
   ...makeRange(0, 41).map((value) => `/original-ui/Help/${value}.png`),
   ...makeRange(340, 354).map((value) => `/original-ui/Title/${value}.png`),
   ...makeRange(360, 362).map((value) => `/original-ui/Title/${value}.png`),

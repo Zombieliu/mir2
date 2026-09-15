@@ -26,7 +26,10 @@ ledger rows. Packet mail retains concrete attachment metadata.
 | --- | --- |
 | Catalog after normal password reconnect | R25 105 products; restored-catalog screenshot |
 | Search replacement RedTiger → BlueTiger | R25 passed; search-replacement screenshot |
-| Ctrl+A visible selection / Home/End caret | Pending R30 visual proof; layout capture repaired |
+| Ctrl+A visible selection / selection replacement | R34 passed; blue highlight and normal RedTiger result after replacement |
+| Home / End insertion | R34 passed; XRedTiger then XRedTigerY, screenshots retained |
+| Left / Backspace / Delete | R34 passed; XRedTigerZY → XRedTigerY → XRedTiger |
+| Mount preview / rotation | R34 RedTiger rider and mount visible in two directions; original paired pass remains open |
 | Quantity two Gold confirmation | R25 330,000 Gold shown |
 | Cancel confirmation | R25 wallet remained 500,000 Gold |
 | Confirm quantity two Gold | R25 wallet became 170,000 Gold |
@@ -68,7 +71,7 @@ growth in that bounded run, not every panel or indefinite stability.
 - Windows R30 full with explicit complete C asset fixture: **655/655**, 15.81 s.
   Previous R27's five talisman failures were resolver/catalog shape mismatch;
   three attack/ImmortalSkin failures used the incomplete E resource fixture.
-- Native UI with `native-ui`: **849/849**, 1.35 s, including retained Mail children.
+- Native UI R34 with `native-ui`: **852/852**, 1.47 s, including retained Mail/Shop children and raw navigation regressions.
 - Talisman reproduction: 0/5 before → 5/5 after; ordinary SoulFireBall 1/1;
   complete C resource Warrior/ImmortalSkin tests 3/3.
 - Game Shop focused simulation: **38/38**; retained bootstrap/mail **7/7**;
@@ -89,6 +92,15 @@ native R30 SHA256
 `B21BF2702F03CC3B6C45355791B303A05BC3DEAAE173B0B6E75EABC6A1FDECF0`.
 Native R30 is a development acceptance EXE, not a newly signed full Candidate
 installer. Its runtime uses the complete C resource package.
+
+R34 uses native SHA256
+`1CFC5729C60F8BA36258518DCD352624B77C11E7B710F2F9A20A5D0A24CD99DF`.
+The R33 real input trace identified Home/End/Left as physical Numpad7/Numpad1/
+Numpad4 with correct logical navigation names. R34 resolves named logical keys
+while preserving numeric character input and avoiding duplicate physical/raw
+dispatch. Actual R34 screenshots verify the editing results above; advanced
+modifier combinations and full original paired behavior remain open. R34 runtime
+redirect files are empty, so no R34 runtime trace or soak duration is claimed.
 
 ## Separate natural journey checkpoint
 

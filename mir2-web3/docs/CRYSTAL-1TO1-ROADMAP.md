@@ -8,9 +8,10 @@
 > claimed status and the two bag items without duplication. Mail subtree
 > retention stops the observed R29 unbounded image growth in the bounded soak.
 > Gateway 778 passed / 8 ignored; Windows 655/655 with complete C assets;
-> native-ui 849/849 plus the retained-shop lifecycle regression. All five initial
+> native-ui R34 852/852, including retained-shop/raw-navigation regressions. All five initial
 > simulation fixture failures pass focused reruns; no final full-suite rerun is
-> claimed. R31 Ctrl+A highlight passes; Home/End remain under repair. Original
+> claimed. R34 visually passes Ctrl+A, Home/End, Left, Backspace/Delete, selection
+> replacement and RedTiger preview rotation. Original
 > paired UI and full three-class visual acceptance remain open. Natural routes:
 > Warrior 55/55 + 4/4 at Lv30; Wizard/Taoist 45/55 + 3/4 at Lv25 each.
 > Completed route units 155/177; this does not change global parity.

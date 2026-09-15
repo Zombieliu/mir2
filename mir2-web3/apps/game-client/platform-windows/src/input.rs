@@ -14,6 +14,7 @@ use bevy::winit::RawWinitWindowEvent;
 use mir2_client_bevy::crystal_ui::hud::{belt_slot_item, CrystalHudAction};
 use mir2_client_bevy::crystal_ui::notice::NoticeDialogState;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
+use mir2_client_bevy::crystal_ui::spec;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
@@ -612,6 +613,41 @@ fn gameplay_input_enabled(
         return false;
     }
     true
+}
+
+/// Whether the current physical cursor is over a real, always-visible HUD
+/// button. The native world-input sender runs in `PreUpdate`, before Bevy has
+/// refreshed the HUD's `Interaction`, so the sender must use the same Crystal
+/// stage-fit and source rectangles for a press arriving in that frame.
+fn cursor_over_native_hud_button(window: &Window) -> bool {
+    if !window.focused {
+        return false;
+    }
+    let Some(cursor) = window.cursor_position() else {
+        return false;
+    };
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit(
+        window.resolution.width(),
+        window.resolution.height(),
+    );
+    if !transform.contains_physical_point(cursor.x, cursor.y) {
+        return false;
+    }
+    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+    [
+        spec::hud::CHARACTER.rect,
+        spec::hud::INVENTORY.rect,
+        spec::hud::SKILL.rect,
+        spec::hud::QUEST.rect,
+        spec::hud::OPTION.rect,
+        spec::hud::MENU.rect,
+        spec::hud::GAME_SHOP.rect,
+        spec::hud::MAIL.rect,
+        spec::hud::BIG_MAP.rect,
+        spec::hud::MINIMAP_TOGGLE.rect,
+    ]
+    .into_iter()
+    .any(|rect| rect.contains(x, y))
 }
 
 pub fn is_world_click_blocked(
@@ -1446,6 +1482,18 @@ pub fn mouse_world_interaction_system(
     let dead = ui_read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
+    // The HUD interaction state is refreshed after this sender. A fresh press
+    // over a source HUD button must consume the press before it can become a
+    // world walk, run, attack, or pickup on the frame that opens the panel.
+    if (left_pressed || right_pressed) && cursor_over_native_hud_button(window) {
+        movement.stop_hold(now_ms, "hudButtonPress");
+        movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        movement.next_harvest_request_at_ms = 0.0;
+        movement.stop_auto_path(now_ms, "hudButtonPress");
+        return;
+    }
     // PreUpdate precedes the current frame's UI focus pass. Use actual current
     // cursor geometry as well as captured interaction, so crossing onto a bar
     // and pressing in the same frame cannot issue a world movement request.
@@ -4202,6 +4250,84 @@ mod tests {
             assert_eq!(pending.from, (10, 10));
             assert_eq!(pending.to, (11, 10));
         }
+    }
+
+    fn stage_window(cursor: bevy::prelude::Vec2) -> Window {
+        let mut window = Window::default();
+        window.resolution.set(1024.0, 768.0);
+        window.focused = true;
+        window.set_cursor_position(Some(cursor));
+        window
+    }
+
+    #[test]
+    fn native_hud_pointer_geometry_uses_source_button_rectangles_and_leaves_empty_world_open() {
+        let (menu_x, menu_y) = spec::hud::MENU.rect.center();
+        assert!(cursor_over_native_hud_button(&stage_window(
+            bevy::prelude::Vec2::new(menu_x, menu_y),
+        )));
+        assert!(!cursor_over_native_hud_button(&stage_window(
+            bevy::prelude::Vec2::new(spec::hud::MENU.rect.left - 0.1, menu_y),
+        )));
+        assert!(!cursor_over_native_hud_button(&stage_window(
+            bevy::prelude::Vec2::new(512.0, 400.0),
+        )));
+    }
+
+    #[test]
+    fn native_hud_menu_pointer_press_with_closed_panels_does_not_arm_world_walk() {
+        let (mut app, receiver) = input_app();
+        let (menu_x, menu_y) = spec::hud::MENU.rect.center();
+        app.world_mut()
+            .spawn(stage_window(bevy::prelude::Vec2::new(menu_x, menu_y)));
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(movement_entities());
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+
+        app.update();
+
+        assert!(
+            receiver.try_recv().is_err(),
+            "MENU press leaked a world walk"
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        assert_eq!(movement.active, None);
+        assert!(movement.pending.is_empty());
+    }
+
+    #[test]
+    fn native_hud_pointer_guard_does_not_block_keyboard_d() {
+        let (mut app, receiver) = input_app();
+        let (menu_x, menu_y) = spec::hud::MENU.rect.center();
+        app.world_mut()
+            .spawn(stage_window(bevy::prelude::Vec2::new(menu_x, menu_y)));
+        app.insert_resource(movement_entities());
+        app.add_systems(bevy::prelude::Update, keyboard_movement_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyD);
+
+        app.update();
+
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
+        ));
     }
 
     #[test]
