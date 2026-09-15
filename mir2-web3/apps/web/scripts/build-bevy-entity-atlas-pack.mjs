@@ -2,12 +2,12 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import { assertEquippedSpriteClosure, inspectEquippedSpriteClosure } from "./asset-pipeline/equipment-sprite-closure.mjs";
+import { sha256 } from "./asset-pipeline/item-icon-closure.mjs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const WEB_ROOT = path.resolve(SCRIPT_DIR, "..");
 const PUBLIC_ROOT = path.join(WEB_ROOT, "public");
-const ORIGINAL_UI_ROOT = path.join(PUBLIC_ROOT, "original-ui");
-const DEFAULT_OUT_DIR = path.join(PUBLIC_ROOT, "bevy-entity-atlases");
 const DEFAULT_ROOTS = [
   "CArmour/00",
   "CHair/00",
@@ -34,11 +34,27 @@ const INITIAL_WIDTH = 512;
 const MAX_SIZE = 4096;
 
 const args = parseArgs(process.argv.slice(2));
-const outDir = path.resolve(args.outDir ?? DEFAULT_OUT_DIR);
+const assetRoot = path.resolve(args.assetRoot ?? PUBLIC_ROOT);
+const originalUiRoot = path.join(assetRoot, "original-ui");
+const outDir = path.resolve(args.outDir ?? path.join(assetRoot, "bevy-entity-atlases"));
 const atlasKey = String(args.atlasKey ?? "starter-bichon-base");
 const roots = parseListArg(args.roots, DEFAULT_ROOTS);
 
 async function main() {
+  // Keep the existing texture budget: later equipment can use verified local
+  // standalone frames. A base package still must close the equipped action
+  // blocks, even when those libraries are not packed into the starter atlas.
+  if (!args.roots || args.verifyEquipmentClosure === "true" || args.equipmentRequirements) {
+    const closure = assertEquippedSpriteClosure(await inspectEquippedSpriteClosure({
+      assetRoot,
+      requirementsPath: args.equipmentRequirements,
+      itemCataloguePath: args.equipmentItemCatalogue,
+      sourceCataloguePath: args.equipmentSourceCatalogue,
+      sourceDataDir: args.sourceDataDir,
+    }));
+    console.log(JSON.stringify({ stage: "equipped-sprite-closure", ...closure }));
+    if (args.verifyEquipmentClosure === "true") return;
+  }
   const sources = await collectSources(roots);
   if (!sources.length) {
     throw new Error("No PNG sources found for Bevy entity atlas pack");
@@ -68,9 +84,10 @@ async function main() {
     .png({ compressionLevel: 9, adaptiveFiltering: true })
     .toFile(imagePath);
 
-  const imageStat = await fs.stat(imagePath);
+  const imageBytes = await fs.readFile(imagePath);
+  const imageByteLength = imageBytes.length;
   const manifest = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: "mir2-bevy-entity-atlas-manifest",
     generatedAt: new Date().toISOString(),
     atlases: [
@@ -80,23 +97,34 @@ async function main() {
         width: packed.width,
         height: packed.height,
         sourceCount: sources.length,
-        imageBytes: imageStat.size,
+        imageBytes: imageByteLength,
         rgbaBytes: packed.width * packed.height * 4,
         roots,
         imageUrl: `/bevy-entity-atlases/${imageFileName}`,
+        sha256: sha256(imageBytes),
+        pages: [{
+          imageUrl: `/bevy-entity-atlases/${imageFileName}`,
+          width: packed.width,
+          height: packed.height,
+          imageBytes: imageByteLength,
+          sha256: sha256(imageBytes),
+        }],
         rects: packed.sources.map((source) => ({
           key: source.key,
           x: source.x,
           y: source.y,
           width: source.width,
           height: source.height,
+          pageIndex: 0,
+          offsetX: source.offsetX,
+          offsetY: source.offsetY,
         })),
       },
     ],
     stats: {
       sourceCount: sources.length,
       roots,
-      imageBytes: imageStat.size,
+      imageBytes: imageByteLength,
       rgbaBytes: packed.width * packed.height * 4,
     },
   };
@@ -110,7 +138,7 @@ async function main() {
         sourceCount: sources.length,
         width: packed.width,
         height: packed.height,
-        imageBytes: imageStat.size,
+        imageBytes: imageByteLength,
         rgbaBytes: packed.width * packed.height * 4,
         manifestPath,
         imagePath,
@@ -124,11 +152,18 @@ async function main() {
 async function collectSources(roots) {
   const sources = [];
   for (const root of roots) {
-    const rootDir = path.join(ORIGINAL_UI_ROOT, root);
+    const rootDir = path.join(originalUiRoot, root);
     if (!(await exists(rootDir))) {
       continue;
     }
     const files = await walkPngFiles(rootDir);
+    let frameMetadata = new Map();
+    try {
+      const meta = JSON.parse(await fs.readFile(path.join(rootDir, "meta.json")));
+      frameMetadata = new Map((meta.frames ?? []).map((frame) => [frame.path, frame]));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+    }
     for (const filePath of files) {
       const metadata = await sharp(filePath).metadata();
       const width = positiveInteger(metadata.width);
@@ -137,12 +172,19 @@ async function collectSources(roots) {
         continue;
       }
       const urlPath = publicUrlForFile(filePath);
+      const original = frameMetadata.get(urlPath);
+      if (original && (!Number.isSafeInteger(original.x) || !Number.isSafeInteger(original.y)
+          || original.width !== width || original.height !== height)) {
+        throw new Error(`Original frame geometry mismatch: ${urlPath}`);
+      }
       sources.push({
         filePath,
         path: urlPath,
         key: `${urlPath}|${width}x${height}`,
         width,
         height,
+        offsetX: original?.x ?? 0,
+        offsetY: original?.y ?? 0,
       });
     }
   }
@@ -207,7 +249,7 @@ function packSources(sources) {
 }
 
 function publicUrlForFile(filePath) {
-  const relative = path.relative(PUBLIC_ROOT, filePath).split(path.sep);
+  const relative = path.relative(assetRoot, filePath).split(path.sep);
   return `/${relative.map((part) => encodeURIComponent(part)).join("/")}`;
 }
 

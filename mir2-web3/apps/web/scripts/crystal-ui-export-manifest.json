@@ -1124,6 +1124,15 @@
         [808,1439]
       ]
     },
+    "CArmour/02": {
+      "ranges": [[0,1615]]
+    },
+    "CArmour/03": {
+      "ranges": [[0,1615]]
+    },
+    "CArmour/04": {
+      "ranges": [[0,1615]]
+    },
     "CArmour/09": {
       "ranges": [[0,1615]]
     },
@@ -1151,6 +1160,15 @@
       "ranges": [
         [0,879]
       ]
+    },
+    "CWeapon/07": {
+      "ranges": [[0,831]]
+    },
+    "CWeapon/09": {
+      "ranges": [[0,831]]
+    },
+    "CWeapon/10": {
+      "ranges": [[0,831]]
     },
     "AArmour/00": {
       "ranges": [
