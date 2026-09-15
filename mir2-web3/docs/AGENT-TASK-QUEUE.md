@@ -1,6 +1,16 @@
 # Agent Task Queue
 
-> Current checkpoint, 2026-09-15: isolated Gateway R54 is active at
+> Latest controller checkpoint, 2026-09-15 R121: Warrior is Lv30, 55/55 mandatory
+> + 4/4 milestones; Wizard and Taoist are Lv25, each 45/55 + 3/4. This is
+> 155/177 units (87.57%), with 20 mandatory tasks and two milestones remaining.
+> R119–R121 retain live-door validation and recover an alive emergency-escape
+> map change without a stale cast. Full controller regression passes 630/630.
+> Wizard R121 resumed normally on R54; Taoist R104 remains active. Partial kills,
+> native UI/animation and full active-play timing remain open. See
+> [evidence](generated/player-qa/protocol-journey-20260915/q89-navigation-r119-r121.md).
+> The older checkpoints below preserve the counts at their observation times.
+
+> Historical checkpoint, 2026-09-15: isolated Gateway R54 is active at
 > localhost 17800/17810. Independent saved-state validation confirms Warrior
 > Lv30, 55/55 mandatory + 4/4 milestones; Wizard Lv25, 45/55 + 3/4, q89 6/9;
 > Taoist Lv23, 39/55 + 2/4, q99 3/6. This is 148/177 quest/milestone units

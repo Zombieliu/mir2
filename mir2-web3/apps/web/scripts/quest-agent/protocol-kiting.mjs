@@ -89,12 +89,14 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       );
       if (!fightWhenBlocked || (!navigationBlocked && !boundedProgress)) throw error;
       const blockedActor = selfPlayer(client);
-      if (String(client.snapshot?.mapFileName ?? '') !== mapId) {
-        throw new Error(`Wizard retreat changed map before combat action (${mapId})`);
-      }
       if (!blockedActor || blockedActor.dead === true || Number(blockedActor.hp) <= 0 ||
           observedPlayerHp(client.snapshot) <= 0) {
         throw new Error('Player died during Wizard retreat');
+      }
+      const changedMapResult = retreatMapChangedResult(client, mapId, targetId);
+      if (changedMapResult) return changedMapResult;
+      if (String(client.snapshot?.mapFileName ?? '') !== mapId) {
+        throw new Error(`Wizard retreat changed map before combat action (${mapId})`);
       }
       const blockedTarget = entityById(client.snapshot, targetId);
       if (!blockedTarget) {
@@ -108,11 +110,13 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       }
     }
     const after = selfPlayer(client);
-    if (String(client.snapshot?.mapFileName ?? '') !== mapId) {
-      throw new Error(`Wizard retreat changed map before combat action (${mapId})`);
-    }
     if (!after || after.dead === true || Number(after.hp) <= 0 || observedPlayerHp(client.snapshot) <= 0) {
       throw new Error('Player died during Wizard retreat');
+    }
+    const changedMapResult = retreatMapChangedResult(client, mapId, targetId);
+    if (changedMapResult) return changedMapResult;
+    if (String(client.snapshot?.mapFileName ?? '') !== mapId) {
+      throw new Error(`Wizard retreat changed map before combat action (${mapId})`);
     }
     const displacement = after ? distance(before, after) : 0;
     // The navigator's successfulSteps can include an authoritative movement
@@ -158,6 +162,19 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
     }
     return baseAction(client, refreshed);
   };
+}
+
+function retreatMapChangedResult(client, originMapFileName, targetId) {
+  const currentMapFileName = String(client.snapshot?.mapFileName ?? '').trim();
+  if (!currentMapFileName || currentMapFileName === originMapFileName) return null;
+  const actor = selfPlayer(client);
+  if (!actor || actor.dead === true || Number(actor.hp) <= 0 ||
+      observedPlayerHp(client.snapshot) <= 0) return null;
+  recordFallback(client, targetId, 'retreatMapChanged', {
+    fromMapFileName: originMapFileName,
+    toMapFileName: currentMapFileName,
+  });
+  return { kind: 'retreated', targetId };
 }
 
 function targetLeftAfterRetreat(client, targetId) {

@@ -8,6 +8,7 @@ import {
   firstReachableDestination,
   harvestDirection,
   provenAggressors,
+  resolveObjectiveMapFallbackDestination,
   unsafeRetreatIsSafe,
 } from "./protocol-combat.mjs";
 import { NavigationStalled } from "./protocol-play.mjs";
@@ -20,6 +21,33 @@ test("explicit objective map preference resolves equal-length dungeon routes", a
     { mapFileName: "D406", position: { x: 100, y: 100 } },
   ], travel, ["D406"]);
   assert.equal(destination.mapFileName, "D406");
+});
+
+test("armed q89 fallback accepts a profile-pruned route only with the exact live doorway", () => {
+  const fallback = { fromMapFileName: "D2031", toMapFileName: "D2032", transferCandidates: [
+    { key: "crystal-move:d2031:198:34:117:184:267", source: { x: 198, y: 34 } },
+  ] };
+  const state = {
+    mapFileName: "D2031",
+    mapTransfers: [{ key: "crystal-move:d2031:198:34:117:184:267", mapFileName: "D2031", toMapFileName: "D2032", bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 } }],
+  };
+  const destination = resolveObjectiveMapFallbackDestination(
+    [{ mapFileName: "D2032" }],
+    { fallback, transfer: { key: "crystal-move:d2031:198:34:117:184:267", source: { x: 198, y: 34 } } },
+    state,
+    89,
+  );
+  assert.equal(destination.mapFileName, "D2032");
+  state.mapTransfers = [];
+  assert.throws(
+    () => resolveObjectiveMapFallbackDestination(
+      [{ mapFileName: "D2032" }],
+      { fallback, transfer: { key: "crystal-move:d2031:198:34:117:184:267", source: { x: 198, y: 34 } } },
+      state,
+      89,
+    ),
+    /q89 live objective-map fallback D2032 transfer is stale/,
+  );
 });
 
 test("retreat route bias preserves cave-exit progress without accepting an adjacent hostile", () => {
@@ -1581,7 +1609,7 @@ test("q89 still retreats at 75 percent HP when two aggressors are proven", async
   assert.ok(diagnostics.some(entry => entry.type === "unsafeTargetCluster"));
 });
 
-test("q89 Wizard uses the live keyed D2031 doorway once after a lost target and never attacks CursedZombie0", async () => {
+test("q89 Wizard returns normally to D2031 before using the live keyed doorway after a retreat", async () => {
   const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedZombie", 0, 1)] };
   const required = monster(70, "CursedZombie", 20, 10, { disposition: "hostile" });
   const unrelatedAggressor = monster(71, "CursedZombie0", 11, 10, { disposition: "hostile" });
@@ -1609,13 +1637,29 @@ test("q89 Wizard uses the live keyed D2031 doorway once after a lost target and 
   const travelled = [];
   const travel = async (mapFileName, options) => {
     travelled.push({ mapFileName, options });
+    if (mapFileName === "D2031") {
+      assert.equal(options.preferredTransferSource, undefined);
+      assert.equal(options.preferredTransferKey, undefined);
+      Object.assign(client.snapshot, {
+        mapFileName: "D2031",
+        mapTransfers: [{
+          key: "crystal-move:d2031:198:34:117:184:267",
+          mapFileName: "D2031", toMapFileName: "D2032",
+          bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+        }],
+      });
+      return;
+    }
     assert.equal(mapFileName, "D2032");
     assert.deepEqual(options.preferredTransferSource, { x: 198, y: 34 });
+    assert.equal(options.preferredTransferKey, "crystal-move:d2031:198:34:117:184:267");
     Object.assign(client.snapshot, { mapFileName: "D2032", mapTransfers: [] });
     Object.assign(client.snapshot.entities[0], { x: 184, y: 267 });
     client.snapshot.entities = [client.snapshot.entities[0], monster(72, "CursedZombie", 185, 267)];
   };
-  travel.routeLength = async mapFileName => mapFileName === "D2032" ? 1 : 2;
+  // The profile-pruned topology intentionally reports no route to D2032;
+  // the armed live doorway must still be handed to the normal traveler.
+  travel.routeLength = async () => null;
   const navigate = async (target, _range, _stopWhen, options = {}) => {
     if (target.objectId === unrelatedAggressor.objectId) {
       client.snapshot.entities = client.snapshot.entities.filter(entry => entry.objectId !== required.objectId);
@@ -1638,6 +1682,9 @@ test("q89 Wizard uses the live keyed D2031 doorway once after a lost target and 
     maxTargetAdjacent: 0,
     maxTargetNearby: 2,
     directAggressorDistance: 8,
+    recoverAfterUnsafeRetreat: async current => {
+      Object.assign(current.snapshot, { mapFileName: "0", mapTransfers: [] });
+    },
     objectiveMapFallback: {
       fromMapFileName: "D2031", toMapFileName: "D2032",
       transferCandidates: [{
@@ -1647,10 +1694,68 @@ test("q89 Wizard uses the live keyed D2031 doorway once after a lost target and 
   });
 
   assert.equal(result.stage, "ReadyToTurnIn");
-  assert.deepEqual(travelled.map(entry => entry.mapFileName), ["D2032"]);
+  assert.deepEqual(travelled.map(entry => entry.mapFileName), ["D2031", "D2032"]);
   assert.deepEqual(client.sent.map(entry => entry.objectId), [72]);
   assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackArmed"));
   assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackEntered"));
+});
+
+test("q89 Wizard fails closed when normal fallback-source travel lands on the wrong map", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedZombie", 0, 1)] };
+  const required = monster(70, "CursedZombie", 20, 10, { disposition: "hostile" });
+  const unrelatedAggressor = monster(71, "CursedZombie0", 11, 10, { disposition: "hostile" });
+  const state = snapshot(quest, [required, unrelatedAggressor]);
+  Object.assign(state, {
+    mapFileName: "D2031",
+    mapTransfers: [{
+      key: "crystal-move:d2031:198:34:117:184:267",
+      mapFileName: "D2031", toMapFileName: "D2032",
+      bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+    }],
+  });
+  const client = new FakeClient(state);
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: unrelatedAggressor.objectId });
+  const travelled = [];
+  const travel = async (mapFileName, options) => {
+    travelled.push({ mapFileName, options });
+    assert.equal(mapFileName, "D2031");
+    assert.equal(options.preferredTransferSource, undefined);
+    assert.equal(options.preferredTransferKey, undefined);
+    Object.assign(client.snapshot, { mapFileName: "0", mapTransfers: [] });
+  };
+  const navigate = async (target, _range, _stopWhen, options = {}) => {
+    if (target.objectId === unrelatedAggressor.objectId) {
+      client.snapshot.entities = client.snapshot.entities.filter(entry => entry.objectId !== required.objectId);
+      Object.assign(unrelatedAggressor, { x: 50, y: 50 });
+      return;
+    }
+    if (options.maxSuccessfulSteps) return;
+    Object.assign(client.snapshot.entities[0], { x: target.x - 1, y: target.y });
+  };
+
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedZombie", spawnCandidates: [
+      { ...spawn("CursedZombie"), mapFileName: "D2031" },
+      { ...spawn("CursedZombie"), mapFileName: "D2032", respawnIndex: 999 },
+    ] }], item: [] },
+  }, navigate, {
+    ...settings,
+    travel,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 2,
+    directAggressorDistance: 8,
+    recoverAfterUnsafeRetreat: async current => {
+      Object.assign(current.snapshot, { mapFileName: "0", mapTransfers: [] });
+    },
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{
+        key: "crystal-move:d2031:198:34:117:184:267", source: { x: 198, y: 34 },
+      }],
+    },
+  }), /q89 objective-map fallback did not authoritatively return to D2031/);
+  assert.deepEqual(travelled.map(entry => entry.mapFileName), ["D2031"]);
 });
 
 test("q89 Wizard fails closed after one live D2032 fallback pass makes no objective progress", async () => {

@@ -259,6 +259,70 @@ test('routeLength reports map 2 as the nearer real q33 source from Bichon than m
   assert.equal(client.sequence, 0);
 });
 
+test('armed q89 live doorway travels through the real traveler when profile route is absent', async () => {
+  const key = 'crystal-move:d2031:198:34:117:184:267';
+  const transfer = {
+    key,
+    mapFileName: 'D2031',
+    toMapFileName: 'D2032',
+    bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+    toPosition: { x: 184, y: 267 },
+  };
+  const client = new FakeClient({
+    mapFileName: 'D2031',
+    mapSnapshotPending: false,
+    playerObjectId: 1,
+    entities: [selfPlayer({ x: 254, y: 244 })],
+    mapTransfers: [transfer],
+  });
+  const navigated = [];
+  const travel = createMapTraveler(client, async (target, distance, _stopWhen, options) => {
+    navigated.push({ target, distance, options });
+    client.receive({
+      type: 'worldSnapshot',
+      payload: {
+        ...client.snapshot,
+        mapFileName: 'D2032',
+        entities: [selfPlayer(transfer.toPosition)],
+        mapTransfers: [],
+      },
+    });
+  }, {
+    loadCollisionMap: async () => ({ width: 400, height: 400, blocked: new Uint8Array(400 * 400) }),
+  });
+
+  assert.equal(await travel.routeLength('D2032'), null);
+  const traversed = await travel('D2032', {
+    preferredTransferKey: key,
+    preferredTransferSource: { x: 198, y: 34 },
+  });
+  assert.deepEqual(traversed, [{
+    fromMapFileName: 'D2031', toMapFileName: 'D2032', transferKey: key,
+    position: { x: 198, y: 34 },
+  }]);
+  assert.equal(navigated.at(-1).options.liveTransferKey, key);
+});
+
+test('armed q89 live doorway refuses a wrong or stale destination key before navigation', async () => {
+  const client = new FakeClient({
+    mapFileName: 'D2031', mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer({ x: 254, y: 244 })],
+    mapTransfers: [{
+      key: 'wrong-key', mapFileName: 'D2031', toMapFileName: 'D2032',
+      bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 }, toPosition: { x: 184, y: 267 },
+    }],
+  });
+  let navigations = 0;
+  const travel = createMapTraveler(client, async () => { navigations += 1; }, {
+    loadCollisionMap: async () => ({ width: 400, height: 400, blocked: new Uint8Array(400 * 400) }),
+  });
+  await assert.rejects(() => travel('D2032', {
+    preferredTransferKey: 'crystal-move:d2031:198:34:117:184:267',
+    preferredTransferSource: { x: 198, y: 34 },
+  }), /No live walking transfer with key/);
+  assert.equal(navigations, 0);
+});
+
 test('travels through an authoritative live walking transfer at distance zero', async () => {
   const client = new FakeClient(walkingSnapshot(ordinaryEdge));
   const calls = [];

@@ -131,7 +131,9 @@ function chooseLiveTransfer(snapshot, edge, options) {
 
 function liveTransferChoices(snapshot, edge, options) {
   const origin = player(snapshot);
-  const candidates = liveTransferCandidates(snapshot, String(edge.toMapFileName));
+  const preferredKey = String(options?.preferredTransferKey ?? '');
+  const candidates = liveTransferCandidates(snapshot, String(edge.toMapFileName))
+    .filter(transfer => !preferredKey || String(transfer?.key ?? '') === preferredKey);
   const preferredSource = options?.preferredTransferSource;
   return candidates
     .map(transfer => {
@@ -605,8 +607,39 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
     const directScriptedEdge = options.preferDirectScriptedEdge === true
       ? nearestDirectScriptedEdge(graph, current, target, client.snapshot)
       : null;
+    const preferredTransferKey = String(options.preferredTransferKey ?? '');
+    const preferredLiveTransfer = preferredTransferKey
+      ? liveTransferCandidates(client.snapshot, target).find(transfer =>
+        String(transfer?.key ?? '') === preferredTransferKey &&
+        String(transfer?.mapFileName ?? current) === current &&
+        String(transfer?.toMapFileName ?? '') === target)
+      : null;
+    if (preferredTransferKey && !preferredLiveTransfer) {
+      throw new Error(`No live walking transfer with key ${preferredTransferKey} from ${current} to ${target}`);
+    }
+    const preferredLiveEdge = preferredLiveTransfer ? {
+      kind: 'map-movement',
+      fromMapFileName: current,
+      toMapFileName: target,
+      fromMapTitle: String(preferredLiveTransfer.mapTitle ?? current),
+      toMapTitle: String(preferredLiveTransfer.toMapTitle ?? target),
+      needHole: false,
+      needMove: false,
+      portals: [{
+        source: {
+          x: Number(preferredLiveTransfer.bounds.minX),
+          y: Number(preferredLiveTransfer.bounds.minY),
+        },
+        destination: {
+          x: Number(preferredLiveTransfer.toPosition?.x),
+          y: Number(preferredLiveTransfer.toPosition?.y),
+        },
+      }],
+    } : null;
     const route = directScriptedEdge
       ? [directScriptedEdge]
+      : preferredLiveEdge
+        ? [preferredLiveEdge]
       : findMapTravelRoute(graph, current, target);
     if (!route?.length) {
       throw new Error(`No normal-player map route from ${current} to ${target}`);

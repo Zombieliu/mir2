@@ -406,10 +406,12 @@ test('retreat budget is scoped to the consecutive target engagement', async () =
   assert.equal(navigationCalls.length, 3);
 });
 
-test('map change during retreat fails closed without issuing the combat action', async () => {
+test('authoritative map change during retreat refreshes without issuing combat', async () => {
   const owner = player();
   const target = monster(20, 7, 5);
   const client = clientFixture([owner, target]);
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
   let acted = false;
   const wrapped = createWizardKitingAction(
     async () => { acted = true; },
@@ -421,8 +423,76 @@ test('map change during retreat fails closed without issuing the combat action',
     { loadCollisionMap: async () => openMap(), maxRetreatSteps: 1 },
   );
 
-  await assert.rejects(wrapped(client, target), /Wizard retreat changed map/);
+  assert.deepEqual(await wrapped(client, target), { kind: 'retreated', targetId: 20 });
   assert.equal(acted, false);
+  assert.ok(diagnostics.some(entry =>
+    entry.type === 'wizardKiteFallback' && entry.reason === 'retreatMapChanged' &&
+    entry.fromMapFileName === 'test' && entry.toMapFileName === 'other-map'));
+});
+
+test('known blocked retreat with an authoritative map change refreshes safely', async () => {
+  const owner = player();
+  const target = monster(20, 7, 5);
+  const client = clientFixture([owner, target]);
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let acted = false;
+  const wrapped = createWizardKitingAction(
+    async () => { acted = true; },
+    async () => {
+      client.snapshot.mapFileName = '0';
+      throw new Error('No walk path after emergency teleport');
+    },
+    { loadCollisionMap: async () => openMap(), maxRetreatSteps: 1, fightWhenBlocked: true },
+  );
+
+  assert.deepEqual(await wrapped(client, target), { kind: 'retreated', targetId: 20 });
+  assert.equal(acted, false);
+  assert.ok(diagnostics.some(entry => entry.reason === 'retreatMapChanged'));
+});
+
+test('map change plus death remains fatal during retreat', async () => {
+  const owner = player();
+  const target = monster(20, 7, 5);
+  const client = clientFixture([owner, target]);
+  const wrapped = createWizardKitingAction(
+    async () => { throw new Error('combat must not run'); },
+    async destination => {
+      Object.assign(owner, destination, { hp: 0, dead: true });
+      client.snapshot.playerHp = 0;
+      client.snapshot.mapFileName = '0';
+      return { reached: true, successfulSteps: 1 };
+    },
+    { loadCollisionMap: async () => openMap(), maxRetreatSteps: 1 },
+  );
+
+  await assert.rejects(wrapped(client, target), /Player died during Wizard retreat/);
+});
+
+test('unknown retreat navigation errors remain fatal', async () => {
+  const owner = player();
+  const target = monster(20, 7, 5);
+  const client = clientFixture([owner, target]);
+  const wrapped = createWizardKitingAction(
+    async () => { throw new Error('combat must not run'); },
+    async () => { throw new Error('socket closed unexpectedly'); },
+    { loadCollisionMap: async () => openMap(), maxRetreatSteps: 1, fightWhenBlocked: true },
+  );
+
+  await assert.rejects(wrapped(client, target), /socket closed unexpectedly/);
+});
+
+test('missing authoritative map remains fatal before retreat', async () => {
+  const owner = player();
+  const target = monster(20, 7, 5);
+  const client = clientFixture([owner, target], { mapFileName: '' });
+  const wrapped = createWizardKitingAction(
+    async () => { throw new Error('combat must not run'); },
+    async () => { throw new Error('navigation must not run'); },
+    { loadCollisionMap: async () => openMap(), maxRetreatSteps: 1 },
+  );
+
+  await assert.rejects(wrapped(client, target), /Cannot kite without an authoritative mapFileName/);
 });
 
 test('player death during retreat fails closed without issuing the combat action', async () => {

@@ -111,6 +111,16 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
 
     let targetPlan = selectTargetPlan(client.snapshot, pending);
     const currentMapFileName = String(client.snapshot?.mapFileName ?? '');
+    const fallback = settings.objectiveMapFallback;
+    // A retreat can legally move the player away from D2031 after the
+    // fallback was armed.  The rendered D2031 doorway is only meaningful on
+    // that source map, so return through ordinary guarded travel first and
+    // obtain a fresh receipt before selecting the keyed hop.
+    const liveFallbackHop = objectiveMapFallbackState.armed &&
+      currentMapFileName === fallback?.fromMapFileName;
+    const returnToFallbackSource = objectiveMapFallbackState.armed &&
+      currentMapFileName !== fallback?.fromMapFileName &&
+      currentMapFileName !== fallback?.toMapFileName;
     const fallbackPrefersAnotherMap = objectiveMapFallbackState.armed &&
       currentMapFileName !== settings.objectiveMapFallback?.toMapFileName;
     const preferConfiguredObjectiveMap = settings.preferObjectiveMapOverCurrent &&
@@ -123,17 +133,30 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
       const groupMaps = groupName ? candidates
         .filter(candidate => normalizeName(candidate?.mapTitle) === groupName)
         .map(candidate => candidate.mapFileName) : [];
-      const destination = await firstReachableDestination(candidates, settings.travel, [
-        ...(objectiveMapFallbackState.armed
-          ? [settings.objectiveMapFallback.toMapFileName]
-          : []),
-        ...settings.preferredObjectiveMaps,
-        routeQuest?.finishNpc?.mapFileName,
-        routeQuest?.startNpc?.mapFileName,
-        ...groupMaps,
-      ]);
+      let destination;
+      if (returnToFallbackSource) {
+        destination = { mapFileName: fallback.fromMapFileName };
+      } else if (liveFallbackHop) {
+        // This exact fallback is already proved against the authoritative
+        // snapshot. Do not ask the profile-pruned topology graph to prove the
+        // same edge a second time: q89's D2032 objective map is intentionally
+        // outside the normal platinum route profile. Revalidate the key and
+        // source immediately before travel so a reconnect or map refresh
+        // cannot reuse a stale doorway.
+        destination = resolveObjectiveMapFallbackDestination(candidates, {
+          fallback: settings.objectiveMapFallback,
+          transfer: objectiveMapFallbackState.transfer,
+        }, client.snapshot, questId);
+      } else {
+        destination = await firstReachableDestination(candidates, settings.travel, [
+          ...settings.preferredObjectiveMaps,
+          routeQuest?.finishNpc?.mapFileName,
+          routeQuest?.startNpc?.mapFileName,
+          ...groupMaps,
+        ]);
+      }
       if (destination) {
-        if (objectiveMapFallbackState.armed &&
+        if (liveFallbackHop &&
             String(destination.mapFileName) !== settings.objectiveMapFallback.toMapFileName) {
           throw new Error(
             `q${questId} live objective-map fallback ${settings.objectiveMapFallback.toMapFileName} is unreachable`,
@@ -168,14 +191,27 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
             // pack. The global one-monster resolver intentionally serves
             // non-combat trips and cannot see this objective's risk limits.
             resolveBlockingMonster: false,
-            ...(objectiveMapFallbackState.armed ? {
+            ...(liveFallbackHop ? {
               // `createMapTraveler` still owns the actual packet-observed
               // transfer and map-landing checks. This only selects the exact
               // live doorway whose source/key was proved before arming.
               preferredTransferSource: objectiveMapFallbackState.transfer.source,
+              preferredTransferKey: objectiveMapFallbackState.transfer.key,
             } : {}),
           });
-          if (objectiveMapFallbackState.armed) {
+          if (returnToFallbackSource) {
+            if (String(client.snapshot?.mapFileName ?? '') !== fallback.fromMapFileName) {
+              throw new Error(
+                `q${questId} objective-map fallback did not authoritatively return to ${fallback.fromMapFileName}`,
+              );
+            }
+            travelThreatEvasions.clear();
+            if (settings.afterTravel && await settings.afterTravel(client)) continue;
+            // Replan from a new D2031 snapshot so the keyed doorway is
+            // revalidated only where that receipt can be authoritative.
+            continue;
+          }
+          if (liveFallbackHop) {
             if (String(client.snapshot?.mapFileName ?? '') !== settings.objectiveMapFallback.toMapFileName) {
               throw new Error(
                 `q${questId} objective-map fallback did not authoritatively enter ${settings.objectiveMapFallback.toMapFileName}`,
@@ -2710,6 +2746,26 @@ function liveObjectiveMapFallbackTransfer(snapshot, fallback) {
     if (transfer) return { key: candidate.key, source: candidate.source };
   }
   return null;
+}
+
+export function resolveObjectiveMapFallbackDestination(candidates, fallbackState, snapshot, questId) {
+  const fallback = fallbackState?.fallback;
+  const armedTransfer = fallbackState?.transfer;
+  const liveTransfer = liveObjectiveMapFallbackTransfer(snapshot, fallback);
+  const sameSource = liveTransfer && armedTransfer &&
+    Number(liveTransfer.source.x) === Number(armedTransfer.source.x) &&
+    Number(liveTransfer.source.y) === Number(armedTransfer.source.y) &&
+    liveTransfer.key === armedTransfer.key;
+  if (!sameSource) {
+    throw new Error(`q${questId} live objective-map fallback ${fallback?.toMapFileName ?? ''} transfer is stale`);
+  }
+  const destination = (candidates ?? []).find(candidate =>
+    String(candidate?.mapFileName ?? '') === String(fallback?.toMapFileName ?? ''),
+  ) ?? null;
+  if (!destination) {
+    throw new Error(`q${questId} live objective-map fallback ${fallback?.toMapFileName ?? ''} objective is absent`);
+  }
+  return destination;
 }
 
 function armObjectiveMapFallback(client, questId, progressKey, state, settings, reason) {
