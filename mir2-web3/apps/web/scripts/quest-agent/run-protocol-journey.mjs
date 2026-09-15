@@ -217,7 +217,7 @@ try {
         ? { ...result, success: true }
         : result;
     };
-    const navigate = createNavigator(client, {
+    const rawNavigate = createNavigator(client, {
       emergencyEscape: async owner => {
         // The cave remains dangerous after the last objective dies. Preserve
         // the same ordinary RandomTeleport escape until the reward NPC has
@@ -230,6 +230,17 @@ try {
       emergencyEscapeDangerDistance: 6,
       maxEmergencyEscapesPerNavigation: journeyNavigationEmergencyEscapeBudget(className),
     });
+    const navigate = (target, desiredDistance = 1, stopWhen = () => false, options = {}) => {
+      const retreatProfile = isWizardQ89Expedition(client.snapshot)
+        ? questRetreatProfile(89, className)
+        : null;
+      return rawNavigate(target, desiredDistance, stopWhen, {
+        ...options,
+        ...(retreatProfile?.emergencyEscapeRequiresProvenAggressors === true
+          ? { emergencyEscapeRequiresProvenAggressors: true }
+          : {}),
+      });
+    };
     report.revivals = [];
     let revival = await reviveInTown(client);
     if (!revival && criticalStrandedPlayer(client.snapshot)) {

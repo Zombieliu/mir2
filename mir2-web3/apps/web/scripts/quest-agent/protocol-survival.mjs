@@ -305,11 +305,16 @@ export function questRetreatProfile(questId, className = '') {
       maxTargetNearby: 5,
     } : {}),
     ...(fragileUndeadMineHunt ? {
-      // R109 spent most casts on unrelated Shamans while live required
-      // zombies appeared during the Priest sweep. Keep the safe selected
-      // objective focused; the existing two-aggressor and HP gates still
+      // R115 reached a valid CursedZombie only after clearing the single
+      // entrance Shaman. Let the ordinary proven-aggressor pass clear that
+      // one blocker; the existing two-aggressor and 75%-HP gates still
       // interrupt a dangerous pull.
-      focusTargetThroughAggressors: true,
+      focusTargetThroughAggressors: false,
+      // R116 showed the navigator independently treating a passive nearby
+      // CursedZombie as a second attacker and Town-teleporting at 53% HP.
+      // q89 keeps the normal .65 eligibility threshold, but needs two fresh
+      // direct attacker receipts before that navigation escape is used.
+      emergencyEscapeRequiresProvenAggressors: true,
       finishableTargetHealthRatio: 0.25,
       finishableTargetMinimumPlayerHpRatio: 0.7,
     } : rangedWoomaExpedition ? {

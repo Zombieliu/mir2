@@ -1486,6 +1486,101 @@ test("a healthy focused ranged hunt finishes its quest target through one proven
   assert.equal(client.snapshot.entities.find(entry => entry.objectId === 61).dead, false);
 });
 
+test("q89 clears one proven entrance aggressor before retaining the required target", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedZombie", 0, 1)] };
+  const blocker = monster(71, "CursedShaman", 11, 10, { disposition: "hostile" });
+  const target = monster(70, "CursedZombie", 20, 10, { disposition: "hostile" });
+  const client = new FakeClient(snapshot(quest, [blocker, target]), (owner, command) => {
+    if (command.type !== "attack") return;
+    const attacked = owner.snapshot.entities.find(entry => entry.objectId === command.objectId);
+    if (command.objectId === blocker.objectId) {
+      Object.assign(attacked, { hp: 0, dead: true });
+      owner.receive("ObjectDied", () => {}, { objectId: blocker.objectId });
+      return;
+    }
+    assert.equal(command.objectId, target.objectId);
+    Object.assign(attacked, { hp: 0, dead: true });
+    owner.receive("ObjectDied", state => {
+      state.questLog[0].objectives[0] = objective("Kill CursedZombie", 1, 1);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: target.objectId });
+  });
+  Object.assign(client.snapshot, { playerHp: 28, playerMaxHp: 40 });
+  Object.assign(client.snapshot.entities[0], { hp: 28, maxHp: 40 });
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: blocker.objectId });
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedZombie", spawnCandidates: [spawn("CursedZombie")] }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 2,
+    directAggressorDistance: 8,
+    multiAggressorRetreatRatio: 0.75,
+    retreatAtActiveAggressorCount: 2,
+    focusTargetThroughAggressors: false,
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [blocker.objectId, target.objectId]);
+});
+
+test("q89 still retreats at 75 percent HP when two aggressors are proven", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedZombie", 0, 1)] };
+  const target = monster(70, "CursedZombie", 20, 10, { disposition: "hostile" });
+  const threats = [
+    monster(71, "CursedShaman", 11, 10, { disposition: "hostile" }),
+    monster(72, "CursedShaman", 10, 11, { disposition: "hostile" }),
+  ];
+  const client = new FakeClient(snapshot(quest, [target, ...threats]), (owner, command) => {
+    if (command.type !== "attack") return;
+    assert.equal(command.objectId, target.objectId);
+    Object.assign(target, { hp: 0, dead: true });
+    owner.receive("ObjectDied", state => {
+      state.questLog[0].objectives[0] = objective("Kill CursedZombie", 1, 1);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: target.objectId });
+  });
+  Object.assign(client.snapshot, { playerHp: 28, playerMaxHp: 40 });
+  Object.assign(client.snapshot.entities[0], { hp: 28, maxHp: 40 });
+  for (const threat of threats) {
+    client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: threat.objectId });
+  }
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let retreatMoves = 0;
+  const navigate = async (destination, _range, stopWhen, options = {}) => {
+    if (options.maxSuccessfulSteps) {
+      retreatMoves += 1;
+      Object.assign(client.snapshot.entities[0], { x: 1, y: 1 });
+      for (const threat of threats) Object.assign(threat, { x: 30, y: 30 });
+      assert.equal(stopWhen(), true);
+      return { reached: false, successfulSteps: 10 };
+    }
+    Object.assign(client.snapshot.entities[0], { x: destination.x - 1, y: destination.y });
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedZombie", spawnCandidates: [spawn("CursedZombie")] }], item: [] },
+  }, navigate, {
+    ...settings,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 2,
+    directAggressorDistance: 8,
+    multiAggressorRetreatRatio: 0.75,
+    retreatAtActiveAggressorCount: 2,
+    focusTargetThroughAggressors: false,
+    recoverAfterUnsafeRetreat: async () => {},
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(retreatMoves, 1);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [target.objectId]);
+  assert.ok(diagnostics.some(entry => entry.type === "unsafeTargetCluster"));
+});
+
 test("a survivable Taoist lands the last bounded hit before retreating from a joining snake", async () => {
   const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
   let attacks = 0;

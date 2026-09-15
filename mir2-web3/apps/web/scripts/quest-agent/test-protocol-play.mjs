@@ -576,6 +576,236 @@ test('moderate navigation damage preserves an escape scroll against one nearby h
   assert.equal(client.diagnostics.length, 0);
 });
 
+test('q89 proven-aggressor navigation continues at 53 percent through one Shaman and a passive zombie', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 53;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push(
+    { objectId: 9, kind: 'monster', disposition: 'hostile', x: 5, y: 1, hp: 20, dead: false },
+    { objectId: 10, kind: 'monster', disposition: 'hostile', x: 5, y: 2, hp: 20, dead: false },
+  );
+  client.events.push(
+    { packet: 'MapInformation', direction: 'received', sequence: 1, payload: { fileName: 'test' }, at: '1970-01-01T00:00:05.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 2, payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:09.000Z' },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 6,
+    emergencyEscapeRequiresProvenAggressors: true,
+    emergencyEscape: async () => { escapeCalls += 1; return { success: true }; },
+  });
+
+  const result = await navigateNear({ x: 3, y: 1 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 0);
+  assert.ok(client.sent.some(command => command.type === 'walk' || command.type === 'run'));
+  assert.equal(client.diagnostics.some(entry => entry.type === 'navigationEmergencyEscapeAttempt'), false);
+});
+
+test('q89 proven-aggressor navigation escapes at 65 percent only after two fresh direct hits', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 53;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push(
+    { objectId: 9, kind: 'monster', disposition: 'hostile', x: 5, y: 1, hp: 20, dead: false },
+    { objectId: 10, kind: 'monster', disposition: 'hostile', x: 5, y: 2, hp: 20, dead: false },
+  );
+  client.events.push(
+    { packet: 'MapInformation', direction: 'received', sequence: 1, payload: { fileName: 'test' }, at: '1970-01-01T00:00:05.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 2, payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:09.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 3, payload: { objectId: 1, attackerId: 10 }, at: '1970-01-01T00:00:09.500Z' },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 6,
+    emergencyEscapeRequiresProvenAggressors: true,
+    emergencyEscape: async owner => {
+      escapeCalls += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 4, y: 4 });
+      owner.snapshot.entities.splice(1);
+      owner.snapshot.playerHp = 80;
+      return { success: true };
+    },
+  });
+
+  const result = await navigateNear({ x: 6, y: 4 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 1);
+  assert.equal(client.diagnostics[0].provenNearby, 2);
+});
+
+test('q89 proven-aggressor navigation preserves its one-attacker critical-floor escape', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 25;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push({
+    objectId: 9, kind: 'monster', disposition: 'hostile', x: 5, y: 1, hp: 20, dead: false,
+  });
+  client.events.push(
+    { packet: 'MapInformation', direction: 'received', sequence: 1, payload: { fileName: 'test' }, at: '1970-01-01T00:00:05.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 2, payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:09.000Z' },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 6,
+    emergencyEscapeRequiresProvenAggressors: true,
+    emergencyEscape: async owner => {
+      escapeCalls += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 4, y: 4 });
+      owner.snapshot.entities.splice(1);
+      owner.snapshot.playerHp = 80;
+      return { success: true };
+    },
+  });
+
+  const result = await navigateNear({ x: 6, y: 4 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 1);
+  assert.equal(client.diagnostics[0].provenNearby, 1);
+});
+
+test('q89 proven-aggressor navigation ignores receipts from the prior map', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 53;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push(
+    { objectId: 9, kind: 'monster', disposition: 'hostile', x: 5, y: 1, hp: 20, dead: false },
+    { objectId: 10, kind: 'monster', disposition: 'hostile', x: 5, y: 2, hp: 20, dead: false },
+  );
+  client.events.push(
+    { packet: 'MapInformation', direction: 'received', sequence: 1, payload: { fileName: 'old-map' }, at: '1970-01-01T00:00:05.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 2, payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:09.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 3, payload: { objectId: 1, attackerId: 10 }, at: '1970-01-01T00:00:09.100Z' },
+    { packet: 'MapInformation', direction: 'received', sequence: 4, payload: { fileName: 'test' }, at: '1970-01-01T00:00:09.200Z' },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 6,
+    emergencyEscapeRequiresProvenAggressors: true,
+    emergencyEscape: async () => { escapeCalls += 1; return { success: true }; },
+  });
+
+  const result = await navigateNear({ x: 3, y: 1 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 0);
+  assert.equal(client.diagnostics.some(entry => entry.type === 'navigationEmergencyEscapeAttempt'), false);
+});
+
+test('q89 proven-aggressor navigation ignores fresh hits before the current player died and revived', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 53;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push(
+    { objectId: 9, kind: 'monster', disposition: 'hostile', x: 5, y: 1, hp: 20, dead: false },
+    { objectId: 10, kind: 'monster', disposition: 'hostile', x: 5, y: 2, hp: 20, dead: false },
+  );
+  client.events.push(
+    { packet: 'MapInformation', direction: 'received', sequence: 1, payload: { fileName: 'test' }, at: '1970-01-01T00:00:05.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 2, payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:09.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 3, payload: { objectId: 1, attackerId: 10 }, at: '1970-01-01T00:00:09.100Z' },
+    { packet: 'ObjectDied', direction: 'received', sequence: 4, payload: { objectId: 999 }, at: '1970-01-01T00:00:09.200Z' },
+    { packet: 'Death', direction: 'received', sequence: 5, payload: { location: { x: 1, y: 1 } }, at: '1970-01-01T00:00:09.300Z' },
+    { packet: 'ObjectDied', direction: 'received', sequence: 6, payload: { objectId: 1 }, at: '1970-01-01T00:00:09.400Z' },
+    { packet: 'ObjectRevived', direction: 'received', sequence: 7, payload: { objectId: 999, effect: true }, at: '1970-01-01T00:00:09.500Z' },
+    { packet: 'ObjectRevived', direction: 'received', sequence: 8, payload: { objectId: 1, effect: true }, at: '1970-01-01T00:00:09.600Z' },
+    { packet: 'Revived', direction: 'received', sequence: 9, payload: {}, at: '1970-01-01T00:00:09.700Z' },
+  );
+  client.sequence = 9;
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 6,
+    emergencyEscapeRequiresProvenAggressors: true,
+    emergencyEscape: async () => { escapeCalls += 1; return { success: true }; },
+  });
+
+  const result = await navigateNear({ x: 3, y: 1 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 0);
+  assert.equal(client.diagnostics.some(entry => entry.type === 'navigationEmergencyEscapeAttempt'), false);
+});
+
+test('q89 proven-aggressor navigation ignores stale, dead, and wrong-recipient receipts', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 53;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push(
+    { objectId: 9, kind: 'monster', disposition: 'hostile', x: 5, y: 1, hp: 20, dead: false },
+    { objectId: 10, kind: 'monster', disposition: 'hostile', x: 5, y: 2, hp: 0, dead: true },
+    { objectId: 11, kind: 'monster', disposition: 'hostile', x: 5, y: 3, hp: 20, dead: false },
+    { objectId: 12, kind: 'monster', disposition: 'hostile', x: 5, y: 4, hp: 20, dead: false },
+  );
+  client.events.push(
+    { packet: 'MapInformation', direction: 'received', sequence: 1, payload: { fileName: 'test' }, at: '1970-01-01T00:00:01.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 2, payload: { objectId: 1, attackerId: 9 }, at: '1970-01-01T00:00:04.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 3, payload: { objectId: 1, attackerId: 10 }, at: '1970-01-01T00:00:09.000Z' },
+    { packet: 'ObjectStruck', direction: 'received', sequence: 4, payload: { objectId: 999, attackerId: 11 }, at: '1970-01-01T00:00:09.100Z' },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 6,
+    emergencyEscapeRequiresProvenAggressors: true,
+    emergencyEscape: async () => { escapeCalls += 1; return { success: true }; },
+  });
+
+  const result = await navigateNear({ x: 3, y: 1 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 0);
+  assert.equal(client.diagnostics.some(entry => entry.type === 'navigationEmergencyEscapeAttempt'), false);
+});
+
+test('the default navigator still escapes a passive two-hostile pack at 53 percent', async () => {
+  const client = navigationClient();
+  client.snapshot.playerHp = 53;
+  client.snapshot.playerMaxHp = 100;
+  client.snapshot.entities.push(
+    { objectId: 9, kind: 'monster', disposition: 'hostile', x: 5, y: 1, hp: 20, dead: false },
+    { objectId: 10, kind: 'monster', disposition: 'hostile', x: 5, y: 2, hp: 20, dead: false },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 6,
+    emergencyEscape: async owner => {
+      escapeCalls += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 4, y: 4 });
+      owner.snapshot.entities.splice(1);
+      owner.snapshot.playerHp = 80;
+      return { success: true };
+    },
+  });
+
+  const result = await navigateNear({ x: 6, y: 4 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 1);
+});
+
 test('navigator optional attempt cap fails without an unbounded movement retry', async () => {
   const client = navigationClient();
   client.wait = async () => { throw new Error('movement timeout'); };

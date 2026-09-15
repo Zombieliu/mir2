@@ -195,6 +195,70 @@ function hostileClearanceObstacles(snapshot, options, memory, observedAt, memory
   return obstacles;
 }
 
+function currentMapReceiptBoundary(client, mapId) {
+  let boundary = 0;
+  let latestMapReceipt = null;
+  for (const event of client?.events ?? []) {
+    if (event?.direction !== 'received' ||
+        !['MapChanged', 'MapInformation'].includes(String(event?.packet ?? ''))) continue;
+    const sequence = Number(event?.sequence) || 0;
+    if (!latestMapReceipt || sequence >= latestMapReceipt.sequence) {
+      latestMapReceipt = {
+        sequence,
+        mapFileName: String(event?.payload?.fileName ?? event?.payload?.mapFileName ?? ''),
+      };
+    }
+    if (String(event?.payload?.fileName ?? event?.payload?.mapFileName ?? '') === mapId) {
+      boundary = Math.max(boundary, sequence);
+    }
+  }
+  // Packet receipts have no map field. Do not allow a hit observed before an
+  // intervening map transition to prove a present-map aggressor.
+  if (latestMapReceipt && latestMapReceipt.mapFileName !== mapId) return Number.POSITIVE_INFINITY;
+  return boundary;
+}
+
+function currentPlayerLifeReceiptBoundary(client, playerObjectId) {
+  let boundary = 0;
+  for (const event of client?.events ?? []) {
+    if (event?.direction !== 'received') continue;
+    const sequence = Number(event?.sequence) || 0;
+    const packet = String(event?.packet ?? '');
+    // Death and Revived are self-only packets. ObjectDied/ObjectRevived are
+    // AOI packets, so only the current owner's objectId is a life boundary.
+    // The protocol calls the self revive packet Revived; it has no payload.
+    if (packet === 'Death' || packet === 'Revived' ||
+        ((packet === 'ObjectDied' || packet === 'ObjectRevived') &&
+          Number(event?.payload?.objectId) === playerObjectId)) {
+      boundary = Math.max(boundary, sequence);
+    }
+  }
+  return boundary;
+}
+
+function provenNearbyEmergencyAggressors(client, nearbyHostiles, mapId, nowMs, withinMs) {
+  const playerObjectId = Number(client?.snapshot?.playerObjectId);
+  if (!Number.isFinite(playerObjectId)) return [];
+  const boundary = Math.max(
+    currentMapReceiptBoundary(client, mapId),
+    currentPlayerLifeReceiptBoundary(client, playerObjectId),
+  );
+  const liveNearbyIds = new Set(nearbyHostiles.map(entity => Number(entity?.objectId))
+    .filter(Number.isFinite));
+  if (liveNearbyIds.size === 0 || !Number.isFinite(nowMs)) return [];
+  const attackers = new Set();
+  for (const event of client?.events ?? []) {
+    if (event?.direction !== 'received' || event?.packet !== 'ObjectStruck' ||
+        (Number(event?.sequence) || 0) <= boundary ||
+        Number(event?.payload?.objectId) !== playerObjectId) continue;
+    const eventAt = Date.parse(String(event?.at ?? ''));
+    if (!Number.isFinite(eventAt) || eventAt > nowMs || nowMs - eventAt > withinMs) continue;
+    const attackerId = Number(event?.payload?.attackerId);
+    if (liveNearbyIds.has(attackerId)) attackers.add(attackerId);
+  }
+  return nearbyHostiles.filter(entity => attackers.has(Number(entity?.objectId)));
+}
+
 export function createNavigator(client, dependencies = {}) {
   const loadCollisionMap = dependencies.loadCollisionMap ?? loadProtocolCollisionMap;
   const sleep = dependencies.delay ?? delay;
@@ -210,6 +274,12 @@ export function createNavigator(client, dependencies = {}) {
   const defaultEmergencyEscapeDangerDistance = nonnegativeIntegerOption(
     dependencies.emergencyEscapeDangerDistance,
     3,
+  );
+  const defaultEmergencyEscapeRequiresProvenAggressors =
+    dependencies.emergencyEscapeRequiresProvenAggressors === true;
+  const defaultEmergencyEscapeAggressorEvidenceWindowMs = positiveIntegerOption(
+    dependencies.emergencyEscapeAggressorEvidenceWindowMs,
+    5_000,
   );
   const defaultMaxEmergencyEscapes = nonnegativeIntegerOption(
     dependencies.maxEmergencyEscapesPerNavigation,
@@ -254,6 +324,14 @@ export function createNavigator(client, dependencies = {}) {
     const emergencyEscapeDangerDistance = nonnegativeIntegerOption(
       options.emergencyEscapeDangerDistance,
       defaultEmergencyEscapeDangerDistance,
+    );
+    const emergencyEscapeRequiresProvenAggressors =
+      options.emergencyEscapeRequiresProvenAggressors == null
+        ? defaultEmergencyEscapeRequiresProvenAggressors
+        : options.emergencyEscapeRequiresProvenAggressors === true;
+    const emergencyEscapeAggressorEvidenceWindowMs = positiveIntegerOption(
+      options.emergencyEscapeAggressorEvidenceWindowMs,
+      defaultEmergencyEscapeAggressorEvidenceWindowMs,
     );
     const maxEmergencyEscapes = nonnegativeIntegerOption(
       options.maxEmergencyEscapesPerNavigation,
@@ -302,8 +380,17 @@ export function createNavigator(client, dependencies = {}) {
       const hpRatio = observedPlayerHp(client.snapshot) /
         Math.max(1, Number(client.snapshot.playerMaxHp));
       const safeZoneAttackReceipt = inSafeZone && !safeZoneEscapeBlocked;
-      const shouldEmergencyEscape = safeZoneAttackReceipt || nearbyHostiles.length >= 2 ||
-        (nearbyHostiles.length > 0 && hpRatio <= emergencyEscapeCriticalHpRatio);
+      const provenNearbyHostiles = emergencyEscapeRequiresProvenAggressors
+        ? provenNearbyEmergencyAggressors(
+          client,
+          nearbyHostiles,
+          String(client.snapshot?.mapFileName ?? mapId),
+          Number(now()),
+          emergencyEscapeAggressorEvidenceWindowMs,
+        )
+        : nearbyHostiles;
+      const shouldEmergencyEscape = safeZoneAttackReceipt || provenNearbyHostiles.length >= 2 ||
+        (provenNearbyHostiles.length > 0 && hpRatio <= emergencyEscapeCriticalHpRatio);
       if (emergencyEscape && !emergencyEscapeFailed && now() >= emergencyEscapeRetryAt &&
           emergencyEscapes < maxEmergencyEscapes &&
           hpRatio <= emergencyEscapeHpRatio && shouldEmergencyEscape) {
@@ -312,6 +399,9 @@ export function createNavigator(client, dependencies = {}) {
           type: 'navigationEmergencyEscapeAttempt',
           hpRatio,
           nearby: nearbyHostiles.length,
+          ...(emergencyEscapeRequiresProvenAggressors
+            ? { provenNearby: provenNearbyHostiles.length }
+            : {}),
           safeZoneAttackReceipt,
           dangerDistance: emergencyEscapeDangerDistance,
           from: before,

@@ -1258,7 +1258,7 @@ test('q99 Warrior admits the measured final WoomaFighter spawn group', () => {
   assert.equal(questRetreatProfile(99, 'Taoist').maxTargetNearby, 4);
 });
 
-test('q89 Wizard carries an escape reserve and detects ranged mine attackers', () => {
+test('q89 Wizard clears one entrance blocker while retaining its retreat gates', () => {
   const profile = questRetreatProfile(89, 'Wizard');
   assert.equal(profile.maxTargetAdjacent, 0);
   assert.equal(profile.maxTargetNearby, 2);
@@ -1266,11 +1266,20 @@ test('q89 Wizard carries an escape reserve and detects ranged mine attackers', (
   assert.equal(profile.multiAggressorRetreatRatio, 0.75);
   assert.equal(profile.retreatAtActiveAggressorCount, 2);
   assert.equal(profile.unsafeRetreatSafeDistance, 8);
-  assert.equal(profile.focusTargetThroughAggressors, true);
+  assert.equal(profile.focusTargetThroughAggressors, false);
+  assert.equal(profile.emergencyEscapeRequiresProvenAggressors, true);
   assert.equal(profile.finishableTargetHealthRatio, 0.25);
   assert.equal(profile.finishableTargetMinimumPlayerHpRatio, 0.7);
   assert.equal(journeyEmergencyTeleportDepartureTarget(89), 8);
   assert.equal(questEmergencyEscapeHpRatio(89, 'Wizard'), 0.65);
+});
+
+test('q89 focus relaxation is isolated from other ranged expeditions', () => {
+  assert.equal(questRetreatProfile(89, 'Taoist').focusTargetThroughAggressors, undefined);
+  assert.equal(questRetreatProfile(89, 'Taoist').emergencyEscapeRequiresProvenAggressors, undefined);
+  assert.equal(questRetreatProfile(98, 'Wizard').focusTargetThroughAggressors, true);
+  assert.equal(questRetreatProfile(98, 'Wizard').emergencyEscapeRequiresProvenAggressors, undefined);
+  assert.equal(questRetreatProfile(99, 'Wizard').focusTargetThroughAggressors, true);
 });
 
 test('q98 Wooma expedition keeps long wide recovery armed for ranged classes', () => {
