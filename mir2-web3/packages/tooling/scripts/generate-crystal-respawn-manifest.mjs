@@ -197,6 +197,19 @@ function main() {
   const quests = parseQuests(reader, version, items, monsterByIndex, npcs, maps, settings);
   const recipes = parseRecipes(items);
   const gameShopInfos = parseGameShopInfos(reader, version, items);
+  if (process.env.MIR2_CRYSTAL_GAME_SHOP_ONLY === "1") {
+    const existing = JSON.parse(readFileSync(gameShopPacketOutputPath, "utf8"));
+    if (existing.crystal_db_version !== version || existing.crystal_db_custom_version !== customVersion
+        || existing.total_items !== gameShopInfos.length) {
+      throw new Error("Game shop-only regeneration requires a matching existing manifest");
+    }
+    writeFileSync(gameShopPacketOutputPath, `${JSON.stringify({
+      ...existing,
+      items: gameShopInfos,
+    }, null, 2)}\n`, "utf8");
+    console.log(`Wrote Crystal game shop packet manifest to ${gameShopPacketOutputPath}`);
+    return;
+  }
   const baseStatsPackets = parseBaseStatsPackets();
   const guildBuffPacket = parseGuildBuffListPacket();
   const mapObjectInfo = buildMapObjectInfo(maps, npcs, settings);
@@ -950,9 +963,18 @@ function parseGameShopInfos(reader, version, items) {
       gold_price: item.gold_price,
       credit_price: item.credit_price,
       count: item.count,
+      item_shape: item.info.shape,
+      item_stack_size: item.info.stack_size,
       class: item.class,
       category: item.category,
       stock: item.stock,
+      individual_stock: item.individual_stock,
+      deal: item.deal,
+      top_item: item.top_item,
+      // Int64 is a BigInt in the binary reader; keep exact Crystal ticks in JSON.
+      date_binary_datetime: item.date_binary.toString(),
+      can_buy_credit: item.can_buy_credit,
+      can_buy_gold: item.can_buy_gold,
       stock_level: stockLevel,
       payload_len: payload.length,
       payload_hex: payload.toString("hex"),

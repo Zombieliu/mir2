@@ -53,7 +53,7 @@ use super::monsters::{
 use super::npc::{ActiveNpcServiceState, NpcFlagState};
 use super::packets::{
     decode_crystal_payload, object_health_info_for_entity, stage5_append_mail_to_save,
-    stage5_guild_request_war_packet,
+    stage5_guild_request_war_packet, stage5_receive_mail_packet,
 };
 use super::quests::QuestState;
 use super::resources::{
@@ -2124,6 +2124,23 @@ mod game_shop_validation_tests {
                 Some(u64::from(committed_mail.id))
             );
             assert_eq!(execution.outcome.failure, None);
+            let receive = execution
+                .packets
+                .iter()
+                .find_map(|packet| match packet {
+                    ServerPacket::ReceiveMail { mail } => Some(mail),
+                    _ => None,
+                })
+                .unwrap_or_else(|| panic!("{label} purchase should refresh ReceiveMail"));
+            let delivered = receive
+                .iter()
+                .find(|mail| mail.mail_id == u64::from(committed_mail.id))
+                .unwrap_or_else(|| panic!("{label} ReceiveMail should include committed id"));
+            assert_eq!(delivered.items.len(), committed_mail.items.len());
+            assert!(
+                delivered.items.len() >= 1,
+                "purchase parcel must carry an item"
+            );
             assert!(execution.packets.iter().any(|packet| match price_type {
                 GameShopPriceType::Gold => matches!(packet, ServerPacket::LoseGold { gold: 10 }),
                 GameShopPriceType::Credit => {
@@ -2305,7 +2322,36 @@ mod game_shop_validation_tests {
             .expect("the authoritative catalog should contain a Gold product");
         let legacy_packets = legacy.game_shop_buy_packet(game_shop_index, 1, 1);
         let typed_execution = typed.game_shop_buy_packet_with_outcome(game_shop_index, 1, 1);
-        assert_eq!(legacy_packets, typed_execution.packets);
+        let legacy_mail = legacy_packets.iter().find_map(|packet| match packet {
+            ServerPacket::ReceiveMail { mail } => Some(mail),
+            _ => None,
+        });
+        let typed_mail = typed_execution
+            .packets
+            .iter()
+            .find_map(|packet| match packet {
+                ServerPacket::ReceiveMail { mail } => Some(mail),
+                _ => None,
+            });
+        let legacy_delivered = legacy_mail
+            .and_then(|mail| mail.first())
+            .expect("legacy path must publish the committed parcel");
+        let delivered = typed_mail
+            .and_then(|mail| mail.first())
+            .expect("typed production path must publish the committed parcel");
+        assert_eq!(legacy_delivered.mail_id, delivered.mail_id);
+        assert_eq!(legacy_delivered.items.len(), delivered.items.len());
+        assert_eq!(delivered.items.len(), 1);
+        let legacy_non_mail = legacy_packets
+            .iter()
+            .filter(|packet| !matches!(packet, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>();
+        let typed_non_mail = typed_execution
+            .packets
+            .iter()
+            .filter(|packet| !matches!(packet, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>();
+        assert_eq!(legacy_non_mail, typed_non_mail);
         assert!(typed_execution.outcome.success);
     }
 
@@ -4743,6 +4789,10 @@ impl SimulationSession {
             ),
             chat_type: ChatType::Hint,
         });
+        // The committed parcel is authoritative mail. Publish the complete
+        // post-commit mailbox so native clients can render it immediately;
+        // idempotent replays returned above remain packet-free.
+        packets.push(stage5_receive_mail_packet(self.app.world()));
         GameShopPurchaseExecution {
             packets,
             outcome: GameShopPurchaseOutcome::success(

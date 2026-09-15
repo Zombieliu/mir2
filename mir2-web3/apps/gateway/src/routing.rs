@@ -22074,6 +22074,47 @@ mod tests {
                 key: "crystal:0:101:100".to_string(),
             })
             .expect("target transfer should execute");
+        // The native attack path refreshes from the authenticated personal
+        // runtime.  Equip a real Crystal profile whose accuracy always clears
+        // this target's derived agility, then re-establish the adjacent
+        // authoritative transform after the fixture state restore.
+        equip_runtime_crystal_items_for_class(
+            &mut first,
+            MirClass::Warrior,
+            &[
+                ("BloodStealerSword", mir2_simulation::EquipmentSlot::Weapon, 1),
+                ("DragonPendant5", mir2_simulation::EquipmentSlot::Necklace, 1),
+                (
+                    "SharpBracelet",
+                    mir2_simulation::EquipmentSlot::BraceletLeft,
+                    1,
+                ),
+                (
+                    "SurvivalBracelet",
+                    mir2_simulation::EquipmentSlot::BraceletRight,
+                    1,
+                ),
+            ],
+        );
+        let attacker_session_id = first
+            .current_zone_session_id()
+            .expect("attacker should have a shared-zone session");
+        let attacker_position = Point { x: 100, y: 100 };
+        let _ = first.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id: attacker_session_id.clone(),
+                position: attacker_position.clone(),
+                direction: MirDirection::Right,
+            },
+            false,
+        );
+        first
+            .inner
+            .force_authoritative_player_transform(attacker_position, MirDirection::Right);
+        second
+            .inner
+            .force_authoritative_player_vitals_with_max_hp(Some(1), Some(1), None);
+        second.sync_zone_snapshot();
         first
             .execute(WorldCommand::ClientPacket(ClientPacket::ChangeAMode {
                 mode: 5,
@@ -22083,6 +22124,9 @@ mod tests {
         let first_snapshot = first.world_snapshot();
         let second_snapshot = second.world_snapshot();
         assert!(!first_snapshot.in_safe_zone && !second_snapshot.in_safe_zone);
+        let target_local_object_id = second_snapshot
+            .player_object_id
+            .expect("target session should expose its owner-local object id");
         let attacker = first_snapshot
             .entities
             .iter()
@@ -22100,13 +22144,10 @@ mod tests {
                 .max((attacker.y - target.y).abs())
                 <= 1
         );
-        let attacker_session_id = first
-            .current_zone_session_id()
-            .expect("attacker should have a shared-zone session");
         let target_session_id = second
             .current_zone_session_id()
             .expect("target should have a shared-zone session");
-        let mut state = zone_state.lock().expect("shared zone state should lock");
+        let state = zone_state.lock().expect("shared zone state should lock");
         let zone = state
             .zone_manager
             .zone(&ZoneKey::for_map("0"))
@@ -22145,18 +22186,19 @@ mod tests {
         assert!(zone
             .player_vitals(&target_session_id)
             .is_some_and(|(hp, _, _)| hp > 0));
-        state
-            .zone_manager
-            .handle(ZoneCommand::UpdatePlayerCombatStats {
-                session_id: attacker_session_id,
-                stats: mir2_simulation::ZonePlayerCombatStats {
-                    min_dc: 500,
-                    max_dc: 500,
-                    accuracy: 100,
-                    ..Default::default()
-                },
-            });
         drop(state);
+        let attacker_stats = first.inner.zone_player_combat_stats();
+        let target_stats = second.inner.zone_player_combat_stats();
+        assert!(
+            attacker_stats.min_dc > 0 && attacker_stats.max_dc >= attacker_stats.min_dc,
+            "fixture requires a real personal melee damage range: {attacker_stats:?}"
+        );
+        assert!(
+            attacker_stats.accuracy >= target_stats.agility,
+            "fixture requires a deterministic personal hit (accuracy {}, target agility {})",
+            attacker_stats.accuracy,
+            target_stats.agility
+        );
 
         let attack_command = WorldCommand::Attack {
             object_id: target.object_id,
@@ -22184,8 +22226,8 @@ mod tests {
         );
         assert!(observer_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::ObjectStruck { info } if info.object_id == target.object_id
-        )));
+            ServerPacket::ObjectStruck { info } if info.object_id == target_local_object_id
+        )), "target keepalive must receive the authoritative PvP hit: {observer_packets:?}");
         assert_eq!(second.world_snapshot().player_hp, Some(0));
         assert_eq!(first.world_snapshot().player_pk_points, 100);
     }
@@ -22207,6 +22249,43 @@ mod tests {
                 key: "crystal:0:331:280".to_string(),
             })
             .expect("target transfer should execute");
+        // Attacks refresh their combat block from the authenticated personal
+        // runtime.  Use legal equipped Crystal items instead of a transient
+        // Zone-only stat override: the resulting DC can damage, and its
+        // accuracy exceeds this target's derived agility for every roll.
+        equip_runtime_crystal_items_for_class(
+            &mut attacker,
+            MirClass::Warrior,
+            &[
+                ("BloodStealerSword", mir2_simulation::EquipmentSlot::Weapon, 1),
+                ("DragonPendant5", mir2_simulation::EquipmentSlot::Necklace, 1),
+                (
+                    "SharpBracelet",
+                    mir2_simulation::EquipmentSlot::BraceletLeft,
+                    1,
+                ),
+                (
+                    "SurvivalBracelet",
+                    mir2_simulation::EquipmentSlot::BraceletRight,
+                    1,
+                ),
+            ],
+        );
+        let attacker_position = Point { x: 330, y: 280 };
+        let attacker_session_id = attacker
+            .current_zone_session_id()
+            .expect("attacker should have a shared-zone session");
+        let _ = attacker.dispatch_zone_player_command(
+            ZoneCommand::SyncPlayerTransform {
+                session_id: attacker_session_id.clone(),
+                position: attacker_position.clone(),
+                direction: MirDirection::Right,
+            },
+            false,
+        );
+        attacker
+            .inner
+            .force_authoritative_player_transform(attacker_position, MirDirection::Right);
         for item_key in ["red-drop-a", "red-drop-b"] {
             target
                 .execute(WorldCommand::Stage5Command {
@@ -22226,10 +22305,30 @@ mod tests {
             }))
             .expect("all-mode change should execute");
         target.inner.apply_zone_unlawful_player_kill(300);
+        // Keep the fixture lethal after the native path refreshes combat stats
+        // from the authenticated personal runtime.  The Zone clamps applied
+        // damage to the target's current HP, so one HP gives a deterministic
+        // queued lethal delta without injecting test-only authority into the
+        // shared Zone combat-stat projection.
+        target
+            .inner
+            .force_authoritative_player_vitals_with_max_hp(Some(1), Some(1), None);
         target.sync_zone_snapshot();
 
         let before = target.world_snapshot();
         assert!(!before.in_safe_zone);
+        let attacker_stats = attacker.inner.zone_player_combat_stats();
+        let target_stats = target.inner.zone_player_combat_stats();
+        assert!(
+            attacker_stats.min_dc > 0 && attacker_stats.max_dc >= attacker_stats.min_dc,
+            "fixture requires a real personal melee damage range: {attacker_stats:?}"
+        );
+        assert!(
+            attacker_stats.accuracy >= target_stats.agility,
+            "fixture requires a deterministic personal hit (accuracy {}, target agility {})",
+            attacker_stats.accuracy,
+            target_stats.agility
+        );
         let expected_lethal_damage = before
             .player_hp
             .expect("red-name target should expose its current HP");
@@ -22244,23 +22343,6 @@ mod tests {
             .into_iter()
             .find(|entity| entity.kind == WorldEntityKind::Player && entity.name == "Outlaw")
             .expect("attacker should see red-name target");
-        let attacker_session_id = attacker
-            .current_zone_session_id()
-            .expect("attacker should have a shared-zone session");
-        zone_state
-            .lock()
-            .expect("shared zone state should lock")
-            .zone_manager
-            .handle(ZoneCommand::UpdatePlayerCombatStats {
-                session_id: attacker_session_id,
-                stats: mir2_simulation::ZonePlayerCombatStats {
-                    min_dc: 500,
-                    max_dc: 500,
-                    accuracy: 100,
-                    ..Default::default()
-                },
-            });
-
         attacker
             .execute(WorldCommand::Attack {
                 object_id: target_entity.object_id,
@@ -28042,6 +28124,9 @@ mod tests {
                 now_ms: 1,
             });
 
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 1 }))
+            .expect("fixture should drain unrelated guild projection before teleport");
         runtime.fail_next_npc_teleport_checkpoint_restore = true;
         let rejected = runtime
             .execute(WorldCommand::ClientPacket(ClientPacket::TeleportToNpc {
@@ -28049,7 +28134,7 @@ mod tests {
             }))
             .unwrap();
 
-        assert!(rejected.is_empty());
+        assert!(rejected.is_empty(), "rollback must dispatch no packets: {rejected:?}");
         assert_eq!(runtime.world_snapshot().gold, 9_000);
         assert_eq!(
             zone_state
@@ -28105,6 +28190,9 @@ mod tests {
             .inner
             .restore_active_character_checkpoint(&checkpoint)
             .unwrap();
+        runtime
+            .execute(WorldCommand::ClientPacket(ClientPacket::KeepAlive { time: 1 }))
+            .expect("fixture should drain unrelated guild projection before teleport");
         let before = runtime.world_snapshot();
 
         let packets = runtime
@@ -28114,7 +28202,7 @@ mod tests {
             .unwrap();
         let after = runtime.world_snapshot();
 
-        assert!(packets.is_empty());
+        assert!(packets.is_empty(), "disabled teleport must dispatch no packets: {packets:?}");
         assert_eq!(after.gold, before.gold);
         let before_player = before
             .entities

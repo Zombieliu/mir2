@@ -42,6 +42,8 @@ pub struct NativeGameShopPurchaseRequest {
 #[derive(Debug, Clone)]
 pub enum WorldCommand {
     ClientPacket(ClientPacket),
+    /// Gateway-only bootstrap after taking custody of an authenticated retained session.
+    ReplayRetainedStartGameBootstrap { character_index: i32 },
     /// Trusted native receipt purchase. Raw clients cannot construct this
     /// command; Gateway binds the server idempotency key to authenticated
     /// identity before the Zone/Simulation path sees it.
@@ -127,6 +129,9 @@ pub fn validate_production_player_command(
     command: &WorldCommand,
 ) -> Result<(), String> {
     match command {
+        WorldCommand::ReplayRetainedStartGameBootstrap { .. } => {
+            Err("retained bootstrap replay is not allowed on the production player path".to_string())
+        }
         WorldCommand::PasskeyLogin { .. } => {
             Err("raw passkey login is not allowed on the production player path".to_string())
         }
@@ -200,6 +205,7 @@ pub(crate) fn parse_debug_crystal_transfer_key(
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WorldCommandKind {
     ClientPacket(&'static str),
+    ReplayRetainedStartGameBootstrap,
     PasskeyLogin,
     MoveTo,
     Attack,
@@ -228,6 +234,7 @@ impl WorldCommand {
                 WorldCommandKind::ClientPacket(client_packet_name(packet))
             }
             Self::NativeGameShopPurchase(_) => WorldCommandKind::ClientPacket("GameShopBuy"),
+            Self::ReplayRetainedStartGameBootstrap { .. } => WorldCommandKind::ReplayRetainedStartGameBootstrap,
             Self::PasskeyLogin { .. } => WorldCommandKind::PasskeyLogin,
             Self::MoveTo { .. } => WorldCommandKind::MoveTo,
             Self::Attack { .. } => WorldCommandKind::Attack,
@@ -963,6 +970,9 @@ impl WorldRuntime for InProcessWorldRuntime {
         let before = if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
         let packets = match command {
             WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
+            WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
+                self.session.replay_active_character_bootstrap(character_index)
+            }
             WorldCommand::NativeGameShopPurchase(request) => {
                 self.session
                     .game_shop_buy_packet_idempotent(request)?

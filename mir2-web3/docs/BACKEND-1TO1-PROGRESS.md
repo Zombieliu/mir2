@@ -1,5 +1,21 @@
 # Backend 1:1 Progress
 
+> 2026-09-16 Game Shop Candidate checkpoint: source cards/categories/quantities,
+> payment confirmation, retained authenticated metadata replay and committed
+> mailbox projection are implemented. Native R30 visually proves two restored
+> parcels, read-state synchronization and two collected bag items. A new normal
+> Gold purchase updates mail total 2 → 3 immediately; normal relogin preserves
+> claimed status and the two bag items without duplication. Mail subtree
+> retention stops the observed R29 unbounded image growth in the bounded soak.
+> Gateway 778 passed / 8 ignored; Windows 655/655 with complete C assets;
+> native-ui 849/849 plus the retained-shop lifecycle regression. All five initial
+> simulation fixture failures pass focused reruns; no final full-suite rerun is
+> claimed. R31 Ctrl+A highlight passes; Home/End remain under repair. Original
+> paired UI and full three-class visual acceptance remain open. Natural routes:
+> Warrior 55/55 + 4/4 at Lv30; Wizard/Taoist 45/55 + 3/4 at Lv25 each.
+> Completed route units 155/177; this does not change global parity.
+> See [Game Shop QA](generated/player-qa/native-game-shop-20260915/README.md).
+
 > 2026-09-15 shared primary-hit practice follow-up: the owner-bound receipt
 > now covers only SoulFireBall, FireBall and GreatFireBall after actual positive
 > primary-target damage. Spell-aware replay fences retain legacy SoulFireBall

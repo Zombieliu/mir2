@@ -5297,6 +5297,7 @@ impl WireZoneOwnerCommandMode {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "command", content = "arguments", rename_all = "camelCase")]
 enum WireWorldCommand {
+    ReplayRetainedStartGameBootstrap { character_index: i32 },
     ClientPacket {
         frame: Vec<u8>,
     },
@@ -5381,6 +5382,9 @@ enum WireWorldCommand {
 impl WireWorldCommand {
     fn from_world(command: WorldCommand) -> Result<Self, String> {
         Ok(match command {
+            WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
+                Self::ReplayRetainedStartGameBootstrap { character_index }
+            }
             WorldCommand::ClientPacket(packet) => Self::ClientPacket {
                 frame: encode_client_packet(&packet)
                     .map_err(|error| format!("client packet encode failed: {error}"))?,
@@ -5452,6 +5456,9 @@ impl WireWorldCommand {
 
     fn into_world(self) -> Result<WorldCommand, ZoneRpcFault> {
         Ok(match self {
+            Self::ReplayRetainedStartGameBootstrap { character_index } => {
+                WorldCommand::ReplayRetainedStartGameBootstrap { character_index }
+            }
             Self::ClientPacket { frame } => {
                 WorldCommand::ClientPacket(decode_client_packet(&frame).map_err(|error| {
                     ZoneRpcFault::new(
@@ -6821,6 +6828,17 @@ mod exact_ground_drop_snapshot_tests {
 #[cfg(test)]
 mod zone_rpc_authorization_tests {
     use super::*;
+
+    #[test]
+    fn retained_bootstrap_rpc_round_trip_remains_gateway_only() {
+        let wire = WireWorldCommand::from_world(WorldCommand::ReplayRetainedStartGameBootstrap { character_index: 8 }).unwrap();
+        let encoded = serde_json::to_vec(&wire).unwrap();
+        let decoded: WireWorldCommand = serde_json::from_slice(&encoded).unwrap();
+        let command = decoded.into_world().unwrap();
+        assert!(matches!(command, WorldCommand::ReplayRetainedStartGameBootstrap { character_index: 8 }));
+        assert!(mir2_simulation::validate_production_player_command(true, &command).is_err());
+        assert!(mir2_simulation::validate_production_player_command(false, &command).is_err());
+    }
 
     fn envelope() -> ZoneRpcEnvelope {
         ZoneRpcEnvelope {

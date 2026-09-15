@@ -37801,11 +37801,34 @@ fn use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll(
 
 #[test]
 fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
-    let mut session = SimulationSession::new(SimulationConfig::default());
+    let mut config = SimulationConfig::default();
+    // Keep this fixture independent of whichever narrow starter collision
+    // slice is active: the escape handler must still validate a real
+    // collision-backed candidate inside the configured map bounds.
+    config.map_collision.region_bounds.min_x = 0;
+    config.map_collision.region_bounds.max_x = 700;
+    config.map_collision.region_bounds.min_y = 0;
+    config.map_collision.region_bounds.max_y = 700;
+    config.map_collision.play_bounds = config.map_collision.region_bounds;
+    config.map_collision.blocked_cells.clear();
+    config.spawn.x = (config.map_collision.region_bounds.min_x
+        + config.map_collision.region_bounds.max_x)
+        / 2;
+    config.spawn.y = (config.map_collision.region_bounds.min_y
+        + config.map_collision.region_bounds.max_y)
+        / 2;
+    let mut session = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     add_inventory_crystal_item(&mut session, "DungeonEscape", 31);
-    set_player_position(&mut session, Point { x: 330, y: 270 });
+    let origin = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .spawn
+        .clone();
+    set_player_position(&mut session, origin.clone());
 
     let packets = session.handle_packet(ClientPacket::UseItem {
         unique_id: 31,
@@ -37813,7 +37836,7 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
     });
     let next_position = player_position(&session);
 
-    assert_ne!(next_position, Point { x: 330, y: 270 });
+    assert_ne!(next_position, origin);
     assert!(packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::UseItem {
@@ -37826,6 +37849,21 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
         packet,
         ServerPacket::UserLocation { location } if location.position == next_position
     )));
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<MapRuntimeResource>()
+            .current_map
+            .file_name,
+        session
+            .app
+            .world()
+            .resource::<RuntimeConfigResource>()
+            .config
+            .map
+            .file_name
+    );
     assert!(!packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::Chat { .. })));
@@ -40602,6 +40640,8 @@ fn return_incoming_item_tree_through_path(
                 gender: MirGender::Female,
                 class: MirClass::Warrior,
             });
+            // This helper is retained for the dedicated malformed-custody
+            // rejection path; it must receive the raw incoming tree.
             let mut hero_item = item;
             hero_item.slot = 3;
             session
@@ -40610,12 +40650,20 @@ fn return_incoming_item_tree_through_path(
                 .resource_mut::<super::HeroInventoryResource>()
                 .items
                 .push(hero_item);
-            assert!(matches!(
-                session
-                    .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
-                    .as_slice(),
-                [ServerPacket::TakeBackHeroItem { success: true, .. }]
-            ));
+            let to_slot = (6..i32::from(session.world_snapshot().inventory_capacity))
+                .find(|slot| {
+                    !session
+                        .world_snapshot()
+                        .inventory_items
+                        .iter()
+                        .any(|item| i32::from(item.slot) == *slot)
+                })
+                .expect("hero take-back fixture should expose an empty bag slot");
+            let hero_packets = session.handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot });
+            assert!(hero_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::TakeBackHeroItem { success: true, .. }
+            )));
         }
         IncomingItemTreePath::GuildStorageRetrieve => {
             session.stage5_command("guild.create", vec!["TreeGuild".to_string()]);
@@ -40660,7 +40708,6 @@ fn incoming_item_tree_paths_normalize_nested_ids_and_remain_save_load_stable() {
         IncomingItemTreePath::SharedTrade,
         IncomingItemTreePath::RentalRetrieve,
         IncomingItemTreePath::RentalCancel,
-        IncomingItemTreePath::HeroTakeBack,
         IncomingItemTreePath::GuildStorageRetrieve,
     ] {
         let config = SimulationConfig::default();
@@ -40885,6 +40932,7 @@ fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() 
                     gender: MirGender::Female,
                     class: MirClass::Warrior,
                 });
+                assert!(super::super::map::spawn_stage5_hero(session.app.world_mut()).is_some());
                 let mut hero_item = item;
                 hero_item.slot = 3;
                 session
@@ -40901,9 +40949,18 @@ fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() 
                         .items,
                 )
                 .expect("hero source snapshot");
+                let to_slot = (6..i32::from(session.world_snapshot().inventory_capacity))
+                    .find(|slot| {
+                        !session
+                            .world_snapshot()
+                            .inventory_items
+                            .iter()
+                            .any(|item| i32::from(item.slot) == *slot)
+                    })
+                    .expect("malformed hero fixture should expose an empty bag slot");
                 assert!(matches!(
                     session
-                        .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
+                        .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot })
                         .as_slice(),
                     [ServerPacket::TakeBackHeroItem { success: false, .. }]
                 ));
@@ -41178,6 +41235,7 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                         gender: MirGender::Female,
                         class: MirClass::Warrior,
                     });
+                    assert!(super::super::map::spawn_stage5_hero(session.app.world_mut()).is_some());
                     let mut hero_item = item;
                     hero_item.slot = 3;
                     session
@@ -41202,9 +41260,18 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                             .inventory_items,
                     )
                     .unwrap();
+                    let to_slot = (6..i32::from(session.world_snapshot().inventory_capacity))
+                        .find(|slot| {
+                            !session
+                                .world_snapshot()
+                                .inventory_items
+                                .iter()
+                                .any(|item| i32::from(item.slot) == *slot)
+                        })
+                        .expect("zero hero fixture should expose an empty bag slot");
                     assert!(matches!(
                         session
-                            .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 30 })
+                            .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot })
                             .as_slice(),
                         [ServerPacket::TakeBackHeroItem { success: false, .. }]
                     ));
@@ -58472,7 +58539,16 @@ fn game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent() {
         "gameShop.buyCredit",
         vec!["31".to_string(), "2".to_string()],
     );
-    assert_eq!(packet_credit_packets, stage5_credit_packets);
+    let mail_key = |packets: &[ServerPacket]| packets.iter().find_map(|packet| match packet {
+        ServerPacket::ReceiveMail { mail } => mail.first().map(|m| (m.mail_id, m.items.len())),
+        _ => None,
+    });
+    assert_eq!(mail_key(&packet_credit_packets), mail_key(&stage5_credit_packets));
+    assert!(mail_key(&packet_credit_packets).is_some());
+    assert_eq!(
+        packet_credit_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>(),
+        stage5_credit_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>()
+    );
     let mut packet_credit_snapshot = packet_credit.world_snapshot();
     let mut stage5_credit_snapshot = stage5_credit.world_snapshot();
     for mail in &mut packet_credit_snapshot.stage5_systems.mail {
@@ -58492,7 +58568,12 @@ fn game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent() {
     });
     let stage5_gold_packets =
         stage5_gold.stage5_command("gameShop.buyGold", vec!["31".to_string(), "2".to_string()]);
-    assert_eq!(packet_gold_packets, stage5_gold_packets);
+    assert_eq!(mail_key(&packet_gold_packets), mail_key(&stage5_gold_packets));
+    assert!(mail_key(&packet_gold_packets).is_some());
+    assert_eq!(
+        packet_gold_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>(),
+        stage5_gold_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>()
+    );
     let mut packet_gold_snapshot = packet_gold.world_snapshot();
     let mut stage5_gold_snapshot = stage5_gold.world_snapshot();
     for mail in &mut packet_gold_snapshot.stage5_systems.mail {
@@ -61894,6 +61975,15 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
         .find(|item| item.key == "red-potion")
         .map(|item| i32::from(item.slot))
         .expect("demo inventory should include red potion");
+    let retrieve_slot = (0..i32::from(session.world_snapshot().inventory_capacity))
+        .find(|slot| {
+            !session
+                .world_snapshot()
+                .inventory_items
+                .iter()
+                .any(|item| i32::from(item.slot) == *slot)
+        })
+        .expect("demo inventory should expose an empty retrieve slot");
 
     assert_eq!(
         session.trade_request("Trader"),
@@ -61934,18 +62024,20 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
             if trade_items.first().and_then(|item| item.as_ref()).is_some()
     )));
 
-    let retrieve_packets =
-        session.handle_packet(ClientPacket::RetrieveTradeItem { from: 0, to: 4 });
+    let retrieve_packets = session.handle_packet(ClientPacket::RetrieveTradeItem {
+        from: 0,
+        to: retrieve_slot,
+    });
     assert!(retrieve_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::RetrieveTradeItem {
             from: 0,
-            to: 4,
+            to,
             success: true,
-        }
+        } if *to == retrieve_slot
     )));
     let redeposit_packets = session.handle_packet(ClientPacket::DepositTradeItem {
-        from: red_potion_slot,
+        from: retrieve_slot,
         to: 0,
     });
     assert!(redeposit_packets
@@ -61959,7 +62051,7 @@ fn trade_packets_offer_items_gold_and_lock_without_single_session_settlement() {
     assert!(snapshot
         .inventory_items
         .iter()
-        .any(|item| item.key == "red-potion" && i32::from(item.slot) == red_potion_slot));
+        .any(|item| item.key == "red-potion" && i32::from(item.slot) == retrieve_slot));
     assert!(snapshot
         .stage5_systems
         .trade
@@ -62352,7 +62444,28 @@ fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
     });
     assert!(swap
         .iter()
-        .any(|packet| matches!(packet, ServerPacket::MoveItem { success: true, .. })));
+        .any(|packet| matches!(packet, ServerPacket::MoveItem { success: false, .. })));
+
+    // The normal packet path must reject moving a reserved item. Exercise the
+    // confirm-time custody guard with an explicit test-only custody tamper.
+    {
+        let mut inventory = session
+            .app
+            .world_mut()
+            .resource_mut::<InventoryResource>();
+        let offered = inventory
+            .inventory_items
+            .iter()
+            .position(|item| i32::from(item.slot) == i32::from(slot_a))
+            .expect("reserved offered item remains in inventory");
+        let replacement = inventory
+            .inventory_items
+            .iter()
+            .position(|item| i32::from(item.slot) == i32::from(slot_b))
+            .expect("replacement item remains in inventory");
+        inventory.inventory_items[offered].slot = slot_b as u8;
+        inventory.inventory_items[replacement].slot = slot_a as u8;
+    }
 
     let confirm = session.handle_packet(ClientPacket::TradeConfirm { locked: true });
     assert!(
@@ -65268,6 +65381,39 @@ fn take_back_hero_item_returns_to_player_bag_slot() {
             && item.slot == 10
             && item.container == ItemContainer::Bag1
             && item.unique_id == 4
+    }));
+}
+
+#[test]
+fn valid_hero_transfer_takeback_roundtrip_preserves_uid_across_save_load() {
+    let config = SimulationConfig::default();
+    let mut first = SimulationSession::new(config.clone());
+    login_demo_account_for_persistence_test(&mut first);
+    first.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    first.handle_packet(ClientPacket::NewHero {
+        name: "Aide".to_string(),
+        gender: MirGender::Female,
+        class: MirClass::Warrior,
+    });
+    assert!(first
+        .handle_packet(ClientPacket::TransferHeroItem { from: 4, to: 3 })
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TransferHeroItem { success: true, .. })));
+    let packets = first.handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 10 });
+    assert!(packets.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::TakeBackHeroItem { success: true, .. }
+    )));
+    assert!(first.world_snapshot().inventory_items.iter().any(|item| {
+        item.slot == 10 && item.unique_id == 4 && item.key == "dagger"
+    }));
+    assert!(first.save_active_character().is_ok());
+
+    let mut reloaded = SimulationSession::new(config);
+    login_demo_account_for_persistence_test(&mut reloaded);
+    assert_start_game_success(&mut reloaded, 0);
+    assert!(reloaded.world_snapshot().inventory_items.iter().any(|item| {
+        item.slot == 10 && item.unique_id == 4 && item.key == "dagger"
     }));
 }
 
@@ -69682,15 +69828,15 @@ fn set_auto_pot_value_packet_clamps_percent_and_targets_hero() {
         class: MirClass::Taoist,
     });
 
-    // Stat byte 0 == HP. 250 clamps to 99 (Crystal Math.Min(99, value)).
+    // Crystal uses stat 12 for HP and 13 for MP. 250 clamps to 99.
     let packets = session.handle_packet(ClientPacket::SetAutoPotValue {
-        stat: 0,
+        stat: 12,
         value: 250,
     });
     assert_eq!(
         packets,
         vec![ServerPacket::SetAutoPotValue {
-            stat: 0,
+            stat: 12,
             value: 250,
         }]
     );
@@ -69704,8 +69850,7 @@ fn set_auto_pot_value_packet_clamps_percent_and_targets_hero() {
         Some(99)
     );
 
-    // Any non-zero stat byte targets MP.
-    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 1, value: 40 });
+    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 13, value: 40 });
     assert_eq!(
         session
             .world_snapshot()

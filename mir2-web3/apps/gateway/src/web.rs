@@ -5550,6 +5550,7 @@ async fn handle_socket_inner(
                     continue;
                 }
                 let start_game_character_index = start_game_character_index_for_action(&action);
+                let mut restored_from_reconnect = false;
                 if let (true, Some(account_id), Some(character_index)) = (
                     authenticated,
                     authenticated_account_id.as_deref(),
@@ -5563,6 +5564,7 @@ async fn handle_socket_inner(
                         let restored_session_id = restored.session.session_id().to_string();
                         *session = restored.session;
                         *active_session_permit = restored.active_session_permit;
+                        restored_from_reconnect = true;
                         eprintln!(
                             "web reconnect grace restored session {restored_session_id} for {}/{}",
                             key.account_id, key.character_index
@@ -5755,6 +5757,12 @@ async fn handle_socket_inner(
                             execute_native_game_shop_handler_seam(session, request).map(|dispatch| {
                                 (dispatch.normal_packets, Some(dispatch.post_execution))
                             })
+                        } else if restored_from_reconnect && authenticated {
+                            session.replay_retained_start_game_bootstrap(
+                                authenticated_account_id.as_deref().unwrap_or_default(),
+                                start_game_character_index.ok_or_else(|| "retained bootstrap requires StartGame".to_string())?,
+                                restored_from_reconnect,
+                            ).map(|packets| (packets, None))
                         } else {
                             execute_session_action(
                                 session,
@@ -17542,7 +17550,7 @@ mod tests {
         assert_eq!(capacity.status().current_active_sessions, 1);
         assert_eq!(capacity.status().current_reconnect_leases, 1);
 
-        let restored = store
+        let mut restored = store
             .take(&key)
             .expect("stored reconnect session should be restored within grace");
         assert_eq!(restored.session.session_id(), session_id);
@@ -17557,6 +17565,16 @@ mod tests {
         assert!(restored.active_session_permit.is_some());
         assert_eq!(store.len(), 0);
         assert_eq!(capacity.status().current_reconnect_leases, 0);
+
+        let before = serde_json::to_value(restored.session.world_snapshot()).unwrap();
+        let packets = restored.session.replay_retained_start_game_bootstrap(
+            "demo", key.character_index, true,
+        ).expect("authenticated retained StartGame must replay metadata");
+        assert!(matches!(packets.first(), Some(ServerPacket::StartGame { result: 4, .. })));
+        assert_eq!(packets.iter().filter(|packet| matches!(packet, ServerPacket::GameShopInfo { .. })).count(), 105);
+        assert_eq!(serde_json::to_value(restored.session.world_snapshot()).unwrap(), before);
+        assert!(store.take(&key).is_none(), "reconnect custody is consumed once");
+        assert!(restored.session.handle_packet(ClientPacket::StartGame { character_index: key.character_index }).is_empty());
 
         drop(restored);
         assert_eq!(capacity.status().current_active_sessions, 0);

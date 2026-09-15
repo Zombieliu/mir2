@@ -3830,6 +3830,36 @@ impl SimulationSession {
             spawn_config_visible_npcs(self.app.world_mut());
         }
 
+        self.build_active_character_bootstrap(&character)
+    }
+
+    /// Internal gateway replay after an authenticated connection takes custody
+    /// of its retained character. Ordinary in-game StartGame stays rejected.
+    pub(crate) fn replay_active_character_bootstrap(
+        &mut self,
+        character_index: i32,
+    ) -> Vec<ServerPacket> {
+        let session = self.app.world().resource::<SessionResource>();
+        let Some(account_id) = active_session_mutating_account_id(session) else {
+            return vec![ServerPacket::StartGame { result: 1, resolution: 0 }];
+        };
+        let Some(character) = session.selected_character.clone()
+            .filter(|character| character.index == character_index) else {
+            return vec![ServerPacket::StartGame { result: 2, resolution: 0 }];
+        };
+        let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+        if let Some(ban) = active_account_ban(config, &account_id) {
+            return vec![ServerPacket::StartGameBanned {
+                reason: ban.reason,
+                expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
+            }];
+        }
+        let mut packets = self.build_active_character_bootstrap(&character);
+        super::packets::apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
+        packets
+    }
+
+    fn build_active_character_bootstrap(&mut self, character: &CharacterRecord) -> Vec<ServerPacket> {
         let visible_objects = collect_visible_objects(self.app.world());
         self.visible_objects = visible_objects.keys().copied().collect();
 
@@ -3928,7 +3958,13 @@ impl SimulationSession {
         ]);
         packets.extend(effective_crystal_quest_info_packets(self.app.world()));
         packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
-        packets.extend(start_game_account_social_and_shop_packets());
+        packets.extend(start_game_account_social_and_shop_packets().into_iter().map(|packet| {
+            if matches!(packet, ServerPacket::ReceiveMail { .. }) {
+                super::packets::stage5_receive_mail_packet(self.app.world())
+            } else {
+                packet
+            }
+        }));
         packets.extend(start_game_base_stats_packet(character.class));
         let npc_flags = self
             .app
