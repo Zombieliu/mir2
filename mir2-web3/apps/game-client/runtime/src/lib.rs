@@ -1936,7 +1936,9 @@ fn ingest_pending_scene_and_data_reset(
 fn discard_pending_scene_thread_locals() {
     PENDING_WORLD_STATE.with(|pending| *pending.borrow_mut() = None);
     PENDING_ENTITY_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
-    PENDING_ENTITY_RENDER_ATLASES.with(|pending| pending.borrow_mut().clear());
+    // Entity atlases are immutable process-lifetime assets.  Scene/session
+    // resets replace the models that reference them, but must not discard the
+    // only uploaded copy: the native host loads these pages once at startup.
     PENDING_MAP_RENDER_STATE.with(|pending| *pending.borrow_mut() = None);
     PENDING_MAP_RENDER_IMAGE_OPS.with(|pending| pending.borrow_mut().clear());
     PENDING_MAP_CAMERA_OFFSET.with(|offset| offset.set((0.0, 0.0)));
@@ -1949,7 +1951,6 @@ fn apply_scene_reset_to_runtime(
     mut tracker: ResMut<RuntimeSceneResetTracker>,
     mut state: ResMut<RuntimeWorldState>,
     mut entity_render_state: ResMut<RuntimeEntityRenderState>,
-    mut entity_atlases: ResMut<RuntimeEntityRenderAtlases>,
     mut map_render_state: ResMut<RuntimeMapRenderState>,
     mut map_atlases: ResMut<RuntimeMapRenderAtlases>,
     mut effect_render_state: ResMut<RuntimeEffectRenderState>,
@@ -1969,7 +1970,9 @@ fn apply_scene_reset_to_runtime(
 
     state.snapshot = None;
     entity_render_state.snapshot = None;
-    entity_atlases.images.clear();
+    // RuntimeEntityRenderAtlases intentionally survives this boundary. The
+    // Windows host uploads entity atlas pages once per process, while players
+    // may cross maps or return to character selection many times.
     map_render_state.snapshot = None;
     *map_atlases = RuntimeMapRenderAtlases::default();
     effect_render_state.snapshot = None;
@@ -8810,6 +8813,10 @@ mod native_data_path_tests {
         let mut app = ingest_app();
         app.world_mut().resource_mut::<RuntimeWorldState>().snapshot =
             Some(serde_json::from_str(r#"{"entities":[]}"#).unwrap());
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderAtlases>()
+            .images
+            .insert("starter:p1".to_owned(), Handle::<Image>::default());
         let scene_entity = app.world_mut().spawn_empty().id();
         app.world_mut()
             .resource_mut::<SceneRegistry>()
@@ -8839,6 +8846,11 @@ mod native_data_path_tests {
             .resource::<RuntimeWorldState>()
             .snapshot
             .is_none());
+        assert!(app
+            .world()
+            .resource::<RuntimeEntityRenderAtlases>()
+            .images
+            .contains_key("starter:p1"));
         assert!(app
             .world()
             .resource::<SceneRegistry>()

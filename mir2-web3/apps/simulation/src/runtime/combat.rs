@@ -60,6 +60,10 @@ use super::stats::{deterministic_range_roll, player_stats, PlayerStats};
 #[path = "warrior_preparation_tests.rs"]
 mod warrior_preparation_tests;
 
+#[cfg(test)]
+#[path = "zone_melee_passive_progression_tests.rs"]
+mod zone_melee_passive_progression_tests;
+
 #[allow(deprecated)]
 pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection) -> Option<u32> {
     attack_target_in_direction_at_distance(world, direction, 1)
@@ -859,7 +863,8 @@ pub(super) fn crystal_armour_reduced_damage(damage: i32, armour: i32) -> i32 {
     (damage - armour.max(0)).max(0)
 }
 
-fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick: u64) {
+fn melee_passive_skill_progression_packets(world: &mut World, tick: u64) -> Vec<ServerPacket> {
+    let mut packets = Vec::new();
     for (spell_name, spell) in [
         ("Fencing", Spell::Fencing),
         ("SpiritSword", Spell::SpiritSword),
@@ -875,9 +880,14 @@ fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick:
             continue;
         };
 
-        for packet in advance_magic_progression(world, index, spell, &magic, tick) {
-            queue_due_packet(world, due_tick, packet);
-        }
+        packets.extend(advance_magic_progression(world, index, spell, &magic, tick));
+    }
+    packets
+}
+
+fn queue_melee_passive_skill_progression(world: &mut World, due_tick: u64, tick: u64) {
+    for packet in melee_passive_skill_progression_packets(world, tick) {
+        queue_due_packet(world, due_tick, packet);
     }
 }
 
@@ -3238,7 +3248,13 @@ impl SimulationSession {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
-        let mut packets = Vec::new();
+        // Routing calls this only after the shared Zone has accepted the swing
+        // and emitted its authoritative ObjectAttack. At that commit boundary,
+        // passive weapon skills progress exactly as they do for personal-world
+        // melee scheduled above. Rejected cooldown, target, and movement
+        // attempts never reach this method.
+        let tick = runtime_tick(self.app.world());
+        let mut packets = melee_passive_skill_progression_packets(self.app.world_mut(), tick);
         if matches!(spell, Spell::Slaying | Spell::FlamingSword | Spell::TwinDrakeBlade)
             && skill_toggle_state(self.app.world(), spell)
         {

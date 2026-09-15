@@ -138,7 +138,9 @@ pub fn triggered(model: &KeyboardDialogUi, keys: &ButtonInput<KeyCode>, function
         return false;
     };
     if let Some(edges) = &model.key_edges {
-        return edges.iter().any(|(name, mods, pressed)| *pressed && bind.matches(name, *mods));
+        return edges
+            .iter()
+            .any(|(name, mods, pressed)| *pressed && bind.matches(name, *mods));
     }
     keys.get_just_pressed().any(|key| {
         let name = model
@@ -155,7 +157,9 @@ pub fn released(model: &KeyboardDialogUi, keys: &ButtonInput<KeyCode>, function:
         return false;
     };
     if let Some(edges) = &model.key_edges {
-        return edges.iter().any(|(name, mods, pressed)| !*pressed && bind.matches(name, *mods));
+        return edges
+            .iter()
+            .any(|(name, mods, pressed)| !*pressed && bind.matches(name, *mods));
     }
     keys.get_just_released()
         .any(|key| key_name(*key).is_some_and(|name| bind.matches(&name, modifiers(keys))))
@@ -172,13 +176,16 @@ fn event_modifiers(keys: &ButtonInput<KeyCode>, events: &[KeyboardInput]) -> Vec
             ButtonState::Released => held.press(event.key_code),
         }
     }
-    events.iter().map(|event| {
-        match event.state {
-            ButtonState::Pressed => held.press(event.key_code),
-            ButtonState::Released => held.release(event.key_code),
-        }
-        modifiers(&held)
-    }).collect()
+    events
+        .iter()
+        .map(|event| {
+            match event.state {
+                ButtonState::Pressed => held.press(event.key_code),
+                ButtonState::Released => held.release(event.key_code),
+            }
+            modifiers(&held)
+        })
+        .collect()
 }
 
 pub(in super::super) fn process(
@@ -415,78 +422,127 @@ mod tests {
         app.add_plugins(bevy::input::InputPlugin)
             .init_resource::<NativePlayerUiState>()
             .init_resource::<KeyboardHost>()
-            .insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..Default::default() })
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
             .add_systems(Update, process);
-        let window = app.world_mut().spawn((Window { focused:true, ..Default::default() },PrimaryWindow)).id();
-        (app,window)
+        let window = app
+            .world_mut()
+            .spawn((
+                Window {
+                    focused: true,
+                    ..Default::default()
+                },
+                PrimaryWindow,
+            ))
+            .id();
+        (app, window)
     }
     fn chord_event(app: &mut App, window: Entity, key: KeyCode, pressed: bool, repeat: bool) {
         app.world_mut().write_message(KeyboardInput {
-            key_code:key,
-            logical_key:match key { KeyCode::F1=>bevy::input::keyboard::Key::F1, KeyCode::ShiftLeft=>bevy::input::keyboard::Key::Shift, _=>bevy::input::keyboard::Key::Control },
-            state:if pressed {ButtonState::Pressed} else {ButtonState::Released},
-            text:None,repeat,window,
+            key_code: key,
+            logical_key: match key {
+                KeyCode::F1 => bevy::input::keyboard::Key::F1,
+                KeyCode::ShiftLeft => bevy::input::keyboard::Key::Shift,
+                _ => bevy::input::keyboard::Key::Control,
+            },
+            state: if pressed {
+                ButtonState::Pressed
+            } else {
+                ButtonState::Released
+            },
+            text: None,
+            repeat,
+            window,
         });
     }
-    fn chord_banks(app: &App) -> (bool,bool) {
-        let state=app.world().resource::<NativePlayerUiState>();
-        let keys=app.world().resource::<ButtonInput<KeyCode>>();
-        (triggered(&state.keyboard,keys,"Bar1Skill1"),triggered(&state.keyboard,keys,"Bar2Skill1"))
+    fn chord_banks(app: &App) -> (bool, bool) {
+        let state = app.world().resource::<NativePlayerUiState>();
+        let keys = app.world().resource::<ButtonInput<KeyCode>>();
+        (
+            triggered(&state.keyboard, keys, "Bar1Skill1"),
+            triggered(&state.keyboard, keys, "Bar2Skill1"),
+        )
     }
     #[test]
     fn quick_control_chord_uses_keydown_modifiers_in_real_input_pipeline() {
-        let (mut app,w)=chord_app();
-        for (key,down) in [(KeyCode::ControlLeft,true),(KeyCode::F1,true),(KeyCode::F1,false),(KeyCode::ControlLeft,false)] {
-            chord_event(&mut app,w,key,down,false);
+        let (mut app, w) = chord_app();
+        for (key, down) in [
+            (KeyCode::ControlLeft, true),
+            (KeyCode::F1, true),
+            (KeyCode::F1, false),
+            (KeyCode::ControlLeft, false),
+        ] {
+            chord_event(&mut app, w, key, down, false);
         }
         app.update();
-        assert_eq!(chord_banks(&app),(false,true));
-        assert!(!app.world().resource::<ButtonInput<KeyCode>>().pressed(KeyCode::ControlLeft));
+        assert_eq!(chord_banks(&app), (false, true));
+        assert!(!app
+            .world()
+            .resource::<ButtonInput<KeyCode>>()
+            .pressed(KeyCode::ControlLeft));
         app.update();
-        assert_eq!(chord_banks(&app),(false,false),"no replay next frame");
-        chord_event(&mut app,w,KeyCode::F1,true,false);
-        chord_event(&mut app,w,KeyCode::F1,false,false);
-        chord_event(&mut app,w,KeyCode::ControlLeft,true,false);
+        assert_eq!(chord_banks(&app), (false, false), "no replay next frame");
+        chord_event(&mut app, w, KeyCode::F1, true, false);
+        chord_event(&mut app, w, KeyCode::F1, false, false);
+        chord_event(&mut app, w, KeyCode::ControlLeft, true, false);
         app.update();
-        assert_eq!(chord_banks(&app),(true,false),"later Ctrl cannot modify earlier F1");
+        assert_eq!(
+            chord_banks(&app),
+            (true, false),
+            "later Ctrl cannot modify earlier F1"
+        );
     }
     #[test]
     fn held_and_two_sided_control_releases_preserve_event_time_bank() {
-        let (mut app,w)=chord_app();
-        chord_event(&mut app,w,KeyCode::ControlRight,true,false);
+        let (mut app, w) = chord_app();
+        chord_event(&mut app, w, KeyCode::ControlRight, true, false);
         app.update();
-        for (key,down) in [(KeyCode::ControlLeft,true),(KeyCode::ControlLeft,false),(KeyCode::F1,true),(KeyCode::F1,false),(KeyCode::ControlRight,false)] {
-            chord_event(&mut app,w,key,down,false);
+        for (key, down) in [
+            (KeyCode::ControlLeft, true),
+            (KeyCode::ControlLeft, false),
+            (KeyCode::F1, true),
+            (KeyCode::F1, false),
+            (KeyCode::ControlRight, false),
+        ] {
+            chord_event(&mut app, w, key, down, false);
         }
         app.update();
-        assert_eq!(chord_banks(&app),(false,true));
-        chord_event(&mut app,w,KeyCode::F1,true,true);
+        assert_eq!(chord_banks(&app), (false, true));
+        chord_event(&mut app, w, KeyCode::F1, true, true);
         app.update();
-        assert_eq!(chord_banks(&app),(false,false),"repeat does not invent a just-pressed binding");
+        assert_eq!(
+            chord_banks(&app),
+            (false, false),
+            "repeat does not invent a just-pressed binding"
+        );
     }
     #[test]
     fn chord_capture_consumes_gameplay_and_unfocused_edges_are_discarded() {
-        let (mut app,w)=chord_app();
+        let (mut app, w) = chord_app();
         {
-            let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
             state.keyboard.show();
             state.keyboard.action(KeyboardAction::Bind(0));
         }
         // Ctrl was held in the previous frame; the capture frame ends with release.
-        app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::ControlLeft);
-        chord_event(&mut app,w,KeyCode::F1,true,false);
-        chord_event(&mut app,w,KeyCode::F1,false,false);
-        chord_event(&mut app,w,KeyCode::ControlLeft,false,false);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::ControlLeft);
+        chord_event(&mut app, w, KeyCode::F1, true, false);
+        chord_event(&mut app, w, KeyCode::F1, false, false);
+        chord_event(&mut app, w, KeyCode::ControlLeft, false, false);
         app.update();
-        let state=app.world().resource::<NativePlayerUiState>();
-        assert_eq!(state.keyboard.bindings[0].key,"F1");
-        assert_eq!(state.keyboard.bindings[0].ctrl,1);
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert_eq!(state.keyboard.bindings[0].key, "F1");
+        assert_eq!(state.keyboard.bindings[0].ctrl, 1);
         assert!(state.keyboard.input_consumed);
         assert!(state.blocks_gameplay_keys());
-        app.world_mut().get_mut::<Window>(w).unwrap().focused=false;
-        chord_event(&mut app,w,KeyCode::F1,true,false);
+        app.world_mut().get_mut::<Window>(w).unwrap().focused = false;
+        chord_event(&mut app, w, KeyCode::F1, true, false);
         app.update();
-        assert_eq!(chord_banks(&app),(false,false));
+        assert_eq!(chord_banks(&app), (false, false));
     }
 
     #[test]

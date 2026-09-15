@@ -1075,14 +1075,25 @@ mod tests {
     fn blessed_armour_uses_registered_sound_without_invented_filename() {
         let mut queue = NativeGameplayAudioQueue::default();
         for (sequence, (file, accepted)) in [
-            ("M69-0.wav", true), ("M71-0.wav", false),
-            ("M71-1.wav", false), ("M17-0.wav", false),
+            ("M69-0.wav", true),
+            ("M71-0.wav", false),
+            ("M71-1.wav", false),
+            ("M17-0.wav", false),
             ("../M69-0.wav", false),
-        ].into_iter().enumerate() {
-            assert_eq!(queue.push(NativeGameplaySoundEvent {
-                generation: 1, sequence: sequence as u64,
-                cue: "BlessedArmour.launch".into(), file_name: file.into(),
-            }), accepted, "{file}");
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            assert_eq!(
+                queue.push(NativeGameplaySoundEvent {
+                    generation: 1,
+                    sequence: sequence as u64,
+                    cue: "BlessedArmour.launch".into(),
+                    file_name: file.into(),
+                }),
+                accepted,
+                "{file}"
+            );
         }
         assert_eq!(queue.len(), 1);
     }

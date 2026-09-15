@@ -795,10 +795,17 @@ mod tests {
 
 #[cfg(test)]
 mod hero_buff_source_preferences {
- use super::*;
- #[test]fn original_save_mirrors_player_expansion_under_hero_key_without_mutating_live_option(){
- let mut options=UiOptions::default();options.expanded_buff_window=false;options.expanded_hero_buff_window=true;
- let wire=PersistedOptions::from(&options);assert!(!wire.expanded_hero_buff_window);assert!(options.expanded_hero_buff_window);
- let restored=UiOptions::try_from(wire).unwrap();assert!(!restored.expanded_buff_window);assert!(!restored.expanded_hero_buff_window);
- }
+    use super::*;
+    #[test]
+    fn original_save_mirrors_player_expansion_under_hero_key_without_mutating_live_option() {
+        let mut options = UiOptions::default();
+        options.expanded_buff_window = false;
+        options.expanded_hero_buff_window = true;
+        let wire = PersistedOptions::from(&options);
+        assert!(!wire.expanded_hero_buff_window);
+        assert!(options.expanded_hero_buff_window);
+        let restored = UiOptions::try_from(wire).unwrap();
+        assert!(!restored.expanded_buff_window);
+        assert!(!restored.expanded_hero_buff_window);
+    }
 }

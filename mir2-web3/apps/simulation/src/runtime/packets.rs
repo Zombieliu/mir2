@@ -98,15 +98,20 @@ use super::monsters::{
 use super::movement::{current_location, town_revive_packets};
 use super::npc::{
     buy_item_impl, crystal_npc_object_in_data_range, crystal_npc_object_visible_in_world,
-    crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog, sell_item_impl,
+    crystal_npc_visible_to_character_for_profile, crystal_quest_ids_by_npc, dismiss_dialog,
+    sell_item_impl,
     CrystalNpcLocalTime, NpcFlagState,
 };
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
     completed_quest_ids, crystal_npc_quest_icon, crystal_quest_finish_npc_matches,
     crystal_quest_info_by_id, crystal_quest_reward_selection_missing,
-    crystal_quest_start_npc_matches, crystal_quest_task_list, ensure_runtime_quest,
+    crystal_quest_start_npc_matches, crystal_quest_task_list, effective_crystal_quest_info_by_id,
+    effective_quest_ids_for_npc, ensure_runtime_quest, newcomer_daily_bonus_update_packet,
     quest_definition_exists, quest_log_snapshots, quest_template_by_id,
+};
+use super::quests::quest_recurrence::{
+    quest_completion_is_permanent, refresh_quest_recurrence,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -3463,6 +3468,15 @@ fn active_npc_allows_quest_request(
     finish: bool,
     selected_item_index: Option<i32>,
 ) -> bool {
+    if newcomer_diary_allows_quest_request_without_npc(
+        world,
+        quest_id,
+        requested_npc_index,
+        finish,
+    ) {
+        return true;
+    }
+
     let Some(active_dialog) = world
         .resource::<NpcStateResource>()
         .active_npc_dialog
@@ -3477,24 +3491,66 @@ fn active_npc_allows_quest_request(
         return false;
     }
 
-    if !quest_npc_matches_request(quest_id, requested_npc_index, finish, npc_object_id) {
+    if !quest_npc_matches_request(
+        world,
+        quest_id,
+        requested_npc_index,
+        finish,
+        npc_object_id,
+    ) {
         return false;
     }
 
     crystal_npc_object_in_data_range(world, npc_object_id)
 }
 
+fn newcomer_diary_allows_quest_request_without_npc(
+    world: &World,
+    quest_id: i32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+) -> bool {
+    if !world
+        .get_resource::<QuestResource>()
+        .is_some_and(|quests| quests.newcomer_v1_cadence)
+    {
+        return false;
+    }
+    let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) else {
+        return false;
+    };
+    newcomer_diary_template_allows_quest_request(
+        info.npc_index,
+        info.finish_npc_index,
+        requested_npc_index,
+        finish,
+    )
+}
+
+fn newcomer_diary_template_allows_quest_request(
+    start_npc_index: u32,
+    finish_npc_index: u32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+) -> bool {
+    if finish {
+        start_npc_index == 0 && finish_npc_index == 0
+    } else {
+        start_npc_index == 0 && requested_npc_index == Some(0)
+    }
+}
+
 fn quest_npc_matches_request(
+    world: &World,
     quest_id: i32,
     requested_npc_index: Option<u32>,
     finish: bool,
     npc_object_id: u32,
 ) -> bool {
-    if quest_template_by_id(quest_id).is_some() {
-        quest_id == GUIDE_QUEST_ID
-            && npc_object_id == GUIDE_NPC_ID
+    if quest_id == GUIDE_QUEST_ID {
+        npc_object_id == GUIDE_NPC_ID
             && requested_npc_index.is_none_or(|index| index == GUIDE_NPC_ID)
-    } else if let Some(info) = crystal_quest_info_by_id(quest_id) {
+    } else if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
         let requested_matches = requested_npc_index
             .is_none_or(|index| index == npc_object_id || index == info.npc_index);
         requested_matches
@@ -3711,11 +3767,15 @@ mod quest_dialog_operation_link_tests {
     }
 }
 
+#[cfg(test)]
+#[path = "packets_diary_quest_tests.rs"]
+mod diary_quest_tests;
+
 pub(super) fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
-    if !quest_definition_exists(quest_id) {
+    if !quest_definition_exists(world, quest_id) {
         return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
     }
     if !can_accept_quest(world, quest_id)
@@ -3780,12 +3840,19 @@ pub(super) fn stage5_finish_quest_packet(
     if stage5_quest_stage(world, quest_id) != Some(QuestStage::Completed) {
         return vec![system_message_key(world, "server.CannotHandInQuestBagFull")];
     }
-    vec![
-        stage5_quest_remove_packet(quest_id, true),
+    let mut packets = vec![
+        stage5_quest_remove_packet(
+            quest_id,
+            quest_completion_is_permanent(world, quest_id),
+        ),
         ServerPacket::CompleteQuest {
             completed_quests: completed_quest_ids(world),
         },
-    ]
+    ];
+    if let Some(packet) = newcomer_daily_bonus_update_packet(world, quest_id) {
+        packets.push(packet);
+    }
+    packets
 }
 
 fn stage5_abandon_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
@@ -3802,7 +3869,7 @@ fn stage5_share_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPack
     if !is_in_world(world) {
         return Vec::new();
     }
-    if !quest_definition_exists(quest_id) {
+    if !quest_definition_exists(world, quest_id) {
         return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
     }
     let sharer_name = stage5_player_name(world);
@@ -4758,7 +4825,7 @@ fn request_monster_info_packet(monster_index: i32) -> Vec<ServerPacket> {
     }]
 }
 
-fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
+fn request_npc_info_packet(world: &World, npc_index: i32) -> Vec<ServerPacket> {
     let Some(npc) = crystal_npc_info_manifest()
         .npcs
         .into_iter()
@@ -4772,6 +4839,11 @@ fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
             quest_ids.push(quest_id);
         }
     }
+    quest_ids = effective_quest_ids_for_npc(
+        world,
+        npc.loaded_object_id.unwrap_or(npc.npc_index.max(0) as u32),
+        &quest_ids,
+    );
     vec![ServerPacket::NewNpcInfo {
         info: NpcInfo {
             object_id: npc.loaded_object_id.unwrap_or(npc.npc_index.max(0) as u32),
@@ -7324,16 +7396,28 @@ pub(super) fn start_game_static_visible_object_packets(
         if !point_in_data_range(&npc.location, player_position) {
             continue;
         }
-        if !crystal_npc_visible_to_character(&npc, character, npc_flags, local_time) {
+        if !crystal_npc_visible_to_character_for_profile(
+            &npc,
+            character,
+            npc_flags,
+            local_time,
+            super::quests::quest_recurrence::server_newcomer_v1_enabled(),
+        ) {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {
             continue;
         };
-        let quest_ids = quest_ids_by_npc
+        let mut quest_ids: Vec<i32> = quest_ids_by_npc
             .get(&object_id)
             .map(|ids| ids.iter().copied().collect())
             .unwrap_or_default();
+        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id)
+        {
+            if !quest_ids.contains(&quest_id) {
+                quest_ids.push(quest_id);
+            }
+        }
         objects.push((
             npc.location.y,
             npc.location.x,
@@ -7805,9 +7889,10 @@ pub(super) fn collect_world_entities(
                 None
             },
         );
-        let quest_ids = npc_agent
+        let source_quest_ids = npc_agent
             .map(|agent| agent.quest_ids.clone())
             .unwrap_or_default();
+        let quest_ids = effective_quest_ids_for_npc(world, object_id.0, &source_quest_ids);
         let quest_icon =
             npc_agent.and_then(|_| crystal_npc_quest_icon(world, object_id.0, &quest_ids));
         let name_colour_argb = match kind {
@@ -8391,7 +8476,7 @@ pub(super) fn visible_object_bundle_for_entity(
                         colour_argb: npc.colour_argb,
                         location: position,
                         direction: facing,
-                        quest_ids: npc.quest_ids.clone(),
+                        quest_ids: effective_quest_ids_for_npc(world, object_id, &npc.quest_ids),
                     },
                 },
                 health_packet: None,
@@ -8724,6 +8809,11 @@ impl SimulationSession {
                 return self.submit_shared_guild_name(name);
             }
         }
+        let mut recurrence_packets = if matches!(packet, ClientPacket::StartGame { .. }) {
+            Vec::new()
+        } else {
+            refresh_quest_recurrence(self.app.world_mut())
+        };
         if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
             if let Err(error) = persist_active_character_save_for_logout(self.app.world()) {
                 clear_account_derived_gm_permissions(self.app.world_mut());
@@ -8732,6 +8822,16 @@ impl SimulationSession {
         }
         if let ClientPacket::StartGame { character_index } = packet {
             let mut packets = self.start_game(character_index);
+            let _ = refresh_quest_recurrence(self.app.world_mut());
+            let completed_quests = completed_quest_ids(self.app.world());
+            for packet in &mut packets {
+                if let ServerPacket::CompleteQuest {
+                    completed_quests: packet_ids,
+                } = packet
+                {
+                    *packet_ids = completed_quests.clone();
+                }
+            }
             apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
             if let Some(friends) = self.friends_with_online_characters(&BTreeSet::new()) {
                 for packet in &mut packets {
@@ -8747,8 +8847,9 @@ impl SimulationSession {
             ClientPacket::Attack{..}|ClientPacket::RangeAttack{..}|ClientPacket::Magic{..}
             |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
         let before = if xp_source { self.begin_guild_experience_command(false)? } else { None };
-        let packets = self.handle_packet_impl(packet);
-        let packets = self.finalize_packets(packets);
+        let mut packets = self.handle_packet_impl(packet);
+        recurrence_packets.append(&mut packets);
+        let packets = self.finalize_packets(recurrence_packets);
         self.finish_guild_experience_command(before,packets)
     }
 
@@ -9032,7 +9133,9 @@ impl SimulationSession {
             ClientPacket::RequestMonsterInfo { monster_index } => {
                 request_monster_info_packet(monster_index)
             }
-            ClientPacket::RequestNpcInfo { npc_index } => request_npc_info_packet(npc_index),
+            ClientPacket::RequestNpcInfo { npc_index } => {
+                request_npc_info_packet(self.app.world(), npc_index)
+            }
             ClientPacket::MarriageRequest => stage5_marriage_request_packet(self.app.world_mut()),
             ClientPacket::MarriageReply { accept_invite } => {
                 stage5_marriage_reply_packet(self.app.world_mut(), accept_invite)
@@ -9123,8 +9226,12 @@ impl SimulationSession {
                     if packets.iter().any(|packet| {
                         matches!(
                             packet,
-                            ServerPacket::CompleteQuest { completed_quests }
-                                if completed_quests.contains(&quest_index)
+                            ServerPacket::ChangeQuest {
+                                quest_id,
+                                taken: false,
+                                quest_state: CRYSTAL_QUEST_STATE_REMOVE,
+                                ..
+                            } if *quest_id == quest_index
                         )
                     }) {
                         dismiss_dialog(self.app.world_mut());

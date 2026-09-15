@@ -458,13 +458,24 @@ export function createNavigator(client, dependencies = {}) {
       const movementResponseAfter = client.sequence;
       client.send({ type: running ? 'run' : 'walk', direction: directionNames[step.direction] });
       let movedDistance = 0;
+      const movementInterruptedByDeath = () => {
+        const currentSelf = selfPlayer(client);
+        if (currentSelf?.dead === true || Number(client.snapshot.playerHp) <= 0) return true;
+        return client.events.some(event =>
+          event.sequence > movementResponseAfter && event.direction === 'received' &&
+          event.packet === 'Death');
+      };
       try {
         await client.wait(() => {
+          if (movementInterruptedByDeath()) return true;
           if (distance(selfPlayer(client), before) > 0) return true;
           return client.events.some(event =>
             event.sequence > movementResponseAfter && event.direction === 'received' &&
             event.packet === 'UserLocation');
         }, 'authoritative movement response', movementResponseTimeoutMs);
+        if (movementInterruptedByDeath()) {
+          throw new Error('Player died during navigation');
+        }
         movedDistance = distance(selfPlayer(client), before);
         if (movedDistance > 0) {
           successfulSteps += movedDistance;
@@ -499,6 +510,9 @@ export function createNavigator(client, dependencies = {}) {
       } catch (error) {
         if (client.failure) throw client.failure;
         if (client.closed) throw error;
+        // Death authoritatively cancels the in-flight movement. It is neither
+        // a lost movement response nor a reason to wait for the normal timeout.
+        if (movementInterruptedByDeath()) throw error;
         // A local WebSocket is ordered and reliable. When the authoritative
         // result is unknown, resending can execute both the delayed original
         // and the retry and move two run segments at once. End this runner so

@@ -1,11 +1,51 @@
 use super::*;
 
 #[test]
+fn no_active_creature_still_removes_a_previous_zone_actor() {
+    let zone = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut runtime = shared_session_runtime(zone.clone());
+    start_new_runtime(&mut runtime, "no-active-creature", "NoCreature");
+    let session_id = runtime
+        .current_zone_session_id()
+        .expect("started runtime should own a Zone session");
+
+    {
+        let mut state = zone.lock().expect("shared zone state should lock");
+        let outbounds = state.zone_manager.sync_intelligent_creature(
+            &session_id,
+            Some(shared_pickup_creature()),
+            BTreeSet::new(),
+            Vec::new(),
+            true,
+            SharedInProcessZoneSessionRuntime::zone_now_ms(),
+        );
+        let _ = state.dispatch_zone_outbounds(outbounds, None);
+        assert!(state
+            .zone_manager
+            .intelligent_creature_object_id(&session_id)
+            .is_some());
+    }
+
+    let packets = runtime.drain_shared_intelligent_creature_actor();
+
+    assert!(zone
+        .lock()
+        .expect("shared zone state should lock")
+        .zone_manager
+        .intelligent_creature_object_id(&session_id)
+        .is_none());
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::ObjectRemove { .. })));
+}
+
+#[test]
 fn creature_mouse_pickup_rejects_remote_tile_and_baby_pig_can_pick_nearby() {
     let mut creature = shared_pickup_creature();
     creature.pet_type = 0;
     creature.creature_rules.mouse_pickup_range = 3;
     creature.creature_rules.auto_pickup_enabled = false;
+    let mouse_pickup_range = i32::from(creature.creature_rules.mouse_pickup_range);
     let (mut first, mut second) = started_shared_zone_sessions_with_creature(creature.clone());
     first.handle_packet(ClientPacket::DropGold { amount: 100 });
     let drop = second.world_snapshot().ground_drops[0].clone();
@@ -36,10 +76,36 @@ fn creature_mouse_pickup_rejects_remote_tile_and_baby_pig_can_pick_nearby() {
         .any(|d| d.object_id == drop.object_id));
     second.transfer_map(&format!("crystal:0:{}:{}", drop.x + 1, drop.y));
     // The shared creature must physically follow its owner before a new mouse request.
-    for _ in 0..80 {
+    let follow_deadline = std::time::Instant::now() + std::time::Duration::from_secs(12);
+    let mut creature_position = None;
+    while std::time::Instant::now() < follow_deadline {
+        creature_position = second
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Monster && entity.ai == Some(64))
+            .map(|entity| Point {
+                x: entity.x,
+                y: entity.y,
+            });
+        if creature_position.as_ref().is_some_and(|position| {
+            (position.x - drop.x).abs().max((position.y - drop.y).abs())
+                <= mouse_pickup_range
+        }) {
+            break;
+        }
         std::thread::sleep(std::time::Duration::from_millis(25));
         second.tick();
     }
+    assert!(
+        creature_position.as_ref().is_some_and(|position| {
+            (position.x - drop.x).abs().max((position.y - drop.y).abs())
+                <= mouse_pickup_range
+        }),
+        "creature did not enter mouse pickup range: creature={creature_position:?}, drop=({}, {})",
+        drop.x,
+        drop.y
+    );
     let mut packets = second.handle_packet(ClientPacket::IntelligentCreaturePickup {
         mouse_mode: true,
         location: Point {

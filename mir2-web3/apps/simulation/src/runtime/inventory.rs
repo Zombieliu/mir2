@@ -2421,6 +2421,109 @@ pub(super) fn is_valid_inventory_slot(slot: u8, inventory_capacity: u16) -> bool
         && inventory_container_and_slot_for_index(slot).is_some()
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CrystalInventoryMoveSlot {
+    Belt(u8),
+    Bag(ItemContainer, u8),
+}
+
+/// Decode Crystal's original unified player-inventory array for the explicit
+/// `Belt` compatibility move path. Slots 0..5 are the belt; bag cells begin at
+/// six even though snapshots keep belt and bag items in separate collections.
+fn crystal_inventory_move_slot(
+    raw_slot: u8,
+    inventory_capacity: u16,
+) -> Option<CrystalInventoryMoveSlot> {
+    if u16::from(raw_slot) >= inventory_capacity {
+        return None;
+    }
+    if raw_slot < crate::config::CRYSTAL_BELT_SLOT_COUNT as u8 {
+        return Some(CrystalInventoryMoveSlot::Belt(raw_slot));
+    }
+    let bag_index = raw_slot - crate::config::CRYSTAL_BELT_SLOT_COUNT as u8;
+    let (container, slot) = inventory_container_and_slot_for_index(bag_index)?;
+    Some(CrystalInventoryMoveSlot::Bag(container, slot))
+}
+
+fn item_matches_crystal_inventory_move_slot(
+    item: &ItemState,
+    slot: CrystalInventoryMoveSlot,
+) -> bool {
+    match slot {
+        CrystalInventoryMoveSlot::Belt(belt_slot) => {
+            item.container == ItemContainer::Belt && item.slot == belt_slot
+        }
+        CrystalInventoryMoveSlot::Bag(container, bag_slot) => {
+            item.container == container && item.slot == bag_slot
+        }
+    }
+}
+
+fn take_crystal_inventory_move_item(
+    resources: &mut InventoryResource,
+    slot: CrystalInventoryMoveSlot,
+) -> Option<ItemState> {
+    let items = match slot {
+        CrystalInventoryMoveSlot::Belt(_) => &mut resources.belt_items,
+        CrystalInventoryMoveSlot::Bag(_, _) => &mut resources.inventory_items,
+    };
+    let index = items
+        .iter()
+        .position(|item| item_matches_crystal_inventory_move_slot(item, slot))?;
+    Some(items.remove(index))
+}
+
+fn put_crystal_inventory_move_item(
+    resources: &mut InventoryResource,
+    slot: CrystalInventoryMoveSlot,
+    mut item: ItemState,
+) {
+    match slot {
+        CrystalInventoryMoveSlot::Belt(belt_slot) => {
+            item.container = ItemContainer::Belt;
+            item.slot = belt_slot;
+            resources.belt_items.push(item);
+        }
+        CrystalInventoryMoveSlot::Bag(container, bag_slot) => {
+            item.container = container;
+            item.slot = bag_slot;
+            resources.inventory_items.push(item);
+        }
+    }
+}
+
+/// Move one item using Crystal's raw player-inventory indices. The operation
+/// removes both endpoints before inserting their swapped values, so a failed
+/// lookup cannot duplicate or discard an item.
+fn move_crystal_inventory_items(
+    resources: &mut InventoryResource,
+    from: CrystalInventoryMoveSlot,
+    to: CrystalInventoryMoveSlot,
+) -> bool {
+    if from == to {
+        return match from {
+            CrystalInventoryMoveSlot::Belt(_) => resources
+                .belt_items
+                .iter()
+                .any(|item| item_matches_crystal_inventory_move_slot(item, from)),
+            CrystalInventoryMoveSlot::Bag(_, _) => resources
+                .inventory_items
+                .iter()
+                .any(|item| item_matches_crystal_inventory_move_slot(item, from)),
+        };
+    }
+
+    let Some(source) = take_crystal_inventory_move_item(resources, from) else {
+        return false;
+    };
+    let destination = take_crystal_inventory_move_item(resources, to);
+    if let Some(destination) = destination {
+        put_crystal_inventory_move_item(resources, from, destination);
+    }
+    put_crystal_inventory_move_item(resources, to, source);
+    true
+}
+
 pub(super) fn move_item_slot_matches_grid(item: &ItemState, grid: MirGridType, slot: u8) -> bool {
     if item.slot != slot && !matches!(grid, MirGridType::Inventory) {
         return false;
@@ -2658,6 +2761,7 @@ pub(super) fn move_item_impl(
     if !matches!(
         grid,
         MirGridType::Inventory
+            | MirGridType::Belt
             | MirGridType::Storage
             | MirGridType::Trade
             | MirGridType::Refine
@@ -2677,6 +2781,68 @@ pub(super) fn move_item_impl(
     let Some(from_slot) = u8::try_from(from).ok() else {
         return vec![failed_packet];
     };
+
+    if grid == MirGridType::Belt {
+        let (from_location, to_location) = {
+            let resources = world.resource::<InventoryResource>();
+            let Some(from_location) =
+                crystal_inventory_move_slot(from_slot, resources.inventory_capacity)
+            else {
+                return vec![failed_packet];
+            };
+            let Some(to_location) =
+                crystal_inventory_move_slot(to_slot, resources.inventory_capacity)
+            else {
+                return vec![failed_packet];
+            };
+            (from_location, to_location)
+        };
+        if matches!(
+            (from_location, to_location),
+            (
+                CrystalInventoryMoveSlot::Belt(_),
+                CrystalInventoryMoveSlot::Belt(_)
+            ) | (
+                CrystalInventoryMoveSlot::Bag(_, _),
+                CrystalInventoryMoveSlot::Bag(_, _)
+            )
+        ) {
+            return vec![failed_packet];
+        }
+
+        let touches_reserved_item = {
+            let resources = world.resource::<InventoryResource>();
+            resources
+                .inventory_items
+                .iter()
+                .chain(resources.belt_items.iter())
+                .any(|item| {
+                    (item_matches_crystal_inventory_move_slot(item, from_location)
+                        || item_matches_crystal_inventory_move_slot(item, to_location))
+                        && super::packets::stage5_trade_reserves_item(world, item)
+                })
+        };
+        if touches_reserved_item {
+            return vec![failed_packet];
+        }
+
+        if !move_crystal_inventory_items(
+            &mut world.resource_mut::<InventoryResource>(),
+            from_location,
+            to_location,
+        ) {
+            return vec![
+                super::session::system_message_key(world, "server.ItemMoveErrorReport"),
+                failed_packet,
+            ];
+        }
+        return vec![ServerPacket::MoveItem {
+            grid,
+            from,
+            to,
+            success: true,
+        }];
+    }
 
     if matches!(grid, MirGridType::Inventory) {
         let resources = world.resource::<InventoryResource>();
@@ -2776,8 +2942,13 @@ pub(super) fn merge_item_impl(
     id_from: u64,
     id_to: u64,
 ) -> Vec<ServerPacket> {
-    if matches!(grid_from, MirGridType::HeroInventory | MirGridType::HeroEquipment)
-        || matches!(grid_to, MirGridType::HeroInventory | MirGridType::HeroEquipment) {
+    if matches!(
+        grid_from,
+        MirGridType::HeroInventory | MirGridType::HeroEquipment
+    ) || matches!(
+        grid_to,
+        MirGridType::HeroInventory | MirGridType::HeroEquipment
+    ) {
         return super::hero_inventory::merge_item(world, grid_from, grid_to, id_from, id_to);
     }
     if grid_from == MirGridType::Trade || grid_to == MirGridType::Trade {
@@ -3316,7 +3487,136 @@ mod stack_identity_tests {
     use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
     use super::super::equipment::EquipmentState;
     use super::super::npc::ActiveNpcServiceState;
-    use super::super::resources::NpcStateResource;
+    use super::super::resources::{NpcStateResource, Stage5SystemsResource};
+
+    #[test]
+    fn belt_move_grid_decodes_crystal_raw_slots_without_changing_normalized_bag_slots() {
+        assert_eq!(
+            crystal_inventory_move_slot(0, 46),
+            Some(CrystalInventoryMoveSlot::Belt(0))
+        );
+        assert_eq!(
+            crystal_inventory_move_slot(8, 46),
+            Some(CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2))
+        );
+        assert_eq!(crystal_inventory_move_slot(46, 46), None);
+        assert_eq!(
+            crystal_inventory_move_slot(46, 86),
+            Some(CrystalInventoryMoveSlot::Bag(ItemContainer::Bag2, 0))
+        );
+        assert_eq!(
+            inventory_container_and_slot_for_index(8),
+            Some((ItemContainer::Bag1, 8)),
+            "the existing Inventory grid keeps its normalized bag contract"
+        );
+    }
+
+    #[test]
+    fn belt_move_grid_moves_bag_item_to_empty_belt_without_changing_identity_or_quantity() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(701, 2, ItemContainer::Bag1, 7));
+
+        assert!(move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert!(resources.inventory_items.is_empty());
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 701
+                && item.quantity == 7
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_belt_grid_moves_raw_bag_slot_to_belt() {
+        let mut world = World::new();
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(705, 2, ItemContainer::Bag1, 4));
+        world.insert_resource(resources);
+        world.insert_resource(Stage5SystemsResource {
+            stage5_systems: Default::default(),
+        });
+
+        assert_eq!(
+            move_item_impl(&mut world, MirGridType::Belt, 8, 0),
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Belt,
+                from: 8,
+                to: 0,
+                success: true,
+            }]
+        );
+        let resources = world.resource::<InventoryResource>();
+        assert!(resources.inventory_items.is_empty());
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 705
+                && item.quantity == 4
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn belt_move_grid_swaps_occupied_belt_and_bag_slots_without_loss_or_duplication() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(702, 2, ItemContainer::Bag1, 3));
+        resources
+            .belt_items
+            .push(identity_stack(703, 0, ItemContainer::Belt, 5));
+
+        assert!(move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert_eq!(resources.inventory_items.len(), 1);
+        assert_eq!(resources.belt_items.len(), 1);
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.unique_id == 703
+                && item.quantity == 5
+                && item.container == ItemContainer::Bag1
+                && item.slot == 2
+        }));
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 702
+                && item.quantity == 3
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn belt_move_grid_missing_source_is_transactional() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .belt_items
+            .push(identity_stack(704, 0, ItemContainer::Belt, 2));
+        let before_inventory = resources.inventory_items.clone();
+        let before_belt = resources.belt_items.clone();
+
+        assert!(!move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert_eq!(
+            format!("{:?}", resources.inventory_items),
+            format!("{before_inventory:?}")
+        );
+        assert_eq!(
+            format!("{:?}", resources.belt_items),
+            format!("{before_belt:?}")
+        );
+    }
 
     #[test]
     fn known_healing_metadata_preserves_crystal_checkpoint_roundtrip() {

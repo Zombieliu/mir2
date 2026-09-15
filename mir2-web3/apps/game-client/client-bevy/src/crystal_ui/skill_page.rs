@@ -239,16 +239,34 @@ mod tests {
             count += 1;
             assert_eq!((hit.left, hit.top), (Val::Px(x), Val::Px(340.)));
             assert_eq!((hit.width, hit.height), (Val::Px(13.), Val::Px(14.)));
-            assert_eq!(button.assets.normal, format!("original-ui/Prguse/{index}.png"));
+            assert_eq!(
+                button.assets.normal,
+                format!("original-ui/Prguse/{index}.png")
+            );
             assert_eq!(button.assets.hover, button.assets.normal);
-            assert_eq!(button.assets.pressed, format!("original-ui/Prguse/{}.png", index + 1));
+            assert_eq!(
+                button.assets.pressed,
+                format!("original-ui/Prguse/{}.png", index + 1)
+            );
             assert_eq!(children.len(), 1);
             let image = world.get::<Node>(children[0]).unwrap();
             assert_eq!((image.left, image.top), (Val::Px(0.), Val::Px(0.)));
             assert_eq!((image.width, image.height), (Val::Px(16.), Val::Px(14.)));
-            assert_eq!(world.get::<ImageNode>(children[0]).unwrap().image.path().unwrap().to_string(), button.assets.normal);
+            assert_eq!(
+                world
+                    .get::<ImageNode>(children[0])
+                    .unwrap()
+                    .image
+                    .path()
+                    .unwrap()
+                    .to_string(),
+                button.assets.normal
+            );
         }
-        assert_eq!(count, 2, "both pagination arrows remain visible at page bounds");
+        assert_eq!(
+            count, 2,
+            "both pagination arrows remain visible at page bounds"
+        );
     }
     #[test]
     fn source_keys_use_two_lines_and_no_unbound_placeholder() {

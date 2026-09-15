@@ -687,6 +687,45 @@ impl EntityAnimationState {
         })
     }
 
+    /// Apply Crystal's revive lifecycle barrier.
+    ///
+    /// A revive is not an ordinary FIFO actor action: Crystal clears any stale
+    /// death, movement, and combat feed before restoring the actor. The local
+    /// player restores Standing immediately, while remote actors play Revive.
+    pub fn apply_revival_event(
+        &mut self,
+        event: AnimationEvent,
+        now_ms: u64,
+    ) -> Result<EventUpdate, AnimationError> {
+        if !matches!(
+            event.action,
+            AnimationAction::Standing | AnimationAction::Revive
+        ) {
+            return Err(AnimationError::UnsupportedAction {
+                action: event.action,
+            });
+        }
+
+        let mut transitions = self.advance_to(now_ms)?;
+        self.catalog.validate_event(event.action)?;
+        if let Some(previous) = self.last_enqueued_event_sequence {
+            if event.sequence <= previous {
+                return Err(AnimationError::OutOfOrderEvent {
+                    previous,
+                    incoming: event.sequence,
+                });
+            }
+        }
+
+        self.last_enqueued_event_sequence = Some(event.sequence);
+        self.action_feed.clear();
+        self.start_event(event, now_ms, &mut transitions)?;
+        Ok(EventUpdate {
+            disposition: QueueDisposition::Started,
+            transitions,
+        })
+    }
+
     pub fn advance_to(&mut self, now_ms: u64) -> Result<Vec<ActionTransition>, AnimationError> {
         if now_ms < self.last_update_at_ms {
             return Err(AnimationError::TimeWentBackwards {
@@ -982,6 +1021,15 @@ impl AnimationWorld {
         now_ms: u64,
     ) -> Result<EventUpdate, AnimationError> {
         state_for_key_mut(&mut self.active, key)?.apply_latest_locomotion_event(event, now_ms)
+    }
+
+    pub fn apply_revival_event(
+        &mut self,
+        key: &EntityKey,
+        event: AnimationEvent,
+        now_ms: u64,
+    ) -> Result<EventUpdate, AnimationError> {
+        state_for_key_mut(&mut self.active, key)?.apply_revival_event(event, now_ms)
     }
 
     pub fn tick(&mut self, now_ms: u64) -> Result<Vec<ActionTransition>, AnimationError> {
@@ -1609,6 +1657,58 @@ mod tests {
         let state = world.state(&key).unwrap();
         assert_eq!(state.current_action, AnimationAction::Standing);
         assert_eq!(state.frame_index, 0);
+    }
+
+    #[test]
+    fn revive_barrier_discards_stale_actions_blocking_a_dead_actor() {
+        let mut world = AnimationWorld::new(31);
+        let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Die, Direction::Down),
+                0,
+            )
+            .unwrap();
+        world.tick(400).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().current_action,
+            AnimationAction::Dead
+        );
+
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Running, Direction::Down),
+                450,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(3, AnimationAction::Standing, Direction::Down),
+                460,
+            )
+            .unwrap();
+        assert_eq!(world.state(&key).unwrap().queue_depth(), 2);
+
+        world
+            .apply_revival_event(
+                &key,
+                AnimationEvent::new(4, AnimationAction::Revive, Direction::Down),
+                500,
+            )
+            .unwrap();
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.current_action, AnimationAction::Revive);
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(state.last_started_event_sequence(), Some(4));
+
+        world.tick(900).unwrap();
+        assert_eq!(
+            world.state(&key).unwrap().current_action,
+            AnimationAction::Standing
+        );
     }
 
     #[test]

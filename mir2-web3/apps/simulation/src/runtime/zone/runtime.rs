@@ -231,6 +231,7 @@ const CRYSTAL_MAGIC_SHIELD_BUFF_TYPE: u8 = 24;
 const CRYSTAL_COUNTER_ATTACK_BUFF_TYPE: u8 = 18;
 const CRYSTAL_SPELL_EFFECT_HEALING: u8 = 3;
 const CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP: u8 = 6;
+const CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN: u8 = 7;
 const CRYSTAL_SPELL_EFFECT_TELEPORT: u8 = 2;
 const CRYSTAL_SPELL_EFFECT_TWIN_DRAKE_BLADE: u8 = 5;
 const CRYSTAL_SPELL_EFFECT_BLEEDING: u8 = 18;
@@ -788,6 +789,20 @@ impl ZoneRuntime {
         self.players
             .get(session_id)
             .map(|player| PlayerId(player.object_id))
+    }
+
+    /// Reports the authoritative AOI bookkeeping for one retained world object.
+    /// `None` distinguishes an unknown player/object from a retained object that
+    /// is currently outside the player's viewport.
+    pub fn player_has_visible_object(
+        &self,
+        session_id: &SessionId,
+        object_id: u32,
+    ) -> Option<bool> {
+        let player = self.players.get(session_id)?;
+        self.objects
+            .contains_key(&object_id)
+            .then(|| player.visible_object_ids.contains(&object_id))
     }
 
     pub fn player_position(&self, session_id: &SessionId) -> Option<Point> {
@@ -1878,6 +1893,11 @@ impl ZoneRuntime {
                 player.vital_settlement(hp_before),
             )
         };
+        let shield_end_packets = if killed {
+            self.remove_native_player_magic_shield(session_id)
+        } else {
+            Vec::new()
+        };
         let recipients = self.native_monster_visible_recipients(object_id, &position);
         let mut outbounds = Vec::new();
         if killed {
@@ -1901,6 +1921,7 @@ impl ZoneRuntime {
                             expire: 0,
                         },
                     }];
+                    packets.extend(shield_end_packets);
                     if killed {
                         packets.push(ServerPacket::ObjectDied {
                             info: ObjectDiedInfo {
@@ -3740,6 +3761,11 @@ impl ZoneRuntime {
         if killed {
             self.clear_native_player_life_actions(target.object_id);
         }
+        let shield_end_packets = if killed {
+            self.remove_native_player_magic_shield(target_session_id)
+        } else {
+            Vec::new()
+        };
         if let Some(attacker) = self.players.get_mut(session_id) {
             attacker.direction = direction;
             attacker.next_attack_ready_at_ms =
@@ -3778,6 +3804,7 @@ impl ZoneRuntime {
                 },
             },
         ];
+        packets.extend(shield_end_packets);
         if killed {
             packets.push(ServerPacket::ObjectDied {
                 info: ObjectDiedInfo {
@@ -3859,6 +3886,11 @@ impl ZoneRuntime {
         if killed {
             self.clear_native_player_life_actions(target.object_id);
         }
+        let shield_end_packets = if killed {
+            self.remove_native_player_magic_shield(target_session_id)
+        } else {
+            Vec::new()
+        };
         let mut packets = vec![
             ServerPacket::ObjectStruck {
                 info: ObjectStruckInfo {
@@ -3881,6 +3913,7 @@ impl ZoneRuntime {
                 },
             },
         ];
+        packets.extend(shield_end_packets);
         if killed {
             packets.push(ServerPacket::ObjectDied {
                 info: ObjectDiedInfo {
@@ -8179,6 +8212,40 @@ impl ZoneRuntime {
         ]
     }
 
+    fn remove_native_player_magic_shield(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Vec<ServerPacket> {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return Vec::new();
+        };
+        if player
+            .buffs
+            .remove(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE)
+            .is_none()
+        {
+            return Vec::new();
+        }
+        if player.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP {
+            player.effect = 0;
+        }
+        vec![
+            ServerPacket::RemoveBuff {
+                buff_type: CRYSTAL_MAGIC_SHIELD_BUFF_TYPE,
+                object_id: player.object_id,
+            },
+            ServerPacket::ObjectEffect {
+                info: ObjectEffectInfo {
+                    object_id: player.object_id,
+                    effect: CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN,
+                    effect_type: 0,
+                    delay_time: 0,
+                    time: 0,
+                },
+            },
+        ]
+    }
+
     fn apply_native_pet_enhancer(
         &mut self,
         object_id: u32,
@@ -9335,6 +9402,11 @@ impl ZoneRuntime {
         if killed {
             self.clear_native_player_life_actions(target_object_id);
         }
+        let shield_end_packets = if killed {
+            self.remove_native_player_magic_shield(&hit.target_session_id)
+        } else {
+            Vec::new()
+        };
         // An absorbed hit can still activate EnergyShield healing. Commit
         // that real HP mutation even when there is no damage event to emit.
         if damage == 0 {
@@ -9408,6 +9480,7 @@ impl ZoneRuntime {
             return Vec::new();
         }
         let mut outbounds = Vec::new();
+        packets.extend(shield_end_packets);
         if killed {
             outbounds.push(ZoneOutbound::ToSession {
                 session_id: hit.target_session_id.clone(),
@@ -10991,12 +11064,25 @@ impl ZoneRuntime {
         source_object_id: u32,
         position: &Point,
     ) -> Option<NativeMonsterDecoyTarget> {
-        self.native_monsters
-            .iter()
+        // StoneTrap eligibility already requires a retained live monster. The
+        // retained-object grid therefore supplies a complete candidate set;
+        // stale object ids are discarded by the native lookup and exact gates.
+        self.object_grid
+            .candidates_in_rect(
+                position,
+                ZONE_NATIVE_MONSTER_AGGRO_X,
+                ZONE_NATIVE_MONSTER_AGGRO_Y,
+            )
+            .into_iter()
+            .filter_map(|object_id| {
+                self.native_monsters
+                    .get(&object_id)
+                    .map(|monster| (object_id, monster))
+            })
             .filter(|(object_id, monster)| {
-                **object_id != source_object_id
+                *object_id != source_object_id
                     && monster.name == "StoneTrap"
-                    && self.stone_trap_decoy_eligible(source_object_id, **object_id)
+                    && self.stone_trap_decoy_eligible(source_object_id, *object_id)
                     && !monster.hostile_to_player
                     && !monster.dead
                     && monster.hp > 0
@@ -11006,10 +11092,10 @@ impl ZoneRuntime {
                     && (monster.position.y - position.y).abs() <= ZONE_NATIVE_MONSTER_AGGRO_Y
             })
             .min_by_key(|(object_id, monster)| {
-                (zone_tile_distance(&monster.position, position), **object_id)
+                (zone_tile_distance(&monster.position, position), *object_id)
             })
             .map(|(object_id, monster)| NativeMonsterDecoyTarget {
-                object_id: *object_id,
+                object_id,
                 position: monster.position.clone(),
             })
     }
@@ -12637,6 +12723,17 @@ impl ZoneRuntime {
                     buff_type,
                     object_id,
                 })
+                .chain((buff_type == CRYSTAL_MAGIC_SHIELD_BUFF_TYPE).then_some(
+                    ServerPacket::ObjectEffect {
+                        info: ObjectEffectInfo {
+                            object_id,
+                            effect: CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN,
+                            effect_type: 0,
+                            delay_time: 0,
+                            time: 0,
+                        },
+                    },
+                ))
                 .chain((buff_type == CRYSTAL_HIDING_BUFF_TYPE).then_some(
                     ServerPacket::ObjectHidden {
                         object_id,
@@ -15071,6 +15168,7 @@ fn shared_object_actor_id(packet: &ServerPacket) -> Option<u32> {
 
 fn shared_object_result_id(packet: &ServerPacket) -> Option<u32> {
     match packet {
+        ServerPacket::ObjectHarvested { movement } => Some(movement.object_id),
         ServerPacket::ObjectHealth { info } => Some(info.object_id),
         ServerPacket::ObjectMana { info } => Some(info.object_id),
         ServerPacket::DamageIndicator { object_id, .. } => Some(*object_id),
@@ -16099,6 +16197,123 @@ mod pvp_tests {
 }
 
 #[cfg(test)]
+mod magic_shield_lifecycle_tests {
+    use super::*;
+    use crate::runtime::zone::types::{ZoneChatProfile, ZonePlayerCombatStats};
+    use mir2_protocol::{MirClass, MirGender};
+
+    fn join_player(zone: &mut ZoneRuntime, id: &str, object_id: u32) -> SessionId {
+        let session_id = SessionId::new(id);
+        zone.handle(ZoneCommand::Join(ZoneJoin {
+            session_id: session_id.clone(),
+            account_id: format!("acct-{id}"),
+            character_index: 0,
+            object_id,
+            name: id.to_owned(),
+            class: MirClass::Wizard,
+            gender: MirGender::Male,
+            level: 30,
+            hp: 500,
+            max_hp: 500,
+            mp: 100,
+            map_file_name: "0".to_owned(),
+            position: Point { x: 50, y: 50 },
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile::default(),
+            combat_stats: ZonePlayerCombatStats::default(),
+        }));
+        session_id
+    }
+
+    fn has_packet(
+        outbounds: &[ZoneOutbound],
+        predicate: impl Fn(&ServerPacket) -> bool,
+    ) -> bool {
+        outbounds.iter().any(|outbound| {
+            let packets = match outbound {
+                ZoneOutbound::ToSession { packets, .. }
+                | ZoneOutbound::ToMany { packets, .. }
+                | ZoneOutbound::ToAll { packets } => packets,
+                _ => return false,
+            };
+            packets.iter().any(&predicate)
+        })
+    }
+
+    #[test]
+    fn magic_shield_expiry_emits_down_and_late_join_packet_restores_up() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let session_id = join_player(&mut zone, "shielded", 101);
+        let packets = zone.apply_native_player_magic_shield(&session_id, 2, 0, 10);
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectEffect { info }
+                if info.object_id == 101 && info.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP
+        )));
+
+        let late_join_packet = crate::runtime::zone::packets::object_player_packet(
+            zone.players.get(&session_id).expect("shielded player"),
+        );
+        assert!(matches!(
+            late_join_packet,
+            ServerPacket::ObjectPlayer { info }
+                if info.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP
+                    && info.buffs.contains(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE)
+        ));
+
+        let expired = zone.expire_buffs(15_010);
+        assert!(has_packet(&expired, |packet| matches!(
+            packet,
+            ServerPacket::RemoveBuff {
+                object_id: 101,
+                buff_type: CRYSTAL_MAGIC_SHIELD_BUFF_TYPE
+            }
+        )));
+        assert!(has_packet(&expired, |packet| matches!(
+            packet,
+            ServerPacket::ObjectEffect { info }
+                if info.object_id == 101
+                    && info.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN
+        )));
+        assert!(!zone.players[&session_id]
+            .buffs
+            .contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE));
+    }
+
+    #[test]
+    fn magic_shield_is_removed_with_down_when_player_dies() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let session_id = join_player(&mut zone, "shielded", 101);
+        zone.apply_native_player_magic_shield(&session_id, 2, 0, 10);
+        zone.sync_player_vitals(&session_id, 2, 500, 100);
+        let strike = (0..100)
+            .find(|&index| zone_hazard_hash(index, 7) % 100 > 2)
+            .expect("bounded lethal hazard seed");
+
+        let outbounds = zone.apply_hazard_damage(&session_id, 101, 100, strike, 7, 1_000);
+
+        assert!(has_packet(&outbounds, |packet| matches!(
+            packet,
+            ServerPacket::RemoveBuff {
+                object_id: 101,
+                buff_type: CRYSTAL_MAGIC_SHIELD_BUFF_TYPE
+            }
+        )));
+        assert!(has_packet(&outbounds, |packet| matches!(
+            packet,
+            ServerPacket::ObjectEffect { info }
+                if info.object_id == 101
+                    && info.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN
+        )));
+        assert!(!zone.players[&session_id]
+            .buffs
+            .contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE));
+    }
+}
+
+#[cfg(test)]
 mod hazard_tests {
     use super::*;
     use crate::runtime::zone::collision::ZoneBounds;
@@ -16426,3 +16641,6 @@ mod shared_world_transaction_state_tests {
 
 #[cfg(test)]
 mod reward_rate_tests;
+
+#[cfg(test)]
+mod shared_harvest_tests;

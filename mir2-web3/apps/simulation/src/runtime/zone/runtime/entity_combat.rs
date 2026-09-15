@@ -556,11 +556,21 @@ mod tests {
         assert_eq!(serde_json::to_value(restored).unwrap(), old);
     }
     fn spawn_target_child(zone: &mut ZoneRuntime, id: u32, ai: u8, position: Point) {
+        spawn_named_target_child(zone, id, "ArcherGuard", ai, position);
+    }
+
+    fn spawn_named_target_child(
+        zone: &mut ZoneRuntime,
+        id: u32,
+        name: &str,
+        ai: u8,
+        position: Point,
+    ) {
         zone.spawn_world_event_monster(
             &ZoneMonsterSpawn {
                 crystal_drop_seed: None,
                 object_id: id,
-                name: "ArcherGuard".into(),
+                name: name.into(),
                 name_colour_argb: -1,
                 image: 139,
                 ai,
@@ -580,6 +590,132 @@ mod tests {
             },
             550,
         );
+    }
+
+    fn make_player_owned_target(zone: &mut ZoneRuntime, id: u32) {
+        let monster = zone.native_monsters.get_mut(&id).unwrap();
+        monster.owner_session_id = Some(SessionId::new("owner"));
+        monster.owner_player_object_id = 101;
+        monster.hostile_to_player = false;
+    }
+
+    fn brute_force_monster_target_ids(
+        zone: &ZoneRuntime,
+        source_id: u32,
+        centre: &Point,
+        radius: i32,
+        purpose: EntityTargetPurpose,
+        now: u64,
+    ) -> Vec<u32> {
+        let source = zone.native_entity_monster_ref(source_id).unwrap();
+        let mut targets = zone
+            .native_monsters
+            .iter()
+            .filter_map(|(&id, monster)| {
+                let reference = zone.native_entity_monster_ref(id)?;
+                (zone_tile_distance(&monster.position, centre) <= radius
+                    && zone.native_entity_can_attack(&source, &reference, purpose, now))
+                .then_some((
+                    id,
+                    monster.position.clone(),
+                    zone_tile_distance(&monster.position, centre),
+                ))
+            })
+            .collect::<Vec<_>>();
+        targets.sort_by_key(|(id, position, distance)| {
+            (*distance, position.y, position.x, *id)
+        });
+        targets.into_iter().map(|(id, _, _)| id).collect()
+    }
+
+    #[test]
+    fn indexed_monster_targets_match_full_scan_order_and_bound_candidates() {
+        let (mut zone, _, _) = fixture();
+        for (id, point) in [
+            (9001, Point { x: 14, y: 20 }),
+            (9002, Point { x: 10, y: 20 }),
+            (9003, Point { x: 12, y: 23 }),
+            (9004, Point { x: 350, y: 350 }),
+        ] {
+            spawn_target_child(&mut zone, id, 0, point);
+            make_player_owned_target(&mut zone, id);
+        }
+        // Stale index entries are harmless because authoritative native/object
+        // lookups and the original eligibility predicate still gate results.
+        zone.object_grid.insert(999_999, &Point { x: 12, y: 20 });
+        zone.native_monsters.get_mut(&9003).unwrap().dead = true;
+        zone.native_monsters.get_mut(&9003).unwrap().hp = 0;
+
+        for radius in [7, 500] {
+            let indexed = zone
+                .native_entity_monster_targets(
+                    9000,
+                    &Point { x: 12, y: 20 },
+                    radius,
+                    EntityTargetPurpose::Search,
+                    600,
+                )
+                .into_iter()
+                .map(|target| target.object_id)
+                .collect::<Vec<_>>();
+            assert_eq!(
+                indexed,
+                brute_force_monster_target_ids(
+                    &zone,
+                    9000,
+                    &Point { x: 12, y: 20 },
+                    radius,
+                    EntityTargetPurpose::Search,
+                    600,
+                ),
+                "indexed lookup must preserve exact full-scan filtering and ordering"
+            );
+        }
+
+        let local_candidates = zone
+            .object_grid
+            .candidates_in_rect(&Point { x: 12, y: 20 }, 7, 7);
+        assert!(
+            local_candidates
+                .iter()
+                .filter(|id| zone.native_monsters.contains_key(id))
+                .count()
+                < zone.native_monsters.len()
+        );
+        assert!(!local_candidates.contains(&9004));
+    }
+
+    #[test]
+    fn indexed_stone_trap_decoy_keeps_exact_distance_and_id_order() {
+        let (mut zone, _, _) = fixture();
+        for (id, point) in [
+            (9001, Point { x: 13, y: 21 }),
+            (9002, Point { x: 11, y: 19 }),
+            (9003, Point { x: 300, y: 300 }),
+        ] {
+            spawn_named_target_child(&mut zone, id, "StoneTrap", 255, point);
+            make_player_owned_target(&mut zone, id);
+        }
+        zone.object_grid.insert(999_999, &Point { x: 12, y: 20 });
+
+        let target = zone
+            .nearest_native_monster_decoy_target(9000, &Point { x: 12, y: 20 })
+            .expect("nearby eligible trap");
+        assert_eq!(target.object_id, 9001, "equal distance retains lowest id");
+        assert_eq!(target.position, Point { x: 13, y: 21 });
+        let candidates = zone.object_grid.candidates_in_rect(
+            &Point { x: 12, y: 20 },
+            ZONE_NATIVE_MONSTER_AGGRO_X,
+            ZONE_NATIVE_MONSTER_AGGRO_Y,
+        );
+        assert!(
+            candidates
+                .iter()
+                .filter(|id| zone.native_monsters.contains_key(id))
+                .count()
+                < zone.native_monsters.len()
+        );
+        assert!(!candidates.contains(&9003));
     }
 
     #[test]
@@ -1284,10 +1420,17 @@ impl ZoneRuntime {
         let Some(source) = self.native_entity_monster_ref(source_id) else {
             return Vec::new();
         };
+        // Every attackable native entity must have a retained object (enforced
+        // again by `native_entity_can_attack`), and retained objects are the
+        // membership authority for `object_grid`. Hidden/dead/stale candidates
+        // remain in or may transiently appear in the superset, then fail the
+        // unchanged authoritative lookup and eligibility checks below.
         let mut targets: Vec<_> = self
-            .native_monsters
-            .iter()
-            .filter_map(|(&id, m)| {
+            .object_grid
+            .candidates_in_rect(centre, radius, radius)
+            .into_iter()
+            .filter_map(|id| {
+                let m = self.native_monsters.get(&id)?;
                 let reference = self.native_entity_monster_ref(id)?;
                 (zone_tile_distance(&m.position, centre) <= radius
                     && self.native_entity_can_attack(&source, &reference, purpose, now))

@@ -16,7 +16,8 @@ use bevy::{
 use crate::crystal_ui::assets::{safe_key_assets, CrystalButtonAssetSet};
 use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, CrystalLoginAction};
 use crate::crystal_ui::select::{
-    animate_character_previews, spawn_character_select_screen, CrystalSelectAction,
+    animate_character_previews, spawn_character_preview_at, spawn_character_select_screen,
+    CrystalSelectAction,
 };
 use crate::crystal_ui::spec::{self, CrystalButtonSpec};
 use crate::crystal_ui::widget::{
@@ -53,7 +54,7 @@ const NEW_CHARACTER_FRAME: spec::CrystalRect = spec::CrystalRect::new(218.0, 154
 const NEW_CHARACTER_TITLE: spec::CrystalRect = spec::CrystalRect::new(424.0, 165.0, 187.0, 20.0);
 const NEW_CHARACTER_NAME_FIELD: spec::CrystalRect =
     spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0);
-const NEW_CHARACTER_PREVIEW: spec::CrystalRect = spec::CrystalRect::new(338.0, 404.0, 196.0, 302.0);
+const NEW_CHARACTER_PREVIEW_ANCHOR: (f32, f32) = (338.0, 404.0);
 const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 3] = [
     spec::CrystalRect::new(541.0, 450.0, 44.0, 42.0),
     spec::CrystalRect::new(591.0, 450.0, 44.0, 42.0),
@@ -1131,14 +1132,12 @@ fn render_character_create(
         "original-ui/Title/20.png",
         NEW_CHARACTER_TITLE,
     );
-    spawn_native_image(
+    spawn_character_preview_at(
         parent,
         asset_server,
-        character_preview_asset(
-            &model.character_create.class_name,
-            &model.character_create.gender_name,
-        ),
-        NEW_CHARACTER_PREVIEW,
+        &model.character_create.class_name,
+        &model.character_create.gender_name,
+        NEW_CHARACTER_PREVIEW_ANCHOR,
     );
     spawn_aux_text(
         parent,
@@ -1672,21 +1671,6 @@ fn character_gender_index(gender_name: &str) -> u16 {
         .iter()
         .position(|candidate| candidate.eq_ignore_ascii_case(gender_name))
         .unwrap_or(0) as u16
-}
-
-fn character_preview_asset(class_name: &str, gender_name: &str) -> String {
-    let class_index = character_class_index(class_name);
-    let gender_index = character_gender_index(gender_name);
-    let frame = match (class_index, gender_index) {
-        (0, 0) => 20,
-        (0, 1) => 300,
-        (1, 0) => 40,
-        (1, 1) => 320,
-        (2, 0) => 60,
-        (2, 1) => 340,
-        _ => 20,
-    };
-    format!("original-ui/ChrSel/{frame}.png")
 }
 
 fn character_description(class_name: &str) -> &'static str {
@@ -2358,10 +2342,7 @@ mod tests {
             NEW_CHARACTER_NAME_FIELD,
             spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0)
         );
-        assert_eq!(
-            NEW_CHARACTER_PREVIEW,
-            spec::CrystalRect::new(338.0, 404.0, 196.0, 302.0)
-        );
+        assert_eq!(NEW_CHARACTER_PREVIEW_ANCHOR, (338.0, 404.0));
         assert_eq!(
             NEW_CHARACTER_CREATE,
             spec::CrystalRect::new(378.0, 579.0, 100.0, 25.0)
@@ -2380,18 +2361,6 @@ mod tests {
             .into_iter()
             .chain(NEW_CHARACTER_GENDER_BUTTONS)
             .all(|rect| NEW_CHARACTER_FRAME.contains(rect.left, rect.top)));
-        assert_eq!(
-            character_preview_asset("Warrior", "Male"),
-            "original-ui/ChrSel/20.png"
-        );
-        assert_eq!(
-            character_preview_asset("Wizard", "Female"),
-            "original-ui/ChrSel/320.png"
-        );
-        assert_eq!(
-            character_preview_asset("Taoist", "Male"),
-            "original-ui/ChrSel/60.png"
-        );
         assert_eq!(
             spec::CrystalFrameSpec::new("Prguse", 73, NEW_CHARACTER_FRAME).asset_path(),
             "original-ui/Prguse/73.png"

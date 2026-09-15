@@ -127,6 +127,30 @@ test('navigator never resends an unacknowledged movement with an unknown result'
   assert.equal(client.diagnostics[0].timeoutMs, 60_000);
 });
 
+test('death immediately interrupts an in-flight movement without reporting a response timeout', async () => {
+  const client = navigationClient();
+  client.wait = async predicate => {
+    client.snapshot.playerHp = 0;
+    client.snapshot.entities[0].dead = true;
+    client.events.push({
+      sequence: client.sequence + 1,
+      direction: 'received',
+      packet: 'Death',
+      payload: { objectId: 1 },
+    });
+    assert.ok(predicate(), 'the Death packet must release the movement wait immediately');
+  };
+
+  const navigateNear = createNavigator(client, dependencies);
+  await assert.rejects(
+    navigateNear({ x: 5, y: 1 }, 1),
+    /Player died during navigation/,
+  );
+  assert.equal(client.sent.length, 1);
+  assert.equal(client.diagnostics.some(entry =>
+    entry.type === 'navigationMovementResponseTimeout'), false);
+});
+
 test('navigator rejects a cell only after an unchanged authoritative UserLocation', async () => {
   const client = navigationClient();
   let waits = 0;

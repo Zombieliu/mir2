@@ -32,13 +32,13 @@
 | 6 | Smith's 2nd Test | 1 / 5 | Blacksmith_Smith@0 → 同上 | HookingCat×10 | 38/150；BronzeWarriorSword/ToughHoaSword/StrongWoodenBow 按职业三选一 |
 | 154 | Emperors Problem | 1 / —（max 65535） | Commander_Luke@0 → Emperor_Far@0122 | 对话/空目标 | 0/0 |
 | 7 | Meet the Warrior Instructor | 4 / — | Assistant_Jane@0 → Master_Wa@0 | 对话 | 60/48 |
-| 8 | Test for the Fencing Skill | 4 / 7 | Master_Wa@0 → 同上 | Omax×10、RakingCat×10 | 45/180；OldLoafer×1、Fencing×1 |
+| 8 | Test for the Fencing Skill | 4 / 7 | Master_Wa@0 → 同上 | Oma×10、RakingCat×10 | 45/180；OldLoafer×1、Fencing×1 |
 | 9 | To Bichon | 4 / 8 | Master_Wa@0 → MirGuide_Peter@0 | 对话 | 60/48 |
 | 10 | Meet the Mage Instructor | 4 / — | Assistant_Jane@0 → MasterMage_Don@0115 | 对话 | 60/48 |
-| 11 | Test for the Fireball Skill | 4 / 10 | MasterMage_Don@0115 → 同上 | Omax×10、RakingCat×10 | 45/180；OldLoafer×1、FireBall×1 |
+| 11 | Test for the Fireball Skill | 4 / 10 | MasterMage_Don@0115 → 同上 | Oma×10、RakingCat×10 | 45/180；OldLoafer×1、FireBall×1 |
 | 12 | To Bichon | 4 / 11 | MasterMage_Don@0115 → MirGuide_Peter@0 | 对话 | 60/48 |
 | 13 | Meet the Taoist Instructor | 4 / — | Assistant_Jane@0 → HighPriest_Jude@0 | 对话 | 60/48 |
-| 14 | Test for the Healing Skill | 4 / 13 | HighPriest_Jude@0 → 同上 | Omax×10、RakingCat×10 | 45/180；OldLoafer×1、Healing×1 |
+| 14 | Test for the Healing Skill | 4 / 13 | HighPriest_Jude@0 → 同上 | Oma×10、RakingCat×10 | 45/180；OldLoafer×1、Healing×1 |
 | 15 | To Bichon | 4 / 14 | HighPriest_Jude@0 → MirGuide_Peter@0 | 对话 | 60/48 |
 | 22 | Forest Yeti's Threat | 6 / — | Quest Diary accept → Quest Diary finish | ForestYeti×5 | 50/200；PrecisionPendant×1 |
 | 23 | !Attack Oma | 7 / 22 | Quest Diary accept → Quest Diary finish | OmaTeeth×10 | 83/300；BronzeShortSword/BronzeHoaSword/ElkWoodenBow 三选一 |

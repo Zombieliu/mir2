@@ -120,6 +120,8 @@ pub mod group_dialog;
 pub mod guild_buff_dialog;
 #[path = "guild_panel.rs"]
 pub mod guild_panel;
+#[path = "hero_buff_hud.rs"]
+pub mod hero_buff_hud;
 #[path = "keyboard_dialog.rs"]
 pub mod keyboard_dialog;
 #[path = "leave_game_dialog.rs"]
@@ -132,12 +134,10 @@ pub mod ranking_dialog;
 pub mod skill_assign_dialog;
 #[path = "social_bond_dialog.rs"]
 pub mod social_bond_dialog;
+#[path = "status_hud.rs"]
+pub mod status_hud;
 #[path = "text_input.rs"]
 pub mod text_input;
-#[path="status_hud.rs"]
-pub mod status_hud;
-#[path="hero_buff_hud.rs"]
-pub mod hero_buff_hud;
 #[path = "trade_dialog.rs"]
 mod trade_dialog;
 pub use trade_dialog::TradeDialogUi;
@@ -615,6 +615,31 @@ pub enum InventoryOperationDraft {
     Merge { source_slot: u32, unique_id: u64 },
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) struct InventoryItemDrag {
+    source_slot: u32,
+    unique_id: u64,
+    start: Vec2,
+}
+
+#[derive(Resource, Debug, Clone, Copy)]
+struct InventoryBeltDiagnostics(bool);
+
+impl FromWorld for InventoryBeltDiagnostics {
+    fn from_world(_world: &mut World) -> Self {
+        Self(std::env::var_os("MIR2_BELT_DIAGNOSTICS").is_some())
+    }
+}
+
+fn belt_diagnostic(
+    diagnostics: Option<&InventoryBeltDiagnostics>,
+    message: impl FnOnce() -> String,
+) {
+    if diagnostics.is_some_and(|diagnostics| diagnostics.0) {
+        eprintln!("[belt-diagnostics] {}", message());
+    }
+}
+
 /// Exact bag-instance identity captured when Crystal opens its destructive
 /// delete prompt.  The live inventory snapshot must still contain this same
 /// stack before the native client is allowed to emit `DeleteItem`.
@@ -770,6 +795,7 @@ pub struct NativePlayerUiState {
     pub game_shop_page: usize,
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
+    pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
     pub selected_skill_id: Option<u32>,
     pub character_page: CharacterPage,
     pub inventory_page: u8,
@@ -902,6 +928,7 @@ impl Default for NativePlayerUiState {
             game_shop_page: 0,
             split_count: 1,
             inventory_operation: None,
+            inventory_item_drag: None,
             selected_skill_id: None,
             character_page: CharacterPage::Character,
             inventory_page: 0,
@@ -1184,6 +1211,7 @@ impl NativePlayerUiState {
         self.core.chat_settings_draft = None;
         self.inspect = None;
         self.inventory_operation = None;
+        self.inventory_item_drag = None;
         self.selected_skill_id = None;
         self.character_page = CharacterPage::Character;
         self.inventory_page = 0;
@@ -1482,9 +1510,9 @@ pub fn dispatch_ui_action(
 
 pub const OVERLAY_HUD_Z: i32 = 950;
 // The map image occupies only the transparent 120x108 opening in the HUD
-// frame. Keep that content one layer above the frame so the retained night
+// frame.  Keep that content one layer above the frame so the retained night
 // lighting composite cannot clear it while the frame/title/footer remain
-// untouched. Dialogs and chat still sort above both layers.
+// untouched.  Dialogs and chat still sort above both layers.
 pub const OVERLAY_MINIMAP_Z: i32 = OVERLAY_HUD_Z + 1;
 pub const OVERLAY_QUEST_Z: i32 = 900;
 pub const OVERLAY_CHAT_Z: i32 = 975;
@@ -2696,6 +2724,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<crate::audio::NativeAudioRuntime>()
             .init_resource::<crate::audio::NativeGameplayAudioQueue>()
             .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .init_resource::<InventoryBeltDiagnostics>()
             .add_message::<CursorMoved>()
             .add_message::<MouseWheel>()
             .add_message::<bevy::window::Ime>()
@@ -2772,7 +2801,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     ranking_dialog::process,
                     trade_dialog::process_items,
                     trade_dialog::process_drag,
-                    process_inventory_drag,
+                    (process_inventory_item_drag, process_inventory_drag).chain(),
                     process_inventory_delete_pointer,
                     process_guild_storage_pointer,
                     process_overlay_keyboard,
@@ -2800,7 +2829,13 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     hero_dialog::render::render,
                     hero_dialog::render::button_visuals,
                     skill_bars::host::render,
-                    (status_hud::render, status_hud::render_hint, hero_buff_hud::render, hero_buff_hud::hint).chain(),
+                    (
+                        status_hud::render,
+                        status_hud::render_hint,
+                        hero_buff_hud::render,
+                        hero_buff_hud::hint,
+                    )
+                        .chain(),
                     guild_panel::render_error,
                     guild_panel::render_buff_hint,
                     equipment_creature_host::render_system,
@@ -2935,6 +2970,7 @@ fn reconcile_inventory_capacity(
     state.inventory_page = 0;
     state.inspect = None;
     state.inventory_operation = None;
+    state.inventory_item_drag = None;
     state.drop_confirmation = None;
     true
 }
@@ -3116,6 +3152,30 @@ pub fn equip_destination_for_name(name: &str) -> i32 {
     }
 }
 
+fn equip_destination_for_item(item: &ItemModel) -> i32 {
+    let authoritative_slot =
+        item.equip_slot
+            .as_deref()
+            .and_then(|slot| match slot.to_ascii_lowercase().as_str() {
+                "weapon" => Some(0),
+                "armour" | "armor" => Some(1),
+                "helmet" => Some(2),
+                "torch" => Some(3),
+                "necklace" => Some(4),
+                "braceletleft" => Some(5),
+                "braceletright" => Some(6),
+                "ringleft" => Some(7),
+                "ringright" => Some(8),
+                "amulet" => Some(9),
+                "belt" => Some(10),
+                "boots" => Some(11),
+                "stone" => Some(12),
+                "mount" => Some(13),
+                _ => None,
+            });
+    authoritative_slot.unwrap_or_else(|| equip_destination_for_name(&item.name))
+}
+
 pub fn equipment_slot_name(slot: u32) -> &'static str {
     match slot {
         0 => "Weapon",
@@ -3156,6 +3216,22 @@ pub fn belt_item_use_intent(inventory: &InventoryModel, slot: u8) -> Option<Nati
         slot: Some(slot),
         grid: Some("belt".to_owned()),
     })
+}
+
+fn inventory_bag_to_belt_move_intent(
+    source_slot: u32,
+    unique_id: u64,
+    belt_slot: u8,
+) -> NativePlayerUiIntent {
+    NativePlayerUiIntent::MoveItem {
+        // Inventory moves in the existing web/native contract use normalized
+        // bag indices. Belt marks the unambiguous compatibility path whose
+        // endpoints use Crystal's unified raw inventory indices.
+        grid: "belt".to_owned(),
+        unique_id,
+        from: i32::try_from(source_slot.saturating_add(6)).unwrap_or(i32::MAX),
+        to: i32::from(belt_slot),
+    }
 }
 
 fn spawn_overlay_root(mut commands: Commands) {
@@ -3468,17 +3544,40 @@ fn consume_hud_buttons(
         (&Interaction, &CrystalHudAction, Option<&CrystalImageButton>),
         Changed<Interaction>,
     >,
+    overlay_buttons: Query<&Interaction, (With<OverlayButton>, Changed<Interaction>)>,
     shell: Option<Res<NativeShellModel>>,
     inventory: Res<InventoryModel>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
+    mut pending: Option<ResMut<PendingOperations>>,
     mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
+    diagnostics: Option<Res<InventoryBeltDiagnostics>>,
 ) {
     if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame)
         || state.amount_modal_open()
     {
         return;
     }
+    // Bevy can report both controls as pressed when a foreground dialog
+    // button overlaps a HUD hit target. Crystal gives the top dialog the
+    // pointer, so suppress every HUD action for that press edge. This keeps a
+    // CharacterDialog close at (1007, 3) from also toggling the minimap below.
+    if overlay_buttons
+        .iter()
+        .any(|interaction| *interaction == Interaction::Pressed)
+    {
+        return;
+    }
     for (interaction, action, image_button) in buttons.iter() {
+        if let CrystalHudAction::BeltUse(slot) = action {
+            belt_diagnostic(diagnostics.as_deref(), || {
+                format!(
+                    "hud slot={slot} interaction={interaction:?} image_enabled={} move_draft={} pending_available={}",
+                    image_button.is_none_or(|button| button.enabled),
+                    matches!(state.inventory_operation, Some(InventoryOperationDraft::Move { .. })),
+                    pending.is_some(),
+                )
+            });
+        }
         if *interaction != Interaction::Pressed
             || image_button.is_some_and(|button| !button.enabled)
         {
@@ -3532,6 +3631,27 @@ fn consume_hud_buttons(
                 }
             }
             CrystalHudAction::BeltUse(slot) => {
+                if let Some(InventoryOperationDraft::Move {
+                    source_slot,
+                    unique_id,
+                }) = state.inventory_operation.clone()
+                {
+                    let Some(pending) = pending.as_deref_mut() else {
+                        continue;
+                    };
+                    let queued = intents.push_pending_intent(
+                        pending,
+                        inventory_bag_to_belt_move_intent(source_slot, unique_id, *slot),
+                    );
+                    belt_diagnostic(diagnostics.as_deref(), || {
+                        format!("hud slot={slot} move_queue={queued}")
+                    });
+                    if queued {
+                        state.inventory_operation = None;
+                        state.inspect = None;
+                    }
+                    continue;
+                }
                 if let Some(intent) = belt_item_use_intent(&inventory, *slot) {
                     intents.push_transient_unique(intent);
                 }
@@ -3713,6 +3833,208 @@ fn process_inventory_drag(
     };
     state.inventory_window.drag_to(cursor.x, cursor.y);
     state.inventory_window.remember_cursor(current_cursor);
+}
+
+fn inventory_bag_slot_at_cursor(state: &NativePlayerUiState, cursor: Vec2) -> Option<u32> {
+    if state.inventory_page > 1 {
+        return None;
+    }
+    let local_x = cursor.x - state.inventory_window.left;
+    let local_y = cursor.y - state.inventory_window.top;
+    (0..INVENTORY_PAGE_SIZE).find_map(|local_slot| {
+        let x = INVENTORY_GRID_ORIGIN.x as f32
+            + (local_slot % INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.x as f32;
+        let y = INVENTORY_GRID_ORIGIN.y as f32
+            + (local_slot / INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.y as f32;
+        CrystalRect::new(
+            x,
+            y,
+            INVENTORY_CELL_SIZE.width as f32,
+            INVENTORY_CELL_SIZE.height as f32,
+        )
+        .contains(local_x, local_y)
+        .then_some((usize::from(state.inventory_page) * INVENTORY_PAGE_SIZE + local_slot) as u32)
+    })
+}
+
+fn belt_slot_at_cursor(belt: super::hud::CrystalBeltPresentation, cursor: Vec2) -> Option<u8> {
+    belt.visible.then_some(())?;
+    (0..6)
+        .find(|slot| super::hud::belt_slot_rect(*slot, belt.vertical).contains(cursor.x, cursor.y))
+}
+
+fn inventory_item_drag_at_cursor(
+    state: &NativePlayerUiState,
+    inventory: &InventoryModel,
+    start: Vec2,
+) -> Option<InventoryItemDrag> {
+    let source_slot = inventory_bag_slot_at_cursor(state, start)?;
+    let item = inventory
+        .items_in(0)
+        .into_iter()
+        .find(|item| item.slot == source_slot)?;
+    Some(InventoryItemDrag {
+        source_slot,
+        unique_id: item_unique_id(item)?,
+        start,
+    })
+}
+
+fn finish_inventory_item_drag(
+    state: &mut NativePlayerUiState,
+    cursor: Option<Vec2>,
+    belt: super::hud::CrystalBeltPresentation,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+    diagnostics: Option<&InventoryBeltDiagnostics>,
+) {
+    let Some(drag) = state.inventory_item_drag.take() else {
+        belt_diagnostic(diagnostics, || "drag release without source".to_owned());
+        return;
+    };
+    let Some(cursor) = cursor else {
+        belt_diagnostic(diagnostics, || "drag release without cursor".to_owned());
+        return;
+    };
+    if drag.start.distance(cursor) < 4.0 {
+        belt_diagnostic(diagnostics, || "drag release below threshold".to_owned());
+        return;
+    }
+    let Some(belt_slot) = belt_slot_at_cursor(belt, cursor) else {
+        belt_diagnostic(diagnostics, || "drag release outside belt".to_owned());
+        return;
+    };
+    let queued = intents.push_pending_intent(
+        pending,
+        inventory_bag_to_belt_move_intent(drag.source_slot, drag.unique_id, belt_slot),
+    );
+    belt_diagnostic(diagnostics, || {
+        format!(
+            "drag source={} belt={belt_slot} move_queue={queued}",
+            drag.source_slot
+        )
+    });
+    if queued {
+        state.inspect = None;
+    }
+}
+
+/// Preserve the native inspect menu on a click while also accepting the
+/// source client's carry gesture when the pointer actually travels from an
+/// occupied bag cell to a belt cell.
+fn process_inventory_item_drag(
+    mut state: ResMut<NativePlayerUiState>,
+    inventory: Res<InventoryModel>,
+    belt: Option<Res<super::hud::CrystalBeltPresentation>>,
+    mouse: Option<Res<ButtonInput<MouseButton>>>,
+    windows: Query<(Entity, &Window), With<PrimaryWindow>>,
+    mut cursor_moves: MessageReader<CursorMoved>,
+    ordered: Option<Res<Messages<bevy::window::WindowEvent>>>,
+    mut ordered_reader: Local<bevy::ecs::message::MessageCursor<bevy::window::WindowEvent>>,
+    mut intents: ResMut<NativePlayerUiIntentQueue>,
+    mut pending: ResMut<PendingOperations>,
+    diagnostics: Option<Res<InventoryBeltDiagnostics>>,
+) {
+    let ordered_events: Vec<_> = ordered
+        .as_ref()
+        .map(|events| ordered_reader.read(events).cloned().collect())
+        .unwrap_or_default();
+    if !state.inventory_open()
+        || state.amount_modal_open()
+        || state.inventory_delete_mode
+        || state.inventory_operation.is_some()
+        || state.trade_dialog.open
+    {
+        state.inventory_item_drag = None;
+        return;
+    }
+    let (Some(mouse), Some(belt)) = (mouse, belt) else {
+        state.inventory_item_drag = None;
+        return;
+    };
+    let Ok((window_entity, window)) = windows.single() else {
+        state.inventory_item_drag = None;
+        return;
+    };
+    if !window.focused {
+        state.inventory_item_drag = None;
+        return;
+    }
+    let cursor_path = cursor_moves
+        .read()
+        .filter(|event| event.window == window_entity)
+        .map(|event| cursor_logical(window, event.position))
+        .collect::<Vec<_>>();
+    let cursor = cursor_path
+        .last()
+        .copied()
+        .or_else(|| help_cursor_logical(window));
+
+    if ordered.is_some() {
+        use bevy::input::ButtonState;
+        use bevy::window::WindowEvent;
+        let mut cursor = state
+            .inventory_window
+            .last_cursor
+            .or_else(|| help_cursor_logical(window));
+        for event in ordered_events {
+            match event {
+                WindowEvent::CursorMoved(event) if event.window == window_entity => {
+                    cursor = Some(cursor_logical(window, event.position));
+                }
+                WindowEvent::CursorLeft(event) if event.window == window_entity => {
+                    cursor = None;
+                    state.inventory_item_drag = None;
+                    belt_diagnostic(diagnostics.as_deref(), || "drag cursor left".to_owned());
+                }
+                WindowEvent::MouseButtonInput(event)
+                    if event.window == window_entity && event.button == MouseButton::Left =>
+                {
+                    match event.state {
+                        ButtonState::Pressed => {
+                            state.inventory_item_drag = cursor.and_then(|start| {
+                                inventory_item_drag_at_cursor(&state, &inventory, start)
+                            });
+                            belt_diagnostic(diagnostics.as_deref(), || {
+                                format!(
+                                    "drag press source={:?}",
+                                    state.inventory_item_drag.map(|drag| drag.source_slot)
+                                )
+                            });
+                        }
+                        ButtonState::Released => finish_inventory_item_drag(
+                            &mut state,
+                            cursor,
+                            *belt,
+                            &mut intents,
+                            &mut pending,
+                            diagnostics.as_deref(),
+                        ),
+                    }
+                }
+                _ => {}
+            }
+        }
+        state.inventory_window.remember_cursor(cursor);
+        return;
+    }
+
+    if mouse.just_pressed(MouseButton::Left) {
+        let start = cursor_path.first().copied().or(cursor);
+        state.inventory_item_drag =
+            start.and_then(|start| inventory_item_drag_at_cursor(&state, &inventory, start));
+    }
+
+    if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
+        finish_inventory_item_drag(
+            &mut state,
+            cursor,
+            *belt,
+            &mut intents,
+            &mut pending,
+            diagnostics.as_deref(),
+        );
+    }
 }
 
 /// Crystal cancels the footer-bin toggle on a right click anywhere inside the
@@ -5749,7 +6071,13 @@ fn process_overlay_buttons(
             }
             OverlayButton::EquipInspected => {
                 if let Some(intent) = inspected_equip_intent(&state, &inventory) {
-                    intents.push_intent(intent);
+                    if intents.push_intent(intent) {
+                        // Crystal disposes the item action menu as soon as the
+                        // equip request is accepted. Keeping this selection
+                        // alive renders the pre-swap bag item after the server
+                        // moves it into the equipment grid.
+                        state.inspect = None;
+                    }
                 }
             }
             OverlayButton::UnequipInspected => {
@@ -6676,7 +7004,7 @@ fn inspected_equip_intent(
     Some(NativePlayerUiIntent::EquipItem {
         unique_id: item_unique_id(item)?,
         grid: container_name(item.container).to_owned(),
-        to: equip_destination_for_name(&item.name),
+        to: equip_destination_for_item(item),
     })
 }
 
@@ -7352,17 +7680,22 @@ fn render_overlays(
         fill_panel(&mut commands, &mut all.p3(), state.menu_open(), |parent| {
             render_menu(parent, asset_server.as_deref())
         });
-        fill_panel(&mut commands, &mut all.p4(), state.core.skill_open(), |parent| {
-            render_equipment(
-                parent,
-                asset_server.as_deref(),
-                wing_materials.as_deref(),
-                &inventory,
-                &ui,
-                &state,
-                &skills,
-            )
-        });
+        fill_panel(
+            &mut commands,
+            &mut all.p4(),
+            state.core.skill_open(),
+            |parent| {
+                render_equipment(
+                    parent,
+                    asset_server.as_deref(),
+                    wing_materials.as_deref(),
+                    &inventory,
+                    &ui,
+                    &state,
+                    &skills,
+                )
+            },
+        );
         fill_panel(
             &mut commands,
             &mut all.p5(),
@@ -13071,6 +13404,41 @@ mod tests {
     }
 
     #[test]
+    fn foreground_close_press_blocks_overlapping_minimap_hud_press() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Update, consume_hud_buttons);
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel = mir2_ui_core::state::UiPanel::Character;
+            state.core.minimap_visible = true;
+        }
+        app.world_mut()
+            .spawn((Interaction::Pressed, CrystalHudAction::MinimapToggle));
+        app.world_mut()
+            .spawn((Interaction::Pressed, OverlayButton::CloseCharacter));
+
+        app.update();
+
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(state.minimap_visible());
+        assert!(state.equipment_open());
+        assert_eq!(
+            app.world()
+                .resource::<crate::audio::NativeUiAudioQueue>()
+                .len(),
+            0
+        );
+    }
+
+    #[test]
     fn character_hud_activation_restores_every_non_character_page_before_closing() {
         for page in [
             CharacterPage::Stats1,
@@ -13891,7 +14259,9 @@ mod tests {
     fn skill_shortcut_uses_one_real_character_dialog_with_all_four_tabs() {
         let mut app = overlay_render_test_app();
         app.world_mut().resource_mut::<UiReadModel>().player.name = Some("SkillTester".into());
-        app.world_mut().resource_mut::<NativePlayerUiState>().toggle_skill();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_skill();
         app.update();
         let world = app.world_mut();
         let state = world.resource::<NativePlayerUiState>();
@@ -13899,19 +14269,42 @@ mod tests {
         assert!(state.skill_open());
         assert!(!state.core.skill_open(), "no separate placeholder window");
         assert_eq!(state.character_page, CharacterPage::Spells);
-        assert_eq!(world.query::<&OverlayButton>().iter(world)
-            .filter(|action| matches!(action, OverlayButton::SelectCharacterPage(_))).count(), 4);
-        assert!(world.query::<&Text>().iter(world).any(|text| text.0 == "SkillTester"));
-        assert_eq!(world.query::<&ImageNode>().iter(world).filter(|image|
-            image.image.path().is_some_and(|path| path.to_string() == "original-ui/Title/504.png")
-        ).count(), 1);
+        assert_eq!(
+            world
+                .query::<&OverlayButton>()
+                .iter(world)
+                .filter(|action| matches!(action, OverlayButton::SelectCharacterPage(_)))
+                .count(),
+            4
+        );
+        assert!(world
+            .query::<&Text>()
+            .iter(world)
+            .any(|text| text.0 == "SkillTester"));
+        assert_eq!(
+            world
+                .query::<&ImageNode>()
+                .iter(world)
+                .filter(|image| image
+                    .image
+                    .path()
+                    .is_some_and(|path| path.to_string() == "original-ui/Title/504.png"))
+                .count(),
+            1
+        );
         let mut state = world.resource_mut::<NativePlayerUiState>();
         state.character_page = CharacterPage::Stats1;
         state.toggle_skill();
-        assert!(state.equipment_open(), "F11 from another tab keeps the dialog open");
+        assert!(
+            state.equipment_open(),
+            "F11 from another tab keeps the dialog open"
+        );
         assert_eq!(state.character_page, CharacterPage::Spells);
         state.toggle_skill();
-        assert!(!state.equipment_open(), "F11 closes only the already-selected spells page");
+        assert!(
+            !state.equipment_open(),
+            "F11 closes only the already-selected spells page"
+        );
     }
 
     fn mail_msg(id: u64, claimed: bool, locked: bool, gold: u32, items: Vec<&str>) -> MailMessage {
@@ -14016,7 +14409,10 @@ mod tests {
             .resource_mut::<NativePlayerUiState>()
             .toggle_skill();
         app.update();
-        assert!(app.world().resource::<NativePlayerUiState>().equipment_open());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .equipment_open());
         let skill_viewports = app
             .world_mut()
             .query_filtered::<&Node, With<OverlaySkillListViewport>>()
@@ -14373,6 +14769,52 @@ mod tests {
     }
 
     #[test]
+    fn inspected_equip_prefers_authoritative_slot_over_display_name() {
+        fn equip_target(mut item: ItemModel, equip_slot: Option<&str>) -> i32 {
+            item.equip_slot = equip_slot.map(str::to_owned);
+            let state = NativePlayerUiState {
+                inspect: Some(inspect_from_item(&item)),
+                ..default()
+            };
+            let inventory = InventoryModel {
+                items: vec![item],
+                ..default()
+            };
+            match inspected_equip_intent(&state, &inventory) {
+                Some(NativePlayerUiIntent::EquipItem { to, .. }) => to,
+                other => panic!("expected equip intent, got {other:?}"),
+            }
+        }
+
+        assert_eq!(
+            equip_target(item("317", "BaseDress(M)", 0, 3), Some("armour")),
+            1
+        );
+        assert_eq!(
+            equip_target(item("245", "DragonSword", 0, 4), Some("weapon")),
+            0
+        );
+        assert_eq!(
+            equip_target(item("900", "RidingToken", 0, 5), Some("mount")),
+            13
+        );
+        assert_eq!(
+            equip_target(item("901", "HandLamp", 0, 6), Some("torch")),
+            3
+        );
+        assert_eq!(
+            equip_target(item("902", "FallbackArmour", 0, 7), Some("unknown")),
+            1,
+            "unknown metadata keeps the legacy name fallback"
+        );
+        assert_eq!(
+            equip_target(item("903", "FallbackRing", 0, 8), None),
+            7,
+            "missing metadata keeps the legacy name fallback"
+        );
+    }
+
+    #[test]
     fn chat_focus_blocks_gameplay_keys_not_bag() {
         let mut state = NativePlayerUiState::default();
         state.core.panel = mir2_ui_core::state::UiPanel::Inventory;
@@ -14428,6 +14870,51 @@ mod tests {
         // identity; a previously pressed HUD node must fail closed.
         inventory.items.clear();
         assert!(belt_item_use_intent(&inventory, 0).is_none());
+    }
+
+    #[test]
+    fn armed_bag_move_uses_crystal_raw_source_when_empty_belt_slot_is_clicked() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<crate::audio::NativeUiAudioQueue>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            })
+            .add_systems(Update, consume_hud_buttons);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .inventory_operation = Some(InventoryOperationDraft::Move {
+            source_slot: 2,
+            unique_id: 7001,
+        });
+        let belt = app
+            .world_mut()
+            .spawn((Interaction::None, CrystalHudAction::BeltUse(0)))
+            .id();
+        app.update();
+        app.world_mut()
+            .entity_mut(belt)
+            .insert(Interaction::Pressed);
+        app.update();
+
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::MoveItem {
+                grid: "belt".to_owned(),
+                unique_id: 7001,
+                from: 8,
+                to: 0,
+            }]
+        );
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(state.inventory_operation.is_none());
+        assert!(state.inspect.is_none());
     }
 
     fn read_player_ui(_state: Res<NativePlayerUiState>) {}
@@ -15438,6 +15925,16 @@ mod tests {
                 container: 0,
                 ..ItemModel::default()
             },
+            ItemModel {
+                unique_id: Some(44),
+                key: "sharp-dagger".into(),
+                name: "SharpDagger".into(),
+                quantity: 1,
+                slot: 4,
+                container: 0,
+                equip_slot: Some("weapon".into()),
+                ..ItemModel::default()
+            },
         ];
         init_overlay_button_test_resources(&mut app);
         app.add_systems(Update, process_overlay_buttons);
@@ -15545,6 +16042,29 @@ mod tests {
             .resource::<NativePlayerUiState>()
             .drop_confirmation
             .is_none());
+
+        press(&mut app, OverlayButton::InspectBag(4));
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inspect
+            .is_some());
+        press(&mut app, OverlayButton::EquipInspected);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inspect
+            .is_none());
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::EquipItem {
+                unique_id: 44,
+                grid: "inventory".to_owned(),
+                to: 0,
+            }]
+        );
     }
 
     #[test]
@@ -16527,6 +17047,242 @@ mod tests {
             (state.inventory_window.left, state.inventory_window.top),
             (75.0, 190.0)
         );
+    }
+
+    #[test]
+    fn inventory_item_drag_to_empty_belt_emits_one_raw_slot_move() {
+        let mut app = App::new();
+        let mut primary = Window::default();
+        primary.focused = true;
+        primary.resolution.set(1024.0, 768.0);
+        let window = app.world_mut().spawn((primary, PrimaryWindow)).id();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<crate::crystal_ui::hud::CrystalBeltPresentation>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<ButtonInput<MouseButton>>()
+            .add_message::<CursorMoved>()
+            .add_systems(Update, process_inventory_item_drag);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_inventory();
+        app.world_mut()
+            .resource_mut::<InventoryModel>()
+            .items
+            .push(ItemModel {
+                unique_id: Some(7002),
+                key: "small-hp-drug".to_owned(),
+                name: "(HP)DrugSmall".to_owned(),
+                quantity: 1,
+                slot: 2,
+                container: 0,
+                ..Default::default()
+            });
+        {
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(state.inventory_open());
+            assert!(!state.amount_modal_open());
+            assert!(!state.inventory_delete_mode);
+            assert!(state.inventory_operation.is_none());
+            assert!(!state.trade_dialog.open);
+        }
+
+        let source = Vec2::new(
+            INVENTORY_GRID_ORIGIN.x as f32 + 2.0 * INVENTORY_GRID_STEP.x as f32 + 2.0,
+            INVENTORY_GRID_ORIGIN.y as f32 + 2.0,
+        );
+        let belt = crate::crystal_ui::hud::belt_slot_rect(0, false);
+        let destination = Vec2::new(belt.left + 2.0, belt.top + 2.0);
+        {
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(state.inventory_open());
+            assert!(!state.amount_modal_open());
+            assert_eq!(inventory_bag_slot_at_cursor(state, source), Some(2));
+        }
+        assert_eq!(
+            belt_slot_at_cursor(
+                *app.world()
+                    .resource::<crate::crystal_ui::hud::CrystalBeltPresentation>(),
+                destination,
+            ),
+            Some(0)
+        );
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.world_mut().write_message(CursorMoved {
+            window,
+            position: source,
+            delta: None,
+        });
+        app.update();
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_item_drag
+            .is_some());
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut().write_message(CursorMoved {
+            window,
+            position: destination,
+            delta: Some(destination - source),
+        });
+        app.update();
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Left);
+        app.world_mut().write_message(CursorMoved {
+            window,
+            position: destination,
+            delta: None,
+        });
+        app.update();
+
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::MoveItem {
+                grid: "belt".to_owned(),
+                unique_id: 7002,
+                from: 8,
+                to: 0,
+            }]
+        );
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_item_drag
+            .is_none());
+    }
+
+    fn ordered_inventory_drag_motion(app: &mut App, window: Entity, position: Vec2) {
+        app.world_mut()
+            .entity_mut(window)
+            .get_mut::<Window>()
+            .unwrap()
+            .set_cursor_position(Some(position));
+        app.world_mut()
+            .write_message(bevy::window::WindowEvent::CursorMoved(CursorMoved {
+                window,
+                position,
+                delta: None,
+            }));
+    }
+
+    fn ordered_inventory_drag_button(app: &mut App, window: Entity, pressed: bool) {
+        app.world_mut()
+            .write_message(bevy::window::WindowEvent::MouseButtonInput(
+                bevy::input::mouse::MouseButtonInput {
+                    window,
+                    button: MouseButton::Left,
+                    state: if pressed {
+                        bevy::input::ButtonState::Pressed
+                    } else {
+                        bevy::input::ButtonState::Released
+                    },
+                },
+            ));
+    }
+
+    fn batched_inventory_drag_app() -> (App, Entity, Vec2, Vec2) {
+        let mut app = App::new();
+        let mut primary = Window::default();
+        primary.focused = true;
+        primary.resolution.set(1024.0, 768.0);
+        let window = app.world_mut().spawn((primary, PrimaryWindow)).id();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<crate::crystal_ui::hud::CrystalBeltPresentation>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<ButtonInput<MouseButton>>()
+            .add_message::<CursorMoved>()
+            .add_message::<bevy::window::WindowEvent>()
+            .add_systems(Update, process_inventory_item_drag);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_inventory();
+        app.world_mut()
+            .resource_mut::<InventoryModel>()
+            .items
+            .push(ItemModel {
+                unique_id: Some(7003),
+                key: "small-hp-drug".to_owned(),
+                name: "(HP)DrugSmall".to_owned(),
+                quantity: 2,
+                slot: 2,
+                container: 0,
+                ..Default::default()
+            });
+        let source = Vec2::new(
+            INVENTORY_GRID_ORIGIN.x as f32 + 2.0 * INVENTORY_GRID_STEP.x as f32 + 2.0,
+            INVENTORY_GRID_ORIGIN.y as f32 + 2.0,
+        );
+        let belt = crate::crystal_ui::hud::belt_slot_rect(0, false);
+        let destination = Vec2::new(belt.left + 2.0, belt.top + 2.0);
+        (app, window, source, destination)
+    }
+
+    fn assert_batched_inventory_drag_intent(app: &mut App) {
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents(),
+            vec![NativePlayerUiIntent::MoveItem {
+                grid: "belt".to_owned(),
+                unique_id: 7003,
+                from: 8,
+                to: 0,
+            }]
+        );
+    }
+
+    #[test]
+    fn inventory_item_drag_uses_ordered_same_frame_press_motion_release() {
+        let (mut app, window, source, destination) = batched_inventory_drag_app();
+        ordered_inventory_drag_motion(&mut app, window, source);
+        ordered_inventory_drag_button(&mut app, window, true);
+        ordered_inventory_drag_motion(&mut app, window, destination);
+        ordered_inventory_drag_button(&mut app, window, false);
+
+        app.update();
+        assert_batched_inventory_drag_intent(&mut app);
+    }
+
+    #[test]
+    fn inventory_item_drag_uses_ordered_cross_frame_press_and_release() {
+        let (mut app, window, source, destination) = batched_inventory_drag_app();
+        ordered_inventory_drag_motion(&mut app, window, source);
+        ordered_inventory_drag_button(&mut app, window, true);
+        app.update();
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .inventory_item_drag
+            .is_some());
+
+        ordered_inventory_drag_motion(&mut app, window, destination);
+        ordered_inventory_drag_button(&mut app, window, false);
+        app.update();
+        assert_batched_inventory_drag_intent(&mut app);
+    }
+
+    #[test]
+    fn inventory_item_motion_without_button_edges_does_not_move() {
+        let (mut app, window, source, destination) = batched_inventory_drag_app();
+        ordered_inventory_drag_motion(&mut app, window, source);
+        ordered_inventory_drag_motion(&mut app, window, destination);
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
     }
 
     #[test]

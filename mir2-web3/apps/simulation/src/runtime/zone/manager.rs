@@ -535,6 +535,17 @@ impl ZoneManager {
         self.zones.get(key)?.player_last_seen_move_seq(session_id)
     }
 
+    pub fn player_has_visible_object(
+        &self,
+        session_id: &SessionId,
+        object_id: u32,
+    ) -> Option<bool> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones
+            .get(key)?
+            .player_has_visible_object(session_id, object_id)
+    }
+
     pub fn player_life_generation(&self, session_id: &SessionId) -> Option<u64> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_life_generation(session_id)

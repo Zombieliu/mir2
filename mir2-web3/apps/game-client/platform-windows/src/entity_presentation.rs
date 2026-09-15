@@ -67,6 +67,7 @@ pub struct NativeEntityPresentation {
     last_effect_visible: Option<bool>,
     hover_cursor_stage: Option<(f32, f32)>,
     highlight_target: bool,
+    local_selected_object_id: Option<String>,
     hovered_object_id: Option<String>,
     self_hovered: bool,
     self_object_id: Option<String>,
@@ -88,6 +89,7 @@ impl Default for NativeEntityPresentation {
             last_effect_visible: None,
             hover_cursor_stage: None,
             highlight_target: true,
+            local_selected_object_id: None,
             hovered_object_id: None,
             self_hovered: false,
             self_object_id: None,
@@ -182,6 +184,16 @@ impl NativeEntityPresentation {
 
     pub(crate) fn current_map_file_name(&self) -> Option<&str> {
         self.latest_payload.as_ref()?.get("mapFileName")?.as_str()
+    }
+
+    /// Packet payload after native movement reconciliation.
+    ///
+    /// The Windows overlay layer must read the same corrected entity/grid
+    /// coordinates that produced the retained sprite scene. Reading the raw
+    /// gameplay clone can leave the self name and health bar on a stale source
+    /// tile while the body has already accepted the next run segment.
+    pub(crate) fn overlay_payload(&self) -> Option<&Value> {
+        self.latest_payload.as_ref()
     }
 
     /// Crystal runs three cells while mounted or while Swift Feet is active;
@@ -520,6 +532,13 @@ impl NativeEntityPresentation {
         }
     }
 
+    fn set_local_selected_object_id(&mut self, object_id: Option<String>) {
+        if self.local_selected_object_id != object_id {
+            self.local_selected_object_id = object_id;
+            self.payload_dirty = true;
+        }
+    }
+
     fn sync_pending_payload(&mut self, animation_now_ms: u64, motion_now_ms: u64) {
         self.sync_pending_payload_with_clocks(
             animation_now_ms,
@@ -639,6 +658,32 @@ impl NativeEntityPresentation {
             let Some(action) = normalize_action(entity.kind, action) else {
                 continue;
             };
+            let revival_barrier = action == AnimationAction::Revive
+                || (entity.kind == EntityKind::Player
+                    && action == AnimationAction::Standing
+                    && self.world.state(&update.key).is_ok_and(|state| {
+                        matches!(
+                            state.pose().action,
+                            AnimationAction::Die
+                                | AnimationAction::Dead
+                                | AnimationAction::Skeleton
+                        )
+                    }));
+            if revival_barrier {
+                if self
+                    .world
+                    .apply_revival_event(
+                        &update.key,
+                        AnimationEvent::new(sequence, action, entity.direction),
+                        animation_now_ms,
+                    )
+                    .is_ok()
+                {
+                    self.last_applied_sequence
+                        .insert(entity.object_id, sequence);
+                }
+                continue;
+            }
             let coalesces_active_player_motion = entity.kind == EntityKind::Player
                 && matches!(action, AnimationAction::Walking | AnimationAction::Running)
                 && self
@@ -1043,6 +1088,17 @@ impl NativeEntityPresentation {
                 "_nativeHighlightTarget".to_owned(),
                 Value::Bool(self.highlight_target),
             );
+            // The browser owns selectedObjectId in its local world store. The
+            // native client keeps the same selection in its pointer movement
+            // controller, so project it into the render-only payload. Without
+            // this bridge the ordinary body pass is correctly hidden by a
+            // tree, but Crystal's selected-object redraw never appears.
+            if let Some(object_id) = &self.local_selected_object_id {
+                object.insert(
+                    "selectedObjectId".to_owned(),
+                    Value::String(object_id.clone()),
+                );
+            }
             if let Some((x, y)) = self.hover_cursor_stage {
                 object.insert(
                     "_nativeHoverCursor".to_owned(),
@@ -1082,6 +1138,7 @@ impl NativeEntityPresentation {
 pub fn tick_native_entity_presentation(
     time: Res<Time>,
     mut presentation: ResMut<NativeEntityPresentation>,
+    movement: Option<Res<crate::input::WorldPointerMovementState>>,
     player_ui: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
     shell: Option<Res<mir2_client_bevy::native_shell::NativeShellModel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
@@ -1096,6 +1153,12 @@ pub fn tick_native_entity_presentation(
         .as_deref()
         .map(|state| state.core.options.highlight_target)
         .unwrap_or(true);
+    presentation.set_local_selected_object_id(
+        movement
+            .as_deref()
+            .and_then(crate::input::WorldPointerMovementState::attack_target)
+            .map(|object_id| object_id.to_string()),
+    );
     // Hit-testing is an input contract, not a highlight preference. Always
     // publish the cursor while world input is allowed; `highlight_target`
     // controls only the extra redraw band; name visibility is handled by the
@@ -1480,6 +1543,36 @@ mod tests {
                 }
             }]
         })
+    }
+
+    #[test]
+    fn local_revived_standing_interrupts_dead_with_stale_locomotion_queued() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut dying = player_payload(1);
+        dying["entities"][0]["dead"] = json!(true);
+        dying["entities"][0]["_nativeAnimationAction"] = json!("die");
+        presentation.replace_payload(dying);
+        presentation.sync_pending_payload_with(0, |_, _, _| AnimationCatalog::crystal_player());
+        presentation.world.tick(400).unwrap();
+
+        let mut stale_move = player_payload(2);
+        stale_move["entities"][0]["dead"] = json!(true);
+        stale_move["entities"][0]["_nativeAnimationAction"] = json!("running");
+        presentation.replace_payload(stale_move);
+        presentation.sync_pending_payload_with(450, |_, _, _| AnimationCatalog::crystal_player());
+        assert_eq!(
+            presentation.world.active_state("1").unwrap().queue_depth(),
+            1
+        );
+
+        let mut revived = player_payload(3);
+        revived["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        presentation.replace_payload(revived);
+        presentation.sync_pending_payload_with(500, |_, _, _| AnimationCatalog::crystal_player());
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.current_action, AnimationAction::Standing);
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(state.last_started_event_sequence(), Some(3));
     }
 
     fn mounted_player_payload(sequence: u64, action: &str) -> Value {
@@ -2244,6 +2337,11 @@ mod tests {
             .expect("authoritative self move");
 
         let mut stale_echo = player_payload(12);
+        // Sustained running can receive a target-centred scene snapshot whose
+        // self entity is still the previous source tile. The renderer already
+        // owns the active 10 -> 11 window, so overlays must consume its
+        // reconciled payload instead of exposing the two-cell visual split.
+        stale_echo["sceneView"]["center"]["x"] = json!(11);
         stale_echo["entities"][0]["direction"] = json!("right");
         presentation.replace_payload(stale_echo);
         let rendered = presentation
@@ -2257,6 +2355,11 @@ mod tests {
         assert_eq!(rendered["entities"][0]["motionFromX"], json!(10.0));
         assert_eq!(rendered["entities"][0]["motionToX"], json!(11.0));
         assert_eq!(rendered["entities"][0]["motionStartedMs"], json!(1_100_u64));
+        let overlay_payload = presentation
+            .overlay_payload()
+            .expect("overlay consumes the reconciled presentation payload");
+        assert_eq!(overlay_payload["sceneView"]["center"]["x"], json!(11));
+        assert_eq!(overlay_payload["entities"][0]["x"], json!(11));
         assert_eq!(presentation.last_positions.get("1"), Some(&(11, 10)));
         assert_eq!(presentation.last_applied_sequence.get("1"), Some(&11));
         let state = presentation
@@ -2309,6 +2412,24 @@ mod tests {
             .render_state_if_changed_with(0, true, |payload, _, _| Some(payload.clone()))
             .expect("setting-only redraw");
         assert_eq!(disabled["_nativeHighlightTarget"], json!(false));
+    }
+
+    #[test]
+    fn native_attack_selection_is_projected_into_the_render_only_payload() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(player_payload(1));
+        presentation.set_local_selected_object_id(Some("2001".to_owned()));
+
+        let selected = presentation
+            .render_state_if_changed_with(0, true, |payload, _, _| Some(payload.clone()))
+            .expect("local combat selection redraw");
+        assert_eq!(selected["selectedObjectId"], json!("2001"));
+
+        presentation.set_local_selected_object_id(None);
+        let cleared = presentation
+            .render_state_if_changed_with(0, true, |payload, _, _| Some(payload.clone()))
+            .expect("selection clear redraw");
+        assert!(cleared["selectedObjectId"].is_null());
     }
 
     #[test]

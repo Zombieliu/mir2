@@ -441,7 +441,17 @@ fn crystal_manifest_movement_destination_is_valid(
     destination: &Point,
 ) -> bool {
     runtime_full_map_collision_data(map_file_name)
-        .map(|collision| full_map_collision_walkable(&collision, destination))
+        .map(|collision| {
+            // Crystal's `Map.ValidPoint` checks the map cell's terrain validity
+            // before a movement completes. A closed door is a separate dynamic
+            // obstruction and does not invalidate an explicitly configured
+            // movement destination. Several real shop exits intentionally land
+            // beside/on a closed door cell (for example 0120 -> map 2 at
+            // 517,492); rejecting those destinations removes the only exit and
+            // strands the player inside the service map.
+            point_in_bounds(&collision.collision.region_bounds, destination)
+                && !collision.blocked_set.contains(&tile_key(destination))
+        })
         .unwrap_or(true)
 }
 

@@ -69,7 +69,9 @@ use crate::resume::{
     ResumeCredential, ResumeCredentialRegistry, ResumeFamilyId, ResumeIssueContext,
     NATIVE_RESUME_PROTOCOL, RESUME_CREDENTIAL_ROTATION_MS,
 };
-use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
+use crate::routing::{
+    SharedZoneLiveOutbound, SharedZoneLiveOutboundSender, ZoneLiveOutboundRegistration,
+};
 use crate::session::{
     catch_gateway_panic, GatewayTeardownPersistenceOutcome, GatewayZoneMovementIngress,
 };
@@ -85,6 +87,7 @@ type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
 type SharedZoneMovementIngressSlot = Arc<RwLock<Option<GatewayZoneMovementIngress>>>;
 type SharedSerialExecutionGate = Arc<AsyncRwLock<()>>;
 const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
+const OWNER_LOCATION_OUTBOUND_CAPACITY: usize = 8;
 const SOCKET_INPUT_CAPACITY: usize = 256;
 const WEBSOCKET_MAX_FRAME_BYTES: usize = 64 * 1024;
 const WEBSOCKET_MAX_MESSAGE_BYTES: usize = WEBSOCKET_MAX_FRAME_BYTES;
@@ -94,6 +97,7 @@ const DEFAULT_PRODUCTION_MAX_ACTIVE_SESSIONS: usize = 512;
 const DEFAULT_PRODUCTION_MAX_RECONNECT_LEASES: usize = 512;
 const DEFAULT_MAX_PERSISTENCE_SESSION_TASKS: usize = 2_048;
 static WEB_PERSISTENCE_SESSION_ADMISSION: OnceLock<Arc<Semaphore>> = OnceLock::new();
+static GATEWAY_SLOW_STAGE_THRESHOLD: OnceLock<Option<Duration>> = OnceLock::new();
 const AUTH_REVISION_BLOCKED: u64 = u64::MAX;
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
 
@@ -183,6 +187,7 @@ impl Drop for PendingSerialAction {
 
 struct QueuedSocketInput {
     input: Option<ParsedSocketInput>,
+    queued_at: Instant,
     _pending: PendingSerialAction,
     _buffered_bytes: OwnedSemaphorePermit,
 }
@@ -195,6 +200,7 @@ impl QueuedSocketInput {
     ) -> Self {
         Self {
             input: Some(input),
+            queued_at: Instant::now(),
             _pending: PendingSerialAction::new(pending_count),
             _buffered_bytes: buffered_bytes,
         }
@@ -205,6 +211,56 @@ impl QueuedSocketInput {
             .take()
             .expect("queued socket input should only be consumed once")
     }
+}
+
+#[must_use]
+pub(crate) struct GatewaySlowStage {
+    label: &'static str,
+    started_at: Instant,
+    threshold: Option<Duration>,
+}
+
+impl GatewaySlowStage {
+    pub(crate) fn start(label: &'static str) -> Self {
+        Self::since(label, Instant::now())
+    }
+
+    fn since(label: &'static str, started_at: Instant) -> Self {
+        Self {
+            label,
+            started_at,
+            threshold: gateway_slow_stage_threshold(),
+        }
+    }
+}
+
+impl Drop for GatewaySlowStage {
+    fn drop(&mut self) {
+        let Some(threshold) = self.threshold else {
+            return;
+        };
+        let elapsed = self.started_at.elapsed();
+        if elapsed >= threshold {
+            eprintln!(
+                "[gateway-slow-stage] stage={} duration_ms={}",
+                self.label,
+                elapsed.as_millis()
+            );
+        }
+    }
+}
+
+fn parse_gateway_slow_stage_threshold(value: Option<&str>) -> Option<Duration> {
+    value
+        .and_then(|value| value.trim().parse::<u64>().ok())
+        .filter(|milliseconds| *milliseconds > 0)
+        .map(Duration::from_millis)
+}
+
+fn gateway_slow_stage_threshold() -> Option<Duration> {
+    *GATEWAY_SLOW_STAGE_THRESHOLD.get_or_init(|| {
+        parse_gateway_slow_stage_threshold(env::var("MIR2_GATEWAY_SLOW_STAGE_MS").ok().as_deref())
+    })
 }
 
 enum SocketInbound {
@@ -4744,18 +4800,50 @@ async fn try_handle_zone_movement_from_reader(
 
 fn spawn_zone_outbound_sender(
     mut receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
+    mut owner_location_receiver: mpsc::Receiver<SharedZoneLiveOutbound>,
     sender: SharedWebSocketSender,
     serial_execution_gate: SharedSerialExecutionGate,
     active_registration_id: Arc<AtomicU64>,
 ) -> ZoneOutboundSenderTask {
     let handle = tokio::spawn(async move {
-        while let Some(outbound) = receiver.recv().await {
+        loop {
+            let outbound = tokio::select! {
+                biased;
+                outbound = owner_location_receiver.recv() => match outbound {
+                    Some(outbound) => outbound,
+                    None => match receiver.recv().await {
+                        Some(outbound) => outbound,
+                        None => return,
+                    },
+                },
+                outbound = receiver.recv() => match outbound {
+                    Some(outbound) => outbound,
+                    None => match owner_location_receiver.recv().await {
+                        Some(outbound) => outbound,
+                        None => return,
+                    },
+                },
+            };
             let registration_id = outbound.registration_id();
             if active_registration_id.load(Ordering::Acquire) != registration_id {
+                if outbound.is_owner_location() {
+                    eprintln!(
+                        "[gateway-zone-live] owner_location result=stale_before_gate registration_id={registration_id} active_registration_id={}",
+                        active_registration_id.load(Ordering::Acquire)
+                    );
+                }
                 continue;
             }
+            let serial_gate_wait = GatewaySlowStage::start("serial_gate.zone_outbound_wait");
             let _serial_execution = serial_execution_gate.read().await;
+            drop(serial_gate_wait);
             if active_registration_id.load(Ordering::Acquire) != registration_id {
+                if outbound.is_owner_location() {
+                    eprintln!(
+                        "[gateway-zone-live] owner_location result=stale_after_gate registration_id={registration_id} active_registration_id={}",
+                        active_registration_id.load(Ordering::Acquire)
+                    );
+                }
                 continue;
             }
             if send_server_packet(&sender, &outbound.into_packet())
@@ -4771,7 +4859,7 @@ fn spawn_zone_outbound_sender(
 
 fn register_zone_live_outbound(
     session: &GatewaySession,
-    sender: &mpsc::Sender<SharedZoneLiveOutbound>,
+    sender: &SharedZoneLiveOutboundSender,
     active_registration_id: &AtomicU64,
 ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
     active_registration_id.store(0, Ordering::Release);
@@ -4782,7 +4870,7 @@ fn register_zone_live_outbound(
 
 fn prepare_zone_live_outbound(
     session: &GatewaySession,
-    sender: &mpsc::Sender<SharedZoneLiveOutbound>,
+    sender: &SharedZoneLiveOutboundSender,
 ) -> Result<Option<Box<dyn ZoneLiveOutboundRegistration>>, String> {
     session.register_zone_live_outbound(sender.clone())
 }
@@ -5123,9 +5211,16 @@ async fn handle_socket_inner(
     let serial_execution_gate = Arc::new(AsyncRwLock::new(()));
     let socket_authenticated = Arc::new(AtomicBool::new(authenticated));
     let (zone_outbound_tx, zone_outbound_rx) = mpsc::channel(LIVE_ZONE_OUTBOUND_CAPACITY);
+    let (owner_location_outbound_tx, owner_location_outbound_rx) =
+        mpsc::channel(OWNER_LOCATION_OUTBOUND_CAPACITY);
+    let zone_outbound_sender = SharedZoneLiveOutboundSender::new(
+        zone_outbound_tx,
+        owner_location_outbound_tx,
+    );
     let active_zone_outbound_registration_id = Arc::new(AtomicU64::new(0));
     let _zone_outbound_sender_task = spawn_zone_outbound_sender(
         zone_outbound_rx,
+        owner_location_outbound_rx,
         Arc::clone(&sender),
         Arc::clone(&serial_execution_gate),
         Arc::clone(&active_zone_outbound_registration_id),
@@ -5153,7 +5248,13 @@ async fn handle_socket_inner(
                         return;
                     }
                 };
+                drop(GatewaySlowStage::since(
+                    "socket_input.queue_residence",
+                    queued_input.queued_at,
+                ));
+                let serial_gate_wait = GatewaySlowStage::start("serial_gate.input_wait");
                 let _serial_execution = serial_execution_gate.write().await;
+                drop(serial_gate_wait);
                 if let Err(error) = catch_gateway_panic("web zone owner command heartbeat", || {
                     tokio::task::block_in_place(|| session.renew_zone_owner_lease_if_due())
                 })
@@ -5215,7 +5316,7 @@ async fn handle_socket_inner(
                                     |reserved_session| {
                                         prepare_zone_live_outbound(
                                             reserved_session,
-                                            &zone_outbound_tx,
+                                            &zone_outbound_sender,
                                         )
                                     },
                                 )
@@ -5648,6 +5749,7 @@ async fn handle_socket_inner(
                     _ => false,
                 };
                 let execution_result = match catch_gateway_panic("web session action", || {
+                    let _slow_stage = GatewaySlowStage::start("session_action.execute");
                     tokio::task::block_in_place(|| {
                         if let Some(request) = native_game_shop_request.as_ref() {
                             execute_native_game_shop_handler_seam(session, request).map(|dispatch| {
@@ -5904,47 +6006,61 @@ async fn handle_socket_inner(
                     .write()
                     .expect("zone movement ingress slot should not be poisoned") =
                     next_movement_ingress.clone();
-                let next_zone_live_outbound_registration = if authenticated {
-                    match tokio::task::block_in_place(|| {
-                        register_zone_live_outbound(
-                            session,
-                            &zone_outbound_tx,
-                            active_zone_outbound_registration_id.as_ref(),
-                        )
-                    }) {
-                        Ok(registration) => registration,
-                        Err(error) => {
-                            if native_game_shop_request.is_some() {
-                                eprintln!(
-                                    "native GameShop post-execution Zone registration failed; closing without receipt: {error}"
-                                );
+                // Keep the live registration stable for the lifetime of one
+                // in-world presence.  Re-registering after every ordinary
+                // action changed the registration id while cadence-delayed
+                // movement was waiting on the serial gate, so a valid
+                // UserLocation was discarded as stale.  StartGame and a real
+                // map change are the only in-world boundaries that need a new
+                // packet fence.
+                if !authenticated || active_identity.is_none() {
+                    active_zone_outbound_registration_id.store(0, Ordering::Release);
+                    _zone_live_outbound_registration = None;
+                } else if _zone_live_outbound_registration.is_none()
+                    || starts_game
+                    || map_changed
+                {
+                    let next_zone_live_outbound_registration =
+                        match tokio::task::block_in_place(|| {
+                            register_zone_live_outbound(
+                                session,
+                                &zone_outbound_sender,
+                                active_zone_outbound_registration_id.as_ref(),
+                            )
+                        }) {
+                            Ok(registration) => registration,
+                            Err(error) => {
+                                if native_game_shop_request.is_some() {
+                                    eprintln!(
+                                        "native GameShop post-execution Zone registration failed; closing without receipt: {error}"
+                                    );
+                                    return;
+                                }
+                                let _ = send_error_message(&sender, &error).await;
                                 return;
                             }
-                            let _ = send_error_message(&sender, &error).await;
-                            return;
-                        }
-                    }
-                } else {
-                    active_zone_outbound_registration_id.store(0, Ordering::Release);
-                    None
-                };
-                _zone_live_outbound_registration = next_zone_live_outbound_registration;
+                        };
+                    _zone_live_outbound_registration = next_zone_live_outbound_registration;
+                }
 
-                if let Err(error) = flush_session_updates(
-                    &sender,
-                    session,
-                    session_cache.as_ref(),
-                    save_queue,
-                    route_refresh,
-                    responses,
-                    quest_operation_ack.as_ref(),
-                    should_send_snapshot_by_action,
-                    low_latency_action,
-                    should_queue_save_by_action,
-                    force_route_refresh,
-                )
-                .await
-                {
+                let flush_result = {
+                    let _slow_stage = GatewaySlowStage::start("session_action.flush");
+                    flush_session_updates(
+                        &sender,
+                        session,
+                        session_cache.as_ref(),
+                        save_queue,
+                        route_refresh,
+                        responses,
+                        quest_operation_ack.as_ref(),
+                        should_send_snapshot_by_action,
+                        low_latency_action,
+                        should_queue_save_by_action,
+                        force_route_refresh,
+                    )
+                    .await
+                };
+                if let Err(error) = flush_result {
                     if native_game_shop_request.is_some() {
                         eprintln!(
                             "native GameShop post-execution flush failed; closing without receipt: {error}"
@@ -6205,6 +6321,7 @@ async fn handle_socket_inner(
                     continue;
                 }
                 let responses = match catch_gateway_panic("web session tick", || {
+                    let _slow_stage = GatewaySlowStage::start("runtime_tick.execute");
                     tokio::task::block_in_place(|| {
                         session
                             .execute_with_outcome(WorldCommand::Tick)
@@ -6226,34 +6343,41 @@ async fn handle_socket_inner(
                 };
                 let map_changed = responses_require_resume_rotation(&responses);
                 if responses.is_empty() {
-                    if let Err(error) = save_queue.checkpoint(now, || {
-                        tokio::task::block_in_place(|| {
-                            catch_gateway_panic("web save_active_character", || {
-                                session.save_active_character()
+                    let checkpoint_result = {
+                        let _slow_stage = GatewaySlowStage::start("runtime_tick.save_checkpoint");
+                        save_queue.checkpoint(now, || {
+                            tokio::task::block_in_place(|| {
+                                catch_gateway_panic("web save_active_character", || {
+                                    session.save_active_character()
+                                })
+                                .and_then(|result| result)
                             })
-                            .and_then(|result| result)
                         })
-                    }) {
+                    };
+                    if let Err(error) = checkpoint_result {
                         let _ = send_error_message(&sender, &error).await;
                         return;
                     }
                     continue;
                 }
-                if let Err(error) = flush_session_updates(
-                    &sender,
-                    session,
-                    session_cache.as_ref(),
-                    save_queue,
-                    route_refresh,
-                    responses,
-                    None,
-                    false,
-                    true,
-                    false,
-                    false,
-                )
-                .await
-                {
+                let flush_result = {
+                    let _slow_stage = GatewaySlowStage::start("runtime_tick.flush");
+                    flush_session_updates(
+                        &sender,
+                        session,
+                        session_cache.as_ref(),
+                        save_queue,
+                        route_refresh,
+                        responses,
+                        None,
+                        false,
+                        true,
+                        false,
+                        false,
+                    )
+                    .await
+                };
+                if let Err(error) = flush_result {
                     let _ = send_error_message(&sender, &error).await;
                     return;
                 }
@@ -6358,19 +6482,32 @@ async fn flush_session_updates(
     force_route_refresh: bool,
 ) -> Result<(), String> {
     let response_requires_snapshot = responses_require_world_snapshot(&responses);
+    let low_latency_response_requires_snapshot =
+        low_latency_responses_require_world_snapshot(&responses);
 
-    for response in responses {
-        send_server_packet(sender, &response)
-            .await
-            .map_err(|error| error.to_string())?;
+    {
+        let _slow_stage = GatewaySlowStage::start("flush.responses");
+        for response in responses {
+            send_server_packet(sender, &response)
+                .await
+                .map_err(|error| error.to_string())?;
+        }
     }
 
     if low_latency_action {
+        // Calendar/kill progress and committed player progression are folded
+        // from the authoritative snapshot by the native client. Keep ordinary
+        // movement and world deltas on the packet-only fast path.
+        if low_latency_response_requires_snapshot {
+            send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
+        }
         return Ok(());
     }
 
-    let external_state_changed =
-        tokio::task::block_in_place(|| refresh_external_session_state(session))?;
+    let external_state_changed = {
+        let _slow_stage = GatewaySlowStage::start("flush.external_state");
+        tokio::task::block_in_place(|| refresh_external_session_state(session))?
+    };
     let should_send_snapshot =
         should_send_snapshot_by_action || response_requires_snapshot || external_state_changed;
 
@@ -6378,28 +6515,32 @@ async fn flush_session_updates(
         send_world_snapshot_with_quest_ack(sender, session, quest_operation_ack).await?;
     }
 
-    if !low_latency_action
-        && should_queue_save_by_action
-        && tokio::task::block_in_place(|| session.active_identity()).is_some()
-    {
-        save_queue.request_save(Instant::now(), || {
-            tokio::task::block_in_place(|| {
-                catch_gateway_panic("web save_active_character", || {
-                    session.save_active_character()
+    let save_result = {
+        let _slow_stage = GatewaySlowStage::start("flush.save");
+        if !low_latency_action
+            && should_queue_save_by_action
+            && tokio::task::block_in_place(|| session.active_identity()).is_some()
+        {
+            save_queue.request_save(Instant::now(), || {
+                tokio::task::block_in_place(|| {
+                    catch_gateway_panic("web save_active_character", || {
+                        session.save_active_character()
+                    })
+                    .and_then(|result| result)
                 })
-                .and_then(|result| result)
             })
-        })?;
-    } else {
-        save_queue.checkpoint(Instant::now(), || {
-            tokio::task::block_in_place(|| {
-                catch_gateway_panic("web save_active_character", || {
-                    session.save_active_character()
+        } else {
+            save_queue.checkpoint(Instant::now(), || {
+                tokio::task::block_in_place(|| {
+                    catch_gateway_panic("web save_active_character", || {
+                        session.save_active_character()
+                    })
+                    .and_then(|result| result)
                 })
-                .and_then(|result| result)
             })
-        })?;
-    }
+        }
+    };
+    save_result?;
 
     if let Err(error) = tokio::task::block_in_place(|| {
         route_refresh.maybe_refresh(session_cache, session, Instant::now(), force_route_refresh)
@@ -8186,17 +8327,18 @@ fn quest_operation_ack_for_responses(
             request_id: request_id.clone(),
             quest_index: *quest_index,
             selected_item_index: *selected_item_index,
-            success: responses.iter().any(|packet| match packet {
-                ServerPacket::CompleteQuest { completed_quests } => {
-                    completed_quests.contains(quest_index)
-                }
+            // A completed-list refresh can precede an unrelated action at a
+            // day boundary. It is not a receipt for this Finish request.
+            // Both permanent and repeatable successful hand-ins emit an exact
+            // Remove; repeatable deliberately carries completed=false.
+            success: responses.iter().any(|packet| matches!(packet,
                 ServerPacket::ChangeQuest {
                     quest_id,
-                    completed: true,
+                    taken: false,
+                    quest_state: 2,
                     ..
-                } => quest_id == quest_index,
-                _ => false,
-            }),
+                } if quest_id == quest_index
+            )),
         },
         QuestOperationRequest::AbandonQuest {
             request_id,
@@ -8232,6 +8374,24 @@ fn is_low_latency_action(action: &SessionAction) -> bool {
     )
 }
 
+fn responses_change_quest_state(responses: &[ServerPacket]) -> bool {
+    responses.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::ChangeQuest { .. } | ServerPacket::CompleteQuest { .. }
+    ))
+}
+
+fn responses_change_player_progression(responses: &[ServerPacket]) -> bool {
+    responses.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::GainExperience { .. } | ServerPacket::LevelChanged { .. }
+    ))
+}
+
+fn low_latency_responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
+    responses_change_quest_state(responses) || responses_change_player_progression(responses)
+}
+
 fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
     responses.iter().any(|packet| {
         matches!(
@@ -8243,6 +8403,10 @@ fn responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
                 | ServerPacket::ObjectHealth { .. }
                 | ServerPacket::ObjectHide { .. }
                 | ServerPacket::ObjectShow { .. }
+                // Native quest state is folded from the snapshot. A calendar
+                // reset can occur on Tick/KeepAlive without another UI action.
+                | ServerPacket::ChangeQuest { .. }
+                | ServerPacket::CompleteQuest { .. }
         )
     })
 }
@@ -8287,6 +8451,7 @@ async fn send_world_snapshot_with_receipts(
     quest_operation_ack: Option<&QuestOperationAck>,
     skill_key_ack: Option<(&SkillKeyRequest, bool)>,
 ) -> Result<(), String> {
+    let _slow_stage = GatewaySlowStage::start("snapshot.build_and_send");
     let snapshot = catch_gateway_panic("web world_snapshot", || {
         tokio::task::block_in_place(|| session.world_snapshot())
     })?;
@@ -12936,6 +13101,89 @@ mod tests {
     }
 
     #[test]
+    fn quest_finish_ack_accepts_repeatable_remove_but_not_completed_list_refresh() {
+        let command = BrowserCommand::FinishQuest {
+            request_id: Some("repeatable-142".to_owned()),
+            quest_index: 142,
+            selected_item_index: -1,
+        };
+        let request = super::quest_operation_request_for_browser_command(&command).unwrap().unwrap();
+        let remove = |quest_id, completed, taken, quest_state| ServerPacket::ChangeQuest {
+            quest_id, completed, taken, quest_state,
+            task_list: Vec::new(), new: false, track_quest: false,
+        };
+        let success = |packets: Vec<ServerPacket>| {
+            serde_json::to_value(super::quest_operation_ack_for_responses(&request, &packets)).unwrap()["success"] == true
+        };
+        assert!(success(vec![remove(142, false, false, 2)]));
+        assert!(success(vec![remove(142, true, false, 2)]));
+        assert!(!success(vec![remove(141, false, false, 2)]));
+        assert!(!success(vec![remove(142, false, true, 1)]));
+        assert!(!success(vec![ServerPacket::CompleteQuest { completed_quests: vec![142] }]));
+        assert!(!success(Vec::new()));
+    }
+
+    #[test]
+    fn quest_calendar_changes_force_snapshot_even_on_idle_actions() {
+        assert!(!should_send_world_snapshot_for_action(&SessionAction::Tick));
+        assert!(!should_send_world_snapshot_for_action(&SessionAction::Packet(
+            ClientPacket::KeepAlive { time: 0 },
+        )));
+        assert!(!responses_require_world_snapshot(&[]));
+        assert!(!super::responses_change_quest_state(&[]));
+        assert!(!super::responses_change_quest_state(&[ServerPacket::ObjectShow { object_id: 42 }]));
+        assert!(super::responses_change_quest_state(&[ServerPacket::CompleteQuest { completed_quests: vec![] }]));
+        assert!(super::responses_change_quest_state(&[ServerPacket::ChangeQuest {
+            quest_id: 2_100_004, completed: false, taken: true, quest_state: 1,
+            task_list: vec![], new: false, track_quest: false,
+        }]));
+        assert!(responses_require_world_snapshot(&[ServerPacket::CompleteQuest {
+            completed_quests: vec![],
+        }]));
+        assert!(responses_require_world_snapshot(&[ServerPacket::ChangeQuest {
+            quest_id: 2_100_004,
+            completed: false,
+            taken: true,
+            quest_state: 1,
+            task_list: vec!["Completed daily commissions: 0/2".to_owned()],
+            new: false,
+            track_quest: false,
+        }]));
+    }
+
+    #[test]
+    fn low_latency_xp_only_kill_and_level_up_force_authoritative_snapshot() {
+        let xp_only_kill = [ServerPacket::GainExperience { amount: 18 }];
+        assert!(super::responses_change_player_progression(&xp_only_kill));
+        assert!(super::low_latency_responses_require_world_snapshot(&xp_only_kill));
+
+        let level_up = [
+            ServerPacket::GainExperience { amount: 18 },
+            ServerPacket::LevelChanged {
+                level: 2,
+                experience: 0,
+                max_experience: 500,
+            },
+        ];
+        assert!(super::responses_change_player_progression(&level_up));
+        assert!(super::low_latency_responses_require_world_snapshot(&level_up));
+    }
+
+    #[test]
+    fn low_latency_unchanged_tick_keeps_packet_only_fast_path() {
+        assert!(!super::low_latency_responses_require_world_snapshot(&[]));
+        assert!(!super::low_latency_responses_require_world_snapshot(&[
+            ServerPacket::ObjectHealth {
+                info: mir2_protocol::ObjectHealthInfo {
+                    object_id: 42,
+                    percent: 75,
+                    expire: 0,
+                },
+            },
+        ]));
+    }
+
+    #[test]
     fn quest_request_ids_reject_malformed_values_and_preserve_legacy_web_commands() {
         for request_id in [
             "".to_owned(),
@@ -16839,6 +17087,21 @@ mod tests {
                 },
             ))
             .is_none()
+        );
+    }
+
+    #[test]
+    fn slow_stage_threshold_accepts_only_positive_milliseconds() {
+        assert_eq!(super::parse_gateway_slow_stage_threshold(None), None);
+        assert_eq!(super::parse_gateway_slow_stage_threshold(Some("")), None);
+        assert_eq!(super::parse_gateway_slow_stage_threshold(Some("0")), None);
+        assert_eq!(
+            super::parse_gateway_slow_stage_threshold(Some("nope")),
+            None
+        );
+        assert_eq!(
+            super::parse_gateway_slow_stage_threshold(Some(" 25 ")),
+            Some(std::time::Duration::from_millis(25))
         );
     }
 

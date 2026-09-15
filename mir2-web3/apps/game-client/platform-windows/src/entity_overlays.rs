@@ -44,6 +44,7 @@ const CRYSTAL_QUEST_MARKER_FALLBACK_TOP_PX: f32 = -58.0;
 #[derive(Component)]
 pub(crate) struct NativeEntityOverlayRoot {
     follows_camera: bool,
+    self_object_id: Option<String>,
 }
 
 #[derive(Resource, Debug, Default)]
@@ -311,12 +312,37 @@ pub fn sync_native_entity_overlays(
     } else {
         fallback_camera_offset
     };
-    // World labels live in a retained camera root. Moving the local player now
-    // changes this one Node instead of deleting and recreating every glyph on
-    // every 100 ms movement phase. Self labels remain screen locked.
+    // Before the first presentation frame only, retain a local fallback copy
+    // so later overlay bookkeeping can mutate its resource independently.
+    let fallback_payload = presentation
+        .overlay_payload()
+        .is_none()
+        .then(|| overlays.latest_payload.clone())
+        .flatten();
+    let payload = presentation.overlay_payload().or(fallback_payload.as_ref());
+    let self_object_id = payload.and_then(payload_self_object_id);
+    let self_screen_offset = self_object_id
+        .as_deref()
+        .and_then(|object_id| {
+            presentation_poses
+                .native_overlay_entity_offset(object_id)
+                .map(|entity| (entity.0 + camera_offset.0, entity.1 + camera_offset.1))
+        })
+        .unwrap_or_else(|| {
+            self_object_id
+                .as_deref()
+                .map(|object_id| presentation.entity_screen_offset(object_id, motion_now_ms))
+                .unwrap_or((0.0, 0.0))
+        });
+    // World labels live in a retained camera root. The self root follows the
+    // exact renderer-owned entity+camera composition, which normally cancels
+    // to zero but also remains correct while a long run is rebased between
+    // source and destination centers.
     for (_, root, mut node) in &mut roots {
         let (left, top) = if root.follows_camera {
             camera_offset
+        } else if root.self_object_id.is_some() {
+            self_screen_offset
         } else {
             (0.0, 0.0)
         };
@@ -366,10 +392,7 @@ pub fn sync_native_entity_overlays(
     // complete overlay tree until the shared renderer commits the same center;
     // rebuilding from the newest packet center here would expose a one-cell
     // mixed frame during every movement acknowledgement.
-    let payload_center = overlays
-        .latest_payload
-        .as_ref()
-        .and_then(payload_scene_center);
+    let payload_center = payload.and_then(payload_scene_center);
     if in_game
         && shared_pose_active
         && (shared_center.is_none()
@@ -396,7 +419,7 @@ pub fn sync_native_entity_overlays(
         }
         return;
     }
-    let Some(payload) = overlays.latest_payload.as_ref() else {
+    let Some(payload) = payload else {
         for (entity, _, _, _) in &mut quest_marker_images {
             commands.entity(entity).despawn();
         }
@@ -519,14 +542,20 @@ pub fn sync_native_entity_overlays(
         if entries.is_empty() && floaters.is_empty() {
             continue;
         }
+        let tracked_self_object_id = (!follows_camera).then(|| self_object_id.clone()).flatten();
         let (root_left, root_top) = if follows_camera {
             camera_offset
+        } else if tracked_self_object_id.is_some() {
+            self_screen_offset
         } else {
             (0.0, 0.0)
         };
         commands
             .spawn((
-                NativeEntityOverlayRoot { follows_camera },
+                NativeEntityOverlayRoot {
+                    follows_camera,
+                    self_object_id: tracked_self_object_id,
+                },
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(root_left),
@@ -1089,6 +1118,17 @@ fn payload_scene_center(payload: &Value) -> Option<(i64, i64)> {
         center.get("x").and_then(value_i64)?,
         center.get("y").and_then(value_i64)?,
     ))
+}
+
+fn payload_self_object_id(payload: &Value) -> Option<String> {
+    payload
+        .get("entities")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
+        .and_then(|entity| entity.get("objectId"))
+        .and_then(normalized_object_id)
 }
 
 fn quest_marker_for_entity(

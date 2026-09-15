@@ -125,6 +125,7 @@ use super::monsters::*;
 use super::movement::*;
 use super::npc::process_crystal_npc_goods_expiry;
 use super::packets::*;
+use super::quests::quest_recurrence::refresh_quest_recurrence;
 use super::rental::{process_expired_rental_items, return_rented_items_on_player_death};
 use super::resources::{
     advance_runtime_tick, crystal_movement_retry_pending, crystal_packet_move_delay_ticks,
@@ -599,8 +600,8 @@ fn advance_world_tick_prelude(
         return None;
     }
 
+    let mut packets = refresh_quest_recurrence(world);
     let tick = advance_runtime_tick(world);
-    let mut packets = Vec::new();
     tick_player_pk_decay(world, &mut packets);
     process_crystal_npc_goods_expiry(world);
     process_expired_rental_items(world, &mut packets);

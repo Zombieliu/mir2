@@ -20,6 +20,116 @@
 > acceptance remain open. `formalCandidate=false`, `accepted=false`,
 > `visualAccepted=false`.
 
+> 2026-09-11 natural-journey J17 Ground Harvest checkpoint: installed r9
+> Native SHA
+> `B9E01520D6AFED67546EA60E897395FA95917CDBDCA85430E70DAC5211C477BA`
+> passes the final harvest set 8/8, Crystal Alt-click 2/2, Alt+NPC 1/1 and
+> same/empty-tile Alt 1/1. Its first launcher attempt referenced r8 metadata;
+> the hash guard rejected it before process start, and the corrected r9
+> reference launched successfully. Live relog restored Warrior level 5, EXP
+> 38%, HP 44/44, gold 230 at (289,584), closing only the level-5 persistence
+> checkpoint. Same-tile/empty-ground Harvest remains under live review. Far
+> angles still use tile approximation and 2500ms is a conservative retry bound,
+> so full input/timing parity remains open. `formalCandidate=false`,
+> `accepted=false`, `visualAccepted=false`; evidence:
+> NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 natural-journey J11 sprite/input checkpoint: q6 HookingCat appears
+> as a name without a monster sprite, blocking ordinary play. The isolated
+> Monster/006 replacement contains 224 unique atlas rects with zero missing or
+> out-of-bounds frames and the expected source Lib hash, but it is not installed
+> or visually accepted. A Deer corpse highlighted blue under r5, yet three real
+> harvest attempts still yielded no reward. The default-off native input trace
+> work remains in progress. Computer Use stopped when the user pressed Esc and
+> no further UI interaction occurred. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`; evidence:
+> NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 natural-journey J09 UI checkpoint: the `groundDrops`-driven Recent
+> Ground Pickups panel is identified as a QA helper and hidden from the ordinary
+> Crystal player HUD. Two focused tests and the optimized-code `dev` Native
+> build pass; SHA
+> `E5FFCEB42AE0DB28E26E883F755B373B3A55A0EC35DB6C717342B1981DC09BD8`
+> is not installed and has no live acceptance yet. q5 completion exposed a
+> separate stale Back-page issue: q6 Accept worked after fully reopening the
+> NPC, while the source fix awaits build/retest. Six equipped items persist,
+> but CopperRing may be missing from the character page and remains under
+> investigation. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`; evidence: NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 NPC-dialog partial visual checkpoint: Board text no longer leaks
+> raw markup; Create Hero labels correctly, down-page reveals ReviveHero,
+> SealHero and Use, Use opens the server shop list, and its last page exposes
+> Hairdresser/Close. The separate QUEST control opens five tasks; top-right X
+> closes both dialog and task list. The feature-enabled native pagination test
+> passes 1/1 with 805 filtered; the related native UI selection passes 4/4 and
+> includes that same case. The native build passes. This is a usability
+> repair within 440x224, not full Crystal layout parity: inline coloured links,
+> large buttons and duplicate fallback footer entries such as Use/Weapon shop
+> remain. Hero business actions were not live-tested. `formalCandidate=false`,
+> `accepted=false`, `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 combat-fix partial visual checkpoint: V revived a persisted HP=0
+> character to Bichon (288,616), showing 224/224. A position-only continuation
+> at map 1 (278,180), with quest counts unseeded, recorded one natural
+> ForestYeti kill (0/8→1/8; EXP 14.29%→14.31%). On a respawned Yeti, the HUD
+> showed 137/224→106→63→27→0 instead of full health followed by immediate death.
+> Relog returned to Bichon (288,616) at 224/224 with Yeti 1/8 and 14.31%
+> retained; the persisted experience value is 20036.
+> Gateway owner-health ID and native dead-V regressions pass 1/1 each; both builds
+> pass. Trees and night lighting obscured parts of combat and attack operation
+> remained awkward, so animation is not visually accepted. Eight Yeti kills,
+> natural Oma, full route/balance and three-class coverage remain open.
+> `formalCandidate=false`, `accepted=false`, `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 partial native quest visual checkpoint: the Board UI verified the
+> two-choice cap and abandon/replace path. After live-found fixes, the objective
+> renders `Defeat OmaFighter (0 / 10)` without duplicate progress and the
+> abandoned Skeleton row remains hidden once Forest Yeti fills the second slot.
+> Level-15/20 milestone gold persisted across relog with no duplicate entry.
+> An explicitly `QA-progress-seeded` continuation verified native hand-in and
+> bonus 0/2→1/2→2/2/claim/relog, but natural kills remain unverified. Focused
+> newcomer tests pass 8/8. `base-dress-equipped-fixed.png` also records the
+> separate BaseDress slot fix working in the running native package. This is
+> partial evidence; `formalCandidate=false`, `accepted=false`, and
+> `visualAccepted=false`. Details and PNGs:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 internal QA package ready: fresh optimized-dev client/Gateway, 50,400
+> asset hashes verified. Isolated level-20 Board fixture and protocol smoke pass
+> (10 definitions, 6 eligible quests). Desktop takeover awaits user pause while
+> DeltaForce runs. No native visual acceptance or signed Release claim. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+
+> 2026-09-11 newcomer progression follow-up implemented: 1–40 guidance (138
+> quests per class / 144 source IDs), three daily choices with a two-quest cap,
+> current-day 2/2 claimable bonus, and one-time gold milestones at 15/20/25/30/35/40.
+> Ten independent IDs are server newcomer-v1 only; default Crystal is preserved.
+> Exact Board binding, distinct claims, persistence/profile isolation and daily
+> high-watermark checks pass. Gateway now sends changed quest snapshots even on
+> Tick/KeepAlive without expanding ordinary movement snapshots. Verification:
+> Node193, Bevy88, Windows1, simulation68, store6, Gateway29 pass. No package or
+> live visual/three-class balance acceptance. This is optional content, not a
+> new Crystal parity percentage. Next: matched package and live Board/Diary/
+> reward/relogin acceptance. Details: QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 newcomer follow-up: 1–25 guidance (110 distinct quest IDs), server
+> Daily/Weekly/Repeatable groups preserved over static optional categories.
+> Native88 and Node193 pass; Gateway28 verifies repeatable Finish ACK compatibility.
+> New package/screenshots/normal progression remain open. Optional guidance is
+> product UX, not an increase in accepted Crystal parity. QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 user-authorized optional quest UX: startup newcomer-v1 profile
+> groups the native diary, orders NPC tasks ready-first, and adds scrollable
+> guidance for the first 15 levels. Fixed zero item rewards are hidden in this
+> mode, selectable rewards retain protocol indices and display zero explicitly.
+> Crystal default remains unchanged. Rust quest 87 / Node 192 pass; current
+> Windows package and visual acceptance remain open. This intentional optional
+> UX is not counted as Crystal 1:1 acceptance. See QUEST-NEWCOMER-ACCEPTANCE.md.
+
 > 2026-09-10 native Keyboard menu: Crystal Title119 editor is connected to
 > actual key capture, strict/relaxed modifiers, Delete unbind, full reset,
 > grouped scrolling, movable window, and application-scoped atomic JSON save/load.

@@ -1220,6 +1220,7 @@ fn build_entity_render_state_with_index(
                         "kind": kind,
                         "isSelf": kind == "selfPlayer",
                         "dead": entity.get("dead").and_then(Value::as_bool).unwrap_or(false),
+                        "harvestable": native_entity_is_harvestable(entity),
                         "gridX": x,
                         "gridY": y,
                         "_nativeTargetable": entity
@@ -1577,28 +1578,55 @@ fn hovered_object_at_cursor(
 
     // Crystal scans the cursor tile's 5x5 neighbourhood from bottom-right to
     // top-left and each cell's object list in reverse insertion order.
-    for y in ((cursor_grid_y - 2)..=(cursor_grid_y + 2)).rev() {
-        for x in ((cursor_grid_x - 2)..=(cursor_grid_x + 2)).rev() {
-            for entity in entities.iter().rev() {
-                if entity.get("gridX").and_then(Value::as_i64) != Some(x)
-                    || entity.get("gridY").and_then(Value::as_i64) != Some(y)
-                    || entity.get("isSelf").and_then(Value::as_bool) == Some(true)
-                    || entity.get("dead").and_then(Value::as_bool) == Some(true)
-                    || entity.get("_nativeTargetable").and_then(Value::as_bool) != Some(true)
-                {
-                    continue;
-                }
-                let object_id = entity.get("objectId").and_then(Value::as_str)?;
-                if (x == cursor_grid_x && y == cursor_grid_y)
-                    || body_visible_pixel(entity, object_id, cursor_x, cursor_y, index, pixels)
-                    || npc_body_bounds_fallback_hit(entity, cursor_x, cursor_y, index, pixels)
-                {
-                    return Some(object_id.to_owned());
+    // Prefer living actors so a harvestable corpse on the same tile cannot
+    // hide a current combat/NPC target. The second pass admits only an
+    // authoritative harvestable monster corpse; ordinary dead actors remain
+    // non-interactive.
+    for corpse_pass in [false, true] {
+        for y in ((cursor_grid_y - 2)..=(cursor_grid_y + 2)).rev() {
+            for x in ((cursor_grid_x - 2)..=(cursor_grid_x + 2)).rev() {
+                for entity in entities.iter().rev() {
+                    let dead = entity.get("dead").and_then(Value::as_bool) == Some(true);
+                    let harvestable_corpse = dead
+                        && entity.get("kind").and_then(Value::as_str) == Some("monster")
+                        && entity.get("harvestable").and_then(Value::as_bool) == Some(true);
+                    if entity.get("gridX").and_then(Value::as_i64) != Some(x)
+                        || entity.get("gridY").and_then(Value::as_i64) != Some(y)
+                        || entity.get("isSelf").and_then(Value::as_bool) == Some(true)
+                        || (corpse_pass && !harvestable_corpse)
+                        || (!corpse_pass && dead)
+                        || entity.get("_nativeTargetable").and_then(Value::as_bool) != Some(true)
+                    {
+                        continue;
+                    }
+                    let object_id = entity.get("objectId").and_then(Value::as_str)?;
+                    if (x == cursor_grid_x && y == cursor_grid_y)
+                        || body_visible_pixel(entity, object_id, cursor_x, cursor_y, index, pixels)
+                        || npc_body_bounds_fallback_hit(entity, cursor_x, cursor_y, index, pixels)
+                    {
+                        return Some(object_id.to_owned());
+                    }
                 }
             }
         }
     }
     None
+}
+
+fn native_entity_is_harvestable(entity: &Value) -> bool {
+    entity
+        .get("harvestable")
+        .and_then(Value::as_bool)
+        .unwrap_or_else(|| {
+            // Keep this fallback aligned with
+            // simulation::runtime::monsters::monster_ai_requires_harvest,
+            // which mirrors Crystal's HarvestMonster subclasses. A future
+            // explicit payload field remains authoritative over this set.
+            matches!(
+                entity.get("ai").and_then(Value::as_u64),
+                Some(1 | 2 | 4 | 5 | 7 | 9 | 28 | 35 | 153)
+            )
+        })
 }
 
 fn npc_body_bounds_fallback_hit(
@@ -3165,6 +3193,7 @@ mod tests {
             "y": 10,
             "direction": "up",
             "dead": dead,
+            "ai": if kind == "monster" { 2 } else { 0 },
             "sprite": {"bodyLibrary": body_library, "frameBaseOffset": 0}
         })
     }
@@ -3232,7 +3261,7 @@ mod tests {
     }
 
     #[test]
-    fn hover_scan_allows_npc_excludes_self_and_dead_and_uses_reverse_cell_order() {
+    fn hover_scan_prefers_live_actor_then_allows_only_harvestable_monster_corpse() {
         let manifest = hover_fixture_manifest();
         let pixels = hover_fixture_pixels(1, 1);
         let poses = HashMap::from([
@@ -3261,6 +3290,46 @@ mod tests {
         assert!(!has_layer(&state, "1000:hover-highlight:body"));
         assert_eq!(state["hoveredObjectId"], json!("3002"));
         assert_eq!(state["selfHovered"], json!(true));
+
+        let corpse_payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "_nativeHoverCursor": {"x": 482.2, "y": 353.2},
+            "entities": [hover_fixture_entity(2001, "monster", 11, true)]
+        });
+        let corpse = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &corpse_payload,
+            &poses,
+            true,
+            &manifest,
+            &pixels,
+        )
+        .expect("harvestable corpse hover state");
+        assert_eq!(corpse["hoveredObjectId"], json!("2001"));
+
+        let mut ordinary_dead = corpse_payload.clone();
+        ordinary_dead["entities"][0]["ai"] = json!(0);
+        let ordinary_dead = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &ordinary_dead,
+            &poses,
+            true,
+            &manifest,
+            &pixels,
+        )
+        .expect("ordinary dead actor hover state");
+        assert!(ordinary_dead["hoveredObjectId"].is_null());
+
+        let mut explicitly_not_harvestable = corpse_payload;
+        explicitly_not_harvestable["entities"][0]["harvestable"] = json!(false);
+        let explicitly_not_harvestable =
+            build_entity_render_state_with_manifest_and_pixels_for_test(
+                &explicitly_not_harvestable,
+                &poses,
+                true,
+                &manifest,
+                &pixels,
+            )
+            .expect("explicitly non-harvestable corpse hover state");
+        assert!(explicitly_not_harvestable["hoveredObjectId"].is_null());
     }
 
     #[test]

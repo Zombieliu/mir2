@@ -114,6 +114,39 @@ impl<K: Ord + Clone> AoiGrid<K> {
         out
     }
 
+    /// Candidate members in every cell intersecting the inclusive rectangle
+    /// around `point`. This is a superset: callers retain responsibility for
+    /// their exact distance/eligibility predicate.
+    pub(crate) fn candidates_in_rect(
+        &self,
+        point: &Point,
+        x_radius: i32,
+        y_radius: i32,
+    ) -> Vec<K> {
+        if x_radius < 0 || y_radius < 0 {
+            return Vec::new();
+        }
+        let min = Point {
+            x: point.x.saturating_sub(x_radius),
+            y: point.y.saturating_sub(y_radius),
+        };
+        let max = Point {
+            x: point.x.saturating_add(x_radius),
+            y: point.y.saturating_add(y_radius),
+        };
+        let (min_cx, min_cy) = self.cell_of(&min);
+        let (max_cx, max_cy) = self.cell_of(&max);
+        let mut out = Vec::new();
+        for cx in min_cx..=max_cx {
+            for cy in min_cy..=max_cy {
+                if let Some(members) = self.cells.get(&(cx, cy)) {
+                    out.extend(members.iter().cloned());
+                }
+            }
+        }
+        out
+    }
+
     #[cfg(test)]
     pub(crate) fn len(&self) -> usize {
         self.member_cell.len()
@@ -216,5 +249,32 @@ mod tests {
         assert_eq!(grid.len(), 1);
         assert!(grid.neighbors(&p(0, 0)).is_empty());
         assert!(grid.neighbors(&p(300, 300)).contains(&1));
+    }
+
+    #[test]
+    fn rectangular_candidates_cover_exact_range_for_large_and_negative_coordinates() {
+        let mut grid = AoiGrid::new(AOI_X_RANGE, AOI_Y_RANGE);
+        let members = scatter(0xfeed_beef, 500, 2_000);
+        for (id, point) in &members {
+            grid.insert(*id, point);
+        }
+        let query = p(-173, 219);
+        let candidates: BTreeSet<u32> = grid
+            .candidates_in_rect(&query, 231, 87)
+            .into_iter()
+            .collect();
+        for (id, point) in &members {
+            if (point.x - query.x).abs() <= 231 && (point.y - query.y).abs() <= 87 {
+                assert!(
+                    candidates.contains(id),
+                    "in-range member {id} at {point:?} missing around {query:?}",
+                );
+            }
+        }
+        assert!(
+            candidates.len() < members.len(),
+            "bounded query must not fall back to scanning every member"
+        );
+        assert!(grid.candidates_in_rect(&query, -1, 4).is_empty());
     }
 }

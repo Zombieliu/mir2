@@ -3,7 +3,8 @@ use std::any::Any;
 use crate::runtime::{
     GameShopPurchaseOutcome, SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
-    SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn, ZonePlayerCombatStats,
+    LocalPlayerVitalsSnapshot,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -11,7 +12,8 @@ use crate::{
     WorldSnapshot,
 };
 use mir2_protocol::{
-    client_packet_name, ChatItem, ClientPacket, MirDirection, Point, ServerPacket, Spell,
+    client_packet_name, ChatItem, ClientIntelligentCreature, ClientPacket, MirDirection, Point,
+    ServerPacket, Spell,
 };
 use serde::{Deserialize, Serialize};
 
@@ -253,6 +255,7 @@ impl WorldCommand {
             self,
             Self::ClientPacket(
                 ClientPacket::KeepAlive { .. }
+                    | ClientPacket::ClientVersion { .. }
                     | ClientPacket::Turn { .. }
                     | ClientPacket::Walk { .. }
                     | ClientPacket::Run { .. }
@@ -439,6 +442,22 @@ impl InProcessWorldRuntime {
 
     pub fn local_player_object_id(&self) -> Option<u32> {
         self.session.local_player_object_id()
+    }
+
+    pub fn local_player_vitals_snapshot(&self) -> LocalPlayerVitalsSnapshot {
+        self.session.local_player_vitals_snapshot()
+    }
+
+    pub fn current_map_file_name(&self) -> Option<String> {
+        self.session.current_map_file_name()
+    }
+
+    pub fn local_player_position(&self) -> Option<Point> {
+        self.session.local_player_position()
+    }
+
+    pub fn active_intelligent_creature_snapshot(&self) -> Option<ClientIntelligentCreature> {
+        self.session.active_intelligent_creature_snapshot()
     }
 
     pub fn shared_intelligent_creature_map_allowed(&self) -> bool {
@@ -736,6 +755,12 @@ impl InProcessWorldRuntime {
         self.session.active_zone_join_snapshot(session_id)
     }
 
+    /// Read the trusted combat projection without building the much broader
+    /// world/quest/UI snapshot used by a full Zone join.
+    pub fn zone_player_combat_stats(&self) -> ZonePlayerCombatStats {
+        self.session.zone_player_combat_stats()
+    }
+
     pub fn force_authoritative_player_transform(
         &mut self,
         position: Point,
@@ -751,6 +776,16 @@ impl InProcessWorldRuntime {
 
     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
         self.session.force_authoritative_player_vitals(hp, mp);
+    }
+
+    pub fn force_authoritative_player_vitals_with_max_hp(
+        &mut self,
+        hp: Option<i32>,
+        max_hp: Option<i32>,
+        mp: Option<i32>,
+    ) {
+        self.session
+            .force_authoritative_player_vitals_with_max_hp(hp, max_hp, mp);
     }
 
     pub fn apply_zone_player_damage(&mut self, damage: i32) -> bool {

@@ -39,6 +39,7 @@ pub enum CrystalSelectAction {
 #[derive(Component, Debug)]
 pub struct CrystalCharacterPreview {
     frame_set_base: u16,
+    anchor: (f32, f32),
     frame: usize,
     /// Only the base layer owns the clock. Optional Crystal overlays follow
     /// the same committed frame so a slower-loading weapon/effect layer cannot
@@ -51,9 +52,15 @@ pub struct CrystalCharacterPreview {
 }
 
 impl CrystalCharacterPreview {
-    fn new(asset_server: &AssetServer, frame_set_base: u16, drives_clock: bool) -> Self {
+    fn new(
+        asset_server: &AssetServer,
+        frame_set_base: u16,
+        anchor: (f32, f32),
+        drives_clock: bool,
+    ) -> Self {
         Self {
             frame_set_base,
+            anchor,
             frame: 0,
             animation: drives_clock.then(|| {
                 Timer::from_seconds(spec::PREVIEW_FRAME_DELAY_SECONDS, TimerMode::Repeating)
@@ -312,9 +319,35 @@ fn spawn_character_preview(
     asset_server: &AssetServer,
     character: &CharacterSummary,
 ) {
-    let base = preview_base_index(&character.class_name, &character.gender_name);
+    spawn_character_preview_at(
+        parent,
+        asset_server,
+        &character.class_name,
+        &character.gender_name,
+        spec::PREVIEW_ANCHOR,
+    );
+}
+
+/// Spawns Crystal's offset-aware animated character preview at a control
+/// anchor. `MirAnimatedControl.UseOffSet` treats the source location as an
+/// anchor; the individual `ChrSel` frame offset determines its top-left.
+pub fn spawn_character_preview_at(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    class_name: &str,
+    gender_name: &str,
+    anchor: (f32, f32),
+) {
+    let base = preview_base_index(class_name, gender_name);
     for (frame_set_base, frame, drives_clock) in preview_layer_specs(base) {
-        spawn_preview_layer(parent, asset_server, frame_set_base, frame, drives_clock);
+        spawn_preview_layer(
+            parent,
+            asset_server,
+            frame_set_base,
+            frame,
+            anchor,
+            drives_clock,
+        );
     }
 }
 
@@ -334,10 +367,11 @@ fn spawn_preview_layer(
     asset_server: &AssetServer,
     frame_set_base: u16,
     frame: PreviewFrame,
+    anchor: (f32, f32),
     drives_clock: bool,
 ) {
-    let rect = preview_rect(frame);
-    let preview = CrystalCharacterPreview::new(asset_server, frame_set_base, drives_clock);
+    let rect = preview_rect_at(anchor, frame);
+    let preview = CrystalCharacterPreview::new(asset_server, frame_set_base, anchor, drives_clock);
     let first_frame = preview.frame_images[0].clone();
     parent.spawn((
         preview,
@@ -388,7 +422,7 @@ pub fn animate_character_previews(
 
     for (preview, mut node, _) in layers {
         let frame = frame_for_set(preview.frame_set_base, preview.frame);
-        let rect = preview_rect(frame);
+        let rect = preview_rect_at(preview.anchor, frame);
         node.left = Val::Px(rect.left);
         node.top = Val::Px(rect.top);
         node.width = Val::Px(rect.width);
@@ -406,10 +440,10 @@ fn frame_for_set(frame_set_base: u16, frame: usize) -> PreviewFrame {
         .expect("spawned Crystal preview frame set must have source metadata")[frame]
 }
 
-fn preview_rect(frame: PreviewFrame) -> CrystalRect {
+fn preview_rect_at(anchor: (f32, f32), frame: PreviewFrame) -> CrystalRect {
     CrystalRect::new(
-        spec::PREVIEW_ANCHOR.0 + frame.x,
-        spec::PREVIEW_ANCHOR.1 + frame.y,
+        anchor.0 + frame.x,
+        anchor.1 + frame.y,
         frame.width,
         frame.height,
     )
@@ -559,12 +593,16 @@ mod tests {
     fn first_preview_frame_applies_crystal_use_offset_anchor() {
         let warrior = preview_frames(20).unwrap()[0];
         assert_eq!(
-            preview_rect(warrior),
+            preview_rect_at(spec::PREVIEW_ANCHOR, warrior),
             CrystalRect::new(177.0, 270.0, 196.0, 302.0)
+        );
+        assert_eq!(
+            preview_rect_at((338.0, 404.0), warrior),
+            CrystalRect::new(255.0, 254.0, 196.0, 302.0)
         );
         let wizard_overlay = preview_overlay_frames(40).unwrap().1[0];
         assert_eq!(
-            preview_rect(wizard_overlay),
+            preview_rect_at(spec::PREVIEW_ANCHOR, wizard_overlay),
             CrystalRect::new(170.0, 176.0, 164.0, 392.0)
         );
     }

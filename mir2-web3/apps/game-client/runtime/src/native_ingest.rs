@@ -144,7 +144,7 @@ impl NativeInboundBuffer {
                 let Ok(json) = serde_json::to_string(&receipt) else {
                     return false;
                 };
-                self.pending.clear();
+                self.pending.retain(is_process_lifetime_asset_message);
                 self.game_shop_receipt = Some(json);
                 self.pending.push_back(
                     NativeInboundMessage::DataResetPreservingExactGameShopReceipt(receipt),
@@ -158,9 +158,11 @@ impl NativeInboundBuffer {
         // for capacity. A newer DataReset dominates every queued model and
         // barrier. A newer SceneReset dominates queued scene presentation but
         // deliberately preserves personal/session models and DataReset.
+        // Immutable entity atlas uploads survive both boundaries because the
+        // native host sends them only once per process.
         match &message {
             NativeInboundMessage::DataReset => {
-                self.pending.clear();
+                self.pending.retain(is_process_lifetime_asset_message);
                 self.game_shop_receipt = None;
                 self.pending.push_back(message);
                 return true;
@@ -859,7 +861,6 @@ fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
-            | NativeInboundMessage::EntityRenderAtlas { .. }
             | NativeInboundMessage::NpcShopService(_)
     )
 }
@@ -874,7 +875,6 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
-            | NativeInboundMessage::EntityRenderAtlas { .. }
             | NativeInboundMessage::UiReadModel(_)
             | NativeInboundMessage::WalletPatch(_)
             | NativeInboundMessage::InventoryModel(_)
@@ -895,6 +895,10 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::SkillModelReceipt(_)
             | NativeInboundMessage::SocialModel(_)
     )
+}
+
+fn is_process_lifetime_asset_message(message: &NativeInboundMessage) -> bool {
+    matches!(message, NativeInboundMessage::EntityRenderAtlas { .. })
 }
 
 #[cfg(test)]
@@ -1082,6 +1086,46 @@ mod tests {
         assert_eq!(buffer.message_count(), 1);
         assert!(matches!(
             buffer.pending.front(),
+            Some(NativeInboundMessage::DataReset)
+        ));
+    }
+
+    #[test]
+    fn reset_barriers_preserve_process_lifetime_entity_atlases() {
+        fn atlas(key: &str) -> NativeInboundMessage {
+            NativeInboundMessage::EntityRenderAtlas {
+                key: key.to_owned(),
+                width: 1,
+                height: 1,
+                pixels: vec![0, 0, 0, 0],
+            }
+        }
+
+        let mut scene = active_buffer();
+        assert!(scene.enqueue(atlas("starter:p1")));
+        assert!(scene.enqueue(NativeInboundMessage::WorldState("old".to_owned())));
+        assert!(scene.enqueue(NativeInboundMessage::SceneReset));
+        assert_eq!(scene.pending.len(), 2);
+        assert!(matches!(
+            scene.pending.front(),
+            Some(NativeInboundMessage::EntityRenderAtlas { key, .. }) if key == "starter:p1"
+        ));
+        assert!(matches!(
+            scene.pending.back(),
+            Some(NativeInboundMessage::SceneReset)
+        ));
+
+        let mut data = active_buffer();
+        assert!(data.enqueue(atlas("starter:p2")));
+        assert!(data.enqueue(NativeInboundMessage::WorldState("old".to_owned())));
+        assert!(data.enqueue(NativeInboundMessage::DataReset));
+        assert_eq!(data.pending.len(), 2);
+        assert!(matches!(
+            data.pending.front(),
+            Some(NativeInboundMessage::EntityRenderAtlas { key, .. }) if key == "starter:p2"
+        ));
+        assert!(matches!(
+            data.pending.back(),
             Some(NativeInboundMessage::DataReset)
         ));
     }

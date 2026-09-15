@@ -134,7 +134,8 @@ struct EffectLightingContext {
     assets: NativeLightAssets,
 }
 
-static EFFECT_LIGHTING_CONTEXT: OnceLock<Mutex<Option<Arc<EffectLightingContext>>>> = OnceLock::new();
+static EFFECT_LIGHTING_CONTEXT: OnceLock<Mutex<Option<Arc<EffectLightingContext>>>> =
+    OnceLock::new();
 
 fn effect_lighting_context() -> &'static Mutex<Option<Arc<EffectLightingContext>>> {
     EFFECT_LIGHTING_CONTEXT.get_or_init(|| Mutex::new(None))
@@ -809,7 +810,10 @@ mod tests {
         bridge.observe_world_snapshot(&next_world);
         retained = make_context(bridge.clone(), Some(replacement), next_world);
         assert!(old_map.upgrade().is_none());
-        assert!(render(&retained)["mapLights"].as_array().unwrap().is_empty());
+        assert!(render(&retained)["mapLights"]
+            .as_array()
+            .unwrap()
+            .is_empty());
 
         bridge.reset_scene();
         retained = make_context(bridge, None, Value::Null);

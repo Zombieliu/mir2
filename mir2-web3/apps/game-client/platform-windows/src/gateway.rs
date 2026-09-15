@@ -1503,8 +1503,11 @@ impl SkillPacketCursor {
             skills.truncate(MAX_LEARNED_SKILLS);
 
             for skill in skills.iter_mut() {
-                if let Some(name) = skill.get("spell").and_then(Value::as_str)
-                    .and_then(|spell| self.magic_names.get(&spell.to_ascii_lowercase())) {
+                if let Some(name) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_names.get(&spell.to_ascii_lowercase()))
+                {
                     skill["magicName"] = json!(name);
                 }
 
@@ -1608,20 +1611,40 @@ impl SkillPacketCursor {
                 let Some(magic) = payload.get("magic") else {
                     return false;
                 };
-                let Some(spell) = magic.get("spell").and_then(Value::as_str).filter(|v| !v.is_empty()) else {
+                let Some(spell) = magic
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .filter(|v| !v.is_empty())
+                else {
                     return false;
                 };
-                let known = self.magic_icons.keys().chain(self.magic_names.keys()).chain(self.magic_needs.keys())
+                let known = self
+                    .magic_icons
+                    .keys()
+                    .chain(self.magic_names.keys())
+                    .chain(self.magic_needs.keys())
                     .any(|key| key.eq_ignore_ascii_case(spell));
-                let distinct = self.magic_icons.keys().chain(self.magic_names.keys()).chain(self.magic_needs.keys())
-                    .map(|key| key.to_ascii_lowercase()).collect::<std::collections::HashSet<_>>().len();
+                let distinct = self
+                    .magic_icons
+                    .keys()
+                    .chain(self.magic_names.keys())
+                    .chain(self.magic_needs.keys())
+                    .map(|key| key.to_ascii_lowercase())
+                    .collect::<std::collections::HashSet<_>>()
+                    .len();
                 if !known && distinct >= MAX_LEARNED_SKILLS {
                     return false;
                 }
-                if let Some(name) = magic.get("name").and_then(Value::as_str).filter(|v| !v.is_empty()) {
-                    self.magic_names.insert(spell.to_ascii_lowercase(), name.to_owned());
+                if let Some(name) = magic
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .filter(|v| !v.is_empty())
+                {
+                    self.magic_names
+                        .insert(spell.to_ascii_lowercase(), name.to_owned());
                 }
-                if let Some(icon) = value_u32(magic.get("icon")).and_then(|v| u8::try_from(v).ok()) {
+                if let Some(icon) = value_u32(magic.get("icon")).and_then(|v| u8::try_from(v).ok())
+                {
                     self.magic_icons.insert(spell.to_ascii_lowercase(), icon);
                 }
                 self.magic_needs.insert(
@@ -5516,10 +5539,10 @@ fn normalized_slot(value: Option<&Value>, fallback: u32) -> u32 {
         "helmet" => 2,
         "torch" => 3,
         "necklace" => 4,
-        "bracelet-left" | "braceletl" => 5,
-        "bracelet-right" | "braceletr" => 6,
-        "ring-left" | "ringl" => 7,
-        "ring-right" | "ringr" => 8,
+        "bracelet-left" | "braceletleft" | "braceletl" => 5,
+        "bracelet-right" | "braceletright" | "braceletr" => 6,
+        "ring-left" | "ringleft" | "ringl" => 7,
+        "ring-right" | "ringright" | "ringr" => 8,
         "amulet" => 9,
         "belt" => 10,
         "boots" => 11,
@@ -8598,7 +8621,11 @@ mod tests {
             "equipmentItems": [
                 { "key": "sword", "name": "WoodenSword", "quantity": 1, "slot": "weapon" },
                 { "key": "dress", "name": "BaseDress(M)", "quantity": 1, "slot": "armour" },
-                { "key": "mystery", "name": "Mystery", "quantity": 1, "slot": "future-slot" }
+                { "key": "mystery", "name": "Mystery", "quantity": 1, "slot": "future-slot" },
+                { "key": "ring-r", "name": "Ring R", "quantity": 1, "slot": "ringRight" },
+                { "key": "bracelet-l", "name": "Bracelet L", "quantity": 1, "slot": "braceletLeft" },
+                { "key": "ring-l", "name": "Ring L", "quantity": 1, "slot": "ringLeft" },
+                { "key": "bracelet-r", "name": "Bracelet R", "quantity": 1, "slot": "braceletRight" }
             ]
         });
 
@@ -8615,6 +8642,22 @@ mod tests {
         assert_eq!(model.items[1].slot, 0);
         assert_eq!(model.items[2].slot, 1);
         assert_eq!(model.items[3].slot, 2);
+        for (key, slot) in [
+            ("bracelet-l", 5),
+            ("bracelet-r", 6),
+            ("ring-l", 7),
+            ("ring-r", 8),
+        ] {
+            assert_eq!(
+                model
+                    .items
+                    .iter()
+                    .find(|item| item.key == key)
+                    .map(|item| item.slot),
+                Some(slot),
+                "camelCase equipment slot must not fall back to array order"
+            );
+        }
     }
 
     #[test]
@@ -8910,11 +8953,26 @@ mod tests {
     fn skill_name_metadata_cap_preserves_known_iconless_updates() {
         let mut cursor = SkillPacketCursor::default();
         for index in 0..MAX_LEARNED_SKILLS {
-            assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":format!("Spell{index}")}}),0));
+            assert!(cursor.apply_packet(
+                "NewMagic",
+                &json!({"hero":false,"magic":{"spell":format!("Spell{index}")}}),
+                0
+            ));
         }
-        assert!(!cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"overflow"}}),0));
-        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"spell0","name":"Updated"}}),0));
-        assert_eq!(cursor.magic_names.get("spell0").map(String::as_str),Some("Updated"));
+        assert!(!cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"overflow"}}),
+            0
+        ));
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"spell0","name":"Updated"}}),
+            0
+        ));
+        assert_eq!(
+            cursor.magic_names.get("spell0").map(String::as_str),
+            Some("Updated")
+        );
     }
 
     #[test]
@@ -8922,9 +8980,21 @@ mod tests {
         let mut cursor = SkillPacketCursor::default();
         let base = json!({"knownSkills":[{"spell":"Fury","name":"Battle Focus","magicName":"Fury"},
             {"spell":"Healing","name":"Minor Heal","magicName":"Healing"}]});
-        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"Fury","name":"定制怒气"}}), 0));
-        assert!(!cursor.apply_packet("NewMagic", &json!({"hero":true,"magic":{"spell":"Fury","name":"Hero name"}}), 0));
-        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"Fury","name":""}}), 0));
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"Fury","name":"定制怒气"}}),
+            0
+        ));
+        assert!(!cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":true,"magic":{"spell":"Fury","name":"Hero name"}}),
+            0
+        ));
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"Fury","name":""}}),
+            0
+        ));
         for _ in 0..3 {
             let mut snapshot = base.clone();
             cursor.observe_snapshot(&mut snapshot);
@@ -8935,7 +9005,10 @@ mod tests {
         cursor.reset();
         let mut snapshot = base;
         cursor.observe_snapshot(&mut snapshot);
-        assert_eq!(transform_skill_model(&snapshot)["skills"][0]["name"], "Fury");
+        assert_eq!(
+            transform_skill_model(&snapshot)["skills"][0]["name"],
+            "Fury"
+        );
     }
 
     #[test]

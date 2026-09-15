@@ -1453,10 +1453,8 @@ mod tests {
                 direction: Some("Down".to_owned()),
             }],
         };
-        let mut player_ui = NativePlayerUiState {
-            character_page: CharacterPage::Stats2,
-            ..Default::default()
-        };
+        let mut player_ui = NativePlayerUiState::default();
+        player_ui.character_page = CharacterPage::Stats2;
         let mut notice = NoticeDialogState::default();
         assert!(
             notice.observe(mir2_client_bevy::crystal_ui::notice::NoticePacketUpdate {

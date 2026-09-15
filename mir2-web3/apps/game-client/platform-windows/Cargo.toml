@@ -47,6 +47,7 @@ tokio = { version = "1.52", features = ["macros", "net", "rt-multi-thread", "syn
 tokio-tungstenite = "0.29"
 toml = { version = "0.8", default-features = false, features = ["parse"] }
 ureq = { version = "2.10", default-features = false, features = ["tls"] }
+winit = { version = "=0.30.13", default-features = false }
 
 # Keep native iteration debuggable while avoiding Bevy's prohibitively slow
 # fully-unoptimized render/update path. Workspace crates retain lightweight

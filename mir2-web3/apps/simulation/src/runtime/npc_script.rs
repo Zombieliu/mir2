@@ -180,19 +180,23 @@ pub(super) fn parse_crystal_npc_links(line: &str) -> Vec<NpcDialogLinkState> {
     let mut links = Vec::new();
     let mut remainder = line;
 
-    while let Some(start) = remainder.find('<') {
-        let after_start = &remainder[start + 1..];
-        let Some(end) = after_start.find('>') else {
-            break;
+    while let Some((_, end, inside, colour_wrapped)) = next_crystal_npc_markup(remainder) {
+        let link_markup = if colour_wrapped {
+            inside
+                .rsplit_once('/')
+                .filter(|(link, _colour)| link.contains('/'))
+                .map(|(link, _colour)| link)
+                .unwrap_or(inside)
+        } else {
+            inside
         };
-        let inside = &after_start[..end];
-        if let Some((text, target)) = inside.rsplit_once('/') {
+        if let Some((text, target)) = link_markup.rsplit_once('/') {
             links.push(NpcDialogLinkState {
                 text: text.trim().to_string(),
                 target: normalize_crystal_npc_label(target.trim()),
             });
         }
-        remainder = &after_start[end + 1..];
+        remainder = &remainder[end..];
     }
 
     links
@@ -202,18 +206,38 @@ pub(super) fn strip_crystal_npc_links(line: &str) -> String {
     let mut output = String::new();
     let mut remainder = line;
 
-    while let Some(start) = remainder.find('<') {
+    while let Some((start, end, _, _)) = next_crystal_npc_markup(remainder) {
         output.push_str(&remainder[..start]);
-        let after_start = &remainder[start + 1..];
-        let Some(end) = after_start.find('>') else {
-            output.push_str(&remainder[start..]);
-            return output;
-        };
-        remainder = &after_start[end + 1..];
+        remainder = &remainder[end..];
     }
 
     output.push_str(remainder);
     output
+}
+
+fn next_crystal_npc_markup(line: &str) -> Option<(usize, usize, &str, bool)> {
+    let start = line.find('<')?;
+    let after_open = start + 1;
+    if line[after_open..].starts_with('<') {
+        let content_start = after_open + 1;
+        let close = line[content_start..].find(">>")?;
+        let content_end = content_start + close;
+        Some((
+            start,
+            content_end + 2,
+            &line[content_start..content_end],
+            true,
+        ))
+    } else {
+        let close = line[after_open..].find('>')?;
+        let content_end = after_open + close;
+        Some((
+            start,
+            content_end + 1,
+            &line[after_open..content_end],
+            false,
+        ))
+    }
 }
 
 pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
@@ -254,7 +278,11 @@ pub(super) fn parse_crystal_label_target(target: &str) -> (String, Vec<String>) 
 
 #[cfg(test)]
 mod crystal_label_compat_tests {
-    use super::parse_crystal_label_target;
+    use super::{
+        crystal_npc_section, parse_crystal_label_target, parse_crystal_npc_links,
+        strip_crystal_npc_links,
+    };
+    use mir2_game_data::crystal_npc_script_by_key;
 
     #[test]
     fn bracketed_crystal_callnpc_labels_preserve_labels_and_arguments() {
@@ -266,6 +294,70 @@ mod crystal_label_compat_tests {
             parse_crystal_label_target("[@Buy](1, two)"),
             ("@Buy".to_string(), vec!["1".to_string(), "two".to_string()])
         );
+    }
+
+    #[test]
+    fn board_links_preserve_coloured_targets_and_inline_text() {
+        let board = crystal_npc_script_by_key("BichonProvince/BichonWall/Board")
+            .expect("real Board script should be present");
+        let main = crystal_npc_section(&board, "@Main").expect("Board main section");
+
+        let coloured = main
+            .lines
+            .iter()
+            .filter(|line| line.starts_with("<<"))
+            .flat_map(|line| parse_crystal_npc_links(line))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            coloured
+                .iter()
+                .map(|link| (link.text.as_str(), link.target.as_str()))
+                .collect::<Vec<_>>(),
+            vec![
+                ("Create Hero", "@CreateHero"),
+                ("ReviveHero", "@ReviveHero"),
+                ("SealHero", "@SealHero"),
+            ]
+        );
+        assert!(main
+            .lines
+            .iter()
+            .filter(|line| line.starts_with("<<"))
+            .all(|line| strip_crystal_npc_links(line).is_empty()));
+
+        let use_line = main
+            .lines
+            .iter()
+            .find(|line| line.starts_with("<Use."))
+            .expect("Board inline prose link");
+        let use_links = parse_crystal_npc_links(use_line);
+        assert_eq!(use_links.len(), 1);
+        assert_eq!(use_links[0].text, "Use.");
+        assert_eq!(use_links[0].target, "@main-1");
+        assert_eq!(
+            strip_crystal_npc_links(use_line).trim(),
+            "teleport to the village stores"
+        );
+
+        let stores = crystal_npc_section(&board, "@main-1").expect("Board stores section");
+        let first_store_line = stores
+            .lines
+            .iter()
+            .find(|line| line.contains("Weapon shop"))
+            .expect("Board multi-link store line");
+        let store_links = parse_crystal_npc_links(first_store_line);
+        assert_eq!(
+            store_links
+                .iter()
+                .map(|link| (link.text.as_str(), link.target.as_str()))
+                .collect::<Vec<_>>(),
+            vec![
+                ("Weapon shop", "@go-weap"),
+                ("Armour shop", "@go-cloth"),
+                ("Inn", "@go-inn"),
+            ]
+        );
+        assert!(strip_crystal_npc_links(first_store_line).trim().is_empty());
     }
 }
 
@@ -1988,7 +2080,9 @@ pub(super) fn execute_crystal_npc_action_line(
                 let current = (*balance).max(0) as u32;
                 *balance = if command == "GIVEPEARLS" {
                     current.saturating_add(amount).min(i32::MAX as u32) as i32
-                } else { current.saturating_sub(amount) as i32 };
+                } else {
+                    current.saturating_sub(amount) as i32
+                };
             }
             CrystalNpcActionControl::Continue
         }

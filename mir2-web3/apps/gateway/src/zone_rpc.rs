@@ -31,6 +31,7 @@ use crate::routing::{
     SharedZoneOwnerLeaseAuthority, ZoneId, ZoneLiveOutboundRegistration, ZoneOwnerCommandMode,
     ZoneOwnerCommandRequest, ZoneOwnerLease, ZoneOwnerRpcTransport, ZoneRuntimeFactory,
 };
+use crate::web::GatewaySlowStage;
 use crate::GatewayConfig;
 use crate::ZonePlacementLease;
 
@@ -2308,7 +2309,7 @@ impl ZoneHostSession {
         let (outbound_sender, outbound_receiver) = mpsc::channel(capacity);
         Self {
             hosted,
-            outbound_sender,
+            outbound_sender: SharedZoneLiveOutboundSender::single(outbound_sender),
             outbound_receiver: Mutex::new(outbound_receiver),
             live_registration: Mutex::new(None),
             outbox: Mutex::new(ZoneHostOutbox::new()),
@@ -3664,6 +3665,8 @@ impl ZoneHostServer {
         }
         let zone_id = ZoneId::new(&envelope.zone_id);
         let gate_wait_started = Instant::now();
+        let slow_gate_wait = matches!(&request, ZoneRpcRequest::Execute { .. })
+            .then(|| GatewaySlowStage::start("zone_rpc.execute_gate_wait"));
         let _operation = if matches!(
             &request,
             ZoneRpcRequest::ExportHostCheckpoint | ZoneRpcRequest::InstallHostCheckpoint { .. }
@@ -3673,6 +3676,7 @@ impl ZoneHostServer {
             self.operation_gate.lock_zone(&zone_id)
         }
         .map_err(|_| ZoneRpcFault::new("internal", "zone host operation mutex poisoned"))?;
+        drop(slow_gate_wait);
         let gate_wait_duration_ns = saturating_duration_ns(gate_wait_started.elapsed());
         self.zone_gate_wait_duration_ns_total
             .fetch_add(gate_wait_duration_ns, Ordering::Relaxed);
@@ -3907,13 +3911,19 @@ impl ZoneHostServer {
                 let runtime_started = Instant::now();
                 #[cfg(test)]
                 self.runtime_execute_calls.fetch_add(1, Ordering::Relaxed);
-                let execution = session.execute_request(request)?;
+                let execution = {
+                    let _slow_stage = GatewaySlowStage::start("zone_rpc.execute_runtime");
+                    session.execute_request(request)?
+                };
                 self.execute_runtime_duration_ns_total.fetch_add(
                     saturating_duration_ns(runtime_started.elapsed()),
                     Ordering::Relaxed,
                 );
                 let journal_started = Instant::now();
-                self.append_journal(journal_entry)?;
+                {
+                    let _slow_stage = GatewaySlowStage::start("zone_rpc.execute_journal");
+                    self.append_journal(journal_entry)?;
+                }
                 self.execute_journal_duration_ns_total.fetch_add(
                     saturating_duration_ns(journal_started.elapsed()),
                     Ordering::Relaxed,

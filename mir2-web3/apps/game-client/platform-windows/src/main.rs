@@ -232,6 +232,7 @@ fn main() {
     app.init_resource::<entity_health::MonsterHealthState>();
     app.init_resource::<effects::NativeEffects>();
     app.init_resource::<input::WorldPointerMovementState>();
+    app.init_resource::<input::NativeModifierState>();
     app.insert_resource(shell_bridge::NativeAutoLoginFlow::from_config(
         session.auto_login.as_ref(),
     ));
@@ -246,6 +247,7 @@ fn main() {
     app.add_systems(
         bevy::app::PreUpdate,
         (
+            input::sync_native_modifier_state,
             shell_bridge::drain_gateway_events,
             gameplay_bridge::drain_gameplay_events,
             entity_presentation::tick_native_entity_presentation,

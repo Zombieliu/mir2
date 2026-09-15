@@ -8,8 +8,9 @@ use super::combat::{
     apply_settled_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state,
 };
 use super::components::{
-    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
-    MonsterAgent, MonsterVitals, PlayerVitals, Position, SpawnSlotRef,
+    entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, entity_position,
+    player_entity, Facing, Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position,
+    SpawnSlotRef,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -53,7 +54,7 @@ use crate::runtime::zone::{
 };
 use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
 use mir2_protocol::{
-    ChatItem, ClientBuff, ItemRentalInformation, Point, ServerPacket, Spell,
+    ChatItem, ClientBuff, ClientIntelligentCreature, ItemRentalInformation, Point, ServerPacket, Spell,
     UserItemRentalInformation,
 };
 
@@ -117,6 +118,17 @@ pub struct ActiveSessionIdentity {
     pub account_id: String,
     pub character_index: i32,
     pub character_name: String,
+}
+
+/// Minimal authoritative player projection for shared-Zone reconciliation.
+/// Values intentionally match the corresponding `WorldSnapshot` fields while
+/// avoiding construction of inventory, quest, entity, and UI projections.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LocalPlayerVitalsSnapshot {
+    pub player_object_id: Option<u32>,
+    pub player_hp: Option<i32>,
+    pub player_max_hp: Option<i32>,
+    pub player_mp: Option<i32>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -686,6 +698,49 @@ impl SimulationSession {
         build_world_snapshot(self.app.world())
     }
 
+    pub fn local_player_vitals_snapshot(&self) -> LocalPlayerVitalsSnapshot {
+        let world = self.app.world();
+        let player = player_entity(world);
+        let player_vitals = player.and_then(|entity| entity_player_vitals(world, entity));
+        LocalPlayerVitalsSnapshot {
+            player_object_id: player.and_then(|entity| entity_object_id(world, entity)),
+            player_hp: player_vitals.map(|vitals| vitals.hp),
+            player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
+            player_mp: player_vitals.map(|vitals| vitals.mp),
+        }
+    }
+
+    pub fn current_map_file_name(&self) -> Option<String> {
+        let world = self.app.world();
+        is_in_world(world).then(|| {
+            world
+                .resource::<MapRuntimeResource>()
+                .current_map
+                .file_name
+                .clone()
+        })
+    }
+
+    /// Read the active player's ECS position without building a full world or
+    /// Zone-join snapshot. The in-world gate prevents the demo fixture's
+    /// default position from leaking before a character is selected.
+    pub fn local_player_position(&self) -> Option<Point> {
+        let world = self.app.world();
+        if !is_in_world(world) {
+            return None;
+        }
+        player_entity(world).and_then(|entity| entity_position(world, entity))
+    }
+
+    pub fn active_intelligent_creature_snapshot(&self) -> Option<ClientIntelligentCreature> {
+        self.app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .active_intelligent_creature()
+            .cloned()
+    }
+
     pub fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
         collect_current_map_shared_entity_snapshots(self.app.world())
     }
@@ -877,6 +932,45 @@ impl SimulationSession {
         let updated_vitals = {
             let mut entity = world.entity_mut(player);
             entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                if let Some(hp) = hp {
+                    vitals.hp = hp.clamp(0, vitals.max_hp);
+                }
+                if let Some(mp) = mp {
+                    vitals.mp = mp.clamp(0, vitals.max_mp);
+                }
+                *vitals
+            })
+        };
+        if let Some(vitals) = updated_vitals {
+            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            advance_runtime_tick(world);
+        }
+    }
+
+    /// Reconcile shared-Zone vitals when the Zone also owns the current HP
+    /// pool size. The legacy method above intentionally updates only current
+    /// HP/MP; this variant must update the maximum before clamping the current
+    /// values so a level-up cannot leave the personal snapshot on its old HP
+    /// ceiling.
+    pub fn force_authoritative_player_vitals_with_max_hp(
+        &mut self,
+        hp: Option<i32>,
+        max_hp: Option<i32>,
+        mp: Option<i32>,
+    ) {
+        if (hp.is_none() && max_hp.is_none() && mp.is_none()) || !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let Some(player) = player_entity(world) else {
+            return;
+        };
+        let updated_vitals = {
+            let mut entity = world.entity_mut(player);
+            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                if let Some(max_hp) = max_hp {
+                    vitals.max_hp = max_hp.max(1);
+                }
                 if let Some(hp) = hp {
                     vitals.hp = hp.clamp(0, vitals.max_hp);
                 }

@@ -4,7 +4,7 @@
 //! They apply deterministic updates and never make game-state mutations such as
 //! granting rewards, mutating inventory, or deciding quest completion.
 
-use std::collections::VecDeque;
+use std::collections::{BTreeSet, VecDeque};
 
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
@@ -15,6 +15,44 @@ use crate::inventory::CrystalItemTooltipSourceModel;
 const MAX_COMPACT_OBJECTIVES: usize = 3;
 /// Maximum number of recent pickup entries kept for HUD toast/replay.
 const MAX_RECENT_PICKUPS: usize = 4;
+/// Defensive bound for the authoritative completed-quest history retained by
+/// presentation clients.
+pub const MAX_COMPLETED_QUEST_IDS: usize = 4_096;
+
+/// Server-authored completed quest history.
+///
+/// `known` distinguishes an authoritative empty history from a connection that
+/// has not supplied `CompleteQuest` (or an equivalent snapshot field) yet.
+/// Presentation code may count ids from this model, but must never infer them
+/// from player level, inventory contents, or local guidance state.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Resource)]
+#[serde(rename_all = "camelCase")]
+pub struct CompletedQuestTracker {
+    pub known: bool,
+    pub quest_ids: BTreeSet<i32>,
+}
+
+impl CompletedQuestTracker {
+    pub fn replace_authoritative(&mut self, quest_ids: impl IntoIterator<Item = i32>) {
+        self.known = true;
+        self.quest_ids = quest_ids
+            .into_iter()
+            .filter(|quest_id| *quest_id > 0)
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .take(MAX_COMPLETED_QUEST_IDS)
+            .collect();
+    }
+
+    pub fn contains(&self, quest_id: i32) -> bool {
+        self.known && self.quest_ids.contains(&quest_id)
+    }
+
+    pub fn reset(&mut self) {
+        self.known = false;
+        self.quest_ids.clear();
+    }
+}
 
 /// Canonical quest status as observed from server authoritative updates.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -667,6 +705,29 @@ impl GroundPickupModel {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn completed_history_distinguishes_unknown_empty_and_authoritative_ids() {
+        let mut completed = CompletedQuestTracker::default();
+        assert!(!completed.known);
+        assert!(!completed.contains(7));
+
+        completed.replace_authoritative([7, 7, -1, 0, 9]);
+        assert!(completed.known);
+        assert_eq!(
+            completed.quest_ids.iter().copied().collect::<Vec<_>>(),
+            [7, 9]
+        );
+        assert!(completed.contains(7));
+
+        completed.replace_authoritative([]);
+        assert!(completed.known);
+        assert!(completed.quest_ids.is_empty());
+
+        completed.reset();
+        assert!(!completed.known);
+        assert!(completed.quest_ids.is_empty());
+    }
 
     fn sample_quest_in_progress() -> Quest {
         Quest {

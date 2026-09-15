@@ -903,6 +903,8 @@ fn spawn_belt_slot(
     // A stale or legacy stack without its server instance id may be displayed,
     // but cannot issue an ambiguous use command.
     let mut hit_target = parent.spawn((
+        Button,
+        Interaction::None,
         {
             let mut node =
                 absolute_node(CrystalRect::new(slot_rect.left, slot_rect.top, 32.0, 32.0));
@@ -1483,8 +1485,8 @@ fn update_hud_inventory(
     }
 }
 
-/// Add/remove the actual UI hit component from the live authoritative belt
-/// model. Dropping `Button` also removes the stale interaction state.
+/// Keep every belt cell clickable so an empty destination can receive an
+/// inventory move. Empty clicks remain inert in the HUD action consumer.
 fn sync_belt_hit_targets(
     mut commands: Commands,
     inventory: Res<InventoryModel>,
@@ -1493,7 +1495,6 @@ fn sync_belt_hit_targets(
 ) {
     for (entity, marker, button) in &targets {
         let item = belt_slot_item(&inventory, marker.slot).filter(|item| item.unique_id.is_some());
-        let enabled = item.is_some();
         if let Some(item) = item {
             commands
                 .entity(entity)
@@ -1503,15 +1504,8 @@ fn sync_belt_hit_targets(
         } else {
             commands.entity(entity).remove::<CrystalItemHint>();
         }
-        match (enabled, button.is_some()) {
-            (true, false) => {
-                commands.entity(entity).insert((Button, Interaction::None));
-            }
-            (false, true) => {
-                commands.entity(entity).remove::<Button>();
-                commands.entity(entity).remove::<Interaction>();
-            }
-            _ => {}
+        if button.is_none() {
+            commands.entity(entity).insert((Button, Interaction::None));
         }
     }
 }
@@ -2181,7 +2175,7 @@ mod tests {
             .id();
 
         app.update();
-        assert!(!app.world().entity(target).contains::<Button>());
+        assert!(app.world().entity(target).contains::<Button>());
 
         app.world_mut().resource_mut::<InventoryModel>().items = vec![ItemModel {
             unique_id: Some(77),
@@ -2248,7 +2242,7 @@ mod tests {
             .items
             .clear();
         app.update();
-        assert!(!app.world().entity(target).contains::<Button>());
+        assert!(app.world().entity(target).contains::<Button>());
         assert!(!app.world().entity(target).contains::<CrystalItemHint>());
     }
 

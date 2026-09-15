@@ -768,10 +768,11 @@ impl ZoneRuntime {
         };
         object.position = point.clone();
         if let ServerPacket::ObjectMonster { info } = &mut object.packet {
-            info.location = point;
+            info.location = point.clone();
             info.direction = direction;
         }
         let packet = object.packet.clone();
+        self.object_grid.moved(&id, &point);
         let mut out = self.diff_all_zone_object_visibility();
         let recipients = self
             .native_monster_visible_recipients(id, &self.native_monsters[&id].position)
@@ -789,6 +790,148 @@ impl ZoneRuntime {
 #[cfg(test)]
 mod life_clear_tests {
     use super::*;
+    use crate::ZonePlayerCombatStats;
+
+    fn join_player(
+        zone: &mut ZoneRuntime,
+        id: &str,
+        object_id: u32,
+        position: Point,
+        min_dc: i32,
+    ) -> SessionId {
+        let session = SessionId::new(id);
+        let mut combat_stats = ZonePlayerCombatStats::default();
+        combat_stats.min_dc = min_dc;
+        zone.handle(ZoneCommand::Join(ZoneJoin {
+            session_id: session.clone(),
+            account_id: format!("account-{id}"),
+            character_index: 1,
+            object_id,
+            name: id.into(),
+            class: MirClass::Warrior,
+            gender: mir2_protocol::MirGender::Male,
+            level: 40,
+            hp: 500,
+            max_hp: 500,
+            mp: 0,
+            map_file_name: "snow-relocation".into(),
+            position,
+            direction: MirDirection::Left,
+            chat_profile: Default::default(),
+            combat_stats,
+        }));
+        session
+    }
+
+    fn spawn_monster(
+        zone: &mut ZoneRuntime,
+        object_id: u32,
+        name: &str,
+        ai: u8,
+        position: Point,
+    ) {
+        assert!(
+            zone.spawn_authoritative_monster(
+                &ZoneMonsterSpawn {
+                    crystal_drop_seed: None,
+                    object_id,
+                    name: name.into(),
+                    name_colour_argb: -1,
+                    image: 139,
+                    ai,
+                    disposition: Some(crate::config::WorldEntityDisposition::Hostile),
+                    level: 40,
+                    max_hp: 10_000,
+                    hp: 10_000,
+                    experience: 0,
+                    move_speed_ms: 300,
+                    attack_speed_ms: 1_000,
+                    friendly_guild: None,
+                    position,
+                    direction: MirDirection::Right,
+                    defense: Default::default(),
+                    respawn: None,
+                    drops: Vec::new(),
+                },
+                0,
+            )
+            .0
+        );
+    }
+
+    #[test]
+    fn snow_wolf_retarget_relocation_updates_grid_before_visibility_diff() {
+        let mut zone = ZoneRuntime::new_with_collision(
+            ZoneKey::for_map("snow-relocation"),
+            ZoneCollision::unbounded(),
+        );
+        let strong = join_player(&mut zone, "strong", 101, Point { x: 14, y: 20 }, 200);
+        let weak = join_player(&mut zone, "weak", 102, Point { x: 17, y: 20 }, 1);
+        let old_observer = join_player(&mut zone, "old", 103, Point { x: -1, y: 20 }, 300);
+        let new_observer = join_player(&mut zone, "new", 104, Point { x: 32, y: 20 }, 300);
+        spawn_monster(
+            &mut zone,
+            180,
+            "FrozenWarewolf",
+            180,
+            Point { x: 15, y: 20 },
+        );
+        initialize_kirin_snow(zone.native_monsters.get_mut(&180).unwrap());
+        let strong_ref = zone.native_entity_player_ref(&strong).unwrap();
+        assert!(zone.set_native_entity_target(180, &strong_ref, 0));
+        assert!(zone.players[&old_observer]
+            .visible_object_ids
+            .contains(&180));
+        assert!(!zone.players[&new_observer]
+            .visible_object_ids
+            .contains(&180));
+
+        let moved_at = (1..=100)
+            .find(|now| {
+                let mut probe = zone.transaction_fork();
+                probe.snow_wolf_attacked(180, i32::MAX, true, *now);
+                probe.native_monsters[&180].position != Point { x: 15, y: 20 }
+            })
+            .expect("bounded deterministic retarget roll");
+        zone.snow_wolf_attacked(180, i32::MAX, true, moved_at);
+
+        let destination = Point { x: 16, y: 20 };
+        assert_eq!(zone.native_monsters[&180].position, destination);
+        assert!(zone.object_grid.candidates_in_rect(&destination, 0, 0).contains(&180));
+        assert!(!zone
+            .object_grid
+            .candidates_in_rect(&Point { x: 15, y: 20 }, 0, 0)
+            .contains(&180));
+        assert!(!zone.players[&old_observer]
+            .visible_object_ids
+            .contains(&180));
+        assert!(zone.players[&new_observer]
+            .visible_object_ids
+            .contains(&180));
+
+        // The indexed combat lookup sees the relocated monster as an owned
+        // target only from its new cell; authoritative eligibility remains the
+        // same final gate.
+        let moved = zone.native_monsters.get_mut(&180).unwrap();
+        moved.owner_session_id = Some(weak.clone());
+        moved.owner_player_object_id = 102;
+        moved.hostile_to_player = false;
+        spawn_monster(
+            &mut zone,
+            9000,
+            "ArcherGuard",
+            0,
+            Point { x: 16, y: 21 },
+        );
+        let targets = zone.native_entity_monster_targets(
+            9000,
+            &Point { x: 16, y: 21 },
+            2,
+            EntityTargetPurpose::Search,
+            200,
+        );
+        assert!(targets.iter().any(|target| target.object_id == 180));
+    }
 
     #[test]
     fn adoption_preserves_lethal_hit_lifecycle_clears_and_checkpoint() {

@@ -126,6 +126,8 @@ const HEALING_CAST_SOUND_FILE: &str = "M61-0.wav";
 const HEALING_TARGET_SOUND_FILE: &str = "M61-1.wav";
 const HEALING_CAST_SOUND_CUE: &str = "Healing.cast";
 const HEALING_TARGET_SOUND_CUE: &str = "Healing.target";
+const MAGIC_SHIELD_UP_EFFECT: u32 = 6;
+const MAGIC_SHIELD_DOWN_EFFECT: u32 = 7;
 const FLAMING_SWORD_SOUND_FILE: &str = "M8-1.wav";
 const FLAMING_SWORD_SOUND_CUE: &str = "FlamingSword.attack";
 const PLAYER_REVIVE_SOUND_FILE: &str = "M79-1.wav";
@@ -1301,6 +1303,13 @@ pub(crate) struct NativeEffects {
     /// proves the object id disappeared and then authoritatively reappeared.
     terminated_scarecrow_sound_keys: HashSet<String>,
     render_actor_keys: HashSet<String>,
+    /// `ObjectPlayer.effect` is the only authoritative recovery signal when an
+    /// actor enters AOI with an already-running MagicShield. A received Down
+    /// suppresses a stale render snapshot until the actor leaves or a new Up
+    /// proves that the shield was applied again.
+    render_actor_object_ids: HashSet<u32>,
+    render_magic_shield_object_ids: HashSet<u32>,
+    magic_shield_down_object_ids: HashSet<u32>,
     /// Map/logout boundaries remain terminal across observe calls. A changed
     /// authoritative render-scene identity reopens the next map only after the
     /// boundary's own event batch has been consumed.
@@ -1339,6 +1348,9 @@ impl Default for NativeEffects {
             dead_scarecrow_sound_keys: HashSet::new(),
             terminated_scarecrow_sound_keys: HashSet::new(),
             render_actor_keys: HashSet::new(),
+            render_actor_object_ids: HashSet::new(),
+            render_magic_shield_object_ids: HashSet::new(),
+            magic_shield_down_object_ids: HashSet::new(),
             scene_audio_terminated: false,
             render_scene_identity: None,
             render_scene_changed: false,
@@ -1385,6 +1397,30 @@ impl NativeEffects {
             .flatten()
             .filter_map(|actor| actor_sound_key(actor))
             .collect::<HashSet<_>>();
+        let current_actor_object_ids = payload
+            .get("entities")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(|actor| actor.get("objectId").and_then(Value::as_u64))
+            .filter_map(|object_id| u32::try_from(object_id).ok())
+            .collect::<HashSet<_>>();
+        self.magic_shield_down_object_ids
+            .retain(|object_id| current_actor_object_ids.contains(object_id));
+        self.render_magic_shield_object_ids = payload
+            .get("entities")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter(|actor| !actor.get("dead").and_then(Value::as_bool).unwrap_or(false))
+            .filter(|actor| {
+                actor.get("effect").and_then(Value::as_u64)
+                    == Some(u64::from(MAGIC_SHIELD_UP_EFFECT))
+            })
+            .filter_map(|actor| actor.get("objectId").and_then(Value::as_u64))
+            .filter_map(|object_id| u32::try_from(object_id).ok())
+            .collect();
+        self.render_actor_object_ids = current_actor_object_ids;
         for reappeared in current_actor_keys.difference(&self.render_actor_keys) {
             self.terminated_scarecrow_sound_keys.remove(reappeared);
         }
@@ -1691,6 +1727,7 @@ impl NativeEffects {
         self.terminated_scarecrow_sound_keys = terminated_scarecrow_keys;
         self.scene_audio_terminated = scene_audio_terminated && !self.render_scene_changed;
         self.render_scene_changed = false;
+        self.reconcile_magic_shield_render_state(zone_tiles);
         while self.active.len() > MAX_ACTIVE_EFFECTS {
             self.active.remove(0);
         }
@@ -1704,6 +1741,9 @@ impl NativeEffects {
         self.clear_active_effects();
         self.terminated_scarecrow_sound_keys.clear();
         self.render_actor_keys.clear();
+        self.render_actor_object_ids.clear();
+        self.render_magic_shield_object_ids.clear();
+        self.magic_shield_down_object_ids.clear();
         self.scene_audio_terminated = false;
         self.render_scene_identity = None;
         self.render_scene_changed = false;
@@ -1785,6 +1825,7 @@ impl NativeEffects {
         self.dead_player_sound_keys.clear();
         self.dead_scarecrow_sound_keys.clear();
         self.revived_player_effect_keys.clear();
+        self.magic_shield_down_object_ids.clear();
     }
 
     fn replace_dead_action_object_ids(&mut self, object_ids: HashSet<u32>) {
@@ -3004,11 +3045,15 @@ impl NativeEffects {
             if let (Some(target_x), Some(target_y), Some(source_id), Some(impact)) = (
                 value_f32(payload, "target", "x"),
                 value_f32(payload, "target", "y"),
-                payload.get("objectId").and_then(Value::as_u64).and_then(|id| u32::try_from(id).ok()),
+                payload
+                    .get("objectId")
+                    .and_then(Value::as_u64)
+                    .and_then(|id| u32::try_from(id).ok()),
                 catalog.spell_impact_animation("FireBang"),
             ) {
                 let impact_key = self.next_key("firebang-impact");
-                self.prestart_source_object_ids.insert(impact_key.clone(), source_id);
+                self.prestart_source_object_ids
+                    .insert(impact_key.clone(), source_id);
                 self.active.push(EffectInstance {
                     key: impact_key,
                     kind: EffectKindTag::Impact,
@@ -3308,6 +3353,11 @@ impl NativeEffects {
         else {
             return;
         };
+        if effect == MAGIC_SHIELD_DOWN_EFFECT {
+            self.magic_shield_down_object_ids.insert(object_id);
+            self.clear_magic_shield_effect(object_id);
+            return;
+        }
         let Some((tile_x, tile_y)) = zone_tiles.get(&object_id).copied() else {
             return;
         };
@@ -3327,7 +3377,13 @@ impl NativeEffects {
                 .and_then(Value::as_u64)
                 .unwrap_or(0)
         };
-        let key = self.next_key("obj");
+        let key = if effect == MAGIC_SHIELD_UP_EFFECT {
+            self.magic_shield_down_object_ids.remove(&object_id);
+            self.clear_magic_shield_effect(object_id);
+            format!("magic-shield-{object_id}")
+        } else {
+            self.next_key("obj")
+        };
         self.anchor_object_ids.insert(key.clone(), object_id);
         if is_healing {
             self.pending_sounds.push(PendingEffectSound {
@@ -3359,6 +3415,45 @@ impl NativeEffects {
             persistent_object_id: None,
             provenance: provenance.clone(),
         });
+    }
+
+    fn clear_magic_shield_effect(&mut self, object_id: u32) {
+        let key = format!("magic-shield-{object_id}");
+        self.active.retain(|instance| instance.key != key);
+        self.anchor_object_ids.remove(&key);
+        self.source_object_ids.remove(&key);
+        self.prestart_source_object_ids.remove(&key);
+        self.pending_sounds.retain(|pending| pending.key != key);
+        self.local_projectile_targets.remove(&key);
+    }
+
+    fn reconcile_magic_shield_render_state(&mut self, zone_tiles: &HashMap<u32, (i32, i32)>) {
+        let missing = self
+            .render_magic_shield_object_ids
+            .iter()
+            .filter(|object_id| !self.magic_shield_down_object_ids.contains(object_id))
+            .filter(|object_id| {
+                let key = format!("magic-shield-{object_id}");
+                !self.active.iter().any(|instance| instance.key == key)
+            })
+            .copied()
+            .collect::<Vec<_>>();
+        for object_id in missing {
+            self.apply_object_effect(
+                &json!({
+                    "objectId": object_id,
+                    "effect": MAGIC_SHIELD_UP_EFFECT,
+                    "delayTime": 0
+                }),
+                zone_tiles,
+                &EffectProvenance {
+                    generation: self.last_generation,
+                    sequence: 0,
+                    packet: "ObjectPlayer".to_owned(),
+                    spell: "effect".to_owned(),
+                },
+            );
+        }
     }
 
     fn apply_object_range_attack(
@@ -3641,6 +3736,10 @@ impl NativeEffects {
         else {
             return;
         };
+        self.clear_magic_shield_effect(object_id);
+        self.magic_shield_down_object_ids.remove(&object_id);
+        self.render_actor_object_ids.remove(&object_id);
+        self.render_magic_shield_object_ids.remove(&object_id);
         let actor_key = object_id.to_string();
         self.cancel_player_sounds(&actor_key);
         self.cancel_scarecrow_sounds(&actor_key);
@@ -4124,6 +4223,157 @@ mod tests {
     use crate::native_protocol::PacketEvent;
     use serde_json::json;
 
+    fn magic_shield_effect_event(sequence: u64, effect: u32) -> NativeEffectEvent {
+        NativeEffectEvent {
+            sequence,
+            generation: 18,
+            packet: "ObjectEffect".to_owned(),
+            payload: json!({
+                "objectId": 1000,
+                "effect": effect,
+                "effectType": 0,
+                "delayTime": 0,
+                "time": 0
+            }),
+        }
+    }
+
+    #[test]
+    fn magic_shield_up_is_idempotent_down_clears_and_recast_restores() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+
+        fx.observe(
+            0,
+            288,
+            616,
+            &[magic_shield_effect_event(1, MAGIC_SHIELD_UP_EFFECT)],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1);
+        assert_eq!(fx.active[0].key, "magic-shield-1000");
+        assert!(fx.active[0]
+            .current
+            .as_ref()
+            .is_some_and(|animation| animation.repeat));
+
+        fx.observe(
+            1_100,
+            288,
+            616,
+            &[magic_shield_effect_event(2, MAGIC_SHIELD_UP_EFFECT)],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1, "repeated Up must replace the loop");
+        assert_eq!(fx.active[0].started_at, 1_100);
+
+        fx.observe(
+            1_200,
+            288,
+            616,
+            &[magic_shield_effect_event(3, MAGIC_SHIELD_DOWN_EFFECT)],
+            &HashMap::new(),
+        );
+        assert!(fx.active.is_empty(), "Down must not require a visible tile");
+        assert!(!fx.anchor_object_ids.contains_key("magic-shield-1000"));
+
+        fx.observe(
+            1_300,
+            288,
+            616,
+            &[magic_shield_effect_event(4, MAGIC_SHIELD_UP_EFFECT)],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1, "a later cast must restore the loop");
+    }
+
+    #[test]
+    fn magic_shield_late_join_restores_without_stale_snapshot_overriding_down() {
+        let zone = HashMap::from([(1000, (288, 616))]);
+        let unshielded_actor = json!({
+            "mapIndex": 1,
+            "entities": [{
+                "objectId": 1000,
+                "kind": "player",
+                "location": {"x": 288, "y": 616},
+                "effect": 0,
+                "dead": false
+            }]
+        });
+        let shielded_actor = json!({
+            "mapIndex": 1,
+            "entities": [{
+                "objectId": 1000,
+                "kind": "player",
+                "location": {"x": 288, "y": 616},
+                "effect": MAGIC_SHIELD_UP_EFFECT,
+                "dead": false
+            }]
+        });
+        let mut fx = NativeEffects::default();
+
+        fx.observe_render_payload(&unshielded_actor);
+        fx.observe(
+            1_000,
+            288,
+            616,
+            &[magic_shield_effect_event(1, MAGIC_SHIELD_UP_EFFECT)],
+            &zone,
+        );
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "a stale unshielded snapshot must not erase a newer Up"
+        );
+
+        fx.observe_render_payload(&shielded_actor);
+        fx.observe(
+            1_100,
+            288,
+            616,
+            &[magic_shield_effect_event(2, MAGIC_SHIELD_DOWN_EFFECT)],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+
+        fx.observe_render_payload(&shielded_actor);
+        fx.observe(1_200, 288, 616, &[], &zone);
+        assert!(
+            fx.active.is_empty(),
+            "a stale ObjectPlayer snapshot must not override a newer Down"
+        );
+
+        fx.observe_render_payload(&shielded_actor);
+        fx.observe(
+            1_250,
+            288,
+            616,
+            &[magic_shield_effect_event(3, MAGIC_SHIELD_UP_EFFECT)],
+            &zone,
+        );
+        assert_eq!(fx.active.len(), 1, "a newer Up must clear Down suppression");
+        fx.observe(
+            1_275,
+            288,
+            616,
+            &[magic_shield_effect_event(4, MAGIC_SHIELD_DOWN_EFFECT)],
+            &zone,
+        );
+        assert!(fx.active.is_empty());
+
+        fx.observe_render_payload(&json!({"mapIndex": 1, "entities": []}));
+        fx.observe(1_300, 288, 616, &[], &HashMap::new());
+        fx.observe_render_payload(&shielded_actor);
+        fx.observe(1_400, 288, 616, &[], &zone);
+        assert_eq!(
+            fx.active.len(),
+            1,
+            "a later AOI incarnation must trust its ObjectPlayer state"
+        );
+        assert_eq!(fx.active[0].key, "magic-shield-1000");
+        assert_eq!(fx.active[0].provenance.packet, "ObjectPlayer");
+    }
+
     fn firebang_event(sequence: u64, cast: bool, target_id: u32) -> NativeEffectEvent {
         let mut event = talisman_event("FireBang", sequence, cast, target_id);
         event.payload["target"] = json!({"x":287,"y":622});
@@ -4133,59 +4383,102 @@ mod tests {
     #[test]
     fn firebang_empty_ground_completion_has_exact_frames_and_fixed_target() {
         let mut fx = NativeEffects::default();
-        let zone = HashMap::from([(1000,(288,616)),(2000,(287,620))]);
-        let event = firebang_event(1,true,0);
-        fx.observe(0,288,616,&[event.clone(),event],&zone);
-        assert_eq!(fx.active.len(),2,"duplicate must not schedule two explosions");
-        let before: Value = serde_json::from_str(&fx.tick_with_visibility(599,true).unwrap()).unwrap();
-        assert!(before["effects"].as_array().unwrap().iter().all(|v| !v["imageUrl"].as_str().unwrap().ends_with("/1660.png")));
-        for (now,frame) in [(600,1660),(1500,1669)] {
-            let state: Value = serde_json::from_str(&fx.tick_with_visibility(now,true).unwrap()).unwrap();
-            assert_eq!(state["effects"].as_array().unwrap().len(),1);
-            assert!(state["effects"][0]["imageUrl"].as_str().unwrap().ends_with(&format!("/{frame}.png")));
-            assert_eq!((fx.active[0].tile_x,fx.active[0].tile_y),(287,622));
+        let zone = HashMap::from([(1000, (288, 616)), (2000, (287, 620))]);
+        let event = firebang_event(1, true, 0);
+        fx.observe(0, 288, 616, &[event.clone(), event], &zone);
+        assert_eq!(
+            fx.active.len(),
+            2,
+            "duplicate must not schedule two explosions"
+        );
+        let before: Value =
+            serde_json::from_str(&fx.tick_with_visibility(599, true).unwrap()).unwrap();
+        assert!(before["effects"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|v| !v["imageUrl"].as_str().unwrap().ends_with("/1660.png")));
+        for (now, frame) in [(600, 1660), (1500, 1669)] {
+            let state: Value =
+                serde_json::from_str(&fx.tick_with_visibility(now, true).unwrap()).unwrap();
+            assert_eq!(state["effects"].as_array().unwrap().len(), 1);
+            assert!(state["effects"][0]["imageUrl"]
+                .as_str()
+                .unwrap()
+                .ends_with(&format!("/{frame}.png")));
+            assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (287, 622));
         }
-        let end: Value = serde_json::from_str(&fx.tick_with_visibility(1600,true).unwrap()).unwrap();
-        assert_eq!(end["effects"],json!([]));
+        let end: Value =
+            serde_json::from_str(&fx.tick_with_visibility(1600, true).unwrap()).unwrap();
+        assert_eq!(end["effects"], json!([]));
         assert!(fx.take_due_sound_events(1600).is_empty());
 
         let mut fx = NativeEffects::default();
-        fx.observe(0,288,616,&[firebang_event(1,true,2000)],&zone);
-        fx.observe(601,288,616,&[],&HashMap::from([(1000,(288,616)),(2000,(280,610))]));
-        fx.tick_with_visibility(601,true);
-        assert_eq!((fx.active[0].tile_x,fx.active[0].tile_y),(287,622));
+        fx.observe(0, 288, 616, &[firebang_event(1, true, 2000)], &zone);
+        fx.observe(
+            601,
+            288,
+            616,
+            &[],
+            &HashMap::from([(1000, (288, 616)), (2000, (280, 610))]),
+        );
+        fx.tick_with_visibility(601, true);
+        assert_eq!((fx.active[0].tile_x, fx.active[0].tile_y), (287, 622));
         assert!(fx.anchor_object_ids.is_empty());
     }
 
     #[test]
     fn firebang_failed_cast_and_source_lifecycle_do_not_leak_completion() {
-        let zone=HashMap::from([(1000,(288,616))]);
-        let mut fx=NativeEffects::default();
-        fx.observe(0,288,616,&[firebang_event(1,false,0)],&zone);
-        assert_eq!(fx.active.len(),1);
+        let zone = HashMap::from([(1000, (288, 616))]);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[firebang_event(1, false, 0)], &zone);
+        assert_eq!(fx.active.len(), 1);
         assert!(fx.prestart_source_object_ids.is_empty());
-        let state: Value=serde_json::from_str(&fx.tick_with_visibility(600,true).unwrap()).unwrap();
-        assert_eq!(state["effects"],json!([]));
-        for removed_at in [100,601] {
-            let mut fx=NativeEffects::default();
-            fx.observe(0,288,616,&[firebang_event(1,true,0)],&zone);
-            if removed_at>600 { fx.tick_with_visibility(601,true); }
-            fx.observe(removed_at,288,616,&[NativeEffectEvent { generation:42,sequence:2,packet:"ObjectRemove".into(),payload:json!({"objectId":1000}) }],&HashMap::new());
-            fx.tick_with_visibility(700,true);
-            assert_eq!(fx.active.len(),usize::from(removed_at>600));
+        let state: Value =
+            serde_json::from_str(&fx.tick_with_visibility(600, true).unwrap()).unwrap();
+        assert_eq!(state["effects"], json!([]));
+        for removed_at in [100, 601] {
+            let mut fx = NativeEffects::default();
+            fx.observe(0, 288, 616, &[firebang_event(1, true, 0)], &zone);
+            if removed_at > 600 {
+                fx.tick_with_visibility(601, true);
+            }
+            fx.observe(
+                removed_at,
+                288,
+                616,
+                &[NativeEffectEvent {
+                    generation: 42,
+                    sequence: 2,
+                    packet: "ObjectRemove".into(),
+                    payload: json!({"objectId":1000}),
+                }],
+                &HashMap::new(),
+            );
+            fx.tick_with_visibility(700, true);
+            assert_eq!(fx.active.len(), usize::from(removed_at > 600));
         }
-        let mut fx=NativeEffects::default();
-        fx.observe(0,288,616,&[firebang_event(1,true,0)],&zone);
-        let mut next_generation=firebang_event(1,false,0);
-        next_generation.generation=43;
-        fx.observe(100,288,616,&[next_generation],&zone);
+        let mut fx = NativeEffects::default();
+        fx.observe(0, 288, 616, &[firebang_event(1, true, 0)], &zone);
+        let mut next_generation = firebang_event(1, false, 0);
+        next_generation.generation = 43;
+        fx.observe(100, 288, 616, &[next_generation], &zone);
         assert!(fx.prestart_source_object_ids.is_empty());
-        let state: Value=serde_json::from_str(&fx.tick_with_visibility(700,true).unwrap()).unwrap();
-        assert_eq!(state["effects"],json!([]),"new generation must retire old pending explosion");
-        for reset_connection in [false,true] {
-            let mut fx=NativeEffects::default();
-            fx.observe(0,288,616,&[firebang_event(1,true,0)],&zone);
-            if reset_connection { fx.reset_for_new_connection(); } else { fx.clear_active_effects(); }
+        let state: Value =
+            serde_json::from_str(&fx.tick_with_visibility(700, true).unwrap()).unwrap();
+        assert_eq!(
+            state["effects"],
+            json!([]),
+            "new generation must retire old pending explosion"
+        );
+        for reset_connection in [false, true] {
+            let mut fx = NativeEffects::default();
+            fx.observe(0, 288, 616, &[firebang_event(1, true, 0)], &zone);
+            if reset_connection {
+                fx.reset_for_new_connection();
+            } else {
+                fx.clear_active_effects();
+            }
             assert!(fx.active.is_empty());
             assert!(fx.prestart_source_object_ids.is_empty());
         }

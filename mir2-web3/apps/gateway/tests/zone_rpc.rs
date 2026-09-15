@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use mir2_gateway::routing::PerMapSessionRouter;
+use mir2_gateway::routing::{PerMapSessionRouter, SharedZoneLiveOutboundSender};
 use mir2_gateway::{
     validate_zone_host_bind, GatewayConfig, GatewaySession, InMemoryZoneOwnerLeaseAuthority,
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
@@ -517,7 +517,10 @@ fn tcp_zone_rpc_registration_bridges_live_outbounds_to_gateway_channel() {
         .expect("setup acknowledge");
 
     let (sender, mut receiver) = tokio::sync::mpsc::channel(16);
-    let registration = ZoneOwnerRpcTransport::register_live_outbound(&observer, sender)
+    let registration = ZoneOwnerRpcTransport::register_live_outbound(
+        &observer,
+        SharedZoneLiveOutboundSender::new(sender.clone(), sender),
+    )
         .expect("remote live outbound registration should succeed")
         .expect("TCP transport should provide a live registration");
     registration.activate();

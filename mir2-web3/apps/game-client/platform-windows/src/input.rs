@@ -7,8 +7,10 @@
 
 use bevy::input::ButtonInput;
 use bevy::prelude::{
-    Interaction, KeyCode, Local, MouseButton, Query, Res, ResMut, Time, Window, With,
+    Interaction, KeyCode, Local, MessageReader, MouseButton, Query, Res, ResMut, Resource, Time,
+    Window, With,
 };
+use bevy::winit::RawWinitWindowEvent;
 use mir2_client_bevy::crystal_ui::hud::{belt_slot_item, CrystalHudAction};
 use mir2_client_bevy::crystal_ui::notice::NoticeDialogState;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
@@ -21,12 +23,171 @@ use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, VecDeque};
+use winit::event::WindowEvent as WinitWindowEvent;
+use winit::keyboard::ModifiersState;
+use winit::window::WindowId;
 
 use crate::effects::{NativeEffects, CELL_HEIGHT, CELL_WIDTH};
 use crate::entity_presentation::NativeEntityPresentation;
 use crate::gameplay_bridge::{GameplayEventInbox, NativeSelfMovementAck, NativeWorldClickState};
 use crate::gateway::{GatewayCommand, GatewayCommandSender, PlayerIntent};
 use crate::native_protocol::NativeOutboundCommand;
+
+pub(crate) const NATIVE_INPUT_TRACE_ENV: &str = "MIR2_NATIVE_INPUT_TRACE";
+
+pub(crate) fn native_input_trace_enabled() -> bool {
+    std::env::var_os(NATIVE_INPUT_TRACE_ENV).is_some()
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub(crate) struct NativeModifiers {
+    pub(crate) alt: bool,
+    pub(crate) shift: bool,
+    pub(crate) control: bool,
+}
+
+impl From<ModifiersState> for NativeModifiers {
+    fn from(state: ModifiersState) -> Self {
+        Self {
+            alt: state.alt_key(),
+            shift: state.shift_key(),
+            control: state.control_key(),
+        }
+    }
+}
+
+/// Modifier state reported by winit for the native window.
+///
+/// Windows sends `ModifiersChanged` before `Focused(true)` when focus returns
+/// from the on-screen keyboard. Bevy does not mirror that event into
+/// `ButtonInput<KeyCode>`, so retain the per-window snapshot and activate it
+/// only when that same window gains focus.
+#[derive(Resource, Debug, Default)]
+pub(crate) struct NativeModifierState {
+    focused_window: Option<WindowId>,
+    by_window: HashMap<WindowId, NativeModifiers>,
+    active: NativeModifiers,
+}
+
+impl NativeModifierState {
+    fn observe(&mut self, window_id: WindowId, event: &WinitWindowEvent) {
+        match event {
+            WinitWindowEvent::ModifiersChanged(modifiers) => {
+                self.observe_modifiers(window_id, NativeModifiers::from(modifiers.state()));
+            }
+            WinitWindowEvent::Focused(true) => {
+                self.observe_focus(window_id, true);
+            }
+            WinitWindowEvent::Focused(false) => {
+                self.observe_focus(window_id, false);
+            }
+            _ => {}
+        }
+    }
+
+    fn observe_modifiers(&mut self, window_id: WindowId, modifiers: NativeModifiers) {
+        self.by_window.insert(window_id, modifiers);
+        if self.focused_window == Some(window_id) {
+            self.active = modifiers;
+        }
+    }
+
+    fn observe_focus(&mut self, window_id: WindowId, focused: bool) {
+        if focused {
+            self.focused_window = Some(window_id);
+            self.active = self.by_window.get(&window_id).copied().unwrap_or_default();
+        } else {
+            self.by_window.remove(&window_id);
+            if self.focused_window == Some(window_id) {
+                self.focused_window = None;
+                self.active = NativeModifiers::default();
+            }
+        }
+    }
+
+    pub(crate) fn active(&self) -> NativeModifiers {
+        self.active
+    }
+
+    #[cfg(test)]
+    pub(crate) fn with_active(active: NativeModifiers) -> Self {
+        Self {
+            active,
+            ..Default::default()
+        }
+    }
+}
+
+pub(crate) fn sync_native_modifier_state(
+    mut events: MessageReader<RawWinitWindowEvent>,
+    mut state: ResMut<NativeModifierState>,
+) {
+    for event in events.read() {
+        state.observe(event.window_id, &event.event);
+        if native_input_trace_enabled() {
+            match &event.event {
+                WinitWindowEvent::ModifiersChanged(modifiers) => {
+                    let observed = NativeModifiers::from(modifiers.state());
+                    eprintln!(
+                        "[native-input-trace] raw=modifiers window={:?} alt={} shift={} control={} focused_window={} active={:?}",
+                        event.window_id,
+                        observed.alt,
+                        observed.shift,
+                        observed.control,
+                        state.focused_window == Some(event.window_id),
+                        state.active,
+                    );
+                }
+                WinitWindowEvent::Focused(focused) => {
+                    eprintln!(
+                        "[native-input-trace] raw=focus window={:?} focused={} active={:?}",
+                        event.window_id, focused, state.active,
+                    );
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
+#[derive(bevy::ecs::system::SystemParam)]
+pub(crate) struct NativeKeyboardInput<'w> {
+    keys: Option<Res<'w, ButtonInput<KeyCode>>>,
+    native_modifiers: Option<Res<'w, NativeModifierState>>,
+}
+
+impl NativeKeyboardInput<'_> {
+    pub(crate) fn keys(&self) -> Option<&ButtonInput<KeyCode>> {
+        self.keys.as_deref()
+    }
+
+    pub(crate) fn modifiers(&self) -> NativeModifiers {
+        let mut modifiers = self.native_modifiers();
+        let key_modifiers = self.bevy_modifiers();
+        modifiers.alt |= key_modifiers.alt;
+        modifiers.shift |= key_modifiers.shift;
+        modifiers.control |= key_modifiers.control;
+        modifiers
+    }
+
+    pub(crate) fn native_modifiers(&self) -> NativeModifiers {
+        self.native_modifiers
+            .as_deref()
+            .map(NativeModifierState::active)
+            .unwrap_or_default()
+    }
+
+    pub(crate) fn bevy_modifiers(&self) -> NativeModifiers {
+        let mut modifiers = NativeModifiers::default();
+        if let Some(keys) = self.keys() {
+            modifiers.alt = keys.pressed(KeyCode::AltLeft) || keys.pressed(KeyCode::AltRight);
+            modifiers.shift = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
+            modifiers.control =
+                keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight);
+        }
+        modifiers
+    }
+}
 
 /// Mir2 direction strings the gateway `Walk`/`Run`/`Turn` commands accept.
 const UP: &str = "up";
@@ -97,6 +258,10 @@ const MOVEMENT_BLOCKED_STEP_MAX_AGE_MS: f64 = 3_000.0;
 const MOVEMENT_BLOCKED_STEP_LIMIT: usize = 16;
 const CRYSTAL_NPC_CLICK_GUARD_MS: f64 = 5_000.0;
 const CRYSTAL_PICKUP_INTERVAL_MS: f64 = 200.0;
+// Crystal PlayerObject.cs uses 2500 ms as the NextAction backstop after a
+// Harvest send. Keep native retries no faster than that conservative bound;
+// the server remains authoritative over acceptance and corpse state.
+const CRYSTAL_HARVEST_INTERVAL_MS: f64 = 2_500.0;
 const CRYSTAL_NEW_MOVE_PATH_LIMIT: i32 = 20;
 const CRYSTAL_NEW_MOVE_SEARCH_LIMIT: usize = 4_096;
 
@@ -137,6 +302,12 @@ pub struct WorldPointerMovementState {
     auto_path_destination: Option<(i32, i32)>,
     attack_target: Option<u32>,
     next_attack_request_at_ms: f64,
+    harvest_target: Option<u32>,
+    /// Directional Harvest armed by an accepted Alt+left press on empty world.
+    /// Targeted corpse holds continue to use `harvest_target` so moving onto a
+    /// different actor cannot retarget an old press.
+    harvest_direction: Option<&'static str>,
+    next_harvest_request_at_ms: f64,
     pending: VecDeque<PendingSelfMove>,
     movement_stall_reported: bool,
     self_object_id: Option<String>,
@@ -154,6 +325,13 @@ pub struct WorldPointerMovementState {
 }
 
 impl WorldPointerMovementState {
+    /// Current native combat selection. Crystal redraws the selected actor in
+    /// a post-world blend pass, which keeps targets readable behind trees and
+    /// other front-map objects while the chase/attack controller is active.
+    pub(crate) fn attack_target(&self) -> Option<u32> {
+        self.attack_target
+    }
+
     /// Arm the same target pursuit used by an ordinary unmodified monster
     /// click. Quest UI buttons call this through the host bridge so they keep
     /// following a moving monster until it is in attack range.
@@ -165,6 +343,9 @@ impl WorldPointerMovementState {
         self.auto_path_destination = None;
         self.attack_target = Some(object_id);
         self.next_attack_request_at_ms = 0.0;
+        self.harvest_target = None;
+        self.harvest_direction = None;
+        self.next_harvest_request_at_ms = 0.0;
         self.last_plan_block_trace_at_ms = None;
     }
 
@@ -335,6 +516,9 @@ impl WorldPointerMovementState {
         self.movement_stall_reported = false;
         self.attack_target = None;
         self.next_attack_request_at_ms = 0.0;
+        self.harvest_target = None;
+        self.harvest_direction = None;
+        self.next_harvest_request_at_ms = 0.0;
         self.auto_path_destination = None;
         self.active = None;
         self.next_move_send_at_ms = 0.0;
@@ -489,6 +673,27 @@ fn hovered_world_intent(
     }
 }
 
+fn hovered_harvest_target(
+    hovered_object_id: Option<&str>,
+    entities: &EntityModelSet,
+    click_state: Option<&NativeWorldClickState>,
+) -> Option<u32> {
+    let object_id = match hovered_world_intent(hovered_object_id, entities)? {
+        QuestUiIntent::AttackTarget { object_id } => object_id,
+        _ => return None,
+    };
+    let state = click_state?;
+    if state.riding_mount != Some(false) {
+        return None;
+    }
+    let target = state.targets.get(&object_id)?;
+    (target.kind == EntityKind::Monster
+        && target.object_id != 0
+        && target.ai.is_some()
+        && target.ai != Some(70))
+    .then_some(object_id)
+}
+
 fn pickup_tile_intent(
     hovered_grid_position: Option<(i32, i32)>,
     entities: &EntityModelSet,
@@ -545,6 +750,21 @@ fn movement_direction_toward(
         (-1, -1) => Some("upleft"),
         _ => None,
     }
+}
+
+fn crystal_harvest_direction_toward(
+    hovered_grid_position: Option<(i32, i32)>,
+    origin: (i32, i32),
+) -> Option<&'static str> {
+    let target = hovered_grid_position?;
+    if target == origin {
+        // Crystal Functions.DirectionFromPoint returns Up for equal points.
+        return Some("up");
+    }
+    // Native presentation exposes a tile, whereas Crystal's far-pointer
+    // MouseDirection uses the precise screen-space angle. This is the same
+    // eight-way tile approximation already used by native movement/targeting.
+    movement_direction_toward(Some(target), origin)
 }
 
 fn authoritative_player(entities: &EntityModelSet) -> Option<(String, (i32, i32), String)> {
@@ -1010,7 +1230,7 @@ fn push_movement_shadow_authoritative(
 /// The shared Zone remains authoritative and may degrade the first run to walk.
 pub fn mouse_world_interaction_system(
     mouse: Res<ButtonInput<MouseButton>>,
-    keys: Option<Res<ButtonInput<KeyCode>>>,
+    keyboard: NativeKeyboardInput,
     shell: Option<Res<NativeShellModel>>,
     mut player_ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
@@ -1026,6 +1246,8 @@ pub fn mouse_world_interaction_system(
     gameplay_inbox: Option<Res<GameplayEventInbox>>,
     mut movement: ResMut<WorldPointerMovementState>,
 ) {
+    let keys = keyboard.keys();
+    let modifiers = keyboard.modifiers();
     let left_pressed = mouse.just_pressed(MouseButton::Left);
     let right_pressed = mouse.just_pressed(MouseButton::Right);
     let left_released = mouse.just_released(MouseButton::Left);
@@ -1033,6 +1255,14 @@ pub fn mouse_world_interaction_system(
     let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
     if left_pressed {
         trace_pointer_input(now_ms, "left", "down");
+        if native_input_trace_enabled() {
+            eprintln!(
+                "[native-input-trace] click=left-down at_ms={now_ms:.1} native={:?} bevy={:?} merged={:?}",
+                keyboard.native_modifiers(),
+                keyboard.bevy_modifiers(),
+                modifiers,
+            );
+        }
     }
     if left_released {
         trace_pointer_input(now_ms, "left", "up");
@@ -1056,6 +1286,8 @@ pub fn mouse_world_interaction_system(
         && movement.active.is_none()
         && movement.auto_path_destination.is_none()
         && movement.attack_target.is_none()
+        && movement.harvest_target.is_none()
+        && movement.harvest_direction.is_none()
         && movement.pending.is_empty()
         && !ack_waiting
     {
@@ -1074,6 +1306,9 @@ pub fn mouse_world_interaction_system(
     };
     let Ok(window) = windows.single() else {
         movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        movement.next_harvest_request_at_ms = 0.0;
         movement.stop_hold(now_ms, "missingWindow");
         movement.stop_auto_path(now_ms, "missingWindow");
         return;
@@ -1097,6 +1332,9 @@ pub fn mouse_world_interaction_system(
             }
         } else {
             movement.stop_hold(now_ms, "missingPlayer");
+            movement.harvest_target = None;
+            movement.harvest_direction = None;
+            movement.next_harvest_request_at_ms = 0.0;
         }
         return;
     };
@@ -1196,6 +1434,9 @@ pub fn mouse_world_interaction_system(
 
     if !window.focused {
         movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        movement.next_harvest_request_at_ms = 0.0;
         movement.stop_hold(now_ms, "windowUnfocused");
         movement.stop_auto_path(now_ms, "windowUnfocused");
         return;
@@ -1260,6 +1501,9 @@ pub fn mouse_world_interaction_system(
     {
         movement.stop_hold(now_ms, "worldInputBlocked");
         movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        movement.next_harvest_request_at_ms = 0.0;
         movement.stop_auto_path(now_ms, "worldInputBlocked");
         return;
     }
@@ -1268,16 +1512,16 @@ pub fn mouse_world_interaction_system(
     // directional key own the frame so a ready auto-path step cannot be sent
     // immediately before the keyboard command and then be coalesced away by
     // the Gateway's latest-intent slot.
-    if keys
-        .as_deref()
-        .is_some_and(|keys| keys.just_pressed(KeyCode::Escape))
-    {
+    if keys.is_some_and(|keys| keys.just_pressed(KeyCode::Escape)) {
         movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        movement.next_harvest_request_at_ms = 0.0;
         movement.stop_auto_path(now_ms, "escape");
         movement.stop_hold(now_ms, "escape");
         return;
     }
-    if keys.as_deref().is_some_and(|keys| {
+    if keys.is_some_and(|keys| {
         walk_key_map().iter().any(|(key, _)| {
             keys.pressed(*key)
                 && !player_ui
@@ -1287,8 +1531,70 @@ pub fn mouse_world_interaction_system(
     }) {
         movement.stop_hold(now_ms, "keyboardInput");
         movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        movement.next_harvest_request_at_ms = 0.0;
         movement.stop_auto_path(now_ms, "keyboardInput");
         return;
+    }
+
+    if let Some(target_id) = movement.harvest_target {
+        let still_held = mouse.pressed(MouseButton::Left) && modifiers.alt;
+        let hovered_target = hovered_harvest_target(
+            presentation.hovered_object_id(),
+            &entities,
+            click_state.as_deref(),
+        );
+        if !still_held || hovered_target != Some(target_id) {
+            movement.harvest_target = None;
+            movement.harvest_direction = None;
+            movement.next_harvest_request_at_ms = 0.0;
+            if !right_pressed {
+                return;
+            }
+        } else {
+            if now_ms >= movement.next_harvest_request_at_ms {
+                if queue.as_deref_mut().is_some_and(|queue| {
+                    queue.push_intent(QuestUiIntent::AttackTarget {
+                        object_id: target_id,
+                    })
+                }) {
+                    movement.next_harvest_request_at_ms = now_ms + CRYSTAL_HARVEST_INTERVAL_MS;
+                }
+            }
+            return;
+        }
+    }
+
+    if movement.harvest_direction.is_some() {
+        let origin = movement.authoritative_position.unwrap_or(entity_position);
+        let direction = (mouse.pressed(MouseButton::Left)
+            && modifiers.alt
+            && presentation.hovered_object_id().is_none()
+            && click_state
+                .as_deref()
+                .is_some_and(|state| state.riding_mount == Some(false)))
+        .then(|| crystal_harvest_direction_toward(presentation.hovered_grid_position(), origin))
+        .flatten();
+        if let Some(direction) = direction {
+            movement.harvest_direction = Some(direction);
+            if now_ms >= movement.next_harvest_request_at_ms {
+                if queue.as_deref_mut().is_some_and(|queue| {
+                    queue.push_intent(QuestUiIntent::HarvestDirection {
+                        direction: direction.to_owned(),
+                    })
+                }) {
+                    movement.next_harvest_request_at_ms = now_ms + CRYSTAL_HARVEST_INTERVAL_MS;
+                }
+            }
+            return;
+        } else {
+            movement.harvest_direction = None;
+            movement.next_harvest_request_at_ms = 0.0;
+            if !right_pressed {
+                return;
+            }
+        }
     }
 
     if left_pressed || right_pressed {
@@ -1327,12 +1633,67 @@ pub fn mouse_world_interaction_system(
     } else if left_pressed {
         movement.attack_target = None;
         movement.stop_auto_path(now_ms, "leftClick");
-        let modified = keys.as_deref().is_some_and(|keys| {
-            keys.pressed(KeyCode::AltLeft)
-                || keys.pressed(KeyCode::AltRight)
-                || keys.pressed(KeyCode::ShiftLeft)
-                || keys.pressed(KeyCode::ShiftRight)
-        });
+        let modified = modifiers.alt || modifiers.shift;
+        if native_input_trace_enabled() {
+            eprintln!(
+                "[native-input-trace] click-route hovered_object={:?} hovered_grid={:?} window_focused={} modified={} alt={} shift={}",
+                presentation.hovered_object_id(),
+                presentation.hovered_grid_position(),
+                window.focused,
+                modified,
+                modifiers.alt,
+                modifiers.shift,
+            );
+        }
+        if modifiers.alt {
+            movement.stop_hold(now_ms, "harvestTarget");
+            if let Some(target_id) = hovered_harvest_target(
+                presentation.hovered_object_id(),
+                &entities,
+                click_state.as_deref(),
+            ) {
+                movement.harvest_target = Some(target_id);
+                movement.harvest_direction = None;
+                if queue.as_deref_mut().is_some_and(|queue| {
+                    queue.push_intent(QuestUiIntent::AttackTarget {
+                        object_id: target_id,
+                    })
+                }) {
+                    movement.next_harvest_request_at_ms = now_ms + CRYSTAL_HARVEST_INTERVAL_MS;
+                }
+                return;
+            }
+            // Crystal's OnMouseClick calls an NPC regardless of Alt. Allow
+            // that initial click to reach the existing guarded NPC branch,
+            // while every other invalid Alt target remains inert.
+            if !matches!(
+                hovered_world_intent(presentation.hovered_object_id(), &entities),
+                Some(QuestUiIntent::InteractNpc { .. })
+            ) {
+                if presentation.hovered_object_id().is_none()
+                    && click_state
+                        .as_deref()
+                        .is_some_and(|state| state.riding_mount == Some(false))
+                {
+                    let origin = movement.authoritative_position.unwrap_or(entity_position);
+                    if let Some(direction) = crystal_harvest_direction_toward(
+                        presentation.hovered_grid_position(),
+                        origin,
+                    ) {
+                        movement.harvest_direction = Some(direction);
+                        if queue.as_deref_mut().is_some_and(|queue| {
+                            queue.push_intent(QuestUiIntent::HarvestDirection {
+                                direction: direction.to_owned(),
+                            })
+                        }) {
+                            movement.next_harvest_request_at_ms =
+                                now_ms + CRYSTAL_HARVEST_INTERVAL_MS;
+                        }
+                    }
+                }
+                return;
+            }
+        }
         if !modified {
             if let Some(QuestUiIntent::AttackTarget { object_id }) =
                 hovered_world_intent(presentation.hovered_object_id(), &entities)
@@ -1409,12 +1770,7 @@ pub fn mouse_world_interaction_system(
     }
 
     if let Some(target_id) = movement.attack_target {
-        if keys.as_deref().is_some_and(|keys| {
-            keys.pressed(KeyCode::AltLeft)
-                || keys.pressed(KeyCode::AltRight)
-                || keys.pressed(KeyCode::ShiftLeft)
-                || keys.pressed(KeyCode::ShiftRight)
-        }) {
+        if modifiers.alt || modifiers.shift {
             movement.attack_target = None;
             movement.stop_auto_path(now_ms, "combatModifier");
             return;
@@ -1908,12 +2264,6 @@ pub fn keyboard_town_revive_system(
     ) {
         return;
     }
-    if player_ui
-        .as_deref()
-        .is_some_and(|u| key_owned_by_binding(&u.keyboard, &keys, KeyCode::KeyV))
-    {
-        return;
-    }
     if !keys.just_pressed(KeyCode::KeyV) {
         return;
     }
@@ -2368,6 +2718,9 @@ mod tests {
         let mut state = WorldPointerMovementState {
             active: Some(WorldPointerMovementMode::Run),
             auto_path_destination: Some((40, 50)),
+            harvest_target: Some(9),
+            harvest_direction: Some("up"),
+            next_harvest_request_at_ms: 2_000.0,
             ..Default::default()
         };
 
@@ -2376,7 +2729,58 @@ mod tests {
         assert_eq!(state.attack_target, Some(77));
         assert_eq!(state.active, None);
         assert_eq!(state.auto_path_destination, None);
-        assert_eq!(state.next_attack_request_at_ms, 0.0);
+        assert_eq!(state.harvest_target, None);
+        assert_eq!(state.harvest_direction, None);
+        assert_eq!(state.next_harvest_request_at_ms, 0.0);
+    }
+
+    #[test]
+    fn osk_modifier_snapshot_restores_on_focus_and_never_sticks_after_loss() {
+        let game_window = WindowId::from(1);
+        let other_window = WindowId::from(2);
+        let all = NativeModifiers {
+            alt: true,
+            shift: true,
+            control: true,
+        };
+        let mut state = NativeModifierState::default();
+
+        // Windows reports the OSK modifier snapshot before focus returns.
+        state.observe_modifiers(game_window, all);
+        assert_eq!(state.active(), NativeModifiers::default());
+        state.observe_focus(game_window, true);
+        assert_eq!(state.active(), all);
+
+        // Events for another window cannot alter the focused game window.
+        state.observe_modifiers(other_window, NativeModifiers::default());
+        state.observe_focus(other_window, false);
+        assert_eq!(state.active(), all);
+
+        state.observe_modifiers(game_window, NativeModifiers::default());
+        assert_eq!(state.active(), NativeModifiers::default());
+        state.observe_modifiers(
+            game_window,
+            NativeModifiers {
+                alt: true,
+                ..Default::default()
+            },
+        );
+        assert!(state.active().alt);
+
+        state.observe_focus(game_window, false);
+        assert_eq!(state.active(), NativeModifiers::default());
+        assert_eq!(state.focused_window, None);
+
+        state.observe_modifiers(
+            game_window,
+            NativeModifiers {
+                shift: true,
+                ..Default::default()
+            },
+        );
+        assert_eq!(state.active(), NativeModifiers::default());
+        state.observe_focus(game_window, true);
+        assert!(state.active().shift);
     }
 
     pub(super) fn input_app() -> (
@@ -2785,6 +3189,504 @@ mod tests {
             .resource_mut::<QuestUiIntentQueue>()
             .drain_intents()
             .is_empty());
+    }
+
+    #[test]
+    fn native_osk_alt_click_routes_live_and_dead_monsters_without_arming_auto_attack() {
+        fn click_app(dead: bool) -> bevy::prelude::App {
+            let mut app = bevy::prelude::App::new();
+            app.world_mut().spawn(Window::default());
+            app.insert_resource(ButtonInput::<MouseButton>::default());
+            app.insert_resource(NativeModifierState::with_active(NativeModifiers {
+                alt: true,
+                ..Default::default()
+            }));
+            app.insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+            app.insert_resource(NativePlayerUiState::default());
+            app.insert_resource(NpcDialogModel::default());
+            app.insert_resource(UiReadModel::default());
+            app.insert_resource(world_entities());
+            app.insert_resource(NativeWorldClickState {
+                player_x: 10,
+                player_y: 10,
+                riding_mount: Some(false),
+                targets: HashMap::from([(
+                    2001,
+                    crate::gameplay_bridge::CrystalWorldClickTarget {
+                        kind: EntityKind::Monster,
+                        object_id: 2001,
+                        x: 11,
+                        y: 10,
+                        dead: Some(dead),
+                        ai: Some(0),
+                        harvestable: Some(true),
+                    },
+                )]),
+                ..Default::default()
+            });
+            let mut presentation = NativeEntityPresentation::default();
+            presentation.set_hovered_object_id_for_test(Some("2001"));
+            app.insert_resource(presentation);
+            app.init_resource::<QuestUiIntentQueue>();
+            app.init_resource::<WorldPointerMovementState>();
+            app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Left);
+            app
+        }
+
+        for dead in [false, true] {
+            let mut app = click_app(dead);
+            app.update();
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents(),
+                vec![QuestUiIntent::AttackTarget { object_id: 2001 }],
+                "raw Alt must preserve the target intent for dead={dead}"
+            );
+            let movement = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(movement.attack_target, None);
+            assert_eq!(movement.active, None);
+
+            if !dead {
+                {
+                    let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+                    mouse.release(MouseButton::Left);
+                    mouse.clear_just_pressed(MouseButton::Left);
+                }
+                app.update();
+                app.insert_resource(NativeModifierState::default());
+                {
+                    let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+                    mouse.clear_just_released(MouseButton::Left);
+                    mouse.press(MouseButton::Left);
+                }
+                app.update();
+                assert_eq!(
+                    app.world_mut()
+                        .resource_mut::<QuestUiIntentQueue>()
+                        .drain_intents(),
+                    vec![QuestUiIntent::AttackTarget { object_id: 2001 }],
+                    "releasing the raw modifier must restore an ordinary attack"
+                );
+                assert_eq!(
+                    app.world()
+                        .resource::<WorldPointerMovementState>()
+                        .attack_target,
+                    Some(2001)
+                );
+            }
+        }
+    }
+
+    fn harvest_hold_app() -> bevy::prelude::App {
+        let mut app = bevy::prelude::App::new();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(bevy::prelude::Time::<()>::default());
+        app.insert_resource(NativeModifierState::with_active(NativeModifiers {
+            alt: true,
+            ..Default::default()
+        }));
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        app.insert_resource(NativeWorldClickState {
+            player_x: 10,
+            player_y: 10,
+            riding_mount: Some(false),
+            targets: HashMap::from([(
+                2001,
+                crate::gameplay_bridge::CrystalWorldClickTarget {
+                    kind: EntityKind::Monster,
+                    object_id: 2001,
+                    x: 11,
+                    y: 10,
+                    dead: Some(true),
+                    ai: Some(0),
+                    harvestable: Some(true),
+                },
+            )]),
+            ..Default::default()
+        });
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hovered_object_id_for_test(Some("2001"));
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.init_resource::<WorldPointerMovementState>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app
+    }
+
+    fn drain_world_intents(app: &mut bevy::prelude::App) -> Vec<QuestUiIntent> {
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+    }
+
+    fn ground_harvest_hold_app(cursor_stage: (f32, f32)) -> bevy::prelude::App {
+        let mut app = bevy::prelude::App::new();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(bevy::prelude::Time::<()>::default());
+        app.insert_resource(NativeModifierState::with_active(NativeModifiers {
+            alt: true,
+            ..Default::default()
+        }));
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        app.insert_resource(NativeWorldClickState {
+            player_x: 10,
+            player_y: 10,
+            riding_mount: Some(false),
+            ..Default::default()
+        });
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.set_hovered_object_id_for_test(None);
+        presentation.set_hover_grid_context_for_test((10, 10), cursor_stage);
+        app.insert_resource(presentation);
+        app.init_resource::<QuestUiIntentQueue>();
+        app.init_resource::<WorldPointerMovementState>();
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app
+    }
+
+    #[test]
+    fn alt_left_on_empty_world_harvests_cardinal_tile_and_repeats_until_release() {
+        let mut app = ground_harvest_hold_app((576.0, 352.0));
+        app.update();
+        assert_eq!(
+            drain_world_intents(&mut app),
+            vec![QuestUiIntent::HarvestDirection {
+                direction: "right".to_owned(),
+            }]
+        );
+        {
+            let state = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(state.harvest_target, None);
+            assert_eq!(state.harvest_direction, Some("right"));
+            assert_eq!(state.active, None);
+        }
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        advance_movement_clock(&mut app, 2_500);
+        app.update();
+        assert_eq!(
+            drain_world_intents(&mut app),
+            vec![QuestUiIntent::HarvestDirection {
+                direction: "right".to_owned(),
+            }]
+        );
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Left);
+        app.update();
+        assert!(drain_world_intents(&mut app).is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .harvest_direction,
+            None
+        );
+    }
+
+    #[test]
+    fn alt_left_on_same_empty_tile_uses_crystal_up_fallback_and_respects_gates() {
+        let mut app = ground_harvest_hold_app((512.0, 368.0));
+        app.update();
+        assert_eq!(
+            drain_world_intents(&mut app),
+            vec![QuestUiIntent::HarvestDirection {
+                direction: "up".to_owned(),
+            }]
+        );
+
+        for blocked in ["mount", "ui"] {
+            let mut app = ground_harvest_hold_app((576.0, 352.0));
+            if blocked == "mount" {
+                app.world_mut()
+                    .resource_mut::<NativeWorldClickState>()
+                    .riding_mount = Some(true);
+            } else {
+                app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+            }
+            app.update();
+            assert!(drain_world_intents(&mut app).is_empty(), "{blocked}");
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .harvest_direction,
+                None,
+                "{blocked}"
+            );
+        }
+    }
+
+    #[test]
+    fn empty_ground_harvest_hold_does_not_leak_when_cursor_moves_onto_actor() {
+        let mut app = ground_harvest_hold_app((576.0, 352.0));
+        app.update();
+        assert_eq!(drain_world_intents(&mut app).len(), 1);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hovered_object_id_for_test(Some("77"));
+        advance_movement_clock(&mut app, 2_500);
+        app.update();
+        assert!(drain_world_intents(&mut app).is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .harvest_direction,
+            None
+        );
+
+        // Moving back to empty world while the old press is still held cannot
+        // resurrect a Harvest that no longer has a fresh down edge.
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hovered_object_id_for_test(None);
+        advance_movement_clock(&mut app, 2_500);
+        app.update();
+        assert!(drain_world_intents(&mut app).is_empty());
+    }
+
+    #[test]
+    fn held_alt_left_repeats_harvest_at_crystal_action_interval_and_release_stops() {
+        let mut app = harvest_hold_app();
+        app.update();
+        assert_eq!(
+            drain_world_intents(&mut app),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+        );
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
+
+        advance_movement_clock(&mut app, 2_499);
+        app.update();
+        assert!(drain_world_intents(&mut app).is_empty());
+        advance_movement_clock(&mut app, 1);
+        app.update();
+        assert_eq!(
+            drain_world_intents(&mut app),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+        );
+        advance_movement_clock(&mut app, 2_500);
+        app.update();
+        assert_eq!(
+            drain_world_intents(&mut app),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+        );
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .release(MouseButton::Left);
+        app.update();
+        assert!(drain_world_intents(&mut app).is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .harvest_target,
+            None
+        );
+        advance_movement_clock(&mut app, 5_000);
+        app.update();
+        assert!(drain_world_intents(&mut app).is_empty());
+    }
+
+    #[test]
+    fn harvest_hold_clears_on_alt_loss_focus_ui_or_hover_target_change() {
+        for reason in ["alt", "focus", "ui", "dead", "riding", "target", "npc"] {
+            let mut app = harvest_hold_app();
+            if reason == "target" {
+                let mut entity = app
+                    .world()
+                    .resource::<EntityModelSet>()
+                    .entities
+                    .iter()
+                    .find(|entity| entity.object_id == "2001")
+                    .unwrap()
+                    .clone();
+                entity.object_id = "2002".to_owned();
+                entity.x = 9;
+                app.world_mut()
+                    .resource_mut::<EntityModelSet>()
+                    .entities
+                    .push(entity);
+                app.world_mut()
+                    .resource_mut::<NativeWorldClickState>()
+                    .targets
+                    .insert(
+                        2002,
+                        crate::gameplay_bridge::CrystalWorldClickTarget {
+                            kind: EntityKind::Monster,
+                            object_id: 2002,
+                            x: 9,
+                            y: 10,
+                            dead: Some(true),
+                            ai: Some(0),
+                            harvestable: Some(true),
+                        },
+                    );
+            }
+            app.update();
+            assert_eq!(drain_world_intents(&mut app).len(), 1, "{reason}");
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Left);
+            match reason {
+                "alt" => {
+                    app.insert_resource(NativeModifierState::default());
+                }
+                "focus" => {
+                    app.world_mut()
+                        .query::<&mut Window>()
+                        .single_mut(app.world_mut())
+                        .unwrap()
+                        .focused = false
+                }
+                "ui" => {
+                    app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+                }
+                "dead" => {
+                    let mut model = app.world_mut().resource_mut::<UiReadModel>();
+                    model.player.max_hp = 100;
+                    model.player.hp = 0;
+                }
+                "riding" => {
+                    app.world_mut()
+                        .resource_mut::<NativeWorldClickState>()
+                        .riding_mount = Some(true);
+                }
+                "target" => app
+                    .world_mut()
+                    .resource_mut::<NativeEntityPresentation>()
+                    .set_hovered_object_id_for_test(Some("2002")),
+                "npc" => app
+                    .world_mut()
+                    .resource_mut::<NativeEntityPresentation>()
+                    .set_hovered_object_id_for_test(Some("77")),
+                _ => unreachable!(),
+            }
+            advance_movement_clock(&mut app, 2_500);
+            app.update();
+            assert!(drain_world_intents(&mut app).is_empty(), "{reason}");
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .harvest_target,
+                None,
+                "{reason}"
+            );
+
+            // Removing the blocker while the old press remains held cannot
+            // resurrect a stale harvest target.
+            app.insert_resource(NativeModifierState::with_active(NativeModifiers {
+                alt: true,
+                ..Default::default()
+            }));
+            {
+                let mut model = app.world_mut().resource_mut::<UiReadModel>();
+                model.player.max_hp = 0;
+                model.player.hp = 0;
+            }
+            app.world_mut()
+                .resource_mut::<NativeWorldClickState>()
+                .riding_mount = Some(false);
+            app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
+            app.world_mut()
+                .query::<&mut Window>()
+                .single_mut(app.world_mut())
+                .unwrap()
+                .focused = true;
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .set_hovered_object_id_for_test(Some("2001"));
+            advance_movement_clock(&mut app, 5_000);
+            app.update();
+            assert!(drain_world_intents(&mut app).is_empty(), "{reason}");
+        }
+    }
+
+    #[test]
+    fn alt_npc_click_keeps_immediate_call_and_existing_five_second_guard() {
+        let mut app = harvest_hold_app();
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .set_hovered_object_id_for_test(Some("77"));
+
+        app.update();
+        assert_eq!(
+            drain_world_intents(&mut app),
+            vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .harvest_target,
+            None
+        );
+
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.clear_just_pressed(MouseButton::Left);
+            mouse.release(MouseButton::Left);
+        }
+        app.update();
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_released(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.update();
+        assert!(drain_world_intents(&mut app).is_empty());
+
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.clear_just_pressed(MouseButton::Left);
+            mouse.release(MouseButton::Left);
+        }
+        app.update();
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_released(MouseButton::Left);
+        advance_movement_clock(&mut app, 5_001);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
+        app.update();
+        assert_eq!(
+            drain_world_intents(&mut app),
+            vec![QuestUiIntent::InteractNpc { npc_object_id: 77 }]
+        );
     }
 
     #[test]
@@ -4468,11 +5370,17 @@ mod tests {
     #[test]
     fn v_key_only_triggers_town_revive_when_dead_with_positive_max_hp() {
         let (mut app, receiver) = input_app_with_ui();
+        app.insert_resource(NativePlayerUiState::default());
         let mut ui_read_model = app.world_mut().resource_mut::<UiReadModel>();
         ui_read_model.player.hp = 0;
         ui_read_model.player.max_hp = 100;
         drop(ui_read_model);
         app.add_systems(bevy::prelude::Update, keyboard_town_revive_system);
+        assert!(key_owned_by_binding(
+            &app.world().resource::<NativePlayerUiState>().keyboard,
+            app.world().resource::<ButtonInput<KeyCode>>(),
+            KeyCode::KeyV,
+        ));
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::KeyV);

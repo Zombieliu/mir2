@@ -74,7 +74,8 @@ pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
 pub use packets::{ChatPacketPreparation, PreparedChatPacket};
 pub use save::{reset_account_password_after_recovery, validate_commercial_identity_credentials};
 pub use session::{
-    ActiveSessionIdentity, PasskeyRecoveryPreflight, SharedItemRentalAgreement,
+    ActiveSessionIdentity, LocalPlayerVitalsSnapshot, PasskeyRecoveryPreflight,
+    SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
     SharedSkillItemConsumptionComponent, SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
 };
@@ -150,6 +151,9 @@ mod intelligent_creatures;
 
 #[cfg(test)]
 mod intelligent_creature_item_tests;
+
+#[cfg(test)]
+mod session_lightweight_snapshot_tests;
 
 mod shared_guild_experience;
 pub use shared_guild_experience::SharedMonsterKillCommitFailure;

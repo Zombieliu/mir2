@@ -785,11 +785,19 @@ impl FishingResource {
 #[derive(Resource, Debug, Clone)]
 pub(super) struct QuestResource {
     pub(super) quests: Vec<QuestState>,
+    /// Cached once per simulation session. Environment changes never alter an
+    /// already running character's quest cadence/profile presentation.
+    pub(super) newcomer_v1_cadence: bool,
 }
 
 impl QuestResource {
     pub(super) fn new() -> Self {
-        Self { quests: Vec::new() }
+        let newcomer_v1_cadence =
+            super::quests::quest_recurrence::server_newcomer_v1_enabled();
+        Self {
+            quests: Vec::new(),
+            newcomer_v1_cadence,
+        }
     }
 }
 
