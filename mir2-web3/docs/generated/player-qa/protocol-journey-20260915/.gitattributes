@@ -1,4 +1,4 @@
 # Preserve raw acceptance logs so committed bytes match the recorded digests.
-q89-transit-guard-r126-focused.log -text
-q89-taoist-reserve-r127-focused.log -text
-q89-taoist-reserve-r127-full.log -text
+q89-transit-guard-r126-focused.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-taoist-reserve-r127-focused.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-taoist-reserve-r127-full.log -text whitespace=cr-at-eol,-blank-at-eof
