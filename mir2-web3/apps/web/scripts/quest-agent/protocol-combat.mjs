@@ -1077,6 +1077,9 @@ function combatSettings(options) {
     // threshold are supplied by the journey policy.
     emergencyEscape: typeof options.emergencyEscape === 'function' ? options.emergencyEscape : null,
     emergencyEscapeHpRatio: boundedRatio(options.emergencyEscapeHpRatio, 0),
+    criticalProvenAggressorOffenseGuard: criticalProvenAggressorOffenseGuardOption(
+      options.criticalProvenAggressorOffenseGuard,
+    ),
     lowHealthTargetRetreatRatio: Number.isFinite(requestedLowHealthRetreat) &&
       requestedLowHealthRetreat >= 0 && requestedLowHealthRetreat <= 1
       ? requestedLowHealthRetreat
@@ -1809,6 +1812,7 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
       if (completed) return completed;
       throw new LostCombatTarget(objectId, initialTarget);
     }
+    throwIfCriticalProvenAggressorOffense(client, target, pending, settings);
     throwIfLowHealthTargetPressure(client, target, pending, settings);
     let approachRange = protectedSpawnBlockerForTarget(target, settings)
       ? protectedSpawnBlockerApproachRange(target, settings, await combatApproachRange(settings, client, target))
@@ -1835,6 +1839,7 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
       throw new LostCombatTarget(objectId, refreshed);
     }
     if (actionable.dead === true || Number(actionable.hp) <= 0) return actionable;
+    throwIfCriticalProvenAggressorOffense(client, actionable, pending, settings);
     throwIfLowHealthTargetPressure(client, actionable, pending, settings);
     approachRange = protectedSpawnBlockerForTarget(actionable, settings)
       ? protectedSpawnBlockerApproachRange(actionable, settings, await combatApproachRange(settings, client, actionable))
@@ -1854,6 +1859,11 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
     if (distance(playerFromSnapshot(client.snapshot), actionable) > approachRange) continue;
     assertFocusedObjectiveTargetLive(client, protectedObjectiveTargetId, pending);
     throwIfUnsafeTargetPack(client, actionable, settings);
+    // Retreat breakout deliberately uses a travel pending action and disables
+    // ordinary aggressor interruption. Keep this immediately before the
+    // command-producing action so a fresh critical pack cannot cast through
+    // that exception or through a finishable wounded target.
+    throwIfCriticalProvenAggressorOffense(client, actionable, pending, settings);
     const aggressorBeforeAttack = interruptingAggressor(
       client, objectId, settings, aggressorInterruptPolicy,
     );
@@ -2181,6 +2191,20 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
             false,
           );
         } catch (error) {
+          // The q89 Taoist critical-pack guard must never turn an unavailable
+          // escape cell into recursive breakout combat. This is already the
+          // bounded retreat path: stop this pass and let its ordinary failure
+          // boundary report the blocked pack without sending an offense.
+          if (error instanceof UnsafeTargetCluster &&
+              error.criticalProvenAggressorOffenseGuard === true) {
+            recordSearchDiagnostic(client, {
+              type: 'unsafePackBreakoutCriticalOffenseBlocked',
+              objectId: Number(breaker.objectId),
+              name: String(breaker.name ?? ''),
+              reason,
+            });
+            return false;
+          }
           if (!isDeferredCombatTargetError(error)) throw error;
           // R16 selected an adjacent SpiderFrog as a breakout target even
           // though dynamic occupancy made its tile unreachable. Do not let one
@@ -2474,6 +2498,60 @@ function throwIfLowHealthTargetPressure(client, target, pending, settings) {
   const error = new UnsafeTargetCluster(Number(target.objectId), targetPackRisk(target, liveHostiles));
   error.transientLowHealth = true;
   throw error;
+}
+
+function throwIfCriticalProvenAggressorOffense(client, target, pending, settings) {
+  const pressure = criticalProvenAggressorPressure(client, settings);
+  if (!pressure) return;
+  recordSearchDiagnostic(client, {
+    type: 'criticalProvenAggressorOffenseGuard',
+    questId: questIdFor(pending),
+    target: pending?.name,
+    objectId: Number(target?.objectId),
+    ...pressure,
+  });
+  // Do not consult shouldFinishLowHealthTarget here. A nearly dead target is
+  // still an offensive command, while this q89 Taoist floor is established by
+  // multiple fresh direct-attacker receipts.
+  const error = unsafeAggressorPack(client, pressure.threats[0]);
+  error.criticalProvenAggressorOffenseGuard = true;
+  throw error;
+}
+
+/**
+ * Recheck this opt-in survival floor from a captured kiting action after its
+ * own navigation cadence. The normal combat loop consumes the resulting wait
+ * and immediately classifies the same condition as UnsafeTargetCluster.
+ */
+export function criticalProvenAggressorOffenseGuardActive(client, options = {}) {
+  const settings = combatSettings(options);
+  const pressure = criticalProvenAggressorPressure(client, settings);
+  if (!pressure) return false;
+  recordSearchDiagnostic(client, {
+    type: 'criticalProvenAggressorOffenseGuard',
+    phase: 'capturedAction',
+    ...pressure,
+  });
+  return true;
+}
+
+function criticalProvenAggressorPressure(client, settings) {
+  const guard = settings.criticalProvenAggressorOffenseGuard;
+  if (!guard) return null;
+  const player = selectPlayer(client.snapshot);
+  const hp = observedPlayerHp(client.snapshot);
+  const maxHp = Number(client.snapshot?.playerMaxHp ?? player?.maxHp ?? 0);
+  if (!player || !(maxHp > 0) || hp / maxHp > guard.hpRatio) return null;
+  const threats = provenAggressors(client, null, settings);
+  if (threats.length < guard.minimumProvenAggressors) return null;
+  return {
+    hp,
+    maxHp,
+    hpRatio: hp / maxHp,
+    minimumProvenAggressors: guard.minimumProvenAggressors,
+    provenAggressorIds: threats.map(entity => Number(entity.objectId)),
+    threats,
+  };
 }
 
 function recordDeferredCombatTarget(client, questId, pending, error) {
@@ -3117,6 +3195,19 @@ function namedHostileClearanceOption(value) {
   return Object.fromEntries(Object.entries(value)
     .filter(([name]) => String(name).replace(/[^a-z0-9]/gi, '').length > 0)
     .map(([name, radius]) => [String(name), nonnegativeInteger(radius, 0)]));
+}
+
+function criticalProvenAggressorOffenseGuardOption(value) {
+  if (value == null) return null;
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('Critical proven aggressor offense guard must be an object');
+  }
+  const hpRatio = boundedRatio(value.hpRatio, 0);
+  if (!(hpRatio > 0)) return null;
+  return {
+    hpRatio,
+    minimumProvenAggressors: positiveInteger(value.minimumProvenAggressors, 2),
+  };
 }
 
 function protectedSpawnBlockerOption(value) {

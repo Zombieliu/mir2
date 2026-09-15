@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-09-16 R129/R130 controller667/667 passes: q89 Taoist critical proven-pack
+> pressure stops offense before captured kiting/travel breakout; healthy travel
+> remains available. Wizard ordinary funding includes its Medium reserve.
+> Both casters resumed on natural R54; completed units remain155/177 at launch.
+> Final normal logout/save and native/Crystal visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-caster-survival-r129-r130.md).
+
 > 2026-09-16 R128: a known stationary D2031 full Priest spread now enables the
 > existing q89 Wizard exact live-key/source D2032 fallback before respawn wait.
 > Controller660/660 passes; Wizard resumed normally, Taoist R127 continues.

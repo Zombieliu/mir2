@@ -3873,6 +3873,117 @@ test("a failed low-health emergency escape falls back to bounded hostile breakou
   assert.ok(client.sent.some(entry => entry.objectId === 61));
 });
 
+test('q89 Taoist blocks a fresh critical travel-breakout cast after sustain creates two proven attackers', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 0, 1)] };
+  const breaker = monster(339001, 'HungryZombie', 11, 10, { disposition: 'hostile' });
+  const second = monster(339906, 'HungryZombie', 10, 9, { disposition: 'hostile' });
+  const client = new FakeClient(snapshot(quest, [breaker, second]));
+  Object.assign(client.snapshot, { playerHp: 80, playerMaxHp: 180 });
+  Object.assign(client.snapshot.entities[0], { hp: 80, maxHp: 180 });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let casts = 0;
+  await assert.rejects(() => clearTravelBlockingMonster(client, breaker, async () => {}, {
+    ...settings,
+    sustainCadenceMs: 0,
+    sustain: async owner => {
+      Object.assign(owner.snapshot, { playerHp: 7, playerMaxHp: 180 });
+      Object.assign(owner.snapshot.entities[0], { hp: 7, maxHp: 180 });
+      owner.receive('ObjectStruck', () => {}, { objectId: 1, attackerId: breaker.objectId });
+      owner.receive('ObjectStruck', () => {}, { objectId: 1, attackerId: second.objectId });
+    },
+    action: () => {
+      casts += 1;
+      return { kind: 'SoulFireBall' };
+    },
+    criticalProvenAggressorOffenseGuard: { hpRatio: 0.35, minimumProvenAggressors: 2 },
+  }), /unsafe hostile pack/);
+  assert.equal(casts, 0);
+  assert.ok(diagnostics.some(entry => entry.type === 'criticalProvenAggressorOffenseGuard' &&
+    entry.hp === 7 && entry.provenAggressorIds.length === 2));
+});
+
+test('q89 Taoist critical overlap uses the held escape before any SoulFireBall', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 0, 1)] };
+  const attackers = [
+    monster(338505, 'ShiZombie', 20, 19, { disposition: 'hostile' }),
+    monster(339001, 'HungryZombie', 21, 20, { disposition: 'hostile' }),
+    monster(339906, 'HungryZombie', 20, 21, { disposition: 'hostile' }),
+    monster(339106, 'CursedZombie', 19, 20, { disposition: 'hostile' }),
+  ];
+  const target = monster(340210, 'CursedPriest', 30, 30, { disposition: 'hostile' });
+  const client = new FakeClient(snapshot(quest, [...attackers, target]));
+  Object.assign(client.snapshot, { playerHp: 7, playerMaxHp: 180 });
+  Object.assign(client.snapshot.entities[0], { x: 20, y: 20, hp: 7, maxHp: 180 });
+  attackers.forEach(attacker => client.receive('ObjectStruck', () => {}, {
+    objectId: 1, attackerId: attacker.objectId,
+  }));
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let escapeCalls = 0;
+  let casts = 0;
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [spawn('CursedPriest', 30, 30)] }], item: [] },
+  }, async () => {}, {
+    ...settings,
+    action: () => { casts += 1; return { kind: 'SoulFireBall' }; },
+    emergencyEscapeHpRatio: 0.35,
+    emergencyEscape: async owner => {
+      escapeCalls += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 60, y: 60 });
+      attackers.forEach(attacker => Object.assign(attacker, { x: 90, y: 90 }));
+      return true;
+    },
+    recoverAfterUnsafeRetreat: async owner => {
+      owner.snapshot.questLog[0].stage = 'ReadyToTurnIn';
+    },
+    criticalProvenAggressorOffenseGuard: { hpRatio: 0.35, minimumProvenAggressors: 2 },
+  });
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.equal(escapeCalls, 1);
+  assert.equal(casts, 0);
+  assert.ok(diagnostics.some(entry => entry.type === 'emergencyEscapeSuccess' && entry.reason === 'criticalPackPressure'));
+});
+
+test('q89 Taoist critical blocked pack ends its bounded retreat without breakout casts or recursive recovery', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 0, 1)] };
+  const cells = [[20, 19], [21, 19], [21, 20], [21, 21], [20, 21], [19, 21], [19, 20], [19, 19]];
+  const attackers = cells.map(([x, y], index) => monster(
+    338505 + index,
+    index === 0 ? 'ShiZombie' : 'HungryZombie',
+    x,
+    y,
+    { disposition: 'hostile' },
+  ));
+  const target = monster(340210, 'CursedPriest', 30, 30, { disposition: 'hostile' });
+  const client = new FakeClient(snapshot(quest, [...attackers, target]));
+  Object.assign(client.snapshot, { playerHp: 7, playerMaxHp: 180 });
+  Object.assign(client.snapshot.entities[0], { x: 20, y: 20, hp: 7, maxHp: 180 });
+  attackers.slice(0, 4).forEach(attacker => client.receive('ObjectStruck', () => {}, {
+    objectId: 1, attackerId: attacker.objectId,
+  }));
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let escapeCalls = 0;
+  let navigateCalls = 0;
+  let casts = 0;
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [spawn('CursedPriest', 30, 30)] }], item: [] },
+  }, async () => { navigateCalls += 1; }, {
+    ...settings,
+    action: () => { casts += 1; return { kind: 'SoulFireBall' }; },
+    emergencyEscapeHpRatio: 0.35,
+    emergencyEscape: async () => { escapeCalls += 1; return false; },
+    criticalProvenAggressorOffenseGuard: { hpRatio: 0.35, minimumProvenAggressors: 2 },
+  }), /unsafe hostile pack retreat failed/);
+  assert.equal(escapeCalls, 1);
+  assert.equal(navigateCalls, 0);
+  assert.equal(casts, 0);
+  assert.equal(diagnostics.filter(entry => entry.type === 'unsafePackBreakoutCriticalOffenseBlocked').length, 1);
+});
+
 test("a multi-kill breakout continues through a second proven attacker before escaping", async () => {
   const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
   const blockers = [

@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> 2026-09-16 R129/R130 controller667/667 passes: q89 Taoist critical proven-pack
+> pressure stops offense before captured kiting/travel breakout; healthy travel
+> remains available. Wizard ordinary funding includes its Medium reserve.
+> Both casters resumed on natural R54; completed units remain155/177 at launch.
+> Final normal logout/save and native/Crystal visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-caster-survival-r129-r130.md).
+
 > 2026-09-16 R128 controller660/660 passes: stationary q89 Wizard Priest search
 > may arm only the existing exact live D2031→D2032 doorway. Ordinary Taoist
 > resupply31→100 Amulet is verified. Both caster routes continue; completed

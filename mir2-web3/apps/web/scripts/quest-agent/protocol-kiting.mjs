@@ -31,11 +31,16 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
   const fightWhenBlocked = options.fightWhenBlocked === true;
   const approachRange = options.approachRange ?? combatApproachRange;
   const rangedSafetyBand = rangedSafetyBandOptions(options.rangedSafetyBand, maxTargetDistance);
+  const beforeBaseAction = typeof options.beforeBaseAction === 'function' ? options.beforeBaseAction : null;
   const maps = new Map();
   let encounterKey = null;
   let encounterRetreatedCells = 0;
 
   return async function wizardKitingAction(client, target) {
+    const invokeBaseAction = async currentTarget => {
+      const prevented = beforeBaseAction ? await beforeBaseAction(client, currentTarget) : null;
+      return prevented ?? baseAction(client, currentTarget);
+    };
     const actor = selfPlayer(client);
     if (!actor) throw new Error('Cannot kite without the authoritative player entity');
     const targetId = Number(target?.objectId);
@@ -51,7 +56,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       recordFallback(client, Number(target?.objectId), 'rangedSafetyBandNoRangedAction');
       throw new RangedSafetyBandUnavailable(target?.objectId, target, mapId);
     }
-    if (!rangedReady || (!closeThreat && !safetyBandRequired)) return baseAction(client, target);
+    if (!rangedReady || (!closeThreat && !safetyBandRequired)) return invokeBaseAction(target);
     if (!Number.isSafeInteger(targetId) || targetId <= 0) {
       throw new Error('Wizard kite target has no valid objectId');
     }
@@ -73,7 +78,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       }
       if (fightWhenBlocked) {
         recordFallback(client, targetId, 'retreatCellBudgetExceeded');
-        return baseAction(client, target);
+        return invokeBaseAction(target);
       }
       throw new Error(`Wizard retreat cell budget exceeded for target ${targetId} (${maxRetreatCellsPerTarget})`);
     }
@@ -103,7 +108,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       }
       if (fightWhenBlocked) {
         recordFallback(client, targetId, 'noCollisionSafeRetreat');
-        return baseAction(client, target);
+        return invokeBaseAction(target);
       }
       throw new Error(`No collision-safe Wizard retreat on ${mapId} from ${actor.x},${actor.y}`);
     }
@@ -164,7 +169,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         navigation = { reached: false, successfulSteps: null };
       } else {
         recordFallback(client, targetId, 'retreatNavigationNoPath');
-        return baseAction(client, blockedTarget);
+        return invokeBaseAction(blockedTarget);
       }
     }
     const after = selfPlayer(client);
@@ -197,7 +202,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         if (!stalledTarget) {
           return targetLeftAfterRetreat(client, targetId);
         }
-        return baseAction(client, stalledTarget);
+        return invokeBaseAction(stalledTarget);
       }
       recordFallback(client, targetId, 'retreatDisplacementOutOfBounds', {
         moved,
@@ -231,7 +236,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       });
       throw new RangedSafetyBandUnavailable(targetId, refreshed, mapId);
     }
-    return baseAction(client, refreshed);
+    return invokeBaseAction(refreshed);
   };
 }
 

@@ -12,6 +12,7 @@ const VILLAGE_FUNDING_RADIUS = 120;
 export function safeFundingVenisonTargetCount(requiredHpStock, {
   className = '',
   requiredMpStock = 0,
+  requiredHpMediumStock = 0,
   requiredAmuletStock = 0,
   additionalGold = 0,
 } = {}) {
@@ -24,6 +25,10 @@ export function safeFundingVenisonTargetCount(requiredHpStock, {
     throw new TypeError('requiredMpStock must be a nonnegative integer');
   }
   const amuletStock = Number(requiredAmuletStock);
+  const mediumHpStock = Number(requiredHpMediumStock);
+  if (!Number.isSafeInteger(mediumHpStock) || mediumHpStock < 0) {
+    throw new TypeError('requiredHpMediumStock must be a nonnegative integer');
+  }
   if (!Number.isSafeInteger(amuletStock) || amuletStock < 0) {
     throw new TypeError('requiredAmuletStock must be a nonnegative integer');
   }
@@ -39,7 +44,10 @@ export function safeFundingVenisonTargetCount(requiredHpStock, {
   // Live Butcher/Ruben prices show one Venison funding about five HP drugs or
   // four MP drugs. Budget both resources explicitly so an HP-first shop pass
   // cannot strand a caster with an unusable skill bar.
-  return Math.max(2, Math.ceil(hpStock / 5) + mpBudget + amuletBudget + Math.ceil(extraGold / 200));
+  // The opt-in Wizard reserve costs 110 gold per Medium bottle at Ruben.
+  // Include it with scroll/weapon capital before the next HP-first shop pass.
+  const reserveGold = extraGold + mediumHpStock * 110;
+  return Math.max(2, Math.ceil(hpStock / 5) + mpBudget + amuletBudget + Math.ceil(reserveGold / 200));
 }
 
 /**

@@ -1,5 +1,12 @@
 # Protocol newcomer journey acceptance
 
+> 2026-09-16 R129/R130 controller667/667 passes: q89 Taoist critical proven-pack
+> pressure stops offense before captured kiting/travel breakout; healthy travel
+> remains available. Wizard ordinary funding includes its Medium reserve.
+> Both casters resumed on natural R54; completed units remain155/177 at launch.
+> Final normal logout/save and native/Crystal visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-caster-survival-r129-r130.md).
+
 > 2026-09-16 R128: stationary exhausted q89 Wizard Priest search can use only
 > the existing fresh exact D2031→D2032 live doorway before another respawn wait.
 > Full controller660/660 passes. Normal Taoist resupply31→100 Amulet is proven;

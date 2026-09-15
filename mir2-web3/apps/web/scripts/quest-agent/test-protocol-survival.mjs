@@ -1398,6 +1398,15 @@ test('q114 Stone Tomb boars keep expedition supplies and wide recovery armed', (
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(114, 'Warrior'), { hp: 64, mp: 0 });
 });
 
+test('q89 Taoist keeps healthy travel progress without inheriting fragile Wizard combat thresholds', () => {
+  const profile = questRetreatProfile(89, 'Taoist');
+  assert.equal(profile.continueTravelWhileHealthy, true);
+  assert.equal(profile.directAggressorDistance, undefined);
+  assert.equal(questRetreatProfile(89, 'Wizard').continueTravelWhileHealthy, true);
+  assert.equal(questRetreatProfile(89, 'Warrior').continueTravelWhileHealthy, false);
+  assert.equal(questRetreatProfile(42, 'Taoist').continueTravelWhileHealthy, false);
+});
+
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {
   assert.deepEqual(questRetreatProfile(54, 'Warrior'), {
     allowLowHealthFollowerRecovery: true,

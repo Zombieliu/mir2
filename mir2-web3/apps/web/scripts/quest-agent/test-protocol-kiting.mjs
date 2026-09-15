@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { createWizardKitingAction, RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
+import { criticalProvenAggressorOffenseGuardActive } from './protocol-combat.mjs';
 import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
 import { createNavigator } from './protocol-play.mjs';
 
@@ -466,6 +467,81 @@ test('journey mode attacks when a moving threat closes the planned retreat path'
   assert.equal(acted, 1);
   assert.ok(diagnostics.some(entry =>
     entry.type === 'wizardKiteFallback' && entry.reason === 'retreatNavigationNoPath'));
+});
+
+test('an opt-in pre-base-action guard blocks the captured cast after kiting navigation receives fresh critical strikes', async () => {
+  const owner = player({ x: 5, y: 5, hp: 80, maxHp: 180 });
+  const target = monster(20, 7, 5);
+  const nearby = monster(21, 5, 6);
+  const client = clientFixture([owner, target, nearby], { playerHp: 80, playerMaxHp: 180 });
+  client.events = [];
+  let casts = 0;
+  let guardCalls = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { casts += 1; return { kind: 'magic', targetId: target.objectId }; },
+    async destination => {
+      Object.assign(owner, destination, { hp: 7, maxHp: 180 });
+      Object.assign(client.snapshot, { playerHp: 7, playerMaxHp: 180 });
+      Object.assign(target, { x: owner.x + 1, y: owner.y });
+      Object.assign(nearby, { x: owner.x, y: owner.y + 1 });
+      client.events.push(
+        { direction: 'received', packet: 'ObjectStruck', payload: { objectId: 1, attackerId: 20 } },
+        { direction: 'received', packet: 'ObjectStruck', payload: { objectId: 1, attackerId: 21 } },
+      );
+      return { reached: true, successfulSteps: 1 };
+    },
+    {
+      loadCollisionMap: async () => openMap(),
+      beforeBaseAction: current => {
+        guardCalls += 1;
+        assert.equal(current.snapshot.playerHp, 7);
+        assert.equal(current.events.filter(event => event.packet === 'ObjectStruck').length, 2);
+        return criticalProvenAggressorOffenseGuardActive(current, {
+          criticalProvenAggressorOffenseGuard: { hpRatio: 0.35, minimumProvenAggressors: 2 },
+        }) ? { kind: 'wait', delayMs: 1 } : null;
+      },
+    },
+  );
+
+  assert.deepEqual(await wrapped(client, target), { kind: 'wait', delayMs: 1 });
+  assert.equal(guardCalls, 1);
+  assert.equal(casts, 0);
+});
+
+test('an opt-in pre-base-action guard covers both fast-path and blocked-retreat fallbacks', async () => {
+  let casts = 0;
+  const block = () => ({ kind: 'wait', delayMs: 1 });
+  const fastOwner = player();
+  const fastTarget = monster(20, 12, 5);
+  const fastClient = clientFixture([fastOwner, fastTarget]);
+  const fast = createWizardKitingAction(
+    async () => { casts += 1; return { kind: 'magic' }; },
+    async () => { throw new Error('fast path must not navigate'); },
+    { loadCollisionMap: async () => openMap(), beforeBaseAction: block },
+  );
+  assert.deepEqual(await fast(fastClient, fastTarget), { kind: 'wait', delayMs: 1 });
+
+  const blocked = [];
+  for (let y = 0; y < 5; y += 1) {
+    for (let x = 0; x < 5; x += 1) {
+      if (x !== 2 || y !== 2) blocked.push({ x, y });
+    }
+  }
+  const blockedOwner = player({ x: 2, y: 2 });
+  const blockedTarget = monster(21, 3, 2);
+  const blockedClient = clientFixture([blockedOwner, blockedTarget]);
+  const fallback = createWizardKitingAction(
+    async () => { casts += 1; return { kind: 'magic' }; },
+    async () => { throw new Error('blocked fallback must not navigate'); },
+    {
+      loadCollisionMap: async () => openMap(5, 5, blocked),
+      maxExpanded: 25,
+      fightWhenBlocked: true,
+      beforeBaseAction: block,
+    },
+  );
+  assert.deepEqual(await fallback(blockedClient, blockedTarget), { kind: 'wait', delayMs: 1 });
+  assert.equal(casts, 0);
 });
 
 test('Wizard without affordable ranged magic and passive or NPC entities never retreat', async () => {

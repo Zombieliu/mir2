@@ -23,8 +23,21 @@ test('safe funding budget covers expedition HP and caster MP working capital', (
   }), 10);
   assert.throws(() => safeFundingVenisonTargetCount(0), /positive integer/);
   assert.throws(() => safeFundingVenisonTargetCount(4, { requiredMpStock: -1 }), /nonnegative integer/);
+  assert.throws(() => safeFundingVenisonTargetCount(4, { requiredHpMediumStock: -1 }), /nonnegative integer/);
   assert.throws(() => safeFundingVenisonTargetCount(4, { requiredAmuletStock: -1 }), /nonnegative integer/);
   assert.throws(() => safeFundingVenisonTargetCount(4, { additionalGold: -1 }), /nonnegative integer/);
+});
+
+test('Wizard cave funding includes the Medium reserve before buying the missing TownTeleport', () => {
+  // R128: Small 59/64, MP 5/12, Medium 0/6, Random 8/8,
+  // TownTeleport 1/2, and 9 gold. The old eight-Venison plan stranded the
+  // player after Ruben purchased Small and Medium bottles before the scroll.
+  const options = { className: 'Wizard', requiredMpStock: 7, additionalGold: 991 };
+  assert.equal(safeFundingVenisonTargetCount(5, options), 8);
+  const target = safeFundingVenisonTargetCount(5, { ...options, requiredHpMediumStock: 6 });
+  assert.equal(target, 12);
+  assert.ok(target * 200 + 9 >= 5 * 40 + 7 * 50 + 6 * 110 + 1000);
+  assert.equal(safeFundingVenisonTargetCount(5, { ...options, requiredHpMediumStock: 0 }), 8);
 });
 
 test('safe Deer funding is available to any healthy living class stranded in village', () => {

@@ -248,6 +248,7 @@ export function questRetreatProfile(questId, className = '') {
     // the approach while healthy; the existing cave target-density and
     // low-health escape gates still take over after arrival.
     continueTravelWhileHealthy: [54, 62, 65].includes(id) || fragileUndeadMineHunt ||
+      (id === 89 && normalizedClass === 'taoist') ||
       rangedInsectExpedition || rangedWoomaExpedition,
     // R37-R42 showed that repeated evasion spends the random-teleport reserve
     // without crossing D401/D2041. These expeditions carry large proven

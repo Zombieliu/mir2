@@ -8,7 +8,7 @@ import { createNavigator, selfPlayer, equipStarterGear, reviveInTown, collectNea
 import { interactQuest } from './protocol-quest-actions.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
 import { travelToQuestNpc } from './protocol-quest-travel.mjs';
-import { clearTravelBlockingMonster } from './protocol-combat.mjs';
+import { clearTravelBlockingMonster, criticalProvenAggressorOffenseGuardActive } from './protocol-combat.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { prepareLoadout, combatAction, combatApproachRange, startEmergencyHpRecovery, useClassRecovery, useSupplies } from './protocol-loadout.mjs';
 import {
@@ -20,6 +20,7 @@ import {
   useTownTeleport,
   useRandomTeleport,
   journeyWeaponFundingGold,
+  hpMediumDrugCount,
 } from './protocol-supplies.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
 import { claimAvailableMilestones, JOURNEY_MILESTONES } from './protocol-milestones.mjs';
@@ -509,6 +510,9 @@ try {
         const requiredFundingCount = safeFundingVenisonTargetCount(fundingHpDeficit, {
           className: selfPlayer(owner)?.class,
           requiredMpStock: fundingMpDeficit,
+          requiredHpMediumStock: Number(questId) === 89 && className === 'Wizard'
+            ? Math.max(0, 6 - hpMediumDrugCount(owner.snapshot))
+            : 0,
           requiredAmuletStock: fundingAmuletDeficit,
           additionalGold: Math.max(
             0,
@@ -794,6 +798,12 @@ try {
         if (q.objectives.kill.length || q.objectives.item.length) {
           const { completeQuestObjectives } = await import('./protocol-combat.mjs');
           const retreatProfile = questRetreatProfile(id, className);
+          const taoistCriticalOffenseGuard = id === 89 && className === 'Taoist'
+            ? {
+              hpRatio: questEmergencyEscapeHpRatio(id, className),
+              minimumProvenAggressors: 2,
+            }
+            : null;
           const objectiveCombatAction = (owner, target) => questCombatAction(owner, q, target);
           const objectiveApproachRange = (owner, target) => questCombatApproachRange(owner, q, target);
           const playerCombatAction = createWizardKitingAction(objectiveCombatAction, navigate, {
@@ -817,6 +827,16 @@ try {
                 unsafeShamanDistance: 6,
                 maxRetreatSteps: 6,
               },
+            } : {}),
+            // A kiting action owns an asynchronous reposition before it calls
+            // the captured base spell. Reuse combat's q89 Taoist policy at
+            // that last possible point, then let the next combat iteration
+            // enter the existing held-escape/bounded-retreat authority.
+            ...(taoistCriticalOffenseGuard ? {
+              beforeBaseAction: owner => criticalProvenAggressorOffenseGuardActive(owner, {
+                criticalProvenAggressorOffenseGuard: taoistCriticalOffenseGuard,
+                directAggressorDistance: retreatProfile.directAggressorDistance,
+              }) ? { kind: 'wait', delayMs: 1 } : null,
             } : {}),
           });
           record.objectives = await completeQuestObjectives(client, q, navigate, {
@@ -1077,6 +1097,11 @@ try {
             emergencyEscape: dangerousExpeditionQuestIds.has(id)
               ? emergencyEscapeForJourney
               : undefined,
+            // R127 entered retreat breakout at 7/180 HP under four direct
+            // zombie hits. Breakout intentionally disables ordinary target
+            // interruption, so keep this narrow q89 Taoist pre-offense guard
+            // ahead of its travel exemption and the wounded-target finish.
+            criticalProvenAggressorOffenseGuard: taoistCriticalOffenseGuard,
             harvestBeforeClearingAggressors: id === 30,
             unsafeRetreatSteps: retreatProfile.unsafeRetreatSteps,
             unsafeRetreatSafeDistance: retreatProfile.unsafeRetreatSafeDistance,
