@@ -1,5 +1,11 @@
 # Crystal Server Parity
 
+> 2026-09-16 R128 controller660/660 passes: stationary q89 Wizard Priest search
+> may arm only the existing exact live D2031→D2032 doorway. Ordinary Taoist
+> resupply31→100 Amulet is verified. Both caster routes continue; completed
+> units remain155/177 at launch and global/visual parity is unchanged.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-stalled-search-r128.md).
+
 > 2026-09-16 R126/R127 route continuation: q89 Wizard transit/action movement
 > uses a fresh physical-cell guard and bounded unresolved-blocker recovery;
 > Taoist q89 funds 100 Amulet normally with a field minimum of32.

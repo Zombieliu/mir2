@@ -1,5 +1,11 @@
 # Protocol newcomer journey acceptance
 
+> 2026-09-16 R128: stationary exhausted q89 Wizard Priest search can use only
+> the existing fresh exact D2031→D2032 live doorway before another respawn wait.
+> Full controller660/660 passes. Normal Taoist resupply31→100 Amulet is proven;
+> caster runs continue. Completed units remain155/177 at launch; full saved
+> route and visual acceptance remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-stalled-search-r128.md).
+
 > 2026-09-16 R126/R127: Warrior has freshly revalidated ordinary completed-route
 > login/LogOutSuccess and persisted revision7447: Lv30, 55/55 mandatory +4/4
 > milestones, map0 (334,270), HP419/MP116. Final proof uses owner state before

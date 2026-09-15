@@ -498,6 +498,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
     let target = nearestAvailableLiveMonster(client, targetPlan.monsterNames, unavailableCorpses, settings);
     if (!target) {
       searches += 1;
+      const searchStartTransform = physicalPlayerTransform(client.snapshot);
       try {
         target = await searchSpawnCandidates(
           client, targetPlan, navigateNear, settings, unavailableCorpses,
@@ -508,6 +509,27 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
         );
       } catch (error) {
         if (error instanceof SpawnStallRecovered) continue;
+        // q89 Wizard's first floor can contain a complete catalogued Priest
+        // spread while the current collision component reaches none of its
+        // generated waypoints. Do not spend the normal respawn window on that
+        // same static pass. Only a completed full-spread result with no
+        // authoritative physical movement may arm the already strict live
+        // D2031->D2032 doorway preference; it does not claim a Priest is live
+        // on D2032, and ordinary arrival/AOI selection remains required.
+        if (error instanceof SpawnSearchExhausted &&
+            q89StalledPriestSearchFallbackEligible(
+              questId,
+              pending,
+              settings.objectiveMapFallback,
+              searchStartTransform,
+              client.snapshot,
+            ) &&
+            armObjectiveMapFallback(
+              client, questId, questProgressKey, objectiveMapFallbackState, settings,
+              'stalledFullSpreadWithoutPhysicalProgress',
+            )) {
+          continue;
+        }
         const respawnWaitLimit = spawnRespawnWaitLimit(targetPlan, settings);
         if (error instanceof SpawnSearchExhausted &&
             spawnRespawnWaits < respawnWaitLimit) {
@@ -3179,8 +3201,13 @@ function liveProtectedBlocker(snapshot, objectId, policy) {
 
 function physicalPlayerTransform(snapshot) {
   const player = playerFromSnapshot(snapshot);
-  const x = Number(player?.x);
-  const y = Number(player?.y);
+  const rawX = player?.x;
+  const rawY = player?.y;
+  if (rawX == null || rawY == null ||
+      (typeof rawX === 'string' && rawX.trim() === '') ||
+      (typeof rawY === 'string' && rawY.trim() === '')) return null;
+  const x = Number(rawX);
+  const y = Number(rawY);
   return Number.isFinite(x) && Number.isFinite(y)
     ? { mapFileName: String(snapshot?.mapFileName ?? ''), x, y }
     : null;
@@ -3189,6 +3216,23 @@ function physicalPlayerTransform(snapshot) {
 function physicalPlayerProgressed(before, after) {
   if (!before || !after) return false;
   return before.mapFileName !== after.mapFileName || before.x !== after.x || before.y !== after.y;
+}
+
+function q89StalledPriestSearchFallbackEligible(
+  questId,
+  pending,
+  fallback,
+  before,
+  snapshot,
+) {
+  return Number(questId) === 89 &&
+    normalizeName(pending?.name) === 'cursedpriest' &&
+    String(fallback?.fromMapFileName ?? '') === 'D2031' &&
+    String(fallback?.toMapFileName ?? '') === 'D2032' &&
+    String(snapshot?.mapFileName ?? '') === String(fallback?.fromMapFileName ?? '') &&
+    before != null &&
+    physicalPlayerTransform(snapshot) != null &&
+    !physicalPlayerProgressed(before, physicalPlayerTransform(snapshot));
 }
 
 function protectedTransitClearanceNavigator(client, navigateNear, policy) {

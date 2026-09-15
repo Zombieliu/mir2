@@ -45,4 +45,11 @@ try {
   makeFixture(root, { wrongIdentity: true });
   const wrongIdentity = run(root); if (wrongIdentity.status !== 2) throw new Error(`wrong-identity fixture did not fail with exit 2: ${wrongIdentity.status}`);
   console.log(JSON.stringify({ result: 'PASS', baselineExit: pass.status, wrongMapExit: wrongMap.status, unknownLevelExit: unknownLevel.status, missingPrelogoutOwnerExit: missingPrelogoutOwner.status, deadFinalExit: deadFinal.status, wrongIdentityExit: wrongIdentity.status, syntheticOnly: true }));
-} finally { fs.rmSync(root, { recursive: true, force: true }); }
+} finally {
+  const resolvedFixture = path.resolve(root);
+  if (path.dirname(resolvedFixture) !== path.resolve(os.tmpdir()) ||
+      !path.basename(resolvedFixture).startsWith('saved-route-fixture-')) {
+    throw new Error('Fixture cleanup target is outside the intended temporary directory');
+  }
+  fs.rmSync(resolvedFixture, { recursive: true, force: true });
+}

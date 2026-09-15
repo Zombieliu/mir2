@@ -2,3 +2,5 @@
 q89-transit-guard-r126-focused.log -text whitespace=cr-at-eol,-blank-at-eof
 q89-taoist-reserve-r127-focused.log -text whitespace=cr-at-eol,-blank-at-eof
 q89-taoist-reserve-r127-full.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-stalled-search-r128-focused.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-stalled-search-r128-full.log -text whitespace=cr-at-eol,-blank-at-eof

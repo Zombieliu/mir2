@@ -2130,6 +2130,224 @@ test("q89 still retreats at 75 percent HP when two aggressors are proven", async
   assert.ok(diagnostics.some(entry => entry.type === "unsafeTargetCluster"));
 });
 
+test("q89 Wizard arms the exact live D2031 doorway after a stalled full Priest spread before respawn waiting", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedPriest", 2, 3)] };
+  const state = snapshot(quest);
+  const doorway = {
+    key: "crystal-move:d2031:198:34:117:184:267",
+    mapFileName: "D2031", toMapFileName: "D2032",
+    bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+  };
+  Object.assign(state, { mapFileName: "D2031", mapTransfers: [doorway] });
+  const client = new FakeClient(state, (owner, command) => {
+    if (command.type !== "attack" || command.objectId !== 72) return;
+    owner.receive("ObjectDied", current => {
+      Object.assign(current.entities.find(entry => entry.objectId === 72), { dead: true, hp: 0 });
+      current.questLog[0].objectives[0] = objective("Kill CursedPriest", 3, 3);
+      current.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 72 });
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  const travelled = [];
+  const travel = async (mapFileName, options) => {
+    travelled.push({ mapFileName, options });
+    assert.equal(mapFileName, "D2032");
+    assert.deepEqual(options.preferredTransferSource, { x: 198, y: 34 });
+    assert.equal(options.preferredTransferKey, doorway.key);
+    Object.assign(client.snapshot, { mapFileName: "D2032", mapTransfers: [] });
+    Object.assign(client.snapshot.entities[0], { x: 184, y: 267 });
+    client.snapshot.entities = [client.snapshot.entities[0], monster(72, "CursedPriest", 185, 267)];
+  };
+  travel.routeLength = async () => null;
+  const navigate = async target => {
+    if (client.snapshot.mapFileName === "D2031") {
+      throw new Error(`No walk path on D2031 to ${target.x},${target.y}`);
+    }
+    Object.assign(client.snapshot.entities[0], { x: target.x - 1, y: target.y });
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedPriest", spawnCandidates: [
+      { ...spawn("CursedPriest", 250, 250), mapFileName: "D2031", spread: 0 },
+      { ...spawn("CursedPriest", 185, 267), mapFileName: "D2032", spread: 0, respawnIndex: 999 },
+    ] }], item: [] },
+  }, navigate, {
+    ...settings,
+    travel,
+    maxSpawnRespawnWaits: 0,
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{ key: doorway.key, source: { x: 198, y: 34 } }],
+    },
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(travelled.map(entry => entry.mapFileName), ["D2032"]);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [72]);
+  assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackArmed" &&
+    entry.reason === "stalledFullSpreadWithoutPhysicalProgress"));
+  assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackEntered"));
+  assert.equal(diagnostics.some(entry => entry.type === "spawnRespawnWait"), false);
+});
+
+test("a q89 Priest full-spread pass with physical progress does not arm the D2032 fallback", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedPriest", 2, 3)] };
+  const doorway = {
+    key: "crystal-move:d2031:198:34:117:184:267",
+    mapFileName: "D2031", toMapFileName: "D2032",
+    bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+  };
+  const state = snapshot(quest);
+  Object.assign(state, { mapFileName: "D2031", mapTransfers: [doorway] });
+  const client = new FakeClient(state);
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let travelCalls = 0;
+  const travel = async () => { travelCalls += 1; };
+  let moved = false;
+  const navigate = async () => {
+    if (!moved) {
+      moved = true;
+      Object.assign(client.snapshot.entities[0], { x: 11, y: 10 });
+    }
+    throw new Error("No walk path on D2031 during covered Priest search");
+  };
+
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedPriest", spawnCandidates: [
+      { ...spawn("CursedPriest", 250, 250), mapFileName: "D2031", spread: 0 },
+      { ...spawn("CursedPriest", 185, 267), mapFileName: "D2032", spread: 0, respawnIndex: 999 },
+    ] }], item: [] },
+  }, navigate, {
+    ...settings,
+    travel,
+    maxSpawnRespawnWaits: 0,
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{ key: doorway.key, source: { x: 198, y: 34 } }],
+    },
+  }), /bounded full-spread spawn search exhausted/);
+
+  assert.equal(travelCalls, 0);
+  assert.equal(diagnostics.some(entry => entry.type === "objectiveMapFallbackArmed"), false);
+});
+
+test("a q89 Priest full-spread pass with unknown physical coordinates does not arm the D2032 fallback", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedPriest", 2, 3)] };
+  const doorway = {
+    key: "crystal-move:d2031:198:34:117:184:267",
+    mapFileName: "D2031", toMapFileName: "D2032",
+    bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+  };
+  const state = snapshot(quest);
+  Object.assign(state, { mapFileName: "D2031", mapTransfers: [doorway] });
+  Object.assign(state.entities[0], { x: null, y: "" });
+  const client = new FakeClient(state);
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let travelCalls = 0;
+
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedPriest", spawnCandidates: [
+      { ...spawn("CursedPriest", 250, 250), mapFileName: "D2031", spread: 0 },
+      { ...spawn("CursedPriest", 185, 267), mapFileName: "D2032", spread: 0, respawnIndex: 999 },
+    ] }], item: [] },
+  }, async target => {
+    throw new Error(`No walk path on D2031 to ${target.x},${target.y}`);
+  }, {
+    ...settings,
+    travel: async () => { travelCalls += 1; },
+    maxSpawnRespawnWaits: 0,
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{ key: doorway.key, source: { x: 198, y: 34 } }],
+    },
+  }), /bounded full-spread spawn search exhausted/);
+
+  assert.equal(travelCalls, 0);
+  assert.equal(diagnostics.some(entry => entry.type === "objectiveMapFallbackArmed"), false);
+});
+
+test("a catalogued D2032 Priest cannot arm a stalled q89 fallback without the exact live D2031 source and key", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedPriest", 2, 3)] };
+  const state = snapshot(quest);
+  Object.assign(state, {
+    mapFileName: "D2031",
+    mapTransfers: [{
+      key: "crystal-move:d2031:198:35:117:184:267",
+      mapFileName: "D2031", toMapFileName: "D2032",
+      bounds: { minX: 198, maxX: 198, minY: 35, maxY: 35 },
+    }],
+  });
+  const client = new FakeClient(state);
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let travelCalls = 0;
+  const navigate = async target => {
+    throw new Error(`No walk path on D2031 to ${target.x},${target.y}`);
+  };
+
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedPriest", spawnCandidates: [
+      { ...spawn("CursedPriest", 250, 250), mapFileName: "D2031", spread: 0 },
+      { ...spawn("CursedPriest", 185, 267), mapFileName: "D2032", spread: 0, respawnIndex: 999 },
+    ] }], item: [] },
+  }, navigate, {
+    ...settings,
+    travel: async () => { travelCalls += 1; },
+    maxSpawnRespawnWaits: 0,
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{
+        key: "crystal-move:d2031:198:34:117:184:267", source: { x: 198, y: 34 },
+      }],
+    },
+  }), /bounded full-spread spawn search exhausted/);
+
+  assert.equal(travelCalls, 0);
+  assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackUnavailable" &&
+    entry.reason === "stalledFullSpreadWithoutPhysicalProgress"));
+  assert.equal(diagnostics.some(entry => entry.type === "objectiveMapFallbackArmed"), false);
+});
+
+test("the stalled Priest fallback stays unavailable for other q89 objectives", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedZombie", 2, 3)] };
+  const doorway = {
+    key: "crystal-move:d2031:198:34:117:184:267",
+    mapFileName: "D2031", toMapFileName: "D2032",
+    bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+  };
+  const state = snapshot(quest);
+  Object.assign(state, { mapFileName: "D2031", mapTransfers: [doorway] });
+  const client = new FakeClient(state);
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedZombie", spawnCandidates: [
+      { ...spawn("CursedZombie", 250, 250), mapFileName: "D2031", spread: 0 },
+      { ...spawn("CursedZombie", 185, 267), mapFileName: "D2032", spread: 0, respawnIndex: 999 },
+    ] }], item: [] },
+  }, async target => {
+    throw new Error(`No walk path on D2031 to ${target.x},${target.y}`);
+  }, {
+    ...settings,
+    maxSpawnRespawnWaits: 0,
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{ key: doorway.key, source: { x: 198, y: 34 } }],
+    },
+  }), /bounded full-spread spawn search exhausted/);
+
+  assert.equal(diagnostics.some(entry => entry.type === "objectiveMapFallbackArmed"), false);
+});
+
 test("q89 Wizard returns normally to D2031 before using the live keyed doorway after a retreat", async () => {
   const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedZombie", 0, 1)] };
   const required = monster(70, "CursedZombie", 20, 10, { disposition: "hostile" });

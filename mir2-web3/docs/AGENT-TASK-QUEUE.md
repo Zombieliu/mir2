@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-09-16 R128: a known stationary D2031 full Priest spread now enables the
+> existing q89 Wizard exact live-key/source D2032 fallback before respawn wait.
+> Controller660/660 passes; Wizard resumed normally, Taoist R127 continues.
+> Taoist's public 69-Amulet purchase is proven by fresh owned stock31→100 and
+> gold20343→18618. Completed units remain155/177 at launch; final/visual gates
+> remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-stalled-search-r128.md).
+
 > 2026-09-16 R126/R127 active continuation: q89 Wizard checks fresh AOI before
 > both Run cells/Walk dispatch, including action-owned kiting; unresolved live
 > blocker recovery is bounded. Taoist q89 normally buys a 100-Amulet departure
