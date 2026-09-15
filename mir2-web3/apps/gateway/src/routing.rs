@@ -34,7 +34,8 @@ use mir2_simulation::{
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
     ZoneBossRewardAudit, ZoneCommand, ZoneKey, ZoneManager, ZoneMonsterDefense,
     ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound,
-    ZoneRuntimeHandle, ZoneSoulFirePracticeReceipt, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneRuntimeHandle, ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneVitalSettlement,
+    CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -2454,10 +2455,14 @@ struct ZoneVitalReceiptProgress {
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-struct ZoneSoulFirePracticeProgress {
+struct ZoneMagicPracticeProgress {
     object_id: u32,
     life_generation: u64,
+    /// Read legacy SoulFireBall-only checkpoints without losing their replay fence.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     highest_cast_at_ms: Option<u64>,
+    #[serde(default)]
+    highest_cast_at_ms_by_spell: BTreeMap<ZoneMagicPracticeSpell, u64>,
 }
 
 #[derive(Debug)]
@@ -2481,8 +2486,8 @@ struct SharedInProcessZoneState {
     pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<QueuedZoneVitalDelta>>,
     pending_zone_player_heals: BTreeMap<ZonePresenceKey, Vec<i32>>,
     vital_receipt_progress: BTreeMap<ZonePresenceKey, ZoneVitalReceiptProgress>,
-    pending_zone_soulfire_practice: BTreeMap<ZonePresenceKey, Vec<ZoneSoulFirePracticeReceipt>>,
-    soulfire_practice_progress: BTreeMap<ZonePresenceKey, ZoneSoulFirePracticeProgress>,
+    pending_zone_magic_practice: BTreeMap<ZonePresenceKey, Vec<ZoneMagicPracticeReceipt>>,
+    magic_practice_progress: BTreeMap<ZonePresenceKey, ZoneMagicPracticeProgress>,
     teardown_fences: BTreeSet<ZonePresenceKey>,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
     players: BTreeMap<ZonePresenceKey, ZonePlayerPresence>,
@@ -2543,10 +2548,18 @@ struct SharedInProcessZoneStateCheckpoint {
     pending_zone_player_heals: Vec<(ZonePresenceKey, Vec<i32>)>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     vital_receipt_progress: Vec<(ZonePresenceKey, ZoneVitalReceiptProgress)>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pending_zone_soulfire_practice: Vec<(ZonePresenceKey, Vec<ZoneSoulFirePracticeReceipt>)>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    soulfire_practice_progress: Vec<(ZonePresenceKey, ZoneSoulFirePracticeProgress)>,
+    #[serde(
+        default,
+        skip_serializing_if = "Vec::is_empty",
+        alias = "pendingZoneSoulfirePractice"
+    )]
+    pending_zone_magic_practice: Vec<(ZonePresenceKey, Vec<ZoneMagicPracticeReceipt>)>,
+    #[serde(
+        default,
+        skip_serializing_if = "Vec::is_empty",
+        alias = "soulfirePracticeProgress"
+    )]
+    magic_practice_progress: Vec<(ZonePresenceKey, ZoneMagicPracticeProgress)>,
     #[serde(default)]
     teardown_fences: Vec<ZonePresenceKey>,
     players: Vec<(ZonePresenceKey, ZonePlayerPresence)>,
@@ -2690,8 +2703,8 @@ impl SharedInProcessZoneStateCheckpoint {
         self.pending_zone_player_damages.clear();
         self.pending_zone_player_heals.clear();
         self.vital_receipt_progress.clear();
-        self.pending_zone_soulfire_practice.clear();
-        self.soulfire_practice_progress.clear();
+        self.pending_zone_magic_practice.clear();
+        self.magic_practice_progress.clear();
         self.teardown_fences.clear();
         self.players.clear();
         self.trade_links = SharedTradeLinks::default();
@@ -2767,8 +2780,8 @@ impl SharedInProcessZoneState {
             pending_zone_player_damages: BTreeMap::new(),
             pending_zone_player_heals: BTreeMap::new(),
             vital_receipt_progress: BTreeMap::new(),
-            pending_zone_soulfire_practice: BTreeMap::new(),
-            soulfire_practice_progress: BTreeMap::new(),
+            pending_zone_magic_practice: BTreeMap::new(),
+            magic_practice_progress: BTreeMap::new(),
             teardown_fences: BTreeSet::new(),
             live_zone_outbounds: BTreeMap::new(),
             players: BTreeMap::new(),
@@ -2842,13 +2855,13 @@ impl SharedInProcessZoneState {
                 .collect(),
             pending_zone_player_heals: self.pending_zone_player_heals.clone().into_iter().collect(),
             vital_receipt_progress: self.vital_receipt_progress.clone().into_iter().collect(),
-            pending_zone_soulfire_practice: self
-                .pending_zone_soulfire_practice
+            pending_zone_magic_practice: self
+                .pending_zone_magic_practice
                 .clone()
                 .into_iter()
                 .collect(),
-            soulfire_practice_progress: self
-                .soulfire_practice_progress
+            magic_practice_progress: self
+                .magic_practice_progress
                 .clone()
                 .into_iter()
                 .collect(),
@@ -2896,8 +2909,8 @@ impl SharedInProcessZoneState {
             pending_zone_player_damages: Vec::new(),
             pending_zone_player_heals: Vec::new(),
             vital_receipt_progress: Vec::new(),
-            pending_zone_soulfire_practice: Vec::new(),
-            soulfire_practice_progress: Vec::new(),
+            pending_zone_magic_practice: Vec::new(),
+            magic_practice_progress: Vec::new(),
             teardown_fences: Vec::new(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
@@ -3161,12 +3174,12 @@ impl SharedInProcessZoneState {
             },
             pending_zone_player_heals: BTreeMap::new(),
             vital_receipt_progress: checkpoint.vital_receipt_progress.into_iter().collect(),
-            pending_zone_soulfire_practice: checkpoint
-                .pending_zone_soulfire_practice
+            pending_zone_magic_practice: checkpoint
+                .pending_zone_magic_practice
                 .into_iter()
                 .collect(),
-            soulfire_practice_progress: checkpoint
-                .soulfire_practice_progress
+            magic_practice_progress: checkpoint
+                .magic_practice_progress
                 .into_iter()
                 .collect(),
             teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
@@ -3275,10 +3288,10 @@ impl SharedInProcessZoneState {
         self.zone_manager.handle(ZoneCommand::Leave { session_id })
     }
 
-    fn soulfire_practice_owner_is_current(
+    fn magic_practice_owner_is_current(
         &self,
         key: &ZonePresenceKey,
-        receipt: &ZoneSoulFirePracticeReceipt,
+        receipt: &ZoneMagicPracticeReceipt,
     ) -> bool {
         receipt.damage > 0
             && receipt.target_object_id != 0
@@ -3307,8 +3320,8 @@ impl SharedInProcessZoneState {
         self.pending_zone_player_damages.remove(key);
         self.pending_zone_player_heals.remove(key);
         self.vital_receipt_progress.remove(key);
-        self.pending_zone_soulfire_practice.remove(key);
-        self.soulfire_practice_progress.remove(key);
+        self.pending_zone_magic_practice.remove(key);
+        self.magic_practice_progress.remove(key);
         self.teardown_fences.remove(key);
         self.live_zone_outbounds.remove(key);
     }
@@ -4060,21 +4073,22 @@ impl SharedInProcessZoneState {
                         self.queue_zone_monster_kill_award(key, award);
                     }
                 }
-                ZoneOutbound::SoulFirePractice { receipt } => {
+                ZoneOutbound::MagicPractice { receipt } => {
                     let Some(key) = self.zone_session_keys.get(&receipt.session_id).cloned() else {
                         continue;
                     };
                     // New side effects cannot cross a logout fence. Previously
                     // resolved receipts are drained before the final save.
                     if self.teardown_fenced(&key)
-                        || !self.soulfire_practice_owner_is_current(&key, &receipt)
+                        || !self.magic_practice_owner_is_current(&key, &receipt)
                     {
                         continue;
                     }
-                    let pending = self.pending_zone_soulfire_practice.entry(key).or_default();
+                    let pending = self.pending_zone_magic_practice.entry(key).or_default();
                     if !pending.iter().any(|queued| {
                         queued.object_id == receipt.object_id
                             && queued.life_generation == receipt.life_generation
+                            && queued.spell == receipt.spell
                             && queued.cast_at_ms == receipt.cast_at_ms
                     }) {
                         pending.push(receipt);
@@ -9411,7 +9425,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
-        packets.extend(self.apply_pending_zone_soulfire_practice(false));
+        packets.extend(self.apply_pending_zone_magic_practice(false));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9501,7 +9515,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         self.apply_zone_monster_kill_awards_checked(&key, monster_kill_awards)?;
-        packets.extend(self.apply_pending_zone_soulfire_practice(true));
+        packets.extend(self.apply_pending_zone_magic_practice(true));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9570,7 +9584,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
-        packets.extend(self.apply_pending_zone_soulfire_practice(false));
+        packets.extend(self.apply_pending_zone_magic_practice(false));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9805,7 +9819,7 @@ impl SharedInProcessZoneSessionRuntime {
         packets
     }
 
-    fn apply_pending_zone_soulfire_practice(
+    fn apply_pending_zone_magic_practice(
         &mut self,
         allow_fenced_current: bool,
     ) -> Vec<ServerPacket> {
@@ -9818,43 +9832,54 @@ impl SharedInProcessZoneSessionRuntime {
                 .lock()
                 .expect("shared Zone state should lock");
             let queued = state
-                .pending_zone_soulfire_practice
+                .pending_zone_magic_practice
                 .remove(&key)
                 .unwrap_or_default();
             let mut accepted = Vec::new();
             for receipt in queued {
                 if (state.teardown_fenced(&key) && !allow_fenced_current)
-                    || !state.soulfire_practice_owner_is_current(&key, &receipt)
+                    || !state.magic_practice_owner_is_current(&key, &receipt)
                 {
                     continue;
                 }
                 let progress = state
-                    .soulfire_practice_progress
+                    .magic_practice_progress
                     .entry(key.clone())
                     .or_default();
                 if progress.object_id != receipt.object_id
                     || progress.life_generation != receipt.life_generation
                 {
-                    *progress = ZoneSoulFirePracticeProgress {
+                    *progress = ZoneMagicPracticeProgress {
                         object_id: receipt.object_id,
                         life_generation: receipt.life_generation,
                         highest_cast_at_ms: None,
+                        highest_cast_at_ms_by_spell: BTreeMap::new(),
                     };
                 }
+                if let Some(legacy) = progress.highest_cast_at_ms.take() {
+                    let previous = progress
+                        .highest_cast_at_ms_by_spell
+                        .entry(ZoneMagicPracticeSpell::SoulFireBall)
+                        .or_default();
+                    *previous = (*previous).max(legacy);
+                }
                 if progress
-                    .highest_cast_at_ms
-                    .is_some_and(|previous| receipt.cast_at_ms <= previous)
+                    .highest_cast_at_ms_by_spell
+                    .get(&receipt.spell)
+                    .is_some_and(|previous| receipt.cast_at_ms <= *previous)
                 {
                     continue;
                 }
-                progress.highest_cast_at_ms = Some(receipt.cast_at_ms);
+                progress
+                    .highest_cast_at_ms_by_spell
+                    .insert(receipt.spell, receipt.cast_at_ms);
                 accepted.push(receipt);
             }
             accepted
         };
         let mut packets = Vec::new();
         for receipt in receipts {
-            packets.extend(self.inner.commit_zone_soulfire_practice(&receipt));
+            packets.extend(self.inner.commit_zone_magic_practice(&receipt));
         }
         packets
     }

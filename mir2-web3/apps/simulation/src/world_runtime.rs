@@ -813,11 +813,11 @@ impl InProcessWorldRuntime {
             .apply_zone_player_magic_spend(spell, mp_cost, cooldown_ms);
     }
 
-    pub fn commit_zone_soulfire_practice(
+    pub fn commit_zone_magic_practice(
         &mut self,
-        receipt: &crate::ZoneSoulFirePracticeReceipt,
+        receipt: &crate::ZoneMagicPracticeReceipt,
     ) -> Vec<ServerPacket> {
-        self.session.commit_zone_soulfire_practice(receipt)
+        self.session.commit_zone_magic_practice(receipt)
     }
 
     pub fn apply_zone_player_buff_packets(

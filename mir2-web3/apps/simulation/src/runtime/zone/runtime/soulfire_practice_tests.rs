@@ -72,11 +72,11 @@ fn launch(
     )
 }
 
-fn practice(outbounds: &[ZoneOutbound]) -> Vec<&ZoneSoulFirePracticeReceipt> {
+fn practice(outbounds: &[ZoneOutbound]) -> Vec<&ZoneMagicPracticeReceipt> {
     outbounds
         .iter()
         .filter_map(|outbound| match outbound {
-            ZoneOutbound::SoulFirePractice { receipt } => Some(receipt),
+            ZoneOutbound::MagicPractice { receipt } => Some(receipt),
             _ => None,
         })
         .collect()
@@ -195,10 +195,98 @@ fn soulfire_practice_lawful_projectile_survives_caster_death_until_presence_chan
 #[test]
 fn soulfire_practice_does_not_extend_other_magic_or_reward_departed_owner() {
     let (mut zone, owner) = fixture();
-    launch(&mut zone, &owner, Spell::FireBall, 7);
+    launch(&mut zone, &owner, Spell::ThunderBolt, 7);
     assert!(practice(&zone.resolve_pending_native_monster_hits(100)).is_empty());
     let (mut zone, owner) = fixture();
     launch(&mut zone, &owner, Spell::SoulFireBall, 7);
     zone.leave(&owner);
     assert!(practice(&zone.resolve_pending_native_monster_hits(100)).is_empty());
+}
+
+#[test]
+fn fireball_practice_positive_primary_hit_is_spell_typed_and_not_launch_reward() {
+    for spell in [Spell::FireBall, Spell::GreatFireBall] {
+        let (mut zone, owner) = fixture();
+        zone.players.get_mut(&owner).unwrap().class = MirClass::Wizard;
+        assert!(practice(&launch(&mut zone, &owner, spell, 7)).is_empty());
+        assert_eq!(zone.native_monsters[&9101].hp, 5);
+        let resolved = zone.resolve_pending_native_monster_hits(100);
+        let receipts = practice(&resolved);
+        assert_eq!(receipts.len(), 1, "{spell:?}");
+        assert_eq!(receipts[0].spell.spell(), spell);
+        assert_eq!(receipts[0].damage, 5);
+        assert_eq!(receipts[0].target_object_id, 9101);
+        assert!(practice(&zone.resolve_pending_native_monster_hits(200)).is_empty());
+    }
+    for spell in [Spell::FireBounce, Spell::FrostCrunch, Spell::ThunderBolt] {
+        assert_eq!(ZoneMagicPracticeSpell::from_spell(spell), None);
+    }
+}
+
+#[test]
+fn fireball_practice_rejects_zero_invalid_target_and_changed_owner_but_keeps_lawful_caster_death() {
+    for spell in [Spell::FireBall, Spell::GreatFireBall] {
+        for case in 0..9 {
+            let (mut zone, owner) = fixture();
+            zone.players.get_mut(&owner).unwrap().class = MirClass::Wizard;
+            if case == 4 {
+                let target = zone.native_monsters.get_mut(&9101).unwrap();
+                target.defense.min_mac = 100;
+                target.defense.max_mac = 100;
+            }
+            launch(&mut zone, &owner, spell, if case == 0 { 0 } else { 7 });
+            match case {
+                1 => {
+                    zone.native_monsters.remove(&9101);
+                }
+                2 => {
+                    let target = zone.native_monsters.get_mut(&9101).unwrap();
+                    target.dead = true;
+                    target.hp = 0;
+                }
+                3 => zone.native_monsters.get_mut(&9101).unwrap().position.x += 3,
+                5 => zone.players.get_mut(&owner).unwrap().object_id += 1,
+                6 => zone.players.get_mut(&owner).unwrap().life_generation += 1,
+                7 => {
+                    zone.leave(&owner);
+                }
+                8 => {
+                    let caster = zone.players.get_mut(&owner).unwrap();
+                    caster.dead = true;
+                    caster.hp = 0;
+                }
+                _ => {}
+            }
+            let resolved = zone.resolve_pending_native_monster_hits(100);
+            assert_eq!(
+                practice(&resolved).len(),
+                usize::from(case == 8),
+                "{spell:?} case {case}"
+            );
+        }
+    }
+}
+
+#[test]
+fn fireball_practice_pending_metadata_survives_checkpoint_and_legacy_defaults_only_soulfire() {
+    for spell in [Spell::FireBall, Spell::GreatFireBall] {
+        let (mut zone, owner) = fixture();
+        zone.collision = ZoneRuntime::new(ZoneKey::for_map("0")).collision;
+        launch(&mut zone, &owner, spell, 7);
+        let mut restored =
+            ZoneRuntime::restore_checkpoint(&zone.checkpoint_bytes().unwrap()).unwrap();
+        let resolved = restored.resolve_pending_native_monster_hits(100);
+        assert_eq!(practice(&resolved).len(), 1);
+        assert_eq!(practice(&resolved)[0].spell.spell(), spell);
+    }
+    let (mut zone, owner) = fixture();
+    launch(&mut zone, &owner, Spell::SoulFireBall, 7);
+    let resolved = zone.resolve_pending_native_monster_hits(100);
+    let mut legacy = serde_json::to_value(practice(&resolved)[0]).unwrap();
+    legacy.as_object_mut().unwrap().remove("spell");
+    let legacy: ZoneMagicPracticeReceipt = serde_json::from_value(legacy).unwrap();
+    assert_eq!(legacy.spell, ZoneMagicPracticeSpell::SoulFireBall);
+    let mut invalid = serde_json::to_value(legacy).unwrap();
+    invalid["spell"] = serde_json::json!("thunderBolt");
+    assert!(serde_json::from_value::<ZoneMagicPracticeReceipt>(invalid).is_err());
 }

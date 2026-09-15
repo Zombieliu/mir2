@@ -58,7 +58,7 @@ pub use runtime::{
     ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput,
     ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
-    ZoneSoulFirePracticeReceipt, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, NativeGameShopPurchaseRequest,

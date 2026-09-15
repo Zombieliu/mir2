@@ -94,7 +94,7 @@ use super::aoi_grid::AoiGrid;
 use super::collision::ZoneCollision;
 use super::ecs::ZoneEcs;
 use super::movement::{movement_delay_ms, offset_point, ZONE_RUN_GRACE_MS, ZONE_TURN_DELAY_MS};
-use super::types::ZoneSoulFirePracticeReceipt;
+use super::types::{ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell};
 use super::packets::{
     apply_observer_action_state, apply_retained_zone_object_packet, chat_packet,
     object_chat_packet, object_chat_packet_with_text, object_player_packets, object_run_packet,
@@ -331,7 +331,9 @@ struct PendingNativeMonsterHit {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     fire_bounce: Option<PendingNativeFireBounce>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    soulfire_practice: Option<ZoneSoulFirePracticeReceipt>,
+    // Retain the existing internal checkpoint field label; the typed payload
+    // now also covers FireBall and GreatFireBall, never other spell families.
+    soulfire_practice: Option<ZoneMagicPracticeReceipt>,
 }
 
 type NativeMonsterDamageResult = (
@@ -4570,8 +4572,10 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id: hit_object_id,
                     damage: hit_damage,
-                    soulfire_practice: (spell == Spell::SoulFireBall && hit_object_id == object_id)
-                        .then(|| ZoneSoulFirePracticeReceipt {
+                    soulfire_practice: ZoneMagicPracticeSpell::from_spell(spell)
+                        .filter(|_| hit_object_id == object_id)
+                        .map(|spell| ZoneMagicPracticeReceipt {
+                            spell,
                             session_id: session_id.clone(),
                             account_id: player.account_id.clone(),
                             character_index: player.character_index,
@@ -9098,13 +9102,13 @@ impl ZoneRuntime {
         }
         let (should_bleed, mut outbounds) =
             self.apply_native_vampire_spider_master_vampire(hit.attacker_object_id, damage, now_ms);
-        // Crystal levels SoulFireBall on a positive resolved hit, including
-        // lawful projectiles whose caster died after launch. A changed online
+        // Crystal levels these three spells on a positive resolved primary hit,
+        // including lawful projectiles whose caster died after launch. A changed online
         // incarnation or revived life must never receive an old projectile's XP.
         if damage > 0 && practice_owner_is_current {
             if let Some(mut receipt) = hit.soulfire_practice.clone() {
                 receipt.damage = damage;
-                outbounds.push(ZoneOutbound::SoulFirePractice { receipt });
+                outbounds.push(ZoneOutbound::MagicPractice { receipt });
             }
         }
         if should_bleed {

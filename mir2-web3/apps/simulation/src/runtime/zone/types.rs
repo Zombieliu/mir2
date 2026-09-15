@@ -764,8 +764,8 @@ pub enum ZoneOutbound {
         session_id: SessionId,
         award: ZoneMonsterKillAward,
     },
-    SoulFirePractice {
-        receipt: ZoneSoulFirePracticeReceipt,
+    MagicPractice {
+        receipt: ZoneMagicPracticeReceipt,
     },
     PlayerDamaged {
         session_id: SessionId,
@@ -779,12 +779,55 @@ pub enum ZoneOutbound {
     },
 }
 
-/// Owner-bound evidence of one positive, resolved SoulFireBall hit. The cast
+/// The bounded set whose Crystal delayed primary hit invokes LevelMagic.
+/// Other spells cannot enter this trusted owner bridge.
+#[derive(
+    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize,
+)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneMagicPracticeSpell {
+    #[default]
+    SoulFireBall,
+    FireBall,
+    GreatFireBall,
+}
+
+impl ZoneMagicPracticeSpell {
+    pub fn from_spell(spell: Spell) -> Option<Self> {
+        match spell {
+            Spell::SoulFireBall => Some(Self::SoulFireBall),
+            Spell::FireBall => Some(Self::FireBall),
+            Spell::GreatFireBall => Some(Self::GreatFireBall),
+            _ => None,
+        }
+    }
+
+    pub fn spell(self) -> Spell {
+        match self {
+            Self::SoulFireBall => Spell::SoulFireBall,
+            Self::FireBall => Spell::FireBall,
+            Self::GreatFireBall => Spell::GreatFireBall,
+        }
+    }
+
+    pub fn skill_key(self) -> &'static str {
+        match self {
+            Self::SoulFireBall => "soulfireball",
+            Self::FireBall => "fireball",
+            Self::GreatFireBall => "greatfireball",
+        }
+    }
+}
+
+/// Owner-bound evidence of one positive, resolved primary magic hit. The cast
 /// timestamp is unique within an online incarnation because accepted casts
 /// obey the authoritative spell cooldown. This is never a launch reward.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ZoneSoulFirePracticeReceipt {
+pub struct ZoneMagicPracticeReceipt {
+    /// Old internal SoulFireBall checkpoints had no spell field.
+    #[serde(default)]
+    pub spell: ZoneMagicPracticeSpell,
     pub session_id: SessionId,
     pub account_id: String,
     pub character_index: i32,
