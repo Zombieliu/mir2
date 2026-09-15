@@ -1,14 +1,10 @@
 import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
 import { delay } from './protocol-client.mjs';
 import { useSupplies } from './protocol-loadout.mjs';
+import { selfActionBlockMask } from './protocol-status.mjs';
 
 export const selfPlayer = client => client.snapshot?.entities.find(e => e.objectId === client.snapshot.playerObjectId);
 export const distance = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
-const MOVEMENT_BLOCKING_POISON_MASK = 8 | 16 | 32 | 256;
-function selfMovementBlockMask(client) {
-  const self = selfPlayer(client);
-  return Number(self?.poison ?? client.snapshot?.playerPoison ?? 0) & MOVEMENT_BLOCKING_POISON_MASK;
-}
 export class NavigationStalled extends Error {
   constructor({ reason, mapId, position, target, bestDistance, successfulSteps }) {
     super(`Navigation stalled (${reason}) on ${mapId} at ${position.x},${position.y} toward ${target.x},${target.y}`);
@@ -278,7 +274,7 @@ export function createNavigator(client, dependencies = {}) {
       if (stopWhen()) return { reached: false, successfulSteps };
       const self = selfPlayer(client);
       if (self.dead || client.snapshot.playerHp <= 0) throw new Error('Player died during navigation');
-      const movementBlockMask = selfMovementBlockMask(client);
+      const movementBlockMask = selfActionBlockMask(client);
       if (movementBlockMask !== 0) {
         remaining = [];
         if (movementBlockMask !== lastMovementBlockMask) {
@@ -490,7 +486,7 @@ export function createNavigator(client, dependencies = {}) {
           if (consumed >= 0) remaining.splice(0, consumed + 1); else remaining = [];
           failures = 0;
         } else {
-          const correctionBlockMask = selfMovementBlockMask(client);
+          const correctionBlockMask = selfActionBlockMask(client);
           if (correctionBlockMask !== 0) {
             remaining = [];
             if (correctionBlockMask !== lastMovementBlockMask) {

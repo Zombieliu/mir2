@@ -654,6 +654,22 @@ test("Warrior passive and unknown skills never produce a magic cast", async () =
   assert.deepEqual(client.sent[0], { type: "attack", objectId: 99 });
 });
 
+test("paralysis waits without spending an attack attempt and attacks after it clears", async () => {
+  const state = snapshot("Warrior", 23);
+  const client = mockClient(state);
+  const target = { objectId: 99, x: 10, y: 11, dead: false };
+  state.entities[0].poison = 32;
+  assert.deepEqual(await combatAction(client, target), {
+    kind: "wait", targetId: 99, delayMs: 650, actionBlockMask: 32,
+  });
+  assert.deepEqual(client.sent, []);
+  state.entities[0].poison = 0;
+  assert.deepEqual(await combatAction(client, target), {
+    kind: "attack", targetId: 99, command: { type: "attack", objectId: 99 },
+  });
+  assert.deepEqual(client.sent, [{ type: "attack", objectId: 99 }]);
+});
+
 test("unavailable or out-of-range FireBall falls back to ordinary attack", async () => {
   for (const change of [
     skill => { skill.mpCost = 40; },

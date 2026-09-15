@@ -1,4 +1,5 @@
 import { equipHeldAmulet } from './protocol-supplies.mjs';
+import { selfActionBlockMask } from './protocol-status.mjs';
 
 const CLASS_MASK = Object.freeze({ warrior: 1, wizard: 2, taoist: 4 });
 const CLASS_ATTACK_STATS = Object.freeze({ warrior: [4, 5], wizard: [6, 7], taoist: [8, 9] });
@@ -109,6 +110,10 @@ export async function combatAction(client, target) {
   const actor = player(snapshot);
   if (!actor) throw new Error("Cannot fight without the authoritative player entity");
   if (!target || target.dead || !Number.isInteger(Number(target.objectId))) throw new Error("Combat target must be a live authoritative entity");
+  const actionBlockMask = selfActionBlockMask(client);
+  if (actionBlockMask) {
+    return { kind: "wait", targetId: Number(target.objectId), delayMs: 650, actionBlockMask };
+  }
 
   const className = normalized(actor.class);
   if (className === "taoist" && healthRatio(snapshot) <= 0.6) {
@@ -170,6 +175,10 @@ export async function meleeCombatAction(client, target) {
   if (!actor) throw new Error("Cannot fight without the authoritative player entity");
   if (!target || target.dead || !Number.isInteger(Number(target.objectId))) {
     throw new Error("Combat target must be a live authoritative entity");
+  }
+  const actionBlockMask = selfActionBlockMask(client);
+  if (actionBlockMask) {
+    return { kind: "wait", targetId: Number(target.objectId), delayMs: 650, actionBlockMask };
   }
   const command = { type: "attack", objectId: Number(target.objectId) };
   client.send(command);
