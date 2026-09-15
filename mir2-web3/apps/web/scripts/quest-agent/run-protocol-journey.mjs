@@ -972,6 +972,27 @@ try {
             // spending one life per crowded Oma pull.
             preferredObjectiveMaps: preferredObjectiveMapsForQuest(id, className),
             preferObjectiveMapOverCurrent: shouldPreferObjectiveMapOverCurrent(id, state, className),
+            // R117 exhausted one q89 Wizard pass in D2031 without an
+            // objective increment, then returned to the same source on every
+            // replan. The combat controller may make one D2032 preference
+            // only after that zero-progress failure and only while this exact
+            // rendered doorway is live. Browser snapshots expose the live
+            // key/source/target map; createMapTraveler retains its normal
+            // authoritative map-landing validation.
+            objectiveMapFallback: id === 89 && className === 'Wizard' ? {
+              fromMapFileName: 'D2031',
+              toMapFileName: 'D2032',
+              transferCandidates: [
+                {
+                  key: 'crystal-move:d2031:198:34:117:184:267',
+                  source: { x: 198, y: 34 },
+                },
+                {
+                  key: 'crystal-move:d2031:198:35:117:184:268',
+                  source: { x: 198, y: 35 },
+                },
+              ],
+            } : undefined,
             preferTravelAggressorCombat: retreatProfile.preferTravelAggressorCombat,
             continueTravelWhileHealthy: retreatProfile.continueTravelWhileHealthy,
             maxTravelThreatEvasionsPerEdge: retreatProfile.maxTravelThreatEvasionsPerEdge,

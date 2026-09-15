@@ -67,6 +67,16 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
   let spawnRespawnWaits = 0;
   let spawnRespawnProgressKey = null;
   let approachBlockerClears = 0;
+  // This state belongs to one normal `completeQuestObjectives` call. It is
+  // intentionally not saved: an authoritative quest increment resets it, and
+  // a reconnect must prove its current live transfer again before preferring a
+  // deeper public source.
+  const objectiveMapFallbackState = {
+    progressKey: null,
+    armed: false,
+    enteredFallback: false,
+    transfer: null,
+  };
 
   for (; engagements < settings.maxEngagements; engagements += 1) {
     assertPlayerAlive(client);
@@ -86,6 +96,13 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
       return { questId, stage: settled.stage, engagements, harvestPasses, searches };
     }
     const currentProgressKey = objectiveFingerprint(client.snapshot, questId, pending);
+    const questProgressKey = questObjectiveProgressFingerprint(client.snapshot, questId);
+    if (questProgressKey !== objectiveMapFallbackState.progressKey) {
+      objectiveMapFallbackState.progressKey = questProgressKey;
+      objectiveMapFallbackState.armed = false;
+      objectiveMapFallbackState.enteredFallback = false;
+      objectiveMapFallbackState.transfer = null;
+    }
     if (currentProgressKey !== spawnRespawnProgressKey) {
       spawnRespawnProgressKey = currentProgressKey;
       spawnRespawnWaits = 0;
@@ -94,10 +111,12 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
 
     let targetPlan = selectTargetPlan(client.snapshot, pending);
     const currentMapFileName = String(client.snapshot?.mapFileName ?? '');
+    const fallbackPrefersAnotherMap = objectiveMapFallbackState.armed &&
+      currentMapFileName !== settings.objectiveMapFallback?.toMapFileName;
     const preferConfiguredObjectiveMap = settings.preferObjectiveMapOverCurrent &&
       settings.preferredObjectiveMaps.length > 0 &&
       !settings.preferredObjectiveMaps.includes(currentMapFileName);
-    if (preferConfiguredObjectiveMap) targetPlan = null;
+    if (preferConfiguredObjectiveMap || fallbackPrefersAnotherMap) targetPlan = null;
     if (!targetPlan && settings.travel) {
       const candidates = pending.kind === 'kill' ? pending.route.spawnCandidates : (pending.route.sources ?? []).flatMap(source => source.spawnCandidates ?? []);
       const groupName = normalizeName(routeQuest?.group);
@@ -105,12 +124,21 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
         .filter(candidate => normalizeName(candidate?.mapTitle) === groupName)
         .map(candidate => candidate.mapFileName) : [];
       const destination = await firstReachableDestination(candidates, settings.travel, [
+        ...(objectiveMapFallbackState.armed
+          ? [settings.objectiveMapFallback.toMapFileName]
+          : []),
         ...settings.preferredObjectiveMaps,
         routeQuest?.finishNpc?.mapFileName,
         routeQuest?.startNpc?.mapFileName,
         ...groupMaps,
       ]);
       if (destination) {
+        if (objectiveMapFallbackState.armed &&
+            String(destination.mapFileName) !== settings.objectiveMapFallback.toMapFileName) {
+          throw new Error(
+            `q${questId} live objective-map fallback ${settings.objectiveMapFallback.toMapFileName} is unreachable`,
+          );
+        }
         recordSearchDiagnostic(client, {
           type: 'chosenObjectiveDestination',
           questId,
@@ -140,7 +168,29 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
             // pack. The global one-monster resolver intentionally serves
             // non-combat trips and cannot see this objective's risk limits.
             resolveBlockingMonster: false,
+            ...(objectiveMapFallbackState.armed ? {
+              // `createMapTraveler` still owns the actual packet-observed
+              // transfer and map-landing checks. This only selects the exact
+              // live doorway whose source/key was proved before arming.
+              preferredTransferSource: objectiveMapFallbackState.transfer.source,
+            } : {}),
           });
+          if (objectiveMapFallbackState.armed) {
+            if (String(client.snapshot?.mapFileName ?? '') !== settings.objectiveMapFallback.toMapFileName) {
+              throw new Error(
+                `q${questId} objective-map fallback did not authoritatively enter ${settings.objectiveMapFallback.toMapFileName}`,
+              );
+            }
+            objectiveMapFallbackState.armed = false;
+            objectiveMapFallbackState.enteredFallback = true;
+            recordSearchDiagnostic(client, {
+              type: 'objectiveMapFallbackEntered',
+              questId,
+              fromMapFileName: settings.objectiveMapFallback.fromMapFileName,
+              toMapFileName: settings.objectiveMapFallback.toMapFileName,
+              transferKey: objectiveMapFallbackState.transfer?.key ?? null,
+            });
+          }
           travelThreatEvasions.clear();
           // A long physical route can consume the last escape scroll or cross
           // a supply threshold after the loop's initial prepare pass. Let the
@@ -397,12 +447,22 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
         if (isDeferredCombatTargetError(error)) {
           recordDeferredCombatTarget(client, questId, pending, error);
           deferUnreachableTarget(error, settings);
+          if (error instanceof LostCombatTarget) {
+            armObjectiveMapFallback(
+              client, questId, questProgressKey, objectiveMapFallbackState, settings,
+              'focusedTargetLostBeforeAggressorClear',
+            );
+          }
           await retreatAndRecover(client, navigateNear, settings);
           continue;
         }
         if (!(error instanceof UnsafeTargetCluster)) throw error;
         recordUnsafeTargetCluster(client, questId, pending, error);
         deferUnsafeTarget(client, error, settings);
+        armObjectiveMapFallback(
+          client, questId, questProgressKey, objectiveMapFallbackState, settings,
+          'focusedTargetUnsafe',
+        );
         await retreatAndRecover(client, navigateNear, settings);
         continue;
       }
@@ -508,6 +568,12 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
           if (isDeferredCombatTargetError(clearError)) {
             recordDeferredCombatTarget(client, questId, pending, clearError);
             deferUnreachableTarget(clearError, settings);
+            if (clearError instanceof LostCombatTarget) {
+              armObjectiveMapFallback(
+                client, questId, questProgressKey, objectiveMapFallbackState, settings,
+                'focusedTargetLostDuringAggressorClear',
+              );
+            }
             await retreatAndRecover(client, navigateNear, settings);
             focusedTargetRetreated = true;
             break;
@@ -527,12 +593,24 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
       }
     }
     if (unsafeTarget) {
+      armObjectiveMapFallback(
+        client, questId, questProgressKey, objectiveMapFallbackState, settings,
+        'focusedTargetUnsafe',
+      );
       await retreatAndRecover(client, navigateNear, settings);
       continue;
     }
     if (approachBlockerCleared) continue;
     if (focusedTargetRetreated) continue;
-    if (unreachableTarget) continue;
+    if (unreachableTarget) {
+      if (unreachableTarget instanceof LostCombatTarget) {
+        armObjectiveMapFallback(
+          client, questId, questProgressKey, objectiveMapFallbackState, settings,
+          'focusedTargetLost',
+        );
+      }
+      continue;
+    }
     if (objectiveAdvanced(client.snapshot, questId, pending, before)) {
       if (settings.afterEngagement) await settings.afterEngagement(client, navigateNear);
       continue;
@@ -868,6 +946,7 @@ function combatSettings(options) {
       ? options.recoverAfterUnsafeRetreat
       : null,
     focusTargetThroughAggressors: options.focusTargetThroughAggressors === true,
+    objectiveMapFallback: objectiveMapFallbackOption(options.objectiveMapFallback),
     preferredObjectiveMaps: Array.isArray(options.preferredObjectiveMaps)
       ? options.preferredObjectiveMaps.map(String).filter(Boolean)
       : [],
@@ -1418,7 +1497,7 @@ function spawnHasMatchingCorpse(snapshot, spawn, monsterNames) {
   );
 }
 
-async function killExactMonster(client, initialTarget, pending, navigateNear, settings, aggressorInterruptPolicy = true) {
+async function killExactMonster(client, initialTarget, pending, navigateNear, settings, aggressorInterruptPolicy = true, protectedObjectiveTargetId = null) {
   const objectId = Number(initialTarget.objectId);
   if (!Number.isSafeInteger(objectId) || objectId <= 0) throw new Error(`q${questIdFor(pending)} target has no valid objectId`);
   const startingProgress = objectiveFingerprint(
@@ -1438,6 +1517,7 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
   let lastAuthoritativeProgressAt = settings.now();
   for (let attempt = 0; attempt < settings.maxAttackAttempts; attempt += 1) {
     assertPlayerAlive(client);
+    assertFocusedObjectiveTargetLive(client, protectedObjectiveTargetId, pending);
     let target = entityById(client.snapshot, objectId);
     if (target?.dead === true || Number(target?.hp) <= 0) return target;
     if (!target) target = await settleMissingTarget(client, objectId, settings);
@@ -1485,6 +1565,7 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
       if (actionable.dead === true || Number(actionable.hp) <= 0) return actionable;
     }
     if (distance(playerFromSnapshot(client.snapshot), actionable) > approachRange) continue;
+    assertFocusedObjectiveTargetLive(client, protectedObjectiveTargetId, pending);
     throwIfUnsafeTargetPack(client, actionable, settings);
     const aggressorBeforeAttack = interruptingAggressor(
       client, objectId, settings, aggressorInterruptPolicy,
@@ -2140,8 +2221,19 @@ async function combatApproachRange(settings, client, target) {
 async function clearProvenAggressors(client, excludedObjectId, pending, navigateNear, settings, budget) {
   let cleared = 0;
   let preferredObjectId = null;
+  // Item objectives clear attackers around an authoritative corpse before
+  // harvesting it, so their excluded actor is expected to be dead. The loss
+  // fence applies only to a still-required kill objective.
+  const protectedObjectiveTargetId = pending?.kind === 'kill' ? excludedObjectId : null;
   while (true) {
     assertPlayerAlive(client);
+    // The focused quest target is an exclusion, not permission to switch the
+    // pull to any other attacker after that target leaves authoritative AOI.
+    // q89 has both CursedZombie and CursedZombie0: when the required actor is
+    // lost, clearing the latter is a normal combat action but cannot advance
+    // the selected objective. Defer/replan before engaging that unrelated
+    // aggressor.
+    assertFocusedObjectiveTargetLive(client, protectedObjectiveTargetId, pending);
     const currentThreats = provenAggressors(client, excludedObjectId, settings);
     const threat = currentThreats.find(candidate =>
       Number(candidate.objectId) === Number(preferredObjectId)) ?? currentThreats[0];
@@ -2169,6 +2261,7 @@ async function clearProvenAggressors(client, excludedObjectId, pending, navigate
           lowHealthUnderMultipleAggressors(client, excludedObjectId, settings) ||
           !establishedObjectIds.has(Number(candidate.objectId))
         ),
+        protectedObjectiveTargetId,
       );
     } catch (error) {
       if (!(error instanceof ThreatenedNavigation) || error.threatObjectId == null) throw error;
@@ -2180,6 +2273,16 @@ async function clearProvenAggressors(client, excludedObjectId, pending, navigate
     }
     cleared += 1;
     preferredObjectId = null;
+  }
+}
+
+function assertFocusedObjectiveTargetLive(client, protectedObjectId, pending) {
+  if (protectedObjectId == null || objectiveDone(snapshotObjective(
+    questEntry(client.snapshot, questIdFor(pending)), pending,
+  ))) return;
+  const protectedTarget = entityById(client.snapshot, protectedObjectId);
+  if (!isLiveMonster(protectedTarget)) {
+    throw new LostCombatTarget(Number(protectedObjectId), protectedTarget ?? null);
   }
 }
 
@@ -2569,6 +2672,75 @@ function objectiveFingerprint(snapshot, questId, pending) {
   return `${normalized(quest?.stage)}:${Number(objective?.current ?? 0)}:${objective?.done === true}`;
 }
 
+function questObjectiveProgressFingerprint(snapshot, questId) {
+  const quest = questEntry(snapshot, questId);
+  const objectives = Array.isArray(quest?.objectives) ? quest.objectives : [];
+  return `${normalized(quest?.stage)}:${objectives.map(entry =>
+    `${Number(entry?.current ?? 0)}/${Number(entry?.required ?? 0)}/${entry?.done === true}`,
+  ).join('|')}`;
+}
+
+function objectiveMapFallbackOption(value) {
+  if (!value || typeof value !== 'object') return null;
+  const fromMapFileName = String(value.fromMapFileName ?? '');
+  const toMapFileName = String(value.toMapFileName ?? '');
+  const transferCandidates = Array.isArray(value.transferCandidates)
+    ? value.transferCandidates.map(candidate => ({
+      key: String(candidate?.key ?? ''),
+      source: candidate?.source,
+    })).filter(candidate => candidate.key && validPoint(candidate.source))
+    : [];
+  if (!fromMapFileName || !toMapFileName || transferCandidates.length === 0) return null;
+  return { fromMapFileName, toMapFileName, transferCandidates };
+}
+
+function liveObjectiveMapFallbackTransfer(snapshot, fallback) {
+  if (!fallback || String(snapshot?.mapFileName ?? '') !== fallback.fromMapFileName) return null;
+  const transfers = Array.isArray(snapshot?.mapTransfers) ? snapshot.mapTransfers : [];
+  for (const candidate of fallback.transferCandidates) {
+    const transfer = transfers.find(entry =>
+      String(entry?.mapFileName ?? snapshot?.mapFileName ?? '') === fallback.fromMapFileName &&
+      String(entry?.toMapFileName ?? '') === fallback.toMapFileName &&
+      String(entry?.key ?? '') === candidate.key &&
+      Number(entry?.bounds?.minX) === Number(candidate.source.x) &&
+      Number(entry?.bounds?.maxX) === Number(candidate.source.x) &&
+      Number(entry?.bounds?.minY) === Number(candidate.source.y) &&
+      Number(entry?.bounds?.maxY) === Number(candidate.source.y),
+    );
+    if (transfer) return { key: candidate.key, source: candidate.source };
+  }
+  return null;
+}
+
+function armObjectiveMapFallback(client, questId, progressKey, state, settings, reason) {
+  const fallback = settings.objectiveMapFallback;
+  if (!fallback || state.progressKey !== progressKey ||
+      questObjectiveProgressFingerprint(client.snapshot, questId) !== progressKey) return false;
+  const currentMapFileName = String(client.snapshot?.mapFileName ?? '');
+  if (state.enteredFallback && currentMapFileName === fallback.toMapFileName) {
+    throw new Error(
+      `q${questId} objective-map fallback ${fallback.toMapFileName} made no objective progress (${reason})`,
+    );
+  }
+  if (state.armed || state.enteredFallback || currentMapFileName !== fallback.fromMapFileName) return false;
+  const transfer = liveObjectiveMapFallbackTransfer(client.snapshot, fallback);
+  if (!transfer) {
+    recordSearchDiagnostic(client, {
+      type: 'objectiveMapFallbackUnavailable', questId, reason,
+      fromMapFileName: fallback.fromMapFileName, toMapFileName: fallback.toMapFileName,
+    });
+    return false;
+  }
+  state.armed = true;
+  state.transfer = transfer;
+  recordSearchDiagnostic(client, {
+    type: 'objectiveMapFallbackArmed', questId, reason,
+    fromMapFileName: fallback.fromMapFileName, toMapFileName: fallback.toMapFileName,
+    transferKey: transfer.key,
+  });
+  return true;
+}
+
 function objectiveAdvanced(snapshot, questId, pending, before) {
   const quest = questEntry(snapshot, questId);
   if (READY_STAGES.has(normalized(quest?.stage))) return true;
@@ -2604,6 +2776,7 @@ function spawnKey(spawn) {
 function validPoint(value) {
   return Number.isFinite(Number(value?.x)) && Number.isFinite(Number(value?.y));
 }
+
 
 function normalizeName(value) {
   return String(value ?? "").replace(/[^a-z0-9]/gi, "").toLowerCase();

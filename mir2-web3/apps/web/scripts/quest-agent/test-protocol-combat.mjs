@@ -1581,6 +1581,128 @@ test("q89 still retreats at 75 percent HP when two aggressors are proven", async
   assert.ok(diagnostics.some(entry => entry.type === "unsafeTargetCluster"));
 });
 
+test("q89 Wizard uses the live keyed D2031 doorway once after a lost target and never attacks CursedZombie0", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedZombie", 0, 1)] };
+  const required = monster(70, "CursedZombie", 20, 10, { disposition: "hostile" });
+  const unrelatedAggressor = monster(71, "CursedZombie0", 11, 10, { disposition: "hostile" });
+  const state = snapshot(quest, [required, unrelatedAggressor]);
+  Object.assign(state, {
+    mapFileName: "D2031",
+    mapTransfers: [{
+      key: "crystal-move:d2031:198:34:117:184:267",
+      mapFileName: "D2031", toMapFileName: "D2032",
+      bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+    }],
+  });
+  const client = new FakeClient(state, (owner, command) => {
+    if (command.type !== "attack") return;
+    assert.equal(command.objectId, 72, "the unrelated CursedZombie0 must never be attacked");
+    owner.receive("ObjectDied", current => {
+      Object.assign(current.entities.find(entry => entry.objectId === 72), { dead: true, hp: 0 });
+      current.questLog[0].objectives[0] = objective("Kill CursedZombie", 1, 1);
+      current.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 72 });
+  });
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: unrelatedAggressor.objectId });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  const travelled = [];
+  const travel = async (mapFileName, options) => {
+    travelled.push({ mapFileName, options });
+    assert.equal(mapFileName, "D2032");
+    assert.deepEqual(options.preferredTransferSource, { x: 198, y: 34 });
+    Object.assign(client.snapshot, { mapFileName: "D2032", mapTransfers: [] });
+    Object.assign(client.snapshot.entities[0], { x: 184, y: 267 });
+    client.snapshot.entities = [client.snapshot.entities[0], monster(72, "CursedZombie", 185, 267)];
+  };
+  travel.routeLength = async mapFileName => mapFileName === "D2032" ? 1 : 2;
+  const navigate = async (target, _range, _stopWhen, options = {}) => {
+    if (target.objectId === unrelatedAggressor.objectId) {
+      client.snapshot.entities = client.snapshot.entities.filter(entry => entry.objectId !== required.objectId);
+      Object.assign(unrelatedAggressor, { x: 50, y: 50 });
+      return;
+    }
+    if (options.maxSuccessfulSteps) return;
+    Object.assign(client.snapshot.entities[0], { x: target.x - 1, y: target.y });
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedZombie", spawnCandidates: [
+      { ...spawn("CursedZombie"), mapFileName: "D2031" },
+      { ...spawn("CursedZombie"), mapFileName: "D2032", respawnIndex: 999 },
+    ] }], item: [] },
+  }, navigate, {
+    ...settings,
+    travel,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 2,
+    directAggressorDistance: 8,
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{
+        key: "crystal-move:d2031:198:34:117:184:267", source: { x: 198, y: 34 },
+      }],
+    },
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(travelled.map(entry => entry.mapFileName), ["D2032"]);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [72]);
+  assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackArmed"));
+  assert.ok(diagnostics.some(entry => entry.type === "objectiveMapFallbackEntered"));
+});
+
+test("q89 Wizard fails closed after one live D2032 fallback pass makes no objective progress", async () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedZombie", 0, 1)] };
+  const required = monster(70, "CursedZombie", 20, 10, { disposition: "hostile" });
+  const unrelatedAggressor = monster(71, "CursedZombie0", 11, 10, { disposition: "hostile" });
+  const state = snapshot(quest, [required, unrelatedAggressor]);
+  Object.assign(state, {
+    mapFileName: "D2031",
+    mapTransfers: [{
+      key: "crystal-move:d2031:198:34:117:184:267",
+      mapFileName: "D2031", toMapFileName: "D2032",
+      bounds: { minX: 198, maxX: 198, minY: 34, maxY: 34 },
+    }],
+  });
+  const client = new FakeClient(state);
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: unrelatedAggressor.objectId });
+  const travelled = [];
+  const travel = async mapFileName => {
+    travelled.push(mapFileName);
+    Object.assign(client.snapshot, { mapFileName: "D2032", mapTransfers: [] });
+    Object.assign(client.snapshot.entities[0], { x: 184, y: 267 });
+    client.snapshot.entities = [client.snapshot.entities[0], monster(72, "CursedZombie", 185, 267)];
+  };
+  travel.routeLength = async mapFileName => mapFileName === "D2032" ? 1 : 2;
+  const navigate = async target => {
+    if (target.objectId === unrelatedAggressor.objectId || target.objectId === 72) {
+      client.snapshot.entities = client.snapshot.entities.filter(entry => entry.objectId !== target.objectId && entry.objectId !== required.objectId);
+    }
+  };
+
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: "CursedZombie", spawnCandidates: [
+      { ...spawn("CursedZombie"), mapFileName: "D2031" },
+      { ...spawn("CursedZombie"), mapFileName: "D2032", respawnIndex: 999 },
+    ] }], item: [] },
+  }, navigate, {
+    ...settings,
+    travel,
+    directAggressorDistance: 8,
+    objectiveMapFallback: {
+      fromMapFileName: "D2031", toMapFileName: "D2032",
+      transferCandidates: [{
+        key: "crystal-move:d2031:198:34:117:184:267", source: { x: 198, y: 34 },
+      }],
+    },
+  }), /q89 objective-map fallback D2032 made no objective progress/);
+  assert.deepEqual(travelled, ["D2032"]);
+  assert.deepEqual(client.sent, []);
+});
+
 test("a survivable Taoist lands the last bounded hit before retreating from a joining snake", async () => {
   const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
   let attacks = 0;
