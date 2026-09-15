@@ -41,6 +41,7 @@ import {
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
   journeyMpRestockTargetForQuest,
+  journeyAmuletSupplyPolicyForQuest,
   minimumJourneyMpStockForQuest,
   mpDrugCount,
   journeyResumeDisposition,
@@ -298,8 +299,9 @@ try {
       // fell back to melee, and died at q60 6/8. Keep a lower field trigger
       // than the full departure target so a partly used stack can finish an
       // engagement without sending every cast back to town.
-      const amuletTrigger = taoistAmuletExpedition ? 12 : 0;
-      const amuletDepartureTarget = taoistAmuletExpedition ? 32 : 0;
+      const amuletPolicy = journeyAmuletSupplyPolicyForQuest(questId, className);
+      const amuletTrigger = taoistAmuletExpedition ? amuletPolicy.minimum : 0;
+      const amuletDepartureTarget = taoistAmuletExpedition ? amuletPolicy.departure : 0;
       const emergencyTeleportTarget = expeditionSupplyActive
         ? journeyEmergencyTeleportDepartureTarget(questId)
         : 0;
@@ -380,7 +382,7 @@ try {
         ) * 100;
         const fundingAmuletDeficit = String(selfPlayer(owner)?.class ?? '').trim().toLowerCase() === 'taoist' &&
           journeyExpeditionSupplyActive(owner.snapshot, questId)
-          ? Math.max(0, 32 - amuletStock(owner.snapshot))
+          ? Math.max(0, journeyAmuletSupplyPolicyForQuest(questId, selfPlayer(owner)?.class).departure - amuletStock(owner.snapshot))
           : 0;
         const requiredFundingCount = safeFundingVenisonTargetCount(fundingHpDeficit, {
           className: selfPlayer(owner)?.class,
@@ -409,7 +411,7 @@ try {
         });
         // Funding ends in the nearby field. Force the follow-up shop pass even
         // when a partial Amulet stack is above the lower field trigger; the
-        // journey must actually sell the Venison and reach the 32-Amulet
+        // journey must actually sell the Venison and reach the quest's Amulet
         // departure reserve before walking back to the cave.
         const restocked = await supplyGate(owner, supplyGateCallOptions(
           owner,

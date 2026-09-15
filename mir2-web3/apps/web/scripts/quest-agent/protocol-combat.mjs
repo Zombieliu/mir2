@@ -78,7 +78,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
     }
     if (stage !== "inprogress") throw new Error(`q${questId} is not active (stage=${stateQuest.stage ?? "unknown"})`);
 
-    const pending = nextPendingObjective(client.snapshot, stateQuest, descriptors);
+    let pending = nextPendingObjective(client.snapshot, stateQuest, descriptors);
     if (!pending) {
       await waitFor(client, () => READY_STAGES.has(normalized(questEntry(client.snapshot, questId)?.stage)), `q${questId} ready stage`, settings.questSettleTimeout);
       const settled = questEntry(client.snapshot, questId);
@@ -311,6 +311,9 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
       try {
         target = await searchSpawnCandidates(
           client, targetPlan, navigateNear, settings, unavailableCorpses,
+          descriptors.filter(descriptor => descriptor.kind === 'kill' &&
+            !objectiveDone(snapshotObjective(questEntry(client.snapshot, questId), descriptor)))
+            .map(descriptor => descriptor.route.monsterName),
         );
       } catch (error) {
         const respawnWaitLimit = spawnRespawnWaitLimit(targetPlan, settings);
@@ -364,6 +367,21 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
         engagements += cleared;
         continue;
       }
+    }
+    if (target && !targetPlan.monsterNames.some(name => sameName(name, target.name))) {
+      const alternative = descriptors.find(descriptor => descriptor.kind === 'kill' &&
+        sameName(descriptor.route.monsterName, target.name) &&
+        !objectiveDone(snapshotObjective(questEntry(client.snapshot, questId), descriptor)));
+      if (!alternative) continue;
+      recordSearchDiagnostic(client, {
+        type: 'spawnSearchObjectiveSwitched',
+        questId,
+        fromTarget: pending.name,
+        toTarget: alternative.name,
+        objectId: Number(target.objectId),
+      });
+      pending = { ...alternative, snapshot: snapshotObjective(questEntry(client.snapshot, questId), alternative) };
+      targetPlan = selectTargetPlan(client.snapshot, pending);
     }
     if (!target) throw new Error(`q${questId} found no live ${targetPlan.monsterNames.join(" or ")} after bounded spawn search`);
 
@@ -1025,7 +1043,7 @@ function sourceSearchEffort(snapshot, spawns) {
 }
 
 async function searchSpawnCandidates(
-  client, targetPlan, navigateNear, settings, unavailableCorpses = new Map(),
+  client, targetPlan, navigateNear, settings, unavailableCorpses = new Map(), alternativeMonsterNames = [],
 ) {
   const origin = playerFromSnapshot(client.snapshot);
   const candidates = [...new Map(targetPlan.spawns.map(spawn => [spawnKey(spawn), spawn])).values()]
@@ -1069,9 +1087,10 @@ async function searchSpawnCandidates(
   const startedAt = settings.now();
   let visited = 0;
   let sawUnsafeTarget = false;
+  const searchMonsterNames = [...new Set([...targetPlan.monsterNames, ...alternativeMonsterNames])];
   const observeSafeTarget = () => {
     const safeTarget = nearestAvailableLiveMonster(
-      client, targetPlan.monsterNames, unavailableCorpses, settings,
+      client, searchMonsterNames, unavailableCorpses, settings,
     );
     if (!safeTarget && nearestLiveMonster(client.snapshot, targetPlan.monsterNames)) {
       sawUnsafeTarget = true;

@@ -177,6 +177,53 @@ test("a multi-objective hunt clears a visible later target while the first targe
   assert.deepEqual(client.sent.map(entry => entry.objectId), [98, 99]);
 });
 
+test("a multi-objective spawn search stops for another safe required monster entering AOI", async () => {
+  const quest = {
+    questId: 89,
+    stage: "InProgress",
+    objectives: [objective("Kill CursedPriest", 0, 1), objective("Kill CursedZombie", 0, 1)],
+  };
+  const client = new FakeClient(snapshot(quest), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      const target = state.entities.find(entry => entry.objectId === command.objectId);
+      Object.assign(target, { dead: true, hp: 0 });
+      const index = target.name === "CursedPriest" ? 0 : 1;
+      state.questLog[0].objectives[index] = objective(`Kill ${target.name}`, 1, 1);
+      if (state.questLog[0].objectives.every(entry => entry.done)) state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: command.objectId });
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let searches = 0;
+  const navigate = async (target, _range, stopWhen) => {
+    const actor = client.snapshot.entities[0];
+    if (target.objectId) {
+      Object.assign(actor, { x: target.x - 1, y: target.y });
+      return { reached: true };
+    }
+    searches += 1;
+    client.snapshot.entities.push(searches === 1
+      ? monster(90, "CursedZombie", actor.x + 1, actor.y, { disposition: "hostile" })
+      : monster(91, "CursedPriest", actor.x + 1, actor.y, { disposition: "hostile" }));
+    assert.equal(stopWhen(), true);
+    return { reached: false };
+  };
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [
+      { monsterName: "CursedPriest", spawnCandidates: [spawn("CursedPriest")] },
+      { monsterName: "CursedZombie", spawnCandidates: [spawn("CursedZombie")] },
+    ], item: [] },
+  }, navigate, { ...settings, maxTargetAdjacent: 0, maxTargetNearby: 0 });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [90, 91]);
+  assert.equal(searches, 2);
+  assert.ok(diagnostics.some(entry => entry.type === "spawnSearchObjectiveSwitched" &&
+    entry.fromTarget === "CursedPriest" && entry.toTarget === "CursedZombie"));
+});
+
 test("a multi-map quest clears an incomplete same-map objective before crossing to the first listed source", async () => {
   const quest = {
     questId: 54,

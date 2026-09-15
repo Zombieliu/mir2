@@ -24,6 +24,7 @@ import {
   journeyEmergencyTeleportCriticalHpRatio,
   journeyResumeDisposition,
   journeyMpRestockTargetForQuest,
+  journeyAmuletSupplyPolicyForQuest,
   questCombatMpUseThresholdForQuest,
   questEmergencyEscapeHpRatio,
   questPostRetreatRecoveryRatio,
@@ -47,6 +48,15 @@ test('level-15 Taoist snake hunting does not require MP-only town trips', () => 
   assert.equal(minimumJourneyMpStockForQuest(42, 'Warrior'), 0);
   assert.equal(minimumJourneyMpStockForQuest(54, 'Wizard'), 12);
   assert.equal(minimumJourneyMpStockForQuest(54, 'Taoist'), 12);
+});
+
+test('Taoist Wooma departure funds enough SoulFireBall casts for a full-health pull', () => {
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Taoist'), { minimum: 48, departure: 64 });
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(99, 'Taoist'), { minimum: 48, departure: 64 });
+  assert.ok(journeyAmuletSupplyPolicyForQuest(98, 'Taoist').minimum * 7 >= 285);
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(60, 'Taoist'), { minimum: 12, departure: 32 });
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Wizard'), { minimum: 0, departure: 0 });
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(42, 'Taoist'), { minimum: 0, departure: 0 });
 });
 
 test('caster expedition restock targets stay separate from their field triggers', () => {
@@ -1107,6 +1117,9 @@ test('q89 Wizard carries an escape reserve and detects ranged mine attackers', (
   assert.equal(profile.multiAggressorRetreatRatio, 0.75);
   assert.equal(profile.retreatAtActiveAggressorCount, 2);
   assert.equal(profile.unsafeRetreatSafeDistance, 8);
+  assert.equal(profile.focusTargetThroughAggressors, true);
+  assert.equal(profile.finishableTargetHealthRatio, 0.25);
+  assert.equal(profile.finishableTargetMinimumPlayerHpRatio, 0.7);
   assert.equal(journeyEmergencyTeleportDepartureTarget(89), 4);
   assert.equal(questEmergencyEscapeHpRatio(89, 'Wizard'), 0.65);
 });

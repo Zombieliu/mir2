@@ -26,6 +26,20 @@ export function minimumJourneyMpStockForQuest(questId, className) {
   return 4;
 }
 
+/** Spell fuel for at least one measured full-health expedition target. */
+export function journeyAmuletSupplyPolicyForQuest(questId, className) {
+  const id = Number(questId);
+  if (String(className ?? '').trim().toLowerCase() !== 'taoist' ||
+      !DANGEROUS_EXPEDITION_QUEST_IDS.has(id)) return { minimum: 0, departure: 0 };
+  // R97 measured 7 damage per SoulFireBall against a 285 HP WoomaSoldier.
+  // Thirty-two casts cannot complete that full-health pull. Reserve forty-
+  // eight before acquisition and leave town with sixty-four for misses and
+  // the next short encounter; other expeditions retain their proven budget.
+  return [98, 99].includes(id)
+    ? { minimum: 48, departure: 64 }
+    : { minimum: 12, departure: 32 };
+}
+
 /** A Taoist should not resume a dangerous kill expedition without spell fuel. */
 export function requiresTaoistAmuletRestock(snapshot, questId, className, minimum = 1) {
   const normalizedClass = String(className ?? '').trim().toLowerCase();
@@ -238,7 +252,15 @@ export function questRetreatProfile(questId, className = '') {
       maxTargetAdjacent: 2,
       maxTargetNearby: 5,
     } : {}),
-    ...(rangedWoomaExpedition ? {
+    ...(fragileUndeadMineHunt ? {
+      // R109 spent most casts on unrelated Shamans while live required
+      // zombies appeared during the Priest sweep. Keep the safe selected
+      // objective focused; the existing two-aggressor and HP gates still
+      // interrupt a dangerous pull.
+      focusTargetThroughAggressors: true,
+      finishableTargetHealthRatio: 0.25,
+      finishableTargetMinimumPlayerHpRatio: 0.7,
+    } : rangedWoomaExpedition ? {
       // R97 reached a FlamingWooma through the zero-clearance corridor and
       // reduced it to one percent before a joining pack forced target loss.
       // A healthy ranged character should land the bounded final cast rather
