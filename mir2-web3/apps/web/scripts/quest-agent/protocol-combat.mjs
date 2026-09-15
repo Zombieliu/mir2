@@ -1,4 +1,4 @@
-import { observedPlayerHp } from './protocol-observation.mjs';
+import { observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
 import { delay as realDelay } from "./protocol-client.mjs";
 import { distance, NavigationStalled } from "./protocol-play.mjs";
 import { selfActionBlockMask } from "./protocol-status.mjs";
@@ -2257,6 +2257,10 @@ function attacksTowardPlayer(attacker, payload, player) {
 }
 
 function threatHealth(entity) {
+  if (entity?.healthObservation === 'percent') {
+    const maximum = finiteHp(entity.maxHp);
+    if (maximum > 0) return Math.ceil(observedEntityHealthRatio(entity) * maximum);
+  }
   const hp = finiteHp(entity?.hp);
   if (hp != null) return hp;
   const percent = finiteHp(entity?.healthPercent);
@@ -2274,11 +2278,7 @@ function shouldFinishLowHealthTarget(client, target, settings) {
 }
 
 function targetRemainingHealthRatio(target) {
-  const hp = finiteHp(target?.hp);
-  const maxHp = finiteHp(target?.maxHp);
-  const percent = finiteHp(target?.healthPercent);
-  if (hp != null && maxHp > 0) return hp / maxHp;
-  return percent != null ? percent / 100 : Number.POSITIVE_INFINITY;
+  return observedEntityHealthRatio(target);
 }
 
 function recentEvent(event, cutoff) {

@@ -1,4 +1,4 @@
-import { observedPlayerHp } from './protocol-observation.mjs';
+import { observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
 const DEFAULT_MAX_RESTOCKS = 32;
 const DEFAULT_MINIMUM_HP_STOCK = 1;
 const REFRESH_TIMEOUT_MS = 12_000;
@@ -28,7 +28,7 @@ export function minimumJourneyMpStockForQuest(questId, className) {
 }
 
 /** Spell fuel for at least one measured full-health expedition target. */
-export function journeyAmuletSupplyPolicyForQuest(questId, className) {
+export function journeyAmuletSupplyPolicyForQuest(questId, className, snapshot = null) {
   const id = Number(questId);
   if (String(className ?? '').trim().toLowerCase() !== 'taoist' ||
       !DANGEROUS_EXPEDITION_QUEST_IDS.has(id)) return { minimum: 0, departure: 0 };
@@ -36,9 +36,25 @@ export function journeyAmuletSupplyPolicyForQuest(questId, className) {
   // Thirty-two casts cannot complete that full-health pull. Reserve forty-
   // eight before acquisition and leave town with sixty-four for misses and
   // the next short encounter; other expeditions retain their proven budget.
-  return [98, 99].includes(id)
-    ? { minimum: 48, departure: 64 }
-    : { minimum: 12, departure: 32 };
+  if (![98, 99].includes(id)) return { minimum: 12, departure: 32 };
+  let minimum = 48;
+  // Do not abandon q98's final measured WoomaSoldier after a reconnect when
+  // the existing stack can finish its visible wound. This never funds a new
+  // full-health pull, and the town departure reserve remains sixty-four.
+  if (id === 98 && remainingPureKillQuestObjectives(snapshot, id) === 1 &&
+      healthRatio(snapshot) >= 0.9) {
+    const actor = snapshotPlayer(snapshot);
+    const wounded = (snapshot?.entities ?? []).filter(entity =>
+      entity?.kind === 'monster' && entity?.dead !== true &&
+      String(entity.name).toLowerCase() === 'woomasoldier' &&
+      Number(entity.maxHp) === 285 && actor && chebyshev(actor, entity) <= 6 &&
+      observedEntityHealthRatio(entity) <= 0.25);
+    for (const target of wounded) {
+      const conservativeHp = Math.min(285, Math.ceil((observedEntityHealthRatio(target) + 0.01) * 285));
+      minimum = Math.min(minimum, Math.ceil(conservativeHp / 7) + 4);
+    }
+  }
+  return { minimum, departure: 64 };
 }
 
 /** A Taoist should not resume a dangerous kill expedition without spell fuel. */

@@ -47,6 +47,7 @@ function upsertEntity(snapshot, payload, kind) {
   const observed = { ...payload, ...positionFields(payload), kind: entity.kind ?? kind };
   delete observed.location;
   Object.assign(entity, observed);
+  if (Number.isFinite(Number(observed.hp)) && observed.hp != null) entity.healthObservation = 'exact';
   if (location && entity.location) delete entity.location;
   return entity;
 }
@@ -129,6 +130,18 @@ export function observedPlayerHp(snapshot) {
   return finiteNumber(snapshot?.playerHp ?? player?.hp) ?? 0;
 }
 
+/** Latest relative health for target choice/finishing, with exact HP retained. */
+export function observedEntityHealthRatio(entity) {
+  const percent = finiteNumber(entity?.healthPercent);
+  if (entity?.healthObservation === 'percent' && percent != null) {
+    return Math.max(0, Math.min(100, percent)) / 100;
+  }
+  const hp = finiteNumber(entity?.hp);
+  const maximum = finiteNumber(entity?.maxHp);
+  if (hp != null && maximum > 0) return Math.max(0, Math.min(1, hp / maximum));
+  return percent != null ? Math.max(0, Math.min(100, percent)) / 100 : Number.POSITIVE_INFINITY;
+}
+
 function applySelfVitals(snapshot, payload) {
   const player = selfEntity(snapshot);
   const hp = finiteNumber(payload?.hp);
@@ -141,6 +154,7 @@ function applySelfVitals(snapshot, payload) {
     snapshot.playerHealthObservation = 'exact';
     if (player) {
       player.hp = current;
+      player.healthObservation = 'exact';
       if (current > 0) player.dead = false;
     }
   }
@@ -225,6 +239,7 @@ export function applyProtocolObservation(snapshot, message) {
       if (entity) {
         entity.healthPercent = payload.percent;
         entity.healthExpire = payload.expire;
+        if (finiteNumber(payload.percent) != null) entity.healthObservation = 'percent';
       }
       if (objectIdOf(payload.objectId) === objectIdOf(snapshot.playerObjectId) &&
           finiteNumber(payload.percent) != null) {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { applyProtocolObservation, observedPlayerHp } from './protocol-observation.mjs';
+import { applyProtocolObservation, observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
 
 const packet = (name, payload = {}) => ({ type: 'packet', packet: name, payload });
 
@@ -116,6 +116,10 @@ test('ObjectHealth keeps percent separate from absolute hp', () => {
   assert.equal(deer.maxHp, 224);
   assert.equal(deer.healthPercent, 47);
   assert.equal(deer.healthExpire, 3_000);
+  assert.equal(observedEntityHealthRatio(deer), 0.47);
+  applyProtocolObservation(state, packet('ObjectHealth', { objectId: 2001, percent: 19 }));
+  assert.equal(observedEntityHealthRatio(deer), 0.19, 'fresh wounds supersede cached absolute target HP');
+  assert.equal(deer.hp, 137);
 });
 
 test('fresh self percentages drive control without altering exact HP evidence', () => {

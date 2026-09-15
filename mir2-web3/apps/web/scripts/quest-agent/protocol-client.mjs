@@ -157,7 +157,8 @@ export class ProtocolClient {
       // request from waiting for its acknowledgement and authoritative save.
       const journeyFailure = this.failure;
       this.failure = null;
-      try { await this.request({ type: 'logOut' }, 'LogOutSuccess', 5000); } catch { /* Trace preserves failed logout; disconnect still saves normally. */ }
+      // R99's save queue delayed receipts beyond the old five-second window.
+      try { await this.request({ type: 'logOut' }, 'LogOutSuccess', 20000); } catch { /* Trace preserves failed logout; disconnect still saves normally. */ }
       finally { this.failure ??= journeyFailure; }
       this.ws.close();
     }

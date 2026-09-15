@@ -1,4 +1,5 @@
 import { observedPlayerHp } from './protocol-observation.mjs';
+import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -276,16 +277,7 @@ try {
       minimumHpStock: minimumJourneyHpStock,
       minimumMpStock: minimumJourneyMpStockForQuest(null, className),
     });
-    const refreshCombatCooldown = async owner => {
-      const afterSequence = owner.sequence ?? 0;
-      owner.send({ type: 'clientVersion' });
-      await owner.wait(
-        () => owner.events.some(event =>
-          event.sequence > afterSequence && event.direction === 'received' && event.type === 'worldSnapshot'),
-        'combat cooldown worldSnapshot',
-        6_000,
-      );
-    };
+    const refreshCombatCooldown = refreshCombatWorldSnapshot;
     const supplyGateCallOptions = (owner, questId, requiredHpStock, {
       replenishEscapeReserve = false,
       forceRestock = false,
@@ -300,7 +292,7 @@ try {
       // fell back to melee, and died at q60 6/8. Keep a lower field trigger
       // than the full departure target so a partly used stack can finish an
       // engagement without sending every cast back to town.
-      const amuletPolicy = journeyAmuletSupplyPolicyForQuest(questId, className);
+      const amuletPolicy = journeyAmuletSupplyPolicyForQuest(questId, className, owner.snapshot);
       const amuletTrigger = taoistAmuletExpedition ? amuletPolicy.minimum : 0;
       const amuletDepartureTarget = taoistAmuletExpedition ? amuletPolicy.departure : 0;
       const emergencyTeleportTarget = expeditionSupplyActive

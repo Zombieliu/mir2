@@ -2,6 +2,29 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { applyProtocolObservation } from './protocol-observation.mjs';
 
+test('a healthy q98 finisher keeps enough held fuel for its last visible wounded soldier', () => {
+  const snapshot = {
+    playerObjectId: 1000, playerHp: 159, playerMaxHp: 159,
+    entities: [
+      { objectId: 1000, kind: 'selfPlayer', hp: 159, maxHp: 159, x: 257, y: 211 },
+      { objectId: 2000, kind: 'monster', name: 'WoomaSoldier', hp: 285, maxHp: 285, healthPercent: 19, healthObservation: 'percent', x: 253, y: 213 },
+    ],
+    questLog: [{ questId: 98, stage: 'inProgress', objectives: [
+      { label: 'Kill Dung', current: 3, required: 3 },
+      { label: 'Kill WoomaSoldier', current: 2, required: 3 },
+    ] }],
+  };
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Taoist', snapshot), { minimum: 13, departure: 64 });
+  snapshot.entities[1].healthPercent = 100;
+  assert.equal(journeyAmuletSupplyPolicyForQuest(98, 'Taoist', snapshot).minimum, 48);
+  snapshot.entities[1].healthPercent = 19;
+  snapshot.questLog[0].objectives[1].current = 1;
+  assert.equal(journeyAmuletSupplyPolicyForQuest(98, 'Taoist', snapshot).minimum, 48);
+  snapshot.questLog[0].objectives[1].current = 2;
+  snapshot.playerHp = 90;
+  assert.equal(journeyAmuletSupplyPolicyForQuest(98, 'Taoist', snapshot).minimum, 48);
+});
+
 test('evasive recovery stops on fresh full-health packets without another retreat', async () => {
   const snapshot = {
     playerObjectId: 1000, playerHp: 65, playerMaxHp: 100,
