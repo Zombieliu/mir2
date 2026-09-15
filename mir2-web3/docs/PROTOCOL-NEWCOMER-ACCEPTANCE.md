@@ -1,5 +1,11 @@
 # Protocol newcomer journey acceptance
 
+> 2026-09-16 R139 controller 679/679 passes: a living startup evasive
+> recovery timeout now defers into the existing guarded quest loop. Death
+> retains normal town revival; missing self and unrelated errors remain fatal.
+> Actual route units remain 155/177, with final logout/save and visual gates open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-startup-recovery-r139.md).
+
 > 2026-09-16 R137/R138 controller 678/678 passes: q89 Taoist may use
 > the existing normal D2031→D2032 fallback after an unsafe/stalled search.
 > Both casters replenish twelve MP doses before town departure while retaining

@@ -1391,7 +1391,27 @@ async function stabilizeJourneyResume(owner, navigateNear, {
     });
     return { ...disposition, status: 'recovered', recovery };
   } catch (error) {
-    if (!playerIsDead(owner.snapshot)) throw error;
-    return { ...disposition, status: 'revived', revival: await reviveInTown(owner) };
+    if (playerIsDead(owner.snapshot)) {
+      return { ...disposition, status: 'revived', revival: await reviveInTown(owner) };
+    }
+    const actor = selfPlayer(owner);
+    const hp = observedPlayerHp(owner.snapshot);
+    const maxHp = Number(owner.snapshot?.playerMaxHp ?? actor?.maxHp ?? 0);
+    // This startup-only recovery runs before the normal per-quest typed
+    // recovery handler. A fresh living snapshot must enter that established
+    // path after its bounded wait instead of terminating the whole journey.
+    // Do not classify a missing/stale actor, a death, or an unrelated error as
+    // retryable.
+    if (actor?.dead === false && hp > 0 && maxHp > 0 &&
+        isLivingEvasiveRecoveryTimeout(owner.snapshot, error)) {
+      owner.record('diagnostic', {
+        type: 'livingResumeEvasiveRecoveryTimeoutRetry',
+        hp,
+        maxHp,
+        mapFileName: String(owner.snapshot?.mapFileName ?? ''),
+      });
+      return { ...disposition, status: 'evasiveRecoveryDeferred', hp, maxHp };
+    }
+    throw error;
   }
 }

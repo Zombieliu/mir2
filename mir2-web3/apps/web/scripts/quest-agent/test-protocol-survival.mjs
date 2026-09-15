@@ -1,6 +1,66 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
 import test from 'node:test';
-import { applyProtocolObservation } from './protocol-observation.mjs';
+import vm from 'node:vm';
+import { applyProtocolObservation, hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
+
+const runnerSource = await fs.readFile(new URL('./run-protocol-journey.mjs', import.meta.url), 'utf8');
+
+function runnerFunctionSource(name) {
+  const start = runnerSource.indexOf(`async function ${name}(`);
+  assert.notEqual(start, -1, `missing runner function ${name}`);
+  // This function takes a destructured options argument, so its first brace
+  // belongs to the parameter list rather than the executable body.
+  const signatureEnd = runnerSource.indexOf('} = {}) {', start);
+  assert.notEqual(signatureEnd, -1, `missing options boundary for ${name}`);
+  const open = signatureEnd + '} = {}) '.length;
+  let depth = 0;
+  let quote = null;
+  for (let index = open; index < runnerSource.length; index += 1) {
+    const character = runnerSource[index];
+    const next = runnerSource[index + 1];
+    if (quote) {
+      if (character === '\\') { index += 1; continue; }
+      if (character === quote) quote = null;
+      continue;
+    }
+    if (character === '/' && next === '/') {
+      index = runnerSource.indexOf('\n', index + 2);
+      if (index < 0) break;
+      continue;
+    }
+    if (character === '/' && next === '*') {
+      index = runnerSource.indexOf('*/', index + 2);
+      if (index < 0) break;
+      index += 1;
+      continue;
+    }
+    if (["'", '"', '`'].includes(character)) { quote = character; continue; }
+    if (character === '{') depth += 1;
+    if (character === '}' && --depth === 0) return runnerSource.slice(start, index + 1);
+  }
+  throw new Error(`unterminated runner function ${name}`);
+}
+
+function stabilizeJourneyResumeHarness(overrides = {}) {
+  const dependencies = {
+    journeyResumeDisposition: () => ({ status: 'evade' }),
+    canResumeStockedCombatExpedition: () => false,
+    playerIsDead: snapshot => snapshot?.entities?.[0]?.dead === true,
+    hpDrugCount: () => 1,
+    recoverHealthWhileEvading: async () => { throw new Error('Evasive HP recovery timed out'); },
+    selfPlayer: owner => owner.snapshot?.entities?.[0] ?? null,
+    observedPlayerHp: snapshot => Number(snapshot?.playerHp ?? 0),
+    isLivingEvasiveRecoveryTimeout: (snapshot, error) =>
+      Number(snapshot?.playerHp ?? 0) > 0 && String(error?.message ?? error) === 'Evasive HP recovery timed out',
+    reviveInTown: async () => ({ revived: true }),
+    startEmergencyHpRecovery: () => [],
+    String,
+    Number,
+    ...overrides,
+  };
+  return vm.runInNewContext(`(${runnerFunctionSource('stabilizeJourneyResume')})`, dependencies);
+}
 
 test('a healthy q98 finisher keeps enough held fuel for its last visible wounded soldier', () => {
   const snapshot = {
@@ -216,6 +276,73 @@ test('only a living exact evasive recovery timeout is retryable', () => {
     { playerHp: 102, playerMaxHp: 224 },
     new Error('No walk path'),
   ), false);
+
+  const freshLiving = {
+    playerObjectId: 1000,
+    playerHp: 109,
+    playerMaxHp: 180,
+    entities: [{ objectId: 1000, kind: 'selfPlayer', hp: 109, maxHp: 180, dead: false }],
+  };
+  assert.equal(hasAuthoritativePlayerDeath(freshLiving), false);
+  assert.equal(isLivingEvasiveRecoveryTimeout(
+    freshLiving,
+    new Error('Evasive HP recovery timed out'),
+  ), true);
+
+  const authoritativeDeath = structuredClone(freshLiving);
+  authoritativeDeath.playerHp = 0;
+  authoritativeDeath.entities[0].hp = 0;
+  authoritativeDeath.entities[0].dead = true;
+  assert.equal(hasAuthoritativePlayerDeath(authoritativeDeath), true);
+  assert.equal(isLivingEvasiveRecoveryTimeout(
+    authoritativeDeath,
+    new Error('Evasive HP recovery timed out'),
+  ), false);
+});
+
+test('startup recovery defers only a fresh living timeout into the guarded quest path', async () => {
+  const stabilize = stabilizeJourneyResumeHarness();
+  const diagnostics = [];
+  const owner = {
+    snapshot: {
+      mapFileName: 'D2031',
+      playerHp: 109,
+      playerMaxHp: 180,
+      entities: [{ objectId: 1000, kind: 'selfPlayer', hp: 109, maxHp: 180, dead: false }],
+    },
+    record: (_direction, payload) => diagnostics.push(payload),
+  };
+  const deferred = await stabilize(owner, async () => {});
+  assert.deepEqual({ ...deferred }, { status: 'evasiveRecoveryDeferred', hp: 109, maxHp: 180 });
+  assert.deepEqual(diagnostics.map(payload => ({ ...payload })), [{
+    type: 'livingResumeEvasiveRecoveryTimeoutRetry', hp: 109, maxHp: 180, mapFileName: 'D2031',
+  }]);
+
+  let revivals = 0;
+  const deadStabilize = stabilizeJourneyResumeHarness({
+    reviveInTown: async () => { revivals += 1; return { revived: true }; },
+  });
+  const deadOwner = {
+    snapshot: {
+      mapFileName: 'D2031', playerHp: 0, playerMaxHp: 180,
+      entities: [{ objectId: 1000, kind: 'selfPlayer', hp: 0, maxHp: 180, dead: true }],
+    },
+    record: () => assert.fail('death must revive rather than defer'),
+  };
+  assert.deepEqual({ ...await deadStabilize(deadOwner, async () => {}) }, {
+    status: 'revived', revival: { revived: true },
+  });
+  assert.equal(revivals, 1);
+
+  const missingSelf = stabilizeJourneyResumeHarness({ selfPlayer: () => null });
+  await assert.rejects(() => missingSelf({
+    snapshot: { playerHp: 109, playerMaxHp: 180, entities: [] }, record: () => {},
+  }, async () => {}), /Evasive HP recovery timed out/);
+
+  const unrelated = stabilizeJourneyResumeHarness({
+    recoverHealthWhileEvading: async () => { throw new Error('No walk path'); },
+  });
+  await assert.rejects(() => unrelated(owner, async () => {}), /No walk path/);
 });
 
 test('only living dangerous expeditions replan transient no-walk-path failures', () => {

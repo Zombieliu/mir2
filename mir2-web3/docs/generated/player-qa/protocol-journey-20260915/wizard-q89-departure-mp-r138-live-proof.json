@@ -1,0 +1,26 @@
+{
+  "trace": "C:/mir2-protocol-journey-20260911/Wizard.2026-09-15T23-36-13-656Z.trace.jsonl",
+  "sampling": {"cutoffSequence": 3405, "cutoffAt": "2026-09-15T23:42:41.705Z", "bytes": 2578996, "sha256": "580FCA3825D77E6D2CAE0761C823C6A4FA23A5AD25B5C21F2155A1DED6BFE865", "activeTrace": true},
+  "firstOwnerSnapshot": {
+    "sequence": 570,
+    "at": "2026-09-15T23:36:17.096Z",
+    "map": "0",
+    "gold": 12,
+    "playerMp": 152,
+    "playerMaxMp": 398,
+    "mpDrugSmall": {"quantity": 12, "uniqueId": 22, "container": "bag1"},
+    "quest89": {"stage": "inProgress", "priest": "2/3", "shiZombie": "3/3", "cursedZombie": "3/3"}
+  },
+  "laterOwnerSnapshots": [
+    {"sequence": 692, "at": "2026-09-15T23:36:29.032Z", "map": "0", "gold": 12, "playerMp": 152, "mpDrugSmall": 12},
+    {"sequence": 963, "at": "2026-09-15T23:37:04.485Z", "map": "0", "gold": 12, "playerMp": 152, "mpDrugSmall": 12}
+  ],
+  "receipts": {
+    "ordinarySale": false,
+    "ordinaryBuy": false,
+    "mpShopBuyAck": false,
+    "useItem": false,
+    "interpretation": "No sale, BuyItem, shop-buy acknowledgement, or UseItem event appears in this trace before the owner snapshots. The 12 MP drugs and gold 12 are present in the first post-StartGame owner snapshot; this sample does not prove that the R138 departure-floor increase caused a purchase."
+  },
+  "denominator": "155/177; no completion claim"
+}
