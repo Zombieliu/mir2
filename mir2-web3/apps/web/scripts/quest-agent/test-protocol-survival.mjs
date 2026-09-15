@@ -14,7 +14,7 @@ test('a healthy q98 finisher keeps enough held fuel for its last visible wounded
       { label: 'Kill WoomaSoldier', current: 2, required: 3 },
     ] }],
   };
-  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Taoist', snapshot), { minimum: 13, departure: 64 });
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Taoist', snapshot), { minimum: 13, departure: 100 });
   snapshot.entities[1].healthPercent = 100;
   assert.equal(journeyAmuletSupplyPolicyForQuest(98, 'Taoist', snapshot).minimum, 48);
   snapshot.entities[1].healthPercent = 19;
@@ -90,8 +90,8 @@ test('level-15 Taoist snake hunting does not require MP-only town trips', () => 
 });
 
 test('Taoist Wooma departure funds enough SoulFireBall casts for a full-health pull', () => {
-  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Taoist'), { minimum: 48, departure: 64 });
-  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(99, 'Taoist'), { minimum: 48, departure: 64 });
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Taoist'), { minimum: 48, departure: 100 });
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(99, 'Taoist'), { minimum: 48, departure: 100 });
   assert.ok(journeyAmuletSupplyPolicyForQuest(98, 'Taoist').minimum * 7 >= 285);
   assert.deepEqual(journeyAmuletSupplyPolicyForQuest(60, 'Taoist'), { minimum: 12, departure: 32 });
   assert.deepEqual(journeyAmuletSupplyPolicyForQuest(98, 'Wizard'), { minimum: 0, departure: 0 });
@@ -1521,6 +1521,41 @@ test('evasive recovery spends a remaining emergency scroll when a dense pack clo
   assert.equal(result.hp, 80);
   assert.ok(diagnostics.some(entry => entry.type === 'recoveryEmergencyEscapeAttempt'));
   assert.ok(diagnostics.some(entry => entry.type === 'recoveryEmergencyEscapeSuccess'));
+});
+
+test('safe-zone recovery ignores neutral residents and does not spend an escape', async () => {
+  const client = clientAt('0', 0);
+  Object.assign(client.snapshot, {
+    inSafeZone: true,
+    playerHp: 20,
+    playerMaxHp: 100,
+    playerObjectId: 1,
+    entities: [
+      { objectId: 1, kind: 'player', x: 288, y: 616, hp: 20, dead: false },
+      { objectId: 61, kind: 'monster', disposition: 'neutral', name: 'Guard', x: 289, y: 616, hp: 48 },
+      { objectId: 62, kind: 'monster', disposition: 'neutral', name: 'Deer', x: 288, y: 617, hp: 48 },
+      { objectId: 63, kind: 'monster', disposition: 'neutral', name: 'Scarecrow', x: 289, y: 617, hp: 48 },
+    ],
+  });
+  let escapeCalls = 0;
+  let sustainCalls = 0;
+  const result = await recoverHealthWhileEvading(client, async () => {
+    throw new Error('neutral safe-zone residents must not trigger retreat movement');
+  }, {
+    requiredRatio: 0.75,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscape: async () => { escapeCalls += 1; return { success: true }; },
+    sustain: async owner => {
+      sustainCalls += 1;
+      owner.snapshot.playerHp = 80;
+      owner.snapshot.entities[0].hp = 80;
+    },
+  });
+
+  assert.equal(result.hp, 80);
+  assert.equal(escapeCalls, 0);
+  assert.equal(sustainCalls, 1);
+  assert.equal(result.evasiveMoves, 0);
 });
 
 test('evasive recovery bias keeps a dungeon retreat moving toward its transfer', async () => {

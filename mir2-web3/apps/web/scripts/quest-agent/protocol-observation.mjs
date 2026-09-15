@@ -77,6 +77,7 @@ function removeEntity(snapshot, objectId) {
 function clearOldMapObservations(snapshot, self) {
   snapshot.entities = self ? [self] : [];
   snapshot.mapSnapshotPending = true;
+  delete snapshot.inSafeZone;
   snapshot.mapTransfers = [];
   snapshot.groundDrops = [];
   snapshot.activeNpcDialog = null;

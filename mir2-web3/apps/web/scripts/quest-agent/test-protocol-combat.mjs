@@ -4487,6 +4487,44 @@ test("cooldown waits preserve the attack budget and refresh from authoritative s
   assert.ok(client.events.some(event => event.type === "worldSnapshot"));
 });
 
+test("positive hits reset consecutive cooldown time during a long spell pull", async () => {
+  const quest = { questId: 6, stage: "InProgress", objectives: [objective("Kill HookingCat", 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [monster(60, "HookingCat", 16, 10)]), (owner, command) => {
+    if (command.type !== "magic") return;
+    owner.receive("ObjectHealth", state => {
+      const target = state.entities.find(entry => entry.objectId === 60);
+      target.hp -= 4;
+      if (target.hp === 0) {
+        target.dead = true;
+        state.questLog[0].objectives[0] = objective("Kill HookingCat", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    }, { objectId: 60 });
+  });
+  let waitsRemaining = 2;
+  let waited = 0;
+  const result = await completeQuestObjectives(client, {
+    questId: 6,
+    objectives: { kill: [{ monsterName: "HookingCat", spawnCandidates: [spawn("HookingCat")] }], item: [] },
+  }, async () => {}, {
+    ...settings,
+    maxAttackAttempts: 5,
+    maxCooldownWaitMs: 2_000,
+    attackResponseTimeout: 1_000,
+    approachRange: () => 6,
+    sleep: async ms => { waited += ms; },
+    action: async (owner, target) => {
+      if (waitsRemaining-- > 0) return { kind: "wait", targetId: target.objectId, delayMs: 650 };
+      owner.send({ type: "magic", targetId: target.objectId });
+      waitsRemaining = 2;
+      return { kind: "magic", targetId: target.objectId };
+    },
+  });
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(client.sent.filter(command => command.type === "magic").length, 5);
+  assert.equal(waited, 6_500);
+});
+
 test("a server cooldown that never changes fails after a bounded total wait", async () => {
   const quest = { questId: 6, stage: "InProgress", objectives: [objective("Kill HookingCat", 0, 1)] };
   const client = new FakeClient(snapshot(quest, [monster(60, "HookingCat", 16, 10)]));

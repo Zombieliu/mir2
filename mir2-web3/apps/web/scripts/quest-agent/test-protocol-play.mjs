@@ -383,6 +383,83 @@ test('critical navigation escapes an adjacent pack before sending another moveme
   assert.ok(client.sent.every(command => command.type === 'walk' || command.type === 'run'));
 });
 
+test('authoritative safe-zone residents do not trigger emergency escape', async () => {
+  const client = navigationClient();
+  client.snapshot.inSafeZone = true;
+  client.snapshot.playerHp = 20;
+  client.snapshot.playerMaxHp = 100;
+  const now = new Date().toISOString();
+  client.events.push(
+    { packet: 'ObjectStruck', direction: 'received', sequence: 4, payload: { objectId: 1, attackerId: 7001 }, at: now },
+    { packet: 'MapInformation', direction: 'received', sequence: 5, payload: { fileName: '0' }, at: now },
+  );
+  client.snapshot.entities.push(
+    { objectId: 8, kind: 'monster', disposition: 'neutral', name: 'Guard', x: 2, y: 1, hp: 20, dead: false },
+    { objectId: 9, kind: 'monster', disposition: 'neutral', name: 'Deer', x: 1, y: 2, hp: 20, dead: false },
+    { objectId: 10, kind: 'monster', disposition: 'neutral', name: 'Scarecrow', x: 2, y: 2, hp: 20, dead: false },
+  );
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    now: Date.now,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 3,
+    maxEmergencyEscapesPerNavigation: 2,
+    emergencyEscape: async () => { escapeCalls += 1; return { success: true }; },
+  });
+
+  const result = await navigateNear({ x: 3, y: 1 }, 0);
+
+  assert.equal(result.reached, true);
+  assert.equal(escapeCalls, 0);
+  assert.equal(client.diagnostics.length, 0);
+});
+
+test('a fresh explicit player-hit receipt still permits safe-zone emergency escape', async () => {
+  const client = navigationClient();
+  client.snapshot.inSafeZone = true;
+  client.snapshot.playerHp = 20;
+  client.snapshot.playerMaxHp = 100;
+  client.events.push({
+    packet: 'ObjectStruck',
+    direction: 'received',
+    sequence: 2,
+    payload: { objectId: 1, attackerId: 7001 },
+    at: new Date().toISOString(),
+  });
+  client.events.unshift({
+    packet: 'MapInformation',
+    direction: 'received',
+    sequence: 1,
+    payload: { fileName: '0' },
+    at: new Date().toISOString(),
+  });
+  client.wait = acknowledgeUnitMovement(client);
+  let escapeCalls = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    now: Date.now,
+    emergencyEscapeHpRatio: 0.65,
+    emergencyEscapeDangerDistance: 3,
+    maxEmergencyEscapesPerNavigation: 2,
+    emergencyEscape: async owner => {
+      escapeCalls += 1;
+      owner.snapshot.mapFileName = '0';
+      owner.snapshot.entities[0].x = 4;
+      owner.snapshot.entities[0].y = 4;
+      return { success: true };
+    },
+  });
+
+  const result = await navigateNear({ x: 6, y: 4 }, 0);
+
+  assert.equal(result.reached, false);
+  assert.equal(escapeCalls, 1);
+  assert.equal(client.snapshot.mapFileName, '0');
+  assert.equal(client.diagnostics[0].safeZoneAttackReceipt, true);
+});
+
 test('a deferred emergency escape becomes eligible again inside the same navigation', async () => {
   const client = navigationClient();
   client.snapshot.playerHp = 30;

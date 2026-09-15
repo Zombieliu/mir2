@@ -62,6 +62,7 @@ import {
   requiresExpeditionEscapeRestock,
   shouldPreferObjectiveMapOverCurrent,
   recoverHealthWhileEvading,
+  safeZoneBlocksEmergencyEscape,
   waitForPassiveHealthRecovery,
 } from './protocol-survival.mjs';
 import { createWizardKitingAction } from './protocol-kiting.mjs';
@@ -194,6 +195,7 @@ try {
       return quest ? questCombatApproachRange(owner, quest, target) : combatApproachRange(owner, target);
     };
     const emergencyEscapeForJourney = async owner => {
+      if (safeZoneBlocksEmergencyEscape(owner)) return false;
       if (isWizardQ89Expedition(owner?.snapshot) &&
           townTeleportCount(owner.snapshot) <= 0 &&
           randomTeleportCount(owner.snapshot) <= 0) return false;

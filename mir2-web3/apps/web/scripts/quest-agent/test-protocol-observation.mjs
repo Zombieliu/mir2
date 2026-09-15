@@ -220,6 +220,7 @@ test('remove and teleport-out retire entities from the visible observation', () 
 
 test('MapChanged clears old-map observations while retaining the relocated self', () => {
   const state = observedWorld();
+  state.inSafeZone = true;
   applyProtocolObservation(state, packet('MapChanged', {
     mapIndex: 1,
     fileName: '0122',
@@ -230,6 +231,7 @@ test('MapChanged clears old-map observations while retaining the relocated self'
   assert.equal(state.mapFileName, '0122');
   assert.equal(state.mapTitle, 'Mongchon Province');
   assert.equal(state.mapSnapshotPending, true);
+  assert.equal(state.inSafeZone, undefined);
   assert.deepEqual(state.mapTransfers, []);
   assert.deepEqual(state.entities.map(entity => entity.objectId), [1001]);
   assert.deepEqual({ x: state.entities[0].x, y: state.entities[0].y, direction: state.entities[0].direction }, { x: 330, y: 270, direction: 'Up' });
@@ -239,6 +241,7 @@ test('MapChanged clears old-map observations while retaining the relocated self'
 
 test('actual MapInformation clears stale AOI and waits for subsequent UserLocation landing', () => {
   const state = observedWorld();
+  state.inSafeZone = true;
   state.mapTransfers = [{ key: 'old-transfer', toMapFileName: '0115' }];
   applyProtocolObservation(state, packet('MapInformation', {
     bigMapIndex: 0,
@@ -257,6 +260,7 @@ test('actual MapInformation clears stale AOI and waits for subsequent UserLocati
     { fileName: state.mapFileName, title: state.mapTitle, mapIndex: state.mapIndex, pending: state.mapSnapshotPending },
     { fileName: '0', title: 'BichonProvince', mapIndex: 33, pending: true },
   );
+  assert.equal(state.inSafeZone, undefined);
   assert.deepEqual(state.entities.map(entity => entity.objectId), [1001]);
   assert.equal(state.entities[0].x, undefined, 'old-map x must not become the new-map landing');
   assert.equal(state.entities[0].y, undefined, 'old-map y must not become the new-map landing');

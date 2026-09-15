@@ -3,6 +3,7 @@ import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-nav
 import { delay } from './protocol-client.mjs';
 import { useSupplies } from './protocol-loadout.mjs';
 import { selfActionBlockMask } from './protocol-status.mjs';
+import { safeZoneBlocksEmergencyEscape } from './protocol-survival.mjs';
 
 export const selfPlayer = client => client.snapshot?.entities.find(e => e.objectId === client.snapshot.playerObjectId);
 export const distance = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
@@ -292,12 +293,16 @@ export function createNavigator(client, dependencies = {}) {
         continue;
       }
       lastMovementBlockMask = 0;
+      const safeZoneEscapeBlocked = safeZoneBlocksEmergencyEscape(client, { now });
+      const inSafeZone = client.snapshot?.inSafeZone === true;
       const nearbyHostiles = (client.snapshot?.entities ?? []).filter(entity =>
         entity?.kind === 'monster' && entity?.dead !== true && Number(entity?.hp ?? 1) > 0 &&
-        entity?.disposition !== 'friendly' && distance(self, entity) <= emergencyEscapeDangerDistance);
+        !inSafeZone && entity?.disposition !== 'friendly' &&
+        distance(self, entity) <= emergencyEscapeDangerDistance);
       const hpRatio = observedPlayerHp(client.snapshot) /
         Math.max(1, Number(client.snapshot.playerMaxHp));
-      const shouldEmergencyEscape = nearbyHostiles.length >= 2 ||
+      const safeZoneAttackReceipt = inSafeZone && !safeZoneEscapeBlocked;
+      const shouldEmergencyEscape = safeZoneAttackReceipt || nearbyHostiles.length >= 2 ||
         (nearbyHostiles.length > 0 && hpRatio <= emergencyEscapeCriticalHpRatio);
       if (emergencyEscape && !emergencyEscapeFailed && now() >= emergencyEscapeRetryAt &&
           emergencyEscapes < maxEmergencyEscapes &&
@@ -307,6 +312,7 @@ export function createNavigator(client, dependencies = {}) {
           type: 'navigationEmergencyEscapeAttempt',
           hpRatio,
           nearby: nearbyHostiles.length,
+          safeZoneAttackReceipt,
           dangerDistance: emergencyEscapeDangerDistance,
           from: before,
         });
@@ -335,6 +341,7 @@ export function createNavigator(client, dependencies = {}) {
                 hpRatio: observedPlayerHp(client.snapshot) /
                   Math.max(1, Number(client.snapshot.playerMaxHp)),
                 nearby: nearbyHostiles.length,
+                safeZoneAttackReceipt,
                 from: before,
                 to: {
                   mapFileName: String(client.snapshot.mapFileName),

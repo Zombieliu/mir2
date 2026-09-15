@@ -5,6 +5,38 @@ const REFRESH_TIMEOUT_MS = 12_000;
 const PASSIVE_RECOVERY_POLL_MS = 3_100;
 const DANGEROUS_EXPEDITION_QUEST_IDS = new Set([54, 60, 62, 65, 89, 98, 99, 113, 114]);
 
+/**
+ * A fresh authoritative safe-zone flag suppresses field-threat reactions. The
+ * only exception is a recent explicit player-hit receipt, which keeps this
+ * guard compatible with a real PvP attacker if one is ever exposed here.
+ */
+export function safeZoneBlocksEmergencyEscape(client, {
+  now = Date.now,
+  withinMs = 5_000,
+} = {}) {
+  if (client?.snapshot?.inSafeZone !== true) return false;
+  const playerObjectId = Number(client.snapshot?.playerObjectId);
+  if (!Number.isFinite(playerObjectId)) return true;
+  const nowMs = typeof now === 'function' ? Number(now()) : Number(now);
+  const windowMs = Math.max(0, Number(withinMs) || 0);
+  const mapBoundarySequence = (client.events ?? [])
+    .filter(event => event?.direction === 'received' &&
+      ['MapChanged', 'MapInformation', 'Revived', 'StartGame'].includes(String(event?.packet ?? '')))
+    .reduce((latest, event) => Math.max(latest, Number(event?.sequence) || 0), 0);
+  const hasRecentPlayerHit = (client.events ?? []).some(event => {
+    if (event?.direction !== 'received' ||
+        (Number(event?.sequence) || 0) <= mapBoundarySequence) return false;
+    const eventAt = Date.parse(String(event?.at ?? ''));
+    if (!Number.isFinite(eventAt) || !Number.isFinite(nowMs) ||
+        eventAt > nowMs || nowMs - eventAt > windowMs) return false;
+    const objectId = Number(event?.payload?.objectId);
+    if (objectId !== playerObjectId) return false;
+    if (event?.packet === 'DamageIndicator') return Number(event?.payload?.damage) > 0;
+    return event?.packet === 'ObjectStruck' && Number(event?.payload?.attackerId) > 0;
+  });
+  return !hasRecentPlayerHit;
+}
+
 export function hpRestockTargetForActiveQuests(snapshot, {
   fallback = 24,
   targets = {},
@@ -34,13 +66,13 @@ export function journeyAmuletSupplyPolicyForQuest(questId, className, snapshot =
       !DANGEROUS_EXPEDITION_QUEST_IDS.has(id)) return { minimum: 0, departure: 0 };
   // R97 measured 7 damage per SoulFireBall against a 285 HP WoomaSoldier.
   // Thirty-two casts cannot complete that full-health pull. Reserve forty-
-  // eight before acquisition and leave town with sixty-four for misses and
-  // the next short encounter; other expeditions retain their proven budget.
+  // eight before acquisition and leave town with one hundred for misses and
+  // the next two short encounters; other expeditions retain their proven budget.
   if (![98, 99].includes(id)) return { minimum: 12, departure: 32 };
   let minimum = 48;
   // Do not abandon q98's final measured WoomaSoldier after a reconnect when
   // the existing stack can finish its visible wound. This never funds a new
-  // full-health pull, and the town departure reserve remains sixty-four.
+  // full-health pull, and the town departure reserve remains one hundred.
   if (id === 98 && remainingPureKillQuestObjectives(snapshot, id) === 1 &&
       healthRatio(snapshot) >= 0.9) {
     const actor = snapshotPlayer(snapshot);
@@ -54,7 +86,7 @@ export function journeyAmuletSupplyPolicyForQuest(questId, className, snapshot =
       minimum = Math.min(minimum, Math.ceil(conservativeHp / 7) + 4);
     }
   }
-  return { minimum, departure: 64 };
+  return { minimum, departure: 100 };
 }
 
 /** A Taoist should not resume a dangerous kill expedition without spell fuel. */
@@ -710,24 +742,29 @@ export async function recoverHealthWhileEvading(client, navigateNear, {
     if (now() - startedAt >= timeoutMs) throw new Error('Evasive HP recovery timed out');
     const actor = snapshotPlayer(client.snapshot);
     if (!actor) throw new Error('Evasive HP recovery has no authoritative player');
+    const safeZoneEscapeBlocked = safeZoneBlocksEmergencyEscape(client, { now });
+    const inSafeZone = client.snapshot?.inSafeZone === true;
     const dangerous = livingHostiles(client.snapshot)
       .filter(entity => chebyshev(actor, entity) < dangerDistance)
+      .filter(() => !inSafeZone)
       .sort((left, right) => chebyshev(actor, left) - chebyshev(actor, right) ||
         Number(left?.objectId ?? 0) - Number(right?.objectId ?? 0));
 
     const adjacent = dangerous.filter(entity => chebyshev(actor, entity) <= 1).length;
     const withinThree = dangerous.filter(entity => chebyshev(actor, entity) <= 3).length;
+    const safeZoneAttackReceipt = inSafeZone && !safeZoneEscapeBlocked;
     if (typeof emergencyEscape === 'function' && !emergencyEscapeFailed &&
         now() >= emergencyEscapeRetryAt &&
         emergencyEscapes < Math.max(0, Number(maxEmergencyEscapes) || 0) &&
         healthRatio(client.snapshot) <= Math.max(0, Number(emergencyEscapeHpRatio) || 0) &&
-        (adjacent >= 2 || withinThree >= 3)) {
+        (safeZoneAttackReceipt || adjacent >= 2 || withinThree >= 3)) {
       const before = { x: Number(actor.x), y: Number(actor.y) };
       recordSurvivalDiagnostic(client, {
         type: 'recoveryEmergencyEscapeAttempt',
         hpRatio: healthRatio(client.snapshot),
         adjacent,
         withinThree,
+        safeZoneAttackReceipt,
         from: before,
       });
       try {

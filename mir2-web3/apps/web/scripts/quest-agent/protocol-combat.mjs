@@ -1552,6 +1552,18 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
           responseAggressor != null;
       }, `target ${objectId} combat response`, settings.attackResponseTimeout);
       noResponse = 0;
+      const live = entityById(client.snapshot, objectId);
+      const targetProgressed = live?.dead === true || Number(live?.hp) <= 0 ||
+        (beforeHp != null && finiteHp(live?.hp) != null && finiteHp(live.hp) < beforeHp) ||
+        (beforePercent != null && finiteHp(live?.healthPercent) != null && live.healthPercent < beforePercent) ||
+        objectiveAdvanced(client.snapshot, questIdFor(pending), pending, beforeProgress) ||
+        receivedPacketAfter(client, afterSequence, "ObjectDied", objectId);
+      if (targetProgressed) {
+        // Bound consecutive unavailable time, rather than accumulating every
+        // ordinary cooldown across a long, progressing SoulFireBall pull.
+        cooldownWaitMs = 0;
+        cooldownWaitSinceRefreshMs = 0;
+      }
     } catch (error) {
       const movedTarget = entityById(client.snapshot, objectId);
       if (beforePosition && movedTarget && validPoint(movedTarget) &&
