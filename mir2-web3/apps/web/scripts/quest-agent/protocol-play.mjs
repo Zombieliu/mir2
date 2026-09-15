@@ -120,6 +120,12 @@ function liveTransferObstacles(snapshot, staticWalkableOverrides) {
   return obstacles;
 }
 
+function explicitForbiddenPoints(options) {
+  return (options?.forbiddenPoints ?? [])
+    .filter(point => Number.isFinite(Number(point?.x)) && Number.isFinite(Number(point?.y)))
+    .map(point => ({ x: Number(point.x), y: Number(point.y) }));
+}
+
 function hostileClearanceObstacles(snapshot, options, memory, observedAt, memoryDurationMs) {
   const radius = nonnegativeIntegerOption(options?.hostileAvoidanceRadius, 0);
   const allowed = new Set((options?.allowedHostileObjectIds ?? []).map(Number));
@@ -380,6 +386,7 @@ export function createNavigator(client, dependencies = {}) {
       const dynamicObstacles = [
         ...rejected,
         ...liveTransferObstacles(client.snapshot, staticWalkableOverrides),
+        ...explicitForbiddenPoints(options),
         ...hostileClearanceObstacles(
           client.snapshot,
           options,

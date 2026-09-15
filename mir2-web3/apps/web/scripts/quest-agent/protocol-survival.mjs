@@ -160,8 +160,9 @@ export function questRetreatProfile(questId, className = '') {
   const rangedMinePassage = id === 65 && fragileMineExpedition;
   const warriorWoomaHunt = id === 99 && normalizedClass === 'warrior';
   const warriorMineralMineHunt = id === 118 && normalizedClass === 'warrior';
+  const warriorPrajnaHunt = [122, 123].includes(id) && normalizedClass === 'warrior';
   return {
-    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 98, 99, 113, 114].includes(id),
+    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 98, 99, 113, 114, 122, 123].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
     // turns the D401 crossing into an unrewarded fight: the surrounding pack
     // converges while Wizard/Taoist spend the MP reserved for D406. Keep the
@@ -222,6 +223,13 @@ export function questRetreatProfile(questId, className = '') {
       // normal proven-aggressor clearing loop can open the pack.
       maxTargetAdjacent: 2,
       maxTargetNearby: 5,
+    } : warriorPrajnaHunt ? {
+      // R87 proved D2061 contains live objective bone monsters omitted from
+      // the imported source list. A level-29 Warrior reduced one BoneArcher
+      // to 37% before a joining pack switched it to unrelated ghouls. Admit
+      // the observed pack and finish that bounded objective while healthy.
+      maxTargetAdjacent: 2,
+      maxTargetNearby: 5,
     } : {}),
     ...(rangedWoomaExpedition ? {
       // R97 reached a FlamingWooma through the zero-clearance corridor and
@@ -229,8 +237,16 @@ export function questRetreatProfile(questId, className = '') {
       // A healthy ranged character should land the bounded final cast rather
       // than discard all of that public-protocol combat progress.
       focusTargetThroughAggressors: true,
-      finishableTargetHealthRatio: 0.1,
+      // R106 repeatedly returned to the same WoomaFighter at 19-24% and full
+      // player health, then abandoned it when another pack entered the
+      // approach window. Preserve that accumulated public-combat progress at
+      // the measured 25% boundary; the 70% player-health floor still wins.
+      finishableTargetHealthRatio: 0.25,
       finishableTargetMinimumPlayerHpRatio: 0.7,
+    } : warriorPrajnaHunt ? {
+      focusTargetThroughAggressors: true,
+      finishableTargetHealthRatio: 0.5,
+      finishableTargetMinimumPlayerHpRatio: 0.65,
     } : {}),
   };
 }

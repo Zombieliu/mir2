@@ -196,6 +196,106 @@ test("a multi-map quest clears an incomplete same-map objective before crossing 
   assert.deepEqual(travelled, []);
 });
 
+test("a live objective omitted from the spawn manifest is fought on the current map", async () => {
+  const quest = {
+    questId: 122,
+    stage: "InProgress",
+    objectives: [objective("Kill BoneArcher", 0, 1)],
+  };
+  const client = new FakeClient(snapshot(quest, [monster(122, "BoneArcher")]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { hp: 0, dead: true });
+      state.questLog[0].objectives = [objective("Kill BoneArcher", 1, 1)];
+      state.questLog[0].stage = "ReadyToTurnIn";
+    });
+  });
+  client.snapshot.mapFileName = "D2061";
+  const travelled = [];
+  const travel = async mapFileName => travelled.push(mapFileName);
+  travel.canReach = async () => true;
+
+  const result = await completeQuestObjectives(client, {
+    questId: 122,
+    objectives: { kill: [{
+      monsterName: "BoneArcher",
+      spawnCandidates: [{ ...spawn("BoneArcher"), mapFileName: "D2062" }],
+    }], item: [] },
+  }, navigateClientNear(client), { ...settings, travel });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(travelled, []);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [122]);
+});
+
+test("an allowed wounded objective is resumed before a closer full-health peer", async () => {
+  const quest = {
+    questId: 98,
+    stage: "InProgress",
+    objectives: [objective("Kill WoomaSoldier", 0, 1)],
+  };
+  const client = new FakeClient(snapshot(quest, [
+    monster(60, "WoomaSoldier", 11, 10),
+    monster(61, "WoomaSoldier", 15, 10, { hp: 5, maxHp: 20 }),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { hp: 0, dead: true });
+      state.questLog[0].objectives = [objective("Kill WoomaSoldier", 1, 1)];
+      state.questLog[0].stage = "ReadyToTurnIn";
+    });
+  });
+
+  const result = await completeQuestObjectives(client, {
+    questId: 98,
+    objectives: { kill: [{ monsterName: "WoomaSoldier", spawnCandidates: [spawn("WoomaSoldier")] }], item: [] },
+  }, navigateClientNear(client), { ...settings, maxTargetNearby: 5 });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [61]);
+});
+
+test("a healthy player keeps approaching a 25-percent objective when a pack appears", async () => {
+  const quest = {
+    questId: 99,
+    stage: "InProgress",
+    objectives: [objective("Kill WoomaFighter", 0, 1)],
+  };
+  const target = monster(70, "WoomaFighter", 20, 10, { hp: 5, maxHp: 20 });
+  const client = new FakeClient(snapshot(quest, [target]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(target, { hp: 0, dead: true });
+      state.questLog[0].objectives = [objective("Kill WoomaFighter", 1, 1)];
+      state.questLog[0].stage = "ReadyToTurnIn";
+    });
+  });
+  const navigate = async (destination, desiredDistance, stopWhen) => {
+    client.snapshot.entities.push(
+      monster(71, "WoomaWarrior", 20, 9),
+      monster(72, "WoomaWarrior", 20, 11),
+    );
+    assert.equal(stopWhen(), false, "finishable target must survive the approach pack check");
+    Object.assign(client.snapshot.entities[0], { x: destination.x - desiredDistance, y: destination.y });
+    return { reached: true, successfulSteps: 1 };
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 99,
+    objectives: { kill: [{ monsterName: "WoomaFighter", spawnCandidates: [spawn("WoomaFighter")] }], item: [] },
+  }, navigate, {
+    ...settings,
+    focusTargetThroughAggressors: true,
+    finishableTargetHealthRatio: 0.25,
+    finishableTargetMinimumPlayerHpRatio: 0.7,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 1,
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [70]);
+});
+
 test("an expedition can prefer its configured objective map over a denser same-map spawn", async () => {
   const quest = {
     questId: 54,

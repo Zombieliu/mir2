@@ -161,6 +161,16 @@ export async function combatAction(client, target) {
     }
   }
 
+  return meleeCombatAction(client, target);
+}
+
+/** Perform one authoritative basic attack without spending class ammunition. */
+export async function meleeCombatAction(client, target) {
+  const actor = player(client?.snapshot);
+  if (!actor) throw new Error("Cannot fight without the authoritative player entity");
+  if (!target || target.dead || !Number.isInteger(Number(target.objectId))) {
+    throw new Error("Combat target must be a live authoritative entity");
+  }
   const command = { type: "attack", objectId: Number(target.objectId) };
   client.send(command);
   return { kind: "attack", targetId: Number(target.objectId), command };

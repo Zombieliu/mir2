@@ -953,7 +953,25 @@ function selectTargetPlan(snapshot, pending) {
   const currentMap = String(snapshot?.mapFileName ?? "");
   if (pending.kind === "kill") {
     const spawns = sameMapSpawns(pending.route.spawnCandidates, currentMap);
-    return spawns.length ? { monsterNames: [pending.route.monsterName], requiresHarvest: false, spawns } : null;
+    if (spawns.length) {
+      return { monsterNames: [pending.route.monsterName], requiresHarvest: false, spawns };
+    }
+    // A live shared-Zone actor is stronger evidence than a stale or incomplete
+    // imported spawn manifest. Fight the visible objective on this map instead
+    // of crossing the same hostile field solely to reach a listed source.
+    const live = (snapshot?.entities ?? []).find(entity =>
+      isLiveMonster(entity) && sameName(entity.name, pending.route.monsterName) && validPoint(entity));
+    return live ? {
+      monsterNames: [pending.route.monsterName],
+      requiresHarvest: false,
+      spawns: [{
+        monsterName: pending.route.monsterName,
+        mapFileName: currentMap,
+        position: { x: Number(live.x), y: Number(live.y) },
+        spread: 0,
+        count: 1,
+      }],
+    } : null;
   }
   const sources = (pending.route.sources ?? []).map((source) => ({
     source,
@@ -1569,7 +1587,8 @@ async function approachCombatTarget(
     if (liveTarget) {
       const liveHostiles = (client.snapshot?.entities ?? []).filter(isPotentialHostileMonster);
       const risk = targetPackRisk(liveTarget, liveHostiles);
-      if (!targetRiskAllowed(risk, settings)) {
+      if (!targetRiskAllowed(risk, settings) &&
+          !shouldFinishLowHealthTarget(client, liveTarget, settings)) {
         unsafeRisk = risk;
         return true;
       }
@@ -2203,17 +2222,20 @@ function threatHealth(entity) {
 
 function shouldFinishLowHealthTarget(client, target, settings) {
   if (!(settings.finishableTargetHealthRatio > 0)) return false;
-  const targetHp = finiteHp(target?.hp);
-  const targetMaxHp = finiteHp(target?.maxHp);
-  const targetPercent = finiteHp(target?.healthPercent);
-  const targetRatio = targetHp != null && targetMaxHp > 0
-    ? targetHp / targetMaxHp
-    : (targetPercent != null ? targetPercent / 100 : Number.POSITIVE_INFINITY);
+  const targetRatio = targetRemainingHealthRatio(target);
   if (targetRatio > settings.finishableTargetHealthRatio) return false;
   const player = selectPlayer(client.snapshot);
   const playerHp = Number(client.snapshot?.playerHp ?? player?.hp ?? 0);
   const playerMaxHp = Number(client.snapshot?.playerMaxHp ?? player?.maxHp ?? 0);
   return playerMaxHp > 0 && playerHp / playerMaxHp >= settings.finishableTargetMinimumPlayerHpRatio;
+}
+
+function targetRemainingHealthRatio(target) {
+  const hp = finiteHp(target?.hp);
+  const maxHp = finiteHp(target?.maxHp);
+  const percent = finiteHp(target?.healthPercent);
+  if (hp != null && maxHp > 0) return hp / maxHp;
+  return percent != null ? percent / 100 : Number.POSITIVE_INFINITY;
 }
 
 function recentEvent(event, cutoff) {
@@ -2391,9 +2413,12 @@ function nearestAvailableLiveMonster(client, monsterNames, unavailableCorpses, s
     .map(entity => ({
       entity,
       risk: targetPackRisk(entity, liveHostiles),
+      remainingHealthRatio: targetRemainingHealthRatio(entity),
     }))
     .filter(candidate => targetRiskAllowed(candidate.risk, settings))
     .sort((left, right) =>
+      Number(left.remainingHealthRatio >= 1) - Number(right.remainingHealthRatio >= 1) ||
+      left.remainingHealthRatio - right.remainingHealthRatio ||
       left.risk.adjacent - right.risk.adjacent ||
       left.risk.nearby - right.risk.nearby ||
       distance(player, left.entity) - distance(player, right.entity) ||

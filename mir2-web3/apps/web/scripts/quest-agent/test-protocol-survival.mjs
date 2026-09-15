@@ -1136,9 +1136,21 @@ test('ranged Wooma hunts finish a nearly dead target only while the caster is he
     for (const className of ['Wizard', 'Taoist']) {
       const profile = questRetreatProfile(questId, className);
       assert.equal(profile.focusTargetThroughAggressors, true);
-      assert.equal(profile.finishableTargetHealthRatio, 0.1);
+      assert.equal(profile.finishableTargetHealthRatio, 0.25);
       assert.equal(profile.finishableTargetMinimumPlayerHpRatio, 0.7);
     }
+  }
+});
+
+test('q122/q123 Warrior resumes a damaged live Prajna objective through the measured pack', () => {
+  for (const questId of [122, 123]) {
+    const profile = questRetreatProfile(questId, 'Warrior');
+    assert.equal(profile.maxTargetAdjacent, 2);
+    assert.equal(profile.maxTargetNearby, 5);
+    assert.equal(profile.focusTargetThroughAggressors, true);
+    assert.equal(profile.finishableTargetHealthRatio, 0.5);
+    assert.equal(profile.finishableTargetMinimumPlayerHpRatio, 0.65);
+    assert.equal(profile.allowLowHealthFollowerRecovery, true);
   }
 });
 

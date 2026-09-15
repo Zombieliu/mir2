@@ -106,6 +106,39 @@ test('Taoist SoulFireBall uses the same bounded ranged retreat with an equipped 
   assert.ok(Math.max(Math.abs(owner.x - 5), Math.abs(owner.y - 5)) <= 3);
 });
 
+test('ranged retreat never selects or crosses a live map-transfer cell', async () => {
+  const owner = player();
+  const target = monster(30, 5, 7);
+  const secondThreat = monster(31, 6, 5);
+  const client = clientFixture([owner, target, secondThreat], {
+    mapTransfers: [{
+      key: 'cave-exit',
+      mapFileName: 'test',
+      bounds: { minX: 2, maxX: 4, minY: 2, maxY: 4 },
+    }],
+  });
+  const navigationCalls = [];
+  navigationCalls.client = client;
+  const wrapped = createWizardKitingAction(
+    async () => ({ kind: 'magic', targetId: target.objectId }),
+    directNavigator(navigationCalls),
+    { loadCollisionMap: async () => openMap() },
+  );
+
+  await wrapped(client, target);
+  assert.equal(navigationCalls.length, 1);
+  const { destination, options } = navigationCalls[0];
+  assert.equal(
+    destination.x >= 2 && destination.x <= 4 && destination.y >= 2 && destination.y <= 4,
+    false,
+  );
+  assert.deepEqual(options.forbiddenPoints, [
+    { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 },
+    { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 },
+    { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 4, y: 4 },
+  ]);
+});
+
 test('authoritative partial retreat progress continues the bounded ranged fight', async () => {
   const owner = player();
   const target = monster(20, 7, 5);

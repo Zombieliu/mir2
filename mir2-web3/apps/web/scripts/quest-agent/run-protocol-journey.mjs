@@ -59,6 +59,7 @@ import {
   waitForPassiveHealthRecovery,
 } from './protocol-survival.mjs';
 import { createWizardKitingAction } from './protocol-kiting.mjs';
+import { questCombatAction, questCombatApproachRange } from './protocol-quest-combat-policy.mjs';
 import {
   canUseSafeDeerFunding,
   collectSafeFundingVenison,
@@ -662,10 +663,13 @@ try {
         if (q.objectives.kill.length || q.objectives.item.length) {
           const { completeQuestObjectives } = await import('./protocol-combat.mjs');
           const retreatProfile = questRetreatProfile(id, className);
-          const playerCombatAction = createWizardKitingAction(combatAction, navigate, {
+          const objectiveCombatAction = (owner, target) => questCombatAction(owner, q, target);
+          const objectiveApproachRange = (owner, target) => questCombatApproachRange(owner, q, target);
+          const playerCombatAction = createWizardKitingAction(objectiveCombatAction, navigate, {
             maxRetreatSteps,
             maxRetreatCellsPerTarget: maxAttackAttempts * maxRetreatSteps,
             fightWhenBlocked: true,
+            approachRange: objectiveApproachRange,
           });
           record.objectives = await completeQuestObjectives(client, q, navigate, {
             prepare: async owner => {
@@ -681,7 +685,7 @@ try {
             // window without ever taking damage. Quarantine that exact actor
             // after twenty seconds and select another live quest target.
             maxMovingTargetNoProgressMs: 20_000,
-            approachRange: combatApproachRange,
+            approachRange: objectiveApproachRange,
             // Shared-zone projectile resolution and the authoritative quest
             // award can arrive more than seven seconds after the cast. R45
             // observed the death/progress packet at 7.18s, just after the old

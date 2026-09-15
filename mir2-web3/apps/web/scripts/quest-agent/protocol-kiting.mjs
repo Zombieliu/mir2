@@ -18,6 +18,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
   const maxTargetDistance = positiveInteger(options.maxTargetDistance, 9);
   const maxExpanded = positiveInteger(options.maxExpanded, 256);
   const fightWhenBlocked = options.fightWhenBlocked === true;
+  const approachRange = options.approachRange ?? combatApproachRange;
   const maps = new Map();
   let encounterKey = null;
   let encounterRetreatedCells = 0;
@@ -30,7 +31,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
     // combatApproachRange is authoritative for both Wizard projectile spells
     // and Taoist SoulFireBall with an equipped Amulet. Warriors and casters
     // without a usable ranged loadout remain at range one and never kite.
-    const rangedReady = combatApproachRange(client, target) > 1;
+    const rangedReady = approachRange(client, target) > 1;
     const closeThreat = hostiles.some(entity => distance(actor, entity) <= triggerDistance);
     if (!rangedReady || !closeThreat) return baseAction(client, target);
     if (!Number.isSafeInteger(targetId) || targetId <= 0) {
@@ -54,10 +55,14 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
     }
     const stepBudget = Math.min(maxRetreatSteps, remainingBudget);
     if (!maps.has(mapId)) maps.set(mapId, await loadCollisionMap(mapId));
+    const transferHazards = liveTransferPoints(client.snapshot, mapId);
     const plan = chooseRetreatPlan({
       map: maps.get(mapId), actor, target, hostiles,
-      dynamicObstacles: (client.snapshot?.entities ?? []).filter(entity =>
-        Number(entity?.objectId) !== Number(actor.objectId) && entity?.dead !== true),
+      dynamicObstacles: [
+        ...(client.snapshot?.entities ?? []).filter(entity =>
+          Number(entity?.objectId) !== Number(actor.objectId) && entity?.dead !== true),
+        ...transferHazards,
+      ],
       stepBudget, maxTargetDistance, maxExpanded,
     });
     if (!plan) {
@@ -74,6 +79,7 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
       navigation = await navigateNear(plan.destination, 0, () => false, {
         maxSuccessfulSteps: stepBudget,
         maxAttempts: maxNavigationAttempts,
+        ...(transferHazards.length ? { forbiddenPoints: transferHazards } : {}),
       });
     } catch (error) {
       const navigationBlocked = /^No walk path\b/.test(String(error?.message ?? ''));
@@ -219,6 +225,23 @@ function minimumDistance(point, entities) {
 
 function entityById(snapshot, objectId) {
   return (snapshot?.entities ?? []).find(entity => Number(entity?.objectId) === Number(objectId));
+}
+
+function liveTransferPoints(snapshot, mapId) {
+  const points = [];
+  for (const transfer of snapshot?.mapTransfers ?? []) {
+    if (String(transfer?.mapFileName ?? mapId) !== String(mapId)) continue;
+    const bounds = transfer?.bounds;
+    const minX = Number(bounds?.minX);
+    const maxX = Number(bounds?.maxX);
+    const minY = Number(bounds?.minY);
+    const maxY = Number(bounds?.maxY);
+    if (![minX, maxX, minY, maxY].every(Number.isInteger) || minX > maxX || minY > maxY) continue;
+    for (let y = minY; y <= maxY; y += 1) {
+      for (let x = minX; x <= maxX; x += 1) points.push({ x, y });
+    }
+  }
+  return points;
 }
 
 function validPoint(value) {
