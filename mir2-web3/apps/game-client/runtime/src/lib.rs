@@ -301,6 +301,10 @@ struct NativeSoakCounts {
     additive_cache_entries: usize,
     additive_cache_live_entries: usize,
     additive_asset_count: usize,
+    image_asset_count: usize,
+    image_data_bytes: usize,
+    native_queue_messages: usize,
+    native_queue_bytes: usize,
 }
 
 /// Take a renderer-only snapshot without touching ECS entities or the native
@@ -334,7 +338,40 @@ fn native_soak_counts(
         additive_cache_entries: additive_cache.len(),
         additive_cache_live_entries: additive_cache.live_len(additive_materials),
         additive_asset_count: additive_materials.len(),
+        image_asset_count: 0,
+        image_data_bytes: 0,
+        native_queue_messages: 0,
+        native_queue_bytes: 0,
     }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_image_asset_counts(images: &Assets<Image>) -> (usize, usize) {
+    images.iter().fold((0, 0), |(count, bytes), (_, image)| {
+        (
+            count.saturating_add(1),
+            bytes.saturating_add(image.data.as_ref().map_or(0, Vec::len)),
+        )
+    })
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_soak_counts_with_runtime(
+    registry: &SceneRegistry,
+    effect_state: &RuntimeEffectRenderState,
+    additive_cache: &additive_material::CrystalAdditiveMaterialCache,
+    additive_materials: &Assets<additive_material::CrystalAdditiveMaterial>,
+    images: &Assets<Image>,
+    native: &native_ingest::NativeInbound,
+) -> NativeSoakCounts {
+    let mut counts = native_soak_counts(registry, effect_state, additive_cache, additive_materials);
+    let (image_asset_count, image_data_bytes) = native_image_asset_counts(images);
+    let queue = native.diagnostics();
+    counts.image_asset_count = image_asset_count;
+    counts.image_data_bytes = image_data_bytes;
+    counts.native_queue_messages = queue.message_count;
+    counts.native_queue_bytes = queue.retained_bytes;
+    counts
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -373,6 +410,10 @@ fn native_soak_metrics_json(
         "additiveCacheEntries": counts.additive_cache_entries,
         "additiveCacheLiveEntries": counts.additive_cache_live_entries,
         "additiveAssetCount": counts.additive_asset_count,
+        "imageAssetCount": counts.image_asset_count,
+        "imageDataBytes": counts.image_data_bytes,
+        "nativeQueueMessages": counts.native_queue_messages,
+        "nativeQueueBytes": counts.native_queue_bytes,
     })
     .to_string()
 }
@@ -388,6 +429,8 @@ fn emit_native_soak_metrics(
     effect_state: Res<RuntimeEffectRenderState>,
     additive_cache: Res<additive_material::CrystalAdditiveMaterialCache>,
     additive_materials: Res<Assets<additive_material::CrystalAdditiveMaterial>>,
+    images: Res<Assets<Image>>,
+    native: Res<native_ingest::NativeInbound>,
     mut clock: Local<NativeSoakMetricsClock>,
 ) {
     if !clock.initialized {
@@ -409,11 +452,13 @@ fn emit_native_soak_metrics(
     }
     clock.last_sample_ms = Some(elapsed_ms);
 
-    let counts = native_soak_counts(
+    let counts = native_soak_counts_with_runtime(
         &registry,
         &effect_state,
         &additive_cache,
         &additive_materials,
+        &images,
+        &native,
     );
     let line = native_soak_metrics_json(std::process::id(), elapsed_ms, &counts);
     eprintln!("[native-soak] {line}");
@@ -9239,5 +9284,37 @@ mod native_soak_metrics_tests {
         assert_eq!(stale.additive_cache_entries, 1);
         assert_eq!(stale.additive_cache_live_entries, 0);
         assert_eq!(stale.additive_asset_count, 0);
+    }
+
+    #[test]
+    fn native_image_asset_counts_sum_cpu_payload_bytes() {
+        let mut images = Assets::<Image>::default();
+        let mut image_with_pixels = Image::default();
+        image_with_pixels.data = Some(vec![0xAB; 17]);
+        images.add(image_with_pixels);
+        let mut image_without_pixels = Image::default();
+        image_without_pixels.data = None;
+        images.add(image_without_pixels);
+
+        assert_eq!(native_image_asset_counts(&images), (2, 17));
+    }
+
+    #[test]
+    fn native_soak_metrics_json_includes_memory_diagnostic_fields() {
+        let counts = NativeSoakCounts {
+            image_asset_count: 2,
+            image_data_bytes: 17,
+            native_queue_messages: 3,
+            native_queue_bytes: 4096,
+            ..NativeSoakCounts::default()
+        };
+        let payload: serde_json::Value =
+            serde_json::from_str(&native_soak_metrics_json(4_242, 12_345, &counts))
+                .expect("native soak metrics should be valid JSON");
+
+        assert_eq!(payload["imageAssetCount"], 2);
+        assert_eq!(payload["imageDataBytes"], 17);
+        assert_eq!(payload["nativeQueueMessages"], 3);
+        assert_eq!(payload["nativeQueueBytes"], 4096);
     }
 }

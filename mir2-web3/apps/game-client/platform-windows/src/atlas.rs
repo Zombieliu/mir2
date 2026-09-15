@@ -77,6 +77,131 @@ static ORIGINAL_FRAME_GEOMETRY_CACHE: OnceLock<
 static ORIGINAL_FRAME_PIXEL_CACHE: OnceLock<Mutex<OriginalFramePixelCache>> = OnceLock::new();
 static RENDER_TRACE_STATE_LOGS: AtomicUsize = AtomicUsize::new(0);
 
+const NATIVE_SOAK_METRICS_INTERVAL_MS: u64 = 10_000;
+
+/// Native atlas ownership counters used by the opt-in soak diagnostics. These
+/// values describe CPU-side retained state; Bevy's asset registry count alone
+/// cannot show how much decoded pixel memory is held by atlas caches.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct NativeAtlasSoakMetrics {
+    pub starter_atlas_pages: usize,
+    pub starter_atlas_rects: usize,
+    pub starter_atlas_cpu_pixel_bytes: usize,
+    pub geometry_cache_libraries: usize,
+    pub geometry_cache_frames: usize,
+    pub pixel_cache_entries: usize,
+    pub pixel_cache_rgba_bytes: usize,
+}
+
+fn starter_atlas_manifest_counts(index: Option<&StarterAtlasIndex>) -> (usize, usize) {
+    index
+        .map(|index| {
+            (
+                index.pages.len(),
+                index.pages.iter().map(|page| page.rects.len()).sum(),
+            )
+        })
+        .unwrap_or_default()
+}
+
+fn native_atlas_soak_metrics() -> NativeAtlasSoakMetrics {
+    let (starter_atlas_pages, starter_atlas_rects) =
+        starter_atlas_manifest_counts(starter_atlas_index());
+    let starter_atlas_cpu_pixel_bytes = STARTER_ATLAS_PIXELS
+        .get()
+        .and_then(Option::as_ref)
+        .map(|pages| pages.values().map(|page| page.rgba.len()).sum::<usize>())
+        .unwrap_or_default();
+    let (geometry_cache_libraries, geometry_cache_frames) = ORIGINAL_FRAME_GEOMETRY_CACHE
+        .get()
+        .and_then(|cache| cache.lock().ok())
+        .map(|cache| {
+            (
+                cache.len(),
+                cache
+                    .values()
+                    .filter_map(Option::as_ref)
+                    .map(HashMap::len)
+                    .sum(),
+            )
+        })
+        .unwrap_or_default();
+    let (pixel_cache_entries, pixel_cache_rgba_bytes) = ORIGINAL_FRAME_PIXEL_CACHE
+        .get()
+        .and_then(|cache| cache.lock().ok())
+        .map(|cache| {
+            (
+                cache.frames.len(),
+                cache
+                    .frames
+                    .values()
+                    .filter_map(Option::as_ref)
+                    .map(|page| page.rgba.len())
+                    .sum(),
+            )
+        })
+        .unwrap_or_default();
+
+    NativeAtlasSoakMetrics {
+        starter_atlas_pages,
+        starter_atlas_rects,
+        starter_atlas_cpu_pixel_bytes,
+        geometry_cache_libraries,
+        geometry_cache_frames,
+        pixel_cache_entries,
+        pixel_cache_rgba_bytes,
+    }
+}
+
+#[derive(Default)]
+pub(crate) struct NativeAtlasSoakMetricsClock {
+    initialized: bool,
+    enabled: bool,
+    last_sample_ms: Option<u64>,
+}
+
+/// Emit atlas CPU ownership counters at the same opt-in 10-second cadence as
+/// the shared runtime sampler. Cache locks and full byte summation happen only
+/// when a line is due, never on the normal per-frame path.
+pub fn emit_native_atlas_soak_metrics(
+    time: bevy::prelude::Res<bevy::prelude::Time>,
+    mut clock: bevy::prelude::Local<NativeAtlasSoakMetricsClock>,
+) {
+    if !clock.initialized {
+        clock.enabled = std::env::var("MIR2_NATIVE_SOAK_METRICS")
+            .map(|value| value.trim() == "1")
+            .unwrap_or(false);
+        clock.initialized = true;
+    }
+    if !clock.enabled {
+        return;
+    }
+
+    let elapsed_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    if clock
+        .last_sample_ms
+        .is_some_and(|last| elapsed_ms.saturating_sub(last) < NATIVE_SOAK_METRICS_INTERVAL_MS)
+    {
+        return;
+    }
+    clock.last_sample_ms = Some(elapsed_ms);
+
+    let metrics = native_atlas_soak_metrics();
+    let line = json!({
+        "processId": std::process::id(),
+        "timestampMs": elapsed_ms,
+        "starterAtlasPages": metrics.starter_atlas_pages,
+        "starterAtlasRects": metrics.starter_atlas_rects,
+        "starterAtlasCpuPixelBytes": metrics.starter_atlas_cpu_pixel_bytes,
+        "geometryCacheLibraries": metrics.geometry_cache_libraries,
+        "geometryCacheFrames": metrics.geometry_cache_frames,
+        "pixelCacheEntries": metrics.pixel_cache_entries,
+        "pixelCacheRgbaBytes": metrics.pixel_cache_rgba_bytes,
+        "pixelCacheLimit": ORIGINAL_FRAME_PIXEL_CACHE_LIMIT,
+    });
+    eprintln!("[native-soak-atlas] {line}");
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct OriginalFrameGeometry {
     pub(crate) width: u32,
@@ -2025,6 +2150,29 @@ mod tests {
         assert_eq!(index.rect_by_path["/original-ui/Monster/004/0.png"], (1, 0));
         assert_eq!(index.pages[0].rects[0].offset_x, Some(3));
         assert_eq!(index.pages[0].rects[0].offset_y, Some(-4));
+    }
+
+    #[test]
+    fn atlas_soak_manifest_counts_include_all_pages_and_rects() {
+        let manifest = json!({
+            "atlases": [{
+                "key": "starter",
+                "width": 32,
+                "height": 32,
+                "imageUrl": "/atlas.png",
+                "rects": [
+                    { "key": "/original-ui/Monster/003/0.png|8x9", "x": 0, "y": 0, "width": 8, "height": 9 },
+                    { "key": "/original-ui/Monster/004/0.png|8x9", "x": 8, "y": 0, "width": 8, "height": 9, "pageIndex": 1 }
+                ],
+                "pages": [
+                    { "width": 32, "height": 32, "imageUrl": "/atlas.png" },
+                    { "width": 64, "height": 64, "imageUrl": "/atlas-p1.png" }
+                ]
+            }]
+        });
+        let index = parse_starter_atlas_manifest(&manifest).expect("atlas fixture");
+
+        assert_eq!(starter_atlas_manifest_counts(Some(&index)), (2, 2));
     }
 
     #[test]

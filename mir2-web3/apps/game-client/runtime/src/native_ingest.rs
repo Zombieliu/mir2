@@ -44,6 +44,15 @@ const MAX_OPERATION_ACK_MESSAGES: usize = 32;
 const MAX_NATIVE_MESSAGE_BYTES: usize = 64 * 1024 * 1024;
 const MAX_NATIVE_BUFFER_BYTES: usize = 128 * 1024 * 1024;
 
+/// Read-only queue occupancy exposed to the opt-in native soak diagnostics.
+/// The byte count includes owned `String`/pixel-vector capacity, matching the
+/// admission accounting used by the bounded queue.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct NativeInboundDiagnostics {
+    pub(crate) message_count: usize,
+    pub(crate) retained_bytes: usize,
+}
+
 /// A snapshot JSON pushed from a background native task.
 #[derive(Debug, Clone)]
 pub(crate) enum NativeInboundMessage {
@@ -757,6 +766,19 @@ impl NativeInbound {
     pub(crate) fn new() -> Self {
         Self {
             buffer: make_buffer(),
+        }
+    }
+
+    /// Snapshot queue occupancy without draining or changing admission state.
+    /// This is called only by the opt-in 10-second native soak sampler.
+    pub(crate) fn diagnostics(&self) -> NativeInboundDiagnostics {
+        let state = self
+            .buffer
+            .lock()
+            .expect("native inbound mutex should not be poisoned");
+        NativeInboundDiagnostics {
+            message_count: state.message_count(),
+            retained_bytes: state.pending_bytes(),
         }
     }
 

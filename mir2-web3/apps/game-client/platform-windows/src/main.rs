@@ -189,6 +189,12 @@ fn main() {
     // built so the runtime's native ingestion channel is registered; the runtime
     // drains it once `app.run()` starts.
     let _ = atlas::load_starter_entity_atlas();
+    if std::env::var("MIR2_NATIVE_SOAK_METRICS")
+        .map(|value| value.trim() == "1")
+        .unwrap_or(false)
+    {
+        app.add_systems(bevy::app::Update, atlas::emit_native_atlas_soak_metrics);
+    }
     if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
         app.init_resource::<atlas::NativeRenderTrace>();
         app.add_systems(bevy::app::Update, atlas::trace_rendered_entity_sprites);
