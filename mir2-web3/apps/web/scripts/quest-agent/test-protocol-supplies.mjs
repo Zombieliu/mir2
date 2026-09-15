@@ -721,6 +721,7 @@ test('journey recovery sells obsolete materials but preserves an active quest it
     { name: 'SpiderTeeth', uniqueId: 911, quantity: 2, container: 'bag1', sellValue: 50 },
     { name: 'JadeRing', uniqueId: 912, quantity: 1, container: 'bag1', sellValue: 400 },
     { name: 'RandomTeleport', uniqueId: 913, quantity: 2, container: 'bag1', sellValue: 50 },
+    { name: 'TownTeleport', uniqueId: 914, quantity: 2, container: 'bag1', sellValue: 500 },
   );
   const client = new FakeClient(state);
   const navigations = [];
@@ -738,6 +739,8 @@ test('journey recovery sells obsolete materials but preserves an active quest it
   assert.equal(result.after.gold, 27);
   assert.ok(client.snapshot.inventoryItems.some(entry => entry.name === 'JadeRing'));
   assert.ok(client.snapshot.inventoryItems.some(entry => entry.name === 'RandomTeleport'));
+  assert.ok(client.snapshot.inventoryItems.some(entry => entry.name === 'TownTeleport' && entry.quantity === 2));
+  assert.ok(!client.sent.some(entry => entry.type === 'sellItem' && entry.uniqueId === 914));
   assert.deepEqual(navigations, [
     [{ x: 295, y: 605 }, 1],
     [{ x: 288, y: 608 }, 1],

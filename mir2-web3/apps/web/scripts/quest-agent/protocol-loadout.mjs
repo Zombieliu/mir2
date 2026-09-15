@@ -1,4 +1,5 @@
 import { observedPlayerHp } from './protocol-observation.mjs';
+import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
 import { equipHeldAmulet } from './protocol-supplies.mjs';
 import { selfActionBlockMask } from './protocol-status.mjs';
 
@@ -249,14 +250,29 @@ async function learnApprovedBooks(client, actor, className, learned) {
 }
 
 async function useRestorative(client, pool, consumed, threshold, options) {
-  const snapshot = client.snapshot;
-  const current = pool === 'hp' ? observedPlayerHp(snapshot) : Number(snapshot?.playerMp);
-  const maximum = Number(snapshot?.[`playerMax${pool === "hp" ? "Hp" : "Mp"}`]);
+  let snapshot = client.snapshot;
+  let current = pool === 'hp' ? observedPlayerHp(snapshot) : Number(snapshot?.playerMp);
+  let maximum = Number(snapshot?.[`playerMax${pool === "hp" ? "Hp" : "Mp"}`]);
   if (!(threshold > 0) || !(maximum > 0) || current / maximum > threshold) return;
-  const now = restorativeNow(options);
+  let now = restorativeNow(options);
   if (restorativeUsePending(client, pool, now, options)) return;
-  const item = restorativeItem(snapshot, pool, options);
+  let item = restorativeItem(snapshot, pool, options);
   if (!item) return;
+  // ObjectMana is percentage-only and cannot replace the exact personal MP
+  // value. It proves MP changed after the exact observation, so before a
+  // further MP dose ask for one fresh public snapshot and decide from its exact
+  // MP. Do this only for the current owner and only when no later exact MP
+  // observation already superseded that receipt.
+  if (pool === 'mp' && hasNewerOwnObjectManaReceipt(client)) {
+    await refreshCombatWorldSnapshot(client);
+    snapshot = client.snapshot;
+    current = Number(snapshot?.playerMp);
+    maximum = Number(snapshot?.playerMaxMp);
+    if (!(maximum > 0) || current / maximum > threshold) return;
+    item = restorativeItem(snapshot, pool, options);
+    if (!item) return;
+    now = restorativeNow(options);
+  }
   const beforeQuantity = Number(item.quantity ?? 1);
   markRestorativeUse(client, pool, now);
   const ack = await client.request({ type: "useItem", uniqueId: item.uniqueId, grid: gridFor(item) }, "UseItem");
@@ -296,6 +312,38 @@ async function useRestorative(client, pool, consumed, threshold, options) {
     return nextValue > current || !remaining || Number(remaining.quantity ?? 0) < beforeQuantity;
   }, `${pool.toUpperCase()} restorative ${item.name}`);
   consumed.push(item.name);
+}
+
+function hasNewerOwnObjectManaReceipt(client) {
+  const ownerObjectId = knownObjectId(client?.snapshot?.playerObjectId);
+  if (ownerObjectId == null) return false;
+  let latestExactMpSequence = -1;
+  let latestOwnManaSequence = -1;
+  for (const event of client?.events ?? []) {
+    if (event?.direction !== 'received') continue;
+    const sequence = Number(event?.sequence);
+    if (!Number.isSafeInteger(sequence) || sequence < 0) continue;
+    if (event?.type === 'worldSnapshot' && knownExactMp(event?.payload?.playerMp)) {
+      latestExactMpSequence = Math.max(latestExactMpSequence, sequence);
+    } else if (event?.packet === 'HealthChanged' && knownExactMp(event?.payload?.mp)) {
+      latestExactMpSequence = Math.max(latestExactMpSequence, sequence);
+    } else if (event?.packet === 'ObjectMana' &&
+      knownObjectId(event?.payload?.objectId) === ownerObjectId) {
+      latestOwnManaSequence = Math.max(latestOwnManaSequence, sequence);
+    }
+  }
+  return latestOwnManaSequence > latestExactMpSequence;
+}
+
+function knownObjectId(value) {
+  if (value == null || (typeof value === 'string' && value.trim() === '')) return null;
+  const objectId = Number(value);
+  return Number.isSafeInteger(objectId) && objectId >= 0 ? objectId : null;
+}
+
+function knownExactMp(value) {
+  if (value == null || (typeof value === 'string' && value.trim() === '')) return false;
+  return Number.isFinite(Number(value));
 }
 
 function restorativeUsePending(client, pool, now, options) {

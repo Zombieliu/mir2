@@ -38,6 +38,31 @@ function mockClient(initial, mutate = () => {}) {
   };
 }
 
+function mpRefreshClient(state, events, refreshedMp, mutate = () => {}) {
+  return {
+    snapshot: state, events, sequence: Math.max(0, ...events.map(event => Number(event.sequence) || 0)), sent: [],
+    send(command) {
+      this.sent.push(command);
+      if (command.type !== 'clientVersion') return;
+      this.snapshot.playerMp = refreshedMp;
+      this.sequence += 1;
+      this.events.push({
+        sequence: this.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: { playerMp: refreshedMp },
+      });
+    },
+    async request(command, packet) {
+      this.sent.push(command);
+      mutate(this, command);
+      return { packet, payload: { success: true } };
+    },
+    async wait(predicate, label) {
+      if (!predicate()) throw new Error(`Mock did not settle ${label}`);
+      return true;
+    },
+  };
+}
+
 test("equips a strictly dominating eligible class upgrade", async () => {
   const state = snapshot("Warrior", 4);
   state.equipmentItems.push(worn("WoodenSword", 1, "weapon", info({ stats: [{ stat: 4, value: 2 }, { stat: 5, value: 4 }] })));
@@ -362,6 +387,102 @@ test("uses held HP and MP drugs only at conservative deficits", async () => {
     { type: "useItem", uniqueId: 31, grid: "inventory" },
   ]);
   assert.deepEqual(result.consumed, ["(HP)DrugSmall", "(MP)DrugSmall"]);
+});
+
+test('a fresh own ObjectMana refresh prevents a duplicate MP dose after the exact snapshot recovers', async () => {
+  const state = snapshot('Wizard', 25);
+  state.playerMp = 115; state.playerMaxMp = 398;
+  state.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 2, container: 'bag1' });
+  const client = mpRefreshClient(state, [
+    { sequence: 1, direction: 'received', type: 'worldSnapshot', payload: { playerMp: 115 } },
+    { sequence: 2, direction: 'received', type: 'packet', packet: 'ObjectMana', payload: { objectId: 10, percent: 38 } },
+  ], 151);
+
+  assert.deepEqual(await useSupplies(client, { hpThreshold: 0, mpThreshold: 0.3 }), []);
+  assert.deepEqual(client.sent, [{ type: 'clientVersion' }]);
+});
+
+test('a fresh own ObjectMana still permits one MP dose when the refreshed exact MP remains low', async () => {
+  const state = snapshot('Wizard', 25);
+  state.playerMp = 115; state.playerMaxMp = 398;
+  state.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 2, container: 'bag1' });
+  const client = mpRefreshClient(state, [
+    { sequence: 1, direction: 'received', type: 'worldSnapshot', payload: { playerMp: 115 } },
+    { sequence: 2, direction: 'received', type: 'packet', packet: 'ObjectMana', payload: { objectId: 10, percent: 38 } },
+  ], 100, (current, command) => {
+    if (command.type !== 'useItem') return;
+    current.snapshot.playerMp = 150;
+    current.snapshot.inventoryItems[0].quantity -= 1;
+  });
+
+  assert.deepEqual(await useSupplies(client, { hpThreshold: 0, mpThreshold: 0.3 }), ['(MP)DrugSmall']);
+  assert.deepEqual(client.sent, [
+    { type: 'clientVersion' },
+    { type: 'useItem', uniqueId: 31, grid: 'inventory' },
+  ]);
+});
+
+test('MP reuse delay starts at the actual dose after a delayed exact snapshot probe', async () => {
+  const state = snapshot('Wizard', 25);
+  state.playerMp = 115; state.playerMaxMp = 398;
+  state.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 3, container: 'bag1' });
+  let now = 0;
+  const client = mpRefreshClient(state, [
+    { sequence: 1, direction: 'received', type: 'worldSnapshot', payload: { playerMp: 115 } },
+    { sequence: 2, direction: 'received', type: 'packet', packet: 'ObjectMana', payload: { objectId: 10, percent: 38 } },
+  ], 100, (current, command) => {
+    if (command.type === 'useItem') current.snapshot.inventoryItems[0].quantity -= 1;
+  });
+  const originalSend = client.send.bind(client);
+  client.send = command => {
+    if (command.type === 'clientVersion') now = 10_000;
+    originalSend(command);
+  };
+  const options = { hpThreshold: 0, mpThreshold: 0.3, restorativeReuseDelayMs: 2_500, now: () => now };
+  assert.deepEqual(await useSupplies(client, options), ['(MP)DrugSmall']);
+  assert.deepEqual(await useSupplies(client, options), []);
+  assert.equal(client.sent.filter(command => command.type === 'useItem').length, 1);
+});
+
+test('another player ObjectMana or a newer exact MP snapshot never probes before an ordinary MP dose', async () => {
+  for (const events of [
+    [
+      { sequence: 1, direction: 'received', type: 'worldSnapshot', payload: { playerMp: 115 } },
+      { sequence: 2, direction: 'received', type: 'packet', packet: 'ObjectMana', payload: { objectId: 11, percent: 38 } },
+    ],
+    [
+      { sequence: 1, direction: 'received', type: 'packet', packet: 'ObjectMana', payload: { objectId: 10, percent: 38 } },
+      { sequence: 2, direction: 'received', type: 'worldSnapshot', payload: { playerMp: 115 } },
+    ],
+  ]) {
+    const state = snapshot('Wizard', 25);
+    state.playerMp = 115; state.playerMaxMp = 398;
+    state.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 1, container: 'bag1' });
+    const client = mpRefreshClient(state, structuredClone(events), 200, current => {
+      current.snapshot.playerMp = 150;
+      current.snapshot.inventoryItems[0].quantity -= 1;
+    });
+    assert.deepEqual(await useSupplies(client, { hpThreshold: 0, mpThreshold: 0.3 }), ['(MP)DrugSmall']);
+    assert.deepEqual(client.sent, [{ type: 'useItem', uniqueId: 31, grid: 'inventory' }]);
+  }
+});
+
+test('unknown or empty player object ids never classify ObjectMana as own', async () => {
+  for (const playerObjectId of [null, '']) {
+    const state = snapshot('Wizard', 25);
+    state.playerObjectId = playerObjectId;
+    state.entities[0].objectId = 0;
+    state.playerMp = 115; state.playerMaxMp = 398;
+    state.inventoryItems.push({ name: '(MP)DrugSmall', uniqueId: 31, quantity: 1, container: 'bag1' });
+    const client = mpRefreshClient(state, [
+      { sequence: 1, direction: 'received', type: 'packet', packet: 'ObjectMana', payload: { objectId: 0, percent: 38 } },
+    ], 200, current => {
+      current.snapshot.playerMp = 150;
+      current.snapshot.inventoryItems[0].quantity -= 1;
+    });
+    assert.deepEqual(await useSupplies(client, { hpThreshold: 0, mpThreshold: 0.3 }), ['(MP)DrugSmall']);
+    assert.deepEqual(client.sent, [{ type: 'useItem', uniqueId: 31, grid: 'inventory' }]);
+  }
 });
 
 test("useSupplies accepts the real first-item uniqueId zero", async () => {

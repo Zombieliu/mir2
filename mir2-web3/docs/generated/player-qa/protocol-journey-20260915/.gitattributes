@@ -8,3 +8,7 @@ q89-taoist-survival-r129-focused.log -text whitespace=cr-at-eol,-blank-at-eof
 q89-taoist-survival-r129-full.log -text whitespace=cr-at-eol,-blank-at-eof
 q89-caster-r130-focused.log -text whitespace=cr-at-eol,-blank-at-eof
 q89-caster-r130-full.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-taoist-density-r131-focused.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-mp-refresh-r132-focused.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-town-scroll-custody-r133-focused.log -text whitespace=cr-at-eol,-blank-at-eof
+q89-caster-r133-full.log -text whitespace=cr-at-eol,-blank-at-eof

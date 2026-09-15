@@ -229,6 +229,11 @@ export function questRetreatProfile(questId, className = '') {
   const rangedWoomaExpedition = [98, 99].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
   const rangedMinePassage = id === 65 && fragileMineExpedition;
   const fragileUndeadMineHunt = id === 89 && normalizedClass === 'wizard';
+  // R130's fresh D2031 observation found the only reachable q89 Taoist
+  // CursedPriest at zero adjacent and two nearby monsters. This is only an
+  // objective-density admission: it deliberately does not inherit the
+  // Wizard's direct-aggressor, retreat, or ranged-safety thresholds.
+  const taoistUndeadMinePriestHunt = id === 89 && normalizedClass === 'taoist';
   const warriorWoomaHunt = id === 99 && normalizedClass === 'warrior';
   const warriorMineralMineHunt = id === 118 && normalizedClass === 'warrior';
   const warriorPrajnaHunt = [122, 123].includes(id) && normalizedClass === 'warrior';
@@ -280,7 +285,7 @@ export function questRetreatProfile(questId, className = '') {
     // no spells and only consumed escape scrolls. Admit the already proven 1/4
     // density for both ranged passages; the proven-aggressor and health gates
     // still interrupt an unsafe engagement.
-    ...(fragileUndeadMineHunt ? {
+    ...(fragileUndeadMineHunt || taoistUndeadMinePriestHunt ? {
       maxTargetAdjacent: 0,
       maxTargetNearby: 2,
     } : (rangedInsectExpedition || rangedWoomaExpedition || rangedMinePassage) ? {

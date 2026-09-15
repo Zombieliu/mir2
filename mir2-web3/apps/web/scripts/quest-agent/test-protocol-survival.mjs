@@ -1398,13 +1398,24 @@ test('q114 Stone Tomb boars keep expedition supplies and wide recovery armed', (
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(114, 'Warrior'), { hp: 64, mp: 0 });
 });
 
-test('q89 Taoist keeps healthy travel progress without inheriting fragile Wizard combat thresholds', () => {
+test('q89 Taoist admits the measured 0-adjacent/2-nearby Priest without inheriting Wizard safety thresholds', () => {
   const profile = questRetreatProfile(89, 'Taoist');
   assert.equal(profile.continueTravelWhileHealthy, true);
+  assert.equal(profile.maxTargetAdjacent, 0);
+  assert.equal(profile.maxTargetNearby, 2);
   assert.equal(profile.directAggressorDistance, undefined);
+  assert.equal(profile.multiAggressorRetreatRatio, undefined);
+  assert.equal(profile.retreatAtActiveAggressorCount, undefined);
+  assert.equal(profile.focusTargetThroughAggressors, undefined);
+  assert.equal(profile.emergencyEscapeRequiresProvenAggressors, undefined);
   assert.equal(questRetreatProfile(89, 'Wizard').continueTravelWhileHealthy, true);
+  assert.equal(questRetreatProfile(89, 'Wizard').directAggressorDistance, 8);
   assert.equal(questRetreatProfile(89, 'Warrior').continueTravelWhileHealthy, false);
+  assert.equal(questRetreatProfile(89, 'Warrior').maxTargetAdjacent, undefined);
+  assert.equal(questRetreatProfile(89, 'Warrior').maxTargetNearby, undefined);
   assert.equal(questRetreatProfile(42, 'Taoist').continueTravelWhileHealthy, false);
+  assert.equal(questRetreatProfile(42, 'Taoist').maxTargetAdjacent, undefined);
+  assert.equal(questRetreatProfile(42, 'Taoist').maxTargetNearby, undefined);
 });
 
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {

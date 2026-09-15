@@ -14,6 +14,7 @@ import {
 import { createWizardKitingAction, RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
 import { createNavigator, NavigationStalled, NavigationStepGuarded } from "./protocol-play.mjs";
 import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
+import { questRetreatProfile } from './protocol-survival.mjs';
 
 test("explicit objective map preference resolves equal-length dungeon routes", async () => {
   const travel = async () => {};
@@ -3944,6 +3945,38 @@ test('q89 Taoist critical overlap uses the held escape before any SoulFireBall',
   assert.equal(escapeCalls, 1);
   assert.equal(casts, 0);
   assert.ok(diagnostics.some(entry => entry.type === 'emergencyEscapeSuccess' && entry.reason === 'criticalPackPressure'));
+});
+
+test('q89 Taoist admits a live Priest with two nonadjacent neighbors and verifies its ordinary death receipt', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
+  const target = monster(340705, 'CursedPriest', 30, 30, { disposition: 'hostile' });
+  const client = new FakeClient(snapshot(quest, [target,
+    monster(339001, 'HungryZombie', 32, 30, { disposition: 'hostile' }),
+    monster(339106, 'CursedZombie', 30, 32, { disposition: 'hostile' }),
+  ]));
+  Object.assign(client.snapshot, { playerHp: 180, playerMaxHp: 180 });
+  Object.assign(client.snapshot.entities[0], { class: 'Taoist', x: 24, y: 30, hp: 180, maxHp: 180 });
+  let casts = 0;
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [spawn('CursedPriest', 30, 30)] }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    ...questRetreatProfile(89, 'Taoist'),
+    criticalProvenAggressorOffenseGuard: { hpRatio: 0.35, minimumProvenAggressors: 2 },
+    action: async owner => {
+      casts += 1;
+      owner.receive('ObjectDied', state => {
+        Object.assign(target, { hp: 0, dead: true });
+        state.questLog[0].objectives[0] = objective('Kill CursedPriest', 3, 3);
+        state.questLog[0].stage = 'ReadyToTurnIn';
+      }, { objectId: target.objectId });
+      return { kind: 'magic', spell: 'SoulFireBall', targetId: target.objectId };
+    },
+  });
+  assert.equal(casts, 1);
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.ok(client.events.some(event => event.packet === 'ObjectDied' && event.payload.objectId === target.objectId));
 });
 
 test('q89 Taoist critical blocked pack ends its bounded retreat without breakout casts or recursive recovery', async () => {

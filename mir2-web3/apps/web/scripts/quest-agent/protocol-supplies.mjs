@@ -1177,6 +1177,7 @@ function obsoleteMaterialsForSale(snapshot, { progressionCandidates = [], protec
     ...protectedItemNames,
     ...Object.values(SUPPLIES).map(supply => supply.name),
     RANDOM_TELEPORT.name,
+    TOWN_TELEPORT.name,
   ].map(normalized).filter(Boolean));
   return (snapshot?.inventoryItems ?? []).filter(item => {
     const name = normalized(item?.name);

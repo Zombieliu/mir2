@@ -1,5 +1,12 @@
 # Protocol newcomer journey acceptance
 
+> 2026-09-16 R131–R133 controller668/668 passes: q89 Taoist admits measured
+> 0-adjacent/2-nearby Priest targets. A newer own Mana receipt prompts one exact
+> snapshot before another low-MP potion; escape Town scrolls are protected from
+> obsolete-material sales. Both ordinary casters resumed on natural R54.
+> Completed units remain155/177 at restart; final normal logout/save and separate
+> visual gates remain open. [Evidence](generated/player-qa/protocol-journey-20260915/q89-admission-mana-and-custody-r131-r133.md).
+
 > 2026-09-16 R129/R130 controller667/667 passes: q89 Taoist critical proven-pack
 > pressure stops offense before captured kiting/travel breakout; healthy travel
 > remains available. Wizard ordinary funding includes its Medium reserve.
