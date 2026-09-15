@@ -222,6 +222,49 @@ test('navigator waits out paralysis without poisoning a valid route cell', async
   );
 });
 
+test('navigator does not dispatch movement when paralysis arrives during cadence wait', async () => {
+  const client = navigationClient();
+  let injected = false;
+  let resumed = false;
+  client.wait = async predicate => {
+    assert.ok(resumed, 'movement must wait for the explicit control release');
+    assert.equal(client.snapshot.entities[0].poison, 0);
+    const command = client.sent.at(-1);
+    const [dx, dy] = directionDelta[command.direction];
+    const scale = command.type === 'run' ? 2 : 1;
+    client.snapshot.entities[0].x += dx * scale;
+    client.snapshot.entities[0].y += dy * scale;
+    assert.ok(predicate());
+  };
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    delay: async () => {
+      if (!injected) {
+        injected = true;
+        client.snapshot.entities[0].poison = 32;
+      } else if (client.snapshot.entities[0].poison === 32) {
+        assert.deepEqual(client.sent, [], 'no command may escape the cadence guard');
+        client.snapshot.entities[0].poison = 0;
+        resumed = true;
+      }
+    },
+  });
+  await navigateNear({ x: 5, y: 1 }, 1);
+  assert.equal(client.snapshot.entities[0].x, 4);
+  assert.equal(client.diagnostics.filter(entry => entry.type === 'navigationMovementControlBlocked').length, 1);
+});
+
+test('navigator stops when death arrives during cadence wait', async () => {
+  const client = navigationClient();
+  client.wait = async () => assert.fail('dead player must not await a movement response');
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    delay: async () => { client.snapshot.entities[0].dead = true; },
+  });
+  await assert.rejects(navigateNear({ x: 5, y: 1 }, 1), /Player died during navigation/);
+  assert.deepEqual(client.sent, []);
+});
+
 test('navigator replans when an earlier authoritative response lands during cadence wait', async () => {
   const client = navigationClient();
   let cadenceCalls = 0;

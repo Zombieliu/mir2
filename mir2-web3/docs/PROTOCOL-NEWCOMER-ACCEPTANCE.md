@@ -1,5 +1,116 @@
 # Protocol newcomer journey acceptance
 
+> Current checkpoint, 2026-09-15: isolated Gateway R54 is active at
+> localhost 17800/17810. Independent saved-state validation confirms Warrior
+> Lv30, 55/55 mandatory + 4/4 milestones; Wizard Lv25, 45/55 + 3/4, q89 6/9;
+> Taoist Lv23, 39/55 + 2/4, q99 3/6. This is 148/177 quest/milestone units
+> (83.62%), with 26 mandatory quests and three milestones left; partial kill
+> progress and visual gates are not counted as completed units.
+> Full controller regression passes 610/610. The latest fixes recheck paralysis
+> and death immediately after movement cadence waiting, preserve Wizard's
+> legal nine-tile fireball range, buy ordinary Ruben Medium HP reserve only
+> for q89 town departures, and require Taoist q98/q99 to leave town with
+> 12 MP drugs while retaining the four-drug field trigger. q89 held Mediums
+> are preferred with a bounded 2.5-second reuse; other play retains six seconds.
+> Missing/unaffordable Medium rows fall back to held Small HP and normal retreat.
+> Wizard R115 and Taoist R104 are now running the ordinary public journey on
+> R54. R53 Taoist SoulFireBall XP193 persisted normally; natural R54 fireball
+> progression and the remaining route/visual results are pending.
+> The 375-minute budget is a design target, not measured full 0→30 playtime.
+> Native 30-minute telemetry is stable but the observer gate remains FAIL for
+> missing successful-reconnect evidence; it does not certify held-right input.
+> See [checkpoint](generated/player-qa/protocol-journey-20260915/three-class-checkpoint-1910.md),
+> [tests](generated/player-qa/protocol-journey-20260915/quest-agent-tests-r117-root.log)
+> and [R54 practice](generated/player-qa/shared-fireball-practice-20260915/README.md).
+> Full route, animation/UI and complete active-play timing remain unaccepted;
+> formalCandidate=false, accepted=false, visualAccepted=false.
+
+## Historical R52 Gateway / Warrior journey R88 completion
+
+The current opt-in `newcomer-v1` route has 55 mandatory quests and four
+separate level-15/20/25/30 milestone claims per class. Its design budget is
+375 minutes (6 hours 15 minutes), with chapter budgets of 20, 25, 60, 75, 90
+and 105 minutes. This is a calibration target; complete 0-to-30 active playtime
+and native visual acceptance have not passed.
+
+| Class | Current ordinary-player protocol checkpoint | Status |
+| --- | --- | --- |
+| Warrior | Journey R88, Lv30, 55/55 mandatory quests and 4/4 milestones persisted | PASS across saved checkpoints; normal LogOut completed |
+| Wizard | Journey R110 resumed saved R109, Lv25, q89 at 3/9 | Active; complete route remains open |
+| Taoist | Journey R98 resumed saved R97, Lv23, q98 at 5/6 | Active; complete route remains open |
+
+Current Gateway R52 listens on `127.0.0.1:17800` and
+`ws://127.0.0.1:17810/ws`, with executable SHA-256
+`EBA81F35BB625C239580E6A7C898F728744EA33F538FA719ED79B7C1636E9413`.
+The isolated launch script enables `MIR2_QUEST_CADENCE=newcomer-v1` while
+retaining `MIR2_CONTENT_PROFILE=crystal_full` and the existing ordinary account
+store. Current quest-agent code includes cadence-state serialization from
+`b846f2a64610b70016bf305a24b3a1b0b3a70871`, paralysis-aware breakout and
+authoritative retreat-state refresh. `1e8931561887b65632ddd5a493d6f942e0772d8f`
+also budgets Taoist q98/q99 at 48 minimum / 64 departure Amulets and lets
+multi-objective searches take an available unfinished required monster.
+The complete suite passes 582/582, with
+zero failures, cancellations or skips:
+[quest-agent-tests-r110.log](generated/player-qa/protocol-journey-20260915/quest-agent-tests-r110.log).
+These are current runner regression results; they do not relabel the earlier
+R88 trace as a new run of later code.
+
+The current route order and fixed quest-only budgets are:
+
+| Chapter | Mandatory IDs | Minutes | Quests | Fixed XP | Kills | Quest items |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 1–5 | 1,2,3,5,6 plus Warrior 7,8,9 / Wizard 10,11,12 / Taoist 13,14,15 | 20 | 8 | 1,600 | 15 | 1 |
+| 6–10 | 22,23,24,25,26,27,29,30,35,36,37 | 25 | 11 | 49,558 | 3 | 6 |
+| 11–15 | 33,49,39,40,41,42 | 60 | 6 | 65,742 | 18 | 0 |
+| 16–20 | 50,51,52,53,54,61,65,60 | 75 | 8 | 480,000 | 14 | 2 |
+| 21–25 | 83,86,87,88,97,98,99,102,103,110,111,112,89 | 90 | 13 | 1,800,000 | 24 | 1 |
+| 26–30 | 113,114,117,118,119,121,124,122,123 | 105 | 9 | 4,900,000 | 36 | 1 |
+| Total | Four milestone claims are counted separately | 375 | 55 | 7,296,900 | 110 | 11 |
+
+q4 harvesting, q62's one KekTal plus one VioletKekTal challenge and q84 thread
+collection are optional. Needed item objectives are capped at one per item;
+NPC-given carry quantities retain their source values. Current configuration
+and the recalculated level gates are documented in
+[NEWCOMER-1-30-DESIGN.md](NEWCOMER-1-30-DESIGN.md).
+
+Warrior R88 run `2026-09-15T01-00-52-845Z` resumed the naturally saved Lv29
+character `JWa3693f66` and finished in 49 minutes 44.279 seconds. Its trace
+`C:\mir2-protocol-journey-20260911\Warrior.2026-09-15T01-00-52-845Z.trace.jsonl`
+contains 30,257 records. A BoneArcher death at sequence 7503 produced q122
+1/6, the needed CleanSkull and q124 1/1 at sequences 7509–7512. NPC1358
+was visible at WhiteVillage `(296,251)` with q124 at sequences 10552/10554,
+and q124 completed at 10559/10560. q122 completed at 23079 with three
+BoneArchers and three BoneSpearmen; q123 completed at 27829 with three
+BoneBlademen and advanced the character to Lv30. The level-30 milestone
+completed at 30252.
+
+The long-run movement audit records 3,387 sends (691 Walk, 2,696 Run),
+3,385 paired `UserLocation` responses and two requests interrupted by Death
+(9476→9477 and 11886→11887). No live request remains unmatched. Response
+latency is p50 400 ms, p95 663 ms, p99 695 ms and maximum 1,146 ms; none
+exceeds 2.5 seconds, and `navigationMovementResponseTimeout` is zero. All
+51 Runs sent 350–450 ms after a Walk response received their own response,
+with p95 352 ms and maximum 480 ms. The trace has 23 `MapInformation`
+packets including the initial map and 22 subsequent map transitions, and all
+four Deaths received Revived within 1.167–1.403 seconds without a 60-second
+death-interrupted movement timeout.
+
+Final snapshot 30254 and account save revision 7427 agree on Lv30,
+BichonProvince `0 (318,275)`, HP 419/419, MP 116/116, EXP
+128,441/2,000,000, 135,652 gold and 21 HP drugs. The store contains all
+55 mandatory quests and all four milestones completed, plus optional q62.
+`logOut` sequence 30256 received `LogOutSuccess` at 30257. Full report,
+trace, task progression, response-pairing method and persistence evidence:
+[warrior-r88.md](generated/player-qa/protocol-journey-20260915/warrior-r88.md).
+
+Warrior's protocol chain passes across saved checkpoints and several repair
+revisions. R88 alone proves the Lv29-to-30 closing segment, not an uninterrupted
+0-to-30 timing certificate. Wizard/Taoist completion, native rendering and
+animation, human feel and full current-version pacing remain open. Overall
+`formalCandidate=false`, `accepted=false`, `visualAccepted=false`; this custom
+profile evidence does not raise the Crystal parity score. Earlier checkpoints
+below retain their contemporaneous versions, route counts and limitations.
+
 ## R47 six-hour route and Sabuk checkpoint
 
 The opt-in 1-30 newcomer route now targets 375 minutes (6 hours 15 minutes),

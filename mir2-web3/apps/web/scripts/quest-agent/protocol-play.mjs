@@ -434,6 +434,16 @@ export function createNavigator(client, dependencies = {}) {
         remaining.length >= 2 && remaining[1].direction === step.direction &&
         !obstacleKeys.has(`${Number(remaining[1].to.x)},${Number(remaining[1].to.y)}`);
       await sleep(Math.max(0, 650 - (now() - (client.lastWalkAt ?? 0))));
+      // Control/death packets can arrive during cadence waiting without
+      // changing position. Recheck before sending an otherwise valid step.
+      const dispatchSelf = selfPlayer(client);
+      if (dispatchSelf.dead || observedPlayerHp(client.snapshot) <= 0) {
+        throw new Error('Player died during navigation');
+      }
+      if (selfActionBlockMask(client) !== 0) {
+        remaining = [];
+        continue;
+      }
       // A fresh world update can expose a transfer after this route was
       // planned. Recheck every physical cell immediately before dispatch,
       // including the intermediate and destination cells of a two-tile Run.

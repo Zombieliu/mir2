@@ -47,6 +47,7 @@ import {
   evasiveRecoveryDangerDistanceForQuest,
   evasiveRecoveryTimeoutMsForQuest,
   hpDrugCount,
+  hpMediumDrugCount,
   hasJourneyEmergencyEscapeQuest,
   isLivingEvasiveRecoveryTimeout,
   isLivingExpeditionNoWalkPath,
@@ -106,6 +107,9 @@ test('caster expedition restock targets stay separate from their field triggers'
   assert.equal(journeyMpRestockTargetForQuest(49, 'Taoist'), 12);
   assert.equal(journeyMpRestockTargetForQuest(54, 'Warrior'), 0);
   assert.equal(journeyMpRestockTargetForQuest(49, 'Wizard', { fallback: 18 }), 18);
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(98, 'Taoist'), { hp: 64, mp: 12 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(99, 'Taoist'), { hp: 64, mp: 12 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(98, 'Wizard'), { hp: 64, mp: 0 });
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Wizard'), 0.75);
   assert.equal(questCombatMpUseThresholdForQuest(54, 'Taoist'), 0.75);
   assert.equal(questCombatMpUseThresholdForQuest(65, 'Taoist'), 0.75);
@@ -398,7 +402,7 @@ test('long expeditions accept a partial but still conservative funded departure 
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(65, 'Wizard'), { hp: 64, mp: 64 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(65, 'Taoist'), { hp: 64, mp: 64 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(98, 'Wizard'), { hp: 64, mp: 0 });
-  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(98, 'Taoist'), { hp: 64, mp: 0 });
+  assert.deepEqual(journeyExpeditionDepartureFloorForQuest(98, 'Taoist'), { hp: 64, mp: 12 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(113, 'Warrior'), { hp: 64, mp: 0 });
   assert.deepEqual(journeyExpeditionDepartureFloorForQuest(49, 'Wizard'), { hp: 0, mp: 0 });
 });
@@ -783,6 +787,56 @@ test('HP stock matches supply use across Small, Medium and Large without countin
       { name: '(MP)DrugSmall', count: 9 },
     ],
   }), 6);
+});
+
+test('HP Medium departure reserve is an opt-in trigger and does not become a field invariant', async () => {
+  const client = clientAt('D2031', 6);
+  client.snapshot.beltItems.push({ name: '(HP)DrugMedium', uniqueId: 100, quantity: 1 });
+  const calls = [];
+  const gate = createPostEngagementSupplyGate({
+    travel: async map => {
+      calls.push(['travel', map]);
+      client.snapshot = { ...client.snapshot, mapFileName: map };
+    },
+    navigateNear: async () => {},
+    restock: async owner => {
+      calls.push(['restock', owner.snapshot.mapFileName]);
+      owner.snapshot.beltItems = [{ name: '(HP)DrugMedium', uniqueId: 101, quantity: 6 }];
+      return { status: 'restocked' };
+    },
+  });
+  const result = await gate(client, {
+    minimumHpStock: 4,
+    minimumHpMediumStock: 3,
+    requiredAfterRestockHpMediumStock: 6,
+    returnMapFileName: '',
+  });
+  assert.equal(result.status, 'restocked');
+  assert.equal(result.hpMedium, 6);
+  assert.equal(result.hpMediumReady, true);
+  assert.deepEqual(calls, [['travel', '0'], ['restock', '0']]);
+  assert.equal(hpMediumDrugCount(client.snapshot), 6);
+});
+
+test('a q89 field pass can keep Small HP without a standalone Medium town loop', async () => {
+  const client = clientAt('D2031', 6);
+  const calls = [];
+  const gate = createPostEngagementSupplyGate({
+    travel: async map => calls.push(['travel', map]),
+    navigateNear: async () => {},
+    restock: async () => {
+      calls.push(['restock']);
+      throw new Error('field-only Medium must not trigger restock');
+    },
+  });
+  const result = await gate(client, {
+    minimumHpStock: 4,
+    minimumHpMediumStock: 0,
+    requiredAfterRestockHpMediumStock: 6,
+  });
+  assert.equal(result.status, 'sufficient');
+  assert.deepEqual(calls, []);
+  assert.equal(hpMediumDrugCount(client.snapshot), 0);
 });
 
 test('caster supply gate requires MP independently while Warrior HP remains sufficient', async () => {

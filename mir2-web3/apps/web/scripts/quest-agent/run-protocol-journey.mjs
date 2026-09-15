@@ -168,6 +168,17 @@ try {
     const isWizardQ89Expedition = snapshot => className === 'Wizard' &&
       (snapshot?.questLog ?? []).some(entry => Number(entry?.questId) === 89 &&
         String(entry?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress');
+    const q89WizardPotionOptions = owner => isWizardQ89Expedition(owner?.snapshot)
+      ? { preferredHpPotion: 'medium', restorativeReuseDelayMs: 2_500 }
+      : {};
+    const useJourneySupplies = (owner, options = {}) => useSupplies(owner, {
+      ...options,
+      ...q89WizardPotionOptions(owner),
+    });
+    const startJourneyEmergencyHpRecovery = (owner, options = {}) => startEmergencyHpRecovery(owner, {
+      ...options,
+      ...q89WizardPotionOptions(owner),
+    });
     const emergencyTeleport = createRandomTeleportEmergencyEscape({
       criticalHpRatio: journeyEmergencyTeleportCriticalHpRatio(className),
       teleport: async owner => {
@@ -247,7 +258,7 @@ try {
         {
           action: journeyCombatAction,
           approachRange: journeyCombatApproachRange,
-          sustain: useSupplies,
+          sustain: owner => useJourneySupplies(owner),
           attackCadenceMs: 650,
           // Shared-zone cooldown counters advance authoritatively, but ordinary
           // movement traffic does not include a fresh personal skill snapshot.
@@ -299,6 +310,10 @@ try {
         // objective map was reached. Carry an evidence-based expedition
         // stock while q54 remains active instead of repeating town loops.
         targetHp: Math.max(activeQuestHpTarget, Number(requestedSupplyOptions.targetHp ?? 0)),
+        ...(isWizardQ89Expedition(owner.snapshot) ? {
+          targetHpMedium: Math.max(6, Number(requestedSupplyOptions.targetHpMedium ?? 0)),
+          lowStockHpMedium: Math.max(3, Number(requestedSupplyOptions.lowStockHpMedium ?? 0)),
+        } : {}),
         targetMp: Math.max(journeySupplyOptions.targetMp, Number(requestedSupplyOptions.targetMp ?? 0)),
         lowStock: Math.max(journeySupplyOptions.lowStock, Number(requestedSupplyOptions.lowStock ?? 0)),
         lowStockHp: Math.max(
@@ -319,7 +334,7 @@ try {
           {
             action: journeyCombatAction,
             approachRange: journeyCombatApproachRange,
-            sustain: useSupplies,
+            sustain: owner => useJourneySupplies(owner),
             attackCadenceMs: 650,
             refreshWhileWaiting: current => refreshCombatCooldown(current),
             combatHostileClearance: 0,
@@ -375,8 +390,16 @@ try {
         townTeleportCount(owner.snapshot) < emergencyTownTeleportTarget;
       const q42WizardExpedition = Number(questId) === 42 &&
         String(className).trim().toLowerCase() === 'wizard';
+      const q89WizardExpedition = isWizardQ89Expedition(owner.snapshot);
+      const q89TownDeparture = q89WizardExpedition &&
+        String(owner.snapshot?.mapFileName ?? '') === '0';
       return {
         minimumHpStock: requiredHpStock,
+        // Medium HP is a q89 departure reserve only. Once the character is
+        // back in the field, missing/unaffordable Medium must fall back to
+        // held Small HP and the normal retreat policy rather than becoming a
+        // standalone town-loop trigger.
+        ...(q89TownDeparture ? { minimumHpMediumStock: 3, requiredAfterRestockHpMediumStock: 6 } : {}),
         minimumMpStock: minimumJourneyMpStockForQuest(questId, className),
         minimumAmuletStock: amuletTrigger,
         requiredAfterRestockAmuletStock: amuletDepartureTarget,
@@ -478,7 +501,7 @@ try {
           approachRange: journeyCombatApproachRange,
           sustain: async current => {
             const classRecovery = await useClassRecovery(current, { hpThreshold: 0.9 });
-            const consumed = startEmergencyHpRecovery(current, { hpThreshold: 0.9 });
+            const consumed = startJourneyEmergencyHpRecovery(current, { hpThreshold: 0.9 });
             return { classRecovery, consumed };
           },
           refreshWhileWaiting: refreshCombatCooldown,
@@ -612,6 +635,7 @@ try {
         });
         return supplyGateForQuest(owner, activeQuestId);
       },
+      startJourneyEmergencyHpRecovery,
       provokeTrappingHostile: owner => {
         const actor = selfPlayer(owner);
         const target = (owner.snapshot?.entities ?? [])
@@ -784,10 +808,10 @@ try {
                 // potion inventory acknowledgement before the first escape
                 // step costs several monster attack cycles in dense fields.
                 const classRecovery = await useClassRecovery(owner, { hpThreshold: 0.85 });
-                const consumed = startEmergencyHpRecovery(owner, { hpThreshold: 0.85 });
+                const consumed = startJourneyEmergencyHpRecovery(owner, { hpThreshold: 0.85 });
                 return { consumed, classRecovery };
               }
-              const consumed = await useSupplies(owner, {
+              const consumed = await useJourneySupplies(owner, {
                 // Carving leaves the player stationary for multiple server
                 // ticks, while a retreat must survive until it opens a real
                 // safety margin. Begin recovery before the combat-only
@@ -999,7 +1023,7 @@ try {
                   maxEmergencyEscapes: 1,
                   sustain: async current => {
                     const classRecovery = await useClassRecovery(current, { hpThreshold: 0.9 });
-                    const consumed = startEmergencyHpRecovery(current, { hpThreshold: 0.9 });
+                    const consumed = startJourneyEmergencyHpRecovery(current, { hpThreshold: 0.9 });
                     return { consumed, classRecovery };
                   },
                 });
@@ -1011,7 +1035,7 @@ try {
                 hp = observedPlayerHp(owner.snapshot);
                 maxHp = Number(owner.snapshot?.playerMaxHp ?? 0);
                 if (maxHp > 0 && hp / maxHp >= 0.9) break;
-                const consumed = await useSupplies(owner, { hpThreshold: 0.9, mpThreshold: 0 });
+                const consumed = await useJourneySupplies(owner, { hpThreshold: 0.9, mpThreshold: 0 });
                 if (!consumed.length) break;
               }
               hp = observedPlayerHp(owner.snapshot);
@@ -1170,6 +1194,7 @@ function minimumJourneyHpStockForQuest(questId) {
 
 async function stabilizeJourneyResume(owner, navigateNear, {
   ensureHpSupply,
+  startJourneyEmergencyHpRecovery: startHpRecovery = startEmergencyHpRecovery,
   provokeTrappingHostile,
 } = {}) {
   let disposition = journeyResumeDisposition(owner.snapshot);
@@ -1224,7 +1249,7 @@ async function stabilizeJourneyResume(owner, navigateNear, {
       sustainCadenceMs: 4_000,
       sustain: async current => {
         const classRecovery = await useClassRecovery(current, { hpThreshold: 0.9 });
-        const consumed = startEmergencyHpRecovery(current, { hpThreshold: 0.9 });
+        const consumed = startHpRecovery(current, { hpThreshold: 0.9 });
         return { classRecovery, consumed };
       },
     });

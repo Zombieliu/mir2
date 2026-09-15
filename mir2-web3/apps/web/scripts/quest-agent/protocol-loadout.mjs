@@ -62,7 +62,7 @@ export function startEmergencyHpRecovery(client, options = {}) {
   if (!(maximum > 0) || current / maximum > ratioThreshold(options.hpThreshold, 0.85)) return [];
   const now = restorativeNow(options);
   if (restorativeUsePending(client, "hp", now, options)) return [];
-  const item = restorativeItem(snapshot, "hp");
+  const item = restorativeItem(snapshot, "hp", options);
   if (!item) return [];
   const command = { type: "useItem", uniqueId: item.uniqueId, grid: gridFor(item) };
   markRestorativeUse(client, "hp", now);
@@ -98,7 +98,7 @@ export function combatApproachRange(client, _target) {
   const snapshot = client?.snapshot;
   const actor = player(snapshot);
   const className = normalized(actor?.class);
-  if (className === "wizard") return preferredWizardSkill(snapshot) ? 6 : 1;
+  if (className === "wizard") return preferredWizardSkill(snapshot) ? 9 : 1;
   if (className === "taoist") {
     return affordableSkill(snapshot, "SoulFireBall") && heldAmuletQuantity(snapshot) >= 1 ? 6 : 1;
   }
@@ -255,7 +255,7 @@ async function useRestorative(client, pool, consumed, threshold, options) {
   if (!(threshold > 0) || !(maximum > 0) || current / maximum > threshold) return;
   const now = restorativeNow(options);
   if (restorativeUsePending(client, pool, now, options)) return;
-  const item = restorativeItem(snapshot, pool);
+  const item = restorativeItem(snapshot, pool, options);
   if (!item) return;
   const beforeQuantity = Number(item.quantity ?? 1);
   markRestorativeUse(client, pool, now);
@@ -303,7 +303,7 @@ function restorativeUsePending(client, pool, now, options) {
   if (!Number.isFinite(lastUseAt)) return false;
   const requestedDelay = Number(options?.restorativeReuseDelayMs);
   const delayMs = Number.isFinite(requestedDelay)
-    ? Math.max(0, requestedDelay)
+    ? Math.max(2_500, requestedDelay)
     : DEFAULT_RESTORATIVE_REUSE_DELAY_MS;
   return now - lastUseAt < delayMs;
 }
@@ -324,10 +324,12 @@ function restorativeNow(options) {
   return Number.isFinite(Number(value)) ? Number(value) : Date.now();
 }
 
-function restorativeItem(snapshot, pool) {
+function restorativeItem(snapshot, pool, options = {}) {
   const pattern = pool === "hp" ? /^\(hp\)drug/i : /^\(mp\)drug/i;
-  return [...(snapshot?.beltItems ?? []), ...(snapshot?.inventoryItems ?? [])]
-    .find(candidate => pattern.test(String(candidate.name)) && validUniqueId(candidate.uniqueId) && Number(candidate.quantity ?? 1) > 0);
+  const candidates = [...(snapshot?.beltItems ?? []), ...(snapshot?.inventoryItems ?? [])]
+    .filter(candidate => pattern.test(String(candidate.name)) && validUniqueId(candidate.uniqueId) && Number(candidate.quantity ?? 1) > 0);
+  if (pool !== "hp" || options?.preferredHpPotion !== "medium") return candidates[0] ?? null;
+  return candidates.find(candidate => /^\(hp\)drugmedium$/i.test(String(candidate.name))) ?? candidates[0] ?? null;
 }
 
 function ratioThreshold(value, fallback) {

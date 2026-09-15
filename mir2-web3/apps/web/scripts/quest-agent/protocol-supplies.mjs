@@ -8,6 +8,7 @@ const BUTCHER = Object.freeze({ name: 'Merchant_John', x: 292, y: 603 });
 const MATERIAL_DEALER = Object.freeze({ name: 'MaterialDealer_Reece', x: 295, y: 605 });
 const SUPPLIES = Object.freeze({
   hp: Object.freeze({ itemIndex: 658, name: '(HP)DrugSmall', target: 6, catalogPrice: 40, stackSize: 20 }),
+  hpMedium: Object.freeze({ itemIndex: 660, name: '(HP)DrugMedium', target: 6, catalogPrice: 110, stackSize: 20 }),
   mp: Object.freeze({ itemIndex: 659, name: '(MP)DrugSmall', target: 6, catalogPrice: 40, stackSize: 20 }),
   amulet: Object.freeze({ itemIndex: 712, name: 'Amulet', target: 6, catalogPrice: 25, stackSize: 100 }),
 });
@@ -85,12 +86,14 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   const className = playerClass(initial);
   const targets = {
     hp: positiveOption(options.targetHp, SUPPLIES.hp.target, 'targetHp'),
+    hpMedium: positiveOrZeroOption(options.targetHpMedium, 0, 'targetHpMedium'),
     mp: positiveOption(options.targetMp, SUPPLIES.mp.target, 'targetMp'),
     amulet: positiveOption(options.targetAmulet, SUPPLIES.amulet.target, 'targetAmulet'),
   };
   const lowStock = positiveOption(options.lowStock, LOW_STOCK, 'lowStock');
   const lowStockByKind = {
     hp: positiveOption(options.lowStockHp, lowStock, 'lowStockHp'),
+    hpMedium: positiveOrZeroOption(options.lowStockHpMedium, 0, 'lowStockHpMedium'),
     mp: positiveOption(options.lowStockMp, lowStock, 'lowStockMp'),
     amulet: positiveOption(options.lowStockAmulet, lowStock, 'lowStockAmulet'),
   };
@@ -106,6 +109,9 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     : className === 'wizard' ? ['hp', 'mp'] : ['hp'];
   const beforeStock = stock(initial);
   const needed = relevant.filter(kind => beforeStock[kind] < lowStockByKind[kind]);
+  const mediumOptIn = className === 'wizard' && targets.hpMedium > 0;
+  const hpMediumBefore = hpMediumDrugCount(initial);
+  const needHpMedium = mediumOptIn && hpMediumBefore < lowStockByKind.hpMedium;
   // This is an opt-in emergency reserve. Ordinary village restocking never
   // opens the shop for RandomTeleport and therefore keeps its old behavior.
   const emergencyTeleportCount = emergencyTeleportOption(options.emergencyTeleportCount);
@@ -113,7 +119,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   const emergencyTownTeleportCount = emergencyTownTeleportOption(options.emergencyTownTeleportCount);
   const needEmergencyTownTeleport = townTeleportStock(initial) < emergencyTownTeleportCount;
   const initialGold = integer(initial.gold, 'snapshot.gold');
-  if (needed.length === 0 && !weaponNeeded && !needEmergencyTeleport && !needEmergencyTownTeleport) {
+  if (needed.length === 0 && !weaponNeeded && !needEmergencyTeleport && !needEmergencyTownTeleport && !needHpMedium) {
     const equippedAmulet = className === 'taoist' ? await equipHeldAmulet(client) : null;
     return { status: 'sufficient', stock: stock(client.snapshot), gold: initialGold, equippedAmulet };
   }
@@ -306,7 +312,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     spendableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
   }
 
-  if (needed.length === 0 && !needEmergencyTeleport && !needEmergencyTownTeleport) {
+  if (needed.length === 0 && !needEmergencyTeleport && !needEmergencyTownTeleport && !needHpMedium) {
     return {
       status: 'restocked',
       before: { gold: initialGold, ...beforeStock },
@@ -318,7 +324,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     };
   }
 
-  if (needed.length === 0 && !needEmergencyTeleport && needEmergencyTownTeleport) {
+  if (needed.length === 0 && !needEmergencyTeleport && needEmergencyTownTeleport && !needHpMedium) {
     const townPurchase = await purchaseEmergencyTownTeleport(
       client,
       navigateNear,
@@ -362,6 +368,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   if (needEmergencyTeleport && !emergencyRow) {
     throw new Error(`Merchant Ruben shop is missing ${RANDOM_TELEPORT.name} (${RANDOM_TELEPORT.itemIndex})`);
   }
+  const hpMediumRow = needHpMedium ? supplyRow(goods.list, SUPPLIES.hpMedium) : null;
 
   // Calculate the full plan once so it always preserves the emergency gold
   // reserve. HP is intentionally first because every class depends on it.
@@ -394,7 +401,40 @@ export async function restockInVillage(client, navigateNear, options = {}) {
       budget -= quantity * unitPrice;
     }
   }
+  let hpMediumSkipped = null;
+  if (needHpMedium) {
+    if (!hpMediumRow || !Number.isSafeInteger(Number(hpMediumRow.price)) || Number(hpMediumRow.price) <= 0) {
+      hpMediumSkipped = 'missingLiveShopRow';
+    } else {
+      const unitPrice = Number(hpMediumRow.price);
+      const existing = hpMediumDrugCount(client.snapshot);
+      const quantity = Math.min(
+        Math.max(0, targets.hpMedium - existing),
+        Math.max(0, Math.floor(budget / unitPrice)),
+      );
+      if (quantity > 0) {
+        for (const chunk of purchaseChunks(client.snapshot, 'hpMedium', quantity)) {
+          plan.push({ kind: 'hpMedium', row: hpMediumRow, quantity: chunk, unitPrice, cost: chunk * unitPrice });
+        }
+        budget -= quantity * unitPrice;
+      } else {
+        hpMediumSkipped = 'insufficientFunds';
+      }
+    }
+  }
   if (plan.length === 0) {
+    if (needHpMedium) {
+      return {
+        status: 'restocked',
+        before: { gold: initialGold, ...beforeStock },
+        after: { gold: integer(client.snapshot.gold, 'snapshot.gold'), ...stock(client.snapshot) },
+        purchases: [],
+        sales,
+        weaponPurchase,
+        ...(hpMediumSkipped ? { hpMediumSkipped } : {}),
+        equippedAmulet: className === 'taoist' ? await equipHeldAmulet(client) : null,
+      };
+    }
     return needsFunds(beforeStock, initialGold, spendableGold, reserveGold);
   }
 
@@ -407,7 +447,9 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     const beforeGold = integer(client.snapshot.gold, 'snapshot.gold');
     const beforeQuantity = purchase.kind === 'randomTeleport'
       ? randomTeleportStock(client.snapshot)
-      : stock(client.snapshot)[purchase.kind];
+      : purchase.kind === 'hpMedium'
+        ? hpMediumDrugCount(client.snapshot)
+        : stock(client.snapshot)[purchase.kind];
     const afterCommand = client.sequence;
     client.send({
       type: 'buyItem',
@@ -420,6 +462,8 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     await client.wait(
       () => purchase.kind === 'randomTeleport'
         ? hasFreshRandomTeleportPurchaseProof(client, afterCommand, beforeGold - purchase.cost, beforeQuantity + purchase.quantity)
+        : purchase.kind === 'hpMedium'
+          ? hasFreshHpMediumPurchaseProof(client, afterCommand, beforeGold - purchase.cost, beforeQuantity + purchase.quantity)
         : hasFreshPurchaseProof(client, afterCommand, purchase.kind, beforeGold - purchase.cost, beforeQuantity + purchase.quantity),
       `authoritative purchase of ${purchase.kind === 'randomTeleport' ? RANDOM_TELEPORT.name : SUPPLIES[purchase.kind].name}`,
       WAIT_MS,
@@ -462,6 +506,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     purchases,
     sales,
     weaponPurchase,
+    ...(hpMediumSkipped ? { hpMediumSkipped } : {}),
     equippedAmulet,
   };
 }
@@ -841,6 +886,16 @@ function hasFreshRandomTeleportPurchaseProof(client, afterSequence, expectedGold
   );
 }
 
+function hasFreshHpMediumPurchaseProof(client, afterSequence, expectedGold, expectedQuantity) {
+  return client.events.some(event =>
+    event?.sequence > afterSequence &&
+    event?.direction === 'received' &&
+    event?.type === 'worldSnapshot' &&
+    Number(event?.payload?.gold) === expectedGold &&
+    hpMediumDrugCount(event?.payload) === expectedQuantity
+  );
+}
+
 function hasFreshTownTeleportPurchaseProof(client, afterSequence, expectedGold, expectedQuantity) {
   return client.events.some(event =>
     event?.sequence > afterSequence &&
@@ -907,6 +962,13 @@ function stock(snapshot) {
     if (kind) result[kind] += Math.max(0, Number(item?.quantity ?? 1));
   }
   return result;
+}
+
+export function hpMediumDrugCount(snapshot) {
+  return [...(snapshot?.inventoryItems ?? []), ...(snapshot?.beltItems ?? []), ...(snapshot?.equipmentItems ?? [])]
+    .filter(item => templateIndex(item) === SUPPLIES.hpMedium.itemIndex ||
+      normalized(item?.name) === normalized(SUPPLIES.hpMedium.name))
+    .reduce((total, item) => total + Math.max(0, Number(item?.quantity ?? 1)), 0);
 }
 
 function randomTeleportStock(snapshot) {
@@ -981,6 +1043,8 @@ function purchaseChunks(snapshot, kind, requested) {
 function supplyKind(item) {
   return templateIndex(item) === SUPPLIES.hp.itemIndex || normalized(item?.name) === normalized(SUPPLIES.hp.name)
     ? 'hp'
+    : templateIndex(item) === SUPPLIES.hpMedium.itemIndex || normalized(item?.name) === normalized(SUPPLIES.hpMedium.name)
+      ? 'hpMedium'
     : templateIndex(item) === SUPPLIES.mp.itemIndex || normalized(item?.name) === normalized(SUPPLIES.mp.name)
       ? 'mp'
       : templateIndex(item) === SUPPLIES.amulet.itemIndex || normalized(item?.name) === normalized(SUPPLIES.amulet.name)
@@ -1193,6 +1257,13 @@ function positiveOption(value, fallback, label) {
   if (value == null) return fallback;
   const parsed = Number(value);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) throw new TypeError(`${label} must be a positive integer`);
+  return parsed;
+}
+
+function positiveOrZeroOption(value, fallback, label) {
+  if (value == null) return fallback;
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed) || parsed < 0) throw new Error(`${label} must be a nonnegative integer`);
   return parsed;
 }
 

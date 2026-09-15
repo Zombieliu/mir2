@@ -13,19 +13,20 @@ import {
 } from './protocol-supplies.mjs';
 
 const HP = 658;
+const HP_MEDIUM = 660;
 const MP = 659;
 const AMULET = 712;
 const RANDOM_TELEPORT = 717;
 const TOWN_TELEPORT = 719;
 
-function item(itemIndex, quantity, name = itemIndex === HP ? '(HP)DrugSmall' : itemIndex === MP ? '(MP)DrugSmall' : 'Amulet', uniqueId = itemIndex) {
+function item(itemIndex, quantity, name = itemIndex === HP ? '(HP)DrugSmall' : itemIndex === HP_MEDIUM ? '(HP)DrugMedium' : itemIndex === MP ? '(MP)DrugSmall' : 'Amulet', uniqueId = itemIndex) {
   return { name, uniqueId, quantity, container: 'bag1', tooltipSource: { info: {
     item_index: itemIndex, required_type: 0, required_amount: itemIndex === AMULET ? 18 : 0,
     required_class: itemIndex === AMULET ? 31 : 0,
   } } };
 }
 
-function snapshot({ className = 'Warrior', level = 20, gold = 1000, hp = 0, mp = 0, amulet = 0, beltAmulet = 0, knownSkills = [], mapFileName = '0', npc = true } = {}) {
+function snapshot({ className = 'Warrior', level = 20, gold = 1000, hp = 0, hpMedium = 0, mp = 0, amulet = 0, beltAmulet = 0, knownSkills = [], mapFileName = '0', npc = true } = {}) {
   return {
     mapFileName,
     gold,
@@ -42,6 +43,7 @@ function snapshot({ className = 'Warrior', level = 20, gold = 1000, hp = 0, mp =
     ],
     inventoryItems: [
       ...(hp ? [item(HP, hp)] : []),
+      ...(hpMedium ? [item(HP_MEDIUM, hpMedium)] : []),
       ...(mp ? [item(MP, mp)] : []),
       ...(amulet ? [item(AMULET, amulet)] : []),
     ],
@@ -204,6 +206,7 @@ class FakeClient {
 function goods() {
   return [
     { id: '9007199254740993', uniqueId: '9007199254740993', itemIndex: HP, name: '(HP)DrugSmall', price: 40, count: 1 },
+    { id: 66001, uniqueId: 66001, itemIndex: HP_MEDIUM, name: '(HP)DrugMedium', price: 110, count: 1 },
     { id: 72, uniqueId: 72, itemIndex: MP, name: '(MP)DrugSmall', price: 40, count: 1 },
     { id: 73, uniqueId: 73, itemIndex: AMULET, name: 'Amulet', price: 25, count: 1 },
   ];
@@ -379,6 +382,45 @@ test('ordinary restock does not buy RandomTeleport unless explicitly requested',
   assert.equal(result.status, 'sufficient');
   assert.equal(client.sent.some(entry => entry.type === 'buyItem' && entry.itemIndex === 71701), false);
   assert.equal(client.snapshot.inventoryItems.some(entry => Number(entry.tooltipSource?.info?.item_index) === RANDOM_TELEPORT), false);
+});
+
+test('Wizard-only HP Medium opt-in buys the live Ruben row to target six', async () => {
+  const client = new FakeClient(snapshot({ className: 'Wizard', gold: 800, hp: 6, hpMedium: 0, mp: 1 }), { goods: goods() });
+  const result = await restockInVillage(client, async () => {}, {
+    targetHp: 6,
+    lowStockHp: 6,
+    targetHpMedium: 6,
+    lowStockHpMedium: 3,
+    targetMp: 1,
+    lowStockMp: 1,
+    reserveGold: 100,
+  });
+  assert.equal(result.status, 'restocked');
+  assert.equal(result.after.gold, 140);
+  assert.equal(client.snapshot.inventoryItems.find(entry => entry.name === '(HP)DrugMedium')?.quantity, 6);
+  assert.deepEqual(client.sent.filter(command => command.type === 'buyItem').map(command => command.itemIndex), [66001]);
+  assert.equal(result.purchases[0].itemIndex, HP_MEDIUM);
+  assert.equal(result.purchases[0].unitPrice, 110);
+});
+
+test('HP Medium opt-in skips safely when the fresh Ruben row is missing or unaffordable', async () => {
+  const missingRow = new FakeClient(snapshot({ className: 'Wizard', gold: 500, hp: 6, mp: 1 }), {
+    goods: goods().filter(row => row.itemIndex !== HP_MEDIUM),
+  });
+  const missingResult = await restockInVillage(missingRow, async () => {}, {
+    targetHp: 6, lowStockHp: 6, targetHpMedium: 6, lowStockHpMedium: 3,
+    targetMp: 1, lowStockMp: 1, reserveGold: 100,
+  });
+  assert.equal(missingResult.status, 'restocked');
+  assert.equal(missingRow.sent.some(command => command.itemIndex === 66001), false);
+
+  const poor = new FakeClient(snapshot({ className: 'Wizard', gold: 150, hp: 6, mp: 1 }), { goods: goods() });
+  const poorResult = await restockInVillage(poor, async () => {}, {
+    targetHp: 6, lowStockHp: 6, targetHpMedium: 6, lowStockHpMedium: 3,
+    targetMp: 1, lowStockMp: 1, reserveGold: 100,
+  });
+  assert.equal(poorResult.status, 'restocked');
+  assert.equal(poor.sent.some(command => command.itemIndex === 66001), false);
 });
 
 test('ordinary restock does not buy TownTeleport unless explicitly requested', async () => {

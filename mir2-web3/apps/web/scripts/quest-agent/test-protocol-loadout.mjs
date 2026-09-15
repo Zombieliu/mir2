@@ -383,6 +383,23 @@ test("useSupplies accepts a higher explicit HP recovery threshold", async () => 
   assert.deepEqual(client.sent, [{ type: "useItem", uniqueId: 41, grid: "inventory" }]);
 });
 
+test("q89 opt-in prefers held HP Medium without rewriting inventory", async () => {
+  const state = snapshot("Wizard", 25);
+  state.playerHp = 84;
+  state.beltItems.push({ name: "(HP)DrugSmall", uniqueId: 40, quantity: 6, container: "belt" });
+  state.inventoryItems.push({ name: "(HP)DrugMedium", uniqueId: 41, quantity: 6, container: "bag1" });
+  const client = mockClient(state, current => { current.snapshot.playerHp = 100; });
+  const result = await useSupplies(client, {
+    hpThreshold: 0.9,
+    mpThreshold: 0,
+    preferredHpPotion: "medium",
+    restorativeReuseDelayMs: 2_500,
+  });
+  assert.deepEqual(result, ["(HP)DrugMedium"]);
+  assert.deepEqual(client.sent, [{ type: "useItem", uniqueId: 41, grid: "inventory" }]);
+  assert.equal(state.beltItems[0].quantity, 6);
+});
+
 test("emergency HP recovery sends immediately without awaiting an item acknowledgement", async () => {
   const state = snapshot("Taoist", 12);
   state.playerHp = 39;
@@ -416,6 +433,28 @@ test("emergency HP recovery waits for the prior gradual potion dose before using
     { type: "useItem", uniqueId: 0, grid: "belt" },
     { type: "useItem", uniqueId: 0, grid: "belt" },
   ]);
+});
+
+test("opt-in restorative reuse cannot go below 2500ms", () => {
+  const state = snapshot("Wizard", 25);
+  state.playerHp = 40;
+  state.beltItems.push({ name: "(HP)DrugMedium", uniqueId: 42, quantity: 3, container: "belt" });
+  const client = mockClient(state);
+  let now = 1_000;
+  assert.equal(startEmergencyHpRecovery(client, {
+    hpThreshold: 0.9, restorativeReuseDelayMs: 1_000, now: () => now,
+    preferredHpPotion: "medium",
+  }).length, 1);
+  now += 2_499;
+  assert.deepEqual(startEmergencyHpRecovery(client, {
+    hpThreshold: 0.9, restorativeReuseDelayMs: 1_000, now: () => now,
+    preferredHpPotion: "medium",
+  }), []);
+  now += 1;
+  assert.equal(startEmergencyHpRecovery(client, {
+    hpThreshold: 0.9, restorativeReuseDelayMs: 1_000, now: () => now,
+    preferredHpPotion: "medium",
+  }).length, 1);
 });
 
 test("dead players emit no restorative item or Healing commands", async () => {
@@ -491,7 +530,7 @@ test("Wizard prefers ready GreatFireBall and falls back while it cools down", as
   const result = await combatAction(ready, target);
   assert.equal(result.spell, "GreatFireBall");
   assert.equal(ready.sent[0].spell, "GreatFireBall");
-  assert.equal(combatApproachRange(ready, target), 6);
+  assert.equal(combatApproachRange(ready, target), 9);
 
   state.knownSkills[1].cooldownRemainingTicks = 2;
   const cooling = mockClient(state);
@@ -528,7 +567,7 @@ test("combat approach keeps a ready Wizard FireBall at a safe ranged distance", 
 
   assert.equal(
     combatApproachRange(mockClient(state), { objectId: 99, x: 30, y: 30, dead: false }),
-    6,
+    9,
   );
 });
 
@@ -538,7 +577,7 @@ test("Wizard holds spell range and waits without a command while FireBall cools 
   const client = mockClient(state);
   const target = { objectId: 99, x: 14, y: 8, dead: false };
 
-  assert.equal(combatApproachRange(client, target), 6);
+  assert.equal(combatApproachRange(client, target), 9);
   assert.deepEqual(await combatAction(client, target), {
     kind: "wait", spell: "FireBall", targetId: 99, delayMs: 650,
   });

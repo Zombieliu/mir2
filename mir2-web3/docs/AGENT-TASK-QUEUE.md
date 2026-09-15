@@ -1,6 +1,64 @@
 # Agent Task Queue
 
-> Active r25 checkpoint: compile/build passed at SHA-256
+> Current checkpoint, 2026-09-15: isolated Gateway R54 is active at
+> localhost 17800/17810. Independent saved-state validation confirms Warrior
+> Lv30, 55/55 mandatory + 4/4 milestones; Wizard Lv25, 45/55 + 3/4, q89 6/9;
+> Taoist Lv23, 39/55 + 2/4, q99 3/6. This is 148/177 quest/milestone units
+> (83.62%), with 26 mandatory quests and three milestones left; partial kill
+> progress and visual gates are not counted as completed units.
+> Full controller regression passes 610/610. The latest fixes recheck paralysis
+> and death immediately after movement cadence waiting, preserve Wizard's
+> legal nine-tile fireball range, buy ordinary Ruben Medium HP reserve only
+> for q89 town departures, and require Taoist q98/q99 to leave town with
+> 12 MP drugs while retaining the four-drug field trigger. q89 held Mediums
+> are preferred with a bounded 2.5-second reuse; other play retains six seconds.
+> Missing/unaffordable Medium rows fall back to held Small HP and normal retreat.
+> Wizard R115 and Taoist R104 are now running the ordinary public journey on
+> R54. R53 Taoist SoulFireBall XP193 persisted normally; natural R54 fireball
+> progression and the remaining route/visual results are pending.
+> The 375-minute budget is a design target, not measured full 0→30 playtime.
+> Native 30-minute telemetry is stable but the observer gate remains FAIL for
+> missing successful-reconnect evidence; it does not certify held-right input.
+> See [checkpoint](generated/player-qa/protocol-journey-20260915/three-class-checkpoint-1910.md),
+> [tests](generated/player-qa/protocol-journey-20260915/quest-agent-tests-r117-root.log)
+> and [R54 practice](generated/player-qa/shared-fireball-practice-20260915/README.md).
+> Full route, animation/UI and complete active-play timing remain unaccepted;
+> formalCandidate=false, accepted=false, visualAccepted=false.
+
+> Historical 2026-09-15 R52 newcomer checkpoint: Gateway R52 is active on
+> `127.0.0.1:17800/17810`; the opt-in route has 55 mandatory quests plus four
+> separate milestones per class and a 375-minute design budget. Chapters target
+> 20/25/60/75/90/105 minutes, with quest-only XP budgets
+> 1,600/49,558/65,742/480,000/1,800,000/4,900,000 (7,296,900 total),
+> 110 bounded kills and 11 needed quest items. Warrior journey R88 completed
+> the ordinary chain across saved checkpoints: Lv30, 55/55 mandatory quests,
+> 4/4 milestones, normal LogOutSuccess and matching account revision 7427.
+> Its 3,387 movement sends include 3,385 paired responses and two Death
+> interruptions; live unmatched requests and responses above 2.5 seconds are
+> zero, maximum response is 1,146 ms, and navigation movement timeout is zero.
+> All four deaths recovered normally. Wizard R110 resumed at Lv25,
+> q89 3/9; Taoist R98 resumed at Lv23, q98 5/6. Current runner fixes
+> include `b846f2a64` cadence serialization, paralysis-aware breakout and
+> authoritative retreat-state refresh. `1e8931561` adds a measured 48/64
+> Taoist Wooma Amulet reserve and alternative unfinished kill targets during
+> search; full regression is 582/582 with no
+> failures, cancellations or skips. Evidence:
+> [quest-agent-tests-r110.log](generated/player-qa/protocol-journey-20260915/quest-agent-tests-r110.log),
+> [Warrior R88](generated/player-qa/protocol-journey-20260915/warrior-r88.md),
+> [protocol status](PROTOCOL-NEWCOMER-ACCEPTANCE.md) and
+> [current design](NEWCOMER-1-30-DESIGN.md).
+> Next: continue the existing ordinary Wizard/Taoist saves through all 55 tasks
+> and four milestones to Lv30, saving exact blockers and retesting repairs.
+> Native UI/animation, three-class completion and complete 0→30 active-play
+> timing remain unaccepted. Overall `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`; Warrior R88's 49m44 closing segment is not full-route
+> timing, and protocol acceptance does not change Crystal parity scores.
+
+Earlier checkpoints below are historical and preserve the route counts and
+versions observed at that time. Warrior journey R88 (2026-09-15) is distinct
+from the older backend completed-round R88 entries.
+
+> Historical r25 checkpoint: compile/build passed at SHA-256
 > `5EFB51A48211897F8B1559E793AEDC9E28B24A68FEC89CC41F99FD7C84908A87`.
 > Five simulation tests, four Gateway cadence tests and all 129 Node protocol
 > tests pass. The selected-character ECS position getter narrows pending
