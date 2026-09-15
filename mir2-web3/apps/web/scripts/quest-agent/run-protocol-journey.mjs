@@ -81,7 +81,7 @@ const bootstrapTimeoutMs = 60_000;
 // quest instead of becoming permanently stuck in town.
 const minimumJourneyHpStock = 4;
 const maxJourneyRevivals = Number(process.env.MIR2_JOURNEY_MAX_REVIVALS ?? 30);
-const dangerousExpeditionQuestIds = new Set([54, 60, 62, 65, 98, 99, 113, 114]);
+const dangerousExpeditionQuestIds = new Set([54, 60, 62, 65, 89, 98, 99, 113, 114]);
 const journeySupplyOptions = Object.freeze({
   targetHp: 24,
   targetMp: 12,
@@ -358,7 +358,7 @@ try {
         // funding only 24 bottles caused repeated under-stocked returns.
         const activeQuestHpTarget = hpRestockTargetForActiveQuests(owner.snapshot, {
           fallback: journeySupplyOptions.targetHp,
-          targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80, 65: 80, 98: 80, 99: 80, 113: 80, 114: 80 },
+          targets: { 42: 32, 49: 24, 54: 80, 60: 80, 62: 80, 65: 80, 89: 64, 98: 80, 99: 80, 113: 80, 114: 80 },
         });
         const fundingHpDeficit = Math.max(
           1,
@@ -378,9 +378,14 @@ try {
           0,
           emergencyTeleportTarget - randomTeleportCount(owner.snapshot),
         ) * 100;
+        const fundingAmuletDeficit = String(selfPlayer(owner)?.class ?? '').trim().toLowerCase() === 'taoist' &&
+          journeyExpeditionSupplyActive(owner.snapshot, questId)
+          ? Math.max(0, 32 - amuletStock(owner.snapshot))
+          : 0;
         const requiredFundingCount = safeFundingVenisonTargetCount(fundingHpDeficit, {
           className: selfPlayer(owner)?.class,
           requiredMpStock: fundingMpDeficit,
+          requiredAmuletStock: fundingAmuletDeficit,
           additionalGold: Math.max(
             0,
             journeyWeaponFundingGold(owner.snapshot) + emergencyTeleportFunding -
@@ -813,6 +818,7 @@ try {
             // the first independently proven attacker means that isolated pull
             // has failed and must be abandoned before the field converges.
             retreatAtActiveAggressorCount: id === 42 ? 1 : retreatProfile.retreatAtActiveAggressorCount,
+            directAggressorDistance: retreatProfile.directAggressorDistance,
             // The unique Currish must be carved for JadeRing. Once ordinary
             // quest funding has supplied HP drugs, a player can burst that
             // small target and harvest immediately instead of trying to clear

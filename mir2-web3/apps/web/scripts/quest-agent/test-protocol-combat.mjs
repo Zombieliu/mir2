@@ -7,6 +7,7 @@ import {
   completeQuestObjectives,
   firstReachableDestination,
   harvestDirection,
+  provenAggressors,
   unsafeRetreatIsSafe,
 } from "./protocol-combat.mjs";
 import { NavigationStalled } from "./protocol-play.mjs";
@@ -82,6 +83,25 @@ const snapshot = (quest, entities = []) => ({ playerObjectId: 1, playerHp: 40, m
 const settings = { sleep: async () => {}, attackCadenceMs: 0, harvestCadenceMs: 0, attackResponseTimeout: 1, questSettleTimeout: 1, spawnObservationTimeout: 1 };
 const spawn = (monsterName, x = 20, y = 20) => ({ monsterName, mapFileName: "0", position: { x, y }, spread: 10, respawnIndex: x * 100 + y });
 const navigateClientNear = client => async target => Object.assign(client.snapshot.entities[0], { x: target.x - 1, y: target.y });
+
+test("direct ranged hit evidence identifies a q89 aggressor up to eight tiles away", () => {
+  const quest = { questId: 89, stage: "InProgress", objectives: [] };
+  const nearRanged = monster(61, "CursedShaman", 16, 10, { disposition: "hostile" });
+  const farRanged = monster(62, "CursedShaman", 19, 10, { disposition: "hostile" });
+  const facingOnly = monster(63, "CursedShaman", 17, 10, { disposition: "hostile" });
+  const client = new FakeClient(snapshot(quest, [nearRanged, farRanged, facingOnly]));
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 62 });
+  client.receive("ObjectAttack", () => {}, {
+    objectId: 63, location: { x: 17, y: 10 }, direction: "Left",
+  });
+  assert.deepEqual(provenAggressors(client, null, {
+    aggressorEvidenceEvents: 128,
+    aggressorEvidenceWindowMs: 5_000,
+    directAggressorDistance: 8,
+    now: () => Date.now(),
+  }).map(entity => entity.objectId), [61]);
+});
 
 test("q2 kills a live Scarecrow and trusts authoritative GingerTea progress", async () => {
   const quest = { questId: 2, stage: "InProgress", objectives: [objective("Collect GingerTea", 0, 1)] };

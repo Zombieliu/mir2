@@ -1099,6 +1099,18 @@ test('q99 Warrior admits the measured final WoomaFighter spawn group', () => {
   assert.equal(questRetreatProfile(99, 'Taoist').maxTargetNearby, 4);
 });
 
+test('q89 Wizard carries an escape reserve and detects ranged mine attackers', () => {
+  const profile = questRetreatProfile(89, 'Wizard');
+  assert.equal(profile.maxTargetAdjacent, 0);
+  assert.equal(profile.maxTargetNearby, 2);
+  assert.equal(profile.directAggressorDistance, 8);
+  assert.equal(profile.multiAggressorRetreatRatio, 0.75);
+  assert.equal(profile.retreatAtActiveAggressorCount, 2);
+  assert.equal(profile.unsafeRetreatSafeDistance, 8);
+  assert.equal(journeyEmergencyTeleportDepartureTarget(89), 4);
+  assert.equal(questEmergencyEscapeHpRatio(89, 'Wizard'), 0.65);
+});
+
 test('q98 Wooma expedition keeps long wide recovery armed for ranged classes', () => {
   for (const className of ['Wizard', 'Taoist']) {
     const profile = questRetreatProfile(98, className);

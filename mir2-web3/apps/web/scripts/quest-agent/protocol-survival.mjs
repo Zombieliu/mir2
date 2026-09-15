@@ -2,7 +2,7 @@ const DEFAULT_MAX_RESTOCKS = 32;
 const DEFAULT_MINIMUM_HP_STOCK = 1;
 const REFRESH_TIMEOUT_MS = 12_000;
 const PASSIVE_RECOVERY_POLL_MS = 3_100;
-const DANGEROUS_EXPEDITION_QUEST_IDS = new Set([54, 60, 62, 65, 98, 99, 113, 114]);
+const DANGEROUS_EXPEDITION_QUEST_IDS = new Set([54, 60, 62, 65, 89, 98, 99, 113, 114]);
 
 export function hpRestockTargetForActiveQuests(snapshot, {
   fallback = 24,
@@ -94,7 +94,7 @@ export function questEmergencyEscapeHpRatio(questId, className = '') {
   // take those measured pulls with Healing, but must escape before the pack
   // reaches the generic one-third-health floor.
   if ([98, 99].includes(id) && normalizedClass === 'taoist') return 0.65;
-  if ([60, 65, 113].includes(id) && normalizedClass === 'wizard') return 0.65;
+  if ([60, 65, 89, 113].includes(id) && normalizedClass === 'wizard') return 0.65;
   return DANGEROUS_EXPEDITION_QUEST_IDS.has(id) ? 0.35 : 0;
 }
 
@@ -158,11 +158,12 @@ export function questRetreatProfile(questId, className = '') {
   const rangedInsectExpedition = [60, 113].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
   const rangedWoomaExpedition = [98, 99].includes(id) && ['wizard', 'taoist'].includes(normalizedClass);
   const rangedMinePassage = id === 65 && fragileMineExpedition;
+  const fragileUndeadMineHunt = id === 89 && normalizedClass === 'wizard';
   const warriorWoomaHunt = id === 99 && normalizedClass === 'warrior';
   const warriorMineralMineHunt = id === 118 && normalizedClass === 'warrior';
   const warriorPrajnaHunt = [122, 123].includes(id) && normalizedClass === 'warrior';
   return {
-    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 98, 99, 113, 114, 122, 123].includes(id),
+    allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 89, 98, 99, 113, 114, 122, 123].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
     // turns the D401 crossing into an unrewarded fight: the surrounding pack
     // converges while Wizard/Taoist spend the MP reserved for D406. Keep the
@@ -176,7 +177,7 @@ export function questRetreatProfile(questId, className = '') {
     // mobs even though it remained healthy and fully supplied. Keep crossing
     // the approach while healthy; the existing cave target-density and
     // low-health escape gates still take over after arrival.
-    continueTravelWhileHealthy: [54, 62, 65].includes(id) ||
+    continueTravelWhileHealthy: [54, 62, 65].includes(id) || fragileUndeadMineHunt ||
       rangedInsectExpedition || rangedWoomaExpedition,
     // R37-R42 showed that repeated evasion spends the random-teleport reserve
     // without crossing D401/D2041. These expeditions carry large proven
@@ -191,11 +192,14 @@ export function questRetreatProfile(questId, className = '') {
     // limit because the same trace band showed its much smaller HP pool can
     // die during a single corridor breakout.
     maxRetreatBreakoutKills: ([54, 62, 65].includes(id) && !fragileMineExpedition) || healingMineExpedition ? 3 : 1,
-    multiAggressorRetreatRatio: [54, 65].includes(id) ? (fragileMineExpedition ? 0.75 : 0.55) : undefined,
-    retreatAtActiveAggressorCount: [54, 65].includes(id) ? (fragileMineExpedition ? 1 : 3) : undefined,
-    unsafeRetreatSteps: id === 62 || fragileMineExpedition ? 24 :
+    multiAggressorRetreatRatio: [54, 65].includes(id) ? (fragileMineExpedition ? 0.75 : 0.55) :
+      (fragileUndeadMineHunt ? 0.75 : undefined),
+    retreatAtActiveAggressorCount: [54, 65].includes(id) ? (fragileMineExpedition ? 1 : 3) :
+      (fragileUndeadMineHunt ? 2 : undefined),
+    ...(fragileUndeadMineHunt ? { directAggressorDistance: 8 } : {}),
+    unsafeRetreatSteps: id === 62 || fragileMineExpedition || fragileUndeadMineHunt ? 24 :
       ([30, 33, 36].includes(id) ? 16 : 12),
-    unsafeRetreatSafeDistance: id === 62 || fragileMineExpedition ? 8 :
+    unsafeRetreatSafeDistance: id === 62 || fragileMineExpedition || fragileUndeadMineHunt ? 8 :
       ([30, 33, 36].includes(id) ? 10 : 6),
     // Live D2041 snapshots consistently expose SpiderFrog candidates with one
     // adjacent and up to four nearby passive monsters. Rejecting every such
@@ -205,7 +209,10 @@ export function questRetreatProfile(questId, className = '') {
     // no spells and only consumed escape scrolls. Admit the already proven 1/4
     // density for both ranged passages; the proven-aggressor and health gates
     // still interrupt an unsafe engagement.
-    ...((rangedInsectExpedition || rangedWoomaExpedition || rangedMinePassage) ? {
+    ...(fragileUndeadMineHunt ? {
+      maxTargetAdjacent: 0,
+      maxTargetNearby: 2,
+    } : (rangedInsectExpedition || rangedWoomaExpedition || rangedMinePassage) ? {
       maxTargetAdjacent: 1,
       maxTargetNearby: 4,
     } : warriorWoomaHunt ? {

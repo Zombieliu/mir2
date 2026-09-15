@@ -18,8 +18,12 @@ test('safe funding budget covers expedition HP and caster MP working capital', (
   assert.equal(safeFundingVenisonTargetCount(24, {
     className: 'Warrior', additionalGold: 1500,
   }), 13);
+  assert.equal(safeFundingVenisonTargetCount(3, {
+    className: 'Taoist', requiredMpStock: 9, requiredAmuletStock: 31, additionalGold: 400,
+  }), 10);
   assert.throws(() => safeFundingVenisonTargetCount(0), /positive integer/);
   assert.throws(() => safeFundingVenisonTargetCount(4, { requiredMpStock: -1 }), /nonnegative integer/);
+  assert.throws(() => safeFundingVenisonTargetCount(4, { requiredAmuletStock: -1 }), /nonnegative integer/);
   assert.throws(() => safeFundingVenisonTargetCount(4, { additionalGold: -1 }), /nonnegative integer/);
 });
 

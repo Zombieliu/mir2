@@ -12,6 +12,7 @@ const VILLAGE_FUNDING_RADIUS = 120;
 export function safeFundingVenisonTargetCount(requiredHpStock, {
   className = '',
   requiredMpStock = 0,
+  requiredAmuletStock = 0,
   additionalGold = 0,
 } = {}) {
   const hpStock = Number(requiredHpStock);
@@ -22,16 +23,23 @@ export function safeFundingVenisonTargetCount(requiredHpStock, {
   if (!Number.isSafeInteger(mpStock) || mpStock < 0) {
     throw new TypeError('requiredMpStock must be a nonnegative integer');
   }
+  const amuletStock = Number(requiredAmuletStock);
+  if (!Number.isSafeInteger(amuletStock) || amuletStock < 0) {
+    throw new TypeError('requiredAmuletStock must be a nonnegative integer');
+  }
   const extraGold = Number(additionalGold);
   if (!Number.isSafeInteger(extraGold) || extraGold < 0) {
     throw new TypeError('additionalGold must be a nonnegative integer');
   }
   const caster = ['wizard', 'taoist'].includes(String(className).trim().toLowerCase());
   const mpBudget = caster ? Math.ceil(mpStock / 4) : 0;
+  const amuletBudget = String(className).trim().toLowerCase() === 'taoist'
+    ? Math.ceil(amuletStock / 8)
+    : 0;
   // Live Butcher/Ruben prices show one Venison funding about five HP drugs or
   // four MP drugs. Budget both resources explicitly so an HP-first shop pass
   // cannot strand a caster with an unusable skill bar.
-  return Math.max(2, Math.ceil(hpStock / 5) + mpBudget + Math.ceil(extraGold / 200));
+  return Math.max(2, Math.ceil(hpStock / 5) + mpBudget + amuletBudget + Math.ceil(extraGold / 200));
 }
 
 /**

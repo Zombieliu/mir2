@@ -829,6 +829,7 @@ function combatSettings(options) {
     sustainCadenceMs: nonnegativeInteger(options.sustainCadenceMs, 2_000),
     aggressorEvidenceWindowMs: positiveInteger(options.aggressorEvidenceWindowMs, 5_000),
     aggressorEvidenceEvents: positiveInteger(options.aggressorEvidenceEvents, 128),
+    directAggressorDistance: positiveInteger(options.directAggressorDistance, 1),
     targetLossSettleMs: positiveInteger(options.targetLossSettleMs, 3_000),
     approachRange: typeof options.approachRange === "function" ? options.approachRange : () => 1,
     maxCooldownWaitMs: positiveInteger(options.maxCooldownWaitMs, 30_000),
@@ -2180,7 +2181,7 @@ function focusedTargetAggressorPolicy(client, excludedObjectId, settings) {
   };
 }
 
-function provenAggressors(client, excludedObjectId, settings) {
+export function provenAggressors(client, excludedObjectId, settings) {
   const player = selectPlayer(client.snapshot);
   if (!player) return [];
   const events = (client.events ?? []).slice(-settings.aggressorEvidenceEvents);
@@ -2198,9 +2199,18 @@ function provenAggressors(client, excludedObjectId, settings) {
     }
   }
   return (client.snapshot?.entities ?? [])
-    .filter(entity => Number(entity?.objectId) !== Number(excludedObjectId) &&
-      isPotentialHostileMonster(entity) &&
-      distance(player, entity) <= 1 && (direct.has(Number(entity.objectId)) || facing.has(Number(entity.objectId))))
+    .filter(entity => {
+      if (Number(entity?.objectId) === Number(excludedObjectId) || !isPotentialHostileMonster(entity)) {
+        return false;
+      }
+      const range = distance(player, entity);
+      const objectId = Number(entity.objectId);
+      // ObjectStruck is direct authoritative evidence and covers ranged
+      // attackers. Facing inference remains melee-only because an ordinary
+      // ObjectAttack packet does not prove a distant projectile target.
+      return (direct.has(objectId) && range <= settings.directAggressorDistance) ||
+        (facing.has(objectId) && range <= 1);
+    })
     .sort((left, right) => threatHealth(left) - threatHealth(right) ||
       distance(player, left) - distance(player, right) || Number(left.objectId) - Number(right.objectId));
 }
