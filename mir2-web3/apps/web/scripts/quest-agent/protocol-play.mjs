@@ -418,7 +418,7 @@ export function createNavigator(client, dependencies = {}) {
         await sleep(750);
         continue;
       }
-      const before = { x: self.x, y: self.y };
+      const plannedFrom = { x: self.x, y: self.y };
       if (successfulSteps >= maxSuccessfulSteps) {
         throw new Error(`Navigation successful step budget exceeded (${maxSuccessfulSteps})`);
       }
@@ -436,6 +436,15 @@ export function createNavigator(client, dependencies = {}) {
           .map(point => `${Number(point.x)},${Number(point.y)}`),
       );
       const liveSelf = selfPlayer(client);
+      // Cadence waiting can overlap the authoritative response to an earlier
+      // action. Never dispatch a route step planned from a transform that is
+      // no longer current, and never let that earlier response satisfy this
+      // movement's acknowledgement wait.
+      if (distance(liveSelf, plannedFrom) > 0) {
+        remaining = [];
+        continue;
+      }
+      const before = { x: Number(liveSelf.x), y: Number(liveSelf.y) };
       const dx = Math.sign(Number(step.to.x) - Number(before.x));
       const dy = Math.sign(Number(step.to.y) - Number(before.y));
       const dispatchSteps = running ? 2 : 1;

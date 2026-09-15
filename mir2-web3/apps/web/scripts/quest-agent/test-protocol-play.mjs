@@ -222,6 +222,38 @@ test('navigator waits out paralysis without poisoning a valid route cell', async
   );
 });
 
+test('navigator replans when an earlier authoritative response lands during cadence wait', async () => {
+  const client = navigationClient();
+  let cadenceCalls = 0;
+  let waitCalls = 0;
+  client.wait = async predicate => {
+    waitCalls += 1;
+    const command = client.sent.at(-1);
+    const [dx, dy] = directionDelta[command.direction];
+    const scale = command.type === 'run' ? 2 : 1;
+    client.snapshot.entities[0].x += dx * scale;
+    client.snapshot.entities[0].y += dy * scale;
+    assert.ok(predicate());
+  };
+
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    delay: async () => {
+      cadenceCalls += 1;
+      if (cadenceCalls === 1) {
+        // Simulate a prior movement ACK arriving after this route was planned
+        // but before its next movement is dispatched.
+        client.snapshot.entities[0].x = 2;
+      }
+    },
+  });
+  await navigateNear({ x: 5, y: 1 }, 1);
+
+  assert.equal(waitCalls, 1, 'the stale planned step must not be sent or awaited');
+  assert.deepEqual(client.sent, [{ type: 'run', direction: 'Right' }]);
+  assert.equal(client.snapshot.entities[0].x, 4);
+});
+
 test('navigator optional successful-step cap prevents Run from exceeding the bounded route', async () => {
   const client = navigationClient();
   client.wait = async predicate => {

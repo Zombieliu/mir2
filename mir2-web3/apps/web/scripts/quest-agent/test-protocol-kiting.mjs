@@ -248,6 +248,29 @@ test('journey mode continues after the navigator spends its exact retreat step b
     entry.type === 'wizardKiteFallback' && entry.reason === 'partialRetreatProgress'));
 });
 
+test('journey mode refreshes after an authoritative correction burst exceeds the local retreat budget', async () => {
+  const owner = player();
+  const target = monster(20, 7, 5);
+  const client = clientFixture([owner, target]);
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let acted = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { acted += 1; return { kind: 'magic', targetId: target.objectId }; },
+    async () => {
+      Object.assign(owner, { x: 3, y: 1 });
+      return { reached: false, successfulSteps: 0 };
+    },
+    { loadCollisionMap: async () => openMap(), fightWhenBlocked: true },
+  );
+
+  assert.deepEqual(await wrapped(client, target), { kind: 'retreated', targetId: target.objectId });
+  assert.equal(acted, 0);
+  assert.ok(diagnostics.some(entry =>
+    entry.type === 'wizardKiteFallback' && entry.reason === 'retreatDisplacementOutOfBounds' &&
+    entry.moved === 4 && entry.stepBudget === 3));
+});
+
 test('journey mode attacks when a moving threat closes the planned retreat path', async () => {
   const owner = player();
   const target = monster(20, 7, 5);

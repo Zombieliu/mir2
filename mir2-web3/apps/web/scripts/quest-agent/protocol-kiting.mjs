@@ -135,6 +135,14 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         reportedSteps,
         stepBudget,
       });
+      if (fightWhenBlocked && moved > stepBudget) {
+        // A burst of ordered authoritative corrections can make the observed
+        // before/after displacement span more than this one retreat call.
+        // Refresh the encounter instead of terminating a live journey after
+        // the server has left the player in a valid same-map position.
+        encounterRetreatedCells = Math.min(maxRetreatCellsPerTarget, encounterRetreatedCells + moved);
+        return { kind: 'retreated', targetId };
+      }
       throw new Error(`Wizard retreat did not complete within its ${stepBudget}-cell budget`);
     }
     if (navigation?.reached === false) {

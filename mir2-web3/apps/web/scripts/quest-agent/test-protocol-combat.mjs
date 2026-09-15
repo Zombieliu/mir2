@@ -2477,6 +2477,78 @@ test("a fully occupied retreat cuts down one proven adjacent attacker to open an
   assert.equal(diagnostics.filter(entry => entry.type === "unsafePackBreakoutCombat").length, 1);
 });
 
+test("a fully occupied retreat waits out paralysis before breakout combat", async () => {
+  const quest = { questId: 98, stage: "InProgress", objectives: [objective("Kill WoomaSoldier", 0, 1)] };
+  const blockers = Array.from({ length: 8 }, (_, index) =>
+    monster(61 + index, index === 0 ? "CaveBat" : "WoomaWarrior", 100 + index, 100, {
+      disposition: "hostile",
+      hp: index === 0 ? 3 : 20,
+    }));
+  const objectiveTarget = monster(60, "WoomaSoldier", 30, 30, { disposition: "hostile" });
+  const client = new FakeClient(snapshot(quest, blockers), (owner, command) => {
+    assert.equal(owner.snapshot.entities[0].poison ?? 0, 0, "breakout attack must wait for poison=0");
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      const target = state.entities.find(entry => entry.objectId === command.objectId);
+      Object.assign(target, { dead: true, hp: 0 });
+      if (command.objectId === 60) {
+        state.questLog[0].objectives[0] = objective("Kill WoomaSoldier", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    }, { objectId: command.objectId });
+  });
+  client.snapshot.entities[0].poison = 32;
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let searchVisits = 0;
+  let blockedSleeps = 0;
+  const navigate = async (target, _range, stopWhen, options = {}) => {
+    const actor = client.snapshot.entities[0];
+    if (target.objectId === 60) {
+      Object.assign(actor, { x: target.x - 1, y: target.y });
+      return { reached: true };
+    }
+    if (options.allowedHostileObjectIds) return { reached: false, successfulSteps: 0 };
+    searchVisits += 1;
+    if (searchVisits === 1) {
+      Object.assign(actor, { x: 20, y: 20 });
+      const occupied = [
+        [20, 19], [21, 19], [21, 20], [21, 21],
+        [20, 21], [19, 21], [19, 20], [19, 19],
+      ];
+      blockers.forEach((blocker, index) => Object.assign(blocker, { x: occupied[index][0], y: occupied[index][1] }));
+      client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+      assert.equal(stopWhen(), true);
+      return { reached: false };
+    }
+    client.snapshot.entities.push(objectiveTarget);
+    return { reached: false };
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 98,
+    objectives: { kill: [{ monsterName: "WoomaSoldier", spawnCandidates: [spawn("WoomaSoldier")] }], item: [] },
+  }, navigate, {
+    ...settings,
+    maxEngagements: 6,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 0,
+    unsafeRetreatSteps: 8,
+    recoverAfterUnsafeRetreat: async () => {},
+    sleep: async () => {
+      if (client.snapshot.entities[0].poison === 32) {
+        blockedSleeps += 1;
+        client.snapshot.entities[0].poison = 0;
+      }
+    },
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(blockedSleeps, 1);
+  assert.ok(diagnostics.some(entry => entry.type === "unsafePackActionControlBlocked"));
+  assert.equal(client.sent[0].objectId, 61);
+});
+
 test("low-health no-step retreat uses the optional emergency escape before breaking out", async () => {
   const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
   const blockers = Array.from({ length: 8 }, (_, index) =>

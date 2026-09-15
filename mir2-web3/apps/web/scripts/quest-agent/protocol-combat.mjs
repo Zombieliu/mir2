@@ -1,5 +1,6 @@
 import { delay as realDelay } from "./protocol-client.mjs";
 import { distance, NavigationStalled } from "./protocol-play.mjs";
+import { selfActionBlockMask } from "./protocol-status.mjs";
 import { TravelBlockedByMonster, TravelInterrupted } from "./protocol-travel.mjs";
 
 const READY_STAGES = new Set(["readytoturnin", "completed"]);
@@ -1738,6 +1739,18 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
     let bestExposure = originExposure;
     const escapeStart = { ...origin };
     const breakOut = async (current, reason) => {
+      const actionBlockMask = selfActionBlockMask(client);
+      if (actionBlockMask !== 0) {
+        recordSearchDiagnostic(client, {
+          type: 'unsafePackActionControlBlocked',
+          from: current,
+          reason,
+          poison: Number(playerFromSnapshot(client.snapshot)?.poison ?? client.snapshot?.playerPoison ?? 0),
+          actionBlockMask,
+        });
+        await settings.sleep(Math.max(250, settings.attackCadenceMs));
+        return true;
+      }
       const breakers = provenAggressors(client, null, settings);
       if (breakers.length === 0 || breakoutKills >= settings.maxRetreatBreakoutKills) return false;
       for (const breaker of breakers) {
