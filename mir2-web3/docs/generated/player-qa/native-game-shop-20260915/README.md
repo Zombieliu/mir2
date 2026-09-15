@@ -147,5 +147,9 @@ R124 search-blocker follow-up passes 645/645 controller tests and corrected
 independent review. The normal R54 run cleared two live Shaman blockers and
 advanced its search position, but q89 remains incomplete at this observation.
 Taoist R104 has stopped with its saved checkpoint retained. This is not route success.
+R125 subsequently resumed Taoist with corrected authoritative death gating:
+647/647 controller tests pass, and valid saved-death revival returns a fresh
+HP180/dead=false town snapshot. No quest unit or visual pass is counted for it.
+See [revival evidence](../protocol-journey-20260915/percent-zero-death-r125.md).
 See [controller evidence](../protocol-journey-20260915/q89-range-and-blocker-r122-r124.md).
 Full three-class Lv30 native/animation/paired acceptance is open.

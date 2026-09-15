@@ -1,4 +1,4 @@
-import { observedPlayerHp } from './protocol-observation.mjs';
+import { hasAuthoritativePlayerDeath, observedPlayerHp } from './protocol-observation.mjs';
 import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-navigation.mjs';
 import { delay } from './protocol-client.mjs';
 import { useSupplies } from './protocol-loadout.mjs';
@@ -22,11 +22,12 @@ export class NavigationStalled extends Error {
 }
 export async function reviveInTown(client) {
   const before = { map: client.snapshot.mapFileName, ...selfPlayer(client) };
-  if (!before.dead && observedPlayerHp(client.snapshot) > 0) return null;
+  if (!hasAuthoritativePlayerDeath(client.snapshot)) return null;
   await client.request({ type: 'townRevive' }, 'Revived');
   const after = client.sequence;
   client.send({ type: 'clientVersion' });
-  await client.wait(() => client.events.some(e => e.sequence > after && e.type === 'worldSnapshot') && observedPlayerHp(client.snapshot) > 0 && !selfPlayer(client).dead, 'town revival snapshot');
+  await client.wait(() => client.events.some(e => e.sequence > after && e.type === 'worldSnapshot') &&
+    observedPlayerHp(client.snapshot) > 0 && !hasAuthoritativePlayerDeath(client.snapshot), 'town revival snapshot');
   return { at: new Date().toISOString(), before, after: { map: client.snapshot.mapFileName, ...selfPlayer(client) } };
 }
 const directionNames = { up: 'Up', 'up+right': 'UpRight', right: 'Right', 'down+right': 'DownRight', down: 'Down', 'down+left': 'DownLeft', left: 'Left', 'up+left': 'UpLeft' };
@@ -410,7 +411,7 @@ export function createNavigator(client, dependencies = {}) {
       if (client.closed) throw new Error('Protocol client closed during navigation');
       if (stopWhen()) return { reached: false, successfulSteps };
       const self = selfPlayer(client);
-      if (self.dead || observedPlayerHp(client.snapshot) <= 0) throw new Error('Player died during navigation');
+      if (hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Player died during navigation');
       const movementBlockMask = selfActionBlockMask(client);
       if (movementBlockMask !== 0) {
         remaining = [];
@@ -612,8 +613,7 @@ export function createNavigator(client, dependencies = {}) {
       await sleep(Math.max(0, 650 - (now() - (client.lastWalkAt ?? 0))));
       // Control/death packets can arrive during cadence waiting without
       // changing position. Recheck before sending an otherwise valid step.
-      const dispatchSelf = selfPlayer(client);
-      if (dispatchSelf.dead || observedPlayerHp(client.snapshot) <= 0) {
+      if (hasAuthoritativePlayerDeath(client.snapshot)) {
         throw new Error('Player died during navigation');
       }
       if (selfActionBlockMask(client) !== 0) {
@@ -665,8 +665,7 @@ export function createNavigator(client, dependencies = {}) {
       client.send({ type: running ? 'run' : 'walk', direction: directionNames[step.direction] });
       let movedDistance = 0;
       const movementInterruptedByDeath = () => {
-        const currentSelf = selfPlayer(client);
-        if (currentSelf?.dead === true || observedPlayerHp(client.snapshot) <= 0) return true;
+        if (hasAuthoritativePlayerDeath(client.snapshot)) return true;
         return client.events.some(event =>
           event.sequence > movementResponseAfter && event.direction === 'received' &&
           event.packet === 'Death');

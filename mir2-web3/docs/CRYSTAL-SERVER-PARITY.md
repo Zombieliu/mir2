@@ -22,6 +22,9 @@
 > collision-checked Shaman approach and blocker-specific death confirmation.
 > The normal R54 live run cleared two blockers; the quest remains incomplete.
 > Taoist R104 has stopped with its saved Lv25 checkpoint retained.
+> R125 now resumes Taoist with authoritative death gating; controller 647/647
+> passes, and a valid saved death produces self Revived/fresh HP180 town state.
+> No new quest completion or visual gate is counted for that recovery.
 > See [Game Shop QA](generated/player-qa/native-game-shop-20260915/README.md).
 
 > 2026-09-15 shared primary-hit practice follow-up: the owner-bound receipt

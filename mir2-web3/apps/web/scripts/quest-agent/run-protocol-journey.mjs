@@ -1,4 +1,4 @@
-import { observedPlayerHp } from './protocol-observation.mjs';
+import { hasAuthoritativePlayerDeath, observedPlayerHp } from './protocol-observation.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -1145,7 +1145,7 @@ try {
       await finishJourneyQuest(q, record);
       await finishReadyDeferredQuests();
       } catch (error) {
-        if ((selfPlayer(client)?.dead || observedPlayerHp(client.snapshot) <= 0) && report.revivals.length < maxJourneyRevivals) {
+        if (hasAuthoritativePlayerDeath(client.snapshot) && report.revivals.length < maxJourneyRevivals) {
           if (report.quests.length) report.quests.at(-1).failure = error.message;
           report.revivals.push(await reviveInTown(client));
           report.restock = await supplyGateForQuest(client, id);
@@ -1217,9 +1217,7 @@ function recordSupplyRetreat(report, questId, supply) {
 }
 
 function playerIsDead(snapshot) {
-  const actor = (snapshot?.entities ?? []).find(entity =>
-    Number(entity?.objectId) === Number(snapshot?.playerObjectId));
-  return actor?.dead === true || observedPlayerHp(snapshot) <= 0;
+  return hasAuthoritativePlayerDeath(snapshot);
 }
 
 function criticalStrandedPlayer(snapshot) {

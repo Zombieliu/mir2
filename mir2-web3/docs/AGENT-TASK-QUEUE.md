@@ -22,6 +22,11 @@
 > and blocker-specific death proof. The normal R54 live run has cleared two
 > Shaman blockers and advanced its search position; q89 completion remains open.
 > See generated/player-qa/protocol-journey-20260915/q89-range-and-blocker-r122-r124.md.
+> R125 separates conservative percent-zero HP from authoritative death; full
+> controller 647/647 passes. Taoist has resumed normally and its valid saved
+> death produced self Revived plus a later healthy HP180 town snapshot.
+> Wizard R124 continues; completed quest units remain 155/177 at this observation.
+> Evidence: generated/player-qa/protocol-journey-20260915/percent-zero-death-r125.md.
 > Evidence: generated/player-qa/native-game-shop-20260915/README.md.
 
 > Historical controller checkpoint follows; R122 supersedes the active Wizard run.

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { applyProtocolObservation, observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
+import { applyProtocolObservation, hasAuthoritativePlayerDeath, observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
 
 const packet = (name, payload = {}) => ({ type: 'packet', packet: name, payload });
 
@@ -153,6 +153,33 @@ test('percentage HP estimates stay conservative and do not revive a dead self', 
   applyProtocolObservation(state, packet('ObjectHealth', { objectId: 1001, percent: 100 }));
   assert.equal(observedPlayerHp(state), 224);
   assert.equal(state.playerHp, undefined, 'percentage estimate is kept separate from exact HP');
+});
+
+test('rounded self percent zero remains low-health control rather than an authoritative death', () => {
+  const state = observedWorld();
+  state.playerHp = 1;
+  state.entities[0].hp = 1;
+  applyProtocolObservation(state, packet('ObjectHealth', { objectId: 1001, percent: 0 }));
+  assert.equal(observedPlayerHp(state), 0, 'safety control remains conservative');
+  assert.equal(hasAuthoritativePlayerDeath(state), false, 'the exact living snapshot wins over rounded percent');
+
+  state.playerHp = null;
+  state.entities[0].hp = 1;
+  assert.equal(hasAuthoritativePlayerDeath(state), false, 'null snapshot HP must not override exact living self HP');
+  state.entities[0].hp = null;
+  assert.equal(hasAuthoritativePlayerDeath(state), false, 'absent exact HP is not death evidence');
+  state.playerHp = 0;
+  assert.equal(hasAuthoritativePlayerDeath(state), true, 'numeric snapshot zero remains authoritative');
+
+  state.playerHp = 1;
+  state.entities[0].hp = 1;
+
+  applyProtocolObservation(state, packet('HealthChanged', { hp: 0 }));
+  assert.equal(hasAuthoritativePlayerDeath(state), true, 'an exact self zero is authoritative');
+  applyProtocolObservation(state, packet('ObjectRevived', { objectId: 2001 }));
+  assert.equal(hasAuthoritativePlayerDeath(state), true, 'another object revival cannot clear the self death');
+  applyProtocolObservation(state, packet('Revived'));
+  assert.equal(hasAuthoritativePlayerDeath(state), false, 'the self lifecycle packet starts the next life');
 });
 
 test('poison packets keep the current self movement-control mask observable', () => {

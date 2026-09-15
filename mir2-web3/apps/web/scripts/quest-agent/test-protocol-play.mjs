@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { createNavigator, NavigationStalled } from './protocol-play.mjs';
+import { createNavigator, NavigationStalled, reviveInTown } from './protocol-play.mjs';
+import { applyProtocolObservation } from './protocol-observation.mjs';
 import { startEmergencyHpRecovery } from './protocol-loadout.mjs';
 import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
 import { q89WizardFreshCursedShamanRecoveryOptions } from './protocol-survival.mjs';
@@ -67,6 +68,50 @@ const dependencies = {
   delay: async () => {},
   now: () => 10_000,
 };
+
+test('town revive waits for authoritative death, then a self Revived and healthy snapshot', async () => {
+  const client = navigationClient();
+  Object.assign(client.snapshot, { playerHp: 1, playerMaxHp: 100, playerHealthObservation: 'exact' });
+  Object.assign(client.snapshot.entities[0], { hp: 1, maxHp: 100, dead: false });
+  applyProtocolObservation(client.snapshot, {
+    type: 'packet', packet: 'ObjectHealth', payload: { objectId: 1, percent: 0 },
+  });
+  const requests = [];
+  client.request = async (command, expectedPacket) => {
+    assert.equal(expectedPacket, 'Revived');
+    requests.push(command);
+    client.sequence += 1;
+    applyProtocolObservation(client.snapshot, { type: 'packet', packet: 'Revived', payload: {} });
+    client.events.push({ sequence: client.sequence, direction: 'received', packet: 'Revived', payload: {} });
+    return client.events.at(-1);
+  };
+  client.send = command => {
+    client.sent.push(command);
+    client.sequence += 1;
+    if (command.type === 'clientVersion') {
+      client.snapshot = {
+        mapFileName: '0', playerObjectId: 1, playerHp: 30, playerMaxHp: 100,
+        entities: [{ objectId: 1, kind: 'selfPlayer', x: 1, y: 1, hp: 30, maxHp: 100, dead: false }],
+      };
+      client.events.push({ sequence: client.sequence, direction: 'received', type: 'worldSnapshot', payload: client.snapshot });
+    }
+  };
+  client.wait = async predicate => assert.equal(predicate(), true);
+
+  assert.equal(await reviveInTown(client), null);
+  assert.equal(requests.length, 0, 'rounded zero must not dispatch townRevive');
+
+  applyProtocolObservation(client.snapshot, { type: 'packet', packet: 'Death', payload: {} });
+  const revival = await reviveInTown(client);
+  assert.equal(requests.length, 1, 'one authoritative death dispatches one townRevive');
+  assert.equal(requests[0].type, 'townRevive');
+  assert.equal(revival.after.map, '0');
+  const revived = client.events.filter(event => event.packet === 'Revived');
+  const healthySnapshots = client.events.filter(event => event.type === 'worldSnapshot');
+  assert.equal(revived.length, 1);
+  assert.equal(healthySnapshots.length, 1);
+  assert.ok(healthySnapshots[0].sequence > revived[0].sequence, 'the healthy snapshot must follow self Revived');
+});
 
 test('navigator propagates a Gateway failure without rejecting a valid tile or sending another move', async () => {
   const client = navigationClient();

@@ -131,6 +131,26 @@ export function observedPlayerHp(snapshot) {
   return finiteNumber(snapshot?.playerHp ?? player?.hp) ?? 0;
 }
 
+/**
+ * Death is a lifecycle decision, distinct from conservative low-health
+ * control. ObjectHealth is rounded to an integer percent, so 0% can still
+ * mean one exact HP. Preserve that 0 estimate for potions and escape, but do
+ * not issue a town revive until the self is dead or an exact self value is 0.
+ */
+export function hasAuthoritativePlayerDeath(snapshot) {
+  const player = snapshot && selfEntity(snapshot);
+  if (player?.dead === true) return true;
+  const snapshotHp = knownExactHp(snapshot?.playerHp);
+  if (snapshotHp != null) return snapshotHp <= 0;
+  const playerHp = knownExactHp(player?.hp);
+  return playerHp != null && playerHp <= 0;
+}
+
+function knownExactHp(value) {
+  if (value == null || value === '') return null;
+  return finiteNumber(value);
+}
+
 /** Latest relative health for target choice/finishing, with exact HP retained. */
 export function observedEntityHealthRatio(entity) {
   const percent = finiteNumber(entity?.healthPercent);

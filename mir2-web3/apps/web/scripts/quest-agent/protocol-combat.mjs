@@ -1,4 +1,4 @@
-import { observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
+import { hasAuthoritativePlayerDeath, observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
 import { delay as realDelay } from "./protocol-client.mjs";
 import { RangedSafetyBandUnavailable } from './protocol-kiting.mjs';
 import { distance, NavigationStalled } from "./protocol-play.mjs";
@@ -2567,7 +2567,7 @@ async function settleMissingTarget(client, objectId, settings) {
 
 function playerIsDead(client) {
   const player = selectPlayer(client.snapshot);
-  return !player || player.dead === true || Number(player.hp) <= 0 || observedPlayerHp(client.snapshot) <= 0;
+  return !player || hasAuthoritativePlayerDeath(client.snapshot);
 }
 
 function contestedLethalByRemotePlayer(client, objectId, afterSequence) {
@@ -2689,7 +2689,7 @@ function playerFromSnapshot(snapshot) {
 
 function assertPlayerAlive(client) {
   const player = selectPlayer(client.snapshot);
-  if (!player || player.dead === true || Number(player.hp) <= 0 || observedPlayerHp(client.snapshot) <= 0) {
+  if (!player || hasAuthoritativePlayerDeath(client.snapshot)) {
     throw new Error("Player died during quest combat");
   }
 }
