@@ -211,7 +211,7 @@ fn preview(
                 361,
                 362,
                 363,
-                CrystalRect::new(230.0, 8.0, 24.0, 21.0),
+                CrystalRect::new(230.0, 8.0, 16.0, 15.0),
                 OverlayButton::GameShopControl(GameShopAction::PreviewClose),
                 true,
             );
@@ -914,21 +914,63 @@ fn text(
     color: Color,
     align: Justify,
 ) {
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(rect.left),
-            top: Val::Px(rect.top),
-            width: Val::Px(rect.width),
-            height: Val::Px(rect.height),
-            overflow: Overflow::clip(),
-            ..default()
-        },
-        Text::new(value),
-        crate::crystal_ui::typography::crystal_text_font(font),
-        TextColor(color),
-        TextLayout::new(align, LineBreak::NoWrap),
-    ));
+    let justify_content = match align {
+        Justify::Right | Justify::End => JustifyContent::FlexEnd,
+        Justify::Center => JustifyContent::Center,
+        Justify::Left | Justify::Start | Justify::Justified => JustifyContent::FlexStart,
+    };
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(rect.left),
+                top: Val::Px(rect.top),
+                width: Val::Px(rect.width),
+                height: Val::Px(rect.height),
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::Center,
+                justify_content,
+                overflow: Overflow::clip(),
+                ..default()
+            },
+        ))
+        .with_children(|label| {
+            label.spawn((
+                Text::new(value),
+                crate::crystal_ui::typography::crystal_text_font(font),
+                TextColor(color),
+                TextLayout::new(Justify::Left, LineBreak::NoWrap),
+            ));
+        });
+}
+
+fn game_shop_friendly_name(name: &str) -> String {
+    let name = name.trim_end_matches(|character: char| character.is_ascii_digit());
+    let mut result = String::new();
+    let mut bracketed = false;
+    for character in name.chars() {
+        match character {
+            '[' => bracketed = true,
+            ']' if bracketed => bracketed = false,
+            _ if !bracketed => result.push(character),
+            _ => {}
+        }
+    }
+    result.chars().take(17).collect()
+}
+
+fn game_shop_grade_color(item: &GameShopEntry) -> Color {
+    let Some(grade) = item.tooltip_source.as_ref().map(|source| source.info.grade) else {
+        return Color::WHITE;
+    };
+    match grade {
+        0 | 1 => Color::srgb_u8(255, 255, 0),
+        2 => Color::srgb_u8(0, 191, 255),
+        3 => Color::srgb_u8(255, 140, 0),
+        4 => Color::srgb_u8(221, 160, 221),
+        5 => Color::srgb_u8(255, 0, 0),
+        _ => Color::srgb_u8(255, 255, 0),
+    }
 }
 
 pub(super) fn render(
@@ -1267,13 +1309,13 @@ fn product(
             if let Some(assets) = assets {
                 native_image(cell, assets, "Title", 750, 0.0, 0.0);
             }
-            let name: String = item.item_name.chars().take(17).collect();
+            let name = game_shop_friendly_name(&item.item_name);
             text(
                 cell,
                 &name,
                 CrystalRect::new(0.0, 13.0, 125.0, 15.0),
                 10.67,
-                TEXT,
+                game_shop_grade_color(item),
                 Justify::Center,
             );
             text(
@@ -1542,6 +1584,26 @@ fn format_number(value: u64) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::inventory::CrystalItemTooltipSourceModel;
+
+    #[test]
+    fn game_shop_names_match_crystal_friendly_name_and_grade_color() {
+        assert_eq!(game_shop_friendly_name("AncientBanga[Green]"), "AncientBanga");
+        assert_eq!(game_shop_friendly_name("Item[Green]2"), "Item");
+        assert_eq!(game_shop_friendly_name("1234567890123456789"), "");
+        assert_eq!(game_shop_friendly_name("Potion2Plus"), "Potion2Plus");
+
+        let mut item = GameShopEntry::default();
+        item.tooltip_source = Some(CrystalItemTooltipSourceModel::default());
+        assert_eq!(game_shop_grade_color(&item), Color::srgb_u8(255, 255, 0));
+        item.tooltip_source.as_mut().unwrap().info.grade = 3;
+        assert_eq!(game_shop_grade_color(&item), Color::srgb_u8(255, 140, 0));
+        item.tooltip_source.as_mut().unwrap().info.grade = 99;
+        assert_eq!(game_shop_grade_color(&item), Color::srgb_u8(255, 255, 0));
+        item.tooltip_source = None;
+        assert_eq!(game_shop_grade_color(&item), Color::WHITE);
+    }
+
     #[test]
     fn categories_keep_server_order_and_class_section_search_filter_real_flags() {
         let mut model = GameShopModel::default();

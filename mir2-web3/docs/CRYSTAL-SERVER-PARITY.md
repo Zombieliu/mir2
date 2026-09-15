@@ -15,6 +15,9 @@
 > paired UI and full three-class visual acceptance remain open. Natural routes:
 > Warrior 55/55 + 4/4 at Lv30; Wizard/Taoist 45/55 + 3/4 at Lv25 each.
 > Completed route units 155/177; this does not change global parity.
+> R35 follow-up: real original screenshots exposed remaining text alignment and
+> missing preview close assets. Source repairs/build and native-ui 853/853 pass;
+> R35 paired visual checks remain pending. R123 route search did not advance q89.
 > See [Game Shop QA](generated/player-qa/native-game-shop-20260915/README.md).
 
 > 2026-09-15 shared primary-hit practice follow-up: the owner-bound receipt

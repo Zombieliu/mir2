@@ -14,6 +14,10 @@
 > 85% HP; controller 634/634. Quest/monster values and escape guards are unchanged.
 > Taoist R104 remains active. Natural completed units remain 155/177; partial
 > kills and these UI leaves do not increase full-route/global acceptance.
+> R35 source alignment/preview asset repair builds; native-ui 853/853 passes.
+> Real original screenshots are retained; repaired paired visual pass remains
+> pending. R123 live search exhausted391 waypoints without q89 advancement;
+> scoped protected-blocker follow-up is under development.
 > Evidence: generated/player-qa/native-game-shop-20260915/README.md.
 
 > Historical controller checkpoint follows; R122 supersedes the active Wizard run.

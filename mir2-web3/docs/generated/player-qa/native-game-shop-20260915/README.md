@@ -102,6 +102,33 @@ dispatch. Actual R34 screenshots verify the editing results above; advanced
 modifier combinations and full original paired behavior remain open. R34 runtime
 redirect files are empty, so no R34 runtime trace or soak duration is claimed.
 
+## R35 original paired follow-up (visual repair not yet accepted)
+
+The original client was changed to a bordered 1024×768 window and the user
+manually logged in as `test`. Actual original default/search/RedTiger preview
+screenshots are retained here. This character differs from the isolated Windows
+Warrior, so matching rider equipment or purchase balances is not claimed.
+
+The paired screenshots exposed a real R34 presentation failure: names, prices,
+counts, quantities, wallets and page text appeared at the left despite declared
+text alignment. R35 uses fixed source rectangles with flex-aligned natural-width
+text children. Friendly names follow source trailing-number/bracket removal and
+17-character display limits; tooltip grades follow the current Crystal source
+color mapping, with missing metadata left white.
+
+The preview close action existed, but Prguse frames 361–363 were absent from the
+export and runtime package. All three are now exported from the matching original
+Prguse.Lib, with source hashes and exact 16×15 geometry retained in
+`preview-close-source-custody.json`. The main shop close button retains its
+different Prguse2 24×21 geometry. Existing PNG bytes were not rewritten.
+
+R35 optimized build completed in 1m49s; native SHA256 is
+`4B1C97EF05417D6273ABA01B0A3A09D1801B116081A9678BC0E7221B025FE567`.
+Final native-ui regression: **853 passed, 0 failed**, 1.51s.
+This remains a development acceptance EXE. R35 paired visual alignment/close
+checks remain pending because both Mir clients were closed before the repair
+could be run visually.
+
 ## Separate natural journey checkpoint
 
 Warrior Lv30: 55/55 mandatory + 4/4 milestones. Wizard and Taoist Lv25:
@@ -113,4 +140,8 @@ R122 starts normal held-Medium recovery after a fresh direct Shaman hit at
 Live R122 direct Shaman hit HP72 → normal Medium UseItem → HP100 is recorded;
 six Mediums were subsequently exhausted and ordinary town escape triggered.
 The remaining CursedPriest objective is not complete.
+R123 full controller regression passes 643/643. Its live attempt preserved the
+Shaman clearance but exhausted 391 bounded search waypoints without invoking
+combat; it saved/logged out with the CursedPriest objective still 2/3. A scoped
+search-blocker follow-up is under development. This is not route success.
 Full three-class Lv30 native/animation/paired acceptance is open.
