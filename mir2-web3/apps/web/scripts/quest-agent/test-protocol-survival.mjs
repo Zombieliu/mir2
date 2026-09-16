@@ -459,16 +459,20 @@ test('a dangerous expedition keeps partial field scrolls but restocks once the r
   }, 98), 0);
 });
 
-test('q89 Wizard TownTeleport reserve is departure-only and map-0 gated', () => {
-  const active = (mapFileName, stage = 'inProgress') => ({
+test('q89 Wizard and q113 casters keep TownTeleport reserves departure-only and map-0 gated', () => {
+  const active = (mapFileName, stage = 'inProgress', questId = 89) => ({
     mapFileName,
-    questLog: [{ questId: 89, stage }],
+    questLog: [{ questId, stage }],
   });
   assert.equal(journeyEmergencyTownTeleportRestockTarget(active('D022'), 89, 'Wizard'), 0);
   assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0'), 89, 'Wizard'), 2);
   assert.equal(journeyEmergencyTownTeleportRestockTarget(active('D022'), 89, 'Wizard', { force: true }), 2);
   assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0'), 89, 'Taoist'), 0);
   assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0', 'readyToTurnIn'), 89, 'Wizard'), 0);
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('D715', 'inProgress', 113), 113, 'Wizard'), 0);
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0', 'inProgress', 113), 113, 'Wizard'), 2);
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0', 'inProgress', 113), 113, 'Taoist'), 2);
+  assert.equal(journeyEmergencyTownTeleportRestockTarget(active('0', 'inProgress', 113), 113, 'Warrior'), 0);
 });
 
 test('TownTeleport departure proof triggers Scott reserve when map-0 stock is missing', async () => {
@@ -1536,6 +1540,7 @@ test('runner dispatches the q89 same-map RandomTeleport policy before Town only 
       journeyEmergencyTeleportCriticalHpRatio: () => 0.65,
       isWizardQ89Expedition: snapshot => (snapshot.questLog ?? []).some(entry =>
         Number(entry.questId) === 89 && String(entry.stage).toLowerCase() === 'inprogress'),
+      isQ113CasterExpedition: () => false,
       shouldUseQ89WizardSameMapRandomEscape,
       randomTeleportCount: () => random,
       townTeleportCount: () => 2,
@@ -1551,6 +1556,81 @@ test('runner dispatches the q89 same-map RandomTeleport policy before Town only 
   assert.deepEqual(await dispatch(62), ['random']);
   assert.deepEqual(await dispatch(59), ['town']);
   assert.deepEqual(await dispatch(62, 0), ['town']);
+});
+
+test('runner dispatches q113 caster TownTeleport only after Random depletion or the Taoist quest floor', async () => {
+  const start = runnerSource.indexOf('    const isWizardQ89Expedition =');
+  const end = runnerSource.indexOf('    const rawNavigate = createNavigator(client, {', start);
+  assert.ok(start >= 0 && end > start, 'runner must retain q113 emergency-dispatch policy');
+  const snippet = runnerSource.slice(start, end).replace(/^    /gm, '');
+  const snapshotAt = (questId, stage, hp, random, town, { self = true, dead = false } = {}) => ({
+    playerObjectId: 1000,
+    playerHp: hp,
+    playerMaxHp: 100,
+    mapFileName: 'D715',
+    entities: self ? [{ objectId: 1000, kind: 'selfPlayer', dead, hp, maxHp: 100 }] : [],
+    questLog: [{ questId, stage }],
+    random,
+    town,
+  });
+  const dispatch = async (className, state, { safeZone = false } = {}) => {
+    const calls = [];
+    const emergencyEscapeForJourney = vm.runInNewContext(`(() => { ${snippet}; return emergencyEscapeForJourney; })()`, {
+      className,
+      observedPlayerHp,
+      hasAuthoritativePlayerDeath,
+      journeyEmergencyTeleportCriticalHpRatio: () => 0.65,
+      questEmergencyEscapeHpRatio: () => 0.35,
+      shouldUseQ89WizardSameMapRandomEscape: () => false,
+      randomTeleportCount: snapshot => snapshot.random,
+      townTeleportCount: snapshot => snapshot.town,
+      useRandomTeleport: async () => { calls.push('random'); return { item: 'RandomTeleport' }; },
+      useTownTeleport: async () => { calls.push('town'); return { item: 'TownTeleport' }; },
+      createRandomTeleportEmergencyEscape: ({ teleport }) => teleport,
+      safeZoneBlocksEmergencyEscape: () => safeZone,
+      Math,
+      Number,
+    });
+    const result = await emergencyEscapeForJourney({ snapshot: state });
+    return { calls, result };
+  };
+  assert.deepEqual((await dispatch('Wizard', snapshotAt(113, 'inProgress', 45, 0, 2))).calls, ['town']);
+  assert.deepEqual((await dispatch('Taoist', snapshotAt(113, 'inProgress', 35, 8, 2))).calls, ['town']);
+  assert.deepEqual((await dispatch('Wizard', snapshotAt(113, 'inProgress', 70, 8, 2))).calls, ['random']);
+  assert.deepEqual((await dispatch('Wizard', snapshotAt(113, 'readyToTurnIn', 45, 0, 2))).calls, ['town']);
+  assert.equal((await dispatch('Wizard', snapshotAt(60, 'inProgress', 45, 0, 2))).result, false);
+  assert.equal((await dispatch('Warrior', snapshotAt(113, 'inProgress', 45, 0, 2))).result, false);
+  assert.equal((await dispatch('Wizard', snapshotAt(113, 'inProgress', 45, 0, 2, { self: false }))).result, false);
+  assert.equal((await dispatch('Wizard', snapshotAt(113, 'inProgress', 0, 0, 2, { dead: true }))).result, false);
+  assert.equal((await dispatch('Wizard', snapshotAt(113, 'inProgress', 45, 0, 0))).result, false);
+  assert.equal((await dispatch('Wizard', snapshotAt(113, 'inProgress', 45, 0, 2), { safeZone: true })).result, false);
+});
+
+test('runner q113 caster village restock carries the TownTeleport departure reserve', () => {
+  const start = runnerSource.indexOf('    const journeyRestock = (owner, navigateNear, requestedSupplyOptions = {}) => {');
+  const end = runnerSource.indexOf('    const supplyGate = createPostEngagementSupplyGate({', start);
+  assert.ok(start >= 0 && end > start, 'runner must retain journey restock policy');
+  const snippet = runnerSource.slice(start, end).replace(/^    /gm, '');
+  const villageOptions = className => vm.runInNewContext(`(() => { ${snippet}; return journeyRestock; })()`, {
+    className,
+    route: { quests: [] },
+    journeySupplyOptions: { targetHp: 24, targetMp: 12, lowStock: 4 },
+    hpRestockTargetForActiveQuests: () => 80,
+    journeyEmergencyTeleportDepartureTarget: () => 4,
+    progressionCandidates: [],
+    isWizardQ89Expedition: () => false,
+    isQ113CasterExpedition: snapshot => ['Wizard', 'Taoist'].includes(className) &&
+      (snapshot.questLog ?? []).some(entry =>
+      Number(entry.questId) === 113 && ['inprogress', 'readytoturnin'].includes(
+        String(entry.stage).replace(/[^a-z]/gi, '').toLowerCase(),
+      )),
+    restockInVillage: (_owner, _navigateNear, options) => options,
+    Math,
+    Number,
+  })({ snapshot: { mapFileName: '0', questLog: [{ questId: 113, stage: 'inProgress' }] } }, async () => {});
+  assert.equal(villageOptions('Wizard').emergencyTownTeleportCount, 2);
+  assert.equal(villageOptions('Taoist').emergencyTownTeleportCount, 2);
+  assert.equal(villageOptions('Warrior').emergencyTownTeleportCount, 0);
 });
 
 test('q89 focus relaxation is isolated from other ranged expeditions', () => {

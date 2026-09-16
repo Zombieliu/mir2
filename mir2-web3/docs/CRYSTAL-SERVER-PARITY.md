@@ -1,5 +1,10 @@
 # Crystal Server Parity
 
+> 2026-09-16 R144 controller 689/689 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-town-backup-r144.md).
+
 > 2026-09-16 R143 controller 687/687 passes. Ordinary route units
 > remain **157/177**; actual route completion, final normal logout/store and
 > separate visual gates remain open.

@@ -685,13 +685,16 @@ export function journeyEmergencyEscapeRestockTarget(snapshot, questId, {
     : 0;
 }
 
-/** q89 Wizard's TownTeleport reserve is a departure check, never a field floor. */
+/** Caster TownTeleport reserves are departure checks, never field floors. */
 export function journeyEmergencyTownTeleportRestockTarget(snapshot, questId, className, {
   force = false,
   target = 2,
 } = {}) {
-  if (String(className ?? '').trim().toLowerCase() !== 'wizard' ||
-      Number(questId) !== 89 || !journeyExpeditionSupplyActive(snapshot, questId)) return 0;
+  const normalizedClass = String(className ?? '').trim().toLowerCase();
+  const id = Number(questId);
+  const casterTownReserve = (id === 89 && normalizedClass === 'wizard') ||
+    (id === 113 && ['wizard', 'taoist'].includes(normalizedClass));
+  if (!casterTownReserve || !journeyExpeditionSupplyActive(snapshot, questId)) return 0;
   const required = nonnegativeInteger(target, 'emergency TownTeleport target');
   return force || String(snapshot?.mapFileName ?? '') === '0' ? required : 0;
 }

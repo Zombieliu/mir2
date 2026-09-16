@@ -171,6 +171,18 @@ try {
     const isWizardQ89Expedition = snapshot => className === 'Wizard' &&
       (snapshot?.questLog ?? []).some(entry => Number(entry?.questId) === 89 &&
         String(entry?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress');
+    const isQ113CasterExpedition = snapshot => ['Wizard', 'Taoist'].includes(className) &&
+      (snapshot?.questLog ?? []).some(entry => Number(entry?.questId) === 113 &&
+        ['inprogress', 'readytoturnin'].includes(
+          String(entry?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase(),
+        ));
+    const hasLivingEmergencyEscapeSnapshot = snapshot => {
+      const playerObjectId = Number(snapshot?.playerObjectId);
+      const player = (snapshot?.entities ?? []).find(entity =>
+        Number(entity?.objectId) === playerObjectId);
+      return Number.isSafeInteger(playerObjectId) && player && player.dead !== true &&
+        !hasAuthoritativePlayerDeath(snapshot);
+    };
     const q89WizardPotionOptions = owner => isWizardQ89Expedition(owner?.snapshot)
       ? { preferredHpPotion: 'medium', restorativeReuseDelayMs: 2_500 }
       : {};
@@ -206,6 +218,12 @@ try {
           // same-map random relocation before repeating the entrance route.
           return useRandomTeleport(owner);
         }
+        if (isQ113CasterExpedition(owner?.snapshot) && townTeleportCount(owner.snapshot) > 0 &&
+            (randomTeleportCount(owner.snapshot) <= 0 ||
+              (className === 'Taoist' &&
+                hpRatio <= questEmergencyEscapeHpRatio(113, className)))) {
+          return useTownTeleport(owner);
+        }
         if (isWizardQ89Expedition(owner?.snapshot) &&
             hpRatio <= journeyEmergencyTeleportCriticalHpRatio(className) &&
             townTeleportCount(owner.snapshot) > 0) {
@@ -229,10 +247,14 @@ try {
     };
     const emergencyEscapeForJourney = async owner => {
       if (safeZoneBlocksEmergencyEscape(owner)) return false;
+      if (!hasLivingEmergencyEscapeSnapshot(owner?.snapshot)) return false;
       if (isWizardQ89Expedition(owner?.snapshot) &&
           townTeleportCount(owner.snapshot) <= 0 &&
           randomTeleportCount(owner.snapshot) <= 0) return false;
-      if (!isWizardQ89Expedition(owner?.snapshot) && randomTeleportCount(owner.snapshot) <= 0) return false;
+      if (isQ113CasterExpedition(owner?.snapshot) &&
+          townTeleportCount(owner.snapshot) <= 0 && randomTeleportCount(owner.snapshot) <= 0) return false;
+      if (!isWizardQ89Expedition(owner?.snapshot) && !isQ113CasterExpedition(owner?.snapshot) &&
+          randomTeleportCount(owner.snapshot) <= 0) return false;
       const result = await emergencyTeleport(owner);
       if (result?.deferred === true || result === false || result === true) return result;
       return result && typeof result === 'object'
@@ -334,10 +356,11 @@ try {
         emergencyTeleportCount: Math.max(0, ...(owner.snapshot?.questLog ?? [])
           .filter(quest => String(quest?.stage ?? '').replace(/[^a-z]/gi, '').toLowerCase() === 'inprogress')
           .map(quest => journeyEmergencyTeleportDepartureTarget(quest?.questId))),
-        // q89 Wizard keeps two TownTeleport scrolls as the first critical
-        // escape reserve. Other classes and quests preserve the ordinary
+        // q89 Wizard and q113 casters keep two TownTeleport scrolls as a
+        // departure reserve. Other classes and quests preserve the ordinary
         // zero-default supply plan.
-        emergencyTownTeleportCount: isWizardQ89Expedition(owner.snapshot) &&
+        emergencyTownTeleportCount: (isWizardQ89Expedition(owner.snapshot) ||
+          isQ113CasterExpedition(owner.snapshot)) &&
           (String(owner.snapshot?.mapFileName ?? '') === '0' ||
             Number(requestedSupplyOptions.emergencyTownTeleportCount ?? 0) > 0)
           ? 2
