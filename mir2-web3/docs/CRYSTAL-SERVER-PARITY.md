@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> 2026-09-16 actual R141 Taoist q89 completed: Priest339200 death3748,
+> Ready3754, normal finishQuest10270→CompleteQuest10272→snapshot10273.
+> Gold105→6705, level25→26 and configured EXP/item rewards match.
+> Taoist46/55+3/4; aggregate **156/177**. Wizard and later Taoist routes,
+> final normal logout/store proof and separate visual gates remain open.
+> [Receipts](generated/player-qa/protocol-journey-20260915/taoist-r141-q89-completed-proof.md).
+
 > 2026-09-16 R141 controller 683/683 passes: q89 casters use eligible
 > normal seven-to-nine Shaman firing positions and up to six bounded
 > receipt-proved clears. A sealed route gets one guarded planning retry;
