@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
+import vm from "node:vm";
 
 import {
   compareRetreatCandidates,
@@ -114,6 +116,31 @@ const snapshot = (quest, entities = []) => ({ playerObjectId: 1, playerHp: 40, m
 const settings = { sleep: async () => {}, attackCadenceMs: 0, harvestCadenceMs: 0, attackResponseTimeout: 1, questSettleTimeout: 1, spawnObservationTimeout: 1 };
 const spawn = (monsterName, x = 20, y = 20) => ({ monsterName, mapFileName: "0", position: { x, y }, spread: 10, respawnIndex: x * 100 + y });
 const navigateClientNear = client => async target => Object.assign(client.snapshot.entities[0], { x: target.x - 1, y: target.y });
+
+test('runner q89 protected-Shaman approach promotion retains the ordinary usable-range gate', async () => {
+  const runnerSource = await readFile(new URL('./run-protocol-journey.mjs', import.meta.url), 'utf8');
+  const start = runnerSource.indexOf('          const q89ProtectedShamanCaster =');
+  const end = runnerSource.indexOf('          const playerCombatAction =', start);
+  assert.ok(start >= 0 && end > start, 'runner must retain the q89 protected-Shaman approach block');
+  const snippet = runnerSource.slice(start, end).replace(/^          /gm, '');
+  const evaluate = ordinaryRange => vm.runInNewContext(
+    `${snippet}\n({ objectiveApproachRange, isProtectedQ89Shaman });`,
+    {
+      id: 89,
+      className: 'Taoist',
+      q: { questId: 89 },
+      questCombatAction: () => ({ kind: 'magic' }),
+      questCombatApproachRange: () => ordinaryRange,
+    },
+  );
+  const noRangedSkill = evaluate(1);
+  assert.equal(noRangedSkill.objectiveApproachRange({}, { name: 'CursedShaman' }), 1,
+    'missing affordable SoulFireBall or Amulet must remain in the ordinary one-tile path');
+  const usableSoulFireBall = evaluate(6);
+  assert.equal(usableSoulFireBall.objectiveApproachRange({}, { name: 'CursedShaman0' }), 9);
+  assert.equal(usableSoulFireBall.objectiveApproachRange({}, { name: 'CursedPriest' }), 6,
+    'ordinary Taoist targets retain their established approach hint');
+});
 
 test('q89 Wizard transit plans around a live named Shaman halo before the fresh movement guard', async () => {
   const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
@@ -508,6 +535,133 @@ test('q89 Wizard keeps the real D2031 fresh guard and rejects a transit with no 
       Math.max(Math.abs(actionAt.position.x - shaman.x), Math.abs(actionAt.position.y - shaman.y)) > 6,
     ));
   }
+});
+
+test('q89 protected transit clears three receipt-proved Shamans after one guarded no-path plan each, then transfers normally', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
+  const owner = self({ kind: 'selfPlayer', x: 10, y: 10, hp: 100, maxHp: 100 });
+  const blockers = [
+    monster(341100, 'CursedShaman', 20, 10, { hp: 205, maxHp: 205, disposition: 'hostile' }),
+    monster(341105, 'CursedShaman0', 40, 10, { hp: 205, maxHp: 205, disposition: 'hostile' }),
+    monster(341109, 'CursedShaman', 60, 10, { hp: 205, maxHp: 205, disposition: 'hostile' }),
+  ];
+  const client = new FakeClient({
+    playerObjectId: 1, playerHp: 100, playerMaxHp: 100, mapFileName: 'D2031',
+    entities: [owner, ...blockers], groundDrops: [], questLog: [quest],
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  const navigationAttempts = [];
+  let travelCalls = 0;
+  const travel = async (mapFileName, options = {}) => {
+    assert.equal(mapFileName, 'D2032');
+    travelCalls += 1;
+    navigationAttempts.push(options.navigationOptions ?? null);
+    const live = blockers.find(blocker => !blocker.dead);
+    if (live) {
+      if (options.navigationOptions?.hostileAvoidanceByName) {
+        throw new Error(`No walk path on D2031 from ${owner.x},${owner.y} to 198,34`);
+      }
+      const hazard = options.navigationOptions?.beforeMovement?.({
+        mapId: 'D2031',
+        from: { x: live.x - 7, y: live.y },
+        physicalCells: [{ x: live.x - 6, y: live.y }],
+      });
+      assert.ok(hazard, 'the one fallback plan keeps the live physical guard');
+      throw new NavigationStepGuarded(hazard);
+    }
+    assert.ok(options.navigationOptions?.hostileAvoidanceByName,
+      'a new transit after a confirmed clear restores named planning');
+    const priest = monster(341200, 'CursedPriest', 184, 262, { disposition: 'hostile' });
+    Object.assign(owner, { x: 184, y: 267 });
+    Object.assign(client.snapshot, { mapFileName: 'D2032', entities: [owner, priest] });
+    client.receive('MapChanged', () => {}, { fileName: 'D2032' });
+  };
+  travel.routeLength = async () => 1;
+  const approaches = [];
+  const navigateNear = async (target, desiredDistance) => {
+    approaches.push({ objectId: target.objectId, desiredDistance });
+    Object.assign(owner, { x: target.x - desiredDistance, y: target.y });
+    return { reached: true, successfulSteps: 1 };
+  };
+  const action = async (actor, target) => {
+    assert.equal(Math.max(Math.abs(owner.x - target.x), Math.abs(owner.y - target.y)), 9,
+      'each protected blocker is normally engaged from the outer firing band');
+    Object.assign(target, { dead: true, hp: 0 });
+    actor.receive('ObjectDied', state => {
+      if (target.name === 'CursedPriest') {
+        state.questLog[0].objectives[0] = objective('Kill CursedPriest', 3, 3);
+        state.questLog[0].stage = 'ReadyToTurnIn';
+      }
+    }, { objectId: target.objectId });
+    return { kind: 'magic', targetId: target.objectId };
+  };
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [
+      { monsterName: 'CursedPriest', mapFileName: 'D2032', position: { x: 184, y: 267 }, spread: 1, respawnIndex: 1 },
+    ] }], item: [] },
+  }, navigateNear, {
+    ...settings,
+    travel,
+    preferObjectiveMapOverCurrent: true,
+    preferredObjectiveMaps: ['D2032'],
+    approachRange: () => 9,
+    action,
+    transitProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 6,
+    },
+  });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.equal(travelCalls, 7, 'each sealed plan gets one guard-preserving fallback before its clear');
+  assert.equal(navigationAttempts.filter(options => options?.hostileAvoidanceByName).length, 4);
+  assert.equal(navigationAttempts.filter(options => options && !options.hostileAvoidanceByName).length, 3);
+  assert.deepEqual(approaches.slice(0, 3).map(entry => entry.desiredDistance), [9, 9, 9]);
+  const cleared = diagnostics.filter(entry => entry.type === 'spawnStallProtectedBlockerCleared');
+  assert.equal(cleared.length, 3);
+  assert.ok(cleared.every(entry => entry.receiptConfirmed === true),
+    'only the named blocker\'s fresh ObjectDied receipt authorizes each clear');
+  assert.equal(diagnostics.filter(entry => entry.type === 'protectedTransitPlanningNoPathFallback').length, 3);
+});
+
+test('q89 protected transit fails closed when both the named and one guarded fallback plan have no path', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(341100, 'CursedShaman', 20, 10, { disposition: 'hostile' }),
+  ]));
+  const navigationAttempts = [];
+  const travel = async (_mapFileName, options = {}) => {
+    navigationAttempts.push(options.navigationOptions ?? null);
+    throw new Error('No walk path on D2031 from 10,10 to 198,34');
+  };
+  travel.routeLength = async () => 1;
+  let actions = 0;
+  await assert.rejects(completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [
+      { monsterName: 'CursedPriest', mapFileName: 'D2032', position: { x: 184, y: 267 }, spread: 1, respawnIndex: 1 },
+    ] }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    travel,
+    preferObjectiveMapOverCurrent: true,
+    preferredObjectiveMaps: ['D2032'],
+    approachRange: () => 9,
+    action: async () => { actions += 1; return { kind: 'magic' }; },
+    transitProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 6,
+    },
+  }), /No walk path on D2031 from 10,10 to 198,34/);
+
+  assert.equal(navigationAttempts.length, 2, 'the no-path retry is bounded to one ordinary guarded plan');
+  assert.ok(navigationAttempts[0]?.hostileAvoidanceByName);
+  assert.equal(navigationAttempts[1]?.hostileAvoidanceByName, undefined);
+  assert.equal(typeof navigationAttempts[1]?.beforeMovement, 'function');
+  assert.equal(actions, 0);
 });
 
 test('q89 transit clearance aborts when a Shaman moves into its fresh cadence cells without recursive clearing', async () => {

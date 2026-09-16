@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+> 2026-09-16 R141 controller 683/683 passes: q89 casters use eligible
+> normal seven-to-nine Shaman firing positions and up to six bounded
+> receipt-proved clears. A sealed route gets one guarded planning retry;
+> the total combat cap remains 200. Ordinary route units remain155/177;
+> final save and separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-two-caster-blockers-r141.md).
+
 > 2026-09-16 R140 controller 680/680 passes: existing q89 Wizard transit
 > now plans around live named Shaman six-cell halos and retains fresh packet
 > guards. Real D2031 collision test proves a sealed corridor fails closed;

@@ -182,7 +182,19 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
           toMapFileName: String(destination.mapFileName),
         });
         try {
-          await settings.travel(destination.mapFileName, {
+          // The real D2031 entrance can have two six-tile named footprints
+          // that disconnect the collision graph entirely. First ask the
+          // planner for the safe outer route. If there is none, make exactly
+          // one ordinary plan attempt without its *planning* obstacles; the
+          // fresh physical-cell guard remains installed and will stop before
+          // an actual halo entry so the existing bounded resolver can clear
+          // that exact live blocker. A later replan starts with avoidance
+          // enabled again after the authoritative clear.
+          let transitNamedPlanningEnabled = Boolean(settings.transitProtectedBlocker);
+          let usedTransitPlanningFallback = false;
+          for (;;) {
+            try {
+              await settings.travel(destination.mapFileName, {
             // Long dungeon crossings remain ordinary movement, but a rendered
             // monster that has actually struck the player may stop the route
             // so the existing bounded quest-combat path can defend the tile.
@@ -216,7 +228,9 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
                 // named-Shaman footprint enforced after cadence below. This
                 // avoids repeatedly selecting a shorter route that the
                 // physical guard must reject at its final Run cells.
-                hostileAvoidanceByName: settings.transitProtectedBlocker.namedClearance,
+                ...(transitNamedPlanningEnabled ? {
+                  hostileAvoidanceByName: settings.transitProtectedBlocker.namedClearance,
+                } : {}),
                 beforeMovement: context => protectedTransitHazard(
                   client.snapshot,
                   context,
@@ -224,7 +238,24 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
                 ),
               },
             } : {}),
-          });
+              });
+              break;
+            } catch (travelError) {
+              if (transitNamedPlanningEnabled && !usedTransitPlanningFallback &&
+                  isNoWalkPathError(travelError)) {
+                transitNamedPlanningEnabled = false;
+                usedTransitPlanningFallback = true;
+                recordSearchDiagnostic(client, {
+                  type: 'protectedTransitPlanningNoPathFallback',
+                  questId,
+                  target: pending.name,
+                  mapFileName: String(client.snapshot?.mapFileName ?? ''),
+                });
+                continue;
+              }
+              throw travelError;
+            }
+          }
           if (returnToFallbackSource) {
             if (String(client.snapshot?.mapFileName ?? '') !== fallback.fromMapFileName) {
               throw new Error(
@@ -2596,15 +2627,19 @@ function recordDeferredCombatTarget(client, questId, pending, error) {
 
 function isRecoverableSearchNavigationError(error) {
   return error instanceof NavigationStalled ||
-    String(error?.message ?? '').startsWith('No walk path') ||
+    isNoWalkPathError(error) ||
     String(error?.message ?? '').startsWith('Navigation successful step budget exceeded');
+}
+
+function isNoWalkPathError(error) {
+  return String(error?.message ?? '').startsWith('No walk path');
 }
 
 function isDeferredCombatTargetError(error) {
   return error instanceof UnreachableCombatTarget ||
     error instanceof UnresponsiveCombatTarget ||
     error instanceof LostCombatTarget ||
-    // A q89 Wizard refuses to cast from a Shaman footprint. Treat an
+    // A q89 protected caster refuses to cast from a Shaman footprint. Treat an
     // unreachable safe band exactly like the existing ordinary unreachable
     // target path: defer that actor and use the established retreat/recovery
     // sequence instead of leaking a controller-fatal generic error.

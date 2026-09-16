@@ -806,8 +806,24 @@ try {
               minimumProvenAggressors: 2,
             }
             : null;
+          const q89ProtectedShamanCaster = id === 89 &&
+            (className === 'Wizard' || className === 'Taoist');
+          const isProtectedQ89Shaman = target =>
+            ['cursedshaman', 'cursedshaman0'].includes(
+              String(target?.name ?? '').replace(/[^a-z0-9]/gi, '').toLowerCase(),
+            );
           const objectiveCombatAction = (owner, target) => questCombatAction(owner, q, target);
-          const objectiveApproachRange = (owner, target) => questCombatApproachRange(owner, q, target);
+          const objectiveApproachRange = (owner, target) => {
+            const ordinaryRange = questCombatApproachRange(owner, q, target);
+            // SoulFireBall's authoritative action gate permits its normal
+            // nine-tile cast. Keep Taoist ordinary target navigation at its
+            // established six-tile hint, but let a q89 protected Shaman use
+            // the same collision-certified 7-9 blocker band as Wizard.
+            return q89ProtectedShamanCaster && Number(ordinaryRange) > 1 &&
+              isProtectedQ89Shaman(target)
+              ? Math.max(Number(ordinaryRange) || 1, 9)
+              : ordinaryRange;
+          };
           const playerCombatAction = createWizardKitingAction(objectiveCombatAction, navigate, {
             maxRetreatSteps,
             maxRetreatCellsPerTarget: maxAttackAttempts * maxRetreatSteps,
@@ -815,13 +831,13 @@ try {
             approachRange: objectiveApproachRange,
             // The D2031 entrance can reveal a CursedShaman before the q89
             // objective is in AOI. Its source attack band ends at six while
-            // the Wizard projectile band ends at nine. Do not convert that
+            // each caster's projectile band ends at nine. Do not convert that
             // theoretical advantage into an immunity claim: require a live,
             // collision-planned 7-9 tile firing position outside every
-            // visible Shaman footprint before this q89 Wizard casts one.
+            // visible Shaman footprint before this q89 caster casts one.
             // Existing proven-aggressor and critical-escape gates run before
             // this action and remain the authority for a second attacker.
-            ...(id === 89 && className === 'Wizard' ? {
+            ...(q89ProtectedShamanCaster ? {
               rangedSafetyBand: {
                 protectedMonsterNames: ['CursedShaman', 'CursedShaman0'],
                 minimumTargetDistance: 7,
@@ -917,38 +933,39 @@ try {
             // aggro contact while allowing a running player to weave through
             // the field; the denser q33/q36 hunts keep the wider buffer.
             spawnSearchHostileClearance: id === 30 ? 2 : 4,
-            // The q89 Wizard reaches CursedShaman at range nine, but its
-            // ordinary spawn-search waypoint must never spend the initial
+            // q89 casters reach CursedShaman at their normal projectile
+            // range, but an ordinary spawn-search waypoint must never spend
+            // the initial
             // approach inside the measured six-tile Shaman footprint. Keep
             // the existing generic clearance (and its cave fallback) for
             // zombies; only these two Shaman names retain this wider buffer.
-            spawnSearchProtectedHostileClearance: id === 89 && className === 'Wizard'
+            spawnSearchProtectedHostileClearance: q89ProtectedShamanCaster
               ? { CursedShaman: 6, CursedShaman0: 6 }
               : {},
             // When that protected search cannot reach a required spawn, a
-            // Wizard may remove at most two visible Shaman blockers through
+            // q89 caster may remove up to six visible Shaman blockers through
             // the normal collision-checked seven-to-nine-tile firing band.
             // The combat helper leaves every other quest and class inert.
-            spawnStallProtectedBlocker: id === 89 && className === 'Wizard'
+            spawnStallProtectedBlocker: q89ProtectedShamanCaster
               ? {
                 monsterNames: ['CursedShaman', 'CursedShaman0'],
                 minimumApproachDistance: 7,
                 maximumApproachDistance: 9,
                 clearance: 6,
-                maxBlockers: 2,
+                maxBlockers: 6,
               }
               : null,
             // The live D2031 -> D2032 route crosses the entrance Shaman
             // pair. Guard every physical transit cell and clear only from
             // the same collision-certified band used by stalled spawn
-            // searches; this option is inert outside q89 Wizard travel.
-            transitProtectedBlocker: id === 89 && className === 'Wizard'
+            // searches; this option is inert outside q89 caster travel.
+            transitProtectedBlocker: q89ProtectedShamanCaster
               ? {
                 monsterNames: ['CursedShaman', 'CursedShaman0'],
                 minimumApproachDistance: 7,
                 maximumApproachDistance: 9,
                 clearance: 6,
-                maxBlockers: 2,
+                maxBlockers: 6,
               }
               : null,
             // Narrow Crystal cave corridors are often sealed by one monster's
@@ -1066,7 +1083,7 @@ try {
             // key/source/target map; createMapTraveler retains its normal
             // authoritative map-landing validation. This is deliberately a
             // route choice only: Taoist keeps its own density and survival
-            // profile and does not inherit Wizard Shaman-band settings.
+            // profile; its named Shaman safety band is configured separately.
             objectiveMapFallback: id === 89 && ['Wizard', 'Taoist'].includes(className) ? {
               fromMapFileName: 'D2031',
               toMapFileName: 'D2032',
