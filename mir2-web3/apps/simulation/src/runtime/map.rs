@@ -441,7 +441,17 @@ fn crystal_manifest_movement_destination_is_valid(
     destination: &Point,
 ) -> bool {
     runtime_full_map_collision_data(map_file_name)
-        .map(|collision| full_map_collision_walkable(&collision, destination))
+        .map(|collision| {
+            // Crystal's `Map.ValidPoint` checks the map cell's terrain validity
+            // before a movement completes. A closed door is a separate dynamic
+            // obstruction and does not invalidate an explicitly configured
+            // movement destination. Several real shop exits intentionally land
+            // beside/on a closed door cell (for example 0120 -> map 2 at
+            // 517,492); rejecting those destinations removes the only exit and
+            // strands the player inside the service map.
+            point_in_bounds(&collision.collision.region_bounds, destination)
+                && !collision.blocked_set.contains(&tile_key(destination))
+        })
         .unwrap_or(true)
 }
 
@@ -1020,6 +1030,10 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
         query.iter(world).collect()
     };
     for entity in existing {
+        if let Some(vitals) = world.get::<PlayerVitals>(entity) {
+            let saved=crate::config::HeroVitalsState {hp:vitals.hp,mp:vitals.mp};
+            world.resource_mut::<super::resources::HeroInventoryResource>().saved_vitals=Some(saved);
+        }
         let _ = world.despawn(entity);
     }
 
@@ -1045,9 +1059,13 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
         .map(|facing| facing.0)?;
     let spawn_position =
         summon_spawn_position_near(world, &player_position, player_direction, 1, Some(player));
-    let max_hp = 60 + i32::from(hero.level).saturating_mul(6);
-    let max_mp = 30 + i32::from(hero.level).saturating_mul(4);
+    let max_hp=super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_HP).max(0);
+    let max_mp=super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_MP).max(0);
+    let saved=world.resource::<super::resources::HeroInventoryResource>().saved_vitals;
+    let hp=saved.map_or(max_hp,|v|v.hp.min(max_hp));
+    let mp=saved.map_or(max_mp,|v|v.mp.min(max_mp));
 
+    let looks=super::hero_inventory::appearance(world);
     Some(
         world
             .spawn((
@@ -1065,13 +1083,13 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
                     class: hero.class,
                     gender: hero.gender,
                     level: hero.level,
-                    armour_shape: None,
-                    weapon_shape: None,
+                    armour_shape: u16::try_from(looks.armour).ok(),
+                    weapon_shape: u16::try_from(looks.weapon).ok(),
                 },
                 PlayerVitals {
-                    hp: max_hp,
+                    hp,
                     max_hp,
-                    mp: max_mp,
+                    mp,
                     max_mp,
                 },
             ))
@@ -2162,3 +2180,11 @@ impl SimulationSession {
 #[cfg(test)]
 #[path = "map_collision_source_tests.rs"]
 mod map_collision_source_tests;
+
+pub(super) fn current_map_disallows_intelligent_creatures(world: &World) -> bool {
+    let map = world.resource::<MapRuntimeResource>();
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    crystal_map_respawns_ref(&map.current_map.file_name)
+        .is_some_and(|map| map.no_intelligent_creatures)
+        || current_map_drop_rule(config, map).is_some_and(|rule| rule.no_intelligent_creatures)
+}

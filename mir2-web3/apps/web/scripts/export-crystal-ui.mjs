@@ -1,6 +1,13 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import sharp from "sharp";
+
+import {
+  collectItemIconRequirements,
+  DEFAULT_ITEM_MANIFEST_PATH,
+  sha256,
+} from "./asset-pipeline/item-icon-closure.mjs";
 
 import {
   PNG_SIGNATURE,
@@ -81,6 +88,13 @@ async function main() {
           manifest.libraries[libraryName] ?? {},
         ])
     : Object.entries(manifest.libraries);
+  const exportsItems = libraryEntries.some(([name]) => normalizeLibraryName(name) === "Items");
+  const itemCatalogueBytes = exportsItems
+    ? await readFile(args.itemManifest ?? DEFAULT_ITEM_MANIFEST_PATH)
+    : null;
+  const itemIconRequirements = itemCatalogueBytes
+    ? collectItemIconRequirements(JSON.parse(itemCatalogueBytes))
+    : null;
   let libraryOrdinal = 0;
 
   for (const [libraryName, config] of libraryEntries) {
@@ -97,8 +111,18 @@ async function main() {
       ? allPresentFrameIndices(library)
       : expandIndices(
           config,
-          normalizedLibraryName.toLowerCase() === "mmap" ? crystalMiniMapIndices : [],
+          normalizedLibraryName === "Items"
+            ? itemIconRequirements.uniqueImages
+            : normalizedLibraryName.toLowerCase() === "mmap" ? crystalMiniMapIndices : [],
         );
+    if (normalizedLibraryName === "Items") {
+      for (const index of itemIconRequirements.uniqueImages) {
+        const frame = library.frames[index];
+        if (!frame || frame.width <= 0 || frame.height <= 0) {
+          throw new Error(`Catalogue item icon ${index} has no drawable source in ${normalizedLibraryName}.Lib`);
+        }
+      }
+    }
 
     await mkdir(exportDir, { recursive: true });
     console.log(
@@ -122,6 +146,20 @@ async function main() {
 
     const libraryMeta = {
       version: library.version,
+      sourceLibrary: {
+        path: `${normalizedLibraryName}.Lib`,
+        sha256: sha256(library.buffer),
+        bytes: library.buffer.length,
+      },
+      ...(normalizedLibraryName === "Items" ? {
+        itemCatalogue: {
+          sha256: sha256(itemCatalogueBytes),
+          itemCount: itemIconRequirements.requirements.length,
+          catalogueImageCount: itemIconRequirements.uniqueCatalogueImages.length,
+          stackImageCount: itemIconRequirements.uniqueStackImages.length,
+          uniqueImageCount: itemIconRequirements.uniqueImages.length,
+        },
+      } : {}),
       count: Math.max(
         library.count,
         frames.reduce((maxIndex, frame) => Math.max(maxIndex, Number(frame.index)), -1) + 1,
@@ -147,13 +185,19 @@ async function main() {
       const basename = `${index}`;
       const pngPath = path.join(exportDir, `${basename}.png`);
       const pngExists = skipExisting && existsSync(pngPath);
+      const rgba = decodeFrameRgba(library, frame);
+      let png;
       if (!pngExists) {
-        await writeFile(
-          pngPath,
-          encodePng(frame.width, frame.height, decodeFrameRgba(library, frame), PNG_DEFLATE_LEVEL),
-        );
+        png = encodePng(frame.width, frame.height, rgba, PNG_DEFLATE_LEVEL);
+        await writeFile(pngPath, png);
         written += 1;
       } else {
+        png = await readFile(pngPath);
+        const decoded = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+        if (decoded.info.width !== frame.width || decoded.info.height !== frame.height
+          || decoded.info.channels !== 4 || !decoded.data.equals(rgba)) {
+          throw new Error(`Existing PNG does not match exact Crystal source pixels: ${pngPath}`);
+        }
         reused += 1;
       }
 
@@ -183,6 +227,8 @@ async function main() {
         hasMask: Boolean(frame.maskRgba),
         maskWidth: frame.maskWidth ?? null,
         maskHeight: frame.maskHeight ?? null,
+        rgbaSha256: sha256(rgba),
+        pngSha256: sha256(png),
         path: `/original-ui/${normalizedLibraryName}/${basename}.png`,
         maskPath: frame.maskRgba ? `/original-ui/${normalizedLibraryName}/${basename}.mask.png` : null,
       };

@@ -8,10 +8,12 @@
 use bevy::prelude::*;
 use bevy::ui::{widget::NodeImageMode, Display, Node, PositionType, Val};
 
-use crate::crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState};
+use crate::crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState, OVERLAY_MINIMAP_Z};
+use crate::crystal_ui::quest_targets::tracker_targets_monster;
 use crate::entities::{EntityKind, EntityModel, EntityModelSet};
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
+use crate::quest_model::QuestTracker;
 use crate::read_model::UiReadModel;
 
 const VIEW_LEFT: f32 = 901.0;
@@ -113,7 +115,7 @@ fn spawn_crystal_minimap(mut commands: Commands) {
             display: Display::None,
             ..default()
         },
-        GlobalZIndex(905),
+        GlobalZIndex(OVERLAY_MINIMAP_Z),
     ));
 }
 
@@ -122,6 +124,7 @@ fn render_crystal_minimap(
     ui_model: Res<UiReadModel>,
     map_model: Res<MapModel>,
     entities: Res<EntityModelSet>,
+    quest_tracker: Option<Res<QuestTracker>>,
     asset_server: Res<AssetServer>,
     mut commands: Commands,
     mut roots: Query<(Entity, &mut Node), With<CrystalMiniMapRoot>>,
@@ -135,7 +138,7 @@ fn render_crystal_minimap(
         .is_some_and(|shell| shell.screen == NativeShellScreen::InGame);
     let minimap_visible = minimap_state
         .as_deref()
-        .map(|s| s.minimap_visible())
+        .map(|s| s.minimap_visible() && !s.local_keys.camera_hidden)
         .unwrap_or(true);
     let profile = mini_map_profile(ui_model.player.map_name.as_deref());
     let visible = in_game && minimap_visible && profile.is_some();
@@ -155,6 +158,9 @@ fn render_crystal_minimap(
         && !ui_model.is_changed()
         && !map_model.is_changed()
         && !entities.is_changed()
+        && !quest_tracker
+            .as_ref()
+            .is_some_and(|tracker| tracker.is_changed())
         && !minimap_changed
     {
         return;
@@ -183,7 +189,11 @@ fn render_crystal_minimap(
         ));
 
         for entity in &entities.entities {
-            spawn_marker(root, profile, crop, entity);
+            let quest_target = entity.kind == EntityKind::Monster
+                && quest_tracker
+                    .as_deref()
+                    .is_some_and(|tracker| tracker_targets_monster(tracker, &entity.name));
+            spawn_marker(root, profile, crop, entity, quest_target);
         }
     });
 }
@@ -193,19 +203,29 @@ fn spawn_marker(
     profile: MiniMapProfile,
     crop: MiniMapCrop,
     entity: &EntityModel,
+    quest_target: bool,
 ) {
     let Some(position) = marker_position(profile, crop, entity.x, entity.y) else {
         return;
     };
+    let (size, color) = marker_style(entity.kind, quest_target);
     parent.spawn((
         absolute_node(
-            VIEW_LEFT + position.x - 1.0,
-            VIEW_TOP + position.y - 1.0,
-            2.0,
-            2.0,
+            VIEW_LEFT + position.x - size * 0.5,
+            VIEW_TOP + position.y - size * 0.5,
+            size,
+            size,
         ),
-        BackgroundColor(marker_color(entity.kind)),
+        BackgroundColor(color),
     ));
+}
+
+fn marker_style(kind: EntityKind, quest_target: bool) -> (f32, Color) {
+    if quest_target {
+        (5.0, Color::srgb_u8(0xff, 0xe6, 0x58))
+    } else {
+        (2.0, marker_color(kind))
+    }
 }
 
 fn absolute_node(left: f32, top: f32, width: f32, height: f32) -> Node {
@@ -264,5 +284,25 @@ mod tests {
         );
         assert_eq!(marker_position(profile, crop, 0, 0), None);
         assert_eq!(marker_color(EntityKind::SelfPlayer), Color::WHITE);
+    }
+
+    #[test]
+    fn quest_target_marker_is_larger_and_gold() {
+        assert_eq!(
+            marker_style(EntityKind::Monster, true),
+            (5.0, Color::srgb_u8(0xff, 0xe6, 0x58))
+        );
+        assert_eq!(
+            marker_style(EntityKind::Monster, false),
+            (2.0, marker_color(EntityKind::Monster))
+        );
+    }
+
+    #[test]
+    fn minimap_content_stays_above_the_hud_skin_during_night_lighting() {
+        use crate::crystal_ui::overlays::{OVERLAY_CHAT_Z, OVERLAY_HUD_Z};
+
+        assert_eq!(OVERLAY_MINIMAP_Z, OVERLAY_HUD_Z + 1);
+        assert!(OVERLAY_MINIMAP_Z < OVERLAY_CHAT_Z);
     }
 }

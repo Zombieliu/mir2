@@ -437,19 +437,26 @@ export function buildClassQuestRoute(sources, { className = "Warrior", maxLevel 
 
   const handlerCounts = countValues(routeQuests.flatMap((quest) => quest.specialHandlers));
   const blockerCounts = countValues(routeQuests.flatMap((quest) => quest.blockers));
-  const segments = QUEST_ROUTE_LEVEL_SEGMENTS.map((segment) => {
-    const segmentQuests = routeQuests.filter((quest) =>
-      quest.eligibility.minLevel >= segment.minLevel &&
-      quest.eligibility.minLevel <= Math.min(segment.maxLevel, acceptanceLevel)
-    );
-    return {
-      ...segment,
-      questCount: segmentQuests.length,
-      questIds: segmentQuests.map((quest) => quest.questId),
-      specialHandlers: countValues(segmentQuests.flatMap((quest) => quest.specialHandlers)),
-      blockedQuestIds: segmentQuests.filter((quest) => quest.blockers.length > 0).map((quest) => quest.questId),
-    };
-  });
+  const segments = QUEST_ROUTE_LEVEL_SEGMENTS
+    .filter((segment) => segment.minLevel <= acceptanceLevel)
+    .map((sourceSegment) => {
+      const segment = {
+        ...sourceSegment,
+        maxLevel: Math.min(sourceSegment.maxLevel, acceptanceLevel),
+      };
+      segment.label = `${segment.minLevel}-${segment.maxLevel}`;
+      const segmentQuests = routeQuests.filter((quest) =>
+        quest.eligibility.minLevel >= segment.minLevel &&
+        quest.eligibility.minLevel <= Math.min(segment.maxLevel, acceptanceLevel)
+      );
+      return {
+        ...segment,
+        questCount: segmentQuests.length,
+        questIds: segmentQuests.map((quest) => quest.questId),
+        specialHandlers: countValues(segmentQuests.flatMap((quest) => quest.specialHandlers)),
+        blockedQuestIds: segmentQuests.filter((quest) => quest.blockers.length > 0).map((quest) => quest.questId),
+      };
+    });
 
   return {
     schema: "mir2-real-client-quest-route/3",

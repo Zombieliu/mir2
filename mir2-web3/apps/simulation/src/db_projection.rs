@@ -71,6 +71,18 @@ pub const MIGRATIONS: &[(&str, &str)] = &[
         "0011_game_economy_trade_projections",
         include_str!("../../../infra/postgres/migrations/0011_game_economy_trade_projections.sql"),
     ),
+    (
+        "0012_shared_guild_authority",
+        include_str!("../../../infra/postgres/migrations/0012_shared_guild_authority.sql"),
+    ),
+    (
+        "0013_shared_guild_clock",
+        include_str!("../../../infra/postgres/migrations/0013_shared_guild_clock.sql"),
+    ),
+    (
+        "0014_shared_hero_authority",
+        include_str!("../../../infra/postgres/migrations/0014_shared_hero_authority.sql"),
+    ),
 ];
 
 /// Apply every pending migration in order.
@@ -753,6 +765,7 @@ mod tests {
             deleted: false,
         });
         systems.auction.push(crate::config::Stage5AuctionListing {
+            item_state_json: None,
             id: 5,
             seller: "Hero".to_string(),
             item_key: "iron-sword".to_string(),

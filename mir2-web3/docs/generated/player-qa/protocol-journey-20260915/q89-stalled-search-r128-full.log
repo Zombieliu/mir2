@@ -1,0 +1,4011 @@
+TAP version 13
+# Subtest: maps zero-index q22 endpoints to visible Quest Diary actions
+ok 1 - maps zero-index q22 endpoints to visible Quest Diary actions
+  ---
+  duration_ms: 1.7839
+  type: 'test'
+  ...
+# Subtest: plans q22 hunting from a real current-map respawn
+ok 2 - plans q22 hunting from a real current-map respawn
+  ---
+  duration_ms: 0.5556
+  type: 'test'
+  ...
+# Subtest: plans CannibalPlant items through the Crystal corpse-harvest lifecycle
+ok 3 - plans CannibalPlant items through the Crystal corpse-harvest lifecycle
+  ---
+  duration_ms: 0.3098
+  type: 'test'
+  ...
+# Subtest: plans q26 PoisonSack through SpittingSpider corpse harvesting
+ok 4 - plans q26 PoisonSack through SpittingSpider corpse harvesting
+  ---
+  duration_ms: 1.2924
+  type: 'test'
+  ...
+# Subtest: active quest preparation grinds when its real source is far above the player
+ok 5 - active quest preparation grinds when its real source is far above the player
+  ---
+  duration_ms: 0.6041
+  type: 'test'
+  ...
+# Subtest: high-level quest preparation first completes an available non-combat delivery
+ok 6 - high-level quest preparation first completes an available non-combat delivery
+  ---
+  duration_ms: 0.6634
+  type: 'test'
+  ...
+# Subtest: high-level quest preparation accepts offered combat inside the bounded melee gap
+ok 7 - high-level quest preparation accepts offered combat inside the bounded melee gap
+  ---
+  duration_ms: 0.3188
+  type: 'test'
+  ...
+# Subtest: active quest preparation uses the live-proven seven-level melee gap
+ok 8 - active quest preparation uses the live-proven seven-level melee gap
+  ---
+  duration_ms: 0.492
+  type: 'test'
+  ...
+# Subtest: completed real quest combat unlocks a bounded efficient grind source
+ok 9 - completed real quest combat unlocks a bounded efficient grind source
+  ---
+  duration_ms: 0.7121
+  type: 'test'
+  ...
+# Subtest: selects a reward compatible with the classic class bit
+ok 10 - selects a reward compatible with the classic class bit
+  ---
+  duration_ms: 0.4931
+  type: 'test'
+  ...
+# Subtest: derives class-compatible progression equipment from authoritative quest rewards
+ok 11 - derives class-compatible progression equipment from authoritative quest rewards
+  ---
+  duration_ms: 0.6536
+  type: 'test'
+  ...
+# Subtest: Crystal map graph resolves ordinary adjacent routes
+ok 12 - Crystal map graph resolves ordinary adjacent routes
+  ---
+  duration_ms: 0.8064
+  type: 'test'
+  ...
+# Subtest: Crystal map graph derives q34 round-trip boats from visible whitelisted NPC scripts
+ok 13 - Crystal map graph derives q34 round-trip boats from visible whitelisted NPC scripts
+  ---
+  duration_ms: 0.8037
+  type: 'test'
+  ...
+# Subtest: White Valley travel uses the paid visible boat and physical return passage
+ok 14 - White Valley travel uses the paid visible boat and physical return passage
+  ---
+  duration_ms: 0.9895
+  type: 'test'
+  ...
+# Subtest: q27 Errands has an enabled real-client route to Brian
+ok 15 - q27 Errands has an enabled real-client route to Brian
+  ---
+  duration_ms: 0.1805
+  type: 'test'
+  ...
+# Subtest: q30 JadeRing has an enabled Currish harvest route
+ok 16 - q30 JadeRing has an enabled Currish harvest route
+  ---
+  duration_ms: 0.1747
+  type: 'test'
+  ...
+# Subtest: q29-q34 band has no hidden content or runtime skip
+ok 17 - q29-q34 band has no hidden content or runtime skip
+  ---
+  duration_ms: 0.1719
+  type: 'test'
+  ...
+# Subtest: q35-q47 band has audited sources and no runtime skip
+ok 18 - q35-q47 band has audited sources and no runtime skip
+  ---
+  duration_ms: 0.3361
+  type: 'test'
+  ...
+# Subtest: q48-q60 band repairs only the disabled q57 prerequisite and has real sources
+ok 19 - q48-q60 band repairs only the disabled q57 prerequisite and has real sources
+  ---
+  duration_ms: 0.3394
+  type: 'test'
+  ...
+# Subtest: q61-q73 band uses the real D2042 insect-cave route and imported drops
+ok 20 - q61-q73 band uses the real D2042 insect-cave route and imported drops
+  ---
+  duration_ms: 0.4361
+  type: 'test'
+  ...
+# Subtest: q75-q86 band audits missing Serpent Mine content and keeps normal travel
+ok 21 - q75-q86 band audits missing Serpent Mine content and keeps normal travel
+  ---
+  duration_ms: 0.5702
+  type: 'test'
+  ...
+# Subtest: q87-q100 band keeps imported undead and Wooma hunts with one audited axe repair
+ok 22 - q87-q100 band keeps imported undead and Wooma hunts with one audited axe repair
+  ---
+  duration_ms: 0.2337
+  type: 'test'
+  ...
+# Subtest: q108-q112 uses the physical Sabuk secret gate, imported books, and visible pillars
+ok 23 - q108-q112 uses the physical Sabuk secret gate, imported books, and visible pillars
+  ---
+  duration_ms: 0.1688
+  type: 'test'
+  ...
+# Subtest: q118-q124 uses imported Mineral Mine and Prajna Stone Cave progression
+ok 24 - q118-q124 uses imported Mineral Mine and Prajna Stone Cave progression
+  ---
+  duration_ms: 0.1542
+  type: 'test'
+  ...
+# Subtest: q125-q133 keeps visible village interiors and physical Prajna Temple floors
+ok 25 - q125-q133 keeps visible village interiors and physical Prajna Temple floors
+  ---
+  duration_ms: 0.1646
+  type: 'test'
+  ...
+# Subtest: q135-q137 unlocks Ancient Stone Tomb through the visible StoneHeart gate
+ok 26 - q135-q137 unlocks Ancient Stone Tomb through the visible StoneHeart gate
+  ---
+  duration_ms: 0.1629
+  type: 'test'
+  ...
+# Subtest: q138-q139 reaches Red Cavern through the complete physical dungeon chain
+ok 27 - q138-q139 reaches Red Cavern through the complete physical dungeon chain
+  ---
+  duration_ms: 0.649
+  type: 'test'
+  ...
+# Subtest: q143-q151 keeps the Holy Sword chain on visible scripts, real fields, and physical portals
+ok 28 - q143-q151 keeps the Holy Sword chain on visible scripts, real fields, and physical portals
+  ---
+  duration_ms: 0.3984
+  type: 'test'
+  ...
+# Subtest: navigation and grinding stay inside the active runtime profile
+ok 29 - navigation and grinding stay inside the active runtime profile
+  ---
+  duration_ms: 0.7051
+  type: 'test'
+  ...
+# Subtest: level gaps produce a real-spawn grind goal without privileged spawning
+ok 30 - level gaps produce a real-spawn grind goal without privileged spawning
+  ---
+  duration_ms: 0.3349
+  type: 'test'
+  ...
+# Subtest: a nearby sustainable grind source beats a marginally more efficient remote field
+ok 31 - a nearby sustainable grind source beats a marginally more efficient remote field
+  ---
+  duration_ms: 0.3457
+  type: 'test'
+  ...
+# Subtest: a long level preparation amortizes one physical trip to a proven high-yield field
+ok 32 - a long level preparation amortizes one physical trip to a proven high-yield field
+  ---
+  duration_ms: 0.3912
+  type: 'test'
+  ...
+# Subtest: unhandled flag tasks stay explicit instead of being skipped or mutated
+ok 33 - unhandled flag tasks stay explicit instead of being skipped or mutated
+  ---
+  duration_ms: 0.1588
+  type: 'test'
+  ...
+# Subtest: guidance covers the real three-class quest union and keeps recommended prerequisites
+ok 34 - guidance covers the real three-class quest union and keeps recommended prerequisites
+  ---
+  duration_ms: 1.3539
+  type: 'test'
+  ...
+# Subtest: annotation preserves every class, reward, objective, eligibility and original order
+ok 35 - annotation preserves every class, reward, objective, eligibility and original order
+  ---
+  duration_ms: 60.7304
+  type: 'test'
+  ...
+# Subtest: level-15 guidance stays complete and later reverse-ID prerequisites are ordered
+ok 36 - level-15 guidance stays complete and later reverse-ID prerequisites are ordered
+  ---
+  duration_ms: 544.5453
+  type: 'test'
+  ...
+# Subtest: invalid, stale and prerequisite-breaking configuration is rejected
+ok 37 - invalid, stale and prerequisite-breaking configuration is rejected
+  ---
+  duration_ms: 1.8775
+  type: 'test'
+  ...
+# Subtest: instructor tips distinguish passive, offensive and healing skills
+ok 38 - instructor tips distinguish passive, offensive and healing skills
+  ---
+  duration_ms: 0.2945
+  type: 'test'
+  ...
+# Subtest: specific monster and empty-reward tips still match authoritative content
+ok 39 - specific monster and empty-reward tips still match authoritative content
+  ---
+  duration_ms: 0.1748
+  type: 'test'
+  ...
+# Subtest: authoring reproduces deterministic milestone rewards and updated chapter summaries
+ok 40 - authoring reproduces deterministic milestone rewards and updated chapter summaries
+  ---
+  duration_ms: 2269.1676
+  type: 'test'
+  ...
+# Subtest: chapter budgets encode the reviewed 5-7 hour first-day cadence
+ok 41 - chapter budgets encode the reviewed 5-7 hour first-day cadence
+  ---
+  duration_ms: 0.1386
+  type: 'test'
+  ...
+# Subtest: all three routes reach every next level gate without repeatables, daily waits or optional harvest
+ok 42 - all three routes reach every next level gate without repeatables, daily waits or optional harvest
+  ---
+  duration_ms: 1618.7318
+  type: 'test'
+  ...
+# Subtest: the shortened snake hunt follows the funding quests within a deterministic XP budget
+ok 43 - the shortened snake hunt follows the funding quests within a deterministic XP budget
+  ---
+  duration_ms: 510.4839
+  type: 'test'
+  ...
+# Subtest: material guidance names real sources and the island collection precedes bone hunts
+ok 44 - material guidance names real sources and the island collection precedes bone hunts
+  ---
+  duration_ms: 536.2401
+  type: 'test'
+  ...
+# Subtest: caps and guarantees reference real objectives while preserving the baseline route
+ok 45 - caps and guarantees reference real objectives while preserving the baseline route
+  ---
+  duration_ms: 1547.6502
+  type: 'test'
+  ...
+# Subtest: the full route has a bounded and class-neutral action budget
+ok 46 - the full route has a bounded and class-neutral action budget
+  ---
+  duration_ms: 1548.7408
+  type: 'test'
+  ...
+# Subtest: journey locations distinguish source NPCs from diary accept and finish actions
+ok 47 - journey locations distinguish source NPCs from diary accept and finish actions
+  ---
+  duration_ms: 1556.5391
+  type: 'test'
+  ...
+# Subtest: nearby gold selection stays within the visible pickup radius
+ok 48 - nearby gold selection stays within the visible pickup radius
+  ---
+  duration_ms: 3.023
+  type: 'test'
+  ...
+# Subtest: dense adjacent occupancy counts only live hostile monsters in the movement ring
+ok 49 - dense adjacent occupancy counts only live hostile monsters in the movement ring
+  ---
+  duration_ms: 0.4526
+  type: 'test'
+  ...
+# Subtest: authoritative zero HP overrides a lagging rendered death flag
+ok 50 - authoritative zero HP overrides a lagging rendered death flag
+  ---
+  duration_ms: 0.1571
+  type: 'test'
+  ...
+# Subtest: confirmed monster death remains excluded while a stale rendered actor persists
+ok 51 - confirmed monster death remains excluded while a stale rendered actor persists
+  ---
+  duration_ms: 0.9254
+  type: 'test'
+  ...
+# Subtest: confirmed monster object is released only after absence and a positive-HP respawn
+ok 52 - confirmed monster object is released only after absence and a positive-HP respawn
+  ---
+  duration_ms: 0.2799
+  type: 'test'
+  ...
+# Subtest: confirmed monster object hold expires defensively
+ok 53 - confirmed monster object hold expires defensively
+  ---
+  duration_ms: 0.2041
+  type: 'test'
+  ...
+# Subtest: safe recovery pacing stays in a bounded cardinal loop around its anchor
+ok 54 - safe recovery pacing stays in a bounded cardinal loop around its anchor
+  ---
+  duration_ms: 0.3223
+  type: 'test'
+  ...
+# Subtest: safe recovery rotates a portal only after bounded net-progress stall
+ok 55 - safe recovery rotates a portal only after bounded net-progress stall
+  ---
+  duration_ms: 0.4454
+  type: 'test'
+  ...
+# Subtest: visible HP-drug selection ignores unrelated and distant drops
+ok 56 - visible HP-drug selection ignores unrelated and distant drops
+  ---
+  duration_ms: 0.5695
+  type: 'test'
+  ...
+# Subtest: potion funding is limited to an underfunded character in the supply area
+ok 57 - potion funding is limited to an underfunded character in the supply area
+  ---
+  duration_ms: 0.6137
+  type: 'test'
+  ...
+# Subtest: potion purchases preserve working capital until a meaningful batch is affordable
+ok 58 - potion purchases preserve working capital until a meaningful batch is affordable
+  ---
+  duration_ms: 0.3126
+  type: 'test'
+  ...
+# Subtest: q1-q5 policy follows the original beginner hand-offs
+ok 59 - q1-q5 policy follows the original beginner hand-offs
+  ---
+  duration_ms: 0.6377
+  type: 'test'
+  ...
+# Subtest: collision navigation keeps a detour whose first step must regress
+ok 60 - collision navigation keeps a detour whose first step must regress
+  ---
+  duration_ms: 0.1706
+  type: 'test'
+  ...
+# Subtest: sticky dynamic detours freeze only after net destination progress
+ok 61 - sticky dynamic detours freeze only after net destination progress
+  ---
+  duration_ms: 0.2302
+  type: 'test'
+  ...
+# Subtest: collision navigation crosses a perpendicular frontier around a long wall
+ok 62 - collision navigation crosses a perpendicular frontier around a long wall
+  ---
+  duration_ms: 0.1059
+  type: 'test'
+  ...
+# Subtest: global collision path goes around a wall instead of oscillating at it
+ok 63 - global collision path goes around a wall instead of oscillating at it
+  ---
+  duration_ms: 1.6002
+  type: 'test'
+  ...
+# Subtest: global collision search expands beyond a bounded false-unreachable corridor
+ok 64 - global collision search expands beyond a bounded false-unreachable corridor
+  ---
+  duration_ms: 58.8906
+  type: 'test'
+  ...
+# Subtest: global collision path stops at pickup range and does not cut blocked corners
+ok 65 - global collision path stops at pickup range and does not cut blocked corners
+  ---
+  duration_ms: 0.3461
+  type: 'test'
+  ...
+# Subtest: long routing reacts only to dynamic occupancy on the immediate physical step
+ok 66 - long routing reacts only to dynamic occupancy on the immediate physical step
+  ---
+  duration_ms: 0.2984
+  type: 'test'
+  ...
+# Subtest: global routing relaxes stale correction memory only after remembered routes close
+ok 67 - global routing relaxes stale correction memory only after remembered routes close
+  ---
+  duration_ms: 14.4738
+  type: 'test'
+  ...
+# Subtest: travel policy identifies only an adjacent non-target hostile
+ok 68 - travel policy identifies only an adjacent non-target hostile
+  ---
+  duration_ms: 0.9183
+  type: 'test'
+  ...
+# Subtest: travel combat interruption requires a recent rendered monster attack
+ok 69 - travel combat interruption requires a recent rendered monster attack
+  ---
+  duration_ms: 0.1535
+  type: 'test'
+  ...
+# Subtest: active harvest and recovery threats require rendered attack evidence
+ok 70 - active harvest and recovery threats require rendered attack evidence
+  ---
+  duration_ms: 0.5278
+  type: 'test'
+  ...
+# Subtest: incidental travel combat is limited to monsters with a real level disadvantage
+ok 71 - incidental travel combat is limited to monsters with a real level disadvantage
+  ---
+  duration_ms: 0.2031
+  type: 'test'
+  ...
+# Subtest: incidental travel no-response budget is shorter than quest combat
+ok 72 - incidental travel no-response budget is shorter than quest combat
+  ---
+  duration_ms: 2.8426
+  type: 'test'
+  ...
+# Subtest: R121 cross-chunk two-tile oscillation remains detectable
+ok 73 - R121 cross-chunk two-tile oscillation remains detectable
+  ---
+  duration_ms: 0.4968
+  type: 'test'
+  ...
+# Subtest: R121 quarantined adjacent pursuer is selected for physical disengage
+ok 74 - R121 quarantined adjacent pursuer is selected for physical disengage
+  ---
+  duration_ms: 0.3106
+  type: 'test'
+  ...
+# Subtest: R122 quarantined retreat fans out when the direct-away tile is blocked
+ok 75 - R122 quarantined retreat fans out when the direct-away tile is blocked
+  ---
+  duration_ms: 0.1572
+  type: 'test'
+  ...
+# Subtest: R126 full-health zero-stock exit kites instead of repeating shelter
+ok 76 - R126 full-health zero-stock exit kites instead of repeating shelter
+  ---
+  duration_ms: 0.1455
+  type: 'test'
+  ...
+# Subtest: R126 runner collision-plans one bounded post-settlement field disengage
+ok 77 - R126 runner collision-plans one bounded post-settlement field disengage
+  ---
+  duration_ms: 4.1868
+  type: 'test'
+  ...
+# Subtest: R127 passive funding quarantine does not become a travel pursuer
+ok 78 - R127 passive funding quarantine does not become a travel pursuer
+  ---
+  duration_ms: 0.2523
+  type: 'test'
+  ...
+# Subtest: R127 runner separates target cooldown from travel escape and prefers known life
+ok 79 - R127 runner separates target cooldown from travel escape and prefers known life
+  ---
+  duration_ms: 92.4503
+  type: 'test'
+  ...
+# Subtest: a currently attacking requested monster overrides stale approach cooldown
+ok 80 - a currently attacking requested monster overrides stale approach cooldown
+  ---
+  duration_ms: 2.9948
+  type: 'test'
+  ...
+# Subtest: melee combat selects an isolated pack-edge target before the closest cluster
+ok 81 - melee combat selects an isolated pack-edge target before the closest cluster
+  ---
+  duration_ms: 0.6378
+  type: 'test'
+  ...
+# Subtest: melee acquisition approaches a safer edge unless an adjacent target is attacking
+ok 82 - melee acquisition approaches a safer edge unless an adjacent target is attacking
+  ---
+  duration_ms: 9.6593
+  type: 'test'
+  ...
+# Subtest: a near-death potion-exhausting win triggers adaptive combat preparation
+ok 83 - a near-death potion-exhausting win triggers adaptive combat preparation
+  ---
+  duration_ms: 0.3912
+  type: 'test'
+  ...
+# Subtest: a grind source cools down only after repeated failed goals without authoritative EXP
+ok 84 - a grind source cools down only after repeated failed goals without authoritative EXP
+  ---
+  duration_ms: 0.3578
+  type: 'test'
+  ...
+# Subtest: a critically depleted shelter escape keeps moving until arrival or normal death recovery
+ok 85 - a critically depleted shelter escape keeps moving until arrival or normal death recovery
+  ---
+  duration_ms: 0.158
+  type: 'test'
+  ...
+# Subtest: a later confirmed kill resolves only older combat resource strain
+ok 86 - a later confirmed kill resolves only older combat resource strain
+  ---
+  duration_ms: 0.3176
+  type: 'test'
+  ...
+# Subtest: an unresolved severe combat strain restores the one-time supply recall
+ok 87 - an unresolved severe combat strain restores the one-time supply recall
+  ---
+  duration_ms: 0.2032
+  type: 'test'
+  ...
+# Subtest: offensive combat skills follow the visible F1-F8 bar without casting passive or ground skills
+ok 88 - offensive combat skills follow the visible F1-F8 bar without casting passive or ground skills
+  ---
+  duration_ms: 0.3377
+  type: 'test'
+  ...
+# Subtest: restorative self skills select only ready Crystal Healing from the visible F1-F8 bar
+ok 89 - restorative self skills select only ready Crystal Healing from the visible F1-F8 bar
+  ---
+  duration_ms: 0.4584
+  type: 'test'
+  ...
+# Subtest: combat skill execution uses a physical F-key and never emits a direct magic command
+ok 90 - combat skill execution uses a physical F-key and never emits a direct magic command
+  ---
+  duration_ms: 4.1518
+  type: 'test'
+  ...
+# Subtest: Taoist self-healing uses a physical F-key and the normal client targets self
+ok 91 - Taoist self-healing uses a physical F-key and the normal client targets self
+  ---
+  duration_ms: 4.2864
+  type: 'test'
+  ...
+# Subtest: progression skill books are picked up and learned only through visible inventory input
+ok 92 - progression skill books are picked up and learned only through visible inventory input
+  ---
+  duration_ms: 2.8231
+  type: 'test'
+  ...
+# Subtest: long grind evidence keeps level changes and bounded visual checkpoints
+ok 93 - long grind evidence keeps level changes and bounded visual checkpoints
+  ---
+  duration_ms: 0.3156
+  type: 'test'
+  ...
+# Subtest: repetitive grind goal records use compact state while semantic goals retain full evidence
+ok 94 - repetitive grind goal records use compact state while semantic goals retain full evidence
+  ---
+  duration_ms: 1.8955
+  type: 'test'
+  ...
+# Subtest: read-only agent snapshots preserve rendered attack evidence
+ok 95 - read-only agent snapshots preserve rendered attack evidence
+  ---
+  duration_ms: 0.4593
+  type: 'test'
+  ...
+# Subtest: websocket event evidence preserves ordering for authoritative bootstrap
+ok 96 - websocket event evidence preserves ordering for authoritative bootstrap
+  ---
+  duration_ms: 0.3299
+  type: 'test'
+  ...
+# Subtest: autonomous planning waits for the post-UserInformation personal snapshot
+ok 97 - autonomous planning waits for the post-UserInformation personal snapshot
+  ---
+  duration_ms: 1.8352
+  type: 'test'
+  ...
+# Subtest: read-only agent snapshots reject a transient post-revive 0,0 sentinel
+ok 98 - read-only agent snapshots reject a transient post-revive 0,0 sentinel
+  ---
+  duration_ms: 136.9632
+  type: 'test'
+  ...
+# Subtest: route halos avoid dangerous monsters without walling off ordinary spawn fields
+ok 99 - route halos avoid dangerous monsters without walling off ordinary spawn fields
+  ---
+  duration_ms: 0.7297
+  type: 'test'
+  ...
+# Subtest: dangerous respawn travel balances distance against field density
+ok 100 - dangerous respawn travel balances distance against field density
+  ---
+  duration_ms: 0.7042
+  type: 'test'
+  ...
+# Subtest: large respawn travel approaches the nearest interior edge
+ok 101 - large respawn travel approaches the nearest interior edge
+  ---
+  duration_ms: 0.4368
+  type: 'test'
+  ...
+# Subtest: long respawn travel budget permits real building detours
+ok 102 - long respawn travel budget permits real building detours
+  ---
+  duration_ms: 0.1032
+  type: 'test'
+  ...
+# Subtest: respawn travel avoids crossing a dense aggressive source field
+ok 103 - respawn travel avoids crossing a dense aggressive source field
+  ---
+  duration_ms: 0.3259
+  type: 'test'
+  ...
+# Subtest: respawn travel inserts a safer orthogonal waypoint around a hostile band
+ok 104 - respawn travel inserts a safer orthogonal waypoint around a hostile band
+  ---
+  duration_ms: 0.6403
+  type: 'test'
+  ...
+# Subtest: long NPC travel can opt into progressive lateral waypoints around a hostile band
+ok 105 - long NPC travel can opt into progressive lateral waypoints around a hostile band
+  ---
+  duration_ms: 2.2997
+  type: 'test'
+  ...
+# Subtest: long NPC travel applies source-backed hostile corridor waypoints before direct walking
+ok 106 - long NPC travel applies source-backed hostile corridor waypoints before direct walking
+  ---
+  duration_ms: 2.8686
+  type: 'test'
+  ...
+# Subtest: ordinary map transfers use progressive hostile detours and a cumulative travel budget
+ok 107 - ordinary map transfers use progressive hostile detours and a cumulative travel budget
+  ---
+  duration_ms: 1.3112
+  type: 'test'
+  ...
+# Subtest: an optional map hazard waypoint cannot reject an otherwise valid transfer
+ok 108 - an optional map hazard waypoint cannot reject an otherwise valid transfer
+  ---
+  duration_ms: 1.4445
+  type: 'test'
+  ...
+# Subtest: an unreachable optional hazard elbow falls back to the direct respawn field
+ok 109 - an unreachable optional hazard elbow falls back to the direct respawn field
+  ---
+  duration_ms: 1.2154
+  type: 'test'
+  ...
+# Subtest: respawn travel avoids a target region overlapped by dense hostiles
+ok 110 - respawn travel avoids a target region overlapped by dense hostiles
+  ---
+  duration_ms: 0.3273
+  type: 'test'
+  ...
+# Subtest: terminal overlap cannot force an arbitrarily long respawn detour
+ok 111 - terminal overlap cannot force an arbitrarily long respawn detour
+  ---
+  duration_ms: 0.6167
+  type: 'test'
+  ...
+# Subtest: repeated hunting prefers lower terminal overlap over a slightly shorter field
+ok 112 - repeated hunting prefers lower terminal overlap over a slightly shorter field
+  ---
+  duration_ms: 0.1806
+  type: 'test'
+  ...
+# Subtest: supply liquidation selects only gear superseded by a later equipped quest reward
+ok 113 - supply liquidation selects only gear superseded by a later equipped quest reward
+  ---
+  duration_ms: 0.5505
+  type: 'test'
+  ...
+# Subtest: duplicate loot is sellable only while an allow-listed same-name copy stays equipped
+ok 114 - duplicate loot is sellable only while an allow-listed same-name copy stays equipped
+  ---
+  duration_ms: 0.2787
+  type: 'test'
+  ...
+# Subtest: ordinary supply loot retains its authoritative merchant proof
+ok 115 - ordinary supply loot retains its authoritative merchant proof
+  ---
+  duration_ms: 0.3129
+  type: 'test'
+  ...
+# Subtest: supply liquidation selects only allow-listed bag material backed by quest-container progress
+ok 116 - supply liquidation selects only allow-listed bag material backed by quest-container progress
+  ---
+  duration_ms: 0.5549
+  type: 'test'
+  ...
+# Subtest: supply liquidation routes each proven slot to a source-compatible visible merchant
+ok 117 - supply liquidation routes each proven slot to a source-compatible visible merchant
+  ---
+  duration_ms: 4.5379
+  type: 'test'
+  ...
+# Subtest: map changes clear stale visible transfer cells before the destination snapshot
+ok 118 - map changes clear stale visible transfer cells before the destination snapshot
+  ---
+  duration_ms: 4.5966
+  type: 'test'
+  ...
+# Subtest: death recovery releases an unacknowledged revive request and retries visible input
+ok 119 - death recovery releases an unacknowledged revive request and retries visible input
+  ---
+  duration_ms: 5.2604
+  type: 'test'
+  ...
+# Subtest: equipment policy never downgrades an occupied progression slot
+ok 120 - equipment policy never downgrades an occupied progression slot
+  ---
+  duration_ms: 0.6903
+  type: 'test'
+  ...
+# Subtest: equipment policy can advance another slot after the strongest weapon is already equipped
+ok 121 - equipment policy can advance another slot after the strongest weapon is already equipped
+  ---
+  duration_ms: 0.1511
+  type: 'test'
+  ...
+# Subtest: equipment repair policy selects only low-durability equipped slots
+ok 122 - equipment repair policy selects only low-durability equipped slots
+  ---
+  duration_ms: 0.3452
+  type: 'test'
+  ...
+# Subtest: equipment repair walks to a visible merchant and clicks the normal repair UI
+ok 123 - equipment repair walks to a visible merchant and clicks the normal repair UI
+  ---
+  duration_ms: 2.0134
+  type: 'test'
+  ...
+# Subtest: q5 chooses the objective with the most work left
+ok 124 - q5 chooses the objective with the most work left
+  ---
+  duration_ms: 0.2902
+  type: 'test'
+  ...
+# Subtest: q6-q9 policy follows the original Warrior hand-offs and class reward
+ok 125 - q6-q9 policy follows the original Warrior hand-offs and class reward
+  ---
+  duration_ms: 0.3947
+  type: 'test'
+  ...
+# Subtest: single-objective progress falls back to the authoritative quest counters
+ok 126 - single-objective progress falls back to the authoritative quest counters
+  ---
+  duration_ms: 0.0584
+  type: 'test'
+  ...
+# Subtest: respawn-region patrol covers the centre and AOI-sized interior quadrants
+ok 127 - respawn-region patrol covers the centre and AOI-sized interior quadrants
+  ---
+  duration_ms: 0.2093
+  type: 'test'
+  ...
+# Subtest: resource-sensitive patrol keeps the entry edge then prefers safer samples
+ok 128 - resource-sensitive patrol keeps the entry edge then prefers safer samples
+  ---
+  duration_ms: 0.246
+  type: 'test'
+  ...
+# Subtest: respawn patrol sweeps the selected field before moving to another centre
+ok 129 - respawn patrol sweeps the selected field before moving to another centre
+  ---
+  duration_ms: 0.0973
+  type: 'test'
+  ...
+# Subtest: respawn arrival approaches a known AOI target before rotating fields
+ok 130 - respawn arrival approaches a known AOI target before rotating fields
+  ---
+  duration_ms: 2.5468
+  type: 'test'
+  ...
+# Subtest: live repeated quest deaths trigger a one-level ordinary grind before retry
+ok 131 - live repeated quest deaths trigger a one-level ordinary grind before retry
+  ---
+  duration_ms: 1.0445
+  type: 'test'
+  ...
+# Subtest: runtime command audit rejects every privileged shortcut
+ok 132 - runtime command audit rejects every privileged shortcut
+  ---
+  duration_ms: 0.5978
+  type: 'test'
+  ...
+# Subtest: audit accepts privileged-looking packets only when caused by matching visible UI input
+ok 133 - audit accepts privileged-looking packets only when caused by matching visible UI input
+  ---
+  duration_ms: 0.2388
+  type: 'test'
+  ...
+# Subtest: route fixtures match the generated Crystal q1-q5 manifest
+ok 134 - route fixtures match the generated Crystal q1-q5 manifest
+  ---
+  duration_ms: 2.0963
+  type: 'test'
+  ...
+# Subtest: route fixtures match the generated Crystal q6-q9 Warrior manifest
+ok 135 - route fixtures match the generated Crystal q6-q9 Warrior manifest
+  ---
+  duration_ms: 1.679
+  type: 'test'
+  ...
+# Subtest: executable agent sources contain no direct bridge or DOM-mutation shortcuts
+ok 136 - executable agent sources contain no direct bridge or DOM-mutation shortcuts
+  ---
+  duration_ms: 4.0151
+  type: 'test'
+  ...
+# Subtest: the full-route supervisor retries transport loss and the exact StartGame lease handoff
+ok 137 - the full-route supervisor retries transport loss and the exact StartGame lease handoff
+  ---
+  duration_ms: 0.658
+  type: 'test'
+  ...
+# Subtest: the full-route supervisor resumes the latest written attempt
+ok 138 - the full-route supervisor resumes the latest written attempt
+  ---
+  duration_ms: 1.0691
+  type: 'test'
+  ...
+# Subtest: typed cancellation wakes pending CDP commands for graceful evidence finalization
+ok 139 - typed cancellation wakes pending CDP commands for graceful evidence finalization
+  ---
+  duration_ms: 0.9095
+  type: 'test'
+  ...
+# Subtest: the supervisor isolates its runner process group before forwarding Ctrl-C
+ok 140 - the supervisor isolates its runner process group before forwarding Ctrl-C
+  ---
+  duration_ms: 0.8991
+  type: 'test'
+  ...
+# Subtest: multi-day supervisor forwards stop signals and the runner writes evidence before browser close
+ok 141 - multi-day supervisor forwards stop signals and the runner writes evidence before browser close
+  ---
+  duration_ms: 1.2903
+  type: 'test'
+  ...
+# Subtest: visible StartGame retries one exact new route-lease error through the real button
+ok 142 - visible StartGame retries one exact new route-lease error through the real button
+  ---
+  duration_ms: 1.2472
+  type: 'test'
+  ...
+# Subtest: ground-drop pickup walks into range and targets the exact visible object
+ok 143 - ground-drop pickup walks into range and targets the exact visible object
+  ---
+  duration_ms: 6.3208
+  type: 'test'
+  ...
+# Subtest: global collision segments use the client's physical continuous-movement gesture
+ok 144 - global collision segments use the client's physical continuous-movement gesture
+  ---
+  duration_ms: 1.7774
+  type: 'test'
+  ...
+# Subtest: continuous collision runs stop near protected map transfers
+ok 145 - continuous collision runs stop near protected map transfers
+  ---
+  duration_ms: 0.4169
+  type: 'test'
+  ...
+# Subtest: intentional map travel leaves an entire same-destination doorway cluster open
+ok 146 - intentional map travel leaves an entire same-destination doorway cluster open
+  ---
+  duration_ms: 0.1222
+  type: 'test'
+  ...
+# Subtest: supply travel visibly recovers from an accidentally entered protected map
+ok 147 - supply travel visibly recovers from an accidentally entered protected map
+  ---
+  duration_ms: 1.3863
+  type: 'test'
+  ...
+# Subtest: collision escape exhausts the bounded direction set around dynamic occupancy
+ok 148 - collision escape exhausts the bounded direction set around dynamic occupancy
+  ---
+  duration_ms: 3.8574
+  type: 'test'
+  ...
+# Subtest: long travel flees while moving and clears a safe attacker only after stalling
+ok 149 - long travel flees while moving and clears a safe attacker only after stalling
+  ---
+  duration_ms: 2.1544
+  type: 'test'
+  ...
+# Subtest: quarantined pursuers break cross-chunk travel loops with physical retreat
+ok 150 - quarantined pursuers break cross-chunk travel loops with physical retreat
+  ---
+  duration_ms: 1.4569
+  type: 'test'
+  ...
+# Subtest: moving-target melee chase may physically clear one certified adjacent occupant
+ok 151 - moving-target melee chase may physically clear one certified adjacent occupant
+  ---
+  duration_ms: 1.0992
+  type: 'test'
+  ...
+# Subtest: monster approach clears certified occupancy without enabling it on ordinary field travel
+ok 152 - monster approach clears certified occupancy without enabling it on ordinary field travel
+  ---
+  duration_ms: 1.4405
+  type: 'test'
+  ...
+# Subtest: incomplete-potion extended routes physically return to the supply area
+ok 153 - incomplete-potion extended routes physically return to the supply area
+  ---
+  duration_ms: 3.001
+  type: 'test'
+  ...
+# Subtest: funded potion purchases stage safe working stock before full departure stock
+ok 154 - funded potion purchases stage safe working stock before full departure stock
+  ---
+  duration_ms: 2.246
+  type: 'test'
+  ...
+# Subtest: supply hunting stays inside authoritative village-edge respawn fields
+ok 155 - supply hunting stays inside authoritative village-edge respawn fields
+  ---
+  duration_ms: 1.9099
+  type: 'test'
+  ...
+# Subtest: unsafe potion funding shelters with emergency-only potion survival
+ok 156 - unsafe potion funding shelters with emergency-only potion survival
+  ---
+  duration_ms: 2.1738
+  type: 'test'
+  ...
+# Subtest: field continuation consumes stock down to a bounded reserve before returning
+ok 157 - field continuation consumes stock down to a bounded reserve before returning
+  ---
+  duration_ms: 1.6067
+  type: 'test'
+  ...
+# Subtest: supply NPC navigation clears only a repeatedly blocking trivial occupant
+ok 158 - supply NPC navigation clears only a repeatedly blocking trivial occupant
+  ---
+  duration_ms: 1.8273
+  type: 'test'
+  ...
+# Subtest: low-stock supply work retreats before optional actions and budgets every NPC trip
+ok 159 - low-stock supply work retreats before optional actions and budgets every NPC trip
+  ---
+  duration_ms: 1.7805
+  type: 'test'
+  ...
+# Subtest: scripted map travel uses visible NPC links and audits the paid map change
+ok 160 - scripted map travel uses visible NPC links and audits the paid map change
+  ---
+  duration_ms: 1.5402
+  type: 'test'
+  ...
+# Subtest: ordinary map travel rotates same-destination entrances only after physical unreachability
+ok 161 - ordinary map travel rotates same-destination entrances only after physical unreachability
+  ---
+  duration_ms: 1.4021
+  type: 'test'
+  ...
+# Subtest: budget-disabled equipment repair travel still clears certified physical occupancy
+ok 162 - budget-disabled equipment repair travel still clears certified physical occupancy
+  ---
+  duration_ms: 1.3158
+  type: 'test'
+  ...
+# Subtest: safe passive recovery accepts authoritative healing completed on the approach
+ok 163 - safe passive recovery accepts authoritative healing completed on the approach
+  ---
+  duration_ms: 3.0253
+  type: 'test'
+  ...
+# Subtest: safe shelter travel re-evaluates a resource budget crossed en route
+ok 164 - safe shelter travel re-evaluates a resource budget crossed en route
+  ---
+  duration_ms: 1.6106
+  type: 'test'
+  ...
+# Subtest: scripted map travel audits required and consumed access items
+ok 165 - scripted map travel audits required and consumed access items
+  ---
+  duration_ms: 1.5664
+  type: 'test'
+  ...
+# Subtest: resource-heavy grind sources are cooled down and replanned
+ok 166 - resource-heavy grind sources are cooled down and replanned
+  ---
+  duration_ms: 1.6656
+  type: 'test'
+  ...
+# Subtest: combat resource strain covers navigation and combat for the whole goal
+ok 167 - combat resource strain covers navigation and combat for the whole goal
+  ---
+  duration_ms: 3.6281
+  type: 'test'
+  ...
+# Subtest: combat completion accepts only target-specific death during deadline settlement
+ok 168 - combat completion accepts only target-specific death during deadline settlement
+  ---
+  duration_ms: 1.202
+  type: 'test'
+  ...
+# Subtest: confirmed combat deaths cannot be selected again from a stale rendered corpse
+ok 169 - confirmed combat deaths cannot be selected again from a stale rendered corpse
+  ---
+  duration_ms: 1.3767
+  type: 'test'
+  ...
+# Subtest: late harvest progression settles after corpse removal without another input
+ok 170 - late harvest progression settles after corpse removal without another input
+  ---
+  duration_ms: 1.3356
+  type: 'test'
+  ...
+# Subtest: active threats preempt corpse harvesting and stationary field recovery
+ok 171 - active threats preempt corpse harvesting and stationary field recovery
+  ---
+  duration_ms: 6.0676
+  type: 'test'
+  ...
+# Subtest: harvest goals clear a certified active threat before creating the source corpse
+ok 172 - harvest goals clear a certified active threat before creating the source corpse
+  ---
+  duration_ms: 1.2352
+  type: 'test'
+  ...
+# Subtest: completed real quest combat can certify an adjacent harvest defender
+ok 173 - completed real quest combat can certify an adjacent harvest defender
+  ---
+  duration_ms: 1.1227
+  type: 'test'
+  ...
+# Subtest: a physically visible nearby monster can enter the normal locked-attack chase
+ok 174 - a physically visible nearby monster can enter the normal locked-attack chase
+  ---
+  duration_ms: 1.1557
+  type: 'test'
+  ...
+# Subtest: moving combat targets keep the production locked chase before manual navigation
+ok 175 - moving combat targets keep the production locked chase before manual navigation
+  ---
+  duration_ms: 1.2948
+  type: 'test'
+  ...
+# Subtest: unsafe harvest threats force a physical retreat and cool the overlapping source field
+ok 176 - unsafe harvest threats force a physical retreat and cool the overlapping source field
+  ---
+  duration_ms: 1.1192
+  type: 'test'
+  ...
+# Subtest: resource-strained quest combat cools the current real respawn group
+ok 177 - resource-strained quest combat cools the current real respawn group
+  ---
+  duration_ms: 1.037
+  type: 'test'
+  ...
+# Subtest: recycled inventory ids never suppress newly dropped supply loot
+ok 178 - recycled inventory ids never suppress newly dropped supply loot
+  ---
+  duration_ms: 1.3078
+  type: 'test'
+  ...
+# Subtest: offscreen merchant rows are reached with visible mouse-wheel input
+ok 179 - offscreen merchant rows are reached with visible mouse-wheel input
+  ---
+  duration_ms: 1.5303
+  type: 'test'
+  ...
+# Subtest: visible NPC interaction retries promptly after normal client approach
+ok 180 - visible NPC interaction retries promptly after normal client approach
+  ---
+  duration_ms: 1.2881
+  type: 'test'
+  ...
+# Subtest: visible map transfers route adjacent before a physical key step into the trigger tile
+ok 181 - visible map transfers route adjacent before a physical key step into the trigger tile
+  ---
+  duration_ms: 5.6004
+  type: 'test'
+  ...
+# Subtest: normal client movement opens indexed Crystal doors before retrying the queued step
+ok 182 - normal client movement opens indexed Crystal doors before retrying the queued step
+  ---
+  duration_ms: 4.0271
+  type: 'test'
+  ...
+# Subtest: inventory activation honors authoritative Crystal equip slots
+ok 183 - inventory activation honors authoritative Crystal equip slots
+  ---
+  duration_ms: 0.8591
+  type: 'test'
+  ...
+# Subtest: quest definitions survive prerequisite-locked snapshot pruning
+ok 184 - quest definitions survive prerequisite-locked snapshot pruning
+  ---
+  duration_ms: 2.5875
+  type: 'test'
+  ...
+# Subtest: browser diagnostics separate optional raster fallbacks from critical failures
+ok 185 - browser diagnostics separate optional raster fallbacks from critical failures
+  ---
+  duration_ms: 0.7951
+  type: 'test'
+  ...
+# Subtest: combat evidence is correlated to the selected target object
+ok 186 - combat evidence is correlated to the selected target object
+  ---
+  duration_ms: 0.6947
+  type: 'test'
+  ...
+# Subtest: start-game bootstrap accepts the exact personal snapshot when UserInformation is omitted
+ok 187 - start-game bootstrap accepts the exact personal snapshot when UserInformation is omitted
+  ---
+  duration_ms: 1.2877
+  type: 'test'
+  ...
+# Subtest: trace append retries a transient Windows busy-file error
+ok 188 - trace append retries a transient Windows busy-file error
+  ---
+  duration_ms: 1.4434
+  type: 'test'
+  ...
+# Subtest: trace append tolerates sustained Windows scanner share violations
+ok 189 - trace append tolerates sustained Windows scanner share violations
+  ---
+  duration_ms: 0.627
+  type: 'test'
+  ...
+# Subtest: trace redacts incoming identity tokens and outgoing credentials
+ok 190 - trace redacts incoming identity tokens and outgoing credentials
+  ---
+  duration_ms: 6.434
+  type: 'test'
+  ...
+# Subtest: quest definitions survive event eviction and reset for a new character session
+ok 191 - quest definitions survive event eviction and reset for a new character session
+  ---
+  duration_ms: 2203.7004
+  type: 'test'
+  ...
+# Subtest: self damage requests coalesced authoritative vitals snapshots through the public command allowlist
+ok 192 - self damage requests coalesced authoritative vitals snapshots through the public command allowlist
+  ---
+  duration_ms: 2.4579
+  type: 'test'
+  ...
+# Subtest: ordinary merchant sale is allowed while QA and direct-state commands remain forbidden
+ok 193 - ordinary merchant sale is allowed while QA and direct-state commands remain forbidden
+  ---
+  duration_ms: 1.2631
+  type: 'test'
+  ...
+# Subtest: signal interruption still waits for LogOutSuccess before closing the socket
+ok 194 - signal interruption still waits for LogOutSuccess before closing the socket
+  ---
+  duration_ms: 16.8361
+  type: 'test'
+  ...
+# Subtest: explicit objective map preference resolves equal-length dungeon routes
+ok 195 - explicit objective map preference resolves equal-length dungeon routes
+  ---
+  duration_ms: 2.5584
+  type: 'test'
+  ...
+# Subtest: armed q89 fallback accepts a profile-pruned route only with the exact live doorway
+ok 196 - armed q89 fallback accepts a profile-pruned route only with the exact live doorway
+  ---
+  duration_ms: 0.9404
+  type: 'test'
+  ...
+# Subtest: retreat route bias preserves cave-exit progress without accepting an adjacent hostile
+ok 197 - retreat route bias preserves cave-exit progress without accepting an adjacent hostile
+  ---
+  duration_ms: 0.36
+  type: 'test'
+  ...
+# Subtest: direct ranged hit evidence identifies a q89 aggressor up to eight tiles away
+ok 198 - direct ranged hit evidence identifies a q89 aggressor up to eight tiles away
+  ---
+  duration_ms: 1.6663
+  type: 'test'
+  ...
+# Subtest: a q89 unavailable Shaman band defers and uses ordinary retreat recovery instead of ending the objective loop
+ok 199 - a q89 unavailable Shaman band defers and uses ordinary retreat recovery instead of ending the objective loop
+  ---
+  duration_ms: 6.6281
+  type: 'test'
+  ...
+# Subtest: q89 spawn-stall clearing reaches a certified Shaman band before its ordinary action
+ok 200 - q89 spawn-stall clearing reaches a certified Shaman band before its ordinary action
+  ---
+  duration_ms: 44.5049
+  type: 'test'
+  ...
+# Subtest: q89 Wizard guards the real D2031-to-D2032 transit before a Run crosses the entrance Shaman halo
+ok 201 - q89 Wizard guards the real D2031-to-D2032 transit before a Run crosses the entrance Shaman halo
+  ---
+  duration_ms: 137.0303
+  type: 'test'
+  ...
+# Subtest: q89 transit clearance aborts when a Shaman moves into its fresh cadence cells without recursive clearing
+ok 202 - q89 transit clearance aborts when a Shaman moves into its fresh cadence cells without recursive clearing
+  ---
+  duration_ms: 1.9203
+  type: 'test'
+  ...
+# Subtest: q89 transit blocker cap performs one recovery then terminates a still-live next halo
+ok 203 - q89 transit blocker cap performs one recovery then terminates a still-live next halo
+  ---
+  duration_ms: 2.2572
+  type: 'test'
+  ...
+# Subtest: q89 deferred live transit blocker does not replan the same guarded step forever
+ok 204 - q89 deferred live transit blocker does not replan the same guarded step forever
+  ---
+  duration_ms: 2.0713
+  type: 'test'
+  ...
+# Subtest: q89 spawn-stall blocker defers when independent quest progress removes it without a death receipt
+ok 205 - q89 spawn-stall blocker defers when independent quest progress removes it without a death receipt
+  ---
+  duration_ms: 1.2674
+  type: 'test'
+  ...
+# Subtest: q2 kills a live Scarecrow and trusts authoritative GingerTea progress
+ok 206 - q2 kills a live Scarecrow and trusts authoritative GingerTea progress
+  ---
+  duration_ms: 0.8293
+  type: 'test'
+  ...
+# Subtest: q5 completes Deer and Scarecrow kill objectives without treating monster level as a gate
+ok 207 - q5 completes Deer and Scarecrow kill objectives without treating monster level as a gate
+  ---
+  duration_ms: 0.9065
+  type: 'test'
+  ...
+# Subtest: a multi-objective hunt clears a visible later target while the first target is respawning
+ok 208 - a multi-objective hunt clears a visible later target while the first target is respawning
+  ---
+  duration_ms: 0.6903
+  type: 'test'
+  ...
+# Subtest: a multi-objective spawn search stops for another safe required monster entering AOI
+ok 209 - a multi-objective spawn search stops for another safe required monster entering AOI
+  ---
+  duration_ms: 1.2748
+  type: 'test'
+  ...
+# Subtest: a multi-map quest clears an incomplete same-map objective before crossing to the first listed source
+ok 210 - a multi-map quest clears an incomplete same-map objective before crossing to the first listed source
+  ---
+  duration_ms: 0.5769
+  type: 'test'
+  ...
+# Subtest: a live objective omitted from the spawn manifest is fought on the current map
+ok 211 - a live objective omitted from the spawn manifest is fought on the current map
+  ---
+  duration_ms: 0.4299
+  type: 'test'
+  ...
+# Subtest: an allowed wounded objective is resumed before a closer full-health peer
+ok 212 - an allowed wounded objective is resumed before a closer full-health peer
+  ---
+  duration_ms: 0.4988
+  type: 'test'
+  ...
+# Subtest: a healthy player keeps approaching a 25-percent objective when a pack appears
+ok 213 - a healthy player keeps approaching a 25-percent objective when a pack appears
+  ---
+  duration_ms: 0.6239
+  type: 'test'
+  ...
+# Subtest: an expedition can prefer its configured objective map over a denser same-map spawn
+ok 214 - an expedition can prefer its configured objective map over a denser same-map spawn
+  ---
+  duration_ms: 0.9047
+  type: 'test'
+  ...
+# Subtest: a post-travel supply checkpoint can leave and replan before objective combat
+ok 215 - a post-travel supply checkpoint can leave and replan before objective combat
+  ---
+  duration_ms: 0.6148
+  type: 'test'
+  ...
+# Subtest: multi-map travel evades a proven adjacent aggressor before retrying the ordinary route
+ok 216 - multi-map travel evades a proven adjacent aggressor before retrying the ordinary route
+  ---
+  duration_ms: 0.9034
+  type: 'test'
+  ...
+# Subtest: a repeated interruption on the same travel edge clears the proven aggressor
+ok 217 - a repeated interruption on the same travel edge clears the proven aggressor
+  ---
+  duration_ms: 1.3497
+  type: 'test'
+  ...
+# Subtest: multi-map travel clears a hostile doorway blocker and retries the same route
+ok 218 - multi-map travel clears a hostile doorway blocker and retries the same route
+  ---
+  duration_ms: 1.1726
+  type: 'test'
+  ...
+# Subtest: doorway blocker retreats when aggressor clearing discovers a dense pack
+ok 219 - doorway blocker retreats when aggressor clearing discovers a dense pack
+  ---
+  duration_ms: 1.4814
+  type: 'test'
+  ...
+# Subtest: stocked expedition travel clears a proven aggressor before retrying the route
+ok 220 - stocked expedition travel clears a proven aggressor before retrying the route
+  ---
+  duration_ms: 0.84
+  type: 'test'
+  ...
+# Subtest: travel retries when the proven threat leaves before fallback combat
+ok 221 - travel retries when the proven threat leaves before fallback combat
+  ---
+  duration_ms: 0.6267
+  type: 'test'
+  ...
+# Subtest: healthy expedition keeps crossing after a glancing hit and interrupts once health is low
+ok 222 - healthy expedition keeps crossing after a glancing hit and interrupts once health is low
+  ---
+  duration_ms: 0.5625
+  type: 'test'
+  ...
+# Subtest: chooses an isolated quest target before a closer target inside a hostile pack
+ok 223 - chooses an isolated quest target before a closer target inside a hostile pack
+  ---
+  duration_ms: 0.3551
+  type: 'test'
+  ...
+# Subtest: defers a clustered target for its current life and selects another target
+ok 224 - defers a clustered target for its current life and selects another target
+  ---
+  duration_ms: 1.0617
+  type: 'test'
+  ...
+# Subtest: reconsiders the only deferred target after enough events prove its pack dispersed
+ok 225 - reconsiders the only deferred target after enough events prove its pack dispersed
+  ---
+  duration_ms: 1.0679
+  type: 'test'
+  ...
+# Subtest: disengages when a second hostile joins an attack already in progress
+ok 226 - disengages when a second hostile joins an attack already in progress
+  ---
+  duration_ms: 1.1816
+  type: 'test'
+  ...
+# Subtest: clears only proven adjacent monster aggressors by lowest HP before the quest target
+ok 227 - clears only proven adjacent monster aggressors by lowest HP before the quest target
+  ---
+  duration_ms: 1.1337
+  type: 'test'
+  ...
+# Subtest: low health under two established aggressors retreats instead of standing to clear both
+ok 228 - low health under two established aggressors retreats instead of standing to clear both
+  ---
+  duration_ms: 1.2723
+  type: 'test'
+  ...
+# Subtest: a stocked mine expedition clears two aggressors above its lower retreat threshold
+ok 229 - a stocked mine expedition clears two aggressors above its lower retreat threshold
+  ---
+  duration_ms: 0.7156
+  type: 'test'
+  ...
+# Subtest: a mine expedition retreats from three active aggressors before waiting for low health
+ok 230 - a mine expedition retreats from three active aggressors before waiting for low health
+  ---
+  duration_ms: 1.0268
+  type: 'test'
+  ...
+# Subtest: a focused snake pull wakes its response wait on the first extra aggressor
+ok 231 - a focused snake pull wakes its response wait on the first extra aggressor
+  ---
+  duration_ms: 1.2127
+  type: 'test'
+  ...
+# Subtest: a newly revived adjacent aggressor pre-empts one established aggressor without target ping-pong
+ok 232 - a newly revived adjacent aggressor pre-empts one established aggressor without target ping-pong
+  ---
+  duration_ms: 1.0426
+  type: 'test'
+  ...
+# Subtest: an objective target cannot interrupt clearing the aggressor that joined its fight
+ok 233 - an objective target cannot interrupt clearing the aggressor that joined its fight
+  ---
+  duration_ms: 1.0071
+  type: 'test'
+  ...
+# Subtest: interrupts target navigation to clear a newly proven adjacent aggressor, then resumes the exact target
+ok 234 - interrupts target navigation to clear a newly proven adjacent aggressor, then resumes the exact target
+  ---
+  duration_ms: 1.4227
+  type: 'test'
+  ...
+# Subtest: an unreachable proven aggressor is recorded, escaped, and does not abort the objective
+ok 235 - an unreachable proven aggressor is recorded, escaped, and does not abort the objective
+  ---
+  duration_ms: 1.2659
+  type: 'test'
+  ...
+# Subtest: a healthy focused ranged hunt finishes its quest target through one proven aggressor
+ok 236 - a healthy focused ranged hunt finishes its quest target through one proven aggressor
+  ---
+  duration_ms: 0.5663
+  type: 'test'
+  ...
+# Subtest: q89 clears one proven entrance aggressor before retaining the required target
+ok 237 - q89 clears one proven entrance aggressor before retaining the required target
+  ---
+  duration_ms: 0.6919
+  type: 'test'
+  ...
+# Subtest: q89 still retreats at 75 percent HP when two aggressors are proven
+ok 238 - q89 still retreats at 75 percent HP when two aggressors are proven
+  ---
+  duration_ms: 1.1231
+  type: 'test'
+  ...
+# Subtest: q89 Wizard arms the exact live D2031 doorway after a stalled full Priest spread before respawn waiting
+ok 239 - q89 Wizard arms the exact live D2031 doorway after a stalled full Priest spread before respawn waiting
+  ---
+  duration_ms: 1.3754
+  type: 'test'
+  ...
+# Subtest: a q89 Priest full-spread pass with physical progress does not arm the D2032 fallback
+ok 240 - a q89 Priest full-spread pass with physical progress does not arm the D2032 fallback
+  ---
+  duration_ms: 0.479
+  type: 'test'
+  ...
+# Subtest: a q89 Priest full-spread pass with unknown physical coordinates does not arm the D2032 fallback
+ok 241 - a q89 Priest full-spread pass with unknown physical coordinates does not arm the D2032 fallback
+  ---
+  duration_ms: 0.54
+  type: 'test'
+  ...
+# Subtest: a catalogued D2032 Priest cannot arm a stalled q89 fallback without the exact live D2031 source and key
+ok 242 - a catalogued D2032 Priest cannot arm a stalled q89 fallback without the exact live D2031 source and key
+  ---
+  duration_ms: 0.4485
+  type: 'test'
+  ...
+# Subtest: the stalled Priest fallback stays unavailable for other q89 objectives
+ok 243 - the stalled Priest fallback stays unavailable for other q89 objectives
+  ---
+  duration_ms: 0.7377
+  type: 'test'
+  ...
+# Subtest: q89 Wizard returns normally to D2031 before using the live keyed doorway after a retreat
+ok 244 - q89 Wizard returns normally to D2031 before using the live keyed doorway after a retreat
+  ---
+  duration_ms: 1.2817
+  type: 'test'
+  ...
+# Subtest: q89 Wizard fails closed when normal fallback-source travel lands on the wrong map
+ok 245 - q89 Wizard fails closed when normal fallback-source travel lands on the wrong map
+  ---
+  duration_ms: 0.8323
+  type: 'test'
+  ...
+# Subtest: q89 Wizard fails closed after one live D2032 fallback pass makes no objective progress
+ok 246 - q89 Wizard fails closed after one live D2032 fallback pass makes no objective progress
+  ---
+  duration_ms: 0.9203
+  type: 'test'
+  ...
+# Subtest: a survivable Taoist lands the last bounded hit before retreating from a joining snake
+ok 247 - a survivable Taoist lands the last bounded hit before retreating from a joining snake
+  ---
+  duration_ms: 0.5153
+  type: 'test'
+  ...
+# Subtest: a proven current target forces retreat below forty percent health before combat resumes
+ok 248 - a proven current target forces retreat below forty percent health before combat resumes
+  ---
+  duration_ms: 0.7414
+  type: 'test'
+  ...
+# Subtest: interrupts an in-progress target fight when a new adjacent aggressor lands a hit
+ok 249 - interrupts an in-progress target fight when a new adjacent aggressor lands a hit
+  ---
+  duration_ms: 0.5748
+  type: 'test'
+  ...
+# Subtest: a supplied harvest hunt focuses its unique target and carves before clearing aggressors
+ok 250 - a supplied harvest hunt focuses its unique target and carves before clearing aggressors
+  ---
+  duration_ms: 0.9087
+  type: 'test'
+  ...
+# Subtest: a focused harvest hunt retreats after two proven attackers converge, then retries the target
+ok 251 - a focused harvest hunt retreats after two proven attackers converge, then retries the target
+  ---
+  duration_ms: 0.8222
+  type: 'test'
+  ...
+# Subtest: trusts objective progress from a proven same-species aggressor without an extra target kill
+ok 252 - trusts objective progress from a proven same-species aggressor without an extra target kill
+  ---
+  duration_ms: 0.5451
+  type: 'test'
+  ...
+# Subtest: applies the same threat interrupt when sustain makes a second target approach necessary
+ok 253 - applies the same threat interrupt when sustain makes a second target approach necessary
+  ---
+  duration_ms: 0.587
+  type: 'test'
+  ...
+# Subtest: does not guess that an adjacent hostile is an aggressor without attack-recipient evidence
+ok 254 - does not guess that an adjacent hostile is an aggressor without attack-recipient evidence
+  ---
+  duration_ms: 0.2789
+  type: 'test'
+  ...
+# Subtest: searches the nearest same-map spawn when no target is in AOI
+ok 255 - searches the nearest same-map spawn when no target is in AOI
+  ---
+  duration_ms: 0.5452
+  type: 'test'
+  ...
+# Subtest: waits for a visible unique target pack to disperse before bounded search failure
+ok 256 - waits for a visible unique target pack to disperse before bounded search failure
+  ---
+  duration_ms: 0.7894
+  type: 'test'
+  ...
+# Subtest: unsafe-target observation retreats on the first proven hit instead of waiting in place
+ok 257 - unsafe-target observation retreats on the first proven hit instead of waiting in place
+  ---
+  duration_ms: 1.6971
+  type: 'test'
+  ...
+# Subtest: interrupts spawn navigation for a proven aggressor, clears it within budget, and resumes search
+ok 258 - interrupts spawn navigation for a proven aggressor, clears it within budget, and resumes search
+  ---
+  duration_ms: 1.1211
+  type: 'test'
+  ...
+# Subtest: a failed spawn route sustains the player and interrupts immediately for a proven aggressor
+ok 259 - a failed spawn route sustains the player and interrupts immediately for a proven aggressor
+  ---
+  duration_ms: 1.0578
+  type: 'test'
+  ...
+# Subtest: retreats from a clustered proven aggressor and resumes the spawn search
+ok 260 - retreats from a clustered proven aggressor and resumes the spawn search
+  ---
+  duration_ms: 1.3808
+  type: 'test'
+  ...
+# Subtest: accepts a material pack retreat that isolates one follower inside the global clearance
+ok 261 - accepts a material pack retreat that isolates one follower inside the global clearance
+  ---
+  duration_ms: 1.3683
+  type: 'test'
+  ...
+# Subtest: low-health pack retreat requires the full safety radius
+ok 262 - low-health pack retreat requires the full safety radius
+  ---
+  duration_ms: 0.2452
+  type: 'test'
+  ...
+# Subtest: severe packs use the open-cell emergency escape before conservative path retries
+ok 263 - severe packs use the open-cell emergency escape before conservative path retries
+  ---
+  duration_ms: 1.7055
+  type: 'test'
+  ...
+# Subtest: a partial cave escape replans when the proven pursuer has left
+ok 264 - a partial cave escape replans when the proven pursuer has left
+  ---
+  duration_ms: 1.778
+  type: 'test'
+  ...
+# Subtest: a cave dead end replans after its only proven blocker is defeated
+ok 265 - a cave dead end replans after its only proven blocker is defeated
+  ---
+  duration_ms: 1.43
+  type: 'test'
+  ...
+# Subtest: a fully occupied retreat cuts down one proven adjacent attacker to open an escape tile
+ok 266 - a fully occupied retreat cuts down one proven adjacent attacker to open an escape tile
+  ---
+  duration_ms: 0.9559
+  type: 'test'
+  ...
+# Subtest: a fully occupied retreat waits out paralysis before breakout combat
+ok 267 - a fully occupied retreat waits out paralysis before breakout combat
+  ---
+  duration_ms: 1.7033
+  type: 'test'
+  ...
+# Subtest: low-health no-step retreat uses the optional emergency escape before breaking out
+ok 268 - low-health no-step retreat uses the optional emergency escape before breaking out
+  ---
+  duration_ms: 1.628
+  type: 'test'
+  ...
+# Subtest: low-health multi-aggressor pressure uses emergency escape before a temporary walk route
+ok 269 - low-health multi-aggressor pressure uses emergency escape before a temporary walk route
+  ---
+  duration_ms: 0.8768
+  type: 'test'
+  ...
+# Subtest: a failed low-health emergency escape falls back to bounded hostile breakout
+ok 270 - a failed low-health emergency escape falls back to bounded hostile breakout
+  ---
+  duration_ms: 1.6964
+  type: 'test'
+  ...
+# Subtest: a multi-kill breakout continues through a second proven attacker before escaping
+ok 271 - a multi-kill breakout continues through a second proven attacker before escaping
+  ---
+  duration_ms: 2.2174
+  type: 'test'
+  ...
+# Subtest: an unreachable breakout attacker is skipped for the next proven blocker
+ok 272 - an unreachable breakout attacker is skipped for the next proven blocker
+  ---
+  duration_ms: 1.7449
+  type: 'test'
+  ...
+# Subtest: iterative pack retreat replans from each live position and sustains during escape
+ok 273 - iterative pack retreat replans from each live position and sustains during escape
+  ---
+  duration_ms: 1.6773
+  type: 'test'
+  ...
+# Subtest: a pursuing pack that preserves exposure is broken after bounded retreat progress
+ok 274 - a pursuing pack that preserves exposure is broken after bounded retreat progress
+  ---
+  duration_ms: 1.5258
+  type: 'test'
+  ...
+# Subtest: moving hostiles can extend retreat across bounded batches until exposure is safe
+ok 275 - moving hostiles can extend retreat across bounded batches until exposure is safe
+  ---
+  duration_ms: 0.7462
+  type: 'test'
+  ...
+# Subtest: search stays in the nearest local field instead of visiting every distant center first
+ok 276 - search stays in the nearest local field instead of visiting every distant center first
+  ---
+  duration_ms: 0.7036
+  type: 'test'
+  ...
+# Subtest: item search prefers an abundant source field over a nearby rare variant
+ok 277 - item search prefers an abundant source field over a nearby rare variant
+  ---
+  duration_ms: 1.0812
+  type: 'test'
+  ...
+# Subtest: a remembered corpse is revisited once without treating it as live, then its candidate is deprioritized
+ok 278 - a remembered corpse is revisited once without treating it as live, then its candidate is deprioritized
+  ---
+  duration_ms: 0.7993
+  type: 'test'
+  ...
+# Subtest: offline monster observations are location hints and require a fresh live AOI target
+ok 279 - offline monster observations are location hints and require a fresh live AOI target
+  ---
+  duration_ms: 0.568
+  type: 'test'
+  ...
+# Subtest: a same-map world refresh preserves monster locations observed earlier in the visit
+ok 280 - a same-map world refresh preserves monster locations observed earlier in the visit
+  ---
+  duration_ms: 0.3578
+  type: 'test'
+  ...
+# Subtest: a remembered CannibalPlant location gets one close bounded reveal observation
+ok 281 - a remembered CannibalPlant location gets one close bounded reveal observation
+  ---
+  duration_ms: 0.4531
+  type: 'test'
+  ...
+# Subtest: nearest-neighbor traversal does not zigzag between distant full-spread regions
+ok 282 - nearest-neighbor traversal does not zigzag between distant full-spread regions
+  ---
+  duration_ms: 0.6491
+  type: 'test'
+  ...
+# Subtest: spawn search obeys one global waypoint budget
+ok 283 - spawn search obeys one global waypoint budget
+  ---
+  duration_ms: 0.5259
+  type: 'test'
+  ...
+# Subtest: full-spread exhaustion waits for a bounded respawn and resumes the active objective
+ok 284 - full-spread exhaustion waits for a bounded respawn and resumes the active objective
+  ---
+  duration_ms: 0.5422
+  type: 'test'
+  ...
+# Subtest: profiled respawn delay extends the default bounded wait window
+ok 285 - profiled respawn delay extends the default bounded wait window
+  ---
+  duration_ms: 2.011
+  type: 'test'
+  ...
+# Subtest: a proven adjacent attack interrupts a respawn wait and is cleared before waiting again
+ok 286 - a proven adjacent attack interrupts a respawn wait and is cleared before waiting again
+  ---
+  duration_ms: 0.5879
+  type: 'test'
+  ...
+# Subtest: full-spread grid covers the observed CannibalPlant offset beyond the old 48-tile ring
+ok 287 - full-spread grid covers the observed CannibalPlant offset beyond the old 48-tile ring
+  ---
+  duration_ms: 0.6
+  type: 'test'
+  ...
+# Subtest: full-spread grid closes RakingCat holes while bare ObjectRevived creates no phantom target
+ok 288 - full-spread grid closes RakingCat holes while bare ObjectRevived creates no phantom target
+  ---
+  duration_ms: 0.5282
+  type: 'test'
+  ...
+# Subtest: known map bounds clip every full-spread waypoint
+ok 289 - known map bounds clip every full-spread waypoint
+  ---
+  duration_ms: 2.8755
+  type: 'test'
+  ...
+# Subtest: wall-clock search timeout reports partial coverage and emits bounded diagnostics
+ok 290 - wall-clock search timeout reports partial coverage and emits bounded diagnostics
+  ---
+  duration_ms: 1.1526
+  type: 'test'
+  ...
+# Subtest: harvest item source uses the corpse direction and waits for quest progress
+ok 291 - harvest item source uses the corpse direction and waits for quest progress
+  ---
+  duration_ms: 0.5702
+  type: 'test'
+  ...
+# Subtest: an already-consumed shared corpse is skipped without claiming progress
+ok 292 - an already-consumed shared corpse is skipped without claiming progress
+  ---
+  duration_ms: 0.6747
+  type: 'test'
+  ...
+# Subtest: three distinct unavailable corpses fail with an explicit bounded error
+ok 293 - three distinct unavailable corpses fail with an explicit bounded error
+  ---
+  duration_ms: 0.8522
+  type: 'test'
+  ...
+# Subtest: player death during unavailable-corpse probing still fails immediately
+ok 294 - player death during unavailable-corpse probing still fails immediately
+  ---
+  duration_ms: 0.3842
+  type: 'test'
+  ...
+# Subtest: fails closed when an objective has no source on the current map
+ok 295 - fails closed when an objective has no source on the current map
+  ---
+  duration_ms: 0.1755
+  type: 'test'
+  ...
+# Subtest: cross-map fallback skips an unreachable first source and travels only to a reachable map
+ok 296 - cross-map fallback skips an unreachable first source and travels only to a reachable map
+  ---
+  duration_ms: 0.2957
+  type: 'test'
+  ...
+# Subtest: cross-map objective prefers its quest NPC map over a closer dangerous source
+ok 297 - cross-map objective prefers its quest NPC map over a closer dangerous source
+  ---
+  duration_ms: 0.3744
+  type: 'test'
+  ...
+# Subtest: diary material objective prefers its quest group map over a shorter wasteland source
+ok 298 - diary material objective prefers its quest group map over a shorter wasteland source
+  ---
+  duration_ms: 0.3169
+  type: 'test'
+  ...
+# Subtest: cross-map fallback fails explicitly without travelling when all source maps are unreachable
+ok 299 - cross-map fallback fails explicitly without travelling when all source maps are unreachable
+  ---
+  duration_ms: 0.2668
+  type: 'test'
+  ...
+# Subtest: stops immediately when the player is dead
+ok 300 - stops immediately when the player is dead
+  ---
+  duration_ms: 0.1764
+  type: 'test'
+  ...
+# Subtest: bounds a target that never reports combat progress
+ok 301 - bounds a target that never reports combat progress
+  ---
+  duration_ms: 1.4947
+  type: 'test'
+  ...
+# Subtest: a non-responsive revived target is quarantined while another live target completes combat
+ok 302 - a non-responsive revived target is quarantined while another live target completes combat
+  ---
+  duration_ms: 0.5068
+  type: 'test'
+  ...
+# Subtest: a fleeing Deer is re-approached instead of being quarantined as unresponsive
+ok 303 - a fleeing Deer is re-approached instead of being quarantined as unresponsive
+  ---
+  duration_ms: 0.423
+  type: 'test'
+  ...
+# Subtest: a same-speed passive target is bounded after prolonged movement without a confirmed hit
+ok 304 - a same-speed passive target is bounded after prolonged movement without a confirmed hit
+  ---
+  duration_ms: 0.3836
+  type: 'test'
+  ...
+# Subtest: travel blocker combat clears a nearer live monster sealing the target approach
+ok 305 - travel blocker combat clears a nearer live monster sealing the target approach
+  ---
+  duration_ms: 0.3821
+  type: 'test'
+  ...
+# Subtest: continues ordinary attacks across HP acknowledgements until target death
+ok 306 - continues ordinary attacks across HP acknowledgements until target death
+  ---
+  duration_ms: 4.1
+  type: 'test'
+  ...
+# Subtest: dynamic approach uses Wizard spell range, closes without MP, and waits without an attack
+ok 307 - dynamic approach uses Wizard spell range, closes without MP, and waits without an attack
+  ---
+  duration_ms: 1.3603
+  type: 'test'
+  ...
+# Subtest: combat approach retries with bounded clearance when the full buffer seals the path
+ok 308 - combat approach retries with bounded clearance when the full buffer seals the path
+  ---
+  duration_ms: 0.3463
+  type: 'test'
+  ...
+# Subtest: an unreachable live monster is quarantined while combat continues with another target
+ok 309 - an unreachable live monster is quarantined while combat continues with another target
+  ---
+  duration_ms: 0.384
+  type: 'test'
+  ...
+# Subtest: a stationary target is retried after its temporary corridor blocker can move
+ok 310 - a stationary target is retried after its temporary corridor blocker can move
+  ---
+  duration_ms: 0.8517
+  type: 'test'
+  ...
+# Subtest: an opted-in objective clears one nearby monster occupying its only approach
+ok 311 - an opted-in objective clears one nearby monster occupying its only approach
+  ---
+  duration_ms: 0.6297
+  type: 'test'
+  ...
+# Subtest: spawn search retries the same cave waypoint with bounded hostile clearance
+ok 312 - spawn search retries the same cave waypoint with bounded hostile clearance
+  ---
+  duration_ms: 0.858
+  type: 'test'
+  ...
+# Subtest: cooldown waits preserve the attack budget and refresh from authoritative snapshots
+ok 313 - cooldown waits preserve the attack budget and refresh from authoritative snapshots
+  ---
+  duration_ms: 0.7124
+  type: 'test'
+  ...
+# Subtest: positive hits reset consecutive cooldown time during a long spell pull
+ok 314 - positive hits reset consecutive cooldown time during a long spell pull
+  ---
+  duration_ms: 0.6566
+  type: 'test'
+  ...
+# Subtest: a server cooldown that never changes fails after a bounded total wait
+ok 315 - a server cooldown that never changes fails after a bounded total wait
+  ---
+  duration_ms: 0.4992
+  type: 'test'
+  ...
+# Subtest: a sustain callback cannot mask authoritative player death
+ok 316 - a sustain callback cannot mask authoritative player death
+  ---
+  duration_ms: 0.3555
+  type: 'test'
+  ...
+# Subtest: a target that leaves during approach is deferred and another live target completes the objective
+ok 317 - a target that leaves during approach is deferred and another live target completes the objective
+  ---
+  duration_ms: 0.468
+  type: 'test'
+  ...
+# Subtest: target removal waits three seconds so a delayed authoritative player death wins the error classification
+ok 318 - target removal waits three seconds so a delayed authoritative player death wins the error classification
+  ---
+  duration_ms: 0.4707
+  type: 'test'
+  ...
+# Subtest: a living player defers an exact removed target but still fails without quest progress
+ok 319 - a living player defers an exact removed target but still fails without quest progress
+  ---
+  duration_ms: 1.4902
+  type: 'test'
+  ...
+# Subtest: authoritative quest progress accepts a target removed before its death packet settles
+ok 320 - authoritative quest progress accepts a target removed before its death packet settles
+  ---
+  duration_ms: 0.4872
+  type: 'test'
+  ...
+# Subtest: proven remote-player last blow is recorded and retries without claiming quest credit
+ok 321 - proven remote-player last blow is recorded and retries without claiming quest credit
+  ---
+  duration_ms: 0.4922
+  type: 'test'
+  ...
+# Subtest: unknown last-blow identity preserves the missing-award failure
+ok 322 - unknown last-blow identity preserves the missing-award failure
+  ---
+  duration_ms: 0.4693
+  type: 'test'
+  ...
+# Subtest: a bystander death is not accepted as the current target death
+ok 323 - a bystander death is not accepted as the current target death
+  ---
+  duration_ms: 0.5789
+  type: 'test'
+  ...
+# Subtest: picks up a visible non-harvest quest drop and requires objective confirmation
+ok 324 - picks up a visible non-harvest quest drop and requires objective confirmation
+  ---
+  duration_ms: 0.4883
+  type: 'test'
+  ...
+# Subtest: same-tile harvest preserves a valid authoritative facing
+ok 325 - same-tile harvest preserves a valid authoritative facing
+  ---
+  duration_ms: 0.0659
+  type: 'test'
+  ...
+# Subtest: q111 pillar uses static metadata only for travel and resolves the live NPC before interaction
+ok 326 - q111 pillar uses static metadata only for travel and resolves the live NPC before interaction
+  ---
+  duration_ms: 2.2756
+  type: 'test'
+  ...
+# Subtest: cross-map setter travels normally and selects only a target present in the live dialog
+ok 327 - cross-map setter travels normally and selects only a target present in the live dialog
+  ---
+  duration_ms: 1.1628
+  type: 'test'
+  ...
+# Subtest: a static target absent from the live dialog is never sent
+ok 328 - a static target absent from the live dialog is never sent
+  ---
+  duration_ms: 0.5823
+  type: 'test'
+  ...
+# Subtest: already-complete objectives produce no travel or commands
+ok 329 - already-complete objectives produce no travel or commands
+  ---
+  duration_ms: 0.2963
+  type: 'test'
+  ...
+# Subtest: safe funding budget covers expedition HP and caster MP working capital
+ok 330 - safe funding budget covers expedition HP and caster MP working capital
+  ---
+  duration_ms: 1.9388
+  type: 'test'
+  ...
+# Subtest: safe Deer funding is available to any healthy living class stranded in village
+ok 331 - safe Deer funding is available to any healthy living class stranded in village
+  ---
+  duration_ms: 0.2198
+  type: 'test'
+  ...
+# Subtest: turns in the first ready positive-gold quest with its class reward before restocking
+ok 332 - turns in the first ready positive-gold quest with its class reward before restocking
+  ---
+  duration_ms: 1.706
+  type: 'test'
+  ...
+# Subtest: does not create funding by accepting, advancing, or turning in an unavailable quest
+ok 333 - does not create funding by accepting, advancing, or turning in an unavailable quest
+  ---
+  duration_ms: 0.2704
+  type: 'test'
+  ...
+# Subtest: does not let a ready optional legacy quest take over mandatory journey recovery
+ok 334 - does not let a ready optional legacy quest take over mandatory journey recovery
+  ---
+  duration_ms: 0.1945
+  type: 'test'
+  ...
+# Subtest: ready q110 funding turn-in keeps the guarded Sabuk endpoint on its quest-safe route
+ok 335 - ready q110 funding turn-in keeps the guarded Sabuk endpoint on its quest-safe route
+  ---
+  duration_ms: 0.6414
+  type: 'test'
+  ...
+# Subtest: bankrupt newcomer hunts and harvests passive Deer through normal protocol commands
+ok 336 - bankrupt newcomer hunts and harvests passive Deer through normal protocol commands
+  ---
+  duration_ms: 2.1281
+  type: 'test'
+  ...
+# Subtest: safe funding waits through a bounded empty field until a Deer respawns
+ok 337 - safe funding waits through a bounded empty field until a Deer respawns
+  ---
+  duration_ms: 0.6241
+  type: 'test'
+  ...
+# Subtest: safe funding retries a Deer contested by another player within the hunt budget
+ok 338 - safe funding retries a Deer contested by another player within the hunt budget
+  ---
+  duration_ms: 1.1066
+  type: 'test'
+  ...
+# Subtest: safe funding quarantines moving Deer that stall or become unreachable
+ok 339 - safe funding quarantines moving Deer that stall or become unreachable
+  ---
+  duration_ms: 1.3116
+  type: 'test'
+  ...
+# Subtest: safe funding waits for the exact ObjectDied before harvesting a snapshot-dead Deer
+ok 340 - safe funding waits for the exact ObjectDied before harvesting a snapshot-dead Deer
+  ---
+  duration_ms: 0.6426
+  type: 'test'
+  ...
+# Subtest: safe funding abandons a harvested corpse with no Venison award and tries another Deer
+ok 341 - safe funding abandons a harvested corpse with no Venison award and tries another Deer
+  ---
+  duration_ms: 0.4037
+  type: 'test'
+  ...
+# Subtest: safe funding budgets a long map-0 entrance route from authoritative distance
+ok 342 - safe funding budgets a long map-0 entrance route from authoritative distance
+  ---
+  duration_ms: 0.3399
+  type: 'test'
+  ...
+# Subtest: safe funding scans the village Deer footprint without blindly walking to remote static spawns
+ok 343 - safe funding scans the village Deer footprint without blindly walking to remote static spawns
+  ---
+  duration_ms: 0.4312
+  type: 'test'
+  ...
+# Subtest: safe funding reuses already-held Venison without repeating the hunt
+ok 344 - safe funding reuses already-held Venison without repeating the hunt
+  ---
+  duration_ms: 0.1747
+  type: 'test'
+  ...
+# Subtest: Wizard retreats on a collision-planned path before using the ranged action
+ok 345 - Wizard retreats on a collision-planned path before using the ranged action
+  ---
+  duration_ms: 7.0988
+  type: 'test'
+  ...
+# Subtest: q89 Wizard moves a close CursedShaman into the 7-9 projectile band outside every visible Shaman footprint
+ok 346 - q89 Wizard moves a close CursedShaman into the 7-9 projectile band outside every visible Shaman footprint
+  ---
+  duration_ms: 0.9391
+  type: 'test'
+  ...
+# Subtest: q89 Wizard never falls back to a close CursedShaman cast when no collision-safe ranged band exists
+ok 347 - q89 Wizard never falls back to a close CursedShaman cast when no collision-safe ranged band exists
+  ---
+  duration_ms: 0.5652
+  type: 'test'
+  ...
+# Subtest: q89 action-owned reposition rechecks a Shaman that moves during navigator cadence
+ok 348 - q89 action-owned reposition rechecks a Shaman that moves during navigator cadence
+  ---
+  duration_ms: 4.541
+  type: 'test'
+  ...
+# Subtest: D2031 entry has a collision-valid nine-tile CursedShaman firing position
+ok 349 - D2031 entry has a collision-valid nine-tile CursedShaman firing position
+  ---
+  duration_ms: 19.6492
+  type: 'test'
+  ...
+# Subtest: q89 Wizard wrapper reaches the live D2031 entry band before casting
+ok 350 - q89 Wizard wrapper reaches the live D2031 entry band before casting
+  ---
+  duration_ms: 12.9582
+  type: 'test'
+  ...
+# Subtest: Taoist SoulFireBall uses the same bounded ranged retreat with an equipped Amulet
+ok 351 - Taoist SoulFireBall uses the same bounded ranged retreat with an equipped Amulet
+  ---
+  duration_ms: 2.3017
+  type: 'test'
+  ...
+# Subtest: ranged retreat never selects or crosses a live map-transfer cell
+ok 352 - ranged retreat never selects or crosses a live map-transfer cell
+  ---
+  duration_ms: 9.0027
+  type: 'test'
+  ...
+# Subtest: authoritative partial retreat progress continues the bounded ranged fight
+ok 353 - authoritative partial retreat progress continues the bounded ranged fight
+  ---
+  duration_ms: 1.734
+  type: 'test'
+  ...
+# Subtest: target leaving AOI after a successful retreat refreshes the encounter
+ok 354 - target leaving AOI after a successful retreat refreshes the encounter
+  ---
+  duration_ms: 1.0342
+  type: 'test'
+  ...
+# Subtest: authoritative displacement wins when the navigator reports stale extra steps
+ok 355 - authoritative displacement wins when the navigator reports stale extra steps
+  ---
+  duration_ms: 1.4593
+  type: 'test'
+  ...
+# Subtest: journey mode attacks when an authoritative retreat makes no progress
+ok 356 - journey mode attacks when an authoritative retreat makes no progress
+  ---
+  duration_ms: 1.6194
+  type: 'test'
+  ...
+# Subtest: journey mode continues after the navigator spends its exact retreat step budget
+ok 357 - journey mode continues after the navigator spends its exact retreat step budget
+  ---
+  duration_ms: 1.4402
+  type: 'test'
+  ...
+# Subtest: journey mode refreshes after an authoritative correction burst exceeds the local retreat budget
+ok 358 - journey mode refreshes after an authoritative correction burst exceeds the local retreat budget
+  ---
+  duration_ms: 1.2227
+  type: 'test'
+  ...
+# Subtest: journey mode attacks when a moving threat closes the planned retreat path
+ok 359 - journey mode attacks when a moving threat closes the planned retreat path
+  ---
+  duration_ms: 1.5898
+  type: 'test'
+  ...
+# Subtest: Wizard without affordable ranged magic and passive or NPC entities never retreat
+ok 360 - Wizard without affordable ranged magic and passive or NPC entities never retreat
+  ---
+  duration_ms: 0.2758
+  type: 'test'
+  ...
+# Subtest: blocked Wizard retreat fails closed without calling navigation or combat
+ok 361 - blocked Wizard retreat fails closed without calling navigation or combat
+  ---
+  duration_ms: 0.4002
+  type: 'test'
+  ...
+# Subtest: journey mode fights the selected threat when every collision-safe retreat is blocked
+ok 362 - journey mode fights the selected threat when every collision-safe retreat is blocked
+  ---
+  duration_ms: 0.365
+  type: 'test'
+  ...
+# Subtest: per-target retreat cell budget stops repeated kiting without another move
+ok 363 - per-target retreat cell budget stops repeated kiting without another move
+  ---
+  duration_ms: 0.4174
+  type: 'test'
+  ...
+# Subtest: q89 exhausted retreat budget never falls through to a close Shaman cast
+ok 364 - q89 exhausted retreat budget never falls through to a close Shaman cast
+  ---
+  duration_ms: 0.742
+  type: 'test'
+  ...
+# Subtest: generic exhausted retreat budget retains its journey combat fallback
+ok 365 - generic exhausted retreat budget retains its journey combat fallback
+  ---
+  duration_ms: 0.3678
+  type: 'test'
+  ...
+# Subtest: retreat budget is scoped to the consecutive target engagement
+ok 366 - retreat budget is scoped to the consecutive target engagement
+  ---
+  duration_ms: 0.641
+  type: 'test'
+  ...
+# Subtest: authoritative map change during retreat refreshes without issuing combat
+ok 367 - authoritative map change during retreat refreshes without issuing combat
+  ---
+  duration_ms: 0.3762
+  type: 'test'
+  ...
+# Subtest: known blocked retreat with an authoritative map change refreshes safely
+ok 368 - known blocked retreat with an authoritative map change refreshes safely
+  ---
+  duration_ms: 0.3585
+  type: 'test'
+  ...
+# Subtest: map change plus death remains fatal during retreat
+ok 369 - map change plus death remains fatal during retreat
+  ---
+  duration_ms: 0.353
+  type: 'test'
+  ...
+# Subtest: unknown retreat navigation errors remain fatal
+ok 370 - unknown retreat navigation errors remain fatal
+  ---
+  duration_ms: 0.322
+  type: 'test'
+  ...
+# Subtest: missing authoritative map remains fatal before retreat
+ok 371 - missing authoritative map remains fatal before retreat
+  ---
+  duration_ms: 0.2383
+  type: 'test'
+  ...
+# Subtest: player death during retreat fails closed without issuing the combat action
+ok 372 - player death during retreat fails closed without issuing the combat action
+  ---
+  duration_ms: 0.2946
+  type: 'test'
+  ...
+# ok - equips a strictly dominating eligible class upgrade
+# ok - equips BronzeShortSword over SharpDagger by expected damage at zero Luck
+# ok - Taoist without a learned offensive skill equips a held DC upgrade for melee
+# ok - Taoist with a learned offensive skill keeps an SC-neutral weapon tradeoff
+# ok - Wizard may improve held melee damage only while preserving MC
+# ok - expected-damage weapon selection requires zero authoritative Luck and no other regression
+# ok - keeps GoldenPendant because PrecisionPendant is an attack-versus-agility tradeoff
+# ok - equips a left-labelled bracelet into the empty opposite wrist
+# ok - does not replace either occupied wrist with an incomparable bracelet
+# ok - does not replace gear for a tradeoff, wrong class, excess level, or missing metadata
+# ok - honours a stat-based item requirement
+# ok - reads real Gateway snake_case requirements and instance added_stats
+# ok - learns only the class beginner book at its authoritative level
+# ok - learns every held eligible approved progression book without inventing levels
+# ok - approved later books still obey their authoritative required level
+# ok - approved book sets cover the three newcomer class progressions
+# ok - uses held HP and MP drugs only at conservative deficits
+# ok - useSupplies accepts the real first-item uniqueId zero
+# ok - useSupplies accepts a higher explicit HP recovery threshold
+# ok - q89 opt-in prefers held HP Medium without rewriting inventory
+# ok - emergency HP recovery sends immediately without awaiting an item acknowledgement
+# ok - emergency HP recovery waits for the prior gradual potion dose before using another
+# ok - opt-in restorative reuse cannot go below 2500ms
+# ok - dead players emit no restorative item or Healing commands
+# ok - a rejected restorative refreshes authoritative state without aborting the journey
+# ok - Wizard casts exact known FireBall at a target in range
+# ok - Wizard prefers ready GreatFireBall and falls back while it cools down
+# ok - Wizard falls back to affordable FireBall when GreatFireBall lacks MP
+# ok - combat approach keeps a ready Wizard FireBall at a safe ranged distance
+# ok - Wizard holds spell range and waits without a command while FireBall cools down
+# ok - combat approach closes to melee without enough authoritative MP
+# ok - combat approach remains melee for other classes
+# ok - Taoist Healing targets self when badly hurt
+# ok - Taoist class recovery can heal during a non-combat interaction
+# ok - class recovery emits no action for Warrior or a Taoist without affordable Healing
+# ok - Taoist uses SoulFireBall only with a real equipped standard Amulet
+# ok - Taoist reloads a consumed equipped Amulet stack before the next SoulFireBall
+# ok - Warrior passive and unknown skills never produce a magic cast
+# ok - paralysis waits without spending an attack attempt and attacks after it clears
+# ok - unavailable or out-of-range FireBall falls back to ordinary attack
+# 40/40 protocol loadout tests passed
+# Subtest: apps\\web\\scripts\\quest-agent\\test-protocol-loadout.mjs
+ok 10 - apps\\web\\scripts\\quest-agent\\test-protocol-loadout.mjs
+  ---
+  duration_ms: 203.0613
+  type: 'test'
+  ...
+# Subtest: streams redacted trace observations and returns only recent location hints
+ok 374 - streams redacted trace observations and returns only recent location hints
+  ---
+  duration_ms: 10.0936
+  type: 'test'
+  ...
+# Subtest: a new isolated run starts with empty memory when no earlier trace exists
+ok 375 - a new isolated run starts with empty memory when no earlier trace exists
+  ---
+  duration_ms: 2.5626
+  type: 'test'
+  ...
+# Subtest: milestone claims use Board accept/finish and require real item and gold deltas once
+ok 376 - milestone claims use Board accept/finish and require real item and gold deltas once
+  ---
+  duration_ms: 2.4999
+  type: 'test'
+  ...
+# Subtest: unreached milestones cause no travel or quest commands
+ok 377 - unreached milestones cause no travel or quest commands
+  ---
+  duration_ms: 0.2614
+  type: 'test'
+  ...
+# Subtest: old gold-only server offer is rejected before accepting a class milestone
+ok 378 - old gold-only server offer is rejected before accepting a class milestone
+  ---
+  duration_ms: 0.578
+  type: 'test'
+  ...
+# Subtest: milestone verification uses the session definition cache after event history eviction
+ok 379 - milestone verification uses the session definition cache after event history eviction
+  ---
+  duration_ms: 3.5864
+  type: 'test'
+  ...
+# Subtest: newly unlocked milestone verifies the exact authoritative Board preview before its definition packet arrives
+ok 380 - newly unlocked milestone verifies the exact authoritative Board preview before its definition packet arrives
+  ---
+  duration_ms: 0.4457
+  type: 'test'
+  ...
+# Subtest: milestone claim follows the real Board dialog links through interactQuest
+ok 381 - milestone claim follows the real Board dialog links through interactQuest
+  ---
+  duration_ms: 1.2639
+  type: 'test'
+  ...
+# Subtest: milestone gender comes from the authoritative actor and unknown classes fail closed
+ok 382 - milestone gender comes from the authoritative actor and unknown classes fail closed
+  ---
+  duration_ms: 0.1848
+  type: 'test'
+  ...
+# Subtest: a completed stage without promised item delivery does not pass acceptance
+ok 383 - a completed stage without promised item delivery does not pass acceptance
+  ---
+  duration_ms: 0.1916
+  type: 'test'
+  ...
+# Subtest: loads a mapFileName from the local packaged map resource
+ok 384 - loads a mapFileName from the local packaged map resource
+  ---
+  duration_ms: 13.1593
+  type: 'test'
+  ...
+# Subtest: rejects mapFileName traversal before reading local files
+ok 385 - rejects mapFileName traversal before reading local files
+  ---
+  duration_ms: 0.5746
+  type: 'test'
+  ...
+# Subtest: A* detours around a static wall and emits only unit Walk steps
+ok 386 - A* detours around a static wall and emits only unit Walk steps
+  ---
+  duration_ms: 1.2467
+  type: 'test'
+  ...
+# Subtest: dynamic obstacles participate in route planning
+ok 387 - dynamic obstacles participate in route planning
+  ---
+  duration_ms: 0.3092
+  type: 'test'
+  ...
+# Subtest: a static transfer override opens only its exact cell and never bypasses dynamic occupancy
+ok 388 - a static transfer override opens only its exact cell and never bypasses dynamic occupancy
+  ---
+  duration_ms: 0.1727
+  type: 'test'
+  ...
+# Subtest: transfer re-entry chooses a normal walkable unoccupied step outside the source bounds
+ok 389 - transfer re-entry chooses a normal walkable unoccupied step outside the source bounds
+  ---
+  duration_ms: 0.4954
+  type: 'test'
+  ...
+# Subtest: real Bichon MageHouse transfer source can be reached at distance zero only with its exact live override
+ok 390 - real Bichon MageHouse transfer source can be reached at distance zero only with its exact live override
+  ---
+  duration_ms: 782.4967
+  type: 'test'
+  ...
+# Subtest: diagonal Walk cannot cut between blocked cardinal neighbors
+ok 391 - diagonal Walk cannot cut between blocked cardinal neighbors
+  ---
+  duration_ms: 0.296
+  type: 'test'
+  ...
+# Subtest: an exact live transfer override permits only the final diagonal door step
+ok 392 - an exact live transfer override permits only the final diagonal door step
+  ---
+  duration_ms: 0.3645
+  type: 'test'
+  ...
+# Subtest: real SerpentValley blacksmith transfer has a path through its authoritative diagonal door
+ok 393 - real SerpentValley blacksmith transfer has a path through its authoritative diagonal door
+  ---
+  duration_ms: 169.3323
+  type: 'test'
+  ...
+# Subtest: returns null for an unreachable target
+ok 394 - returns null for an unreachable target
+  ---
+  duration_ms: 0.3549
+  type: 'test'
+  ...
+# Subtest: protocolWalkSteps rejects skips that cannot be sent as one normal Walk
+ok 395 - protocolWalkSteps rejects skips that cannot be sent as one normal Walk
+  ---
+  duration_ms: 0.1139
+  type: 'test'
+  ...
+# Subtest: type100 parser can leave doors open when live door state is supplied separately
+ok 396 - type100 parser can leave doors open when live door state is supplied separately
+  ---
+  duration_ms: 0.1597
+  type: 'test'
+  ...
+# Subtest: type100 back-image index bit is not mistaken for the high-wall flag
+ok 397 - type100 back-image index bit is not mistaken for the high-wall flag
+  ---
+  duration_ms: 0.073
+  type: 'test'
+  ...
+# Subtest: worldSnapshot replaces rather than merges the observed cache
+ok 398 - worldSnapshot replaces rather than merges the observed cache
+  ---
+  duration_ms: 1.8616
+  type: 'test'
+  ...
+# Subtest: real movement packet fields update self and remote entities
+ok 399 - real movement packet fields update self and remote entities
+  ---
+  duration_ms: 0.4028
+  type: 'test'
+  ...
+# Subtest: ObjectMonster and NewMonsterInfo use their location payload to upsert monsters
+ok 400 - ObjectMonster and NewMonsterInfo use their location payload to upsert monsters
+  ---
+  duration_ms: 0.4477
+  type: 'test'
+  ...
+# Subtest: incremental packets retain Crystal neutral disposition for passive and guard AI families
+ok 401 - incremental packets retain Crystal neutral disposition for passive and guard AI families
+  ---
+  duration_ms: 0.5229
+  type: 'test'
+  ...
+# Subtest: ObjectHealth keeps percent separate from absolute hp
+ok 402 - ObjectHealth keeps percent separate from absolute hp
+  ---
+  duration_ms: 0.2819
+  type: 'test'
+  ...
+# Subtest: fresh self percentages drive control without altering exact HP evidence
+ok 403 - fresh self percentages drive control without altering exact HP evidence
+  ---
+  duration_ms: 0.5369
+  type: 'test'
+  ...
+# Subtest: percentage HP estimates stay conservative and do not revive a dead self
+ok 404 - percentage HP estimates stay conservative and do not revive a dead self
+  ---
+  duration_ms: 0.2928
+  type: 'test'
+  ...
+# Subtest: rounded self percent zero remains low-health control rather than an authoritative death
+ok 405 - rounded self percent zero remains low-health control rather than an authoritative death
+  ---
+  duration_ms: 0.4012
+  type: 'test'
+  ...
+# Subtest: poison packets keep the current self movement-control mask observable
+ok 406 - poison packets keep the current self movement-control mask observable
+  ---
+  duration_ms: 0.4495
+  type: 'test'
+  ...
+# Subtest: an omitted snapshot poison field does not clear current paralysis
+ok 407 - an omitted snapshot poison field does not clear current paralysis
+  ---
+  duration_ms: 0.5922
+  type: 'test'
+  ...
+# Subtest: death retains a harvestable corpse and revive restores its lifecycle flag
+ok 408 - death retains a harvestable corpse and revive restores its lifecycle flag
+  ---
+  duration_ms: 0.4694
+  type: 'test'
+  ...
+# Subtest: remove and teleport-out retire entities from the visible observation
+ok 409 - remove and teleport-out retire entities from the visible observation
+  ---
+  duration_ms: 1.1977
+  type: 'test'
+  ...
+# Subtest: MapChanged clears old-map observations while retaining the relocated self
+ok 410 - MapChanged clears old-map observations while retaining the relocated self
+  ---
+  duration_ms: 0.449
+  type: 'test'
+  ...
+# Subtest: actual MapInformation clears stale AOI and waits for subsequent UserLocation landing
+ok 411 - actual MapInformation clears stale AOI and waits for subsequent UserLocation landing
+  ---
+  duration_ms: 0.3606
+  type: 'test'
+  ...
+# Subtest: visibility and self death packets update observed lifecycle without inventing hp
+ok 412 - visibility and self death packets update observed lifecycle without inventing hp
+  ---
+  duration_ms: 0.1867
+  type: 'test'
+  ...
+# Subtest: HealthChanged restores exact self vitals after Revived
+ok 413 - HealthChanged restores exact self vitals after Revived
+  ---
+  duration_ms: 0.1614
+  type: 'test'
+  ...
+# Subtest: UserInformation restores exact self and maximum vitals from its public fields
+ok 414 - UserInformation restores exact self and maximum vitals from its public fields
+  ---
+  duration_ms: 0.192
+  type: 'test'
+  ...
+# Subtest: town revive waits for authoritative death, then a self Revived and healthy snapshot
+ok 415 - town revive waits for authoritative death, then a self Revived and healthy snapshot
+  ---
+  duration_ms: 2.8842
+  type: 'test'
+  ...
+# Subtest: navigator propagates a Gateway failure without rejecting a valid tile or sending another move
+ok 416 - navigator propagates a Gateway failure without rejecting a valid tile or sending another move
+  ---
+  duration_ms: 3.2076
+  type: 'test'
+  ...
+# Subtest: before-movement guard rechecks fresh AOI after cadence and blocks both physical Run cells
+ok 417 - before-movement guard rechecks fresh AOI after cadence and blocks both physical Run cells
+  ---
+  duration_ms: 1.9193
+  type: 'test'
+  ...
+# Subtest: navigator propagates an existing failure before a tactical stop predicate can mask it
+ok 418 - navigator propagates an existing failure before a tactical stop predicate can mask it
+  ---
+  duration_ms: 0.2985
+  type: 'test'
+  ...
+# Subtest: navigator waits sixty seconds for one authoritative movement response
+ok 419 - navigator waits sixty seconds for one authoritative movement response
+  ---
+  duration_ms: 0.5435
+  type: 'test'
+  ...
+# Subtest: navigator never resends an unacknowledged movement with an unknown result
+ok 420 - navigator never resends an unacknowledged movement with an unknown result
+  ---
+  duration_ms: 0.3689
+  type: 'test'
+  ...
+# Subtest: death immediately interrupts an in-flight movement without reporting a response timeout
+ok 421 - death immediately interrupts an in-flight movement without reporting a response timeout
+  ---
+  duration_ms: 0.3103
+  type: 'test'
+  ...
+# Subtest: navigator rejects a cell only after an unchanged authoritative UserLocation
+ok 422 - navigator rejects a cell only after an unchanged authoritative UserLocation
+  ---
+  duration_ms: 1.1195
+  type: 'test'
+  ...
+# Subtest: navigator waits out paralysis without poisoning a valid route cell
+ok 423 - navigator waits out paralysis without poisoning a valid route cell
+  ---
+  duration_ms: 0.7192
+  type: 'test'
+  ...
+# Subtest: navigator does not dispatch movement when paralysis arrives during cadence wait
+ok 424 - navigator does not dispatch movement when paralysis arrives during cadence wait
+  ---
+  duration_ms: 0.8475
+  type: 'test'
+  ...
+# Subtest: navigator stops when death arrives during cadence wait
+ok 425 - navigator stops when death arrives during cadence wait
+  ---
+  duration_ms: 0.3846
+  type: 'test'
+  ...
+# Subtest: navigator replans when an earlier authoritative response lands during cadence wait
+ok 426 - navigator replans when an earlier authoritative response lands during cadence wait
+  ---
+  duration_ms: 0.3777
+  type: 'test'
+  ...
+# Subtest: navigator optional successful-step cap prevents Run from exceeding the bounded route
+ok 427 - navigator optional successful-step cap prevents Run from exceeding the bounded route
+  ---
+  duration_ms: 0.4599
+  type: 'test'
+  ...
+# Subtest: navigator detects an authoritative position cycle after the last strict distance improvement
+ok 428 - navigator detects an authoritative position cycle after the last strict distance improvement
+  ---
+  duration_ms: 0.4693
+  type: 'test'
+  ...
+# Subtest: retreat navigation can disable blocking automatic supply use before its first step
+ok 429 - retreat navigation can disable blocking automatic supply use before its first step
+  ---
+  duration_ms: 0.2866
+  type: 'test'
+  ...
+# Subtest: ordinary navigation can recover HP without spending MP before combat
+ok 430 - ordinary navigation can recover HP without spending MP before combat
+  ---
+  duration_ms: 0.7433
+  type: 'test'
+  ...
+# Subtest: critical navigation escapes an adjacent pack before sending another movement intent
+ok 431 - critical navigation escapes an adjacent pack before sending another movement intent
+  ---
+  duration_ms: 0.2676
+  type: 'test'
+  ...
+# Subtest: authoritative safe-zone residents do not trigger emergency escape
+ok 432 - authoritative safe-zone residents do not trigger emergency escape
+  ---
+  duration_ms: 0.643
+  type: 'test'
+  ...
+# Subtest: a fresh explicit player-hit receipt still permits safe-zone emergency escape
+ok 433 - a fresh explicit player-hit receipt still permits safe-zone emergency escape
+  ---
+  duration_ms: 0.207
+  type: 'test'
+  ...
+# Subtest: a deferred emergency escape becomes eligible again inside the same navigation
+ok 434 - a deferred emergency escape becomes eligible again inside the same navigation
+  ---
+  duration_ms: 0.6133
+  type: 'test'
+  ...
+# Subtest: moderate navigation damage preserves an escape scroll against one nearby hostile
+ok 435 - moderate navigation damage preserves an escape scroll against one nearby hostile
+  ---
+  duration_ms: 0.3563
+  type: 'test'
+  ...
+# Subtest: q89 proven-aggressor navigation continues at 53 percent through one Shaman and a passive zombie
+ok 436 - q89 proven-aggressor navigation continues at 53 percent through one Shaman and a passive zombie
+  ---
+  duration_ms: 1.297
+  type: 'test'
+  ...
+# Subtest: q89 Wizard drinks one Medium immediately after the first fresh CursedShaman hit
+ok 437 - q89 Wizard drinks one Medium immediately after the first fresh CursedShaman hit
+  ---
+  duration_ms: 3.0748
+  type: 'test'
+  ...
+# Subtest: fresh-hit recovery does not redrink a receipt revisited during navigation
+ok 438 - fresh-hit recovery does not redrink a receipt revisited during navigation
+  ---
+  duration_ms: 1.6602
+  type: 'test'
+  ...
+# Subtest: fresh-hit recovery rejects prior-map and wrong-owner receipts
+ok 439 - fresh-hit recovery rejects prior-map and wrong-owner receipts
+  ---
+  duration_ms: 0.3305
+  type: 'test'
+  ...
+# Subtest: q89 proven-aggressor navigation escapes at 65 percent only after two fresh direct hits
+ok 440 - q89 proven-aggressor navigation escapes at 65 percent only after two fresh direct hits
+  ---
+  duration_ms: 0.3195
+  type: 'test'
+  ...
+# Subtest: q89 proven-aggressor navigation preserves its one-attacker critical-floor escape
+ok 441 - q89 proven-aggressor navigation preserves its one-attacker critical-floor escape
+  ---
+  duration_ms: 0.261
+  type: 'test'
+  ...
+# Subtest: q89 proven-aggressor navigation ignores receipts from the prior map
+ok 442 - q89 proven-aggressor navigation ignores receipts from the prior map
+  ---
+  duration_ms: 0.2798
+  type: 'test'
+  ...
+# Subtest: q89 proven-aggressor navigation ignores fresh hits before the current player died and revived
+ok 443 - q89 proven-aggressor navigation ignores fresh hits before the current player died and revived
+  ---
+  duration_ms: 0.3944
+  type: 'test'
+  ...
+# Subtest: q89 proven-aggressor navigation ignores stale, dead, and wrong-recipient receipts
+ok 444 - q89 proven-aggressor navigation ignores stale, dead, and wrong-recipient receipts
+  ---
+  duration_ms: 0.286
+  type: 'test'
+  ...
+# Subtest: the default navigator still escapes a passive two-hostile pack at 53 percent
+ok 445 - the default navigator still escapes a passive two-hostile pack at 53 percent
+  ---
+  duration_ms: 0.2695
+  type: 'test'
+  ...
+# Subtest: navigator optional attempt cap fails without an unbounded movement retry
+ok 446 - navigator optional attempt cap fails without an unbounded movement retry
+  ---
+  duration_ms: 0.531
+  type: 'test'
+  ...
+# Subtest: ordinary navigation detours around a live transfer source
+ok 447 - ordinary navigation detours around a live transfer source
+  ---
+  duration_ms: 0.552
+  type: 'test'
+  ...
+# Subtest: dispatch recheck blocks a newly observed transfer across both Run cells
+ok 448 - dispatch recheck blocks a newly observed transfer across both Run cells
+  ---
+  duration_ms: 0.6431
+  type: 'test'
+  ...
+# Subtest: selected live transfer remains an allowed navigation destination
+ok 449 - selected live transfer remains an allowed navigation destination
+  ---
+  duration_ms: 0.4357
+  type: 'test'
+  ...
+# Subtest: intentional map travel keeps an entire same-destination doorway corridor open
+ok 450 - intentional map travel keeps an entire same-destination doorway corridor open
+  ---
+  duration_ms: 0.6237
+  type: 'test'
+  ...
+# Subtest: hostile clearance keeps spawn-search movement outside visible aggro cells
+ok 451 - hostile clearance keeps spawn-search movement outside visible aggro cells
+  ---
+  duration_ms: 0.5431
+  type: 'test'
+  ...
+# Subtest: named hostile clearance protects the Shaman band without widening a zombie route
+ok 452 - named hostile clearance protects the Shaman band without widening a zombie route
+  ---
+  duration_ms: 0.7197
+  type: 'test'
+  ...
+# Subtest: the q89 D2031 entry navigator refuses a waypoint sealed by both Shaman footprints
+ok 453 - the q89 D2031 entry navigator refuses a waypoint sealed by both Shaman footprints
+  ---
+  duration_ms: 27.953
+  type: 'test'
+  ...
+# Subtest: navigator replans before a newly revealed hostile intersects the remaining route
+ok 454 - navigator replans before a newly revealed hostile intersects the remaining route
+  ---
+  duration_ms: 0.9041
+  type: 'test'
+  ...
+# Subtest: navigator remembers a recently hidden hostile long enough to avoid route oscillation
+ok 455 - navigator remembers a recently hidden hostile long enough to avoid route oscillation
+  ---
+  duration_ms: 1.2243
+  type: 'test'
+  ...
+# Subtest: zero-clearance travel remembers an exact hidden monster tile across a forced replan
+ok 456 - zero-clearance travel remembers an exact hidden monster tile across a forced replan
+  ---
+  duration_ms: 0.7481
+  type: 'test'
+  ...
+# Subtest: hostile clearance lets a player already inside the buffer move outward
+ok 457 - hostile clearance lets a player already inside the buffer move outward
+  ---
+  duration_ms: 0.4684
+  type: 'test'
+  ...
+# Subtest: NPC accept navigates, opens the actual quest page, and proves ACK plus stage
+ok 458 - NPC accept navigates, opens the actual quest page, and proves ACK plus stage
+  ---
+  duration_ms: 3.6056
+  type: 'test'
+  ...
+# Subtest: NPC metadata alone cannot authorize an operation after range navigation
+ok 459 - NPC metadata alone cannot authorize an operation after range navigation
+  ---
+  duration_ms: 0.847
+  type: 'test'
+  ...
+# Subtest: reward definition rejection prevents accepting an otherwise available NPC quest
+ok 460 - reward definition rejection prevents accepting an otherwise available NPC quest
+  ---
+  duration_ms: 0.5401
+  type: 'test'
+  ...
+# Subtest: NPC finish preserves the selected reward index and requires its actual dialog link
+ok 461 - NPC finish preserves the selected reward index and requires its actual dialog link
+  ---
+  duration_ms: 0.4121
+  type: 'test'
+  ...
+# Subtest: Diary metadata permits a no-NPC operation without navigation or interaction
+ok 462 - Diary metadata permits a no-NPC operation without navigation or interaction
+  ---
+  duration_ms: 0.3956
+  type: 'test'
+  ...
+# Subtest: missing NPC and Diary metadata fails closed
+ok 463 - missing NPC and Diary metadata fails closed
+  ---
+  duration_ms: 0.1824
+  type: 'test'
+  ...
+# Subtest: an unrelated or rejected acknowledgement cannot prove an operation
+ok 464 - an unrelated or rejected acknowledgement cannot prove an operation
+  ---
+  duration_ms: 0.2119
+  type: 'test'
+  ...
+# Subtest: Taoist Wooma expedition melees a non-objective blocker without spending an Amulet
+ok 465 - Taoist Wooma expedition melees a non-objective blocker without spending an Amulet
+  ---
+  duration_ms: 1.5806
+  type: 'test'
+  ...
+# Subtest: Taoist Wooma expedition still casts at an objective monster
+ok 466 - Taoist Wooma expedition still casts at an objective monster
+  ---
+  duration_ms: 0.4874
+  type: 'test'
+  ...
+# Subtest: q99 keeps the same melee blocker rule while preserving ranged objective combat
+ok 467 - q99 keeps the same melee blocker rule while preserving ranged objective combat
+  ---
+  duration_ms: 0.3454
+  type: 'test'
+  ...
+# Subtest: q124 defers its CleanSkull hunt while q122 and q123 remain in the route
+ok 468 - q124 defers its CleanSkull hunt while q122 and q123 remain in the route
+  ---
+  duration_ms: 1.5439
+  type: 'test'
+  ...
+# Subtest: q124 does not defer after its shared hunting quests have passed
+ok 469 - q124 does not defer after its shared hunting quests have passed
+  ---
+  duration_ms: 0.2171
+  type: 'test'
+  ...
+# Subtest: ordinary quests are never deferred by the co-farm scheduler
+ok 470 - ordinary quests are never deferred by the co-farm scheduler
+  ---
+  duration_ms: 0.9411
+  type: 'test'
+  ...
+# Subtest: one-step active quest tails run before longer active expeditions
+ok 471 - one-step active quest tails run before longer active expeditions
+  ---
+  duration_ms: 0.3971
+  type: 'test'
+  ...
+# Subtest: scheduler preserves authored order when no active quest is one step from completion
+ok 472 - scheduler preserves authored order when no active quest is one step from completion
+  ---
+  duration_ms: 0.24
+  type: 'test'
+  ...
+# Subtest: q110 finish uses the D701 walking-transfer detour into the Sabuk merchant quarter
+ok 473 - q110 finish uses the D701 walking-transfer detour into the Sabuk merchant quarter
+  ---
+  duration_ms: 1.6491
+  type: 'test'
+  ...
+# Subtest: q110 start and unrelated quest endpoints keep direct topology travel
+ok 474 - q110 start and unrelated quest endpoints keep direct topology travel
+  ---
+  duration_ms: 1.0439
+  type: 'test'
+  ...
+# Subtest: q111 and q112 stay inside the Sabuk merchant quarter once the detour landed
+ok 475 - q111 and q112 stay inside the Sabuk merchant quarter once the detour landed
+  ---
+  duration_ms: 0.3025
+  type: 'test'
+  ...
+# Subtest: a resumed q110 inside D701 continues toward the inner exit without portal ping-pong
+ok 476 - a resumed q110 inside D701 continues toward the inner exit without portal ping-pong
+  ---
+  duration_ms: 0.1959
+  type: 'test'
+  ...
+# Subtest: an outside quest endpoint leaves the Sabuk quarter through D701 instead of crossing guards
+ok 477 - an outside quest endpoint leaves the Sabuk quarter through D701 instead of crossing guards
+  ---
+  duration_ms: 0.1931
+  type: 'test'
+  ...
+# Subtest: Sabuk detour fails closed when the authoritative landing is outside the wall
+ok 478 - Sabuk detour fails closed when the authoritative landing is outside the wall
+  ---
+  duration_ms: 0.4003
+  type: 'test'
+  ...
+# Subtest: a delayed 10.61-second snapshot completes one cooldown probe
+ok 479 - a delayed 10.61-second snapshot completes one cooldown probe
+  ---
+  duration_ms: 2.9194
+  type: 'test'
+  ...
+# Subtest: death interrupts cooldown refresh before the full timeout
+ok 480 - death interrupts cooldown refresh before the full timeout
+  ---
+  duration_ms: 0.5875
+  type: 'test'
+  ...
+# Subtest: a missing fresh snapshot still fails at a bounded deadline
+ok 481 - a missing fresh snapshot still fails at a bounded deadline
+  ---
+  duration_ms: 0.2328
+  type: 'test'
+  ...
+# Subtest: expected rewards retain exact itemIndex and omit zero-count or unselected choices
+ok 482 - expected rewards retain exact itemIndex and omit zero-count or unselected choices
+  ---
+  duration_ms: 1.3971
+  type: 'test'
+  ...
+# Subtest: item reward verification uses itemIndex rather than a matching display name
+ok 483 - item reward verification uses itemIndex rather than a matching display name
+  ---
+  duration_ms: 0.5442
+  type: 'test'
+  ...
+# Subtest: missing item quantity rejects reward verification
+ok 484 - missing item quantity rejects reward verification
+  ---
+  duration_ms: 1.2066
+  type: 'test'
+  ...
+# Subtest: duplicate rewards for one itemIndex require their combined quantity across containers
+ok 485 - duplicate rewards for one itemIndex require their combined quantity across containers
+  ---
+  duration_ms: 0.3215
+  type: 'test'
+  ...
+# Subtest: reports preferred weapon funding for an unarmed or under-geared Warrior
+ok 486 - reports preferred weapon funding for an unarmed or under-geared Warrior
+  ---
+  duration_ms: 1.537
+  type: 'test'
+  ...
+# Subtest: reports and buys the live class weapon when a caster lost every weapon
+ok 487 - reports and buys the live class weapon when a caster lost every weapon
+  ---
+  duration_ms: 3.439
+  type: 'test'
+  ...
+# Subtest: under-geared Warrior upgrades Dagger to the preferred BronzeAxe without a lower-tier fallback
+ok 488 - under-geared Warrior upgrades Dagger to the preferred BronzeAxe without a lower-tier fallback
+  ---
+  duration_ms: 1.0503
+  type: 'test'
+  ...
+# Subtest: unarmed Warrior buys the best affordable live Blacksmith weapon with exact proof
+ok 489 - unarmed Warrior buys the best affordable live Blacksmith weapon with exact proof
+  ---
+  duration_ms: 1.2822
+  type: 'test'
+  ...
+# Subtest: unarmed Warrior falls back to the strongest affordable exact catalog row
+ok 490 - unarmed Warrior falls back to the strongest affordable exact catalog row
+  ---
+  duration_ms: 0.6561
+  type: 'test'
+  ...
+# Subtest: weapon purchase proves the live Blacksmith rate-adjusted price
+ok 491 - weapon purchase proves the live Blacksmith rate-adjusted price
+  ---
+  duration_ms: 1.1147
+  type: 'test'
+  ...
+# Subtest: recomputes caster stock after service travel consumes the departure-floor MP bottle
+ok 492 - recomputes caster stock after service travel consumes the departure-floor MP bottle
+  ---
+  duration_ms: 2.1959
+  type: 'test'
+  ...
+# Subtest: does nothing outside map 0 or when relevant stock is sufficient
+ok 493 - does nothing outside map 0 or when relevant stock is sufficient
+  ---
+  duration_ms: 0.5089
+  type: 'test'
+  ...
+# Subtest: ordinary restock does not buy RandomTeleport unless explicitly requested
+ok 494 - ordinary restock does not buy RandomTeleport unless explicitly requested
+  ---
+  duration_ms: 0.5844
+  type: 'test'
+  ...
+# Subtest: Wizard-only HP Medium opt-in buys the live Ruben row to target six
+ok 495 - Wizard-only HP Medium opt-in buys the live Ruben row to target six
+  ---
+  duration_ms: 1.0988
+  type: 'test'
+  ...
+# Subtest: HP Medium opt-in skips safely when the fresh Ruben row is missing or unaffordable
+ok 496 - HP Medium opt-in skips safely when the fresh Ruben row is missing or unaffordable
+  ---
+  duration_ms: 0.8178
+  type: 'test'
+  ...
+# Subtest: ordinary restock does not buy TownTeleport unless explicitly requested
+ok 497 - ordinary restock does not buy TownTeleport unless explicitly requested
+  ---
+  duration_ms: 0.1796
+  type: 'test'
+  ...
+# Subtest: opt-in TownTeleport reserve uses Scott goods when Ruben lacks TownTeleport
+ok 498 - opt-in TownTeleport reserve uses Scott goods when Ruben lacks TownTeleport
+  ---
+  duration_ms: 0.94
+  type: 'test'
+  ...
+# Subtest: TownTeleport funding shortfall reports needsFunds after Ruben potions without visiting Scott
+ok 499 - TownTeleport funding shortfall reports needsFunds after Ruben potions without visiting Scott
+  ---
+  duration_ms: 1.3749
+  type: 'test'
+  ...
+# Subtest: explicit eight-scroll route reserve buys exact Merchant Ruben rows and proves deltas
+ok 500 - explicit eight-scroll route reserve buys exact Merchant Ruben rows and proves deltas
+  ---
+  duration_ms: 0.7919
+  type: 'test'
+  ...
+# Subtest: emergency reserve liquidates Venison until all requested RandomTeleport scrolls are affordable
+ok 501 - emergency reserve liquidates Venison until all requested RandomTeleport scrolls are affordable
+  ---
+  duration_ms: 1.5501
+  type: 'test'
+  ...
+# Subtest: emergency reserve is a target and does not repurchase an existing full stock
+ok 502 - emergency reserve is a target and does not repurchase an existing full stock
+  ---
+  duration_ms: 0.2724
+  type: 'test'
+  ...
+# Subtest: RandomTeleport use requires an ack, a fresh quantity decrease, and changed position
+ok 503 - RandomTeleport use requires an ack, a fresh quantity decrease, and changed position
+  ---
+  duration_ms: 0.7293
+  type: 'test'
+  ...
+# Subtest: RandomTeleport use fails closed on a rejected ack
+ok 504 - RandomTeleport use fails closed on a rejected ack
+  ---
+  duration_ms: 0.6503
+  type: 'test'
+  ...
+# Subtest: TownTeleport use proves consumption and accepts a map change with unchanged coordinates
+ok 505 - TownTeleport use proves consumption and accepts a map change with unchanged coordinates
+  ---
+  duration_ms: 0.6177
+  type: 'test'
+  ...
+# Subtest: TownTeleport UseItem rejection leaves the authoritative item unconsumed
+ok 506 - TownTeleport UseItem rejection leaves the authoritative item unconsumed
+  ---
+  duration_ms: 0.2992
+  type: 'test'
+  ...
+# Subtest: TownTeleport false ack cannot be treated as consumption
+ok 507 - TownTeleport false ack cannot be treated as consumption
+  ---
+  duration_ms: 0.3136
+  type: 'test'
+  ...
+# Subtest: shared emergency escape cooldown conserves scrolls across independent loops
+ok 508 - shared emergency escape cooldown conserves scrolls across independent loops
+  ---
+  duration_ms: 0.4823
+  type: 'test'
+  ...
+# Subtest: insufficient funds preserves the 100 gold reserve and sends no command
+ok 509 - insufficient funds preserves the 100 gold reserve and sends no command
+  ---
+  duration_ms: 0.3272
+  type: 'test'
+  ...
+# Subtest: journey mode sells only provably superseded quest gear before buying survival stock
+ok 510 - journey mode sells only provably superseded quest gear before buying survival stock
+  ---
+  duration_ms: 1.4189
+  type: 'test'
+  ...
+# Subtest: journey liquidation accepts Crystal Blacksmith combined BuySell service
+ok 511 - journey liquidation accepts Crystal Blacksmith combined BuySell service
+  ---
+  duration_ms: 0.8315
+  type: 'test'
+  ...
+# Subtest: journey recovery sells obsolete materials but preserves an active quest item
+ok 512 - journey recovery sells obsolete materials but preserves an active quest item
+  ---
+  duration_ms: 0.8077
+  type: 'test'
+  ...
+# Subtest: journey recovery sells harvested Venison to Butcher John before buying potions
+ok 513 - journey recovery sells harvested Venison to Butcher John before buying potions
+  ---
+  duration_ms: 0.8546
+  type: 'test'
+  ...
+# Subtest: Warrior buys HP only through the fresh Ruben row id and proves exact snapshot deltas
+ok 514 - Warrior buys HP only through the fresh Ruben row id and proves exact snapshot deltas
+  ---
+  duration_ms: 0.7427
+  type: 'test'
+  ...
+# Subtest: restock clears an adjacent hostile that seals the supply service approach
+ok 515 - restock clears an adjacent hostile that seals the supply service approach
+  ---
+  duration_ms: 1.2305
+  type: 'test'
+  ...
+# Subtest: restock clears a distant hostile that seals every final service approach
+ok 516 - restock clears a distant hostile that seals every final service approach
+  ---
+  duration_ms: 1.4777
+  type: 'test'
+  ...
+# Subtest: a distant village service receives a route budget derived from authoritative distance
+ok 517 - a distant village service receives a route budget derived from authoritative distance
+  ---
+  duration_ms: 0.5051
+  type: 'test'
+  ...
+# Subtest: large restock fills the partial potion stack before buying the overflow chunk
+ok 518 - large restock fills the partial potion stack before buying the overflow chunk
+  ---
+  duration_ms: 0.5133
+  type: 'test'
+  ...
+# Subtest: Taoist does not detour for Amulets before level 18 or without learned SoulFireBall
+ok 519 - Taoist does not detour for Amulets before level 18 or without learned SoulFireBall
+  ---
+  duration_ms: 0.4381
+  type: 'test'
+  ...
+# Subtest: caster stocks both HP and MP while preserving the fixed gold reserve
+ok 520 - caster stocks both HP and MP while preserving the fixed gold reserve
+  ---
+  duration_ms: 0.9221
+  type: 'test'
+  ...
+# Subtest: equips an eligible held Amulet into slot 9 even when total stock is already sufficient
+ok 521 - equips an eligible held Amulet into slot 9 even when total stock is already sufficient
+  ---
+  duration_ms: 0.2441
+  type: 'test'
+  ...
+# Subtest: moves a milestone Amulet stack from its authoritative belt slot before equipping slot 9
+ok 522 - moves a milestone Amulet stack from its authoritative belt slot before equipping slot 9
+  ---
+  duration_ms: 0.4844
+  type: 'test'
+  ...
+# Subtest: belt Amulet movement remains fail closed for level, space, rejection, and stale snapshots
+ok 523 - belt Amulet movement remains fail closed for level, space, rejection, and stale snapshots
+  ---
+  duration_ms: 0.6109
+  type: 'test'
+  ...
+# Subtest: a tight caster budget buys a bounded HP partial and never spends the reserve
+ok 524 - a tight caster budget buys a bounded HP partial and never spends the reserve
+  ---
+  duration_ms: 0.2656
+  type: 'test'
+  ...
+# Subtest: Wizard with 600 gold reaches both six-potion targets and preserves the reserve
+ok 525 - Wizard with 600 gold reaches both six-potion targets and preserves the reserve
+  ---
+  duration_ms: 0.2575
+  type: 'test'
+  ...
+# Subtest: requires a live exact Ruben and an enabled exact BuySell link
+ok 526 - requires a live exact Ruben and an enabled exact BuySell link
+  ---
+  duration_ms: 0.7897
+  type: 'test'
+  ...
+# Subtest: rejects stale, missing, or malformed goods instead of guessing a shop row
+ok 527 - rejects stale, missing, or malformed goods instead of guessing a shop row
+  ---
+  duration_ms: 0.9424
+  type: 'test'
+  ...
+# Subtest: silent rejection and incorrect authoritative deltas cannot prove purchase
+ok 528 - silent rejection and incorrect authoritative deltas cannot prove purchase
+  ---
+  duration_ms: 1.4235
+  type: 'test'
+  ...
+# Subtest: a healthy q98 finisher keeps enough held fuel for its last visible wounded soldier
+ok 529 - a healthy q98 finisher keeps enough held fuel for its last visible wounded soldier
+  ---
+  duration_ms: 3.2449
+  type: 'test'
+  ...
+# Subtest: evasive recovery stops on fresh full-health packets without another retreat
+ok 530 - evasive recovery stops on fresh full-health packets without another retreat
+  ---
+  duration_ms: 0.8922
+  type: 'test'
+  ...
+# Subtest: level-15 Taoist snake hunting does not require MP-only town trips
+ok 531 - level-15 Taoist snake hunting does not require MP-only town trips
+  ---
+  duration_ms: 0.1868
+  type: 'test'
+  ...
+# Subtest: Taoist Wooma departure funds enough SoulFireBall casts for a full-health pull
+ok 532 - Taoist Wooma departure funds enough SoulFireBall casts for a full-health pull
+  ---
+  duration_ms: 0.2958
+  type: 'test'
+  ...
+# Subtest: q89 Taoist reserves 100 Amulet while other class and quest policies stay unchanged
+ok 533 - q89 Taoist reserves 100 Amulet while other class and quest policies stay unchanged
+  ---
+  duration_ms: 0.4726
+  type: 'test'
+  ...
+# Subtest: caster expedition restock targets stay separate from their field triggers
+ok 534 - caster expedition restock targets stay separate from their field triggers
+  ---
+  duration_ms: 0.446
+  type: 'test'
+  ...
+# Subtest: dangerous expedition escape remains armed for the completed cave return
+ok 535 - dangerous expedition escape remains armed for the completed cave return
+  ---
+  duration_ms: 0.2689
+  type: 'test'
+  ...
+# Subtest: dangerous Taoist expeditions restock missing equipped or carried Amulets
+ok 536 - dangerous Taoist expeditions restock missing equipped or carried Amulets
+  ---
+  duration_ms: 0.2268
+  type: 'test'
+  ...
+# Subtest: only a living exact evasive recovery timeout is retryable
+ok 537 - only a living exact evasive recovery timeout is retryable
+  ---
+  duration_ms: 0.4089
+  type: 'test'
+  ...
+# Subtest: only living dangerous expeditions replan transient no-walk-path failures
+ok 538 - only living dangerous expeditions replan transient no-walk-path failures
+  ---
+  duration_ms: 0.6054
+  type: 'test'
+  ...
+# Subtest: a living partial unsafe-pack retreat can replan without discarding field progress
+ok 539 - a living partial unsafe-pack retreat can replan without discarding field progress
+  ---
+  duration_ms: 0.2473
+  type: 'test'
+  ...
+# Subtest: a living target lost at the AOI edge is retryable but death and unrelated errors are not
+ok 540 - a living target lost at the AOI edge is retryable but death and unrelated errors are not
+  ---
+  duration_ms: 0.3108
+  type: 'test'
+  ...
+# Subtest: a resumed expedition preserves field progress while it still has a public escape reserve
+ok 541 - a resumed expedition preserves field progress while it still has a public escape reserve
+  ---
+  duration_ms: 0.2302
+  type: 'test'
+  ...
+# Subtest: a dangerous expedition keeps partial field scrolls but restocks once the reserve is empty
+ok 542 - a dangerous expedition keeps partial field scrolls but restocks once the reserve is empty
+  ---
+  duration_ms: 0.2331
+  type: 'test'
+  ...
+# Subtest: q89 Wizard TownTeleport reserve is departure-only and map-0 gated
+ok 543 - q89 Wizard TownTeleport reserve is departure-only and map-0 gated
+  ---
+  duration_ms: 0.1459
+  type: 'test'
+  ...
+# Subtest: TownTeleport departure proof triggers Scott reserve when map-0 stock is missing
+ok 544 - TownTeleport departure proof triggers Scott reserve when map-0 stock is missing
+  ---
+  duration_ms: 1.7451
+  type: 'test'
+  ...
+# Subtest: TownTeleport departure proof fails closed when Scott purchase did not increase stock
+ok 545 - TownTeleport departure proof fails closed when Scott purchase did not increase stock
+  ---
+  duration_ms: 0.6472
+  type: 'test'
+  ...
+# Subtest: Wooma and Stone Tomb carry navigation plus combat escape reserves
+ok 546 - Wooma and Stone Tomb carry navigation plus combat escape reserves
+  ---
+  duration_ms: 0.1228
+  type: 'test'
+  ...
+# Subtest: completed expedition objectives stop requiring departure supplies before turn-in
+ok 547 - completed expedition objectives stop requiring departure supplies before turn-in
+  ---
+  duration_ms: 0.1114
+  type: 'test'
+  ...
+# Subtest: long expeditions accept a partial but still conservative funded departure stock
+ok 548 - long expeditions accept a partial but still conservative funded departure stock
+  ---
+  duration_ms: 0.1367
+  type: 'test'
+  ...
+# Subtest: a stocked Warrior resumes q54 combat instead of attempting passive field recovery
+ok 549 - a stocked Warrior resumes q54 combat instead of attempting passive field recovery
+  ---
+  duration_ms: 0.1912
+  type: 'test'
+  ...
+# Subtest: a stocked q54 Taoist reaches the class-specific retreat loop without waiting in the old field
+ok 550 - a stocked q54 Taoist reaches the class-specific retreat loop without waiting in the old field
+  ---
+  duration_ms: 0.1717
+  type: 'test'
+  ...
+# Subtest: resumed field pressure evades while recoverable and waits for death only below one-hit survival
+ok 551 - resumed field pressure evades while recoverable and waits for death only below one-hit survival
+  ---
+  duration_ms: 0.3434
+  type: 'test'
+  ...
+# Subtest: active expedition quests raise HP stock without affecting completed quests
+ok 552 - active expedition quests raise HP stock without affecting completed quests
+  ---
+  duration_ms: 0.1903
+  type: 'test'
+  ...
+# Subtest: q62 can request a full insect-cave departure stock independently of the field trigger
+ok 553 - q62 can request a full insect-cave departure stock independently of the field trigger
+  ---
+  duration_ms: 0.1021
+  type: 'test'
+  ...
+# Subtest: post-engagement gate leaves a stocked player in place
+ok 554 - post-engagement gate leaves a stocked player in place
+  ---
+  duration_ms: 0.1775
+  type: 'test'
+  ...
+# Subtest: post-engagement gate can force a town service pass for missing combat gear
+ok 555 - post-engagement gate can force a town service pass for missing combat gear
+  ---
+  duration_ms: 0.3705
+  type: 'test'
+  ...
+# Subtest: journey stock threshold proactively restocks before the last potion is consumed
+ok 556 - journey stock threshold proactively restocks before the last potion is consumed
+  ---
+  duration_ms: 0.4176
+  type: 'test'
+  ...
+# Subtest: an expedition refill can require a full departure stock without raising its field trigger
+ok 557 - an expedition refill can require a full departure stock without raising its field trigger
+  ---
+  duration_ms: 0.4103
+  type: 'test'
+  ...
+# Subtest: a field expedition does not turn around solely to replace one used escape scroll
+ok 558 - a field expedition does not turn around solely to replace one used escape scroll
+  ---
+  duration_ms: 0.2115
+  type: 'test'
+  ...
+# Subtest: an expedition refill fails closed when its emergency scroll reserve was not funded
+ok 559 - an expedition refill fails closed when its emergency scroll reserve was not funded
+  ---
+  duration_ms: 0.5072
+  type: 'test'
+  ...
+# Subtest: empty HP stock travels to village, proves restock, returns and refreshes quest state
+ok 560 - empty HP stock travels to village, proves restock, returns and refreshes quest state
+  ---
+  duration_ms: 0.3202
+  type: 'test'
+  ...
+# Subtest: expedition restock may return directly to a safer objective map
+ok 561 - expedition restock may return directly to a safer objective map
+  ---
+  duration_ms: 0.4633
+  type: 'test'
+  ...
+# Subtest: an explicit empty return leaves a dangerous expedition in town for its quest-aware traveler
+ok 562 - an explicit empty return leaves a dangerous expedition in town for its quest-aware traveler
+  ---
+  duration_ms: 0.3434
+  type: 'test'
+  ...
+# Subtest: needsFunds fails explicitly before returning to danger
+ok 563 - needsFunds fails explicitly before returning to danger
+  ---
+  duration_ms: 0.315
+  type: 'test'
+  ...
+# Subtest: bounded restock count prevents endless supply travel
+ok 564 - bounded restock count prevents endless supply travel
+  ---
+  duration_ms: 0.2444
+  type: 'test'
+  ...
+# Subtest: HP stock matches supply use across Small, Medium and Large without counting MP drugs
+ok 565 - HP stock matches supply use across Small, Medium and Large without counting MP drugs
+  ---
+  duration_ms: 0.1036
+  type: 'test'
+  ...
+# Subtest: HP Medium departure reserve is an opt-in trigger and does not become a field invariant
+ok 566 - HP Medium departure reserve is an opt-in trigger and does not become a field invariant
+  ---
+  duration_ms: 0.3041
+  type: 'test'
+  ...
+# Subtest: a q89 field pass can keep Small HP without a standalone Medium town loop
+ok 567 - a q89 field pass can keep Small HP without a standalone Medium town loop
+  ---
+  duration_ms: 0.1574
+  type: 'test'
+  ...
+# Subtest: q89 Wizard fresh CursedShaman recovery is limited to an injured Medium-equipped Wizard
+ok 568 - q89 Wizard fresh CursedShaman recovery is limited to an injured Medium-equipped Wizard
+  ---
+  duration_ms: 0.2388
+  type: 'test'
+  ...
+# Subtest: caster supply gate requires MP independently while Warrior HP remains sufficient
+ok 569 - caster supply gate requires MP independently while Warrior HP remains sufficient
+  ---
+  duration_ms: 0.3236
+  type: 'test'
+  ...
+# Subtest: a caster expedition refills its departure MP stock without raising the field trigger
+ok 570 - a caster expedition refills its departure MP stock without raising the field trigger
+  ---
+  duration_ms: 0.3377
+  type: 'test'
+  ...
+# Subtest: a Taoist expedition refills a full Amulet reserve at its lower field trigger
+ok 571 - a Taoist expedition refills a full Amulet reserve at its lower field trigger
+  ---
+  duration_ms: 0.46
+  type: 'test'
+  ...
+# Subtest: a Taoist expedition rejects an underfilled Amulet departure reserve
+ok 572 - a Taoist expedition rejects an underfilled Amulet departure reserve
+  ---
+  duration_ms: 0.3126
+  type: 'test'
+  ...
+# Subtest: only a healthy near-complete kill quest may make a cash-poor no-stock finish attempt
+ok 573 - only a healthy near-complete kill quest may make a cash-poor no-stock finish attempt
+  ---
+  duration_ms: 0.3811
+  type: 'test'
+  ...
+# Subtest: a healthy q42-style hunt can finish two kills from measured reduced stock
+ok 574 - a healthy q42-style hunt can finish two kills from measured reduced stock
+  ---
+  duration_ms: 0.258
+  type: 'test'
+  ...
+# Subtest: passive recovery proves exact HP through bounded fresh snapshots
+ok 575 - passive recovery proves exact HP through bounded fresh snapshots
+  ---
+  duration_ms: 0.5003
+  type: 'test'
+  ...
+# Subtest: evasive recovery moves away from a nearby follower before refreshing HP
+ok 576 - evasive recovery moves away from a nearby follower before refreshing HP
+  ---
+  duration_ms: 0.8588
+  type: 'test'
+  ...
+# Subtest: evasive recovery keeps sustaining after reaching a safe gap
+ok 577 - evasive recovery keeps sustaining after reaching a safe gap
+  ---
+  duration_ms: 0.844
+  type: 'test'
+  ...
+# Subtest: expedition recovery budgets span cadence-limited doses beyond the short field timeout
+ok 578 - expedition recovery budgets span cadence-limited doses beyond the short field timeout
+  ---
+  duration_ms: 3.7443
+  type: 'test'
+  ...
+# Subtest: q62 leaves D2041 packs toward the real D2042 transfer
+ok 579 - q62 leaves D2041 packs toward the real D2042 transfer
+  ---
+  duration_ms: 0.3471
+  type: 'test'
+  ...
+# Subtest: q60 ranged classes admit the measured D2041 SpiderFrog spawn density
+ok 580 - q60 ranged classes admit the measured D2041 SpiderFrog spawn density
+  ---
+  duration_ms: 0.1065
+  type: 'test'
+  ...
+# Subtest: q65 preserves D421 progress toward its D422 Zombie1 field
+ok 581 - q65 preserves D421 progress toward its D422 Zombie1 field
+  ---
+  duration_ms: 0.2934
+  type: 'test'
+  ...
+# Subtest: q99 Warrior admits the measured final WoomaFighter spawn group
+ok 582 - q99 Warrior admits the measured final WoomaFighter spawn group
+  ---
+  duration_ms: 0.0894
+  type: 'test'
+  ...
+# Subtest: q89 Wizard clears one entrance blocker while retaining its retreat gates
+ok 583 - q89 Wizard clears one entrance blocker while retaining its retreat gates
+  ---
+  duration_ms: 0.0776
+  type: 'test'
+  ...
+# Subtest: q89 focus relaxation is isolated from other ranged expeditions
+ok 584 - q89 focus relaxation is isolated from other ranged expeditions
+  ---
+  duration_ms: 0.0606
+  type: 'test'
+  ...
+# Subtest: q98 Wooma expedition keeps long wide recovery armed for ranged classes
+ok 585 - q98 Wooma expedition keeps long wide recovery armed for ranged classes
+  ---
+  duration_ms: 0.0746
+  type: 'test'
+  ...
+# Subtest: q99 keeps the same Wooma expedition recovery and supplies as q98
+ok 586 - q99 keeps the same Wooma expedition recovery and supplies as q98
+  ---
+  duration_ms: 0.0817
+  type: 'test'
+  ...
+# Subtest: ranged Wooma hunts finish a nearly dead target only while the caster is healthy
+ok 587 - ranged Wooma hunts finish a nearly dead target only while the caster is healthy
+  ---
+  duration_ms: 0.1632
+  type: 'test'
+  ...
+# Subtest: q122/q123 Warrior resumes a damaged live Prajna objective through the measured pack
+ok 588 - q122/q123 Warrior resumes a damaged live Prajna objective through the measured pack
+  ---
+  duration_ms: 0.1614
+  type: 'test'
+  ...
+# Subtest: q118 Warrior admits the measured Mineral Mine pack for ordinary aggressor clearing
+ok 589 - q118 Warrior admits the measured Mineral Mine pack for ordinary aggressor clearing
+  ---
+  duration_ms: 0.1155
+  type: 'test'
+  ...
+# Subtest: q113 deep Bug Cave hunt uses expedition recovery and ranged density limits
+ok 590 - q113 deep Bug Cave hunt uses expedition recovery and ranged density limits
+  ---
+  duration_ms: 0.1406
+  type: 'test'
+  ...
+# Subtest: q114 Stone Tomb boars keep expedition supplies and wide recovery armed
+ok 591 - q114 Stone Tomb boars keep expedition supplies and wide recovery armed
+  ---
+  duration_ms: 0.1337
+  type: 'test'
+  ...
+# Subtest: q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room
+ok 592 - q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room
+  ---
+  duration_ms: 0.2106
+  type: 'test'
+  ...
+# Subtest: q54 finishes available D401 zombies before preferring the D406 source
+ok 593 - q54 finishes available D401 zombies before preferring the D406 source
+  ---
+  duration_ms: 0.1962
+  type: 'test'
+  ...
+# Subtest: a completed combat objective leaves for turn-in instead of recovering in its old field
+ok 594 - a completed combat objective leaves for turn-in instead of recovering in its old field
+  ---
+  duration_ms: 0.3149
+  type: 'test'
+  ...
+# Subtest: evasive recovery recomputes from a partial failed move and reaches clearance before sleeping
+ok 595 - evasive recovery recomputes from a partial failed move and reaches clearance before sleeping
+  ---
+  duration_ms: 0.468
+  type: 'test'
+  ...
+# Subtest: evasive recovery keeps kiting a same-speed follower across bounded refresh batches
+ok 596 - evasive recovery keeps kiting a same-speed follower across bounded refresh batches
+  ---
+  duration_ms: 0.3496
+  type: 'test'
+  ...
+# Subtest: evasive recovery spends a remaining emergency scroll when a dense pack closes again
+ok 597 - evasive recovery spends a remaining emergency scroll when a dense pack closes again
+  ---
+  duration_ms: 0.3553
+  type: 'test'
+  ...
+# Subtest: safe-zone recovery ignores neutral residents and does not spend an escape
+ok 598 - safe-zone recovery ignores neutral residents and does not spend an escape
+  ---
+  duration_ms: 0.2209
+  type: 'test'
+  ...
+# Subtest: evasive recovery bias keeps a dungeon retreat moving toward its transfer
+ok 599 - evasive recovery bias keeps a dungeon retreat moving toward its transfer
+  ---
+  duration_ms: 0.439
+  type: 'test'
+  ...
+# Subtest: blocked evasive poll refreshes authoritative recovery instead of failing immediately
+ok 600 - blocked evasive poll refreshes authoritative recovery instead of failing immediately
+  ---
+  duration_ms: 0.5563
+  type: 'test'
+  ...
+# Subtest: evasive recovery can use an off-axis endpoint in a narrow corridor
+ok 601 - evasive recovery can use an off-axis endpoint in a narrow corridor
+  ---
+  duration_ms: 0.3959
+  type: 'test'
+  ...
+# Subtest: evasive recovery aborts a dead snapshot before navigation or sustain
+ok 602 - evasive recovery aborts a dead snapshot before navigation or sustain
+  ---
+  duration_ms: 0.1684
+  type: 'test'
+  ...
+# Subtest: finds a hostile sealing a distant one-cell corridor
+ok 603 - finds a hostile sealing a distant one-cell corridor
+  ---
+  duration_ms: 3.594
+  type: 'test'
+  ...
+# Subtest: Crystal scripted edges retain exact Sailor targets, strict balances, costs, and destinations
+ok 604 - Crystal scripted edges retain exact Sailor targets, strict balances, costs, and destinations
+  ---
+  duration_ms: 1.0694
+  type: 'test'
+  ...
+# Subtest: canReach filters the real q60 and q62 unreachable cave candidates without travelling
+ok 605 - canReach filters the real q60 and q62 unreachable cave candidates without travelling
+  ---
+  duration_ms: 97.7046
+  type: 'test'
+  ...
+# Subtest: routeLength reports map 2 as the nearer real q33 source from Bichon than map 3
+ok 606 - routeLength reports map 2 as the nearer real q33 source from Bichon than map 3
+  ---
+  duration_ms: 1.0983
+  type: 'test'
+  ...
+# Subtest: armed q89 live doorway travels through the real traveler when profile route is absent
+ok 607 - armed q89 live doorway travels through the real traveler when profile route is absent
+  ---
+  duration_ms: 2.3444
+  type: 'test'
+  ...
+# Subtest: map travel forwards an opt-in transit movement guard only to the selected live transfer
+ok 608 - map travel forwards an opt-in transit movement guard only to the selected live transfer
+  ---
+  duration_ms: 0.5208
+  type: 'test'
+  ...
+# Subtest: armed q89 live doorway refuses a wrong or stale destination key before navigation
+ok 609 - armed q89 live doorway refuses a wrong or stale destination key before navigation
+  ---
+  duration_ms: 0.4217
+  type: 'test'
+  ...
+# Subtest: travels through an authoritative live walking transfer at distance zero
+ok 610 - travels through an authoritative live walking transfer at distance zero
+  ---
+  duration_ms: 0.4272
+  type: 'test'
+  ...
+# Subtest: a caller can prefer a safe authoritative transfer source over the nearest portal
+ok 611 - a caller can prefer a safe authoritative transfer source over the nearest portal
+  ---
+  duration_ms: 0.5771
+  type: 'test'
+  ...
+# Subtest: a caller can prefer the nearest direct Crystal transporter over a shorter walking route
+ok 612 - a caller can prefer the nearest direct Crystal transporter over a shorter walking route
+  ---
+  duration_ms: 1.5957
+  type: 'test'
+  ...
+# Subtest: generic travel leaves the Sabuk merchant quarter through D701 before continuing
+ok 613 - generic travel leaves the Sabuk merchant quarter through D701 before continuing
+  ---
+  duration_ms: 1.3761
+  type: 'test'
+  ...
+# Subtest: generic travel resumes an interrupted Sabuk departure through the western D701 exit
+ok 614 - generic travel resumes an interrupted Sabuk departure through the western D701 exit
+  ---
+  duration_ms: 0.7705
+  type: 'test'
+  ...
+# Subtest: a proven threat can interrupt ordinary transfer travel before the client enters the portal
+ok 615 - a proven threat can interrupt ordinary transfer travel before the client enters the portal
+  ---
+  duration_ms: 0.6663
+  type: 'test'
+  ...
+# Subtest: a proven threat converts a sealed local path into a travel interruption
+ok 616 - a proven threat converts a sealed local path into a travel interruption
+  ---
+  duration_ms: 0.6208
+  type: 'test'
+  ...
+# Subtest: reports the hostile monster that blocks a narrow live transfer approach
+ok 617 - reports the hostile monster that blocks a narrow live transfer approach
+  ---
+  duration_ms: 33.2739
+  type: 'test'
+  ...
+# Subtest: a configured resolver clears a hostile transfer blocker and retries the portal
+ok 618 - a configured resolver clears a hostile transfer blocker and retries the portal
+  ---
+  duration_ms: 38.088
+  type: 'test'
+  ...
+# Subtest: a travel call can delegate a blocker to its quest policy instead of the global resolver
+ok 619 - a travel call can delegate a blocker to its quest policy instead of the global resolver
+  ---
+  duration_ms: 21.7077
+  type: 'test'
+  ...
+# Subtest: a configured resolver clears a nearby cave blocker before a distant transfer is visible
+ok 620 - a configured resolver clears a nearby cave blocker before a distant transfer is visible
+  ---
+  duration_ms: 25.4355
+  type: 'test'
+  ...
+# Subtest: walking travel rotates to another live transfer cell after an unblocked no-path result
+ok 621 - walking travel rotates to another live transfer cell after an unblocked no-path result
+  ---
+  duration_ms: 25.5385
+  type: 'test'
+  ...
+# Subtest: walking travel can relocate from a statically disconnected map component
+ok 622 - walking travel can relocate from a statically disconnected map component
+  ---
+  duration_ms: 1.2376
+  type: 'test'
+  ...
+# Subtest: D611 reaches its deep component through the physical Crystal cave loop
+ok 623 - D611 reaches its deep component through the physical Crystal cave loop
+  ---
+  duration_ms: 7.8416
+  type: 'test'
+  ...
+# Subtest: D601 returns from its D610 component through the physical Crystal cave loop
+ok 624 - D601 returns from its D610 component through the physical Crystal cave loop
+  ---
+  duration_ms: 10.9624
+  type: 'test'
+  ...
+# Subtest: steps off and re-enters the real MageHouse exit when already standing on its source
+ok 625 - steps off and re-enters the real MageHouse exit when already standing on its source
+  ---
+  duration_ms: 2.3472
+  type: 'test'
+  ...
+# Subtest: refreshes a pending source snapshot before selecting and entering a live walking transfer
+ok 626 - refreshes a pending source snapshot before selecting and entering a live walking transfer
+  ---
+  duration_ms: 0.8109
+  type: 'test'
+  ...
+# Subtest: actual MapInformation plus UserLocation completes walking transfer after one fresh snapshot request
+ok 627 - actual MapInformation plus UserLocation completes walking transfer after one fresh snapshot request
+  ---
+  duration_ms: 0.8139
+  type: 'test'
+  ...
+# Subtest: refuses a live walking transfer without an authoritative key before navigation
+ok 628 - refuses a live walking transfer without an authoritative key before navigation
+  ---
+  duration_ms: 0.4369
+  type: 'test'
+  ...
+# Subtest: Rupert travel uses a live dialog link and refreshes a pending destination snapshot
+ok 629 - Rupert travel uses a live dialog link and refreshes a pending destination snapshot
+  ---
+  duration_ms: 0.7847
+  type: 'test'
+  ...
+# Subtest: scripted travel accepts MapInformation only with its following exact UserLocation and fresh snapshot
+ok 630 - scripted travel accepts MapInformation only with its following exact UserLocation and fresh snapshot
+  ---
+  duration_ms: 0.8484
+  type: 'test'
+  ...
+# Subtest: Raymond travel verifies the live White Valley link, landing, and 12000 gold debit
+ok 631 - Raymond travel verifies the live White Valley link, landing, and 12000 gold debit
+  ---
+  duration_ms: 0.6149
+  type: 'test'
+  ...
+# Subtest: an item-gated scripted edge verifies and consumes its exact inventory cost
+ok 632 - an item-gated scripted edge verifies and consumes its exact inventory cost
+  ---
+  duration_ms: 1.5609
+  type: 'test'
+  ...
+# Subtest: refuses a walking edge when no matching live transfer exists
+ok 633 - refuses a walking edge when no matching live transfer exists
+  ---
+  duration_ms: 0.698
+  type: 'test'
+  ...
+# Subtest: refuses scripted travel when gold only equals the strict threshold
+ok 634 - refuses scripted travel when gold only equals the strict threshold
+  ---
+  duration_ms: 0.9589
+  type: 'test'
+  ...
+# Subtest: refuses an item-gated scripted edge before navigation when the required item is absent
+ok 635 - refuses an item-gated scripted edge before navigation when the required item is absent
+  ---
+  duration_ms: 0.8727
+  type: 'test'
+  ...
+# Subtest: requires the exact live NPC binding before opening a scripted dialog
+ok 636 - requires the exact live NPC binding before opening a scripted dialog
+  ---
+  duration_ms: 1.2385
+  type: 'test'
+  ...
+# Subtest: never sends a static scripted target absent from the live dialog
+ok 637 - never sends a static scripted target absent from the live dialog
+  ---
+  duration_ms: 1.3411
+  type: 'test'
+  ...
+# Subtest: an old active dialog does not replace fresh post-interact snapshot proof
+ok 638 - an old active dialog does not replace fresh post-interact snapshot proof
+  ---
+  duration_ms: 1.0404
+  type: 'test'
+  ...
+# Subtest: rejects MapChanged whose landing does not match the scripted edge
+ok 639 - rejects MapChanged whose landing does not match the scripted edge
+  ---
+  duration_ms: 1.1932
+  type: 'test'
+  ...
+# Subtest: rejects MapInformation without a following exact UserLocation landing
+ok 640 - rejects MapInformation without a following exact UserLocation landing
+  ---
+  duration_ms: 1.1334
+  type: 'test'
+  ...
+# Subtest: rejects a fresh destination snapshot with the wrong charged balance
+ok 641 - rejects a fresh destination snapshot with the wrong charged balance
+  ---
+  duration_ms: 1.1407
+  type: 'test'
+  ...
+# Subtest: already being on the target map is a no-op
+ok 642 - already being on the target map is a no-op
+  ---
+  duration_ms: 0.1326
+  type: 'test'
+  ...
+# Subtest: level-15 routes bound every segment and preserve each class instructor branch
+ok 643 - level-15 routes bound every segment and preserve each class instructor branch
+  ---
+  duration_ms: 582.3324
+  type: 'test'
+  ...
+# Subtest: decodes authoritative Crystal ClientQuestInfo headers
+ok 644 - decodes authoritative Crystal ClientQuestInfo headers
+  ---
+  duration_ms: 0.1906
+  type: 'test'
+  ...
+# Subtest: resolves quest NPC object IDs to real map positions
+ok 645 - resolves quest NPC object IDs to real map positions
+  ---
+  duration_ms: 0.1528
+  type: 'test'
+  ...
+# Subtest: binds kill tasks to real respawns
+ok 646 - binds kill tasks to real respawns
+  ---
+  duration_ms: 0.1087
+  type: 'test'
+  ...
+# Subtest: distinguishes ordinary Q-drops from harvest Q-drops
+ok 647 - distinguishes ordinary Q-drops from harvest Q-drops
+  ---
+  duration_ms: 0.1706
+  type: 'test'
+  ...
+# Subtest: marks Crystal HarvestMonster subclasses as corpse-harvest item sources
+ok 648 - marks Crystal HarvestMonster subclasses as corpse-harvest item sources
+  ---
+  duration_ms: 0.1276
+  type: 'test'
+  ...
+# Subtest: models zero-index quest endpoints as visible Quest Diary actions
+ok 649 - models zero-index quest endpoints as visible Quest Diary actions
+  ---
+  duration_ms: 0.101
+  type: 'test'
+  ...
+# Subtest: harvest monster drops can satisfy Crystal item tasks
+ok 650 - harvest monster drops can satisfy Crystal item tasks
+  ---
+  duration_ms: 0.0808
+  type: 'test'
+  ...
+# Subtest: binds q140 GoldChestnut to the imported chestnut-tree fields
+ok 651 - binds q140 GoldChestnut to the imported chestnut-tree fields
+  ---
+  duration_ms: 0.2158
+  type: 'test'
+  ...
+# Subtest: safe supply loot is derived from ordinary drops, class stats, and merchant trade lists
+ok 652 - safe supply loot is derived from ordinary drops, class stats, and merchant trade lists
+  ---
+  duration_ms: 2.0743
+  type: 'test'
+  ...
+# Subtest: progression skill books are class-compatible and level-bounded Crystal items
+ok 653 - progression skill books are class-compatible and level-bounded Crystal items
+  ---
+  duration_ms: 0.6227
+  type: 'test'
+  ...
+# Subtest: binds flag tasks to visible scripted-world NPC interactions
+ok 654 - binds flag tasks to visible scripted-world NPC interactions
+  ---
+  duration_ms: 0.2745
+  type: 'test'
+  ...
+# Subtest: summarizes the complete Warrior 1-50 data surface
+ok 655 - summarizes the complete Warrior 1-50 data surface
+  ---
+  duration_ms: 0.0624
+  type: 'test'
+  ...
+# Subtest: records current runtime-profile gaps separately from Crystal content gaps
+ok 656 - records current runtime-profile gaps separately from Crystal content gaps
+  ---
+  duration_ms: 0.0484
+  type: 'test'
+  ...
+# Subtest: builds distinct Warrior, Wizard, and Taoist instructor branches
+ok 657 - builds distinct Warrior, Wizard, and Taoist instructor branches
+  ---
+  duration_ms: 1899.3835
+  type: 'test'
+  ...
+# Subtest: streams the latest session observation and separates mandatory counts from active progress
+ok 658 - streams the latest session observation and separates mandatory counts from active progress
+  ---
+  duration_ms: 15.1588
+  type: 'test'
+  ...
+# Subtest: includes only whitelisted fields from a failure report overlapping the latest trace session
+ok 659 - includes only whitelisted fields from a failure report overlapping the latest trace session
+  ---
+  duration_ms: 7.4663
+  type: 'test'
+  ...
+# Subtest: summarizes the newest isolated runner trace instead of the stale legacy aggregate
+ok 660 - summarizes the newest isolated runner trace instead of the stale legacy aggregate
+  ---
+  duration_ms: 8.5637
+  type: 'test'
+  ...
+1..660
+# tests 660
+# suites 0
+# pass 660
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9849.6947

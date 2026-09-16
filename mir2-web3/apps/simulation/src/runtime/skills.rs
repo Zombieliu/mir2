@@ -289,17 +289,18 @@ fn canonical_spell_name(spell: Option<Spell>) -> Option<&'static str> {
 fn crystal_spell_cast_kind(spell: Spell) -> SkillCastKind {
     match spell {
         Spell::Fencing
+        | Spell::Slaying
         | Spell::SpiritSword
         | Spell::Focus
         | Spell::Meditation
         | Spell::MentalState
         | Spell::MPEater
         | Spell::Hemorrhage => SkillCastKind::Passive,
-        Spell::Slaying
-        | Spell::Thrusting
+        Spell::Thrusting
         | Spell::HalfMoon
         | Spell::CrossHalfMoon
         | Spell::DoubleSlash
+        | Spell::TwinDrakeBlade
         | Spell::CounterAttack
         | Spell::FatalSword
         | Spell::FlamingSword
@@ -624,6 +625,7 @@ pub(super) fn skill_key_for_crystal_spell(spell: Spell) -> Option<String> {
 }
 
 pub(super) fn assign_magic_key(world: &mut World, spell: Spell, key: u8, old_key: u8) {
+    if !supports_magic_key_assignment(world,spell,key,old_key){return;}
     if key > 16 || old_key > 16 {
         assign_hero_magic_key(world, spell, key);
         return;
@@ -641,6 +643,24 @@ pub(super) fn assign_magic_key(world: &mut World, spell: Spell, key: u8, old_key
         }
     }
 }
+
+pub(super) fn supports_magic_key_assignment(world:&World,spell:Spell,key:u8,old_key:u8)->bool{
+    if !super::resources::is_in_world(world){return false;}
+    if key>16 || old_key>16 {
+        return world.resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().is_some_and(|hero|hero.spawned)
+            && hero_entity(world).and_then(|entity|world.entity(entity).get::<PlayerVitals>()).is_some_and(|vitals|vitals.hp>0)
+            && world.resource::<Stage5SystemsResource>().stage5_systems.hero_learned_magics.iter().any(|learned|learned.spell==spell);
+    }
+    skill_key_for_crystal_spell(spell).is_some_and(|key|world.resource::<SkillResource>().skills.iter().any(|skill|skill.key==key))
+}
+
+#[cfg(test)]
+#[path="magic_key_preflight_tests.rs"]
+mod magic_key_preflight_tests;
+
+#[cfg(test)]
+#[path = "slaying_passive_tests.rs"]
+mod slaying_passive_tests;
 
 fn assign_hero_magic_key(world: &mut World, spell: Spell, key: u8) {
     if !world
@@ -1064,6 +1084,7 @@ fn cast_skill_with_context_impl(
                 let (resolved_buff_name, resolved_buff_description) =
                     buff_metadata(buff_key, buff_name, buff_description);
                 let buff = BuffState {
+                    real_time_duration: None,
                     key: buff_key.clone(),
                     name: resolved_buff_name,
                     description: resolved_buff_description,
@@ -1450,6 +1471,7 @@ fn apply_manifest_spell_effect(
         "MagicBooster" => {
             let magic_bonus = 6 + i32::from(skill.level) * 6;
             let buff = BuffState {
+                real_time_duration: None,
                 key: "magic-booster".to_string(),
                 name: "Magic Booster".to_string(),
                 description: "Crystal magic booster buff is active.".to_string(),
@@ -1764,6 +1786,41 @@ fn append_failed_manifest_cast_packets(
     });
 }
 
+/// Crystal HumanObject.SpellToggle arms TwinDrakeBlade even for a disable
+/// request. Repeated requests while armed do not charge or restart the effect.
+pub(super) fn prepare_twin_drake_blade(world: &mut World) -> Vec<ServerPacket> {
+    if super::combat::skill_toggle_state(world, Spell::TwinDrakeBlade) {
+        return Vec::new();
+    }
+    let Some((magic, level)) = super::combat::crystal_skill_magic(world, "TwinDrakeBlade") else {
+        return Vec::new();
+    };
+    let Some(player) = player_entity(world) else { return Vec::new(); };
+    let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
+    if entity_player_vitals(world, player).map(|v| v.mp).unwrap_or_default() <= cost {
+        return Vec::new();
+    }
+    world.entity_mut(player).get_mut::<PlayerVitals>().expect("player vitals").mp -= cost;
+    super::combat::set_skill_toggle_state(world, Spell::TwinDrakeBlade, true);
+    let location = super::movement::current_location(world);
+    let mut packets = vec![ServerPacket::ObjectMagic {
+        object_id: current_player_object_id(world).unwrap_or_default(),
+        location: location.position.clone(),
+        direction: location.direction,
+        spell: Spell::TwinDrakeBlade,
+        target_id: 0,
+        target: Point { x: 0, y: 0 },
+        cast: false,
+        level,
+        self_broadcast: false,
+        secondary_target_ids: Vec::new(),
+    }];
+    if let Some(info) = super::packets::object_mana_info_for_entity(world, player) {
+        packets.push(ServerPacket::ObjectMana { info });
+    }
+    packets
+}
+
 fn apply_crystal_self_buff_spell(
     world: &mut World,
     skill: &SkillState,
@@ -1928,6 +1985,7 @@ fn apply_crystal_self_buff_spell(
     };
 
     let buff = BuffState {
+        real_time_duration: None,
         key: key.to_string(),
         name: name.to_string(),
         description: description.to_string(),
@@ -1982,6 +2040,7 @@ fn apply_crystal_energy_shield_spell(
     let hp_gain = ((spirit_power as f32 / 4.0) * (level + 1) as f32).round() as i32;
     let duration_ms = (30_u64 + u64::from(skill.level).saturating_mul(50)).saturating_mul(1_000);
     let buff = BuffState {
+        real_time_duration: None,
         key: "energy-shield".to_string(),
         name: "Energy Shield".to_string(),
         description: "Crystal Energy Shield buff is active.".to_string(),
@@ -2037,6 +2096,7 @@ fn apply_crystal_magic_shield_spell(
         .unwrap_or(1)
         .saturating_mul(1_000);
     let buff = BuffState {
+        real_time_duration: None,
         key: "magic-shield".to_string(),
         name: "Magic Shield".to_string(),
         description: "Crystal magic shield buff is active.".to_string(),
@@ -2096,6 +2156,7 @@ fn apply_crystal_teleport_spell(
         super::components::Facing(direction),
     ));
     let buff = BuffState {
+        real_time_duration: None,
         key: "temporal-flux".to_string(),
         name: "Temporal Flux".to_string(),
         description: "Crystal temporal flux teleport penalty is active.".to_string(),
@@ -2174,6 +2235,7 @@ fn apply_crystal_blink_spell(
         super::components::Facing(context.direction),
     ));
     let buff = BuffState {
+        real_time_duration: None,
         key: "temporal-flux".to_string(),
         name: "Temporal Flux".to_string(),
         description: "Crystal temporal flux teleport penalty is active.".to_string(),
@@ -2455,6 +2517,7 @@ fn apply_crystal_taoist_support_spell(
                     .unwrap_or_default()
                     .saturating_mul(1_000);
             let buff = BuffState {
+                real_time_duration: None,
                 key: "ultimate-enhancer".to_string(),
                 name: "Ultimate Enhancer".to_string(),
                 description: "Crystal Ultimate Enhancer buff is active.".to_string(),
@@ -2484,6 +2547,7 @@ fn apply_crystal_concentration_spell(
     };
     let duration_ms = (45_u64 + u64::from(skill.level).saturating_mul(15)).saturating_mul(1_000);
     let buff = BuffState {
+        real_time_duration: None,
         key: "concentration".to_string(),
         name: "Concentration".to_string(),
         description: "Crystal Concentration buff is active.".to_string(),
@@ -2589,6 +2653,7 @@ fn apply_crystal_elemental_barrier_spell(
         .saturating_add(orb_power)
         .max(1);
     let buff = BuffState {
+        real_time_duration: None,
         key: "elemental-barrier".to_string(),
         name: "Elemental Barrier".to_string(),
         description: "Crystal elemental barrier buff is active.".to_string(),
@@ -3313,6 +3378,7 @@ fn apply_crystal_storm_escape_spell(
         super::components::Facing(context.direction),
     ));
     let buff = BuffState {
+        real_time_duration: None,
         key: "temporal-flux".to_string(),
         name: "Temporal Flux".to_string(),
         description: "Crystal temporal flux teleport penalty is active.".to_string(),
@@ -4917,6 +4983,7 @@ fn apply_crystal_mass_hiding_action(
             .is_some_and(|position| action.locations.iter().any(|cell| cell == &position));
         if player_in_area {
             let buff = BuffState {
+                real_time_duration: None,
                 key: "hiding".to_string(),
                 name: "Mass Hiding".to_string(),
                 description: "Crystal mass hiding buff is active.".to_string(),
@@ -5009,6 +5076,7 @@ fn apply_crystal_taoist_area_support_action(
                 .saturating_div(7)
                 .saturating_add(4);
             let buff = BuffState {
+                real_time_duration: None,
                 key: key.to_string(),
                 name: name.to_string(),
                 description: format!("Crystal {name} buff is active."),
@@ -6571,6 +6639,7 @@ fn apply_crystal_moon_mist_spell(
     .unwrap_or(1)
     .saturating_mul(500);
     let buff = BuffState {
+        real_time_duration: None,
         key: "moon-light".to_string(),
         name: "Moon Light".to_string(),
         description: "Crystal moon mist stealth is active.".to_string(),
@@ -7151,6 +7220,7 @@ fn apply_crystal_arrow_marker_buff(
 
     let duration_ms = (5_u64 + u64::from(skill.level).saturating_mul(5)).saturating_mul(1_000);
     let buff = BuffState {
+        real_time_duration: None,
         key: buff_key.to_string(),
         name: name.to_string(),
         description: format!("Crystal {name} buff is active."),

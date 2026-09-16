@@ -44,6 +44,15 @@ const MAX_OPERATION_ACK_MESSAGES: usize = 32;
 const MAX_NATIVE_MESSAGE_BYTES: usize = 64 * 1024 * 1024;
 const MAX_NATIVE_BUFFER_BYTES: usize = 128 * 1024 * 1024;
 
+/// Read-only queue occupancy exposed to the opt-in native soak diagnostics.
+/// The byte count includes owned `String`/pixel-vector capacity, matching the
+/// admission accounting used by the bounded queue.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) struct NativeInboundDiagnostics {
+    pub(crate) message_count: usize,
+    pub(crate) retained_bytes: usize,
+}
+
 /// A snapshot JSON pushed from a background native task.
 #[derive(Debug, Clone)]
 pub(crate) enum NativeInboundMessage {
@@ -93,6 +102,9 @@ pub(crate) enum NativeInboundMessage {
     /// Apply authoritative storage metadata from a storage result packet.
     StoragePatch(String),
     SkillModel(String),
+    HeroModel(String),
+    HeroModelReceipt(String),
+    SkillModelReceipt(String),
     SocialModel(String),
     EntityRenderAtlas {
         key: String,
@@ -141,7 +153,7 @@ impl NativeInboundBuffer {
                 let Ok(json) = serde_json::to_string(&receipt) else {
                     return false;
                 };
-                self.pending.clear();
+                self.pending.retain(is_process_lifetime_asset_message);
                 self.game_shop_receipt = Some(json);
                 self.pending.push_back(
                     NativeInboundMessage::DataResetPreservingExactGameShopReceipt(receipt),
@@ -155,9 +167,11 @@ impl NativeInboundBuffer {
         // for capacity. A newer DataReset dominates every queued model and
         // barrier. A newer SceneReset dominates queued scene presentation but
         // deliberately preserves personal/session models and DataReset.
+        // Immutable entity atlas uploads survive both boundaries because the
+        // native host sends them only once per process.
         match &message {
             NativeInboundMessage::DataReset => {
-                self.pending.clear();
+                self.pending.retain(is_process_lifetime_asset_message);
                 self.game_shop_receipt = None;
                 self.pending.push_back(message);
                 return true;
@@ -418,6 +432,7 @@ fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::ShopModel(_)
             | NativeInboundMessage::StorageModel(_)
             | NativeInboundMessage::StorageItems(_)
+            | NativeInboundMessage::HeroModel(_)
             | NativeInboundMessage::SkillModel(_)
             | NativeInboundMessage::EntityRenderAtlas { .. }
     )
@@ -447,6 +462,7 @@ fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessag
         | (NativeInboundMessage::ShopModel(_), NativeInboundMessage::ShopModel(_))
         | (NativeInboundMessage::StorageModel(_), NativeInboundMessage::StorageModel(_))
         | (NativeInboundMessage::StorageItems(_), NativeInboundMessage::StorageItems(_))
+        | (NativeInboundMessage::HeroModel(_), NativeInboundMessage::HeroModel(_))
         | (NativeInboundMessage::SkillModel(_), NativeInboundMessage::SkillModel(_)) => true,
         (
             NativeInboundMessage::EntityRenderAtlas { key: left, .. },
@@ -470,11 +486,18 @@ fn is_critical_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::NpcShopService(_)
             | NativeInboundMessage::StoragePatch(_)
             | NativeInboundMessage::SocialModel(_)
+            | NativeInboundMessage::HeroModelReceipt(_)
+            | NativeInboundMessage::SkillModelReceipt(_)
     )
 }
 
 fn is_operation_ack(message: &NativeInboundMessage) -> bool {
-    matches!(message, NativeInboundMessage::InventoryOperationAck(_))
+    matches!(
+        message,
+        NativeInboundMessage::InventoryOperationAck(_)
+            | NativeInboundMessage::HeroModelReceipt(_)
+            | NativeInboundMessage::SkillModelReceipt(_)
+    )
 }
 
 fn native_message_bytes(message: &NativeInboundMessage) -> usize {
@@ -500,7 +523,10 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         | NativeInboundMessage::StorageModel(json)
         | NativeInboundMessage::StorageItems(json)
         | NativeInboundMessage::StoragePatch(json)
+        | NativeInboundMessage::HeroModel(json)
         | NativeInboundMessage::SkillModel(json)
+        | NativeInboundMessage::HeroModelReceipt(json)
+        | NativeInboundMessage::SkillModelReceipt(json)
         | NativeInboundMessage::SocialModel(json) => json.capacity(),
         NativeInboundMessage::EntityRenderAtlas { key, pixels, .. } => {
             key.capacity().saturating_add(pixels.capacity())
@@ -674,8 +700,36 @@ pub fn push_native_storage_patch(json: String) -> bool {
 /// Native-host entry point: push a skill model JSON.
 ///
 /// The payload mirrors `mir2-client-bevy::skill_model::SkillModel`.
+pub fn push_native_hero_model(json: String) -> bool {
+    let receipt = serde_json::from_str::<serde_json::Value>(&json)
+        .ok()
+        .is_some_and(|v| {
+            v.get("skillKeyAck").is_some_and(|ack| !ack.is_null())
+                || v.get("itemResultReceipt")
+                    .and_then(serde_json::Value::as_bool)
+                    == Some(true)
+        });
+    send_native(if receipt {
+        NativeInboundMessage::HeroModelReceipt(json)
+    } else {
+        NativeInboundMessage::HeroModel(json)
+    })
+}
+
 pub fn push_native_skill_model(json: String) -> bool {
-    send_native(NativeInboundMessage::SkillModel(json))
+    let receipt = serde_json::from_str::<serde_json::Value>(&json)
+        .ok()
+        .and_then(|v| {
+            v.get("skillKeyAck")
+                .or_else(|| v.get("skill_key_ack"))
+                .cloned()
+        })
+        .is_some_and(|v| !v.is_null());
+    send_native(if receipt {
+        NativeInboundMessage::SkillModelReceipt(json)
+    } else {
+        NativeInboundMessage::SkillModel(json)
+    })
 }
 
 /// Native-host entry point: push authoritative Group/Guild/Trade state.
@@ -712,6 +766,19 @@ impl NativeInbound {
     pub(crate) fn new() -> Self {
         Self {
             buffer: make_buffer(),
+        }
+    }
+
+    /// Snapshot queue occupancy without draining or changing admission state.
+    /// This is called only by the opt-in 10-second native soak sampler.
+    pub(crate) fn diagnostics(&self) -> NativeInboundDiagnostics {
+        let state = self
+            .buffer
+            .lock()
+            .expect("native inbound mutex should not be poisoned");
+        NativeInboundDiagnostics {
+            message_count: state.message_count(),
+            retained_bytes: state.pending_bytes(),
         }
     }
 
@@ -816,7 +883,6 @@ fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
-            | NativeInboundMessage::EntityRenderAtlas { .. }
             | NativeInboundMessage::NpcShopService(_)
     )
 }
@@ -831,7 +897,6 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
-            | NativeInboundMessage::EntityRenderAtlas { .. }
             | NativeInboundMessage::UiReadModel(_)
             | NativeInboundMessage::WalletPatch(_)
             | NativeInboundMessage::InventoryModel(_)
@@ -846,9 +911,16 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::StorageModel(_)
             | NativeInboundMessage::StorageItems(_)
             | NativeInboundMessage::StoragePatch(_)
+            | NativeInboundMessage::HeroModel(_)
             | NativeInboundMessage::SkillModel(_)
+            | NativeInboundMessage::HeroModelReceipt(_)
+            | NativeInboundMessage::SkillModelReceipt(_)
             | NativeInboundMessage::SocialModel(_)
     )
+}
+
+fn is_process_lifetime_asset_message(message: &NativeInboundMessage) -> bool {
+    matches!(message, NativeInboundMessage::EntityRenderAtlas { .. })
 }
 
 #[cfg(test)]
@@ -871,6 +943,44 @@ mod tests {
             pending: VecDeque::new(),
             game_shop_receipt: None,
         }
+    }
+
+    #[test]
+    fn hero_receipts_retain_each_snapshot_and_reset_with_session() {
+        let mut buffer = active_buffer();
+        assert!(buffer.enqueue(NativeInboundMessage::HeroModel("old".into())));
+        for id in [51, 52] {
+            assert!(buffer.enqueue(NativeInboundMessage::HeroModelReceipt(id.to_string())));
+        }
+        for serial in 0..1000 {
+            assert!(buffer.enqueue(NativeInboundMessage::HeroModel(serial.to_string())));
+        }
+        assert_eq!(buffer.pending.len(), 3);
+        assert!(matches!(&buffer.pending[0], NativeInboundMessage::HeroModelReceipt(v) if v=="51"));
+        assert!(matches!(&buffer.pending[1], NativeInboundMessage::HeroModelReceipt(v) if v=="52"));
+        assert!(matches!(&buffer.pending[2], NativeInboundMessage::HeroModel(v) if v=="999"));
+        assert!(buffer.enqueue(NativeInboundMessage::DataReset));
+        assert!(!buffer.pending.iter().any(|v| matches!(
+            v,
+            NativeInboundMessage::HeroModel(_) | NativeInboundMessage::HeroModelReceipt(_)
+        )));
+    }
+
+    #[test]
+    fn skill_receipt_is_not_coalesced_with_newer_skill_snapshots() {
+        let mut buffer = active_buffer();
+        let receipt = r#"{"skillKeyAck":{"requestId":73},"skills":[{"hotkey":16}]}"#.to_owned();
+        assert!(buffer.enqueue(NativeInboundMessage::SkillModel("old".into())));
+        assert!(buffer.enqueue(NativeInboundMessage::SkillModelReceipt(receipt.clone())));
+        for serial in 0..1000 {
+            assert!(buffer.enqueue(NativeInboundMessage::SkillModel(serial.to_string())));
+        }
+        let models: Vec<_> = buffer.pending.iter().collect();
+        assert_eq!(models.len(), 2);
+        assert!(
+            matches!(models[0], NativeInboundMessage::SkillModelReceipt(json) if json == &receipt)
+        );
+        assert!(matches!(models[1], NativeInboundMessage::SkillModel(json) if json == "999"));
     }
 
     #[test]
@@ -998,6 +1108,46 @@ mod tests {
         assert_eq!(buffer.message_count(), 1);
         assert!(matches!(
             buffer.pending.front(),
+            Some(NativeInboundMessage::DataReset)
+        ));
+    }
+
+    #[test]
+    fn reset_barriers_preserve_process_lifetime_entity_atlases() {
+        fn atlas(key: &str) -> NativeInboundMessage {
+            NativeInboundMessage::EntityRenderAtlas {
+                key: key.to_owned(),
+                width: 1,
+                height: 1,
+                pixels: vec![0, 0, 0, 0],
+            }
+        }
+
+        let mut scene = active_buffer();
+        assert!(scene.enqueue(atlas("starter:p1")));
+        assert!(scene.enqueue(NativeInboundMessage::WorldState("old".to_owned())));
+        assert!(scene.enqueue(NativeInboundMessage::SceneReset));
+        assert_eq!(scene.pending.len(), 2);
+        assert!(matches!(
+            scene.pending.front(),
+            Some(NativeInboundMessage::EntityRenderAtlas { key, .. }) if key == "starter:p1"
+        ));
+        assert!(matches!(
+            scene.pending.back(),
+            Some(NativeInboundMessage::SceneReset)
+        ));
+
+        let mut data = active_buffer();
+        assert!(data.enqueue(atlas("starter:p2")));
+        assert!(data.enqueue(NativeInboundMessage::WorldState("old".to_owned())));
+        assert!(data.enqueue(NativeInboundMessage::DataReset));
+        assert_eq!(data.pending.len(), 2);
+        assert!(matches!(
+            data.pending.front(),
+            Some(NativeInboundMessage::EntityRenderAtlas { key, .. }) if key == "starter:p2"
+        ));
+        assert!(matches!(
+            data.pending.back(),
             Some(NativeInboundMessage::DataReset)
         ));
     }

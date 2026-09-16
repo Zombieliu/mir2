@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 
-use mir2_protocol::ClientPacket;
+use mir2_protocol::{ClientPacket, ServerPacket};
 use mir2_simulation::{SimulationSession, WorldCommandExecution};
 
 use crate::routing::{
@@ -388,10 +388,16 @@ fn db_failure_journals_the_exact_frozen_checkpoint_and_revokes_resume_eligibilit
         .expect("real recovery journal should replay");
     assert_eq!(replay.replayed, 1);
     let mut recovered = SimulationSession::new(fixture.config.clone());
-    recovered.handle_packet(ClientPacket::Login {
+    let login = recovered.handle_packet(ClientPacket::Login {
         account_id: "demo".to_string(),
         password: "demo".to_string(),
     });
+    assert!(matches!(
+        login.as_slice(),
+        [ServerPacket::LoginSuccess { characters }]
+            if characters.iter().any(|character|
+                character.index == 0 && character.last_access_binary_datetime != 0)
+    ));
     recovered.handle_packet(ClientPacket::StartGame { character_index: 0 });
     let mut recovered = serde_json::to_value(
         recovered
@@ -442,4 +448,27 @@ fn db_and_journal_failure_retain_frozen_authority_and_retry_same_checkpoint() {
         .release_teardown_for_resume()
         .expect("Saved checkpoint may thaw for resume");
     assert!(!zone_teardown_is_fenced(&session.runtime));
+}
+
+#[test]
+fn abnormal_teardown_updates_the_next_character_roster_last_access() {
+    let fixture = TeardownFixture::new("last-access");
+    let mut session = started_session(&fixture.config);
+
+    assert_eq!(
+        session.try_persist_teardown_once(),
+        GatewayTeardownPersistenceOutcome::Saved
+    );
+
+    let mut next_connection = SimulationSession::new(fixture.config.clone());
+    let packets = next_connection.handle_packet(ClientPacket::Login {
+        account_id: "demo".to_string(),
+        password: "demo".to_string(),
+    });
+    assert!(matches!(
+        packets.as_slice(),
+        [ServerPacket::LoginSuccess { characters }]
+            if characters.iter().any(|character|
+                character.index == 0 && character.last_access_binary_datetime != 0)
+    ));
 }

@@ -12602,6 +12602,7 @@ mod tests {
             let save = account.saves.get_mut(&0).expect("demo save");
             let mut systems = Stage5SystemsState::default();
             systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                item_state_json: None,
                 id: 1,
                 seller: "Scout".into(),
                 item_key: "auction-sword".into(),
@@ -12612,6 +12613,7 @@ mod tests {
                 expired: false,
             });
             systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                item_state_json: None,
                 id: 2,
                 seller: "Scout".into(),
                 item_key: "auction-shield".into(),
@@ -12622,6 +12624,7 @@ mod tests {
                 expired: false,
             });
             systems.auction.push(mir2_simulation::Stage5AuctionListing {
+                item_state_json: None,
                 id: 3,
                 seller: "Scout".into(),
                 item_key: "auction-ring".into(),

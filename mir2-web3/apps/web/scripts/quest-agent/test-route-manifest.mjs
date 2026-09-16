@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   QUEST_CLASS_MASKS,
   buildAuthoritativeClassQuestRoute,
+  buildClassQuestRoute,
   buildProgressionSkillBookCatalog,
   buildSafeSupplyLootCatalog,
   decodeCrystalQuestHeader,
@@ -17,6 +18,23 @@ const quest = (questId) => {
   assert.ok(value, `expected q${questId} in Warrior route`);
   return value;
 };
+
+test("level-15 routes bound every segment and preserve each class instructor branch", () => {
+  for (const [className, instructorId, otherIds] of [
+    ["Warrior", 7, [10, 13]],
+    ["Wizard", 10, [7, 13]],
+    ["Taoist", 13, [7, 10]],
+  ]) {
+    const bounded = buildClassQuestRoute(sources, { className, maxLevel: 15 });
+    assert.deepEqual(bounded.segments.map(({ label }) => label), ["1-7", "8-15"]);
+    const ids = bounded.quests.map(({ questId }) => questId);
+    assert.ok(ids.includes(instructorId));
+    assert.ok(otherIds.every((id) => !ids.includes(id)));
+    assert.ok(bounded.quests.every((q) => q.eligibility.minLevel <= 15));
+    assert.deepEqual(bounded.segments.flatMap((s) => s.questIds).sort((a, b) => a - b),
+      [...ids].sort((a, b) => a - b));
+  }
+});
 
 test("decodes authoritative Crystal ClientQuestInfo headers", () => {
   const q1 = sources.questManifest.quests.find((candidate) => candidate.index === 1);

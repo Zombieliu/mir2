@@ -13,11 +13,14 @@ use mir2_protocol::{ChatType, ClientPacket, MirDirection, Point, ServerPacket};
 use serde::{Deserialize, Serialize};
 
 use crate::config::{
-    apply_crystal_map_metadata, crystal_base_vitals, new_stage5_mail_delivery_nonce,
-    AccountBanStatus, AccountRecord, AccountSourceRefreshOutcome, CharacterRecord,
-    CharacterSaveRecord, ItemContainer, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
+    apply_crystal_map_metadata, crystal_bag_slot_capacity, crystal_base_vitals,
+    is_valid_crystal_inventory_capacity, new_stage5_mail_delivery_nonce, AccountBanStatus,
+    AccountRecord, AccountSourceRefreshOutcome, CharacterRecord, CharacterSaveRecord,
+    ItemContainer, SimulationConfig, Stage5MailMessage, Stage5SystemsState,
+    CRYSTAL_MAX_INVENTORY_CAPACITY,
 };
 
+use super::buffs::BuffState;
 use super::components::{
     entity_facing, entity_player_vitals, entity_position, player_entity, PlayerVitals,
 };
@@ -26,6 +29,8 @@ use super::equipment::{
     equipment_state_from_item_state, item_state_from_equipment_state,
     refresh_mount_resource_from_equipment, seed_equipment_items_for_character, EquipmentState,
 };
+#[cfg(test)]
+use super::inventory::free_bag_slots;
 use super::inventory::{
     crystal_start_inventory_items, normalize_inventory_known_item_metadata,
     normalize_inventory_unique_ids, refresh_storage_password_state, seed_belt_items,
@@ -51,7 +56,7 @@ use super::resources::{
     SessionResource, SkillResource, Stage5SystemsResource,
 };
 use super::session::SimulationSession;
-use super::skills::seed_skills;
+use super::skills::{seed_skills, SkillState};
 use super::stage5::{
     merge_native_game_shop_ledger_mail, validate_stage5_mail_item_carriers,
     validate_stage5_systems_item_carriers,
@@ -147,6 +152,78 @@ where
         .collect()
 }
 
+const DURABLE_SKILL_CLOCK_SCHEMA: u8 = 1;
+const SKILL_CLOCK_METADATA_KEY: &str = "_runtimeCooldownClock";
+
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DurableSkillClock {
+    schema: u8,
+    saved_at_unix_ms: u64,
+    remaining_ms: u64,
+}
+
+fn encode_durable_skill_states(skills: &[SkillState], tick: u64, now_ms: u64) -> Vec<String> {
+    skills
+        .iter()
+        .map(|skill| {
+            let mut value = serde_json::to_value(skill).expect("skill state should serialize");
+            let remaining_ticks = skill
+                .cooldown_ends_at
+                .saturating_sub(tick)
+                .min(u64::from(skill.cooldown_ticks));
+            let saved_at_unix_ms = if remaining_ticks == 0 { 0 } else { now_ms };
+            value
+                .as_object_mut()
+                .expect("skill state should serialize as an object")
+                .insert(
+                    SKILL_CLOCK_METADATA_KEY.to_string(),
+                    serde_json::json!({
+                        "schema": DURABLE_SKILL_CLOCK_SCHEMA,
+                        "savedAtUnixMs": saved_at_unix_ms,
+                        "remainingMs": remaining_ticks.saturating_mul(1_000),
+                    }),
+                );
+            serde_json::to_string(&value).expect("skill state should serialize")
+        })
+        .collect()
+}
+
+fn decode_durable_skill_states(
+    items: &[String],
+) -> Option<Vec<(SkillState, Option<DurableSkillClock>)>> {
+    items
+        .iter()
+        .map(|item| {
+            let value = serde_json::from_str::<serde_json::Value>(item).ok()?;
+            let skill = serde_json::from_value::<SkillState>(value.clone()).ok()?;
+            let clock = match value.get(SKILL_CLOCK_METADATA_KEY) {
+                Some(metadata) => {
+                    let clock = serde_json::from_value::<DurableSkillClock>(metadata.clone()).ok()?;
+                    (clock.schema == DURABLE_SKILL_CLOCK_SCHEMA).then_some(clock)
+                }
+                None => None,
+            };
+            Some((skill, clock))
+        })
+        .collect()
+}
+
+fn rebased_durable_cooldown_ticks(
+    cooldown_ticks: u32,
+    clock: Option<DurableSkillClock>,
+    now_ms: u64,
+) -> u64 {
+    let Some(clock) = clock else {
+        return 0;
+    };
+    clock
+        .remaining_ms
+        .saturating_sub(now_ms.saturating_sub(clock.saved_at_unix_ms))
+        .div_ceil(1_000)
+        .min(u64::from(cooldown_ticks))
+}
+
 pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterSaveRecord> {
     let resources = world.resource::<InventoryResource>();
     let hero_inventory = world.resource::<HeroInventoryResource>();
@@ -154,6 +231,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     let map = world.resource::<MapRuntimeResource>();
     let quests = world.resource::<QuestResource>();
     let skills = world.resource::<SkillResource>();
+    let buffs = world.resource::<BuffResource>();
     let npc_state = world.resource::<NpcStateResource>();
     let rental = world.resource::<ItemRentalResource>();
     let stage5 = world.resource::<Stage5SystemsResource>();
@@ -165,7 +243,10 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
     let direction = entity_facing(world, player)?;
     let vitals = entity_player_vitals(world, player)?;
 
+    let mut saved_systems = stage5.stage5_systems.clone();
+    super::refine_oven::snapshot_timer(&mut saved_systems.refine, true);
     Some(CharacterSaveRecord {
+        guild_experience_journal: super::shared_guild_experience::snapshot(world),
         revision,
         character,
         map_file_name: map.current_map.file_name.clone(),
@@ -184,14 +265,28 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         pk_points: player_runtime.pk_points,
         chat_banned: player_runtime.chat_banned,
         chat_ban_until_ms: player_runtime.chat_ban_until_ms,
+        inventory_capacity: resources.inventory_capacity,
         inventory_items_json: encode_state_vec(&resources.inventory_items),
         belt_items_json: encode_state_vec(&resources.belt_items),
         hero_inventory_items_json: encode_state_vec(&hero_inventory.items),
+        hero_equipment_items_json: encode_state_vec(&hero_inventory.equipment),
+        hero_inventory_capacity: Some(hero_inventory.capacity),
+        hero_inventory_legacy_40: hero_inventory.legacy_40,
+        hero_registry_attachment: hero_inventory.registry_attachment,
+        hero_vitals: super::components::hero_entity(world)
+            .and_then(|entity| entity_player_vitals(world, entity))
+            .map(|v| crate::config::HeroVitalsState {hp:v.hp,mp:v.mp})
+            .or(hero_inventory.saved_vitals),
         storage_items_json: encode_state_vec(&resources.storage_items),
         equipment_items_json: encode_state_vec(&resources.equipment_items),
         equipment_items_explicit_empty: resources.equipment_items.is_empty(),
         quest_states_json: encode_state_vec(&quests.quests),
-        skill_states_json: encode_state_vec(&skills.skills),
+        skill_states_json: encode_durable_skill_states(
+            &skills.skills,
+            runtime_tick(world),
+            unix_now_ms(),
+        ),
+        buff_states_json: encode_state_vec(&buffs.buffs),
         npc_flag_states_json: encode_state_vec(&npc_state.npc_flags),
         npc_saved_values_json: encode_state_vec(&npc_state.npc_saved_values),
         npc_buy_back_items_json: encode_state_vec(&npc_state.npc_buy_back_items),
@@ -199,8 +294,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         item_rental_records_json: encode_state_vec(&rental.rented_items),
         has_rented_item: rental.has_rented_item,
         stage5_systems_json: Some(
-            serde_json::to_string(&stage5.stage5_systems)
-                .expect("stage5 systems state should serialize"),
+            serde_json::to_string(&saved_systems).expect("stage5 systems state should serialize"),
         ),
     })
 }
@@ -243,6 +337,37 @@ pub(super) fn crystal_character_select_state(
 }
 
 pub(super) fn persist_active_character_save(world: &World) -> Result<(), String> {
+    persist_active_character_save_inner(world, None)
+}
+
+fn current_crystal_logout_binary_datetime() -> i64 {
+    const DOTNET_TICKS_AT_UNIX_EPOCH: i64 = 621_355_968_000_000_000;
+    const DOTNET_DATETIME_KIND_UTC: i64 = 1_i64 << 62;
+
+    // Crystal's `Envir.Now` starts from `DateTime.UtcNow`, so
+    // `LastLogoutDate.ToBinary()` carries the UTC kind bit. Reusing the
+    // inventory/rental helper here would mark the same ticks as Local and make
+    // the native select screen apply the host timezone a second time.
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system time should be after unix epoch");
+    let ticks = DOTNET_TICKS_AT_UNIX_EPOCH
+        + i64::try_from(now.as_secs()).expect("unix seconds should fit in i64") * 10_000_000
+        + i64::from(now.subsec_nanos() / 100);
+    ticks | DOTNET_DATETIME_KIND_UTC
+}
+
+/// Crystal records `LastLogoutDate` only when an in-world character leaves the
+/// world. Keep that select-screen metadata in the same durable transaction as
+/// the final private character snapshot.
+pub(super) fn persist_active_character_save_for_logout(world: &World) -> Result<(), String> {
+    persist_active_character_save_inner(world, Some(current_crystal_logout_binary_datetime()))
+}
+
+fn persist_active_character_save_inner(
+    world: &World,
+    last_access_binary_datetime: Option<i64>,
+) -> Result<(), String> {
     let Some(save) = snapshot_active_character_save(world) else {
         return Ok(());
     };
@@ -260,7 +385,7 @@ pub(super) fn persist_active_character_save(world: &World) -> Result<(), String>
         return Err("active character full-save snapshot identity mismatch".to_string());
     }
     let expected_revision = save.revision;
-    match persist_character_save(world, &account_id, save)? {
+    match persist_character_save_inner(world, &account_id, save, last_access_binary_datetime)? {
         PersistCharacterSaveResult::Full(committed_revision) => {
             if !world
                 .resource::<SessionResource>()
@@ -376,7 +501,17 @@ impl SimulationSession {
     /// Capture the exact durable private state for the active character without
     /// mutating the configured account store.
     pub fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
-        snapshot_active_character_save(self.app.world())
+        let mut save = snapshot_active_character_save(self.app.world())?;
+        // Transaction rollback remains in the same runtime clock domain. Keep
+        // its exact deadline instead of the wall-clock durable representation.
+        save.skill_states_json = encode_state_vec(
+            &self
+                .app
+                .world()
+                .resource::<SkillResource>()
+                .skills,
+        );
+        Some(save)
     }
 
     /// Restore the active character's durable private state after journal
@@ -402,7 +537,11 @@ impl SimulationSession {
         }
 
         let replay_tick = runtime_tick(self.app.world());
-        apply_character_save(self.app.world_mut(), save)?;
+        apply_character_save_with_timing(
+            self.app.world_mut(),
+            save,
+            SkillTimingRestore::PreserveSameSession,
+        )?;
         refresh_runtime_map_collision(self.app.world_mut());
         refresh_storage_password_state(self.app.world_mut());
         rebuild_world(self.app.world_mut());
@@ -424,6 +563,10 @@ impl SimulationSession {
 #[cfg(test)]
 #[path = "save_fail_closed_tests.rs"]
 mod save_fail_closed_tests;
+
+#[cfg(test)]
+#[path = "skill_cooldown_restore_tests.rs"]
+mod skill_cooldown_restore_tests;
 
 pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
     let (config, account_id, selected_character) = {
@@ -778,7 +921,16 @@ mod stale_mail_status_merge_tests {
 pub(super) fn persist_character_save(
     world: &World,
     account_id: &str,
+    save: CharacterSaveRecord,
+) -> Result<PersistCharacterSaveResult, String> {
+    persist_character_save_inner(world, account_id, save, None)
+}
+
+fn persist_character_save_inner(
+    world: &World,
+    account_id: &str,
     mut save: CharacterSaveRecord,
+    last_access_binary_datetime: Option<i64>,
 ) -> Result<PersistCharacterSaveResult, String> {
     let config = world.resource::<RuntimeConfigResource>().config.clone();
     let active_character = {
@@ -801,14 +953,34 @@ pub(super) fn persist_character_save(
     migrate_legacy_candidate_save_record(&mut save)?;
     validate_character_save_record(&save)?;
     let account_id = account_id.to_string();
-    let expected_revision = save.revision;
-    let character_index = active_character.index;
     let touched_accounts = vec![account_id.clone()];
 
-    config.commit_account_store_transaction(&touched_accounts, move |store| {
+    super::shared_guild_experience::commit_source(world, &config, &touched_accounts, move |store| {
+        apply_full_character_save_mutation(store, &account_id, &active_character, save, last_access_binary_datetime)
+    })
+}
+
+pub(super) fn stage_prepared_character_save(world: &World, store: &mut crate::config::AccountStore, mut save: CharacterSaveRecord) -> Result<(), String> {
+    let session = world.resource::<SessionResource>();
+    let account_id = active_session_mutating_account_id(session).ok_or("prepared source requires authenticated identity")?;
+    let active = session.selected_character.as_ref().ok_or("prepared source requires selected character")?;
+    if !exact_character_identity_matches(&save.character, active) { return Err("prepared source character mismatch".into()); }
+    migrate_legacy_candidate_save_record(&mut save)?;
+    validate_character_save_record(&save)?;
+    match apply_full_character_save_mutation(store, &account_id, active, save, None)? {
+        PersistCharacterSaveResult::Full(_) => Ok(()),
+        PersistCharacterSaveResult::StaleMailStatusOnly => Err("prepared kill requires full source CAS".into()),
+    }
+}
+
+fn apply_full_character_save_mutation(store: &mut crate::config::AccountStore, account_id: &str, active_character: &CharacterRecord,
+    mut save: CharacterSaveRecord, last_access_binary_datetime: Option<i64>) -> Result<PersistCharacterSaveResult, String> {
+    let expected_revision = save.revision;
+    let character_index = active_character.index;
+
         let account = store
             .accounts
-            .get(&account_id)
+            .get(account_id)
             .ok_or_else(|| "full character save requires an existing account".to_string())?;
         let persisted_character = account
             .characters
@@ -843,7 +1015,7 @@ pub(super) fn persist_character_save(
                 .ok_or_else(|| "mail-status revision exhausted".to_string())?;
             store
                 .accounts
-                .get_mut(&account_id)
+                .get_mut(account_id)
                 .expect("validated stale-save account should exist")
                 .saves
                 .insert(character_index, durable_save);
@@ -859,7 +1031,7 @@ pub(super) fn persist_character_save(
 
         let account = store
             .accounts
-            .get_mut(&account_id)
+            .get_mut(account_id)
             .expect("validated full-save account should exist");
         if let Some(character) = account
             .characters
@@ -869,8 +1041,12 @@ pub(super) fn persist_character_save(
             *character = save.character.clone();
         }
         account.saves.insert(character_index, save);
+        if let Some(last_access_binary_datetime) = last_access_binary_datetime {
+            account
+                .character_last_access_binary_datetimes
+                .insert(character_index, last_access_binary_datetime);
+        }
         Ok(PersistCharacterSaveResult::Full(committed_revision))
-    })
 }
 
 pub(super) fn merge_persisted_mail_into_character_save(
@@ -889,13 +1065,52 @@ pub(super) fn merge_persisted_mail_into_character_save(
         None => Stage5SystemsState::default(),
     };
     validate_stage5_systems_item_carriers(&systems)?;
+    let marriage_changed =
+        persisted_systems.relationship.authority_revision > systems.relationship.authority_revision;
+    if marriage_changed {
+        systems.relationship = persisted_systems.relationship.clone();
+        if systems.relationship.partner_identity.is_none()
+            && systems.relationship.cooldown_until_ms > 0
+        {
+            super::shared_marriage::clear_divorced_ring_save(save)?;
+        }
+    }
+    let local_mentor = systems.mentor.clone();
+    if persisted_systems.mentor.authority_revision > systems.mentor.authority_revision {
+        systems.mentor = persisted_systems.mentor.clone();
+    }
+    let ledger = &mut systems.mentor.ledger;
+    let local = &local_mentor.ledger;
+    let durable = &persisted_systems.mentor.ledger;
+    ledger.bank_earned = local.bank_earned.max(durable.bank_earned);
+    ledger.bank_settled = local.bank_settled.max(durable.bank_settled);
+    ledger.local_event_sequence = local.local_event_sequence.max(durable.local_event_sequence);
+    ledger.bank_events.extend(local.bank_events.iter().cloned());
+    ledger
+        .bank_events
+        .extend(durable.bank_events.iter().cloned());
+    ledger.leveling_credit = local.leveling_credit.max(durable.leveling_credit);
+    ledger.balance_credit = local.balance_credit.max(durable.balance_credit);
+    let leveling_missing = ledger
+        .leveling_credit
+        .checked_sub(local.leveling_applied)
+        .ok_or("invalid mentor leveling credit")?;
+    let balance_missing = ledger
+        .balance_credit
+        .checked_sub(local.balance_applied)
+        .ok_or("invalid mentor balance credit")?;
+    super::shared_mentor_rewards::apply_saved_mentor_credit(save, leveling_missing, true)?;
+    super::shared_mentor_rewards::apply_saved_mentor_credit(save, balance_missing, false)?;
+    ledger.leveling_applied = ledger.leveling_credit;
+    ledger.balance_applied = ledger.balance_credit;
+    let mentor_changed = systems.mentor != local_mentor;
     let marker_count = systems.economy_projection_event_ids.len();
     systems
         .economy_projection_event_ids
         .extend(persisted_systems.economy_projection_event_ids);
     let markers_changed = systems.economy_projection_event_ids.len() != marker_count;
     let mail_changed = merge_external_stage5_mail(&mut systems.mail, persisted_systems.mail)?;
-    if !markers_changed && !mail_changed {
+    if !markers_changed && !mail_changed && !mentor_changed && !marriage_changed {
         return Ok(false);
     }
     save.stage5_systems_json = Some(
@@ -917,6 +1132,21 @@ pub(super) fn account_characters(
         .accounts
         .get(account_id)
         .map(|account| account.characters.clone())
+        .unwrap_or_default()
+}
+
+pub(super) fn account_select_infos(
+    config: &SimulationConfig,
+    account_id: &str,
+) -> Vec<mir2_protocol::SelectInfo> {
+    let store = config
+        .account_store
+        .lock()
+        .expect("account store mutex should not be poisoned");
+    store
+        .accounts
+        .get(account_id)
+        .map(AccountRecord::select_infos)
         .unwrap_or_default()
 }
 
@@ -1515,6 +1745,9 @@ pub(super) fn delete_character_from_account(
         account
             .characters
             .retain(|character| character.index != character_index);
+        account
+            .character_last_access_binary_datetimes
+            .remove(&character_index);
         account.saves.remove(&character_index);
         Ok(existing.name)
     })
@@ -1649,6 +1882,27 @@ pub(super) fn normalize_legacy_default_account_demo_seed_state(
     if save.character.index != 0 || save.character.level != 7 {
         return false;
     }
+    // A live trade can legitimately hold the entire wallet or inventory.
+    // Treating that saved zero as a legacy demo seed would manufacture assets.
+    if save
+        .stage5_systems_json
+        .as_deref()
+        .and_then(|encoded| serde_json::from_str::<Stage5SystemsState>(encoded).ok())
+        .is_some_and(|systems| {
+            systems.trade.is_some()
+                || systems
+                    .auction
+                    .iter()
+                    .any(|listing| listing.item_state_json.is_some())
+                || systems.refine.oven_item_state_json.is_some()
+                || !systems.refine.slots.is_empty()
+                || !systems.refine.item_states.is_empty()
+                || systems.refine.pending_unique_id != 0
+                || systems.refine.refining
+        })
+    {
+        return false;
+    }
 
     let mut changed = false;
     if save.gold == 0 {
@@ -1657,6 +1911,10 @@ pub(super) fn normalize_legacy_default_account_demo_seed_state(
     }
     if save.inventory_items_json.is_empty() {
         save.inventory_items_json = encode_state_vec(&seed_inventory_items());
+        changed = true;
+    }
+    if save.inventory_capacity != CRYSTAL_MAX_INVENTORY_CAPACITY {
+        save.inventory_capacity = CRYSTAL_MAX_INVENTORY_CAPACITY;
         changed = true;
     }
     if save.belt_items_json.is_empty() {
@@ -1889,6 +2147,7 @@ fn migrate_legacy_candidate_equipment_state(item: &mut EquipmentState) -> Result
 }
 
 fn migrate_legacy_candidate_stage5_systems(systems: &mut Stage5SystemsState) -> Result<(), String> {
+    systems.migrate_legacy_intelligent_creature_state();
     for (mail_index, mail) in systems.mail.iter_mut().enumerate() {
         for key in &mut mail.items {
             canonicalize_legacy_candidate_key(key)?;
@@ -1940,6 +2199,24 @@ fn migrate_legacy_candidate_stage5_systems(systems: &mut Stage5SystemsState) -> 
     }
     for listing in &mut systems.auction {
         canonicalize_legacy_candidate_key(&mut listing.item_key)?;
+        if let Some(encoded) = listing.item_state_json.as_mut() {
+            let mut item: ItemState = serde_json::from_str(encoded).map_err(|e| e.to_string())?;
+            if migrate_legacy_candidate_item_state(&mut item)? {
+                *encoded = serde_json::to_string(&item).map_err(|e| e.to_string())?;
+            }
+        }
+    }
+    if let Some(encoded) = systems.refine.oven_item_state_json.as_mut() {
+        let mut item: ItemState = serde_json::from_str(encoded).map_err(|e| e.to_string())?;
+        if migrate_legacy_candidate_item_state(&mut item)? {
+            *encoded = serde_json::to_string(&item).map_err(|e| e.to_string())?;
+        }
+    }
+    for encoded in systems.refine.item_states.values_mut() {
+        let mut item: ItemState = serde_json::from_str(encoded).map_err(|e| e.to_string())?;
+        if migrate_legacy_candidate_item_state(&mut item)? {
+            *encoded = serde_json::to_string(&item).map_err(|e| e.to_string())?;
+        }
     }
     for key in systems.refine.slots.values_mut() {
         canonicalize_legacy_candidate_key(key)?;
@@ -1989,6 +2266,7 @@ fn migrate_legacy_candidate_save_record(save: &mut CharacterSaveRecord) -> Resul
     changed |= migrate_item_vec("belt", &mut save.belt_items_json)?;
     changed |= migrate_item_vec("storage", &mut save.storage_items_json)?;
     changed |= migrate_item_vec("hero inventory", &mut save.hero_inventory_items_json)?;
+    changed |= migrate_item_vec("hero equipment", &mut save.hero_equipment_items_json)?;
     changed |= migrate_equipment_vec("equipment", &mut save.equipment_items_json)?;
 
     if let Some(encoded) = save.stage5_systems_json.as_mut() {
@@ -2109,6 +2387,27 @@ fn decode_and_validate_character_items(
     validate_saved_item_states("storage", &storage_items)?;
     validate_saved_item_states("hero inventory", &hero_inventory_items)?;
     validate_saved_equipment_states("equipment", &equipment_items)?;
+    if !is_valid_crystal_inventory_capacity(save.inventory_capacity) {
+        return Err(format!(
+            "invalid Crystal inventory capacity {}",
+            save.inventory_capacity
+        ));
+    }
+    let bag_capacity = crystal_bag_slot_capacity(save.inventory_capacity);
+    for (index, item) in inventory_items.iter().enumerate() {
+        if matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2) {
+            let logical_slot = match item.container {
+                ItemContainer::Bag1 => u16::from(item.slot),
+                ItemContainer::Bag2 => 40 + u16::from(item.slot),
+                _ => unreachable!(),
+            };
+            if logical_slot >= bag_capacity {
+                return Err(format!(
+                    "invalid inventory item at index {index}: slot {logical_slot} exceeds Crystal bag capacity {bag_capacity}"
+                ));
+            }
+        }
+    }
 
     Ok((
         inventory_items,
@@ -2179,7 +2478,10 @@ struct DecodedCharacterSavePreflight {
     belt_items: Vec<ItemState>,
     storage_items: Vec<ItemState>,
     equipment_items: Vec<EquipmentState>,
-    hero_inventory_items: Vec<ItemState>,
+    hero_inventory: HeroInventoryResource,
+    quest_states: Vec<QuestState>,
+    skill_states: Vec<(SkillState, Option<DurableSkillClock>)>,
+    buff_states: Vec<BuffState>,
     stage5_systems: Stage5SystemsState,
     npc_buy_back_items: Vec<NpcBuyBackState>,
     npc_used_goods_items: Vec<NpcUsedGoodsState>,
@@ -2188,9 +2490,30 @@ struct DecodedCharacterSavePreflight {
 fn decode_and_validate_character_save(
     save: &CharacterSaveRecord,
 ) -> Result<DecodedCharacterSavePreflight, String> {
-    let (inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
+    let (mut inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
         decode_and_validate_character_items(save)?;
-    let stage5_systems = decode_and_validate_stage5_systems(save)?;
+    let mut hero_equipment = decode_saved_item_states("hero equipment", &save.hero_equipment_items_json)?;
+    for item in &mut hero_equipment { migrate_legacy_candidate_item_state(item)?; }
+    validate_saved_item_states("hero equipment", &hero_equipment)?;
+    let hero_inventory = super::hero_inventory::restored_hero_inventory(save, hero_inventory_items, hero_equipment)?;
+    let hero_ids = super::hero_inventory::validate_hero_custody(&hero_inventory)?;
+    for item in inventory_items.iter().chain(belt_items.iter()).chain(storage_items.iter()) {
+        super::hero_inventory::reject_cross_custody_ids(item, &hero_ids)?;
+    }
+    for item in &equipment_items {
+        super::hero_inventory::reject_cross_custody_ids(&item_state_from_equipment_state(item.clone(), ItemContainer::Bag1, item.slot as u8), &hero_ids)?;
+    }
+    let buff_states = decode_state_vec::<BuffState>(&save.buff_states_json)
+        .ok_or_else(|| "failed to decode buff state".to_string())?;
+    let quest_states = decode_state_vec::<QuestState>(&save.quest_states_json)
+        .ok_or_else(|| "failed to decode quest state".to_string())?;
+    let skill_states = decode_durable_skill_states(&save.skill_states_json)
+        .ok_or_else(|| "failed to decode skill state".to_string())?;
+    let mut stage5_systems = decode_and_validate_stage5_systems(save)?;
+    if super::item_custody::reserved_ids(&stage5_systems)?.iter().any(|id|hero_ids.contains(id)) {
+        return Err("Hero item UID collides with held custody".into());
+    }
+    super::refine_oven::migrate_legacy_pending(&mut inventory_items, &mut stage5_systems.refine)?;
     let npc_buy_back_items = decode_and_validate_npc_buy_back_items(&save.npc_buy_back_items_json)?;
     let npc_used_goods_items =
         decode_and_validate_npc_used_goods_items(&save.npc_used_goods_items_json)?;
@@ -2199,7 +2522,10 @@ fn decode_and_validate_character_save(
         belt_items,
         storage_items,
         equipment_items,
-        hero_inventory_items,
+        hero_inventory,
+        quest_states,
+        skill_states,
+        buff_states,
         stage5_systems,
         npc_buy_back_items,
         npc_used_goods_items,
@@ -2215,16 +2541,73 @@ pub(super) fn apply_character_save(
     world: &mut World,
     save: &CharacterSaveRecord,
 ) -> Result<(), String> {
+    apply_character_save_with_timing(world, save, SkillTimingRestore::ResetForNewSession)
+}
+
+#[derive(Clone, Copy)]
+enum SkillTimingRestore {
+    ResetForNewSession,
+    PreserveSameSession,
+}
+
+fn apply_character_save_with_timing(
+    world: &mut World,
+    save: &CharacterSaveRecord,
+    skill_timing_restore: SkillTimingRestore,
+) -> Result<(), String> {
     let DecodedCharacterSavePreflight {
         inventory_items,
         belt_items,
         storage_items,
         equipment_items,
-        hero_inventory_items,
-        stage5_systems,
+        hero_inventory,
+        quest_states,
+        skill_states,
+        buff_states,
+        mut stage5_systems,
         npc_buy_back_items,
         npc_used_goods_items,
     } = decode_and_validate_character_save(save)?;
+    let now_ms = unix_now_ms();
+    let skill_states = skill_states
+        .into_iter()
+        .map(|(mut skill, durable_clock)| {
+            if matches!(skill_timing_restore, SkillTimingRestore::ResetForNewSession) {
+                // Crystal persists the remaining delay across a normal logout
+                // and rebases CastTime on login. Old saves have no clock marker;
+                // treating their absolute deadline as expired matches Crystal's
+                // database-load reset and prevents an uptime-sized cooldown.
+                skill.cooldown_ends_at = rebased_durable_cooldown_ticks(
+                    skill.cooldown_ticks,
+                    durable_clock,
+                    now_ms,
+                );
+                skill.cast_time_ms = 0;
+            }
+            skill
+        })
+        .collect();
+    super::refine_oven::restore_timer(&mut stage5_systems.refine)?;
+    let mut custody_ids = super::item_custody::reserved_ids(&stage5_systems)?;
+    for id in super::hero_inventory::validate_hero_custody(&hero_inventory)? {
+        if !custody_ids.insert(id) {return Err("saved Hero UID collides with market/refine custody".into());}
+    }
+    let mut restored_inventory = world.resource::<InventoryResource>().clone();
+    restored_inventory.reserved_item_unique_ids.clear();
+    restored_inventory.inventory_capacity = save.inventory_capacity;
+    restored_inventory.inventory_items = inventory_items;
+    restored_inventory.belt_items = belt_items;
+    restored_inventory.storage_items = storage_items;
+    restored_inventory.equipment_items = equipment_items;
+    if custody_ids
+        .iter()
+        .any(|id| super::inventory::inventory_unique_id_is_used(&restored_inventory, *id))
+    {
+        return Err("saved inventory collides with a held market/refine UID".into());
+    }
+    restored_inventory.reserved_item_unique_ids = custody_ids;
+    normalize_inventory_known_item_metadata(&mut restored_inventory);
+    normalize_inventory_unique_ids(&mut restored_inventory);
     {
         let mut session = world.resource_mut::<SessionResource>();
         session.selected_character = Some(save.character.clone());
@@ -2335,16 +2718,14 @@ pub(super) fn apply_character_save(
         player_runtime.chat_next_allowed_at_ms = 0;
         player_runtime.chat_spam_tick = 0;
     }
-    let mut resources = world.resource_mut::<InventoryResource>();
-    resources.inventory_items = inventory_items;
-    resources.belt_items = belt_items;
-    resources.storage_items = storage_items;
-    resources.equipment_items = equipment_items;
-    normalize_inventory_known_item_metadata(&mut resources);
-    normalize_inventory_unique_ids(&mut resources);
-    drop(resources);
+    super::shared_guild_experience::restore(world, &save.guild_experience_journal);
+    *world.resource_mut::<InventoryResource>() = restored_inventory;
     refresh_mount_resource_from_equipment(world);
-    world.resource_mut::<HeroInventoryResource>().items = hero_inventory_items;
+    *world.resource_mut::<HeroInventoryResource>() = hero_inventory;
+    super::hero_ai::hero_cast::reset(world);
+    super::hero_ai::hero_buffs::reset(world);
+    super::hero_ai::hero_mount::reset(world);
+    super::hero_ai::hero_cadence::reset(world);
     world.resource_mut::<Stage5SystemsResource>().stage5_systems = stage5_systems;
     {
         let mut npc_state = world.resource_mut::<NpcStateResource>();
@@ -2371,11 +2752,10 @@ pub(super) fn apply_character_save(
         queue.pending_ground_spell_actions = Vec::new();
         queue.pending_movement_command = None;
     }
-    world.resource_mut::<QuestResource>().quests =
-        decode_state_vec(&save.quest_states_json).unwrap_or_default();
-    world.resource_mut::<SkillResource>().skills =
-        decode_state_vec(&save.skill_states_json).unwrap_or_default();
-    world.resource_mut::<BuffResource>().buffs = Vec::new();
+    world.resource_mut::<QuestResource>().quests = quest_states;
+    super::quests::reconcile_effective_quest_states(world);
+    world.resource_mut::<SkillResource>().skills = skill_states;
+    world.resource_mut::<BuffResource>().buffs = buff_states;
     {
         let mut rental = world.resource_mut::<ItemRentalResource>();
         rental.rented_items = decode_state_vec(&save.item_rental_records_json).unwrap_or_default();
@@ -2723,6 +3103,12 @@ mod character_save_item_validation_tests {
         use std::fs;
 
         let (config, mut session, root, path) = atomic_fixture("zero-active-save");
+        let baseline_save = {
+            let store = config.account_store.lock().unwrap();
+            store.accounts["demo"].saves[&0].clone()
+        };
+        validate_character_save_record(&baseline_save)
+            .unwrap_or_else(|error| panic!("zero-active-save baseline is invalid: {error}"));
         assert!(session
             .handle_packet(ClientPacket::Login {
                 account_id: "demo".to_string(),
@@ -2730,10 +3116,13 @@ mod character_save_item_validation_tests {
             })
             .iter()
             .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. })));
-        assert!(session
-            .handle_packet(ClientPacket::StartGame { character_index: 0 })
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
+        let start_packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert!(
+            start_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })),
+            "unexpected StartGame packets: {start_packets:?}"
+        );
         config
             .save_account_store()
             .expect("active-save fixture should have a durable baseline");
@@ -3084,12 +3473,15 @@ mod character_save_item_validation_tests {
             offered_slots: BTreeMap::new(),
             offered_unique_ids: BTreeMap::new(),
             offered_gold: 0,
+            held_gold: None,
             offered_currency: CurrencyKind::Gold,
             accepted: false,
             locked: false,
+            escrow_prepared: false,
             completed: false,
         });
         systems.auction.push(Stage5AuctionListing {
+            item_state_json: None,
             id: 1,
             seller: "LegacyCarrier".to_string(),
             item_key: "guide-ring-right".to_string(),
@@ -3196,6 +3588,106 @@ mod character_save_item_validation_tests {
         assert_eq!(second_persisted, first_persisted);
 
         let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[test]
+    fn crystal_buff_state_survives_save_preflight_and_apply() {
+        let config = SimulationConfig::default();
+        let mut session = SimulationSession::new(config.clone());
+        let mut save = legacy_save_with_inventory(&config);
+        let rested = BuffState {
+            real_time_duration: None,
+            key: "rested".to_string(),
+            name: "Rested".to_string(),
+            description: "Crystal rested buff.".to_string(),
+            expires_at_tick: 10_092,
+            attack_bonus: 0,
+            defence_bonus: 0,
+            stats: vec![mir2_protocol::UserItemStat {
+                stat: 100,
+                value: 5,
+            }],
+        };
+        save.buff_states_json = encode_state_vec(&vec![rested]);
+
+        apply_character_save(session.app.world_mut(), &save)
+            .expect("valid imported Crystal buff should apply");
+        let buffs = &session.app.world().resource::<BuffResource>().buffs;
+        assert_eq!(buffs.len(), 1);
+        assert_eq!(buffs[0].key, "rested");
+        assert_eq!(buffs[0].expires_at_tick, 10_092);
+        assert_eq!(buffs[0].stats[0].stat, 100);
+        assert_eq!(buffs[0].stats[0].value, 5);
+
+        save.buff_states_json = vec!["{not valid buff state".to_string()];
+        assert!(validate_character_save_record(&save)
+            .unwrap_err()
+            .contains("failed to decode buff state"));
+    }
+
+    #[test]
+    fn crystal_inventory_capacity_controls_bag2_and_user_information_raw_slots() {
+        let config = SimulationConfig::default();
+        let mut session = SimulationSession::new(config.clone());
+        let mut save = legacy_save_with_inventory(&config);
+        let mut inventory: Vec<ItemState> =
+            decode_state_vec(&save.inventory_items_json).expect("fixture inventory should decode");
+        let mut bag2_item = inventory
+            .first()
+            .cloned()
+            .expect("fixture should contain a starter inventory item");
+        bag2_item.container = ItemContainer::Bag2;
+        bag2_item.slot = 7;
+        bag2_item.unique_id = 79_322;
+        bag2_item.user_item_metadata = None;
+        inventory.push(bag2_item);
+        save.inventory_capacity = 54;
+        save.inventory_items_json = encode_state_vec(&inventory);
+
+        apply_character_save(session.app.world_mut(), &save)
+            .expect("first Crystal expansion and Bag2 slot 7 should apply");
+        rebuild_world(session.app.world_mut());
+        let resources = session.app.world().resource::<InventoryResource>();
+        assert_eq!(resources.inventory_capacity, 54);
+        assert_eq!(free_bag_slots(resources), 54 - 6 - inventory.len() as u16);
+        let raw = user_inventory_slots(
+            resources.inventory_capacity,
+            &resources.belt_items,
+            &resources.inventory_items,
+        );
+        assert_eq!(raw.len(), 54);
+        assert!(
+            raw[53].is_some(),
+            "Bag2 slot 7 must occupy raw index 46 + 7"
+        );
+
+        let snapshot = session.world_snapshot();
+        assert_eq!(snapshot.inventory_capacity, 54);
+        assert_eq!(snapshot.max_bag_slots, 48);
+        let persisted = snapshot_active_character_save(session.app.world())
+            .expect("active character state should snapshot");
+        assert_eq!(persisted.inventory_capacity, 54);
+
+        save.inventory_capacity = 46;
+        assert!(validate_character_save_record(&save)
+            .unwrap_err()
+            .contains("exceeds Crystal bag capacity 40"));
+    }
+
+    #[test]
+    fn malformed_quest_and_skill_state_fail_preflight_instead_of_clearing() {
+        let config = SimulationConfig::default();
+        let mut save = legacy_save_with_inventory(&config);
+        save.quest_states_json = vec!["{not valid quest state".to_string()];
+        assert!(validate_character_save_record(&save)
+            .unwrap_err()
+            .contains("failed to decode quest state"));
+
+        save.quest_states_json = Vec::new();
+        save.skill_states_json = vec!["{not valid skill state".to_string()];
+        assert!(validate_character_save_record(&save)
+            .unwrap_err()
+            .contains("failed to decode skill state"));
     }
 }
 
@@ -3338,6 +3830,36 @@ impl SimulationSession {
             spawn_config_visible_npcs(self.app.world_mut());
         }
 
+        self.build_active_character_bootstrap(&character)
+    }
+
+    /// Internal gateway replay after an authenticated connection takes custody
+    /// of its retained character. Ordinary in-game StartGame stays rejected.
+    pub(crate) fn replay_active_character_bootstrap(
+        &mut self,
+        character_index: i32,
+    ) -> Vec<ServerPacket> {
+        let session = self.app.world().resource::<SessionResource>();
+        let Some(account_id) = active_session_mutating_account_id(session) else {
+            return vec![ServerPacket::StartGame { result: 1, resolution: 0 }];
+        };
+        let Some(character) = session.selected_character.clone()
+            .filter(|character| character.index == character_index) else {
+            return vec![ServerPacket::StartGame { result: 2, resolution: 0 }];
+        };
+        let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+        if let Some(ban) = active_account_ban(config, &account_id) {
+            return vec![ServerPacket::StartGameBanned {
+                reason: ban.reason,
+                expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
+            }];
+        }
+        let mut packets = self.build_active_character_bootstrap(&character);
+        super::packets::apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
+        packets
+    }
+
+    fn build_active_character_bootstrap(&mut self, character: &CharacterRecord) -> Vec<ServerPacket> {
         let visible_objects = collect_visible_objects(self.app.world());
         self.visible_objects = visible_objects.keys().copied().collect();
 
@@ -3421,6 +3943,8 @@ impl SimulationSession {
                         .stage5_systems
                         .appearance
                         .hair,
+                    resources.inventory_capacity,
+                    &resources.belt_items,
                     &resources.inventory_items,
                     &resources.equipment_items,
                     self.app
@@ -3434,7 +3958,13 @@ impl SimulationSession {
         ]);
         packets.extend(effective_crystal_quest_info_packets(self.app.world()));
         packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
-        packets.extend(start_game_account_social_and_shop_packets());
+        packets.extend(start_game_account_social_and_shop_packets().into_iter().map(|packet| {
+            if matches!(packet, ServerPacket::ReceiveMail { .. }) {
+                super::packets::stage5_receive_mail_packet(self.app.world())
+            } else {
+                packet
+            }
+        }));
         packets.extend(start_game_base_stats_packet(character.class));
         let npc_flags = self
             .app
@@ -3467,6 +3997,7 @@ impl SimulationSession {
             }
         }
         packets.extend(start_game_post_visible_crystal_bootstrap_packets());
+        packets.extend(super::packets::hero_bootstrap_packets(self.app.world()));
         // Render mineable veins immediately on entry, not just after the first swing.
         packets.extend(super::mining::mine_node_state_packets(self.app.world()));
         // On-chain veins render on entry too, from the last chain-reported stones (M4).

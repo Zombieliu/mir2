@@ -47,7 +47,7 @@ export const NATIVE_KEYED_MANIFEST_KIND = "mir2-native-map-keyed-manifest";
 // Map 0 still references Crystal frames that have not been legally exported.
 // This is the tracked clean-checkout baseline; local untracked exports must not
 // make CI's budget artificially stricter or looser.
-export const NATIVE_KEYED_MAX_MISSING_SOURCES = 2508;
+export const NATIVE_KEYED_MAX_MISSING_SOURCES = 2969;
 
 function loadTypeScriptModule(url, requireMap = {}) {
   const source = readFileSync(url, "utf8");
@@ -449,6 +449,18 @@ export function collectStandaloneMapReferences(parsedMap) {
           });
         }
       };
+      const addFamily = (
+        libraryKey,
+        baseFrameIndex,
+        frameCount,
+        additive,
+        layer,
+      ) => {
+        const count = Math.max(1, positiveInteger(frameCount));
+        for (let phase = 0; phase < count; phase += 1) {
+          add(libraryKey, baseFrameIndex + phase, additive, layer);
+        }
+      };
 
       const backFrame =
         cell.backImage === 0 ? -1 : (cell.backImage & 0x1fffffff) - 1;
@@ -458,9 +470,10 @@ export function collectStandaloneMapReferences(parsedMap) {
 
       const middleFrame = cell.middleImage - 1;
       if (cell.middleIndex >= 0 && middleFrame >= 0) {
-        add(
+        addFamily(
           mapLibraryKeyForIndex(cell.middleIndex),
           middleFrame,
+          decodeCrystalMiddleAnimationCount(cell.middleAnimationFrame),
           crystalMiddleMapBlendMode(cell.middleAnimationFrame) === "additive",
           "middle",
         );
@@ -468,9 +481,10 @@ export function collectStandaloneMapReferences(parsedMap) {
 
       const frontFrame = (cell.frontImage & 0x7fff) - 1;
       if (cell.frontIndex >= 0 && frontFrame >= 0) {
-        add(
+        addFamily(
           mapLibraryKeyForIndex(cell.frontIndex),
           frontFrame,
+          decodeCrystalFrontAnimationCount(cell.frontAnimationFrame),
           crystalFrontMapBlendMode(cell.frontAnimationFrame) === "additive",
           "front",
         );
@@ -624,27 +638,6 @@ async function removeStaleOutputs(root, allowedRoot = root) {
     }
   }
   return removed;
-}
-
-async function keyedImageForSource(absolutePath) {
-  const { data, info } = await sharp(absolutePath)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const pixels = new Uint8ClampedArray(
-    data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength),
-  );
-  alphaKeyMapObjectPixels(pixels, info.width, info.height);
-  const encoded = await sharp(Buffer.from(pixels), {
-    raw: {
-      width: info.width,
-      height: info.height,
-      channels: 4,
-    },
-  })
-    .png({ compressionLevel: 9, adaptiveFiltering: true })
-    .toBuffer();
-  return { encoded, width: info.width, height: info.height };
 }
 
 async function rawImageForSource(absolutePath) {
@@ -986,6 +979,8 @@ export async function buildNativeKeyedMapPack({
 
   const offsetIndex = await loadStarterMapOffsetIndex(starterMapRegionPath);
   const entries = [];
+  // Kept for schema/backward compatibility: this now counts normal standalone
+  // entries, whose local Crystal PNG payload is authoritative RGBA passthrough.
   let keyedEntryCount = 0;
   let additiveEntryCount = 0;
   let fullPackEntryCount = 0;
@@ -1014,11 +1009,14 @@ export async function buildNativeKeyedMapPack({
       }
       placement = image.placement;
       fullPackEntryCount += 1;
-    } else if (reference.additive) {
-      image = await rawImageForSource(sourcePlan.absoluteSourcePath);
-      placement = resolveCrystalMapPlacement(reference, offsetIndex);
     } else {
-      image = await keyedImageForSource(sourcePlan.absoluteSourcePath);
+      // `original-map` PNGs are direct Crystal `.Lib` exports: their RGBA,
+      // including binary alpha on ordinary buildings, is already authoritative.
+      // Re-running the legacy black-key/feather pass here turns edge-connected
+      // dark roof and wall pixels partially transparent and lets the ground show
+      // through. Stage both normal and additive local frames byte-for-byte; the
+      // runtime still chooses their distinct blend modes from map metadata.
+      image = await rawImageForSource(sourcePlan.absoluteSourcePath);
       placement = resolveCrystalMapPlacement(reference, offsetIndex);
     }
 

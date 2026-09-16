@@ -208,6 +208,28 @@ function sha256(bytes) {
 }
 
 {
+  const bytes = makeType100MapBytes([
+    (target, base) => {
+      target.writeInt16LE(2, base + 10);
+      target.writeInt16LE(2724, base + 12); // front base frame 2723
+      target[base + 16] = 0x8a; // ten-frame additive Crystal lamp flame
+    },
+  ]);
+  const parsed = parseType100Map(bytes);
+  assert.ok(parsed);
+  const refs = collectStandaloneMapReferences(parsed);
+  assert.deepEqual(
+    refs.map((reference) => reference.key),
+    Array.from(
+      { length: 10 },
+      (_, phase) => `WemadeMir2/Objects#${2723 + phase}`,
+    ),
+    "native keyed pack must close every phase in a Crystal animation family",
+  );
+  assert.ok(refs.every((reference) => reference.additive));
+}
+
+{
   const bytes = makeType1MapBytes([
     (target, base, xor) => {
       target.writeInt32LE(0xaa38aa38 | 0, base);
@@ -254,6 +276,13 @@ function sha256(bytes) {
       { key: "WemadeMir3/Dungeonsc#1", additive: false, layer: "back" },
       { key: "WemadeMir3/Object1c#3", additive: true, layer: "front" },
       { key: "WemadeMir3/Tilesc#2", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#3", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#4", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#5", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#6", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#7", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#8", additive: true, layer: "middle" },
+      { key: "WemadeMir3/Tilesc#9", additive: true, layer: "middle" },
     ],
   );
 }
@@ -343,7 +372,7 @@ function sha256(bytes) {
   const mapBytes = makeType100MapBytes([
     (target, base) => {
       target.writeInt16LE(2, base + 6);
-      target.writeInt16LE(2, base + 8); // frame 1 -> alpha-key
+      target.writeInt16LE(2, base + 8); // frame 1 -> authoritative Crystal RGBA
     },
     (target, base) => {
       target.writeInt16LE(2, base + 10);
@@ -355,14 +384,18 @@ function sha256(bytes) {
     path.join(packagedMapRoot, "0.map.gz"),
     gzipSync(mapBytes),
   );
-  const keyedSource = await sharp({
-    create: {
-      width: 2,
-      height: 2,
-      channels: 4,
-      background: { r: 0, g: 0, b: 0, alpha: 1 },
-    },
-  })
+  // Crystal exports ordinary map objects with authoritative alpha. In particular,
+  // dark opaque art is allowed to touch a narrow frame's edge; treating that art
+  // as a second black-key background is the regression that made buildings pale.
+  const keyedSource = await sharp(
+    Buffer.from([
+      8, 8, 8, 255,
+      0, 0, 0, 0,
+      32, 24, 16, 255,
+      200, 180, 120, 255,
+    ]),
+    { raw: { width: 2, height: 2, channels: 4 } },
+  )
     .png()
     .toBuffer();
   const additiveSource = await sharp({
@@ -458,6 +491,11 @@ function sha256(bytes) {
     ),
     false,
     "custom output must not leak additive pages into the default generated tree",
+  );
+  assert.deepEqual(
+    readFileSync(keyedPagePath),
+    keyedSource,
+    "normal staged PNG must preserve authoritative Crystal RGBA byte-for-byte",
   );
   assert.deepEqual(
     readFileSync(additivePagePath),

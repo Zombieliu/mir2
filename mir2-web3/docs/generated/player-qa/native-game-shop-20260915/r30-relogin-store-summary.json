@@ -1,0 +1,40 @@
+{
+  "fixture": true,
+  "revision": 7468,
+  "gold": 5000,
+  "credit": 340,
+  "naturalWarriorGold": 135652,
+  "naturalStoreReceivedShopFixture": false,
+  "mail": [
+    {
+      "id": 1,
+      "opened": true,
+      "claimed": true,
+      "attachmentCount": 0
+    },
+    {
+      "id": 3,
+      "opened": false,
+      "claimed": false,
+      "attachmentCount": 1
+    },
+    {
+      "id": 4,
+      "opened": false,
+      "claimed": false,
+      "attachmentCount": 1
+    }
+  ],
+  "accuracyPotions": [
+    {
+      "slot": 1,
+      "uniqueId": 63,
+      "quantity": 1
+    },
+    {
+      "slot": 3,
+      "uniqueId": 64,
+      "quantity": 1
+    }
+  ]
+}

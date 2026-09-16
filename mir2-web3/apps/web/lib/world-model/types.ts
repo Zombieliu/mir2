@@ -196,6 +196,9 @@ export type WorldItem = {
 
 export type EquipmentItem = {
   slot: EquipmentSlot;
+  key?: string;
+  uniqueId?: number;
+  quantity?: number;
   name: string;
   icon: number;
   shape?: number;
@@ -204,6 +207,11 @@ export type EquipmentItem = {
   durabilityMax: number;
   attack: number;
   defence: number;
+  grade?: string;
+  addedAttack?: number;
+  addedDefence?: number;
+  addedLuck?: number;
+  socketSlots?: number;
 };
 
 // ---------------------------------------------------------------------------
@@ -250,6 +258,8 @@ export type KnownSkill = {
   spell?: string | null;
   castKind?: "passive" | "toggle" | "self" | "target" | "ground" | "direction";
   offensive?: boolean;
+  level?: number;
+  experience?: number;
   hotkey?: number;
   delayMs?: number;
   castTimeMs?: number;
@@ -308,6 +318,7 @@ export type RankingState = {
 
 export type Stage5SystemsState = {
   group?: {
+    allowGroup?: boolean;
     members?: string[];
     memberInfos?: Array<{
       name: string;
@@ -363,6 +374,8 @@ export type Stage5SystemsState = {
     craftedItems?: string[];
   };
   appearance?: { hair?: number };
+  attackMode?: number;
+  petMode?: number;
   nameLists?: string[];
   intelligentCreatures?: Array<Record<string, unknown>>;
 };
@@ -400,6 +413,7 @@ export type WorldState = {
   maxWeight: number;
   freeBagSlots: number;
   maxBagSlots: number;
+  inventoryCapacity: number;
   storageSize: number;
   hasExpandedStorage: boolean;
   hasStoragePassword: boolean;
@@ -469,6 +483,7 @@ export const DEFAULT_WORLD_STATE: WorldState = {
   maxWeight: 0,
   freeBagSlots: 0,
   maxBagSlots: 0,
+  inventoryCapacity: 46,
   storageSize: 80,
   hasExpandedStorage: false,
   hasStoragePassword: false,

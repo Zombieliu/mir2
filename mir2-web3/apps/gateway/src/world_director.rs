@@ -1922,6 +1922,7 @@ fn director_monster_spawns(
                 / BASIS_POINTS)
                 .min(i32::MAX as u64) as i32;
             ZoneMonsterSpawn {
+                crystal_drop_seed: None,
                 object_id,
                 name: template.name.clone(),
                 name_colour_argb: if boss_mutation { -65_281 } else { -1 },
