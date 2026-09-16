@@ -46,6 +46,7 @@ import {
   journeyEmergencyTeleportDepartureTarget,
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
+  shouldUseQ89WizardSameMapRandomEscape,
   journeyMpRestockTargetForQuest,
   journeyAmuletSupplyPolicyForQuest,
   minimumJourneyMpStockForQuest,
@@ -195,6 +196,16 @@ try {
       teleport: async owner => {
         const maxHp = Math.max(1, Number(owner?.snapshot?.playerMaxHp ?? 0));
         const hpRatio = observedPlayerHp(owner?.snapshot) / maxHp;
+        if (isWizardQ89Expedition(owner?.snapshot) &&
+            shouldUseQ89WizardSameMapRandomEscape(
+              owner.snapshot,
+              randomTeleportCount(owner.snapshot),
+            )) {
+          // In the measured living D2031 60-65% window, keep the Town
+          // reserve for a genuinely critical escape and make one ordinary
+          // same-map random relocation before repeating the entrance route.
+          return useRandomTeleport(owner);
+        }
         if (isWizardQ89Expedition(owner?.snapshot) &&
             hpRatio <= journeyEmergencyTeleportCriticalHpRatio(className) &&
             townTeleportCount(owner.snapshot) > 0) {

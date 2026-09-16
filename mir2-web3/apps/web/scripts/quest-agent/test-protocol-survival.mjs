@@ -2,7 +2,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
-import { applyProtocolObservation, hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
+import {
+  applyProtocolObservation,
+  hasAuthoritativePlayerDeath,
+  observedPlayerHp,
+} from './protocol-observation.mjs';
 
 const runnerSource = await fs.readFile(new URL('./run-protocol-journey.mjs', import.meta.url), 'utf8');
 
@@ -122,6 +126,7 @@ import {
   journeyExpeditionSupplyActive,
   journeyNavigationEmergencyEscapeBudget,
   journeyEmergencyTeleportCriticalHpRatio,
+  shouldUseQ89WizardSameMapRandomEscape,
   journeyResumeDisposition,
   journeyMpRestockTargetForQuest,
   journeyAmuletSupplyPolicyForQuest,
@@ -1475,6 +1480,68 @@ test('q89 Wizard clears one entrance blocker while retaining its retreat gates',
   assert.equal(profile.finishableTargetMinimumPlayerHpRatio, 0.7);
   assert.equal(journeyEmergencyTeleportDepartureTarget(89), 8);
   assert.equal(questEmergencyEscapeHpRatio(89, 'Wizard'), 0.65);
+});
+
+test('q89 Wizard uses a held ordinary RandomTeleport in the living D2031 60-percent band only', () => {
+  const active = {
+    playerObjectId: 1000,
+    playerHp: 62,
+    playerMaxHp: 100,
+    mapFileName: 'D2031',
+    entities: [{ objectId: 1000, kind: 'selfPlayer', dead: false, hp: 62, maxHp: 100 }],
+    questLog: [{ questId: 89, stage: 'InProgress' }],
+  };
+  assert.equal(shouldUseQ89WizardSameMapRandomEscape(active, 8), true);
+  assert.equal(shouldUseQ89WizardSameMapRandomEscape({ ...active, playerHp: 59 }, 8), false,
+    'Town remains first at the critical floor');
+  assert.equal(shouldUseQ89WizardSameMapRandomEscape({ ...active, playerHp: 70 }, 8), false,
+    'the policy cannot start an unneeded healthy relocation');
+  assert.equal(shouldUseQ89WizardSameMapRandomEscape({ ...active, mapFileName: 'D2032' }, 8), false);
+  assert.equal(shouldUseQ89WizardSameMapRandomEscape(active, 0), false);
+  assert.equal(shouldUseQ89WizardSameMapRandomEscape({
+    ...active,
+    playerHp: 0,
+    entities: [{ ...active.entities[0], dead: true, hp: 0 }],
+  }, 8), false, 'a dead player never issues an escape item');
+  assert.equal(shouldUseQ89WizardSameMapRandomEscape({
+    ...active,
+    questLog: [{ questId: 89, stage: 'ReadyToTurnIn' }],
+  }, 8), false);
+});
+
+test('runner dispatches the q89 same-map RandomTeleport policy before Town only in its living band', async () => {
+  const start = runnerSource.indexOf('    const emergencyTeleport = createRandomTeleportEmergencyEscape({');
+  const end = runnerSource.indexOf('    const journeyCombatAction =', start);
+  assert.ok(start >= 0 && end > start, 'runner must retain its emergency teleport policy block');
+  const snippet = runnerSource.slice(start, end).replace(/^    /gm, '');
+  const snapshotAt = hp => ({
+    playerObjectId: 1000, playerHp: hp, playerMaxHp: 100, mapFileName: 'D2031',
+    entities: [{ objectId: 1000, kind: 'selfPlayer', dead: false, hp, maxHp: 100 }],
+    questLog: [{ questId: 89, stage: 'InProgress' }],
+  });
+  const dispatch = async (hp, random = 8) => {
+    const calls = [];
+    const emergencyTeleport = vm.runInNewContext(`(() => { ${snippet}; return emergencyTeleport; })()`, {
+      className: 'Wizard',
+      observedPlayerHp,
+      journeyEmergencyTeleportCriticalHpRatio: () => 0.65,
+      isWizardQ89Expedition: snapshot => (snapshot.questLog ?? []).some(entry =>
+        Number(entry.questId) === 89 && String(entry.stage).toLowerCase() === 'inprogress'),
+      shouldUseQ89WizardSameMapRandomEscape,
+      randomTeleportCount: () => random,
+      townTeleportCount: () => 2,
+      useRandomTeleport: async () => { calls.push('random'); return { item: 'RandomTeleport' }; },
+      useTownTeleport: async () => { calls.push('town'); return { item: 'TownTeleport' }; },
+      createRandomTeleportEmergencyEscape: ({ teleport }) => teleport,
+      Math,
+      Number,
+    });
+    await emergencyTeleport({ snapshot: snapshotAt(hp) });
+    return calls;
+  };
+  assert.deepEqual(await dispatch(62), ['random']);
+  assert.deepEqual(await dispatch(59), ['town']);
+  assert.deepEqual(await dispatch(62, 0), ['town']);
 });
 
 test('q89 focus relaxation is isolated from other ranged expeditions', () => {

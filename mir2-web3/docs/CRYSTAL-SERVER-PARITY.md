@@ -1,5 +1,10 @@
 # Crystal Server Parity
 
+> 2026-09-16 R142 controller 685/685 passes. Ordinary route units
+> remain **156/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-wizard-escape-choice-r142.md).
+
 > 2026-09-16 actual R141 Taoist q89 completed: Priest339200 death3748,
 > Ready3754, normal finishQuest10270→CompleteQuest10272→snapshot10273.
 > Gold105→6705, level25→26 and configured EXP/item rewards match.

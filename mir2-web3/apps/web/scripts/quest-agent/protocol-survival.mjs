@@ -1,4 +1,8 @@
-import { observedPlayerHp, observedEntityHealthRatio } from './protocol-observation.mjs';
+import {
+  hasAuthoritativePlayerDeath,
+  observedPlayerHp,
+  observedEntityHealthRatio,
+} from './protocol-observation.mjs';
 const DEFAULT_MAX_RESTOCKS = 32;
 const DEFAULT_MINIMUM_HP_STOCK = 1;
 const REFRESH_TIMEOUT_MS = 12_000;
@@ -188,6 +192,27 @@ export function journeyEmergencyTeleportCriticalHpRatio(className = '') {
   // those delayed same-map hits valid, so fragile casters must leave before
   // their remaining HP falls below the measured queued-damage window.
   return ['wizard', 'taoist'].includes(normalizedClass) ? 0.65 : 0.35;
+}
+
+/**
+ * A q89 Wizard who is still alive in D2031 can use an ordinary RandomTeleport
+ * before consuming the TownTeleport reserve, but only through the measured
+ * 60-65% band where relocation is survivable. Below that floor Town remains
+ * the safer first escape; other maps, quests, and classes do not opt in.
+ */
+export function shouldUseQ89WizardSameMapRandomEscape(snapshot, randomStock = 0) {
+  if (!(Number(randomStock) > 0) ||
+      String(snapshot?.mapFileName ?? '') !== 'D2031' ||
+      hasAuthoritativePlayerDeath(snapshot)) return false;
+  const actor = snapshotPlayer(snapshot);
+  if (!actor || actor.dead === true) return false;
+  const q89Active = (snapshot?.questLog ?? []).some(quest =>
+    Number(quest?.questId) === 89 && normalizedStage(quest?.stage) === 'inprogress');
+  if (!q89Active) return false;
+  const hp = observedPlayerHp(snapshot);
+  const maxHp = Number(snapshot?.playerMaxHp ?? actor?.maxHp ?? 0);
+  const ratio = hp / maxHp;
+  return hp > 0 && maxHp > 0 && ratio >= 0.6 && ratio <= 0.65;
 }
 
 /** Public-shop departure reserve measured for each dangerous route. */
