@@ -1458,6 +1458,15 @@ test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
   assert.equal(questRetreatProfile(65, 'Warrior').maxTargetAdjacent, undefined);
 });
 
+test('q113 caster map preference keeps BlackMaggot and WedgeMoth on the shared D715 field', () => {
+  assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Wizard'), ['D715']);
+  assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Taoist'), ['D715']);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(113, {}, 'Wizard'), true);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(113, {}, 'Taoist'), true);
+  assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Warrior'), []);
+  assert.equal(shouldPreferObjectiveMapOverCurrent(113, {}, 'Warrior'), false);
+});
+
 test('q99 Warrior admits the measured final WoomaFighter spawn group', () => {
   const warrior = questRetreatProfile(99, 'Warrior');
   assert.equal(warrior.maxTargetAdjacent, 2);

@@ -1,5 +1,10 @@
 # Backend 1:1 Progress
 
+> 2026-09-16 R143 controller 687/687 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-shared-hunt-r143.md).
+
 > 2026-09-16 R142 controller 685/685 passes. Ordinary route units
 > remain **156/177**; actual route completion, final normal logout/store and
 > separate visual gates remain open.

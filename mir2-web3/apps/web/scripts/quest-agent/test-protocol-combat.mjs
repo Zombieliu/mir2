@@ -1206,6 +1206,68 @@ test("an expedition can prefer its configured objective map over a denser same-m
   assert.deepEqual(client.sent.map(entry => entry.objectId), [64]);
 });
 
+test('q113 caster preference chooses shared D715 over shorter D612 and completes both objectives without another map trip', async () => {
+  const quest = {
+    questId: 113,
+    stage: 'InProgress',
+    objectives: [objective('Kill BlackMaggot', 0, 3), objective('Kill WedgeMoth', 0, 3)],
+  };
+  let nextObjectId = 716;
+  const nextMonster = name => monster(nextObjectId++, name, 20, 10);
+  const client = new FakeClient(snapshot(quest, [monster(612, 'BlackMaggot')]), (owner, command) => {
+    if (command.type !== 'attack') return;
+    owner.receive('ObjectDied', state => {
+      const target = state.entities.find(entity => entity.objectId === command.objectId);
+      Object.assign(target, { dead: true, hp: 0 });
+      const isBlackMaggot = target.name === 'BlackMaggot';
+      const objectiveIndex = isBlackMaggot ? 0 : 1;
+      const progress = state.questLog[0].objectives[objectiveIndex];
+      progress.current += 1;
+      progress.done = progress.current >= progress.required;
+      if (progress.done && objectiveIndex === 1) {
+        state.questLog[0].stage = 'ReadyToTurnIn';
+        return;
+      }
+      const nextName = isBlackMaggot && progress.done ? 'WedgeMoth' : target.name;
+      state.entities = [state.entities[0], nextMonster(nextName)];
+    }, { objectId: command.objectId });
+  });
+  client.snapshot.mapFileName = 'D612';
+  const travelled = [];
+  const travel = async mapFileName => {
+    travelled.push(mapFileName);
+    client.snapshot.mapFileName = mapFileName;
+    client.snapshot.entities = [self(), nextMonster('BlackMaggot')];
+  };
+  travel.routeLength = async mapFileName => ({ D612: 7, D715: 8 })[mapFileName] ?? null;
+
+  const result = await completeQuestObjectives(client, {
+    questId: 113,
+    objectives: {
+      kill: [
+        { monsterName: 'BlackMaggot', spawnCandidates: [
+          { ...spawn('BlackMaggot'), mapFileName: 'D612' },
+          { ...spawn('BlackMaggot'), mapFileName: 'D715' },
+        ] },
+        { monsterName: 'WedgeMoth', spawnCandidates: [
+          { ...spawn('WedgeMoth'), mapFileName: 'D715' },
+        ] },
+      ],
+      item: [],
+    },
+  }, navigateClientNear(client), {
+    ...settings,
+    travel,
+    preferredObjectiveMaps: ['D715'],
+    preferObjectiveMapOverCurrent: true,
+  });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.deepEqual(travelled, ['D715'], 'D612 is shorter but lacks WedgeMoth; D715 is entered once');
+  assert.deepEqual(client.snapshot.questLog[0].objectives.map(entry => entry.current), [3, 3]);
+  assert.equal(client.sent.filter(entry => entry.type === 'attack').length, 6);
+});
+
 test("a post-travel supply checkpoint can leave and replan before objective combat", async () => {
   const quest = {
     questId: 113,
