@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> 2026-09-16 R140 controller 680/680 passes: existing q89 Wizard transit
+> now plans around live named Shaman six-cell halos and retains fresh packet
+> guards. Real D2031 collision test proves a sealed corridor fails closed;
+> a separate synthetic detour is not actual-map acceptance. Route units remain
+> 155/177, with final save and visual gates open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q89-transit-planning-r140.md).
+
 > 2026-09-16 R139 controller 679/679 passes: a living startup evasive
 > recovery timeout now defers into the existing guarded quest loop. Death
 > retains normal town revival; missing self and unrelated errors remain fatal.

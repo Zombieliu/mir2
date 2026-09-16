@@ -212,6 +212,11 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
             } : {}),
             ...(settings.transitProtectedBlocker ? {
               navigationOptions: {
+                // Keep the ordinary transit planner outside the same live
+                // named-Shaman footprint enforced after cadence below. This
+                // avoids repeatedly selecting a shorter route that the
+                // physical guard must reject at its final Run cells.
+                hostileAvoidanceByName: settings.transitProtectedBlocker.namedClearance,
                 beforeMovement: context => protectedTransitHazard(
                   client.snapshot,
                   context,

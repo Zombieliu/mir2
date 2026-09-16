@@ -115,6 +115,76 @@ const settings = { sleep: async () => {}, attackCadenceMs: 0, harvestCadenceMs: 
 const spawn = (monsterName, x = 20, y = 20) => ({ monsterName, mapFileName: "0", position: { x, y }, spread: 10, respawnIndex: x * 100 + y });
 const navigateClientNear = client => async target => Object.assign(client.snapshot.entities[0], { x: target.x - 1, y: target.y });
 
+test('q89 Wizard transit plans around a live named Shaman halo before the fresh movement guard', async () => {
+  const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
+  const owner = self({ kind: 'selfPlayer', x: 1, y: 10, hp: 100, maxHp: 100 });
+  const shaman = monster(71, 'CursedShaman', 8, 10, { disposition: 'hostile' });
+  const directions = {
+    Up: [0, -1], UpRight: [1, -1], Right: [1, 0], DownRight: [1, 1],
+    Down: [0, 1], DownLeft: [-1, 1], Left: [-1, 0], UpLeft: [-1, -1],
+  };
+  const travelled = [];
+  const client = new FakeClient({
+    playerObjectId: 1, playerHp: 100, playerMaxHp: 100, mapFileName: '0',
+    entities: [owner, shaman], groundDrops: [], questLog: [quest],
+  }, (actor, command) => {
+    if (command.type !== 'walk' && command.type !== 'run') return;
+    const [dx, dy] = directions[command.direction];
+    for (let index = 0; index < (command.type === 'run' ? 2 : 1); index += 1) {
+      owner.x += dx;
+      owner.y += dy;
+      travelled.push({ x: owner.x, y: owner.y });
+    }
+    actor.receive('UserLocation', () => {}, { objectId: owner.objectId, x: owner.x, y: owner.y });
+  });
+  client.wait = async predicate => assert.equal(predicate(), true, 'the ordinary navigator must observe each detour receipt');
+  const rawNavigate = createNavigator(client, {
+    loadCollisionMap: async () => ({
+      mapFileName: '0', sourcePath: 'transit-detour', width: 20, height: 20, blocked: new Uint8Array(400),
+    }),
+    delay: async () => {}, now: () => 10_000,
+  });
+  let transitOptions = null;
+  const travel = async (mapFileName, options = {}) => {
+    assert.equal(mapFileName, 'D2032');
+    transitOptions = options.navigationOptions;
+    await rawNavigate({ x: 16, y: 10 }, 0, () => false, transitOptions);
+    Object.assign(client.snapshot, {
+      mapFileName: 'D2032',
+      entities: [owner, monster(72, 'CursedPriest', 17, 10, { disposition: 'hostile' })],
+    });
+  };
+  travel.routeLength = async () => 1;
+
+  const result = await completeQuestObjectives(client, {
+    questId: 89,
+    objectives: { kill: [{ monsterName: 'CursedPriest', spawnCandidates: [
+      { monsterName: 'CursedPriest', mapFileName: 'D2032', position: { x: 16, y: 10 }, spread: 1, respawnIndex: 1 },
+    ] }], item: [] },
+  }, rawNavigate, {
+    ...settings,
+    travel,
+    preferObjectiveMapOverCurrent: true,
+    preferredObjectiveMaps: ['D2032'],
+    action: async (actor, target) => {
+      Object.assign(target, { dead: true, hp: 0 });
+      actor.snapshot.questLog[0].stage = 'ReadyToTurnIn';
+      return { kind: 'magic', targetId: target.objectId };
+    },
+    transitProtectedBlocker: {
+      monsterNames: ['CursedShaman', 'CursedShaman0'],
+      minimumApproachDistance: 7, maximumApproachDistance: 9, clearance: 6, maxBlockers: 2,
+    },
+  });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.deepEqual(transitOptions.hostileAvoidanceByName, { cursedshaman: 6, cursedshaman0: 6 });
+  assert.equal(typeof transitOptions.beforeMovement, 'function');
+  assert.ok(travelled.length > 15, 'the shorter direct path through the halo must be rejected in favour of a detour');
+  assert.ok(travelled.some(point => point.y === 3), 'the navigator must use the available outer corridor');
+  assert.ok(travelled.every(point => Math.max(Math.abs(point.x - shaman.x), Math.abs(point.y - shaman.y)) > 6));
+});
+
 test("direct ranged hit evidence identifies a q89 aggressor up to eight tiles away", () => {
   const quest = { questId: 89, stage: "InProgress", objectives: [] };
   const nearRanged = monster(61, "CursedShaman", 16, 10, { disposition: "hostile" });
@@ -289,7 +359,7 @@ test('q89 spawn-stall clearing reaches a certified Shaman band before its ordina
   assert.equal(actionPositions[1].targetId, 341200);
 });
 
-test('q89 Wizard guards the real D2031-to-D2032 transit before a Run crosses the entrance Shaman halo', async () => {
+test('q89 Wizard keeps the real D2031 fresh guard and rejects a transit with no collision-safe outer corridor', async () => {
   const quest = { questId: 89, stage: 'InProgress', objectives: [objective('Kill CursedPriest', 2, 3)] };
   const owner = self({ kind: 'selfPlayer', x: 278, y: 284, hp: 100, maxHp: 100 });
   const firstShaman = monster(341100, 'CursedShaman', 263, 273, { hp: 205, maxHp: 205, disposition: 'hostile' });
@@ -367,10 +437,32 @@ test('q89 Wizard guards the real D2031-to-D2032 transit before a Run crosses the
   });
   const travel = async (mapFileName, options = {}) => {
     assert.equal(mapFileName, 'D2032');
-    await rawNavigate({ x: 198, y: 34 }, 0, () => false, {
+    // Retain the actual Crystal map proof for the post-cadence guard. This
+    // direct route is the old shorter transit and must halt before a physical
+    // cell reaches either Shaman halo.
+    const { hostileAvoidanceByName, ...freshPhysicalGuard } = options.navigationOptions ?? {};
+    await assert.rejects(rawNavigate({ x: 198, y: 34 }, 0, () => false, {
       liveTransferKey: transfer.key,
-      ...(options.navigationOptions ?? {}),
-    });
+      ...freshPhysicalGuard,
+    }), error => error instanceof NavigationStepGuarded &&
+      error.hazard?.type === 'protectedTransitShamanHalo');
+
+    // The live named six-cell barriers make this Crystal collision route
+    // unreachable. That is a bounded no-path outcome, not a reason to revive
+    // the shorter inward transit or to manufacture a detour.
+    Object.assign(owner, { x: 278, y: 284 });
+    const sentBeforeSafePlan = client.sent.length;
+    await assert.rejects(rawNavigate({ x: 198, y: 34 }, 0, () => false, {
+      liveTransferKey: transfer.key,
+      ...options.navigationOptions,
+      maxNoPathRefreshes: 0,
+    }), /No walk path on D2031 from 278,284 to 198,34/);
+    assert.equal(client.sent.length, sentBeforeSafePlan, 'the collision-sealed safe plan must not send a new transit move');
+
+    Object.assign(owner, transfer.toPosition);
+    const priest = monster(341200, 'CursedPriest', 184, 262, { disposition: 'hostile' });
+    Object.assign(client.snapshot, { mapFileName: 'D2032', mapTransfers: [], entities: [owner, priest] });
+    client.receive('MapChanged', () => {}, { fileName: 'D2032' });
   };
   travel.routeLength = async () => 1;
 
@@ -402,7 +494,7 @@ test('q89 Wizard guards the real D2031-to-D2032 transit before a Run crosses the
   });
 
   assert.equal(result.stage, 'ReadyToTurnIn');
-  assert.ok(diagnostics.some(entry => entry.type === 'protectedTransitBlockerIntercepted' && entry.blockerObjectId === 341105));
+  assert.ok(!diagnostics.some(entry => entry.type === 'protectedTransitBlockerIntercepted'));
   assert.ok(physicalCells.length > 0);
   assert.ok(physicalCells.every(entry => entry.liveShamans.every(shaman =>
     Math.max(Math.abs(entry.point.x - shaman.x), Math.abs(entry.point.y - shaman.y)) > 6,
