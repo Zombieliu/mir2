@@ -1022,6 +1022,7 @@ async function castV2Spell(client, target, spell) {
     throw new V2Pause('awaitingLearnedSkill', null, `${spell} is not authoritative in knownSkills`);
   }
   const lightning = spell === 'Lightning';
+  const ground = spell === 'FireWall';
   const command = lightning
     ? {
         // Lightning is a self-routed Crystal cast. Its targeting coordinates
@@ -1034,6 +1035,16 @@ async function castV2Spell(client, target, spell) {
         direction: direction(actor, target),
         targetId: Number(actor.objectId), x: Number(actor.x), y: Number(actor.y), spellTargetLock: false,
       }
+    : ground
+      ? {
+          // The public gateway keeps the actor in objectId, while targetId=0
+          // selects the Zone's ground-spell route. The live monster tile is
+          // is used for this practice; the target must later receive positive
+          // damage before this step can pass.
+          type: 'magic', objectId: Number(actor.objectId), spell,
+          direction: direction(actor, target), targetId: 0,
+          x: Number(target.x), y: Number(target.y), spellTargetLock: false,
+        }
     : {
         type: 'magic', objectId: Number(actor.objectId), spell,
         direction: direction(actor, target), targetId: Number(target.objectId), x: Number(target.x), y: Number(target.y), spellTargetLock: true,
@@ -1137,8 +1148,9 @@ function targetTookDamage(client, target, beforeHp, after, attackerId = null) {
 
 function magicAccepted(client, after, spell, actor, expectedTargetId = null) {
   return receivedAfter(client, after, 'ObjectMagic', payload => Number(payload?.objectId) === Number(actor?.objectId) &&
-    String(payload?.spell) === spell && (expectedTargetId == null || Number(payload?.targetId) === Number(expectedTargetId))) ||
-    receivedAfter(client, after, 'Magic', payload => String(payload?.spell) === spell &&
+    String(payload?.spell) === spell && payload?.cast === true &&
+    (expectedTargetId == null || Number(payload?.targetId) === Number(expectedTargetId))) ||
+    receivedAfter(client, after, 'Magic', payload => String(payload?.spell) === spell && payload?.cast === true &&
       (expectedTargetId == null || Number(payload?.targetId) === Number(expectedTargetId)));
 }
 
@@ -1155,7 +1167,12 @@ async function waitForTargetDamage(client, after, target, beforeHp, questId, lab
 
 async function waitForSpellDamage(client, after, target, beforeHp, spell, questId) {
   const actor = selfPlayer(client);
-  await client.wait(() => magicAccepted(client, after, spell, actor, spell === 'Lightning' ? actor?.objectId : target?.objectId) &&
+  const expectedTargetId = spell === 'Lightning'
+    ? actor?.objectId
+    : spell === 'FireWall'
+      ? 0
+      : target?.objectId;
+  await client.wait(() => magicAccepted(client, after, spell, actor, expectedTargetId) &&
     targetTookDamage(client, target, beforeHp, after, actor?.objectId), `q${questId} ${spell} damage`, 12_000).catch(() => {
     throw new V2Pause('awaitingPracticeDamage', questId, `${spell} lacked a positive post-send target damage receipt`);
   });

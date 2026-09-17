@@ -4,7 +4,7 @@
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
 > V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
-> Web guidance/goal and localization tests plus TypeScript pass; controller 26/26.
+> Web guidance/goal and localization tests plus TypeScript pass; controller 28/28.
 > Ordinary three-class 9/78 persist after normal logout; actual Gateway N4
 > self-Healing 1/1 passes, with isolated restart pending. Timing, survival, suitable
 > equipment acquisition, exact native package and visual acceptance remain open.

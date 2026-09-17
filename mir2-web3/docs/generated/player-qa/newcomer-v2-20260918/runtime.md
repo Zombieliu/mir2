@@ -32,7 +32,7 @@ checkpointed, deduplicated and discarded when no V2 training evidence is needed.
 | Existing V1 progression/daily/milestone regression | 11/11 |
 | Native journey projection | 20/20; local graduation selection without command 1/1 |
 | Web chapter, localization and graduation | both Node scripts + TypeScript pass |
-| V2 public-protocol controller contracts | 26/26 |
+| V2 public-protocol controller contracts | 28/28 including actual FireWall public ground-cast shape |
 | Candidate region static collision paths | all sampled paths reachable |
 
 The reward-test correction counts both belt and bag, by actual item index:
@@ -99,6 +99,16 @@ reward or quest completion. A realistic level-30 equipment source remains
 unverified; see guidance-native.md, guidance-web.md and graduation-acquisition.md.
 The controller now has bounded, confirmed death/town-revive and in-combat
 supply handling, not additional retry time. Live recovery is still open.
+The independent N9–N16 audit found another controller gap: N16/N21 FireWall
+sent a locked monster target. The public packet now retains the legitimate
+caster objectId but uses targetId 0 and the live monster coordinates, with no
+target lock. Its acceptance must be targetId 0 / cast true; wrong-target or
+cast-false acknowledgements fail even if a target is struck. Actual damage and
+the final server flag remain separate requirements. Controller 28/28 passes;
+this is not yet an ordinary N16/N21 pass. N17–N22/growth30 read-only review
+found no additional deterministic server-condition mismatch.
+The receipt verifier labels first-action values as latest-resume-trace-only,
+not first-ever actions of the whole journey; measuredTime remains false.
 
 Open: ordinary route/skills/supplies/death handling/save-relogin, dynamic
 occupancy and survivability, search-time/hostile-density gates, actionable

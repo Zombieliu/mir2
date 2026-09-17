@@ -217,9 +217,9 @@ test('V2 recovery fails closed after three confirmed deaths in one ordinary proc
   assert.equal(result.recoveries.length, 3);
 });
 
-function practiceQuest(requirements, { kills = [{ monsterName: 'Scarecrow', spawns: [{ mapFileName: '0', position: { x: 2, y: 0 }, spread: 0 }] }] } = {}) {
+function practiceQuest(requirements, { questId = 2110004, kills = [{ monsterName: 'Scarecrow', spawns: [{ mapFileName: '0', position: { x: 2, y: 0 }, spread: 0 }] }] } = {}) {
   return {
-    questId: 2110004,
+    questId,
     objectives: {
       kill: kills,
       flag: [{ number: 2210041, message: 'Class practice', conditions: [], requirements }],
@@ -227,10 +227,10 @@ function practiceQuest(requirements, { kills = [{ monsterName: 'Scarecrow', spaw
   };
 }
 
-function practiceClient({ knownSkills, inventoryItems = [], requirements, completeOn = 1 }) {
+function practiceClient({ knownSkills, inventoryItems = [], requirements, completeOn = 1, questId, magicCast = true, magicTargetId = null }) {
   const sent = [];
   const requests = [];
-  const quest = practiceQuest(requirements);
+  const quest = practiceQuest(requirements, { questId });
   const snapshot = {
     playerObjectId: 1, mapFileName: '0', playerHp: 100, playerMaxHp: 100,
     knownSkills: knownSkills.map(spell => ({ spell })), inventoryItems, beltItems: [], equipmentItems: [],
@@ -276,10 +276,17 @@ function practiceClient({ knownSkills, inventoryItems = [], requirements, comple
         if (target) receive('ObjectStruck', { objectId: target.objectId, attackerId: 1 });
       }
       if (command.type === 'magic') {
+        const ground = command.spell === 'FireWall';
         const target = command.spell === 'Lightning'
           ? directionalMonster(command, 6)
+          : ground
+            ? snapshot.entities.find(entity => entity.kind === 'monster' && entity.dead !== true &&
+              Number(entity.hp ?? 1) > 0 && Number(entity.x) === Number(command.x) && Number(entity.y) === Number(command.y))
           : liveMonster(command.targetId);
-        receive('ObjectMagic', { objectId: 1, spell: command.spell, targetId: command.targetId });
+        receive('ObjectMagic', {
+          objectId: 1, spell: command.spell,
+          targetId: magicTargetId ?? command.targetId, cast: magicCast,
+        });
         if (command.spell !== 'Healing' && command.spell !== 'Poisoning' && target) receive('ObjectStruck', { objectId: target.objectId, attackerId: 1 });
         if (command.spell === 'Poisoning') {
           snapshot.equipmentItems[0].quantity -= 1;
@@ -396,6 +403,41 @@ test('directional practice moves to a line before packets and refreshes a differ
   assert.equal(movement[0].desiredDistance, 0);
   assert.deepEqual(sent.map(command => command.spell), ['Lightning', 'FireWall']);
   assert.deepEqual(client.events.filter(event => event.packet === 'ObjectStruck').map(event => event.payload.objectId), [9, 10]);
+});
+
+test('N16 and N21 FireWall practice use the public ground-cast packet and require the target-zero cast receipt', async () => {
+  for (const [questId, requirements] of [
+    [2110016, ['FireWall learned', 'owned FireWall damage committed']],
+    [2110021, ['Lightning damage committed', 'legal reposition between attacks', 'FireWall learned', 'owned FireWall damage committed']],
+  ]) {
+    const { client, quest, sent } = practiceClient({
+      questId, knownSkills: ['FireWall'], completeOn: 1, requirements: { wizard: requirements },
+    });
+    client.snapshot.entities[0].class = 'Wizard';
+    await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'spell', spell: 'FireWall' }] });
+    assert.deepEqual(sent, [{
+      type: 'magic', objectId: 1, spell: 'FireWall', direction: 'Right',
+      targetId: 0, x: 1, y: 0, spellTargetLock: false,
+    }], `q${questId} uses the shared public FireWall ground packet`);
+  }
+});
+
+test('FireWall rejects a monster-target or non-cast acknowledgement even when the live target is struck', async () => {
+  for (const options of [
+    { magicTargetId: 9, magicCast: true },
+    { magicTargetId: 0, magicCast: false },
+  ]) {
+    const { client, quest } = practiceClient({
+      knownSkills: ['FireWall'], completeOn: 1,
+      requirements: { wizard: ['FireWall learned', 'owned FireWall damage committed'] },
+      ...options,
+    });
+    client.snapshot.entities[0].class = 'Wizard';
+    await assert.rejects(
+      executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'spell', spell: 'FireWall' }] }),
+      /FireWall lacked a positive post-send target damage receipt/,
+    );
+  }
 });
 
 test('practice plans execute every q21 class action rather than one priority spell', () => {

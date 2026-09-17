@@ -65,6 +65,7 @@ for (const className of ['Warrior', 'Wizard', 'Taoist']) {
     verifiedCompletedIds, logoutCommitted: !!logoutSuccess, transformMatches,
     saveRevision: save?.revision ?? null, ordinaryStartedAt,
     ordinaryElapsedMs: report.ordinaryElapsedMs, pause: report.v2.pause ?? null,
+    actionTimingScope: 'latest-resume-trace-only',
     firstOwnedAttackMs: sinceStart(firstOwnedAttack), firstOwnedStruckMs: sinceStart(firstOwnedStruck),
     firstLearnedSkillMs: sinceStart(firstLearnedSkill),
     completed: verifiedCompletedIds.length === 26 && Number(actor?.level) >= 30 && report.completed === true,
@@ -74,6 +75,6 @@ for (const className of ['Warrior', 'Wizard', 'Taoist']) {
 const output = { schema: 1, profile: 'newcomer-v2', checkedAt: new Date().toISOString(), denominator: 78,
   completedUnits: results.reduce((sum, row) => sum + row.completedUnits, 0),
   allClassesCompleted: results.length === 3 && results.every(row => row.completed === true),
-  visualAccepted: false, globalParityPercent: null, classes: results };
+  measuredTime: false, visualAccepted: false, globalParityPercent: null, classes: results };
 await fs.writeFile(path.join(evidenceRoot, 'ordinary-evidence.json'), JSON.stringify(output, null, 2) + '\n');
 console.log(JSON.stringify(output, null, 2));
