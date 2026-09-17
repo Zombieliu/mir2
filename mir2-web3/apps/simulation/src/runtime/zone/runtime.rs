@@ -852,6 +852,31 @@ impl ZoneRuntime {
             .map(|player| player.chat_profile.clone())
     }
 
+    /// Returns the remaining authoritative shared-Zone cooldown for one spell.
+    ///
+    /// A spell has both its own Crystal delay and the short global spell-action
+    /// delay. The public observer must wait for whichever becomes ready last.
+    /// `None` keeps an unknown session distinct from a known player whose spell
+    /// is ready now.
+    pub fn player_magic_cooldown_remaining_ms(
+        &self,
+        session_id: &SessionId,
+        spell: Spell,
+        now_ms: u64,
+    ) -> Option<u64> {
+        let player = self.players.get(session_id)?;
+        let spell_ready_at_ms = player
+            .magic_ready_at_ms
+            .get(&(spell as u8))
+            .copied()
+            .unwrap_or_default();
+        Some(
+            spell_ready_at_ms
+                .max(player.next_spell_ready_at_ms)
+                .saturating_sub(now_ms),
+        )
+    }
+
     pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
         self.players
             .get(session_id)
@@ -17082,3 +17107,6 @@ mod soulfire_practice_tests;
 
 #[cfg(test)]
 mod safe_zone_profile_tests;
+
+#[cfg(test)]
+mod player_magic_cooldown_tests;

@@ -4,6 +4,113 @@ use mir2_simulation::{
     ZoneJourneyEventKind, ZoneJourneyEventReceipt, ZoneJourneyPhysicalTechnique,
 };
 
+#[test]
+#[ignore = "requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"]
+fn public_shared_magic_cooldown_survives_private_tick_acceleration() {
+    let (shared, mut owner) = taoist_healing_training_fixture("SharedCooldownOwner");
+    let self_entity = owner
+        .world_snapshot()
+        .entities
+        .into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .unwrap();
+    let cast = ClientPacket::Magic {
+        object_id: self_entity.object_id,
+        spell: Spell::Healing,
+        direction: MirDirection::Down,
+        target_id: self_entity.object_id,
+        location: Point {
+            x: self_entity.x,
+            y: self_entity.y,
+        },
+        spell_target_lock: true,
+    };
+    let accepted = owner
+        .execute(WorldCommand::ClientPacket(cast.clone()))
+        .unwrap();
+    assert!(accepted.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Magic {
+            spell: Spell::Healing,
+            cast: true,
+            ..
+        }
+    )));
+    let mp_after_cast = owner.world_snapshot().player_mp;
+
+    // Exercise the actual personal tick path, which must not advance Zone
+    // spell readiness just because packets accelerate the personal clock.
+    for _ in 0..8 {
+        owner.inner.execute(WorldCommand::Tick).unwrap();
+    }
+    let private_snapshot = owner.inner.world_snapshot();
+    let private_healing = private_snapshot
+        .known_skills
+        .iter()
+        .find(|skill| skill.spell.as_deref() == Some("Healing"))
+        .unwrap();
+    assert_eq!(private_healing.cooldown_remaining_ticks, 0);
+    let public_snapshot = owner.world_snapshot();
+    let public_healing = public_snapshot
+        .known_skills
+        .iter()
+        .find(|skill| skill.spell.as_deref() == Some("Healing"))
+        .unwrap();
+    assert!(
+        public_healing.cooldown_remaining_ticks > 0,
+        "the public owner must remain cooling while the shared gate is closed"
+    );
+    let rejected = owner
+        .execute(WorldCommand::ClientPacket(cast.clone()))
+        .unwrap();
+    assert!(!rejected.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Magic {
+            spell: Spell::Healing,
+            cast: true,
+            ..
+        }
+    )));
+    assert_eq!(owner.world_snapshot().player_mp, mp_after_cast);
+
+    let key = owner.current_presence_key().unwrap();
+    let remaining_ms = {
+        let state = shared.lock().unwrap();
+        let session_id = &state.zone_sessions[&key];
+        state
+            .zone_manager
+            .zone(&ZoneKey::for_map("0"))
+            .unwrap()
+            .player_magic_cooldown_remaining_ms(
+                session_id,
+                Spell::Healing,
+                SharedInProcessZoneSessionRuntime::zone_now_ms(),
+            )
+            .unwrap()
+    };
+    assert!(remaining_ms > 0 && remaining_ms < 30_000);
+    std::thread::sleep(std::time::Duration::from_millis(remaining_ms + 10));
+    let ready_snapshot = owner.world_snapshot();
+    assert_eq!(
+        ready_snapshot
+            .known_skills
+            .iter()
+            .find(|skill| skill.spell.as_deref() == Some("Healing"))
+            .unwrap()
+            .cooldown_remaining_ticks,
+        0
+    );
+    let second = owner.execute(WorldCommand::ClientPacket(cast)).unwrap();
+    assert!(second.iter().any(|packet| matches!(
+        packet,
+        ServerPacket::Magic {
+            spell: Spell::Healing,
+            cast: true,
+            ..
+        }
+    )));
+}
+
 fn fixture(
     name: &str,
 ) -> (

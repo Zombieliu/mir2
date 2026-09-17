@@ -144,3 +144,14 @@ See ordinary-pass4.md/json. Cross-repair clocks do not certify clean timing.
 
 `accepted=false`, `visualAccepted=false`, `measuredTime=false`,
 `globalParityPercent=null`.
+
+Shared cooldown source checkpoint: the actual ordinary Taoist failure revealed
+early private-tick readiness against a still-closed Zone spell gate. Getter
+regressions pass 3/3 and fresh actual Gateway journey/arrival/Healing/receipt
+tests pass 11/11. The public owner snapshot now uses the same shared clock as
+cast admission; passive/toggle entries keep their semantics. No cooldown rule
+or engagement budget changed. See shared-skill-cooldown.md. Release deployment
+and a separate clean three-class run are pending. Original clocks stay expired;
+33/78 ordinary saved units remain the verified checkpoint. Later-route source
+audit found no deterministic mismatch; dynamic route/survival and visuals stay
+open (later-route-source-audit.md).

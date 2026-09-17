@@ -14321,12 +14321,33 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 }
             }
             if let Some(session_id) = zone_state.zone_sessions.get(key) {
-                if let Some(profile) = zone_state
+                if let Some(zone) = zone_state
                     .zone_manager
                     .zone(&ZoneKey::for_map(map_file_name))
-                    .and_then(|zone| zone.player_chat_profile(session_id))
                 {
-                    snapshot.in_safe_zone = profile.in_safe_zone;
+                    if let Some(profile) = zone.player_chat_profile(session_id) {
+                        snapshot.in_safe_zone = profile.in_safe_zone;
+                    }
+                    // Personal ticks can advance through packet processing.
+                    // Shared casts are admitted by the Zone wall clock, so
+                    // their public readiness must use that same authority.
+                    let now_ms = Self::zone_now_ms();
+                    for skill in &mut snapshot.known_skills {
+                        if matches!(skill.cast_kind.as_str(), "passive" | "toggle") {
+                            continue;
+                        }
+                        let Some(spell) = skill.spell.as_deref().and_then(|name| {
+                            serde_json::from_value::<Spell>(serde_json::json!(name)).ok()
+                        }) else {
+                            continue;
+                        };
+                        if let Some(remaining_ms) =
+                            zone.player_magic_cooldown_remaining_ms(session_id, spell, now_ms)
+                        {
+                            skill.cooldown_remaining_ticks =
+                                remaining_ms.div_ceil(1_000).min(u64::from(u32::MAX)) as u32;
+                        }
+                    }
                 }
                 if let Some((hp, max_hp, mp)) = zone_state.zone_manager.player_vitals(session_id) {
                     snapshot.player_hp = Some(hp);
