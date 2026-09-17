@@ -349,9 +349,10 @@ function practiceQuest(requirements, { questId = 2110004, kills = [{ monsterName
   };
 }
 
-function noWalkPath(successfulSteps = 0) {
+function noWalkPath(successfulSteps = 0, attempts = 1) {
   const error = new Error('No walk path on D001');
   error.successfulSteps = successfulSteps;
+  error.attempts = attempts;
   return error;
 }
 
@@ -463,7 +464,7 @@ test('practice search ranks a near spawn field ahead of a remote manifest first 
       snapshot.entities.push({ kind: 'monster', objectId: 9, name: 'Oma', x: 250, y: 540, hp: 30, dead: false });
       Object.assign(snapshot.entities[0], { x: 250, y: 539 });
       assert.equal(stopWhen(), true, 'a newly authoritative target ends field navigation immediately');
-      return { reached: false, successfulSteps: 16 };
+      return { reached: false, successfulSteps: 16, attempts: 16 };
     }
     return { reached: true, successfulSteps: 0 };
   }, 1, () => {});
@@ -471,6 +472,95 @@ test('practice search ranks a near spawn field ahead of a remote manifest first 
   assert.equal(calls.length, 2, 'the practice pass must not continue through later coverage after an AOI target appears');
   assert.equal(calls[0].options.maxSuccessfulSteps, 120);
   assert.ok(calls[0].options.maxAttempts <= 180);
+});
+
+test('practice reserves the shared attempt budget for the distant first Oma field edge', async () => {
+  const quest = {
+    questId: 2110004,
+    objectives: { kill: [{ monsterName: 'Oma', spawnCandidates: [
+      { mapFileName: '0', position: { x: 220, y: 470 }, spread: 70, count: 40, respawnIndex: 56 },
+      { mapFileName: '0', position: { x: 140, y: 500 }, spread: 50, count: 30, respawnIndex: 57 },
+      { mapFileName: '0', position: { x: 110, y: 440 }, spread: 70, count: 40, respawnIndex: 55 },
+    ] }], item: [], flag: [] },
+  };
+  const snapshot = {
+    playerObjectId: 1, mapFileName: '0',
+    entities: [{ kind: 'selfPlayer', objectId: 1, x: 293, y: 610, hp: 60, maxHp: 60 }],
+  };
+  // The field has several equally near y=540 edge cells; ordering selects
+  // x=230 first, while x=290 is the same 70-tile distance from this actor.
+  assert.deepEqual(practiceSpawnWaypoints(snapshot, quest)[0], { x: 230, y: 540 });
+  const calls = [];
+  const target = await approachPracticeTarget({ snapshot }, quest, async (point, distance, _stopWhen, options) => {
+    calls.push({ point, distance, options });
+    if (calls.length === 1) {
+      Object.assign(snapshot.entities[0], { x: 230, y: 539 });
+      snapshot.entities.push({ kind: 'monster', objectId: 9, name: 'Oma', x: 230, y: 540, hp: 30, dead: false });
+      return { reached: false, successfulSteps: 71, attempts: 75 };
+    }
+    return { reached: true, successfulSteps: 0, attempts: 0 };
+  }, 1);
+  assert.equal(target.objectId, 9);
+  assert.equal(calls[0].options.maxSuccessfulSteps, 120);
+  assert.equal(calls[0].options.maxAttempts, 88, 'the initial 70-tile edge receives a bounded detour reservation');
+  assert.equal(calls[1].options.maxAttempts, 180, 'the ordinary final target approach keeps its existing independent cap');
+});
+
+test('practice debits actual exhausted attempts and successful steps across bounded waypoints', async () => {
+  const quest = practiceQuest({ warrior: ['Fencing learned'] }, {
+    kills: [{ monsterName: 'Scarecrow', spawnCandidates: [
+      { mapFileName: '0', position: { x: 40, y: 0 }, spread: 0, count: 1 },
+      { mapFileName: '0', position: { x: 50, y: 0 }, spread: 0, count: 1 },
+    ] }],
+  });
+  const snapshot = { mapFileName: '0', playerObjectId: 1, entities: [{ kind: 'player', objectId: 1, x: 0, y: 0 }] };
+  const calls = [];
+  const diagnostics = [];
+  await assert.rejects(
+    approachPracticeTarget({ snapshot, record: (type, payload) => diagnostics.push({ type, payload }) }, quest,
+      async (_point, _distance, _stopWhen, options) => {
+        calls.push(options);
+        const error = new Error(`Navigation attempt budget exceeded (${options.maxAttempts})`);
+        error.successfulSteps = 40;
+        error.attempts = options.maxAttempts;
+        throw error;
+      }, 1),
+    /has no live configured objective monster/,
+  );
+  assert.deepEqual(calls.map(options => ({ steps: options.maxSuccessfulSteps, attempts: options.maxAttempts })), [
+    { steps: 120, attempts: 90 }, { steps: 80, attempts: 90 },
+  ]);
+  assert.deepEqual(diagnostics.map(entry => entry.payload.type), [
+    'practiceSpawnWaypointAttemptBudgetExhausted', 'practiceSpawnWaypointAttemptBudgetExhausted',
+  ]);
+});
+
+test('practice keeps a target revealed by the final accepted move at its attempt cap', async () => {
+  const quest = practiceQuest({ warrior: ['Fencing learned'] }, {
+    kills: [{ monsterName: 'Scarecrow', spawnCandidates: [
+      { mapFileName: '0', position: { x: 100, y: 0 }, spread: 0, count: 1 },
+    ] }],
+  });
+  const snapshot = { mapFileName: '0', playerObjectId: 1, entities: [{ kind: 'player', objectId: 1, x: 0, y: 0 }] };
+  const calls = [];
+  const target = await approachPracticeTarget({ snapshot }, quest,
+    async (point, distance, _stopWhen, options) => {
+      calls.push({ point, distance, options });
+      if (calls.length === 1) {
+        Object.assign(snapshot.entities[0], { x: 99, y: 0 });
+        snapshot.entities.push({ kind: 'monster', objectId: 17, name: 'Scarecrow', x: 100, y: 0, hp: 10, dead: false });
+        const error = new Error(`Navigation attempt budget exceeded (${options.maxAttempts})`);
+        error.successfulSteps = 100;
+        error.attempts = options.maxAttempts;
+        throw error;
+      }
+      return { reached: true, successfulSteps: 0, attempts: 0 };
+    }, 1);
+  assert.equal(target.objectId, 17);
+  assert.deepEqual(calls.map(call => ({ point: { x: call.point.x, y: call.point.y }, distance: call.distance, attempts: call.options.maxAttempts })), [
+    { point: { x: 100, y: 0 }, distance: 6, attempts: 180 },
+    { point: { x: 100, y: 0 }, distance: 1, attempts: 180 },
+  ]);
 });
 
 test('practice skips an unreachable spread waypoint and completes only after a fresh live target and server flag', async () => {
@@ -533,6 +623,13 @@ test('practice still fails after every bounded waypoint is unreachable and does 
   await assert.rejects(
     approachPracticeTarget({ snapshot }, quest, async () => { throw missingCount; }, 1),
     error => error === missingCount,
+  );
+  const stringCounts = new Error('Navigation attempt budget exceeded (90)');
+  stringCounts.successfulSteps = '0';
+  stringCounts.attempts = '90';
+  await assert.rejects(
+    approachPracticeTarget({ snapshot }, quest, async () => { throw stringCounts; }, 1),
+    error => error === stringCounts,
   );
 });
 

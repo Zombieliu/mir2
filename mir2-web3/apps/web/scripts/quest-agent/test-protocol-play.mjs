@@ -127,6 +127,19 @@ test('navigator propagates a Gateway failure without rejecting a valid tile or s
   assert.equal(client.diagnostics.length, 0);
 });
 
+test('navigator reports exact accepted movement and attempt counts when its attempt cap is exhausted', async () => {
+  const client = navigationClient();
+  client.wait = acknowledgeUnitMovement(client);
+  const navigateNear = createNavigator(client, dependencies);
+
+  await assert.rejects(
+    navigateNear({ x: 7, y: 1 }, 0, () => false, { maxAttempts: 1, maxSuccessfulSteps: 20 }),
+    error => /Navigation attempt budget exceeded \(1\)/.test(error?.message ?? '') &&
+      error.successfulSteps === 1 && error.attempts === 1,
+  );
+  assert.equal(client.sent.length, 1);
+});
+
 test('before-movement guard rechecks fresh AOI after cadence and blocks both physical Run cells', async () => {
   const client = navigationClient();
   let guardCall = null;

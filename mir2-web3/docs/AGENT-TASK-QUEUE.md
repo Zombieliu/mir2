@@ -15,6 +15,8 @@
 > Public owner readiness follows the Zone clock; the 6e1778957 release is deployed.
 > Fresh ordinary three-class accounts started on isolated ports 19800/19810, with unextended 120-minute ledgers.
 > Native clean-source build is running; documented Windows control now lists windows successfully.
+> Fresh Wizard N4 practice reservation/accounting repair passes affected suites 87/87;
+> the 180-attempt/120-step caps and original fresh timing ledger remain unchanged.
 > Remaining ordinary route, timing, survival,
 > suitable equipment, exact native package and visual acceptance remain open.
 > This adds custom onboarding, no Crystal parity percentage. V1 evidence stays

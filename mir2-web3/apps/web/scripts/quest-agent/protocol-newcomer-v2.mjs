@@ -825,33 +825,45 @@ export async function approachPracticeTarget(client, quest, navigate, desiredDis
   if (!target) {
     const waypoints = practiceSpawnWaypoints(client.snapshot, quest);
     let remainingSteps = PRACTICE_SPAWN_STEP_BUDGET;
-    const attemptsPerWaypoint = Math.max(1, Math.floor(PRACTICE_SPAWN_ATTEMPT_BUDGET /
-      Math.max(1, waypoints.length)));
-    for (const waypoint of waypoints) {
-      if (target || remainingSteps <= 0) break;
+    let remainingAttempts = PRACTICE_SPAWN_ATTEMPT_BUDGET;
+    for (let index = 0; index < waypoints.length; index += 1) {
+      const waypoint = waypoints[index];
+      if (target || remainingSteps <= 0 || remainingAttempts <= 0) break;
       checkDeadline();
       // A target can enter AOI while walking a legitimate spawn field. Stop
       // immediately and retarget it rather than spending the remaining field
       // budget marching toward a stale manifest center.
+      const waypointAttempts = practiceWaypointAttemptReservation(
+        selfPlayer(client), waypoint, remainingAttempts, waypoints.length - index,
+      );
       let progress;
       try {
         progress = await navigate(waypoint, 6, () => Boolean(selectTarget()), {
           maxSuccessfulSteps: remainingSteps,
-          maxAttempts: attemptsPerWaypoint,
+          maxAttempts: waypointAttempts,
           detectPositionCycles: true,
         });
       } catch (error) {
         // A manifest spread may cover an unreachable collision component.
-        // Skip only the traveler's exact no-path result; all other navigation
-        // failures remain terminal and this fixed candidate list remains
-        // bounded by its existing waypoint and step budgets.
-        if (!/^No walk path/.test(String(error?.message ?? ''))) throw error;
-        const failedSuccessfulSteps = error?.successfulSteps;
-        if (!Number.isSafeInteger(failedSuccessfulSteps) || failedSuccessfulSteps < 0) throw error;
-        remainingSteps -= Math.min(remainingSteps, failedSuccessfulSteps);
+        // Skip only its exact no-path result or this waypoint's exact, fully
+        // accounted attempt cap; every other navigation failure stays terminal.
+        // The fixed candidate list remains bounded by its existing budgets.
+        const noWalkPath = /^No walk path/.test(String(error?.message ?? ''));
+        const attemptBudgetExhausted = new RegExp(`^Navigation attempt budget exceeded \\(${waypointAttempts}\\)$`)
+          .test(String(error?.message ?? ''));
+        if (!noWalkPath && !attemptBudgetExhausted) throw error;
+        const settled = settlePracticeNavigationBudget(error, remainingSteps, remainingAttempts, waypointAttempts);
+        if (!settled) throw error;
+        remainingSteps = settled.remainingSteps;
+        remainingAttempts = settled.remainingAttempts;
+        // The final accepted move can reveal an authoritative target at the
+        // same moment its per-waypoint attempt cap is exhausted. Preserve
+        // that receipt before the shared ledger decides whether another field
+        // waypoint may start.
+        target = selectTarget();
         if (typeof client?.record === 'function') {
           client.record('diagnostic', {
-            type: 'practiceSpawnWaypointUnreachable',
+            type: noWalkPath ? 'practiceSpawnWaypointUnreachable' : 'practiceSpawnWaypointAttemptBudgetExhausted',
             questId: Number(quest.questId),
             mapFileName: String(client.snapshot?.mapFileName ?? ''),
             waypoint: { x: Number(waypoint.x), y: Number(waypoint.y) },
@@ -859,7 +871,10 @@ export async function approachPracticeTarget(client, quest, navigate, desiredDis
         }
         continue;
       }
-      remainingSteps -= Math.max(0, Math.min(remainingSteps, Number(progress?.successfulSteps) || 0));
+      const settled = settlePracticeNavigationBudget(progress, remainingSteps, remainingAttempts, waypointAttempts);
+      if (!settled) throw new Error('practice navigation lacked trustworthy budget accounting');
+      remainingSteps = settled.remainingSteps;
+      remainingAttempts = settled.remainingAttempts;
       target = selectTarget();
     }
   }
@@ -880,6 +895,31 @@ export async function approachPracticeTarget(client, quest, navigate, desiredDis
     throw new V2Pause('targetOutOfRange', quest.questId, 'configured practice target lost its authoritative in-range receipt');
   }
   return refreshed;
+}
+
+function practiceWaypointAttemptReservation(actor, waypoint, remainingAttempts, remainingWaypoints) {
+  const fairShare = Math.max(1, Math.floor(remainingAttempts / Math.max(1, remainingWaypoints)));
+  const directDistance = distance(actor, waypoint);
+  // Retain the 180-attempt total, but do not strand the closest real field
+  // behind an arbitrary equal sixth of it.  The modest route allowance covers
+  // a static detour while the later candidates retain the remainder.
+  const travelReserve = Number.isFinite(directDistance)
+    ? Math.ceil(directDistance * 1.25)
+    : fairShare;
+  return Math.max(1, Math.min(remainingAttempts, Math.max(fairShare, travelReserve)));
+}
+
+function settlePracticeNavigationBudget(progress, remainingSteps, remainingAttempts, allocatedAttempts) {
+  const successfulSteps = progress?.successfulSteps;
+  const attempts = progress?.attempts;
+  if (!Number.isSafeInteger(successfulSteps) || successfulSteps < 0 || successfulSteps > remainingSteps ||
+      !Number.isSafeInteger(attempts) || attempts < 0 || attempts > allocatedAttempts || attempts > remainingAttempts) {
+    return null;
+  }
+  return {
+    remainingSteps: remainingSteps - successfulSteps,
+    remainingAttempts: remainingAttempts - attempts,
+  };
 }
 
 /**

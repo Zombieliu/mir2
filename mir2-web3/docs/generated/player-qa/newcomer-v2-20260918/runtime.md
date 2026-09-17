@@ -163,3 +163,9 @@ Windows control has now recovered via its documented initialized node_repl
 entry (computer-use-recovery.md/json). Native clean-source build is running.
 This does not change the retained old 33/78 durable checkpoint or imply new
 route, timing, signed-package or visual acceptance.
+
+Fresh Wizard N4 exposed a controller-only equal-per-waypoint reservation gap.
+The fixed 180-attempt/120-step total now follows actual spending and waypoint
+distance; affected Navigator/V2 suites pass 87/87. Invalid accounting fails
+closed, including a target appearing on the exact final movement. The original
+fresh clock and normal saved character are retained (practice-navigation.md).

@@ -469,7 +469,7 @@ export function createNavigator(client, dependencies = {}) {
       if (client.closed) throw new Error('Protocol client closed during navigation');
       const self = selfPlayer(client);
       lastActiveOwner = activeOwnerTransform(client.snapshot) ?? lastActiveOwner;
-      if (stopWhen()) return { reached: false, successfulSteps };
+      if (stopWhen()) return { reached: false, successfulSteps, attempts: count };
       if (hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Player died during navigation');
       const movementBlockMask = selfActionBlockMask(client);
       if (movementBlockMask !== 0) {
@@ -585,7 +585,7 @@ export function createNavigator(client, dependencies = {}) {
                   y: Number(after.y),
                 },
               });
-              if (client.snapshot.mapFileName !== mapId) return { reached: false, successfulSteps };
+              if (client.snapshot.mapFileName !== mapId) return { reached: false, successfulSteps, attempts: count };
               continue;
             }
             emergencyEscapeFailed = true;
@@ -616,8 +616,8 @@ export function createNavigator(client, dependencies = {}) {
         // is being cast can strand a caster before the actual engagement.
         await useSupplies(client, { mpThreshold: 0 });
       }
-      if (client.snapshot.mapFileName !== mapId) return { reached: false, successfulSteps };
-      if (distance(self, target) <= desiredDistance) return { reached: true, successfulSteps };
+      if (client.snapshot.mapFileName !== mapId) return { reached: false, successfulSteps, attempts: count };
+      if (distance(self, target) <= desiredDistance) return { reached: true, successfulSteps, attempts: count };
       const staticWalkableOverrides = liveTransferStaticWalkableOverrides(client.snapshot, target, options);
       // Enter a transfer only when the caller selected its live authoritative
       // key. Ordinary same-map navigation treats every other transfer source
@@ -656,6 +656,7 @@ export function createNavigator(client, dependencies = {}) {
         if (++failures > maxNoPathRefreshes) {
           const error = new Error(`No walk path on ${mapId} from ${self.x},${self.y} to ${target.x},${target.y}`);
           error.successfulSteps = successfulSteps;
+          error.attempts = count + 1;
           throw error;
         }
         client.record('diagnostic', { type: 'navigationReplan', mapId, mapSource: maps.get(mapId).sourcePath, width: maps.get(mapId).width, height: maps.get(mapId).height, desiredDistance, start: { x: self.x, y: self.y }, target, rejected: [...rejected], obstacleCount: dynamicObstacles.length });
@@ -668,7 +669,10 @@ export function createNavigator(client, dependencies = {}) {
       }
       const plannedFrom = { x: self.x, y: self.y };
       if (successfulSteps >= maxSuccessfulSteps) {
-        throw new Error(`Navigation successful step budget exceeded (${maxSuccessfulSteps})`);
+        const error = new Error(`Navigation successful step budget exceeded (${maxSuccessfulSteps})`);
+        error.successfulSteps = successfulSteps;
+        error.attempts = count;
+        throw error;
       }
       const running = maxSuccessfulSteps - successfulSteps >= 2 &&
         remaining.length >= 2 && remaining[1].direction === step.direction &&
@@ -721,6 +725,7 @@ export function createNavigator(client, dependencies = {}) {
         if (++failures > maxNoPathRefreshes) {
           const error = new Error(`No walk path on ${mapId} from ${liveSelf.x},${liveSelf.y} to ${target.x},${target.y}`);
           error.successfulSteps = successfulSteps;
+          error.attempts = count + 1;
           throw error;
         }
         continue;
@@ -861,7 +866,10 @@ export function createNavigator(client, dependencies = {}) {
         }
       }
     }
-    throw new Error(`Navigation attempt budget exceeded (${maxAttempts})`);
+    const error = new Error(`Navigation attempt budget exceeded (${maxAttempts})`);
+    error.successfulSteps = successfulSteps;
+    error.attempts = maxAttempts;
+    throw error;
   };
   // External combat/recovery code may complete a normal same-map emergency
   // scroll while this navigator is idle. Its hostile trail belongs to the
