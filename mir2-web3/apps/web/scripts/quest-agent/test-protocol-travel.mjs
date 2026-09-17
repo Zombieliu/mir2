@@ -370,6 +370,105 @@ test('travels through an authoritative live walking transfer at distance zero', 
   }]);
 });
 
+test('D711 emergency landing on requested town stops before waiting for stale D710', async () => {
+  const transfer = {
+    key: 'crystal-move:d711:205:197:202:26:20', mapFileName: 'D711', toMapFileName: 'D710',
+    bounds: { minX: 205, maxX: 205, minY: 197, maxY: 197 }, toPosition: { x: 26, y: 20 },
+  };
+  const client = new FakeClient({
+    mapFileName: 'D711', mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer({ x: 340, y: 149 })], mapTransfers: [transfer],
+  });
+  const travel = createMapTraveler(client, async (_target, _distance, _stopWhen, options) => {
+    assert.equal(options.liveTransferKey, transfer.key);
+    // Public trace shape: a navigation escape left D711 for map 0 while the
+    // ordinary route was awaiting the intermediate D710 transfer.
+    client.receive({ type: 'worldSnapshot', payload: {
+      mapFileName: '0', mapSnapshotPending: false, playerObjectId: 1,
+      entities: [selfPlayer({ x: 293, y: 605 })], mapTransfers: [],
+    } });
+  });
+
+  assert.deepEqual(await travel('0'), []);
+  assert.equal(client.snapshot.mapFileName, '0');
+});
+
+test('D711 final-map shortcut rejects missing, wrong, stale, and pending owner snapshots', async () => {
+  const transfer = {
+    key: 'crystal-move:d711:205:197:202:26:20', mapFileName: 'D711', toMapFileName: 'D710',
+    bounds: { minX: 205, maxX: 205, minY: 197, maxY: 197 }, toPosition: { x: 26, y: 20 },
+  };
+  const source = {
+    mapFileName: 'D711', mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer({ x: 340, y: 149 })], mapTransfers: [transfer],
+  };
+  const cases = [
+    { name: 'missing owner', landing: { mapFileName: '0', mapSnapshotPending: false, playerObjectId: 1, entities: [], mapTransfers: [] } },
+    { name: 'wrong owner', landing: { mapFileName: '0', mapSnapshotPending: false, playerObjectId: 2, entities: [{ objectId: 2, kind: 'selfPlayer', x: 293, y: 605 }], mapTransfers: [] } },
+    { name: 'wrong owner retaining old entity', landing: { mapFileName: '0', mapSnapshotPending: false, playerObjectId: 2, entities: [{ objectId: 2, kind: 'selfPlayer', x: 293, y: 605 }, { objectId: 1, kind: 'remotePlayer', x: 293, y: 605 }], mapTransfers: [] } },
+    { name: 'unknown owner coordinates', landing: { mapFileName: '0', mapSnapshotPending: false, playerObjectId: 1, entities: [selfPlayer({ x: null, y: null })], mapTransfers: [] } },
+    { name: 'pending owner', landing: { mapFileName: '0', mapSnapshotPending: true, playerObjectId: 1, entities: [selfPlayer({ x: 293, y: 605 })], mapTransfers: [] } },
+  ];
+  for (const fixture of cases) {
+    const client = new FakeClient(source);
+    const travel = createMapTraveler(client, async () => client.receive({ type: 'worldSnapshot', payload: fixture.landing }));
+    await assert.rejects(() => travel('0'), /Fake timeout waiting for map transfer D711 -> D710/, fixture.name);
+  }
+
+  const stale = new FakeClient(source);
+  stale.receive({ type: 'worldSnapshot', payload: {
+    mapFileName: '0', mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer({ x: 293, y: 605 })], mapTransfers: [],
+  } });
+  stale.snapshot = structuredClone(source);
+  const staleTravel = createMapTraveler(stale, async () => {});
+  await assert.rejects(() => staleTravel('0'), /Fake timeout waiting for map transfer D711 -> D710/, 'stale pre-edge landing');
+});
+
+test('an unrelated fresh map landing fails instead of waiting for the stale D711 transfer', async () => {
+  const transfer = {
+    key: 'crystal-move:d711:205:197:202:26:20', mapFileName: 'D711', toMapFileName: 'D710',
+    bounds: { minX: 205, maxX: 205, minY: 197, maxY: 197 }, toPosition: { x: 26, y: 20 },
+  };
+  const client = new FakeClient({
+    mapFileName: 'D711', mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer({ x: 340, y: 149 })], mapTransfers: [transfer],
+  });
+  const travel = createMapTraveler(client, async () => {
+    client.receive({ type: 'worldSnapshot', payload: {
+      mapFileName: 'D712', mapSnapshotPending: false, playerObjectId: 1,
+      entities: [selfPlayer({ x: 367, y: 225 })], mapTransfers: [],
+    } });
+  });
+
+  await assert.rejects(() => travel('0'), /Map route became stale: expected D710, found D712/);
+});
+
+test('the expected D711 landing still refreshes a pending owner snapshot', async () => {
+  const transfer = {
+    key: 'crystal-move:d711:205:197:202:26:20', mapFileName: 'D711', toMapFileName: 'D710',
+    bounds: { minX: 205, maxX: 205, minY: 197, maxY: 197 }, toPosition: { x: 26, y: 20 },
+  };
+  const client = new FakeClient({
+    mapFileName: 'D711', mapSnapshotPending: false, playerObjectId: 1,
+    entities: [selfPlayer({ x: 340, y: 149 })], mapTransfers: [transfer],
+  }, (command, current) => {
+    if (command.type === 'clientVersion') current.receive({ type: 'worldSnapshot', payload: {
+      mapFileName: 'D710', mapSnapshotPending: false, playerObjectId: 1,
+      entities: [selfPlayer({ x: 26, y: 20 })], mapTransfers: [],
+    } });
+  });
+  const travel = createMapTraveler(client, async () => {
+    client.receive({ type: 'packet', packet: 'MapChanged', payload: {
+      fileName: 'D710', location: { x: 26, y: 20 },
+    } });
+    client.snapshot.mapSnapshotPending = true;
+  });
+
+  assert.equal((await travel('D710'))[0].transferKey, transfer.key);
+  assert.deepEqual(client.commands, [{ type: 'clientVersion' }]);
+});
+
 test('a caller can prefer a safe authoritative transfer source over the nearest portal', async () => {
   const sabukEdge = graph.edges.find(edge =>
     edge.kind === 'map-movement' && edge.fromMapFileName === '3' && edge.toMapFileName === 'D701'

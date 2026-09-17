@@ -74,3 +74,56 @@ test('q99 keeps the same melee blocker rule while preserving ranged objective co
   assert.equal(shouldPreserveTaoistObjectiveAmmo(owner, q99, objective), false);
   assert.equal(questCombatApproachRange(owner, q99, objective), 6);
 });
+
+test('q113 Taoist uses the ordinary nine-tile SoulFireBall action range', async () => {
+  const owner = client();
+  const q113 = { questId: 113, objectives: { kill: [{ monsterName: 'BlackBoar' }], item: [] } };
+  const target = { kind: 'monster', objectId: 3, name: 'BlackBoar', x: 19, y: 10, hp: 285, dead: false };
+  owner.snapshot.entities.push(target);
+
+  assert.equal(questCombatApproachRange(owner, q113, target), 9);
+  assert.deepEqual(await questCombatAction(owner, q113, target), {
+    kind: 'magic', spell: 'SoulFireBall', targetId: 3,
+    command: {
+      type: 'magic', objectId: 1, spell: 'SoulFireBall', direction: 'Right', targetId: 3,
+      x: 19, y: 10, spellTargetLock: true,
+    },
+  });
+  assert.deepEqual(owner.sent, [{
+    type: 'magic', objectId: 1, spell: 'SoulFireBall', direction: 'Right', targetId: 3,
+    x: 19, y: 10, spellTargetLock: true,
+  }]);
+});
+
+test('q113 range policy leaves other Taoist quest approach hints unchanged', () => {
+  const owner = client();
+  const target = { kind: 'monster', objectId: 3, name: 'BlackBoar', x: 19, y: 10, hp: 285, dead: false };
+  owner.snapshot.entities.push(target);
+
+  for (const questId of [60, 89]) {
+    assert.equal(
+      questCombatApproachRange(owner, { questId, objectives: { kill: [], item: [] } }, target),
+      6,
+      `q${questId}`,
+    );
+  }
+});
+
+test('q113 Taoist keeps melee approach and actions when SoulFireBall is unavailable', async () => {
+  const q113 = { questId: 113, objectives: { kill: [{ monsterName: 'BlackBoar' }], item: [] } };
+  for (const unavailable of [
+    { name: 'no Amulet', apply: owner => { owner.snapshot.equipmentItems = []; } },
+    { name: 'insufficient MP', apply: owner => { owner.snapshot.playerMp = 4; } },
+    { name: 'unknown SoulFireBall', apply: owner => { owner.snapshot.knownSkills = []; } },
+  ]) {
+    const owner = client();
+    const target = { kind: 'monster', objectId: 3, name: 'BlackBoar', x: 19, y: 10, hp: 285, dead: false };
+    owner.snapshot.entities.push(target);
+    unavailable.apply(owner);
+
+    assert.equal(questCombatApproachRange(owner, q113, target), 1, unavailable.name);
+    assert.deepEqual(await questCombatAction(owner, q113, target), {
+      kind: 'attack', targetId: 3, command: { type: 'attack', objectId: 3 },
+    }, unavailable.name);
+  }
+});

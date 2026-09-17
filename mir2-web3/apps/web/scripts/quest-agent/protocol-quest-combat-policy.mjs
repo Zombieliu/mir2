@@ -16,9 +16,11 @@ export function shouldPreserveTaoistObjectiveAmmo(client, routeQuest, target) {
 }
 
 export function questCombatApproachRange(client, routeQuest, target) {
-  return shouldPreserveTaoistObjectiveAmmo(client, routeQuest, target)
-    ? 1
-    : combatApproachRange(client, target);
+  const ordinaryRange = combatApproachRange(client, target);
+  if (shouldPreserveTaoistObjectiveAmmo(client, routeQuest, target)) return 1;
+  return Number(routeQuest?.questId) === 113 && isTaoist(client) && ordinaryRange > 1
+    ? 9
+    : ordinaryRange;
 }
 
 export async function questCombatAction(client, routeQuest, target) {
@@ -39,4 +41,11 @@ function objectiveMonsterNames(routeQuest) {
 
 function normalized(value) {
   return String(value ?? '').trim().toLowerCase();
+}
+
+function isTaoist(client) {
+  const snapshot = client?.snapshot;
+  const actor = (snapshot?.entities ?? []).find(entity =>
+    Number(entity?.objectId) === Number(snapshot?.playerObjectId));
+  return normalized(actor?.class) === 'taoist';
 }

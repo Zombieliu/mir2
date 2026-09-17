@@ -259,6 +259,33 @@ function observedMapChange(client, afterSequence, nextMap) {
   );
 }
 
+// A navigation-owned emergency escape can land on the caller's final map
+// while this traveler is still executing an intermediate topology edge. Only
+// accept that landing when it arrived after the edge began and the current
+// owner snapshot is complete; a stale packet or pending map snapshot remains
+// unsuitable for selecting the next route state.
+function sameActiveOwner(snapshot, objectId) {
+  if (!Number.isSafeInteger(Number(objectId)) ||
+      Number(snapshot?.playerObjectId) !== Number(objectId)) return false;
+  const owner = (snapshot?.entities ?? []).find(entity =>
+    Number(entity?.objectId) === Number(objectId),
+  );
+  return Boolean(owner) && Number.isFinite(owner?.x) && Number.isFinite(owner?.y);
+}
+
+function observedFreshCurrentMapLanding(client, afterSequence, mapFileName, activeOwnerId) {
+  if (client.snapshot?.mapSnapshotPending ||
+      String(client.snapshot?.mapFileName) !== String(mapFileName) ||
+      !sameActiveOwner(client.snapshot, activeOwnerId)) return false;
+  return client.events.some(event =>
+    event?.sequence > afterSequence && event?.direction === 'received' &&
+    event?.type === 'worldSnapshot' &&
+    event?.payload?.mapSnapshotPending !== true &&
+    String(event?.payload?.mapFileName) === String(mapFileName) &&
+    sameActiveOwner(event.payload, activeOwnerId),
+  );
+}
+
 async function requireFreshCurrentMapSnapshot(client, mapFileName) {
   if (!client.snapshot?.mapSnapshotPending) return;
   const afterRequest = client.sequence;
@@ -731,9 +758,23 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
       }
 
       const beforeTransfer = client.sequence;
+      const currentPlayer = player(client.snapshot);
+      const activeOwnerId = Number(currentPlayer?.objectId);
+      // Do not turn a normal completion of the expected final hop into an
+      // unrecorded shortcut. This is only for an unexpected authoritative
+      // landing on the travel call's final requested map. Other fresh map
+      // landings are still errors (or a caller-owned interruption), never a
+      // reason to wait twenty seconds for a stale intermediate transfer.
+      const handleUnexpectedCurrentMapLanding = () => {
+        const landedMap = String(client.snapshot?.mapFileName ?? '');
+        if (landedMap === current || landedMap === String(edge.toMapFileName) ||
+            !observedFreshCurrentMapLanding(client, beforeTransfer, landedMap, activeOwnerId)) return false;
+        if (landedMap === target) return true;
+        throwIfTravelInterrupted(options, current, edge.toMapFileName);
+        throw new Error(`Map route became stale: expected ${edge.toMapFileName}, found ${landedMap}`);
+      };
       const rejectedTransferKeys = new Set();
       let disconnectedRegionRelocations = 0;
-      const currentPlayer = player(client.snapshot);
       if (pointInBounds(currentPlayer, live.transfer.bounds)) {
         const exit = findProtocolTransferExitStep({
           map: await collisionMapFor(current),
@@ -751,6 +792,7 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
             travelShouldInterrupt(options),
           options.navigationOptions,
         );
+        if (handleUnexpectedCurrentMapLanding()) return traversed;
         if (!observedMapChange(client, beforeTransfer, String(edge.toMapFileName))) {
           throwIfTravelInterrupted(options, current, edge.toMapFileName);
         }
@@ -766,6 +808,7 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
               liveTransferKey: String(live.transfer.key ?? ''),
               ...(options.navigationOptions ?? {}),
             });
+            if (handleUnexpectedCurrentMapLanding()) return traversed;
             break;
           } catch (error) {
             if (!String(error?.message ?? '').startsWith('No walk path')) throw error;
@@ -849,10 +892,12 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
             await activeBlockingMonsterResolver(client, blocker, blocked);
           }
         }
+        if (handleUnexpectedCurrentMapLanding()) return traversed;
         if (!observedMapChange(client, beforeTransfer, String(edge.toMapFileName))) {
           throwIfTravelInterrupted(options, current, edge.toMapFileName);
         }
       }
+      if (handleUnexpectedCurrentMapLanding()) return traversed;
       await client.wait(
         () => observedMapChange(client, beforeTransfer, String(edge.toMapFileName)),
         `map transfer ${current} -> ${edge.toMapFileName}`,

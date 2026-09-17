@@ -1,5 +1,10 @@
 # Crystal Server Parity
 
+> 2026-09-17 R147 controller 699/699 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-final-landing-r146-tao-range-r147.md).
+
 > 2026-09-17 R145 controller 692/692 passes. Ordinary route units
 > remain **157/177**; actual route completion, final normal logout/store and
 > separate visual gates remain open.
