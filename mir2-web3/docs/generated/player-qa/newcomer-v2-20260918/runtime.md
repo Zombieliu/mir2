@@ -28,7 +28,7 @@ checkpointed, deduplicated and discarded when no V2 training evidence is needed.
 | Existing shared SoulFireBall/practice regression | 13/13 |
 | Existing V1 progression/daily/milestone regression | 11/11 |
 | Native journey projection | 17/17, including five V2 tests |
-| V2 public-protocol controller contracts | 14/14 |
+| V2 public-protocol controller contracts | 19/19 |
 | Candidate region static collision paths | all sampled paths reachable |
 
 The reward-test correction counts both belt and bag, by actual item index:
@@ -50,6 +50,22 @@ separate file store, localhost ports and a V2 directory marker; existing V1
 services/stores are not replaced. Three-class completion is **0/78 verified**
 at this checkpoint; no actual timing result is claimed. The 90+30-minute budget
 is a target until complete ordinary runs and human timing support it.
+
+First ordinary pass: **6/78** units persist across normal logout (two per class).
+The verifier compares server snapshot and private account-save quest records,
+level/transform/EXP/gold, and requires post-request LogOutSuccess. All three
+initial saves match; no direct store or QA command was used. See
+`ordinary-pass1.json` and `build.json` for the isolated release and receipts.
+Warrior/Wizard reached Scarecrow 2/2, then paused at RakingCat because the
+V2 route factory exposed `spawns` while ordinary combat consumes
+`spawnCandidates`. Both now reference the same real manifest list; a consumer
+contract test covers the correction. Taoist paused while searching Scarecrow.
+The same characters resume with the original timing ledger; cross-repair runs
+prove functionality, not a clean two-hour content-version timing result.
+Controller completion also requires authoritative level 30 and all 26 server
+Completed rows. Per-node QA checkpoints retain the initial clock. Mixed
+map-entry/skill AND flags wait for a fresh map/position receipt before preparation;
+N18 loadout-only requirements do not invent a target to run pet combat.
 
 Open: ordinary route/skills/supplies/death handling/save-relogin, dynamic
 occupancy and survivability, search-time/hostile-density gates, graduation

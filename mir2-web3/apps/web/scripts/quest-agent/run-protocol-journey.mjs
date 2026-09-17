@@ -122,6 +122,10 @@ const client = new ProtocolClient(
   traceFile,
 );
 const report = { runId, className, name: credentials.name, startedAt: new Date().toISOString(), gatewayUrl: client.url, traceFile, transport: 'normal-local-websocket', visualAccepted: false, completed: false };
+// This QA-only report ledger lets a normal process resume retain the original
+// two-hour ordinary-run deadline. It never writes or influences server state.
+const v2TimingLedger = await loadV2TimingLedger(path.join(output, `${className}.report.json`));
+if (v2TimingLedger) report.v2TimingLedger = { ordinaryStartedAt: v2TimingLedger, resumed: true };
 try {
   // Each run writes an isolated trace so Windows readers and virus scanners
   // cannot lock a shared multi-gigabyte append target. Bootstrap memory reads
@@ -155,7 +159,25 @@ try {
   report.bootstrapSignal = bootstrapEvidence.source;
   await client.wait(() => client.snapshot?.entities?.some(e => e.objectId === client.snapshot.playerObjectId && e.name === credentials.name), 'personal snapshot', bootstrapTimeoutMs);
   report.bootstrapPassed = true;
-  if (process.env.MIR2_JOURNEY_PLAY === '1') {
+  if (process.env.MIR2_JOURNEY_PLAY === '1' &&
+      String(process.env.MIR2_QUEST_CADENCE ?? '').trim().toLowerCase() === 'newcomer-v2') {
+    const { runNewcomerV2Journey } = await import('./protocol-newcomer-v2.mjs');
+    const result = await runNewcomerV2Journey({
+      client,
+      className,
+      gender: 'Male',
+      report,
+      ordinaryStartedAt: v2TimingLedger ?? report.startedAt,
+      deadlineMs: 120 * 60_000,
+      // Completed-node checkpoints are local QA evidence only. They retain
+      // the ordinary clock on a normal process resume and never alter server
+      // quest state or character storage.
+      checkpoint: async currentReport => {
+        await fs.writeFile(path.join(output, `${className}.report.json`), JSON.stringify(currentReport, null, 2));
+      },
+    });
+    report.completed = result.completed === true;
+  } else if (process.env.MIR2_JOURNEY_PLAY === '1') {
     const route = JSON.parse(await fs.readFile(new URL(`../../../../docs/generated/quest-agent/${className.toLowerCase()}-1-30-newcomer-v1.json`, import.meta.url), 'utf8'));
     const activeWoomaQuest = owner => {
       const activeIds = (owner?.snapshot?.questLog ?? [])
@@ -1357,6 +1379,17 @@ try {
   await client.close();
   await fs.writeFile(path.join(output, `${className}.report.json`), JSON.stringify(report, null, 2));
   await fs.writeFile(path.join(output, `${className}.${runId}.report.json`), JSON.stringify(report, null, 2));
+}
+
+async function loadV2TimingLedger(reportPath) {
+  try {
+    const prior = JSON.parse(await fs.readFile(reportPath, 'utf8'));
+    const startedAt = prior?.v2?.ordinaryStartedAt;
+    return Number.isFinite(Date.parse(startedAt ?? '')) ? startedAt : null;
+  } catch (error) {
+    if (error?.code === 'ENOENT' || error instanceof SyntaxError) return null;
+    throw error;
+  }
 }
 
 function recordSupplyRetreat(report, questId, supply) {
