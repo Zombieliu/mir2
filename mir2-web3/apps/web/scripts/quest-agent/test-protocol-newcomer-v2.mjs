@@ -3,8 +3,9 @@ import test from 'node:test';
 import { firstReachableDestination } from './protocol-combat.mjs';
 import {
   assertV2FlagsConfirmed, availableV2Growth, buildNewcomerV2Route,
-  BICHON_SAFE_AREA, checkpointV2Progress, countBasicHpPotion, executeV2PracticePlan, hasFreshV2MapEntryReceipt, practicePlan, requiredV2Skills,
-  v2CompletionState, v2FlagState,
+  approachPracticeTarget, BICHON_SAFE_AREA, checkpointV2Progress, countBasicHpPotion, executeV2PracticePlan, hasFreshV2MapEntryReceipt,
+  directionalApproachPoints, directionalRayDistance, loadNewcomerV2Route, practicePlan, practiceSpawnCandidates, practiceSpawnWaypoints, requiredV2Skills,
+  recoverV2Death, v2CompletionState, v2FlagState,
 } from './protocol-newcomer-v2.mjs';
 
 const npcManifest = { npcs: [
@@ -21,6 +22,13 @@ const itemManifest = { items: [
   { item_index: 1, name: 'WoodenSword' }, { item_index: 2, name: '(HP)DrugSmall' },
   { item_index: 3, name: 'SharpSword' }, { item_index: 4, name: 'Slaying' }, { item_index: 5, name: '(MP)DrugSmall' },
 ] };
+
+test('real V2 factory keeps class training separate from the other class requirements', async () => {
+  for (const [className, expected] of [['Warrior', ['Fencing']], ['Wizard', ['FireBall']], ['Taoist', ['Healing']]]) {
+    const route = await loadNewcomerV2Route({ className, gender: 'Male' });
+    assert.deepEqual(requiredV2Skills(route.quests.find(row => row.questId === 2110004), className), expected);
+  }
+});
 function config() {
   return {
     profile: 'newcomer-v2',
@@ -121,8 +129,9 @@ test('final V2 completion requires every one of 26 server Completed rows and aut
 });
 
 test('completed-node checkpoint retains the ordinary start and server receipt in the local QA report', async () => {
-  const report = { startedAt: '2026-09-18T01:00:00.000Z' };
+  const report = { startedAt: '2026-09-18T01:00:00.000Z', v2: { status: 'paused', finishedAt: 'earlier-process' } };
   const result = {
+    status: 'running',
     ordinaryStartedAt: '2026-09-18T01:00:00.000Z',
     attempts: [{ questId: 2110001, completedAt: '2026-09-18T01:01:00.000Z' }],
   };
@@ -132,8 +141,80 @@ test('completed-node checkpoint retains the ordinary start and server receipt in
     checkpoint: async currentReport => { persisted = structuredClone(currentReport); },
   });
   assert.equal(wrote, true);
+  assert.equal(persisted.v2.status, 'running');
   assert.equal(persisted.v2.ordinaryStartedAt, '2026-09-18T01:00:00.000Z');
   assert.deepEqual(persisted.v2.attempts.map(attempt => [attempt.questId, attempt.completedAt]), [[2110001, '2026-09-18T01:01:00.000Z']]);
+});
+
+test('authoritative V2 death is revived once, checkpointed, and leaves the unfinished server quest unchanged', async () => {
+  const snapshot = {
+    playerObjectId: 1, mapFileName: 'D001', playerHp: 0,
+    entities: [{ kind: 'player', objectId: 1, x: 25, y: 30, hp: 0, dead: true }],
+    questLog: [{ questId: 2110010, stage: 'InProgress' }],
+  };
+  const client = { snapshot };
+  const result = { status: 'running', attempts: [{ questId: 2110010 }], recoveries: [] };
+  const report = {};
+  const writes = [];
+  const recovered = await recoverV2Death({
+    client, result, report, questId: 2110010, phase: 'quest',
+    checkpoint: async current => writes.push(structuredClone(current.v2.recoveries)),
+    inWorldStartedAt: Date.now() - 20, startedAt: Date.now() - 100,
+    recovery: {
+      maxRecoveries: 3,
+      isDead: current => current.playerHp <= 0,
+      revive: async current => {
+        current.snapshot.playerHp = 40;
+        Object.assign(current.snapshot.entities[0], { hp: 40, dead: false, x: 328, y: 264 });
+        current.snapshot.mapFileName = '0';
+        return { at: 'revived', before: { map: 'D001' }, after: { map: '0' } };
+      },
+    },
+  });
+  assert.equal(recovered, true);
+  assert.equal(result.recoveries.length, 1);
+  assert.equal(result.recoveries[0].questId, 2110010);
+  assert.equal(result.recoveries[0].phase, 'quest');
+  assert.equal(result.recoveries[0].revive.after.map, '0');
+  assert.equal(writes.length, 2, 'death and confirmed revive each persist local QA evidence');
+  assert.deepEqual(snapshot.questLog, [{ questId: 2110010, stage: 'InProgress' }], 'recovery cannot complete or advance a quest locally');
+});
+
+test('a living V2 client never sends a revive request or consumes a recovery slot', async () => {
+  const client = { snapshot: { playerHp: 30, entities: [{ objectId: 1, hp: 30, dead: false }] } };
+  const result = { recoveries: [] };
+  let reviveCalls = 0;
+  const recovered = await recoverV2Death({
+    client, result, inWorldStartedAt: Date.now(), startedAt: Date.now(),
+    recovery: { isDead: current => current.playerHp <= 0, revive: async () => { reviveCalls += 1; } },
+  });
+  assert.equal(recovered, false);
+  assert.equal(reviveCalls, 0);
+  assert.deepEqual(result.recoveries, []);
+});
+
+test('V2 recovery fails closed after three confirmed deaths in one ordinary process', async () => {
+  const client = { snapshot: { playerHp: 0, entities: [{ objectId: 1, hp: 0, dead: true }] } };
+  const result = { recoveries: [] };
+  const recovery = {
+    maxRecoveries: 3,
+    isDead: current => current.playerHp <= 0,
+    revive: async current => {
+      current.snapshot.playerHp = 10;
+      Object.assign(current.snapshot.entities[0], { hp: 10, dead: false });
+      return { at: 'revived' };
+    },
+  };
+  for (let index = 0; index < 3; index += 1) {
+    assert.equal(await recoverV2Death({ client, result, inWorldStartedAt: Date.now(), startedAt: Date.now(), recovery }), true);
+    client.snapshot.playerHp = 0;
+    Object.assign(client.snapshot.entities[0], { hp: 0, dead: true });
+  }
+  await assert.rejects(
+    recoverV2Death({ client, result, inWorldStartedAt: Date.now(), startedAt: Date.now(), recovery }),
+    /exceeded the 3 authoritative V2 recovery limit/,
+  );
+  assert.equal(result.recoveries.length, 3);
 });
 
 function practiceQuest(requirements, { kills = [{ monsterName: 'Scarecrow', spawns: [{ mapFileName: '0', position: { x: 2, y: 0 }, spread: 0 }] }] } = {}) {
@@ -163,6 +244,20 @@ function practiceClient({ knownSkills, inventoryItems = [], requirements, comple
   const receive = (packet, payload) => {
     client.events.push({ sequence: ++client.sequence, direction: 'received', packet, payload });
   };
+  const liveMonster = objectId => snapshot.entities.find(entity =>
+    entity.kind === 'monster' && entity.dead !== true && Number(entity.hp ?? 1) > 0 && Number(entity.objectId) === Number(objectId));
+  const directionalMonster = (command, maximumRange) => {
+    const actor = snapshot.entities[0];
+    return snapshot.entities.filter(entity => entity.kind === 'monster' && entity.dead !== true && Number(entity.hp ?? 1) > 0)
+      .find(entity => {
+        const range = directionalRayDistance(actor, entity);
+        if (range == null || range > maximumRange) return false;
+        const dx = Math.sign(Number(entity.x) - Number(actor.x));
+        const dy = Math.sign(Number(entity.y) - Number(actor.y));
+        const directions = new Map([['0,-1', 'Up'], ['1,-1', 'UpRight'], ['1,0', 'Right'], ['1,1', 'DownRight'], ['0,1', 'Down'], ['-1,1', 'DownLeft'], ['-1,0', 'Left'], ['-1,-1', 'UpLeft']]);
+        return directions.get(`${dx},${dy}`) === command.direction;
+      });
+  };
   const client = {
     snapshot,
     sequence: 0,
@@ -171,17 +266,24 @@ function practiceClient({ knownSkills, inventoryItems = [], requirements, comple
       sent.push(command);
       client.sequence += 1;
       actions += 1;
-      if (command.type === 'attack') receive('ObjectStruck', { objectId: 9, attackerId: 1 });
+      if (command.type === 'attack') {
+        const target = liveMonster(command.objectId);
+        if (target) receive('ObjectStruck', { objectId: target.objectId, attackerId: 1 });
+      }
       if (command.type === 'attackDirection') {
+        const target = directionalMonster(command, command.spell === 3 ? 2 : 1);
         receive('ObjectAttack', { objectId: 1, spell: command.spell });
-        receive('ObjectStruck', { objectId: 9, attackerId: 1 });
+        if (target) receive('ObjectStruck', { objectId: target.objectId, attackerId: 1 });
       }
       if (command.type === 'magic') {
+        const target = command.spell === 'Lightning'
+          ? directionalMonster(command, 6)
+          : liveMonster(command.targetId);
         receive('ObjectMagic', { objectId: 1, spell: command.spell, targetId: command.targetId });
-        if (command.spell !== 'Healing' && command.spell !== 'Poisoning') receive('ObjectStruck', { objectId: 9, attackerId: 1 });
+        if (command.spell !== 'Healing' && command.spell !== 'Poisoning' && target) receive('ObjectStruck', { objectId: target.objectId, attackerId: 1 });
         if (command.spell === 'Poisoning') {
           snapshot.equipmentItems[0].quantity -= 1;
-          receive('ObjectPoisoned', { objectId: 9, poison: 1 });
+          if (target) receive('ObjectPoisoned', { objectId: target.objectId, poison: 1 });
         }
       }
       if (actions >= completeOn) snapshot.questLog[0].objectives[0] = { number: 2210041, current: 1, required: 1, done: true };
@@ -201,6 +303,100 @@ function practiceClient({ knownSkills, inventoryItems = [], requirements, comple
   };
   return { client, quest, sent, requests };
 }
+
+test('practice search ranks a near spawn field ahead of a remote manifest first entry and stops for an AOI target', async () => {
+  const quest = {
+    questId: 2110004,
+    objectives: { kill: [{ monsterName: 'Oma', spawnCandidates: [
+      { mapFileName: '0', position: { x: 90, y: 240 }, spread: 60, count: 20, delayMinutes: 4, respawnIndex: 10 },
+      { mapFileName: '0', position: { x: 220, y: 470 }, spread: 70, count: 40, delayMinutes: 7, respawnIndex: 56 },
+    ] }], item: [], flag: [] },
+  };
+  const snapshot = {
+    playerObjectId: 1, mapFileName: '0',
+    entities: [{ kind: 'selfPlayer', objectId: 1, x: 300, y: 591, hp: 60, maxHp: 60 }],
+  };
+  assert.deepEqual(practiceSpawnCandidates(snapshot, quest).map(entry => entry.respawnIndex), [56, 10]);
+  // The nearest waypoint is inside the close field's real spread, not the
+  // remote first center nor an artificial six-tile center radius.
+  assert.deepEqual(practiceSpawnWaypoints(snapshot, quest)[0], { x: 250, y: 540 });
+  const calls = [];
+  const client = { snapshot };
+  const target = await approachPracticeTarget(client, quest, async (point, distance, stopWhen, options) => {
+    calls.push({ point, distance, options });
+    if (calls.length === 1) {
+      snapshot.entities.push({ kind: 'monster', objectId: 9, name: 'Oma', x: 250, y: 540, hp: 30, dead: false });
+      Object.assign(snapshot.entities[0], { x: 250, y: 539 });
+      assert.equal(stopWhen(), true, 'a newly authoritative target ends field navigation immediately');
+      return { reached: false, successfulSteps: 16 };
+    }
+    return { reached: true, successfulSteps: 0 };
+  }, 1, () => {});
+  assert.equal(target.objectId, 9);
+  assert.equal(calls.length, 2, 'the practice pass must not continue through later coverage after an AOI target appears');
+  assert.equal(calls[0].options.maxSuccessfulSteps, 120);
+  assert.ok(calls[0].options.maxAttempts <= 180);
+});
+
+test('directional practice aligns exact Thrusting and Lightning rays instead of accepting off-axis Chebyshev range', () => {
+  assert.equal(directionalRayDistance({ x: 0, y: 0 }, { x: 2, y: 1 }), null);
+  assert.equal(directionalRayDistance({ x: 0, y: 0 }, { x: 2, y: 2 }), 2);
+  const thrusting = directionalApproachPoints({ x: 0, y: 0 }, { x: 2, y: 1 }, { minRange: 1, maxRange: 2 });
+  assert.ok(thrusting.length > 0);
+  assert.ok(directionalRayDistance(thrusting[0], { x: 2, y: 1 }) >= 1);
+  assert.ok(directionalRayDistance(thrusting[0], { x: 2, y: 1 }) <= 2);
+
+  const lightning = directionalApproachPoints({ x: 0, y: 0 }, { x: 8, y: 1 }, { minRange: 1, maxRange: 6, preferDistant: true });
+  assert.equal(lightning[0].range, 6, 'an off-axis Wizard approaches a safer four-to-six tile line before a close tile');
+  assert.equal(directionalRayDistance(lightning[0], { x: 8, y: 1 }), 6);
+  const closeLightning = directionalApproachPoints({ x: 0, y: 0 }, { x: 1, y: 0 }, { minRange: 1, maxRange: 6, preferDistant: true });
+  assert.ok(closeLightning[0].range >= 4, 'an aligned adjacent target still moves the Wizard to a safer ray tile');
+});
+
+test('directional practice moves to a line before packets and refreshes a different live target for the next q21 action', async () => {
+  const thrusting = practiceClient({
+    knownSkills: ['Thrusting'], requirements: { warrior: ['Thrusting attack damage committed'] }, completeOn: 1,
+  });
+  thrusting.client.snapshot.entities[0].class = 'Warrior';
+  Object.assign(thrusting.client.snapshot.entities[1], { x: 2, y: 1 });
+  const thrustMoves = [];
+  await executeV2PracticePlan({
+    client: thrusting.client,
+    quest: thrusting.quest,
+    navigate: async (point, desiredDistance) => {
+      thrustMoves.push({ point: { x: point.x, y: point.y }, desiredDistance });
+      Object.assign(thrusting.client.snapshot.entities[0], { x: point.x, y: point.y });
+      return { reached: true, successfulSteps: 1, attempts: 1 };
+    },
+    plan: [{ kind: 'technique', spell: 'Thrusting' }],
+  });
+  assert.equal(thrustMoves[0].desiredDistance, 0);
+  assert.ok(directionalRayDistance(thrusting.client.snapshot.entities[0], thrusting.client.snapshot.entities[1]) <= 2);
+  assert.deepEqual(thrusting.sent, [{ type: 'attackDirection', direction: 'DownRight', spell: 3 }]);
+
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['Lightning', 'FireWall'], requirements: { wizard: ['Lightning damage committed', 'owned FireWall damage committed'] }, completeOn: 2,
+  });
+  client.snapshot.entities[0].class = 'Wizard';
+  Object.assign(client.snapshot.entities[1], { x: 2, y: 1 }); // Chebyshev two, but not a Zone ray.
+  client.snapshot.entities.push({ kind: 'monster', objectId: 10, name: 'Scarecrow', x: 8, y: 0, hp: 10, dead: false });
+  const movement = [];
+  await executeV2PracticePlan({
+    client,
+    quest,
+    navigate: async (point, desiredDistance) => {
+      movement.push({ point: { x: point.x, y: point.y }, desiredDistance });
+      Object.assign(client.snapshot.entities[0], desiredDistance === 0
+        ? { x: point.x, y: point.y }
+        : { x: point.x - desiredDistance, y: point.y });
+      return { reached: true, successfulSteps: 1, attempts: 1 };
+    },
+    plan: [{ kind: 'spell', spell: 'Lightning' }, { kind: 'spell', spell: 'FireWall' }],
+  });
+  assert.equal(movement[0].desiredDistance, 0);
+  assert.deepEqual(sent.map(command => command.spell), ['Lightning', 'FireWall']);
+  assert.deepEqual(client.events.filter(event => event.packet === 'ObjectStruck').map(event => event.payload.objectId), [9, 10]);
+});
 
 test('practice plans execute every q21 class action rather than one priority spell', () => {
   const warrior = practiceQuest({ warrior: ['HalfMoon attack damage committed', 'Thrusting attack damage committed'] });
@@ -269,8 +465,16 @@ test('HalfMoon uses the ordinary attack-direction technique packet and Lightning
   const wizard = practiceClient({ knownSkills: ['Lightning'], requirements: { wizard: ['Lightning damage committed'] } });
   wizard.client.snapshot.entities[0].class = 'Wizard';
   wizard.client.snapshot.entities[0].direction = 'Left';
-  await executeV2PracticePlan({ client: wizard.client, quest: wizard.quest, navigate: async () => {}, plan: [{ kind: 'spell', spell: 'Lightning' }] });
-  assert.deepEqual(wizard.sent, [{ type: 'magic', objectId: 1, spell: 'Lightning', direction: 'Right', targetId: 1, x: 0, y: 0, spellTargetLock: false }]);
+  await executeV2PracticePlan({
+    client: wizard.client, quest: wizard.quest,
+    navigate: async (point, desiredDistance) => {
+      assert.equal(desiredDistance, 0);
+      Object.assign(wizard.client.snapshot.entities[0], { x: point.x, y: point.y });
+      return { reached: true, successfulSteps: 1, attempts: 1 };
+    },
+    plan: [{ kind: 'spell', spell: 'Lightning' }],
+  });
+  assert.deepEqual(wizard.sent, [{ type: 'magic', objectId: 1, spell: 'Lightning', direction: 'Right', targetId: 1, x: -3, y: 0, spellTargetLock: false }]);
 });
 
 test('Poisoning equips bag poison before its public magic packet and waits for server progress', async () => {

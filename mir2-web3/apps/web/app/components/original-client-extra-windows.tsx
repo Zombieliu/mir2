@@ -167,6 +167,7 @@ export type ExtraWindowsProps = {
       | "canAcceptQuest"
       | "canFinishQuest"
       | "playerClass"
+      | "playerLevel"
     >;
 
   heroPet?: WindowToggle &
@@ -339,6 +340,7 @@ function ExtraWindowsInner({
           t={t}
           quests={questLog.quests}
           playerClass={questLog.playerClass}
+          playerLevel={questLog.playerLevel}
           onTrackQuest={questLog.onTrackQuest}
           onAbandonQuest={questLog.onAbandonQuest}
           onShareQuest={questLog.onShareQuest}

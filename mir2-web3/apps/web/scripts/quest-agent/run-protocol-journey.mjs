@@ -162,6 +162,33 @@ try {
   if (process.env.MIR2_JOURNEY_PLAY === '1' &&
       String(process.env.MIR2_QUEST_CADENCE ?? '').trim().toLowerCase() === 'newcomer-v2') {
     const { runNewcomerV2Journey } = await import('./protocol-newcomer-v2.mjs');
+    // V2 uses the same public, receipted RandomTeleport route as the ordinary
+    // controller. It is unavailable without a live stack and `useRandomTeleport`
+    // proves both item consumption and an authoritative relocation.
+    const v2EmergencyTeleport = createRandomTeleportEmergencyEscape({
+      criticalHpRatio: 0.35,
+      teleport: async owner => {
+        if (randomTeleportCount(owner?.snapshot) <= 0) return false;
+        return useRandomTeleport(owner);
+      },
+    });
+    const v2PlayerAlive = owner => {
+      const actor = selfPlayer(owner);
+      return Boolean(actor && actor.dead !== true && !hasAuthoritativePlayerDeath(owner?.snapshot));
+    };
+    const v2Survival = {
+      emergencyEscapeHpRatio: 0.35,
+      maxEmergencyEscapesPerNavigation: 1,
+      emergencyEscape: async owner => {
+        if (!v2PlayerAlive(owner) || randomTeleportCount(owner.snapshot) <= 0) return false;
+        const result = await v2EmergencyTeleport(owner);
+        return result && typeof result === 'object' && result.deferred !== true
+          ? { ...result, success: true }
+          : result;
+      },
+      sustain: (owner, thresholds) => useSupplies(owner, thresholds),
+      recoverAfterUnsafeRetreat: owner => useSupplies(owner, { hpThreshold: 0.85, mpThreshold: 0.35 }),
+    };
     const result = await runNewcomerV2Journey({
       client,
       className,
@@ -169,6 +196,12 @@ try {
       report,
       ordinaryStartedAt: v2TimingLedger ?? report.startedAt,
       deadlineMs: 120 * 60_000,
+      survival: v2Survival,
+      recovery: {
+        maxRecoveries: 3,
+        isDead: hasAuthoritativePlayerDeath,
+        revive: reviveInTown,
+      },
       // Completed-node checkpoints are local QA evidence only. They retain
       // the ordinary clock on a normal process resume and never alter server
       // quest state or character storage.

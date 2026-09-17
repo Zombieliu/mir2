@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v2",
+  "minimumLevel": 30,
+  "requiredCompletionIds": [
+    2110001, 2110002, 2110003, 2110004, 2110005, 2110006,
+    2110007, 2110008, 2110009, 2110010, 2110011, 2110012,
+    2110013, 2110014, 2110015, 2110016, 2110017, 2110018,
+    2110019, 2110020, 2110021, 2110022,
+    2120015, 2120020, 2120025, 2120030
+  ],
+  "title": "Wooma Graduation",
+  "classes": {
+    "Warrior": {
+      "equipment": {
+        "title": "JudgementMace",
+        "itemIndex": 244,
+        "catalogPrice": 50000,
+        "requirements": "Level 30. Compatible with Warrior, Wizard, and Taoist.",
+        "normalAcquisition": "Equipment target for your next hunt."
+      },
+      "skill": {
+        "title": "ShoulderDash",
+        "bookItemIndex": 977,
+        "catalogPrice": 18000,
+        "requirements": "Warrior, level 30. Skill levels: 30 / 32 / 34.",
+        "normalAcquisition": "Hunt EvilCentipede in Life Death Coffin for this book."
+      }
+    },
+    "Wizard": {
+      "equipment": {
+        "title": "WarMageStaff",
+        "itemIndex": 259,
+        "catalogPrice": 50000,
+        "requirements": "Level 30. Compatible with Warrior, Wizard, and Taoist.",
+        "normalAcquisition": "Equipment target for your next hunt."
+      },
+      "skill": {
+        "title": "ThunderStorm",
+        "bookItemIndex": 1001,
+        "catalogPrice": 20000,
+        "requirements": "Wizard, level 30. Skill levels: 30 / 32 / 34.",
+        "normalAcquisition": "Hunt EvilCentipede in Life Death Coffin for this book."
+      }
+    },
+    "Taoist": {
+      "equipment": {
+        "title": "SoulSpringWand",
+        "itemIndex": 272,
+        "catalogPrice": 40000,
+        "requirements": "Level 30. Compatible with Warrior, Wizard, and Taoist.",
+        "normalAcquisition": "Equipment target for your next hunt."
+      },
+      "skill": {
+        "title": "Purification",
+        "bookItemIndex": 1028,
+        "catalogPrice": 25000,
+        "requirements": "Taoist, level 30. Skill levels: 30 / 32 / 35.",
+        "normalAcquisition": "Hunt WhiteBoar in Angled Stone Tomb B4 for this book."
+      }
+    }
+  },
+  "challenge": {
+    "title": "Insect Cave N 2F sweep",
+    "difficulty": "Medium",
+    "mapFileName": "D605",
+    "mapTitle": "Insect Cave N 2F",
+    "normalTravel": "Reach Insect Cave N 2F from Insect Cave W 1F or W 2F.",
+    "detail": "Fight Centipede and Tongs; stay alert for a medium challenge.",
+    "targets": [
+      { "monsterIndex": 152, "name": "Centipede", "configuredCount": 77, "hp": 210, "respawnMinutes": 3 },
+      { "monsterIndex": 158, "name": "Tongs", "configuredCount": 70, "hp": 240, "respawnMinutes": 3 }
+    ]
+  }
+}

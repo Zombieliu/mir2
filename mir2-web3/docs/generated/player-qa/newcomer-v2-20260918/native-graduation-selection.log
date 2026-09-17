@@ -1,0 +1,6 @@
+
+running 1 test
+test quest_ui::tests::graduation_target_selection_is_local_and_clears_with_the_session ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 862 filtered out; finished in 0.00s
+

@@ -4,7 +4,7 @@
 //! objective progress, completion and rewards remain server-authored read
 //! models. This module never infers completion from level, items, or hints.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use bevy::prelude::Resource;
 use serde::Deserialize;
@@ -17,6 +17,15 @@ const NEWCOMER_V1_JOURNEY_JSON: &str =
     include_str!("../../../../config/quest-guidance/newcomer-journey-v1.json");
 const NEWCOMER_V2_JOURNEY_JSON: &str =
     include_str!("../../../../config/quest-guidance/newcomer-journey-v2-ui.json");
+const NEWCOMER_V2_GRADUATION_JSON: &str =
+    include_str!("../../../../config/quest-guidance/newcomer-v2-graduation.json");
+
+const V2_GRADUATION_COMPLETION_IDS: &[i32] = &[
+    2_110_001, 2_110_002, 2_110_003, 2_110_004, 2_110_005, 2_110_006, 2_110_007, 2_110_008,
+    2_110_009, 2_110_010, 2_110_011, 2_110_012, 2_110_013, 2_110_014, 2_110_015, 2_110_016,
+    2_110_017, 2_110_018, 2_110_019, 2_110_020, 2_110_021, 2_110_022, 2_120_015, 2_120_020,
+    2_120_025, 2_120_030,
+];
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,6 +47,10 @@ pub struct JourneyChapter {
 #[cfg(test)]
 #[path = "newcomer_v2_guidance_tests.rs"]
 mod newcomer_v2_guidance_tests;
+
+#[cfg(test)]
+#[path = "graduation_tests.rs"]
+mod graduation_tests;
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -85,6 +98,7 @@ pub struct NewcomerJourneyCatalog {
     max_objective_groups: usize,
     chapters: Vec<JourneyChapter>,
     quest_overrides: BTreeMap<i32, JourneyQuestOverride>,
+    graduation: Option<NewcomerGraduationCatalog>,
 }
 
 const fn one_objective_group() -> usize {
@@ -118,6 +132,11 @@ impl NewcomerJourneyCatalog {
                 return Err(format!("invalid newcomer journey chapter {}", chapter.id));
             }
         }
+        let graduation = document
+            .profile
+            .eq_ignore_ascii_case("newcomer-v2")
+            .then(|| NewcomerGraduationCatalog::from_json(NEWCOMER_V2_GRADUATION_JSON))
+            .transpose()?;
         Ok(Self {
             max_level: document.max_level,
             profile: document.profile,
@@ -128,6 +147,7 @@ impl NewcomerJourneyCatalog {
                 .into_iter()
                 .map(|entry| (entry.quest_id, entry))
                 .collect(),
+            graduation,
         })
     }
 
@@ -163,6 +183,19 @@ impl NewcomerJourneyCatalog {
                     .find(|chapter| (chapter.min_level..=chapter.max_level).contains(&level))
             })
             .flatten()
+    }
+
+    fn graduation_view(
+        &self,
+        guidance: &QuestGuidance,
+        completed: &CompletedQuestTracker,
+        player: &PlayerStats,
+    ) -> Option<GraduationView> {
+        guidance
+            .profile_name()
+            .is_some_and(|profile| profile.eq_ignore_ascii_case("newcomer-v2"))
+            .then_some(())?;
+        self.graduation.as_ref()?.derive(completed, player)
     }
 
     pub fn derive(
@@ -236,6 +269,7 @@ impl NewcomerJourneyCatalog {
         all_route_ids.sort_unstable();
         all_route_ids.dedup();
         let progress_known = completed.known && class_known;
+        let graduation = self.graduation_view(guidance, completed, player);
         let graduated = progress_known
             && self.chapters.iter().all(|chapter| {
                 chapter
@@ -310,6 +344,7 @@ impl NewcomerJourneyCatalog {
             reward_summary: chapter.reward_summary.clone(),
             class_hint: chapter.class_hint(class_name).map(str::to_owned),
             graduated,
+            graduation,
             next,
             optional,
         })
@@ -319,6 +354,232 @@ impl NewcomerJourneyCatalog {
 impl Default for NewcomerJourneyCatalog {
     fn default() -> Self {
         Self::from_profile_name(&std::env::var("MIR2_QUEST_GUIDANCE").unwrap_or_default())
+    }
+}
+
+/// A target in the V2 graduation surface. Selecting one is deliberately a
+/// client-only diary choice: it does not produce a protocol intent or alter
+/// any server-owned quest, inventory, skill, or transform state.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GraduationDirection {
+    Equipment,
+    Skill,
+    Challenge,
+}
+
+impl GraduationDirection {
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Equipment => "Equipment",
+            Self::Skill => "Skill",
+            Self::Challenge => "Challenge",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GraduationOption {
+    pub direction: GraduationDirection,
+    pub title: String,
+    pub summary: String,
+    pub instruction: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GraduationView {
+    pub title: String,
+    pub options: Vec<GraduationOption>,
+}
+
+impl GraduationView {
+    pub fn option(&self, direction: GraduationDirection) -> Option<&GraduationOption> {
+        self.options
+            .iter()
+            .find(|option| option.direction == direction)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GraduationDocument {
+    schema: u32,
+    profile: String,
+    minimum_level: u32,
+    required_completion_ids: Vec<i32>,
+    title: String,
+    classes: BTreeMap<String, GraduationClassDirections>,
+    challenge: GraduationChallenge,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GraduationClassDirections {
+    equipment: GraduationEquipment,
+    skill: GraduationSkill,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GraduationEquipment {
+    title: String,
+    item_index: i32,
+    catalog_price: u32,
+    requirements: String,
+    normal_acquisition: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GraduationSkill {
+    title: String,
+    book_item_index: i32,
+    catalog_price: u32,
+    requirements: String,
+    normal_acquisition: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GraduationChallenge {
+    title: String,
+    difficulty: String,
+    map_file_name: String,
+    map_title: String,
+    normal_travel: String,
+    detail: String,
+    targets: Vec<GraduationChallengeTarget>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GraduationChallengeTarget {
+    monster_index: i32,
+    name: String,
+    configured_count: u32,
+    hp: u32,
+    respawn_minutes: u32,
+}
+
+#[derive(Debug, Clone)]
+struct NewcomerGraduationCatalog {
+    minimum_level: u32,
+    required_completion_ids: BTreeSet<i32>,
+    title: String,
+    classes: BTreeMap<String, GraduationClassDirections>,
+    challenge: GraduationChallenge,
+}
+
+impl NewcomerGraduationCatalog {
+    fn from_json(json: &str) -> Result<Self, String> {
+        let document: GraduationDocument = serde_json::from_str(json)
+            .map_err(|error| format!("invalid newcomer V2 graduation JSON: {error}"))?;
+        let expected_ids = V2_GRADUATION_COMPLETION_IDS
+            .iter()
+            .copied()
+            .collect::<BTreeSet<_>>();
+        let completion_ids = document
+            .required_completion_ids
+            .iter()
+            .copied()
+            .collect::<BTreeSet<_>>();
+        if document.schema != 1
+            || !document.profile.eq_ignore_ascii_case("newcomer-v2")
+            || document.minimum_level != 30
+            || completion_ids != expected_ids
+            || document.required_completion_ids.len() != expected_ids.len()
+            || document.title.trim().is_empty()
+        {
+            return Err("unsupported newcomer V2 graduation profile".to_owned());
+        }
+        for class_name in ["Warrior", "Wizard", "Taoist"] {
+            let Some(directions) = case_insensitive_value(&document.classes, Some(class_name))
+            else {
+                return Err(format!("graduation profile omits {class_name}"));
+            };
+            if directions.equipment.title.trim().is_empty()
+                || directions.equipment.item_index <= 0
+                || directions.equipment.catalog_price == 0
+                || directions.equipment.requirements.trim().is_empty()
+                || directions.equipment.normal_acquisition.trim().is_empty()
+                || directions.skill.title.trim().is_empty()
+                || directions.skill.book_item_index <= 0
+                || directions.skill.catalog_price == 0
+                || directions.skill.requirements.trim().is_empty()
+                || directions.skill.normal_acquisition.trim().is_empty()
+            {
+                return Err(format!("invalid {class_name} graduation directions"));
+            }
+        }
+        if document.challenge.title.trim().is_empty()
+            || document.challenge.difficulty.trim().is_empty()
+            || document.challenge.map_file_name.trim().is_empty()
+            || document.challenge.map_title.trim().is_empty()
+            || document.challenge.normal_travel.trim().is_empty()
+            || document.challenge.detail.trim().is_empty()
+            || document.challenge.targets.is_empty()
+            || document.challenge.targets.iter().any(|target| {
+                target.monster_index <= 0
+                    || target.name.trim().is_empty()
+                    || target.configured_count == 0
+                    || target.hp == 0
+                    || target.respawn_minutes == 0
+            })
+        {
+            return Err("invalid newcomer V2 graduation challenge".to_owned());
+        }
+        Ok(Self {
+            minimum_level: document.minimum_level,
+            required_completion_ids: completion_ids,
+            title: document.title,
+            classes: document.classes,
+            challenge: document.challenge,
+        })
+    }
+
+    fn derive(
+        &self,
+        completed: &CompletedQuestTracker,
+        player: &PlayerStats,
+    ) -> Option<GraduationView> {
+        if !completed.known
+            || player.level < self.minimum_level
+            || !self
+                .required_completion_ids
+                .iter()
+                .all(|quest_id| completed.contains(*quest_id))
+        {
+            return None;
+        }
+        let class = case_insensitive_value(&self.classes, player.class_name.as_deref())?;
+        Some(GraduationView {
+            title: self.title.clone(),
+            options: vec![
+                GraduationOption {
+                    direction: GraduationDirection::Equipment,
+                    title: class.equipment.title.clone(),
+                    summary: format!("{} Equipment target.", class.equipment.requirements),
+                    instruction: class.equipment.normal_acquisition.clone(),
+                },
+                GraduationOption {
+                    direction: GraduationDirection::Skill,
+                    title: class.skill.title.clone(),
+                    summary: format!("{} Next skill goal.", class.skill.requirements),
+                    instruction: class.skill.normal_acquisition.clone(),
+                },
+                GraduationOption {
+                    direction: GraduationDirection::Challenge,
+                    title: self.challenge.title.clone(),
+                    summary: format!(
+                        "{} difficulty · {}",
+                        self.challenge.difficulty, self.challenge.map_title
+                    ),
+                    instruction: format!(
+                        "{} {}",
+                        self.challenge.normal_travel, self.challenge.detail
+                    ),
+                },
+            ],
+        })
     }
 }
 
@@ -361,6 +622,9 @@ pub struct JourneyView {
     pub reward_summary: String,
     pub class_hint: Option<String>,
     pub graduated: bool,
+    /// A local-only graduation chooser. It exists only after the authoritative
+    /// V2 route and the level gate have both been confirmed by read models.
+    pub graduation: Option<GraduationView>,
     pub next: Option<JourneyStep>,
     pub optional: Vec<JourneyQuestSummary>,
 }

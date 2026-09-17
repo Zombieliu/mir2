@@ -34,7 +34,7 @@ use crate::pending_operations::{
     QuestResetTracker, SessionResetRevision,
 };
 use crate::quest_guidance::QuestGuidance;
-use crate::quest_journey::{JourneyView, NewcomerJourneyCatalog};
+use crate::quest_journey::{GraduationDirection, JourneyView, NewcomerJourneyCatalog};
 use crate::quest_model::{
     CombatTargetModel, CompletedQuestTracker, GroundPickupModel, NearbyNpcModel, NpcDialogModel,
     Quest, QuestTracker,
@@ -507,6 +507,9 @@ pub struct QuestUiState {
     /// Crystal expands every diary group by default and remembers only groups
     /// the player explicitly collapsed during the current client session.
     pub collapsed_groups: Vec<String>,
+    /// A local-only V2 graduation target. It is never serialized, bridged, or
+    /// treated as a server quest; `reset` clears it with the client session.
+    pub selected_graduation_direction: Option<GraduationDirection>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -646,6 +649,16 @@ impl QuestUiState {
         } else {
             self.tracked_quest_indices.push(quest_index);
             QuestTrackingChange::Added
+        }
+    }
+
+    pub fn toggle_graduation_direction(&mut self, direction: GraduationDirection) -> bool {
+        if self.selected_graduation_direction == Some(direction) {
+            self.selected_graduation_direction = None;
+            false
+        } else {
+            self.selected_graduation_direction = Some(direction);
+            true
         }
     }
 
@@ -860,6 +873,9 @@ enum QuestUiButton {
     PickUpTile,
     ToggleQuestGroup {
         group: String,
+    },
+    SelectGraduationDirection {
+        direction: GraduationDirection,
     },
     SelectQuestFilter {
         filter: QuestStageFilter,
@@ -1646,6 +1662,14 @@ fn process_quest_ui_input(
         match action.clone() {
             QuestUiButton::ToggleQuestGroup { group } => {
                 quest_state.toggle_group(group);
+            }
+            QuestUiButton::SelectGraduationDirection { direction } => {
+                if quest_state.toggle_graduation_direction(direction) {
+                    quest_state
+                        .set_feedback(format!("Goal selected: {}", direction.label()), false);
+                } else {
+                    quest_state.set_feedback("Goal cleared", false);
+                }
             }
             QuestUiButton::QuestHelp => {
                 quest_state.set_feedback("Quest Log help is not available.", false);
@@ -2700,6 +2724,45 @@ fn render_quest_tracker_panel(
                 Justify::Left,
             );
         }
+        let graduation_offset = if let Some(graduation) = &journey.graduation {
+            if let Some(option) = state
+                .selected_graduation_direction
+                .and_then(|direction| graduation.option(direction))
+            {
+                quest_log_text_at(
+                    parent,
+                    &format!(
+                        "Graduation target: {} · {}",
+                        option.direction.label(),
+                        truncate_chars(&option.title, 23)
+                    ),
+                    QuestLogRect::new(5.0, 65.0, 300.0, 15.0),
+                    journey_text_size,
+                    PANEL_HIGHLIGHT,
+                    Justify::Left,
+                );
+                quest_log_text_at(
+                    parent,
+                    &truncate_chars(&option.instruction, 48),
+                    QuestLogRect::new(5.0, 80.0, 300.0, 15.0),
+                    journey_text_size,
+                    PANEL_TEXT,
+                    Justify::Left,
+                );
+            } else {
+                quest_log_text_at(
+                    parent,
+                    "Graduation: choose Equipment, Skill, or Challenge in Diary",
+                    QuestLogRect::new(5.0, 65.0, 300.0, 15.0),
+                    journey_text_size,
+                    PANEL_HIGHLIGHT,
+                    Justify::Left,
+                );
+            }
+            30.0
+        } else {
+            0.0
+        };
         let location_offset = if journey
             .next
             .as_ref()
@@ -2727,7 +2790,12 @@ fn render_quest_tracker_panel(
             quest_log_text_at(
                 parent,
                 &format!("   Tip: {}", truncate_chars(class_hint, 38)),
-                QuestLogRect::new(5.0, 110.0 + location_offset + target_offset, 300.0, 15.0),
+                QuestLogRect::new(
+                    5.0,
+                    110.0 + graduation_offset + location_offset + target_offset,
+                    300.0,
+                    15.0,
+                ),
                 journey_text_size,
                 PANEL_TEXT,
                 Justify::Left,
@@ -2750,7 +2818,12 @@ fn render_quest_tracker_panel(
             quest_log_text_at(
                 parent,
                 &format!("Optional: {}", truncate_chars(&optional.title, 34)),
-                QuestLogRect::new(5.0, 125.0 + location_offset + target_offset, 300.0, 15.0),
+                QuestLogRect::new(
+                    5.0,
+                    125.0 + graduation_offset + location_offset + target_offset,
+                    300.0,
+                    15.0,
+                ),
                 journey_text_size,
                 PANEL_TEXT,
                 Justify::Left,
@@ -2764,7 +2837,12 @@ fn render_quest_tracker_panel(
                 .expect("nearest quest target ids are validated");
             quest_log_text_button_at(
                 parent,
-                QuestLogRect::new(25.0, 140.0 + location_offset + target_offset, 205.0, 18.0),
+                QuestLogRect::new(
+                    25.0,
+                    140.0 + graduation_offset + location_offset + target_offset,
+                    205.0,
+                    18.0,
+                ),
                 &format!(
                     "▶ {} · {} tiles",
                     truncate_chars(&target.entity.name, 21),
@@ -2777,7 +2855,7 @@ fn render_quest_tracker_panel(
         } else {
             0.0
         };
-        y = 135.0 + location_offset + target_offset + optional_target_offset;
+        y = 135.0 + graduation_offset + location_offset + target_offset + optional_target_offset;
     }
     let tracked_limit = if compact_journey {
         2
@@ -3554,6 +3632,60 @@ fn render_quest_diary_panel(
                         Justify::Left,
                     );
                 });
+            next_y += QUEST_DIARY_ROW_HEIGHT;
+        }
+    }
+
+    if let Some(graduation) = journey.and_then(|journey| journey.graduation.as_ref()) {
+        next_y += QUEST_DIARY_ROW_HEIGHT;
+        quest_log_text_at(
+            parent,
+            &format!("{} · Choose your next goal", graduation.title),
+            QuestLogRect::new(
+                QUEST_DIARY_GROUP_LEFT,
+                next_y,
+                270.0,
+                QUEST_DIARY_ROW_HEIGHT,
+            ),
+            8.0,
+            PANEL_HIGHLIGHT,
+            Justify::Left,
+        );
+        next_y += QUEST_DIARY_ROW_HEIGHT;
+        for option in &graduation.options {
+            let selected = state.selected_graduation_direction == Some(option.direction);
+            let marker = if selected { "*" } else { "+" };
+            quest_log_text_button_at(
+                parent,
+                QuestLogRect::new(QUEST_DIARY_GROUP_LEFT + 3.0, next_y, 282.0, 15.0),
+                &format!(
+                    "{marker} {}: {}",
+                    option.direction.label(),
+                    truncate_chars(&option.title, 28)
+                ),
+                QuestUiButton::SelectGraduationDirection {
+                    direction: option.direction,
+                },
+                true,
+            );
+            next_y += QUEST_DIARY_ROW_HEIGHT;
+            quest_log_text_at(
+                parent,
+                &truncate_chars(&option.summary, 58),
+                QuestLogRect::new(QUEST_DIARY_GROUP_LEFT + 12.0, next_y, 270.0, 15.0),
+                8.0,
+                PANEL_TEXT,
+                Justify::Left,
+            );
+            next_y += QUEST_DIARY_ROW_HEIGHT;
+            quest_log_text_at(
+                parent,
+                &truncate_chars(&option.instruction, 58),
+                QuestLogRect::new(QUEST_DIARY_GROUP_LEFT + 12.0, next_y, 270.0, 15.0),
+                8.0,
+                if selected { FEEDBACK_OK } else { PANEL_TEXT },
+                Justify::Left,
+            );
             next_y += QUEST_DIARY_ROW_HEIGHT;
         }
     }
@@ -5864,6 +5996,27 @@ mod tests {
             intent_from_button(&QuestUiButton::AttackQuestTarget { object_id: 77 }),
             Some(QuestUiIntent::AttackTarget { object_id: 77 })
         );
+    }
+
+    #[test]
+    fn graduation_target_selection_is_local_and_clears_with_the_session() {
+        let mut state = QuestUiState::default();
+        assert!(state.toggle_graduation_direction(GraduationDirection::Challenge));
+        assert_eq!(
+            state.selected_graduation_direction,
+            Some(GraduationDirection::Challenge)
+        );
+        assert_eq!(
+            intent_from_button(&QuestUiButton::SelectGraduationDirection {
+                direction: GraduationDirection::Challenge,
+            }),
+            None
+        );
+        assert!(!state.toggle_graduation_direction(GraduationDirection::Challenge));
+        assert_eq!(state.selected_graduation_direction, None);
+        assert!(state.toggle_graduation_direction(GraduationDirection::Skill));
+        state.reset();
+        assert_eq!(state.selected_graduation_direction, None);
     }
 
     #[test]

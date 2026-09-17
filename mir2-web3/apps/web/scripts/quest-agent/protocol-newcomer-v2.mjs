@@ -1,11 +1,12 @@
 import fs from 'node:fs/promises';
 import { completeQuestObjectives } from './protocol-combat.mjs';
 import { interactQuest } from './protocol-quest-actions.mjs';
-import { createNavigator, selfPlayer } from './protocol-play.mjs';
+import { createNavigator, reviveInTown, selfPlayer } from './protocol-play.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
 import { prepareLoadout, combatAction, meleeCombatAction, useSupplies } from './protocol-loadout.mjs';
 import { restockInVillage, equipHeldAmulet } from './protocol-supplies.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
+import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
 
 const ROOT = new URL('../../../../', import.meta.url);
 const V2_CONFIG = new URL('config/quest-guidance/newcomer-journey-v2.json', ROOT);
@@ -18,6 +19,10 @@ const GENDER_MASK = Object.freeze({ Male: 1, Female: 2 });
 const BASIC_HP_ITEM_INDEX = 658; // Crystal item manifest: (HP)DrugSmall.
 export const BICHON_SAFE_AREA = Object.freeze({ x: 328, y: 264 });
 const TECHNIQUE_SPELL = Object.freeze({ Thrusting: 3, HalfMoon: 4 });
+const PRACTICE_SPAWN_CANDIDATE_LIMIT = 3;
+const PRACTICE_SPAWN_WAYPOINT_LIMIT = 6;
+const PRACTICE_SPAWN_STEP_BUDGET = 120;
+const PRACTICE_SPAWN_ATTEMPT_BUDGET = 180;
 // V2 quest templates address the live NPC object IDs. Crystal's database
 // manifest numbers Board as npc_index 35, while the public world object is
 // 24, so never reinterpret these object IDs as database row indexes.
@@ -87,7 +92,6 @@ function buildQuest(definition, npcById, respawns, itemByName, className, gender
     kind: requiredString(flag.kind, `q${questId} flag kind`),
     conditions: Object.freeze([
       ...(flag.conditions ?? []).map(String),
-      ...Object.values(flag.requirements ?? {}).flat().map(String),
     ]),
     requirements: Object.freeze(flag.requirements ?? {}),
   }));
@@ -244,7 +248,7 @@ export function availableV2Growth(snapshot, route) {
  * must each advance the authoritative snapshot. A blocked condition returns a
  * durable pause record for a later normal resume.
  */
-export async function runNewcomerV2Journey({ client, className, gender, report, ordinaryStartedAt, deadlineMs = 120 * 60_000, checkpoint = null }) {
+export async function runNewcomerV2Journey({ client, className, gender, report, ordinaryStartedAt, deadlineMs = 120 * 60_000, checkpoint = null, survival = {}, recovery = {} }) {
   if (!client?.snapshot) throw new Error('V2 runner requires an authoritative bootstrap snapshot');
   const route = await loadNewcomerV2Route({ className, gender });
   const inWorldStartedAt = Date.now();
@@ -261,13 +265,27 @@ export async function runNewcomerV2Journey({ client, className, gender, report, 
   // sends and waits share this absolute deadline, so an old inner loop cannot
   // continue issuing public commands after the journey's ordinary-run cap.
   const boundedClient = deadlineBoundClient(client, deadline, checkDeadline);
-  const navigate = createNavigator(boundedClient);
+  const navigate = createNavigator(boundedClient, {
+    emergencyEscape: typeof survival.emergencyEscape === 'function' ? survival.emergencyEscape : undefined,
+    emergencyEscapeHpRatio: Number(survival.emergencyEscapeHpRatio ?? 0),
+    maxEmergencyEscapesPerNavigation: Number.isSafeInteger(Number(survival.maxEmergencyEscapesPerNavigation))
+      ? Number(survival.maxEmergencyEscapesPerNavigation)
+      : undefined,
+  });
   const travel = createMapTraveler(boundedClient, navigate);
   const result = {
-    profile: route.profile, status: 'running', routeQuestIds: route.quests.map(quest => quest.questId), attempts: [],
+    profile: route.profile, status: 'running', routeQuestIds: route.quests.map(quest => quest.questId), attempts: [], recoveries: [],
     ordinaryStartedAt: new Date(startedAt).toISOString(), deadlineAt: new Date(deadline).toISOString(),
   };
   try {
+    await recoverV2Death({
+      client: boundedClient, result, report, checkpoint, inWorldStartedAt, startedAt,
+      phase: 'bootstrap', recovery,
+    });
+    // Replace an earlier run's paused/completed QA projection as soon as this
+    // ordinary process has entered the world. This remains local evidence;
+    // it has no relationship to server quest state.
+    await checkpointV2Progress({ checkpoint, report, result, inWorldStartedAt, startedAt });
     for (let step = 0; step < 80; step += 1) {
       checkDeadline();
       const quest = nextServerQuest(boundedClient.snapshot, route);
@@ -286,35 +304,51 @@ export async function runNewcomerV2Journey({ client, className, gender, report, 
       }
       const record = { questId: quest.questId, kind: quest.kind, startedAt: new Date().toISOString() };
       result.attempts.push(record);
-      const before = serverQuest(boundedClient.snapshot, quest.questId);
-      if (stage(before?.stage) === 'available') {
-        await acceptV2Quest(boundedClient, quest, navigate, travel, checkDeadline);
-        await waitForServerStage(boundedClient, quest.questId, ['inprogress', 'readytoturnin'], `q${quest.questId} accept`);
-      }
-      const current = serverQuest(boundedClient.snapshot, quest.questId);
-      if (stage(current?.stage) === 'inprogress') {
-        await completeV2Objectives(boundedClient, quest, { navigate, travel, className, checkDeadline });
-        try {
-          assertV2FlagsConfirmed(boundedClient.snapshot, quest);
-        } catch {
-          throw new V2Pause('awaitingServerFlag', quest.questId, `q${quest.questId} flags are not server-confirmed`);
-        }
-        await waitForServerStage(boundedClient, quest.questId, ['readytoturnin'], `q${quest.questId} objectives`);
-      }
-      if (stage(serverQuest(boundedClient.snapshot, quest.questId)?.stage) === 'readytoturnin') {
-        const inventoryBefore = structuredClone(boundedClient.snapshot);
-        await finishV2Quest(boundedClient, quest, navigate, travel, checkDeadline);
-        await waitForServerStage(boundedClient, quest.questId, ['completed'], `q${quest.questId} finish`);
-        record.itemRewards = verifyItemRewards(inventoryBefore, boundedClient.snapshot, expectedItemRewards(quest, -1));
-      }
-      if (stage(serverQuest(boundedClient.snapshot, quest.questId)?.stage) !== 'completed') {
-        throw new V2Pause('serverNoProgress', quest.questId, `q${quest.questId} did not reach Completed`);
-      }
-      record.completedAt = new Date().toISOString();
-      // This writes only the local QA report. It preserves the original
-      // ordinary-run clock and completed receipts across a process crash; it
-      // has no protocol, store, or server-state side effect.
+      // Persist the running attempt before its first public action. A crash
+      // during a long combat/search must not leave the last report claiming
+      // that an older attempt is still the current state.
       await checkpointV2Progress({ checkpoint, report, result, inWorldStartedAt, startedAt });
+      try {
+        const before = serverQuest(boundedClient.snapshot, quest.questId);
+        if (stage(before?.stage) === 'available') {
+          await acceptV2Quest(boundedClient, quest, navigate, travel, checkDeadline);
+          await waitForServerStage(boundedClient, quest.questId, ['inprogress', 'readytoturnin'], `q${quest.questId} accept`);
+        }
+        const current = serverQuest(boundedClient.snapshot, quest.questId);
+        if (stage(current?.stage) === 'inprogress') {
+          await completeV2Objectives(boundedClient, quest, { navigate, travel, className, checkDeadline, survival });
+          try {
+            assertV2FlagsConfirmed(boundedClient.snapshot, quest);
+          } catch {
+            throw new V2Pause('awaitingServerFlag', quest.questId, `q${quest.questId} flags are not server-confirmed`);
+          }
+          await waitForServerStage(boundedClient, quest.questId, ['readytoturnin'], `q${quest.questId} objectives`);
+        }
+        if (stage(serverQuest(boundedClient.snapshot, quest.questId)?.stage) === 'readytoturnin') {
+          const inventoryBefore = structuredClone(boundedClient.snapshot);
+          await finishV2Quest(boundedClient, quest, navigate, travel, checkDeadline);
+          await waitForServerStage(boundedClient, quest.questId, ['completed'], `q${quest.questId} finish`);
+          record.itemRewards = verifyItemRewards(inventoryBefore, boundedClient.snapshot, expectedItemRewards(quest, -1));
+        }
+        if (stage(serverQuest(boundedClient.snapshot, quest.questId)?.stage) !== 'completed') {
+          throw new V2Pause('serverNoProgress', quest.questId, `q${quest.questId} did not reach Completed`);
+        }
+        record.completedAt = new Date().toISOString();
+        // This writes only the local QA report. It preserves the original
+        // ordinary-run clock and completed receipts across a process crash; it
+        // has no protocol, store, or server-state side effect.
+        await checkpointV2Progress({ checkpoint, report, result, inWorldStartedAt, startedAt });
+      } catch (error) {
+        const recovered = await recoverV2Death({
+          client: boundedClient, result, report, checkpoint, inWorldStartedAt, startedAt,
+          questId: quest.questId, phase: 'quest', recovery,
+        });
+        if (!recovered) throw error;
+        record.interruptedByDeath = true;
+        // Re-select strictly from the new authoritative quest log. Do not
+        // infer the old quest's state or replay a local completion marker.
+        continue;
+      }
     }
   } catch (error) {
     const pause = error instanceof V2Pause
@@ -342,6 +376,68 @@ function updateV2TimingReport(report, result, inWorldStartedAt, startedAt) {
   report.v2 = result;
   report.inWorldElapsedMs = result.elapsedMs;
   report.ordinaryElapsedMs = result.ordinaryElapsedMs;
+}
+
+/**
+ * Recover only an already-authoritative death. ReviveInTown itself proves the
+ * public Revived/world snapshot receipt; this wrapper records both lifecycle
+ * edges locally and never edits quest progress. A recovered pass always
+ * reselects its work from the server quest log.
+ */
+export async function recoverV2Death({
+  client,
+  result,
+  report,
+  checkpoint,
+  inWorldStartedAt,
+  startedAt,
+  questId = null,
+  phase = 'quest',
+  recovery = {},
+}) {
+  const isDead = typeof recovery.isDead === 'function' ? recovery.isDead : hasAuthoritativePlayerDeath;
+  if (!isDead(client?.snapshot)) return false;
+  const maxRecoveries = Number.isSafeInteger(Number(recovery.maxRecoveries))
+    ? Math.max(0, Number(recovery.maxRecoveries))
+    : 3;
+  const recoveries = result.recoveries ??= [];
+  if (recoveries.length >= maxRecoveries) {
+    throw new V2Pause('deathRecoveryLimit', questId,
+      `q${questId ?? 'bootstrap'} exceeded the ${maxRecoveries} authoritative V2 recovery limit`);
+  }
+  const before = selfPlayer(client);
+  const entry = {
+    phase,
+    questId,
+    deathAt: new Date().toISOString(),
+    before: before ? {
+      mapFileName: String(client?.snapshot?.mapFileName ?? ''),
+      objectId: Number(before.objectId), x: Number(before.x), y: Number(before.y), hp: Number(before.hp ?? client?.snapshot?.playerHp),
+    } : null,
+  };
+  recoveries.push(entry);
+  await checkpointV2Progress({ checkpoint, report, result, inWorldStartedAt, startedAt });
+  const revive = typeof recovery.revive === 'function' ? recovery.revive : reviveInTown;
+  let receipt;
+  try {
+    receipt = await revive(client);
+  } catch (error) {
+    throw new V2Pause('reviveUnconfirmed', questId,
+      `q${questId ?? 'bootstrap'} authoritative death could not be revived: ${String(error?.message ?? error)}`);
+  }
+  if (!receipt || isDead(client?.snapshot)) {
+    throw new V2Pause('reviveUnconfirmed', questId,
+      `q${questId ?? 'bootstrap'} lacked an authoritative town-revive receipt`);
+  }
+  const after = selfPlayer(client);
+  entry.revive = receipt;
+  entry.revivedAt = new Date().toISOString();
+  entry.after = after ? {
+    mapFileName: String(client?.snapshot?.mapFileName ?? ''),
+    objectId: Number(after.objectId), x: Number(after.x), y: Number(after.y), hp: Number(after.hp ?? client?.snapshot?.playerHp),
+  } : null;
+  await checkpointV2Progress({ checkpoint, report, result, inWorldStartedAt, startedAt });
+  return true;
 }
 
 class V2Pause extends Error {
@@ -416,7 +512,7 @@ async function finishV2Quest(client, quest, navigate, travel, checkDeadline) {
   await interactQuest(client, quest, { type: 'finish', selectedItemIndex: -1 }, navigate);
 }
 
-async function completeV2Objectives(client, quest, { navigate, travel, className, checkDeadline }) {
+async function completeV2Objectives(client, quest, { navigate, travel, className, checkDeadline, survival = {} }) {
   checkDeadline();
   let enteredObjectiveMap = false;
   const mapEntryAfter = Number(client.sequence);
@@ -452,9 +548,21 @@ async function completeV2Objectives(client, quest, { navigate, travel, className
       action: (owner, target) => combatAction(owner, target),
       prepare: async owner => {
         checkDeadline();
-        const used = await useSupplies(owner, { hpThreshold: 0.6, mpThreshold: 0.35 });
-        return used;
+        return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.6, mpThreshold: 0.35 });
       },
+      // `prepare` runs once per engagement; sustain is also called from the
+      // ordinary attack/search/retreat cadence so stocked restoratives are not
+      // stranded while a live objective needs several public actions.
+      sustain: owner => v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.75, mpThreshold: 0.35 }),
+      recoverAfterUnsafeRetreat: async (owner, navigateNear) => {
+        checkDeadline();
+        if (typeof survival.recoverAfterUnsafeRetreat === 'function') {
+          return survival.recoverAfterUnsafeRetreat(owner, navigateNear);
+        }
+        return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.85, mpThreshold: 0.35 });
+      },
+      emergencyEscape: typeof survival.emergencyEscape === 'function' ? survival.emergencyEscape : undefined,
+      emergencyEscapeHpRatio: Number(survival.emergencyEscapeHpRatio ?? 0),
       // Each inner bounded loop also receives the deadline-guarded client.
       // Keep its own budgets deliberately small so a later ordinary resume is
       // preferred over speculative spawn searching.
@@ -469,6 +577,12 @@ async function completeV2Objectives(client, quest, { navigate, travel, className
       preferredObjectiveMaps: quest.objectiveMaps,
     });
   }
+}
+
+async function v2Sustain(owner, survival, checkDeadline, thresholds) {
+  checkDeadline();
+  if (typeof survival.sustain === 'function') return survival.sustain(owner, thresholds);
+  return useSupplies(owner, thresholds);
 }
 
 function needsPotionPurchase(quest) {
@@ -527,24 +641,41 @@ async function driveV2Practice(client, quest, navigate, className, checkDeadline
  * contract tests; the runner always obtains `plan` from `practicePlan`.
  */
 export async function executeV2PracticePlan({ client, quest, navigate, checkDeadline = () => {}, plan = [] }) {
+  // q21 is an AND sequence. Reacquire a live target for every damaging step
+  // and prefer a different AOI object when one exists, while retaining a
+  // one-monster fallback for sparse legitimate respawns.
+  const usedTargetIds = new Set();
+  const acquireTarget = async (desiredDistance, options = {}) => {
+    const target = await approachPracticeTarget(client, quest, navigate, desiredDistance, checkDeadline, {
+      ...options,
+      excludeObjectIds: usedTargetIds,
+    });
+    usedTargetIds.add(Number(target.objectId));
+    return target;
+  };
   for (const step of plan) {
     checkDeadline();
     if (step.kind === 'poison') {
-      const target = await approachPracticeTarget(client, quest, navigate, 6, checkDeadline);
+      const target = await acquireTarget(6);
       await equipHeldPoison(client, quest.questId);
       const after = client.sequence;
       const poisonBefore = equippedPoisonQuantity(client.snapshot);
       await castV2Spell(client, target, 'Poisoning');
       await waitForPoisonEvidence(client, after, target, poisonBefore, quest.questId);
     } else if (step.kind === 'normal') {
-      const target = await approachPracticeTarget(client, quest, navigate, 1, checkDeadline);
+      const target = await acquireTarget(1);
       const after = client.sequence;
       const hp = Number(target.hp);
       await meleeCombatAction(client, target);
       await waitForTargetDamage(client, after, target, hp, quest.questId, 'normal attack');
     } else if (step.kind === 'technique') {
       const range = step.spell === 'Thrusting' ? 2 : 1;
-      const target = await approachPracticeTarget(client, quest, navigate, range, checkDeadline);
+      // Zone combat selects Thrusting targets only from the adjacent tile or
+      // the exact second tile in the attack direction. Chebyshev distance
+      // alone allows an off-ray (2,1) target, which the server cannot hit.
+      const target = await acquireTarget(range, step.spell === 'Thrusting'
+        ? { directionalRay: { minRange: 1, maxRange: 2 } }
+        : {});
       const after = client.sequence;
       const hp = Number(target.hp);
       await attackDirectionTechnique(client, target, step.spell);
@@ -556,7 +687,7 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
       await castV2Spell(client, selfPlayer(client), 'Healing');
       await waitForSelfMagic(client, after, 'Healing', quest.questId);
     } else if (step.kind === 'summon') {
-      const target = await approachPracticeTarget(client, quest, navigate, 6, checkDeadline);
+      const target = await acquireTarget(6);
       await equipHeldAmulet(client);
       const after = client.sequence;
       await castV2Spell(client, target, 'SummonSkeleton');
@@ -565,14 +696,21 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
       const pet = ownedBoneFamiliar(client.snapshot);
       await waitForPetDamage(client, after, pet, target, quest.questId);
     } else if (step.kind === 'spell') {
-      const target = await approachPracticeTarget(client, quest, navigate, 8, checkDeadline);
+      // Lightning is a six-tile, directional Zone ray. Select a live target
+      // on that ray, preferring a distant aligned tile if movement is needed;
+      // the self-routed client packet alone does not make an off-axis target
+      // hittable.
+      const target = await acquireTarget(step.spell === 'Lightning' ? 6 : 8,
+        step.spell === 'Lightning'
+          ? { directionalRay: { minRange: 1, maxRange: 6, preferDistant: true } }
+          : {});
       if (step.spell === 'SoulFireBall') await equipHeldAmulet(client);
       const after = client.sequence;
       const hp = Number(target.hp);
       await castV2Spell(client, target, step.spell);
       await waitForSpellDamage(client, after, target, hp, step.spell, quest.questId);
     } else if (step.kind === 'reposition') {
-      const target = await approachPracticeTarget(client, quest, navigate, 8, checkDeadline);
+      const target = await acquireTarget(8);
       const actor = selfPlayer(client);
       const destination = legalReposition(actor, target);
       await navigate(destination, 0, () => false, { maxSuccessfulSteps: 12, maxAttempts: 20, detectPositionCycles: true });
@@ -684,34 +822,195 @@ async function purchaseRequiredBasicPotion(client, navigate, quest, checkDeadlin
   }
 }
 
-async function approachPracticeTarget(client, quest, navigate, desiredDistance, checkDeadline) {
-  let target = matchingPracticeTarget(client.snapshot, quest);
+export async function approachPracticeTarget(client, quest, navigate, desiredDistance, checkDeadline = () => {}, options = {}) {
+  const selectTarget = () => matchingPracticeTarget(client.snapshot, quest, options.excludeObjectIds) ??
+    matchingPracticeTarget(client.snapshot, quest);
+  let target = selectTarget();
   if (!target) {
-    const spawn = (quest.objectives.kill ?? []).flatMap(kill => kill.spawns ?? [])
-      .find(candidate => String(candidate?.mapFileName) === String(client.snapshot?.mapFileName));
-    if (spawn) {
+    const waypoints = practiceSpawnWaypoints(client.snapshot, quest);
+    let remainingSteps = PRACTICE_SPAWN_STEP_BUDGET;
+    const attemptsPerWaypoint = Math.max(1, Math.floor(PRACTICE_SPAWN_ATTEMPT_BUDGET /
+      Math.max(1, waypoints.length)));
+    for (const waypoint of waypoints) {
+      if (target || remainingSteps <= 0) break;
       checkDeadline();
-      await navigate(spawn.position, Math.max(1, Math.min(6, Number(spawn.spread ?? 0))), () => false,
-        { maxSuccessfulSteps: 120, maxAttempts: 180, detectPositionCycles: true });
-      target = matchingPracticeTarget(client.snapshot, quest);
+      // A target can enter AOI while walking a legitimate spawn field. Stop
+      // immediately and retarget it rather than spending the remaining field
+      // budget marching toward a stale manifest center.
+      const progress = await navigate(waypoint, 6, () => Boolean(selectTarget()), {
+        maxSuccessfulSteps: remainingSteps,
+        maxAttempts: attemptsPerWaypoint,
+        detectPositionCycles: true,
+      });
+      remainingSteps -= Math.max(0, Math.min(remainingSteps, Number(progress?.successfulSteps) || 0));
+      target = selectTarget();
     }
   }
   if (!target) throw new V2Pause('awaitingObjectiveTarget', quest.questId, `q${quest.questId} has no live configured objective monster`);
   checkDeadline();
-  await navigate(target, desiredDistance, () => false, { maxSuccessfulSteps: 120, maxAttempts: 180, detectPositionCycles: true });
+  if (options.directionalRay) {
+    await alignDirectionalPracticeTarget(client, quest, target, navigate, options.directionalRay, checkDeadline);
+  } else {
+    await navigate(target, desiredDistance, () => false, { maxSuccessfulSteps: 120, maxAttempts: 180, detectPositionCycles: true });
+  }
   checkDeadline();
   const refreshed = (client.snapshot?.entities ?? []).find(entity => Number(entity?.objectId) === Number(target.objectId));
-  if (!refreshed || refreshed.dead === true || Number(refreshed.hp ?? 1) <= 0 || distance(selfPlayer(client), refreshed) > desiredDistance) {
+  const directionalRange = options.directionalRay && directionalRayDistance(selfPlayer(client), refreshed);
+  const directionalInRange = !options.directionalRay || (directionalRange != null &&
+    directionalRange >= Number(options.directionalRay.minRange) && directionalRange <= Number(options.directionalRay.maxRange));
+  if (!refreshed || refreshed.dead === true || Number(refreshed.hp ?? 1) <= 0 ||
+      distance(selfPlayer(client), refreshed) > desiredDistance || !directionalInRange) {
     throw new V2Pause('targetOutOfRange', quest.questId, 'configured practice target lost its authoritative in-range receipt');
   }
   return refreshed;
 }
 
-function matchingPracticeTarget(snapshot, quest) {
+/**
+ * Crystal directional actions hit exact tiles, not an arbitrary Chebyshev
+ * radius. Keep the existing 120/180 final-approach envelope, but share it
+ * across at most three manifest-free alignment points.
+ */
+async function alignDirectionalPracticeTarget(client, quest, target, navigate, ray, checkDeadline) {
+  const points = directionalApproachPoints(selfPlayer(client), target, ray).slice(0, 3);
+  if (!points.length) throw new V2Pause('targetOutOfRange', quest.questId, 'configured practice target has no legal directional ray');
+  let remainingSteps = 120;
+  let remainingAttempts = 180;
+  let lastNavigationError = null;
+  for (let index = 0; index < points.length && remainingSteps > 0 && remainingAttempts > 0; index += 1) {
+    checkDeadline();
+    const slots = points.length - index;
+    // Reserve each remaining candidate's share before navigation. A rejected
+    // first point must not grant its unused allowance to every fallback and
+    // quietly turn the existing 120/180 cap into an expanded search.
+    const stepAllowance = Math.max(1, Math.floor(remainingSteps / slots));
+    const attemptAllowance = Math.max(1, Math.floor(remainingAttempts / slots));
+    try {
+      await navigate(points[index], 0, () => false, {
+        maxSuccessfulSteps: stepAllowance,
+        maxAttempts: attemptAllowance,
+        detectPositionCycles: true,
+      });
+    } catch (error) {
+      // A collision-blocked ray endpoint is ordinary movement failure, not
+      // proof that the live target is invalid. Spend only its reserved share
+      // and let the next bounded alignment endpoint try once.
+      lastNavigationError = error;
+    }
+    remainingSteps -= stepAllowance;
+    remainingAttempts -= attemptAllowance;
+    const current = (client.snapshot?.entities ?? []).find(entity => Number(entity?.objectId) === Number(target.objectId));
+    const rayDistance = directionalRayDistance(selfPlayer(client), current);
+    if (current?.dead !== true && Number(current?.hp ?? 1) > 0 && rayDistance != null &&
+      rayDistance >= Number(ray.minRange) && rayDistance <= Number(ray.maxRange)) return;
+  }
+  if (lastNavigationError) throw lastNavigationError;
+}
+
+/** Return the exact line distance for Crystal's eight-direction rays. */
+export function directionalRayDistance(from, to) {
+  const dx = Math.abs(Number(to?.x) - Number(from?.x));
+  const dy = Math.abs(Number(to?.y) - Number(from?.y));
+  if (!Number.isFinite(dx) || !Number.isFinite(dy) || (dx === 0 && dy === 0)) return null;
+  return dx === 0 || dy === 0 || dx === dy ? Math.max(dx, dy) : null;
+}
+
+/**
+ * Candidate standing tiles that place a known live target on an exact ray.
+ * If the actor is already aligned, retain that verified location. Otherwise
+ * Lightning ranks longer (4–6) lanes before close lanes, avoiding an
+ * unnecessary adjacent cast while keeping the route search bounded.
+ */
+export function directionalApproachPoints(actor, target, { minRange = 1, maxRange, preferDistant = false } = {}) {
+  const minimum = Math.max(1, Number(minRange));
+  const maximum = Math.max(minimum, Number(maxRange));
+  if (!validPracticePoint(actor) || !validPracticePoint(target) || !Number.isFinite(maximum)) return Object.freeze([]);
+  const currentRange = directionalRayDistance(actor, target);
+  if (currentRange != null && currentRange >= minimum && currentRange <= maximum &&
+      (!preferDistant || currentRange >= 4)) {
+    return Object.freeze([Object.freeze({ x: Number(actor.x), y: Number(actor.y), range: currentRange })]);
+  }
+  const directions = [
+    [-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1],
+  ];
+  const ranges = Array.from({ length: maximum - minimum + 1 }, (_, index) => minimum + index);
+  const candidates = directions.flatMap(([dx, dy]) => ranges.map(range => ({
+    x: Number(target.x) - dx * range,
+    y: Number(target.y) - dy * range,
+    range,
+  })));
+  return Object.freeze(candidates.sort((left, right) => {
+    const leftSafety = preferDistant && left.range >= 4 ? 0 : 1;
+    const rightSafety = preferDistant && right.range >= 4 ? 0 : 1;
+    return leftSafety - rightSafety || distance(actor, left) - distance(actor, right) ||
+      (preferDistant ? right.range - left.range : left.range - right.range) || left.y - right.y || left.x - right.x;
+  }).map(point => Object.freeze(point)));
+}
+
+/**
+ * Rank only same-map, manifest-backed combat fields by distance to their
+ * footprint. This mirrors normal objective selection without teaching the V2
+ * practice driver to invent a target or cross maps.
+ */
+export function practiceSpawnCandidates(snapshot, quest) {
+  const actor = selfPlayer({ snapshot });
+  const mapFileName = String(snapshot?.mapFileName ?? '');
+  return Object.freeze((quest?.objectives?.kill ?? []).flatMap(kill =>
+    kill?.spawnCandidates ?? kill?.spawns ?? []).filter(candidate =>
+    String(candidate?.mapFileName ?? '') === mapFileName && validPracticePoint(candidate?.position)
+  ).sort((left, right) =>
+    practiceFootprintDistance(actor, left) - practiceFootprintDistance(actor, right) ||
+    Number(right?.count ?? 0) - Number(left?.count ?? 0) ||
+    Number(left?.delayMinutes ?? 0) - Number(right?.delayMinutes ?? 0) ||
+    Number(left?.respawnIndex ?? 0) - Number(right?.respawnIndex ?? 0)
+  ).slice(0, PRACTICE_SPAWN_CANDIDATE_LIMIT));
+}
+
+/** Bounded, spread-aware field coverage for a V2 class-practice target. */
+export function practiceSpawnWaypoints(snapshot, quest) {
+  const actor = selfPlayer({ snapshot });
+  const candidates = practiceSpawnCandidates(snapshot, quest);
+  const points = candidates.flatMap((candidate, candidateIndex) => practiceFieldCoverage(candidate)
+    .map(point => ({ ...point, candidateIndex })));
+  return Object.freeze(points.sort((left, right) =>
+    distance(actor, left) - distance(actor, right) ||
+    left.candidateIndex - right.candidateIndex || left.y - right.y || left.x - right.x
+  ).slice(0, PRACTICE_SPAWN_WAYPOINT_LIMIT).map(({ x, y }) => Object.freeze({ x, y })));
+}
+
+function practiceFootprintDistance(actor, candidate) {
+  return Math.max(0, distance(actor, candidate?.position) - Math.max(0, Number(candidate?.spread ?? 0)));
+}
+
+function practiceFieldCoverage(candidate) {
+  const center = candidate?.position;
+  const spread = Math.max(0, Math.ceil(Number(candidate?.spread ?? 0)));
+  if (!validPracticePoint(center)) return [];
+  // Crystal respawn spreads are fields, not a six-tile disk around the
+  // manifest center. Sample the center and its bounded 20-tile grid so a
+  // field visible from an edge is eligible before a remote center is reached.
+  const axis = value => {
+    const low = Math.ceil(Number(value) - spread);
+    const high = Math.floor(Number(value) + spread);
+    const values = [];
+    for (let current = low; current <= high; current += 20) values.push(current);
+    if (!values.includes(Number(value))) values.push(Number(value));
+    if (!values.includes(high)) values.push(high);
+    return values;
+  };
+  return axis(center.x).flatMap(x => axis(center.y).map(y => ({ x, y })));
+}
+
+function validPracticePoint(point) {
+  return Number.isFinite(Number(point?.x)) && Number.isFinite(Number(point?.y));
+}
+
+function matchingPracticeTarget(snapshot, quest, excludedObjectIds = null) {
   const names = new Set((quest.objectives.kill ?? []).map(kill => normalize(kill.monsterName)));
   const actor = selfPlayer({ snapshot });
+  const excluded = excludedObjectIds instanceof Set ? excludedObjectIds : new Set();
   return (snapshot?.entities ?? []).filter(entity => entity?.kind === 'monster' && entity.dead !== true && Number(entity?.hp ?? 1) > 0 &&
-    names.has(normalize(entity?.name)) && String(entity?.mapFileName ?? snapshot?.mapFileName ?? '') === String(snapshot?.mapFileName ?? ''))
+    !excluded.has(Number(entity?.objectId)) && names.has(normalize(entity?.name)) &&
+    String(entity?.mapFileName ?? snapshot?.mapFileName ?? '') === String(snapshot?.mapFileName ?? ''))
     .sort((left, right) => distance(actor, left) - distance(actor, right))[0] ?? null;
 }
 
