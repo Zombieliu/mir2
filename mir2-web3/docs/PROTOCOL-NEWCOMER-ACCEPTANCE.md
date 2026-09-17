@@ -1,5 +1,11 @@
 # Protocol newcomer journey acceptance
 
+> 2026-09-17 actual Wizard R153 q113 completed: public finish45596,
+> CompleteQuest45598 and snapshot45599 prove BM3/3, Wedge3/3 and exact
+> +12500 gold/+544444 EXP. Aggregate **158/177**; both caster routes continue,
+> final normal logout/store and separate visual gates remain open.
+> [Receipts](generated/player-qa/protocol-journey-20260915/wizard-r153-q113-completed-proof.md).
+
 > 2026-09-17 R153 ordinary recovery: live Wizard q113 is BlackMaggot3/3,
 > WedgeMoth2/3; Taoist normal earned sales/purchases restored the full
 > Amulet100/MP12/Town2 departure stocks. Both continue; completed units remain
