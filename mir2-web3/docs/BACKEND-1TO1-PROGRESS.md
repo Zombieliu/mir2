@@ -2,10 +2,12 @@
 
 > 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
-> Simulation V2 14 resolved leaves, Zone 6/6, Gateway bridge 4/4, movement 4/4,
-> V1 progression 11/11 and native journey 17/17 (five V2) pass. Static sampled
-> region paths pass; ordinary three-class 0/78, actual timing, dynamic survival,
-> Web guidance, exact native package and visual acceptance remain open.
+> Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
+> V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
+> Web guidance/goal and localization tests plus TypeScript pass; controller 26/26.
+> Ordinary three-class 9/78 persist after normal logout; actual Gateway N4
+> self-Healing 1/1 passes, with isolated restart pending. Timing, survival, suitable
+> equipment acquisition, exact native package and visual acceptance remain open.
 > This adds custom onboarding, no Crystal parity percentage. V1 evidence stays
 > separate. [Implementation evidence](generated/player-qa/newcomer-v2-20260918/runtime.md).
 

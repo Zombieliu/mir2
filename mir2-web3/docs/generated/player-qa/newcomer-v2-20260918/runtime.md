@@ -21,14 +21,18 @@ checkpointed, deduplicated and discarded when no V2 training evidence is needed.
 
 | Check | Verified result |
 |---|---:|
-| Simulation V2 definitions/projection/public claim tests | 14 resolved leaves: 13 prior passes + corrected reward test 1/1 |
-| Actual Zone event resolution | 6/6 |
+| Simulation V2 definitions/projection/public claim tests | 15/15 including real Healing alias and shared attack profile |
+| Actual Zone event resolution | 7/7 including public explicit self-target Healing |
 | Gateway owner/replay/checkpoint/cleanup bridge | 4/4 |
+| Gateway owner combat / magic identity normalization | 2/2; delayed-hit owner/observer 1/1 |
+| Actual public Gateway Healing to N4 flag | isolated V2 process 1/1 after alias/profile and self-route fixes |
+| Public magic route / actor rejection | learned FireBall 1/1; invalid/nonplayer actor 1/1 |
 | Existing deferred map-transfer regression | 4/4 |
-| Existing shared SoulFireBall/practice regression | 13/13 |
+| Existing shared SoulFireBall/practice regression | 13/13 after self-route/profile changes |
 | Existing V1 progression/daily/milestone regression | 11/11 |
-| Native journey projection | 17/17, including five V2 tests |
-| V2 public-protocol controller contracts | 19/19 |
+| Native journey projection | 20/20; local graduation selection without command 1/1 |
+| Web chapter, localization and graduation | both Node scripts + TypeScript pass |
+| V2 public-protocol controller contracts | 26/26 |
 | Candidate region static collision paths | all sampled paths reachable |
 
 The reward-test correction counts both belt and bag, by actual item index:
@@ -67,9 +71,38 @@ Completed rows. Per-node QA checkpoints retain the initial clock. Mixed
 map-entry/skill AND flags wait for a fresh map/position receipt before preparation;
 N18 loadout-only requirements do not invent a target to run pet combat.
 
+Second ordinary saved checkpoint: **9/78** completed, three per class, each
+level 7, all latest snapshot/save state matching with normal LogOutSuccess.
+See ordinary-pass2.json. Warrior/Wizard have the independent N4 practice
+flag 1/1; the ordinary controller paused because owner attack feedback used
+the global Zone attacker id. Owner-only final packet normalization now rebases
+that identity to the local scene id; observers keep global actor ids.
+Taoist remains N4 practice 0/1. The real public Healing integration exposed
+three gaps: stored minor-heal alias recognition, self versus friendly routing,
+and explicit local self target lookup. The shared attack profile also needs
+the alias. The actual opt-in Gateway integration now passes 1/1, proving accepted
+self Healing updates only the owner's saved N4 practice flag while independent
+Oma kills remain 0/2. Three earlier failures are retained, including the file
+named gateway-healing-public-v2-final.log; the positive result is explicitly
+gateway-healing-public-v2-pass.log. A final release rebuild is underway before
+ordinary roles resume; the current live checkpoint still predates the fix.
+The strengthened opt-in test also rejects a Healing monster target without
+accepted Magic or personal-world fallback. An old generic magic fixture had
+incorrectly used Healing against a hostile monster; it now uses a genuinely
+learned level-7 Wizard FireBall. That route and existing nonplayer-actor security
+test each pass 1/1. gateway-existing-shared-magic.log preserves the old fixture
+failure; gateway-learned-fireball-route-pass.log records its valid correction.
+
+Native/Web graduation and chapter guidance are tested candidates. The chooser
+requires all 26 completed rows plus actual level 30. Local choice grants no
+reward or quest completion. A realistic level-30 equipment source remains
+unverified; see guidance-native.md, guidance-web.md and graduation-acquisition.md.
+The controller now has bounded, confirmed death/town-revive and in-combat
+supply handling, not additional retry time. Live recovery is still open.
+
 Open: ordinary route/skills/supplies/death handling/save-relogin, dynamic
-occupancy and survivability, search-time/hostile-density gates, graduation
-choices, Web guidance, exact native package and visual skill/UI comparison.
+occupancy and survivability, search-time/hostile-density gates, actionable
+graduation equipment, exact native package and visual skill/UI comparison.
 Windows computer-use could not start: importing the documented `@oai/sky`
 runtime returned `Trusted RPC service is not configured: sky`. No new native
 screenshot or visual acceptance is claimed.

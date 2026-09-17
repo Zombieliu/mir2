@@ -1461,7 +1461,12 @@ impl ZoneRuntime {
                 now_ms,
             );
         }
-        if zone_magic_targets_friendly_player(spell) && object_id != 0 {
+        if zone_magic_targets_friendly_player(spell)
+            && object_id != 0
+            && !(zone_magic_targets_self(spell)
+                && self.players.get(session_id)
+                    .is_some_and(|player| player.object_id == object_id))
+        {
             let Some(target_session_id) =
                 self.players
                     .iter()
@@ -4385,7 +4390,12 @@ impl ZoneRuntime {
                 now_ms,
             );
         }
-        if zone_magic_targets_friendly_player(spell) && object_id != 0 {
+        if zone_magic_targets_friendly_player(spell)
+            && object_id != 0
+            && !(zone_magic_targets_self(spell)
+                && self.players.get(session_id)
+                    .is_some_and(|player| player.object_id == object_id))
+        {
             let Some(target_session_id) =
                 self.players
                     .iter()

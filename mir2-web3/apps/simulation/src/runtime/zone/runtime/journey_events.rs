@@ -233,6 +233,37 @@ fn journey_healing_records_accepted_full_hp_cast_but_rejected_cast_is_quiet() {
 }
 
 #[test]
+fn journey_public_healing_with_explicit_self_id_uses_self_route_at_full_and_partial_hp() {
+    for hp in [100, 50] {
+        let (mut zone, owner) = joined_zone(hp, 10);
+        let accepted = zone.handle(ZoneCommand::PlayerCastMagic {
+            session_id: owner.clone(),
+            object_id: 101,
+            spell: Spell::Healing,
+            direction: MirDirection::Right,
+            target: Point { x: 10, y: 10 },
+            cast: true,
+            level: 0,
+            damage: 1,
+            mp_cost: 1,
+            cooldown_ms: 100,
+            now_ms: 10,
+        });
+        let receipts = journey_receipts(&accepted);
+        assert_eq!(receipts.len(), 1, "explicit self target at {hp} HP must retain journey evidence");
+        assert_eq!(receipts[0].kind, ZoneJourneyEventKind::HealingAccepted { full_hp_exercise: hp == 100 });
+        assert_eq!(receipts[0].target_object_id, Some(101));
+        assert_eq!(zone.players[&owner].mp, 9);
+        zone.tick(510);
+        if hp < 100 {
+            assert!(zone.players[&owner].hp > hp, "normal self healing still restores damaged HP");
+        } else {
+            assert_eq!(zone.players[&owner].hp, 100);
+        }
+    }
+}
+
+#[test]
 fn journey_physical_receipts_follow_committed_native_skill_hits() {
     for (raw_spell, technique, target_position) in [
         (

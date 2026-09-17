@@ -7,7 +7,7 @@ use super::super::resources::{
     is_in_world, InventoryResource, MapRuntimeResource, NpcStateResource, PlayerRuntimeResource,
     QuestResource, RuntimeConfigResource, SkillResource,
 };
-use super::super::skills::normalize_crystal_skill_key;
+use super::super::skills::crystal_magic_for_skill_key;
 use super::{
     crystal_flag_task_key, crystal_quest_update_packet, effective_crystal_quest_template_by_id,
     newcomer_v2, recompute_crystal_quest_current,
@@ -142,12 +142,14 @@ fn record_conditions_for(
 }
 
 fn knows(world: &World, spell: &str) -> bool {
-    let key = normalize_crystal_skill_key(spell);
     world
         .resource::<SkillResource>()
         .skills
         .iter()
-        .any(|skill| skill.key == key)
+        .any(|skill| {
+            crystal_magic_for_skill_key(&skill.key)
+                .is_some_and(|magic| magic.spell.eq_ignore_ascii_case(spell))
+        })
 }
 
 fn eligible_equipment(world: &World, slot: EquipmentSlot) -> bool {

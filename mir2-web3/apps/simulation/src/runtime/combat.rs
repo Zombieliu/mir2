@@ -52,7 +52,7 @@ use super::resources::{
 use super::session::SimulationSession;
 use super::skills::{
     advance_magic_progression, crystal_attack_power_roll, crystal_magic_damage,
-    normalize_crystal_skill_key,
+    crystal_magic_for_skill_key, normalize_crystal_skill_key,
 };
 use super::stats::{deterministic_range_roll, player_stats, PlayerStats};
 
@@ -239,7 +239,11 @@ fn crystal_skill_level(world: &World, spell_name: &str) -> Option<u8> {
         .resource::<SkillResource>()
         .skills
         .iter()
-        .find(|skill| skill.key == key)
+        .find(|skill| {
+            skill.key == key
+                || crystal_magic_for_skill_key(&skill.key)
+                    .is_some_and(|magic| normalize_crystal_skill_key(&magic.spell) == key)
+        })
         .map(|skill| skill.level)
 }
 

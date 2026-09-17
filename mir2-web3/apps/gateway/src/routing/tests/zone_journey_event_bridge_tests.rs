@@ -1,5 +1,5 @@
-use super::*;
 use super::super::{ZoneJourneyEventIdentity, ZoneJourneyEventProgress};
+use super::*;
 use mir2_simulation::{
     ZoneJourneyEventKind, ZoneJourneyEventReceipt, ZoneJourneyPhysicalTechnique,
 };
@@ -65,6 +65,59 @@ fn progress_for(receipt: &ZoneJourneyEventReceipt) -> ZoneJourneyEventProgress {
         life_generation: receipt.life_generation,
         committed: BTreeSet::from([ZoneJourneyEventIdentity::from(receipt)]),
     }
+}
+
+fn taoist_healing_training_fixture(
+    name: &str,
+) -> (
+    Arc<Mutex<SharedInProcessZoneState>>,
+    SharedInProcessZoneSessionRuntime,
+) {
+    // Both the personal session and the Zone cache the server cadence when
+    // constructed. Restore a durable in-progress N4 record only after those
+    // authorities have been created with the actual V2 cadence.
+    assert_eq!(std::env::var("MIR2_QUEST_CADENCE").as_deref(), Ok("newcomer-v2"),
+        "run this opt-in integration test in an isolated V2 process");
+    let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut runtime = shared_session_runtime(shared.clone());
+    start_new_runtime_with_class(&mut runtime, name, name, MirClass::Taoist);
+
+    let mut save = runtime
+        .inner
+        .active_character_checkpoint()
+        .expect("Taoist fixture should have an active durable character");
+    save.character.level = 7;
+    // Healing's real starter-book state is deliberately the `minor-heal`
+    // alias, rather than a test-only `healing` spelling.
+    save.skill_states_json = vec![serde_json::json!({
+        "key": "minor-heal",
+        "name": "Minor Heal",
+        "description": "Restores a small amount of HP.",
+        "level": 0,
+        "experience": 0,
+        "cooldown_ticks": 6,
+        "cooldown_ends_at": 0,
+    })
+    .to_string()];
+    save.quest_states_json = vec![serde_json::json!({
+        "quest_id": 2_110_004,
+        "title": "Your first class skill",
+        "summary": "",
+        "reward_preview": "",
+        "required": 3,
+        "current": 0,
+        "stage": "inProgress",
+        "task_progress": { "v2:accepted_at:1": 1 },
+        "cadence_last_claimed_period": null,
+        "cadence_high_watermark_period": null,
+    })
+    .to_string()];
+    runtime
+        .inner
+        .restore_active_character_checkpoint(&save)
+        .expect("restored N4 fixture should be valid");
+    runtime.sync_zone_snapshot();
+    (shared, runtime)
 }
 
 #[test]
@@ -171,4 +224,108 @@ fn zone_journey_event_not_needed_discards_pending_and_replay_fence() {
     let state = runtime.zone_state.lock().unwrap();
     assert!(!state.pending_zone_journey_events.contains_key(&key));
     assert!(!state.journey_event_progress.contains_key(&key));
+}
+
+#[test]
+#[ignore = "requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"]
+fn public_taoist_healing_commits_n4_flag_through_the_zone_journey_bridge() {
+    let (shared, mut owner) = taoist_healing_training_fixture("JourneyHealingOwner");
+    assert!(
+        owner.inner.needs_zone_journey_evidence(),
+        "restored N4 class-practice flag should request trusted Zone evidence"
+    );
+    let mut observer = shared_session_runtime(shared);
+    start_new_runtime_with_class(
+        &mut observer,
+        "JourneyHealingObserver",
+        "JourneyHealingObserver",
+        MirClass::Warrior,
+    );
+
+    let owner_entity = owner
+        .world_snapshot()
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .expect("owner should be visible in its public snapshot")
+        .clone();
+    let monster = owner.world_snapshot().entities.into_iter()
+        .find(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead)
+        .expect("fixture should expose a normal monster target");
+    let rejected = owner.execute(WorldCommand::ClientPacket(ClientPacket::Magic {
+        object_id: owner_entity.object_id,
+        spell: Spell::Healing,
+        direction: MirDirection::Right,
+        target_id: monster.object_id,
+        location: Point { x: monster.x, y: monster.y },
+        spell_target_lock: true,
+    })).unwrap();
+    assert!(!rejected.iter().any(|packet| matches!(packet,
+        ServerPacket::Magic { spell: Spell::Healing, cast: true, .. })),
+        "Healing must reject a monster through the Zone, not fall back to the personal caster: {rejected:?}");
+    let packets = owner
+        .execute(WorldCommand::ClientPacket(ClientPacket::Magic {
+            object_id: owner_entity.object_id,
+            spell: Spell::Healing,
+            direction: MirDirection::Right,
+            target_id: owner_entity.object_id,
+            location: Point {
+                x: owner_entity.x,
+                y: owner_entity.y,
+            },
+            spell_target_lock: true,
+        }))
+        .expect("ordinary self Healing should execute through the shared Zone");
+
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::Magic {
+                spell: Spell::Healing,
+                cast: true,
+                target_id,
+                ..
+            } if *target_id == owner_entity.object_id
+        )),
+        "{packets:?}"
+    );
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 2_110_004,
+                task_list,
+                ..
+            } if task_list.iter().any(|task| task == "Complete your class practice 1/1")
+        )),
+        "the trusted Zone receipt must project the N4 flag to its owner: {packets:?}"
+    );
+
+    let save = owner
+        .inner
+        .active_character_checkpoint()
+        .expect("owner quest progress should checkpoint after the bridge commit");
+    let n4 = save
+        .quest_states_json
+        .iter()
+        .map(|json| serde_json::from_str::<serde_json::Value>(json).unwrap())
+        .find(|quest| quest["quest_id"] == 2_110_004)
+        .expect("N4 should remain in the owner checkpoint");
+    assert_eq!(n4["task_progress"]["flag:2210041"], 1);
+    assert_eq!(n4["current"], 1, "the two Oma kills remain independent");
+    assert_eq!(n4["required"], 3);
+
+    let observer_packets = observer
+        .execute(WorldCommand::Tick)
+        .expect("observer tick should drain only its public Zone packets");
+    assert!(
+        !observer_packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 2_110_004,
+                ..
+            }
+        )),
+        "N4 quest projection must remain owner-only: {observer_packets:?}"
+    );
 }

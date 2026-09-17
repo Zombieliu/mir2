@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn owner_combat_results_rebase_only_the_exact_zone_target_to_local_identity() {
+fn owner_combat_results_rebase_only_the_exact_owner_zone_identity() {
     let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
     let mut runtime = shared_session_runtime(zone_state);
     start_demo_runtime(&mut runtime);
@@ -94,8 +94,59 @@ fn owner_combat_results_rebase_only_the_exact_zone_target_to_local_identity() {
         matches!(
             &packets[6],
             ServerPacket::ObjectStruck { info }
-                if info.object_id == remote_id && info.attacker_id == zone_id
+                if info.object_id == remote_id && info.attacker_id == local_id
         ),
-        "the owner's Zone id is not rewritten when it identifies the attacker"
+        "the owner-facing hit identifies the rendered local attacker; remote targets keep their ids"
     );
+}
+
+#[test]
+fn owner_magic_packets_rebase_caster_and_self_targets_without_rewriting_remote_actors() {
+    let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut runtime = shared_session_runtime(zone_state);
+    start_demo_runtime(&mut runtime);
+    let local_id = runtime.local_self_object_id().unwrap();
+    let zone_id = runtime.current_zone_player_object_id().unwrap();
+    let remote_id = zone_id + 77;
+    let mut packets = vec![
+        ServerPacket::ObjectMagic {
+            object_id: zone_id,
+            location: Point { x: 330, y: 270 },
+            direction: MirDirection::Down,
+            spell: Spell::Healing,
+            target_id: zone_id,
+            target: Point { x: 330, y: 270 },
+            cast: true,
+            level: 0,
+            self_broadcast: false,
+            secondary_target_ids: vec![zone_id, remote_id],
+        },
+        ServerPacket::Magic {
+            spell: Spell::Healing,
+            target_id: zone_id,
+            target: Point { x: 330, y: 270 },
+            cast: true,
+            level: 0,
+            secondary_target_ids: vec![remote_id, zone_id],
+        },
+        ServerPacket::ObjectMagic {
+            object_id: remote_id,
+            location: Point { x: 331, y: 270 },
+            direction: MirDirection::Left,
+            spell: Spell::FireBall,
+            target_id: zone_id,
+            target: Point { x: 330, y: 270 },
+            cast: true,
+            level: 0,
+            self_broadcast: false,
+            secondary_target_ids: vec![remote_id],
+        },
+    ];
+    runtime.normalize_owner_state_packets(&mut packets);
+    assert!(matches!(&packets[0], ServerPacket::ObjectMagic { object_id, target_id, secondary_target_ids, .. }
+        if *object_id == local_id && *target_id == local_id && secondary_target_ids == &vec![local_id, remote_id]));
+    assert!(matches!(&packets[1], ServerPacket::Magic { target_id, secondary_target_ids, .. }
+        if *target_id == local_id && secondary_target_ids == &vec![remote_id, local_id]));
+    assert!(matches!(&packets[2], ServerPacket::ObjectMagic { object_id, target_id, secondary_target_ids, .. }
+        if *object_id == remote_id && *target_id == local_id && secondary_target_ids == &vec![remote_id]));
 }

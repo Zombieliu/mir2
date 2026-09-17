@@ -10195,10 +10195,36 @@ impl SharedInProcessZoneSessionRuntime {
                 ServerPacket::ObjectHealth { info } if info.object_id == zone_id => {
                     info.object_id = local_id;
                 }
-                ServerPacket::ObjectStruck { info } if info.object_id == zone_id => {
-                    // The attacker remains a shared-world object. Only the
-                    // owner's target identity is local to its rendered scene.
-                    info.object_id = local_id;
+                ServerPacket::ObjectStruck { info } => {
+                    if info.object_id == zone_id {
+                        info.object_id = local_id;
+                    }
+                    if info.attacker_id == zone_id {
+                        info.attacker_id = local_id;
+                    }
+                }
+                ServerPacket::ObjectMagic { object_id, target_id, secondary_target_ids, .. } => {
+                    if *object_id == zone_id {
+                        *object_id = local_id;
+                    }
+                    if *target_id == zone_id {
+                        *target_id = local_id;
+                    }
+                    for target in secondary_target_ids {
+                        if *target == zone_id {
+                            *target = local_id;
+                        }
+                    }
+                }
+                ServerPacket::Magic { target_id, secondary_target_ids, .. } => {
+                    if *target_id == zone_id {
+                        *target_id = local_id;
+                    }
+                    for target in secondary_target_ids {
+                        if *target == zone_id {
+                            *target = local_id;
+                        }
+                    }
                 }
                 ServerPacket::DamageIndicator { object_id, .. }
                 | ServerPacket::ObjectPoisoned { object_id, .. }
@@ -11165,6 +11191,16 @@ impl SharedInProcessZoneSessionRuntime {
         };
         let snapshot = self.inner.world_snapshot();
         let map_file_name = snapshot.map_file_name.as_deref()?;
+        // SelfPlayer is addressed by the owner's local scene id on the wire.
+        // Rebase an explicit self-magic target before shared target lookup;
+        // otherwise its SelfPlayer kind fails the remote Player/Monster gate
+        // and silently falls back to the personal world instead of the Zone.
+        if Some(object_id) == self.local_self_object_id()
+            && matches!(&kind, ZoneNativePlayerAttackKind::Magic { spell, .. }
+                if gateway_zone_magic_targets_self(*spell))
+        {
+            object_id = self.current_zone_player_object_id()?;
+        }
         if object_id == 0 {
             if let ZoneNativePlayerAttackKind::Melee { spell, .. } = &kind {
                 let origin = self.authoritative_self_entity_for_snapshot(&snapshot)?;
@@ -24827,7 +24863,8 @@ mod tests {
             .expect("owner personal tick should drain Zone results");
         assert!(owner_tick_packets.iter().any(|packet| matches!(
             packet,
-            ServerPacket::ObjectStruck { info } if info.object_id == target.object_id
+            ServerPacket::ObjectStruck { info }
+                if info.object_id == target.object_id && Some(info.attacker_id) == first.local_self_object_id()
         )));
         let observer_packets = second
             .execute(WorldCommand::Tick)
@@ -25932,8 +25969,15 @@ mod tests {
         let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
         let mut first = shared_session_runtime(zone_state.clone());
         let mut second = shared_session_runtime(zone_state);
-        start_demo_runtime(&mut first);
+        start_new_runtime_with_class(&mut first, "magic-caster", "Mage", MirClass::Wizard);
         start_new_runtime(&mut second, "magic-observer", "Blade");
+        let mut save = first.inner.active_character_checkpoint().unwrap();
+        save.character.level = 7;
+        save.skill_states_json = vec![serde_json::json!({
+            "key": "fireball", "name": "FireBall", "description": "", "level": 0,
+            "experience": 0, "cooldown_ticks": 0, "cooldown_ends_at": 0
+        }).to_string()];
+        first.inner.restore_active_character_checkpoint(&save).unwrap();
 
         let target = first
             .inner
@@ -25966,7 +26010,7 @@ mod tests {
         let launch_packets = first
             .execute(WorldCommand::ClientPacket(ClientPacket::Magic {
                 object_id: self_object_id,
-                spell: Spell::Healing,
+                spell: Spell::FireBall,
                 direction: MirDirection::Right,
                 target_id: target.object_id,
                 location: Point {
@@ -25975,7 +26019,7 @@ mod tests {
                 },
                 spell_target_lock: true,
             }))
-            .expect("Healing should execute through shared Zone");
+            .expect("a learned offensive FireBall should execute through shared Zone");
 
         assert!(launch_packets.iter().any(|packet| matches!(
             packet,
@@ -25983,7 +26027,7 @@ mod tests {
                 spell,
                 target_id,
                 ..
-            } if *spell == Spell::Healing && *target_id == target.object_id
+            } if *spell == Spell::FireBall && *target_id == target.object_id
         )));
         assert!(launch_packets.iter().any(|packet| matches!(
             packet,
@@ -25991,7 +26035,7 @@ mod tests {
                 spell,
                 target_id,
                 ..
-            } if *spell == Spell::Healing && *target_id == target.object_id
+            } if *spell == Spell::FireBall && *target_id == target.object_id
         )));
 
         let observer_packets = second
@@ -26003,7 +26047,7 @@ mod tests {
                 spell,
                 target_id,
                 ..
-            } if *spell == Spell::Healing && *target_id == target.object_id
+            } if *spell == Spell::FireBall && *target_id == target.object_id
         )));
     }
 

@@ -66,6 +66,45 @@ fn learn(world: &mut World, spell: &str) {
 }
 
 #[test]
+fn newcomer_v2_healing_training_recognizes_the_real_starter_book_skill_key() {
+    use super::super::super::zone::{ZoneJourneyEventKind, ZoneJourneyEventReceipt, ZoneKey};
+    let mut session = session(MirClass::Taoist);
+    learn(session.app.world_mut(), "Healing");
+    assert_eq!(session.app.world().resource::<SkillResource>().skills.last().unwrap().key, "minor-heal");
+    assert!(session.zone_magic_attack_profile(mir2_protocol::Spell::Healing).is_some(),
+        "the real starter-book alias must admit Healing through the shared Zone profile");
+    begin(&mut session, 2_110_004);
+    let identity = session.active_identity().unwrap();
+    let world = session.app.world_mut();
+    let accepted_at = acceptance(world, 2_110_004);
+    let flag = newcomer_v2::flag_objectives(world, 2_110_004)[0].number;
+    let receipt = ZoneJourneyEventReceipt {
+        kind: ZoneJourneyEventKind::HealingAccepted { full_hp_exercise: true },
+        session_id: "healing-training".into(),
+        account_id: identity.account_id,
+        character_index: identity.character_index,
+        object_id: 1000,
+        life_generation: 1,
+        zone_key: ZoneKey::for_map("0"),
+        source_action_at_ms: accepted_at + 1,
+        committed_at_ms: accepted_at + 1,
+        event_sequence: 1,
+        source_object_id: 1000,
+        target_object_id: Some(1000),
+        target_location: Some(Point { x: 297, y: 592 }),
+        effect_object_id: Some(1000),
+        damage: None,
+        material_consumed: false,
+    };
+    assert!(!record_zone_event(world, &receipt).is_empty());
+    let quest = world.resource::<QuestResource>().quests.iter()
+        .find(|quest| quest.quest_id == 2_110_004).unwrap();
+    assert_eq!(quest.task_progress.get(&crystal_flag_task_key(flag)), Some(&1));
+    assert_eq!(quest.stage, QuestStage::InProgress);
+    assert_eq!(quest.current, 1, "the two required Oma kills remain independent");
+}
+
+#[test]
 fn newcomer_v2_training_requires_post_acceptance_damage_and_the_correct_map() {
     let mut session = session(MirClass::Wizard);
     let world = session.app.world_mut();
