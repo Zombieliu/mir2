@@ -4,12 +4,14 @@
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
 > V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
-> Web guidance/goal and localization plus TypeScript pass; controller regressions 232/232.
-> Ordinary three-class 12/78 persist after normal logout, four per class at level 8.
+> Web guidance/goal and localization plus TypeScript pass; controller regressions 288/288.
+> Ordinary three-class 33/78 persist after normal logout; levels 19/16/18.
+> All three pass N5/N6. Original timing ledgers remain; clean two-hour time is unverified.
 > Actual Gateway N4 self-Healing 1/1 and N5 arrival/autosave/rejection 4/4 pass;
 > movement map-transfer 4/4 and Simulation V2 15/15 plus Zone 7/7 reruns pass.
 > N5 release is deployed; safe-profile Zone 4/4, Gateway snapshot 1/1 and arrival 4/4 pass.
-> Safe-profile source is not deployed. Ordinary resumes, timing, survival,
+> Safe-profile release is deployed; legacy safe-area/PvP plus profile reruns 9/9 pass.
+> Remaining ordinary route, timing, survival,
 > suitable equipment, exact native package and visual acceptance remain open.
 > This adds custom onboarding, no Crystal parity percentage. V1 evidence stays
 > separate. [Implementation evidence](generated/player-qa/newcomer-v2-20260918/runtime.md).

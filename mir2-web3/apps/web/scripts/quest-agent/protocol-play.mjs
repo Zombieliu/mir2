@@ -653,7 +653,11 @@ export function createNavigator(client, dependencies = {}) {
       }
       const step = remaining[0];
       if (!step) {
-        if (++failures > maxNoPathRefreshes) throw new Error(`No walk path on ${mapId} from ${self.x},${self.y} to ${target.x},${target.y}`);
+        if (++failures > maxNoPathRefreshes) {
+          const error = new Error(`No walk path on ${mapId} from ${self.x},${self.y} to ${target.x},${target.y}`);
+          error.successfulSteps = successfulSteps;
+          throw error;
+        }
         client.record('diagnostic', { type: 'navigationReplan', mapId, mapSource: maps.get(mapId).sourcePath, width: maps.get(mapId).width, height: maps.get(mapId).height, desiredDistance, start: { x: self.x, y: self.y }, target, rejected: [...rejected], obstacleCount: dynamicObstacles.length });
         const after = client.sequence;
         client.send({ type: 'clientVersion' });
@@ -715,7 +719,9 @@ export function createNavigator(client, dependencies = {}) {
           transferCell: protectedStep,
         });
         if (++failures > maxNoPathRefreshes) {
-          throw new Error(`No walk path on ${mapId} from ${liveSelf.x},${liveSelf.y} to ${target.x},${target.y}`);
+          const error = new Error(`No walk path on ${mapId} from ${liveSelf.x},${liveSelf.y} to ${target.x},${target.y}`);
+          error.successfulSteps = successfulSteps;
+          throw error;
         }
         continue;
       }

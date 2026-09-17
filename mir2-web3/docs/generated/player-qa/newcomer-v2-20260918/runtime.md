@@ -136,5 +136,11 @@ The 83c157b46 N5 release was deployed; it excludes the later safe-profile Rust
 repair. Ordinary roles resumed with cooldown refresh and strict corpse retry,
 preserving the initial deadlines. See safe-profile-and-controller.md.
 
+Fourth ordinary saved checkpoint verifies **33/78** after normal logout:
+Warrior level 19 (12/26), Wizard level 16 (10/26), Taoist level 18 (11/26).
+All three pass N5/N6 and match durable saves. Warrior practice search and Taoist
+attack budgets remain paused; Wizard reached the original 120-minute deadline.
+See ordinary-pass4.md/json. Cross-repair clocks do not certify clean timing.
+
 `accepted=false`, `visualAccepted=false`, `measuredTime=false`,
 `globalParityPercent=null`.

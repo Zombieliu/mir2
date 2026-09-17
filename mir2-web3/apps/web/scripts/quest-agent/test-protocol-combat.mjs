@@ -6361,6 +6361,83 @@ test("unknown last-blow identity preserves the missing-award failure", async () 
   }, async () => {}, settings), /Fake timeout waiting for q22 ForestYeti kill progress/);
 });
 
+test('opt-in timed full-spread search takes one bounded respawn wait, refreshes, then completes normally', async () => {
+  const quest = { questId: 41, stage: 'InProgress', objectives: [objective('OmaFighter', 0, 1)] };
+  const client = new FakeClient(snapshot(quest), (owner, command) => {
+    if (command.type !== 'attack') return;
+    owner.receive('ObjectDied', state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 81), { hp: 0, dead: true });
+      state.questLog[0].objectives[0] = objective('OmaFighter', 1, 1);
+      state.questLog[0].stage = 'ReadyToTurnIn';
+    }, { objectId: 81 });
+  });
+  let clock = 0;
+  let waits = 0;
+  let refreshes = 0;
+  const result = await completeQuestObjectives(client, {
+    questId: 41,
+    objectives: { kill: [{ monsterName: 'OmaFighter', spawnCandidates: [{ ...spawn('OmaFighter', 20, 20), spread: 0 }] }], item: [] },
+  }, async point => {
+    clock = 30;
+    Object.assign(client.snapshot.entities[0], { x: Number(point.x) - 1, y: Number(point.y) });
+  }, {
+    ...settings,
+    now: () => clock,
+    spawnSearchTimeoutMs: 30,
+    maxSpawnWaypoints: 2,
+    maxSpawnRespawnWaits: 1,
+    spawnRespawnWaitMs: 1,
+    retrySpawnSearchTimeout: true,
+    sleep: async milliseconds => { if (milliseconds === 1) waits += 1; },
+    refreshWhileWaiting: async owner => {
+      refreshes += 1;
+      owner.snapshot.entities.push(monster(81, 'OmaFighter', 20, 20));
+      owner.events.push({ sequence: ++owner.sequence, direction: 'received', type: 'worldSnapshot', payload: structuredClone(owner.snapshot) });
+    },
+  });
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.equal(waits, 1);
+  assert.equal(refreshes, 1);
+  assert.deepEqual(client.sent, [{ type: 'attack', objectId: 81 }]);
+});
+
+test('default timed full-spread search remains terminal and never enters the respawn retry', async () => {
+  const quest = { questId: 42, stage: 'InProgress', objectives: [objective('OmaFighter', 0, 1)] };
+  const client = new FakeClient(snapshot(quest));
+  let clock = 0;
+  let slept = false;
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 42,
+    objectives: { kill: [{ monsterName: 'OmaFighter', spawnCandidates: [{ ...spawn('OmaFighter', 20, 20), spread: 0 }] }], item: [] },
+  }, async () => { clock = 30; }, {
+    ...settings,
+    now: () => clock,
+    spawnSearchTimeoutMs: 30,
+    maxSpawnWaypoints: 2,
+    maxSpawnRespawnWaits: 1,
+    spawnRespawnWaitMs: 1,
+    sleep: async () => { slept = true; },
+  }), /timed out after 30ms/);
+  assert.equal(slept, false);
+});
+
+test('opt-in timed-search recovery does not swallow an ordinary navigation error', async () => {
+  const quest = { questId: 43, stage: 'InProgress', objectives: [objective('OmaFighter', 0, 1)] };
+  const client = new FakeClient(snapshot(quest));
+  let slept = false;
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 43,
+    objectives: { kill: [{ monsterName: 'OmaFighter', spawnCandidates: [{ ...spawn('OmaFighter', 20, 20), spread: 0 }] }], item: [] },
+  }, async () => { throw new Error('ordinary navigation failure'); }, {
+    ...settings,
+    retrySpawnSearchTimeout: true,
+    spawnRespawnWaitMs: 1,
+    maxSpawnRespawnWaits: 1,
+    sleep: async () => { slept = true; },
+  }), /ordinary navigation failure/);
+  assert.equal(slept, false);
+});
+
 test('opt-in fresh corpse without an accepted owner attack rescans without awarding credit', async () => {
   const quest = { questId: 22, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
   const client = new FakeClient(snapshot(quest, [

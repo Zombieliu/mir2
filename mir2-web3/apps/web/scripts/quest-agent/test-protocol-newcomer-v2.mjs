@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { firstReachableDestination } from './protocol-combat.mjs';
 import {
@@ -205,6 +206,18 @@ test('V2 Wizard combat refreshes a stale cooldown snapshot and then casts normal
   assert.equal(client.snapshot.questLog[0].stage, 'ReadyToTurnIn');
 });
 
+test('V2 objective combat explicitly opts into the bounded timed-search respawn observation', async () => {
+  const source = await readFile(new URL('./protocol-newcomer-v2.mjs', import.meta.url), 'utf8');
+  const start = source.indexOf('export async function completeV2Objectives');
+  const end = source.indexOf('\nasync function v2Sustain', start);
+  assert.ok(start >= 0 && end > start, 'V2 objective combat block');
+  const options = source.slice(start, end);
+  assert.match(options, /retrySpawnSearchTimeout:\s*true/);
+  assert.match(options, /spawnSearchTimeoutMs:\s*30_000/);
+  assert.match(options, /maxSpawnWaypoints:\s*120/);
+  assert.match(options, /maxSpawnRespawnWaits:\s*1/);
+});
+
 test('server flag projection cannot be replaced by a local completion boolean', () => {
   const route = buildNewcomerV2Route({ config: config(), npcManifest, respawnManifest, itemManifest, className: 'Warrior', gender: 'Male' });
   const quest = route.quests[0];
@@ -336,6 +349,12 @@ function practiceQuest(requirements, { questId = 2110004, kills = [{ monsterName
   };
 }
 
+function noWalkPath(successfulSteps = 0) {
+  const error = new Error('No walk path on D001');
+  error.successfulSteps = successfulSteps;
+  return error;
+}
+
 function practiceClient({ knownSkills, inventoryItems = [], requirements, completeOn = 1, questId, magicCast = true, magicTargetId = null }) {
   const sent = [];
   const requests = [];
@@ -452,6 +471,98 @@ test('practice search ranks a near spawn field ahead of a remote manifest first 
   assert.equal(calls.length, 2, 'the practice pass must not continue through later coverage after an AOI target appears');
   assert.equal(calls[0].options.maxSuccessfulSteps, 120);
   assert.ok(calls[0].options.maxAttempts <= 180);
+});
+
+test('practice skips an unreachable spread waypoint and completes only after a fresh live target and server flag', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['Fencing'], requirements: { warrior: ['Fencing learned', 'normal attack landed with Fencing learned'] },
+  });
+  client.snapshot.entities.splice(1);
+  quest.objectives.kill[0].spawnCandidates = [
+    { mapFileName: '0', position: { x: 10, y: 10 }, spread: 0, count: 1 },
+    { mapFileName: '0', position: { x: 20, y: 20 }, spread: 0, count: 1 },
+  ];
+  const diagnostics = [];
+  client.record = (type, payload) => diagnostics.push({ type, payload });
+  let navigationCalls = 0;
+  await executeV2PracticePlan({
+    client,
+    quest,
+    navigate: async point => {
+      navigationCalls += 1;
+      if (navigationCalls === 1) throw noWalkPath(0);
+      if (navigationCalls === 2) {
+        Object.assign(client.snapshot.entities[0], { x: 19, y: 20 });
+        client.snapshot.entities.push({ kind: 'monster', objectId: 17, name: 'Scarecrow', x: 20, y: 20, hp: 10, dead: false });
+        client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'worldSnapshot', payload: structuredClone(client.snapshot) });
+      }
+      return { reached: true, successfulSteps: 1, attempts: 1 };
+    },
+    plan: [{ kind: 'normal' }],
+  });
+  assert.deepEqual(diagnostics, [{
+    type: 'diagnostic',
+    payload: {
+      type: 'practiceSpawnWaypointUnreachable', questId: quest.questId, mapFileName: '0', waypoint: { x: 10, y: 10 },
+    },
+  }]);
+  assert.deepEqual(sent, [{ type: 'attack', objectId: 17 }]);
+  assert.equal(v2FlagState(client.snapshot, quest.questId, quest.objectives.flag[0]).complete, true);
+});
+
+test('practice still fails after every bounded waypoint is unreachable and does not swallow other errors', async () => {
+  const quest = practiceQuest({ warrior: ['Fencing learned'] }, {
+    kills: [{ monsterName: 'Scarecrow', spawnCandidates: [
+      { mapFileName: '0', position: { x: 10, y: 10 }, spread: 0, count: 1 },
+      { mapFileName: '0', position: { x: 20, y: 20 }, spread: 0, count: 1 },
+    ] }],
+  });
+  const snapshot = { mapFileName: '0', playerObjectId: 1, entities: [{ kind: 'player', objectId: 1, x: 0, y: 0 }] };
+  const diagnostics = [];
+  await assert.rejects(
+    approachPracticeTarget({ snapshot, record: (type, payload) => diagnostics.push({ type, payload }) }, quest,
+      async () => { throw noWalkPath(0); }, 1),
+    /has no live configured objective monster/,
+  );
+  assert.equal(diagnostics.length, 2);
+  await assert.rejects(
+    approachPracticeTarget({ snapshot }, quest, async () => { throw new Error('ordinary practice navigation failure'); }, 1),
+    /ordinary practice navigation failure/,
+  );
+  const missingCount = new Error('No walk path on D001');
+  await assert.rejects(
+    approachPracticeTarget({ snapshot }, quest, async () => { throw missingCount; }, 1),
+    error => error === missingCount,
+  );
+});
+
+test('practice consumes trusted no-path movement before trying the next bounded waypoint', async () => {
+  const quest = practiceQuest({ warrior: ['Fencing learned'] }, {
+    kills: [{ monsterName: 'Scarecrow', spawnCandidates: [
+      { mapFileName: '0', position: { x: 10, y: 10 }, spread: 0, count: 1 },
+      { mapFileName: '0', position: { x: 20, y: 20 }, spread: 0, count: 1 },
+    ] }],
+  });
+  const freshSnapshot = () => ({ mapFileName: '0', playerObjectId: 1, entities: [{ kind: 'player', objectId: 1, x: 0, y: 0 }] });
+  const callsAfter119 = [];
+  await assert.rejects(
+    approachPracticeTarget({ snapshot: freshSnapshot() }, quest, async (_point, _distance, _stopWhen, options) => {
+      callsAfter119.push(options.maxSuccessfulSteps);
+      throw noWalkPath(callsAfter119.length === 1 ? 119 : 1);
+    }, 1),
+    /has no live configured objective monster/,
+  );
+  assert.deepEqual(callsAfter119, [120, 1]);
+
+  const callsAfter120 = [];
+  await assert.rejects(
+    approachPracticeTarget({ snapshot: freshSnapshot() }, quest, async (_point, _distance, _stopWhen, options) => {
+      callsAfter120.push(options.maxSuccessfulSteps);
+      throw noWalkPath(120);
+    }, 1),
+    /has no live configured objective monster/,
+  );
+  assert.deepEqual(callsAfter120, [120]);
 });
 
 test('directional practice aligns exact Thrusting and Lightning rays instead of accepting off-axis Chebyshev range', () => {

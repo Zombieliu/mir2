@@ -1087,6 +1087,10 @@ function combatSettings(options) {
   return {
     maxEngagements: positiveInteger(options.maxEngagements, 200),
     retryUnclaimedSnapshotCorpse: options.retryUnclaimedSnapshotCorpse === true,
+    // A V2 route may convert a time-bounded coverage attempt into its
+    // already-bounded respawn observation. Legacy callers keep timeout as a
+    // terminal error unless they explicitly request this recovery.
+    retrySpawnSearchTimeout: options.retrySpawnSearchTimeout === true,
     maxAttackAttempts: positiveInteger(options.maxAttackAttempts, 120),
     maxHarvestPasses: positiveInteger(options.maxHarvestPasses, 16),
     maxUnavailableCorpses: positiveInteger(options.maxUnavailableCorpses, 3),
@@ -1696,7 +1700,9 @@ function assertSpawnSearchTime(client, targetPlan, startedAt, visited, total, se
   const elapsed = Math.max(0, settings.now() - startedAt);
   if (elapsed < settings.spawnSearchTimeoutMs) return;
   const map = String(client.snapshot?.mapFileName ?? 'unknown');
-  throw new Error(`bounded full-spread spawn search timed out after ${elapsed}ms; visited ${visited}/${total} waypoints on map ${map} for ${targetPlan.monsterNames.join(" or ")}`);
+  const message = `bounded full-spread spawn search timed out after ${elapsed}ms; visited ${visited}/${total} waypoints on map ${map} for ${targetPlan.monsterNames.join(" or ")}`;
+  if (settings.retrySpawnSearchTimeout) throw new SpawnSearchExhausted(message);
+  throw new Error(message);
 }
 
 function recordSpawnSearchProgress(client, targetPlan, visited, total) {

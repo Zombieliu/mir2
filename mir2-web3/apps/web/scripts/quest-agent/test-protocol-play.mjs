@@ -1061,6 +1061,28 @@ test('dispatch recheck blocks a newly observed transfer across both Run cells', 
     entry.movementType === 'run' && entry.transferCell.x === 3));
 });
 
+test('transfer dispatch no-path retains completed movement count on its original Error', async () => {
+  const client = navigationClient();
+  let exposed = false;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    delay: async () => {
+      if (exposed) return;
+      exposed = true;
+      client.snapshot.mapTransfers = [{
+        key: 'late-door', mapFileName: 'test', toMapFileName: 'other',
+        bounds: { minX: 3, maxX: 3, minY: 1, maxY: 1 },
+      }];
+    },
+  });
+
+  await assert.rejects(
+    navigateNear({ x: 6, y: 1 }, 0, () => false, { maxNoPathRefreshes: 0 }),
+    error => /No walk path on test from 1,1 to 6,1/.test(error?.message ?? '') && error.successfulSteps === 0,
+  );
+  assert.deepEqual(client.sent, []);
+});
+
 test('selected live transfer remains an allowed navigation destination', async () => {
   const client = navigationClient();
   client.snapshot.mapTransfers = [{
@@ -1242,7 +1264,8 @@ test('the q89 D2031 entry navigator refuses a waypoint sealed by both Shaman foo
       hostileAvoidanceByName: { CursedShaman: 6, CursedShaman0: 6 },
       maxNoPathRefreshes: 0,
     }),
-    /No walk path on D2031 from 278,284 to 250,270/,
+    error => /No walk path on D2031 from 278,284 to 250,270/.test(error?.message ?? '') &&
+      error.successfulSteps === 0,
   );
   assert.deepEqual(client.sent, []);
 });

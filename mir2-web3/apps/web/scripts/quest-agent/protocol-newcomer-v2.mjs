@@ -578,6 +578,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       preferredObjectiveMaps: quest.objectiveMaps,
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
+      retrySpawnSearchTimeout: true,
     });
   }
 }
@@ -832,11 +833,32 @@ export async function approachPracticeTarget(client, quest, navigate, desiredDis
       // A target can enter AOI while walking a legitimate spawn field. Stop
       // immediately and retarget it rather than spending the remaining field
       // budget marching toward a stale manifest center.
-      const progress = await navigate(waypoint, 6, () => Boolean(selectTarget()), {
-        maxSuccessfulSteps: remainingSteps,
-        maxAttempts: attemptsPerWaypoint,
-        detectPositionCycles: true,
-      });
+      let progress;
+      try {
+        progress = await navigate(waypoint, 6, () => Boolean(selectTarget()), {
+          maxSuccessfulSteps: remainingSteps,
+          maxAttempts: attemptsPerWaypoint,
+          detectPositionCycles: true,
+        });
+      } catch (error) {
+        // A manifest spread may cover an unreachable collision component.
+        // Skip only the traveler's exact no-path result; all other navigation
+        // failures remain terminal and this fixed candidate list remains
+        // bounded by its existing waypoint and step budgets.
+        if (!/^No walk path/.test(String(error?.message ?? ''))) throw error;
+        const failedSuccessfulSteps = error?.successfulSteps;
+        if (!Number.isSafeInteger(failedSuccessfulSteps) || failedSuccessfulSteps < 0) throw error;
+        remainingSteps -= Math.min(remainingSteps, failedSuccessfulSteps);
+        if (typeof client?.record === 'function') {
+          client.record('diagnostic', {
+            type: 'practiceSpawnWaypointUnreachable',
+            questId: Number(quest.questId),
+            mapFileName: String(client.snapshot?.mapFileName ?? ''),
+            waypoint: { x: Number(waypoint.x), y: Number(waypoint.y) },
+          });
+        }
+        continue;
+      }
       remainingSteps -= Math.max(0, Math.min(remainingSteps, Number(progress?.successfulSteps) || 0));
       target = selectTarget();
     }
