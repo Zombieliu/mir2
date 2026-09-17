@@ -1,5 +1,11 @@
 # Agent Task Queue
 
+> 2026-09-17 R153 ordinary recovery: live Wizard q113 is BlackMaggot3/3,
+> WedgeMoth2/3; Taoist normal earned sales/purchases restored the full
+> Amulet100/MP12/Town2 departure stocks. Both continue; completed units remain
+> **157/177**, with final logout/store and separate visual gates open.
+> [Public receipts](generated/player-qa/protocol-journey-20260915/r153-ordinary-recovery-partial-proof.md).
+
 > 2026-09-17 R152/R153 controller 719/719 passes. Actual ordinary route units
 > remain **157/177**; the same accounts resumed after verified escape-memory
 > and Scott-only supply fixes. Final route/logout/store and visual gates remain open.
