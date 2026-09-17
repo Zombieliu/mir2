@@ -223,6 +223,8 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   }
 
   let weaponPurchase = null;
+  let townPurchaseBeforeOrdinaryRestock = null;
+  let freshTownDeficit = false;
   if (weaponNeeded) {
     await navigateSupplyService(client, navigateNear, BLACKSMITH, options.clearBlockingMonster);
     const { npc: blacksmith, goodsEvent } = await openBuyService(
@@ -336,17 +338,29 @@ export async function restockInVillage(client, navigateNear, options = {}) {
       const currentGold = integer(client.snapshot.gold, 'snapshot.gold');
       return needsFunds(stock(client.snapshot), currentGold, spendable(currentGold, reserveGold), reserveGold);
     }
-    const equippedAmulet = className === 'taoist' ? await equipHeldAmulet(client) : null;
-    return {
-      status: 'restocked',
-      merchant: { objectId: townPurchase.npc.objectId, name: townPurchase.npc.name, x: Number(townPurchase.npc.x), y: Number(townPurchase.npc.y) },
-      before: { gold: initialGold, ...beforeStock },
-      after: { gold: integer(client.snapshot.gold, 'snapshot.gold'), ...stock(client.snapshot) },
-      purchases: [townPurchase.purchase],
-      sales,
-      weaponPurchase,
-      equippedAmulet,
-    };
+    const currentGold = integer(client.snapshot.gold, 'snapshot.gold');
+    const freshStock = stock(client.snapshot);
+    freshTownDeficit = relevant.some(kind => freshStock[kind] < lowStockByKind[kind]);
+    if (freshTownDeficit) {
+      // Scott travel can consume a floor stack (for example SoulFireBall
+      // Amulets) after the initial sufficient-stock decision. Take one
+      // ordinary Ruben pass from the live snapshot; do not recurse or alter
+      // the normal supply priority.
+      townPurchaseBeforeOrdinaryRestock = townPurchase.purchase;
+      spendableGold = spendable(currentGold, reserveGold);
+    } else {
+      const equippedAmulet = className === 'taoist' ? await equipHeldAmulet(client) : null;
+      return {
+        status: 'restocked',
+        merchant: { objectId: townPurchase.npc.objectId, name: townPurchase.npc.name, x: Number(townPurchase.npc.x), y: Number(townPurchase.npc.y) },
+        before: { gold: initialGold, ...beforeStock },
+        after: { gold: currentGold, ...freshStock },
+        purchases: [townPurchase.purchase],
+        sales,
+        weaponPurchase,
+        equippedAmulet,
+      };
+    }
   }
 
   await navigateSupplyService(client, navigateNear, RUBEN, options.clearBlockingMonster);
@@ -435,6 +449,15 @@ export async function restockInVillage(client, navigateNear, options = {}) {
         equippedAmulet: className === 'taoist' ? await equipHeldAmulet(client) : null,
       };
     }
+    if (freshTownDeficit) {
+      const currentGold = integer(client.snapshot.gold, 'snapshot.gold');
+      return {
+        ...needsFunds(stock(client.snapshot), currentGold, spendable(currentGold, reserveGold), reserveGold),
+        sales,
+        purchases: townPurchaseBeforeOrdinaryRestock ? [townPurchaseBeforeOrdinaryRestock] : [],
+        weaponPurchase,
+      };
+    }
     return needsFunds(beforeStock, initialGold, spendableGold, reserveGold);
   }
 
@@ -442,7 +465,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     gold: integer(client.snapshot.gold, 'snapshot.gold'),
     ...stock(client.snapshot),
   };
-  const purchases = [];
+  const purchases = townPurchaseBeforeOrdinaryRestock ? [townPurchaseBeforeOrdinaryRestock] : [];
   for (const purchase of plan) {
     const beforeGold = integer(client.snapshot.gold, 'snapshot.gold');
     const beforeQuantity = purchase.kind === 'randomTeleport'
@@ -478,7 +501,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     });
   }
 
-  if (needEmergencyTownTeleport) {
+  if (needEmergencyTownTeleport && !townPurchaseBeforeOrdinaryRestock) {
     const townPurchase = await purchaseEmergencyTownTeleport(
       client,
       navigateNear,

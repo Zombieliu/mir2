@@ -454,7 +454,119 @@ test('opt-in TownTeleport reserve uses Scott goods when Ruben lacks TownTeleport
   assert.equal(result.after.gold, 100);
   assert.equal(townTeleportCount(client.snapshot), 1);
   assert.equal(client.sent.some(entry => entry.type === 'interact' && entry.objectId === 42), true);
+  assert.equal(client.sent.some(entry => entry.type === 'interact' && entry.objectId === 88), false);
   assert.deepEqual(client.sent.at(-1), { type: 'buyItem', itemIndex: 71901, count: 1, panelType: 0 });
+});
+
+test('Scott travel refreshes a Taoist Amulet floor from one fresh Ruben receipt', async () => {
+  const knownSkills = [{ spell: 'SoulFireBall', offensive: true, cooldownRemainingTicks: 0, mpCost: 4 }];
+  const state = snapshot({ className: 'Taoist', level: 18, gold: 1164, hp: 3, mp: 8, amulet: 100, knownSkills });
+  state.inventoryItems.push(item(TOWN_TELEPORT, 1, 'TownTeleport', 719000));
+  state.entities.push(
+    { objectId: 200, kind: 'monster', name: 'Scarecrow', disposition: 'hostile', x: 291, y: 609, hp: 4, dead: false },
+    { objectId: 201, kind: 'monster', name: 'Scarecrow', disposition: 'hostile', x: 292, y: 610, hp: 4, dead: false },
+  );
+  const client = new FakeClient(state, {
+    goodsByNpc: { '42': townEmergencyGoods(), '88': goods() },
+  });
+  let ScottAttempts = 0;
+  const cleared = [];
+  const result = await restockInVillage(client, async target => {
+    if (Number(target.x) === 291 && Number(target.y) === 610 && ScottAttempts++ < 2) {
+      throw new Error('No walk path on 0 to Merchant Scott');
+    }
+  }, {
+    emergencyTownTeleportCount: 2,
+    targetHp: 3,
+    targetMp: 8,
+    targetAmulet: 100,
+    lowStockAmulet: 100,
+    reserveGold: 0,
+    clearBlockingMonster: async (_owner, blocker) => {
+      cleared.push(Number(blocker.objectId));
+      const next = structuredClone(client.snapshot);
+      const amulet = next.inventoryItems.find(entry => Number(entry.tooltipSource?.info?.item_index) === AMULET);
+      amulet.quantity -= 2;
+      Object.assign(next.entities.find(entry => Number(entry.objectId) === Number(blocker.objectId)), { hp: 0, dead: true });
+      client.receive(next);
+    },
+  });
+
+  assert.equal(result.status, 'restocked');
+  assert.deepEqual(cleared, [200, 201]);
+  assert.deepEqual(result.purchases.map(entry => [entry.itemIndex, entry.quantity]), [[TOWN_TELEPORT, 1], [AMULET, 4]]);
+  assert.deepEqual(client.sent.filter(entry => entry.type === 'buyItem').map(entry => [entry.itemIndex, entry.count]), [[71901, 1], [73, 4]]);
+  assert.equal(result.after.amulet, 100);
+  assert.equal(townTeleportCount(client.snapshot), 2);
+  assert.equal(result.after.gold, 64);
+});
+
+test('post-Scott Amulet refresh fails closed from live gold without spending the reserve', async () => {
+  const knownSkills = [{ spell: 'SoulFireBall', offensive: true, cooldownRemainingTicks: 0, mpCost: 4 }];
+  const state = snapshot({ className: 'Taoist', level: 18, gold: 1000, hp: 3, mp: 8, amulet: 100, knownSkills });
+  state.inventoryItems.push(item(TOWN_TELEPORT, 1, 'TownTeleport', 719001));
+  state.entities.push(
+    { objectId: 210, kind: 'monster', name: 'Scarecrow', disposition: 'hostile', x: 291, y: 609, hp: 4, dead: false },
+    { objectId: 211, kind: 'monster', name: 'Scarecrow', disposition: 'hostile', x: 292, y: 610, hp: 4, dead: false },
+  );
+  const client = new FakeClient(state, {
+    goodsByNpc: { '42': townEmergencyGoods(), '88': goods() },
+  });
+  let ScottAttempts = 0;
+  const result = await restockInVillage(client, async target => {
+    if (Number(target.x) === 291 && Number(target.y) === 610 && ScottAttempts++ < 2) {
+      throw new Error('No walk path on 0 to Merchant Scott');
+    }
+  }, {
+    emergencyTownTeleportCount: 2,
+    targetHp: 3,
+    targetMp: 8,
+    targetAmulet: 100,
+    lowStockAmulet: 100,
+    reserveGold: 0,
+    clearBlockingMonster: async (_owner, blocker) => {
+      const next = structuredClone(client.snapshot);
+      next.inventoryItems.find(entry => Number(entry.tooltipSource?.info?.item_index) === AMULET).quantity -= 2;
+      Object.assign(next.entities.find(entry => Number(entry.objectId) === Number(blocker.objectId)), { hp: 0, dead: true });
+      client.receive(next);
+    },
+  });
+
+  assert.equal(result.status, 'needsFunds');
+  assert.equal(result.gold, 0);
+  assert.equal(result.spendableGold, 0);
+  assert.equal(result.reserveGold, 0);
+  assert.equal(result.stock.amulet, 96);
+  assert.deepEqual(result.purchases.map(entry => entry.itemIndex), [TOWN_TELEPORT]);
+  assert.deepEqual(client.sent.filter(entry => entry.type === 'buyItem').map(entry => entry.itemIndex), [71901]);
+});
+
+test('Scott TownTeleport failures and unknown live gold do not fall through to Ruben', async () => {
+  const knownSkills = [{ spell: 'SoulFireBall', offensive: true, cooldownRemainingTicks: 0, mpCost: 4 }];
+  const rejected = new FakeClient(
+    snapshot({ className: 'Taoist', level: 18, gold: 1100, hp: 3, mp: 8, amulet: 100, knownSkills }),
+    { goodsByNpc: { '42': townEmergencyGoods(), '88': goods() }, rejectBuy: true },
+  );
+  await assert.rejects(() => restockInVillage(rejected, async () => {}, {
+    emergencyTownTeleportCount: 1, targetHp: 3, targetMp: 8, targetAmulet: 100, lowStockAmulet: 100, reserveGold: 0,
+  }), /authoritative purchase of TownTeleport/);
+  assert.equal(rejected.sent.some(entry => entry.type === 'interact' && entry.objectId === 88), false);
+
+  const unknown = new FakeClient(
+    snapshot({ className: 'Taoist', level: 18, gold: 1100, hp: 3, mp: 8, amulet: 100, knownSkills }),
+    { goodsByNpc: { '42': townEmergencyGoods(), '88': goods() } },
+  );
+  await assert.rejects(() => restockInVillage(unknown, async target => {
+    if (Number(target.x) === 291 && Number(target.y) === 610) {
+      const next = structuredClone(unknown.snapshot);
+      next.gold = 'unknown';
+      unknown.receive(next);
+    }
+  }, {
+    emergencyTownTeleportCount: 1, targetHp: 3, targetMp: 8, targetAmulet: 100, lowStockAmulet: 100, reserveGold: 0,
+  }), /snapshot\.gold/);
+  assert.equal(unknown.sent.some(entry => entry.type === 'buyItem'), false);
+  assert.equal(unknown.sent.some(entry => entry.type === 'interact' && entry.objectId === 88), false);
 });
 
 test('TownTeleport funding shortfall reports needsFunds after Ruben potions without visiting Scott', async () => {

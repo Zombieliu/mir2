@@ -1568,6 +1568,8 @@ test('runner dispatches the q89 same-map RandomTeleport policy before Town only 
       townTeleportCount: () => 2,
       useRandomTeleport: async () => { calls.push('random'); return { item: 'RandomTeleport' }; },
       useTownTeleport: async () => { calls.push('town'); return { item: 'TownTeleport' }; },
+      selfPlayer: owner => owner?.snapshot?.entities?.find(entity =>
+        Number(entity?.objectId) === Number(owner?.snapshot?.playerObjectId)),
       createRandomTeleportEmergencyEscape: ({ teleport }) => teleport,
       Math,
       Number,
@@ -1608,6 +1610,8 @@ test('runner dispatches q113 caster TownTeleport only after Random depletion or 
       townTeleportCount: snapshot => snapshot.town,
       useRandomTeleport: async () => { calls.push('random'); return { item: 'RandomTeleport' }; },
       useTownTeleport: async () => { calls.push('town'); return { item: 'TownTeleport' }; },
+      selfPlayer: owner => owner?.snapshot?.entities?.find(entity =>
+        Number(entity?.objectId) === Number(owner?.snapshot?.playerObjectId)),
       createRandomTeleportEmergencyEscape: ({ teleport }) => teleport,
       safeZoneBlocksEmergencyEscape: () => safeZone,
       Math,
@@ -1626,6 +1630,96 @@ test('runner dispatches q113 caster TownTeleport only after Random depletion or 
   assert.equal((await dispatch('Wizard', snapshotAt(113, 'inProgress', 0, 0, 2, { dead: true }))).result, false);
   assert.equal((await dispatch('Wizard', snapshotAt(113, 'inProgress', 45, 0, 0))).result, false);
   assert.equal((await dispatch('Wizard', snapshotAt(113, 'inProgress', 45, 0, 2), { safeZone: true })).result, false);
+});
+
+test('runner resets q113 navigation memory only after a proved same-map external escape', async () => {
+  const start = runnerSource.indexOf('    const isWizardQ89Expedition =');
+  const end = runnerSource.indexOf('    const navigate = (target, desiredDistance', start);
+  assert.ok(start >= 0 && end > start, 'runner must wire the external escape reset beside raw navigation');
+  const snippet = runnerSource.slice(start, end).replace(/^    /gm, '');
+  const run = async ({ outcome = 'success', questId = 113, beforeX = 22, random = 3, town = 2 } = {}) => {
+    const resets = [];
+    const snapshot = {
+      playerObjectId: 1000,
+      playerHp: 70,
+      playerMaxHp: 100,
+      mapFileName: 'D711',
+      random,
+      town,
+      entities: [{ objectId: 1000, kind: 'selfPlayer', dead: false, x: beforeX, y: 1 }],
+      questLog: [{ questId, stage: 'InProgress' }],
+    };
+    const owner = { sequence: 10, snapshot };
+    const rawNavigate = () => {};
+    rawNavigate.resetHostileMemoryAfterVerifiedEmergencyRelocation = proof => resets.push(proof);
+    const emergencyEscapeForJourney = vm.runInNewContext(`(() => { ${snippet}; return emergencyEscapeForJourney; })()`, {
+      className: 'Wizard',
+      client: owner,
+      observedPlayerHp,
+      hasAuthoritativePlayerDeath,
+      journeyEmergencyTeleportCriticalHpRatio: () => 0.65,
+      questEmergencyEscapeHpRatio: () => 0.35,
+      shouldUseQ89WizardSameMapRandomEscape: () => false,
+      randomTeleportCount: state => state.random,
+      townTeleportCount: state => state.town,
+      selfPlayer: stateOwner => stateOwner?.snapshot?.entities?.find(entity =>
+        Number(entity?.objectId) === Number(stateOwner?.snapshot?.playerObjectId)),
+      createRandomTeleportEmergencyEscape: ({ teleport }) => teleport,
+      createNavigator: () => rawNavigate,
+      journeyNavigationEmergencyEscapeBudget: () => 1,
+      safeZoneBlocksEmergencyEscape: () => false,
+      useTownTeleport: async () => { throw new Error('q113 fixture must use RandomTeleport'); },
+      useRandomTeleport: async stateOwner => {
+        if (outcome === 'deferred') return { deferred: true };
+        if (outcome === 'false') return false;
+        const sameMap = outcome !== 'map-changed';
+        stateOwner.snapshot.mapFileName = sameMap ? 'D711' : 'D710';
+        stateOwner.snapshot.random = 2;
+        stateOwner.snapshot.entities = [{ objectId: outcome === 'wrong-owner' ? 2000 : 1000,
+          kind: 'selfPlayer', dead: false, x: 46, y: 1 }];
+        if (outcome === 'wrong-owner') stateOwner.snapshot.playerObjectId = 2000;
+        stateOwner.sequence = 11;
+        return {
+          uniqueId: 1,
+          quantityBefore: 3,
+          quantityAfter: 2,
+          from: { x: beforeX, y: 1 },
+          to: { x: 46, y: 1 },
+          fromMapFileName: 'D711',
+          toMapFileName: sameMap ? 'D711' : 'D710',
+        };
+      },
+      Math,
+      Number,
+    });
+    const result = await emergencyEscapeForJourney(owner);
+    return { resets, result };
+  };
+
+  const success = await run();
+  assert.equal(success.result.success, true);
+  assert.equal(success.resets.length, 1);
+  assert.deepEqual(JSON.parse(JSON.stringify(success.resets[0])), {
+    beforeSequence: 10,
+    before: { mapFileName: 'D711', objectId: 1000, x: 22, y: 1 },
+    relocation: {
+      uniqueId: 1,
+      quantityBefore: 3,
+      quantityAfter: 2,
+      from: { x: 22, y: 1 },
+      to: { x: 46, y: 1 },
+      fromMapFileName: 'D711',
+      toMapFileName: 'D711',
+      success: true,
+    },
+  });
+  for (const outcome of ['deferred', 'false', 'map-changed', 'wrong-owner']) {
+    assert.equal((await run({ outcome })).resets.length, 0, `${outcome} must retain navigation memory`);
+  }
+  assert.equal((await run({ questId: 60 })).resets.length, 0, 'other quests cannot invoke q113 reset');
+  assert.equal((await run({ random: 0, town: 0 })).resets.length, 0, 'no fuel cannot invoke q113 reset');
+  assert.equal((await run({ beforeX: null })).resets.length, 0, 'unknown pre-escape coordinates fail closed');
+  assert.equal((await run({ questId: 113, outcome: 'success', beforeX: 22 })).resets.length, 1);
 });
 
 test('runner q113 caster village restock carries the TownTeleport departure reserve', () => {

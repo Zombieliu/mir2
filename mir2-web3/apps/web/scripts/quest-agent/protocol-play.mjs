@@ -324,6 +324,52 @@ function freshDirectMonsterHits(client, mapId, nowMs, withinMs, afterSequence) {
   return hits;
 }
 
+const EMERGENCY_RELOCATION_MEMORY_RESET_DISTANCE = 24;
+
+function activeOwnerTransform(snapshot) {
+  if (snapshot?.mapSnapshotPending === true) return null;
+  const objectId = Number(snapshot?.playerObjectId);
+  if (!Number.isSafeInteger(objectId)) return null;
+  const owner = (snapshot?.entities ?? []).find(entity => Number(entity?.objectId) === objectId);
+  const rawMapFileName = snapshot?.mapFileName;
+  const rawX = owner?.x;
+  const rawY = owner?.y;
+  const x = Number(rawX);
+  const y = Number(rawY);
+  if (!owner || owner.dead === true || rawMapFileName == null || String(rawMapFileName).trim() === '' ||
+      rawX == null || rawY == null ||
+      (typeof rawX === 'string' && rawX.trim() === '') ||
+      (typeof rawY === 'string' && rawY.trim() === '') ||
+      !Number.isFinite(x) || !Number.isFinite(y)) return null;
+  return { mapFileName: String(rawMapFileName), objectId, x, y };
+}
+
+function sameOwnerTransform(left, right) {
+  return left != null && right != null &&
+    String(left.mapFileName) === String(right.mapFileName) &&
+    Number(left.objectId) === Number(right.objectId) &&
+    Number(left.x) === Number(right.x) && Number(left.y) === Number(right.y);
+}
+
+function sameMapOwner(left, right) {
+  return left != null && right != null &&
+    String(left.mapFileName) === String(right.mapFileName) &&
+    Number(left.objectId) === Number(right.objectId);
+}
+
+function hasFiniteExternalTransform(transform) {
+  const rawMapFileName = transform?.mapFileName;
+  const rawObjectId = transform?.objectId;
+  const rawX = transform?.x;
+  const rawY = transform?.y;
+  return rawMapFileName != null && String(rawMapFileName).trim() !== '' &&
+    rawObjectId != null && Number.isSafeInteger(Number(rawObjectId)) &&
+    rawX != null && rawY != null &&
+    !(typeof rawX === 'string' && rawX.trim() === '') &&
+    !(typeof rawY === 'string' && rawY.trim() === '') &&
+    Number.isFinite(Number(rawX)) && Number.isFinite(Number(rawY));
+}
+
 export function createNavigator(client, dependencies = {}) {
   const loadCollisionMap = dependencies.loadCollisionMap ?? loadProtocolCollisionMap;
   const sleep = dependencies.delay ?? delay;
@@ -365,7 +411,8 @@ export function createNavigator(client, dependencies = {}) {
   );
   const maps = new Map();
   const hostileMemory = new Map();
-  return async function navigateNear(target, desiredDistance = 1, stopWhen = () => false, options = {}) {
+  let lastActiveOwner = null;
+  const navigateNear = async function navigateNear(target, desiredDistance = 1, stopWhen = () => false, options = {}) {
     const mapId = client.snapshot.mapFileName;
     if (!maps.has(mapId)) maps.set(mapId, await loadCollisionMap(mapId));
     const maxSuccessfulSteps = positiveIntegerOption(options.maxSuccessfulSteps, 2500);
@@ -420,8 +467,9 @@ export function createNavigator(client, dependencies = {}) {
     for (let count = 0; count < maxAttempts; count++) {
       if (client.failure) throw client.failure;
       if (client.closed) throw new Error('Protocol client closed during navigation');
-      if (stopWhen()) return { reached: false, successfulSteps };
       const self = selfPlayer(client);
+      lastActiveOwner = activeOwnerTransform(client.snapshot) ?? lastActiveOwner;
+      if (stopWhen()) return { reached: false, successfulSteps };
       if (hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Player died during navigation');
       const movementBlockMask = selfActionBlockMask(client);
       if (movementBlockMask !== 0) {
@@ -809,6 +857,76 @@ export function createNavigator(client, dependencies = {}) {
     }
     throw new Error(`Navigation attempt budget exceeded (${maxAttempts})`);
   };
+  // External combat/recovery code may complete a normal same-map emergency
+  // scroll while this navigator is idle. Its hostile trail belongs to the
+  // old field position, but only a fresh full snapshot can prove that the
+  // same owner actually relocated. Ordinary movement, ObjectRemove, and
+  // unproved coordinate changes intentionally retain their existing memory.
+  navigateNear.resetHostileMemoryAfterVerifiedEmergencyRelocation = ({
+    beforeSequence,
+    before,
+    relocation,
+  } = {}) => {
+    const current = activeOwnerTransform(client.snapshot);
+    const relocationFrom = {
+      mapFileName: relocation?.fromMapFileName,
+      objectId: before?.objectId,
+      x: relocation?.from?.x,
+      y: relocation?.from?.y,
+    };
+    const relocationTo = {
+      mapFileName: relocation?.toMapFileName,
+      objectId: before?.objectId,
+      x: relocation?.to?.x,
+      y: relocation?.to?.y,
+    };
+    if (!hasFiniteExternalTransform(before) || !hasFiniteExternalTransform(relocationFrom) ||
+        !hasFiniteExternalTransform(relocationTo)) return false;
+    const capturedBefore = {
+      mapFileName: String(before?.mapFileName ?? ''),
+      objectId: Number(before?.objectId),
+      x: Number(before?.x),
+      y: Number(before?.y),
+    };
+    const from = {
+      mapFileName: String(relocationFrom.mapFileName),
+      objectId: Number(before?.objectId),
+      x: Number(relocation?.from?.x),
+      y: Number(relocation?.from?.y),
+    };
+    const to = {
+      mapFileName: String(relocationTo.mapFileName),
+      objectId: Number(before?.objectId),
+      x: Number(relocation?.to?.x),
+      y: Number(relocation?.to?.y),
+    };
+    const boundary = Number(beforeSequence);
+    if (!current || !lastActiveOwner || !Number.isSafeInteger(boundary) ||
+        !Number.isSafeInteger(from.objectId) || !sameMapOwner(lastActiveOwner, current) ||
+        !sameMapOwner(capturedBefore, current) || !sameOwnerTransform(from, capturedBefore) ||
+        !sameOwnerTransform(to, current) ||
+        !(Number(relocation?.quantityAfter) < Number(relocation?.quantityBefore)) ||
+        distance(from, current) < EMERGENCY_RELOCATION_MEMORY_RESET_DISTANCE) return false;
+    const freshCurrentOwnerSnapshot = client.events?.some(event =>
+      Number(event?.sequence) > boundary && event?.direction === 'received' &&
+      event?.type === 'worldSnapshot' && sameOwnerTransform(activeOwnerTransform(event.payload), current),
+    );
+    if (!freshCurrentOwnerSnapshot) return false;
+    const cleared = hostileMemory.size;
+    hostileMemory.clear();
+    client.record('diagnostic', {
+      type: 'navigationHostileMemoryResetAfterEmergencyRelocation',
+      mapId: current.mapFileName,
+      objectId: current.objectId,
+      from: { x: from.x, y: from.y },
+      to: { x: current.x, y: current.y },
+      distance: distance(from, current),
+      cleared,
+    });
+    lastActiveOwner = current;
+    return true;
+  };
+  return navigateNear;
 }
 
 function positiveIntegerOption(value, fallback) {

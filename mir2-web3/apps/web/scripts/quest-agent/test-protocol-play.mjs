@@ -1320,6 +1320,168 @@ test('navigator remembers a recently hidden hostile long enough to avoid route o
     Math.max(Math.abs(point.x - 5), Math.abs(point.y - 2)) > 1));
 });
 
+function longCorridorMap() {
+  const width = 80;
+  const height = 3;
+  const blocked = new Uint8Array(width * height).fill(1);
+  for (let x = 0; x < width; x += 1) blocked[width + x] = 0;
+  return { mapFileName: 'test', sourcePath: 'corridor.map', width, height, blocked };
+}
+
+async function navigatorWithRememberedCorridorBlocker() {
+  const client = navigationClient();
+  Object.assign(client.snapshot.entities[0], { x: 1, y: 1 });
+  client.snapshot.entities.push({
+    objectId: 9, kind: 'monster', name: 'BlackMaggot', disposition: 'hostile',
+    hp: 200, dead: false, x: 50, y: 1,
+  });
+  client.wait = acknowledgeUnitMovement(client);
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    loadCollisionMap: async () => longCorridorMap(),
+  });
+  await navigateNear({ x: 20, y: 1 }, 0, () => false, {
+    hostileAvoidanceRadius: 2,
+    detectPositionCycles: true,
+  });
+  // Combat can make one final ordinary step after navigator completion before
+  // a scroll. The reset must trust the explicit owner proof, not require this
+  // cached navigator coordinate to be identical to the escape origin.
+  Object.assign(client.snapshot.entities[0], { x: 22, y: 1 });
+  return { client, navigateNear };
+}
+
+function publishRelocationSnapshot(client) {
+  client.events.push({
+    sequence: ++client.sequence,
+    direction: 'received',
+    type: 'worldSnapshot',
+    payload: structuredClone(client.snapshot),
+  });
+}
+
+function sameMapEmergencyProof(before, to) {
+  return {
+    quantityBefore: 3,
+    quantityAfter: 2,
+    from: before,
+    to,
+    fromMapFileName: 'test',
+    toMapFileName: 'test',
+  };
+}
+
+test('a proven same-map emergency relocation clears only stale hostile memory before the next route', async () => {
+  const { client, navigateNear } = await navigatorWithRememberedCorridorBlocker();
+  const beforeSequence = client.sequence;
+  const before = { mapFileName: 'test', objectId: 1, x: 22, y: 1 };
+  client.snapshot.entities = [{ objectId: 1, kind: 'selfPlayer', x: 46, y: 1, dead: false }];
+  publishRelocationSnapshot(client);
+
+  assert.equal(navigateNear.resetHostileMemoryAfterVerifiedEmergencyRelocation({
+    beforeSequence,
+    before,
+    relocation: sameMapEmergencyProof(before, { x: 46, y: 1 }),
+  }), true);
+  await navigateNear({ x: 70, y: 1 }, 0, () => false, {
+    hostileAvoidanceRadius: 2,
+    detectPositionCycles: true,
+  });
+  assert.equal(client.snapshot.entities[0].x, 70);
+  assert.ok(client.diagnostics.some(entry =>
+    entry.type === 'navigationHostileMemoryResetAfterEmergencyRelocation' && entry.distance === 24));
+});
+
+test('a proven relocation preserves the current live hostile buffer', async () => {
+  const { client, navigateNear } = await navigatorWithRememberedCorridorBlocker();
+  const beforeSequence = client.sequence;
+  const before = { mapFileName: 'test', objectId: 1, x: 22, y: 1 };
+  client.snapshot.entities = [
+    { objectId: 1, kind: 'selfPlayer', x: 46, y: 1, dead: false },
+    { objectId: 10, kind: 'monster', name: 'BlackMaggot', disposition: 'hostile', hp: 200, dead: false, x: 50, y: 1 },
+  ];
+  publishRelocationSnapshot(client);
+
+  assert.equal(navigateNear.resetHostileMemoryAfterVerifiedEmergencyRelocation({
+    beforeSequence,
+    before,
+    relocation: sameMapEmergencyProof(before, { x: 46, y: 1 }),
+  }), true);
+  await assert.rejects(
+    () => navigateNear({ x: 70, y: 1 }, 0, () => false, {
+      hostileAvoidanceRadius: 2,
+      detectPositionCycles: true,
+      maxNoPathRefreshes: 0,
+    }),
+    /No walk path on test from 46,1 to 70,1/,
+  );
+});
+
+test('an unproved or different-owner relocation retains hostile memory', async () => {
+  const cases = [
+    {
+      name: 'no fresh snapshot',
+      update: client => {
+        client.snapshot.entities = [{ objectId: 1, kind: 'selfPlayer', x: 46, y: 1, dead: false }];
+      },
+    },
+    {
+      name: 'different owner snapshot',
+      update: client => {
+        client.snapshot.playerObjectId = 2;
+        client.snapshot.entities = [{ objectId: 2, kind: 'selfPlayer', x: 46, y: 1, dead: false }];
+        publishRelocationSnapshot(client);
+      },
+    },
+    {
+      name: 'pending snapshot',
+      update: client => {
+        client.snapshot.entities = [{ objectId: 1, kind: 'selfPlayer', x: 46, y: 1, dead: false }];
+        client.snapshot.mapSnapshotPending = true;
+        publishRelocationSnapshot(client);
+      },
+      afterProof: client => { client.snapshot.mapSnapshotPending = false; },
+    },
+    {
+      name: 'unknown scroll origin',
+      update: client => {
+        client.snapshot.entities = [{ objectId: 1, kind: 'selfPlayer', x: 46, y: 1, dead: false }];
+        publishRelocationSnapshot(client);
+      },
+      proof: before => ({ ...sameMapEmergencyProof(before, { x: 46, y: 1 }), from: { x: null, y: 1 } }),
+    },
+    {
+      name: 'mismatched scroll origin',
+      update: client => {
+        client.snapshot.entities = [{ objectId: 1, kind: 'selfPlayer', x: 46, y: 1, dead: false }];
+        publishRelocationSnapshot(client);
+      },
+      proof: before => ({ ...sameMapEmergencyProof(before, { x: 46, y: 1 }), from: { x: 21, y: 1 } }),
+    },
+  ];
+  for (const fixture of cases) {
+    const { client, navigateNear } = await navigatorWithRememberedCorridorBlocker();
+    const beforeSequence = client.sequence;
+    const before = { mapFileName: 'test', objectId: 1, x: 22, y: 1 };
+    fixture.update(client);
+    assert.equal(navigateNear.resetHostileMemoryAfterVerifiedEmergencyRelocation({
+      beforeSequence,
+      before,
+      relocation: fixture.proof?.(before) ?? sameMapEmergencyProof(before, { x: 46, y: 1 }),
+    }), false, fixture.name);
+    fixture.afterProof?.(client);
+    await assert.rejects(
+      () => navigateNear({ x: 70, y: 1 }, 0, () => false, {
+        hostileAvoidanceRadius: 2,
+        detectPositionCycles: true,
+        maxNoPathRefreshes: 0,
+      }),
+      /No walk path on test from 46,1 to 70,1/,
+      fixture.name,
+    );
+  }
+});
+
 test('zero-clearance travel remembers an exact hidden monster tile across a forced replan', async () => {
   const client = navigationClient();
   Object.assign(client.snapshot.entities[0], { x: 1, y: 3 });

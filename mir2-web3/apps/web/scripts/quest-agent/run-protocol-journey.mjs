@@ -255,11 +255,57 @@ try {
           townTeleportCount(owner.snapshot) <= 0 && randomTeleportCount(owner.snapshot) <= 0) return false;
       if (!isWizardQ89Expedition(owner?.snapshot) && !isQ113CasterExpedition(owner?.snapshot) &&
           randomTeleportCount(owner.snapshot) <= 0) return false;
+      const beforeSequence = Number(owner?.sequence ?? 0);
+      const beforeActor = selfPlayer(owner);
+      const hasKnownCoordinate = value => value !== null && value !== undefined &&
+        !(typeof value === 'string' && value.trim() === '') && Number.isFinite(Number(value));
+      const hasKnownMap = value => value !== null && value !== undefined && String(value).trim() !== '';
+      const before = beforeActor && Number.isSafeInteger(Number(owner?.snapshot?.playerObjectId)) &&
+        Number(owner.snapshot.playerObjectId) === Number(beforeActor.objectId) &&
+        hasKnownMap(owner.snapshot?.mapFileName) &&
+        hasKnownCoordinate(beforeActor.x) && hasKnownCoordinate(beforeActor.y)
+        ? {
+          mapFileName: String(owner.snapshot?.mapFileName ?? ''),
+          objectId: Number(beforeActor.objectId),
+          x: Number(beforeActor.x),
+          y: Number(beforeActor.y),
+        }
+        : null;
       const result = await emergencyTeleport(owner);
       if (result?.deferred === true || result === false || result === true) return result;
-      return result && typeof result === 'object'
+      const success = result && typeof result === 'object'
         ? { ...result, success: true }
         : result;
+      // q113 caster travel keeps a two-cell monster trail. A normal emergency
+      // scroll can relocate within the same cave; after its own fresh item and
+      // owner snapshot proof, discard only that old-position trail before the
+      // next transit plan. The navigator validates every field again and this
+      // hook is absent for other quests and for TownTeleport map changes.
+      const afterActor = selfPlayer(owner);
+      const afterOwnerProved = afterActor && owner?.snapshot?.mapSnapshotPending !== true &&
+        Number(owner?.snapshot?.playerObjectId) === Number(before?.objectId) &&
+        Number(afterActor.objectId) === Number(before?.objectId) && afterActor.dead !== true &&
+        hasKnownMap(owner.snapshot?.mapFileName) &&
+        hasKnownCoordinate(afterActor.x) && hasKnownCoordinate(afterActor.y) &&
+        Number(success?.to?.x) === Number(afterActor.x) &&
+        Number(success?.to?.y) === Number(afterActor.y);
+      if (success && before && isQ113CasterExpedition(owner?.snapshot) &&
+          afterOwnerProved &&
+          String(success.fromMapFileName ?? before.mapFileName) === before.mapFileName &&
+          String(success.toMapFileName ?? owner.snapshot?.mapFileName ?? '') === before.mapFileName &&
+          typeof rawNavigate !== 'undefined' &&
+          typeof rawNavigate.resetHostileMemoryAfterVerifiedEmergencyRelocation === 'function') {
+        rawNavigate.resetHostileMemoryAfterVerifiedEmergencyRelocation({
+          beforeSequence,
+          before,
+          relocation: {
+            ...success,
+            fromMapFileName: String(success.fromMapFileName ?? before.mapFileName),
+            toMapFileName: String(success.toMapFileName ?? owner.snapshot?.mapFileName ?? ''),
+          },
+        });
+      }
+      return success;
     };
     const rawNavigate = createNavigator(client, {
       emergencyEscape: async owner => {
