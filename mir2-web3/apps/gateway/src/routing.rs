@@ -8704,6 +8704,7 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(key) = key else {
             return Ok(());
         };
+        let previous_position = self.inner.local_player_position();
         let transform = self
             .zone_state
             .lock()
@@ -8714,6 +8715,21 @@ impl SharedInProcessZoneSessionRuntime {
         // transform was consumed by an earlier packet. Persist from the current
         // shared-Zone position, never from a stale private-runtime coordinate.
         self.force_inner_to_current_zone_transform();
+        // Autosave can consume the authoritative movement before the next Tick.
+        // Commit its journey evidence here and retain the owner projection for
+        // that Tick, so comparing the already-updated mirror cannot lose it.
+        if previous_position.is_some() && previous_position != self.inner.local_player_position() {
+            let packets = self.inner.commit_zone_journey_reposition();
+            if !packets.is_empty() {
+                self.zone_state
+                    .lock()
+                    .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+                    .pending_zone_packets
+                    .entry(key)
+                    .or_default()
+                    .extend(packets);
+            }
+        }
         Ok(())
     }
 

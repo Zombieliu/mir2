@@ -76,8 +76,11 @@ fn taoist_healing_training_fixture(
     // Both the personal session and the Zone cache the server cadence when
     // constructed. Restore a durable in-progress N4 record only after those
     // authorities have been created with the actual V2 cadence.
-    assert_eq!(std::env::var("MIR2_QUEST_CADENCE").as_deref(), Ok("newcomer-v2"),
-        "run this opt-in integration test in an isolated V2 process");
+    assert_eq!(
+        std::env::var("MIR2_QUEST_CADENCE").as_deref(),
+        Ok("newcomer-v2"),
+        "run this opt-in integration test in an isolated V2 process"
+    );
     let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
     let mut runtime = shared_session_runtime(shared.clone());
     start_new_runtime_with_class(&mut runtime, name, name, MirClass::Taoist);
@@ -118,6 +121,213 @@ fn taoist_healing_training_fixture(
         .expect("restored N4 fixture should be valid");
     runtime.sync_zone_snapshot();
     (shared, runtime)
+}
+
+fn safe_arrival_fixture(name: &str) -> SharedInProcessZoneSessionRuntime {
+    assert_eq!(
+        std::env::var("MIR2_QUEST_CADENCE").as_deref(),
+        Ok("newcomer-v2")
+    );
+    let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut runtime = shared_session_runtime(shared);
+    runtime.inner = InProcessWorldRuntime::new(
+        GatewayConfig::default()
+            .with_crystal_world_runtime()
+            .with_platinum_176_profile(),
+    );
+    start_new_runtime_with_class(&mut runtime, name, name, MirClass::Warrior);
+    let mut save = runtime.inner.active_character_checkpoint().unwrap();
+    save.character.level = 8;
+    save.position = Point { x: 324, y: 275 };
+    save.map_file_name = "0".into();
+    save.quest_states_json = vec![serde_json::json!({
+        "quest_id": 2_110_005,
+        "title": "A safe return",
+        "summary": "",
+        "reward_preview": "",
+        "required": 1,
+        "current": 0,
+        "stage": "inProgress",
+        "task_progress": { "v2:accepted_at:1": 1 },
+        "cadence_last_claimed_period": null,
+        "cadence_high_watermark_period": null,
+    })
+    .to_string()];
+    runtime
+        .inner
+        .restore_active_character_checkpoint(&save)
+        .unwrap();
+    runtime.force_next_zone_transform_sync = true;
+    runtime.sync_zone_snapshot();
+    assert_eq!(
+        runtime.inner.local_player_position(),
+        Some(Point { x: 324, y: 275 })
+    );
+    assert_eq!(safe_arrival_progress(&runtime), 0);
+    runtime
+}
+
+fn safe_arrival_progress(runtime: &SharedInProcessZoneSessionRuntime) -> u64 {
+    runtime
+        .inner
+        .active_character_checkpoint()
+        .unwrap()
+        .quest_states_json
+        .iter()
+        .map(|json| serde_json::from_str::<serde_json::Value>(json).unwrap())
+        .find(|quest| quest["quest_id"] == 2_110_005)
+        .unwrap()["task_progress"]["flag:2210051"]
+        .as_u64()
+        .unwrap_or(0)
+}
+
+#[test]
+#[ignore = "requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"]
+fn public_v2_safe_arrival_direct_shared_walk_refreshes_owner_quest() {
+    let mut owner = safe_arrival_fixture("ArrivalDirect");
+    let packets = owner
+        .execute(WorldCommand::ClientPacket(ClientPacket::Walk {
+            direction: MirDirection::Up,
+        }))
+        .unwrap();
+    assert_eq!(
+        owner.inner.local_player_position(),
+        Some(Point { x: 324, y: 274 }),
+        "{packets:?}"
+    );
+    assert_eq!(safe_arrival_progress(&owner), 1);
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 2_110_005,
+                ..
+            }
+        )),
+        "{packets:?}"
+    );
+}
+
+#[test]
+#[ignore = "requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"]
+fn public_v2_safe_arrival_pending_shared_walk_refreshes_owner_quest() {
+    let mut owner = safe_arrival_fixture("ArrivalPending");
+    let execution = owner
+        .movement_ingress
+        .try_execute(ClientPacket::Walk {
+            direction: MirDirection::Up,
+        })
+        .unwrap()
+        .expect("low-latency shared movement should execute");
+    assert_eq!(
+        safe_arrival_progress(&owner),
+        0,
+        "private quest must await authoritative delivery"
+    );
+    let packets = owner.execute(WorldCommand::Tick).unwrap();
+    assert_eq!(
+        owner.inner.local_player_position(),
+        Some(Point { x: 324, y: 274 }),
+        "{execution:?} {packets:?}"
+    );
+    assert_eq!(safe_arrival_progress(&owner), 1);
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 2_110_005,
+                ..
+            }
+        )),
+        "{packets:?}"
+    );
+}
+
+#[test]
+#[ignore = "requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"]
+fn public_v2_safe_arrival_pending_walk_survives_autosave_before_tick() {
+    let mut owner = safe_arrival_fixture("ArrivalAutosave");
+    owner
+        .movement_ingress
+        .try_execute(ClientPacket::Walk {
+            direction: MirDirection::Up,
+        })
+        .unwrap()
+        .expect("low-latency shared movement should execute");
+    owner.save_active_character().unwrap();
+    let packets = owner.execute(WorldCommand::Tick).unwrap();
+    assert_eq!(
+        owner.inner.local_player_position(),
+        Some(Point { x: 324, y: 274 })
+    );
+    assert_eq!(
+        safe_arrival_progress(&owner),
+        1,
+        "autosave must not consume the arrival receipt"
+    );
+    assert!(
+        packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 2_110_005,
+                ..
+            }
+        )),
+        "{packets:?}"
+    );
+}
+
+#[test]
+#[ignore = "requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"]
+fn public_v2_safe_arrival_turn_and_occupancy_rejection_do_not_grant_arrival() {
+    let mut owner = safe_arrival_fixture("ArrivalRejected");
+    owner
+        .execute(WorldCommand::ClientPacket(ClientPacket::Turn {
+            direction: MirDirection::Up,
+        }))
+        .unwrap();
+    assert_eq!(safe_arrival_progress(&owner), 0);
+    let mut observer = shared_session_runtime(owner.zone_state.clone());
+    observer.inner = InProcessWorldRuntime::new(
+        GatewayConfig::default()
+            .with_crystal_world_runtime()
+            .with_platinum_176_profile(),
+    );
+    start_new_runtime_with_class(
+        &mut observer,
+        "ArrivalBlocker",
+        "ArrivalBlocker",
+        MirClass::Warrior,
+    );
+    let mut save = observer.inner.active_character_checkpoint().unwrap();
+    save.position = Point { x: 324, y: 274 };
+    observer
+        .inner
+        .restore_active_character_checkpoint(&save)
+        .unwrap();
+    observer.force_next_zone_transform_sync = true;
+    observer.sync_zone_snapshot();
+    let packets = owner
+        .execute(WorldCommand::ClientPacket(ClientPacket::Walk {
+            direction: MirDirection::Up,
+        }))
+        .unwrap();
+    assert_eq!(
+        owner.inner.local_player_position(),
+        Some(Point { x: 324, y: 275 }),
+        "{packets:?}"
+    );
+    assert_eq!(safe_arrival_progress(&owner), 0);
+    assert!(
+        !packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ChangeQuest {
+                quest_id: 2_110_005,
+                ..
+            }
+        )),
+        "rejected movement must not grant arrival: {packets:?}"
+    );
 }
 
 #[test]
@@ -249,17 +459,25 @@ fn public_taoist_healing_commits_n4_flag_through_the_zone_journey_bridge() {
         .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
         .expect("owner should be visible in its public snapshot")
         .clone();
-    let monster = owner.world_snapshot().entities.into_iter()
+    let monster = owner
+        .world_snapshot()
+        .entities
+        .into_iter()
         .find(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead)
         .expect("fixture should expose a normal monster target");
-    let rejected = owner.execute(WorldCommand::ClientPacket(ClientPacket::Magic {
-        object_id: owner_entity.object_id,
-        spell: Spell::Healing,
-        direction: MirDirection::Right,
-        target_id: monster.object_id,
-        location: Point { x: monster.x, y: monster.y },
-        spell_target_lock: true,
-    })).unwrap();
+    let rejected = owner
+        .execute(WorldCommand::ClientPacket(ClientPacket::Magic {
+            object_id: owner_entity.object_id,
+            spell: Spell::Healing,
+            direction: MirDirection::Right,
+            target_id: monster.object_id,
+            location: Point {
+                x: monster.x,
+                y: monster.y,
+            },
+            spell_target_lock: true,
+        }))
+        .unwrap();
     assert!(!rejected.iter().any(|packet| matches!(packet,
         ServerPacket::Magic { spell: Spell::Healing, cast: true, .. })),
         "Healing must reject a monster through the Zone, not fall back to the personal caster: {rejected:?}");

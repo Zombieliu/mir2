@@ -26,6 +26,7 @@ checkpointed, deduplicated and discarded when no V2 training evidence is needed.
 | Gateway owner/replay/checkpoint/cleanup bridge | 4/4 |
 | Gateway owner combat / magic identity normalization | 2/2; delayed-hit owner/observer 1/1 |
 | Actual public Gateway Healing to N4 flag | isolated V2 process 1/1 after alias/profile and self-route fixes |
+| Actual public Gateway N5 shared arrival | 4/4: direct, pending, autosave before Tick, Turn/occupancy rejection |
 | Public magic route / actor rejection | learned FireBall 1/1; invalid/nonplayer actor 1/1 |
 | Existing deferred map-transfer regression | 4/4 |
 | Existing shared SoulFireBall/practice regression | 13/13 after self-route/profile changes |
@@ -92,6 +93,18 @@ incorrectly used Healing against a hostile monster; it now uses a genuinely
 learned level-7 Wizard FireBall. That route and existing nonplayer-actor security
 test each pass 1/1. gateway-existing-shared-magic.log preserves the old fixture
 failure; gateway-learned-fireball-route-pass.log records its valid correction.
+
+Third ordinary saved checkpoint: **12/78**, four per class, level 8, normal
+LogOutSuccess and matching durable saves (`ordinary-pass3.json`). All three N4
+practices and Oma objectives passed on the rebuilt Healing/identity release
+(`build-healing.json`); Wizard recovered one ordinary death through TownRevive.
+All three then reached the valid N5 safe coordinate but the arrival flag remained
+0/1. Accepted shared displacement now refreshes V2 general state conditions;
+autosave-before-Tick retains the owner quest projection. Actual public Gateway
+direct/pending/autosave/rejection tests pass 4/4, deferred map transfer 4/4, and
+fresh Simulation V2 15/15 plus Zone 7/7 reruns pass. See `ordinary-pass3.md` and
+`safe-arrival.md`. N5 ordinary resume is still pending at this saved checkpoint.
+The separate shared `inSafeZone` protection/display freshness issue remains open.
 
 Native/Web graduation and chapter guidance are tested candidates. The chooser
 requires all 26 completed rows plus actual level 30. Local choice grants no

@@ -357,7 +357,11 @@ pub(in crate::runtime) fn record_legal_reposition(world: &mut World) -> Vec<Serv
                 .insert("v2:moved_after_damage".into(), 1);
         }
     }
-    record_conditions(world, &conditions, None)
+    let mut packets = record_conditions(world, &conditions, None);
+    // Shared movement bypasses the personal Walk/Run handler. Evaluate arrival
+    // conditions only after its accepted authoritative transform is mirrored.
+    packets.extend(refresh_state_conditions(world));
+    packets
 }
 
 pub(in crate::runtime) fn record_spell_damage(

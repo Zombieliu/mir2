@@ -1,0 +1,38 @@
+
+running 3 tests
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_direct_shared_walk_refreshes_owner_quest ... FAILED
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_shared_walk_refreshes_owner_quest ... FAILED
+test routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_turn_and_occupancy_rejection_do_not_grant_arrival ... FAILED
+
+failures:
+
+---- routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_direct_shared_walk_refreshes_owner_quest stdout ----
+
+thread 'routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_direct_shared_walk_refreshes_owner_quest' (53136) panicked at apps\gateway\src\routing\tests\zone_journey_event_bridge_tests.rs:168:5:
+assertion `left == right` failed: [UserLocation { location: UserLocation { position: Point { x: 288, y: 616 }, direction: Down } }]
+  left: Some(Point { x: 324, y: 275 })
+ right: Some(Point { x: 324, y: 274 })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_shared_walk_refreshes_owner_quest stdout ----
+
+thread 'routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_shared_walk_refreshes_owner_quest' (57328) panicked at apps\gateway\src\routing\tests\zone_journey_event_bridge_tests.rs:183:5:
+assertion `left == right` failed: WorldCommandExecution { packets: [UserLocation { location: UserLocation { position: Point { x: 288, y: 616 }, direction: Down } }], outcome: WorldCommandOutcome { command_kind: ClientPacket("Walk"), packet_count: 1, snapshot_tick: 0, active_identity: Some(ActiveSessionIdentity { account_id: "ArrivalPending", character_index: 1, character_name: "ArrivalPending" }) }, game_shop_purchase_outcome: None } []
+  left: Some(Point { x: 324, y: 275 })
+ right: Some(Point { x: 324, y: 274 })
+
+---- routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_turn_and_occupancy_rejection_do_not_grant_arrival stdout ----
+
+thread 'routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_turn_and_occupancy_rejection_do_not_grant_arrival' (50948) panicked at apps\gateway\src\routing\tests\zone_journey_event_bridge_tests.rs:205:5:
+assertion `left == right` failed: [UserLocation { location: UserLocation { position: Point { x: 288, y: 616 }, direction: Up } }]
+  left: Some(Point { x: 288, y: 616 })
+ right: Some(Point { x: 324, y: 275 })
+
+
+failures:
+    routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_direct_shared_walk_refreshes_owner_quest
+    routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_pending_shared_walk_refreshes_owner_quest
+    routing::tests::zone_journey_event_bridge_tests::public_v2_safe_arrival_turn_and_occupancy_rejection_do_not_grant_arrival
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 792 filtered out; finished in 89.50s
+
