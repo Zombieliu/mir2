@@ -1002,6 +1002,7 @@ try {
                 maxBlockers: 6,
               }
               : null,
+            transitHostileAvoidanceRadius: retreatProfile.transitHostileAvoidanceRadius,
             // Narrow Crystal cave corridors are often sealed by one monster's
             // four-cell avoidance halo. Retry the same search waypoint with a
             // one-cell buffer; proven attacks still interrupt navigation and

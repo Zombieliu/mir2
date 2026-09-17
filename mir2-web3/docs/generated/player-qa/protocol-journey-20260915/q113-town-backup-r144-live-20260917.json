@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-09-17T08:46:16.405Z",
+  "proofs": [
+    {
+      "class": "Wizard",
+      "trace": "Wizard.2026-09-17T08-13-25-272Z.trace.jsonl",
+      "cutoff": {
+        "sequence": 13699,
+        "at": "2026-09-17T08:46:15.793Z",
+        "bytes": 13931669,
+        "sha256": "c746ddfa2271b8a58589b22067673adc6412f7ebd168fa51f17c4e6275b83d87"
+      },
+      "ordinaryTownUses": [
+        {
+          "sentSequence": 10657,
+          "at": "2026-09-17T08:38:55.493Z",
+          "itemName": "TownTeleport",
+          "uniqueId": 24,
+          "before": {
+            "map": "D713",
+            "x": 234,
+            "y": 242,
+            "hp": 58,
+            "maxHp": 105
+          },
+          "ack": {
+            "sequence": 10691,
+            "at": "2026-09-17T08:38:56.645Z",
+            "success": true
+          },
+          "after": {
+            "sequence": 10693,
+            "at": "2026-09-17T08:38:56.645Z",
+            "map": "0",
+            "x": 288,
+            "y": 616,
+            "hp": 58,
+            "maxHp": 105
+          }
+        }
+      ]
+    },
+    {
+      "class": "Taoist",
+      "trace": "Taoist.2026-09-17T08-13-25-273Z.trace.jsonl",
+      "cutoff": {
+        "sequence": 14233,
+        "at": "2026-09-17T08:46:15.628Z",
+        "bytes": 25804929,
+        "sha256": "e45107ff3ff4362c5ffbb2aabdb4a9bfb5613cecf0e25cd0ab8b96bd79d0965c"
+      },
+      "ordinaryTownUses": [
+        {
+          "sentSequence": 10207,
+          "at": "2026-09-17T08:33:58.563Z",
+          "itemName": "TownTeleport",
+          "uniqueId": 10,
+          "before": {
+            "map": "D714",
+            "x": 340,
+            "y": 175,
+            "hp": 62,
+            "maxHp": 191
+          },
+          "ack": {
+            "sequence": 10238,
+            "at": "2026-09-17T08:33:59.457Z",
+            "success": true
+          },
+          "after": {
+            "sequence": 10240,
+            "at": "2026-09-17T08:33:59.458Z",
+            "map": "0",
+            "x": 288,
+            "y": 616,
+            "hp": 62,
+            "maxHp": 191
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -206,10 +206,54 @@ test('q89 Wizard transit plans around a live named Shaman halo before the fresh 
 
   assert.equal(result.stage, 'ReadyToTurnIn');
   assert.deepEqual(transitOptions.hostileAvoidanceByName, { cursedshaman: 6, cursedshaman0: 6 });
+  assert.equal(transitOptions.hostileAvoidanceRadius, undefined);
   assert.equal(typeof transitOptions.beforeMovement, 'function');
   assert.ok(travelled.length > 15, 'the shorter direct path through the halo must be rejected in favour of a detour');
   assert.ok(travelled.some(point => point.y === 3), 'the navigator must use the available outer corridor');
   assert.ok(travelled.every(point => Math.max(Math.abs(point.x - shaman.x), Math.abs(point.y - shaman.y)) > 6));
+});
+
+test('q113 caster transit gives the ordinary traveler a two-cell hostile buffer only for that profile', async () => {
+  const run = async (questId, transitHostileAvoidanceRadius) => {
+    const quest = { questId, stage: 'InProgress', objectives: [objective('Kill BlackMaggot', 0, 1)] };
+    const owner = self({ kind: 'selfPlayer', x: 10, y: 10, hp: 100, maxHp: 100 });
+    const client = new FakeClient({
+      playerObjectId: 1, playerHp: 100, playerMaxHp: 100, mapFileName: 'D713',
+      entities: [owner], groundDrops: [], questLog: [quest],
+    });
+    let navigationOptions = null;
+    const travel = async (_mapFileName, options = {}) => {
+      navigationOptions = options.navigationOptions ?? null;
+      const target = monster(71, 'BlackMaggot', 16, 10, { disposition: 'hostile' });
+      Object.assign(client.snapshot, { mapFileName: 'D714', entities: [owner, target] });
+    };
+    travel.routeLength = async () => 1;
+    const result = await completeQuestObjectives(client, {
+      questId,
+      objectives: { kill: [{ monsterName: 'BlackMaggot', spawnCandidates: [
+        { monsterName: 'BlackMaggot', mapFileName: 'D714', position: { x: 16, y: 10 }, spread: 1, respawnIndex: 1 },
+      ] }], item: [] },
+    }, async target => {
+      Object.assign(owner, { x: target.x - 1, y: target.y });
+      return { reached: true, successfulSteps: 1 };
+    }, {
+      ...settings,
+      travel,
+      preferObjectiveMapOverCurrent: true,
+      preferredObjectiveMaps: ['D714'],
+      transitHostileAvoidanceRadius,
+      action: async (actor, target) => {
+        Object.assign(target, { dead: true, hp: 0 });
+        actor.snapshot.questLog[0].stage = 'ReadyToTurnIn';
+        return { kind: 'magic', targetId: target.objectId };
+      },
+    });
+    assert.equal(result.stage, 'ReadyToTurnIn');
+    return navigationOptions;
+  };
+
+  assert.deepEqual(await run(113, 2), { hostileAvoidanceRadius: 2 });
+  assert.equal(await run(60, 0), null);
 });
 
 test("direct ranged hit evidence identifies a q89 aggressor up to eight tiles away", () => {

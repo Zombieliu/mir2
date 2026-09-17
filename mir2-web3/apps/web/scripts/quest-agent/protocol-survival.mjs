@@ -264,6 +264,13 @@ export function questRetreatProfile(questId, className = '') {
   const warriorMineralMineHunt = id === 118 && normalizedClass === 'warrior';
   const warriorPrajnaHunt = [122, 123].includes(id) && normalizedClass === 'warrior';
   return {
+    // R145's D713/D714 traces showed q113 casters encountering BlackBoar and
+    // BlackMaggot melee pockets during ordinary transit. Keep a two-cell
+    // planner buffer only for this caster expedition; combat and emergency
+    // policies remain independent and retain their established limits.
+    transitHostileAvoidanceRadius: id === 113 && ['wizard', 'taoist'].includes(normalizedClass)
+      ? 2
+      : 0,
     allowLowHealthFollowerRecovery: [30, 33, 36, 49, 54, 60, 62, 65, 89, 98, 99, 113, 114, 122, 123].includes(id),
     // R27 showed that stopping a stocked q54 caster on the first glancing hit
     // turns the D401 crossing into an unrewarded fight: the surrounding pack

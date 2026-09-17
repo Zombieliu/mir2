@@ -1,5 +1,10 @@
 # Crystal Server Parity
 
+> 2026-09-17 R145 controller 692/692 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-transit-avoidance-r145.md).
+
 > 2026-09-16 R144 controller 689/689 passes. Ordinary route units
 > remain **157/177**; actual route completion, final normal logout/store and
 > separate visual gates remain open.

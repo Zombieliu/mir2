@@ -1403,6 +1403,7 @@ test('expedition recovery budgets span cadence-limited doses beyond the short fi
 
 test('q62 leaves D2041 packs toward the real D2042 transfer', () => {
   assert.deepEqual(questRetreatProfile(62), {
+    transitHostileAvoidanceRadius: 0,
     allowLowHealthFollowerRecovery: true,
     continueTravelWhileHealthy: true,
     preferTravelAggressorCombat: true,
@@ -1445,6 +1446,7 @@ test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
   assert.equal(shouldPreferObjectiveMapOverCurrent(65, {}, 'Taoist'), true);
   assert.equal(shouldPreferObjectiveMapOverCurrent(65, {}, 'Warrior'), false);
   assert.deepEqual(questRetreatProfile(65, 'Taoist'), {
+    transitHostileAvoidanceRadius: 0,
     allowLowHealthFollowerRecovery: true,
     continueTravelWhileHealthy: true,
     preferTravelAggressorCombat: true,
@@ -1469,6 +1471,9 @@ test('q113 caster map preference keeps BlackMaggot and WedgeMoth on the shared D
   assert.equal(shouldPreferObjectiveMapOverCurrent(113, {}, 'Taoist'), true);
   assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Warrior'), []);
   assert.equal(shouldPreferObjectiveMapOverCurrent(113, {}, 'Warrior'), false);
+  assert.equal(questRetreatProfile(113, 'Wizard').transitHostileAvoidanceRadius, 2);
+  assert.equal(questRetreatProfile(113, 'Taoist').transitHostileAvoidanceRadius, 2);
+  assert.equal(questRetreatProfile(113, 'Warrior').transitHostileAvoidanceRadius, 0);
 });
 
 test('q99 Warrior admits the measured final WoomaFighter spawn group', () => {
@@ -1745,6 +1750,7 @@ test('q89 Taoist admits the measured 0-adjacent/2-nearby Priest without inheriti
 
 test('q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room', () => {
   assert.deepEqual(questRetreatProfile(54, 'Warrior'), {
+    transitHostileAvoidanceRadius: 0,
     allowLowHealthFollowerRecovery: true,
     continueTravelWhileHealthy: true,
     preferTravelAggressorCombat: true,

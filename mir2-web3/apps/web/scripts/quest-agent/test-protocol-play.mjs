@@ -1138,6 +1138,64 @@ test('hostile clearance keeps spawn-search movement outside visible aggro cells'
   assert.ok(visited.every(point => Math.max(Math.abs(point.x - 3), Math.abs(point.y - 2)) > 1));
 });
 
+test('a two-cell hostile buffer detours around a reachable melee neighbor', async () => {
+  const run = async hostileAvoidanceRadius => {
+    const client = navigationClient();
+    client.snapshot.entities.push({
+      objectId: 9, kind: 'monster', name: 'BlackBoar', disposition: 'hostile',
+      x: 4, y: 2, hp: 280, maxHp: 280, dead: false,
+    });
+    const visited = [];
+    client.wait = acknowledgeUnitMovement(client, visited);
+    const result = await createNavigator(client, dependencies)(
+      { x: 7, y: 1 }, 0, () => false, { hostileAvoidanceRadius },
+    );
+    assert.equal(result.reached, true);
+    return visited;
+  };
+
+  const ordinary = await run(0);
+  const buffered = await run(2);
+  const distanceToBlackBoar = point => Math.max(Math.abs(point.x - 4), Math.abs(point.y - 2));
+  assert.ok(ordinary.some(point => distanceToBlackBoar(point) <= 1));
+  assert.ok(buffered.every(point => distanceToBlackBoar(point) > 2));
+});
+
+test('the public pre-hit D713 fixture plans with radius two without calling it route acceptance', async () => {
+  // Sanitized from Wizard trace sequence 10600, before BlackBoar 466601's
+  // first 22-damage receipt at sequence 10614. The transfer is the live D713
+  // -> D714 source observed in the same snapshot. The static fixture has no
+  // proof that this route caused the later hit, so only assert the planner's
+  // selected two-cell buffer. The separate synthetic detour test above
+  // supplies the radius-zero counterfactual; it is not actual-map acceptance.
+  const transfer = {
+    key: 'crystal-move:d713:350:244:203:382:190', mapFileName: 'D713', toMapFileName: 'D714',
+    bounds: { minX: 350, maxX: 350, minY: 244, maxY: 244 },
+  };
+  const client = navigationClient();
+  Object.assign(client.snapshot, {
+    mapFileName: 'D713',
+    mapTransfers: [transfer],
+    entities: [
+      { objectId: 1, kind: 'selfPlayer', x: 247, y: 229, hp: 105, maxHp: 105, dead: false },
+      { objectId: 466601, kind: 'monster', name: 'BlackBoar', disposition: 'hostile', x: 243, y: 234, hp: 280, maxHp: 280, dead: false },
+    ],
+  });
+  const visited = [];
+  client.wait = acknowledgeUnitMovement(client, visited);
+  const result = await createNavigator(client, {
+    ...dependencies,
+    loadCollisionMap: loadProtocolCollisionMap,
+  })({ x: 350, y: 244 }, 0, () => false, {
+    liveTransferKey: transfer.key,
+    hostileAvoidanceRadius: 2,
+    maxNoPathRefreshes: 0,
+  });
+
+  assert.equal(result.reached, true);
+  assert.ok(visited.every(point => Math.max(Math.abs(point.x - 243), Math.abs(point.y - 234)) > 2));
+});
+
 test('named hostile clearance protects the Shaman band without widening a zombie route', async () => {
   const client = navigationClient();
   Object.assign(client.snapshot.entities[0], { x: 1, y: 5 });

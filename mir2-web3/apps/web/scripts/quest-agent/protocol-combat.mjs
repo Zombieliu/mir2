@@ -222,8 +222,15 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
               preferredTransferSource: objectiveMapFallbackState.transfer.source,
               preferredTransferKey: objectiveMapFallbackState.transfer.key,
             } : {}),
-            ...(settings.transitProtectedBlocker ? {
+            ...(settings.transitProtectedBlocker || settings.transitHostileAvoidanceRadius > 0 ? {
               navigationOptions: {
+                ...(settings.transitHostileAvoidanceRadius > 0 ? {
+                  // q113 caster transit avoids every currently visible hostile
+                  // by the profile's conservative melee buffer. Unlike q89's
+                  // named policy, this has no lower-radius retry: a sealed
+                  // route remains a normal bounded no-path result.
+                  hostileAvoidanceRadius: settings.transitHostileAvoidanceRadius,
+                } : {}),
                 // Keep the ordinary transit planner outside the same live
                 // named-Shaman footprint enforced after cadence below. This
                 // avoids repeatedly selecting a shorter route that the
@@ -231,11 +238,13 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
                 ...(transitNamedPlanningEnabled ? {
                   hostileAvoidanceByName: settings.transitProtectedBlocker.namedClearance,
                 } : {}),
-                beforeMovement: context => protectedTransitHazard(
-                  client.snapshot,
-                  context,
-                  settings.transitProtectedBlocker,
-                ),
+                ...(settings.transitProtectedBlocker ? {
+                  beforeMovement: context => protectedTransitHazard(
+                    client.snapshot,
+                    context,
+                    settings.transitProtectedBlocker,
+                  ),
+                } : {}),
               },
             } : {}),
               });
@@ -1086,6 +1095,7 @@ function combatSettings(options) {
     ),
     spawnStallProtectedBlocker: protectedSpawnBlockerOption(options.spawnStallProtectedBlocker),
     transitProtectedBlocker: protectedSpawnBlockerOption(options.transitProtectedBlocker),
+    transitHostileAvoidanceRadius: nonnegativeInteger(options.transitHostileAvoidanceRadius, 0),
     combatHostileClearance: nonnegativeInteger(options.combatHostileClearance, 0),
     combatHostileClearanceFallback: nonnegativeInteger(
       options.combatHostileClearanceFallback,
