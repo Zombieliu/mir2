@@ -47,3 +47,15 @@ not copy, reset or extend the old clocks or alter saved character rows.
 No ordinary completion, native package or visual acceptance is implied here.
 
 visualAccepted=false; measuredTime=false; globalParityPercent=null.
+
+Deployment checkpoint: optimized release completed in 13m24s and its matching
+locked/offline current-source confirmation exits zero (0.49s, no recompilation).
+Named immutable EXE, relevant source hashes and isolated PID/health/profile
+are recorded in build-shared-cooldown.json. A separate fresh ordinary account
+per class started at about 20:35:16Z on ports 19800/19810; original accounts,
+store and expired clocks remain unchanged. Subsequent interruptions and any
+repairs remain inside these new clocks. This is not yet timing acceptance.
+
+Windows control capability now succeeds through the documented node_repl
+entry; see computer-use-recovery.md/json. Native build, signed packaging,
+ordinary full-route/save completion and visual acceptance remain separate.

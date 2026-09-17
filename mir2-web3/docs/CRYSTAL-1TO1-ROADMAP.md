@@ -12,8 +12,9 @@
 > N5 release is deployed; safe-profile Zone 4/4, Gateway snapshot 1/1 and arrival 4/4 pass.
 > Safe-profile release is deployed; legacy safe-area/PvP plus profile reruns 9/9 pass.
 > Shared spell cooldown getter 3/3 and fresh Gateway journey bridge 11/11 pass.
-> Public owner readiness now follows the shared Zone clock; release deployment is pending.
-> A separate clean three-class run will retain a fresh, unextended 120-minute ledger.
+> Public owner readiness follows the Zone clock; the 6e1778957 release is deployed.
+> Fresh ordinary three-class accounts started on isolated ports 19800/19810, with unextended 120-minute ledgers.
+> Native clean-source build is running; documented Windows control now lists windows successfully.
 > Remaining ordinary route, timing, survival,
 > suitable equipment, exact native package and visual acceptance remain open.
 > This adds custom onboarding, no Crystal parity percentage. V1 evidence stays

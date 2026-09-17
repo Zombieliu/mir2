@@ -155,3 +155,11 @@ and a separate clean three-class run are pending. Original clocks stay expired;
 33/78 ordinary saved units remain the verified checkpoint. Later-route source
 audit found no deterministic mismatch; dynamic route/survival and visuals stay
 open (later-route-source-audit.md).
+
+The shared-clock release 6e1778957 is deployed on a separate fresh store at
+ports 19800/19810 (build-shared-cooldown.json). New ordinary three-class runs
+started at 20:35:16Z; their original clocks will not be extended for failures.
+Windows control has now recovered via its documented initialized node_repl
+entry (computer-use-recovery.md/json). Native clean-source build is running.
+This does not change the retained old 33/78 durable checkpoint or imply new
+route, timing, signed-package or visual acceptance.
