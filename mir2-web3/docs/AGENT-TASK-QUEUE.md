@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-09-18 newcomer V2 design: six chapters, 22 new main quests and four growth
+> claims per class; 90-minute core plus 30-minute allowance targets a two-hour
+> journey. Design only: definitions, server event bridges, region certification,
+> guidance, ordinary three-class timing and visual acceptance remain open.
+> V1 runs/evidence and Crystal defaults retain their existing contracts.
+> [Design and implementation order](NEWCOMER-1-30-V2-DESIGN.md).
+
 > 2026-09-17 R154 controller 723/723 passes. Ordinary route units
 > remain **158/177**; actual route completion, final normal logout/store and
 > separate visual gates remain open.

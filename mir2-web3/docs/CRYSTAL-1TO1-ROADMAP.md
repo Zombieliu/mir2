@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-18 product design checkpoint: the optional newcomer V2 proposal reduces
+> the main route to 22 tasks plus four growth claims, with 38 explicit kills and
+> a 90+30-minute design budget. This is unimplemented custom onboarding content,
+> not additional Crystal parity, measured completion time or visual acceptance.
+> V1 route evidence and default Crystal rules remain versioned separately.
+> [Design](NEWCOMER-1-30-V2-DESIGN.md).
+
 > 2026-09-17 R154 controller 723/723 passes. Ordinary route units
 > remain **158/177**; actual route completion, final normal logout/store and
 > separate visual gates remain open.
