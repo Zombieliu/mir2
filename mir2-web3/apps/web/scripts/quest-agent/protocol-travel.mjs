@@ -302,6 +302,40 @@ async function requireFreshCurrentMapSnapshot(client, mapFileName) {
   );
 }
 
+// Incremental AOI packets can remove and later re-add a monster without its
+// disposition or health. A cycle is opt-in evidence that those short-lived
+// observations may have affected navigation, but it is never evidence that an
+// unknown entity is hostile. Ask the normal client-version endpoint for one
+// full current-map observation before deciding whether an already bounded
+// combat recovery is justified.
+async function refreshCycleClassificationSnapshot(client, mapFileName, activeOwnerId) {
+  const afterRequest = client.sequence;
+  client.send({ type: 'clientVersion' });
+  const isFreshCurrentOwnerSnapshot = event =>
+    event?.sequence > afterRequest && event?.direction === 'received' &&
+    event?.type === 'worldSnapshot' && event?.payload?.mapSnapshotPending !== true &&
+    String(event?.payload?.mapFileName) === String(mapFileName) &&
+    sameActiveOwner(event.payload, activeOwnerId);
+  try {
+    await client.wait(
+      () => !client.snapshot?.mapSnapshotPending &&
+        String(client.snapshot?.mapFileName) === String(mapFileName) &&
+        sameActiveOwner(client.snapshot, activeOwnerId) &&
+        client.events.some(isFreshCurrentOwnerSnapshot),
+      `fresh cycle classification snapshot for ${mapFileName}`,
+      20_000,
+    );
+  } catch {
+    // The original typed cycle is the useful failure if a fresh authoritative
+    // view cannot be obtained. Do not replace it with a generic timeout.
+    return false;
+  }
+  return !client.snapshot?.mapSnapshotPending &&
+    String(client.snapshot?.mapFileName) === String(mapFileName) &&
+    sameActiveOwner(client.snapshot, activeOwnerId) &&
+    client.events.some(isFreshCurrentOwnerSnapshot);
+}
+
 function receivedAfter(client, afterSequence, predicate) {
   return client.events.find(event =>
     event?.sequence > afterSequence && event?.direction === 'received' && predicate(event)
@@ -825,6 +859,21 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
                 String(client.snapshot?.mapFileName ?? '') !== current ||
                 !sameActiveOwner(client.snapshot, activeOwnerId))) {
               throw error;
+            }
+            if (navigationStalled) {
+              const refreshed = await refreshCycleClassificationSnapshot(
+                client,
+                current,
+                activeOwnerId,
+              );
+              // An interrupt observed while the normal full snapshot was in
+              // flight belongs to the caller, ahead of any monster recovery.
+              throwIfTravelInterrupted(options, current, edge.toMapFileName);
+              if (!refreshed || client.snapshot?.mapSnapshotPending ||
+                  String(client.snapshot?.mapFileName ?? '') !== current ||
+                  !sameActiveOwner(client.snapshot, activeOwnerId)) {
+                throw error;
+              }
             }
             // A narrow cave can be sealed near the player long before the
             // destination transfer enters AOI. Clear the nearest bounded local

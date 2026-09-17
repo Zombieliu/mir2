@@ -133,6 +133,18 @@ class FakeClient {
   }
 }
 
+function clientWithCycleSnapshot(snapshot, freshSnapshot = snapshot) {
+  return new FakeClient(snapshot, (command, client) => {
+    if (command.type !== 'clientVersion') return;
+    client.receive({
+      type: 'worldSnapshot',
+      payload: typeof freshSnapshot === 'function'
+        ? freshSnapshot(client.snapshot)
+        : structuredClone(freshSnapshot),
+    });
+  });
+}
+
 function destinationSnapshot(edge, beforeGold, overrides = {}) {
   return {
     mapFileName: edge.toMapFileName,
@@ -664,7 +676,7 @@ test('an opt-in transit position cycle maps a currently proved blocker to the bo
     hp: 20,
     dead: false,
   });
-  const client = new FakeClient(source);
+  const client = clientWithCycleSnapshot(source);
   const stalled = new NavigationStalled({
     reason: 'position-cycle',
     mapId: ordinaryEdge.fromMapFileName,
@@ -683,6 +695,43 @@ test('an opt-in transit position cycle maps a currently proved blocker to the bo
     error => error instanceof TravelBlockedByMonster &&
       error.objectId === 77 && error.cause === stalled,
   );
+  assert.deepEqual(client.commands, [{ type: 'clientVersion' }]);
+});
+
+test('an opt-in cycle refreshes a removed unknown Taoist blocker before bounded recovery', async () => {
+  const source = walkingSnapshot(ordinaryEdge);
+  source.entities = [
+    selfPlayer({ x: 378, y: 180 }),
+    // Incremental ObjectMonster packets omit these fields. This is the exact
+    // state that must not be treated as authority to attack.
+    { objectId: 454500, kind: 'monster', name: 'BlackMaggot', x: 374, y: 180, dead: false },
+    { objectId: 454501, kind: 'monster', name: 'BlackMaggot', x: 379, y: 189, dead: false },
+  ];
+  const fresh = {
+    ...source,
+    entities: [
+      selfPlayer({ x: 378, y: 180 }),
+      { objectId: 454500, kind: 'monster', name: 'BlackMaggot', disposition: 'hostile', hp: 200, x: 374, y: 180, dead: false },
+      { objectId: 454501, kind: 'monster', name: 'BlackMaggot', disposition: 'hostile', hp: 200, x: 379, y: 189, dead: false },
+    ],
+  };
+  const client = clientWithCycleSnapshot(source, fresh);
+  const stalled = new NavigationStalled({
+    reason: 'position-cycle', mapId: ordinaryEdge.fromMapFileName,
+    position: { x: 378, y: 180 }, target: { x: 8, y: 4 },
+    bestDistance: 3, successfulSteps: 12,
+  });
+  const travel = createMapTraveler(client, async () => {
+    client.receive({ type: 'packet', packet: 'ObjectRemove', payload: { objectId: 454500 } });
+    assert.equal(client.snapshot.entities.some(entity => entity.objectId === 454500), false);
+    throw stalled;
+  });
+
+  await assert.rejects(
+    () => travel(ordinaryEdge.toMapFileName, { navigationOptions: { detectPositionCycles: true } }),
+    error => error instanceof TravelBlockedByMonster && error.objectId === 454500 && error.cause === stalled,
+  );
+  assert.deepEqual(client.commands, [{ type: 'clientVersion' }]);
 });
 
 test('an opt-in transit position cycle uses one bounded blocker clear then retries the portal', async () => {
@@ -697,7 +746,7 @@ test('an opt-in transit position cycle uses one bounded blocker clear then retri
     hp: 20,
     dead: false,
   });
-  const client = new FakeClient(source);
+  const client = clientWithCycleSnapshot(source);
   let navigationCalls = 0;
   let resolverCalls = 0;
   const travel = createMapTraveler(client, async () => {
@@ -735,7 +784,7 @@ test('an opt-in transit position cycle uses one bounded blocker clear then retri
 });
 
 test('an opt-in transit position cycle without a fresh blocker fails closed', async () => {
-  const client = new FakeClient(walkingSnapshot(ordinaryEdge));
+  const client = clientWithCycleSnapshot(walkingSnapshot(ordinaryEdge));
   const stalled = new NavigationStalled({
     reason: 'position-cycle',
     mapId: ordinaryEdge.fromMapFileName,
@@ -755,6 +804,36 @@ test('an opt-in transit position cycle without a fresh blocker fails closed', as
     error => error === stalled,
   );
   assert.equal(calls, 1);
+  assert.deepEqual(client.commands, [{ type: 'clientVersion' }]);
+});
+
+test('a fresh cycle snapshot without an explicit live hostile fails closed', async () => {
+  const cases = [
+    {
+      name: 'neutral candidate',
+      entities: [selfPlayer(), { objectId: 77, kind: 'monster', disposition: 'neutral', hp: 20, x: 8, y: 5 }],
+    },
+    {
+      name: 'no candidate',
+      entities: [selfPlayer()],
+    },
+  ];
+  for (const fixture of cases) {
+    const source = walkingSnapshot(ordinaryEdge);
+    const client = clientWithCycleSnapshot(source, { ...source, entities: fixture.entities });
+    const stalled = new NavigationStalled({
+      reason: 'position-cycle', mapId: ordinaryEdge.fromMapFileName,
+      position: { x: 5, y: 5 }, target: { x: 8, y: 4 },
+      bestDistance: 3, successfulSteps: 12,
+    });
+    const travel = createMapTraveler(client, async () => { throw stalled; });
+    await assert.rejects(
+      () => travel(ordinaryEdge.toMapFileName, { navigationOptions: { detectPositionCycles: true } }),
+      error => error === stalled,
+      fixture.name,
+    );
+    assert.deepEqual(client.commands, [{ type: 'clientVersion' }], fixture.name);
+  }
 });
 
 test('an unopted transit NavigationStalled remains a raw typed failure', async () => {
@@ -831,6 +910,51 @@ test('a pending, changed, or ownerless snapshot after an opt-in cycle fails clos
   }
 });
 
+test('a stale fresh-cycle response fails closed for pending, changed map, or changed owner', async () => {
+  const cases = [
+    {
+      name: 'pending response',
+      refresh: source => ({ ...source, mapSnapshotPending: true }),
+    },
+    {
+      name: 'changed map response',
+      refresh: source => ({ ...source, mapFileName: ordinaryEdge.toMapFileName }),
+    },
+    {
+      name: 'changed owner response',
+      refresh: source => ({ ...source, playerObjectId: 2, entities: [
+        { objectId: 2, kind: 'selfPlayer', x: 5, y: 5 },
+        { objectId: 77, kind: 'monster', disposition: 'hostile', hp: 20, x: 8, y: 5 },
+      ] }),
+    },
+    {
+      name: 'no full response',
+      refresh: null,
+    },
+  ];
+  for (const fixture of cases) {
+    const source = walkingSnapshot(ordinaryEdge);
+    source.entities.push({
+      objectId: 77, kind: 'monster', disposition: 'hostile', hp: 20, x: 8, y: 5,
+    });
+    const client = fixture.refresh
+      ? clientWithCycleSnapshot(source, fixture.refresh(source))
+      : new FakeClient(source);
+    const stalled = new NavigationStalled({
+      reason: 'position-cycle', mapId: ordinaryEdge.fromMapFileName,
+      position: { x: 5, y: 5 }, target: { x: 8, y: 4 },
+      bestDistance: 3, successfulSteps: 12,
+    });
+    const travel = createMapTraveler(client, async () => { throw stalled; });
+    await assert.rejects(
+      () => travel(ordinaryEdge.toMapFileName, { navigationOptions: { detectPositionCycles: true } }),
+      error => error === stalled,
+      fixture.name,
+    );
+    assert.deepEqual(client.commands, [{ type: 'clientVersion' }], fixture.name);
+  }
+});
+
 test('an interrupt wins over an opt-in transit position-cycle blocker classification', async () => {
   const source = walkingSnapshot(ordinaryEdge);
   source.entities.push({
@@ -869,6 +993,36 @@ test('an interrupt wins over an opt-in transit position-cycle blocker classifica
   assert.equal(navigationCalls, 1);
 });
 
+test('an interrupt that arrives with the fresh cycle snapshot wins over blocker recovery', async () => {
+  const source = walkingSnapshot(ordinaryEdge);
+  source.entities.push({
+    objectId: 77, kind: 'monster', disposition: 'hostile', hp: 20, x: 8, y: 5,
+  });
+  let interrupted = false;
+  const client = new FakeClient(source, (command, current) => {
+    if (command.type !== 'clientVersion') return;
+    current.receive({ type: 'worldSnapshot', payload: { ...source } });
+    interrupted = true;
+  });
+  const stalled = new NavigationStalled({
+    reason: 'position-cycle', mapId: ordinaryEdge.fromMapFileName,
+    position: { x: 5, y: 5 }, target: { x: 8, y: 4 },
+    bestDistance: 3, successfulSteps: 12,
+  });
+  const travel = createMapTraveler(client, async () => { throw stalled; }, {
+    resolveBlockingMonster: async () => assert.fail('interrupt must prevent resolver'),
+  });
+
+  await assert.rejects(
+    () => travel(ordinaryEdge.toMapFileName, {
+      navigationOptions: { detectPositionCycles: true },
+      interruptWhen: () => interrupted,
+    }),
+    error => error instanceof TravelInterrupted,
+  );
+  assert.deepEqual(client.commands, [{ type: 'clientVersion' }]);
+});
+
 test('a healthy acyclic transit remains successful with cycle detection enabled', async () => {
   const client = new FakeClient(walkingSnapshot(ordinaryEdge));
   const travel = createMapTraveler(client, async (_target, _distance, _stopWhen, options) => {
@@ -884,6 +1038,7 @@ test('a healthy acyclic transit remains successful with cycle detection enabled'
   });
   assert.equal(traversed.length, 1);
   assert.equal(traversed[0].toMapFileName, ordinaryEdge.toMapFileName);
+  assert.deepEqual(client.commands, []);
 });
 
 test('a configured resolver clears a hostile transfer blocker and retries the portal', async () => {

@@ -68,6 +68,70 @@ test("binds kill tasks to real respawns", () => {
   }
 });
 
+test("q113 casters retain Crystal D711's shared BlackMaggot and WedgeMoth rows", async () => {
+  const routes = await Promise.all(
+    ["Wizard", "Taoist", "Warrior"].map((className) =>
+      buildAuthoritativeClassQuestRoute({ className, maxLevel: 30 })
+    ),
+  );
+  const quest113 = (className) => routes
+    .find((route) => route.className === className)
+    .quests.find((candidate) => candidate.questId === 113);
+  const objective = (className, monsterName) => quest113(className).objectives.kill
+    .find((candidate) => candidate.monsterName === monsterName);
+
+  for (const className of ["Wizard", "Taoist"]) {
+    const blackMaggot = objective(className, "BlackMaggot").spawnCandidates
+      .filter((spawn) => spawn.mapFileName === "D711");
+    assert.deepEqual(blackMaggot.map((spawn) => ({
+      count: spawn.count,
+      spread: spawn.spread,
+      respawnIndex: spawn.respawnIndex,
+      position: spawn.position,
+    })), [
+      [251, 41], [321, 72], [363, 146], [172, 59], [210, 93], [262, 140],
+      [309, 19], [350, 303], [111, 105], [158, 149], [200, 200], [255, 306],
+      [287, 286], [56, 158], [153, 237], [112, 250], [114, 314], [304, 340],
+    ].map(([x, y], offset) => ({
+      count: 8,
+      spread: 30,
+      respawnIndex: 2543 + offset,
+      position: { x, y },
+    })));
+    assert.deepEqual(objective(className, "WedgeMoth").spawnCandidates
+      .filter((spawn) => spawn.mapFileName === "D711")
+      .map((spawn) => ({
+        count: spawn.count,
+        spread: spawn.spread,
+        respawnIndex: spawn.respawnIndex,
+        position: spawn.position,
+      })), [{
+      count: 25,
+      spread: 200,
+      respawnIndex: 2561,
+      position: { x: 200, y: 200 },
+    }]);
+  }
+
+  for (const monsterName of ["BlackMaggot", "WedgeMoth"]) {
+    assert.equal(objective("Warrior", monsterName).spawnCandidates.length, 16);
+    assert.equal(objective("Warrior", monsterName).spawnCandidates.some(
+      (spawn) => spawn.mapFileName === "D711"
+    ), false);
+  }
+  for (const route of routes) {
+    const nonQ113Candidates = route.quests
+      .filter((candidate) => candidate.questId !== 113)
+      .flatMap((candidate) => candidate.objectives.kill)
+      .flatMap((candidate) => candidate.spawnCandidates);
+    assert.ok(nonQ113Candidates.length > 0);
+    assert.ok(route.quests
+      .filter((candidate) => candidate.questId !== 113)
+      .flatMap((candidate) => candidate.objectives.kill)
+      .every((candidate) => candidate.spawnCandidates.length <= 16));
+  }
+});
+
 test("distinguishes ordinary Q-drops from harvest Q-drops", () => {
   const gingerTea = route.quests
     .flatMap((entry) => entry.objectives.item)

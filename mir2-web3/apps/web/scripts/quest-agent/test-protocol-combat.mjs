@@ -1253,7 +1253,7 @@ test("an expedition can prefer its configured objective map over a denser same-m
   assert.deepEqual(client.sent.map(entry => entry.objectId), [64]);
 });
 
-test('q113 caster preference chooses shared D715 over shorter D612 and completes both objectives without another map trip', async () => {
+test('q113 caster preference chooses shared D711 over shorter D612 and completes both objectives without D715', async () => {
   const quest = {
     questId: 113,
     stage: 'InProgress',
@@ -1286,7 +1286,7 @@ test('q113 caster preference chooses shared D715 over shorter D612 and completes
     client.snapshot.mapFileName = mapFileName;
     client.snapshot.entities = [self(), nextMonster('BlackMaggot')];
   };
-  travel.routeLength = async mapFileName => ({ D612: 7, D715: 8 })[mapFileName] ?? null;
+  travel.routeLength = async mapFileName => ({ D612: 7, D711: 4, D715: 8 })[mapFileName] ?? null;
 
   const result = await completeQuestObjectives(client, {
     questId: 113,
@@ -1294,10 +1294,10 @@ test('q113 caster preference chooses shared D715 over shorter D612 and completes
       kill: [
         { monsterName: 'BlackMaggot', spawnCandidates: [
           { ...spawn('BlackMaggot'), mapFileName: 'D612' },
-          { ...spawn('BlackMaggot'), mapFileName: 'D715' },
+          { ...spawn('BlackMaggot'), mapFileName: 'D711' },
         ] },
         { monsterName: 'WedgeMoth', spawnCandidates: [
-          { ...spawn('WedgeMoth'), mapFileName: 'D715' },
+          { ...spawn('WedgeMoth'), mapFileName: 'D711' },
         ] },
       ],
       item: [],
@@ -1305,12 +1305,12 @@ test('q113 caster preference chooses shared D715 over shorter D612 and completes
   }, navigateClientNear(client), {
     ...settings,
     travel,
-    preferredObjectiveMaps: ['D715'],
+    preferredObjectiveMaps: ['D711'],
     preferObjectiveMapOverCurrent: true,
   });
 
   assert.equal(result.stage, 'ReadyToTurnIn');
-  assert.deepEqual(travelled, ['D715'], 'D612 is shorter but lacks WedgeMoth; D715 is entered once');
+  assert.deepEqual(travelled, ['D711'], 'D612 is shorter but lacks WedgeMoth; D711 is entered once');
   assert.deepEqual(client.snapshot.questLog[0].objectives.map(entry => entry.current), [3, 3]);
   assert.equal(client.sent.filter(entry => entry.type === 'attack').length, 6);
 });

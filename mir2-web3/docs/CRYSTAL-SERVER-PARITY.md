@@ -1,5 +1,10 @@
 # Crystal Server Parity
 
+> 2026-09-17 R151 controller 712/712 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-fresh-cycle-nearest-source-r150-r151.md).
+
 > 2026-09-17 R149 controller 707/707 passes. Ordinary route units
 > remain **157/177**; actual route completion, final normal logout/store and
 > separate visual gates remain open.

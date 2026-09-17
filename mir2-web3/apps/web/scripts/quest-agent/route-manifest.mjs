@@ -308,7 +308,10 @@ export function buildClassQuestRoute(sources, { className = "Warrior", maxLevel 
         monsterName: String(task.monster_name),
         count: Number(task.count),
         message: String(task.message ?? ""),
-        spawnCandidates: spawnCandidatesForTask(spawnRows, task),
+        spawnCandidates: spawnCandidatesForTask(spawnRows, task, {
+          questId: Number(header.index),
+          className,
+        }),
       }));
       const itemObjectives = (template.item_tasks ?? []).map((task) => ({
         itemIndex: Number(task.item_index),
@@ -923,18 +926,34 @@ function flattenRespawns(maps, monsters = [], profile = null) {
   return [...imported, ...overrides];
 }
 
-function spawnCandidatesForTask(spawnRows, task) {
+function spawnCandidatesForTask(spawnRows, task, { questId = null, className = '' } = {}) {
   const monsterIndex = Number(task.monster_index);
   const monsterName = normalizeName(task.monster_name);
-  return spawnRows
+  const candidates = spawnRows
     .filter((spawn) =>
       spawn.monsterIndex === monsterIndex || normalizeName(spawn.monsterName) === monsterName
     )
     .sort((left, right) =>
       right.count - left.count || left.delayMinutes - right.delayMinutes ||
       left.mapFileName.localeCompare(right.mapFileName) || left.respawnIndex - right.respawnIndex
-    )
-    .slice(0, 16);
+    );
+  const q113CasterJointSource = Number(questId) === 113 &&
+    ['wizard', 'taoist'].includes(String(className).trim().toLowerCase()) &&
+    ['blackmaggot', 'wedgemoth'].includes(monsterName);
+  if (!q113CasterJointSource) return candidates.slice(0, 16);
+
+  // Crystal's D711 field contains both q113 kill targets, but its individual
+  // BlackMaggot rows sort below the generic top-16 cap. Retain the complete
+  // source-proven field before the ordinary candidates so casters can select
+  // the nearest shared objective map without inventing a combined respawn.
+  const d711Candidates = candidates.filter((spawn) =>
+    normalizeMapFileName(spawn.mapFileName) === 'd711'
+  );
+  if (d711Candidates.length === 0) return candidates.slice(0, 16);
+  return [
+    ...d711Candidates,
+    ...candidates.filter((spawn) => normalizeMapFileName(spawn.mapFileName) !== 'd711').slice(0, 16),
+  ];
 }
 
 function flattenQuestItemDrops(tables) {

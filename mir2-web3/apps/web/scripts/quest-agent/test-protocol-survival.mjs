@@ -1481,9 +1481,9 @@ test('q65 preserves D421 progress toward its D422 Zombie1 field', () => {
   assert.equal(questRetreatProfile(65, 'Warrior').maxTargetAdjacent, undefined);
 });
 
-test('q113 caster map preference keeps BlackMaggot and WedgeMoth on the shared D715 field', () => {
-  assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Wizard'), ['D715']);
-  assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Taoist'), ['D715']);
+test('q113 caster map preference keeps BlackMaggot and WedgeMoth on the shared D711 field', () => {
+  assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Wizard'), ['D711']);
+  assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Taoist'), ['D711']);
   assert.equal(shouldPreferObjectiveMapOverCurrent(113, {}, 'Wizard'), true);
   assert.equal(shouldPreferObjectiveMapOverCurrent(113, {}, 'Taoist'), true);
   assert.deepEqual(preferredObjectiveMapsForQuest(113, 'Warrior'), []);

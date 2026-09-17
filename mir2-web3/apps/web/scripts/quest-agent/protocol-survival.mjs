@@ -436,9 +436,8 @@ export function shouldPreferObjectiveMapOverCurrent(questId, questState = null, 
   // did not reach D422; the same Wizard already completed q54 through D406,
   // which contains thirty authoritative Zombie1 spawns.
   if (id === 65) return ['wizard', 'taoist'].includes(normalizedClass);
-  // q113's nearer D612 source has BlackMaggot only. The same normal D715
-  // crossing provides both remaining BlackMaggot and WedgeMoth objectives, so
-  // casters avoid a second full cave traverse after the first three kills.
+  // Crystal's normal D711 field provides both BlackMaggot and WedgeMoth q113
+  // objectives, so casters avoid an unnecessary deeper cave crossing.
   if (id === 113) return ['wizard', 'taoist'].includes(normalizedClass);
   if (id !== 54) return false;
 
@@ -470,7 +469,7 @@ export function preferredObjectiveMapsForQuest(questId, className = '') {
     return ['D406'];
   }
   if (id === 113 && ['wizard', 'taoist'].includes(String(className).trim().toLowerCase())) {
-    return ['D715'];
+    return ['D711'];
   }
   return [];
 }

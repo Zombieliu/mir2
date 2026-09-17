@@ -72336,6 +72336,348 @@
                 "monsterLevel": 28,
                 "monsterExperience": 250,
                 "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 251,
+                  "y": 41
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2543
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 321,
+                  "y": 72
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2544
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 363,
+                  "y": 146
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2545
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 172,
+                  "y": 59
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2546
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 210,
+                  "y": 93
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2547
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 262,
+                  "y": 140
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2548
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 309,
+                  "y": 19
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2549
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 350,
+                  "y": 303
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2550
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 111,
+                  "y": 105
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2551
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 158,
+                  "y": 149
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2552
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 200,
+                  "y": 200
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2553
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 255,
+                  "y": 306
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2554
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 287,
+                  "y": 286
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2555
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 56,
+                  "y": 158
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2556
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 153,
+                  "y": 237
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2557
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 112,
+                  "y": 250
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2558
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 114,
+                  "y": 314
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2559
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 304,
+                  "y": 340
+                },
+                "count": 8,
+                "spread": 30,
+                "delayMinutes": 8,
+                "respawnIndex": 2560
+              },
+              {
+                "monsterIndex": 150,
+                "monsterName": "BlackMaggot",
+                "monsterAi": 0,
+                "monsterHp": 200,
+                "monsterLevel": 28,
+                "monsterExperience": 250,
+                "isBoss": false,
                 "mapFileName": "D717",
                 "mapTitle": "B7_AngledStoneTomb",
                 "position": {
@@ -72640,6 +72982,25 @@
             "count": 3,
             "message": "",
             "spawnCandidates": [
+              {
+                "monsterIndex": 165,
+                "monsterName": "WedgeMoth",
+                "monsterAi": 7,
+                "monsterHp": 220,
+                "monsterLevel": 32,
+                "monsterExperience": 540,
+                "isBoss": false,
+                "mapFileName": "D711",
+                "mapTitle": "B1_AngledStoneTomb",
+                "position": {
+                  "x": 200,
+                  "y": 200
+                },
+                "count": 25,
+                "spread": 200,
+                "delayMinutes": 8,
+                "respawnIndex": 2561
+              },
               {
                 "monsterIndex": 165,
                 "monsterName": "WedgeMoth",
