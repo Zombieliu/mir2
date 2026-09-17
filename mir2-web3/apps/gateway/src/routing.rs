@@ -32,10 +32,10 @@ use mir2_simulation::{
     SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
     WorldCommandExecution, WorldCommandOutcome, WorldEntityDisposition, WorldEntityKind,
     WorldEntitySnapshot, WorldEntitySpriteSnapshot, WorldRuntime, WorldSnapshot,
-    ZoneBossRewardAudit, ZoneCommand, ZoneKey, ZoneManager, ZoneMonsterDefense,
-    ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneOutbound,
-    ZoneRuntimeHandle, ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneVitalSettlement,
-    CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneBossRewardAudit, ZoneCommand, ZoneJourneyEventReceipt, ZoneKey, ZoneManager,
+    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot,
+    ZoneOutbound, ZoneRuntimeHandle, ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell,
+    ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -2465,6 +2465,32 @@ struct ZoneMagicPracticeProgress {
     highest_cast_at_ms_by_spell: BTreeMap<ZoneMagicPracticeSpell, u64>,
 }
 
+/// Exactly-once identity supplied by the authoritative Zone writer for a
+/// newcomer journey event. Delayed effects can share an action timestamp, so
+/// the Zone-issued event sequence is part of the receipt identity.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+struct ZoneJourneyEventIdentity {
+    source_action_at_ms: u64,
+    event_sequence: u64,
+}
+
+impl From<&ZoneJourneyEventReceipt> for ZoneJourneyEventIdentity {
+    fn from(receipt: &ZoneJourneyEventReceipt) -> Self {
+        Self {
+            source_action_at_ms: receipt.source_action_at_ms,
+            event_sequence: receipt.event_sequence,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+struct ZoneJourneyEventProgress {
+    object_id: u32,
+    life_generation: u64,
+    #[serde(default)]
+    committed: BTreeSet<ZoneJourneyEventIdentity>,
+}
+
 #[derive(Debug)]
 struct SharedInProcessZoneState {
     next_zone_object_id: u32,
@@ -2488,6 +2514,8 @@ struct SharedInProcessZoneState {
     vital_receipt_progress: BTreeMap<ZonePresenceKey, ZoneVitalReceiptProgress>,
     pending_zone_magic_practice: BTreeMap<ZonePresenceKey, Vec<ZoneMagicPracticeReceipt>>,
     magic_practice_progress: BTreeMap<ZonePresenceKey, ZoneMagicPracticeProgress>,
+    pending_zone_journey_events: BTreeMap<ZonePresenceKey, Vec<ZoneJourneyEventReceipt>>,
+    journey_event_progress: BTreeMap<ZonePresenceKey, ZoneJourneyEventProgress>,
     teardown_fences: BTreeSet<ZonePresenceKey>,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
     players: BTreeMap<ZonePresenceKey, ZonePlayerPresence>,
@@ -2560,6 +2588,10 @@ struct SharedInProcessZoneStateCheckpoint {
         alias = "soulfirePracticeProgress"
     )]
     magic_practice_progress: Vec<(ZonePresenceKey, ZoneMagicPracticeProgress)>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pending_zone_journey_events: Vec<(ZonePresenceKey, Vec<ZoneJourneyEventReceipt>)>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    journey_event_progress: Vec<(ZonePresenceKey, ZoneJourneyEventProgress)>,
     #[serde(default)]
     teardown_fences: Vec<ZonePresenceKey>,
     players: Vec<(ZonePresenceKey, ZonePlayerPresence)>,
@@ -2705,6 +2737,8 @@ impl SharedInProcessZoneStateCheckpoint {
         self.vital_receipt_progress.clear();
         self.pending_zone_magic_practice.clear();
         self.magic_practice_progress.clear();
+        self.pending_zone_journey_events.clear();
+        self.journey_event_progress.clear();
         self.teardown_fences.clear();
         self.players.clear();
         self.trade_links = SharedTradeLinks::default();
@@ -2782,6 +2816,8 @@ impl SharedInProcessZoneState {
             vital_receipt_progress: BTreeMap::new(),
             pending_zone_magic_practice: BTreeMap::new(),
             magic_practice_progress: BTreeMap::new(),
+            pending_zone_journey_events: BTreeMap::new(),
+            journey_event_progress: BTreeMap::new(),
             teardown_fences: BTreeSet::new(),
             live_zone_outbounds: BTreeMap::new(),
             players: BTreeMap::new(),
@@ -2865,6 +2901,12 @@ impl SharedInProcessZoneState {
                 .clone()
                 .into_iter()
                 .collect(),
+            pending_zone_journey_events: self
+                .pending_zone_journey_events
+                .clone()
+                .into_iter()
+                .collect(),
+            journey_event_progress: self.journey_event_progress.clone().into_iter().collect(),
             teardown_fences: self.teardown_fences.clone().into_iter().collect(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
@@ -2911,6 +2953,8 @@ impl SharedInProcessZoneState {
             vital_receipt_progress: Vec::new(),
             pending_zone_magic_practice: Vec::new(),
             magic_practice_progress: Vec::new(),
+            pending_zone_journey_events: Vec::new(),
+            journey_event_progress: Vec::new(),
             teardown_fences: Vec::new(),
             players: self.players.clone().into_iter().collect(),
             maps: self.maps.clone(),
@@ -3182,6 +3226,11 @@ impl SharedInProcessZoneState {
                 .magic_practice_progress
                 .into_iter()
                 .collect(),
+            pending_zone_journey_events: checkpoint
+                .pending_zone_journey_events
+                .into_iter()
+                .collect(),
+            journey_event_progress: checkpoint.journey_event_progress.into_iter().collect(),
             teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
             live_zone_outbounds: BTreeMap::new(),
             players,
@@ -3308,6 +3357,27 @@ impl SharedInProcessZoneState {
                 == Some(receipt.life_generation)
     }
 
+    fn journey_event_owner_is_current(
+        &self,
+        key: &ZonePresenceKey,
+        receipt: &ZoneJourneyEventReceipt,
+    ) -> bool {
+        receipt.event_sequence > 0
+            && receipt.committed_at_ms >= receipt.source_action_at_ms
+            && receipt.source_object_id != 0
+            && key.account_id == receipt.account_id
+            && key.character_index == receipt.character_index
+            && self.zone_sessions.get(key) == Some(&receipt.session_id)
+            && self.players.get(key).is_some_and(|player| {
+                player.zone_object_id == receipt.object_id
+                    && ZoneKey::for_map(&player.map_file_name) == receipt.zone_key
+            })
+            && self
+                .zone_manager
+                .player_life_generation(&receipt.session_id)
+                == Some(receipt.life_generation)
+    }
+
     fn forget_zone_session(&mut self, key: &ZonePresenceKey) {
         if let Some(session_id) = self.zone_sessions.remove(key) {
             self.zone_session_keys.remove(&session_id);
@@ -3322,6 +3392,8 @@ impl SharedInProcessZoneState {
         self.vital_receipt_progress.remove(key);
         self.pending_zone_magic_practice.remove(key);
         self.magic_practice_progress.remove(key);
+        self.pending_zone_journey_events.remove(key);
+        self.journey_event_progress.remove(key);
         self.teardown_fences.remove(key);
         self.live_zone_outbounds.remove(key);
     }
@@ -4090,6 +4162,26 @@ impl SharedInProcessZoneState {
                             && queued.life_generation == receipt.life_generation
                             && queued.spell == receipt.spell
                             && queued.cast_at_ms == receipt.cast_at_ms
+                    }) {
+                        pending.push(receipt);
+                    }
+                }
+                ZoneOutbound::JourneyEvent { receipt } => {
+                    let Some(key) = self.zone_session_keys.get(&receipt.session_id).cloned() else {
+                        continue;
+                    };
+                    // The Zone writer is the sole producer. Gateway still
+                    // fences every receipt to the authenticated current owner
+                    // before it may affect personal quest state.
+                    if self.teardown_fenced(&key)
+                        || !self.journey_event_owner_is_current(&key, &receipt)
+                    {
+                        continue;
+                    }
+                    let identity = ZoneJourneyEventIdentity::from(&receipt);
+                    let pending = self.pending_zone_journey_events.entry(key).or_default();
+                    if !pending.iter().any(|queued| {
+                        ZoneJourneyEventIdentity::from(queued) == identity
                     }) {
                         pending.push(receipt);
                     }
@@ -9093,6 +9185,11 @@ impl SharedInProcessZoneSessionRuntime {
         self.apply_zone_player_buff_packets(&packets);
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         self.apply_zone_transform(transform);
+        if should_join_zone {
+            // The authoritative map/bootstrap snapshot establishes the first
+            // trusted state at which V2 checkpoint conditions may be refreshed.
+            packets.extend(self.inner.commit_zone_journey_state());
+        }
         self.apply_zone_shout_consume(shout_consume);
         self.filter_stale_owner_vital_packets(&mut packets, &player_damages);
         packets.extend(self.apply_zone_player_damages(player_damages));
@@ -9402,6 +9499,9 @@ impl SharedInProcessZoneSessionRuntime {
                     .is_some_and(|private| private != position)
             });
         self.apply_zone_transform(transform);
+        if completed_authoritative_position_change {
+            packets.extend(self.inner.commit_zone_journey_reposition());
+        }
         let mut deferred_monster_spawns = Vec::new();
         if defer_unowned_monster_spawns {
             packets.retain(|packet| {
@@ -9426,6 +9526,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
         packets.extend(self.apply_pending_zone_magic_practice(false));
+        packets.extend(self.apply_pending_zone_journey_events(false));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9516,6 +9617,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         self.apply_zone_monster_kill_awards_checked(&key, monster_kill_awards)?;
         packets.extend(self.apply_pending_zone_magic_practice(true));
+        packets.extend(self.apply_pending_zone_journey_events(true));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9585,6 +9687,7 @@ impl SharedInProcessZoneSessionRuntime {
         self.inner.apply_shared_monster_lifecycle_packets(&packets);
         packets.extend(self.apply_zone_monster_kill_awards(monster_kill_awards));
         packets.extend(self.apply_pending_zone_magic_practice(false));
+        packets.extend(self.apply_pending_zone_journey_events(false));
         let (claim_packets_by_object_id, canceled_claims) =
             self.apply_zone_ground_drop_claims(ground_drop_claims);
         merge_ground_drop_claim_packets_in_crystal_order(
@@ -9882,6 +9985,92 @@ impl SharedInProcessZoneSessionRuntime {
             packets.extend(self.inner.commit_zone_magic_practice(&receipt));
         }
         packets
+    }
+
+    fn apply_pending_zone_journey_events(
+        &mut self,
+        allow_fenced_current: bool,
+    ) -> Vec<ServerPacket> {
+        let Some(key) = self.current_presence_key() else {
+            return Vec::new();
+        };
+
+        // Zone journey evidence is needed only while an accepted V2 newcomer
+        // training flag remains incomplete. Clearing both caches here releases
+        // the per-incarnation dedup set after that transition.
+        if !self.inner.needs_zone_journey_evidence() {
+            self.discard_zone_journey_event_state(&key);
+            return Vec::new();
+        }
+
+        // Take first, then recheck personal state. A transition caused by a
+        // preceding packet in this same drain cannot admit stale evidence into
+        // the replay fence. Keep the shared Zone mutex out of personal state
+        // evaluation to preserve the existing lock boundary.
+        let queued = {
+            self.zone_state
+                .lock()
+                .expect("shared Zone state should lock")
+                .pending_zone_journey_events
+                .remove(&key)
+                .unwrap_or_default()
+        };
+        if !self.inner.needs_zone_journey_evidence() {
+            self.discard_zone_journey_event_state(&key);
+            return Vec::new();
+        }
+
+        let receipts = {
+            let mut state = self
+                .zone_state
+                .lock()
+                .expect("shared Zone state should lock");
+            let mut accepted = Vec::new();
+            for receipt in queued {
+                if (state.teardown_fenced(&key) && !allow_fenced_current)
+                    || !state.journey_event_owner_is_current(&key, &receipt)
+                {
+                    continue;
+                }
+                let identity = ZoneJourneyEventIdentity::from(&receipt);
+                let progress = state.journey_event_progress.entry(key.clone()).or_default();
+                if progress.object_id != receipt.object_id
+                    || progress.life_generation != receipt.life_generation
+                {
+                    *progress = ZoneJourneyEventProgress {
+                        object_id: receipt.object_id,
+                        life_generation: receipt.life_generation,
+                        committed: BTreeSet::new(),
+                    };
+                }
+                if !progress.committed.insert(identity) {
+                    continue;
+                }
+                accepted.push(receipt);
+            }
+            accepted
+        };
+        let mut packets = Vec::new();
+        for receipt in receipts {
+            packets.extend(self.inner.commit_zone_journey_event(receipt));
+            // A committed receipt can complete the final accepted training
+            // flag. Remaining receipts came from the prior state and must not
+            // become evidence for a later node; drop their queue/progress now.
+            if !self.inner.needs_zone_journey_evidence() {
+                self.discard_zone_journey_event_state(&key);
+                break;
+            }
+        }
+        packets
+    }
+
+    fn discard_zone_journey_event_state(&self, key: &ZonePresenceKey) {
+        let mut state = self
+            .zone_state
+            .lock()
+            .expect("shared Zone state should lock");
+        state.pending_zone_journey_events.remove(key);
+        state.journey_event_progress.remove(key);
     }
 
     fn apply_zone_death_penalty_and_register_drops(&mut self) -> Vec<ServerPacket> {
@@ -11827,9 +12016,18 @@ impl SharedInProcessZoneSessionRuntime {
                     // stale/missing presence must not mutate its private world instead.
                     return Some(Vec::new());
                 };
+                let accepted_walk_or_run = matches!(packet, ClientPacket::Walk { .. } | ClientPacket::Run { .. })
+                    && execution.transform.as_ref().is_some_and(|(position, _)| {
+                        self.inner
+                            .local_player_position()
+                            .is_some_and(|current| current != *position)
+                    });
                 self.apply_zone_transform(execution.transform);
                 let mut packets = execution.packets;
                 if matches!(packet, ClientPacket::Walk { .. } | ClientPacket::Run { .. }) {
+                    if accepted_walk_or_run {
+                        packets.extend(self.inner.commit_zone_journey_reposition());
+                    }
                     packets.extend(self.sync_newly_active_private_monsters_to_zone());
                 }
                 // Crystal Turn invokes CheckMovement on the standing tile after
@@ -14561,6 +14759,8 @@ mod tests {
     mod zone_melee_passive_progression_tests;
     #[path = "zone_soulfire_practice_tests.rs"]
     mod zone_soulfire_practice_tests;
+    #[path = "zone_journey_event_bridge_tests.rs"]
+    mod zone_journey_event_bridge_tests;
     #[path = "shared_session_hot_path_tests.rs"]
     mod shared_session_hot_path_tests;
 

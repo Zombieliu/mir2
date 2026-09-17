@@ -1,5 +1,14 @@
 # Agent Orchestration
 
+> 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
+> claims, six chapters and trusted committed server/Zone evidence are implemented.
+> Simulation V2 14 resolved leaves, Zone 6/6, Gateway bridge 4/4, movement 4/4,
+> V1 progression 11/11 and native journey 17/17 (five V2) pass. Static sampled
+> region paths pass; ordinary three-class 0/78, actual timing, dynamic survival,
+> Web guidance, exact native package and visual acceptance remain open.
+> This adds custom onboarding, no Crystal parity percentage. V1 evidence stays
+> separate. [Implementation evidence](generated/player-qa/newcomer-v2-20260918/runtime.md).
+
 > 2026-09-08 Windows repackaging checkpoint: clean snapshot `4264b9149`
 > builds and passes the signed Candidate verifier (37,534 files). Sound104
 > package/allowlist mismatch and malformed-Unicode PE scan false positive are

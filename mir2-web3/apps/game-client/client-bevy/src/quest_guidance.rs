@@ -8,9 +8,12 @@ use std::collections::BTreeMap;
 use bevy::prelude::Resource;
 use serde::Deserialize;
 
-const NEWCOMER_PROFILE_NAME: &str = "newcomer-v1";
-const NEWCOMER_PROFILE_JSON: &str =
+const NEWCOMER_V1_PROFILE_NAME: &str = "newcomer-v1";
+const NEWCOMER_V1_PROFILE_JSON: &str =
     include_str!("../../../../config/quest-guidance/newcomer-v1.json");
+const NEWCOMER_V2_PROFILE_NAME: &str = "newcomer-v2";
+const NEWCOMER_V2_PROFILE_JSON: &str =
+    include_str!("../../../../config/quest-guidance/newcomer-v2.json");
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -77,15 +80,19 @@ impl QuestGuidance {
     }
 
     pub fn from_profile_name(profile: &str) -> Self {
-        if !profile.eq_ignore_ascii_case(NEWCOMER_PROFILE_NAME) {
+        let (expected_profile, json) = if profile.eq_ignore_ascii_case(NEWCOMER_V1_PROFILE_NAME) {
+            (NEWCOMER_V1_PROFILE_NAME, NEWCOMER_V1_PROFILE_JSON)
+        } else if profile.eq_ignore_ascii_case(NEWCOMER_V2_PROFILE_NAME) {
+            (NEWCOMER_V2_PROFILE_NAME, NEWCOMER_V2_PROFILE_JSON)
+        } else {
             return Self::disabled();
-        }
+        };
 
-        let document: QuestGuidanceDocument = serde_json::from_str(NEWCOMER_PROFILE_JSON)
-            .expect("bundled newcomer quest guidance must be valid JSON");
+        let document: QuestGuidanceDocument =
+            serde_json::from_str(json).expect("bundled newcomer quest guidance must be valid JSON");
         assert_eq!(document.schema, 1, "unsupported quest guidance schema");
         assert_eq!(
-            document.profile, NEWCOMER_PROFILE_NAME,
+            document.profile, expected_profile,
             "bundled quest guidance profile mismatch"
         );
 
@@ -104,6 +111,10 @@ impl QuestGuidance {
 
     pub fn is_enabled(&self) -> bool {
         self.profile.is_some()
+    }
+
+    pub fn profile_name(&self) -> Option<&str> {
+        self.profile.as_deref()
     }
 
     pub fn entry(&self, quest_id: i32) -> Option<&QuestGuidanceEntry> {
@@ -144,6 +155,18 @@ mod tests {
             .entries
             .values()
             .all(|entry| !entry.hint.trim().is_empty()));
+    }
+
+    #[test]
+    fn newcomer_v2_profile_loads_every_server_owned_journey_task() {
+        let guidance = QuestGuidance::from_profile_name("newcomer-v2");
+        assert!(guidance.is_enabled());
+        assert_eq!(guidance.profile_name(), Some("newcomer-v2"));
+        assert_eq!(guidance.entries.len(), 26);
+        assert!((2110001..=2110022).all(|id| guidance.entry(id).is_some()));
+        assert!([2120015, 2120020, 2120025, 2120030]
+            .into_iter()
+            .all(|id| guidance.entry(id).is_some()));
     }
 
     #[test]

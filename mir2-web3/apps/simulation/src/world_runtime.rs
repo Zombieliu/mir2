@@ -827,6 +827,25 @@ impl InProcessWorldRuntime {
         self.session.commit_zone_magic_practice(receipt)
     }
 
+    pub fn commit_zone_journey_event(
+        &mut self,
+        receipt: crate::ZoneJourneyEventReceipt,
+    ) -> Vec<ServerPacket> {
+        self.session.commit_zone_journey_event(receipt)
+    }
+
+    pub fn needs_zone_journey_evidence(&self) -> bool {
+        self.session.needs_zone_journey_evidence()
+    }
+
+    pub fn commit_zone_journey_reposition(&mut self) -> Vec<ServerPacket> {
+        self.session.commit_zone_journey_reposition()
+    }
+
+    pub fn commit_zone_journey_state(&mut self) -> Vec<ServerPacket> {
+        self.session.commit_zone_journey_state()
+    }
+
     pub fn apply_zone_player_buff_packets(
         &mut self,
         packets: &[ServerPacket],

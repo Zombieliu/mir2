@@ -34,6 +34,12 @@ pub(in crate::runtime) fn server_newcomer_v1_enabled() -> bool {
         .is_some_and(|value| value.trim().eq_ignore_ascii_case("newcomer-v1"))
 }
 
+pub(in crate::runtime) fn server_newcomer_v2_enabled() -> bool {
+    std::env::var("MIR2_QUEST_CADENCE")
+        .ok()
+        .is_some_and(|value| value.trim().eq_ignore_ascii_case("newcomer-v2"))
+}
+
 pub(super) fn cadence_for_quest(world: &World, quest_id: i32) -> Option<QuestCadence> {
     let newcomer_v1 = world
         .get_resource::<QuestResource>()

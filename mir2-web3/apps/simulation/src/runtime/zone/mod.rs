@@ -27,7 +27,8 @@ pub use types::{
     GroundDropClaimTicket, PlayerId, SessionId, ZoneBossRewardAudit, ZoneChatItem, ZoneChatProfile,
     ZoneCommand, ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward,
     ZoneMonsterRespawnPolicy, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
-    ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats, ZoneMagicPracticeReceipt,
+    ZoneNpcTeleportDestination, ZoneOutbound, ZonePlayerCombatStats, ZoneJourneyEventKind,
+    ZoneJourneyEventReceipt, ZoneJourneyPhysicalTechnique, ZoneMagicPracticeReceipt,
     ZoneMagicPracticeSpell,
     ZoneVitalSettlement,
 };

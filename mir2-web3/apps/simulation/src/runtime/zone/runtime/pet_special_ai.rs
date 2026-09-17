@@ -176,6 +176,7 @@ impl ZoneRuntime {
                         object_id: h.target,
                         damage,
                         soulfire_practice: None,
+                        journey_event: None,
                         fire_bounce: None,
                     },
                     now,

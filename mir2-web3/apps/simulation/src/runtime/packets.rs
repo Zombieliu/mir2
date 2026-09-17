@@ -3512,7 +3512,7 @@ fn newcomer_diary_allows_quest_request_without_npc(
 ) -> bool {
     if !world
         .get_resource::<QuestResource>()
-        .is_some_and(|quests| quests.newcomer_v1_cadence)
+        .is_some_and(|quests| quests.newcomer_v1_cadence || quests.newcomer_v2_cadence)
     {
         return false;
     }
@@ -7412,7 +7412,8 @@ pub(super) fn start_game_static_visible_object_packets(
             .get(&object_id)
             .map(|ids| ids.iter().copied().collect())
             .unwrap_or_default();
-        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id)
+        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id).into_iter()
+            .chain(super::quests::newcomer_v2::configured_quest_ids_for_npc(object_id))
         {
             if !quest_ids.contains(&quest_id) {
                 quest_ids.push(quest_id);
@@ -8847,7 +8848,11 @@ impl SimulationSession {
             ClientPacket::Attack{..}|ClientPacket::RangeAttack{..}|ClientPacket::Magic{..}
             |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
         let before = if xp_source { self.begin_guild_experience_command(false)? } else { None };
+        let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
         let mut packets = self.handle_packet_impl(packet);
+        let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
+            self.app.world_mut(), journey_context, &packets);
+        packets.append(&mut journey_packets);
         recurrence_packets.append(&mut packets);
         let packets = self.finalize_packets(recurrence_packets);
         self.finish_guild_experience_command(before,packets)

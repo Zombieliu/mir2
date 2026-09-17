@@ -1164,11 +1164,49 @@ impl SimulationSession {
             return Vec::new();
         };
         let tick = runtime_tick(world);
-        let packets = advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
+        let mut packets = advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
+        packets.extend(super::quests::newcomer_v2_events::record_spell_damage(
+            world, &magic.spell, receipt.cast_at_ms));
         if !packets.is_empty() {
             advance_runtime_tick(world);
         }
         packets
+    }
+
+    /// Trusted Gateway-only outcome bridge. The Gateway fences owner incarnation
+    /// and duplicate receipts; Session additionally binds the personal identity.
+    pub fn commit_zone_journey_event(
+        &mut self,
+        receipt: super::zone::ZoneJourneyEventReceipt,
+    ) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) { return Vec::new(); }
+        let Some(identity) = self.active_identity() else { return Vec::new(); };
+        if identity.account_id != receipt.account_id || identity.character_index != receipt.character_index
+            || !self.app.world().resource::<MapRuntimeResource>().current_map.file_name
+                .eq_ignore_ascii_case(&receipt.zone_key.map_file_name) {
+            return Vec::new();
+        }
+        let packets = super::quests::newcomer_v2_events::record_zone_event(self.app.world_mut(), &receipt);
+        self.finalize_packets(packets)
+    }
+
+    pub fn needs_zone_journey_evidence(&self) -> bool {
+        let world = self.app.world();
+        super::quests::newcomer_v2::enabled(world) && is_in_world(world)
+            && world.resource::<QuestResource>().quests.iter().any(|quest|
+                quest.stage == crate::QuestStage::InProgress
+                    && super::quests::newcomer_v2::flag_objectives(world, quest.quest_id).iter().any(|flag|
+                        quest.task_progress.get(&format!("flag:{}", flag.number)).copied().unwrap_or(0) < 1))
+    }
+
+    pub fn commit_zone_journey_reposition(&mut self) -> Vec<ServerPacket> {
+        let packets = super::quests::newcomer_v2_events::record_legal_reposition(self.app.world_mut());
+        self.finalize_packets(packets)
+    }
+
+    pub fn commit_zone_journey_state(&mut self) -> Vec<ServerPacket> {
+        let packets = super::quests::newcomer_v2_events::refresh_state_conditions(self.app.world_mut());
+        self.finalize_packets(packets)
     }
 
     pub fn apply_zone_player_buff_packets(

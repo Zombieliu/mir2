@@ -3358,12 +3358,12 @@ impl SimulationSession {
 
     pub fn interact(&mut self, object_id: u32) -> Vec<ServerPacket> {
         let packets = self.interact_impl(object_id);
-        self.finalize_packets(packets)
+        self.finalize_journey_npc_packets(object_id, packets)
     }
 
     pub fn interact_shared_npc_snapshot(&mut self, npc: &WorldEntitySnapshot) -> Vec<ServerPacket> {
         let packets = self.interact_shared_npc_snapshot_impl(npc);
-        self.finalize_packets(packets)
+        self.finalize_journey_npc_packets(npc.object_id, packets)
     }
 
     pub fn call_shared_npc_snapshot(
@@ -3372,16 +3372,27 @@ impl SimulationSession {
         key: &str,
     ) -> Vec<ServerPacket> {
         let packets = self.call_shared_npc_snapshot_impl(npc, key);
-        self.finalize_packets(packets)
+        self.finalize_journey_npc_packets(npc.object_id, packets)
     }
 
     pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
         let packets = self.call_npc_impl(object_id, key);
-        self.finalize_packets(packets)
+        self.finalize_journey_npc_packets(object_id, packets)
     }
 
     pub fn select_npc_dialog_target(&mut self, target: &str) -> Vec<ServerPacket> {
+        let object_id = self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()
+            .map(|dialog| dialog.npc_object_id);
         let packets = self.select_npc_dialog_target_impl(target);
+        match object_id {
+            Some(object_id) => self.finalize_journey_npc_packets(object_id, packets),
+            None => self.finalize_packets(packets),
+        }
+    }
+
+    fn finalize_journey_npc_packets(&mut self, object_id: u32, mut packets: Vec<ServerPacket>) -> Vec<ServerPacket> {
+        packets.extend(super::quests::newcomer_v2_events::observe_committed_command(
+            self.app.world_mut(), super::quests::newcomer_v2_events::CommandContext::Npc(object_id), &packets));
         self.finalize_packets(packets)
     }
 

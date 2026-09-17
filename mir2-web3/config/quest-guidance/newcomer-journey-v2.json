@@ -1,0 +1,1197 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v2",
+  "maxLevel": 0,
+  "quests": [
+    {
+      "id": 2110001,
+      "order": 1,
+      "title": "Your first patrol kit",
+      "minLevel": 1,
+      "requiredQuestId": 0,
+      "afterQuestIds": [],
+      "startNpcId": 3,
+      "finishNpcId": 3,
+      "maps": [
+        "0"
+      ],
+      "experience": 100,
+      "gold": 100,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210011,
+          "message": "Report to Assistant Jane",
+          "kind": "serverEvent",
+          "conditions": [
+            "initialNpcReport"
+          ]
+        }
+      ],
+      "rewards": {
+        "common": [
+          {
+            "count": 1,
+            "name": "WoodenSword"
+          },
+          {
+            "count": 10,
+            "name": "(HP)DrugSmall"
+          }
+        ],
+        "warrior": [],
+        "wizard": [
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110002,
+      "order": 2,
+      "title": "Equip your weapon",
+      "minLevel": 2,
+      "requiredQuestId": 2110001,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "0"
+      ],
+      "experience": 200,
+      "gold": 100,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210021,
+          "message": "Equip a weapon you can use",
+          "kind": "serverEvent",
+          "conditions": [
+            "eligibleWeaponEquipped"
+          ]
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110003,
+      "order": 3,
+      "title": "Protect the village",
+      "minLevel": 3,
+      "requiredQuestId": 2110002,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "0"
+      ],
+      "experience": 2200,
+      "gold": 150,
+      "kills": [
+        {
+          "monster": "Scarecrow",
+          "monsterIndex": 39,
+          "count": 2,
+          "message": "Defeat 2 Scarecrow."
+        },
+        {
+          "monster": "RakingCat",
+          "monsterIndex": 44,
+          "count": 2,
+          "message": "Defeat 2 RakingCat."
+        }
+      ],
+      "flags": [],
+      "rewards": {
+        "common": [],
+        "warrior": [
+          {
+            "count": 1,
+            "name": "Fencing"
+          }
+        ],
+        "wizard": [
+          {
+            "count": 1,
+            "name": "FireBall"
+          },
+          {
+            "count": 20,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 1,
+            "name": "Healing"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110004,
+      "order": 4,
+      "title": "Your first class skill",
+      "minLevel": 7,
+      "requiredQuestId": 2110003,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "0"
+      ],
+      "experience": 1200,
+      "gold": 150,
+      "kills": [
+        {
+          "monster": "Oma",
+          "monsterIndex": 48,
+          "count": 2,
+          "message": "Defeat 2 Oma."
+        }
+      ],
+      "flags": [
+        {
+          "number": 2210041,
+          "message": "Complete your class practice",
+          "kind": "classPractice",
+          "requirements": {
+            "warrior": [
+              "Fencing learned",
+              "normal attack landed with Fencing learned"
+            ],
+            "wizard": [
+              "FireBall learned",
+              "FireBall damage committed"
+            ],
+            "taoist": [
+              "Healing learned",
+              "Healing cast accepted on self"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110005,
+      "order": 5,
+      "title": "Arrive safely in Bichon",
+      "minLevel": 8,
+      "requiredQuestId": 2110004,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "0"
+      ],
+      "experience": 1700,
+      "gold": 200,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210051,
+          "message": "Reach a Bichon safe area",
+          "kind": "serverEvent",
+          "conditions": [
+            "bichonSafeArrival"
+          ]
+        }
+      ],
+      "rewards": {
+        "common": [
+          {
+            "count": 1,
+            "name": "TownTeleport"
+          }
+        ],
+        "warrior": [],
+        "wizard": [],
+        "taoist": [
+          {
+            "count": 1,
+            "name": "SpiritSword"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110006,
+      "order": 6,
+      "title": "Prepare your supplies",
+      "minLevel": 9,
+      "requiredQuestId": 2110005,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "0"
+      ],
+      "experience": 8500,
+      "gold": 300,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210061,
+          "message": "Buy a small HP or MP potion from a normal shop",
+          "kind": "serverEvent",
+          "conditions": [
+            "ordinaryBasicPotionBought"
+          ]
+        }
+      ],
+      "rewards": {
+        "common": [
+          {
+            "count": 10,
+            "name": "(HP)DrugSmall"
+          },
+          {
+            "count": 2,
+            "name": "RandomTeleport"
+          }
+        ],
+        "warrior": [],
+        "wizard": [
+          {
+            "count": 20,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 20,
+            "name": "(MP)DrugSmall"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110007,
+      "order": 7,
+      "title": "Clear the forest path",
+      "minLevel": 11,
+      "requiredQuestId": 2110006,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "0"
+      ],
+      "experience": 63000,
+      "gold": 500,
+      "kills": [
+        {
+          "monster": "ForestYeti",
+          "monsterIndex": 55,
+          "count": 4,
+          "message": "Defeat 4 ForestYeti."
+        }
+      ],
+      "flags": [],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": [
+          {
+            "count": 1,
+            "name": "Poisoning"
+          },
+          {
+            "count": 20,
+            "name": "GreenPoison"
+          },
+          {
+            "count": 20,
+            "name": "RedPoison"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110008,
+      "order": 8,
+      "title": "Show your class training",
+      "minLevel": 15,
+      "requiredQuestId": 2110007,
+      "afterQuestIds": [
+        2120015
+      ],
+      "startNpcId": 0,
+      "finishNpcId": 24,
+      "maps": [
+        "0"
+      ],
+      "experience": 40000,
+      "gold": 500,
+      "kills": [
+        {
+          "monster": "Oma",
+          "monsterIndex": 48,
+          "count": 2,
+          "message": "Defeat 2 Oma."
+        }
+      ],
+      "flags": [
+        {
+          "number": 2210081,
+          "message": "Complete your class practice",
+          "kind": "classPractice",
+          "requirements": {
+            "warrior": [
+              "Slaying learned",
+              "normal attack landed with Slaying learned"
+            ],
+            "wizard": [
+              "GreatFireBall learned",
+              "GreatFireBall damage committed"
+            ],
+            "taoist": [
+              "SpiritSword learned",
+              "normal attack landed with SpiritSword learned"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110009,
+      "order": 9,
+      "title": "Enter Oma Cave",
+      "minLevel": 16,
+      "requiredQuestId": 2110008,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D001"
+      ],
+      "experience": 0,
+      "gold": 500,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210091,
+          "message": "Reach the Oma Cave entrance",
+          "kind": "serverEvent",
+          "conditions": [
+            "omaCaveEntryReached"
+          ]
+        }
+      ],
+      "rewards": {
+        "common": [
+          {
+            "count": 10,
+            "name": "(HP)DrugSmall"
+          },
+          {
+            "count": 1,
+            "name": "TownTeleport"
+          }
+        ],
+        "warrior": [],
+        "wizard": [
+          {
+            "count": 20,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 20,
+            "name": "(MP)DrugSmall"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110010,
+      "order": 10,
+      "title": "Push back the skeletons",
+      "minLevel": 16,
+      "requiredQuestId": 2110009,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D001"
+      ],
+      "experience": 120000,
+      "gold": 1000,
+      "kills": [
+        {
+          "monster": "Skeleton",
+          "monsterIndex": 85,
+          "count": 4,
+          "message": "Defeat 4 Skeleton."
+        }
+      ],
+      "flags": [],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110011,
+      "order": 11,
+      "title": "Practice against the undead",
+      "minLevel": 18,
+      "requiredQuestId": 2110010,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D001"
+      ],
+      "experience": 100000,
+      "gold": 1000,
+      "kills": [
+        {
+          "monster": "Skeleton",
+          "monsterIndex": 85,
+          "count": 3,
+          "message": "Defeat 3 Skeleton."
+        }
+      ],
+      "flags": [
+        {
+          "number": 2210111,
+          "message": "Complete your class practice",
+          "kind": "classPractice",
+          "requirements": {
+            "warrior": [
+              "Slaying learned",
+              "normal attack landed with Slaying learned"
+            ],
+            "wizard": [
+              "GreatFireBall damage committed"
+            ],
+            "taoist": [
+              "SoulFireBall learned",
+              "SoulFireBall damage committed with material consumption"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": [
+          {
+            "count": 1,
+            "name": "SummonSkeleton"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110012,
+      "order": 12,
+      "title": "Complete the cave patrol",
+      "minLevel": 19,
+      "requiredQuestId": 2110011,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 24,
+      "maps": [
+        "D001"
+      ],
+      "experience": 120000,
+      "gold": 500,
+      "kills": [
+        {
+          "monster": "Skeleton",
+          "monsterIndex": 85,
+          "count": 1,
+          "message": "Defeat 1 Skeleton."
+        }
+      ],
+      "flags": [
+        {
+          "number": 2210121,
+          "message": "Complete your class practice",
+          "kind": "classPractice",
+          "requirements": {
+            "warrior": [
+              "normal attack landed with Slaying learned"
+            ],
+            "wizard": [
+              "GreatFireBall damage committed"
+            ],
+            "taoist": [
+              "SummonSkeleton learned",
+              "owned skeleton exists in authoritative Zone",
+              "owned skeleton damage committed"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110013,
+      "order": 13,
+      "title": "Enter the Dead Mine",
+      "minLevel": 20,
+      "requiredQuestId": 2110012,
+      "afterQuestIds": [
+        2120020
+      ],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D401"
+      ],
+      "experience": 140000,
+      "gold": 500,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210131,
+          "message": "Reach the Dead Mine entrance",
+          "kind": "serverEvent",
+          "conditions": [
+            "deadMineEntryReached"
+          ]
+        }
+      ],
+      "rewards": {
+        "common": [
+          {
+            "count": 10,
+            "name": "(HP)DrugSmall"
+          },
+          {
+            "count": 2,
+            "name": "TownTeleport"
+          },
+          {
+            "count": 1,
+            "name": "RandomTeleport"
+          }
+        ],
+        "warrior": [],
+        "wizard": [
+          {
+            "count": 20,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          },
+          {
+            "count": 100,
+            "name": "Amulet"
+          },
+          {
+            "count": 30,
+            "name": "GreenPoison"
+          },
+          {
+            "count": 30,
+            "name": "RedPoison"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110014,
+      "order": 14,
+      "title": "Clear the mine entrance",
+      "minLevel": 21,
+      "requiredQuestId": 2110013,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D401"
+      ],
+      "experience": 250000,
+      "gold": 1500,
+      "kills": [
+        {
+          "monster": "Zombie2",
+          "monsterIndex": 110,
+          "count": 3,
+          "message": "Defeat 3 Zombie2."
+        },
+        {
+          "monster": "Zombie3",
+          "monsterIndex": 112,
+          "count": 2,
+          "message": "Defeat 2 Zombie3."
+        }
+      ],
+      "flags": [],
+      "rewards": {
+        "common": [],
+        "warrior": [
+          {
+            "count": 1,
+            "name": "Thrusting"
+          }
+        ],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110015,
+      "order": 15,
+      "title": "Fight and reposition",
+      "minLevel": 22,
+      "requiredQuestId": 2110014,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D401"
+      ],
+      "experience": 650000,
+      "gold": 1500,
+      "kills": [
+        {
+          "monster": "Zombie2",
+          "monsterIndex": 110,
+          "count": 1,
+          "message": "Defeat 1 Zombie2."
+        }
+      ],
+      "flags": [
+        {
+          "number": 2210151,
+          "message": "Complete your class practice",
+          "kind": "classPractice",
+          "requirements": {
+            "warrior": [
+              "Thrusting learned",
+              "Thrusting attack damage committed"
+            ],
+            "wizard": [
+              "spell damage followed by legal reposition"
+            ],
+            "taoist": [
+              "Poisoning learned",
+              "owned poison effect committed with material consumption"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [
+          {
+            "count": 1,
+            "name": "FireWall"
+          }
+        ],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110016,
+      "order": 16,
+      "title": "Complete the mine patrol",
+      "minLevel": 24,
+      "requiredQuestId": 2110015,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 24,
+      "maps": [
+        "D401"
+      ],
+      "experience": 400000,
+      "gold": 1500,
+      "kills": [
+        {
+          "monster": "Zombie3",
+          "monsterIndex": 112,
+          "count": 3,
+          "message": "Defeat 3 Zombie3."
+        }
+      ],
+      "flags": [
+        {
+          "number": 2210161,
+          "message": "Complete your class practice",
+          "kind": "classPractice",
+          "requirements": {
+            "warrior": [
+              "Thrusting attack damage committed"
+            ],
+            "wizard": [
+              "FireWall learned",
+              "owned FireWall damage committed"
+            ],
+            "taoist": [
+              "owned skeleton damage committed",
+              "SoulFireBall damage committed"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110017,
+      "order": 17,
+      "title": "Prepare for the expedition",
+      "minLevel": 25,
+      "requiredQuestId": 2110016,
+      "afterQuestIds": [
+        2120025
+      ],
+      "startNpcId": 24,
+      "finishNpcId": 24,
+      "maps": [
+        "0"
+      ],
+      "experience": 500000,
+      "gold": 1500,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210171,
+          "message": "Equip armour for your class and level",
+          "kind": "serverEvent",
+          "conditions": [
+            "eligibleClassArmourEquipped"
+          ]
+        },
+        {
+          "number": 2210172,
+          "message": "Report to the Bichon Wall Board",
+          "kind": "serverEvent",
+          "conditions": [
+            "expeditionNpcReport"
+          ]
+        }
+      ],
+      "rewards": {
+        "common": [
+          {
+            "count": 10,
+            "name": "(HP)DrugSmall"
+          },
+          {
+            "count": 2,
+            "name": "TownTeleport"
+          },
+          {
+            "count": 1,
+            "name": "RandomTeleport"
+          }
+        ],
+        "warrior": [
+          {
+            "count": 1,
+            "name": "HalfMoon"
+          }
+        ],
+        "wizard": [
+          {
+            "count": 1,
+            "name": "Lightning"
+          },
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 10,
+            "name": "(MP)DrugSmall"
+          },
+          {
+            "count": 100,
+            "name": "Amulet"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2110018,
+      "order": 18,
+      "title": "Reach Wooma Temple",
+      "minLevel": 26,
+      "requiredQuestId": 2110017,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D021"
+      ],
+      "experience": 0,
+      "gold": 1500,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210181,
+          "message": "Reach the Wooma Temple entrance",
+          "kind": "serverEvent",
+          "conditions": [
+            "woomaEntranceReached"
+          ]
+        },
+        {
+          "number": 2210182,
+          "message": "Complete your class practice",
+          "kind": "classPractice",
+          "requirements": {
+            "warrior": [
+              "HalfMoon learned",
+              "level-eligible weapon equipped"
+            ],
+            "wizard": [
+              "Lightning learned",
+              "level-eligible weapon equipped"
+            ],
+            "taoist": [
+              "SummonSkeleton learned",
+              "level-eligible weapon equipped",
+              "eligible Amulet equipped and legal poison available in bag for re-equip between casts"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110019,
+      "order": 19,
+      "title": "Clear a foothold",
+      "minLevel": 26,
+      "requiredQuestId": 2110018,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D022"
+      ],
+      "experience": 700000,
+      "gold": 3500,
+      "kills": [
+        {
+          "monster": "Dung",
+          "monsterIndex": 242,
+          "count": 3,
+          "message": "Defeat 3 Dung."
+        }
+      ],
+      "flags": [],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110020,
+      "order": 20,
+      "title": "Defeat Wooma Soldiers",
+      "minLevel": 27,
+      "requiredQuestId": 2110019,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D022"
+      ],
+      "experience": 1000000,
+      "gold": 2500,
+      "kills": [
+        {
+          "monster": "WoomaSoldier",
+          "monsterIndex": 244,
+          "count": 3,
+          "message": "Defeat 3 WoomaSoldier."
+        }
+      ],
+      "flags": [],
+      "rewards": {
+        "common": [
+          {
+            "count": 10,
+            "name": "(HP)DrugSmall"
+          }
+        ],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110021,
+      "order": 21,
+      "title": "Prove your class tactics",
+      "minLevel": 28,
+      "requiredQuestId": 2110020,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 0,
+      "maps": [
+        "D022"
+      ],
+      "experience": 1400000,
+      "gold": 3500,
+      "kills": [
+        {
+          "monster": "WoomaFighter",
+          "monsterIndex": 246,
+          "count": 3,
+          "message": "Defeat 3 WoomaFighter."
+        }
+      ],
+      "flags": [
+        {
+          "number": 2210211,
+          "message": "Complete your class practice",
+          "kind": "classPractice",
+          "requirements": {
+            "warrior": [
+              "HalfMoon attack damage committed",
+              "Thrusting attack damage committed"
+            ],
+            "wizard": [
+              "Lightning damage committed",
+              "owned FireWall damage committed",
+              "legal reposition between attacks"
+            ],
+            "taoist": [
+              "owned skeleton damage committed",
+              "SoulFireBall damage committed",
+              "owned poison effect committed"
+            ]
+          }
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    },
+    {
+      "id": 2110022,
+      "order": 22,
+      "title": "Report the expedition",
+      "minLevel": 29,
+      "requiredQuestId": 2110021,
+      "afterQuestIds": [],
+      "startNpcId": 0,
+      "finishNpcId": 24,
+      "maps": [
+        "0"
+      ],
+      "experience": 1800000,
+      "gold": 2500,
+      "kills": [],
+      "flags": [
+        {
+          "number": 2210221,
+          "message": "Return to the Bichon Wall Board",
+          "kind": "serverEvent",
+          "conditions": [
+            "expeditionFinalReport"
+          ]
+        }
+      ],
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    }
+  ],
+  "growthRewards": [
+    {
+      "id": 2120015,
+      "level": 15,
+      "afterQuestId": 2110007,
+      "finishNpcId": 0,
+      "gold": 5000,
+      "experience": 0,
+      "rewards": {
+        "common": [],
+        "warrior": [
+          {
+            "count": 1,
+            "name": "SharpSword"
+          },
+          {
+            "count": 1,
+            "name": "Slaying"
+          }
+        ],
+        "wizard": [
+          {
+            "count": 1,
+            "name": "SharpTrident"
+          },
+          {
+            "count": 1,
+            "name": "GreatFireBall"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 1,
+            "name": "SharpScimitar"
+          },
+          {
+            "count": 1,
+            "name": "SoulFireBall"
+          },
+          {
+            "count": 100,
+            "name": "Amulet"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2120020,
+      "level": 20,
+      "afterQuestId": 2110012,
+      "finishNpcId": 24,
+      "gold": 10000,
+      "experience": 0,
+      "rewards": {
+        "common": [],
+        "warrior": [
+          {
+            "count": 1,
+            "name": "MartialSabre"
+          }
+        ],
+        "wizard": [
+          {
+            "count": 1,
+            "name": "SpearWithHook"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 1,
+            "name": "KeenKrissSword"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2120025,
+      "level": 25,
+      "afterQuestId": 2110016,
+      "finishNpcId": 24,
+      "gold": 15000,
+      "experience": 0,
+      "rewards": {
+        "common": [],
+        "warrior": [
+          {
+            "count": 1,
+            "maleItem": "ThickArmour(M)",
+            "femaleItem": "ThickArmour(F)"
+          },
+          {
+            "count": 1,
+            "name": "SolidGreatAxe"
+          }
+        ],
+        "wizard": [
+          {
+            "count": 1,
+            "maleItem": "FireMagicRobe(M)",
+            "femaleItem": "FireMagicRobe(F)"
+          },
+          {
+            "count": 1,
+            "name": "SolidBronzeStaff"
+          }
+        ],
+        "taoist": [
+          {
+            "count": 1,
+            "maleItem": "TaoArmour(M)",
+            "femaleItem": "TaoArmour(F)"
+          },
+          {
+            "count": 1,
+            "name": "SolidSerpentSword"
+          }
+        ]
+      }
+    },
+    {
+      "id": 2120030,
+      "level": 30,
+      "afterQuestId": 2110022,
+      "finishNpcId": 24,
+      "gold": 25000,
+      "experience": 0,
+      "rewards": {
+        "common": [],
+        "warrior": [],
+        "wizard": [],
+        "taoist": []
+      }
+    }
+  ]
+}

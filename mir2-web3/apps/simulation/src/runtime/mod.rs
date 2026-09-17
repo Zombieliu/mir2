@@ -89,7 +89,8 @@ pub use zone::{
     ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
     ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
-    ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneVitalSettlement,
+    ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
+    ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

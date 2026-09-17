@@ -767,6 +767,12 @@ pub enum ZoneOutbound {
     MagicPractice {
         receipt: ZoneMagicPracticeReceipt,
     },
+    /// Trusted evidence stamped by the single Zone writer after the gameplay
+    /// action named in `receipt.kind` has committed. The gateway owns replay
+    /// suppression and the session bridge; packets never carry this data.
+    JourneyEvent {
+        receipt: ZoneJourneyEventReceipt,
+    },
     PlayerDamaged {
         session_id: SessionId,
         damage: i32,
@@ -781,9 +787,7 @@ pub enum ZoneOutbound {
 
 /// The bounded set whose Crystal delayed primary hit invokes LevelMagic.
 /// Other spells cannot enter this trusted owner bridge.
-#[derive(
-    Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize,
-)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum ZoneMagicPracticeSpell {
     #[default]
@@ -838,6 +842,74 @@ pub struct ZoneMagicPracticeReceipt {
     pub target_object_id: u32,
     pub target_location: Point,
     pub damage: i32,
+}
+
+/// Physical actions the newcomer journey recognizes. Keeping the technique
+/// typed prevents a client packet's raw spell byte from becoming quest input.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneJourneyPhysicalTechnique {
+    Normal,
+    Fencing,
+    Slaying,
+    Thrusting,
+    HalfMoon,
+}
+
+/// A narrowly scoped, server-owned gameplay outcome for the V2 journey bridge.
+///
+/// This deliberately does not share `ZoneMagicPracticeReceipt`: LevelMagic
+/// progression has a different Crystal contract and must remain isolated from
+/// quest evidence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ZoneJourneyEventKind {
+    PhysicalDamage {
+        technique: ZoneJourneyPhysicalTechnique,
+    },
+    LightningDamage,
+    FireWallDamage,
+    PoisoningApplied,
+    /// A self-cast Healing action accepted by the Zone. `full_hp_exercise` is
+    /// descriptive evidence only; the session bridge decides whether the
+    /// currently accepted V2 node may use it.
+    HealingAccepted {
+        full_hp_exercise: bool,
+    },
+    SummonSkeletonSpawn,
+    SummonSkeletonDamage,
+}
+
+/// Owner-bound receipt for a committed V2 journey action. `source_action_at_ms`
+/// identifies the accepted attack/cast that caused a delayed result, while
+/// `committed_at_ms` and `event_sequence` order actual Zone mutations.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneJourneyEventReceipt {
+    pub kind: ZoneJourneyEventKind,
+    pub session_id: SessionId,
+    pub account_id: String,
+    pub character_index: i32,
+    pub object_id: u32,
+    pub life_generation: u64,
+    pub zone_key: ZoneKey,
+    pub source_action_at_ms: u64,
+    pub committed_at_ms: u64,
+    pub event_sequence: u64,
+    /// The attacking/casting object. This is the skeleton object for owned
+    /// skeleton damage and the player object for all player actions.
+    pub source_object_id: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_object_id: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub target_location: Option<Point>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub effect_object_id: Option<u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub damage: Option<i32>,
+    /// True only when the Zone has committed the item-consuming effect. It is
+    /// currently used for Poisoning, whose material debit is authoritative.
+    pub material_consumed: bool,
 }
 
 /// A receipt stamped by the single Zone writer at the HP mutation, before a
@@ -1129,6 +1201,10 @@ pub(crate) struct ZonePlayer {
     pub life_generation: u64,
     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
     pub vital_receipt_sequence: u64,
+    /// Monotonic owner-local ordering for Zone journey receipts. Kept separate
+    /// from vital settlements because only the Zone event bridge consumes it.
+    #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+    pub journey_event_sequence: u64,
     pub hidden: bool,
     pub sneaking: bool,
     pub effect: u8,
@@ -1239,6 +1315,7 @@ impl ZonePlayer {
             dead: join.hp <= 0,
             life_generation: 0,
             vital_receipt_sequence: 0,
+            journey_event_sequence: 0,
             hidden: false,
             sneaking: false,
             effect: 0,

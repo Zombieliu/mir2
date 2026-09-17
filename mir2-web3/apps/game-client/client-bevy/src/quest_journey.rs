@@ -13,8 +13,10 @@ use crate::quest_guidance::{QuestGuidance, QuestGuidanceCategory};
 use crate::quest_model::{CompletedQuestTracker, Quest, QuestReward, QuestStatus, QuestTracker};
 use crate::read_model::PlayerStats;
 
-const NEWCOMER_JOURNEY_JSON: &str =
+const NEWCOMER_V1_JOURNEY_JSON: &str =
     include_str!("../../../../config/quest-guidance/newcomer-journey-v1.json");
+const NEWCOMER_V2_JOURNEY_JSON: &str =
+    include_str!("../../../../config/quest-guidance/newcomer-journey-v2-ui.json");
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -33,12 +35,18 @@ pub struct JourneyChapter {
     pub class_hints: BTreeMap<String, String>,
 }
 
+#[cfg(test)]
+#[path = "newcomer_v2_guidance_tests.rs"]
+mod newcomer_v2_guidance_tests;
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct JourneyDocument {
     schema: u32,
     profile: String,
     max_level: u32,
+    #[serde(default = "one_objective_group")]
+    max_objective_groups: usize,
     chapters: Vec<JourneyChapter>,
     #[serde(default)]
     quest_overrides: Vec<JourneyQuestOverride>,
@@ -61,6 +69,8 @@ struct JourneyQuestOverride {
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct JourneyNpcLocation {
+    #[serde(default)]
+    npc_id: Option<i32>,
     name: String,
     map_name: String,
     map_file_name: String,
@@ -71,15 +81,27 @@ struct JourneyNpcLocation {
 #[derive(Resource, Debug, Clone)]
 pub struct NewcomerJourneyCatalog {
     max_level: u32,
+    profile: String,
+    max_objective_groups: usize,
     chapters: Vec<JourneyChapter>,
     quest_overrides: BTreeMap<i32, JourneyQuestOverride>,
+}
+
+const fn one_objective_group() -> usize {
+    1
 }
 
 impl NewcomerJourneyCatalog {
     pub fn from_json(json: &str) -> Result<Self, String> {
         let document: JourneyDocument =
             serde_json::from_str(json).map_err(|error| format!("invalid journey JSON: {error}"))?;
-        if document.schema != 1 || !document.profile.eq_ignore_ascii_case("newcomer-v1") {
+        if document.schema != 1
+            || !matches!(
+                document.profile.as_str(),
+                profile if profile.eq_ignore_ascii_case("newcomer-v1")
+                    || profile.eq_ignore_ascii_case("newcomer-v2")
+            )
+        {
             return Err("unsupported newcomer journey profile".to_owned());
         }
         if document.max_level == 0 || document.chapters.is_empty() {
@@ -98,6 +120,8 @@ impl NewcomerJourneyCatalog {
         }
         Ok(Self {
             max_level: document.max_level,
+            profile: document.profile,
+            max_objective_groups: document.max_objective_groups.clamp(1, 3),
             chapters: document.chapters,
             quest_overrides: document
                 .quest_overrides
@@ -108,8 +132,27 @@ impl NewcomerJourneyCatalog {
     }
 
     pub fn bundled() -> Self {
-        Self::from_json(NEWCOMER_JOURNEY_JSON)
+        Self::from_json(NEWCOMER_V1_JOURNEY_JSON)
             .expect("bundled newcomer journey profile must be valid JSON")
+    }
+
+    pub fn from_guidance(guidance: &QuestGuidance) -> Self {
+        match guidance.profile_name() {
+            Some(profile) if profile.eq_ignore_ascii_case("newcomer-v2") => {
+                Self::from_json(NEWCOMER_V2_JOURNEY_JSON)
+                    .expect("bundled newcomer v2 journey profile must be valid JSON")
+            }
+            _ => Self::bundled(),
+        }
+    }
+
+    fn from_profile_name(profile: &str) -> Self {
+        if profile.eq_ignore_ascii_case("newcomer-v2") {
+            Self::from_json(NEWCOMER_V2_JOURNEY_JSON)
+                .expect("bundled newcomer v2 journey profile must be valid JSON")
+        } else {
+            Self::bundled()
+        }
     }
 
     pub fn chapter_for_level(&self, level: u32) -> Option<&JourneyChapter> {
@@ -129,14 +172,18 @@ impl NewcomerJourneyCatalog {
         completed: &CompletedQuestTracker,
         player: &PlayerStats,
     ) -> Option<JourneyView> {
-        if !guidance.is_enabled() {
+        if !guidance.is_enabled()
+            || !guidance
+                .profile_name()
+                .is_some_and(|profile| profile.eq_ignore_ascii_case(&self.profile))
+        {
             return None;
         }
         let class_name = player.class_name.as_deref();
-        let class_known = self
-            .chapters
-            .iter()
-            .all(|chapter| case_insensitive_value(&chapter.class_quest_ids, class_name).is_some());
+        let class_known = self.chapters.iter().all(|chapter| {
+            chapter.class_quest_ids.is_empty()
+                || case_insensitive_value(&chapter.class_quest_ids, class_name).is_some()
+        });
         let chapter = if completed.known && class_known {
             self.chapters
                 .iter()
@@ -147,6 +194,22 @@ impl NewcomerJourneyCatalog {
                         .any(|quest_id| !completed.contains(*quest_id))
                 })
                 .or_else(|| self.chapters.last())?
+        } else if self.profile.eq_ignore_ascii_case("newcomer-v2") {
+            self.chapters
+                .iter()
+                .find(|chapter| {
+                    let ids = chapter.quest_ids_for_class(class_name);
+                    tracker.active_quests.iter().any(|quest| {
+                        ids.contains(&quest.quest_index)
+                            && matches!(
+                                quest.status,
+                                QuestStatus::NotStarted
+                                    | QuestStatus::InProgress
+                                    | QuestStatus::ReadyToTurnIn
+                            )
+                    })
+                })
+                .or_else(|| self.chapters.first())?
         } else {
             self.chapters
                 .iter()
@@ -211,7 +274,11 @@ impl NewcomerJourneyCatalog {
             .collect::<Vec<_>>();
         candidates.sort_by_key(|(status, guidance, _)| (*status, *guidance));
         let next = candidates.first().map(|(_, _, quest)| {
-            JourneyStep::from_quest(quest, self.quest_overrides.get(&quest.quest_index))
+            JourneyStep::from_quest_with_objective_groups(
+                quest,
+                self.quest_overrides.get(&quest.quest_index),
+                self.max_objective_groups,
+            )
         });
 
         let mut optional = tracker
@@ -251,7 +318,7 @@ impl NewcomerJourneyCatalog {
 
 impl Default for NewcomerJourneyCatalog {
     fn default() -> Self {
-        Self::bundled()
+        Self::from_profile_name(&std::env::var("MIR2_QUEST_GUIDANCE").unwrap_or_default())
     }
 }
 
@@ -319,6 +386,14 @@ pub struct JourneyStep {
 
 impl JourneyStep {
     fn from_quest(quest: &Quest, route: Option<&JourneyQuestOverride>) -> Self {
+        Self::from_quest_with_objective_groups(quest, route, 1)
+    }
+
+    fn from_quest_with_objective_groups(
+        quest: &Quest,
+        route: Option<&JourneyQuestOverride>,
+        max_objective_groups: usize,
+    ) -> Self {
         let (action, location) = match quest.status {
             QuestStatus::ReadyToTurnIn if route.is_some_and(|route| route.finish_in_diary) => {
                 ("Open Quest Diary to finish".to_owned(), None)
@@ -341,18 +416,26 @@ impl JourneyStep {
             ),
             _ => (String::new(), None),
         };
-        let objective = quest
+        let objective_groups = quest
             .objectives
             .iter()
-            .find(|objective| !objective.is_complete())
-            .or_else(|| quest.objectives.first())
+            .filter(|objective| !objective.is_complete())
+            .chain(
+                quest
+                    .objectives
+                    .iter()
+                    .filter(|objective| objective.is_complete()),
+            )
+            .take(max_objective_groups.clamp(1, 3))
             .map(|objective| {
                 format!(
                     "{} ({})",
                     inline_text(&objective.text),
                     objective.progress_label()
                 )
-            });
+            })
+            .collect::<Vec<_>>();
+        let objective = (!objective_groups.is_empty()).then(|| objective_groups.join(" • "));
         let reward = {
             let visible = quest
                 .rewards
@@ -589,6 +672,7 @@ mod tests {
             start_in_diary: false,
             finish_in_diary: false,
             start_npc: Some(JourneyNpcLocation {
+                npc_id: None,
                 name: "Assistant Jane".to_owned(),
                 map_name: "BichonProvince".to_owned(),
                 map_file_name: "0".to_owned(),

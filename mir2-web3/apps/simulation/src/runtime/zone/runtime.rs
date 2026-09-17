@@ -94,7 +94,6 @@ use super::aoi_grid::AoiGrid;
 use super::collision::ZoneCollision;
 use super::ecs::ZoneEcs;
 use super::movement::{movement_delay_ms, offset_point, ZONE_RUN_GRACE_MS, ZONE_TURN_DELAY_MS};
-use super::types::{ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell};
 use super::packets::{
     apply_observer_action_state, apply_retained_zone_object_packet, chat_packet,
     object_chat_packet, object_chat_packet_with_text, object_player_packets, object_run_packet,
@@ -109,6 +108,10 @@ use super::types::{
     ZoneMonsterKillAward, ZoneMonsterSpawn, ZoneMovementAction, ZoneMovementActionKind,
     ZoneNativeMonster, ZoneNativeMonsterRespawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
     ZoneObject, ZoneOutbound, ZonePlayer, ZonePlayerCombatState, ZoneReincarnationOffer,
+};
+use super::types::{
+    ZoneJourneyEventKind, ZoneJourneyEventReceipt, ZoneJourneyPhysicalTechnique,
+    ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell,
 };
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
@@ -247,6 +250,9 @@ pub struct ZoneRuntime {
     intelligent_creature_operations: Vec<super::intelligent_creatures::CreatureOperation>,
     key: ZoneKey,
     collision: ZoneCollision,
+    /// The Zone snapshots the trusted server cadence at construction. Ordinary
+    /// Crystal/V1 zones must not produce unbounded newcomer-V2 receipt traffic.
+    journey_evidence_enabled: bool,
     players: BTreeMap<SessionId, ZonePlayer>,
     objects: BTreeMap<u32, ZoneObject>,
     dead_object_ids: BTreeMap<u32, ZoneObjectDeadState>,
@@ -334,6 +340,11 @@ struct PendingNativeMonsterHit {
     // Retain the existing internal checkpoint field label; the typed payload
     // now also covers FireBall and GreatFireBall, never other spell families.
     soulfire_practice: Option<ZoneMagicPracticeReceipt>,
+    /// A Zone-owned outcome draft. It carries the accepting incarnation across
+    /// delayed resolution; the receipt sequence is assigned only at a positive
+    /// committed HP mutation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    journey_event: Option<ZoneJourneyEventReceipt>,
 }
 
 type NativeMonsterDamageResult = (
@@ -383,6 +394,8 @@ struct PendingNativePlayerHeal {
     ready_at_ms: u64,
     session_id: SessionId,
     amount: i32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    journey_event: Option<ZoneJourneyEventReceipt>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -397,6 +410,8 @@ struct PendingNativeSummon {
     skill_level: u8,
     position: Point,
     direction: MirDirection,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    journey_event: Option<ZoneJourneyEventReceipt>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -416,6 +431,8 @@ struct PendingNativeGroundSpellAction {
     next_damage_at_ms: u64,
     expires_at_ms: u64,
     tick_interval_ms: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    journey_event: Option<ZoneJourneyEventReceipt>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -513,6 +530,8 @@ impl ZoneRuntime {
         Self {
             key,
             collision,
+            journey_evidence_enabled:
+                crate::runtime::quests::quest_recurrence::server_newcomer_v2_enabled(),
             players: BTreeMap::new(),
             objects: BTreeMap::new(),
             dead_object_ids: BTreeMap::new(),
@@ -564,6 +583,7 @@ impl ZoneRuntime {
             self.npc_teleport_config.clone(),
         );
         fork.players = self.players.clone();
+        fork.journey_evidence_enabled = self.journey_evidence_enabled;
         fork.objects = self.objects.clone();
         fork.dead_object_ids = self.dead_object_ids.clone();
         fork.revived_object_ids = self.revived_object_ids.clone();
@@ -609,6 +629,11 @@ impl ZoneRuntime {
 
     pub fn key(&self) -> &ZoneKey {
         &self.key
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_journey_evidence_enabled_for_test(&mut self, enabled: bool) {
+        self.journey_evidence_enabled = enabled;
     }
 
     pub fn player_count(&self) -> usize {
@@ -3601,6 +3626,18 @@ impl ZoneRuntime {
                 object_id,
                 damage: resolved_damage,
                 soulfire_practice: None,
+                journey_event: zone_journey_physical_technique(attack_spell).map(|technique| {
+                    self.journey_event_draft(
+                        &player,
+                        ZoneJourneyEventKind::PhysicalDamage { technique },
+                        now_ms,
+                        player.object_id,
+                        Some(object_id),
+                        Some(monster.position.clone()),
+                        None,
+                        false,
+                    )
+                }),
                 fire_bounce: None,
             });
             if attack_spell == Spell::TwinDrakeBlade {
@@ -3611,6 +3648,7 @@ impl ZoneRuntime {
                     object_id,
                     damage: resolved_damage,
                     soulfire_practice: None,
+                    journey_event: None,
                     fire_bounce: None,
                 });
                 if let Some(target) = self.native_monsters.get_mut(&object_id) {
@@ -3681,6 +3719,20 @@ impl ZoneRuntime {
                             hit_damage
                         },
                         soulfire_practice: None,
+                        journey_event: zone_journey_physical_technique(attack_spell).map(
+                            |technique| {
+                                self.journey_event_draft(
+                                    &player,
+                                    ZoneJourneyEventKind::PhysicalDamage { technique },
+                                    now_ms,
+                                    player.object_id,
+                                    Some(target_id),
+                                    Some(target.position.clone()),
+                                    None,
+                                    false,
+                                )
+                            },
+                        ),
                         fire_bounce: None,
                     });
                 }
@@ -4095,6 +4147,7 @@ impl ZoneRuntime {
                 object_id,
                 damage: resolved_damage,
                 soulfire_practice: None,
+                journey_event: None,
                 fire_bounce: None,
             });
         }
@@ -4482,11 +4535,12 @@ impl ZoneRuntime {
                 destination_id: object_id,
             });
         }
+        let mut poisoning_applied = false;
         if cast {
             action_packets.extend(self.apply_native_monster_magic_control(
                 session_id, object_id, spell, level, damage, now_ms,
             ));
-            action_packets.extend(self.apply_native_monster_magic_damage_poison(
+            let (poison_packets, applied) = self.apply_native_monster_magic_damage_poison(
                 object_id,
                 session_id,
                 player.object_id,
@@ -4495,7 +4549,9 @@ impl ZoneRuntime {
                 damage,
                 item_param,
                 now_ms,
-            ));
+            );
+            action_packets.extend(poison_packets);
+            poisoning_applied = applied;
             // FireBang/IceStorm keep their original immediate primary-target
             // path when cast on a monster. Their object_id=0 ground-target
             // form is handled earlier by player_cast_native_ground_magic.
@@ -4587,6 +4643,18 @@ impl ZoneRuntime {
                             target_location: hit_monster.position.clone(),
                             damage: 0,
                         }),
+                    journey_event: (spell == Spell::Lightning).then(|| {
+                        self.journey_event_draft(
+                            &player,
+                            ZoneJourneyEventKind::LightningDamage,
+                            now_ms,
+                            player.object_id,
+                            Some(hit_object_id),
+                            Some(hit_monster.position.clone()),
+                            None,
+                            false,
+                        )
+                    }),
                     fire_bounce: None,
                 });
             }
@@ -4596,6 +4664,7 @@ impl ZoneRuntime {
                         ready_at_ms: now_ms,
                         session_id: session_id.clone(),
                         amount: zone_vampire_shot_heal_amount(native_damage, level),
+                        journey_event: None,
                     });
             }
             if spell == Spell::Vampirism {
@@ -4607,6 +4676,7 @@ impl ZoneRuntime {
                             .saturating_mul(i32::from(level).saturating_add(1))
                             .saturating_div(3)
                             .max(1),
+                        journey_event: None,
                     });
             }
         }
@@ -4627,6 +4697,23 @@ impl ZoneRuntime {
                 session_ids: recipients,
                 packets: action_packets,
             });
+        }
+        if poisoning_applied {
+            let draft = self.journey_event_draft(
+                &player,
+                ZoneJourneyEventKind::PoisoningApplied,
+                now_ms,
+                player.object_id,
+                Some(object_id),
+                Some(monster.position),
+                None,
+                true,
+            );
+            if let Some(receipt) =
+                self.commit_journey_event(&draft, now_ms, Some(object_id), None, None, None)
+            {
+                outbounds.push(ZoneOutbound::JourneyEvent { receipt });
+            }
         }
         outbounds
     }
@@ -4863,6 +4950,7 @@ impl ZoneRuntime {
                         ready_at_ms: now_ms,
                         session_id: session_id.clone(),
                         amount: zone_vampire_shot_heal_amount(resolved_damage, level),
+                        journey_event: None,
                     });
             }
         } else if cast && spell == Spell::Poisoning {
@@ -5274,6 +5362,18 @@ impl ZoneRuntime {
                         skill_level: level,
                         position: summon_position,
                         direction,
+                        journey_event: (spell == Spell::SummonSkeleton).then(|| {
+                            self.journey_event_draft(
+                                &player,
+                                ZoneJourneyEventKind::SummonSkeletonSpawn,
+                                now_ms,
+                                player.object_id,
+                                None,
+                                None,
+                                None,
+                                false,
+                            )
+                        }),
                     });
                 }
             }
@@ -5527,6 +5627,7 @@ impl ZoneRuntime {
         }
 
         let player = self.players.get(session_id).cloned().unwrap_or(player);
+        let healing_was_full_hp = spell == Spell::Healing && player.hp >= player.max_hp;
         let moved = player.position != original_position;
         if moved {
             owner_packets.push(user_location_packet(&player));
@@ -5546,9 +5647,33 @@ impl ZoneRuntime {
         if moved {
             outbounds.push(ZoneOutbound::SaveTransform {
                 session_id: session_id.clone(),
-                position: player.position,
+                position: player.position.clone(),
                 direction: player.direction,
             });
+        }
+        if cast && spell == Spell::Healing {
+            let draft = self.journey_event_draft(
+                &player,
+                ZoneJourneyEventKind::HealingAccepted {
+                    full_hp_exercise: healing_was_full_hp,
+                },
+                now_ms,
+                player.object_id,
+                Some(player.object_id),
+                Some(player.position.clone()),
+                Some(player.object_id),
+                false,
+            );
+            if let Some(receipt) = self.commit_journey_event(
+                &draft,
+                now_ms,
+                Some(player.object_id),
+                Some(player.position.clone()),
+                Some(player.object_id),
+                None,
+            ) {
+                outbounds.push(ZoneOutbound::JourneyEvent { receipt });
+            }
         }
         outbounds
     }
@@ -5750,7 +5875,10 @@ impl ZoneRuntime {
             }
         }
         match spell {
-            Spell::Healing => player.hp < player.max_hp,
+            // Crystal accepts a self Healing cast at full HP. The Zone records
+            // the action, and the session bridge alone decides whether the
+            // V2 first-exercise objective may use that full-HP receipt.
+            Spell::Healing => true,
             Spell::MassHealing | Spell::HealingCircle => !self
                 .native_area_heal_target_session_ids(session_id, target)
                 .is_empty(),
@@ -6001,9 +6129,9 @@ impl ZoneRuntime {
         damage: i32,
         item_param: u8,
         now_ms: u64,
-    ) -> Vec<ServerPacket> {
+    ) -> (Vec<ServerPacket>, bool) {
         if spell == Spell::Poisoning {
-            return self.apply_native_monster_taoist_poison(
+            let packets = self.apply_native_monster_taoist_poison(
                 object_id,
                 owner_session_id,
                 owner_object_id,
@@ -6012,17 +6140,21 @@ impl ZoneRuntime {
                 zone_taoist_poison_from_item_param(item_param),
                 now_ms,
             );
+            return (packets.clone(), !packets.is_empty());
         }
         if spell != Spell::PoisonShot {
-            return Vec::new();
+            return (Vec::new(), false);
         }
-        self.apply_native_monster_green_damage_poison(
-            object_id,
-            owner_session_id,
-            owner_object_id,
-            level,
-            damage,
-            now_ms,
+        (
+            self.apply_native_monster_green_damage_poison(
+                object_id,
+                owner_session_id,
+                owner_object_id,
+                level,
+                damage,
+                now_ms,
+            ),
+            false,
         )
     }
 
@@ -6206,6 +6338,22 @@ impl ZoneRuntime {
                 next_damage_at_ms,
                 expires_at_ms,
                 tick_interval_ms,
+                journey_event: (spell == Spell::FireWall)
+                    .then(|| {
+                        self.players.get(session_id).map(|player| {
+                            self.journey_event_draft(
+                                player,
+                                ZoneJourneyEventKind::FireWallDamage,
+                                now_ms,
+                                player_object_id,
+                                None,
+                                Some(target.clone()),
+                                None,
+                                false,
+                            )
+                        })
+                    })
+                    .flatten(),
             });
         Vec::new()
     }
@@ -6397,6 +6545,7 @@ impl ZoneRuntime {
             object_id: primary_object_id,
             damage,
             soulfire_practice: None,
+            journey_event: None,
             fire_bounce: Some(PendingNativeFireBounce {
                 remaining_bounces: level.saturating_add(2),
                 target_location: primary_monster.position,
@@ -6441,6 +6590,7 @@ impl ZoneRuntime {
                         ready_at_ms: now_ms.saturating_add(500),
                         session_id: target_session_id.clone(),
                         amount: heal,
+                        journey_event: None,
                     });
                 vec![ServerPacket::ObjectEffect {
                     info: ObjectEffectInfo {
@@ -7115,6 +7265,22 @@ impl ZoneRuntime {
             }
         }
         for (object_id, hit_damage) in hit_damages {
+            let journey_event = (spell == Spell::Lightning)
+                .then(|| {
+                    self.native_monsters.get(&object_id).map(|monster| {
+                        self.journey_event_draft(
+                            &player,
+                            ZoneJourneyEventKind::LightningDamage,
+                            now_ms,
+                            player.object_id,
+                            Some(object_id),
+                            Some(monster.position.clone()),
+                            None,
+                            false,
+                        )
+                    })
+                })
+                .flatten();
             self.pending_native_hits.push(PendingNativeMonsterHit {
                 ready_at_ms: now_ms.saturating_add(500),
                 session_id: session_id.clone(),
@@ -7122,6 +7288,7 @@ impl ZoneRuntime {
                 object_id,
                 damage: hit_damage,
                 soulfire_practice: None,
+                journey_event,
                 fire_bounce: None,
             });
         }
@@ -7226,6 +7393,7 @@ impl ZoneRuntime {
                 object_id,
                 damage: damage.max(1),
                 soulfire_practice: None,
+                journey_event: None,
                 fire_bounce: None,
             });
         }
@@ -7413,6 +7581,7 @@ impl ZoneRuntime {
                 ready_at_ms: now_ms.saturating_add(500),
                 session_id: session_id.clone(),
                 amount: heal,
+                journey_event: None,
             });
         vec![ServerPacket::ObjectEffect {
             info: ObjectEffectInfo {
@@ -7473,6 +7642,7 @@ impl ZoneRuntime {
                 next_damage_at_ms: due_ms,
                 expires_at_ms: due_ms.saturating_add(expires_after_ms),
                 tick_interval_ms,
+                journey_event: None,
             });
         Vec::new()
     }
@@ -7553,6 +7723,7 @@ impl ZoneRuntime {
                 next_damage_at_ms: due_ms,
                 expires_at_ms: due_ms.saturating_add(1),
                 tick_interval_ms: 1,
+                journey_event: None,
             });
     }
 
@@ -7824,6 +7995,7 @@ impl ZoneRuntime {
                         object_id,
                         damage: hit_damage,
                         soulfire_practice: None,
+                        journey_event: None,
                         fire_bounce: None,
                     },
                     now_ms,
@@ -8115,6 +8287,7 @@ impl ZoneRuntime {
                     object_id,
                     damage: hit_damage,
                     soulfire_practice: None,
+                    journey_event: None,
                     fire_bounce: None,
                 },
                 now_ms,
@@ -8465,6 +8638,7 @@ impl ZoneRuntime {
                     ready_at_ms: now_ms,
                     session_id: session_id.clone(),
                     amount: zone_vampire_shot_heal_amount(damage, level),
+                    journey_event: None,
                 });
         }
         packets
@@ -8833,6 +9007,14 @@ impl ZoneRuntime {
                             ),
                             None => action.damage,
                         };
+                        let effect_object_id =
+                            self.native_monsters.get(&object_id).and_then(|monster| {
+                                action
+                                    .locations
+                                    .iter()
+                                    .position(|location| *location == monster.position)
+                                    .and_then(|index| action.spell_object_ids.get(index).copied())
+                            });
                         outbounds.extend(self.resolve_pending_native_monster_hit(
                             PendingNativeMonsterHit {
                                 ready_at_ms: now_ms,
@@ -8841,6 +9023,11 @@ impl ZoneRuntime {
                                 object_id,
                                 damage: hit_damage,
                                 soulfire_practice: None,
+                                journey_event: action.journey_event.as_ref().map(|draft| {
+                                    let mut draft = draft.clone();
+                                    draft.effect_object_id = effect_object_id;
+                                    draft
+                                }),
                                 fire_bounce: None,
                             },
                             now_ms,
@@ -9111,6 +9298,20 @@ impl ZoneRuntime {
                 outbounds.push(ZoneOutbound::MagicPractice { receipt });
             }
         }
+        if damage > 0 {
+            if let Some(receipt) = hit.journey_event.as_ref().and_then(|draft| {
+                self.commit_journey_event(
+                    draft,
+                    now_ms,
+                    Some(hit.object_id),
+                    Some(position.clone()),
+                    None,
+                    Some(damage),
+                )
+            }) {
+                outbounds.push(ZoneOutbound::JourneyEvent { receipt });
+            }
+        }
         if should_bleed {
             packets.push(ServerPacket::ObjectEffect {
                 info: ObjectEffectInfo {
@@ -9192,6 +9393,76 @@ impl ZoneRuntime {
         outbounds
     }
 
+    /// Keep V2 journey proof creation in the Zone, alongside the authoritative
+    /// outcome it names. The draft is stored with delayed actions so a later
+    /// leave/rejoin cannot attribute an old projectile or pet strike to a new
+    /// owner incarnation.
+    fn journey_event_draft(
+        &self,
+        player: &super::types::ZonePlayer,
+        kind: ZoneJourneyEventKind,
+        source_action_at_ms: u64,
+        source_object_id: u32,
+        target_object_id: Option<u32>,
+        target_location: Option<Point>,
+        effect_object_id: Option<u32>,
+        material_consumed: bool,
+    ) -> ZoneJourneyEventReceipt {
+        ZoneJourneyEventReceipt {
+            kind,
+            session_id: player.session_id.clone(),
+            account_id: player.account_id.clone(),
+            character_index: player.character_index,
+            object_id: player.object_id,
+            life_generation: player.life_generation,
+            zone_key: self.key.clone(),
+            source_action_at_ms,
+            committed_at_ms: 0,
+            event_sequence: 0,
+            source_object_id,
+            target_object_id,
+            target_location,
+            effect_object_id,
+            damage: None,
+            material_consumed,
+        }
+    }
+
+    fn commit_journey_event(
+        &mut self,
+        draft: &ZoneJourneyEventReceipt,
+        committed_at_ms: u64,
+        target_object_id: Option<u32>,
+        target_location: Option<Point>,
+        effect_object_id: Option<u32>,
+        damage: Option<i32>,
+    ) -> Option<ZoneJourneyEventReceipt> {
+        if !self.journey_evidence_enabled {
+            return None;
+        }
+        let owner = self.players.get_mut(&draft.session_id)?;
+        if owner.account_id != draft.account_id
+            || owner.character_index != draft.character_index
+            || owner.object_id != draft.object_id
+            || owner.life_generation != draft.life_generation
+            || draft.zone_key != self.key
+        {
+            return None;
+        }
+        owner.journey_event_sequence = owner
+            .journey_event_sequence
+            .checked_add(1)
+            .expect("Zone journey event sequence exhausted");
+        let mut receipt = draft.clone();
+        receipt.committed_at_ms = committed_at_ms;
+        receipt.event_sequence = owner.journey_event_sequence;
+        receipt.target_object_id = target_object_id.or(receipt.target_object_id);
+        receipt.target_location = target_location.or(receipt.target_location);
+        receipt.effect_object_id = effect_object_id.or(receipt.effect_object_id);
+        receipt.damage = damage;
+        Some(receipt)
+    }
+
     fn continue_native_fire_bounce(
         &mut self,
         hit: &PendingNativeMonsterHit,
@@ -9253,6 +9524,7 @@ impl ZoneRuntime {
             object_id: target_object_id,
             damage: hit.damage,
             soulfire_practice: None,
+            journey_event: None,
             fire_bounce: Some(PendingNativeFireBounce {
                 remaining_bounces: fire_bounce.remaining_bounces.saturating_sub(1),
                 target_location: target_position,
@@ -9637,6 +9909,7 @@ impl ZoneRuntime {
                     object_id: attacker_object_id,
                     damage,
                     soulfire_practice: None,
+                    journey_event: None,
                     fire_bounce: None,
                 });
             }
@@ -9878,7 +10151,7 @@ impl ZoneRuntime {
             attack_speed_ms: u64::from(template.attack_speed),
             friendly_guild: None,
             defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
-            position,
+            position: position.clone(),
             direction: summon.direction,
             respawn: None,
             drops: Vec::new(),
@@ -9931,7 +10204,20 @@ impl ZoneRuntime {
                 object.expires_at_ms = Some(expires_at_ms);
             }
         }
-        self.diff_all_zone_object_visibility()
+        let mut outbounds = self.diff_all_zone_object_visibility();
+        if let Some(receipt) = summon.journey_event.as_ref().and_then(|draft| {
+            self.commit_journey_event(
+                draft,
+                now_ms,
+                None,
+                Some(position.clone()),
+                Some(object_id),
+                None,
+            )
+        }) {
+            outbounds.push(ZoneOutbound::JourneyEvent { receipt });
+        }
+        outbounds
     }
 
     fn active_native_summon_count_for_profile(
@@ -10272,6 +10558,7 @@ impl ZoneRuntime {
                     object_id: target_object_id,
                     damage,
                     soulfire_practice: None,
+                    journey_event: None,
                     fire_bounce: None,
                 },
                 now_ms,
@@ -10975,6 +11262,23 @@ impl ZoneRuntime {
         monster.next_attack_ready_at_ms = now_ms.saturating_add(monster.attack_speed_ms);
         let monster_position = monster.position.clone();
         let damage = zone_native_summon_monster_attack_damage(monster, &target.position);
+        let is_skeleton = monster.name == "BoneFamiliar";
+        let journey_event = is_skeleton
+            .then(|| {
+                self.players.get(owner_session_id).map(|owner| {
+                    self.journey_event_draft(
+                        owner,
+                        ZoneJourneyEventKind::SummonSkeletonDamage,
+                        now_ms,
+                        object_id,
+                        Some(target.object_id),
+                        Some(target.position.clone()),
+                        None,
+                        false,
+                    )
+                })
+            })
+            .flatten();
         self.pending_native_hits.push(PendingNativeMonsterHit {
             ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
             session_id: owner_session_id.clone(),
@@ -10982,6 +11286,7 @@ impl ZoneRuntime {
             object_id: target.object_id,
             damage,
             soulfire_practice: None,
+            journey_event,
             fire_bounce: None,
         });
         let packet = ServerPacket::ObjectAttack {
@@ -11026,7 +11331,7 @@ impl ZoneRuntime {
             return Vec::new();
         }
 
-        let Some((monster_position, attack_type, damage, hit_delay_ms)) = ({
+        let Some((monster_position, attack_type, damage, hit_delay_ms, is_skeleton)) = ({
             let Some(monster) = self.native_monsters.get_mut(&object_id) else {
                 return Vec::new();
             };
@@ -11045,11 +11350,28 @@ impl ZoneRuntime {
                 ),
                 zone_native_summon_monster_attack_damage(monster, &target.position),
                 zone_native_summon_hit_delay_ms(monster, &target.position),
+                monster.name == "BoneFamiliar",
             ))
         }) else {
             return Vec::new();
         };
         if damage > 0 {
+            let journey_event = is_skeleton
+                .then(|| {
+                    self.players.get(owner_session_id).map(|owner| {
+                        self.journey_event_draft(
+                            owner,
+                            ZoneJourneyEventKind::SummonSkeletonDamage,
+                            now_ms,
+                            object_id,
+                            Some(target.object_id),
+                            Some(target.position.clone()),
+                            None,
+                            false,
+                        )
+                    })
+                })
+                .flatten();
             self.pending_native_hits.push(PendingNativeMonsterHit {
                 ready_at_ms: now_ms.saturating_add(hit_delay_ms),
                 session_id: owner_session_id.clone(),
@@ -11057,6 +11379,7 @@ impl ZoneRuntime {
                 object_id: target.object_id,
                 damage,
                 soulfire_practice: None,
+                journey_event,
                 fire_bounce: None,
             });
         }
@@ -13621,6 +13944,17 @@ fn zone_apply_melee_skill_damage(spell: Spell, level: u8, base_damage: i32) -> i
         .unwrap_or(base_damage)
 }
 
+fn zone_journey_physical_technique(spell: Spell) -> Option<ZoneJourneyPhysicalTechnique> {
+    match spell {
+        Spell::None => Some(ZoneJourneyPhysicalTechnique::Normal),
+        Spell::Fencing => Some(ZoneJourneyPhysicalTechnique::Fencing),
+        Spell::Slaying => Some(ZoneJourneyPhysicalTechnique::Slaying),
+        Spell::Thrusting => Some(ZoneJourneyPhysicalTechnique::Thrusting),
+        Spell::HalfMoon => Some(ZoneJourneyPhysicalTechnique::HalfMoon),
+        _ => None,
+    }
+}
+
 fn zone_apply_rate_percent(value: i32, rate_percent: i32) -> i32 {
     value
         .saturating_mul(100_i32.saturating_add(rate_percent).max(0))
@@ -13792,6 +14126,10 @@ fn qa_natural_kill_damage_multiplier() -> i32 {
             .as_deref(),
     )
 }
+
+#[cfg(test)]
+#[path = "runtime/journey_events.rs"]
+mod journey_events;
 
 #[cfg(test)]
 mod player_vital_regen_tests {
