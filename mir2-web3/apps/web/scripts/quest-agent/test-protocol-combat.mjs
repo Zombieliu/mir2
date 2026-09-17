@@ -6361,6 +6361,80 @@ test("unknown last-blow identity preserves the missing-award failure", async () 
   }, async () => {}, settings), /Fake timeout waiting for q22 ForestYeti kill progress/);
 });
 
+test('opt-in fresh corpse without an accepted owner attack rescans without awarding credit', async () => {
+  const quest = { questId: 22, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(60, 'ForestYeti'), monster(61, 'ForestYeti', 12, 10),
+  ]), (owner, command) => {
+    if (command.type !== 'attack') return;
+    Object.assign(owner.snapshot.entities.find(entity => entity.objectId === command.objectId), { hp: 0, dead: true });
+    if (command.objectId === 60) {
+      owner.events.push({ sequence: ++owner.sequence, direction: 'received', type: 'worldSnapshot', payload: structuredClone(owner.snapshot) });
+      return;
+    }
+    assert.equal(quest.objectives[0].current, 0, 'the unclaimed corpse must never grant progress');
+    owner.receive('ChangeQuest', state => {
+      state.questLog[0].objectives[0] = objective('Kill ForestYeti', 1, 1);
+      state.questLog[0].stage = 'ReadyToTurnIn';
+    });
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  const result = await completeQuestObjectives(client, {
+    questId: 22, objectives: { kill: [{ monsterName: 'ForestYeti', spawnCandidates: [spawn('ForestYeti')] }], item: [] },
+  }, navigateClientNear(client), { ...settings, retryUnclaimedSnapshotCorpse: true });
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.deepEqual(client.sent.map(command => command.objectId), [60, 61]);
+  assert.equal(diagnostics[0].type, 'unclaimedSnapshotCorpse');
+});
+
+for (const receipt of [
+  ['ObjectAttack', { objectId: 1 }],
+  ['ObjectStruck', { objectId: 60, attackerId: 1 }],
+  ['ObjectStruck', { objectId: 60, attackerId: 900 }],
+  ['Magic', { cast: true, targetId: 60 }],
+]) {
+  test(`accepted owner ${receipt[0]} keeps the missing-award failure despite a fresh corpse snapshot`, async () => {
+    const quest = { questId: 22, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
+    const client = new FakeClient(snapshot(quest, [monster(60, 'ForestYeti')]), (owner, command) => {
+      if (command.type !== 'attack') return;
+      owner.receive(receipt[0], () => {}, receipt[1]);
+      Object.assign(owner.snapshot.entities.find(entity => entity.objectId === 60), { hp: 0, dead: true });
+      owner.events.push({ sequence: ++owner.sequence, direction: 'received', type: 'worldSnapshot', payload: structuredClone(owner.snapshot) });
+    });
+    await assert.rejects(() => completeQuestObjectives(client, {
+      questId: 22, objectives: { kill: [{ monsterName: 'ForestYeti', spawnCandidates: [spawn('ForestYeti')] }], item: [] },
+    }, navigateClientNear(client), { ...settings, retryUnclaimedSnapshotCorpse: true }), /kill progress/);
+    assert.equal(quest.objectives[0].current, 0);
+  });
+}
+
+test('default controller retains strict missing-award behavior for an unclaimed snapshot corpse', async () => {
+  const quest = { questId: 22, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [monster(60, 'ForestYeti')]), (owner, command) => {
+    if (command.type !== 'attack') return;
+    Object.assign(owner.snapshot.entities.find(entity => entity.objectId === 60), { hp: 0, dead: true });
+    owner.events.push({ sequence: ++owner.sequence, direction: 'received', type: 'worldSnapshot', payload: structuredClone(owner.snapshot) });
+  });
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 22, objectives: { kill: [{ monsterName: 'ForestYeti', spawnCandidates: [spawn('ForestYeti')] }], item: [] },
+  }, navigateClientNear(client), settings), /kill progress/);
+});
+
+test('unclaimed snapshot corpse retries consume the existing engagement budget', async () => {
+  const quest = { questId: 22, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [monster(60, 'ForestYeti'), monster(61, 'ForestYeti', 12, 10)]), (owner, command) => {
+    if (command.type !== 'attack') return;
+    Object.assign(owner.snapshot.entities.find(entity => entity.objectId === command.objectId), { hp: 0, dead: true });
+    owner.events.push({ sequence: ++owner.sequence, direction: 'received', type: 'worldSnapshot', payload: structuredClone(owner.snapshot) });
+  });
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 22, objectives: { kill: [{ monsterName: 'ForestYeti', spawnCandidates: [spawn('ForestYeti')] }], item: [] },
+  }, navigateClientNear(client), { ...settings, retryUnclaimedSnapshotCorpse: true, maxEngagements: 2 }), /engagement budget exceeded/);
+  assert.equal(client.sent.length, 2);
+  assert.equal(quest.objectives[0].current, 0);
+});
+
 test("a bystander death is not accepted as the current target death", async () => {
   const quest = { questId: 6, stage: "InProgress", objectives: [objective("Kill HookingCat", 0, 1)] };
   let attacks = 0;

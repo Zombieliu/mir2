@@ -838,6 +838,15 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
       continue;
     }
 
+    if (pending.kind === 'kill' && settings.retryUnclaimedSnapshotCorpse &&
+        unclaimedSnapshotCorpse(client, corpse?.objectId ?? target.objectId, engagementSequence)) {
+      recordSearchDiagnostic(client, {
+        type: 'unclaimedSnapshotCorpse', questId, target: pending.name,
+        objectId: Number(corpse?.objectId ?? target.objectId),
+      });
+      continue;
+    }
+
     const contested = contestedLethalByRemotePlayer(client, corpse?.objectId ?? target.objectId, engagementSequence);
     if (contested) {
       recordSearchDiagnostic(client, {
@@ -1077,6 +1086,7 @@ function combatSettings(options) {
   );
   return {
     maxEngagements: positiveInteger(options.maxEngagements, 200),
+    retryUnclaimedSnapshotCorpse: options.retryUnclaimedSnapshotCorpse === true,
     maxAttackAttempts: positiveInteger(options.maxAttackAttempts, 120),
     maxHarvestPasses: positiveInteger(options.maxHarvestPasses, 16),
     maxUnavailableCorpses: positiveInteger(options.maxUnavailableCorpses, 3),
@@ -2873,6 +2883,27 @@ async function settleMissingTarget(client, objectId, settings) {
 function playerIsDead(client) {
   const player = selectPlayer(client.snapshot);
   return !player || hasAuthoritativePlayerDeath(client.snapshot);
+}
+
+function unclaimedSnapshotCorpse(client, objectId, afterSequence) {
+  const id = Number(objectId);
+  const selfId = Number(client.snapshot?.playerObjectId);
+  const events = (client.events ?? []).filter(event =>
+    event.sequence > afterSequence && event.direction === 'received');
+  const deadSnapshot = events.some(event => event.type === 'worldSnapshot' &&
+    (event.payload?.entities ?? []).some(entity => Number(entity.objectId) === id &&
+      (entity.dead === true || (entity.hp != null && Number(entity.hp) <= 0))));
+  if (!deadSnapshot) return false;
+  // A sent intent is not proof that the server accepted an attack. A corpse
+  // first observed through a snapshot can predate that intent; rescan without
+  // claiming credit. Keep missing-award failures for accepted owner actions
+  // or a known strike; its attacker could be an owned pet.
+  return !events.some(event =>
+    (event.packet === 'ObjectAttack' && Number(event.payload?.objectId) === selfId) ||
+    (event.packet === 'ObjectStruck' && Number(event.payload?.objectId) === id) ||
+    (event.packet === 'Magic' && event.payload?.cast === true && Number(event.payload?.targetId) === id) ||
+    (event.packet === 'ObjectMagic' && Number(event.payload?.objectId) === selfId &&
+      Number(event.payload?.targetId) === id));
 }
 
 function contestedLethalByRemotePlayer(client, objectId, afterSequence) {

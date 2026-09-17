@@ -3,6 +3,10 @@ import { supersededProgressionGearForSale } from './policy.mjs';
 
 const RUBEN = Object.freeze({ name: 'Merchant_Ruben', x: 288, y: 608 });
 const SCOTT = Object.freeze({ name: 'Merchant_Scott', x: 291, y: 610 });
+// Crystal NPC-info: BichonProvince/BichonWall/Potion1, loaded object id 20.
+// Resolve its public object id from the live AOI, rather than treating the
+// source NPC index (28) as an interaction id.
+const BICHON_WALL_SAMUEL = Object.freeze({ name: 'Alchemist_Samuel', x: 324, y: 291 });
 const BLACKSMITH = Object.freeze({ name: 'Blacksmith_Smith', x: 296, y: 613 });
 const BUTCHER = Object.freeze({ name: 'Merchant_John', x: 292, y: 603 });
 const MATERIAL_DEALER = Object.freeze({ name: 'MaterialDealer_Reece', x: 295, y: 605 });
@@ -589,6 +593,56 @@ export async function restockInVillage(client, navigateNear, options = {}) {
 }
 
 /**
+ * Buy exactly one ordinary Basic HP Potion for the V2 purchase condition.
+ *
+ * Samuel is the real Bichon Wall Potion1 merchant, so this stays local to the
+ * city route and does not add the regular village MP/Amulet restock policy.
+ * Completion requires one fresh snapshot with the precise live shop debit and
+ * an inventory-or-belt HP-potion increase.
+ */
+export async function purchaseV2BasicHpPotion(client, navigateNear, options = {}) {
+  const initial = client?.snapshot;
+  if (!initial || typeof initial !== 'object') throw new Error('Cannot purchase a V2 Basic Potion without an authoritative snapshot');
+  if (String(initial.mapFileName ?? '') !== '0') {
+    throw new Error(`Alchemist Samuel Basic Potion purchase requires map 0, received ${initial.mapFileName ?? 'unknown'}`);
+  }
+
+  await navigateSupplyService(client, navigateNear, BICHON_WALL_SAMUEL, options.clearBlockingMonster);
+  const { npc, goodsEvent } = await openBuySellService(client, liveBichonWallSamuel, 'Alchemist Samuel');
+  const goods = goodsEvent?.payload;
+  if (!goods || Number(goods.panelType) !== 0 || !Array.isArray(goods.list)) {
+    throw new Error('Alchemist Samuel returned an invalid buy goods panel');
+  }
+  const row = supplyRow(goods.list, SUPPLIES.hp);
+  if (!row) throw new Error(`Alchemist Samuel shop is missing ${SUPPLIES.hp.name} (${SUPPLIES.hp.itemIndex})`);
+  const unitPrice = positiveInteger(row.price, `${SUPPLIES.hp.name} price`);
+  const beforeGold = integer(client.snapshot?.gold, 'snapshot.gold');
+  if (beforeGold < unitPrice) {
+    throw new Error(`Alchemist Samuel Basic Potion purchase requires ${unitPrice} gold, has ${beforeGold}`);
+  }
+  const beforeTotalQuantity = stock(client.snapshot).hp;
+  const beforeQuantity = basicHpPotionBagBeltCount(client.snapshot);
+  const afterCommand = Number(client.sequence);
+  client.send({ type: 'buyItem', itemIndex: shopRowId(row), count: 1, panelType: 0 });
+  await client.wait(
+    () => hasFreshPurchaseProof(
+      client,
+      afterCommand,
+      'hp',
+      beforeGold - unitPrice,
+      beforeTotalQuantity + 1,
+      { expectedBagBeltHp: beforeQuantity + 1 },
+    ),
+    `authoritative purchase of ${SUPPLIES.hp.name} from Alchemist Samuel`,
+    WAIT_MS,
+  );
+  return {
+    merchant: { objectId: numericId(npc.objectId, 'Alchemist Samuel objectId'), name: npc.name, x: Number(npc.x), y: Number(npc.y) },
+    purchase: { itemIndex: SUPPLIES.hp.itemIndex, name: SUPPLIES.hp.name, shopItemId: shopRowId(row), quantity: 1, unitPrice, cost: unitPrice },
+  };
+}
+
+/**
  * Use one authoritative RandomTeleport stack through the normal public
  * useItem command. Success requires both a fresh quantity decrease and a
  * fresh authoritative player-coordinate change; an ack alone is insufficient.
@@ -714,6 +768,14 @@ function liveScott(snapshot) {
     String(entity?.kind ?? '').toLowerCase() === 'npc' &&
     normalized(entity?.name) === normalized(SCOTT.name) &&
     Number(entity?.x) === SCOTT.x && Number(entity?.y) === SCOTT.y
+  ) ?? null;
+}
+
+function liveBichonWallSamuel(snapshot) {
+  return (snapshot?.entities ?? []).find(entity =>
+    String(entity?.kind ?? '').toLowerCase() === 'npc' &&
+    normalized(entity?.name) === normalized(BICHON_WALL_SAMUEL.name) &&
+    Number(entity?.x) === BICHON_WALL_SAMUEL.x && Number(entity?.y) === BICHON_WALL_SAMUEL.y
   ) ?? null;
 }
 
@@ -994,13 +1056,14 @@ function affordableClassWeapon(list, level, availableGold, catalog, { exactItemI
   return null;
 }
 
-function hasFreshPurchaseProof(client, afterSequence, kind, expectedGold, expectedQuantity) {
+function hasFreshPurchaseProof(client, afterSequence, kind, expectedGold, expectedQuantity, options = {}) {
   return client.events.some(event =>
     event?.sequence > afterSequence &&
     event?.direction === 'received' &&
     event?.type === 'worldSnapshot' &&
     Number(event?.payload?.gold) === expectedGold &&
-    stock(event?.payload)[kind] === expectedQuantity
+    stock(event?.payload)[kind] === expectedQuantity &&
+    (options.expectedBagBeltHp == null || basicHpPotionBagBeltCount(event?.payload) === options.expectedBagBeltHp)
   );
 }
 
@@ -1090,6 +1153,12 @@ function stock(snapshot) {
     if (kind) result[kind] += Math.max(0, Number(item?.quantity ?? 1));
   }
   return result;
+}
+
+function basicHpPotionBagBeltCount(snapshot) {
+  return [...(snapshot?.inventoryItems ?? []), ...(snapshot?.beltItems ?? [])]
+    .filter(item => templateIndex(item) === SUPPLIES.hp.itemIndex || normalized(item?.name) === normalized(SUPPLIES.hp.name))
+    .reduce((total, item) => total + Math.max(0, Number(item?.quantity ?? 1)), 0);
 }
 
 export function hpMediumDrugCount(snapshot) {

@@ -14321,6 +14321,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 }
             }
             if let Some(session_id) = zone_state.zone_sessions.get(key) {
+                if let Some(profile) = zone_state
+                    .zone_manager
+                    .zone(&ZoneKey::for_map(map_file_name))
+                    .and_then(|zone| zone.player_chat_profile(session_id))
+                {
+                    snapshot.in_safe_zone = profile.in_safe_zone;
+                }
                 if let Some((hp, max_hp, mp)) = zone_state.zone_manager.player_vitals(session_id) {
                     snapshot.player_hp = Some(hp);
                     snapshot.player_max_hp = Some(max_hp);

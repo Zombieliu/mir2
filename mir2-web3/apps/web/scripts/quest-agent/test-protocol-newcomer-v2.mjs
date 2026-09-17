@@ -4,7 +4,7 @@ import { firstReachableDestination } from './protocol-combat.mjs';
 import {
   assertV2FlagsConfirmed, availableV2Growth, buildNewcomerV2Route,
   approachPracticeTarget, BICHON_SAFE_AREA, checkpointV2Progress, countBasicHpPotion, executeV2PracticePlan, hasFreshV2MapEntryReceipt,
-  directionalApproachPoints, directionalRayDistance, loadNewcomerV2Route, practicePlan, practiceSpawnCandidates, practiceSpawnWaypoints, requiredV2Skills,
+  completeV2Objectives, directionalApproachPoints, directionalRayDistance, loadNewcomerV2Route, practicePlan, practiceSpawnCandidates, practiceSpawnWaypoints, purchaseRequiredBasicPotion, requiredV2Skills,
   recoverV2Death, v2CompletionState, v2FlagState,
 } from './protocol-newcomer-v2.mjs';
 
@@ -94,6 +94,115 @@ test('reward verification selects only the current class and resolves real item 
     { itemIndex: 5, itemName: '(MP)DrugSmall', count: 3 },
   ]);
   assert.equal(route.quests.find(quest => quest.questId === 2120015).rewards.fixedItems.length, 0);
+});
+
+test('V2 Basic Potion condition uses the nearby live Samuel shop without adding MP or Amulets', async () => {
+  const sent = [];
+  const client = {
+    sequence: 0,
+    events: [],
+    snapshot: {
+      mapFileName: '0', gold: 100, playerObjectId: 1,
+      entities: [
+        { objectId: 1, kind: 'player', x: 328, y: 264 },
+        { objectId: 205, kind: 'npc', name: 'Alchemist_Samuel', x: 324, y: 291 },
+      ],
+      inventoryItems: [], beltItems: [], equipmentItems: [], activeNpcDialog: null,
+    },
+    receive(next) {
+      this.snapshot = next;
+      this.events.push({ sequence: ++this.sequence, direction: 'received', type: 'worldSnapshot', payload: structuredClone(next) });
+    },
+    send(command) {
+      sent.push(structuredClone(command));
+      if (command.type === 'interact') {
+        this.receive({ ...this.snapshot, activeNpcDialog: { npcObjectId: command.objectId, links: [{ text: 'Buy and sell', target: '@BuySell' }] } });
+      }
+      if (command.type === 'buyItem') {
+        const next = structuredClone(this.snapshot);
+        next.gold -= 40;
+        next.inventoryItems.push({ name: '(HP)DrugSmall', quantity: 1, tooltipSource: { info: { item_index: 658 } } });
+        this.receive(next);
+      }
+    },
+    async request(command, packet) {
+      sent.push(structuredClone(command));
+      assert.equal(packet, 'NPCGoods');
+      return { packet, payload: { panelType: 0, list: [{ id: 92005, itemIndex: 658, name: '(HP)DrugSmall', price: 40, count: 1 }] } };
+    },
+    async wait(predicate, label) {
+      const value = predicate();
+      assert.ok(value, `authoritative ${label} predicate`);
+      return value;
+    },
+  };
+  const navigations = [];
+  await purchaseRequiredBasicPotion(client, async (...args) => navigations.push(args), { questId: 2110006 }, () => {});
+  assert.deepEqual(navigations, [[{ x: 324, y: 291 }, 1]]);
+  assert.deepEqual(sent, [
+    { type: 'interact', objectId: 205 },
+    { type: 'selectNpcDialog', target: '@BuySell' },
+    { type: 'buyItem', itemIndex: 92005, count: 1, panelType: 0 },
+  ]);
+  assert.equal(countBasicHpPotion(client.snapshot), 1);
+  assert.equal(client.snapshot.inventoryItems.some(item => Number(item.tooltipSource?.info?.item_index) === 659 || item.name === 'Amulet'), false);
+});
+
+test('V2 Wizard combat refreshes a stale cooldown snapshot and then casts normally', async () => {
+  const quest = {
+    questId: 2110007,
+    objectiveMaps: ['0'],
+    objectives: {
+      kill: [{ monsterName: 'Scarecrow', spawnCandidates: [{ mapFileName: '0', position: { x: 2, y: 0 }, spread: 0, count: 1 }] }],
+      item: [], flag: [],
+    },
+  };
+  const sent = [];
+  const client = {
+    sequence: 0,
+    events: [],
+    snapshot: {
+      mapFileName: '0', playerObjectId: 1, playerHp: 100, playerMaxHp: 100, playerMp: 30, playerMaxMp: 30,
+      entities: [
+        { objectId: 1, kind: 'player', class: 'Wizard', level: 8, x: 0, y: 0, hp: 100, maxHp: 100 },
+        { objectId: 9, kind: 'monster', name: 'Scarecrow', x: 2, y: 0, hp: 10, dead: false },
+      ],
+      knownSkills: [{ spell: 'FireBall', mpCost: 4, cooldownRemainingTicks: 1 }],
+      inventoryItems: [], beltItems: [], equipmentItems: [],
+      questLog: [{ questId: 2110007, stage: 'InProgress', objectives: [{ label: 'Scarecrow', current: 0, required: 1, done: false }] }],
+    },
+    receive(next) {
+      this.snapshot = next;
+      this.events.push({ sequence: ++this.sequence, direction: 'received', type: 'worldSnapshot', payload: structuredClone(next) });
+    },
+    send(command) {
+      sent.push(structuredClone(command));
+      const next = structuredClone(this.snapshot);
+      if (command.type === 'clientVersion') {
+        next.knownSkills[0].cooldownRemainingTicks = 0;
+      }
+      if (command.type === 'magic') {
+        next.entities[1].hp = 0;
+        next.entities[1].dead = true;
+        next.questLog[0].objectives[0] = { label: 'Scarecrow', current: 1, required: 1, done: true };
+        next.questLog[0].stage = 'ReadyToTurnIn';
+      }
+      this.receive(next);
+    },
+    async wait(predicate, label) {
+      const value = predicate();
+      assert.ok(value, `authoritative ${label} predicate`);
+      return value;
+    },
+  };
+  await completeV2Objectives(client, quest, {
+    navigate: async point => { client.snapshot.entities[0].x = Number(point.x) - 1; },
+    travel: async () => {}, className: 'Wizard', checkDeadline: () => {},
+  });
+  assert.equal(sent[0].type, 'clientVersion');
+  assert.equal(sent[1].type, 'magic');
+  assert.equal(sent[1].spell, 'FireBall');
+  assert.equal(client.snapshot.questLog[0].stage, 'ReadyToTurnIn');
 });
 
 test('server flag projection cannot be replaced by a local completion boolean', () => {

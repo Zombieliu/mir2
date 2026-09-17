@@ -26,7 +26,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot};
 
 use mir2_game_data::{
-    crystal_magic_by_spell, crystal_monster_by_name, platinum_176_monster_is_boss,
+    crystal_magic_by_spell, crystal_map_respawns_ref, crystal_monster_by_name,
+    platinum_176_monster_is_boss,
 };
 use mir2_protocol::{
     ChatItem, ChatType, ClientBuff, MirClass, MirDirection, MonsterInfo, ObjectAttackInfo,
@@ -2366,6 +2367,7 @@ impl ZoneRuntime {
             self.player_grid.moved(session_id, &moved_position);
             self.ecs.move_player(session_id, &moved_position);
         }
+        self.refresh_crystal_safe_zone_profile_after_accepted_step(session_id);
 
         let mut outbounds = Vec::new();
         outbounds.extend(self.diff_visibility_for(session_id));
@@ -2407,6 +2409,26 @@ impl ZoneRuntime {
             direction: player.direction,
         });
         outbounds
+    }
+
+    /// Crystal maps carry their safe-area geometry in the generated respawn
+    /// manifest. A shared-Zone walk/run owns the accepted destination, so it
+    /// must immediately project that geometry into the combat-facing profile.
+    /// Custom maps have no imported geometry and retain their trusted profile.
+    fn refresh_crystal_safe_zone_profile_after_accepted_step(&mut self, session_id: &SessionId) {
+        let Some(map) = crystal_map_respawns_ref(&self.key.map_file_name) else {
+            return;
+        };
+        let Some(player) = self.players.get_mut(session_id) else {
+            return;
+        };
+        player.chat_profile.in_safe_zone = map.safe_zones.iter().any(|safe_zone| {
+            let size = i32::from(safe_zone.size);
+            player.position.x >= safe_zone.location.x - size
+                && player.position.x <= safe_zone.location.x + size
+                && player.position.y >= safe_zone.location.y - size
+                && player.position.y <= safe_zone.location.y + size
+        });
     }
 
     fn consume_turn_action(
@@ -17057,3 +17079,6 @@ mod shared_harvest_tests;
 
 #[cfg(test)]
 mod soulfire_practice_tests;
+
+#[cfg(test)]
+mod safe_zone_profile_tests;

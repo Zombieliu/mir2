@@ -9,6 +9,7 @@ import {
   useTownTeleport,
   useRandomTeleport,
   journeyWeaponFundingGold,
+  purchaseV2BasicHpPotion,
   warriorWeaponFundingGold,
 } from './protocol-supplies.mjs';
 
@@ -1043,6 +1044,53 @@ test('Warrior buys HP only through the fresh Ruben row id and proves exact snaps
   }]);
   assert.deepEqual(client.sent.map(entry => entry.type), ['interact', 'selectNpcDialog', 'buyItem']);
   assert.deepEqual(client.sent.at(-1), { type: 'buyItem', itemIndex: '9007199254740993', count: 4, panelType: 0 });
+});
+
+function samuelSnapshot({ gold = 1000, hp = 0, samuelObjectId = 205 } = {}) {
+  const state = snapshot({ gold, hp, npc: false });
+  Object.assign(state.entities[0], { x: 328, y: 264 });
+  state.entities.push({ objectId: samuelObjectId, kind: 'npc', name: 'Alchemist_Samuel', x: 324, y: 291 });
+  return state;
+}
+
+test('V2 Basic Potion uses the live Bichon Wall Samuel object and its fresh row receipt', async () => {
+  const client = new FakeClient(samuelSnapshot({ samuelObjectId: 205 }), {
+    goodsByNpc: { 205: [{ id: '92005', itemIndex: HP, name: '(HP)DrugSmall', price: 40, count: 1 }] },
+    enforceMerchantOwnership: true,
+  });
+  const navigations = [];
+  const result = await purchaseV2BasicHpPotion(client, async (...args) => navigations.push(args));
+  assert.deepEqual(navigations, [[{ x: 324, y: 291 }, 1]]);
+  assert.deepEqual(result, {
+    merchant: { objectId: 205, name: 'Alchemist_Samuel', x: 324, y: 291 },
+    purchase: { itemIndex: HP, name: '(HP)DrugSmall', shopItemId: '92005', quantity: 1, unitPrice: 40, cost: 40 },
+  });
+  assert.deepEqual(client.sent, [
+    { type: 'interact', objectId: 205 },
+    { type: 'selectNpcDialog', target: '@BuySell' },
+    { type: 'buyItem', itemIndex: '92005', count: 1, panelType: 0 },
+  ]);
+  assert.equal(client.snapshot.gold, 960);
+  assert.equal(client.snapshot.inventoryItems.find(entry => Number(entry.tooltipSource?.info?.item_index) === HP)?.quantity, 1);
+});
+
+test('V2 Samuel purchase fails closed for a wrong goods row, absent receipt, or insufficient gold', async () => {
+  const wrongGoods = new FakeClient(samuelSnapshot(), {
+    goodsByNpc: { 205: [{ id: 'wrong-hp-row', itemIndex: HP, name: '(HP)DrugMedium', price: 40, count: 1 }] },
+  });
+  await assert.rejects(() => purchaseV2BasicHpPotion(wrongGoods, async () => {}), /missing \(HP\)DrugSmall/);
+
+  const noReceipt = new FakeClient(samuelSnapshot(), {
+    goodsByNpc: { 205: [{ id: '92005', itemIndex: HP, name: '(HP)DrugSmall', price: 40, count: 1 }] },
+    rejectBuy: true,
+  });
+  await assert.rejects(() => purchaseV2BasicHpPotion(noReceipt, async () => {}), /authoritative purchase/);
+
+  const insufficientGold = new FakeClient(samuelSnapshot({ gold: 39 }), {
+    goodsByNpc: { 205: [{ id: '92005', itemIndex: HP, name: '(HP)DrugSmall', price: 40, count: 1 }] },
+  });
+  await assert.rejects(() => purchaseV2BasicHpPotion(insufficientGold, async () => {}), /requires 40 gold, has 39/);
+  assert.equal(insufficientGold.sent.some(command => command.type === 'buyItem'), false);
 });
 
 test('restock clears an adjacent hostile that seals the supply service approach', async () => {

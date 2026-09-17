@@ -279,6 +279,53 @@ fn public_v2_safe_arrival_pending_walk_survives_autosave_before_tick() {
 
 #[test]
 #[ignore = "requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"]
+fn public_v2_pending_safe_zone_snapshot_follows_zone_before_private_tick() {
+    let mut owner = safe_arrival_fixture("SafeSnapshot");
+    assert!(!owner.world_snapshot().in_safe_zone);
+    owner
+        .movement_ingress
+        .try_execute(ClientPacket::Walk {
+            direction: MirDirection::Up,
+        })
+        .unwrap()
+        .expect("accepted ingress should enter the safe area");
+    assert!(
+        !owner.inner.world_snapshot().in_safe_zone,
+        "private mirror should still be outside before Tick"
+    );
+    assert!(
+        owner.world_snapshot().in_safe_zone,
+        "public safe flag must follow its already-authoritative coordinate"
+    );
+    owner.execute(WorldCommand::Tick).unwrap();
+    assert!(owner.inner.world_snapshot().in_safe_zone);
+    std::thread::sleep(Duration::from_millis(650));
+    owner
+        .movement_ingress
+        .try_execute(ClientPacket::Walk {
+            direction: MirDirection::Down,
+        })
+        .unwrap()
+        .expect("accepted ingress should leave the safe area");
+    let public = owner.world_snapshot();
+    let actor = public
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .unwrap();
+    assert_eq!((actor.x, actor.y), (324, 275));
+    assert!(
+        owner.inner.world_snapshot().in_safe_zone,
+        "private mirror should still be inside before delivery"
+    );
+    assert!(
+        !public.in_safe_zone,
+        "public safe flag must immediately lose protection on exit"
+    );
+}
+
+#[test]
+#[ignore = "requires isolated MIR2_QUEST_CADENCE=newcomer-v2 process"]
 fn public_v2_safe_arrival_turn_and_occupancy_rejection_do_not_grant_arrival() {
     let mut owner = safe_arrival_fixture("ArrivalRejected");
     owner

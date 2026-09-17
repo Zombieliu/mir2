@@ -130,5 +130,11 @@ Windows computer-use could not start: importing the documented `@oai/sky`
 runtime returned `Trusted RPC service is not configured: sky`. No new native
 screenshot or visual acceptance is claimed.
 
+Later source checkpoint: safe-profile Zone 4/4, public snapshot 1/1 and arrival
+regressions 4/4 pass. Controller combat/supplies/V2 regressions pass 232/232.
+The 83c157b46 N5 release was deployed; it excludes the later safe-profile Rust
+repair. Ordinary roles resumed with cooldown refresh and strict corpse retry,
+preserving the initial deadlines. See safe-profile-and-controller.md.
+
 `accepted=false`, `visualAccepted=false`, `measuredTime=false`,
 `globalParityPercent=null`.

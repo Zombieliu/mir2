@@ -4,9 +4,10 @@ import { interactQuest } from './protocol-quest-actions.mjs';
 import { createNavigator, reviveInTown, selfPlayer } from './protocol-play.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
 import { prepareLoadout, combatAction, meleeCombatAction, useSupplies } from './protocol-loadout.mjs';
-import { restockInVillage, equipHeldAmulet } from './protocol-supplies.mjs';
+import { purchaseV2BasicHpPotion, equipHeldAmulet } from './protocol-supplies.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
+import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
 
 const ROOT = new URL('../../../../', import.meta.url);
 const V2_CONFIG = new URL('config/quest-guidance/newcomer-journey-v2.json', ROOT);
@@ -512,7 +513,7 @@ async function finishV2Quest(client, quest, navigate, travel, checkDeadline) {
   await interactQuest(client, quest, { type: 'finish', selectedItemIndex: -1 }, navigate);
 }
 
-async function completeV2Objectives(client, quest, { navigate, travel, className, checkDeadline, survival = {} }) {
+export async function completeV2Objectives(client, quest, { navigate, travel, className, checkDeadline, survival = {} }) {
   checkDeadline();
   let enteredObjectiveMap = false;
   const mapEntryAfter = Number(client.sequence);
@@ -575,6 +576,8 @@ async function completeV2Objectives(client, quest, { navigate, travel, className
       maxSpawnRespawnWaits: 1,
       questSettleTimeout: 12_000,
       preferredObjectiveMaps: quest.objectiveMaps,
+      refreshWhileWaiting: refreshCombatWorldSnapshot,
+      retryUnclaimedSnapshotCorpse: true,
     });
   }
 }
@@ -805,19 +808,11 @@ async function learnV2Skills(client, spells) {
   }
 }
 
-async function purchaseRequiredBasicPotion(client, navigate, quest, checkDeadline) {
+export async function purchaseRequiredBasicPotion(client, navigate, quest, checkDeadline) {
   const before = basicPotionCount(client.snapshot);
   checkDeadline();
-  const restock = await restockInVillage(client, navigate, {
-    targetHp: before + 1,
-    // Force Ruben to open through the existing receipted shop path even when
-    // a previous reward left ten potions in the bag.
-    lowStockHp: before + 1,
-    targetMp: 1,
-    targetAmulet: 1,
-    reserveGold: 0,
-  });
-  if (restock?.status === 'needsFunds' || basicPotionCount(client.snapshot) <= before) {
+  await purchaseV2BasicHpPotion(client, navigate);
+  if (basicPotionCount(client.snapshot) !== before + 1) {
     throw new V2Pause('potionPurchaseUnconfirmed', quest.questId, 'ordinary Basic Potion purchase lacked an authoritative receipt');
   }
 }
