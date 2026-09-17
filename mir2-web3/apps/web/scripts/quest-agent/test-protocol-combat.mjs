@@ -5004,6 +5004,89 @@ test("a same-map world refresh preserves monster locations observed earlier in t
   assert.deepEqual(client.sent.map(entry => entry.objectId), [60]);
 });
 
+test('V2 full-spread search ignores a stale ordinary-monster history hint before the nearest field', async () => {
+  const quest = { questId: 2110007, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
+  const client = new FakeClient(snapshot(quest), (owner, command) => {
+    if (command.type !== 'attack') return;
+    owner.receive('ObjectDied', state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 60), { hp: 0, dead: true });
+      state.questLog[0].objectives[0] = objective('Kill ForestYeti', 1, 1);
+      state.questLog[0].stage = 'ReadyToTurnIn';
+    }, { objectId: 60 });
+  });
+  client.receive('MapInformation', () => {}, { fileName: '0' });
+  // This packet predates the V2 search and is far beyond the local certified
+  // spawn field. It must not consume the short V2 coverage window.
+  client.receive('ObjectMonster', () => {}, { name: 'ForestYeti', location: { x: 90, y: 90 } });
+  const visits = [];
+  const result = await completeQuestObjectives(client, {
+    questId: 2110007,
+    objectives: { kill: [{ monsterName: 'ForestYeti', spawnCandidates: [{ ...spawn('ForestYeti', 20, 10), spread: 0 }] }], item: [] },
+  }, async point => {
+    visits.push({ ...point });
+    Object.assign(client.snapshot.entities[0], { x: point.x, y: point.y });
+    if (point.x === 20 && point.y === 10) client.snapshot.entities.push(monster(60, 'ForestYeti', 20, 10));
+  }, { ...settings, allowHistoricalSpawnHints: false });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.deepEqual(visits[0], { x: 20, y: 10 });
+  assert.deepEqual(client.sent, [{ type: 'attack', objectId: 60 }]);
+});
+
+test('V2 keeps a live current-AOI objective ahead of its manifest field', async () => {
+  const quest = { questId: 2110007, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [monster(60, 'ForestYeti', 11, 10)]), (owner, command) => {
+    if (command.type !== 'attack') return;
+    owner.receive('ObjectDied', state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 60), { hp: 0, dead: true });
+      state.questLog[0].objectives[0] = objective('Kill ForestYeti', 1, 1);
+      state.questLog[0].stage = 'ReadyToTurnIn';
+    }, { objectId: 60 });
+  });
+  const approaches = [];
+  const result = await completeQuestObjectives(client, {
+    questId: 2110007,
+    objectives: { kill: [{ monsterName: 'ForestYeti', spawnCandidates: [spawn('ForestYeti', 90, 90)] }], item: [] },
+  }, async point => {
+    approaches.push({ x: point.x, y: point.y });
+    Object.assign(client.snapshot.entities[0], { x: point.x - 1, y: point.y });
+  }, {
+    ...settings,
+    allowHistoricalSpawnHints: false,
+  });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.deepEqual(approaches, [{ x: 11, y: 10 }]);
+  assert.deepEqual(client.sent, [{ type: 'attack', objectId: 60 }]);
+});
+
+test('default V1 search continues to prioritize same-map historical ordinary-monster hints', async () => {
+  const quest = { questId: 40, stage: 'InProgress', objectives: [objective('Kill OmaFighter', 0, 1)] };
+  const client = new FakeClient(snapshot(quest), (owner, command) => {
+    if (command.type !== 'attack') return;
+    owner.receive('ObjectDied', state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 60), { hp: 0, dead: true });
+      state.questLog[0].objectives[0] = objective('Kill OmaFighter', 1, 1);
+      state.questLog[0].stage = 'ReadyToTurnIn';
+    }, { objectId: 60 });
+  });
+  client.receive('MapInformation', () => {}, { fileName: '0' });
+  client.receive('ObjectMonster', () => {}, { name: 'OmaFighter', location: { x: 30, y: 30 } });
+  const visits = [];
+  const result = await completeQuestObjectives(client, {
+    questId: 40,
+    objectives: { kill: [{ monsterName: 'OmaFighter', spawnCandidates: [spawn('OmaFighter', 20, 10)] }], item: [] },
+  }, async point => {
+    visits.push({ ...point });
+    Object.assign(client.snapshot.entities[0], { x: point.x, y: point.y });
+    if (point.x === 30 && point.y === 30) client.snapshot.entities.push(monster(60, 'OmaFighter', 30, 30));
+  }, settings);
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.deepEqual(visits[0], { x: 30, y: 30 });
+  assert.deepEqual(client.sent, [{ type: 'attack', objectId: 60 }]);
+});
+
 test("a remembered CannibalPlant location gets one close bounded reveal observation", async () => {
   const quest = { questId: 25, stage: "InProgress", objectives: [objective("Collect CannibalStem", 0, 1)] };
   const client = new FakeClient(snapshot(quest), (owner, command) => {

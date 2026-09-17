@@ -169,3 +169,11 @@ The fixed 180-attempt/120-step total now follows actual spending and waypoint
 distance; affected Navigator/V2 suites pass 87/87. Invalid accounting fails
 closed, including a target appearing on the exact final movement. The original
 fresh clock and normal saved character are retained (practice-navigation.md).
+
+Fresh Taoist N7 exposed stale historical spawn hints preceding the nearest real
+field. V2 now keeps live AOI priority without those ordinary-monster hints;
+default V1 and CannibalPlant reveal semantics are retained (combat 156/156).
+Normal V2 resume also preserves confirmed recovery rows and the cumulative
+three-recovery limit; invalid evidence fails closed (ledger 14/14, V2 38/38).
+Root verifies the real Taoist's one recovery and original start are retained.
+See search-and-resume-ledger.md; full route, timing and visuals remain open.

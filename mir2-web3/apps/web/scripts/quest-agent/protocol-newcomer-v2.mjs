@@ -8,6 +8,7 @@ import { purchaseV2BasicHpPotion, equipHeldAmulet } from './protocol-supplies.mj
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
+import { cloneConfirmedV2Recoveries } from './newcomer-v2-recovery-ledger.mjs';
 
 const ROOT = new URL('../../../../', import.meta.url);
 const V2_CONFIG = new URL('config/quest-guidance/newcomer-journey-v2.json', ROOT);
@@ -274,8 +275,12 @@ export async function runNewcomerV2Journey({ client, className, gender, report, 
       : undefined,
   });
   const travel = createMapTraveler(boundedClient, navigate);
+  const priorRecoveries = Object.hasOwn(recovery, 'priorRecoveries')
+    ? recovery.priorRecoveries
+    : [];
   const result = {
-    profile: route.profile, status: 'running', routeQuestIds: route.quests.map(quest => quest.questId), attempts: [], recoveries: [],
+    profile: route.profile, status: 'running', routeQuestIds: route.quests.map(quest => quest.questId), attempts: [],
+    recoveries: cloneConfirmedV2Recoveries(priorRecoveries),
     ordinaryStartedAt: new Date(startedAt).toISOString(), deadlineAt: new Date(deadline).toISOString(),
   };
   try {
@@ -579,6 +584,10 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
       retrySpawnSearchTimeout: true,
+      // V2 keeps only live AOI target hints ahead of the certified field. A
+      // historical same-map packet can be minutes old and must not spend this
+      // route's fixed 30-second coverage window before its nearest waypoint.
+      allowHistoricalSpawnHints: false,
     });
   }
 }

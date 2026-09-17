@@ -6,8 +6,9 @@ import {
   assertV2FlagsConfirmed, availableV2Growth, buildNewcomerV2Route,
   approachPracticeTarget, BICHON_SAFE_AREA, checkpointV2Progress, countBasicHpPotion, executeV2PracticePlan, hasFreshV2MapEntryReceipt,
   completeV2Objectives, directionalApproachPoints, directionalRayDistance, loadNewcomerV2Route, practicePlan, practiceSpawnCandidates, practiceSpawnWaypoints, purchaseRequiredBasicPotion, requiredV2Skills,
-  recoverV2Death, v2CompletionState, v2FlagState,
+  recoverV2Death, runNewcomerV2Journey, v2CompletionState, v2FlagState,
 } from './protocol-newcomer-v2.mjs';
+import { parseV2RecoveryLedger } from './newcomer-v2-recovery-ledger.mjs';
 
 const npcManifest = { npcs: [
   { npc_index: 3, name: 'Assistant Jane', map_file_name: '0', script_key: 'BichonProvince/BorderVillage/Jane', location: { x: 284, y: 606 } },
@@ -213,6 +214,7 @@ test('V2 objective combat explicitly opts into the bounded timed-search respawn 
   assert.ok(start >= 0 && end > start, 'V2 objective combat block');
   const options = source.slice(start, end);
   assert.match(options, /retrySpawnSearchTimeout:\s*true/);
+  assert.match(options, /allowHistoricalSpawnHints:\s*false/);
   assert.match(options, /spawnSearchTimeoutMs:\s*30_000/);
   assert.match(options, /maxSpawnWaypoints:\s*120/);
   assert.match(options, /maxSpawnRespawnWaits:\s*1/);
@@ -337,6 +339,60 @@ test('V2 recovery fails closed after three confirmed deaths in one ordinary proc
     /exceeded the 3 authoritative V2 recovery limit/,
   );
   assert.equal(result.recoveries.length, 3);
+});
+
+test('a resumed V2 recovery ledger preserves its confirmed receipt and leaves only two recovery slots', async () => {
+  const priorRecovery = {
+    phase: 'quest', questId: 2110004,
+    deathAt: '2026-09-17T20:41:15.152Z',
+    before: { mapFileName: '0', objectId: 1, x: 20, y: 30, hp: 0 },
+    revive: {
+      at: '2026-09-17T20:41:15.615Z',
+      before: { map: '0', objectId: 1, x: 20, y: 30, hp: 0, dead: true },
+      after: { map: '0', objectId: 1, x: 288, y: 616, hp: 39, dead: false },
+    },
+    revivedAt: '2026-09-17T20:41:15.615Z',
+    after: { mapFileName: '0', objectId: 1, x: 288, y: 616, hp: 39 },
+  };
+  const ordinaryStartedAt = new Date().toISOString();
+  const ledger = parseV2RecoveryLedger({ v2: {
+    profile: 'newcomer-v2', ordinaryStartedAt, recoveries: [priorRecovery],
+  } });
+  const route = await loadNewcomerV2Route({ className: 'Taoist', gender: 'Male' });
+  const client = { snapshot: {
+    playerObjectId: 1, playerHp: 10, playerLevel: 30,
+    entities: [{ objectId: 1, hp: 10, dead: false, level: 30 }],
+    questLog: route.quests.map(quest => ({ questId: quest.questId, stage: 'Completed' })),
+  } };
+  const recovery = {
+    maxRecoveries: 3,
+    priorRecoveries: ledger.recoveries,
+    isDead: current => current.playerHp <= 0,
+    revive: async current => {
+      current.snapshot.playerHp = 10;
+      Object.assign(current.snapshot.entities[0], { hp: 10, dead: false });
+      return { at: 'revived' };
+    },
+  };
+  const result = await runNewcomerV2Journey({
+    client, className: 'Taoist', gender: 'Male', report: { startedAt: new Date().toISOString() },
+    ordinaryStartedAt: ledger.ordinaryStartedAt, recovery,
+  });
+  assert.equal(result.completed, true);
+  assert.notStrictEqual(result.recoveries[0], priorRecovery, 'runner clone-isolates the carried receipt');
+  client.snapshot.playerHp = 0;
+  Object.assign(client.snapshot.entities[0], { hp: 0, dead: true });
+  for (let index = 0; index < 2; index += 1) {
+    assert.equal(await recoverV2Death({ client, result, inWorldStartedAt: Date.now(), startedAt: Date.now(), recovery }), true);
+    client.snapshot.playerHp = 0;
+    Object.assign(client.snapshot.entities[0], { hp: 0, dead: true });
+  }
+  await assert.rejects(
+    recoverV2Death({ client, result, inWorldStartedAt: Date.now(), startedAt: Date.now(), recovery }),
+    /exceeded the 3 authoritative V2 recovery limit/,
+  );
+  assert.equal(result.recoveries.length, 3);
+  assert.deepEqual(result.recoveries[0], priorRecovery, 'the prior confirmed town-revive remains in the new report');
 });
 
 function practiceQuest(requirements, { questId = 2110004, kills = [{ monsterName: 'Scarecrow', spawns: [{ mapFileName: '0', position: { x: 2, y: 0 }, spread: 0 }] }] } = {}) {

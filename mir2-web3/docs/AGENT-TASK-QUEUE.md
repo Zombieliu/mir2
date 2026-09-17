@@ -17,6 +17,8 @@
 > Native clean-source build is running; documented Windows control now lists windows successfully.
 > Fresh Wizard N4 practice reservation/accounting repair passes affected suites 87/87;
 > the 180-attempt/120-step caps and original fresh timing ledger remain unchanged.
+> Fresh Taoist N7 stale-hint priority repair passes combat 156/156; V2 resume
+> preserves cumulative recoveries (ledger 14/14, V2 38/38). No caps or clocks grow.
 > Remaining ordinary route, timing, survival,
 > suitable equipment, exact native package and visual acceptance remain open.
 > This adds custom onboarding, no Crystal parity percentage. V1 evidence stays

@@ -23,6 +23,7 @@ import {
   hpMediumDrugCount,
 } from './protocol-supplies.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
+import { loadV2RecoveryLedger } from './newcomer-v2-recovery-ledger.mjs';
 import { claimAvailableMilestones, JOURNEY_MILESTONES } from './protocol-milestones.mjs';
 import {
   amuletStock,
@@ -105,6 +106,8 @@ const journeySupplyOptions = Object.freeze({
 await fs.mkdir(output, { recursive: true });
 const className = process.env.MIR2_JOURNEY_CLASS ?? 'Warrior';
 if (!['Warrior', 'Wizard', 'Taoist'].includes(className)) throw new Error('Invalid class');
+const isNewcomerV2Run = process.env.MIR2_JOURNEY_PLAY === '1' &&
+  String(process.env.MIR2_QUEST_CADENCE ?? '').trim().toLowerCase() === 'newcomer-v2';
 await fs.writeFile(path.join(output, `${className}.runner.pid`), String(process.pid));
 const credentialPath = path.join(output, `${className}.private.json`);
 let credentials;
@@ -122,10 +125,18 @@ const client = new ProtocolClient(
   traceFile,
 );
 const report = { runId, className, name: credentials.name, startedAt: new Date().toISOString(), gatewayUrl: client.url, traceFile, transport: 'normal-local-websocket', visualAccepted: false, completed: false };
-// This QA-only report ledger lets a normal process resume retain the original
-// two-hour ordinary-run deadline. It never writes or influences server state.
-const v2TimingLedger = await loadV2TimingLedger(path.join(output, `${className}.report.json`));
-if (v2TimingLedger) report.v2TimingLedger = { ordinaryStartedAt: v2TimingLedger, resumed: true };
+// This QA-only ledger retains both the original ordinary-run clock and every
+// confirmed death/town-revive. It never writes or influences server state.
+const v2RecoveryLedger = isNewcomerV2Run
+  ? await loadV2RecoveryLedger(path.join(output, `${className}.report.json`))
+  : null;
+if (v2RecoveryLedger) {
+  report.v2TimingLedger = {
+    ordinaryStartedAt: v2RecoveryLedger.ordinaryStartedAt,
+    recoveries: structuredClone(v2RecoveryLedger.recoveries),
+    resumed: true,
+  };
+}
 try {
   // Each run writes an isolated trace so Windows readers and virus scanners
   // cannot lock a shared multi-gigabyte append target. Bootstrap memory reads
@@ -159,8 +170,7 @@ try {
   report.bootstrapSignal = bootstrapEvidence.source;
   await client.wait(() => client.snapshot?.entities?.some(e => e.objectId === client.snapshot.playerObjectId && e.name === credentials.name), 'personal snapshot', bootstrapTimeoutMs);
   report.bootstrapPassed = true;
-  if (process.env.MIR2_JOURNEY_PLAY === '1' &&
-      String(process.env.MIR2_QUEST_CADENCE ?? '').trim().toLowerCase() === 'newcomer-v2') {
+  if (isNewcomerV2Run) {
     const { runNewcomerV2Journey } = await import('./protocol-newcomer-v2.mjs');
     // V2 uses the same public, receipted RandomTeleport route as the ordinary
     // controller. It is unavailable without a live stack and `useRandomTeleport`
@@ -194,11 +204,12 @@ try {
       className,
       gender: 'Male',
       report,
-      ordinaryStartedAt: v2TimingLedger ?? report.startedAt,
+      ordinaryStartedAt: v2RecoveryLedger?.ordinaryStartedAt ?? report.startedAt,
       deadlineMs: 120 * 60_000,
       survival: v2Survival,
       recovery: {
         maxRecoveries: 3,
+        priorRecoveries: v2RecoveryLedger?.recoveries ?? [],
         isDead: hasAuthoritativePlayerDeath,
         revive: reviveInTown,
       },
@@ -1412,17 +1423,6 @@ try {
   await client.close();
   await fs.writeFile(path.join(output, `${className}.report.json`), JSON.stringify(report, null, 2));
   await fs.writeFile(path.join(output, `${className}.${runId}.report.json`), JSON.stringify(report, null, 2));
-}
-
-async function loadV2TimingLedger(reportPath) {
-  try {
-    const prior = JSON.parse(await fs.readFile(reportPath, 'utf8'));
-    const startedAt = prior?.v2?.ordinaryStartedAt;
-    return Number.isFinite(Date.parse(startedAt ?? '')) ? startedAt : null;
-  } catch (error) {
-    if (error?.code === 'ENOENT' || error instanceof SyntaxError) return null;
-    throw error;
-  }
 }
 
 function recordSupplyRetreat(report, questId, supply) {

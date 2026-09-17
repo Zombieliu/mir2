@@ -1091,6 +1091,11 @@ function combatSettings(options) {
     // already-bounded respawn observation. Legacy callers keep timeout as a
     // terminal error unless they explicitly request this recovery.
     retrySpawnSearchTimeout: options.retrySpawnSearchTimeout === true,
+    // Legacy searches may continue to prioritize same-map monster packets from
+    // the current visit. V2's short, full-spread pass opts out for ordinary
+    // monsters so an old AOI observation cannot consume its whole time budget
+    // before the nearest manifest-backed field is reached.
+    allowHistoricalSpawnHints: options.allowHistoricalSpawnHints !== false,
     maxAttackAttempts: positiveInteger(options.maxAttackAttempts, 120),
     maxHarvestPasses: positiveInteger(options.maxHarvestPasses, 16),
     maxUnavailableCorpses: positiveInteger(options.maxUnavailableCorpses, 3),
@@ -1379,7 +1384,12 @@ async function searchSpawnCandidates(
     )
     .slice(0, settings.maxSpawnSearches);
   const bounds = knownMapBounds(client.snapshot);
-  const remembered = rememberedTargetLocations(client, targetPlan.monsterNames);
+  // A live AOI target is always safe to retain. Historical packets are only
+  // admitted when the caller keeps legacy behavior, except CannibalPlant: its
+  // server-side reveal check needs the remembered tile for one close probe.
+  const allowHistoricalHints = settings.allowHistoricalSpawnHints ||
+    targetPlan.monsterNames.some(name => normalizeName(name) === 'cannibalplant');
+  const remembered = rememberedTargetLocations(client, targetPlan.monsterNames, allowHistoricalHints);
   const coverage = interleavedSpawnWaypoints(candidates, bounds);
   const rememberedWaypoints = [];
   const coverageWaypoints = [];
@@ -1776,13 +1786,16 @@ function coverageAxis(center, spread, minimum, maximum) {
   return values;
 }
 
-function rememberedTargetLocations(client, monsterNames) {
+function rememberedTargetLocations(client, monsterNames, allowHistoricalHints = true) {
   const wanted = new Set(monsterNames.map(normalizeName));
   const points = [];
   for (const entity of client.snapshot?.entities ?? []) {
     if (normalized(entity?.kind) === 'monster' && wanted.has(normalizeName(entity?.name)) && validPoint(entity)) {
       points.push({ x: Number(entity.x), y: Number(entity.y) });
     }
+  }
+  if (!allowHistoricalHints) {
+    return points.sort((left, right) => distance(playerFromSnapshot(client.snapshot), left) - distance(playerFromSnapshot(client.snapshot), right));
   }
   const currentMap = String(client.snapshot?.mapFileName ?? '');
   let boundary = -1;
