@@ -181,6 +181,23 @@ test('q89 Taoist reserves 100 Amulet while other class and quest policies stay u
   assert.deepEqual(journeyAmuletSupplyPolicyForQuest(60, 'Taoist'), { minimum: 12, departure: 32 });
 });
 
+test('q113 Taoist funds the deeper trip without abandoning a viable field stack', () => {
+  const policy = journeyAmuletSupplyPolicyForQuest(113, 'Taoist');
+  assert.equal(policy.departure, 100);
+  const snapshot = quantity => ({
+    knownSkills: [{ spell: 'SoulFireBall' }],
+    equipmentItems: [{ name: 'Amulet', uniqueId: 10, quantity }],
+  });
+  // The measured objective and doorway clear used 28 Amulet. A full ordinary
+  // departure retains fuel, whereas the former departure needs resupply.
+  assert.equal(requiresTaoistAmuletRestock(snapshot(policy.departure - 28), 113, 'Taoist', policy.minimum), false);
+  assert.equal(requiresTaoistAmuletRestock(snapshot(32 - 28), 113, 'Taoist', policy.minimum), true);
+  assert.equal(requiresTaoistAmuletRestock(snapshot(12), 113, 'Taoist', policy.minimum), false);
+  assert.equal(requiresTaoistAmuletRestock(snapshot(11), 113, 'Taoist', policy.minimum), true);
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(113, 'Wizard'), { minimum: 0, departure: 0 });
+  assert.deepEqual(journeyAmuletSupplyPolicyForQuest(114, 'Taoist'), { minimum: 12, departure: 32 });
+});
+
 test('caster expedition restock targets stay separate from their field triggers', () => {
   assert.equal(journeyMpRestockTargetForQuest(54, 'Wizard'), 80);
   assert.equal(journeyMpRestockTargetForQuest(54, 'Taoist'), 80);

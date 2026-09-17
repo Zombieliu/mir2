@@ -1,5 +1,10 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-17 R149 controller 707/707 passes. Ordinary route units
+> remain **157/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-transit-cycle-and-fuel-r148-r149.md).
+
 > 2026-09-17 R147 controller 699/699 passes. Ordinary route units
 > remain **157/177**; actual route completion, final normal logout/store and
 > separate visual gates remain open.

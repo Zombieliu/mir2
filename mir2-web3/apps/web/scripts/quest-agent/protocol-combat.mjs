@@ -231,6 +231,13 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
                   // route remains a normal bounded no-path result.
                   hostileAvoidanceRadius: settings.transitHostileAvoidanceRadius,
                 } : {}),
+                // The q113 caster-only radius-two policy can otherwise keep
+                // replanning around a moving cave pack until the global step
+                // cap. Stop on an authoritative repeat so the existing
+                // travel-blocker policy can make one bounded decision.
+                ...(questId === 113 && settings.transitHostileAvoidanceRadius > 0 ? {
+                  detectPositionCycles: true,
+                } : {}),
                 // Keep the ordinary transit planner outside the same live
                 // named-Shaman footprint enforced after cadence below. This
                 // avoids repeatedly selecting a shorter route that the

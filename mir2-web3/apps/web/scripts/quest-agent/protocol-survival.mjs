@@ -76,6 +76,10 @@ export function journeyAmuletSupplyPolicyForQuest(questId, className, snapshot =
   // stack before returning through town. Keep q89's lower field trigger at
   // 32 and fund the same 100-item departure reserve used by q98/q99.
   if (id === 89) return { minimum: 32, departure: 100 };
+  // q113's ordinary BlackMaggot and doorway BlackBoar consumed 28 of the
+  // 32 departure Amulet before the deeper hunting map. Fund a full stack
+  // in town without raising the field trigger for an ongoing encounter.
+  if (id === 113) return { minimum: 12, departure: 100 };
   if (![98, 99].includes(id)) return { minimum: 12, departure: 32 };
   let minimum = 48;
   // Do not abandon q98's final measured WoomaSoldier after a reconnect when

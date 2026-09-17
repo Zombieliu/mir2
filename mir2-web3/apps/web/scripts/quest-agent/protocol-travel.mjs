@@ -8,6 +8,7 @@ import {
   findProtocolTransferExitStep,
   loadProtocolCollisionMap,
 } from './protocol-navigation.mjs';
+import { NavigationStalled } from './protocol-play.mjs';
 
 const travelGraphPromise = loadCrystalQuestRouteSources().then(sources => {
   return buildMapTravelGraph(sources);
@@ -811,14 +812,20 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
             if (handleUnexpectedCurrentMapLanding()) return traversed;
             break;
           } catch (error) {
-            if (!String(error?.message ?? '').startsWith('No walk path')) throw error;
+            const navigationStalled = error instanceof NavigationStalled &&
+              options.navigationOptions?.detectPositionCycles === true;
+            if (!navigationStalled && !String(error?.message ?? '').startsWith('No walk path')) throw error;
             // A dense pack may seal every locally planned first step while the
-            // selected transfer is still far away. Once an adjacent attacker
-            // is proven, classify that no-path result as the same bounded
-            // travel interruption used by stopWhen; the quest combat policy
-            // can then clear or evade the actual threat instead of exiting on
-            // a raw navigation error.
+            // selected transfer is still far away. An opt-in position cycle
+            // is the same live traversal symptom, but never gets a generic
+            // retry: first honour a fresh caller-owned threat interruption,
+            // then classify only a currently proved blocker.
             throwIfTravelInterrupted(options, current, edge.toMapFileName);
+            if (navigationStalled && (client.snapshot?.mapSnapshotPending ||
+                String(client.snapshot?.mapFileName ?? '') !== current ||
+                !sameActiveOwner(client.snapshot, activeOwnerId))) {
+              throw error;
+            }
             // A narrow cave can be sealed near the player long before the
             // destination transfer enters AOI. Clear the nearest bounded local
             // blocker when no transfer-adjacent monster is visible, then retry
@@ -830,6 +837,10 @@ export function createMapTraveler(client, navigateNear, dependencies = {}) {
             }) ?? transferBlockingMonster(client.snapshot, live) ??
               localBlockingMonster(client.snapshot);
             if (!blocker) {
+              // A position cycle without a currently rendered blocker is not
+              // evidence for an alternate doorway, relocation, or retry.
+              // Preserve the typed stall so callers fail closed.
+              if (navigationStalled) throw error;
               rejectedTransferKeys.add(String(live.transfer.key));
               const alternative = liveTransferChoices(client.snapshot, edge, options).find(candidate =>
                 !rejectedTransferKeys.has(String(candidate.transfer.key)) &&

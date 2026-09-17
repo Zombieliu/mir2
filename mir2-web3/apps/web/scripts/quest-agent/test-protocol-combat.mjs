@@ -252,7 +252,10 @@ test('q113 caster transit gives the ordinary traveler a two-cell hostile buffer 
     return navigationOptions;
   };
 
-  assert.deepEqual(await run(113, 2), { hostileAvoidanceRadius: 2 });
+  assert.deepEqual(await run(113, 2), {
+    hostileAvoidanceRadius: 2,
+    detectPositionCycles: true,
+  });
   assert.equal(await run(60, 0), null);
 });
 
