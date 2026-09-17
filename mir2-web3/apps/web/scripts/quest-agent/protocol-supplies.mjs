@@ -178,41 +178,15 @@ export async function restockInVillage(client, navigateNear, options = {}) {
       },
     ];
     for (const group of groups) {
-      if (spendableGold >= desiredSpendable || group.candidates.length === 0) continue;
-      await navigateSupplyService(client, navigateNear, group.position, options.clearBlockingMonster);
-      const { npc: seller } = await group.open();
-      for (const candidate of group.candidates) {
-        if (spendableGold >= desiredSpendable) break;
-        const quantity = positiveInteger(candidate.quantity ?? 1, `${candidate.name} quantity`);
-        const unitValue = positiveInteger(candidate.sellValue, `${candidate.name} sellValue`);
-        const beforeGold = integer(client.snapshot.gold, 'snapshot.gold');
-        const afterCommand = Number(client.sequence ?? 0);
-        const acknowledgement = await client.request({
-          type: 'sellItem',
-          uniqueId: numericId(candidate.uniqueId, `${candidate.name} uniqueId`),
-          count: quantity,
-        }, 'SellItem', WAIT_MS);
-        if (acknowledgement?.payload?.success !== true) {
-          throw new Error(`${seller.name} rejected sale of ${candidate.name}`);
-        }
-        await client.wait(
-          () => hasFreshSaleProof(
-            client,
-            afterCommand,
-            candidate.uniqueId,
-            beforeGold + unitValue * quantity,
-          ),
-          `authoritative sale of ${candidate.name}`,
-          WAIT_MS,
-        );
-        sales.push({
-          uniqueId: Number(candidate.uniqueId),
-          name: String(candidate.name),
-          quantity,
-          gold: unitValue * quantity,
-        });
-        spendableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
-      }
+      spendableGold = await sellCandidateGroupUntilSpendable(
+        client,
+        navigateNear,
+        group,
+        desiredSpendable,
+        reserveGold,
+        sales,
+        options.clearBlockingMonster,
+      );
     }
   }
   if (spendableGold < cheapestNeeded) {
@@ -364,25 +338,105 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   }
 
   await navigateSupplyService(client, navigateNear, RUBEN, options.clearBlockingMonster);
-  const { npc, goodsEvent } = await openBuySellService(client, liveRuben, 'Merchant Ruben');
-  const goods = goodsEvent?.payload;
-  if (!goods || Number(goods.panelType) !== 0 || !Array.isArray(goods.list)) {
-    throw new Error('Merchant Ruben returned an invalid buy goods panel');
-  }
+  let { npc, goodsEvent } = await openBuySellService(client, liveRuben, 'Merchant Ruben');
+  let purchaseKinds;
+  let rows;
+  let emergencyRow;
+  let hpMediumRow;
+  const rebuildRubenPlan = event => {
+    const goods = event?.payload;
+    if (!goods || Number(goods.panelType) !== 0 || !Array.isArray(goods.list)) {
+      throw new Error('Merchant Ruben returned an invalid buy goods panel');
+    }
+    // Navigation, blocker combat and liquidation can consume supplies. Rebuild
+    // the shopping list from the fresh shop snapshot instead of freezing the
+    // pre-travel stock decision.
+    purchaseKinds = relevant.filter(kind => stock(client.snapshot)[kind] < lowStockByKind[kind]);
+    rows = Object.fromEntries(purchaseKinds.map(kind => [kind, supplyRow(goods.list, SUPPLIES[kind])]));
+    for (const kind of purchaseKinds) {
+      if (!rows[kind]) throw new Error(`Merchant Ruben shop is missing ${SUPPLIES[kind].name}`);
+    }
+    emergencyRow = needEmergencyTeleport ? supplyRow(goods.list, RANDOM_TELEPORT) : null;
+    if (needEmergencyTeleport && !emergencyRow) {
+      throw new Error(`Merchant Ruben shop is missing ${RANDOM_TELEPORT.name} (${RANDOM_TELEPORT.itemIndex})`);
+    }
+    hpMediumRow = needHpMedium ? supplyRow(goods.list, SUPPLIES.hpMedium) : null;
+  };
+  rebuildRubenPlan(goodsEvent);
 
-  // Navigation, blocker combat and liquidation can consume supplies. Rebuild
-  // the shopping list from the fresh shop snapshot instead of freezing the
-  // pre-travel stock decision.
-  const purchaseKinds = relevant.filter(kind => stock(client.snapshot)[kind] < lowStockByKind[kind]);
-  const rows = Object.fromEntries(purchaseKinds.map(kind => [kind, supplyRow(goods.list, SUPPLIES[kind])]));
-  for (const kind of purchaseKinds) {
-    if (!rows[kind]) throw new Error(`Merchant Ruben shop is missing ${SUPPLIES[kind].name}`);
+  // The first liquidation target is calculated before travel. If service
+  // combat consumed a fresh low-stock supply, fund the rebuilt Ruben plan and
+  // its pending TownTeleport once before any ordinary purchase can consume
+  // the scroll's capital. This is deliberately one material-service pass.
+  const pendingTownCost = needEmergencyTownTeleport && !townPurchaseBeforeOrdinaryRestock
+    ? Math.max(0, emergencyTownTeleportCount - townTeleportStock(client.snapshot)) * TOWN_TELEPORT.catalogPrice
+    : 0;
+  const freshOrdinaryCost = purchaseKinds.reduce((total, kind) =>
+    total + Math.max(0, targets[kind] - stock(client.snapshot)[kind]) *
+      positiveInteger(rows[kind].price, `${SUPPLIES[kind].name} price`), 0) +
+    (needEmergencyTeleport
+      ? Math.max(0, emergencyTeleportCount - randomTeleportStock(client.snapshot)) *
+        positiveInteger(emergencyRow.price, `${RANDOM_TELEPORT.name} price`)
+      : 0) +
+    (needHpMedium && hpMediumRow && Number.isSafeInteger(Number(hpMediumRow.price)) && Number(hpMediumRow.price) > 0
+      ? Math.max(0, targets.hpMedium - hpMediumDrugCount(client.snapshot)) * Number(hpMediumRow.price)
+      : 0) +
+    pendingTownCost;
+  const freshSpendableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
+  if (pendingTownCost > 0 && freshSpendableGold < freshOrdinaryCost) {
+    const soldIds = new Set(sales.map(sale => Number(sale.uniqueId)));
+    // Re-evaluate from the live snapshot: a sold item id can be recycled by a
+    // later authoritative snapshot, and it must never be treated as the old
+    // eligible material merely because the stale candidate had that id.
+    const freshMaterials = options.liquidateObsoleteMaterials === true
+      ? obsoleteMaterialsForSale(client.snapshot, {
+          progressionCandidates: options.progressionCandidates,
+          protectedItemNames: options.protectedItemNames,
+        })
+      : [];
+    const remainingMeat = freshMaterials.filter(candidate =>
+      normalized(candidate?.name) === 'venison' && !soldIds.has(Number(candidate.uniqueId)));
+    const remainingMaterials = freshMaterials.filter(candidate =>
+      normalized(candidate?.name) !== 'venison' && !soldIds.has(Number(candidate.uniqueId)));
+    const topUpGroup = remainingMeat.length > 0
+      ? {
+          candidates: remainingMeat,
+          position: BUTCHER,
+          open: () => openSellService(client, liveButcher, 'Butcher John'),
+          currentCandidates: () => obsoleteMaterialsForSale(client.snapshot, {
+            progressionCandidates: options.progressionCandidates,
+            protectedItemNames: options.protectedItemNames,
+          }).filter(candidate => normalized(candidate?.name) === 'venison' && !soldIds.has(Number(candidate.uniqueId))),
+        }
+      : remainingMaterials.length > 0
+        ? {
+            candidates: remainingMaterials,
+            position: MATERIAL_DEALER,
+            open: () => openSellService(client, liveMaterialDealer, 'Material Dealer Reece'),
+            currentCandidates: () => obsoleteMaterialsForSale(client.snapshot, {
+              progressionCandidates: options.progressionCandidates,
+              protectedItemNames: options.protectedItemNames,
+            }).filter(candidate => normalized(candidate?.name) !== 'venison' && !soldIds.has(Number(candidate.uniqueId))),
+          }
+        : null;
+    if (topUpGroup) {
+      spendableGold = await sellCandidateGroupUntilSpendable(
+        client,
+        navigateNear,
+        topUpGroup,
+        freshOrdinaryCost,
+        reserveGold,
+        sales,
+        options.clearBlockingMonster,
+      );
+      // The material service owns the active NPC dialog. Re-open Ruben and
+      // replace every row and deficit with the returned authoritative panel;
+      // this is not another liquidation pass.
+      await navigateSupplyService(client, navigateNear, RUBEN, options.clearBlockingMonster);
+      ({ npc, goodsEvent } = await openBuySellService(client, liveRuben, 'Merchant Ruben'));
+      rebuildRubenPlan(goodsEvent);
+    }
   }
-  const emergencyRow = needEmergencyTeleport ? supplyRow(goods.list, RANDOM_TELEPORT) : null;
-  if (needEmergencyTeleport && !emergencyRow) {
-    throw new Error(`Merchant Ruben shop is missing ${RANDOM_TELEPORT.name} (${RANDOM_TELEPORT.itemIndex})`);
-  }
-  const hpMediumRow = needHpMedium ? supplyRow(goods.list, SUPPLIES.hpMedium) : null;
 
   // Calculate the full plan once so it always preserves the emergency gold
   // reserve. HP is intentionally first because every class depends on it.
@@ -733,6 +787,57 @@ async function navigateSupplyService(client, navigateNear, target, clearBlocking
     }
   }
   throw new Error(`Unable to reach supply service at ${target.x},${target.y}`);
+}
+
+async function sellCandidateGroupUntilSpendable(
+  client,
+  navigateNear,
+  group,
+  requiredSpendable,
+  reserveGold,
+  sales,
+  clearBlockingMonster,
+) {
+  let availableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
+  if (availableGold >= requiredSpendable || group.candidates.length === 0) return availableGold;
+  await navigateSupplyService(client, navigateNear, group.position, clearBlockingMonster);
+  const { npc: seller } = await group.open();
+  const candidates = typeof group.currentCandidates === 'function'
+    ? group.currentCandidates()
+    : group.candidates;
+  for (const candidate of candidates) {
+    if (availableGold >= requiredSpendable) break;
+    const quantity = positiveInteger(candidate.quantity ?? 1, `${candidate.name} quantity`);
+    const unitValue = positiveInteger(candidate.sellValue, `${candidate.name} sellValue`);
+    const beforeGold = integer(client.snapshot.gold, 'snapshot.gold');
+    const afterCommand = Number(client.sequence ?? 0);
+    const acknowledgement = await client.request({
+      type: 'sellItem',
+      uniqueId: numericId(candidate.uniqueId, `${candidate.name} uniqueId`),
+      count: quantity,
+    }, 'SellItem', WAIT_MS);
+    if (acknowledgement?.payload?.success !== true) {
+      throw new Error(`${seller.name} rejected sale of ${candidate.name}`);
+    }
+    await client.wait(
+      () => hasFreshSaleProof(
+        client,
+        afterCommand,
+        candidate.uniqueId,
+        beforeGold + unitValue * quantity,
+      ),
+      `authoritative sale of ${candidate.name}`,
+      WAIT_MS,
+    );
+    sales.push({
+      uniqueId: Number(candidate.uniqueId),
+      name: String(candidate.name),
+      quantity,
+      gold: unitValue * quantity,
+    });
+    availableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
+  }
+  return availableGold;
 }
 
 async function purchaseEmergencyTownTeleport(client, navigateNear, targetCount, reserveGold, clearBlockingMonster) {

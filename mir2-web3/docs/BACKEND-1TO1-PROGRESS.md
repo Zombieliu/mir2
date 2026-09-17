@@ -1,5 +1,10 @@
 # Backend 1:1 Progress
 
+> 2026-09-17 R154 controller 723/723 passes. Ordinary route units
+> remain **158/177**; actual route completion, final normal logout/store and
+> separate visual gates remain open.
+> [Evidence](generated/player-qa/protocol-journey-20260915/q113-fresh-material-town-capital-r154.md).
+
 > 2026-09-17 actual Wizard R153 q113 completed: public finish45596,
 > CompleteQuest45598 and snapshot45599 prove BM3/3, Wedge3/3 and exact
 > +12500 gold/+544444 EXP. Aggregate **158/177**; both caster routes continue,

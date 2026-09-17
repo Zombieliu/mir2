@@ -81,8 +81,13 @@ class FakeClient {
     }
     if (command.type === 'buyItem' && !this.options.rejectBuy) {
       const objectId = this.snapshot?.activeNpcDialog?.npcObjectId;
-      const availableGoods = this.options.goodsByNpc?.[String(objectId)] ?? this.options.goods ?? goods();
+      const availableGoods = Object.hasOwn(this.options.goodsByNpc ?? {}, String(objectId))
+        ? this.options.goodsByNpc[String(objectId)]
+        : this.options.goods ?? goods();
       const row = availableGoods.find(entry => String(entry.id) === String(command.itemIndex));
+      if (this.options.enforceMerchantOwnership && !row) {
+        throw new Error(`merchant ${objectId} does not own buy row ${command.itemIndex}`);
+      }
       const index = Number(row?.itemIndex);
       const quantity = Number(command.count);
       const next = structuredClone(this.snapshot);
@@ -179,7 +184,9 @@ class FakeClient {
     if (packet === 'NPCGoods' && !this.options.noGoods) {
       const objectId = this.snapshot?.activeNpcDialog?.npcObjectId;
       this.packet('NPCGoods', {
-        list: this.options.goodsByNpc?.[String(objectId)] ?? this.options.goods ?? goods(),
+        list: Object.hasOwn(this.options.goodsByNpc ?? {}, String(objectId))
+          ? this.options.goodsByNpc[String(objectId)]
+          : this.options.goods ?? goods(),
         panelType: this.options.panelType ?? 0,
         rate: 1,
       });
@@ -234,6 +241,44 @@ function weaponGoods() {
       count: 1, equipSlot: 'weapon', itemType: 1, requiredLevel: 1, requiredClass: 7 },
   ];
 }
+
+function taoistFreshMaterialTopUpState(gold, { includeVenison = true } = {}) {
+  const state = snapshot({
+    className: 'Taoist', level: 18, gold, hp: 80, mp: 11, amulet: 99,
+    knownSkills: [{ spell: 'SoulFireBall', offensive: true, cooldownRemainingTicks: 0, mpCost: 4 }],
+  });
+  state.inventoryItems.push(item(TOWN_TELEPORT, 1, 'TownTeleport', 719100));
+  if (includeVenison) {
+    state.inventoryItems.push(
+      { name: 'Venison', uniqueId: 719101, quantity: 1, container: 'bag1', sellValue: 249 },
+      { name: 'Venison', uniqueId: 719102, quantity: 1, container: 'bag1', sellValue: 226 },
+    );
+  }
+  return state;
+}
+
+function freshRubenNavigation(client, { unknownGold = false } = {}) {
+  let consumed = false;
+  return async target => {
+    if (consumed || Number(target.x) !== 288 || Number(target.y) !== 608) return;
+    consumed = true;
+    const next = structuredClone(client.snapshot);
+    next.inventoryItems.find(entry => Number(entry.tooltipSource?.info?.item_index) === AMULET).quantity -= 10;
+    if (unknownGold) next.gold = 'unknown';
+    client.receive(next);
+  };
+}
+
+const freshMaterialTopUpOptions = Object.freeze({
+  emergencyTownTeleportCount: 2,
+  targetHp: 80,
+  targetMp: 12,
+  targetAmulet: 100,
+  lowStockMp: 4,
+  lowStockAmulet: 100,
+  liquidateObsoleteMaterials: true,
+  reserveGold: 0,
+});
 
 test('reports preferred weapon funding for an unarmed or under-geared Warrior', () => {
   const unarmed = snapshot({ className: 'Warrior', level: 18, hp: 6 });
@@ -567,6 +612,100 @@ test('Scott TownTeleport failures and unknown live gold do not fall through to R
   }), /snapshot\.gold/);
   assert.equal(unknown.sent.some(entry => entry.type === 'buyItem'), false);
   assert.equal(unknown.sent.some(entry => entry.type === 'interact' && entry.objectId === 88), false);
+});
+
+test('fresh Ruben funding sells one live Venison before Amulet and TownTeleport purchases', async () => {
+  const client = new FakeClient(taoistFreshMaterialTopUpState(1201), {
+    goodsByNpc: { '6': [], '43': [], '88': goods(), '42': townEmergencyGoods() },
+    enforceMerchantOwnership: true,
+  });
+  const result = await restockInVillage(client, freshRubenNavigation(client), freshMaterialTopUpOptions);
+
+  assert.equal(result.status, 'restocked');
+  assert.deepEqual(result.sales, [{ uniqueId: 719101, name: 'Venison', quantity: 1, gold: 249 }]);
+  assert.deepEqual(result.purchases.map(entry => [entry.itemIndex, entry.quantity]), [[AMULET, 11], [TOWN_TELEPORT, 1]]);
+  assert.deepEqual(client.sent.filter(entry => entry.type === 'sellItem').map(entry => entry.uniqueId), [719101]);
+  assert.deepEqual(client.sent.filter(entry => entry.type === 'buyItem').map(entry => [entry.itemIndex, entry.count]), [[73, 11], [71901, 1]]);
+  assert.deepEqual(client.sent.filter(entry => entry.type === 'interact').map(entry => entry.objectId), [88, 6, 88, 42]);
+  assert.equal(result.after.gold, 175);
+  assert.equal(townTeleportCount(client.snapshot), 2);
+  assert.equal(client.snapshot.inventoryItems.some(entry => Number(entry.uniqueId) === 719102), true);
+});
+
+test('fresh Ruben funding skips the material top-up when the live budget already covers both purchases', async () => {
+  const client = new FakeClient(taoistFreshMaterialTopUpState(1275), {
+    goodsByNpc: { '6': [], '43': [], '88': goods(), '42': townEmergencyGoods() },
+    enforceMerchantOwnership: true,
+  });
+  const result = await restockInVillage(client, freshRubenNavigation(client), freshMaterialTopUpOptions);
+
+  assert.equal(result.status, 'restocked');
+  assert.deepEqual(result.sales, []);
+  assert.equal(client.sent.some(entry => entry.type === 'interact' && entry.objectId === 6), false);
+  assert.equal(result.after.gold, 0);
+  assert.equal(townTeleportCount(client.snapshot), 2);
+});
+
+test('fresh Ruben funding preserves the reserve and fails closed when no eligible material can top up', async () => {
+  const reserve = new FakeClient(taoistFreshMaterialTopUpState(1301), {
+    goodsByNpc: { '6': [], '43': [], '88': goods(), '42': townEmergencyGoods() },
+    enforceMerchantOwnership: true,
+  });
+  const reserveResult = await restockInVillage(reserve, freshRubenNavigation(reserve), {
+    ...freshMaterialTopUpOptions,
+    reserveGold: 100,
+  });
+  assert.equal(reserveResult.status, 'restocked');
+  assert.equal(reserveResult.after.gold, 275);
+  assert.ok(reserveResult.after.gold >= 100);
+  assert.deepEqual(reserveResult.sales.map(entry => entry.uniqueId), [719101]);
+
+  const noEligible = new FakeClient(taoistFreshMaterialTopUpState(1201, { includeVenison: false }), {
+    goodsByNpc: { '88': goods(), '42': townEmergencyGoods() },
+  });
+  const shortfall = await restockInVillage(noEligible, freshRubenNavigation(noEligible), freshMaterialTopUpOptions);
+  assert.equal(shortfall.status, 'needsFunds');
+  assert.deepEqual(shortfall.sales, []);
+  assert.equal(noEligible.sent.some(entry => entry.type === 'sellItem'), false);
+  assert.deepEqual(noEligible.sent.filter(entry => entry.type === 'buyItem').map(entry => entry.itemIndex), [73]);
+});
+
+test('fresh Ruben funding rejects a sale and ignores a recycled non-material item id', async () => {
+  const rejected = new FakeClient(taoistFreshMaterialTopUpState(1201), {
+    goodsByNpc: { '6': [], '43': [], '88': goods(), '42': townEmergencyGoods() },
+    rejectSell: true,
+  });
+  await assert.rejects(() => restockInVillage(rejected, freshRubenNavigation(rejected), freshMaterialTopUpOptions), /rejected sale of Venison/);
+  assert.equal(rejected.sent.some(entry => entry.type === 'buyItem'), false);
+
+  const recycledState = taoistFreshMaterialTopUpState(1201);
+  recycledState.inventoryItems = recycledState.inventoryItems.filter(entry => Number(entry.uniqueId) !== 719102);
+  const recycled = new FakeClient(recycledState, {
+    goodsByNpc: { '6': [], '43': [], '88': goods(), '42': townEmergencyGoods() },
+  });
+  const navigate = freshRubenNavigation(recycled);
+  const recycledResult = await restockInVillage(recycled, async target => {
+    await navigate(target);
+    if (Number(target.x) === 292 && Number(target.y) === 603) {
+      const next = structuredClone(recycled.snapshot);
+      const index = next.inventoryItems.findIndex(entry => Number(entry.uniqueId) === 719101);
+      next.inventoryItems[index] = item(AMULET, 1, 'Amulet', 719101);
+      recycled.receive(next);
+    }
+  }, freshMaterialTopUpOptions);
+  assert.equal(recycledResult.status, 'needsFunds');
+  assert.equal(recycled.sent.some(entry => entry.type === 'sellItem'), false);
+  assert.deepEqual(recycled.sent.filter(entry => entry.type === 'interact').map(entry => entry.objectId), [88, 6, 88]);
+
+  const unknown = new FakeClient(taoistFreshMaterialTopUpState(1201), {
+    goodsByNpc: { '6': [], '43': [], '88': goods(), '42': townEmergencyGoods() },
+  });
+  await assert.rejects(() => restockInVillage(
+    unknown,
+    freshRubenNavigation(unknown, { unknownGold: true }),
+    freshMaterialTopUpOptions,
+  ), /snapshot\.gold/);
+  assert.equal(unknown.sent.some(entry => entry.type === 'sellItem' || entry.type === 'buyItem'), false);
 });
 
 test('TownTeleport funding shortfall reports needsFunds after Ruben potions without visiting Scott', async () => {
