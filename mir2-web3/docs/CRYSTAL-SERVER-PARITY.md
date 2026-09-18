@@ -5,8 +5,10 @@
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
 > V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
 > Web guidance/goal and localization plus TypeScript pass; controller regressions 288/288.
-> Ordinary three-class 33/78 persist after normal logout; levels 19/16/18.
-> All three pass N5/N6. Original timing ledgers remain; clean two-hour time is unverified.
+> Fresh ordinary three-class 34/78 persist after normal logout; levels 22/19/11.
+> All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
+> Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
+> Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.
 > Actual Gateway N4 self-Healing 1/1 and N5 arrival/autosave/rejection 4/4 pass;
 > movement map-transfer 4/4 and Simulation V2 15/15 plus Zone 7/7 reruns pass.
 > N5 release is deployed; safe-profile Zone 4/4, Gateway snapshot 1/1 and arrival 4/4 pass.
@@ -14,7 +16,7 @@
 > Shared spell cooldown getter 3/3 and fresh Gateway journey bridge 11/11 pass.
 > Public owner readiness follows the Zone clock; the 6e1778957 release is deployed.
 > Fresh ordinary three-class accounts started on isolated ports 19800/19810, with unextended 120-minute ledgers.
-> Native clean-source build is running; documented Windows control now lists windows successfully.
+> Native clean-source release build and unauthenticated startup diagnostic pass; visual capture remains unaccepted.
 > Remaining ordinary route, timing, survival,
 > suitable equipment, exact native package and visual acceptance remain open.
 > This adds custom onboarding, no Crystal parity percentage. V1 evidence stays

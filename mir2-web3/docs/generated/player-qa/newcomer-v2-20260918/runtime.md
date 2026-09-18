@@ -177,3 +177,18 @@ Normal V2 resume also preserves confirmed recovery rows and the cumulative
 three-recovery limit; invalid evidence fails closed (ledger 14/14, V2 38/38).
 Root verifies the real Taoist's one recovery and original start are retained.
 See search-and-resume-ledger.md; full route, timing and visuals remain open.
+
+Latest fresh-account read-only verification confirms **34/78** after normal
+logout, with matching durable state: Warrior level 22 (16/26), Wizard level 19
+(12/26), Taoist level 11 (6/26). Blocking nodes are N15 Thrusting damage, N12
+practice target receipt and N7 ForestYeti attack cap. Original starts and
+cumulative revives 0/3/1 remain intact; the 120-minute deadlines have expired.
+No new journey clock is created. See fresh-ordinary-checkpoint.md. The older
+33/78 and paused V1 evidence are independent historical checkpoints.
+
+The clean-source native release build has now completed and its immutable copy
+matches the attestation SHA256. The hidden unauthenticated startup diagnostic
+passed asset/map checks, connected to WS19810 and forwarded its first snapshot
+at 1399.260 ms. A screenshot-target failure is retained without inferring an
+application crash. This development artifact is not a signed portable package
+or a native visual acceptance. See native-build-and-startup.md.

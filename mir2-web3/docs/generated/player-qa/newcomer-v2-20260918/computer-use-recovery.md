@@ -20,3 +20,10 @@ formal signed packaging remains a separate prerequisite. A build attestation,
 a development launch, protocol completion and visual acceptance are distinct.
 
 visualAccepted=false; signedPackage=false; ordinaryComplete=false.
+
+Later result: the clean-source build completed at 2026-09-17T21:04:19Z.
+The first native launch returned a window but its screenshot target could not
+be resolved. A separate hidden startup diagnostic remained alive and connected
+with all required assets present; no gameplay login/input or screenshot was
+accepted. See native-build-and-startup.md for the exact EXE hash and stage times.
+No application crash is established by the screenshot-target error alone.
