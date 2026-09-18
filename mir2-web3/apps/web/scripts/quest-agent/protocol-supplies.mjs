@@ -60,6 +60,11 @@ const CLASS_WEAPONS = Object.freeze({
     Object.freeze({ itemIndex: 221, name: 'WoodenSword', catalogPrice: 50, requiredLevel: 1 }),
   ]),
 });
+const TAOIST_FOREST_WEAPONS = Object.freeze([
+  Object.freeze({ itemIndex: 226, name: 'IronSword', catalogPrice: 1100, requiredLevel: 10 }),
+  Object.freeze({ itemIndex: 224, name: 'BronzeSword', catalogPrice: 900, requiredLevel: 5 }),
+]);
+const TAOIST_FOREST_MINIMUM_STOCK = Object.freeze({ hp: 6, mp: 6, randomTeleport: 1, townTeleport: 1 });
 
 /** Gold needed for the preferred ordinary replacement when a Warrior is unarmed or under-geared. */
 export function warriorWeaponFundingGold(snapshot) {
@@ -102,8 +107,11 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     amulet: positiveOption(options.lowStockAmulet, lowStock, 'lowStockAmulet'),
   };
   const reserveGold = nonnegativeOption(options.reserveGold, GOLD_RESERVE, 'reserveGold');
-  const weaponRequirement = options.ensureClassWeapon === true
-    ? classWeaponRequirement(initial)
+  const essentialTaoistForestWeapon = options.ensureTaoistForestWeapon === true;
+  const weaponRequirement = essentialTaoistForestWeapon
+    ? taoistForestWeaponRequirement(initial)
+    : options.ensureClassWeapon === true
+      ? classWeaponRequirement(initial)
     : options.ensureWarriorWeapon === true
       ? warriorWeaponRequirement(initial)
       : null;
@@ -123,6 +131,17 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   const emergencyTownTeleportCount = emergencyTownTeleportOption(options.emergencyTownTeleportCount);
   const needEmergencyTownTeleport = townTeleportStock(initial) < emergencyTownTeleportCount;
   const initialGold = integer(initial.gold, 'snapshot.gold');
+  if (essentialTaoistForestWeapon && weaponNeeded && !taoistForestSupplyReady(initial)) {
+    return {
+      status: 'needsMandatorySupplies',
+      stock: stock(initial),
+      randomTeleport: randomTeleportStock(initial),
+      townTeleport: townTeleportStock(initial),
+      required: TAOIST_FOREST_MINIMUM_STOCK,
+      gold: initialGold,
+      reserveGold,
+    };
+  }
   if (needed.length === 0 && !weaponNeeded && !needEmergencyTeleport && !needEmergencyTownTeleport && !needHpMedium) {
     const equippedAmulet = className === 'taoist' ? await equipHeldAmulet(client) : null;
     return { status: 'sufficient', stock: stock(client.snapshot), gold: initialGold, equippedAmulet };
@@ -137,6 +156,10 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     ...(needEmergencyTownTeleport ? [TOWN_TELEPORT.catalogPrice] : []),
   ];
   const cheapestNeeded = cheapestCandidates.length > 0 ? Math.min(...cheapestCandidates) : 0;
+  // This narrowly scoped q7 readiness purchase may use the existing account's
+  // last reserve only after its independent HP/MP/transport floor is proven.
+  // All ordinary/V1 restocking retains the generic reserve unchanged.
+  const cheapestBudget = essentialTaoistForestWeapon ? initialGold : spendableGold;
   const gearCandidates = options.liquidateSuperseded === true
     ? supersededProgressionGearForSale(initial, options.progressionCandidates)
         .filter(item => normalized(item?.equipSlot) === 'weapon')
@@ -150,7 +173,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
   const meatCandidates = materialCandidates.filter(item => normalized(item?.name) === 'venison');
   const generalMaterialCandidates = materialCandidates.filter(item => normalized(item?.name) !== 'venison');
   const liquidationCandidates = [...materialCandidates, ...gearCandidates];
-  if (spendableGold < cheapestNeeded && liquidationCandidates.length === 0 && !needEmergencyTeleport && !needEmergencyTownTeleport) {
+  if (cheapestBudget < cheapestNeeded && liquidationCandidates.length === 0 && !needEmergencyTeleport && !needEmergencyTownTeleport) {
     return needsFunds(beforeStock, initialGold, spendableGold, reserveGold);
   }
   if (typeof navigateNear !== 'function') throw new Error('navigateNear is required to reach Merchant Ruben');
@@ -193,7 +216,7 @@ export async function restockInVillage(client, navigateNear, options = {}) {
       );
     }
   }
-  if (spendableGold < cheapestNeeded) {
+  if (essentialTaoistForestWeapon ? integer(client.snapshot.gold, 'snapshot.gold') < cheapestNeeded : spendableGold < cheapestNeeded) {
     return {
       ...needsFunds(stock(client.snapshot), integer(client.snapshot.gold, 'snapshot.gold'), spendableGold, reserveGold),
       sales,
@@ -214,7 +237,23 @@ export async function restockInVillage(client, navigateNear, options = {}) {
     if (!goods || Number(goods.panelType) !== 0 || !Array.isArray(goods.list)) {
       throw new Error('Blacksmith Smith returned an invalid buy goods panel');
     }
-    const affordableGold = spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
+    // Navigation and dialog work are live time. Re-prove the q7 exception's
+    // recovery floor after those actions and before its irreversible purchase.
+    if (essentialTaoistForestWeapon && !taoistForestSupplyReady(client.snapshot)) {
+      return {
+        status: 'needsMandatorySupplies',
+        stock: stock(client.snapshot),
+        randomTeleport: randomTeleportStock(client.snapshot),
+        townTeleport: townTeleportStock(client.snapshot),
+        required: TAOIST_FOREST_MINIMUM_STOCK,
+        gold: integer(client.snapshot.gold, 'snapshot.gold'),
+        reserveGold,
+        sales,
+      };
+    }
+    const affordableGold = essentialTaoistForestWeapon
+      ? integer(client.snapshot.gold, 'snapshot.gold')
+      : spendable(integer(client.snapshot.gold, 'snapshot.gold'), reserveGold);
     const weapon = affordableClassWeapon(
       goods.list,
       playerLevel(client.snapshot),
@@ -1441,6 +1480,32 @@ function classWeaponRequirement(snapshot) {
   return bestOrdinaryIndex > preferredIndex
     ? { preferred: catalog[preferredIndex], allowFallback: false, catalog }
     : null;
+}
+
+function taoistForestWeaponRequirement(snapshot) {
+  if (playerClass(snapshot) !== 'taoist' || playerLevel(snapshot) < 11) return null;
+  const heldWeapons = [...(snapshot?.inventoryItems ?? []), ...(snapshot?.equipmentItems ?? [])]
+    .filter(item => normalized(item?.slot ?? item?.equipSlot) === 'weapon' ||
+      Number(item?.tooltipSource?.realInfo?.item_type ??
+        item?.tooltipSource?.real_info?.item_type ??
+        item?.tooltipSource?.info?.item_type ??
+        item?.tooltipSource?.info?.itemType) === 1);
+  // This is a replacement for the documented WoodenSword-only q7 state, not
+  // a broad inference that arbitrary quest or dropped weapons are inadequate.
+  if (heldWeapons.some(item => templateIndex(item) !== 221)) return null;
+  return {
+    preferred: TAOIST_FOREST_WEAPONS[0],
+    allowFallback: true,
+    catalog: TAOIST_FOREST_WEAPONS,
+  };
+}
+
+function taoistForestSupplyReady(snapshot) {
+  const held = stock(snapshot);
+  return held.hp >= TAOIST_FOREST_MINIMUM_STOCK.hp &&
+    held.mp >= TAOIST_FOREST_MINIMUM_STOCK.mp &&
+    randomTeleportStock(snapshot) >= TAOIST_FOREST_MINIMUM_STOCK.randomTeleport &&
+    townTeleportStock(snapshot) >= TAOIST_FOREST_MINIMUM_STOCK.townTeleport;
 }
 
 function spendable(gold, reserveGold = GOLD_RESERVE) {

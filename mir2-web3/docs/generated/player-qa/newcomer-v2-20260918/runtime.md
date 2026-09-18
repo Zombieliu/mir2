@@ -192,3 +192,10 @@ passed asset/map checks, connected to WS19810 and forwarded its first snapshot
 at 1399.260 ms. A screenshot-target failure is retained without inferring an
 application crash. This development artifact is not a signed portable package
 or a native visual acceptance. See native-build-and-startup.md.
+
+Fresh-route controller repairs pass 102/102 in Root's final scoped run:
+V2 43/43 and ordinary supplies 59/59. Thrusting/HalfMoon require exact public
+toggle acknowledgment before practice; level-11 Taoist N7 uses an affordable
+normal Blacksmith melee upgrade with held survival supplies rechecked before
+purchase. Neither cap nor deadline is increased. See blocking-repairs.md;
+ordinary route units remain 34/78 and these repaired nodes are not yet re-passed.

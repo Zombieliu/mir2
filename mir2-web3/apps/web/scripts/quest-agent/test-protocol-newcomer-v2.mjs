@@ -412,7 +412,7 @@ function noWalkPath(successfulSteps = 0, attempts = 1) {
   return error;
 }
 
-function practiceClient({ knownSkills, inventoryItems = [], requirements, completeOn = 1, questId, magicCast = true, magicTargetId = null }) {
+function practiceClient({ knownSkills, inventoryItems = [], requirements, completeOn = 1, questId, magicCast = true, magicTargetId = null, toggleAcknowledged = true, toggleReceiptOverride = null, preexistingToggleReceipt = null }) {
   const sent = [];
   const requests = [];
   const quest = practiceQuest(requirements, { questId });
@@ -450,7 +450,7 @@ function practiceClient({ knownSkills, inventoryItems = [], requirements, comple
     send(command) {
       sent.push(command);
       client.sequence += 1;
-      actions += 1;
+      if (['attack', 'attackDirection', 'magic'].includes(command.type)) actions += 1;
       if (command.type === 'attack') {
         const target = liveMonster(command.objectId);
         if (target) receive('ObjectStruck', { objectId: target.objectId, attackerId: 1 });
@@ -459,6 +459,9 @@ function practiceClient({ knownSkills, inventoryItems = [], requirements, comple
         const target = directionalMonster(command, command.spell === 3 ? 2 : 1);
         receive('ObjectAttack', { objectId: 1, spell: command.spell });
         if (target) receive('ObjectStruck', { objectId: target.objectId, attackerId: 1 });
+      }
+      if (command.type === 'spellToggle' && toggleAcknowledged) {
+        receive('SpellToggle', toggleReceiptOverride ?? { objectId: 1, spell: command.spell, canUse: command.canUse });
       }
       if (command.type === 'magic') {
         const ground = command.spell === 'FireWall';
@@ -493,6 +496,7 @@ function practiceClient({ knownSkills, inventoryItems = [], requirements, comple
       return true;
     },
   };
+  if (preexistingToggleReceipt) receive('SpellToggle', preexistingToggleReceipt);
   return { client, quest, sent, requests };
 }
 
@@ -752,7 +756,10 @@ test('directional practice moves to a line before packets and refreshes a differ
   });
   assert.equal(thrustMoves[0].desiredDistance, 0);
   assert.ok(directionalRayDistance(thrusting.client.snapshot.entities[0], thrusting.client.snapshot.entities[1]) <= 2);
-  assert.deepEqual(thrusting.sent, [{ type: 'attackDirection', direction: 'DownRight', spell: 3 }]);
+  assert.deepEqual(thrusting.sent, [
+    { type: 'spellToggle', spell: 'Thrusting', canUse: true },
+    { type: 'attackDirection', direction: 'DownRight', spell: 3 },
+  ]);
 
   const { client, quest, sent } = practiceClient({
     knownSkills: ['Lightning', 'FireWall'], requirements: { wizard: ['Lightning damage committed', 'owned FireWall damage committed'] }, completeOn: 2,
@@ -871,11 +878,14 @@ test('Fencing and SpiritSword practice use normal attacks, never magic packets',
   assert.deepEqual(sent, [{ type: 'attack', objectId: 9 }]);
 });
 
-test('HalfMoon uses the ordinary attack-direction technique packet and Lightning self-routes toward its current target', async () => {
+test('HalfMoon arms through its public toggle before attacking, and Lightning self-routes toward its current target', async () => {
   const warrior = practiceClient({ knownSkills: ['HalfMoon'], requirements: { warrior: ['HalfMoon attack damage committed'] } });
   warrior.client.snapshot.entities[0].class = 'Warrior';
   await executeV2PracticePlan({ client: warrior.client, quest: warrior.quest, navigate: async () => {}, plan: [{ kind: 'technique', spell: 'HalfMoon' }] });
-  assert.deepEqual(warrior.sent, [{ type: 'attackDirection', direction: 'Right', spell: 4 }]);
+  assert.deepEqual(warrior.sent, [
+    { type: 'spellToggle', spell: 'HalfMoon', canUse: true },
+    { type: 'attackDirection', direction: 'Right', spell: 4 },
+  ]);
 
   const wizard = practiceClient({ knownSkills: ['Lightning'], requirements: { wizard: ['Lightning damage committed'] } });
   wizard.client.snapshot.entities[0].class = 'Wizard';
@@ -890,6 +900,40 @@ test('HalfMoon uses the ordinary attack-direction technique packet and Lightning
     plan: [{ kind: 'spell', spell: 'Lightning' }],
   });
   assert.deepEqual(wizard.sent, [{ type: 'magic', objectId: 1, spell: 'Lightning', direction: 'Right', targetId: 1, x: -3, y: 0, spellTargetLock: false }]);
+});
+
+for (const [label, options] of [
+  ['wrong owner', { toggleReceiptOverride: { objectId: 2, spell: 'Thrusting', canUse: true } }],
+  ['wrong spell', { toggleReceiptOverride: { objectId: 1, spell: 'HalfMoon', canUse: true } }],
+  ['disabled receipt', { toggleReceiptOverride: { objectId: 1, spell: 'Thrusting', canUse: false } }],
+  ['old pre-send receipt', {
+    toggleAcknowledged: false,
+    preexistingToggleReceipt: { objectId: 1, spell: 'Thrusting', canUse: true },
+  }],
+]) {
+  test(`Thrusting fails closed for ${label} toggle receipt`, async () => {
+    const { client, quest, sent } = practiceClient({
+      knownSkills: ['Thrusting'], requirements: { warrior: ['Thrusting attack damage committed'] }, ...options,
+    });
+    client.snapshot.entities[0].class = 'Warrior';
+    await assert.rejects(
+      executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'technique', spell: 'Thrusting' }] }),
+      /Thrusting lacked an authoritative arming receipt/,
+    );
+    assert.deepEqual(sent, [{ type: 'spellToggle', spell: 'Thrusting', canUse: true }]);
+  });
+}
+
+test('HalfMoon fails closed until the server confirms its public toggle', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['HalfMoon'], requirements: { warrior: ['HalfMoon attack damage committed'] }, toggleAcknowledged: false,
+  });
+  client.snapshot.entities[0].class = 'Warrior';
+  await assert.rejects(
+    executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'technique', spell: 'HalfMoon' }] }),
+    /HalfMoon lacked an authoritative arming receipt/,
+  );
+  assert.deepEqual(sent, [{ type: 'spellToggle', spell: 'HalfMoon', canUse: true }]);
 });
 
 test('Poisoning equips bag poison before its public magic packet and waits for server progress', async () => {

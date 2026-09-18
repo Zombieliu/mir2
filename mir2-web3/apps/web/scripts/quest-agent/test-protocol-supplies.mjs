@@ -238,6 +238,8 @@ function weaponGoods() {
       count: 1, equipSlot: 'weapon', itemType: 1, requiredLevel: 13, requiredClass: 7 },
     { id: 22401, uniqueId: 22401, itemIndex: 224, name: 'BronzeSword', price: 900,
       count: 1, equipSlot: 'weapon', itemType: 1, requiredLevel: 5, requiredClass: 7 },
+    { id: 22601, uniqueId: 22601, itemIndex: 226, name: 'IronSword', price: 1100,
+      count: 1, equipSlot: 'weapon', itemType: 1, requiredLevel: 10, requiredClass: 7 },
     { id: 22101, uniqueId: 22101, itemIndex: 221, name: 'WoodenSword', price: 50,
       count: 1, equipSlot: 'weapon', itemType: 1, requiredLevel: 1, requiredClass: 7 },
   ];
@@ -385,6 +387,85 @@ test('weapon purchase proves the live Blacksmith rate-adjusted price', async () 
   assert.equal(result.weaponPurchase.name, 'BronzeAxe');
   assert.equal(result.weaponPurchase.unitPrice, 1800);
   assert.equal(result.after.gold, 200);
+});
+
+function taoistForestState({ gold = 960, hp = 7, mp = 20, randomTeleport = 2, townTeleport = 1 } = {}) {
+  const state = snapshot({ className: 'Taoist', level: 11, gold, hp, mp });
+  state.inventoryItems.push(
+    ...Array.from({ length: randomTeleport }, (_, index) => item(RANDOM_TELEPORT, 1, 'RandomTeleport', 71700 + index)),
+    ...Array.from({ length: townTeleport }, (_, index) => item(TOWN_TELEPORT, 1, 'TownTeleport', 71900 + index)),
+  );
+  state.equipmentItems.push({ ...item(221, 1, 'WoodenSword', 22100), slot: 'weapon', tooltipSource: { info: {
+    item_index: 221, item_type: 1, required_type: 0, required_amount: 1, required_class: 7,
+  } } });
+  return state;
+}
+
+test('q7 Taoist uses the live BronzeSword fallback at 960 only after its held survival floor is proven', async () => {
+  const client = new FakeClient(taoistForestState(), { goods: weaponGoods(), enforceMerchantOwnership: true });
+  const result = await restockInVillage(client, async () => {}, { ensureTaoistForestWeapon: true });
+  assert.equal(result.status, 'restocked');
+  assert.equal(result.weaponPurchase.name, 'BronzeSword');
+  assert.equal(result.after.gold, 60);
+  assert.deepEqual(client.sent.filter(command => command.type === 'buyItem'), [
+    { type: 'buyItem', itemIndex: 22401, count: 1, panelType: 0 },
+  ]);
+  assert.ok(client.snapshot.equipmentItems.some(entry => entry.name === 'BronzeSword' && entry.slot === 'weapon'));
+});
+
+test('q7 Taoist prefers the live IronSword when its ordinary account gold covers it', async () => {
+  const client = new FakeClient(taoistForestState({ gold: 1200 }), { goods: weaponGoods() });
+  const result = await restockInVillage(client, async () => {}, { ensureTaoistForestWeapon: true });
+  assert.equal(result.status, 'restocked');
+  assert.equal(result.weaponPurchase.name, 'IronSword');
+  assert.equal(result.after.gold, 100);
+});
+
+test('q7 Taoist forest upgrade fails before shopping when held survival supplies are insufficient', async () => {
+  const client = new FakeClient(taoistForestState({ hp: 5 }), { goods: weaponGoods() });
+  const result = await restockInVillage(client, async () => {}, { ensureTaoistForestWeapon: true });
+  assert.equal(result.status, 'needsMandatorySupplies');
+  assert.equal(client.sent.length, 0);
+});
+
+test('q7 Taoist rechecks held survival supplies after Blacksmith travel before spending the reserve', async () => {
+  const client = new FakeClient(taoistForestState({ hp: 9 }), { goods: weaponGoods() });
+  const result = await restockInVillage(client, async () => {
+    const next = structuredClone(client.snapshot);
+    next.inventoryItems.find(entry => Number(entry.tooltipSource?.info?.item_index) === HP).quantity = 5;
+    client.receive(next);
+  }, { ensureTaoistForestWeapon: true });
+  assert.equal(result.status, 'needsMandatorySupplies');
+  assert.equal(client.sent.some(command => command.type === 'buyItem'), false);
+  assert.equal(client.snapshot.gold, 960);
+});
+
+test('q7 Taoist forest upgrade still requires a fresh exact purchase receipt', async () => {
+  const client = new FakeClient(taoistForestState(), { goods: weaponGoods(), wrongGoldDelta: 1 });
+  await assert.rejects(
+    restockInVillage(client, async () => {}, { ensureTaoistForestWeapon: true }),
+    /Timeout waiting for authoritative purchase of BronzeSword/,
+  );
+  assert.equal(client.snapshot.equipmentItems.some(entry => entry.name === 'BronzeSword'), false);
+});
+
+test('ordinary class weapon restocking retains its reserve and does not use the q7 exception', async () => {
+  const client = new FakeClient(taoistForestState(), { goods: weaponGoods() });
+  const result = await restockInVillage(client, async () => {}, { ensureClassWeapon: true });
+  assert.equal(result.status, 'needsFunds');
+  assert.equal(result.reserveGold, 100);
+  assert.equal(client.sent.length, 0);
+});
+
+test('q7 Taoist leaves an existing non-Wooden weapon in place and never buys a weaker fallback', async () => {
+  const state = taoistForestState();
+  state.equipmentItems = [{ ...item(226, 1, 'IronSword', 22600), slot: 'weapon', tooltipSource: { info: {
+    item_index: 226, item_type: 1, required_type: 0, required_amount: 10, required_class: 7,
+  } } }];
+  const client = new FakeClient(state, { goods: weaponGoods() });
+  const result = await restockInVillage(client, async () => {}, { ensureTaoistForestWeapon: true });
+  assert.equal(result.status, 'sufficient');
+  assert.equal(client.sent.length, 0);
 });
 
 test('recomputes caster stock after service travel consumes the departure-floor MP bottle', async () => {

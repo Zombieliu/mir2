@@ -4,7 +4,7 @@ import { interactQuest } from './protocol-quest-actions.mjs';
 import { createNavigator, reviveInTown, selfPlayer } from './protocol-play.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
 import { prepareLoadout, combatAction, meleeCombatAction, useSupplies } from './protocol-loadout.mjs';
-import { purchaseV2BasicHpPotion, equipHeldAmulet } from './protocol-supplies.mjs';
+import { purchaseV2BasicHpPotion, equipHeldAmulet, restockInVillage } from './protocol-supplies.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
@@ -538,6 +538,20 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
   await prepareLoadout(client);
   await learnV2Skills(client, requiredV2Skills(quest, className));
   if (className === 'Taoist') await equipHeldAmulet(client);
+  if (Number(quest?.questId) === 2110007 && className === 'Taoist') {
+    const readiness = await restockInVillage(client, navigate, {
+      ensureTaoistForestWeapon: true,
+    });
+    if (readiness.status !== 'restocked' && readiness.status !== 'sufficient') {
+      throw new V2Pause(
+        readiness.status === 'needsMandatorySupplies' ? 'awaitingForestSupplies' : 'awaitingForestWeapon',
+        quest.questId,
+        readiness.status === 'needsMandatorySupplies'
+          ? 'q2110007 Taoist requires held HP, MP, and transport supplies before an ordinary melee upgrade'
+          : 'q2110007 Taoist requires a live, affordable Blacksmith melee upgrade',
+      );
+    }
+  }
   await driveServerEventFlags(client, quest, navigate, checkDeadline);
   if (needsPotionPurchase(quest)) {
     await purchaseRequiredBasicPotion(client, navigate, quest, checkDeadline);
@@ -683,6 +697,10 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
       await waitForTargetDamage(client, after, target, hp, quest.questId, 'normal attack');
     } else if (step.kind === 'technique') {
       const range = step.spell === 'Thrusting' ? 2 : 1;
+      // These Crystal weapon techniques are stateful toggles, not immediately
+      // usable learned book skills. Wait for the server's SpellToggle receipt
+      // before choosing a directional target or sending the attack intent.
+      await armWeaponTechnique(client, quest.questId, step.spell);
       // Zone combat selects Thrusting targets only from the adjacent tile or
       // the exact second tile in the attack direction. Chebyshev distance
       // alone allows an off-ray (2,1) target, which the server cannot hit.
@@ -1124,6 +1142,20 @@ async function attackDirectionTechnique(client, target, spell) {
   const spellId = TECHNIQUE_SPELL[spell];
   if (!actor || !Number.isSafeInteger(spellId)) throw new Error(`unsupported warrior technique ${spell}`);
   client.send({ type: 'attackDirection', direction: direction(actor, target), spell: spellId });
+}
+
+async function armWeaponTechnique(client, questId, spell) {
+  const actor = selfPlayer(client);
+  if (!actor) throw new V2Pause('awaitingTechniqueArming', questId, `${spell} has no authoritative player`);
+  if (!Number.isSafeInteger(TECHNIQUE_SPELL[spell])) throw new Error(`unsupported warrior technique ${spell}`);
+  const after = client.sequence;
+  client.send({ type: 'spellToggle', spell, canUse: true });
+  await client.wait(() => receivedAfter(client, after, 'SpellToggle', payload =>
+    Number(payload?.objectId) === Number(actor.objectId) &&
+    String(payload?.spell) === spell && payload?.canUse === true,
+  ), `q${questId} ${spell} armed`, 12_000).catch(() => {
+    throw new V2Pause('awaitingTechniqueArming', questId, `${spell} lacked an authoritative arming receipt`);
+  });
 }
 
 async function equipHeldPoison(client, questId) {
