@@ -9,6 +9,7 @@ import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
 import { amuletStock, hpDrugCount } from './protocol-survival.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
+import { createWizardKitingAction } from './protocol-kiting.mjs';
 import { cloneConfirmedV2Recoveries } from './newcomer-v2-recovery-ledger.mjs';
 
 const ROOT = new URL('../../../../', import.meta.url);
@@ -696,6 +697,11 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
   if (quest.objectives.kill.length) {
     const woomaSummonsAttempted = new Set();
     const allowedTargetObjectIds = trainingTargetObjectIds(quest);
+    const wizardMineQuest = className === 'Wizard' &&
+      [2110014, 2110015, 2110016].includes(Number(quest.questId));
+    const objectiveCombatAction = wizardMineQuest
+      ? createWizardKitingAction(combatAction, navigate)
+      : combatAction;
     await completeQuestObjectives(client, quest, navigate, {
       travel,
       allowedTargetObjectIds,
@@ -725,7 +731,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
           throw new V2Pause('awaitingWoomaAmulets', quest.questId,
             `q${quest.questId} cannot continue Wooma combat without ready SoulFireBall and real Amulets`);
         }
-        return combatAction(owner, target);
+        return objectiveCombatAction(owner, target);
       },
       prepare: async owner => {
         checkDeadline();
@@ -772,8 +778,13 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
         : {}),
       // D401 has overlapping Zombie2/Zombie3 packs. Prefer an isolated
       // required target before committing to a mine fight.
-      ...(className === 'Wizard' && [2110014, 2110015, 2110016].includes(Number(quest.questId))
-        ? { maxTargetAdjacent: 0, maxTargetNearby: 1 }
+      ...(wizardMineQuest
+        ? {
+          maxTargetAdjacent: 0,
+          maxTargetNearby: 1,
+          spawnSearchHostileClearance: 1,
+          combatHostileClearance: 1,
+        }
         : {}),
       maxSpawnSearches: 4,
       maxSpawnWaypoints: 120,

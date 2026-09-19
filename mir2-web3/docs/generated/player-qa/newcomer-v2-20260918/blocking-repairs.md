@@ -476,3 +476,16 @@ candidate, so it was stopped after a subsequent authoritative town snapshot
 at 19:29 UTC for a normal same-clock reload; this repair interruption is
 not clean player time. N14 live revalidation, the original two-hour gate,
 and the three-class completion remain open.
+
+The N14 reload retained 1/5 progress and its original clock/death. It safely
+used real TownTeleport twice when the mine entrance reached 40–46/81 HP, but
+did not gain another kill. A 19:39:45 UTC public snapshot at D401 (65,158)
+showed nine live monsters within 12 tiles, including adjacent Zombie2 and
+Zombie3; the chosen Zombie2 had taken 35 real damage before the safe retreat.
+This is a survival-without-progress loop, not N14 success. The next candidate
+uses the already bounded collision-planned Wizard retreat action, one-tile
+hostile clearance during objective search/approach, and the same public
+spell/escape commands. Its existing per-target retreat caps are unchanged;
+combat, V2 and kiting suites pass 259/259. The earlier process was stopped
+on map 0 near the mine entrance to load the candidate under the same clock.
+Live kill progression and save parity remain pending.
