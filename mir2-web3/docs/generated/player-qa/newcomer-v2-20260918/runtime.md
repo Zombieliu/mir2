@@ -247,3 +247,14 @@ nodes still require normal account reruns. The original two-hour clocks remain
 expired, and the additional functional deadline remains 2026-09-19T12:36:27.064Z.
 No final level30, visual, animation, Crystal-original or clean-human-time
 acceptance is claimed.
+
+The next same-clock retry did not add a verified quest unit. Warrior N16
+practice passed, but clearing a fresh Zombie3 exhausted the unchanged
+20-action target cap; Taoist N11 reached 2/3 Skeleton kills but could not
+retreat from a four-monster adjacent pack. Both now have scoped ordinary
+target/held-teleport policy repairs awaiting live retry. Wizard N12 instead
+suffered an authoritative fourth death with the three allowed revivals
+already spent, and its saved HP is zero. This V2 run cannot reach 78/78 under
+the retained rules. Read-only re-evaluation of the latest public snapshot
+during normal LogOut, rather than an earlier local file, confirms the existing
+40/78 and all three save transforms; no account/store fields were changed.

@@ -604,7 +604,13 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
         return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.85, mpThreshold: 0.35 });
       },
       emergencyEscape: typeof survival.emergencyEscape === 'function' ? survival.emergencyEscape : undefined,
-      emergencyEscapeHpRatio: Number(survival.emergencyEscapeHpRatio ?? 0),
+      // The two Taoist cave Skeleton steps can trap a low-armour caster in
+      // four adjacent hostiles before the generic 35% escape threshold. Use
+      // the already-held public RandomTeleport while it is still survivable;
+      // the existing one-scroll cap and authoritative relocation still apply.
+      emergencyEscapeHpRatio: className === 'Taoist' && [2110010, 2110011].includes(Number(quest.questId))
+        ? Math.max(0.65, Number(survival.emergencyEscapeHpRatio ?? 0))
+        : Number(survival.emergencyEscapeHpRatio ?? 0),
       // Each inner bounded loop also receives the deadline-guarded client.
       // Keep its own budgets deliberately small so a later ordinary resume is
       // preferred over speculative spawn searching.
@@ -619,8 +625,12 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       preferredObjectiveMaps: quest.objectiveMaps,
       // At the Taoist Skeleton steps, a nearby BoneFighter can outlast the
       // fixed attack budget even though it is not a quest target. Keep the
-      // objective in focus and retreat from an unsafe pull instead.
-      focusTargetThroughAggressors: className === 'Taoist' && [2110010, 2110011].includes(Number(quest.questId)),
+      // objective in focus and retreat from an unsafe pull instead. At
+      // Warrior N16, a full-health adjacent Zombie3 can similarly exhaust
+      // the cap before a wounded objective Zombie3 is reached.
+      focusTargetThroughAggressors:
+        (className === 'Taoist' && [2110010, 2110011].includes(Number(quest.questId))) ||
+        (className === 'Warrior' && Number(quest.questId) === 2110016),
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
       retrySpawnSearchTimeout: true,

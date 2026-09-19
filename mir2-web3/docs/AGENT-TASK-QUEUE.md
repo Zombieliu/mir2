@@ -1,5 +1,10 @@
 # Agent Task Queue
 
+> 2026-09-19 V2 same-clock update: Wizard N12 suffered a real fourth death
+> with its cumulative three revivals already spent; 78/78 is impossible under
+> the retained rules. Continue lawful Warrior/Taoist checks and keep the
+> original clock, deaths and saved-state evidence intact. Verified: 40/78.
+
 > 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,

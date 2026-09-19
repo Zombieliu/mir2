@@ -24,16 +24,15 @@ for (const className of ['Warrior', 'Wizard', 'Taoist']) {
   let snapshot;
   try { snapshot = JSON.parse(await fs.readFile(path.join(directory, `${className}.snapshot.json`), 'utf8')); }
   catch (error) { if (error.code === 'ENOENT') { results.push({ className, status: 'running-no-final-snapshot', completedUnits: 0 }); continue; } throw error; }
-  const actor = snapshot.entities?.find(row => Number(row.objectId) === Number(snapshot.playerObjectId));
   const account = Object.values(accounts).find(row => row.characters?.some(character => character.name === report.name && Number(character.index) === Number(report.characterIndex)));
   const save = account?.saves?.[String(report.characterIndex)];
   const savedQuests = !save ? [] : Array.isArray(save.quest_states_json)
     ? save.quest_states_json.map(row => typeof row === 'string' ? JSON.parse(row) : row)
     : JSON.parse(save.quest_states_json);
-  const snapshotCompleted = new Set((snapshot.questLog ?? []).filter(row => normalize(row.stage) === 'completed').map(row => Number(row.questId)));
   const savedCompleted = new Set(savedQuests.filter(row => normalize(row.stage) === 'completed').map(row => Number(row.quest_id)));
   let logoutSent = null;
   let logoutSuccess = null;
+  let logoutSnapshot = null;
   let firstOwnedAttack = null;
   let firstOwnedStruck = null;
   let firstLearnedSkill = null;
@@ -43,16 +42,25 @@ for (const className of ['Warrior', 'Wizard', 'Taoist']) {
     const event = JSON.parse(line);
     if (event.direction === 'sent' && event.type === 'logOut') logoutSent = event;
     if (event.direction !== 'received') continue;
+    if (event.type === 'worldSnapshot' && logoutSent && !logoutSuccess && event.sequence > logoutSent.sequence) {
+      logoutSnapshot = event.payload;
+    }
     if (event.packet === 'LogOutSuccess' && logoutSent && event.sequence > logoutSent.sequence) logoutSuccess = event;
-    if (event.packet === 'ObjectAttack' && Number(event.payload?.objectId) === Number(actor?.objectId)) firstOwnedAttack ??= event;
-    if (event.packet === 'ObjectStruck' && Number(event.payload?.attackerId) === Number(actor?.objectId)) firstOwnedStruck ??= event;
+    if (event.packet === 'ObjectAttack' && Number(event.payload?.objectId) === Number(snapshot.playerObjectId)) firstOwnedAttack ??= event;
+    if (event.packet === 'ObjectStruck' && Number(event.payload?.attackerId) === Number(snapshot.playerObjectId)) firstOwnedStruck ??= event;
     if (event.packet === 'NewMagic') firstLearnedSkill ??= event;
   }
+  // Zone combat can settle a hit and XP during normal LogOut. Use the last
+  // actual public worldSnapshot before its success receipt, when present;
+  // comparing a pre-logout local file would falsely reject a newer save.
+  const finalSnapshot = logoutSuccess && logoutSnapshot ? logoutSnapshot : snapshot;
+  const actor = finalSnapshot.entities?.find(row => Number(row.objectId) === Number(finalSnapshot.playerObjectId));
+  const snapshotCompleted = new Set((finalSnapshot.questLog ?? []).filter(row => normalize(row.stage) === 'completed').map(row => Number(row.questId)));
   const transformMatches = !!actor && !!save && actor.name === report.name && save.character?.name === report.name &&
-    Number(actor.level) === Number(save.character?.level) && String(snapshot.mapFileName) === String(save.map_file_name) &&
+    Number(actor.level) === Number(save.character?.level) && String(finalSnapshot.mapFileName) === String(save.map_file_name) &&
     Number(actor.x) === Number(save.position?.x) && Number(actor.y) === Number(save.position?.y) &&
-    actor.direction === save.direction && Number(snapshot.gold) === Number(save.gold) &&
-    Number(snapshot.playerExperience) === Number(save.experience);
+    actor.direction === save.direction && Number(finalSnapshot.gold) === Number(save.gold) &&
+    Number(finalSnapshot.playerExperience) === Number(save.experience);
   const persistedCompletedIds = expectedIds.filter(id => snapshotCompleted.has(id) && savedCompleted.has(id));
   const verifiedCompletedIds = logoutSuccess && transformMatches ? persistedCompletedIds : [];
   const ordinaryStartedAt = report.v2.ordinaryStartedAt;
@@ -63,6 +71,7 @@ for (const className of ['Warrior', 'Wizard', 'Taoist']) {
     snapshotCompletedIds: expectedIds.filter(id => snapshotCompleted.has(id)),
     savedCompletedIds: expectedIds.filter(id => savedCompleted.has(id)),
     verifiedCompletedIds, logoutCommitted: !!logoutSuccess, transformMatches,
+    snapshotSource: logoutSuccess && logoutSnapshot ? 'post-logout-worldSnapshot' : 'runner-file',
     saveRevision: save?.revision ?? null, ordinaryStartedAt,
     ordinaryElapsedMs: report.ordinaryElapsedMs, pause: report.v2.pause ?? null,
     actionTimingScope: 'latest-resume-trace-only',

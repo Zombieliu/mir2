@@ -1,5 +1,10 @@
 # Agent Orchestration
 
+> 2026-09-19 V2 same-clock update: Wizard N12 suffered a real fourth death
+> with its cumulative three revivals already spent; 78/78 is impossible under
+> the retained rules. Warrior and Taoist can continue lawful functional
+> checks. The verified saved tally remains 40/78; see newcomer V2 QA evidence.
+
 > 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,

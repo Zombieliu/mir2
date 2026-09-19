@@ -1439,8 +1439,11 @@ try {
   console.error(error.message);
 } finally {
   report.finishedAt = new Date().toISOString();
-  if (client.snapshot) await fs.writeFile(path.join(output, `${className}.snapshot.json`), JSON.stringify(client.snapshot, null, 2));
   await client.close();
+  // A queued Zone hit can resolve between the last gameplay snapshot and
+  // LogOutSuccess. The ordinary logout may deliver a newer worldSnapshot
+  // before it durably saves; retain that final authoritative projection.
+  if (client.snapshot) await fs.writeFile(path.join(output, `${className}.snapshot.json`), JSON.stringify(client.snapshot, null, 2));
   await fs.writeFile(path.join(output, `${className}.report.json`), JSON.stringify(report, null, 2));
   await fs.writeFile(path.join(output, `${className}.${runId}.report.json`), JSON.stringify(report, null, 2));
 }

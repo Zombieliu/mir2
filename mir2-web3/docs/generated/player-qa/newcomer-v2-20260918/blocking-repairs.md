@@ -132,3 +132,36 @@ Functional completion, real level 30, final logout/store checks, human timing,
 graduation equipment sources, UI, animations and original comparisons remain
 separate open gates. `visualAccepted=false`, `measuredTime=false`,
 `globalParityPercent=null`.
+
+## Subsequent ordinary stop and evidence repair
+
+The next same-clock retry kept the saved tally at 40/78. Warrior N16's
+Thrusting practice did receive its positive server flag, but its objective
+loop cleared a fresh 155-HP Zombie3 that had attacked the player before a
+visible 80-HP objective Zombie3; twenty accepted hits left the fresh monster
+at 35%. Warrior N16 now uses the existing focused-target policy, keeping
+the wounded required-species target ahead of that proven aggressor. The
+target-selection regression passes, and the 20-action budget is unchanged.
+
+Taoist N11 advanced to 2/3 Skeleton kills with class practice done, then
+could not path out of four adjacent hostiles at 53/113 HP. The scoped cave
+policy now permits its already-held ordinary RandomTeleport at 65% HP rather
+than waiting for the general 35% threshold; the existing one-scroll usage
+limit remains. Neither fix is yet a completed ordinary route unit.
+
+Wizard N12 suffered a real Scorpion strike while at 8/72 HP and died. The
+public death packet and saved 0 HP agree. Its historical three revivals are
+already spent, so this character cannot lawfully continue under the current
+three-revival rule. The new GreatFireBall readiness wait was entered but no
+GreatFireBall was sent before that death. No extra revival or clock reset is
+claimed.
+
+On Taoist's previous normal LogOut, the Zone committed 280 experience after
+the runner's pre-logout snapshot file and before LogOutSuccess; the saved
+character included that experience. The runner now writes its final snapshot
+after `close()`, and the read-only verifier prefers the actual public
+worldSnapshot received during logout when one exists. Reverification of the
+unaltered packets/store restores 40/78 with all three normal logout/save
+transforms matching. This repairs evidence timing, not character state.
+Current focused runs pass V2 46/46 and combat 158/158; syntax and diff checks
+pass. The Wizard hard stop means 78/78 is impossible in this same-clock run.

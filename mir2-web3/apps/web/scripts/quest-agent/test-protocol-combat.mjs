@@ -3180,6 +3180,32 @@ test("a focused Skeleton kill does not spend the attack budget on a proven BoneF
   assert.equal(client.snapshot.entities.find(entry => entry.objectId === 61).dead, false);
 });
 
+test("focused Zombie3 objective prefers an injured target over a fresh same-species aggressor", async () => {
+  const quest = { questId: 2110016, stage: "InProgress", objectives: [objective("Kill Zombie3", 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(60, "Zombie3", 11, 10, { hp: 80, maxHp: 155, disposition: "hostile" }),
+    monster(61, "Zombie3", 10, 9, { hp: 155, maxHp: 155, disposition: "hostile" }),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    assert.equal(command.objectId, 60, "the healthy aggressor must not consume the wounded objective's budget");
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 60), { dead: true, hp: 0 });
+      state.questLog[0].objectives[0] = objective("Kill Zombie3", 1, 1);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 60 });
+  });
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+
+  const result = await completeQuestObjectives(client, {
+    questId: 2110016,
+    objectives: { kill: [{ monsterName: "Zombie3", spawnCandidates: [spawn("Zombie3")] }], item: [] },
+  }, async () => {}, { ...settings, maxAttackAttempts: 20, focusTargetThroughAggressors: true });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [60]);
+  assert.equal(client.snapshot.entities.find(entry => entry.objectId === 61).dead, false);
+});
+
 test("a focused harvest hunt retreats after two proven attackers converge, then retries the target", async () => {
   const quest = { questId: 30, stage: "InProgress", objectives: [objective("Collect JadeRing", 0, 1)] };
   const client = new FakeClient(snapshot(quest, [
