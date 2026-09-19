@@ -67,6 +67,9 @@ class FakeClient {
   }
   send(command) {
     this.sent.push(structuredClone(command));
+    if (command.type === 'clientVersion' && this.options.refreshNpc) {
+      this.receive({ ...this.snapshot, entities: [...this.snapshot.entities, structuredClone(this.options.refreshNpc)] });
+    }
     if (command.type === 'interact' && !this.options.noDialog) {
       this.receive({ ...this.snapshot, activeNpcDialog: {
         npcObjectId: command.objectId,
@@ -583,6 +586,24 @@ test('opt-in TownTeleport reserve uses Scott goods when Ruben lacks TownTeleport
   assert.equal(client.sent.some(entry => entry.type === 'interact' && entry.objectId === 42), true);
   assert.equal(client.sent.some(entry => entry.type === 'interact' && entry.objectId === 88), false);
   assert.deepEqual(client.sent.at(-1), { type: 'buyItem', itemIndex: 71901, count: 1, panelType: 0 });
+});
+
+test('TownTeleport restock refreshes a missing live Scott before opening his real goods', async () => {
+  const state = snapshot({ gold: 1100, hp: 6 });
+  state.entities = state.entities.filter(entity => entity.objectId !== 42);
+  const client = new FakeClient(state, {
+    refreshNpc: { objectId: 42, kind: 'npc', name: 'Merchant_Scott', x: 291, y: 610 },
+    goodsByNpc: { '42': townEmergencyGoods() },
+  });
+  const result = await restockInVillage(client, async () => {}, {
+    emergencyTownTeleportCount: 1,
+    reserveGold: 0,
+  });
+  assert.equal(result.status, 'restocked');
+  assert.equal(townTeleportCount(client.snapshot), 1);
+  const refreshIndex = client.sent.findIndex(command => command.type === 'clientVersion');
+  const interactIndex = client.sent.findIndex(command => command.type === 'interact' && command.objectId === 42);
+  assert.ok(refreshIndex >= 0 && interactIndex > refreshIndex);
 });
 
 test('Scott travel refreshes a Taoist Amulet floor from one fresh Ruben receipt', async () => {

@@ -998,7 +998,7 @@ function tileDistance(left, right) {
 }
 
 async function openBuySellService(client, findNpc, label) {
-  const npc = await client.wait(() => findNpc(client.snapshot), `live ${label}`, WAIT_MS);
+  const npc = await liveServiceNpc(client, findNpc, label);
   const afterInteract = client.sequence;
   client.send({ type: 'interact', objectId: numericId(npc.objectId, `${label} objectId`) });
   await client.wait(
@@ -1017,7 +1017,7 @@ async function openBuySellService(client, findNpc, label) {
 }
 
 async function openBuyService(client, findNpc, label) {
-  const npc = await client.wait(() => findNpc(client.snapshot), `live ${label}`, WAIT_MS);
+  const npc = await liveServiceNpc(client, findNpc, label);
   const afterInteract = client.sequence;
   client.send({ type: 'interact', objectId: numericId(npc.objectId, `${label} objectId`) });
   await client.wait(
@@ -1035,8 +1035,20 @@ async function openBuyService(client, findNpc, label) {
   return { npc, goodsEvent };
 }
 
+async function liveServiceNpc(client, findNpc, label) {
+  const present = findNpc(client.snapshot);
+  if (present) return present;
+  // Incremental AOI can omit an NPC immediately after a long walk or town
+  // teleport. A normal client-version request supplies one current-map
+  // projection before declaring the merchant absent.
+  const afterRequest = client.sequence;
+  client.send({ type: 'clientVersion' });
+  return client.wait(() => client.sequence > afterRequest && findNpc(client.snapshot),
+    `live ${label}`, WAIT_MS);
+}
+
 async function openSellService(client, findNpc, label) {
-  const npc = await client.wait(() => findNpc(client.snapshot), `live ${label}`, WAIT_MS);
+  const npc = await liveServiceNpc(client, findNpc, label);
   const afterInteract = client.sequence;
   client.send({ type: 'interact', objectId: numericId(npc.objectId, `${label} objectId`) });
   await client.wait(
