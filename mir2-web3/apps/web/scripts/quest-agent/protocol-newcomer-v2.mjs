@@ -705,9 +705,11 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
     const objectiveCombatAction = wizardCaveQuest
       ? createWizardKitingAction(combatAction, navigate, {
         triggerDistance: 1,
-        // A D022 Wooma has far more HP than a training Dung. If its melee
-        // surround blocks retreat, a spell trade is not a safe fallback.
-        fightWhenBlocked: !wizardTempleQuest,
+        // A training Dung can follow for the full twelve-cell retreat budget.
+        // Finish that bounded target with ordinary spells when the combat
+        // loop still considers its pack safe. The stronger Wooma steps keep
+        // the no-trade rule for a blocked surround.
+        fightWhenBlocked: !wizardTempleQuest || Number(quest.questId) === 2110019,
       })
       : combatAction;
     await completeQuestObjectives(client, quest, navigate, {

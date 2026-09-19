@@ -632,3 +632,13 @@ retains imported D022 groups, stats, spread and respawn timing in the opt-in
 V2 mode, but caps each imported group to one live actor. All other cadences
 and maps keep their original counts. Targeted test and resumed live result
 must still confirm the new behavior.
+
+The reduced-density E continuation reached an actual N19 training Dung in
+D022. Its HP fell from 155 to 39 while the Wizard remained at 100/105 HP;
+no other monster was within 12 tiles in the final snapshot. The Dung followed
+each retreat until the existing 12-cell per-target kiting budget was spent,
+then the generic no-trade rule paused before an otherwise legal finishing
+spell. N19 alone now permits that bounded direct spell fallback; N20–N21
+retain the strict no-trade rule for Wooma. No retreat, attack, death, or time
+budget was raised. The combined V2/kiting Node suites pass 100/100. The E
+run remains at N19 0/3 until live damage and quest receipts prove progress.
