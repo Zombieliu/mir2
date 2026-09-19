@@ -5089,6 +5089,30 @@ test('V2 full-spread search ignores a stale ordinary-monster history hint before
   assert.deepEqual(client.sent, [{ type: 'attack', objectId: 60 }]);
 });
 
+test('V2 full-spread search ignores a dead current-snapshot monster waypoint', async () => {
+  const quest = { questId: 2110019, stage: 'InProgress', objectives: [objective('Kill Dung', 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [monster(61, 'Dung', 90, 90, { hp: 0, dead: true })]), (owner, command) => {
+    if (command.type !== 'attack') return;
+    owner.receive('ObjectDied', state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 60), { hp: 0, dead: true });
+      state.questLog[0].objectives[0] = objective('Kill Dung', 1, 1);
+      state.questLog[0].stage = 'ReadyToTurnIn';
+    }, { objectId: 60 });
+  });
+  const visits = [];
+  const result = await completeQuestObjectives(client, {
+    questId: 2110019,
+    objectives: { kill: [{ monsterName: 'Dung', spawnCandidates: [{ ...spawn('Dung', 20, 10), spread: 0 }] }], item: [] },
+  }, async point => {
+    visits.push({ ...point });
+    Object.assign(client.snapshot.entities[0], { x: point.x, y: point.y });
+    if (point.x === 20 && point.y === 10) client.snapshot.entities.push(monster(60, 'Dung', 20, 10));
+  }, { ...settings, allowHistoricalSpawnHints: false });
+
+  assert.equal(result.stage, 'ReadyToTurnIn');
+  assert.deepEqual(visits[0], { x: 20, y: 10 });
+});
+
 test('V2 keeps a live current-AOI objective ahead of its manifest field', async () => {
   const quest = { questId: 2110007, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
   const client = new FakeClient(snapshot(quest, [monster(60, 'ForestYeti', 11, 10)]), (owner, command) => {
@@ -6498,6 +6522,45 @@ test("unknown last-blow identity preserves the missing-award failure", async () 
   await assert.rejects(() => completeQuestObjectives(client, {
     questId: 22, objectives: { kill: [{ monsterName: "ForestYeti", spawnCandidates: [spawn("ForestYeti")] }], item: [] },
   }, async () => {}, settings), /Fake timeout waiting for q22 ForestYeti kill progress/);
+});
+
+test("defensive self-healing does not consume the bounded monster attack budget", async () => {
+  const quest = { questId: 2110014, stage: "InProgress", objectives: [objective("Kill Zombie3", 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [monster(60, "Zombie3", 16, 10, { hp: 8, maxHp: 8 })]), (owner, command) => {
+    if (command.type !== "magic" || command.targetId !== 60) return;
+    owner.receive("ObjectHealth", state => {
+      const target = state.entities.find(entry => entry.objectId === 60);
+      target.hp -= 4;
+      if (target.hp <= 0) {
+        target.dead = true;
+        state.questLog[0].objectives[0] = objective("Kill Zombie3", 1, 1);
+        state.questLog[0].stage = "ReadyToTurnIn";
+      }
+    }, { objectId: 60 });
+  });
+  let selfCasts = 0;
+  let attacks = 0;
+  const result = await completeQuestObjectives(client, {
+    questId: 2110014,
+    objectives: { kill: [{ monsterName: "Zombie3", spawnCandidates: [spawn("Zombie3")] }], item: [] },
+  }, async () => {}, {
+    ...settings,
+    maxAttackAttempts: 2,
+    approachRange: () => 6,
+    action: async (owner, target) => {
+      if (selfCasts < 3) {
+        selfCasts += 1;
+        owner.send({ type: "magic", targetId: owner.snapshot.playerObjectId });
+        return { kind: "magic", targetId: owner.snapshot.playerObjectId };
+      }
+      attacks += 1;
+      owner.send({ type: "magic", targetId: target.objectId });
+      return { kind: "magic", targetId: target.objectId };
+    },
+  });
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(selfCasts, 3);
+  assert.equal(attacks, 2);
 });
 
 test('opt-in timed full-spread search takes one bounded respawn wait, refreshes, then completes normally', async () => {

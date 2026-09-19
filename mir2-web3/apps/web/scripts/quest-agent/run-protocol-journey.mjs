@@ -1439,11 +1439,23 @@ try {
   console.error(error.message);
 } finally {
   report.finishedAt = new Date().toISOString();
+  const completeSnapshot = snapshot => !!snapshot?.mapFileName &&
+    Number.isSafeInteger(Number(snapshot?.playerObjectId)) &&
+    (snapshot?.entities ?? []).some(entity => Number(entity?.objectId) === Number(snapshot.playerObjectId));
+  // The last movement can follow the latest gameplay snapshot. Probe the
+  // ordinary server once more before LogOut so its saved transform has a
+  // comparable full projection. Keep this QA finalization bounded and never
+  // replace the actual route failure if the probe cannot complete.
+  if (isNewcomerV2Run && client.ws?.readyState === 1) {
+    try { await refreshCombatWorldSnapshot(client, { timeoutMs: 5_000 }); } catch { /* final receipt check reports any mismatch */ }
+  }
   await client.close();
-  // A queued Zone hit can resolve between the last gameplay snapshot and
-  // LogOutSuccess. The ordinary logout may deliver a newer worldSnapshot
-  // before it durably saves; retain that final authoritative projection.
-  if (client.snapshot) await fs.writeFile(path.join(output, `${className}.snapshot.json`), JSON.stringify(client.snapshot, null, 2));
+  // Logout can deliver either a later complete worldSnapshot (for queued XP)
+  // or an empty map-cleanup snapshot. Retain the last complete public packet.
+  const finalSnapshot = [...(client.events ?? [])].reverse()
+    .find(event => event?.direction === 'received' && event?.type === 'worldSnapshot' && completeSnapshot(event.payload))?.payload
+    ?? (completeSnapshot(client.snapshot) ? client.snapshot : null);
+  if (finalSnapshot) await fs.writeFile(path.join(output, `${className}.snapshot.json`), JSON.stringify(finalSnapshot, null, 2));
   await fs.writeFile(path.join(output, `${className}.report.json`), JSON.stringify(report, null, 2));
   await fs.writeFile(path.join(output, `${className}.${runId}.report.json`), JSON.stringify(report, null, 2));
 }

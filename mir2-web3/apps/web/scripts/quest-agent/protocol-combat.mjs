@@ -1790,7 +1790,8 @@ function rememberedTargetLocations(client, monsterNames, allowHistoricalHints = 
   const wanted = new Set(monsterNames.map(normalizeName));
   const points = [];
   for (const entity of client.snapshot?.entities ?? []) {
-    if (normalized(entity?.kind) === 'monster' && wanted.has(normalizeName(entity?.name)) && validPoint(entity)) {
+    if (normalized(entity?.kind) === 'monster' && wanted.has(normalizeName(entity?.name)) && validPoint(entity) &&
+        (allowHistoricalHints || isLiveMonster(entity))) {
       points.push({ x: Number(entity.x), y: Number(entity.y) });
     }
   }
@@ -1990,7 +1991,18 @@ async function killExactMonster(client, initialTarget, pending, navigateNear, se
         attempt -= 1;
         continue;
       }
-      if (action.targetId === client.snapshot.playerObjectId) { await settings.sleep(1000); continue; }
+      if (action.targetId === client.snapshot.playerObjectId) {
+        // A defensive self-cast is not an attack on this monster. Bound
+        // consecutive self-casts with the existing cooldown wait limit.
+        if (cooldownWaitMs >= settings.maxCooldownWaitMs) {
+          throw new Error(`target ${objectId} defensive cast wait exceeded ${settings.maxCooldownWaitMs}ms without an attack`);
+        }
+        const delayMs = Math.min(1000, settings.maxCooldownWaitMs - cooldownWaitMs);
+        await settings.sleep(delayMs);
+        cooldownWaitMs += delayMs;
+        attempt -= 1;
+        continue;
+      }
     } else client.send({ type: "attack", objectId });
     try {
       await waitFor(client, () => {

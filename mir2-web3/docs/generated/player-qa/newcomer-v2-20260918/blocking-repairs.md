@@ -165,3 +165,28 @@ unaltered packets/store restores 40/78 with all three normal logout/save
 transforms matching. This repairs evidence timing, not character state.
 Current focused runs pass V2 46/46 and combat 158/158; syntax and diff checks
 pass. The Wizard hard stop means 78/78 is impossible in this same-clock run.
+
+## Same-clock continuation, 19 September
+
+The fixed shared functional-recheck deadline remains 12:36:27 UTC. The
+Wizard's real death and exhausted 3/3 revival allowance remain recorded; no
+further Wizard run is attempted. Warrior and Taoist continue on their original
+characters through public login and player commands only.
+
+Taoist N14 exposed an accounting error: 17 accepted SoulFireBall hits plus
+three accepted self-Healing casts exhausted the 20-attack limit while a
+Zombie3 still had 4/155 HP. Self-Healing is now charged to the existing
+bounded consecutive-wait time, not to the target's offensive-attempt count;
+the 20-offense cap is unchanged. Warrior N19 exposed a separate stale hint:
+a dead Dung in the current snapshot was classified as a live V2 search
+waypoint. V2 now excludes dead current-snapshot monsters when historical
+hints are disabled. Neither correction awards quest progress on its own.
+
+The runner also retains the last complete public worldSnapshot around normal
+logout, because Zone map cleanup may send a later empty snapshot. It probes
+once before logout with the ordinary `clientVersion` command, then retains
+the latest complete public projection for strict save comparison. It does not
+alter the save or replace a failed route with a success. Focused combat tests
+pass 160/160, including both new regression cases; syntax and diff checks
+pass. The subsequent Warrior/Taoist live runs and logout/store comparison are
+still in progress, so the last fully verified total remains 40/78.
