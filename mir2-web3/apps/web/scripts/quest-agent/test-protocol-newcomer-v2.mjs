@@ -1047,6 +1047,48 @@ test('practice plans execute every q21 class action rather than one priority spe
   assert.deepEqual(requiredV2Skills(taoist, 'Taoist'), ['SoulFireBall', 'SummonSkeleton', 'Poisoning']);
 });
 
+test('Wizard reposition accepts an authoritative in-place UserLocation update', async () => {
+  const { client, quest } = practiceClient({
+    knownSkills: ['GreatFireBall'],
+    requirements: { wizard: ['legal reposition between attacks'] },
+  });
+  client.snapshot.entities[0].class = 'Wizard';
+  const actor = client.snapshot.entities[0];
+  await executeV2PracticePlan({
+    client, quest, plan: [{ kind: 'reposition' }],
+    navigate: async (destination, desiredDistance) => {
+      if (desiredDistance === 8) return { reached: true };
+      assert.deepEqual(destination, { x: -2, y: -1 });
+      Object.assign(actor, destination);
+      client.events.push({
+        sequence: ++client.sequence, direction: 'received', packet: 'UserLocation',
+        payload: { ...destination },
+      });
+      client.snapshot.questLog[0].objectives[0] = {
+        number: 2210041, current: 1, required: 1, done: true,
+      };
+    },
+  });
+  assert.equal(client.snapshot.entities[0], actor, 'the protocol mutates the same player entity');
+  assert.deepEqual({ x: actor.x, y: actor.y }, { x: -2, y: -1 });
+});
+
+test('Wizard reposition rejects a local coordinate change without UserLocation', async () => {
+  const { client, quest } = practiceClient({
+    knownSkills: ['GreatFireBall'],
+    requirements: { wizard: ['legal reposition between attacks'] },
+  });
+  client.snapshot.entities[0].class = 'Wizard';
+  await assert.rejects(executeV2PracticePlan({
+    client, quest, plan: [{ kind: 'reposition' }],
+    navigate: async (destination, desiredDistance) => {
+      if (desiredDistance === 8) return { reached: true };
+      Object.assign(client.snapshot.entities[0], destination);
+      return { reached: true };
+    },
+  }), /wizard reposition had no authoritative movement receipt/);
+});
+
 test('N18 loadout-only SummonSkeleton requirement learns the skill without entering owned-pet combat', () => {
   const n18 = practiceQuest({ taoist: [
     'SummonSkeleton learned',

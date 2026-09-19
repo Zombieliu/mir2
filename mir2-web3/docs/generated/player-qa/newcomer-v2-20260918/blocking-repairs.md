@@ -592,3 +592,16 @@ also forbids Wizard N19–N21 from converting a blocked kite into a spell trade
 with high-HP Wooma. The 320 combat/V2/kiting/supplies Node tests pass. A fresh
 ordinary Wizard account is required for a valid at-most-three-death recheck;
 the failed D evidence and its original clock are preserved unchanged.
+
+A fresh E Wizard started at 21:19:06.394 UTC with a new public account and an
+unchanged 120-minute deadline. It reached N14 at level 20 with zero deaths,
+completed all five Zombie2/Zombie3 kills, and reached N15 at level 22. At
+21:44:48 UTC it paused alive at D401 (43,179), 85 HP, on the class-practice
+reposition step. Its trace contains an accepted `UserLocation` from (41,179)
+to (43,179). The runner compared the current mutable player entity with the
+same object captured before navigation, so it incorrectly called this legal
+move unconfirmed. The scoped fix copies the origin coordinates before moving
+and also requires a post-dispatch `UserLocation` packet. A regression test
+uses the real in-place update shape, plus a negative case with a local-only
+coordinate mutation. This was a repair interruption, not a new clean clock or
+a completed N15.

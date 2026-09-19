@@ -1013,9 +1013,18 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
     } else if (step.kind === 'reposition') {
       const target = await acquireTarget(8);
       const actor = selfPlayer(client);
+      // ProtocolClient updates this entity in place on UserLocation. Preserve
+      // the old coordinates as values before navigation or the comparison can
+      // compare the moved actor with itself and reject a valid public move.
+      const origin = { x: Number(actor.x), y: Number(actor.y) };
+      const beforeSequence = Number(client.sequence ?? 0);
       const destination = legalReposition(actor, target);
       await navigate(destination, 0, () => false, { maxSuccessfulSteps: 12, maxAttempts: 20, detectPositionCycles: true });
-      if (distance(selfPlayer(client), actor) < 1) throw new V2Pause('repositionRejected', quest.questId, 'wizard reposition had no authoritative movement receipt');
+      if (distance(selfPlayer(client), origin) < 1 ||
+          !receivedAfter(client, beforeSequence, 'UserLocation', point =>
+            distance(point, origin) >= 1)) {
+        throw new V2Pause('repositionRejected', quest.questId, 'wizard reposition had no authoritative movement receipt');
+      }
     }
   }
   // A display group can be 0/1 for an AND-chain, so it is valid for its first
