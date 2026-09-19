@@ -1096,6 +1096,11 @@ function combatSettings(options) {
     // monsters so an old AOI observation cannot consume its whole time budget
     // before the nearest manifest-backed field is reached.
     allowHistoricalSpawnHints: options.allowHistoricalSpawnHints !== false,
+    // Optional authored training actor IDs. Restricts objective selection and
+    // remembered search hints without changing world occupancy or kill credit.
+    allowedTargetObjectIds: options.allowedTargetObjectIds instanceof Set
+      ? new Set(options.allowedTargetObjectIds)
+      : null,
     maxAttackAttempts: positiveInteger(options.maxAttackAttempts, 120),
     maxHarvestPasses: positiveInteger(options.maxHarvestPasses, 16),
     maxUnavailableCorpses: positiveInteger(options.maxUnavailableCorpses, 3),
@@ -1389,7 +1394,9 @@ async function searchSpawnCandidates(
   // server-side reveal check needs the remembered tile for one close probe.
   const allowHistoricalHints = settings.allowHistoricalSpawnHints ||
     targetPlan.monsterNames.some(name => normalizeName(name) === 'cannibalplant');
-  const remembered = rememberedTargetLocations(client, targetPlan.monsterNames, allowHistoricalHints);
+  const remembered = rememberedTargetLocations(
+    client, targetPlan.monsterNames, allowHistoricalHints, settings.allowedTargetObjectIds,
+  );
   const coverage = interleavedSpawnWaypoints(candidates, bounds);
   const rememberedWaypoints = [];
   const coverageWaypoints = [];
@@ -1428,7 +1435,7 @@ async function searchSpawnCandidates(
     const safeTarget = nearestAvailableLiveMonster(
       client, searchMonsterNames, unavailableCorpses, settings,
     );
-    if (!safeTarget && nearestLiveMonster(client.snapshot, targetPlan.monsterNames)) {
+    if (!safeTarget && nearestLiveMonster(client.snapshot, targetPlan.monsterNames, settings.allowedTargetObjectIds)) {
       sawUnsafeTarget = true;
     }
     return safeTarget;
@@ -1786,11 +1793,12 @@ function coverageAxis(center, spread, minimum, maximum) {
   return values;
 }
 
-function rememberedTargetLocations(client, monsterNames, allowHistoricalHints = true) {
+function rememberedTargetLocations(client, monsterNames, allowHistoricalHints = true, allowedObjectIds = null) {
   const wanted = new Set(monsterNames.map(normalizeName));
   const points = [];
   for (const entity of client.snapshot?.entities ?? []) {
     if (normalized(entity?.kind) === 'monster' && wanted.has(normalizeName(entity?.name)) && validPoint(entity) &&
+        (!allowedObjectIds || allowedObjectIds.has(Number(entity?.objectId))) &&
         (allowHistoricalHints || isLiveMonster(entity))) {
       points.push({ x: Number(entity.x), y: Number(entity.y) });
     }
@@ -1813,12 +1821,14 @@ function rememberedTargetLocations(client, monsterNames, allowHistoricalHints = 
     }
   }
   for (const event of (client.events ?? []).slice(boundary + 1)) {
-    if (!['ObjectMonster', 'NewMonsterInfo'].includes(event?.packet) || !wanted.has(normalizeName(event?.payload?.name))) continue;
+    if (!['ObjectMonster', 'NewMonsterInfo'].includes(event?.packet) || !wanted.has(normalizeName(event?.payload?.name)) ||
+        (allowedObjectIds && !allowedObjectIds.has(Number(event?.payload?.objectId)))) continue;
     const point = packetPoint(event.payload);
     if (point) points.push(point);
   }
   for (const observation of client.observedMonsterLocations ?? []) {
-    if (String(observation?.mapFileName ?? '') !== currentMap || !wanted.has(normalizeName(observation?.monsterName))) continue;
+    if (String(observation?.mapFileName ?? '') !== currentMap || !wanted.has(normalizeName(observation?.monsterName)) ||
+        (allowedObjectIds && !allowedObjectIds.has(Number(observation?.objectId)))) continue;
     if (validPoint(observation)) points.push({ x: Number(observation.x), y: Number(observation.y) });
   }
   return points.sort((left, right) => distance(playerFromSnapshot(client.snapshot), left) - distance(playerFromSnapshot(client.snapshot), right));
@@ -3061,12 +3071,13 @@ function assertPlayerAlive(client) {
   }
 }
 
-function nearestLiveMonster(snapshot, monsterNames) {
+function nearestLiveMonster(snapshot, monsterNames, allowedObjectIds = null) {
   const wanted = new Set(monsterNames.map(normalizeName));
   let player;
   try { player = playerFromSnapshot(snapshot); } catch { return null; }
   return (snapshot?.entities ?? [])
-    .filter((entity) => isLiveMonster(entity) && wanted.has(normalizeName(entity.name)))
+    .filter((entity) => isLiveMonster(entity) && wanted.has(normalizeName(entity.name)) &&
+      (!allowedObjectIds || allowedObjectIds.has(Number(entity.objectId))))
     .sort((left, right) => distance(player, left) - distance(player, right) || Number(left.objectId) - Number(right.objectId))[0] ?? null;
 }
 
@@ -3085,6 +3096,7 @@ function nearestAvailableLiveMonster(client, monsterNames, unavailableCorpses, s
   const liveHostiles = (client.snapshot?.entities ?? []).filter(isPotentialHostileMonster);
   return (client.snapshot?.entities ?? [])
     .filter(entity => isLiveMonster(entity) && wanted.has(normalizeName(entity.name)) &&
+      (!settings.allowedTargetObjectIds || settings.allowedTargetObjectIds.has(Number(entity.objectId))) &&
       !excluded.has(Number(entity.objectId)) &&
       !unreachableTargetDeferred(entity, settings) &&
       !unsafeTargetDeferred(client, Number(entity.objectId), settings))

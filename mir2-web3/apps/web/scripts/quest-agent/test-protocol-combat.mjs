@@ -2548,6 +2548,27 @@ test("q89 Wizard arms the exact live D2031 doorway after a stalled full Priest s
   assert.equal(diagnostics.some(entry => entry.type === "spawnRespawnWait"), false);
 });
 
+test("an authored objective actor allowlist excludes a closer full-strength world monster", async () => {
+  const quest = { questId: 33, stage: "InProgress", objectives: [objective("Kill RedSnake", 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(60, "RedSnake", 11, 10, { disposition: "hostile" }),
+    monster(70, "RedSnake", 17, 10, { disposition: "hostile" }),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { dead: true, hp: 0 });
+      state.questLog[0].objectives[0] = objective("Kill RedSnake", 1, 1);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: command.objectId });
+  });
+  const result = await completeQuestObjectives(client, {
+    questId: 33,
+    objectives: { kill: [{ monsterName: "RedSnake", spawnCandidates: [spawn("RedSnake")] }], item: [] },
+  }, navigateClientNear(client), { ...settings, allowedTargetObjectIds: new Set([70]) });
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [70]);
+});
+
 test("q89 Taoist rejects an unsafe D2031 Priest then uses the exact live doorway for a normal D2032 completion", async () => {
   const quest = { questId: 89, stage: "InProgress", objectives: [objective("Kill CursedPriest", 2, 3)] };
   const state = snapshot(quest);

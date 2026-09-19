@@ -48,24 +48,18 @@ test('V2 training footholds are data-defined, bounded, and separate from importe
   const dung = route.quests.find(row => row.questId === 2110019).objectives.kill[0];
   const soldier = route.quests.find(row => row.questId === 2110020).objectives.kill[0];
   const fighter = route.quests.find(row => row.questId === 2110021).objectives.kill[0];
-  const dungTraining = dung.spawnCandidates.find(row => row.respawnIndex === 10019);
-  const soldierTraining = soldier.spawnCandidates.find(row => row.respawnIndex === 10020);
-  const fighterTraining = fighter.spawnCandidates.find(row => row.respawnIndex === 10021);
-  assert.deepEqual(dungTraining.position, { x: 335, y: 360 });
-  assert.equal(dungTraining.count, 1);
-  assert.equal(dung.spawnCandidates[0].respawnIndex, 10019);
-  assert.deepEqual(dung.spawnCandidates.map(row => row.respawnIndex), [10019],
-    'V2 route searches the certified foothold instead of the broad imported spread');
-  assert.deepEqual(soldierTraining.position, { x: 320, y: 345 });
-  assert.deepEqual(fighterTraining.position, { x: 300, y: 335 });
-  assert.equal(soldier.spawnCandidates[0].respawnIndex, 10020);
-  assert.equal(fighter.spawnCandidates[0].respawnIndex, 10021);
-  assert.equal(soldierTraining.count, 1);
-  assert.equal(fighterTraining.count, 1);
-  assert.equal(dungTraining.spread, 0);
-  assert.equal(soldierTraining.spread, 0);
-  assert.equal(fighterTraining.spread, 0);
-  const footholds = [dungTraining.position, soldierTraining.position, fighterTraining.position];
+  const expected = [
+    [dung, [10019, 10022, 10023]],
+    [soldier, [10020, 10024, 10025]],
+    [fighter, [10021, 10026, 10027]],
+  ];
+  for (const [kill, ids] of expected) {
+    assert.deepEqual(kill.spawnCandidates.map(row => row.respawnIndex).sort(), ids,
+      'V2 searches three separated authored actors instead of the broad imported spread');
+    assert.ok(kill.spawnCandidates.every(row => row.count === 1 && row.spread === 0 && row.delayMinutes === 0));
+  }
+  assert.ok([...soldier.spawnCandidates, ...fighter.spawnCandidates].every(row => row.maxHp === 120));
+  const footholds = expected.flatMap(([kill]) => kill.spawnCandidates.map(row => row.position));
   for (let left = 0; left < footholds.length; left += 1) {
     assert.ok(Math.max(Math.abs(footholds[left].x - 250), Math.abs(footholds[left].y - 282)) >= 50,
       'training foothold must stay clear of the observed central D022 Wooma pack');
@@ -75,15 +69,31 @@ test('V2 training footholds are data-defined, bounded, and separate from importe
       'training footholds must not form a new immediate hostile pack');
     }
   }
-  assert.notEqual(soldierTraining.respawnIndex, fighterTraining.respawnIndex);
-  assert.deepEqual(soldier.spawnCandidates.map(row => row.respawnIndex), [10020]);
-  assert.deepEqual(fighter.spawnCandidates.map(row => row.respawnIndex), [10021]);
+});
+
+test('N21 class practice selects the authored training actor over a closer imported fighter', async () => {
+  const route = await loadNewcomerV2Route({ className: 'Warrior', gender: 'Male' });
+  const quest = route.quests.find(row => row.questId === 2110021);
+  const snapshot = {
+    playerObjectId: 1, mapFileName: 'D022',
+    entities: [
+      { kind: 'selfPlayer', objectId: 1, x: 299, y: 385, hp: 90, dead: false },
+      { kind: 'monster', objectId: 294325, name: 'WoomaFighter', x: 298, y: 385, hp: 285, dead: false },
+      { kind: 'monster', objectId: 210021, name: 'WoomaFighter', x: 300, y: 385, hp: 120, dead: false },
+    ],
+  };
+  const target = await approachPracticeTarget({ snapshot }, quest, async () => ({ reached: true }), 1, () => {});
+  assert.equal(target.objectId, 210021);
 });
 
 test('all three D022 training footholds have a static walk path from the ordinary entry', async () => {
   const map = await loadProtocolCollisionMap('D022');
   const blockedTransfers = [{ x: 338, y: 354 }, { x: 251, y: 207 }, { x: 251, y: 206 }];
-  for (const target of [{ x: 335, y: 360 }, { x: 320, y: 345 }, { x: 300, y: 335 }]) {
+  for (const target of [
+    { x: 340, y: 355 }, { x: 370, y: 340 }, { x: 300, y: 385 },
+    { x: 360, y: 355 }, { x: 335, y: 380 }, { x: 320, y: 395 },
+    { x: 370, y: 325 }, { x: 280, y: 340 }, { x: 300, y: 330 },
+  ]) {
     assert.equal(map.blocked[target.y * map.width + target.x], 0);
     assert.ok(findProtocolWalkPath({
       map, start: { x: 338, y: 356 }, target, dynamicObstacles: blockedTransfers,
@@ -1099,6 +1109,30 @@ test('HalfMoon arms through its public toggle before attacking, and Lightning se
     plan: [{ kind: 'spell', spell: 'Lightning' }],
   });
   assert.deepEqual(wizard.sent, [{ type: 'magic', objectId: 1, spell: 'Lightning', direction: 'Right', targetId: 1, x: -3, y: 0, spellTargetLock: false }]);
+});
+
+test('N21 separates accepted HalfMoon and Thrusting swings by the shared Zone action clock', async () => {
+  const { client, quest, sent } = practiceClient({
+    questId: 2110021,
+    knownSkills: ['HalfMoon', 'Thrusting'],
+    completeOn: 2,
+    requirements: { warrior: ['HalfMoon attack damage committed', 'Thrusting attack damage committed'] },
+  });
+  client.snapshot.entities[0].class = 'Warrior';
+  const swings = [];
+  const send = client.send.bind(client);
+  client.send = command => {
+    if (command.type === 'attackDirection') swings.push({ spell: command.spell, at: Date.now() });
+    send(command);
+  };
+  await executeV2PracticePlan({
+    client, quest, navigate: async () => {},
+    plan: [{ kind: 'technique', spell: 'HalfMoon' }, { kind: 'technique', spell: 'Thrusting' }],
+  });
+  assert.deepEqual(swings.map(swing => swing.spell), [4, 3]);
+  assert.ok(swings[1].at - swings[0].at >= 600, 'Thrusting must not be sent while Zone melee is locked');
+  assert.deepEqual(sent.filter(command => command.type === 'spellToggle').map(command => command.spell),
+    ['HalfMoon', 'Thrusting']);
 });
 
 for (const [label, options] of [

@@ -27,6 +27,7 @@ const PRACTICE_SPAWN_STEP_BUDGET = 120;
 const PRACTICE_SPAWN_ATTEMPT_BUDGET = 180;
 const PRACTICE_TECHNIQUE_WINDOW_MS = 12_000;
 const PRACTICE_TECHNIQUE_MAX_SWINGS = 3;
+const PRACTICE_TECHNIQUE_ACTION_SPACING_MS = 650; // Zone accepts one melee action per 600 ms.
 // V2 quest templates address the live NPC object IDs. Crystal's database
 // manifest numbers Board as npc_index 35, while the public world object is
 // 24, so never reinterpret these object IDs as database row indexes.
@@ -108,6 +109,7 @@ function appendTrainingSpawns(index, configuredSpawns) {
       spread: Number(spawn.spread ?? 0),
       delayMinutes: Number(spawn.delayMinutes ?? 0),
       respawnIndex,
+      maxHp: Number(spawn.maxHp ?? 0),
       isBoss: false,
       monsterIndex,
       monsterName: requiredString(spawn.monster, `training respawn ${respawnIndex} monster name`),
@@ -199,6 +201,9 @@ function buildKill(kill, maps, respawns, questId) {
   const trainingSources = [2110019, 2110020, 2110021].includes(questId)
     ? sources.filter(spawn => spawn.newcomerTraining === true)
     : [];
+  if ([2110019, 2110020, 2110021].includes(questId) && trainingSources.length === 0) {
+    throw new Error(`q${questId} has no certified isolated D022 training source`);
+  }
   const spawns = trainingSources.length ? trainingSources : sources;
   if (!spawns.length) throw new Error(`q${questId} ${kill.monster} has no Crystal respawn in ${maps.join(',')}`);
   // completeQuestObjectives consumes `spawnCandidates`, rather than the
@@ -659,8 +664,10 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
   }
   if (quest.objectives.kill.length) {
     const woomaSummonsAttempted = new Set();
+    const allowedTargetObjectIds = trainingTargetObjectIds(quest);
     await completeQuestObjectives(client, quest, navigate, {
       travel,
+      allowedTargetObjectIds,
       action: async (owner, target) => {
         if (className === 'Taoist' && [2110020, 2110021].includes(Number(quest.questId)) &&
             !ownedBoneFamiliar(owner.snapshot) && !woomaSummonsAttempted.has(Number(target.objectId))) {
@@ -797,6 +804,7 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
   // and prefer a different AOI object when one exists, while retaining a
   // one-monster fallback for sparse legitimate respawns.
   const usedTargetIds = new Set();
+  let lastTechniqueDamageAtMs = null;
   const acquireTarget = async (desiredDistance, options = {}) => {
     const target = await approachPracticeTarget(client, quest, navigate, desiredDistance, checkDeadline, {
       ...options,
@@ -840,6 +848,11 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
       await meleeCombatAction(client, target);
       await waitForTargetDamage(client, after, target, hp, quest.questId, 'normal attack');
     } else if (step.kind === 'technique') {
+      if (lastTechniqueDamageAtMs != null) {
+        const remaining = PRACTICE_TECHNIQUE_ACTION_SPACING_MS - (Date.now() - lastTechniqueDamageAtMs);
+        if (remaining > 0) await new Promise(resolve => setTimeout(resolve, remaining));
+        checkDeadline();
+      }
       const range = step.spell === 'Thrusting' ? 2 : 1;
       let firstSwingAt = null;
       for (let swing = 0; swing < PRACTICE_TECHNIQUE_MAX_SWINGS; swing += 1) {
@@ -862,6 +875,7 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
         const receiptTimeout = swing + 1 < PRACTICE_TECHNIQUE_MAX_SWINGS ? Math.min(2_500, remaining) : remaining;
         try {
           await waitForTargetDamage(client, after, target, hp, quest.questId, step.spell, TECHNIQUE_SPELL[step.spell], receiptTimeout);
+          lastTechniqueDamageAtMs = Date.now();
           break;
         } catch (error) {
           const acceptedSwing = receivedAfter(client, after, 'ObjectAttack', payload =>
@@ -1262,12 +1276,24 @@ function validPracticePoint(point) {
 
 function matchingPracticeTarget(snapshot, quest, excludedObjectIds = null) {
   const names = new Set((quest.objectives.kill ?? []).map(kill => normalize(kill.monsterName)));
+  const allowedTargetObjectIds = trainingTargetObjectIds(quest);
   const actor = selfPlayer({ snapshot });
   const excluded = excludedObjectIds instanceof Set ? excludedObjectIds : new Set();
   return (snapshot?.entities ?? []).filter(entity => entity?.kind === 'monster' && entity.dead !== true && Number(entity?.hp ?? 1) > 0 &&
     !excluded.has(Number(entity?.objectId)) && names.has(normalize(entity?.name)) &&
+    (!allowedTargetObjectIds || allowedTargetObjectIds.has(Number(entity?.objectId))) &&
     String(entity?.mapFileName ?? snapshot?.mapFileName ?? '') === String(snapshot?.mapFileName ?? ''))
     .sort((left, right) => distance(actor, left) - distance(actor, right))[0] ?? null;
+}
+
+function trainingTargetObjectIds(quest) {
+  if (![2110019, 2110020, 2110021].includes(Number(quest?.questId))) return null;
+  const ids = (quest?.objectives?.kill ?? []).flatMap(kill => kill.spawnCandidates ?? [])
+    .filter(source => source.newcomerTraining === true)
+    .map(source => 200_000 + Number(source.respawnIndex));
+  if (ids.length === 0) return null;
+  if (ids.some(id => !Number.isSafeInteger(id))) throw new Error(`q${quest?.questId} has invalid V2 training actor IDs`);
+  return new Set(ids);
 }
 
 async function waitForV2SpellReady(client, spell, checkDeadline, questId) {

@@ -1,14 +1,14 @@
 # Agent Task Queue
 
-> 2026-09-19 V2 current work: verify the deployed shared-Zone directional
-> attack against Warrior N21 after ordinary logout; verify Taoist's ordinary
-> BoneFamiliar-assisted Wooma battle without changing the 20-attack cap.
-> One restored cohort B remains 66/78 in its strict expired window and cannot
-> become a pass after Wizard's fourth death. The separate functional recheck
-> uses the same account/store and original death ledger; its clock is labelled
-> separately. The isolated D022 search-source and zero-neighbor safety policy
-> pass 57/57 Node tests but need live proof. Save parity, UI, animation and
-> Crystal comparison remain independent gates.
+> 2026-09-19 V2 current work: release-build and deploy nine separated authored
+> D022 actors plus corrected BoneFamiliar
+> damage after all normal logout sessions. Resume ordinary Warrior/Taoist
+> rechecks on the separately labelled clock without increasing the 20-attack,
+> 30-second search or three-revival limits. Warrior HalfMoon already has live
+> positive damage; Thrusting action spacing is tested but not live-proven.
+> Strict cohort B remains 66/78 with Wizard's fourth death and cannot pass.
+> Fresh full three-class 120-minute evidence, save parity, UI, animation and
+> original Crystal comparison are separate pending gates.
 
 > 2026-09-19 current V2 priority: finish the D022 safety repair and normal
 > Warrior/Taoist saved runs without interrupting their active sessions. The

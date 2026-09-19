@@ -13946,11 +13946,39 @@ fn zone_native_summon_hit_delay_ms(monster: &ZoneNativeMonster, target: &Point) 
 
 fn zone_native_summon_monster_attack_damage(monster: &ZoneNativeMonster, target: &Point) -> i32 {
     let dc_bonus = zone_native_monster_buff_stat_total(monster, CRYSTAL_STAT_MAX_DC).max(0);
-    match monster.ai {
-        38 | 60 | 61 | 63 if zone_tile_distance(&monster.position, target) > 0 => {
-            zone_crystal_monster_attack_damage(&monster.name).saturating_add(dc_bonus)
-        }
-        _ => 1_i32.saturating_add(dc_bonus),
+    zone_native_summon_base_attack_damage(
+        &monster.name,
+        monster.ai,
+        zone_tile_distance(&monster.position, target),
+    )
+    .saturating_add(dc_bonus)
+}
+
+fn zone_native_summon_base_attack_damage(name: &str, ai: u8, distance: i32) -> i32 {
+    // Crystal's summoned BoneFamiliar has 12–23 DC in the imported monster
+    // template. The old generic pet fallback dealt exactly one damage and
+    // made its class-defining summon ineffective against Wooma enemies.
+    if name == "BoneFamiliar" || (matches!(ai, 38 | 60 | 61 | 63) && distance > 0) {
+        zone_crystal_monster_attack_damage(name)
+    } else {
+        1
+    }
+}
+
+#[cfg(test)]
+mod summon_damage_tests {
+    use super::*;
+
+    #[test]
+    fn bone_familiar_uses_imported_crystal_dc_instead_of_one_damage() {
+        let template = crystal_monster_by_name("BoneFamiliar").expect("Crystal familiar template");
+        assert_eq!(template.min_dc, 12);
+        assert_eq!(template.max_dc, 23);
+        assert_eq!(
+            zone_native_summon_base_attack_damage("BoneFamiliar", template.ai, 1),
+            i32::from(template.max_dc),
+        );
+        assert_eq!(zone_native_summon_base_attack_damage("UnknownPet", 0, 1), 1);
     }
 }
 

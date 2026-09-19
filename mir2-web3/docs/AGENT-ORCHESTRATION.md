@@ -1,17 +1,22 @@
 # Agent Orchestration
 
-> 2026-09-19 latest V2 handoff: the original cohort B finished at 66/78,
-> levels 28/26/27, with matching normal logout saves; Wizard's fourth death
-> invalidates its strict two-hour/three-revival gate. A separately labelled
-> functional recheck retains the old clock and deaths. Its Taoist N20 bought
-> 100 Amulets through the public shop, dealt 200 SoulFireBall damage in 20
-> attacks, and hit the unchanged cap before a 285-HP Wooma died. A normal
-> owned-pet assist is being checked. Warrior N21 exposed stale personal-map
-> directional melee; a shared-Zone resolution regression passes and the
-> rebuilt Gateway is deployed, but live HalfMoon damage is still unproved.
-> The V2 route now searches only its three isolated D022 footholds and rejects
-> crowded N20/N21 targets; controller tests pass 57/57. No 78/78 or visual
-> acceptance claim is authorized by these candidate repairs.
+> 2026-09-19 latest V2 handoff: strict cohort B ended 66/78, levels 28/26/27,
+> with matching normal logout saves; Wizard's fourth death invalidates its
+> two-hour/three-revival gate. The separate functional recheck retains old
+> clocks/deaths. Warrior N21 HalfMoon now has public spell-4/positive-damage
+> receipts after shared-Zone directional repair, but its next Thrusting swing
+> arrived during the server's 600 ms action lock; a 650 ms class-practice
+> spacing regression passes. Warrior later dealt only 144 damage to a 285-HP
+> imported WoomaFighter in the fixed 20-attack budget. Taoist N20 bought real
+> Amulets, used an owned BoneFamiliar, and suffered one ordinary death before
+> a blocked D021→D022 transfer paused its run. The familiar's one-damage
+> generic fallback contradicts its imported 12–23 DC; focused correction
+> passes. Candidate V2 content now has nine separated training actors (three
+> per quest target) and 120 HP on training Wooma only, preserving full-strength
+> imported actors and normal respawn timing. V2 runner targets only those
+> authored IDs; Node V2/combat tests pass 59/59 and 161/161, focused Rust
+> spawn integration 1/1. Rebuilt deployment and fresh live proof remain open. No 78/78 or visual
+> acceptance claim follows yet.
 
 > 2026-09-19 D022 safety correction: cohort B's Wizard completed N12 and
 > N16, then died a fourth time during N19 at (248,284). Six nearby Wooma

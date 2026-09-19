@@ -1,12 +1,13 @@
 # Crystal Server Parity
 
-> 2026-09-19 V2 candidate Gateway now resolves directional melee against
-> the authoritative shared Zone map instead of a stale personal monster
-> mirror. The focused regression verifies a moved live target is selected
-> and a miss cannot emit a phantom attack (release 1/1). Original Crystal
-> behavior and visual/animation parity have not been accepted. The V2-only
-> D022 runner searches isolated authored footholds while imported monster
-> groups still exist; this is a route/safety change, not original parity.
+> 2026-09-19 V2 candidate: shared-Zone directional melee fix passes a focused
+> regression and live Warrior HalfMoon positive damage. Imported BoneFamiliar
+> has 12–23 DC, but the generic summon fallback gave it one damage; a scoped
+> template-based fix passes release 1/1 and awaits live Gateway deployment.
+> V2-only D022 training Wooma actors use 120 HP and separated placements;
+> original imported Wooma keep their 285 HP and respawn schedule. These
+> tutorial balance changes are separate from Crystal 1:1 parity, which still
+> requires visual/animation comparison and original-path testing.
 
 > 2026-09-19 V2-only D022 safety follow-up: the initial three-monster
 > footholds made N19 unsafe and contributed to Wizard's fourth death.

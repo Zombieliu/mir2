@@ -366,3 +366,17 @@ is deployed, while live damage is still pending. V2 quest searches now use
 only their isolated D022 training sources and reject crowded N20/N21 targets.
 Node route suite 57/57 and supply suite 59/59 pass. No 78/78, three level-30
 saves, clean two-hour completion, or UI/animation/Crystal visual claim follows.
+
+Later 2026-09-19 functional observations: Warrior N21's HalfMoon emitted a
+spell-4 ObjectAttack and positive damage after the deployed shared-Zone fix.
+The immediately following Thrusting was rejected during Zone's 600 ms melee
+action lock; a 650 ms practice spacing regression passes. In the actual
+objective, 20 ordinary attacks dealt 144 damage to a 285-HP imported
+WoomaFighter. Taoist used an owned BoneFamiliar but died once and, after a
+normal revive, paused on a D021→D022 monster-blocked transfer. Its pet's
+one-damage output contradicted BoneFamiliar's imported 12–23 DC. Focused
+Rust summon correction passes 1/1; new V2-only 120-HP training Wooma and
+nine isolated actors retain full-strength imported groups and normal respawn
+timing. V2 and combat controller suites pass 59/59 and 161/161. Rust spawn
+integration passes 1/1; new Gateway deployment, live three-class 78/78 and visual
+acceptance remain open.

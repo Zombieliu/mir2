@@ -45,6 +45,8 @@ struct NewcomerV2TrainingSpawn {
     spread: u16,
     delay_minutes: u16,
     respawn_index: i32,
+    #[serde(default)]
+    max_hp: Option<i32>,
 }
 
 #[derive(Debug, Clone, Deserialize, Default)]
@@ -99,7 +101,10 @@ fn newcomer_v2_training_respawns_for_map(map_file_name: &str) -> Vec<CrystalResp
                         monster_image: monster.image,
                         monster_ai: monster.ai,
                         monster_view_range: monster.view_range,
-                        monster_hp: monster.hp,
+                        monster_hp: spawn
+                            .max_hp
+                            .filter(|hp| *hp > 0 && *hp <= monster.hp)
+                            .unwrap_or(monster.hp),
                         monster_attack_speed: monster.attack_speed,
                         monster_move_speed: monster.move_speed,
                         monster_can_push: monster.can_push,

@@ -1,13 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> 2026-09-19 cohort B strict result is 66/78 with levels 28/26/27 and saved
-> logout parity. Wizard's fourth death rules out a strict two-hour completion.
-> Separate functional rechecks found the Taoist's unchanged 20-action cap
-> cannot kill a 285-HP Wooma with 200 damage from SoulFireBall alone, and
-> Warrior N21 directional melee used a stale personal target. A deployed
-> shared-Zone target fix passes 1/1; isolated D022 V2 search sources and
-> owned-pet support pass affected Node tests. Live battle, 78/78, level-30
-> saves, timing, UI, animation and original Crystal visuals remain open.
+> 2026-09-19 strict cohort B remains 66/78, levels 28/26/27, saved logout
+> parity; Wizard's fourth death rules out its two-hour completion. Separate
+> functional recheck proved Warrior HalfMoon positive damage after shared-Zone
+> repair but exposed the 600 ms action lock and 285-HP imported Wooma target.
+> V2-only candidate content supplies three separated 120-HP training Wooma of
+> each type while preserving imported full-strength actors; the runner targets
+> their exact server IDs. BoneFamiliar's imported 12–23 DC replaces its
+> one-damage generic fallback. Focused tests pass; rebuilt live deployment,
+> 78/78, level-30 saves, timing, UI, animation and Crystal visuals remain open.
 
 > 2026-09-19 V2 D022 correction candidate: the first three-monster footholds
 > created a lethal cluster at N19 and Wizard exhausted its fourth death.

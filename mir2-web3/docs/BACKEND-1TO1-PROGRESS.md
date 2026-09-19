@@ -1,12 +1,14 @@
 # Backend 1:1 Progress
 
-> 2026-09-19 directional melee correction: N21 Warrior sent a public HalfMoon
-> directional attack, but target lookup read a stale personal snapshot while
-> the player stood in the shared Zone, producing spell-0 phantom attacks.
-> Gateway now resolves the ray against shared map actors and players, with an
-> owner location correction on a true miss. Focused release test passes 1/1;
-> rebuilt Gateway is deployed on the isolated V2 cohort ports. Live N21
-> damage and complete three-class route are still unverified.
+> 2026-09-19 V2 candidate follow-up: N21 Warrior's public HalfMoon now emits
+> spell-4 ObjectAttack and positive target damage after shared-Zone directional
+> target resolution (focused release test 1/1). BoneFamiliar still dealt one
+> damage despite its imported Crystal 12–23 DC; a scoped summon damage fix
+> passes focused release test 1/1 but awaits Gateway deployment. V2-only D022
+> training Wooma now have 120 HP, with three separated actors of each target;
+> imported Crystal monsters retain full HP and normal respawn timing. Rust
+> spawn integration passes 1/1; live 78/78 is pending. This optional newcomer mode
+> does not establish 1:1 original-client parity.
 
 > 2026-09-19 D022 candidate repair: Wizard's fourth N19 death occurred amid
 > six nearby hostiles, including the V2-only dense WoomaSoldier group. The V2 overlay
