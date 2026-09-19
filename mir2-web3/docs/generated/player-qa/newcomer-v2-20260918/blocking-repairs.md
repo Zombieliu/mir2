@@ -463,3 +463,16 @@ against the existing shared Gateway to live-check the repair. Cohort C remains
 preserved as failed evidence. D is a new run, not a reset of C's clock or
 deaths; its outcome and normal saved logout are still pending. No UI,
 animation, Crystal original-client visual, or clean two-hour pass is claimed.
+
+At 19:24:23 UTC cohort D suffered one real N14 death at D401 (39,126) before
+any N14 kill. The last public snapshots showed four Zombie3 converging at
+melee range while the Wizard still held 32 small HP medicines and four normal
+TownTeleport scrolls. A scoped candidate applies the same isolated-target
+selection and pre-transfer real-supply check to N14 and requests the already
+held public emergency scroll at 65% rather than 35% HP. It does not grant or
+increase scrolls, damage, attack/search steps, revivals, or deadlines. The
+affected Node suites remain 222/222. The running process had not loaded this
+candidate, so it was stopped after a subsequent authoritative town snapshot
+at 19:29 UTC for a normal same-clock reload; this repair interruption is
+not clean player time. N14 live revalidation, the original two-hour gate,
+and the three-class completion remain open.

@@ -699,11 +699,11 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
     await completeQuestObjectives(client, quest, navigate, {
       travel,
       allowedTargetObjectIds,
-      // A TownTeleport during this mine objective returns to Bichon inside
+      // A TownTeleport during these mine objectives returns to Bichon inside
       // the same quest loop. Recheck real potions and escape scrolls before
       // its next ordinary map transfer, not only at quest acceptance.
       beforeTravel: async (owner, destination) => {
-        if (className !== 'Wizard' || ![2110015, 2110016].includes(Number(quest.questId)) ||
+        if (className !== 'Wizard' || ![2110014, 2110015, 2110016].includes(Number(quest.questId)) ||
             String(owner.snapshot?.mapFileName ?? '') !== '0' ||
             String(destination?.mapFileName ?? '') === '0' ||
             typeof survival.ensureReady !== 'function') return;
@@ -759,6 +759,8 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // the existing one-scroll cap and authoritative relocation still apply.
       emergencyEscapeHpRatio: className === 'Taoist' && [2110010, 2110011].includes(Number(quest.questId))
         ? Math.max(0.65, Number(survival.emergencyEscapeHpRatio ?? 0))
+        : className === 'Wizard' && [2110014, 2110015, 2110016].includes(Number(quest.questId))
+          ? Math.max(0.65, Number(survival.emergencyEscapeHpRatio ?? 0))
         : Number(survival.emergencyEscapeHpRatio ?? 0),
       // Each inner bounded loop also receives the deadline-guarded client.
       // Keep its own budgets deliberately small so a later ordinary resume is
@@ -768,10 +770,9 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       ...([2110020, 2110021].includes(Number(quest.questId))
         ? { maxTargetAdjacent: 0, maxTargetNearby: 0 }
         : {}),
-      // The mine entrance has several Zombie3 around a wounded Zombie2.
-      // A Wizard should select an isolated quest target instead of spending
-      // the entire medicine supply on that non-objective pack.
-      ...(className === 'Wizard' && [2110015, 2110016].includes(Number(quest.questId))
+      // D401 has overlapping Zombie2/Zombie3 packs. Prefer an isolated
+      // required target before committing to a mine fight.
+      ...(className === 'Wizard' && [2110014, 2110015, 2110016].includes(Number(quest.questId))
         ? { maxTargetAdjacent: 0, maxTargetNearby: 1 }
         : {}),
       maxSpawnSearches: 4,
@@ -788,7 +789,8 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // the cap while the required Zombie2 remains alive in the same pack.
       focusTargetThroughAggressors:
         (className === 'Taoist' && [2110010, 2110011, 2110020, 2110021].includes(Number(quest.questId))) ||
-        (['Warrior', 'Wizard'].includes(className) && [2110015, 2110016].includes(Number(quest.questId))),
+        (className === 'Warrior' && [2110015, 2110016].includes(Number(quest.questId))) ||
+        (className === 'Wizard' && [2110014, 2110015, 2110016].includes(Number(quest.questId))),
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
       retrySpawnSearchTimeout: true,
