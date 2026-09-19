@@ -380,3 +380,21 @@ nine isolated actors retain full-strength imported groups and normal respawn
 timing. V2 and combat controller suites pass 59/59 and 161/161. Rust spawn
 integration passes 1/1; new Gateway deployment, live three-class 78/78 and visual
 acceptance remain open.
+
+2026-09-19 functional recheck after the nine-actor Gateway deployment:
+Warrior finished N21 on a real training Wooma, then used a held TownTeleport
+to return from D022 for N22. The normal scroll lands more than 350 walking
+tiles from the Board, so report navigation now permits that actual city
+walk. The independent `verify-newcomer-v2-evidence.mjs` check reports Warrior
+**26/26, level 30**, `LogOutSuccess`, and matching saved level, transform,
+gold, experience, and completed quest rows. Its original 12:45–14:45 UTC
+strict clock had already expired; this is a separately labelled functional
+recheck and cannot be called a clean two-hour pass. Taoist N20 resumed using
+ordinary shop supplies; the D021→D022 path exposed a live CaveBat blocking
+the cave corridor. V2 map travel now uses bounded public combat to clear a
+proved blocker, with the existing 20-action target cap and deadline intact.
+The V2 controller suite passes 59/59 and travel suite 55/55; Taoist remains
+under live recheck. The earlier Wizard cohort exceeded its unchanged three
+revivals, so a separately registered fresh ordinary Wizard cohort C is
+running against the same shared Gateway. UI, animation, Crystal visual
+comparison, clean two-hour timing, and three-class 78/78 remain unaccepted.
