@@ -570,3 +570,25 @@ and permit an already-held public escape at the existing 65% cave threshold
 or when bounded retreat is blocked. It adds no item, level, death allowance,
 attack/search attempt, or extra time. Combat, V2, and kiting Node suites pass
 260/260; live D022 and ordinary saved logout are still pending.
+
+The same D account made a second ordinary D022 pass after buying 22 small HP
+medicines with its own gold. It advanced N19 from 1/3 to 2/3, then returned
+to town alive when the stock ran out. A further same-clock continuation reached
+the third Dung, but at 21:15:18 UTC four Wooma/Dung actors occupied adjacent
+tiles. At 82/105 HP the retreat controller found no authoritative escape
+step, yet incorrectly tried breakout FireBall attacks because its above-65%
+blocked-retreat escape exception was only checked *after* breakout failed.
+The public RandomTeleport executed at 27 HP; already pending monster damage
+still killed the player at its new D022 coordinate (254,198). This was a
+fourth actual death, so the runner correctly stopped with `deathRecoveryLimit`
+and did not revive again. D remains an explicit **failed** two-hour run and
+failed capped functional recheck at N19 2/3, level 26. It must not be merged
+into a passing three-class result.
+
+The next candidate attempts an already-held public escape immediately when a
+retreat has no legal first step and the caller opted into blocked-retreat
+escape, before any breakout attack, even above the ordinary HP threshold. It
+also forbids Wizard N19–N21 from converting a blocked kite into a spell trade
+with high-HP Wooma. The 320 combat/V2/kiting/supplies Node tests pass. A fresh
+ordinary Wizard account is required for a valid at-most-three-death recheck;
+the failed D evidence and its original clock are preserved unchanged.

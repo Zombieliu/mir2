@@ -2437,11 +2437,15 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
         break;
       }
       if (!moved) {
-        // If every walkable first step is occupied or the only apparent exit
-        // is rejected by authoritative collision, a real player must cut down
-        // one of the monsters already striking them before an escape tile can
-        // exist. Keep this bounded and target only a proven adjacent attacker.
-        if (await tryEmergencyEscape('noAuthoritativeEscapeStep', current)) return true;
+        // Use an already-held public escape before breakout combat when the
+        // caller explicitly permits escape from a blocked retreat. Waiting for
+        // HP to fall below the ordinary threshold can let a surrounding pack
+        // kill the player while the next spell is still action-locked.
+        if (await tryEmergencyEscape(
+          'noAuthoritativeEscapeStep', current, settings.escapeWhenRetreatBlocked,
+        )) return true;
+        // Without that option or a successful scroll, a real player must cut
+        // down a proven adjacent attacker before an escape tile can exist.
         if (!await breakOut(current, 'noAuthoritativeEscapeStep')) return false;
         continue;
       }

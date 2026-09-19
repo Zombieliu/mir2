@@ -5137,7 +5137,7 @@ test("a same-map world refresh preserves monster locations observed earlier in t
   assert.deepEqual(client.sent.map(entry => entry.objectId), [60]);
 });
 
-test('a blocked mine retreat can use a held escape while HP remains above the usual threshold', async () => {
+test('a blocked cave retreat uses a held escape before breakout combat above the usual HP threshold', async () => {
   const quest = { questId: 2110014, stage: 'InProgress', objectives: [objective('Kill Zombie2', 0, 1)] };
   const attackers = [
     monster(61, 'Zombie3', 19, 20, { disposition: 'hostile' }),
@@ -5178,7 +5178,9 @@ test('a blocked mine retreat can use a held escape while HP remains above the us
     recoverAfterUnsafeRetreat: async () => { throw new Error('escaped blocked pack'); },
   }), /escaped blocked pack/);
   assert.equal(escapes, 1);
-  assert.ok(diagnostics.some(entry => entry.type === 'emergencyEscapeSuccess' && entry.reason === 'blockedRetreat'));
+  assert.ok(diagnostics.some(entry => entry.type === 'emergencyEscapeSuccess' && entry.reason === 'noAuthoritativeEscapeStep'));
+  assert.deepEqual(client.sent.filter(command => command.type === 'attack' || command.type === 'magic'), [],
+    'an optional public escape prevents an unsafe breakout attack');
 });
 
 test('V2 full-spread search ignores a stale ordinary-monster history hint before the nearest field', async () => {

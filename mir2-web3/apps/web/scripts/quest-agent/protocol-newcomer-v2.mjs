@@ -703,7 +703,12 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       [2110019, 2110020, 2110021].includes(Number(quest.questId));
     const wizardCaveQuest = wizardMineQuest || wizardTempleQuest;
     const objectiveCombatAction = wizardCaveQuest
-      ? createWizardKitingAction(combatAction, navigate, { triggerDistance: 1, fightWhenBlocked: true })
+      ? createWizardKitingAction(combatAction, navigate, {
+        triggerDistance: 1,
+        // A D022 Wooma has far more HP than a training Dung. If its melee
+        // surround blocks retreat, a spell trade is not a safe fallback.
+        fightWhenBlocked: !wizardTempleQuest,
+      })
       : combatAction;
     await completeQuestObjectives(client, quest, navigate, {
       travel,
