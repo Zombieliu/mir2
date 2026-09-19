@@ -211,3 +211,26 @@ pauses instead of casting. This protects a future fresh run; it does not
 change the Wizard's exhausted 3/3 revival ledger or restart this character.
 Focused V2 tests pass 48/48 and supplies tests 59/59. Taoist N15 recheck and
 its subsequent normal logout/store verification remain open.
+
+Taoist N15's first Poisoning cast had no server receipt despite a verified
+GreenPoison equip. The chosen Zombie2 was AI 24: the personal snapshot listed
+its HP, but the shared Zone kept the buried monster hidden until the player
+approached within three tiles. V2 practice now approaches such a target and
+waits for a public `ObjectShow` or visible `ObjectMonster` packet before
+casting. The next ordinary run received `ObjectPoisoned`, completed N15, and
+normally logged out. The read-only verifier confirmed 50/78 completed units:
+Warrior 21/26 level 26, Wizard 12/26 level 19, Taoist 17/26 level 24, with
+all three logout/save transforms matching. (The Taoist count includes the
+earlier sixteenth completed unit and N15; quest IDs are not contiguous with
+growth rewards.)
+
+Taoist N16 then paused on a SummonSkeleton cast with no owned-pet receipt.
+Its public snapshot showed GreenPoison equipped, zero Amulets in bag, belt,
+or equipment, and adequate gold. The V2 pre-objective readiness gate now
+uses an ordinary TownTeleport and public village shop if a required summon
+or SoulFireBall practice lacks real Amulets, then checks the authoritative
+stock before returning to the cave. Summon practice also pauses before
+casting if no real Amulet can be equipped. Focused V2 tests pass 51/51,
+including buried-target reveal and no-material summon cases. N16 live
+recheck and the final 78/78, level-30, timing, UI, animation, and Crystal
+comparison gates remain open.

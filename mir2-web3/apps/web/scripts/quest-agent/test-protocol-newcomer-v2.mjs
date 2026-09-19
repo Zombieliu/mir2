@@ -1092,6 +1092,54 @@ test('Poisoning moves an existing belt poison stack through public packets befor
   assert.equal(sent[0].spell, 'Poisoning');
 });
 
+test('Poisoning waits for a buried Zombie2 to reveal at three tiles before casting', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['Poisoning'], inventoryItems: [{ uniqueId: 41, name: 'GreenPoison', quantity: 20 }],
+    requirements: { taoist: ['Poisoning learned', 'owned poison effect committed'] },
+  });
+  Object.assign(client.snapshot.entities[1], { name: 'Zombie2', ai: 24, x: 6, y: 0 });
+  quest.objectives.kill[0].monsterName = 'Zombie2';
+  const approaches = [];
+  await executeV2PracticePlan({ client, quest, navigate: async (point, range) => {
+    approaches.push(range);
+    client.snapshot.entities[0].x = Number(point.x) - range;
+    if (range === 3) client.events.push({
+      sequence: ++client.sequence, direction: 'received', packet: 'ObjectMonster',
+      payload: { objectId: 9, hidden: false },
+    });
+    return { reached: true, successfulSteps: 1, attempts: 1 };
+  }, plan: practicePlan(client.snapshot, quest, 'Taoist') });
+  assert.ok(approaches.includes(3));
+  assert.equal(sent[0].spell, 'Poisoning');
+});
+
+test('Poisoning does not cast at a buried target without a public reveal receipt', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['Poisoning'], inventoryItems: [{ uniqueId: 41, name: 'GreenPoison', quantity: 20 }],
+    requirements: { taoist: ['Poisoning learned', 'owned poison effect committed'] },
+  });
+  Object.assign(client.snapshot.entities[1], { name: 'Zombie2', ai: 24, x: 6, y: 0 });
+  quest.objectives.kill[0].monsterName = 'Zombie2';
+  await assert.rejects(() => executeV2PracticePlan({
+    client, quest, navigate: async (point, range) => {
+      client.snapshot.entities[0].x = Number(point.x) - range;
+      return { reached: true, successfulSteps: 1, attempts: 1 };
+    }, plan: practicePlan(client.snapshot, quest, 'Taoist'),
+  }), /buried target lacked an authoritative/);
+  assert.deepEqual(sent, []);
+});
+
+test('SummonSkeleton pauses before casting when no real Amulet can be equipped', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['SoulFireBall', 'SummonSkeleton'],
+    requirements: { taoist: ['SummonSkeleton learned', 'owned skeleton damage committed'] },
+  });
+  await assert.rejects(() => executeV2PracticePlan({
+    client, quest, navigate: async () => {}, plan: [{ kind: 'summon' }],
+  }), /requires a real equipped Amulet/);
+  assert.deepEqual(sent, []);
+});
+
 test('three independently receipted practice actions do not wait for an AND-group before its final action', async () => {
   const { client, quest, sent } = practiceClient({
     knownSkills: ['Healing'], requirements: { taoist: ['Healing cast accepted on self'] }, completeOn: 3,

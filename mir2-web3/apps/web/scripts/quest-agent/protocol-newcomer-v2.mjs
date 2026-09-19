@@ -730,6 +730,27 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
     checkDeadline();
     if (step.kind === 'poison') {
       const target = await acquireTarget(6);
+      if ([5, 14, 24, 124, 125].includes(Number(target.ai))) {
+        // Crystal's buried monsters are listed by the personal snapshot but
+        // the shared Zone rejects spells until a nearby player reveals them.
+        await navigate({ x: Number(target.x), y: Number(target.y) }, 3);
+        const mapEntry = [...(client.events ?? [])].reverse().find(event =>
+          ['MapChanged', 'MapInformation'].includes(String(event?.packet ?? '')) &&
+          String(event?.payload?.fileName ?? '') === String(client.snapshot?.mapFileName ?? ''))?.sequence ?? 0;
+        await client.wait(() => {
+          let visible = false;
+          for (const event of client.events ?? []) {
+            if (Number(event?.sequence) <= mapEntry || Number(event?.payload?.objectId) !== Number(target.objectId)) continue;
+            if (event.packet === 'ObjectMonster') visible = event.payload.hidden === false;
+            if (event.packet === 'ObjectShow') visible = true;
+            if (['ObjectHide', 'ObjectRemove'].includes(event.packet)) visible = false;
+          }
+          return visible;
+        }, `q${quest.questId} buried target reveal`, 7_000).catch(() => {
+          throw new V2Pause('awaitingTargetReveal', quest.questId,
+            `q${quest.questId} buried target lacked an authoritative ObjectShow/ObjectMonster receipt`);
+        });
+      }
       await equipHeldPoison(client, quest.questId);
       const cast = await castV2Spell(client, target, 'Poisoning', checkDeadline, quest.questId);
       await waitForPoisonEvidence(client, cast.after, cast.target, cast.poisonBefore, quest.questId);
@@ -779,7 +800,10 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
       await waitForSelfMagic(client, cast.after, 'Healing', quest.questId);
     } else if (step.kind === 'summon') {
       const target = await acquireTarget(6);
-      await equipHeldAmulet(client);
+      if (!await equipHeldAmulet(client)) {
+        throw new V2Pause('awaitingAmulet', quest.questId,
+          `q${quest.questId} SummonSkeleton requires a real equipped Amulet`);
+      }
       const cast = await castV2Spell(client, target, 'SummonSkeleton', checkDeadline, quest.questId);
       await client.wait(() => ownedBoneFamiliar(client.snapshot), `q${quest.questId} owned BoneFamiliar`, 12_000)
         .catch(() => { throw new V2Pause('awaitingOwnedPet', quest.questId, 'SummonSkeleton lacked an authoritative owned-pet receipt'); });

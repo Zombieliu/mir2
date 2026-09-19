@@ -189,7 +189,7 @@ try {
   await client.wait(() => client.snapshot?.entities?.some(e => e.objectId === client.snapshot.playerObjectId && e.name === credentials.name), 'personal snapshot', bootstrapTimeoutMs);
   report.bootstrapPassed = true;
   if (isNewcomerV2Run) {
-    const { runNewcomerV2Journey } = await import('./protocol-newcomer-v2.mjs');
+    const { runNewcomerV2Journey, practicePlan } = await import('./protocol-newcomer-v2.mjs');
     // V2 uses the same public, receipted RandomTeleport route as the ordinary
     // controller. It is unavailable without a live stack and `useRandomTeleport`
     // proves both item consumption and an authoritative relocation.
@@ -219,7 +219,10 @@ try {
       ensureReady: async (owner, quest, navigateNear) => {
         const hpRatio = () => Number(owner.snapshot?.playerHp ?? 0) /
           Math.max(1, Number(owner.snapshot?.playerMaxHp ?? 1));
-        if (hpRatio() >= 0.35 && hpDrugCount(owner.snapshot) >= minimumJourneyHpStock) {
+        const needsAmulet = () => className === 'Taoist' && amuletStock(owner.snapshot) < 4 &&
+          practicePlan(owner.snapshot, quest, className).some(step =>
+            step.kind === 'summon' || (step.kind === 'spell' && step.spell === 'SoulFireBall'));
+        if (hpRatio() >= 0.35 && hpDrugCount(owner.snapshot) >= minimumJourneyHpStock && !needsAmulet()) {
           return { status: 'ready' };
         }
         if (String(owner.snapshot?.mapFileName ?? '') !== '0') {
@@ -232,11 +235,11 @@ try {
           }
         }
         const restock = await restockInVillage(owner, navigateNear, {
-          targetHp: 24, targetMp: 12, lowStock: minimumJourneyHpStock, reserveGold: 0,
+          targetHp: 24, targetMp: 12, targetAmulet: 6, lowStock: minimumJourneyHpStock, reserveGold: 0,
         });
         if (!['restocked', 'sufficient'].includes(restock.status) ||
-            hpDrugCount(owner.snapshot) < minimumJourneyHpStock) {
-          return { status: 'blocked', message: `q${quest.questId} needs four real HP potions before combat (${restock.status})` };
+            hpDrugCount(owner.snapshot) < minimumJourneyHpStock || needsAmulet()) {
+          return { status: 'blocked', message: `q${quest.questId} needs real HP potions and class casting materials before combat (${restock.status})` };
         }
         if (hpRatio() < 0.35) await useSupplies(owner, { hpThreshold: 0.65, mpThreshold: 0.35 });
         return hpRatio() >= 0.35
