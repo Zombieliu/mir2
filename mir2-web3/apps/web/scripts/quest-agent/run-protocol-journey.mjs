@@ -216,6 +216,33 @@ try {
       },
       sustain: (owner, thresholds) => useSupplies(owner, thresholds),
       recoverAfterUnsafeRetreat: owner => useSupplies(owner, { hpThreshold: 0.85, mpThreshold: 0.35 }),
+      ensureReady: async (owner, quest, navigateNear) => {
+        const hpRatio = () => Number(owner.snapshot?.playerHp ?? 0) /
+          Math.max(1, Number(owner.snapshot?.playerMaxHp ?? 1));
+        if (hpRatio() >= 0.35 && hpDrugCount(owner.snapshot) >= minimumJourneyHpStock) {
+          return { status: 'ready' };
+        }
+        if (String(owner.snapshot?.mapFileName ?? '') !== '0') {
+          if (townTeleportCount(owner.snapshot) <= 0) {
+            return { status: 'blocked', message: `q${quest.questId} cannot begin combat critically undersupplied outside town without an ordinary TownTeleport` };
+          }
+          await useTownTeleport(owner);
+          if (String(owner.snapshot?.mapFileName ?? '') !== '0') {
+            return { status: 'blocked', message: `q${quest.questId} TownTeleport lacked an authoritative village arrival` };
+          }
+        }
+        const restock = await restockInVillage(owner, navigateNear, {
+          targetHp: 24, targetMp: 12, lowStock: minimumJourneyHpStock, reserveGold: 0,
+        });
+        if (!['restocked', 'sufficient'].includes(restock.status) ||
+            hpDrugCount(owner.snapshot) < minimumJourneyHpStock) {
+          return { status: 'blocked', message: `q${quest.questId} needs four real HP potions before combat (${restock.status})` };
+        }
+        if (hpRatio() < 0.35) await useSupplies(owner, { hpThreshold: 0.65, mpThreshold: 0.35 });
+        return hpRatio() >= 0.35
+          ? { status: 'ready' }
+          : { status: 'blocked', message: `q${quest.questId} remains below safe departure HP after ordinary supplies` };
+      },
     };
     const result = await runNewcomerV2Journey({
       client,

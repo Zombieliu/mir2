@@ -297,6 +297,35 @@ test('functional recheck bounds public work by its separate deadline while retai
   assert.ok(report.functionalRecheckElapsedMs >= 0);
 });
 
+test('a critical unsupplied cave resume checks safety before any V2 practice cast', async () => {
+  const sent = [];
+  const client = {
+    snapshot: {
+      playerObjectId: 1, mapFileName: 'D001', playerHp: 8, playerMaxHp: 72,
+      inventoryItems: [], beltItems: [], equipmentItems: [],
+      entities: [{ objectId: 1, kind: 'player', hp: 8, maxHp: 72, dead: false, level: 19 }],
+      questLog: [{ questId: 2110012, stage: 'InProgress' }],
+    },
+    events: [], sequence: 0,
+    send(command) { sent.push(command); },
+  };
+  let checked = 0;
+  const result = await runNewcomerV2Journey({
+    client, className: 'Wizard', gender: 'Male', ordinaryStartedAt: new Date().toISOString(),
+    survival: {
+      ensureReady: async owner => {
+        checked += 1;
+        assert.equal(owner.snapshot.playerHp, 8);
+        return { status: 'blocked', message: 'ordinary TownTeleport and restock required' };
+      },
+    },
+  });
+  assert.equal(checked, 1);
+  assert.equal(result.status, 'paused');
+  assert.equal(result.pause.reason, 'awaitingSafeSupplies');
+  assert.deepEqual(sent, [], 'no FireBall or other combat command precedes the safety gate');
+});
+
 test('authoritative V2 death is revived once, checkpointed, and leaves the unfinished server quest unchanged', async () => {
   const snapshot = {
     playerObjectId: 1, mapFileName: 'D001', playerHp: 0,
@@ -439,13 +468,13 @@ function noWalkPath(successfulSteps = 0, attempts = 1) {
   return error;
 }
 
-function practiceClient({ knownSkills, inventoryItems = [], requirements, completeOn = 1, questId, magicCast = true, magicTargetId = null, toggleAcknowledged = true, toggleReceiptOverride = null, preexistingToggleReceipt = null }) {
+function practiceClient({ knownSkills, inventoryItems = [], beltItems = [], requirements, completeOn = 1, questId, magicCast = true, magicTargetId = null, toggleAcknowledged = true, toggleReceiptOverride = null, preexistingToggleReceipt = null }) {
   const sent = [];
   const requests = [];
   const quest = practiceQuest(requirements, { questId });
   const snapshot = {
     playerObjectId: 1, mapFileName: '0', playerHp: 100, playerMaxHp: 100,
-    knownSkills: knownSkills.map(spell => ({ spell })), inventoryItems, beltItems: [], equipmentItems: [],
+    knownSkills: knownSkills.map(spell => ({ spell })), inventoryItems, beltItems, equipmentItems: [], maxBagSlots: 40,
     entities: [
       { kind: 'player', objectId: 1, x: 0, y: 0, class: 'Taoist' },
       { kind: 'monster', objectId: 9, name: 'Scarecrow', x: 1, y: 0, hp: 10, dead: false },
@@ -512,6 +541,12 @@ function practiceClient({ knownSkills, inventoryItems = [], requirements, comple
     },
     async request(command) {
       requests.push(command);
+      if (command.type === 'moveItem' && command.grid === 'belt') {
+        const index = snapshot.beltItems.findIndex(item => Number(item.slot) === Number(command.from));
+        if (index < 0) return { payload: { success: false } };
+        const [item] = snapshot.beltItems.splice(index, 1);
+        snapshot.inventoryItems.push({ ...item, slot: Number(command.to) - 6, container: 'bag1' });
+      }
       if (command.type === 'equipItem') {
         const item = snapshot.inventoryItems.find(candidate => Number(candidate.uniqueId) === Number(command.uniqueId));
         snapshot.equipmentItems = [{ ...item, slot: 'amulet' }];
@@ -1041,6 +1076,19 @@ test('Poisoning equips bag poison before its public magic packet and waits for s
   await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: practicePlan(client.snapshot, quest, 'Taoist') });
   assert.deepEqual(requests, [{ type: 'equipItem', grid: 'inventory', uniqueId: 41, to: 9 }]);
   assert.equal(sent[0].type, 'magic');
+  assert.equal(sent[0].spell, 'Poisoning');
+});
+
+test('Poisoning moves an existing belt poison stack through public packets before practice', async () => {
+  const poison = { uniqueId: 41, name: 'GreenPoison', quantity: 50, slot: 4, container: 'belt' };
+  const { client, quest, sent, requests } = practiceClient({
+    knownSkills: ['Poisoning'], beltItems: [poison], requirements: { taoist: ['Poisoning learned', 'owned poison effect committed'] },
+  });
+  await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: practicePlan(client.snapshot, quest, 'Taoist') });
+  assert.deepEqual(requests, [
+    { type: 'moveItem', grid: 'belt', from: 4, to: 6 },
+    { type: 'equipItem', grid: 'inventory', uniqueId: 41, to: 9 },
+  ]);
   assert.equal(sent[0].spell, 'Poisoning');
 });
 

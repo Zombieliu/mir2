@@ -190,3 +190,24 @@ alter the save or replace a failed route with a success. Focused combat tests
 pass 160/160, including both new regression cases; syntax and diff checks
 pass. The subsequent Warrior/Taoist live runs and logout/store comparison are
 still in progress, so the last fully verified total remains 40/78.
+
+The next public runs verified Warrior 21/26 at level 26 after normal logout,
+with snapshot/save quest rows and transform agreeing. N19 progressed Dung to
+2/3, then a real 30-second search visited 5 of 677 valid wide-area points
+without a third live target. Taoist completed N14 and reached 16/26 at level
+22. N15 paused before practice because the poison equip helper looked only in
+the bag. Its actual public logout snapshot holds GreenPoison x50 in belt slot
+4 and RedPoison x50 in belt slot 5. The repair moves a held belt stack to a
+verified empty bag slot with `moveItem`, then equips it with the ordinary
+`equipItem` command. No poison was minted or inserted into storage.
+
+The Wizard N12 death trace also shows a critical 8/72 HP cave resume with
+zero HP potions and two TownTeleport scrolls. V2 previously started practice
+before its supply/survival path. A new V2 pre-objective readiness hook blocks
+combat until an undersupplied character uses an ordinary TownTeleport,
+receives its town arrival, restocks at the public shop, and has at least four
+real HP potions and safe departure HP. If that path cannot be proven, it
+pauses instead of casting. This protects a future fresh run; it does not
+change the Wizard's exhausted 3/3 revival ledger or restart this character.
+Focused V2 tests pass 48/48 and supplies tests 59/59. Taoist N15 recheck and
+its subsequent normal logout/store verification remain open.

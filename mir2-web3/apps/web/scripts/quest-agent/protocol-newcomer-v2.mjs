@@ -4,7 +4,7 @@ import { interactQuest } from './protocol-quest-actions.mjs';
 import { createNavigator, reviveInTown, selfPlayer } from './protocol-play.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
 import { prepareLoadout, combatAction, meleeCombatAction, useSupplies } from './protocol-loadout.mjs';
-import { purchaseV2BasicHpPotion, equipHeldAmulet, restockInVillage } from './protocol-supplies.mjs';
+import { purchaseV2BasicHpPotion, equipHeldAmulet, moveHeldBeltItemToInventory, restockInVillage } from './protocol-supplies.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
@@ -336,6 +336,16 @@ export async function runNewcomerV2Journey({ client, className, gender, report, 
         }
         const current = serverQuest(boundedClient.snapshot, quest.questId);
         if (stage(current?.stage) === 'inprogress') {
+          // A resumed character can be alive but one hit from death with no
+          // potions. Complete the ordinary departure check before map travel
+          // or practice can issue a combat command.
+          if (typeof survival.ensureReady === 'function') {
+            const readiness = await survival.ensureReady(boundedClient, quest, navigate);
+            if (readiness?.status !== 'ready') {
+              throw new V2Pause('awaitingSafeSupplies', quest.questId,
+                String(readiness?.message ?? `q${quest.questId} needs ordinary travel supplies before combat`));
+            }
+          }
           await completeV2Objectives(boundedClient, quest, { navigate, travel, className, checkDeadline, survival });
           try {
             assertV2FlagsConfirmed(boundedClient.snapshot, quest);
@@ -1231,7 +1241,14 @@ async function armWeaponTechnique(client, questId, spell) {
 }
 
 async function equipHeldPoison(client, questId) {
-  const poison = (client.snapshot?.inventoryItems ?? []).find(item => /(?:green|red)poison/i.test(String(item?.name)) && validUniqueId(item?.uniqueId) && Number(item?.quantity ?? 1) > 0);
+  const heldPoison = item => /(?:green|red)poison/i.test(String(item?.name)) &&
+    validUniqueId(item?.uniqueId) && Number(item?.quantity ?? 1) > 0;
+  if ((client.snapshot?.equipmentItems ?? []).some(heldPoison)) return;
+  let poison = (client.snapshot?.inventoryItems ?? []).find(heldPoison);
+  if (!poison) {
+    const beltPoison = (client.snapshot?.beltItems ?? []).find(heldPoison);
+    if (beltPoison) poison = await moveHeldBeltItemToInventory(client, beltPoison, 'Poison');
+  }
   if (!poison) throw new V2Pause('awaitingPoisonMaterial', questId, 'Poisoning requires an authoritative poison stack in the bag');
   const ack = await client.request({ type: 'equipItem', grid: 'inventory', uniqueId: poison.uniqueId, to: 9 }, 'EquipItem', 12_000);
   if (ack?.payload?.success !== true) throw new V2Pause('poisonEquipRejected', questId, 'Poison material equip was rejected');

@@ -1299,27 +1299,9 @@ export async function equipHeldAmulet(client) {
     const beltHeld = (client.snapshot?.beltItems ?? []).find(item =>
       isStandardAmulet(item) && validUniqueId(item.uniqueId) && heldQuantity(item) !== null && amuletEquipEligible(client.snapshot, item));
     if (!beltHeld) return null;
-    const beltQuantity = heldQuantity(beltHeld);
-    const emptyBagSlot = firstEmptyBagSlot(client.snapshot);
-    if (emptyBagSlot === null) return null;
-    const from = boundedSlot(beltHeld.slot, 'Amulet belt slot');
-    const to = BELT_SLOT_COUNT + emptyBagSlot;
-    const moveAck = await client.request({ type: 'moveItem', grid: 'belt', from, to }, 'MoveItem');
-    if (moveAck?.payload?.success !== true) throw new Error('Move from belt to inventory rejected for Amulet');
-    await client.wait(
-      () => {
-        const inInventory = (client.snapshot?.inventoryItems ?? []).find(item =>
-          Number(item?.uniqueId) === Number(beltHeld.uniqueId) && heldQuantity(item) === beltQuantity);
-        const stillInBelt = (client.snapshot?.beltItems ?? []).some(item =>
-          Number(item?.uniqueId) === Number(beltHeld.uniqueId));
-        return inInventory && !stillInBelt ? inInventory : null;
-      },
-      'Amulet moved from belt to inventory',
-      WAIT_MS,
-    );
-    held = (client.snapshot?.inventoryItems ?? []).find(item =>
-      Number(item?.uniqueId) === Number(beltHeld.uniqueId));
-    if (!held || !amuletEquipEligible(client.snapshot, held)) {
+    held = await moveHeldBeltItemToInventory(client, beltHeld, 'Amulet');
+    if (!held) return null;
+    if (!amuletEquipEligible(client.snapshot, held)) {
       throw new Error('Moved Amulet is not authoritative or eligible in inventory');
     }
   }
@@ -1337,6 +1319,28 @@ export async function equipHeldAmulet(client) {
   );
   const equipped = (client.snapshot?.equipmentItems ?? []).find(item => Number(item?.uniqueId) === Number(held.uniqueId));
   return { uniqueId: equipped.uniqueId, quantity: expectedQuantity };
+}
+
+/** Move a live belt stack through the ordinary public MoveItem packet. */
+export async function moveHeldBeltItemToInventory(client, beltHeld, label = 'item') {
+  if (!validUniqueId(beltHeld?.uniqueId)) return null;
+  const expectedQuantity = heldQuantity(beltHeld);
+  if (expectedQuantity === null) return null;
+  const emptyBagSlot = firstEmptyBagSlot(client.snapshot);
+  if (emptyBagSlot === null) return null;
+  const from = boundedSlot(beltHeld.slot, `${label} belt slot`);
+  const to = BELT_SLOT_COUNT + emptyBagSlot;
+  const moveAck = await client.request({ type: 'moveItem', grid: 'belt', from, to }, 'MoveItem');
+  if (moveAck?.payload?.success !== true) throw new Error(`Move from belt to inventory rejected for ${label}`);
+  await client.wait(() => {
+    const inInventory = (client.snapshot?.inventoryItems ?? []).find(item =>
+      Number(item?.uniqueId) === Number(beltHeld.uniqueId) && heldQuantity(item) === expectedQuantity);
+    const stillInBelt = (client.snapshot?.beltItems ?? []).some(item =>
+      Number(item?.uniqueId) === Number(beltHeld.uniqueId));
+    return inInventory && !stillInBelt ? inInventory : null;
+  }, `${label} moved from belt to inventory`, WAIT_MS);
+  return (client.snapshot?.inventoryItems ?? []).find(item =>
+    Number(item?.uniqueId) === Number(beltHeld.uniqueId)) ?? null;
 }
 
 function firstEmptyBagSlot(snapshot) {
