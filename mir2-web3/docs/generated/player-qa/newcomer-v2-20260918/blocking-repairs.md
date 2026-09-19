@@ -527,3 +527,28 @@ after a town snapshot to load this repair. Its 18:31:56–20:31:56 UTC clock,
 one actual revival and 2/5 N14 progress remain unchanged. Live-range and
 three-class route validation are still pending; the interruption is repair
 time, not clean player time.
+
+The original D 120-minute clock expired at 20:31:56.928 UTC, and the runner
+paused at 20:31:57.412 UTC with N14/N15 complete, N16 1/4, Wizard level 24,
+two actual death/revive receipts, and an authoritative D401 (38,145) snapshot
+at 92 HP. This is an explicit **failed two-hour Wizard result**; repair waits,
+repeated town crossings and deaths remain in its elapsed clock. Warrior and
+Taoist had previously passed their separate functional checks, but no honest
+three-class timed pass exists. At 20:32:56.247 UTC a separately labelled
+functional recheck began on the same ordinary account and save; its ledger
+retains the original 18:31:56.928–20:31:56.928 UTC clock and two recorded
+revivals. The recheck cannot make the failed two-hour run pass. N16–N22, the
+Wizard level-30/save gate and all UI/animation/original-client visual checks
+remain open.
+
+The first separately labelled functional pass reached N16 2/4, level 24,
+and paused alive at D401 (29,174), 83 HP, at 20:34:37 UTC. Its last trace
+reported `navigationMovementControlBlocked` before `Navigation attempt budget
+exceeded (8)`: the navigator counted 250 ms waits under an authoritative
+action block as attempted moves. A scoped repair excludes such no-dispatch
+waits from the existing movement-attempt cap and independently stops after
+20 bounded control waits; it does not increase the eight actual movement
+attempts. Navigator tests pass 52/52, including a ten-wait paralysis release
+and a permanent block that sends no Walk/Run. A same-account, same-clock
+recheck resumed with the original two deaths and N16 2/4. Live N16–N22 and
+normal saved logout remain unverified.

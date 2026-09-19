@@ -462,6 +462,7 @@ export function createNavigator(client, dependencies = {}) {
     let bestDistance = distance(selfPlayer(client), target);
     let nonImprovingSteps = 0;
     let lastMovementBlockMask = 0;
+    let movementControlWaits = 0;
     let positionsSinceImprovement = new Set([`${selfPlayer(client).x},${selfPlayer(client).y}`]);
     let remaining = [];
     for (let count = 0; count < maxAttempts; count++) {
@@ -473,6 +474,9 @@ export function createNavigator(client, dependencies = {}) {
       if (hasAuthoritativePlayerDeath(client.snapshot)) throw new Error('Player died during navigation');
       const movementBlockMask = selfActionBlockMask(client);
       if (movementBlockMask !== 0) {
+        if (++movementControlWaits > 20) {
+          throw new Error(`Movement control remained blocked after ${movementControlWaits - 1} bounded waits on ${mapId}`);
+        }
         remaining = [];
         if (movementBlockMask !== lastMovementBlockMask) {
           client.record('diagnostic', {
@@ -485,8 +489,11 @@ export function createNavigator(client, dependencies = {}) {
         }
         lastMovementBlockMask = movementBlockMask;
         await sleep(250);
+        // No Walk/Run was dispatched, so this wait is not a movement attempt.
+        count -= 1;
         continue;
       }
+      movementControlWaits = 0;
       lastMovementBlockMask = 0;
       const safeZoneEscapeBlocked = safeZoneBlocksEmergencyEscape(client, { now });
       const inSafeZone = client.snapshot?.inSafeZone === true;
@@ -798,6 +805,9 @@ export function createNavigator(client, dependencies = {}) {
         } else {
           const correctionBlockMask = selfActionBlockMask(client);
           if (correctionBlockMask !== 0) {
+            if (++movementControlWaits > 20) {
+              throw new Error(`Movement control remained blocked after ${movementControlWaits - 1} bounded waits on ${mapId}`);
+            }
             remaining = [];
             if (correctionBlockMask !== lastMovementBlockMask) {
               client.record('diagnostic', {
@@ -810,6 +820,9 @@ export function createNavigator(client, dependencies = {}) {
             }
             lastMovementBlockMask = correctionBlockMask;
             await sleep(250);
+            // The server rejected this command because actions were disabled;
+            // do not consume the route's collision/movement retry allowance.
+            count -= 1;
             continue;
           }
           // An unchanged UserLocation is an authoritative collision

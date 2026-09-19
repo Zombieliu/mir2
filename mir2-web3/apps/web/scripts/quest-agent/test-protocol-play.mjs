@@ -317,6 +317,36 @@ test('navigator waits out paralysis without poisoning a valid route cell', async
   );
 });
 
+test('paralysis waits do not spend the bounded movement-attempt allowance', async () => {
+  const client = navigationClient();
+  client.snapshot.entities[0].poison = 32;
+  client.wait = acknowledgeUnitMovement(client);
+  let blockedWaits = 0;
+  const navigateNear = createNavigator(client, {
+    ...dependencies,
+    delay: async () => {
+      if (client.snapshot.entities[0].poison === 32 && ++blockedWaits === 10) {
+        client.snapshot.entities[0].poison = 0;
+      }
+    },
+  });
+  const result = await navigateNear({ x: 2, y: 1 }, 0, () => false, { maxAttempts: 2 });
+  assert.equal(result.reached, true);
+  assert.equal(blockedWaits, 10);
+  assert.equal(client.sent.length, 1, 'the blocked interval sends no movement');
+});
+
+test('permanent movement control still stops after a separate bounded wait', async () => {
+  const client = navigationClient();
+  client.snapshot.entities[0].poison = 32;
+  const navigateNear = createNavigator(client, dependencies);
+  await assert.rejects(
+    navigateNear({ x: 2, y: 1 }, 0, () => false, { maxAttempts: 2 }),
+    /Movement control remained blocked after 20 bounded waits/,
+  );
+  assert.deepEqual(client.sent, []);
+});
+
 test('navigator does not dispatch movement when paralysis arrives during cadence wait', async () => {
   const client = navigationClient();
   let injected = false;
