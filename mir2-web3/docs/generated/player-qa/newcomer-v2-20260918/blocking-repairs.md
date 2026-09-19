@@ -23,6 +23,25 @@ both positive toggle-before-attack cases and negative receipt cases. These are
 protocol contract tests; actual Gateway technique integration and ordinary N15
 completion remain open.
 
+The first functional recheck exposed a separate controller gate before the
+packet reached Gateway: ProtocolClient's normal-command allowlist omitted the
+public `spellToggle` packet. It now permits that exact ordinary command while
+still rejecting QA commands; focused client tests pass 9/9. Warrior resumed on
+the same persisted recheck start, with no additional attempt or revival budget.
+
+That Warrior retry armed Thrusting and sent an accepted attack, but N15 still
+paused before the authoritative damage/quest flag arrived. The Wizard N12
+FireBall behaved the same way. Their positive ObjectStruck/DamageIndicator
+packets appeared only when each runner issued normal LogOut after its 12-second
+receipt wait. Gateway StartGame deferred the serialized runtime tick for 15
+seconds; only movement woke it early, while KeepAlive merely acknowledged.
+The shared Zone had resolved the hits; its combat outbounds were queued until
+the serialized session drain. Gateway now treats normal attack, directional
+attack, range attack, magic and CastSkill as active input with the existing
+75 ms tick wake. Focused Gateway regression passes 1/1. This changes packet
+delivery latency, not combat rules, attack count or the original clocks; live
+revalidation on a rebuilt Gateway remains open.
+
 Root's final affected-controller run passes 102/102: V2 43/43 plus ordinary
 supplies 59/59. Raw local output is
 `C:/mir2-newcomer-v2-clean-20260918/controller-blocking-repairs.tap.log`.
@@ -51,7 +70,10 @@ stock contract, IronSword preference at 1200, failure with insufficient held
 supplies, rechecking stock after travel, rejecting incorrect purchase debit,
 and unchanged generic reserve behavior. Held supplies require at least six
 HP and six MP potions plus one RandomTeleport and one TownTeleport. No attack
-or search cap changed. This is a controller candidate, not an ordinary kill pass.
+or search cap changed. The additional normal run completed N7 and three more
+units through N9, with level16 and matching normal logout/save. This is N7
+functional evidence, not a measured two-hour completion. Taoist N10 paused
+against target 240470 at the unchanged 20-attack cap; diagnosis remains open.
 
 ## Wizard contradictory monster lifecycle
 
@@ -71,6 +93,11 @@ rejecting a late corpse. The existing TownRevive/re-entry AOI regression also
 passes. Raw output: `C:/mir2-newcomer-v2-clean-20260918/pending-zone-aoi-final.log`.
 This closes the targeted packet regression, not Wizard N12 ordinary completion;
 the repaired release and saved normal character still require live revalidation.
+
+The latest normal logout/store verification is 38/78 overall: Warrior 16/26
+level22, Wizard 12/26 level19, Taoist 10/26 level16. All three save/snapshot
+transforms match. The separate functional recheck retains original expired
+clocks and cumulative recoveries 0/3/1.
 
 Functional completion, real level 30, final logout/store checks, human timing,
 graduation equipment sources, UI, animations and original comparisons remain

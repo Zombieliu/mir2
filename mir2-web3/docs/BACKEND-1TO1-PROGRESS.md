@@ -8,7 +8,10 @@
 > Latest affected V2/supply controller regressions pass 102/102; ordinary revalidation remains open.
 > Gateway pending-Zone monster lifecycle regressions pass 2/2 after a real
 > Zone kill and respawn; no ordinary Wizard N12 completion is claimed.
-> Fresh ordinary three-class 34/78 persist after normal logout; levels 22/19/11.
+> Active combat wakes the post-StartGame Gateway tick at the existing 75 ms
+> input grace (focused 1/1); rebuilt release and ordinary recheck remain open.
+> Additional ordinary functional recheck verifies 38/78 after normal logout;
+> levels 22/19/16, with Taoist N7/G15/N8/N9 newly completed.
 > All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
 > Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
 > Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.

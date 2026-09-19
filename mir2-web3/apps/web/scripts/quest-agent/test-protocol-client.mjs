@@ -5,6 +5,18 @@ import os from 'node:os';
 import path from 'node:path';
 import { ProtocolClient, startGameBootstrapEvidence } from './protocol-client.mjs';
 
+test('public weapon toggle is permitted while QA commands remain forbidden', async () => {
+  const wire = [];
+  const client = new ProtocolClient('ws://127.0.0.1:17810/ws', 'unused.jsonl', {
+    appendFile: async () => {},
+  });
+  client.ws = { send: message => wire.push(JSON.parse(message)) };
+  client.send({ type: 'spellToggle', spell: 'Thrusting', canUse: true });
+  assert.deepEqual(wire, [{ type: 'spellToggle', spell: 'Thrusting', canUse: true }]);
+  assert.throws(() => client.send({ type: 'qa.giveItem', item: 1 }), /Forbidden journey command/);
+  await client.writeQueue;
+});
+
 test('start-game bootstrap accepts the exact personal snapshot when UserInformation is omitted', () => {
   const client = {
     events: [{ sequence: 10, direction: 'received', packet: 'LoginSuccess' }],

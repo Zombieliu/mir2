@@ -10,7 +10,12 @@
 > Zone kill and respawn; no ordinary Wizard N12 completion is claimed.
 > Separate functional recheck clock and recovery-ledger checks pass 62/62;
 > original two-hour route evidence and revival caps remain unchanged.
-> Fresh ordinary three-class 34/78 persist after normal logout; levels 22/19/11.
+> Active combat wakes the post-StartGame Gateway tick at the existing 75 ms
+> input grace (focused 1/1); rebuilt release and ordinary recheck remain open.
+> First live Warrior N15 controller spellToggle allowlist gate is fixed (9/9);
+> Wizard N12 delayed real damage awaits routing RCA. Normal route count is not inflated.
+> Additional ordinary functional recheck verifies 38/78 after normal logout;
+> levels 22/19/16, with Taoist N7/G15/N8/N9 newly completed.
 > All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
 > Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
 > Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.

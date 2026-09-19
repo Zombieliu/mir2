@@ -214,3 +214,22 @@ recorded before network login. The original start/deadline/elapsed evidence and
 limits are unchanged. Focused recovery-ledger 18/18 and V2 protocol 44/44 pass
 (`C:/mir2-newcomer-v2-clean-20260918/recheck-*-tests.tap.log`). No recheck
 route unit or clean two-hour journey is claimed by these tests.
+
+The first resumed Warrior N15 attempt paused on the controller's omitted public
+spellToggle allowlist entry before Gateway saw the command. That ordinary
+client command is now allowed (client 9/9, QA commands still rejected), and
+Warrior restarted with the same recheck start. Wizard N12 sent an accepted
+FireBall but its positive target damage arrived only after the 12-second
+receipt wait and subsequent normal LogOut; autonomous packet-delivery RCA is
+open. Taoist N7 continued. No added completed units are claimed here.
+
+After normal logout, the additional functional recheck verifies **38/78**
+with matching durable saves: Warrior level22 (16/26), Wizard level19 (12/26),
+Taoist level16 (10/26). Taoist completed N7, growth15, N8 and N9, then paused
+at N10's unchanged 20-attack cap. Warrior N15 and Wizard N12 each sent an
+accepted attack/cast but received their positive hit only after LogOut. The
+Gateway StartGame 15-second tick grace was not shortened by combat input;
+KeepAlive only acknowledged, leaving resolved Zone hits queued. Normal combat
+input now wakes the serialized session tick after the existing 75 ms input
+grace (focused Gateway test 1/1). Its rebuilt release and ordinary retry are
+still required; no original two-hour, UI or animation pass is claimed.

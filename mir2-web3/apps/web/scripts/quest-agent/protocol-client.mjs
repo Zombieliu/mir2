@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { applyProtocolObservation } from './protocol-observation.mjs';
 
-const allowed = new Set(['clientVersion', 'newAccount', 'login', 'newCharacter', 'startGame', 'townRevive', 'keepAlive', 'walk', 'run', 'turn', 'attack', 'attackDirection', 'magic', 'harvest', 'interact', 'selectNpcDialog', 'acceptQuest', 'finishQuest', 'pickUp', 'pickUpTile', 'equipItem', 'moveItem', 'useItem', 'buyItem', 'sellItem', 'logOut']);
+const allowed = new Set(['clientVersion', 'newAccount', 'login', 'newCharacter', 'startGame', 'townRevive', 'keepAlive', 'walk', 'run', 'turn', 'attack', 'attackDirection', 'magic', 'spellToggle', 'harvest', 'interact', 'selectNpcDialog', 'acceptQuest', 'finishQuest', 'pickUp', 'pickUpTile', 'equipItem', 'moveItem', 'useItem', 'buyItem', 'sellItem', 'logOut']);
 const DAMAGE_VITALS_REFRESH_MS = 500;
 export const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 

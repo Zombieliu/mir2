@@ -6654,13 +6654,21 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         SessionAction::Packet(ClientPacket::StartGame { .. }) => {
             Some(gateway_runtime_tick_bootstrap_grace())
         }
-        // Active input should wake the runtime tick loop, otherwise a queued
-        // Crystal movement retry can inherit StartGame's bootstrap grace. Keep
-        // a tiny batching window so follow-up input wins races against heavy
-        // world ticks on the same WebSocket task.
+        // Active movement and combat must wake the runtime tick loop. Without
+        // this, a cast immediately after StartGame leaves its resolved Zone
+        // damage queued for the full bootstrap grace (or until LogOut), even
+        // though KeepAlive continues to acknowledge. Retain the small input
+        // batching window before draining the ordinary session path.
         SessionAction::MoveTo { .. }
+        | SessionAction::Attack { .. }
+        | SessionAction::CastSkill { .. }
         | SessionAction::Packet(
-            ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. },
+            ClientPacket::Walk { .. }
+                | ClientPacket::Run { .. }
+                | ClientPacket::Turn { .. }
+                | ClientPacket::Attack { .. }
+                | ClientPacket::RangeAttack { .. }
+                | ClientPacket::Magic { .. },
         ) => Some(gateway_runtime_tick_input_wake_grace()),
         _ => None,
     }
@@ -17056,7 +17064,7 @@ mod tests {
     }
 
     #[test]
-    fn runtime_tick_defers_after_bootstrap_but_not_player_movement() {
+    fn runtime_tick_defers_after_bootstrap_but_wakes_for_player_input() {
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
                 ClientPacket::StartGame { character_index: 0 },
@@ -17087,6 +17095,34 @@ mod tests {
             )),
             Some(std::time::Duration::from_millis(75))
         );
+        for action in [
+            SessionAction::Attack { object_id: 42 },
+            SessionAction::CastSkill { key: "battle-focus".to_string() },
+            SessionAction::Packet(ClientPacket::Attack {
+                direction: MirDirection::Right,
+                spell: Spell::Thrusting,
+            }),
+            SessionAction::Packet(ClientPacket::RangeAttack {
+                direction: MirDirection::Right,
+                location: Point { x: 10, y: 10 },
+                target_id: 42,
+                target_location: Point { x: 11, y: 10 },
+            }),
+            SessionAction::Packet(ClientPacket::Magic {
+                object_id: 1_000,
+                spell: Spell::FireBall,
+                direction: MirDirection::Right,
+                target_id: 42,
+                location: Point { x: 11, y: 10 },
+                spell_target_lock: true,
+            }),
+        ] {
+            assert_eq!(
+                super::runtime_tick_defer_duration_for_action(&action),
+                Some(std::time::Duration::from_millis(75)),
+                "combat input must drain the native Zone hit promptly: {action:?}"
+            );
+        }
         assert!(
             super::runtime_tick_defer_duration_for_action(&SessionAction::Packet(
                 ClientPacket::Chat {
