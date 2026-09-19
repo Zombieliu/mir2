@@ -15,6 +15,7 @@ use std::os::windows::ffi::OsStrExt;
 use mir2_game_data::{
     content_profile_experience_required, content_profile_monster_is_boss,
     content_profile_respawn_overrides_for_map, crystal_map_respawns_by_file_name,
+    crystal_monster_by_name,
     crystal_respawn_manifest, platinum_176_profile, platinum_176_profile_bundle,
     starter_map_collision, starter_scene, validate_content_profile, ContentProfile,
     ContentSkillRule, CrystalItemTemplate, CrystalRespawnTemplate, DecorObjectTemplate, MapBounds,
@@ -28,6 +29,94 @@ use postgres::{Client, Config as PostgresClientConfig, NoTls, Transaction};
 use rand_core::{OsRng, RngCore};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+
+const NEWCOMER_V2_CONFIG_JSON: &str =
+    include_str!("../../../config/quest-guidance/newcomer-journey-v2.json");
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct NewcomerV2TrainingSpawn {
+    map_file_name: String,
+    monster: String,
+    #[serde(default)]
+    monster_index: Option<i32>,
+    position: Point,
+    count: u16,
+    spread: u16,
+    delay_minutes: u16,
+    respawn_index: i32,
+}
+
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+struct NewcomerV2TrainingConfig {
+    #[serde(default)]
+    training_spawns: Vec<NewcomerV2TrainingSpawn>,
+}
+
+fn newcomer_v2_training_respawns_for_map(map_file_name: &str) -> Vec<CrystalRespawnTemplate> {
+    if !env::var("MIR2_QUEST_CADENCE")
+        .is_ok_and(|value| value.trim().eq_ignore_ascii_case("newcomer-v2"))
+    {
+        return Vec::new();
+    }
+    static TRAINING_SPAWNS: OnceLock<Vec<CrystalRespawnTemplate>> = OnceLock::new();
+    TRAINING_SPAWNS
+        .get_or_init(|| {
+            let Ok(config) = serde_json::from_str::<NewcomerV2TrainingConfig>(NEWCOMER_V2_CONFIG_JSON)
+            else {
+                return Vec::new();
+            };
+            let mut ids = BTreeSet::new();
+            config
+                .training_spawns
+                .into_iter()
+                .filter(|spawn| {
+                    spawn.map_file_name.eq_ignore_ascii_case("D022")
+                        && (1..=3).contains(&spawn.count)
+                        && spawn.spread <= 8
+                        && spawn.respawn_index > 0
+                        && ids.insert(spawn.respawn_index)
+                })
+                .filter_map(|spawn| {
+                    let monster = crystal_monster_by_name(&spawn.monster)?;
+                    if spawn.monster_index.is_some_and(|index| index != monster.monster_index) {
+                        return None;
+                    }
+                    Some(CrystalRespawnTemplate {
+                        monster_index: monster.monster_index,
+                        location: spawn.position,
+                        count: spawn.count,
+                        spread: spawn.spread,
+                        delay_minutes: spawn.delay_minutes,
+                        direction: MirDirection::Up,
+                        route_path: None,
+                        random_delay_minutes: 0,
+                        respawn_index: spawn.respawn_index,
+                        save_respawn_time: false,
+                        respawn_ticks: 0,
+                        monster_name: monster.name,
+                        monster_image: monster.image,
+                        monster_ai: monster.ai,
+                        monster_view_range: monster.view_range,
+                        monster_hp: monster.hp,
+                        monster_attack_speed: monster.attack_speed,
+                        monster_move_speed: monster.move_speed,
+                        monster_can_push: monster.can_push,
+                        monster_can_tame: monster.can_tame,
+                        monster_auto_rev: monster.auto_rev,
+                        monster_undead: monster.undead,
+                        monster_agility: monster.agility,
+                        route: Vec::new(),
+                    })
+                })
+                .collect()
+        })
+        .iter()
+        .filter(|spawn| map_file_name.eq_ignore_ascii_case("D022") && spawn.location.x >= 0 && spawn.location.y >= 0)
+        .cloned()
+        .collect()
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -3452,6 +3541,7 @@ impl ContentProfileRuntime {
             &self.profile,
             map_file_name,
         ));
+        respawns.extend(newcomer_v2_training_respawns_for_map(map_file_name));
         respawns
     }
 

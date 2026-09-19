@@ -2,6 +2,44 @@
   "schema": 1,
   "profile": "newcomer-v2",
   "maxLevel": 0,
+  "trainingSpawns": [
+    {
+      "mapFileName": "D022",
+      "monster": "Dung",
+      "monsterIndex": 242,
+      "position": { "x": 250, "y": 292 },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10019,
+      "sourceQuestId": 2110019,
+      "sourceNote": "V2-only Dung foothold on a collision-walkable pocket 122 steps from the D022 entrance; preserves the imported Crystal group."
+    },
+    {
+      "mapFileName": "D022",
+      "monster": "WoomaSoldier",
+      "monsterIndex": 244,
+      "position": { "x": 250, "y": 282 },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10020,
+      "sourceQuestId": 2110020,
+      "sourceNote": "V2-only training foothold at the certified q19 anchor; preserves the imported Crystal groups and keeps the immediate hostile pack at three."
+    },
+    {
+      "mapFileName": "D022",
+      "monster": "WoomaFighter",
+      "monsterIndex": 246,
+      "position": { "x": 270, "y": 270 },
+      "count": 3,
+      "spread": 3,
+      "delayMinutes": 0,
+      "respawnIndex": 10021,
+      "sourceQuestId": 2110021,
+      "sourceNote": "V2-only training foothold on a separate collision-walkable pocket near the certified q19 anchor; preserves the imported Crystal groups and keeps the immediate hostile pack at three."
+    }
+  ],
   "quests": [
     {
       "id": 2110001,
@@ -747,10 +785,10 @@
       "gold": 1500,
       "kills": [
         {
-          "monster": "Zombie3",
-          "monsterIndex": 112,
+          "monster": "Zombie2",
+          "monsterIndex": 110,
           "count": 3,
-          "message": "Defeat 3 Zombie3."
+          "message": "Defeat 3 Zombie2."
         }
       ],
       "flags": [

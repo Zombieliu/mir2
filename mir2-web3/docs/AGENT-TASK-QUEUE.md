@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-09-19 active V2 cohort B: Wizard N12 and Warrior N16 passed normally;
+> Wizard continues N16, while Warrior and Taoist are paused at N19 after
+> real bounded D022 Dung searches. The V2-only three-foothold gateway build
+> is pinned and awaits a safe all-runner logout handoff. Preserve cohort B's
+> original 120-minute clocks and cumulative revival counts. Continue public
+> player routes, verify three level-30 saves, then separately record visual,
+> animation, Crystal comparison, and measured human time. Cohort A 51/78
+> remains separate and cannot be turned into a pass.
+
 > 2026-09-19 V2 same-clock update: Wizard N12 suffered a real fourth death
 > with its cumulative three revivals already spent; 78/78 is impossible under
 > the retained rules. Continue lawful Warrior/Taoist checks and keep the

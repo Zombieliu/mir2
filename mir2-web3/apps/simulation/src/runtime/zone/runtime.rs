@@ -4524,7 +4524,10 @@ impl ZoneRuntime {
         else {
             return Vec::new();
         };
-        if target != monster.position
+        // The object id is authoritative. A monster can step once between the
+        // client's rendered snapshot and this packet; accept that small stale
+        // cursor offset while still checking range against its live position.
+        if !points_within_action_range(&target, &monster.position, 1)
             || !points_within_action_range(
                 &player.position,
                 &monster.position,
@@ -4533,6 +4536,7 @@ impl ZoneRuntime {
         {
             return self.correct_player_location(session_id, now_ms);
         }
+        let target = monster.position.clone();
         let Some(live_player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };

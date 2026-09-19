@@ -1,5 +1,15 @@
 # Agent Orchestration
 
+> 2026-09-19 independent newcomer V2 cohort B keeps three original
+> 12:45:19–14:45:19 UTC ordinary clocks and the three-revival ceiling.
+> Wizard N12 and Warrior N16 now pass with public combat receipts after
+> bounded stale-cursor magic handling and a V2 N16 Zombie2 objective;
+> Taoist and Warrior reached N19, where the imported D022 Dung spread
+> exhausted the unchanged 30-second search. V2-only three-monster Dung,
+> WoomaSoldier, and WoomaFighter footholds are built; deployment and
+> strict three-class 78/78, level-30, save, timing, and visual gates remain open.
+> Cohort A's final 51/78 and paused V1 evidence are independent.
+
 > 2026-09-19 V2 same-clock update: Wizard N12 suffered a real fourth death
 > with its cumulative three revivals already spent; 78/78 is impossible under
 > the retained rules. Warrior and Taoist can continue lawful functional

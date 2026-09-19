@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> 2026-09-19 optional newcomer V2 evidence: normal Wizard GreatFireBall
+> at N12 now has authoritative ObjectMagic and positive damage after a
+> bounded one-tile moving-target correction. V2 N16's Zombie2 objective
+> passed for Warrior; its prior N14 still requires Zombie3. Imported
+> Crystal D022 respawns are preserved while V2-only N19–N21 footholds
+> are added. These changes and live receipts are candidate behavior;
+> the three-class 78/78 save route and original-client visual parity remain open.
+
 > 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,

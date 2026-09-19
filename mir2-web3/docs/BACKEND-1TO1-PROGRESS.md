@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> 2026-09-19 V2-only backend integration: the normal Zone magic path
+> tolerates at most one stale cursor tile for an authoritative live monster
+> ID, retains the live-range check, and emits the live target coordinate.
+> Wizard N12's public GreatFireBall/ObjectMagic/positive DamageIndicator
+> and Warrior N16's changed objective have live cohort B receipts. The
+> imported D022 broad respawns remain untouched; three bounded V2-only
+> footholds are built for N19–N21. Full saved 78/78 and level-30 routes,
+> focused Zone regression, and frontend/Crystal visual acceptance remain open.
+
 > 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,

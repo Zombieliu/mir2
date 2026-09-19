@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-19 optional newcomer V2 candidate correction: one-tile stale
+> monster cursor magic now resolves by authoritative object ID and current
+> range; V2 N16 uses Zombie2 after N14's Zombie3 training. Three isolated
+> D022 training footholds preserve imported Crystal groups and V1/default
+> cadences. Focused Node route/collision checks pass 57/57; release Gateway
+> builds. Cohort B live packet proof covers Wizard N12 and Warrior N16,
+> while 78/78, three level-30 saves, UI, animation, and Crystal visual
+> comparison are still unaccepted. This does not raise overall parity.
+
 > 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,

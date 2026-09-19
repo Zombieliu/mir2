@@ -6424,6 +6424,55 @@ fn zone_native_player_magic_damages_monster_and_projects_authoritatively() {
 }
 
 #[test]
+fn zone_native_player_magic_retargets_one_stale_monster_step_but_rejects_two() {
+    let mut zone = zone();
+    let caster = session("caster");
+    zone.handle(ZoneCommand::Join(join("caster", 101, "Mage", 330, 270)));
+    zone.handle(ZoneCommand::SpawnMonster {
+        session_id: caster.clone(),
+        monster: native_neutral_monster_spawn(9100, "Royal_Guard", 1, 334, 270),
+        now_ms: 0,
+    });
+
+    let accepted = zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: caster.clone(),
+        object_id: 9100,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target: Point { x: 333, y: 270 },
+        cast: true,
+        level: 2,
+        damage: 9,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 20,
+    });
+    assert!(has_packet(&accepted, &caster, |packet| matches!(
+        packet,
+        ServerPacket::Magic { target_id: 9100, target, .. }
+            if target == &(Point { x: 334, y: 270 })
+    )));
+    assert_eq!(damage_indicator_for(&zone.tick(20), 9100), Some(9));
+
+    let rejected = zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: caster.clone(),
+        object_id: 9100,
+        spell: Spell::FireBall,
+        direction: MirDirection::Right,
+        target: Point { x: 332, y: 270 },
+        cast: true,
+        level: 2,
+        damage: 9,
+        mp_cost: 0,
+        cooldown_ms: 500,
+        now_ms: 1000,
+    });
+    assert!(!has_packet(&rejected, &caster, |packet| matches!(
+        packet, ServerPacket::Magic { .. } | ServerPacket::ObjectMagic { .. }
+    )));
+}
+
+#[test]
 fn zone_native_player_magic_subtracts_monster_magic_armour() {
     // A monster with authoritative MAC must mitigate incoming attack-magic with
     // Random(MinMAC,MaxMAC) — mirroring how the physical path subtracts AC. Here

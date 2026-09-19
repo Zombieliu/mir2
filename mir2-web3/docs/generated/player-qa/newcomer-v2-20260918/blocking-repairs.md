@@ -271,3 +271,33 @@ transforms and quest rows. `visualAccepted=false` and `measuredTime=false`.
 Warrior N20's WoomaSoldier spawn search and Wizard N12's exhausted revival
 allowance remain separate blockers. This window cannot be reported as a
 78/78, three-level-30, or Crystal visual completion.
+
+2026-09-19 independent cohort B uses new ordinary accounts and the isolated
+`C:/mir2-newcomer-v2-cohort-b-20260919` store on ports 19900/19910. Each
+class retains its original 2026-09-19 12:45:19 UTC start and 14:45:19 UTC
+deadline; no account state, revival allowance, or 30-second search and
+20-attack limits were changed. Warrior N16 exposed an underpowered level-20
+MartialSabre against the required Zombie3. Bichon Blacksmith's live goods
+do not sell the stronger PowerAxe, so the rejected purchase approach was
+removed. V2 N16 now asks for Zombie2 x3 after N14 has already taught
+Zombie3 x2; the class skill practice remains. The updated server projected
+that objective for the already accepted quest, and the normal Warrior run
+subsequently completed N16. Wizard N12 exposed a one-tile stale cursor race:
+the server previously required exact target coordinates even when the same
+monster object ID had moved one tile. The Zone now accepts at most one stale
+tile, checks range against the live monster, and broadcasts the live target
+position. A same-clock ordinary GreatFireBall cast received `ObjectMagic`
+and positive `DamageIndicator`, then Wizard completed N12. These are
+functional packet observations, not animation or Crystal visual acceptance.
+
+Taoist reached N19 and normally paused after the unchanged 30-second
+full-spread Dung search visited 5/677 waypoints. Imported D022 Dung,
+WoomaSoldier, and WoomaFighter groups all use broad nominal (250,250)
+spread-250 sources. V2-only bounded three-monster footholds were added at
+collision-walkable (250,292), (250,282), and (270,270), while imported
+Crystal groups and V1/default cadences remain unchanged. The Dung point
+is 122 walk steps from the D022 entry under the static collision map.
+The final gateway binary containing all three footholds is built, but its
+cohort B live deployment and three-class N19–N22 recheck remain open as of
+2026-09-19 14:02 UTC. No 78/78, three-level-30, two-hour, save, UI,
+animation, or original-client visual claim follows from these repairs.

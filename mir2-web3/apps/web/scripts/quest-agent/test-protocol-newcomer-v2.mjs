@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { firstReachableDestination } from './protocol-combat.mjs';
+import { findProtocolWalkPath, loadProtocolCollisionMap } from './protocol-navigation.mjs';
 import {
   assertV2FlagsConfirmed, availableV2Growth, buildNewcomerV2Route,
   approachPracticeTarget, BICHON_SAFE_AREA, checkpointV2Progress, countBasicHpPotion, executeV2PracticePlan, hasFreshV2MapEntryReceipt,
@@ -31,6 +32,58 @@ test('real V2 factory keeps class training separate from the other class require
     assert.deepEqual(requiredV2Skills(route.quests.find(row => row.questId === 2110004), className), expected);
   }
 });
+
+test('N16 keeps the mine skill check while reserving Zombie3 exposure for N14', async () => {
+  const route = await loadNewcomerV2Route({ className: 'Warrior', gender: 'Male' });
+  assert.deepEqual(route.quests.find(row => row.questId === 2110014).objectives.kill
+    .map(row => [row.monsterName, row.count]), [['Zombie2', 3], ['Zombie3', 2]]);
+  assert.deepEqual(route.quests.find(row => row.questId === 2110016).objectives.kill
+    .map(row => [row.monsterName, row.count]), [['Zombie2', 3]]);
+  assert.ok(route.quests.find(row => row.questId === 2110016).objectives.flag
+    .some(row => row.message === 'Complete your class practice'));
+});
+
+test('V2 training footholds are data-defined, bounded, and separate from imported D022 groups', async () => {
+  const route = await loadNewcomerV2Route({ className: 'Warrior', gender: 'Male' });
+  const dung = route.quests.find(row => row.questId === 2110019).objectives.kill[0];
+  const soldier = route.quests.find(row => row.questId === 2110020).objectives.kill[0];
+  const fighter = route.quests.find(row => row.questId === 2110021).objectives.kill[0];
+  const dungTraining = dung.spawnCandidates.find(row => row.respawnIndex === 10019);
+  const soldierTraining = soldier.spawnCandidates.find(row => row.respawnIndex === 10020);
+  const fighterTraining = fighter.spawnCandidates.find(row => row.respawnIndex === 10021);
+  assert.deepEqual(dungTraining.position, { x: 250, y: 292 });
+  assert.equal(dungTraining.count, 3);
+  assert.equal(dung.spawnCandidates[0].respawnIndex, 10019);
+  assert.equal(dung.spawnCandidates.filter(row => row.respawnIndex === 939).length, 1);
+  assert.deepEqual(soldierTraining.position, { x: 250, y: 282 });
+  assert.deepEqual(fighterTraining.position, { x: 270, y: 270 });
+  assert.equal(soldier.spawnCandidates[0].respawnIndex, 10020);
+  assert.equal(fighter.spawnCandidates[0].respawnIndex, 10021);
+  assert.equal(soldierTraining.count, 3);
+  assert.equal(fighterTraining.count, 3);
+  assert.notEqual(soldierTraining.respawnIndex, fighterTraining.respawnIndex);
+  assert.equal(soldier.spawnCandidates.filter(row => row.respawnIndex === 940).length, 1);
+  assert.equal(fighter.spawnCandidates.filter(row => row.respawnIndex === 941).length, 1);
+});
+
+test('all three D022 training footholds have a static walk path from the ordinary entry', async () => {
+  const map = await loadProtocolCollisionMap('D022');
+  const blockedTransfers = [{ x: 338, y: 354 }, { x: 251, y: 207 }, { x: 251, y: 206 }];
+  for (const target of [{ x: 250, y: 292 }, { x: 250, y: 282 }, { x: 270, y: 270 }]) {
+    assert.equal(map.blocked[target.y * map.width + target.x], 0);
+    assert.ok(findProtocolWalkPath({
+      map, start: { x: 338, y: 356 }, target, dynamicObstacles: blockedTransfers,
+    }), `D022 entry cannot reach ${target.x},${target.y}`);
+  }
+});
+
+test('Wizard N12 practices GreatFireBall without an extra FireBall cast', async () => {
+  const route = await loadNewcomerV2Route({ className: 'Wizard', gender: 'Male' });
+  const quest = route.quests.find(row => row.questId === 2110012);
+  const snapshot = { knownSkills: [{ spell: 'FireBall' }, { spell: 'GreatFireBall' }] };
+  assert.deepEqual(practicePlan(snapshot, quest, 'Wizard'), [{ kind: 'spell', spell: 'GreatFireBall' }]);
+});
+
 function config() {
   return {
     profile: 'newcomer-v2',

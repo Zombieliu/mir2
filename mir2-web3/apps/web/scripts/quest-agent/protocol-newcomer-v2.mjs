@@ -69,6 +69,7 @@ export function buildNewcomerV2Route({ config, npcManifest, respawnManifest, ite
   const npcById = new Map((npcManifest?.npcs ?? []).map(npc => [Number(npc.npc_index), npc]));
   const itemByName = new Map((itemManifest?.items ?? []).map(item => [String(item.name), item]));
   const respawns = respawnIndex(respawnManifest);
+  appendTrainingSpawns(respawns, config.trainingSpawns);
   const quests = (config.quests ?? []).map(definition => buildQuest(definition, npcById, respawns, itemByName, className, gender));
   const growth = (config.growthRewards ?? []).map(definition => buildGrowth(definition, npcById, itemByName, className, gender));
   const ids = [...quests, ...growth].map(quest => quest.questId);
@@ -83,6 +84,38 @@ export function buildNewcomerV2Route({ config, npcManifest, respawnManifest, ite
     mainQuestIds: Object.freeze(quests.map(quest => quest.questId)),
     growthQuestIds: Object.freeze(growth.map(quest => quest.questId)),
   });
+}
+
+function appendTrainingSpawns(index, configuredSpawns) {
+  const seen = new Set();
+  for (const spawn of configuredSpawns ?? []) {
+    const mapFileName = String(spawn?.mapFileName ?? '');
+    const monsterIndex = Number(spawn?.monsterIndex);
+    const respawnIndex = Number(spawn?.respawnIndex);
+    const count = Number(spawn?.count);
+    const position = spawn?.position;
+    if (mapFileName.toUpperCase() !== 'D022' || !Number.isSafeInteger(monsterIndex) ||
+        !Number.isSafeInteger(respawnIndex) || respawnIndex <= 0 || !Number.isSafeInteger(count) ||
+        count < 1 || count > 3 || Number(spawn?.spread ?? 0) > 8 || !position ||
+        !Number.isSafeInteger(Number(position.x)) || !Number.isSafeInteger(Number(position.y)) ||
+        seen.has(respawnIndex)) continue;
+    seen.add(respawnIndex);
+    const entry = Object.freeze({
+      mapFileName: 'D022',
+      mapTitle: 'WoomaTemple_1F',
+      position: Object.freeze({ x: Number(position.x), y: Number(position.y) }),
+      count,
+      spread: Number(spawn.spread ?? 0),
+      delayMinutes: Number(spawn.delayMinutes ?? 0),
+      respawnIndex,
+      isBoss: false,
+      monsterIndex,
+      monsterName: requiredString(spawn.monster, `training respawn ${respawnIndex} monster name`),
+    });
+    const entries = index.get(monsterIndex) ?? [];
+    entries.unshift(entry);
+    index.set(monsterIndex, entries);
+  }
 }
 
 function buildQuest(definition, npcById, respawns, itemByName, className, gender) {
@@ -636,11 +669,11 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // At the Taoist Skeleton steps, a nearby BoneFighter can outlast the
       // fixed attack budget even though it is not a quest target. Keep the
       // objective in focus and retreat from an unsafe pull instead. At
-      // Warrior N16, a full-health adjacent Zombie3 can similarly exhaust
-      // the cap before a wounded objective Zombie3 is reached.
+      // At Warrior N15/N16, an adjacent non-objective Zombie3 can exhaust
+      // the cap while the required Zombie2 remains alive in the same pack.
       focusTargetThroughAggressors:
         (className === 'Taoist' && [2110010, 2110011].includes(Number(quest.questId))) ||
-        (className === 'Warrior' && Number(quest.questId) === 2110016),
+        (className === 'Warrior' && [2110015, 2110016].includes(Number(quest.questId))),
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
       retrySpawnSearchTimeout: true,
@@ -852,8 +885,13 @@ export function practicePlan(snapshot, quest, className) {
     if (includes('Fencing') || includes('Slaying')) steps.push(Object.freeze({ kind: 'normal' }));
     for (const spell of ['HalfMoon', 'Thrusting']) if (includes(spell) && includes(`${spell} attack damage`)) steps.push(Object.freeze({ kind: 'technique', spell }));
   } else if (className === 'Wizard') {
+    // FireBall is a substring of GreatFireBall. Treat spell names as whole
+    // words so a GreatFireBall-only class objective never starts with an
+    // unrelated FireBall cast and pauses before its required action.
+    const mentionsSpell = spell => conditions.some(condition =>
+      String(condition).split(/[^A-Za-z0-9]+/).some(word => word.toLowerCase() === spell.toLowerCase()));
     const spellSteps = ['FireBall', 'GreatFireBall', 'Lightning', 'FireWall']
-      .filter(spell => includes(spell) && (includes(`${spell} damage`) || (spell === 'FireWall' && includes('owned FireWall damage'))));
+      .filter(spell => mentionsSpell(spell) && (includes(`${spell} damage`) || (spell === 'FireWall' && includes('owned FireWall damage'))));
     if (includes('spell damage followed') && spellSteps.length === 0) {
       const known = new Set((snapshot?.knownSkills ?? []).map(skill => String(skill?.spell)));
       const spell = ['Lightning', 'GreatFireBall', 'FireBall'].find(candidate => known.has(candidate));
