@@ -615,6 +615,10 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       maxSpawnRespawnWaits: 1,
       questSettleTimeout: 12_000,
       preferredObjectiveMaps: quest.objectiveMaps,
+      // At the Taoist Skeleton step, a nearby BoneFighter can outlast the
+      // fixed attack budget even though it is not a quest target. Keep the
+      // objective in focus and retreat from an unsafe pull instead.
+      focusTargetThroughAggressors: className === 'Taoist' && Number(quest.questId) === 2110010,
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
       retrySpawnSearchTimeout: true,

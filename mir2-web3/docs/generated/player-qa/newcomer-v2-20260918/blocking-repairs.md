@@ -73,7 +73,15 @@ HP and six MP potions plus one RandomTeleport and one TownTeleport. No attack
 or search cap changed. The additional normal run completed N7 and three more
 units through N9, with level16 and matching normal logout/save. This is N7
 functional evidence, not a measured two-hour completion. Taoist N10 paused
-against target 240470 at the unchanged 20-attack cap; diagnosis remains open.
+against target 240470 at the unchanged 20-attack cap. Packet evidence identifies
+that target as a 110-HP BoneFighter, not an objective Skeleton. The runner had
+already damaged a Skeleton to 47% but diverted to clear the proven BoneFighter;
+five-damage hits need at least 22 attacks. N10 now opts into the existing
+focused-target safety policy so an unsafe pull retreats and reacquires a live
+Skeleton instead of consuming the fixed budget on a nonobjective. The specific
+Skeleton/BoneFighter regression and full combat suite pass 157/157; V2 tests
+pass 44/44. No attack, search, retry, or revival caps changed. Ordinary Taoist
+N10 completion on the saved character still requires live revalidation.
 
 ## Wizard contradictory monster lifecycle
 

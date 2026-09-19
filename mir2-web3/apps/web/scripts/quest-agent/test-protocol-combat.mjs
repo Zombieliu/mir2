@@ -3150,6 +3150,36 @@ test("a supplied harvest hunt focuses its unique target and carves before cleari
   assert.equal(client.snapshot.entities.find(entry => entry.objectId === 61).dead, false);
 });
 
+test("a focused Skeleton kill does not spend the attack budget on a proven BoneFighter aggressor", async () => {
+  const quest = { questId: 2110010, stage: "InProgress", objectives: [objective("Kill Skeleton", 3, 4)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(60, "Skeleton", 11, 10, { hp: 47, disposition: "hostile" }),
+    monster(61, "BoneFighter", 10, 9, { hp: 110, disposition: "hostile" }),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    assert.equal(command.objectId, 60, "a nonobjective BoneFighter must not consume the fixed attack budget");
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 60), { dead: true, hp: 0 });
+      state.questLog[0].objectives[0] = objective("Kill Skeleton", 4, 4);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 60 });
+  });
+  client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+
+  const result = await completeQuestObjectives(client, {
+    questId: 2110010,
+    objectives: { kill: [{ monsterName: "Skeleton", spawnCandidates: [spawn("Skeleton")] }], item: [] },
+  }, async () => {}, {
+    ...settings,
+    maxAttackAttempts: 20,
+    focusTargetThroughAggressors: true,
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [60]);
+  assert.equal(client.snapshot.entities.find(entry => entry.objectId === 61).dead, false);
+});
+
 test("a focused harvest hunt retreats after two proven attackers converge, then retries the target", async () => {
   const quest = { questId: 30, stage: "InProgress", objectives: [objective("Collect JadeRing", 0, 1)] };
   const client = new FakeClient(snapshot(quest, [
