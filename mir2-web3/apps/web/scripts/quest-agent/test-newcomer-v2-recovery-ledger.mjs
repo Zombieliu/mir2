@@ -10,8 +10,47 @@ import {
   loadV2RecoveryLedger,
   parseV2RecoveryLedger,
   persistV2FunctionalRecheckLedger,
+  primeV2RunReport,
   resolveV2FunctionalRecheckLedger,
 } from './newcomer-v2-recovery-ledger.mjs';
+
+test('bootstrap rejection cannot replace a resumed V2 death and time ledger', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'mir2-v2-bootstrap-resume-'));
+  const reportPath = path.join(directory, 'Wizard.report.json');
+  try {
+    const prior = report([confirmedRecovery(), confirmedRecovery(), confirmedRecovery()]);
+    prior.v2.status = 'paused';
+    await writeFile(reportPath, JSON.stringify(prior));
+    const ledger = await loadV2RecoveryLedger(reportPath);
+    const next = { startedAt: new Date().toISOString() };
+    await primeV2RunReport(reportPath, next, ledger);
+    next.error = 'character is already online or route lease is unavailable';
+    await writeFile(reportPath, JSON.stringify(next));
+    const retained = await loadV2RecoveryLedger(reportPath);
+    assert.equal(retained.ordinaryStartedAt, prior.v2.ordinaryStartedAt);
+    assert.equal(retained.recoveries.length, 3);
+    assert.equal(next.v2.status, 'paused');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('fresh V2 run persists its clock before a login failure', async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'mir2-v2-bootstrap-fresh-'));
+  const reportPath = path.join(directory, 'Wizard.report.json');
+  try {
+    const next = { startedAt: new Date().toISOString() };
+    await primeV2RunReport(reportPath, next, null);
+    assert.equal((await loadV2RecoveryLedger(reportPath)).ordinaryStartedAt, next.startedAt);
+    next.error = 'login unavailable';
+    await writeFile(reportPath, JSON.stringify(next));
+    assert.equal((await loadV2RecoveryLedger(reportPath)).ordinaryStartedAt, next.startedAt);
+    await assert.rejects(primeV2RunReport(reportPath, { startedAt: new Date().toISOString() }, null),
+      /existing report has no V2 recovery ledger/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 function confirmedRecovery() {
   return {

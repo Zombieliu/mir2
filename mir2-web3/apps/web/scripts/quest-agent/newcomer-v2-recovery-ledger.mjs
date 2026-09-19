@@ -1,6 +1,38 @@
 import { readFile, rename, writeFile } from 'node:fs/promises';
 
 const MAX_V2_RECOVERIES = 3;
+
+/** Keep the original clock and death receipts even when login fails before
+ * the journey runner can create its first progress checkpoint. */
+export async function primeV2RunReport(reportPath, report, ledger) {
+  if (ledger) {
+    const prior = JSON.parse(await readFile(reportPath, 'utf8'));
+    const stored = parseV2RecoveryLedger(prior);
+    if (!stored || stored.ordinaryStartedAt !== ledger.ordinaryStartedAt ||
+        JSON.stringify(stored.recoveries) !== JSON.stringify(ledger.recoveries)) {
+      throw new Error('V2 resume report changed after the recovery ledger was loaded');
+    }
+    report.v2 = structuredClone(prior.v2);
+    if (Object.hasOwn(prior, 'ordinaryElapsedMs')) report.ordinaryElapsedMs = prior.ordinaryElapsedMs;
+    return;
+  }
+  try {
+    await readFile(reportPath, 'utf8');
+    throw new Error('existing report has no V2 recovery ledger');
+  } catch (error) {
+    if (error?.code !== 'ENOENT') throw error;
+  }
+  if (!isIsoInstant(report.startedAt)) throw new Error('invalid fresh V2 ordinary start time');
+  report.v2 = {
+    profile: 'newcomer-v2', status: 'bootstrapping', routeQuestIds: [], attempts: [],
+    recoveries: [], ordinaryStartedAt: report.startedAt,
+    deadlineAt: new Date(Date.parse(report.startedAt) + FUNCTIONAL_RECHECK_DURATION_MS).toISOString(),
+    elapsedMs: 0, ordinaryElapsedMs: 0,
+  };
+  const temporaryPath = `${reportPath}.${process.pid}.bootstrap.tmp`;
+  await writeFile(temporaryPath, JSON.stringify(report, null, 2));
+  await rename(temporaryPath, reportPath);
+}
 export const FUNCTIONAL_RECHECK_DURATION_MS = 120 * 60_000;
 const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 

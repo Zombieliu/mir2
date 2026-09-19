@@ -23,7 +23,7 @@ import {
   hpMediumDrugCount,
 } from './protocol-supplies.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
-import { loadV2FunctionalRecheckLedger, loadV2RecoveryLedger, persistV2FunctionalRecheckLedger } from './newcomer-v2-recovery-ledger.mjs';
+import { loadV2FunctionalRecheckLedger, loadV2RecoveryLedger, persistV2FunctionalRecheckLedger, primeV2RunReport } from './newcomer-v2-recovery-ledger.mjs';
 import { claimAvailableMilestones, JOURNEY_MILESTONES } from './protocol-milestones.mjs';
 import {
   amuletStock,
@@ -128,12 +128,13 @@ const client = new ProtocolClient(
   traceFile,
 );
 const report = { runId, className, name: credentials.name, startedAt: new Date().toISOString(), gatewayUrl: client.url, traceFile, transport: 'normal-local-websocket', visualAccepted: false, completed: false };
+const canonicalReportPath = path.join(output, `${className}.report.json`);
 // This QA-only ledger retains both the original ordinary-run clock and every
 // confirmed death/town-revive. It never writes or influences server state.
 const v2RecoveryLedger = isNewcomerV2Run
   ? (functionalRecheckStartedAt
-    ? await loadV2FunctionalRecheckLedger(path.join(output, `${className}.report.json`), { functionalRecheckStartedAt })
-    : await loadV2RecoveryLedger(path.join(output, `${className}.report.json`)))
+    ? await loadV2FunctionalRecheckLedger(canonicalReportPath, { functionalRecheckStartedAt })
+    : await loadV2RecoveryLedger(canonicalReportPath))
   : null;
 if (v2RecoveryLedger) {
   report.v2TimingLedger = {
@@ -149,12 +150,13 @@ if (v2RecoveryLedger) {
   if (v2RecoveryLedger.functionalRecheck) {
     // Persist before connect/login so a crash cannot replace the shared start
     // during a later resume. This is local QA evidence only.
-    await persistV2FunctionalRecheckLedger(path.join(output, `${className}.report.json`), {
+    await persistV2FunctionalRecheckLedger(canonicalReportPath, {
       functionalRecheckStartedAt,
     });
     report.ordinaryElapsedMs = v2RecoveryLedger.ordinaryElapsedMs;
   }
 }
+if (isNewcomerV2Run) await primeV2RunReport(canonicalReportPath, report, v2RecoveryLedger);
 try {
   // Each run writes an isolated trace so Windows readers and virus scanners
   // cannot lock a shared multi-gigabyte append target. Bootstrap memory reads

@@ -423,3 +423,15 @@ serves public `Interact`, `@BuySell`, `NPCGoods` and a normal 1,000-gold
 TownTeleport `BuyItem`. The persisted Wizard resumed N10 with the original
 16:04–18:04 UTC deadline and all three actual revivals still recorded.
 Completion, UI/animation and original-client visual comparison remain open.
+
+One connection immediately after the shop probe was rejected by the existing
+30-second route lease. Before V2 gameplay began, the runner's `finally`
+handler overwrote the canonical report without its V2 ledger; a later resume
+then incorrectly opened a fresh 17:23–19:23 clock with zero deaths. That run
+was stopped as soon as the mismatch was detected. The incorrect report and
+its public trace remain archived, and the canonical report was restored byte
+for byte from the preceding valid 16:40 report. The ordinary 16:04–18:04
+clock and all three real death/revive receipts now survive a tested bootstrap
+failure; the resumed live report confirms them. The server character save was
+not edited or reset. The intervening purchase and walking were real actions
+and their repair wait is not clean player time.
