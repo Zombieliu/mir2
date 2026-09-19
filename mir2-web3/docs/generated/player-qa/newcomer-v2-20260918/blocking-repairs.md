@@ -258,3 +258,16 @@ damage, while the old target-specific waiter falsely paused. N16 practice
 now accepts positive owned-pet damage to any hostile, without extending the
 12-second receipt window or adding attacks. The focused V2 suite passes
 53/53, and the lawful same-character recheck is running.
+
+The fixed functional-recheck deadline arrived at 2026-09-19 12:36:27 UTC.
+Taoist N16's class practice and all three Zombie3 kills were authoritatively
+complete, but the quest was only `readyToTurnIn` while the player was still
+walking to its finish NPC. The runner stopped before turn-in, received
+`LogOutSuccess` at the deadline, and saved without changing the original
+clock or the cumulative revival ledger. The final strict verifier remains
+51/78 completed units: Warrior 22/26 level 27, Wizard 12/26 level 19,
+Taoist 17/26 level 24. All three normal logout snapshots match their saved
+transforms and quest rows. `visualAccepted=false` and `measuredTime=false`.
+Warrior N20's WoomaSoldier spawn search and Wizard N12's exhausted revival
+allowance remain separate blockers. This window cannot be reported as a
+78/78, three-level-30, or Crystal visual completion.
