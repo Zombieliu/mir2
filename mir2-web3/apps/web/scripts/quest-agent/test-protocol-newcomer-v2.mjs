@@ -270,6 +270,33 @@ test('completed-node checkpoint retains the ordinary start and server receipt in
   assert.deepEqual(persisted.v2.attempts.map(attempt => [attempt.questId, attempt.completedAt]), [[2110001, '2026-09-18T01:01:00.000Z']]);
 });
 
+test('functional recheck bounds public work by its separate deadline while retaining ordinary timing fields', async () => {
+  const route = await loadNewcomerV2Route({ className: 'Warrior', gender: 'Male' });
+  const ordinaryStartedAt = new Date(Date.now() - 121 * 60_000).toISOString();
+  const recheckStartedAt = new Date(Date.now() - 500).toISOString();
+  const recheckDeadlineAt = new Date(Date.parse(recheckStartedAt) + 120 * 60_000).toISOString();
+  const report = { ordinaryElapsedMs: 120 * 60_000 + 1 };
+  const client = { snapshot: {
+    playerObjectId: 1,
+    entities: [{ objectId: 1, kind: 'player', hp: 30, dead: false, level: 30 }],
+    questLog: route.quests.map(quest => ({ questId: quest.questId, stage: 'Completed' })),
+  } };
+  const result = await runNewcomerV2Journey({
+    client, className: 'Warrior', gender: 'Male', report, ordinaryStartedAt,
+    functionalRecheck: { startedAt: recheckStartedAt, deadlineAt: recheckDeadlineAt, elapsedMs: 0 },
+    recovery: { priorRecoveries: [], ordinaryElapsedMs: report.ordinaryElapsedMs },
+  });
+  assert.equal(result.completed, true);
+  assert.equal(result.ordinaryStartedAt, ordinaryStartedAt);
+  assert.equal(result.deadlineAt, new Date(Date.parse(ordinaryStartedAt) + 120 * 60_000).toISOString());
+  assert.equal(result.functionalRecheckStartedAt, recheckStartedAt);
+  assert.equal(result.functionalRecheckDeadlineAt, recheckDeadlineAt);
+  assert.equal(result.ordinaryElapsedMs, 120 * 60_000 + 1);
+  assert.equal(report.ordinaryElapsedMs, 120 * 60_000 + 1);
+  assert.equal(report.v2.ordinaryElapsedMs, 120 * 60_000 + 1);
+  assert.ok(report.functionalRecheckElapsedMs >= 0);
+});
+
 test('authoritative V2 death is revived once, checkpointed, and leaves the unfinished server quest unchanged', async () => {
   const snapshot = {
     playerObjectId: 1, mapFileName: 'D001', playerHp: 0,

@@ -1,6 +1,7 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, rename, writeFile } from 'node:fs/promises';
 
 const MAX_V2_RECOVERIES = 3;
+export const FUNCTIONAL_RECHECK_DURATION_MS = 120 * 60_000;
 const ISO_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 /**
@@ -18,6 +19,85 @@ export async function loadV2RecoveryLedger(reportPath) {
   return parseV2RecoveryLedger(prior);
 }
 
+/**
+ * Open the separately labelled functional recheck clock. This is deliberately
+ * unavailable for a fresh or still-active ordinary run: the persisted
+ * ordinary evidence remains intact and is never repurposed as a new clock.
+ */
+export async function loadV2FunctionalRecheckLedger(reportPath, {
+  functionalRecheckStartedAt,
+  nowMs = Date.now(),
+} = {}) {
+  let prior;
+  try {
+    prior = JSON.parse(await readFile(reportPath, 'utf8'));
+  } catch (error) {
+    if (error?.code === 'ENOENT') throw new Error('functional recheck requires an existing expired ordinary V2 ledger');
+    throw new Error(`cannot read V2 functional recheck ledger: ${String(error?.message ?? error)}`);
+  }
+  return resolveV2FunctionalRecheckLedger(prior, { functionalRecheckStartedAt, nowMs });
+}
+
+/**
+ * Durably record the first shared recheck clock before a caller opens a
+ * network connection. A resume validates the same persisted clock instead of
+ * accepting a replacement start after a process crash.
+ */
+export async function persistV2FunctionalRecheckLedger(reportPath, {
+  functionalRecheckStartedAt,
+  nowMs = Date.now(),
+} = {}) {
+  let prior;
+  try {
+    prior = JSON.parse(await readFile(reportPath, 'utf8'));
+  } catch (error) {
+    throw new Error(`cannot persist V2 functional recheck ledger: ${String(error?.message ?? error)}`);
+  }
+  const ledger = resolveV2FunctionalRecheckLedger(prior, { functionalRecheckStartedAt, nowMs });
+  prior.v2.functionalRecheckStartedAt = ledger.functionalRecheck.startedAt;
+  prior.v2.functionalRecheckDeadlineAt = ledger.functionalRecheck.deadlineAt;
+  prior.v2.functionalRecheckElapsedMs = ledger.functionalRecheck.elapsedMs;
+  const temporaryPath = `${reportPath}.${process.pid}.functional-recheck.tmp`;
+  await writeFile(temporaryPath, JSON.stringify(prior, null, 2));
+  await rename(temporaryPath, reportPath);
+  return ledger;
+}
+
+/** Validate an opt-in recheck against its persisted ordinary evidence. */
+export function resolveV2FunctionalRecheckLedger(prior, { functionalRecheckStartedAt, nowMs = Date.now() } = {}) {
+  const ledger = parseV2RecoveryLedger(prior);
+  if (!ledger) throw new Error('functional recheck requires an existing expired ordinary V2 ledger');
+  if (!isIsoInstant(functionalRecheckStartedAt)) throw new Error('functional recheck requires MIR2_V2_FUNCTIONAL_RECHECK_STARTED_AT as an ISO instant');
+  const ordinaryDeadlineAt = prior.v2.deadlineAt;
+  if (!isIsoInstant(ordinaryDeadlineAt) || Date.parse(ordinaryDeadlineAt) !== Date.parse(ledger.ordinaryStartedAt) + FUNCTIONAL_RECHECK_DURATION_MS) {
+    throw new Error('functional recheck requires an unmodified persisted ordinary V2 deadline');
+  }
+  if (Number(nowMs) < Date.parse(ordinaryDeadlineAt)) throw new Error('functional recheck requires an expired ordinary V2 ledger');
+  const persisted = functionalRecheckFromReport(prior.v2);
+  const startedAt = persisted?.startedAt ?? functionalRecheckStartedAt;
+  if (persisted && persisted.startedAt !== functionalRecheckStartedAt) {
+    throw new Error('functional recheck start does not match the persisted recheck ledger');
+  }
+  if (Date.parse(startedAt) > Number(nowMs)) throw new Error('functional recheck start cannot be in the future');
+  if (Date.parse(startedAt) < Date.parse(ordinaryDeadlineAt)) throw new Error('functional recheck start cannot precede the expired ordinary V2 deadline');
+  if (persisted && persisted.elapsedMs > Number(nowMs) - Date.parse(startedAt)) {
+    throw new Error('invalid persisted functional recheck elapsed time');
+  }
+  const deadlineAt = new Date(Date.parse(startedAt) + FUNCTIONAL_RECHECK_DURATION_MS).toISOString();
+  if (persisted && persisted.deadlineAt !== deadlineAt) throw new Error('invalid persisted functional recheck deadline');
+  if (Number(nowMs) >= Date.parse(deadlineAt)) throw new Error('functional recheck 120-minute deadline has expired');
+  return {
+    ...ledger,
+    ordinaryDeadlineAt,
+    ordinaryElapsedMs: prior.ordinaryElapsedMs ?? prior.v2.ordinaryElapsedMs,
+    functionalRecheck: {
+      startedAt,
+      deadlineAt,
+      elapsedMs: persisted?.elapsedMs ?? 0,
+    },
+  };
+}
+
 /** Parse and clone a persisted V2 ledger without changing its original clock. */
 export function parseV2RecoveryLedger(prior) {
   if (!isRecord(prior)) throw new Error('invalid existing V2 resume ledger');
@@ -32,6 +112,21 @@ export function parseV2RecoveryLedger(prior) {
   return {
     ordinaryStartedAt: v2.ordinaryStartedAt,
     recoveries: cloneConfirmedV2Recoveries(v2.recoveries),
+  };
+}
+
+function functionalRecheckFromReport(v2) {
+  const fields = ['functionalRecheckStartedAt', 'functionalRecheckDeadlineAt', 'functionalRecheckElapsedMs'];
+  if (!fields.some(field => Object.hasOwn(v2, field))) return null;
+  if (!fields.every(field => Object.hasOwn(v2, field)) ||
+      !isIsoInstant(v2.functionalRecheckStartedAt) || !isIsoInstant(v2.functionalRecheckDeadlineAt) ||
+      !Number.isFinite(v2.functionalRecheckElapsedMs) || v2.functionalRecheckElapsedMs < 0) {
+    throw new Error('invalid persisted functional recheck ledger');
+  }
+  return {
+    startedAt: v2.functionalRecheckStartedAt,
+    deadlineAt: v2.functionalRecheckDeadlineAt,
+    elapsedMs: v2.functionalRecheckElapsedMs,
   };
 }
 

@@ -23,7 +23,7 @@ import {
   hpMediumDrugCount,
 } from './protocol-supplies.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
-import { loadV2RecoveryLedger } from './newcomer-v2-recovery-ledger.mjs';
+import { loadV2FunctionalRecheckLedger, loadV2RecoveryLedger, persistV2FunctionalRecheckLedger } from './newcomer-v2-recovery-ledger.mjs';
 import { claimAvailableMilestones, JOURNEY_MILESTONES } from './protocol-milestones.mjs';
 import {
   amuletStock,
@@ -108,6 +108,9 @@ const className = process.env.MIR2_JOURNEY_CLASS ?? 'Warrior';
 if (!['Warrior', 'Wizard', 'Taoist'].includes(className)) throw new Error('Invalid class');
 const isNewcomerV2Run = process.env.MIR2_JOURNEY_PLAY === '1' &&
   String(process.env.MIR2_QUEST_CADENCE ?? '').trim().toLowerCase() === 'newcomer-v2';
+// This explicit shared wall-clock opt-in only permits a separately labelled
+// functional recheck after the ordinary 120-minute evidence has expired.
+const functionalRecheckStartedAt = String(process.env.MIR2_V2_FUNCTIONAL_RECHECK_STARTED_AT ?? '').trim() || null;
 await fs.writeFile(path.join(output, `${className}.runner.pid`), String(process.pid));
 const credentialPath = path.join(output, `${className}.private.json`);
 let credentials;
@@ -128,14 +131,29 @@ const report = { runId, className, name: credentials.name, startedAt: new Date()
 // This QA-only ledger retains both the original ordinary-run clock and every
 // confirmed death/town-revive. It never writes or influences server state.
 const v2RecoveryLedger = isNewcomerV2Run
-  ? await loadV2RecoveryLedger(path.join(output, `${className}.report.json`))
+  ? (functionalRecheckStartedAt
+    ? await loadV2FunctionalRecheckLedger(path.join(output, `${className}.report.json`), { functionalRecheckStartedAt })
+    : await loadV2RecoveryLedger(path.join(output, `${className}.report.json`)))
   : null;
 if (v2RecoveryLedger) {
   report.v2TimingLedger = {
     ordinaryStartedAt: v2RecoveryLedger.ordinaryStartedAt,
     recoveries: structuredClone(v2RecoveryLedger.recoveries),
     resumed: true,
+    ...(v2RecoveryLedger.functionalRecheck ? {
+      functionalRecheckStartedAt: v2RecoveryLedger.functionalRecheck.startedAt,
+      functionalRecheckDeadlineAt: v2RecoveryLedger.functionalRecheck.deadlineAt,
+      functionalRecheck: true,
+    } : {}),
   };
+  if (v2RecoveryLedger.functionalRecheck) {
+    // Persist before connect/login so a crash cannot replace the shared start
+    // during a later resume. This is local QA evidence only.
+    await persistV2FunctionalRecheckLedger(path.join(output, `${className}.report.json`), {
+      functionalRecheckStartedAt,
+    });
+    report.ordinaryElapsedMs = v2RecoveryLedger.ordinaryElapsedMs;
+  }
 }
 try {
   // Each run writes an isolated trace so Windows readers and virus scanners
@@ -206,10 +224,12 @@ try {
       report,
       ordinaryStartedAt: v2RecoveryLedger?.ordinaryStartedAt ?? report.startedAt,
       deadlineMs: 120 * 60_000,
+      functionalRecheck: v2RecoveryLedger?.functionalRecheck ?? null,
       survival: v2Survival,
       recovery: {
         maxRecoveries: 3,
         priorRecoveries: v2RecoveryLedger?.recoveries ?? [],
+        ordinaryElapsedMs: v2RecoveryLedger?.ordinaryElapsedMs,
         isDead: hasAuthoritativePlayerDeath,
         revive: reviveInTown,
       },

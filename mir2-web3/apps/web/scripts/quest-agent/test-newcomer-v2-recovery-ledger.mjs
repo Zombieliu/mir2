@@ -1,10 +1,17 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 
-import { loadV2RecoveryLedger, parseV2RecoveryLedger } from './newcomer-v2-recovery-ledger.mjs';
+import {
+  FUNCTIONAL_RECHECK_DURATION_MS,
+  loadV2FunctionalRecheckLedger,
+  loadV2RecoveryLedger,
+  parseV2RecoveryLedger,
+  persistV2FunctionalRecheckLedger,
+  resolveV2FunctionalRecheckLedger,
+} from './newcomer-v2-recovery-ledger.mjs';
 
 function confirmedRecovery() {
   return {
@@ -95,4 +102,100 @@ test('an existing V1 report remains outside the V2 resume ledger', async () => {
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
+});
+
+function expiredOrdinaryReport({ functionalRecheck = null } = {}) {
+  const ordinaryStartedAt = new Date(Date.now() - FUNCTIONAL_RECHECK_DURATION_MS - 60_000).toISOString();
+  const v2 = {
+    profile: 'newcomer-v2', ordinaryStartedAt,
+    deadlineAt: new Date(Date.parse(ordinaryStartedAt) + FUNCTIONAL_RECHECK_DURATION_MS).toISOString(),
+    recoveries: [],
+  };
+  if (functionalRecheck) Object.assign(v2, functionalRecheck);
+  return { ordinaryElapsedMs: FUNCTIONAL_RECHECK_DURATION_MS + 60_000, v2 };
+}
+
+test('functional recheck uses an explicit shared start while preserving the expired ordinary clock and recovery cap', () => {
+  const prior = expiredOrdinaryReport();
+  const startedAt = new Date(Date.now() - 1_000).toISOString();
+  const ledger = resolveV2FunctionalRecheckLedger(prior, { functionalRecheckStartedAt: startedAt });
+  assert.equal(ledger.ordinaryStartedAt, prior.v2.ordinaryStartedAt);
+  assert.equal(ledger.ordinaryDeadlineAt, prior.v2.deadlineAt);
+  assert.equal(ledger.ordinaryElapsedMs, prior.ordinaryElapsedMs);
+  assert.deepEqual(ledger.recoveries, []);
+  assert.deepEqual(ledger.functionalRecheck, {
+    startedAt,
+    deadlineAt: new Date(Date.parse(startedAt) + FUNCTIONAL_RECHECK_DURATION_MS).toISOString(),
+    elapsedMs: 0,
+  });
+});
+
+test('functional recheck resume requires the same persisted shared start and valid persisted deadline', async () => {
+  const startedAt = new Date(Date.now() - 1_000).toISOString();
+  const deadlineAt = new Date(Date.parse(startedAt) + FUNCTIONAL_RECHECK_DURATION_MS).toISOString();
+  const prior = expiredOrdinaryReport({ functionalRecheck: {
+    functionalRecheckStartedAt: startedAt,
+    functionalRecheckDeadlineAt: deadlineAt,
+    functionalRecheckElapsedMs: 900,
+  } });
+  const ledger = resolveV2FunctionalRecheckLedger(prior, { functionalRecheckStartedAt: startedAt });
+  assert.equal(ledger.functionalRecheck.elapsedMs, 900);
+  assert.throws(() => resolveV2FunctionalRecheckLedger(prior, {
+    functionalRecheckStartedAt: new Date(Date.now() - 2_000).toISOString(),
+  }), /does not match/);
+  prior.v2.functionalRecheckDeadlineAt = new Date(Date.parse(deadlineAt) + 1).toISOString();
+  assert.throws(() => resolveV2FunctionalRecheckLedger(prior, { functionalRecheckStartedAt: startedAt }), /invalid persisted functional recheck deadline/);
+
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'mir2-v2-functional-recheck-'));
+  const reportPath = path.join(directory, 'Warrior.report.json');
+  try {
+    await writeFile(reportPath, JSON.stringify(expiredOrdinaryReport()));
+    const persisted = await loadV2FunctionalRecheckLedger(reportPath, { functionalRecheckStartedAt: startedAt });
+    assert.equal(persisted.functionalRecheck.startedAt, startedAt);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('functional recheck clock is atomically persisted before a later resume can select a replacement', async () => {
+  const startedAt = new Date(Date.now() - 1_000).toISOString();
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'mir2-v2-functional-recheck-persist-'));
+  const reportPath = path.join(directory, 'Wizard.report.json');
+  try {
+    await writeFile(reportPath, JSON.stringify(expiredOrdinaryReport()));
+    await persistV2FunctionalRecheckLedger(reportPath, { functionalRecheckStartedAt: startedAt });
+    const stored = JSON.parse(await readFile(reportPath, 'utf8'));
+    assert.equal(stored.v2.functionalRecheckStartedAt, startedAt);
+    assert.equal(stored.v2.functionalRecheckDeadlineAt,
+      new Date(Date.parse(startedAt) + FUNCTIONAL_RECHECK_DURATION_MS).toISOString());
+    await assert.rejects(persistV2FunctionalRecheckLedger(reportPath, {
+      functionalRecheckStartedAt: new Date(Date.now() - 2_000).toISOString(),
+    }), /does not match/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('functional recheck rejects fresh, active, malformed, and expired ordinary evidence', () => {
+  const startedAt = new Date(Date.now() - 1_000).toISOString();
+  assert.throws(() => resolveV2FunctionalRecheckLedger({ v2: {
+    profile: 'newcomer-v2', ordinaryStartedAt: startedAt, recoveries: [],
+  } }, { functionalRecheckStartedAt: startedAt }), /unmodified persisted ordinary V2 deadline/);
+  const active = expiredOrdinaryReport();
+  active.v2.ordinaryStartedAt = new Date(Date.now() - 1_000).toISOString();
+  active.v2.deadlineAt = new Date(Date.parse(active.v2.ordinaryStartedAt) + FUNCTIONAL_RECHECK_DURATION_MS).toISOString();
+  assert.throws(() => resolveV2FunctionalRecheckLedger(active, { functionalRecheckStartedAt: startedAt }), /requires an expired/);
+  const longExpired = expiredOrdinaryReport();
+  longExpired.v2.ordinaryStartedAt = new Date(Date.now() - 2 * FUNCTIONAL_RECHECK_DURATION_MS - 60_000).toISOString();
+  longExpired.v2.deadlineAt = new Date(Date.parse(longExpired.v2.ordinaryStartedAt) + FUNCTIONAL_RECHECK_DURATION_MS).toISOString();
+  assert.throws(() => resolveV2FunctionalRecheckLedger(longExpired, {
+    functionalRecheckStartedAt: new Date(Date.parse(longExpired.v2.deadlineAt) + 1).toISOString(),
+  }), /functional recheck 120-minute deadline has expired/);
+  assert.throws(() => resolveV2FunctionalRecheckLedger(expiredOrdinaryReport(), {
+    functionalRecheckStartedAt: new Date(Date.now() + 1_000).toISOString(),
+  }), /cannot be in the future/);
+  const beforeOrdinaryExpiry = expiredOrdinaryReport();
+  assert.throws(() => resolveV2FunctionalRecheckLedger(beforeOrdinaryExpiry, {
+    functionalRecheckStartedAt: beforeOrdinaryExpiry.v2.ordinaryStartedAt,
+  }), /cannot precede/);
 });

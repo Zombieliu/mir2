@@ -250,7 +250,7 @@ export function availableV2Growth(snapshot, route) {
  * must each advance the authoritative snapshot. A blocked condition returns a
  * durable pause record for a later normal resume.
  */
-export async function runNewcomerV2Journey({ client, className, gender, report, ordinaryStartedAt, deadlineMs = 120 * 60_000, checkpoint = null, survival = {}, recovery = {} }) {
+export async function runNewcomerV2Journey({ client, className, gender, report, ordinaryStartedAt, deadlineMs = 120 * 60_000, functionalRecheck = null, checkpoint = null, survival = {}, recovery = {} }) {
   if (!client?.snapshot) throw new Error('V2 runner requires an authoritative bootstrap snapshot');
   const route = await loadNewcomerV2Route({ className, gender });
   const inWorldStartedAt = Date.now();
@@ -259,9 +259,15 @@ export async function runNewcomerV2Journey({ client, className, gender, report, 
   // V2 retry in this normal process, while retaining in-world time separately
   // for diagnosing route work from connection/bootstrap cost.
   const startedAt = Number.isFinite(reportStartedAt) ? reportStartedAt : inWorldStartedAt;
-  const deadline = startedAt + deadlineMs;
+  const recheckStartedAt = functionalRecheck ? Date.parse(functionalRecheck.startedAt) : null;
+  const recheckDeadline = functionalRecheck ? Date.parse(functionalRecheck.deadlineAt) : null;
+  if (functionalRecheck && (!Number.isFinite(recheckStartedAt) || !Number.isFinite(recheckDeadline) || recheckDeadline !== recheckStartedAt + deadlineMs)) {
+    throw new Error('invalid functional recheck clock');
+  }
+  const deadline = functionalRecheck ? recheckDeadline : startedAt + deadlineMs;
   const checkDeadline = () => {
-    if (Date.now() >= deadline) throw new V2Pause('deadline', null, '120-minute V2 journey deadline reached');
+    if (Date.now() >= deadline) throw new V2Pause(functionalRecheck ? 'functionalRecheckDeadline' : 'deadline', null,
+      functionalRecheck ? '120-minute functional V2 recheck deadline reached' : '120-minute V2 journey deadline reached');
   };
   // The route helper modules own their loops.  Give each one a client whose
   // sends and waits share this absolute deadline, so an old inner loop cannot
@@ -281,7 +287,13 @@ export async function runNewcomerV2Journey({ client, className, gender, report, 
   const result = {
     profile: route.profile, status: 'running', routeQuestIds: route.quests.map(quest => quest.questId), attempts: [],
     recoveries: cloneConfirmedV2Recoveries(priorRecoveries),
-    ordinaryStartedAt: new Date(startedAt).toISOString(), deadlineAt: new Date(deadline).toISOString(),
+    ordinaryStartedAt: new Date(startedAt).toISOString(), deadlineAt: new Date(startedAt + deadlineMs).toISOString(),
+    ...(functionalRecheck ? {
+      functionalRecheckStartedAt: functionalRecheck.startedAt,
+      functionalRecheckDeadlineAt: functionalRecheck.deadlineAt,
+      functionalRecheckElapsedMs: Number(functionalRecheck.elapsedMs ?? 0),
+      ordinaryElapsedMs: recovery.ordinaryElapsedMs ?? report?.ordinaryElapsedMs ?? report?.v2?.ordinaryElapsedMs,
+    } : {}),
   };
   try {
     await recoverV2Death({
@@ -377,11 +389,19 @@ export async function checkpointV2Progress({ checkpoint, report, result, inWorld
 
 function updateV2TimingReport(report, result, inWorldStartedAt, startedAt) {
   result.elapsedMs = Date.now() - inWorldStartedAt;
-  result.ordinaryElapsedMs = Date.now() - startedAt;
+  const functionalRecheck = result.functionalRecheckStartedAt;
+  if (functionalRecheck) {
+    result.functionalRecheckElapsedMs = Date.now() - Date.parse(functionalRecheck);
+  } else {
+    result.ordinaryElapsedMs = Date.now() - startedAt;
+  }
   if (!report) return;
   report.v2 = result;
   report.inWorldElapsedMs = result.elapsedMs;
-  report.ordinaryElapsedMs = result.ordinaryElapsedMs;
+  if (functionalRecheck) {
+    report.functionalRecheckElapsedMs = result.functionalRecheckElapsedMs;
+    report.ordinaryElapsedMs = result.ordinaryElapsedMs;
+  } else report.ordinaryElapsedMs = result.ordinaryElapsedMs;
 }
 
 /**

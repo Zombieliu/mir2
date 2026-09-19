@@ -205,3 +205,12 @@ pending dequeue against authoritative Zone monster lifecycle. Targeted actual
 Zone death/respawn plus existing TownRevive/re-entry AOI regressions pass 2/2
 (`pending-zone-aoi-final.log`). This is a source/test checkpoint only; the
 repaired Gateway release and the normal Wizard N12 run remain outstanding.
+
+The user authorized a further two-hour functional recheck after the original
+120-minute route clocks expired. Its shared start and deadline are separate
+local QA fields; opt-in resumes require the same saved start, and the clock is
+recorded before network login. The original start/deadline/elapsed evidence and
+0/3/1 cumulative revival ledgers remain retained, and attack/search/revival
+limits are unchanged. Focused recovery-ledger 18/18 and V2 protocol 44/44 pass
+(`C:/mir2-newcomer-v2-clean-20260918/recheck-*-tests.tap.log`). No recheck
+route unit or clean two-hour journey is claimed by these tests.
