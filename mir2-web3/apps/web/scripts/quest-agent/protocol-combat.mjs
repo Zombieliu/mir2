@@ -174,6 +174,7 @@ export async function completeQuestObjectives(client, routeQuest, navigateNear, 
             `q${questId} live objective-map fallback ${settings.objectiveMapFallback.toMapFileName} is unreachable`,
           );
         }
+        if (settings.beforeTravel) await settings.beforeTravel(client, destination);
         recordSearchDiagnostic(client, {
           type: 'chosenObjectiveDestination',
           questId,
@@ -1195,6 +1196,7 @@ function combatSettings(options) {
     lastSustainAt: Number.NEGATIVE_INFINITY,
     action: options.action,
     travel: options.travel,
+    beforeTravel: typeof options.beforeTravel === 'function' ? options.beforeTravel : null,
     afterTravel: typeof options.afterTravel === 'function' ? options.afterTravel : null,
     afterEngagement: options.afterEngagement,
     recoverAfterUnsafeRetreat: typeof options.recoverAfterUnsafeRetreat === 'function'

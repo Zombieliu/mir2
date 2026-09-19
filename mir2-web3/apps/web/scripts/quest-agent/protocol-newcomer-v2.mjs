@@ -699,6 +699,21 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
     await completeQuestObjectives(client, quest, navigate, {
       travel,
       allowedTargetObjectIds,
+      // A TownTeleport during this mine objective returns to Bichon inside
+      // the same quest loop. Recheck real potions and escape scrolls before
+      // its next ordinary map transfer, not only at quest acceptance.
+      beforeTravel: async (owner, destination) => {
+        if (className !== 'Wizard' || ![2110015, 2110016].includes(Number(quest.questId)) ||
+            String(owner.snapshot?.mapFileName ?? '') !== '0' ||
+            String(destination?.mapFileName ?? '') === '0' ||
+            typeof survival.ensureReady !== 'function') return;
+        checkDeadline();
+        const readiness = await survival.ensureReady(owner, quest, navigate);
+        if (readiness?.status !== 'ready') {
+          throw new V2Pause('awaitingSafeSupplies', quest.questId,
+            String(readiness?.message ?? `q${quest.questId} needs real supplies before mine travel`));
+        }
+      },
       action: async (owner, target) => {
         if (className === 'Taoist' && [2110020, 2110021].includes(Number(quest.questId)) &&
             !ownedBoneFamiliar(owner.snapshot) && !woomaSummonsAttempted.has(Number(target.objectId))) {
@@ -753,6 +768,12 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       ...([2110020, 2110021].includes(Number(quest.questId))
         ? { maxTargetAdjacent: 0, maxTargetNearby: 0 }
         : {}),
+      // The mine entrance has several Zombie3 around a wounded Zombie2.
+      // A Wizard should select an isolated quest target instead of spending
+      // the entire medicine supply on that non-objective pack.
+      ...(className === 'Wizard' && [2110015, 2110016].includes(Number(quest.questId))
+        ? { maxTargetAdjacent: 0, maxTargetNearby: 1 }
+        : {}),
       maxSpawnSearches: 4,
       maxSpawnWaypoints: 120,
       spawnSearchTimeoutMs: 30_000,
@@ -767,7 +788,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // the cap while the required Zombie2 remains alive in the same pack.
       focusTargetThroughAggressors:
         (className === 'Taoist' && [2110010, 2110011, 2110020, 2110021].includes(Number(quest.questId))) ||
-        (className === 'Warrior' && [2110015, 2110016].includes(Number(quest.questId))),
+        (['Warrior', 'Wizard'].includes(className) && [2110015, 2110016].includes(Number(quest.questId))),
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
       retrySpawnSearchTimeout: true,

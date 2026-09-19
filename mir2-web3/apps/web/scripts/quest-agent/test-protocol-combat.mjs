@@ -1165,6 +1165,40 @@ test("an allowed wounded objective is resumed before a closer full-health peer",
   assert.deepEqual(client.sent.map(entry => entry.objectId), [61]);
 });
 
+test("a mine quest skips a wounded Zombie2 trapped in a hostile pack", async () => {
+  const quest = {
+    questId: 2110015,
+    stage: "InProgress",
+    objectives: [objective("Kill Zombie2", 0, 1)],
+  };
+  const client = new FakeClient(snapshot(quest, [
+    monster(60, "Zombie2", 11, 10, { hp: 3 }),
+    monster(61, "Zombie3", 11, 9),
+    monster(62, "Zombie3", 12, 10),
+    monster(63, "Zombie2", 20, 10),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === command.objectId), { hp: 0, dead: true });
+      state.questLog[0].objectives = [objective("Kill Zombie2", 1, 1)];
+      state.questLog[0].stage = "ReadyToTurnIn";
+    });
+  });
+
+  const result = await completeQuestObjectives(client, {
+    questId: 2110015,
+    objectives: { kill: [{ monsterName: "Zombie2", spawnCandidates: [spawn("Zombie2")] }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 1,
+    focusTargetThroughAggressors: true,
+  });
+
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [63]);
+});
+
 test("a healthy player keeps approaching a 25-percent objective when a pack appears", async () => {
   const quest = {
     questId: 99,
@@ -1251,6 +1285,28 @@ test("an expedition can prefer its configured objective map over a denser same-m
   assert.equal(result.stage, "ReadyToTurnIn");
   assert.deepEqual(travelled, ["D406"]);
   assert.deepEqual(client.sent.map(entry => entry.objectId), [64]);
+});
+
+test("a returned mine quest checks real supplies before reentering the dungeon", async () => {
+  const quest = { questId: 2110015, stage: "InProgress", objectives: [objective("Kill Zombie2", 0, 1)] };
+  const client = new FakeClient(snapshot(quest));
+  const travelled = [];
+  const travel = async mapFileName => travelled.push(mapFileName);
+  travel.canReach = async () => true;
+
+  await assert.rejects(completeQuestObjectives(client, {
+    questId: 2110015,
+    objectives: { kill: [{ monsterName: "Zombie2", spawnCandidates: [{ ...spawn("Zombie2"), mapFileName: "D401" }] }], item: [] },
+  }, navigateClientNear(client), {
+    ...settings,
+    travel,
+    beforeTravel: async (owner, destination) => {
+      assert.equal(owner.snapshot.mapFileName, "0");
+      assert.equal(destination.mapFileName, "D401");
+      throw new Error("real HP medicine and TownTeleport required");
+    },
+  }), /real HP medicine and TownTeleport required/);
+  assert.deepEqual(travelled, []);
 });
 
 test('q113 caster preference chooses shared D711 over shorter D612 and completes both objectives without D715', async () => {

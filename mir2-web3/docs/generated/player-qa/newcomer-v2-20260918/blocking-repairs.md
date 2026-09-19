@@ -444,3 +444,22 @@ two-hour result, not a timing pass. A separate functional recheck started at
 original start/deadline and three revivals retained in the report. Its own
 deadline is 20:05:32 UTC; no character level, item, gold or save was granted
 or edited for this recheck.
+
+2026-09-19 18:27 UTC: cohort C's separate Wizard functional recheck paused at
+N15, level 22, with the same three recorded revivals. Its saved public
+snapshot was at D401 (38,180), 24/85 HP, no HP medicine or TownTeleport,
+beside four Zombie3 and a wounded Zombie2. This character is **not** a
+three-class completion. The objective selector favored that wounded Zombie2
+before considering its hostile pack, and the V2 Wizard policy cleared
+non-objective aggressors; after returning to town inside one quest loop, it
+could reenter the mine without repeating the departure supply check. The
+candidate repair excludes adjacent/packed targets for Wizard N15/N16, keeps
+the required Zombie2 in focus, and runs ordinary supply readiness before
+each new mine transfer. It does not increase the 20-attack, 30-second search,
+or three-revival limits. The combat/V2 Node suites pass 222/222, including
+an isolated-versus-wounded target test and a blocked-unsupplied-transfer test.
+An independently registered ordinary Wizard cohort D began at 18:31:56 UTC
+against the existing shared Gateway to live-check the repair. Cohort C remains
+preserved as failed evidence. D is a new run, not a reset of C's clock or
+deaths; its outcome and normal saved logout are still pending. No UI,
+animation, Crystal original-client visual, or clean two-hour pass is claimed.
