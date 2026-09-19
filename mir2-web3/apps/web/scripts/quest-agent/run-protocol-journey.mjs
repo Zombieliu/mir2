@@ -231,7 +231,11 @@ try {
         const needsAmulet = () => className === 'Taoist' && amuletStock(owner.snapshot) < 4 &&
           practicePlan(owner.snapshot, quest, className).some(step =>
             step.kind === 'summon' || (step.kind === 'spell' && step.spell === 'SoulFireBall'));
-        if (hpRatio() >= 0.35 && hpDrugCount(owner.snapshot) >= minimumJourneyHpStock && !needsAmulet()) {
+        const needsWizardEscapeStock = () => className === 'Wizard' &&
+          Number(quest.questId) >= 2110010 && Number(quest.questId) <= 2110021 &&
+          townTeleportCount(owner.snapshot) < 2;
+        if (hpRatio() >= 0.35 && hpDrugCount(owner.snapshot) >= minimumJourneyHpStock &&
+            !needsAmulet() && !needsWizardEscapeStock()) {
           return { status: 'ready' };
         }
         if (String(owner.snapshot?.mapFileName ?? '') !== '0') {
@@ -245,9 +249,12 @@ try {
         }
         const restock = await restockInVillage(owner, navigateNear, {
           targetHp: 24, targetMp: 12, targetAmulet: 6, lowStock: minimumJourneyHpStock, reserveGold: 0,
+          ...(className === 'Wizard' && Number(quest.questId) >= 2110010 &&
+            Number(quest.questId) <= 2110021 ? { emergencyTownTeleportCount: 2 } : {}),
         });
         if (!['restocked', 'sufficient'].includes(restock.status) ||
-            hpDrugCount(owner.snapshot) < minimumJourneyHpStock || needsAmulet()) {
+            hpDrugCount(owner.snapshot) < minimumJourneyHpStock || needsAmulet() ||
+            needsWizardEscapeStock()) {
           return { status: 'blocked', message: `q${quest.questId} needs real HP potions and class casting materials before combat (${restock.status})` };
         }
         if (hpRatio() < 0.35) await useSupplies(owner, { hpThreshold: 0.65, mpThreshold: 0.35 });
