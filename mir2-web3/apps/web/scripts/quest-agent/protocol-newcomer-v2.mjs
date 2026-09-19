@@ -7,6 +7,7 @@ import { prepareLoadout, combatAction, combatApproachRange, meleeCombatAction, u
 import { purchaseV2BasicHpPotion, equipHeldAmulet, moveHeldBeltItemToInventory, restockInVillage, townTeleportCount, useTownTeleport } from './protocol-supplies.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
+import { hpDrugCount } from './protocol-survival.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
 import { cloneConfirmedV2Recoveries } from './newcomer-v2-recovery-ledger.mjs';
 
@@ -715,7 +716,17 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // `prepare` runs once per engagement; sustain is also called from the
       // ordinary attack/search/retreat cadence so stocked restoratives are not
       // stranded while a live objective needs several public actions.
-      sustain: owner => v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.75, mpThreshold: 0.35 }),
+      sustain: async owner => {
+        checkDeadline();
+        const hpRatio = Number(owner.snapshot?.playerHp ?? 0) /
+          Math.max(1, Number(owner.snapshot?.playerMaxHp ?? 1));
+        if (hpRatio < 0.5 && hpDrugCount(owner.snapshot) === 0) {
+          if (townTeleportCount(owner.snapshot) > 0) await useTownTeleport(owner);
+          throw new V2Pause('awaitingSafeSupplies', quest.questId,
+            `q${quest.questId} has no real HP medicine below half health; ordinary resupply is required`);
+        }
+        return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.75, mpThreshold: 0.35 });
+      },
       recoverAfterUnsafeRetreat: async (owner, navigateNear) => {
         checkDeadline();
         if (typeof survival.recoverAfterUnsafeRetreat === 'function') {

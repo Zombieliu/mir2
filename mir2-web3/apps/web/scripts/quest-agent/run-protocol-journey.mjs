@@ -196,8 +196,16 @@ try {
     const v2EmergencyTeleport = createRandomTeleportEmergencyEscape({
       criticalHpRatio: 0.35,
       teleport: async owner => {
-        if (randomTeleportCount(owner?.snapshot) <= 0) return false;
-        return useRandomTeleport(owner);
+        // With no HP medicine, a random landing may strand a low-HP Wizard in
+        // another hostile pack. Spend a held ordinary TownTeleport first so
+        // the next normal visit can resupply; otherwise use the existing
+        // bounded RandomTeleport escape.
+        if (hpDrugCount(owner?.snapshot) === 0 && townTeleportCount(owner?.snapshot) > 0) {
+          return useTownTeleport(owner);
+        }
+        if (randomTeleportCount(owner?.snapshot) > 0) return useRandomTeleport(owner);
+        if (townTeleportCount(owner?.snapshot) > 0) return useTownTeleport(owner);
+        return false;
       },
     });
     const v2PlayerAlive = owner => {
@@ -208,7 +216,8 @@ try {
       emergencyEscapeHpRatio: 0.35,
       maxEmergencyEscapesPerNavigation: 1,
       emergencyEscape: async owner => {
-        if (!v2PlayerAlive(owner) || randomTeleportCount(owner.snapshot) <= 0) return false;
+        if (!v2PlayerAlive(owner) ||
+            (randomTeleportCount(owner.snapshot) <= 0 && townTeleportCount(owner.snapshot) <= 0)) return false;
         const result = await v2EmergencyTeleport(owner);
         return result && typeof result === 'object' && result.deferred !== true
           ? { ...result, success: true }
