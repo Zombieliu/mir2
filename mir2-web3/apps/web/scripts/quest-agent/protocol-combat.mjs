@@ -1155,6 +1155,7 @@ function combatSettings(options) {
     // threshold are supplied by the journey policy.
     emergencyEscape: typeof options.emergencyEscape === 'function' ? options.emergencyEscape : null,
     emergencyEscapeHpRatio: boundedRatio(options.emergencyEscapeHpRatio, 0),
+    escapeWhenRetreatBlocked: options.escapeWhenRetreatBlocked === true,
     criticalProvenAggressorOffenseGuard: criticalProvenAggressorOffenseGuardOption(
       options.criticalProvenAggressorOffenseGuard,
     ),
@@ -2217,10 +2218,10 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
   let lastError = null;
   let emergencyEscapeAttempted = false;
   let emergencyEscapeRetryAt = Number.NEGATIVE_INFINITY;
-  const tryEmergencyEscape = async (reason, current) => {
+  const tryEmergencyEscape = async (reason, current, allowBlockedRetreat = false) => {
     if (!settings.emergencyEscape || emergencyEscapeAttempted || settings.now() < emergencyEscapeRetryAt) return false;
     const hpRatio = playerHealthRatio(client);
-    if (hpRatio > settings.emergencyEscapeHpRatio) return false;
+    if (hpRatio > settings.emergencyEscapeHpRatio && !allowBlockedRetreat) return false;
     emergencyEscapeAttempted = true;
     recordSearchDiagnostic(client, {
       type: 'emergencyEscapeAttempt',
@@ -2496,6 +2497,8 @@ async function retreatFromUnsafePack(client, navigateNear, settings) {
     });
     return;
   }
+  if (finalPlayer && settings.escapeWhenRetreatBlocked &&
+      await tryEmergencyEscape('blockedRetreat', { x: Number(finalPlayer.x), y: Number(finalPlayer.y) }, true)) return;
   throw new Error(`unsafe hostile pack retreat failed from ${origin.x},${origin.y}`, { cause: lastError });
 }
 

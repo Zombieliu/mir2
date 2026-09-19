@@ -5137,6 +5137,50 @@ test("a same-map world refresh preserves monster locations observed earlier in t
   assert.deepEqual(client.sent.map(entry => entry.objectId), [60]);
 });
 
+test('a blocked mine retreat can use a held escape while HP remains above the usual threshold', async () => {
+  const quest = { questId: 2110014, stage: 'InProgress', objectives: [objective('Kill Zombie2', 0, 1)] };
+  const attackers = [
+    monster(61, 'Zombie3', 19, 20, { disposition: 'hostile' }),
+    monster(62, 'Zombie3', 20, 19, { disposition: 'hostile' }),
+    monster(63, 'Zombie3', 21, 20, { disposition: 'hostile' }),
+  ];
+  const target = monster(60, 'Zombie2', 21, 21, { disposition: 'hostile' });
+  const client = new FakeClient(snapshot(quest, [...attackers, target]));
+  Object.assign(client.snapshot, { playerHp: 35, playerMaxHp: 40 });
+  Object.assign(client.snapshot.entities[0], { x: 20, y: 20, hp: 35, maxHp: 40 });
+  client.receive('ObjectStruck', () => {}, { objectId: 1, attackerId: 61 });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let escapes = 0;
+  await assert.rejects(() => completeQuestObjectives(client, {
+    questId: 2110014,
+    objectives: { kill: [{ monsterName: 'Zombie2', spawnCandidates: [spawn('Zombie2', 21, 21)] }], item: [] },
+  }, async (destination, _range, stopWhen, options = {}) => {
+    if (options.allowedHostileObjectIds) return { reached: false, successfulSteps: 0 };
+    if (destination.objectId === 60) {
+      Object.assign(client.snapshot.entities[0], { x: destination.x - 1, y: destination.y });
+      return { reached: true };
+    }
+    return { reached: stopWhen(), successfulSteps: 0 };
+  }, {
+    ...settings,
+    maxEngagements: 3,
+    maxTargetAdjacent: 0,
+    maxTargetNearby: 0,
+    unsafeRetreatMaxSteps: 1,
+    emergencyEscapeHpRatio: 0.65,
+    escapeWhenRetreatBlocked: true,
+    emergencyEscape: async owner => {
+      escapes += 1;
+      Object.assign(owner.snapshot.entities[0], { x: 50, y: 50 });
+      return true;
+    },
+    recoverAfterUnsafeRetreat: async () => { throw new Error('escaped blocked pack'); },
+  }), /escaped blocked pack/);
+  assert.equal(escapes, 1);
+  assert.ok(diagnostics.some(entry => entry.type === 'emergencyEscapeSuccess' && entry.reason === 'blockedRetreat'));
+});
+
 test('V2 full-spread search ignores a stale ordinary-monster history hint before the nearest field', async () => {
   const quest = { questId: 2110007, stage: 'InProgress', objectives: [objective('Kill ForestYeti', 0, 1)] };
   const client = new FakeClient(snapshot(quest), (owner, command) => {

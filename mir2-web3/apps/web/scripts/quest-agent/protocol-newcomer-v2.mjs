@@ -700,7 +700,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
     const wizardMineQuest = className === 'Wizard' &&
       [2110014, 2110015, 2110016].includes(Number(quest.questId));
     const objectiveCombatAction = wizardMineQuest
-      ? createWizardKitingAction(combatAction, navigate)
+      ? createWizardKitingAction(combatAction, navigate, { triggerDistance: 1, fightWhenBlocked: true })
       : combatAction;
     await completeQuestObjectives(client, quest, navigate, {
       travel,
@@ -759,6 +759,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
         return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.85, mpThreshold: 0.35 });
       },
       emergencyEscape: typeof survival.emergencyEscape === 'function' ? survival.emergencyEscape : undefined,
+      escapeWhenRetreatBlocked: wizardMineQuest,
       // The two Taoist cave Skeleton steps can trap a low-armour caster in
       // four adjacent hostiles before the generic 35% escape threshold. Use
       // the already-held public RandomTeleport while it is still survivable;
@@ -781,7 +782,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       ...(wizardMineQuest
         ? {
           maxTargetAdjacent: 0,
-          maxTargetNearby: 1,
+          maxTargetNearby: 2,
           spawnSearchHostileClearance: 1,
           combatHostileClearance: 1,
         }

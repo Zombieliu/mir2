@@ -489,3 +489,17 @@ spell/escape commands. Its existing per-target retreat caps are unchanged;
 combat, V2 and kiting suites pass 259/259. The earlier process was stopped
 on map 0 near the mine entrance to load the candidate under the same clock.
 Live kill progression and save parity remain pending.
+
+At 19:47:20 UTC the kiting candidate stopped alive at D401 (47,129), 58/81
+HP, N14 1/5, after an occupied corridor prevented a bounded retreat. The
+character still held two TownTeleport scrolls, but the combat controller only
+used them below its 65% emergency HP threshold. The next scoped repair permits
+one already-held public escape if the bounded retreat actually fails, even
+above that threshold. It also allows a target with two nonadjacent nearby
+monsters and keeps the Wizard on the chosen target after its 12-cell kiting
+budget, rather than abandoning an injured Zombie after one or two casts. The
+combat/V2/kiting Node suites pass 260/260. Cohort D resumed from the same
+18:31:56–20:31:56 UTC clock and one recorded death. At 20:03:31 UTC its live
+server snapshot had N14 2/5 and 81/81 HP at D401 (40,119); this is progress,
+not an N14 or three-class completion. The repair and run remain unverified for
+full route, clean two-hour timing, UI/animation, or original Crystal visuals.
