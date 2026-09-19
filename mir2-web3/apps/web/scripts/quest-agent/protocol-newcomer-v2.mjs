@@ -733,6 +733,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
         }
         return objectiveCombatAction(owner, target);
       },
+      approachRange: combatApproachRange,
       prepare: async owner => {
         checkDeadline();
         return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.6, mpThreshold: 0.35 });

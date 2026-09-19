@@ -275,7 +275,9 @@ test('V2 Wizard combat refreshes a stale cooldown snapshot and then casts normal
     },
   };
   await completeV2Objectives(client, quest, {
-    navigate: async point => { client.snapshot.entities[0].x = Number(point.x) - 1; },
+    navigate: async (_point, desiredDistance) => {
+      assert.equal(desiredDistance, 9, 'Wizard stays at spell range instead of walking into melee');
+    },
     travel: async () => {}, className: 'Wizard', checkDeadline: () => {},
   });
   assert.equal(sent[0].type, 'clientVersion');

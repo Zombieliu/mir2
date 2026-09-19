@@ -513,3 +513,17 @@ pauses safely. Survival, supplies, and V2 Node suites pass 203/203. The
 same-clock live resume reached 79/81 HP by 20:10:08 UTC and was traveling
 back through Bichon, confirming the former false pause was removed. N14 and
 the overall three-class gate are still open.
+
+At 20:17:58 UTC D remained N14 2/5 and was back in Bichon alive after a
+second mine excursion. A direct controller audit found that V2 kill objectives
+supplied `combatAction` but omitted its `combatApproachRange`. The generic
+objective default is one tile, so a Wizard with ready FireBall walked toward
+melee range before casting and repeatedly pulled overlapping Zombies. V2 now
+passes the class-aware authoritative approach distance (nine tiles for an
+affordable Wizard spell, six for a usable Taoist ranged spell, one for melee).
+The Wizard cooldown-refresh integration test now rejects a one-tile approach;
+combat, V2, and kiting suites pass 260/260. The old runner was stopped only
+after a town snapshot to load this repair. Its 18:31:56–20:31:56 UTC clock,
+one actual revival and 2/5 N14 progress remain unchanged. Live-range and
+three-class route validation are still pending; the interruption is repair
+time, not clean player time.
