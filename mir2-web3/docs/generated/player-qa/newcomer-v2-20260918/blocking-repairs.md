@@ -653,3 +653,35 @@ steps and 20 attempts across all three. It still requires post-send
 `UserLocation` before counting the reposition. The V2 Node suite passes
 64/64, including the blocked-endpoint and missing-receipt cases; live N21
 remains pending.
+
+## 2026-09-20 mixed-cohort functional closure
+
+The legal-fallback candidate cleared E Wizard N21 on live server receipts,
+then N22 and the level-30 growth claim. Its ordinary runner reported completion
+at 2026-09-19 22:50:48.754 UTC. The unextended original E deadline was
+23:19:06.394 UTC. This run retained one actual death and revival. Its
+91m42s wall interval includes several development repair waits, so it is not
+a clean uninterrupted player-time measurement.
+
+The read-only evidence verifier was run against the original B Warrior and
+Taoist evidence, original E Wizard evidence, and the real B Gateway account
+store after normal logout. A staging directory used directory symlinks only;
+the source reports, traces, snapshots and account store were not copied or
+edited for verification. The sanitized verifier output is
+[`ordinary-evidence-mixed-b-e.json`](ordinary-evidence-mixed-b-e.json),
+SHA-256 `67B9A71B0329A896733FE3D71243F0D9C196BA118628C654ADC550E3A6C67DB7`.
+
+| Class and source | Saved level | Persisted V2 units | Normal logout | Final snapshot vs save |
+|---|---:|---:|---|---|
+| Warrior, B (`C:/mir2-newcomer-v2-cohort-b-20260919/warrior`) | 30 | 26/26 | success | match, revision 285 |
+| Wizard, E (`C:/mir2-newcomer-v2-cohort-e-20260920/wizard`) | 30 | 26/26 | success | match, revision 301 |
+| Taoist, B (`C:/mir2-newcomer-v2-cohort-b-20260919/taoist`) | 30 | 26/26 | success | match, revision 404 |
+
+The V2 **functional route and save gate is 78/78** across these explicitly
+mixed cohorts. B Warrior and Taoist completed after their original strict
+120-minute deadlines in separately labelled functional rechecks. The failed
+B/C/D Wizard runs and their death/deadline ledgers remain failed evidence;
+combining B and E results does not turn any of those cohorts into a clean
+three-class two-hour pass. No fresh same-build three-class time trial, human
+player timing, native visual/animation acceptance, Crystal 1:1 comparison,
+or level-30 graduation-equipment source audit is claimed here.

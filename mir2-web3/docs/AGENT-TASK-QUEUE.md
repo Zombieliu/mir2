@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-09-20 V2 functional route/save gate: **78/78**, using B Warrior/Taoist
+> and E Wizard ordinary-player evidence with explicit mixed-cohort provenance.
+> All three are real level 30 and have public LogOutSuccess plus final snapshot
+> matching persistent character level, map, transform, gold, experience and
+> all 26 V2 quest states. [Verifier output](generated/player-qa/newcomer-v2-20260918/ordinary-evidence-mixed-b-e.json)
+> and [repair/evidence notes](generated/player-qa/newcomer-v2-20260918/blocking-repairs.md).
+> This is not a clean same-build two-hour trial or human timing result; native
+> UI, animations, Crystal comparison and graduation-equipment source checks
+> remain separate. B/C/D failed Wizard evidence and the paused V1 goal remain
+> independent. Stop the completed V2 functional replay and work these open
+> acceptance gates without calling the whole game 100%.
+
 > 2026-09-19 V2 current work: release-build and deploy nine separated authored
 > D022 actors plus corrected BoneFamiliar
 > damage after all normal logout sessions. Resume ordinary Warrior/Taoist
