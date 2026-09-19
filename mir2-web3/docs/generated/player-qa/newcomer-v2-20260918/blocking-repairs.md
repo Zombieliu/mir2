@@ -552,3 +552,21 @@ attempts. Navigator tests pass 52/52, including a ten-wait paralysis release
 and a permanent block that sends no Walk/Run. A same-account, same-clock
 recheck resumed with the original two deaths and N16 2/4. Live N16–N22 and
 normal saved logout remain unverified.
+
+The D Wizard subsequently completed N16, the level-25 growth claim, N17,
+and N18, reaching level 26 with the real Lightning book learned. N19 had one
+of three Dung kills confirmed before the second D022 pull. At 20:51:40 UTC
+the third real death occurred at D022 (349,358): the trace shows a non-objective
+WoomaWarrior (285 HP) intercepted the path to Dung, the Wizard spent repeated
+FireBall casts on that warrior at one-tile range, and three adjacent monsters
+landed attacks in the last seconds. The public revive returned the player to
+Bichon; the runner was stopped alive on map 0 after its third recorded revival.
+The three-death ceiling is exhausted. N19 remains 1/3, not complete.
+
+The scoped N19–N21 candidate reuses the existing Wizard cave policy: retain
+the required target through an aggressor interruption, reject adjacent packs,
+kite on a one-tile threat, check real supplies before re-entering from town,
+and permit an already-held public escape at the existing 65% cave threshold
+or when bounded retreat is blocked. It adds no item, level, death allowance,
+attack/search attempt, or extra time. Combat, V2, and kiting Node suites pass
+260/260; live D022 and ordinary saved logout are still pending.

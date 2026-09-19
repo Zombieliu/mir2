@@ -699,17 +699,20 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
     const allowedTargetObjectIds = trainingTargetObjectIds(quest);
     const wizardMineQuest = className === 'Wizard' &&
       [2110014, 2110015, 2110016].includes(Number(quest.questId));
-    const objectiveCombatAction = wizardMineQuest
+    const wizardTempleQuest = className === 'Wizard' &&
+      [2110019, 2110020, 2110021].includes(Number(quest.questId));
+    const wizardCaveQuest = wizardMineQuest || wizardTempleQuest;
+    const objectiveCombatAction = wizardCaveQuest
       ? createWizardKitingAction(combatAction, navigate, { triggerDistance: 1, fightWhenBlocked: true })
       : combatAction;
     await completeQuestObjectives(client, quest, navigate, {
       travel,
       allowedTargetObjectIds,
-      // A TownTeleport during these mine objectives returns to Bichon inside
+      // A TownTeleport during these cave objectives returns to Bichon inside
       // the same quest loop. Recheck real potions and escape scrolls before
       // its next ordinary map transfer, not only at quest acceptance.
       beforeTravel: async (owner, destination) => {
-        if (className !== 'Wizard' || ![2110014, 2110015, 2110016].includes(Number(quest.questId)) ||
+        if (!wizardCaveQuest ||
             String(owner.snapshot?.mapFileName ?? '') !== '0' ||
             String(destination?.mapFileName ?? '') === '0' ||
             typeof survival.ensureReady !== 'function') return;
@@ -717,7 +720,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
         const readiness = await survival.ensureReady(owner, quest, navigate);
         if (readiness?.status !== 'ready') {
           throw new V2Pause('awaitingSafeSupplies', quest.questId,
-            String(readiness?.message ?? `q${quest.questId} needs real supplies before mine travel`));
+            String(readiness?.message ?? `q${quest.questId} needs real supplies before cave travel`));
         }
       },
       action: async (owner, target) => {
@@ -760,14 +763,14 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
         return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.85, mpThreshold: 0.35 });
       },
       emergencyEscape: typeof survival.emergencyEscape === 'function' ? survival.emergencyEscape : undefined,
-      escapeWhenRetreatBlocked: wizardMineQuest,
+      escapeWhenRetreatBlocked: wizardCaveQuest,
       // The two Taoist cave Skeleton steps can trap a low-armour caster in
       // four adjacent hostiles before the generic 35% escape threshold. Use
       // the already-held public RandomTeleport while it is still survivable;
       // the existing one-scroll cap and authoritative relocation still apply.
       emergencyEscapeHpRatio: className === 'Taoist' && [2110010, 2110011].includes(Number(quest.questId))
         ? Math.max(0.65, Number(survival.emergencyEscapeHpRatio ?? 0))
-        : className === 'Wizard' && [2110014, 2110015, 2110016].includes(Number(quest.questId))
+        : wizardCaveQuest
           ? Math.max(0.65, Number(survival.emergencyEscapeHpRatio ?? 0))
         : Number(survival.emergencyEscapeHpRatio ?? 0),
       // Each inner bounded loop also receives the deadline-guarded client.
@@ -778,12 +781,13 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       ...([2110020, 2110021].includes(Number(quest.questId))
         ? { maxTargetAdjacent: 0, maxTargetNearby: 0 }
         : {}),
-      // D401 has overlapping Zombie2/Zombie3 packs. Prefer an isolated
-      // required target before committing to a mine fight.
-      ...(wizardMineQuest
+      // D401 has overlapping Zombies and D022 has roaming Wooma around its
+      // training actors. Never trade a low-armour Wizard into a nearby Temple
+      // pack just to clear a non-objective blocker.
+      ...(wizardCaveQuest
         ? {
           maxTargetAdjacent: 0,
-          maxTargetNearby: 2,
+          maxTargetNearby: wizardTempleQuest ? 0 : 2,
           spawnSearchHostileClearance: 1,
           combatHostileClearance: 1,
         }
@@ -803,7 +807,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       focusTargetThroughAggressors:
         (className === 'Taoist' && [2110010, 2110011, 2110020, 2110021].includes(Number(quest.questId))) ||
         (className === 'Warrior' && [2110015, 2110016].includes(Number(quest.questId))) ||
-        (className === 'Wizard' && [2110014, 2110015, 2110016].includes(Number(quest.questId))),
+        wizardCaveQuest,
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
       retrySpawnSearchTimeout: true,
