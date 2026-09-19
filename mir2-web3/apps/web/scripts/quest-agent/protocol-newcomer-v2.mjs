@@ -7,7 +7,7 @@ import { prepareLoadout, combatAction, combatApproachRange, meleeCombatAction, u
 import { purchaseV2BasicHpPotion, equipHeldAmulet, moveHeldBeltItemToInventory, restockInVillage, townTeleportCount, useTownTeleport } from './protocol-supplies.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
-import { hpDrugCount } from './protocol-survival.mjs';
+import { amuletStock, hpDrugCount } from './protocol-survival.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
 import { cloneConfirmedV2Recoveries } from './newcomer-v2-recovery-ledger.mjs';
 
@@ -627,11 +627,14 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
     await useTownTeleport(client);
     checkDeadline();
   }
-  if (className === 'Taoist' && [2110020, 2110021].includes(Number(quest.questId))) {
+  const woomaQuestId = Number(quest.questId);
+  const woomaAmuletFloor = woomaQuestId === 2110020 ? 100 : 48;
+  if (className === 'Taoist' && [2110020, 2110021].includes(woomaQuestId) &&
+      amuletStock(client.snapshot) < woomaAmuletFloor) {
     // A Wooma needs far more SoulFireBall casts than the generic six-Amulet
-    // starter reserve. Buy an ordinary expedition stack before entering D022;
-    // otherwise the caster silently falls back to low-damage melee and spends
-    // the unchanged 20-action combat budget without killing the target.
+    // starter reserve. Buy an ordinary expedition stack before entering D022.
+    // N21 can keep its real remaining N20 stack when at least 48 charges cover
+    // three 120-HP training targets; no redundant trip back to Bichon.
     if (String(client.snapshot?.mapFileName ?? '') !== '0' && townTeleportCount(client.snapshot) > 0) {
       await useTownTeleport(client);
     }
