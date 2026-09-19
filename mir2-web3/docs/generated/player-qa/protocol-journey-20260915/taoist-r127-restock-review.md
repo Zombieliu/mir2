@@ -1,0 +1,5 @@
+# Taoist R127 restock review
+
+The trace proves an ordinary Amulet restock to the new q89 departure target. At sequence 4579 (`20:49:19.984Z`), the fresh world snapshot still owned 31 Amulet: 5 equipped and 26 belt, with gold 20,343. The runner sent `buyItem` for catalog item `46661648`, count 69 at sequence 4578. A received `LoseGold` at sequence 4580 debited 1,725 gold, and the next fresh world snapshot at sequence 4582 (`20:49:20.618Z`) owned 100 Amulet: 5 equipped, 69 bag, 26 belt, gold 18,618. This is inventory proof, not a command-only claim.
+
+The character then continued ordinary navigation after the purchase. The trace reaches received `UserLocation` `(265,110)` at sequence 5867 (`20:52:16.820Z`) and sends another walk; no map transition, death, or q89 credit change is recorded after the restock in this trace window. The bounded delay was route travel to Ruben/shop and then continued departure navigation, not a failed purchase or funding loop. No source, process, store, or repository state was modified.

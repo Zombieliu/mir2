@@ -1,0 +1,15 @@
+{
+  "recordedAt": "2026-09-15T11:12:46.640Z",
+  "coordinatorSourceAndLogHashesVerified": true,
+  "executable": "C:/mir2-protocol-journey-20260911/gateway/mir2-gateway-snapshot-r54-release.exe",
+  "executableSha256": "ffbed5844913d338f501d85869992e689f53d63336640be9f35d7baf7a4d06d8",
+  "preR54StoreBackup": "C:/mir2-protocol-journey-20260911/gateway/pre-r54-20260915/accounts.json",
+  "preR54StoreBackupSha256": "c1b7d2c1cc20ac4d3635dcb3b3d9c6f4f4efe06cb2d7c2116266073d7013f05d",
+  "r53Shutdown": "Operator stdin shutdown after public runners logged out and native teardown save completed",
+  "initialR54Startup": "Before the native observer window started at 2026-09-15T07:15:28.2781168Z; exact launch wallclock is not certified here",
+  "r54RestartedAfterControlSessionResetAt": "2026-09-15T11:12:46.693Z",
+  "liveFireBallGreatFireBallProgressionAccepted": false,
+  "projectileTimingAccepted": false,
+  "visualAccepted": false,
+  "globalParityPercent": null
+}

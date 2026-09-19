@@ -173,6 +173,9 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
+    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        self.runtime.supports_magic_key_assignment(spell,key,old_key)
+    }
     pub fn new(config: GatewayConfig) -> Self {
         Self::new_with_zone_registry(config, &ZoneRegistry::in_process())
     }
@@ -467,6 +470,24 @@ impl GatewaySession {
             self.prepare_standard_login_recovery(account_id, password)?;
         }
         self.execute_world_command(WorldCommand::ClientPacket(packet))
+            .map(|execution| execution.packets)
+    }
+
+    pub(crate) fn replay_retained_start_game_bootstrap(
+        &mut self,
+        authenticated_account_id: &str,
+        character_index: i32,
+        restored_from_reconnect: bool,
+    ) -> Result<Vec<ServerPacket>, String> {
+        if !restored_from_reconnect || authenticated_account_id.is_empty() {
+            return Err("retained bootstrap requires authenticated reconnect custody".to_string());
+        }
+        let identity = self.active_identity()
+            .ok_or_else(|| "retained bootstrap requires an active character".to_string())?;
+        if identity.account_id != authenticated_account_id || identity.character_index != character_index {
+            return Err("retained bootstrap identity mismatch".to_string());
+        }
+        self.execute_world_command(WorldCommand::ReplayRetainedStartGameBootstrap { character_index })
             .map(|execution| execution.packets)
     }
 
@@ -1035,25 +1056,31 @@ impl GatewaySession {
             default_zone_owner_command_client(&routed.zone_id, Some(&routed.owner_lease_authority));
         let mut target_runtime = routed.runtime;
         let prepare_result = (|| -> Result<(), String> {
-            target_client.execute(
-                &mut target_runtime,
-                ZoneOwnerCommandRequest::direct(
-                    routed.owner_lease.clone(),
-                    WorldCommand::PasskeyLogin {
-                        account_id: identity.account_id.clone(),
-                    },
-                ),
-            )?;
-            target_client.execute(
-                &mut target_runtime,
-                ZoneOwnerCommandRequest::direct(
-                    routed.owner_lease.clone(),
-                    WorldCommand::ClientPacket(ClientPacket::StartGame {
-                        character_index: identity.character_index,
-                    }),
-                ),
-            )?;
-            let target_identity = target_client.active_identity(&target_runtime)?;
+            target_client
+                .execute(
+                    &mut target_runtime,
+                    ZoneOwnerCommandRequest::direct(
+                        routed.owner_lease.clone(),
+                        WorldCommand::PasskeyLogin {
+                            account_id: identity.account_id.clone(),
+                        },
+                    ),
+                )
+                .map_err(|error| format!("target login: {error}"))?;
+            target_client
+                .execute(
+                    &mut target_runtime,
+                    ZoneOwnerCommandRequest::direct(
+                        routed.owner_lease.clone(),
+                        WorldCommand::ClientPacket(ClientPacket::StartGame {
+                            character_index: identity.character_index,
+                        }),
+                    ),
+                )
+                .map_err(|error| format!("target StartGame: {error}"))?;
+            let target_identity = target_client
+                .active_identity(&target_runtime)
+                .map_err(|error| format!("target identity read: {error}"))?;
             if target_identity.as_ref() != Some(&identity) {
                 return Err(format!(
                     "target identity mismatch: expected {identity:?}, got {target_identity:?}"
@@ -1066,9 +1093,11 @@ impl GatewaySession {
             // changes. This carries vitals, inventory, map and private systems
             // as one commitment.
             target_client
-                .restore_active_character_checkpoint(&mut target_runtime, &source_checkpoint)?;
+                .restore_active_character_checkpoint(&mut target_runtime, &source_checkpoint)
+                .map_err(|error| format!("target checkpoint restore: {error}"))?;
             let target_checkpoint = target_client
-                .active_character_checkpoint(&target_runtime)?
+                .active_character_checkpoint(&target_runtime)
+                .map_err(|error| format!("target checkpoint read: {error}"))?
                 .ok_or_else(|| {
                     "target returned no active character checkpoint after restore".to_string()
                 })?;
@@ -1339,6 +1368,22 @@ fn gateway_now_ms() -> u64 {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn retained_bootstrap_requires_exact_authenticated_custody() {
+        let mut session = super::GatewaySession::new(crate::GatewayConfig::default());
+        assert!(session.replay_retained_start_game_bootstrap("demo", 0, true).is_err());
+        session.handle_packet(mir2_protocol::ClientPacket::Login { account_id: "demo".into(), password: "demo".into() });
+        session.handle_packet(mir2_protocol::ClientPacket::StartGame { character_index: 0 });
+        let before = serde_json::to_value(session.world_snapshot()).unwrap();
+        for (account, index, restored) in [("demo", 0, false), ("", 0, true), ("other", 0, true), ("demo", 1, true)] {
+            assert!(session.replay_retained_start_game_bootstrap(account, index, restored).is_err());
+        }
+        let packets = session.replay_retained_start_game_bootstrap("demo", 0, true).unwrap();
+        assert!(matches!(packets.first(), Some(mir2_protocol::ServerPacket::StartGame { result: 4, .. })));
+        assert_eq!(packets.iter().filter(|p| matches!(p, mir2_protocol::ServerPacket::GameShopInfo { .. })).count(), 105);
+        assert_eq!(serde_json::to_value(session.world_snapshot()).unwrap(), before);
+    }
+
     use super::{GatewayConfig, GatewaySession};
     use crate::{
         CharacterRecord, HostedZoneOwnerCommandClient, InMemoryGameplayEventSink,

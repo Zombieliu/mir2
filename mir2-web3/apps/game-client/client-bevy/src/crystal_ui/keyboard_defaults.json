@@ -1,0 +1,962 @@
+[
+  {
+    "function": "Inventory",
+    "group": "Dialogs",
+    "description": "Inventory Open/Close",
+    "key": "F9",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Inventory2",
+    "group": "Dialogs",
+    "description": "Inventory Open/Close Alt",
+    "key": "I",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 0
+  },
+  {
+    "function": "Equipment",
+    "group": "Dialogs",
+    "description": "Equipment Open/Close",
+    "key": "F10",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Equipment2",
+    "group": "Dialogs",
+    "description": "Equipment Open/Close Alt",
+    "key": "C",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 0
+  },
+  {
+    "function": "Skills",
+    "group": "Dialogs",
+    "description": "Skills Open/Close",
+    "key": "F11",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Skills2",
+    "group": "Dialogs",
+    "description": "Skills Open/Close Alt",
+    "key": "S",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 0
+  },
+  {
+    "function": "HeroInventory",
+    "group": "Dialogs",
+    "description": "Hero Inventory Open/Close",
+    "key": "I",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 1
+  },
+  {
+    "function": "HeroEquipment",
+    "group": "Dialogs",
+    "description": "Hero Equipment Open/Close",
+    "key": "C",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 1
+  },
+  {
+    "function": "HeroSkills",
+    "group": "Dialogs",
+    "description": "Hero Skills Open/Close",
+    "key": "S",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 1
+  },
+  {
+    "function": "Creature",
+    "group": "Dialogs",
+    "description": "Creatures Open/Close",
+    "key": "E",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "MountWindow",
+    "group": "Dialogs",
+    "description": "Mount Open/Close",
+    "key": "J",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Fishing",
+    "group": "Dialogs",
+    "description": "Fishing Open/Close",
+    "key": "N",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Skillbar",
+    "group": "Dialogs",
+    "description": "Skillbar Open/Close",
+    "key": "R",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Mentor",
+    "group": "Dialogs",
+    "description": "Mentor Open/Close",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Relationship",
+    "group": "Dialogs",
+    "description": "Relationship Open/Close",
+    "key": "L",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Friends",
+    "group": "Dialogs",
+    "description": "Friends Open/Close",
+    "key": "F",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Guilds",
+    "group": "Dialogs",
+    "description": "Guild Open/Close",
+    "key": "G",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 0
+  },
+  {
+    "function": "GameShop",
+    "group": "Dialogs",
+    "description": "Gameshop Open/Close",
+    "key": "Y",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Quests",
+    "group": "Dialogs",
+    "description": "Quest Diary Open/Close",
+    "key": "Q",
+    "alt": 0,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Options",
+    "group": "Dialogs",
+    "description": "Options Open/Close",
+    "key": "F12",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Options2",
+    "group": "Dialogs",
+    "description": "Options Open/Close Alt",
+    "key": "O",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Group",
+    "group": "Dialogs",
+    "description": "Group Open/Close",
+    "key": "P",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt",
+    "group": "Dialogs",
+    "description": "Belt Open/Close",
+    "key": "Z",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 0
+  },
+  {
+    "function": "Minimap",
+    "group": "Dialogs",
+    "description": "Minimap Open/Close",
+    "key": "V",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Bigmap",
+    "group": "Dialogs",
+    "description": "Bigmap Open/Close",
+    "key": "B",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Ranking",
+    "group": "Dialogs",
+    "description": "Ranking Open/Close",
+    "key": "K",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Help",
+    "group": "Dialogs",
+    "description": "Help Open/Close",
+    "key": "H",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 2,
+    "ctrl": 0
+  },
+  {
+    "function": "Keybind",
+    "group": "Dialogs",
+    "description": "Keybinds Open/Close",
+    "key": "U",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Closeall",
+    "group": "Dialogs",
+    "description": "Close All Windows",
+    "key": "Escape",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Bar1Skill1",
+    "group": "Skillbar",
+    "description": "Skillbar Slot 1",
+    "key": "F1",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "Bar1Skill2",
+    "group": "Skillbar",
+    "description": "Skillbar Slot 2",
+    "key": "F2",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "Bar1Skill3",
+    "group": "Skillbar",
+    "description": "Skillbar Slot 3",
+    "key": "F3",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "Bar1Skill4",
+    "group": "Skillbar",
+    "description": "Skillbar Slot 4",
+    "key": "F4",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "Bar1Skill5",
+    "group": "Skillbar",
+    "description": "Skillbar Slot 5",
+    "key": "F5",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "Bar1Skill6",
+    "group": "Skillbar",
+    "description": "Skillbar Slot 6",
+    "key": "F6",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "Bar1Skill7",
+    "group": "Skillbar",
+    "description": "Skillbar Slot 7",
+    "key": "F7",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "Bar1Skill8",
+    "group": "Skillbar",
+    "description": "Skillbar Slot 8",
+    "key": "F8",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "Bar2Skill1",
+    "group": "Skillbar",
+    "description": "Skillbar Alt Slot 1",
+    "key": "F1",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 1
+  },
+  {
+    "function": "Bar2Skill2",
+    "group": "Skillbar",
+    "description": "Skillbar Alt Slot 2",
+    "key": "F2",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 1
+  },
+  {
+    "function": "Bar2Skill3",
+    "group": "Skillbar",
+    "description": "Skillbar Alt Slot 3",
+    "key": "F3",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 1
+  },
+  {
+    "function": "Bar2Skill4",
+    "group": "Skillbar",
+    "description": "Skillbar Alt Slot 4",
+    "key": "F4",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 1
+  },
+  {
+    "function": "Bar2Skill5",
+    "group": "Skillbar",
+    "description": "Skillbar Alt Slot 5",
+    "key": "F5",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 1
+  },
+  {
+    "function": "Bar2Skill6",
+    "group": "Skillbar",
+    "description": "Skillbar Alt Slot 6",
+    "key": "F6",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 1
+  },
+  {
+    "function": "Bar2Skill7",
+    "group": "Skillbar",
+    "description": "Skillbar Alt Slot 7",
+    "key": "F7",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 1
+  },
+  {
+    "function": "Bar2Skill8",
+    "group": "Skillbar",
+    "description": "Skillbar Alt Slot 8",
+    "key": "F8",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 0,
+    "ctrl": 1
+  },
+  {
+    "function": "HeroSkill1",
+    "group": "Skillbar",
+    "description": "Hero Skillbar Slot 1",
+    "key": "F1",
+    "alt": 2,
+    "shift": 1,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "HeroSkill2",
+    "group": "Skillbar",
+    "description": "Hero Skillbar Slot 2",
+    "key": "F2",
+    "alt": 2,
+    "shift": 1,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "HeroSkill3",
+    "group": "Skillbar",
+    "description": "Hero Skillbar Slot 3",
+    "key": "F3",
+    "alt": 2,
+    "shift": 1,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "HeroSkill4",
+    "group": "Skillbar",
+    "description": "Hero Skillbar Slot 4",
+    "key": "F4",
+    "alt": 2,
+    "shift": 1,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "HeroSkill5",
+    "group": "Skillbar",
+    "description": "Hero Skillbar Slot 5",
+    "key": "F5",
+    "alt": 2,
+    "shift": 1,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "HeroSkill6",
+    "group": "Skillbar",
+    "description": "Hero Skillbar Slot 6",
+    "key": "F6",
+    "alt": 2,
+    "shift": 1,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "HeroSkill7",
+    "group": "Skillbar",
+    "description": "Hero Skillbar Slot 7",
+    "key": "F7",
+    "alt": 2,
+    "shift": 1,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "HeroSkill8",
+    "group": "Skillbar",
+    "description": "Hero Skillbar Slot 8",
+    "key": "F8",
+    "alt": 2,
+    "shift": 1,
+    "tilde": 0,
+    "ctrl": 0
+  },
+  {
+    "function": "BeltFlip",
+    "group": "Belt",
+    "description": "Rotate Belt",
+    "key": "Z",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 1
+  },
+  {
+    "function": "Belt1",
+    "group": "Belt",
+    "description": "Belt Slot 1",
+    "key": "D1",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt1Alt",
+    "group": "Belt",
+    "description": "Belt Slot 1 Alt",
+    "key": "NumPad1",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt2",
+    "group": "Belt",
+    "description": "Belt Slot 2",
+    "key": "D2",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt2Alt",
+    "group": "Belt",
+    "description": "Belt Slot 2 Alt",
+    "key": "NumPad2",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt3",
+    "group": "Belt",
+    "description": "Belt Slot 3",
+    "key": "D3",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt3Alt",
+    "group": "Belt",
+    "description": "Belt Slot 3 Alt",
+    "key": "NumPad3",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt4",
+    "group": "Belt",
+    "description": "Belt Slot 4",
+    "key": "D4",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt4Alt",
+    "group": "Belt",
+    "description": "Belt Slot 4 Alt",
+    "key": "NumPad4",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt5",
+    "group": "Belt",
+    "description": "Belt Slot 5",
+    "key": "D5",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt5Alt",
+    "group": "Belt",
+    "description": "Belt Slot 5 Alt",
+    "key": "NumPad5",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt6",
+    "group": "Belt",
+    "description": "Belt Slot 6",
+    "key": "D6",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt6Alt",
+    "group": "Belt",
+    "description": "Belt Slot 6 Alt",
+    "key": "NumPad6",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt7",
+    "group": "Belt",
+    "description": "Belt Slot 7",
+    "key": "D7",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt7Alt",
+    "group": "Belt",
+    "description": "Belt Slot 7 Alt",
+    "key": "NumPad7",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt8",
+    "group": "Belt",
+    "description": "Belt Slot 8",
+    "key": "D8",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Belt8Alt",
+    "group": "Belt",
+    "description": "Belt Slot 8 Alt",
+    "key": "NumPad8",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Logout",
+    "group": "General",
+    "description": "Logout",
+    "key": "X",
+    "alt": 1,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Exit",
+    "group": "General",
+    "description": "Exit",
+    "key": "Q",
+    "alt": 1,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Mount",
+    "group": "General",
+    "description": "Mount/Dismount",
+    "key": "M",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Pickup",
+    "group": "General",
+    "description": "Pickup Floor Item",
+    "key": "Tab",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "CreaturePickup",
+    "group": "General",
+    "description": "Creature Item Pickup",
+    "key": "X",
+    "alt": 0,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "CreatureAutoPickup",
+    "group": "General",
+    "description": "Creature Auto Pickup",
+    "key": "A",
+    "alt": 1,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 0
+  },
+  {
+    "function": "Trade",
+    "group": "General",
+    "description": "Request Trade",
+    "key": "T",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "AddGroupMember",
+    "group": "General",
+    "description": "Recruit Group Member",
+    "key": "G",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 1
+  },
+  {
+    "function": "ChangeAttackmode",
+    "group": "Toggle",
+    "description": "Toggle Attack Mode",
+    "key": "H",
+    "alt": 2,
+    "shift": 0,
+    "tilde": 2,
+    "ctrl": 1
+  },
+  {
+    "function": "AttackmodePeace",
+    "group": "Toggle",
+    "description": "Set Attack Mode : Peace",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "AttackmodeGroup",
+    "group": "Toggle",
+    "description": "Set Attack Mode : Group",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "AttackmodeGuild",
+    "group": "Toggle",
+    "description": "Set Attack Mode : Guild",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "AttackmodeEnemyguild",
+    "group": "Toggle",
+    "description": "Set Attack Mode : Enemy Guild",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "AttackmodeRedbrown",
+    "group": "Toggle",
+    "description": "Set Attack Mode : Red/Brown",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "AttackmodeAll",
+    "group": "Toggle",
+    "description": "Set Attack Mode : All",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "ChangePetmode",
+    "group": "Toggle",
+    "description": "Toggle Pet Mode",
+    "key": "A",
+    "alt": 0,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 1
+  },
+  {
+    "function": "PetmodeBoth",
+    "group": "Toggle",
+    "description": "Set Pet Mode : Both",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "PetmodeMoveonly",
+    "group": "Toggle",
+    "description": "Set Pet Mode : Move Only",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "PetmodeAttackonly",
+    "group": "Toggle",
+    "description": "Set Pet Mode : Attack Only",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "PetmodeNone",
+    "group": "Toggle",
+    "description": "Set Pet Mode : None",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "PetmodeFocusMasterTarget",
+    "group": "Toggle",
+    "description": "Set Pet Mode : Focus Master Target",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Autorun",
+    "group": "Toggle",
+    "description": "Toggle Autorun",
+    "key": "D",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Cameramode",
+    "group": "Toggle",
+    "description": "Toggle Camera Mode",
+    "key": "Insert",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "Screenshot",
+    "group": "Toggle",
+    "description": "Take Screenshot",
+    "key": "PrintScreen",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "DropView",
+    "group": "Toggle",
+    "description": "Toggle Dropview",
+    "key": "Tab",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  },
+  {
+    "function": "TargetSpellLockOn",
+    "group": "Combat",
+    "description": "Hold to enable target spell lock-on",
+    "key": "None",
+    "alt": 2,
+    "shift": 2,
+    "tilde": 2,
+    "ctrl": 2
+  }
+]

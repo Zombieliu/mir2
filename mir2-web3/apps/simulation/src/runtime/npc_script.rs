@@ -180,19 +180,23 @@ pub(super) fn parse_crystal_npc_links(line: &str) -> Vec<NpcDialogLinkState> {
     let mut links = Vec::new();
     let mut remainder = line;
 
-    while let Some(start) = remainder.find('<') {
-        let after_start = &remainder[start + 1..];
-        let Some(end) = after_start.find('>') else {
-            break;
+    while let Some((_, end, inside, colour_wrapped)) = next_crystal_npc_markup(remainder) {
+        let link_markup = if colour_wrapped {
+            inside
+                .rsplit_once('/')
+                .filter(|(link, _colour)| link.contains('/'))
+                .map(|(link, _colour)| link)
+                .unwrap_or(inside)
+        } else {
+            inside
         };
-        let inside = &after_start[..end];
-        if let Some((text, target)) = inside.rsplit_once('/') {
+        if let Some((text, target)) = link_markup.rsplit_once('/') {
             links.push(NpcDialogLinkState {
                 text: text.trim().to_string(),
                 target: normalize_crystal_npc_label(target.trim()),
             });
         }
-        remainder = &after_start[end + 1..];
+        remainder = &remainder[end..];
     }
 
     links
@@ -202,18 +206,38 @@ pub(super) fn strip_crystal_npc_links(line: &str) -> String {
     let mut output = String::new();
     let mut remainder = line;
 
-    while let Some(start) = remainder.find('<') {
+    while let Some((start, end, _, _)) = next_crystal_npc_markup(remainder) {
         output.push_str(&remainder[..start]);
-        let after_start = &remainder[start + 1..];
-        let Some(end) = after_start.find('>') else {
-            output.push_str(&remainder[start..]);
-            return output;
-        };
-        remainder = &after_start[end + 1..];
+        remainder = &remainder[end..];
     }
 
     output.push_str(remainder);
     output
+}
+
+fn next_crystal_npc_markup(line: &str) -> Option<(usize, usize, &str, bool)> {
+    let start = line.find('<')?;
+    let after_open = start + 1;
+    if line[after_open..].starts_with('<') {
+        let content_start = after_open + 1;
+        let close = line[content_start..].find(">>")?;
+        let content_end = content_start + close;
+        Some((
+            start,
+            content_end + 2,
+            &line[content_start..content_end],
+            true,
+        ))
+    } else {
+        let close = line[after_open..].find('>')?;
+        let content_end = after_open + close;
+        Some((
+            start,
+            content_end + 1,
+            &line[after_open..content_end],
+            false,
+        ))
+    }
 }
 
 pub(super) fn normalize_crystal_npc_label(label: &str) -> String {
@@ -254,7 +278,11 @@ pub(super) fn parse_crystal_label_target(target: &str) -> (String, Vec<String>) 
 
 #[cfg(test)]
 mod crystal_label_compat_tests {
-    use super::parse_crystal_label_target;
+    use super::{
+        crystal_npc_section, parse_crystal_label_target, parse_crystal_npc_links,
+        strip_crystal_npc_links,
+    };
+    use mir2_game_data::crystal_npc_script_by_key;
 
     #[test]
     fn bracketed_crystal_callnpc_labels_preserve_labels_and_arguments() {
@@ -266,6 +294,70 @@ mod crystal_label_compat_tests {
             parse_crystal_label_target("[@Buy](1, two)"),
             ("@Buy".to_string(), vec!["1".to_string(), "two".to_string()])
         );
+    }
+
+    #[test]
+    fn board_links_preserve_coloured_targets_and_inline_text() {
+        let board = crystal_npc_script_by_key("BichonProvince/BichonWall/Board")
+            .expect("real Board script should be present");
+        let main = crystal_npc_section(&board, "@Main").expect("Board main section");
+
+        let coloured = main
+            .lines
+            .iter()
+            .filter(|line| line.starts_with("<<"))
+            .flat_map(|line| parse_crystal_npc_links(line))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            coloured
+                .iter()
+                .map(|link| (link.text.as_str(), link.target.as_str()))
+                .collect::<Vec<_>>(),
+            vec![
+                ("Create Hero", "@CreateHero"),
+                ("ReviveHero", "@ReviveHero"),
+                ("SealHero", "@SealHero"),
+            ]
+        );
+        assert!(main
+            .lines
+            .iter()
+            .filter(|line| line.starts_with("<<"))
+            .all(|line| strip_crystal_npc_links(line).is_empty()));
+
+        let use_line = main
+            .lines
+            .iter()
+            .find(|line| line.starts_with("<Use."))
+            .expect("Board inline prose link");
+        let use_links = parse_crystal_npc_links(use_line);
+        assert_eq!(use_links.len(), 1);
+        assert_eq!(use_links[0].text, "Use.");
+        assert_eq!(use_links[0].target, "@main-1");
+        assert_eq!(
+            strip_crystal_npc_links(use_line).trim(),
+            "teleport to the village stores"
+        );
+
+        let stores = crystal_npc_section(&board, "@main-1").expect("Board stores section");
+        let first_store_line = stores
+            .lines
+            .iter()
+            .find(|line| line.contains("Weapon shop"))
+            .expect("Board multi-link store line");
+        let store_links = parse_crystal_npc_links(first_store_line);
+        assert_eq!(
+            store_links
+                .iter()
+                .map(|link| (link.text.as_str(), link.target.as_str()))
+                .collect::<Vec<_>>(),
+            vec![
+                ("Weapon shop", "@go-weap"),
+                ("Armour shop", "@go-cloth"),
+                ("Inn", "@go-inn"),
+            ]
+        );
+        assert!(strip_crystal_npc_links(first_store_line).trim().is_empty());
     }
 }
 
@@ -701,6 +793,10 @@ pub(super) fn run_crystal_npc_script_impl(
             );
             if label_key == "STORAGE" {
                 packets.extend(crystal_npc_storage_open_packets(world));
+            } else if label_key == "REFINE" {
+                packets.extend(super::refine_oven::menu(world));
+            } else if label_key == "REFINECOLLECT" {
+                packets.extend(super::refine_oven::collect(world));
             } else {
                 packets.extend(service_packets);
             }
@@ -1451,10 +1547,16 @@ pub(super) fn crystal_npc_conquest_owner_name(world: &World) -> String {
 }
 
 pub(super) fn crystal_npc_check_permission(world: &World, _parts: &[&str]) -> bool {
-    let guild = &world
-        .resource::<Stage5SystemsResource>()
-        .stage5_systems
-        .guild;
+    if super::shared_guilds::enabled(world) {
+        return super::shared_guilds::is_guild_leader(world);
+    }
+    let projected = super::shared_guilds::project_legacy_shape(world);
+    let guild = projected.as_ref().unwrap_or(
+        &world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .guild,
+    );
     guild.rank.eq_ignore_ascii_case("Guild Chief")
         || guild
             .permissions
@@ -1480,10 +1582,13 @@ pub(super) fn crystal_npc_has_gt(world: &World) -> bool {
 }
 
 pub(super) fn crystal_npc_in_guild(world: &World, parts: &[&str]) -> bool {
-    let guild = &world
-        .resource::<Stage5SystemsResource>()
-        .stage5_systems
-        .guild;
+    let projected = super::shared_guilds::project_legacy_shape(world);
+    let guild = projected.as_ref().unwrap_or(
+        &world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .guild,
+    );
     if guild.name.is_empty() {
         return false;
     }
@@ -1966,6 +2071,19 @@ pub(super) fn execute_crystal_npc_action_line(
         }
         "GIVEGOLD" => {
             crystal_npc_give_gold(world, &parts[1..]);
+            CrystalNpcActionControl::Continue
+        }
+        "GIVEPEARLS" | "TAKEPEARLS" => {
+            if let Some(amount) = parts.get(1).and_then(|value| value.parse::<u32>().ok()) {
+                let mut state = world.resource_mut::<Stage5SystemsResource>();
+                let balance = &mut state.stage5_systems.intelligent_creature_pearls;
+                let current = (*balance).max(0) as u32;
+                *balance = if command == "GIVEPEARLS" {
+                    current.saturating_add(amount).min(i32::MAX as u32) as i32
+                } else {
+                    current.saturating_sub(amount) as i32
+                };
+            }
             CrystalNpcActionControl::Continue
         }
         "GIVECITYCURRENCY" => {
@@ -2990,6 +3108,9 @@ pub(super) fn crystal_npc_teleport_gt_packets(world: &mut World) -> Option<Vec<S
 }
 
 pub(super) fn crystal_npc_add_to_guild(world: &mut World, parts: &[&str]) {
+    if super::shared_guilds::enabled(world) {
+        return;
+    }
     let guild_name = parts.first().copied().unwrap_or("NewbieGuild").to_string();
     let player_name = stage5_player_name(world);
     let mut resources = world.resource_mut::<Stage5SystemsResource>();
@@ -3068,6 +3189,7 @@ pub(super) fn crystal_npc_give_buff(world: &mut World, parts: &[&str]) {
     apply_or_refresh_buff(
         world,
         BuffState {
+            real_time_duration: None,
             key: key.clone(),
             name: stage5_item_name(&key),
             description: "Crystal NPC buff.".to_string(),
@@ -3146,7 +3268,9 @@ pub(super) fn crystal_npc_give_exp(world: &mut World, parts: &[&str]) {
     // Crystal `GainExp`: experience rolls into levels via the shared curve. The
     // resulting level/exp/HP changes reach the client through the world snapshot
     // emitted after the NPC interaction, so the level-up packets are discarded.
-    let _ = super::leveling::apply_experience_gain(world, amount.max(0));
+    let amount = u32::try_from(amount.max(0)).unwrap_or(u32::MAX);
+    let amount = super::stats::crystal_apply_social_exp_rate(world, amount);
+    let _ = super::leveling::apply_experience_gain(world, i64::from(amount));
 }
 
 pub(super) fn crystal_npc_load_value(world: &mut World, line: &str) {
@@ -3234,12 +3358,12 @@ impl SimulationSession {
 
     pub fn interact(&mut self, object_id: u32) -> Vec<ServerPacket> {
         let packets = self.interact_impl(object_id);
-        self.finalize_packets(packets)
+        self.finalize_journey_npc_packets(object_id, packets)
     }
 
     pub fn interact_shared_npc_snapshot(&mut self, npc: &WorldEntitySnapshot) -> Vec<ServerPacket> {
         let packets = self.interact_shared_npc_snapshot_impl(npc);
-        self.finalize_packets(packets)
+        self.finalize_journey_npc_packets(npc.object_id, packets)
     }
 
     pub fn call_shared_npc_snapshot(
@@ -3248,16 +3372,27 @@ impl SimulationSession {
         key: &str,
     ) -> Vec<ServerPacket> {
         let packets = self.call_shared_npc_snapshot_impl(npc, key);
-        self.finalize_packets(packets)
+        self.finalize_journey_npc_packets(npc.object_id, packets)
     }
 
     pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
         let packets = self.call_npc_impl(object_id, key);
-        self.finalize_packets(packets)
+        self.finalize_journey_npc_packets(object_id, packets)
     }
 
     pub fn select_npc_dialog_target(&mut self, target: &str) -> Vec<ServerPacket> {
+        let object_id = self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()
+            .map(|dialog| dialog.npc_object_id);
         let packets = self.select_npc_dialog_target_impl(target);
+        match object_id {
+            Some(object_id) => self.finalize_journey_npc_packets(object_id, packets),
+            None => self.finalize_packets(packets),
+        }
+    }
+
+    fn finalize_journey_npc_packets(&mut self, object_id: u32, mut packets: Vec<ServerPacket>) -> Vec<ServerPacket> {
+        packets.extend(super::quests::newcomer_v2_events::observe_committed_command(
+            self.app.world_mut(), super::quests::newcomer_v2_events::CommandContext::Npc(object_id), &packets));
         self.finalize_packets(packets)
     }
 
@@ -3410,6 +3545,12 @@ impl SimulationSession {
             return self.select_npc_dialog_target_impl(requested_key);
         }
 
+        if normalized_label.eq_ignore_ascii_case("@CREATEGUILD") {
+            // This is a privileged built-in, not an arbitrary script label.
+            // Require an already displayed NPC page rather than opening one implicitly.
+            return Vec::new();
+        }
+
         let mut packets = self.interact_impl(object_id);
         let active_npc_object_id = self
             .app
@@ -3493,6 +3634,10 @@ impl SimulationSession {
                 .is_none_or(|input| !crystal_npc_labels_match(&input.target, &normalized_target))
         {
             return Vec::new();
+        }
+
+        if normalized_target.eq_ignore_ascii_case("@CREATEGUILD") {
+            return self.grant_shared_guild_creation_from_npc();
         }
 
         if let Some(command) = parse_explicit_npc_quest_command(&normalized_target) {

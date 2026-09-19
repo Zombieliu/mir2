@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-09-02T23:23:44Z",
+  "checkpoint": "native-ui-parity-20260903-item-true-size",
+  "implementation": {
+    "baselineCommit": "cb2c4ec3832bd589014178b15e3ca05cb70e05da",
+    "branch": "codex/windows-player-journey",
+    "pullRequest": "https://github.com/Zombieliu/mir2/pull/250",
+    "baseBranch": "codex/windows-visual-parity",
+    "draft": true,
+    "scope": "source, original-asset and headless geometry/logic evidence; no current-source running-game EXE or visual acceptance",
+    "hashes": [
+      {
+        "path": "apps/game-client/client-bevy/src/inventory.rs",
+        "localFileSha256": "49f7baa095a9dda1436cf9bb0741211a7928e0c9462866811f0ed9f271803825",
+        "lfNormalizedSha256": "49f7baa095a9dda1436cf9bb0741211a7928e0c9462866811f0ed9f271803825"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/shop.rs",
+        "localFileSha256": "c5383211d72458381cab1041ffc319e5e606f8c35c3a01d987a753a3042c6398",
+        "lfNormalizedSha256": "c5383211d72458381cab1041ffc319e5e606f8c35c3a01d987a753a3042c6398"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/item_image.rs",
+        "localFileSha256": "67f9920b199f47d28b0ac7f4a7e405039f7f183f83322b17b0a040d40eebf1e4",
+        "lfNormalizedSha256": "67f9920b199f47d28b0ac7f4a7e405039f7f183f83322b17b0a040d40eebf1e4"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "localFileSha256": "4876eae81fb695cb15d41721b744e525777a198fee610422e6df183faf548069",
+        "lfNormalizedSha256": "4876eae81fb695cb15d41721b744e525777a198fee610422e6df183faf548069"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+        "localFileSha256": "69c383d9e9f0242ef00929cd19d0771090621576c49620fa4fd599b347c52159",
+        "lfNormalizedSha256": "69c383d9e9f0242ef00929cd19d0771090621576c49620fa4fd599b347c52159"
+      },
+      {
+        "path": "apps/game-client/platform-windows/src/gateway.rs",
+        "localFileSha256": "45f67ce7bf53d73af3d631a101d5b30c150ce2658522cf8b7eef721e14ddd8d4",
+        "lfNormalizedSha256": "45f67ce7bf53d73af3d631a101d5b30c150ce2658522cf8b7eef721e14ddd8d4"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/primary_item_image_tests.rs",
+        "localFileSha256": "e3ab36dca39fc366ed2d3f7bcfa7b713ff96476268a3f34a5302a32d1a42d32e",
+        "lfNormalizedSha256": "e3ab36dca39fc366ed2d3f7bcfa7b713ff96476268a3f34a5302a32d1a42d32e"
+      },
+      {
+        "path": "apps/game-client/client-bevy/src/crystal_ui/hud_item_image_tests.rs",
+        "localFileSha256": "be8f0f978d6d33f95ab1c7c98e0223d04047c488d0a7e565766daa5843f26293",
+        "lfNormalizedSha256": "be8f0f978d6d33f95ab1c7c98e0223d04047c488d0a7e565766daa5843f26293"
+      },
+      {
+        "path": "apps/game-client/client-bevy/test-fixtures/original-item-true-sizes.json",
+        "localFileSha256": "a36ff048c8cd50628f40c9f7613ea63c3a65b59a58c6eec894ba7d0925df70e2",
+        "lfNormalizedSha256": "a36ff048c8cd50628f40c9f7613ea63c3a65b59a58c6eec894ba7d0925df70e2"
+      },
+      {
+        "path": "apps/web/scripts/verify-item-true-size.mjs",
+        "localFileSha256": "eb470ef830cd82c4ff982766d4da1cacd4922e1b325464be5a60f86645ac5151",
+        "lfNormalizedSha256": "eb470ef830cd82c4ff982766d4da1cacd4922e1b325464be5a60f86645ac5151"
+      }
+    ],
+    "hashSemantics": {
+      "localFileSha256": "SHA-256 of final local file bytes after the full harness and formatting checks",
+      "lfNormalizedSha256": "UTF-8 text with CRLF normalized to LF; verify against staged Git blob content before commit"
+    }
+  },
+  "crystalSource": {
+    "revision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+    "scopedStatusClean": true,
+    "scopedStatus": [],
+    "files": [
+      {
+        "path": "Client/MirControls/MirItemCell.cs",
+        "sha256": "01d650b790e82f7d591ebb6162157672debe1df7a743e61b0d624bdf98ce3e84"
+      },
+      {
+        "path": "Client/MirControls/MirControl.cs",
+        "sha256": "6356acf1fd91ad8f38bd9f2d25f1e33c62dab1d9072bcbfef60a8b2e5e82bd26"
+      },
+      {
+        "path": "Client/MirControls/MirImageControl.cs",
+        "sha256": "e0805305c2762f9b503a10cd052970a8af4a26ba0daddcf56fe70fe82d3569cc"
+      },
+      {
+        "path": "Client/MirControls/MirGoodsCell.cs",
+        "sha256": "78d385de8e62a5e60dd75b58290986597a44f76595c659749d4fe90c1797042e"
+      },
+      {
+        "path": "Client/MirControls/MirAmountBox.cs",
+        "sha256": "d2f1cf4032bcbfb235138eece1d5a0dca94355d10a1bfaa44c3e75a086873b65"
+      },
+      {
+        "path": "Client/MirGraphics/MLibrary.cs",
+        "sha256": "afda6ebb7a163d745d6398ea5c92ce80524daa6fb85c6167a09514867cf6f8c8"
+      },
+      {
+        "path": "Client/MirScenes/Dialogs/InventoryDialog.cs",
+        "sha256": "36893aa25c2969cd1415e0c23114a5afe1a52af886c3e601baa09edd266271fd"
+      },
+      {
+        "path": "Client/MirScenes/Dialogs/CharacterDialog.cs",
+        "sha256": "9d892a2acb93ce753d1f224965d725205c8ca0c5288cc2a7167bd6e46e45a4ba"
+      },
+      {
+        "path": "Client/MirScenes/Dialogs/NPCDialogs.cs",
+        "sha256": "e6990182afb620554f6d379aade875a33a2c72ac26f0e9ec09af092461a9beea"
+      },
+      {
+        "path": "Client/MirScenes/Dialogs/TradeDialogs.cs",
+        "sha256": "93433bb70cc2eb6792e4039f794197c851ff085abba2ffed627811ed23c58baf"
+      },
+      {
+        "path": "Shared/Data/ItemData.cs",
+        "sha256": "8d0d549f299edd9c9379a3876f04ea2f9e827f0f703e7bca1eecfd8379fbf9f0"
+      }
+    ]
+  },
+  "tests": {
+    "environment": {
+      "toolchain": "1.95.0",
+      "targetDirectory": "C:/Users/Administrator/AppData/Local/Temp/mir2-stack-image-regression-44eb501f0d1842aeb14ce9fc23e1e23f",
+      "cargoBuildJobs": 2,
+      "cargoIncremental": 0,
+      "cargoProfileTestDebug": 0,
+      "cargoProfileDevDebug": 0,
+      "rustTestThreads": 1,
+      "locked": true,
+      "offline": true
+    },
+    "nativeUi": {
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui -- --quiet",
+      "passed": 562,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "exitCode": 0
+    },
+    "windows": {
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/platform-windows/Cargo.toml -- --quiet",
+      "passed": 528,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "exitCode": 0
+    },
+    "runtime": {
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/runtime/Cargo.toml -- --quiet",
+      "passed": 212,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "exitCode": 0
+    },
+    "uiCore": {
+      "command": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/ui-core/Cargo.toml -- --quiet",
+      "passed": 43,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 0,
+      "exitCode": 0
+    },
+    "focusedPrimary": {
+      "reproduceCommand": "cargo +1.95.0 test --locked --offline --manifest-path apps/game-client/client-bevy/Cargo.toml --features native-ui primary_ -- --quiet",
+      "passed": 13,
+      "failed": 0,
+      "ignored": 0,
+      "filteredOut": 549,
+      "exitCode": 0,
+      "note": "Subset of the 562 native tests, not 13 additional tests."
+    },
+    "newTestCount": {
+      "nativeUi": 11,
+      "windows": 1,
+      "nativeBreakdown": {
+        "primaryEcs": 7,
+        "beltEcs": 2,
+        "itemModel": 2
+      },
+      "replacedLegacyGeometryTest": "inventory_icons_use_true_size_centering_and_fail_closed_without_geometry now loads actual PNGs; test remains enabled"
+    },
+    "nativeGeometry": {
+      "actualOriginalPngCount": 1003,
+      "cellSizes": [
+        [
+          36,
+          32
+        ],
+        [
+          32,
+          32
+        ],
+        [
+          40,
+          32
+        ],
+        [
+          35,
+          35
+        ],
+        [
+          38,
+          34
+        ]
+      ],
+      "exactNodeGeometryAssertions": 5015,
+      "comparison": "Every exported PNG is decoded with Bevy; fixture alpha sizes and source integer node positions are checked. This is not a GPU or screenshot comparison."
+    },
+    "itemIconGate": {
+      "command": "npm.cmd --prefix apps/web run test:item-icons",
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0,
+      "itemCount": 1628,
+      "catalogueImageCount": 913,
+      "quantityImageCount": 11,
+      "requiredImageCount": 924,
+      "exitCode": 0
+    },
+    "formatting": {
+      "toolchain": "1.95.0",
+      "manifestPaths": [
+        "apps/game-client/client-bevy/Cargo.toml",
+        "apps/game-client/platform-windows/Cargo.toml",
+        "apps/game-client/runtime/Cargo.toml",
+        "apps/game-client/ui-core/Cargo.toml"
+      ],
+      "arguments": "fmt --manifest-path <path> -- --check",
+      "exitCode": 0
+    },
+    "scriptSyntax": {
+      "command": "node --check apps/web/scripts/verify-item-true-size.mjs",
+      "exitCode": 0
+    },
+    "diffWhitespace": {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    "fullServerRerun": false,
+    "historicalServerEvidenceNotReusedAsCurrent": true,
+    "remoteCi": "Read separately after pushing the forthcoming commit; local passes do not imply remote CI success."
+  },
+  "originalAssets": {
+    "verifier": "apps/web/scripts/verify-item-true-size.mjs",
+    "reproduceCommand": "node apps/web/scripts/verify-item-true-size.mjs <Crystal-client-Data-directory>",
+    "fixture": "apps/game-client/client-bevy/test-fixtures/original-item-true-sizes.json",
+    "fixtureMatches": true,
+    "verifiedOriginalPngCount": 1003,
+    "sourceLibrarySha256": "5d5f6e0251d2e5f7d87cb18352be2c2999ea311a7aa988de63dcf2fa78f9fb5a",
+    "sourceLibraryBytes": 4035433,
+    "rgbaAndGeometryFingerprintSha256": "e453722861498d71ae0facaa90c506d0e3d4a9ec362431639499255b9c84849d",
+    "differentSizeCount": 550,
+    "different35PixelOffsetCount": 478,
+    "visualAccepted": false,
+    "accepted": false,
+    "globalParityPercent": null,
+    "method": "Sharp independently decodes every currently exported Items PNG and checks exact RGBA plus full-frame metadata against original Items.Lib. Four source edge scans compute true size independently of the Rust bounding-box implementation.",
+    "fixtureReproduction": "Final stdout matches the checked-in fixture after newline normalization.",
+    "denominator": "All 1003 currently exported Items PNGs, not the entire original library or all game surfaces.",
+    "originalAssetFilesChanged": false
+  },
+  "fixedContracts": [
+    "Current concrete source Info and count select UserItem.Image, including valid image zero, without changing realInfo, raw user count, name or legacy metadata.",
+    "Without source Info, a positive legacy image is usable; legacy zero stays absent and receives no abbreviated-name substitute.",
+    "Alpha-bound SIZE centres the unchanged full PNG with signed integer division toward zero; no cropping, stretching, alpha-origin subtraction or library offsets.",
+    "Default white image handles, missing/removed assets and missing image resources cannot show invented or stale icons.",
+    "Belt selection is ordered before shared layout; late image availability needs no further inventory mutation.",
+    "Fourteen equipment cells use 36x32 rather than 32x32; personal storage uses 36x32 rather than 32x30; source positions, pitch and slot addressing remain.",
+    "Oversized original icons are not clipped by item cells, the bag window/grid or NPC row; hit rectangles are not expanded to fit art.",
+    "Source StackSize greater than one shows count one, including on the belt.",
+    "Primary and migrated amount, warehouse-side and trade icon regions share the helper; their entire windows, operations and state overlays are not accepted."
+  ],
+  "backlog": {
+    "count": 33,
+    "unchangedFromBaseline": true,
+    "ids": [
+      "WN-ACTOR-001",
+      "WN-ACTOR-002",
+      "WN-AUDIO-001",
+      "WN-BOOT-001",
+      "WN-BOOT-002",
+      "WN-CHAR-001",
+      "WN-CHAR-002",
+      "WN-CHAT-001",
+      "WN-CHAT-002",
+      "WN-CHAT-003",
+      "WN-HUD-001",
+      "WN-HUD-002",
+      "WN-HUD-003",
+      "WN-HUD-004",
+      "WN-INPUT-001",
+      "WN-INPUT-002",
+      "WN-INPUT-003",
+      "WN-ITEM-001",
+      "WN-ITEM-002",
+      "WN-ITEM-003",
+      "WN-ITEM-004",
+      "WN-QA-001",
+      "WN-QA-002",
+      "WN-QUEST-001",
+      "WN-QUEST-002",
+      "WN-QUEST-003",
+      "WN-QUEST-004",
+      "WN-UI-001",
+      "WN-WORLD-001",
+      "WN-WORLD-002",
+      "WN-WORLD-003",
+      "WN-WORLD-004",
+      "WN-WORLD-005"
+    ]
+  },
+  "openLeaves": [
+    "TradeDialog and GuestTradeDialog source window/cell layout, gold/confirm/cancel state and full transaction UI",
+    "Guild item operations/overlays, full text editing, window movement/overlap/topmost routing and cross-action throttle",
+    "Other concrete-item surfaces and deliberate base-image GameShop/Quest/craft/mail-preview layouts",
+    "FloorItems and world drop presentation",
+    "WN-CHAR-002 source item operations, paired-slot choice and raw-Crystal versus normalized-Gateway slot contract",
+    "Remaining registered UI/HUD/world/actor/audio/input/state denominator",
+    "Final-source manual transitions, original paired state, trusted package/light, real DPI, soak and human acceptance"
+  ],
+  "safety": {
+    "computerUsePaused": true,
+    "reason": "User Escape; no new explicit foreground resumption",
+    "applicationWindowLaunched": false,
+    "inputInjected": false,
+    "screenshotCaptured": false,
+    "currentSourceRunningGameExeClaimed": false,
+    "testExecutablesAreNotApplicationAcceptance": true,
+    "protocolSchemaChanged": false,
+    "authoritativeStateChanged": false,
+    "saveDataChanged": false,
+    "authenticationChanged": false,
+    "zoneCodeChanged": false,
+    "originalPngsChanged": false,
+    "originalLibraryChanged": false,
+    "dependencyLocksChanged": false,
+    "unrelatedProcessesStopped": false,
+    "materialFilesDeletedOrMoved": false,
+    "priorRecoverablePdbBackupsUntouched": true
+  },
+  "visualAccepted": false,
+  "accepted": false,
+  "globalParityPercent": null
+}

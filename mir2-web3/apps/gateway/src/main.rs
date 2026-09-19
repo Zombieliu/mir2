@@ -78,15 +78,56 @@ async fn async_main() -> std::io::Result<()> {
     };
     let config = configure_save_recovery_mac_key(config, encoded_recovery_key.as_deref())
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
     let chat_hub = ChatBroadcastHub::from_env()?;
     let _chat_broadcast_task = chat_hub.spawn();
 
-    tokio::try_join!(
-        run_tcp_gateway(&tcp_addr, config.clone(), chat_hub.clone()),
-        run_web_gateway(&web_addr, config, chat_hub),
-    )?;
+    tokio::select! {
+        result = async {
+            tokio::try_join!(
+                run_tcp_gateway(&tcp_addr, config.clone(), chat_hub.clone()),
+                run_web_gateway(&web_addr, config, chat_hub),
+            )
+        } => { result?; }
+        signal = tokio::signal::ctrl_c() => {
+            signal?;
+            eprintln!("gateway interrupt received; settling the server-owned guild clock");
+        }
+        _ = operator_stdin_shutdown() => {
+            eprintln!("gateway operator shutdown received; settling the server-owned guild clock");
+        }
+    }
+    // Operators should disconnect players before stopping the local server.
+    // Joining the clock completes any in-flight File publication before exit.
+    drop(_guild_clock);
 
     Ok(())
+}
+
+// Opt-in local console control for hosts whose PTY cancellation kills the
+// process instead of delivering Ctrl+C. Disconnect players before using it.
+async fn operator_stdin_shutdown() {
+    if env::var("MIR2_GATEWAY_STDIN_SHUTDOWN").as_deref() != Ok("1") {
+        std::future::pending::<()>().await;
+    }
+    let (sender, receiver) = tokio::sync::oneshot::channel();
+    let reader = std::thread::Builder::new()
+        .name("gateway-operator-console".into())
+        .spawn(move || {
+            use std::io::BufRead;
+            for line in std::io::stdin().lock().lines() {
+                let Ok(line) = line else { break };
+                if line.trim() == "shutdown" {
+                    let _ = sender.send(());
+                    return;
+                }
+            }
+        });
+    if reader.is_ok() && receiver.await.is_ok() {
+        return;
+    }
+    // EOF or an unavailable console must never stop the server.
+    std::future::pending::<()>().await;
 }
 
 fn configure_save_recovery_mac_key(

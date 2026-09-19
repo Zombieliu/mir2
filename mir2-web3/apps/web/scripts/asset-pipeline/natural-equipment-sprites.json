@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "mir2-natural-equipment-sprite-requirements",
+  "profiles": [
+    {
+      "class": "Warrior",
+      "gender": "Male",
+      "hair": 0,
+      "equipment": [
+        { "slot": "armour", "key": "crystal-item-1221" },
+        { "slot": "weapon", "key": "crystal-item-1216" }
+      ]
+    },
+    {
+      "class": "Wizard",
+      "gender": "Male",
+      "hair": 0,
+      "equipment": [
+        { "slot": "armour", "key": "crystal-item-1223" },
+        { "slot": "weapon", "key": "crystal-item-1217" }
+      ]
+    },
+    {
+      "class": "Taoist",
+      "gender": "Male",
+      "hair": 0,
+      "equipment": [
+        { "slot": "armour", "key": "crystal-item-1190" },
+        { "slot": "weapon", "key": "crystal-item-268" }
+      ]
+    }
+  ]
+}

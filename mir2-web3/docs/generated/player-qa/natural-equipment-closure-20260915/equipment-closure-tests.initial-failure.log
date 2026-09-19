@@ -1,0 +1,68 @@
+TAP version 13
+# Subtest: equipment item types/shapes derive libraries, and gender selects complete action blocks
+ok 1 - equipment item types/shapes derive libraries, and gender selects complete action blocks
+  ---
+  duration_ms: 7.4884
+  type: 'test'
+  ...
+# Subtest: the former hair-only package fails both library closure and the verify CLI
+ok 2 - the former hair-only package fails both library closure and the verify CLI
+  ---
+  duration_ms: 107.7605
+  type: 'test'
+  ...
+# Subtest: verified standalone body and weapon close an existing hair atlas without rebuilding it
+ok 3 - verified standalone body and weapon close an existing hair atlas without rebuilding it
+  ---
+  duration_ms: 948.508
+  type: 'test'
+  ...
+# Subtest: removing a movement frame cannot shrink the equipment denominator
+ok 4 - removing a movement frame cannot shrink the equipment denominator
+  ---
+  duration_ms: 510.0213
+  type: 'test'
+  ...
+# Subtest: same-sized pixel substitutions and invalid original offsets fail integrity
+ok 5 - same-sized pixel substitutions and invalid original offsets fail integrity
+  ---
+  duration_ms: 501.8699
+  type: 'test'
+  ...
+# Subtest: source identity changes and a corrupt atlas page fail closed
+not ok 6 - source identity changes and a corrupt atlas page fail closed
+  ---
+  duration_ms: 430.6363
+  type: 'test'
+  location: 'E:\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\test-equipment-sprite-closure.mjs:129:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert(report.errors.some(({ library, reason }) => library === "CHair/00" && /atlas page hash/.test(reason)))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///E:/mir2-player-journey/mir2-web3/apps/web/scripts/test-equipment-sprite-closure.mjs:137:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a standalone first build emits a hash-bound atlas with exact source offsets that passes closure
+ok 7 - a standalone first build emits a hash-bound atlas with exact source offsets that passes closure
+  ---
+  duration_ms: 2209.2173
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 6
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 4805.0712

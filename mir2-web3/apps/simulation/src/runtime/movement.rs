@@ -10,17 +10,20 @@ use super::components::{
     PlayerVitals, Position, RemotePlayer, SelfPlayer,
 };
 use super::map::{
-    apply_current_player_position_map_transfer, is_current_map_transfer_source,
+    apply_current_player_position_map_transfer, collision_data_for_map_or_config,
+    is_current_map_transfer_source, is_static_spawnable_point_with_collision,
     normalize_map_file_name, relocate_player_to_map,
 };
 use super::map_events::map_coordinate_hint_packets_for_path;
 use super::monster_ai::advance_world;
+use super::monsters::deterministic_roll;
 use super::npc::dismiss_dialog;
 use super::packets::{object_health_info_for_entity, object_revived_info_for_entity};
 use super::pathfind;
 use super::resources::{
-    crystal_player_can_run, is_in_world, mark_crystal_player_move, MapRuntimeResource,
-    PlayerRuntimeResource, RuntimeConfigResource,
+    crystal_player_can_run, is_in_world, mark_crystal_player_move,
+    reset_crystal_player_movement_timing, runtime_tick, MapRuntimeResource, PlayerRuntimeResource,
+    RuntimeConfigResource, RuntimeQueueResource,
 };
 use super::session::SimulationSession;
 
@@ -198,17 +201,112 @@ pub(super) fn current_location(world: &World) -> UserLocation {
 }
 
 pub(super) fn town_teleport_packets(world: &mut World) -> Vec<ServerPacket> {
-    if let Some(player) = player_entity(world) {
-        let spawn = world
-            .resource::<RuntimeConfigResource>()
-            .config
-            .spawn
-            .clone();
-        world
-            .entity_mut(player)
-            .insert((Position(spawn), Facing(MirDirection::Down)));
+    let (bind_position, direction) = {
+        let config = &world.resource::<RuntimeConfigResource>().config;
+        let direction = world.resource::<PlayerRuntimeResource>().player_direction;
+        (config.spawn.clone(), direction)
+    };
+    teleport_to_bind_map(world, bind_position, direction)
+}
+
+/// Crystal `PlayerObject.TeleportEscape(20)` samples at most twenty valid
+/// locations in the square around the character's bind point, on the bind map.
+/// It is intentionally different from `TeleportRandom`, which remains on the
+/// current map and uses a 200-cell radius.
+pub(super) fn crystal_dungeon_escape_packets(world: &mut World) -> Option<Vec<ServerPacket>> {
+    let player = player_entity(world)?;
+    let start = entity_position(world, player)?;
+    let (config, bind_map, bind_position, direction) = {
+        let config = world.resource::<RuntimeConfigResource>().config.clone();
+        let bind_map = config.map.clone();
+        let bind_position = config.spawn.clone();
+        let direction = world.resource::<PlayerRuntimeResource>().player_direction;
+        (config, bind_map, bind_position, direction)
+    };
+    if !config.map_is_allowed(&bind_map.file_name) {
+        return None;
     }
 
+    let collision = collision_data_for_map_or_config(&config, &bind_map.file_name);
+    let tick = runtime_tick(world);
+    let actor_seed = usize::try_from(current_player_object_id(world).unwrap_or_default())
+        .unwrap_or_default()
+        ^ usize::try_from(start.x.unsigned_abs())
+            .unwrap_or_default()
+            .rotate_left(7)
+        ^ usize::try_from(start.y.unsigned_abs())
+            .unwrap_or_default()
+            .rotate_left(13);
+    const CRYSTAL_ESCAPE_SPAN: u64 = 200;
+    for attempt in 0..20_usize {
+        let dx = i32::try_from(deterministic_roll(
+            tick,
+            actor_seed,
+            attempt * 2,
+            CRYSTAL_ESCAPE_SPAN,
+        ))
+        .ok()?
+            - 100;
+        let dy = i32::try_from(deterministic_roll(
+            tick,
+            actor_seed,
+            attempt * 2 + 1,
+            CRYSTAL_ESCAPE_SPAN,
+        ))
+        .ok()?
+            - 100;
+        let candidate = Point {
+            x: bind_position.x.saturating_add(dx),
+            y: bind_position.y.saturating_add(dy),
+        };
+        if is_static_spawnable_point_with_collision(
+            &config,
+            &bind_map.file_name,
+            &collision,
+            &candidate,
+        ) {
+            return Some(teleport_to_bind_map(world, candidate, direction));
+        }
+    }
+    None
+}
+
+fn teleport_to_bind_map(
+    world: &mut World,
+    position: Point,
+    direction: MirDirection,
+) -> Vec<ServerPacket> {
+    let bind_map = world.resource::<RuntimeConfigResource>().config.map.clone();
+    let current_map_file_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    if normalize_map_file_name(&current_map_file_name)
+        != normalize_map_file_name(&bind_map.file_name)
+    {
+        return relocate_player_to_map(world, bind_map, position, direction, None);
+    }
+
+    let Some(player) = player_entity(world) else {
+        return Vec::new();
+    };
+    dismiss_dialog(world);
+    {
+        let mut queue = world.resource_mut::<RuntimeQueueResource>();
+        queue.pending_combat_actions.clear();
+        queue.pending_ground_spell_actions.clear();
+        queue.pending_movement_command = None;
+    }
+    reset_crystal_player_movement_timing(world);
+    world
+        .entity_mut(player)
+        .insert((Position(position.clone()), Facing(direction)));
+    {
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_position = position;
+        runtime.player_direction = direction;
+    }
     vec![ServerPacket::UserLocation {
         location: current_location(world),
     }]
@@ -296,7 +394,44 @@ pub(super) fn crystal_random_same_map_teleport_packets(
     let direction = world.resource::<PlayerRuntimeResource>().player_direction;
     let map_info = world.resource::<MapRuntimeResource>().current_map.clone();
 
-    for radius in 1..=max_radius.max(1) {
+    // Crystal chooses a random valid point inside the requested radius. The
+    // old deterministic stand-in scanned from radius one upward, which made a
+    // 200-cell RandomTeleport move only one tile and left the player inside
+    // the same attacking pack. Sample the full square first, while avoiding
+    // the statistically exceptional near-origin band. A descending exhaustive
+    // fallback keeps tiny or heavily blocked maps functional.
+    let radius_limit = max_radius.max(1);
+    let minimum_distance = (radius_limit / 4).max(1);
+    let span = u64::try_from(radius_limit.saturating_mul(2).saturating_add(1)).ok()?;
+    let tick = runtime_tick(world);
+    let actor_seed = usize::try_from(current_player_object_id(world).unwrap_or_default())
+        .unwrap_or_default()
+        ^ usize::try_from(start.x.unsigned_abs())
+            .unwrap_or_default()
+            .rotate_left(7)
+        ^ usize::try_from(start.y.unsigned_abs())
+            .unwrap_or_default()
+            .rotate_left(13);
+    for attempt in 0..512_usize {
+        let dx = i32::try_from(deterministic_roll(tick, actor_seed, attempt * 2, span)).ok()?
+            - radius_limit;
+        let dy = i32::try_from(deterministic_roll(tick, actor_seed, attempt * 2 + 1, span)).ok()?
+            - radius_limit;
+        if dx.abs().max(dy.abs()) < minimum_distance {
+            continue;
+        }
+        let candidate = Point {
+            x: start.x.saturating_add(dx),
+            y: start.y.saturating_add(dy),
+        };
+        if can_occupy(world, candidate.clone(), Some(player)) {
+            return Some(relocate_player_to_map(
+                world, map_info, candidate, direction, None,
+            ));
+        }
+    }
+
+    for radius in (minimum_distance..=radius_limit).rev() {
         for dx in -radius..=radius {
             for dy in -radius..=radius {
                 if dx.abs().max(dy.abs()) != radius {
@@ -309,6 +444,25 @@ pub(super) fn crystal_random_same_map_teleport_packets(
                 if candidate == start {
                     continue;
                 }
+                if can_occupy(world, candidate.clone(), Some(player)) {
+                    return Some(relocate_player_to_map(
+                        world, map_info, candidate, direction, None,
+                    ));
+                }
+            }
+        }
+    }
+
+    for radius in 1..minimum_distance {
+        for dx in -radius..=radius {
+            for dy in -radius..=radius {
+                if dx.abs().max(dy.abs()) != radius {
+                    continue;
+                }
+                let candidate = Point {
+                    x: start.x.saturating_add(dx),
+                    y: start.y.saturating_add(dy),
+                };
                 if can_occupy(world, candidate.clone(), Some(player)) {
                     return Some(relocate_player_to_map(
                         world, map_info, candidate, direction, None,

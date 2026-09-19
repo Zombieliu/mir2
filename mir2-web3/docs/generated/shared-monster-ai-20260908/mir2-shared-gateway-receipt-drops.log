@@ -1,0 +1,6 @@
+
+running 1 test
+test routing::tests::lethal_delta_registers_death_penalty_drops_without_waiting_for_snapshot_tick ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 702 filtered out; finished in 1.84s
+

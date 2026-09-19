@@ -1,0 +1,18 @@
+
+running 13 tests
+test routing::tests::zone_soulfire_practice_tests::zone_fireball_practice_invalid_unlearned_and_stale_queued_life_are_rejected ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_fireball_practice_obeys_distinct_crystal_character_level_gates ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_fireball_practice_owner_only_spell_aware_dedupe_and_checkpoint_replay ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_fireball_practice_resolved_hit_threshold_save_reload_and_next_public_level ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_magic_practice_legacy_soulfire_checkpoint_preserves_pending_and_replay_fence ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_dead_caster_keeps_lawful_hit_and_logout_fence_drains_only_prior_receipts ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_invalid_owner_zero_damage_and_stale_life_are_rejected ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_normal_teardown_checkpoint_includes_prior_resolved_practice ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_obeys_original_character_level_gate ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_owner_only_dedupes_queue_and_later_replay ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_pending_and_dedupe_progress_survive_shared_checkpoint ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_resolved_hit_is_saved_reloaded_and_next_public_cast_uses_level_one ... ok
+test routing::tests::zone_soulfire_practice_tests::zone_soulfire_practice_stale_queued_receipt_cannot_follow_reconnect_or_revive ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 779 filtered out; finished in 44.03s
+

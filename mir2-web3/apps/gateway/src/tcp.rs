@@ -7,7 +7,9 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::{broadcast, mpsc, Semaphore};
 
 use crate::events::{default_gameplay_event_sink_from_env, SharedGameplayEventSink};
-use crate::routing::{SharedZoneLiveOutbound, ZoneLiveOutboundRegistration};
+use crate::routing::{
+    SharedZoneLiveOutbound, SharedZoneLiveOutboundSender, ZoneLiveOutboundRegistration,
+};
 use crate::session::{catch_gateway_panic, GatewayTeardownPersistenceOutcome};
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
@@ -17,6 +19,7 @@ pub mod chat_broadcast;
 use chat_broadcast::{recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol};
 
 const LIVE_ZONE_OUTBOUND_CAPACITY: usize = 256;
+const OWNER_LOCATION_OUTBOUND_CAPACITY: usize = 8;
 const DEFAULT_MAX_PERSISTENCE_SESSION_TASKS: usize = 2_048;
 
 pub async fn run_tcp_gateway(
@@ -144,6 +147,12 @@ async fn handle_client_inner(
     let (mut reader, mut writer) = stream.split();
     let (zone_outbound_tx, mut zone_outbound_rx) =
         mpsc::channel::<SharedZoneLiveOutbound>(LIVE_ZONE_OUTBOUND_CAPACITY);
+    let (owner_location_outbound_tx, mut owner_location_outbound_rx) =
+        mpsc::channel::<SharedZoneLiveOutbound>(OWNER_LOCATION_OUTBOUND_CAPACITY);
+    let zone_outbound_sender = SharedZoneLiveOutboundSender::new(
+        zone_outbound_tx,
+        owner_location_outbound_tx,
+    );
     let mut active_zone_outbound_registration_id = 0;
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
@@ -158,6 +167,18 @@ async fn handle_client_inner(
                     biased;
 
                     frame = &mut next_frame => break frame,
+                    outbound = owner_location_outbound_rx.recv() => {
+                        let Some(outbound) = outbound else {
+                            return Err(io::Error::new(
+                                io::ErrorKind::BrokenPipe,
+                                "shared Zone owner-location outbound channel closed",
+                            ));
+                        };
+                        if outbound.registration_id() != active_zone_outbound_registration_id {
+                            continue;
+                        }
+                        send_packet(&mut writer, &outbound.into_packet()).await?;
+                    }
                     outbound = zone_outbound_rx.recv() => {
                         let Some(outbound) = outbound else {
                             return Err(io::Error::new(
@@ -276,6 +297,9 @@ async fn handle_client_inner(
                     }
                     Err(error) => return Err(session_panic_io_error(error)),
                 };
+                let map_changed = responses
+                    .iter()
+                    .any(|packet| matches!(packet, ServerPacket::MapChanged { .. }));
                 if responses
                     .iter()
                     .any(|packet| matches!(packet, ServerPacket::LoginSuccess { .. }))
@@ -298,18 +322,26 @@ async fn handle_client_inner(
                 if leaves_world {
                     authenticated_account_id = None;
                 }
-                let next_registration = gateway_blocking(|| {
-                    session.register_zone_live_outbound(zone_outbound_tx.clone())
-                })
-                .map_err(session_panic_io_error)?;
-                active_zone_outbound_registration_id = next_registration
-                    .as_ref()
-                    .map(|registration| registration.registration_id())
-                    .unwrap_or(0);
-                if let Some(registration) = next_registration.as_ref() {
-                    registration.activate();
+                if active_identity.is_none() {
+                    active_zone_outbound_registration_id = 0;
+                    _zone_live_outbound_registration = None;
+                } else if _zone_live_outbound_registration.is_none()
+                    || starts_game
+                    || map_changed
+                {
+                    let next_registration = gateway_blocking(|| {
+                        session.register_zone_live_outbound(zone_outbound_sender.clone())
+                    })
+                    .map_err(session_panic_io_error)?;
+                    active_zone_outbound_registration_id = next_registration
+                        .as_ref()
+                        .map(|registration| registration.registration_id())
+                        .unwrap_or(0);
+                    if let Some(registration) = next_registration.as_ref() {
+                        registration.activate();
+                    }
+                    _zone_live_outbound_registration = next_registration;
                 }
-                _zone_live_outbound_registration = next_registration;
                 for response in responses {
                     send_packet(&mut writer, &response).await?;
                 }

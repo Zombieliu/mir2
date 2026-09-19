@@ -16,7 +16,8 @@ use bevy::{
 use crate::crystal_ui::assets::{safe_key_assets, CrystalButtonAssetSet};
 use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, CrystalLoginAction};
 use crate::crystal_ui::select::{
-    animate_character_previews, spawn_character_select_screen, CrystalSelectAction,
+    animate_character_previews, spawn_character_preview_at, spawn_character_select_screen,
+    CrystalSelectAction,
 };
 use crate::crystal_ui::spec::{self, CrystalButtonSpec};
 use crate::crystal_ui::widget::{
@@ -47,12 +48,13 @@ const GENDERS: [&str; 2] = ["Male", "Female"];
 const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
     spec::CrystalRect::new(348.0, 224.0, 328.0, 350.0);
 const AUX_CONFIRM_PANEL: spec::CrystalRect = spec::CrystalRect::new(348.0, 286.0, 328.0, 196.0);
+const CONNECTION_LOST_PANEL: spec::CrystalRect = spec::CrystalRect::new(284.0, 289.0, 456.0, 190.0);
 
 const NEW_CHARACTER_FRAME: spec::CrystalRect = spec::CrystalRect::new(218.0, 154.0, 588.0, 460.0);
 const NEW_CHARACTER_TITLE: spec::CrystalRect = spec::CrystalRect::new(424.0, 165.0, 187.0, 20.0);
 const NEW_CHARACTER_NAME_FIELD: spec::CrystalRect =
     spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0);
-const NEW_CHARACTER_PREVIEW: spec::CrystalRect = spec::CrystalRect::new(338.0, 404.0, 196.0, 302.0);
+const NEW_CHARACTER_PREVIEW_ANCHOR: (f32, f32) = (338.0, 404.0);
 const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 3] = [
     spec::CrystalRect::new(541.0, 450.0, 44.0, 42.0),
     spec::CrystalRect::new(591.0, 450.0, 44.0, 42.0),
@@ -304,6 +306,40 @@ enum NativeShellButton {
 
 pub struct Mir2NativeShellUiPlugin;
 
+#[derive(Component)]
+struct NativeLoginDoorBackground;
+
+#[derive(Resource)]
+struct NativeLoginDoorFrames(Vec<Handle<Image>>);
+
+fn animate_login_door(
+    time: Res<Time>,
+    mut shell: Option<ResMut<NativeShellModel>>,
+    frames: Option<Res<NativeLoginDoorFrames>>,
+    images: Res<Assets<Image>>,
+    mut backgrounds: Query<&mut ImageNode, With<NativeLoginDoorBackground>>,
+) {
+    let (Some(shell), Some(frames)) = (shell.as_deref_mut(), frames) else {
+        return;
+    };
+    // Keep the first frame visible until all frames are resident. Do not skip
+    // the opening sequence on a cold disk or flash missing image placeholders.
+    let ready = frames.0.iter().all(|frame| images.contains(frame.id()));
+    if ready {
+        shell.advance_login_opening(time.delta());
+    }
+    let frame = if ready {
+        shell.login_opening_frame() as usize
+    } else {
+        0
+    };
+    for mut image in &mut backgrounds {
+        if image.image != frames.0[frame] {
+            image.image = frames.0[frame].clone();
+        }
+    }
+}
+
 impl Plugin for Mir2NativeShellUiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<NativeUiIntentQueue>()
@@ -313,6 +349,7 @@ impl Plugin for Mir2NativeShellUiPlugin {
             .add_systems(
                 Update,
                 (
+                    animate_login_door,
                     update_root_visibility,
                     shell_keyboard_input,
                     shell_pointer_input,
@@ -333,6 +370,11 @@ impl Plugin for Mir2NativeShellUiPlugin {
 }
 
 fn spawn_shell_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(NativeLoginDoorFrames(
+        (0..19)
+            .map(|index| asset_server.load(format!("original-ui/ChrSel/{index}.png")))
+            .collect(),
+    ));
     commands
         .spawn((
             NativeShellRoot,
@@ -353,6 +395,7 @@ fn spawn_shell_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|root| {
             root.spawn((
+                NativeLoginDoorBackground,
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(0.0),
@@ -991,6 +1034,10 @@ fn render_shell_ui(
                     info_block(panel, "Authenticating", "Authenticating account...");
                 });
             }
+            NativeShellScreen::OpeningLogin => {
+                // The original login dialog is disposed before the door opens.
+                // No widgets or generic loading panel may obscure the frames.
+            }
             NativeShellScreen::StartingGame => {
                 with_generic_panel(screen, |panel| {
                     info_block(panel, "Starting", "Entering game world...");
@@ -1085,14 +1132,12 @@ fn render_character_create(
         "original-ui/Title/20.png",
         NEW_CHARACTER_TITLE,
     );
-    spawn_native_image(
+    spawn_character_preview_at(
         parent,
         asset_server,
-        character_preview_asset(
-            &model.character_create.class_name,
-            &model.character_create.gender_name,
-        ),
-        NEW_CHARACTER_PREVIEW,
+        &model.character_create.class_name,
+        &model.character_create.gender_name,
+        NEW_CHARACTER_PREVIEW_ANCHOR,
     );
     spawn_aux_text(
         parent,
@@ -1542,40 +1587,38 @@ fn render_connection_lost(
     model: &NativeShellModel,
     aux_focus: NativeShellAuxFocus,
 ) {
-    spawn_auxiliary_panel(parent, asset_server, AUX_CONFIRM_PANEL);
+    spawn_native_image(
+        parent,
+        asset_server,
+        "original-ui/Prguse/360.png",
+        CONNECTION_LOST_PANEL,
+    );
     spawn_aux_text(
         parent,
         "Connection Lost",
-        spec::CrystalRect::new(366.0, 304.0, 292.0, 28.0),
-        19.0,
+        spec::CrystalRect::new(319.0, 316.0, 390.0, 24.0),
+        18.0,
         GOLD,
         Justify::Center,
     );
     spawn_aux_text(
         parent,
         "Press Enter, Escape, or Retry to reconnect.",
-        spec::CrystalRect::new(366.0, 350.0, 292.0, 25.0),
-        13.0,
+        spec::CrystalRect::new(319.0, 348.0, 390.0, 30.0),
+        12.0,
         CREAM,
         Justify::Center,
     );
     if let Some(notice) = &model.notice {
+        let notice_summary = connection_notice_summary(&notice.message);
         spawn_aux_notice(
             parent,
-            &notice.message,
+            &notice_summary,
             notice.kind,
-            spec::CrystalRect::new(366.0, 374.0, 292.0, 20.0),
+            spec::CrystalRect::new(319.0, 388.0, 390.0, 34.0),
         );
     }
-    let retry_spec = CrystalButtonSpec::new(
-        "Title",
-        320,
-        321,
-        322,
-        spec::CrystalRect::new(575.0, 398.0, 42.0, 42.0),
-        48.0,
-        48.0,
-    );
+    let retry_spec = connection_lost_retry_spec();
     spawn_crystal_image_button(
         parent,
         asset_server,
@@ -1585,14 +1628,35 @@ fn render_connection_lost(
         aux_focus.connection_retry,
         true,
     );
-    spawn_aux_text(
-        parent,
-        "Retry",
-        spec::CrystalRect::new(524.0, 444.0, 144.0, 20.0),
-        12.0,
-        CREAM,
-        Justify::Center,
-    );
+}
+
+const fn connection_lost_retry_spec() -> CrystalButtonSpec {
+    CrystalButtonSpec::new(
+        "Title",
+        200,
+        201,
+        202,
+        spec::CrystalRect::new(644.0, 446.0, 76.0, 25.0),
+        76.0,
+        25.0,
+    )
+}
+
+fn connection_notice_summary(message: &str) -> String {
+    if let Some(start) = message.rfind("(os error ") {
+        if let Some(relative_end) = message[start..].find(')') {
+            let end = start + relative_end + 1;
+            return format!("Cannot reach the local Gateway.\n{}", &message[start..end]);
+        }
+    }
+
+    const MAX_NOTICE_CHARS: usize = 72;
+    let mut summary = message.split_whitespace().collect::<Vec<_>>().join(" ");
+    if summary.chars().count() > MAX_NOTICE_CHARS {
+        summary = summary.chars().take(MAX_NOTICE_CHARS - 1).collect();
+        summary.push('…');
+    }
+    summary
 }
 
 fn character_class_index(class_name: &str) -> u16 {
@@ -1607,21 +1671,6 @@ fn character_gender_index(gender_name: &str) -> u16 {
         .iter()
         .position(|candidate| candidate.eq_ignore_ascii_case(gender_name))
         .unwrap_or(0) as u16
-}
-
-fn character_preview_asset(class_name: &str, gender_name: &str) -> String {
-    let class_index = character_class_index(class_name);
-    let gender_index = character_gender_index(gender_name);
-    let frame = match (class_index, gender_index) {
-        (0, 0) => 20,
-        (0, 1) => 300,
-        (1, 0) => 40,
-        (1, 1) => 320,
-        (2, 0) => 60,
-        (2, 1) => 340,
-        _ => 20,
-    };
-    format!("original-ui/ChrSel/{frame}.png")
 }
 
 fn character_description(class_name: &str) -> &'static str {
@@ -1689,8 +1738,10 @@ fn spawn_aux_text(
     color: Color,
     justify: Justify,
 ) {
+    let mut node = absolute_node(rect);
+    node.overflow = Overflow::clip();
     parent.spawn((
-        absolute_node(rect),
+        node,
         Text::new(value.to_owned()),
         body_font(size),
         TextColor(color),
@@ -1944,6 +1995,59 @@ fn body_font(size: f32) -> TextFont {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn door_waits_for_all_frames_then_updates_the_real_background_handle() {
+        use super::*;
+        let mut images = Assets::<Image>::default();
+        let frames = (0..19)
+            .map(|_| images.add(Image::default()))
+            .collect::<Vec<_>>();
+        let missing = images.remove(frames[18].id()).unwrap();
+        let mut app = App::new();
+        app.insert_resource(images);
+        app.insert_resource(NativeLoginDoorFrames(frames.clone()));
+        app.insert_resource(Time::<()>::default());
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::OpeningLogin;
+        app.insert_resource(model);
+        let background = app
+            .world_mut()
+            .spawn((NativeLoginDoorBackground, ImageNode::default()))
+            .id();
+        app.add_systems(Update, animate_login_door);
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(100));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .login_opening_elapsed,
+            std::time::Duration::ZERO
+        );
+        assert_eq!(
+            app.world().get::<ImageNode>(background).unwrap().image,
+            frames[0]
+        );
+        app.world_mut()
+            .resource_mut::<Assets<Image>>()
+            .insert(frames[18].id(), missing)
+            .unwrap();
+        app.update();
+        assert_eq!(
+            app.world().get::<ImageNode>(background).unwrap().image,
+            frames[2]
+        );
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(1700));
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            NativeShellScreen::CharacterSelect
+        );
+    }
+
     use super::*;
     use crate::native_shell::{CharacterSummary, NativeGatewayEvent};
 
@@ -2238,10 +2342,7 @@ mod tests {
             NEW_CHARACTER_NAME_FIELD,
             spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0)
         );
-        assert_eq!(
-            NEW_CHARACTER_PREVIEW,
-            spec::CrystalRect::new(338.0, 404.0, 196.0, 302.0)
-        );
+        assert_eq!(NEW_CHARACTER_PREVIEW_ANCHOR, (338.0, 404.0));
         assert_eq!(
             NEW_CHARACTER_CREATE,
             spec::CrystalRect::new(378.0, 579.0, 100.0, 25.0)
@@ -2260,18 +2361,6 @@ mod tests {
             .into_iter()
             .chain(NEW_CHARACTER_GENDER_BUTTONS)
             .all(|rect| NEW_CHARACTER_FRAME.contains(rect.left, rect.top)));
-        assert_eq!(
-            character_preview_asset("Warrior", "Male"),
-            "original-ui/ChrSel/20.png"
-        );
-        assert_eq!(
-            character_preview_asset("Wizard", "Female"),
-            "original-ui/ChrSel/320.png"
-        );
-        assert_eq!(
-            character_preview_asset("Taoist", "Male"),
-            "original-ui/ChrSel/60.png"
-        );
         assert_eq!(
             spec::CrystalFrameSpec::new("Prguse", 73, NEW_CHARACTER_FRAME).asset_path(),
             "original-ui/Prguse/73.png"
@@ -2519,5 +2608,43 @@ mod tests {
         ));
         assert!(queue.is_empty());
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+    }
+
+    #[test]
+    fn connection_notice_collapses_localized_socket_text_to_a_bounded_summary() {
+        assert_eq!(
+            connection_notice_summary(
+                "gateway connect failed: IO error: 由于目标计算机积极拒绝，无法连接。 (os error 10061)"
+            ),
+            "Cannot reach the local Gateway.\n(os error 10061)"
+        );
+    }
+
+    #[test]
+    fn connection_notice_truncation_is_unicode_safe() {
+        let source = "网关连接失败".repeat(20);
+        let summary = connection_notice_summary(&source);
+        assert_eq!(summary.chars().count(), 72);
+        assert!(summary.ends_with('…'));
+    }
+
+    #[test]
+    fn connection_lost_dialog_uses_crystal_message_box_and_ok_button_geometry() {
+        assert_eq!(
+            CONNECTION_LOST_PANEL,
+            spec::CrystalRect::new(284.0, 289.0, 456.0, 190.0)
+        );
+        assert_eq!(
+            connection_lost_retry_spec(),
+            CrystalButtonSpec::new(
+                "Title",
+                200,
+                201,
+                202,
+                spec::CrystalRect::new(644.0, 446.0, 76.0, 25.0),
+                76.0,
+                25.0,
+            )
+        );
     }
 }

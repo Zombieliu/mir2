@@ -27,6 +27,7 @@ pub mod chat_settings_effects;
 pub mod crystal_ui;
 pub mod entities;
 pub mod game_shop;
+pub mod hero_model;
 #[cfg(feature = "native-ui")]
 pub mod hud;
 pub mod inventory;
@@ -39,6 +40,10 @@ pub mod native_shell_ui;
 #[cfg(feature = "native-ui")]
 pub mod options_effects;
 pub mod pending_operations;
+#[cfg(feature = "native-ui")]
+pub mod quest_guidance;
+#[cfg(feature = "native-ui")]
+pub mod quest_journey;
 #[cfg(feature = "native-ui")]
 pub mod quest_model;
 #[cfg(feature = "native-ui")]

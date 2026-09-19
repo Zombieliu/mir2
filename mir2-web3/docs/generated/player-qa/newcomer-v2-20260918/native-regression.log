@@ -1,0 +1,22 @@
+
+running 17 tests
+test quest_journey::newcomer_v2_guidance_tests::v2_bundle_has_six_chapters_and_projects_all_twenty_six_server_tasks ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_keeps_at_most_three_server_objective_groups_in_the_hud_projection ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_chapter_selection_never_treats_level_as_completion ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_uses_reviewed_jane_and_board_endpoints ... ok
+test quest_journey::tests::diary_accept_and_finish_take_priority_over_npc_fallbacks ... ok
+test quest_journey::tests::next_step_objective_collapses_multiline_server_text_to_one_layout_line ... ok
+test quest_journey::tests::next_step_uses_reviewed_location_when_giver_is_outside_live_entities ... ok
+test quest_journey::tests::next_step_omits_fixed_items_with_zero_authoritative_quantity ... ok
+test quest_journey::tests::bundled_profile_has_six_contiguous_chapters_through_level_thirty ... ok
+test quest_journey::tests::class_hint_is_presentation_text_and_never_a_completion_signal ... ok
+test quest_journey::tests::extra_experience_does_not_skip_an_unfinished_earlier_chapter_quest ... ok
+test quest_journey::tests::chapter_progress_uses_only_authoritative_completed_ids ... ok
+test quest_journey::newcomer_v2_guidance_tests::v1_bundle_and_profile_selection_remain_available ... ok
+test quest_journey::tests::crystal_mode_has_no_journey_projection ... ok
+test quest_journey::tests::main_step_prefers_turn_in_and_does_not_promote_optional_teaching_quest ... ok
+test quest_journey::tests::completed_full_class_route_is_a_graduated_journey_even_when_overleveled ... ok
+test quest_journey::tests::unknown_history_keeps_an_active_earlier_chapter_visible_when_overleveled ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 842 filtered out; finished in 0.00s
+

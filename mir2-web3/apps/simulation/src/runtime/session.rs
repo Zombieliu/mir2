@@ -4,10 +4,13 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::combat::{apply_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state};
+use super::combat::{
+    apply_settled_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state,
+};
 use super::components::{
-    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
-    MonsterAgent, MonsterVitals, PlayerVitals, Position, SpawnSlotRef,
+    entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, entity_position,
+    player_entity, Facing, Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position,
+    SpawnSlotRef,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -42,8 +45,8 @@ use super::skills::*;
 use bevy_ecs::prelude::{Resource, World};
 
 use crate::config::{
-    CharacterRecord, GroundDropSnapshot, ItemContainer, SimulationConfig, WorldEntityKind,
-    WorldEntitySnapshot, WorldSnapshot,
+    GroundDropSnapshot, ItemContainer, SimulationConfig, WorldEntityKind, WorldEntitySnapshot,
+    WorldSnapshot, CRYSTAL_MAX_INVENTORY_CAPACITY,
 };
 use crate::runtime::zone::{
     SessionId, ZoneChatProfile, ZoneJoin, ZoneMonsterDefense, ZoneMonsterRespawnPolicy,
@@ -51,7 +54,7 @@ use crate::runtime::zone::{
 };
 use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
 use mir2_protocol::{
-    ChatItem, ClientBuff, ItemRentalInformation, Point, ServerPacket, Spell,
+    ChatItem, ClientBuff, ClientIntelligentCreature, ItemRentalInformation, Point, ServerPacket, Spell,
     UserItemRentalInformation,
 };
 
@@ -115,6 +118,17 @@ pub struct ActiveSessionIdentity {
     pub account_id: String,
     pub character_index: i32,
     pub character_name: String,
+}
+
+/// Minimal authoritative player projection for shared-Zone reconciliation.
+/// Values intentionally match the corresponding `WorldSnapshot` fields while
+/// avoiding construction of inventory, quest, entity, and UI projections.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LocalPlayerVitalsSnapshot {
+    pub player_object_id: Option<u32>,
+    pub player_hp: Option<i32>,
+    pub player_max_hp: Option<i32>,
+    pub player_mp: Option<i32>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -187,6 +201,9 @@ pub enum SharedItemRentalDelivery {
 }
 
 impl SimulationSession {
+    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        super::skills::supports_magic_key_assignment(self.app.world(),spell,key,old_key)
+    }
     pub fn new(config: SimulationConfig) -> Self {
         let mut app = HeadlessRuntime::new();
         let initial_collision = runtime_map_collision_data(&config.map.file_name)
@@ -209,6 +226,7 @@ impl SimulationSession {
         super::mining::rebuild_mine_spots(app.world_mut());
         app.insert_resource(super::hazard::MapHazardResource::default());
         let mut inventory = InventoryResource::new(BASE_STORAGE_SLOTS);
+        inventory.inventory_capacity = CRYSTAL_MAX_INVENTORY_CAPACITY;
         inventory.inventory_items = seed_inventory_items();
         inventory.belt_items = seed_belt_items();
         inventory.storage_items = seed_storage_items();
@@ -271,6 +289,10 @@ impl SimulationSession {
 
     pub fn save_active_character(&self) -> Result<(), String> {
         persist_active_character_save(self.app.world())
+    }
+
+    pub fn save_active_character_for_logout(&self) -> Result<(), String> {
+        persist_active_character_save_for_logout(self.app.world())
     }
 
     pub fn has_shared_economy_projection_event(&self, event_id: &str) -> bool {
@@ -360,6 +382,17 @@ impl SimulationSession {
         self.finalize_packets(packets)
     }
 
+    pub fn shared_trade_allowed(&self) -> bool {
+        self.app
+            .world()
+            .resource::<super::resources::GmRuntimeResource>()
+            .allow_trade
+    }
+
+    pub fn shared_trade_refusal_message(&self, name: &str) -> ServerPacket {
+        system_message_key_args(self.app.world(), "server.PlayerRefusedTrade", [name])
+    }
+
     pub fn trade_request(&mut self, partner_name: &str) -> Vec<ServerPacket> {
         super::packets::stage5_trade_request_packet(
             self.app.world_mut(),
@@ -424,17 +457,80 @@ impl SimulationSession {
             .is_some()
     }
 
+    /// Checks whether a finalized offer still belongs to the active custody.
+    pub fn shared_trade_offer_matches_active_escrow(
+        &self,
+        offer: &SharedTradeOffer,
+        rollback: bool,
+    ) -> bool {
+        shared_trade_offer_matches_active_escrow(self.app.world(), offer, rollback)
+    }
+
+    /// Read-only eligibility; the gateway must exclude active pairs and durable
+    /// or unknown outcomes before treating this custody as orphaned.
+    pub fn shared_trade_unprepared_held_gold(&self) -> Option<u32> {
+        let systems = self.app.world().resource::<Stage5SystemsResource>();
+        let trade = systems.stage5_systems.trade.as_ref()?;
+        if trade.outgoing_escrow_debited()
+            || trade.offered_currency != crate::config::CurrencyKind::Gold
+        {
+            return None;
+        }
+        trade.validated_held_gold()
+    }
+
+    /// Refund only editable gold custody. This does not resolve durable work
+    /// and deliberately never releases prepared/legacy-completed snapshots.
+    pub fn recover_unprepared_trade_gold(&mut self) -> Vec<ServerPacket> {
+        if !self
+            .shared_trade_unprepared_held_gold()
+            .is_some_and(|held| held > 0)
+        {
+            return Vec::new();
+        }
+        let gold_before = self.app.world().resource::<PlayerRuntimeResource>().gold;
+        let trade_before = self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade
+            .clone();
+        let packets = super::packets::stage5_trade_cancel_packet(self.app.world_mut());
+        if packets.is_empty() {
+            return packets;
+        }
+        if self.save_active_character().is_err() {
+            self.app
+                .world_mut()
+                .resource_mut::<PlayerRuntimeResource>()
+                .gold = gold_before;
+            self.app
+                .world_mut()
+                .resource_mut::<Stage5SystemsResource>()
+                .stage5_systems
+                .trade = trade_before;
+            return Vec::new();
+        }
+        self.finalize_packets(packets)
+    }
+
     pub fn shared_trade_confirm(&mut self) -> (Vec<ServerPacket>, Option<SharedTradeOffer>) {
-        let offer = build_shared_trade_offer(self.app.world());
-        let packets = super::packets::stage5_trade_confirm_packet(self.app.world_mut(), true);
-        let confirmed = packets
-            .iter()
-            .any(|packet| matches!(packet, ServerPacket::TradeConfirm));
-        let packets = self.finalize_packets(packets);
-        if confirmed {
-            (packets, offer)
-        } else {
-            (packets, None)
+        // Preserve source rejection/unlock packets before building the owned
+        // offer: a mismatched deposited UID must not disappear as a bare None.
+        if let Err(packets) = super::packets::validate_trade_confirmation(self.app.world_mut()) {
+            return (self.finalize_packets(packets), None);
+        }
+        let Some(offer) = build_shared_trade_offer(self.app.world()) else {
+            return (Vec::new(), None);
+        };
+        match super::packets::prepare_shared_trade_escrow(self.app.world_mut()) {
+            super::packets::SharedTradePreparation::Prepared(packets) => {
+                (self.finalize_packets(packets), Some(offer))
+            }
+            super::packets::SharedTradePreparation::Rejected(packets) => {
+                (self.finalize_packets(packets), None)
+            }
         }
     }
 
@@ -448,6 +544,9 @@ impl SimulationSession {
     }
 
     pub fn apply_shared_trade_delivery(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        if !shared_trade_offer_matches_active_escrow(self.app.world(), offer, false) {
+            return Vec::new();
+        }
         let packets = apply_shared_trade_offer(self.app.world_mut(), offer, false);
         self.finalize_packets(packets)
     }
@@ -519,6 +618,9 @@ impl SimulationSession {
     }
 
     pub fn rollback_shared_trade_offer(&mut self, offer: &SharedTradeOffer) -> Vec<ServerPacket> {
+        if !shared_trade_offer_matches_active_escrow(self.app.world(), offer, true) {
+            return Vec::new();
+        }
         let packets = apply_shared_trade_offer(self.app.world_mut(), offer, true);
         self.finalize_packets(packets)
     }
@@ -578,6 +680,7 @@ impl SimulationSession {
                 return vec![ServerPacket::Login { result: 4 }];
             }
         };
+        let select_infos = account_select_infos(&config, account_id);
         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
         session.account_id = Some(account_id.to_string());
         session.characters = characters;
@@ -587,16 +690,55 @@ impl SimulationSession {
         session.selected_character = None;
         session.clear_active_save_revision();
         vec![ServerPacket::LoginSuccess {
-            characters: session
-                .characters
-                .iter()
-                .map(CharacterRecord::to_select_info)
-                .collect(),
+            characters: select_infos,
         }]
     }
 
     pub fn world_snapshot(&self) -> WorldSnapshot {
         build_world_snapshot(self.app.world())
+    }
+
+    pub fn local_player_vitals_snapshot(&self) -> LocalPlayerVitalsSnapshot {
+        let world = self.app.world();
+        let player = player_entity(world);
+        let player_vitals = player.and_then(|entity| entity_player_vitals(world, entity));
+        LocalPlayerVitalsSnapshot {
+            player_object_id: player.and_then(|entity| entity_object_id(world, entity)),
+            player_hp: player_vitals.map(|vitals| vitals.hp),
+            player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
+            player_mp: player_vitals.map(|vitals| vitals.mp),
+        }
+    }
+
+    pub fn current_map_file_name(&self) -> Option<String> {
+        let world = self.app.world();
+        is_in_world(world).then(|| {
+            world
+                .resource::<MapRuntimeResource>()
+                .current_map
+                .file_name
+                .clone()
+        })
+    }
+
+    /// Read the active player's ECS position without building a full world or
+    /// Zone-join snapshot. The in-world gate prevents the demo fixture's
+    /// default position from leaking before a character is selected.
+    pub fn local_player_position(&self) -> Option<Point> {
+        let world = self.app.world();
+        if !is_in_world(world) {
+            return None;
+        }
+        player_entity(world).and_then(|entity| entity_position(world, entity))
+    }
+
+    pub fn active_intelligent_creature_snapshot(&self) -> Option<ClientIntelligentCreature> {
+        self.app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .active_intelligent_creature()
+            .cloned()
     }
 
     pub fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
@@ -613,10 +755,9 @@ impl SimulationSession {
             .world()
             .resource::<Stage5SystemsResource>()
             .stage5_systems
-            .intelligent_creatures
-            .iter()
-            .any(|creature| {
-                creature.pet_mode != 0
+            .active_intelligent_creature()
+            .is_some_and(|creature| {
+                creature.pet_mode == 0
                     && creature.creature_rules.auto_pickup_enabled
                     && creature.fullness >= creature.creature_rules.minimal_fullness.max(0)
                     && creature.creature_rules.auto_pickup_range > 0
@@ -707,8 +848,8 @@ impl SimulationSession {
         let stage5 = self.app.world().resource::<Stage5SystemsResource>();
         let permissions = self.app.world().resource::<PlayerPermissionResource>();
         let player_runtime = self.app.world().resource::<PlayerRuntimeResource>();
-        let guild_name = (!stage5.stage5_systems.guild.name.trim().is_empty())
-            .then(|| stage5.stage5_systems.guild.name.clone());
+        let guild_name = (!snapshot.stage5_systems.guild.name.trim().is_empty())
+            .then(|| snapshot.stage5_systems.guild.name.clone());
         let mentor_name = (!stage5.stage5_systems.mentor.name.trim().is_empty())
             .then(|| stage5.stage5_systems.mentor.name.clone());
         let relationship_name = (!stage5
@@ -739,7 +880,7 @@ impl SimulationSession {
             chat_profile: ZoneChatProfile {
                 group_members: stage5.stage5_systems.group.members.clone(),
                 guild_name,
-                active_guild_wars: stage5.stage5_systems.guild.active_wars.clone(),
+                active_guild_wars: snapshot.stage5_systems.guild.active_wars.clone(),
                 blocked_names: stage5.stage5_systems.social.blocked.clone(),
                 mentor_name,
                 relationship_name,
@@ -806,6 +947,45 @@ impl SimulationSession {
         }
     }
 
+    /// Reconcile shared-Zone vitals when the Zone also owns the current HP
+    /// pool size. The legacy method above intentionally updates only current
+    /// HP/MP; this variant must update the maximum before clamping the current
+    /// values so a level-up cannot leave the personal snapshot on its old HP
+    /// ceiling.
+    pub fn force_authoritative_player_vitals_with_max_hp(
+        &mut self,
+        hp: Option<i32>,
+        max_hp: Option<i32>,
+        mp: Option<i32>,
+    ) {
+        if (hp.is_none() && max_hp.is_none() && mp.is_none()) || !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let Some(player) = player_entity(world) else {
+            return;
+        };
+        let updated_vitals = {
+            let mut entity = world.entity_mut(player);
+            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                if let Some(max_hp) = max_hp {
+                    vitals.max_hp = max_hp.max(1);
+                }
+                if let Some(hp) = hp {
+                    vitals.hp = hp.clamp(0, vitals.max_hp);
+                }
+                if let Some(mp) = mp {
+                    vitals.mp = mp.clamp(0, vitals.max_mp);
+                }
+                *vitals
+            })
+        };
+        if let Some(vitals) = updated_vitals {
+            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            advance_runtime_tick(world);
+        }
+    }
+
     /// Land chain-confirmed ore in the active player's bag (M3, WF-4) and re-render the
     /// vein from the chain-reported `stones_left` when `mine_id` maps to a configured
     /// on-chain node (M4, WF-6). Injected by the trusted relayer/gateway path only (never
@@ -846,7 +1026,10 @@ impl SimulationSession {
             return false;
         }
         let world = self.app.world_mut();
-        let outcome = apply_damage_to_current_player(world, damage, &mut Vec::new());
+        // The Zone already resolved this exact HP loss and owns Death/ObjectDied
+        // replication. Only mirror the settlement and report its first local
+        // alive->dead transition for the gateway's existing penalty path.
+        let outcome = apply_settled_damage_to_current_player(world, damage, &mut Vec::new());
         if outcome.applied {
             advance_runtime_tick(world);
         }
@@ -896,12 +1079,20 @@ impl SimulationSession {
     }
 
     pub fn apply_zone_player_death_penalty(&mut self) -> Vec<ServerPacket> {
-        if !is_in_world(self.app.world()) {
+        if !is_in_world(self.app.world())
+            || !super::components::current_player_is_dead(self.app.world())
+        {
             return Vec::new();
         }
-        let packets = drop_player_death_penalty(self.app.world_mut());
+        let world = self.app.world_mut();
+        let mut packets = Vec::new();
+        // Match the existing personal death prelude immediately, before drop
+        // candidates are selected. Shared deaths must not wait for WorldTick
+        // to remove rented possessions and enqueue their return mail.
+        super::rental::return_rented_items_on_player_death(world, &mut packets);
+        packets.extend(drop_player_death_penalty(world));
         if !packets.is_empty() {
-            advance_runtime_tick(self.app.world_mut());
+            advance_runtime_tick(world);
         }
         packets
     }
@@ -940,6 +1131,82 @@ impl SimulationSession {
             }
         }
         advance_runtime_tick(world);
+    }
+
+    /// Trusted owner bridge; the gateway validates the Zone incarnation and
+    /// deduplicates resolved receipts before entering personal progression.
+    pub fn commit_zone_magic_practice(
+        &mut self,
+        receipt: &super::zone::ZoneMagicPracticeReceipt,
+    ) -> Vec<ServerPacket> {
+        if receipt.damage <= 0 || receipt.target_object_id == 0 || !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        let Some(identity) = self.active_identity() else {
+            return Vec::new();
+        };
+        if identity.account_id != receipt.account_id
+            || identity.character_index != receipt.character_index
+        {
+            return Vec::new();
+        }
+        let skill_key = receipt.spell.skill_key();
+        let Some(magic) = crystal_magic_for_skill_key(skill_key) else {
+            return Vec::new();
+        };
+        let world = self.app.world_mut();
+        let Some(index) = world
+            .resource::<SkillResource>()
+            .skills
+            .iter()
+            .position(|skill| skill.key == skill_key)
+        else {
+            return Vec::new();
+        };
+        let tick = runtime_tick(world);
+        let mut packets = advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
+        packets.extend(super::quests::newcomer_v2_events::record_spell_damage(
+            world, &magic.spell, receipt.cast_at_ms));
+        if !packets.is_empty() {
+            advance_runtime_tick(world);
+        }
+        packets
+    }
+
+    /// Trusted Gateway-only outcome bridge. The Gateway fences owner incarnation
+    /// and duplicate receipts; Session additionally binds the personal identity.
+    pub fn commit_zone_journey_event(
+        &mut self,
+        receipt: super::zone::ZoneJourneyEventReceipt,
+    ) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) { return Vec::new(); }
+        let Some(identity) = self.active_identity() else { return Vec::new(); };
+        if identity.account_id != receipt.account_id || identity.character_index != receipt.character_index
+            || !self.app.world().resource::<MapRuntimeResource>().current_map.file_name
+                .eq_ignore_ascii_case(&receipt.zone_key.map_file_name) {
+            return Vec::new();
+        }
+        let packets = super::quests::newcomer_v2_events::record_zone_event(self.app.world_mut(), &receipt);
+        self.finalize_packets(packets)
+    }
+
+    pub fn needs_zone_journey_evidence(&self) -> bool {
+        let world = self.app.world();
+        super::quests::newcomer_v2::enabled(world) && is_in_world(world)
+            && world.resource::<QuestResource>().quests.iter().any(|quest|
+                quest.stage == crate::QuestStage::InProgress
+                    && super::quests::newcomer_v2::flag_objectives(world, quest.quest_id).iter().any(|flag|
+                        quest.task_progress.get(&format!("flag:{}", flag.number)).copied().unwrap_or(0) < 1))
+    }
+
+    pub fn commit_zone_journey_reposition(&mut self) -> Vec<ServerPacket> {
+        let packets = super::quests::newcomer_v2_events::record_legal_reposition(self.app.world_mut());
+        self.finalize_packets(packets)
+    }
+
+    pub fn commit_zone_journey_state(&mut self) -> Vec<ServerPacket> {
+        let packets = super::quests::newcomer_v2_events::refresh_state_conditions(self.app.world_mut());
+        self.finalize_packets(packets)
     }
 
     pub fn apply_zone_player_buff_packets(
@@ -1053,6 +1320,7 @@ impl SimulationSession {
         super::buffs::apply_or_refresh_buff(
             world,
             super::buffs::BuffState {
+                real_time_duration: None,
                 key: key.to_string(),
                 name,
                 description,
@@ -1192,6 +1460,7 @@ impl SimulationSession {
         let max_hp = vitals.max_hp.max(1);
 
         Some(ZoneMonsterSpawn {
+            crystal_drop_seed: None,
             object_id,
             name: name.clone(),
             name_colour_argb: -1,
@@ -1430,7 +1699,8 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     let character = session.selected_character.as_ref()?;
     let stage5 = world.resource::<Stage5SystemsResource>();
     let trade = stage5.stage5_systems.trade.as_ref()?;
-    if trade.completed
+    if trade.outgoing_escrow_debited()
+        || trade.validated_held_gold().is_none()
         || trade.settlement_nonce.len() != 32
         || !trade
             .settlement_nonce
@@ -1472,6 +1742,44 @@ fn build_shared_trade_offer(world: &World) -> Option<SharedTradeOffer> {
     })
 }
 
+fn shared_trade_offer_matches_active_escrow(
+    world: &World,
+    offer: &SharedTradeOffer,
+    rollback: bool,
+) -> bool {
+    if !is_in_world(world) {
+        return false;
+    }
+    let session = world.resource::<SessionResource>();
+    let Some(character) = session.selected_character.as_ref() else {
+        return false;
+    };
+    let systems = world.resource::<Stage5SystemsResource>();
+    let Some(trade) = systems.stage5_systems.trade.as_ref() else {
+        return false;
+    };
+    if !trade.outgoing_escrow_debited() || trade.validated_held_gold() != Some(trade.offered_gold) {
+        return false;
+    }
+    if rollback {
+        session.account_id.as_deref() == Some(offer.account_id.as_str())
+            && character.index == offer.character_index
+            && character.name.eq_ignore_ascii_case(&offer.character_name)
+            && trade.partner.eq_ignore_ascii_case(&offer.partner_name)
+            && trade.settlement_nonce == offer.settlement_nonce
+            && trade.offered_gold == offer.gold
+    } else {
+        character.name.eq_ignore_ascii_case(&offer.partner_name)
+            && trade.partner.eq_ignore_ascii_case(&offer.character_name)
+            && trade.settlement_nonce != offer.settlement_nonce
+            && offer.settlement_nonce.len() == 32
+            && offer
+                .settlement_nonce
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    }
+}
+
 fn apply_shared_trade_offer(
     world: &mut World,
     offer: &SharedTradeOffer,
@@ -1480,12 +1788,21 @@ fn apply_shared_trade_offer(
     if !is_in_world(world) {
         return Vec::new();
     }
+    let Some(final_gold) = world
+        .resource::<PlayerRuntimeResource>()
+        .gold
+        .checked_add(offer.gold)
+    else {
+        // Keep the custody record intact; a later retry/cancellation can recover.
+        return Vec::new();
+    };
     let mut packets = Vec::new();
 
     let mut staged_inventory = world
         .resource::<InventoryResource>()
         .inventory_items
         .clone();
+    let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
     let mut delivered_items = Vec::new();
     for offered_item in &offer.items {
         let Ok(mut item) = serde_json::from_str::<ItemState>(&offered_item.item_state_json) else {
@@ -1501,6 +1818,7 @@ fn apply_shared_trade_offer(
             &staged_inventory,
             item.container,
             item.slot,
+            inventory_capacity,
         ) else {
             return trade_offer_delivery_failed_packets(world, rollback);
         };
@@ -1520,7 +1838,7 @@ fn apply_shared_trade_offer(
 
     if offer.gold > 0 {
         let mut player = world.resource_mut::<PlayerRuntimeResource>();
-        player.gold = player.gold.saturating_add(offer.gold);
+        player.gold = final_gold;
         packets.push(ServerPacket::GainedGold { gold: offer.gold });
     }
 
@@ -1538,6 +1856,23 @@ fn apply_shared_trade_offer(
             .stage5_systems
             .trade = None;
         packets.push(ServerPacket::TradeCancel { unlock: false });
+    } else if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .as_ref()
+        .is_some_and(|trade| {
+            trade.outgoing_escrow_debited()
+                && trade.partner.eq_ignore_ascii_case(&offer.character_name)
+        })
+    {
+        world
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .trade = None;
+        // Crystal GameScene.TradeConfirm resets both windows. Emit it only
+        // after this committed delivery has actually materialized.
+        packets.push(ServerPacket::TradeConfirm);
     }
 
     packets
@@ -1591,7 +1926,7 @@ fn apply_shared_trade_settlement_projection(
         return Err("trade projection identity does not match the active character".to_string());
     }
 
-    let outgoing_already_debited = {
+    let (outgoing_items_debited, outgoing_gold_held) = {
         let systems = world.resource::<Stage5SystemsResource>();
         match systems.stage5_systems.trade.as_ref() {
             Some(trade)
@@ -1600,7 +1935,15 @@ fn apply_shared_trade_settlement_projection(
                         .partner
                         .eq_ignore_ascii_case(&incoming_offer.character_name) =>
             {
-                trade.completed
+                if trade.offered_currency != crate::config::CurrencyKind::Gold
+                    || (trade.outgoing_escrow_debited() && trade.offered_gold != own_offer.gold)
+                {
+                    return Err("trade projection conflicts with gold custody".to_string());
+                }
+                let held = trade
+                    .validated_held_gold()
+                    .ok_or_else(|| "invalid trade gold custody".to_string())?;
+                (trade.outgoing_escrow_debited(), held)
             }
             Some(_) => {
                 return Err(
@@ -1609,20 +1952,20 @@ fn apply_shared_trade_settlement_projection(
             }
             // A crash may restore a checkpoint from before the trade UI was
             // opened. Such a snapshot cannot contain the outgoing debit,
-            // because debit and the matching completed trade state are saved
+            // because debit and the matching prepared trade state are saved
             // atomically in one CharacterSaveRecord.
-            None => false,
+            None => (false, 0),
         }
     };
 
+    let outgoing_gold_due = own_offer
+        .gold
+        .checked_sub(outgoing_gold_held)
+        .ok_or_else(|| "trade projection held gold exceeds offer".to_string())?;
     let current_gold = world.resource::<PlayerRuntimeResource>().gold;
-    let gold_after_outgoing = if outgoing_already_debited {
-        current_gold
-    } else {
-        current_gold
-            .checked_sub(own_offer.gold)
-            .ok_or_else(|| "trade projection outgoing gold is unavailable".to_string())?
-    };
+    let gold_after_outgoing = current_gold
+        .checked_sub(outgoing_gold_due)
+        .ok_or_else(|| "trade projection outgoing gold is unavailable".to_string())?;
     let final_gold = gold_after_outgoing
         .checked_add(incoming_offer.gold)
         .ok_or_else(|| "trade projection incoming gold exceeds the character cap".to_string())?;
@@ -1631,8 +1974,9 @@ fn apply_shared_trade_settlement_projection(
         .resource::<InventoryResource>()
         .inventory_items
         .clone();
+    let inventory_capacity = world.resource::<InventoryResource>().inventory_capacity;
     let mut outgoing_deleted_items = Vec::new();
-    if !outgoing_already_debited {
+    if !outgoing_items_debited {
         let mut outgoing_ids = BTreeSet::new();
         for offered_item in &own_offer.items {
             let item = staged_inventory
@@ -1672,6 +2016,7 @@ fn apply_shared_trade_settlement_projection(
             &staged_inventory,
             item.container,
             item.slot,
+            inventory_capacity,
         )
         .ok_or_else(|| "trade projection has no free inventory slot".to_string())?;
         item.container = container;
@@ -1690,9 +2035,9 @@ fn apply_shared_trade_settlement_projection(
         .trade = None;
 
     let mut packets = Vec::new();
-    if !outgoing_already_debited && own_offer.gold > 0 {
+    if outgoing_gold_due > 0 {
         packets.push(ServerPacket::LoseGold {
-            gold: own_offer.gold,
+            gold: outgoing_gold_due,
         });
     }
     packets.extend(
@@ -1710,19 +2055,17 @@ fn apply_shared_trade_settlement_projection(
             .into_iter()
             .map(|(_, item)| ServerPacket::GainedItem { item }),
     );
+    // The public wrapper releases these packets only after the projection and
+    // its idempotency marker have been saved together. Save failure restores
+    // the checkpoint and must not announce a completed trade.
+    packets.push(ServerPacket::TradeConfirm);
     Ok(packets)
 }
 
-fn trade_offer_delivery_failed_packets(world: &mut World, rollback: bool) -> Vec<ServerPacket> {
-    let mut packets = vec![system_message_key(world, "server.YouCannotCarryAnymore")];
-    if rollback {
-        world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .trade = None;
-    }
-    packets.push(ServerPacket::TradeCancel { unlock: false });
-    packets
+fn trade_offer_delivery_failed_packets(world: &mut World, _rollback: bool) -> Vec<ServerPacket> {
+    // Materialization failure is retryable: retain custody and never publish
+    // a terminal packet before the items and gold have been restored.
+    vec![system_message_key(world, "server.YouCannotCarryAnymore")]
 }
 
 fn shared_rental_delivery_matches_active_state(
@@ -1924,6 +2267,7 @@ fn preferred_or_empty_trade_delivery_slot(
         &inventory.inventory_items,
         preferred_container,
         preferred_slot,
+        inventory.inventory_capacity,
     )
 }
 
@@ -1931,17 +2275,26 @@ fn preferred_or_empty_trade_delivery_slot_for_items(
     items: &[ItemState],
     preferred_container: ItemContainer,
     preferred_slot: u8,
+    inventory_capacity: u16,
 ) -> Option<(ItemContainer, u8)> {
     if matches!(
         preferred_container,
         ItemContainer::Bag1 | ItemContainer::Bag2
-    ) && !items
-        .iter()
-        .any(|item| item.container == preferred_container && item.slot == preferred_slot)
-    {
-        return Some((preferred_container, preferred_slot));
+    ) {
+        let logical_slot = match preferred_container {
+            ItemContainer::Bag1 => preferred_slot,
+            ItemContainer::Bag2 => 40u8.saturating_add(preferred_slot),
+            _ => unreachable!(),
+        };
+        if is_valid_inventory_slot(logical_slot, inventory_capacity)
+            && !items
+                .iter()
+                .any(|item| item.container == preferred_container && item.slot == preferred_slot)
+        {
+            return Some((preferred_container, preferred_slot));
+        }
     }
-    find_empty_inventory_item_slot(items, ItemContainer::Bag1)
+    find_empty_inventory_item_slot(items, ItemContainer::Bag1, inventory_capacity)
 }
 
 #[cfg(test)]

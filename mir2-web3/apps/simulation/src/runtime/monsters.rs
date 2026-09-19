@@ -1,10 +1,11 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
+use std::sync::OnceLock;
 
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::{Resource, World};
 use mir2_game_data::{
-    crystal_monster_by_name, crystal_starter_region_respawns, starter_server_data,
-    CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
+    crystal_monster_by_name, crystal_respawn_manifest_ref, crystal_starter_region_respawns,
+    starter_server_data, CrystalMonsterTemplate, CrystalRespawnTemplate, CrystalRoutePoint,
     MonsterSpawnDispositionTemplate,
 };
 use mir2_protocol::{
@@ -95,6 +96,67 @@ pub(super) struct MonsterSpawnRule {
 #[derive(Resource, Debug, Clone)]
 pub(super) struct MonsterSpawnTable {
     pub(super) rules: Vec<MonsterSpawnRule>,
+}
+
+/// Keep manifest-authored arrival cells clear far enough that a player can
+/// receive the new map, choose a direction and move before a hostile acquires
+/// them. Crystal's broad respawn rectangles can otherwise place several slots
+/// directly around a portal (D401's `(24,181)`/`(25,181)` entrances are the
+/// concrete regression). Most ordinary monsters have a seven-tile view range,
+/// so eight tiles leaves the first active ring outside immediate aggro range.
+const CRYSTAL_ARRIVAL_SPAWN_PROTECTION_RADIUS: i32 = 8;
+
+fn crystal_arrival_points_by_map() -> &'static BTreeMap<String, Vec<Point>> {
+    static CACHE: OnceLock<BTreeMap<String, Vec<Point>>> = OnceLock::new();
+    CACHE.get_or_init(|| {
+        let manifest = crystal_respawn_manifest_ref();
+        let file_name_by_index = manifest
+            .maps
+            .iter()
+            .map(|map| {
+                (
+                    map.map_index,
+                    map.map_file_name
+                        .trim()
+                        .trim_end_matches(".map")
+                        .trim_end_matches(".MAP")
+                        .to_ascii_lowercase(),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+        let mut points = BTreeMap::<String, Vec<Point>>::new();
+        for source_map in &manifest.maps {
+            for movement in &source_map.movements {
+                if movement.destination.x == 0 && movement.destination.y == 0 {
+                    continue;
+                }
+                let Some(target_file_name) = file_name_by_index.get(&movement.map_index) else {
+                    continue;
+                };
+                let target_points = points.entry(target_file_name.clone()).or_default();
+                if !target_points.contains(&movement.destination) {
+                    target_points.push(movement.destination.clone());
+                }
+            }
+        }
+        points
+    })
+}
+
+fn crystal_monster_spawn_is_in_arrival_protection(map_file_name: &str, point: &Point) -> bool {
+    let normalized = map_file_name
+        .trim()
+        .trim_end_matches(".map")
+        .trim_end_matches(".MAP")
+        .to_ascii_lowercase();
+    crystal_arrival_points_by_map()
+        .get(&normalized)
+        .is_some_and(|arrivals| {
+            arrivals.iter().any(|arrival| {
+                (arrival.x - point.x).abs().max((arrival.y - point.y).abs())
+                    <= CRYSTAL_ARRIVAL_SPAWN_PROTECTION_RADIUS
+            })
+        })
 }
 
 pub(super) fn build_spawn_table(config: &SimulationConfig) -> MonsterSpawnTable {
@@ -269,7 +331,10 @@ pub fn crystal_world_respawn_spawns(
         respawn.location.x + spread,
         respawn.location.y - spread,
         respawn.location.y + spread,
-    );
+    )
+    .into_iter()
+    .filter(|point| !crystal_monster_spawn_is_in_arrival_protection(map_file_name, point))
+    .collect::<Vec<_>>();
     if cells.is_empty() {
         return Vec::new();
     }
@@ -1962,9 +2027,12 @@ pub(super) fn start_game_visible_respawn_spawns(
     }
 
     let full_collision = runtime_full_map_collision_data(map_file_name);
-    let visible_candidates = full_collision
-        .as_ref()
-        .map(|collision| walkable_points_in_rect(collision, min_x, max_x, min_y, max_y));
+    let visible_candidates = full_collision.as_ref().map(|collision| {
+        walkable_points_in_rect(collision, min_x, max_x, min_y, max_y)
+            .into_iter()
+            .filter(|point| !crystal_monster_spawn_is_in_arrival_protection(map_file_name, point))
+            .collect::<Vec<_>>()
+    });
     let spawn_candidate_count = full_collision.as_ref().map(|collision| {
         walkable_point_count_in_rect(
             collision,
@@ -2035,7 +2103,9 @@ pub(super) fn start_game_visible_respawn_spawns(
             };
             let x = point.x;
             let y = point.y;
-            if used.insert((x, y)) {
+            if !crystal_monster_spawn_is_in_arrival_protection(map_file_name, &point)
+                && used.insert((x, y))
+            {
                 let direction = crystal_respawn_dynamic_direction(respawn, slot_index);
                 spawns.push((slot_index, point, direction));
                 break;

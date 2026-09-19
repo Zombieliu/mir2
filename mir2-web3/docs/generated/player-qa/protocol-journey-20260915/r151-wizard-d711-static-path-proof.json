@@ -1,0 +1,23 @@
+{
+  "source": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\d711.map.gz",
+  "mapSha256": "9BD8E5B04F53EEA8609318CCCB13C40C00D0032CBE1DAC0A2A1E955AAF6162DA",
+  "map": "D711",
+  "start": {
+    "x": 306,
+    "y": 212
+  },
+  "target": {
+    "x": 205,
+    "y": 197
+  },
+  "staticPathCells": 202,
+  "currentWedge": {
+    "id": 456115,
+    "x": 298,
+    "y": 205,
+    "clearance": 2
+  },
+  "currentWedgePathCells": 202,
+  "nativeVisualAccepted": false,
+  "routeCompleted": false
+}

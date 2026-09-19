@@ -1414,6 +1414,8 @@ impl QuestStateMarker {
             current: 0,
             stage: QuestStage::Completed,
             task_progress: Default::default(),
+            cadence_last_claimed_period: None,
+            cadence_high_watermark_period: None,
         }
     }
 }

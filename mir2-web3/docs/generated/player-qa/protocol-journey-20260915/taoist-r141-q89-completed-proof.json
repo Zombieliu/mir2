@@ -1,0 +1,85 @@
+{
+  "artifact": "taoist-r141-q89-completed-proof",
+  "generatedAt": "2026-09-16T00:50:04.0356972Z",
+  "trace": "C:\\mir2-protocol-journey-20260911\\Taoist.2026-09-16T00-28-55-830Z.trace.jsonl",
+  "boundedCutoff": {
+    "sequence": 10777,
+    "at": "2026-09-16T00:47:46.269Z",
+    "traceBytes": 46720459,
+    "sha256": "7908AE0D056842F2BF23DDCF8126B9E8F0E931DE22BFB882677386518F760637",
+    "activeTrace": true
+  },
+  "finishRequest": {
+    "sequence": 10270,
+    "at": "2026-09-16T00:46:28.986Z",
+    "type": "finishQuest",
+    "requestId": "pq-mu3drbzu-1-finish-89",
+    "questIndex": 89,
+    "selectedItemIndex": -1,
+    "direction": "sent"
+  },
+  "questFinishReceipt": {
+    "sequence": 10271,
+    "at": "2026-09-16T00:46:29.561Z",
+    "packet": "ChangeQuest",
+    "questId": 89,
+    "completed": true,
+    "questState": 2,
+    "state": 2,
+    "taken": false,
+    "objectives": []
+  },
+  "completedQuestsReceipt": {
+    "sequence": 10272,
+    "at": "2026-09-16T00:46:29.561Z",
+    "packet": "CompleteQuest",
+    "q89Included": true
+  },
+  "rewardAndLevelSnapshot": {
+    "sequence": 10273,
+    "at": "2026-09-16T00:46:29.674Z",
+    "map": "1002",
+    "goldBefore": 105,
+    "goldAfter": 6705,
+    "goldDelta": 6600,
+    "levelBefore": 25,
+    "levelAfter": 26,
+    "xpBefore": 407242,
+    "xpAfter": 45704,
+    "hp": 191,
+    "inventoryDelta": "No new fixed/selectable item observed; finish request selectedItemIndex=-1",
+    "q89Stage": "completed",
+    "q89Current": 9,
+    "q89Required": 9
+  },
+  "questDefinitionReward": {
+    "source": "docs/generated/quest-agent/taoist-1-30-newcomer-v1.json",
+    "questId": 89,
+    "name": "Zombies Hunt",
+    "gold": 6600,
+    "experience": 138462,
+    "fixedItems": [],
+    "selectableItems": [],
+    "finishNpc": {
+      "name": "LeadTrainer_Harry",
+      "objectId": 834,
+      "mapFileName": "1002",
+      "position": {
+        "y": 8,
+        "x": 11
+      }
+    }
+  },
+  "nextQuest": {
+    "acceptRequestSequence": 10274,
+    "acceptReceiptSequence": 10275,
+    "questId": 113,
+    "title": "Insomnia",
+    "objectives": [
+      "Kill BlackMaggot 0/3",
+      "Kill WedgeMoth 0/3"
+    ]
+  },
+  "aggregateBoundary": "Observed mandatory count 46/55 and milestones 3/4 (aggregate 156/177 cited by root); q89 completion is one completed mandatory unit, not full 55/4",
+  "sensitiveDataExcluded": true
+}

@@ -1,0 +1,38 @@
+{
+  "sourceCommit": "6e1778957299367b3fbd39961f827c1bcb2d628a",
+  "executable": "C:/mir2-newcomer-v2-clean-20260918/mir2-gateway-6e1778957.exe",
+  "sha256": "665BDF6D534A617365FF35EBECCE60B601D3E486CAB1C60718783F7FA1328BBC",
+  "launcherPid": 50048,
+  "cargoExitCode": 0,
+  "cargoDuration": "13m24s",
+  "clockProjectionIncluded": true,
+  "visualAccepted": false,
+  "measuredTime": false,
+  "profile": "newcomer-v2",
+  "contentProfile": "platinum_176",
+  "verifiedAt": "2026-09-17T20:34:30.5925561Z",
+  "gatewayPid": 53708,
+  "sourceSha256": [
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "sha256": "9F6DD3B7679F2B7EA61BD205131DD56B02F32CF450B4358935BE0BF3C431CC90"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/zone_journey_event_bridge_tests.rs",
+      "sha256": "BDC1CDCCDE9B2D55E950C878CC284B1EFC1EE53908B8336609C281DCFE3A7DB5"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "158F1830C476C443B23FCCB84C5C243F9C9CCE232DAC7BEA73F602EEAC548BE3"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs",
+      "sha256": "C1938539621DEB890EB445172F6F20F9324C4239A807AD9BAB0EDAB5DB33E8B1"
+    },
+    {
+      "path": "config/quest-guidance/newcomer-journey-v2.json",
+      "sha256": "78B485EA521F5A0F1ECB8C0F28319F5CCC12DE8C39C71B6CD8E0A23EF834A8F9"
+    }
+  ],
+  "healthReady": true
+}

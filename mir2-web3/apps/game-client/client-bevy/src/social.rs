@@ -9,11 +9,13 @@ use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::inventory::CrystalItemTooltipSourceModel;
+
 pub const MAX_GROUP_MEMBERS: usize = 15;
 pub const MAX_GUILD_MEMBERS: usize = 200;
-pub const MAX_GUILD_RANKS: usize = 32;
+pub const MAX_GUILD_RANKS: usize = 255;
 pub const MAX_GUILD_STORAGE_ITEMS: usize = 112;
-pub const MAX_NOTICE_LINES: usize = 8;
+pub const MAX_NOTICE_LINES: usize = 200;
 pub const MAX_TRADE_ITEMS: usize = 10;
 pub const MAX_SOCIAL_PENDING: usize = 8;
 pub const MAX_GUILD_PERMISSIONS: usize = 8;
@@ -48,6 +50,7 @@ pub struct GroupMemberModel {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GroupModel {
+    pub member_maps: std::collections::BTreeMap<String, String>,
     pub active: bool,
     pub allow_invites: bool,
     pub leader_name: Option<String>,
@@ -61,6 +64,7 @@ pub struct GroupModel {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GuildMemberModel {
+    pub last_login_binary_datetime: i64,
     pub name: String,
     pub id: i32,
     pub online: bool,
@@ -84,11 +88,15 @@ pub struct GuildStorageItemModel {
     pub item_index: i32,
     pub count: u16,
     pub user_id: i64,
+    /// Exact `GuildStorageItem.Item` metadata used by Crystal's shared
+    /// `MirItemCell.OnMouseEnter` tooltip path.
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GuildModel {
+    pub spare_points: u8,
     pub name: Option<String>,
     pub notice: Vec<String>,
     pub rank_name: Option<String>,
@@ -119,20 +127,39 @@ pub struct TradeItemModel {
     pub item_index: Option<i32>,
     pub name: Option<String>,
     pub count: u16,
+    /// Exact offered `UserItem` metadata used by both Crystal trade grids.
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct TradeModel {
+    /// Packet identities survive unrelated social events in the same frame.
+    pub invite_revision: u64,
+    pub cancel_revision: u64,
+    /// Cursor revision for a validated trade packet, not a transaction receipt.
+    /// UI-local locks must react even to repeated equal partner offers.
+    pub event_revision: u64,
+    /// Accepted-exchange epoch in the local packet cursor. Distinguishes two
+    /// exchanges with the same partner even when their packets share a frame.
+    pub open_revision: u64,
+    /// Last explicit source packet that unlocked this exchange. Kept apart
+    /// from last_event so a later Group/Guild packet cannot hide the unlock.
+    pub unlock_revision: u64,
     pub state: String,
     pub partner: Option<String>,
     pub partner_gold: u32,
-    pub partner_items: Vec<TradeItemModel>,
+    /// Packet array positions are the original 2*x+y cell IDs. Never compact
+    /// null entries or renumber an offered item into an earlier empty cell.
+    pub partner_items: Vec<Option<TradeItemModel>>,
     pub partner_confirmed: bool,
+    /// Exact Candidate snapshot identity. Never use an item name or a partner
+    /// update as evidence for an offer belonging to this local participant.
+    pub my_offer_nonce: Option<String>,
     /// The native client does not invent its own offer. These are filled only
-    /// by an authoritative local-side packet when the protocol provides one.
+    /// by a validated authoritative local-side snapshot, not partner packets.
     pub my_gold: u32,
-    pub my_items: Vec<TradeItemModel>,
+    pub my_items: Vec<Option<TradeItemModel>>,
     pub my_confirmed: bool,
 }
 
@@ -215,6 +242,21 @@ pub enum SocialPendingOperation {
     TradeCancel,
 }
 
+impl SocialPendingOperation {
+    pub fn is_trade(&self) -> bool {
+        matches!(
+            self,
+            Self::TradeRequest
+                | Self::TradeReply
+                | Self::TradeGold { .. }
+                | Self::TradeDeposit { .. }
+                | Self::TradeRetrieve { .. }
+                | Self::TradeConfirm { .. }
+                | Self::TradeCancel
+        )
+    }
+}
+
 #[derive(Debug, Clone, Resource, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct SocialModel {
@@ -265,9 +307,18 @@ impl SocialModel {
         self.reconcile_pending(&old);
     }
 
+    /// Each wire arrival is a new request; repeated state projections are not.
+    pub fn apply_network_packet(&mut self, packet: &str, payload: &Value) -> bool {
+        if packet == "GroupInvite" && clean_name(payload.get("name")).is_some() {
+            self.group.pending_invite_from = None;
+        }
+        self.apply_packet(packet, payload)
+    }
+
     /// Fold one ordinary gateway ServerPacket payload into the cursor model.
     /// Returns false for unknown, missing, or over-limit payloads.
     pub fn apply_packet(&mut self, packet: &str, payload: &Value) -> bool {
+        let next_trade_revision = self.trade.event_revision.wrapping_add(1);
         let changed;
         let mut success = None;
         let mut from = None;
@@ -289,6 +340,7 @@ impl SocialModel {
                     return false;
                 };
                 self.group.members.retain(|member| member.name != name);
+                self.group.member_maps.remove(&name);
                 changed = true;
             }
             "GroupInvite" => {
@@ -324,6 +376,24 @@ impl SocialModel {
                 upsert_group_member(&mut self.group, name);
                 if !was_active && self.group.active {
                     self.group.pending_invite_from = None;
+                }
+                changed = true;
+            }
+            "GroupMembersMap" => {
+                let (Some(name), Some(map)) = (
+                    clean_name(payload.get("playerName")),
+                    payload.get("playerMap").and_then(Value::as_str),
+                ) else {
+                    return false;
+                };
+                if !self.group.member_maps.contains_key(&name)
+                    && self.group.member_maps.len() >= MAX_GROUP_MEMBERS
+                {
+                    return false;
+                }
+                self.group.member_maps.insert(name.clone(), map.to_owned());
+                if let Some(member) = self.group.members.iter_mut().find(|m| m.name == name) {
+                    member.map = Some(map.to_owned());
                 }
                 changed = true;
             }
@@ -383,6 +453,8 @@ impl SocialModel {
                 };
                 self.guild.name = Some(name);
                 self.guild.rank_name = clean_name(Some(&Value::String(raw_rank.to_owned())));
+                self.guild.spare_points =
+                    value_u8(guild_field(payload, "spare_points", "sparePoints")).unwrap_or(0);
                 self.guild.level = value_u8(guild_field(payload, "level", "level")).unwrap_or(0);
                 self.guild.experience = value_i64(guild_field(payload, "experience", "experience"))
                     .unwrap_or(0)
@@ -617,8 +689,12 @@ impl SocialModel {
                 else {
                     return false;
                 };
-                self.trade.partner = Some(name);
-                self.trade.state = "requested".to_owned();
+                self.trade = TradeModel {
+                    partner: Some(name),
+                    state: "requested".to_owned(),
+                    invite_revision: next_trade_revision,
+                    ..TradeModel::default()
+                };
                 changed = true;
             }
             "TradeAccept" => {
@@ -627,8 +703,16 @@ impl SocialModel {
                 else {
                     return false;
                 };
-                self.trade.partner = Some(name);
-                self.trade.state = "open".to_owned();
+                if self.trade.state != "open"
+                    || self.trade.partner.as_deref() != Some(name.as_str())
+                {
+                    self.trade = TradeModel {
+                        partner: Some(name),
+                        state: "open".to_owned(),
+                        open_revision: next_trade_revision,
+                        ..TradeModel::default()
+                    };
+                }
                 changed = true;
             }
             "TradeGold" => {
@@ -638,6 +722,7 @@ impl SocialModel {
                     return false;
                 };
                 self.trade.partner_gold = amount;
+                self.trade.my_confirmed = false;
                 changed = true;
             }
             "TradeItem" => {
@@ -651,22 +736,41 @@ impl SocialModel {
                 if items.len() > MAX_TRADE_ITEMS {
                     return false;
                 }
-                let parsed = items
+                let Some(parsed) = items
                     .iter()
-                    .filter_map(parse_trade_item)
-                    .collect::<Vec<_>>();
-                if parsed.len() != items.iter().filter(|item| !item.is_null()).count() {
+                    .map(|item| {
+                        if item.is_null() {
+                            Some(None)
+                        } else {
+                            parse_trade_item(item).map(Some)
+                        }
+                    })
+                    .collect::<Option<Vec<_>>>()
+                else {
                     return false;
-                }
+                };
                 self.trade.partner_items = parsed;
+                self.trade.my_confirmed = false;
                 changed = true;
             }
             "TradeConfirm" => {
-                self.trade.partner_confirmed = true;
+                // GameScene.TradeConfirm is settlement completion, NOT a
+                // partner's lock notification. Crystal resets both windows.
+                self.trade = TradeModel::default();
                 changed = true;
             }
             "TradeCancel" => {
-                self.trade = TradeModel::default();
+                let Some(unlock) = payload.get("unlock").and_then(Value::as_bool) else {
+                    return false;
+                };
+                if unlock {
+                    self.trade.my_confirmed = false;
+                } else {
+                    self.trade = TradeModel {
+                        cancel_revision: next_trade_revision,
+                        ..TradeModel::default()
+                    };
+                }
                 changed = true;
             }
             "DepositTradeItem" | "RetrieveTradeItem" => {
@@ -677,10 +781,27 @@ impl SocialModel {
                 }
                 success = payload.get("success").and_then(Value::as_bool);
                 changed = success.is_some();
+                if changed {
+                    // Both success and failure release Crystal's cell locks.
+                    self.trade.my_confirmed = false;
+                }
             }
             _ => return false,
         }
         if changed {
+            if packet.starts_with("Trade")
+                || matches!(packet, "DepositTradeItem" | "RetrieveTradeItem")
+            {
+                self.trade.event_revision = next_trade_revision;
+                if matches!(
+                    packet,
+                    "TradeGold" | "TradeItem" | "DepositTradeItem" | "RetrieveTradeItem"
+                ) || (packet == "TradeCancel"
+                    && payload.get("unlock") == Some(&Value::Bool(true)))
+                {
+                    self.trade.unlock_revision = next_trade_revision;
+                }
+            }
             let subject = payload
                 .get("name")
                 .and_then(Value::as_str)
@@ -730,6 +851,19 @@ impl SocialModel {
         old: &SocialModel,
         current: &SocialModel,
     ) -> bool {
+        // Completion/cancellation ends every request owned by this exchange.
+        // An Unlock=true packet merely unlocks and retains both offers.
+        if operation.is_trade()
+            && event.is_some_and(|event| {
+                event.packet == "TradeConfirm"
+                    || (event.packet == "TradeCancel" && current.trade.state.is_empty())
+                    || (event.packet == "TradeAccept"
+                        && old.trade.state == "open"
+                        && old.trade.open_revision != current.trade.open_revision)
+            })
+        {
+            return true;
+        }
         match operation {
             SocialPendingOperation::GroupSwitch { allow_group } => {
                 event.is_some_and(|e| e.packet == "SwitchGroup")
@@ -841,24 +975,50 @@ impl SocialModel {
             }
             // Crystal has no sender/request id on these packets. A partner
             // update is not proof that this client's offer/lock was accepted.
-            SocialPendingOperation::TradeGold { .. }
-            | SocialPendingOperation::TradeConfirm { .. } => false,
+            SocialPendingOperation::TradeGold { amount } => event.is_some_and(|event| {
+                // This is an internal read-model event, not a new wire packet.
+                // A same-owner snapshot must prove the exact positive delta;
+                // equal/stale or partner updates cannot release the request.
+                event.packet == "NativeOwnTradeSnapshot"
+                    && *amount > 0
+                    && current.trade.state == "open"
+                    && old.trade.partner == current.trade.partner
+                    && old.trade.open_revision == current.trade.open_revision
+                    && current.trade.my_offer_nonce.is_some()
+                    && (old.trade.my_offer_nonce.is_none()
+                        || old.trade.my_offer_nonce == current.trade.my_offer_nonce)
+                    && old.trade.my_gold.checked_add(*amount) == Some(current.trade.my_gold)
+            }),
+            SocialPendingOperation::TradeConfirm { .. } => event.is_some_and(|event| {
+                matches!(
+                    event.packet.as_str(),
+                    "TradeCancel"
+                        | "TradeGold"
+                        | "TradeItem"
+                        | "DepositTradeItem"
+                        | "RetrieveTradeItem"
+                ) && !current.trade.my_confirmed
+            }),
             SocialPendingOperation::TradeDeposit { from, to } => event.is_some_and(|e| {
                 e.packet == "DepositTradeItem"
-                    && e.success == Some(true)
+                    && e.success.is_some()
                     && e.from == Some(*from)
                     && e.to == Some(*to)
             }),
             SocialPendingOperation::TradeRetrieve { from, to } => event.is_some_and(|e| {
                 e.packet == "RetrieveTradeItem"
-                    && e.success == Some(true)
+                    && e.success.is_some()
                     && e.from == Some(*from)
                     && e.to == Some(*to)
             }),
-            SocialPendingOperation::TradeCancel => event.is_some_and(|e| e.packet == "TradeCancel"),
+            SocialPendingOperation::TradeCancel => false,
         }
     }
 }
+
+#[cfg(test)]
+#[path = "social_trade_tests.rs"]
+mod trade_source_tests;
 
 fn clean_name(value: Option<&Value>) -> Option<String> {
     let text = value?.as_str()?.trim();
@@ -907,6 +1067,12 @@ fn parse_group_member(value: &Value) -> Option<GroupMemberModel> {
 
 fn parse_guild_member(value: &Value) -> Option<GuildMemberModel> {
     Some(GuildMemberModel {
+        last_login_binary_datetime: value_i64(
+            value
+                .get("last_login_binary_datetime")
+                .or_else(|| value.get("lastLoginBinaryDatetime")),
+        )
+        .unwrap_or(0),
         name: clean_name(value.get("name"))?,
         id: value_i32(value.get("id")).unwrap_or(0),
         online: value
@@ -928,19 +1094,40 @@ fn parse_guild_storage_item(value: &Value) -> Option<GuildStorageItemModel> {
         item_index,
         count,
         user_id,
+        tooltip_source: value
+            .get("tooltipSource")
+            .or_else(|| item.get("tooltipSource"))
+            .and_then(|source| serde_json::from_value(source.clone()).ok()),
     })
 }
 
 fn parse_trade_item(value: &Value) -> Option<TradeItemModel> {
-    if value.is_null() {
-        return None;
-    }
-    Some(TradeItemModel {
-        unique_id: value_u64(value.get("uniqueId")),
-        item_index: value_i32(value.get("itemIndex")),
+    value.as_object()?;
+    let unique_id = value.get("uniqueId").or_else(|| value.get("unique_id"));
+    let item_index = value.get("itemIndex").or_else(|| value.get("item_index"));
+    let item = TradeItemModel {
+        unique_id: match unique_id {
+            Some(v) => Some(value_u64(Some(v))?),
+            None => None,
+        },
+        item_index: match item_index {
+            Some(v) => Some(value_i32(Some(v))?),
+            None => None,
+        },
         name: clean_name(value.get("name")),
-        count: value_u16(value.get("count")).unwrap_or(1).max(1),
-    })
+        count: match value.get("count") {
+            Some(v) => value_u16(Some(v))?,
+            None => 1,
+        },
+        tooltip_source: value
+            .get("tooltipSource")
+            .and_then(|source| serde_json::from_value(source.clone()).ok()),
+    };
+    (item.unique_id.is_some()
+        || item.item_index.is_some()
+        || item.name.is_some()
+        || item.tooltip_source.is_some())
+    .then_some(item)
 }
 
 fn upsert_group_member(group: &mut GroupModel, name: String) {
@@ -1628,9 +1815,13 @@ mod tests {
         trade.begin_pending(SocialPendingOperation::TradeGold { amount: 100 });
         trade.begin_pending(SocialPendingOperation::TradeConfirm { locked: true });
         reconcile_packet(&mut trade, "TradeGold", json!({"amount":100}));
-        assert_eq!(trade.pending.len(), 2);
+        assert_eq!(
+            trade.pending,
+            vec![SocialPendingOperation::TradeGold { amount: 100 }]
+        );
         reconcile_packet(&mut trade, "TradeConfirm", json!({}));
-        assert_eq!(trade.pending.len(), 2);
+        assert!(trade.pending.is_empty());
+        assert!(trade.trade.state.is_empty());
 
         let mut deposit = SocialModel::default();
         deposit.begin_pending(SocialPendingOperation::TradeDeposit { from: 2, to: 0 });
@@ -1639,7 +1830,8 @@ mod tests {
             "DepositTradeItem",
             json!({"from":2,"to":0,"success":false}),
         );
-        assert_eq!(deposit.pending.len(), 1);
+        assert!(deposit.pending.is_empty()); // Failure releases this exact cell lock, not success.
+        deposit.begin_pending(SocialPendingOperation::TradeDeposit { from: 2, to: 0 });
         reconcile_packet(
             &mut deposit,
             "DepositTradeItem",
@@ -1753,7 +1945,12 @@ mod tests {
             &json!({"from": 2, "to": 0, "success": false})
         ));
         model.apply_authoritative(model.clone());
-        assert_eq!(model.pending.len(), 2);
+        assert_eq!(
+            model.pending,
+            vec![SocialPendingOperation::GroupRemove { name: "Bob".into() }]
+        );
+        // Failure releases the exact request without inventing item movement.
+        model.begin_pending(SocialPendingOperation::TradeDeposit { from: 2, to: 0 });
         assert!(model.apply_packet(
             "DepositTradeItem",
             &json!({"from": 2, "to": 0, "success": true})
