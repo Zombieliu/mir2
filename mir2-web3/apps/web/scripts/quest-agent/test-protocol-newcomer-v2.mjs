@@ -1140,6 +1140,60 @@ test('SummonSkeleton pauses before casting when no real Amulet can be equipped',
   assert.deepEqual(sent, []);
 });
 
+test('SummonSkeleton uses the public target-zero summon route after equipping real Amulet', async () => {
+  const { client, quest } = practiceClient({
+    knownSkills: ['SoulFireBall', 'SummonSkeleton'],
+    inventoryItems: [{ uniqueId: 42, name: 'Amulet', quantity: 6,
+      tooltipSource: { info: { requiredClass: 31, requiredType: 0, requiredAmount: 1 } } }],
+    requirements: { taoist: ['SummonSkeleton learned', 'owned skeleton damage committed'] },
+  });
+  client.snapshot.entities[0].level = 24;
+  client.send = command => {
+    assert.deepEqual(command, {
+      type: 'magic', objectId: 1, spell: 'SummonSkeleton', direction: 'Right',
+      targetId: 0, x: 1, y: 0, spellTargetLock: false,
+    });
+    throw new Error('summon command inspected');
+  };
+  await assert.rejects(() => executeV2PracticePlan({
+    client, quest, navigate: async () => {}, plan: [{ kind: 'summon' }],
+  }), /summon command inspected/);
+  assert.equal(client.snapshot.equipmentItems[0]?.name, 'Amulet');
+});
+
+test('SummonSkeleton proves a same-owner BoneFamiliar after its public spawn packet', async () => {
+  const { client, quest } = practiceClient({
+    knownSkills: ['SoulFireBall', 'SummonSkeleton'],
+    inventoryItems: [{ uniqueId: 42, name: 'Amulet', quantity: 6,
+      tooltipSource: { info: { requiredClass: 31, requiredType: 0, requiredAmount: 1 } } }],
+    requirements: { taoist: ['SummonSkeleton learned', 'owned skeleton damage committed'] },
+  });
+  Object.assign(client.snapshot.entities[0], { name: 'QaTaoist', level: 24 });
+  client.snapshot.entities.push({ kind: 'monster', objectId: 10, name: 'Zombie2', x: 2, y: 1, hp: 10, dead: false });
+  const packet = (name, payload) => client.events.push({
+    sequence: ++client.sequence, direction: 'received', type: 'packet', packet: name, payload,
+  });
+  client.send = command => {
+    client.sequence += 1;
+    if (command.type === 'magic') {
+      assert.equal(command.targetId, 0);
+      packet('ObjectMagic', { objectId: 1, spell: 'SummonSkeleton', targetId: 0, cast: true });
+      packet('ObjectMonster', { objectId: 99, name: 'BoneFamiliar', dead: false });
+    }
+    if (command.type === 'clientVersion') {
+      client.snapshot.entities.push({
+        kind: 'monster', objectId: 99, name: 'BoneFamiliar', ownerName: 'QaTaoist', dead: false,
+      });
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot', payload: client.snapshot });
+      packet('ObjectStruck', { objectId: 10, attackerId: 99 });
+      packet('DamageIndicator', { objectId: 10, damage: 1 });
+      client.snapshot.questLog[0].objectives[0] = { number: 2210041, current: 1, required: 1, done: true };
+    }
+  };
+  await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'summon' }] });
+  assert.equal(client.snapshot.entities.find(entity => entity.objectId === 99)?.ownerName, 'QaTaoist');
+});
+
 test('three independently receipted practice actions do not wait for an AND-group before its final action', async () => {
   const { client, quest, sent } = practiceClient({
     knownSkills: ['Healing'], requirements: { taoist: ['Healing cast accepted on self'] }, completeOn: 3,

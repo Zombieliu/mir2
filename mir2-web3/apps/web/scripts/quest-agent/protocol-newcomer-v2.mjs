@@ -805,10 +805,17 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
           `q${quest.questId} SummonSkeleton requires a real equipped Amulet`);
       }
       const cast = await castV2Spell(client, target, 'SummonSkeleton', checkDeadline, quest.questId);
-      await client.wait(() => ownedBoneFamiliar(client.snapshot), `q${quest.questId} owned BoneFamiliar`, 12_000)
+      await client.wait(() => receivedAfter(client, cast.after, 'ObjectMonster', payload =>
+        String(payload?.name ?? '') === 'BoneFamiliar' && payload?.dead !== true),
+      `q${quest.questId} BoneFamiliar spawn`, 12_000)
         .catch(() => { throw new V2Pause('awaitingOwnedPet', quest.questId, 'SummonSkeleton lacked an authoritative owned-pet receipt'); });
+      // Zone's ObjectMonster announces the summon before the personal
+      // worldSnapshot includes its ownerName. Probe once, then prove it is
+      // this character's pet rather than a nearby player's summon.
+      await refreshCombatWorldSnapshot(client);
       const pet = ownedBoneFamiliar(client.snapshot);
-      await waitForPetDamage(client, cast.after, pet, cast.target, quest.questId);
+      if (!pet) throw new V2Pause('awaitingOwnedPet', quest.questId, 'BoneFamiliar spawn lacked a same-owner snapshot');
+      await waitForPetDamage(client, cast.after, pet, quest.questId);
     } else if (step.kind === 'spell') {
       // Lightning is a six-tile, directional Zone ray. Select a live target
       // on that ray, preferring a distant aligned tile if movement is needed;
@@ -1213,6 +1220,7 @@ async function castV2Spell(client, target, spell, checkDeadline = () => {}, ques
   const poisonBefore = equippedPoisonQuantity(client.snapshot);
   const lightning = spell === 'Lightning';
   const ground = spell === 'FireWall';
+  const summon = spell === 'SummonSkeleton';
   const command = lightning
     ? {
         // Lightning is a self-routed Crystal cast. Its targeting coordinates
@@ -1225,12 +1233,11 @@ async function castV2Spell(client, target, spell, checkDeadline = () => {}, ques
         direction: direction(actor, currentTarget),
         targetId: Number(actor.objectId), x: Number(actor.x), y: Number(actor.y), spellTargetLock: false,
       }
-    : ground
+    : (ground || summon)
       ? {
-          // The public gateway keeps the actor in objectId, while targetId=0
-          // selects the Zone's ground-spell route. The live monster tile is
-          // is used for this practice; the target must later receive positive
-          // damage before this step can pass.
+          // Ground spells and summons both use targetId=0 in the public
+          // gateway. The cursor location stays on the live practice target;
+          // later damage must still be proved against that target.
           type: 'magic', objectId: Number(actor.objectId), spell,
           direction: direction(actor, currentTarget), targetId: 0,
           x: Number(currentTarget.x), y: Number(currentTarget.y), spellTargetLock: false,
@@ -1406,9 +1413,16 @@ async function waitForPoisonEvidence(client, after, target, beforeQuantity, ques
   });
 }
 
-async function waitForPetDamage(client, after, pet, target, questId) {
-  const hp = Number(target?.hp);
-  await client.wait(() => targetTookDamage(client, target, hp, after, pet?.objectId), `q${questId} BoneFamiliar damage`, 12_000).catch(() => {
+async function waitForPetDamage(client, after, pet, questId) {
+  // The owned summon may choose a nearer hostile than the cursor target.
+  // Match its strike to a positive damage packet on that same object.
+  await client.wait(() => (client.events ?? []).some(struck =>
+    Number(struck?.sequence) > after && struck?.direction === 'received' && struck?.packet === 'ObjectStruck' &&
+    Number(struck?.payload?.attackerId) === Number(pet?.objectId) &&
+    (client.events ?? []).some(damage => Number(damage?.sequence) > Number(struck.sequence) &&
+      Number(damage?.sequence) <= Number(struck.sequence) + 10 && damage?.direction === 'received' &&
+      damage?.packet === 'DamageIndicator' && Number(damage?.payload?.objectId) === Number(struck?.payload?.objectId) &&
+      Number(damage?.payload?.damage) > 0)), `q${questId} BoneFamiliar damage`, 12_000).catch(() => {
     throw new V2Pause('awaitingOwnedPetDamage', questId, 'BoneFamiliar lacked a positive owned-pet damage receipt');
   });
 }

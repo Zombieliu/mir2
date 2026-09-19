@@ -234,3 +234,27 @@ casting if no real Amulet can be equipped. Focused V2 tests pass 51/51,
 including buried-target reveal and no-material summon cases. N16 live
 recheck and the final 78/78, level-30, timing, UI, animation, and Crystal
 comparison gates remain open.
+
+The ordinary shop recheck did buy and equip six Amulets, but N16 still
+paused. Its packet trace shows `Magic` and `ObjectMagic` for SummonSkeleton
+with the monster object ID as `targetId`; no owned BoneFamiliar appeared.
+Gateway's native summon route requires `targetId=0` while preserving the
+cursor target location. V2 SummonSkeleton now sends that public summon
+shape; a focused packet-shape regression passes (V2 suite 52/52), and the
+same-clock live recheck is underway. The Warrior's later ordinary run
+completed N19 and reached N20 at level 27, then failed its genuine bounded
+30-second WoomaSoldier search (5/677 D022 waypoints). After both normal
+logouts, the strict read-only verifier records 51/78: Warrior 22/26,
+Wizard 12/26, Taoist 17/26; each saved transform matches the public logout
+snapshot. Neither the Wizard revival limit nor the shared deadline changed.
+
+The next N16 public attempt followed the corrected target-zero route and
+spawned BoneFamiliar. Its `ObjectMonster` packet arrived before the personal
+snapshot identified the owner, so V2 now probes one ordinary `clientVersion`
+snapshot after the spawn and confirms `ownerName` matches the player. The
+pet then struck a nearer Zombie2, not the selected Zombie3; `ObjectStruck`
+from the owned pet and a matching positive `DamageIndicator` prove real
+damage, while the old target-specific waiter falsely paused. N16 practice
+now accepts positive owned-pet damage to any hostile, without extending the
+12-second receipt window or adding attacks. The focused V2 suite passes
+53/53, and the lawful same-character recheck is running.
