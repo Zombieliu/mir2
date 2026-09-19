@@ -10382,17 +10382,70 @@ impl SharedInProcessZoneSessionRuntime {
         key: &ZonePresenceKey,
         packets: &mut Vec<ServerPacket>,
     ) {
+        if !packets.iter().any(|packet| match packet {
+            ServerPacket::ObjectMonster { info } => info.master_object_id == 0,
+            ServerPacket::ObjectHealth { info } => info.percent > 0,
+            _ => false,
+        }) {
+            return;
+        }
         let session_id = SharedInProcessZoneState::zone_session_id_for_key(key);
         let zone_state = self
             .zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned");
+        let Some(presence) = zone_state.players.get(key) else {
+            // Preserve cleanup/control packets and owner-controlled pets. This
+            // is the historical no-presence behaviour: only an unowned AOI
+            // projection has no recipient to which it can safely be sent.
+            packets.retain(|packet| !matches!(
+                packet,
+                ServerPacket::ObjectMonster { info } if info.master_object_id == 0
+            ));
+            return;
+        };
+        let map_file_name = &presence.map_file_name;
+        let dead_entity_ids = zone_state
+            .maps
+            .get(map_file_name)
+            .map(|map| &map.dead_entity_ids);
+        let zone = zone_state
+            .zone_manager
+            .zone(&ZoneKey::for_map(map_file_name));
+
         packets.retain(|packet| match packet {
             ServerPacket::ObjectMonster { info } if info.master_object_id == 0 => {
-                zone_state
+                if !zone_state
                     .zone_manager
                     .player_has_visible_object(&session_id, info.object_id)
                     .unwrap_or(false)
+                {
+                    return false;
+                }
+                // A queued AOI projection is lossy: it carries no incarnation
+                // token. The native Zone lifecycle wins for retained objects:
+                // a dead incarnation cannot be reopened by a live packet, and
+                // a live respawn cannot be killed by a late corpse packet. For
+                // an unknown native object, retain first admission but still
+                // fence a recorded corpse from a stale live projection.
+                match zone.and_then(|zone| zone.native_monster_is_alive(info.object_id)) {
+                    Some(true) => !info.dead,
+                    Some(false) => info.dead,
+                    None => info.dead
+                        || !dead_entity_ids
+                            .is_some_and(|dead_entity_ids| dead_entity_ids.contains_key(&info.object_id)),
+                }
+            }
+            ServerPacket::ObjectHealth { info } if info.percent > 0 => {
+                // The health companion to a stale ObjectMonster must not make
+                // the dead shared object actionable again. Keep zero-health
+                // and other lifecycle/control packets in Crystal order.
+                match zone.and_then(|zone| zone.native_monster_is_alive(info.object_id)) {
+                    Some(false) => false,
+                    Some(true) => true,
+                    None => !dead_entity_ids
+                        .is_some_and(|dead_entity_ids| dead_entity_ids.contains_key(&info.object_id)),
+                }
             }
             _ => true,
         });

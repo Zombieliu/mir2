@@ -785,6 +785,15 @@ impl ZoneRuntime {
         self.native_monsters.contains_key(&object_id)
     }
 
+    /// The current lifecycle of one retained native monster. Gateway packet
+    /// dequeue uses this narrow query to fence stale AOI projections without
+    /// cloning every monster snapshot on an ordinary pending-packet drain.
+    pub fn native_monster_is_alive(&self, object_id: u32) -> Option<bool> {
+        self.native_monsters
+            .get(&object_id)
+            .map(|monster| !monster.dead && monster.hp > 0)
+    }
+
     pub fn native_monster_snapshots(&self) -> Vec<ZoneNativeMonsterSnapshot> {
         self.native_monsters
             .iter()

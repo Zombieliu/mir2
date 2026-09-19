@@ -61,11 +61,16 @@ snapshot still showed it dead at (166,317). The controller's final live-target
 check correctly paused. Following moving coordinates alone cannot fix these
 contradictory lifecycle receipts.
 
-The pending unowned-monster filter currently validates visibility without
-checking native Zone lifecycle. The candidate repair validates queued monster
-and positive-health projections against current authority, preserving death,
-cleanup and genuine respawn ordering. Focused actual-Zone kill/dequeue/respawn
-regressions, source review and ordinary revalidation are required before closure.
+The pending unowned-monster filter previously validated visibility without
+checking native Zone lifecycle. The repair validates queued monster and
+positive-health projections against current authority, preserving death,
+cleanup and genuine respawn ordering. A targeted Gateway run passes 2/2:
+real Zone kill/dequeue rejects queued live/positive-health ghost packets;
+real Zone respawn retains ObjectRevived and its fresh live projection while
+rejecting a late corpse. The existing TownRevive/re-entry AOI regression also
+passes. Raw output: `C:/mir2-newcomer-v2-clean-20260918/pending-zone-aoi-final.log`.
+This closes the targeted packet regression, not Wizard N12 ordinary completion;
+the repaired release and saved normal character still require live revalidation.
 
 Functional completion, real level 30, final logout/store checks, human timing,
 graduation equipment sources, UI, animations and original comparisons remain

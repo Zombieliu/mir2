@@ -4,7 +4,10 @@
 > claims, six chapters and trusted committed server/Zone evidence are implemented.
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
 > V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
-> Web guidance/goal and localization plus TypeScript pass; controller regressions 288/288.
+> Web guidance/goal and localization plus TypeScript pass; earlier controller checkpoint 288/288.
+> Latest affected V2/supply controller regressions pass 102/102; ordinary revalidation remains open.
+> Gateway pending-Zone monster lifecycle regressions pass 2/2 after a real
+> Zone kill and respawn; no ordinary Wizard N12 completion is claimed.
 > Fresh ordinary three-class 34/78 persist after normal logout; levels 22/19/11.
 > All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
 > Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.

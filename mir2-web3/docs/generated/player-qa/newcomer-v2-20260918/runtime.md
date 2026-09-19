@@ -199,3 +199,9 @@ toggle acknowledgment before practice; level-11 Taoist N7 uses an affordable
 normal Blacksmith melee upgrade with held survival supplies rechecked before
 purchase. Neither cap nor deadline is increased. See blocking-repairs.md;
 ordinary route units remain 34/78 and these repaired nodes are not yet re-passed.
+
+Wizard N12's contradictory dead/live Skeleton projection is fenced at Gateway
+pending dequeue against authoritative Zone monster lifecycle. Targeted actual
+Zone death/respawn plus existing TownRevive/re-entry AOI regressions pass 2/2
+(`pending-zone-aoi-final.log`). This is a source/test checkpoint only; the
+repaired Gateway release and the normal Wizard N12 run remain outstanding.
