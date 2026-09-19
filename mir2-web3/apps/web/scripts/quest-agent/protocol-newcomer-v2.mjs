@@ -1026,11 +1026,35 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
       // compare the moved actor with itself and reject a valid public move.
       const origin = { x: Number(actor.x), y: Number(actor.y) };
       const beforeSequence = Number(client.sequence ?? 0);
-      const destination = legalReposition(actor, target);
-      await navigate(destination, 0, () => false, { maxSuccessfulSteps: 12, maxAttempts: 20, detectPositionCycles: true });
-      if (distance(selfPlayer(client), origin) < 1 ||
-          !receivedAfter(client, beforeSequence, 'UserLocation', point =>
-            distance(point, origin) >= 1)) {
+      const candidates = legalRepositionCandidates(actor, target);
+      let remainingSteps = 12;
+      let remainingAttempts = 20;
+      let moved = false;
+      for (let index = 0; index < candidates.length; index += 1) {
+        checkDeadline();
+        const slots = candidates.length - index;
+        const stepAllowance = Math.max(1, Math.floor(remainingSteps / slots));
+        const attemptAllowance = Math.max(1, Math.floor(remainingAttempts / slots));
+        try {
+          await navigate(candidates[index], 0, () => false, {
+            maxSuccessfulSteps: stepAllowance,
+            maxAttempts: attemptAllowance,
+            detectPositionCycles: true,
+          });
+        } catch (error) {
+          // One chosen endpoint can be a wall while an adjacent legal step
+          // still completes the same public reposition. Do not expand the
+          // original twelve-step/twenty-attempt envelope across fallbacks.
+          if (!/^No walk path\b/.test(String(error?.message ?? ''))) throw error;
+        }
+        moved = distance(selfPlayer(client), origin) >= 1 &&
+          receivedAfter(client, beforeSequence, 'UserLocation', point =>
+            distance(point, origin) >= 1);
+        if (moved) break;
+        remainingSteps -= stepAllowance;
+        remainingAttempts -= attemptAllowance;
+      }
+      if (!moved) {
         throw new V2Pause('repositionRejected', quest.questId, 'wizard reposition had no authoritative movement receipt');
       }
     }
@@ -1565,6 +1589,18 @@ function legalReposition(actor, target) {
   const dx = Number(actor?.x) <= Number(target?.x) ? -2 : 2;
   const dy = Number(actor?.y) <= Number(target?.y) ? -1 : 1;
   return { x: Number(actor?.x) + dx, y: Number(actor?.y) + dy };
+}
+
+function legalRepositionCandidates(actor, target) {
+  const x = Number(actor.x);
+  const y = Number(actor.y);
+  const awayX = x <= Number(target.x) ? -1 : 1;
+  const awayY = y <= Number(target.y) ? -1 : 1;
+  return [
+    legalReposition(actor, target),
+    { x, y: y + awayY },
+    { x: x + awayX, y },
+  ];
 }
 
 function basicPotionCount(snapshot) {

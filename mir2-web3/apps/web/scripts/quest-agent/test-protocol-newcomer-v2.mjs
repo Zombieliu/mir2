@@ -1124,6 +1124,35 @@ test('Wizard reposition rejects a local coordinate change without UserLocation',
   }), /wizard reposition had no authoritative movement receipt/);
 });
 
+test('Wizard reposition uses an open adjacent cell when the first endpoint is a wall', async () => {
+  const { client, quest } = practiceClient({
+    knownSkills: ['Lightning', 'FireWall'],
+    requirements: { wizard: ['legal reposition between attacks'] },
+  });
+  client.snapshot.entities[0].class = 'Wizard';
+  Object.assign(client.snapshot.entities[0], { x: 306, y: 391 });
+  Object.assign(client.snapshot.entities[1], { x: 304, y: 389 });
+  const budgets = [];
+  await executeV2PracticePlan({
+    client, quest, plan: [{ kind: 'reposition' }],
+    navigate: async (destination, desiredDistance, _stopWhen, options) => {
+      if (desiredDistance === 8) return { reached: true };
+      budgets.push({ destination, steps: options.maxSuccessfulSteps, attempts: options.maxAttempts });
+      if (budgets.length === 1) throw new Error('No walk path on D022');
+      assert.deepEqual(destination, { x: 306, y: 392 });
+      Object.assign(client.snapshot.entities[0], destination);
+      client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'UserLocation', payload: destination });
+      client.snapshot.questLog[0].objectives[0] = {
+        number: 2210041, current: 1, required: 1, done: true,
+      };
+      return { reached: true, successfulSteps: 1, attempts: 1 };
+    },
+  });
+  assert.deepEqual(budgets.map(entry => entry.destination), [{ x: 308, y: 392 }, { x: 306, y: 392 }]);
+  assert.ok(budgets.reduce((total, entry) => total + entry.steps, 0) <= 12);
+  assert.ok(budgets.reduce((total, entry) => total + entry.attempts, 0) <= 20);
+});
+
 test('N18 loadout-only SummonSkeleton requirement learns the skill without entering owned-pet combat', () => {
   const n18 = practiceQuest({ taoist: [
     'SummonSkeleton learned',

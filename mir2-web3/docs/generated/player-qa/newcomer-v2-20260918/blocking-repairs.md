@@ -642,3 +642,14 @@ spell. N19 alone now permits that bounded direct spell fallback; N20–N21
 retain the strict no-trade rule for Wooma. No retreat, attack, death, or time
 budget was raised. The combined V2/kiting Node suites pass 100/100. The E
 run remains at N19 0/3 until live damage and quest receipts prove progress.
+
+Live E then cleared N19 and N20, reaching level 28 and N21 with one death.
+Its first Lightning hit was accepted, but the planned q21 reposition tried
+(308,392) from (306,391), a statically blocked D022 cell; the live
+WoomaFighter was at (304,389). The runner paused alive before any unconfirmed
+movement could count. The scoped candidate tries the original endpoint, then
+an adjacent vertical and horizontal step, sharing the original 12 successful
+steps and 20 attempts across all three. It still requires post-send
+`UserLocation` before counting the reposition. The V2 Node suite passes
+64/64, including the blocked-endpoint and missing-receipt cases; live N21
+remains pending.
