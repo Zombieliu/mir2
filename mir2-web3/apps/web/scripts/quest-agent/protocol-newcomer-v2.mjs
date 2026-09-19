@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { completeQuestObjectives } from './protocol-combat.mjs';
+import { clearTravelBlockingMonster, completeQuestObjectives } from './protocol-combat.mjs';
 import { interactQuest } from './protocol-quest-actions.mjs';
 import { createNavigator, reviveInTown, selfPlayer } from './protocol-play.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
@@ -329,7 +329,25 @@ export async function runNewcomerV2Journey({ client, className, gender, report, 
       ? Number(survival.maxEmergencyEscapesPerNavigation)
       : undefined,
   });
-  const travel = createMapTraveler(boundedClient, navigate);
+  const travel = createMapTraveler(boundedClient, navigate, {
+    // A live cave occupant can seal the only portal corridor. Resolve that
+    // observed blocker with the same bounded, public combat used by quests;
+    // keep the V2 per-target 20-action limit and the shared journey deadline.
+    resolveBlockingMonster: (owner, blocker) => clearTravelBlockingMonster(
+      owner, blocker, navigate, {
+        action: combatAction,
+        approachRange: combatApproachRange,
+        sustain: current => v2Sustain(current, survival, checkDeadline, {
+          hpThreshold: 0.75, mpThreshold: 0.35,
+        }),
+        refreshWhileWaiting: current => refreshCombatWorldSnapshot(current),
+        attackCadenceMs: 650,
+        maxAttackAttempts: 20,
+        combatHostileClearance: 0,
+        combatHostileClearanceFallback: 0,
+      },
+    ),
+  });
   const priorRecoveries = Object.hasOwn(recovery, 'priorRecoveries')
     ? recovery.priorRecoveries
     : [];
@@ -599,6 +617,15 @@ async function finishV2Quest(client, quest, navigate, travel, checkDeadline) {
 
 export async function completeV2Objectives(client, quest, { navigate, travel, className, checkDeadline, survival = {} }) {
   checkDeadline();
+  if (Number(quest.questId) === 2110022 &&
+      String(client.snapshot?.mapFileName ?? '') !== '0' &&
+      townTeleportCount(client.snapshot) > 0) {
+    // The final Board report is back in Bichon. Spend a held TownTeleport as
+    // an ordinary player instead of walking back through the occupied D022
+    // exit; the server's map and quest receipts remain authoritative.
+    await useTownTeleport(client);
+    checkDeadline();
+  }
   if (className === 'Taoist' && [2110020, 2110021].includes(Number(quest.questId))) {
     // A Wooma needs far more SoulFireBall casts than the generic six-Amulet
     // starter reserve. Buy an ordinary expedition stack before entering D022;
@@ -780,7 +807,10 @@ async function driveServerEventFlags(client, quest, navigate, checkDeadline) {
 async function publicNpcReport(client, endpoint, navigate, checkDeadline) {
   if (!endpoint) throw new Error('server report lacks a configured NPC endpoint');
   checkDeadline();
-  await navigate(endpoint.position, 16, () => false, { maxSuccessfulSteps: 180, maxAttempts: 240, detectPositionCycles: true });
+  // A normal TownTeleport lands near Bichon's south gate, over 350 walking
+  // tiles from the Board. This is a travel allowance, not a combat/search
+  // retry; every step still requires an authoritative normal movement receipt.
+  await navigate(endpoint.position, 16, () => false, { maxSuccessfulSteps: 520, maxAttempts: 640, detectPositionCycles: true });
   const npc = await client.wait(() => (client.snapshot?.entities ?? []).find(entity =>
     entity?.kind === 'npc' && Number(entity?.objectId) === Number(endpoint.objectId)), `live report NPC ${endpoint.objectId}`, 20_000);
   const after = client.sequence;
