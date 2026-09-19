@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> 2026-09-20 optional newcomer V2 supply correction: the imported
+> Border Village Pedlar script belongs to the visible Merchant Scott
+> (object 42), but `platinum_176` excluded its script while showing the NPC.
+> Profile v26 admits that original script; a same-profile shared-Zone
+> round-trip and public interaction regression passes 1/1. This opens a
+> normal merchant service; a live public TownTeleport purchase succeeded.
+> It does not claim full Crystal shop or visual parity. Live Wizard N10 and
+> three-class 78/78 remain unverified.
+
 > 2026-09-19 V2 candidate: shared-Zone directional melee fix passes a focused
 > regression and live Warrior HalfMoon positive damage. Imported BoneFamiliar
 > has 12–23 DC, but the generic summon fallback gave it one damage; a scoped

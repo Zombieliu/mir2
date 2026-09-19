@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-20 optional V2 route: Warrior and Taoist independently reached
+> 26/26 at level 30 with ordinary logout/save parity in a labelled
+> functional recheck. Fresh Wizard cohort C remains at N10/level 16 with
+> all three permitted real revivals used. A visible but inert Merchant
+> Scott was traced to the `platinum_176` script allowlist; profile v26
+> restores the original Pedlar service and a same-profile Gateway regression
+> passes. The rebuilt Gateway delivered a normal TownTeleport shop purchase
+> for Wizard. Wizard completion, clean two-hour timing,
+> UI, animation, and Crystal visual comparison remain open.
+
 > 2026-09-19 strict cohort B remains 66/78, levels 28/26/27, saved logout
 > parity; Wizard's fourth death rules out its two-hour completion. Separate
 > functional recheck proved Warrior HalfMoon positive damage after shared-Zone

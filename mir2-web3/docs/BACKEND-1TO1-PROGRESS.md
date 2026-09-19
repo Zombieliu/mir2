@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> 2026-09-20 V2 supply blocker: Merchant Scott (Border Village Pedlar,
+> object 42) was visible in the shared map but absent from the
+> `platinum_176` NPC-script allowlist, so ordinary interaction could not
+> open his shop after Wizard's cave escape. Profile v26 includes that
+> original placed service. The same-profile map-round-trip Gateway
+> interaction regression passes 1/1. A fresh release then served public
+> `Interact` → `@BuySell` → `NPCGoods` → `BuyItem` for the persisted Wizard;
+> TownTeleport cost 1,000 gold and the saved gold fell from 6,500 to 5,500.
+> The remaining Wizard route still requires recheck. This does not establish
+> visual parity.
+
 > 2026-09-19 V2 candidate follow-up: N21 Warrior's public HalfMoon now emits
 > spell-4 ObjectAttack and positive target damage after shared-Zone directional
 > target resolution (focused release test 1/1). BoneFamiliar still dealt one

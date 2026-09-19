@@ -1,6 +1,6 @@
 {
   "profileId": "platinum_176",
-  "version": 25,
+  "version": 26,
   "source": "Crystal.Database-29.01.25/Jev with classic 1.76 world overrides and the source three-class level-50 skill set",
   "disabledStage5ActionPrefixes": [
     "auction.",
@@ -815,6 +815,7 @@
     "BichonProvince/BorderVillage/Butcher",
     "BichonProvince/BorderVillage/Drapery",
     "BichonProvince/BorderVillage/Grocery",
+    "BichonProvince/BorderVillage/Pedlar",
     "BichonProvince/BorderVillage/Materials",
     "BichonProvince/BorderVillage/BookStore",
     "BichonProvince/BorderVillage/Ring",

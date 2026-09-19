@@ -414,3 +414,12 @@ The next ordinary return-scroll purchase paused at Merchant Scott despite the
 NPC appearing in the final public snapshot. A focused merchant observation
 refresh test passes; live Scott interaction and the remaining Wizard route
 are not yet accepted. These repair waits are not clean player time.
+
+The Scott failure was a content-profile mismatch: `platinum_176` showed
+object 42 but omitted its original `BichonProvince/BorderVillage/Pedlar`
+script. Profile v26 restores the script; the same-profile shared Gateway
+round-trip interaction regression passes 1/1 and the rebuilt live Gateway
+serves public `Interact`, `@BuySell`, `NPCGoods` and a normal 1,000-gold
+TownTeleport `BuyItem`. The persisted Wizard resumed N10 with the original
+16:04–18:04 UTC deadline and all three actual revivals still recorded.
+Completion, UI/animation and original-client visual comparison remain open.

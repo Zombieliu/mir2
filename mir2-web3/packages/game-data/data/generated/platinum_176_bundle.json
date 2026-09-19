@@ -1,31 +1,31 @@
 {
   "schema": "mir2-content-profile-bundle/1",
   "profileId": "platinum_176",
-  "profileVersion": 25,
+  "profileVersion": 26,
   "acceptanceLevel": 50,
   "source": "Crystal.Database-29.01.25/Jev with classic 1.76 world overrides and the source three-class level-50 skill set",
   "sourceData": {
     "crystalDatabaseVersion": 117,
     "crystalDatabaseCustomVersion": 0
   },
-  "builtAt": "2026-08-17T11:39:52.561Z",
+  "builtAt": "2026-09-19T17:03:58.633Z",
   "hashAlgorithm": "sha256",
-  "contentHash": "db020d72bddea3e22892dd2f06f14342de0fc484a0e41f08b80244ac06e52fd3",
+  "contentHash": "b2bb23127956c5eb7397619bb6bd6621c945eea730405c2417018cac87c6bba4",
   "files": [
     {
       "path": "packages/game-data/data/content_profiles/platinum_176.json",
-      "bytes": 42682,
-      "sha256": "c1c27d4dad3bc132c3580621f13af1cf31fd849fc5241291dfbacb9e8472b6bc"
+      "bytes": 42725,
+      "sha256": "328ecec1474f9bde809b6a57508cb9dd9d3b0be82c136fb4dabcd8bba85b66cd"
     },
     {
       "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
-      "bytes": 6394977,
-      "sha256": "2f3436064a1cca763718d1724960274bb1fd2c6e4c8b54f15a0aeeb1c7e9b16f"
+      "bytes": 6741323,
+      "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
     },
     {
       "path": "packages/game-data/data/generated/crystal_monster_manifest.json",
-      "bytes": 384996,
-      "sha256": "29aa645f3293911e42bbd7ede519335cce61af4c074d7a7a2d6cdf495ac982d3"
+      "bytes": 397117,
+      "sha256": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec"
     },
     {
       "path": "packages/game-data/data/generated/crystal_monster_ai_summary.json",
@@ -83,7 +83,7 @@
     "monsters": 174,
     "items": 195,
     "skills": 63,
-    "npcScripts": 100,
+    "npcScripts": 101,
     "respawnOverrides": 2,
     "dropOverrides": 40,
     "questPrerequisiteOverrides": 1,

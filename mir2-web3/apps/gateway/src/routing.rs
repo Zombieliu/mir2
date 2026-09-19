@@ -26815,6 +26815,46 @@ mod tests {
     }
 
     #[test]
+    fn shared_border_village_pedlar_opens_buy_sell_dialog() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state);
+        runtime.inner = InProcessWorldRuntime::new(
+            GatewayConfig::default()
+                .with_crystal_world_runtime()
+                .with_platinum_176_profile(),
+        );
+        start_new_runtime(&mut runtime, "npc-pedlar", "Shopper");
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: "crystal:D001:180:316".to_string(),
+            })
+            .expect("visit the mine before returning to the village");
+        runtime
+            .execute(WorldCommand::TransferMap {
+                key: "crystal:0:290:610".to_string(),
+            })
+            .expect("place player beside the ordinary Pedlar");
+        assert!(runtime.shared_npc_entity(42).is_some(), "Scott must survive the return to map 0 in the shared Zone");
+        let scott = runtime
+            .world_snapshot()
+            .entities
+            .into_iter()
+            .find(|entity| entity.kind == WorldEntityKind::Npc && entity.object_id == 42)
+            .expect("Border Village Pedlar should be visible");
+        let packets = runtime
+            .execute(WorldCommand::Interact { object_id: scott.object_id })
+            .expect("public Pedlar interaction should execute");
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectChat { object_id, .. } if *object_id == scott.object_id
+        )));
+        assert_eq!(
+            runtime.world_snapshot().active_npc_dialog.as_ref().map(|dialog| dialog.npc_object_id),
+            Some(scott.object_id),
+        );
+    }
+
+    #[test]
     fn shared_in_process_registry_callnpc_shared_guide_starts_sparse_session_quest() {
         let registry = ZoneRegistry::in_process();
         let mut first = GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
