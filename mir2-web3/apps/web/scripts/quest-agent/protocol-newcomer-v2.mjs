@@ -902,31 +902,36 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
     usedTargetIds.add(Number(target.objectId));
     return target;
   };
+  const revealBuriedTarget = async target => {
+    if (![5, 14, 24, 124, 125].includes(Number(target.ai))) return;
+    // Personal snapshots include buried monsters before the shared Zone lets
+    // spells hit them. Moving inside the reveal radius must produce a public
+    // visibility packet; an accepted cast alone is not a damage receipt.
+    const mapEntry = [...(client.events ?? [])].reverse().find(event =>
+      ['MapChanged', 'MapInformation'].includes(String(event?.packet ?? '')) &&
+      String(event?.payload?.fileName ?? '') === String(client.snapshot?.mapFileName ?? ''))?.sequence ?? 0;
+    const visible = () => {
+      let shown = false;
+      for (const event of client.events ?? []) {
+        if (Number(event?.sequence) <= mapEntry || Number(event?.payload?.objectId) !== Number(target.objectId)) continue;
+        if (event.packet === 'ObjectMonster') shown = event.payload.hidden === false && event.payload.dead !== true;
+        if (event.packet === 'ObjectShow') shown = true;
+        if (['ObjectHide', 'ObjectRemove', 'ObjectRevived'].includes(event.packet)) shown = false;
+      }
+      return shown;
+    };
+    if (visible()) return;
+    await navigate({ x: Number(target.x), y: Number(target.y) }, 3);
+    await client.wait(visible, `q${quest.questId} buried target reveal`, 7_000).catch(() => {
+      throw new V2Pause('awaitingTargetReveal', quest.questId,
+        `q${quest.questId} buried target lacked an authoritative ObjectShow/ObjectMonster receipt`);
+    });
+  };
   for (const step of plan) {
     checkDeadline();
     if (step.kind === 'poison') {
       const target = await acquireTarget(6);
-      if ([5, 14, 24, 124, 125].includes(Number(target.ai))) {
-        // Crystal's buried monsters are listed by the personal snapshot but
-        // the shared Zone rejects spells until a nearby player reveals them.
-        await navigate({ x: Number(target.x), y: Number(target.y) }, 3);
-        const mapEntry = [...(client.events ?? [])].reverse().find(event =>
-          ['MapChanged', 'MapInformation'].includes(String(event?.packet ?? '')) &&
-          String(event?.payload?.fileName ?? '') === String(client.snapshot?.mapFileName ?? ''))?.sequence ?? 0;
-        await client.wait(() => {
-          let visible = false;
-          for (const event of client.events ?? []) {
-            if (Number(event?.sequence) <= mapEntry || Number(event?.payload?.objectId) !== Number(target.objectId)) continue;
-            if (event.packet === 'ObjectMonster') visible = event.payload.hidden === false;
-            if (event.packet === 'ObjectShow') visible = true;
-            if (['ObjectHide', 'ObjectRemove'].includes(event.packet)) visible = false;
-          }
-          return visible;
-        }, `q${quest.questId} buried target reveal`, 7_000).catch(() => {
-          throw new V2Pause('awaitingTargetReveal', quest.questId,
-            `q${quest.questId} buried target lacked an authoritative ObjectShow/ObjectMonster receipt`);
-        });
-      }
+      await revealBuriedTarget(target);
       await equipHeldPoison(client, quest.questId);
       const cast = await castV2Spell(client, target, 'Poisoning', checkDeadline, quest.questId);
       await waitForPoisonEvidence(client, cast.after, cast.target, cast.poisonBefore, quest.questId);
@@ -1007,6 +1012,7 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
         step.spell === 'Lightning'
           ? { directionalRay: { minRange: 1, maxRange: 6, preferDistant: true } }
           : {});
+      await revealBuriedTarget(target);
       if (step.spell === 'SoulFireBall') await equipHeldAmulet(client);
       const cast = await castV2Spell(client, target, step.spell, checkDeadline, quest.questId);
       await waitForSpellDamage(client, cast.after, cast.target, cast.beforeHp, step.spell, quest.questId);

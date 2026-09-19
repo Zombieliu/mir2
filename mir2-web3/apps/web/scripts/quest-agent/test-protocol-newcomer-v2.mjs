@@ -1013,6 +1013,41 @@ test('N16 and N21 FireWall practice use the public ground-cast packet and requir
   }
 });
 
+test('FireWall reveals a buried Zombie2 through public visibility before casting', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['FireWall'], requirements: { wizard: ['FireWall learned', 'owned FireWall damage committed'] },
+  });
+  Object.assign(client.snapshot.entities[0], { class: 'Wizard' });
+  Object.assign(client.snapshot.entities[1], { name: 'Zombie2', ai: 24, x: 6, y: 0 });
+  quest.objectives.kill[0].monsterName = 'Zombie2';
+  client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectRevived', payload: { objectId: 9 } });
+  const approaches = [];
+  await executeV2PracticePlan({ client, quest, navigate: async (point, range) => {
+    approaches.push(range);
+    client.snapshot.entities[0].x = Number(point.x) - range;
+    if (range === 3) client.events.push({
+      sequence: ++client.sequence, direction: 'received', packet: 'ObjectShow', payload: { objectId: 9 },
+    });
+    return { reached: true, successfulSteps: 1, attempts: 1 };
+  }, plan: [{ kind: 'spell', spell: 'FireWall' }] });
+  assert.ok(approaches.includes(3));
+  assert.equal(sent[0].spell, 'FireWall');
+});
+
+test('FireWall does not cast at a still-buried snapshot monster', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['FireWall'], requirements: { wizard: ['FireWall learned', 'owned FireWall damage committed'] },
+  });
+  Object.assign(client.snapshot.entities[0], { class: 'Wizard' });
+  Object.assign(client.snapshot.entities[1], { name: 'Zombie2', ai: 24, x: 6, y: 0 });
+  quest.objectives.kill[0].monsterName = 'Zombie2';
+  await assert.rejects(() => executeV2PracticePlan({ client, quest, navigate: async (point, range) => {
+    client.snapshot.entities[0].x = Number(point.x) - range;
+    return { reached: true, successfulSteps: 1, attempts: 1 };
+  }, plan: [{ kind: 'spell', spell: 'FireWall' }] }), /buried target lacked an authoritative/);
+  assert.deepEqual(sent, []);
+});
+
 test('FireWall rejects a monster-target or non-cast acknowledgement even when the live target is struck', async () => {
   for (const options of [
     { magicTargetId: 9, magicCast: true },

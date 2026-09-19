@@ -605,3 +605,17 @@ and also requires a post-dispatch `UserLocation` packet. A regression test
 uses the real in-place update shape, plus a negative case with a local-only
 coordinate mutation. This was a repair interruption, not a new clean clock or
 a completed N15.
+
+E resumed on the same clock, completed N15 at 21:57:02 UTC, and entered N16
+at level 24 with zero deaths. Its first FireWall at (48,178) produced the
+accepted `ObjectMagic` and five `ObjectSpell` cells, but no target damage over
+12 seconds. The chosen Zombie2 had just respawned via `ObjectRevived` and had
+no later `ObjectShow` or live `ObjectMonster` receipt. Crystal's AI 24 Zombie
+is buried until a player comes within three tiles; the personal snapshot still
+listed it while the shared Zone correctly rejected damage. The V2 spell
+practice now approaches that reveal radius and requires the public visibility
+receipt before casting, sharing the same rule previously used by Poisoning.
+It does not count the failed cast as practice, alter the quest or save, or
+extend E's original deadline. The targeted V2 Node suite passes 63/63,
+including positive and negative buried FireWall cases. Live N16 completion
+remains to be observed.
