@@ -11279,7 +11279,7 @@ impl SharedInProcessZoneSessionRuntime {
                 } else {
                     1
                 };
-                object_id = (1..=max_distance).find_map(|distance| {
+                let points = (1..=max_distance).map(|distance| {
                     let mut point = Point {
                         x: origin.x,
                         y: origin.y,
@@ -11287,20 +11287,40 @@ impl SharedInProcessZoneSessionRuntime {
                     for _ in 0..distance {
                         point = point_in_direction(&point, packet_direction?);
                     }
-                    snapshot
-                        .entities
-                        .iter()
-                        .find(|entity| {
-                            !entity.dead
-                                && matches!(
-                                    entity.kind,
-                                    WorldEntityKind::Monster | WorldEntityKind::Player
-                                )
-                                && entity.x == point.x
-                                && entity.y == point.y
+                    Some(point)
+                }).collect::<Option<Vec<_>>>()?;
+                let owner_zone_object_id = self.current_zone_player_object_id().unwrap_or(0);
+                let shared_target = {
+                    let zone_state = self.zone_state.lock()
+                        .expect("shared zone presence mutex should not be poisoned");
+                    zone_state.maps.get(map_file_name).map(|map| {
+                        points.iter().find_map(|point| {
+                            map.entities.values().find(|entity| {
+                                !entity.dead
+                                    && entity.hp.is_none_or(|hp| hp > 0)
+                                    && !map.removed_entity_ids.contains(&entity.object_id)
+                                    && !map.dead_entity_ids.contains_key(&entity.object_id)
+                                    && matches!(entity.kind, WorldEntityKind::Monster | WorldEntityKind::Player)
+                                    && entity.x == point.x && entity.y == point.y
+                            }).map(|entity| entity.object_id).or_else(|| {
+                                zone_state.players.values().find(|presence| {
+                                    presence.map_file_name == map_file_name
+                                        && presence.zone_object_id != owner_zone_object_id
+                                        && !presence.entity.dead
+                                        && presence.entity.x == point.x && presence.entity.y == point.y
+                                }).map(|presence| presence.zone_object_id)
+                            })
                         })
-                        .map(|entity| entity.object_id)
-                })?;
+                    })
+                };
+                object_id = match shared_target {
+                    Some(target) => target?,
+                    None => points.iter().find_map(|point| snapshot.entities.iter().find(|entity| {
+                        !entity.dead
+                            && matches!(entity.kind, WorldEntityKind::Monster | WorldEntityKind::Player)
+                            && entity.x == point.x && entity.y == point.y
+                    }).map(|entity| entity.object_id))?,
+                };
             }
         }
         let (monster, direction, is_player_target, is_red_player_target) = if object_id == 0 {
@@ -14028,6 +14048,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.inner.execute(command)?
         } else if let Some(attack) = zone_native_player_attack {
             self.execute_zone_native_player_attack(attack)
+        } else if matches!(&command, WorldCommand::ClientPacket(ClientPacket::Attack { .. }))
+            && self.current_zone_session_id().is_some()
+        {
+            // Directional melee with no live shared target is a miss in the
+            // Zone. The personal session's stale monster mirror must never
+            // emit a phantom ObjectAttack or consume a weapon-technique cast.
+            self.authoritative_zone_owner_correction()
         } else if is_world_tick {
             // Session is personal; Zone is world. Drain the shared Zone above,
             // then advance only personal compatibility timers here. Running
@@ -25456,6 +25483,42 @@ mod tests {
             .native_monster_snapshots(&ZoneKey::for_map("0"))
             .iter()
             .any(|monster| monster.object_id == target.object_id));
+    }
+
+    #[test]
+    fn directional_melee_resolves_current_shared_tile_and_never_uses_stale_personal_monster() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "directional-shared-tile", "SharedTile");
+        let snapshot = runtime.inner.world_snapshot();
+        let target = snapshot.entities.iter()
+            .find(|entity| entity.kind == WorldEntityKind::Monster && !entity.dead)
+            .cloned().expect("starter map should have a monster");
+        let key = runtime.current_presence_key().expect("shared Zone presence");
+        {
+            let mut state = zone_state.lock().unwrap();
+            let presence = state.players.get_mut(&key).expect("owner presence");
+            presence.entity.x = 1000;
+            presence.entity.y = 1000;
+            let map = state.maps.get_mut("0").expect("shared map");
+            let mut moved_target = target.clone();
+            moved_target.x = 1001;
+            moved_target.y = 1000;
+            map.entities.insert(target.object_id, moved_target);
+        }
+        assert_ne!(target.x, 1001, "personal monster mirror must be stale");
+        let right = WorldCommand::ClientPacket(ClientPacket::Attack {
+            direction: MirDirection::Right, spell: Spell::HalfMoon,
+        });
+        assert_eq!(runtime.prepare_zone_native_player_attack(&right)
+            .expect("shared adjacent target should route to Zone").object_id, target.object_id);
+        let left = WorldCommand::ClientPacket(ClientPacket::Attack {
+            direction: MirDirection::Left, spell: Spell::HalfMoon,
+        });
+        assert!(runtime.prepare_zone_native_player_attack(&left).is_none());
+        let packets = runtime.execute(left).expect("unmatched Zone melee should be corrected");
+        assert!(packets.iter().any(|packet| matches!(packet, ServerPacket::UserLocation { .. })));
+        assert!(!packets.iter().any(|packet| matches!(packet, ServerPacket::ObjectAttack { .. })));
     }
 
     #[test]

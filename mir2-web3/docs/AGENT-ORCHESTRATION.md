@@ -1,5 +1,35 @@
 # Agent Orchestration
 
+> 2026-09-19 latest V2 handoff: the original cohort B finished at 66/78,
+> levels 28/26/27, with matching normal logout saves; Wizard's fourth death
+> invalidates its strict two-hour/three-revival gate. A separately labelled
+> functional recheck retains the old clock and deaths. Its Taoist N20 bought
+> 100 Amulets through the public shop, dealt 200 SoulFireBall damage in 20
+> attacks, and hit the unchanged cap before a 285-HP Wooma died. A normal
+> owned-pet assist is being checked. Warrior N21 exposed stale personal-map
+> directional melee; a shared-Zone resolution regression passes and the
+> rebuilt Gateway is deployed, but live HalfMoon damage is still unproved.
+> The V2 route now searches only its three isolated D022 footholds and rejects
+> crowded N20/N21 targets; controller tests pass 57/57. No 78/78 or visual
+> acceptance claim is authorized by these candidate repairs.
+
+> 2026-09-19 D022 safety correction: cohort B's Wizard completed N12 and
+> N16, then died a fourth time during N19 at (248,284). Six nearby Wooma
+> were present, including the three tightly grouped V2 WoomaSoldier spawns.
+> Its three lawful revivals were already spent, so strict cohort B 78/78 is
+> impossible. The next candidate separates one V2 monster per foothold at
+> (335,360), (320,345), and (300,335), with ordinary respawn waits. Static
+> collision paths and Node 57/57 pass; live safety and saved completion are
+> still unverified. Preserve the original 120-minute clocks and all deaths.
+
+> 2026-09-19 14:39 UTC strict saved cohort B check: 66/78, Warrior 23/26
+> level 28, Wizard 21/26 level 26, Taoist 22/26 level 27. All three had
+> normal logout and matching saved transforms. Warrior paused on N21 search;
+> Taoist consumed its real Amulets during N20, fell back to melee, and hit the
+> unchanged 20-action cap. A V2-only ordinary shop preflight for 100 Amulets
+> is coded and Node-tested, but live revalidation remains open. This cohort's
+> 78/78 within the original clock is impossible after Wizard's fourth death.
+
 > 2026-09-19 independent newcomer V2 cohort B keeps three original
 > 12:45:19–14:45:19 UTC ordinary clocks and the three-revival ceiling.
 > Wizard N12 and Warrior N16 now pass with public combat receipts after
@@ -10,7 +40,7 @@
 > strict three-class 78/78, level-30, save, timing, and visual gates remain open.
 > Cohort A's final 51/78 and paused V1 evidence are independent.
 
-> 2026-09-19 V2 same-clock update: Wizard N12 suffered a real fourth death
+> 2026-09-19 V2 same-clock update: Wizard N19 suffered a real fourth death
 > with its cumulative three revivals already spent; 78/78 is impossible under
 > the retained rules. Warrior and Taoist can continue lawful functional
 > checks. The verified saved tally remains 40/78; see newcomer V2 QA evidence.

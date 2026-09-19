@@ -1,6 +1,56 @@
 # Fresh V2 blocking failures and bounded repairs
 
-The first fresh ordinary saved checkpoint was 34/78; the latest is 40/78. None of the repairs below
+2026-09-19 14:23 UTC, independent cohort B Wizard died for the fourth time
+at N19 near D022 (248,284), after completing N12 and N16. Its cumulative
+three normal revivals were already spent. The packet trace showed six nearby
+hostiles, including the initial V2 WoomaSoldier group of three at (250,282).
+It received normal `LogOutSuccess`, retained the death and deadline evidence,
+and cannot reach strict 78/78 under this cohort's rules. Warrior and Taoist
+were still on their original runs when this was diagnosed.
+
+The next V2-only spawn candidate reduces each training group to one monster
+with zero spread and separates Dung (335,360), WoomaSoldier (320,345), and
+WoomaFighter (300,335). All three cells have a static path from the ordinary
+D022 entry, at 5/37/48 steps respectively, and the route/collision tests pass
+57/57. Imported Crystal groups remain unchanged; ordinary respawn waits and
+the unchanged 30-second search/20-attack/revival limits still apply. This is
+a code/test candidate, not a live survival or completion receipt.
+
+The 2026-09-19 14:39 UTC read-only strict verifier records Warrior 23/26
+at level 28, Wizard 21/26 at level 26, and Taoist 22/26 at level 27,
+total 66/78. All three public logouts succeeded and their authoritative
+snapshot transforms matched the persisted characters. Raw verifier output:
+`C:/mir2-newcomer-v2-cohort-b-20260919/strict-verification-20260919T1439.json`.
+Warrior paused at N21 because the current broad WoomaFighter source was not
+found in its bounded search. Taoist paused in N20 against WoomaSoldier
+294000: normal SoulFireBall casts consumed its last Amulets, then the
+controller fell back to low-damage melee and exhausted the existing
+20-action cap with the target still alive. The V2 N20/N21 candidate now
+visits the ordinary village shop for 100 real Amulets before D022; it
+fails closed if the full stack cannot be purchased. Existing shop tests
+exercise 100-Amulet purchasing, and V2 route tests pass 57/57. No live
+success, two-hour pass, UI, animation or Crystal parity is inferred.
+
+At 2026-09-19 14:50 UTC, the separately labelled functional recheck kept
+the original cohort B clock and revival ledger. Warrior N21 armed HalfMoon
+and sent its normal directional attack after walking to (319,366), but the
+Gateway emitted `ObjectAttack` with spell 0 and no owned damage. The shared
+Zone had a live WoomaFighter at (318,366); Gateway's directional-target
+resolver consulted the stale personal monster mirror rather than its current
+shared map, then fell back to personal combat. The candidate gateway repair
+resolves the target from shared-map state and corrects unmatched Zone swings
+without a phantom private attack. A focused gateway regression and live
+N21 replay are pending; this does not claim HalfMoon animation parity.
+
+The Taoist functional recheck reached Merchant Ruben through ordinary map
+transfers. Its public snapshot at 15:02:35 UTC showed 100 real Amulets and
+gold 40,190, down from 42,690 before the normal purchase. The character was
+still travelling back toward D022; N20 survival and kills were not yet
+proven. This purchase belongs to the separate recheck window, not the
+expired strict 120-minute cohort B run.
+
+The first fresh ordinary saved checkpoint was 34/78; the latest independent
+cohort B strict saved checkpoint is 66/78. None of the repairs below
 is a claim that the paused ordinary route, native UI or original Crystal visual
 comparison has passed. The original clocks are expired and cumulative revivals
 remain 0/3/1. No route has restarted with a replacement clock.
@@ -301,3 +351,18 @@ The final gateway binary containing all three footholds is built, but its
 cohort B live deployment and three-class N19–N22 recheck remain open as of
 2026-09-19 14:02 UTC. No 78/78, three-level-30, two-hour, save, UI,
 animation, or original-client visual claim follows from these repairs.
+
+2026-09-19 latest bounded recheck: strict cohort B ended 66/78 (Warrior
+23/26 level 28, Wizard 21/26 level 26, Taoist 22/26 level 27) with normal
+logout and matching saved transforms. Wizard's fourth death exceeds its
+original three-revival allowance, so this two-hour cohort cannot pass. A
+separately labelled functional clock preserves every original start/death.
+Taoist N20 bought 100 real Amulets through Merchant Ruben and hit the
+unchanged 20-attack cap after 200 SoulFireBall damage against a roughly
+285-HP WoomaSoldier; an owned BoneFamiliar assist is a candidate, not a
+pass. Warrior N21 public HalfMoon exposed a stale personal-monster target
+lookup; the shared-Zone directional fix has a passing release regression and
+is deployed, while live damage is still pending. V2 quest searches now use
+only their isolated D022 training sources and reject crowded N20/N21 targets.
+Node route suite 57/57 and supply suite 59/59 pass. No 78/78, three level-30
+saves, clean two-hour completion, or UI/animation/Crystal visual claim follows.

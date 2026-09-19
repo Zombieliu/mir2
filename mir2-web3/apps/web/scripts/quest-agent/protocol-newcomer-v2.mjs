@@ -3,8 +3,8 @@ import { completeQuestObjectives } from './protocol-combat.mjs';
 import { interactQuest } from './protocol-quest-actions.mjs';
 import { createNavigator, reviveInTown, selfPlayer } from './protocol-play.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
-import { prepareLoadout, combatAction, meleeCombatAction, useSupplies } from './protocol-loadout.mjs';
-import { purchaseV2BasicHpPotion, equipHeldAmulet, moveHeldBeltItemToInventory, restockInVillage } from './protocol-supplies.mjs';
+import { prepareLoadout, combatAction, combatApproachRange, meleeCombatAction, useSupplies } from './protocol-loadout.mjs';
+import { purchaseV2BasicHpPotion, equipHeldAmulet, moveHeldBeltItemToInventory, restockInVillage, townTeleportCount, useTownTeleport } from './protocol-supplies.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
@@ -111,6 +111,7 @@ function appendTrainingSpawns(index, configuredSpawns) {
       isBoss: false,
       monsterIndex,
       monsterName: requiredString(spawn.monster, `training respawn ${respawnIndex} monster name`),
+      newcomerTraining: true,
     });
     const entries = index.get(monsterIndex) ?? [];
     entries.unshift(entry);
@@ -190,7 +191,15 @@ function endpoint(npcId, npcById, questId, phase) {
 
 function buildKill(kill, maps, respawns, questId) {
   const monsterIndex = integer(kill.monsterIndex, `q${questId} monster index`);
-  const spawns = (respawns.get(monsterIndex) ?? []).filter(spawn => maps.includes(spawn.mapFileName));
+  const sources = (respawns.get(monsterIndex) ?? []).filter(spawn => maps.includes(spawn.mapFileName));
+  // D022's imported groups occupy a wide, dangerous central footprint. The
+  // V2 route certifies the three separated footholds as its search sources;
+  // the original Crystal actors remain in the shared world and can still be
+  // fought when a player encounters a safely isolated one.
+  const trainingSources = [2110019, 2110020, 2110021].includes(questId)
+    ? sources.filter(spawn => spawn.newcomerTraining === true)
+    : [];
+  const spawns = trainingSources.length ? trainingSources : sources;
   if (!spawns.length) throw new Error(`q${questId} ${kill.monster} has no Crystal respawn in ${maps.join(',')}`);
   // completeQuestObjectives consumes `spawnCandidates`, rather than the
   // presentation-oriented `spawns` name used by the V2 practice driver.
@@ -585,6 +594,27 @@ async function finishV2Quest(client, quest, navigate, travel, checkDeadline) {
 
 export async function completeV2Objectives(client, quest, { navigate, travel, className, checkDeadline, survival = {} }) {
   checkDeadline();
+  if (className === 'Taoist' && [2110020, 2110021].includes(Number(quest.questId))) {
+    // A Wooma needs far more SoulFireBall casts than the generic six-Amulet
+    // starter reserve. Buy an ordinary expedition stack before entering D022;
+    // otherwise the caster silently falls back to low-damage melee and spends
+    // the unchanged 20-action combat budget without killing the target.
+    if (String(client.snapshot?.mapFileName ?? '') !== '0' && townTeleportCount(client.snapshot) > 0) {
+      await useTownTeleport(client);
+    }
+    if (String(client.snapshot?.mapFileName ?? '') !== '0') await travel('0');
+    checkDeadline();
+    const readiness = await restockInVillage(client, navigate, {
+      targetHp: 24, lowStockHp: 12,
+      targetMp: 24, lowStockMp: 12,
+      targetAmulet: 100, lowStockAmulet: 100,
+    });
+    const held = Number(readiness?.after?.amulet ?? readiness?.stock?.amulet ?? 0);
+    if (!['restocked', 'sufficient'].includes(readiness?.status) || held < 100) {
+      throw new V2Pause('awaitingWoomaAmulets', quest.questId,
+        `q${quest.questId} requires 100 real Amulets from the ordinary village shop before D022 combat`);
+    }
+  }
   let enteredObjectiveMap = false;
   const mapEntryAfter = Number(client.sequence);
   if (quest.objectiveMaps.length && !quest.objectiveMaps.includes(String(client.snapshot?.mapFileName ?? ''))) {
@@ -628,9 +658,22 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
     await driveV2Practice(client, quest, navigate, className, checkDeadline);
   }
   if (quest.objectives.kill.length) {
+    const woomaSummonsAttempted = new Set();
     await completeQuestObjectives(client, quest, navigate, {
       travel,
-      action: (owner, target) => combatAction(owner, target),
+      action: async (owner, target) => {
+        if (className === 'Taoist' && [2110020, 2110021].includes(Number(quest.questId)) &&
+            !ownedBoneFamiliar(owner.snapshot) && !woomaSummonsAttempted.has(Number(target.objectId))) {
+          woomaSummonsAttempted.add(Number(target.objectId));
+          return summonWoomaFamiliar(owner, target, quest.questId, checkDeadline);
+        }
+        if (className === 'Taoist' && [2110020, 2110021].includes(Number(quest.questId)) &&
+            combatApproachRange(owner, target) <= 1) {
+          throw new V2Pause('awaitingWoomaAmulets', quest.questId,
+            `q${quest.questId} cannot continue Wooma combat without ready SoulFireBall and real Amulets`);
+        }
+        return combatAction(owner, target);
+      },
       prepare: async owner => {
         checkDeadline();
         return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.6, mpThreshold: 0.35 });
@@ -659,6 +702,9 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // preferred over speculative spawn searching.
       maxEngagements: 48,
       maxAttackAttempts: 20,
+      ...([2110020, 2110021].includes(Number(quest.questId))
+        ? { maxTargetAdjacent: 0, maxTargetNearby: 0 }
+        : {}),
       maxSpawnSearches: 4,
       maxSpawnWaypoints: 120,
       spawnSearchTimeoutMs: 30_000,
@@ -672,7 +718,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // At Warrior N15/N16, an adjacent non-objective Zombie3 can exhaust
       // the cap while the required Zombie2 remains alive in the same pack.
       focusTargetThroughAggressors:
-        (className === 'Taoist' && [2110010, 2110011].includes(Number(quest.questId))) ||
+        (className === 'Taoist' && [2110010, 2110011, 2110020, 2110021].includes(Number(quest.questId))) ||
         (className === 'Warrior' && [2110015, 2110016].includes(Number(quest.questId))),
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
@@ -1330,6 +1376,25 @@ function ownedBoneFamiliar(snapshot) {
   return (snapshot?.entities ?? []).find(entity =>
     entity?.kind === 'monster' && entity?.dead !== true && String(entity?.name) === 'BoneFamiliar' &&
     String(entity?.ownerName ?? '').trim().toLowerCase() === owner.toLowerCase()) ?? null;
+}
+
+async function summonWoomaFamiliar(client, target, questId, checkDeadline) {
+  checkDeadline();
+  if (!await equipHeldAmulet(client)) {
+    throw new V2Pause('awaitingAmulet', questId, `q${questId} requires a real Amulet to summon BoneFamiliar`);
+  }
+  const cast = await castV2Spell(client, target, 'SummonSkeleton', checkDeadline, questId);
+  await client.wait(() => receivedAfter(client, cast.after, 'ObjectMonster', payload =>
+    String(payload?.name ?? '') === 'BoneFamiliar' && payload?.dead !== true),
+  `q${questId} BoneFamiliar spawn`, 12_000).catch(() => {
+    throw new V2Pause('awaitingOwnedPet', questId, 'SummonSkeleton lacked an authoritative pet spawn');
+  });
+  await refreshCombatWorldSnapshot(client);
+  if (!ownedBoneFamiliar(client.snapshot)) {
+    throw new V2Pause('awaitingOwnedPet', questId, 'BoneFamiliar spawn lacked a same-owner snapshot');
+  }
+  // Summoning is a real normal command but it is not an attack on this target.
+  return { kind: 'wait', targetId: Number(target.objectId), delayMs: 650 };
 }
 
 function practiceFingerprint(snapshot, quest) {

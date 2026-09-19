@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> 2026-09-19 directional melee correction: N21 Warrior sent a public HalfMoon
+> directional attack, but target lookup read a stale personal snapshot while
+> the player stood in the shared Zone, producing spell-0 phantom attacks.
+> Gateway now resolves the ray against shared map actors and players, with an
+> owner location correction on a true miss. Focused release test passes 1/1;
+> rebuilt Gateway is deployed on the isolated V2 cohort ports. Live N21
+> damage and complete three-class route are still unverified.
+
+> 2026-09-19 D022 candidate repair: Wizard's fourth N19 death occurred amid
+> six nearby hostiles, including the V2-only dense WoomaSoldier group. The V2 overlay
+> now proposes one Dung, one WoomaSoldier and one WoomaFighter on separated
+> walkable cells; normal respawn timing and imported Crystal groups are kept.
+> Node route/collision checks pass 57/57. Release deployment, live survival,
+> saved three-class level-30 completion and visual parity remain unverified.
+
 > 2026-09-19 V2-only backend integration: the normal Zone magic path
 > tolerates at most one stale cursor tile for an authoritative live monster
 > ID, retains the live-range check, and emits the live target coordinate.

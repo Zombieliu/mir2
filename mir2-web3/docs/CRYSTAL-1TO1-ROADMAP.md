@@ -1,5 +1,21 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-19 cohort B strict result is 66/78 with levels 28/26/27 and saved
+> logout parity. Wizard's fourth death rules out a strict two-hour completion.
+> Separate functional rechecks found the Taoist's unchanged 20-action cap
+> cannot kill a 285-HP Wooma with 200 damage from SoulFireBall alone, and
+> Warrior N21 directional melee used a stale personal target. A deployed
+> shared-Zone target fix passes 1/1; isolated D022 V2 search sources and
+> owned-pet support pass affected Node tests. Live battle, 78/78, level-30
+> saves, timing, UI, animation and original Crystal visuals remain open.
+
+> 2026-09-19 V2 D022 correction candidate: the first three-monster footholds
+> created a lethal cluster at N19 and Wizard exhausted its fourth death.
+> Revised V2-only single spawns are separated on walkable D022 cells, while
+> imported Crystal groups remain unchanged. Static path and Node 57/57 pass;
+> ordinary live safety, three-class 78/78, level-30 saves and visual parity
+> remain open. Cohort B's original two-hour gate cannot pass.
+
 > 2026-09-19 optional newcomer V2 candidate correction: one-tile stale
 > monster cursor magic now resolves by authoritative object ID and current
 > range; V2 N16 uses Zombie2 after N14's Zombie3 training. Three isolated

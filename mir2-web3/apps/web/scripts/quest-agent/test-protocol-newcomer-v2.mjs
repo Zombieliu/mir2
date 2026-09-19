@@ -51,25 +51,39 @@ test('V2 training footholds are data-defined, bounded, and separate from importe
   const dungTraining = dung.spawnCandidates.find(row => row.respawnIndex === 10019);
   const soldierTraining = soldier.spawnCandidates.find(row => row.respawnIndex === 10020);
   const fighterTraining = fighter.spawnCandidates.find(row => row.respawnIndex === 10021);
-  assert.deepEqual(dungTraining.position, { x: 250, y: 292 });
-  assert.equal(dungTraining.count, 3);
+  assert.deepEqual(dungTraining.position, { x: 335, y: 360 });
+  assert.equal(dungTraining.count, 1);
   assert.equal(dung.spawnCandidates[0].respawnIndex, 10019);
-  assert.equal(dung.spawnCandidates.filter(row => row.respawnIndex === 939).length, 1);
-  assert.deepEqual(soldierTraining.position, { x: 250, y: 282 });
-  assert.deepEqual(fighterTraining.position, { x: 270, y: 270 });
+  assert.deepEqual(dung.spawnCandidates.map(row => row.respawnIndex), [10019],
+    'V2 route searches the certified foothold instead of the broad imported spread');
+  assert.deepEqual(soldierTraining.position, { x: 320, y: 345 });
+  assert.deepEqual(fighterTraining.position, { x: 300, y: 335 });
   assert.equal(soldier.spawnCandidates[0].respawnIndex, 10020);
   assert.equal(fighter.spawnCandidates[0].respawnIndex, 10021);
-  assert.equal(soldierTraining.count, 3);
-  assert.equal(fighterTraining.count, 3);
+  assert.equal(soldierTraining.count, 1);
+  assert.equal(fighterTraining.count, 1);
+  assert.equal(dungTraining.spread, 0);
+  assert.equal(soldierTraining.spread, 0);
+  assert.equal(fighterTraining.spread, 0);
+  const footholds = [dungTraining.position, soldierTraining.position, fighterTraining.position];
+  for (let left = 0; left < footholds.length; left += 1) {
+    assert.ok(Math.max(Math.abs(footholds[left].x - 250), Math.abs(footholds[left].y - 282)) >= 50,
+      'training foothold must stay clear of the observed central D022 Wooma pack');
+    for (let right = left + 1; right < footholds.length; right += 1) {
+      assert.ok(Math.max(Math.abs(footholds[left].x - footholds[right].x),
+        Math.abs(footholds[left].y - footholds[right].y)) >= 15,
+      'training footholds must not form a new immediate hostile pack');
+    }
+  }
   assert.notEqual(soldierTraining.respawnIndex, fighterTraining.respawnIndex);
-  assert.equal(soldier.spawnCandidates.filter(row => row.respawnIndex === 940).length, 1);
-  assert.equal(fighter.spawnCandidates.filter(row => row.respawnIndex === 941).length, 1);
+  assert.deepEqual(soldier.spawnCandidates.map(row => row.respawnIndex), [10020]);
+  assert.deepEqual(fighter.spawnCandidates.map(row => row.respawnIndex), [10021]);
 });
 
 test('all three D022 training footholds have a static walk path from the ordinary entry', async () => {
   const map = await loadProtocolCollisionMap('D022');
   const blockedTransfers = [{ x: 338, y: 354 }, { x: 251, y: 207 }, { x: 251, y: 206 }];
-  for (const target of [{ x: 250, y: 292 }, { x: 250, y: 282 }, { x: 270, y: 270 }]) {
+  for (const target of [{ x: 335, y: 360 }, { x: 320, y: 345 }, { x: 300, y: 335 }]) {
     assert.equal(map.blocked[target.y * map.width + target.x], 0);
     assert.ok(findProtocolWalkPath({
       map, start: { x: 338, y: 356 }, target, dynamicObstacles: blockedTransfers,

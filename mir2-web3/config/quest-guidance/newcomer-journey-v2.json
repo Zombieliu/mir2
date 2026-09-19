@@ -7,37 +7,37 @@
       "mapFileName": "D022",
       "monster": "Dung",
       "monsterIndex": 242,
-      "position": { "x": 250, "y": 292 },
-      "count": 3,
-      "spread": 3,
+      "position": { "x": 335, "y": 360 },
+      "count": 1,
+      "spread": 0,
       "delayMinutes": 0,
       "respawnIndex": 10019,
       "sourceQuestId": 2110019,
-      "sourceNote": "V2-only Dung foothold on a collision-walkable pocket 122 steps from the D022 entrance; preserves the imported Crystal group."
+      "sourceNote": "V2-only single Dung foothold five walk steps from the D022 entrance; preserves the imported Crystal group and requires ordinary respawn waits."
     },
     {
       "mapFileName": "D022",
       "monster": "WoomaSoldier",
       "monsterIndex": 244,
-      "position": { "x": 250, "y": 282 },
-      "count": 3,
-      "spread": 3,
+      "position": { "x": 320, "y": 345 },
+      "count": 1,
+      "spread": 0,
       "delayMinutes": 0,
       "respawnIndex": 10020,
       "sourceQuestId": 2110020,
-      "sourceNote": "V2-only training foothold at the certified q19 anchor; preserves the imported Crystal groups and keeps the immediate hostile pack at three."
+      "sourceNote": "V2-only single WoomaSoldier foothold 37 walk steps from the D022 entrance, separated from Dung and WoomaFighter; preserves the imported Crystal groups."
     },
     {
       "mapFileName": "D022",
       "monster": "WoomaFighter",
       "monsterIndex": 246,
-      "position": { "x": 270, "y": 270 },
-      "count": 3,
-      "spread": 3,
+      "position": { "x": 300, "y": 335 },
+      "count": 1,
+      "spread": 0,
       "delayMinutes": 0,
       "respawnIndex": 10021,
       "sourceQuestId": 2110021,
-      "sourceNote": "V2-only training foothold on a separate collision-walkable pocket near the certified q19 anchor; preserves the imported Crystal groups and keeps the immediate hostile pack at three."
+      "sourceNote": "V2-only single WoomaFighter foothold 48 walk steps from the D022 entrance, separated from Dung and WoomaSoldier; preserves the imported Crystal groups."
     }
   ],
   "quests": [

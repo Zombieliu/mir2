@@ -16,15 +16,16 @@ fn v2_training_spawns_are_real_profile_sources_and_do_not_change_other_cadences(
     std::env::set_var("MIR2_QUEST_CADENCE", "newcomer-v2");
     let v2 = config.crystal_respawns_for_map("D022");
     for (index, name, x, y) in [
-        (10019, "Dung", 250, 292),
-        (10020, "WoomaSoldier", 250, 282),
-        (10021, "WoomaFighter", 270, 270),
+        (10019, "Dung", 335, 360),
+        (10020, "WoomaSoldier", 320, 345),
+        (10021, "WoomaFighter", 300, 335),
     ] {
         let spawn = v2.iter().find(|spawn| spawn.respawn_index == index).unwrap();
         assert_eq!(spawn.monster_name, name);
         assert_eq!(spawn.location.x, x);
         assert_eq!(spawn.location.y, y);
-        assert_eq!(spawn.count, 3);
+        assert_eq!(spawn.count, 1);
+        assert_eq!(spawn.spread, 0);
         assert_eq!(spawn.delay_minutes, 0);
     }
     assert!(v2.iter().any(|spawn| spawn.respawn_index == 940));

@@ -1,5 +1,31 @@
 # Agent Task Queue
 
+> 2026-09-19 V2 current work: verify the deployed shared-Zone directional
+> attack against Warrior N21 after ordinary logout; verify Taoist's ordinary
+> BoneFamiliar-assisted Wooma battle without changing the 20-attack cap.
+> One restored cohort B remains 66/78 in its strict expired window and cannot
+> become a pass after Wizard's fourth death. The separate functional recheck
+> uses the same account/store and original death ledger; its clock is labelled
+> separately. The isolated D022 search-source and zero-neighbor safety policy
+> pass 57/57 Node tests but need live proof. Save parity, UI, animation and
+> Crystal comparison remain independent gates.
+
+> 2026-09-19 current V2 priority: finish the D022 safety repair and normal
+> Warrior/Taoist saved runs without interrupting their active sessions. The
+> first dense V2 WoomaSoldier foothold contributed to Wizard's fourth death
+> at N19; strict cohort B 78/78 is no longer possible. A separated one-monster
+> candidate has static walk paths and 57/57 Node checks; release build and
+> live recheck remain open. Do not reset the clocks or revival ledger, and do
+> not represent functional checks as visual/Crystal acceptance.
+
+> 2026-09-19 14:39 UTC read-only strict cohort B verifier records 66/78:
+> Warrior 23/26 level 28, Wizard 21/26 level 26, Taoist 22/26 level 27.
+> Each public LogOut succeeded and snapshot transform matches the saved
+> character. The new V2 Taoist N20/N21 shop preflight for 100 real Amulets
+> addresses the observed SoulFireBall-to-melee depletion; Node tests pass,
+> live proof remains open. Release deployment must follow a safe all-runner
+> logout; keep all original clocks and recovery limits.
+
 > 2026-09-19 active V2 cohort B: Wizard N12 and Warrior N16 passed normally;
 > Wizard continues N16, while Warrior and Taoist are paused at N19 after
 > real bounded D022 Dung searches. The V2-only three-foothold gateway build
@@ -9,7 +35,7 @@
 > animation, Crystal comparison, and measured human time. Cohort A 51/78
 > remains separate and cannot be turned into a pass.
 
-> 2026-09-19 V2 same-clock update: Wizard N12 suffered a real fourth death
+> 2026-09-19 V2 same-clock update: Wizard N19 suffered a real fourth death
 > with its cumulative three revivals already spent; 78/78 is impossible under
 > the retained rules. Continue lawful Warrior/Taoist checks and keep the
 > original clock, deaths and saved-state evidence intact. Verified: 40/78.

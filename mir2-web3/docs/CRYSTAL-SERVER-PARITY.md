@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+> 2026-09-19 V2 candidate Gateway now resolves directional melee against
+> the authoritative shared Zone map instead of a stale personal monster
+> mirror. The focused regression verifies a moved live target is selected
+> and a miss cannot emit a phantom attack (release 1/1). Original Crystal
+> behavior and visual/animation parity have not been accepted. The V2-only
+> D022 runner searches isolated authored footholds while imported monster
+> groups still exist; this is a route/safety change, not original parity.
+
+> 2026-09-19 V2-only D022 safety follow-up: the initial three-monster
+> footholds made N19 unsafe and contributed to Wizard's fourth death.
+> Candidate isolated single spawns at (335,360), (320,345), (300,335)
+> preserve all imported Crystal respawns. Static paths pass, but no live
+> safety or Crystal visual parity claim is made from this configuration.
+
 > 2026-09-19 optional newcomer V2 evidence: normal Wizard GreatFireBall
 > at N12 now has authoritative ObjectMagic and positive damage after a
 > bounded one-tile moving-target correction. V2 N16's Zombie2 objective
