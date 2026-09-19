@@ -25,6 +25,8 @@ const PRACTICE_SPAWN_CANDIDATE_LIMIT = 3;
 const PRACTICE_SPAWN_WAYPOINT_LIMIT = 6;
 const PRACTICE_SPAWN_STEP_BUDGET = 120;
 const PRACTICE_SPAWN_ATTEMPT_BUDGET = 180;
+const PRACTICE_TECHNIQUE_WINDOW_MS = 12_000;
+const PRACTICE_TECHNIQUE_MAX_SWINGS = 3;
 // V2 quest templates address the live NPC object IDs. Crystal's database
 // manifest numbers Board as npc_index 35, while the public world object is
 // 24, so never reinterpret these object IDs as database row indexes.
@@ -615,10 +617,10 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       maxSpawnRespawnWaits: 1,
       questSettleTimeout: 12_000,
       preferredObjectiveMaps: quest.objectiveMaps,
-      // At the Taoist Skeleton step, a nearby BoneFighter can outlast the
+      // At the Taoist Skeleton steps, a nearby BoneFighter can outlast the
       // fixed attack budget even though it is not a quest target. Keep the
       // objective in focus and retreat from an unsafe pull instead.
-      focusTargetThroughAggressors: className === 'Taoist' && Number(quest.questId) === 2110010,
+      focusTargetThroughAggressors: className === 'Taoist' && [2110010, 2110011].includes(Number(quest.questId)),
       refreshWhileWaiting: refreshCombatWorldSnapshot,
       retryUnclaimedSnapshotCorpse: true,
       retrySpawnSearchTimeout: true,
@@ -709,10 +711,8 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
     if (step.kind === 'poison') {
       const target = await acquireTarget(6);
       await equipHeldPoison(client, quest.questId);
-      const after = client.sequence;
-      const poisonBefore = equippedPoisonQuantity(client.snapshot);
-      await castV2Spell(client, target, 'Poisoning');
-      await waitForPoisonEvidence(client, after, target, poisonBefore, quest.questId);
+      const cast = await castV2Spell(client, target, 'Poisoning', checkDeadline, quest.questId);
+      await waitForPoisonEvidence(client, cast.after, cast.target, cast.poisonBefore, quest.questId);
     } else if (step.kind === 'normal') {
       const target = await acquireTarget(1);
       const after = client.sequence;
@@ -721,35 +721,50 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
       await waitForTargetDamage(client, after, target, hp, quest.questId, 'normal attack');
     } else if (step.kind === 'technique') {
       const range = step.spell === 'Thrusting' ? 2 : 1;
-      // These Crystal weapon techniques are stateful toggles, not immediately
-      // usable learned book skills. Wait for the server's SpellToggle receipt
-      // before choosing a directional target or sending the attack intent.
-      await armWeaponTechnique(client, quest.questId, step.spell);
-      // Zone combat selects Thrusting targets only from the adjacent tile or
-      // the exact second tile in the attack direction. Chebyshev distance
-      // alone allows an off-ray (2,1) target, which the server cannot hit.
-      const target = await acquireTarget(range, step.spell === 'Thrusting'
-        ? { directionalRay: { minRange: 1, maxRange: 2 } }
-        : {});
-      const after = client.sequence;
-      const hp = Number(target.hp);
-      await attackDirectionTechnique(client, target, step.spell);
-      await waitForTargetDamage(client, after, target, hp, quest.questId, step.spell, TECHNIQUE_SPELL[step.spell]);
+      let firstSwingAt = null;
+      for (let swing = 0; swing < PRACTICE_TECHNIQUE_MAX_SWINGS; swing += 1) {
+        checkDeadline();
+        if (firstSwingAt != null && Date.now() - firstSwingAt >= PRACTICE_TECHNIQUE_WINDOW_MS) {
+          throw new V2Pause('awaitingPracticeDamage', quest.questId, `${step.spell} missed within the original receipt window`);
+        }
+        // Crystal weapon techniques are stateful toggles. Re-arm and choose a
+        // fresh live ray target after a lawful accuracy miss; a mere attack
+        // animation is not evidence of positive damage.
+        await armWeaponTechnique(client, quest.questId, step.spell);
+        const target = await acquireTarget(range, step.spell === 'Thrusting'
+          ? { directionalRay: { minRange: 1, maxRange: 2 } }
+          : {});
+        const after = client.sequence;
+        const hp = Number(target.hp);
+        await attackDirectionTechnique(client, target, step.spell);
+        firstSwingAt ??= Date.now();
+        const remaining = Math.max(1, PRACTICE_TECHNIQUE_WINDOW_MS - (Date.now() - firstSwingAt));
+        const receiptTimeout = swing + 1 < PRACTICE_TECHNIQUE_MAX_SWINGS ? Math.min(2_500, remaining) : remaining;
+        try {
+          await waitForTargetDamage(client, after, target, hp, quest.questId, step.spell, TECHNIQUE_SPELL[step.spell], receiptTimeout);
+          break;
+        } catch (error) {
+          const acceptedSwing = receivedAfter(client, after, 'ObjectAttack', payload =>
+            Number(payload?.objectId) === Number(selfPlayer(client)?.objectId) &&
+            Number(payload?.spell) === TECHNIQUE_SPELL[step.spell]);
+          if (error?.reason !== 'awaitingPracticeDamage' || !acceptedSwing ||
+              swing + 1 >= PRACTICE_TECHNIQUE_MAX_SWINGS) throw error;
+          usedTargetIds.delete(Number(target.objectId));
+        }
+      }
     } else if (step.kind === 'healing') {
       // This is deliberately not gated on damage or HP: q4 requires the
       // accepted self-cast even when the new character is still at full HP.
-      const after = client.sequence;
-      await castV2Spell(client, selfPlayer(client), 'Healing');
-      await waitForSelfMagic(client, after, 'Healing', quest.questId);
+      const cast = await castV2Spell(client, selfPlayer(client), 'Healing', checkDeadline, quest.questId);
+      await waitForSelfMagic(client, cast.after, 'Healing', quest.questId);
     } else if (step.kind === 'summon') {
       const target = await acquireTarget(6);
       await equipHeldAmulet(client);
-      const after = client.sequence;
-      await castV2Spell(client, target, 'SummonSkeleton');
+      const cast = await castV2Spell(client, target, 'SummonSkeleton', checkDeadline, quest.questId);
       await client.wait(() => ownedBoneFamiliar(client.snapshot), `q${quest.questId} owned BoneFamiliar`, 12_000)
         .catch(() => { throw new V2Pause('awaitingOwnedPet', quest.questId, 'SummonSkeleton lacked an authoritative owned-pet receipt'); });
       const pet = ownedBoneFamiliar(client.snapshot);
-      await waitForPetDamage(client, after, pet, target, quest.questId);
+      await waitForPetDamage(client, cast.after, pet, cast.target, quest.questId);
     } else if (step.kind === 'spell') {
       // Lightning is a six-tile, directional Zone ray. Select a live target
       // on that ray, preferring a distant aligned tile if movement is needed;
@@ -760,10 +775,8 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
           ? { directionalRay: { minRange: 1, maxRange: 6, preferDistant: true } }
           : {});
       if (step.spell === 'SoulFireBall') await equipHeldAmulet(client);
-      const after = client.sequence;
-      const hp = Number(target.hp);
-      await castV2Spell(client, target, step.spell);
-      await waitForSpellDamage(client, after, target, hp, step.spell, quest.questId);
+      const cast = await castV2Spell(client, target, step.spell, checkDeadline, quest.questId);
+      await waitForSpellDamage(client, cast.after, cast.target, cast.beforeHp, step.spell, quest.questId);
     } else if (step.kind === 'reposition') {
       const target = await acquireTarget(8);
       const actor = selfPlayer(client);
@@ -1122,13 +1135,38 @@ function matchingPracticeTarget(snapshot, quest, excludedObjectIds = null) {
     .sort((left, right) => distance(actor, left) - distance(actor, right))[0] ?? null;
 }
 
-async function castV2Spell(client, target, spell) {
+async function waitForV2SpellReady(client, spell, checkDeadline, questId) {
+  const until = Date.now() + 20_000;
+  for (;;) {
+    checkDeadline();
+    const skill = (client.snapshot?.knownSkills ?? []).find(entry => String(entry?.spell) === spell);
+    if (!skill) throw new V2Pause('awaitingLearnedSkill', questId, `${spell} is not authoritative in knownSkills`);
+    if (Number(skill.cooldownRemainingTicks ?? 0) <= 0) return;
+    const remaining = until - Date.now();
+    if (remaining <= 0) throw new V2Pause('awaitingSkillCooldown', questId, `${spell} stayed on authoritative cooldown`);
+    // A prior cast can leave the shared Zone action clock locked even when
+    // this spell itself has not been used. A fresh public snapshot, not a
+    // local timer guess, must release the next practice cast.
+    await new Promise(resolve => setTimeout(resolve, Math.min(200, remaining)));
+    checkDeadline();
+    await refreshCombatWorldSnapshot(client, { timeoutMs: Math.max(1, until - Date.now()) });
+  }
+}
+
+async function castV2Spell(client, target, spell, checkDeadline = () => {}, questId = null) {
+  await waitForV2SpellReady(client, spell, checkDeadline, questId);
   const actor = selfPlayer(client);
   if (!actor) throw new Error('V2 combat actor is absent');
   if (!target || !Number.isSafeInteger(Number(target.objectId))) throw new Error(`V2 ${spell} needs an authoritative target`);
-  if (!(client.snapshot?.knownSkills ?? []).some(skill => String(skill?.spell) === spell)) {
-    throw new V2Pause('awaitingLearnedSkill', null, `${spell} is not authoritative in knownSkills`);
+  const currentTarget = Number(target.objectId) === Number(actor.objectId)
+    ? actor
+    : (client.snapshot?.entities ?? []).find(entity => Number(entity?.objectId) === Number(target.objectId));
+  if (!currentTarget || currentTarget.dead === true || Number(currentTarget.hp ?? 1) <= 0) {
+    throw new V2Pause('practiceTargetLost', questId, `${spell} target is no longer live after cooldown`);
   }
+  const after = Number(client.sequence ?? 0);
+  const beforeHp = Number(currentTarget.hp);
+  const poisonBefore = equippedPoisonQuantity(client.snapshot);
   const lightning = spell === 'Lightning';
   const ground = spell === 'FireWall';
   const command = lightning
@@ -1140,7 +1178,7 @@ async function castV2Spell(client, target, spell) {
         // Crystal routes Lightning through the caster, but its direction must
         // still be derived from the current authoritative target rather than
         // reusing the actor's stale facing direction.
-        direction: direction(actor, target),
+        direction: direction(actor, currentTarget),
         targetId: Number(actor.objectId), x: Number(actor.x), y: Number(actor.y), spellTargetLock: false,
       }
     : ground
@@ -1150,15 +1188,15 @@ async function castV2Spell(client, target, spell) {
           // is used for this practice; the target must later receive positive
           // damage before this step can pass.
           type: 'magic', objectId: Number(actor.objectId), spell,
-          direction: direction(actor, target), targetId: 0,
-          x: Number(target.x), y: Number(target.y), spellTargetLock: false,
+          direction: direction(actor, currentTarget), targetId: 0,
+          x: Number(currentTarget.x), y: Number(currentTarget.y), spellTargetLock: false,
         }
     : {
         type: 'magic', objectId: Number(actor.objectId), spell,
-        direction: direction(actor, target), targetId: Number(target.objectId), x: Number(target.x), y: Number(target.y), spellTargetLock: true,
+        direction: direction(actor, currentTarget), targetId: Number(currentTarget.objectId), x: Number(currentTarget.x), y: Number(currentTarget.y), spellTargetLock: true,
       };
   client.send(command);
-  return { kind: 'magic', spell, targetId: Number(target.objectId), command };
+  return { kind: 'magic', spell, targetId: Number(currentTarget.objectId), command, after, target: currentTarget, beforeHp, poisonBefore };
 }
 
 async function attackDirectionTechnique(client, target, spell) {
@@ -1276,13 +1314,13 @@ function magicAccepted(client, after, spell, actor, expectedTargetId = null) {
       (expectedTargetId == null || Number(payload?.targetId) === Number(expectedTargetId)));
 }
 
-async function waitForTargetDamage(client, after, target, beforeHp, questId, label, spellId = null) {
+async function waitForTargetDamage(client, after, target, beforeHp, questId, label, spellId = null, timeoutMs = 12_000) {
   const actor = selfPlayer(client);
   await client.wait(() => {
     const attack = spellId == null || receivedAfter(client, after, 'ObjectAttack', payload =>
       Number(payload?.objectId) === Number(actor?.objectId) && Number(payload?.spell) === spellId);
     return attack && targetTookDamage(client, target, beforeHp, after, actor?.objectId);
-  }, `q${questId} ${label} damage`, 12_000).catch(() => {
+  }, `q${questId} ${label} damage`, timeoutMs).catch(() => {
     throw new V2Pause('awaitingPracticeDamage', questId, `${label} lacked a positive post-send target damage receipt`);
   });
 }

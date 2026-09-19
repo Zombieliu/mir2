@@ -1,6 +1,6 @@
 # Fresh V2 blocking failures and bounded repairs
 
-The fresh ordinary saved checkpoint remains 34/78. None of the repairs below
+The first fresh ordinary saved checkpoint was 34/78; the latest is 40/78. None of the repairs below
 is a claim that the paused ordinary route, native UI or original Crystal visual
 comparison has passed. The original clocks are expired and cumulative revivals
 remain 0/3/1. No route has restarted with a replacement clock.
@@ -40,7 +40,11 @@ the serialized session drain. Gateway now treats normal attack, directional
 attack, range attack, magic and CastSkill as active input with the existing
 75 ms tick wake. Focused Gateway regression passes 1/1. This changes packet
 delivery latency, not combat rules, attack count or the original clocks; live
-revalidation on a rebuilt Gateway remains open.
+revalidation on a rebuilt Gateway was required. The immutable release from
+`3e5a29924` (SHA-256 `9ECC3826A3BDB531A59C9740049AB6455DA5BAA2482D55C68B8D20736C614BC8`)
+was deployed to the isolated 19800/19810 service. Warrior N15 completed on
+the ordinary account, with normal logout and matching save; the Wizard's
+FireBall hit also arrived promptly instead of at logout.
 
 Root's final affected-controller run passes 102/102: V2 43/43 plus ordinary
 supplies 59/59. Raw local output is
@@ -80,8 +84,12 @@ five-damage hits need at least 22 attacks. N10 now opts into the existing
 focused-target safety policy so an unsafe pull retreats and reacquires a live
 Skeleton instead of consuming the fixed budget on a nonobjective. The specific
 Skeleton/BoneFighter regression and full combat suite pass 157/157; V2 tests
-pass 44/44. No attack, search, retry, or revival caps changed. Ordinary Taoist
-N10 completion on the saved character still requires live revalidation.
+pass 44/44. No attack, search, retry, or revival caps changed. The ordinary
+Taoist completed N10, reached level18, logged out normally and matched its
+save. N11 then paused on another nonobjective 110-HP BoneFighter: 12 accepted
+SoulFireBall hits and eight accepted self-Heals consumed its fixed 20-action
+window. The same focused-target policy now applies only to Taoist N10 and N11;
+the 20-action cap remains unchanged. N11 live revalidation is still open.
 
 ## Wizard contradictory monster lifecycle
 
@@ -99,13 +107,26 @@ real Zone kill/dequeue rejects queued live/positive-health ghost packets;
 real Zone respawn retains ObjectRevived and its fresh live projection while
 rejecting a late corpse. The existing TownRevive/re-entry AOI regression also
 passes. Raw output: `C:/mir2-newcomer-v2-clean-20260918/pending-zone-aoi-final.log`.
-This closes the targeted packet regression, not Wizard N12 ordinary completion;
-the repaired release and saved normal character still require live revalidation.
+The deployed release delivered the Wizard's FireBall hit promptly. N12 still
+paused because the V2 practice driver sent GreatFireBall while its public
+cooldown projection was one tick; Zone correctly rejected that cast. The
+driver now waits for fresh ordinary `clientVersion` snapshots to confirm
+readiness before a practice spell and uses a refreshed live target. Wizard
+N12 on the saved character remains open until the next ordinary retry.
 
-The latest normal logout/store verification is 38/78 overall: Warrior 16/26
-level22, Wizard 12/26 level19, Taoist 10/26 level16. All three save/snapshot
-transforms match. The separate functional recheck retains original expired
-clocks and cumulative recoveries 0/3/1.
+Warrior N16 separately proved a correct Thrusting toggle, legal two-tile ray
+and accepted ObjectAttack, but the accuracy roll missed. The practice driver
+now permits at most three ordinary swings inside its existing 12-second
+receipt window, requiring a fresh toggle, live ray target and a positive owner
+damage receipt. The objective combat cap remains 20. A missed-then-hit
+regression passes; live N16 is open.
+
+The latest normal logout/store verification is 40/78 overall: Warrior 17/26
+level24, Wizard 12/26 level19, Taoist 11/26 level18. All three logouts and
+save/snapshot transforms match. The separate functional recheck retains the
+original expired clocks and cumulative recoveries 0/3/1. Current affected
+tests pass V2 46/46, combat 157/157 and supplies 59/59; test logs are under
+`C:/mir2-newcomer-v2-clean-20260918/` with the `v2-*-repairs-final` prefix.
 
 Functional completion, real level 30, final logout/store checks, human timing,
 graduation equipment sources, UI, animations and original comparisons remain

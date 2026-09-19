@@ -233,3 +233,17 @@ KeepAlive only acknowledged, leaving resolved Zone hits queued. Normal combat
 input now wakes the serialized session tick after the existing 75 ms input
 grace (focused Gateway test 1/1). Its rebuilt release and ordinary retry are
 still required; no original two-hour, UI or animation pass is claimed.
+
+The isolated 19800/19810 service now runs immutable Gateway release
+`3e5a29924` (SHA-256 `9ECC3826A3BDB531A59C9740049AB6455DA5BAA2482D55C68B8D20736C614BC8`).
+It delivered Warrior Thrusting and Wizard FireBall hits promptly in ordinary
+retries. After all three normal logouts and saved-transform checks, the V2
+functional evidence is **40/78**: Warrior level24 17/26, Wizard level19 12/26,
+Taoist level18 11/26. Warrior N16 paused after an accepted lawful Thrusting
+miss, Wizard N12 after a GreatFireBall cast sent during a visible one-tick
+cooldown, and Taoist N11 after clearing a nonobjective BoneFighter. Scoped
+controller fixes pass V2 46/46, combat 157/157, supplies 59/59; these three
+nodes still require normal account reruns. The original two-hour clocks remain
+expired, and the additional functional deadline remains 2026-09-19T12:36:27.064Z.
+No final level30, visual, animation, Crystal-original or clean-human-time
+acceptance is claimed.

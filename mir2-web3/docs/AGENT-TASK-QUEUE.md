@@ -5,17 +5,17 @@
 > Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
 > V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
 > Web guidance/goal and localization plus TypeScript pass; earlier controller checkpoint 288/288.
-> Latest affected V2/supply controller regressions pass 102/102; ordinary revalidation remains open.
+> Latest affected V2/supply controller regressions pass 105/105; ordinary revalidation remains open.
 > Gateway pending-Zone monster lifecycle regressions pass 2/2 after a real
 > Zone kill and respawn; no ordinary Wizard N12 completion is claimed.
 > Separate functional recheck clock and recovery-ledger checks pass 62/62;
 > original two-hour route evidence and revival caps remain unchanged.
 > Active combat wakes the post-StartGame Gateway tick at the existing 75 ms
-> input grace (focused 1/1); rebuilt release and ordinary recheck remain open.
-> First live Warrior N15 controller spellToggle allowlist gate is fixed (9/9);
-> Wizard N12 delayed real damage awaits routing RCA. Normal route count is not inflated.
-> Additional ordinary functional recheck verifies 38/78 after normal logout;
-> levels 22/19/16, with Taoist N7/G15/N8/N9 newly completed.
+> input grace (focused 1/1); release `3e5a29924` is deployed and prompt hits are live-proven.
+> Warrior N15 and Taoist N10 passed; Wizard N12, Warrior N16 and Taoist N11
+> have scoped practice/target-policy repairs and require normal saved retries.
+> Additional ordinary functional recheck verifies 40/78 after normal logout;
+> levels 24/19/18, with Warrior N15 and Taoist N10 newly completed.
 > All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
 > Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
 > Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.

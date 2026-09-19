@@ -812,6 +812,76 @@ test('directional practice moves to a line before packets and refreshes a differ
   assert.deepEqual(client.events.filter(event => event.packet === 'ObjectStruck').map(event => event.payload.objectId), [9, 10]);
 });
 
+test('Warrior technique practice retries an accepted accuracy miss inside the same receipt window', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['Thrusting'], requirements: { warrior: ['Thrusting attack damage committed'] }, completeOn: 1,
+  });
+  client.snapshot.entities[0].class = 'Warrior';
+  client.snapshot.entities[1].x = 2;
+  const originalSend = client.send.bind(client);
+  let missed = false;
+  client.send = command => {
+    if (command.type === 'attackDirection' && !missed) {
+      missed = true;
+      sent.push(command);
+      client.events.push({
+        sequence: ++client.sequence, direction: 'received', packet: 'ObjectAttack',
+        payload: { objectId: 1, spell: 3 },
+      });
+      return;
+    }
+    originalSend(command);
+  };
+
+  await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'technique', spell: 'Thrusting' }] });
+  assert.equal(missed, true);
+  assert.deepEqual(sent.map(command => command.type), [
+    'spellToggle', 'attackDirection', 'spellToggle', 'attackDirection',
+  ]);
+  assert.equal(client.events.filter(event => event.packet === 'ObjectStruck').length, 1);
+  assert.equal(client.snapshot.questLog[0].objectives[0].done, true);
+});
+
+test('Wizard practice waits for a fresh shared cooldown receipt before GreatFireBall', async () => {
+  const { client, quest, sent } = practiceClient({
+    knownSkills: ['FireBall', 'GreatFireBall'],
+    requirements: { wizard: ['FireBall damage committed', 'GreatFireBall damage committed'] },
+    completeOn: 2,
+  });
+  client.snapshot.entities[0].class = 'Wizard';
+  client.snapshot.entities.push({ kind: 'monster', objectId: 10, name: 'Scarecrow', x: 2, y: 0, hp: 10, dead: false });
+  let refreshes = 0;
+  const originalSend = client.send.bind(client);
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      refreshes += 1;
+      if (refreshes === 2) client.snapshot.knownSkills.find(skill => skill.spell === 'GreatFireBall').cooldownRemainingTicks = 0;
+      client.events.push({
+        sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot),
+      });
+      return;
+    }
+    if (command.type === 'magic' && command.spell === 'GreatFireBall') {
+      assert.equal(refreshes, 2, 'the locked global action clock must expire before sending the second spell');
+    }
+    originalSend(command);
+    if (command.type === 'magic' && command.spell === 'FireBall') {
+      client.snapshot.knownSkills.find(skill => skill.spell === 'GreatFireBall').cooldownRemainingTicks = 1;
+    }
+  };
+
+  await executeV2PracticePlan({
+    client, quest, navigate: async () => {},
+    plan: [{ kind: 'spell', spell: 'FireBall' }, { kind: 'spell', spell: 'GreatFireBall' }],
+  });
+  assert.equal(refreshes, 2);
+  assert.deepEqual(sent.map(command => [command.type, command.spell, command.targetId]), [
+    ['magic', 'FireBall', 9], ['magic', 'GreatFireBall', 10],
+  ]);
+  assert.deepEqual(client.events.filter(event => event.packet === 'ObjectStruck').map(event => event.payload.objectId), [9, 10]);
+});
+
 test('N16 and N21 FireWall practice use the public ground-cast packet and require the target-zero cast receipt', async () => {
   for (const [questId, requirements] of [
     [2110016, ['FireWall learned', 'owned FireWall damage committed']],

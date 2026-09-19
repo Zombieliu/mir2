@@ -10,8 +10,8 @@
 > Zone kill and respawn; no ordinary Wizard N12 completion is claimed.
 > Active combat wakes the post-StartGame Gateway tick at the existing 75 ms
 > input grace (focused 1/1); rebuilt release and ordinary recheck remain open.
-> Additional ordinary functional recheck verifies 38/78 after normal logout;
-> levels 22/19/16, with Taoist N7/G15/N8/N9 newly completed.
+> Additional ordinary functional recheck verifies 40/78 after normal logout;
+> levels 24/19/18, with Warrior N15 and Taoist N10 newly completed.
 > All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
 > Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
 > Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.
