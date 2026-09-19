@@ -435,3 +435,12 @@ clock and all three real death/revive receipts now survive a tested bootstrap
 failure; the resumed live report confirms them. The server character save was
 not edited or reset. The intervening purchase and walking were real actions
 and their repair wait is not clean player time.
+
+The restored strict Wizard clock expired exactly at 18:04:26 UTC: the public
+snapshot showed level 21, 13/22 main nodes plus 2/4 growth claims, N14 at
+3/5, and all three permitted revivals already consumed. This is a failed
+two-hour result, not a timing pass. A separate functional recheck started at
+18:05:32 UTC using the same ordinary character/account store, with the
+original start/deadline and three revivals retained in the report. Its own
+deadline is 20:05:32 UTC; no character level, item, gold or save was granted
+or edited for this recheck.
