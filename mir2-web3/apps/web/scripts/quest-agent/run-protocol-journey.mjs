@@ -259,7 +259,19 @@ try {
             needsWizardEscapeStock()) {
           return { status: 'blocked', message: `q${quest.questId} needs real HP potions and class casting materials before combat (${restock.status})` };
         }
-        if (hpRatio() < 0.35) await useSupplies(owner, { hpThreshold: 0.65, mpThreshold: 0.35 });
+        if (hpRatio() < 0.35) {
+          await useSupplies(owner, { hpThreshold: 0.65, mpThreshold: 0.35 });
+          if (hpRatio() < 0.35) {
+            // Small medicines restore over server ticks. A same-packet HP
+            // check can pause a safe, stocked character before that ordinary
+            // recovery has had any chance to apply.
+            try {
+              await waitForPassiveHealthRecovery(owner, { requiredRatio: 0.35, timeoutMs: 30_000 });
+            } catch {
+              return { status: 'blocked', message: `q${quest.questId} remains below safe departure HP after ordinary supplies` };
+            }
+          }
+        }
         return hpRatio() >= 0.35
           ? { status: 'ready' }
           : { status: 'blocked', message: `q${quest.questId} remains below safe departure HP after ordinary supplies` };

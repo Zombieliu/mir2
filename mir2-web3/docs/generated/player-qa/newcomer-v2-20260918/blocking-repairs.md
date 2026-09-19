@@ -503,3 +503,13 @@ combat/V2/kiting Node suites pass 260/260. Cohort D resumed from the same
 server snapshot had N14 2/5 and 81/81 HP at D401 (40,119); this is progress,
 not an N14 or three-class completion. The repair and run remain unverified for
 full route, clean two-hour timing, UI/animation, or original Crystal visuals.
+
+At 20:07:10 UTC the same D Wizard returned alive to town after N14 2/5 and
+paused at 26/81 HP despite seven real HP medicines and 9,580 gold. The
+departure guard used a medicine but immediately compared HP before the
+server's timed potion recovery could apply. It now waits at most 30 seconds
+for an authoritative 35% HP receipt while in the village; a timeout still
+pauses safely. Survival, supplies, and V2 Node suites pass 203/203. The
+same-clock live resume reached 79/81 HP by 20:10:08 UTC and was traveling
+back through Bichon, confirming the former false pause was removed. N14 and
+the overall three-class gate are still open.
