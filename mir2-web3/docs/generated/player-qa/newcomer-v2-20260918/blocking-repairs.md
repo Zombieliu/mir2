@@ -398,3 +398,19 @@ under live recheck. The earlier Wizard cohort exceeded its unchanged three
 revivals, so a separately registered fresh ordinary Wizard cohort C is
 running against the same shared Gateway. UI, animation, Crystal visual
 comparison, clean two-hour timing, and three-class 78/78 remain unaccepted.
+
+Later in the same functional recheck, Taoist completed N20's three
+WoomaSoldiers and N21's three WoomaFighters plus the class-practice receipt,
+then completed N22 and all four growth claims. The independent verifier now
+reports both Warrior and Taoist at **26/26, level 30**, with normal
+`LogOutSuccess` and matching persisted save state. Cohort B's old Wizard
+remains 21/26 and exhausted its original revival allowance; this does not
+become 78/78 by combining incompatible clocks. A fresh normal Wizard cohort C
+reached N10 but used all three real revivals in N4, N7, and N10. Its timer
+and death ledger stayed intact through two explicitly recorded runner
+interruptions to load ordinary TownTeleport survival handling. That handling
+produced a public `UseItem` and authoritative D001→Bichon transfer at low HP.
+The next ordinary return-scroll purchase paused at Merchant Scott despite the
+NPC appearing in the final public snapshot. A focused merchant observation
+refresh test passes; live Scott interaction and the remaining Wizard route
+are not yet accepted. These repair waits are not clean player time.
