@@ -13,7 +13,7 @@
       "delayMinutes": 0,
       "respawnIndex": 10019,
       "sourceQuestId": 2110019,
-      "sourceNote": "V2-only isolated Dung foothold near the D022 entrance; imported Crystal group and ordinary respawn timing remain unchanged."
+      "sourceNote": "V2-only Dung foothold near the D022 entrance; the opt-in V2 profile keeps imported groups and timing but limits each imported group to one roaming actor."
     },
     {
       "mapFileName": "D022",
@@ -26,7 +26,7 @@
       "respawnIndex": 10020,
       "maxHp": 120,
       "sourceQuestId": 2110020,
-      "sourceNote": "V2-only isolated 120-HP WoomaSoldier training foothold; imported Crystal groups retain their full strength and ordinary respawn timing."
+      "sourceNote": "V2-only 120-HP WoomaSoldier foothold; imported Crystal group stats and timing remain, with one roaming actor per group in this profile."
     },
     {
       "mapFileName": "D022",
@@ -39,7 +39,7 @@
       "respawnIndex": 10021,
       "maxHp": 120,
       "sourceQuestId": 2110021,
-      "sourceNote": "V2-only isolated 120-HP WoomaFighter training foothold; imported Crystal groups retain their full strength and ordinary respawn timing."
+      "sourceNote": "V2-only 120-HP WoomaFighter foothold; imported Crystal group stats and timing remain, with one roaming actor per group in this profile."
     },
     {
       "mapFileName": "D022", "monster": "Dung", "monsterIndex": 242,

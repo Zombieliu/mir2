@@ -3542,6 +3542,19 @@ impl ContentProfileRuntime {
         let mut respawns = crystal_map_respawns_by_file_name(map_file_name)
             .map(|map| map.respawns)
             .unwrap_or_default();
+        // The V2 newcomer route enters D022 at level 26. Its authored
+        // one-monster practice footholds are not usable when each imported
+        // wide-spread Crystal group contributes dozens of roaming hostiles to
+        // the same entrance. Keep every original group and its stats/timing,
+        // but use one actor per group only in this opt-in onboarding profile.
+        if map_file_name.eq_ignore_ascii_case("D022")
+            && env::var("MIR2_QUEST_CADENCE")
+                .is_ok_and(|value| value.trim().eq_ignore_ascii_case("newcomer-v2"))
+        {
+            for spawn in &mut respawns {
+                spawn.count = spawn.count.min(1);
+            }
+        }
         respawns.extend(content_profile_respawn_overrides_for_map(
             &self.profile,
             map_file_name,

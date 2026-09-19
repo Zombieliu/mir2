@@ -619,3 +619,16 @@ It does not count the failed cast as practice, alter the quest or save, or
 extend E's original deadline. The targeted V2 Node suite passes 63/63,
 including positive and negative buried FireWall cases. Live N16 completion
 remains to be observed.
+
+E subsequently completed N16 and its growth claim, reached N19 at level 26,
+and retained one actual death from a seven-monster D401 surround. The D022
+entry at (339,355) placed the authored Dung foothold at (340,355) amid at
+least four imported 285-HP Wooma and another imported enemy within five tiles
+in the 22:23:46 UTC snapshot. The Wizard used real escape items twice and
+returned alive, but N19 stayed 0/3. This disproves the earlier "isolated"
+label. The runner was stopped while alive on map 1 at 22:28 UTC for repair;
+the original clock and one death remain in the evidence. Candidate repair
+retains imported D022 groups, stats, spread and respawn timing in the opt-in
+V2 mode, but caps each imported group to one live actor. All other cadences
+and maps keep their original counts. Targeted test and resumed live result
+must still confirm the new behavior.
