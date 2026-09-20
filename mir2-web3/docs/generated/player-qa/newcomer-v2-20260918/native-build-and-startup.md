@@ -42,3 +42,21 @@ The development artifact uses a junction to the current repository assets and
 localhost WS19810, at 1024x768. It is not a portable signed Candidate package.
 Formal signing material, package verification and native/original visual
 acceptance remain open. `signedPackage=false`, `visualAccepted=false`.
+
+## 2026-09-20 manual QA launch correction
+
+An interactive QA launch connected the V2 Gateway on port 19910 but omitted
+`MIR2_QUEST_GUIDANCE=newcomer-v2`. The server correctly completed character
+`a1`'s first Jane quest and persisted level 2, but the client did not enable
+the V2 Diary entry for quest 2110002 or the compact journey HUD. This was a
+launch configuration error, not a deleted second quest. The client was closed
+through its window and reopened with the matching guidance profile; the saved
+character remained level 2 with quest 2110001 completed. The new window is
+connected, while post-login visual confirmation of the Diary remains pending.
+
+Use `apps/game-client/platform-windows/scripts/start-newcomer-v2-qa.ps1` for
+future isolated V2 manual runs, passing the development client directory and
+local WebSocket URL. It sets the presentation profile and leaves account and
+password entry to the visible login screen. Quest 2110002 starts and finishes
+in the Quest Diary (`Q`); its first objective is to equip the WoodenSword
+awarded by Jane. It is not offered by another NPC.
