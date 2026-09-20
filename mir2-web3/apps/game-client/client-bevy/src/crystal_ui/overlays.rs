@@ -806,6 +806,7 @@ pub struct NativePlayerUiState {
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
     pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
+    pub(crate) inventory_item_pointer_consumed: bool,
     pub selected_skill_id: Option<u32>,
     pub character_page: CharacterPage,
     pub inventory_page: u8,
@@ -943,6 +944,7 @@ impl Default for NativePlayerUiState {
             split_count: 1,
             inventory_operation: None,
             inventory_item_drag: None,
+            inventory_item_pointer_consumed: false,
             selected_skill_id: None,
             character_page: CharacterPage::Character,
             inventory_page: 0,
@@ -3966,6 +3968,7 @@ fn inventory_item_drag_at_cursor(
 
 fn finish_inventory_item_drag(
     state: &mut NativePlayerUiState,
+    inventory: &InventoryModel,
     cursor: Option<Vec2>,
     belt: super::hud::CrystalBeltPresentation,
     intents: &mut NativePlayerUiIntentQueue,
@@ -3976,25 +3979,65 @@ fn finish_inventory_item_drag(
         belt_diagnostic(diagnostics, || "drag release without source".to_owned());
         return;
     };
+    state.inventory_item_pointer_consumed = true;
+    let Some(source) = inventory.items_in(0).into_iter().find(|item| {
+        item.slot == drag.source_slot && item_unique_id(item) == Some(drag.unique_id)
+    }) else {
+        return;
+    };
     let Some(cursor) = cursor else {
         belt_diagnostic(diagnostics, || "drag release without cursor".to_owned());
         return;
     };
     if drag.start.distance(cursor) < 4.0 {
+        state.inspect = Some(inspect_from_item(source));
+        state.split_count = 1;
+        state.drop_confirmation = None;
         belt_diagnostic(diagnostics, || "drag release below threshold".to_owned());
         return;
     }
-    let Some(belt_slot) = belt_slot_at_cursor(belt, cursor) else {
-        belt_diagnostic(diagnostics, || "drag release outside belt".to_owned());
+    state.inspect = None;
+    let intent = if let Some(to) = inventory_bag_slot_at_cursor(state, cursor) {
+        if to == drag.source_slot {
+            return;
+        }
+        let target = inventory.items_in(0).into_iter().find(|item| item.slot == to);
+        // MirItemCell.MoveItem merges matching, non-full stacks; otherwise
+        // MoveItem swaps occupied cells or moves into an empty cell.
+        let merge_target = target
+            .filter(|target| {
+                source.tooltip_source.as_ref()
+                    .zip(target.tooltip_source.as_ref())
+                    .is_some_and(|(from, to)| {
+                        from.info.item_index == to.info.item_index
+                            && target.quantity < u32::from(to.info.stack_size)
+                    })
+            })
+            .and_then(item_unique_id);
+        if let Some(id_to) = merge_target {
+            NativePlayerUiIntent::MergeItem {
+                grid_from: "inventory".to_owned(),
+                grid_to: "inventory".to_owned(),
+                id_from: drag.unique_id,
+                id_to,
+            }
+        } else {
+            NativePlayerUiIntent::MoveItem {
+                grid: "inventory".to_owned(),
+                unique_id: drag.unique_id,
+                from: drag.source_slot as i32,
+                to: to as i32,
+            }
+        }
+    } else if let Some(belt_slot) = belt_slot_at_cursor(belt, cursor) {
+        inventory_bag_to_belt_move_intent(drag.source_slot, drag.unique_id, belt_slot)
+    } else {
         return;
     };
-    let queued = intents.push_pending_intent(
-        pending,
-        inventory_bag_to_belt_move_intent(drag.source_slot, drag.unique_id, belt_slot),
-    );
+    let queued = intents.push_pending_intent(pending, intent);
     belt_diagnostic(diagnostics, || {
         format!(
-            "drag source={} belt={belt_slot} move_queue={queued}",
+            "drag source={} move_queue={queued}",
             drag.source_slot
         )
     });
@@ -4003,9 +4046,7 @@ fn finish_inventory_item_drag(
     }
 }
 
-/// Preserve the native inspect menu on a click while also accepting the
-/// source client's carry gesture when the pointer actually travels from an
-/// occupied bag cell to a belt cell.
+/// A click inspects on release; a carry gesture moves/merges on release.
 fn process_inventory_item_drag(
     mut state: ResMut<NativePlayerUiState>,
     inventory: Res<InventoryModel>,
@@ -4019,6 +4060,7 @@ fn process_inventory_item_drag(
     mut pending: ResMut<PendingOperations>,
     diagnostics: Option<Res<InventoryBeltDiagnostics>>,
 ) {
+    state.inventory_item_pointer_consumed = false;
     let ordered_events: Vec<_> = ordered
         .as_ref()
         .map(|events| ordered_reader.read(events).cloned().collect())
@@ -4088,6 +4130,7 @@ fn process_inventory_item_drag(
                         }
                         ButtonState::Released => finish_inventory_item_drag(
                             &mut state,
+                            &inventory,
                             cursor,
                             *belt,
                             &mut intents,
@@ -4112,6 +4155,7 @@ fn process_inventory_item_drag(
     if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
         finish_inventory_item_drag(
             &mut state,
+            &inventory,
             cursor,
             *belt,
             &mut intents,
@@ -6350,6 +6394,8 @@ fn process_overlay_buttons(
                 state.inventory_operation = None;
             }
             OverlayButton::InspectBag(_) if state.trade_dialog.open => {}
+            OverlayButton::InspectBag(_) if state.inventory_item_drag.is_some()
+                || state.inventory_item_pointer_consumed => {}
             OverlayButton::InspectBag(slot) if state.inventory_delete_mode => {
                 let _ = state.open_inventory_delete_for_slot(&inventory, slot);
             }
@@ -17391,6 +17437,83 @@ mod tests {
 
         app.update();
         assert_batched_inventory_drag_intent(&mut app);
+    }
+
+    #[test]
+    fn inventory_item_drag_bag_destinations_use_source_merge_or_swap_rules() {
+        for (target_index, target_count, expected_merge) in [
+            (None, 0, false), (Some(100), 3, true),
+            (Some(100), 20, false), (Some(101), 3, false),
+        ] {
+            let (mut app, window, source, _) = batched_inventory_drag_app();
+            app.init_resource::<MailComposeUi>()
+                .init_resource::<NativeUiIntentQueue>()
+                .init_resource::<MailModel>()
+                .init_resource::<ShopModel>()
+                .init_resource::<GameShopModel>()
+                .init_resource::<StorageModel>()
+                .init_resource::<crate::social::SocialModel>()
+                .insert_resource(NativeShellModel {
+                    screen: NativeShellScreen::InGame,
+                    ..Default::default()
+                });
+            init_overlay_button_test_resources(&mut app);
+            app.add_systems(Update, process_overlay_buttons.after(process_inventory_item_drag));
+            {
+                let mut inventory = app.world_mut().resource_mut::<InventoryModel>();
+                inventory.items[0].tooltip_source = Some(surface_tooltip_source(100, "Drug", 1, 7003, 2));
+                if let Some(index) = target_index {
+                    inventory.items.push(ItemModel {
+                        unique_id: Some(7004), slot: 12, container: 0,
+                        quantity: target_count,
+                        tooltip_source: Some(surface_tooltip_source(index, "Drug", 1, 7004, target_count as u16)),
+                        ..Default::default()
+                    });
+                }
+            }
+            let destination = Vec2::new(
+                INVENTORY_GRID_ORIGIN.x as f32 + (12 % INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.x as f32 + 2.0,
+                INVENTORY_GRID_ORIGIN.y as f32 + (12 / INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.y as f32 + 2.0,
+            );
+            ordered_inventory_drag_motion(&mut app, window, source);
+            ordered_inventory_drag_button(&mut app, window, true);
+            let cell = app.world_mut().spawn((Button, Interaction::Pressed, OverlayButton::InspectBag(2))).id();
+            app.update();
+            assert!(app.world().resource::<NativePlayerUiState>().inspect.is_none());
+            app.world_mut().despawn(cell);
+            ordered_inventory_drag_motion(&mut app, window, destination);
+            ordered_inventory_drag_button(&mut app, window, false);
+            // A batched pointer edge may also leave a pressed destination
+            // interaction in this frame; it must not reopen the item menu.
+            let cell = app.world_mut().spawn((Button, Interaction::Pressed, OverlayButton::InspectBag(12))).id();
+            app.update();
+            app.world_mut().despawn(cell);
+            let expected = if expected_merge {
+                NativePlayerUiIntent::MergeItem { grid_from: "inventory".into(), grid_to: "inventory".into(), id_from: 7003, id_to: 7004 }
+            } else {
+                NativePlayerUiIntent::MoveItem { grid: "inventory".into(), unique_id: 7003, from: 2, to: 12 }
+            };
+            assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(), vec![expected]);
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert!(state.inspect.is_none());
+            assert!(state.inventory_item_drag.is_none());
+            assert!(state.inventory_item_pointer_consumed);
+            app.update();
+            assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty());
+        }
+    }
+
+    #[test]
+    fn inventory_item_drag_rejects_replaced_source_between_press_and_release() {
+        let (mut app, window, source, destination) = batched_inventory_drag_app();
+        ordered_inventory_drag_motion(&mut app, window, source);
+        ordered_inventory_drag_button(&mut app, window, true);
+        app.update();
+        app.world_mut().resource_mut::<InventoryModel>().items[0].unique_id = Some(9999);
+        ordered_inventory_drag_motion(&mut app, window, destination);
+        ordered_inventory_drag_button(&mut app, window, false);
+        app.update();
+        assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty());
     }
 
     #[test]
