@@ -2915,18 +2915,31 @@ fn sync_big_map_ui(
     mut ui: ResMut<BigMapUiState>,
     quests: Option<Res<crate::quest_model::QuestTracker>>,
     guidance: Option<Res<crate::quest_guidance::QuestGuidance>>,
+    quest_state: Option<Res<crate::quest_ui::QuestUiState>>,
+    catalog: Option<Res<crate::quest_journey::NewcomerJourneyCatalog>>,
+    completed: Option<Res<crate::quest_model::CompletedQuestTracker>>,
+    gameplay: Option<Res<UiReadModel>>,
 ) {
     intents.sync_model(&model);
+    let journey = catalog.as_deref().zip(guidance.as_deref())
+        .zip(quests.as_deref()).zip(completed.as_deref()).zip(gameplay.as_deref())
+        .and_then(|((((catalog, guidance), quests), completed), gameplay)| {
+            catalog.derive(guidance, quests, completed, &gameplay.player)
+        });
+    let primary = quests.as_deref().zip(quest_state.as_deref()).and_then(|(quests, state)| {
+        crate::quest_ui::primary_quest_index(quests, state, journey.as_ref())
+    });
     let destination = model.active_map().is_some_and(|map| {
         crate::quest_destination::is_bichon_map(map.map_index)
-    }) && quests.as_deref().is_some_and(crate::quest_destination::bichon_safe_arrival_pending);
+    }) && quests.as_deref().is_some_and(crate::quest_destination::bichon_safe_arrival_pending)
+        && (quest_state.is_none() || primary == Some(2_110_005));
     if ui.bichon_safe_destination != destination {
         ui.bichon_safe_destination = destination;
     }
     let regions = if guidance.as_deref().and_then(|g| g.profile_name()) == Some("newcomer-v2") {
         model.active_map().zip(quests.as_deref()).map(|(map, quests)| {
-            crate::quest_hunt_regions::active_hunt_regions(
-                quests, map.map_index, model.player_location.unwrap_or_default(),
+            crate::quest_hunt_regions::active_hunt_regions_for_primary(
+                quests, map.map_index, model.player_location.unwrap_or_default(), primary,
             )
         }).unwrap_or_default()
     } else { Vec::new() };
@@ -11578,7 +11591,7 @@ fn render_bigmap(
             position_type: PositionType::Absolute,
             left: Val::Px(16.0), top: Val::Px(30.0),
             ..default()
-        }, Text::new("Amber areas: unfinished quest targets (possible spawn range)"),
+        }, Text::new("Cyan: current task · Amber: other tasks (possible spawn areas)"),
            crate::crystal_ui::typography::crystal_text_font(10.0),
            TextColor(Color::srgb(1.0, 0.82, 0.2))));
     }
@@ -11690,6 +11703,8 @@ fn render_bigmap(
                     ));
                 }
                 for (index, region) in renderer.hunt_regions.iter().enumerate() {
+                    let color = if region.primary { Color::srgb(0.2, 0.9, 1.0) }
+                        else { Color::srgb(1.0, 0.72, 0.1) };
                     let (left, top) = big_map_view_position(
                         BigMapPoint { x: region.center.x - region.radius, y: region.center.y - region.radius },
                         entry.info.width, entry.info.height,
@@ -11705,14 +11720,14 @@ fn render_bigmap(
                         border: UiRect::all(Val::Px(2.0)),
                         ..default()
                     }, BackgroundColor(Color::srgba(1.0, 0.65, 0.0, 0.18)),
-                       BorderColor::all(Color::srgb(1.0, 0.72, 0.1))));
+                       BorderColor::all(color)));
                     viewport.spawn((Node {
                         position_type: PositionType::Absolute,
                         left: Val::Px(left.min(BIGMAP_WIDTH - 180.0)),
                         top: Val::Px(top.max(15.0) - 15.0 + index as f32 * 2.0),
                         ..default()
                     }, BackgroundColor(Color::srgba(0.02, 0.015, 0.0, 0.9)),
-                       Text::new(format!("{}: {} left ({},{})", region.name, region.remaining, region.center.x, region.center.y)),
+                       Text::new(format!("{}{}: {} left ({},{})", if region.primary { "[Tracked] " } else { "" }, region.name, region.remaining, region.center.x, region.center.y)),
                        crate::crystal_ui::typography::crystal_text_font(11.0),
                        TextColor(Color::srgb(1.0, 0.82, 0.2))));
                 }
@@ -15384,6 +15399,7 @@ mod tests {
         app.insert_resource(model);
         app.insert_resource(BigMapUiState {
             hunt_regions: vec![crate::quest_hunt_regions::QuestHuntRegion {
+                primary: false,
                 monster_index: 44, name: "RakingCat".into(),
                 center: BigMapPoint { x: 340, y: 550 }, radius: 50, remaining: 2,
             }],

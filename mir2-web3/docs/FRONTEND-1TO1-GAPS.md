@@ -1,5 +1,11 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-21 multi-task guidance: one manually overridable primary task,
+> full counters, nearby/other-map grouping and primary-colored map hunt areas
+> are implemented using source/read-model destinations. Full UI tests 883/883;
+> live visual acceptance and cross-map exit routing remain open.
+> [Evidence](generated/player-qa/multi-quest-guidance-20260921.md).
+
 > 2026-09-21 whole native UI repair pass: 2,361 drawable configured/static UI
 > frames are source-pixel verified; 82 original empty slots are recorded separately.
 > Five keyboard-required and seven NPC-service sprites are restored. NPC sell,

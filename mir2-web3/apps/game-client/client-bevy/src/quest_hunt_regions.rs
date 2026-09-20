@@ -6,6 +6,7 @@ use crate::quest_model::{QuestStatus, QuestTracker};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct QuestHuntRegion {
+    pub primary: bool,
     pub monster_index: i32,
     pub name: String,
     pub center: BigMapPoint,
@@ -17,6 +18,15 @@ pub fn active_hunt_regions(
     tracker: &QuestTracker,
     map_index: i32,
     player: BigMapPoint,
+) -> Vec<QuestHuntRegion> {
+    active_hunt_regions_for_primary(tracker, map_index, player, None)
+}
+
+pub fn active_hunt_regions_for_primary(
+    tracker: &QuestTracker,
+    map_index: i32,
+    player: BigMapPoint,
+    primary: Option<i32>,
 ) -> Vec<QuestHuntRegion> {
     static CONFIG: OnceLock<serde_json::Value> = OnceLock::new();
     let config = CONFIG.get_or_init(|| {
@@ -33,7 +43,9 @@ pub fn active_hunt_regions(
         return Vec::new();
     };
     let mut regions = Vec::new();
-    for quest in &tracker.active_quests {
+    let mut quests: Vec<_> = tracker.active_quests.iter().collect();
+    quests.sort_by_key(|quest| Some(quest.quest_index) != primary);
+    for quest in quests {
         if quest.status != QuestStatus::InProgress {
             continue;
         }
@@ -87,6 +99,7 @@ pub fn active_hunt_regions(
                     continue;
                 }
                 regions.push(QuestHuntRegion {
+                    primary: Some(quest.quest_index) == primary,
                     monster_index,
                     name: spawn.monster_name.clone(),
                     center: BigMapPoint {
@@ -146,6 +159,11 @@ mod tests {
         assert_eq!(regions[0].name, "RakingCat");
         assert_eq!(regions[0].center, BigMapPoint { x: 340, y: 550 });
         assert_eq!(regions[0].remaining, 2);
+        assert!(!regions[0].primary);
+        let focused = active_hunt_regions_for_primary(&tracker, map.map_index, player, Some(2110003));
+        assert!(focused[0].primary);
+        assert_eq!(focused[0].center, regions[0].center);
+        assert_eq!(focused[0].remaining, regions[0].remaining);
         assert!(active_hunt_regions(&tracker, -1, player).is_empty());
         tracker.active_quests[0].objectives[1].current = 2;
         assert!(active_hunt_regions(&tracker, map.map_index, player).is_empty());

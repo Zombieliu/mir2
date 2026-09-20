@@ -9,6 +9,10 @@
 
 use std::collections::VecDeque;
 
+#[path = "quest_multi_guidance.rs"]
+mod multi_guidance;
+pub use multi_guidance::primary_quest_index;
+
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 use bevy::text::{Justify, LineBreak, TextLayout};
@@ -493,6 +497,8 @@ pub struct QuestUiState {
     /// Right-clicking a diary row toggles membership; there is no implicit
     /// "track the first quest" fallback.
     pub tracked_quest_indices: Vec<i32>,
+    /// Local guidance choice, independent of Crystal's persisted tracking list.
+    pub pinned_primary_quest_index: Option<i32>,
     /// Quest whose source `MirMessageBox` abandon confirmation is open.
     pub abandon_confirmation_quest_index: Option<i32>,
     pub quest_alert_message: Option<String>,
@@ -844,6 +850,7 @@ struct QuestUiButtonVisual {
 
 #[derive(Component, Clone, Debug, PartialEq, Eq)]
 enum QuestUiButton {
+    MakePrimary { quest_index: i32 },
     OpenDestinationMap,
     SelectNpcDialog {
         target: String,
@@ -1584,6 +1591,7 @@ struct JourneyRenderModels<'w> {
     catalog: Res<'w, NewcomerJourneyCatalog>,
     entities: Res<'w, EntityModelSet>,
     map: Res<'w, MapModel>,
+    big_map: Option<Res<'w, crate::big_map::BigMapModel>>,
 }
 
 fn process_quest_ui_input(
@@ -1628,6 +1636,9 @@ fn process_quest_ui_input(
     let blocks_gameplay_keys = player_ui.blocks_gameplay_keys();
     let guidance = models.guidance.as_deref();
     let tracker: &QuestTracker = &models.tracker;
+    if quest_state.pinned_primary_quest_index.is_some_and(|id| !tracker.active_quests.iter().any(|q| q.quest_index == id && q.status.is_active())) {
+        quest_state.pinned_primary_quest_index = None;
+    }
     let npc_quest_indices = npc_available_quest_indices(&dialog, tracker, guidance);
     if quest_state.npc_quest_list_open {
         if npc_quest_indices.is_empty() {
@@ -1820,6 +1831,12 @@ fn process_quest_ui_input(
                 let count = npc_dialog_rows(&dialog).len();
                 if quest_state.dialog_scroll_top + NPC_DIALOG_VISIBLE_ROWS < count {
                     quest_state.dialog_scroll_top += NPC_DIALOG_VISIBLE_ROWS;
+                }
+            }
+            QuestUiButton::MakePrimary { quest_index } => {
+                if tracker.active_quests.iter().any(|q| q.quest_index == quest_index && q.status.is_active()) {
+                    quest_state.pinned_primary_quest_index = Some(quest_index);
+                    quest_state.set_feedback("已设为当前引导任务", false);
                 }
             }
             QuestUiButton::SelectQuest { quest_index } => {
@@ -2346,6 +2363,7 @@ fn render_quest_ui(
         && !target.is_changed()
         && !journey_models.entities.is_changed()
         && !journey_models.map.is_changed()
+        && !journey_models.big_map.as_ref().is_some_and(|model| model.is_changed())
         && !pickups.is_changed()
         && !ui_model.is_changed()
         && !inventory.is_changed()
@@ -2418,6 +2436,7 @@ fn render_quest_ui(
                     journey.as_ref(),
                     &journey_models.entities,
                     &journey_models.map,
+                    journey_models.big_map.as_deref(),
                 );
             } else if is_dialog.is_some() {
                 render_dialog_panel(
@@ -2596,8 +2615,12 @@ fn render_quest_tracker_panel(
     journey: Option<&JourneyView>,
     entities: &EntityModelSet,
     map_model: &MapModel,
+    big_map: Option<&crate::big_map::BigMapModel>,
 ) {
-    if journey.and_then(|journey| journey.next.as_ref()).is_some_and(|next| next.quest_id == 2110005)
+    if journey.is_some() && multi_guidance::render(parent, tracker, state, journey, entities, map_model, big_map) {
+        return;
+    }
+    if primary_quest_index(tracker, state, journey) == Some(2_110_005)
         && crate::quest_destination::bichon_safe_arrival_pending(tracker)
     {
         render_bichon_arrival_tracker(parent, map_model);
@@ -4337,6 +4360,11 @@ fn render_quest_detail_panel(
     player: &crate::read_model::PlayerStats,
 ) {
     let layout = quest_detail_layout(1.0);
+    if guidance.is_enabled() && quest.status.is_active() {
+        quest_log_text_button_at(parent, QuestLogRect::new(125.0, 436.0, 70.0, 25.0),
+            if state.pinned_primary_quest_index == Some(quest.quest_index) { "当前引导" } else { "设为当前" },
+            QuestUiButton::MakePrimary { quest_index: quest.quest_index }, true);
+    }
     let lines = quest_detail_lines(quest, Some(guidance));
     let max_top = lines.len().saturating_sub(QUEST_DETAIL_LINE_COUNT);
     let scroll_top = state.detail_scroll_top.min(max_top);
