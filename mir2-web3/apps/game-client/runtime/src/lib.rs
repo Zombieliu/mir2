@@ -3807,101 +3807,48 @@ fn sync_map_render(
     // WITHOUT marking it applied. (This race — not the tile z value — was the real
     // cause of the "band-z map vanishes" bug; z=-50 only ever "worked" when the
     // images happened to be ingested before the first sync.)
-    let mut failed_url_asset = None;
-    let atlases_ready = snapshot.atlases.iter().all(|atlas| {
-        let Some(image) = atlas_assets.images.get(&atlas.key) else {
-            return false;
+    // Standalone animation frames and residency-only images must pass the same
+    // pixel-readiness gate as atlas pages. A URL handle only means that loading
+    // was queued; it must never release the previous complete map frame.
+    let mut image_keys: Vec<_> = map_render_active_image_keys(snapshot).into_iter().collect();
+    image_keys.sort();
+    let mut pending_images = Vec::new();
+    for key in image_keys {
+        let Some(image) = atlas_assets.images.get(&key) else {
+            pending_images.push(format!("{key}=missing-handle"));
+            continue;
         };
-        if !atlas_assets.url_image_keys.contains(&atlas.key) {
-            return true;
+        if !atlas_assets.url_image_keys.contains(&key) {
+            continue;
         }
         match asset_server.load_state(image.id()) {
-            LoadState::Loaded => asset_server.is_loaded_with_dependencies(image.id()),
+            LoadState::Loaded if asset_server.is_loaded_with_dependencies(image.id()) => {}
             LoadState::Failed(error) => {
-                failed_url_asset = Some((atlas.key.clone(), error.to_string()));
-                false
-            }
-            _ => false,
-        }
-    });
-    if let Some((key, error)) = failed_url_asset {
-        trace_native_map_state(
-            &mut native_trace_state,
-            format!("asset-failed key={key} error={error}"),
-        );
-        publish_map_status(
-            "map-render-asset-error",
-            &format!("Failed to load map atlas {key}: {error}"),
-            &snapshot.ack_key,
-            &[key],
-        );
-        return;
-    }
-    if !atlases_ready {
-        let states = snapshot
-            .atlases
-            .iter()
-            .map(|atlas| {
-                let state = atlas_assets.images.get(&atlas.key).map_or_else(
-                    || "missing-handle".to_owned(),
-                    |image| format!("{:?}", asset_server.load_state(image.id())),
+                trace_native_map_state(
+                    &mut native_trace_state,
+                    format!("asset-failed key={key} error={error}"),
                 );
-                format!("{}={state}", atlas.key)
-            })
-            .collect::<Vec<_>>()
-            .join(",");
+                publish_map_status(
+                    "map-render-asset-error",
+                    &format!("Failed to load map image {key}: {error}"),
+                    &snapshot.ack_key,
+                    &[key],
+                );
+                return;
+            }
+            state => pending_images.push(format!("{key}={state:?}")),
+        }
+    }
+    if !pending_images.is_empty() {
         trace_native_map_state(
             &mut native_trace_state,
             format!(
-                "waiting-atlases center={map_center:?} count={} states=[{states}]",
-                snapshot.atlases.len()
+                "waiting-images center={map_center:?} states=[{}]",
+                pending_images.join(",")
             ),
         );
         return;
     }
-
-    // Keep the previous complete frame visible while standalone textures decode.
-    // Mutating only the ready subset would despawn retained tiles and expose holes.
-    let standalone_images_ready = snapshot
-        .standalone_tiles
-        .iter()
-        .all(|tile| atlas_assets.images.contains_key(&tile.image_key));
-    if !standalone_images_ready {
-        let missing = snapshot
-            .standalone_tiles
-            .iter()
-            .filter(|tile| !atlas_assets.images.contains_key(&tile.image_key))
-            .map(|tile| tile.image_key.as_str())
-            .collect::<Vec<_>>()
-            .join(",");
-        trace_native_map_state(
-            &mut native_trace_state,
-            format!("waiting-standalone missing=[{missing}]"),
-        );
-        return;
-    }
-
-    // Animation-family textures are residency-only: they participate in the
-    // atomic frame handoff but never produce map render entities themselves.
-    let retained_images_ready = snapshot
-        .retained_image_keys
-        .iter()
-        .all(|key| atlas_assets.images.contains_key(key));
-    if !retained_images_ready {
-        let missing = snapshot
-            .retained_image_keys
-            .iter()
-            .filter(|key| !atlas_assets.images.contains_key(*key))
-            .map(String::as_str)
-            .collect::<Vec<_>>()
-            .join(",");
-        trace_native_map_state(
-            &mut native_trace_state,
-            format!("waiting-retained missing=[{missing}]"),
-        );
-        return;
-    }
-
     // A loaded atlas page does not guarantee that every draw can bind: stale
     // manifests or an incorrect library-index mapping can still omit a layout
     // or rect. Keep rendering the valid subset, but surface exact coverage in
@@ -4248,12 +4195,12 @@ fn sync_map_render_atlas_layouts(
             rects.insert(key, index);
         }
         let layout = texture_atlas_layouts.add(layout);
-        if let Some((stale_layout, _)) = atlas_assets
+        // Sprites from the applied frame still own the old layout while the
+        // replacement waits at the image-readiness barrier. Let strong handles
+        // retain it until all sprites rebind; Bevy reclaims it after that.
+        atlas_assets
             .layouts
-            .insert(atlas.key.clone(), (layout, rects))
-        {
-            texture_atlas_layouts.remove(stale_layout.id());
-        }
+            .insert(atlas.key.clone(), (layout, rects));
         atlas_assets.layout_sizes.insert(atlas.key.clone(), size);
         atlas_assets.revision = atlas_assets.revision.wrapping_add(1);
     }
@@ -7313,6 +7260,226 @@ mod entity_atlas_tests {
         assert_eq!(
             map_render_missing_bindings(&state, &atlases),
             ["hole:map:page#tiles#2:rect"]
+        );
+    }
+
+    fn map_handoff_test_app() -> App {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_asset::<Mesh>()
+            .init_asset::<TextureAtlasLayout>()
+            .init_asset::<additive_material::CrystalAdditiveMaterial>()
+            .init_resource::<RuntimeMapRenderState>()
+            .init_resource::<RuntimeEntityRenderState>()
+            .init_resource::<RuntimeMapCameraOffset>()
+            .init_resource::<RuntimeMapRenderAtlases>()
+            .init_resource::<SceneRegistry>()
+            .init_resource::<additive_material::CrystalAdditiveMaterialCache>()
+            .init_resource::<presentation_pose::PresentationPoseBuffer>()
+            .add_systems(Update, sync_map_render);
+        app
+    }
+
+    fn map_handoff_snapshot() -> MapRenderState {
+        serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth": 1024, "stageHeight": 768, "revision": 1,
+            "atlases": [{"key": "page", "width": 512, "height": 512,
+                "rects": [{"key": "first", "x": 0, "y": 0, "width": 48, "height": 32}]}],
+            "tiles": [{"key": "floor", "atlasKey": "page", "rectKey": "first",
+                "left": 0, "top": 0, "width": 48, "height": 32, "z": 0}]
+        }))
+        .unwrap()
+    }
+
+    fn apply_map_handoff_baseline(app: &mut App) {
+        let image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderAtlases>()
+            .images
+            .insert("page".into(), image);
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(map_handoff_snapshot());
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(1)
+        );
+    }
+
+    #[test]
+    fn map_handoff_keeps_previous_layout_while_next_page_is_pending() {
+        let mut app = map_handoff_test_app();
+        apply_map_handoff_baseline(&mut app);
+        let entity = app.world().resource::<SceneRegistry>().map_render.tiles["floor"].entity;
+        let old_layout = app
+            .world()
+            .get::<Sprite>(entity)
+            .unwrap()
+            .texture_atlas
+            .as_ref()
+            .unwrap()
+            .layout
+            .clone();
+        let mut next = map_handoff_snapshot();
+        next.revision = Some(2);
+        next.atlases[0].rects.push(MapRenderAtlasRect {
+            key: "second".into(),
+            x: 48,
+            y: 0,
+            width: 48,
+            height: 32,
+        });
+        next.atlases.push(MapRenderAtlas {
+            key: "pending-page".into(),
+            width: 512,
+            height: 512,
+            image_url: None,
+            rects: vec![],
+        });
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(next);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(1)
+        );
+        assert!(
+            app.world()
+                .resource::<Assets<TextureAtlasLayout>>()
+                .get(&old_layout)
+                .is_some(),
+            "the retained sprite must still resolve its old layout while the next frame waits"
+        );
+
+        let image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderAtlases>()
+            .images
+            .insert("pending-page".into(), image);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(2)
+        );
+        assert_ne!(
+            app.world()
+                .get::<Sprite>(entity)
+                .unwrap()
+                .texture_atlas
+                .as_ref()
+                .unwrap()
+                .layout,
+            old_layout
+        );
+        let old_id = old_layout.id();
+        drop(old_layout);
+        app.update();
+        app.update();
+        assert!(
+            app.world()
+                .resource::<Assets<TextureAtlasLayout>>()
+                .get(old_id)
+                .is_none(),
+            "superseded layouts are reclaimed after the old sprites release them"
+        );
+    }
+
+    #[test]
+    fn map_handoff_waits_for_url_standalone_pixels_not_just_handle() {
+        let mut app = map_handoff_test_app();
+        apply_map_handoff_baseline(&mut app);
+        let mut next = map_handoff_snapshot();
+        next.revision = Some(2);
+        next.standalone_tiles = serde_json::from_value(serde_json::json!([{
+            "key": "gate", "imageKey": "gate-image", "imageUrl": "/handoff-test-not-loaded.png",
+            "left": 0, "top": 0, "width": 48, "height": 64, "z": 1
+        }]))
+        .unwrap();
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(next);
+        app.update();
+        assert!(app
+            .world()
+            .resource::<RuntimeMapRenderAtlases>()
+            .images
+            .contains_key("gate-image"));
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(1),
+            "queuing a URL image cannot commit a frame before its pixels load"
+        );
+        assert!(!app
+            .world()
+            .resource::<SceneRegistry>()
+            .map_render
+            .tiles
+            .contains_key("gate"));
+    }
+
+    #[test]
+    fn map_handoff_waits_for_retained_url_animation_pixels() {
+        let mut app = map_handoff_test_app();
+        apply_map_handoff_baseline(&mut app);
+        let image: Handle<Image> = app
+            .world()
+            .resource::<AssetServer>()
+            .load("handoff-retained-not-loaded.png");
+        {
+            let mut assets = app.world_mut().resource_mut::<RuntimeMapRenderAtlases>();
+            assets.images.insert("animation-phase".into(), image);
+            assets.url_image_keys.insert("animation-phase".into());
+        }
+        let mut next = map_handoff_snapshot();
+        next.revision = Some(2);
+        next.retained_image_keys.push("animation-phase".into());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(next);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<SceneRegistry>()
+                .map_render
+                .applied
+                .as_ref()
+                .unwrap()
+                .producer_revision,
+            Some(1)
         );
     }
 
