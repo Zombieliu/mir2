@@ -28,6 +28,9 @@ const ENTITY_BODY_ORDER: f32 = 5.0;
 const ENTITY_HAIR_ORDER: f32 = 6.0;
 const ENTITY_FRONT_WEAPON_ORDER: f32 = 7.0;
 const MAP_FRONT_ORDER: f32 = crate::map_parser::MAP_FRONT_DEPTH_ORDER * ENTITY_DEPTH_GAIN;
+// Crystal draws each cell's front map image before its ItemObject. Keep the
+// floor item just above that front image while leaving later rows in front.
+const GROUND_ITEM_ORDER: f32 = MAP_FRONT_ORDER + 1.0;
 const POST_WORLD_BAND_GAP: f32 = 20.0;
 const TARGET_HIGHLIGHT_OPACITY: f64 = 0.3;
 const ORIGINAL_FRAME_PIXEL_CACHE_LIMIT: usize = 256;
@@ -1451,10 +1454,7 @@ fn build_entity_render_state_with_index(
             continue;
         };
         let path = format!("/original-ui/DNItems/{frame}.png");
-        let Some(pixels) = original_frame_pixels(&path) else {
-            continue;
-        };
-        let Some((true_width, true_height)) = visible_pixel_size(&pixels) else {
+        let Some((width, height, true_width, true_height)) = ground_item_frame_size(frame) else {
             continue;
         };
         entities.push(json!({
@@ -1464,8 +1464,8 @@ fn build_entity_render_state_with_index(
                 "key": format!("{object_id}:ground-item"), "path": path,
                 "left": entity_origin_x + (x-center_x) as f32 * CELL_WIDTH + ((CELL_WIDTH as i32 - true_width as i32) / 2) as f32,
                 "top": entity_origin_y + (y-center_y) as f32 * CELL_HEIGHT + ((CELL_HEIGHT as i32 - true_height as i32) / 2) as f32,
-                "width": pixels.width, "height": pixels.height,
-                "z": entity_z_base(x,y),
+                "width": width, "height": height,
+                "z": entity_z_base(x,y) + GROUND_ITEM_ORDER,
             }]
         }));
     }
@@ -1617,6 +1617,15 @@ fn visible_pixel_size(pixels: &StarterAtlasPixelPage) -> Option<(u32, u32)> {
         bounds.3 = bounds.3.max(y + 1);
     }
     (bounds.2 > bounds.0 && bounds.3 > bounds.1).then(|| (bounds.2 - bounds.0, bounds.3 - bounds.1))
+}
+
+/// The DropView overlay uses the same source image and tile centering as the
+/// world item. This also rejects empty/missing DNItems frames before loading a
+/// UI image, so a label cannot acquire a placeholder rectangle.
+pub(crate) fn ground_item_frame_size(frame: i64) -> Option<(u32, u32, u32, u32)> {
+    let pixels = original_frame_pixels(&format!("/original-ui/DNItems/{frame}.png"))?;
+    let (true_width, true_height) = visible_pixel_size(&pixels)?;
+    Some((pixels.width, pixels.height, true_width, true_height))
 }
 
 fn normalized_object_id(value: Option<&Value>) -> Option<String> {
@@ -2437,12 +2446,15 @@ mod tests {
     #[test]
     fn ground_item_renders_without_actor_or_name_and_disappears_when_removed() {
         let mut payload = json!({"sceneView":{"center":{"x":10,"y":20}},
-            "entities":[], "groundDrops":[{"objectId":99,"image":0,"x":11,"y":20}]});
+            "entities":[], "groundDrops":[{"objectId":99,"image":30,"x":11,"y":20}]});
         let render = build_entity_render_state_with_frames(&payload, &HashMap::new()).unwrap();
         let item = &render["entities"][0];
         assert_eq!(item["kind"], "item");
-        assert_eq!(item["layers"][0]["path"], "/original-ui/DNItems/0.png");
+        assert_eq!(item["layers"][0]["path"], "/original-ui/DNItems/30.png");
         assert!(item["layers"][0]["width"].as_u64().unwrap() > 0);
+        let item_z = item["layers"][0]["z"].as_f64().unwrap() as f32;
+        assert!(item_z > entity_z_base(11, 20) + MAP_FRONT_ORDER);
+        assert!(item_z < entity_z_base(11, 21));
         assert!(render["hoveredObjectId"].is_null());
         payload["groundDrops"] = json!([]);
         assert!(

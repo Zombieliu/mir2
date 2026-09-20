@@ -1,5 +1,19 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-20 Windows ground-drop visibility candidate: a live player screenshot
+> showed `WoodenSword` text over a Bichon roof with no discernible item sprite.
+> The authoritative drop has image 30 and the original `DNItems/30.png` is
+> present (36x25). The native world pass now draws an item after its own cell's
+> front map image, matching Crystal's row order. When DropView is on, its
+> post-world name layer also displays that same DNItems frame at the exact
+> ground-item position, so later-row roofs cannot leave only a floating name.
+> Missing/empty frames are skipped, and pickup state is unchanged. The focused
+> item test and 17/17 entity-overlay tests pass; the Release EXE was built and
+> opened at the login screen from `C:/mir2-ground-drop-20260920/native-client`
+> (SHA-256 `349EB41DCF998325753D348C47DC87B62A940106736646F139BA471EDB4683F7`).
+> An authenticated in-world capture, roof/drop pickup check, and Crystal
+> same-scene comparison are still pending. `visualAccepted=false`.
+
 > 2026-09-14 Windows-native R15 minimap/attack-facing repair: the Bichon
 > minimap source and the `(252,520)` crop were both non-black, locating the
 > reported dark-scene failure in UI composition rather than asset export or

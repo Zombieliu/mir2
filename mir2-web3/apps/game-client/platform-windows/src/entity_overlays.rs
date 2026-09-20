@@ -59,6 +59,7 @@ pub struct NativeEntityOverlays {
     last_self_hovered: bool,
     // Keep both animation frames alive across label rebuilds and frame swaps.
     quest_marker_assets: HashMap<u16, Handle<Image>>,
+    ground_item_assets: HashMap<i64, Handle<Image>>,
 }
 
 /// Local Crystal name/drop presentation flags. They only select which labels
@@ -207,6 +208,15 @@ struct OverlayEntry {
     font_size: f32,
     self_health_ratio: Option<f32>,
     follows_camera: bool,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+struct GroundItemImageEntry {
+    frame: i64,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -455,6 +465,24 @@ pub fn sync_native_entity_overlays(
         (0.0, 0.0),
         center_override,
     );
+    // DropView names are drawn after the world in Crystal. Draw a second copy
+    // of the *same* DNItems frame at its ground coordinate in that UI pass:
+    // later-row roof fronts can otherwise cover every pixel while leaving a
+    // floating yellow item name. The underlying world sprite and pickup state
+    // remain unchanged, including when DropView is disabled.
+    let ground_items = if visibility.drop_view {
+        ground_item_image_entries(payload, center_override)
+    } else {
+        Vec::new()
+    };
+    for item in &ground_items {
+        overlays
+            .ground_item_assets
+            .entry(item.frame)
+            .or_insert_with(|| {
+                asset_server.load(format!("original-ui/DNItems/{}.png", item.frame))
+            });
+    }
     let floaters = damage_floater_entries_with_motion_at_center(
         payload,
         &overlays.active_floaters,
@@ -526,7 +554,7 @@ pub fn sync_native_entity_overlays(
             ),
         ));
     }
-    if entries.is_empty() && floaters.is_empty() {
+    if entries.is_empty() && floaters.is_empty() && ground_items.is_empty() {
         return;
     }
 
@@ -539,7 +567,8 @@ pub fn sync_native_entity_overlays(
         (true, world_entries, world_floaters),
         (false, fixed_entries, fixed_floaters),
     ] {
-        if entries.is_empty() && floaters.is_empty() {
+        if entries.is_empty() && floaters.is_empty() && (!follows_camera || ground_items.is_empty())
+        {
             continue;
         }
         let tracked_self_object_id = (!follows_camera).then(|| self_object_id.clone()).flatten();
@@ -567,6 +596,23 @@ pub fn sync_native_entity_overlays(
                 GlobalZIndex(OVERLAY_Z_INDEX),
             ))
             .with_children(|root| {
+                if follows_camera {
+                    for item in &ground_items {
+                        root.spawn((
+                            Name::new(format!("NativeGroundDropImage:{}", item.frame)),
+                            Node {
+                                position_type: PositionType::Absolute,
+                                left: Val::Px(item.left),
+                                top: Val::Px(item.top),
+                                width: Val::Px(item.width),
+                                height: Val::Px(item.height),
+                                ..default()
+                            },
+                            ImageNode::new(overlays.ground_item_assets[&item.frame].clone()),
+                            bevy::ui::FocusPolicy::Pass,
+                        ));
+                    }
+                }
                 for entry in entries {
                     if let Some(ratio) = entry.self_health_ratio {
                         root.spawn((
@@ -800,6 +846,42 @@ fn overlay_entries(
         &HashMap::new(),
         (0.0, 0.0),
     )
+}
+
+fn ground_item_image_entries(
+    payload: &Value,
+    center_override: Option<(i64, i64)>,
+) -> Vec<GroundItemImageEntry> {
+    let (center_x, center_y) = center_override
+        .or_else(|| payload_scene_center(payload))
+        .unwrap_or((0, 0));
+    let origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
+    let origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
+    payload
+        .get("groundDrops")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .take(256)
+        .filter_map(|drop| {
+            let x = drop.get("x").and_then(value_i64)?;
+            let y = drop.get("y").and_then(value_i64)?;
+            let frame = drop.get("image").and_then(value_i64)?;
+            let (width, height, true_width, true_height) =
+                crate::atlas::ground_item_frame_size(frame)?;
+            Some(GroundItemImageEntry {
+                frame,
+                left: origin_x
+                    + (x - center_x) as f32 * CELL_WIDTH
+                    + ((CELL_WIDTH as i32 - true_width as i32) / 2) as f32,
+                top: origin_y
+                    + (y - center_y) as f32 * CELL_HEIGHT
+                    + ((CELL_HEIGHT as i32 - true_height as i32) / 2) as f32,
+                width: width as f32,
+                height: height as f32,
+            })
+        })
+        .collect()
 }
 
 fn overlay_entries_with_motion(
@@ -1552,6 +1634,70 @@ mod tests {
             None,
         )
         .is_empty());
+    }
+
+    #[test]
+    fn drop_view_image_uses_the_world_items_actual_dnitems_frame_and_position() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "entities": [],
+            "groundDrops": [
+                {"objectId": 9, "name": "WoodenSword", "image": 30, "x": 11, "y": 20},
+                {"objectId": 10, "name": "Missing", "image": 999999, "x": 10, "y": 20}
+            ]
+        });
+        let images = ground_item_image_entries(&payload, None);
+        assert_eq!(images.len(), 1);
+        assert_eq!(images[0].frame, 30);
+        let world = crate::atlas::build_entity_render_state_with_frames(&payload, &HashMap::new())
+            .expect("world render state");
+        let layer = &world["entities"][0]["layers"][0];
+        assert_eq!(layer["path"], "/original-ui/DNItems/30.png");
+        assert_eq!(images[0].left as f64, layer["left"].as_f64().unwrap());
+        assert_eq!(images[0].top as f64, layer["top"].as_f64().unwrap());
+        assert_eq!(images[0].width as f64, layer["width"].as_f64().unwrap());
+        assert_eq!(images[0].height as f64, layer["height"].as_f64().unwrap());
+    }
+
+    #[test]
+    fn drop_view_spawns_a_pickup_image_and_removes_it_with_the_drop() {
+        let mut app = App::new();
+        app.add_plugins((
+            bevy::app::TaskPoolPlugin::default(),
+            bevy::asset::AssetPlugin::default(),
+        ));
+        app.init_asset::<Image>();
+        app.insert_resource(Time::<()>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.init_resource::<NativeEntityPresentation>();
+        app.init_resource::<PresentationPoseBuffer>();
+        let mut overlays = NativeEntityOverlays::default();
+        overlays.replace_payload(json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "groundDrops": [{"objectId": 9, "name": "WoodenSword", "image": 30, "x": 11, "y": 20}]
+        }));
+        app.insert_resource(overlays);
+        app.add_systems(Update, sync_native_entity_overlays);
+        app.update();
+
+        let image_count = |app: &mut App| {
+            app.world_mut()
+                .query::<(&Name, &ImageNode)>()
+                .iter(app.world())
+                .filter(|(name, _)| name.as_str() == "NativeGroundDropImage:30")
+                .count()
+        };
+        assert_eq!(image_count(&mut app), 1);
+        app.world_mut()
+            .resource_mut::<NativeEntityOverlays>()
+            .replace_payload(
+                json!({"sceneView": {"center": {"x": 10, "y": 20}}, "groundDrops": []}),
+            );
+        app.update();
+        assert_eq!(image_count(&mut app), 0);
     }
 
     #[test]

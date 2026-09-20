@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-20 native ground-drop visibility candidate: the original DNItems
+> frame for WoodenSword exists, but a later Bichon roof row covered its world
+> sprite while the post-world DropView name remained visible. The native item
+> now follows Crystal's same-cell front-before-object order, and DropView
+> repeats the same sprite at the identical ground coordinate above occluding
+> fronts. Focused item and 17/17 overlay tests pass; a fresh Release client
+> opens at login. Authenticated roof/pickup and original-client comparison
+> remain open, so no visual acceptance or overall parity claim follows.
+
 > 2026-09-20 optional V2 route: Warrior and Taoist independently reached
 > 26/26 at level 30 with ordinary logout/save parity in a labelled
 > functional recheck. Fresh Wizard cohort C remains at N10/level 16 with
