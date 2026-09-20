@@ -12,6 +12,8 @@ pub mod local_keyboard_ui;
 pub mod skill_bars;
 #[path = "skill_page.rs"]
 mod skill_page;
+#[path = "npc_item_service.rs"]
+mod npc_item_service;
 
 use std::collections::VecDeque;
 
@@ -789,6 +791,8 @@ pub struct NativePlayerUiState {
     /// Local presentation tab for an NPC service that advertises both Buy
     /// and Sell. Capabilities remain authoritative in `ShopModel`.
     pub npc_shop_buy_tab: bool,
+    /// Crystal Hold auto-submits the next selection in this service only.
+    pub npc_service_hold: Option<NpcShopServiceMode>,
     pub shop_repair_mode: bool,
     /// Repair selection is a `(container, slot)` pair. The emitted command
     /// still carries the authoritative unique id, so bag slot 3 cannot be
@@ -930,6 +934,7 @@ impl Default for NativePlayerUiState {
             inspect: None,
             shop_quantity: 1,
             npc_shop_buy_tab: true,
+            npc_service_hold: None,
             shop_repair_mode: false,
             shop_repair_container: 0,
             shop_repair_slot: None,
@@ -2623,6 +2628,7 @@ enum OverlayButton {
     ShopShowSell,
     ShopBuy,
     ShopSell,
+    ShopToggleHold,
     ShopRepair,
     ShopSRepair,
     ShopQuantityInc,
@@ -4767,6 +4773,7 @@ pub(crate) fn process_overlay_keyboard(
     if let Some(signals) = surface_signals.as_deref_mut() {
         if signals.npc_shop_open_requested {
             state.npc_shop_buy_tab = true;
+            state.npc_service_hold = None;
             if !state.npc_shop_open() {
                 state.toggle_npc_shop();
             }
@@ -5564,6 +5571,7 @@ fn process_overlay_buttons(
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
                 state.shop_quantity = 1;
+                state.npc_service_hold = None;
                 state.npc_shop_buy_tab = true;
                 state.shop_repair_container = 0;
                 state.shop_repair_slot = None;
@@ -6823,56 +6831,24 @@ fn process_overlay_buttons(
                     );
                 }
             }
-            OverlayButton::ShopSell => {
-                if !state.npc_shop_open() || !shop.allows_sell() {
-                    continue;
-                }
-                if let Some(slot) = shop.selected_bag_slot_for_sell {
-                    if let Some(item) = inventory
-                        .items
-                        .iter()
-                        .find(|i| i.container == 0 && i.slot == slot)
-                    {
-                        if let Some(uid) = item_unique_id(item) {
-                            intents.push_pending_intent(
-                                &mut pending,
-                                NativePlayerUiIntent::SellItem {
-                                    unique_id: uid,
-                                    count: shop_quantity_clamped(state.shop_quantity),
-                                },
-                            );
-                        }
-                    }
+            OverlayButton::ShopToggleHold => {
+                if state.npc_shop_open() && npc_item_service::service_action(&shop).is_some() {
+                    state.npc_service_hold = if state.npc_service_hold == Some(shop.service_mode) {
+                        None
+                    } else {
+                        Some(shop.service_mode)
+                    };
                 }
             }
-            OverlayButton::ShopRepair => {
-                if !state.npc_shop_open() || !shop.allows_repair() {
-                    continue;
-                }
-                if let Some(item) = selected_repair_item(&state, &inventory) {
-                    if let Some(uid) = item_unique_id(item) {
-                        if repair_selection_enabled(&state, &inventory) {
-                            intents.push_pending_intent(
-                                &mut pending,
-                                NativePlayerUiIntent::RepairItem { unique_id: uid },
-                            );
-                        }
-                    }
-                }
-            }
-            OverlayButton::ShopSRepair => {
-                if !state.npc_shop_open() || !shop.allows_special_repair() {
-                    continue;
-                }
-                if let Some(item) = selected_repair_item(&state, &inventory) {
-                    if let Some(uid) = item_unique_id(item) {
-                        if repair_selection_enabled(&state, &inventory) {
-                            intents.push_pending_intent(
-                                &mut pending,
-                                NativePlayerUiIntent::SRepairItem { unique_id: uid },
-                            );
-                        }
-                    }
+            OverlayButton::ShopSell | OverlayButton::ShopRepair | OverlayButton::ShopSRepair => {
+                let allowed = match button {
+                    OverlayButton::ShopSell => shop.allows_sell(),
+                    OverlayButton::ShopRepair => shop.allows_repair(),
+                    OverlayButton::ShopSRepair => shop.allows_special_repair(),
+                    _ => false,
+                };
+                if allowed {
+                    npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
                 }
             }
             OverlayButton::ShopQuantityInc => {
@@ -6912,37 +6888,9 @@ fn process_overlay_buttons(
                 if !state.npc_shop_open() {
                     continue;
                 }
-                if shop.allows_repair() || shop.allows_special_repair() {
-                    if let Some(item) = selected_repair_item(&state, &inventory) {
-                        if let Some(uid) = item_unique_id(item) {
-                            if repair_selection_enabled(&state, &inventory) {
-                                let intent = if shop.allows_special_repair() {
-                                    NativePlayerUiIntent::SRepairItem { unique_id: uid }
-                                } else {
-                                    NativePlayerUiIntent::RepairItem { unique_id: uid }
-                                };
-                                intents.push_pending_intent(&mut pending, intent);
-                            }
-                        }
-                    }
-                } else if shop.allows_sell() && (!shop.allows_buy() || !state.npc_shop_buy_tab) {
-                    if let Some(slot) = shop.selected_bag_slot_for_sell {
-                        if let Some(item) = inventory
-                            .items
-                            .iter()
-                            .find(|item| item.container == 0 && item.slot == slot)
-                        {
-                            if let Some(unique_id) = item_unique_id(item) {
-                                intents.push_pending_intent(
-                                    &mut pending,
-                                    NativePlayerUiIntent::SellItem {
-                                        unique_id,
-                                        count: shop_quantity_clamped(state.shop_quantity),
-                                    },
-                                );
-                            }
-                        }
-                    }
+                if shop.allows_repair() || shop.allows_special_repair()
+                    || (shop.allows_sell() && (!shop.allows_buy() || !state.npc_shop_buy_tab)) {
+                    npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
                 } else if shop.allows_buy()
                     && shop_buy_enabled_with_pearls(
                         &shop,
@@ -6966,6 +6914,7 @@ fn process_overlay_buttons(
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
                 state.shop_quantity = 1;
+                state.npc_service_hold = None;
                 state.npc_shop_buy_tab = true;
                 shop.selected_id = None;
                 shop.selected_bag_slot_for_sell = None;
@@ -6977,6 +6926,9 @@ fn process_overlay_buttons(
             OverlayButton::SelectBagForSell(slot) => {
                 if state.npc_shop_open() && shop.allows_sell() {
                     shop.selected_bag_slot_for_sell = Some(slot);
+                    if state.npc_service_hold == Some(shop.service_mode) {
+                        npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
+                    }
                 }
             }
             OverlayButton::SelectBagForRepair(slot) => {
@@ -6984,12 +6936,18 @@ fn process_overlay_buttons(
                     shop.selected_bag_slot_for_repair = Some(slot);
                     state.shop_repair_container = 0;
                     state.shop_repair_slot = Some(slot);
+                    if state.npc_service_hold == Some(shop.service_mode) {
+                        npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
+                    }
                 }
             }
             OverlayButton::SelectEquipForRepair(slot) => {
                 if state.npc_shop_open() && (shop.allows_repair() || shop.allows_special_repair()) {
                     state.shop_repair_container = 2;
                     state.shop_repair_slot = Some(slot);
+                    if state.npc_service_hold == Some(shop.service_mode) {
+                        npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
+                    }
                 }
             }
             // Storage
@@ -11971,7 +11929,7 @@ fn render_shop(
 ) {
     let show_buy = shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab);
     if !show_buy {
-        render_npc_item_service(parent, asset_server, shop, inventory, state);
+        npc_item_service::render(parent, asset_server, shop, inventory, state, player);
         return;
     }
     let buy_enabled = shop_buy_enabled_with_pearls(
@@ -11982,16 +11940,13 @@ fn render_shop(
     );
 
     if let Some(asset_server) = asset_server {
-        // Crystal's NPCGoodsDialog frame is Prguse/1000.  The extracted
-        // layout does not declare its intrinsic size; derive the occupied
-        // bounds from the furthest confirmed control instead of stretching
-        // the art to the old provisional 620x520 panel.
+        // Crystal NPCGoodsDialog uses the intrinsic Prguse/1000 frame size.
         spawn_overlay_frame(
             parent,
             asset_server,
             "original-ui/Prguse/1000.png",
-            242.0,
-            330.0,
+            244.0,
+            334.0,
         );
         spawn_overlay_crystal_button(
             parent,
@@ -12044,7 +11999,7 @@ fn render_shop(
             312,
             313,
             314,
-            CrystalRect::new(77.0, 304.0, 80.0, 22.0),
+            CrystalRect::new(77.0, 304.0, 80.0, 25.0),
             OverlayButton::ShopBuy,
             buy_enabled,
         );
@@ -12073,7 +12028,7 @@ fn render_shop(
         overlay_absolute_button(
             parent,
             "Buy",
-            CrystalRect::new(77.0, 304.0, 80.0, 22.0),
+            CrystalRect::new(77.0, 304.0, 80.0, 25.0),
             OverlayButton::ShopBuy,
             buy_enabled,
         );
@@ -12148,161 +12103,6 @@ fn render_shop(
     }
 }
 
-fn render_npc_item_service(
-    parent: &mut ChildSpawnerCommands,
-    _asset_server: Option<&AssetServer>,
-    shop: &ShopModel,
-    inventory: &InventoryModel,
-    state: &NativePlayerUiState,
-) {
-    let title = if shop.allows_special_repair() {
-        "Special repair"
-    } else if shop.allows_repair() {
-        "Repair items"
-    } else if shop.allows_sell() {
-        "Sell items"
-    } else {
-        "NPC service unavailable"
-    };
-    let sell_mode = shop.allows_sell();
-    let repair_mode = shop.allows_repair() || shop.allows_special_repair();
-    let sell_enabled = sell_mode && shop_sell_enabled(inventory, shop.selected_bag_slot_for_sell);
-    let repair_enabled = repair_mode && repair_selection_enabled(state, inventory);
-
-    parent
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(0.0),
-                top: Val::Px(0.0),
-                width: Val::Px(360.0),
-                height: Val::Px(360.0),
-                display: Display::Flex,
-                flex_direction: FlexDirection::Column,
-                padding: UiRect::all(Val::Px(8.0)),
-                row_gap: Val::Px(3.0),
-                overflow: Overflow::clip(),
-                ..default()
-            },
-            BackgroundColor(PANEL_BG),
-        ))
-        .with_children(|panel| {
-            panel
-                .spawn(Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    justify_content: JustifyContent::SpaceBetween,
-                    ..default()
-                })
-                .with_children(|header| {
-                    body(header, title);
-                    if shop.allows_buy() && shop.allows_sell() {
-                        overlay_button(header, "Buy", OverlayButton::ShopShowBuy, true);
-                    }
-                    overlay_button(header, "Close", OverlayButton::ShopCancel, true);
-                });
-
-            if let Some(rate) = shop.repair_rate.filter(|_| repair_mode) {
-                body(panel, &format!("Repair rate x{rate:.2}"));
-            }
-
-            for item in inventory.items_in(0).into_iter().take(10) {
-                let selected = if sell_mode {
-                    shop.selected_bag_slot_for_sell == Some(item.slot)
-                } else {
-                    state.shop_repair_container == 0 && state.shop_repair_slot == Some(item.slot)
-                };
-                overlay_button(
-                    panel,
-                    &format!(
-                        "{}{} x{}",
-                        if selected { "▶ " } else { "" },
-                        short_name(&item.name, &item.key),
-                        item.quantity
-                    ),
-                    if sell_mode {
-                        OverlayButton::SelectBagForSell(item.slot)
-                    } else {
-                        OverlayButton::SelectBagForRepair(item.slot)
-                    },
-                    sell_mode || repair_mode,
-                );
-            }
-
-            if repair_mode {
-                body(panel, "Equipment");
-                panel
-                    .spawn(Node {
-                        display: Display::Flex,
-                        flex_direction: FlexDirection::Row,
-                        flex_wrap: bevy::ui::FlexWrap::Wrap,
-                        column_gap: Val::Px(2.0),
-                        row_gap: Val::Px(2.0),
-                        ..default()
-                    })
-                    .with_children(|grid| {
-                        for slot in 0..14 {
-                            let item = inventory
-                                .items_in(2)
-                                .into_iter()
-                                .find(|item| item.slot == slot);
-                            let selected = state.shop_repair_container == 2
-                                && state.shop_repair_slot == Some(slot);
-                            overlay_button(
-                                grid,
-                                &format!(
-                                    "{}{}",
-                                    if selected { "▶" } else { "" },
-                                    equipment_slot_name(slot)
-                                ),
-                                OverlayButton::SelectEquipForRepair(slot),
-                                item.is_some(),
-                            );
-                        }
-                    });
-            }
-
-            panel
-                .spawn(Node {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    column_gap: Val::Px(4.0),
-                    ..default()
-                })
-                .with_children(|actions| {
-                    if sell_mode {
-                        overlay_button(
-                            actions,
-                            "−",
-                            OverlayButton::ShopQuantityDec,
-                            state.shop_quantity > SHOP_QUANTITY_MIN,
-                        );
-                        body(actions, &format!("x{}", state.shop_quantity));
-                        overlay_button(
-                            actions,
-                            "+",
-                            OverlayButton::ShopQuantityInc,
-                            state.shop_quantity < SHOP_QUANTITY_MAX,
-                        );
-                        overlay_button(actions, "Sell", OverlayButton::ShopSell, sell_enabled);
-                    } else if shop.allows_repair() {
-                        overlay_button(
-                            actions,
-                            "Repair",
-                            OverlayButton::ShopRepair,
-                            repair_enabled,
-                        );
-                    } else if shop.allows_special_repair() {
-                        overlay_button(
-                            actions,
-                            "Special repair",
-                            OverlayButton::ShopSRepair,
-                            repair_enabled,
-                        );
-                    }
-                });
-        });
-}
 
 fn native_skill_page_count(item_count: usize) -> usize {
     item_count
@@ -14258,7 +14058,7 @@ mod tests {
         }
     }
 
-    fn init_overlay_button_test_resources(app: &mut App) {
+    pub(super) fn init_overlay_button_test_resources(app: &mut App) {
         let test_name = std::thread::current()
             .name()
             .unwrap_or("unnamed")
@@ -17909,7 +17709,8 @@ mod tests {
             app.world()
                 .resource::<ShopModel>()
                 .selected_bag_slot_for_repair,
-            Some(1)
+            None,
+            "successful repair enqueue clears Crystal's target item"
         );
         assert_eq!(
             app.world().resource::<StorageModel>().selected_bag_slot,

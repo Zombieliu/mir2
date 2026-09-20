@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "export:crystal-ui": "node ./scripts/export-crystal-ui.mjs",
+    "audit:native-ui-assets": "node ./scripts/audit-native-ui-assets.mjs",
     "export:crystal-sounds": "node ./scripts/export-crystal-sounds.mjs",
     "export:crystal-magic-effects": "node ./scripts/export-crystal-magic-effects.mjs",
     "export:crystal-light-textures": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./scripts/export-crystal-light-textures.ps1",

@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-21 whole native UI repair pass: 2,361 drawable configured/static UI
+> frames are source-pixel verified; 82 original empty slots are recorded separately.
+> Five keyboard-required and seven NPC-service sprites are restored. NPC sell,
+> repair and special-repair now use original drop-frame geometry and controls,
+> with a complete native inventory picker, Hold and shared guarded submission.
+> Full client library tests pass 876/876. Original drag/drop, reliable repair
+> quoting, dynamic UI states and whole-client visual acceptance remain open.
+> See [scope and remaining work](generated/player-qa/whole-ui-20260921.md).
+
 > 2026-09-21 N5 destination guidance: pending arrival now uses a Chinese,
 > flow-layout tracker card with Microsoft YaHei, readable spacing, explicit
 > Bichon city (328,264), northbound direction and the exclusion of the starter
