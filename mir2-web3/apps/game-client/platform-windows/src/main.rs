@@ -176,6 +176,16 @@ fn main() {
         ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
     });
     app.add_systems(bevy::app::Update, branding::apply_window_icon);
+    // Persist the matching server's presentation profile in the package, so
+    // opening the EXE directly also enables Diary accept/finish actions.
+    let guidance = session.quest_guidance.as_deref().map_or_else(
+        mir2_client_bevy::quest_guidance::QuestGuidance::from_environment,
+        mir2_client_bevy::quest_guidance::QuestGuidance::from_profile_name,
+    );
+    app.insert_resource(
+        mir2_client_bevy::quest_journey::NewcomerJourneyCatalog::from_guidance(&guidance),
+    );
+    app.insert_resource(guidance);
     timing::report("build_runtime_app", app_started);
     app.world_mut()
         .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()

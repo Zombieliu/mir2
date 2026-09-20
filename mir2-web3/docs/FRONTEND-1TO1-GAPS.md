@@ -1,5 +1,13 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-20 direct-launch V2 guidance repair: the branded client was opened
+> without the QA launcher's temporary guidance environment, hiding V2 Diary
+> actions despite intact server progress. The Windows config now persists
+> `[gameplay] quest_guidance = "newcomer-v2"` and installs both native guidance
+> resources. Session-config tests pass 11/11. Saved `a1` remains Warrior level 3,
+> two completed main quests and N3 at 2/4 (two Scarecrows); two RakingCats remain.
+> Authenticated Diary visual verification is still pending.
+
 > 2026-09-20 Windows map/branding follow-up: Bichon sand Back and grass Middle
 > tiles shared a depth, allowing rectangular sand patches to cover grass.
 > Floor depth now preserves Back/Middle/Front pass order; 39/39 map-parser
