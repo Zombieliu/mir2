@@ -165,16 +165,30 @@ fn main() {
     }
     eprintln!(
         "[platform-windows] gateway_url={} window={}x{}",
-        session.gateway_url, session.window_width, session.window_height
+        session.gateway_url, session_config::DEFAULT_WINDOW_WIDTH, session_config::DEFAULT_WINDOW_HEIGHT
     );
     timing::report("asset_validation_and_map_decode", assets_started);
     let app_started = std::time::Instant::now();
     let mut app = build_runtime_app(RuntimeWindowSpec {
         asset_root: asset_root.to_string_lossy().into_owned(),
-        width: session.window_width,
-        height: session.window_height,
+        width: session_config::DEFAULT_WINDOW_WIDTH,
+        height: session_config::DEFAULT_WINDOW_HEIGHT,
         ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
     });
+    // Native Crystal panels currently have a fixed pixel layout. Configure the
+    // Window before Winit creates it; resizing is not a supported layout mode.
+    let world = app.world_mut();
+    for mut window in world.query::<&mut bevy::window::Window>().iter_mut(world) {
+        window.resizable = false;
+        window.enabled_buttons.maximize = false;
+        window.resolution.set_scale_factor_override(Some(1.0));
+        window.resize_constraints = bevy::window::WindowResizeConstraints {
+            min_width: session_config::DEFAULT_WINDOW_WIDTH as f32,
+            max_width: session_config::DEFAULT_WINDOW_WIDTH as f32,
+            min_height: session_config::DEFAULT_WINDOW_HEIGHT as f32,
+            max_height: session_config::DEFAULT_WINDOW_HEIGHT as f32,
+        };
+    }
     app.add_systems(bevy::app::Update, branding::apply_window_icon);
     // Persist the matching server's presentation profile in the package, so
     // opening the EXE directly also enables Diary accept/finish actions.

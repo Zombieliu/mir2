@@ -1,5 +1,13 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-20 Windows fixed-size policy: the native host now creates a
+> 1024x768 client area with scale override 1, equal minimum/maximum size,
+> resizing disabled and the maximize button disabled. Move, minimize and
+> close retain their defaults. Legacy display width/height are no longer
+> applied by this host while the pixel layout is fixed. The Web host is
+> unchanged. Release compilation and interactive acceptance are recorded
+> separately; desktop drag/DPI acceptance remains pending.
+
 > 2026-09-20 V2 hunting-area guidance: the big map now overlays up to three
 > unfinished quest targets using the nearest imported respawn area's center
 > and spread, with monster name, remaining count and coordinates. Completed
