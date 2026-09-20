@@ -43,6 +43,8 @@ pub mod pending_operations;
 #[cfg(feature = "native-ui")]
 pub mod quest_guidance;
 #[cfg(feature = "native-ui")]
+pub mod quest_hunt_regions;
+#[cfg(feature = "native-ui")]
 pub mod quest_journey;
 #[cfg(feature = "native-ui")]
 pub mod quest_model;

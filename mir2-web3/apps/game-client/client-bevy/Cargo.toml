@@ -17,6 +17,7 @@ path = "src/lib.rs"
 [features]
 default = []
 native-ui = [
+  "dep:mir2-game-data",
   "bevy/bevy_ui",
   "bevy/bevy_text",
   "bevy/bevy_ui_render",
@@ -39,6 +40,7 @@ bevy = { version = "0.19.0", default-features = false, features = [
 ] }
 chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
 mir2-client-core = { path = "../client-core" }
+mir2-game-data = { path = "../../../packages/game-data", optional = true }
 mir2-protocol = { path = "../../../packages/protocol" }
 mir2-ui-core = { path = "../ui-core" }
 serde = { version = "1", features = ["derive"] }

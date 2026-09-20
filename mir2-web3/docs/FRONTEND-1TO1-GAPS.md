@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-20 V2 hunting-area guidance: the big map now overlays up to three
+> unfinished quest targets using the nearest imported respawn area's center
+> and spread, with monster name, remaining count and coordinates. Completed
+> targets disappear; other-map and missing-progress targets are omitted.
+> N3 guidance names RakingCat near (340,550), northeast of the starter village.
+> These are possible spawn areas, not live monster positions or a new auto-path
+> implementation. Two focused tests and 19 big-map regressions pass; Windows
+> release package is built. Authenticated visual acceptance remains pending.
+> Evidence: [hunt-map QA](generated/player-qa/numeron-hunt-map-20260920.md).
+
 > 2026-09-20 blank Diary deployment diagnosis: after the client profile repair,
 > the running Gateway was independently verified to have no MIR2_QUEST_CADENCE.
 > It therefore filtered out a1's persisted V2 quests, yielding an empty list and

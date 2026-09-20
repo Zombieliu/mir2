@@ -876,6 +876,7 @@ pub struct MailComposeUi {
 #[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
 pub struct BigMapUiState {
     pub search_focused: bool,
+    hunt_regions: Vec<crate::quest_hunt_regions::QuestHuntRegion>,
     last_reset_epoch: Option<u64>,
     requested_epoch_map: Option<(u64, i32)>,
 }
@@ -2877,8 +2878,18 @@ fn sync_big_map_ui(
     model: Res<BigMapModel>,
     mut intents: ResMut<BigMapGatewayIntentQueue>,
     mut ui: ResMut<BigMapUiState>,
+    quests: Option<Res<crate::quest_model::QuestTracker>>,
+    guidance: Option<Res<crate::quest_guidance::QuestGuidance>>,
 ) {
     intents.sync_model(&model);
+    let regions = if guidance.as_deref().and_then(|g| g.profile_name()) == Some("newcomer-v2") {
+        model.active_map().zip(quests.as_deref()).map(|(map, quests)| {
+            crate::quest_hunt_regions::active_hunt_regions(
+                quests, map.map_index, model.player_location.unwrap_or_default(),
+            )
+        }).unwrap_or_default()
+    } else { Vec::new() };
+    if ui.hunt_regions != regions { ui.hunt_regions = regions; }
     if ui.last_reset_epoch != Some(model.reset_epoch) {
         ui.search_focused = false;
         ui.last_reset_epoch = Some(model.reset_epoch);
@@ -11542,6 +11553,15 @@ fn render_bigmap(
         760.0,
         500.0,
     );
+    if !renderer.hunt_regions.is_empty() && model.view != BigMapView::WorldMap {
+        parent.spawn((Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(16.0), top: Val::Px(30.0),
+            ..default()
+        }, Text::new("Amber areas: unfinished quest targets (possible spawn range)"),
+           crate::crystal_ui::typography::crystal_text_font(10.0),
+           TextColor(Color::srgb(1.0, 0.82, 0.2))));
+    }
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -11648,6 +11668,33 @@ fn render_bigmap(
                         },
                         BackgroundColor(GOLD),
                     ));
+                }
+                for (index, region) in renderer.hunt_regions.iter().enumerate() {
+                    let (left, top) = big_map_view_position(
+                        BigMapPoint { x: region.center.x - region.radius, y: region.center.y - region.radius },
+                        entry.info.width, entry.info.height,
+                    );
+                    let (right, bottom) = big_map_view_position(
+                        BigMapPoint { x: region.center.x + region.radius, y: region.center.y + region.radius },
+                        entry.info.width, entry.info.height,
+                    );
+                    viewport.spawn((Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(left), top: Val::Px(top),
+                        width: Val::Px((right-left).max(4.0)), height: Val::Px((bottom-top).max(4.0)),
+                        border: UiRect::all(Val::Px(2.0)),
+                        ..default()
+                    }, BackgroundColor(Color::srgba(1.0, 0.65, 0.0, 0.18)),
+                       BorderColor::all(Color::srgb(1.0, 0.72, 0.1))));
+                    viewport.spawn((Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(left.min(BIGMAP_WIDTH - 180.0)),
+                        top: Val::Px(top.max(15.0) - 15.0 + index as f32 * 2.0),
+                        ..default()
+                    }, BackgroundColor(Color::srgba(0.02, 0.015, 0.0, 0.9)),
+                       Text::new(format!("{}: {} left ({},{})", region.name, region.remaining, region.center.x, region.center.y)),
+                       crate::crystal_ui::typography::crystal_text_font(11.0),
+                       TextColor(Color::srgb(1.0, 0.82, 0.2))));
                 }
                 for npc in entry.info.npcs.iter().filter(|npc| npc.show_on_big_map) {
                     let (x, y) =
@@ -15386,6 +15433,33 @@ mod tests {
         commands.spawn(Node::default()).with_children(|parent| {
             render_bigmap(parent, Some(&asset_server), &model, &renderer, &ui);
         });
+    }
+
+    #[test]
+    fn big_map_hunt_regions_render_remaining_target() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<UiReadModel>()
+            .add_systems(Startup, spawn_big_map_render_test);
+        let mut model = BigMapModel::default();
+        model.set_current_map(1);
+        model.apply_new_map_info(1, crate::big_map::BigMapInfo {
+            title: "BichonProvince".into(), width: 800, height: 800, big_map: 101,
+            movements: vec![], npcs: vec![],
+        });
+        app.insert_resource(model);
+        app.insert_resource(BigMapUiState {
+            hunt_regions: vec![crate::quest_hunt_regions::QuestHuntRegion {
+                monster_index: 44, name: "RakingCat".into(),
+                center: BigMapPoint { x: 340, y: 550 }, radius: 50, remaining: 2,
+            }],
+            ..Default::default()
+        });
+        app.update();
+        assert!(app.world_mut().query::<&Text>().iter(app.world())
+            .any(|text| text.0 == "RakingCat: 2 left (340,550)"));
     }
 
     #[test]

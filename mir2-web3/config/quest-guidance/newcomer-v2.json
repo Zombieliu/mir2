@@ -4,7 +4,7 @@
   "quests": [
     {"id":2110001,"category":"recommended","order":1,"hint":"Visit Assistant Jane in Bichon Province (map 0, 284,606) and complete the first ordinary NPC report."},
     {"id":2110002,"category":"recommended","order":2,"hint":"Open your equipment and equip a weapon your class and level can use."},
-    {"id":2110003,"category":"recommended","order":3,"hint":"Outside Bichon Village, defeat 2 Scarecrows and 2 Raking Cats; carry small HP medicine."},
+    {"id":2110003,"category":"recommended","order":3,"hint":"Defeat 2 Scarecrows near the village. For 2 RakingCats, head northeast of the starter village toward (340,550). Open the big map: amber boxes mark hunting areas for unfinished targets, not exact live monster positions. Carry small HP medicine."},
     {"id":2110004,"category":"recommended","order":4,"hint":"Defeat 2 Omas near the village, then use your class's first skill: Fencing, FireBall, or Healing."},
     {"id":2110005,"category":"recommended","order":5,"hint":"Follow the normal route to the Bichon safe area; keep a Town Teleport ready for a safe return."},
     {"id":2110006,"category":"recommended","order":6,"hint":"Buy one basic HP or MP potion from a legitimate town merchant before leaving for the forest."},
