@@ -49,6 +49,8 @@ pub mod quest_journey;
 #[cfg(feature = "native-ui")]
 pub mod quest_model;
 #[cfg(feature = "native-ui")]
+pub mod quest_destination;
+#[cfg(feature = "native-ui")]
 pub mod quest_ui;
 pub mod read_model;
 pub mod shop;

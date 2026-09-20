@@ -1,5 +1,13 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-21 N5 destination guidance: pending arrival now uses a Chinese,
+> flow-layout tracker card with Microsoft YaHei, readable spacing, explicit
+> Bichon city (328,264), northbound direction and the exclusion of the starter
+> village safe zone. A local map button opens the existing big map; a cyan
+> destination square follows the imported safe-zone extent and disappears
+> after completion. Three focused UI/source tests pass. This is map guidance,
+> not an automatic-path or authenticated visual acceptance claim.
+
 > 2026-09-21 unexpected window disappearance: no panic or matching Windows
 > Application 1000/1001 record was found; teardown save succeeded, but the
 > original process exit code was not retained. A separate real-timing regression

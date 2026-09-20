@@ -879,6 +879,7 @@ pub struct MailComposeUi {
 #[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
 pub struct BigMapUiState {
     pub search_focused: bool,
+    bichon_safe_destination: bool,
     hunt_regions: Vec<crate::quest_hunt_regions::QuestHuntRegion>,
     last_reset_epoch: Option<u64>,
     requested_epoch_map: Option<(u64, i32)>,
@@ -2386,6 +2387,9 @@ struct OverlayMail;
 #[derive(Component)]
 struct OverlayBigMap;
 
+#[derive(Component)]
+struct BichonSafeDestinationArea;
+
 /// Testable ECS provenance markers for the Big Map-only render tree. They
 /// intentionally retain the authoritative renderer projection rather than
 /// deriving values back from UI text or asset names.
@@ -2907,6 +2911,12 @@ fn sync_big_map_ui(
     guidance: Option<Res<crate::quest_guidance::QuestGuidance>>,
 ) {
     intents.sync_model(&model);
+    let destination = model.active_map().is_some_and(|map| {
+        crate::quest_destination::is_bichon_map(map.map_index)
+    }) && quests.as_deref().is_some_and(crate::quest_destination::bichon_safe_arrival_pending);
+    if ui.bichon_safe_destination != destination {
+        ui.bichon_safe_destination = destination;
+    }
     let regions = if guidance.as_deref().and_then(|g| g.profile_name()) == Some("newcomer-v2") {
         model.active_map().zip(quests.as_deref()).map(|(map, quests)| {
             crate::quest_hunt_regions::active_hunt_regions(
@@ -11748,6 +11758,34 @@ fn render_bigmap(
                        crate::crystal_ui::typography::crystal_text_font(11.0),
                        TextColor(Color::srgb(1.0, 0.82, 0.2))));
                 }
+                if renderer.bichon_safe_destination && model.view == BigMapView::CurrentMap
+                    && crate::quest_destination::is_bichon_map(entry.map_index)
+                {
+                    use crate::quest_destination::{BICHON_SAFE_X, BICHON_SAFE_Y, BICHON_SAFE_RADIUS};
+                    let (left, top) = big_map_view_position(BigMapPoint {
+                        x: BICHON_SAFE_X - BICHON_SAFE_RADIUS, y: BICHON_SAFE_Y - BICHON_SAFE_RADIUS,
+                    }, entry.info.width, entry.info.height);
+                    let (right, bottom) = big_map_view_position(BigMapPoint {
+                        x: BICHON_SAFE_X + BICHON_SAFE_RADIUS, y: BICHON_SAFE_Y + BICHON_SAFE_RADIUS,
+                    }, entry.info.width, entry.info.height);
+                    viewport.spawn((BichonSafeDestinationArea, Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(left), top: Val::Px(top),
+                        width: Val::Px((right - left).max(4.0)),
+                        height: Val::Px((bottom - top).max(4.0)),
+                        border: UiRect::all(Val::Px(2.0)), ..default()
+                    }, BackgroundColor(Color::srgba(0.1, 0.85, 1.0, 0.2)),
+                        BorderColor::all(Color::srgb(0.2, 0.9, 1.0))));
+                    viewport.spawn((Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(left.min(BIGMAP_WIDTH - 210.0).max(0.0)),
+                        top: Val::Px((top - 22.0).max(0.0)), ..default()
+                    }, BackgroundColor(Color::srgba(0.01, 0.03, 0.04, 0.95)),
+                        Text::new("比奇城安全区 (328,264)"),
+                        TextFont { font: FontSource::Family("Microsoft YaHei".into()),
+                            font_size: FontSize::Px(14.0), ..default() },
+                        TextColor(Color::srgb(0.4, 0.95, 1.0))));
+                }
                 for npc in entry.info.npcs.iter().filter(|npc| npc.show_on_big_map) {
                     let (x, y) =
                         big_map_view_position(npc.location, entry.info.width, entry.info.height);
@@ -15485,6 +15523,48 @@ mod tests {
         commands.spawn(Node::default()).with_children(|parent| {
             render_bigmap(parent, Some(&asset_server), &model, &renderer, &ui);
         });
+    }
+
+    #[test]
+    fn bichon_destination_ecs_only_renders_unfinished_arrival_on_bichon() {
+        use crate::quest_model::{Quest, QuestTracker};
+        for (map_index, current, status, visible) in [
+            (1, 0, "inProgress", true),
+            (1, 1, "inProgress", false),
+            (1, 0, "completed", false),
+            (0, 0, "inProgress", false),
+        ] {
+            let quest: Quest = serde_json::from_value(serde_json::json!({
+                "questIndex": 2110005, "title": "Safe arrival", "status": status,
+                "objectives": [{"objectiveId":"flag:2210051", "text":"Arrival", "current":current,"target":1}],
+                "rewards": []
+            })).unwrap();
+            let mut app = App::new();
+            app.add_plugins(MinimalPlugins)
+                .add_plugins(AssetPlugin::default()).init_asset::<Image>()
+                .init_resource::<UiReadModel>().init_resource::<NativePlayerUiState>()
+                .init_resource::<BigMapGatewayIntentQueue>().init_resource::<BigMapUiState>()
+                .insert_resource(QuestTracker { active_quests: vec![quest] })
+                .add_systems(Update, (sync_big_map_ui, spawn_big_map_render_test).chain());
+            let mut model = BigMapModel::default();
+            model.set_current_map(map_index);
+            model.apply_new_map_info(map_index, crate::big_map::BigMapInfo {
+                title: "BichonProvince".into(), width: 700, height: 700, big_map: 101,
+                movements: vec![], npcs: vec![],
+            });
+            app.insert_resource(model);
+            app.update();
+            assert_eq!(app.world().resource::<BigMapUiState>().bichon_safe_destination, visible);
+            let count = app.world_mut().query_filtered::<&Node, With<BichonSafeDestinationArea>>()
+                .iter(app.world()).count();
+            assert_eq!(count, usize::from(visible));
+            let label = app.world_mut().query::<(&Text, &TextFont)>().iter(app.world())
+                .find(|(text, _)| text.0 == "比奇城安全区 (328,264)");
+            assert_eq!(label.is_some(), visible);
+            if let Some((_, font)) = label {
+                assert_eq!(font.font, FontSource::Family("Microsoft YaHei".into()));
+            }
+        }
     }
 
     #[test]

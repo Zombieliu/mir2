@@ -844,6 +844,7 @@ struct QuestUiButtonVisual {
 
 #[derive(Component, Clone, Debug, PartialEq, Eq)]
 enum QuestUiButton {
+    OpenDestinationMap,
     SelectNpcDialog {
         target: String,
     },
@@ -2097,6 +2098,12 @@ fn process_quest_ui_input(
                 quest_state.clear_feedback();
                 // Keep feedback about close? Clear to avoid stale message.
             }
+            QuestUiButton::OpenDestinationMap => {
+                dispatch_ui_action(
+                    &mut player_ui.core, &mut effects,
+                    mir2_ui_core::action::UiAction::OpenBigMap,
+                );
+            }
             QuestUiButton::AttackTarget { object_id } => {
                 if target_is_attackable(target.as_deref(), object_id) {
                     if queue.push_intent(QuestUiIntent::AttackTarget { object_id }) {
@@ -2590,6 +2597,12 @@ fn render_quest_tracker_panel(
     entities: &EntityModelSet,
     map_model: &MapModel,
 ) {
+    if journey.and_then(|journey| journey.next.as_ref()).is_some_and(|next| next.quest_id == 2110005)
+        && crate::quest_destination::bichon_safe_arrival_pending(tracker)
+    {
+        render_bichon_arrival_tracker(parent, map_model);
+        return;
+    }
     let quests = visible_tracker_quests(tracker, state);
     if quests.is_empty() && journey.is_none() {
         return;
@@ -2914,6 +2927,50 @@ fn render_quest_tracker_panel(
 
 // The source skin is 440x224. Its header and footer are not content rows.
 // Page all server options inside the body instead of silently taking four.
+fn render_bichon_arrival_tracker(parent: &mut ChildSpawnerCommands, map: &MapModel) {
+    let font = TextFont {
+        font: FontSource::Family("Microsoft YaHei".into()),
+        font_size: FontSize::Px(14.0),
+        ..default()
+    };
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(8.0), top: Val::Px(16.0), width: Val::Px(304.0),
+            flex_direction: FlexDirection::Column,
+            row_gap: Val::Px(5.0), padding: UiRect::all(Val::Px(12.0)),
+            border: UiRect::all(Val::Px(1.0)), ..default()
+        },
+        BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.88)),
+        BorderColor::all(PANEL_HIGHLIGHT),
+    )).with_children(|card| {
+        for (text, color) in [
+            ("主线 · 前往比奇城".to_owned(), PANEL_HIGHLIGHT),
+            ("目的地：比奇城安全区".to_owned(), Color::srgb(0.3, 1.0, 0.3)),
+            (format!("比奇省 · 坐标 ({},{})", crate::quest_destination::BICHON_SAFE_X, crate::quest_destination::BICHON_SAFE_Y), Color::WHITE),
+            ("从新手村向北，前往北部大城。".to_owned(), Color::WHITE),
+            ("进入城内安全区后，任务进度会更新。".to_owned(), Color::WHITE),
+            ("注意：新手村安全区不算此任务目标。".to_owned(), PANEL_HIGHLIGHT),
+            (format!("当前位置：({},{})", map.center_x, map.center_y), PANEL_TEXT),
+            ("路途较长，出发前补充血药。".to_owned(), PANEL_TEXT),
+        ] {
+            card.spawn((
+                Node { width: Val::Percent(100.0), min_height: Val::Px(20.0), flex_shrink: 0.0, ..default() },
+                Text::new(text), font.clone(), TextColor(color),
+                TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+            ));
+        }
+        card.spawn((
+            Button, QuestUiButton::OpenDestinationMap, QuestUiButtonVisual { enabled: true },
+            Node { height: Val::Px(30.0), width: Val::Percent(100.0), align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center, flex_shrink: 0.0, ..default() },
+            BackgroundColor(BUTTON_BG), FocusPolicy::Block,
+        )).with_children(|button| {
+            button.spawn((Text::new("打开大地图 · 查看目的地"), font, TextColor(PANEL_HIGHLIGHT)));
+        });
+    });
+}
+
 fn npc_dialog_weighted_width(text: &str) -> usize {
     text.chars()
         .map(|character| if character.is_ascii() { 1 } else { 2 })
@@ -5650,6 +5707,27 @@ fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn bichon_arrival_card_has_readable_destination_and_local_map_button() {
+        use super::*;
+        fn spawn(mut commands: Commands) {
+            commands.spawn(Node::default()).with_children(|parent| {
+                render_bichon_arrival_tracker(parent, &MapModel::default());
+            });
+        }
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins).add_systems(Startup, spawn);
+        app.update();
+        let texts: Vec<String> = app.world_mut().query::<&Text>().iter(app.world()).map(|t| t.0.clone()).collect();
+        assert!(texts.iter().any(|t| t.contains("(328,264)")));
+        assert!(texts.iter().any(|t| t.contains("新手村安全区不算")));
+        assert!(app.world_mut().query::<&QuestUiButton>().iter(app.world()).any(|b| matches!(b, QuestUiButton::OpenDestinationMap)));
+        for font in app.world_mut().query::<&TextFont>().iter(app.world()) {
+            assert_eq!(font.font, FontSource::Family("Microsoft YaHei".into()));
+        }
+        assert_eq!(intent_from_button(&QuestUiButton::OpenDestinationMap), None);
+    }
+
     use super::*;
     use crate::quest_model::QuestStatus;
     use bevy::prelude::App;
