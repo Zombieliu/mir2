@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-21 full workspace asset audit supersedes subset-closure assumptions:
+> 555 monster definitions / 6,341 respawn rows examined; 164 of 174 profile
+> monster definitions fail current native animation reachability. Nine of 11
+> V2 targets plus BoneFamiliar fail. All 1,628 item rows' 924 Items frames and
+> 214 equipment StateItem frames match original pixels, but 34 DNItems frames
+> are source-empty/transparent (one invalid zero-size PNG). Current profile
+> 195 item icons/ground frames pass; map-worn weapon/armour libraries exist
+> for only 5 of 54 profile items. These counts describe the workspace assets
+> targeted by the latest package junctions, not historical external QA packs
+> or live visual acceptance. Full missing lists and limitations:
+> [audit summary](generated/player-qa/all-assets-20260921/README.md).
+
 > 2026-09-21 reported potion/missing-monster repairs: inventory was blocking
 > every world click while open. Native mouse movement now uses its moved panel
 > bounds, keeping drag, item-operation and modal capture. UI boundary test
