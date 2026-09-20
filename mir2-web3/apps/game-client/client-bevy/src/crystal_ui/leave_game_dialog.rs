@@ -8,8 +8,8 @@ pub enum LeaveKind {
 impl LeaveKind {
     pub fn message(self) -> &'static str {
         match self {
-            Self::Exit => "Do you want to quit Legend of Mir?",
-            Self::Logout => "Do you want to log out of Legend of Mir?",
+            Self::Exit => "Exit numeron-legend of rebirth?",
+            Self::Logout => "Return to character selection?",
         }
     }
 }

@@ -993,9 +993,8 @@ impl NativeShellModel {
                     self.set_error("logout request is still pending");
                     return false;
                 }
-                self.screen = NativeShellScreen::Login;
-                self.selected_character_index = None;
-                self.active_character = None;
+                // Stay in the current scene until the server saves the character
+                // and supplies its refreshed roster through LogOutSuccess.
                 self.start_game_acknowledged = false;
                 self.logout_request_in_flight = true;
                 self.notice = None;
@@ -1194,6 +1193,10 @@ impl NativeShellModel {
                 true
             }
             (_, NativeGatewayEvent::OperationFailure { message }) => {
+                if self.logout_request_in_flight {
+                    self.logout_request_in_flight = false;
+                    self.start_game_acknowledged = self.screen == NativeShellScreen::InGame;
+                }
                 match self.screen {
                     NativeShellScreen::Authenticating => {
                         self.login_request_in_flight = false;
@@ -1239,9 +1242,11 @@ impl NativeShellModel {
                 self.change_password_command_sent = false;
                 self.delete_request_in_flight = false;
                 self.delete_command_sent = false;
-                self.screen = NativeShellScreen::Login;
+                self.screen = NativeShellScreen::CharacterSelect;
                 self.characters = characters;
-                self.selected_character_index = None;
+                self.selected_character_index = self.selected_character_index
+                    .filter(|index| self.characters.iter().any(|character| character.index == *index))
+                    .or_else(|| self.characters.first().map(|character| character.index));
                 self.active_character = None;
                 self.notice = None;
                 self.login.clear_password();
@@ -1837,7 +1842,7 @@ mod tests {
     }
 
     #[test]
-    fn logged_out_returns_to_login_with_server_roster() {
+    fn logged_out_returns_to_character_select_with_server_roster() {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::InGame;
         model.login.password = "super-secret".to_owned();
@@ -1847,8 +1852,9 @@ mod tests {
         assert!(model.apply_gateway_event(NativeGatewayEvent::LoggedOut {
             characters: roster.clone(),
         }));
-        assert_eq!(model.screen, NativeShellScreen::Login);
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert_eq!(model.characters, roster);
+        assert_eq!(model.selected_character_index, roster.first().map(|character| character.index));
         assert!(model.active_character.is_none());
         assert!(model.login.password.is_empty());
         let debug = format!("{model:?}");
@@ -1862,12 +1868,37 @@ mod tests {
         model.login.password = "super-secret".to_owned();
         model.active_character = starter_characters().into_iter().next();
         assert!(model.apply_ui_intent(NativeUiIntent::Logout));
-        assert_eq!(model.screen, NativeShellScreen::Login);
+        assert_eq!(model.screen, NativeShellScreen::InGame);
         assert!(model.login.password.is_empty());
-        assert!(model.active_character.is_none());
+        assert!(model.active_character.is_some());
+        assert!(model.logout_request_in_flight);
+        assert!(!model.apply_ui_intent(NativeUiIntent::Logout));
         assert_ne!(model.screen, NativeShellScreen::Connecting);
         let debug = format!("{model:?}");
         assert!(!debug.contains("super-secret"));
+    }
+
+    #[test]
+    fn logout_failure_keeps_character_and_allows_retry_then_switch() {
+        let mut model = model_with_valid_login();
+        model.screen = NativeShellScreen::InGame;
+        model.characters = starter_characters();
+        model.active_character = model.characters.first().cloned();
+        assert!(model.apply_ui_intent(NativeUiIntent::Logout));
+        assert!(model.apply_gateway_event(NativeGatewayEvent::OperationFailure {
+            message: "log out failed".into(),
+        }));
+        assert_eq!(model.screen, NativeShellScreen::InGame);
+        assert!(model.active_character.is_some());
+        assert!(!model.logout_request_in_flight);
+        assert!(model.apply_ui_intent(NativeUiIntent::Logout));
+        assert!(model.apply_gateway_event(NativeGatewayEvent::LoggedOut {
+            characters: starter_characters(),
+        }));
+        assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+        assert!(model.active_character.is_none());
+        assert!(model.apply_ui_intent(NativeUiIntent::StartGame));
+        assert_eq!(model.screen, NativeShellScreen::StartingGame);
     }
 
     #[test]
