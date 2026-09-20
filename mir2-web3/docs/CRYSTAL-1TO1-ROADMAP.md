@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-21 current-profile asset closure repaired: full original libraries
+> for 174 monsters plus BoneFamiliar and 54 weapon/armour items are exported
+> and pixel-verified; native lazy Monster/Gate rendering and server Gate
+> dispatch are implemented. This closes valid-source asset reachability for
+> the profile, not visual parity or all 555 imported monsters. New package
+> and remaining source exceptions: [evidence](generated/player-qa/profile-assets-repair-20260921/README.md).
+
 > 2026-09-20 native map/branding candidate: floor passes now retain
 > Back/Middle/Front ordering (39/39 map tests), and dead-player V no longer
 > toggles the minimap during revival (focused regression passes). Window

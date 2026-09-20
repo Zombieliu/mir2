@@ -1,5 +1,10 @@
 # Backend 1:1 Progress
 
+> 2026-09-21 profile Gate sprite dispatch: images 950..953 now emit Gate/00..03
+> using Crystal's library family and zero base offset. Two focused mapping
+> and boundary tests pass; Gateway release builds. Deployment is pending
+> normal user logout. Other special-image families remain outside this patch.
+
 > 2026-09-20 V2 supply blocker: Merchant Scott (Border Village Pedlar,
 > object 42) was visible in the shared map but absent from the
 > `platinum_176` NPC-script allowlist, so ordinary interaction could not

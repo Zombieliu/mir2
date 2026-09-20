@@ -108,7 +108,7 @@ async function main() {
     const library = await parseLibrary(inputPath);
     const exportDir = path.join(publicDir, ...normalizedLibraryName.split("/"));
     const indices = exportAllLibraries || fullLibraries?.has(normalizedLibraryName)
-      ? allPresentFrameIndices(library)
+      ? allPresentFrameIndices(library).filter((index) => library.frames[index].width > 0 && library.frames[index].height > 0)
       : expandIndices(
           config,
           normalizedLibraryName === "Items"
@@ -168,7 +168,7 @@ async function main() {
       frames,
     };
 
-    await writeFile(
+    await writeManifestWithRetry(
       path.join(exportDir, "meta.json"),
       `${JSON.stringify(libraryMeta, null, 2)}\n`,
       "utf8",
@@ -235,13 +235,25 @@ async function main() {
     }
   }
 
-  await writeFile(
+  await writeManifestWithRetry(
     summaryPath,
     `${JSON.stringify(summary, null, 2)}\n`,
     "utf8",
   );
 
   console.log(`Exported UI assets to ${publicDir}`);
+}
+
+// Windows readers may briefly hold the large global manifest while it is loaded.
+// Retry only transient sharing errors; never swallow an exhausted write failure.
+async function writeManifestWithRetry(...args) {
+  for (let attempt = 0; ; attempt += 1) {
+    try { return await writeFile(...args); }
+    catch (error) {
+      if (attempt >= 9 || !["EBUSY", "EPERM", "EACCES", "UNKNOWN"].includes(error.code)) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 100 * (attempt + 1)));
+    }
+  }
 }
 
 function parseArgs(argv) {

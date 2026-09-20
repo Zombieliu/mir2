@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-21 profile asset repair: 139 original libraries / 60,556 drawable
+> frames now cover 174 profile monsters plus BoneFamiliar and all 54 direct
+> weapon/armour shapes (both genders). Source RGBA, masks, geometry and hashes
+> pass. Native Monster/Gate standalone frames now use the existing strict
+> metadata/path handling; atlas regressions pass 32/32. Profile and V2 valid
+> source-frame closure has zero missing/unknown entries. Original blank Gate
+> slots and Sheep harvested-Skeleton out-of-range behavior are separate, not
+> manufactured frames. Client/Gateway release builds pass; new package awaits
+> normal logout before switching. Visual and full imported-content gates are
+> still open. [Repair evidence](generated/player-qa/profile-assets-repair-20260921/README.md).
+
 > 2026-09-21 full workspace asset audit supersedes subset-closure assumptions:
 > 555 monster definitions / 6,341 respawn rows examined; 164 of 174 profile
 > monster definitions fail current native animation reachability. Nine of 11

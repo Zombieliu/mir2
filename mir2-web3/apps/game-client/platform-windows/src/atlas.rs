@@ -620,7 +620,15 @@ fn player_frame_path_parts(frame_path: &str) -> Option<(String, i64, String)> {
     let relative = frame_path.trim().trim_start_matches('/').replace('\\', "/");
     let source_path = relative.strip_prefix("original-ui/")?;
     let (library, file_name) = source_path.rsplit_once('/')?;
+    // Complete content packs keep large monster libraries as individual PNGs.
+    // Apply the same metadata/file checks as character frames, without forcing
+    // every monster texture into the always-resident starter atlas.
+    let monster_library = library.strip_prefix("Monster/").is_some_and(|index| {
+        index.len() == 3 && index.bytes().all(|b| b.is_ascii_digit())
+    });
+    let gate_library = matches!(library, "Gate/00" | "Gate/01" | "Gate/02" | "Gate/03");
     if library != "DNItems" && !is_player_sprite_library(library) && !is_pet_sprite_library(library)
+        && !monster_library && !gate_library
     {
         return None;
     }
@@ -2309,6 +2317,38 @@ mod tests {
                         assert!(layer.get("atlasRectKey").is_none());
                     }
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn monster_standalone_paths_remain_strict() {
+        for path in ["/original-ui/Monster/009/80.png", "/original-ui/Gate/00/33.png"] {
+            assert!(player_frame_path_parts(path).is_some(), "{path}");
+        }
+        for path in [
+            "/original-ui/Monster/../009/80.png", "/original-ui/Monster/9/80.png",
+            "/original-ui/Monster/009/-1.png", "/original-ui/Monster/009/080.png",
+            "/original-ui/Monster/009/80.png/extra", "/original-ui/Gate/04/0.png",
+        ] {
+            assert!(player_frame_path_parts(path).is_none(), "{path}");
+        }
+    }
+
+    #[test]
+    fn newcomer_monster_standalone_frames_retain_original_geometry() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        for library in ["Monster/009", "Monster/011", "Monster/022", "Monster/027",
+            "Monster/029", "Monster/030", "Monster/069", "Monster/070", "Monster/078", "Gate/00"] {
+            let frames = load_original_frame_geometry(library).expect(library);
+            for (frame, geometry) in frames {
+                let layer = build_entity_layer(index, &mut HashMap::new(), "1:body".to_owned(),
+                    &format!("/original-ui/{library}"), frame, 100.0, 200.0, 5.0)
+                    .unwrap_or_else(|| panic!("missing native {library}/{frame}"));
+                assert_eq!(layer["width"], json!(geometry.width as f32));
+                assert_eq!(layer["height"], json!(geometry.height as f32));
+                assert_eq!(layer["left"], json!(100.0 + geometry.offset_x as f32));
+                assert_eq!(layer["top"], json!(200.0 + geometry.offset_y as f32));
             }
         }
     }

@@ -1,5 +1,10 @@
 # Crystal Server Parity
 
+> 2026-09-21 Gate family correction: current-profile images 950..953 select
+> Gate/00..03 rather than nonexistent Monster/950..953. Original per-library
+> action metadata remains authoritative. Focused tests 2/2 and release build
+> pass; no live gate or broader Dragon/Pet acceptance is claimed.
+
 > 2026-09-20 optional newcomer V2 supply correction: the imported
 > Border Village Pedlar script belongs to the visible Merchant Scott
 > (object 42), but `platinum_176` excluded its script while showing the NPC.

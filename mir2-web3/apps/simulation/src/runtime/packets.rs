@@ -8111,7 +8111,7 @@ pub(super) fn entity_sprite_snapshot(
 
     if let Some(monster) = monster_agent {
         return Some(WorldEntitySpriteSnapshot {
-            body_library: format!("Monster/{:03}", monster.image),
+            body_library: monster_body_library(monster.image),
             hair_library: None,
             weapon_library: None,
             weapon_library_secondary: None,
@@ -8149,6 +8149,21 @@ pub(super) fn entity_sprite_snapshot(
         mount_frame_offset: None,
     })
 }
+
+// Crystal MonsterObject.Load selects Libraries.Gates[BaseImage - 950];
+// MLibrary.Initialize uses Settings.GatePath and the two-digit "00" format.
+// Keep this correction bounded to the four gates in platinum_176. Their
+// animation descriptors come from each Gate library, with no extra base offset.
+fn monster_body_library(image: u16) -> String {
+    match image {
+        950..=953 => format!("Gate/{:02}", image - 950),
+        _ => format!("Monster/{image:03}"),
+    }
+}
+
+#[cfg(test)]
+#[path = "special_monster_sprite_tests.rs"]
+mod special_monster_sprite_tests;
 
 #[allow(deprecated)]
 pub(super) fn collect_ground_drops(
