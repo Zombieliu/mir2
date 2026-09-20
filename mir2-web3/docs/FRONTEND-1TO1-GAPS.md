@@ -22,8 +22,10 @@
 > included operator analysis time, so the coordinate delta is **not** a
 > measured speed result. A subsequent run reached `(315,642)` behind a castle
 > roof, where the character sprite is occluded while the name/HP remain
-> visible. Continuous right-button-hold timing, original-client comparison,
-> and a readable outdoor stop frame remain open; `visualAccepted=false`.
+> visible. Normal movement back to `(309,636)` produced a readable stopped
+> frame with the self sprite, name, and HP bar horizontally aligned and full
+> 30/30 HP; AutoRun remains off. Continuous right-button-hold timing and
+> original-client comparison remain open; `visualAccepted=false`.
 
 > 2026-09-20 Windows ground-drop visibility candidate: a live player screenshot
 > showed `WoodenSword` text over a Bichon roof with no discernible item sprite.
