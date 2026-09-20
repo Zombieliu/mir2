@@ -9950,31 +9950,33 @@ fn render_help(
         overlay_text_at(
             parent,
             "Shortcuts",
-            CrystalRect::new(25.0, 110.0, 100.0, 30.0),
+            CrystalRect::new(13.0, 75.0, 100.0, 30.0),
             10.0,
             TEXT,
         );
         overlay_text_at(
             parent,
             "Information",
-            CrystalRect::new(126.0, 110.0, 405.0, 30.0),
+            CrystalRect::new(114.0, 75.0, 405.0, 30.0),
             10.0,
             TEXT,
         );
         for (row, (shortcut, information)) in rows.iter().enumerate() {
-            let top = 142.0 + row as f32 * 20.0;
+            // ShortcutInfoPage is a direct HelpDialog child at (0, 0).
+            // Only the separate title/image HelpPage receives the (12, 35) offset.
+            let top = 107.0 + row as f32 * 20.0;
             let current_shortcut = help_bound_key(page, row, shortcut, keyboard);
             overlay_text_at(
                 parent,
                 &current_shortcut,
-                CrystalRect::new(30.0, top, 95.0, 23.0),
+                CrystalRect::new(18.0, top, 95.0, 23.0),
                 9.0,
                 GOLD,
             );
             overlay_text_at(
                 parent,
                 information,
-                CrystalRect::new(131.0, top, 400.0, 23.0),
+                CrystalRect::new(119.0, top, 400.0, 23.0),
                 9.0,
                 TEXT,
             );
@@ -18815,6 +18817,57 @@ mod tests {
             .intents
             .is_empty());
         assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
+    }
+
+    #[test]
+    fn help_dynamic_pages_keep_every_source_row_above_the_footer() {
+        let mut app = overlay_render_test_app();
+        for page in 0..3 {
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .help
+                .display_page(page);
+            app.update();
+            let world = app.world_mut();
+            let mut text_nodes = world.query::<(&Text, &Node)>();
+            for (label, left, top) in [("Shortcuts", 13.0, 75.0), ("Information", 114.0, 75.0)] {
+                let (_, node) = text_nodes
+                    .iter(world)
+                    .find(|(text, _)| text.0 == label)
+                    .unwrap();
+                assert_eq!(node.left, Val::Px(left));
+                assert_eq!(node.top, Val::Px(top));
+            }
+            let rows = help_shortcut_rows(page as u8).unwrap();
+            for (row, (_, information)) in rows.iter().enumerate() {
+                let matching: Vec<_> = text_nodes
+                    .iter(world)
+                    .filter(|(text, _)| text.0 == *information)
+                    .collect();
+                assert_eq!(matching.len(), 1, "page {page} row {row} remains present");
+                let node = matching[0].1;
+                assert_eq!(node.left, Val::Px(119.0));
+                assert_eq!(node.width, Val::Px(400.0));
+                let Val::Px(top) = node.top else {
+                    panic!("absolute row top")
+                };
+                let Val::Px(height) = node.height else {
+                    panic!("absolute row height")
+                };
+                assert_eq!(top, 107.0 + row as f32 * 20.0);
+                assert_eq!(height, 23.0);
+                assert!(
+                    top >= 105.0 && top + height <= 480.0,
+                    "page {page} row {row} must fit below headings and above pager"
+                );
+                assert!(text_nodes
+                    .iter(world)
+                    .any(|(_, key_node)| key_node.left == Val::Px(18.0)
+                        && key_node.top == node.top
+                        && key_node.width == Val::Px(95.0)
+                        && key_node.height == node.height));
+            }
+        }
     }
 
     #[test]
