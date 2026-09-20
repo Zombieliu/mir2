@@ -13,6 +13,18 @@
 > captured. Authenticated sustained-running capture and original Crystal
 > comparison remain open; `visualAccepted=false`.
 
+> 2026-09-20 live follow-up after reboot: the rebuilt EXE connected to the
+> isolated V2 Gateway at `127.0.0.1:19910`; the user manually logged in as
+> `a1`. With AutoRun enabled, sampled outdoor frames near `(230,609)` and
+> `(342,496)` kept the body, `a1` name, and self HP bar on the same screen
+> anchor. The character died near the eastern shore, then revived in town via
+> the normal `V` action; AutoRun was turned off. The interval between samples
+> included operator analysis time, so the coordinate delta is **not** a
+> measured speed result. A subsequent run reached `(315,642)` behind a castle
+> roof, where the character sprite is occluded while the name/HP remain
+> visible. Continuous right-button-hold timing, original-client comparison,
+> and a readable outdoor stop frame remain open; `visualAccepted=false`.
+
 > 2026-09-20 Windows ground-drop visibility candidate: a live player screenshot
 > showed `WoodenSword` text over a Bichon roof with no discernible item sprite.
 > The authoritative drop has image 30 and the original `DNItems/30.png` is
