@@ -1,5 +1,18 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-20 Windows fast-run self-label candidate: a player capture at
+> `(232,607)` shows the body roughly one run step ahead of its `a1` name and
+> self HP bar. The native renderer can accept a corrected/predicted self tile
+> while the raw gameplay snapshot remains unchanged; the overlay's early
+> return previously ignored that tile change. The overlay now invalidates on
+> the renderer payload's self object/tile or scene-center change. A no-new-raw-
+> snapshot two-cell run regression and the full 18/18 entity-overlay suite
+> pass. The Release EXE at `C:/mir2-fast-run-anchor-20260920/native-client`
+> (SHA-256 `75F94CED5B728B30D2F5C65849F496A5F7DC9C84ABA3A2BF009C66E836D83834`)
+> started and connected to the local V2 Gateway; the visible login screen was
+> captured. Authenticated sustained-running capture and original Crystal
+> comparison remain open; `visualAccepted=false`.
+
 > 2026-09-20 Windows ground-drop visibility candidate: a live player screenshot
 > showed `WoodenSword` text over a Bichon roof with no discernible item sprite.
 > The authoritative drop has image 30 and the original `DNItems/30.png` is

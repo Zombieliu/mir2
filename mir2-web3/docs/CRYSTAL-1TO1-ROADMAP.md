@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-20 native fast-run label candidate: renderer-side self position
+> reconciliation could move the body without replacing the raw gameplay
+> snapshot, while the UI name/HP overlay skipped its rebuild. A self-anchor
+> invalidation now follows the renderer payload's tile and scene center;
+> focused two-cell drift regression and 18/18 overlay tests pass. The new
+> Release client opens and connects at login. Sustained-run visual and
+> Crystal same-scene checks are still unaccepted.
+
 > 2026-09-20 native ground-drop visibility candidate: the original DNItems
 > frame for WoodenSword exists, but a later Bichon roof row covered its world
 > sprite while the post-world DropView name remained visible. The native item

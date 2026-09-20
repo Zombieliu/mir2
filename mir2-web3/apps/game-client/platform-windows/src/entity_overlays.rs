@@ -57,6 +57,7 @@ pub struct NativeEntityOverlays {
     last_visibility: Option<OverlayVisibility>,
     last_hovered_object_id: Option<String>,
     last_self_hovered: bool,
+    last_self_anchor: Option<SelfOverlayAnchor>,
     // Keep both animation frames alive across label rebuilds and frame swaps.
     quest_marker_assets: HashMap<u16, Handle<Image>>,
     ground_item_assets: HashMap<i64, Handle<Image>>,
@@ -95,6 +96,7 @@ impl NativeEntityOverlays {
         self.last_in_game = false;
         self.last_hovered_object_id = None;
         self.last_self_hovered = false;
+        self.last_self_anchor = None;
     }
 
     pub fn replace_payload(&mut self, payload: Value) {
@@ -219,6 +221,15 @@ struct GroundItemImageEntry {
     height: f32,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct SelfOverlayAnchor {
+    object_id: String,
+    center_x: i64,
+    center_y: i64,
+    x: i64,
+    y: i64,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 enum QuestMarkerKind {
@@ -330,6 +341,14 @@ pub fn sync_native_entity_overlays(
         .then(|| overlays.latest_payload.clone())
         .flatten();
     let payload = presentation.overlay_payload().or(fallback_payload.as_ref());
+    let self_anchor = payload.and_then(self_overlay_anchor);
+    // Local run prediction and stale-ACK reconciliation can advance the
+    // renderer's self tile without replacing the raw gameplay snapshot. The
+    // fixed self name/HP root must rebuild its tile anchor even when the usual
+    // packet/hover/visibility dirty flags are unchanged.
+    if overlays.last_self_anchor != self_anchor {
+        overlays.dirty = true;
+    }
     let self_object_id = payload.and_then(payload_self_object_id);
     let self_screen_offset = self_object_id
         .as_deref()
@@ -419,6 +438,7 @@ pub fn sync_native_entity_overlays(
     overlays.last_visibility = Some(visibility);
     overlays.last_hovered_object_id = hovered_object_id.map(str::to_owned);
     overlays.last_self_hovered = self_hovered;
+    overlays.last_self_anchor = self_anchor;
     overlays.dirty = false;
     for (root, _, _) in &mut roots {
         commands.entity(root).despawn();
@@ -1202,6 +1222,22 @@ fn payload_scene_center(payload: &Value) -> Option<(i64, i64)> {
     ))
 }
 
+fn self_overlay_anchor(payload: &Value) -> Option<SelfOverlayAnchor> {
+    let (center_x, center_y) = payload_scene_center(payload)?;
+    let entity = payload
+        .get("entities")?
+        .as_array()?
+        .iter()
+        .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))?;
+    Some(SelfOverlayAnchor {
+        object_id: normalized_object_id(entity.get("objectId")?)?,
+        center_x,
+        center_y,
+        x: entity.get("x").and_then(value_i64)?,
+        y: entity.get("y").and_then(value_i64)?,
+    })
+}
+
 fn payload_self_object_id(payload: &Value) -> Option<String> {
     payload
         .get("entities")
@@ -1698,6 +1734,88 @@ mod tests {
             );
         app.update();
         assert_eq!(image_count(&mut app), 0);
+    }
+
+    #[test]
+    fn self_name_and_health_reanchor_when_render_payload_moves_without_raw_snapshot() {
+        let initial = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "playerHp": 9,
+            "playerMaxHp": 18,
+            "entities": [{"objectId": 1, "kind": "selfPlayer", "name": "Runner", "x": 10, "y": 20}]
+        });
+        let mut app = App::new();
+        app.add_plugins((
+            bevy::app::TaskPoolPlugin::default(),
+            bevy::asset::AssetPlugin::default(),
+        ));
+        app.init_asset::<Image>();
+        app.insert_resource(Time::<()>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.observe_packet_payload(initial.clone(), 0);
+        app.insert_resource(presentation);
+        app.init_resource::<PresentationPoseBuffer>();
+        let mut overlays = NativeEntityOverlays::default();
+        overlays.replace_payload(initial.clone());
+        app.insert_resource(overlays);
+        app.add_systems(Update, sync_native_entity_overlays);
+
+        let self_overlay_left = |app: &mut App| {
+            let root = {
+                let world = app.world_mut();
+                let mut query = world.query::<(Entity, &NativeEntityOverlayRoot)>();
+                query
+                    .iter(world)
+                    .find(|(_, overlay)| overlay.self_object_id.as_deref() == Some("1"))
+                    .expect("self overlay root")
+                    .0
+            };
+            app.world()
+                .get::<Children>(root)
+                .expect("self overlay children")
+                .iter()
+                .filter_map(|child| app.world().get::<Node>(child))
+                .filter_map(|node| match node.left {
+                    Val::Px(left) => Some(left),
+                    _ => None,
+                })
+                .reduce(f32::min)
+                .expect("self name or health node")
+        };
+        app.update();
+        let initial_left = self_overlay_left(&mut app);
+        assert_eq!(
+            app.world()
+                .resource::<NativeEntityOverlays>()
+                .last_self_anchor
+                .as_ref()
+                .unwrap()
+                .x,
+            10
+        );
+
+        let mut predicted = initial;
+        predicted["entities"][0]["x"] = json!(12);
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .observe_packet_payload(predicted, 100);
+        // Raw gameplay snapshot stays unchanged, as during local run/ACK
+        // reconciliation. The renderer payload alone must invalidate the UI.
+        app.update();
+        assert_eq!(self_overlay_left(&mut app) - initial_left, 96.0);
+        assert_eq!(
+            app.world()
+                .resource::<NativeEntityOverlays>()
+                .last_self_anchor
+                .as_ref()
+                .unwrap()
+                .x,
+            12
+        );
     }
 
     #[test]
