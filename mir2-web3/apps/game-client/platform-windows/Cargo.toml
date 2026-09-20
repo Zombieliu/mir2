@@ -49,6 +49,9 @@ toml = { version = "0.8", default-features = false, features = ["parse"] }
 ureq = { version = "2.10", default-features = false, features = ["tls"] }
 winit = { version = "=0.30.13", default-features = false }
 
+[build-dependencies]
+embed-resource = "3.0.11"
+
 # Keep native iteration debuggable while avoiding Bevy's prohibitively slow
 # fully-unoptimized render/update path. Workspace crates retain lightweight
 # optimization for useful stepping; third-party dependencies are optimized so

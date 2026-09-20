@@ -11,6 +11,7 @@ use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 
 mod assets;
 mod atlas;
+mod branding;
 mod capture;
 mod clipboard;
 mod cursor;
@@ -172,8 +173,9 @@ fn main() {
         asset_root: asset_root.to_string_lossy().into_owned(),
         width: session.window_width,
         height: session.window_height,
-        ..RuntimeWindowSpec::native("mir2-web3 (native)")
+        ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
     });
+    app.add_systems(bevy::app::Update, branding::apply_window_icon);
     timing::report("build_runtime_app", app_started);
     app.world_mut()
         .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()

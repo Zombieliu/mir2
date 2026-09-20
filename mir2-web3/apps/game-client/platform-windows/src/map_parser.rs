@@ -730,7 +730,7 @@ fn map_draw_is_floor(layer: TileLayer, animated: bool, width: u32, height: u32) 
     layer == TileLayer::Back || (!animated && floor_sized_frame(width, height))
 }
 
-fn map_floor_depth(map: &ParsedMap, x: i32, y: i32) -> f32 {
+fn map_floor_depth(map: &ParsedMap, x: i32, y: i32, layer: TileLayer) -> f32 {
     let width = u64::from(map.width);
     let height = u64::from(map.height);
     let cell_count = width.saturating_mul(height);
@@ -747,7 +747,20 @@ fn map_floor_depth(map: &ParsedMap, x: i32, y: i32) -> f32 {
         .saturating_mul(width)
         .saturating_add(x)
         .min(cell_count.saturating_sub(1));
-    (f64::from(MAP_FLOOR_DEPTH_MIN) + rank as f64 / cell_count as f64 * MAP_FLOOR_DEPTH_SPAN) as f32
+    // Crystal composites the complete Back pass before Middle and Front.
+    // Sorting only by cell gave an even/even Back and its Middle the same Z;
+    // Bevy could then draw the 96x64 sand Back over a 48x32 grass Middle,
+    // producing square ground holes as the camera moved through Bichon.
+    let layer_order = match layer {
+        TileLayer::Back => 0,
+        TileLayer::Middle => 1,
+        TileLayer::Front => 2,
+        TileLayer::TileAnimation => 3,
+    };
+    let layer_span = MAP_FLOOR_DEPTH_SPAN / 4.0;
+    (f64::from(MAP_FLOOR_DEPTH_MIN)
+        + f64::from(layer_order) * layer_span
+        + rank as f64 / cell_count as f64 * layer_span) as f32
 }
 
 fn build_original_map_frame_path(library: &str, frame_index: i32) -> String {
@@ -1299,7 +1312,7 @@ fn build_map_render_state_with_indexes(
                     let draw_as_floor =
                         map_draw_is_floor(draw.layer, animated, asset.width, asset.height);
                     let depth = if draw_as_floor {
-                        map_floor_depth(map, draw.x, draw.y)
+                        map_floor_depth(map, draw.x, draw.y, draw.layer)
                     } else {
                         cell_depth
                     };
@@ -1336,7 +1349,7 @@ fn build_map_render_state_with_indexes(
                     let draw_as_floor =
                         map_draw_is_floor(draw.layer, animated, rect.width, rect.height);
                     let depth = if draw_as_floor {
-                        map_floor_depth(map, draw.x, draw.y)
+                        map_floor_depth(map, draw.x, draw.y, draw.layer)
                     } else {
                         cell_depth
                     };
@@ -1524,6 +1537,41 @@ mod tests {
         eprintln!(
             "[map-relocation-regression] Bichon (302,634): {} atlas tiles, {} standalone tiles, {} local images",
             atlas_tiles.len(), standalone_tiles.len(), images.len()
+        );
+    }
+
+    #[test]
+    fn bichon_market_grass_middle_renders_above_its_sand_back() {
+        let map = load_map("0").expect("Bichon map layout");
+        let state = build_map_render_state_for_file(
+            &map,
+            MapViewport {
+                center_x: 287,
+                center_y: 607,
+                width: 22,
+                height: 18,
+            },
+            "0",
+        )
+        .expect("Bichon market render state");
+        let tiles = state["tiles"].as_array().expect("map tiles");
+        let tile = |key: &str| {
+            tiles
+                .iter()
+                .find(|tile| tile["key"] == key)
+                .unwrap_or_else(|| panic!("missing {key}"))
+        };
+        let back = tile("back:290:600");
+        let middle = tile("mid:290:600");
+        assert_eq!(back["rectKey"], "WemadeMir2/Tiles#3");
+        assert_eq!(middle["rectKey"], "WemadeMir2/SmTiles#123");
+        assert!(
+            middle["z"].as_f64().unwrap() > back["z"].as_f64().unwrap(),
+            "a sand Back must never cover the same cell's grass Middle"
+        );
+        assert!(
+            tile("mid:290:601")["z"].as_f64().unwrap() > back["z"].as_f64().unwrap(),
+            "the 96x64 Back also covers the next row's grass Middle"
         );
     }
 

@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-20 Windows map/branding follow-up: Bichon sand Back and grass Middle
+> tiles shared a depth, allowing rectangular sand patches to cover grass.
+> Floor depth now preserves Back/Middle/Front pass order; 39/39 map-parser
+> tests pass, including the reported market cell (290,600). Dead-player V
+> revival no longer also folds the minimap; the dead/alive V regression passes.
+> User-requested branding is `numeron-legend of rebirth`, with the existing
+> launcher gold-diamond art embedded in the EXE and applied to the native
+> window/taskbar. Updated in-game visual acceptance remains open after the
+> user stopped Computer Use with Escape. See
+> [repair notes](generated/player-qa/numeron-branding-20260920/README.md).
+
 > 2026-09-20 Windows fast-run self-label candidate: a player capture at
 > `(232,607)` shows the body roughly one run step ahead of its `a1` name and
 > self HP bar. The native renderer can accept a corrected/predicted self tile

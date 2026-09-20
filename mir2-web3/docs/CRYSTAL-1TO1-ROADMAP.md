@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-20 native map/branding candidate: floor passes now retain
+> Back/Middle/Front ordering (39/39 map tests), and dead-player V no longer
+> toggles the minimap during revival (focused regression passes). Window
+> product name is now `numeron-legend of rebirth`; window/taskbar and PE icon
+> use the existing launcher artwork. New-package visual acceptance remains
+> open; these checks do not establish Crystal visual parity. Evidence:
+> [repair notes](generated/player-qa/numeron-branding-20260920/README.md).
+
 > 2026-09-20 native fast-run label candidate: renderer-side self position
 > reconciliation could move the body without replacing the raw gameplay
 > snapshot, while the UI name/HP overlay skipped its rebuild. A self-anchor

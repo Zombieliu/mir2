@@ -4936,7 +4936,13 @@ pub(crate) fn process_overlay_keyboard(
     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Bigmap") {
         state.toggle_bigmap();
     }
-    if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Minimap") {
+    // V is also the native town-revive key. While dead, reserve that press for
+    // revival so the minimap does not silently collapse on the respawn frame.
+    let v_revives_dead_player = keys.just_pressed(KeyCode::KeyV)
+        && ui
+            .as_deref()
+            .is_some_and(|model| model.player.hp <= 0 && model.player.max_hp > 0);
+    if !v_revives_dead_player && keyboard_dialog::host::triggered(&state.keyboard, &keys, "Minimap") {
         state.toggle_minimap();
     }
     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "GameShop") {
@@ -15054,6 +15060,44 @@ mod tests {
             .world()
             .resource::<NativePlayerUiState>()
             .inventory_open());
+    }
+
+    #[test]
+    fn revive_v_does_not_toggle_minimap_but_alive_v_does() {
+        for (hp, expected_visible) in [(0, true), (30, false)] {
+            let mut app = App::new();
+            app.init_resource::<NativePlayerUiState>()
+                .init_resource::<MailComposeUi>()
+                .init_resource::<NativePlayerUiIntentQueue>()
+                .init_resource::<PendingOperations>()
+                .init_resource::<NativeUiIntentQueue>()
+                .init_resource::<InventoryModel>()
+                .init_resource::<MailModel>()
+                .init_resource::<MapModel>()
+                .init_resource::<ShopModel>()
+                .init_resource::<StorageModel>()
+                .init_resource::<ButtonInput<KeyCode>>()
+                .init_resource::<crate::audio::NativeUiAudioQueue>()
+                .add_message::<KeyboardInput>()
+                .add_systems(Update, process_overlay_keyboard);
+            app.insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..Default::default()
+            });
+            let mut ui = UiReadModel::default();
+            ui.player.hp = hp;
+            ui.player.max_hp = 30;
+            app.insert_resource(ui);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::KeyV);
+            app.update();
+            assert_eq!(
+                app.world().resource::<NativePlayerUiState>().minimap_visible(),
+                expected_visible,
+                "hp={hp}"
+            );
+        }
     }
 
     #[test]
