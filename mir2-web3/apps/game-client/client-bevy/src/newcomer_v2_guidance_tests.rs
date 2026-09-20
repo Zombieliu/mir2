@@ -50,12 +50,16 @@ fn v2_bundle_has_six_chapters_and_projects_all_twenty_six_server_tasks() {
         .collect::<std::collections::BTreeSet<_>>();
     assert_eq!(ids.len(), 26);
     assert!((2110001..=2110022).all(|id| ids.contains(&id)));
-    assert!([2120015, 2120020, 2120025, 2120030]
-        .into_iter()
-        .all(|id| ids.contains(&id)));
-    assert!(ids.iter().all(|id| guidance
-        .entry(*id)
-        .is_some_and(|entry| !entry.hint.trim().is_empty())));
+    assert!(
+        [2120015, 2120020, 2120025, 2120030]
+            .into_iter()
+            .all(|id| ids.contains(&id))
+    );
+    assert!(ids.iter().all(|id| {
+        guidance
+            .entry(*id)
+            .is_some_and(|entry| !entry.hint.trim().is_empty())
+    }));
 }
 
 #[test]
