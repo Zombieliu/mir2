@@ -24,6 +24,7 @@ const DEFAULT_ROOTS = [
   "Monster/003",
   "Monster/004",
   "Monster/005",
+  "Monster/006",
   "Monster/007",
   "Monster/010",
   "Monster/012",
@@ -64,6 +65,14 @@ async function main() {
   const imageFileName = `${atlasKey}.png`;
   const imagePath = path.join(outDir, imageFileName);
   const manifestPath = path.join(outDir, "manifest.json");
+  // A bounded library repair must retain existing multi-page starter atlases.
+  // Read before writing pixels so a missing/malformed base fails without changes.
+  const existingManifest = args.append === "true"
+    ? JSON.parse(await fs.readFile(manifestPath, "utf8"))
+    : null;
+  if (existingManifest && (existingManifest.schemaVersion !== 2 || !Array.isArray(existingManifest.atlases))) {
+    throw new Error("Append requires a schema-v2 entity atlas manifest");
+  }
 
   await fs.mkdir(outDir, { recursive: true });
   await sharp({
@@ -87,13 +96,14 @@ async function main() {
   const imageBytes = await fs.readFile(imagePath);
   const imageByteLength = imageBytes.length;
   const manifest = {
+    ...existingManifest,
     schemaVersion: 2,
     kind: "mir2-bevy-entity-atlas-manifest",
     generatedAt: new Date().toISOString(),
     atlases: [
       {
         key: atlasKey,
-        label: "Starter Bichon base player/NPC entity atlas",
+        label: `Entity atlas: ${atlasKey}`,
         width: packed.width,
         height: packed.height,
         sourceCount: sources.length,
@@ -129,6 +139,20 @@ async function main() {
     },
   };
 
+  if (existingManifest) {
+    manifest.atlases = [
+      ...existingManifest.atlases.filter((atlas) => atlas.key !== atlasKey),
+      ...manifest.atlases,
+    ];
+    manifest.stats = {
+      ...existingManifest.stats,
+      sourceCount: manifest.atlases.reduce((sum, atlas) => sum + atlas.sourceCount, 0),
+      roots: [...new Set(manifest.atlases.flatMap((atlas) => atlas.roots))],
+      imageBytes: manifest.atlases.reduce((sum, atlas) => sum + atlas.pages.reduce((bytes, page) => bytes + page.imageBytes, 0), 0),
+      rgbaBytes: manifest.atlases.reduce((sum, atlas) => sum + atlas.pages.reduce((bytes, page) => bytes + page.width * page.height * 4, 0), 0),
+      pageCount: manifest.atlases.reduce((sum, atlas) => sum + atlas.pages.length, 0),
+    };
+  }
   await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   console.log(
     JSON.stringify(

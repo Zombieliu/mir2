@@ -1166,6 +1166,28 @@ impl NativePlayerUiState {
             || self.friends.modal.is_some()
     }
     pub fn blocks_world_click(&self) -> bool {
+        self.blocks_world_click_with_panel(self.core.blocks_world_click())
+    }
+
+    /// Inventory is non-modal: its visible bounds capture the pointer, not
+    /// the entire world. Item transactions and other dialogs remain guarded.
+    pub fn blocks_world_pointer_at(&self, x: f32, y: f32) -> bool {
+        if !self.inventory_open() {
+            return self.blocks_world_click();
+        }
+        let bag = &self.inventory_window;
+        let inside = x >= bag.left
+            && x < bag.left + INVENTORY_PANEL_SIZE.width as f32
+            && y >= bag.top
+            && y < bag.top + INVENTORY_PANEL_SIZE.height as f32;
+        self.blocks_world_click_with_panel(self.core.chat_focused())
+            || inside
+            || bag.dragging()
+            || self.inventory_item_drag.is_some()
+            || self.inventory_operation.is_some()
+    }
+
+    fn blocks_world_click_with_panel(&self, panel_blocks: bool) -> bool {
         self.game_shop_dialog.confirmation.is_some()
             || self.guild_panel.blocks()
             || self.guild_panel.consumed
@@ -1181,7 +1203,7 @@ impl NativePlayerUiState {
             || self.status_hud.hovered
             || self.menu_pointer_consumed
             || self.equipment_dialogs.fishing
-            || self.core.blocks_world_click()
+            || panel_blocks
             || self.inspect.is_some()
             || self.inventory_delete_prompt.is_some()
             || self.guild_gold_prompt.is_some()
@@ -18123,6 +18145,26 @@ mod tests {
         state.core.chat_focused = true;
         assert!(state.chat_focused());
         assert!(state.chat_draft.is_empty());
+    }
+
+    #[test]
+    fn inventory_allows_world_pointer_outside_but_keeps_drag_and_modal_capture() {
+        let mut state = NativePlayerUiState::default();
+        state.core.panel = mir2_ui_core::state::UiPanel::Inventory;
+        assert!(state.blocks_world_pointer_at(20.0, 60.0));
+        assert!(!state.blocks_world_pointer_at(500.0, 400.0));
+        state.inventory_window.left = 400.0;
+        state.inventory_window.top = 200.0;
+        assert!(state.blocks_world_pointer_at(500.0, 250.0));
+        assert!(!state.blocks_world_pointer_at(20.0, 60.0));
+        state.inventory_window.dragging = true;
+        assert!(state.blocks_world_pointer_at(20.0, 60.0));
+        state.inventory_window.dragging = false;
+        state.menu_pointer_consumed = true;
+        assert!(state.blocks_world_pointer_at(20.0, 60.0));
+        state.menu_pointer_consumed = false;
+        state.core.panel = mir2_ui_core::state::UiPanel::Storage;
+        assert!(state.blocks_world_pointer_at(20.0, 60.0));
     }
 
     #[test]

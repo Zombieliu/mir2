@@ -1542,7 +1542,17 @@ pub fn mouse_world_interaction_system(
     if over_skill_bar
         || over_hero_window
         || notice.as_deref().is_some_and(NoticeDialogState::is_open)
-        || is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
+        || dialog_open
+        || dead
+        || player_ui.as_deref().is_some_and(|ui| {
+            window.cursor_position().map_or_else(|| ui.blocks_world_click(), |cursor| {
+                let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+                    window.resolution.width(), window.resolution.height(),
+                );
+                let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                ui.blocks_world_pointer_at(x, y)
+            })
+        })
         || player_ui
             .as_deref()
             .is_some_and(|ui| ui.skill_bars.hovered || ui.skill_bars.dragging.is_some())
@@ -4328,6 +4338,34 @@ mod tests {
             receiver.try_recv(),
             Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"
         ));
+    }
+
+    #[test]
+    fn open_inventory_only_blocks_movement_over_its_own_surface() {
+        for (cursor, blocked) in [
+            (bevy::prelude::Vec2::new(576.0, 352.0), false),
+            (bevy::prelude::Vec2::new(20.0, 60.0), true),
+        ] {
+            let (mut app, receiver) = input_app();
+            install_movement_clock_and_inbox(&mut app);
+            app.world_mut().spawn(stage_window(cursor));
+            app.insert_resource(ButtonInput::<MouseButton>::default());
+            let mut ui = NativePlayerUiState::default();
+            ui.core.panel = mir2_ui_core::state::UiPanel::Inventory;
+            app.insert_resource(ui);
+            app.insert_resource(NpcDialogModel::default());
+            app.insert_resource(UiReadModel::default());
+            app.insert_resource(movement_entities());
+            let mut presentation = NativeEntityPresentation::default();
+            presentation.set_hover_grid_context_for_test((10, 10), (576.0, 352.0));
+            app.insert_resource(presentation);
+            app.init_resource::<QuestUiIntentQueue>();
+            app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+            app.update();
+            let walked = matches!(receiver.try_recv(), Ok(GatewayCommand::Player(PlayerIntent::Walk { .. })));
+            assert_eq!(walked, !blocked, "inventory pointer at {cursor:?}");
+        }
     }
 
     #[test]

@@ -2314,6 +2314,20 @@ mod tests {
     }
 
     #[test]
+    fn hooking_cat_all_exported_frames_resolve_to_native_atlas_layers() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        for frame in 0..224 {
+            let layer = build_entity_layer(
+                index, &mut HashMap::new(), "42:body".to_owned(),
+                "/original-ui/Monster/006", frame, 100.0, 200.0, 5.0,
+            ).unwrap_or_else(|| panic!("HookingCat missing native frame {frame}"));
+            assert_eq!(layer["atlasKey"], "hooking-cat");
+            assert!(layer["width"].as_f64().unwrap() > 0.0);
+            assert!(layer["height"].as_f64().unwrap() > 0.0);
+        }
+    }
+
+    #[test]
     fn high_armour_exports_keep_every_original_frame_and_exact_geometry() {
         let index = starter_atlas_index().expect("starter atlas index");
         // Crystal PlayerObject.SetLibraries selects Shape 9/10 independently

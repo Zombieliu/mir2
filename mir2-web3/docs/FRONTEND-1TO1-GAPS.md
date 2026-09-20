@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-21 reported potion/missing-monster repairs: inventory was blocking
+> every world click while open. Native mouse movement now uses its moved panel
+> bounds, keeping drag, item-operation and modal capture. UI boundary test
+> passes; native input suite passes 72/72, including an actual Walk intent
+> outside the bag and no Walk inside. HookingCat image 6 was absent from both
+> original PNG exports and starter atlas. All 224 original frames are restored
+> in an appended atlas page, preserving the prior seven pages. Monster frame
+> closure passes 8/8; native atlas test resolves all 224 frames. These are
+> functional/resource results; live potion use, walking and visible HookingCat
+> acceptance remain pending. [Evidence](generated/player-qa/inventory-hookingcat-20260921.md).
+
 > 2026-09-20 Windows fixed-size policy: the native host now creates a
 > 1024x768 client area with scale override 1, equal minimum/maximum size,
 > resizing disabled and the maximize button disabled. Move, minimize and
