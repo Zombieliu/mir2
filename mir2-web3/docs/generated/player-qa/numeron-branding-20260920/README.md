@@ -1,5 +1,27 @@
 # Native map fixes and numeron branding — 2026-09-20
 
+## Blank Diary after profile-enabled client launch
+
+The user then reported an empty Diary with chapter 0/4. Read-only inspection
+of the running Gateway's four non-secret configuration values confirmed:
+`MIR2_CONTENT_PROFILE=platinum_176`, but `MIR2_QUEST_CADENCE`,
+`MIR2_SPECTATOR_ENABLED`, and `MIR2_SPECTATOR_RECORDING_ENABLED` were unset.
+`quest_log_snapshots` filters out saved V2 quests when server V2 cadence is
+disabled. Enabling only the client profile cannot restore those filtered rows.
+
+After the user explicitly logged out, the account store was privately backed
+up and the same Gateway EXE/store restarted through the existing
+`apps/web/scripts/quest-agent/launch-newcomer-v2-gateway.ps1`, with TCP19900,
+WS19910, newcomer-v2 cadence and spectator recording disabled. Both ports
+listen under replacement PID 20200. Saved a1 is still level 3, N1/N2 completed,
+N3 in progress at 2/4. Post-login visual confirmation is pending.
+
+The unconfigured Gateway had also been recording spectator frames to E: until
+the disk filled. A closed previous recording was retained on C: to free space;
+recording is now disabled for this ordinary-player local test. No character
+state was edited. Logs and private backup remain local under
+`C:/mir2-task-panel-recovery-20260920`; do not commit the private account backup.
+
 ## Direct-launch task follow-up
 
 The branded EXE was launched and its title-bar name/icon were visually seen.

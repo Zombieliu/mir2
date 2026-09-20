@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-20 blank Diary deployment diagnosis: after the client profile repair,
+> the running Gateway was independently verified to have no MIR2_QUEST_CADENCE.
+> It therefore filtered out a1's persisted V2 quests, yielding an empty list and
+> 0/4 chapter progress. After user logout, the same store/EXE was restarted via
+> the dedicated V2 launcher on 19900/19910. Saved level 3, N1/N2 completed and
+> N3 2/4 are unchanged. Authenticated visual confirmation remains pending.
+
 > 2026-09-20 direct-launch V2 guidance repair: the branded client was opened
 > without the QA launcher's temporary guidance environment, hiding V2 Diary
 > actions despite intact server progress. The Windows config now persists
