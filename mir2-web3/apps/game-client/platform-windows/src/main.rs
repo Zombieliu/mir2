@@ -26,6 +26,7 @@ mod gateway;
 mod hero_pointer_settings;
 mod hero_wire;
 mod input;
+mod lifecycle;
 mod map_parser;
 mod movement_trace;
 mod native_protocol;
@@ -173,6 +174,7 @@ fn main() {
         asset_root: asset_root.to_string_lossy().into_owned(),
         width: session_config::DEFAULT_WINDOW_WIDTH,
         height: session_config::DEFAULT_WINDOW_HEIGHT,
+        close_when_requested: false,
         ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
     });
     // Native Crystal panels currently have a fixed pixel layout. Configure the
@@ -190,6 +192,8 @@ fn main() {
         };
     }
     app.add_systems(bevy::app::Update, branding::apply_window_icon);
+    app.add_systems(bevy::app::PostUpdate, lifecycle::handle_close_requests);
+    app.add_systems(bevy::app::Last, lifecycle::record_exit_events.after(bevy::window::ExitSystems));
     // Persist the matching server's presentation profile in the package, so
     // opening the EXE directly also enables Diary accept/finish actions.
     let guidance = session.quest_guidance.as_deref().map_or_else(
@@ -386,7 +390,8 @@ fn main() {
     // tokio runtime in the background and pushes snapshots into the runtime
     // channel. The runtime handle stays alive until the window closes.
     timing::milestone("enter_event_loop");
-    app.run();
+    let exit = app.run();
+    eprintln!("[native-lifecycle] event_loop_returned exit={exit:?}");
 
     // Best-effort: drop the gateway task after the window closes.
     let _ = command_tx.send(gateway::GatewayCommand::Shutdown);

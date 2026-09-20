@@ -514,6 +514,7 @@ fn shell_pointer_input(
                 let _ = shell.apply_ui_intent(NativeUiIntent::OpenSafeKey);
             }
             CrystalLoginAction::Cancel => {
+                eprintln!("[native-lifecycle] exit_source=login_cancel");
                 app_exit.write(AppExit::Success);
             }
         }
@@ -552,6 +553,7 @@ fn shell_pointer_input(
             // Crystal's SelectScene credits handler is intentionally empty.
             CrystalSelectAction::Credits => {}
             CrystalSelectAction::Exit => {
+                eprintln!("[native-lifecycle] exit_source=character_select_exit");
                 app_exit.write(AppExit::Success);
             }
         }

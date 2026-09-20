@@ -128,6 +128,9 @@ pub mod hero_buff_hud;
 pub mod keyboard_dialog;
 #[path = "leave_game_dialog.rs"]
 pub mod leave_game_dialog;
+#[cfg(test)]
+#[path = "leave_game_input_tests.rs"]
+mod leave_game_input_tests;
 #[path = "mount_fishing_dialog.rs"]
 pub mod mount_fishing_dialog;
 #[path = "ranking_dialog.rs"]
@@ -4290,7 +4293,21 @@ pub(crate) fn process_overlay_keyboard(
     }
     if state.leave_game.blocks() {
         for event in typed.read() {
-            if event.state == ButtonState::Pressed && !event.repeat {
+            // Other UI branches can leave raw messages unread. A key pressed
+            // before this prompt opened must not confirm it on a later frame.
+            if event.state == ButtonState::Pressed
+                && !event.repeat
+                && keys.just_pressed(event.key_code)
+            {
+                if matches!(
+                    event.key_code,
+                    KeyCode::Enter | KeyCode::NumpadEnter | KeyCode::Escape
+                ) {
+                    eprintln!(
+                        "[native-exit] leave_answer source=keyboard key={:?} prompt={:?}",
+                        event.key_code, state.leave_game.prompt
+                    );
+                }
                 match event.key_code {
                     KeyCode::Enter | KeyCode::NumpadEnter => leave_game_dialog::finish(
                         &mut state,
@@ -5084,6 +5101,7 @@ pub(crate) fn process_overlay_keyboard(
         );
     }
     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Exit") {
+        eprintln!("[native-exit] leave_request source=keyboard_exit");
         state.leave_game.request(
             leave_game_dialog::LeaveKind::Exit,
             std::time::Instant::now(),
@@ -5250,6 +5268,16 @@ fn process_overlay_buttons(
             continue;
         }
         if state.leave_game.blocks() {
+            if matches!(
+                *button,
+                OverlayButton::LeaveConfirm | OverlayButton::LeaveCancel
+            ) {
+                eprintln!(
+                    "[native-exit] leave_answer source=pointer yes={} prompt={:?}",
+                    matches!(*button, OverlayButton::LeaveConfirm),
+                    state.leave_game.prompt
+                );
+            }
             match *button {
                 OverlayButton::LeaveConfirm => leave_game_dialog::finish(
                     &mut state,
@@ -5413,6 +5441,7 @@ fn process_overlay_buttons(
             OverlayButton::RefreshSkillBar => {}
 
             OverlayButton::ExitApplication => {
+                eprintln!("[native-exit] leave_request source=menu_exit");
                 state.leave_game.request(
                     leave_game_dialog::LeaveKind::Exit,
                     std::time::Instant::now(),
@@ -7062,6 +7091,7 @@ fn consume_exit_application(
     mut app_exit: MessageWriter<AppExit>,
 ) {
     if effects.take_exit_application() {
+        eprintln!("[native-exit] app_exit source=ui_effect code=success");
         app_exit.write(AppExit::Success);
     }
 }

@@ -27,18 +27,21 @@ impl LeaveGameDialog {
     }
     pub fn request(&mut self, kind: LeaveKind, now: Instant) {
         if let Some(until) = self.log_time.filter(|until| *until > now) {
+            eprintln!("[native-exit] leave_request_blocked kind={kind:?} reason=combat_delay");
             // C# integer division intentionally reports zero for the final partial second.
             self.notice = Some(format!(
                 "Cannot leave game for {} seconds",
                 until.duration_since(now).as_secs()
             ));
         } else {
+            eprintln!("[native-exit] leave_prompt_open kind={kind:?}");
             self.prompt = Some(kind);
         }
     }
     pub fn answer(&mut self, yes: bool) -> Option<LeaveKind> {
         self.consumed = self.prompt.is_some();
         let kind = self.prompt.take()?;
+        eprintln!("[native-exit] leave_prompt_answer kind={kind:?} yes={yes}");
         yes.then_some(kind)
     }
     pub fn blocks(&self) -> bool {
@@ -93,6 +96,7 @@ pub(super) fn finish(
     match state.leave_game.answer(yes) {
         Some(LeaveKind::Exit) => {
             if let Some(effects) = effects {
+                eprintln!("[native-exit] exit_effect_enqueued source=confirmed_leave_dialog");
                 effects.push(mir2_ui_core::effect::UiEffect::ExitApplication);
             }
         }

@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-21 unexpected window disappearance: no panic or matching Windows
+> Application 1000/1001 record was found; teardown save succeeded, but the
+> original process exit code was not retained. A separate real-timing regression
+> reproduces stale Enter confirming a newly opened quit prompt without new
+> input; this is fixed (leave tests 4/4). Native OS close now uses in-game
+> confirmation (lifecycle test 1/1). Exit-source, event-loop result and launcher
+> exit-code/memory diagnostics are added. The reported incident itself is not
+> attributed conclusively and live stability remains open.
+
 > 2026-09-21 profile asset repair: 139 original libraries / 60,556 drawable
 > frames now cover 174 profile monsters plus BoneFamiliar and all 54 direct
 > weapon/armour shapes (both genders). Source RGBA, masks, geometry and hashes

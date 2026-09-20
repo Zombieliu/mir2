@@ -1352,6 +1352,8 @@ pub struct RuntimeWindowSpec {
     pub transparent: bool,
     pub fit_canvas_to_parent: bool,
     pub prevent_default_event_handling: bool,
+    /// Hosts with an in-game quit confirmation handle OS close requests themselves.
+    pub close_when_requested: bool,
     pub composite_alpha_mode: CompositeAlphaMode,
     /// Native hosts: filesystem root the AssetServer resolves relative paths
     /// against (e.g. the repo `apps/web` so `public/` atlas images load). WASM
@@ -1371,6 +1373,7 @@ impl RuntimeWindowSpec {
             transparent: true,
             fit_canvas_to_parent: true,
             prevent_default_event_handling: true,
+            close_when_requested: true,
             composite_alpha_mode: WINDOW_COMPOSITE_ALPHA_MODE,
             asset_root: ".".to_owned(),
         }
@@ -1386,6 +1389,7 @@ impl RuntimeWindowSpec {
             transparent: false,
             fit_canvas_to_parent: false,
             prevent_default_event_handling: false,
+            close_when_requested: true,
             composite_alpha_mode: CompositeAlphaMode::Auto,
             asset_root: ".".to_owned(),
         }
@@ -1449,6 +1453,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 })
                 .set(ImagePlugin::default_nearest())
                 .set(WindowPlugin {
+                    close_when_requested: spec.close_when_requested,
                     primary_window: Some(Window {
                         canvas: spec.canvas_selector.clone(),
                         composite_alpha_mode: spec.composite_alpha_mode,
