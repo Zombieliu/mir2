@@ -3640,6 +3640,13 @@ impl SimulationSession {
             return self.grant_shared_guild_creation_from_npc();
         }
 
+        // Crystal treats this as a built-in NPC key, not a script section.
+        // Keep it after the active-dialog link and DataRange checks: callers
+        // cannot open a parcel prompt by fabricating an arbitrary target.
+        if normalized_target.eq_ignore_ascii_case("@SENDPARCEL") {
+            return vec![ServerPacket::MailSendRequest];
+        }
+
         if let Some(command) = parse_explicit_npc_quest_command(&normalized_target) {
             return match command {
                 ExplicitNpcQuestCommand::Accept { quest_index } => {
@@ -3824,6 +3831,10 @@ fn parse_explicit_npc_quest_command(target: &str) -> Option<ExplicitNpcQuestComm
         None
     }
 }
+
+#[cfg(test)]
+#[path = "npc_parcel_tests.rs"]
+mod npc_parcel_tests;
 
 #[cfg(test)]
 mod dialog_security_tests {

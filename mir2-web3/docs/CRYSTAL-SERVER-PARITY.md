@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> 2026-09-21 parcel postage follows checked Crystal MailSystem.ini values:
+> CostPer1k=100, InsurancePerItem=5, FreeWithStamp=True. Stamp ownership and
+> atomic consumption are enforced rather than trusting the client flag.
+> Unstamped extra slots and invalid/NoMail attachments fail closed. Offered
+> NPC @SendParcel dispatch is restored. Mail 52/52, parcel 12/12 and separate
+> stale sender/shop 1/1 each pass; source/test evidence only, not deployment
+> or native UI acceptance. Existing player saves were not edited.
+
 > 2026-09-21 candidate NPC sale/repair pricing now matches source Stat.Count
 > weighting and RentalInformation repair multiplier. Numeric tests 3/3 and
 > ordinary packet repair/sale regressions 5/5 + 2/2 pass. This is source/test

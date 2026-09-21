@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-21 parcel backend candidate: source postage includes item insurance;
+> an owned stamp is consumed atomically with delivery and permits five slots.
+> Offered, in-range NPC @SendParcel links now emit MailSendRequest. Mail 52/52,
+> parcel 12/12 and two separate stale-save/shop checks pass. UI integration,
+> rebuilt deployment and live source comparison remain open; no visual pass.
+
 > 2026-09-21 settings candidate: source-position volume drag, Ctrl/tilde SkillMode
 > and NewMove routing pass client1005/1005 and Windows input74/74. Same-map
 > task guidance exposes remaining hunt regions without live AOI. New-package

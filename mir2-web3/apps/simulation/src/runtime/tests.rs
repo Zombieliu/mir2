@@ -1668,6 +1668,11 @@ fn unique_mail_transaction_store(label: &str) -> (std::path::PathBuf, Simulation
     (dir, config)
 }
 
+// Crystal Dagger template: price500, durability5000. This fixture has max20,
+// current13 and AddedStats.Count7: Price=floor(0.5+0.325+250)*1.7=425.
+// Mail insurance floors each item's price*5/100, therefore 21 gold.
+const MAIL_TEST_MODIFIED_DAGGER_INSURANCE: u32 = 21;
+
 fn prepare_atomic_mail_sender(config: &SimulationConfig) -> (SimulationSession, u64) {
     let mut sender = SimulationSession::new(config.clone());
     assert!(sender
@@ -1692,6 +1697,7 @@ fn prepare_atomic_mail_sender(config: &SimulationConfig) -> (SimulationSession, 
             .expect("seed dagger should exist");
         dagger.durability_current = Some(13);
         dagger.added_attack = 7;
+        assert_eq!(dagger.durability_max, Some(20));
         super::item_unique_id(dagger)
     };
     sender.save_active_character();
@@ -62839,6 +62845,16 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
             items_idx: [7, 0, 0, 0, 0],
             stamped: false,
         }),
+        // A lock echo is not proof of item ownership; unknown ID7 must not
+        // receive a cheap quote that excludes its unknown insurance value.
+        vec![ServerPacket::MailCost { cost: u32::MAX }]
+    );
+    assert_eq!(
+        session.handle_packet(ClientPacket::MailCost {
+            gold: 2_500,
+            items_idx: [0; 5],
+            stamped: false,
+        }),
         vec![ServerPacket::MailCost { cost: 200 }]
     );
     let sent_packets = session.handle_packet(ClientPacket::SendMail {
@@ -63045,7 +63061,7 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
 
     assert!(sent_packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::LoseGold { gold } if *gold == 1_600
+        ServerPacket::LoseGold { gold } if *gold == 1_500 + 100 + MAIL_TEST_MODIFIED_DAGGER_INSURANCE
     )));
     assert!(sent_packets.iter().any(|packet| matches!(
         packet,
@@ -63056,7 +63072,7 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
         .iter()
         .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
     let sender_snapshot = sender.world_snapshot();
-    assert_eq!(sender_snapshot.gold, 1_400);
+    assert_eq!(sender_snapshot.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
     assert!(!sender_snapshot
         .inventory_items
         .iter()
@@ -63211,7 +63227,7 @@ fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
     });
     assert!(packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::LoseGold { gold } if *gold == 1_600
+        ServerPacket::LoseGold { gold } if *gold == 1_500 + 100 + MAIL_TEST_MODIFIED_DAGGER_INSURANCE
     )));
     assert!(packets.iter().any(|packet| matches!(
         packet,
@@ -63221,7 +63237,7 @@ fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
-    assert_eq!(sender.world_snapshot().gold, 1_400);
+    assert_eq!(sender.world_snapshot().gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
     assert!(!sender
         .world_snapshot()
         .inventory_items
@@ -63241,7 +63257,7 @@ fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
             .get("demo")
             .and_then(|account| account.saves.get(&0))
             .expect("sender save should exist");
-        assert_eq!(sender_save.gold, 1_400);
+        assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
         assert!(!sender_save.inventory_items_json.iter().any(|state| {
             serde_json::from_str::<ItemState>(state)
                 .ok()
@@ -63363,7 +63379,7 @@ fn stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance
             .and_then(|account| account.saves.get(&0))
             .expect("sender save should remain durable");
         assert_eq!(sender_save.revision, 3);
-        assert_eq!(sender_save.gold, 1_400, "stale balance must not win");
+        assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE, "stale balance must not win");
         assert!(
             !sender_save.inventory_items_json.iter().any(|state| {
                 serde_json::from_str::<ItemState>(state)
@@ -63495,7 +63511,7 @@ fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting
         })
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 165_000 })));
-    assert_eq!(stale.world_snapshot().gold, 333_400);
+    assert_eq!(stale.world_snapshot().gold, 500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000);
     assert!(!stale
         .world_snapshot()
         .inventory_items
@@ -63514,7 +63530,7 @@ fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting
         .and_then(|account| account.saves.get(&0))
         .expect("sender save should remain durable");
     assert_eq!(sender_save.revision, 4);
-    assert_eq!(sender_save.gold, 333_400);
+    assert_eq!(sender_save.gold, 500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000);
     assert!(!sender_save.inventory_items_json.iter().any(|state| {
         serde_json::from_str::<ItemState>(state)
             .ok()
@@ -63602,7 +63618,7 @@ fn concurrent_same_account_mail_transactions_have_no_lost_update() {
         .and_then(|account| account.saves.get(&0))
         .expect("sender save should remain durable");
     assert_eq!(sender_save.revision, 3);
-    assert_eq!(sender_save.gold, 1_400);
+    assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
     assert!(!sender_save.inventory_items_json.iter().any(|state| {
         serde_json::from_str::<ItemState>(state)
             .ok()
@@ -63818,7 +63834,7 @@ fn online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status
     let attachment = serde_json::from_str::<ItemState>(&external_mail.item_states_json[0])
         .expect("external exact attachment should decode");
     assert_eq!(super::item_unique_id(&attachment), dagger_unique_id);
-    assert_eq!(sender.world_snapshot().gold, 1_400);
+    assert_eq!(sender.world_snapshot().gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
 
     let _ = std::fs::remove_dir_all(dir);
 }

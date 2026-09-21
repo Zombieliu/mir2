@@ -226,12 +226,85 @@ fn current_stage5_character_index(world: &World) -> i32 {
         .unwrap_or_default()
 }
 
-fn stage5_mail_cost(gold: u32, stamped: bool) -> u32 {
-    // `stamped` is client-controlled. Until a server-side stamp inventory and
-    // consume operation exists, it must never authorize free postage.
-    let _ = stamped;
-    (gold / 1_000) * 100
+// Crystal MailSystem.ini defaults: FreeWithStamp=True, CostPer1k=100,
+// InsurancePerItem=5. These are server policy, never supplied by the client.
+const MAIL_GOLD_COST_PER_1K: u32 = 100;
+const MAIL_INSURANCE_PERCENT: u32 = 5;
+const MAIL_BIND_NO_MAIL: i16 = 16_384;
+
+fn stage5_mail_item_allowed(item: &ItemState) -> bool {
+    exact_mail_item_state_is_valid(item)
+        && stage5_trade_item_can_enter(item)
+        && !item_has_crystal_or_rental_bind_flag(item, MAIL_BIND_NO_MAIL)
 }
+
+fn stage5_mail_cost(gold: u32, items: &[ItemState], has_stamp: bool) -> Option<u32> {
+    if has_stamp {
+        return Some(0);
+    }
+    items.iter().try_fold((gold / 1_000).checked_mul(MAIL_GOLD_COST_PER_1K)?, |cost, item| {
+        let template = crystal_item_template_for_item_key(&item.key)?;
+        let price = crystal_item_current_price(item, &template, crystal_item_added_stat_weight(item));
+        // Match PlayerObject.GetMailCost's double division and per-item floor.
+        let insurance = ((f64::from(price) / 100.0) * f64::from(MAIL_INSURANCE_PERCENT)).floor() as u32;
+        cost.checked_add(insurance)
+    })
+}
+
+struct Stage5MailParcelPlan {
+    cost: u32,
+    stamp: Option<ItemState>,
+    attachments: Vec<ItemState>,
+}
+
+fn stage5_mail_parcel_plan(
+    inventory: &[ItemState], gold: u32, items_idx: &[u64; 5], stamped: bool,
+) -> Option<Stage5MailParcelPlan> {
+    let ids = stage5_mail_attachment_ids(items_idx)?;
+    let stamp = stamped.then(|| inventory.iter().find(|item| {
+        matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+            && item.quantity > 0
+            && exact_mail_item_state_is_valid(item)
+            && crystal_item_template_for_item_key(&item.key)
+                .is_some_and(|template| template.item_type == 0 && template.shape == 1)
+    })).flatten().cloned();
+    if let Some(stamp) = &stamp {
+        let id = item_unique_id(stamp);
+        // A stamp cannot pay postage and also be mailed; reject the ambiguous
+        // request rather than relying on attachment ordering or stack counts.
+        if ids.contains(&id) || inventory.iter().filter(|item| item_unique_id(item) == id).count() != 1 {
+            return None;
+        }
+    } else if items_idx[1..].iter().any(|id| *id != 0) {
+        return None;
+    }
+    let attachments = ids.iter().map(|id| {
+        let matches = inventory.iter().filter(|item| item_matches_inventory_unique_id(item, *id)).collect::<Vec<_>>();
+        let [item] = matches.as_slice() else { return None; };
+        (matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+            && stage5_mail_item_allowed(item)).then(|| (*item).clone())
+    }).collect::<Option<Vec<_>>>()?;
+    let cost = stage5_mail_cost(gold, &attachments, stamp.is_some())?;
+    Some(Stage5MailParcelPlan { cost, stamp, attachments })
+}
+
+fn stage5_mail_quote(world: &World, gold: u32, items_idx: &[u64; 5], stamped: bool) -> Option<u32> {
+    let sender = stage5_mail_sender(world)?;
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let store = config.account_store.lock().ok()?;
+    let account = store.accounts.get(&sender.account_id)?;
+    let character = account.characters.iter().find(|character| character.index == sender.character_index && character.name == sender.character_name)?;
+    let save = account.saves.get(&character.index)?;
+    if save.character.index != character.index || save.character.name != character.name {
+        return None;
+    }
+    let inventory = save.inventory_items_json.iter().map(|state| serde_json::from_str::<ItemState>(state).ok()).collect::<Option<Vec<_>>>()?;
+    stage5_mail_parcel_plan(&inventory, gold, items_idx, stamped).map(|plan| plan.cost)
+}
+
+#[cfg(test)]
+#[path = "mail_parcel_tests.rs"]
+mod mail_parcel_tests;
 
 #[derive(Debug, Clone)]
 struct Stage5MailSender {
@@ -370,8 +443,7 @@ fn stage5_take_mail_attachments_from_save(
         if attachment_id_set.contains(&unique_id) {
             if !removed.insert(unique_id)
                 || !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-                || !exact_mail_item_state_is_valid(&item)
-                || !stage5_trade_item_can_enter(&item)
+                || !stage5_mail_item_allowed(&item)
             {
                 return Err("mail attachment changed before commit".to_string());
             }
@@ -416,6 +488,9 @@ fn stage5_commit_mail_transaction(
     total: u32,
     attachment_ids: &[u64],
     expected_attachment_states_json: &[String],
+    items_idx: &[u64; 5],
+    stamped: bool,
+    expected_stamp_state_json: Option<&str>,
 ) -> Result<Stage5MailCommit, String> {
     let self_mail =
         sender.account_id == target.account_id && sender.character_index == target.character_index;
@@ -474,15 +549,41 @@ fn stage5_commit_mail_transaction(
             Some(target_save)
         };
         let sender_baseline_revision = sender_save.revision;
-        sender_save.gold = sender_save
-            .gold
-            .checked_sub(total)
-            .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
+        let durable_inventory = sender_save.inventory_items_json.iter()
+            .map(|state| serde_json::from_str::<ItemState>(state))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| format!("invalid parcel inventory: {error}"))?;
+        let durable_plan = stage5_mail_parcel_plan(&durable_inventory, mail.gold, items_idx, stamped)
+            .ok_or_else(|| "parcel ownership or postage changed before commit".to_string())?;
+        let durable_stamp_json = durable_plan.stamp.as_ref().map(serde_json::to_string).transpose()
+            .map_err(|error| format!("invalid parcel stamp: {error}"))?;
+        if durable_stamp_json.as_deref() != expected_stamp_state_json
+            || mail.gold.checked_add(durable_plan.cost) != Some(total)
+        {
+            return Err("parcel stamp or fee changed before commit".to_string());
+        }
         let removed_attachments = stage5_take_mail_attachments_from_save(
             &mut sender_save,
             attachment_ids,
             expected_attachment_states_json,
         )?;
+        sender_save.gold = sender_save
+            .gold
+            .checked_sub(total)
+            .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
+        if let Some(mut stamp) = durable_plan.stamp {
+            let stamp_id = item_unique_id(&stamp);
+            let index = sender_save.inventory_items_json.iter().position(|state| {
+                serde_json::from_str::<ItemState>(state).is_ok_and(|item| item_unique_id(&item) == stamp_id)
+            }).ok_or_else(|| "parcel stamp disappeared before commit".to_string())?;
+            if stamp.quantity == 1 {
+                sender_save.inventory_items_json.remove(index);
+            } else {
+                stamp.quantity -= 1;
+                sender_save.inventory_items_json[index] = serde_json::to_string(&stamp)
+                    .map_err(|error| format!("failed to encode consumed stamp: {error}"))?;
+            }
+        }
         mail.items = removed_attachments
             .iter()
             .map(|item| item.key.clone())
@@ -564,30 +665,6 @@ fn stage5_mail_attachment_ids(items_idx: &[u64; 5]) -> Option<Vec<u64>> {
         ids.push(unique_id);
     }
     Some(ids)
-}
-
-fn stage5_mail_attachment_states(world: &World, unique_ids: &[u64]) -> Option<Vec<ItemState>> {
-    let inventory = world.resource::<InventoryResource>();
-    let mut items = Vec::with_capacity(unique_ids.len());
-    for unique_id in unique_ids {
-        let matches = inventory
-            .inventory_items
-            .iter()
-            .filter(|item| item_matches_inventory_unique_id(item, *unique_id))
-            .collect::<Vec<_>>();
-        let [item] = matches.as_slice() else {
-            return None;
-        };
-        if !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            || !exact_mail_item_state_is_valid(item)
-            || !stage5_trade_item_can_enter(item)
-        {
-            return None;
-        }
-        let item = (*item).clone();
-        items.push(item);
-    }
-    Some(items)
 }
 
 fn stage5_mail_attachment_user_items(mail: &Stage5MailMessage) -> Vec<UserItem> {
@@ -682,11 +759,12 @@ fn stage5_send_mail_packet(
     let Some(target) = stage5_mail_target_for_name(&config, &name) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
-    let Some(attachment_states) = stage5_mail_attachment_states(world, &attachment_ids) else {
+    let Some(plan) = stage5_mail_parcel_plan(
+        &world.resource::<InventoryResource>().inventory_items, gold, &items_idx, stamped,
+    ) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
-    let cost = stage5_mail_cost(gold, stamped);
-    let Some(total) = gold.checked_add(cost) else {
+    let Some(total) = gold.checked_add(plan.cost) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
     if world.resource::<PlayerRuntimeResource>().gold < total {
@@ -696,12 +774,16 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
 
-    let item_states_json = match attachment_states
+    let item_states_json = match plan.attachments
         .iter()
         .map(serde_json::to_string)
         .collect::<Result<Vec<_>, _>>()
     {
         Ok(states) => states,
+        Err(_) => return vec![ServerPacket::MailSent { result: -1 }],
+    };
+    let stamp_state_json = match plan.stamp.as_ref().map(serde_json::to_string).transpose() {
+        Ok(state) => state,
         Err(_) => return vec![ServerPacket::MailSent { result: -1 }],
     };
     let mail = Stage5MailMessage {
@@ -727,6 +809,9 @@ fn stage5_send_mail_packet(
         total,
         &attachment_ids,
         &item_states_json,
+        &items_idx,
+        stamped,
+        stamp_state_json.as_deref(),
     ) {
         Ok(committed) => committed,
         Err(error) => {
@@ -750,17 +835,20 @@ fn stage5_send_mail_packet(
     // The durable sender image is authoritative. A stale same-account session
     // is fully synchronized for the fields this transaction can affect, so an
     // attachment removed by another session cannot remain in this World.
-    let committed_ids = committed
+    let committed_quantities = committed
         .sender_inventory_items
         .iter()
-        .map(item_unique_id)
-        .collect::<BTreeSet<_>>();
+        .map(|item| (item_unique_id(item), item.quantity))
+        .collect::<BTreeMap<_, _>>();
     let removed_from_live = world
         .resource::<InventoryResource>()
         .inventory_items
         .iter()
-        .filter(|item| !committed_ids.contains(&item_unique_id(item)))
-        .cloned()
+        .filter_map(|item| {
+            let remaining = committed_quantities.get(&item_unique_id(item)).copied().unwrap_or(0);
+            let removed = item.quantity.saturating_sub(remaining);
+            (removed > 0).then_some((item_unique_id(item), removed))
+        })
         .collect::<Vec<_>>();
     world.resource_mut::<PlayerRuntimeResource>().gold = committed.sender_gold;
     world.resource_mut::<InventoryResource>().inventory_items = committed.sender_inventory_items;
@@ -773,10 +861,10 @@ fn stage5_send_mail_packet(
     if total > 0 {
         packets.push(ServerPacket::LoseGold { gold: total });
     }
-    for item in removed_from_live {
+    for (unique_id, count) in removed_from_live {
         packets.push(ServerPacket::DeleteItem {
-            unique_id: item_unique_id(&item),
-            count: item.quantity.min(u32::from(u16::MAX)) as u16,
+            unique_id,
+            count: count.min(u32::from(u16::MAX)) as u16,
         });
     }
     packets.push(ServerPacket::MailSent { result: 1 });
@@ -9306,9 +9394,11 @@ impl SimulationSession {
             ClientPacket::MailLockedItem { unique_id, locked } => {
                 vec![ServerPacket::MailLockedItem { unique_id, locked }]
             }
-            ClientPacket::MailCost { gold, stamped, .. } => {
+            ClientPacket::MailCost { gold, stamped, items_idx } => {
                 vec![ServerPacket::MailCost {
-                    cost: stage5_mail_cost(gold, stamped),
+                    // This packet has no error field. An invalid quote must
+                    // clear any old cheap/free quote, never authorize delivery.
+                    cost: stage5_mail_quote(self.app.world(), gold, &items_idx, stamped).unwrap_or(u32::MAX),
                 }]
             }
             ClientPacket::RequestIntelligentCreatureUpdates { update } => {

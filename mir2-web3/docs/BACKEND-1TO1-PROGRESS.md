@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+> 2026-09-21 parcel candidate: server validates owned attachments and NoMail,
+> quotes 100 gold per whole 1,000 attached gold plus 5% per-item insurance,
+> and consumes a real stamp inside the durable mail transaction. Failed
+> persistence preserves stamp/items/gold. NPC parcel service requires the
+> active offered link and interaction range. Mail 52/52, parcel 12/12 and
+> stale sender/shop 1/1 each pass. Live service remains unchanged; UI pending.
+
 > 2026-09-21 NPC price correction: use the absolute-value sum of merged wire
 > added stats instead of entry count; rental repair uses the same presence
 > reconstruction as UserItem serialization. Source rounding examples 3/3,
