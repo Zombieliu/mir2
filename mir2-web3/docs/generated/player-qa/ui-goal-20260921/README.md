@@ -116,3 +116,29 @@ Current package remains at login for user handoff following previous client
 Error1. Fresh logs C:/mir2-ui-repair-20260921/auth-lifetime-live include Bevy
 errors and native-soak resource counters. Memory/drag/help/multi-quest live
 checks still pending. Full goal remains active, not complete or paused.
+
+## Authorized login and in-game operation checks
+
+User explicitly authorized self-entry of the local test account credentials for
+future runs. Auth-lifetime package login succeeded through UI; selected existing
+a1 level11, Bichon (336,285), HP99/gold960. No account/password mutation.
+
+Live bag drag now passes: WoodenSword slot0 to empty row2/column5, then onto
+IronSword slot3 swapped both; both weapons were subsequently restored to their
+original slots. Gold and weight remained 960/39. Screenshots
+ auth-lifetime-bag-drag-empty.png and auth-lifetime-bag-swap.png.
+Stack merge remains unverified (only one potion stack present).
+
+Help dynamic pages 1,2,3 display all rows within the content frame. Next-page
+and close work. Screenshots auth-lifetime-help-page1/2/3.png. This verifies
+three dynamic pages only; other 42 help pages remain separate.
+
+Stationary a1 telemetry shows image assets rising 3122->10392->13424,
+imageDataBytes 3.16GB->10.77GB->13.95GB, while additive cache/material91,
+map tiles609 and entity layers8 remain stable. Process private bytes ~29.2GB.
+The map additive eviction fix therefore does NOT establish a memory fix.
+Image path/category telemetry is the next diagnostic step; do not suppress
+actor fallback textures simply to reduce counts.
+
+Computer tool detected user input before Q task panel action. Refreshed once
+and stopped keyboard/mouse; resumed backend diagnostics pending handoff.
