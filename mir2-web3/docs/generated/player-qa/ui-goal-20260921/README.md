@@ -272,3 +272,11 @@ Source f7057b28e. Client library951/951, Windows exact Equip/Remove receipt1/1, 
 Staged C:/numeron-legend-of-rebirth-20260921-equipment-storage. Client SHA256 BAC61E9B52A08DEF0CF12C2782E3405D465FA4D63541977DCEE9215345CD4858; Gateway SHA256 F4DBD45E090FF6D6C1E27415BF45733C4E7C57F1079DE59654242F7EB1A6FA29. Release builds: native15.59s, Gateway2m08s. Logs C:/mir2-ui-repair-20260921/equipment-storage-{client-tests,native-tests,backend-tests,merge-regression,native-build,gateway-build}.log.
 
 Same localhost19910/newcomer-v2 configuration and public asset junction. Neither executable launched or deployed; ordinary live session untouched. Pending renewed desktop handoff remains separate from authorization to enter local demo/demo credentials. Equipment/storage visual acceptance and wider whole-UI goal remain open; tests/package do not imply those gates passed.
+
+## Warehouse password feedback package
+
+Source2081eadd2. Native-ui952/952, runtime237/237, Windows receipt boundary1/1 passed. Release build15.25s. Logs C:/mir2-ui-repair-20260921/storage-feedback-{client-tests,runtime-tests,native-tests,native-build}.log.
+
+Staged C:/numeron-legend-of-rebirth-20260921-storage-feedback. Client SHA256 A4415B9EF8072146EB984911A8C60BAC86DA6C6FB7F060030D63916848A27008; unchanged matched Gateway SHA256 F4DBD45E090FF6D6C1E27415BF45733C4E7C57F1079DE59654242F7EB1A6FA29. Same localhost19910 config/public asset junction. This candidate includes previous equipment/warehouse work and new authoritative password feedback. Neither binary launched; no actual password changed. Renewed computer handoff and live/visual acceptance remain pending.
+
+Read-only process check still finds old native PID49272 responsive with29,251,375,104 private bytes. No new telemetry/live memory pass. An accidental recursive formatter run during implementation was backed up at C:/mir2-ui-repair-20260921/unintended-formatting-backup.patch and removed against this turn's verified baseline; final changes are scoped to the password UI/runtime/bridge and QA documentation. Unrelated quest artifacts were retained.
