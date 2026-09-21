@@ -1089,7 +1089,7 @@ fn captured_sealed_matches_live(captured: &UserItemSealedInfo, item: &ItemState)
         && captured.next_seal_binary_datetime == item.sealed_next_time_binary_datetime
 }
 
-fn rental_information_from_item_state(
+pub(super) fn rental_information_from_item_state(
     item: &ItemState,
     metadata: Option<&ItemStateUserItemMetadata>,
 ) -> Option<UserItemRentalInformation> {

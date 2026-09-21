@@ -1,6 +1,5 @@
-//! NPCDropDialog source geometry with an explicit native inventory picker.
-//! Ordinary bag drags may select the source cell when released over ItemCell;
-//! the picker remains available as an adapter for direct selection and equipment.
+//! NPCDropDialog source geometry with ordinary bag drag selection.
+//! The equipment picker remains an explicit adapter until equipment drag is wired.
 use super::*;
 
 const CONFIRM: CrystalRect = CrystalRect::new(114.0, 62.0, 48.0, 25.0);
@@ -100,9 +99,15 @@ fn selection_intent(
     }
     let item = selected_item(shop, inventory, state)?;
     let unique_id = item_unique_id(item)?;
-    if shop.allows_special_repair() && repair_selection_enabled(state, inventory) {
+    if shop.allows_special_repair()
+        && repair_selection_enabled(state, inventory)
+        && repair_quote(shop, item).is_some()
+    {
         Some(NativePlayerUiIntent::SRepairItem { unique_id })
-    } else if shop.allows_repair() && repair_selection_enabled(state, inventory) {
+    } else if shop.allows_repair()
+        && repair_selection_enabled(state, inventory)
+        && repair_quote(shop, item).is_some()
+    {
         Some(NativePlayerUiIntent::RepairItem { unique_id })
     } else if shop.allows_sell() && shop_sell_enabled(inventory, shop.selected_bag_slot_for_sell) {
         let count = state
@@ -116,6 +121,18 @@ fn selection_intent(
     } else {
         None
     }
+}
+
+fn repair_quote(
+    shop: &ShopModel,
+    item: &ItemModel,
+) -> Option<crate::crystal_ui::npc_item_quote::NpcRepairQuote> {
+    let rate = shop.repair_rate?;
+    crate::crystal_ui::npc_item_quote::crystal_npc_repair_quote(
+        item,
+        rate,
+        shop.allows_special_repair(),
+    )
 }
 
 pub(super) fn submit_selection(
@@ -216,10 +233,11 @@ pub(super) fn render(
     let service = service_action(shop);
     let repair = shop.allows_repair() || shop.allows_special_repair();
     let selected = selected_item(shop, inventory, state);
+    let repair_quote = repair.then(|| selected.and_then(|item| repair_quote(shop, item))).flatten();
     let enabled = service.is_some()
         && selected.is_some_and(|item| item_unique_id(item).is_some())
         && if repair {
-            repair_selection_enabled(state, inventory)
+            repair_selection_enabled(state, inventory) && repair_quote.is_some()
         } else {
             shop_sell_enabled(inventory, shop.selected_bag_slot_for_sell)
         };
@@ -254,7 +272,12 @@ pub(super) fn render(
         );
     }
     let title = service.map_or("Unavailable", |(title, _)| title);
-    let info = if shop.allows_sell() && !repair {
+    let info = if repair {
+        repair_quote.map_or_else(
+            || title.to_owned(),
+            |quote| format!("{title}: {} gold", quote.total_price),
+        )
+    } else if shop.allows_sell() {
         selected
             .and_then(|item| {
                 item.sell_value.checked_mul(
@@ -400,7 +423,7 @@ pub(super) fn render(
             TEXT,
         );
     }
-    if repair {
+    if repair && repair_quote.is_none() {
         overlay_text_at(
             parent,
             "Quote unavailable",
@@ -454,6 +477,40 @@ fn picker_item(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::inventory::{
+        CrystalItemInfoModel, CrystalItemStatModel, CrystalItemTooltipSourceModel,
+        CrystalUserItemModel,
+    };
+
+    fn repairable_item(unique_id: u64, container: u8, slot: u32) -> ItemModel {
+        ItemModel {
+            unique_id: Some(unique_id),
+            container,
+            slot,
+            quantity: 1,
+            durability_current: Some(500),
+            durability_max: Some(1000),
+            tooltip_source: Some(CrystalItemTooltipSourceModel {
+                info: CrystalItemInfoModel {
+                    item_index: 77,
+                    price: 1000,
+                    durability: 1000,
+                    ..Default::default()
+                },
+                user_item: Some(CrystalUserItemModel {
+                    unique_id,
+                    item_index: 77,
+                    current_dura: 500,
+                    max_dura: 1000,
+                    count: 1,
+                    added_stats: vec![CrystalItemStatModel { stat: 5, value: 5 }],
+                    ..Default::default()
+                }),
+                ..Default::default()
+            }),
+            ..Default::default()
+        }
+    }
 
     #[test]
     fn hold_selection_emits_once_and_idle_updates_do_not_resubmit() {
@@ -487,13 +544,7 @@ mod tests {
         app.world_mut()
             .resource_mut::<InventoryModel>()
             .items
-            .push(ItemModel {
-                unique_id: Some(42),
-                container: 2,
-                slot: 13,
-                quantity: 1,
-                ..default()
-            });
+            .push(repairable_item(42, 2, 13));
         fn press(app: &mut App, action: OverlayButton) {
             let button = app
                 .world_mut()
@@ -595,33 +646,33 @@ mod tests {
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .toggle_npc_shop();
-        app.world_mut().resource_mut::<ShopModel>().service_mode = NpcShopServiceMode::Repair;
+        *app.world_mut().resource_mut::<ShopModel>() = ShopModel {
+            service_mode: NpcShopServiceMode::Repair,
+            repair_rate: Some(1.0),
+            ..Default::default()
+        };
         app.world_mut().resource_mut::<InventoryModel>().items = vec![
-            ItemModel {
-                unique_id: Some(10),
-                container: 0,
-                slot: 45,
-                quantity: 1,
-                ..default()
-            },
-            ItemModel {
-                unique_id: Some(20),
-                container: 2,
-                slot: 13,
-                quantity: 1,
-                ..default()
-            },
+            repairable_item(10, 0, 45),
+            repairable_item(20, 2, 13),
         ];
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .shop_repair_slot = Some(45);
         app.update();
-        let world = app.world_mut();
-        let controls: Vec<_> = world
-            .query::<(&OverlayButton, &Node)>()
-            .iter(world)
-            .map(|(action, node)| (*action, node.clone()))
-            .collect();
+        let (controls, labels) = {
+            let world = app.world_mut();
+            let controls: Vec<_> = world
+                .query::<(&OverlayButton, &Node)>()
+                .iter(world)
+                .map(|(action, node)| (*action, node.clone()))
+                .collect();
+            let labels: Vec<_> = world
+                .query::<&Text>()
+                .iter(world)
+                .map(|text| text.0.clone())
+                .collect();
+            (controls, labels)
+        };
         assert!(!controls
             .iter()
             .any(|(action, _)| *action == OverlayButton::SelectBagForRepair(45)));
@@ -636,6 +687,22 @@ mod tests {
             (confirm.left, confirm.top, confirm.width, confirm.height),
             (Val::Px(114.0), Val::Px(62.0), Val::Px(48.0), Val::Px(25.0))
         );
+        assert!(labels.iter().any(|text| text == "Repair: 188 gold"));
+
+        app.world_mut().resource_mut::<InventoryModel>().items[0].tooltip_source = None;
+        {
+            let world = app.world();
+            let shop = world.resource::<ShopModel>();
+            let inventory = world.resource::<InventoryModel>();
+            let state = world.resource::<NativePlayerUiState>();
+            let selected = selected_item(shop, inventory, state).unwrap();
+            assert!(repair_quote(shop, selected).is_none());
+            assert!(selection_intent(shop, inventory, state).is_none());
+        }
+        app.update();
+        let world = app.world_mut();
+        let labels: Vec<_> = world.query::<&Text>().iter(world).map(|text| text.0.clone()).collect();
+        assert!(labels.iter().any(|text| text == "Quote unavailable"));
     }
 
     #[test]

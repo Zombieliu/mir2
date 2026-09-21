@@ -1,5 +1,11 @@
 # Backend 1:1 Progress
 
+> 2026-09-21 NPC price correction: use the absolute-value sum of merged wire
+> added stats instead of entry count; rental repair uses the same presence
+> reconstruction as UserItem serialization. Source rounding examples 3/3,
+> repair packet 5/5 and sale packet 2/2 pass. Existing saves unchanged; running
+> Gateway is not replaced yet. See NPC-service QA notes for exact evidence.
+
 > 2026-09-21 profile Gate sprite dispatch: images 950..953 now emit Gate/00..03
 > using Crystal's library family and zero base offset. Two focused mapping
 > and boundary tests pass; Gateway release builds. Deployment is pending

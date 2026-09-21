@@ -98,3 +98,42 @@ Candidate package C:/numeron-legend-of-rebirth-20260921-npc-service-drag,
 EXE SHA256 184A68FE091578BBCC95871684149394F0DB10EEAED6EB8117FEEFE004B2A1F2.
 It includes image/font attribution telemetry but has NOT been launched.
 Source, tests, and build do not establish live visual/service acceptance.
+
+## Repair/sale pricing candidate correction
+
+The earlier source-contract gate is now fixed in simulation source: merged
+AddedStats uses the sum of absolute values, and rental identity doubles repair
+cost using the existing wire-presence reconstruction (including Some(default)).
+No carrier schema or saved player state changed. Fixed numeric vectors pass3/3:
+base1000/max1000/current500/+5 yields current1312, repair188, special564;
+rental repair376 and special at rate1.5 yields1692. Negative stats, stack count,
+full durability and nondurable zero quotes are covered. Existing public packet
+repair tests5/5 and sale tests2/2 pass. Logs under
+C:/mir2-ui-repair-20260921/npc-price-tests.log,
+npc-repair-packet-tests.log and npc-sale-packet-tests.log.
+Running Gateway remains the old build; UI quotes must be deployed alongside
+this correction before claiming displayed/deducted equality. Live acceptance
+and source-equivalent equipment drag remain open.
+
+## Matched quote package receipts
+
+Client now computes ordinary/special repair display from concrete tooltip Info
+and UserItem identity, live top-level quantity and current/max durability,
+absolute stat-value weight, rental presence and validated NPC rate. Missing or
+inconsistent source data retains Quote unavailable and cannot enqueue repair.
+Authoritative simulation snapshots rebuild tooltip metadata; external partial
+payloads have no revision guarantee for same-ID stat/rental changes. No full
+external-server parity claim is made. Live quantity/durability updates are tested.
+
+Initial full client suite found2 incomplete repair fixtures; those now provide
+real source metadata and rate without weakening intent assertions. Final full
+native-ui suite900/900 passes; log npc-quote-client-tests-rerun.log under
+C:/mir2-ui-repair-20260921. Server release139s and native release68s pass.
+Matched candidate directory C:/numeron-legend-of-rebirth-20260921-npc-quotes:
+- mir2-platform-windows.exe SHA256 F4658793D053848295FFA2CAFBD01B3FAC7EA95C12E55C2B4082463EB62CB156
+- mir2-gateway.exe SHA256 FED42F81FF2160C3A95583747C95EA7AC97F6AE52B06502D503D4F5E817C16FD
+Both are staged, neither deployed/launched. Preserve current saved account store
+and ports when switching after normal logout and desktop handoff. Do not use
+a new client quote against the old server to claim exact pricing acceptance.
+Affordability feedback, actual deduction, equipment drag, and visual acceptance
+remain separate. Memory diagnostic instrumentation is included, not a leak fix.

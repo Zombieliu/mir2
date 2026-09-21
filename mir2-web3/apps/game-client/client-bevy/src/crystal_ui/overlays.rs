@@ -14188,6 +14188,30 @@ mod tests {
         }
     }
 
+    fn complete_repair_quote_metadata(item: &mut ItemModel) {
+        let unique_id = item.unique_id.expect("test repair item ID");
+        item.durability_current = Some(500);
+        item.durability_max = Some(1000);
+        item.tooltip_source = Some(CrystalItemTooltipSourceModel {
+            info: CrystalItemInfoModel {
+                item_index: 77,
+                name: item.name.clone(),
+                price: 1000,
+                durability: 1000,
+                ..Default::default()
+            },
+            user_item: Some(CrystalUserItemModel {
+                unique_id,
+                item_index: 77,
+                current_dura: 500,
+                max_dura: 1000,
+                count: u16::try_from(item.quantity).expect("test repair item count"),
+                ..Default::default()
+            }),
+            ..Default::default()
+        });
+    }
+
     pub(super) fn init_overlay_button_test_resources(app: &mut App) {
         let test_name = std::thread::current()
             .name()
@@ -17591,12 +17615,27 @@ mod tests {
         hold: bool,
     ) -> (App, Entity, Vec2, Vec2) {
         let (mut app, window, source, _) = batched_inventory_drag_app();
+        complete_repair_quote_metadata(
+            app.world_mut()
+                .resource_mut::<InventoryModel>()
+                .items
+                .first_mut()
+                .expect("test drag item"),
+        );
         {
             let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
             state.toggle_npc_shop();
             state.npc_service_hold = hold.then_some(mode);
         }
-        app.world_mut().resource_mut::<ShopModel>().service_mode = mode;
+        {
+            let mut shop = app.world_mut().resource_mut::<ShopModel>();
+            shop.service_mode = mode;
+            shop.repair_rate = matches!(
+                mode,
+                NpcShopServiceMode::Repair | NpcShopServiceMode::SpecialRepair
+            )
+            .then_some(1.0);
+        }
         // OverlayShop is at y=224 and NPCDropDialog.ItemCell is (38,72).
         let target = Vec2::new(40.0, 298.0);
         (app, window, source, target)
@@ -18038,7 +18077,9 @@ mod tests {
             let mut inv = app.world_mut().resource_mut::<InventoryModel>();
             inv.gold = 5000;
             inv.items.push(item("1", "Potion", 0, 0));
-            inv.items.push(item("2", "Sword", 0, 1));
+            let mut sword = item("2", "Sword", 0, 1);
+            complete_repair_quote_metadata(&mut sword);
+            inv.items.push(sword);
         }
         {
             let mut shop = app.world_mut().resource_mut::<ShopModel>();

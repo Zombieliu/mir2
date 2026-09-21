@@ -26,7 +26,7 @@ use super::crystal_compat::{
     CRYSTAL_GOODS_MAX_STORED_PER_ITEM, CRYSTAL_PANEL_BUY, CRYSTAL_PANEL_BUY_SUB,
     CRYSTAL_PANEL_CRAFT, GUIDE_NPC_ID,
 };
-use super::equipment::crystal_item_current_price;
+use super::equipment::{crystal_item_added_stat_weight, crystal_item_current_price};
 use super::inventory::{
     add_or_increment_item_with_durability_and_stats, binary_datetime_ticks, can_gain_item_quantity,
     current_binary_datetime, future_binary_datetime_minutes, item_matches_inventory_unique_id,
@@ -1272,13 +1272,7 @@ pub(super) fn sell_item_impl(world: &mut World, unique_id: u64, count: u16) -> V
 pub(super) fn crystal_sell_value_for_item(item: &ItemState) -> u32 {
     crystal_item_template_for_item_key(&item.key)
         .map(|template| {
-            let added_stat_count = merged_user_item_stats(
-                &item.added_stats,
-                item.added_defence,
-                item.added_attack,
-                None,
-            )
-            .len();
+            let added_stat_count = crystal_item_added_stat_weight(item);
             crystal_item_current_price(item, &template, added_stat_count) / 2
         })
         .unwrap_or_else(|| u32::from(item.weight.max(1)) * item.quantity.max(1))

@@ -33,6 +33,7 @@ use super::items::{
     default_item_unique_id, equipment_has_crystal_or_rental_bind_flag,
     item_has_crystal_or_rental_bind_flag, item_is_socket_type, item_state_can_equip_to_slot,
     item_state_identified, item_state_soul_bound_id, merged_user_item_stats,
+    rental_information_from_item_state,
     try_item_state_from_user_item, try_user_item_from_item_state, upsert_user_item_stat,
     user_item_from_item_state, ItemState, ItemStateUserItemMetadata,
 };
@@ -2344,19 +2345,32 @@ pub(super) fn crystal_item_repair_price(item: &ItemState, template: &CrystalItem
         return 0;
     }
 
-    let added_stat_count = merged_user_item_stats(
+    let added_stat_count = crystal_item_added_stat_weight(item);
+    let count = item.quantity.max(1);
+    let price_when_full = crystal_item_full_durability_price(item, template, added_stat_count);
+    let current_price = crystal_item_current_price(item, template, added_stat_count);
+    let cost = price_when_full
+        .saturating_mul(count)
+        .saturating_sub(current_price);
+    // Use the same rental presence as the outgoing UserItem, including
+    // Some(default) identity preserved by the metadata sidecar.
+    if rental_information_from_item_state(item, item.user_item_metadata.as_ref()).is_some() {
+        cost.saturating_mul(2)
+    } else {
+        cost
+    }
+}
+
+pub(super) fn crystal_item_added_stat_weight(item: &ItemState) -> usize {
+    // Crystal Stats.Count sums absolute values, not dictionary entries.
+    merged_user_item_stats(
         &item.added_stats,
         item.added_defence,
         item.added_attack,
         None,
     )
-    .len();
-    let count = item.quantity.max(1);
-    let price_when_full = crystal_item_full_durability_price(item, template, added_stat_count);
-    let current_price = crystal_item_current_price(item, template, added_stat_count);
-    price_when_full
-        .saturating_mul(count)
-        .saturating_sub(current_price)
+    .iter()
+    .fold(0usize, |total, stat| total.saturating_add(stat.value.unsigned_abs() as usize))
 }
 
 pub(super) fn crystal_item_full_durability_price(
@@ -2947,3 +2961,7 @@ mod native_start_equipment_tests {
 pub(super) fn crystal_apply_added_stat_price_factor(price: f32, added_stat_count: usize) -> u32 {
     (price * (1.0 + (added_stat_count as f32 * 0.1))).trunc() as u32
 }
+
+#[cfg(test)]
+#[path = "npc_item_price_tests.rs"]
+mod npc_item_price_tests;

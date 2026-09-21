@@ -1,5 +1,11 @@
 # Crystal Server Parity
 
+> 2026-09-21 candidate NPC sale/repair pricing now matches source Stat.Count
+> weighting and RentalInformation repair multiplier. Numeric tests 3/3 and
+> ordinary packet repair/sale regressions 5/5 + 2/2 pass. This is source/test
+> evidence only; rebuilt server deployment and native price/deduction comparison
+> remain pending. No player inventory, currency or save was edited.
+
 > 2026-09-21 Gate family correction: current-profile images 950..953 select
 > Gate/00..03 rather than nonexistent Monster/950..953. Original per-library
 > action metadata remains authoritative. Focused tests 2/2 and release build

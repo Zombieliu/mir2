@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-21 NPC pricing candidate: sale/repair added-stat weight now follows
+> Crystal Stats.Count (sum of absolute values), and repair doubles for rental
+> identity, including preserved Some(default). Source numeric regressions 3/3,
+> repair packet tests 5/5 and sale packet tests 2/2 pass. New server deployment
+> and live quotes/transactions remain open; no economy or visual acceptance claim.
+
 > 2026-09-21 current-profile asset closure repaired: full original libraries
 > for 174 monsters plus BoneFamiliar and 54 weapon/armour items are exported
 > and pixel-verified; native lazy Monster/Gate rendering and server Gate

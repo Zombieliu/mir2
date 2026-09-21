@@ -179,3 +179,13 @@ Not launched. Existing auth-lifetime client remains untouched during manual
 input handoff. Runtime memory, service visual/transactions, repair quotes and
 remaining whole-UI gates remain open. See NPC service QA notes for source and
 test receipts.
+
+## Repair quotes candidate
+
+Next matched candidate is C:/numeron-legend-of-rebirth-20260921-npc-quotes,
+containing rebuilt client and Gateway. Adds displayed source-derived repair and
+special-repair prices, corrects server absolute stat-value weighting and rental
+repair x2. Backend numeric3/3, repair packets5/5, sale packets2/2; full client
+900/900. Builds pass. Neither binary is deployed. Exact hashes and limitations
+are in NPC service notes. Existing desktop session untouched; renewal of control
+handoff remains pending. Entire UI goal and high-memory diagnosis remain open.
