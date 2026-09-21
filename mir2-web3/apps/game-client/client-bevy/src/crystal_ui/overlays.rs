@@ -81,6 +81,8 @@ use crate::storage::{
 use super::amount_input::{AmountKeyAction, CrystalAmountInput};
 #[path = "mail_reader_drag.rs"]
 mod mail_reader_drag;
+#[path = "mail_list.rs"]
+mod mail_list;
 use super::assets::CrystalButtonAssetSet;
 use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
 use super::hud::{free_inventory_slots, CrystalHudAction};
@@ -3212,7 +3214,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     friend_dialog::host::render_system,
                     ranking_dialog::render_system,
                     keyboard_dialog::host::render_system,
-                    layout_original_item_images,
+                    (layout_original_item_images, mail_list::layout_icons).chain(),
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Read),
@@ -13590,39 +13592,14 @@ fn render_mail(
         return;
     }
     let page = mail.page(mail_ui.cursor.page);
-    overlay_text_at(
-        parent,
-        &format!(
-            "Unread {} / Total {}",
-            mail.unread_count(),
-            mail.visible_mails().len()
-        ),
-        CrystalRect::new(10.0, 31.0, 290.0, 18.0),
-        10.0,
-        TEXT,
-    );
+    if let Some(assets) = asset_server {
+        spawn_static_overlay_sprite(parent, assets, "original-ui/Title/7.png".into(), CrystalRect::new(18.0, 9.0, 43.0, 14.0));
+    }
+    for (label, left, width) in [("Type", 8.0, 37.0), ("Sender", 47.0, 132.0), ("Message", 181.0, 122.0)] {
+        overlay_text_at(parent, label, CrystalRect::new(left, 34.0, width, 19.0), 10.0, TEXT);
+    }
     for (row, msg) in page.entries.iter().enumerate() {
-        let flags = format!(
-            "{}{}{}",
-            if msg.read { "" } else { "[New] " },
-            if msg.has_attachment() { "[+] " } else { "" },
-            if msg.locked { "[Lock] " } else { "" },
-        );
-        let selected = mail.selected_id == Some(msg.id);
-        let label = format!(
-            "{}{}{}: {}",
-            if selected { "▶ " } else { "" },
-            flags,
-            short_name(&msg.sender, "Unknown"),
-            short_name(&msg.subject, "Mail")
-        );
-        overlay_absolute_button(
-            parent,
-            &label,
-            CrystalRect::new(10.0, 55.0 + row as f32 * 33.0, 290.0, 33.0),
-            OverlayButton::SelectMail(msg.id),
-            true,
-        );
+        mail_list::row(parent, asset_server, msg, row, mail.selected_id == Some(msg.id));
     }
 
     if let Some(asset_server) = asset_server {
@@ -13633,7 +13610,7 @@ fn render_mail(
             240,
             241,
             242,
-            CrystalRect::new(102.0, 389.0, 24.0, 21.0),
+            CrystalRect::new(102.0, 389.0, 16.0, 16.0),
             OverlayButton::MailPagePrev,
             page.page > 0,
         );
@@ -13644,7 +13621,7 @@ fn render_mail(
             243,
             244,
             245,
-            CrystalRect::new(192.0, 389.0, 24.0, 21.0),
+            CrystalRect::new(192.0, 389.0, 16.0, 16.0),
             OverlayButton::MailPageNext,
             page.page + 1 < page.page_count,
         );
@@ -13667,20 +13644,20 @@ fn render_mail(
             563,
             564,
             565,
-            CrystalRect::new(75.0, 414.0, 27.0, 25.0),
+            CrystalRect::new(75.0, 414.0, 28.0, 25.0),
             OverlayButton::OpenMailCompose,
         );
-        spawn_overlay_crystal_button_enabled(
+        if selected.is_some_and(|message| message.can_reply) { spawn_overlay_crystal_button_enabled(
             parent,
             asset_server,
             "Prguse",
             569,
             570,
             571,
-            CrystalRect::new(102.0, 414.0, 27.0, 25.0),
+            CrystalRect::new(102.0, 414.0, 28.0, 25.0),
             OverlayButton::MailReply(selected_id),
             selected.is_some_and(|message| message.can_reply),
-        );
+        ); }
         spawn_overlay_crystal_button_enabled(
             parent,
             asset_server,
@@ -13688,7 +13665,7 @@ fn render_mail(
             572,
             573,
             574,
-            CrystalRect::new(129.0, 414.0, 27.0, 25.0),
+            CrystalRect::new(129.0, 414.0, 28.0, 25.0),
             OverlayButton::ReadMail(selected_id),
             selected.is_some(),
         );
@@ -13699,19 +13676,14 @@ fn render_mail(
             557,
             558,
             559,
-            CrystalRect::new(156.0, 414.0, 27.0, 25.0),
+            CrystalRect::new(156.0, 414.0, 28.0, 25.0),
             OverlayButton::DeleteMail(selected_id),
             selected.is_some_and(mail_delete_enabled),
         );
-    }
-    if let Some(message) = selected.filter(|message| mail_claim_enabled(message)) {
-        overlay_absolute_button(
-            parent,
-            "Claim",
-            CrystalRect::new(215.0, 414.0, 55.0, 24.0),
-            OverlayButton::ClaimMail(message.id),
-            true,
-        );
+        for (index, left) in [(520, 183.0), (523, 210.0)] {
+            spawn_overlay_crystal_button_enabled(parent, asset_server, "Prguse", index, index + 1, index + 2,
+                CrystalRect::new(left, 414.0, 28.0, 25.0), OverlayButton::CloseMail, false);
+        }
     }
 }
 
