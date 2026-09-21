@@ -58,7 +58,39 @@ fn deserialize_mail_messages<'de, D>(deserializer: D) -> Result<Vec<MailMessage>
 where
     D: de::Deserializer<'de>,
 {
-    deserialize_bounded::<D, MailMessage, MAX_MAIL_MESSAGES>(deserializer)
+    // The native bridge appends one transient operation receipt after the
+    // mailbox. It must not compete with real mail for the 256-row limit:
+    // dropping that receipt would leave a full inbox's operation pending.
+    struct MailMessagesVisitor;
+    impl<'de> Visitor<'de> for MailMessagesVisitor {
+        type Value = Vec<MailMessage>;
+
+        fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+            formatter.write_str("a bounded mailbox with at most one operation receipt")
+        }
+
+        fn visit_seq<A>(self, mut sequence: A) -> Result<Self::Value, A::Error>
+        where
+            A: SeqAccess<'de>,
+        {
+            let mut rows = Vec::with_capacity(MAX_MAIL_MESSAGES + 1);
+            let mut messages = 0;
+            let mut has_feedback = false;
+            while let Some(row) = sequence.next_element::<MailMessage>()? {
+                if row.operation.is_some() {
+                    if !has_feedback {
+                        rows.push(row);
+                        has_feedback = true;
+                    }
+                } else if messages < MAX_MAIL_MESSAGES {
+                    rows.push(row);
+                    messages += 1;
+                }
+            }
+            Ok(rows)
+        }
+    }
+    deserializer.deserialize_seq(MailMessagesVisitor)
 }
 
 /// A server-owned mail attachment. `unique_id` is optional only for legacy
@@ -190,7 +222,7 @@ impl MailModel {
     }
 
     pub fn unread_count(&self) -> usize {
-        self.mails.iter().filter(|m| !m.read).count()
+        self.mails.iter().filter(|m| m.operation.is_none() && !m.read).count()
     }
 
     pub fn visible_mails(&self) -> Vec<&MailMessage> {
@@ -269,16 +301,51 @@ pub fn mail_attachment_label(item: &MailAttachment) -> String {
 }
 
 pub fn mail_claim_enabled(msg: &MailMessage) -> bool {
-    !msg.claimed && !msg.locked && msg.has_attachment()
+    msg.operation.is_none() && !msg.claimed && !msg.locked && msg.has_attachment()
 }
 
 pub fn mail_delete_enabled(msg: &MailMessage) -> bool {
-    !msg.locked
+    msg.operation.is_none() && !msg.locked
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn full_mailbox_keeps_appended_receipt_without_evicting_real_mail() {
+        use crate::pending_operations::{reconcile_mail_refresh, PendingOperationKey, PendingOperations};
+        let rows: Vec<_> = (0..MAX_MAIL_MESSAGES).map(|id| serde_json::json!({"id":id,"read":true})).collect();
+        let old: MailModel = serde_json::from_value(serde_json::json!({"mails":rows})).unwrap();
+        let mut rows = rows;
+        rows.push(serde_json::json!({"id":u64::MAX,"operation":{"kind":"collect","success":false,"mailId":255}}));
+        let new: MailModel = serde_json::from_value(serde_json::json!({"mails":rows})).unwrap();
+        assert_eq!(new.visible_mails(), old.visible_mails());
+        assert_eq!(new.mails.len(), MAX_MAIL_MESSAGES + 1);
+        assert_eq!(new.unread_count(), 0);
+        let feedback = new.mails.last().unwrap();
+        assert!(!mail_delete_enabled(feedback));
+        assert!(!mail_claim_enabled(feedback));
+        let mut pending = PendingOperations::default();
+        assert!(pending.try_begin(PendingOperationKey::ClaimMail(255)));
+        assert!(pending.try_begin(PendingOperationKey::ClaimMail(254)));
+        assert_eq!(reconcile_mail_refresh(&mut pending, &old, &new), 1);
+        assert!(!pending.contains(&PendingOperationKey::ClaimMail(255)));
+        assert!(pending.contains(&PendingOperationKey::ClaimMail(254)));
+    }
+
+    #[test]
+    fn mailbox_limits_real_messages_and_feedback_independently() {
+        let receipt = serde_json::json!({"id":u64::MAX,"operation":{"kind":"send","success":false,"mailId":null}});
+        let mut rows = vec![receipt.clone(); 50];
+        rows.extend((0..MAX_MAIL_MESSAGES + 20).map(|id| serde_json::json!({"id":id})));
+        rows.push(receipt);
+        let model: MailModel = serde_json::from_value(serde_json::json!({"mails":rows})).unwrap();
+        assert_eq!(model.mails.len(), MAX_MAIL_MESSAGES + 1);
+        assert_eq!(model.visible_mails().len(), MAX_MAIL_MESSAGES);
+        assert_eq!(model.mails.iter().filter(|m| m.operation.is_some()).count(), 1);
+        assert_eq!(model.unread_count(), MAX_MAIL_MESSAGES);
+    }
 
     fn msg(id: u64, claimed: bool, locked: bool, gold: u32) -> MailMessage {
         MailMessage {

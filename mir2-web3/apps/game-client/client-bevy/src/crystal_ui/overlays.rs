@@ -44,8 +44,8 @@ use crate::game_shop::{
 };
 use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
 use crate::mail::{
-    mail_claim_enabled, mail_delete_enabled, MailModel, MailOperationKind, MailPageCursor,
-    MAX_MAIL_ATTACHMENTS,
+    mail_claim_enabled, mail_delete_enabled, MailAttachment, MailModel, MailOperationKind,
+    MailPageCursor, MAX_MAIL_ATTACHMENTS,
 };
 use crate::map::MapModel;
 use crate::native_shell::{
@@ -845,6 +845,12 @@ pub struct NativePlayerUiState {
     /// an authoritative server acknowledgement.
     pub inventory_delete_mode: bool,
     pub inventory_delete_prompt: Option<InventoryDeletePrompt>,
+    /// MailDialog's source Yes/No warning for a parcel that still contains
+    /// item rows or gold. Its identity is rechecked on the eventual Yes.
+    pub(crate) mail_delete_prompt: Option<MailDeletePrompt>,
+    /// A prompt closing on Enter/Escape/Yes/No consumes the remainder of that
+    /// input frame so covered mail or world controls cannot receive it.
+    pub(crate) mail_delete_input_consumed: bool,
     pub inventory_window: InventoryDialogUi,
     pub selected_group_member: Option<u8>,
     /// Crystal's group window accepts a player name independently of the
@@ -943,6 +949,16 @@ struct StorageItemDrag {
     start: Vec2,
 }
 
+/// Crystal's MailDialog warns before discarding a parcel with an attachment.
+/// Capture the attachment snapshot so a late Yes cannot delete a refreshed
+/// message whose contents changed while the source MirMessageBox was open.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct MailDeletePrompt {
+    mail_id: u64,
+    gold: u32,
+    items: Vec<MailAttachment>,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) struct EquipmentItemDrag {
     source_slot: u32,
@@ -1036,6 +1052,8 @@ impl Default for NativePlayerUiState {
             drop_confirmation: None,
             inventory_delete_mode: false,
             inventory_delete_prompt: None,
+            mail_delete_prompt: None,
+            mail_delete_input_consumed: false,
             inventory_window: InventoryDialogUi::default(),
             selected_group_member: None,
             group_invite_draft: String::new(),
@@ -1291,7 +1309,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
-        self.storage_password_prompt.is_some()
+        self.mail_delete_prompt.is_some()
+            || self.mail_delete_input_consumed
+            || self.storage_password_prompt.is_some()
             || self.storage_password_input_consumed
             || self.storage_rental_confirmation.is_some()
             || self.storage_rental_input_consumed
@@ -1364,6 +1384,8 @@ impl NativePlayerUiState {
             || panel_blocks
             || self.inspect.is_some()
             || self.inventory_delete_prompt.is_some()
+            || self.mail_delete_prompt.is_some()
+            || self.mail_delete_input_consumed
             || self.guild_gold_prompt.is_some()
             || self.trade_dialog.open
             || self.trade_dialog.message.is_some()
@@ -1412,6 +1434,8 @@ impl NativePlayerUiState {
         self.drop_confirmation = None;
         self.inventory_delete_mode = false;
         self.inventory_delete_prompt = None;
+        self.mail_delete_prompt = None;
+        self.mail_delete_input_consumed = false;
         self.inventory_window.end_drag();
         self.inventory_window.clear_cursor();
         self.shop_repair_container = 0;
@@ -1466,6 +1490,7 @@ impl NativePlayerUiState {
             || self.social_bonds.prompt.is_some()
             || self.social_bonds.input_consumed
             || self.inventory_delete_prompt.is_some()
+            || self.mail_delete_prompt.is_some()
             || self.guild_gold_prompt.is_some()
             || self.trade_dialog.gold_prompt.is_some()
             || self.trade_dialog.message.is_some()
@@ -2528,6 +2553,9 @@ struct OverlayInventory;
 struct OverlayInventoryDeleteModal;
 
 #[derive(Component)]
+struct OverlayMailDeleteModal;
+
+#[derive(Component)]
 struct OverlayStoragePasswordModal;
 
 #[derive(Component)]
@@ -2562,6 +2590,9 @@ struct OverlayInventoryDeleteCursor;
 
 #[derive(Component)]
 struct OverlayInventoryDeleteDialog;
+
+#[derive(Component)]
+struct OverlayMailDeleteDialog;
 
 #[derive(Component)]
 struct OverlayInventoryDeleteAmountInput;
@@ -2785,6 +2816,8 @@ enum OverlayButton {
     InventoryDeleteConfirm,
     InventoryDeleteCancel,
     InventoryDeleteAmountClose,
+    MailDeleteConfirm,
+    MailDeleteCancel,
     DropInspected,
     ConfirmDropInspected,
     CancelDropInspected,
@@ -2886,6 +2919,7 @@ pub(crate) struct OverlayKeyboardControls<'w> {
     surface_signals: Option<ResMut<'w, UiSurfaceSignals>>,
     ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
     ui: Option<Res<'w, UiReadModel>>,
+    mail: Option<ResMut<'w, MailModel>>,
     effects: Option<ResMut<'w, UiEffectQueue>>,
     belt: Option<ResMut<'w, super::hud::CrystalBeltPresentation>>,
 }
@@ -3205,6 +3239,7 @@ fn sync_local_panel_models(
     mut skills: ResMut<SkillModel>,
     mut skill_receipts: Option<ResMut<crate::skill_model::SkillModelReceipts>>,
 ) {
+    state.mail_delete_input_consumed = false;
     reconcile_inventory_capacity(&mut state, &inventory);
     if !state.inventory_open() {
         state.inventory_delete_mode = false;
@@ -3219,6 +3254,15 @@ fn sync_local_panel_models(
         state.cancel_inventory_delete();
     }
     mail.clamp_after_refresh(&mut mail_ui.cursor);
+    if !state.mail_open()
+        || state
+            .mail_delete_prompt
+            .as_ref()
+            .is_some_and(|prompt| !mail_delete_prompt_is_current(prompt, &mail))
+    {
+        state.mail_delete_input_consumed |= state.mail_delete_prompt.is_some();
+        state.mail_delete_prompt = None;
+    }
     storage.clamp_after_refresh(&mut storage_ui.cursor);
     storage_ui.bag_selection = storage_ui.bag_selection.filter(|selection| {
         inventory_selection_for_slot(&inventory, selection.slot) == Some(*selection)
@@ -3581,6 +3625,24 @@ fn spawn_overlay_root(mut commands: Commands) {
             root.spawn((
                 OverlayInventoryDeleteModal,
                 Button,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(1024.0),
+                    height: Val::Px(768.0),
+                    display: Display::None,
+                    ..default()
+                },
+                GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
+                BackgroundColor(Color::NONE),
+            ));
+            // MailDialog's parcel warning is the same source MirMessageBox
+            // shape, but owns an independent confirmation identity.
+            root.spawn((
+                OverlayMailDeleteModal,
+                Button,
+                FocusPolicy::Block,
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(0.0),
@@ -5531,6 +5593,7 @@ pub(crate) fn process_overlay_keyboard(
         mut surface_signals,
         mut ui_audio,
         ui,
+        mut mail,
         mut effects,
         mut belt,
     } = keyboard_controls;
@@ -5771,6 +5834,25 @@ pub(crate) fn process_overlay_keyboard(
                 state.trade_dialog.gold_prompt = None;
             }
         }
+        return;
+    }
+
+    // MailDialog's parcel warning is a source MirMessageBox Yes/No. It owns
+    // this entire input frame even after Enter/Escape closes it.
+    if state.mail_delete_prompt.is_some() {
+        if keys.just_pressed(KeyCode::Escape) {
+            state.mail_delete_input_consumed = true;
+            state.mail_delete_prompt = None;
+            ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+        } else if keys.just_pressed(KeyCode::Enter) {
+            state.mail_delete_input_consumed = true;
+            if mail.as_deref_mut().is_some_and(|mail| {
+                confirm_mail_delete(&mut state, mail, &mut intents, &mut pending)
+            }) {
+                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+            }
+        }
+        typed.clear();
         return;
     }
 
@@ -6510,6 +6592,7 @@ fn process_overlay_buttons(
     let gold_modal_was_open = state.guild_gold_prompt.is_some();
     let trade_modal_was_open = state.trade_dialog.gold_prompt.is_some();
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
+    let mail_delete_modal_was_open = state.mail_delete_prompt.is_some();
     let message_was_open = state.trade_dialog.message.is_some();
     let game_shop_modal_was_open = state.game_shop_dialog.confirmation.is_some();
     let storage_rental_modal_was_open = state.storage_rental_confirmation.is_some();
@@ -6530,7 +6613,18 @@ fn process_overlay_buttons(
         if *interaction != Interaction::Pressed {
             continue;
         }
-        if state.storage_password_input_consumed || state.storage_rental_input_consumed {
+        if state.storage_password_input_consumed
+            || state.storage_rental_input_consumed
+            || state.mail_delete_input_consumed
+        {
+            continue;
+        }
+        if (mail_delete_modal_was_open || state.mail_delete_prompt.is_some())
+            && !matches!(
+                button,
+                OverlayButton::MailDeleteConfirm | OverlayButton::MailDeleteCancel
+            )
+        {
             continue;
         }
         if (storage_rental_modal_was_open || state.storage_rental_confirmation.is_some())
@@ -6842,6 +6936,8 @@ fn process_overlay_buttons(
                 if state.mail_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
+                state.mail_delete_prompt = None;
+                state.mail_delete_input_consumed = false;
             }
             OverlayButton::CloseBigMap => {
                 if state.bigmap_open() {
@@ -7553,6 +7649,17 @@ fn process_overlay_buttons(
                     ui_audio.push(crate::audio::NativeUiSound::ButtonA);
                 }
             }
+            OverlayButton::MailDeleteConfirm => {
+                state.mail_delete_input_consumed = true;
+                if confirm_mail_delete(&mut state, &mut mail, &mut intents, &mut pending) {
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                }
+            }
+            OverlayButton::MailDeleteCancel => {
+                state.mail_delete_prompt = None;
+                state.mail_delete_input_consumed = true;
+                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+            }
             OverlayButton::DropInspected => {
                 state.drop_confirmation = inspected_drop_confirmation(&state, &inventory);
             }
@@ -7799,7 +7906,9 @@ fn process_overlay_buttons(
             }
             OverlayButton::DeleteMail(id) => {
                 if let Some(msg) = mail.mails.iter().find(|m| m.id == id) {
-                    if mail_delete_enabled(msg) {
+                    if let Some(prompt) = mail_delete_prompt_for_message(msg) {
+                        state.mail_delete_prompt = Some(prompt);
+                    } else if mail_delete_enabled(msg) {
                         intents.push_pending_intent(
                             &mut pending,
                             NativePlayerUiIntent::DeleteMail { mail_id: id },
@@ -8566,6 +8675,51 @@ fn confirm_inventory_delete(
     true
 }
 
+fn mail_delete_prompt_for_message(message: &crate::mail::MailMessage) -> Option<MailDeletePrompt> {
+    (mail_delete_enabled(message) && message.has_attachment()).then(|| MailDeletePrompt {
+        mail_id: message.id,
+        gold: message.gold,
+        items: message.items.clone(),
+    })
+}
+
+fn mail_delete_prompt_is_current(prompt: &MailDeletePrompt, mail: &MailModel) -> bool {
+    mail.mails.iter().find(|message| message.id == prompt.mail_id).is_some_and(|message| {
+        mail_delete_enabled(message)
+            && message.has_attachment()
+            && message.gold == prompt.gold
+            && message.items == prompt.items
+    })
+}
+
+fn confirm_mail_delete(
+    state: &mut NativePlayerUiState,
+    mail: &mut MailModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    let Some(prompt) = state.mail_delete_prompt.clone() else {
+        return false;
+    };
+    if !mail_delete_prompt_is_current(&prompt, mail) {
+        state.mail_delete_prompt = None;
+        return false;
+    }
+    if !intents.push_pending_intent(
+        pending,
+        NativePlayerUiIntent::DeleteMail {
+            mail_id: prompt.mail_id,
+        },
+    ) {
+        return false;
+    }
+    // Crystal clears SelectedMail once its Yes handler has accepted the
+    // enqueue. Keep a failed/deduplicated request selected for a later retry.
+    mail.selected_id = None;
+    state.mail_delete_prompt = None;
+    true
+}
+
 fn inspected_drop_confirmation(
     state: &NativePlayerUiState,
     inventory: &InventoryModel,
@@ -8820,6 +8974,67 @@ fn render_inventory_delete_modal(
                 });
         }
     }
+}
+
+/// MailDialog's attachment warning uses the standard Crystal Yes/No
+/// MirMessageBox frame and wording, rather than the inventory's permanent
+/// item-delete message.
+fn render_mail_delete_modal(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+) {
+    parent
+        .spawn((
+            OverlayMailDeleteDialog,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.left),
+                top: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.top),
+                width: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.width),
+                height: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.height),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|dialog| {
+            if let Some(asset_server) = asset_server {
+                spawn_overlay_frame(
+                    dialog,
+                    asset_server,
+                    "original-ui/Prguse/360.png",
+                    CRYSTAL_DELETE_CONFIRM_RECT.width,
+                    CRYSTAL_DELETE_CONFIRM_RECT.height,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    206,
+                    207,
+                    208,
+                    CrystalRect::new(260.0, 157.0, 76.0, 25.0),
+                    OverlayButton::MailDeleteConfirm,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    210,
+                    211,
+                    212,
+                    CrystalRect::new(360.0, 157.0, 76.0, 25.0),
+                    OverlayButton::MailDeleteCancel,
+                );
+            }
+            overlay_text_at(
+                dialog,
+                "This parcel contains items or gold. Are you sure you want to delete it?",
+                CrystalRect::new(35.0, 35.0, 390.0, 110.0),
+                10.0,
+                TEXT,
+            );
+        });
 }
 
 fn storage_password_caption(stage: StoragePasswordStage) -> &'static str {
@@ -9194,6 +9409,7 @@ fn render_overlays(
             Query<(Entity, &mut Node), With<OverlayTradeGoldModal>>,
             Query<(Entity, &mut Node), With<OverlayStoragePasswordModal>>,
             Query<(Entity, &mut Node), With<OverlayStorageRentalModal>>,
+            Query<(Entity, &mut Node), With<OverlayMailDeleteModal>>,
         )>,
     )>,
     mut commands: Commands,
@@ -9511,6 +9727,12 @@ fn render_overlays(
                     state.storage_rental_confirmation,
                 )
             },
+        );
+        fill_panel(
+            &mut commands,
+            &mut delete_layers.p7(),
+            state.mail_delete_prompt.is_some(),
+            |parent| render_mail_delete_modal(parent, asset_server.as_deref()),
         );
 
         let cursor = windows
@@ -14209,6 +14431,10 @@ mod storage_password_tests;
 mod storage_rental_tests;
 
 #[cfg(test)]
+#[path = "mail_delete_tests.rs"]
+mod mail_delete_tests;
+
+#[cfg(test)]
 mod tests {
     #[test]
     fn item_use_time_is_shared_across_player_hero_and_survives_draining() {
@@ -17443,8 +17669,9 @@ mod tests {
                 .clone();
             assert!(intents.is_empty());
         }
-        // Delete mail 10 should push
-        press(&mut app, OverlayButton::DeleteMail(10));
+        // A parcel warning is covered by focused mail_delete_tests. A plain
+        // row keeps MailDialog's direct-delete path.
+        press(&mut app, OverlayButton::DeleteMail(11));
         {
             let intents = app
                 .world()
@@ -17453,7 +17680,7 @@ mod tests {
                 .clone();
             assert!(intents
                 .iter()
-                .any(|i| matches!(i, NativePlayerUiIntent::DeleteMail { mail_id: 10 })));
+                .any(|i| matches!(i, NativePlayerUiIntent::DeleteMail { mail_id: 11 })));
         }
     }
 
