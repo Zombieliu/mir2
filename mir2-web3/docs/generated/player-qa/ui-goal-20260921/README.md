@@ -264,3 +264,11 @@ Source 9956a5039; 936 native-ui tests and one Windows storage transformer regres
 
 Source d2c9d820d. Client943/943, backend addstorage8/8, source asset audit0 issues (2371 positive frames/82 source-empty) passed. Matched releases built: native1m09s, Gateway2m18s. Staged C:/numeron-legend-of-rebirth-20260921-storage-rental. Client SHA256 ABF53C685646830AE5912399FE0E3DE225A569E8BE340A9FE95C5B8DCB2BC13C; Gateway SHA256 9A50205320130863549E6A51728CC0DE6C983A45A9692DBD85596C00568224B3. Same localhost19910 config and public assets junction; neither binary launched/deployed. Do not use older gateway to validate the corrected 1,000,000-gold/10-day rental flow. Exact source images inspected, not native desktop visuals. Renewed computer handoff still pending; active session untouched.
 
+
+## Equipment and warehouse matched package
+
+Source f7057b28e. Client library951/951, Windows exact Equip/Remove receipt1/1, new backend merge9/9 and existing merge_item24/24 passed. Initial backend fixture failures (belt auto-placement) and a real synthetic Amulet durability mismatch were corrected before passing; failures were not counted as accepted evidence.
+
+Staged C:/numeron-legend-of-rebirth-20260921-equipment-storage. Client SHA256 BAC61E9B52A08DEF0CF12C2782E3405D465FA4D63541977DCEE9215345CD4858; Gateway SHA256 F4DBD45E090FF6D6C1E27415BF45733C4E7C57F1079DE59654242F7EB1A6FA29. Release builds: native15.59s, Gateway2m08s. Logs C:/mir2-ui-repair-20260921/equipment-storage-{client-tests,native-tests,backend-tests,merge-regression,native-build,gateway-build}.log.
+
+Same localhost19910/newcomer-v2 configuration and public asset junction. Neither executable launched or deployed; ordinary live session untouched. Pending renewed desktop handoff remains separate from authorization to enter local demo/demo credentials. Equipment/storage visual acceptance and wider whole-UI goal remain open; tests/package do not imply those gates passed.
