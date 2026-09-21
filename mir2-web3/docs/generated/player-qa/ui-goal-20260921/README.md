@@ -383,3 +383,19 @@ Letter now uses shaped glyph positions for its caret, pointer selection, vertica
 
 Native UI library: 994 passed, 0 failed (C:/mir2-ui-repair-20260921/mail-editor-final-tests.log). These are code tests, not desktop visual acceptance. Clipboard, IME, explicit wheel scrolling, complete original Parcel/service flow, and same-build native visual checks remain open. Existing 256-unit editor limit is not claimed to match the original server limit.
 Staged package: C:/numeron-legend-of-rebirth-20260921-mail-editor. Client SHA256 333AC3B6698178F03F7FC7FC429CA3DECA06CDD00F38DAD17F79C9F41E8FE28B; matched Gateway SHA256 9CB0C8491BB1D41A4885E28CDE314DA9A2BE1FF57463509D1213B46F802C2F55. Release build passed (mail-editor-native-build.log). Not deployed or visually accepted; existing live account/session untouched.
+
+## Old live client OOM — not a new-package result
+
+Read-only process/log verification found the old auth-lifetime client exited with code1 at 2026-09-21 13:24:40 UTC. stderr first reports Out of Memory at13:24:38.629, then invalid textures/UI material errors and intentional renderer shutdown. Latest pre-fault sample:15308 images /15794462044 image CPU bytes; private bytes peaked33084MB, working set18595MB. Image growth accelerated after the final StartGame; map tiles1424, entity atlases7 and active effects52 remained stable. Queue stayed empty. The old trace has no FontAtlasSet/path ownership telemetry, so it cannot establish the allocation owner or prove the newer pinned-font fix.
+
+Logs: C:/mir2-ui-repair-20260921/auth-lifetime-live/20260921-080429-331.stderr.log and matching .process.jsonl. The new settings candidate must repeat ordinary login/StartGame and reconnect, with at least three stationary minutes after each, capturing image-path/font-atlas attribution and process memory. No same-build stability pass exists. Do not classify expected cleanup warnings after the OOM as the initial cause.
+
+## Settings controls and same-map task guidance candidate
+
+- Original options Sound/Music bars now accept source-position click/drag with scaled pointer coordinates, modal/focus/session cancellation and closing-frame consumption. Native thumb placement matches source. Background-music development mute remains explicit; no audible-music pass is claimed.
+- SkillMode now changes only original constrained Bar1/Bar2 Ctrl/tilde bindings, skips disabled keys, preserves unrelated/custom bindings and applies after load plus in the same frame as a setting change.
+- NewMove now gates right-click path creation, held retargeting and destination marker. Classic mode uses direct held-right movement and stops on release. Disabling NewMove cancels only its pointer path, preserving accepted pending movement, pursuit and non-pointer navigation.
+- Same-map secondary hunt tasks use authored unfinished-objective spawn regions when no live monster is visible. Labels identify a hunting region, never a guaranteed live target. Completion or absent progress excludes that region.
+
+Verification: native UI library1005/1005 (settings-guidance-pass-tests.log); Windows input74/74 (settings-native-input-tests.log), including old/new movement and option transitions. Initial compilation exposed the Bevy tuple-size limit; nesting preserves system order. One isolated volume test fixture omitted the real per-frame pointer latch reset; fixed without weakening the production guard. An initial quest test filter matched zero and is not counted; the explicit authored_cat_region regression and final full suite pass. Same-build visual, sound and memory acceptance remain open.
+Staged settings/guidance package: C:/numeron-legend-of-rebirth-20260921-settings-guidance. Client SHA256 28E37B2DC989B73CE3A46D9A0EE3ABEAB4474E56FCE0962FD4CDAEFC8829AEE8; matched Gateway SHA256 9CB0C8491BB1D41A4885E28CDE314DA9A2BE1FF57463509D1213B46F802C2F55. Release build passed (settings-native-build.log). Not launched/deployed; no live or visual pass.

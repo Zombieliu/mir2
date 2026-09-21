@@ -48,6 +48,40 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
         }
     }
     if quest.status == QuestStatus::InProgress {
+        if let Some(current_map) = big_map.and_then(|model| model.current_map_index) {
+            // The authored respawn area is a fallback when no relevant monster
+            // is presently visible. Scope it to this one authoritative quest:
+            // unrelated active objectives must not make a task look nearby.
+            let single = QuestTracker {
+                active_quests: vec![quest.clone()],
+            };
+            if let Some(region) = crate::quest_hunt_regions::active_hunt_regions(
+                &single,
+                current_map,
+                crate::big_map::BigMapPoint {
+                    x: map.center_x,
+                    y: map.center_y,
+                },
+            )
+            .into_iter()
+            .min_by_key(|region| {
+                map.center_x
+                    .abs_diff(region.center.x)
+                    .max(map.center_y.abs_diff(region.center.y))
+            }) {
+                let distance = map
+                    .center_x
+                    .abs_diff(region.center.x)
+                    .max(map.center_y.abs_diff(region.center.y));
+                return Place::Current {
+                    label: format!(
+                        "狩猎区域 · {} ({},{}) · {} 格",
+                        region.name, region.center.x, region.center.y, distance
+                    ),
+                    distance,
+                };
+            }
+        }
         if let Some(label) = authored_other_map(quest.quest_index, big_map.and_then(|m| m.current_map_index)) {
             return Place::Other(label);
         }
@@ -135,13 +169,7 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
                 Place::Unknown => {
                     if let Some(location) = next.and_then(|s| s.location.as_ref()) { line(card, location, PANEL_TEXT); }
                     else if quest.status == QuestStatus::InProgress {
-                        let regions = big_map.and_then(|m| m.current_map_index).map(|index| {
-                            crate::quest_hunt_regions::active_hunt_regions(
-                                &QuestTracker { active_quests: vec![quest.clone()] }, index,
-                                crate::big_map::BigMapPoint { x: map.center_x, y: map.center_y })
-                        }).unwrap_or_default();
-                        if regions.is_empty() { line(card, "目标位置待发现 · 查看详情或地图", PANEL_TEXT); }
-                        for region in regions { line(card, format!("狩猎区域 · {} ({},{})", region.name, region.center.x, region.center.y), PANEL_TEXT); }
+                        line(card, "目标位置待发现 · 查看详情或地图", PANEL_TEXT);
                     }
                 }
             }
@@ -258,5 +286,62 @@ mod tests {
         assert!(authored_other_map(2_110_019, Some(bichon.map_index)).unwrap().contains(&wooma.map_title));
         assert_eq!(authored_other_map(2_110_019, None), None);
         assert_eq!(authored_other_map(12345, Some(bichon.map_index)), None);
+    }
+
+    #[test]
+    fn authored_cat_region_is_nearby_without_live_entities_and_completed_or_absent_progress_is_not_inferred() {
+        let bichon = mir2_game_data::crystal_map_respawns_ref("0").unwrap();
+        let map = MapModel {
+            center_x: 290,
+            center_y: 614,
+            ..default()
+        };
+        let big_map = BigMapModel {
+            current_map_index: Some(bichon.map_index),
+            ..default()
+        };
+        let mut cats = quest(2_110_003);
+        cats.objectives = vec![
+            QuestObjective {
+                objective_id: "2110003:0".into(),
+                text: "Scarecrow".into(),
+                current: 2,
+                target: 2,
+            },
+            QuestObjective {
+                objective_id: "2110003:1".into(),
+                text: "RakingCat".into(),
+                current: 0,
+                target: 2,
+            },
+        ];
+        let tracker = QuestTracker {
+            active_quests: vec![quest(1), cats.clone()],
+        };
+        let empty_entities = EntityModelSet::default();
+        assert_eq!(
+            place(&cats, &tracker, &empty_entities, &map, Some(&big_map)),
+            Place::Current {
+                label: "狩猎区域 · RakingCat (340,550) · 64 格".into(),
+                distance: 64,
+            },
+        );
+        assert_eq!(
+            nearby_indices(1, &tracker, &empty_entities, &map, Some(&big_map)),
+            vec![2_110_003],
+        );
+
+        cats.objectives[1].current = 2;
+        assert_eq!(
+            place(&cats, &tracker, &empty_entities, &map, Some(&big_map)),
+            Place::Unknown,
+            "completed objectives must not create an authored target",
+        );
+        cats.objectives.clear();
+        assert_eq!(
+            place(&cats, &tracker, &empty_entities, &map, Some(&big_map)),
+            Place::Unknown,
+            "missing progress never infers a hunt objective",
+        );
     }
 }

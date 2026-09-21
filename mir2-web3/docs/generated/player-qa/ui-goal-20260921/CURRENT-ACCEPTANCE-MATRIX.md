@@ -1,6 +1,6 @@
 # Current whole-UI acceptance matrix
 
-Goal scope is unchanged. Latest staged Letter editor package is C:/numeron-legend-of-rebirth-20260921-mail-editor, client SHA256 333AC3B6698178F03F7FC7FC429CA3DECA06CDD00F38DAD17F79C9F41E8FE28B (see README for matched Gateway). No same-build native screenshot or desktop operation proves acceptance for this package. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots in README.md belong to explicitly older packages.
+Goal scope is unchanged. Latest staged settings/guidance package is C:/numeron-legend-of-rebirth-20260921-settings-guidance, client SHA256 28E37B2DC989B73CE3A46D9A0EE3ABEAB4474E56FCE0962FD4CDAEFC8829AEE8 (see README for matched Gateway). No same-build native screenshot or desktop operation proves acceptance for this package. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots in README.md belong to explicitly older packages.
 
 Every row below requires actual visible rendering, correct inputs/state/close behavior, applicable Crystal source or original-client comparison, and an evidence path tied to the tested executable. Status **open** means not accepted, including rows with implemented code and passing tests.
 
@@ -42,7 +42,6 @@ Every row below requires actual visible rendering, correct inputs/state/close be
 | Hero | Eligibility/open/equipment/skills/actions and correct owner/hero targeting | Open |
 | Logout / exit | Correct separate actions, confirmation, durable save, roster/login/exit | Open; older normal roster return only |
 | Cross-page input | Overlap/topmost, modal closing frame, drag cancellation, focus loss | Open |
-| Scaling and stability | Supported window modes/DPI, readable bounds, running/map transitions, soak | Open; old29GB memory blocker unresolved |
+| Scaling and stability | Supported window modes/DPI, readable bounds, running/map transitions, soak | Open; old client renderer OOM at33.08GB private; new-package soak pending |
 
 Desktop input stopped after detected manual interference. Pending handoff is separate from standing demo/demo credential authorization. Code work can proceed, but no screenshots may be attributed to unlaunched candidates. The memory cause is unproven until attribution/reproduction; stable high usage is not a pass.
-

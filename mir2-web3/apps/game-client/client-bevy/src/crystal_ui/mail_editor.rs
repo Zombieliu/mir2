@@ -449,4 +449,3 @@ pub(super) fn capture_layout_system(
 #[cfg(test)]
 #[path = "mail_editor_tests.rs"]
 mod tests;
-

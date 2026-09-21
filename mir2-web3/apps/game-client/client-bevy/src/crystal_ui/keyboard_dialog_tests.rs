@@ -137,6 +137,59 @@ fn persistence_round_trip_and_invalid_load_are_atomic() {
     assert!(!m.capture("A", KeyModifiers::default()));
 }
 
+
+#[test]
+fn skill_mode_remaps_only_explicit_skill_modifier_rows() {
+    let mut model = KeyboardDialogUi::default();
+    let bar1 = index(&model, "Bar1Skill1");
+    let bar2 = index(&model, "Bar2Skill1");
+    let disabled = index(&model, "Bar2Skill2");
+    let other = index(&model, "HeroInventory");
+
+    // Preserve a customized constrained skill row's key and non-mode modifiers.
+    model.bindings[bar2].key = "F24".into();
+    model.bindings[bar2].alt = 1;
+    model.bindings[bar2].shift = 2;
+    // Bar1 is unconstrained and Crystal leaves it alone.
+    model.bindings[bar1].ctrl = 0;
+    model.bindings[bar1].tilde = 0;
+    // Crystal skips Keys.None before changing the modifier family.
+    model.bindings[disabled].key = "None".into();
+    model.bindings[disabled].ctrl = 1;
+    model.bindings[disabled].tilde = 0;
+
+    assert!(model.apply_skill_mode(true));
+    assert_eq!(
+        (
+            model.bindings[bar2].key.as_str(),
+            model.bindings[bar2].alt,
+            model.bindings[bar2].ctrl,
+            model.bindings[bar2].shift,
+            model.bindings[bar2].tilde,
+        ),
+        ("F24", 1, 0, 2, 1)
+    );
+    assert_eq!(
+        (model.bindings[bar1].ctrl, model.bindings[bar1].tilde),
+        (0, 0)
+    );
+    assert_eq!(
+        (model.bindings[disabled].ctrl, model.bindings[disabled].tilde),
+        (1, 0)
+    );
+    assert_eq!(
+        (model.bindings[other].ctrl, model.bindings[other].tilde),
+        (1, 2)
+    );
+
+    assert!(model.apply_skill_mode(false));
+    assert_eq!(
+        (model.bindings[bar2].ctrl, model.bindings[bar2].tilde),
+        (1, 0)
+    );
+    assert!(!model.apply_skill_mode(false));
+}
+
 #[test]
 fn source_group_geometry_and_scroll_clamps() {
     let mut m = KeyboardDialogUi::default();

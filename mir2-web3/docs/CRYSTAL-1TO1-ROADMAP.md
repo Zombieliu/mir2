@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-21 settings candidate: source-position volume drag, Ctrl/tilde SkillMode
+> and NewMove routing pass client1005/1005 and Windows input74/74. Same-map
+> task guidance exposes remaining hunt regions without live AOI. New-package
+> visual and memory-soak gates remain open; old auth-lifetime client exited
+> on renderer OOM. See UI goal QA ledger for package hashes and open gates.
+
 > 2026-09-21 NPC pricing candidate: sale/repair added-stat weight now follows
 > Crystal Stats.Count (sum of absolute values), and repair doubles for rental
 > identity, including preserved Some(default). Source numeric regressions 3/3,

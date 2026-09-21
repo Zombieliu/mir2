@@ -9,6 +9,7 @@ pub struct KeyboardHost {
     pub notice: Option<String>,
     dimensions: std::collections::HashMap<(String, u16), Vec2>,
     thumb_drag: bool,
+    applied_skill_mode: Option<bool>,
 }
 
 impl KeyboardHost {
@@ -213,6 +214,7 @@ pub(in super::super) fn process(
             }
         }
     }
+    apply_current_skill_mode(&mut state, &mut host);
     let in_game = shell
         .as_ref()
         .is_some_and(|s| s.screen == NativeShellScreen::InGame);
@@ -310,6 +312,29 @@ pub(in super::super) fn process(
         host.thumb_drag = false;
         state.keyboard.end_drag();
     }
+}
+
+fn apply_current_skill_mode(state: &mut NativePlayerUiState, host: &mut KeyboardHost) {
+    // Crystal applies OptionDialog's SkillMode to loaded key rows exactly
+    // when the setting changes. Remembering the mode avoids overwriting a
+    // later keyboard-dialog edit on every input frame.
+    let skill_mode = state.core.options.skill_mode;
+    if host.applied_skill_mode != Some(skill_mode) {
+        state.keyboard.apply_skill_mode(skill_mode);
+        host.applied_skill_mode = Some(skill_mode);
+    }
+}
+
+/// Applies a SkillMode button change made later in the overlay update.
+///
+/// `process` calls the same helper immediately after loading key bindings.
+/// Schedule this after option controls and before gameplay input so a click
+/// takes effect for the current frame without repeatedly replacing user edits.
+pub(in super::super) fn sync_skill_mode(
+    mut state: ResMut<NativePlayerUiState>,
+    mut host: ResMut<KeyboardHost>,
+) {
+    apply_current_skill_mode(&mut state, &mut host);
 }
 
 pub(in super::super) fn render_system(
@@ -445,6 +470,7 @@ mod tests {
             logical_key: match key {
                 KeyCode::F1 => bevy::input::keyboard::Key::F1,
                 KeyCode::ShiftLeft => bevy::input::keyboard::Key::Shift,
+                KeyCode::Backquote => bevy::input::keyboard::Key::Character("`".into()),
                 _ => bevy::input::keyboard::Key::Control,
             },
             state: if pressed {
@@ -647,6 +673,175 @@ mod tests {
         assert_eq!(key_name(KeyCode::Numpad1).as_deref(), Some("NumPad1"));
         assert_eq!(key_name(KeyCode::Digit1).as_deref(), Some("D1"));
     }
+
+    #[test]
+    fn post_option_sync_applies_skill_mode_in_the_same_update() {
+        fn choose_tilde_skill_mode(mut state: ResMut<NativePlayerUiState>) {
+            state.core.options.skill_mode = true;
+        }
+
+        let (mut app, _) = chord_app();
+        app.add_systems(
+            Update,
+            (
+                choose_tilde_skill_mode.after(process),
+                sync_skill_mode.after(choose_tilde_skill_mode),
+            ),
+        );
+        app.update();
+
+        let state = app.world().resource::<NativePlayerUiState>();
+        let binding = state
+            .keyboard
+            .bindings
+            .iter()
+            .find(|binding| binding.function == "Bar2Skill1")
+            .unwrap();
+        assert_eq!(
+            (binding.ctrl, binding.tilde),
+            (0, 1),
+            "the post-option sync observes the click without another update"
+        );
+    }
+
+    #[test]
+    fn skill_mode_switches_host_dispatch_without_replacing_later_custom_edits() {
+        let (mut app, window) = chord_app();
+        app.update();
+
+        for (key, pressed) in [
+            (KeyCode::ControlLeft, true),
+            (KeyCode::F1, true),
+            (KeyCode::F1, false),
+            (KeyCode::ControlLeft, false),
+        ] {
+            chord_event(&mut app, window, key, pressed, false);
+        }
+        app.update();
+        assert_eq!(chord_banks(&app), (false, true), "default mode uses Ctrl");
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .skill_mode = true;
+        app.update();
+        for (key, pressed) in [
+            (KeyCode::ControlLeft, true),
+            (KeyCode::F1, true),
+            (KeyCode::F1, false),
+            (KeyCode::ControlLeft, false),
+        ] {
+            chord_event(&mut app, window, key, pressed, false);
+        }
+        app.update();
+        assert_eq!(chord_banks(&app), (false, false), "mode change removes Ctrl");
+
+        for (key, pressed) in [
+            (KeyCode::Backquote, true),
+            (KeyCode::F1, true),
+            (KeyCode::F1, false),
+            (KeyCode::Backquote, false),
+        ] {
+            chord_event(&mut app, window, key, pressed, false);
+        }
+        app.update();
+        assert_eq!(chord_banks(&app), (false, true), "mode change enables tilde");
+
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            let binding = state
+                .keyboard
+                .bindings
+                .iter_mut()
+                .find(|binding| binding.function == "Bar2Skill1")
+                .unwrap();
+            binding.key = "F24".into();
+            binding.alt = 1;
+            binding.ctrl = 2;
+            binding.shift = 2;
+            binding.tilde = 2;
+        }
+        app.update();
+        let binding = app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .keyboard
+            .bindings
+            .iter()
+            .find(|binding| binding.function == "Bar2Skill1")
+            .unwrap();
+        assert_eq!(
+            (
+                binding.key.as_str(),
+                binding.alt,
+                binding.ctrl,
+                binding.shift,
+                binding.tilde
+            ),
+            ("F24", 1, 2, 2, 2),
+            "unchanged SkillMode must not replace a later custom binding"
+        );
+    }
+
+    #[test]
+    fn skill_mode_is_applied_after_each_disk_load() {
+        let dir = std::env::temp_dir().join(format!(
+            "mir2-keybind-skill-mode-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("bindings.json");
+        let mut stored = KeyboardDialogUi::default();
+        let binding = stored
+            .bindings
+            .iter_mut()
+            .find(|binding| binding.function == "Bar2Skill1")
+            .unwrap();
+        binding.key = "F24".into();
+        binding.alt = 1;
+        binding.ctrl = 1;
+        binding.tilde = 0;
+        std::fs::write(&path, stored.to_json().unwrap()).unwrap();
+
+        for load in 0..2 {
+            let (mut app, _) = chord_app();
+            app.world_mut().insert_resource(KeyboardHost {
+                path: Some(path.clone()),
+                ..Default::default()
+            });
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .options
+                .skill_mode = true;
+            app.update();
+            let state = app.world().resource::<NativePlayerUiState>();
+            let binding = state
+                .keyboard
+                .bindings
+                .iter()
+                .find(|binding| binding.function == "Bar2Skill1")
+                .unwrap();
+            assert_eq!(
+                (
+                    binding.key.as_str(),
+                    binding.alt,
+                    binding.ctrl,
+                    binding.tilde
+                ),
+                ("F24", 1, 0, 1),
+                "load {load} maps saved Ctrl rows to tilde after loading"
+            );
+        }
+        std::fs::remove_file(path).unwrap();
+        std::fs::remove_dir(dir).unwrap();
+    }
+
     #[test]
     fn disk_save_replaces_previous_file_and_loads_application_scoped_binding() {
         let dir = std::env::temp_dir().join(format!("mir2-keybind-{}", std::process::id()));

@@ -85,6 +85,8 @@ mod mail_reader_drag;
 mod mail_compose_drag;
 #[path = "mail_editor.rs"]
 mod mail_editor;
+#[path = "options_volume.rs"]
+mod options_volume;
 #[path = "mail_list.rs"]
 mod mail_list;
 use super::assets::CrystalButtonAssetSet;
@@ -120,6 +122,10 @@ mod guild_storage_tests;
 #[cfg(test)]
 #[path = "primary_item_image_tests.rs"]
 mod primary_item_image_tests;
+
+#[cfg(test)]
+#[path = "options_volume_tests.rs"]
+mod options_volume_tests;
 
 #[path = "combat_mode_keys.rs"]
 pub mod combat_mode_keys;
@@ -3270,6 +3276,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<MailComposeUi>()
             .init_resource::<mail_compose_drag::MailLetterWindow>()
             .init_resource::<mail_editor::MailLetterEditor>()
+            .init_resource::<options_volume::OptionsVolumeDrag>()
             .init_resource::<BigMapModel>()
             .init_resource::<BigMapGatewayIntentQueue>()
             .init_resource::<BigMapUiState>()
@@ -3397,8 +3404,12 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                         .chain(),
                     process_inventory_delete_pointer,
                     process_guild_storage_pointer,
-                    process_overlay_keyboard,
-                    process_overlay_buttons,
+                    (process_overlay_keyboard, options_volume::process).chain(),
+                    (
+                        process_overlay_buttons,
+                        keyboard_dialog::host::sync_skill_mode,
+                    )
+                        .chain(),
                     crate::audio::sync_native_ui_audio,
                     consume_exit_application,
                     crate::pending_operations::observe_native_session_boundary,
@@ -15456,42 +15467,64 @@ fn spawn_invisible_overlay_button(
 fn spawn_option_volume_bar(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
-    top: f32,
+    channel: options_volume::VolumeChannel,
     volume: u8,
 ) {
     let ratio = f32::from(volume.min(100)) / 100.0;
     let fill_width = 74.0 * ratio;
     parent
-        .spawn(Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(159.0),
-            top: Val::Px(top),
-            width: Val::Px(fill_width),
-            height: Val::Px(19.0),
-            overflow: Overflow::clip(),
-            ..default()
-        })
-        .with_children(|clip| {
-            clip.spawn((
-                Node {
+        .spawn((
+            options_volume::OptionsVolumeTrack(channel),
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(options_volume::rect(channel).left),
+                top: Val::Px(options_volume::rect(channel).top),
+                width: Val::Px(options_volume::rect(channel).width),
+                height: Val::Px(options_volume::rect(channel).height),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            FocusPolicy::Block,
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|track| {
+            track
+                .spawn(Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(0.0),
                     top: Val::Px(0.0),
-                    width: Val::Px(76.0),
+                    width: Val::Px(fill_width),
                     height: Val::Px(19.0),
+                    overflow: Overflow::clip(),
                     ..default()
-                },
-                ImageNode {
-                    image: asset_server.load("original-ui/Prguse2/468.png"),
-                    ..default()
-                },
-            ));
+                })
+                .with_children(|clip| {
+                    clip.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            left: Val::Px(0.0),
+                            top: Val::Px(0.0),
+                            width: Val::Px(76.0),
+                            height: Val::Px(19.0),
+                            ..default()
+                        },
+                        ImageNode {
+                            image: asset_server.load("original-ui/Prguse2/468.png"),
+                            ..default()
+                        },
+                    ));
+                });
         });
+    let bar = options_volume::rect(channel);
     parent.spawn((
+        options_volume::OptionsVolumeThumb(channel),
         Node {
             position_type: PositionType::Absolute,
-            left: Val::Px(155.0 + fill_width),
-            top: Val::Px(top - 7.0),
+            // MainDialogs.cs puts the source `VolumeBar` control at the
+            // SoundBar's x plus the clipped 74px fill, not at its older
+            // adapter-only x-4 offset.
+            left: Val::Px(bar.left + fill_width),
+            top: Val::Px(bar.top - 7.0),
             width: Val::Px(8.0),
             height: Val::Px(22.0),
             ..default()
@@ -15688,31 +15721,17 @@ fn render_options(
     } else {
         0
     };
-    spawn_option_volume_bar(parent, asset_server, 225.0, sound_volume);
-    spawn_option_volume_bar(parent, asset_server, 251.0, music_volume);
-
-    // Crystal uses drag bars. Until pointer-drag state is shared across the
-    // Windows/Android adapters, the left/right halves provide deterministic
-    // decrement/increment behavior without adding non-Crystal text buttons.
-    spawn_invisible_overlay_button(
+    spawn_option_volume_bar(
         parent,
-        CrystalRect::new(159.0, 225.0, 38.0, 19.0),
-        OverlayButton::OptionsSoundVolumeDown,
+        asset_server,
+        options_volume::VolumeChannel::Sound,
+        sound_volume,
     );
-    spawn_invisible_overlay_button(
+    spawn_option_volume_bar(
         parent,
-        CrystalRect::new(197.0, 225.0, 38.0, 19.0),
-        OverlayButton::OptionsSoundVolumeUp,
-    );
-    spawn_invisible_overlay_button(
-        parent,
-        CrystalRect::new(159.0, 251.0, 38.0, 19.0),
-        OverlayButton::OptionsMusicVolumeDown,
-    );
-    spawn_invisible_overlay_button(
-        parent,
-        CrystalRect::new(197.0, 251.0, 38.0, 19.0),
-        OverlayButton::OptionsMusicVolumeUp,
+        asset_server,
+        options_volume::VolumeChannel::Music,
+        music_volume,
     );
 }
 

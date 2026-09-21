@@ -301,6 +301,8 @@ enum MovementAckOutcome {
 pub struct WorldPointerMovementState {
     active: Option<WorldPointerMovementMode>,
     auto_path_destination: Option<(i32, i32)>,
+    /// Only NewMove pointer paths are canceled when that option is disabled.
+    pointer_auto_path: bool,
     attack_target: Option<u32>,
     next_attack_request_at_ms: f64,
     harvest_target: Option<u32>,
@@ -342,6 +344,7 @@ impl WorldPointerMovementState {
         }
         self.active = None;
         self.auto_path_destination = None;
+        self.pointer_auto_path = false;
         self.attack_target = Some(object_id);
         self.next_attack_request_at_ms = 0.0;
         self.harvest_target = None;
@@ -385,10 +388,12 @@ impl WorldPointerMovementState {
             }));
         }
         self.auto_path_destination = Some(destination);
+        self.pointer_auto_path = true;
         self.last_plan_block_trace_at_ms = None;
     }
 
     fn stop_auto_path(&mut self, at_ms: f64, reason: &'static str) {
+        self.pointer_auto_path = false;
         if let Some(destination) = self.auto_path_destination.take() {
             crate::movement_trace::record(serde_json::json!({
                 "type": "autoPathStopped",
@@ -399,6 +404,14 @@ impl WorldPointerMovementState {
             }));
         }
         self.last_plan_block_trace_at_ms = None;
+    }
+
+    fn sync_new_move_option(&mut self, enabled: bool, at_ms: f64) {
+        if !enabled && self.pointer_auto_path {
+            // Pending authoritative steps and an accepted button hold survive.
+            // Combat pursuit and non-pointer navigation are separate intents.
+            self.stop_auto_path(at_ms, "newMoveDisabled");
+        }
     }
 
     fn reset_controller(&mut self, at_ms: f64, reason: &'static str) {
@@ -521,6 +534,7 @@ impl WorldPointerMovementState {
         self.harvest_direction = None;
         self.next_harvest_request_at_ms = 0.0;
         self.auto_path_destination = None;
+        self.pointer_auto_path = false;
         self.active = None;
         self.next_move_send_at_ms = 0.0;
         self.run_primed_until_ms = 0.0;
@@ -1289,6 +1303,10 @@ pub fn mouse_world_interaction_system(
     let left_released = mouse.just_released(MouseButton::Left);
     let right_released = mouse.just_released(MouseButton::Right);
     let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
+    let new_move = player_ui
+        .as_deref()
+        .is_some_and(|ui| ui.core.options.new_move);
+    movement.sync_new_move_option(new_move, now_ms);
     if left_pressed {
         trace_pointer_input(now_ms, "left", "down");
         if native_input_trace_enabled() {
@@ -1675,7 +1693,7 @@ pub fn mouse_world_interaction_system(
         }
         let origin = movement.authoritative_position.unwrap_or(entity_position);
         if let Some(target) = presentation.hovered_grid_position() {
-            if target != origin {
+            if new_move && target != origin {
                 movement.start_auto_path(target, now_ms);
                 if let (Some(cursor_stage), Some(effects)) =
                     (presentation.hover_cursor_stage(), effects.as_deref_mut())
@@ -1811,15 +1829,17 @@ pub fn mouse_world_interaction_system(
         movement.begin(WorldPointerMovementMode::Run, now_ms);
         movement.attack_target = None;
         movement.auto_path_destination = None;
+        movement.pointer_auto_path = false;
     }
     if right_pressed && presentation.hovered_grid_position().is_some() {
         movement.begin(WorldPointerMovementMode::Run, now_ms);
     }
     if movement.active == Some(WorldPointerMovementMode::Run) {
         if mouse.pressed(MouseButton::Right) || auto_run {
-            if !auto_run {
+            if !auto_run && new_move {
                 if let Some(target) = presentation.hovered_grid_position() {
                     movement.auto_path_destination = Some(target);
+                    movement.pointer_auto_path = true;
                 }
             }
         } else {
@@ -1928,6 +1948,7 @@ pub fn mouse_world_interaction_system(
             return;
         };
         movement.auto_path_destination = Some(destination);
+        movement.pointer_auto_path = false;
     }
     let auto_path_destination = movement.auto_path_destination;
     let mode = if auto_path_destination.is_some() {
@@ -4228,6 +4249,11 @@ mod tests {
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .new_move = true;
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
         app.insert_resource(movement_entities());
@@ -4260,6 +4286,137 @@ mod tests {
             assert_eq!(pending.from, (10, 10));
             assert_eq!(pending.to, (11, 10));
         }
+    }
+
+    #[test]
+    fn classic_right_hold_tracks_cursor_without_path_and_stops_on_release() {
+        // Crystal GameScene.cs:11310 gates path/marker on NewMove, while
+        // :11673 uses direct held-right steering only with that option off.
+        // Also cover turning it off during an already accepted NewMove hold.
+        for starts_new_move in [false, true] {
+            let (mut app, receiver) = input_app();
+            install_movement_clock_and_inbox(&mut app);
+            app.world_mut().spawn(Window::default());
+            app.insert_resource(ButtonInput::<MouseButton>::default());
+            let mut ui = NativePlayerUiState::default();
+            ui.core.options.new_move = starts_new_move;
+            app.insert_resource(ui);
+            app.insert_resource(NpcDialogModel::default());
+            app.insert_resource(UiReadModel::default());
+            app.insert_resource(movement_entities());
+            let mut presentation = NativeEntityPresentation::default();
+            presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
+            app.insert_resource(presentation);
+            app.init_resource::<QuestUiIntentQueue>();
+            app.init_resource::<NativeEffects>();
+            app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Right);
+            app.update();
+            assert!(
+                matches!(receiver.try_recv(), Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right")
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<WorldPointerMovementState>()
+                    .auto_path_destination
+                    .is_some(),
+                starts_new_move
+            );
+            let effects = app
+                .world_mut()
+                .resource_mut::<NativeEffects>()
+                .tick(0)
+                .unwrap_or_default();
+            assert_eq!(
+                effects.contains("/original-effects/Magic3/500.png"),
+                starts_new_move
+            );
+
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Right);
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .options
+                .new_move = false;
+            app.world_mut()
+                .resource_mut::<EntityModelSet>()
+                .entities
+                .iter_mut()
+                .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                .unwrap()
+                .x = 11;
+            push_test_movement_ack(&app, 11, 10, "right");
+            app.world_mut()
+                .resource_mut::<NativeEntityPresentation>()
+                .set_hover_grid_context_for_test((11, 10), (480., 480.));
+            advance_movement_clock(&mut app, 600);
+            app.update();
+            assert!(
+                matches!(receiver.try_recv(), Ok(GatewayCommand::Player(PlayerIntent::Run { direction })) if direction == "down")
+            );
+            let state = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(state.auto_path_destination, None);
+            assert!(!state.pointer_auto_path);
+            let destination = state.pending.back().unwrap().to;
+
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .release(MouseButton::Right);
+            let player = app
+                .world_mut()
+                .resource_mut::<EntityModelSet>()
+                .into_inner()
+                .entities
+                .iter_mut()
+                .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                .unwrap();
+            player.x = destination.0;
+            player.y = destination.1;
+            push_test_movement_ack(&app, destination.0, destination.1, "down");
+            advance_movement_clock(&mut app, 600);
+            app.update();
+            let state = app.world().resource::<WorldPointerMovementState>();
+            assert_eq!(state.active, None);
+            assert_eq!(state.auto_path_destination, None);
+            assert!(state.pending.is_empty());
+            assert!(
+                receiver.try_recv().is_err(),
+                "classic mouse-up must stop movement"
+            );
+        }
+    }
+
+    #[test]
+    fn disabling_new_move_cancels_released_pointer_path_but_preserves_other_navigation() {
+        let mut state = WorldPointerMovementState::default();
+        state.start_auto_path((20, 20), 0.);
+        state.sync_new_move_option(true, 1.);
+        assert_eq!(state.auto_path_destination, Some((20, 20)));
+        state.sync_new_move_option(false, 2.);
+        assert_eq!(state.auto_path_destination, None);
+        assert_eq!(state.active, None);
+
+        state.auto_path_destination = Some((30, 30));
+        state.sync_new_move_option(false, 3.);
+        assert_eq!(
+            state.auto_path_destination,
+            Some((30, 30)),
+            "non-pointer route survives"
+        );
+        state.start_auto_path((20, 20), 4.);
+        state.pursue_attack_target(77);
+        state.auto_path_destination = Some((40, 40));
+        state.sync_new_move_option(false, 5.);
+        assert_eq!(state.attack_target, Some(77));
+        assert_eq!(
+            state.auto_path_destination,
+            Some((40, 40)),
+            "combat chase survives"
+        );
     }
 
     fn stage_window(cursor: bevy::prelude::Vec2) -> Window {
@@ -4361,9 +4518,14 @@ mod tests {
             app.insert_resource(presentation);
             app.init_resource::<QuestUiIntentQueue>();
             app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
-            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+            app.world_mut()
+                .resource_mut::<ButtonInput<MouseButton>>()
+                .press(MouseButton::Left);
             app.update();
-            let walked = matches!(receiver.try_recv(), Ok(GatewayCommand::Player(PlayerIntent::Walk { .. })));
+            let walked = matches!(
+                receiver.try_recv(),
+                Ok(GatewayCommand::Player(PlayerIntent::Walk { .. }))
+            );
             assert_eq!(walked, !blocked, "inventory pointer at {cursor:?}");
         }
     }
@@ -4613,6 +4775,11 @@ mod tests {
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .new_move = true;
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
         app.insert_resource(movement_entities());
@@ -4702,6 +4869,11 @@ mod tests {
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .new_move = true;
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
         app.insert_resource(movement_entities());
@@ -4777,6 +4949,11 @@ mod tests {
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .new_move = true;
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
         app.insert_resource(movement_entities());
@@ -4819,6 +4996,11 @@ mod tests {
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .new_move = true;
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
         app.insert_resource(movement_entities());
@@ -5039,6 +5221,11 @@ mod tests {
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .new_move = true;
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
         app.insert_resource(movement_entities());
@@ -5085,6 +5272,11 @@ mod tests {
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .new_move = true;
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
         app.insert_resource(movement_entities());
@@ -5174,6 +5366,11 @@ mod tests {
         app.world_mut().spawn(Window::default());
         app.insert_resource(ButtonInput::<MouseButton>::default());
         app.insert_resource(NativePlayerUiState::default());
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .options
+            .new_move = true;
         app.insert_resource(NpcDialogModel::default());
         app.insert_resource(UiReadModel::default());
         app.insert_resource(movement_entities());
