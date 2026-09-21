@@ -9,7 +9,8 @@ pub(super) const MAIL_LETTER_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 92.
 /// lower than LetterDialog.  Keep layout shaping shared while the source
 /// frame owns each control's real local origin.
 pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
-const MAIL_LETTER_BODY_LIMIT: usize = 256;
+// Crystal's SendMail validation counts .NET string.Length (UTF-16 units).
+pub(super) const MAIL_LETTER_BODY_LIMIT: usize = 500;
 pub(super) const MAIL_LETTER_CONTENT_INSET: Vec2 = Vec2::splat(2.0);
 pub(super) const MAIL_LETTER_CONTENT_SIZE: Vec2 = Vec2::new(
     MAIL_LETTER_BODY_RECT.width - MAIL_LETTER_CONTENT_INSET.x * 2.0,

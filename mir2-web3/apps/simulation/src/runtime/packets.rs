@@ -147,7 +147,9 @@ use super::stage5::{
 const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
 const CRYSTAL_MAIL_CAPACITY: usize = 100;
 pub(super) const MAX_MAIL_RECIPIENT_CHARS: usize = 20;
-pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 1_000;
+/// Crystal validates `string.Length`, which counts UTF-16 code units rather
+/// than Unicode scalar values.
+pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 500;
 const MAIL_TARGET_DURABLE_IDENTITY_MISMATCH: &str = "mail target durable save identity mismatch";
 
 #[derive(Resource, Debug, Default)]
@@ -356,11 +358,15 @@ fn stage5_mail_recipient_is_valid(name: &str) -> bool {
 }
 
 fn stage5_mail_message_is_valid(message: &str) -> bool {
-    message.chars().count() <= MAX_MAIL_MESSAGE_CHARS
+    message.encode_utf16().count() <= MAX_MAIL_MESSAGE_CHARS
         && message
             .chars()
             .all(|character| matches!(character, '\r' | '\n') || !character.is_control())
 }
+
+#[cfg(test)]
+#[path = "mail_body_validation_tests.rs"]
+mod mail_body_validation_tests;
 
 #[derive(Debug, Clone)]
 struct Stage5MailTarget {
@@ -10333,20 +10339,6 @@ mod mail_status_transaction_tests {
             .iter()
             .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
         session
-    }
-
-    #[test]
-    fn mail_body_validation_allows_line_endings_but_rejects_other_controls() {
-        assert!(stage5_mail_message_is_valid("first\nsecond"));
-        assert!(stage5_mail_message_is_valid("first\rsecond"));
-        assert!(stage5_mail_message_is_valid("first\r\nsecond"));
-
-        for invalid in ["first\tsecond", "first\0second", "first\u{001B}second"] {
-            assert!(
-                !stage5_mail_message_is_valid(invalid),
-                "non-line-ending control must remain invalid: {invalid:?}"
-            );
-        }
     }
 
     #[test]

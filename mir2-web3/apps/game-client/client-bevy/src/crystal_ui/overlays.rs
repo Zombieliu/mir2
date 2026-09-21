@@ -6963,13 +6963,15 @@ pub(crate) fn process_overlay_keyboard(
                     if event.state != ButtonState::Pressed {
                         continue;
                     }
-                    let mut value = draft.message.clone();
+                    let mut value = friend_dialog::text_editor::FriendTextEditor::new(
+                        draft.message.clone(), mail_editor::MAIL_LETTER_BODY_LIMIT, true,
+                    );
                     if matches!(event.key_code, KeyCode::Enter | KeyCode::NumpadEnter) {
-                        value.push('\n');
+                        value.newline();
                     } else if let Some(text) = event.text.as_deref() {
-                        value.extend(text.chars().filter(|ch| !ch.is_control()));
+                        value.insert_with_policy(text, friend_dialog::text_editor::InsertPolicy::FitPrefix);
                     }
-                    draft.message = value.chars().take(256).collect();
+                    draft.message = value.text().to_owned();
                 }
             }
             return;

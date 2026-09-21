@@ -52,6 +52,44 @@ fn type_text(app: &mut App, key_code: KeyCode, text: &str) {
 }
 
 #[test]
+fn mail_body_utf16_budget_matches_with_and_without_native_editor() {
+    for native_editor in [true, false] {
+        for kind in [MailComposeKind::Letter, MailComposeKind::Parcel] {
+            for (input, expected) in [
+                ("a".repeat(501), "a".repeat(500)),
+                ("😀".repeat(251), "😀".repeat(250)),
+                (format!("{}😀", "中".repeat(499)), "中".repeat(499)),
+            ] {
+                let mut app = input_app();
+                if !native_editor {
+                    app.world_mut().remove_resource::<mail_editor::MailLetterEditor>();
+                }
+                app.world_mut().resource_mut::<NativePlayerUiState>().core.mail_compose =
+                    Some(mir2_ui_core::state::MailComposeDraft {
+                        recipient: "Receiver".into(), ..default()
+                    });
+                {
+                    let mut compose = app.world_mut().resource_mut::<MailComposeUi>();
+                    compose.kind = kind;
+                    compose.focus = MailComposeFocus::Message;
+                }
+                type_text(&mut app, KeyCode::KeyA, &input);
+                let message = &app.world().resource::<NativePlayerUiState>()
+                    .core.mail_compose.as_ref().unwrap().message;
+                assert_eq!(message, &expected, "native editor={native_editor}");
+                type_text(&mut app, KeyCode::Enter, "");
+                let message = &app.world().resource::<NativePlayerUiState>()
+                    .core.mail_compose.as_ref().unwrap().message;
+                let expected = if expected.encode_utf16().count() < 500 {
+                    format!("{expected}\n")
+                } else { expected };
+                assert_eq!(message, &expected);
+            }
+        }
+    }
+}
+
+#[test]
 fn letter_renderer_uses_source_root_full_multiline_text_and_visible_focus() {
     let mut app = super::tests::overlay_render_test_app();
     {

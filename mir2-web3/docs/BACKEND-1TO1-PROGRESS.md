@@ -4272,3 +4272,5 @@ Stage5 mail does not persist a sent timestamp. Its ClientMail projection now emi
 ## 2026-09-21 ordinary multiline mail
 
 Mail body validation now permits CR/LF while retaining the1000-scalar bound and rejecting other control characters. Recipient rules, attachment/funds revalidation and atomic persistence are unchanged. An ordinary temporary-account SendMail/reload regression preserves mixed CRLF/LF verbatim. Existing rejection coverage uses NUL; legacy date assertions reflect the already-adopted unknown0 timestamp rather than fabricated current time. Focused4/4 and complete mail filter47/47 pass (C:/mir2-ui-repair-20260921/mail-compose-backend-{tests,regression}.log). Original stamp/insurance/quote parity and same-build visual/live validation remain open.
+
+2026-09-22 mail body candidate: align authenticated validation and Letter/Parcel input with Crystal500 UTF-16 units. Simulation mail53/53 and UI mail71/71 pass; package deployment and native visual acceptance remain open. See generated/player-qa/ui-goal-20260921/mail-compose-contract.md.
