@@ -283,7 +283,10 @@ fn stage5_mail_recipient_is_valid(name: &str) -> bool {
 }
 
 fn stage5_mail_message_is_valid(message: &str) -> bool {
-    message.chars().count() <= MAX_MAIL_MESSAGE_CHARS && !message.chars().any(char::is_control)
+    message.chars().count() <= MAX_MAIL_MESSAGE_CHARS
+        && message
+            .chars()
+            .all(|character| matches!(character, '\r' | '\n') || !character.is_control())
 }
 
 #[derive(Debug, Clone)]
@@ -10240,6 +10243,75 @@ mod mail_status_transaction_tests {
             .iter()
             .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
         session
+    }
+
+    #[test]
+    fn mail_body_validation_allows_line_endings_but_rejects_other_controls() {
+        assert!(stage5_mail_message_is_valid("first\nsecond"));
+        assert!(stage5_mail_message_is_valid("first\rsecond"));
+        assert!(stage5_mail_message_is_valid("first\r\nsecond"));
+
+        for invalid in ["first\tsecond", "first\0second", "first\u{001B}second"] {
+            assert!(
+                !stage5_mail_message_is_valid(invalid),
+                "non-line-ending control must remain invalid: {invalid:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn ordinary_multiline_mail_is_durable_and_preserves_the_body_verbatim() {
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock should be after unix epoch")
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!(
+            "mir2-mail-multiline-unit-{}-{suffix}",
+            std::process::id()
+        ));
+        let path = dir.join("accounts.json");
+        let config = SimulationConfig::default().with_account_store_path(path.clone());
+        deliver_stage5_system_mail(
+            &config,
+            Stage5MailDelivery {
+                target_kind: Stage5MailTargetKind::Character,
+                target_id: "Scout".to_string(),
+                from: "System".to_string(),
+                subject: "Fixture".to_string(),
+                body: "fixture".to_string(),
+                gold: 0,
+                items: Vec::new(),
+            },
+        )
+        .expect("temporary mail fixture should persist");
+
+        let message = "first line\r\nsecond line\nthird line".to_string();
+        let mut session = start_test_session(config);
+        let packets = session.handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: message.clone(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        });
+        assert!(packets.iter().any(
+            |packet| matches!(packet, ServerPacket::MailSent { result: 1 })
+        ));
+        assert!(packets.iter().any(|packet| {
+            matches!(packet, ServerPacket::ReceiveMail { mail }
+                if mail.iter().any(|entry| entry.sender_name == "Scout" && entry.message == message))
+        }));
+        drop(session);
+
+        let reloaded = start_test_session(SimulationConfig::default().with_account_store_path(path));
+        assert!(reloaded
+            .world_snapshot()
+            .stage5_systems
+            .mail
+            .iter()
+            .any(|mail| mail.from == "Scout" && mail.body == message));
+        drop(reloaded);
+        let _ = std::fs::remove_dir_all(dir);
     }
 
     #[test]

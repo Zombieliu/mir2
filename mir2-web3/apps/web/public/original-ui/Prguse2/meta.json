@@ -445,6 +445,38 @@
       "maskPath": null
     },
     {
+      "index": 203,
+      "width": 20,
+      "height": 18,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "a0ba2647e36f5bf568e7055f92dfd4cd07b211b106e378d0a6eb8b7d90dc6894",
+      "pngSha256": "526f98e0503f42a23aba026e7c0f1853d1b424250b9a3c4d6641c9baea2f996d",
+      "path": "/original-ui/Prguse2/203.png",
+      "maskPath": null
+    },
+    {
+      "index": 204,
+      "width": 20,
+      "height": 18,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "50d9ede5da89af9dae37c954d25a24d72ca30b429dec509c00daf1be51c9ed59",
+      "pngSha256": "b469f4a05cd4f7183237faaf6fe5fdf64ae1202a4dda953f020e82165f8e824e",
+      "path": "/original-ui/Prguse2/204.png",
+      "maskPath": null
+    },
+    {
       "index": 205,
       "width": 12,
       "height": 18,

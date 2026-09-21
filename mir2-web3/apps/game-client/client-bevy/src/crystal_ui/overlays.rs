@@ -2910,6 +2910,7 @@ enum OverlayButton {
     MailRecipientFocus,
     MailMessageFocus,
     MailGoldInc,
+    MailGoldFocus,
     MailGoldDec,
     AddMailAttachment(u64),
     RemoveMailAttachment(u64),
@@ -6163,7 +6164,9 @@ pub(crate) fn process_overlay_keyboard(
                         value.pop();
                         state.core.mail_compose.as_mut().unwrap().message = value;
                     }
-                    MailComposeFocus::Gold => {}
+                    MailComposeFocus::Gold => {
+                        state.core.mail_compose.as_mut().unwrap().gold /= 10;
+                    }
                 }
             }
         }
@@ -6171,7 +6174,7 @@ pub(crate) fn process_overlay_keyboard(
             if event.state != ButtonState::Pressed {
                 continue;
             }
-            let Some(text) = &event.text else { continue };
+            let text = event.text.as_deref().unwrap_or("");
             match compose_ui.focus {
                 MailComposeFocus::Recipient => {
                     let mut value = state
@@ -6194,14 +6197,27 @@ pub(crate) fn process_overlay_keyboard(
                         .as_ref()
                         .map(|draft| draft.message.clone())
                         .unwrap_or_default();
-                    value.extend(text.chars().filter(|ch| !ch.is_control()));
+                    if matches!(event.key_code, KeyCode::Enter | KeyCode::NumpadEnter) {
+                        value.push('\n');
+                    } else {
+                        value.extend(text.chars().filter(|ch| !ch.is_control()));
+                    }
                     dispatch_ui_action(
                         &mut state.core,
                         &mut UiEffectQueue::default(),
                         mir2_ui_core::action::UiAction::SetMailMessage { message: value },
                     );
                 }
-                MailComposeFocus::Gold => {}
+                MailComposeFocus::Gold => {
+                    if let Some(draft) = state.core.mail_compose.as_mut() {
+                        for digit in text.chars().filter(|ch| ch.is_ascii_digit()) {
+                            if let Some(value) = draft.gold.checked_mul(10)
+                                .and_then(|value| value.checked_add(digit as u32 - '0' as u32)) {
+                                draft.gold = value;
+                            }
+                        }
+                    }
+                }
             }
         }
         return;
@@ -8131,6 +8147,9 @@ fn process_overlay_buttons(
             }
             OverlayButton::MailMessageFocus => {
                 compose_ui.focus = MailComposeFocus::Message;
+            }
+            OverlayButton::MailGoldFocus => {
+                compose_ui.focus = MailComposeFocus::Gold;
             }
             OverlayButton::MailGoldInc | OverlayButton::MailGoldDec => {
                 if let Some(draft) = state.core.mail_compose.as_ref() {
@@ -13725,7 +13744,7 @@ fn render_mail_compose(
             ..default()
         })
         .with_children(|row| {
-            body(row, &format!("Gold: {}", draft.gold));
+            overlay_button(row, &format!("Gold: {}", draft.gold), OverlayButton::MailGoldFocus, true);
             overlay_button(row, "-100", OverlayButton::MailGoldDec, draft.gold >= 100);
             overlay_button(row, "+100", OverlayButton::MailGoldInc, true);
         });
@@ -14954,6 +14973,9 @@ mod mail_delete_tests;
 #[cfg(test)]
 #[path = "mail_reader_tests.rs"]
 mod mail_reader_tests;
+#[cfg(test)]
+#[path = "mail_compose_input_tests.rs"]
+mod mail_compose_input_tests;
 
 #[cfg(test)]
 mod tests {

@@ -62742,7 +62742,7 @@ fn send_mail_rejects_invalid_text_and_every_ambiguous_or_ineligible_attachment_a
             "body".to_string(),
         ),
         ("Scout\n".to_string(), "body".to_string()),
-        ("Scout".to_string(), "bad\nbody".to_string()),
+        ("Scout".to_string(), "bad\0body".to_string()),
         (
             "Scout".to_string(),
             "X".repeat(super::super::packets::MAX_MAIL_MESSAGE_CHARS + 1),
@@ -62861,7 +62861,9 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
             && !mail[0].collected
             && mail[0].gold == 250
             && mail[0].items.is_empty()
-            && mail[0].date_sent_binary_datetime != 0
+            // Stage5 mail has no persisted send timestamp; projecting "now"
+            // would fabricate a different source date on every refresh.
+            && mail[0].date_sent_binary_datetime == 0
     ));
     assert!(matches!(
         session.handle_packet(ClientPacket::ReadMail { mail_id: 1 }).as_slice(),
@@ -62902,7 +62904,7 @@ fn mail_friend_packets_preserve_crystal_ack_surface() {
             && mail[0].collected
             && mail[0].gold == 0
             && mail[0].items.is_empty()
-            && mail[0].date_sent_binary_datetime != 0
+            && mail[0].date_sent_binary_datetime == 0
     ));
     assert_eq!(
         session.handle_packet(ClientPacket::DeleteMail { mail_id: 1 }),
