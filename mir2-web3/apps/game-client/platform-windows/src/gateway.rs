@@ -3868,7 +3868,8 @@ where
                     };
                     push_native_npc_shop_service(signal)?;
                 }
-                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem" => {
+                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem"
+                | "EquipItem" | "RemoveItem" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(ack) = transform_inventory_operation_ack(packet, payload) {
                             if let Ok(json) = serde_json::to_string(&ack) {
@@ -4794,6 +4795,18 @@ fn transform_inventory_operation_ack(
     }
     let success = payload.get("success")?.as_bool()?;
     match packet {
+        "EquipItem" => Some(InventoryOperationAck::Equip {
+            grid: payload.get("grid")?.as_str()?.to_owned(),
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            to: value_i32(payload.get("to"))?,
+            success,
+        }),
+        "RemoveItem" => Some(InventoryOperationAck::Remove {
+            grid: payload.get("grid")?.as_str()?.to_owned(),
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            to: value_i32(payload.get("to"))?,
+            success,
+        }),
         "DropItem" => Some(InventoryOperationAck::Drop {
             unique_id: value_u64(payload.get("uniqueId"))?,
             count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
@@ -9896,6 +9909,24 @@ mod tests {
             packet: "ObjectMonster".into(),
             payload: json!({}),
         }));
+    }
+
+    #[test]
+    fn equipment_storage_ack_transform_preserves_identity_and_failure() {
+        for success in [false, true] {
+            let payload = json!({"grid":"Storage","uniqueId":"9007199254740993","to":17,"success":success});
+            assert_eq!(transform_inventory_operation_ack("EquipItem", &payload),
+                Some(InventoryOperationAck::Equip { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
+            assert_eq!(transform_inventory_operation_ack("RemoveItem", &payload),
+                Some(InventoryOperationAck::Remove { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
+            for field in ["grid", "uniqueId", "to", "success"] {
+                let mut malformed = payload.clone();
+                malformed.as_object_mut().unwrap().remove(field);
+                for packet in ["EquipItem", "RemoveItem"] {
+                    assert!(transform_inventory_operation_ack(packet, &malformed).is_none());
+                }
+            }
+        }
     }
 
     #[test]

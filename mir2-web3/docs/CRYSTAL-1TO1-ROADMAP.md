@@ -6484,3 +6484,9 @@ The intermittent item drag is fixed by replaying ordered Winit/Bevy WindowEvent 
 ### 2026-09-21 storage rental correction
 
 Crystal PlayerObject `ADDSTORAGE` charges 1,000,000 gold for 10 days. Candidate now commits the debit, expanded capacity and expiry together before publishing the live state, rejects unauthenticated/stale saves and rolls back persistence failures. Success emits LoseGold then ResizeStorage; low gold leaves balances/capacity unchanged. Eight focused `addstorage` tests passed (C:/mir2-ui-repair-20260921/storage-rental-backend-tests.log). This replaces the earlier free 30-day behavior. Matching gateway deployment and live/native visual acceptance remain pending; no overall parity percentage changes.
+
+## 2026-09-21 equipped Amulet / warehouse candidate
+
+Equipment now supports protocol-root-UID merges with Inventory/Storage for real Amulet templates only. Storage service/range/password/accessibility and reserved-item checks remain authoritative. Full removal refreshes equipment stats; partial transfer preserves the worn carrier. Comparison-only normalization handles the equipment conversion's synthetic durability 10 versus ordinary non-durable Amulet 0; live and persisted metadata is unchanged. Other item metadata still must match. Cursed-removal and DONT_STORE protection is intentionally stricter than the inspected Crystal MergeItem branch; this is not exact behavioral parity.
+
+Focused equipment_storage_merge_tests: 9/9. Existing merge_item regressions: 24/24. Receipts: C:/mir2-ui-repair-20260921/equipment-storage-backend-tests.log and equipment-storage-merge-regression.log. Native UI and Windows receipt changes require a matched release. No live account mutation, desktop acceptance or overall parity percentage is asserted.

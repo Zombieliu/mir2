@@ -25,6 +25,8 @@ mod hero_stats;
 mod inventory;
 #[cfg(test)]
 mod storage_rental_tests;
+#[cfg(test)]
+mod equipment_storage_merge_tests;
 mod item_custody;
 mod item_sets;
 mod items;

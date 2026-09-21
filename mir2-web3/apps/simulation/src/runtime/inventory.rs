@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{
-    crystal_bag_slot_capacity, AccountRecord, CharacterRecord, EquipmentSlot,
-    GroundDropItemPayload, ItemContainer, ItemGrade, SimulationConfig,
+    AccountRecord, CharacterRecord, EquipmentSlot, GroundDropItemPayload, ItemContainer, ItemGrade,
+    SimulationConfig, crystal_bag_slot_capacity,
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback};
@@ -13,18 +13,19 @@ use mir2_protocol::{
 
 use super::components::current_player_is_dead;
 use super::crystal_compat::{
-    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
-    DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
+    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_MAX_AC,
+    CRYSTAL_STAT_MAX_DC, DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH,
+    EXPANDED_STORAGE_SLOTS,
 };
 use super::items::{
-    crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
-    crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
-    crystal_item_stat_value, crystal_item_template_for_item_key, crystal_stack_size_for_item_key,
-    default_item_unique_id, embedded_item_state_from_template, item_has_rental_bind_flag,
-    item_icon_for_key, item_unique_id, try_item_state_from_user_item,
-    try_user_item_from_item_state, user_item_from_item_state,
-    validate_committed_item_state_carrier, validate_committed_user_item_carrier, ItemState,
-    ItemStateUserItemMetadata,
+    ItemState, ItemStateUserItemMetadata, crystal_belt_slot_range_for_item_key,
+    crystal_equipment_slot_for_item_key, crystal_equipment_slot_for_template,
+    crystal_item_has_bind_flag, crystal_item_key_for_template, crystal_item_stat_value,
+    crystal_item_template_for_item_key, crystal_stack_size_for_item_key, default_item_unique_id,
+    embedded_item_state_from_template, item_has_rental_bind_flag, item_icon_for_key,
+    item_unique_id, try_item_state_from_user_item, try_user_item_from_item_state,
+    user_item_from_item_state, validate_committed_item_state_carrier,
+    validate_committed_user_item_carrier,
 };
 use super::npc::active_crystal_storage_service;
 use super::resources::{
@@ -3014,11 +3015,20 @@ pub(super) fn merge_item_impl(
         id_to,
         success: false,
     };
+    let equipment_amulet_merge = matches!(
+        (grid_from, grid_to),
+        (
+            MirGridType::Equipment,
+            MirGridType::Inventory | MirGridType::Storage
+        ) | (
+            MirGridType::Inventory | MirGridType::Storage,
+            MirGridType::Equipment
+        )
+    );
     if matches!(
         grid_from,
         MirGridType::HeroInventory
             | MirGridType::HeroEquipment
-            | MirGridType::Equipment
             | MirGridType::Fishing
             | MirGridType::QuestInventory
             | MirGridType::Trade
@@ -3027,12 +3037,13 @@ pub(super) fn merge_item_impl(
         grid_to,
         MirGridType::HeroInventory
             | MirGridType::HeroEquipment
-            | MirGridType::Equipment
             | MirGridType::Fishing
             | MirGridType::QuestInventory
             | MirGridType::Trade
             | MirGridType::Refine
-    ) {
+    ) || (!equipment_amulet_merge
+        && (grid_from == MirGridType::Equipment || grid_to == MirGridType::Equipment))
+    {
         return vec![failed_packet];
     }
     if (matches!(grid_from, MirGridType::Storage) || matches!(grid_to, MirGridType::Storage))
@@ -3058,6 +3069,20 @@ pub(super) fn merge_item_impl(
     {
         return vec![failed_packet];
     }
+
+    if equipment_amulet_merge {
+        if !merge_equipped_amulet_item(world, grid_from, grid_to, id_from, id_to) {
+            return vec![failed_packet];
+        }
+        return vec![ServerPacket::MergeItem {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+            success: true,
+        }];
+    }
+
     let mut resources = world.resource_mut::<InventoryResource>();
     let storage_slot_limit = accessible_storage_size(&resources);
     let success = match (grid_from, grid_to) {
@@ -3181,6 +3206,240 @@ pub(super) fn merge_item_impl(
         id_to,
         success: true,
     }]
+}
+
+/// Crystal `PlayerObject.MergeItem` permits an equipped stack only for real
+/// `ItemType.Amulet` instances. Keep the equipment carrier in place for a
+/// partial merge; a full merge retires just that worn carrier.
+fn merge_equipped_amulet_item(
+    world: &mut World,
+    grid_from: MirGridType,
+    grid_to: MirGridType,
+    id_from: u64,
+    id_to: u64,
+) -> bool {
+    let allow_cursed_removal = world
+        .resource::<super::resources::PlayerPermissionResource>()
+        .unlock_curse;
+    let removed_cursed_equipment = {
+        let mut resources = world.resource_mut::<InventoryResource>();
+        let storage_slot_limit = accessible_storage_size(&resources);
+        match (grid_from, grid_to) {
+            (MirGridType::Equipment, MirGridType::Inventory) => {
+                let InventoryResource {
+                    equipment_items,
+                    inventory_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_from,
+                    inventory_items,
+                    grid_to,
+                    id_to,
+                    true,
+                    None,
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Equipment, MirGridType::Storage) => {
+                let InventoryResource {
+                    equipment_items,
+                    storage_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_from,
+                    storage_items,
+                    grid_to,
+                    id_to,
+                    true,
+                    Some(storage_slot_limit),
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Inventory, MirGridType::Equipment) => {
+                let InventoryResource {
+                    equipment_items,
+                    inventory_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_to,
+                    inventory_items,
+                    grid_from,
+                    id_from,
+                    false,
+                    None,
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Storage, MirGridType::Equipment) => {
+                let InventoryResource {
+                    equipment_items,
+                    storage_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_to,
+                    storage_items,
+                    grid_from,
+                    id_from,
+                    false,
+                    Some(storage_slot_limit),
+                    allow_cursed_removal,
+                )
+            }
+            _ => return false,
+        }
+    };
+
+    let Some(removed_cursed_equipment) = removed_cursed_equipment else {
+        return false;
+    };
+    if removed_cursed_equipment {
+        world
+            .resource_mut::<super::resources::PlayerPermissionResource>()
+            .unlock_curse = false;
+    }
+    super::stats::refresh_player_stats(world);
+    true
+}
+
+#[allow(clippy::too_many_arguments)]
+fn merge_equipped_amulet_with_collection(
+    equipment_items: &mut Vec<super::equipment::EquipmentState>,
+    reserved_item_unique_ids: &BTreeSet<u64>,
+    equipment_unique_id: u64,
+    collection: &mut Vec<ItemState>,
+    collection_grid: MirGridType,
+    collection_unique_id: u64,
+    equipment_is_source: bool,
+    storage_slot_limit: Option<u16>,
+    allow_cursed_removal: bool,
+) -> Option<bool> {
+    let equipment_index =
+        exact_equipment_index_for_client_reference(equipment_items, equipment_unique_id)?;
+    let collection_index =
+        item_index_for_client_reference(collection, collection_grid, collection_unique_id)?;
+    if storage_slot_limit
+        .is_some_and(|limit| !storage_slot_within_limit(collection[collection_index].slot, limit))
+    {
+        return None;
+    }
+
+    let equipment = &equipment_items[equipment_index];
+    if !crystal_item_template_for_item_key(&equipment.key)
+        .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET)
+    {
+        return None;
+    }
+    // The temporary ItemState is only a strict identity carrier. Its exact root
+    // UID and every nested UserItem field are retained by the conversion.
+    let equipment_carrier = super::equipment::item_state_from_equipment_state(
+        equipment.clone(),
+        collection[collection_index].container,
+        collection[collection_index].slot,
+    );
+    if !equipped_amulet_stack_identity_compatible(&equipment_carrier, &collection[collection_index])
+    {
+        return None;
+    }
+    if reserved_item_unique_ids.contains(&equipment_carrier.unique_id)
+        || reserved_item_unique_ids.contains(&collection[collection_index].unique_id)
+    {
+        return None;
+    }
+    if equipment_is_source && equipment.cursed && !allow_cursed_removal {
+        return None;
+    }
+    if equipment_is_source
+        && collection_grid == MirGridType::Storage
+        && (crystal_item_has_bind_flag(&equipment.key, CRYSTAL_BIND_DONT_STORE)
+            || item_has_rental_bind_flag(&equipment_carrier, CRYSTAL_BIND_DONT_STORE))
+    {
+        return None;
+    }
+
+    let max_stack = crystal_stack_size_for_item_key(&collection[collection_index].key);
+    let target_quantity = if equipment_is_source {
+        collection[collection_index].quantity
+    } else {
+        equipment.quantity
+    };
+    let source_quantity = if equipment_is_source {
+        equipment.quantity
+    } else {
+        collection[collection_index].quantity
+    };
+    if source_quantity == 0 || max_stack <= 1 || target_quantity >= max_stack {
+        return None;
+    }
+    let transferred = source_quantity.min(max_stack.saturating_sub(target_quantity));
+    if transferred == 0 {
+        return None;
+    }
+
+    if equipment_is_source {
+        collection[collection_index].quantity += transferred;
+        if transferred == source_quantity {
+            let removed = equipment_items.remove(equipment_index);
+            return Some(removed.cursed);
+        }
+        equipment_items[equipment_index].quantity -= transferred;
+    } else {
+        equipment_items[equipment_index].quantity += transferred;
+        if transferred == source_quantity {
+            collection.remove(collection_index);
+        } else {
+            collection[collection_index].quantity -= transferred;
+        }
+    }
+    Some(false)
+}
+
+fn equipped_amulet_stack_identity_compatible(
+    equipment_carrier: &ItemState,
+    collection_item: &ItemState,
+) -> bool {
+    let mut equipment_carrier = equipment_carrier.clone();
+    let mut collection_item = collection_item.clone();
+    // Amulets do not use durability (`equipment_uses_durability` explicitly
+    // excludes their slot), but the legacy equipment carrier supplies 10 when
+    // an ordinary zero-durability ItemState is worn. Canonicalize only that
+    // inert field for merge comparison; the retained carriers are unchanged.
+    equipment_carrier.durability_current = None;
+    equipment_carrier.durability_max = None;
+    collection_item.durability_current = None;
+    collection_item.durability_max = None;
+    item_stack_identity_compatible(&equipment_carrier, &collection_item)
+}
+
+fn exact_equipment_index_for_client_reference(
+    equipment_items: &[super::equipment::EquipmentState],
+    unique_id: u64,
+) -> Option<usize> {
+    let mut matches = equipment_items
+        .iter()
+        .enumerate()
+        .filter_map(|(index, item)| {
+            super::equipment::user_item_from_equipment_state(item)
+                .is_some_and(|user_item| user_item.unique_id == unique_id)
+                .then_some(index)
+        });
+    let index = matches.next()?;
+    matches.next().is_none().then_some(index)
 }
 
 pub(super) fn item_stack_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
@@ -3942,12 +4201,14 @@ mod stack_identity_tests {
         resources.inventory_items = seed_inventory_items();
         resources.storage_items = seed_storage_items();
         resources.equipment_items = super::super::equipment::seed_equipment_items();
-        assert!(resources
-            .belt_items
-            .iter()
-            .chain(resources.inventory_items.iter())
-            .chain(resources.storage_items.iter())
-            .all(|item| item.user_item_metadata.is_none()));
+        assert!(
+            resources
+                .belt_items
+                .iter()
+                .chain(resources.inventory_items.iter())
+                .chain(resources.storage_items.iter())
+                .all(|item| item.user_item_metadata.is_none())
+        );
 
         let expected_belt = resources
             .belt_items

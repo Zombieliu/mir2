@@ -829,6 +829,11 @@ pub struct NativePlayerUiState {
     pub split_count: u16,
     pub inventory_operation: Option<InventoryOperationDraft>,
     pub(crate) inventory_item_drag: Option<InventoryItemDrag>,
+    /// StorageDialog can coexist with CharacterDialog. Keep this host-local
+    /// visibility bit separate from the exclusive core panel so both source
+    /// frames remain reachable without replacing the warehouse.
+    pub(crate) storage_equipment_visible: bool,
+    pub(crate) equipment_item_drag: Option<EquipmentItemDrag>,
     pub(crate) inventory_item_pointer_consumed: bool,
     pub selected_skill_id: Option<u32>,
     pub character_page: CharacterPage,
@@ -938,6 +943,13 @@ struct StorageItemDrag {
     start: Vec2,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) struct EquipmentItemDrag {
+    source_slot: u32,
+    unique_id: u64,
+    start: Vec2,
+}
+
 /// Crystal's Rent click distinguishes a first rental from a renewal only in
 /// its confirmation message; both submit the same `@ADDSTORAGE` request.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1014,6 +1026,8 @@ impl Default for NativePlayerUiState {
             split_count: 1,
             inventory_operation: None,
             inventory_item_drag: None,
+            storage_equipment_visible: false,
+            equipment_item_drag: None,
             inventory_item_pointer_consumed: false,
             selected_skill_id: None,
             character_page: CharacterPage::Character,
@@ -1106,7 +1120,7 @@ impl NativePlayerUiState {
             || self.storage_open()
     }
     pub fn equipment_open(&self) -> bool {
-        self.core.equipment_open()
+        self.core.equipment_open() || (self.storage_open() && self.storage_equipment_visible)
     }
     pub fn menu_open(&self) -> bool {
         self.core.menu_open()
@@ -1170,12 +1184,30 @@ impl NativePlayerUiState {
         }
     }
     pub fn toggle_equipment(&mut self) {
+        if self.storage_open() {
+            self.storage_equipment_visible = !self.storage_equipment_visible;
+            if self.storage_equipment_visible {
+                self.character_page = CharacterPage::Character;
+            }
+            self.equipment_item_drag = None;
+            return;
+        }
         self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
     }
     fn activate_character_hud_button(&mut self) {
         // Crystal's main Character button closes only when the dialog is
         // already showing CharacterPage. From a stats/spells page it keeps
         // the dialog open and returns to CharacterPage instead.
+        if self.storage_open() {
+            if self.storage_equipment_visible && self.character_page == CharacterPage::Character {
+                self.storage_equipment_visible = false;
+            } else {
+                self.storage_equipment_visible = true;
+                self.character_page = CharacterPage::Character;
+            }
+            self.equipment_item_drag = None;
+            return;
+        }
         if self.equipment_open() && self.character_page == CharacterPage::Character {
             self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
             return;
@@ -1191,6 +1223,16 @@ impl NativePlayerUiState {
     pub fn toggle_skill(&mut self) {
         // Crystal F11/Skills2 opens the CharacterDialog's SkillPage. It must
         // retain the real header and working CHAR/STATS/SPELLS controls.
+        if self.storage_open() {
+            if self.storage_equipment_visible && self.character_page == CharacterPage::Spells {
+                self.storage_equipment_visible = false;
+            } else {
+                self.storage_equipment_visible = true;
+                self.character_page = CharacterPage::Spells;
+            }
+            self.equipment_item_drag = None;
+            return;
+        }
         if self.equipment_open() && self.character_page == CharacterPage::Spells {
             self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
             return;
@@ -1358,6 +1400,8 @@ impl NativePlayerUiState {
         self.inspect = None;
         self.inventory_operation = None;
         self.inventory_item_drag = None;
+        self.storage_equipment_visible = false;
+        self.equipment_item_drag = None;
         self.selected_skill_id = None;
         self.character_page = CharacterPage::Character;
         self.inventory_page = 0;
@@ -2031,6 +2075,16 @@ impl NativePlayerUiIntent {
                 unique_id: *unique_id,
                 count: *count,
             }),
+            Self::EquipItem { unique_id, grid, to } => Some(PendingOperationKey::Equip {
+                grid: grid.clone(),
+                unique_id: *unique_id,
+                to: *to,
+            }),
+            Self::RemoveItem { unique_id, grid, to } => Some(PendingOperationKey::Remove {
+                grid: grid.clone(),
+                unique_id: *unique_id,
+                to: *to,
+            }),
             Self::StoreItem {
                 request_id,
                 unique_id,
@@ -2079,8 +2133,6 @@ impl NativePlayerUiIntent {
             | Self::HeroPacket(_)
             | Self::EquipmentCreaturePacket(_)
             | Self::UseItem { .. }
-            | Self::EquipItem { .. }
-            | Self::RemoveItem { .. }
             | Self::Chat { .. }
             | Self::GetRanking { .. }
             | Self::InspectRanking { .. }
@@ -4223,6 +4275,39 @@ fn storage_item_drag_at_cursor(
     })
 }
 
+/// CharacterDialog remains at the source's fixed top-right location while a
+/// StorageDialog is open. Only its Character page owns these equipment cells.
+fn equipment_slot_at_cursor(state: &NativePlayerUiState, cursor: Vec2) -> Option<u32> {
+    if !state.storage_open()
+        || !state.storage_equipment_visible
+        || state.character_page != CharacterPage::Character
+    {
+        return None;
+    }
+    let local_x = cursor.x - CRYSTAL_CHARACTER_PANEL_RECT.left;
+    let local_y = cursor.y - CRYSTAL_CHARACTER_PANEL_RECT.top;
+    CRYSTAL_CHARACTER_EQUIPMENT_SLOTS
+        .iter()
+        .find_map(|(slot, rect)| rect.contains(local_x, local_y).then_some(*slot))
+}
+
+fn equipment_item_drag_at_cursor(
+    state: &NativePlayerUiState,
+    inventory: &InventoryModel,
+    start: Vec2,
+) -> Option<EquipmentItemDrag> {
+    let source_slot = equipment_slot_at_cursor(state, start)?;
+    let item = inventory
+        .items_in(2)
+        .into_iter()
+        .find(|item| item.slot == source_slot)?;
+    Some(EquipmentItemDrag {
+        source_slot,
+        unique_id: item_unique_id(item)?,
+        start,
+    })
+}
+
 fn complete_live_storage_template_index(item: &ItemModel) -> Option<i32> {
     let source = item.tooltip_source.as_ref()?;
     let user_item = source.user_item.as_ref()?;
@@ -4269,6 +4354,20 @@ fn push_storage_drag_merge(
         id_from,
         id_to,
     };
+    let Some(key) = intent.pending_key() else {
+        return false;
+    };
+    if pending.has_storage_drag_conflict(&key) {
+        return false;
+    }
+    intents.push_pending_intent(pending, intent)
+}
+
+fn push_equipment_storage_pending_intent(
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+    intent: NativePlayerUiIntent,
+) -> bool {
     let Some(key) = intent.pending_key() else {
         return false;
     };
@@ -4414,6 +4513,103 @@ fn enqueue_storage_to_bag_drag(
         i32::try_from(source_slot).unwrap_or(i32::MAX),
         i32::try_from(destination).unwrap_or(i32::MAX),
     )
+}
+
+/// `MirItemCell.ToStorage` uses RemoveItem with Storage as the destination
+/// grid for worn equipment. Its sole occupied-target exception is a complete,
+/// non-full matching amulet stack; all other occupied targets use the first
+/// empty storage slot fallback.
+fn enqueue_equipment_to_storage_drag(
+    source: &ItemModel,
+    target_slot: u32,
+    storage: &StorageModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    if !storage.transfers_unlocked() || !storage.is_valid_slot(target_slot) {
+        return false;
+    }
+    let Some(unique_id) = item_unique_id(source) else {
+        return false;
+    };
+    if source
+        .tooltip_source
+        .as_ref()
+        .is_some_and(|tooltip| tooltip.info.item_type == 8)
+    {
+        if let Some(target_id) = storage
+            .item_in_storage(target_slot)
+            .filter(|target| compatible_storage_stack(source, target))
+            .and_then(item_unique_id)
+        {
+            return push_storage_drag_merge(
+                intents,
+                pending,
+                "equipment",
+                "storage",
+                unique_id,
+                target_id,
+            );
+        }
+    }
+    let destination = if storage.item_in_storage(target_slot).is_none() {
+        Some(target_slot)
+    } else {
+        storage.first_empty_storage_slot()
+    };
+    let Some(destination) = destination.and_then(|slot| i32::try_from(slot).ok()) else {
+        return false;
+    };
+    push_equipment_storage_pending_intent(intents, pending, NativePlayerUiIntent::RemoveItem {
+        unique_id,
+        grid: "storage".to_owned(),
+        to: destination,
+    })
+}
+
+/// Source ToEquipment sends the concrete destination slot and leaves wear,
+/// curse, and requirements to the authoritative server.
+fn enqueue_storage_to_equipment_drag(
+    source: &ItemModel,
+    target_slot: u32,
+    inventory: &InventoryModel,
+    storage: &StorageModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    if !storage.transfers_unlocked() {
+        return false;
+    }
+    let Some(unique_id) = item_unique_id(source) else {
+        return false;
+    };
+    if source
+        .tooltip_source
+        .as_ref()
+        .is_some_and(|tooltip| tooltip.info.item_type == 8)
+    {
+        if let Some(target_id) = inventory
+            .items_in(2)
+            .into_iter()
+            .find(|target| target.slot == target_slot)
+            .filter(|target| compatible_storage_stack(source, target))
+            .and_then(item_unique_id)
+        {
+            return push_storage_drag_merge(
+                intents,
+                pending,
+                "storage",
+                "equipment",
+                unique_id,
+                target_id,
+            );
+        }
+    }
+    push_equipment_storage_pending_intent(intents, pending, NativePlayerUiIntent::EquipItem {
+        unique_id,
+        grid: "storage".to_owned(),
+        to: i32::try_from(target_slot).unwrap_or(i32::MAX),
+    })
 }
 
 fn finish_inventory_item_drag(
@@ -4573,6 +4769,17 @@ fn finish_storage_item_drag(
         );
         return;
     }
+    if let Some(target_slot) = equipment_slot_at_cursor(state, cursor) {
+        let _ = enqueue_storage_to_equipment_drag(
+            source,
+            target_slot,
+            inventory,
+            storage,
+            intents,
+            pending,
+        );
+        return;
+    }
     let Some(target_slot) = inventory_bag_slot_at_cursor(state, cursor) else {
         return;
     };
@@ -4585,6 +4792,38 @@ fn finish_storage_item_drag(
         intents,
         pending,
     );
+}
+
+fn finish_equipment_item_drag(
+    state: &mut NativePlayerUiState,
+    inventory: &InventoryModel,
+    storage: &StorageModel,
+    storage_ui: &StorageUiState,
+    cursor: Option<Vec2>,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) {
+    let Some(drag) = state.equipment_item_drag.take() else {
+        return;
+    };
+    state.inventory_item_pointer_consumed = true;
+    let Some(source) = inventory.items_in(2).into_iter().find(|item| {
+        item.slot == drag.source_slot && item_unique_id(item) == Some(drag.unique_id)
+    }) else {
+        return;
+    };
+    let Some(cursor) = cursor else {
+        return;
+    };
+    if drag.start.distance(cursor) < 4.0 {
+        state.inspect = Some(inspect_from_item(source));
+        return;
+    }
+    state.inspect = None;
+    let Some(target_slot) = storage_slot_at_cursor(state, storage, storage_ui, cursor) else {
+        return;
+    };
+    let _ = enqueue_equipment_to_storage_drag(source, target_slot, storage, intents, pending);
 }
 
 /// A click inspects on release; a carry gesture moves/merges on release.
@@ -4627,6 +4866,7 @@ fn process_inventory_item_drag(
         || state.trade_dialog.open
     {
         state.inventory_item_drag = None;
+        state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
             storage_ui.storage_item_drag = None;
         }
@@ -4634,6 +4874,7 @@ fn process_inventory_item_drag(
     }
     let (Some(mouse), Some(belt)) = (mouse, belt) else {
         state.inventory_item_drag = None;
+        state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
             storage_ui.storage_item_drag = None;
         }
@@ -4641,6 +4882,7 @@ fn process_inventory_item_drag(
     };
     let Ok((window_entity, window)) = windows.single() else {
         state.inventory_item_drag = None;
+        state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
             storage_ui.storage_item_drag = None;
         }
@@ -4648,6 +4890,7 @@ fn process_inventory_item_drag(
     };
     if !window.focused {
         state.inventory_item_drag = None;
+        state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
             storage_ui.storage_item_drag = None;
         }
@@ -4678,6 +4921,7 @@ fn process_inventory_item_drag(
                 WindowEvent::CursorLeft(event) if event.window == window_entity => {
                     cursor = None;
                     state.inventory_item_drag = None;
+                    state.equipment_item_drag = None;
                     if let Some(storage_ui) = storage_ui.as_deref_mut() {
                         storage_ui.storage_item_drag = None;
                     }
@@ -4691,6 +4935,7 @@ fn process_inventory_item_drag(
                             state.inventory_item_drag = cursor.and_then(|start| {
                                 inventory_item_drag_at_cursor(&state, &inventory, start)
                             });
+                            state.equipment_item_drag = None;
                             if let Some(storage_ui) = storage_ui.as_deref_mut() {
                                 storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
                                     storage.as_deref().and_then(|storage| {
@@ -4701,6 +4946,15 @@ fn process_inventory_item_drag(
                                 } else {
                                     None
                                 };
+                            }
+                            if state.inventory_item_drag.is_none()
+                                && storage_ui
+                                    .as_deref()
+                                    .is_none_or(|ui| ui.storage_item_drag.is_none())
+                            {
+                                state.equipment_item_drag = cursor.and_then(|start| {
+                                    equipment_item_drag_at_cursor(&state, &inventory, start)
+                                });
                             }
                             belt_diagnostic(diagnostics.as_deref(), || {
                                 format!(
@@ -4735,6 +4989,15 @@ fn process_inventory_item_drag(
                                     &mut intents,
                                     &mut pending,
                                 );
+                                finish_equipment_item_drag(
+                                    &mut state,
+                                    &inventory,
+                                    storage,
+                                    storage_ui,
+                                    cursor,
+                                    &mut intents,
+                                    &mut pending,
+                                );
                             }
                         }
                     }
@@ -4750,6 +5013,7 @@ fn process_inventory_item_drag(
         let start = cursor_path.first().copied().or(cursor);
         state.inventory_item_drag =
             start.and_then(|start| inventory_item_drag_at_cursor(&state, &inventory, start));
+        state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
             storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
                 storage.as_deref().and_then(|storage| {
@@ -4758,6 +5022,14 @@ fn process_inventory_item_drag(
             } else {
                 None
             };
+        }
+        if state.inventory_item_drag.is_none()
+            && storage_ui
+                .as_deref()
+                .is_none_or(|ui| ui.storage_item_drag.is_none())
+        {
+            state.equipment_item_drag = start
+                .and_then(|start| equipment_item_drag_at_cursor(&state, &inventory, start));
         }
     }
 
@@ -4776,6 +5048,15 @@ fn process_inventory_item_drag(
         );
         if let (Some(storage), Some(storage_ui)) = (storage.as_deref(), storage_ui.as_deref_mut()) {
             finish_storage_item_drag(
+                &mut state,
+                &inventory,
+                storage,
+                storage_ui,
+                cursor,
+                &mut intents,
+                &mut pending,
+            );
+            finish_equipment_item_drag(
                 &mut state,
                 &inventory,
                 storage,
@@ -4952,11 +5233,14 @@ fn sync_storage_inventory_location(
     state.inventory_window.end_drag();
     state.inventory_window.clear_cursor();
     state.inventory_item_drag = None;
+    state.equipment_item_drag = None;
     state.inventory_item_pointer_consumed = false;
     storage_ui.storage_item_drag = None;
     if is_open {
         state.inventory_window.left = 393.0;
         state.inventory_window.top = 0.0;
+    } else {
+        state.storage_equipment_visible = false;
     }
 }
 
@@ -4989,6 +5273,7 @@ fn sync_storage_password_prompt(
         state.storage_password_prompt = Some(StoragePasswordPrompt::unlock());
         clear_legacy_storage_password_drafts(&mut storage);
         state.inventory_item_drag = None;
+        state.equipment_item_drag = None;
         state.inventory_item_pointer_consumed = false;
         storage_ui.storage_item_drag = None;
     }
@@ -6451,6 +6736,15 @@ fn process_overlay_buttons(
                     // assigning sound to every generic CloseWindows caller.
                     ui_audio.push(crate::audio::NativeUiSound::ButtonA);
                 }
+                if matches!(*button, OverlayButton::CloseCharacter)
+                    && state.storage_open()
+                    && state.storage_equipment_visible
+                {
+                    state.storage_equipment_visible = false;
+                    state.equipment_item_drag = None;
+                    state.inspect = None;
+                    continue;
+                }
                 equipment_creature_host::close_general(
                     &mut state,
                     &mut intents,
@@ -6564,6 +6858,8 @@ fn process_overlay_buttons(
                 }
                 state.storage_password_prompt = None;
                 state.storage_rental_confirmation = None;
+                state.storage_equipment_visible = false;
+                state.equipment_item_drag = None;
                 clear_legacy_storage_password_drafts(&mut storage);
                 storage_ui.bag_selection = None;
                 storage_ui.storage_selection = None;
@@ -13881,6 +14177,10 @@ fn overlay_button(
 #[cfg(test)]
 #[path = "storage_drag_tests.rs"]
 mod storage_drag_tests;
+
+#[cfg(test)]
+#[path = "equipment_storage_tests.rs"]
+mod equipment_storage_tests;
 
 #[cfg(test)]
 #[path = "storage_password_tests.rs"]

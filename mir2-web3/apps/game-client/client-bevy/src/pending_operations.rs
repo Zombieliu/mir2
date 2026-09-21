@@ -92,6 +92,16 @@ pub enum PendingOperationKey {
     },
     Repair(u64),
     SpecialRepair(u64),
+    Equip {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+    },
+    Remove {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+    },
     StorageDeposit {
         unique_id: u64,
         from: i32,
@@ -287,6 +297,18 @@ pub enum InventoryOperationAck {
         count: u16,
         success: bool,
     },
+    Equip {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+        success: bool,
+    },
+    Remove {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+        success: bool,
+    },
 }
 
 impl InventoryOperationAck {
@@ -297,7 +319,9 @@ impl InventoryOperationAck {
             | Self::Move { success, .. }
             | Self::Merge { success, .. }
             | Self::Split { success, .. }
-            | Self::Sell { success, .. } => *success,
+            | Self::Sell { success, .. }
+            | Self::Equip { success, .. }
+            | Self::Remove { success, .. } => *success,
         }
     }
 
@@ -309,6 +333,8 @@ impl InventoryOperationAck {
             Self::Merge { .. } => "Merge",
             Self::Split { .. } => "Split",
             Self::Sell { .. } => "Sell",
+            Self::Equip { .. } => "Equip",
+            Self::Remove { .. } => "Remove",
         }
     }
 }
@@ -404,6 +430,40 @@ pub fn apply_inventory_operation_ack(
                 count: pending_count,
             },
         ) => unique_id == pending_id && count == pending_count,
+        (
+            InventoryOperationAck::Equip {
+                grid,
+                unique_id,
+                to,
+                ..
+            },
+            PendingOperationKey::Equip {
+                grid: pending_grid,
+                unique_id: pending_id,
+                to: pending_to,
+            },
+        ) => {
+            grid.eq_ignore_ascii_case(pending_grid)
+                && unique_id == pending_id
+                && to == pending_to
+        }
+        (
+            InventoryOperationAck::Remove {
+                grid,
+                unique_id,
+                to,
+                ..
+            },
+            PendingOperationKey::Remove {
+                grid: pending_grid,
+                unique_id: pending_id,
+                to: pending_to,
+            },
+        ) => {
+            grid.eq_ignore_ascii_case(pending_grid)
+                && unique_id == pending_id
+                && to == pending_to
+        }
         _ => false,
     });
     feedback.last = Some(ack);
@@ -790,6 +850,12 @@ fn storage_drag_cells(key: &PendingOperationKey) -> [Option<(&'static str, i32)>
         PendingOperationKey::Move { grid, from, to, .. } if grid == "storage" => {
             [Some(("storage", *from)), Some(("storage", *to))]
         }
+        PendingOperationKey::Equip { grid, to, .. } if grid == "storage" => {
+            [None, Some(("equipment", *to))]
+        }
+        PendingOperationKey::Remove { grid, to, .. } if grid == "storage" => {
+            [None, Some(("storage", *to))]
+        }
         _ => [None, None],
     }
 }
@@ -809,6 +875,12 @@ fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a
         } if matches!(grid.as_str(), "inventory" | "storage") => {
             [Some((grid, *unique_id)), None]
         }
+        PendingOperationKey::Equip {
+            grid, unique_id, ..
+        } if grid == "storage" => [Some(("storage", *unique_id)), None],
+        PendingOperationKey::Remove {
+            grid, unique_id, ..
+        } if grid == "storage" => [Some(("equipment", *unique_id)), None],
         PendingOperationKey::Split {
             grid, unique_id, ..
         } if grid == "inventory" => [Some(("inventory", *unique_id)), None],
@@ -830,6 +902,8 @@ fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a
                 | ("storage", "inventory")
                 | ("inventory", "inventory")
                 | ("storage", "storage")
+                | ("equipment", "storage")
+                | ("storage", "equipment")
         ) => [Some((grid_from, *id_from)), Some((grid_to, *id_to))],
         _ => [None, None],
     }
@@ -2459,6 +2533,64 @@ mod tests {
         new.expiry = ((1u64 << 63) | 1001) as i64;
         assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 1);
         assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn equipment_storage_receipts_release_only_the_exact_grid_item_and_slot() {
+        let mut pending = PendingOperations::default();
+        let remove = PendingOperationKey::Remove {
+            grid: "storage".into(),
+            unique_id: 90,
+            to: 5,
+        };
+        let equip = PendingOperationKey::Equip {
+            grid: "storage".into(),
+            unique_id: 91,
+            to: 9,
+        };
+        let other_slot = PendingOperationKey::Remove {
+            grid: "storage".into(),
+            unique_id: 90,
+            to: 6,
+        };
+        assert!(pending.try_begin(remove.clone()));
+        assert!(pending.try_begin(equip.clone()));
+        assert!(pending.try_begin(other_slot.clone()));
+        let mut feedback = InventoryOperationFeedback::default();
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Remove {
+                    grid: "Storage".into(),
+                    unique_id: 90,
+                    to: 5,
+                    success: false,
+                },
+            ),
+            1,
+        );
+        assert!(!pending.contains(&remove));
+        assert!(pending.contains(&equip));
+        assert!(pending.contains(&other_slot));
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Equip {
+                    grid: "STORAGE".into(),
+                    unique_id: 91,
+                    to: 9,
+                    success: true,
+                },
+            ),
+            1,
+        );
+        assert!(!pending.contains(&equip));
+        assert!(pending.contains(&other_slot));
+        assert_eq!(feedback.last.as_ref().map(InventoryOperationAck::label), Some("Equip"));
     }
 
     #[test]
