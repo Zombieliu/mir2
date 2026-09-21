@@ -18,8 +18,8 @@ pub const STORAGE_GRID_ROWS: u32 = 16;
 pub const STORAGE_PAGE_ROWS: u32 = STORAGE_GRID_ROWS / 2;
 pub const STORAGE_PAGE_SIZE: u32 = STORAGE_GRID_COLUMNS * STORAGE_PAGE_ROWS;
 pub const STORAGE_VIEW_PAGE_COUNT: usize = 2;
-pub const STORAGE_BASE_SIZE: u16 = 30;
-pub const STORAGE_EXPANDED_SIZE: u16 = 42;
+pub const STORAGE_BASE_SIZE: u16 = 80;
+pub const STORAGE_EXPANDED_SIZE: u16 = 160;
 pub const STORAGE_EXPAND_COST: u32 = 1_000_000;
 pub const BAG_SLOTS: u32 = 46;
 
@@ -54,7 +54,7 @@ where
     deserializer.deserialize_seq(StorageItemsVisitor)
 }
 
-#[derive(Debug, Clone, Default, Resource, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Resource, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct StorageModel {
     #[serde(default, deserialize_with = "deserialize_bounded_items")]
@@ -74,6 +74,24 @@ pub struct StorageModel {
     pub password_draft: String,
     pub new_password_draft: String,
     pub confirm_password_draft: String,
+}
+
+impl Default for StorageModel {
+    fn default() -> Self {
+        Self {
+            items: Vec::new(),
+            size: STORAGE_BASE_SIZE,
+            has_password: false,
+            unlocked: false,
+            has_expanded: false,
+            expiry: 0,
+            selected_bag_slot: None,
+            selected_storage_slot: None,
+            password_draft: String::new(),
+            new_password_draft: String::new(),
+            confirm_password_draft: String::new(),
+        }
+    }
 }
 
 impl StorageModel {
@@ -104,11 +122,34 @@ impl StorageModel {
     }
 
     pub fn effective_size(&self) -> u16 {
-        self.size.min(STORAGE_EXPANDED_SIZE)
+        // `ResizeStorage` carries the concrete storage count. Keep a smaller
+        // authoritative nonzero count, but never expose the second Crystal page
+        // after `has_expanded` is revoked while a stale 160-slot count remains.
+        let declared_size = if self.size == 0 {
+            STORAGE_BASE_SIZE
+        } else {
+            self.size.min(STORAGE_EXPANDED_SIZE)
+        };
+        if self.has_expanded {
+            declared_size
+        } else {
+            declared_size.min(STORAGE_BASE_SIZE)
+        }
     }
 
     pub fn is_valid_slot(&self, slot: u32) -> bool {
         slot < u32::from(self.effective_size())
+    }
+
+    /// Clears the model-owned storage selection when refreshed authority no
+    /// longer exposes that exact storage slot (for example, expansion revocation).
+    pub fn clear_invalid_storage_selection(&mut self) {
+        if self
+            .selected_storage_slot
+            .is_some_and(|slot| self.item_in_storage(slot).is_none())
+        {
+            self.selected_storage_slot = None;
+        }
     }
 
     pub fn page_count(&self) -> usize {
@@ -137,15 +178,16 @@ impl StorageModel {
         StoragePage {
             page,
             page_count: self.page_count(),
-            locked: !self.unlocked || (page == 1 && !self.has_expanded),
-            expanded: self.has_expanded,
+            locked: !self.unlocked || !self.is_valid_slot(start),
+            expanded: self.has_expanded && self.effective_size() > STORAGE_BASE_SIZE,
             expiry: self.expiry,
             slots,
         }
     }
 
-    pub fn clamp_after_refresh(&self, cursor: &mut StoragePageCursor) {
+    pub fn clamp_after_refresh(&mut self, cursor: &mut StoragePageCursor) {
         cursor.page = self.clamp_page(cursor.page);
+        self.clear_invalid_storage_selection();
     }
 
     pub fn selection_for_slot(&self, slot: u32) -> Option<StorageItemSelection> {
@@ -337,21 +379,17 @@ mod tests {
 
     #[test]
     fn storage_occupied_and_free() {
-        let mut m = StorageModel {
-            size: 10,
-            ..Default::default()
-        };
+        let mut m = StorageModel::new();
         m.items.push(item(0, 4));
         m.items.push(item(1, 4));
         m.items.push(item(2, 0));
         assert_eq!(m.storage_occupied(), 2);
-        assert_eq!(m.free_storage_slots(), 8);
+        assert_eq!(m.free_storage_slots(), 78);
     }
 
     #[test]
     fn deposit_requires_unlocked_and_free_slot() {
         let storage = StorageModel {
-            size: 1,
             has_password: true,
             unlocked: false,
             selected_bag_slot: Some(0),
@@ -366,14 +404,16 @@ mod tests {
         let mut unlocked = storage;
         unlocked.unlocked = true;
         assert!(storage_deposit_enabled(&unlocked, &inv));
-        unlocked.items.push(item(0, 4));
+        unlocked.items.extend(
+            (0..STORAGE_BASE_SIZE).map(|slot| item(u32::from(slot), 4)),
+        );
         assert!(!storage_deposit_enabled(&unlocked, &inv)); // no free slot
     }
 
     #[test]
     fn serde_roundtrip() {
         let m = StorageModel {
-            size: 30,
+            size: STORAGE_BASE_SIZE,
             has_password: true,
             unlocked: true,
             has_expanded: false,
@@ -391,9 +431,17 @@ mod tests {
         let mut model = StorageModel::new();
         model.items.push(item(0, 4));
         assert_eq!(STORAGE_GRID_COLUMNS * STORAGE_GRID_ROWS, 160);
+        assert_eq!(model.effective_size(), STORAGE_BASE_SIZE);
         assert_eq!(model.page(0).slots.len(), 80);
         assert_eq!(model.page(1).page, 1);
         assert_eq!(model.page_count(), STORAGE_VIEW_PAGE_COUNT);
+
+        let locked_page = model.page(1);
+        assert!(locked_page.locked, "unavailable second tab is locked");
+        assert!(
+            locked_page.slots[0].locked,
+            "unavailable second tab is locked"
+        );
 
         model.has_expanded = true;
         model.size = STORAGE_EXPANDED_SIZE;
@@ -401,20 +449,65 @@ mod tests {
         assert_eq!(page.page, 1);
         assert_eq!(page.page_count, STORAGE_VIEW_PAGE_COUNT);
         assert_eq!(page.slots[0].slot, 80);
-        assert!(page.slots[0].locked);
+        assert!(!page.slots[0].locked);
         assert_eq!(page.slots.len(), 80);
         assert_eq!(page.expiry, 0);
 
-        model.has_expanded = false;
-        let locked_page = model.page(1);
-        assert!(locked_page.locked, "unavailable second tab is locked");
-        assert!(
-            locked_page.slots[0].locked,
-            "unavailable second tab is locked"
-        );
         let mut cursor = StoragePageCursor { page: 99 };
         model.clamp_after_refresh(&mut cursor);
         assert_eq!(cursor.page, 1);
+    }
+
+    #[test]
+    fn storage_capacity_uses_crystal_80_and_160_slot_boundaries() {
+        let mut model = StorageModel {
+            size: STORAGE_EXPANDED_SIZE,
+            ..StorageModel::new()
+        };
+        assert!(model.is_valid_slot(79));
+        assert!(!model.is_valid_slot(80));
+        assert!(model.page(1).locked);
+        assert!(model.page(1).slots[0].locked);
+
+        model.has_expanded = true;
+        assert!(model.is_valid_slot(80));
+        assert!(model.is_valid_slot(159));
+        assert!(!model.is_valid_slot(160));
+        assert!(!model.page(1).locked);
+        assert!(!model.page(1).slots[0].locked);
+        assert!(!model.page(1).slots[79].locked);
+    }
+
+    #[test]
+    fn storage_keeps_smaller_authoritative_capacity_and_locks_second_page() {
+        let model = StorageModel {
+            size: 79,
+            has_expanded: true,
+            ..StorageModel::new()
+        };
+        assert_eq!(model.effective_size(), 79);
+        assert!(model.is_valid_slot(78));
+        assert!(!model.is_valid_slot(79));
+        assert!(model.page(1).locked);
+    }
+
+    #[test]
+    fn storage_expansion_revocation_invalidates_selected_second_page_slot() {
+        let mut model = StorageModel {
+            size: STORAGE_EXPANDED_SIZE,
+            has_expanded: true,
+            selected_storage_slot: Some(80),
+            ..StorageModel::new()
+        };
+        model.items.push(item(80, 4));
+        assert!(model.selection_for_slot(80).is_some());
+
+        model.has_expanded = false;
+        let mut cursor = StoragePageCursor { page: 1 };
+        model.clamp_after_refresh(&mut cursor);
+        assert_eq!(model.selected_storage_slot, None);
+        assert!(model.selection_for_slot(80).is_none());
+        assert!(model.page(1).locked);
     }
 
     #[test]
@@ -487,6 +580,7 @@ mod tests {
         assert_eq!(model.page_count(), 2);
 
         let defaults: StorageModel = serde_json::from_str("{}").expect("old empty model");
-        assert_eq!(defaults.size, 0);
+        assert_eq!(defaults.size, STORAGE_BASE_SIZE);
+        assert_eq!(defaults.effective_size(), STORAGE_BASE_SIZE);
     }
 }

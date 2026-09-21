@@ -3018,7 +3018,7 @@ fn sync_local_panel_models(
     mut mail: ResMut<MailModel>,
     mut mail_ui: ResMut<MailUiState>,
     inventory: Res<InventoryModel>,
-    storage: Res<StorageModel>,
+    mut storage: ResMut<StorageModel>,
     mut storage_ui: ResMut<StorageUiState>,
     shop: Res<ShopModel>,
     mut shop_ui: ResMut<ShopUiState>,

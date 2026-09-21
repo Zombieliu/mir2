@@ -217,3 +217,23 @@ rejection retains selection without sending sale. This overflow protection is
 an intentional improvement over unchecked source arithmetic. No new package or
 desktop input this round; staged npc-layout binary predates this source patch.
 Live service, memory and other full-UI acceptance gates remain open.
+
+## Consolidated service build and read-only desktop observation
+
+Consolidated source ed113b8fd built successfully (68s). Staged package
+C:/numeron-legend-of-rebirth-20260921-ui-services contains client SHA256
+51D261BA359BFD4B8A1CBE6562427F3417ACA03442D707678E2A2C1B52887716 and matched
+Gateway FED42F81FF2160C3A95583747C95EA7AC97F6AE52B06502D503D4F5E817C16FD.
+Build receipt C:/mir2-ui-repair-20260921/ui-service-consolidated-build.log.
+Neither staged binary launched. No ordinary account/save mutation.
+
+Read-only window discovery/capture confirmed the old auth-lifetime process49272
+still shows a1 in-game with HP99/99, close to the previously saved observation
+position. Current private memory remains29.25GB. Screenshot
+readonly-handoff-pending.jpg records this observation only; it is NOT evidence
+for newer service fixes. No mouse/keyboard input was sent; handoff remains pending.
+
+Next surface audit found storage base/expanded constants30/42 conflicting with
+source/backend80/160. Native storage still uses a non-source bag picker and
+button-first-free transfers; ordinary two-way target-cell drag is not implemented.
+Capacity correction is in progress separately from the consolidated package.
