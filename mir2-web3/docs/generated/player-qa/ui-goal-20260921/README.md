@@ -98,3 +98,21 @@ library 232/232 passed after symbol backup. Original UI asset audit verifies
 2362 drawable frames, 82 source-empty slots, no issues; includes newly restored
 Prguse/50 pixels and metadata. Release build pending; no live authentication
 submission or leak-fix result is implied.
+
+## Packaged authentication layout live check
+
+Release build succeeded. Running package:
+C:/numeron-legend-of-rebirth-20260921-ui-auth-lifetime/mir2-platform-windows.exe
+SHA256 9157EC7F0BC4F7B12A591AC0A24609C4ADB5B0F7C5A4C45370764D429C142201.
+Source commit 9a9ca0b7a pushed. New login NEW opens original registration
+modal with empty login fields; eight text inputs and source artwork visible;
+Cancel returns to login. Change Password opens original correctly aligned
+Prguse/50 panel; Cancel returns to login. Evidence:
+auth-lifetime-registration-empty.png and auth-lifetime-change-password.png.
+No registration or password change was submitted. These prove opening,
+layout and cancellation only, not server/account lifecycle acceptance.
+
+Current package remains at login for user handoff following previous client
+Error1. Fresh logs C:/mir2-ui-repair-20260921/auth-lifetime-live include Bevy
+errors and native-soak resource counters. Memory/drag/help/multi-quest live
+checks still pending. Full goal remains active, not complete or paused.
