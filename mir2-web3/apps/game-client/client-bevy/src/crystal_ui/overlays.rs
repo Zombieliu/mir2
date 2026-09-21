@@ -18250,7 +18250,9 @@ mod tests {
         {
             let mut inv = app.world_mut().resource_mut::<InventoryModel>();
             inv.gold = 5000;
-            inv.items.push(item("1", "Potion", 0, 0));
+            let mut potion = item("1", "Potion", 0, 0);
+            complete_repair_quote_metadata(&mut potion);
+            inv.items.push(potion);
             let mut sword = item("2", "Sword", 0, 1);
             complete_repair_quote_metadata(&mut sword);
             inv.items.push(sword);

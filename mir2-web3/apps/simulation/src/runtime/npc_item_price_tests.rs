@@ -61,3 +61,16 @@ fn crystal_repair_full_and_non_durable_items_are_free() {
     template.durability = 0;
     assert_eq!(crystal_item_repair_price(&item, &template), 0);
 }
+
+#[test]
+fn crystal_sale_divides_after_multiplying_selected_stack() {
+    let (mut item, mut template) = priced_item();
+    template.price = 101;
+    template.durability = 0;
+    item.added_stats.clear();
+    // Crystal NPC sale is Price()/2, where Price has already multiplied Count.
+    for (count, expected) in [(1, 50), (2, 101), (3, 151)] {
+        item.quantity = count;
+        assert_eq!(crystal_item_current_price(&item, &template, 0) / 2, expected);
+    }
+}

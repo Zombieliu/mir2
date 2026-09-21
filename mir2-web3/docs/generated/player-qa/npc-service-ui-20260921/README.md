@@ -211,3 +211,38 @@ Gateway retains FED42F81FF2160C3A95583747C95EA7AC97F6AE52B06502D503D4F5E817C16FD
 Includes prior pricing, affordability and memory-attribution diagnostics. Neither
 binary deployed; no visual/live transaction result is implied. Sale gold-cap
 rounding and current high memory remain open, alongside other full-UI gates.
+
+## Sale stack-price and wallet-cap source audit
+
+Added a fixed server price regression: nondurable template101, zero added stats,
+selected counts1/2/3 produce sale totals50/101/151. The existing current-price
+function multiplies count before division, as Crystal ItemData.Price requires.
+Backend price suite4/4 passes; log
+C:/mir2-ui-repair-20260921/npc-sale-rounding-server-tests.log.
+No backend sale semantics were changed by this regression.
+
+A checked client wallet-cap rejection is an intentional protection, not a claim
+of identical overflow behavior: Crystal GameScene.Gold is uint and its literal
+Gold + Price()/2 comparison can wrap in unchecked arithmetic. Existing simulation
+full-stack-at-cap test removes the sold item with zero gain. The native guard
+must therefore retain the item selection and send no sale request when exact
+quote plus wallet exceeds u32::MAX. Exact stack quote and the checked guard are
+separate claims. Missing/stale source must not produce an invented exact quote.
+
+## Exact sale quote implementation receipt
+
+Native sale display and Confirm/Hold now share a concrete-source quote, with
+adjusted unit value multiplied by selected live count before halving. Missing
+source, identity mismatch, invalid live durability or out-of-range selected
+count cannot enqueue; a selected unquotable item shows Quote unavailable, while
+an empty target retains the ordinary Sale title. Repair reuses the current-price
+helper, including Crystal's zero-MaxDura ratio0 behavior.
+
+Wallet-cap equality permits sale; checked overflow preserves selection, creates
+no pending operation, and reports Cannot carry anymore gold. The checked guard
+is the intentional protection described above, not identical C# overflow behavior.
+Full native client library911/911 passes; receipt
+C:/mir2-ui-repair-20260921/npc-sale-quote-client-tests.log. Backend price vectors
+4/4 pass. No server behavior changed, no live sale/account operation was run.
+This latest source is not yet repackaged; npc-layout remains the latest staged
+binary. Matched deployment, live transactions and complete UI visuals remain open.

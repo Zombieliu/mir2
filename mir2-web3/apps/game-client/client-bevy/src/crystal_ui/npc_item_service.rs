@@ -11,6 +11,7 @@ const ITEM_CLICK_TARGET: CrystalRect = CrystalRect::new(20.0, 55.0, 75.0, 75.0);
 const NPC_DROP_PANEL_LEFT: f32 = 264.0;
 const NPC_DROP_PANEL_TOP: f32 = 224.0;
 const LOW_GOLD_NOTICE: &str = "Not enough gold.";
+const GOLD_CAP_NOTICE: &str = "Cannot carry anymore gold.";
 
 pub(super) fn service_action(shop: &ShopModel) -> Option<(&'static str, OverlayButton)> {
     if shop.allows_special_repair() {
@@ -112,17 +113,30 @@ fn selection_intent(
     {
         Some(NativePlayerUiIntent::RepairItem { unique_id })
     } else if shop.allows_sell() && shop_sell_enabled(inventory, shop.selected_bag_slot_for_sell) {
-        let count = state
-            .shop_service_drag_count
-            .unwrap_or_else(|| shop_quantity_clamped(state.shop_quantity))
-            .min(item.quantity.min(u32::from(u16::MAX)) as u16);
-        Some(NativePlayerUiIntent::SellItem {
-            unique_id,
-            count,
-        })
+        let count = sale_selection_count(state, item)?;
+        crate::crystal_ui::npc_item_quote::crystal_npc_sale_quote(item, count)?;
+        Some(NativePlayerUiIntent::SellItem { unique_id, count })
     } else {
         None
     }
+}
+
+fn sale_selection_count(state: &NativePlayerUiState, item: &ItemModel) -> Option<u16> {
+    let requested = state
+        .shop_service_drag_count
+        .unwrap_or_else(|| shop_quantity_clamped(state.shop_quantity));
+    let count = requested.min(item.quantity.min(u32::from(u16::MAX)) as u16);
+    (count > 0).then_some(count)
+}
+
+fn sale_quote(
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    state: &NativePlayerUiState,
+) -> Option<u32> {
+    shop.allows_sell().then_some(())?;
+    let item = selected_item(shop, inventory, state)?;
+    crate::crystal_ui::npc_item_quote::crystal_npc_sale_quote(item, sale_selection_count(state, item)?)
 }
 
 fn repair_quote(
@@ -162,6 +176,16 @@ pub(super) fn submit_selection(
         state.npc_service_notice_mode = Some(shop.service_mode);
         return false;
     }
+    if matches!(intent, NativePlayerUiIntent::SellItem { .. })
+        && !sale_fits_wallet_cap(shop, inventory, state)
+    {
+        // Crystal evaluates Gold + sale value in an unchecked uint expression.
+        // This checked preflight is intentionally protective: it avoids an
+        // overflowed wallet/UI state while retaining TargetItem for retry.
+        state.npc_service_notice = Some(GOLD_CAP_NOTICE.to_owned());
+        state.npc_service_notice_mode = Some(shop.service_mode);
+        return false;
+    }
     if !intents.push_pending_intent(pending, intent) {
         return false;
     }
@@ -176,6 +200,17 @@ pub(super) fn submit_selection(
     state.npc_service_notice = None;
     state.npc_service_notice_mode = None;
     true
+}
+
+/// A protective client preflight around Crystal's unchecked `uint` sale
+/// capacity expression. It deliberately retains the current target on reject.
+fn sale_fits_wallet_cap(
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    state: &NativePlayerUiState,
+) -> bool {
+    sale_quote(shop, inventory, state)
+        .is_some_and(|amount| inventory.gold.checked_add(amount).is_some())
 }
 
 /// `NPCDropDialog.Confirm` compares `GameScene.Gold` to the untruncated
@@ -310,7 +345,7 @@ fn render_contents(
         && if repair {
             repair_selection_enabled(state, inventory) && repair_quote.is_some()
         } else {
-            shop_sell_enabled(inventory, shop.selected_bag_slot_for_sell)
+            sale_quote(shop, inventory, state).is_some()
         };
     if let Some(assets) = assets {
         // BeforeDraw changes the constructor's Prguse/392 to Prguse2/351.
@@ -349,21 +384,14 @@ fn render_contents(
             |quote| format!("{title}: {} gold", quote.displayed_total),
         )
     } else if shop.allows_sell() {
-        selected
-            .and_then(|item| {
-                item.sell_value.checked_mul(
-                    item.quantity
-                        .min(u32::from(
-                            state
-                                .shop_service_drag_count
-                                .unwrap_or_else(|| shop_quantity_clamped(state.shop_quantity)),
-                        )),
-                )
-            })
-            .map_or_else(
-                || title.to_owned(),
+        if selected.is_none() {
+            title.to_owned()
+        } else {
+            sale_quote(shop, inventory, state).map_or_else(
+                || "Quote unavailable".to_owned(),
                 |price| format!("{title}: {price} gold"),
             )
+        }
     } else {
         title.to_owned()
     };
@@ -399,10 +427,9 @@ fn render_contents(
     }
 
     if shop.allows_sell() {
-        if let Some(item) = selected {
-            let selected_count = state
-                .shop_service_drag_count
-                .unwrap_or_else(|| item.quantity.min(u32::from(u16::MAX)) as u16);
+        if let Some(item) = selected.filter(|_| sale_quote(shop, inventory, state).is_some()) {
+            let selected_count = sale_selection_count(state, item)
+                .expect("sale quote requires a positive selected count");
             // TargetItem.Count is drawn inside Crystal's ItemCell. There is no
             // adjacent quantity picker on NPCDropDialog.
             overlay_text_at(
@@ -555,11 +582,8 @@ mod tests {
     fn enqueue_clears_target_only_on_success_and_sale_count_never_exceeds_stack() {
         let inventory = InventoryModel {
             items: vec![ItemModel {
-                unique_id: Some(77),
                 quantity: 3,
-                slot: 45,
-                container: 0,
-                ..default()
+                ..repairable_item(77, 0, 45)
             }],
             ..default()
         };
@@ -573,6 +597,14 @@ mod tests {
         };
         let mut intents = NativePlayerUiIntentQueue::default();
         let mut pending = PendingOperations::default();
+        assert!(state.npc_shop_open());
+        assert_eq!(
+            crate::crystal_ui::npc_item_quote::crystal_npc_sale_quote(&inventory.items[0], 3),
+            Some(1968)
+        );
+        assert_eq!(selected_item(&shop, &inventory, &state).map(|item| item.slot), Some(45));
+        assert_eq!(sale_quote(&shop, &inventory, &state), Some(1968));
+        assert!(selection_intent(&shop, &inventory, &state).is_some());
         assert!(submit_selection(
             &mut shop,
             &inventory,
@@ -598,6 +630,120 @@ mod tests {
         ));
         assert_eq!(shop.selected_bag_slot_for_sell, Some(45));
         assert!(intents.drain_intents().is_empty());
+    }
+
+    #[test]
+    fn sale_wallet_cap_uses_the_full_stack_quote_and_retains_the_target() {
+        let mut item = repairable_item(77, 0, 45);
+        item.quantity = 2;
+        item.durability_current = None;
+        item.durability_max = None;
+        let source = item.tooltip_source.as_mut().unwrap();
+        source.info.price = 101;
+        source.info.durability = 0;
+        source.user_item.as_mut().unwrap().added_stats.clear();
+        let mut inventory = InventoryModel {
+            gold: u32::MAX - 101,
+            items: vec![item.clone()],
+            ..default()
+        };
+        let mut state = NativePlayerUiState::default();
+        state.toggle_npc_shop();
+        state.shop_service_drag_count = Some(2);
+        let mut shop = ShopModel {
+            service_mode: NpcShopServiceMode::Sell,
+            selected_bag_slot_for_sell: Some(45),
+            ..default()
+        };
+        let mut intents = NativePlayerUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+        assert!(state.npc_shop_open());
+        assert_eq!(
+            crate::crystal_ui::npc_item_quote::crystal_npc_sale_quote(&inventory.items[0], 2),
+            Some(101)
+        );
+        assert_eq!(selected_item(&shop, &inventory, &state).map(|item| item.slot), Some(45));
+        assert_eq!(sale_quote(&shop, &inventory, &state), Some(101));
+        assert!(selection_intent(&shop, &inventory, &state).is_some());
+        assert!(submit_selection(
+            &mut shop,
+            &inventory,
+            &mut state,
+            &mut intents,
+            &mut pending,
+        ));
+        assert!(matches!(
+            intents.drain_intents().as_slice(),
+            [NativePlayerUiIntent::SellItem { unique_id: 77, count: 2 }]
+        ));
+        pending.clear();
+
+        inventory.gold = u32::MAX;
+        shop.selected_bag_slot_for_sell = Some(45);
+        state.shop_service_drag_count = Some(2);
+        assert!(!submit_selection(
+            &mut shop,
+            &inventory,
+            &mut state,
+            &mut intents,
+            &mut pending,
+        ));
+        assert_eq!(state.npc_service_notice.as_deref(), Some(GOLD_CAP_NOTICE));
+        assert_eq!(shop.selected_bag_slot_for_sell, Some(45));
+        assert!(intents.drain_intents().is_empty());
+        assert!(pending.is_empty());
+
+        state.npc_service_hold = Some(NpcShopServiceMode::Sell);
+        state.npc_service_notice = None;
+        assert!(select_bag_dragged_for_service(
+            &mut shop,
+            &inventory,
+            &mut state,
+            45,
+            77,
+            &mut intents,
+            &mut pending,
+        ));
+        assert_eq!(state.npc_service_notice.as_deref(), Some(GOLD_CAP_NOTICE));
+        assert_eq!(shop.selected_bag_slot_for_sell, Some(45));
+        assert!(intents.drain_intents().is_empty());
+        assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn sale_without_a_concrete_quote_keeps_its_target_and_does_not_enqueue() {
+        let inventory = InventoryModel {
+            items: vec![ItemModel {
+                unique_id: Some(77),
+                quantity: 2,
+                slot: 45,
+                container: 0,
+                ..default()
+            }],
+            ..default()
+        };
+        let mut state = NativePlayerUiState::default();
+        state.toggle_npc_shop();
+        state.shop_service_drag_count = Some(2);
+        let mut shop = ShopModel {
+            service_mode: NpcShopServiceMode::Sell,
+            selected_bag_slot_for_sell: Some(45),
+            ..default()
+        };
+        let mut intents = NativePlayerUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+        assert_eq!(sale_quote(&shop, &inventory, &state), None);
+        assert!(selection_intent(&shop, &inventory, &state).is_none());
+        assert!(!submit_selection(
+            &mut shop,
+            &inventory,
+            &mut state,
+            &mut intents,
+            &mut pending,
+        ));
+        assert_eq!(shop.selected_bag_slot_for_sell, Some(45));
+        assert!(intents.drain_intents().is_empty());
+        assert!(pending.is_empty());
     }
 
     #[test]

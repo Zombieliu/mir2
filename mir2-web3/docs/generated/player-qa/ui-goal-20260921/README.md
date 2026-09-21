@@ -210,3 +210,10 @@ explicit within-frame Buy navigation adapter. Native client library907/907 and
 release build pass. No desktop input, switch or live visual acceptance occurred.
 Latest actual screenshots still belong to auth-lifetime build. Full-UI goal
 remains active; high-memory investigation and remaining live checks are open.
+
+Exact sale quote follow-up: client911/911 and server price-vector4/4 pass.
+Source-order full-stack quote drives display and Confirm/Hold; wallet-cap checked
+rejection retains selection without sending sale. This overflow protection is
+an intentional improvement over unchecked source arithmetic. No new package or
+desktop input this round; staged npc-layout binary predates this source patch.
+Live service, memory and other full-UI acceptance gates remain open.
