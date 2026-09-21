@@ -288,3 +288,9 @@ Source8834cf3ec. Full native-ui959/959 passed, including five new delete-confirm
 Staged C:/numeron-legend-of-rebirth-20260921-mail-delete. Client SHA256 58B6E96FEA3A569082D85372443DA28D1DC6F4787FD37E2AA0D7D042771E6C4B; unchanged Gateway SHA256 F4DBD45E090FF6D6C1E27415BF45733C4E7C57F1079DE59654242F7EB1A6FA29. Existing localhost19910 config/public assets junction retained. No launch/deployment, live deletion or mail sent to anyone. Desktop handoff remains pending. This package is cumulative through prior storage/equipment/password work; no whole-UI or mailbox visual pass follows.
 
 Read/Delete rejection recovery remains open: source backend can return no packet and existing pending keys have no correlated negative receipt. Full source mailbox/read/parcel/compose visual alignment and ordinary live operations also remain open.
+
+## Mail status retry package and next reader gate
+
+Source5be3a627e. Native-ui961/961 pass, release1m10s; receipts C:/mir2-ui-repair-20260921/mail-status-retry-tests.log and mail-status-retry-build.log. Staged C:/numeron-legend-of-rebirth-20260921-mail-status, client SHA256037D49F13802C26A160E3184043E33A4F49A17CC5F62D840A2917CD82D105214; unchanged matched Gateway F4DBD45E090FF6D6C1E27415BF45733C4E7C57F1079DE59654242F7EB1A6FA29. Same local configuration/assets junction; neither binary launched. Read/Delete no longer wait indefinitely for nonexistent negative receipts, but ordinary live failure recovery is not visually accepted. No account/mailbox mutation.
+
+Detailed next-surface audit: mail-reader-audit.md. Dedicated letter/parcel windows, wire date/reply/lock data and missing source Title frames remain implementation work, in addition to same-build live/full-UI acceptance. Renewed desktop handoff remains pending.
