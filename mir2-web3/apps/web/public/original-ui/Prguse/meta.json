@@ -2189,6 +2189,22 @@
       "maskPath": null
     },
     {
+      "index": 586,
+      "width": 388,
+      "height": 346,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "addbfdced07d81645ed287194033a7123261ffbf6c896519a8a2215413d65b27",
+      "pngSha256": "af68c4fb8aa9208749cef451a6519a8b3147a221e2113142dc5e6356c7dd02be",
+      "path": "/original-ui/Prguse/586.png",
+      "maskPath": null
+    },
+    {
       "index": 600,
       "width": 28,
       "height": 25,
@@ -11674,6 +11690,22 @@
       "rgbaSha256": "0c0bd304ce64c376962f56e7ec33fa9b4f6240a74f9d6409bdb3fe7ba1a58605",
       "pngSha256": "5ab2c6008529dda84dcb29d9e1ff1ad0868009a6f5033d66fb64dcaf365a6983",
       "path": "/original-ui/Prguse/2434.png",
+      "maskPath": null
+    },
+    {
+      "index": 2443,
+      "width": 372,
+      "height": 265,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "38e6a1ecdd966e124e5c6fe733d63c155c12f3d6d59485add69ce646e14fe9a8",
+      "pngSha256": "53715fce027146d34a46da83ee4671b2a2eb1b0ce394fc84f688483300c0437c",
+      "path": "/original-ui/Prguse/2443.png",
       "maskPath": null
     }
   ]

@@ -189,7 +189,12 @@ impl StorageModel {
         StoragePage {
             page,
             page_count: self.page_count(),
-            locked: !self.transfers_unlocked() || !self.is_valid_slot(start),
+            // Password protection and the un-rented second page are separate
+            // source states. RefreshStorage2 remains reachable while its
+            // rental page is locked, and shows its own cover instead of a
+            // disabled tab.
+            locked: !self.transfers_unlocked(),
+            rental_locked: page == 1 && !self.has_expanded,
             expanded: self.has_expanded && self.effective_size() > STORAGE_BASE_SIZE,
             expiry: self.expiry,
             slots,
@@ -239,7 +244,11 @@ pub struct StorageSlot<'a> {
 pub struct StoragePage<'a> {
     pub page: usize,
     pub page_count: usize,
+    /// Password protection state. It does not disable the second tab.
     pub locked: bool,
+    /// Crystal RefreshStorage2 covers an un-rented second page with
+    /// Prguse[2443] and hides every storage cell.
+    pub rental_locked: bool,
     pub expanded: bool,
     pub expiry: i64,
     pub slots: Vec<StorageSlot<'a>>,
@@ -357,14 +366,10 @@ pub fn storage_remove_password_enabled(storage: &StorageModel) -> bool {
     storage.has_password && !storage.password_draft.trim().is_empty()
 }
 
-pub fn storage_expand_enabled(storage: &StorageModel, gold: u32) -> bool {
-    if storage.has_expanded {
-        return false;
-    }
-    if gold < STORAGE_EXPAND_COST {
-        return false;
-    }
-    true
+/// Crystal permits the same Rent control to extend an active storage rental.
+/// The confirmation differs by state, but the wallet threshold is identical.
+pub fn storage_expand_enabled(_storage: &StorageModel, gold: u32) -> bool {
+    gold >= STORAGE_EXPAND_COST
 }
 
 pub fn storage_password_display(draft: &str) -> String {
@@ -448,10 +453,11 @@ mod tests {
         assert_eq!(model.page_count(), STORAGE_VIEW_PAGE_COUNT);
 
         let locked_page = model.page(1);
-        assert!(locked_page.locked, "unavailable second tab is locked");
+        assert!(!locked_page.locked, "the second tab remains clickable");
+        assert!(locked_page.rental_locked, "unrented page is covered");
         assert!(
             locked_page.slots[0].locked,
-            "unavailable second tab is locked"
+            "unrented page slots remain unavailable"
         );
 
         model.has_expanded = true;
@@ -477,14 +483,14 @@ mod tests {
         };
         assert!(model.is_valid_slot(79));
         assert!(!model.is_valid_slot(80));
-        assert!(model.page(1).locked);
+        assert!(model.page(1).rental_locked);
         assert!(model.page(1).slots[0].locked);
 
         model.has_expanded = true;
         assert!(model.is_valid_slot(80));
         assert!(model.is_valid_slot(159));
         assert!(!model.is_valid_slot(160));
-        assert!(!model.page(1).locked);
+        assert!(!model.page(1).rental_locked);
         assert!(!model.page(1).slots[0].locked);
         assert!(!model.page(1).slots[79].locked);
     }
@@ -499,7 +505,8 @@ mod tests {
         assert_eq!(model.effective_size(), 79);
         assert!(model.is_valid_slot(78));
         assert!(!model.is_valid_slot(79));
-        assert!(model.page(1).locked);
+        assert!(!model.page(1).locked);
+        assert!(!model.page(1).rental_locked, "expanded authority has no rental cover");
     }
 
     #[test]
@@ -518,7 +525,7 @@ mod tests {
         model.clamp_after_refresh(&mut cursor);
         assert_eq!(model.selected_storage_slot, None);
         assert!(model.selection_for_slot(80).is_none());
-        assert!(model.page(1).locked);
+        assert!(model.page(1).rental_locked);
     }
 
     #[test]

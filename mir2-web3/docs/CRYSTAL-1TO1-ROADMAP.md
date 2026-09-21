@@ -6480,3 +6480,7 @@ visual/feel acceptance.
 ## 2026-09-09 native trade drag fix
 
 The intermittent item drag is fixed by replaying ordered Winit/Bevy WindowEvent input and retaining a preselected source until release. Pointer tracking survives pending/modal gesture cancellation. Native UI 624/624 and Windows host 561/561 serial pass. Exact signed EXE B62330DFA03EB8A2A5976C0662A327D95A2E65A4721C0B3E2D0ECC3F9DE75599 passed seven native drag operations: deposit, occupied swap, preselected-source move, retrieve, redeposit and partial merge, with matching ACKs. This supersedes the prior drag-open finding only; full-game acceptance remains false. Evidence: [drag fix](generated/player-qa/native-trade-drag-fix-20260909/README.md).
+
+### 2026-09-21 storage rental correction
+
+Crystal PlayerObject `ADDSTORAGE` charges 1,000,000 gold for 10 days. Candidate now commits the debit, expanded capacity and expiry together before publishing the live state, rejects unauthenticated/stale saves and rolls back persistence failures. Success emits LoseGold then ResizeStorage; low gold leaves balances/capacity unchanged. Eight focused `addstorage` tests passed (C:/mir2-ui-repair-20260921/storage-rental-backend-tests.log). This replaces the earlier free 30-day behavior. Matching gateway deployment and live/native visual acceptance remain pending; no overall parity percentage changes.

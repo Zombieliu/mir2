@@ -27,7 +27,12 @@ use super::items::{
     ItemStateUserItemMetadata,
 };
 use super::npc::active_crystal_storage_service;
-use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
+use super::resources::{
+    InventoryResource, PlayerRuntimeResource, RuntimeConfigResource, SessionResource,
+};
+
+const STORAGE_RENTAL_PRICE_GOLD: u32 = 1_000_000;
+const STORAGE_RENTAL_DAYS: u64 = 10;
 
 #[allow(clippy::too_many_arguments)]
 fn seed_item(
@@ -583,38 +588,78 @@ pub(super) fn extend_binary_datetime(base_binary_datetime: i64, days: u64) -> i6
 }
 
 pub(super) fn expand_storage_rental_impl(world: &mut World) -> Vec<ServerPacket> {
-    let (config, account_id) = {
+    let (config, account_id, mut save) = {
         let config = world.resource::<RuntimeConfigResource>().config.clone();
         let session = world.resource::<SessionResource>();
-        (
-            config,
-            session
-                .account_id
-                .clone()
-                .unwrap_or_else(|| "demo".to_string()),
-        )
+        let Some(account_id) = super::save::active_session_mutating_account_id(session) else {
+            return Vec::new();
+        };
+        let Some(save) = super::save::snapshot_active_character_save(world) else {
+            return Vec::new();
+        };
+        (config, account_id, save)
     };
 
-    let expiry_time_binary_datetime = {
-        let mut store = config
-            .account_store
-            .lock()
-            .expect("account store mutex should not be poisoned");
-        let account = store
-            .accounts
-            .entry(account_id)
-            .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-        let expiry =
-            extend_binary_datetime(account.expanded_storage_expiry_time_binary_datetime, 30);
-        account.storage_size = EXPANDED_STORAGE_SLOTS;
-        account.has_expanded_storage = true;
-        account.expanded_storage_expiry_time_binary_datetime = expiry;
-        expiry
-    };
-
-    if let Err(error) = config.save_account_store() {
-        eprintln!("failed to persist account store: {error}");
+    if save.gold < STORAGE_RENTAL_PRICE_GOLD {
+        return vec![super::packets::system_message_key(world, "server.LowGold")];
     }
+    save.gold -= STORAGE_RENTAL_PRICE_GOLD;
+    let expected_revision = save.revision;
+    let remaining_gold = save.gold;
+
+    // Crystal's PlayerObject3663 charges before extending the rental.  Stage
+    // the active character's gold snapshot and the account-scoped capacity in
+    // one account-store transaction; the live ECS mirror changes only after
+    // that durable commit succeeds.
+    let expiry_time_binary_datetime = match super::shared_guild_experience::commit_source(
+        world,
+        &config,
+        std::slice::from_ref(&account_id),
+        |store| {
+            let expiry = {
+                let account = store
+                    .accounts
+                    .get(&account_id)
+                    .ok_or_else(|| "storage rental account changed before commit".to_string())?;
+                extend_binary_datetime(
+                    account.expanded_storage_expiry_time_binary_datetime,
+                    STORAGE_RENTAL_DAYS,
+                )
+            };
+            super::save::stage_prepared_character_save(world, store, save)?;
+            let account = store
+                .accounts
+                .get_mut(&account_id)
+                .expect("validated storage rental account should exist");
+            account.storage_size = EXPANDED_STORAGE_SLOTS;
+            account.has_expanded_storage = true;
+            account.expanded_storage_expiry_time_binary_datetime = expiry;
+            Ok(expiry)
+        },
+    ) {
+        Ok(expiry) => expiry,
+        Err(error) => {
+            eprintln!("storage rental transaction failed: {error}");
+            return vec![super::packets::system_message_key(
+                world,
+                "server.InvalidPacketReceived",
+            )];
+        }
+    };
+
+    // `stage_prepared_character_save` performed the sole durable revision
+    // increment. Advance the session's CAS cursor to that receipt exactly
+    // once before exposing the committed values to the World.
+    let committed_revision = expected_revision
+        .checked_add(1)
+        .expect("successful storage rental save revision should not overflow");
+    let advanced = world
+        .resource::<SessionResource>()
+        .advance_active_save_revision(expected_revision, committed_revision);
+    debug_assert!(
+        advanced,
+        "active storage rental revision changed during commit"
+    );
 
     {
         let mut resources = world.resource_mut::<InventoryResource>();
@@ -623,12 +668,18 @@ pub(super) fn expand_storage_rental_impl(world: &mut World) -> Vec<ServerPacket>
         resources.expanded_storage_expiry_time_binary_datetime = expiry_time_binary_datetime;
         resources.expanded_storage_expiry_notice_pending = false;
     }
+    world.resource_mut::<PlayerRuntimeResource>().gold = remaining_gold;
 
-    vec![ServerPacket::ResizeStorage {
-        size: i32::from(EXPANDED_STORAGE_SLOTS),
-        has_expanded_storage: true,
-        expiry_time_binary_datetime,
-    }]
+    vec![
+        ServerPacket::LoseGold {
+            gold: STORAGE_RENTAL_PRICE_GOLD,
+        },
+        ServerPacket::ResizeStorage {
+            size: i32::from(EXPANDED_STORAGE_SLOTS),
+            has_expanded_storage: true,
+            expiry_time_binary_datetime,
+        },
+    ]
 }
 
 pub(super) fn storage_password_required(

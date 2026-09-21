@@ -69,12 +69,14 @@ use crate::skill_binding_persistence::{
 use crate::skill_binding_ui::SkillBindingUi;
 use crate::skill_model::SkillModel;
 use crate::storage::{
-    inventory_selection_for_slot, storage_deposit_enabled_for_selection, storage_expand_enabled,
+    inventory_selection_for_slot, storage_deposit_enabled_for_selection,
     storage_remove_password_enabled, storage_set_password_enabled, storage_unlock_enabled,
     storage_withdraw_enabled_for_selection, StorageItemSelection, StorageModel, StoragePageCursor,
 };
 #[cfg(test)]
-use crate::storage::{storage_deposit_enabled, storage_withdraw_enabled};
+use crate::storage::{
+    storage_deposit_enabled, storage_expand_enabled, storage_withdraw_enabled,
+};
 
 use super::amount_input::{AmountKeyAction, CrystalAmountInput};
 use super::assets::CrystalButtonAssetSet;
@@ -889,6 +891,13 @@ pub struct NativePlayerUiState {
     /// A submit/cancel must consume the rest of its input frame even after it
     /// closes the prompt, so Enter/Escape cannot reach chat or world controls.
     pub(crate) storage_password_input_consumed: bool,
+    /// StorageDialog's Rent control first opens the source OK/Cancel prompt.
+    /// The eventual request stays pending-authoritative; this is not an
+    /// optimistic rental state.
+    pub(crate) storage_rental_confirmation: Option<StorageRentalConfirmation>,
+    /// Consume the remainder of a confirmation frame after closing it so
+    /// Enter/Escape and covered controls cannot leak into the world.
+    pub(crate) storage_rental_input_consumed: bool,
     pub help: HelpDialogUi,
 }
 
@@ -927,6 +936,27 @@ struct StorageItemDrag {
     source_slot: u32,
     unique_id: u64,
     start: Vec2,
+}
+
+/// Crystal's Rent click distinguishes a first rental from a renewal only in
+/// its confirmation message; both submit the same `@ADDSTORAGE` request.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct StorageRentalConfirmation {
+    renew: bool,
+}
+
+impl StorageRentalConfirmation {
+    fn from_storage(storage: &StorageModel) -> Self {
+        Self { renew: storage.has_expanded }
+    }
+
+    fn message(self) -> &'static str {
+        if self.renew {
+            "Would you like to extend your rental period for 10 days at a cost of 1,000,000 gold?"
+        } else {
+            "Would you like to rent extra storage for 10 days at a cost of 1,000,000 gold?"
+        }
+    }
 }
 
 #[derive(Debug, Clone, Default, Resource, PartialEq)]
@@ -1032,6 +1062,8 @@ impl Default for NativePlayerUiState {
             guild_notice_submission: None,
             storage_password_prompt: None,
             storage_password_input_consumed: false,
+            storage_rental_confirmation: None,
+            storage_rental_input_consumed: false,
             help: HelpDialogUi::default(),
         }
     }
@@ -1219,6 +1251,8 @@ impl NativePlayerUiState {
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
         self.storage_password_prompt.is_some()
             || self.storage_password_input_consumed
+            || self.storage_rental_confirmation.is_some()
+            || self.storage_rental_input_consumed
             || self.game_shop_dialog.confirmation.is_some()
             || (self.shop_open() && self.game_shop_dialog.search_focused)
             || self.guild_panel.blocks()
@@ -1249,7 +1283,7 @@ impl NativePlayerUiState {
             && x >= 0.0
             && x < 388.0
             && y >= 0.0
-            && y < 330.0
+            && y < 346.0
         {
             return true;
         }
@@ -1269,6 +1303,8 @@ impl NativePlayerUiState {
         self.game_shop_dialog.confirmation.is_some()
             || self.storage_password_prompt.is_some()
             || self.storage_password_input_consumed
+            || self.storage_rental_confirmation.is_some()
+            || self.storage_rental_input_consumed
             || self.guild_panel.blocks()
             || self.guild_panel.consumed
             || self.skill_assign.open
@@ -2443,6 +2479,9 @@ struct OverlayInventoryDeleteModal;
 struct OverlayStoragePasswordModal;
 
 #[derive(Component)]
+struct OverlayStorageRentalModal;
+
+#[derive(Component)]
 struct OverlayGuildGoldModal;
 
 #[derive(Component)]
@@ -2775,6 +2814,8 @@ enum OverlayButton {
     StorageRemovePassword,
     StoragePasswordSubmit,
     StoragePasswordCancel,
+    StorageRentalConfirm,
+    StorageRentalCancel,
     StorageExpand,
 }
 
@@ -2933,6 +2974,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     sync_npc_dialog_inventory_location,
                     sync_storage_inventory_location,
                     sync_storage_password_prompt,
+                    sync_storage_rental_confirmation,
                     sync_guild_storage_ui,
                     trade_dialog::sync,
                 )
@@ -3516,6 +3558,25 @@ fn spawn_overlay_root(mut commands: Commands) {
                 GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
                 BackgroundColor(Color::NONE),
             ));
+            // StorageDialog Rent uses an ordinary MirMessageBox OK/Cancel
+            // confirmation. Like the password prompt it captures the full
+            // stage while visible.
+            root.spawn((
+                OverlayStorageRentalModal,
+                Button,
+                FocusPolicy::Block,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(1024.0),
+                    height: Val::Px(768.0),
+                    display: Display::None,
+                    ..default()
+                },
+                GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
+                BackgroundColor(Color::NONE),
+            ));
             root.spawn((
                 OverlayInventoryDeleteCursor,
                 Node {
@@ -3707,7 +3768,7 @@ fn spawn_overlay_root(mut commands: Commands) {
                     left: Val::Px(0.0),
                     top: Val::Px(224.0),
                     width: Val::Px(620.0),
-                    height: Val::Px(344.0),
+                    height: Val::Px(346.0),
                     display: Display::None,
                     ..default()
                 },
@@ -3735,7 +3796,7 @@ fn spawn_overlay_root(mut commands: Commands) {
                     left: Val::Px(0.0),
                     top: Val::Px(0.0),
                     width: Val::Px(388.0),
-                    height: Val::Px(344.0),
+                    height: Val::Px(346.0),
                     display: Display::None,
                     ..default()
                 },
@@ -3787,6 +3848,7 @@ fn consume_hud_buttons(
     if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame)
         || state.amount_modal_open()
         || state.storage_password_prompt.is_some()
+        || state.storage_rental_confirmation.is_some()
     {
         return;
     }
@@ -3983,7 +4045,11 @@ fn process_inventory_drag(
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
-    if !state.inventory_open() || state.amount_modal_open() || state.storage_password_prompt.is_some() {
+    if !state.inventory_open()
+        || state.amount_modal_open()
+        || state.storage_password_prompt.is_some()
+        || state.storage_rental_confirmation.is_some()
+    {
         state.inventory_window.end_drag();
         state.inventory_window.clear_cursor();
         return;
@@ -4123,7 +4189,7 @@ fn storage_slot_at_cursor(
         return None;
     }
     let page = storage.page(storage_ui.cursor.page);
-    if page.locked {
+    if page.locked || page.rental_locked {
         return None;
     }
     page.slots.iter().enumerate().find_map(|(offset, slot)| {
@@ -4555,6 +4621,7 @@ fn process_inventory_item_drag(
                 .is_some_and(|storage| !storage.transfers_unlocked()))
         || state.amount_modal_open()
         || state.storage_password_prompt.is_some()
+        || state.storage_rental_confirmation.is_some()
         || state.inventory_delete_mode
         || state.inventory_operation.is_some()
         || state.trade_dialog.open
@@ -4734,6 +4801,7 @@ fn process_inventory_delete_pointer(
         || !state.inventory_delete_mode
         || state.amount_modal_open()
         || state.storage_password_prompt.is_some()
+        || state.storage_rental_confirmation.is_some()
         || !mouse.is_some_and(|mouse| mouse.just_pressed(MouseButton::Right))
     {
         return;
@@ -4944,11 +5012,63 @@ fn clear_legacy_storage_password_drafts(storage: &mut StorageModel) {
     storage.confirm_password_draft.clear();
 }
 
+
+/// Keeps the Rent confirmation session-scoped. The authoritative ResizeStorage
+/// receipt, rather than this presentation prompt, changes rental state.
+fn sync_storage_rental_confirmation(
+    shell: Res<NativeShellModel>,
+    mut state: ResMut<NativePlayerUiState>,
+) {
+    state.storage_rental_input_consumed = false;
+    if shell.screen != NativeShellScreen::InGame || !state.storage_open() {
+        state.storage_rental_confirmation = None;
+    }
+}
+
+fn open_storage_rental_confirmation(
+    state: &mut NativePlayerUiState,
+    storage: &StorageModel,
+) -> bool {
+    if !state.storage_open()
+        || state.storage_password_prompt.is_some()
+        || state.storage_rental_confirmation.is_some()
+    {
+        return false;
+    }
+    state.storage_rental_confirmation = Some(StorageRentalConfirmation::from_storage(storage));
+    true
+}
+
+fn cancel_storage_rental_confirmation(state: &mut NativePlayerUiState) {
+    state.storage_rental_confirmation = None;
+    state.storage_rental_input_consumed = true;
+}
+
+/// Enqueue only after the source OK action. Rental rejection is ordinary chat
+/// without a correlated response, so this deliberately has no pending
+/// reservation that could make a later funded retry impossible.
+fn submit_storage_rental_confirmation(
+    state: &mut NativePlayerUiState,
+    intents: &mut NativePlayerUiIntentQueue,
+) -> bool {
+    if state.storage_rental_confirmation.is_none()
+        || !intents.push_intent(NativePlayerUiIntent::ExpandStorage)
+    {
+        return false;
+    }
+    state.storage_rental_confirmation = None;
+    state.storage_rental_input_consumed = true;
+    true
+}
+
 fn open_storage_password_prompt(
     state: &mut NativePlayerUiState,
     storage: &mut StorageModel,
 ) -> bool {
-    if !state.storage_open() || state.storage_password_prompt.is_some() {
+    if !state.storage_open()
+        || state.storage_password_prompt.is_some()
+        || state.storage_rental_confirmation.is_some()
+    {
         return false;
     }
     state.storage_password_prompt = match (storage.has_password, storage.unlocked) {
@@ -5697,6 +5817,21 @@ pub(crate) fn process_overlay_keyboard(
         return;
     }
 
+    // StorageDialog's Rent message box owns every keyboard event. Enter is
+    // its OK action and Escape is Cancel; neither may fall through to chat.
+    if state.storage_rental_confirmation.is_some() {
+        if keys.just_pressed(KeyCode::Escape) {
+            cancel_storage_rental_confirmation(&mut state);
+            typed.clear();
+            return;
+        }
+        if keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::NumpadEnter) {
+            let _ = submit_storage_rental_confirmation(&mut state, &mut intents);
+        }
+        typed.clear();
+        return;
+    }
+
     // StorageDialog's MirInputBox owns every keyboard event. In particular,
     // Enter cannot fall through to chat and Escape cannot close an unrelated
     // panel after cancelling a password stage.
@@ -6074,6 +6209,7 @@ fn process_overlay_buttons(
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
     let message_was_open = state.trade_dialog.message.is_some();
     let game_shop_modal_was_open = state.game_shop_dialog.confirmation.is_some();
+    let storage_rental_modal_was_open = state.storage_rental_confirmation.is_some();
     for (interaction, button) in buttons.iter() {
         if state.hero.modal() {
             continue;
@@ -6091,7 +6227,15 @@ fn process_overlay_buttons(
         if *interaction != Interaction::Pressed {
             continue;
         }
-        if state.storage_password_input_consumed {
+        if state.storage_password_input_consumed || state.storage_rental_input_consumed {
+            continue;
+        }
+        if (storage_rental_modal_was_open || state.storage_rental_confirmation.is_some())
+            && !matches!(
+                button,
+                OverlayButton::StorageRentalConfirm | OverlayButton::StorageRentalCancel
+            )
+        {
             continue;
         }
         if state.storage_password_prompt.is_some()
@@ -6419,6 +6563,7 @@ fn process_overlay_buttons(
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
                 state.storage_password_prompt = None;
+                state.storage_rental_confirmation = None;
                 clear_legacy_storage_password_drafts(&mut storage);
                 storage_ui.bag_selection = None;
                 storage_ui.storage_selection = None;
@@ -7853,10 +7998,14 @@ fn process_overlay_buttons(
             OverlayButton::StoragePasswordCancel => {
                 cancel_storage_password_prompt(&mut state, &mut storage);
             }
+            OverlayButton::StorageRentalConfirm => {
+                let _ = submit_storage_rental_confirmation(&mut state, &mut intents);
+            }
+            OverlayButton::StorageRentalCancel => {
+                cancel_storage_rental_confirmation(&mut state);
+            }
             OverlayButton::StorageExpand => {
-                if storage_expand_enabled(&storage, inventory.gold) {
-                    intents.push_pending_intent(&mut pending, NativePlayerUiIntent::ExpandStorage);
-                }
+                let _ = open_storage_rental_confirmation(&mut state, &storage);
             }
         }
     }
@@ -8483,6 +8632,84 @@ fn render_storage_password_modal(
         });
 }
 
+/// StorageDialog.Rent opens MirMessageBox(OKCancel). It uses the same
+/// centered Prguse[360] message frame as Crystal's other confirmations.
+fn render_storage_rental_confirmation(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    confirmation: Option<StorageRentalConfirmation>,
+) {
+    let Some(confirmation) = confirmation else {
+        return;
+    };
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.left),
+                top: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.top),
+                width: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.width),
+                height: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.height),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|dialog| {
+            if let Some(asset_server) = asset_server {
+                spawn_overlay_frame(
+                    dialog,
+                    asset_server,
+                    "original-ui/Prguse/360.png",
+                    CRYSTAL_DELETE_CONFIRM_RECT.width,
+                    CRYSTAL_DELETE_CONFIRM_RECT.height,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    206,
+                    207,
+                    208,
+                    CrystalRect::new(260.0, 157.0, 76.0, 25.0),
+                    OverlayButton::StorageRentalConfirm,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    210,
+                    211,
+                    212,
+                    CrystalRect::new(360.0, 157.0, 76.0, 25.0),
+                    OverlayButton::StorageRentalCancel,
+                );
+            } else {
+                overlay_absolute_button(
+                    dialog,
+                    "OK",
+                    CrystalRect::new(260.0, 157.0, 76.0, 25.0),
+                    OverlayButton::StorageRentalConfirm,
+                    true,
+                );
+                overlay_absolute_button(
+                    dialog,
+                    "Cancel",
+                    CrystalRect::new(360.0, 157.0, 76.0, 25.0),
+                    OverlayButton::StorageRentalCancel,
+                    true,
+                );
+            }
+            overlay_text_at(
+                dialog,
+                confirmation.message(),
+                CrystalRect::new(35.0, 35.0, 390.0, 110.0),
+                10.0,
+                TEXT,
+            );
+        });
+}
+
 fn render_guild_gold_modal(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
@@ -8652,6 +8879,7 @@ fn render_overlays(
             Query<(Entity, &mut Node), With<OverlayTrade>>,
             Query<(Entity, &mut Node), With<OverlayTradeGoldModal>>,
             Query<(Entity, &mut Node), With<OverlayStoragePasswordModal>>,
+            Query<(Entity, &mut Node), With<OverlayStorageRentalModal>>,
         )>,
     )>,
     mut commands: Commands,
@@ -8955,6 +9183,18 @@ fn render_overlays(
                     parent,
                     asset_server.as_deref(),
                     state.storage_password_prompt.as_ref(),
+                )
+            },
+        );
+        fill_panel(
+            &mut commands,
+            &mut delete_layers.p6(),
+            state.storage_rental_confirmation.is_some(),
+            |parent| {
+                render_storage_rental_confirmation(
+                    parent,
+                    asset_server.as_deref(),
+                    state.storage_rental_confirmation,
                 )
             },
         );
@@ -13096,7 +13336,7 @@ fn render_storage(
     asset_server: Option<&AssetServer>,
     storage: &StorageModel,
     storage_ui: &StorageUiState,
-    inventory: &InventoryModel,
+    _inventory: &InventoryModel,
     _state: &NativePlayerUiState,
     player: &crate::read_model::PlayerStats,
 ) {
@@ -13108,7 +13348,13 @@ fn render_storage(
         asset_server,
         "original-ui/Prguse/586.png",
         388.0,
-        330.0,
+        346.0,
+    );
+    spawn_static_overlay_sprite(
+        parent,
+        asset_server,
+        "original-ui/Title/0.png".to_owned(),
+        CrystalRect::new(18.0, 8.0, 71.0, 15.0),
     );
     let page = storage.page(storage_ui.cursor.page);
     spawn_overlay_crystal_button(
@@ -13121,7 +13367,9 @@ fn render_storage(
         CrystalRect::new(8.0, 36.0, 72.0, 20.0),
         OverlayButton::StoragePage(0),
     );
-    spawn_overlay_crystal_button_enabled(
+    // RefreshStorage2 is always a live MirButton. An un-rented page is shown
+    // by the LockedPage cover below instead of disabling this tab.
+    spawn_overlay_crystal_button(
         parent,
         asset_server,
         "Title",
@@ -13130,7 +13378,6 @@ fn render_storage(
         746,
         CrystalRect::new(80.0, 36.0, 72.0, 20.0),
         OverlayButton::StoragePage(1),
-        storage.has_expanded,
     );
     spawn_overlay_crystal_button(
         parent,
@@ -13143,92 +13390,141 @@ fn render_storage(
         OverlayButton::CloseStorage,
     );
 
-    for (offset, slot) in page.slots.iter().enumerate() {
-        let column = offset % 10;
-        let row = offset / 10;
-        let rect = CrystalRect::new(
-            9.0 + column as f32 * 37.0,
-            60.0 + row as f32 * 33.0,
-            36.0,
-            32.0,
+    if page.rental_locked {
+        // NPCDialogs.RefreshStorage2: hide all cells and cover the second
+        // page with Prguse[2443] until the rental becomes authoritative.
+        spawn_static_overlay_sprite(
+            parent,
+            asset_server,
+            "original-ui/Prguse/2443.png".to_owned(),
+            CrystalRect::new(8.0, 59.0, 372.0, 265.0),
         );
-        if let Some(item) = slot.item {
-            let selected = storage_ui.storage_selection
-                == slot.unique_id.map(|unique_id| StorageItemSelection {
-                    slot: slot.slot,
-                    unique_id,
-                });
-            overlay_absolute_item_button(
-                parent,
-                asset_server,
-                item,
-                rect,
-                OverlayButton::SelectStorage(slot.slot),
-                !slot.locked && item.unique_id.is_some(),
-                player,
+        overlay_centered_text_at(
+            parent,
+            "Expanded Storage Locked",
+            CrystalRect::new(40.0, 322.0, 300.0, 16.0),
+            10.0,
+            Color::srgb(0.95, 0.20, 0.20),
+        );
+    } else {
+        for (offset, slot) in page.slots.iter().enumerate() {
+            let column = offset % 10;
+            let row = offset / 10;
+            let rect = CrystalRect::new(
+                9.0 + column as f32 * 37.0,
+                60.0 + row as f32 * 33.0,
+                36.0,
+                32.0,
             );
-            if selected {
-                overlay_text_at(parent, "▶", rect, 10.0, GOLD);
+            if let Some(item) = slot.item {
+                let selected = storage_ui.storage_selection
+                    == slot.unique_id.map(|unique_id| StorageItemSelection {
+                        slot: slot.slot,
+                        unique_id,
+                    });
+                overlay_absolute_item_button(
+                    parent,
+                    asset_server,
+                    item,
+                    rect,
+                    OverlayButton::SelectStorage(slot.slot),
+                    !slot.locked && item.unique_id.is_some(),
+                    player,
+                );
+                if selected {
+                    overlay_text_at(parent, "▶", rect, 10.0, GOLD);
+                }
+            } else {
+                parent.spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(rect.left),
+                        top: Val::Px(rect.top),
+                        width: Val::Px(rect.width),
+                        height: Val::Px(rect.height),
+                        ..default()
+                    },
+                    BackgroundColor(if slot.locked {
+                        Color::srgba(0.20, 0.16, 0.11, 0.70)
+                    } else {
+                        Color::srgba(0.06, 0.04, 0.02, 0.35)
+                    }),
+                ));
             }
-        } else {
-            parent.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(rect.left),
-                    top: Val::Px(rect.top),
-                    width: Val::Px(rect.width),
-                    height: Val::Px(rect.height),
-                    ..default()
-                },
-                BackgroundColor(if slot.locked {
-                    Color::srgba(0.20, 0.16, 0.11, 0.70)
-                } else {
-                    Color::srgba(0.06, 0.04, 0.02, 0.35)
-                }),
-            ));
         }
     }
 
-    overlay_text_at(
+    if page.page == 1 {
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Title",
+            483,
+            484,
+            485,
+            CrystalRect::new(283.0, 33.0, 48.0, 25.0),
+            OverlayButton::StorageExpand,
+        );
+        if !page.rental_locked {
+            let label = storage_expiry_label(page.expiry)
+                .map(|expiry| format!("Expanded Storage Expires On{expiry}"))
+                .unwrap_or_else(|| "Expanded Storage Expires On".to_owned());
+            overlay_centered_text_at(
+                parent,
+                &label,
+                CrystalRect::new(40.0, 322.0, 300.0, 16.0),
+                10.0,
+                TEXT,
+            );
+        }
+    }
+    spawn_overlay_crystal_button(
         parent,
-        &format!(
-            "{}/{}  Page {}/{}",
-            storage.storage_occupied(),
-            storage.effective_size(),
-            page.page + 1,
-            page.page_count
-        ),
-        CrystalRect::new(8.0, 310.0, 240.0, 16.0),
-        9.0,
-        TEXT,
-    );
-
-    // StorageDialog keeps its protection and rental affordances inside the
-    // source frame. Transfers themselves are performed by the concurrent
-    // InventoryDialog and this storage grid; there is no compact bag picker.
-    overlay_absolute_button(
-        parent,
-        if storage.has_password && !storage.unlocked {
-            "Unlock"
-        } else {
-            "Protect"
-        },
-        CrystalRect::new(328.0, 33.0, 35.0, 22.0),
+        asset_server,
+        "Title",
+        113,
+        114,
+        115,
+        CrystalRect::new(328.0, 33.0, 48.0, 25.0),
         if storage.has_password && !storage.unlocked {
             OverlayButton::StorageUnlock
         } else {
             OverlayButton::StorageSetPassword
         },
-        true,
     );
-    overlay_absolute_button(
-        parent,
-        "Rent",
-        CrystalRect::new(283.0, 33.0, 41.0, 22.0),
-        OverlayButton::StorageExpand,
-        storage_expand_enabled(storage, inventory.gold),
-    );
+}
 
+/// Safely decodes the .NET DateTime binary value carried by ResizeStorage.
+/// Invalid/zero values retain the source label without exposing raw ticks.
+fn storage_expiry_label(binary_datetime: i64) -> Option<String> {
+    const DOTNET_TICKS_MASK: u64 = 0x3fff_ffff_ffff_ffff;
+    const DOTNET_KIND_MASK: u64 = 0xc000_0000_0000_0000;
+    const DOTNET_KIND_LOCAL: u64 = 0x8000_0000_0000_0000;
+    const DOTNET_UNIX_EPOCH_TICKS: i128 = 621_355_968_000_000_000;
+    const DOTNET_MAX_TICKS: i128 = 3_155_378_975_999_999_999;
+    const DOTNET_TICKS_PER_SECOND: i128 = 10_000_000;
+    if binary_datetime == 0 {
+        return None;
+    }
+    let bits = binary_datetime as u64;
+    let ticks = i128::from(bits & DOTNET_TICKS_MASK);
+    if ticks > DOTNET_MAX_TICKS {
+        return None;
+    }
+    let unix_ticks = ticks - DOTNET_UNIX_EPOCH_TICKS;
+    let seconds = unix_ticks.div_euclid(DOTNET_TICKS_PER_SECOND);
+    let nanos = unix_ticks.rem_euclid(DOTNET_TICKS_PER_SECOND).saturating_mul(100);
+    let (Ok(seconds), Ok(nanos)) = (i64::try_from(seconds), u32::try_from(nanos)) else {
+        return None;
+    };
+    let utc = chrono::DateTime::<chrono::Utc>::from_timestamp(seconds, nanos)?;
+    Some(if bits & DOTNET_KIND_MASK == DOTNET_KIND_LOCAL {
+        utc.with_timezone(&chrono::Local)
+            .format("%Y/%m/%d %H:%M:%S")
+            .to_string()
+    } else {
+        utc.format("%Y/%m/%d %H:%M:%S").to_string()
+    })
 }
 
 fn spawn_invisible_overlay_button(
@@ -13589,6 +13885,10 @@ mod storage_drag_tests;
 #[cfg(test)]
 #[path = "storage_password_tests.rs"]
 mod storage_password_tests;
+
+#[cfg(test)]
+#[path = "storage_rental_tests.rs"]
+mod storage_rental_tests;
 
 #[cfg(test)]
 mod tests {
@@ -17062,7 +17362,7 @@ mod tests {
             has_expanded: true,
             ..Default::default()
         };
-        assert!(!storage_expand_enabled(&expanded, 2_000_000));
+        assert!(storage_expand_enabled(&expanded, 2_000_000));
     }
 
     #[test]
@@ -19212,21 +19512,32 @@ mod tests {
             .resource_mut::<NativePlayerUiIntentQueue>()
             .drain_intents();
         // Expand storage
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Storage;
         {
             let mut inv = app.world_mut().resource_mut::<InventoryModel>();
             inv.gold = 2_000_000;
         }
         press(&mut app, OverlayButton::StorageExpand);
-        {
-            let intents = app
-                .world()
-                .resource::<NativePlayerUiIntentQueue>()
-                .intents
-                .clone();
-            assert!(intents
-                .iter()
-                .any(|i| matches!(i, NativePlayerUiIntent::ExpandStorage)));
-        }
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiState>()
+            .storage_rental_confirmation
+            .is_some());
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .is_empty());
+        press(&mut app, OverlayButton::StorageRentalConfirm);
+        assert!(app
+            .world()
+            .resource::<NativePlayerUiIntentQueue>()
+            .intents
+            .iter()
+            .any(|i| matches!(i, NativePlayerUiIntent::ExpandStorage)));
     }
 
     #[test]

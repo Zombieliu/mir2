@@ -3957,3 +3957,7 @@ CMS validation, `nonvisual=true`, and `launchRequested=false`. No client was
 started. The CMS certificate is internal/self-signed and does not satisfy the
 formal Authenticode publisher gate. This artifact closes only the exact-head
 nonvisual binding; it does not increase or define whole-game server parity.
+
+### 2026-09-21 storage rental correction
+
+Crystal PlayerObject `ADDSTORAGE` charges 1,000,000 gold for 10 days. Candidate now commits the debit, expanded capacity and expiry together before publishing the live state, rejects unauthenticated/stale saves and rolls back persistence failures. Success emits LoseGold then ResizeStorage; low gold leaves balances/capacity unchanged. Eight focused `addstorage` tests passed (C:/mir2-ui-repair-20260921/storage-rental-backend-tests.log). This replaces the earlier free 30-day behavior. Matching gateway deployment and live/native visual acceptance remain pending; no overall parity percentage changes.

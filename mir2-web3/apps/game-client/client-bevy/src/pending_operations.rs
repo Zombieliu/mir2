@@ -1205,6 +1205,9 @@ pub fn reconcile_storage_refresh(
         PendingOperationKey::StorageRemovePassword => old.has_password && !new.has_password,
         PendingOperationKey::StorageExpand => {
             (!old.has_expanded && new.has_expanded) || new.size > old.size
+                || (new.has_expanded
+                    && ((new.expiry as u64) & 0x3fff_ffff_ffff_ffff)
+                        > ((old.expiry as u64) & 0x3fff_ffff_ffff_ffff))
         }
         _ => false,
     })
@@ -2431,6 +2434,30 @@ mod tests {
         assert_eq!(reconcile_quest_refresh(&mut pending, &old, &unchanged), 0);
         assert!(pending.contains(&key));
         assert_eq!(reconcile_quest_refresh(&mut pending, &old, &aborted), 1);
+        assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn storage_renewal_releases_only_after_authoritative_expiry_extension() {
+        let old = crate::storage::StorageModel {
+            has_expanded: true,
+            size: crate::storage::STORAGE_EXPANDED_SIZE,
+            expiry: 1000,
+            ..Default::default()
+        };
+        let mut pending = PendingOperations::default();
+        let key = PendingOperationKey::StorageExpand;
+        assert!(pending.try_begin(key.clone()));
+        let inventory = crate::inventory::InventoryModel::default();
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &old), 0);
+        let mut new = old.clone();
+        new.expiry = 999;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 0);
+        // DateTime kind bits are not elapsed time or renewal evidence.
+        new.expiry = ((1u64 << 63) | 1000) as i64;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 0);
+        new.expiry = ((1u64 << 63) | 1001) as i64;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 1);
         assert!(!pending.contains(&key));
     }
 

@@ -44592,6 +44592,11 @@ fn addstorage_chat_command_expands_storage_and_updates_snapshot() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 1_000_000;
 
     let packets = session.handle_packet(ClientPacket::Chat {
         message: "@ADDSTORAGE".to_string(),
@@ -44623,6 +44628,11 @@ fn addstorage_chat_command_extends_existing_expiry() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .gold = 2_000_000;
 
     let first_packets = session.handle_packet(ClientPacket::Chat {
         message: "@ADDSTORAGE".to_string(),
