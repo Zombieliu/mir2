@@ -242,3 +242,77 @@ fn wheel_uses_shaped_extent_clamps_and_preserves_caret_and_selection() {
     assert!(editor.scroll_wheel_pixels(10_000.0));
     assert_eq!(editor.scroll().y, 0.0, "wheel clamps to shaped top");
 }
+
+
+#[test]
+fn host_clipboard_cut_and_paste_share_selection_and_utf16_budget() {
+    let mut editor = MailLetterEditor::default();
+    let mut draft = draft("keep remove");
+    editor.sync(true, Some(&draft.message));
+    editor.edit_key(&key(KeyCode::ControlLeft, ""), &mut draft);
+    editor.edit_key(&key(KeyCode::KeyA, "a"), &mut draft);
+    editor.edit_key(&release(KeyCode::ControlLeft), &mut draft);
+    assert_eq!(editor.selected_text(), "keep remove");
+    editor.cut_selection(&mut draft);
+    assert_eq!(draft.message, "");
+
+    editor.paste(&mut draft, &"😀".repeat(251));
+    assert_eq!(draft.message, "😀".repeat(250));
+    assert_eq!(draft.message.encode_utf16().count(), MAIL_LETTER_BODY_LIMIT);
+}
+
+#[test]
+fn ime_preedit_is_presentation_only_and_uses_real_authoritative_caret_layout() {
+    let mut editor = MailLetterEditor::default();
+    let mut draft = draft("abcd");
+    editor.sync(true, Some(&draft.message));
+    editor.install_layout(vec![line(0.0, &[0, 1, 3, 4])]);
+    editor.pointer(Vec2::new(39.0, 4.0), false);
+    editor.set_composition("你好".into(), Some((3, 6)));
+
+    assert_eq!(draft.message, "abcd");
+    assert_eq!(editor.active_editor().unwrap().text(), "abcd");
+    assert!(editor.composition().is_some());
+    assert_eq!(editor.ime_caret(), Some(Vec2::new(39.0, 20.0)));
+
+    editor.clear_composition();
+    editor.paste(&mut draft, "你好");
+    assert_eq!(draft.message, "abc你好d");
+}
+
+
+#[test]
+fn preedit_display_layout_rewraps_candidate_and_scroll_without_mutating_draft() {
+    let mut editor = MailLetterEditor::default();
+    let draft = draft("a");
+    editor.sync(true, Some(&draft.message));
+    editor.modifiers[0] = true;
+    editor.set_composition("甲乙".into(), None);
+    assert_eq!(editor.modifiers, [false; 4], "composition cannot retain Ctrl");
+    let display = "a甲乙".to_owned();
+    editor.accept_display_layout(
+        EditorTextLayout {
+            lines: vec![
+                line(0.0, &[0, 1]),
+                VisualLine {
+                    y: 200.0,
+                    height: 20.0,
+                    stops: vec![
+                        CaretStop { byte: 1, x: 0.0 },
+                        CaretStop { byte: display.len(), x: 45.0 },
+                    ],
+                },
+            ],
+        },
+        display,
+        "a甲乙".len(),
+    );
+
+    assert_eq!(draft.message, "a");
+    assert_eq!(editor.ime_caret(), Some(Vec2::new(45.0, 220.0)));
+    assert_eq!(editor.scroll().y, 59.0, "preedit layout clamps using its wrapped extent");
+
+    editor.modifiers[1] = true;
+    editor.clear_composition();
+    assert_eq!(editor.modifiers, [false; 4], "clear also drops stale Ctrl state");
+}

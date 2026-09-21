@@ -327,3 +327,125 @@ fn menu_editor_and_overlay_labels_use_original_arial_family() {
         assert_eq!(font.font, bevy::prelude::FontSource::Family("Arial".into()));
     }
 }
+
+
+fn mail_app() -> (App, Entity) {
+    let mut state = NativePlayerUiState::default();
+    state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+    state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+        recipient: "Receiver".into(),
+        message: "A".into(),
+        ..default()
+    });
+    let mut compose = MailComposeUi {
+        focus: MailComposeFocus::Message,
+        kind: MailComposeKind::Letter,
+        ..default()
+    };
+    compose.advance_draft_epoch();
+    let mut editor = super::super::mail_editor::MailLetterEditor::default();
+    editor.sync(true, Some("A"));
+    let mut app = App::new();
+    app.insert_resource(state)
+        .insert_resource(compose)
+        .insert_resource(editor)
+        .insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<crate::pending_operations::PendingOperations>()
+        .init_resource::<crate::pending_operations::SessionResetRevision>()
+        .init_resource::<ImeState>()
+        .init_resource::<ButtonInput<KeyCode>>()
+        .init_resource::<ButtonInput<MouseButton>>()
+        .add_message::<Ime>()
+        .add_systems(Update, process_ime);
+    let mut window = Window::default();
+    window.focused = true;
+    let window = app.world_mut().spawn((window, PrimaryWindow)).id();
+    app.update();
+    app.update();
+    app.world_mut().write_message(Ime::Enabled { window });
+    app.update();
+    (app, window)
+}
+
+#[test]
+fn mail_ime_preedit_never_mutates_draft_and_exact_commit_is_once() {
+    let (mut app, window) = mail_app();
+    send(
+        &mut app,
+        Ime::Preedit {
+            window,
+            value: "你好".into(),
+            cursor: Some((3, 6)),
+        },
+    );
+    assert_eq!(
+        app.world().resource::<NativePlayerUiState>().core.mail_compose
+            .as_ref().unwrap().message,
+        "A"
+    );
+    assert!(app.world().resource::<super::super::mail_editor::MailLetterEditor>()
+        .composition().is_some());
+    send(
+        &mut app,
+        Ime::Commit {
+            window,
+            value: "你好".into(),
+        },
+    );
+    assert_eq!(
+        app.world().resource::<NativePlayerUiState>().core.mail_compose
+            .as_ref().unwrap().message,
+        "A你好"
+    );
+    assert!(app.world().resource::<NativePlayerUiState>().ime_frame_consumed);
+}
+
+#[test]
+fn covered_or_new_session_mail_target_rejects_late_ime_commit() {
+    let (mut app, window) = mail_app();
+    send(
+        &mut app,
+        Ime::Preedit {
+            window,
+            value: "old".into(),
+            cursor: None,
+        },
+    );
+    app.world_mut().resource_mut::<NativePlayerUiState>().mail_feedback_prompt =
+        Some("covered".into());
+    send(
+        &mut app,
+        Ime::Commit {
+            window,
+            value: "must not apply".into(),
+        },
+    );
+    assert_eq!(
+        app.world().resource::<NativePlayerUiState>().core.mail_compose
+            .as_ref().unwrap().message,
+        "A"
+    );
+    assert!(app.world().resource::<super::super::mail_editor::MailLetterEditor>()
+        .composition().is_none());
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_feedback_prompt = None;
+    app.world_mut()
+        .resource_mut::<crate::pending_operations::SessionResetRevision>()
+        .request();
+    send(
+        &mut app,
+        Ime::Commit {
+            window,
+            value: "old session".into(),
+        },
+    );
+    assert_eq!(
+        app.world().resource::<NativePlayerUiState>().core.mail_compose
+            .as_ref().unwrap().message,
+        "A"
+    );
+}

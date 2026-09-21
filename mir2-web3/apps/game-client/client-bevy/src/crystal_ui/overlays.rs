@@ -85,7 +85,9 @@ mod mail_reader_drag;
 #[path = "mail_compose_drag.rs"]
 mod mail_compose_drag;
 #[path = "mail_editor.rs"]
-mod mail_editor;
+pub mod mail_editor;
+#[path = "mail_text_adapter.rs"]
+pub mod mail_text_adapter;
 #[path = "mail_parcel.rs"]
 mod mail_parcel;
 #[path = "options_volume.rs"]
@@ -991,6 +993,9 @@ pub struct MailComposeUi {
     pub(crate) recipient_prompt: Option<MailRecipientPrompt>,
     letter_draft: Option<mir2_ui_core::state::MailComposeDraft>,
     parcel_draft: Option<mir2_ui_core::state::MailComposeDraft>,
+    /// Changes whenever an active draft instance is restored or selected.
+    /// Async text reads bind to this rather than treating equal body text as identity.
+    draft_epoch: u64,
     pub last_notice: Option<String>,
 }
 
@@ -1023,6 +1028,17 @@ fn letter_draft(mut draft: mir2_ui_core::state::MailComposeDraft) -> mir2_ui_cor
     draft
 }
 
+impl MailComposeUi {
+    pub(crate) fn draft_epoch(&self) -> u64 {
+        self.draft_epoch
+    }
+
+    fn advance_draft_epoch(&mut self) {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        self.draft_epoch = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
 fn store_active_mail_draft(state: &mut NativePlayerUiState, compose: &mut MailComposeUi) {
     let Some(draft) = state.core.mail_compose.take() else {
         return;
@@ -1045,6 +1061,7 @@ fn activate_mail_compose(
         MailComposeKind::Letter => compose.letter_draft.take().map(letter_draft),
         MailComposeKind::Parcel => compose.parcel_draft.take(),
     };
+    compose.advance_draft_epoch();
     dispatch_ui_action(
         &mut state.core,
         effects,
@@ -1083,6 +1100,7 @@ fn cancel_mail_recipient_prompt(state: &mut NativePlayerUiState, compose: &mut M
     if let Some(prompt) = compose.recipient_prompt.take() {
         compose.kind = prompt.suspended_kind;
         state.core.mail_compose = prompt.suspended_draft;
+        compose.advance_draft_epoch();
         if prompt.close_parent_on_cancel {
             state.core.panel = mir2_ui_core::state::UiPanel::None;
             state.mail_inventory_visible = false;
@@ -3537,7 +3555,9 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             )
             .add_systems(
                 PostUpdate,
-                text_input::position_ime.after(bevy::ui::UiSystems::Layout),
+                text_input::position_ime
+                    .after(bevy::ui::UiSystems::Layout)
+                    .after(mail_editor::capture_layout_system),
             )
             .add_systems(
                 PostUpdate,

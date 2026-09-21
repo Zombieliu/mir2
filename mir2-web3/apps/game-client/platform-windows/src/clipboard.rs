@@ -233,9 +233,23 @@ fn append_filtered(
 #[derive(Default)]
 pub(crate) struct FriendClipboardPending(Option<(u64, bevy::clipboard::ClipboardRead)>);
 
+/// OS reads may resolve after the compose surface was closed or retargeted.
+#[derive(Default)]
+pub(crate) struct MailClipboardPending(Option<(MailTextTarget, bevy::clipboard::ClipboardRead)>);
+
+fn mail_paste_is_current(pending: &MailTextTarget, current: Option<&MailTextTarget>) -> bool {
+    current == Some(pending)
+}
+
 use mir2_client_bevy::crystal_ui::overlays::text_input::{
     editor_mut, editor_owner, friend_clipboard_target, sync_draft, EditorOwner,
 };
+use mir2_client_bevy::crystal_ui::overlays::{
+    mail_editor::MailLetterEditor,
+    mail_text_adapter::{active_mail_text_target, MailTextTarget},
+    MailComposeUi,
+};
+use mir2_client_bevy::pending_operations::{PendingOperations, SessionResetRevision};
 
 /// Clipboard operations require a focused field. Pending reads are bound to a
 /// globally unique editor instance and are cancelled on focus/modal/session changes.
@@ -243,14 +257,20 @@ pub fn paste_system(
     mut keyboard_inputs: MessageReader<KeyboardInput>,
     mut shortcut: Local<ClipboardShortcutState>,
     mut pending: Local<FriendClipboardPending>,
+    mut mail_pending: Local<MailClipboardPending>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut clipboard: Option<ResMut<bevy::clipboard::Clipboard>>,
     mut shell: Option<ResMut<NativeShellModel>>,
     mut ui: Option<ResMut<mir2_client_bevy::crystal_ui::NativePlayerUiState>>,
+    compose: Option<Res<MailComposeUi>>,
+    mut mail_editor: Option<ResMut<MailLetterEditor>>,
+    pending_operations: Option<Res<PendingOperations>>,
+    reset: Option<Res<SessionResetRevision>>,
 ) {
     if !windows.iter().any(|window| window.focused) {
         *shortcut = ClipboardShortcutState::default();
         pending.0 = None;
+        mail_pending.0 = None;
         keyboard_inputs.read().for_each(drop);
         return;
     }
@@ -266,6 +286,7 @@ pub fn paste_system(
     if ingame {
         let Some(ui) = ui.as_deref_mut() else {
             pending.0 = None;
+            mail_pending.0 = None;
             return;
         };
         ui.friends.sync_editor();
@@ -274,8 +295,79 @@ pub fn paste_system(
         ui.game_shop_dialog.sync_search_editor();
         if ui.ime_frame_consumed {
             pending.0 = None;
+            mail_pending.0 = None;
             return;
         }
+        let session_revision = reset.as_deref().map_or(0, |revision| revision.0);
+        let mail_target = match (
+            compose.as_deref(),
+            mail_editor.as_deref(),
+            pending_operations.as_deref(),
+        ) {
+            (Some(compose), Some(editor), Some(pending_operations)) => active_mail_text_target(
+                shell.as_deref().expect("in-game shell"),
+                ui,
+                compose,
+                editor,
+                pending_operations,
+                session_revision,
+            ),
+            _ => None,
+        };
+        if let Some(mail_target) = mail_target {
+            pending.0 = None;
+            let Some(editor) = mail_editor.as_deref_mut() else {
+                mail_pending.0 = None;
+                return;
+            };
+            let Some(draft) = ui.core.mail_compose.as_mut() else {
+                mail_pending.0 = None;
+                return;
+            };
+            if mail_pending
+                .0
+                .as_ref()
+                .is_some_and(|(target, _)| target != &mail_target)
+            {
+                mail_pending.0 = None;
+            }
+            for action in actions {
+                // Ctrl shortcut literals also reach the client editor; its
+                // Ctrl+C/X/V branch deliberately treats those as host-owned.
+                match action {
+                    KeyCode::KeyA => editor.select_all(),
+                    KeyCode::KeyV => {
+                        if let Some(clipboard) = clipboard.as_deref_mut() {
+                            mail_pending.0 = Some((mail_target.clone(), clipboard.fetch_text()));
+                        }
+                    }
+                    KeyCode::KeyC | KeyCode::KeyX => {
+                        if let Some(clipboard) = clipboard.as_deref_mut() {
+                            let selected = editor.selected_text().to_owned();
+                            if !selected.is_empty()
+                                && clipboard.set_text(selected).is_ok()
+                                && action == KeyCode::KeyX
+                            {
+                                editor.cut_selection(draft);
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            if let Some((target, read)) = mail_pending.0.as_mut() {
+                if !mail_paste_is_current(target, Some(&mail_target)) {
+                    mail_pending.0 = None;
+                } else if let Some(result) = read.poll_result() {
+                    mail_pending.0 = None;
+                    if let Ok(text) = result {
+                        editor.paste(draft, &text);
+                    }
+                }
+            }
+            return;
+        }
+        mail_pending.0 = None;
         let Some(owner) = editor_owner(ui) else {
             pending.0 = None;
             return;
@@ -332,6 +424,7 @@ pub fn paste_system(
         return;
     }
     pending.0 = None;
+    mail_pending.0 = None;
     if !actions.contains(&KeyCode::KeyV) {
         return;
     }
@@ -565,4 +658,30 @@ mod tests {
             None
         );
     }
+
+    #[test]
+    fn delayed_mail_paste_requires_exact_draft_kind_recipient_revision_and_session() {
+        let target = MailTextTarget {
+            kind: mir2_client_bevy::crystal_ui::overlays::MailComposeKind::Letter,
+            recipient: "Receiver".into(),
+            draft_epoch: 7,
+            editor_revision: 11,
+            session_revision: 3,
+        };
+        assert!(mail_paste_is_current(&target, Some(&target)));
+        for stale in [
+            MailTextTarget { recipient: "Other".into(), ..target.clone() },
+            MailTextTarget {
+                kind: mir2_client_bevy::crystal_ui::overlays::MailComposeKind::Parcel,
+                ..target.clone()
+            },
+            MailTextTarget { draft_epoch: 8, ..target.clone() },
+            MailTextTarget { editor_revision: 12, ..target.clone() },
+            MailTextTarget { session_revision: 4, ..target.clone() },
+        ] {
+            assert!(!mail_paste_is_current(&target, Some(&stale)));
+        }
+        assert!(!mail_paste_is_current(&target, None));
+    }
+
 }

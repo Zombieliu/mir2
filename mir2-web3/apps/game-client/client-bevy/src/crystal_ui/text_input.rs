@@ -153,6 +153,7 @@ pub struct Composition {
 #[derive(Default, Resource)]
 pub struct ImeState {
     lease: Option<(EditorOwner, u64)>,
+    mail_lease: Option<super::mail_text_adapter::MailTextTarget>,
     enabled: bool,
 }
 
@@ -164,6 +165,10 @@ pub fn process_ime(
     mut windows: Query<(Entity, &mut Window), With<PrimaryWindow>>,
     keys: Option<Res<ButtonInput<KeyCode>>>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
+    compose: Option<Res<MailComposeUi>>,
+    mut mail_editor: Option<ResMut<super::mail_editor::MailLetterEditor>>,
+    pending: Option<Res<crate::pending_operations::PendingOperations>>,
+    reset: Option<Res<crate::pending_operations::SessionResetRevision>>,
 ) {
     ui.ime_frame_consumed = false;
     let events: Vec<_> = events.read().cloned().collect();
@@ -174,6 +179,94 @@ pub fn process_ime(
     let Ok((window_id, mut window)) = windows.single_mut() else {
         return;
     };
+    let session_revision = reset.as_deref().map_or(0, |revision| revision.0);
+    let mail_target = (window.focused && shell.screen == NativeShellScreen::InGame)
+        .then(|| {
+            Some(super::mail_text_adapter::active_mail_text_target(
+                &shell,
+                &ui,
+                compose.as_deref()?,
+                mail_editor.as_deref()?,
+                pending.as_deref()?,
+                session_revision,
+            ))
+        })
+        .flatten()
+        .flatten();
+    if let Some(target) = mail_target {
+        if let Some((old, _)) = state.lease.take() {
+            let editor = editor_mut(&mut ui, old);
+            editor.composition = None;
+            editor.modifiers = [false; 4];
+        }
+        if state.mail_lease.as_ref() != Some(&target) {
+            if let Some(editor) = mail_editor.as_deref_mut() {
+                editor.clear_composition();
+            }
+            state.mail_lease = Some(target);
+            state.enabled = false;
+            window.ime_enabled = false;
+            return;
+        }
+        let Some(editor) = mail_editor.as_deref_mut() else {
+            state.mail_lease = None;
+            state.enabled = false;
+            window.ime_enabled = false;
+            return;
+        };
+        window.ime_enabled = true;
+        let clicked = mouse
+            .as_deref()
+            .is_some_and(|m| m.just_pressed(MouseButton::Left) || m.just_pressed(MouseButton::Right));
+        let had_composition = editor.composition().is_some();
+        if had_composition
+            && (clicked
+                || keys
+                    .as_deref()
+                    .is_some_and(|k| k.just_pressed(KeyCode::Escape)))
+        {
+            editor.clear_composition();
+            window.ime_enabled = false;
+            state.enabled = false;
+            ui.ime_frame_consumed = true;
+            return;
+        }
+        ui.ime_frame_consumed = had_composition;
+        for event in events {
+            match event {
+                Ime::Enabled { window } if window == window_id => state.enabled = true,
+                Ime::Disabled { window } if window == window_id => {
+                    state.enabled = false;
+                    editor.clear_composition();
+                }
+                Ime::Preedit {
+                    window,
+                    value,
+                    cursor,
+                } if window == window_id && state.enabled => {
+                    editor.set_composition(value, cursor);
+                    ui.ime_frame_consumed = true;
+                }
+                Ime::Commit { window, value } if window == window_id && state.enabled => {
+                    editor.clear_composition();
+                    if let Some(draft) = ui.core.mail_compose.as_mut() {
+                        editor.paste(draft, &value);
+                    }
+                    ui.ime_frame_consumed = true;
+                }
+                _ => {}
+            }
+        }
+        return;
+    }
+    if state.mail_lease.take().is_some() {
+        if let Some(editor) = mail_editor.as_deref_mut() {
+            editor.clear_composition();
+        }
+        state.enabled = false;
+        window.ime_enabled = false;
+        return;
+    }
     let owner = (window.focused && shell.screen == NativeShellScreen::InGame)
         .then(|| editor_owner(&ui))
         .flatten();
@@ -246,14 +339,59 @@ pub fn process_ime(
 /// Candidate location follows actual laid-out glyph geometry, including DPI and scrolling.
 pub fn position_ime(
     ui: Res<NativePlayerUiState>,
+    shell: Res<NativeShellModel>,
     state: Res<ImeState>,
+    compose: Option<Res<MailComposeUi>>,
+    mail_editor: Option<Res<super::mail_editor::MailLetterEditor>>,
+    pending: Option<Res<crate::pending_operations::PendingOperations>>,
+    reset: Option<Res<crate::pending_operations::SessionResetRevision>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
     texts: Query<(
         &friend_dialog::view::FriendEditText,
         &ComputedNode,
         &bevy::ui::UiGlobalTransform,
     )>,
+    mail_texts: Query<(
+        &super::mail_editor::MailLetterEditText,
+        &ComputedNode,
+        &bevy::ui::UiGlobalTransform,
+    )>,
 ) {
+    let session_revision = reset.as_deref().map_or(0, |revision| revision.0);
+    let mail_target = match (compose.as_deref(), mail_editor.as_deref(), pending.as_deref()) {
+        (Some(compose), Some(editor), Some(pending)) => super::mail_text_adapter::active_mail_text_target(
+            &shell,
+            &ui,
+            compose,
+            editor,
+            pending,
+            session_revision,
+        ),
+        _ => None,
+    };
+    if let Some(target) = state.mail_lease.as_ref() {
+        if Some(target) != mail_target.as_ref() {
+            return;
+        }
+        let Some(editor) = mail_editor.as_deref() else {
+            return;
+        };
+        let Some((tag, node, transform)) = mail_texts
+            .iter()
+            .find(|(tag, _, _)| tag.revision == target.editor_revision)
+        else {
+            return;
+        };
+        let caret = editor.ime_caret().unwrap_or(Vec2::new(0., 14.));
+        let scale = node.inverse_scale_factor().max(0.001);
+        let point = transform.transform_point2(-node.size() * 0.5 + caret / scale);
+        if let Ok(mut window) = windows.single_mut() {
+            window.ime_position = point / window.scale_factor();
+        }
+        let _ = tag;
+        return;
+    }
+
     let Some((owner, revision)) = state.lease else {
         return;
     };

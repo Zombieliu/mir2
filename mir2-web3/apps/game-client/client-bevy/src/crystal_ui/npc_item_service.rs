@@ -430,15 +430,27 @@ fn render_contents(
         if let Some(item) = selected.filter(|_| sale_quote(shop, inventory, state).is_some()) {
             let selected_count = sale_selection_count(state, item)
                 .expect("sale quote requires a positive selected count");
-            // TargetItem.Count is drawn inside Crystal's ItemCell. There is no
-            // adjacent quantity picker on NPCDropDialog.
-            overlay_text_at(
-                parent,
-                &format!("x{selected_count}"),
-                CrystalRect::new(ITEM.left, ITEM.top + 20.0, ITEM.width, 12.0),
-                9.0,
-                TEXT,
-            );
+            // MirItemCell.CreateDisposeLabel: only stackable items show a
+            // count (including one), yellow and aligned to the bottom right.
+            // Use the selected sale amount rather than the whole carried stack.
+            if !item.crystal_stack_label().is_empty() {
+                parent.spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(ITEM.left),
+                        bottom: Val::Px(147.0 - ITEM.top - ITEM.height),
+                        width: Val::Px(ITEM.width),
+                        ..default()
+                    },
+                    Text::new(selected_count.to_string()),
+                    crate::crystal_ui::typography::crystal_text_font(
+                        crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                    ),
+                    TextColor(Color::srgb(1.0, 1.0, 0.0)),
+                    TextLayout::new(Justify::Right, LineBreak::NoWrap),
+                    FocusPolicy::Pass,
+                ));
+            }
         }
     }
     if shop.allows_buy() && shop.allows_sell() {
