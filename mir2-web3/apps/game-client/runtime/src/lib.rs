@@ -2600,6 +2600,14 @@ fn ingest_pending_npc_shop_service(
     );
 }
 
+#[derive(Debug, Deserialize)]
+struct StoragePasswordResult {
+    operation: String,
+    result: i32,
+    #[serde(default)]
+    removing: bool,
+}
+
 #[derive(Debug, Default, Deserialize)]
 #[serde(default)]
 struct StorageModelPatch {
@@ -2609,6 +2617,7 @@ struct StorageModelPatch {
     has_expanded: Option<bool>,
     expiry: Option<i64>,
     ack: Option<StorageOperationAck>,
+    password_result: Option<StoragePasswordResult>,
 }
 
 impl StorageModelPatch {
@@ -2619,6 +2628,7 @@ impl StorageModelPatch {
             && self.has_expanded.is_none()
             && self.expiry.is_none()
             && self.ack.is_none()
+            && self.password_result.is_none()
     }
 
     fn apply_to(&self, storage: &mut mir2_client_bevy::storage::StorageModel) {
@@ -2640,11 +2650,47 @@ impl StorageModelPatch {
     }
 }
 
+/// Crystal's storage-result handlers emit system chat only for explicit result
+/// packets. Ordinary storage snapshots must remain silent, even when their
+/// password fields change.
+fn storage_password_result_message(
+    result: &StoragePasswordResult,
+    had_password: bool,
+) -> Option<&'static str> {
+    match result.operation.as_str() {
+        "unlock" => match result.result {
+            1 => Some("Password not acceptable."),
+            2 => Some("Incorrect storage password."),
+            3 => Some("Storage is not available."),
+            _ => None,
+        },
+        "password" => match result.result {
+            0 => Some("Storage is not available."),
+            1 | 3 => Some("Password not acceptable."),
+            2 => Some("Incorrect storage password."),
+            5 => Some("No storage password is set."),
+            4 if result.removing => Some("Storage password removed."),
+            4 if had_password => Some("Storage password changed."),
+            4 => Some("Storage password set."),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+fn successful_storage_password_removal(result: Option<&StoragePasswordResult>) -> bool {
+    result.is_some_and(|result| {
+        result.operation == "password" && result.result == 4 && result.removing
+    })
+}
+
 fn ingest_pending_storage_patch(
     mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
     inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
     mut revisions: ResMut<AuthoritativeModelRevisions>,
     mut pending: ResMut<PendingOperations>,
+    mut chat: ResMut<mir2_client_bevy::chat::ChatModel>,
+    mut storage_feedback: Option<ResMut<mir2_client_bevy::storage::StorageUiFeedback>>,
     native: Res<native_ingest::NativeInbound>,
 ) {
     native.drain_matching(
@@ -2663,6 +2709,24 @@ fn ingest_pending_storage_patch(
                             apply_storage_operation_ack(&mut pending, ack);
                         }
                         patch.apply_to(&mut storage);
+                        if let Some(text) = patch.password_result.as_ref().and_then(|result| {
+                            storage_password_result_message(result, old.has_password)
+                        }) {
+                            chat.push(mir2_client_bevy::chat::ChatLine {
+                                text: text.to_owned(),
+                                channel: "system".to_owned(),
+                            });
+                        }
+                        if successful_storage_password_removal(patch.password_result.as_ref()) {
+                            // Crystal immediately relocks and hides StorageDialog after a
+                            // successful removal, even though the result metadata says it
+                            // was unlocked while processing the request. The native host
+                            // owns the optional one-shot close latch.
+                            storage.unlocked = false;
+                            if let Some(storage_feedback) = storage_feedback.as_deref_mut() {
+                                storage_feedback.close_requested = true;
+                            }
+                        }
                         reconcile_storage_refresh(&mut pending, &inventory, &old, &storage);
                         mark_authoritative_refresh(
                             &mut revisions,
@@ -9093,6 +9157,196 @@ mod native_data_path_tests {
         assert!(!storage.has_password);
         assert!(!storage.unlocked);
         assert!(storage.items.is_empty());
+    }
+
+    #[test]
+    fn storage_password_receipt_emits_system_feedback_without_mutating_the_model() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        let before = app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>()
+            .clone();
+        let unlock = PendingOperationKey::StorageUnlock;
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(unlock.clone()));
+
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"ack":{"operation":"unlock","success":false},"password_result":{"operation":"unlock","result":2},"password":"never-render-or-log-this"}"#.to_owned()
+        ));
+        app.update();
+
+        assert_eq!(
+            app.world()
+                .resource::<mir2_client_bevy::storage::StorageModel>(),
+            &before,
+            "a receipt without storage fields must not fabricate a model update"
+        );
+        assert!(!app.world().resource::<PendingOperations>().contains(&unlock));
+        let lines = &app.world().resource::<mir2_client_bevy::chat::ChatModel>().lines;
+        assert_eq!(
+            lines,
+            &[mir2_client_bevy::chat::ChatLine {
+                text: "Incorrect storage password.".to_owned(),
+                channel: "system".to_owned(),
+            }]
+        );
+        assert!(lines.iter().all(|line| !line.text.contains("never-render-or-log-this")));
+    }
+
+    #[test]
+    fn storage_password_results_use_pre_result_state_and_snapshots_stay_silent() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+
+        // The ingest chain runs the receipt patch before the following storage
+        // snapshot, so this is a first set rather than a false "changed" notice.
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"has_password":true,"password_result":{"operation":"password","result":4}}"#.to_owned()
+        ));
+        assert!(native_ingest::push_native_storage_model(
+            r#"{"items":[],"has_password":true,"unlocked":true}"#.to_owned()
+        ));
+        app.update();
+        assert_eq!(
+            app.world().resource::<mir2_client_bevy::chat::ChatModel>().lines,
+            vec![mir2_client_bevy::chat::ChatLine {
+                text: "Storage password set.".to_owned(),
+                channel: "system".to_owned(),
+            }]
+        );
+
+        assert!(native_ingest::push_native_storage_model(
+            r#"{"items":[],"has_password":true,"unlocked":true}"#.to_owned()
+        ));
+        app.update();
+        assert_eq!(
+            app.world().resource::<mir2_client_bevy::chat::ChatModel>().lines.len(),
+            1,
+            "ordinary snapshots are not password-result feedback"
+        );
+
+        for result in [
+            r#"{"operation":"unlock","result":1}"#,
+            r#"{"operation":"unlock","result":2}"#,
+            r#"{"operation":"unlock","result":3}"#,
+            r#"{"operation":"password","result":0}"#,
+            r#"{"operation":"password","result":1}"#,
+            r#"{"operation":"password","result":2}"#,
+            r#"{"operation":"password","result":3}"#,
+            r#"{"operation":"password","result":5}"#,
+            r#"{"operation":"password","result":4}"#,
+            r#"{"operation":"unknown","result":2}"#,
+        ] {
+            assert!(native_ingest::push_native_storage_patch(format!(
+                r#"{{"password_result":{result}}}"#
+            )));
+        }
+        app.update();
+        let texts = app
+            .world()
+            .resource::<mir2_client_bevy::chat::ChatModel>()
+            .lines
+            .iter()
+            .map(|line| line.text.as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(
+            texts,
+            vec![
+                "Storage password set.",
+                "Password not acceptable.",
+                "Incorrect storage password.",
+                "Storage is not available.",
+                "Storage is not available.",
+                "Password not acceptable.",
+                "Incorrect storage password.",
+                "Password not acceptable.",
+                "No storage password is set.",
+                "Storage password changed.",
+            ]
+        );
+    }
+
+    #[test]
+    fn storage_password_remove_success_relocks_and_acknowledges_once() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.init_resource::<mir2_client_bevy::storage::StorageUiFeedback>();
+        {
+            let mut storage = app
+                .world_mut()
+                .resource_mut::<mir2_client_bevy::storage::StorageModel>();
+            storage.has_password = true;
+            storage.unlocked = true;
+        }
+        let remove = PendingOperationKey::StorageRemovePassword;
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(remove.clone()));
+
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"has_password":false,"unlocked":true,"ack":{"operation":"removePassword","success":true},"password_result":{"operation":"password","result":4,"removing":true}}"#.to_owned()
+        ));
+        app.update();
+
+        let storage = app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>();
+        assert!(!storage.has_password);
+        assert!(!storage.unlocked, "source Hide relocks after removal");
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::storage::StorageUiFeedback>()
+                .close_requested,
+            "the native host closes only StorageDialog from this explicit receipt"
+        );
+        assert!(!app.world().resource::<PendingOperations>().contains(&remove));
+        assert_eq!(
+            app.world().resource::<mir2_client_bevy::chat::ChatModel>().lines,
+            vec![mir2_client_bevy::chat::ChatLine {
+                text: "Storage password removed.".to_owned(),
+                channel: "system".to_owned(),
+            }]
+        );
+    }
+
+    #[test]
+    fn storage_password_remove_failure_does_not_request_close() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        app.init_resource::<mir2_client_bevy::storage::StorageUiFeedback>();
+        {
+            let mut storage = app
+                .world_mut()
+                .resource_mut::<mir2_client_bevy::storage::StorageModel>();
+            storage.has_password = true;
+            storage.unlocked = true;
+        }
+        let remove = PendingOperationKey::StorageRemovePassword;
+        assert!(app
+            .world_mut()
+            .resource_mut::<PendingOperations>()
+            .try_begin(remove.clone()));
+
+        assert!(native_ingest::push_native_storage_patch(
+            r#"{"ack":{"operation":"removePassword","success":false},"password_result":{"operation":"password","result":2,"removing":true}}"#.to_owned()
+        ));
+        app.update();
+
+        assert!(
+            app.world()
+                .resource::<mir2_client_bevy::storage::StorageModel>()
+                .unlocked
+        );
+        assert!(
+            !app.world()
+                .resource::<mir2_client_bevy::storage::StorageUiFeedback>()
+                .close_requested
+        );
+        assert!(!app.world().resource::<PendingOperations>().contains(&remove));
     }
 
     #[test]

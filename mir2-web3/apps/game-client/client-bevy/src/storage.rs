@@ -23,6 +23,12 @@ pub const STORAGE_EXPANDED_SIZE: u16 = 160;
 pub const STORAGE_EXPAND_COST: u32 = 1_000_000;
 pub const BAG_SLOTS: u32 = 46;
 
+/// One-shot UI effects from explicit storage receipts, independent of snapshots.
+#[derive(Debug, Default, Resource)]
+pub struct StorageUiFeedback {
+    pub close_requested: bool,
+}
+
 fn deserialize_bounded_items<'de, D>(deserializer: D) -> Result<Vec<ItemModel>, D::Error>
 where
     D: de::Deserializer<'de>,

@@ -2972,6 +2972,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<ShopModel>()
             .init_resource::<GameShopModel>()
             .init_resource::<StorageModel>()
+            .init_resource::<crate::storage::StorageUiFeedback>()
             .init_resource::<crate::hero_model::HeroModel>()
             .init_resource::<crate::hero_model::HeroModelReceipts>()
             .init_resource::<SkillModel>()
@@ -5254,10 +5255,27 @@ fn sync_storage_password_prompt(
     mut storage: ResMut<StorageModel>,
     mut storage_ui: ResMut<StorageUiState>,
     pending: Res<PendingOperations>,
+    feedback: Option<ResMut<crate::storage::StorageUiFeedback>>,
 ) {
     // This latch lasts through the current input frame only. It is set when
     // a modal action removes the prompt later in the ordered Update chain.
     state.storage_password_input_consumed = false;
+    if feedback.is_some_and(|mut feedback| std::mem::take(&mut feedback.close_requested)) {
+        if state.storage_open() {
+            state.core.panel = if state.storage_equipment_visible {
+                mir2_ui_core::state::UiPanel::Character
+            } else {
+                mir2_ui_core::state::UiPanel::Inventory
+            };
+            state.storage_equipment_visible = false;
+            state.inventory_item_drag = None;
+            state.equipment_item_drag = None;
+            state.storage_password_prompt = None;
+            storage_ui.storage_item_drag = None;
+            state.storage_password_input_consumed = true;
+            clear_legacy_storage_password_drafts(&mut storage);
+        }
+    }
     let active = shell.screen == NativeShellScreen::InGame && state.storage_open();
     if !active {
         state.storage_password_prompt = None;

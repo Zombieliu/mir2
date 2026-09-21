@@ -327,3 +327,37 @@ fn rendered_modal_is_a_visible_full_stage_pointer_blocker() {
     assert_eq!(node.width, Val::Px(1024.0));
     assert_eq!(node.height, Val::Px(768.0));
 }
+
+#[test]
+fn successful_password_removal_dismisses_storage_once_without_closing_other_panels() {
+    for equipment_open in [false, true] {
+        let mut app = password_test_app();
+        app.insert_resource(crate::storage::StorageUiFeedback { close_requested: true });
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel = mir2_ui_core::state::UiPanel::Storage;
+            state.storage_equipment_visible = equipment_open;
+            state.storage_password_prompt = Some(StoragePasswordPrompt::unlock());
+        }
+        app.update();
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(!state.storage_open());
+        assert!(state.storage_password_prompt.is_none());
+        assert!(state.storage_password_input_consumed);
+        assert_eq!(state.core.panel, if equipment_open {
+            mir2_ui_core::state::UiPanel::Character
+        } else {
+            mir2_ui_core::state::UiPanel::Inventory
+        });
+        assert!(!app.world().resource::<crate::storage::StorageUiFeedback>().close_requested);
+        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel = mir2_ui_core::state::UiPanel::Storage;
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().storage_open());
+    }
+    let mut app = password_test_app();
+    app.insert_resource(crate::storage::StorageUiFeedback { close_requested: true });
+    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel = mir2_ui_core::state::UiPanel::QuestLog;
+    app.update();
+    assert_eq!(app.world().resource::<NativePlayerUiState>().core.panel, mir2_ui_core::state::UiPanel::QuestLog);
+    assert!(!app.world().resource::<crate::storage::StorageUiFeedback>().close_requested);
+}

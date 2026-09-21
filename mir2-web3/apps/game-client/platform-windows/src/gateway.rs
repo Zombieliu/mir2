@@ -5388,9 +5388,10 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
+                "password_result": { "operation": "unlock", "result": result },
                 "ack": { "operation": "unlock", "success": result == 0 || result == 4 }
             });
-            if result == 0 || !has_password {
+            if result == 0 || result == 4 || !has_password {
                 patch["unlocked"] = json!(true);
             }
             Some(patch)
@@ -5401,6 +5402,7 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
+                "password_result": { "operation": "password", "result": result, "removing": removing },
                 "ack": {
                     "operation": if removing { "removePassword" } else { "setPassword" },
                     "success": result == 4,
@@ -9909,6 +9911,31 @@ mod tests {
             packet: "ObjectMonster".into(),
             payload: json!({}),
         }));
+    }
+
+    #[test]
+    fn storage_password_receipts_preserve_results_without_echoing_credentials() {
+        for result in 0..=6 {
+            let unlock = transform_storage_patch_from_packet("StorageUnlockResult",
+                &json!({"result":result,"hasPassword":true,"password":"private-input"})).unwrap();
+            assert_eq!(unlock["password_result"]["operation"], "unlock");
+            assert_eq!(unlock["password_result"]["result"], result);
+            assert_eq!(unlock["ack"]["success"], result == 0 || result == 4);
+            if result == 0 || result == 4 {
+                assert_eq!(unlock["unlocked"], true);
+            } else {
+                assert!(unlock.get("unlocked").is_none());
+            }
+            for removing in [false, true] {
+                let password = transform_storage_patch_from_packet("StoragePasswordResult",
+                    &json!({"result":result,"removing":removing,"hasPassword":true,"password":"private-input"})).unwrap();
+                assert_eq!(password["password_result"], json!({"operation":"password","result":result,"removing":removing}));
+                assert!(!password.to_string().contains("private-input"));
+            }
+            assert!(!unlock.to_string().contains("private-input"));
+        }
+        assert!(transform_storage_patch_from_packet("StorageUnlockResult", &json!({"hasPassword":true})).is_none());
+        assert!(transform_storage_patch_from_packet("StoragePasswordResult", &json!({"result":4,"hasPassword":true})).is_none());
     }
 
     #[test]
