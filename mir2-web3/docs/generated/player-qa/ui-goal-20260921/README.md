@@ -280,3 +280,11 @@ Source2081eadd2. Native-ui952/952, runtime237/237, Windows receipt boundary1/1 p
 Staged C:/numeron-legend-of-rebirth-20260921-storage-feedback. Client SHA256 A4415B9EF8072146EB984911A8C60BAC86DA6C6FB7F060030D63916848A27008; unchanged matched Gateway SHA256 F4DBD45E090FF6D6C1E27415BF45733C4E7C57F1079DE59654242F7EB1A6FA29. Same localhost19910 config/public asset junction. This candidate includes previous equipment/warehouse work and new authoritative password feedback. Neither binary launched; no actual password changed. Renewed computer handoff and live/visual acceptance remain pending.
 
 Read-only process check still finds old native PID49272 responsive with29,251,375,104 private bytes. No new telemetry/live memory pass. An accidental recursive formatter run during implementation was backed up at C:/mir2-ui-repair-20260921/unintended-formatting-backup.patch and removed against this turn's verified baseline; final changes are scoped to the password UI/runtime/bridge and QA documentation. Unrelated quest artifacts were retained.
+
+## Mailbox confirmation and full-inbox receipt package
+
+Source8834cf3ec. Full native-ui959/959 passed, including five new delete-confirmation tests and two bounded mailbox/receipt regressions. Initial development builds encountered incomplete overlay edits and a missing optional MailModel fixture dependency; final suite is green. Receipt C:/mir2-ui-repair-20260921/mail-delete-client-tests.log. Native release1m09s: mail-delete-native-build.log.
+
+Staged C:/numeron-legend-of-rebirth-20260921-mail-delete. Client SHA256 58B6E96FEA3A569082D85372443DA28D1DC6F4787FD37E2AA0D7D042771E6C4B; unchanged Gateway SHA256 F4DBD45E090FF6D6C1E27415BF45733C4E7C57F1079DE59654242F7EB1A6FA29. Existing localhost19910 config/public assets junction retained. No launch/deployment, live deletion or mail sent to anyone. Desktop handoff remains pending. This package is cumulative through prior storage/equipment/password work; no whole-UI or mailbox visual pass follows.
+
+Read/Delete rejection recovery remains open: source backend can return no packet and existing pending keys have no correlated negative receipt. Full source mailbox/read/parcel/compose visual alignment and ordinary live operations also remain open.
