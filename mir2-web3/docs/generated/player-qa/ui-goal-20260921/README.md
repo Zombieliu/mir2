@@ -198,3 +198,15 @@ npc-quotes. A deeper source audit corrects the service backlog: ordinary Crystal
 repair/sale accepts inventory cells only, so remove the equipment adapter rather
 than implement equipped-item drag. Native service x0 also differs from source
 x264. Exact source references and remaining sale rounding gate are in NPC notes.
+
+## Source service layout candidate
+
+Latest staged matched package: C:/numeron-legend-of-rebirth-20260921-npc-layout.
+Client SHA25697CC363ACE932442A230BAE905CD19FBB4BF6AD3B41AB8BF204B2DB728E21326;
+Gateway unchanged from npc-quotes staged package. Service frame/hit origin now
+matches264,224, visible bag placement follows NPC dialogue lifecycle, and
+nonsource equipment/footer adapters are removed. Combined BuySell retains one
+explicit within-frame Buy navigation adapter. Native client library907/907 and
+release build pass. No desktop input, switch or live visual acceptance occurred.
+Latest actual screenshots still belong to auth-lifetime build. Full-UI goal
+remains active; high-memory investigation and remaining live checks are open.

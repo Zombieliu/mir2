@@ -1,14 +1,14 @@
 //! NPCDropDialog source geometry with ordinary bag drag selection.
-//! The equipment picker remains an explicit adapter until equipment drag is wired.
 use super::*;
 
 const CONFIRM: CrystalRect = CrystalRect::new(114.0, 62.0, 48.0, 25.0);
 const ITEM: CrystalRect = CrystalRect::new(38.0, 72.0, 36.0, 32.0);
 // NPCDropPanel_Click forwards this wider source rectangle to ItemCell_Click.
 const ITEM_CLICK_TARGET: CrystalRect = CrystalRect::new(20.0, 55.0, 75.0, 75.0);
-// `OverlayShop` owns the Crystal NPCDropDialog's source-relative frame at
-// (0, 224).  Keep hit testing beside the source ItemCell geometry instead of
-// teaching the generic inventory drag code about service-specific layout.
+// NPCDialogs.NPCDropPanel_BeforeDraw anchors this frame at
+// (264, NPCDialog.Size.Height). Prguse/995 is 440x224, and OverlayShop is
+// already rooted at y=224 for the independent Buy list.
+const NPC_DROP_PANEL_LEFT: f32 = 264.0;
 const NPC_DROP_PANEL_TOP: f32 = 224.0;
 const LOW_GOLD_NOTICE: &str = "Not enough gold.";
 
@@ -31,8 +31,9 @@ pub(super) fn drag_target_at_cursor(
 ) -> bool {
     state.npc_shop_open()
         && service_action(shop).is_some()
+        && !(shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab))
         && CrystalRect::new(
-            ITEM_CLICK_TARGET.left,
+            NPC_DROP_PANEL_LEFT + ITEM_CLICK_TARGET.left,
             NPC_DROP_PANEL_TOP + ITEM_CLICK_TARGET.top,
             ITEM_CLICK_TARGET.width,
             ITEM_CLICK_TARGET.height,
@@ -215,8 +216,7 @@ fn selected_item<'a>(
     state: &NativePlayerUiState,
 ) -> Option<&'a ItemModel> {
     if shop.allows_repair() || shop.allows_special_repair() {
-        selected_repair_item(state, inventory)
-            .filter(|item| item.container == 0 || item.container == 2)
+        selected_repair_item(state, inventory).filter(|item| item.container == 0)
             .filter(|item| {
                 state
                     .shop_service_drag_unique_id
@@ -274,7 +274,32 @@ pub(super) fn render(
     shop: &ShopModel,
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
-    player: &crate::read_model::PlayerStats,
+) {
+    // `OverlayShop` retains its y=224 origin for Buy. The service frame itself
+    // supplies Crystal's x=264 origin without moving that separate mode.
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(NPC_DROP_PANEL_LEFT),
+                top: Val::Px(0.0),
+                width: Val::Px(176.0),
+                height: Val::Px(147.0),
+                ..default()
+            },
+            FocusPolicy::Block,
+        ))
+        .with_children(|service_parent| {
+            render_contents(service_parent, assets, shop, inventory, state);
+        });
+}
+
+fn render_contents(
+    parent: &mut ChildSpawnerCommands,
+    assets: Option<&AssetServer>,
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    state: &NativePlayerUiState,
 ) {
     let service = service_action(shop);
     let repair = shop.allows_repair() || shop.allows_special_repair();
@@ -320,7 +345,7 @@ pub(super) fn render(
     let title = service.map_or("Unavailable", |(title, _)| title);
     let info = if repair {
         repair_quote.map_or_else(
-            || title.to_owned(),
+            || "Quote unavailable".to_owned(),
             |quote| format!("{title}: {} gold", quote.displayed_total),
         )
     } else if shop.allows_sell() {
@@ -373,151 +398,34 @@ pub(super) fn render(
         }
     }
 
-    // NPCDropDialog.Show keeps Crystal's ordinary InventoryDialog visible,
-    // so bag selection now comes from that real panel rather than this former
-    // adjacent picker. Equipment remains an explicit adapter until its drag
-    // source is wired into the service target.
-    if repair {
-        parent.spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(180.0),
-                top: Val::Px(0.0),
-                width: Val::Px(296.0),
-                height: Val::Px(326.0),
-                ..default()
-            },
-            BackgroundColor(Color::srgba(0.03, 0.03, 0.035, 0.96)),
-        ));
-        overlay_text_at(
-            parent,
-            "Equipment",
-            CrystalRect::new(184.0, 235.0, 160.0, 18.0),
-            11.0,
-            GOLD,
-        );
-        for item in inventory
-            .items_in(2)
-            .into_iter()
-            .filter(|item| item.slot < 14)
-        {
-            picker_item(
+    if shop.allows_sell() {
+        if let Some(item) = selected {
+            let selected_count = state
+                .shop_service_drag_count
+                .unwrap_or_else(|| item.quantity.min(u32::from(u16::MAX)) as u16);
+            // TargetItem.Count is drawn inside Crystal's ItemCell. There is no
+            // adjacent quantity picker on NPCDropDialog.
+            overlay_text_at(
                 parent,
-                assets,
-                item,
-                CrystalRect::new(
-                    184.0 + (item.slot % 8) as f32 * 36.0,
-                    255.0 + (item.slot / 8) as f32 * 34.0,
-                    36.0,
-                    32.0,
-                ),
-                OverlayButton::SelectEquipForRepair(item.slot),
-                true,
-                selected,
-                player,
+                &format!("x{selected_count}"),
+                CrystalRect::new(ITEM.left, ITEM.top + 20.0, ITEM.width, 12.0),
+                9.0,
+                TEXT,
             );
         }
-    } else if shop.allows_sell() {
-        let selected_count = state
-            .shop_service_drag_count
-            .unwrap_or_else(|| shop_quantity_clamped(state.shop_quantity));
-        let drag_selected = state.shop_service_drag_count.is_some();
-        overlay_absolute_button(
-            parent,
-            "−",
-            CrystalRect::new(20.0, 153.0, 28.0, 22.0),
-            OverlayButton::ShopQuantityDec,
-            !drag_selected && state.shop_quantity > SHOP_QUANTITY_MIN,
-        );
-        overlay_text_at(
-            parent,
-            &format!("x{selected_count}"),
-            CrystalRect::new(50.0, 155.0, 50.0, 18.0),
-            11.0,
-            TEXT,
-        );
-        overlay_absolute_button(
-            parent,
-            "+",
-            CrystalRect::new(105.0, 153.0, 28.0, 22.0),
-            OverlayButton::ShopQuantityInc,
-            !drag_selected && state.shop_quantity < SHOP_QUANTITY_MAX,
-        );
     }
     if shop.allows_buy() && shop.allows_sell() {
+        // A combined BUYSELL session needs one native navigation adapter to
+        // return from its Sell service frame to the separately rendered Buy list.
         overlay_absolute_button(
             parent,
             "Buy",
-            CrystalRect::new(20.0, 182.0, 60.0, 22.0),
+            CrystalRect::new(20.0, 112.0, 60.0, 22.0),
             OverlayButton::ShopShowBuy,
             true,
         );
     }
-    overlay_absolute_button(
-        parent,
-        "Close",
-        CrystalRect::new(90.0, 182.0, 60.0, 22.0),
-        OverlayButton::ShopCancel,
-        true,
-    );
-    if let Some(rate) = shop.repair_rate.filter(|_| repair) {
-        overlay_text_at(
-            parent,
-            &format!("Repair rate x{rate:.2}"),
-            CrystalRect::new(20.0, 212.0, 150.0, 18.0),
-            10.0,
-            TEXT,
-        );
-    }
-    if repair && repair_quote.is_none() {
-        overlay_text_at(
-            parent,
-            "Quote unavailable",
-            CrystalRect::new(20.0, 235.0, 150.0, 18.0),
-            10.0,
-            TEXT,
-        );
-    }
-}
 
-fn picker_item(
-    parent: &mut ChildSpawnerCommands,
-    assets: Option<&AssetServer>,
-    item: &ItemModel,
-    rect: CrystalRect,
-    action: OverlayButton,
-    enabled: bool,
-    selected: Option<&ItemModel>,
-    player: &crate::read_model::PlayerStats,
-) {
-    let is_selected = selected
-        .is_some_and(|selected| selected.container == item.container && selected.slot == item.slot);
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(rect.left),
-            top: Val::Px(rect.top),
-            width: Val::Px(rect.width),
-            height: Val::Px(rect.height),
-            ..default()
-        },
-        BackgroundColor(if is_selected {
-            Color::srgba(0.2, 0.6, 0.2, 0.45)
-        } else {
-            Color::srgba(0.0, 0.0, 0.0, 0.55)
-        }),
-    ));
-    if let Some(assets) = assets {
-        overlay_absolute_item_button(parent, assets, item, rect, action, enabled, player);
-    } else {
-        overlay_absolute_button(
-            parent,
-            &short_name(&item.name, &item.key),
-            rect,
-            action,
-            enabled,
-        );
-    }
 }
 
 #[cfg(test)]
@@ -595,7 +503,7 @@ mod tests {
             let mut inventory = app.world_mut().resource_mut::<InventoryModel>();
             // Crystal's special quote is 188 * 3 * 2 for this fixture.
             inventory.gold = 1128;
-            inventory.items.push(repairable_item(42, 2, 13));
+            inventory.items.push(repairable_item(42, 0, 4));
         }
         fn press(app: &mut App, action: OverlayButton) {
             let button = app
@@ -611,7 +519,7 @@ mod tests {
             .resource_mut::<NativePlayerUiIntentQueue>()
             .drain_intents()
             .is_empty());
-        press(&mut app, OverlayButton::SelectEquipForRepair(13));
+        press(&mut app, OverlayButton::SelectBagForRepair(4));
         let intents = app
             .world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()
@@ -820,7 +728,7 @@ mod tests {
         app.world_mut()
             .resource_mut::<InventoryModel>()
             .items
-            .push(repairable_item(42, 2, 13));
+            .push(repairable_item(42, 0, 4));
         fn press(app: &mut App, action: OverlayButton) {
             let button = app
                 .world_mut()
@@ -831,7 +739,7 @@ mod tests {
         }
 
         press(&mut app, OverlayButton::ShopToggleHold);
-        press(&mut app, OverlayButton::SelectEquipForRepair(13));
+        press(&mut app, OverlayButton::SelectBagForRepair(4));
         assert!(app
             .world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()
@@ -842,7 +750,7 @@ mod tests {
             app.world()
                 .resource::<NativePlayerUiState>()
                 .shop_repair_slot,
-            Some(13)
+            Some(4)
         );
         assert_eq!(
             app.world().resource::<crate::chat::ChatModel>().lines,
@@ -856,7 +764,7 @@ mod tests {
     }
 
     #[test]
-    fn rendered_service_exposes_last_bag_and_equipment_slots_and_original_confirm() {
+    fn rendered_service_uses_source_origin_without_an_equipment_picker() {
         let mut app = super::super::tests::overlay_render_test_app();
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
@@ -874,7 +782,7 @@ mod tests {
             .resource_mut::<NativePlayerUiState>()
             .shop_repair_slot = Some(45);
         app.update();
-        let (controls, labels) = {
+        let (controls, labels, nodes, focus_nodes) = {
             let world = app.world_mut();
             let controls: Vec<_> = world
                 .query::<(&OverlayButton, &Node)>()
@@ -886,14 +794,32 @@ mod tests {
                 .iter(world)
                 .map(|text| text.0.clone())
                 .collect();
-            (controls, labels)
+            let nodes: Vec<_> = world.query::<&Node>().iter(world).cloned().collect();
+            let focus_nodes: Vec<_> = world
+                .query::<(&Node, &FocusPolicy)>()
+                .iter(world)
+                .map(|(node, focus)| (node.clone(), *focus))
+                .collect();
+            (controls, labels, nodes, focus_nodes)
         };
         assert!(!controls
             .iter()
             .any(|(action, _)| *action == OverlayButton::SelectBagForRepair(45)));
-        assert!(controls
-            .iter()
-            .any(|(action, _)| *action == OverlayButton::SelectEquipForRepair(13)));
+        assert!(!labels.iter().any(|text| text == "Equipment"));
+        assert!(nodes.iter().any(|node| {
+            (node.left, node.top, node.width, node.height)
+                == (Val::Px(264.0), Val::Px(0.0), Val::Px(176.0), Val::Px(147.0))
+        }));
+        assert!(focus_nodes.iter().any(|(node, focus)| {
+            (node.left, node.top, node.width, node.height, *focus)
+                == (
+                    Val::Px(264.0),
+                    Val::Px(0.0),
+                    Val::Px(176.0),
+                    Val::Px(147.0),
+                    FocusPolicy::Block,
+                )
+        }));
         let (_, confirm) = controls
             .iter()
             .find(|(action, _)| *action == OverlayButton::ShopRepair)
@@ -903,6 +829,29 @@ mod tests {
             (Val::Px(114.0), Val::Px(62.0), Val::Px(48.0), Val::Px(25.0))
         );
         assert!(labels.iter().any(|text| text == "Repair: 188 gold"));
+        assert!(controls.iter().filter(|(action, _)| {
+            matches!(
+                action,
+                OverlayButton::ShopRepair
+                    | OverlayButton::ShopSRepair
+                    | OverlayButton::ShopSell
+                    | OverlayButton::ShopToggleHold
+                    | OverlayButton::ShopShowBuy
+            )
+        }).all(|(_, node)| match (node.left, node.top, node.width, node.height) {
+            (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) => {
+                left >= 0.0 && top >= 0.0 && left + width <= 176.0 && top + height <= 147.0
+            }
+            _ => false,
+        }));
+        assert!(!controls.iter().any(|(action, _)| {
+            matches!(
+                action,
+                OverlayButton::ShopQuantityInc
+                    | OverlayButton::ShopQuantityDec
+                    | OverlayButton::ShopCancel
+            )
+        }));
 
         app.world_mut().resource_mut::<InventoryModel>().items[0].tooltip_source = None;
         {
@@ -918,6 +867,18 @@ mod tests {
         let world = app.world_mut();
         let labels: Vec<_> = world.query::<&Text>().iter(world).map(|text| text.0.clone()).collect();
         assert!(labels.iter().any(|text| text == "Quote unavailable"));
+    }
+
+    #[test]
+    fn service_drag_target_uses_crystal_drop_origin_and_not_the_old_buy_origin() {
+        let shop = ShopModel {
+            service_mode: NpcShopServiceMode::Sell,
+            ..default()
+        };
+        let mut state = NativePlayerUiState::default();
+        state.toggle_npc_shop();
+        assert!(drag_target_at_cursor(&shop, &state, Vec2::new(304.0, 298.0)));
+        assert!(!drag_target_at_cursor(&shop, &state, Vec2::new(40.0, 298.0)));
     }
 
     #[test]
@@ -941,7 +902,7 @@ mod tests {
     }
 
     #[test]
-    fn repair_selection_keeps_equipment_identity_and_sale_uses_only_bag() {
+    fn repair_selection_accepts_only_bag_items_and_sale_uses_only_bag() {
         let inventory = InventoryModel {
             items: vec![
                 ItemModel {
@@ -967,9 +928,12 @@ mod tests {
             selected_bag_slot_for_sell: Some(45),
             ..default()
         };
+        assert!(selected_item(&shop, &inventory, &state).is_none());
+        state.shop_repair_container = 0;
+        state.shop_repair_slot = Some(45);
         assert_eq!(
             selected_item(&shop, &inventory, &state).unwrap().unique_id,
-            Some(20)
+            Some(10)
         );
         shop.service_mode = NpcShopServiceMode::Sell;
         assert_eq!(

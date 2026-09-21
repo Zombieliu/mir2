@@ -170,3 +170,44 @@ This patch is source/test verified only, not yet packaged or run in-game.
 Sale gold-cap preflight remains open: native per-unit sell_value multiplication
 can differ from original floor(total Price /2) for an odd-price stack. Do not
 implement a supposedly exact capacity guard from that lossy unit value.
+
+## NPC dialogue geometry source references
+
+Original NPCDialog constructor caches Prguse/995 size and disables AutoSize.
+Exported metadata index995 is440x224; native quest_ui.rs1334-1339 uses the same
+fixed bounds. NPCDialog.Show places InventoryDialog at(width+5,0)=(445,0).
+NPCDialog.Hide closes child goods/drop windows and restores bag position(0,0)
+without forcibly hiding an already-visible bag. These are parent dialogue
+lifecycle rules, not an instruction to reset bag position every frame or on a
+Buy/Sell tab switch. Item drag must cancel when the bag is relocated.
+
+NPCDrop BeforeDraw uses(264,224) and a176x147 frame. Pure sale/repair source has
+Confirm/Hold and ItemCell; the prior equipment/quantity/rate/close adjuncts were
+native additions. Combined BuySell mode may still require an explicitly labelled
+native navigation adapter; that mode must not activate an invisible Sell target
+while Buy is visible. Visual acceptance remains pending.
+
+## Service layout implementation receipt
+
+Candidate now uses source(264,224) service frame and matching item hit target;
+Buy list retains its separate origin and cannot intercept a hidden Sell target.
+Equipment selection/picker and pure-service footer adapters removed. The stack
+count stays in ItemCell; unavailable pricing stays in InfoLabel. Combined
+BUYSELL retains one within-frame Buy navigation adapter, explicitly not an
+original standalone Sell control. OverlayShop root passes pointer picking;
+source176x147 child blocks it, removing the former invisible adjunct hit area.
+
+Authoritative NpcDialogModel open transitions move bag to445,0; hide restores
+origin, closes child shop, clears item drag/selection, and preserves bag visibility.
+Tests cover source/old target coordinates, hidden-Buy-target rejection, equipment
+rejection, controls within pure-service bounds, bag lifecycle and pointer policy.
+Client native-ui library907/907 and focused npc47/47 pass. Full receipt:
+C:/mir2-ui-repair-20260921/npc-service-layout-client-tests.log.
+Windows release69s passes; npc-layout-native-build.log in the same directory.
+
+Matched staged package C:/numeron-legend-of-rebirth-20260921-npc-layout:
+client SHA25697CC363ACE932442A230BAE905CD19FBB4BF6AD3B41AB8BF204B2DB728E21326;
+Gateway retains FED42F81FF2160C3A95583747C95EA7AC97F6AE52B06502D503D4F5E817C16FD.
+Includes prior pricing, affordability and memory-attribution diagnostics. Neither
+binary deployed; no visual/live transaction result is implied. Sale gold-cap
+rounding and current high memory remain open, alongside other full-UI gates.
