@@ -632,6 +632,11 @@ pub(crate) struct InventoryItemDrag {
 #[derive(Resource, Debug, Clone, Copy)]
 struct InventoryBeltDiagnostics(bool);
 
+#[derive(Default, Resource)]
+struct StorageInventoryPlacement {
+    was_open: bool,
+}
+
 impl FromWorld for InventoryBeltDiagnostics {
     fn from_world(_world: &mut World) -> Self {
         Self(std::env::var_os("MIR2_BELT_DIAGNOSTICS").is_some())
@@ -910,11 +915,19 @@ pub struct MailUiState {
     pub cursor: MailPageCursor,
 }
 
-#[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct StorageItemDrag {
+    source_slot: u32,
+    unique_id: u64,
+    start: Vec2,
+}
+
+#[derive(Debug, Clone, Default, Resource, PartialEq)]
 pub struct StorageUiState {
     pub cursor: StoragePageCursor,
     pub bag_selection: Option<StorageItemSelection>,
     pub storage_selection: Option<StorageItemSelection>,
+    storage_item_drag: Option<StorageItemDrag>,
 }
 
 #[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
@@ -1045,10 +1058,11 @@ impl NativePlayerUiState {
     }
 
     pub fn inventory_open(&self) -> bool {
-        // Crystal NPCDropDialog.Show also shows InventoryDialog. The shared
-        // core has one panel enum, so retain NpcShop as the modal owner while
-        // exposing its ordinary bag as a concurrent native overlay.
-        self.core.inventory_open() || (self.npc_shop_open() && !self.npc_inventory_hidden)
+        // Crystal NPCDropDialog.Show and StorageDialog.Show both show the
+        // ordinary InventoryDialog beside their own service frame.
+        self.core.inventory_open()
+            || (self.npc_shop_open() && !self.npc_inventory_hidden)
+            || self.storage_open()
     }
     pub fn equipment_open(&self) -> bool {
         self.core.equipment_open()
@@ -1219,6 +1233,14 @@ impl NativePlayerUiState {
     pub fn blocks_world_pointer_at(&self, x: f32, y: f32) -> bool {
         if !self.inventory_open() {
             return self.blocks_world_click();
+        }
+        if self.storage_open()
+            && x >= 0.0
+            && x < 388.0
+            && y >= 0.0
+            && y < 330.0
+        {
+            return true;
         }
         let bag = &self.inventory_window;
         let inside = x >= bag.left
@@ -2303,6 +2325,44 @@ impl NativePlayerUiIntentQueue {
         self.push_pending_intent(pending, intent)
     }
 
+    /// Drag-only warehouse submission: reserve source identities/cells across
+    /// Store, TakeBack, and Merge gestures before the generic V2 key enters
+    /// the queue. Legacy adapter callers retain ordinary V2 semantics.
+    pub fn push_storage_drag_pending_intent(
+        &mut self,
+        pending: &mut PendingOperations,
+        deposit: bool,
+        unique_id: u64,
+        from: i32,
+        to: i32,
+    ) -> bool {
+        let Some(request_id) = self.storage_request_ids.next_request_id() else {
+            return false;
+        };
+        let intent = if deposit {
+            NativePlayerUiIntent::StoreItem {
+                request_id,
+                unique_id,
+                from,
+                to,
+            }
+        } else {
+            NativePlayerUiIntent::TakeBackItem {
+                request_id,
+                unique_id,
+                from,
+                to,
+            }
+        };
+        let Some(key) = intent.pending_key() else {
+            return false;
+        };
+        if pending.has_storage_drag_conflict(&key) {
+            return false;
+        }
+        self.push_pending_intent(pending, intent)
+    }
+
     /// Atomically reserve and enqueue the one in-flight native GameShop
     /// purchase. No correlation state is left behind when capacity or any
     /// reservation step fails.
@@ -2788,6 +2848,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             .init_resource::<SkillBindingPersistenceRuntime>()
             .init_resource::<MailUiState>()
             .init_resource::<StorageUiState>()
+            .init_resource::<StorageInventoryPlacement>()
             .init_resource::<ShopUiState>()
             .init_resource::<MapModel>()
             .init_resource::<UiReadModel>()
@@ -2849,6 +2910,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     sync_big_map_ui,
                     sync_local_panel_models,
                     sync_npc_dialog_inventory_location,
+                    sync_storage_inventory_location,
                     sync_guild_storage_ui,
                     trade_dialog::sync,
                 )
@@ -3630,17 +3692,14 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlayStorage,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(150.0),
-                    top: Val::Px(100.0),
-                    width: Val::Px(640.0),
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(388.0),
                     height: Val::Px(344.0),
                     display: Display::None,
-                    flex_direction: FlexDirection::Column,
-                    padding: UiRect::all(Val::Px(10.0)),
-                    row_gap: Val::Px(6.0),
                     ..default()
                 },
-                BackgroundColor(PANEL_BG),
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlayOptions,
@@ -4013,10 +4072,202 @@ fn inventory_item_drag_at_cursor(
     })
 }
 
+fn storage_slot_at_cursor(
+    state: &NativePlayerUiState,
+    storage: &StorageModel,
+    storage_ui: &StorageUiState,
+    cursor: Vec2,
+) -> Option<u32> {
+    if !state.storage_open() || !storage.transfers_unlocked() {
+        return None;
+    }
+    let page = storage.page(storage_ui.cursor.page);
+    if page.locked {
+        return None;
+    }
+    page.slots.iter().enumerate().find_map(|(offset, slot)| {
+        let column = offset % 10;
+        let row = offset / 10;
+        CrystalRect::new(
+            9.0 + column as f32 * 37.0,
+            60.0 + row as f32 * 33.0,
+            36.0,
+            32.0,
+        )
+        .contains(cursor.x, cursor.y)
+        .then_some(slot)
+        .filter(|slot| !slot.locked)
+        .map(|slot| slot.slot)
+    })
+}
+
+fn storage_item_drag_at_cursor(
+    state: &NativePlayerUiState,
+    storage: &StorageModel,
+    storage_ui: &StorageUiState,
+    start: Vec2,
+) -> Option<StorageItemDrag> {
+    let source_slot = storage_slot_at_cursor(state, storage, storage_ui, start)?;
+    let item = storage.item_in_storage(source_slot)?;
+    Some(StorageItemDrag {
+        source_slot,
+        unique_id: item_unique_id(item)?,
+        start,
+    })
+}
+
+fn complete_live_storage_template_index(item: &ItemModel) -> Option<i32> {
+    let source = item.tooltip_source.as_ref()?;
+    let user_item = source.user_item.as_ref()?;
+    (item.unique_id == Some(user_item.unique_id)
+        && user_item.item_index == source.info.item_index
+        && u16::try_from(item.quantity).ok() == Some(user_item.count))
+        .then_some(source.info.item_index)
+}
+
+fn compatible_storage_stack(source: &ItemModel, target: &ItemModel) -> bool {
+    complete_live_storage_template_index(source)
+        .zip(complete_live_storage_template_index(target))
+        .is_some_and(|(from_index, to_index)| {
+            from_index == to_index
+                && target
+                    .tooltip_source
+                    .as_ref()
+                    .is_some_and(|source| {
+                        target.quantity < u32::from(source.info.stack_size)
+                    })
+        })
+}
+
+fn first_empty_bag_slot(inventory: &InventoryModel) -> Option<u32> {
+    (0..u32::from(inventory.bag_slot_capacity())).find(|slot| {
+        !inventory
+            .items_in(0)
+            .into_iter()
+            .any(|item| item.slot == *slot)
+    })
+}
+
+fn push_storage_drag_merge(
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+    grid_from: &str,
+    grid_to: &str,
+    id_from: u64,
+    id_to: u64,
+) -> bool {
+    let intent = NativePlayerUiIntent::MergeItem {
+        grid_from: grid_from.to_owned(),
+        grid_to: grid_to.to_owned(),
+        id_from,
+        id_to,
+    };
+    let Some(key) = intent.pending_key() else {
+        return false;
+    };
+    if pending.has_storage_drag_conflict(&key) {
+        return false;
+    }
+    intents.push_pending_intent(pending, intent)
+}
+
+fn enqueue_bag_to_storage_drag(
+    source: &ItemModel,
+    source_slot: u32,
+    target_slot: u32,
+    storage: &StorageModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    if !storage.transfers_unlocked() || !storage.is_valid_slot(target_slot) {
+        return false;
+    }
+    let Some(source_id) = item_unique_id(source) else {
+        return false;
+    };
+    let target = storage.item_in_storage(target_slot);
+    if let Some(target_id) = target.filter(|item| compatible_storage_stack(source, item)).and_then(item_unique_id) {
+        return push_storage_drag_merge(
+            intents,
+            pending,
+            "inventory",
+            "storage",
+            source_id,
+            target_id,
+        );
+    }
+    let destination = if target.is_none() {
+        Some(target_slot)
+    } else {
+        storage.first_empty_storage_slot()
+    };
+    let Some(destination) = destination else {
+        return false;
+    };
+    intents.push_storage_drag_pending_intent(
+        pending,
+        true,
+        source_id,
+        i32::try_from(source_slot).unwrap_or(i32::MAX),
+        i32::try_from(destination).unwrap_or(i32::MAX),
+    )
+}
+
+fn enqueue_storage_to_bag_drag(
+    source: &ItemModel,
+    source_slot: u32,
+    target_slot: u32,
+    inventory: &InventoryModel,
+    storage: &StorageModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    if !storage.transfers_unlocked()
+        || !storage.is_valid_slot(source_slot)
+        || target_slot >= u32::from(inventory.bag_slot_capacity())
+    {
+        return false;
+    }
+    let Some(source_id) = item_unique_id(source) else {
+        return false;
+    };
+    let target = inventory
+        .items_in(0)
+        .into_iter()
+        .find(|item| item.slot == target_slot);
+    if let Some(target_id) = target.filter(|item| compatible_storage_stack(source, item)).and_then(item_unique_id) {
+        return push_storage_drag_merge(
+            intents,
+            pending,
+            "storage",
+            "inventory",
+            source_id,
+            target_id,
+        );
+    }
+    let destination = if target.is_none() {
+        Some(target_slot)
+    } else {
+        first_empty_bag_slot(inventory)
+    };
+    let Some(destination) = destination else {
+        return false;
+    };
+    intents.push_storage_drag_pending_intent(
+        pending,
+        false,
+        source_id,
+        i32::try_from(source_slot).unwrap_or(i32::MAX),
+        i32::try_from(destination).unwrap_or(i32::MAX),
+    )
+}
+
 fn finish_inventory_item_drag(
     state: &mut NativePlayerUiState,
     inventory: &InventoryModel,
     mut shop: Option<&mut ShopModel>,
+    storage: Option<&mut StorageModel>,
+    storage_ui: Option<&mut StorageUiState>,
     cursor: Option<Vec2>,
     belt: super::hud::CrystalBeltPresentation,
     intents: &mut NativePlayerUiIntentQueue,
@@ -4045,6 +4296,22 @@ fn finish_inventory_item_drag(
         return;
     }
     state.inspect = None;
+    if let (Some(storage), Some(storage_ui)) = (storage, storage_ui) {
+        if let Some(target_slot) = storage_slot_at_cursor(state, storage, storage_ui, cursor) {
+            let queued = enqueue_bag_to_storage_drag(
+                source,
+                drag.source_slot,
+                target_slot,
+                storage,
+                intents,
+                pending,
+            );
+            belt_diagnostic(diagnostics, || {
+                format!("drag source={} storage_queue={queued}", drag.source_slot)
+            });
+            return;
+        }
+    }
     if shop
         .as_ref()
         .is_some_and(|shop| npc_item_service::drag_target_at_cursor(shop, state, cursor))
@@ -4115,11 +4382,53 @@ fn finish_inventory_item_drag(
     }
 }
 
+fn finish_storage_item_drag(
+    state: &mut NativePlayerUiState,
+    inventory: &InventoryModel,
+    storage: &StorageModel,
+    storage_ui: &mut StorageUiState,
+    cursor: Option<Vec2>,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) {
+    let Some(drag) = storage_ui.storage_item_drag.take() else {
+        return;
+    };
+    state.inventory_item_pointer_consumed = true;
+    let Some(source) = storage.item_in_storage(drag.source_slot).filter(|item| {
+        item_unique_id(item) == Some(drag.unique_id)
+    }) else {
+        return;
+    };
+    let Some(cursor) = cursor else {
+        return;
+    };
+    if drag.start.distance(cursor) < 4.0 {
+        state.inspect = Some(inspect_from_item(source));
+        return;
+    }
+    state.inspect = None;
+    let Some(target_slot) = inventory_bag_slot_at_cursor(state, cursor) else {
+        return;
+    };
+    let _ = enqueue_storage_to_bag_drag(
+        source,
+        drag.source_slot,
+        target_slot,
+        inventory,
+        storage,
+        intents,
+        pending,
+    );
+}
+
 /// A click inspects on release; a carry gesture moves/merges on release.
 fn process_inventory_item_drag(
     mut state: ResMut<NativePlayerUiState>,
     inventory: Res<InventoryModel>,
     mut shop: Option<ResMut<ShopModel>>,
+    mut storage: Option<ResMut<StorageModel>>,
+    mut storage_ui: Option<ResMut<StorageUiState>>,
     belt: Option<Res<super::hud::CrystalBeltPresentation>>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
@@ -4139,24 +4448,42 @@ fn process_inventory_item_drag(
     // currently represents the NPC panel as the active panel, so retain bag
     // drag input while the service frame is open.
     if !state.inventory_open()
+        // StorageDialog hides the regular bag until its password prompt has
+        // succeeded, so it cannot be used as an invisible drag source.
+        || (state.storage_open()
+            && storage
+                .as_deref()
+                .is_some_and(|storage| !storage.transfers_unlocked()))
         || state.amount_modal_open()
         || state.inventory_delete_mode
         || state.inventory_operation.is_some()
         || state.trade_dialog.open
     {
         state.inventory_item_drag = None;
+        if let Some(storage_ui) = storage_ui.as_deref_mut() {
+            storage_ui.storage_item_drag = None;
+        }
         return;
     }
     let (Some(mouse), Some(belt)) = (mouse, belt) else {
         state.inventory_item_drag = None;
+        if let Some(storage_ui) = storage_ui.as_deref_mut() {
+            storage_ui.storage_item_drag = None;
+        }
         return;
     };
     let Ok((window_entity, window)) = windows.single() else {
         state.inventory_item_drag = None;
+        if let Some(storage_ui) = storage_ui.as_deref_mut() {
+            storage_ui.storage_item_drag = None;
+        }
         return;
     };
     if !window.focused {
         state.inventory_item_drag = None;
+        if let Some(storage_ui) = storage_ui.as_deref_mut() {
+            storage_ui.storage_item_drag = None;
+        }
         return;
     }
     let cursor_path = cursor_moves
@@ -4184,6 +4511,9 @@ fn process_inventory_item_drag(
                 WindowEvent::CursorLeft(event) if event.window == window_entity => {
                     cursor = None;
                     state.inventory_item_drag = None;
+                    if let Some(storage_ui) = storage_ui.as_deref_mut() {
+                        storage_ui.storage_item_drag = None;
+                    }
                     belt_diagnostic(diagnostics.as_deref(), || "drag cursor left".to_owned());
                 }
                 WindowEvent::MouseButtonInput(event)
@@ -4194,23 +4524,52 @@ fn process_inventory_item_drag(
                             state.inventory_item_drag = cursor.and_then(|start| {
                                 inventory_item_drag_at_cursor(&state, &inventory, start)
                             });
+                            if let Some(storage_ui) = storage_ui.as_deref_mut() {
+                                storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
+                                    storage.as_deref().and_then(|storage| {
+                                        cursor.and_then(|start| {
+                                            storage_item_drag_at_cursor(&state, storage, storage_ui, start)
+                                        })
+                                    })
+                                } else {
+                                    None
+                                };
+                            }
                             belt_diagnostic(diagnostics.as_deref(), || {
                                 format!(
-                                    "drag press source={:?}",
-                                    state.inventory_item_drag.map(|drag| drag.source_slot)
+                                    "drag press bag={:?} storage={:?}",
+                                    state.inventory_item_drag.map(|drag| drag.source_slot),
+                                    storage_ui.as_deref().and_then(|ui| ui.storage_item_drag.map(|drag| drag.source_slot)),
                                 )
                             });
                         }
-                        ButtonState::Released => finish_inventory_item_drag(
-                            &mut state,
-                            &inventory,
-                            shop.as_deref_mut(),
-                            cursor,
-                            *belt,
-                            &mut intents,
-                            &mut pending,
-                            diagnostics.as_deref(),
-                        ),
+                        ButtonState::Released => {
+                            finish_inventory_item_drag(
+                                &mut state,
+                                &inventory,
+                                shop.as_deref_mut(),
+                                storage.as_deref_mut(),
+                                storage_ui.as_deref_mut(),
+                                cursor,
+                                *belt,
+                                &mut intents,
+                                &mut pending,
+                                diagnostics.as_deref(),
+                            );
+                            if let (Some(storage), Some(storage_ui)) =
+                                (storage.as_deref(), storage_ui.as_deref_mut())
+                            {
+                                finish_storage_item_drag(
+                                    &mut state,
+                                    &inventory,
+                                    storage,
+                                    storage_ui,
+                                    cursor,
+                                    &mut intents,
+                                    &mut pending,
+                                );
+                            }
+                        }
                     }
                 }
                 _ => {}
@@ -4224,6 +4583,15 @@ fn process_inventory_item_drag(
         let start = cursor_path.first().copied().or(cursor);
         state.inventory_item_drag =
             start.and_then(|start| inventory_item_drag_at_cursor(&state, &inventory, start));
+        if let Some(storage_ui) = storage_ui.as_deref_mut() {
+            storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
+                storage.as_deref().and_then(|storage| {
+                    start.and_then(|start| storage_item_drag_at_cursor(&state, storage, storage_ui, start))
+                })
+            } else {
+                None
+            };
+        }
     }
 
     if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
@@ -4231,12 +4599,25 @@ fn process_inventory_item_drag(
             &mut state,
             &inventory,
             shop.as_deref_mut(),
+            storage.as_deref_mut(),
+            storage_ui.as_deref_mut(),
             cursor,
             *belt,
             &mut intents,
             &mut pending,
             diagnostics.as_deref(),
         );
+        if let (Some(storage), Some(storage_ui)) = (storage.as_deref(), storage_ui.as_deref_mut()) {
+            finish_storage_item_drag(
+                &mut state,
+                &inventory,
+                storage,
+                storage_ui,
+                cursor,
+                &mut intents,
+                &mut pending,
+            );
+        }
     }
 }
 
@@ -4384,6 +4765,30 @@ fn process_guild_storage_pointer(
         }
     }
     *last_cursor = cursor;
+}
+
+/// StorageDialog.Show puts the ordinary bag immediately to the right of its
+/// 388px frame. This transition owns only the initial placement, so a player
+/// may still drag the visible bag afterwards like the Crystal client.
+fn sync_storage_inventory_location(
+    mut state: ResMut<NativePlayerUiState>,
+    mut placement: ResMut<StorageInventoryPlacement>,
+    mut storage_ui: ResMut<StorageUiState>,
+) {
+    let is_open = state.storage_open();
+    if is_open == placement.was_open {
+        return;
+    }
+    placement.was_open = is_open;
+    state.inventory_window.end_drag();
+    state.inventory_window.clear_cursor();
+    state.inventory_item_drag = None;
+    state.inventory_item_pointer_consumed = false;
+    storage_ui.storage_item_drag = None;
+    if is_open {
+        state.inventory_window.left = 393.0;
+        state.inventory_window.top = 0.0;
+    }
 }
 
 /// Crystal's NPCDialog.Show moves InventoryDialog beside its 440px frame and
@@ -7166,21 +7571,15 @@ fn process_overlay_buttons(
                 }) {
                     let from = selection.slot as i32;
                     let unique_id = selection.unique_id;
-                    // find first free storage slot
-                    let used: std::collections::HashSet<u32> = storage
-                        .items
-                        .iter()
-                        .filter(|i| i.container == 4)
-                        .map(|i| i.slot)
-                        .collect();
-                    let mut to = 0;
-                    for s in 0..storage.size as u32 {
-                        if !used.contains(&s) {
-                            to = s as i32;
-                            break;
-                        }
+                    if let Some(to) = storage.first_empty_storage_slot() {
+                        intents.push_storage_pending_intent(
+                            &mut pending,
+                            true,
+                            unique_id,
+                            from,
+                            i32::try_from(to).unwrap_or(i32::MAX),
+                        );
                     }
-                    intents.push_storage_pending_intent(&mut pending, true, unique_id, from, to);
                 }
             }
             OverlayButton::StorageWithdraw => {
@@ -7189,20 +7588,15 @@ fn process_overlay_buttons(
                 }) {
                     let from = selection.slot as i32;
                     let unique_id = selection.unique_id;
-                    let occupied: std::collections::HashSet<u32> = inventory
-                        .items
-                        .iter()
-                        .filter(|i| i.container == 0)
-                        .map(|i| i.slot)
-                        .collect();
-                    let mut to = 0;
-                    for s in 0..BAG_SLOTS {
-                        if !occupied.contains(&s) {
-                            to = s as i32;
-                            break;
-                        }
+                    if let Some(to) = first_empty_bag_slot(&inventory) {
+                        intents.push_storage_pending_intent(
+                            &mut pending,
+                            false,
+                            unique_id,
+                            from,
+                            i32::try_from(to).unwrap_or(i32::MAX),
+                        );
                     }
-                    intents.push_storage_pending_intent(&mut pending, false, unique_id, from, to);
                 }
             }
             OverlayButton::StorageUnlock => {
@@ -7961,10 +8355,10 @@ fn render_overlays(
             &mut all.p1(),
             state.inventory_window.left,
             state.inventory_window.top,
-            // Crystal NPCDropDialog.Show calls InventoryDialog.Show. The core
-            // has one active panel enum, so NpcShop owns that enum while this
-            // separate overlay keeps the ordinary bag source visible.
-            state.inventory_open(),
+            // StorageDialog hides InventoryDialog while its password gate is
+            // active, then restores the same positioned bag after unlock.
+            state.inventory_open()
+                && (!state.storage_open() || storage.transfers_unlocked()),
             |parent| {
                 render_inventory(
                     parent,
@@ -12449,72 +12843,17 @@ fn render_storage(
         TEXT,
     );
 
-    overlay_text_at(
-        parent,
-        "Bag items",
-        CrystalRect::new(400.0, 8.0, 200.0, 18.0),
-        11.0,
-        GOLD,
-    );
-    for (row, item) in inventory
-        .items_in(0)
-        .into_iter()
-        .filter(|item| item.unique_id.is_some())
-        .take(8)
-        .enumerate()
-    {
-        let selected = storage_ui.bag_selection
-            == item.unique_id.map(|unique_id| StorageItemSelection {
-                slot: item.slot,
-                unique_id,
-            });
-        overlay_compact_item_button(
-            parent,
-            Some(asset_server),
-            item,
-            &format!(
-                "{}{} x{}",
-                if selected { "▶" } else { "" },
-                short_name(&item.name, &item.key),
-                item.quantity
-            ),
-            OverlayButton::SelectBagForStore(item.slot),
-            true,
-            player,
-        );
-        let _ = row;
-    }
-
-    let deposit_enabled = storage_ui.bag_selection.is_some_and(|selection| {
-        storage_deposit_enabled_for_selection(storage, inventory, selection)
-    });
-    let withdraw_enabled = storage_ui.storage_selection.is_some_and(|selection| {
-        storage_withdraw_enabled_for_selection(storage, inventory, selection)
-    });
-    overlay_absolute_button(
-        parent,
-        "Deposit →",
-        CrystalRect::new(400.0, 280.0, 90.0, 24.0),
-        OverlayButton::StorageDeposit,
-        deposit_enabled,
-    );
-    overlay_absolute_button(
-        parent,
-        "← Withdraw",
-        CrystalRect::new(495.0, 280.0, 90.0, 24.0),
-        OverlayButton::StorageWithdraw,
-        withdraw_enabled,
-    );
+    // StorageDialog keeps its protection and rental affordances inside the
+    // source frame. Transfers themselves are performed by the concurrent
+    // InventoryDialog and this storage grid; there is no compact bag picker.
     overlay_absolute_button(
         parent,
         if storage.has_password && !storage.unlocked {
             "Unlock"
-        } else if storage.has_password {
-            "Remove password"
         } else {
-            "Set password"
+            "Protect"
         },
-        CrystalRect::new(400.0, 310.0, 130.0, 24.0),
+        CrystalRect::new(328.0, 33.0, 35.0, 22.0),
         if storage.has_password && !storage.unlocked {
             OverlayButton::StorageUnlock
         } else if storage.has_password {
@@ -12532,11 +12871,12 @@ fn render_storage(
     );
     overlay_absolute_button(
         parent,
-        &format!("Expand {}G", STORAGE_EXPAND_COST),
-        CrystalRect::new(535.0, 310.0, 100.0, 24.0),
+        "Rent",
+        CrystalRect::new(283.0, 33.0, 41.0, 22.0),
         OverlayButton::StorageExpand,
         storage_expand_enabled(storage, inventory.gold),
     );
+
 }
 
 fn spawn_invisible_overlay_button(
@@ -12889,6 +13229,10 @@ fn overlay_button(
         ));
     });
 }
+
+#[cfg(test)]
+#[path = "storage_drag_tests.rs"]
+mod storage_drag_tests;
 
 #[cfg(test)]
 mod tests {
@@ -13737,7 +14081,7 @@ mod tests {
     }
 
     #[test]
-    fn warehouse_bag_item_uses_the_same_rich_tooltip_document() {
+    fn warehouse_uses_the_concurrent_bag_rich_tooltip_document() {
         let mut app = overlay_render_test_app();
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
@@ -13778,10 +14122,10 @@ mod tests {
         let (hint, action) = query
             .iter(world)
             .find(|(hint, _)| hint.0.plain_text().contains("Small HP Drug (5)"))
-            .expect("warehouse bag row must remain a rich item hover target");
+            .expect("concurrent warehouse bag must remain a rich item hover target");
         assert!(hint.0.source_complete);
         assert!(hint.0.plain_text().contains("Potion"));
-        assert!(matches!(action, Some(OverlayButton::SelectBagForStore(0))));
+        assert!(matches!(action, Some(OverlayButton::InspectBag(0))));
     }
 
     fn surface_tooltip_source(

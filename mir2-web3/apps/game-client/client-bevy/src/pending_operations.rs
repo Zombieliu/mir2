@@ -552,10 +552,8 @@ impl Default for PendingOperations {
 impl PendingOperations {
     /// Register a logical operation.
     ///
-    /// Crystal's storage transfer ACKs do not contain the source item id. A
-    /// deposit/withdraw pair therefore acts as an indistinguishable protocol
-    /// slot: allowing two item ids in the same slot would make a later ACK
-    /// impossible to correlate safely. Other operation families retain their
+    /// Storage gestures reserve their live source/destination identities until
+    /// the corresponding authoritative result. Other operation families retain
     /// exact-key de-duplication semantics.
     pub fn try_begin(&mut self, key: PendingOperationKey) -> bool {
         if self.entries.contains(&key)
@@ -657,6 +655,16 @@ impl PendingOperations {
         self.quest_request_ids.clear();
     }
 
+    /// Native warehouse drag input calls this before it reserves a new
+    /// Store/TakeBack/Merge operation. Unlike the general pending registry,
+    /// this deliberately locks an item or known cell across the three storage
+    /// gesture variants until an authoritative result arrives.
+    pub fn has_storage_drag_conflict(&self, key: &PendingOperationKey) -> bool {
+        self.entries
+            .iter()
+            .any(|pending| storage_drag_conflicts(pending, key))
+    }
+
     pub fn contains(&self, key: &PendingOperationKey) -> bool {
         self.entries.contains(key)
     }
@@ -710,6 +718,10 @@ impl PendingOperations {
     }
 }
 
+/// Preserve legacy `try_begin` semantics for transport callers. Their V2
+/// request ids are exact acknowledgement identities, so multiple V2 packets
+/// sharing coordinates remain correlatable; the native drag surface applies
+/// its stronger per-item/cell lock through `has_storage_drag_conflict`.
 fn storage_transfer_slot_conflicts(
     pending: &PendingOperationKey,
     candidate: &PendingOperationKey,
@@ -741,6 +753,97 @@ fn storage_transfer_slot_conflicts(
         ) => pending_from == candidate_from && pending_to == candidate_to,
         _ => false,
     }
+}
+
+/// Storage drag operations lock only the item identities and concrete cells
+/// they touch. A Store/TakeBack request supplies both cells; a MergeItem has
+/// the two live item identities. This keeps independent warehouse gestures
+/// concurrent while preventing a second release from retargeting an item that
+/// is still awaiting an authoritative result.
+fn storage_drag_conflicts(
+    pending: &PendingOperationKey,
+    candidate: &PendingOperationKey,
+) -> bool {
+    let pending_cells = storage_drag_cells(pending);
+    let candidate_cells = storage_drag_cells(candidate);
+    let cells_conflict = pending_cells.iter().flatten().any(|(pending_grid, pending_slot)| {
+        candidate_cells
+            .iter()
+            .flatten()
+            .any(|(candidate_grid, candidate_slot)| {
+                pending_grid == candidate_grid && pending_slot == candidate_slot
+            })
+    });
+    cells_conflict || storage_drag_item_conflicts(pending, candidate)
+}
+
+fn storage_drag_cells(key: &PendingOperationKey) -> [Option<(&'static str, i32)>; 2] {
+    match key {
+        PendingOperationKey::StorageDeposit { from, to, .. }
+        | PendingOperationKey::StorageDepositV2 { from, to, .. } => {
+            [Some(("inventory", *from)), Some(("storage", *to))]
+        }
+        PendingOperationKey::StorageWithdraw { from, to, .. }
+        | PendingOperationKey::StorageWithdrawV2 { from, to, .. } => {
+            [Some(("storage", *from)), Some(("inventory", *to))]
+        }
+        _ => [None, None],
+    }
+}
+
+fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a str, u64)>; 2] {
+    match key {
+        PendingOperationKey::StorageDeposit { unique_id, .. }
+        | PendingOperationKey::StorageDepositV2 { unique_id, .. } => {
+            [Some(("inventory", *unique_id)), None]
+        }
+        PendingOperationKey::StorageWithdraw { unique_id, .. }
+        | PendingOperationKey::StorageWithdrawV2 { unique_id, .. } => {
+            [Some(("storage", *unique_id)), None]
+        }
+        PendingOperationKey::Move {
+            grid, unique_id, ..
+        } if grid == "inventory" => [Some(("inventory", *unique_id)), None],
+        PendingOperationKey::Split {
+            grid, unique_id, ..
+        } if grid == "inventory" => [Some(("inventory", *unique_id)), None],
+        PendingOperationKey::Sell { unique_id, .. }
+        | PendingOperationKey::Repair(unique_id)
+        | PendingOperationKey::SpecialRepair(unique_id)
+        | PendingOperationKey::DeleteItem { unique_id, .. }
+        | PendingOperationKey::Drop { unique_id, .. } => {
+            [Some(("inventory", *unique_id)), None]
+        }
+        PendingOperationKey::Merge {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+        } if matches!(
+            (grid_from.as_str(), grid_to.as_str()),
+            ("inventory", "storage")
+                | ("storage", "inventory")
+                | ("inventory", "inventory")
+        ) => [Some((grid_from, *id_from)), Some((grid_to, *id_to))],
+        _ => [None, None],
+    }
+}
+
+fn storage_drag_item_conflicts(
+    pending: &PendingOperationKey,
+    candidate: &PendingOperationKey,
+) -> bool {
+    storage_drag_item_endpoints(pending)
+        .iter()
+        .flatten()
+        .any(|(pending_grid, pending_id)| {
+            storage_drag_item_endpoints(candidate)
+                .iter()
+                .flatten()
+                .any(|(candidate_grid, candidate_id)| {
+                    pending_grid == candidate_grid && pending_id == candidate_id
+                })
+        })
 }
 
 /// Monotonic counters proving that a renderer-neutral authoritative model was

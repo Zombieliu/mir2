@@ -115,6 +115,17 @@ impl StorageModel {
             .saturating_sub(self.storage_occupied() as u16)
     }
 
+    /// Crystal StorageDialog permits transfers without a password and after a
+    /// successful password unlock. The `unlocked` bit alone is not a lock when
+    /// the account does not require storage protection.
+    pub fn transfers_unlocked(&self) -> bool {
+        !self.has_password || self.unlocked
+    }
+
+    pub fn first_empty_storage_slot(&self) -> Option<u32> {
+        (0..u32::from(self.effective_size())).find(|slot| self.item_in_storage(*slot).is_none())
+    }
+
     pub fn item_in_storage(&self, slot: u32) -> Option<&ItemModel> {
         self.items
             .iter()
@@ -178,7 +189,7 @@ impl StorageModel {
         StoragePage {
             page,
             page_count: self.page_count(),
-            locked: !self.unlocked || !self.is_valid_slot(start),
+            locked: !self.transfers_unlocked() || !self.is_valid_slot(start),
             expanded: self.has_expanded && self.effective_size() > STORAGE_BASE_SIZE,
             expiry: self.expiry,
             slots,
@@ -235,7 +246,7 @@ pub struct StoragePage<'a> {
 }
 
 pub fn storage_deposit_enabled(storage: &StorageModel, inventory: &InventoryModel) -> bool {
-    if storage.has_password && !storage.unlocked {
+    if !storage.transfers_unlocked() {
         return false;
     }
     let Some(slot) = storage.selected_bag_slot else {
@@ -273,7 +284,7 @@ pub fn storage_deposit_enabled_for_selection(
     inventory: &InventoryModel,
     selection: StorageItemSelection,
 ) -> bool {
-    if storage.has_password && !storage.unlocked {
+    if !storage.transfers_unlocked() {
         return false;
     }
     if inventory_selection_for_slot(inventory, selection.slot) != Some(selection) {
@@ -283,7 +294,7 @@ pub fn storage_deposit_enabled_for_selection(
 }
 
 pub fn storage_withdraw_enabled(storage: &StorageModel, inventory: &InventoryModel) -> bool {
-    if storage.has_password && !storage.unlocked {
+    if !storage.transfers_unlocked() {
         return false;
     }
     let Some(slot) = storage.selected_storage_slot else {
@@ -307,7 +318,7 @@ pub fn storage_withdraw_enabled_for_selection(
     inventory: &InventoryModel,
     selection: StorageItemSelection,
 ) -> bool {
-    if storage.has_password && !storage.unlocked {
+    if !storage.transfers_unlocked() {
         return false;
     }
     if storage.item_for_selection(selection).is_none() {
