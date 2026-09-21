@@ -254,3 +254,8 @@ after prior manual-input detection pending renewed handoff.
 Candidate adds actual bag/storage target-cell dragging and capacity80/160.
 Remaining warehouse paths and source-fidelity limitations are enumerated in
 `../whole-ui-20260921.md`; no warehouse visual pass follows from these tests.
+
+## Warehouse internal drag and password package
+
+Source 9956a5039; 936 native-ui tests and one Windows storage transformer regression passed. Windows release succeeded in 15.26s; log C:/mir2-ui-repair-20260921/storage-password-native-build.log. Staged C:/numeron-legend-of-rebirth-20260921-storage-password, client SHA256 E45598A3D33778347D3D83737DB193A73D06FCA9C51B3FF7EB84863EF7B0CADC. Matched gateway remains FED42F81FF2160C3A95583747C95EA7AC97F6AE52B06502D503D4F5E817C16FD. Same localhost19910 configuration and repository assets junction. Not launched or deployed; current session untouched. Warehouse visual acceptance remains open, along with source gaps in whole-ui-20260921.md.
+
