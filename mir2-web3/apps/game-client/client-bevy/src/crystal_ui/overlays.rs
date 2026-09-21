@@ -79,6 +79,8 @@ use crate::storage::{
 };
 
 use super::amount_input::{AmountKeyAction, CrystalAmountInput};
+#[path = "mail_reader_drag.rs"]
+mod mail_reader_drag;
 use super::assets::CrystalButtonAssetSet;
 use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
 use super::hud::{free_inventory_slots, CrystalHudAction};
@@ -854,6 +856,7 @@ pub struct NativePlayerUiState {
     /// The source reader is keyed by the authoritative MailID, rather than a
     /// list row. Refreshes therefore cannot retarget a reader action.
     pub(crate) mail_reader: Option<MailReaderUi>,
+    pub(crate) mail_reader_windows: mail_reader_drag::ReaderWindows,
     /// Close/Escape/read actions consume their input frame after dismissing a
     /// reader so covered MailDialog or world controls cannot receive it.
     pub(crate) mail_reader_input_consumed: bool,
@@ -1073,6 +1076,7 @@ impl Default for NativePlayerUiState {
             mail_delete_prompt: None,
             mail_delete_input_consumed: false,
             mail_reader: None,
+            mail_reader_windows: default(),
             mail_reader_input_consumed: false,
             inventory_window: InventoryDialogUi::default(),
             selected_group_member: None,
@@ -1461,6 +1465,7 @@ impl NativePlayerUiState {
         self.mail_delete_prompt = None;
         self.mail_delete_input_consumed = false;
         self.mail_reader = None;
+        self.mail_reader_windows = default();
         self.mail_reader_input_consumed = false;
         self.inventory_window.end_drag();
         self.inventory_window.clear_cursor();
@@ -3130,7 +3135,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     consume_mail_operation_feedback,
                     consume_hud_buttons,
-                    process_help_drag,
+                    (process_help_drag, mail_reader_drag::process).chain(),
                     keyboard_dialog::host::process,
                     (
                         equipment_creature_host::process,
@@ -4219,7 +4224,7 @@ fn process_help_drag(
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    if !state.help.open || state.amount_modal_open() {
+    if !state.help.open || state.amount_modal_open() || state.mail_reader.is_some() {
         state.help.end_drag();
         return;
     }
@@ -4259,6 +4264,7 @@ fn process_inventory_drag(
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
     if !state.inventory_open()
+        || state.mail_reader.is_some()
         || state.amount_modal_open()
         || state.storage_password_prompt.is_some()
         || state.storage_rental_confirmation.is_some()
@@ -5013,6 +5019,7 @@ fn process_inventory_item_drag(
     // currently represents the NPC panel as the active panel, so retain bag
     // drag input while the service frame is open.
     if !state.inventory_open()
+        || state.mail_reader.is_some()
         // StorageDialog hides the regular bag until its password prompt has
         // succeeded, so it cannot be used as an invisible drag source.
         || (state.storage_open()
@@ -9863,8 +9870,8 @@ fn render_overlays(
         fill_positioned_panel(
             &mut commands,
             &mut readers.p0(),
-            100.0,
-            100.0,
+            state.mail_reader_windows.position(MailReaderKind::Letter).x,
+            state.mail_reader_windows.position(MailReaderKind::Letter).y,
             OVERLAY_NPC_DIALOG_Z,
             reader.is_some_and(|(reader, _)| reader.kind == MailReaderKind::Letter),
             |parent| {
@@ -9876,8 +9883,8 @@ fn render_overlays(
         fill_positioned_panel(
             &mut commands,
             &mut readers.p1(),
-            100.0,
-            100.0,
+            state.mail_reader_windows.position(MailReaderKind::Parcel).x,
+            state.mail_reader_windows.position(MailReaderKind::Parcel).y,
             OVERLAY_NPC_DIALOG_Z,
             reader.is_some_and(|(reader, _)| reader.kind == MailReaderKind::Parcel),
             |parent| {
@@ -13269,6 +13276,7 @@ fn open_mail_reader(
         // source reader never depends on a later snapshot acknowledgement.
         let _ = intents.push_pending_intent(pending, NativePlayerUiIntent::ReadMail { mail_id });
     }
+    state.mail_reader_windows.cancel();
     state.mail_reader = Some(MailReaderUi {
         mail_id,
         kind: mail_reader_kind(message),
@@ -13518,7 +13526,7 @@ fn render_mail_reader_parcel(
         681,
         682,
         683,
-        CrystalRect::new(30.0, 350.0, 100.0, 25.0),
+        CrystalRect::new(30.0, 350.0, 72.0, 25.0),
         OverlayButton::MailReaderClaim,
         collect_enabled,
     );
