@@ -356,3 +356,9 @@ The headless probe now exercises regular and bold Arial: continuous recreation u
 This closes the reproduced font-source identity mechanism for the explicitly pinned faces. It does not attribute all old-client29GB growth, cover arbitrary fallback fonts or sizes, or prove whole-UI typography and live soak acceptance. The old client is not replaced or killed; same-build native screenshots, font telemetry and long-run memory checks remain open.
 
 Matched font-lifetime package: C:/numeron-legend-of-rebirth-20260921-font-lifetime. Native release build15.21s; client SHA256 B231F6C325005D49382BCD29179F50F54AC8180C5B4DA1C82C3A9F80E7F9FF2D; Gateway SHA256 9CB0C8491BB1D41A4885E28CDE314DA9A2BE1FF57463509D1213B46F802C2F55. Config and source-assets junction retained. Neither launched/deployed; native-fonts-build.log records the build.
+
+## Chinese glyph comparison
+
+The headless probe now additionally shapes a real Chinese quest-guidance sample with installed Microsoft YaHei regular and bold, compares both raster atlases byte-for-byte against the system-font path, and repeats100 three-prune/recreate cycles. Both faces remain at2 pages/2MiB and glyph counts/pixels match. Receipt: C:/mir2-ui-repair-20260921/font-atlas-cjk-probe.log. The run also emits ICU4X missing Japanese segmentation-model warnings; identical raster pixels do not establish correct wrapping. That dependency/fallback behavior needs separate investigation. This example change does not alter the staged production executable or establish live UI acceptance.
+
+Read-only desktop check still found the old ui-auth-lifetime executable, with a1 in game. No mouse/key input or deployment occurred; a fresh explicit handoff question is pending after earlier user interference.

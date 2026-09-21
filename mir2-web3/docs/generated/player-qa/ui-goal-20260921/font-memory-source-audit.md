@@ -20,3 +20,9 @@ Windows now retains strong Bevy Font assets for installed Arial regular/bold/ita
 The headless probe now exercises regular and bold Arial: continuous recreation uses2 atlas pages/2MiB; system-source expiry and recreation adds a third page. With installed memory-backed faces,100 expiry/recreate cycles keep2 pages/2MiB, with exact sample raster pixels and glyph count matching the original path. Native integration2/2 passes using the actual Bevy font-asset registration system: installed TTF/TTC faces resolve by the original family names to retained blob IDs and survive source pruning. Logs: C:/mir2-ui-repair-20260921/font-atlas-pinned-probe.log and native-fonts-tests.log.
 
 This closes the reproduced font-source identity mechanism for the explicitly pinned faces. It does not attribute all old-client29GB growth, cover arbitrary fallback fonts or sizes, or prove whole-UI typography and live soak acceptance. The old client is not replaced or killed; same-build native screenshots, font telemetry and long-run memory checks remain open.
+
+## Chinese glyph comparison
+
+The headless probe now additionally shapes a real Chinese quest-guidance sample with installed Microsoft YaHei regular and bold, compares both raster atlases byte-for-byte against the system-font path, and repeats100 three-prune/recreate cycles. Both faces remain at2 pages/2MiB and glyph counts/pixels match. Receipt: C:/mir2-ui-repair-20260921/font-atlas-cjk-probe.log. The run also emits ICU4X missing Japanese segmentation-model warnings; identical raster pixels do not establish correct wrapping. That dependency/fallback behavior needs separate investigation. This example change does not alter the staged production executable or establish live UI acceptance.
+
+Read-only desktop check still found the old ui-auth-lifetime executable, with a1 in game. No mouse/key input or deployment occurred; a fresh explicit handoff question is pending after earlier user interference.
