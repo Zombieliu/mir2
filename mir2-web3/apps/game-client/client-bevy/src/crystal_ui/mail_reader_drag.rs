@@ -79,6 +79,7 @@ pub(super) fn process(
         .map(|event| cursor_logical(window, event.position)).collect();
     let ready = window.focused && !state.amount_modal_open()
         && state.mail_feedback_prompt.is_none() && !state.mail_feedback_input_consumed
+        && !state.mail_recipient_prompt_active && !state.mail_recipient_input_consumed
         && state.mail_delete_prompt.is_none() && state.storage_password_prompt.is_none()
         && state.storage_rental_confirmation.is_none();
     let (Some(reader), Some(mouse), true) = (state.mail_reader, mouse, ready) else {
@@ -168,6 +169,26 @@ mod tests {
         app.update();
         assert!(app.world().resource::<NativePlayerUiState>().mail_reader_windows.dragging.is_none());
         app.world_mut().resource_mut::<NativePlayerUiState>().mail_feedback_prompt = None;
+        // Keep the mouse held so only modal input ownership can cancel the
+        // drag, rather than accidentally passing because the button released.
+        for closing_frame in [false, true] {
+            {
+                let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+                mouse.press(MouseButton::Left);
+                mouse.clear();
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.mail_recipient_prompt_active = !closing_frame;
+                state.mail_recipient_input_consumed = closing_frame;
+                state.mail_reader_windows.begin(reader, Vec2::new(320.0, 210.0));
+            }
+            app.update();
+            assert!(app.world().resource::<NativePlayerUiState>().mail_reader_windows.dragging.is_none());
+        }
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.mail_recipient_prompt_active = false;
+            state.mail_recipient_input_consumed = false;
+        }
         app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader_windows
             .begin(reader, Vec2::new(320.0, 210.0));
         app.world_mut().entity_mut(entity).get_mut::<Window>().unwrap().focused = false;

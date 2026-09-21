@@ -17,6 +17,8 @@ fn app() -> App {
     let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
     state.core.panel = mir2_ui_core::state::UiPanel::Mail;
     state.core.mail_compose = Some(default());
+    drop(state);
+    app.world_mut().resource_mut::<MailComposeUi>().kind = MailComposeKind::Parcel;
     app
 }
 

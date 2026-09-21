@@ -43,8 +43,7 @@ pub fn dispatch(
             intents.push_intent(intent)
         }
         FriendEffect::ComposeMail(recipient) => {
-            state.apply(mir2_ui_core::action::UiAction::OpenMailCompose);
-            state.apply(mir2_ui_core::action::UiAction::SetMailRecipient { recipient });
+            state.request_mail_letter(recipient);
             true
         }
         FriendEffect::Whisper(text) => {

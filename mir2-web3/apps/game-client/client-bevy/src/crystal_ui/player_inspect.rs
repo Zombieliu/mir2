@@ -141,10 +141,7 @@ pub(super) fn process(
                     }
                 }
                 InspectAction::Mail => {
-                    state.apply(mir2_ui_core::action::UiAction::OpenMailCompose);
-                    state.apply(mir2_ui_core::action::UiAction::SetMailRecipient {
-                        recipient: info.name,
-                    });
+                    state.request_mail_letter(info.name);
                     state.ranking.player_inspect.close();
                 }
                 InspectAction::Whisper => {

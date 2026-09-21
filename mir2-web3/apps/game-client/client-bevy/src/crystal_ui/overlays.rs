@@ -860,6 +860,14 @@ pub struct NativePlayerUiState {
     /// movement and covered controls while it is visible.
     pub(crate) mail_feedback_prompt: Option<String>,
     pub(crate) mail_feedback_input_consumed: bool,
+    /// The source MailDialog Write route asks for a recipient before opening
+    /// MailComposeLetterDialog. These flags protect raw drag systems through
+    /// the same close frame as the visible MirInputBox.
+    pub(crate) mail_recipient_prompt_active: bool,
+    pub(crate) mail_recipient_input_consumed: bool,
+    /// External source controls (friend, inspect, and bond windows) queue a
+    /// recipient here; the overlay owns the safe Letter/Parcel transition.
+    pub(crate) queued_mail_letter_recipient: Option<String>,
     /// The source reader is keyed by the authoritative MailID, rather than a
     /// list row. Refreshes therefore cannot retarget a reader action.
     pub(crate) mail_reader: Option<MailReaderUi>,
@@ -936,9 +944,29 @@ pub enum MailComposeFocus {
     Gold,
 }
 
+/// Crystal has independent letter and parcel compose dialogs. Parcel remains
+/// an explicit adapter until its authoritative postage/lock transport exists.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum MailComposeKind {
+    #[default]
+    Letter,
+    Parcel,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub(crate) struct MailRecipientPrompt {
+    recipient: String,
+    suspended_kind: MailComposeKind,
+    suspended_draft: Option<mir2_ui_core::state::MailComposeDraft>,
+}
+
 #[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
 pub struct MailComposeUi {
     pub focus: MailComposeFocus,
+    pub kind: MailComposeKind,
+    pub(crate) recipient_prompt: Option<MailRecipientPrompt>,
+    letter_draft: Option<mir2_ui_core::state::MailComposeDraft>,
+    parcel_draft: Option<mir2_ui_core::state::MailComposeDraft>,
     pub last_notice: Option<String>,
 }
 
@@ -956,6 +984,128 @@ fn clear_mail_feedback(state: &mut NativePlayerUiState, compose: &mut MailCompos
     state.mail_feedback_prompt = None;
     state.mail_feedback_input_consumed = false;
     compose.last_notice = None;
+}
+
+fn clear_mail_recipient_prompt(state: &mut NativePlayerUiState, compose: &mut MailComposeUi) {
+    compose.recipient_prompt = None;
+    state.mail_recipient_prompt_active = false;
+}
+
+fn letter_draft(mut draft: mir2_ui_core::state::MailComposeDraft) -> mir2_ui_core::state::MailComposeDraft {
+    // LetterDialog has no gold or item controls. Never retain an adapter-only
+    // parcel payload where the Letter surface cannot show it.
+    draft.gold = 0;
+    draft.attachment_unique_ids.clear();
+    draft
+}
+
+fn store_active_mail_draft(state: &mut NativePlayerUiState, compose: &mut MailComposeUi) {
+    let Some(draft) = state.core.mail_compose.take() else {
+        return;
+    };
+    match compose.kind {
+        MailComposeKind::Letter => compose.letter_draft = Some(letter_draft(draft)),
+        MailComposeKind::Parcel => compose.parcel_draft = Some(draft),
+    }
+}
+
+fn activate_mail_compose(
+    state: &mut NativePlayerUiState,
+    compose: &mut MailComposeUi,
+    effects: &mut UiEffectQueue,
+    kind: MailComposeKind,
+) {
+    store_active_mail_draft(state, compose);
+    compose.kind = kind;
+    state.core.mail_compose = match kind {
+        MailComposeKind::Letter => compose.letter_draft.take().map(letter_draft),
+        MailComposeKind::Parcel => compose.parcel_draft.take(),
+    };
+    dispatch_ui_action(
+        &mut state.core,
+        effects,
+        mir2_ui_core::action::UiAction::OpenMailCompose,
+    );
+}
+
+fn begin_mail_recipient_prompt(state: &mut NativePlayerUiState, compose: &mut MailComposeUi) {
+    let suspended_kind = compose.kind;
+    let suspended_draft = state.core.mail_compose.take();
+    compose.recipient_prompt = Some(MailRecipientPrompt {
+        recipient: String::new(),
+        suspended_kind,
+        suspended_draft,
+    });
+    compose.last_notice = None;
+    state.mail_recipient_prompt_active = true;
+}
+
+fn cancel_mail_recipient_prompt(state: &mut NativePlayerUiState, compose: &mut MailComposeUi) {
+    if let Some(prompt) = compose.recipient_prompt.take() {
+        compose.kind = prompt.suspended_kind;
+        state.core.mail_compose = prompt.suspended_draft;
+    }
+    state.mail_recipient_prompt_active = false;
+    state.mail_recipient_input_consumed = true;
+}
+
+fn confirm_mail_recipient_prompt(
+    state: &mut NativePlayerUiState,
+    compose: &mut MailComposeUi,
+    effects: &mut UiEffectQueue,
+) -> bool {
+    let Some(prompt) = compose.recipient_prompt.as_ref().cloned() else {
+        return false;
+    };
+    let recipient = prompt.recipient.trim().to_owned();
+    if recipient.is_empty() {
+        compose.last_notice = Some("Recipient is required".to_owned());
+        return false;
+    }
+    compose.recipient_prompt = None;
+    state.mail_recipient_prompt_active = false;
+    if let Some(draft) = prompt.suspended_draft {
+        match prompt.suspended_kind {
+            MailComposeKind::Letter => compose.letter_draft = Some(letter_draft(draft)),
+            MailComposeKind::Parcel => compose.parcel_draft = Some(draft),
+        }
+    }
+    activate_mail_compose(state, compose, effects, MailComposeKind::Letter);
+    dispatch_ui_action(
+        &mut state.core,
+        effects,
+        mir2_ui_core::action::UiAction::SetMailRecipient { recipient },
+    );
+    compose.focus = MailComposeFocus::Message;
+    compose.last_notice = None;
+    state.mail_recipient_input_consumed = true;
+    true
+}
+
+fn process_queued_mail_letter_request(
+    mut state: ResMut<NativePlayerUiState>,
+    mut compose: ResMut<MailComposeUi>,
+    mut pending: ResMut<PendingOperations>,
+    mut effects: Option<ResMut<UiEffectQueue>>,
+) {
+    let Some(recipient) = state.queued_mail_letter_recipient.take() else {
+        return;
+    };
+    if pending.has_pending_mail_operation() {
+        compose.last_notice = Some("Sending mail…".to_owned());
+        return;
+    }
+    let mut fallback = UiEffectQueue::default();
+    let effects = effects.as_deref_mut().unwrap_or(&mut fallback);
+    activate_mail_compose(&mut state, &mut compose, effects, MailComposeKind::Letter);
+    dispatch_ui_action(
+        &mut state.core,
+        effects,
+        mir2_ui_core::action::UiAction::SetMailRecipient { recipient },
+    );
+    compose.focus = MailComposeFocus::Message;
+    clear_mail_recipient_prompt(&mut state, &mut compose);
+    clear_mail_feedback(&mut state, &mut compose);
 }
 
 /// Renderer-only state for the Crystal BigMap search field. Authoritative map,
@@ -1100,6 +1250,9 @@ impl Default for NativePlayerUiState {
             mail_delete_input_consumed: false,
             mail_feedback_prompt: None,
             mail_feedback_input_consumed: false,
+            mail_recipient_prompt_active: false,
+            mail_recipient_input_consumed: false,
+            queued_mail_letter_recipient: None,
             mail_reader: None,
             mail_reader_windows: default(),
             mail_reader_input_consumed: false,
@@ -1362,6 +1515,8 @@ impl NativePlayerUiState {
             || self.mail_delete_input_consumed
             || self.mail_feedback_prompt.is_some()
             || self.mail_feedback_input_consumed
+            || self.mail_recipient_prompt_active
+            || self.mail_recipient_input_consumed
             || self.mail_reader.is_some()
             || self.mail_reader_input_consumed
             || self.storage_password_prompt.is_some()
@@ -1441,6 +1596,8 @@ impl NativePlayerUiState {
             || self.mail_delete_input_consumed
             || self.mail_feedback_prompt.is_some()
             || self.mail_feedback_input_consumed
+            || self.mail_recipient_prompt_active
+            || self.mail_recipient_input_consumed
             || self.mail_reader.is_some()
             || self.mail_reader_input_consumed
             || self.guild_gold_prompt.is_some()
@@ -1495,6 +1652,9 @@ impl NativePlayerUiState {
         self.mail_delete_input_consumed = false;
         self.mail_feedback_prompt = None;
         self.mail_feedback_input_consumed = false;
+        self.mail_recipient_prompt_active = false;
+        self.mail_recipient_input_consumed = false;
+        self.queued_mail_letter_recipient = None;
         self.mail_reader = None;
         self.mail_reader_windows = default();
         self.mail_reader_input_consumed = false;
@@ -1594,6 +1754,10 @@ impl NativePlayerUiState {
         self.close_windows();
         self.help.hide();
     }
+    pub(crate) fn request_mail_letter(&mut self, recipient: String) {
+        self.queued_mail_letter_recipient = Some(recipient);
+    }
+
     pub fn reset_session(&mut self) {
         let options = self.core.options.clone();
         let chat_settings = self.core.chat_settings;
@@ -1815,6 +1979,7 @@ const CRYSTAL_DELETE_CURSOR_SIZE: (f32, f32) = (16.0, 15.0);
 /// `StorageDialog` uses `Prguse[660]`, a 288x156 MirInputBox frame centered
 /// on Crystal's fixed 1024x768 stage.
 const CRYSTAL_STORAGE_PASSWORD_RECT: CrystalRect = CrystalRect::new(368.0, 306.0, 288.0, 156.0);
+const CRYSTAL_MAIL_LETTER_RECT: CrystalRect = CrystalRect::new(100.0, 100.0, 236.0, 300.0);
 
 /// Verify HUD < Chat < NPC < Death < Menu < Shell ordering.
 pub fn is_overlay_z_order_correct() -> bool {
@@ -2689,6 +2854,9 @@ struct OverlayMailReadLetter;
 struct OverlayMailReadParcel;
 
 #[derive(Component)]
+struct OverlayMailComposeLetter;
+
+#[derive(Component)]
 struct OverlayInventoryDeleteAmountInput;
 
 #[derive(Component)]
@@ -2945,6 +3113,9 @@ enum OverlayButton {
     MailReaderLock,
     MailReaderClaim,
     OpenMailCompose,
+    OpenMailParcelCompose,
+    MailRecipientSubmit,
+    MailRecipientCancel,
     MailRecipientFocus,
     MailMessageFocus,
     MailGoldInc,
@@ -3036,6 +3207,7 @@ struct OverlayRenderModels<'w> {
     inventory_feedback: Res<'w, InventoryOperationFeedback>,
     mail: Res<'w, MailModel>,
     mail_ui: Res<'w, MailUiState>,
+    compose_ui: Res<'w, MailComposeUi>,
     big_map: Res<'w, BigMapModel>,
     big_map_ui: Res<'w, BigMapUiState>,
     ui: Res<'w, UiReadModel>,
@@ -3194,7 +3366,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     )
                         .chain(),
                     friend_dialog::host::process,
-                    ranking_dialog::process,
+                    (ranking_dialog::process, process_queued_mail_letter_request).chain(),
                     trade_dialog::process_items,
                     trade_dialog::process_drag,
                     (
@@ -3343,9 +3515,14 @@ fn sync_local_panel_models(
 ) {
     state.mail_delete_input_consumed = false;
     state.mail_feedback_input_consumed = false;
+    state.mail_recipient_input_consumed = false;
     state.mail_reader_input_consumed = false;
     if shell.screen != NativeShellScreen::InGame {
         clear_mail_feedback(&mut state, &mut compose_ui);
+        clear_mail_recipient_prompt(&mut state, &mut compose_ui);
+        compose_ui.kind = MailComposeKind::Letter;
+        compose_ui.letter_draft = None;
+        compose_ui.parcel_draft = None;
     }
     reconcile_inventory_capacity(&mut state, &inventory);
     if !state.inventory_open() {
@@ -3361,6 +3538,14 @@ fn sync_local_panel_models(
         state.cancel_inventory_delete();
     }
     mail.clamp_after_refresh(&mut mail_ui.cursor);
+    if !state.mail_open() && compose_ui.recipient_prompt.is_some() {
+        // This is a parent-panel/session close, not the visible prompt's
+        // Cancel control. Discard the suspended payload so a hidden compose
+        // cannot reappear after the Mail panel has been closed.
+        clear_mail_recipient_prompt(&mut state, &mut compose_ui);
+        state.mail_recipient_input_consumed = true;
+        state.core.mail_compose = None;
+    }
     if !state.mail_open()
         || state
             .mail_delete_prompt
@@ -3996,6 +4181,22 @@ fn spawn_overlay_root(mut commands: Commands) {
                 },
                 BackgroundColor(Color::NONE),
             ));
+            root.spawn((
+                OverlayMailComposeLetter,
+                FocusPolicy::Block,
+                GlobalZIndex(OVERLAY_NPC_DIALOG_Z),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(CRYSTAL_MAIL_LETTER_RECT.left),
+                    top: Val::Px(CRYSTAL_MAIL_LETTER_RECT.top),
+                    width: Val::Px(CRYSTAL_MAIL_LETTER_RECT.width),
+                    height: Val::Px(CRYSTAL_MAIL_LETTER_RECT.height),
+                    display: Display::None,
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                BackgroundColor(Color::NONE),
+            ));
             // Source Title675's exported frame is 236x384 even though the
             // dialog constructor declared 236x300. Its controls reach y=375.
             root.spawn((
@@ -4253,6 +4454,8 @@ fn consume_mail_operation_feedback(
         // retryable because its receipt carries no more specific reason.
         (MailOperationKind::Send, true) => {
             state.core.mail_compose = None;
+            compose.kind = MailComposeKind::Letter;
+            clear_mail_recipient_prompt(&mut state, &mut compose);
             clear_mail_feedback(&mut state, &mut compose);
         }
         (MailOperationKind::Send, false) => {
@@ -4297,6 +4500,8 @@ fn process_help_drag(
         || state.amount_modal_open()
         || state.mail_feedback_prompt.is_some()
         || state.mail_feedback_input_consumed
+        || state.mail_recipient_prompt_active
+        || state.mail_recipient_input_consumed
         || state.mail_reader.is_some()
     {
         state.help.end_drag();
@@ -4340,6 +4545,8 @@ fn process_inventory_drag(
     if !state.inventory_open()
         || state.mail_feedback_prompt.is_some()
         || state.mail_feedback_input_consumed
+        || state.mail_recipient_prompt_active
+        || state.mail_recipient_input_consumed
         || state.mail_reader.is_some()
         || state.amount_modal_open()
         || state.storage_password_prompt.is_some()
@@ -5097,6 +5304,8 @@ fn process_inventory_item_drag(
     if !state.inventory_open()
         || state.mail_feedback_prompt.is_some()
         || state.mail_feedback_input_consumed
+        || state.mail_recipient_prompt_active
+        || state.mail_recipient_input_consumed
         || state.mail_reader.is_some()
         // StorageDialog hides the regular bag until its password prompt has
         // succeeded, so it cannot be used as an invisible drag source.
@@ -6020,6 +6229,44 @@ pub(crate) fn process_overlay_keyboard(
         return;
     }
 
+    // MailDialog's Write action opens a MirInputBox before the Letter dialog.
+    // It owns this frame, including the close frame, so recipient input cannot
+    // reach the covered list, chat, or world controls.
+    if compose_ui.recipient_prompt.is_some() {
+        if keys.just_pressed(KeyCode::Escape) {
+            cancel_mail_recipient_prompt(&mut state, &mut compose_ui);
+            ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+        } else {
+            if keys.just_pressed(KeyCode::Backspace) {
+                if let Some(prompt) = compose_ui.recipient_prompt.as_mut() {
+                    prompt.recipient.pop();
+                }
+            }
+            for event in typed.read() {
+                if event.state == ButtonState::Pressed {
+                    if let Some(text) = event.text.as_deref() {
+                        if let Some(prompt) = compose_ui.recipient_prompt.as_mut() {
+                            for ch in text.chars().filter(|ch| !ch.is_control()) {
+                                if prompt.recipient.chars().count() < 20 {
+                                    prompt.recipient.push(ch);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::NumpadEnter) {
+                let mut fallback = UiEffectQueue::default();
+                let effects = effects.as_deref_mut().unwrap_or(&mut fallback);
+                if confirm_mail_recipient_prompt(&mut state, &mut compose_ui, effects) {
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                }
+            }
+        }
+        typed.clear();
+        return;
+    }
+
     // Mail result/error feedback owns this input frame even after its OK
     // button, Enter, or Escape closes it. This is intentionally above the
     // reader and parcel-delete warning in both render and input order.
@@ -6233,7 +6480,38 @@ pub(crate) fn process_overlay_keyboard(
                 &mut UiEffectQueue::default(),
                 mir2_ui_core::action::UiAction::CancelMailCompose,
             );
+            compose_ui.kind = MailComposeKind::Letter;
             clear_mail_feedback(&mut state, &mut compose_ui);
+            return;
+        }
+        if compose_ui.kind == MailComposeKind::Letter {
+            compose_ui.focus = MailComposeFocus::Message;
+            if keys.just_pressed(KeyCode::Backspace) {
+                if let Some(draft) = state.core.mail_compose.as_mut() {
+                    draft.message.pop();
+                }
+            }
+            for event in typed.read() {
+                if event.state != ButtonState::Pressed {
+                    continue;
+                }
+                let mut value = state
+                    .core
+                    .mail_compose
+                    .as_ref()
+                    .map(|draft| draft.message.clone())
+                    .unwrap_or_default();
+                if matches!(event.key_code, KeyCode::Enter | KeyCode::NumpadEnter) {
+                    value.push('\n');
+                } else if let Some(text) = event.text.as_deref() {
+                    value.extend(text.chars().filter(|ch| !ch.is_control()));
+                }
+                dispatch_ui_action(
+                    &mut state.core,
+                    &mut UiEffectQueue::default(),
+                    mir2_ui_core::action::UiAction::SetMailMessage { message: value },
+                );
+            }
             return;
         }
         if keys.just_pressed(KeyCode::Tab) {
@@ -6821,6 +7099,7 @@ fn process_overlay_buttons(
     let trade_modal_was_open = state.trade_dialog.gold_prompt.is_some();
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
     let mail_delete_modal_was_open = state.mail_delete_prompt.is_some();
+    let mail_recipient_modal_was_open = compose_ui.recipient_prompt.is_some();
     let mail_feedback_modal_was_open = state.mail_feedback_prompt.is_some();
     let mail_reader_was_open = state.mail_reader.is_some();
     let message_was_open = state.trade_dialog.message.is_some();
@@ -6847,11 +7126,16 @@ fn process_overlay_buttons(
             || state.storage_rental_input_consumed
             || state.mail_delete_input_consumed
             || state.mail_feedback_input_consumed
+            || state.mail_recipient_input_consumed
             || state.mail_reader_input_consumed
         {
             continue;
         }
-        if mail_feedback_modal_was_open || state.mail_feedback_prompt.is_some() {
+        if mail_recipient_modal_was_open || compose_ui.recipient_prompt.is_some() {
+            if !matches!(button, OverlayButton::MailRecipientSubmit | OverlayButton::MailRecipientCancel) {
+                continue;
+            }
+        } else if mail_feedback_modal_was_open || state.mail_feedback_prompt.is_some() {
             if !matches!(button, OverlayButton::MailFeedbackAcknowledge) {
                 continue;
             }
@@ -8156,6 +8440,10 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::MailReply(id) => {
+                if pending.has_pending_mail_operation() {
+                    compose_ui.last_notice = Some("Sending mail…".to_owned());
+                    continue;
+                }
                 let recipient = mail
                     .mails
                     .iter()
@@ -8164,17 +8452,20 @@ fn process_overlay_buttons(
                     })
                     .map(|message| message.sender.clone());
                 if let Some(recipient) = recipient {
-                    dispatch_ui_action(
-                        &mut state.core,
+                    activate_mail_compose(
+                        &mut state,
+                        &mut compose_ui,
                         &mut effects,
-                        mir2_ui_core::action::UiAction::OpenMailCompose,
+                        MailComposeKind::Letter,
                     );
                     dispatch_ui_action(
                         &mut state.core,
                         &mut effects,
                         mir2_ui_core::action::UiAction::SetMailRecipient { recipient },
                     );
+                    compose_ui.kind = MailComposeKind::Letter;
                     compose_ui.focus = MailComposeFocus::Message;
+                    clear_mail_recipient_prompt(&mut state, &mut compose_ui);
                     clear_mail_feedback(&mut state, &mut compose_ui);
                 }
             }
@@ -8241,13 +8532,36 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::OpenMailCompose => {
-                dispatch_ui_action(
-                    &mut state.core,
+                if pending.has_pending_mail_operation() {
+                    compose_ui.last_notice = Some("Sending mail…".to_owned());
+                    continue;
+                }
+                begin_mail_recipient_prompt(&mut state, &mut compose_ui);
+                clear_mail_feedback(&mut state, &mut compose_ui);
+            }
+            OverlayButton::OpenMailParcelCompose => {
+                if pending.has_pending_mail_operation() {
+                    compose_ui.last_notice = Some("Sending mail…".to_owned());
+                    continue;
+                }
+                activate_mail_compose(
+                    &mut state,
+                    &mut compose_ui,
                     &mut effects,
-                    mir2_ui_core::action::UiAction::OpenMailCompose,
+                    MailComposeKind::Parcel,
                 );
                 compose_ui.focus = MailComposeFocus::Recipient;
+                clear_mail_recipient_prompt(&mut state, &mut compose_ui);
                 clear_mail_feedback(&mut state, &mut compose_ui);
+            }
+            OverlayButton::MailRecipientSubmit => {
+                if confirm_mail_recipient_prompt(&mut state, &mut compose_ui, &mut effects) {
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                }
+            }
+            OverlayButton::MailRecipientCancel => {
+                cancel_mail_recipient_prompt(&mut state, &mut compose_ui);
+                ui_audio.push(crate::audio::NativeUiSound::ButtonB);
             }
             OverlayButton::MailRecipientFocus => {
                 compose_ui.focus = MailComposeFocus::Recipient;
@@ -8289,6 +8603,12 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::SubmitMail => {
+                if compose_ui.kind == MailComposeKind::Letter {
+                    if let Some(draft) = state.core.mail_compose.as_mut() {
+                        let clean = letter_draft(std::mem::take(draft));
+                        *draft = clean;
+                    }
+                }
                 let Some(draft) = state.core.mail_compose.clone() else {
                     continue;
                 };
@@ -8342,6 +8662,8 @@ fn process_overlay_buttons(
                     &mut effects,
                     mir2_ui_core::action::UiAction::CancelMailCompose,
                 );
+                compose_ui.kind = MailComposeKind::Letter;
+                clear_mail_recipient_prompt(&mut state, &mut compose_ui);
                 clear_mail_feedback(&mut state, &mut compose_ui);
             }
             OverlayButton::BigMapScrollUp => {
@@ -9800,6 +10122,7 @@ fn render_overlays(
         ParamSet<(
             Query<(Entity, &mut Node, &mut GlobalZIndex), With<OverlayMailReadLetter>>,
             Query<(Entity, &mut Node, &mut GlobalZIndex), With<OverlayMailReadParcel>>,
+            Query<(Entity, &mut Node, &mut GlobalZIndex), With<OverlayMailComposeLetter>>,
         )>,
     )>,
     mut commands: Commands,
@@ -9816,6 +10139,7 @@ fn render_overlays(
         inventory_feedback,
         mail,
         mail_ui,
+        compose_ui,
         big_map,
         big_map_ui,
         ui,
@@ -9920,6 +10244,7 @@ fn render_overlays(
             state.mail_open(),
             &mail,
             &mail_ui,
+            &compose_ui,
             state.core.mail_compose.as_ref(),
             &inventory,
             &mut mail_cache,
@@ -9931,6 +10256,7 @@ fn render_overlays(
                     &mail_ui,
                     &inventory,
                     &state,
+                    &compose_ui,
                 )
             },
         );
@@ -10080,6 +10406,26 @@ fn render_overlays(
                 }
             },
         );
+        fill_positioned_panel(
+            &mut commands,
+            &mut readers.p2(),
+            CRYSTAL_MAIL_LETTER_RECT.left,
+            CRYSTAL_MAIL_LETTER_RECT.top,
+            OVERLAY_NPC_DIALOG_Z,
+            state.mail_open()
+                && state.core.mail_compose.is_some()
+                && compose_ui.kind == MailComposeKind::Letter,
+            |parent| {
+                if let Some(draft) = state.core.mail_compose.as_ref() {
+                    render_mail_compose_letter(
+                        parent,
+                        asset_server.as_deref(),
+                        draft,
+                        &compose_ui,
+                    );
+                }
+            },
+        );
     }
     {
         let mut delete_layers = panels.p2();
@@ -10160,9 +10506,13 @@ fn render_overlays(
         fill_panel(
             &mut commands,
             &mut delete_layers.p7(),
-            state.mail_delete_prompt.is_some() || state.mail_feedback_prompt.is_some(),
+            compose_ui.recipient_prompt.is_some()
+                || state.mail_delete_prompt.is_some()
+                || state.mail_feedback_prompt.is_some(),
             |parent| {
-                if let Some(message) = state.mail_feedback_prompt.as_deref() {
+                if let Some(prompt) = compose_ui.recipient_prompt.as_ref() {
+                    render_mail_recipient_prompt(parent, asset_server.as_deref(), prompt);
+                } else if let Some(message) = state.mail_feedback_prompt.as_deref() {
                     render_mail_feedback_modal(parent, asset_server.as_deref(), message);
                 } else {
                     render_mail_delete_modal(parent, asset_server.as_deref());
@@ -10232,6 +10582,7 @@ struct MailRenderKey {
     root: Entity,
     model: MailModel,
     ui: MailUiState,
+    compose_ui: MailComposeUi,
     compose: Option<mir2_ui_core::state::MailComposeDraft>,
     compose_inventory: Option<String>,
 }
@@ -10247,6 +10598,7 @@ fn fill_mail_panel(
     visible: bool,
     mail: &MailModel,
     mail_ui: &MailUiState,
+    compose_ui: &MailComposeUi,
     compose: Option<&mir2_ui_core::state::MailComposeDraft>,
     inventory: &InventoryModel,
     cache: &mut MailRenderCache,
@@ -10268,6 +10620,7 @@ fn fill_mail_panel(
         root: entity,
         model: mail.clone(),
         ui: mail_ui.clone(),
+        compose_ui: compose_ui.clone(),
         compose: compose.clone(),
         compose_inventory: compose
             .as_ref()
@@ -13414,7 +13767,7 @@ fn mail_attachment_is_current(inventory: &InventoryModel, unique_id: u64) -> boo
         && inventory
             .items
             .iter()
-            .any(|item| item.container == 0 && item.unique_id == Some(unique_id))
+            .any(|item| matches!(item.container, 0 | 1) && item.unique_id == Some(unique_id))
 }
 
 fn valid_mail_attachment_ids(inventory: &InventoryModel, ids: &[u64]) -> Option<Vec<u64>> {
@@ -13744,6 +14097,7 @@ fn render_mail(
     mail_ui: &MailUiState,
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
+    compose_ui: &MailComposeUi,
 ) {
     if let Some(asset_server) = asset_server {
         spawn_overlay_frame(
@@ -13777,10 +14131,15 @@ fn render_mail(
             false,
         );
     }
-    if let Some(compose) = state.core.mail_compose.as_ref() {
-        render_mail_compose(parent, compose, inventory);
-        overlay_button(parent, "Cancel", OverlayButton::CancelMailCompose, true);
-        return;
+    if compose_ui.kind == MailComposeKind::Parcel {
+        if let Some(compose) = state.core.mail_compose.as_ref() {
+            render_mail_compose(parent, compose, inventory);
+            if let Some(notice) = compose_ui.last_notice.as_deref() {
+                body(parent, notice);
+            }
+            overlay_button(parent, "Cancel", OverlayButton::CancelMailCompose, true);
+            return;
+        }
     }
     let page = mail.page(mail_ui.cursor.page);
     if let Some(assets) = asset_server {
@@ -13876,6 +14235,15 @@ fn render_mail(
                 CrystalRect::new(left, 414.0, 28.0, 25.0), OverlayButton::CloseMail, false);
         }
     }
+    // Crystal opens a parcel only from the server's MailSendRequest path.
+    // Keep the candidate's existing attachment/gold composer explicitly
+    // reachable until that path, postage and item-lock receipts are native.
+    overlay_button(
+        parent,
+        "Send items and gold",
+        OverlayButton::OpenMailParcelCompose,
+        true,
+    );
 }
 
 fn render_mail_compose(
@@ -13928,7 +14296,7 @@ fn render_mail_compose(
         if let Some(item) = inventory
             .items
             .iter()
-            .find(|item| item.container == 0 && item.unique_id == Some(*id))
+            .find(|item| matches!(item.container, 0 | 1) && item.unique_id == Some(*id))
         {
             parent
                 .spawn(Node {
@@ -13948,7 +14316,7 @@ fn render_mail_compose(
                 });
         }
     }
-    for item in inventory.items_in(0) {
+    for item in inventory.items.iter().filter(|item| matches!(item.container, 0 | 1)) {
         let Some(id) = item.unique_id else { continue };
         if draft.attachment_unique_ids.contains(&id) {
             continue;
@@ -13959,8 +14327,8 @@ fn render_mail_compose(
         overlay_button(
             parent,
             &format!(
-                "Attach {} ×{} (slot {})",
-                item.name, item.quantity, item.slot
+                "Attach {} ×{} (Bag{} slot {})",
+                item.name, item.quantity, item.container + 1, item.slot
             ),
             OverlayButton::AddMailAttachment(id),
             true,
@@ -13972,6 +14340,175 @@ fn render_mail_compose(
         OverlayButton::SubmitMail,
         !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty(),
     );
+}
+
+/// Crystal `MailComposeLetterDialog`: recipient is chosen by the preceding
+/// input box and is display-only here; the message remains a real multiline
+/// field instead of the list adapter's shortened preview.
+fn render_mail_compose_letter(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    draft: &mir2_ui_core::state::MailComposeDraft,
+    compose_ui: &MailComposeUi,
+) {
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_frame(parent, asset_server, "original-ui/Title/671.png", 236.0, 300.0);
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Prguse2",
+            360,
+            361,
+            362,
+            CrystalRect::new(209.0, 3.0, 24.0, 21.0),
+            OverlayButton::CancelMailCompose,
+        );
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Title",
+            607,
+            608,
+            609,
+            CrystalRect::new(30.0, 265.0, 76.0, 25.0),
+            OverlayButton::SubmitMail,
+        );
+        spawn_overlay_crystal_button(
+            parent,
+            asset_server,
+            "Title",
+            193,
+            194,
+            195,
+            CrystalRect::new(135.0, 265.0, 68.0, 25.0),
+            OverlayButton::CancelMailCompose,
+        );
+    }
+    overlay_text_at(
+        parent,
+        &draft.recipient,
+        CrystalRect::new(70.0, 35.0, 150.0, 15.0),
+        crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
+        TEXT,
+    );
+    let focused = compose_ui.focus == MailComposeFocus::Message;
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(15.0),
+                top: Val::Px(92.0),
+                width: Val::Px(202.0),
+                height: Val::Px(165.0),
+                border: UiRect::all(Val::Px(1.0)),
+                padding: UiRect::all(Val::Px(2.0)),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.55)),
+            BorderColor::all(if focused { Color::srgb(0.0, 1.0, 0.0) } else { Color::NONE }),
+        ))
+        .with_children(|field| {
+            field.spawn((
+                Text::new(draft.message.clone()),
+                crate::crystal_ui::typography::crystal_text_font(
+                    crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                ),
+                TextColor(TEXT),
+                TextLayout::new(Justify::Left, LineBreak::AnyCharacter),
+            ));
+        });
+    if let Some(notice) = compose_ui.last_notice.as_deref() {
+        overlay_text_at(
+            parent,
+            notice,
+            CrystalRect::new(15.0, 72.0, 202.0, 15.0),
+            8.0,
+            TEXT,
+        );
+    }
+}
+
+fn render_mail_recipient_prompt(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    prompt: &MailRecipientPrompt,
+) {
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.left),
+                top: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.top),
+                width: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.width),
+                height: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.height),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ))
+        .with_children(|dialog| {
+            if let Some(asset_server) = asset_server {
+                spawn_overlay_frame(
+                    dialog,
+                    asset_server,
+                    "original-ui/Prguse/660.png",
+                    CRYSTAL_STORAGE_PASSWORD_RECT.width,
+                    CRYSTAL_STORAGE_PASSWORD_RECT.height,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    200,
+                    201,
+                    202,
+                    CrystalRect::new(60.0, 123.0, 76.0, 25.0),
+                    OverlayButton::MailRecipientSubmit,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    203,
+                    204,
+                    205,
+                    CrystalRect::new(160.0, 123.0, 76.0, 25.0),
+                    OverlayButton::MailRecipientCancel,
+                );
+            }
+            overlay_centered_text_at(
+                dialog,
+                "Enter mail recipient name",
+                CrystalRect::new(25.0, 25.0, 235.0, 40.0),
+                10.0,
+                TEXT,
+            );
+            dialog
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(23.0),
+                        top: Val::Px(86.0),
+                        width: Val::Px(240.0),
+                        height: Val::Px(19.0),
+                        border: UiRect::all(Val::Px(1.0)),
+                        padding: UiRect::axes(Val::Px(2.0), Val::Px(0.0)),
+                        overflow: Overflow::clip(),
+                        ..default()
+                    },
+                    BackgroundColor(Color::BLACK),
+                    BorderColor::all(Color::srgb(0.0, 1.0, 0.0)),
+                ))
+                .with_children(|input| {
+                    input.spawn((
+                        Text::new(prompt.recipient.clone()),
+                        crate::crystal_ui::typography::crystal_text_font(10.0),
+                        TextColor(TEXT),
+                        TextLayout::new(Justify::Left, LineBreak::NoWrap),
+                    ));
+                });
+        });
 }
 
 fn big_map_view_position(point: BigMapPoint, width: i32, height: i32) -> (f32, f32) {
@@ -15152,6 +15689,10 @@ mod mail_reader_tests;
 #[cfg(test)]
 #[path = "mail_compose_input_tests.rs"]
 mod mail_compose_input_tests;
+
+#[cfg(test)]
+#[path = "mail_compose_tests.rs"]
+mod mail_compose_tests;
 
 #[cfg(test)]
 mod tests {
@@ -16574,6 +17115,7 @@ mod tests {
             .init_resource::<InventoryOperationFeedback>()
             .init_resource::<MailModel>()
             .init_resource::<MailUiState>()
+            .init_resource::<MailComposeUi>()
             .init_resource::<BigMapModel>()
             .init_resource::<BigMapUiState>()
             .init_resource::<UiReadModel>()
@@ -17848,6 +18390,7 @@ mod tests {
             open: Res<MailOpen>,
             mail: Res<MailModel>,
             mail_ui: Res<MailUiState>,
+            compose_ui: Res<MailComposeUi>,
             state: Res<NativePlayerUiState>,
             inventory: Res<InventoryModel>,
         ) {
@@ -17857,6 +18400,7 @@ mod tests {
                 open.0,
                 &mail,
                 &mail_ui,
+                &compose_ui,
                 state.core.mail_compose.as_ref(),
                 &inventory,
                 &mut cache,
@@ -17878,6 +18422,7 @@ mod tests {
         app.insert_resource(MailOpen(true))
             .init_resource::<MailModel>()
             .init_resource::<MailUiState>()
+            .init_resource::<MailComposeUi>()
             .init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
             .add_systems(Update, render_test_mail);

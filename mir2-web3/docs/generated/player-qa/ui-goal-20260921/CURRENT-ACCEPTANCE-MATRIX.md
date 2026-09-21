@@ -1,6 +1,6 @@
 # Current whole-UI acceptance matrix
 
-Goal scope is unchanged. Latest staged font-lifetime package is C:/numeron-legend-of-rebirth-20260921-font-lifetime, client SHA256 B231F6C325005D49382BCD29179F50F54AC8180C5B4DA1C82C3A9F80E7F9FF2D (see README for matched Gateway). No same-build native screenshot or desktop operation proves acceptance for this package. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots in README.md belong to explicitly older packages.
+Goal scope is unchanged. Latest staged Letter compose package is C:/numeron-legend-of-rebirth-20260921-mail-letter-compose, client SHA256 6CFE63A1C7D11F774ECFB9FED6B1A239BA049BA0A2B44F414410DD54A0681876 (see README for matched Gateway). No same-build native screenshot or desktop operation proves acceptance for this package. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots in README.md belong to explicitly older packages.
 
 Every row below requires actual visible rendering, correct inputs/state/close behavior, applicable Crystal source or original-client comparison, and an evidence path tied to the tested executable. Status **open** means not accepted, including rows with implemented code and passing tests.
 

@@ -32,6 +32,7 @@ mod native {
     const SAMPLE: &str = "Arial atlas probe 0123456789";
     const CYCLES: usize = 100;
     const INACTIVE_PRUNES: usize = 3;
+    const CJK_WRAP_WIDTH: f32 = 96.0;
 
     #[derive(Debug, Clone, PartialEq, Eq)]
     struct Snapshot {
@@ -140,6 +141,107 @@ mod native {
             .map_err(|error| format!("Arial atlas update failed: {error}"))?;
 
         Ok(layout_info.glyphs.len())
+    }
+
+    // This intentionally uses WordOrCharacter rather than avoiding the CJK
+    // segmentation path. ICU4X may emit its debug-only missing-Japanese-model
+    // diagnostic for Han text; the assertion verifies the Bevy layout fallback
+    // still wraps complete Chinese glyph output inside a constrained quest-like
+    // width.
+    fn verify_cjk_word_or_character_wrap(
+        probe: &mut Probe,
+        family: &str,
+        sample: &str,
+        expected_glyphs: usize,
+    ) -> Result<(), String> {
+        let text_font = TextFont {
+            font: FontSource::Family(family.into()),
+            font_size: FontSize::Px(14.0),
+            ..Default::default()
+        };
+        let bounds = TextBounds::new_horizontal(CJK_WRAP_WIDTH);
+        let mut computed = ComputedTextBlock::default();
+        let mut layout_info = TextLayoutInfo::default();
+
+        probe
+            .pipeline
+            .update_buffer(
+                &probe.fonts,
+                std::iter::once((
+                    Entity::PLACEHOLDER,
+                    0,
+                    sample,
+                    &text_font,
+                    Color::WHITE,
+                    LineHeight::default(),
+                    LetterSpacing::default(),
+                )),
+                LineBreak::WordOrCharacter,
+                Justify::Left,
+                bounds,
+                1.0,
+                &mut computed,
+                &mut probe.font_cx,
+                &mut probe.layout_cx,
+                Vec2::new(1920.0, 1080.0),
+                16.0,
+            )
+            .map_err(|error| format!("CJK WordOrCharacter layout failed: {error}"))?;
+        probe
+            .pipeline
+            .update_text_layout_info(
+                &mut layout_info,
+                &mut probe.atlases,
+                &mut probe.images,
+                &mut computed,
+                &mut probe.scale_cx,
+                bounds,
+                Justify::Left,
+                FontHinting::default(),
+            )
+            .map_err(|error| format!("CJK WordOrCharacter atlas update failed: {error}"))?;
+
+        let line_count = layout_info
+            .glyphs
+            .iter()
+            .map(|glyph| glyph.line_index)
+            .collect::<BTreeSet<_>>()
+            .len();
+        if layout_info.glyphs.len() != expected_glyphs {
+            return Err(format!(
+                "CJK WordOrCharacter lost glyphs: expected {expected_glyphs}, got {}",
+                layout_info.glyphs.len()
+            ));
+        }
+        if line_count < 2 {
+            return Err(format!(
+                "CJK WordOrCharacter did not wrap at {CJK_WRAP_WIDTH}px: lines={line_count}, size={:?}",
+                layout_info.size
+            ));
+        }
+        if layout_info.size.x > CJK_WRAP_WIDTH + 0.01 {
+            return Err(format!(
+                "CJK WordOrCharacter overflowed {CJK_WRAP_WIDTH}px: size={:?}",
+                layout_info.size
+            ));
+        }
+        let max_glyph_x = layout_info
+            .glyphs
+            .iter()
+            .map(|glyph| glyph.position.x)
+            .fold(f32::NEG_INFINITY, f32::max);
+        if max_glyph_x > CJK_WRAP_WIDTH + 1.0 {
+            return Err(format!(
+                "CJK WordOrCharacter placed a glyph past {CJK_WRAP_WIDTH}px: max_x={max_glyph_x}"
+            ));
+        }
+
+        println!(
+            "cjk_word_or_character_wrap=lines={line_count}, glyphs={}, max_glyph_x={max_glyph_x}, size={:?}",
+            layout_info.glyphs.len(),
+            layout_info.size
+        );
+        Ok(())
     }
 
     fn run() -> Result<(), String> {
@@ -267,6 +369,7 @@ mod native {
         if chinese_pixels != pinned_chinese_pixels || regular_glyphs == 0 || bold_glyphs == 0 {
             return Err("pinned YaHei raster pixels differ or glyph sample is empty".into());
         }
+        verify_cjk_word_or_character_wrap(&mut chinese_system, family, sample, regular_glyphs)?;
         let chinese_warm = snapshot(&chinese_pinned);
         for cycle in 0..CYCLES {
             for _ in 0..INACTIVE_PRUNES { chinese_pinned.font_cx.source_cache.prune(2, false); }
