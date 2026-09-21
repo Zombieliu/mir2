@@ -5277,13 +5277,22 @@ fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
         .or_else(|| payload.get("storage_items"))?
         .as_array()?;
     let items = storage_items_json(source)?;
+    let unlocked = payload.get("storageUnlocked")
+        .or_else(|| payload.get("storage_unlocked"))
+        .and_then(Value::as_bool)
+        .unwrap_or_else(|| !payload.get("requireStoragePassword")
+            .or_else(|| payload.get("require_storage_password"))
+            .and_then(Value::as_bool).unwrap_or(false));
     Some(json!({
         "items": items,
-        "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(30),
+        "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(80),
         "has_password": payload.get("hasStoragePassword").or_else(|| payload.get("has_storage_password")).and_then(Value::as_bool).unwrap_or(false),
-        "unlocked": payload.get("storageUnlocked").or_else(|| payload.get("storage_unlocked")).and_then(Value::as_bool).unwrap_or(true),
+        "unlocked": unlocked,
         "has_expanded": payload.get("hasExpandedStorage").or_else(|| payload.get("has_expanded_storage")).and_then(Value::as_bool).unwrap_or(false),
-        "expiry": value_i64(payload.get("expiryTimeBinaryDatetime").or_else(|| payload.get("expiry_time_binary_datetime"))).unwrap_or_default(),
+        "expiry": value_i64(payload.get("expandedStorageExpiryTimeBinaryDatetime")
+            .or_else(|| payload.get("expanded_storage_expiry_time_binary_datetime"))
+            .or_else(|| payload.get("expiryTimeBinaryDatetime"))
+            .or_else(|| payload.get("expiry_time_binary_datetime"))).unwrap_or_default(),
         "selected_bag_slot": Value::Null,
         "selected_storage_slot": Value::Null,
         "password_draft": "",
@@ -5366,7 +5375,7 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
-                "ack": { "operation": "unlock", "success": result == 0 }
+                "ack": { "operation": "unlock", "success": result == 0 || result == 4 }
             });
             if result == 0 || !has_password {
                 patch["unlocked"] = json!(true);
@@ -5379,7 +5388,6 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
-                "expiry": value_i64(payload.get("lastSetBinaryDatetime"))?,
                 "ack": {
                     "operation": if removing { "removePassword" } else { "setPassword" },
                     "success": result == 4,
@@ -6670,6 +6678,27 @@ mod tests {
         )
         .is_none());
 
+        let locked_snapshot = try_transform_storage_model_from_snapshot(&json!({
+            "storage_items": [], "has_storage_password": true,
+            "require_storage_password": true,
+            "expanded_storage_expiry_time_binary_datetime": 987
+        })).expect("locked authoritative snapshot");
+        assert_eq!(locked_snapshot["unlocked"], false);
+        assert_eq!(locked_snapshot["size"], 80);
+        assert_eq!(locked_snapshot["expiry"], 987);
+        let unlocked_snapshot = try_transform_storage_model_from_snapshot(&json!({
+            "storageItems": [], "hasStoragePassword": true,
+            "requireStoragePassword": false,
+            "expandedStorageExpiryTimeBinaryDatetime": 654
+        })).expect("unlocked authoritative snapshot");
+        assert_eq!(unlocked_snapshot["unlocked"], true);
+        assert_eq!(unlocked_snapshot["expiry"], 654);
+        let explicit_unlock = try_transform_storage_model_from_snapshot(&json!({
+            "storageItems": [], "requireStoragePassword": true,
+            "storageUnlocked": true
+        })).expect("explicit unlock compatibility");
+        assert_eq!(explicit_unlock["unlocked"], true);
+
         let password_failure = transform_storage_patch_from_packet(
             "StoragePasswordResult",
             &json!({
@@ -6682,6 +6711,13 @@ mod tests {
         .expect("password failure acknowledgement");
         assert_eq!(password_failure["ack"]["operation"], "removePassword");
         assert_eq!(password_failure["ack"]["success"], false);
+        assert!(password_failure.get("expiry").is_none(),
+            "password last-set timestamp must not replace warehouse rental expiry");
+        let no_password = transform_storage_patch_from_packet(
+            "StorageUnlockResult", &json!({"result": 4, "hasPassword": false})
+        ).expect("no-password unlock result");
+        assert_eq!(no_password["ack"]["success"], true);
+        assert_eq!(no_password["unlocked"], true);
 
         let resize = transform_storage_patch_from_packet(
             "ResizeStorage",

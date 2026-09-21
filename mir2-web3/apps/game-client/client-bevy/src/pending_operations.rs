@@ -787,6 +787,9 @@ fn storage_drag_cells(key: &PendingOperationKey) -> [Option<(&'static str, i32)>
         | PendingOperationKey::StorageWithdrawV2 { from, to, .. } => {
             [Some(("storage", *from)), Some(("inventory", *to))]
         }
+        PendingOperationKey::Move { grid, from, to, .. } if grid == "storage" => {
+            [Some(("storage", *from)), Some(("storage", *to))]
+        }
         _ => [None, None],
     }
 }
@@ -803,7 +806,9 @@ fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a
         }
         PendingOperationKey::Move {
             grid, unique_id, ..
-        } if grid == "inventory" => [Some(("inventory", *unique_id)), None],
+        } if matches!(grid.as_str(), "inventory" | "storage") => {
+            [Some((grid, *unique_id)), None]
+        }
         PendingOperationKey::Split {
             grid, unique_id, ..
         } if grid == "inventory" => [Some(("inventory", *unique_id)), None],
@@ -824,6 +829,7 @@ fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a
             ("inventory", "storage")
                 | ("storage", "inventory")
                 | ("inventory", "inventory")
+                | ("storage", "storage")
         ) => [Some((grid_from, *id_from)), Some((grid_to, *id_to))],
         _ => [None, None],
     }

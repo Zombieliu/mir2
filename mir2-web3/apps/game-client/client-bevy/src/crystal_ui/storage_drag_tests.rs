@@ -1,5 +1,8 @@
 use super::*;
 use crate::inventory::{CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel};
+use crate::pending_operations::{
+    apply_inventory_operation_ack, InventoryOperationAck, InventoryOperationFeedback,
+};
 use crate::storage::STORAGE_PAGE_SIZE;
 
 fn storage_item(slot: u32, unique_id: u64, item_index: i32, quantity: u32) -> ItemModel {
@@ -284,6 +287,134 @@ fn ordered_warehouse_storage_drag_uses_exact_take_back_v2_target_and_compatible_
             id_from: 8001,
             id_to: 7001,
         }]
+    );
+}
+
+#[test]
+fn ordered_warehouse_storage_drag_moves_empty_and_incompatible_or_full_targets() {
+    for target in [None, Some(storage_item(6, 8002, 101, 4)), Some(storage_item(6, 8002, 100, 20))] {
+        let (mut app, window) = storage_drag_app();
+        app.world_mut()
+            .resource_mut::<StorageModel>()
+            .items
+            .push(storage_item(5, 8001, 100, 2));
+        if let Some(target) = target {
+            app.world_mut().resource_mut::<StorageModel>().items.push(target);
+        }
+        ordered_drag(&mut app, window, storage_point(5), storage_point(6));
+        assert_eq!(
+            drain(&mut app),
+            vec![NativePlayerUiIntent::MoveItem {
+                grid: "storage".to_owned(),
+                unique_id: 8001,
+                from: 5,
+                to: 6,
+            }],
+        );
+    }
+}
+
+#[test]
+fn ordered_warehouse_storage_drag_merges_only_nonfull_compatible_target_and_same_slot_is_noop() {
+    let (mut app, window) = storage_drag_app();
+    app.world_mut()
+        .resource_mut::<StorageModel>()
+        .items
+        .extend([storage_item(5, 8001, 100, 2), storage_item(6, 8002, 100, 4)]);
+    ordered_drag(&mut app, window, storage_point(5), storage_point(5));
+    assert!(drain(&mut app).is_empty(), "same source and target must not enqueue");
+
+    ordered_drag(&mut app, window, storage_point(5), storage_point(6));
+    assert_eq!(
+        drain(&mut app),
+        vec![NativePlayerUiIntent::MergeItem {
+            grid_from: "storage".to_owned(),
+            grid_to: "storage".to_owned(),
+            id_from: 8001,
+            id_to: 8002,
+        }],
+    );
+}
+
+#[test]
+fn warehouse_storage_drag_rechecks_source_and_rejects_locked_or_inaccessible_pages() {
+    let (mut app, window) = storage_drag_app();
+    app.world_mut()
+        .resource_mut::<StorageModel>()
+        .items
+        .push(storage_item(5, 8001, 100, 2));
+    ordered_move(&mut app, window, storage_point(5));
+    ordered_left(&mut app, window, true);
+    app.update();
+    app.world_mut().resource_mut::<StorageModel>().items[0].unique_id = Some(8999);
+    ordered_move(&mut app, window, storage_point(6));
+    ordered_left(&mut app, window, false);
+    app.update();
+    assert!(drain(&mut app).is_empty());
+
+    app.world_mut().resource_mut::<StorageModel>().items[0].unique_id = Some(8001);
+    app.world_mut().resource_mut::<StorageModel>().has_password = true;
+    app.world_mut().resource_mut::<StorageModel>().unlocked = false;
+    ordered_drag(&mut app, window, storage_point(5), storage_point(6));
+    assert!(drain(&mut app).is_empty());
+
+    {
+        let mut storage = app.world_mut().resource_mut::<StorageModel>();
+        storage.has_password = false;
+        storage.unlocked = true;
+        storage.size = STORAGE_EXPANDED_SIZE;
+        storage.has_expanded = false;
+        storage.items.push(storage_item(80, 8010, 100, 2));
+    }
+    app.world_mut().resource_mut::<StorageUiState>().cursor.page = 1;
+    ordered_drag(&mut app, window, storage_point(80), storage_point(81));
+    assert!(drain(&mut app).is_empty());
+}
+
+#[test]
+fn pending_storage_move_locks_source_and_target_cells_until_exact_ack() {
+    let (mut app, window) = storage_drag_app();
+    app.world_mut()
+        .resource_mut::<StorageModel>()
+        .items
+        .extend([storage_item(5, 8001, 100, 2), storage_item(7, 8002, 101, 2)]);
+
+    ordered_drag(&mut app, window, storage_point(5), storage_point(6));
+    ordered_drag(&mut app, window, storage_point(5), storage_point(8));
+    ordered_drag(&mut app, window, storage_point(7), storage_point(6));
+    assert_eq!(
+        drain(&mut app),
+        vec![NativePlayerUiIntent::MoveItem {
+            grid: "storage".to_owned(),
+            unique_id: 8001,
+            from: 5,
+            to: 6,
+        }],
+    );
+
+    let mut feedback = InventoryOperationFeedback::default();
+    assert_eq!(
+        apply_inventory_operation_ack(
+            app.world_mut().resource_mut::<PendingOperations>().into_inner(),
+            &mut feedback,
+            InventoryOperationAck::Move {
+                grid: "Storage".to_owned(),
+                from: 5,
+                to: 6,
+                success: true,
+            },
+        ),
+        1,
+    );
+    ordered_drag(&mut app, window, storage_point(5), storage_point(8));
+    assert_eq!(
+        drain(&mut app),
+        vec![NativePlayerUiIntent::MoveItem {
+            grid: "storage".to_owned(),
+            unique_id: 8001,
+            from: 5,
+            to: 8,
+        }],
     );
 }
 

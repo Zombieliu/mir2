@@ -22,6 +22,7 @@ pub mod preview_data;
 pub mod quest_targets;
 pub mod select;
 pub mod spec;
+pub(crate) mod storage_password;
 pub mod typography;
 pub mod widget;
 

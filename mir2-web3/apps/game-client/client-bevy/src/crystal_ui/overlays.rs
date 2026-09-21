@@ -99,6 +99,7 @@ use super::panel_layouts::{
     INVENTORY_WEIGHT_BAR_SIZE, SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
     SKILL_ROW_STEP_Y,
 };
+use super::storage_password::{Command as StoragePasswordCommand, Prompt as StoragePasswordPrompt, Stage as StoragePasswordStage};
 use super::spec::{CrystalButtonSpec, CrystalFrameSpec, CrystalRect};
 use super::widget::{spawn_crystal_image_button, CrystalImageButton, CrystalItemHint};
 
@@ -882,6 +883,12 @@ pub struct NativePlayerUiState {
     pub guild_notice_editing: bool,
     pub guild_notice_draft: String,
     pub guild_notice_submission: Option<Vec<String>>,
+    /// StorageDialog owns a sequential MirInputBox workflow. Credentials stay
+    /// inside this renderer state until one server request is accepted.
+    pub(crate) storage_password_prompt: Option<StoragePasswordPrompt>,
+    /// A submit/cancel must consume the rest of its input frame even after it
+    /// closes the prompt, so Enter/Escape cannot reach chat or world controls.
+    pub(crate) storage_password_input_consumed: bool,
     pub help: HelpDialogUi,
 }
 
@@ -1023,6 +1030,8 @@ impl Default for NativePlayerUiState {
             guild_notice_editing: false,
             guild_notice_draft: String::new(),
             guild_notice_submission: None,
+            storage_password_prompt: None,
+            storage_password_input_consumed: false,
             help: HelpDialogUi::default(),
         }
     }
@@ -1208,7 +1217,9 @@ impl NativePlayerUiState {
         self.hero.modal() || self.hero.input_consumed || self.blocks_gameplay_keys_except_hero()
     }
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
-        self.game_shop_dialog.confirmation.is_some()
+        self.storage_password_prompt.is_some()
+            || self.storage_password_input_consumed
+            || self.game_shop_dialog.confirmation.is_some()
             || (self.shop_open() && self.game_shop_dialog.search_focused)
             || self.guild_panel.blocks()
             || self.guild_panel.consumed
@@ -1256,6 +1267,8 @@ impl NativePlayerUiState {
 
     fn blocks_world_click_with_panel(&self, panel_blocks: bool) -> bool {
         self.game_shop_dialog.confirmation.is_some()
+            || self.storage_password_prompt.is_some()
+            || self.storage_password_input_consumed
             || self.guild_panel.blocks()
             || self.guild_panel.consumed
             || self.skill_assign.open
@@ -1630,6 +1643,9 @@ pub const OVERLAY_SHELL_Z: i32 = 1000;
 const CRYSTAL_DELETE_AMOUNT_RECT: CrystalRect = CrystalRect::new(410.0, 329.0, 204.0, 109.0);
 const CRYSTAL_DELETE_CONFIRM_RECT: CrystalRect = CrystalRect::new(284.0, 289.0, 456.0, 190.0);
 const CRYSTAL_DELETE_CURSOR_SIZE: (f32, f32) = (16.0, 15.0);
+/// `StorageDialog` uses `Prguse[660]`, a 288x156 MirInputBox frame centered
+/// on Crystal's fixed 1024x768 stage.
+const CRYSTAL_STORAGE_PASSWORD_RECT: CrystalRect = CrystalRect::new(368.0, 306.0, 288.0, 156.0);
 
 /// Verify HUD < Chat < NPC < Death < Menu < Shell ordering.
 pub fn is_overlay_z_order_correct() -> bool {
@@ -2424,6 +2440,9 @@ struct OverlayInventory;
 struct OverlayInventoryDeleteModal;
 
 #[derive(Component)]
+struct OverlayStoragePasswordModal;
+
+#[derive(Component)]
 struct OverlayGuildGoldModal;
 
 #[derive(Component)]
@@ -2754,6 +2773,8 @@ enum OverlayButton {
     StorageUnlock,
     StorageSetPassword,
     StorageRemovePassword,
+    StoragePasswordSubmit,
+    StoragePasswordCancel,
     StorageExpand,
 }
 
@@ -2911,6 +2932,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     sync_local_panel_models,
                     sync_npc_dialog_inventory_location,
                     sync_storage_inventory_location,
+                    sync_storage_password_prompt,
                     sync_guild_storage_ui,
                     trade_dialog::sync,
                 )
@@ -3476,6 +3498,24 @@ fn spawn_overlay_root(mut commands: Commands) {
                 GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
                 BackgroundColor(Color::NONE),
             ));
+            // StorageDialog's MirInputBox is modal to every underlying
+            // control, including the concurrent bag/storage panels.
+            root.spawn((
+                OverlayStoragePasswordModal,
+                Button,
+                FocusPolicy::Block,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(0.0),
+                    top: Val::Px(0.0),
+                    width: Val::Px(1024.0),
+                    height: Val::Px(768.0),
+                    display: Display::None,
+                    ..default()
+                },
+                GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
+                BackgroundColor(Color::NONE),
+            ));
             root.spawn((
                 OverlayInventoryDeleteCursor,
                 Node {
@@ -3746,6 +3786,7 @@ fn consume_hud_buttons(
 ) {
     if !shell.is_some_and(|model| model.screen == NativeShellScreen::InGame)
         || state.amount_modal_open()
+        || state.storage_password_prompt.is_some()
     {
         return;
     }
@@ -3942,7 +3983,7 @@ fn process_inventory_drag(
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
-    if !state.inventory_open() || state.amount_modal_open() {
+    if !state.inventory_open() || state.amount_modal_open() || state.storage_password_prompt.is_some() {
         state.inventory_window.end_drag();
         state.inventory_window.clear_cursor();
         return;
@@ -4213,6 +4254,53 @@ fn enqueue_bag_to_storage_drag(
     )
 }
 
+fn enqueue_storage_to_storage_drag(
+    source: &ItemModel,
+    source_slot: u32,
+    target_slot: u32,
+    storage: &StorageModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    if !storage.transfers_unlocked()
+        || !storage.is_valid_slot(source_slot)
+        || !storage.is_valid_slot(target_slot)
+        || source_slot == target_slot
+    {
+        return false;
+    }
+    let Some(source_id) = item_unique_id(source) else {
+        return false;
+    };
+    let target = storage.item_in_storage(target_slot);
+    if let Some(target_id) = target
+        .filter(|item| compatible_storage_stack(source, item))
+        .and_then(item_unique_id)
+    {
+        return push_storage_drag_merge(
+            intents,
+            pending,
+            "storage",
+            "storage",
+            source_id,
+            target_id,
+        );
+    }
+    let intent = NativePlayerUiIntent::MoveItem {
+        grid: "storage".to_owned(),
+        unique_id: source_id,
+        from: i32::try_from(source_slot).unwrap_or(i32::MAX),
+        to: i32::try_from(target_slot).unwrap_or(i32::MAX),
+    };
+    let Some(key) = intent.pending_key() else {
+        return false;
+    };
+    if pending.has_storage_drag_conflict(&key) {
+        return false;
+    }
+    intents.push_pending_intent(pending, intent)
+}
+
 fn enqueue_storage_to_bag_drag(
     source: &ItemModel,
     source_slot: u32,
@@ -4408,6 +4496,17 @@ fn finish_storage_item_drag(
         return;
     }
     state.inspect = None;
+    if let Some(target_slot) = storage_slot_at_cursor(state, storage, storage_ui, cursor) {
+        let _ = enqueue_storage_to_storage_drag(
+            source,
+            drag.source_slot,
+            target_slot,
+            storage,
+            intents,
+            pending,
+        );
+        return;
+    }
     let Some(target_slot) = inventory_bag_slot_at_cursor(state, cursor) else {
         return;
     };
@@ -4455,6 +4554,7 @@ fn process_inventory_item_drag(
                 .as_deref()
                 .is_some_and(|storage| !storage.transfers_unlocked()))
         || state.amount_modal_open()
+        || state.storage_password_prompt.is_some()
         || state.inventory_delete_mode
         || state.inventory_operation.is_some()
         || state.trade_dialog.open
@@ -4633,6 +4733,7 @@ fn process_inventory_delete_pointer(
     if !state.inventory_open()
         || !state.inventory_delete_mode
         || state.amount_modal_open()
+        || state.storage_password_prompt.is_some()
         || !mouse.is_some_and(|mouse| mouse.just_pressed(MouseButton::Right))
     {
         return;
@@ -4789,6 +4890,124 @@ fn sync_storage_inventory_location(
         state.inventory_window.left = 393.0;
         state.inventory_window.top = 0.0;
     }
+}
+
+/// StorageDialog.Show hides the bag and opens an Unlock MirInputBox when the
+/// server says storage protection is active. This is deliberately driven by
+/// the authoritative `has_password`/`unlocked` pair only: no local setting is
+/// treated as a forced-password-setup instruction.
+fn sync_storage_password_prompt(
+    shell: Res<NativeShellModel>,
+    mut state: ResMut<NativePlayerUiState>,
+    mut storage: ResMut<StorageModel>,
+    mut storage_ui: ResMut<StorageUiState>,
+    pending: Res<PendingOperations>,
+) {
+    // This latch lasts through the current input frame only. It is set when
+    // a modal action removes the prompt later in the ordered Update chain.
+    state.storage_password_input_consumed = false;
+    let active = shell.screen == NativeShellScreen::InGame && state.storage_open();
+    if !active {
+        state.storage_password_prompt = None;
+        clear_legacy_storage_password_drafts(&mut storage);
+        return;
+    }
+
+    if storage.has_password
+        && !storage.unlocked
+        && state.storage_password_prompt.is_none()
+        && !pending.contains(&PendingOperationKey::StorageUnlock)
+    {
+        state.storage_password_prompt = Some(StoragePasswordPrompt::unlock());
+        clear_legacy_storage_password_drafts(&mut storage);
+        state.inventory_item_drag = None;
+        state.inventory_item_pointer_consumed = false;
+        storage_ui.storage_item_drag = None;
+    }
+
+    if state
+        .storage_password_prompt
+        .as_ref()
+        .is_some_and(|prompt| {
+            prompt.stage == StoragePasswordStage::Unlock
+                && (!storage.has_password || storage.unlocked)
+        })
+    {
+        state.storage_password_prompt = None;
+        clear_legacy_storage_password_drafts(&mut storage);
+    }
+}
+
+fn clear_legacy_storage_password_drafts(storage: &mut StorageModel) {
+    storage.password_draft.clear();
+    storage.new_password_draft.clear();
+    storage.confirm_password_draft.clear();
+}
+
+fn open_storage_password_prompt(
+    state: &mut NativePlayerUiState,
+    storage: &mut StorageModel,
+) -> bool {
+    if !state.storage_open() || state.storage_password_prompt.is_some() {
+        return false;
+    }
+    state.storage_password_prompt = match (storage.has_password, storage.unlocked) {
+        (true, false) => Some(StoragePasswordPrompt::unlock()),
+        (true, true) => Some(StoragePasswordPrompt::change()),
+        (false, _) => Some(StoragePasswordPrompt::setup(false)),
+    };
+    clear_legacy_storage_password_drafts(storage);
+    true
+}
+
+fn cancel_storage_password_prompt(
+    state: &mut NativePlayerUiState,
+    storage: &mut StorageModel,
+) {
+    let close_storage = state
+        .storage_password_prompt
+        .as_ref()
+        .is_some_and(|prompt| prompt.close_storage_on_cancel);
+    state.storage_password_prompt = None;
+    state.storage_password_input_consumed = true;
+    clear_legacy_storage_password_drafts(storage);
+    if close_storage && state.storage_open() {
+        state.core.panel = mir2_ui_core::state::UiPanel::None;
+        state.inventory_item_drag = None;
+        state.inventory_item_pointer_consumed = false;
+    }
+}
+
+/// The final stage keeps its sensitive drafts until the outbound queue accepts
+/// the exact pending operation. A full queue or duplicate key leaves the
+/// prompt intact for a retry.
+fn submit_storage_password_prompt(
+    state: &mut NativePlayerUiState,
+    storage: &mut StorageModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    let Some(command) = state
+        .storage_password_prompt
+        .as_mut()
+        .and_then(StoragePasswordPrompt::submit)
+    else {
+        return false;
+    };
+    let intent = match command {
+        StoragePasswordCommand::Unlock(password) => NativePlayerUiIntent::UnlockStorage { password },
+        StoragePasswordCommand::Set { current, new } => NativePlayerUiIntent::SetStoragePassword {
+            current,
+            new_password: new,
+        },
+    };
+    if !intents.push_pending_intent(pending, intent) {
+        return false;
+    }
+    state.storage_password_prompt = None;
+    state.storage_password_input_consumed = true;
+    clear_legacy_storage_password_drafts(storage);
+    true
 }
 
 /// Crystal's NPCDialog.Show moves InventoryDialog beside its 440px frame and
@@ -5478,39 +5697,45 @@ pub(crate) fn process_overlay_keyboard(
         return;
     }
 
-    // Storage password typing when storage is open and locked: capture text input for password draft
-    if state.storage_open() && storage.has_password && !storage.unlocked {
+    // StorageDialog's MirInputBox owns every keyboard event. In particular,
+    // Enter cannot fall through to chat and Escape cannot close an unrelated
+    // panel after cancelling a password stage.
+    if state.storage_password_prompt.is_some() {
+        if keys.just_pressed(KeyCode::Escape) {
+            cancel_storage_password_prompt(&mut state, &mut storage);
+            typed.clear();
+            return;
+        }
         if keys.just_pressed(KeyCode::Backspace) {
-            storage.password_draft.pop();
+            if let Some(prompt) = state.storage_password_prompt.as_mut() {
+                prompt.draft.pop();
+            }
         }
         for event in typed.read() {
-            if event.state != ButtonState::Pressed {
-                continue;
-            }
-            if let Some(text) = &event.text {
-                for ch in text.chars() {
-                    if !ch.is_control() && storage.password_draft.chars().count() < 16 {
-                        storage.password_draft.push(ch);
+            if event.state == ButtonState::Pressed {
+                if let Some(text) = &event.text {
+                    if let Some(prompt) = state.storage_password_prompt.as_mut() {
+                        prompt.push_text(text);
                     }
                 }
             }
         }
-        if keys.just_pressed(KeyCode::Enter) {
-            if storage_unlock_enabled(&storage) {
-                let pwd = storage.password_draft.clone();
-                intents.push_pending_intent(
-                    &mut pending,
-                    NativePlayerUiIntent::UnlockStorage { password: pwd },
-                );
-            }
-            return;
+        if keys.just_pressed(KeyCode::Enter) || keys.just_pressed(KeyCode::NumpadEnter) {
+            let _ = submit_storage_password_prompt(
+                &mut state,
+                &mut storage,
+                &mut intents,
+                &mut pending,
+            );
         }
-        if keys.just_pressed(KeyCode::Escape) {
-            // let Escape close windows below
-        } else {
-            // When locked, block other hotkeys
-            return;
-        }
+        return;
+    }
+
+    // Clear obsolete hidden drafts left by the pre-modal adapter. The visible
+    // modal above is now the sole password input path.
+    if state.storage_open() && storage.has_password && !storage.unlocked {
+        clear_legacy_storage_password_drafts(&mut storage);
+        return;
     }
 
     if keys.just_pressed(KeyCode::Enter) {
@@ -5866,6 +6091,17 @@ fn process_overlay_buttons(
         if *interaction != Interaction::Pressed {
             continue;
         }
+        if state.storage_password_input_consumed {
+            continue;
+        }
+        if state.storage_password_prompt.is_some()
+            && !matches!(
+                button,
+                OverlayButton::StoragePasswordSubmit | OverlayButton::StoragePasswordCancel
+            )
+        {
+            continue;
+        }
         if (game_shop_modal_was_open || state.game_shop_dialog.confirmation.is_some())
             && !matches!(
                 button,
@@ -6182,9 +6418,8 @@ fn process_overlay_buttons(
                 if state.storage_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
-                storage.password_draft.clear();
-                storage.new_password_draft.clear();
-                storage.confirm_password_draft.clear();
+                state.storage_password_prompt = None;
+                clear_legacy_storage_password_drafts(&mut storage);
                 storage_ui.bag_selection = None;
                 storage_ui.storage_selection = None;
             }
@@ -7600,35 +7835,23 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::StorageUnlock => {
-                if storage_unlock_enabled(&storage) {
-                    let pwd = storage.password_draft.clone();
-                    intents.push_pending_intent(
-                        &mut pending,
-                        NativePlayerUiIntent::UnlockStorage { password: pwd },
-                    );
-                }
+                let _ = open_storage_password_prompt(&mut state, &mut storage);
             }
-            OverlayButton::StorageSetPassword => {
-                if storage_set_password_enabled(&storage) {
-                    let cur = storage.password_draft.clone();
-                    let new = storage.new_password_draft.clone();
-                    intents.push_pending_intent(
-                        &mut pending,
-                        NativePlayerUiIntent::SetStoragePassword {
-                            current: cur,
-                            new_password: new,
-                        },
-                    );
-                }
+            OverlayButton::StorageSetPassword | OverlayButton::StorageRemovePassword => {
+                // Crystal's Protect path changes an existing password; it
+                // does not dispatch the legacy RemoveStoragePassword command.
+                let _ = open_storage_password_prompt(&mut state, &mut storage);
             }
-            OverlayButton::StorageRemovePassword => {
-                if storage_remove_password_enabled(&storage) {
-                    let cur = storage.password_draft.clone();
-                    intents.push_pending_intent(
-                        &mut pending,
-                        NativePlayerUiIntent::RemoveStoragePassword { current: cur },
-                    );
-                }
+            OverlayButton::StoragePasswordSubmit => {
+                let _ = submit_storage_password_prompt(
+                    &mut state,
+                    &mut storage,
+                    &mut intents,
+                    &mut pending,
+                );
+            }
+            OverlayButton::StoragePasswordCancel => {
+                cancel_storage_password_prompt(&mut state, &mut storage);
             }
             OverlayButton::StorageExpand => {
                 if storage_expand_enabled(&storage, inventory.gold) {
@@ -8136,6 +8359,130 @@ fn render_inventory_delete_modal(
     }
 }
 
+fn storage_password_caption(stage: StoragePasswordStage) -> &'static str {
+    match stage {
+        StoragePasswordStage::Unlock => "Enter storage password",
+        StoragePasswordStage::ConfirmChange => "Change storage password?",
+        StoragePasswordStage::Current => "Enter current password",
+        StoragePasswordStage::New => "Enter new password",
+        StoragePasswordStage::ConfirmNew => "Confirm new password",
+    }
+}
+
+/// Exact StorageDialog / MirInputBox layout. The background and Title button
+/// frames come from the original Crystal libraries; text input is rendered as
+/// a masked, keyboard-owned field at the source coordinates.
+fn render_storage_password_modal(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    prompt: Option<&StoragePasswordPrompt>,
+) {
+    let Some(prompt) = prompt else {
+        return;
+    };
+    parent
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.left),
+                top: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.top),
+                width: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.width),
+                height: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.height),
+                ..default()
+            },
+            BackgroundColor(PANEL_BG),
+        ))
+        .with_children(|dialog| {
+            if let Some(asset_server) = asset_server {
+                spawn_overlay_frame(
+                    dialog,
+                    asset_server,
+                    "original-ui/Prguse/660.png",
+                    CRYSTAL_STORAGE_PASSWORD_RECT.width,
+                    CRYSTAL_STORAGE_PASSWORD_RECT.height,
+                );
+            }
+            overlay_centered_text_at(
+                dialog,
+                storage_password_caption(prompt.stage),
+                CrystalRect::new(25.0, 25.0, 235.0, 40.0),
+                10.0,
+                TEXT,
+            );
+            dialog
+                .spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        left: Val::Px(23.0),
+                        top: Val::Px(86.0),
+                        width: Val::Px(240.0),
+                        height: Val::Px(19.0),
+                        border: UiRect::all(Val::Px(1.0)),
+                        padding: UiRect::axes(Val::Px(2.0), Val::Px(0.0)),
+                        align_items: AlignItems::Center,
+                        overflow: Overflow::clip(),
+                        ..default()
+                    },
+                    BackgroundColor(Color::BLACK),
+                    BorderColor::all(if prompt.mismatch { Color::srgb(0.85, 0.22, 0.18) } else { GOLD }),
+                ))
+                .with_children(|field| {
+                    field.spawn((
+                        Text::new(prompt.masked()),
+                        crate::crystal_ui::typography::crystal_text_font(10.0),
+                        TextColor(TEXT),
+                        TextLayout::new(Justify::Left, LineBreak::NoWrap),
+                    ));
+                });
+            if prompt.mismatch {
+                overlay_centered_text_at(
+                    dialog,
+                    "Passwords do not match.",
+                    CrystalRect::new(25.0, 65.0, 235.0, 16.0),
+                    9.0,
+                    Color::srgb(0.95, 0.34, 0.28),
+                );
+            }
+            if let Some(asset_server) = asset_server {
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    200,
+                    201,
+                    202,
+                    CrystalRect::new(60.0, 123.0, 76.0, 25.0),
+                    OverlayButton::StoragePasswordSubmit,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    203,
+                    204,
+                    205,
+                    CrystalRect::new(160.0, 123.0, 76.0, 25.0),
+                    OverlayButton::StoragePasswordCancel,
+                );
+            } else {
+                overlay_absolute_button(
+                    dialog,
+                    "OK",
+                    CrystalRect::new(60.0, 123.0, 76.0, 25.0),
+                    OverlayButton::StoragePasswordSubmit,
+                    true,
+                );
+                overlay_absolute_button(
+                    dialog,
+                    "Cancel",
+                    CrystalRect::new(160.0, 123.0, 76.0, 25.0),
+                    OverlayButton::StoragePasswordCancel,
+                    true,
+                );
+            }
+        });
+}
+
 fn render_guild_gold_modal(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
@@ -8304,6 +8651,7 @@ fn render_overlays(
             Query<(Entity, &mut Node), With<OverlayGuildGoldModal>>,
             Query<(Entity, &mut Node), With<OverlayTrade>>,
             Query<(Entity, &mut Node), With<OverlayTradeGoldModal>>,
+            Query<(Entity, &mut Node), With<OverlayStoragePasswordModal>>,
         )>,
     )>,
     mut commands: Commands,
@@ -8596,6 +8944,18 @@ fn render_overlays(
             state.inventory_delete_prompt.is_some(),
             |parent| {
                 render_inventory_delete_modal(parent, asset_server.as_deref(), &state, &inventory)
+            },
+        );
+        fill_panel(
+            &mut commands,
+            &mut delete_layers.p5(),
+            state.storage_password_prompt.is_some(),
+            |parent| {
+                render_storage_password_modal(
+                    parent,
+                    asset_server.as_deref(),
+                    state.storage_password_prompt.as_ref(),
+                )
             },
         );
 
@@ -12856,18 +13216,10 @@ fn render_storage(
         CrystalRect::new(328.0, 33.0, 35.0, 22.0),
         if storage.has_password && !storage.unlocked {
             OverlayButton::StorageUnlock
-        } else if storage.has_password {
-            OverlayButton::StorageRemovePassword
         } else {
             OverlayButton::StorageSetPassword
         },
-        if storage.has_password && !storage.unlocked {
-            storage_unlock_enabled(storage)
-        } else if storage.has_password {
-            storage_remove_password_enabled(storage)
-        } else {
-            storage_set_password_enabled(storage)
-        },
+        true,
     );
     overlay_absolute_button(
         parent,
@@ -13233,6 +13585,10 @@ fn overlay_button(
 #[cfg(test)]
 #[path = "storage_drag_tests.rs"]
 mod storage_drag_tests;
+
+#[cfg(test)]
+#[path = "storage_password_tests.rs"]
+mod storage_password_tests;
 
 #[cfg(test)]
 mod tests {
