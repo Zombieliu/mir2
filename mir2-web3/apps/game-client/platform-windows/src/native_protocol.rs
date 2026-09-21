@@ -450,6 +450,11 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "mailId")]
         mail_id: u64,
     },
+    LockMail {
+        #[serde(rename = "mailId")]
+        mail_id: u64,
+        lock: bool,
+    },
     CollectParcel {
         #[serde(rename = "mailId")]
         mail_id: u64,
@@ -677,6 +682,7 @@ impl NativeOutboundCommand {
             Self::SetStoragePassword { .. } => "setStoragePassword",
             Self::RemoveStoragePassword { .. } => "removeStoragePassword",
             Self::ReadMail { .. } => "readMail",
+            Self::LockMail { .. } => "lockMail",
             Self::CollectParcel { .. } => "collectParcel",
             Self::DeleteMail { .. } => "deleteMail",
             Self::SendMail { .. } => "sendMail",

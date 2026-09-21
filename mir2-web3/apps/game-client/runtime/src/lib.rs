@@ -2366,8 +2366,27 @@ fn ingest_pending_mail_model(
                     serde_json::from_value::<mir2_client_bevy::mail::MailModel>(value)
                         .map_err(|error| error.to_string())
                 }) {
-                    Ok(model) => {
+                    Ok(mut model) => {
                         let old = mail.clone();
+                        for incoming in &mut model.mails {
+                            if incoming.metadata_known {
+                                continue;
+                            }
+                            let Some(previous) = old.mails.iter().find(|previous| {
+                                previous.metadata_known
+                                    && previous.id == incoming.id
+                                    && previous.sender == incoming.sender
+                            }) else {
+                                continue;
+                            };
+                            // Stage5 snapshots omit Crystal's per-message reply/date
+                            // metadata. Retain only known packet metadata for the
+                            // same sender and mail identity; every mailbox state field
+                            // still comes from the authoritative snapshot.
+                            incoming.can_reply = previous.can_reply;
+                            incoming.date_sent_binary_datetime = previous.date_sent_binary_datetime;
+                            incoming.metadata_known = true;
+                        }
                         let selected_valid = model
                             .selected_id
                             .and_then(|id| model.mails.iter().find(|m| m.id == id).map(|_| id))
@@ -8861,6 +8880,95 @@ mod native_data_path_tests {
                     .after(ingest_pending_inventory_model),
             );
         app
+    }
+
+    #[test]
+    fn stage5_mail_snapshot_retains_packet_metadata_for_exact_sender() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":71,"sender":"GM","can_reply":true,"date_sent_binary_datetime":638000000000000000,"metadata_known":true,"body":"packet","claimed":false,"locked":false,"read":false}]}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":71,"sender":"GM","body":"snapshot","claimed":true,"locked":true,"read":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+
+        let mail = &app.world().resource::<mir2_client_bevy::mail::MailModel>().mails[0];
+        assert_eq!(mail.body, "snapshot");
+        assert!(mail.claimed && mail.locked && mail.read);
+        assert!(mail.can_reply);
+        assert_eq!(mail.date_sent_binary_datetime, 638000000000000000);
+        assert!(mail.metadata_known);
+    }
+
+    #[test]
+    fn known_stage5_mail_metadata_explicitly_replaces_packet_metadata() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":72,"sender":"GM","can_reply":true,"date_sent_binary_datetime":638000000000000000,"metadata_known":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":72,"sender":"GM","can_reply":false,"date_sent_binary_datetime":0,"metadata_known":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+
+        let mail = &app.world().resource::<mir2_client_bevy::mail::MailModel>().mails[0];
+        assert!(!mail.can_reply);
+        assert_eq!(mail.date_sent_binary_datetime, 0);
+        assert!(mail.metadata_known);
+    }
+
+    #[test]
+    fn stage5_mail_snapshot_never_reuses_metadata_across_id_or_sender() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":73,"sender":"GM","can_reply":true,"date_sent_binary_datetime":638000000000000000,"metadata_known":true},{"id":74,"sender":"Guide","can_reply":true,"date_sent_binary_datetime":638000000000000001,"metadata_known":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":73,"sender":"Impostor"},{"id":75,"sender":"Guide"}]}"#
+                .to_owned()
+        ));
+        app.update();
+
+        for mail in &app.world().resource::<mir2_client_bevy::mail::MailModel>().mails {
+            assert!(!mail.can_reply);
+            assert_eq!(mail.date_sent_binary_datetime, 0);
+            assert!(!mail.metadata_known);
+        }
+    }
+
+    #[test]
+    fn stage5_mail_snapshot_does_not_reuse_packet_metadata_after_session_reset() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":76,"sender":"GM","can_reply":true,"date_sent_binary_datetime":638000000000000000,"metadata_known":true}]}"#
+                .to_owned()
+        ));
+        app.update();
+        assert!(native_ingest::push_native_data_reset());
+        app.update();
+        assert!(app.world().resource::<mir2_client_bevy::mail::MailModel>().mails.is_empty());
+        assert!(native_ingest::push_native_mail_model(
+            r#"{"mails":[{"id":76,"sender":"GM"}]}"#.to_owned()
+        ));
+        app.update();
+
+        let mail = &app.world().resource::<mir2_client_bevy::mail::MailModel>().mails[0];
+        assert!(!mail.can_reply);
+        assert_eq!(mail.date_sent_binary_datetime, 0);
+        assert!(!mail.metadata_known);
     }
 
     #[test]

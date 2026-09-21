@@ -99,6 +99,7 @@ where
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct MailAttachment {
+    pub image: Option<u32>,
     pub unique_id: Option<u64>,
     pub item_index: Option<i32>,
     pub key: Option<String>,
@@ -151,6 +152,11 @@ pub struct MailMessage {
     pub id: u64,
     #[serde(alias = "from", alias = "senderName")]
     pub sender: String,
+    #[serde(alias = "canReply")]
+    pub can_reply: bool,
+    #[serde(alias = "dateSentBinaryDatetime")]
+    pub date_sent_binary_datetime: i64,
+    pub metadata_known: bool,
     pub subject: String,
     pub body: String,
     pub gold: u32,
@@ -300,6 +306,27 @@ pub fn mail_attachment_label(item: &MailAttachment) -> String {
     item.label()
 }
 
+/// Crystal DateTime.FromBinary display; unknown/invalid dates remain blank.
+pub fn mail_date_label(binary: i64) -> String {
+    const EPOCH_TICKS: i64 = 621_355_968_000_000_000;
+    const MAX_TICKS: u64 = 3_155_378_975_999_999_999;
+    let bits = binary as u64;
+    let ticks = bits & 0x3fff_ffff_ffff_ffff;
+    if ticks == 0 || ticks > MAX_TICKS {
+        return String::new();
+    }
+    let unix_ticks = ticks as i64 - EPOCH_TICKS;
+    let Some(date) = chrono::DateTime::from_timestamp(
+        unix_ticks.div_euclid(10_000_000),
+        (unix_ticks.rem_euclid(10_000_000) * 100) as u32,
+    ) else { return String::new(); };
+    if bits >> 62 >= 2 {
+        date.with_timezone(&chrono::Local).format("%d/%m/%y %-H:%M:%S").to_string()
+    } else {
+        date.format("%d/%m/%y %-H:%M:%S").to_string()
+    }
+}
+
 pub fn mail_claim_enabled(msg: &MailMessage) -> bool {
     msg.operation.is_none() && !msg.claimed && !msg.locked && msg.has_attachment()
 }
@@ -311,6 +338,18 @@ pub fn mail_delete_enabled(msg: &MailMessage) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mail_dates_follow_source_format_and_leave_unknown_values_blank() {
+        assert_eq!(mail_date_label(0), "");
+        assert_eq!(mail_date_label(i64::MAX), "");
+        assert_eq!(mail_date_label(-1), "");
+        assert_eq!(mail_date_label(621_355_968_000_000_000), "01/01/70 0:00:00");
+        assert_eq!(mail_date_label(621_355_968_000_000_000 | (1i64 << 62)), "01/01/70 0:00:00");
+        let parsed: MailMessage = serde_json::from_str(r#"{"id":3,"canReply":true,"dateSentBinaryDatetime":621355968000000000}"#).unwrap();
+        assert!(parsed.can_reply);
+        assert_eq!(parsed.date_sent_binary_datetime, 621_355_968_000_000_000);
+    }
 
     #[test]
     fn full_mailbox_keeps_appended_receipt_without_evicting_real_mail() {
@@ -366,6 +405,7 @@ mod tests {
             claimed,
             locked,
             read: false,
+            ..Default::default()
         }
     }
 

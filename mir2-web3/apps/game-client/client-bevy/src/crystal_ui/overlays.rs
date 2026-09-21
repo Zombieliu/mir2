@@ -44,8 +44,8 @@ use crate::game_shop::{
 };
 use crate::inventory::{concrete_item_image_index, item_icon_path, InventoryModel, ItemModel};
 use crate::mail::{
-    mail_claim_enabled, mail_delete_enabled, MailAttachment, MailModel, MailOperationKind,
-    MailPageCursor, MAX_MAIL_ATTACHMENTS,
+    mail_claim_enabled, mail_date_label, mail_delete_enabled, MailAttachment, MailMessage,
+    MailModel, MailOperationKind, MailPageCursor, MAX_MAIL_ATTACHMENTS,
 };
 use crate::map::MapModel;
 use crate::native_shell::{
@@ -851,6 +851,12 @@ pub struct NativePlayerUiState {
     /// A prompt closing on Enter/Escape/Yes/No consumes the remainder of that
     /// input frame so covered mail or world controls cannot receive it.
     pub(crate) mail_delete_input_consumed: bool,
+    /// The source reader is keyed by the authoritative MailID, rather than a
+    /// list row. Refreshes therefore cannot retarget a reader action.
+    pub(crate) mail_reader: Option<MailReaderUi>,
+    /// Close/Escape/read actions consume their input frame after dismissing a
+    /// reader so covered MailDialog or world controls cannot receive it.
+    pub(crate) mail_reader_input_consumed: bool,
     pub inventory_window: InventoryDialogUi,
     pub selected_group_member: Option<u8>,
     /// Crystal's group window accepts a player name independently of the
@@ -959,6 +965,18 @@ pub(crate) struct MailDeletePrompt {
     items: Vec<MailAttachment>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MailReaderKind {
+    Letter,
+    Parcel,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct MailReaderUi {
+    mail_id: u64,
+    kind: MailReaderKind,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) struct EquipmentItemDrag {
     source_slot: u32,
@@ -1054,6 +1072,8 @@ impl Default for NativePlayerUiState {
             inventory_delete_prompt: None,
             mail_delete_prompt: None,
             mail_delete_input_consumed: false,
+            mail_reader: None,
+            mail_reader_input_consumed: false,
             inventory_window: InventoryDialogUi::default(),
             selected_group_member: None,
             group_invite_draft: String::new(),
@@ -1311,6 +1331,8 @@ impl NativePlayerUiState {
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
         self.mail_delete_prompt.is_some()
             || self.mail_delete_input_consumed
+            || self.mail_reader.is_some()
+            || self.mail_reader_input_consumed
             || self.storage_password_prompt.is_some()
             || self.storage_password_input_consumed
             || self.storage_rental_confirmation.is_some()
@@ -1386,6 +1408,8 @@ impl NativePlayerUiState {
             || self.inventory_delete_prompt.is_some()
             || self.mail_delete_prompt.is_some()
             || self.mail_delete_input_consumed
+            || self.mail_reader.is_some()
+            || self.mail_reader_input_consumed
             || self.guild_gold_prompt.is_some()
             || self.trade_dialog.open
             || self.trade_dialog.message.is_some()
@@ -1436,6 +1460,8 @@ impl NativePlayerUiState {
         self.inventory_delete_prompt = None;
         self.mail_delete_prompt = None;
         self.mail_delete_input_consumed = false;
+        self.mail_reader = None;
+        self.mail_reader_input_consumed = false;
         self.inventory_window.end_drag();
         self.inventory_window.clear_cursor();
         self.shop_repair_container = 0;
@@ -1914,6 +1940,12 @@ pub enum NativePlayerUiIntent {
     DeleteMail {
         mail_id: u64,
     },
+    /// MailReadLetterDialog toggles the authoritative lock state by exact
+    /// MailID. It is intentionally a status request, like Read/Delete.
+    LockMail {
+        mail_id: u64,
+        lock: bool,
+    },
     SendMail {
         recipient: String,
         message: String,
@@ -2029,7 +2061,7 @@ impl NativePlayerUiIntent {
             // Crystal has no negative acknowledgement for these status
             // commands. Queue-local deduplication prevents duplicate input;
             // a persistent receipt lock would make a rejected request unretryable.
-            Self::ReadMail { .. } | Self::DeleteMail { .. } => None,
+            Self::ReadMail { .. } | Self::DeleteMail { .. } | Self::LockMail { .. } => None,
             Self::ClaimMail { mail_id } => Some(PendingOperationKey::ClaimMail(*mail_id)),
             Self::SendMail {
                 recipient,
@@ -2195,7 +2227,12 @@ impl NativePlayerUiIntentQueue {
         self.push_intent_at(intent, crate::hero_model::hero_clock_ms(), delay)
     }
     fn push_intent_at(&mut self, intent: NativePlayerUiIntent, now: u64, delay: u64) -> bool {
-        if matches!(&intent, NativePlayerUiIntent::ReadMail { .. } | NativePlayerUiIntent::DeleteMail { .. })
+        if matches!(
+            &intent,
+            NativePlayerUiIntent::ReadMail { .. }
+                | NativePlayerUiIntent::DeleteMail { .. }
+                | NativePlayerUiIntent::LockMail { .. }
+        )
             && (self.intents.len() >= MAX_QUEUED || self.intents.iter().any(|queued| queued == &intent))
         {
             return false;
@@ -2602,6 +2639,12 @@ struct OverlayInventoryDeleteDialog;
 struct OverlayMailDeleteDialog;
 
 #[derive(Component)]
+struct OverlayMailReadLetter;
+
+#[derive(Component)]
+struct OverlayMailReadParcel;
+
+#[derive(Component)]
 struct OverlayInventoryDeleteAmountInput;
 
 #[derive(Component)]
@@ -2851,6 +2894,11 @@ enum OverlayButton {
     ReadMail(u64),
     ClaimMail(u64),
     DeleteMail(u64),
+    MailReply(u64),
+    MailReaderClose,
+    MailReaderDelete,
+    MailReaderLock,
+    MailReaderClaim,
     OpenMailCompose,
     MailRecipientFocus,
     MailMessageFocus,
@@ -3247,6 +3295,7 @@ fn sync_local_panel_models(
     mut skill_receipts: Option<ResMut<crate::skill_model::SkillModelReceipts>>,
 ) {
     state.mail_delete_input_consumed = false;
+    state.mail_reader_input_consumed = false;
     reconcile_inventory_capacity(&mut state, &inventory);
     if !state.inventory_open() {
         state.inventory_delete_mode = false;
@@ -3269,6 +3318,14 @@ fn sync_local_panel_models(
     {
         state.mail_delete_input_consumed |= state.mail_delete_prompt.is_some();
         state.mail_delete_prompt = None;
+    }
+    if state
+        .mail_reader
+        .as_ref()
+        .is_some_and(|reader| !mail_reader_is_current(reader, &mail))
+    {
+        state.mail_reader_input_consumed = true;
+        state.mail_reader = None;
     }
     storage.clamp_after_refresh(&mut storage_ui.cursor);
     storage_ui.bag_selection = storage_ui.bag_selection.filter(|selection| {
@@ -3869,6 +3926,40 @@ fn spawn_overlay_root(mut commands: Commands) {
                     ..default()
                 },
                 BackgroundColor(PANEL_BG),
+            ));
+            root.spawn((
+                OverlayMailReadLetter,
+                FocusPolicy::Block,
+                GlobalZIndex(OVERLAY_NPC_DIALOG_Z),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(100.0),
+                    top: Val::Px(100.0),
+                    width: Val::Px(236.0),
+                    height: Val::Px(300.0),
+                    display: Display::None,
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                BackgroundColor(Color::NONE),
+            ));
+            // Source Title675's exported frame is 236x384 even though the
+            // dialog constructor declared 236x300. Its controls reach y=375.
+            root.spawn((
+                OverlayMailReadParcel,
+                FocusPolicy::Block,
+                GlobalZIndex(OVERLAY_NPC_DIALOG_Z),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(100.0),
+                    top: Val::Px(100.0),
+                    width: Val::Px(236.0),
+                    height: Val::Px(384.0),
+                    display: Display::None,
+                    overflow: Overflow::clip(),
+                    ..default()
+                },
+                BackgroundColor(Color::NONE),
             ));
             root.spawn((
                 OverlayBigMap,
@@ -5863,6 +5954,19 @@ pub(crate) fn process_overlay_keyboard(
         return;
     }
 
+    // Mail readers are independent source windows. Escape closes the current
+    // exact-ID reader and consumes the entire frame before it can reach the
+    // list, chat, or world movement handlers.
+    if state.mail_reader.is_some() {
+        if keys.just_pressed(KeyCode::Escape) {
+            state.mail_reader = None;
+            state.mail_reader_input_consumed = true;
+            ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+        }
+        typed.clear();
+        return;
+    }
+
     // MirAmountBox/MirMessageBox consume every keyboard event while modal.
     // Enter confirms, Escape follows Cancel/No, and the amount textbox accepts
     // digits only with the initial maximum value fully selected.
@@ -6600,6 +6704,7 @@ fn process_overlay_buttons(
     let trade_modal_was_open = state.trade_dialog.gold_prompt.is_some();
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
     let mail_delete_modal_was_open = state.mail_delete_prompt.is_some();
+    let mail_reader_was_open = state.mail_reader.is_some();
     let message_was_open = state.trade_dialog.message.is_some();
     let game_shop_modal_was_open = state.game_shop_dialog.confirmation.is_some();
     let storage_rental_modal_was_open = state.storage_rental_confirmation.is_some();
@@ -6623,6 +6728,18 @@ fn process_overlay_buttons(
         if state.storage_password_input_consumed
             || state.storage_rental_input_consumed
             || state.mail_delete_input_consumed
+            || state.mail_reader_input_consumed
+        {
+            continue;
+        }
+        if (mail_reader_was_open || state.mail_reader.is_some())
+            && !matches!(
+                button,
+                OverlayButton::MailReaderClose
+                    | OverlayButton::MailReaderDelete
+                    | OverlayButton::MailReaderLock
+                    | OverlayButton::MailReaderClaim
+            )
         {
             continue;
         }
@@ -7878,7 +7995,11 @@ fn process_overlay_buttons(
                 state.selected_skill_id = None;
             }
             OverlayButton::SelectMail(id) => {
-                let _ = mail.select_visible(id);
+                if mail.selected_id == Some(id) {
+                    let _ = open_mail_reader(&mut state, &mail, &mut intents, &mut pending, id);
+                } else {
+                    let _ = mail.select_visible(id);
+                }
             }
             OverlayButton::MailPagePrev => {
                 mail_ui.cursor.page = mail_ui.cursor.page.saturating_sub(1);
@@ -7890,16 +8011,7 @@ fn process_overlay_buttons(
                 mail.selected_id = None;
             }
             OverlayButton::ReadMail(id) => {
-                if mail
-                    .mails
-                    .iter()
-                    .any(|message| message.id == id && message.operation.is_none() && !message.read)
-                {
-                    intents.push_pending_intent(
-                        &mut pending,
-                        NativePlayerUiIntent::ReadMail { mail_id: id },
-                    );
-                }
+                let _ = open_mail_reader(&mut state, &mail, &mut intents, &mut pending, id);
             }
             OverlayButton::ClaimMail(id) => {
                 if let Some(msg) = mail.mails.iter().find(|m| m.id == id) {
@@ -7908,6 +8020,79 @@ fn process_overlay_buttons(
                             &mut pending,
                             NativePlayerUiIntent::ClaimMail { mail_id: id },
                         );
+                    }
+                }
+            }
+            OverlayButton::MailReply(id) => {
+                let recipient = mail
+                    .mails
+                    .iter()
+                    .find(|message| {
+                        message.id == id && message.operation.is_none() && message.can_reply
+                    })
+                    .map(|message| message.sender.clone());
+                if let Some(recipient) = recipient {
+                    dispatch_ui_action(
+                        &mut state.core,
+                        &mut effects,
+                        mir2_ui_core::action::UiAction::OpenMailCompose,
+                    );
+                    dispatch_ui_action(
+                        &mut state.core,
+                        &mut effects,
+                        mir2_ui_core::action::UiAction::SetMailRecipient { recipient },
+                    );
+                    compose_ui.focus = MailComposeFocus::Message;
+                    compose_ui.last_notice = None;
+                }
+            }
+            OverlayButton::MailReaderClose => {
+                if state.mail_reader.take().is_some() {
+                    state.mail_reader_input_consumed = true;
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                }
+            }
+            OverlayButton::MailReaderDelete => {
+                let mail_id = mail_reader_message(&state, &mail).and_then(|message| {
+                    (message.has_attachment() == false && mail_delete_enabled(message))
+                        .then_some(message.id)
+                });
+                if let Some(mail_id) = mail_id {
+                    if intents.push_pending_intent(
+                        &mut pending,
+                        NativePlayerUiIntent::DeleteMail { mail_id },
+                    ) {
+                        state.mail_reader = None;
+                        state.mail_reader_input_consumed = true;
+                        ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                    }
+                }
+            }
+            OverlayButton::MailReaderLock => {
+                let lock = mail_reader_message(&state, &mail).and_then(|message| {
+                    (mail_reader_kind(message) == MailReaderKind::Letter)
+                        .then_some((message.id, !message.locked))
+                });
+                if let Some((mail_id, lock)) = lock {
+                    if intents.push_pending_intent(
+                        &mut pending,
+                        NativePlayerUiIntent::LockMail { mail_id, lock },
+                    ) {
+                        ui_audio.push(crate::audio::NativeUiSound::ButtonA);
+                    }
+                }
+            }
+            OverlayButton::MailReaderClaim => {
+                let mail_id = mail_reader_message(&state, &mail).and_then(|message| {
+                    (mail_reader_kind(message) == MailReaderKind::Parcel && mail_claim_enabled(message))
+                        .then_some(message.id)
+                });
+                if let Some(mail_id) = mail_id {
+                    if intents.push_pending_intent(
+                        &mut pending,
+                        NativePlayerUiIntent::ClaimMail { mail_id },
+                    ) {
+                        ui_audio.push(crate::audio::NativeUiSound::ButtonB);
                     }
                 }
             }
@@ -9418,6 +9603,10 @@ fn render_overlays(
             Query<(Entity, &mut Node), With<OverlayStorageRentalModal>>,
             Query<(Entity, &mut Node), With<OverlayMailDeleteModal>>,
         )>,
+        ParamSet<(
+            Query<(Entity, &mut Node, &mut GlobalZIndex), With<OverlayMailReadLetter>>,
+            Query<(Entity, &mut Node, &mut GlobalZIndex), With<OverlayMailReadParcel>>,
+        )>,
     )>,
     mut commands: Commands,
     mut mail_cache: Local<MailRenderCache>,
@@ -9656,6 +9845,45 @@ fn render_overlays(
                     state.help.page,
                     &state.keyboard,
                 )
+            },
+        );
+    }
+    {
+        let reader = state.mail_reader.and_then(|reader| {
+            mail.mails
+                .iter()
+                .find(|message| {
+                    message.id == reader.mail_id
+                        && message.operation.is_none()
+                        && mail_reader_kind(message) == reader.kind
+                })
+                .map(|message| (reader, message))
+        });
+        let mut readers = panels.p3();
+        fill_positioned_panel(
+            &mut commands,
+            &mut readers.p0(),
+            100.0,
+            100.0,
+            OVERLAY_NPC_DIALOG_Z,
+            reader.is_some_and(|(reader, _)| reader.kind == MailReaderKind::Letter),
+            |parent| {
+                if let Some((_, message)) = reader {
+                    render_mail_reader_letter(parent, asset_server.as_deref(), message);
+                }
+            },
+        );
+        fill_positioned_panel(
+            &mut commands,
+            &mut readers.p1(),
+            100.0,
+            100.0,
+            OVERLAY_NPC_DIALOG_Z,
+            reader.is_some_and(|(reader, _)| reader.kind == MailReaderKind::Parcel),
+            |parent| {
+                if let Some((_, message)) = reader {
+                    render_mail_reader_parcel(parent, asset_server.as_deref(), message);
+                }
             },
         );
     }
@@ -13006,6 +13234,308 @@ fn valid_mail_attachment_ids(inventory: &InventoryModel, ids: &[u64]) -> Option<
     Some(result)
 }
 
+fn mail_reader_kind(message: &MailMessage) -> MailReaderKind {
+    if message.has_attachment() {
+        MailReaderKind::Parcel
+    } else {
+        MailReaderKind::Letter
+    }
+}
+
+fn mail_reader_is_current(reader: &MailReaderUi, mail: &MailModel) -> bool {
+    mail.mails.iter().any(|message| {
+        message.id == reader.mail_id
+            && message.operation.is_none()
+            && mail_reader_kind(message) == reader.kind
+    })
+}
+
+fn open_mail_reader(
+    state: &mut NativePlayerUiState,
+    mail: &MailModel,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+    mail_id: u64,
+) -> bool {
+    let Some(message) = mail
+        .mails
+        .iter()
+        .find(|message| message.id == mail_id && message.operation.is_none())
+    else {
+        return false;
+    };
+    if !message.read {
+        // This status request has no negative acknowledgement. Opening the
+        // source reader never depends on a later snapshot acknowledgement.
+        let _ = intents.push_pending_intent(pending, NativePlayerUiIntent::ReadMail { mail_id });
+    }
+    state.mail_reader = Some(MailReaderUi {
+        mail_id,
+        kind: mail_reader_kind(message),
+    });
+    true
+}
+
+fn mail_reader_message<'a>(
+    state: &NativePlayerUiState,
+    mail: &'a MailModel,
+) -> Option<&'a MailMessage> {
+    let reader = state.mail_reader.as_ref()?;
+    mail.mails.iter().find(|message| {
+        message.id == reader.mail_id
+            && message.operation.is_none()
+            && mail_reader_kind(message) == reader.kind
+    })
+}
+
+fn mail_reader_text(message: &MailMessage) -> String {
+    message.body.replace("\\r\\n", "\r\n")
+}
+
+fn overlay_wrapped_text_at(
+    parent: &mut ChildSpawnerCommands,
+    text: &str,
+    rect: CrystalRect,
+    font_size: f32,
+    color: Color,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            overflow: Overflow::clip(),
+            ..default()
+        },
+        Text::new(text.to_owned()),
+        crate::crystal_ui::typography::crystal_text_font(font_size),
+        TextColor(color),
+        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+    ));
+}
+
+fn spawn_mail_reader_button(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    library: &'static str,
+    normal: u16,
+    hover: u16,
+    pressed: u16,
+    disabled: u16,
+    rect: CrystalRect,
+    action: OverlayButton,
+    enabled: bool,
+) {
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_crystal_button_enabled_with_disabled(
+            parent,
+            asset_server,
+            library,
+            normal,
+            hover,
+            pressed,
+            Some(disabled),
+            rect,
+            action,
+            enabled,
+        );
+    } else if enabled {
+        spawn_invisible_overlay_button(parent, rect, action);
+    }
+}
+
+fn render_mail_reader_header(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    message: &MailMessage,
+    frame: &'static str,
+    height: f32,
+) {
+    if let Some(asset_server) = asset_server {
+        spawn_overlay_frame(parent, asset_server, frame, 236.0, height);
+    }
+    spawn_mail_reader_button(
+        parent,
+        asset_server,
+        "Prguse2",
+        360,
+        361,
+        362,
+        362,
+        CrystalRect::new(209.0, 3.0, 24.0, 21.0),
+        OverlayButton::MailReaderClose,
+        true,
+    );
+    overlay_text_at(
+        parent,
+        &message.sender,
+        CrystalRect::new(70.0, 35.0, 150.0, 15.0),
+        10.0,
+        TEXT,
+    );
+    overlay_text_at(
+        parent,
+        &mail_date_label(message.date_sent_binary_datetime),
+        CrystalRect::new(70.0, 56.0, 150.0, 15.0),
+        10.0,
+        TEXT,
+    );
+}
+
+fn render_mail_reader_letter(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    message: &MailMessage,
+) {
+    render_mail_reader_header(
+        parent,
+        asset_server,
+        message,
+        "original-ui/Title/672.png",
+        300.0,
+    );
+    overlay_wrapped_text_at(
+        parent,
+        &mail_reader_text(message),
+        CrystalRect::new(15.0, 92.0, 202.0, 165.0),
+        10.0,
+        TEXT,
+    );
+    // Source handlers guard delete against Locked; retain the source button
+    // but repeat that guard at the action boundary.
+    spawn_mail_reader_button(
+        parent,
+        asset_server,
+        "Title",
+        540,
+        541,
+        542,
+        542,
+        CrystalRect::new(12.0, 265.0, 64.0, 25.0),
+        OverlayButton::MailReaderDelete,
+        true,
+    );
+    spawn_mail_reader_button(
+        parent,
+        asset_server,
+        "Title",
+        686,
+        687,
+        688,
+        688,
+        CrystalRect::new(81.0, 265.0, 64.0, 25.0),
+        OverlayButton::MailReaderLock,
+        true,
+    );
+    spawn_mail_reader_button(
+        parent,
+        asset_server,
+        "Title",
+        193,
+        194,
+        195,
+        195,
+        CrystalRect::new(154.0, 265.0, 68.0, 25.0),
+        OverlayButton::MailReaderClose,
+        true,
+    );
+}
+
+fn render_mail_reader_parcel(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    message: &MailMessage,
+) {
+    render_mail_reader_header(
+        parent,
+        asset_server,
+        message,
+        "original-ui/Title/675.png",
+        384.0,
+    );
+    overlay_wrapped_text_at(
+        parent,
+        &mail_reader_text(message),
+        CrystalRect::new(15.0, 98.0, 202.0, 165.0),
+        10.0,
+        TEXT,
+    );
+    overlay_text_at(
+        parent,
+        &format_crystal_gold(message.gold),
+        CrystalRect::new(63.0, 290.0, 143.0, 15.0),
+        10.0,
+        TEXT,
+    );
+    for (index, attachment) in message.items.iter().take(5).enumerate() {
+        let left = 27.0 + index as f32 * 36.0;
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(left),
+                top: Val::Px(311.0),
+                width: Val::Px(35.0),
+                height: Val::Px(31.0),
+                border: UiRect::all(Val::Px(1.0)),
+                ..default()
+            },
+            BorderColor::all(Color::srgb(0.0, 1.0, 0.0)),
+            BackgroundColor(Color::NONE),
+        ));
+        if let (Some(asset_server), Some(image)) = (
+            asset_server,
+            attachment.image.and_then(|image| u16::try_from(image).ok()),
+        ) {
+            parent.spawn(Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(left),
+                top: Val::Px(311.0),
+                width: Val::Px(35.0),
+                height: Val::Px(31.0),
+                ..default()
+            }).with_children(|cell| {
+                spawn_original_item_image(cell, asset_server, image, 35, 31);
+            });
+        }
+        if attachment.count > 1 {
+            overlay_text_at(
+                parent,
+                &attachment.count.to_string(),
+                CrystalRect::new(left + 18.0, 327.0, 16.0, 12.0),
+                9.0,
+                Color::srgb(1.0, 1.0, 0.0),
+            );
+        }
+    }
+    let collect_enabled = mail_claim_enabled(message);
+    spawn_mail_reader_button(
+        parent,
+        asset_server,
+        "Title",
+        680,
+        681,
+        682,
+        683,
+        CrystalRect::new(30.0, 350.0, 100.0, 25.0),
+        OverlayButton::MailReaderClaim,
+        collect_enabled,
+    );
+    spawn_mail_reader_button(
+        parent,
+        asset_server,
+        "Title",
+        193,
+        194,
+        195,
+        195,
+        CrystalRect::new(135.0, 350.0, 68.0, 25.0),
+        OverlayButton::MailReaderClose,
+        true,
+    );
+}
+
 fn render_mail(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
@@ -13140,8 +13670,8 @@ fn render_mail(
             570,
             571,
             CrystalRect::new(102.0, 414.0, 27.0, 25.0),
-            OverlayButton::OpenMailCompose,
-            false,
+            OverlayButton::MailReply(selected_id),
+            selected.is_some_and(|message| message.can_reply),
         );
         spawn_overlay_crystal_button_enabled(
             parent,
@@ -13152,7 +13682,7 @@ fn render_mail(
             574,
             CrystalRect::new(129.0, 414.0, 27.0, 25.0),
             OverlayButton::ReadMail(selected_id),
-            selected.is_some_and(|message| !message.read),
+            selected.is_some(),
         );
         spawn_overlay_crystal_button_enabled(
             parent,
@@ -14440,6 +14970,10 @@ mod storage_rental_tests;
 #[cfg(test)]
 #[path = "mail_delete_tests.rs"]
 mod mail_delete_tests;
+
+#[cfg(test)]
+#[path = "mail_reader_tests.rs"]
+mod mail_reader_tests;
 
 #[cfg(test)]
 mod tests {
@@ -16044,6 +16578,7 @@ mod tests {
             claimed,
             locked,
             read: false,
+            ..Default::default()
         }
     }
 
@@ -17632,6 +18167,13 @@ mod tests {
             .resource::<NativePlayerUiIntentQueue>()
             .intents
             .is_empty());
+        // A second source row click opens the reader. The remaining legacy
+        // list-action assertions model closing it before returning to MailDialog.
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.mail_reader = None;
+            state.mail_reader_input_consumed = false;
+        }
         assert!(
             !app.world()
                 .resource::<MailModel>()

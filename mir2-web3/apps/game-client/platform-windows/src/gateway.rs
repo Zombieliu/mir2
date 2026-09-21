@@ -5162,6 +5162,10 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
     Some(json!({
         "id": id,
         "sender": mail.get("senderName").or_else(|| mail.get("sender")).or_else(|| mail.get("from")).and_then(Value::as_str).unwrap_or("System"),
+        "can_reply": mail.get("canReply").or_else(|| mail.get("can_reply")).and_then(Value::as_bool).unwrap_or(false),
+        "date_sent_binary_datetime": value_i64(mail.get("dateSentBinaryDatetime").or_else(|| mail.get("date_sent_binary_datetime"))).unwrap_or_default(),
+        "metadata_known": mail.get("canReply").or_else(|| mail.get("can_reply")).and_then(Value::as_bool).is_some()
+            && value_i64(mail.get("dateSentBinaryDatetime").or_else(|| mail.get("date_sent_binary_datetime"))).is_some(),
         "subject": if subject.is_empty() { message.lines().next().unwrap_or("Mail") } else { &subject },
         "body": message,
         "gold": value_u32(mail.get("gold")).unwrap_or_default(),
@@ -5174,7 +5178,8 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
 
 fn mail_attachment_json(item: &Value) -> Option<Value> {
     if let Some(name) = item.as_str().filter(|name| !name.is_empty()) {
-        return Some(json!({ "name": name, "count": 1 }));
+        return Some(json!({ "name": name, "count": 1,
+            "image": mir2_game_data::crystal_item_by_name(name).map(|template| template.image) }));
     }
     let item_index = value_i32(item.get("itemIndex").or_else(|| item.get("item_index")));
     let name = value_string(item.get("name"));
@@ -5185,6 +5190,9 @@ fn mail_attachment_json(item: &Value) -> Option<Value> {
     Some(json!({
         "uniqueId": value_u64(item.get("uniqueId").or_else(|| item.get("unique_id"))),
         "itemIndex": item_index,
+        "image": item_index.and_then(mir2_game_data::crystal_item_by_index)
+            .or_else(|| name.as_deref().and_then(mir2_game_data::crystal_item_by_name))
+            .map(|template| template.image),
         "key": key,
         "name": name,
         "count": value_u32(item.get("count")).and_then(|value| u16::try_from(value).ok()).unwrap_or(1),
@@ -9911,6 +9919,28 @@ mod tests {
             packet: "ObjectMonster".into(),
             payload: json!({}),
         }));
+    }
+
+    #[test]
+    fn mail_reader_metadata_and_exact_source_icons_survive_wire_transform() {
+        let template = mir2_game_data::crystal_item_by_index(658).expect("potion template");
+        let mail = mail_message_json(&json!({"mailId":42,"canReply":true,"dateSentBinaryDatetime":"621355968000000000",
+            "items":[{"itemIndex":658,"uniqueId":777,"count":3}]})).unwrap();
+        assert_eq!(mail["can_reply"], true);
+        assert_eq!(mail["metadata_known"], true);
+        assert_eq!(mail["date_sent_binary_datetime"], 621_355_968_000_000_000i64);
+        assert_eq!(mail["items"][0]["image"], template.image);
+        assert_eq!(mail["items"][0]["uniqueId"], 777);
+        assert_eq!(mail["items"][0]["count"], 3);
+        assert_eq!(mail_attachment_json(&json!(template.name)).unwrap()["image"], template.image);
+        assert!(mail_attachment_json(&json!("unknown mail item 12345")).unwrap()["image"].is_null());
+        let snapshot = mail_message_json(&json!({"id":42,"items":[]})).unwrap();
+        assert_eq!(snapshot["metadata_known"], false);
+        let command = NativeOutboundCommand::LockMail { mail_id: 42, lock: true };
+        assert_eq!(command.command_type(), "lockMail");
+        let wire = serde_json::to_value(command).unwrap();
+        assert_eq!(wire["mailId"], 42);
+        assert_eq!(wire["lock"], true);
     }
 
     #[test]

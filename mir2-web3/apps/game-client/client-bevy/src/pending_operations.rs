@@ -1569,6 +1569,9 @@ mod tests {
         crate::mail::MailMessage {
             id,
             sender: "System".into(),
+            can_reply: false,
+            date_sent_binary_datetime: 0,
+            metadata_known: false,
             subject: "Subject".into(),
             body: "Body".into(),
             gold: 10,
@@ -1645,6 +1648,7 @@ mod tests {
                     claimed: false,
                     locked: true,
                     read: true,
+                    ..Default::default()
                 },
             ],
             selected_id: None,
@@ -1669,6 +1673,7 @@ mod tests {
                 claimed: false,
                 locked: true,
                 read: true,
+                ..Default::default()
             }],
             selected_id: None,
         };

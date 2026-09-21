@@ -363,10 +363,16 @@ fn mail_status_retry_preserves_authority_and_claim_pending_protection() {
     app.world_mut().resource_mut::<MailModel>().mails.push(mail(70, 0, None, false));
     let before = app.world().resource::<MailModel>().mails.clone();
     for button in [OverlayButton::ReadMail(70), OverlayButton::DeleteMail(70)] {
-        press_button(&mut app, button);
-        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().len(), 1);
-        press_button(&mut app, button);
-        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().len(), 1);
+        for _ in 0..2 {
+            // Read now opens its independent source reader. This test exercises
+            // status-command retry after that reader is explicitly closed.
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.mail_reader = None;
+            state.mail_reader_input_consumed = false;
+            drop(state);
+            press_button(&mut app, button);
+            assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().len(), 1);
+        }
         assert_eq!(app.world().resource::<MailModel>().mails, before);
     }
     let mut queue = NativePlayerUiIntentQueue::default();

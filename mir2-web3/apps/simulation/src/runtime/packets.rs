@@ -625,7 +625,10 @@ fn stage5_mail_to_client_mail(mail: &Stage5MailMessage) -> ClientMail {
         locked: mail.locked,
         can_reply: true,
         collected: mail.claimed,
-        date_sent_binary_datetime: current_binary_datetime(),
+        // Legacy Stage5 mail has no persisted send timestamp. Re-projecting
+        // the mailbox must not invent a new sent date on every refresh.
+        // Zero is an unknown date until durable creation metadata is supplied.
+        date_sent_binary_datetime: 0,
         gold: mail.gold,
         items: stage5_mail_attachment_user_items(mail),
     }
@@ -10179,6 +10182,18 @@ mod game_shop_start_stock_tests {
 #[cfg(test)]
 mod mail_status_transaction_tests {
     use super::*;
+    #[test]
+    fn legacy_mail_projection_does_not_invent_a_send_timestamp() {
+        let mail: Stage5MailMessage = serde_json::from_value(serde_json::json!({
+            "id": 42, "from": "System", "to": "Scout", "subject": "Old mail",
+            "body": "No persisted date", "gold": 0, "claimed": false, "deleted": false
+        })).unwrap();
+        let first = stage5_mail_to_client_mail(&mail);
+        let again = stage5_mail_to_client_mail(&mail);
+        assert_eq!(first.date_sent_binary_datetime, 0);
+        assert_eq!(again.date_sent_binary_datetime, first.date_sent_binary_datetime);
+        assert_eq!(again.mail_id, 42);
+    }
     use crate::config::{
         deliver_stage5_system_mail, AccountStoreTransactionFault, Stage5MailDelivery,
         Stage5MailTargetKind,

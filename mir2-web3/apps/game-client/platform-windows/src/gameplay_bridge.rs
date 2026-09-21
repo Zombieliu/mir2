@@ -2724,6 +2724,9 @@ pub fn forward_quest_ui_intents(
             NativePlayerUiIntent::ReadMail { mail_id } => {
                 NativeOutboundCommand::ReadMail { mail_id }
             }
+            NativePlayerUiIntent::LockMail { mail_id, lock } => {
+                NativeOutboundCommand::LockMail { mail_id, lock }
+            }
             NativePlayerUiIntent::ClaimMail { mail_id } => {
                 NativeOutboundCommand::CollectParcel { mail_id }
             }
