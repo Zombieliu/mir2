@@ -1,6 +1,6 @@
 # Current whole-UI acceptance matrix
 
-Goal scope is unchanged. Latest staged settings/guidance package is C:/numeron-legend-of-rebirth-20260921-settings-guidance, client SHA256 28E37B2DC989B73CE3A46D9A0EE3ABEAB4474E56FCE0962FD4CDAEFC8829AEE8 (see README for matched Gateway). No same-build native screenshot or desktop operation proves acceptance for this package. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots in README.md belong to explicitly older packages.
+Goal scope is unchanged. Running manual-acceptance package is C:/numeron-legend-of-rebirth-20260922-parcel-map (client E088C0ED52EC23C0BE93F2CEFC314174E3D5FE703FBAD1A7CD9455E06EF52E5C); the next source-size/hierarchy package is C:/numeron-legend-of-rebirth-20260922-map-geometry (client2EA421408137B0533BB6347DC0EDA6EFB51A0721DA19ADC9CE96B78F4E27305F), pending normal-exit handoff. Further postage-reserve edits are not included in that prepared package. Startup/LoginSuccess alone is not page acceptance. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots in README.md belong to explicitly older packages.
 
 Every row below requires actual visible rendering, correct inputs/state/close behavior, applicable Crystal source or original-client comparison, and an evidence path tied to the tested executable. Status **open** means not accepted, including rows with implemented code and passing tests.
 
@@ -21,14 +21,14 @@ Every row below requires actual visible rendering, correct inputs/state/close be
 | Quest tracking | Main choice, destination/coordinates, map link, target counter/route | Open; older objective card only |
 | NPC dialogue | Pages/options/close, no background click, current NPC identity | Open |
 | Small map | Terrain/markers/day-night, move/zoom/toggle, no stale resources | Open |
-| Large/world map | Search, NPC/hunt areas, map transitions, go-to/cancel path | Open; user confirmed map right-click does nothing in settings-guidance; source fix not yet tested or deployed |
+| Large/world map | Search, NPC/hunt areas, map transitions, go-to/cancel path | Open; navigation deployed in parcel-map, focused4/4; source-sized image geometry input87/87 in next package, no same-version visual pass |
 | NPC buy | Item list/scroll, quantity/cost, inventory/gold after receipt | Open |
 | NPC sell | Drag correct instance/count, quote/confirm/cancel, authoritative balances | Open |
 | Repair / special repair | Eligible item, quote, affordability, confirmed durability | Open |
 | Storage | Password flows, capacity/rental, pages, drag/swap/merge, persistence | Open |
 | Trade | Two ordinary players, items/gold/cancel/confirm/reject, no duplicate assets | Open |
 | Mail list/read | Original rows, letter/parcel, read/lock, delete warning, claim | Open; source-backed candidate only |
-| Mail compose | NPC parcel entry, recipient, text, attachments, postage/stamp, send/error | Open; Parcel frame/transport in uncommitted integration; UI library 1016/1016, native integration/overflow recovery and visual still pending; backend 8560ce6df separately tested, not deployed |
+| Mail compose | NPC parcel entry, recipient, text, attachments, postage/stamp, send/error | Open; Parcel/backend deployed; follow-up reserve/error-display code UI1020/1020, runtime250/250, not deployed; ordinary operations/visual still pending |
 | Auction | Browse/search/pages, actual eligible listing/cancel/purchase receipts | Open |
 | Game shop | Categories, currency/prices, pages/details, ordinary purchase/error | Open |
 | Friends / blacklist | Empty/populated list, selection, authorized actions, persistence | Open; older empty/tabs only |

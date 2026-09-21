@@ -124,6 +124,11 @@ struct NativeInboundBuffer {
     /// Highest-priority single-slot receipt reserve. It is outside the normal
     /// critical FIFO so no snapshot/ACK/social flood can evict it.
     game_shop_receipt: Option<String>,
+    /// One structurally-valid, uncorrelated parcel postage reply that could
+    /// not enter the saturated critical FIFO. Keeping it outside the FIFO
+    /// prevents a lost reply from permanently reserving the UI's single
+    /// in-flight quote, without replacing any transaction receipt.
+    mail_cost_reserve: Option<u32>,
 }
 
 impl NativeInboundBuffer {
@@ -158,6 +163,7 @@ impl NativeInboundBuffer {
                 };
                 self.pending.retain(is_process_lifetime_asset_message);
                 self.game_shop_receipt = Some(json);
+                self.mail_cost_reserve = None;
                 self.pending.push_back(
                     NativeInboundMessage::DataResetPreservingExactGameShopReceipt(receipt),
                 );
@@ -165,6 +171,24 @@ impl NativeInboundBuffer {
             }
             other => other,
         };
+
+        // A reserved Cost is ordered after every MailService event already in
+        // `pending`. Do not admit a later service event ahead of it.
+        if matches!(&message, NativeInboundMessage::MailService(_))
+            && self.mail_cost_reserve.is_some()
+        {
+            return false;
+        }
+        let mail_cost = match &message {
+            NativeInboundMessage::MailService(json) => mail_service_cost(json),
+            _ => None,
+        };
+        // Crystal carries no quote request ID. The UI sends only one Cost
+        // request at a time, so retaining a second queued Cost would make its
+        // reply ambiguous and let a later receipt compete with the first.
+        if mail_cost.is_some() && self.pending.iter().any(is_valid_mail_cost) {
+            return false;
+        }
 
         // Reset barriers must never compete with snapshots or acknowledgements
         // for capacity. A newer DataReset dominates every queued model and
@@ -176,6 +200,7 @@ impl NativeInboundBuffer {
             NativeInboundMessage::DataReset => {
                 self.pending.retain(is_process_lifetime_asset_message);
                 self.game_shop_receipt = None;
+                self.mail_cost_reserve = None;
                 self.pending.push_back(message);
                 return true;
             }
@@ -252,6 +277,10 @@ impl NativeInboundBuffer {
         } else if is_critical_message(&message) {
             while self.message_count() >= MAX_NATIVE_MESSAGES {
                 if !self.evict_oldest_non_critical() {
+                    if let Some(cost) = mail_cost {
+                        self.mail_cost_reserve = Some(cost);
+                        return true;
+                    }
                     return false;
                 }
             }
@@ -266,6 +295,10 @@ impl NativeInboundBuffer {
                 self.evict_oldest_coalescible_snapshot()
             };
             if !evicted {
+                if let Some(cost) = mail_cost {
+                    self.mail_cost_reserve = Some(cost);
+                    return true;
+                }
                 return false;
             }
         }
@@ -314,6 +347,7 @@ impl NativeInboundBuffer {
         self.pending
             .len()
             .saturating_add(usize::from(self.game_shop_receipt.is_some()))
+            .saturating_add(usize::from(self.mail_cost_reserve.is_some()))
     }
 
     fn pending_bytes(&self) -> usize {
@@ -323,6 +357,9 @@ impl NativeInboundBuffer {
                 total.saturating_add(native_message_bytes(message))
             })
             .saturating_add(self.game_shop_receipt.as_ref().map_or(0, String::capacity))
+            .saturating_add(
+                usize::from(self.mail_cost_reserve.is_some()) * std::mem::size_of::<u32>(),
+            )
     }
 
     fn coalesced_snapshot_count(&self) -> usize {
@@ -355,6 +392,7 @@ impl NativeInboundBuffer {
     fn evict_oldest_non_ack_non_boundary(&mut self) -> bool {
         let Some(index) = self.pending.iter().position(|message| {
             !is_operation_ack(message)
+                && !is_valid_mail_cost(message)
                 && !matches!(
                     message,
                     NativeInboundMessage::DataReset
@@ -370,12 +408,13 @@ impl NativeInboundBuffer {
 
     fn evict_oldest_non_boundary(&mut self) -> bool {
         let Some(index) = self.pending.iter().position(|message| {
-            !matches!(
-                message,
-                NativeInboundMessage::DataReset
-                    | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
-                    | NativeInboundMessage::SceneReset
-            )
+            !is_valid_mail_cost(message)
+                && !matches!(
+                    message,
+                    NativeInboundMessage::DataReset
+                        | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
+                        | NativeInboundMessage::SceneReset
+                )
         }) else {
             return false;
         };
@@ -384,11 +423,23 @@ impl NativeInboundBuffer {
     }
 }
 
+fn mail_service_cost(json: &str) -> Option<u32> {
+    match serde_json::from_str::<mir2_client_bevy::mail_service::MailServiceEvent>(json).ok()? {
+        mir2_client_bevy::mail_service::MailServiceEvent::Cost { cost } => Some(cost),
+        _ => None,
+    }
+}
+
+fn is_valid_mail_cost(message: &NativeInboundMessage) -> bool {
+    matches!(message, NativeInboundMessage::MailService(json) if mail_service_cost(json).is_some())
+}
+
 fn make_buffer() -> Arc<Mutex<NativeInboundBuffer>> {
     let buffer = Arc::new(Mutex::new(NativeInboundBuffer {
         active: true,
         pending: VecDeque::new(),
         game_shop_receipt: None,
+        mail_cost_reserve: None,
     }));
     let mut slot = NATIVE_QUEUE
         .get_or_init(|| Mutex::new(None))
@@ -824,6 +875,19 @@ impl NativeInbound {
                 }
             }
             state.pending = retained;
+            if let Some(cost) = state.mail_cost_reserve.take() {
+                let message = NativeInboundMessage::MailService(
+                    serde_json::to_string(
+                        &mir2_client_bevy::mail_service::MailServiceEvent::Cost { cost },
+                    )
+                    .expect("mail cost event should always serialize"),
+                );
+                if matches(&message) {
+                    matched.push(message);
+                } else {
+                    state.mail_cost_reserve = Some(cost);
+                }
+            }
             matched
         };
 
@@ -881,6 +945,7 @@ impl Drop for NativeInbound {
         buffer.active = false;
         buffer.pending.clear();
         buffer.game_shop_receipt = None;
+        buffer.mail_cost_reserve = None;
     }
 }
 
@@ -954,6 +1019,7 @@ mod tests {
             active: true,
             pending: VecDeque::new(),
             game_shop_receipt: None,
+            mail_cost_reserve: None,
         }
     }
 
@@ -976,6 +1042,143 @@ mod tests {
             buffer.pending.front(),
             Some(NativeInboundMessage::DataReset)
         ));
+    }
+
+    #[test]
+    fn saturated_native_fifo_reserves_one_valid_mail_cost_for_its_consumer() {
+        let _native_queue_guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+        for index in 0..MAX_NATIVE_MESSAGES {
+            assert!(push_native_social_model(index.to_string()));
+        }
+        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
+
+        let mut costs = Vec::new();
+        inbound.drain_matching(
+            |message| matches!(message, NativeInboundMessage::MailService(_)),
+            |message| {
+                if let NativeInboundMessage::MailService(json) = message {
+                    costs.push(json);
+                }
+            },
+        );
+        assert_eq!(costs, vec![r#"{"kind":"cost","cost":125}"#]);
+    }
+
+    #[test]
+    fn queued_mail_cost_survives_full_fifo_game_shop_receipt_and_keeps_its_position() {
+        let _native_queue_guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
+        assert!(!push_native_mail_service(r#"{"kind":"cost","cost":250}"#.to_owned()));
+        for index in 0..MAX_NATIVE_MESSAGES - 1 {
+            assert!(push_native_social_model(index.to_string()));
+        }
+        assert!(push_native_game_shop_receipt(valid_receipt("gs-queued-cost")));
+
+        let mut costs = Vec::new();
+        inbound.drain_matching(
+            |message| matches!(message, NativeInboundMessage::MailService(_)),
+            |message| {
+                if let NativeInboundMessage::MailService(json) = message {
+                    costs.push(json);
+                }
+            },
+        );
+        assert_eq!(costs, vec![r#"{"kind":"cost","cost":125}"#]);
+        let mut receipts = Vec::new();
+        inbound.drain_matching(
+            |message| matches!(message, NativeInboundMessage::GameShopReceipt(_)),
+            |message| {
+                if let NativeInboundMessage::GameShopReceipt(json) = message {
+                    receipts.push(json);
+                }
+            },
+        );
+        assert_eq!(receipts, vec![valid_receipt("gs-queued-cost")]);
+    }
+
+    #[test]
+    fn queued_mail_cost_survives_full_fifo_operation_ack() {
+        let _native_queue_guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
+        for index in 0..MAX_NATIVE_MESSAGES - 1 {
+            assert!(push_native_social_model(index.to_string()));
+        }
+        assert!(push_native_inventory_operation_ack(r#"{"kind":"item","id":7}"#.to_owned()));
+
+        let mut costs = Vec::new();
+        inbound.drain_matching(
+            |message| matches!(message, NativeInboundMessage::MailService(_)),
+            |message| {
+                if let NativeInboundMessage::MailService(json) = message {
+                    costs.push(json);
+                }
+            },
+        );
+        assert_eq!(costs, vec![r#"{"kind":"cost","cost":125}"#]);
+        let mut acknowledgements = 0;
+        inbound.drain_matching(
+            |message| matches!(message, NativeInboundMessage::InventoryOperationAck(_)),
+            |_| acknowledgements += 1,
+        );
+        assert_eq!(acknowledgements, 1);
+    }
+
+    #[test]
+    fn mail_cost_reserve_does_not_displace_a_game_shop_receipt() {
+        let mut buffer = active_buffer();
+        for index in 0..MAX_NATIVE_MESSAGES {
+            assert!(buffer.enqueue(NativeInboundMessage::SocialModel(index.to_string())));
+        }
+        assert!(buffer.enqueue(NativeInboundMessage::MailService(
+            r#"{"kind":"cost","cost":125}"#.to_owned(),
+        )));
+        assert_eq!(buffer.mail_cost_reserve, Some(125));
+        assert!(buffer.enqueue(NativeInboundMessage::GameShopReceipt(valid_receipt("gs-mail"))));
+        assert!(buffer
+            .game_shop_receipt
+            .as_deref()
+            .is_some_and(|json| json.contains("\"requestId\":\"gs-mail\"")));
+        assert_eq!(buffer.mail_cost_reserve, Some(125));
+    }
+
+    #[test]
+    fn data_reset_clears_old_cost_reserve_but_keeps_post_reset_cost_reserve() {
+        let _native_queue_guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+        for index in 0..MAX_NATIVE_MESSAGES {
+            assert!(push_native_social_model(format!("old-{index}")));
+        }
+        assert!(push_native_mail_service(r#"{"kind":"cost","cost":1}"#.to_owned()));
+        assert!(push_native_data_reset());
+
+        // The barrier itself occupies one normal slot. Refill the new session
+        // before adding its Cost, which must remain reserved through the
+        // barrier consumer's stale-data pass.
+        for index in 0..MAX_NATIVE_MESSAGES - 1 {
+            assert!(push_native_social_model(format!("new-{index}")));
+        }
+        assert!(push_native_mail_service(r#"{"kind":"cost","cost":2}"#.to_owned()));
+        inbound.discard_stale_data_before_latest_reset();
+
+        let mut resets = 0;
+        inbound.drain_matching(
+            |message| matches!(message, NativeInboundMessage::DataReset),
+            |_| resets += 1,
+        );
+        assert_eq!(resets, 1);
+        let mut costs = Vec::new();
+        inbound.drain_matching(
+            |message| matches!(message, NativeInboundMessage::MailService(_)),
+            |message| {
+                if let NativeInboundMessage::MailService(json) = message {
+                    costs.push(json);
+                }
+            },
+        );
+        assert_eq!(costs, vec![r#"{"kind":"cost","cost":2}"#]);
     }
 
     #[test]

@@ -161,7 +161,7 @@ impl MailParcelUi {
     }
 
     pub(super) fn postage(&self) -> Option<u32> {
-        self.quote.as_ref().map(|quote| quote.cost)
+        self.quote.as_ref().map(|quote| quote.cost).filter(|cost| *cost != u32::MAX)
     }
 
     pub(super) fn quote_error(&self) -> Option<&str> {
@@ -288,7 +288,7 @@ impl MailParcelUi {
         let Some(current) = Fingerprint::from_draft(draft, inventory, self.stamped) else {
             return false;
         };
-        self.quote.as_ref().is_some_and(|quote| quote.fingerprint == current)
+        self.quote.as_ref().is_some_and(|quote| quote.fingerprint == current && quote.cost != u32::MAX)
             && self.pending_cost.is_none()
     }
 
@@ -352,7 +352,7 @@ impl MailParcelUi {
         let current = draft.and_then(|draft| Fingerprint::from_draft(draft, inventory, self.stamped));
         if current.as_ref() == Some(&pending.fingerprint) {
             self.quote = Some(Quote { fingerprint: pending.fingerprint, cost });
-            self.quote_error = None;
+            self.quote_error = (cost == u32::MAX).then(|| "Postage quote unavailable".to_owned());
         }
     }
 
@@ -570,6 +570,22 @@ pub(super) fn render(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejected_postage_is_unavailable_and_does_not_retry_every_frame() {
+        let mut ui = MailParcelUi::default();
+        let inventory = InventoryModel::default();
+        let mut draft = mir2_ui_core::state::MailComposeDraft::default();
+        draft.gold = 1_000;
+        assert!(ui.begin_quote(&draft, &inventory, 1).is_some());
+        ui.apply_cost(u32::MAX, Some(&draft), &inventory);
+        assert!(!ui.quote_is_current(&draft, &inventory));
+        assert_eq!(ui.postage(), None);
+        assert_eq!(ui.quote_error(), Some("Postage quote unavailable"));
+        assert!(ui.begin_quote(&draft, &inventory, 2).is_none());
+        draft.gold = 2_000;
+        assert!(ui.begin_quote(&draft, &inventory, 3).is_some());
+    }
 
     fn item(id: u64, slot: u32) -> ItemModel {
         ItemModel {
