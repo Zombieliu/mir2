@@ -237,3 +237,20 @@ Next surface audit found storage base/expanded constants30/42 conflicting with
 source/backend80/160. Native storage still uses a non-source bag picker and
 button-first-free transfers; ordinary two-way target-cell drag is not implemented.
 Capacity correction is in progress separately from the consolidated package.
+# Warehouse drag candidate package
+
+Source commit `7636cccd0`. Native-ui library 922/922 passed; Windows release
+build succeeded in 1m18s. Receipts in `C:/mir2-ui-repair-20260921/`:
+`storage-drag-client-tests.log`, `storage-drag-native-build.log`.
+
+Staged directory: `C:/numeron-legend-of-rebirth-20260921-storage-drag`.
+Client SHA256: `A14A86679FF6852CD1779BDB21288B2153B4BD013BD6123CF111F24748E5114A`.
+Gateway SHA256: `FED42F81FF2160C3A95583747C95EA7AC97F6AE52B06502D503D4F5E817C16FD`.
+Config retains localhost19910,1024x768,newcomer-v2; assets junction references
+the repository public asset tree. This package was not launched or deployed.
+No current character/session was interrupted; computer input remains stopped
+after prior manual-input detection pending renewed handoff.
+
+Candidate adds actual bag/storage target-cell dragging and capacity80/160.
+Remaining warehouse paths and source-fidelity limitations are enumerated in
+`../whole-ui-20260921.md`; no warehouse visual pass follows from these tests.
