@@ -33,3 +33,11 @@ Code evidence under C:/mir2-ui-repair-20260921:
 Release build, normal-exit switch and same-version visual/ordinary walking
 verification must be recorded separately. These tests do not prove an actual
 player arrived at the cave or that every map route is collision-reachable.
+
+Release build completed in 1m14s (quest-entry-floor-release-build.log). Prepared
+package: C:/numeron-legend-of-rebirth-20260922-quest-entry-floor, source ffc29fecc.
+Client SHA256: 87ABCF9C032556B66BC968C8A97E2F76A950DF59D38F24FED457E3E8E7DA895E.
+Gateway remains the already-running 3b8bd01f9 version; client-only switch is
+pending normal logout. candidate-manifest.json includes config and both map
+manifest hashes. Assets remain shared, not immutable. Old ui-text client PID59632
+was still running at packaging; no visual pass or player arrival is claimed.
