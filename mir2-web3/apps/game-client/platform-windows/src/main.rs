@@ -29,6 +29,7 @@ mod input;
 mod lifecycle;
 mod map_parser;
 mod movement_trace;
+mod native_fonts;
 mod native_protocol;
 mod session_config;
 mod shell_bridge;
@@ -205,6 +206,7 @@ fn main() -> bevy::app::AppExit {
     );
     app.insert_resource(guidance);
     timing::report("build_runtime_app", app_started);
+    native_fonts::install(&mut app);
     app.world_mut()
         .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()
         .set_native_consumer_enabled(true);
