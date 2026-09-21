@@ -18,7 +18,7 @@ mod remote_motion;
 pub use presentation_pose::PresentationPoseBuffer;
 
 use std::cell::{Cell, RefCell};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use bevy::asset::{AssetMetaCheck, AssetPlugin, LoadState, RenderAssetUsages};
 use bevy::camera::{visibility::RenderLayers, ClearColorConfig, RenderTarget};
@@ -305,6 +305,106 @@ struct NativeSoakCounts {
     image_data_bytes: usize,
     native_queue_messages: usize,
     native_queue_bytes: usize,
+    map_render_images: usize,
+    map_render_url_image_keys: usize,
+    map_render_layouts: usize,
+    map_render_layout_rect_pages: usize,
+}
+
+/// One resolved `AssetServer` image-path group.  Keep this native-only and
+/// sample it only with the opt-in soak line: its purpose is to identify which
+/// producer is retaining decoded `Image` payloads, not to participate in
+/// rendering or asset lifetime.
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct NativeImagePathBucket {
+    count: usize,
+    bytes: usize,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+struct NativeImagePathTelemetry {
+    buckets: Vec<(String, NativeImagePathBucket)>,
+    largest: Vec<(String, usize)>,
+    duplicate_paths: Vec<(String, NativeImagePathBucket)>,
+    untracked_assets: NativeImagePathBucket,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_image_path_bucket(path: &str) -> String {
+    let mut components = path.split('/').filter(|component| !component.is_empty());
+    match (components.next(), components.next()) {
+        (Some("original-ui"), Some(library)) => format!("original-ui/{library}"),
+        (Some("generated"), Some(pack)) => format!("generated/{pack}"),
+        (Some(first), _) => first.to_owned(),
+        _ => "<untracked>".to_owned(),
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn native_image_path_telemetry(
+    images: &Assets<Image>,
+    asset_server: &AssetServer,
+) -> NativeImagePathTelemetry {
+    let mut buckets = BTreeMap::<String, NativeImagePathBucket>::new();
+    let mut paths = BTreeMap::<String, NativeImagePathBucket>::new();
+    let mut untracked_assets = NativeImagePathBucket::default();
+
+    for (id, image) in images.iter() {
+        let bytes = image.data.as_ref().map_or(0, Vec::len);
+        let Some(path) = asset_server.get_path(id) else {
+            untracked_assets.count = untracked_assets.count.saturating_add(1);
+            untracked_assets.bytes = untracked_assets.bytes.saturating_add(bytes);
+            continue;
+        };
+        let path = path.path().to_string_lossy().replace('\\', "/");
+        let bucket = buckets.entry(native_image_path_bucket(&path)).or_default();
+        bucket.count = bucket.count.saturating_add(1);
+        bucket.bytes = bucket.bytes.saturating_add(bytes);
+        let entry = paths.entry(path).or_default();
+        entry.count = entry.count.saturating_add(1);
+        entry.bytes = entry.bytes.saturating_add(bytes);
+    }
+
+    let mut buckets = buckets.into_iter().collect::<Vec<_>>();
+    buckets.sort_by(|left, right| {
+        right
+            .1
+            .bytes
+            .cmp(&left.1.bytes)
+            .then_with(|| right.1.count.cmp(&left.1.count))
+            .then_with(|| left.0.cmp(&right.0))
+    });
+    buckets.truncate(12);
+
+    let mut largest = paths
+        .iter()
+        .map(|(path, value)| (path.clone(), value.bytes))
+        .collect::<Vec<_>>();
+    largest.sort_by(|left, right| right.1.cmp(&left.1).then_with(|| left.0.cmp(&right.0)));
+    largest.truncate(12);
+
+    let mut duplicate_paths = paths
+        .into_iter()
+        .filter(|(_, value)| value.count > 1)
+        .collect::<Vec<_>>();
+    duplicate_paths.sort_by(|left, right| {
+        right
+            .1
+            .bytes
+            .cmp(&left.1.bytes)
+            .then_with(|| right.1.count.cmp(&left.1.count))
+            .then_with(|| left.0.cmp(&right.0))
+    });
+    duplicate_paths.truncate(12);
+
+    NativeImagePathTelemetry {
+        buckets,
+        largest,
+        duplicate_paths,
+        untracked_assets,
+    }
 }
 
 /// Take a renderer-only snapshot without touching ECS entities or the native
@@ -342,6 +442,10 @@ fn native_soak_counts(
         image_data_bytes: 0,
         native_queue_messages: 0,
         native_queue_bytes: 0,
+        map_render_images: 0,
+        map_render_url_image_keys: 0,
+        map_render_layouts: 0,
+        map_render_layout_rect_pages: 0,
     }
 }
 
@@ -363,6 +467,7 @@ fn native_soak_counts_with_runtime(
     additive_materials: &Assets<additive_material::CrystalAdditiveMaterial>,
     images: &Assets<Image>,
     native: &native_ingest::NativeInbound,
+    map_atlases: &RuntimeMapRenderAtlases,
 ) -> NativeSoakCounts {
     let mut counts = native_soak_counts(registry, effect_state, additive_cache, additive_materials);
     let (image_asset_count, image_data_bytes) = native_image_asset_counts(images);
@@ -371,6 +476,10 @@ fn native_soak_counts_with_runtime(
     counts.image_data_bytes = image_data_bytes;
     counts.native_queue_messages = queue.message_count;
     counts.native_queue_bytes = queue.retained_bytes;
+    counts.map_render_images = map_atlases.images.len();
+    counts.map_render_url_image_keys = map_atlases.url_image_keys.len();
+    counts.map_render_layouts = map_atlases.layouts.len();
+    counts.map_render_layout_rect_pages = map_atlases.layout_rects.len();
     counts
 }
 
@@ -390,6 +499,7 @@ fn native_soak_metrics_json(
     process_id: u32,
     timestamp_ms: u64,
     counts: &NativeSoakCounts,
+    image_paths: &NativeImagePathTelemetry,
 ) -> String {
     serde_json::json!({
         "processId": process_id,
@@ -414,6 +524,14 @@ fn native_soak_metrics_json(
         "imageDataBytes": counts.image_data_bytes,
         "nativeQueueMessages": counts.native_queue_messages,
         "nativeQueueBytes": counts.native_queue_bytes,
+        "mapRenderImages": counts.map_render_images,
+        "mapRenderUrlImageKeys": counts.map_render_url_image_keys,
+        "mapRenderLayouts": counts.map_render_layouts,
+        "mapRenderLayoutRectPages": counts.map_render_layout_rect_pages,
+        "imagePathBuckets": image_paths.buckets.iter().map(|(path, value)| serde_json::json!({"path": path, "count": value.count, "bytes": value.bytes})).collect::<Vec<_>>(),
+        "largestImagePaths": image_paths.largest.iter().map(|(path, bytes)| serde_json::json!({"path": path, "bytes": bytes})).collect::<Vec<_>>(),
+        "duplicateImagePaths": image_paths.duplicate_paths.iter().map(|(path, value)| serde_json::json!({"path": path, "count": value.count, "bytes": value.bytes})).collect::<Vec<_>>(),
+        "untrackedImages": {"count": image_paths.untracked_assets.count, "bytes": image_paths.untracked_assets.bytes},
     })
     .to_string()
 }
@@ -430,7 +548,9 @@ fn emit_native_soak_metrics(
     additive_cache: Res<additive_material::CrystalAdditiveMaterialCache>,
     additive_materials: Res<Assets<additive_material::CrystalAdditiveMaterial>>,
     images: Res<Assets<Image>>,
+    asset_server: Res<AssetServer>,
     native: Res<native_ingest::NativeInbound>,
+    map_atlases: Res<RuntimeMapRenderAtlases>,
     mut clock: Local<NativeSoakMetricsClock>,
 ) {
     if !clock.initialized {
@@ -459,8 +579,10 @@ fn emit_native_soak_metrics(
         &additive_materials,
         &images,
         &native,
+        &map_atlases,
     );
-    let line = native_soak_metrics_json(std::process::id(), elapsed_ms, &counts);
+    let image_paths = native_image_path_telemetry(&images, &asset_server);
+    let line = native_soak_metrics_json(std::process::id(), elapsed_ms, &counts, &image_paths);
     eprintln!("[native-soak] {line}");
 }
 
@@ -9568,7 +9690,8 @@ mod native_soak_metrics_tests {
         assert_eq!(counts.additive_cache_live_entries, 1);
         assert_eq!(counts.additive_asset_count, 1);
 
-        let encoded = native_soak_metrics_json(4_242, 12_345, &counts);
+        let encoded =
+            native_soak_metrics_json(4_242, 12_345, &counts, &NativeImagePathTelemetry::default());
         let payload: serde_json::Value =
             serde_json::from_str(&encoded).expect("native soak metrics should be valid JSON");
         assert_eq!(payload["processId"], 4_242);
@@ -9612,13 +9735,33 @@ mod native_soak_metrics_tests {
             native_queue_bytes: 4096,
             ..NativeSoakCounts::default()
         };
-        let payload: serde_json::Value =
-            serde_json::from_str(&native_soak_metrics_json(4_242, 12_345, &counts))
-                .expect("native soak metrics should be valid JSON");
+        let payload: serde_json::Value = serde_json::from_str(&native_soak_metrics_json(
+            4_242,
+            12_345,
+            &counts,
+            &NativeImagePathTelemetry::default(),
+        ))
+        .expect("native soak metrics should be valid JSON");
 
         assert_eq!(payload["imageAssetCount"], 2);
         assert_eq!(payload["imageDataBytes"], 17);
         assert_eq!(payload["nativeQueueMessages"], 3);
         assert_eq!(payload["nativeQueueBytes"], 4096);
+    }
+
+    #[test]
+    fn native_image_path_bucket_preserves_source_library_identity() {
+        assert_eq!(
+            native_image_path_bucket("original-ui/CArmour/00/42.png"),
+            "original-ui/CArmour"
+        );
+        assert_eq!(
+            native_image_path_bucket("generated/native-map-keyed/ground.png"),
+            "generated/native-map-keyed"
+        );
+        assert_eq!(
+            native_image_path_bucket("bevy-entity-atlases/p0.png"),
+            "bevy-entity-atlases"
+        );
     }
 }

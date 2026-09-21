@@ -142,3 +142,12 @@ actor fallback textures simply to reduce counts.
 
 Computer tool detected user input before Q task panel action. Refreshed once
 and stopped keyboard/mouse; resumed backend diagnostics pending handoff.
+
+Image ownership diagnostic candidate built successfully and packaged at
+C:/numeron-legend-of-rebirth-20260921-image-ownership. Not yet launched; active
+player session remains untouched after manual-input detection. Adds opt-in
+path byte buckets, largest/duplicate AssetServer paths and untracked image
+counts, plus map URL image/layout registry counts. Focused tests 6/6 pass.
+Rendering behavior is unchanged by this diagnostic addition. Switch only after
+normal logout once computer handoff is available. Local demo login is now
+explicitly user-authorized, so no recurring manual-auth handoff is needed.
