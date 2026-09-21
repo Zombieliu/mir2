@@ -78,6 +78,7 @@ pub(super) fn process(
     let path: Vec<_> = moves.read().filter(|event| event.window == entity)
         .map(|event| cursor_logical(window, event.position)).collect();
     let ready = window.focused && !state.amount_modal_open()
+        && state.mail_feedback_prompt.is_none() && !state.mail_feedback_input_consumed
         && state.mail_delete_prompt.is_none() && state.storage_password_prompt.is_none()
         && state.storage_rental_confirmation.is_none();
     let (Some(reader), Some(mouse), true) = (state.mail_reader, mouse, ready) else {
@@ -159,6 +160,14 @@ mod tests {
         assert_eq!(state.mail_reader_windows.position(reader.kind), Vec2::new(300.0, 200.0));
         assert!(state.mail_reader_windows.dragging.is_none());
         assert!(state.blocks_world_click());
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.mail_reader_windows.begin(reader, Vec2::new(320.0, 210.0));
+            state.mail_feedback_prompt = Some("Mail claim failed".into());
+        }
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().mail_reader_windows.dragging.is_none());
+        app.world_mut().resource_mut::<NativePlayerUiState>().mail_feedback_prompt = None;
         app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader_windows
             .begin(reader, Vec2::new(320.0, 210.0));
         app.world_mut().entity_mut(entity).get_mut::<Window>().unwrap().focused = false;

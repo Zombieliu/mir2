@@ -146,6 +146,7 @@ fn production_refresh_closes_removed_or_retyped_reader_before_input() {
     let mut app = App::new();
     app.init_resource::<NativePlayerUiState>()
         .init_resource::<MailModel>()
+        .init_resource::<MailComposeUi>()
         .init_resource::<MailUiState>()
         .init_resource::<InventoryModel>()
         .init_resource::<StorageModel>()

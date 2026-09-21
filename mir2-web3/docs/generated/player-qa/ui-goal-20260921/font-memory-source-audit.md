@@ -1,0 +1,14 @@
+# Image/font memory source audit — 2026-09-21
+
+Read-only live check: old auth-lifetime process49272 remains responsive at29,253,332,992 private bytes; latest old soak log reports13,425 image assets and13,949,273,628 CPU image bytes. This is not a pass, nor evidence from any newer staged executable. No desktop input/restart was performed.
+
+Bevy0.19 FontAtlas creates minimum512x512 RGBA8 atlas images (1,048,576 bytes each), retained in main/render worlds. FontAtlasSet uses persistent keys containing font blob ID, face, size bits, variation/hinting/smoothing and has no runtime eviction. The observed ~1MiB/image ratio is consistent with font atlas retention but does not identify these live images.
+
+Source FontSource::Family(Arial) alone is not proof of changing IDs. Fontique0.9 SourceCache reuses cloned blobs with stable IDs while accessed. Its two-prune inactivity policy can reload a later font source with a fresh blob ID, leaving older atlas keys retained. Generic native overlay helpers also despawn/recreate visible content each Update; that churn is concrete, but continuous recreation should normally reuse font IDs. Do not remove fallback fonts or label this the proven live cause.
+
+Next discriminating evidence is already implemented in the staged runtime: fontAtlasKeys/pages/bytes, distinct font IDs/size bits, asset-path buckets and untracked images. It needs the ordinary save/logout/new-package handoff. Atlas growth alongside image growth supports the font path; stable atlas totals with growing images rejects it. A separate headless continuous-recreation versus three-frame-absence probe can test font source reactivation independently, without asserting it caused the player's memory usage. No additional telemetry or speculative fix was added this round.
+
+Source references: local registry bevy_text-0.19.0/src/{font_atlas.rs,font_atlas_set.rs,pipeline.rs}; fontique-0.9.0/src/source_cache.rs; linebender_resource_handle-0.1.1/src/blob.rs. Project typography: client-bevy/src/crystal_ui/typography.rs. Existing diagnostics: runtime/src/lib.rs resource snapshot. Latest exact package hashes remain in README.md.
+## Headless mechanism reproduction
+
+`cargo +1.95.0 run --offline --example font_atlas_probe --features native-ui` passed, using the actual Bevy text pipeline with no App, window or renderer. Log: C:/mir2-ui-repair-20260921/font-atlas-probe.log. The100 continuous Arial recreations retained1 atlas/1 font ID/1,048,576bytes. After3 source-cache prune passes without Arial followed by recreation, the same text retained2 atlases/2 font IDs/2,097,152bytes. Thus source-cache expiry can produce a second retained font atlas; continuous recreation alone did not do so in this probe. This is a reproducible engine mechanism, not proof that it accounts for the old live client's29GB or a production repair. Live attribution and stable-font integration remain open.

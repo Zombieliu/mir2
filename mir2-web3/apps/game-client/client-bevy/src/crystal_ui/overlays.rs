@@ -855,6 +855,11 @@ pub struct NativePlayerUiState {
     /// A prompt closing on Enter/Escape/Yes/No consumes the remainder of that
     /// input frame so covered mail or world controls cannot receive it.
     pub(crate) mail_delete_input_consumed: bool,
+    /// Result and validation feedback uses Crystal's modal message frame.
+    /// Keeping this in the native state lets the shared input guards block
+    /// movement and covered controls while it is visible.
+    pub(crate) mail_feedback_prompt: Option<String>,
+    pub(crate) mail_feedback_input_consumed: bool,
     /// The source reader is keyed by the authoritative MailID, rather than a
     /// list row. Refreshes therefore cannot retarget a reader action.
     pub(crate) mail_reader: Option<MailReaderUi>,
@@ -935,6 +940,22 @@ pub enum MailComposeFocus {
 pub struct MailComposeUi {
     pub focus: MailComposeFocus,
     pub last_notice: Option<String>,
+}
+
+fn show_mail_feedback(
+    state: &mut NativePlayerUiState,
+    compose: &mut MailComposeUi,
+    message: impl Into<String>,
+) {
+    let message = message.into();
+    compose.last_notice = Some(message.clone());
+    state.mail_feedback_prompt = Some(message);
+}
+
+fn clear_mail_feedback(state: &mut NativePlayerUiState, compose: &mut MailComposeUi) {
+    state.mail_feedback_prompt = None;
+    state.mail_feedback_input_consumed = false;
+    compose.last_notice = None;
 }
 
 /// Renderer-only state for the Crystal BigMap search field. Authoritative map,
@@ -1077,6 +1098,8 @@ impl Default for NativePlayerUiState {
             inventory_delete_prompt: None,
             mail_delete_prompt: None,
             mail_delete_input_consumed: false,
+            mail_feedback_prompt: None,
+            mail_feedback_input_consumed: false,
             mail_reader: None,
             mail_reader_windows: default(),
             mail_reader_input_consumed: false,
@@ -1337,6 +1360,8 @@ impl NativePlayerUiState {
     pub fn blocks_gameplay_keys_except_hero(&self) -> bool {
         self.mail_delete_prompt.is_some()
             || self.mail_delete_input_consumed
+            || self.mail_feedback_prompt.is_some()
+            || self.mail_feedback_input_consumed
             || self.mail_reader.is_some()
             || self.mail_reader_input_consumed
             || self.storage_password_prompt.is_some()
@@ -1414,6 +1439,8 @@ impl NativePlayerUiState {
             || self.inventory_delete_prompt.is_some()
             || self.mail_delete_prompt.is_some()
             || self.mail_delete_input_consumed
+            || self.mail_feedback_prompt.is_some()
+            || self.mail_feedback_input_consumed
             || self.mail_reader.is_some()
             || self.mail_reader_input_consumed
             || self.guild_gold_prompt.is_some()
@@ -1466,6 +1493,8 @@ impl NativePlayerUiState {
         self.inventory_delete_prompt = None;
         self.mail_delete_prompt = None;
         self.mail_delete_input_consumed = false;
+        self.mail_feedback_prompt = None;
+        self.mail_feedback_input_consumed = false;
         self.mail_reader = None;
         self.mail_reader_windows = default();
         self.mail_reader_input_consumed = false;
@@ -1774,6 +1803,8 @@ pub const OVERLAY_DEATH_Z: i32 = 985;
 pub const OVERLAY_MENU_Z: i32 = 990;
 const OVERLAY_INVENTORY_DELETE_MODAL_Z: i32 = 991;
 const OVERLAY_INVENTORY_DELETE_CURSOR_Z: i32 = 992;
+/// Mail result/error dialogs are above the reader and parcel-delete prompt.
+const OVERLAY_MAIL_FEEDBACK_MODAL_Z: i32 = 993;
 pub const OVERLAY_SHELL_Z: i32 = 1000;
 
 /// `MirAmountBox` / `MirMessageBox` use integer centering at Crystal's fixed
@@ -2607,6 +2638,9 @@ struct OverlayInventoryDeleteModal;
 struct OverlayMailDeleteModal;
 
 #[derive(Component)]
+struct OverlayMailFeedbackModal;
+
+#[derive(Component)]
 struct OverlayStoragePasswordModal;
 
 #[derive(Component)]
@@ -2644,6 +2678,9 @@ struct OverlayInventoryDeleteDialog;
 
 #[derive(Component)]
 struct OverlayMailDeleteDialog;
+
+#[derive(Component)]
+struct OverlayMailFeedbackDialog;
 
 #[derive(Component)]
 struct OverlayMailReadLetter;
@@ -2875,6 +2912,7 @@ enum OverlayButton {
     InventoryDeleteAmountClose,
     MailDeleteConfirm,
     MailDeleteCancel,
+    MailFeedbackAcknowledge,
     DropInspected,
     ConfirmDropInspected,
     CancelDropInspected,
@@ -3293,6 +3331,7 @@ fn sync_local_panel_models(
     mut state: ResMut<NativePlayerUiState>,
     mut mail: ResMut<MailModel>,
     mut mail_ui: ResMut<MailUiState>,
+    mut compose_ui: ResMut<MailComposeUi>,
     inventory: Res<InventoryModel>,
     mut storage: ResMut<StorageModel>,
     mut storage_ui: ResMut<StorageUiState>,
@@ -3303,7 +3342,11 @@ fn sync_local_panel_models(
     mut skill_receipts: Option<ResMut<crate::skill_model::SkillModelReceipts>>,
 ) {
     state.mail_delete_input_consumed = false;
+    state.mail_feedback_input_consumed = false;
     state.mail_reader_input_consumed = false;
+    if shell.screen != NativeShellScreen::InGame {
+        clear_mail_feedback(&mut state, &mut compose_ui);
+    }
     reconcile_inventory_capacity(&mut state, &inventory);
     if !state.inventory_open() {
         state.inventory_delete_mode = false;
@@ -3709,10 +3752,12 @@ fn spawn_overlay_root(mut commands: Commands) {
                 GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
                 BackgroundColor(Color::NONE),
             ));
-            // MailDialog's parcel warning is the same source MirMessageBox
-            // shape, but owns an independent confirmation identity.
+            // MailDialog's parcel warning and one-button result feedback
+            // share a source MirMessageBox host. Feedback replaces a stale
+            // warning on this root and therefore remains above the reader.
             root.spawn((
                 OverlayMailDeleteModal,
+                OverlayMailFeedbackModal,
                 Button,
                 FocusPolicy::Block,
                 Node {
@@ -3724,7 +3769,7 @@ fn spawn_overlay_root(mut commands: Commands) {
                     display: Display::None,
                     ..default()
                 },
-                GlobalZIndex(OVERLAY_INVENTORY_DELETE_MODAL_Z),
+                GlobalZIndex(OVERLAY_MAIL_FEEDBACK_MODAL_Z),
                 BackgroundColor(Color::NONE),
             ));
             // StorageDialog's MirInputBox is modal to every underlying
@@ -4202,20 +4247,41 @@ fn consume_mail_operation_feedback(
     let Some(feedback) = mail.operation_feedback().cloned() else {
         return;
     };
-    let text = match (feedback.kind, feedback.success) {
-        (MailOperationKind::Send, true) => "Mail sent successfully".to_owned(),
-        (MailOperationKind::Send, false) => "Mail was rejected; draft kept".to_owned(),
-        (MailOperationKind::Collect, true) => "Mail attachments claimed".to_owned(),
-        (MailOperationKind::Collect, false) => "Mail claim failed".to_owned(),
-        (MailOperationKind::Delete, true) => "Mail deleted".to_owned(),
-        (MailOperationKind::Delete, false) => "Mail delete failed".to_owned(),
-        (MailOperationKind::Read, true) => "Mail opened".to_owned(),
-        (MailOperationKind::Read, false) => "Mail read failed".to_owned(),
-    };
-    if matches!(feedback.kind, MailOperationKind::Send) && feedback.success {
-        state.core.mail_compose = None;
+    match (feedback.kind, feedback.success) {
+        // Crystal's MailSent handler closes the compose dialog rather than
+        // showing a success box. Candidate rejection keeps the exact draft
+        // retryable because its receipt carries no more specific reason.
+        (MailOperationKind::Send, true) => {
+            state.core.mail_compose = None;
+            clear_mail_feedback(&mut state, &mut compose);
+        }
+        (MailOperationKind::Send, false) => {
+            show_mail_feedback(&mut state, &mut compose, "Mail was rejected; draft kept");
+        }
+        // Crystal closes MailReadParcelDialog after a successful collection;
+        // its error results are ordinary OK message boxes.
+        (MailOperationKind::Collect, true) => {
+            if state
+                .mail_reader
+                .is_some_and(|reader| Some(reader.mail_id) == feedback.mail_id)
+            {
+                state.mail_reader = None;
+            }
+            clear_mail_feedback(&mut state, &mut compose);
+        }
+        (MailOperationKind::Collect, false) => {
+            show_mail_feedback(&mut state, &mut compose, "Mail claim failed");
+        }
+        // Read/Delete completion has no source result box. In particular it
+        // must not erase an unrelated rejected send/collect notice.
+        (MailOperationKind::Delete, true) | (MailOperationKind::Read, true) => {}
+        (MailOperationKind::Delete, false) => {
+            show_mail_feedback(&mut state, &mut compose, "Mail delete failed");
+        }
+        (MailOperationKind::Read, false) => {
+            show_mail_feedback(&mut state, &mut compose, "Mail read failed");
+        }
     }
-    compose.last_notice = Some(text);
     mail.mails.retain(|message| message.operation.is_none());
 }
 
@@ -4227,7 +4293,12 @@ fn process_help_drag(
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    if !state.help.open || state.amount_modal_open() || state.mail_reader.is_some() {
+    if !state.help.open
+        || state.amount_modal_open()
+        || state.mail_feedback_prompt.is_some()
+        || state.mail_feedback_input_consumed
+        || state.mail_reader.is_some()
+    {
         state.help.end_drag();
         return;
     }
@@ -4267,6 +4338,8 @@ fn process_inventory_drag(
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
     if !state.inventory_open()
+        || state.mail_feedback_prompt.is_some()
+        || state.mail_feedback_input_consumed
         || state.mail_reader.is_some()
         || state.amount_modal_open()
         || state.storage_password_prompt.is_some()
@@ -5022,6 +5095,8 @@ fn process_inventory_item_drag(
     // currently represents the NPC panel as the active panel, so retain bag
     // drag input while the service frame is open.
     if !state.inventory_open()
+        || state.mail_feedback_prompt.is_some()
+        || state.mail_feedback_input_consumed
         || state.mail_reader.is_some()
         // StorageDialog hides the regular bag until its password prompt has
         // succeeded, so it cannot be used as an invisible drag source.
@@ -5945,6 +6020,23 @@ pub(crate) fn process_overlay_keyboard(
         return;
     }
 
+    // Mail result/error feedback owns this input frame even after its OK
+    // button, Enter, or Escape closes it. This is intentionally above the
+    // reader and parcel-delete warning in both render and input order.
+    if state.mail_feedback_prompt.is_some() {
+        if keys.just_pressed(KeyCode::Escape)
+            || keys.just_pressed(KeyCode::Enter)
+            || keys.just_pressed(KeyCode::NumpadEnter)
+        {
+            state.mail_feedback_prompt = None;
+            state.mail_feedback_input_consumed = true;
+            compose_ui.last_notice = None;
+            ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+        }
+        typed.clear();
+        return;
+    }
+
     // MailDialog's parcel warning is a source MirMessageBox Yes/No. It owns
     // this entire input frame even after Enter/Escape closes it.
     if state.mail_delete_prompt.is_some() {
@@ -6141,7 +6233,7 @@ pub(crate) fn process_overlay_keyboard(
                 &mut UiEffectQueue::default(),
                 mir2_ui_core::action::UiAction::CancelMailCompose,
             );
-            compose_ui.last_notice = None;
+            clear_mail_feedback(&mut state, &mut compose_ui);
             return;
         }
         if keys.just_pressed(KeyCode::Tab) {
@@ -6729,6 +6821,7 @@ fn process_overlay_buttons(
     let trade_modal_was_open = state.trade_dialog.gold_prompt.is_some();
     let delete_modal_was_open = state.inventory_delete_prompt.is_some();
     let mail_delete_modal_was_open = state.mail_delete_prompt.is_some();
+    let mail_feedback_modal_was_open = state.mail_feedback_prompt.is_some();
     let mail_reader_was_open = state.mail_reader.is_some();
     let message_was_open = state.trade_dialog.message.is_some();
     let game_shop_modal_was_open = state.game_shop_dialog.confirmation.is_some();
@@ -6753,28 +6846,35 @@ fn process_overlay_buttons(
         if state.storage_password_input_consumed
             || state.storage_rental_input_consumed
             || state.mail_delete_input_consumed
+            || state.mail_feedback_input_consumed
             || state.mail_reader_input_consumed
         {
             continue;
         }
-        if (mail_reader_was_open || state.mail_reader.is_some())
-            && !matches!(
-                button,
-                OverlayButton::MailReaderClose
-                    | OverlayButton::MailReaderDelete
-                    | OverlayButton::MailReaderLock
-                    | OverlayButton::MailReaderClaim
-            )
-        {
-            continue;
-        }
-        if (mail_delete_modal_was_open || state.mail_delete_prompt.is_some())
-            && !matches!(
-                button,
-                OverlayButton::MailDeleteConfirm | OverlayButton::MailDeleteCancel
-            )
-        {
-            continue;
+        if mail_feedback_modal_was_open || state.mail_feedback_prompt.is_some() {
+            if !matches!(button, OverlayButton::MailFeedbackAcknowledge) {
+                continue;
+            }
+        } else {
+            if (mail_reader_was_open || state.mail_reader.is_some())
+                && !matches!(
+                    button,
+                    OverlayButton::MailReaderClose
+                        | OverlayButton::MailReaderDelete
+                        | OverlayButton::MailReaderLock
+                        | OverlayButton::MailReaderClaim
+                )
+            {
+                continue;
+            }
+            if (mail_delete_modal_was_open || state.mail_delete_prompt.is_some())
+                && !matches!(
+                    button,
+                    OverlayButton::MailDeleteConfirm | OverlayButton::MailDeleteCancel
+                )
+            {
+                continue;
+            }
         }
         if (storage_rental_modal_was_open || state.storage_rental_confirmation.is_some())
             && !matches!(
@@ -7809,6 +7909,13 @@ fn process_overlay_buttons(
                 state.mail_delete_input_consumed = true;
                 ui_audio.push(crate::audio::NativeUiSound::ButtonB);
             }
+            OverlayButton::MailFeedbackAcknowledge => {
+                if state.mail_feedback_prompt.take().is_some() {
+                    compose_ui.last_notice = None;
+                    state.mail_feedback_input_consumed = true;
+                    ui_audio.push(crate::audio::NativeUiSound::ButtonB);
+                }
+            }
             OverlayButton::DropInspected => {
                 state.drop_confirmation = inspected_drop_confirmation(&state, &inventory);
             }
@@ -8068,7 +8175,7 @@ fn process_overlay_buttons(
                         mir2_ui_core::action::UiAction::SetMailRecipient { recipient },
                     );
                     compose_ui.focus = MailComposeFocus::Message;
-                    compose_ui.last_notice = None;
+                    clear_mail_feedback(&mut state, &mut compose_ui);
                 }
             }
             OverlayButton::MailReaderClose => {
@@ -8140,7 +8247,7 @@ fn process_overlay_buttons(
                     mir2_ui_core::action::UiAction::OpenMailCompose,
                 );
                 compose_ui.focus = MailComposeFocus::Recipient;
-                compose_ui.last_notice = None;
+                clear_mail_feedback(&mut state, &mut compose_ui);
             }
             OverlayButton::MailRecipientFocus => {
                 compose_ui.focus = MailComposeFocus::Recipient;
@@ -8187,12 +8294,19 @@ fn process_overlay_buttons(
                 };
                 let Some(ids) = valid_mail_attachment_ids(&inventory, &draft.attachment_unique_ids)
                 else {
-                    compose_ui.last_notice =
-                        Some("Attachment is no longer in Bag1/Bag2".to_owned());
+                    show_mail_feedback(
+                        &mut state,
+                        &mut compose_ui,
+                        "Attachment is no longer in Bag1/Bag2",
+                    );
                     continue;
                 };
                 if draft.recipient.trim().is_empty() || draft.message.trim().is_empty() {
-                    compose_ui.last_notice = Some("Recipient and message are required".to_owned());
+                    show_mail_feedback(
+                        &mut state,
+                        &mut compose_ui,
+                        "Recipient and message are required",
+                    );
                     continue;
                 }
                 dispatch_ui_action(
@@ -8228,7 +8342,7 @@ fn process_overlay_buttons(
                     &mut effects,
                     mir2_ui_core::action::UiAction::CancelMailCompose,
                 );
-                compose_ui.last_notice = None;
+                clear_mail_feedback(&mut state, &mut compose_ui);
             }
             OverlayButton::BigMapScrollUp => {
                 if state.bigmap_open() {
@@ -9257,6 +9371,58 @@ fn render_mail_delete_modal(
         });
 }
 
+/// Mail send/parcel result and local validation feedback use Crystal's
+/// one-button MirMessageBox. The full-stage parent captures clicks outside
+/// this source-sized frame.
+fn render_mail_feedback_modal(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: Option<&AssetServer>,
+    message: &str,
+) {
+    parent
+        .spawn((
+            OverlayMailFeedbackDialog,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.left),
+                top: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.top),
+                width: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.width),
+                height: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.height),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+        ))
+        .with_children(|dialog| {
+            if let Some(asset_server) = asset_server {
+                spawn_overlay_frame(
+                    dialog,
+                    asset_server,
+                    "original-ui/Prguse/360.png",
+                    CRYSTAL_DELETE_CONFIRM_RECT.width,
+                    CRYSTAL_DELETE_CONFIRM_RECT.height,
+                );
+                spawn_overlay_crystal_button(
+                    dialog,
+                    asset_server,
+                    "Title",
+                    200,
+                    201,
+                    202,
+                    CrystalRect::new(360.0, 157.0, 76.0, 25.0),
+                    OverlayButton::MailFeedbackAcknowledge,
+                );
+            }
+            overlay_text_at(
+                dialog,
+                message,
+                CrystalRect::new(35.0, 35.0, 390.0, 110.0),
+                10.0,
+                TEXT,
+            );
+        });
+}
+
 fn storage_password_caption(stage: StoragePasswordStage) -> &'static str {
     match stage {
         StoragePasswordStage::Unlock => "Enter storage password",
@@ -9994,8 +10160,14 @@ fn render_overlays(
         fill_panel(
             &mut commands,
             &mut delete_layers.p7(),
-            state.mail_delete_prompt.is_some(),
-            |parent| render_mail_delete_modal(parent, asset_server.as_deref()),
+            state.mail_delete_prompt.is_some() || state.mail_feedback_prompt.is_some(),
+            |parent| {
+                if let Some(message) = state.mail_feedback_prompt.as_deref() {
+                    render_mail_feedback_modal(parent, asset_server.as_deref(), message);
+                } else {
+                    render_mail_delete_modal(parent, asset_server.as_deref());
+                }
+            },
         );
 
         let cursor = windows
@@ -14969,6 +15141,10 @@ mod storage_rental_tests;
 #[cfg(test)]
 #[path = "mail_delete_tests.rs"]
 mod mail_delete_tests;
+
+#[cfg(test)]
+#[path = "mail_feedback_tests.rs"]
+mod mail_feedback_tests;
 
 #[cfg(test)]
 #[path = "mail_reader_tests.rs"]
