@@ -21,6 +21,7 @@ pub fn primary_quest_index(
 #[derive(Debug, PartialEq, Eq)]
 enum Place {
     Current { label: String, distance: u32 },
+    Route(crate::quest_ui::route::QuestRouteStep),
     Other(String),
     Unknown,
 }
@@ -82,6 +83,14 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
                 };
             }
         }
+        let targets = crate::quest_destination::authored_target_map_indices(quest.quest_index);
+        if let Some(big_map) = big_map {
+            if let crate::quest_ui::route::QuestRoute::NextStep(step) =
+                crate::quest_ui::route::resolve(big_map.current_map_index, &targets)
+            {
+                return Place::Route(step);
+            }
+        }
         if let Some(label) = authored_other_map(quest.quest_index, big_map.and_then(|m| m.current_map_index)) {
             return Place::Other(label);
         }
@@ -90,16 +99,16 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
 }
 
 fn authored_other_map(quest_index: i32, current_map: Option<i32>) -> Option<String> {
-    static CONFIG: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
     let current_map = current_map?;
-    let config = CONFIG.get_or_init(|| serde_json::from_str(include_str!(
-        "../../../../config/quest-guidance/newcomer-journey-v2.json")).expect("bundled V2 guidance"));
-    let definition = config["quests"].as_array()?.iter().find(|q| q["id"].as_i64() == Some(i64::from(quest_index)))?;
-    let files = definition["maps"].as_array()?;
+    let targets = crate::quest_destination::authored_target_map_indices(quest_index);
+    if targets.contains(&current_map) {
+        return None;
+    }
     let maps = &mir2_game_data::crystal_respawn_manifest_ref().maps;
-    let targets = maps.iter().filter(|map| files.iter().any(|f| f.as_str() == Some(map.map_file_name.as_str()))).collect::<Vec<_>>();
-    if targets.iter().any(|map| map.map_index == current_map) { return None; }
-    let labels = targets.into_iter().map(|map| map.map_title.as_str()).collect::<Vec<_>>();
+    let labels = targets.into_iter().filter_map(|target| maps.iter()
+        .find(|map| map.map_index == target)
+        .map(|map| map.map_title.as_str()))
+        .collect::<Vec<_>>();
     (!labels.is_empty()).then(|| labels.join(" / "))
 }
 
@@ -159,20 +168,47 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
         } else if quest.status == QuestStatus::NotStarted {
             line(card, next.map(|s| s.action.as_str()).unwrap_or("查看详情领取任务"), FEEDBACK_OK);
         }
-        if primary == 2_110_005 && crate::quest_destination::bichon_safe_arrival_pending(tracker) {
+        let route = if primary == 2_110_005 && crate::quest_destination::bichon_safe_arrival_pending(tracker) {
             line(card, format!("目的地：比奇城安全区 ({},{})", crate::quest_destination::BICHON_SAFE_X, crate::quest_destination::BICHON_SAFE_Y), FEEDBACK_OK);
             line(card, "从新手村向北前往大城；新手村安全区不算目标。", PANEL_TEXT);
+            None
         } else {
             match place(quest, tracker, entities, map, big_map) {
-                Place::Current { label, .. } => line(card, label, FEEDBACK_OK),
-                Place::Other(label) => line(card, format!("其他地图 · {label}"), PANEL_TEXT),
+                Place::Current { label, .. } => {
+                    line(card, label, FEEDBACK_OK);
+                    None
+                }
+                Place::Route(step) => {
+                    line(card, format!("当前地图 · {} · 当前位置 ({},{})", step.current_map_title, map.center_x, map.center_y), PANEL_TEXT);
+                    line(card, format!("下一步 · 入口 ({},{}) · 进入 {}", step.entrance_x, step.entrance_y, step.next_map_title), FEEDBACK_OK);
+                    if step.remaining_hops > 1 {
+                        line(card, format!("到目标仍需经过 {} 个地图入口", step.remaining_hops), PANEL_TEXT);
+                    }
+                    Some(step)
+                }
+                Place::Other(label) => {
+                    line(card, format!("其他地图 · {label}"), PANEL_TEXT);
+                    None
+                }
                 Place::Unknown => {
                     if let Some(location) = next.and_then(|s| s.location.as_ref()) { line(card, location, PANEL_TEXT); }
                     else if quest.status == QuestStatus::InProgress {
                         line(card, "目标位置待发现 · 查看详情或地图", PANEL_TEXT);
                     }
+                    None
                 }
             }
+        };
+        if let (Some(step), Some(big_map)) = (route, big_map) {
+            button(card, "前往入口 · 自动寻路", QuestUiButton::NavigateQuestRoute(
+                crate::quest_ui::QuestRouteNavigationIntent {
+                    quest_index: primary,
+                    reset_epoch: big_map.reset_epoch,
+                    map_index: step.current_map_index,
+                    x: step.entrance_x,
+                    y: step.entrance_y,
+                },
+            ));
         }
         button(card, "查看任务详情", QuestUiButton::SelectQuest { quest_index: primary });
         button(card, "打开大地图", QuestUiButton::OpenDestinationMap);
@@ -286,6 +322,37 @@ mod tests {
         assert!(authored_other_map(2_110_019, Some(bichon.map_index)).unwrap().contains(&wooma.map_title));
         assert_eq!(authored_other_map(2_110_019, None), None);
         assert_eq!(authored_other_map(12345, Some(bichon.map_index)), None);
+    }
+
+    #[test]
+    fn oma_route_card_uses_the_imported_bichon_entrance_and_navigation_intent() {
+        let bichon = mir2_game_data::crystal_respawn_manifest_ref().maps.iter()
+            .find(|map| map.map_file_name == "0").unwrap();
+        let mut world = World::new();
+        let tracker = QuestTracker { active_quests: vec![quest(2_110_010)] };
+        let state = QuestUiState::default();
+        let map = MapModel { center_x: 288, center_y: 616, ..default() };
+        let big_map = BigMapModel {
+            current_map_index: Some(bichon.map_index),
+            reset_epoch: 41,
+            ..default()
+        };
+        let mut queue = bevy::ecs::world::CommandQueue::default();
+        let mut commands = Commands::new(&mut queue, &world);
+        commands.spawn_empty().with_children(|parent| {
+            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map)));
+        });
+        queue.apply(&mut world);
+        let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str())
+            .collect::<Vec<_>>().join("\n");
+        assert!(text.contains("当前位置 (288,616)"));
+        assert!(text.contains("入口 (147,33)"));
+        assert!(text.contains("OmaCave_1F"));
+        assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
+            QuestUiButton::NavigateQuestRoute(crate::quest_ui::QuestRouteNavigationIntent {
+                quest_index: 2_110_010, reset_epoch: 41, map_index, x: 147, y: 33,
+            }) if *map_index == bichon.map_index
+        )));
     }
 
     #[test]

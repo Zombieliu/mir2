@@ -42,3 +42,29 @@ map0-floor-budget-tests.log and map0-floor-pack-merge.log.
 
 Live verification remains open: revisit the reported coordinates after restart,
 walk across the affected region, and capture same-asset-version screenshots.
+
+## Classification and verification follow-up
+
+The 5,467 count above initially proved resource/pixel closure, not successful
+native routing. A read-only review found that `SmObjectsc/2766.png` at map-0
+front cells (0,28) and (0,52) was present in the repaired keyed pack but excluded
+by both the builder and native library classifier. The prior `smobjects` rule
+accepted only the plain or numbered Mir2 form, omitting the actual Mir3 `c`
+suffix. This did not affect the ten Tiles frames around the user's screenshot.
+
+The builder and native classifiers now also accept the real `SmObjectsc`
+family, including Shanda's `cwood`, `csand`, `csnow`, and `cforest` suffixes.
+No RGBA data or blend behavior changes. A normal local full rebuild now discovers
+all 2,076 added PNGs: 394 raw frames and 1,682 standalone references. Source
+classification and actual standalone selection have Node/Rust regressions;
+the Node pack suite passes, while Rust execution is pending the parent's serial
+Windows test run. The running binary still needs the rebuilt classification code.
+
+The pixel verifier now rejects empty/incomplete reports, missing libraries,
+duplicate report/manifest keys, unsupported render routes, out-of-bounds atlas
+rectangles, and target PNG dimensions inconsistent with their manifest. Its two
+Node regression tests pass, including equal-length RGBA buffers with transposed
+image dimensions. It still requires a freshly generated audit report: it does
+not independently bind the report to current map/Lib hashes or re-decode every
+existing source PNG from the original Lib. Pixel closure and runtime/live visual
+acceptance remain separate checks.

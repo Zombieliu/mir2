@@ -11,6 +11,8 @@ use std::collections::VecDeque;
 
 #[path = "quest_multi_guidance.rs"]
 mod multi_guidance;
+#[path = "quest_route.rs"]
+mod route;
 pub use multi_guidance::primary_quest_index;
 
 use bevy::ecs::system::SystemParam;
@@ -342,6 +344,72 @@ pub enum QuestUiIntent {
         object_id: u32,
     },
     PickUpTile,
+}
+
+/// One request to begin ordinary local walk/run toward a configured Crystal map entrance.
+/// The Windows input host must reject it unless both identity values still
+/// match its authoritative Big Map model.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QuestRouteNavigationIntent {
+    pub quest_index: i32,
+    pub reset_epoch: u64,
+    pub map_index: i32,
+    pub x: i32,
+    pub y: i32,
+}
+
+/// Bounded handoff from quest guidance to the native ordinary movement
+/// controller. This carries no map change or teleport operation.
+#[derive(Resource, Debug, Default)]
+pub struct QuestRouteNavigationIntentQueue {
+    pending: Option<QuestRouteNavigationIntent>,
+}
+
+impl QuestRouteNavigationIntentQueue {
+    pub fn push(&mut self, intent: QuestRouteNavigationIntent) -> bool {
+        if self.pending.is_some() {
+            return false;
+        }
+        self.pending = Some(intent);
+        true
+    }
+
+    pub fn take(&mut self) -> Option<QuestRouteNavigationIntent> {
+        self.pending.take()
+    }
+
+    pub fn clear(&mut self) {
+        self.pending = None;
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.pending.is_none()
+    }
+}
+
+fn quest_route_intent_is_current(
+    intent: QuestRouteNavigationIntent,
+    tracker: &QuestTracker,
+    state: &QuestUiState,
+    journey: Option<&JourneyView>,
+    big_map: Option<&crate::big_map::BigMapModel>,
+) -> bool {
+    if primary_quest_index(tracker, state, journey) != Some(intent.quest_index) {
+        return false;
+    }
+    let Some(big_map) = big_map else {
+        return false;
+    };
+    let targets = crate::quest_destination::authored_target_map_indices(intent.quest_index);
+    let crate::quest_ui::route::QuestRoute::NextStep(step) =
+        crate::quest_ui::route::resolve(big_map.current_map_index, &targets)
+    else {
+        return false;
+    };
+    big_map.reset_epoch == intent.reset_epoch
+        && step.current_map_index == intent.map_index
+        && step.entrance_x == intent.x
+        && step.entrance_y == intent.y
 }
 
 impl QuestUiIntent {
@@ -852,6 +920,7 @@ struct QuestUiButtonVisual {
 enum QuestUiButton {
     MakePrimary { quest_index: i32 },
     OpenDestinationMap,
+    NavigateQuestRoute(QuestRouteNavigationIntent),
     SelectNpcDialog {
         target: String,
     },
@@ -1211,6 +1280,7 @@ impl Plugin for Mir2QuestUiPlugin {
             .init_resource::<MapModel>()
             .init_resource::<InventoryModel>()
             .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<QuestRouteNavigationIntentQueue>()
             .init_resource::<PendingOperations>()
             .init_resource::<AuthoritativeModelRevisions>()
             .init_resource::<SessionResetRevision>()
@@ -1582,6 +1652,11 @@ struct QuestInputModels<'w> {
     tracker: Res<'w, QuestTracker>,
     guidance: Option<Res<'w, QuestGuidance>>,
     entities: Option<Res<'w, EntityModelSet>>,
+    completed: Option<Res<'w, CompletedQuestTracker>>,
+    catalog: Option<Res<'w, NewcomerJourneyCatalog>>,
+    read_model: Option<Res<'w, UiReadModel>>,
+    big_map: Option<Res<'w, crate::big_map::BigMapModel>>,
+    route_navigation: Option<ResMut<'w, QuestRouteNavigationIntentQueue>>,
 }
 
 #[derive(SystemParam)]
@@ -1610,7 +1685,7 @@ fn process_quest_ui_input(
     nearby: Option<Res<NearbyNpcModel>>,
     target: Option<Res<CombatTargetModel>>,
     pickups: Option<Res<GroundPickupModel>>,
-    models: QuestInputModels,
+    mut models: QuestInputModels,
 ) {
     let Some(shell) = shell else {
         return;
@@ -1618,6 +1693,9 @@ fn process_quest_ui_input(
     let mut fallback_effects = UiEffectQueue::default();
     let mut effects = effects.as_deref_mut().unwrap_or(&mut fallback_effects);
     if shell.screen != NativeShellScreen::InGame {
+        if let Some(route_navigation) = models.route_navigation.as_deref_mut() {
+            route_navigation.clear();
+        }
         quest_state.reset();
         npc_nav.clear();
         return;
@@ -1634,8 +1712,14 @@ fn process_quest_ui_input(
     let quest_log_open = player_ui.quest_open();
     let dialog_open = dialog.is_open;
     let blocks_gameplay_keys = player_ui.blocks_gameplay_keys();
+    let mut route_navigation = models.route_navigation;
     let guidance = models.guidance.as_deref();
     let tracker: &QuestTracker = &models.tracker;
+    let journey = models.catalog.as_deref().zip(guidance)
+        .zip(models.completed.as_deref()).zip(models.read_model.as_deref())
+        .and_then(|(((catalog, guidance), completed), read_model)| {
+            catalog.derive(guidance, tracker, completed, &read_model.player)
+        });
     if quest_state.pinned_primary_quest_index.is_some_and(|id| !tracker.active_quests.iter().any(|q| q.quest_index == id && q.status.is_active())) {
         quest_state.pinned_primary_quest_index = None;
     }
@@ -2120,6 +2204,28 @@ fn process_quest_ui_input(
                     &mut player_ui.core, &mut effects,
                     mir2_ui_core::action::UiAction::OpenBigMap,
                 );
+            }
+            QuestUiButton::NavigateQuestRoute(intent) => {
+                if !quest_route_intent_is_current(
+                    intent,
+                    tracker,
+                    &quest_state,
+                    journey.as_ref(),
+                    models.big_map.as_deref(),
+                ) {
+                    quest_state.set_feedback("入口引导已更新，请使用当前任务路线", true);
+                } else if let Some(route_navigation) = route_navigation.as_deref_mut() {
+                    if route_navigation.push(intent) {
+                        quest_state.set_feedback(
+                            format!("前往入口 ({},{})", intent.x, intent.y),
+                            false,
+                        );
+                    } else {
+                        quest_state.set_feedback("已有前往入口的指令等待处理", true);
+                    }
+                } else {
+                    quest_state.set_feedback("入口导航暂不可用", true);
+                }
             }
             QuestUiButton::AttackTarget { object_id } => {
                 if target_is_attackable(target.as_deref(), object_id) {
@@ -5735,6 +5841,114 @@ fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn route_navigation_queue_is_bounded_and_preserves_the_configured_source_coordinate() {
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: 7,
+            map_index: 1,
+            x: 147,
+            y: 33,
+        };
+        let mut queue = QuestRouteNavigationIntentQueue::default();
+        assert!(queue.push(intent));
+        assert!(!queue.push(QuestRouteNavigationIntent { x: 151, y: 362, ..intent }));
+        assert_eq!(queue.take(), Some(intent));
+        assert!(queue.is_empty());
+    }
+
+    #[test]
+    fn pressed_route_button_enqueues_the_current_source_entrance() {
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: 7,
+            map_index: 1,
+            x: 147,
+            y: 33,
+        };
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(QuestTracker { active_quests: vec![quest(2_110_010, QuestStatus::InProgress)] });
+        app.insert_resource(crate::big_map::BigMapModel {
+            reset_epoch: 7,
+            current_map_index: Some(1),
+            ..default()
+        });
+        app.init_resource::<NpcDialogModel>()
+            .init_resource::<NpcDialogNav>()
+            .init_resource::<QuestUiState>()
+            .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<QuestRouteNavigationIntentQueue>()
+            .init_resource::<PendingOperations>();
+        app.world_mut().spawn((
+            Button,
+            QuestUiButton::NavigateQuestRoute(intent),
+            Interaction::Pressed,
+        ));
+        app.add_systems(Update, process_quest_ui_input);
+        app.update();
+        assert_eq!(
+            app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().take(),
+            Some(intent),
+        );
+    }
+
+    #[test]
+    fn route_navigation_is_discarded_after_leaving_the_game_session() {
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: 7,
+            map_index: 1,
+            x: 147,
+            y: 33,
+        };
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel { screen: NativeShellScreen::Login, ..default() });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(QuestTracker::default());
+        app.init_resource::<NpcDialogModel>()
+            .init_resource::<NpcDialogNav>()
+            .init_resource::<QuestUiState>()
+            .init_resource::<QuestUiIntentQueue>()
+            .init_resource::<QuestRouteNavigationIntentQueue>()
+            .init_resource::<PendingOperations>();
+        assert!(app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent));
+        app.add_systems(Update, process_quest_ui_input);
+        app.update();
+        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+    }
+
+    #[test]
+    fn route_navigation_rechecks_primary_task_and_current_entrance() {
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: 7,
+            map_index: 1,
+            x: 147,
+            y: 33,
+        };
+        let tracker = QuestTracker { active_quests: vec![
+            quest(2_110_010, QuestStatus::InProgress),
+            quest(42, QuestStatus::InProgress),
+        ] };
+        let state = QuestUiState::default();
+        let big_map = crate::big_map::BigMapModel {
+            reset_epoch: 7,
+            current_map_index: Some(1),
+            ..default()
+        };
+        assert!(quest_route_intent_is_current(intent, &tracker, &state, None, Some(&big_map)));
+        let pinned = QuestUiState { pinned_primary_quest_index: Some(42), ..default() };
+        assert!(!quest_route_intent_is_current(intent, &tracker, &pinned, None, Some(&big_map)));
+        assert!(!quest_route_intent_is_current(
+            QuestRouteNavigationIntent { x: 148, ..intent },
+            &tracker, &state, None, Some(&big_map),
+        ));
+    }
+
     #[test]
     fn bichon_arrival_card_has_readable_destination_and_local_map_button() {
         use super::*;

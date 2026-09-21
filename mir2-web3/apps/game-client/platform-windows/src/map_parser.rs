@@ -788,7 +788,9 @@ fn map_library_segment_requires_alpha_key(segment: &str) -> bool {
             || rest.chars().all(|character| character.is_ascii_digit());
     }
     if let Some(rest) = segment.strip_prefix("smobjects") {
-        return rest.is_empty() || rest.chars().all(|character| character.is_ascii_digit());
+        return rest.is_empty()
+            || rest.chars().all(|character| character.is_ascii_digit())
+            || matches!(rest, "c" | "cwood" | "csand" | "csnow" | "cforest");
     }
 
     fn matches_optional_plural_c(segment: &str, stem: &str) -> bool {
@@ -2520,6 +2522,24 @@ mod tests {
             .as_f64()
             .expect("standalone floor z");
         assert!((-2.0..-1.0).contains(&z), "got {z}");
+    }
+
+    #[test]
+    fn mir3_small_objects_use_standalone_source_images() {
+        for index in [210, 225, 240, 255, 270, 310, 325, 340, 355, 370] {
+            let library = library_key_for_index(index);
+            assert!(map_path_requires_alpha_key(&build_original_map_frame_path(&library, 2766)));
+        }
+        for name in ["smobjectsbad", "smobjectsc2", "smobjectscwoods"] {
+            assert!(!map_library_segment_requires_alpha_key(name));
+        }
+        let map = ParsedMap { width: 1, height: 1, cells: vec![middle_cell(255, 2766)] };
+        let key = atlas_rect_key("WemadeMir3/Snow/SmObjectsc", 2766);
+        let atlas = atlas_index_for(&key, 48, 32);
+        let standalone = standalone_index_for(&key, "/generated/native-map-keyed/pages/snow.png", 48, 32);
+        let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone)).unwrap();
+        assert_eq!(state["tiles"].as_array().unwrap().len(), 0);
+        assert_eq!(state["standaloneTiles"].as_array().unwrap().len(), 1);
     }
 
     #[test]

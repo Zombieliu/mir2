@@ -19,7 +19,9 @@ use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{CombatTargetModel, NpcDialogModel};
-use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
+use mir2_client_bevy::quest_ui::{
+    QuestRouteNavigationIntent, QuestRouteNavigationIntentQueue, QuestUiIntent, QuestUiIntentQueue,
+};
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
 use std::cmp::Reverse;
@@ -1281,6 +1283,82 @@ fn push_movement_shadow_authoritative(
     }));
 }
 
+fn take_quest_route_navigation_after_pointer_input(
+    queue: &mut QuestRouteNavigationIntentQueue,
+    pointer_held: bool,
+) -> Option<QuestRouteNavigationIntent> {
+    (!pointer_held).then(|| queue.take()).flatten()
+}
+
+fn quest_route_matches_current_map(
+    intent: QuestRouteNavigationIntent,
+    model: Option<&mir2_client_bevy::big_map::BigMapModel>,
+) -> bool {
+    model.is_some_and(|model| {
+        model.reset_epoch == intent.reset_epoch
+            && model.current_map_index == Some(intent.map_index)
+            && model.active_map_index == Some(intent.map_index)
+            && model.current_map().is_some()
+    })
+}
+
+/// Start a full-map ordinary walk/run route to a quest entrance. This reuses
+/// the Big Map planner and never emits a map-change or teleport command.
+fn begin_quest_route_navigation(
+    movement: &mut WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: &NativeEntityPresentation,
+    self_id: &str,
+    big_map: Option<&mir2_client_bevy::big_map::BigMapModel>,
+    intent: QuestRouteNavigationIntent,
+    now_ms: f64,
+) -> Result<(), &'static str> {
+    if !quest_route_matches_current_map(intent, big_map) {
+        return Err("入口导航已过期；请按当前地图重新选择。");
+    }
+    let model = big_map.expect("validated above");
+    let map_file = presentation.current_map_file_name()
+        .ok_or("当前地图尚未加载。")?;
+    let parsed = crate::map_parser::load_map(map_file)
+        .ok_or("当前地图的寻路数据尚未加载。")?;
+    let info = &model.current_map().expect("validated above").info;
+    if i32::from(parsed.width) != info.width || i32::from(parsed.height) != info.height {
+        return Err("地图尺寸尚未同步，请稍后重试。");
+    }
+    let origin = movement.planning_origin(entities.entities.iter().find_map(|entity| {
+        (entity.object_id == self_id).then_some((entity.x, entity.y))
+    }).ok_or("玩家位置尚未加载。")?);
+    let destination = (intent.x, intent.y);
+    let steps = big_map_input::plan(
+        movement,
+        entities,
+        presentation,
+        self_id,
+        map_file,
+        origin,
+        destination,
+    )?;
+    if steps.is_empty() {
+        return Ok(());
+    }
+    movement.stop_hold(now_ms, "questRouteStarted");
+    movement.stop_auto_path(now_ms, "questRouteStarted");
+    movement.attack_target = None;
+    movement.harvest_target = None;
+    movement.harvest_direction = None;
+    movement.next_harvest_request_at_ms = 0.0;
+    movement.auto_path_destination = Some(destination);
+    movement.pointer_auto_path = false;
+    movement.map_auto_path = Some(big_map_input::MapRoute {
+        map_file: map_file.to_owned(),
+        map_index: intent.map_index,
+        origin,
+        destination,
+        steps,
+    });
+    Ok(())
+}
+
 /// Convert Crystal world mouse input into bounded intents. Left click keeps the
 /// pixel-tested combat/NPC/pickup priorities and walks while empty world stays
 /// held. Right-click NewMove stores a bounded destination and continues after
@@ -1303,7 +1381,10 @@ pub fn mouse_world_interaction_system(
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
     (time, real_time): (Option<Res<Time>>, Option<Res<Time<bevy::time::Real>>>),
     windows: Query<&Window>,
-    mut queue: Option<ResMut<QuestUiIntentQueue>>,
+    (mut queue, mut route_navigation): (
+        Option<ResMut<QuestUiIntentQueue>>,
+        Option<ResMut<QuestRouteNavigationIntentQueue>>,
+    ),
     commands: Option<Res<GatewayCommands>>,
     mut effects: Option<ResMut<NativeEffects>>,
     gameplay_inbox: Option<Res<GameplayEventInbox>>,
@@ -1313,6 +1394,7 @@ pub fn mouse_world_interaction_system(
     let modifiers = keyboard.modifiers();
     let mut left_pressed = mouse.just_pressed(MouseButton::Left);
     let mut right_pressed = mouse.just_pressed(MouseButton::Right);
+    let pointer_held = mouse.pressed(MouseButton::Left) || mouse.pressed(MouseButton::Right);
     let left_released = mouse.just_released(MouseButton::Left);
     let right_released = mouse.just_released(MouseButton::Right);
     let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
@@ -1357,6 +1439,9 @@ pub fn mouse_world_interaction_system(
         && movement.harvest_direction.is_none()
         && movement.pending.is_empty()
         && !ack_waiting
+        && route_navigation
+            .as_deref()
+            .is_none_or(QuestRouteNavigationIntentQueue::is_empty)
     {
         return;
     }
@@ -1381,6 +1466,9 @@ pub fn mouse_world_interaction_system(
         return;
     };
     if shell.screen != NativeShellScreen::InGame {
+        if let Some(route_navigation) = route_navigation.as_deref_mut() {
+            route_navigation.clear();
+        }
         push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
         movement.reset_controller(now_ms, "notInGame");
         if let Some(inbox) = gameplay_inbox.as_deref() {
@@ -1500,6 +1588,9 @@ pub fn mouse_world_interaction_system(
     }
 
     if !window.focused {
+        if let Some(route_navigation) = route_navigation.as_deref_mut() {
+            route_navigation.clear();
+        }
         movement.attack_target = None;
         movement.harvest_target = None;
         movement.harvest_direction = None;
@@ -1579,6 +1670,58 @@ pub fn mouse_world_interaction_system(
                     || ui.hero.dragging.is_some()
             })
     });
+    let manual_route_cancel = keys.is_some_and(|keys| {
+        keys.just_pressed(KeyCode::Escape)
+            || walk_key_map().iter().any(|(key, _)| keys.pressed(*key))
+    });
+    if manual_route_cancel {
+        if let Some(route_navigation) = route_navigation.as_deref_mut() {
+            route_navigation.clear();
+        }
+    }
+    // The button is covered by the Quest panel, so the release frame must
+    // consume the queued route before that panel's general pointer shield.
+    // A held mouse keeps the route queued and returns before any world click
+    // can reach entities behind the button. Other modal/input owners cancel
+    // it through the ordinary blocker below.
+    let route_can_consume = !manual_route_cancel
+        && route_navigation
+            .as_deref()
+            .is_some_and(|queue| !queue.is_empty())
+        && player_ui.as_deref().is_some_and(|ui| {
+            ui.quest_open() && !ui.blocks_gameplay_keys()
+        })
+        && !over_skill_bar
+        && !over_hero_window
+        && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
+        && !dialog_open
+        && !dead
+        && !map_open
+        && !player_ui
+            .as_deref()
+            .is_some_and(|ui| ui.skill_bars.hovered || ui.skill_bars.dragging.is_some());
+    if route_can_consume {
+        if pointer_held {
+            return;
+        }
+        if let Some(intent) = route_navigation.as_deref_mut().and_then(|queue| {
+            take_quest_route_navigation_after_pointer_input(queue, false)
+        }) {
+            match begin_quest_route_navigation(
+                &mut movement,
+                &entities,
+                presentation,
+                &object_id,
+                big_map.as_deref(),
+                intent,
+                now_ms,
+            ) {
+                Ok(()) => {}
+                Err(message) => big_map_input::feedback(map_chat.as_deref_mut(), message),
+            }
+        }
+        return;
+    }
     if over_skill_bar
         || over_hero_window
         || notice.as_deref().is_some_and(NoticeDialogState::is_open)
@@ -1601,6 +1744,9 @@ pub fn mouse_world_interaction_system(
             .as_deref()
             .is_some_and(|ui| ui.skill_bars.hovered || ui.skill_bars.dragging.is_some())
     {
+        if let Some(route_navigation) = route_navigation.as_deref_mut() {
+            route_navigation.clear();
+        }
         movement.stop_hold(now_ms, "worldInputBlocked");
         movement.attack_target = None;
         movement.harvest_target = None;
@@ -1615,6 +1761,9 @@ pub fn mouse_world_interaction_system(
     // immediately before the keyboard command and then be coalesced away by
     // the Gateway's latest-intent slot.
     if keys.is_some_and(|keys| keys.just_pressed(KeyCode::Escape)) {
+        if let Some(route_navigation) = route_navigation.as_deref_mut() {
+            route_navigation.clear();
+        }
         movement.attack_target = None;
         movement.harvest_target = None;
         movement.harvest_direction = None;
@@ -1631,6 +1780,9 @@ pub fn mouse_world_interaction_system(
                     .is_some_and(|ui| key_owned_by_binding(&ui.keyboard, keys, *key))
         })
     }) {
+        if let Some(route_navigation) = route_navigation.as_deref_mut() {
+            route_navigation.clear();
+        }
         movement.stop_hold(now_ms, "keyboardInput");
         movement.attack_target = None;
         movement.harvest_target = None;
@@ -2859,6 +3011,153 @@ mod tests {
     use bevy::prelude::IntoScheduleConfigs;
     use mir2_client_bevy::entities::{EntityKind, EntityModel, EntityModelSet};
     use mir2_client_bevy::read_model::UiReadModel;
+
+    #[test]
+    fn queued_route_survives_button_press_until_pointer_release() {
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: 7,
+            map_index: 1,
+            x: 147,
+            y: 33,
+        };
+        let mut queue = QuestRouteNavigationIntentQueue::default();
+        assert!(queue.push(intent));
+        assert_eq!(
+            take_quest_route_navigation_after_pointer_input(&mut queue, true),
+            None,
+        );
+        assert!(!queue.is_empty());
+        assert_eq!(
+            take_quest_route_navigation_after_pointer_input(&mut queue, false),
+            Some(intent),
+        );
+        assert!(queue.is_empty());
+    }
+
+    #[test]
+    fn held_quest_route_button_never_clicks_through_and_releases_to_the_bridge() {
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: 7,
+            map_index: 1,
+            x: 147,
+            y: 33,
+        };
+        let mut app = bevy::prelude::App::new();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        });
+        let mut ui = NativePlayerUiState::default();
+        ui.toggle_quest();
+        app.insert_resource(ui);
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(world_entities());
+        app.insert_resource(NativeEntityPresentation::default());
+        app.init_resource::<QuestUiIntentQueue>();
+        app.init_resource::<QuestRouteNavigationIntentQueue>();
+        app.init_resource::<WorldPointerMovementState>();
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+        app.update();
+        assert_eq!(
+            app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().take(),
+            Some(intent),
+            "a down-frame must retain the route rather than allowing a world click"
+        );
+        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+        assert!(app.world().resource::<WorldPointerMovementState>().map_auto_path.is_none());
+
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear_just_pressed(MouseButton::Left);
+        app.update();
+        assert!(
+            !app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty(),
+            "a held button remains distinct from a released button"
+        );
+
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.release(MouseButton::Left);
+            mouse.clear_just_pressed(MouseButton::Left);
+        }
+        app.update();
+        assert!(
+            app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty(),
+            "the release frame must consume the client button intent instead of clearing it as UI input"
+        );
+        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+    }
+
+    #[test]
+    fn escape_cancels_a_queued_quest_route_before_it_can_start() {
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: 7,
+            map_index: 1,
+            x: 147,
+            y: 33,
+        };
+        let mut app = bevy::prelude::App::new();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(NpcDialogModel::default());
+        app.insert_resource(world_entities());
+        app.insert_resource(NativeEntityPresentation::default());
+        app.init_resource::<QuestUiIntentQueue>();
+        app.init_resource::<QuestRouteNavigationIntentQueue>();
+        app.init_resource::<WorldPointerMovementState>();
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Escape);
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.update();
+        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        assert!(app.world().resource::<WorldPointerMovementState>().map_auto_path.is_none());
+    }
+
+    #[test]
+    fn quest_route_navigation_accepts_only_the_current_authoritative_map_epoch() {
+        use mir2_client_bevy::big_map::{BigMapInfo, BigMapModel};
+
+        let mut map = BigMapModel { reset_epoch: 12, ..Default::default() };
+        map.apply_new_map_info(1, BigMapInfo {
+            title: "BichonProvince".into(),
+            width: 700,
+            height: 700,
+            movements: Vec::new(),
+            npcs: Vec::new(),
+            big_map: 101,
+        });
+        map.set_current_map(1);
+        let intent = QuestRouteNavigationIntent {
+            quest_index: 2_110_010,
+            reset_epoch: map.reset_epoch,
+            map_index: 1,
+            x: 147,
+            y: 33,
+        };
+        assert!(quest_route_matches_current_map(intent, Some(&map)));
+        assert!(!quest_route_matches_current_map(
+            QuestRouteNavigationIntent { reset_epoch: 11, ..intent },
+            Some(&map),
+        ));
+        assert!(!quest_route_matches_current_map(
+            QuestRouteNavigationIntent { map_index: 39, ..intent },
+            Some(&map),
+        ));
+        assert!(!quest_route_matches_current_map(intent, None));
+    }
 
     #[test]
     fn quest_target_action_arms_the_normal_moving_target_pursuit() {
