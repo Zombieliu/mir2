@@ -12,6 +12,10 @@ use std::collections::{BTreeMap, VecDeque};
 use bevy::prelude::Resource;
 use serde::{Deserialize, Deserializer, Serialize};
 
+#[path = "big_map_geometry.rs"]
+mod geometry;
+pub use geometry::BigMapImageGeometry;
+
 pub const BIG_MAP_NPC_ROW_COUNT: usize = 18;
 pub const MAX_MAP_MOVEMENTS: usize = 128;
 pub const MAX_MAP_NPCS: usize = 128;

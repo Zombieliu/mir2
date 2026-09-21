@@ -15,6 +15,9 @@ mod native_ingest;
 #[cfg(test)]
 #[path = "mail_service_runtime_tests.rs"]
 mod mail_service_runtime_tests;
+#[cfg(test)]
+#[path = "fallback_hierarchy_tests.rs"]
+mod fallback_hierarchy_tests;
 mod presentation_pose;
 mod remote_motion;
 
@@ -4748,7 +4751,11 @@ fn sync_entities(
         let mut facing = None;
         let mut selection = None;
         let entity = commands
-            .spawn((MirObject, Transform::from_translation(position)))
+            .spawn((
+                MirObject,
+                Transform::from_translation(position),
+                Visibility::Inherited,
+            ))
             .with_children(|parent| {
                 selection = Some(
                     parent
@@ -6070,7 +6077,11 @@ fn sync_mine_nodes(
         translation.z = 0.2;
         let mut ore: Option<Entity> = None;
         let root = commands
-            .spawn((MirObject, Transform::from_translation(translation)))
+            .spawn((
+                MirObject,
+                Transform::from_translation(translation),
+                Visibility::Inherited,
+            ))
             .with_children(|parent| {
                 parent.spawn((
                     Sprite::from_color(Color::srgb(0.18, 0.16, 0.15), Vec2::splat(TILE_SIZE - 8.0)),
@@ -6129,7 +6140,10 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
             translation.z = -0.75;
 
             let root = commands
-                .spawn(Transform::from_translation(translation))
+                .spawn((
+                    Transform::from_translation(translation),
+                    Visibility::Inherited,
+                ))
                 .with_children(|parent| {
                     parent.spawn((
                         Sprite::from_color(
@@ -6167,7 +6181,10 @@ fn spawn_map_scene(commands: &mut Commands, blueprint: &MapSceneBlueprint) -> Ve
         translation.z = 0.3;
 
         let entity = commands
-            .spawn(Transform::from_translation(translation))
+            .spawn((
+                Transform::from_translation(translation),
+                Visibility::Inherited,
+            ))
             .with_children(|parent| {
                 parent.spawn((
                     Sprite::from_color(Color::srgba(0.02, 0.02, 0.02, 0.10), Vec2::new(18.0, 8.0)),

@@ -30,7 +30,10 @@ fn map_image_coordinates_follow_stage_fit_and_exclude_panel_controls() {
         let mut window = stage_window(bevy::prelude::Vec2::new(physical.0, physical.1));
         window.resolution.set(width, height);
         assert_eq!(
-            big_map_input::destination(&model, big_map_input::image_position(&window).unwrap()),
+            big_map_input::destination(
+                &model,
+                big_map_input::image_position(&window, &model).unwrap()
+            ),
             Ok((350, 350))
         );
         for point in [
@@ -42,7 +45,7 @@ fn map_image_coordinates_follow_stage_fit_and_exclude_panel_controls() {
         ] {
             let physical = transform.logical_to_physical(point.0, point.1);
             window.set_cursor_position(Some(bevy::prelude::Vec2::new(physical.0, physical.1)));
-            assert!(big_map_input::image_position(&window).is_none());
+            assert!(big_map_input::image_position(&window, &model).is_none());
         }
     }
     let mut remote = model;
@@ -104,6 +107,33 @@ fn navigation_app(
         .resource_mut::<ButtonInput<MouseButton>>()
         .press(button);
     (app, receiver, destination)
+}
+
+#[test]
+fn small_map_click_geometry_tracks_centered_image_at_each_window_scale() {
+    use mir2_client_bevy::big_map::BigMapImageGeometry;
+    for index in [8, 14, 101] {
+        let mut model = model(700, 700);
+        let mut info = model.active_map().unwrap().info.clone();
+        info.big_map = index;
+        model.apply_new_map_info(0, info);
+        let g = BigMapImageGeometry::for_model(&model).unwrap();
+        for (w, h) in [(1024., 768.), (1600., 900.), (800., 600.)] {
+            let t = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(w, h);
+            let p = t.logical_to_physical(
+                132. + g.left + g.width * 350.5 / 700.,
+                134. + g.top + g.height * 350.5 / 700.,
+            );
+            let mut window = stage_window(bevy::prelude::Vec2::new(p.0, p.1));
+            window.resolution.set(w, h);
+            let image_point = big_map_input::image_position(&window, &model).unwrap();
+            let destination = big_map_input::destination(&model, image_point).unwrap();
+            assert_eq!(destination, (350, 350));
+            let outside = t.logical_to_physical(132. + g.left - 1., 134. + g.top + 1.);
+            window.set_cursor_position(Some(bevy::prelude::Vec2::new(outside.0, outside.1)));
+            assert!(big_map_input::image_position(&window, &model).is_none());
+        }
+    }
 }
 
 #[test]
@@ -174,9 +204,12 @@ fn left_and_right_map_clicks_send_ack_bounded_movement_and_survive_mouse_up_with
 #[test]
 fn remote_map_and_modal_clicks_never_fall_through_to_world_input() {
     let (mut app, receiver, _) = navigation_app(MouseButton::Right);
-    app.world_mut()
-        .resource_mut::<BigMapModel>()
-        .active_map_index = Some(99);
+    {
+        let mut model = app.world_mut().resource_mut::<BigMapModel>();
+        let info = model.active_map().unwrap().info.clone();
+        model.apply_new_map_info(99, info);
+        model.active_map_index = Some(99);
+    }
     app.update();
     assert!(receiver.try_recv().is_err());
     assert!(app

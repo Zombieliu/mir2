@@ -1,10 +1,8 @@
 //! Native BigMap image input and bounded full-map routes (no teleport intents).
 use super::*;
-use mir2_client_bevy::big_map::{BigMapModel, BigMapView};
+use mir2_client_bevy::big_map::{BigMapImageGeometry, BigMapModel, BigMapView};
 use mir2_client_bevy::chat::{ChatLine, ChatModel};
-use mir2_client_bevy::crystal_ui::overlays::{
-    BIGMAP_HEIGHT, BIGMAP_WIDTH, CRYSTAL_BIGMAP_PANEL_RECT,
-};
+use mir2_client_bevy::crystal_ui::overlays::CRYSTAL_BIGMAP_PANEL_RECT;
 
 const SEARCH_BUDGET: usize = 250_000;
 
@@ -17,21 +15,17 @@ pub(super) struct MapRoute {
     pub steps: Vec<(i32, i32)>,
 }
 
-pub(super) fn image_position(window: &Window) -> Option<(f32, f32)> {
+pub(super) fn image_position(window: &Window, model: &BigMapModel) -> Option<(f32, f32)> {
     let cursor = window.cursor_position()?;
     let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
         window.resolution.width(),
         window.resolution.height(),
     );
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-    // render_bigmap uses this same fixed image viewport, stretched to fill.
-    let x = x - CRYSTAL_BIGMAP_PANEL_RECT.left - 14.;
-    let y = y - CRYSTAL_BIGMAP_PANEL_RECT.top - 52.;
-    (x.is_finite()
-        && y.is_finite()
-        && (0. ..BIGMAP_WIDTH).contains(&x)
-        && (0. ..BIGMAP_HEIGHT).contains(&y))
-    .then_some((x, y))
+    BigMapImageGeometry::for_model(model)?.image_point((
+        x - CRYSTAL_BIGMAP_PANEL_RECT.left,
+        y - CRYSTAL_BIGMAP_PANEL_RECT.top,
+    ))
 }
 
 pub(super) fn destination(
@@ -43,16 +37,10 @@ pub(super) fn destination(
     }
     let map = model.active_map().ok_or("地图信息尚未加载。");
     let map = map?;
-    if map.info.width <= 0 || map.info.height <= 0 || map.info.big_map_image_index().is_none() {
-        return Err("地图信息尚未加载。");
-    }
-    if !(0. ..BIGMAP_WIDTH).contains(&point.0) || !(0. ..BIGMAP_HEIGHT).contains(&point.1) {
-        return Err("请选择地图图像内的位置。");
-    }
-    Ok((
-        (point.0 * map.info.width as f32 / BIGMAP_WIDTH).floor() as i32,
-        (point.1 * map.info.height as f32 / BIGMAP_HEIGHT).floor() as i32,
-    ))
+    let geometry = BigMapImageGeometry::for_model(model).ok_or("地图图片尺寸尚未加载。");
+    geometry?
+        .tile_at(point, map.info.width, map.info.height)
+        .ok_or("请选择有效地图图像内的位置。")
 }
 
 pub(super) fn feedback(chat: Option<&mut ChatModel>, message: &str) {

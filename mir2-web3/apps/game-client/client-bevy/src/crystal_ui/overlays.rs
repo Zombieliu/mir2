@@ -15145,15 +15145,6 @@ fn render_mail_recipient_prompt(
         });
 }
 
-fn big_map_view_position(point: BigMapPoint, width: i32, height: i32) -> (f32, f32) {
-    if width <= 0 || height <= 0 {
-        return (BIGMAP_WIDTH * 0.5, BIGMAP_HEIGHT * 0.5);
-    }
-    let x = (point.x.max(0) as f32 / width as f32).clamp(0.0, 1.0) * BIGMAP_WIDTH;
-    let y = (point.y.max(0) as f32 / height as f32).clamp(0.0, 1.0) * BIGMAP_HEIGHT;
-    (x, y)
-}
-
 fn render_bigmap(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
@@ -15165,6 +15156,9 @@ fn render_bigmap(
         return;
     };
     let rendered = model.render_snapshot();
+    let source_geometry = crate::big_map::BigMapImageGeometry::for_model(model);
+    // The full rectangle is only a loading placeholder, never invented image geometry.
+    let geometry = source_geometry.unwrap_or(crate::big_map::BigMapImageGeometry::WORLD);
     let map_name = rendered
         .title
         .as_deref()
@@ -15204,15 +15198,15 @@ fn render_bigmap(
     parent
         .spawn(Node {
             position_type: PositionType::Absolute,
-            left: Val::Px(14.0),
-            top: Val::Px(52.0),
-            width: Val::Px(BIGMAP_WIDTH),
-            height: Val::Px(BIGMAP_HEIGHT),
+            left: Val::Px(geometry.left),
+            top: Val::Px(geometry.top),
+            width: Val::Px(geometry.width),
+            height: Val::Px(geometry.height),
             overflow: Overflow::clip(),
             ..default()
         })
         .with_children(|viewport| {
-            let asset = rendered.map_image_url.clone();
+            let asset = source_geometry.and(rendered.map_image_url.clone());
             if let Some(asset) = asset {
                 viewport.spawn((
                     BigMapImageEntity { url: asset.clone() },
@@ -15220,8 +15214,8 @@ fn render_bigmap(
                         position_type: PositionType::Absolute,
                         left: Val::Px(0.0),
                         top: Val::Px(0.0),
-                        width: Val::Px(BIGMAP_WIDTH),
-                        height: Val::Px(BIGMAP_HEIGHT),
+                        width: Val::Px(geometry.width),
+                        height: Val::Px(geometry.height),
                         ..default()
                     },
                     ImageNode {
@@ -15244,8 +15238,8 @@ fn render_bigmap(
                     Node {
                         position_type: PositionType::Absolute,
                         left: Val::Px(0.0),
-                        top: Val::Px(BIGMAP_HEIGHT * 0.5 - 8.0),
-                        width: Val::Px(BIGMAP_WIDTH),
+                        top: Val::Px(geometry.height * 0.5 - 8.0),
+                        width: Val::Px(geometry.width),
                         height: Val::Px(16.0),
                         ..default()
                     },
@@ -15263,8 +15257,8 @@ fn render_bigmap(
                             position_type: PositionType::Absolute,
                             left: Val::Px(0.0),
                             top: Val::Px(0.0),
-                            width: Val::Px(BIGMAP_WIDTH),
-                            height: Val::Px(BIGMAP_HEIGHT),
+                            width: Val::Px(geometry.width),
+                            height: Val::Px(geometry.height),
                             ..default()
                         },
                         ImageNode {
@@ -15274,9 +15268,9 @@ fn render_bigmap(
                         },
                     ));
                 }
-            } else if let Some(entry) = model.active_map() {
+            } else if let Some(entry) = model.active_map().filter(|_| source_geometry.is_some()) {
                 for movement in &entry.info.movements {
-                    let (x, y) = big_map_view_position(
+                    let (x, y) = geometry.view_position(
                         movement.location,
                         entry.info.width,
                         entry.info.height,
@@ -15296,11 +15290,11 @@ fn render_bigmap(
                 for (index, region) in renderer.hunt_regions.iter().enumerate() {
                     let color = if region.primary { Color::srgb(0.2, 0.9, 1.0) }
                         else { Color::srgb(1.0, 0.72, 0.1) };
-                    let (left, top) = big_map_view_position(
+                    let (left, top) = geometry.view_position(
                         BigMapPoint { x: region.center.x - region.radius, y: region.center.y - region.radius },
                         entry.info.width, entry.info.height,
                     );
-                    let (right, bottom) = big_map_view_position(
+                    let (right, bottom) = geometry.view_position(
                         BigMapPoint { x: region.center.x + region.radius, y: region.center.y + region.radius },
                         entry.info.width, entry.info.height,
                     );
@@ -15314,7 +15308,7 @@ fn render_bigmap(
                        BorderColor::all(color)));
                     viewport.spawn((Node {
                         position_type: PositionType::Absolute,
-                        left: Val::Px(left.min(BIGMAP_WIDTH - 180.0)),
+                        left: Val::Px(left.min(geometry.width - 180.0).max(0.0)),
                         top: Val::Px(top.max(15.0) - 15.0 + index as f32 * 2.0),
                         ..default()
                     }, BackgroundColor(Color::srgba(0.02, 0.015, 0.0, 0.9)),
@@ -15326,10 +15320,10 @@ fn render_bigmap(
                     && crate::quest_destination::is_bichon_map(entry.map_index)
                 {
                     use crate::quest_destination::{BICHON_SAFE_X, BICHON_SAFE_Y, BICHON_SAFE_RADIUS};
-                    let (left, top) = big_map_view_position(BigMapPoint {
+                    let (left, top) = geometry.view_position(BigMapPoint {
                         x: BICHON_SAFE_X - BICHON_SAFE_RADIUS, y: BICHON_SAFE_Y - BICHON_SAFE_RADIUS,
                     }, entry.info.width, entry.info.height);
-                    let (right, bottom) = big_map_view_position(BigMapPoint {
+                    let (right, bottom) = geometry.view_position(BigMapPoint {
                         x: BICHON_SAFE_X + BICHON_SAFE_RADIUS, y: BICHON_SAFE_Y + BICHON_SAFE_RADIUS,
                     }, entry.info.width, entry.info.height);
                     viewport.spawn((BichonSafeDestinationArea, Node {
@@ -15342,7 +15336,7 @@ fn render_bigmap(
                         BorderColor::all(Color::srgb(0.2, 0.9, 1.0))));
                     viewport.spawn((Node {
                         position_type: PositionType::Absolute,
-                        left: Val::Px(left.min(BIGMAP_WIDTH - 210.0).max(0.0)),
+                        left: Val::Px(left.min(geometry.width - 210.0).max(0.0)),
                         top: Val::Px((top - 22.0).max(0.0)), ..default()
                     }, BackgroundColor(Color::srgba(0.01, 0.03, 0.04, 0.95)),
                         Text::new("比奇城安全区 (328,264)"),
@@ -15352,7 +15346,7 @@ fn render_bigmap(
                 }
                 for npc in entry.info.npcs.iter().filter(|npc| npc.show_on_big_map) {
                     let (x, y) =
-                        big_map_view_position(npc.location, entry.info.width, entry.info.height);
+                        geometry.view_position(npc.location, entry.info.width, entry.info.height);
                     viewport.spawn((
                         Node {
                             position_type: PositionType::Absolute,
@@ -15371,7 +15365,7 @@ fn render_bigmap(
                 }
                 if let Some(location) = rendered.player_location {
                     let (px, py) =
-                        big_map_view_position(location, entry.info.width, entry.info.height);
+                        geometry.view_position(location, entry.info.width, entry.info.height);
                     viewport.spawn((
                         BigMapPlayerEntity { location },
                         Node {
@@ -19166,6 +19160,41 @@ mod tests {
     }
 
     #[test]
+    fn big_map_images_and_player_markers_use_centered_source_viewport() {
+        for index in [8, 14, 101, i32::MAX] {
+            let mut app = App::new();
+            app.add_plugins(MinimalPlugins).add_plugins(AssetPlugin::default())
+                .init_asset::<Image>().init_resource::<UiReadModel>()
+                .init_resource::<BigMapUiState>()
+                .add_systems(Startup, spawn_big_map_render_test);
+            let mut model = BigMapModel::default();
+            model.set_current_map(1);
+            model.apply_new_map_info(1, crate::big_map::BigMapInfo {
+                title: "Geometry".into(), width: 700, height: 700, big_map: index,
+                movements: vec![], npcs: vec![],
+            });
+            model.set_player_location(Some(1), BigMapPoint { x: 350, y: 350 });
+            app.insert_resource(model);
+            app.update();
+            let world = app.world_mut();
+            let images = world.query::<(&BigMapImageEntity, &Node, &ChildOf)>()
+                .iter(world).map(|(_,node,parent)| (node.clone(), parent.parent())).collect::<Vec<_>>();
+            let players = world.query::<(&BigMapPlayerEntity, &Node)>()
+                .iter(world).map(|(_,node)| (node.left,node.top)).collect::<Vec<_>>();
+            let Some(g) = crate::big_map::BigMapImageGeometry::for_image(index as u32) else {
+                assert!(images.is_empty());
+                assert!(players.is_empty());
+                continue;
+            };
+            assert_eq!(images.len(),1);
+            assert_eq!((images[0].0.width,images[0].0.height),(Val::Px(g.width),Val::Px(g.height)));
+            let viewport = world.get::<Node>(images[0].1).unwrap();
+            assert_eq!((viewport.left,viewport.top),(Val::Px(g.left),Val::Px(g.top)));
+            assert_eq!(players,vec![(Val::Px(g.width/2.-6.),Val::Px(g.height/2.-5.))]);
+        }
+    }
+
+    #[test]
     fn bichon_destination_ecs_only_renders_unfinished_arrival_on_bichon() {
         use crate::quest_model::{Quest, QuestTracker};
         for (map_index, current, status, visible) in [
@@ -19299,7 +19328,7 @@ mod tests {
             .collect::<Vec<_>>();
         assert_eq!(players.len(), 1);
         assert_eq!(players[0].0, BigMapPoint { x: 257, y: 594 });
-        let (player_x, player_y) = big_map_view_position(BigMapPoint { x: 257, y: 594 }, 700, 700);
+        let (player_x, player_y) = crate::big_map::BigMapImageGeometry::for_image(101).unwrap().view_position(BigMapPoint { x: 257, y: 594 }, 700, 700);
         assert_eq!(players[0].1, Val::Px(player_x - 6.0));
         assert_eq!(players[0].2, Val::Px(player_y - 5.0));
 

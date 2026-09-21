@@ -1515,7 +1515,7 @@ pub fn mouse_world_interaction_system(
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     let map_open = player_ui.as_deref().is_some_and(|ui| ui.bigmap_open());
     let map_image_press = map_open && (left_pressed || right_pressed)
-        && big_map_input::image_position(window).is_some();
+        && big_map.as_deref().and_then(|model| big_map_input::image_position(window, model)).is_some();
     if movement.map_auto_path.as_ref().is_some_and(|route| {
         presentation.current_map_file_name() != Some(route.map_file.as_str())
             || big_map.as_deref().and_then(|model| model.current_map_index) != Some(route.map_index)
@@ -1652,7 +1652,7 @@ pub fn mouse_world_interaction_system(
         let request = (|| {
             let model = big_map.as_deref().ok_or("地图信息尚未加载。");
             let model = model?;
-            let destination = big_map_input::destination(model, big_map_input::image_position(window).unwrap())?;
+            let destination = big_map_input::destination(model, big_map_input::image_position(window, model).unwrap())?;
             let map_file = presentation.current_map_file_name().ok_or("当前地图尚未加载。");
             let map_file = map_file?;
             let parsed = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。");
