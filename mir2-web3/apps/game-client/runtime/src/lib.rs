@@ -490,6 +490,10 @@ struct MapRenderSceneCache {
 struct MapRenderTileHandle {
     entity: Entity,
     last_seen_generation: u64,
+    /// Additive map sprites own a cache entry keyed by their stable tile key.
+    /// Keep this ownership bit with the ECS handle so a viewport eviction can
+    /// release the material (and its strong image handle) at the same time.
+    additive: bool,
 }
 
 /// One preloaded phase of a Crystal map animation family. Every family frame
@@ -3501,8 +3505,11 @@ fn clear_scene_registry(
     for entity in registry.map.spawned.drain(..) {
         commands.entity(entity).despawn();
     }
-    for (_, handle) in registry.map_render.tiles.drain() {
+    for (key, handle) in registry.map_render.tiles.drain() {
         commands.entity(handle.entity).despawn();
+        if handle.additive {
+            additive_cache.evict(&key, additive_materials);
+        }
     }
     for (_, handles) in registry.mine_nodes.drain() {
         commands.entity(handles.root).despawn();
@@ -3740,8 +3747,11 @@ fn sync_map_render(
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
     if !active {
-        for (_, handle) in registry.map_render.tiles.drain() {
+        for (key, handle) in registry.map_render.tiles.drain() {
             commands.entity(handle.entity).despawn();
+            if handle.additive {
+                additive_cache.evict(&key, &mut additive_materials);
+            }
         }
         registry.map_render.applied = None;
         if !atlas_assets.images.is_empty() || !atlas_assets.layouts.is_empty() {
@@ -3930,6 +3940,7 @@ fn sync_map_render(
                 MapRenderTileHandle {
                     entity,
                     last_seen_generation: generation,
+                    additive: false,
                 },
             );
         }
@@ -4027,6 +4038,7 @@ fn sync_map_render(
                 MapRenderTileHandle {
                     entity,
                     last_seen_generation: generation,
+                    additive: tile.additive,
                 },
             );
         }
@@ -4044,6 +4056,9 @@ fn sync_map_render(
     for key in stale {
         if let Some(handle) = registry.map_render.tiles.remove(&key) {
             commands.entity(handle.entity).despawn();
+            if handle.additive {
+                additive_cache.evict(&key, &mut additive_materials);
+            }
         }
     }
 
@@ -7293,6 +7308,30 @@ mod entity_atlas_tests {
         .unwrap()
     }
 
+    fn additive_standalone_map_snapshot(revision: u64, include_glow: bool) -> MapRenderState {
+        serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth": 1024, "stageHeight": 768, "revision": revision,
+            "standaloneTiles": if include_glow { serde_json::json!([{
+                "key": "standalone:additive:12:34:WemadeMir2/Objects#7",
+                "imageKey": "standalone-additive:WemadeMir2/Objects#7",
+                "left": 0, "top": 0, "width": 48, "height": 64, "z": 1,
+                "additive": true
+            }]) } else { serde_json::json!([]) }
+        }))
+        .unwrap()
+    }
+
+    fn install_additive_map_image(app: &mut App) {
+        let image = app
+            .world_mut()
+            .resource_mut::<Assets<Image>>()
+            .add(Image::default());
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderAtlases>()
+            .images
+            .insert("standalone-additive:WemadeMir2/Objects#7".into(), image);
+    }
+
     fn apply_map_handoff_baseline(app: &mut App) {
         let image = app
             .world_mut()
@@ -7480,6 +7519,81 @@ mod entity_atlas_tests {
                 .unwrap()
                 .producer_revision,
             Some(1)
+        );
+    }
+
+    #[test]
+    fn stale_additive_map_tile_releases_its_material_and_image_handle() {
+        let mut app = map_handoff_test_app();
+        install_additive_map_image(&mut app);
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(additive_standalone_map_snapshot(1, true));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            1
+        );
+        assert_eq!(
+            app.world()
+                .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+                .len(),
+            1
+        );
+
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(additive_standalone_map_snapshot(2, false));
+        app.update();
+        assert!(app
+            .world()
+            .resource::<SceneRegistry>()
+            .map_render
+            .tiles
+            .is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0,
+            "a tile that leaves the viewport must not retain its material/image handle"
+        );
+        assert_eq!(
+            app.world()
+                .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+                .len(),
+            0
+        );
+    }
+
+    #[test]
+    fn disabled_map_render_releases_additive_map_materials() {
+        let mut app = map_handoff_test_app();
+        install_additive_map_image(&mut app);
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(additive_standalone_map_snapshot(1, true));
+        app.update();
+
+        let mut disabled = additive_standalone_map_snapshot(2, false);
+        disabled.enabled = false;
+        app.world_mut()
+            .resource_mut::<RuntimeMapRenderState>()
+            .snapshot = Some(disabled);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<additive_material::CrystalAdditiveMaterialCache>()
+                .len(),
+            0
+        );
+        assert_eq!(
+            app.world()
+                .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+                .len(),
+            0
         );
     }
 
@@ -8868,6 +8982,7 @@ mod native_data_path_tests {
         let map_entity = app.world_mut().spawn_empty().id();
         let effect_entity = app.world_mut().spawn_empty().id();
         let additive_entity = app.world_mut().spawn_empty().id();
+        let map_additive_entity = app.world_mut().spawn_empty().id();
         app.world_mut().resource_scope(
             |world, mut cache: Mut<additive_material::CrystalAdditiveMaterialCache>| {
                 let mut materials =
@@ -8878,11 +8993,25 @@ mod native_data_path_tests {
                     1.0,
                     &mut materials,
                 );
+                cache.material(
+                    "standalone:additive:12:34:WemadeMir2/Objects#7",
+                    Handle::<Image>::default(),
+                    1.0,
+                    &mut materials,
+                );
             },
         );
         {
             let mut registry = app.world_mut().resource_mut::<SceneRegistry>();
             registry.map.spawned.push(map_entity);
+            registry.map_render.tiles.insert(
+                "standalone:additive:12:34:WemadeMir2/Objects#7".to_owned(),
+                MapRenderTileHandle {
+                    entity: map_additive_entity,
+                    last_seen_generation: 1,
+                    additive: true,
+                },
+            );
             registry.effect_render.insert(
                 "fx".to_owned(),
                 EffectRenderLayerHandle {
@@ -8978,11 +9107,13 @@ mod native_data_path_tests {
             .is_empty());
         let registry = app.world().resource::<SceneRegistry>();
         assert!(registry.map.spawned.is_empty());
+        assert!(registry.map_render.tiles.is_empty());
         assert!(registry.effect_render.is_empty());
         assert!(registry.entity_render_layers.is_empty());
         assert!(!app.world().entities().contains(map_entity));
         assert!(!app.world().entities().contains(effect_entity));
         assert!(!app.world().entities().contains(additive_entity));
+        assert!(!app.world().entities().contains(map_additive_entity));
         assert_eq!(
             app.world()
                 .resource::<additive_material::CrystalAdditiveMaterialCache>()
@@ -9364,6 +9495,7 @@ mod native_soak_metrics_tests {
             MapRenderTileHandle {
                 entity: Entity::PLACEHOLDER,
                 last_seen_generation: 1,
+                additive: false,
             },
         );
         registry.map.spawned.push(Entity::PLACEHOLDER);

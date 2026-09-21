@@ -8,6 +8,7 @@ $taskLogs = [IO.Path]::GetFullPath($LogDirectory)
 New-Item -ItemType Directory -Path $taskLogs -Force | Out-Null
 $taskPrefix = Join-Path $taskLogs (Get-Date -Format 'yyyyMMdd-HHmmss-fff')
 $env:RUST_BACKTRACE = '1'
+$env:MIR2_NATIVE_SOAK_METRICS = '1'
 $taskProcess = Start-Process -FilePath $taskClient -WorkingDirectory (Split-Path -Parent $taskClient) -PassThru -RedirectStandardOutput "$taskPrefix.stdout.log" -RedirectStandardError "$taskPrefix.stderr.log"
 @{ event='start'; at=(Get-Date).ToUniversalTime().ToString('o'); processId=$taskProcess.Id; executable=$taskClient } | ConvertTo-Json -Compress | Set-Content "$taskPrefix.process.jsonl"
 while (-not $taskProcess.WaitForExit(10000)) {

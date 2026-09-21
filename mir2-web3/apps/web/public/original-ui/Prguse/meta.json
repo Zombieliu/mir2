@@ -173,6 +173,22 @@
       "maskPath": null
     },
     {
+      "index": 50,
+      "width": 348,
+      "height": 268,
+      "x": 0,
+      "y": 0,
+      "shadowX": 0,
+      "shadowY": 0,
+      "hasMask": false,
+      "maskWidth": null,
+      "maskHeight": null,
+      "rgbaSha256": "cbdf26b3766ce2458ee7dfb294413f23c1a353ba7edfce9461c67475d581e3a5",
+      "pngSha256": "384758bd2f217b9177486ccaab7403b100016896cea4583c16ff9650995594f2",
+      "path": "/original-ui/Prguse/50.png",
+      "maskPath": null
+    },
+    {
       "index": 63,
       "width": 588,
       "height": 460,

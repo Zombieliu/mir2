@@ -10,6 +10,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use mir2_client_bevy::native_shell::{
     ChangePasswordFocus, CharacterCreateFocus, LoginFocus, NativeShellModel, NativeShellScreen,
+    RegistrationFocus,
 };
 
 const MAX_ACCOUNT: usize = 24;
@@ -17,6 +18,8 @@ const MAX_PASSWORD: usize = 32;
 const MAX_NAME: usize = 18;
 const MAX_CHANGE_ACCOUNT: usize = 15;
 const MAX_CHANGE_PASSWORD: usize = 15;
+const MAX_REGISTRATION_TEXT: usize = 30;
+const MAX_REGISTRATION_EMAIL: usize = 50;
 
 #[derive(Default)]
 pub(crate) struct ClipboardShortcutState {
@@ -119,6 +122,57 @@ pub fn apply_shell_clipboard(shell: &mut NativeShellModel, clipboard: &str) -> b
             ),
             ChangePasswordFocus::SubmitButton | ChangePasswordFocus::CancelButton => false,
         },
+        NativeShellScreen::Registration => match shell.registration.focus {
+            RegistrationFocus::AccountId => append_filtered(
+                &mut shell.registration.account_id,
+                clipboard,
+                MAX_CHANGE_ACCOUNT,
+                |character| character.is_ascii_alphanumeric(),
+            ),
+            RegistrationFocus::Password => append_filtered(
+                &mut shell.registration.password,
+                clipboard,
+                MAX_CHANGE_PASSWORD,
+                |character| character.is_ascii_alphanumeric(),
+            ),
+            RegistrationFocus::ConfirmPassword => append_filtered(
+                &mut shell.registration.confirm_password,
+                clipboard,
+                MAX_CHANGE_PASSWORD,
+                |character| character.is_ascii_alphanumeric(),
+            ),
+            RegistrationFocus::UserName => append_filtered(
+                &mut shell.registration.user_name,
+                clipboard,
+                20,
+                |character| !character.is_control(),
+            ),
+            RegistrationFocus::BirthDate => append_filtered(
+                &mut shell.registration.birth_date,
+                clipboard,
+                10,
+                |character| character.is_ascii_digit() || character == '-',
+            ),
+            RegistrationFocus::SecretQuestion => append_filtered(
+                &mut shell.registration.secret_question,
+                clipboard,
+                MAX_REGISTRATION_TEXT,
+                |character| !character.is_control(),
+            ),
+            RegistrationFocus::SecretAnswer => append_filtered(
+                &mut shell.registration.secret_answer,
+                clipboard,
+                MAX_REGISTRATION_TEXT,
+                |character| !character.is_control(),
+            ),
+            RegistrationFocus::EmailAddress => append_filtered(
+                &mut shell.registration.email_address,
+                clipboard,
+                MAX_REGISTRATION_EMAIL,
+                |character| !character.is_control(),
+            ),
+            RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => false,
+        },
         // SafeKey is a button grid, not a text field.  In particular, never
         // paste a secret into the account/password preview used by that panel.
         _ => false,
@@ -142,6 +196,17 @@ fn shell_has_clipboard_target(shell: &NativeShellModel) -> bool {
                 | ChangePasswordFocus::OldPassword
                 | ChangePasswordFocus::NewPassword
                 | ChangePasswordFocus::ConfirmPassword
+        ),
+        NativeShellScreen::Registration => matches!(
+            shell.registration.focus,
+            RegistrationFocus::AccountId
+                | RegistrationFocus::Password
+                | RegistrationFocus::ConfirmPassword
+                | RegistrationFocus::UserName
+                | RegistrationFocus::BirthDate
+                | RegistrationFocus::SecretQuestion
+                | RegistrationFocus::SecretAnswer
+                | RegistrationFocus::EmailAddress
         ),
         _ => false,
     }

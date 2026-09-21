@@ -63,3 +63,38 @@ Includes multi-quest guidance, bag drag routing and help layout correction.
 Started through diagnostic launcher; logs C:/mir2-ui-repair-20260921/goal-live.
 Currently at login awaiting the user's account handoff. No evidence from the
 old package is attributed to the new fixes. Entire UI goal remains active.
+
+## Authentication UI and interruption during renewed handoff
+
+New ui-goal package: NEW with empty login inputs did not open a registration
+form on two observed attempts. Existing handler immediately registered using
+login credentials. A dedicated Crystal Prguse/63 form is being implemented.
+Change-password used a stretched login panel, with old embedded field borders
+behind custom inputs; evidence new-build-change-password-layout.png. New
+renderer uses original Prguse/50 (348x268), original controls/coordinates and
+masked password fields; no password was submitted or account created.
+
+User entered Scout level7 Bichon (288,616), not a1. New quest card displays
+Assistant Jane destination (284,606), objective counter and details/map actions;
+new-build-scout-quest-card.png is a narrow visual observation, not multi-quest
+interaction acceptance. User then authorized renewed control.
+
+Before the next input, window inventory showed no game window/process.
+C:/mir2-ui-repair-20260921/goal-live/20260921-070547-657.process.jsonl records
+private bytes growing from ~1.4GB on login to 32,395,902,976 before exit.
+stderr ends event_loop_returned exit=Error(1), but host returned OS exitCode0.
+The cause of Error1 is not established. A concrete retained additive-map
+material/image path is fixed with three focused runtime regression cases;
+live memory attribution and stability remain pending. Host now returns AppExit,
+enables Bevy logs, and diagnostic launcher enables native-soak resource counts.
+
+Build interruption: E: exhausted during test linking. Large generated debug
+PDBs in runtime/client-bevy target/debug/deps moved to
+C:/mir2-ui-repair-20260921/build-symbol-backup, leaving source/assets/saves intact.
+Final tests are being rerun; no completed full UI or live leak-fix claim.
+
+Final post-refinement suites: client-bevy native-ui library 891/891 and runtime
+library 232/232 passed after symbol backup. Original UI asset audit verifies
+2362 drawable frames, 82 source-empty slots, no issues; includes newly restored
+Prguse/50 pixels and metadata. Release build pending; no live authentication
+submission or leak-fix result is implied.

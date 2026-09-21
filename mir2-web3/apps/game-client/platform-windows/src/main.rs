@@ -111,7 +111,7 @@ fn report_r2_progress_via_chat(
     reporter.last_r2 = r2;
 }
 
-fn main() {
+fn main() -> bevy::app::AppExit {
     timing::initialize();
     let config_started = std::time::Instant::now();
     console_error_panic_hook::set_once();
@@ -396,4 +396,7 @@ fn main() {
     // Best-effort: drop the gateway task after the window closes.
     let _ = command_tx.send(gateway::GatewayCommand::Shutdown);
     let _ = gateway_task.abort();
+    // Preserve renderer/event-loop failures for the diagnostic launcher.
+    // Returning unit previously reported OS success even for AppExit::Error.
+    exit
 }

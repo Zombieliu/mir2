@@ -1045,6 +1045,7 @@ fn native_shell_screen_slug(screen: NativeShellScreen) -> &'static str {
         NativeShellScreen::StartingGame => "starting-game",
         NativeShellScreen::InGame => "in-game",
         NativeShellScreen::ConnectionLost => "connection-lost",
+        NativeShellScreen::Registration => "registration",
         NativeShellScreen::ChangePassword => "change-password",
         NativeShellScreen::SafeKey => "safe-key",
         NativeShellScreen::DeleteConfirm { .. } => "delete-confirm",
@@ -1068,6 +1069,7 @@ fn parse_shell_screen_slug(raw: &str) -> Option<NativeShellScreen> {
         "connection-lost" | "connectionlost" | "disconnected" => {
             Some(NativeShellScreen::ConnectionLost)
         }
+        "registration" | "new-account" | "newaccount" => Some(NativeShellScreen::Registration),
         _ => None,
     }
 }
