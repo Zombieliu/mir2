@@ -259,3 +259,8 @@ Remaining warehouse paths and source-fidelity limitations are enumerated in
 
 Source 9956a5039; 936 native-ui tests and one Windows storage transformer regression passed. Windows release succeeded in 15.26s; log C:/mir2-ui-repair-20260921/storage-password-native-build.log. Staged C:/numeron-legend-of-rebirth-20260921-storage-password, client SHA256 E45598A3D33778347D3D83737DB193A73D06FCA9C51B3FF7EB84863EF7B0CADC. Matched gateway remains FED42F81FF2160C3A95583747C95EA7AC97F6AE52B06502D503D4F5E817C16FD. Same localhost19910 configuration and repository assets junction. Not launched or deployed; current session untouched. Warehouse visual acceptance remains open, along with source gaps in whole-ui-20260921.md.
 
+
+## Expanded warehouse rental package
+
+Source d2c9d820d. Client943/943, backend addstorage8/8, source asset audit0 issues (2371 positive frames/82 source-empty) passed. Matched releases built: native1m09s, Gateway2m18s. Staged C:/numeron-legend-of-rebirth-20260921-storage-rental. Client SHA256 ABF53C685646830AE5912399FE0E3DE225A569E8BE340A9FE95C5B8DCB2BC13C; Gateway SHA256 9A50205320130863549E6A51728CC0DE6C983A45A9692DBD85596C00568224B3. Same localhost19910 config and public assets junction; neither binary launched/deployed. Do not use older gateway to validate the corrected 1,000,000-gold/10-day rental flow. Exact source images inspected, not native desktop visuals. Renewed computer handoff still pending; active session untouched.
+
