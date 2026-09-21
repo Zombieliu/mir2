@@ -26,6 +26,8 @@ use bevy::image::{Image, ImagePlugin, TextureAtlas, TextureAtlasLayout};
 use bevy::math::{Rect, URect, UVec2};
 use bevy::prelude::*;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+#[cfg(all(not(target_arch = "wasm32"), feature = "native-font-atlas-telemetry"))]
+use bevy::text::FontAtlasSet;
 use bevy::window::{CompositeAlphaMode, WindowResolution};
 use js_sys::Function;
 use mir2_client_bevy::pending_operations::{
@@ -309,6 +311,11 @@ struct NativeSoakCounts {
     map_render_url_image_keys: usize,
     map_render_layouts: usize,
     map_render_layout_rect_pages: usize,
+    font_atlas_keys: usize,
+    font_atlas_pages: usize,
+    font_atlas_bytes: u64,
+    font_atlas_font_ids: Vec<u32>,
+    font_atlas_font_size_bits: Vec<u32>,
 }
 
 /// One resolved `AssetServer` image-path group.  Keep this native-only and
@@ -407,6 +414,41 @@ fn native_image_path_telemetry(
     }
 }
 
+#[cfg(all(not(target_arch = "wasm32"), feature = "native-font-atlas-telemetry"))]
+fn native_font_atlas_counts(
+    font_atlases: Option<&FontAtlasSet>,
+    images: &Assets<Image>,
+) -> (usize, usize, u64, Vec<u32>, Vec<u32>) {
+    let Some(font_atlases) = font_atlases else {
+        return (0, 0, 0, Vec::new(), Vec::new());
+    };
+    let mut font_ids = font_atlases.keys().map(|key| key.id).collect::<Vec<_>>();
+    font_ids.sort_unstable();
+    font_ids.dedup();
+    let mut font_size_bits = font_atlases
+        .keys()
+        .map(|key| key.font_size_bits)
+        .collect::<Vec<_>>();
+    font_size_bits.sort_unstable();
+    font_size_bits.dedup();
+    (
+        font_atlases.len(),
+        font_atlases.values().map(Vec::len).sum(),
+        font_atlases.total_bytes(images),
+        font_ids,
+        font_size_bits,
+    )
+}
+
+#[cfg(all(
+    not(target_arch = "wasm32"),
+    not(feature = "native-font-atlas-telemetry")
+))]
+fn native_font_atlas_counts(images: &Assets<Image>) -> (usize, usize, u64, Vec<u32>, Vec<u32>) {
+    let _ = images;
+    (0, 0, 0, Vec::new(), Vec::new())
+}
+
 /// Take a renderer-only snapshot without touching ECS entities or the native
 /// ingest queue. The registry maps are the authoritative retained counts;
 /// Bevy despawn commands are deferred and therefore unsuitable as same-frame
@@ -446,6 +488,11 @@ fn native_soak_counts(
         map_render_url_image_keys: 0,
         map_render_layouts: 0,
         map_render_layout_rect_pages: 0,
+        font_atlas_keys: 0,
+        font_atlas_pages: 0,
+        font_atlas_bytes: 0,
+        font_atlas_font_ids: Vec::new(),
+        font_atlas_font_size_bits: Vec::new(),
     }
 }
 
@@ -528,6 +575,11 @@ fn native_soak_metrics_json(
         "mapRenderUrlImageKeys": counts.map_render_url_image_keys,
         "mapRenderLayouts": counts.map_render_layouts,
         "mapRenderLayoutRectPages": counts.map_render_layout_rect_pages,
+        "fontAtlasKeys": counts.font_atlas_keys,
+        "fontAtlasPages": counts.font_atlas_pages,
+        "fontAtlasBytes": counts.font_atlas_bytes,
+        "fontAtlasFontIds": counts.font_atlas_font_ids,
+        "fontAtlasFontSizeBits": counts.font_atlas_font_size_bits,
         "imagePathBuckets": image_paths.buckets.iter().map(|(path, value)| serde_json::json!({"path": path, "count": value.count, "bytes": value.bytes})).collect::<Vec<_>>(),
         "largestImagePaths": image_paths.largest.iter().map(|(path, bytes)| serde_json::json!({"path": path, "bytes": bytes})).collect::<Vec<_>>(),
         "duplicateImagePaths": image_paths.duplicate_paths.iter().map(|(path, value)| serde_json::json!({"path": path, "count": value.count, "bytes": value.bytes})).collect::<Vec<_>>(),
@@ -551,6 +603,7 @@ fn emit_native_soak_metrics(
     asset_server: Res<AssetServer>,
     native: Res<native_ingest::NativeInbound>,
     map_atlases: Res<RuntimeMapRenderAtlases>,
+    #[cfg(feature = "native-font-atlas-telemetry")] font_atlases: Option<Res<FontAtlasSet>>,
     mut clock: Local<NativeSoakMetricsClock>,
 ) {
     if !clock.initialized {
@@ -572,7 +625,7 @@ fn emit_native_soak_metrics(
     }
     clock.last_sample_ms = Some(elapsed_ms);
 
-    let counts = native_soak_counts_with_runtime(
+    let mut counts = native_soak_counts_with_runtime(
         &registry,
         &effect_state,
         &additive_cache,
@@ -581,6 +634,15 @@ fn emit_native_soak_metrics(
         &native,
         &map_atlases,
     );
+    #[cfg(feature = "native-font-atlas-telemetry")]
+    let font_atlas_counts = native_font_atlas_counts(font_atlases.as_deref(), &images);
+    #[cfg(not(feature = "native-font-atlas-telemetry"))]
+    let font_atlas_counts = native_font_atlas_counts(&images);
+    counts.font_atlas_keys = font_atlas_counts.0;
+    counts.font_atlas_pages = font_atlas_counts.1;
+    counts.font_atlas_bytes = font_atlas_counts.2;
+    counts.font_atlas_font_ids = font_atlas_counts.3;
+    counts.font_atlas_font_size_bits = font_atlas_counts.4;
     let image_paths = native_image_path_telemetry(&images, &asset_server);
     let line = native_soak_metrics_json(std::process::id(), elapsed_ms, &counts, &image_paths);
     eprintln!("[native-soak] {line}");
@@ -9733,6 +9795,11 @@ mod native_soak_metrics_tests {
             image_data_bytes: 17,
             native_queue_messages: 3,
             native_queue_bytes: 4096,
+            font_atlas_keys: 4,
+            font_atlas_pages: 5,
+            font_atlas_bytes: 6_291_456,
+            font_atlas_font_ids: vec![3, 9],
+            font_atlas_font_size_bits: vec![12.0_f32.to_bits(), 18.0_f32.to_bits()],
             ..NativeSoakCounts::default()
         };
         let payload: serde_json::Value = serde_json::from_str(&native_soak_metrics_json(
@@ -9747,6 +9814,14 @@ mod native_soak_metrics_tests {
         assert_eq!(payload["imageDataBytes"], 17);
         assert_eq!(payload["nativeQueueMessages"], 3);
         assert_eq!(payload["nativeQueueBytes"], 4096);
+        assert_eq!(payload["fontAtlasKeys"], 4);
+        assert_eq!(payload["fontAtlasPages"], 5);
+        assert_eq!(payload["fontAtlasBytes"], 6_291_456);
+        assert_eq!(payload["fontAtlasFontIds"], serde_json::json!([3, 9]));
+        assert_eq!(
+            payload["fontAtlasFontSizeBits"],
+            serde_json::json!([12.0_f32.to_bits(), 18.0_f32.to_bits()])
+        );
     }
 
     #[test]

@@ -35,7 +35,7 @@ bevy = { version = "0.19.0", default-features = false, features = [
 console_error_panic_hook = "0.1.7"
 flate2 = "1"
 futures-util = "0.3"
-mir2-bevy-runtime = { path = "../runtime" }
+mir2-bevy-runtime = { path = "../runtime", features = ["native-font-atlas-telemetry"] }
 mir2-client-bevy = { path = "../client-bevy", features = ["native-ui"] }
 mir2-game-data = { path = "../../../packages/game-data" }
 mir2-protocol = { path = "../../../packages/protocol" }

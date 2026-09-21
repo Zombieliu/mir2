@@ -151,3 +151,17 @@ counts, plus map URL image/layout registry counts. Focused tests 6/6 pass.
 Rendering behavior is unchanged by this diagnostic addition. Switch only after
 normal logout once computer handoff is available. Local demo login is now
 explicitly user-authorized, so no recurring manual-auth handoff is needed.
+
+## Font/image attribution candidate
+
+User-input handoff remains pending; PID49272 auth-lifetime client is still live,
+private bytes ~29GB, and image count13425 / image bytes13.95GB have plateaued.
+No desktop inputs or client switch were performed in this continuation.
+Added fontAtlasKeys/pages/bytes and distinct font IDs/sizes to the opt-in soak
+telemetry; native Windows feature build succeeds, default metrics tests5/5.
+C:/numeron-legend-of-rebirth-20260921-font-ownership is packaged but NOT running.
+The image ownership and font attribution candidates are diagnostics only, not
+an asserted fix. Next: normal logout, switch latest candidate, authorized demo
+login, gather stationary resource attribution before changing asset behavior.
+Additional generated platform debug PDBs were moved to the existing C: backup
+after E: exhausted during validation. Source, assets and saves unchanged by move.
