@@ -2026,9 +2026,11 @@ pub enum NativePlayerUiIntent {
 impl NativePlayerUiIntent {
     pub fn pending_key(&self) -> Option<PendingOperationKey> {
         match self {
-            Self::ReadMail { mail_id } => Some(PendingOperationKey::ReadMail(*mail_id)),
+            // Crystal has no negative acknowledgement for these status
+            // commands. Queue-local deduplication prevents duplicate input;
+            // a persistent receipt lock would make a rejected request unretryable.
+            Self::ReadMail { .. } | Self::DeleteMail { .. } => None,
             Self::ClaimMail { mail_id } => Some(PendingOperationKey::ClaimMail(*mail_id)),
-            Self::DeleteMail { mail_id } => Some(PendingOperationKey::DeleteMail(*mail_id)),
             Self::SendMail {
                 recipient,
                 message,
@@ -2193,6 +2195,11 @@ impl NativePlayerUiIntentQueue {
         self.push_intent_at(intent, crate::hero_model::hero_clock_ms(), delay)
     }
     fn push_intent_at(&mut self, intent: NativePlayerUiIntent, now: u64, delay: u64) -> bool {
+        if matches!(&intent, NativePlayerUiIntent::ReadMail { .. } | NativePlayerUiIntent::DeleteMail { .. })
+            && (self.intents.len() >= MAX_QUEUED || self.intents.iter().any(|queued| queued == &intent))
+        {
+            return false;
+        }
         let uses_item = matches!(
             &intent,
             NativePlayerUiIntent::UseItem { .. }

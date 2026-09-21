@@ -183,7 +183,7 @@ fn attachment_confirm_rechecks_identity_contents_and_lock_before_queueing() {
 }
 
 #[test]
-fn yes_and_enter_consume_the_close_frame_and_pending_deduplicates_the_same_mail() {
+fn yes_and_enter_consume_the_close_frame_and_silent_rejection_allows_reconfirm() {
     let mut app = delete_test_app();
     app.world_mut().resource_mut::<MailModel>().mails.extend([
         mail(20, 0, Some("Potion"), false),
@@ -226,12 +226,11 @@ fn yes_and_enter_consume_the_close_frame_and_pending_deduplicates_the_same_mail(
         .world()
         .resource::<NativePlayerUiState>()
         .mail_delete_prompt
-        .is_some(), "a duplicate pending delete remains retryable after a receipt");
-    assert!(app
+        .is_none(), "a new explicit confirmation may retry after a silent rejection");
+    assert_eq!(app
         .world_mut()
         .resource_mut::<NativePlayerUiIntentQueue>()
-        .drain_intents()
-        .is_empty());
+        .drain_intents(), vec![NativePlayerUiIntent::DeleteMail { mail_id: 20 }]);
 
     let mut keyboard_app = delete_test_app();
     keyboard_app
@@ -337,4 +336,44 @@ fn rendered_warning_uses_a_modal_source_frame_and_blocks_pointer_input() {
     assert_eq!(*focus, FocusPolicy::Block);
     assert_eq!(node.width, Val::Px(1024.0));
     assert_eq!(node.height, Val::Px(768.0));
+}
+
+#[test]
+fn unacknowledged_mail_status_commands_deduplicate_only_until_queue_drain() {
+    for intent in [NativePlayerUiIntent::ReadMail { mail_id: 70 }, NativePlayerUiIntent::DeleteMail { mail_id: 70 }] {
+        let mut queue = NativePlayerUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+        assert!(intent.pending_key().is_none());
+        assert!(queue.push_pending_intent(&mut pending, intent.clone()));
+        assert!(!queue.push_pending_intent(&mut pending, intent.clone()));
+        assert_eq!(queue.drain_intents(), vec![intent.clone()]);
+        // Model unchanged, no reply and no elapsed-time reset: the player may
+        // retry after a silent rejection, just as Crystal Network.Enqueue does.
+        assert!(queue.push_pending_intent(&mut pending, intent.clone()));
+        assert_eq!(queue.drain_intents(), vec![intent]);
+        assert!(!pending.contains(&PendingOperationKey::ReadMail(70)));
+        assert!(!pending.contains(&PendingOperationKey::DeleteMail(70)));
+    }
+}
+
+#[test]
+fn mail_status_retry_preserves_authority_and_claim_pending_protection() {
+    let mut app = delete_test_app();
+    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel = mir2_ui_core::state::UiPanel::Mail;
+    app.world_mut().resource_mut::<MailModel>().mails.push(mail(70, 0, None, false));
+    let before = app.world().resource::<MailModel>().mails.clone();
+    for button in [OverlayButton::ReadMail(70), OverlayButton::DeleteMail(70)] {
+        press_button(&mut app, button);
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().len(), 1);
+        press_button(&mut app, button);
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().len(), 1);
+        assert_eq!(app.world().resource::<MailModel>().mails, before);
+    }
+    let mut queue = NativePlayerUiIntentQueue::default();
+    let mut pending = PendingOperations::default();
+    let claim = NativePlayerUiIntent::ClaimMail { mail_id: 71 };
+    assert!(queue.push_pending_intent(&mut pending, claim.clone()));
+    assert_eq!(queue.drain_intents(), vec![claim.clone()]);
+    assert!(!queue.push_pending_intent(&mut pending, claim));
+    assert!(pending.contains(&PendingOperationKey::ClaimMail(71)));
 }
