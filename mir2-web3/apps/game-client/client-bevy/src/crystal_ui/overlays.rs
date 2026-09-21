@@ -3279,6 +3279,7 @@ pub(crate) struct OverlayKeyboardControls<'w> {
     effects: Option<ResMut<'w, UiEffectQueue>>,
     belt: Option<ResMut<'w, super::hud::CrystalBeltPresentation>>,
     letter_editor: Option<ResMut<'w, mail_editor::MailLetterEditor>>,
+    parcel: Option<Res<'w, mail_parcel::MailParcelUi>>,
 }
 
 fn release_mail_parcel_locks(
@@ -3286,6 +3287,18 @@ fn release_mail_parcel_locks(
     intents: &mut NativePlayerUiIntentQueue,
 ) {
     for unique_id in parcel.release_all() {
+        let _ = intents.push_transient_unique(NativePlayerUiIntent::MailLockItem {
+            unique_id,
+            locked: false,
+        });
+    }
+}
+
+fn complete_mail_parcel_send(
+    parcel: &mut mail_parcel::MailParcelUi,
+    intents: &mut NativePlayerUiIntentQueue,
+) {
+    for unique_id in parcel.complete_send() {
         let _ = intents.push_transient_unique(NativePlayerUiIntent::MailLockItem {
             unique_id,
             locked: false,
@@ -3345,6 +3358,7 @@ fn process_mail_service_inbox(
             }
             MailServiceEvent::LockedItem { unique_id, locked } => {
                 parcel.apply_lock_receipt(unique_id, locked);
+                clear_mail_locked_inventory_interaction(&mut state, &inventory, &parcel);
             }
         }
     }
@@ -4570,6 +4584,7 @@ fn consume_hud_buttons(
     overlay_buttons: Query<&Interaction, (With<OverlayButton>, Changed<Interaction>)>,
     shell: Option<Res<NativeShellModel>>,
     inventory: Res<InventoryModel>,
+    parcel: Option<Res<mail_parcel::MailParcelUi>>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
     mut pending: Option<ResMut<PendingOperations>>,
     mut ui_audio: ResMut<crate::audio::NativeUiAudioQueue>,
@@ -4661,6 +4676,10 @@ fn consume_hud_buttons(
                     unique_id,
                 }) = state.inventory_operation.clone()
                 {
+                    if parcel.as_ref().is_some_and(|parcel| parcel.blocks_item(unique_id)) {
+                        state.inventory_operation = None;
+                        continue;
+                    }
                     let Some(pending) = pending.as_deref_mut() else {
                         continue;
                     };
@@ -4719,7 +4738,7 @@ fn consume_mail_operation_feedback(
         // retryable because its receipt carries no more specific reason.
         (MailOperationKind::Send, true) => {
             if let (Some(parcel), Some(intents)) = (parcel.as_deref_mut(), intents.as_deref_mut()) {
-                release_mail_parcel_locks(parcel, intents);
+                complete_mail_parcel_send(parcel, intents);
             }
             state.core.mail_compose = None;
             compose.kind = MailComposeKind::Letter;
@@ -5148,6 +5167,7 @@ fn belt_slot_at_cursor(belt: super::hud::CrystalBeltPresentation, cursor: Vec2) 
 fn inventory_item_drag_at_cursor(
     state: &NativePlayerUiState,
     inventory: &InventoryModel,
+    parcel: Option<&mail_parcel::MailParcelUi>,
     start: Vec2,
 ) -> Option<InventoryItemDrag> {
     let source_slot = inventory_bag_slot_at_cursor(state, start)?;
@@ -5155,9 +5175,13 @@ fn inventory_item_drag_at_cursor(
         .items_in(0)
         .into_iter()
         .find(|item| item.slot == source_slot)?;
+    let unique_id = item_unique_id(item)?;
+    if parcel.is_some_and(|parcel| parcel.blocks_item(unique_id)) {
+        return None;
+    }
     Some(InventoryItemDrag {
         source_slot,
-        unique_id: item_unique_id(item)?,
+        unique_id,
         start,
     })
 }
@@ -5547,7 +5571,7 @@ fn finish_inventory_item_drag(
     state: &mut NativePlayerUiState,
     inventory: &InventoryModel,
     parcel_active: bool,
-    parcel: Option<&mut mail_parcel::MailParcelUi>,
+    mut parcel: Option<&mut mail_parcel::MailParcelUi>,
     mut shop: Option<&mut ShopModel>,
     storage: Option<&mut StorageModel>,
     storage_ui: Option<&mut StorageUiState>,
@@ -5567,6 +5591,12 @@ fn finish_inventory_item_drag(
     }) else {
         return;
     };
+    if parcel
+        .as_deref()
+        .is_some_and(|parcel| parcel.blocks_item(drag.unique_id))
+    {
+        return;
+    }
     let Some(cursor) = cursor else {
         belt_diagnostic(diagnostics, || "drag release without cursor".to_owned());
         return;
@@ -5580,8 +5610,8 @@ fn finish_inventory_item_drag(
     }
     state.inspect = None;
     if parcel_active {
-        if let Some(parcel) = parcel {
-            if let Some(target_slot) = mail_parcel::slot_at_cursor(parcel, cursor) {
+        if let Some(parcel) = parcel.as_deref_mut() {
+            if mail_parcel::slot_at_cursor(parcel, cursor).is_some() {
                 if let Some(draft) = state.core.mail_compose.as_mut() {
                     if parcel.attach(draft, inventory, drag.unique_id) {
                         let _ = intents.push_transient_unique(NativePlayerUiIntent::MailLockItem {
@@ -5636,6 +5666,12 @@ fn finish_inventory_item_drag(
             return;
         }
         let target = inventory.items_in(0).into_iter().find(|item| item.slot == to);
+        if target
+            .and_then(item_unique_id)
+            .is_some_and(|unique_id| parcel.as_deref().is_some_and(|parcel| parcel.blocks_item(unique_id)))
+        {
+            return;
+        }
         // MirItemCell.MoveItem merges matching, non-full stacks; otherwise
         // MoveItem swaps occupied cells or moves into an empty cell.
         let merge_target = target
@@ -5683,6 +5719,7 @@ fn finish_inventory_item_drag(
 fn finish_storage_item_drag(
     state: &mut NativePlayerUiState,
     inventory: &InventoryModel,
+    parcel: Option<&mail_parcel::MailParcelUi>,
     storage: &StorageModel,
     storage_ui: &mut StorageUiState,
     cursor: Option<Vec2>,
@@ -5731,6 +5768,9 @@ fn finish_storage_item_drag(
     let Some(target_slot) = inventory_bag_slot_at_cursor(state, cursor) else {
         return;
     };
+    if bag_slot_is_mail_locked_opt(parcel, inventory, target_slot) {
+        return;
+    }
     let _ = enqueue_storage_to_bag_drag(
         source,
         drag.source_slot,
@@ -5893,7 +5933,12 @@ fn process_inventory_item_drag(
                     match event.state {
                         ButtonState::Pressed => {
                             state.inventory_item_drag = cursor.and_then(|start| {
-                                inventory_item_drag_at_cursor(&state, &inventory, start)
+                                inventory_item_drag_at_cursor(
+                                    &state,
+                                    &inventory,
+                                    parcel.as_deref(),
+                                    start,
+                                )
                             });
                             state.equipment_item_drag = None;
                             if let Some(storage_ui) = storage_ui.as_deref_mut() {
@@ -5945,6 +5990,7 @@ fn process_inventory_item_drag(
                                 finish_storage_item_drag(
                                     &mut state,
                                     &inventory,
+                                    parcel.as_deref(),
                                     storage,
                                     storage_ui,
                                     cursor,
@@ -5974,7 +6020,9 @@ fn process_inventory_item_drag(
     if mouse.just_pressed(MouseButton::Left) {
         let start = cursor_path.first().copied().or(cursor);
         state.inventory_item_drag =
-            start.and_then(|start| inventory_item_drag_at_cursor(&state, &inventory, start));
+            start.and_then(|start| {
+                inventory_item_drag_at_cursor(&state, &inventory, parcel.as_deref(), start)
+            });
         state.equipment_item_drag = None;
         if let Some(storage_ui) = storage_ui.as_deref_mut() {
             storage_ui.storage_item_drag = if state.inventory_item_drag.is_none() {
@@ -6014,6 +6062,7 @@ fn process_inventory_item_drag(
             finish_storage_item_drag(
                 &mut state,
                 &inventory,
+                parcel.as_deref(),
                 storage,
                 storage_ui,
                 cursor,
@@ -6498,7 +6547,10 @@ pub(crate) fn process_overlay_keyboard(
         mut effects,
         mut belt,
         mut letter_editor,
+        parcel,
     } = keyboard_controls;
+    let fallback_parcel = mail_parcel::MailParcelUi::default();
+    let parcel = parcel.as_deref().unwrap_or(&fallback_parcel);
 
     if keys.just_pressed(KeyCode::F12)
         && (keys.pressed(KeyCode::ControlLeft) || keys.pressed(KeyCode::ControlRight))
@@ -6865,7 +6917,13 @@ pub(crate) fn process_overlay_keyboard(
             return;
         }
         if keys.just_pressed(KeyCode::Enter) {
-            if confirm_inventory_delete(&mut state, &inventory, &mut intents, &mut pending) {
+            if confirm_inventory_delete(
+                &mut state,
+                &inventory,
+                parcel,
+                &mut intents,
+                &mut pending,
+            ) {
                 ui_audio.push(crate::audio::NativeUiSound::ButtonB);
             }
             return;
@@ -8698,18 +8756,22 @@ fn process_overlay_buttons(
                 );
             }
             OverlayButton::UseInspected => {
-                if let Some(intent) = inspected_use_intent(&state, &inventory) {
-                    intents.push_intent(intent);
+                if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
+                    if let Some(intent) = inspected_use_intent(&state, &inventory) {
+                        intents.push_intent(intent);
+                    }
                 }
             }
             OverlayButton::EquipInspected => {
-                if let Some(intent) = inspected_equip_intent(&state, &inventory) {
-                    if intents.push_intent(intent) {
-                        // Crystal disposes the item action menu as soon as the
-                        // equip request is accepted. Keeping this selection
-                        // alive renders the pre-swap bag item after the server
-                        // moves it into the equipment grid.
-                        state.inspect = None;
+                if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
+                    if let Some(intent) = inspected_equip_intent(&state, &inventory) {
+                        if intents.push_intent(intent) {
+                            // Crystal disposes the item action menu as soon as the
+                            // equip request is accepted. Keeping this selection
+                            // alive renders the pre-swap bag item after the server
+                            // moves it into the equipment grid.
+                            state.inspect = None;
+                        }
                     }
                 }
             }
@@ -8722,6 +8784,9 @@ fn process_overlay_buttons(
                 if let Some(slot) =
                     inspected_inventory_item(&state, &inventory).map(|item| item.slot)
                 {
+                    if bag_slot_is_mail_locked(parcel_ui, &inventory, slot) {
+                        continue;
+                    }
                     // DelItemButton itself owns ButtonA even when an existing
                     // selected cell opens the prompt without toggling mode.
                     ui_audio.push(crate::audio::NativeUiSound::ButtonA);
@@ -8737,7 +8802,13 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::InventoryDeleteConfirm => {
-                if confirm_inventory_delete(&mut state, &inventory, &mut intents, &mut pending) {
+                if confirm_inventory_delete(
+                    &mut state,
+                    &inventory,
+                    parcel_ui,
+                    &mut intents,
+                    &mut pending,
+                ) {
                     ui_audio.push(crate::audio::NativeUiSound::ButtonB);
                 }
             }
@@ -8777,13 +8848,17 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::DropInspected => {
-                state.drop_confirmation = inspected_drop_confirmation(&state, &inventory);
+                if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
+                    state.drop_confirmation = inspected_drop_confirmation(&state, &inventory);
+                }
             }
             OverlayButton::ConfirmDropInspected => {
                 let Some(confirmation) = state.drop_confirmation.take() else {
                     continue;
                 };
-                if !drop_confirmation_is_current(&confirmation, &inventory) {
+                if parcel_ui.blocks_item(confirmation.unique_id)
+                    || !drop_confirmation_is_current(&confirmation, &inventory)
+                {
                     continue;
                 }
                 intents.push_pending_intent(
@@ -8800,19 +8875,21 @@ fn process_overlay_buttons(
                 state.drop_confirmation = None;
             }
             OverlayButton::SplitInspected => {
-                if let Some(item) = inspected_inventory_item(&state, &inventory) {
-                    if let Some(unique_id) = item_unique_id(item) {
-                        let max = item.quantity.saturating_sub(1).min(u32::from(u16::MAX)) as u16;
-                        let count = state.split_count.clamp(1, max.max(1));
-                        if max > 0 {
-                            intents.push_pending_intent(
-                                &mut pending,
-                                NativePlayerUiIntent::SplitItem {
-                                    unique_id,
-                                    grid: "inventory".to_owned(),
-                                    count,
-                                },
-                            );
+                if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
+                    if let Some(item) = inspected_inventory_item(&state, &inventory) {
+                        if let Some(unique_id) = item_unique_id(item) {
+                            let max = item.quantity.saturating_sub(1).min(u32::from(u16::MAX)) as u16;
+                            let count = state.split_count.clamp(1, max.max(1));
+                            if max > 0 {
+                                intents.push_pending_intent(
+                                    &mut pending,
+                                    NativePlayerUiIntent::SplitItem {
+                                        unique_id,
+                                        grid: "inventory".to_owned(),
+                                        count,
+                                    },
+                                );
+                            }
                         }
                     }
                 }
@@ -8821,28 +8898,34 @@ fn process_overlay_buttons(
                 state.split_count = state.split_count.saturating_sub(1).max(1);
             }
             OverlayButton::SplitCountInc => {
-                if let Some(item) = inspected_inventory_item(&state, &inventory) {
-                    let max = item.quantity.saturating_sub(1).min(u32::from(u16::MAX)) as u16;
-                    state.split_count = state.split_count.saturating_add(1).min(max.max(1));
+                if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
+                    if let Some(item) = inspected_inventory_item(&state, &inventory) {
+                        let max = item.quantity.saturating_sub(1).min(u32::from(u16::MAX)) as u16;
+                        state.split_count = state.split_count.saturating_add(1).min(max.max(1));
+                    }
                 }
             }
             OverlayButton::ArmMoveInspected => {
-                if let Some(item) = inspected_inventory_item(&state, &inventory) {
-                    if let Some(unique_id) = item_unique_id(item) {
-                        state.inventory_operation = Some(InventoryOperationDraft::Move {
-                            source_slot: item.slot,
-                            unique_id,
-                        });
+                if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
+                    if let Some(item) = inspected_inventory_item(&state, &inventory) {
+                        if let Some(unique_id) = item_unique_id(item) {
+                            state.inventory_operation = Some(InventoryOperationDraft::Move {
+                                source_slot: item.slot,
+                                unique_id,
+                            });
+                        }
                     }
                 }
             }
             OverlayButton::ArmMergeInspected => {
-                if let Some(item) = inspected_inventory_item(&state, &inventory) {
-                    if let Some(unique_id) = item_unique_id(item) {
-                        state.inventory_operation = Some(InventoryOperationDraft::Merge {
-                            source_slot: item.slot,
-                            unique_id,
-                        });
+                if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
+                    if let Some(item) = inspected_inventory_item(&state, &inventory) {
+                        if let Some(unique_id) = item_unique_id(item) {
+                            state.inventory_operation = Some(InventoryOperationDraft::Merge {
+                                source_slot: item.slot,
+                                unique_id,
+                            });
+                        }
                     }
                 }
             }
@@ -8852,6 +8935,7 @@ fn process_overlay_buttons(
             OverlayButton::InspectBag(_) if state.trade_dialog.open => {}
             OverlayButton::InspectBag(_) if state.inventory_item_drag.is_some()
                 || state.inventory_item_pointer_consumed => {}
+            OverlayButton::InspectBag(slot) if bag_slot_is_mail_locked(parcel_ui, &inventory, slot) => {}
             OverlayButton::InspectBag(slot) if state.inventory_delete_mode => {
                 let _ = state.open_inventory_delete_for_slot(&inventory, slot);
             }
@@ -8860,6 +8944,12 @@ fn process_overlay_buttons(
                     source_slot,
                     unique_id,
                 }) if source_slot != slot => {
+                    if parcel_ui.blocks_item(unique_id)
+                        || bag_slot_is_mail_locked(parcel_ui, &inventory, slot)
+                    {
+                        state.inventory_operation = None;
+                        continue;
+                    }
                     if intents.push_pending_intent(
                         &mut pending,
                         NativePlayerUiIntent::MoveItem {
@@ -8881,6 +8971,12 @@ fn process_overlay_buttons(
                     source_slot,
                     unique_id: id_from,
                 }) if source_slot != slot => {
+                    if parcel_ui.blocks_item(id_from)
+                        || bag_slot_is_mail_locked(parcel_ui, &inventory, slot)
+                    {
+                        state.inventory_operation = None;
+                        continue;
+                    }
                     let target = inventory
                         .items_in(0)
                         .into_iter()
@@ -9823,6 +9919,65 @@ fn inspected_inventory_item<'a>(
         .find(|item| item.container == 0 && item.slot == inspect.slot && item.key == inspect.key)
 }
 
+fn bag_slot_is_mail_locked(
+    parcel: &mail_parcel::MailParcelUi,
+    inventory: &InventoryModel,
+    slot: u32,
+) -> bool {
+    inventory
+        .items_in(0)
+        .into_iter()
+        .find(|item| item.slot == slot)
+        .and_then(item_unique_id)
+        .is_some_and(|unique_id| parcel.blocks_item(unique_id))
+}
+
+fn bag_slot_is_mail_locked_opt(
+    parcel: Option<&mail_parcel::MailParcelUi>,
+    inventory: &InventoryModel,
+    slot: u32,
+) -> bool {
+    parcel.is_some_and(|parcel| bag_slot_is_mail_locked(parcel, inventory, slot))
+}
+
+fn inspected_bag_item_is_mail_locked(
+    state: &NativePlayerUiState,
+    inventory: &InventoryModel,
+    parcel: &mail_parcel::MailParcelUi,
+) -> bool {
+    inspected_inventory_item(state, inventory)
+        .and_then(item_unique_id)
+        .is_some_and(|unique_id| parcel.blocks_item(unique_id))
+}
+
+/// A lock echo can race a pre-existing item menu or destructive prompt.  Clear
+/// only the exact bag interaction it protects; unrelated inventory operations
+/// retain their normal lifecycle.
+fn clear_mail_locked_inventory_interaction(
+    state: &mut NativePlayerUiState,
+    inventory: &InventoryModel,
+    parcel: &mail_parcel::MailParcelUi,
+) {
+    if inspected_bag_item_is_mail_locked(state, inventory, parcel) {
+        state.inspect = None;
+        state.drop_confirmation = None;
+    }
+    if state.inventory_operation.as_ref().is_some_and(|operation| {
+        let unique_id = match operation {
+            InventoryOperationDraft::Move { unique_id, .. }
+            | InventoryOperationDraft::Merge { unique_id, .. } => *unique_id,
+        };
+        parcel.blocks_item(unique_id)
+    }) {
+        state.inventory_operation = None;
+    }
+    if state.inventory_delete_prompt.as_ref().is_some_and(|prompt| {
+        parcel.blocks_item(prompt.target().unique_id)
+    }) {
+        state.cancel_inventory_delete();
+    }
+}
+
 fn inspected_use_intent(
     state: &NativePlayerUiState,
     inventory: &InventoryModel,
@@ -10004,6 +10159,7 @@ fn push_delete_amount_text(state: &mut NativePlayerUiState, text: &str) {
 fn confirm_inventory_delete(
     state: &mut NativePlayerUiState,
     inventory: &InventoryModel,
+    parcel: &mail_parcel::MailParcelUi,
     intents: &mut NativePlayerUiIntentQueue,
     pending: &mut PendingOperations,
 ) -> bool {
@@ -10011,6 +10167,10 @@ fn confirm_inventory_delete(
         return false;
     };
     if !inventory_delete_prompt_is_current(&prompt, inventory) {
+        state.cancel_inventory_delete();
+        return false;
+    }
+    if parcel.blocks_item(prompt.target().unique_id) {
         state.cancel_inventory_delete();
         return false;
     }
@@ -10893,6 +11053,7 @@ fn render_overlays(
                     &state,
                     &inventory_feedback,
                     &social,
+                    parcel_ui.as_deref(),
                 )
             },
         );
@@ -10935,7 +11096,7 @@ fn render_overlays(
             &mut commands,
             &mut all.p5(),
             state.inspect.is_some(),
-            |parent| render_inspect(parent, &state, &inventory),
+            |parent| render_inspect(parent, &state, &inventory, parcel_ui.as_deref()),
         );
         let dead = ui.player.max_hp > 0 && ui.player.hp <= 0;
         fill_panel(&mut commands, &mut all.p6(), dead, render_death);
@@ -11538,6 +11699,7 @@ fn render_inventory(
     state: &NativePlayerUiState,
     feedback: &InventoryOperationFeedback,
     social: &crate::social::SocialModel,
+    parcel: Option<&mail_parcel::MailParcelUi>,
 ) {
     if let Some(asset_server) = asset_server {
         spawn_overlay_frame(
@@ -11676,7 +11838,11 @@ fn render_inventory(
                         .filter(|item| {
                             container != 0 || !trade_dialog::offered_bag_item(social, item)
                         });
-                    let enabled = if container == 3 {
+                    let mail_locked = container == 0
+                        && item
+                            .and_then(item_unique_id)
+                            .is_some_and(|unique_id| parcel.is_some_and(|parcel| parcel.blocks_item(unique_id)));
+                    let enabled = !mail_locked && if container == 3 {
                         item.is_some()
                     } else {
                         match &state.inventory_operation {
@@ -11712,6 +11878,7 @@ fn render_inventory(
                             rect,
                             button,
                             enabled,
+                            mail_locked,
                             &ui.player,
                         );
                     } else {
@@ -11777,7 +11944,10 @@ fn render_inventory(
                         }
                     })
                     .unwrap_or_default();
-                let enabled = match &state.inventory_operation {
+                let enabled = !item
+                    .and_then(item_unique_id)
+                    .is_some_and(|unique_id| parcel.is_some_and(|parcel| parcel.blocks_item(unique_id)))
+                    && match &state.inventory_operation {
                     Some(InventoryOperationDraft::Move { source_slot, .. }) => *source_slot != slot,
                     Some(InventoryOperationDraft::Merge { source_slot, .. }) => {
                         *source_slot != slot && item.and_then(item_unique_id).is_some()
@@ -12185,6 +12355,7 @@ fn render_equipment(
                             rect,
                             OverlayButton::InspectEquip(slot),
                             true,
+                            false,
                             &ui.player,
                         );
                     }
@@ -12442,6 +12613,7 @@ fn overlay_absolute_item_button(
     rect: CrystalRect,
     action: OverlayButton,
     enabled: bool,
+    mail_locked: bool,
     player: &crate::read_model::PlayerStats,
 ) {
     let mut entity = parent.spawn((
@@ -12462,18 +12634,29 @@ fn overlay_absolute_item_button(
     }
     entity.with_children(|cell| {
         if let Some(index) = item.user_item_image_index() {
-            let (marker, node, mut image) = original_item_image_bundle(
-                asset_server,
-                Some(index),
-                rect.width as i32,
-                rect.height as i32,
-            );
-            image.color = if enabled {
-                Color::WHITE
+            if mail_locked {
+                crate::crystal_ui::item_image::spawn_original_item_image_tinted(
+                    cell,
+                    asset_server,
+                    index,
+                    rect.width as i32,
+                    rect.height as i32,
+                    Color::srgba(105.0 / 255.0, 105.0 / 255.0, 105.0 / 255.0, 0.8),
+                );
             } else {
-                Color::srgba(0.412, 0.412, 0.412, 0.8)
-            };
-            cell.spawn((marker, node, image));
+                let (marker, node, mut image) = original_item_image_bundle(
+                    asset_server,
+                    Some(index),
+                    rect.width as i32,
+                    rect.height as i32,
+                );
+                image.color = if enabled {
+                    Color::WHITE
+                } else {
+                    Color::srgba(0.412, 0.412, 0.412, 0.8)
+                };
+                cell.spawn((marker, node, image));
+            }
         }
         let detail = inventory_cell_stack_label(item);
         if !detail.is_empty() {
@@ -14379,6 +14562,7 @@ fn render_inspect(
     parent: &mut ChildSpawnerCommands,
     state: &NativePlayerUiState,
     inventory: &InventoryModel,
+    parcel: Option<&mail_parcel::MailParcelUi>,
 ) {
     title(parent, "Item");
     if let Some(inspect) = state.inspect.as_ref() {
@@ -14396,7 +14580,10 @@ fn render_inspect(
                 inspect.slot
             ),
         );
-        let use_enabled = inspected_use_intent(state, inventory).is_some();
+        let mail_locked = parcel.is_some_and(|parcel| {
+            inspected_bag_item_is_mail_locked(state, inventory, parcel)
+        });
+        let use_enabled = !mail_locked && inspected_use_intent(state, inventory).is_some();
         overlay_button(parent, "Use (U)", OverlayButton::UseInspected, use_enabled);
         if inspect.container == 2 {
             overlay_button(
@@ -14410,11 +14597,11 @@ fn render_inspect(
                 parent,
                 "Equip (G)",
                 OverlayButton::EquipInspected,
-                inspected_equip_intent(state, inventory).is_some(),
+                !mail_locked && inspected_equip_intent(state, inventory).is_some(),
             );
         }
         if let Some(item) = inspected_inventory_item(state, inventory) {
-            let valid_id = item_unique_id(item).is_some();
+            let valid_id = !mail_locked && item_unique_id(item).is_some();
             let drop_enabled =
                 valid_id && u16::try_from(item.quantity).is_ok() && item.quantity > 0;
             let split_max = item.quantity.saturating_sub(1).min(u32::from(u16::MAX)) as u16;
@@ -14457,7 +14644,7 @@ fn render_inspect(
                     );
                 });
             if let Some(confirmation) = state.drop_confirmation.as_ref() {
-                let current = drop_confirmation_is_current(confirmation, inventory);
+                let current = !mail_locked && drop_confirmation_is_current(confirmation, inventory);
                 body(
                     parent,
                     &format!("Drop {} x{}?", confirmation.key, confirmation.count),
@@ -15935,6 +16122,7 @@ fn render_storage(
                     rect,
                     OverlayButton::SelectStorage(slot.slot),
                     !slot.locked && item.unique_id.is_some(),
+                    false,
                     player,
                 );
                 if selected {
@@ -20362,9 +20550,11 @@ mod tests {
         inventory.items[0].unique_id = Some(8);
         let mut intents = NativePlayerUiIntentQueue::default();
         let mut pending = PendingOperations::default();
+        let parcel = mail_parcel::MailParcelUi::default();
         assert!(!confirm_inventory_delete(
             &mut state,
             &inventory,
+            &parcel,
             &mut intents,
             &mut pending,
         ));

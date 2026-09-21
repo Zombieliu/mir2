@@ -123,9 +123,11 @@ impl MailParcelWindow {
 }
 
 /// The source page has five cells but leaves only the first exposed until a
-/// real stamp is selected. `locked_ids` records server echoes; `selected_ids`
-/// are stored on the authoritative compose draft and are always rechecked
-/// before a request is sent.
+/// real stamp is selected. `locked_ids` records acknowledged locks while
+/// `selected_ids` gives the local attachment an immediate, optimistic lock.
+/// Both sets use exact carried-item identities and are always rechecked before
+/// a request is sent.  The bounded native event queue may drop an unlock echo,
+/// so a local cancel remains the authority that clears its own identities.
 #[derive(Debug, Resource)]
 pub(super) struct MailParcelUi {
     pub window: MailParcelWindow,
@@ -186,12 +188,28 @@ impl MailParcelUi {
         false
     }
 
+    /// Applies only an echo for an item this parcel currently owns.  The
+    /// service event queue can cross a close/reset boundary, so a stray `true`
+    /// receipt must not manufacture a lock for an arbitrary inventory item.
     pub(super) fn apply_lock_receipt(&mut self, unique_id: u64, locked: bool) {
+        if unique_id == 0 {
+            return;
+        }
         if locked {
-            self.locked_ids.insert(unique_id);
+            if self.selected_ids.contains(&unique_id) || self.locked_ids.contains(&unique_id) {
+                self.locked_ids.insert(unique_id);
+            }
         } else {
             self.locked_ids.remove(&unique_id);
         }
+    }
+
+    /// Attachment selection disables the cell before its echoed lock arrives.
+    /// Local cancellation clears both sets because a bounded inbox may drop
+    /// the false echo; delayed false replies never unlock a current selection.
+    pub(super) fn blocks_item(&self, unique_id: u64) -> bool {
+        unique_id != 0
+            && (self.selected_ids.contains(&unique_id) || self.locked_ids.contains(&unique_id))
     }
 
     pub(super) fn selected_ids(&self) -> impl Iterator<Item = u64> + '_ {
@@ -368,6 +386,9 @@ impl MailParcelUi {
     pub(super) fn release_all(&mut self) -> Vec<u64> {
         let ids = self.selected_ids.iter().copied().collect();
         self.selected_ids.clear();
+        // Crystal waits for its reliable false echo before clearing the cell.
+        // Native MailService ingress is deliberately bounded and can drop that
+        // echo; its server has no escrow lock, so local cancel must recover.
         self.locked_ids.clear();
         self.stamped = false;
         self.quote = None;
@@ -377,6 +398,15 @@ impl MailParcelUi {
         self.desired = None;
         self.quote_error = None;
         ids
+    }
+
+    /// Crystal clears every inventory-cell lock when the authoritative send
+    /// result succeeds.  Keep the explicit operation so success remains clear
+    /// at the call site even though local cancel also clears its own locks.
+    pub(super) fn complete_send(&mut self) -> Vec<u64> {
+        let released = self.release_all();
+        self.locked_ids.clear();
+        released
     }
 
     pub(super) fn session_reset(&mut self, revision: u64) -> Option<Vec<u64>> {
@@ -514,7 +544,10 @@ pub(super) fn render(
         spawn_overlay_frame(parent, asset_server, "original-ui/Title/674.png", MAIL_PARCEL_SIZE.x, MAIL_PARCEL_SIZE.y);
         spawn_overlay_crystal_button(parent, asset_server, "Prguse2", 360, 361, 362,
             CrystalRect::new(209.0, 3.0, 24.0, 21.0), OverlayButton::CancelMailCompose);
-        spawn_overlay_crystal_button_enabled(parent, asset_server, "Prguse2", 203, 204, 205,
+        // Crystal UpdateParcel keeps every interaction frame on the current
+        // stamped state; these are checkbox states, not hover/pressed sprites.
+        let stamp_frame = if parcel.stamped() { 204 } else { 203 };
+        spawn_overlay_crystal_button_enabled(parent, asset_server, "Prguse2", stamp_frame, stamp_frame, stamp_frame,
             CrystalRect::new(73.0, 56.0, 20.0, 20.0), OverlayButton::MailParcelStamp,
             parcel.stamp_available(inventory));
         spawn_overlay_crystal_button_enabled(parent, asset_server, "Title", 607, 608, 609,

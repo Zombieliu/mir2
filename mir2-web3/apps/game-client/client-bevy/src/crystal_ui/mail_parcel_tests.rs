@@ -41,7 +41,7 @@ fn parcel_renderer_uses_independent_source_frame_cells_and_bag_offset() {
         });
     }
     app.world_mut().resource_mut::<MailComposeUi>().kind = MailComposeKind::Parcel;
-    app.world_mut().resource_mut::<InventoryModel>().items = vec![source_item(41, 0)];
+    app.world_mut().resource_mut::<InventoryModel>().items = vec![source_item(41, 0), source_item(42, 1)];
     app.update();
 
     let world = app.world_mut();
@@ -167,4 +167,166 @@ fn quote_is_invalidated_by_live_attachment_pricing_changes() {
     inventory.items[0].quantity = 2;
     assert!(!ui.quote_is_current(&draft, &inventory));
     assert!(ui.begin_quote(&draft, &inventory, 2).is_some());
+}
+
+#[test]
+fn parcel_lock_is_exact_and_local_cancel_recovers_if_echoes_are_dropped() {
+    let inventory = InventoryModel {
+        items: vec![source_item(41, 0), source_item(42, 1)],
+        ..default()
+    };
+    let mut ui = mail_parcel::MailParcelUi::default();
+    let mut draft = mir2_ui_core::state::MailComposeDraft::default();
+
+    assert!(ui.attach(&mut draft, &inventory, 41));
+    assert!(ui.blocks_item(41), "selection locks before the true echo");
+    assert!(!ui.blocks_item(42));
+    ui.apply_lock_receipt(41, true);
+    ui.apply_lock_receipt(9_999, true);
+    assert!(ui.blocks_item(41));
+    assert!(!ui.blocks_item(9_999), "unknown echoed IDs cannot create a permanent lock");
+
+    assert_eq!(ui.detach_at(&mut draft, 0), Some(41));
+    assert!(!ui.blocks_item(41), "cancel is locally authoritative when false echo is lost");
+    ui.apply_lock_receipt(41, true);
+    ui.apply_lock_receipt(41, false);
+    assert!(!ui.blocks_item(41), "late cancel echoes stay harmless after release");
+
+    assert!(ui.attach(&mut draft, &inventory, 41));
+    ui.apply_lock_receipt(41, false);
+    assert!(ui.blocks_item(41), "a delayed old false cannot unlock a reselected item");
+    ui.complete_send();
+    assert!(!ui.blocks_item(41));
+    draft.attachment_unique_ids.clear();
+
+    assert!(ui.attach(&mut draft, &inventory, 41));
+    assert!(ui.session_reset(1).is_none());
+    assert!(ui.session_reset(2).is_some());
+    ui.apply_lock_receipt(41, true);
+    assert!(!ui.blocks_item(41), "reset rejects a previous session's true echo");
+}
+
+#[test]
+fn parcel_locked_bag_item_is_dimmed_and_cannot_start_a_drag() {
+    let inventory = InventoryModel { items: vec![source_item(41, 0)], ..default() };
+    let mut state = NativePlayerUiState::default();
+    let mut parcel = mail_parcel::MailParcelUi::default();
+    let mut draft = mir2_ui_core::state::MailComposeDraft::default();
+    assert!(parcel.attach(&mut draft, &inventory, 41));
+
+    let cursor = Vec2::new(
+        state.inventory_window.left + INVENTORY_GRID_ORIGIN.x as f32 + 2.0,
+        state.inventory_window.top + INVENTORY_GRID_ORIGIN.y as f32 + 2.0,
+    );
+    assert!(
+        inventory_item_drag_at_cursor(&state, &inventory, Some(&parcel), cursor).is_none(),
+        "the precise selected UID cannot enter the bag drag pipeline"
+    );
+    assert!(
+        inventory_item_drag_at_cursor(&state, &inventory, None, cursor).is_some(),
+        "ordinary operation locking remains separate from mail selection"
+    );
+
+    let mut app = super::tests::overlay_render_test_app();
+    {
+        let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+        state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+        state.mail_inventory_visible = true;
+        state.core.mail_compose = Some(draft);
+    }
+    app.world_mut().resource_mut::<MailComposeUi>().kind = MailComposeKind::Parcel;
+    app.world_mut().resource_mut::<InventoryModel>().items = inventory.items;
+    *app.world_mut().resource_mut::<mail_parcel::MailParcelUi>() = parcel;
+    app.update();
+
+    let dim_gray = Color::srgba(105.0 / 255.0, 105.0 / 255.0, 105.0 / 255.0, 0.8);
+    assert!(
+        app.world_mut()
+            .query::<&ImageNode>()
+            .iter(app.world())
+            .any(|image| image.color == dim_gray),
+        "a locked carried cell keeps Crystal's DimGray 0.8 presentation"
+    );
+}
+
+#[test]
+fn parcel_selected_uid_blocks_the_overlay_action_chain() {
+    let mut app = App::new();
+    app.init_resource::<NativePlayerUiState>()
+        .init_resource::<MailComposeUi>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .init_resource::<PendingOperations>()
+        .init_resource::<NativeUiIntentQueue>()
+        .init_resource::<InventoryModel>()
+        .init_resource::<MailModel>()
+        .init_resource::<ShopModel>()
+        .init_resource::<StorageModel>()
+        .init_resource::<crate::social::SocialModel>();
+    app.insert_resource(NativeShellModel {
+        screen: NativeShellScreen::InGame,
+        ..default()
+    });
+    super::tests::init_overlay_button_test_resources(&mut app);
+    app.add_systems(Update, process_overlay_buttons);
+    app.world_mut().resource_mut::<InventoryModel>().items = vec![source_item(41, 0)];
+    {
+        let inventory = app.world().resource::<InventoryModel>().clone();
+        let mut parcel = app.world_mut().resource_mut::<mail_parcel::MailParcelUi>();
+        assert!(parcel.attach(
+            &mut mir2_ui_core::state::MailComposeDraft::default(),
+            &inventory,
+            41,
+        ));
+    }
+
+    fn press(app: &mut App, button: OverlayButton) {
+        let entity = app.world_mut().spawn((Interaction::Pressed, button, Button)).id();
+        app.update();
+        app.world_mut().despawn(entity);
+    }
+
+    press(&mut app, OverlayButton::InspectBag(0));
+    assert!(app.world().resource::<NativePlayerUiState>().inspect.is_none());
+
+    {
+        let item = app.world().resource::<InventoryModel>().items[0].clone();
+        app.world_mut().resource_mut::<NativePlayerUiState>().inspect = Some(inspect_from_item(&item));
+    }
+    press(&mut app, OverlayButton::UseInspected);
+    press(&mut app, OverlayButton::EquipInspected);
+    press(&mut app, OverlayButton::DropInspected);
+    press(&mut app, OverlayButton::SplitInspected);
+    press(&mut app, OverlayButton::ArmMoveInspected);
+    press(&mut app, OverlayButton::ArmMergeInspected);
+    {
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(state.drop_confirmation.is_none());
+        assert!(state.inventory_operation.is_none());
+    }
+    assert!(app
+        .world_mut()
+        .resource_mut::<NativePlayerUiIntentQueue>()
+        .drain_intents()
+        .is_empty());
+
+    app.world_mut().resource_mut::<NativePlayerUiState>().inventory_delete_mode = true;
+    press(&mut app, OverlayButton::InspectBag(0));
+    assert!(app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .inventory_delete_prompt
+        .is_none());
+
+    app.world_mut().resource_mut::<NativePlayerUiState>().inventory_operation = Some(
+        InventoryOperationDraft::Move {
+            source_slot: 1,
+            unique_id: 42,
+        },
+    );
+    press(&mut app, OverlayButton::InspectBag(0));
+    assert!(app
+        .world_mut()
+        .resource_mut::<NativePlayerUiIntentQueue>()
+        .drain_intents()
+        .is_empty(), "a non-mail source cannot swap into a locked attachment cell");
 }
