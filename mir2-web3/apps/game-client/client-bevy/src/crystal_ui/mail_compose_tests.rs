@@ -368,3 +368,198 @@ fn queued_friend_inspect_and_bond_letter_request_uses_the_safe_letter_transition
     assert_eq!(compose.parcel_draft.as_ref(), Some(&parcel));
     assert!(state.queued_mail_letter_recipient.is_none());
 }
+
+fn mail_wheel_layout(text: &str) -> Vec<friend_dialog::text_editor::VisualLine> {
+    let mut starts = text
+        .match_indices('\n')
+        .map(|(index, _)| index + 1)
+        .collect::<Vec<_>>();
+    starts.insert(0, 0);
+    starts
+        .into_iter()
+        .enumerate()
+        .map(|(index, start)| {
+            let end = text[start..]
+                .find('\n')
+                .map(|offset| start + offset)
+                .unwrap_or(text.len());
+            friend_dialog::text_editor::VisualLine {
+                y: index as f32 * 20.0,
+                height: 20.0,
+                stops: vec![
+                    friend_dialog::text_editor::CaretStop { byte: start, x: 0.0 },
+                    friend_dialog::text_editor::CaretStop { byte: end, x: 20.0 },
+                ],
+            }
+        })
+        .collect()
+}
+
+fn mail_wheel_app(kind: MailComposeKind) -> (App, Entity) {
+    let body = "x\n".repeat(20);
+    let mut app = App::new();
+    app.init_resource::<NativePlayerUiState>()
+        .init_resource::<MailComposeUi>()
+        .init_resource::<mail_compose_drag::MailLetterWindow>()
+        .init_resource::<mail_parcel::MailParcelUi>()
+        .init_resource::<mail_editor::MailLetterEditor>()
+        .init_resource::<PendingOperations>()
+        .insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        })
+        .add_message::<MouseWheel>()
+        .add_systems(Update, process_mail_letter_editor_wheel);
+    {
+        let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+        state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+        state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+            recipient: "Receiver".into(),
+            message: body.clone(),
+            ..default()
+        });
+    }
+    app.world_mut().resource_mut::<MailComposeUi>().kind = kind;
+    {
+        let mut editor = app.world_mut().resource_mut::<mail_editor::MailLetterEditor>();
+        editor.sync(true, Some(&body));
+        editor.install_layout(mail_wheel_layout(&body));
+    }
+    let (origin, body_rect) = if kind == MailComposeKind::Parcel {
+        (
+            app.world().resource::<mail_parcel::MailParcelUi>().window.position,
+            mail_parcel::MAIL_PARCEL_BODY_RECT,
+        )
+    } else {
+        (
+            app.world().resource::<mail_compose_drag::MailLetterWindow>().position,
+            mail_editor::MAIL_LETTER_BODY_RECT,
+        )
+    };
+    let logical = origin
+        + Vec2::new(body_rect.left, body_rect.top)
+        + mail_editor::MAIL_LETTER_CONTENT_INSET
+        + Vec2::new(10.0, 10.0);
+    let mut window = Window::default();
+    window.focused = true;
+    window.resolution.set(2048.0, 1536.0);
+    window.set_cursor_position(Some(logical * 2.0));
+    let window = app.world_mut().spawn((window, PrimaryWindow)).id();
+    (app, window)
+}
+
+fn wheel(app: &mut App, window: Entity, y: f32, unit: MouseScrollUnit) {
+    app.world_mut().write_message(MouseWheel {
+        phase: bevy::input::touch::TouchPhase::Moved,
+        unit,
+        x: 0.0,
+        y,
+        window,
+    });
+    app.update();
+}
+
+#[test]
+fn scaled_mail_body_wheel_routes_letter_and_parcel_without_leaking_past_guards() {
+    for kind in [MailComposeKind::Letter, MailComposeKind::Parcel] {
+        let (mut app, window) = mail_wheel_app(kind);
+        let before = app
+            .world()
+            .resource::<mail_editor::MailLetterEditor>()
+            .active_editor()
+            .expect("mail editor")
+            .selection();
+        wheel(&mut app, window, -400.0, MouseScrollUnit::Pixel);
+        assert_eq!(
+            app.world().resource::<mail_editor::MailLetterEditor>().scroll().y,
+            200.0,
+            "{kind:?} converts physical pixel wheel delta through the 2x stage scale"
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .menu_pointer_consumed = false;
+        wheel(&mut app, window, -100.0, MouseScrollUnit::Line);
+        assert_eq!(
+            app.world().resource::<mail_editor::MailLetterEditor>().scroll().y,
+            259.0,
+            "{kind:?} consumes a scaled in-viewport line wheel"
+        );
+        assert_eq!(
+            app.world()
+                .resource::<mail_editor::MailLetterEditor>()
+                .active_editor()
+                .expect("mail editor")
+                .selection(),
+            before,
+            "wheel does not change selection"
+        );
+
+        // A new input frame clears this pointer latch in the normal host before
+        // independent pointer consumers run.
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .menu_pointer_consumed = false;
+        app.world_mut()
+            .get_mut::<Window>(window)
+            .expect("window")
+            .set_cursor_position(Some(Vec2::new(2.0, 2.0)));
+        let before_outside = app.world().resource::<mail_editor::MailLetterEditor>().scroll();
+        wheel(&mut app, window, 1.0, MouseScrollUnit::Line);
+        assert_eq!(
+            app.world().resource::<mail_editor::MailLetterEditor>().scroll(),
+            before_outside,
+            "wheel outside the body is not routed to mail"
+        );
+
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .mail_feedback_prompt = Some("covered".into());
+        let before_covered = app.world().resource::<mail_editor::MailLetterEditor>().scroll();
+        wheel(&mut app, window, -1.0, MouseScrollUnit::Line);
+        assert_eq!(
+            app.world().resource::<mail_editor::MailLetterEditor>().scroll(),
+            before_covered,
+            "covered compose ignores queued wheel input"
+        );
+    }
+}
+
+#[test]
+fn mail_body_wheel_ignores_pending_send_and_focus_loss() {
+    let (mut pending_app, pending_window) = mail_wheel_app(MailComposeKind::Letter);
+    assert!(pending_app.world_mut().resource_mut::<PendingOperations>().try_begin(
+        crate::pending_operations::PendingOperationKey::SendMail {
+            recipient: "Receiver".into(),
+            message: "body".into(),
+            gold: 0,
+            attachment_unique_ids: vec![],
+        },
+    ));
+    wheel(&mut pending_app, pending_window, -1.0, MouseScrollUnit::Line);
+    assert_eq!(
+        pending_app
+            .world()
+            .resource::<mail_editor::MailLetterEditor>()
+            .scroll()
+            .y,
+        0.0,
+        "pending send freezes mail body input"
+    );
+
+    let (mut unfocused_app, unfocused_window) = mail_wheel_app(MailComposeKind::Letter);
+    unfocused_app
+        .world_mut()
+        .get_mut::<Window>(unfocused_window)
+        .expect("window")
+        .focused = false;
+    wheel(&mut unfocused_app, unfocused_window, -1.0, MouseScrollUnit::Line);
+    assert_eq!(
+        unfocused_app
+            .world()
+            .resource::<mail_editor::MailLetterEditor>()
+            .scroll()
+            .y,
+        0.0,
+        "focus loss discards mail wheel input"
+    );
+}

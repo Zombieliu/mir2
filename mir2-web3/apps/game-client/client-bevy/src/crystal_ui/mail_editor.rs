@@ -206,6 +206,32 @@ impl MailLetterEditor {
         self.selecting
     }
 
+    /// Scrolls by source text lines without changing the authoritative caret
+    /// or selection. The extent comes from the shaped layout, not a character
+    /// count or guessed line height.
+    pub(super) fn scroll_wheel_lines(&mut self, upward_lines: f32) -> bool {
+        let Some(height) = self.visible_line_height() else {
+            return false;
+        };
+        self.scroll_wheel_pixels(upward_lines * height)
+    }
+
+    /// `upward_pixels` is already in Crystal logical-stage units.
+    pub(super) fn scroll_wheel_pixels(&mut self, upward_pixels: f32) -> bool {
+        if !upward_pixels.is_finite() || upward_pixels == 0.0 {
+            return false;
+        }
+        let Some(max_scroll) = self.max_scroll_y() else {
+            return false;
+        };
+        let next = (self.scroll.y - upward_pixels).clamp(0.0, max_scroll);
+        if (next - self.scroll.y).abs() <= f32::EPSILON {
+            return false;
+        }
+        self.scroll.y = next;
+        true
+    }
+
     pub(super) fn render(&self, parent: &mut ChildSpawnerCommands) {
         self.render_at(parent, MAIL_LETTER_BODY_RECT);
     }
@@ -327,6 +353,33 @@ impl MailLetterEditor {
         self.scroll.y = self.scroll.y.max(0.0);
     }
 
+    fn max_scroll_y(&self) -> Option<f32> {
+        let editor = self.editor.as_ref()?;
+        if self.layout_text != editor.text() || !self.layout.valid_for(editor) {
+            return None;
+        }
+        let bottom = self
+            .layout
+            .lines
+            .iter()
+            .map(|line| line.y + line.height)
+            .fold(0.0_f32, f32::max);
+        Some((bottom - MAIL_LETTER_CONTENT_SIZE.y).max(0.0))
+    }
+
+    fn visible_line_height(&self) -> Option<f32> {
+        let editor = self.editor.as_ref()?;
+        if self.layout_text != editor.text() || !self.layout.valid_for(editor) {
+            return None;
+        }
+        self.layout
+            .lines
+            .iter()
+            .find(|line| self.scroll.y >= line.y && self.scroll.y < line.y + line.height)
+            .or_else(|| self.layout.lines.first())
+            .map(|line| line.height)
+    }
+
     fn sync_visual_line_for_caret(&mut self) {
         let Some(editor) = self.editor.as_ref() else {
             return;
@@ -412,28 +465,52 @@ impl MailLetterEditor {
         if !layout.valid_for(editor) {
             return;
         }
+        self.accept_layout(layout, tag.text.clone());
+    }
+
+    fn accept_layout(&mut self, layout: EditorTextLayout, text: String) {
+        let Some(editor) = self.editor.as_ref() else {
+            return;
+        };
+        let caret = editor.caret();
         if layout
             .lines
             .get(self.visual_line)
-            .is_none_or(|line| !line.stops.iter().any(|stop| stop.byte == editor.caret()))
+            .is_none_or(|line| !line.stops.iter().any(|stop| stop.byte == caret))
         {
             self.visual_line = layout
                 .lines
                 .iter()
-                .position(|line| line.stops.iter().any(|stop| stop.byte == editor.caret()))
+                .position(|line| line.stops.iter().any(|stop| stop.byte == caret))
                 .unwrap_or(0);
         }
+        // Layout capture runs every frame. Only a new draft or caret movement
+        // should restore caret visibility; otherwise it would undo a manual
+        // wheel position immediately after rendering.
+        let caret_changed = self.captured_caret != Some(caret) || self.layout_text != text;
         self.layout = layout;
-        self.layout_text = tag.text.clone();
-        self.keep_caret_visible();
-        self.captured_caret = self.editor.as_ref().map(FriendTextEditor::caret);
+        self.layout_text = text;
+        if caret_changed {
+            self.keep_caret_visible();
+        }
+        self.clamp_scroll_to_extent();
+        self.captured_caret = Some(caret);
+    }
+
+    fn clamp_scroll_to_extent(&mut self) {
+        if let Some(max_scroll) = self.max_scroll_y() {
+            self.scroll.y = self.scroll.y.clamp(0.0, max_scroll);
+        }
     }
 
     #[cfg(test)]
     pub(super) fn install_layout(&mut self, lines: Vec<VisualLine>) {
         let text = self.editor.as_ref().map_or_else(String::new, |editor| editor.text().to_owned());
+        // Test fixtures install already-shaped layout without reproducing the
+        // renderer's initial caret-visibility transition.
         self.layout = EditorTextLayout { lines };
         self.layout_text = text;
+        self.captured_caret = self.editor.as_ref().map(FriendTextEditor::caret);
     }
 
     #[cfg(test)]

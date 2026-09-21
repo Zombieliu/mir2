@@ -164,3 +164,81 @@ fn retained_letter_draft_keeps_selection_through_a_transient_modal() {
     editor.sync(true, Some(&draft.message));
     assert_eq!(editor.active_editor().unwrap().selection(), selection);
 }
+
+#[test]
+fn wheel_uses_shaped_extent_clamps_and_preserves_caret_and_selection() {
+    let message = "x\n".repeat(20);
+    let mut editor = MailLetterEditor::default();
+    let mut draft = draft(&message);
+    editor.sync(true, Some(&draft.message));
+    let mut starts = message
+        .match_indices('\n')
+        .map(|(index, _)| index + 1)
+        .collect::<Vec<_>>();
+    starts.insert(0, 0);
+    editor.install_layout(
+        starts
+            .iter()
+            .copied()
+            .enumerate()
+            .map(|(index, start)| {
+                let end = message[start..]
+                    .find('\n')
+                    .map(|offset| start + offset)
+                    .unwrap_or(message.len());
+                line(index as f32 * 20.0, &[start, end])
+            })
+            .collect(),
+    );
+    let caret = editor.active_editor().unwrap().caret();
+    let selection = editor.active_editor().unwrap().selection();
+
+    assert!(editor.scroll_wheel_lines(-100.0));
+    assert_eq!(editor.scroll().y, 259.0, "wheel clamps to shaped bottom");
+    assert_eq!(editor.active_editor().unwrap().caret(), caret);
+    assert_eq!(editor.active_editor().unwrap().selection(), selection);
+    // Text layout capture happens every render frame. Re-capturing identical
+    // shaped geometry must retain a manual wheel position instead of snapping
+    // to the unchanged caret.
+    editor.accept_layout(
+        EditorTextLayout {
+            lines: starts
+                .iter()
+                .copied()
+                .enumerate()
+                .map(|(index, start)| {
+                    let end = message[start..]
+                        .find('\n')
+                        .map(|offset| start + offset)
+                        .unwrap_or(message.len());
+                    line(index as f32 * 20.0, &[start, end])
+                })
+                .collect(),
+        },
+        message.clone(),
+    );
+    assert_eq!(editor.scroll().y, 259.0, "unchanged frame capture keeps wheel scroll");
+    assert!(!editor.scroll_wheel_lines(-1.0), "bottom cannot overscroll");
+
+    editor.accept_layout(
+        EditorTextLayout {
+            lines: starts
+                .iter()
+                .copied()
+                .enumerate()
+                .map(|(index, start)| {
+                    let end = message[start..]
+                        .find('\n')
+                        .map(|offset| start + offset)
+                        .unwrap_or(message.len());
+                    line(index as f32 * 10.0, &[start, end])
+                })
+                .collect(),
+        },
+        message.clone(),
+    );
+    assert_eq!(editor.scroll().y, 59.0, "new shaped extent clamps retained wheel scroll");
+
+    assert!(editor.scroll_wheel_pixels(10_000.0));
+    assert_eq!(editor.scroll().y, 0.0, "wheel clamps to shaped top");
+}

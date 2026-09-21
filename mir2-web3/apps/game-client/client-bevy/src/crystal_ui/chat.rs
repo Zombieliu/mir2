@@ -2632,6 +2632,7 @@ fn handle_chat_pointer_scroll(
     };
     if !window.focused
         || shell.is_none_or(|s| s.screen != NativeShellScreen::InGame)
+        || ui.menu_pointer_consumed
         || ui.amount_modal_open()
         || ui.core.chat_settings_open()
     {
@@ -2678,6 +2679,36 @@ fn handle_chat_pointer_scroll(
 #[cfg(test)]
 mod pointer_scroll_tests {
     use super::*;
+    #[test]
+    fn foreground_wheel_consumption_prevents_chat_scroll_and_does_not_replay() {
+        use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+        let mut app = App::new();
+        app.init_resource::<CrystalChatState>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<ButtonInput<MouseButton>>()
+            .insert_resource(ChatModel { lines: (0..20).map(|i| crate::chat::ChatLine {
+                text: i.to_string(), channel: "normal".into(),
+            }).collect() })
+            .insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() })
+            .add_message::<MouseWheel>()
+            .add_systems(Update, handle_chat_pointer_scroll);
+        let panel = app.world().resource::<CrystalChatState>().window_size.spec_rect();
+        let mut window = Window { resolution: (1024, 768).into(), focused: true, ..default() };
+        window.set_cursor_position(Some(Vec2::new(panel.left + 20.0, panel.top + 20.0)));
+        let window = app.world_mut().spawn((window, bevy::window::PrimaryWindow)).id();
+        app.world_mut().resource_mut::<CrystalChatState>().scroll = 10;
+        app.world_mut().resource_mut::<NativePlayerUiState>().menu_pointer_consumed = true;
+        app.world_mut().write_message(MouseWheel { unit: MouseScrollUnit::Line, x: 0.0, y: 1.0, window, phase: bevy::input::touch::TouchPhase::Moved });
+        app.update();
+        assert_eq!(app.world().resource::<CrystalChatState>().scroll, 10);
+        app.world_mut().resource_mut::<NativePlayerUiState>().menu_pointer_consumed = false;
+        app.update();
+        assert_eq!(app.world().resource::<CrystalChatState>().scroll, 10);
+        app.world_mut().write_message(MouseWheel { unit: MouseScrollUnit::Line, x: 0.0, y: 1.0, window, phase: bevy::input::touch::TouchPhase::Moved });
+        app.update();
+        assert_eq!(app.world().resource::<CrystalChatState>().scroll, 9);
+    }
+
     #[test]
     fn original_track_reaches_last_history_index() {
         assert_eq!(chat_index_at_track(16., 0., 30., 100), 0);

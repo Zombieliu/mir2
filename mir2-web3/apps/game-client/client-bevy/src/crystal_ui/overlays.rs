@@ -3583,6 +3583,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                         mail_compose_drag::process,
                         mail_parcel::process_drag,
                         process_mail_letter_editor_pointer,
+                        process_mail_letter_editor_wheel,
                     )
                         .chain(),
                     keyboard_dialog::host::process,
@@ -4889,6 +4890,100 @@ fn process_mail_letter_editor_pointer(
     }
     if mouse.just_released(MouseButton::Left) || !mouse.pressed(MouseButton::Left) {
         editor.set_selecting(false);
+    }
+}
+
+/// Crystal's native multiline TextBox scrolls only while the pointer is over
+/// its body. Keep that ownership separate from every other panel's wheel
+/// consumer and convert touchpad pixel deltas through the same stage transform
+/// used for the body hit test.
+fn process_mail_letter_editor_wheel(
+    shell: Res<NativeShellModel>,
+    mut state: ResMut<NativePlayerUiState>,
+    compose: Res<MailComposeUi>,
+    frame: Res<mail_compose_drag::MailLetterWindow>,
+    parcel: Option<Res<mail_parcel::MailParcelUi>>,
+    mut editor: ResMut<mail_editor::MailLetterEditor>,
+    pending: Res<PendingOperations>,
+    windows: Query<(Entity, &Window), With<PrimaryWindow>>,
+    mut wheel: MessageReader<MouseWheel>,
+) {
+    let Some((window_position, body_rect, frame_dragging)) = (if compose.kind == MailComposeKind::Parcel {
+        parcel.as_deref().map(|parcel| (
+            parcel.window.position,
+            mail_parcel::MAIL_PARCEL_BODY_RECT,
+            parcel.window.dragging(),
+        ))
+    } else {
+        Some((
+            frame.position,
+            mail_editor::MAIL_LETTER_BODY_RECT,
+            frame.dragging(),
+        ))
+    }) else {
+        wheel.clear();
+        return;
+    };
+    let interactive = shell.screen == NativeShellScreen::InGame
+        && state.mail_open()
+        && state.core.mail_compose.is_some()
+        && matches!(compose.kind, MailComposeKind::Letter | MailComposeKind::Parcel)
+        && editor.focused()
+        && !state.amount_modal_open()
+        && state.mail_feedback_prompt.is_none()
+        && !state.mail_feedback_input_consumed
+        && !state.mail_recipient_prompt_active
+        && !state.mail_recipient_input_consumed
+        && state.mail_reader.is_none()
+        && !state.mail_reader_input_consumed
+        && state.mail_delete_prompt.is_none()
+        && !state.mail_delete_input_consumed
+        && state.storage_password_prompt.is_none()
+        && state.storage_rental_confirmation.is_none()
+        && !mail_compose_drag::covered(&state)
+        && !frame_dragging
+        && !state.menu_pointer_consumed
+        && !pending.has_pending_mail_send();
+    let Ok((window_entity, window)) = windows.single() else {
+        wheel.clear();
+        return;
+    };
+    if !interactive || !window.focused {
+        wheel.clear();
+        return;
+    }
+    let Some(cursor) = help_cursor_logical(window) else {
+        wheel.clear();
+        return;
+    };
+    let local = cursor - window_position - Vec2::new(body_rect.left, body_rect.top)
+        - mail_editor::MAIL_LETTER_CONTENT_INSET;
+    let inside = local.x >= 0.0
+        && local.x < mail_editor::MAIL_LETTER_CONTENT_SIZE.x
+        && local.y >= 0.0
+        && local.y < mail_editor::MAIL_LETTER_CONTENT_SIZE.y;
+    if !inside {
+        wheel.clear();
+        return;
+    }
+    let stage_scale = super::metrics::CrystalStageTransform::fit(
+        window.resolution.width(),
+        window.resolution.height(),
+    )
+    .scale;
+    let mut consumed = false;
+    for event in wheel.read() {
+        if event.window != window_entity || !event.y.is_finite() || event.y == 0.0 {
+            continue;
+        }
+        consumed = true;
+        match event.unit {
+            MouseScrollUnit::Line => editor.scroll_wheel_lines(event.y),
+            MouseScrollUnit::Pixel => editor.scroll_wheel_pixels(event.y / stage_scale),
+        };
+    }
+    if consumed {
+        state.menu_pointer_consumed = true;
     }
 }
 
