@@ -49,3 +49,52 @@ Validation:
 No native screenshot, original/candidate paired visual check, live service
 transaction, package or human frontend acceptance was performed here.
 `visualAccepted=false`; `accepted=false`; no global parity claim.
+
+## Source contract for remaining repair-quote gate
+
+Verified against Shared/Data/ItemData.cs Price()/RepairPrice() and
+Shared/Data/Stat.cs Count: added-stat weight is the sum of absolute values,
+not the number of stat entries. RentalInformation != null doubles RepairPrice.
+For source price1000, durability/max1000, current500, one added stat +5:
+Price=floor(875*1.5)=1312; full-price1500; RepairPrice188 (rental376),
+before ordinary/special NPC rate multiplication. Current simulation's .len()
+uses1 rather than5 and produces138 for the same nonrental item.
+
+Do not turn `Quote unavailable` into a client-invented number. This gate needs
+shared source arithmetic and rental identity parity, then matching display and
+authoritative deduction tests. No economy or save changes were made by this
+source review. Public ordinary repair remains separate live acceptance.
+
+## NPC service drag integration (2026-09-21)
+
+Source review found two gaps behind otherwise passing service tests: the native
+single-panel state hid the regular inventory when NPCDrop opened, and selection
+retained only a bag slot rather than the source item identity. Crystal
+NPCDialogs.cs NPCDropDialog.Show opens InventoryDialog; ItemCell_Click assigns
+TargetItem, and its active sale path retains the full stack (the amount prompt
+branch is commented out).
+
+Candidate now routes ordinary bag drag release to the source NPCDrop target,
+keeps the regular bag visible with the service, and removes the redundant bag
+picker. Sale/repair/special-repair deferred confirmation revalidates the selected
+instance. Hold submits through the same pending queue once. Full-stack sale
+count and displayed price use the dragged quantity bounded by current quantity
+and protocol width. Equipment selection remains an adapter; repair quotes still
+have the separately documented source arithmetic gap.
+
+Ordered gesture, stale-instance, and rendered-source-panel regressions cover
+these changes. Final build/test receipts follow after the independent bag-close
+behavior is checked. No live transaction or screenshot is claimed for this
+candidate. Existing player session remains untouched while desktop handoff is
+pending; the stationary memory blocker is still unresolved.
+
+Final regression receipt: client native-ui 897 passed, 0 failed;
+C:/Users/Administrator/AppData/Local/Temp/mir2-client-bevy-native-ui-npc-service.log.
+Windows release build passes (77 s); log
+C:/mir2-ui-repair-20260921/npc-service-drag-build.log.
+Independent bag close/reopen preserves NPC service, hides/cancels its bag drag
+source while closed, and reopens the bag on a new NPC service session.
+Candidate package C:/numeron-legend-of-rebirth-20260921-npc-service-drag,
+EXE SHA256 184A68FE091578BBCC95871684149394F0DB10EEAED6EB8117FEEFE004B2A1F2.
+It includes image/font attribution telemetry but has NOT been launched.
+Source, tests, and build do not establish live visual/service acceptance.

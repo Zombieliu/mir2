@@ -165,3 +165,17 @@ an asserted fix. Next: normal logout, switch latest candidate, authorized demo
 login, gather stationary resource attribution before changing asset behavior.
 Additional generated platform debug PDBs were moved to the existing C: backup
 after E: exhausted during validation. Source, assets and saves unchanged by move.
+
+## NPC service drag candidate
+
+Source-backed NPC sale/repair/special-repair bag drag is now implemented;
+ordinary bag renders alongside NPC service and can independently close/reopen.
+Redundant bag picker removed; equipment picker remains a known adapter.
+Deferred confirmation validates item identity for all three services; full-stack
+sale and Hold-once regressions pass. Client native-ui suite897/897, Windows
+release build pass. Candidate C:/numeron-legend-of-rebirth-20260921-npc-service-drag,
+SHA256 184A68FE091578BBCC95871684149394F0DB10EEAED6EB8117FEEFE004B2A1F2.
+Not launched. Existing auth-lifetime client remains untouched during manual
+input handoff. Runtime memory, service visual/transactions, repair quotes and
+remaining whole-UI gates remain open. See NPC service QA notes for source and
+test receipts.

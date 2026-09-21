@@ -1,9 +1,16 @@
 //! NPCDropDialog source geometry with an explicit native inventory picker.
-//! The picker remains a native adapter until ordinary inventory drag/drop is wired.
+//! Ordinary bag drags may select the source cell when released over ItemCell;
+//! the picker remains available as an adapter for direct selection and equipment.
 use super::*;
 
 const CONFIRM: CrystalRect = CrystalRect::new(114.0, 62.0, 48.0, 25.0);
 const ITEM: CrystalRect = CrystalRect::new(38.0, 72.0, 36.0, 32.0);
+// NPCDropPanel_Click forwards this wider source rectangle to ItemCell_Click.
+const ITEM_CLICK_TARGET: CrystalRect = CrystalRect::new(20.0, 55.0, 75.0, 75.0);
+// `OverlayShop` owns the Crystal NPCDropDialog's source-relative frame at
+// (0, 224).  Keep hit testing beside the source ItemCell geometry instead of
+// teaching the generic inventory drag code about service-specific layout.
+const NPC_DROP_PANEL_TOP: f32 = 224.0;
 
 pub(super) fn service_action(shop: &ShopModel) -> Option<(&'static str, OverlayButton)> {
     if shop.allows_special_repair() {
@@ -15,6 +22,71 @@ pub(super) fn service_action(shop: &ShopModel) -> Option<(&'static str, OverlayB
     } else {
         None
     }
+}
+
+pub(super) fn drag_target_at_cursor(
+    shop: &ShopModel,
+    state: &NativePlayerUiState,
+    cursor: Vec2,
+) -> bool {
+    state.npc_shop_open()
+        && service_action(shop).is_some()
+        && CrystalRect::new(
+            ITEM_CLICK_TARGET.left,
+            NPC_DROP_PANEL_TOP + ITEM_CLICK_TARGET.top,
+            ITEM_CLICK_TARGET.width,
+            ITEM_CLICK_TARGET.height,
+        )
+        .contains(cursor.x, cursor.y)
+}
+
+/// Crystal's `NPCDropDialog.ItemCell_Click` takes the currently selected
+/// inventory cell, locks it as TargetItem, and invokes Confirm only while
+/// Hold is enabled. A drag has already captured the source identity, so
+/// reject a replacement at the same bag slot before changing selection.
+pub(super) fn select_bag_dragged_for_service(
+    shop: &mut ShopModel,
+    inventory: &InventoryModel,
+    state: &mut NativePlayerUiState,
+    source_slot: u32,
+    unique_id: u64,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    if !state.npc_shop_open()
+        || service_action(shop).is_none()
+        || !inventory.items.iter().any(|item| {
+            item.container == 0
+                && item.slot == source_slot
+                && item_unique_id(item) == Some(unique_id)
+        })
+    {
+        return false;
+    }
+
+    let dragged_count = inventory
+        .items
+        .iter()
+        .find(|item| item.container == 0 && item.slot == source_slot)
+        .map(|item| item.quantity.min(u32::from(u16::MAX)) as u16);
+    if shop.allows_sell() {
+        shop.selected_bag_slot_for_sell = Some(source_slot);
+        state.shop_service_drag_count = dragged_count;
+        state.shop_service_drag_unique_id = Some(unique_id);
+    } else if shop.allows_repair() || shop.allows_special_repair() {
+        shop.selected_bag_slot_for_repair = Some(source_slot);
+        state.shop_service_drag_count = None;
+        state.shop_service_drag_unique_id = Some(unique_id);
+        state.shop_repair_container = 0;
+        state.shop_repair_slot = Some(source_slot);
+    } else {
+        return false;
+    }
+
+    if state.npc_service_hold == Some(shop.service_mode) {
+        let _ = submit_selection(shop, inventory, state, intents, pending);
+    }
+    true
 }
 
 /// Shared by Confirm and Hold selection events; never called by rendering.
@@ -33,13 +105,13 @@ fn selection_intent(
     } else if shop.allows_repair() && repair_selection_enabled(state, inventory) {
         Some(NativePlayerUiIntent::RepairItem { unique_id })
     } else if shop.allows_sell() && shop_sell_enabled(inventory, shop.selected_bag_slot_for_sell) {
+        let count = state
+            .shop_service_drag_count
+            .unwrap_or_else(|| shop_quantity_clamped(state.shop_quantity))
+            .min(item.quantity.min(u32::from(u16::MAX)) as u16);
         Some(NativePlayerUiIntent::SellItem {
             unique_id,
-            count: u16::try_from(
-                item.quantity
-                    .min(u32::from(shop_quantity_clamped(state.shop_quantity))),
-            )
-            .ok()?,
+            count,
         })
     } else {
         None
@@ -53,6 +125,10 @@ pub(super) fn submit_selection(
     intents: &mut NativePlayerUiIntentQueue,
     pending: &mut PendingOperations,
 ) -> bool {
+    if !dragged_service_selection_is_current(shop, inventory, state) {
+        clear_dragged_service_selection(shop, state);
+        return false;
+    }
     let Some(intent) = selection_intent(shop, inventory, state) else {
         return false;
     };
@@ -63,6 +139,8 @@ pub(super) fn submit_selection(
     // when local pending/queue backpressure rejects the operation.
     shop.selected_bag_slot_for_sell = None;
     shop.selected_bag_slot_for_repair = None;
+    state.shop_service_drag_count = None;
+    state.shop_service_drag_unique_id = None;
     state.shop_repair_slot = None;
     state.shop_repair_container = 0;
     true
@@ -76,14 +154,55 @@ fn selected_item<'a>(
     if shop.allows_repair() || shop.allows_special_repair() {
         selected_repair_item(state, inventory)
             .filter(|item| item.container == 0 || item.container == 2)
+            .filter(|item| {
+                state
+                    .shop_service_drag_unique_id
+                    .is_none_or(|unique_id| item_unique_id(item) == Some(unique_id))
+            })
     } else if shop.allows_sell() {
         inventory
             .items
             .iter()
             .find(|item| item.container == 0 && Some(item.slot) == shop.selected_bag_slot_for_sell)
+            .filter(|item| {
+                state
+                    .shop_service_drag_unique_id
+                    .is_none_or(|unique_id| item_unique_id(item) == Some(unique_id))
+            })
     } else {
         None
     }
+}
+
+fn dragged_service_selection_is_current(
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    state: &NativePlayerUiState,
+) -> bool {
+    let Some(unique_id) = state.shop_service_drag_unique_id else {
+        return true;
+    };
+    let (container, slot) = if shop.allows_repair() || shop.allows_special_repair() {
+        (state.shop_repair_container, state.shop_repair_slot)
+    } else if shop.allows_sell() {
+        (0, shop.selected_bag_slot_for_sell)
+    } else {
+        return false;
+    };
+    inventory.items.iter().any(|item| {
+        item.container == container
+            && Some(item.slot) == slot
+            && item_unique_id(item) == Some(unique_id)
+    })
+}
+
+fn clear_dragged_service_selection(shop: &mut ShopModel, state: &mut NativePlayerUiState) {
+    shop.selected_bag_slot_for_sell = None;
+    shop.selected_bag_slot_for_repair = None;
+    state.shop_service_drag_count = None;
+    state.shop_service_drag_unique_id = None;
+    state.shop_repair_container = 0;
+    state.shop_repair_slot = None;
 }
 
 pub(super) fn render(
@@ -140,7 +259,11 @@ pub(super) fn render(
             .and_then(|item| {
                 item.sell_value.checked_mul(
                     item.quantity
-                        .min(u32::from(shop_quantity_clamped(state.shop_quantity))),
+                        .min(u32::from(
+                            state
+                                .shop_service_drag_count
+                                .unwrap_or_else(|| shop_quantity_clamped(state.shop_quantity)),
+                        )),
                 )
             })
             .map_or_else(
@@ -181,53 +304,22 @@ pub(super) fn render(
         }
     }
 
-    // Full inventory access replaces the former first-ten-only text list.
-    // Keep this explicit adapter outside the source 176x147 drop frame.
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(180.0),
-            top: Val::Px(0.0),
-            width: Val::Px(296.0),
-            height: Val::Px(if repair { 326.0 } else { 236.0 }),
-            ..default()
-        },
-        BackgroundColor(Color::srgba(0.03, 0.03, 0.035, 0.96)),
-    ));
-    overlay_text_at(
-        parent,
-        "Inventory",
-        CrystalRect::new(184.0, 4.0, 160.0, 20.0),
-        11.0,
-        GOLD,
-    );
-    for item in inventory
-        .items_in(0)
-        .into_iter()
-        .filter(|item| item.slot < crate::shop::BAG_SLOTS)
-    {
-        let action = if repair {
-            OverlayButton::SelectBagForRepair(item.slot)
-        } else {
-            OverlayButton::SelectBagForSell(item.slot)
-        };
-        picker_item(
-            parent,
-            assets,
-            item,
-            CrystalRect::new(
-                184.0 + (item.slot % 8) as f32 * 36.0,
-                28.0 + (item.slot / 8) as f32 * 34.0,
-                36.0,
-                32.0,
-            ),
-            action,
-            service.is_some(),
-            selected,
-            player,
-        );
-    }
+    // NPCDropDialog.Show keeps Crystal's ordinary InventoryDialog visible,
+    // so bag selection now comes from that real panel rather than this former
+    // adjacent picker. Equipment remains an explicit adapter until its drag
+    // source is wired into the service target.
     if repair {
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(180.0),
+                top: Val::Px(0.0),
+                width: Val::Px(296.0),
+                height: Val::Px(326.0),
+                ..default()
+            },
+            BackgroundColor(Color::srgba(0.03, 0.03, 0.035, 0.96)),
+        ));
         overlay_text_at(
             parent,
             "Equipment",
@@ -257,16 +349,20 @@ pub(super) fn render(
             );
         }
     } else if shop.allows_sell() {
+        let selected_count = state
+            .shop_service_drag_count
+            .unwrap_or_else(|| shop_quantity_clamped(state.shop_quantity));
+        let drag_selected = state.shop_service_drag_count.is_some();
         overlay_absolute_button(
             parent,
             "−",
             CrystalRect::new(20.0, 153.0, 28.0, 22.0),
             OverlayButton::ShopQuantityDec,
-            state.shop_quantity > SHOP_QUANTITY_MIN,
+            !drag_selected && state.shop_quantity > SHOP_QUANTITY_MIN,
         );
         overlay_text_at(
             parent,
-            &format!("x{}", shop_quantity_clamped(state.shop_quantity)),
+            &format!("x{selected_count}"),
             CrystalRect::new(50.0, 155.0, 50.0, 18.0),
             11.0,
             TEXT,
@@ -276,7 +372,7 @@ pub(super) fn render(
             "+",
             CrystalRect::new(105.0, 153.0, 28.0, 22.0),
             OverlayButton::ShopQuantityInc,
-            state.shop_quantity < SHOP_QUANTITY_MAX,
+            !drag_selected && state.shop_quantity < SHOP_QUANTITY_MAX,
         );
     }
     if shop.allows_buy() && shop.allows_sell() {
@@ -526,7 +622,7 @@ mod tests {
             .iter(world)
             .map(|(action, node)| (*action, node.clone()))
             .collect();
-        assert!(controls
+        assert!(!controls
             .iter()
             .any(|(action, _)| *action == OverlayButton::SelectBagForRepair(45)));
         assert!(controls

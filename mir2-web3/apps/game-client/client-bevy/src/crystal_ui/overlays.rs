@@ -788,6 +788,15 @@ pub struct NativePlayerUiState {
     pub chat_draft: String,
     pub inspect: Option<ItemInspect>,
     pub shop_quantity: u16,
+    /// A dragged NPC sale mirrors Crystal TargetItem.Count. Direct picker
+    /// selection continues to use the explicit quantity control.
+    pub shop_service_drag_count: Option<u16>,
+    /// The source instance retained by an NPC service drag until its Confirm
+    /// reaches the outbound queue. A slot replacement must not be retargeted.
+    pub shop_service_drag_unique_id: Option<u64>,
+    /// Crystal's InventoryDialog stays independently closable while
+    /// NPCDropDialog remains visible.
+    pub npc_inventory_hidden: bool,
     /// Local presentation tab for an NPC service that advertises both Buy
     /// and Sell. Capabilities remain authoritative in `ShopModel`.
     pub npc_shop_buy_tab: bool,
@@ -934,6 +943,9 @@ impl Default for NativePlayerUiState {
             chat_draft: String::new(),
             inspect: None,
             shop_quantity: 1,
+            shop_service_drag_count: None,
+            shop_service_drag_unique_id: None,
+            npc_inventory_hidden: false,
             npc_shop_buy_tab: true,
             npc_service_hold: None,
             shop_repair_mode: false,
@@ -1025,7 +1037,10 @@ impl NativePlayerUiState {
     }
 
     pub fn inventory_open(&self) -> bool {
-        self.core.inventory_open()
+        // Crystal NPCDropDialog.Show also shows InventoryDialog. The shared
+        // core has one panel enum, so retain NpcShop as the modal owner while
+        // exposing its ordinary bag as a concurrent native overlay.
+        self.core.inventory_open() || (self.npc_shop_open() && !self.npc_inventory_hidden)
     }
     pub fn equipment_open(&self) -> bool {
         self.core.equipment_open()
@@ -1079,6 +1094,12 @@ impl NativePlayerUiState {
     }
 
     pub fn toggle_inventory(&mut self) {
+        // The visible bag belongs to the open NPC service. Do not replace its
+        // modal panel with Inventory; toggle the independently closable bag.
+        if self.npc_shop_open() {
+            self.npc_inventory_hidden = !self.npc_inventory_hidden;
+            return;
+        }
         self.apply(mir2_ui_core::action::UiAction::OpenInventory);
         if !self.inventory_open() {
             self.inventory_window.end_drag();
@@ -1132,6 +1153,9 @@ impl NativePlayerUiState {
         self.apply(mir2_ui_core::action::UiAction::OpenGameShop);
     }
     pub fn toggle_npc_shop(&mut self) {
+        if !self.npc_shop_open() {
+            self.npc_inventory_hidden = false;
+        }
         self.apply(mir2_ui_core::action::UiAction::OpenNpcShop);
     }
     pub fn toggle_storage(&mut self) {
@@ -3969,6 +3993,7 @@ fn inventory_item_drag_at_cursor(
 fn finish_inventory_item_drag(
     state: &mut NativePlayerUiState,
     inventory: &InventoryModel,
+    mut shop: Option<&mut ShopModel>,
     cursor: Option<Vec2>,
     belt: super::hud::CrystalBeltPresentation,
     intents: &mut NativePlayerUiIntentQueue,
@@ -3997,6 +4022,27 @@ fn finish_inventory_item_drag(
         return;
     }
     state.inspect = None;
+    if shop
+        .as_ref()
+        .is_some_and(|shop| npc_item_service::drag_target_at_cursor(shop, state, cursor))
+    {
+        let selected = npc_item_service::select_bag_dragged_for_service(
+            shop.as_deref_mut().expect("service drag target has shop"),
+            inventory,
+            state,
+            drag.source_slot,
+            drag.unique_id,
+            intents,
+            pending,
+        );
+        belt_diagnostic(diagnostics, || {
+            format!(
+                "drag source={} npc_service_selected={selected}",
+                drag.source_slot
+            )
+        });
+        return;
+    }
     let intent = if let Some(to) = inventory_bag_slot_at_cursor(state, cursor) {
         if to == drag.source_slot {
             return;
@@ -4050,6 +4096,7 @@ fn finish_inventory_item_drag(
 fn process_inventory_item_drag(
     mut state: ResMut<NativePlayerUiState>,
     inventory: Res<InventoryModel>,
+    mut shop: Option<ResMut<ShopModel>>,
     belt: Option<Res<super::hud::CrystalBeltPresentation>>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
@@ -4065,6 +4112,9 @@ fn process_inventory_item_drag(
         .as_ref()
         .map(|events| ordered_reader.read(events).cloned().collect())
         .unwrap_or_default();
+    // Crystal opens InventoryDialog alongside NPCDropDialog. The native core
+    // currently represents the NPC panel as the active panel, so retain bag
+    // drag input while the service frame is open.
     if !state.inventory_open()
         || state.amount_modal_open()
         || state.inventory_delete_mode
@@ -4131,6 +4181,7 @@ fn process_inventory_item_drag(
                         ButtonState::Released => finish_inventory_item_drag(
                             &mut state,
                             &inventory,
+                            shop.as_deref_mut(),
                             cursor,
                             *belt,
                             &mut intents,
@@ -4156,6 +4207,7 @@ fn process_inventory_item_drag(
         finish_inventory_item_drag(
             &mut state,
             &inventory,
+            shop.as_deref_mut(),
             cursor,
             *belt,
             &mut intents,
@@ -5628,6 +5680,9 @@ fn process_overlay_buttons(
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
                 state.shop_quantity = 1;
+                state.shop_service_drag_count = None;
+                state.shop_service_drag_unique_id = None;
+                state.npc_inventory_hidden = false;
                 state.npc_service_hold = None;
                 state.npc_shop_buy_tab = true;
                 state.shop_repair_container = 0;
@@ -6973,6 +7028,9 @@ fn process_overlay_buttons(
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
                 state.shop_quantity = 1;
+                state.shop_service_drag_count = None;
+                state.shop_service_drag_unique_id = None;
+                state.npc_inventory_hidden = false;
                 state.npc_service_hold = None;
                 state.npc_shop_buy_tab = true;
                 shop.selected_id = None;
@@ -6985,6 +7043,8 @@ fn process_overlay_buttons(
             OverlayButton::SelectBagForSell(slot) => {
                 if state.npc_shop_open() && shop.allows_sell() {
                     shop.selected_bag_slot_for_sell = Some(slot);
+                    state.shop_service_drag_count = None;
+                    state.shop_service_drag_unique_id = None;
                     if state.npc_service_hold == Some(shop.service_mode) {
                         npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
                     }
@@ -6993,6 +7053,8 @@ fn process_overlay_buttons(
             OverlayButton::SelectBagForRepair(slot) => {
                 if state.npc_shop_open() && (shop.allows_repair() || shop.allows_special_repair()) {
                     shop.selected_bag_slot_for_repair = Some(slot);
+                    state.shop_service_drag_count = None;
+                    state.shop_service_drag_unique_id = None;
                     state.shop_repair_container = 0;
                     state.shop_repair_slot = Some(slot);
                     if state.npc_service_hold == Some(shop.service_mode) {
@@ -7002,6 +7064,8 @@ fn process_overlay_buttons(
             }
             OverlayButton::SelectEquipForRepair(slot) => {
                 if state.npc_shop_open() && (shop.allows_repair() || shop.allows_special_repair()) {
+                    state.shop_service_drag_count = None;
+                    state.shop_service_drag_unique_id = None;
                     state.shop_repair_container = 2;
                     state.shop_repair_slot = Some(slot);
                     if state.npc_service_hold == Some(shop.service_mode) {
@@ -7830,6 +7894,9 @@ fn render_overlays(
             &mut all.p1(),
             state.inventory_window.left,
             state.inventory_window.top,
+            // Crystal NPCDropDialog.Show calls InventoryDialog.Show. The core
+            // has one active panel enum, so NpcShop owns that enum while this
+            // separate overlay keeps the ordinary bag source visible.
             state.inventory_open(),
             |parent| {
                 render_inventory(
@@ -14375,6 +14442,94 @@ mod tests {
     }
 
     #[test]
+    fn npc_shop_renders_the_visible_inventory_drag_source_with_single_core_panel() {
+        let mut app = overlay_render_test_app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::NpcShop;
+        app.world_mut().resource_mut::<ShopModel>().service_mode = NpcShopServiceMode::Sell;
+        app.world_mut().resource_mut::<InventoryModel>().items.push(ItemModel {
+            unique_id: Some(7),
+            container: 0,
+            slot: 2,
+            quantity: 1,
+            ..Default::default()
+        });
+        app.update();
+
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(state.npc_shop_open());
+        assert!(
+            !state.core.inventory_open(),
+            "the shared core has only one active panel"
+        );
+        assert!(state.inventory_open(), "NPC service exposes its ordinary bag");
+        let inventory = app
+            .world_mut()
+            .query_filtered::<&Node, With<OverlayInventory>>()
+            .single(app.world())
+            .expect("visible inventory alongside NPC shop");
+        assert_eq!(inventory.display, Display::Flex);
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<&OverlayButton, With<Button>>()
+                .iter(app.world())
+                .filter(|button| **button == OverlayButton::InspectBag(2))
+                .count(),
+            1,
+            "the visible source bag cell owns the normal inventory action"
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_inventory();
+        assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
+        assert!(!app.world().resource::<NativePlayerUiState>().inventory_open());
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<&Node, With<OverlayInventory>>()
+                .single(app.world())
+                .expect("hidden inventory panel")
+                .display,
+            Display::None
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_inventory();
+        assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
+        assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<&Node, With<OverlayInventory>>()
+                .single(app.world())
+                .expect("reopened inventory panel")
+                .display,
+            Display::Flex
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::None;
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .query_filtered::<&Node, With<OverlayInventory>>()
+                .single(app.world())
+                .expect("inventory panel")
+                .display,
+            Display::None
+        );
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.npc_inventory_hidden = true;
+            state.toggle_npc_shop();
+        }
+        assert!(app.world().resource::<NativePlayerUiState>().inventory_open());
+    }
+
+    #[test]
     fn native_panel_ecs_bounds_inventory_skill_and_cash_shop_at_1024x768() {
         let mut app = overlay_render_test_app();
         app.world_mut()
@@ -17245,6 +17400,7 @@ mod tests {
         let window = app.world_mut().spawn((primary, PrimaryWindow)).id();
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
+            .init_resource::<ShopModel>()
             .init_resource::<crate::crystal_ui::hud::CrystalBeltPresentation>()
             .init_resource::<NativePlayerUiIntentQueue>()
             .init_resource::<PendingOperations>()
@@ -17384,6 +17540,7 @@ mod tests {
         let window = app.world_mut().spawn((primary, PrimaryWindow)).id();
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<InventoryModel>()
+            .init_resource::<ShopModel>()
             .init_resource::<crate::crystal_ui::hud::CrystalBeltPresentation>()
             .init_resource::<NativePlayerUiIntentQueue>()
             .init_resource::<PendingOperations>()
@@ -17426,6 +17583,223 @@ mod tests {
                 from: 8,
                 to: 0,
             }]
+        );
+    }
+
+    fn npc_service_drag_app(
+        mode: NpcShopServiceMode,
+        hold: bool,
+    ) -> (App, Entity, Vec2, Vec2) {
+        let (mut app, window, source, _) = batched_inventory_drag_app();
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.toggle_npc_shop();
+            state.npc_service_hold = hold.then_some(mode);
+        }
+        app.world_mut().resource_mut::<ShopModel>().service_mode = mode;
+        // OverlayShop is at y=224 and NPCDropDialog.ItemCell is (38,72).
+        let target = Vec2::new(40.0, 298.0);
+        (app, window, source, target)
+    }
+
+    #[test]
+    fn ordered_bag_drag_to_npc_target_selects_sale_without_inventory_move() {
+        let (mut app, window, source, target) =
+            npc_service_drag_app(NpcShopServiceMode::Sell, false);
+        ordered_inventory_drag_motion(&mut app, window, source);
+        ordered_inventory_drag_button(&mut app, window, true);
+        ordered_inventory_drag_motion(&mut app, window, target);
+        ordered_inventory_drag_button(&mut app, window, false);
+
+        app.update();
+        assert_eq!(
+            app.world().resource::<ShopModel>().selected_bag_slot_for_sell,
+            Some(2)
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+    }
+
+    #[test]
+    fn deferred_npc_sale_confirm_rejects_a_replaced_drag_source() {
+        let (mut app, window, source, target) =
+            npc_service_drag_app(NpcShopServiceMode::Sell, false);
+        ordered_inventory_drag_motion(&mut app, window, source);
+        ordered_inventory_drag_button(&mut app, window, true);
+        ordered_inventory_drag_motion(&mut app, window, target);
+        ordered_inventory_drag_button(&mut app, window, false);
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativePlayerUiState>().shop_service_drag_unique_id,
+            Some(7003)
+        );
+
+        app.world_mut().resource_mut::<InventoryModel>().items[0].unique_id = Some(9999);
+        let inventory = app.world().resource::<InventoryModel>().clone();
+        let mut state = app
+            .world_mut()
+            .remove_resource::<NativePlayerUiState>()
+            .expect("native UI state");
+        let mut shop = app
+            .world_mut()
+            .remove_resource::<ShopModel>()
+            .expect("shop model");
+        let mut intents = app
+            .world_mut()
+            .remove_resource::<NativePlayerUiIntentQueue>()
+            .expect("intent queue");
+        let mut pending = app
+            .world_mut()
+            .remove_resource::<PendingOperations>()
+            .expect("pending operations");
+
+        assert!(!npc_item_service::submit_selection(
+            &mut shop,
+            &inventory,
+            &mut state,
+            &mut intents,
+            &mut pending,
+        ));
+        assert_eq!(shop.selected_bag_slot_for_sell, None);
+        assert_eq!(state.shop_service_drag_unique_id, None);
+        assert!(intents.drain_intents().is_empty());
+
+        app.world_mut().insert_resource(state);
+        app.world_mut().insert_resource(shop);
+        app.world_mut().insert_resource(intents);
+        app.world_mut().insert_resource(pending);
+    }
+
+    #[test]
+    fn deferred_npc_repair_confirms_reject_replaced_drag_sources() {
+        for mode in [
+            NpcShopServiceMode::Repair,
+            NpcShopServiceMode::SpecialRepair,
+        ] {
+            let (mut app, window, source, target) = npc_service_drag_app(mode, false);
+            ordered_inventory_drag_motion(&mut app, window, source);
+            ordered_inventory_drag_button(&mut app, window, true);
+            ordered_inventory_drag_motion(&mut app, window, target);
+            ordered_inventory_drag_button(&mut app, window, false);
+            app.update();
+            assert_eq!(
+                app.world().resource::<NativePlayerUiState>().shop_service_drag_unique_id,
+                Some(7003)
+            );
+
+            app.world_mut().resource_mut::<InventoryModel>().items[0].unique_id = Some(9999);
+            let inventory = app.world().resource::<InventoryModel>().clone();
+            let mut state = app
+                .world_mut()
+                .remove_resource::<NativePlayerUiState>()
+                .expect("native UI state");
+            let mut shop = app
+                .world_mut()
+                .remove_resource::<ShopModel>()
+                .expect("shop model");
+            let mut intents = app
+                .world_mut()
+                .remove_resource::<NativePlayerUiIntentQueue>()
+                .expect("intent queue");
+            let mut pending = app
+                .world_mut()
+                .remove_resource::<PendingOperations>()
+                .expect("pending operations");
+
+            assert!(!npc_item_service::submit_selection(
+                &mut shop,
+                &inventory,
+                &mut state,
+                &mut intents,
+                &mut pending,
+            ));
+            assert_eq!(shop.selected_bag_slot_for_repair, None);
+            assert_eq!(state.shop_repair_slot, None);
+            assert_eq!(state.shop_service_drag_unique_id, None);
+            assert!(intents.drain_intents().is_empty());
+
+            app.world_mut().insert_resource(state);
+            app.world_mut().insert_resource(shop);
+            app.world_mut().insert_resource(intents);
+            app.world_mut().insert_resource(pending);
+        }
+    }
+
+    #[test]
+    fn ordered_bag_drag_to_npc_target_uses_the_active_service_and_hold_once() {
+        for (mode, expected) in [
+            (
+                NpcShopServiceMode::Sell,
+                NativePlayerUiIntent::SellItem {
+                    unique_id: 7003,
+                    count: 2,
+                },
+            ),
+            (
+                NpcShopServiceMode::Repair,
+                NativePlayerUiIntent::RepairItem { unique_id: 7003 },
+            ),
+            (
+                NpcShopServiceMode::SpecialRepair,
+                NativePlayerUiIntent::SRepairItem { unique_id: 7003 },
+            ),
+        ] {
+            let (mut app, window, source, target) = npc_service_drag_app(mode, true);
+            ordered_inventory_drag_motion(&mut app, window, source);
+            ordered_inventory_drag_button(&mut app, window, true);
+            ordered_inventory_drag_motion(&mut app, window, target);
+            ordered_inventory_drag_button(&mut app, window, false);
+
+            app.update();
+            assert_eq!(
+                app.world_mut()
+                    .resource_mut::<NativePlayerUiIntentQueue>()
+                    .drain_intents(),
+                vec![expected]
+            );
+            assert!(app
+                .world()
+                .resource::<NativePlayerUiState>()
+                .inventory_item_drag
+                .is_none());
+            app.update();
+            assert!(app
+                .world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents()
+                .is_empty());
+        }
+    }
+
+    #[test]
+    fn ordered_npc_service_drag_rejects_replaced_source_identity() {
+        let (mut app, window, source, target) =
+            npc_service_drag_app(NpcShopServiceMode::SpecialRepair, true);
+        ordered_inventory_drag_motion(&mut app, window, source);
+        ordered_inventory_drag_button(&mut app, window, true);
+        app.update();
+        app.world_mut().resource_mut::<InventoryModel>().items[0].unique_id = Some(9999);
+        ordered_inventory_drag_motion(&mut app, window, target);
+        ordered_inventory_drag_button(&mut app, window, false);
+
+        app.update();
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert_eq!(
+            app.world().resource::<ShopModel>().selected_bag_slot_for_repair,
+            None
         );
     }
 
