@@ -376,3 +376,10 @@ The updated font probe passes constrained CJK WordOrCharacter:29 glyphs,5 lines,
 Open: Letter caret/selection/scroll and dragging; complete source Parcel UI, authoritative postage/stamp/item locking, NPC MailSendRequest entry; same-build screenshots/operations, wider cross-panel behavior, long-run live memory and the full37-row UI acceptance matrix. No real mail was sent, account altered, desktop input injected or live package replaced.
 
 Matched Letter compose package: C:/numeron-legend-of-rebirth-20260921-mail-letter-compose. Native release1m19s; client SHA256 6CFE63A1C7D11F774ECFB9FED6B1A239BA049BA0A2B44F414410DD54A0681876; Gateway SHA256 9CB0C8491BB1D41A4885E28CDE314DA9A2BE1FF57463509D1213B46F802C2F55. Existing local19910/newcomer-v2 config and source-assets junction retained; neither executable launched/deployed. Build log mail-letter-native-build.log.
+
+## Letter editing and movable frame candidate
+
+Letter now uses shaped glyph positions for its caret, pointer selection, vertical navigation and automatic caret scrolling, with Unicode grapheme-aware deletion. The source-sized window can be dragged; higher modal layers, focus loss and session reset cancel captures. A retained draft keeps its selection through frame moves and temporary modal coverage. Pending sends freeze edits. Shared wrap-boundary caret affinity and the 198x161 content viewport have dedicated regressions.
+
+Native UI library: 994 passed, 0 failed (C:/mir2-ui-repair-20260921/mail-editor-final-tests.log). These are code tests, not desktop visual acceptance. Clipboard, IME, explicit wheel scrolling, complete original Parcel/service flow, and same-build native visual checks remain open. Existing 256-unit editor limit is not claimed to match the original server limit.
+Staged package: C:/numeron-legend-of-rebirth-20260921-mail-editor. Client SHA256 333AC3B6698178F03F7FC7FC429CA3DECA06CDD00F38DAD17F79C9F41E8FE28B; matched Gateway SHA256 9CB0C8491BB1D41A4885E28CDE314DA9A2BE1FF57463509D1213B46F802C2F55. Release build passed (mail-editor-native-build.log). Not deployed or visually accepted; existing live account/session untouched.

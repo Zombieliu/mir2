@@ -1,6 +1,6 @@
 # Current whole-UI acceptance matrix
 
-Goal scope is unchanged. Latest staged Letter compose package is C:/numeron-legend-of-rebirth-20260921-mail-letter-compose, client SHA256 6CFE63A1C7D11F774ECFB9FED6B1A239BA049BA0A2B44F414410DD54A0681876 (see README for matched Gateway). No same-build native screenshot or desktop operation proves acceptance for this package. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots in README.md belong to explicitly older packages.
+Goal scope is unchanged. Latest staged Letter editor package is C:/numeron-legend-of-rebirth-20260921-mail-editor, client SHA256 333AC3B6698178F03F7FC7FC429CA3DECA06CDD00F38DAD17F79C9F41E8FE28B (see README for matched Gateway). No same-build native screenshot or desktop operation proves acceptance for this package. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots in README.md belong to explicitly older packages.
 
 Every row below requires actual visible rendering, correct inputs/state/close behavior, applicable Crystal source or original-client comparison, and an evidence path tied to the tested executable. Status **open** means not accepted, including rows with implemented code and passing tests.
 
@@ -45,3 +45,4 @@ Every row below requires actual visible rendering, correct inputs/state/close be
 | Scaling and stability | Supported window modes/DPI, readable bounds, running/map transitions, soak | Open; old29GB memory blocker unresolved |
 
 Desktop input stopped after detected manual interference. Pending handoff is separate from standing demo/demo credential authorization. Code work can proceed, but no screenshots may be attributed to unlaunched candidates. The memory cause is unproven until attribution/reproduction; stable high usage is not a pass.
+

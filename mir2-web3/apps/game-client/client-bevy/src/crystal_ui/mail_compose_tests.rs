@@ -6,6 +6,7 @@ fn input_app() -> App {
         .init_resource::<MailComposeUi>()
         .init_resource::<NativePlayerUiIntentQueue>()
         .init_resource::<PendingOperations>()
+        .init_resource::<mail_editor::MailLetterEditor>()
         .init_resource::<NativeUiIntentQueue>()
         .init_resource::<InventoryModel>()
         .init_resource::<MailModel>()
@@ -107,6 +108,36 @@ fn letter_renderer_uses_source_root_full_multiline_text_and_visible_focus() {
         })
         .expect("focused full-body field");
     assert_eq!(*border, BorderColor::all(Color::srgb(0.0, 1.0, 0.0)));
+    let tag = world
+        .query::<&mail_editor::MailLetterEditText>()
+        .single(world)
+        .expect("shaped message text tag");
+    assert_eq!(tag.viewport, [198.0, 161.0]);
+}
+
+#[test]
+fn letter_renderer_follows_the_movable_source_window_position() {
+    let mut app = super::tests::overlay_render_test_app();
+    {
+        let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+        state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+        state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+            recipient: "Receiver".into(),
+            message: "body".into(),
+            ..default()
+        });
+    }
+    app.world_mut().resource_mut::<MailComposeUi>().kind = MailComposeKind::Letter;
+    app.world_mut()
+        .resource_mut::<mail_compose_drag::MailLetterWindow>()
+        .position = Vec2::new(420.0, 215.0);
+    app.update();
+    let world = app.world_mut();
+    let node = world
+        .query_filtered::<&Node, With<OverlayMailComposeLetter>>()
+        .single(world)
+        .expect("movable letter root");
+    assert_eq!((node.left, node.top), (Val::Px(420.0), Val::Px(215.0)));
 }
 
 #[test]
@@ -247,6 +278,28 @@ fn parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_d
         Some("Letter recipient"),
         "Reply is blocked until the uncorrelated Send result resolves",
     );
+}
+
+#[test]
+fn submitted_letter_body_is_frozen_until_the_uncorrelated_send_receipt() {
+    let mut app = input_app();
+    {
+        let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+        state.core.panel = mir2_ui_core::state::UiPanel::Mail;
+        state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+            recipient: "Receiver".into(),
+            message: "submitted body".into(),
+            ..default()
+        });
+    }
+    app.world_mut().resource_mut::<MailComposeUi>().kind = MailComposeKind::Letter;
+    press(&mut app, OverlayButton::SubmitMail);
+    type_text(&mut app, KeyCode::KeyX, " later edit");
+    assert_eq!(
+        app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref().map(|draft| draft.message.as_str()),
+        Some("submitted body"),
+    );
+    assert_eq!(app.world().resource::<MailComposeUi>().last_notice.as_deref(), Some("Sending mail…"));
 }
 
 #[test]
