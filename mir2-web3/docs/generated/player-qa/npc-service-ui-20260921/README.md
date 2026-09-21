@@ -137,3 +137,36 @@ and ports when switching after normal logout and desktop handoff. Do not use
 a new client quote against the old server to claim exact pricing acceptance.
 Affordability feedback, actual deduction, equipment drag, and visual acceptance
 remain separate. Memory diagnostic instrumentation is included, not a leak fix.
+
+## Corrected source scope for next service-layout pass
+
+A deeper active-code read supersedes the earlier equipment-drag backlog:
+Crystal NPCDialogs.cs ItemCell_Click at1699 requires MirGridType.Inventory for
+Sell/Repair/SpecialRepair. Equipment cells are not a supported drop source for
+these three services; the native equipment picker is an extra adapter to remove,
+not a missing source-equivalent equipment drag to implement. Disassemble/reset
+have separate preceding branches and do not change this repair/sale restriction.
+
+BeforeDraw sets NPCDropDialog.Location=(264,NPCDialog.Size.Height), not x0.
+Native OverlayShop currently uses(0,224). Earlier notes asserting source-faithful
+overall frame position proved only relative cell/button geometry and were too
+broad. Next layout pass must move the service frame/hit target consistently,
+remove the equipment adjunct, and verify the ordinary bag remains visible and
+usable. No source/client paired visual result has established this yet.
+
+## Repair affordability feedback
+
+Native repair/SRepair Confirm and Hold now preserve selection and report the
+source LowGold text through one System-chat entry when funds are insufficient.
+No request or pending operation is created on rejection. Confirm remains
+clickable, matching source feedback rather than silently disabling it.
+NpcRepairQuote now distinguishes displayed/compared f32 value from the server's
+truncated u32 deduction:188*0.1 displays18.8, gold18 rejects and19 accepts.
+Low/equal-gold normal/special, Hold-once, and fractional-rate regressions pass.
+Full native-ui suite904/904; log
+C:/mir2-ui-repair-20260921/npc-affordability-client-tests.log.
+This patch is source/test verified only, not yet packaged or run in-game.
+
+Sale gold-cap preflight remains open: native per-unit sell_value multiplication
+can differ from original floor(total Price /2) for an odd-price stack. Do not
+implement a supposedly exact capacity guard from that lossy unit value.

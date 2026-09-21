@@ -7,11 +7,14 @@
 use crate::inventory::ItemModel;
 
 /// Source-faithful repair price before and after the current NPC multiplier.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub(crate) struct NpcRepairQuote {
     /// Crystal `UserItem.RepairPrice()` before the NPC rate/service factor.
     pub repair_price: u32,
-    /// The price rendered by `NPCDropDialog.InfoLabel` for this service.
+    /// The float Crystal renders in `NPCDropDialog.InfoLabel` and compares
+    /// against the player's gold before it sends a repair packet.
+    pub displayed_total: f32,
+    /// The `uint` cost used by the server after the client-side float check.
     pub total_price: u32,
 }
 
@@ -84,9 +87,11 @@ pub(crate) fn crystal_npc_repair_quote(
     }
 
     let service_multiplier = if special { 3.0 } else { 1.0 };
-    let total_price = source_u32(repair_price as f32 * service_multiplier * rate)?;
+    let displayed_total = repair_price as f32 * service_multiplier * rate;
+    let total_price = source_u32(displayed_total)?;
     Some(NpcRepairQuote {
         repair_price,
+        displayed_total,
         total_price,
     })
 }
@@ -151,6 +156,7 @@ mod tests {
             crystal_npc_repair_quote(&item, 1.0, false),
             Some(NpcRepairQuote {
                 repair_price: 188,
+                displayed_total: 188.0,
                 total_price: 188,
             })
         );
@@ -158,6 +164,7 @@ mod tests {
             crystal_npc_repair_quote(&item, 1.0, true),
             Some(NpcRepairQuote {
                 repair_price: 188,
+                displayed_total: 564.0,
                 total_price: 564,
             })
         );
@@ -181,6 +188,7 @@ mod tests {
             crystal_npc_repair_quote(&item, 1.0, false),
             Some(NpcRepairQuote {
                 repair_price: 376,
+                displayed_total: 376.0,
                 total_price: 376,
             })
         );
@@ -222,5 +230,18 @@ mod tests {
             .unwrap()
             .unique_id = 99;
         assert_eq!(crystal_npc_repair_quote(&item, 1.0, false), None);
+    }
+
+    #[test]
+    fn quote_keeps_the_fractional_client_affordability_threshold() {
+        let item = item();
+        assert_eq!(
+            crystal_npc_repair_quote(&item, 0.1, false),
+            Some(NpcRepairQuote {
+                repair_price: 188,
+                displayed_total: 18.800001,
+                total_price: 18,
+            })
+        );
     }
 }

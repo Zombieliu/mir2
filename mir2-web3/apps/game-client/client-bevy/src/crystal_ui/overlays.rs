@@ -802,6 +802,12 @@ pub struct NativePlayerUiState {
     pub npc_shop_buy_tab: bool,
     /// Crystal Hold auto-submits the next selection in this service only.
     pub npc_service_hold: Option<NpcShopServiceMode>,
+    /// A locally rejected NPC service attempt waits for the System chat
+    /// bridge. Rendering never consumes or repeats this feedback.
+    pub npc_service_notice: Option<String>,
+    /// The service that produced the pending feedback. A later service mode
+    /// invalidates it before the player sees a stale rejection.
+    pub npc_service_notice_mode: Option<NpcShopServiceMode>,
     pub shop_repair_mode: bool,
     /// Repair selection is a `(container, slot)` pair. The emitted command
     /// still carries the authoritative unique id, so bag slot 3 cannot be
@@ -948,6 +954,8 @@ impl Default for NativePlayerUiState {
             npc_inventory_hidden: false,
             npc_shop_buy_tab: true,
             npc_service_hold: None,
+            npc_service_notice: None,
+            npc_service_notice_mode: None,
             shop_repair_mode: false,
             shop_repair_container: 0,
             shop_repair_slot: None,
@@ -1155,6 +1163,8 @@ impl NativePlayerUiState {
     pub fn toggle_npc_shop(&mut self) {
         if !self.npc_shop_open() {
             self.npc_inventory_hidden = false;
+            self.npc_service_notice = None;
+            self.npc_service_notice_mode = None;
         }
         self.apply(mir2_ui_core::action::UiAction::OpenNpcShop);
     }
@@ -2895,6 +2905,12 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             )
             .add_systems(
                 Update,
+                npc_item_service::drain_service_notice
+                    .after(process_overlay_buttons)
+                    .in_set(NativePlayerUiSet::Mutate),
+            )
+            .add_systems(
+                Update,
                 (
                     (
                         render_overlays,
@@ -3032,6 +3048,12 @@ fn sync_local_panel_models(
         .storage_selection
         .filter(|selection| storage.item_for_selection(*selection).is_some());
     shop_ui.start_index = shop_ui.start_index.min(shop.goods.len().saturating_sub(8));
+    if state.npc_service_notice.is_some()
+        && state.npc_service_notice_mode != Some(shop.service_mode)
+    {
+        state.npc_service_notice = None;
+        state.npc_service_notice_mode = None;
+    }
 
     // A transport callback and its server receipt can arrive in one frame.
     // Keep receipts until process has established the exact pending request.
@@ -17622,6 +17644,9 @@ mod tests {
                 .first_mut()
                 .expect("test drag item"),
         );
+        // The complete two-item source fixture quotes 250 ordinary / 750
+        // special repair at rate 1.0, so Hold reaches the service assertion.
+        app.world_mut().resource_mut::<InventoryModel>().gold = 750;
         {
             let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
             state.toggle_npc_shop();

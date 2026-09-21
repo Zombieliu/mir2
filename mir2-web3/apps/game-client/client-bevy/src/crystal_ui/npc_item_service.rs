@@ -10,6 +10,7 @@ const ITEM_CLICK_TARGET: CrystalRect = CrystalRect::new(20.0, 55.0, 75.0, 75.0);
 // (0, 224).  Keep hit testing beside the source ItemCell geometry instead of
 // teaching the generic inventory drag code about service-specific layout.
 const NPC_DROP_PANEL_TOP: f32 = 224.0;
+const LOW_GOLD_NOTICE: &str = "Not enough gold.";
 
 pub(super) fn service_action(shop: &ShopModel) -> Option<(&'static str, OverlayButton)> {
     if shop.allows_special_repair() {
@@ -149,6 +150,17 @@ pub(super) fn submit_selection(
     let Some(intent) = selection_intent(shop, inventory, state) else {
         return false;
     };
+    if matches!(
+        intent,
+        NativePlayerUiIntent::RepairItem { .. } | NativePlayerUiIntent::SRepairItem { .. }
+    ) && !repair_is_affordable(shop, inventory, state)
+    {
+        // Crystal leaves TargetItem selected and emits LowGold through System
+        // chat. Keep the native selection/pending queue in the same state.
+        state.npc_service_notice = Some(LOW_GOLD_NOTICE.to_owned());
+        state.npc_service_notice_mode = Some(shop.service_mode);
+        return false;
+    }
     if !intents.push_pending_intent(pending, intent) {
         return false;
     }
@@ -160,7 +172,41 @@ pub(super) fn submit_selection(
     state.shop_service_drag_unique_id = None;
     state.shop_repair_slot = None;
     state.shop_repair_container = 0;
+    state.npc_service_notice = None;
+    state.npc_service_notice_mode = None;
     true
+}
+
+/// `NPCDropDialog.Confirm` compares `GameScene.Gold` to the untruncated
+/// float (`RepairPrice * multiplier * NPCRate`). The server then truncates the
+/// same value for its deduction, so quote `total_price` must not drive this
+/// client-side gate.
+fn repair_is_affordable(
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    state: &NativePlayerUiState,
+) -> bool {
+    selected_item(shop, inventory, state)
+        .and_then(|item| repair_quote(shop, item))
+        .is_some_and(|quote| inventory.gold as f32 >= quote.displayed_total)
+}
+
+/// Deliver exactly one pending local NPC service rejection through Crystal's
+/// System-chat route. Retaining it until `ChatModel` exists makes lightweight
+/// UI tests and startup ordering safe without rendering side effects.
+pub(super) fn drain_service_notice(
+    mut state: ResMut<NativePlayerUiState>,
+    mut chat: Option<ResMut<crate::chat::ChatModel>>,
+) {
+    let Some(chat) = chat.as_deref_mut() else {
+        return;
+    };
+    if let Some(text) = state.npc_service_notice.take() {
+        chat.push(crate::chat::ChatLine {
+            text,
+            channel: "system".to_owned(),
+        });
+    }
 }
 
 fn selected_item<'a>(
@@ -275,7 +321,7 @@ pub(super) fn render(
     let info = if repair {
         repair_quote.map_or_else(
             || title.to_owned(),
-            |quote| format!("{title}: {} gold", quote.total_price),
+            |quote| format!("{title}: {} gold", quote.displayed_total),
         )
     } else if shop.allows_sell() {
         selected
@@ -520,6 +566,7 @@ mod tests {
             .init_resource::<NativePlayerUiIntentQueue>()
             .init_resource::<PendingOperations>()
             .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<crate::chat::ChatModel>()
             .init_resource::<InventoryModel>()
             .init_resource::<MailModel>()
             .init_resource::<MapModel>()
@@ -531,7 +578,10 @@ mod tests {
                 ..default()
             });
         super::super::tests::init_overlay_button_test_resources(&mut app);
-        app.add_systems(Update, process_overlay_buttons);
+        app.add_systems(
+            Update,
+            (process_overlay_buttons, drain_service_notice).chain(),
+        );
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .toggle_npc_shop();
@@ -541,10 +591,12 @@ mod tests {
                 mode: NpcShopServiceMode::SpecialRepair,
                 repair_rate: Some(2.0),
             });
-        app.world_mut()
-            .resource_mut::<InventoryModel>()
-            .items
-            .push(repairable_item(42, 2, 13));
+        {
+            let mut inventory = app.world_mut().resource_mut::<InventoryModel>();
+            // Crystal's special quote is 188 * 3 * 2 for this fixture.
+            inventory.gold = 1128;
+            inventory.items.push(repairable_item(42, 2, 13));
+        }
         fn press(app: &mut App, action: OverlayButton) {
             let button = app
                 .world_mut()
@@ -638,6 +690,169 @@ mod tests {
         ));
         assert_eq!(shop.selected_bag_slot_for_sell, Some(45));
         assert!(intents.drain_intents().is_empty());
+    }
+
+    #[test]
+    fn repair_requires_the_untruncated_crystal_gold_threshold_and_keeps_target() {
+        for (mode, exact_gold) in [
+            (NpcShopServiceMode::Repair, 188_u32),
+            (NpcShopServiceMode::SpecialRepair, 564_u32),
+        ] {
+            let mut inventory = InventoryModel {
+                gold: exact_gold - 1,
+                items: vec![repairable_item(42, 0, 4)],
+                ..default()
+            };
+            let mut state = NativePlayerUiState::default();
+            state.toggle_npc_shop();
+            state.shop_repair_container = 0;
+            state.shop_repair_slot = Some(4);
+            let mut shop = ShopModel {
+                service_mode: mode,
+                repair_rate: Some(1.0),
+                selected_bag_slot_for_repair: Some(4),
+                ..default()
+            };
+            let mut intents = NativePlayerUiIntentQueue::default();
+            let mut pending = PendingOperations::default();
+
+            assert!(!submit_selection(
+                &mut shop,
+                &inventory,
+                &mut state,
+                &mut intents,
+                &mut pending,
+            ));
+            assert_eq!(state.npc_service_notice.as_deref(), Some(LOW_GOLD_NOTICE));
+            assert_eq!(state.shop_repair_slot, Some(4));
+            assert_eq!(shop.selected_bag_slot_for_repair, Some(4));
+            assert!(intents.drain_intents().is_empty());
+            assert!(pending.is_empty());
+
+            inventory.gold = exact_gold;
+            assert!(submit_selection(
+                &mut shop,
+                &inventory,
+                &mut state,
+                &mut intents,
+                &mut pending,
+            ));
+            assert!(matches!(
+                intents.drain_intents().as_slice(),
+                [NativePlayerUiIntent::RepairItem { unique_id: 42 }]
+                    | [NativePlayerUiIntent::SRepairItem { unique_id: 42 }]
+            ));
+        }
+    }
+
+    #[test]
+    fn fractional_quote_rejects_truncated_server_cost_and_accepts_ceil_gold() {
+        let mut inventory = InventoryModel {
+            gold: 18,
+            items: vec![repairable_item(42, 0, 4)],
+            ..default()
+        };
+        let mut state = NativePlayerUiState::default();
+        state.toggle_npc_shop();
+        state.shop_repair_container = 0;
+        state.shop_repair_slot = Some(4);
+        let mut shop = ShopModel {
+            service_mode: NpcShopServiceMode::Repair,
+            repair_rate: Some(0.1),
+            selected_bag_slot_for_repair: Some(4),
+            ..default()
+        };
+        let mut intents = NativePlayerUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+
+        assert!(!submit_selection(
+            &mut shop,
+            &inventory,
+            &mut state,
+            &mut intents,
+            &mut pending,
+        ));
+        assert_eq!(state.npc_service_notice.as_deref(), Some(LOW_GOLD_NOTICE));
+        assert!(pending.is_empty());
+        inventory.gold = 19;
+        assert!(submit_selection(
+            &mut shop,
+            &inventory,
+            &mut state,
+            &mut intents,
+            &mut pending,
+        ));
+    }
+
+    #[test]
+    fn hold_low_gold_reports_once_without_pending_or_losing_selection() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<crate::chat::ChatModel>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<MapModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<crate::social::SocialModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            });
+        super::super::tests::init_overlay_button_test_resources(&mut app);
+        app.add_systems(
+            Update,
+            (process_overlay_buttons, drain_service_notice).chain(),
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_npc_shop();
+        app.world_mut()
+            .resource_mut::<ShopModel>()
+            .apply_service_signal(NpcShopServiceSignal {
+                mode: NpcShopServiceMode::SpecialRepair,
+                repair_rate: Some(1.0),
+            });
+        app.world_mut()
+            .resource_mut::<InventoryModel>()
+            .items
+            .push(repairable_item(42, 2, 13));
+        fn press(app: &mut App, action: OverlayButton) {
+            let button = app
+                .world_mut()
+                .spawn((Button, action, Interaction::Pressed))
+                .id();
+            app.update();
+            app.world_mut().despawn(button);
+        }
+
+        press(&mut app, OverlayButton::ShopToggleHold);
+        press(&mut app, OverlayButton::SelectEquipForRepair(13));
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert!(app.world().resource::<PendingOperations>().is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<NativePlayerUiState>()
+                .shop_repair_slot,
+            Some(13)
+        );
+        assert_eq!(
+            app.world().resource::<crate::chat::ChatModel>().lines,
+            vec![crate::chat::ChatLine {
+                text: LOW_GOLD_NOTICE.to_owned(),
+                channel: "system".to_owned(),
+            }]
+        );
+        app.update();
+        assert_eq!(app.world().resource::<crate::chat::ChatModel>().lines.len(), 1);
     }
 
     #[test]

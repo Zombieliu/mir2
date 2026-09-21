@@ -189,3 +189,12 @@ repair x2. Backend numeric3/3, repair packets5/5, sale packets2/2; full client
 900/900. Builds pass. Neither binary is deployed. Exact hashes and limitations
 are in NPC service notes. Existing desktop session untouched; renewal of control
 handoff remains pending. Entire UI goal and high-memory diagnosis remain open.
+
+Repair affordability follow-up:904/904 client tests pass. Insufficient-gold
+Confirm/Hold leaves target and pending queue intact and reports one source System
+chat notice. Fractional source label/affordability is retained separately from
+server integer deduction. Not packaged/deployed; latest staged binary remains
+npc-quotes. A deeper source audit corrects the service backlog: ordinary Crystal
+repair/sale accepts inventory cells only, so remove the equipment adapter rather
+than implement equipped-item drag. Native service x0 also differs from source
+x264. Exact source references and remaining sale rounding gate are in NPC notes.
