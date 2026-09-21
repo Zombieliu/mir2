@@ -1,5 +1,29 @@
 # UI goal live ledger
 
+## Latest prepared package — 2026-09-22
+
+Rechecked package C:/numeron-legend-of-rebirth-20260922-ui-text against its
+candidate-manifest.json. Client source c2a2d9f0c, Gateway source 3b8bd01f9.
+Actual SHA256 values match the manifest:
+
+- Client: F7107C13E397441B438CE9154A09471D54B0043F717CAA4A04AEEF14AD4C52FC
+- Gateway: ADC7B40FB6E3734D6C57E3C069625F72EC464E4C8C71DFB316CBBDB2406CD651
+- Config: 6BEAADB2B9B28FDFEE2EF17545148FA5F3171ECAF635776DAF1D64010BEF3775
+
+Assets remain a shared junction, not an immutable package. Verified log tails
+under C:/mir2-ui-repair-20260921: mail-text-client-build.log completes release
+build in 1m43s; mail-text-client-full.log passes 1035/1035; mail-text-clipboard.log
+passes 13/13 (668 filtered out). These do not establish visual acceptance.
+No native client process is running. Gateway PID55572 still uses the older
+parcel-map executable. The new package is neither deployed nor visually accepted.
+Renewed desktop handoff remains pending; the old client's exit cause is unproven.
+
+The source comparison for BigMapDialog.cs:610 confirms click-to-path and AutoPath;
+its drawing routine does not render a route polyline. Route visualization is a
+suggested enhancement, not an implemented or accepted original-parity feature.
+
+## Historical observations
+
 Active goal: whole native UI repair and live acceptance, not completed.
 Observed executable: C:/numeron-legend-of-rebirth-20260921-character-return/
 mir2-platform-windows.exe (PID 45452). Character a1, level11, Bichon (336,285).
