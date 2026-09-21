@@ -65,6 +65,19 @@ fn compose_gold_accepts_digits_backspace_and_rejects_overflow_without_wallet_mut
 #[test]
 fn compose_recipient_uses_server_twenty_scalar_limit() {
     let mut app = app();
+    // Crystal edits a recipient in the preceding MirInputBox; Parcel itself
+    // displays the accepted name as a label.
+    app.world_mut().resource_scope(|world, mut state: Mut<NativePlayerUiState>| {
+        let mut compose = world.resource_mut::<MailComposeUi>();
+        begin_mail_recipient_prompt(&mut state, &mut compose);
+    });
     key(&mut app, KeyCode::KeyA, Some(&"界".repeat(25)));
-    assert_eq!(app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref().unwrap().recipient, "界".repeat(20));
+    assert_eq!(
+        app.world()
+            .resource::<MailComposeUi>()
+            .recipient_prompt
+            .as_ref()
+            .map(|prompt| prompt.recipient.as_str()),
+        Some("界界界界界界界界界界界界界界界界界界界界"),
+    );
 }

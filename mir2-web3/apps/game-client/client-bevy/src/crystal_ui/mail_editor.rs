@@ -5,6 +5,10 @@ use super::*;
 use friend_dialog::text_editor::{CaretStop, EditResult, FriendTextEditor, TextLayout as EditorTextLayout, VisualLine};
 
 pub(super) const MAIL_LETTER_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 92.0, 202.0, 165.0);
+/// `MailComposeParcelDialog` uses the same 202×165 edit viewport six pixels
+/// lower than LetterDialog.  Keep layout shaping shared while the source
+/// frame owns each control's real local origin.
+pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
 const MAIL_LETTER_BODY_LIMIT: usize = 256;
 pub(super) const MAIL_LETTER_CONTENT_INSET: Vec2 = Vec2::splat(2.0);
 pub(super) const MAIL_LETTER_CONTENT_SIZE: Vec2 = Vec2::new(
@@ -202,6 +206,10 @@ impl MailLetterEditor {
     }
 
     pub(super) fn render(&self, parent: &mut ChildSpawnerCommands) {
+        self.render_at(parent, MAIL_LETTER_BODY_RECT);
+    }
+
+    pub(super) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
         let Some(editor) = self.editor.as_ref() else {
             return;
         };
@@ -210,10 +218,10 @@ impl MailLetterEditor {
             .spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(MAIL_LETTER_BODY_RECT.left),
-                    top: Val::Px(MAIL_LETTER_BODY_RECT.top),
-                    width: Val::Px(MAIL_LETTER_BODY_RECT.width),
-                    height: Val::Px(MAIL_LETTER_BODY_RECT.height),
+                    left: Val::Px(body_rect.left),
+                    top: Val::Px(body_rect.top),
+                    width: Val::Px(body_rect.width),
+                    height: Val::Px(body_rect.height),
                     border: UiRect::all(Val::Px(1.0)),
                     overflow: Overflow::clip(),
                     ..default()

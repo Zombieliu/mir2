@@ -215,6 +215,7 @@ fn recipient_cancel_and_letter_send_keep_input_isolated_and_draft_authoritative(
             message: "first\nsecond".into(),
             gold: 0,
             attachment_unique_ids: vec![],
+            stamped: false,
         }],
     );
 }
@@ -260,6 +261,7 @@ fn parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_d
             message: "Letter message".into(),
             gold: 0,
             attachment_unique_ids: vec![],
+            stamped: false,
         }],
     );
 

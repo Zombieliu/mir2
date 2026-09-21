@@ -34,6 +34,9 @@ use crate::gameplay_bridge::{GameplayEventInbox, NativeSelfMovementAck, NativeWo
 use crate::gateway::{GatewayCommand, GatewayCommandSender, PlayerIntent};
 use crate::native_protocol::NativeOutboundCommand;
 
+#[path = "big_map_input.rs"]
+mod big_map_input;
+
 pub(crate) const NATIVE_INPUT_TRACE_ENV: &str = "MIR2_NATIVE_INPUT_TRACE";
 
 pub(crate) fn native_input_trace_enabled() -> bool {
@@ -303,6 +306,7 @@ pub struct WorldPointerMovementState {
     auto_path_destination: Option<(i32, i32)>,
     /// Only NewMove pointer paths are canceled when that option is disabled.
     pointer_auto_path: bool,
+    map_auto_path: Option<big_map_input::MapRoute>,
     attack_target: Option<u32>,
     next_attack_request_at_ms: f64,
     harvest_target: Option<u32>,
@@ -345,6 +349,7 @@ impl WorldPointerMovementState {
         self.active = None;
         self.auto_path_destination = None;
         self.pointer_auto_path = false;
+        self.map_auto_path = None;
         self.attack_target = Some(object_id);
         self.next_attack_request_at_ms = 0.0;
         self.harvest_target = None;
@@ -378,6 +383,7 @@ impl WorldPointerMovementState {
     }
 
     fn start_auto_path(&mut self, destination: (i32, i32), at_ms: f64) {
+        self.map_auto_path = None;
         self.stop_hold(at_ms, "autoPathStarted");
         if self.auto_path_destination != Some(destination) {
             crate::movement_trace::record(serde_json::json!({
@@ -393,6 +399,7 @@ impl WorldPointerMovementState {
     }
 
     fn stop_auto_path(&mut self, at_ms: f64, reason: &'static str) {
+        self.map_auto_path = None;
         self.pointer_auto_path = false;
         if let Some(destination) = self.auto_path_destination.take() {
             crate::movement_trace::record(serde_json::json!({
@@ -535,6 +542,7 @@ impl WorldPointerMovementState {
         self.next_harvest_request_at_ms = 0.0;
         self.auto_path_destination = None;
         self.pointer_auto_path = false;
+        self.map_auto_path = None;
         self.active = None;
         self.next_move_send_at_ms = 0.0;
         self.run_primed_until_ms = 0.0;
@@ -1285,7 +1293,12 @@ pub fn mouse_world_interaction_system(
     mut player_ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
-    (ui_read_model, click_state): (Option<Res<UiReadModel>>, Option<Res<NativeWorldClickState>>),
+    (ui_read_model, click_state, big_map, mut map_chat, big_map_ui): (
+        Option<Res<UiReadModel>>, Option<Res<NativeWorldClickState>>,
+        Option<Res<mir2_client_bevy::big_map::BigMapModel>>,
+        Option<ResMut<mir2_client_bevy::chat::ChatModel>>,
+        Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+    ),
     entities: Option<Res<EntityModelSet>>,
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
     (time, real_time): (Option<Res<Time>>, Option<Res<Time<bevy::time::Real>>>),
@@ -1298,8 +1311,8 @@ pub fn mouse_world_interaction_system(
 ) {
     let keys = keyboard.keys();
     let modifiers = keyboard.modifiers();
-    let left_pressed = mouse.just_pressed(MouseButton::Left);
-    let right_pressed = mouse.just_pressed(MouseButton::Right);
+    let mut left_pressed = mouse.just_pressed(MouseButton::Left);
+    let mut right_pressed = mouse.just_pressed(MouseButton::Right);
     let left_released = mouse.just_released(MouseButton::Left);
     let right_released = mouse.just_released(MouseButton::Right);
     let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
@@ -1500,6 +1513,15 @@ pub fn mouse_world_interaction_system(
     let dead = ui_read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
+    let map_open = player_ui.as_deref().is_some_and(|ui| ui.bigmap_open());
+    let map_image_press = map_open && (left_pressed || right_pressed)
+        && big_map_input::image_position(window).is_some();
+    if movement.map_auto_path.as_ref().is_some_and(|route| {
+        presentation.current_map_file_name() != Some(route.map_file.as_str())
+            || big_map.as_deref().and_then(|model| model.current_map_index) != Some(route.map_index)
+    }) {
+        movement.stop_auto_path(now_ms, "mapChanged");
+    }
     // The HUD interaction state is refreshed after this sender. A fresh press
     // over a source HUD button must consume the press before it can become a
     // world walk, run, attack, or pickup on the frame that opens the panel.
@@ -1562,7 +1584,11 @@ pub fn mouse_world_interaction_system(
         || notice.as_deref().is_some_and(NoticeDialogState::is_open)
         || dialog_open
         || dead
+        || (map_open && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused))
         || player_ui.as_deref().is_some_and(|ui| {
+            if map_open && (map_image_press || (movement.map_auto_path.is_some() && !left_pressed && !right_pressed)) {
+                return big_map_input::ui_blocks_except_map(ui);
+            }
             window.cursor_position().map_or_else(|| ui.blocks_world_click(), |cursor| {
                 let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
                     window.resolution.width(), window.resolution.height(),
@@ -1612,6 +1638,43 @@ pub fn mouse_world_interaction_system(
         movement.next_harvest_request_at_ms = 0.0;
         movement.stop_auto_path(now_ms, "keyboardInput");
         return;
+    }
+
+    if map_image_press {
+        // Consume the image press before interpreting world actors beneath it.
+        // Crystal BigMap.OnMouseClick accepts both left and right buttons.
+        movement.stop_hold(now_ms, "bigMapClick");
+        movement.stop_auto_path(now_ms, "bigMapClick");
+        movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        if let Some(ui) = player_ui.as_deref_mut() { ui.local_keys.set_auto_run(false); }
+        let request = (|| {
+            let model = big_map.as_deref().ok_or("地图信息尚未加载。");
+            let model = model?;
+            let destination = big_map_input::destination(model, big_map_input::image_position(window).unwrap())?;
+            let map_file = presentation.current_map_file_name().ok_or("当前地图尚未加载。");
+            let map_file = map_file?;
+            let parsed = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。");
+            let parsed = parsed?;
+            let info = &model.active_map().unwrap().info;
+            if i32::from(parsed.width) != info.width || i32::from(parsed.height) != info.height {
+                return Err("地图尺寸尚未同步，请稍后重试。");
+            }
+            let origin = movement.planning_origin(entity_position);
+            let steps = big_map_input::plan(&movement, &entities, presentation, &object_id, map_file, origin, destination)?;
+            Ok(big_map_input::MapRoute { map_file: map_file.to_owned(), map_index: model.current_map_index.unwrap(), origin, destination, steps })
+        })();
+        match request {
+            Ok(route) if !route.steps.is_empty() => {
+                movement.auto_path_destination = Some(route.destination);
+                movement.map_auto_path = Some(route);
+            }
+            Ok(_) => return,
+            Err(message) => { big_map_input::feedback(map_chat.as_deref_mut(), message); return; }
+        }
+        left_pressed = false;
+        right_pressed = false;
     }
 
     if let Some(target_id) = movement.harvest_target {
@@ -1830,6 +1893,7 @@ pub fn mouse_world_interaction_system(
         movement.attack_target = None;
         movement.auto_path_destination = None;
         movement.pointer_auto_path = false;
+        movement.map_auto_path = None;
     }
     if right_pressed && presentation.hovered_grid_position().is_some() {
         movement.begin(WorldPointerMovementMode::Run, now_ms);
@@ -2004,15 +2068,16 @@ pub fn mouse_world_interaction_system(
             movement.stop_auto_path(now_ms, "destinationReached");
             return;
         }
-        let Some(path) = find_crystal_auto_path(
-            &movement,
-            &entities,
-            Some(presentation),
-            &object_id,
-            map_file_name.as_deref(),
-            origin,
-            destination,
-        ) else {
+        let path = if movement.map_auto_path.is_some() {
+            match big_map_input::advance(&mut movement, &entities, presentation, &object_id, origin) {
+                Ok(path) => Some(path),
+                Err(message) => { big_map_input::feedback(map_chat.as_deref_mut(), message); None }
+            }
+        } else {
+            find_crystal_auto_path(&movement, &entities, Some(presentation), &object_id,
+                map_file_name.as_deref(), origin, destination)
+        };
+        let Some(path) = path else {
             movement.trace_plan_blocked(now_ms, origin, "down", mode);
             movement.stop_auto_path(now_ms, "pathUnavailable");
             return;
@@ -2787,6 +2852,9 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 
 #[cfg(test)]
 mod tests {
+    mod big_map_input_tests {
+        include!("big_map_input_tests.rs");
+    }
     use super::*;
     use bevy::prelude::IntoScheduleConfigs;
     use mir2_client_bevy::entities::{EntityKind, EntityModel, EntityModelSet};

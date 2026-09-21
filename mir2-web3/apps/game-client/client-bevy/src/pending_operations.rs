@@ -2836,12 +2836,14 @@ mod native_ui_tests {
             message: "one".into(),
             gold: 1,
             attachment_unique_ids: vec![7],
+            stamped: false,
         };
         let second_send = NativePlayerUiIntent::SendMail {
             recipient: "B".into(),
             message: "two".into(),
             gold: 2,
             attachment_unique_ids: vec![8],
+            stamped: false,
         };
         assert!(!queue.push_pending_intent(&mut pending, first_send.clone()));
         assert_eq!(queue.drain_intents().len(), 1);

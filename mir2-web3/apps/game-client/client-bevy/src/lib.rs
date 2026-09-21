@@ -33,6 +33,7 @@ pub mod hud;
 pub mod inventory;
 pub mod mail;
 pub mod map;
+pub mod mail_service;
 #[cfg(feature = "native-ui")]
 pub mod native_shell;
 #[cfg(feature = "native-ui")]

@@ -12,6 +12,9 @@ pub mod native_ingest;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
+#[cfg(test)]
+#[path = "mail_service_runtime_tests.rs"]
+mod mail_service_runtime_tests;
 mod presentation_pose;
 mod remote_motion;
 
@@ -188,6 +191,7 @@ impl Plugin for Mir2NativeSessionBoundaryPlugin {
             .init_resource::<mir2_client_bevy::inventory::InventoryModel>()
             .init_resource::<mir2_client_bevy::chat::ChatModel>()
             .init_resource::<mir2_client_bevy::mail::MailModel>()
+            .init_resource::<mir2_client_bevy::mail_service::MailServiceInbox>()
             .init_resource::<mir2_client_bevy::shop::ShopModel>()
             .init_resource::<mir2_client_bevy::game_shop::GameShopModel>()
             .init_resource::<mir2_client_bevy::storage::StorageModel>()
@@ -1723,6 +1727,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 ingest_pending_inventory_operation_ack,
                 ingest_pending_wallet_patch,
                 ingest_pending_mail_model,
+                ingest_pending_mail_service,
                 ingest_pending_shop_model,
                 ingest_pending_game_shop_info,
                 ingest_pending_game_shop_stock,
@@ -2288,7 +2293,10 @@ fn apply_session_reset_to_runtime_models(
     mut entities: ResMut<mir2_client_bevy::entities::EntityModelSet>,
     mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
     mut chat: ResMut<mir2_client_bevy::chat::ChatModel>,
-    mut mail: ResMut<mir2_client_bevy::mail::MailModel>,
+    (mut mail, mut mail_service): (
+        ResMut<mir2_client_bevy::mail::MailModel>,
+        ResMut<mir2_client_bevy::mail_service::MailServiceInbox>,
+    ),
     mut shop: ResMut<mir2_client_bevy::shop::ShopModel>,
     mut game_shop: ResMut<mir2_client_bevy::game_shop::GameShopModel>,
     mut storage: ResMut<mir2_client_bevy::storage::StorageModel>,
@@ -2317,6 +2325,7 @@ fn apply_session_reset_to_runtime_models(
     *inventory = mir2_client_bevy::inventory::InventoryModel::default();
     *chat = mir2_client_bevy::chat::ChatModel::default();
     *mail = mir2_client_bevy::mail::MailModel::default();
+    mail_service.clear();
     *shop = mir2_client_bevy::shop::ShopModel::default();
     let preserved_receipt = preservation.receipt_for(reset.0).cloned();
     if let Some(receipt) = preserved_receipt.as_ref() {
@@ -2403,6 +2412,33 @@ fn ingest_pending_mail_model(
                     Err(error) => {
                         publish_status("native-decode-error", "invalid native mail model");
                         eprintln!("[runtime] mail model decode error: {error}");
+                    }
+                }
+            }
+        },
+    );
+}
+
+fn ingest_pending_mail_service(
+    mut inbox: ResMut<mir2_client_bevy::mail_service::MailServiceInbox>,
+    native: Res<native_ingest::NativeInbound>,
+) {
+    native.drain_matching(
+        |message| matches!(message, native_ingest::NativeInboundMessage::MailService(_)),
+        |message| {
+            if let native_ingest::NativeInboundMessage::MailService(json) = message {
+                match serde_json::from_str::<mir2_client_bevy::mail_service::MailServiceEvent>(
+                    &json,
+                ) {
+                    Ok(event) => {
+                        if !inbox.push(event) {
+                            publish_status("native-mail-service-overflow", "mail service inbox is full");
+                            eprintln!("[runtime] mail service inbox is full");
+                        }
+                    }
+                    Err(error) => {
+                        publish_status("native-decode-error", "invalid native mail service event");
+                        eprintln!("[runtime] mail service decode error: {error}");
                     }
                 }
             }
@@ -8816,6 +8852,7 @@ mod native_data_path_tests {
             .insert_resource(mir2_client_bevy::inventory::InventoryModel::default())
             .insert_resource(mir2_client_bevy::chat::ChatModel::default())
             .insert_resource(mir2_client_bevy::mail::MailModel::default())
+            .insert_resource(mir2_client_bevy::mail_service::MailServiceInbox::default())
             .insert_resource(mir2_client_bevy::shop::ShopModel::default())
             .insert_resource(mir2_client_bevy::game_shop::GameShopModel::default())
             .insert_resource(mir2_client_bevy::storage::StorageModel::default())
@@ -8864,6 +8901,7 @@ mod native_data_path_tests {
                     ingest_pending_inventory_operation_ack,
                     ingest_pending_wallet_patch,
                     ingest_pending_mail_model,
+                    ingest_pending_mail_service,
                     ingest_pending_shop_model,
                     ingest_pending_game_shop_info,
                     ingest_pending_game_shop_stock,

@@ -2191,6 +2191,35 @@ pub struct NativeQuestWorldInput<'w> {
     movement: Option<ResMut<'w, WorldPointerMovementState>>,
 }
 
+/// Crystal's mail target accepts `MirGridType.Inventory`, which covers Bag1
+/// and the purchased Bag2 page. The native inventory projection folds those
+/// pages into container 0 and slots 0..79; belt/equipment/quest custody is not
+/// a parcel attachment source.
+fn mail_attachment_indices(inventory: &InventoryModel, ids: &[u64]) -> Option<[u64; 5]> {
+    if ids.len() > 5
+        || ids.iter().any(|id| *id == 0)
+        || ids
+            .iter()
+            .enumerate()
+            .any(|(index, id)| ids[..index].contains(id))
+    {
+        return None;
+    }
+
+    let mut indices = [0_u64; 5];
+    for (index, id) in ids.iter().enumerate() {
+        let item = inventory
+            .items
+            .iter()
+            .find(|item| item.unique_id == Some(*id))?;
+        if item.container != 0 || item.slot >= u32::from(inventory.bag_slot_capacity()) {
+            return None;
+        }
+        indices[index] = *id;
+    }
+    Some(indices)
+}
+
 pub fn forward_quest_ui_intents(
     shell: Res<NativeShellModel>,
     mut intents: ResMut<QuestUiIntentQueue>,
@@ -2733,48 +2762,53 @@ pub fn forward_quest_ui_intents(
             NativePlayerUiIntent::DeleteMail { mail_id } => {
                 NativeOutboundCommand::DeleteMail { mail_id }
             }
+            NativePlayerUiIntent::MailCost {
+                gold,
+                attachment_unique_ids,
+                stamped,
+            } => {
+                let Some(inventory) = inventory.as_deref() else {
+                    continue;
+                };
+                let Some(items_idx) = mail_attachment_indices(inventory, &attachment_unique_ids)
+                else {
+                    continue;
+                };
+                NativeOutboundCommand::MailCost {
+                    gold,
+                    items_idx,
+                    stamped,
+                }
+            }
+            NativePlayerUiIntent::MailLockItem { unique_id, locked } => {
+                let Some(inventory) = inventory.as_deref() else {
+                    continue;
+                };
+                if mail_attachment_indices(inventory, &[unique_id]).is_none() {
+                    continue;
+                }
+                NativeOutboundCommand::MailLockedItem { unique_id, locked }
+            }
             NativePlayerUiIntent::SendMail {
                 recipient,
                 message,
                 gold,
                 attachment_unique_ids,
+                stamped,
             } => {
-                let mut items_idx = [0_u64; 5];
-                if attachment_unique_ids.len() > 5
-                    || attachment_unique_ids.iter().any(|id| *id == 0)
-                    || attachment_unique_ids
-                        .iter()
-                        .enumerate()
-                        .any(|(index, id)| attachment_unique_ids[..index].contains(id))
-                {
-                    continue;
-                }
                 let Some(inventory) = inventory.as_deref() else {
                     continue;
                 };
-                for (index, id) in attachment_unique_ids.iter().enumerate() {
-                    if !inventory
-                        .items
-                        .iter()
-                        .any(|item| item.container == 0 && item.unique_id == Some(*id))
-                    {
-                        continue;
-                    }
-                    items_idx[index] = *id;
-                }
-                if attachment_unique_ids
-                    .iter()
-                    .enumerate()
-                    .any(|(index, id)| items_idx[index] != *id)
-                {
+                let Some(items_idx) = mail_attachment_indices(inventory, &attachment_unique_ids)
+                else {
                     continue;
-                }
+                };
                 NativeOutboundCommand::SendMail {
                     name: recipient,
                     message,
                     gold,
                     items_idx,
-                    stamped: false,
+                    stamped,
                 }
             }
             NativePlayerUiIntent::GroupSwitch { allow_group } => {
@@ -4050,6 +4084,115 @@ mod tests {
     use bevy::prelude::App;
     use mir2_client_bevy::big_map::{BigMapInfo, BigMapNpc};
     use serde_json::json;
+
+    #[test]
+    fn parcel_attachment_mapping_accepts_both_logical_bag_pages_only() {
+        let inventory = InventoryModel {
+            capacity: 86,
+            items: vec![
+                mir2_client_bevy::inventory::ItemModel {
+                    unique_id: Some(11),
+                    slot: 3,
+                    container: 0,
+                    ..Default::default()
+                },
+                // Gateway folds the Crystal Bag2 page into the same carried
+                // container, with slots 40..79.
+                mir2_client_bevy::inventory::ItemModel {
+                    unique_id: Some(22),
+                    slot: 47,
+                    container: 0,
+                    ..Default::default()
+                },
+                mir2_client_bevy::inventory::ItemModel {
+                    unique_id: Some(33),
+                    slot: 0,
+                    container: 1,
+                    ..Default::default()
+                },
+                mir2_client_bevy::inventory::ItemModel {
+                    unique_id: Some(44),
+                    slot: 80,
+                    container: 0,
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        assert_eq!(
+            mail_attachment_indices(&inventory, &[11, 22]),
+            Some([11, 22, 0, 0, 0])
+        );
+        assert_eq!(mail_attachment_indices(&inventory, &[33]), None);
+        assert_eq!(mail_attachment_indices(&inventory, &[44]), None);
+        assert_eq!(mail_attachment_indices(&inventory, &[11, 11]), None);
+    }
+
+    #[test]
+    fn parcel_intents_emit_server_validated_cost_lock_and_stamp_preference() {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let mut app = App::new();
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..Default::default()
+        })
+        .init_resource::<QuestUiIntentQueue>()
+        .init_resource::<NativePlayerUiIntentQueue>()
+        .insert_resource(InventoryModel {
+            capacity: 86,
+            items: vec![mir2_client_bevy::inventory::ItemModel {
+                unique_id: Some(22),
+                slot: 47,
+                container: 0,
+                ..Default::default()
+            }],
+            ..Default::default()
+        })
+        .insert_resource(GatewayCommands::new(sender))
+        .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
+        let mut intents = app.world_mut().resource_mut::<NativePlayerUiIntentQueue>();
+        intents.push_intent(NativePlayerUiIntent::MailCost {
+            gold: 100,
+            attachment_unique_ids: vec![22],
+            stamped: true,
+        });
+        intents.push_intent(NativePlayerUiIntent::MailLockItem {
+            unique_id: 22,
+            locked: true,
+        });
+        intents.push_intent(NativePlayerUiIntent::SendMail {
+            recipient: "Receiver".into(),
+            message: "Parcel".into(),
+            gold: 100,
+            attachment_unique_ids: vec![22],
+            stamped: true,
+        });
+        drop(intents);
+        app.update();
+
+        let commands = receiver.try_iter().collect::<Vec<_>>();
+        assert!(matches!(
+            commands.as_slice(),
+            [
+                GatewayCommand::Wire(NativeOutboundCommand::MailCost {
+                    gold: 100,
+                    items_idx: [22, 0, 0, 0, 0],
+                    stamped: true,
+                }),
+                GatewayCommand::Wire(NativeOutboundCommand::MailLockedItem {
+                    unique_id: 22,
+                    locked: true,
+                }),
+                GatewayCommand::Wire(NativeOutboundCommand::SendMail {
+                    name,
+                    message,
+                    gold: 100,
+                    items_idx: [22, 0, 0, 0, 0],
+                    stamped: true,
+                }),
+            ] if name == "Receiver" && message == "Parcel"
+        ));
+    }
 
     #[test]
     fn quest_reward_parser_preserves_zero_count_instead_of_inventing_one() {

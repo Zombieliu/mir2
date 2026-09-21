@@ -3183,17 +3183,38 @@ mod tests {
             .as_array_mut()
             .expect("entities")
             .truncate(1);
-        let missing_rect = crate::atlas::build_entity_render_state_with_manifest_for_test(
+        let individual_png = crate::atlas::build_entity_render_state_with_manifest_for_test(
             &payload,
             &HashMap::from([("2005".to_owned(), (136, AnimationAction::Struck))]),
             true,
             &crate::atlas::routing_atlas_manifest_fixture(&[]),
         )
-        .expect("missing target rect state");
+        .expect("individual source PNG render state");
+        assert_eq!(highlight_layer_count(&individual_png), 1);
+        let layers = rendered_layers(&individual_png, "2005");
+        assert!(!layers.is_empty());
+        for layer in layers {
+            assert_eq!(layer["path"], "/original-ui/Monster/005/136.png");
+            assert_eq!((layer["width"].as_f64(), layer["height"].as_f64()),
+                (Some(96.0), Some(76.0)), "fallback retains real source geometry");
+        }
+
+        // A missing atlas rect alone is no longer missing source geometry:
+        // complete packs can supply individual monster PNGs. This frame is
+        // outside the source library, so neither valid source can resolve it.
+        assert!(crate::assets::asset_path("original-ui/Monster/005/2147483647.png")
+            .is_none_or(|path| !path.is_file()));
+        let missing_rect = crate::atlas::build_entity_render_state_with_manifest_for_test(
+            &payload,
+            &HashMap::from([("2005".to_owned(), (i64::from(i32::MAX), AnimationAction::Struck))]),
+            true,
+            &crate::atlas::routing_atlas_manifest_fixture(&[]),
+        )
+        .expect("missing target frame state");
         assert_eq!(highlight_layer_count(&missing_rect), 0);
         assert!(
             rendered_layers(&missing_rect, "2005").is_empty(),
-            "a non-player body without atlas geometry fails closed instead of inventing 48x64"
+            "a body without atlas or individual PNG geometry fails closed instead of inventing 48x64"
         );
     }
 

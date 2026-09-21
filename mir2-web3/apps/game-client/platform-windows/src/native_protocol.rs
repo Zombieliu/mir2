@@ -463,6 +463,17 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "mailId")]
         mail_id: u64,
     },
+    MailCost {
+        gold: u32,
+        #[serde(rename = "itemsIdx")]
+        items_idx: [u64; 5],
+        stamped: bool,
+    },
+    MailLockedItem {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        locked: bool,
+    },
     SendMail {
         name: String,
         message: String,
@@ -685,6 +696,8 @@ impl NativeOutboundCommand {
             Self::LockMail { .. } => "lockMail",
             Self::CollectParcel { .. } => "collectParcel",
             Self::DeleteMail { .. } => "deleteMail",
+            Self::MailCost { .. } => "mailCost",
+            Self::MailLockedItem { .. } => "mailLockedItem",
             Self::SendMail { .. } => "sendMail",
             Self::SwitchGroup { .. } => "switchGroup",
             Self::AddMember { .. } => "addMember",
@@ -1563,6 +1576,26 @@ mod tests {
                 to: 3,
             },
             json!({"type":"takeBackItemV2","requestId":"st-0000000000000002","from":9,"to":3}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::MailCost {
+                gold: 100,
+                items_idx: [11, 22, 0, 0, 0],
+                stamped: true,
+            },
+            json!({
+                "type":"mailCost",
+                "gold":100,
+                "itemsIdx":[11,22,0,0,0],
+                "stamped":true
+            }),
+        );
+        assert_serialized(
+            NativeOutboundCommand::MailLockedItem {
+                unique_id: 22,
+                locked: false,
+            },
+            json!({"type":"mailLockedItem","uniqueId":22,"locked":false}),
         );
         assert_serialized(
             NativeOutboundCommand::SendMail {

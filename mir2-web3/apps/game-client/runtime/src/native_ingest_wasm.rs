@@ -25,6 +25,7 @@ pub(crate) enum NativeInboundMessage {
     DataResetPreservingExactGameShopReceipt(mir2_client_bevy::game_shop::GameShopReceipt),
     SceneReset,
     MailModel(String),
+    MailService(String),
     ShopModel(String),
     GameShopInfo(String),
     GameShopStock(String),

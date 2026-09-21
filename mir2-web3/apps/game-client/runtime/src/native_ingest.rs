@@ -87,6 +87,9 @@ pub(crate) enum NativeInboundMessage {
     /// read models, login state, and UI pending operations remain intact.
     SceneReset,
     MailModel(String),
+    /// Ordered Crystal parcel-service packets. Unlike mailbox snapshots these
+    /// responses have no request ID and must never be coalesced.
+    MailService(String),
     ShopModel(String),
     GameShopInfo(String),
     GameShopStock(String),
@@ -483,6 +486,7 @@ fn is_critical_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::GameShopInfo(_)
             | NativeInboundMessage::GameShopStock(_)
             | NativeInboundMessage::GameShopReceipt(_)
+            | NativeInboundMessage::MailService(_)
             | NativeInboundMessage::NpcShopService(_)
             | NativeInboundMessage::StoragePatch(_)
             | NativeInboundMessage::SocialModel(_)
@@ -515,6 +519,7 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         | NativeInboundMessage::InventoryOperationAck(json)
         | NativeInboundMessage::ChatLine(json)
         | NativeInboundMessage::MailModel(json)
+        | NativeInboundMessage::MailService(json)
         | NativeInboundMessage::ShopModel(json)
         | NativeInboundMessage::GameShopInfo(json)
         | NativeInboundMessage::GameShopStock(json)
@@ -648,6 +653,12 @@ pub fn push_native_scene_reset() -> bool {
 /// enabled) so the Windows Mail panel shows authoritative stage5 mail.
 pub fn push_native_mail_model(json: String) -> bool {
     send_native(NativeInboundMessage::MailModel(json))
+}
+
+/// Native-host entry point for ordered Crystal `MailSendRequest`, `MailCost`,
+/// and `MailLockedItem` events. The payload is shared tagged event JSON.
+pub fn push_native_mail_service(json: String) -> bool {
+    send_native(NativeInboundMessage::MailService(json))
 }
 
 /// Native-host entry point: push a shop model JSON.
@@ -903,6 +914,7 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::InventoryOperationAck(_)
             | NativeInboundMessage::ChatLine(_)
             | NativeInboundMessage::MailModel(_)
+            | NativeInboundMessage::MailService(_)
             | NativeInboundMessage::ShopModel(_)
             | NativeInboundMessage::GameShopInfo(_)
             | NativeInboundMessage::GameShopStock(_)
@@ -943,6 +955,27 @@ mod tests {
             pending: VecDeque::new(),
             game_shop_receipt: None,
         }
+    }
+
+    #[test]
+    fn mail_service_events_are_critical_ordered_and_removed_by_data_reset() {
+        let mut buffer = active_buffer();
+        for index in 0..NON_CRITICAL_MESSAGE_LIMIT {
+            assert!(buffer.enqueue(NativeInboundMessage::ChatLine(index.to_string())));
+        }
+        assert!(buffer.enqueue(NativeInboundMessage::MailService("first".into())));
+        assert!(buffer.enqueue(NativeInboundMessage::MailService("second".into())));
+        assert_eq!(
+            buffer.pending.len(),
+            NON_CRITICAL_MESSAGE_LIMIT + 2,
+            "critical service events bypass the ordinary queue limit and must not coalesce"
+        );
+        assert!(buffer.enqueue(NativeInboundMessage::DataReset));
+        assert_eq!(buffer.pending.len(), 1);
+        assert!(matches!(
+            buffer.pending.front(),
+            Some(NativeInboundMessage::DataReset)
+        ));
     }
 
     #[test]

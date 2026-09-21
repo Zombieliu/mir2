@@ -1,0 +1,262 @@
+//! Native BigMap image input and bounded full-map routes (no teleport intents).
+use super::*;
+use mir2_client_bevy::big_map::{BigMapModel, BigMapView};
+use mir2_client_bevy::chat::{ChatLine, ChatModel};
+use mir2_client_bevy::crystal_ui::overlays::{
+    BIGMAP_HEIGHT, BIGMAP_WIDTH, CRYSTAL_BIGMAP_PANEL_RECT,
+};
+
+const SEARCH_BUDGET: usize = 250_000;
+
+#[derive(Debug)]
+pub(super) struct MapRoute {
+    pub map_file: String,
+    pub map_index: i32,
+    pub origin: (i32, i32),
+    pub destination: (i32, i32),
+    pub steps: Vec<(i32, i32)>,
+}
+
+pub(super) fn image_position(window: &Window) -> Option<(f32, f32)> {
+    let cursor = window.cursor_position()?;
+    let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+        window.resolution.width(),
+        window.resolution.height(),
+    );
+    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+    // render_bigmap uses this same fixed image viewport, stretched to fill.
+    let x = x - CRYSTAL_BIGMAP_PANEL_RECT.left - 14.;
+    let y = y - CRYSTAL_BIGMAP_PANEL_RECT.top - 52.;
+    (x.is_finite()
+        && y.is_finite()
+        && (0. ..BIGMAP_WIDTH).contains(&x)
+        && (0. ..BIGMAP_HEIGHT).contains(&y))
+    .then_some((x, y))
+}
+
+pub(super) fn destination(
+    model: &BigMapModel,
+    point: (f32, f32),
+) -> Result<(i32, i32), &'static str> {
+    if model.view == BigMapView::WorldMap || model.active_map_index != model.current_map_index {
+        return Err("只能在当前地图内自动寻路。");
+    }
+    let map = model.active_map().ok_or("地图信息尚未加载。");
+    let map = map?;
+    if map.info.width <= 0 || map.info.height <= 0 || map.info.big_map_image_index().is_none() {
+        return Err("地图信息尚未加载。");
+    }
+    if !(0. ..BIGMAP_WIDTH).contains(&point.0) || !(0. ..BIGMAP_HEIGHT).contains(&point.1) {
+        return Err("请选择地图图像内的位置。");
+    }
+    Ok((
+        (point.0 * map.info.width as f32 / BIGMAP_WIDTH).floor() as i32,
+        (point.1 * map.info.height as f32 / BIGMAP_HEIGHT).floor() as i32,
+    ))
+}
+
+pub(super) fn feedback(chat: Option<&mut ChatModel>, message: &str) {
+    if let Some(chat) = chat {
+        chat.push(ChatLine {
+            text: message.to_owned(),
+            channel: "system".to_owned(),
+        });
+    }
+}
+
+pub(super) fn ui_blocks_except_map(ui: &NativePlayerUiState) -> bool {
+    let mut guard = ui.clone();
+    if guard.bigmap_open() {
+        guard.core.panel = mir2_ui_core::state::UiPanel::None;
+    }
+    guard.blocks_world_click()
+}
+
+// Eight-way Crystal pathing, bounded by actual map edges rather than the
+// short NewMove click radius. The search budget bounds memory/latency on a
+// pathological maze; exceeding it is reported instead of publishing a route.
+fn search(
+    width: i32,
+    height: i32,
+    origin: (i32, i32),
+    destination: (i32, i32),
+    mut blocked: impl FnMut((i32, i32), (i32, i32)) -> bool,
+) -> Result<Vec<(i32, i32)>, &'static str> {
+    let inside = |p: (i32, i32)| p.0 >= 0 && p.1 >= 0 && p.0 < width && p.1 < height;
+    if !inside(origin) || !inside(destination) {
+        return Err("目标不在当前地图范围内。");
+    }
+    if origin == destination {
+        return Ok(Vec::new());
+    }
+    let mut open = BinaryHeap::new();
+    let mut costs = HashMap::from([(origin, 0)]);
+    let mut previous = HashMap::new();
+    open.push(Reverse((
+        chebyshev_distance(origin, destination),
+        0,
+        0_u64,
+        origin,
+    )));
+    let mut expanded = 0;
+    let mut sequence = 0_u64;
+    while let Some(Reverse((_, negative_cost, _, current))) = open.pop() {
+        let cost = -negative_cost;
+        if costs.get(&current) != Some(&cost) {
+            continue;
+        }
+        if current == destination {
+            let mut steps = Vec::new();
+            let mut p = current;
+            while p != origin {
+                steps.push(p);
+                p = previous[&p];
+            }
+            steps.reverse();
+            return Ok(steps);
+        }
+        expanded += 1;
+        if expanded > SEARCH_BUDGET {
+            return Err("寻路范围过于复杂，请选择更近的目标。");
+        }
+        let preferred = movement_direction_toward(Some(destination), current).unwrap();
+        for rotation in [0, 1, -1, 2, -2, 3, -3, 4] {
+            let (dx, dy) = direction_to_delta(rotate_direction(preferred, rotation).unwrap());
+            let next = (current.0 + dx, current.1 + dy);
+            let next_cost = cost + 1;
+            if !inside(next)
+                || blocked(current, next)
+                || costs.get(&next).is_some_and(|old| *old <= next_cost)
+            {
+                continue;
+            }
+            costs.insert(next, next_cost);
+            previous.insert(next, current);
+            // Prefer deeper nodes for equal estimates, avoiding a broad
+            // plateau scan on large open maps. Stable direction order keeps
+            // unobstructed routes straight instead of zigzagging on ties.
+            sequence += 1;
+            open.push(Reverse((
+                next_cost + chebyshev_distance(next, destination),
+                -next_cost,
+                sequence,
+                next,
+            )));
+        }
+    }
+    Err("无法找到通往目标的路径。")
+}
+
+pub(super) fn plan(
+    movement: &WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: &NativeEntityPresentation,
+    self_id: &str,
+    map_file: &str,
+    origin: (i32, i32),
+    destination: (i32, i32),
+) -> Result<Vec<(i32, i32)>, &'static str> {
+    let map = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。");
+    let map = map?;
+    if map.cell_blocks_movement(destination.0, destination.1)
+        || entity_blocks_movement(entities, Some(presentation), self_id, destination)
+    {
+        return Err("目标位置有障碍，无法到达。");
+    }
+    search(
+        i32::from(map.width),
+        i32::from(map.height),
+        origin,
+        destination,
+        |from, to| {
+            map.cell_blocks_movement(to.0, to.1)
+                || auto_path_step_blocked(
+                    movement,
+                    entities,
+                    Some(presentation),
+                    self_id,
+                    None,
+                    from,
+                    to,
+                )
+        },
+    )
+}
+
+pub(super) fn advance(
+    movement: &mut WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: &NativeEntityPresentation,
+    self_id: &str,
+    origin: (i32, i32),
+) -> Result<Vec<(i32, i32)>, &'static str> {
+    let route = movement.map_auto_path.as_ref().ok_or("自动寻路已取消。");
+    let route = route?;
+    let index = if origin == route.origin {
+        Some(0)
+    } else {
+        route
+            .steps
+            .iter()
+            .position(|point| *point == origin)
+            .map(|i| i + 1)
+    };
+    if let Some(index) = index {
+        let remaining = &route.steps[index..];
+        let mut from = origin;
+        let next_clear = remaining.iter().take(3).all(|to| {
+            let clear = !auto_path_step_blocked(
+                movement,
+                entities,
+                Some(presentation),
+                self_id,
+                Some(&route.map_file),
+                from,
+                *to,
+            );
+            from = *to;
+            clear
+        });
+        if next_clear {
+            return Ok(remaining.iter().take(3).copied().collect());
+        }
+    }
+    let map_file = route.map_file.clone();
+    let destination = route.destination;
+    let steps = plan(
+        movement,
+        entities,
+        presentation,
+        self_id,
+        &map_file,
+        origin,
+        destination,
+    )?;
+    let next = steps.iter().take(3).copied().collect();
+    let route = movement.map_auto_path.as_mut().unwrap();
+    route.origin = origin;
+    route.steps = steps;
+    Ok(next)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn long_route_passes_gap_and_does_not_use_twenty_tile_click_limit() {
+        assert_eq!(
+            search(80, 80, (10, 10), (16, 10), |_, _| false).unwrap(),
+            (11..=16).map(|x| (x, 10)).collect::<Vec<_>>()
+        );
+        let route = search(700, 700, (10, 10), (650, 10), |_, to| {
+            to.0 == 300 && to.1 != 50
+        })
+        .unwrap();
+        assert_eq!(route.last(), Some(&(650, 10)));
+        assert!(route.contains(&(300, 50)));
+        assert!(route.len() > 20);
+        assert!(search(80, 80, (10, 10), (60, 10), |_, to| to.0 == 30).is_err());
+        assert!(search(80, 80, (10, 10), (80, 10), |_, _| false).is_err());
+    }
+}

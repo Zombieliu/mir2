@@ -3935,6 +3935,12 @@ where
                         }
                     }
                 }
+                "MailSendRequest" | "MailCost" | "MailLockedItem" => {
+                    let payload = event.payload.as_ref().unwrap_or(&Value::Null);
+                    if !push_native_mail_service_event(packet, payload)? {
+                        eprintln!("[gateway-client] ignored malformed {packet} parcel service packet");
+                    }
+                }
                 "ReceiveMail" => {
                     if let Some(payload) = event.payload.as_ref() {
                         let row_count = payload
@@ -5210,6 +5216,49 @@ fn mail_packet_body(payload: &Value) -> &Value {
         .get("data")
         .filter(|value| value.is_object())
         .unwrap_or(payload)
+}
+
+/// Convert the three Crystal parcel-service packets without inventing local
+/// request correlation. `MailCost` responses enter the native FIFO in packet
+/// order; the compose UI keeps its postage request single-flight.
+fn mail_service_event_from_packet(
+    packet: &str,
+    payload: &Value,
+) -> Option<mir2_client_bevy::mail_service::MailServiceEvent> {
+    use mir2_client_bevy::mail_service::MailServiceEvent;
+
+    let body = mail_packet_body(payload);
+    match packet {
+        "MailSendRequest" => Some(MailServiceEvent::OpenParcel),
+        "MailCost" => Some(MailServiceEvent::Cost {
+            cost: value_u32(body.get("cost"))?,
+        }),
+        "MailLockedItem" => Some(MailServiceEvent::LockedItem {
+            unique_id: value_u64(body.get("uniqueId").or_else(|| body.get("unique_id")))?,
+            locked: body.get("locked")?.as_bool()?,
+        }),
+        _ => None,
+    }
+}
+
+fn push_native_mail_service_event_with(
+    packet: &str,
+    payload: &Value,
+    deliver: impl FnOnce(String) -> bool,
+) -> Result<bool, String> {
+    let Some(event) = mail_service_event_from_packet(packet, payload) else {
+        return Ok(false);
+    };
+    let json = serde_json::to_string(&event).map_err(|error| error.to_string())?;
+    Ok(deliver(json))
+}
+
+fn push_native_mail_service_event(packet: &str, payload: &Value) -> Result<bool, String> {
+    push_native_mail_service_event_with(
+        packet,
+        payload,
+        mir2_bevy_runtime::native_ingest::push_native_mail_service,
+    )
 }
 
 fn mail_operation_feedback(
@@ -6562,6 +6611,38 @@ mod tests {
             pending.is_empty(),
             "accepted delivery consumes exactly one ACK"
         );
+    }
+
+    #[test]
+    fn parcel_service_packets_preserve_source_order_without_local_correlation() {
+        let mut delivered = Vec::new();
+        for (packet, payload) in [
+            ("MailSendRequest", json!({})),
+            ("MailCost", json!({"cost":125})),
+            ("MailLockedItem", json!({"uniqueId":77,"locked":true})),
+        ] {
+            assert!(push_native_mail_service_event_with(packet, &payload, |json| {
+                delivered.push(json);
+                true
+            })
+            .unwrap());
+        }
+        let events = delivered
+            .iter()
+            .map(|json| serde_json::from_str(json).unwrap())
+            .collect::<Vec<mir2_client_bevy::mail_service::MailServiceEvent>>();
+        assert_eq!(
+            events,
+            vec![
+                mir2_client_bevy::mail_service::MailServiceEvent::OpenParcel,
+                mir2_client_bevy::mail_service::MailServiceEvent::Cost { cost: 125 },
+                mir2_client_bevy::mail_service::MailServiceEvent::LockedItem {
+                    unique_id: 77,
+                    locked: true,
+                },
+            ]
+        );
+        assert!(!push_native_mail_service_event_with("MailCost", &json!({}), |_| true).unwrap());
     }
 
     #[test]

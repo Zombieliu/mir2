@@ -21,14 +21,14 @@ Every row below requires actual visible rendering, correct inputs/state/close be
 | Quest tracking | Main choice, destination/coordinates, map link, target counter/route | Open; older objective card only |
 | NPC dialogue | Pages/options/close, no background click, current NPC identity | Open |
 | Small map | Terrain/markers/day-night, move/zoom/toggle, no stale resources | Open |
-| Large/world map | Search, NPC/hunt areas, map transitions, go-to/cancel path | Open |
+| Large/world map | Search, NPC/hunt areas, map transitions, go-to/cancel path | Open; user confirmed map right-click does nothing in settings-guidance; source fix not yet tested or deployed |
 | NPC buy | Item list/scroll, quantity/cost, inventory/gold after receipt | Open |
 | NPC sell | Drag correct instance/count, quote/confirm/cancel, authoritative balances | Open |
 | Repair / special repair | Eligible item, quote, affordability, confirmed durability | Open |
 | Storage | Password flows, capacity/rental, pages, drag/swap/merge, persistence | Open |
 | Trade | Two ordinary players, items/gold/cancel/confirm/reject, no duplicate assets | Open |
 | Mail list/read | Original rows, letter/parcel, read/lock, delete warning, claim | Open; source-backed candidate only |
-| Mail compose | NPC parcel entry, recipient, text, attachments, postage/stamp, send/error | Open; generic form remains; original contract gaps documented |
+| Mail compose | NPC parcel entry, recipient, text, attachments, postage/stamp, send/error | Open; Parcel frame/transport in uncommitted integration; UI library 1016/1016, native integration/overflow recovery and visual still pending; backend 8560ce6df separately tested, not deployed |
 | Auction | Browse/search/pages, actual eligible listing/cancel/purchase receipts | Open |
 | Game shop | Categories, currency/prices, pages/details, ordinary purchase/error | Open |
 | Friends / blacklist | Empty/populated list, selection, authorized actions, persistence | Open; older empty/tabs only |
