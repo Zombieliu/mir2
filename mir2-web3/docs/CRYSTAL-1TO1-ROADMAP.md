@@ -6,7 +6,8 @@
 > to 0.699 ms, with zero corrections and normal logout in both runs. Client
 > producer ordering, confirmed predecessor-center handoff and scene cleanup
 > pass runtime 271/271; Windows 696/696. Simulation/Gateway deadline 3/3 each
-> and shared-zone 55/55 pass. Paired deployment and native feel remain pending;
+> and shared-zone 55/55 pass. Paired source `1b60931f7` is deployed after normal
+> user exit; personal native feel testing remains pending;
 > no whole UI/visual acceptance follows. [Evidence](generated/player-qa/ui-goal-20260921/movement-cadence-handoff-20260922.md).
 
 > 2026-09-21 parcel backend candidate: source postage includes item insurance;

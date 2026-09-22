@@ -8,7 +8,9 @@ keeps the repaired server near 0.7 ms. Client confirmed-center handoff and
 input-consumer order are repaired too; old scene motion is cleared on transfer.
 See [cadence/handoff evidence](movement-cadence-handoff-20260922.md), including
 the coarse-timer negative control. Runtime 271/271 and Windows 696/696 pass.
-Paired deployment and actual native feel are still unverified. Do not mark
+Paired source `1b60931f7` was deployed after confirmed normal exit, retaining
+the existing player store. The user chose personal testing; native feel is
+still unverified. Do not mark
 the earlier camera fixes or the whole UI goal accepted from these CPU/protocol tests.
 
 ## Current map repair — 2026-09-22

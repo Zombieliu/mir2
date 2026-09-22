@@ -6,8 +6,9 @@
 > accumulating tick cost. Simulation 3/3, Gateway deadline 3/3 and shared-zone
 > 55/55 pass. Fresh ordinary 64-step protocol A/B reproduces old final-quarter
 > ACK 653.234 ms and repaired 0.699 ms; both have zero corrections and normal
-> logout. No player store editing, grants or debug travel occurred. Native
-> visual acceptance and replacement of the live service remain pending.
+> logout. No player store editing, grants or debug travel occurred. Paired
+> source `1b60931f7` is deployed after normal exit with the original store and
+> keys; native visual acceptance remains pending.
 > [Evidence](generated/player-qa/ui-goal-20260921/movement-cadence-handoff-20260922.md).
 
 > 2026-09-21 parcel candidate: server validates owned attachments and NoMail,

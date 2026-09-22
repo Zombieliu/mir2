@@ -95,3 +95,26 @@ The protocol A/B proves removal of the reproduced server cadence drift. It
 does not measure GPU presentation, native frame pacing, or human feel.
 The paired new client/Gateway package still needs native continuous-running
 and map-change verification. `visualAccepted=false`, whole UI goal incomplete.
+
+## Deployed user-test package
+
+After the user explicitly confirmed normal exit and chose to test personally,
+the old client was absent, no player TCP/WS connection remained, and its exit
+log showed the confirmed Exit dialog and lifecycle Success. The account store
+was backed up and its SHA256 verified before stopping old Gateway PID26712.
+No store contents or identity/recovery keys were changed by deployment.
+
+At 2026-09-22 22:34 Asia/Shanghai, both executables from source
+`1b60931f7bd5e425181ca087223f1c90144be29f` run from
+`C:/numeron-legend-of-rebirth-20260922-movement-cadence`:
+
+- Client SHA256 `14CD225663E1B390047B64F7120686746FF1B1235DB937FD1FCD78B618CCCD28`.
+- Gateway SHA256 `457C9EDAA5305D23B15C6F2CC15BE829F702711F99AC7E2FF619A7C93307B773`.
+- Config SHA256 `6BEAADB2B9B28FDFEE2EF17545148FA5F3171ECAF635776DAF1D64010BEF3775`.
+- Gateway PID42392 owns 127.0.0.1 ports 19900/19910 and retains the cohort-B
+  `gateway/accounts.json` store, `platinum_176` and newcomer-v2 settings.
+- Native client PID21464 uses smooth movement and both live diagnostics.
+  Log prefix: `C:/mir2-ui-repair-20260921/render-live/20260922-223420-664`.
+
+Assets remain a shared junction, not an immutable resource snapshot. User
+testing is pending; no gameplay input was injected during this handoff.
