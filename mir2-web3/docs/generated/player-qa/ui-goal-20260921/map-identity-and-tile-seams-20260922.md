@@ -87,3 +87,12 @@ The candidate manifest pins the new map atlas hash and records the shared
 mutable asset junction. A live-process check still found old client PID44840;
 normal logout/close was requested only after packaging to preserve progress.
 `deployed=false`, `visualAccepted=false` at this checkpoint.
+
+After the user's explicit normal-exit/switch-for-personal-testing reply,
+the old client log recorded the confirmed exit and successful event-loop
+return. The verified candidate launched at 2026-09-23 00:07 Asia/Shanghai,
+PID45952, with render/movement prefix
+`C:/mir2-ui-repair-20260921/render-live/20260923-000717-726`.
+Startup connected to the existing Gateway and retained force_daylight=true.
+`deployed=true`; the user retains gameplay control. Actual map-transfer and
+running-scene acceptance remain `visualAccepted=false` pending their test.
