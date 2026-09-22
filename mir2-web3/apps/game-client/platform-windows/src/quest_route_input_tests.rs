@@ -3,6 +3,143 @@ use mir2_client_bevy::big_map::BigMapModel;
 use mir2_client_bevy::chat::ChatModel;
 use mir2_client_bevy::quest_ui::QuestUiState;
 
+fn skeleton_hunt_app(origin: (i32, i32)) -> (
+    bevy::prelude::App,
+    std::sync::mpsc::Receiver<GatewayCommand>,
+    QuestRouteNavigationIntent,
+) {
+    use mir2_client_bevy::quest_model::{Quest, QuestObjective, QuestStatus};
+    let (mut app, receiver, mut intent) = d401_route_app();
+    app.world_mut().resource_mut::<BigMapModel>().set_current_map(39);
+    let tracker = QuestTracker { active_quests: vec![Quest {
+        quest_index: 2_110_010, title: "Push back the skeletons".into(),
+        status: QuestStatus::InProgress, accept_npc_index: None, finish_npc_index: None,
+        npc_name: None, group: None, min_level_needed: 16, detail: Default::default(),
+        objectives: vec![QuestObjective {
+            objective_id: "2110010:0".into(), text: "Defeat 4 Skeleton.".into(), current: 0, target: 4,
+        }], rewards: vec![], unknown_text: None,
+    }] };
+    let region = mir2_client_bevy::quest_hunt_regions::active_hunt_regions(&tracker, 39,
+        mir2_client_bevy::big_map::BigMapPoint { x: origin.0, y: origin.1 }).remove(0);
+    intent.target = QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: region.radius };
+    intent.map_index = 39;
+    intent.reset_epoch = app.world().resource::<BigMapModel>().reset_epoch;
+    intent.x = region.center.x;
+    intent.y = region.center.y;
+    assert_eq!((intent.x, intent.y, region.radius), (250, 260, 30));
+    app.insert_resource(tracker);
+    let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+    entities.entities[0].x = origin.0;
+    entities.entities[0].y = origin.1;
+    app.world_mut().resource_mut::<NativeEntityPresentation>()
+        .observe_packet_payload(serde_json::json!({"mapFileName":"D001"}), 0);
+    (app, receiver, intent)
+}
+
+#[test]
+fn hunt_navigation_d001_route_avoids_new_occupancy_and_stops_on_authoritative_arrival() {
+    let map = crate::map_parser::load_map("D001").expect("actual D001 collision map");
+    assert!(!map.cell_blocks_movement(211, 320));
+    let (mut app, receiver, intent) = skeleton_hunt_app((211, 320));
+    app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+    app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+    app.update();
+    assert!(receiver.try_recv().is_err());
+    assert!(!app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+    {
+        let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+        mouse.clear_just_pressed(MouseButton::Left);
+        mouse.release(MouseButton::Left);
+    }
+    app.update();
+    app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear();
+    let original_destination = app.world().resource::<WorldPointerMovementState>().map_auto_path.as_ref()
+        .expect("hunting card starts a route with the diary and map closed").destination;
+    assert!(chebyshev_distance(original_destination, (250, 260)) <= 30);
+    app.world_mut().resource_mut::<EntityModelSet>().entities.push(EntityModel {
+        object_id: "9999".into(), kind: EntityKind::Monster, name: "Skeleton".into(),
+        x: original_destination.0, y: original_destination.1, level: Some(15), direction: Some("up".into()),
+    });
+    let mut moved = 0;
+    for _ in 0..256 {
+        app.update();
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        if movement.map_auto_path.is_none() {
+            assert!(moved > 0);
+            assert!(receiver.try_recv().is_err());
+            assert!(movement.auto_path_destination.is_none());
+            assert!(movement.attack_target.is_none());
+            let player = &app.world().resource::<EntityModelSet>().entities[0];
+            assert!(chebyshev_distance((player.x, player.y), (250, 260)) <= 30);
+            assert_ne!((player.x, player.y), original_destination);
+            assert!(app.world().resource::<QuestUiState>().feedback.as_ref().unwrap().message.contains("已到达狩猎区域"));
+            assert_eq!(app.world().resource::<QuestTracker>().active_quests[0].objectives[0].current, 0);
+            eprintln!("D001 hunting route: {moved} acknowledged ordinary moves; dynamic goal occupancy avoided; no attack or quest progress inferred");
+            return;
+        }
+        let command = receiver.try_recv().expect("route progresses after mouse release");
+        assert!(matches!(command, GatewayCommand::Player(PlayerIntent::Walk { .. } | PlayerIntent::Run { .. })), "{command:?}");
+        let pending = movement.pending.back().unwrap().clone();
+        let (dx, dy) = direction_to_delta(pending.direction);
+        for step in 1..=chebyshev_distance(pending.from, pending.to) {
+            let tile = (pending.from.0 + dx * step, pending.from.1 + dy * step);
+            assert!(!map.cell_blocks_movement(tile.0, tile.1), "static obstacle {tile:?}");
+            assert_ne!(tile, original_destination);
+        }
+        app.update();
+        assert!(receiver.try_recv().is_err(), "ordinary authority ACK remains mandatory");
+        let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+        entities.entities[0].x = pending.to.0;
+        entities.entities[0].y = pending.to.1;
+        push_test_movement_ack(&app, pending.to.0, pending.to.1, pending.direction);
+        advance_movement_clock(&mut app, 600);
+        moved += 1;
+    }
+    panic!("D001 hunting route exceeded the fixed route fixture limit");
+}
+
+#[test]
+fn hunt_navigation_already_in_region_stops_without_attacking_or_claiming_progress() {
+    let (mut app, receiver, intent) = skeleton_hunt_app((250, 260));
+    app.world_mut().resource_mut::<WorldPointerMovementState>().attack_target = Some(9999);
+    app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+    app.update();
+    assert!(receiver.try_recv().is_err());
+    let movement = app.world().resource::<WorldPointerMovementState>();
+    assert!(movement.map_auto_path.is_none());
+    assert!(movement.auto_path_destination.is_none());
+    assert!(movement.attack_target.is_none());
+    assert!(app.world().resource::<QuestUiState>().feedback.as_ref().unwrap().message.contains("已到达狩猎区域"));
+}
+
+#[test]
+fn hunt_navigation_host_rechecks_completion_primary_and_region_before_pointer_release() {
+    for changed in ["complete", "primary", "map", "radius", "missing"] {
+        let (mut app, receiver, mut intent) = skeleton_hunt_app((211, 320));
+        if changed == "radius" { intent.target = QuestRouteTarget::HuntRegion { monster_index: -1, radius: 300 }; }
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+        app.update();
+        assert!(!app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        match changed {
+            "complete" => app.world_mut().resource_mut::<QuestTracker>().active_quests[0].objectives[0].current = 4,
+            "primary" => app.world_mut().resource_mut::<QuestUiState>().pinned_primary_quest_index = Some(42),
+            "map" => app.world_mut().resource_mut::<BigMapModel>().set_current_map(1),
+            "missing" => { app.world_mut().remove_resource::<QuestTracker>(); },
+            _ => (),
+        }
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.clear_just_pressed(MouseButton::Left);
+            mouse.release(MouseButton::Left);
+        }
+        app.update();
+        assert!(receiver.try_recv().is_err(), "{changed}");
+        assert!(app.world().resource::<WorldPointerMovementState>().map_auto_path.is_none(), "{changed}");
+        assert!(app.world().resource::<QuestUiState>().feedback.as_ref().is_some_and(|f| f.is_error), "{changed}");
+    }
+}
+
 fn d401_route_app() -> (
     bevy::prelude::App,
     std::sync::mpsc::Receiver<GatewayCommand>,
@@ -27,6 +164,7 @@ fn d401_route_app() -> (
     // opening the Big Map. A visible task card must not depend on that cache.
     assert!(big_map.current_map().is_none());
     let intent = QuestRouteNavigationIntent {
+        target: QuestRouteTarget::Entrance,
         quest_index: 2_110_010,
         reset_epoch: big_map.reset_epoch,
         map_index: 47,

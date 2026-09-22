@@ -120,6 +120,24 @@ fn authored_other_map(quest_index: i32, current_map: Option<i32>) -> Option<Stri
     (!labels.is_empty()).then(|| labels.join(" / "))
 }
 
+fn hunt_navigation(quest: &Quest, map: &MapModel, big_map: Option<&BigMapModel>) -> Option<QuestRouteNavigationIntent> {
+    let big_map = big_map?;
+    let map_index = big_map.current_map_index?;
+    let region = crate::quest_hunt_regions::active_hunt_regions(
+        &QuestTracker { active_quests: vec![quest.clone()] },
+        map_index,
+        crate::big_map::BigMapPoint { x: map.center_x, y: map.center_y },
+    ).into_iter().min_by_key(|region| map.center_x.abs_diff(region.center.x).max(map.center_y.abs_diff(region.center.y)))?;
+    Some(QuestRouteNavigationIntent {
+        target: QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: region.radius },
+        quest_index: quest.quest_index,
+        reset_epoch: big_map.reset_epoch,
+        map_index,
+        x: region.center.x,
+        y: region.center.y,
+    })
+}
+
 fn nearby_indices(primary: i32, tracker: &QuestTracker, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>) -> Vec<i32> {
     let mut candidates = tracker.active_quests.iter()
         .filter(|q| q.quest_index != primary && q.status.is_active())
@@ -210,6 +228,7 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
         if let (Some(step), Some(big_map)) = (route, big_map) {
             button(card, "前往入口 · 自动寻路", QuestUiButton::NavigateQuestRoute(
                 crate::quest_ui::QuestRouteNavigationIntent {
+                    target: QuestRouteTarget::Entrance,
                     quest_index: primary,
                     reset_epoch: big_map.reset_epoch,
                     map_index: step.current_map_index,
@@ -217,6 +236,10 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
                     y: step.entrance_y,
                 },
             ));
+        } else if let Some(intent) = hunt_navigation(quest, map, big_map) {
+            // Keep this action independent of live monster visibility. A
+            // nearby target hint must not hide the authored hunting area.
+            button(card, "前往狩猎区域 · 自动寻路", QuestUiButton::NavigateQuestRoute(intent));
         }
         if let Some(feedback) = state.feedback.as_ref() {
             line(card, feedback.message.clone(), if feedback.is_error { FEEDBACK_ERR } else { FEEDBACK_OK });
@@ -361,6 +384,7 @@ mod tests {
         assert!(text.contains("OmaCave_1F"));
         assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
             QuestUiButton::NavigateQuestRoute(crate::quest_ui::QuestRouteNavigationIntent {
+                target: QuestRouteTarget::Entrance,
                 quest_index: 2_110_010, reset_epoch: 41, map_index, x: 147, y: 33,
             }) if *map_index == bichon.map_index
         )));
@@ -479,6 +503,7 @@ mod tests {
             queue.apply(&mut world);
             assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
                 QuestUiButton::NavigateQuestRoute(crate::quest_ui::QuestRouteNavigationIntent {
+                    target: QuestRouteTarget::Entrance,
                     quest_index: 2_110_009, reset_epoch: 42, map_index: 1, x: 147, y: 33,
                 })
             )), "visible Oma={visible} must not remove the arrival route button");
@@ -507,5 +532,42 @@ mod tests {
         assert!(matches!(place(&hunt, &tracker, &entities, &map, Some(&big_map)), Place::Current { .. }));
         assert_eq!(place(&hunt, &tracker, &entities, &map, None), Place::Unknown,
             "unknown map identity must not claim a map-specific monster is nearby");
+    }
+
+    #[test]
+    fn hunt_navigation_card_keeps_region_action_with_or_without_visible_skeletons() {
+        for visible in [false, true, false] {
+            let mut hunt = quest(2_110_010);
+            hunt.title = "Push back the skeletons".into();
+            hunt.objectives.push(QuestObjective {
+                objective_id: "2110010:0".into(), text: "Defeat 4 Skeleton.".into(), current: 0, target: 4,
+            });
+            let tracker = QuestTracker { active_quests: vec![hunt] };
+            let map = MapModel { center_x: 211, center_y: 320, ..default() };
+            let big_map = BigMapModel { current_map_index: Some(39), reset_epoch: 12, ..default() };
+            let mut entities = EntityModelSet::default();
+            if visible {
+                entities.entities.push(crate::entities::EntityModel {
+                    object_id: "22".into(), kind: crate::entities::EntityKind::Monster, name: "Skeleton".into(),
+                    x: 221, y: 320, level: None, direction: None,
+                });
+            }
+            let mut world = World::new();
+            let mut queue = bevy::ecs::world::CommandQueue::default();
+            let mut commands = Commands::new(&mut queue, &world);
+            commands.spawn_empty().with_children(|parent| {
+                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map)));
+            });
+            queue.apply(&mut world);
+            assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
+                QuestUiButton::NavigateQuestRoute(crate::quest_ui::QuestRouteNavigationIntent {
+                    target: QuestRouteTarget::HuntRegion { radius: 30, .. },
+                    quest_index: 2_110_010, reset_epoch: 12, map_index: 39, x: 250, y: 260, ..
+                })
+            )), "visible Skeleton={visible} must retain the hunting-area action");
+            let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str()).collect::<Vec<_>>().join("\n");
+            assert!(text.contains("前往狩猎区域 · 自动寻路"));
+            assert!(text.contains("Defeat 4 Skeleton.  0/4"));
+        }
     }
 }

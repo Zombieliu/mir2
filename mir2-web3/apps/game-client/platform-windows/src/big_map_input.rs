@@ -6,6 +6,12 @@ use mir2_client_bevy::crystal_ui::overlays::CRYSTAL_BIGMAP_PANEL_RECT;
 
 const SEARCH_BUDGET: usize = 250_000;
 
+#[derive(Clone, Copy, Debug)]
+pub(super) struct HuntArea {
+    pub center: (i32, i32),
+    pub radius: i32,
+}
+
 #[derive(Debug)]
 pub(super) struct MapRoute {
     pub map_file: String,
@@ -13,6 +19,7 @@ pub(super) struct MapRoute {
     pub origin: (i32, i32),
     pub destination: (i32, i32),
     pub steps: Vec<(i32, i32)>,
+    pub hunt_area: Option<HuntArea>,
 }
 
 pub(super) fn image_position(window: &Window, model: &BigMapModel) -> Option<(f32, f32)> {
@@ -86,20 +93,34 @@ fn search(
     height: i32,
     origin: (i32, i32),
     destination: (i32, i32),
+    blocked: impl FnMut((i32, i32), (i32, i32)) -> bool,
+) -> Result<Vec<(i32, i32)>, &'static str> {
+    search_region(width, height, origin, destination, 0, blocked)
+}
+
+// A hunting destination is the imported square spawn area, not a monster's
+// occupied tile. One A* search retains the existing total expansion budget.
+fn search_region(
+    width: i32,
+    height: i32,
+    origin: (i32, i32),
+    destination: (i32, i32),
+    radius: i32,
     mut blocked: impl FnMut((i32, i32), (i32, i32)) -> bool,
 ) -> Result<Vec<(i32, i32)>, &'static str> {
     let inside = |p: (i32, i32)| p.0 >= 0 && p.1 >= 0 && p.0 < width && p.1 < height;
-    if !inside(origin) || !inside(destination) {
+    if !inside(origin) || !inside(destination) || radius < 0 || radius > width.max(height) {
         return Err("目标不在当前地图范围内。");
     }
-    if origin == destination {
+    let distance = |point| chebyshev_distance(point, destination).saturating_sub(radius).max(0);
+    if distance(origin) == 0 {
         return Ok(Vec::new());
     }
     let mut open = BinaryHeap::new();
     let mut costs = HashMap::from([(origin, 0)]);
     let mut previous = HashMap::new();
     open.push(Reverse((
-        chebyshev_distance(origin, destination),
+        distance(origin),
         0,
         0_u64,
         origin,
@@ -111,7 +132,7 @@ fn search(
         if costs.get(&current) != Some(&cost) {
             continue;
         }
-        if current == destination {
+        if distance(current) == 0 {
             let mut steps = Vec::new();
             let mut p = current;
             while p != origin {
@@ -143,7 +164,7 @@ fn search(
             // unobstructed routes straight instead of zigzagging on ties.
             sequence += 1;
             open.push(Reverse((
-                next_cost + chebyshev_distance(next, destination),
+                next_cost + distance(next),
                 -next_cost,
                 sequence,
                 next,
@@ -190,6 +211,27 @@ pub(super) fn plan(
     )
 }
 
+pub(super) fn plan_hunt_region(
+    movement: &WorldPointerMovementState,
+    entities: &EntityModelSet,
+    presentation: &NativeEntityPresentation,
+    self_id: &str,
+    map_file: &str,
+    origin: (i32, i32),
+    area: HuntArea,
+) -> Result<Vec<(i32, i32)>, &'static str> {
+    let map = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。")?;
+    if chebyshev_distance(origin, area.center) <= area.radius
+        && (map.cell_blocks_movement(origin.0, origin.1)
+            || entity_blocks_movement(entities, Some(presentation), self_id, origin))
+    {
+        return Err("当前位置被占用，无法确认到达狩猎区域。");
+    }
+    search_region(i32::from(map.width), i32::from(map.height), origin, area.center, area.radius,
+        |from, to| map.cell_blocks_movement(to.0, to.1)
+            || auto_path_step_blocked(movement, entities, Some(presentation), self_id, None, from, to))
+}
+
 pub(super) fn advance(
     movement: &mut WorldPointerMovementState,
     entities: &EntityModelSet,
@@ -230,25 +272,39 @@ pub(super) fn advance(
     }
     let map_file = route.map_file.clone();
     let destination = route.destination;
-    let steps = plan(
-        movement,
-        entities,
-        presentation,
-        self_id,
-        &map_file,
-        origin,
-        destination,
-    )?;
+    let steps = if let Some(area) = route.hunt_area {
+        plan_hunt_region(movement, entities, presentation, self_id, &map_file, origin, area)?
+    } else {
+        plan(movement, entities, presentation, self_id, &map_file, origin, destination)?
+    };
+    let destination = steps.last().copied().unwrap_or(origin);
     let next = steps.iter().take(3).copied().collect();
     let route = movement.map_auto_path.as_mut().unwrap();
     route.origin = origin;
     route.steps = steps;
+    route.destination = destination;
+    movement.auto_path_destination = Some(destination);
     Ok(next)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn hunt_navigation_region_search_avoids_occupied_goal_tiles_and_reports_unreachable_areas() {
+        let steps = search_region(80, 80, (10, 30), (50, 30), 4,
+            |_, to| to.0 == 46 && to.1 == 30).unwrap();
+        let destination = *steps.last().unwrap();
+        assert!(chebyshev_distance(destination, (50, 30)) <= 4);
+        assert_ne!(destination, (46, 30));
+        assert!(!steps.contains(&(46, 30)));
+        assert_eq!(steps.len(), 36, "shortest route to the square, not to its occupied center");
+        assert!(search_region(80, 80, (50, 30), (50, 30), 4, |_, _| false).unwrap().is_empty());
+        assert!(search_region(80, 80, (10, 30), (50, 30), 4,
+            |_, to| chebyshev_distance(to, (50, 30)) <= 4).is_err());
+        assert!(search_region(80, 80, (10, 30), (50, 30), -1, |_, _| false).is_err());
+    }
 
     #[test]
     fn long_route_passes_gap_and_does_not_use_twenty_tile_click_limit() {

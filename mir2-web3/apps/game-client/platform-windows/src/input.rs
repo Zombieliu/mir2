@@ -18,9 +18,9 @@ use mir2_client_bevy::crystal_ui::spec;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
-use mir2_client_bevy::quest_model::{CombatTargetModel, NpcDialogModel};
+use mir2_client_bevy::quest_model::{CombatTargetModel, NpcDialogModel, QuestTracker};
 use mir2_client_bevy::quest_ui::{
-    QuestRouteNavigationIntent, QuestRouteNavigationIntentQueue, QuestUiIntent, QuestUiIntentQueue,
+    QuestRouteNavigationIntent, QuestRouteNavigationIntentQueue, QuestRouteTarget, QuestUiIntent, QuestUiIntentQueue,
     QuestUiState,
 };
 use mir2_client_bevy::read_model::UiReadModel;
@@ -1319,7 +1319,7 @@ fn quest_route_matches_current_map(
     })
 }
 
-/// Start a full-map ordinary walk/run route to a quest entrance. This reuses
+/// Start a full-map ordinary walk/run route to a quest destination. This reuses
 /// the Big Map planner and never emits a map-change or teleport command.
 fn begin_quest_route_navigation(
     movement: &mut WorldPointerMovementState,
@@ -1328,10 +1328,20 @@ fn begin_quest_route_navigation(
     self_id: &str,
     big_map: Option<&mir2_client_bevy::big_map::BigMapModel>,
     intent: QuestRouteNavigationIntent,
+    tracker: Option<&QuestTracker>,
+    pinned_primary: Option<i32>,
     now_ms: f64,
-) -> Result<(), &'static str> {
+) -> Result<(i32, i32), &'static str> {
     if !quest_route_matches_current_map(intent, big_map) {
-        return Err("入口导航已过期；请按当前地图重新选择。");
+        return Err(if matches!(intent.target, QuestRouteTarget::Entrance) {
+            "入口导航已过期；请按当前地图重新选择。"
+        } else { "狩猎区域导航已过期；请按当前地图重新选择。" });
+    }
+    if matches!(intent.target, QuestRouteTarget::HuntRegion { .. })
+        && (pinned_primary.is_some_and(|primary| primary != intent.quest_index)
+            || !tracker.is_some_and(|tracker| intent.matches_active_hunt_region(tracker)))
+    {
+        return Err("狩猎目标已更新，请使用当前未完成任务的引导。");
     }
     let map_file = presentation
         .current_map_file_name()
@@ -1352,24 +1362,25 @@ fn begin_quest_route_navigation(
             .ok_or("玩家位置尚未加载。")?,
     );
     let destination = (intent.x, intent.y);
-    let steps = big_map_input::plan(
-        movement,
-        entities,
-        presentation,
-        self_id,
-        map_file,
-        origin,
-        destination,
-    )?;
-    if steps.is_empty() {
-        return Ok(());
-    }
+    let hunt_area = match intent.target {
+        QuestRouteTarget::Entrance => None,
+        QuestRouteTarget::HuntRegion { radius, .. } => Some(big_map_input::HuntArea { center: destination, radius }),
+    };
+    let steps = if let Some(area) = hunt_area {
+        big_map_input::plan_hunt_region(movement, entities, presentation, self_id, map_file, origin, area)?
+    } else {
+        big_map_input::plan(movement, entities, presentation, self_id, map_file, origin, destination)?
+    };
     movement.stop_hold(now_ms, "questRouteStarted");
     movement.stop_auto_path(now_ms, "questRouteStarted");
     movement.attack_target = None;
     movement.harvest_target = None;
     movement.harvest_direction = None;
     movement.next_harvest_request_at_ms = 0.0;
+    let destination = steps.last().copied().unwrap_or(origin);
+    if steps.is_empty() {
+        return Ok(destination);
+    }
     movement.auto_path_destination = Some(destination);
     movement.pointer_auto_path = false;
     movement.map_auto_path = Some(big_map_input::MapRoute {
@@ -1378,8 +1389,17 @@ fn begin_quest_route_navigation(
         origin,
         destination,
         steps,
+        hunt_area,
     });
-    Ok(())
+    Ok(destination)
+}
+
+fn quest_hunt_arrival_feedback(movement: &WorldPointerMovementState, state: Option<&mut QuestUiState>) {
+    if movement.map_auto_path.as_ref().is_some_and(|route| route.hunt_area.is_some()) {
+        if let Some(state) = state {
+            state.set_feedback("已到达狩猎区域，请选择怪物战斗", false);
+        }
+    }
 }
 
 /// Convert Crystal world mouse input into bounded intents. Left click keeps the
@@ -1405,10 +1425,11 @@ pub fn mouse_world_interaction_system(
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
     (time, real_time): (Option<Res<Time>>, Option<Res<Time<bevy::time::Real>>>),
     windows: Query<&Window>,
-    (mut queue, mut route_navigation, mut quest_ui_state): (
+    (mut queue, mut route_navigation, mut quest_ui_state, quest_tracker): (
         Option<ResMut<QuestUiIntentQueue>>,
         Option<ResMut<QuestRouteNavigationIntentQueue>>,
         Option<ResMut<QuestUiState>>,
+        Option<Res<QuestTracker>>,
     ),
     commands: Option<Res<GatewayCommands>>,
     mut effects: Option<ResMut<NativeEffects>>,
@@ -1537,6 +1558,7 @@ pub fn mouse_world_interaction_system(
             let outcome = movement.reconcile_ack(&ack, now_ms);
             push_movement_shadow_authoritative(now_ms, &ack, predicted, outcome);
             if movement.auto_path_destination == Some((ack.x, ack.y)) {
+                quest_hunt_arrival_feedback(&movement, quest_ui_state.as_deref_mut());
                 movement.stop_auto_path(now_ms, "destinationReached");
             }
             if matches!(
@@ -1577,6 +1599,7 @@ pub fn mouse_world_interaction_system(
         let outcome = movement.reconcile_ack(&snapshot, now_ms);
         push_movement_shadow_authoritative(now_ms, &snapshot, predicted, outcome);
         if movement.auto_path_destination == Some(entity_position) {
+            quest_hunt_arrival_feedback(&movement, quest_ui_state.as_deref_mut());
             movement.stop_auto_path(now_ms, "destinationReached");
         }
         if matches!(
@@ -1753,23 +1776,33 @@ pub fn mouse_world_interaction_system(
                 &object_id,
                 big_map.as_deref(),
                 intent,
+                quest_tracker.as_deref(),
+                quest_ui_state.as_deref().and_then(|state| state.pinned_primary_quest_index),
                 now_ms,
             );
             crate::movement_trace::record(serde_json::json!({
                 "type": "questRouteNavigation", "atMs": now_ms,
                 "questIndex": intent.quest_index, "mapIndex": intent.map_index,
                 "destinationX": intent.x, "destinationY": intent.y,
+                "targetKind": intent.target.label(),
+                "resolvedDestination": result.as_ref().ok(),
                 "accepted": result.is_ok(), "error": result.as_ref().err(),
             }));
             match result {
-                Ok(()) => {
+                Ok(destination) => {
                     // Starting travel dismisses the diary's world-input shield;
                     // the persistent task card remains visible during movement.
                     if let Some(ui) = player_ui.as_deref_mut().filter(|ui| ui.quest_open()) {
                         ui.core.panel = mir2_ui_core::state::UiPanel::None;
                     }
                     if let Some(state) = quest_ui_state.as_deref_mut() {
-                        state.set_feedback(format!("已设置入口路线 ({},{}) · 按 Esc 可停止", intent.x, intent.y), false);
+                        state.set_feedback(if movement.map_auto_path.is_none() {
+                            format!("已到达{}{}", intent.target.label(), if matches!(intent.target, QuestRouteTarget::HuntRegion { .. }) {
+                                "，请选择怪物战斗"
+                            } else { "" })
+                        } else {
+                            format!("已设置{}路线 ({},{}) · 按 Esc 可停止", intent.target.label(), destination.0, destination.1)
+                        }, false);
                     }
                 }
                 Err(message) => {
@@ -1965,6 +1998,7 @@ pub fn mouse_world_interaction_system(
                 origin,
                 destination,
                 steps,
+                hunt_area: None,
             })
         })();
         match request {
@@ -2370,6 +2404,7 @@ pub fn mouse_world_interaction_system(
     let run_distance = presentation.self_run_distance(&object_id).max(2);
     let (direction, requested_mode) = if let Some(destination) = auto_path_destination {
         if origin == destination {
+            quest_hunt_arrival_feedback(&movement, quest_ui_state.as_deref_mut());
             movement.stop_auto_path(now_ms, "destinationReached");
             return;
         }
@@ -2402,6 +2437,7 @@ pub fn mouse_world_interaction_system(
             return;
         };
         let Some(first) = path.first().copied() else {
+            quest_hunt_arrival_feedback(&movement, quest_ui_state.as_deref_mut());
             movement.stop_auto_path(now_ms, "destinationReached");
             return;
         };
@@ -3185,6 +3221,7 @@ mod tests {
     #[test]
     fn queued_route_survives_button_press_until_pointer_release() {
         let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::Entrance,
             quest_index: 2_110_010,
             reset_epoch: 7,
             map_index: 1,
@@ -3208,6 +3245,7 @@ mod tests {
     #[test]
     fn held_quest_route_button_never_clicks_through_and_releases_to_the_bridge() {
         let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::Entrance,
             quest_index: 2_110_010,
             reset_epoch: 7,
             map_index: 1,
@@ -3291,6 +3329,7 @@ mod tests {
     #[test]
     fn escape_cancels_a_queued_quest_route_before_it_can_start() {
         let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::Entrance,
             quest_index: 2_110_010,
             reset_epoch: 7,
             map_index: 1,
@@ -3352,6 +3391,7 @@ mod tests {
         );
         map.set_current_map(1);
         let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::Entrance,
             quest_index: 2_110_010,
             reset_epoch: map.reset_epoch,
             map_index: 1,

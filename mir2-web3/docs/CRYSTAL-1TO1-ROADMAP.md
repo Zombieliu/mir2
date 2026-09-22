@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-23 task hunting travel: an explicit same-map hunting action now routes
+> to an unoccupied reachable tile in the authored spawn area. It preserves one
+> bounded search and ordinary movement authority, and stops without attacking.
+> Native input 104/104 and shared quest filter 154/154 pass. Turn-in readiness
+> is labelled `可交付` rather than `Complete`. Native packaging/visual and the
+> separately observed old-client rendering OOM remain distinct gates; no new
+> Crystal parity percentage is claimed.
+> [Evidence](generated/player-qa/ui-goal-20260921/hunt-navigation-20260923.md).
+
 > 2026-09-23 quest target semantics: V2 arrival/flag descriptions no longer
 > become monster hints through matching words. Authored destination maps take
 > priority over local species, preserving the entrance button for the actual

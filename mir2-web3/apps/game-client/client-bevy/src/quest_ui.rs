@@ -346,16 +346,48 @@ pub enum QuestUiIntent {
     PickUpTile,
 }
 
-/// One request to begin ordinary local walk/run toward a configured Crystal map entrance.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum QuestRouteTarget {
+    Entrance,
+    HuntRegion { monster_index: i32, radius: i32 },
+}
+
+impl QuestRouteTarget {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Entrance => "入口",
+            Self::HuntRegion { .. } => "狩猎区域",
+        }
+    }
+}
+
+/// One request to begin ordinary local walk/run toward an authored destination.
 /// The Windows input host must reject it unless both identity values still
 /// match its authoritative Big Map model.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QuestRouteNavigationIntent {
+    pub target: QuestRouteTarget,
     pub quest_index: i32,
     pub reset_epoch: u64,
     pub map_index: i32,
     pub x: i32,
     pub y: i32,
+}
+
+impl QuestRouteNavigationIntent {
+    /// Shared UI/host validation against one specific unfinished kill and its
+    /// imported area. Coordinates or a remaining unrelated flag are not enough.
+    pub fn matches_active_hunt_region(self, tracker: &QuestTracker) -> bool {
+        let QuestRouteTarget::HuntRegion { monster_index, radius } = self.target else { return false; };
+        let Some(quest) = tracker.active_quests.iter().find(|quest| quest.quest_index == self.quest_index) else {
+            return false;
+        };
+        crate::quest_hunt_regions::active_hunt_regions(
+            &QuestTracker { active_quests: vec![quest.clone()] }, self.map_index,
+            crate::big_map::BigMapPoint { x: self.x, y: self.y },
+        ).iter().any(|region| region.monster_index == monster_index && region.radius == radius
+            && region.center.x == self.x && region.center.y == self.y)
+    }
 }
 
 /// Bounded handoff from quest guidance to the native ordinary movement
@@ -400,6 +432,12 @@ fn quest_route_intent_is_current(
     let Some(big_map) = big_map else {
         return false;
     };
+    if big_map.reset_epoch != intent.reset_epoch || big_map.current_map_index != Some(intent.map_index) {
+        return false;
+    }
+    if matches!(intent.target, QuestRouteTarget::HuntRegion { .. }) {
+        return intent.matches_active_hunt_region(tracker);
+    }
     let targets = crate::quest_destination::authored_target_map_indices(intent.quest_index);
     let crate::quest_ui::route::QuestRoute::NextStep(step) =
         crate::quest_ui::route::resolve(big_map.current_map_index, &targets)
@@ -1720,6 +1758,14 @@ fn process_quest_ui_input(
         .and_then(|(((catalog, guidance), completed), read_model)| {
             catalog.derive(guidance, tracker, completed, &read_model.player)
         });
+    if let Some(navigation) = route_navigation.as_deref_mut() {
+        if navigation.pending.is_some_and(|intent| !quest_route_intent_is_current(
+            intent, tracker, &quest_state, journey.as_ref(), models.big_map.as_deref(),
+        )) {
+            navigation.clear();
+            quest_state.set_feedback("任务导航已更新，请重新选择目标", true);
+        }
+    }
     if quest_state.pinned_primary_quest_index.is_some_and(|id| !tracker.active_quests.iter().any(|q| q.quest_index == id && q.status.is_active())) {
         quest_state.pinned_primary_quest_index = None;
     }
@@ -2213,18 +2259,18 @@ fn process_quest_ui_input(
                     journey.as_ref(),
                     models.big_map.as_deref(),
                 ) {
-                    quest_state.set_feedback("入口引导已更新，请使用当前任务路线", true);
+                    quest_state.set_feedback(format!("{}引导已更新，请使用当前任务路线", intent.target.label()), true);
                 } else if let Some(route_navigation) = route_navigation.as_deref_mut() {
                     if route_navigation.push(intent) {
                         quest_state.set_feedback(
-                            format!("前往入口 ({},{})", intent.x, intent.y),
+                            format!("前往{} ({},{})", intent.target.label(), intent.x, intent.y),
                             false,
                         );
                     } else {
-                        quest_state.set_feedback("已有前往入口的指令等待处理", true);
+                        quest_state.set_feedback("已有寻路指令等待处理", true);
                     }
                 } else {
-                    quest_state.set_feedback("入口导航暂不可用", true);
+                    quest_state.set_feedback("任务导航暂不可用", true);
                 }
             }
             QuestUiButton::AttackTarget { object_id } => {
@@ -3670,7 +3716,7 @@ fn quest_diary_group_name(quest: &Quest, guidance: Option<&QuestGuidance>) -> St
 fn quest_diary_status_label(quest: &Quest) -> &'static str {
     match quest.status {
         crate::quest_model::QuestStatus::NotStarted => "Available",
-        crate::quest_model::QuestStatus::ReadyToTurnIn => "Complete",
+        crate::quest_model::QuestStatus::ReadyToTurnIn => "可交付",
         _ => "In Progress",
     }
 }
@@ -5842,8 +5888,67 @@ fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
 #[cfg(test)]
 mod tests {
     #[test]
+    fn hunt_navigation_ready_status_means_turn_in_not_reward_already_claimed() {
+        assert_eq!(quest_diary_status_label(&quest(2_110_012, QuestStatus::ReadyToTurnIn)), "可交付");
+    }
+
+    #[test]
+    fn hunt_navigation_click_checks_the_specific_unfinished_kill_and_authoritative_region() {
+        let mut hunt = quest(2_110_010, QuestStatus::InProgress);
+        hunt.objectives = vec![crate::quest_model::QuestObjective {
+            objective_id: "2110010:0".into(), text: "Defeat 4 Skeleton.".into(), current: 0, target: 4,
+        }];
+        let tracker = QuestTracker { active_quests: vec![hunt] };
+        let region = crate::quest_hunt_regions::active_hunt_regions(&tracker, 39,
+            crate::big_map::BigMapPoint { x: 211, y: 320 }).remove(0);
+        let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: region.radius },
+            quest_index: 2_110_010, reset_epoch: 12, map_index: 39, x: 250, y: 260,
+        };
+        let big_map = crate::big_map::BigMapModel { current_map_index: Some(39), reset_epoch: 12, ..default() };
+        let state = QuestUiState::default();
+        assert!(quest_route_intent_is_current(intent, &tracker, &state, None, Some(&big_map)));
+        for invalid in [
+            QuestRouteNavigationIntent { target: QuestRouteTarget::Entrance, ..intent },
+            QuestRouteNavigationIntent { target: QuestRouteTarget::HuntRegion { monster_index: -1, radius: 30 }, ..intent },
+            QuestRouteNavigationIntent { target: QuestRouteTarget::HuntRegion { monster_index: region.monster_index, radius: 31 }, ..intent },
+            QuestRouteNavigationIntent { x: 251, ..intent },
+            QuestRouteNavigationIntent { reset_epoch: 13, ..intent },
+            QuestRouteNavigationIntent { map_index: 1, ..intent },
+        ] {
+            assert!(!quest_route_intent_is_current(invalid, &tracker, &state, None, Some(&big_map)), "{invalid:?}");
+        }
+        let mut finished = tracker.clone();
+        finished.active_quests[0].objectives[0].current = 4;
+        assert!(!quest_route_intent_is_current(intent, &finished, &state, None, Some(&big_map)));
+        finished.active_quests[0].objectives.clear();
+        assert!(!quest_route_intent_is_current(intent, &finished, &state, None, Some(&big_map)));
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default());
+        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        app.insert_resource(NativePlayerUiState::default());
+        app.insert_resource(tracker);
+        app.insert_resource(big_map);
+        app.init_resource::<NpcDialogModel>().init_resource::<NpcDialogNav>()
+            .init_resource::<QuestUiState>().init_resource::<QuestUiIntentQueue>()
+            .init_resource::<QuestRouteNavigationIntentQueue>().init_resource::<PendingOperations>();
+        app.world_mut().spawn((Button, QuestUiButton::NavigateQuestRoute(intent), Interaction::Pressed));
+        app.add_systems(Update, process_quest_ui_input);
+        app.update();
+        assert_eq!(app.world().resource::<QuestRouteNavigationIntentQueue>().pending, Some(intent));
+        assert!(app.world().resource::<QuestUiState>().feedback.as_ref().unwrap().message.contains("前往狩猎区域"));
+        // Completion while the pointer still holds the button invalidates the
+        // queued walk before release. No command is sent to claim a kill.
+        app.world_mut().resource_mut::<QuestTracker>().active_quests[0].objectives[0].current = 4;
+        app.update();
+        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        assert!(app.world().resource::<QuestUiIntentQueue>().is_empty());
+    }
+
+    #[test]
     fn route_navigation_queue_is_bounded_and_preserves_the_configured_source_coordinate() {
         let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::Entrance,
             quest_index: 2_110_010,
             reset_epoch: 7,
             map_index: 1,
@@ -5863,6 +5968,7 @@ mod tests {
             .find(|map| map.map_file_name == "D401").expect("imported D401 map");
         assert_eq!(d401.map_index, 47);
         let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::Entrance,
             quest_index: 2_110_010,
             reset_epoch: 7,
             map_index: d401.map_index,
@@ -5901,6 +6007,7 @@ mod tests {
     #[test]
     fn route_navigation_is_discarded_after_leaving_the_game_session() {
         let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::Entrance,
             quest_index: 2_110_010,
             reset_epoch: 7,
             map_index: 1,
@@ -5927,6 +6034,7 @@ mod tests {
     #[test]
     fn route_navigation_rechecks_primary_task_and_current_entrance() {
         let intent = QuestRouteNavigationIntent {
+            target: QuestRouteTarget::Entrance,
             quest_index: 2_110_010,
             reset_epoch: 7,
             map_index: 1,
@@ -8154,7 +8262,7 @@ mod tests {
         assert_eq!(groups[0].quests[0].quest_index, 2);
         assert_eq!(groups[1].name, "BorderVillage");
         assert_eq!(groups[1].quests[0].quest_index, 3);
-        assert_eq!(quest_diary_status_label(groups[0].quests[0]), "Complete");
+        assert_eq!(quest_diary_status_label(groups[0].quests[0]), "可交付");
         assert_eq!(quest_diary_status_label(groups[1].quests[0]), "In Progress");
     }
 

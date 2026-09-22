@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-09-23 hunting-area follow-up: local task cards now have a typed ordinary
+> hunt-region route, independent of live target visibility. Shared/native
+> validation rejects stale progress/primary/map/area metadata. Real D001 collision
+> plus dynamic endpoint occupancy passes 18 fixture-ACK moves; native input
+> 104/104 and shared quest filter 154/154 pass. `ReadyToTurnIn` now says `可交付`;
+> the three Skeleton tasks are distinct authored content, not duplicate progress.
+> Release packaging is in progress. Prior client PID29460 exited with rendering
+> OOM; Gateway stays running. OOM/visual acceptance is not claimed.
+> [Evidence](generated/player-qa/ui-goal-20260921/hunt-navigation-20260923.md).
+
 > 2026-09-23 missing arrival navigation: quest 2110009's `Oma Cave` flag text
 > incorrectly matched a nearby Oma and replaced its entrance button. V2 hints
 > now use declared kills plus authoritative counters, and map destinations
