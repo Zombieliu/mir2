@@ -80,7 +80,25 @@ was issued in this repair turn. Their termination cause and whether a normal
 logout occurred are not established. The existing accounts store is present
 (335097 bytes, modified 03:45:59); OS uptime shows no intervening reboot.
 
-Before restoring the login screen, preserve a copy of the current store and
-retain the original identity/recovery keys, profile and recovery directory.
-Do not restore an older save or claim unsaved progress was verified. Native
-visual acceptance remains open and the user retains gameplay control.
+The current store and profile were backed up under
+`C:/mir2-ui-repair-20260921/task-target-deploy-20260923-042028` before startup.
+Accounts backup SHA256:
+`C4E813BE6C299CA3EC9FC808431E26DCC988083432C53F67027A340BA0232F10`.
+No older save was restored; identity/recovery keys, profile and recovery
+directory were retained. A JSON value comparison after Gateway startup found
+only the four `guildClock` generation/lease/anchor/owner values changed.
+Account and character values were identical at this pre-login check. This does
+not establish whether the earlier process termination lost unsaved progress.
+
+Code `37e0dcacbad10163124fac2e892f47440f8ef158` is deployed as native client
+PID29460, with retained Gateway binary restored as PID45232. Both resolve to
+the new package. Gateway owns listeners 127.0.0.1:19900/19910; native startup
+logs record `connected generation=1 resume=false` and the first world snapshot.
+The agent launched the game but issued no login or gameplay inputs. Records:
+
+- `C:/numeron-legend-of-rebirth-20260923-task-target/candidate-manifest.json`
+- `C:/mir2-ui-repair-20260921/render-live/task-target-client-launch.json`
+- `C:/mir2-ui-repair-20260921/render-live/20260923-042028-826-gateway-launch.json`
+- Client trace/log prefix: `20260923-042121-056` in the same `render-live` directory.
+
+Native visual acceptance remains open and the user retains gameplay control.

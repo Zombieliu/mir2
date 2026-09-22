@@ -5,9 +5,10 @@
 > now use declared kills plus authoritative counters, and map destinations
 > take priority until the target map is reached. New regressions improve from
 > 0/4 to 4/4; shared-client quest filter 151/151 passes. Native release build
-> passes and the package is ready at `C:/numeron-legend-of-rebirth-20260923-task-target`.
-> Both prior client and Gateway were absent at the deployment check; restoration
-> will retain the original store/keys and Gateway binary. Gameplay stays with the user.
+> passes. Client `37e0dcacb` is deployed as PID29460 from
+> `C:/numeron-legend-of-rebirth-20260923-task-target` and its WebSocket is connected.
+> Both prior processes were absent; the unchanged Gateway was restored as PID45232
+> with the original store/keys after backup. Gameplay stays with the user.
 > Native visual acceptance remains open.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-target-priority-20260923.md).
 

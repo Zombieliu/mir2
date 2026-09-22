@@ -4,8 +4,8 @@
 > become monster hints through matching words. Authored destination maps take
 > priority over local species, preserving the entrance button for the actual
 > 2110009 Oma arrival quest. Targeted 4/4 and native UI quest filter 151/151 pass;
-> native release build passes and the candidate is packaged; visual acceptance
-> remains open. No Crystal parity percentage
+> native release build passes and client `37e0dcacb` is deployed and connected
+> to the retained Gateway binary. Visual acceptance remains open. No Crystal parity percentage
 > is added by this custom guidance repair.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-target-priority-20260923.md).
 
