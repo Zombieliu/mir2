@@ -229,6 +229,12 @@ pub struct BigMapSearchState {
     pub last_submitted: Option<String>,
     #[serde(default)]
     pub last_result: Option<BigMapSearchResult>,
+    /// Monotonic identity for an authoritative `SearchMapResult`. It lets
+    /// the renderer retain local draft/scroll state across ordinary snapshots
+    /// while still accepting a newly-arrived authoritative result, even when
+    /// it points to the same NPC as the prior result.
+    #[serde(default)]
+    pub result_revision: u64,
 }
 
 impl Default for BigMapSearchState {
@@ -239,6 +245,7 @@ impl Default for BigMapSearchState {
             cooldown_until_ms: None,
             last_submitted: None,
             last_result: None,
+            result_revision: 0,
         }
     }
 }
@@ -380,6 +387,44 @@ impl BigMapModel {
             self.active_map_index = Some(map_index);
             self.clamp_selection_and_scroll();
         }
+    }
+
+    /// Merge a packet-derived read model without discarding renderer-local
+    /// controls. Snapshot state owns map data, world setup, player location,
+    /// and a newly-arrived search result. A renderer owns its view, draft,
+    /// scroll position, and ordinary NPC selection while it remains in the
+    /// same map/session epoch.
+    pub fn reconcile_authoritative_snapshot(&mut self, authoritative: Self) {
+        let same_scene = self.reset_epoch == authoritative.reset_epoch
+            && self.current_map_index == authoritative.current_map_index;
+        let has_new_search_result =
+            same_scene && self.search.result_revision != authoritative.search.result_revision;
+        let local_view = self.view;
+        let local_search = self.search.clone();
+        let local_scroll_row = self.npc_scroll_row;
+        let local_selection = self.selected_npc_object_id;
+        let local_active_map_index = self.active_map_index;
+
+        *self = authoritative;
+        if !same_scene || has_new_search_result {
+            self.clamp_selection_and_scroll();
+            return;
+        }
+
+        self.view = if local_view == BigMapView::WorldMap && self.world.enabled {
+            BigMapView::WorldMap
+        } else {
+            BigMapView::CurrentMap
+        };
+        self.search = local_search;
+        self.npc_scroll_row = local_scroll_row;
+        self.selected_npc_object_id = local_selection;
+        if local_active_map_index.is_some_and(|index| self.maps.contains_key(&index)) {
+            self.active_map_index = local_active_map_index;
+        }
+        // The snapshot may have removed or hidden an NPC, or shortened the
+        // filtered list. Never retain an invalid local selection or scroll.
+        self.clamp_selection_and_scroll();
     }
 
     /// Reconcile the authoritative current map from `MapInformation` or a
@@ -528,6 +573,7 @@ impl BigMapModel {
     /// Apply the authoritative `SearchMapResult`.  A zero NPC index is the
     /// Crystal map-hit encoding; a non-zero value is the NPC object id.
     pub fn apply_search_result(&mut self, map_index: i32, npc_index: u32) {
+        self.search.result_revision = self.search.result_revision.saturating_add(1);
         self.search.last_result = Some(if npc_index == 0 {
             BigMapSearchResult::Map { map_index }
         } else {
@@ -615,7 +661,7 @@ impl BigMapModel {
             return None;
         }
         let npc = self.selected_npc()?;
-        if !self.world.enabled || !npc.can_teleport_to || npc.object_id == 0 {
+        if !npc.can_teleport_to || npc.object_id == 0 {
             return None;
         }
         Some(BigMapTeleportIntent {
@@ -970,8 +1016,98 @@ mod tests {
         assert_eq!(model.current_map_index, Some(1));
         assert_eq!(model.view, BigMapView::CurrentMap);
 
+        // Crystal gates this request by the selected NPC's `canTeleportTo`;
+        // WorldMapSetup controls the world-map view, not the GO TO action.
         model.apply_world_map_setup(false, Vec::new(), 3_000);
-        assert!(model.selected_teleport_intent().is_none());
+        assert!(model.selected_teleport_intent().is_some());
+    }
+
+    #[test]
+    fn same_scene_snapshot_preserves_local_big_map_controls() {
+        let npcs = (1..=40)
+            .map(|id| npc(id, &format!("NPC {id}"), id == 40))
+            .collect();
+        let mut authoritative = BigMapModel::default();
+        authoritative.apply_new_map_info(39, info(npcs));
+        authoritative.set_current_map(39);
+        authoritative.apply_world_map_setup(true, Vec::new(), 3_000);
+
+        let mut renderer = authoritative.clone();
+        renderer.set_view(BigMapView::WorldMap);
+        renderer.set_search_draft("NPC");
+        renderer.set_npc_scroll_row(19);
+        assert!(renderer.select_npc(40));
+
+        renderer.reconcile_authoritative_snapshot(authoritative);
+        assert_eq!(renderer.view, BigMapView::WorldMap);
+        assert_eq!(renderer.search.draft, "NPC");
+        assert_eq!(renderer.npc_scroll_row, 19);
+        assert_eq!(renderer.selected_npc_object_id, Some(40));
+    }
+
+    #[test]
+    fn same_scene_snapshot_keeps_existing_remote_active_map() {
+        let mut authoritative = BigMapModel::default();
+        authoritative.apply_new_map_info(39, info(vec![npc(40, "Guide", true)]));
+        authoritative.apply_new_map_info(40, info(vec![npc(41, "Remote Guide", true)]));
+        authoritative.set_current_map(39);
+        let mut renderer = authoritative.clone();
+        renderer.active_map_index = Some(40);
+
+        renderer.reconcile_authoritative_snapshot(authoritative);
+        assert_eq!(renderer.current_map_index, Some(39));
+        assert_eq!(renderer.active_map_index, Some(40));
+    }
+
+    #[test]
+    fn snapshot_map_change_or_removed_npc_drops_local_selection() {
+        let mut renderer = BigMapModel::default();
+        renderer.apply_new_map_info(39, info(vec![npc(40, "Guide", true)]));
+        renderer.set_current_map(39);
+        assert!(renderer.select_npc(40));
+        renderer.set_search_draft("Guide");
+        assert!(renderer.select_npc(40));
+
+        let mut without_guide = renderer.clone();
+        without_guide.apply_new_map_info(39, info(Vec::new()));
+        renderer.reconcile_authoritative_snapshot(without_guide);
+        assert_eq!(renderer.current_map_index, Some(39));
+        assert_eq!(renderer.selected_npc_object_id, None);
+
+        let mut next_map = BigMapModel::default();
+        next_map.reset_epoch = renderer.reset_epoch.saturating_add(1);
+        next_map.current_map_index = Some(40);
+        next_map.active_map_index = Some(40);
+        renderer.reconcile_authoritative_snapshot(next_map);
+        assert_eq!(renderer.current_map_index, Some(40));
+        assert_eq!(renderer.selected_npc_object_id, None);
+        assert!(renderer.search.draft.is_empty());
+        assert_eq!(renderer.npc_scroll_row, 0);
+    }
+
+    #[test]
+    fn new_authoritative_search_result_overrides_local_selection() {
+        let mut authoritative = BigMapModel::default();
+        authoritative.apply_new_map_info(
+            39,
+            info(vec![npc(40, "Guide", true), npc(41, "Teleporter", true)]),
+        );
+        authoritative.set_current_map(39);
+        let mut renderer = authoritative.clone();
+        assert!(renderer.select_npc(40));
+        renderer.set_search_draft("Guide");
+        assert!(renderer.select_npc(40));
+
+        authoritative.apply_search_result(39, 41);
+        renderer.reconcile_authoritative_snapshot(authoritative);
+        assert_eq!(renderer.selected_npc_object_id, Some(41));
+        assert_eq!(
+            renderer.search.last_result,
+            Some(BigMapSearchResult::Npc {
+                map_index: 39,
+                object_id: 41,
+            })
+        );
     }
 
     #[test]

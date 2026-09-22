@@ -1659,8 +1659,21 @@ impl NativeGameplayAdapter {
             .and_then(value_i32)
             .filter(|index| *index > 0);
         if let Some((x, y)) = authoritative_player_position(payload) {
-            self.big_map
-                .set_player_location(map_index, BigMapPoint { x, y });
+            // Map transfers are packet-first: the server emits
+            // MapInformation before the destination UserLocation. A delayed
+            // source-map snapshot must not replace that newer identity merely
+            // because BigMapModel::set_player_location(Some(map), ..) also
+            // selects `map`. A snapshot remains the bootstrap authority until
+            // a map packet exists, and thereafter supplies positions only for
+            // its current map.
+            let stale_map_identity = matches!(
+                (self.big_map.current_map_index, map_index),
+                (Some(current), Some(snapshot)) if current != snapshot
+            );
+            if !stale_map_identity {
+                self.big_map
+                    .set_player_location(map_index, BigMapPoint { x, y });
+            }
         }
         self.latest_player_object_id = payload.get("playerObjectId").and_then(value_u32);
         self.actor_sound_contexts.clear();
@@ -1823,6 +1836,10 @@ fn decode_quest_operation_ack(payload: &Value) -> Option<QuestOperationAck> {
             None
         }
     }
+}
+
+fn reconcile_big_map_snapshot(big_map: &mut BigMapModel, authoritative: &BigMapModel) {
+    big_map.reconcile_authoritative_snapshot(authoritative.clone());
 }
 
 fn apply_quest_operation_acks(
@@ -2057,7 +2074,7 @@ pub fn drain_gameplay_events(
     }
     apply_quest_operation_acks(&mut models.pending, &snapshots);
     if let (Some(big_map), Some(latest)) = (models.big_map.as_deref_mut(), snapshots.last()) {
-        *big_map = latest.big_map.clone();
+        reconcile_big_map_snapshot(big_map, &latest.big_map);
     }
     let Some(snapshot) = snapshots
         .into_iter()
@@ -7688,6 +7705,74 @@ mod tests {
     }
 
     #[test]
+    fn raw_map_information_then_location_rejects_a_delayed_source_map_snapshot() {
+        use crate::native_protocol::{parse_inbound_event, InboundEvent};
+
+        let mut adapter = NativeGameplayAdapter::default();
+        // A periodic source-map snapshot establishes the initial bootstrap
+        // identity. The simulation's transfer sequence then sends the typed
+        // MapInformation wire frame before UserLocation.
+        adapter.observe_world_snapshot(&json!({
+            "mapIndex": 1,
+            "playerObjectId": 1000,
+            "entities": [{"objectId": 1000, "kind": "selfPlayer", "x": 659, "y": 215}]
+        }));
+        assert_eq!(adapter.big_map.current_map_index, Some(1));
+
+        let map_information = parse_inbound_event(
+            r#"{"type":"packet","packet":"MapInformation","payload":{"mapIndex":39,"fileName":"D001","title":"OmaCave_1F"}}"#,
+        )
+        .expect("actual MapInformation envelope must parse");
+        let InboundEvent::Packet(map_information) = map_information else {
+            panic!("expected packet");
+        };
+        assert!(!adapter.observe_packet(&map_information));
+        assert_eq!(adapter.big_map.current_map_index, Some(39));
+        assert_eq!(adapter.big_map.player_location, None);
+
+        let user_location = parse_inbound_event(
+            r#"{"type":"packet","packet":"UserLocation","payload":{"x":151,"y":362,"direction":"Down"}}"#,
+        )
+        .expect("actual UserLocation envelope must parse");
+        let InboundEvent::Packet(user_location) = user_location else {
+            panic!("expected packet");
+        };
+        assert!(adapter.observe_packet(&user_location));
+        assert_eq!(
+            adapter.big_map.player_location,
+            Some(BigMapPoint { x: 151, y: 362 })
+        );
+
+        // A stale personal snapshot from Bichon used to call
+        // set_player_location(Some(1), ..), which replaced the packet-first
+        // Oma Cave identity and sent the task card back to Bichon.
+        adapter.observe_world_snapshot(&json!({
+            "mapIndex": 1,
+            "playerObjectId": 1000,
+            "entities": [{"objectId": 1000, "kind": "selfPlayer", "x": 659, "y": 215}]
+        }));
+        assert_eq!(adapter.big_map.current_map_index, Some(39));
+        assert_eq!(adapter.big_map.active_map_index, Some(39));
+        assert_eq!(
+            adapter.big_map.player_location,
+            Some(BigMapPoint { x: 151, y: 362 })
+        );
+
+        // The first matching destination snapshot remains authoritative for
+        // the moving marker after the packet-first landing.
+        adapter.observe_world_snapshot(&json!({
+            "mapIndex": 39,
+            "playerObjectId": 1000,
+            "entities": [{"objectId": 1000, "kind": "selfPlayer", "x": 152, "y": 362}]
+        }));
+        assert_eq!(adapter.big_map.current_map_index, Some(39));
+        assert_eq!(
+            adapter.big_map.player_location,
+            Some(BigMapPoint { x: 152, y: 362 })
+        );
+    }
+
+    #[test]
     fn map_information_identity_change_clears_source_population_but_preserves_self() {
         use crate::native_protocol::MapIdentity;
 
@@ -7753,6 +7838,44 @@ mod tests {
         assert!(adapter.zone_ground_drops.is_empty());
         assert!(adapter.effect_events.is_empty());
         assert_eq!(adapter.big_map.current_map_index, Some(141));
+    }
+
+    #[test]
+    fn snapshot_reconciliation_keeps_renderer_npc_selection_on_the_same_map() {
+        let mut authoritative = BigMapModel::default();
+        authoritative.apply_new_map_info(
+            39,
+            BigMapInfo {
+                title: "OmaCave_1F".into(),
+                width: 1,
+                height: 1,
+                big_map: 1,
+                movements: Vec::new(),
+                npcs: vec![BigMapNpc {
+                    index: 1,
+                    file_name: "NPC/00".into(),
+                    name: "Guide".into(),
+                    map_index: 39,
+                    location: BigMapPoint::default(),
+                    image: 0,
+                    rate: 0,
+                    show_on_big_map: true,
+                    big_map_icon: 0,
+                    object_id: 77,
+                    icon: 0,
+                    can_teleport_to: true,
+                }],
+            },
+        );
+        authoritative.set_current_map(39);
+        let mut renderer = authoritative.clone();
+        assert!(renderer.select_npc(77));
+        renderer.set_search_draft("Guide");
+        assert!(renderer.select_npc(77));
+
+        reconcile_big_map_snapshot(&mut renderer, &authoritative);
+        assert_eq!(renderer.selected_npc_object_id, Some(77));
+        assert_eq!(renderer.search.draft, "Guide");
     }
 
     #[test]

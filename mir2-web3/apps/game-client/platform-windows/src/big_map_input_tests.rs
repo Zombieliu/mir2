@@ -192,13 +192,174 @@ fn left_and_right_map_clicks_send_ack_bounded_movement_and_survive_mouse_up_with
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::Escape);
         app.update();
+        assert!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .map_auto_path
+                .is_some(),
+            "Escape closes the active Big Map panel, not its route"
+        );
+        assert!(receiver.try_recv().is_err());
+
+        // Overlay mutation closes the Big Map after the PreUpdate input pass.
+        // The following frame must retain the same route once the panel is gone.
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::None;
+        {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.release(KeyCode::Escape);
+            keys.clear_just_pressed(KeyCode::Escape);
+        }
+        app.update();
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .map_auto_path
+            .is_some());
+
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Escape);
+        app.update();
         assert!(app
             .world()
             .resource::<WorldPointerMovementState>()
             .map_auto_path
             .is_none());
-        assert!(receiver.try_recv().is_err());
     }
+}
+
+#[test]
+fn big_map_close_controls_do_not_click_through_and_cancel_a_running_route() {
+    let (mut app, receiver, _) = navigation_app(MouseButton::Right);
+    app.update();
+    let _ = receiver.try_recv();
+    assert!(app
+        .world()
+        .resource::<WorldPointerMovementState>()
+        .map_auto_path
+        .is_some());
+    {
+        let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+        mouse.release(MouseButton::Right);
+        mouse.clear_just_pressed(MouseButton::Right);
+    }
+
+    // Crystal BigMap's close glyph is parent-relative (735,3) inside the
+    // 760x500 panel at (132,134): stage coordinate (867,137).
+    app.world_mut()
+        .query::<&mut Window>()
+        .single_mut(app.world_mut())
+        .expect("one Big Map test window")
+        .set_cursor_position(Some(bevy::prelude::Vec2::new(868., 138.)));
+    app.world_mut()
+        .resource_mut::<ButtonInput<MouseButton>>()
+        .press(MouseButton::Left);
+    app.update();
+    assert!(app
+        .world()
+        .resource::<WorldPointerMovementState>()
+        .map_auto_path
+        .is_some());
+
+    {
+        let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+        mouse.release(MouseButton::Left);
+        mouse.clear_just_pressed(MouseButton::Left);
+    }
+    let rect = spec::hud::BIG_MAP.rect;
+    app.world_mut()
+        .query::<&mut Window>()
+        .single_mut(app.world_mut())
+        .expect("one Big Map test window")
+        .set_cursor_position(Some(bevy::prelude::Vec2::new(
+            rect.left + 1.,
+            rect.top + 1.,
+        )));
+    app.world_mut()
+        .resource_mut::<ButtonInput<MouseButton>>()
+        .press(MouseButton::Left);
+    app.update();
+    assert!(app
+        .world()
+        .resource::<WorldPointerMovementState>()
+        .map_auto_path
+        .is_some());
+    assert!(receiver.try_recv().is_err());
+
+    // A panel-open route is still canceled by an actual world press outside
+    // the 760x500 Big Map panel. Closing controls must not turn the entire
+    // screen into a protected UI region.
+    {
+        let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+        mouse.release(MouseButton::Left);
+        mouse.clear_just_pressed(MouseButton::Left);
+    }
+    app.world_mut()
+        .query::<&mut Window>()
+        .single_mut(app.world_mut())
+        .expect("one Big Map test window")
+        .set_cursor_position(Some(bevy::prelude::Vec2::new(20., 20.)));
+    app.world_mut()
+        .resource_mut::<ButtonInput<MouseButton>>()
+        .press(MouseButton::Left);
+    app.update();
+    assert!(app
+        .world()
+        .resource::<WorldPointerMovementState>()
+        .map_auto_path
+        .is_none());
+}
+
+#[test]
+fn imported_oma_entrance_source_tile_is_statically_walkable() {
+    let map = crate::map_parser::load_map("0").expect("packaged Bichon collision map");
+    assert!(
+        !map.cell_blocks_movement(147, 33),
+        "Crystal map movement source must remain the exact walkable trigger tile"
+    );
+}
+
+#[test]
+fn occupied_entrance_reports_a_retryable_dynamic_blocker() {
+    use mir2_client_bevy::entities::{EntityKind, EntityModel, EntityModelSet};
+
+    let entities = EntityModelSet {
+        entities: vec![
+            EntityModel {
+                object_id: "self".into(),
+                kind: EntityKind::SelfPlayer,
+                name: "Self".into(),
+                x: 145,
+                y: 34,
+                level: None,
+                direction: None,
+            },
+            EntityModel {
+                object_id: "occupied-entrance".into(),
+                kind: EntityKind::Npc,
+                name: "Entrance occupant".into(),
+                x: 147,
+                y: 33,
+                level: None,
+                direction: None,
+            },
+        ],
+    };
+    assert_eq!(
+        big_map_input::plan(
+            &WorldPointerMovementState::default(),
+            &entities,
+            &NativeEntityPresentation::default(),
+            "self",
+            "0",
+            (145, 34),
+            (147, 33),
+        ),
+        Err("入口当前被实体占用，请稍后重试。")
+    );
 }
 
 #[test]

@@ -28,6 +28,24 @@ pub(super) fn image_position(window: &Window, model: &BigMapModel) -> Option<(f3
     ))
 }
 
+/// The Big Map panel is the only overlay whose close and control presses may
+/// preserve an already-running map route. A press outside this rectangle is a
+/// normal world action and must retain the usual cancellation behavior.
+pub(super) fn cursor_over_panel(window: &Window) -> bool {
+    let Some(cursor) = window.cursor_position() else {
+        return false;
+    };
+    let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+        window.resolution.width(),
+        window.resolution.height(),
+    );
+    if !transform.contains_physical_point(cursor.x, cursor.y) {
+        return false;
+    }
+    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+    CRYSTAL_BIGMAP_PANEL_RECT.contains(x, y)
+}
+
 pub(super) fn destination(
     model: &BigMapModel,
     point: (f32, f32),
@@ -146,10 +164,11 @@ pub(super) fn plan(
 ) -> Result<Vec<(i32, i32)>, &'static str> {
     let map = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。");
     let map = map?;
-    if map.cell_blocks_movement(destination.0, destination.1)
-        || entity_blocks_movement(entities, Some(presentation), self_id, destination)
-    {
+    if map.cell_blocks_movement(destination.0, destination.1) {
         return Err("目标位置有障碍，无法到达。");
+    }
+    if entity_blocks_movement(entities, Some(presentation), self_id, destination) {
+        return Err("入口当前被实体占用，请稍后重试。");
     }
     search(
         i32::from(map.width),

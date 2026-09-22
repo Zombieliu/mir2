@@ -674,6 +674,24 @@ fn cursor_over_native_hud_button(window: &Window) -> bool {
     .any(|rect| rect.contains(x, y))
 }
 
+fn cursor_over_big_map_hud_button(window: &Window) -> bool {
+    if !window.focused {
+        return false;
+    }
+    let Some(cursor) = window.cursor_position() else {
+        return false;
+    };
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit(
+        window.resolution.width(),
+        window.resolution.height(),
+    );
+    if !transform.contains_physical_point(cursor.x, cursor.y) {
+        return false;
+    }
+    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+    spec::hud::BIG_MAP.rect.contains(x, y)
+}
+
 pub fn is_world_click_blocked(
     player_ui: Option<&NativePlayerUiState>,
     dialog_open: bool,
@@ -1317,17 +1335,21 @@ fn begin_quest_route_navigation(
         return Err("入口导航已过期；请按当前地图重新选择。");
     }
     let model = big_map.expect("validated above");
-    let map_file = presentation.current_map_file_name()
+    let map_file = presentation
+        .current_map_file_name()
         .ok_or("当前地图尚未加载。")?;
-    let parsed = crate::map_parser::load_map(map_file)
-        .ok_or("当前地图的寻路数据尚未加载。")?;
+    let parsed = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。")?;
     let info = &model.current_map().expect("validated above").info;
     if i32::from(parsed.width) != info.width || i32::from(parsed.height) != info.height {
         return Err("地图尺寸尚未同步，请稍后重试。");
     }
-    let origin = movement.planning_origin(entities.entities.iter().find_map(|entity| {
-        (entity.object_id == self_id).then_some((entity.x, entity.y))
-    }).ok_or("玩家位置尚未加载。")?);
+    let origin = movement.planning_origin(
+        entities
+            .entities
+            .iter()
+            .find_map(|entity| (entity.object_id == self_id).then_some((entity.x, entity.y)))
+            .ok_or("玩家位置尚未加载。")?,
+    );
     let destination = (intent.x, intent.y);
     let steps = big_map_input::plan(
         movement,
@@ -1372,7 +1394,8 @@ pub fn mouse_world_interaction_system(
     notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
     (ui_read_model, click_state, big_map, mut map_chat, big_map_ui): (
-        Option<Res<UiReadModel>>, Option<Res<NativeWorldClickState>>,
+        Option<Res<UiReadModel>>,
+        Option<Res<NativeWorldClickState>>,
         Option<Res<mir2_client_bevy::big_map::BigMapModel>>,
         Option<ResMut<mir2_client_bevy::chat::ChatModel>>,
         Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
@@ -1605,8 +1628,12 @@ pub fn mouse_world_interaction_system(
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     let map_open = player_ui.as_deref().is_some_and(|ui| ui.bigmap_open());
-    let map_image_press = map_open && (left_pressed || right_pressed)
-        && big_map.as_deref().and_then(|model| big_map_input::image_position(window, model)).is_some();
+    let map_image_press = map_open
+        && (left_pressed || right_pressed)
+        && big_map
+            .as_deref()
+            .and_then(|model| big_map_input::image_position(window, model))
+            .is_some();
     if movement.map_auto_path.as_ref().is_some_and(|route| {
         presentation.current_map_file_name() != Some(route.map_file.as_str())
             || big_map.as_deref().and_then(|model| model.current_map_index) != Some(route.map_index)
@@ -1622,7 +1649,12 @@ pub fn mouse_world_interaction_system(
         movement.harvest_target = None;
         movement.harvest_direction = None;
         movement.next_harvest_request_at_ms = 0.0;
-        movement.stop_auto_path(now_ms, "hudButtonPress");
+        // Toggling the Big Map is a view change, including the close path;
+        // it must not discard an already-planned ordinary route. Other HUD
+        // actions remain direct manual input and cancel it as before.
+        if !(movement.map_auto_path.is_some() && cursor_over_big_map_hud_button(window)) {
+            movement.stop_auto_path(now_ms, "hudButtonPress");
+        }
         return;
     }
     // PreUpdate precedes the current frame's UI focus pass. Use actual current
@@ -1688,9 +1720,9 @@ pub fn mouse_world_interaction_system(
         && route_navigation
             .as_deref()
             .is_some_and(|queue| !queue.is_empty())
-        && player_ui.as_deref().is_some_and(|ui| {
-            ui.quest_open() && !ui.blocks_gameplay_keys()
-        })
+        && player_ui
+            .as_deref()
+            .is_some_and(|ui| ui.quest_open() && !ui.blocks_gameplay_keys())
         && !over_skill_bar
         && !over_hero_window
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
@@ -1704,9 +1736,10 @@ pub fn mouse_world_interaction_system(
         if pointer_held {
             return;
         }
-        if let Some(intent) = route_navigation.as_deref_mut().and_then(|queue| {
-            take_quest_route_navigation_after_pointer_input(queue, false)
-        }) {
+        if let Some(intent) = route_navigation
+            .as_deref_mut()
+            .and_then(|queue| take_quest_route_navigation_after_pointer_input(queue, false))
+        {
             match begin_quest_route_navigation(
                 &mut movement,
                 &entities,
@@ -1729,16 +1762,21 @@ pub fn mouse_world_interaction_system(
         || dead
         || (map_open && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused))
         || player_ui.as_deref().is_some_and(|ui| {
-            if map_open && (map_image_press || (movement.map_auto_path.is_some() && !left_pressed && !right_pressed)) {
+            if map_open && (map_image_press || movement.map_auto_path.is_some()) {
                 return big_map_input::ui_blocks_except_map(ui);
             }
-            window.cursor_position().map_or_else(|| ui.blocks_world_click(), |cursor| {
-                let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
-                    window.resolution.width(), window.resolution.height(),
-                );
-                let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-                ui.blocks_world_pointer_at(x, y)
-            })
+            window.cursor_position().map_or_else(
+                || ui.blocks_world_click(),
+                |cursor| {
+                    let transform =
+                        mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+                            window.resolution.width(),
+                            window.resolution.height(),
+                        );
+                    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                    ui.blocks_world_pointer_at(x, y)
+                },
+            )
         })
         || player_ui
             .as_deref()
@@ -1761,6 +1799,12 @@ pub fn mouse_world_interaction_system(
     // immediately before the keyboard command and then be coalesced away by
     // the Gateway's latest-intent slot.
     if keys.is_some_and(|keys| keys.just_pressed(KeyCode::Escape)) {
+        // The Big Map owns Escape in the later UI update and closes there.
+        // Keep its running map route; Escape with no map panel remains the
+        // ordinary movement cancellation below.
+        if map_open && movement.map_auto_path.is_some() {
+            return;
+        }
         if let Some(route_navigation) = route_navigation.as_deref_mut() {
             route_navigation.clear();
         }
@@ -1792,6 +1836,18 @@ pub fn mouse_world_interaction_system(
         return;
     }
 
+    // Big Map controls (not its image) are UI-only. In particular, the close
+    // button must not fall through to the ordinary left-click route cancel.
+    // A map-image click is handled next and deliberately replaces the route.
+    if map_open
+        && movement.map_auto_path.is_some()
+        && (left_pressed || right_pressed)
+        && !map_image_press
+        && big_map_input::cursor_over_panel(window)
+    {
+        return;
+    }
+
     if map_image_press {
         // Consume the image press before interpreting world actors beneath it.
         // Crystal BigMap.OnMouseClick accepts both left and right buttons.
@@ -1800,22 +1856,44 @@ pub fn mouse_world_interaction_system(
         movement.attack_target = None;
         movement.harvest_target = None;
         movement.harvest_direction = None;
-        if let Some(ui) = player_ui.as_deref_mut() { ui.local_keys.set_auto_run(false); }
+        if let Some(ui) = player_ui.as_deref_mut() {
+            ui.local_keys.set_auto_run(false);
+        }
         let request = (|| {
             let model = big_map.as_deref().ok_or("地图信息尚未加载。");
             let model = model?;
-            let destination = big_map_input::destination(model, big_map_input::image_position(window, model).unwrap())?;
-            let map_file = presentation.current_map_file_name().ok_or("当前地图尚未加载。");
+            let destination = big_map_input::destination(
+                model,
+                big_map_input::image_position(window, model).unwrap(),
+            )?;
+            let map_file = presentation
+                .current_map_file_name()
+                .ok_or("当前地图尚未加载。");
             let map_file = map_file?;
-            let parsed = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。");
+            let parsed =
+                crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。");
             let parsed = parsed?;
             let info = &model.active_map().unwrap().info;
             if i32::from(parsed.width) != info.width || i32::from(parsed.height) != info.height {
                 return Err("地图尺寸尚未同步，请稍后重试。");
             }
             let origin = movement.planning_origin(entity_position);
-            let steps = big_map_input::plan(&movement, &entities, presentation, &object_id, map_file, origin, destination)?;
-            Ok(big_map_input::MapRoute { map_file: map_file.to_owned(), map_index: model.current_map_index.unwrap(), origin, destination, steps })
+            let steps = big_map_input::plan(
+                &movement,
+                &entities,
+                presentation,
+                &object_id,
+                map_file,
+                origin,
+                destination,
+            )?;
+            Ok(big_map_input::MapRoute {
+                map_file: map_file.to_owned(),
+                map_index: model.current_map_index.unwrap(),
+                origin,
+                destination,
+                steps,
+            })
         })();
         match request {
             Ok(route) if !route.steps.is_empty() => {
@@ -1823,7 +1901,10 @@ pub fn mouse_world_interaction_system(
                 movement.map_auto_path = Some(route);
             }
             Ok(_) => return,
-            Err(message) => { big_map_input::feedback(map_chat.as_deref_mut(), message); return; }
+            Err(message) => {
+                big_map_input::feedback(map_chat.as_deref_mut(), message);
+                return;
+            }
         }
         left_pressed = false;
         right_pressed = false;
@@ -2221,13 +2302,24 @@ pub fn mouse_world_interaction_system(
             return;
         }
         let path = if movement.map_auto_path.is_some() {
-            match big_map_input::advance(&mut movement, &entities, presentation, &object_id, origin) {
+            match big_map_input::advance(&mut movement, &entities, presentation, &object_id, origin)
+            {
                 Ok(path) => Some(path),
-                Err(message) => { big_map_input::feedback(map_chat.as_deref_mut(), message); None }
+                Err(message) => {
+                    big_map_input::feedback(map_chat.as_deref_mut(), message);
+                    None
+                }
             }
         } else {
-            find_crystal_auto_path(&movement, &entities, Some(presentation), &object_id,
-                map_file_name.as_deref(), origin, destination)
+            find_crystal_auto_path(
+                &movement,
+                &entities,
+                Some(presentation),
+                &object_id,
+                map_file_name.as_deref(),
+                origin,
+                destination,
+            )
         };
         let Some(path) = path else {
             movement.trace_plan_blocked(now_ms, origin, "down", mode);
@@ -3060,24 +3152,44 @@ mod tests {
         app.init_resource::<QuestUiIntentQueue>();
         app.init_resource::<QuestRouteNavigationIntentQueue>();
         app.init_resource::<WorldPointerMovementState>();
-        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.world_mut()
+            .resource_mut::<QuestRouteNavigationIntentQueue>()
+            .push(intent);
         app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
 
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Left);
         app.update();
         assert_eq!(
-            app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().take(),
+            app.world_mut()
+                .resource_mut::<QuestRouteNavigationIntentQueue>()
+                .take(),
             Some(intent),
             "a down-frame must retain the route rather than allowing a world click"
         );
-        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
-        assert!(app.world().resource::<WorldPointerMovementState>().map_auto_path.is_none());
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .map_auto_path
+            .is_none());
 
-        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear_just_pressed(MouseButton::Left);
+        app.world_mut()
+            .resource_mut::<QuestRouteNavigationIntentQueue>()
+            .push(intent);
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Left);
         app.update();
         assert!(
-            !app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty(),
+            !app.world()
+                .resource::<QuestRouteNavigationIntentQueue>()
+                .is_empty(),
             "a held button remains distinct from a released button"
         );
 
@@ -3091,7 +3203,11 @@ mod tests {
             app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty(),
             "the release frame must consume the client button intent instead of clearing it as UI input"
         );
-        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
     }
 
     #[test]
@@ -3118,27 +3234,44 @@ mod tests {
         app.init_resource::<QuestUiIntentQueue>();
         app.init_resource::<QuestRouteNavigationIntentQueue>();
         app.init_resource::<WorldPointerMovementState>();
-        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
-        app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Escape);
+        app.world_mut()
+            .resource_mut::<QuestRouteNavigationIntentQueue>()
+            .push(intent);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Escape);
         app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
         app.update();
-        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
-        assert!(app.world().resource::<WorldPointerMovementState>().map_auto_path.is_none());
+        assert!(app
+            .world()
+            .resource::<QuestRouteNavigationIntentQueue>()
+            .is_empty());
+        assert!(app
+            .world()
+            .resource::<WorldPointerMovementState>()
+            .map_auto_path
+            .is_none());
     }
 
     #[test]
     fn quest_route_navigation_accepts_only_the_current_authoritative_map_epoch() {
         use mir2_client_bevy::big_map::{BigMapInfo, BigMapModel};
 
-        let mut map = BigMapModel { reset_epoch: 12, ..Default::default() };
-        map.apply_new_map_info(1, BigMapInfo {
-            title: "BichonProvince".into(),
-            width: 700,
-            height: 700,
-            movements: Vec::new(),
-            npcs: Vec::new(),
-            big_map: 101,
-        });
+        let mut map = BigMapModel {
+            reset_epoch: 12,
+            ..Default::default()
+        };
+        map.apply_new_map_info(
+            1,
+            BigMapInfo {
+                title: "BichonProvince".into(),
+                width: 700,
+                height: 700,
+                movements: Vec::new(),
+                npcs: Vec::new(),
+                big_map: 101,
+            },
+        );
         map.set_current_map(1);
         let intent = QuestRouteNavigationIntent {
             quest_index: 2_110_010,
@@ -3149,11 +3282,17 @@ mod tests {
         };
         assert!(quest_route_matches_current_map(intent, Some(&map)));
         assert!(!quest_route_matches_current_map(
-            QuestRouteNavigationIntent { reset_epoch: 11, ..intent },
+            QuestRouteNavigationIntent {
+                reset_epoch: 11,
+                ..intent
+            },
             Some(&map),
         ));
         assert!(!quest_route_matches_current_map(
-            QuestRouteNavigationIntent { map_index: 39, ..intent },
+            QuestRouteNavigationIntent {
+                map_index: 39,
+                ..intent
+            },
             Some(&map),
         ));
         assert!(!quest_route_matches_current_map(intent, None));
