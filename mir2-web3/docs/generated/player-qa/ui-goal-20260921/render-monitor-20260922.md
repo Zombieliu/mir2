@@ -49,3 +49,11 @@ platform-windows. Compare anomaly frames, CPU stages and movement outcomes at th
 same timestamps. Captured frames are selected by anomalies; do not calculate
 whole-session frame rates from them. Health summaries are separate. Screen/video
 review and GPU-present measurements remain separate acceptance evidence.
+
+## Windows startup correction
+
+The first live startup rejected the append-only file handle at `try_lock`; the
+trace remained empty. Added read access (required by Windows file locking) and
+a real-filesystem writer regression. Focused diagnostics now pass 10/10, including
+opening, locking, writing, flushing and closing the actual Windows trace file.
+The failed startup is retained in `render-live/20260922-193711-015-client.stderr.log`.

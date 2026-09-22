@@ -56,6 +56,8 @@ fn run_writer(path: &std::path::Path, receiver: mpsc::Receiver<Value>) -> std::i
     }
     let file = std::fs::OpenOptions::new()
         .create(true)
+        // Windows cannot lock an append-only handle; include read access.
+        .read(true)
         .append(true)
         .open(path)?;
     // Never let two processes race the same file budget. Failure affects only
@@ -528,6 +530,18 @@ impl CaptureRing {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn real_file_writer_locks_and_flushes_session() {
+        let path = std::env::temp_dir().join(format!("mir2-render-writer-{}-{}.jsonl", std::process::id(), unix_ms()));
+        let (sender, receiver) = mpsc::sync_channel(1);
+        drop(sender);
+        run_writer(&path, receiver).expect("real platform file locking and write must succeed");
+        let contents = std::fs::read_to_string(&path).unwrap();
+        std::fs::remove_file(&path).unwrap();
+        let session: Value = serde_json::from_str(contents.trim()).unwrap();
+        assert_eq!(session["type"], "renderTraceSession");
+    }
+
     #[test]
     fn file_budget_records_stop_reason_without_exceeding_limit() {
         let mut writer = BudgetWriter {
