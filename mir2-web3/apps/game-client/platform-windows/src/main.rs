@@ -304,6 +304,7 @@ fn main() -> bevy::app::AppExit {
             input::keyboard_movement_system,
         )
             .chain()
+            .in_set(mir2_bevy_runtime::NativeMotionProducerSet)
             .after(bevy::input::InputSystems),
     );
     app.add_systems(

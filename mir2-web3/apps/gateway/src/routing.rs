@@ -8057,15 +8057,27 @@ fn shared_zone_owner_loop(
 ) {
     let cadence = cadence.max(Duration::from_millis(1));
     let mut next_tick = Instant::now() + cadence;
+    let mut movement_retry_after = Instant::now();
     loop {
         let now = Instant::now();
-        if now >= next_tick {
+        let enabled = autonomous_ticks_enabled.load(Ordering::Acquire);
+        let movement_due_ms = if enabled && now >= movement_retry_after {
+            zone_state
+                .lock()
+                .ok()
+                .and_then(|state| shared_zone_movement_deadline(&state))
+        } else {
+            None
+        };
+        let clock_ms = shared_gateway_now_ms();
+        let maintenance_due = now >= next_tick;
+        let movement_due = movement_due_ms.is_some_and(|due| due <= clock_ms);
+        if maintenance_due || movement_due {
             let _tick_total = GatewaySlowStage::start("zone_cadence.total");
-            if !autonomous_ticks_enabled.load(Ordering::Acquire) {
-                next_tick = Instant::now() + cadence;
+            if !enabled {
+                next_tick = next_owner_maintenance_deadline(next_tick, Instant::now(), cadence);
                 continue;
             }
-            let now_ms = shared_gateway_now_ms();
             let capture = mutation_capture
                 .lock()
                 .ok()
@@ -8085,25 +8097,35 @@ fn shared_zone_owner_loop(
                     // alive but frozen. A later Commonware generation may
                     // promote this host again, so do not terminate its owner
                     // loop on a fencing miss.
-                    next_tick = Instant::now() + cadence;
+                    if maintenance_due {
+                        next_tick = next_owner_maintenance_deadline(next_tick, Instant::now(), cadence);
+                    }
+                    movement_retry_after = next_tick;
                     continue;
                 }
-                run_shared_zone_cadence_tick(&zone_state, now_ms)
+                let now_ms = shared_gateway_now_ms();
+                run_shared_zone_owner_tick(&zone_state, now_ms, maintenance_due)
                     .and_then(|()| (capture.observer)(&zone_id, now_ms))
             } else {
-                run_shared_zone_cadence_tick(&zone_state, now_ms)
+                let now_ms = shared_gateway_now_ms();
+                run_shared_zone_owner_tick(&zone_state, now_ms, maintenance_due)
             };
             if let Err(error) = result {
                 eprintln!("shared zone cadence stopped: {error}");
                 return;
             }
-            tick_count.fetch_add(1, Ordering::Release);
-            // Coalesce a late tick instead of replaying a burst of stale ticks.
-            next_tick = Instant::now() + cadence;
+            if maintenance_due {
+                tick_count.fetch_add(1, Ordering::Release);
+                next_tick = next_owner_maintenance_deadline(next_tick, Instant::now(), cadence);
+            }
             continue;
         }
 
-        match movement_receiver.recv_timeout(next_tick.saturating_duration_since(now)) {
+        let movement_wait =
+            movement_due_ms.map(|due| Duration::from_millis(due.saturating_sub(clock_ms)));
+        let maintenance_wait = next_tick.saturating_duration_since(now);
+        let wait = movement_wait.map_or(maintenance_wait, |movement| movement.min(maintenance_wait));
+        match movement_receiver.recv_timeout(wait) {
             Ok(request) => {
                 let result = execute_shared_zone_movement(
                     &zone_state,
@@ -8128,15 +8150,44 @@ fn shared_zone_owner_loop(
     }
 }
 
+fn next_owner_maintenance_deadline(previous: Instant, now: Instant, cadence: Duration) -> Instant {
+    let cadence = cadence.max(Duration::from_millis(1));
+    if previous > now {
+        return previous;
+    }
+    let periods = now.duration_since(previous).as_nanos() / cadence.as_nanos() + 1;
+    u32::try_from(periods)
+        .ok()
+        .and_then(|n| cadence.checked_mul(n))
+        .and_then(|advance| previous.checked_add(advance))
+        .unwrap_or(now + cadence)
+}
+
+fn shared_zone_movement_deadline(state: &SharedInProcessZoneState) -> Option<u64> {
+    if state.any_teardown_fenced() {
+        None
+    } else {
+        state.zone_manager.next_pending_movement_deadline_ms()
+    }
+}
+
 fn run_shared_zone_cadence_tick(
     zone_state: &Arc<Mutex<SharedInProcessZoneState>>,
     now_ms: u64,
 ) -> Result<(), String> {
+    run_shared_zone_owner_tick(zone_state, now_ms, true)
+}
+
+fn run_shared_zone_owner_tick(
+    zone_state: &Arc<Mutex<SharedInProcessZoneState>>,
+    now_ms: u64,
+    maintenance: bool,
+) -> Result<(), String> {
     let mut zone_state = zone_state
         .lock()
         .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
-    // A teardown checkpoint must observe a quiescent Zone. ZoneManager only
-    // exposes a global Tick, so pause autonomous mutations while any player is
+    // A teardown checkpoint must observe a quiescent Zone, so pause all
+    // autonomous maintenance and movement mutations while any player is
     // frozen; explicit teardown performs one final fenced drain itself.
     if zone_state.any_teardown_fenced() {
         return Ok(());
@@ -8147,11 +8198,17 @@ fn run_shared_zone_cadence_tick(
     zone_state.retry_pending_realtime_zone_outbounds();
     #[cfg(test)]
     {
-        zone_state.zone_cadence_tick_count = zone_state.zone_cadence_tick_count.saturating_add(1);
+        if maintenance {
+            zone_state.zone_cadence_tick_count = zone_state.zone_cadence_tick_count.saturating_add(1);
+        }
     }
     let outbounds = {
         let _slow_stage = GatewaySlowStage::start("zone_cadence.manager_tick");
-        zone_state.zone_manager.handle(ZoneCommand::Tick { now_ms })
+        if maintenance {
+            zone_state.zone_manager.handle(ZoneCommand::Tick { now_ms })
+        } else {
+            zone_state.zone_manager.tick_pending_movement(now_ms)
+        }
     };
     {
         let _slow_stage = GatewaySlowStage::start("zone_cadence.dispatch");
@@ -8159,6 +8216,9 @@ fn run_shared_zone_cadence_tick(
         zone_state.retry_pending_realtime_zone_outbounds();
     }
 
+    if !maintenance {
+        return Ok(());
+    }
     let map_file_names = zone_state.maps.keys().cloned().collect::<Vec<_>>();
     for map_file_name in map_file_names {
         let _ = zone_state.expire_shared_drops(&map_file_name, None, now_ms);
@@ -14909,6 +14969,8 @@ mod tests {
     mod trade_item_edit_tests;
     #[path = "cadence_map_transfer_tests.rs"]
     mod cadence_map_transfer_tests;
+    #[path = "movement_deadline_tests.rs"]
+    mod movement_deadline_tests;
     #[path = "pending_zone_aoi_tests.rs"]
     mod pending_zone_aoi_tests;
     #[path = "incremental_monster_hydration_tests.rs"]

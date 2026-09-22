@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> 2026-09-22 sustained movement: this owner scheduling repair keeps Crystal
+> action cooldown/run eligibility and all occupancy/collision checks. Pending
+> moves are consumed at their ready time instead of waiting for drifting
+> maintenance; delayed owners do not replay catch-up movement. Protocol A/B
+> over 64 ordinary steps removes reproduced ACK growth (last-quarter mean
+> 653.234 ms to 0.699 ms), with no corrections and acknowledged logout.
+> Deadline regressions pass Simulation 3/3, Gateway 3/3 and existing shared-zone
+> 55/55. This is server timing evidence, not visual/original-client acceptance.
+> [Evidence](generated/player-qa/ui-goal-20260921/movement-cadence-handoff-20260922.md).
+
 > 2026-09-21 parcel postage follows checked Crystal MailSystem.ini values:
 > CostPer1k=100, InsurancePerItem=5, FreeWithStamp=True. Stamp ownership and
 > atomic consumption are enforced rather than trusting the client flag.

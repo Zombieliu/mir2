@@ -1585,9 +1585,19 @@ impl ZoneRuntime {
                 .is_none()
     }
 
-    pub fn tick(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
-        let mut outbounds = self.tick_native_periodic_player_poisons(now_ms);
-        outbounds.extend(self.expire_zone_player_status_poisons(now_ms));
+    /// Deadline inspection is read-only. Empty/cancelled/left sessions never
+    /// keep the gateway owner awake; execution still uses normal validation.
+    pub fn next_pending_movement_deadline_ms(&self) -> Option<u64> {
+        self.players
+            .values()
+            .filter(|player| !player.movement_actions.is_empty())
+            .map(|player| player.movement_ready_at_ms)
+            .min()
+    }
+
+    /// Movement-only owner wake: do not advance AI, regen or maintenance clocks.
+    pub fn tick_pending_movement(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let mut outbounds = Vec::new();
         let ready_sessions = self
             .players
             .iter()
@@ -1599,6 +1609,13 @@ impl ZoneRuntime {
         for session_id in ready_sessions {
             outbounds.extend(self.tick_player_movement(&session_id, now_ms));
         }
+        outbounds
+    }
+
+    pub fn tick(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let mut outbounds = self.tick_native_periodic_player_poisons(now_ms);
+        outbounds.extend(self.expire_zone_player_status_poisons(now_ms));
+        outbounds.extend(self.tick_pending_movement(now_ms));
         outbounds.extend(self.resolve_pending_native_projectiles(now_ms));
         outbounds.extend(self.tick_town_archer_arrows(now_ms));
         outbounds.extend(self.tick_shinsu_hits(now_ms));
@@ -15855,6 +15872,10 @@ fn zone_hazard_hash(a: u64, b: u64) -> u64 {
 fn zone_hazard_interval_ms(strike_index: u64, salt: u64) -> u64 {
     3_000 + zone_hazard_hash(strike_index, salt) % 12_000
 }
+
+#[cfg(test)]
+#[path = "movement_deadline_tests.rs"]
+mod movement_deadline_tests;
 
 #[cfg(test)]
 mod door_tests {

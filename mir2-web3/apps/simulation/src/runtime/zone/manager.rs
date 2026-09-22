@@ -34,6 +34,20 @@ struct ZoneManagerCheckpoint {
 }
 
 impl ZoneManager {
+    pub fn next_pending_movement_deadline_ms(&self) -> Option<u64> {
+        self.zones
+            .values()
+            .filter_map(ZoneRuntime::next_pending_movement_deadline_ms)
+            .min()
+    }
+
+    pub fn tick_pending_movement(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        self.zones
+            .values_mut()
+            .flat_map(|zone| zone.tick_pending_movement(now_ms))
+            .collect()
+    }
+
     pub fn sync_intelligent_creature(
         &mut self,
         session_id: &SessionId,

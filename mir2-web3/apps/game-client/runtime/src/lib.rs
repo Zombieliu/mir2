@@ -70,6 +70,11 @@ const COMPILED_RENDER_BACKEND: &str = "native";
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RuntimePresentationSet;
 
+/// Native packets and input publish movement before its presentation consumer
+/// runs in the same PreUpdate. Registration order alone provides no ordering.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct NativeMotionProducerSet;
+
 // Both wasm backends composite transparently over the DOM map/floor/UI layers, so
 // Bevy can be the entity renderer on non-WebGPU too (the webgl2 build was opaque,
 // which forced the DOM WebGl2EntityAtlasLayer to draw entities there).
@@ -133,6 +138,15 @@ fn pending_self_camera_motion() -> Option<SelfCameraMotionWindow> {
         *PENDING_SELF_CAMERA_MOTION
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+}
+
+/// Scene reset arrives in `Update`, after native input can have produced a
+/// command in that frame's `PreUpdate`. The local shadow identifies that exact
+/// new command using the runtime clock; only it may retain its camera window.
+fn clear_stale_self_camera_motion_for_scene_reset(keep_current_command: bool) {
+    if !keep_current_command {
+        set_pending_self_camera_motion(None);
     }
 }
 
@@ -2210,6 +2224,7 @@ fn apply_scene_reset_to_runtime(
     mut map_camera_offset: ResMut<RuntimeMapCameraOffset>,
     mut snapshots: ResMut<interpolation::SnapshotBuffer>,
     mut motion_table: ResMut<motion::EntityMotionTable>,
+    mut local_motion: Option<ResMut<local_motion::LocalMotionPresentationShadow>>,
     mut presentation_poses: ResMut<presentation_pose::PresentationPoseBuffer>,
     mut registry: ResMut<SceneRegistry>,
     mut commands: Commands,
@@ -2232,6 +2247,12 @@ fn apply_scene_reset_to_runtime(
     *map_camera_offset = RuntimeMapCameraOffset::default();
     *snapshots = interpolation::SnapshotBuffer::default();
     *motion_table = motion::EntityMotionTable::default();
+    if let Some(local_motion) = local_motion.as_deref_mut() {
+        let keep_current_command = local_motion.clear_stale_for_scene_reset();
+        clear_stale_self_camera_motion_for_scene_reset(keep_current_command);
+    } else {
+        clear_mir2_self_camera_motion();
+    }
     presentation_poses.reset_scene();
 
     clear_scene_registry(
@@ -2317,10 +2338,14 @@ fn apply_session_reset_to_runtime_models(
         Option<ResMut<mir2_client_bevy::hero_model::HeroModelReceipts>>,
     ),
     mut social: ResMut<mir2_client_bevy::social::SocialModel>,
-    mut inventory_feedback: ResMut<InventoryOperationFeedback>,
-    mut preservation: ResMut<SessionResetGameShopPreservation>,
+    runtime_reset_state: (
+        ResMut<InventoryOperationFeedback>,
+        ResMut<SessionResetGameShopPreservation>,
+        Option<ResMut<local_motion::LocalMotionPresentationShadow>>,
+    ),
 ) {
     let (mut skills, mut receipts, mut hero, mut hero_receipts) = skill_state;
+    let (mut inventory_feedback, mut preservation, mut local_motion) = runtime_reset_state;
     if tracker.0 == reset.0 {
         return;
     }
@@ -2352,6 +2377,10 @@ fn apply_session_reset_to_runtime_models(
     if let Some(receipts) = hero_receipts.as_deref_mut() {
         receipts.0.clear();
     }
+    if let Some(local_motion) = local_motion.as_deref_mut() {
+        local_motion.clear_for_session_reset();
+    }
+    clear_mir2_self_camera_motion();
     social.clear_session();
     inventory_feedback.last = None;
 }
@@ -9941,6 +9970,89 @@ mod native_data_path_tests {
             .resource::<PendingOperations>()
             .contains(&pending_key));
         assert_eq!(app.world().resource::<SessionResetRevision>().0, 0);
+    }
+
+    #[test]
+    fn scene_reset_retires_confirmed_old_map_handoff_but_keeps_new_map_command() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let _motion_guard = local_motion::local_motion_test_guard();
+        local_motion::reset_local_motion_bridge_for_test();
+        clear_mir2_self_camera_motion();
+
+        let mut app = ingest_app();
+        app.add_plugins((
+            motion::CrystalMoveClockPlugin,
+            local_motion::LocalMotionPresentationShadowPlugin,
+        ));
+        app.insert_resource(motion::MoveClockSource::Manual(
+            mir2_client_core::clock::ManualClock::new(600),
+        ));
+
+        local_motion::enqueue_local_motion_event_json(
+            r#"{"type":"reset","atMs":0.0,"objectId":"self","x":10,"y":10,"direction":"Right"}"#.to_owned(),
+        );
+        local_motion::enqueue_local_motion_event_json(
+            r#"{"type":"commandSent","atMs":0.0,"direction":"Right","mode":"run","fromX":10,"fromY":10,"toX":12,"toY":10,"phaseCount":6}"#.to_owned(),
+        );
+        app.update();
+        match &mut *app.world_mut().resource_mut::<motion::MoveClockSource>() {
+            motion::MoveClockSource::Manual(clock) => clock.set_ms(650),
+            motion::MoveClockSource::Wall => unreachable!("test installs a manual clock"),
+        }
+        local_motion::enqueue_local_motion_event_json(
+            r#"{"type":"authoritative","atMs":650.0,"objectId":"self","isSelf":true,"x":12,"y":10,"tsDisposition":"confirmed"}"#.to_owned(),
+        );
+        app.update();
+
+        // `PreUpdate` accepts the first command from the new map before the
+        // queued SceneReset reaches Update. Its coordinates overlap the old
+        // map's source/target, which would otherwise admit the old handoff.
+        local_motion::enqueue_local_motion_event_json(
+            r#"{"type":"commandSent","atMs":650.0,"direction":"Right","mode":"run","fromX":12,"fromY":10,"toX":14,"toY":10,"phaseCount":6}"#.to_owned(),
+        );
+        set_mir2_self_camera_motion(12.0, 10.0, 14.0, 10.0, 650.0, 1_250.0);
+        assert!(native_ingest::push_native_scene_reset());
+        app.update();
+
+        let mut shadow = app
+            .world_mut()
+            .resource_mut::<local_motion::LocalMotionPresentationShadow>();
+        assert!(shadow
+            .candidate_offset_for_applied_center("self", 10, 10, 650.0, 48.0, 32.0)
+            .is_none());
+        assert!(shadow
+            .candidate_offset_for_applied_center("self", 12, 10, 650.0, 48.0, 32.0)
+            .is_some());
+        assert_eq!(
+            pending_self_camera_motion(),
+            Some((12.0, 10.0, 14.0, 10.0, 650.0, 1_250.0))
+        );
+
+        clear_mir2_self_camera_motion();
+        local_motion::reset_local_motion_bridge_for_test();
+    }
+
+    #[test]
+    fn scene_reset_clears_retained_camera_without_a_new_map_command() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let _motion_guard = local_motion::local_motion_test_guard();
+        local_motion::reset_local_motion_bridge_for_test();
+        let mut app = ingest_app();
+        app.add_plugins((
+            motion::CrystalMoveClockPlugin,
+            local_motion::LocalMotionPresentationShadowPlugin,
+        ));
+        app.insert_resource(motion::MoveClockSource::Manual(
+            mir2_client_core::clock::ManualClock::new(650),
+        ));
+        app.update();
+
+        set_mir2_self_camera_motion(10.0, 10.0, 12.0, 10.0, 0.0, 600.0);
+        assert!(native_ingest::push_native_scene_reset());
+        app.update();
+        assert_eq!(pending_self_camera_motion(), None);
+        clear_mir2_self_camera_motion();
+        local_motion::reset_local_motion_bridge_for_test();
     }
 
     #[test]

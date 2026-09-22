@@ -1,5 +1,16 @@
 # UI goal live ledger
 
+## Current running-pause repair — 2026-09-22
+
+The user still reports per-step pauses on `67d18345e`. A fresh 64-step ordinary
+protocol A/B reproduces old-server ACK drift from about 0.7 to 653 ms and
+keeps the repaired server near 0.7 ms. Client confirmed-center handoff and
+input-consumer order are repaired too; old scene motion is cleared on transfer.
+See [cadence/handoff evidence](movement-cadence-handoff-20260922.md), including
+the coarse-timer negative control. Runtime 271/271 and Windows 696/696 pass.
+Paired deployment and actual native feel are still unverified. Do not mark
+the earlier camera fixes or the whole UI goal accepted from these CPU/protocol tests.
+
 ## Current map repair — 2026-09-22
 
 Minimap/self-occlusion source 7532ac047 was subsequently built and launched as
