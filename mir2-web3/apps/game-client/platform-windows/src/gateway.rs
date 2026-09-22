@@ -2833,6 +2833,7 @@ where
     lighting_publisher.push_clear_state();
     let mut last_world_payload: Option<Value> = None;
     let mut last_wallet: Option<WalletState> = None;
+    let mut map_packet_cursor = NativeMapPacketCursor::default();
     let mut ui_cursor = NativeUiPlayerCursor::default();
     let mut skill_cursor = SkillPacketCursor::default();
     let mut social_cursor = SocialModel::default();
@@ -3016,6 +3017,7 @@ where
                                     gameplay_events,
                                     &mut last_world_payload,
                                     &mut last_wallet,
+                                    &mut map_packet_cursor,
                                     &mut ui_cursor,
                                     &mut in_flight_claim_mail_id,
                                     &mut send_mail_in_flight,
@@ -3234,6 +3236,7 @@ fn handle_gateway_text_for_connection<F>(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -3338,6 +3341,7 @@ where
         gameplay_events,
         last_world_payload,
         last_wallet,
+        map_packet_cursor,
         ui_cursor,
         in_flight_claim_mail_id,
         send_mail_in_flight,
@@ -3436,6 +3440,7 @@ fn handle_gateway_text(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -3452,6 +3457,7 @@ fn handle_gateway_text(
         gameplay_events,
         last_world_payload,
         last_wallet,
+        map_packet_cursor,
         ui_cursor,
         in_flight_claim_mail_id,
         send_mail_in_flight,
@@ -3471,6 +3477,7 @@ fn handle_gateway_text_with_world_ingest<F>(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -3510,6 +3517,7 @@ where
         // world/map/entity/effect registry in the same frame. Never re-emit
         // the previous map's personal snapshot.
         *last_world_payload = None;
+        map_packet_cursor.reset();
         if scope == NativeResetScope::Session {
             ui_cursor.reset();
             *last_wallet = None;
@@ -3666,6 +3674,7 @@ where
                 .payload
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
+            map_packet_cursor.merge_into_same_map_snapshot(&mut payload);
             validate_quest_operation_ack(&payload)?;
             gameplay_adapter.observe_world_snapshot_dispositions(&payload);
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
@@ -3790,6 +3799,7 @@ where
                 "MapInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
                     if let Some(payload) = event.payload.as_ref() {
+                        map_packet_cursor.observe_map_information(payload);
                         if let Some(world) = last_world_payload.as_mut() {
                             apply_map_information_to_world_payload(world, payload);
                         }
@@ -3802,6 +3812,7 @@ where
                 "MapChanged" => {
                     eprintln!("[gateway-client] packet {packet}");
                     if let Some(payload) = event.payload.as_ref() {
+                        map_packet_cursor.observe_map_information(payload);
                         ui_cursor.observe_map_identity(payload);
                         let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(
                             ui_cursor.to_read_model_json().to_string(),
@@ -4092,7 +4103,6 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         ("mapIndex", "mapIndex"),
         ("fileName", "mapFileName"),
         ("title", "mapTitle"),
-        ("miniMapIndex", "miniMapIndex"),
         ("bigMapIndex", "bigMapIndex"),
         ("lights", "mapLightSetting"),
         ("mapDarkLight", "mapDarkLight"),
@@ -4102,6 +4112,9 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
             object.insert(destination.to_owned(), value.clone());
         }
+    }
+    if let Some(value) = packet_minimap_value(packet) {
+        object.insert("miniMapIndex".to_owned(), value.clone());
     }
     if !map_changed {
         return false;
@@ -4132,6 +4145,92 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         });
     }
     true
+}
+
+/// Keeps packet-only minimap metadata long enough for the next matching
+/// worldSnapshot. MapInformation carries `miniMapIndex`, while the ordinary
+/// snapshot schema does not. The cursor is scoped to the exact map filename:
+/// it is cleared on map/session reset and never fills a snapshot whose map is
+/// absent or different.
+#[derive(Debug, Default)]
+struct NativeMapPacketCursor {
+    map_file_name: Option<String>,
+    mini_map_index: Option<u16>,
+}
+
+impl NativeMapPacketCursor {
+    fn reset(&mut self) {
+        *self = Self::default();
+    }
+
+    fn observe_map_information(&mut self, packet: &Value) {
+        let Some(map_file_name) = map_file_name(packet) else {
+            return;
+        };
+        let changed = self.map_file_name.as_deref().is_some_and(|current| {
+            normalize_map_file_name(current) != normalize_map_file_name(map_file_name)
+        });
+        if changed {
+            self.mini_map_index = None;
+        }
+        self.map_file_name = Some(map_file_name.to_owned());
+
+        // A present zero is authoritative: it means the destination has no
+        // minimap and must clear a prior map's positive index.
+        if packet_minimap_value(packet).is_some() {
+            self.mini_map_index = map_minimap_index(packet);
+        }
+    }
+
+    fn merge_into_same_map_snapshot(&mut self, snapshot: &mut Value) {
+        let Some(snapshot_file_name) = map_file_name(snapshot).map(str::to_owned) else {
+            return;
+        };
+        let same_map = self.map_file_name.as_deref().is_some_and(|current| {
+            normalize_map_file_name(current) == normalize_map_file_name(&snapshot_file_name)
+        });
+        if !same_map {
+            // Snapshots can be delayed across a transition. They may not use
+            // a packet cursor for another map, but must not erase the newer
+            // MapInformation/MapChanged identity that will receive its own
+            // periodic snapshot next.
+            return;
+        }
+        let Some(index) = self.mini_map_index else {
+            return;
+        };
+        let Some(object) = snapshot.as_object_mut() else {
+            return;
+        };
+        if object
+            .get("miniMapIndex")
+            .is_none_or(|value| value.is_null())
+        {
+            object.insert("miniMapIndex".to_owned(), json!(index));
+        }
+    }
+}
+
+fn packet_minimap_value(packet: &Value) -> Option<&Value> {
+    packet
+        .get("miniMapIndex")
+        .filter(|value| !value.is_null())
+        .or_else(|| packet.get("miniMap").filter(|value| !value.is_null()))
+}
+
+fn map_minimap_index(packet: &Value) -> Option<u16> {
+    value_u64(packet_minimap_value(packet))
+        .and_then(|index| u16::try_from(index).ok())
+        .filter(|index| *index > 0)
+}
+
+fn map_file_name(value: &Value) -> Option<&str> {
+    value
+        .get("fileName")
+        .or_else(|| value.get("mapFileName"))
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
 }
 
 fn normalize_map_file_name(value: &str) -> String {
@@ -4691,11 +4790,25 @@ fn transform_map_model(payload: &Value) -> Value {
     let time_of_day_light_setting = value_u64(payload.get("lightSetting"))
         .and_then(|value| u8::try_from(value).ok())
         .filter(|value| *value <= 4);
+    let mini_map_index = value_u64(payload.get("miniMapIndex"))
+        .and_then(|value| u16::try_from(value).ok())
+        .filter(|value| *value > 0);
+    // The map parser is cache-backed and already used for native scene
+    // rendering. Its dimensions are required to scale the authoritative MMap
+    // image without title-specific geometry guesses.
+    let map_dimensions = payload
+        .get("mapFileName")
+        .and_then(Value::as_str)
+        .and_then(crate::map_parser::load_map)
+        .map(|map| (map.width, map.height));
 
     json!({
         "centerX": center_x,
         "centerY": center_y,
         "timeOfDayLightSetting": time_of_day_light_setting,
+        "miniMapIndex": mini_map_index,
+        "mapWidth": map_dimensions.map(|(width, _)| width),
+        "mapHeight": map_dimensions.map(|(_, height)| height),
         "patches": payload.get("terrainPatches").cloned().unwrap_or(Value::Array(vec![])),
     })
 }
@@ -7251,6 +7364,132 @@ mod tests {
     }
 
     #[test]
+    fn gateway_map_information_survives_schema_snapshots_until_the_map_changes() {
+        let context = GatewaySessionContext::default();
+        let (shell_sender, _shell_receiver) = std::sync::mpsc::channel();
+        let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
+        let mut snapshot_log_counter = 0;
+        let mut gameplay_adapter = NativeGameplayAdapter::default();
+        let mut last_world_payload = None;
+        let mut last_wallet = None;
+        let mut map_packet_cursor = NativeMapPacketCursor::default();
+        let mut ui_cursor = NativeUiPlayerCursor::default();
+        let mut in_flight_claim_mail_id = None;
+        let mut send_mail_in_flight = false;
+        let mut pending_mail_feedback = VecDeque::new();
+        let mut skill_cursor = SkillPacketCursor::default();
+        let mut social_cursor = SocialModel::default();
+        let mut push_world_state = |_: String| true;
+        macro_rules! ingest {
+            ($envelope:expr) => {{
+                handle_gateway_text_with_world_ingest(
+                    &$envelope.to_string(),
+                    &mut snapshot_log_counter,
+                    &context,
+                    &shell_sender,
+                    &mut gameplay_adapter,
+                    &gameplay_sender,
+                    &mut last_world_payload,
+                    &mut last_wallet,
+                    &mut map_packet_cursor,
+                    &mut ui_cursor,
+                    &mut in_flight_claim_mail_id,
+                    &mut send_mail_in_flight,
+                    &mut pending_mail_feedback,
+                    &mut skill_cursor,
+                    &mut social_cursor,
+                    &mut push_world_state,
+                )
+                .expect("gateway event")
+            }};
+        }
+
+        let d401_changed = json!({
+            "type": "packet",
+            "packet": "MapChanged",
+            "payload": {"mapIndex": 401, "fileName": "D401", "miniMap": 8},
+        });
+        assert_eq!(ingest!(d401_changed), WorldSnapshotIngestOutcome::NotSnapshot);
+        let d401_snapshot = json!({
+            "type": "worldSnapshot",
+            // The ordinary server snapshot deliberately lacks miniMapIndex.
+            "payload": {"mapFileName": "D401", "sceneView": {"center": {"x": 19, "y": 156}}},
+        });
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8))
+        );
+        let map_model: mir2_client_bevy::map::MapModel = serde_json::from_value(
+            transform_map_model(last_world_payload.as_ref().expect("cached snapshot")),
+        )
+        .expect("MapModel");
+        assert_eq!(
+            map_model.mini_map_index,
+            Some(8),
+            "the map model receives packet-only minimap metadata"
+        );
+
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8)),
+            "later same-map snapshots retain the cursor"
+        );
+
+        let d402_no_minimap = json!({
+            "type": "packet",
+            "packet": "MapChanged",
+            "payload": {"mapIndex": 402, "fileName": "D402", "miniMap": 0},
+        });
+        assert_eq!(
+            ingest!(d402_no_minimap),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        let d402_snapshot = json!({
+            "type": "worldSnapshot",
+            "payload": {"mapFileName": "D402", "sceneView": {"center": {"x": 1, "y": 2}}},
+        });
+        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert!(last_world_payload
+            .as_ref()
+            .is_some_and(|world| world.get("miniMapIndex").is_none()));
+
+        let d401_information = json!({
+            "type": "packet",
+            "packet": "MapInformation",
+            "payload": {"mapIndex": 401, "fileName": "D401", "miniMapIndex": 8},
+        });
+        assert_eq!(
+            ingest!(d401_information),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        // This is a stale pre-transition payload. It cannot clear the newer
+        // D401 packet identity before the first fresh D401 snapshot arrives.
+        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert!(last_world_payload
+            .as_ref()
+            .is_some_and(|world| world.get("miniMapIndex").is_none()));
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8)),
+            "the new D401 packet restores index 8 after the zero-index map"
+        );
+
+        assert_eq!(
+            ingest!(json!({"type": "packet", "packet": "LogOutSuccess", "payload": {}})),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert!(last_world_payload
+            .as_ref()
+            .is_some_and(|world| world.get("miniMapIndex").is_none()),
+            "a session boundary must not reuse the prior map's packet cursor"
+        );
+    }
+
+    #[test]
     fn equivalent_map_file_spellings_do_not_clear_the_live_scene() {
         let mut world = json!({
             "mapFileName": "0141.map",
@@ -8494,7 +8733,23 @@ mod tests {
         assert_eq!(model.center_x, 9);
         assert_eq!(model.center_y, 7);
         assert_eq!(model.time_of_day_light_setting, Some(4));
+        assert_eq!(model.mini_map_index, None);
+        assert_eq!(model.map_width, None);
+        assert_eq!(model.map_height, None);
         assert_eq!(model.patches.len(), 1);
+    }
+
+    #[test]
+    fn d401_minimap_transform_uses_authoritative_index_and_parsed_dimensions() {
+        let payload = json!({
+            "mapFileName": "D401",
+            "miniMapIndex": 8,
+            "sceneView": { "center": { "x": 19, "y": 156 } },
+        });
+        let model: mir2_client_bevy::map::MapModel =
+            serde_json::from_value(transform_map_model(&payload)).expect("MapModel");
+        assert_eq!(model.mini_map_index, Some(8));
+        assert_eq!((model.map_width, model.map_height), (Some(200), Some(200)));
     }
 
     #[test]
@@ -10492,6 +10747,7 @@ mod tests {
         let mut gameplay_adapter = NativeGameplayAdapter::default();
         let mut last_world_payload = None;
         let mut last_wallet = None;
+        let mut map_packet_cursor = NativeMapPacketCursor::default();
         let mut ui_cursor = NativeUiPlayerCursor::default();
         let mut in_flight_claim_mail_id = None;
         let mut send_mail_in_flight = false;
@@ -10517,6 +10773,7 @@ mod tests {
                 &gameplay_sender,
                 &mut last_world_payload,
                 &mut last_wallet,
+                &mut map_packet_cursor,
                 &mut ui_cursor,
                 &mut in_flight_claim_mail_id,
                 &mut send_mail_in_flight,
@@ -10546,6 +10803,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,
@@ -10582,6 +10840,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,
@@ -10610,6 +10869,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,
@@ -10637,6 +10897,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,

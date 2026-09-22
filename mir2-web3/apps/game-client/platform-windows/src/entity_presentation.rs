@@ -3295,10 +3295,29 @@ mod tests {
         };
         let layers = rendered["layers"].as_array().expect("rendered layers");
         let expected_layers = checkpoint["layers"].as_array().expect("checkpoint layers");
+        let redraws = layers.iter().filter(|layer| layer["key"].as_str().unwrap().contains(":self-occlusion:")).collect::<Vec<_>>();
+        let expected_redraw_roles = if rendered["isSelf"] == true {
+            expected_layers.iter().filter_map(|layer| {
+                let key = layer["key"].as_str()?;
+                let role = key.rsplit(':').next()?;
+                matches!(role, "body" | "hair" | "wings").then_some(role)
+            }).collect::<Vec<_>>()
+        } else { Vec::new() };
+        assert_eq!(redraws.len(), expected_redraw_roles.len());
+        for role in expected_redraw_roles {
+            let source = layers.iter().find(|v| v["key"] == format!("{object_id}:{role}")).unwrap();
+            let redraw = redraws.iter().find(|v| v["key"] == format!("{object_id}:self-occlusion:{role}")).unwrap();
+            for field in ["path", "atlasRectKey", "left", "top", "width", "height"] {
+                assert_eq!(source[field], redraw[field], "redraw preserves {role} {field}");
+            }
+            assert_eq!(redraw["opacity"], json!(0.4));
+            assert_eq!(redraw["additive"], json!(role == "wings"));
+            assert!(redraw["z"].as_f64().unwrap() > source["z"].as_f64().unwrap());
+        }
         assert_eq!(
-            layers.len(),
+            layers.len() - redraws.len(),
             expected_layers.len(),
-            "object {object_id} must have no extra or missing layers"
+            "object {object_id} must have no extra or missing original actor layers"
         );
         let unique_keys = layers
             .iter()

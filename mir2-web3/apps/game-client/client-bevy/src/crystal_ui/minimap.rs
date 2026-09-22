@@ -1,9 +1,8 @@
 //! Crystal large-minimap presentation for the Windows-native client.
 //!
-//! The first visual Candidate intentionally supports the required Bichon
-//! vertical slice. The source minimap index is server data in Crystal; the
-//! current renderer-neutral model does not expose it yet, so the profile is
-//! selected from the authoritative map title without changing shared schema.
+//! The source minimap index and map dimensions are authoritative map data.
+//! The renderer combines them with the loaded MMap image dimensions, so it
+//! never guesses geometry from a localized map title.
 
 use bevy::prelude::*;
 use bevy::ui::{widget::NodeImageMode, Display, Node, PositionType, Val};
@@ -14,7 +13,6 @@ use crate::entities::{EntityKind, EntityModel, EntityModelSet};
 use crate::map::MapModel;
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use crate::quest_model::QuestTracker;
-use crate::read_model::UiReadModel;
 
 const VIEW_LEFT: f32 = 901.0;
 const VIEW_TOP: f32 = 22.0;
@@ -23,6 +21,14 @@ const VIEW_HEIGHT: f32 = 108.0;
 
 #[derive(Component)]
 pub struct CrystalMiniMapRoot;
+
+/// Keeps the current image handle alive while the asynchronous asset load is
+/// pending, and replaces it only when the authoritative MMap index changes.
+#[derive(Resource, Default)]
+struct MiniMapAssetState {
+    image_index: Option<u16>,
+    image: Option<Handle<Image>>,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MiniMapProfile {
@@ -45,27 +51,32 @@ pub struct Mir2CrystalMiniMapPlugin;
 
 impl Plugin for Mir2CrystalMiniMapPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_crystal_minimap).add_systems(
-            Update,
-            render_crystal_minimap.after(NativePlayerUiSet::Mutate),
-        );
+        app.add_systems(Startup, spawn_crystal_minimap)
+            .init_resource::<MiniMapAssetState>()
+            .add_systems(
+                Update,
+                render_crystal_minimap.after(NativePlayerUiSet::Mutate),
+            );
     }
 }
 
-pub fn mini_map_profile(map_name: Option<&str>) -> Option<MiniMapProfile> {
-    let map_name = map_name?.trim();
-    if map_name.eq_ignore_ascii_case("BichonProvince")
-        || map_name.eq_ignore_ascii_case("Bichon Province")
-    {
-        return Some(MiniMapProfile {
-            image_index: 101,
-            image_width: 1050.0,
-            image_height: 700.0,
-            map_width: 700.0,
-            map_height: 700.0,
-        });
-    }
-    None
+pub fn mini_map_profile(
+    mini_map_index: Option<u16>,
+    map_width: Option<u16>,
+    map_height: Option<u16>,
+    image_width: u32,
+    image_height: u32,
+) -> Option<MiniMapProfile> {
+    let image_index = mini_map_index.filter(|index| *index > 0)?;
+    let map_width = map_width.filter(|value| *value > 0)?;
+    let map_height = map_height.filter(|value| *value > 0)?;
+    (image_width > 0 && image_height > 0).then_some(MiniMapProfile {
+        image_index,
+        image_width: image_width as f32,
+        image_height: image_height as f32,
+        map_width: map_width as f32,
+        map_height: map_height as f32,
+    })
 }
 
 pub fn source_crop(profile: MiniMapProfile, center_x: i32, center_y: i32) -> MiniMapCrop {
@@ -92,6 +103,13 @@ pub fn marker_position(
     let x = source_x - crop.left;
     let y = source_y - crop.top;
     (x >= 0.0 && x < crop.width && y >= 0.0 && y < crop.height).then_some(Vec2::new(x, y))
+}
+
+fn marker_display_position(crop: MiniMapCrop, source_position: Vec2) -> Vec2 {
+    Vec2::new(
+        source_position.x * VIEW_WIDTH / crop.width,
+        source_position.y * VIEW_HEIGHT / crop.height,
+    )
 }
 
 pub fn marker_color(kind: EntityKind) -> Color {
@@ -121,11 +139,12 @@ fn spawn_crystal_minimap(mut commands: Commands) {
 
 fn render_crystal_minimap(
     shell: Option<Res<NativeShellModel>>,
-    ui_model: Res<UiReadModel>,
     map_model: Res<MapModel>,
     entities: Res<EntityModelSet>,
     quest_tracker: Option<Res<QuestTracker>>,
     asset_server: Res<AssetServer>,
+    images: Res<Assets<Image>>,
+    mut asset_state: ResMut<MiniMapAssetState>,
     mut commands: Commands,
     mut roots: Query<(Entity, &mut Node), With<CrystalMiniMapRoot>>,
     minimap_state: Option<Res<NativePlayerUiState>>,
@@ -140,7 +159,25 @@ fn render_crystal_minimap(
         .as_deref()
         .map(|s| s.minimap_visible() && !s.local_keys.camera_hidden)
         .unwrap_or(true);
-    let profile = mini_map_profile(ui_model.player.map_name.as_deref());
+    let requested_image_index = map_model.mini_map_index;
+    if asset_state.image_index != requested_image_index {
+        asset_state.image_index = requested_image_index;
+        asset_state.image = requested_image_index
+            .map(|image_index| asset_server.load(format!("original-ui/MMap/{image_index}.png")));
+    }
+    let profile = asset_state
+        .image
+        .as_ref()
+        .and_then(|handle| images.get(handle))
+        .and_then(|image| {
+            mini_map_profile(
+                requested_image_index,
+                map_model.map_width,
+                map_model.map_height,
+                image.width(),
+                image.height(),
+            )
+        });
     let visible = in_game && minimap_visible && profile.is_some();
     root_node.display = if visible {
         Display::Flex
@@ -155,8 +192,8 @@ fn render_crystal_minimap(
     let shell_changed = shell.as_ref().is_some_and(|shell| shell.is_changed());
     let minimap_changed = minimap_state.as_ref().is_some_and(|s| s.is_changed());
     if !shell_changed
-        && !ui_model.is_changed()
         && !map_model.is_changed()
+        && !images.is_changed()
         && !entities.is_changed()
         && !quest_tracker
             .as_ref()
@@ -171,12 +208,16 @@ fn render_crystal_minimap(
         return;
     };
     let crop = source_crop(profile, map_model.center_x, map_model.center_y);
+    let image = asset_state
+        .image
+        .clone()
+        .expect("loaded minimap profile retains its image handle");
 
     commands.entity(root_entity).with_children(|root| {
         root.spawn((
             absolute_node(VIEW_LEFT, VIEW_TOP, VIEW_WIDTH, VIEW_HEIGHT),
             ImageNode {
-                image: asset_server.load(format!("original-ui/MMap/{}.png", profile.image_index)),
+                image,
                 rect: Some(Rect::new(
                     crop.left,
                     crop.top,
@@ -205,9 +246,12 @@ fn spawn_marker(
     entity: &EntityModel,
     quest_target: bool,
 ) {
-    let Some(position) = marker_position(profile, crop, entity.x, entity.y) else {
+    let Some(source_position) = marker_position(profile, crop, entity.x, entity.y) else {
         return;
     };
+    // ImageNode stretches a source crop smaller than the HUD viewport. Apply
+    // the same display scale to markers so they remain on their map pixels.
+    let position = marker_display_position(crop, source_position);
     let (size, color) = marker_style(entity.kind, quest_target);
     parent.spawn((
         absolute_node(
@@ -244,28 +288,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn bichon_profile_matches_source_map_and_exported_minimap() {
+    fn d401_profile_uses_authoritative_index_image_and_map_dimensions() {
         assert_eq!(
-            mini_map_profile(Some("BichonProvince")),
+            mini_map_profile(Some(8), Some(200), Some(200), 300, 199),
             Some(MiniMapProfile {
-                image_index: 101,
-                image_width: 1050.0,
-                image_height: 700.0,
-                map_width: 700.0,
-                map_height: 700.0,
+                image_index: 8,
+                image_width: 300.0,
+                image_height: 199.0,
+                map_width: 200.0,
+                map_height: 200.0,
             })
         );
-        assert_eq!(mini_map_profile(Some("Unknown")), None);
+        assert_eq!(mini_map_profile(None, Some(200), Some(200), 300, 199), None);
+        assert_eq!(mini_map_profile(Some(8), None, Some(200), 300, 199), None);
     }
 
     #[test]
-    fn source_crop_centres_the_bichon_player_and_clamps_edges() {
-        let profile = mini_map_profile(Some("BichonProvince")).unwrap();
+    fn map_change_uses_the_new_authoritative_image_geometry() {
+        let d401 = mini_map_profile(Some(8), Some(200), Some(200), 300, 199).unwrap();
+        let next_map = mini_map_profile(Some(9), Some(400), Some(300), 600, 399).unwrap();
+        assert_eq!(d401.image_index, 8);
+        assert_eq!(next_map.image_index, 9);
+        assert_ne!(source_crop(d401, 100, 100), source_crop(next_map, 100, 100));
+    }
+
+    #[test]
+    fn source_crop_centres_the_d401_player_and_clamps_edges() {
+        let profile = mini_map_profile(Some(8), Some(200), Some(200), 300, 199).unwrap();
         assert_eq!(
-            source_crop(profile, 335, 262),
+            source_crop(profile, 100, 100),
             MiniMapCrop {
-                left: 442.5,
-                top: 208.0,
+                left: 90.0,
+                top: 45.5,
                 width: 120.0,
                 height: 108.0,
             }
@@ -276,14 +330,31 @@ mod tests {
 
     #[test]
     fn marker_positions_share_the_same_source_crop_transform() {
-        let profile = mini_map_profile(Some("BichonProvince")).unwrap();
-        let crop = source_crop(profile, 335, 262);
+        let profile = mini_map_profile(Some(8), Some(200), Some(200), 300, 199).unwrap();
+        let crop = source_crop(profile, 100, 100);
         assert_eq!(
-            marker_position(profile, crop, 335, 262),
+            marker_position(profile, crop, 100, 100),
             Some(Vec2::new(60.0, 54.0))
         );
         assert_eq!(marker_position(profile, crop, 0, 0), None);
         assert_eq!(marker_color(EntityKind::SelfPlayer), Color::WHITE);
+    }
+
+    #[test]
+    fn small_source_crop_scales_markers_with_the_stretched_image() {
+        let profile = mini_map_profile(Some(8), Some(100), Some(80), 100, 80).unwrap();
+        let crop = source_crop(profile, 50, 40);
+        assert_eq!(
+            crop,
+            MiniMapCrop {
+                left: 0.0,
+                top: 0.0,
+                width: 100.0,
+                height: 80.0
+            }
+        );
+        let source = marker_position(profile, crop, 50, 40).expect("centre marker");
+        assert_eq!(marker_display_position(crop, source), Vec2::new(60.0, 54.0));
     }
 
     #[test]

@@ -1351,6 +1351,15 @@ fn build_entity_render_state_with_index(
                             layer["opacity"] = json!(0.5);
                         }
                     }
+                    if kind == "selfPlayer" {
+                        append_self_occlusion_redraw(
+                            &mut layers,
+                            actor_layer_count,
+                            &object_id,
+                            direction,
+                            payload,
+                        );
+                    }
                     let mut rendered_entity = json!({
                         "objectId": object_id,
                         "kind": kind,
@@ -1648,6 +1657,48 @@ fn normalized_object_id(value: Option<&Value>) -> Option<String> {
 enum HighlightBand {
     Hover,
     Selected,
+}
+
+// Crystal GameScene redraws only the user's body/head/wings at opacity 0.4
+// after the map, before target blends and effects. Body/head use ordinary
+// alpha; DrawWings retains its additive blend. Independent of HighlightTarget;
+// weapons, mounts and shadows stay occluded.
+fn append_self_occlusion_redraw(
+    layers: &mut Vec<Value>,
+    actor_layer_count: usize,
+    object_id: &str,
+    direction: &str,
+    payload: &Value,
+) {
+    let prefix = format!("{object_id}:");
+    let head_before_wings = matches!(direction_index(direction), 0 | 1 | 2 | 6 | 7);
+    let roles = if head_before_wings {
+        ["body", "hair", "wings"]
+    } else {
+        ["body", "wings", "hair"]
+    };
+    let (_, max_world_z) = post_world_depth_bounds(payload);
+    // Reserve the existing gap below the first hover band, without changing
+    // any actor/effect depth contracts. The three source draws fit inside it.
+    let base_z = max_world_z + POST_WORLD_BAND_GAP * 0.5;
+    let source = &layers[..actor_layer_count.min(layers.len())];
+    let redraws = roles
+        .iter()
+        .enumerate()
+        .filter_map(|(order, role)| {
+            let key = format!("{prefix}{role}");
+            let layer = source.iter().find(|layer| layer["key"] == key)?;
+            let mut redraw = layer.clone();
+            redraw["key"] = json!(format!("{object_id}:self-occlusion:{role}"));
+            redraw["z"] = json!(base_z + order as f32);
+            // Hidden's 0.5 applies only inside PlayerObject.Draw and is
+            // restored before GameScene's explicit 0.4 redraw pass.
+            redraw["opacity"] = json!(0.4);
+            redraw["additive"] = json!(*role == "wings");
+            Some(redraw)
+        })
+        .collect::<Vec<_>>();
+    layers.extend(redraws);
 }
 
 fn append_actor_highlight(
@@ -2101,6 +2152,10 @@ pub(crate) fn routing_atlas_manifest_fixture(frame_paths: &[&str]) -> Value {
 }
 
 #[cfg(test)]
+#[path = "self_occlusion_redraw_tests.rs"]
+mod self_occlusion_redraw_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -2467,8 +2522,20 @@ mod tests {
                                 build_entity_render_state_with_poses(&payload, &poses).unwrap();
                             let entity = &state["entities"][0];
                             let layers = entity["layers"].as_array().unwrap();
-                            assert_eq!(layers.len(), 3,
+                            let actor_layers = layers.iter().filter(|layer| !layer["key"].as_str().unwrap().contains(":self-occlusion:")).collect::<Vec<_>>();
+                            assert_eq!(actor_layers.len(), 3,
                                 "{library} offset {body_offset}, {direction}, {action:?}, phase {phase}");
+                            assert_eq!(layers.len(), 5, "three actor parts plus body/hair redraw");
+                            for role in ["body", "hair"] {
+                                let original = actor_layers.iter().find(|v| v["key"] == format!("1000:{role}")).unwrap();
+                                let redraw = layers.iter().find(|v| v["key"] == format!("1000:self-occlusion:{role}")).unwrap();
+                                for field in ["path", "atlasRectKey", "left", "top", "width", "height"] {
+                                    assert_eq!(original[field], redraw[field]);
+                                }
+                                assert_eq!(redraw["opacity"], json!(0.4));
+                                assert_eq!(redraw["additive"], json!(false));
+                                assert!(redraw["z"].as_f64().unwrap() > original["z"].as_f64().unwrap());
+                            }
                             let body = layers
                                 .iter()
                                 .find(|layer| layer["key"] == "1000:body")

@@ -1768,7 +1768,7 @@ fn update_hud_map_model(
 fn update_hud_minimap_visibility(
     shell: Res<NativeShellModel>,
     state: Option<Res<NativePlayerUiState>>,
-    ui_model: Res<UiReadModel>,
+    map_model: Res<MapModel>,
     mut node_queries: ParamSet<(
         Query<&mut Node, With<CrystalHudMinimap>>,
         Query<&mut Node, With<CrystalHudMinimapCollapsed>>,
@@ -1784,7 +1784,12 @@ fn update_hud_minimap_visibility(
         .as_deref()
         .map(|s| s.minimap_visible())
         .unwrap_or(true);
-    let expanded = minimap_is_expanded(preferred_expanded, ui_model.player.map_name.as_deref());
+    let expanded = minimap_is_expanded(
+        preferred_expanded,
+        map_model.mini_map_index,
+        map_model.map_width,
+        map_model.map_height,
+    );
     let expanded_display = if in_game && expanded {
         Display::Flex
     } else {
@@ -1835,8 +1840,16 @@ pub const fn minimap_footer_top(expanded: bool) -> f32 {
     }
 }
 
-pub fn minimap_is_expanded(preferred_expanded: bool, map_name: Option<&str>) -> bool {
-    preferred_expanded && super::minimap::mini_map_profile(map_name).is_some()
+pub fn minimap_is_expanded(
+    preferred_expanded: bool,
+    mini_map_index: Option<u16>,
+    map_width: Option<u16>,
+    map_height: Option<u16>,
+) -> bool {
+    preferred_expanded
+        && mini_map_index.is_some_and(|index| index > 0)
+        && map_width.is_some_and(|width| width > 0)
+        && map_height.is_some_and(|height| height > 0)
 }
 
 fn set_text<T>(texts: &mut Query<&mut Text, With<T>>, value: String)
@@ -2084,7 +2097,8 @@ mod tests {
             screen: NativeShellScreen::InGame,
             ..Default::default()
         })
-        .init_resource::<UiReadModel>();
+        .init_resource::<UiReadModel>()
+        .init_resource::<MapModel>();
         app.add_systems(Update, update_hud_minimap_visibility);
         app.world_mut().spawn((
             Node::default(),
@@ -2492,10 +2506,11 @@ mod tests {
     }
 
     #[test]
-    fn missing_minimap_profile_forces_small_frame_without_losing_preference() {
-        assert!(minimap_is_expanded(true, Some("BichonProvince")));
-        assert!(!minimap_is_expanded(true, Some("UnknownMap")));
-        assert!(!minimap_is_expanded(false, Some("BichonProvince")));
+    fn missing_minimap_index_or_dimensions_forces_small_frame_without_losing_preference() {
+        assert!(minimap_is_expanded(true, Some(8), Some(200), Some(200)));
+        assert!(!minimap_is_expanded(true, None, Some(200), Some(200)));
+        assert!(!minimap_is_expanded(true, Some(8), None, Some(200)));
+        assert!(!minimap_is_expanded(false, Some(8), Some(200), Some(200)));
     }
 
     #[test]
