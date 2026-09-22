@@ -4,7 +4,8 @@
 > HUD, skill, hero or ordinary inventory hover. Actual modal/input and service
 > panel guards remain. Windows input 100/100, shared UI guards 12/12, and a
 > 58-step Bichon entrance controller route with real collision pass. Release
-> package is ready; normal-exit switch and visual acceptance remain open.
+> client `841da03dc` is deployed after normal user exit and connected to the
+> retained Gateway; native visual acceptance remains open.
 > No new Crystal parity percentage is claimed.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-route-hover-20260923.md).
 

@@ -6,8 +6,9 @@
 > guard now excludes hover while retaining modal/drag/press/service-panel
 > protection. Windows input 100/100 and shared UI guards 12/12 pass; actual
 > Bichon collision plus a new entity is avoided over 58 fixture ACK steps.
-> Release package is ready at `C:/numeron-legend-of-rebirth-20260923-route-hover`;
-> switch after normal user exit. Gateway is unchanged.
+> Client `841da03dc` is deployed as PID29732 from
+> `C:/numeron-legend-of-rebirth-20260923-route-hover` after normal user exit;
+> WebSocket is connected to unchanged Gateway PID36484.
 > Native visual acceptance stays open; the user retains gameplay control.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-route-hover-20260923.md).
 

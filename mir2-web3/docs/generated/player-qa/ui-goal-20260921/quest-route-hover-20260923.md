@@ -79,5 +79,16 @@ Offline native release build succeeded. Candidate package:
 Gateway `e65bdc4eb` and original store/keys stay running without a restart.
 Config hash remains `01E4A40E54A5B8C7D6B1DABD7E4C13F7BEF434EC26EAEB1B77180E4BCEFEE834`.
 The assets junction, fixed daylight and movement/render diagnostics are retained.
-The previous client PID44352 is still running; replacement waits for normal
-user exit/close. The new candidate is not yet deployed or visually accepted.
+After the user confirmed normal exit, no previous native client process
+remained. Its log records the confirmed Exit dialog and successful event-loop
+return. Client source `841da03dc87fd7cfde839e2ca3aa998981e17dae` launched as
+PID29732 at local 2026-09-23 03:38 with matching executable/config hashes.
+It is responsive with title `numeron-legend of rebirth`; startup confirms
+complete local assets, fixed daylight and a WebSocket connection to the
+retained Gateway PID36484 at `ws://127.0.0.1:19910/ws`.
+
+Launch record: `C:/mir2-ui-repair-20260921/render-live/route-hover-client-launch.json`.
+Logs use prefix `20260923-033815-735` in the same directory. The local manifest
+now records `deployed=true`, while `visualAccepted=false` remains. No service
+restart, account editing or gameplay input was performed. The user retains
+control for actual path-following acceptance.
