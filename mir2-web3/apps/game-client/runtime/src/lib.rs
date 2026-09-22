@@ -5856,7 +5856,21 @@ fn begin_presentation_pose_frame(
         .snapshot
         .as_ref()
         .is_some_and(|snapshot| snapshot.enabled);
+    let previous_camera = presentation_poses.camera_screen_offset();
+    let previous_source = presentation_poses.camera_source();
     presentation_poses.begin_frame(motion_table.now_ms, renderer_enabled);
+    let incoming_center = entity_render_state.snapshot.as_ref()
+        .and_then(|snapshot| snapshot.center_x.zip(snapshot.center_y))
+        .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
+    if matches!((presentation_poses.applied_map_center(), incoming_center),
+        (Some(map), Some(entity)) if map != entity)
+    {
+        // sync_entity_render_layers retains the entire previous actor frame
+        // while waiting for its matching map center. Retain its camera too:
+        // advancing just the camera exposes a one-phase screen-space jerk.
+        presentation_poses.set_camera(previous_camera, previous_source);
+        return;
+    }
     // `sync_map_render` runs immediately before this system. Use the centre it
     // actually committed, not the newer requested snapshot centre, so a local
     // movement window has the same screen pose before and after its fast ACK.
@@ -6713,6 +6727,35 @@ mod entity_atlas_tests {
         assert!(!map_render_revision_is_current(Some(42), Some(&applied), 7));
         assert!(!map_render_revision_is_current(Some(41), Some(&applied), 8));
         assert!(!map_render_revision_is_current(Some(41), None, 7));
+    }
+
+    #[test]
+    fn pending_entity_center_retains_camera_with_the_previous_actor_frame() {
+        let mut app = App::new();
+        let snapshot: EntityRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth":1024, "stageHeight":768,
+            "centerX":304, "centerY":447, "entities":[]
+        })).unwrap();
+        let mut state = RuntimeEntityRenderState::default();
+        state.snapshot = Some(snapshot);
+        let mut poses = presentation_pose::PresentationPoseBuffer::default();
+        poses.begin_frame(0.0, true);
+        poses.set_applied_map_provenance(Some(presentation_pose::PresentationGridCenter {x:302,y:445}), Some(1));
+        poses.set_applied_entity_center(Some(presentation_pose::PresentationGridCenter {x:302,y:445}));
+        poses.set_camera(Vec2::new(-16.0,16.0), presentation_pose::CameraPoseSource::LocalCommand);
+        app.insert_resource(state)
+            .insert_resource(poses)
+            .insert_resource(motion::EntityMotionTable::default())
+            .insert_resource(local_motion::LocalMotionPresentationShadow::default())
+            .add_systems(Update, begin_presentation_pose_frame);
+        // Repeat the delay: neither a later phase nor a repeated tick may move
+        // the camera while sync_entity_render_layers keeps the old body.
+        for now in [120.0, 140.0, 240.0] {
+            app.world_mut().resource_mut::<motion::EntityMotionTable>().now_ms = now;
+            app.update();
+            assert_eq!(app.world().resource::<presentation_pose::PresentationPoseBuffer>()
+                .camera_screen_offset(), Vec2::new(-16.0,16.0));
+        }
     }
 
     fn entity_sync_test_app() -> App {
