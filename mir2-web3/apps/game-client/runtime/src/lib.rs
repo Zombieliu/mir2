@@ -5638,6 +5638,7 @@ fn browser_asset_path(path: &str) -> String {
 fn self_camera_screen_offset(
     motion_table: &motion::EntityMotionTable,
     applied_map_center: Option<presentation_pose::PresentationGridCenter>,
+    smooth_display: bool,
 ) -> (Vec2, presentation_pose::CameraPoseSource) {
     let Some((from_x, from_y, to_x, to_y, started_ms, expires_ms)) = pending_self_camera_motion()
     else {
@@ -5652,7 +5653,7 @@ fn self_camera_screen_offset(
         expires_ms,
     };
     let Some(camera_offset) =
-        self_camera_offset_for_applied_center(window, motion_table.now_ms, applied_map_center)
+        self_camera_offset_for_applied_center_mode(window, motion_table.now_ms, applied_map_center, smooth_display)
     else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     };
@@ -5667,6 +5668,15 @@ fn self_camera_offset_for_applied_center(
     now_ms: f64,
     applied_map_center: Option<presentation_pose::PresentationGridCenter>,
 ) -> Option<Vec2> {
+    self_camera_offset_for_applied_center_mode(window, now_ms, applied_map_center, false)
+}
+
+fn self_camera_offset_for_applied_center_mode(
+    window: local_motion::LocalTsMotionWindow,
+    now_ms: f64,
+    applied_map_center: Option<presentation_pose::PresentationGridCenter>,
+    smooth_display: bool,
+) -> Option<Vec2> {
     if window.expires_ms <= window.started_ms
         || (window.from_x == window.to_x && window.from_y == window.to_y)
     {
@@ -5678,7 +5688,10 @@ fn self_camera_offset_for_applied_center(
     // A late ACK must not move the camera back to a source-centred frame at
     // the animation deadline. The motion function clamps at the endpoint;
     // centre compensation below then reaches zero when the map commits.
-    let mut entity_offset = motion::compute_motion_offset_fractional(
+    let mut entity_offset = if smooth_display {
+        let progress = ((now_ms - window.started_ms) / (window.expires_ms - window.started_ms)).clamp(0.0, 1.0) as f32;
+        Vec2::new((window.from_x - window.to_x) * 48.0, (window.from_y - window.to_y) * 32.0) * (1.0 - progress)
+    } else { motion::compute_motion_offset_fractional(
         window.from_x,
         window.from_y,
         window.to_x,
@@ -5688,7 +5701,7 @@ fn self_camera_offset_for_applied_center(
         now_ms,
         48.0,
         32.0,
-    );
+    ) };
     if let Some(center) = applied_map_center {
         let center_matches_window = (center.x == window.from_x.round() as i32
             && center.y == window.from_y.round() as i32)
@@ -5732,6 +5745,26 @@ fn active_self_camera_motion_window(now_ms: f64) -> Option<local_motion::LocalTs
 #[cfg(test)]
 mod self_camera_motion_tests {
     use super::*;
+
+    #[test]
+    fn smooth_fallback_does_not_jump_one_sprite_phase_before_command_takeover() {
+        let window = run_window();
+        let source = Some(presentation_pose::PresentationGridCenter { x:10, y:5 });
+        let target = Some(presentation_pose::PresentationGridCenter { x:12, y:5 });
+        let mut previous = 0.0;
+        for now in [0.0, 10.0, 20.0, 30.0, 40.0, 100.0, 600.0, 900.0] {
+            let offset = self_camera_offset_for_applied_center_mode(window, now, source, true).unwrap();
+            let expected = 96.0 * (now / 600.0).min(1.0) as f32;
+            assert!((-offset.x - expected).abs() < 0.001);
+            assert!(-offset.x >= previous);
+            previous = -offset.x;
+            let recentered = self_camera_offset_for_applied_center_mode(window, now, target, true).unwrap();
+            assert!(((-recentered.x + 96.0) - expected).abs() < 0.001);
+        }
+        // Old fallback exposed phase zero immediately: a 16 px jump followed
+        // by a rollback when the smooth command arrived a few ticks later.
+        assert_eq!(self_camera_offset_for_applied_center_mode(window, 0.0, source, false).unwrap().x, -16.0);
+    }
 
     fn run_window() -> local_motion::LocalTsMotionWindow {
         local_motion::LocalTsMotionWindow {
@@ -5882,7 +5915,7 @@ fn begin_presentation_pose_frame(
     // actually committed, not the newer requested snapshot centre, so a local
     // movement window has the same screen pose before and after its fast ACK.
     let (ts_camera_offset, ts_source) =
-        self_camera_screen_offset(&motion_table, presentation_poses.applied_map_center());
+        self_camera_screen_offset(&motion_table, presentation_poses.applied_map_center(), local_motion.smooth_display_enabled());
     let mut selected_camera_offset = ts_camera_offset;
     let mut selected_source = ts_source;
     let mut selected_motion = None;
