@@ -24,8 +24,17 @@ are added. Other render layers and the movement-cadence repair remain active.
 Verification: lighting regressions 14/14 and session-config regressions 11/11
 pass. The new lifecycle regression covers server Night, dark map override,
 scene reset, normal logout, reconnect, and restoration of source lighting
-when the preference is disabled. The native release build/package is recorded
-at handoff. Native visual verification remains separate.
+when the preference is disabled. The native release build passes. Native visual
+verification remains separate.
 
 Logs: `C:/mir2-ui-repair-20260921/daylight-lighting-tests.log`,
 `daylight-config-tests.log`, and `daylight-client-build.log`.
+
+Prepared package: `C:/numeron-legend-of-rebirth-20260922-daylight`.
+Client source `e3d32fa9fed3069024bdf822f95ca751453ebdf4`, SHA256
+`2575F495C1C4EF3CE1A7F1BDB73FD89C9E1F9F0930BD354E4E5727B3BF24D53D`.
+Its config explicitly sets `force_daylight = true`, SHA256
+`01E4A40E54A5B8C7D6B1DABD7E4C13F7BEF434EC26EAEB1B77180E4BCEFEE834`.
+Gateway source remains `1b60931f7` with the movement-deadline repair; no server
+replacement is required for this display setting. Native switch awaits normal
+user logout/close. Assets remain a shared junction. `visualAccepted=false`.
