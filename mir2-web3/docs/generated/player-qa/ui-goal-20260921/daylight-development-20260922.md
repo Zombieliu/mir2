@@ -36,5 +36,10 @@ Client source `e3d32fa9fed3069024bdf822f95ca751453ebdf4`, SHA256
 Its config explicitly sets `force_daylight = true`, SHA256
 `01E4A40E54A5B8C7D6B1DABD7E4C13F7BEF434EC26EAEB1B77180E4BCEFEE834`.
 Gateway source remains `1b60931f7` with the movement-deadline repair; no server
-replacement is required for this display setting. Native switch awaits normal
-user logout/close. Assets remain a shared junction. `visualAccepted=false`.
+replacement is required for this display setting. After the user confirmed
+normal logout/close, native PID44840 launched from this package at 23:01
+Asia/Shanghai. Startup reports `force_daylight=true` and connects to the
+existing Gateway. Movement/render diagnostics use prefix
+`C:/mir2-ui-repair-20260921/render-live/20260922-230135-354`.
+Assets remain a shared junction. User visual testing is pending;
+`visualAccepted=false`.
