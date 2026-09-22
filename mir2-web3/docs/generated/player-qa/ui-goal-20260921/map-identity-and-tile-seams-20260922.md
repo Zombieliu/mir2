@@ -65,7 +65,7 @@ Reproduction commands from the project root:
 ```powershell
 cargo +1.95.0 test --manifest-path apps/game-client/platform-windows/Cargo.toml --offline -- --test-threads=1
 cargo +1.95.0 run --manifest-path apps/game-client/runtime/Cargo.toml --example tile_seam_probe --no-default-features --offline
-node --test apps/web/scripts/test-map-atlas-budget.mjs apps/web/scripts/test-map-atlas-gutters.mjs
+npm --prefix apps/web run test:map-atlas-budget
 node apps/web/scripts/build-map-atlas-pack.mjs --preserveExisting true
 node apps/web/scripts/audit-map-atlas-gutters.mjs
 ```
@@ -76,3 +76,14 @@ and linked back; source, assets and saves were not moved. The first GPU
 capture was empty before readiness and was discarded as inconclusive;
 the final matrix enforces positive controls. Evidence JSON accompanies this
 record. Deployment and native visual checks remain pending normal logout.
+
+Prepared client source `192e14ce14a9bfb248b4a03c96121e84964a86e8`, package
+`C:/numeron-legend-of-rebirth-20260923-map-identity-seams`.
+Client SHA256 `B94737CB547F574C77BE609E1F44F5FC230A18C91327390A22E70FD0B4B5D476`.
+Gateway remains deployed source `1b60931f7` / PID42392; no service or store
+restart is needed. The retained daylight config SHA256 is
+`01E4A40E54A5B8C7D6B1DABD7E4C13F7BEF434EC26EAEB1B77180E4BCEFEE834`.
+The candidate manifest pins the new map atlas hash and records the shared
+mutable asset junction. A live-process check still found old client PID44840;
+normal logout/close was requested only after packaging to preserve progress.
+`deployed=false`, `visualAccepted=false` at this checkpoint.
