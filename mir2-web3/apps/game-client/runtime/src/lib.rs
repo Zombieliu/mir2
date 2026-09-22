@@ -1508,7 +1508,8 @@ pub fn set_mir2_map_camera_offset(x: f32, y: f32) {
 /// camera scroll at display refresh rate (instead of the ~33Hz React `motionNow`
 /// clock). Opt-in: only the `?bevySelfCamera=1` producer calls this. Mirrors
 /// `EntityMotionSnapshot` (`fromX,fromY,toX,toY,startedAt,expiresAt`). When the step
-/// has elapsed (`now >= expires_ms`) the camera falls back to origin.
+/// has elapsed the pose stays at its endpoint until the retained map centre
+/// catches up or the producer clears/replaces the window.
 #[wasm_bindgen(js_name = setMir2SelfCameraMotion)]
 pub fn set_mir2_self_camera_motion(
     from_x: f32,
@@ -5603,7 +5604,8 @@ fn browser_asset_path(path: &str) -> String {
 /// self motion window pushed via `setMir2SelfCameraMotion` and interpolates the
 /// sub-cell offset every frame (so the scroll no longer steps at the ~33Hz React
 /// `motionNow` clock). Returns `Vec2::ZERO` when no window is set (default
-/// fold-in) or the step has elapsed → camera stays pinned at origin.
+/// fold-in). A completed step stays at its endpoint relative to the applied
+/// map centre until that centre catches up or the producer clears the window.
 ///
 /// Units: CSS-px screen space (the entity render layers' coordinate system, 48×32
 /// per cell), Y flipped because `entity_render_layer_position` maps screen-top via
@@ -5643,7 +5645,6 @@ fn self_camera_offset_for_applied_center(
     applied_map_center: Option<presentation_pose::PresentationGridCenter>,
 ) -> Option<Vec2> {
     if window.expires_ms <= window.started_ms
-        || now_ms >= window.expires_ms
         || (window.from_x == window.to_x && window.from_y == window.to_y)
     {
         return None;
@@ -5651,6 +5652,9 @@ fn self_camera_offset_for_applied_center(
     // Successive movement windows can start from the fractional pose of the
     // previous step. Preserve that value across the JS/WASM boundary; coercing
     // it to i32 makes the fallback camera disagree with the local-command pose.
+    // A late ACK must not move the camera back to a source-centred frame at
+    // the animation deadline. The motion function clamps at the endpoint;
+    // centre compensation below then reaches zero when the map commits.
     let mut entity_offset = motion::compute_motion_offset_fractional(
         window.from_x,
         window.from_y,
@@ -5757,7 +5761,7 @@ mod self_camera_motion_tests {
     }
 
     #[test]
-    fn stale_scene_center_and_expired_window_fail_closed() {
+    fn stale_scene_center_fails_closed_and_finished_step_stays_at_endpoint() {
         assert_eq!(
             self_camera_offset_for_applied_center(
                 run_window(),
@@ -5772,8 +5776,37 @@ mod self_camera_motion_tests {
                 600.0,
                 Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
             ),
-            None
+            Some(Vec2::ZERO)
         );
+    }
+
+    #[test]
+    fn completed_prediction_keeps_camera_at_endpoint_until_map_commit() {
+        for now_ms in [600.0, 750.0, 1_500.0] {
+            let old_center = self_camera_offset_for_applied_center(
+                run_window(), now_ms,
+                Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 }),
+            ).unwrap();
+            let committed = self_camera_offset_for_applied_center(
+                run_window(), now_ms,
+                Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
+            ).unwrap();
+            assert_eq!(old_center, Vec2::new(-96.0, 0.0));
+            assert_eq!(committed, Vec2::ZERO);
+            assert_eq!(committed.x - old_center.x, 96.0);
+            // Exercise the renderer's shared actor/camera pose contract:
+            // the player stays screen-locked and a fixed world object does
+            // not jump when the ACK finally commits the target-centred map.
+            let mut poses = presentation_pose::PresentationPoseBuffer::default();
+            poses.begin_frame(now_ms, true);
+            poses.set_camera(old_center, presentation_pose::CameraPoseSource::SelfWindow);
+            assert_eq!(poses.self_entity_offset() + poses.camera_screen_offset(), Vec2::ZERO);
+            let world_before = (30.0 - 10.0) * 48.0 + poses.camera_screen_offset().x;
+            poses.set_camera(committed, presentation_pose::CameraPoseSource::SelfWindow);
+            assert_eq!(poses.self_entity_offset() + poses.camera_screen_offset(), Vec2::ZERO);
+            let world_after = (30.0 - 12.0) * 48.0 + poses.camera_screen_offset().x;
+            assert_eq!(world_before, world_after);
+        }
     }
 
     #[cfg(not(target_arch = "wasm32"))]

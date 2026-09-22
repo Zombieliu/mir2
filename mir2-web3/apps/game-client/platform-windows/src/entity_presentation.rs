@@ -41,6 +41,7 @@ struct NativeMotionWindow {
     action: AnimationAction,
     direction: Direction,
     locally_predicted: bool,
+    locally_settled: bool,
 }
 
 #[derive(Debug)]
@@ -405,6 +406,7 @@ impl NativeEntityPresentation {
                 action,
                 direction,
                 locally_predicted: true,
+                locally_settled: false,
             },
         );
         self.self_object_id = Some(object_id.to_owned());
@@ -772,18 +774,22 @@ impl NativeEntityPresentation {
                         .get(&object_id)
                         .copied()
                         .filter(|window| {
-                            now_ms < window.expires_ms
+                            (now_ms < window.expires_ms || window.locally_predicted)
                                 && is_stale_self_source_echo(entity, x, y, *window)
                         })
                 {
-                    x = window.to_x as i32;
-                    y = window.to_y as i32;
-                    entity["x"] = Value::from(x);
-                    entity["y"] = Value::from(y);
+                    // Unacknowledged pixels belong to the camera/self offset,
+                    // not a new render center: the map is still source-centred.
+                    if !window.locally_predicted {
+                        x = window.to_x as i32;
+                        y = window.to_y as i32;
+                        entity["x"] = Value::from(x);
+                        entity["y"] = Value::from(y);
+                        self_center_correction = Some((x, y));
+                    }
                     entity["_nativeAnimationSequence"] = Value::from(window.animation_sequence);
                     entity["_nativeAnimationAction"] =
                         Value::from(movement_action_name(window.action));
-                    self_center_correction = Some((x, y));
                     stale_self_source_echo_applied = true;
                 }
             }
@@ -792,10 +798,9 @@ impl NativeEntityPresentation {
                 .motion_windows
                 .get_mut(&object_id)
                 .filter(|window| {
-                    now_ms < window.expires_ms
-                        && window.locally_predicted
-                        && window.to_x == x as f32
-                        && window.to_y == y as f32
+                    window.locally_predicted
+                        && (stale_self_source_echo_applied
+                            || (window.to_x == x as f32 && window.to_y == y as f32))
                 })
                 .map(|window| {
                     if !stale_self_source_echo_applied {
@@ -807,10 +812,21 @@ impl NativeEntityPresentation {
                             window.direction = direction;
                         }
                         window.locally_predicted = false;
+                        if now_ms >= window.expires_ms {
+                            // This movement was already displayed to completion.
+                            // Consume its ACK sequence without replaying locomotion.
+                            entity["_nativeAnimationAction"] = Value::from("standing");
+                        }
                     }
                 })
                 .is_some();
-            let previous = self.last_positions.insert(object_id.clone(), (x, y));
+            let previous = if stale_self_source_echo_applied
+                && self.motion_windows.get(&object_id).is_some_and(|window| window.locally_settled)
+            {
+                self.last_positions.get(&object_id).copied()
+            } else {
+                self.last_positions.insert(object_id.clone(), (x, y))
+            };
             if !preserved_local_prediction {
                 if let Some((from_x, from_y)) = previous.filter(|previous| *previous != (x, y)) {
                     let active_previous =
@@ -864,6 +880,7 @@ impl NativeEntityPresentation {
                             action,
                             direction,
                             locally_predicted: false,
+                            locally_settled: false,
                         };
                         self.motion_windows.insert(object_id.clone(), window);
                         if is_self {
@@ -904,7 +921,8 @@ impl NativeEntityPresentation {
         self.last_positions
             .retain(|object_id, _| observed_ids.contains(object_id));
         self.motion_windows.retain(|object_id, window| {
-            observed_ids.contains(object_id) && now_ms < window.expires_ms
+            observed_ids.contains(object_id)
+                && (now_ms < window.expires_ms || window.locally_predicted)
         });
         if let Some((x, y)) = self_center_correction {
             if let Some(center) = payload
@@ -931,15 +949,18 @@ impl NativeEntityPresentation {
         let expired = self
             .motion_windows
             .iter()
-            .filter(|(_, window)| now_ms >= window.expires_ms)
+            .filter(|(_, window)| now_ms >= window.expires_ms && !window.locally_settled)
             .map(|(object_id, _)| object_id.clone())
             .collect::<HashSet<_>>();
         if expired.is_empty() {
             return;
         }
 
-        self.motion_windows
-            .retain(|object_id, _| !expired.contains(object_id));
+        // An animation deadline is not an authoritative ACK. Retain one local
+        // receipt until confirmation/correction, while settling its pixels once.
+        self.motion_windows.retain(|object_id, window| {
+            !expired.contains(object_id) || window.locally_predicted
+        });
         if let Some(entities) = self
             .latest_payload
             .as_mut()
@@ -952,6 +973,16 @@ impl NativeEntityPresentation {
                 };
                 if !expired.contains(&object_id) {
                     continue;
+                }
+                if let Some(window) = self.motion_windows.get_mut(&object_id) {
+                    if window.locally_predicted {
+                        let destination = (window.to_x as i32, window.to_y as i32);
+                        // Remember the already-presented endpoint without
+                        // publishing a center the authoritative map has not
+                        // committed. Runtime holds the camera/self offset.
+                        self.last_positions.insert(object_id.clone(), destination);
+                        window.locally_settled = true;
+                    }
                 }
                 if let Some(object) = entity.as_object_mut() {
                     for field in [
@@ -972,7 +1003,10 @@ impl NativeEntityPresentation {
         if self
             .self_object_id
             .as_ref()
-            .is_some_and(|object_id| expired.contains(object_id))
+            .is_some_and(|object_id| {
+                expired.contains(object_id)
+                    && !self.motion_windows.get(object_id).is_some_and(|window| window.locally_predicted)
+            })
         {
             mir2_bevy_runtime::clear_mir2_self_camera_motion();
         }
@@ -1878,6 +1912,7 @@ mod tests {
             action: AnimationAction::Walking,
             direction: Direction::Right,
             locally_predicted: false,
+            locally_settled: false,
         };
         assert_eq!(native_motion_offset(&horizontal, 1_000), (-40.0, 0.0));
         assert_eq!(native_motion_offset(&horizontal, 1_099), (-40.0, 0.0));
@@ -1900,6 +1935,7 @@ mod tests {
             action: AnimationAction::Walking,
             direction: Direction::Up,
             locally_predicted: false,
+            locally_settled: false,
         };
         assert_eq!(native_motion_offset(&vertical, 2_000), (0.0, 26.0));
         assert_eq!(native_motion_offset(&vertical, 2_100), (0.0, 22.0));
@@ -1995,6 +2031,54 @@ mod tests {
         assert!(settled["entities"][0].get("motionSortX").is_none());
         assert!(settled["entities"][0].get("motionFromX").is_none());
         assert_eq!(settled["entities"][0]["x"], json!(11));
+    }
+
+    #[test]
+    fn late_self_run_ack_never_replays_completed_prediction_or_blocks_correction() {
+        let render = |p: &mut NativeEntityPresentation, time| {
+            p.render_state_if_changed_with_clocks(time - 1000, time, true, |payload, _, _| Some(payload.clone()));
+        };
+        let mut p = NativeEntityPresentation::default();
+        let mut initial = player_payload(7);
+        initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        p.replace_payload(initial.clone());
+        render(&mut p, 1000);
+        assert!(p.begin_local_self_motion("1", (10,10), (12,10), "right", true, 100, 1100));
+        render(&mut p, 1700);
+        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(10), "unacknowledged render coordinates must remain coherent with the source map");
+        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(10));
+        assert_eq!(p.last_positions["1"], (12,10), "receipt remembers the already-played endpoint");
+        assert!(p.motion_windows["1"].locally_settled);
+        let mut ack = player_payload(9);
+        ack["entities"][0]["x"] = json!(12);
+        ack["entities"][0]["direction"] = json!("right");
+        ack["entities"][0]["_nativeAnimationAction"] = json!("running");
+        ack["sceneView"]["center"]["x"] = json!(12);
+        p.replace_payload(ack.clone());
+        render(&mut p, 1850);
+        assert!(!p.has_active_motion(1850), "late ACK cannot restart movement");
+        assert_eq!(p.world.active_state("1").unwrap().pose().action, AnimationAction::Standing);
+        assert_eq!(p.last_positions["1"], (12,10));
+        assert!(p.begin_local_self_motion("1", (12,10), (14,10), "right", true, 900, 1900));
+        for time in [2000,2100,2300] {
+            p.replace_payload(ack.clone());
+            render(&mut p, time);
+            assert_eq!(p.motion_windows["1"].started_ms,1900,"source echoes cannot restart second run");
+            assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
+            assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12));
+        }
+        render(&mut p, 2500);
+        p.replace_payload(ack.clone());
+        render(&mut p, 2600);
+        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12), "render center stays source until ACK");
+        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
+        assert_eq!(p.last_positions["1"], (14,10));
+        assert!(p.motion_windows["1"].locally_predicted);
+        p.cancel_local_self_prediction("1", (12,10), "left");
+        assert!(!p.motion_windows.contains_key("1"));
+        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12));
+        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
+        assert_eq!(p.last_positions["1"], (12,10));
     }
 
     #[test]
