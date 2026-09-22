@@ -119,6 +119,15 @@ impl LocalMotionSegment {
         )
     }
 
+    fn smooth_pose(&self, now_ms: f64) -> Vec2 {
+        // Display-only interpolation. Sprite phases and command readiness keep
+        // their Crystal clocks; never extend travel when a display pulse is late.
+        let duration = f64::from(self.phase_count.max(1)) * MOVE_PHASE_INTERVAL_MS;
+        let progress = ((now_ms - self.started_ms) / duration).clamp(0.0, 1.0) as f32;
+        Vec2::new(self.from_x, self.from_y)
+            .lerp(Vec2::new(self.to_x, self.to_y), progress)
+    }
+
     fn current_offset(&self, cell_width: f32, cell_height: f32) -> Vec2 {
         motion::compute_motion_offset_fractional_for_phase_count(
             self.from_x,
@@ -257,6 +266,7 @@ impl Default for LocalMotionDiagnostics {
 
 #[derive(Debug, Default, Resource)]
 pub(crate) struct LocalMotionPresentationShadow {
+    smooth_display: bool,
     now_ms: f64,
     move_clock_pulse_id: u64,
     move_clock_next_pulse_ms: f64,
@@ -296,7 +306,11 @@ pub(crate) struct LocalMotionPresentationShadow {
 impl LocalMotionPresentationShadow {
     fn set_presentation_enabled(&mut self, enabled: bool) {
         self.presentation_enabled = enabled;
+        #[cfg(not(target_arch = "wasm32"))]
+        { self.smooth_display = std::env::var("MIR2_NATIVE_SMOOTH_MOVEMENT").as_deref() == Ok("1"); }
     }
+
+    pub(crate) fn smooth_display_enabled(&self) -> bool { self.smooth_display }
 
     pub(crate) fn presentation_enabled(&self) -> bool {
         self.presentation_enabled
@@ -408,7 +422,7 @@ impl LocalMotionPresentationShadow {
         if let Some(previous) = &self.segment {
             if previous.to_x == provided_from.x && previous.to_y == provided_from.y {
                 presentation_committed = previous.presentation_committed;
-                let current = previous.current_pose();
+                let current = if self.smooth_display { previous.smooth_pose(self.now_ms) } else { previous.current_pose() };
                 if chebyshev_distance(current, target) <= MAX_SMOOTH_TILE_DISTANCE {
                     effective_from = current;
                 }
@@ -566,7 +580,7 @@ impl LocalMotionPresentationShadow {
         object_id: &str,
         center_x: i32,
         center_y: i32,
-        _now_ms: f64,
+        now_ms: f64,
         cell_width: f32,
         cell_height: f32,
     ) -> Option<Vec2> {
@@ -597,7 +611,10 @@ impl LocalMotionPresentationShadow {
         }
 
         self.candidate_match_count = self.candidate_match_count.saturating_add(1);
-        let target_relative = segment.current_offset(cell_width, cell_height);
+        let target_relative = if self.smooth_display {
+            let pose = segment.smooth_pose(now_ms);
+            Vec2::new((pose.x - segment.to_x) * cell_width, (pose.y - segment.to_y) * cell_height)
+        } else { segment.current_offset(cell_width, cell_height) };
         Some(
             target_relative
                 + Vec2::new(
@@ -1401,6 +1418,34 @@ mod tests {
                 .presentation_committed
         );
         assert!(shadow.committed_segment_matches_ts_target(rebased_window));
+    }
+
+    #[test]
+    fn smooth_display_advances_inside_phase_and_preserves_recenter_and_endpoint() {
+        let mut shadow = LocalMotionPresentationShadow::default();
+        shadow.smooth_display = true;
+        shadow.apply_event(reset_event());
+        shadow.apply_event(walk_command(0.0));
+        let at = |s: &mut LocalMotionPresentationShadow, t, center| s.candidate_offset_for_applied_center("self", center, 10, t, 48.0, 32.0).unwrap();
+        let start = at(&mut shadow, 0.0, 10);
+        let first = at(&mut shadow, 10.0, 10);
+        let second = at(&mut shadow, 20.0, 10);
+        assert_eq!(start, Vec2::ZERO);
+        assert!(first.x > 0.0 && second.x > first.x && second.x < 2.0);
+        let recentered = at(&mut shadow, 20.0, 11);
+        assert!((second.x - (recentered.x + 48.0)).abs() < 0.001);
+        assert_eq!(at(&mut shadow, 600.0, 11), Vec2::ZERO);
+        assert_eq!(at(&mut shadow, 900.0, 11), Vec2::ZERO);
+        assert_eq!(shadow.segment.as_ref().unwrap().phase_index, 0, "display reads must not advance sprite phases");
+        shadow.now_ms = 300.0;
+        let before_turn = at(&mut shadow, 300.0, 10);
+        shadow.apply_event(MovementShadowEvent::CommandSent {
+            at_ms:300.0, direction:"Right".to_owned(), mode:"run".to_owned(),
+            from_x:11, from_y:10, to_x:13, to_y:10, phase_count:None,
+        });
+        assert_eq!(at(&mut shadow, 300.0, 10), before_turn, "successor starts at the displayed pose");
+        shadow.clear_state();
+        assert!(shadow.candidate_offset_for_applied_center("self", 10, 10, 301.0, 48.0, 32.0).is_none());
     }
 
     #[test]

@@ -54,6 +54,10 @@ fn run_writer(path: &std::path::Path, receiver: mpsc::Receiver<Value>) -> std::i
     if let Some(parent) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
         std::fs::create_dir_all(parent)?;
     }
+    // Lock a sidecar so the JSONL remains readable during a live reproduction.
+    let lock = std::fs::OpenOptions::new().create(true).read(true).write(true)
+        .truncate(false).open(path.with_extension("writer.lock"))?;
+    lock.try_lock().map_err(|error| std::io::Error::other(format!("trace writer already active: {error}")))?;
     let file = std::fs::OpenOptions::new()
         .create(true)
         // Windows cannot lock an append-only handle; include read access.
@@ -62,9 +66,6 @@ fn run_writer(path: &std::path::Path, receiver: mpsc::Receiver<Value>) -> std::i
         .open(path)?;
     // Never let two processes race the same file budget. Failure affects only
     // diagnostics; use separate trace paths for simultaneous clients.
-    file.try_lock().map_err(|error| {
-        std::io::Error::other(format!("trace file already locked or unavailable: {error}"))
-    })?;
     let existing = file.metadata()?.len();
     let mut output = BudgetWriter {
         writer: BufWriter::new(file),
@@ -83,7 +84,7 @@ fn run_writer(path: &std::path::Path, receiver: mpsc::Receiver<Value>) -> std::i
         if let Some(summary) = health.observe(&event) {
             output.record(&summary)?;
         }
-        let events = if event["type"] == "renderFrame" {
+        let events = if event["type"] == "renderFrame" && event.get("movementCorrelation").is_none() {
             ring.push(event)
         } else {
             vec![event]
@@ -538,6 +539,7 @@ mod tests {
         run_writer(&path, receiver).expect("real platform file locking and write must succeed");
         let contents = std::fs::read_to_string(&path).unwrap();
         std::fs::remove_file(&path).unwrap();
+        std::fs::remove_file(path.with_extension("writer.lock")).unwrap();
         let session: Value = serde_json::from_str(contents.trim()).unwrap();
         assert_eq!(session["type"], "renderTraceSession");
     }

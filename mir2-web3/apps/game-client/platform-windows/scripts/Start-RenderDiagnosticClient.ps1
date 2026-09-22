@@ -16,9 +16,11 @@ $renderLog = Join-Path $logPath "$stamp-render.jsonl"
 $movementLog = Join-Path $logPath "$stamp-movement.jsonl"
 $oldRenderPath = $env:MIR2_NATIVE_RENDER_TRACE_PATH
 $oldMovementPath = $env:MIR2_NATIVE_MOVEMENT_TRACE_PATH
+$oldSmoothMovement = $env:MIR2_NATIVE_SMOOTH_MOVEMENT
 try {
     $env:MIR2_NATIVE_RENDER_TRACE_PATH = $renderLog
     $env:MIR2_NATIVE_MOVEMENT_TRACE_PATH = $movementLog
+    $env:MIR2_NATIVE_SMOOTH_MOVEMENT = '1'
     # This is the interactive game window requested by the player.
     $clientProcess = Start-Process -FilePath $clientPath -WorkingDirectory $packagePath -WindowStyle Normal `
         -RedirectStandardOutput (Join-Path $logPath "$stamp-client.stdout.log") `
@@ -27,4 +29,5 @@ try {
 } finally {
     $env:MIR2_NATIVE_RENDER_TRACE_PATH = $oldRenderPath
     $env:MIR2_NATIVE_MOVEMENT_TRACE_PATH = $oldMovementPath
+    $env:MIR2_NATIVE_SMOOTH_MOVEMENT = $oldSmoothMovement
 }

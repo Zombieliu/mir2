@@ -4951,7 +4951,14 @@ fn sync_entity_render_layers(
                     direction: phase.direction,
                 }
             });
-            presentation_poses.reconcile_local_command_for_applied_center(candidate, motion);
+            if local_motion.smooth_display_enabled() {
+                // Path and committed-center validation above still applies;
+                // smooth display deliberately differs from the stepped fallback.
+                presentation_poses.set_local_self_motion(motion);
+                presentation_poses.set_camera(-candidate, presentation_pose::CameraPoseSource::LocalCommand);
+            } else {
+                presentation_poses.reconcile_local_command_for_applied_center(candidate, motion);
+            }
         }
     }
 
