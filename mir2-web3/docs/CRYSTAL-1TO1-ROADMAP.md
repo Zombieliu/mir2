@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-22 map transfer/floor seam candidate: packet map identity survives
+> partial/delayed snapshots without losing quest or skill receipts. Windows
+> 701/701 and native release build pass. Real GPU readback reproduces fractional
+> floor seams and verifies copied atlas borders across all tested motion phases;
+> source audit preserves 13,148,168 pixels across 2952 frames. Daylight and
+> continuous camera motion remain unchanged. Native visual acceptance is open.
+> [Evidence](generated/player-qa/ui-goal-20260921/map-identity-and-tile-seams-20260922.md).
+
 > 2026-09-22 user-requested development preference: Windows defaults to fixed
 > daylight, including the HUD sun icon, across map/logout/reconnect boundaries.
 > `[display] force_daylight = false` restores source lighting for original

@@ -3675,8 +3675,20 @@ where
                 .payload
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
-            map_packet_cursor.merge_into_same_map_snapshot(&mut payload);
             validate_quest_operation_ack(&payload)?;
+            map_packet_cursor.trace_snapshot_identity(&payload);
+            if map_packet_cursor.snapshot_is_from_previous_map(&payload) {
+                // An explicitly named source-map snapshot cannot supersede a
+                // newer transfer packet or repopulate destination UI/actors.
+                forward_stale_map_receipts(
+                    &mut payload,
+                    gameplay_adapter,
+                    gameplay_events,
+                    skill_cursor,
+                )?;
+                return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
+            }
+            map_packet_cursor.merge_into_same_map_snapshot(&mut payload);
             gameplay_adapter.observe_world_snapshot_dispositions(&payload);
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
             gameplay_adapter.observe_world_snapshot(&payload);
@@ -3819,7 +3831,7 @@ where
                         mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
                     }
                     if let Some(payload) = event.payload.as_ref() {
-                        map_packet_cursor.observe_map_information(payload);
+                        map_packet_cursor.observe_map_information_kind(payload, "MapChanged");
                         ui_cursor.observe_map_identity(payload);
                         let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(
                             ui_cursor.to_read_model_json().to_string(),
@@ -4078,13 +4090,42 @@ where
     }
 }
 
-/// Fold the authoritative MapInformation identity into the retained personal
-/// snapshot before the destination UserLocation arrives.
-///
-/// The Web client applies this packet immediately. The native packet-first
-/// path used to overlay only the new coordinates onto the retained snapshot,
-/// leaving `mapFileName`, title and source-map population untouched. Entering
-/// `0141` therefore rendered map `0` at `(2, 11)` and kept the Bichon title.
+/// Preserve session-scoped operation receipts without restoring the old scene.
+fn forward_stale_map_receipts(
+    payload: &mut Value,
+    gameplay_adapter: &NativeGameplayAdapter,
+    gameplay_events: &std::sync::mpsc::Sender<crate::gameplay_bridge::NativeGameplaySnapshot>,
+    skill_cursor: &mut SkillPacketCursor,
+) -> Result<(), String> {
+    validate_quest_operation_ack(payload)?;
+    if let Some(ack) = payload.get("questOperationAck").filter(|value| !value.is_null()) {
+        // ACKs are applied before full gameplay projections; this envelope
+        // carries the current big map and no old actors or scene metadata.
+        let mut receipt = gameplay_adapter.big_map_snapshot();
+        receipt.quest_operation_ack = Some(serde_json::from_value(ack.clone()).map_err(|e| e.to_string())?);
+        let _ = gameplay_events.send(receipt);
+    }
+    if payload.get("skillKeyAck").is_some_and(|value| !value.is_null()) {
+        // Skill authority is session-scoped. Retain its full model with the
+        // receipt, independently of the rejected world/map projection.
+        skill_cursor.observe_snapshot(payload);
+        if skill_cursor.hero.observe_snapshot(payload) {
+            skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+            if skill_cursor.hero.skill_key_ack.is_some() {
+                skill_cursor.pending_hero_receipts.push_back(
+                    serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?,
+                );
+                skill_cursor.pending_hero_model = None;
+            }
+        }
+        skill_cursor.flush_hero_model();
+        let _ = skill_cursor.queue_skill_model(payload)?;
+    }
+    Ok(())
+}
+
+/// Fold MapInformation into the retained snapshot before UserLocation. A
+/// transfer must not put destination coordinates onto source-map metadata.
 fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> bool {
     let next_file_name = packet
         .get("fileName")
@@ -4106,6 +4147,12 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
     let Some(object) = world.as_object_mut() else {
         return false;
     };
+    if map_changed {
+        for key in ["mapTitle", "miniMapIndex", "bigMapIndex", "mapLightSetting",
+            "mapDarkLight", "weatherParticles", "mapMusic"] {
+            object.remove(key);
+        }
+    }
     for (source, destination) in [
         ("mapIndex", "mapIndex"),
         ("fileName", "mapFileName"),
@@ -4154,15 +4201,17 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
     true
 }
 
-/// Keeps packet-only minimap metadata long enough for the next matching
-/// worldSnapshot. MapInformation carries `miniMapIndex`, while the ordinary
-/// snapshot schema does not. The cursor is scoped to the exact map filename:
-/// it is cleared on map/session reset and never fills a snapshot whose map is
-/// absent or different.
+/// Retains authoritative packet map identity across schema/partial snapshots.
+/// An absent snapshot identity inherits the latest map packet; an explicitly
+/// different identity is stale and must not replace destination projections.
+/// Scene/session reset clears this cursor before adopting the new packet.
 #[derive(Debug, Default)]
 struct NativeMapPacketCursor {
     map_file_name: Option<String>,
     mini_map_index: Option<u16>,
+    identity_metadata: serde_json::Map<String, Value>,
+    trace_pending_snapshot: bool,
+    trace_rejected_file: Option<String>,
 }
 
 impl NativeMapPacketCursor {
@@ -4171,16 +4220,43 @@ impl NativeMapPacketCursor {
     }
 
     fn observe_map_information(&mut self, packet: &Value) {
+        self.observe_map_information_kind(packet, "MapInformation");
+    }
+
+    fn observe_map_information_kind(&mut self, packet: &Value, packet_kind: &str) {
         let Some(map_file_name) = map_file_name(packet) else {
             return;
         };
         let changed = self.map_file_name.as_deref().is_some_and(|current| {
             normalize_map_file_name(current) != normalize_map_file_name(map_file_name)
         });
+        if changed || self.map_file_name.is_none() {
+            if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
+                    "event":"packet", "packet":packet_kind,
+                    "sourceFile":self.map_file_name, "sourceTitle":self.identity_metadata.get("mapTitle"),
+                    "sourceMiniMap":self.mini_map_index, "destinationFile":map_file_name,
+                    "destinationTitle":packet.get("title"), "destinationMiniMap":packet_minimap_value(packet),
+                }));
+            }
+            self.trace_pending_snapshot = true;
+            self.trace_rejected_file = None;
+        }
         if changed {
             self.mini_map_index = None;
+            self.identity_metadata.clear();
         }
         self.map_file_name = Some(map_file_name.to_owned());
+        for (source, destination) in [
+            ("mapIndex", "mapIndex"), ("title", "mapTitle"),
+            ("bigMapIndex", "bigMapIndex"), ("lights", "mapLightSetting"),
+            ("mapDarkLight", "mapDarkLight"), ("weatherParticles", "weatherParticles"),
+            ("music", "mapMusic"),
+        ] {
+            if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
+                self.identity_metadata.insert(destination.to_owned(), value.clone());
+            }
+        }
 
         // A present zero is authoritative: it means the destination has no
         // minimap and must clear a prior map's positive index.
@@ -4189,31 +4265,51 @@ impl NativeMapPacketCursor {
         }
     }
 
+    fn snapshot_is_from_previous_map(&self, snapshot: &Value) -> bool {
+        self.map_file_name.as_deref().zip(map_file_name(snapshot))
+            .is_some_and(|(current, incoming)| {
+                normalize_map_file_name(current) != normalize_map_file_name(incoming)
+            })
+    }
+
+    fn trace_snapshot_identity(&mut self, snapshot: &Value) {
+        if !mir2_bevy_runtime::native_render_diagnostics_enabled() { return; }
+        let rejected = self.snapshot_is_from_previous_map(snapshot);
+        let incoming = map_file_name(snapshot).unwrap_or("<partial>");
+        if rejected && self.trace_rejected_file.as_deref() == Some(incoming) { return; }
+        if !rejected && !self.trace_pending_snapshot && self.trace_rejected_file.is_none() { return; }
+        mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
+            "event":"snapshot", "accepted":!rejected, "snapshotFile":incoming,
+            "snapshotTitle":snapshot.get("mapTitle"), "snapshotMiniMap":packet_minimap_value(snapshot),
+            "authoritativeFile":self.map_file_name, "authoritativeTitle":self.identity_metadata.get("mapTitle"),
+            "authoritativeMiniMap":self.mini_map_index,
+        }));
+        if rejected { self.trace_rejected_file = Some(incoming.to_owned()); }
+        else { self.trace_pending_snapshot = false; self.trace_rejected_file = None; }
+    }
+
     fn merge_into_same_map_snapshot(&mut self, snapshot: &mut Value) {
-        let Some(snapshot_file_name) = map_file_name(snapshot).map(str::to_owned) else {
+        let Some(current_file_name) = self.map_file_name.as_ref() else {
             return;
         };
-        let same_map = self.map_file_name.as_deref().is_some_and(|current| {
-            normalize_map_file_name(current) == normalize_map_file_name(&snapshot_file_name)
-        });
-        if !same_map {
+        if self.snapshot_is_from_previous_map(snapshot) {
             // Snapshots can be delayed across a transition. They may not use
             // a packet cursor for another map, but must not erase the newer
             // MapInformation/MapChanged identity that will receive its own
             // periodic snapshot next.
             return;
         }
-        let Some(index) = self.mini_map_index else {
-            return;
-        };
         let Some(object) = snapshot.as_object_mut() else {
             return;
         };
-        if object
-            .get("miniMapIndex")
-            .is_none_or(|value| value.is_null())
-        {
+        object.insert("mapFileName".to_owned(), json!(current_file_name));
+        for (key, value) in &self.identity_metadata {
+            object.insert(key.clone(), value.clone());
+        }
+        if let Some(index) = self.mini_map_index {
             object.insert("miniMapIndex".to_owned(), json!(index));
+        } else {
+            object.remove("miniMapIndex");
         }
     }
 }
@@ -6441,6 +6537,10 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
 }
 
 #[cfg(test)]
+#[path = "gateway_map_identity_tests.rs"]
+mod map_identity_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -7420,9 +7520,20 @@ mod tests {
         let d401_changed = json!({
             "type": "packet",
             "packet": "MapChanged",
-            "payload": {"mapIndex": 401, "fileName": "D401", "miniMap": 8},
+            "payload": {"mapIndex": 401, "fileName": "D401", "title": "DeadMineEntrance", "miniMap": 8},
         });
         assert_eq!(ingest!(d401_changed), WorldSnapshotIngestOutcome::NotSnapshot);
+        let partial_destination = json!({
+            "type": "worldSnapshot",
+            "payload": {"mapTitle": "BichonProvince", "miniMapIndex": 1,
+                "sceneView": {"center": {"x": 30, "y": 179}}},
+        });
+        assert_eq!(ingest!(partial_destination), WorldSnapshotIngestOutcome::Applied);
+        let destination = last_world_payload.as_ref().unwrap();
+        assert_eq!(destination["mapFileName"], json!("D401"));
+        assert_eq!(destination["mapTitle"], json!("DeadMineEntrance"));
+        assert_eq!(destination["miniMapIndex"], json!(8));
+        assert_eq!(transform_world_snapshot(destination)["playerStats"]["mapName"], json!("DeadMineEntrance"));
         let d401_snapshot = json!({
             "type": "worldSnapshot",
             // The ordinary server snapshot deliberately lacks miniMapIndex.
@@ -7479,10 +7590,8 @@ mod tests {
         );
         // This is a stale pre-transition payload. It cannot clear the newer
         // D401 packet identity before the first fresh D401 snapshot arrives.
-        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::Applied);
-        assert!(last_world_payload
-            .as_ref()
-            .is_some_and(|world| world.get("miniMapIndex").is_none()));
+        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::NotSnapshot);
+        assert_eq!(last_world_payload.as_ref().unwrap()["miniMapIndex"], json!(8));
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
         assert_eq!(
             last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
