@@ -626,13 +626,19 @@ pub(super) fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPack
     }
 
     let current_map = world.resource::<MapRuntimeResource>().current_map.clone();
+    let mut destination_map = MapInformation {
+        file_name: transfer.to_map_file_name.clone(),
+        title: transfer.to_map_title.clone(),
+        ..current_map
+    };
+    // Ordinary entrance transfers must carry the destination's identity and
+    // presentation metadata, just as login does. Keeping the source map's
+    // index/minimap/light makes a real map change look like same-map movement.
+    // Custom maps absent from the Crystal manifest retain configured values.
+    crate::config::apply_crystal_map_metadata(&mut destination_map);
     relocate_player_to_map(
         world,
-        MapInformation {
-            file_name: transfer.to_map_file_name.clone(),
-            title: transfer.to_map_title.clone(),
-            ..current_map
-        },
+        destination_map,
         transfer.to_position,
         transfer.to_direction,
         None,
@@ -2180,6 +2186,10 @@ impl SimulationSession {
 #[cfg(test)]
 #[path = "map_collision_source_tests.rs"]
 mod map_collision_source_tests;
+
+#[cfg(test)]
+#[path = "map_transfer_metadata_tests.rs"]
+mod map_transfer_metadata_tests;
 
 pub(super) fn current_map_disallows_intelligent_creatures(world: &World) -> bool {
     let map = world.resource::<MapRuntimeResource>();

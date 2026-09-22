@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> 2026-09-23 ordinary entrance metadata: destination filename/title previously
+> inherited the source index, images and lighting. Transfers now apply the
+> complete imported destination metadata before relocation. Simulation 7/7
+> and Gateway 6/6 pass. Isolated public-protocol before/after proves Bichon/D401
+> identity/image/light correction and matching normal logout saves. No live
+> save editing or debug movement; deployment awaits user logout.
+> [Evidence](generated/player-qa/ui-goal-20260921/map-transfer-server-metadata-20260923.md).
+
 > 2026-09-22 movement owner deadline repair: movement-only wakes preserve
 > collision/cooldown validation, teardown fencing and mutation authorization;
 > AI/regen/drop maintenance remains on its original 300 ms cadence without

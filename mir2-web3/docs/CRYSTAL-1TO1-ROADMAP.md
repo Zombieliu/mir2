@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-23 map-identity follow-up: the user rejected the previous client-only
+> candidate. Real packets exposed ordinary entrance transfers retaining the
+> source map index/minimap/light. Destination Crystal metadata is now resolved
+> before relocation. Simulation 7/7, Gateway 6/6 and Windows 5/5 pass; public
+> protocol on isolated save copies reproduces the old error and verifies the
+> repaired Bichon/D401 roundtrip with matching logout saves. Paired package
+> awaits normal user exit; native visual acceptance remains open.
+> [Evidence](generated/player-qa/ui-goal-20260921/map-transfer-server-metadata-20260923.md).
+
 > 2026-09-22 map transfer/floor seam candidate: packet map identity survives
 > partial/delayed snapshots without losing quest or skill receipts. Windows
 > 701/701 and native release build pass. Real GPU readback reproduces fractional

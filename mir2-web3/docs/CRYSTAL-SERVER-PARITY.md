@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> 2026-09-23 map transfer: ordinary entrance packets now use the destination's
+> imported index, title, minimap, big map, light, music, weather and flags.
+> D401 is index 47/image 8; Bichon is index 1/image 101. Source-field inheritance
+> was reproduced over public WS and removed in the release candidate. Simulation
+> 7/7, Gateway 6/6, Windows 5/5 and isolated normal logout/save comparison pass;
+> native visual and original-client acceptance remain separate and open.
+> [Evidence](generated/player-qa/ui-goal-20260921/map-transfer-server-metadata-20260923.md).
+
 > 2026-09-22 sustained movement: this owner scheduling repair keeps Crystal
 > action cooldown/run eligibility and all occupancy/collision checks. Pending
 > moves are consumed at their ready time instead of waiting for drifting

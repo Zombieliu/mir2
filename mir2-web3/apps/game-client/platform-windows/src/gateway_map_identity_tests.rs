@@ -37,19 +37,19 @@ fn map_identity_stale_snapshot_receipts_do_not_project_actors() {
 fn map_identity_packet_replaces_source_metadata_before_partial_snapshot() {
     let mut cursor = NativeMapPacketCursor::default();
     cursor.observe_map_information(&json!({
-        "fileName": "0", "title": "BichonProvince", "mapIndex": 1, "miniMap": 1,
+        "fileName": "0", "title": "BichonProvince", "mapIndex": 1, "miniMap": 101,
     }));
-    let source = json!({"mapFileName": "0", "mapTitle": "BichonProvince", "miniMapIndex": 1});
+    let source = json!({"mapFileName": "0", "mapTitle": "BichonProvince", "miniMapIndex": 101});
     cursor.observe_map_information(&json!({
-        "fileName": "D401", "title": "DeadMineEntrance", "mapIndex": 401, "miniMap": 8,
+        "fileName": "D401", "title": "DeadMineEntrance", "mapIndex": 47, "miniMap": 8,
     }));
     assert!(cursor.snapshot_is_from_previous_map(&source));
-    let mut partial = json!({"mapTitle": "BichonProvince", "miniMapIndex": 1,
+    let mut partial = json!({"mapTitle": "BichonProvince", "miniMapIndex": 101,
         "sceneView": {"center": {"x": 38, "y": 160}}});
     cursor.merge_into_same_map_snapshot(&mut partial);
     assert_eq!(partial["mapFileName"], json!("D401"));
     assert_eq!(partial["mapTitle"], json!("DeadMineEntrance"));
-    assert_eq!(partial["mapIndex"], json!(401));
+    assert_eq!(partial["mapIndex"], json!(47));
     assert_eq!(partial["miniMapIndex"], json!(8));
     assert_eq!(transform_map_model(&partial)["miniMapIndex"], json!(8));
     assert_eq!(
@@ -60,10 +60,10 @@ fn map_identity_packet_replaces_source_metadata_before_partial_snapshot() {
 
 #[test]
 fn map_identity_missing_or_zero_minimap_cannot_reuse_previous_image_and_reconnect_resets() {
-    let mut world = json!({"mapFileName": "0", "mapTitle": "BichonProvince", "miniMapIndex": 1,
+    let mut world = json!({"mapFileName": "0", "mapTitle": "BichonProvince", "miniMapIndex": 101,
         "mapMusic": 9, "bigMapIndex": 3});
     let mut cursor = NativeMapPacketCursor::default();
-    cursor.observe_map_information(&json!({"fileName": "0", "miniMap": 1}));
+    cursor.observe_map_information(&json!({"fileName": "0", "miniMap": 101}));
     let destination = json!({"fileName": "D401", "title": "DeadMineEntrance"});
     assert!(apply_map_information_to_world_payload(
         &mut world,
@@ -72,7 +72,7 @@ fn map_identity_missing_or_zero_minimap_cannot_reuse_previous_image_and_reconnec
     assert!(world.get("miniMapIndex").is_none());
     assert!(world.get("mapMusic").is_none());
     cursor.observe_map_information(&destination);
-    let mut partial = json!({"miniMapIndex": 1});
+    let mut partial = json!({"miniMapIndex": 101});
     cursor.merge_into_same_map_snapshot(&mut partial);
     assert!(partial.get("miniMapIndex").is_none());
     cursor.observe_map_information(&json!({"fileName": "D401", "miniMap": 0}));
@@ -81,11 +81,11 @@ fn map_identity_missing_or_zero_minimap_cannot_reuse_previous_image_and_reconnec
     assert!(partial.get("miniMapIndex").is_none());
     cursor.reset();
     let mut reconnect =
-        json!({"mapFileName": "0", "mapTitle": "BichonProvince", "miniMapIndex": 1});
+        json!({"mapFileName": "0", "mapTitle": "BichonProvince", "miniMapIndex": 101});
     assert!(!cursor.snapshot_is_from_previous_map(&reconnect));
     cursor.merge_into_same_map_snapshot(&mut reconnect);
     assert_eq!(reconnect["mapFileName"], json!("0"));
-    assert_eq!(reconnect["miniMapIndex"], json!(1));
+    assert_eq!(reconnect["miniMapIndex"], json!(101));
 }
 
 #[test]
@@ -129,10 +129,10 @@ fn map_identity_information_only_transfer_rejects_source_but_keeps_receipts() {
         }};
     }
 
-    let source = json!({"type":"worldSnapshot","payload":{"mapFileName":"0","mapTitle":"BichonProvince","miniMapIndex":1,"playerObjectId":1,"entities":[{"objectId":1,"kind":"selfPlayer","x":320,"y":270}],"sceneView":{"center":{"x":320,"y":270}}}});
+    let source = json!({"type":"worldSnapshot","payload":{"mapFileName":"0","mapTitle":"BichonProvince","miniMapIndex":101,"playerObjectId":1,"entities":[{"objectId":1,"kind":"selfPlayer","x":320,"y":270}],"sceneView":{"center":{"x":320,"y":270}}}});
     assert_eq!(ingest!(source), WorldSnapshotIngestOutcome::Applied);
     ingest!(
-        json!({"type":"packet","packet":"MapInformation","payload":{"mapIndex":401,"fileName":"D401","title":"DeadMineEntrance","miniMap":8}})
+        json!({"type":"packet","packet":"MapInformation","payload":{"mapIndex":47,"fileName":"D401","title":"DeadMineEntrance","miniMap":8}})
     );
     ingest!(
         json!({"type":"packet","packet":"UserLocation","payload":{"x":38,"y":160,"direction":"Down"}})
@@ -156,7 +156,7 @@ fn map_identity_information_only_transfer_rejects_source_but_keeps_receipts() {
         json!("D401")
     );
     for file in [None, Some("D401")] {
-        let mut partial = json!({"mapTitle":"BichonProvince","miniMapIndex":1,"sceneView":{"center":{"x":30,"y":179}}});
+        let mut partial = json!({"mapTitle":"BichonProvince","miniMapIndex":101,"sceneView":{"center":{"x":30,"y":179}}});
         if let Some(file) = file {
             partial["mapFileName"] = json!(file);
         }
@@ -172,4 +172,85 @@ fn map_identity_information_only_transfer_rejects_source_but_keeps_receipts() {
             json!("DeadMineEntrance")
         );
     }
+}
+
+#[test]
+fn actual_d401_catalog_map_information_and_snapshot_keep_minimap_and_quest_identity() {
+    use crate::native_protocol::{parse_inbound_event, InboundEvent};
+
+    fn observe(adapter: &mut NativeGameplayAdapter, envelope: &str) {
+        let InboundEvent::Packet(packet) =
+            parse_inbound_event(envelope).expect("actual map packet envelope")
+        else {
+            panic!("expected packet envelope");
+        };
+        adapter.observe_packet(&packet);
+    }
+
+    let manifest = mir2_game_data::crystal_respawn_manifest_ref();
+    let map = |file_name: &str| {
+        manifest
+            .maps
+            .iter()
+            .find(|map| map.map_file_name == file_name)
+            .expect("imported Crystal map")
+    };
+    assert_eq!((map("0").map_index, map("0").mini_map), (1, 101));
+    assert_eq!((map("D001").map_index, map("D001").mini_map), (39, 1));
+    assert_eq!((map("D401").map_index, map("D401").mini_map), (47, 8));
+
+    let mut adapter = NativeGameplayAdapter::default();
+    adapter.observe_world_snapshot(&json!({
+        "mapIndex": 1,
+        "mapFileName": "0",
+        "mapTitle": "BichonProvince",
+        "miniMapIndex": 101,
+        "playerObjectId": 1000,
+        "entities": [{"objectId": 1000, "kind": "selfPlayer", "x": 659, "y": 215}],
+    }));
+    observe(
+        &mut adapter,
+        r#"{"type":"packet","packet":"WorldMapSetup","payload":{"setup":{"enabled":true,"icons":[{"imageIndex":101,"title":"BichonProvince","mapIndex":1},{"imageIndex":8,"title":"DeadMineEntrance","mapIndex":47}]},"teleportToNpcCost":3000}}"#,
+    );
+    observe(
+        &mut adapter,
+        r#"{"type":"packet","packet":"NewMapInfo","payload":{"mapIndex":1,"info":{"title":"BichonProvince","width":960,"height":640,"bigMap":101,"movements":[],"npcs":[]}}}"#,
+    );
+    observe(
+        &mut adapter,
+        r#"{"type":"packet","packet":"MapInformation","payload":{"mapIndex":47,"fileName":"D401","title":"DeadMineEntrance","miniMapIndex":8,"bigMapIndex":8}}"#,
+    );
+    // Transfer invalidates map definitions containing old scene NPC object IDs.
+    // The normal GetMapInfo response repopulates the destination after transfer.
+    observe(
+        &mut adapter,
+        r#"{"type":"packet","packet":"NewMapInfo","payload":{"mapIndex":47,"info":{"title":"DeadMineEntrance","width":200,"height":200,"bigMap":8,"movements":[],"npcs":[]}}}"#,
+    );
+    observe(
+        &mut adapter,
+        r#"{"type":"packet","packet":"UserLocation","payload":{"x":24,"y":182,"direction":"Down"}}"#,
+    );
+
+    let big_map = adapter.big_map_snapshot().big_map;
+    let current = big_map.current_map().expect("D401 map definition");
+    assert_eq!(big_map.current_map_index, Some(47));
+    assert_eq!(big_map.active_map_index, Some(47));
+    assert_eq!(current.info.title, "DeadMineEntrance");
+    assert_eq!(current.info.big_map, 8);
+    assert_eq!(
+        big_map.player_location,
+        Some(mir2_client_bevy::big_map::BigMapPoint { x: 24, y: 182 })
+    );
+
+    let map_model = transform_map_model(&json!({
+        "mapFileName": "D401", "miniMapIndex": 8,
+        "sceneView": {"center": {"x": 24, "y": 182}},
+    }));
+    assert_eq!(map_model["miniMapIndex"], json!(8));
+    let targets = mir2_client_bevy::quest_destination::authored_target_map_indices(2_110_013);
+    assert_eq!(targets, vec![47], "imported D401 quest target");
+    assert!(
+        targets.contains(&big_map.current_map_index.unwrap()),
+        "the current D401 identity must replace Bichon before quest routing"
+    );
 }

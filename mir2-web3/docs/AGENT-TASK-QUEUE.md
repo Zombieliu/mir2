@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-09-23 immediate handoff: package the ordinary entrance metadata repair
+> with native client `192e14ce1`, then replace live Gateway only after the user
+> normally exits/closes the game. Preserve original store/keys. Simulation 7/7,
+> Gateway 6/6, Windows 5/5 and isolated public Bichon/D401 roundtrip/save evidence
+> pass; the previous client-only fix failed the user's screenshot acceptance.
+> The user retains gameplay control. Native screenshots and seam/whole UI
+> acceptance remain open. [Evidence](generated/player-qa/ui-goal-20260921/map-transfer-server-metadata-20260923.md).
+
 > 2026-09-20 V2 functional route/save gate: **78/78**, using B Warrior/Taoist
 > and E Wizard ordinary-player evidence with explicit mixed-cohort provenance.
 > All three are real level 30 and have public LogOutSuccess plus final snapshot
