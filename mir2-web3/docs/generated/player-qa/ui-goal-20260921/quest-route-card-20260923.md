@@ -38,7 +38,7 @@ entrance action; this change does not teleport or automatically complete quests.
 
 ## Verification and limits
 
-New Windows input-system regressions fail **0/3** on the prior implementation
+New Windows input-system regressions pass **0/3** on the prior implementation
 and pass **3/3** after repair. They use the packaged D401 collision file and
 the user's `(23,176) -> (24,182)` route, with no diary and no NewMapInfo cache.
 They verify mouse-down/release ownership, subsequent real input-system
@@ -67,8 +67,12 @@ cargo +1.95.0 test --offline --manifest-path apps/game-client/client-bevy/Cargo.
 cargo +1.95.0 build --release --offline --manifest-path apps/game-client/platform-windows/Cargo.toml
 ```
 
-Native package preparation targets
-`C:/numeron-legend-of-rebirth-20260923-quest-route-card`. The already repaired
+Native release build and package are ready at
+`C:/numeron-legend-of-rebirth-20260923-quest-route-card`, with client source
+`47efc7896bda9c855d6a410e663e511090ac67e7` and SHA256
+`210DAE35C3C7552FFB5FBD627930835BEAA6E371BDD5CD38ACEF898BDE08EE7C`.
+The local candidate manifest pins the client, Gateway and config hashes and
+records `deployed=false` / `visualAccepted=false`. The already repaired
 Gateway stays on its current original store and keys. Client replacement
 requires normal user exit/close; native click-through-arrival screenshot
 acceptance remains open. Daylight, movement cadence and atlas seam settings
