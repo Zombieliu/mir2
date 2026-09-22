@@ -50,5 +50,22 @@ C:/numeron-legend-of-rebirth-20260922-map-navigation.
 Client SHA256: 5C72AE630673D1CD2D52700A8281F3EC153D8E4FED92832114636B2A57630D4E.
 Its manifest pins the six-map asset manifest hashes from the resource-repair
 record, while documenting the shared mutable junction. Deployment and visual
-acceptance remain false. A combined normal-logout/desktop handoff was requested;
-the current user session has not been interrupted.
+acceptance were false at preparation. After the user's normal-exit/desktop
+handoff, this client was launched (PID37312); the unchanged paired Gateway
+remains PID26712 from the quest-entry-floor directory. The previous client log
+records a successful exit outside the game. The user entered a1 normally.
+
+Live D401 (19,156) evidence is saved at
+C:/mir2-ui-repair-20260921/d401-19-156-live-before-minimap.png.
+The task card now correctly says DeadMineEntrance and points to the return
+entrance (24,182), but the minimap is absent and the self character is obscured
+by cave roofs. Therefore this is only a narrow map-identity observation, not
+visual acceptance. Close-and-continue walking and NPC selection remain open.
+
+The minimap renderer incorrectly restricts its profile to Bichon titles despite
+the D401 source having MMap index8 (300x199 image for a 200x200 map). A repair
+must carry authoritative map index/dimensions through the model and replace the
+image/geometry on transfer. Original Objects2 cave roofs contain opaque black
+pixels; removing their black alpha would corrupt the source. Crystal's separate
+40-percent self-body/head/wings redraw is absent in the native renderer and is
+being repaired independently. Neither repair is included in this 19c23c262 EXE.

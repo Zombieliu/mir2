@@ -1,6 +1,14 @@
 # Current whole-UI acceptance matrix
 
-Goal scope is unchanged. No native client is currently running; the older parcel-map Gateway remains PID55572. Latest prepared paired package: C:/numeron-legend-of-rebirth-20260922-ui-text, client source c2a2d9f0c / Gateway source 3b8bd01f9. Exact hashes and build evidence are in README.md. It includes source-size map geometry, fallback hierarchy, postage reserves, 500 UTF-16 body validation, body wheel/chat isolation, exact-UID attachment locks, source stamp states, mail clipboard/IME and NPC sale-count presentation. It is not deployed or launched; renewed desktop handoff is pending following user interference. Startup/LoginSuccess alone is not page acceptance. Test counts are code evidence, not a page-acceptance denominator. Historical partial screenshots belong to their explicitly recorded older packages.
+Goal scope is unchanged. The map-navigation package (client 19c23c262, Gateway
+3b8bd01f9) was launched after the renewed user handoff. D401 task-map identity
+is visibly correct, but its minimap is absent and cave roofs fully obscure the
+self player. These defects are under repair. a1 died during the ordinary check,
+revived normally in town, and exited through the confirmed Exit dialog; no
+autopath pass follows. Gateway PID26712 remains active; the next candidate is
+not yet visually accepted. Exact package evidence is in
+map-navigation-state-20260922.md. Test counts are code evidence, not a
+page-acceptance denominator. Historical screenshots retain their own versions.
 
 Every row below requires actual visible rendering, correct inputs/state/close behavior, applicable Crystal source or original-client comparison, and an evidence path tied to the tested executable. Status **open** means not accepted, including rows with implemented code and passing tests.
 

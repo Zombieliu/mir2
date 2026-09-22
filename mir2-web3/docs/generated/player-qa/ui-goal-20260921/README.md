@@ -1,6 +1,30 @@
 # UI goal live ledger
 
-## Latest prepared package — 2026-09-22
+## Current map repair — 2026-09-22
+
+Minimap/self-occlusion source 7532ac047 was subsequently built and launched as
+C:/numeron-legend-of-rebirth-20260922-minimap (client SHA256
+4333234D3C5C4DA95259DC3B9AFA815011751E8856EBBBBFE4D53C378D05422A).
+Computer Use then reported the user's physical Escape stop; no further inputs
+were issued. The user is testing this package. Their subsequent sustained-run
+rubber-banding report has a reproducible delayed-ACK presentation failure and
+candidate repair 91a3325b6; see running-late-ack-20260922.md. It is not yet live
+accepted. The running client is not replaced while the user plays.
+
+The map-navigation client (source 19c23c262) was deployed following the user's
+normal-exit handoff. Its live D401 (19,156) task card correctly names the map,
+but the minimap is absent. The source has MMap/8.png; the old renderer only
+enabled Bichon. A general map-index/dimension repair and packet-lifetime tests
+are in progress, together with Crystal's missing 40-percent self redraw behind
+cave roofs. See map-navigation-state-20260922.md for the exact EXE and evidence.
+
+During the ordinary live check a1 died in D401 (18,155), then used normal V
+town revival to Bichon (288,616), HP162/162. The client exited through its
+confirmed Exit dialog with lifecycle Success; no save or character values were
+edited. Close-and-continue autopath was not verified because death interrupted
+the check. The next repaired build is not yet visually accepted.
+
+## Historical prepared package — 2026-09-22 UI text
 
 Rechecked package C:/numeron-legend-of-rebirth-20260922-ui-text against its
 candidate-manifest.json. Client source c2a2d9f0c, Gateway source 3b8bd01f9.
