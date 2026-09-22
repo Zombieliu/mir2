@@ -39,3 +39,25 @@ that it is the only cause of the user's live symptom. Same-build continuous
 running with movement trace and ordinary collision/turn/stop checks remains
 required. No server cooldown, collision rule, save or character progress was
 modified. The running user's client has not been interrupted.
+
+## Deployed follow-up
+
+After the user's normal exit, source 91a3325b6 was launched from
+C:/numeron-legend-of-rebirth-20260922-run-confirmation, PID42684, with the
+existing movement trace enabled. Client SHA256:
+E88780F37A6B84CF1FB5CB7CF59BF605816FFF86ADF00AD6BD806E19BC28B033.
+Gateway remains unchanged. Following renewed desktop handoff, a1 was already
+logged in. Two ordinary map routes reached (234,364) and (285,438).
+
+At the saved checkpoint the session trace contains 115 matched command/ACK
+pairs, all confirmed; 33 exceed 600ms, maximum684.86ms. This aggregate includes
+the user's movement before handoff. No correction is recorded in that sample.
+The route-close clicks occurred after arrival, so they do not prove closing
+the map preserves an active route. No continuous-frame/no-rubber-band pass is
+claimed from intermittent screenshots. Final observed a1 position is (284,437)
+with HP162/162; client remains open for user testing.
+
+Local evidence: run-confirmation-live-movement.jsonl,
+run-confirmation-live-summary.json and run-confirmation-live-end.png under
+C:/mir2-ui-repair-20260921. The minimap is visible in these Bichon observations;
+this does not substitute for the pending D401 map-transfer visual check.
