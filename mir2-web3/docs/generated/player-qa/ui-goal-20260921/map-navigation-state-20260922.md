@@ -42,3 +42,13 @@ map-identity-gameplay-bridge.log, map-identity-input.log,
 big-map-reconcile-client.log and big-map-reconcile-platform.log under
 C:/mir2-ui-repair-20260921. Actual close-and-continue walking, map transfer and NPC
 selection require same-version visual acceptance after a normal-exit switch.
+
+Verified final candidate: source 19c23c262, Windows release build completed in
+1m53s (map-complete-navigation-release.log). Big Map model 17/17, gameplay bridge
+91/91 and Windows input 86/86 pass. Prepared package:
+C:/numeron-legend-of-rebirth-20260922-map-navigation.
+Client SHA256: 5C72AE630673D1CD2D52700A8281F3EC153D8E4FED92832114636B2A57630D4E.
+Its manifest pins the six-map asset manifest hashes from the resource-repair
+record, while documenting the shared mutable junction. Deployment and visual
+acceptance remain false. A combined normal-logout/desktop handoff was requested;
+the current user session has not been interrupted.
