@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-23 quest target semantics: V2 arrival/flag descriptions no longer
+> become monster hints through matching words. Authored destination maps take
+> priority over local species, preserving the entrance button for the actual
+> 2110009 Oma arrival quest. Targeted 4/4 and native UI quest filter 151/151 pass;
+> native release build passes and the candidate is packaged; visual acceptance
+> remains open. No Crystal parity percentage
+> is added by this custom guidance repair.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-target-priority-20260923.md).
+
 > 2026-09-23 route/UI ownership: established routes no longer stop for passive
 > HUD, skill, hero or ordinary inventory hover. Actual modal/input and service
 > panel guards remain. Windows input 100/100, shared UI guards 12/12, and a

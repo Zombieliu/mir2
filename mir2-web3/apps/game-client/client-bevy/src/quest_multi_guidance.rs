@@ -27,6 +27,25 @@ enum Place {
 }
 
 fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>) -> Place {
+    if quest.status == QuestStatus::InProgress {
+        let targets = crate::quest_destination::authored_target_map_indices(quest.quest_index);
+        if !targets.is_empty() {
+            let Some(current_map) = big_map.and_then(|model| model.current_map_index) else {
+                return Place::Unknown;
+            };
+            // A nearby name cannot replace an authored destination on another
+            // map. Keep the entrance action until authoritative map arrival.
+            if !targets.contains(&current_map) {
+                if let crate::quest_ui::route::QuestRoute::NextStep(step) =
+                    crate::quest_ui::route::resolve(Some(current_map), &targets)
+                {
+                    return Place::Route(step);
+                }
+                return authored_other_map(quest.quest_index, Some(current_map))
+                    .map_or(Place::Unknown, Place::Other);
+            }
+        }
+    }
     if let Some(target) = nearest_quest_monster(tracker, Some(quest.quest_index), entities, map.center_x, map.center_y) {
         return Place::Current {
             label: format!("{} ({},{}) · {} 格", target.entity.name, target.entity.x, target.entity.y, target.distance),
@@ -82,17 +101,6 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
                     distance,
                 };
             }
-        }
-        let targets = crate::quest_destination::authored_target_map_indices(quest.quest_index);
-        if let Some(big_map) = big_map {
-            if let crate::quest_ui::route::QuestRoute::NextStep(step) =
-                crate::quest_ui::route::resolve(big_map.current_map_index, &targets)
-            {
-                return Place::Route(step);
-            }
-        }
-        if let Some(label) = authored_other_map(quest.quest_index, big_map.and_then(|m| m.current_map_index)) {
-            return Place::Other(label);
         }
     }
     Place::Unknown
@@ -442,5 +450,62 @@ mod tests {
             Place::Unknown,
             "missing progress never infers a hunt objective",
         );
+    }
+
+    #[test]
+    fn authored_target_oma_arrival_card_keeps_navigation_when_oma_appears() {
+        let mut arrival = quest(2_110_009);
+        arrival.title = "Enter Oma Cave".into();
+        arrival.objectives.push(QuestObjective {
+            objective_id: "2110009:0".into(), text: "Reach the Oma Cave entrance".into(), current: 0, target: 1,
+        });
+        let tracker = QuestTracker { active_quests: vec![arrival] };
+        let map = MapModel { center_x: 429, center_y: 82, ..default() };
+        let big_map = BigMapModel { current_map_index: Some(1), reset_epoch: 42, ..default() };
+        for visible in [false, true, false] {
+            let mut entities = EntityModelSet::default();
+            if visible {
+                entities.entities.push(crate::entities::EntityModel {
+                    object_id: "20".into(), kind: crate::entities::EntityKind::Monster, name: "Oma".into(),
+                    x: 420, y: 91, level: None, direction: None,
+                });
+            }
+            let mut world = World::new();
+            let mut queue = bevy::ecs::world::CommandQueue::default();
+            let mut commands = Commands::new(&mut queue, &world);
+            commands.spawn_empty().with_children(|parent| {
+                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map)));
+            });
+            queue.apply(&mut world);
+            assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
+                QuestUiButton::NavigateQuestRoute(crate::quest_ui::QuestRouteNavigationIntent {
+                    quest_index: 2_110_009, reset_epoch: 42, map_index: 1, x: 147, y: 33,
+                })
+            )), "visible Oma={visible} must not remove the arrival route button");
+            let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str()).collect::<Vec<_>>().join("\n");
+            assert!(text.contains("入口 (147,33)"));
+            assert!(!text.contains("Oma (420,91)"));
+            assert!(text.contains("Reach the Oma Cave entrance  0/1"));
+        }
+    }
+
+    #[test]
+    fn authored_target_map_takes_priority_over_a_monster_on_the_wrong_map() {
+        let mut hunt = quest(2_110_010);
+        hunt.objectives.push(QuestObjective {
+            objective_id: "2110010:0".into(), text: "Skeleton".into(), current: 0, target: 4,
+        });
+        let tracker = QuestTracker { active_quests: vec![hunt.clone()] };
+        let entities = EntityModelSet { entities: vec![crate::entities::EntityModel {
+            object_id: "21".into(), kind: crate::entities::EntityKind::Monster, name: "Skeleton".into(),
+            x: 420, y: 91, level: None, direction: None,
+        }] };
+        let map = MapModel { center_x: 429, center_y: 82, ..default() };
+        let mut big_map = BigMapModel { current_map_index: Some(1), ..default() };
+        assert!(matches!(place(&hunt, &tracker, &entities, &map, Some(&big_map)), Place::Route(_)));
+        big_map.set_current_map(39);
+        assert!(matches!(place(&hunt, &tracker, &entities, &map, Some(&big_map)), Place::Current { .. }));
+        assert_eq!(place(&hunt, &tracker, &entities, &map, None), Place::Unknown,
+            "unknown map identity must not claim a map-specific monster is nearby");
     }
 }

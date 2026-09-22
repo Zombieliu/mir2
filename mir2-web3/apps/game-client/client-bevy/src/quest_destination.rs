@@ -5,16 +5,22 @@ pub const BICHON_SAFE_X: i32 = 328;
 pub const BICHON_SAFE_Y: i32 = 264;
 pub const BICHON_SAFE_RADIUS: i32 = 10;
 
-/// Imported V2 task-map declarations resolved to Crystal map identities.
-/// Empty means the task has no authored cross-map destination.
-pub fn authored_target_map_indices(quest_index: i32) -> Vec<i32> {
+/// Display-only authored semantics, shared by destination and monster hints.
+/// None preserves the legacy packet-label matcher for non-V2 quests.
+pub(crate) fn authored_quest_definition(quest_index: i32) -> Option<&'static serde_json::Value> {
     static CONFIG: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
     let config = CONFIG.get_or_init(|| serde_json::from_str(include_str!(
         "../../../../config/quest-guidance/newcomer-journey-v2.json"
     )).expect("bundled V2 guidance"));
-    let Some(files) = config["quests"].as_array().and_then(|quests| quests.iter()
+    config["quests"].as_array()?.iter()
         .find(|quest| quest["id"].as_i64() == Some(i64::from(quest_index)))
-        .and_then(|quest| quest["maps"].as_array())) else {
+}
+
+/// Imported V2 task-map declarations resolved to Crystal map identities.
+/// Empty means the task has no authored cross-map destination.
+pub fn authored_target_map_indices(quest_index: i32) -> Vec<i32> {
+    let Some(files) = authored_quest_definition(quest_index)
+        .and_then(|quest| quest["maps"].as_array()) else {
         return Vec::new();
     };
     mir2_game_data::crystal_respawn_manifest_ref().maps.iter()

@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-23 missing arrival navigation: quest 2110009's `Oma Cave` flag text
+> incorrectly matched a nearby Oma and replaced its entrance button. V2 hints
+> now use declared kills plus authoritative counters, and map destinations
+> take priority until the target map is reached. New regressions improve from
+> 0/4 to 4/4; shared-client quest filter 151/151 passes. Native release build
+> passes and the package is ready at `C:/numeron-legend-of-rebirth-20260923-task-target`.
+> Both prior client and Gateway were absent at the deployment check; restoration
+> will retain the original store/keys and Gateway binary. Gameplay stays with the user.
+> Native visual acceptance remains open.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-target-priority-20260923.md).
+
 > 2026-09-23 route stop near Bichon `(205,62)`: the live trace records
 > `worldInputBlocked` after a confirmed move, not a collision correction.
 > Passive UI hover incorrectly cancelled established map routes; a dedicated
