@@ -5858,13 +5858,16 @@ mod tests {
     }
 
     #[test]
-    fn pressed_route_button_enqueues_the_current_source_entrance() {
+    fn pressed_d401_route_button_enqueues_the_current_oma_entrance() {
+        let d401 = mir2_game_data::crystal_respawn_manifest_ref().maps.iter()
+            .find(|map| map.map_file_name == "D401").expect("imported D401 map");
+        assert_eq!(d401.map_index, 47);
         let intent = QuestRouteNavigationIntent {
             quest_index: 2_110_010,
             reset_epoch: 7,
-            map_index: 1,
-            x: 147,
-            y: 33,
+            map_index: d401.map_index,
+            x: 24,
+            y: 182,
         };
         let mut app = App::new();
         app.insert_resource(ButtonInput::<KeyCode>::default());
@@ -5873,7 +5876,7 @@ mod tests {
         app.insert_resource(QuestTracker { active_quests: vec![quest(2_110_010, QuestStatus::InProgress)] });
         app.insert_resource(crate::big_map::BigMapModel {
             reset_epoch: 7,
-            current_map_index: Some(1),
+            current_map_index: Some(d401.map_index),
             ..default()
         });
         app.init_resource::<NpcDialogModel>()

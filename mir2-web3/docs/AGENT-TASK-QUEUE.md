@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-09-23 latest task-card fix: the entrance button incorrectly depended on
+> the separate Quest Diary being open and cached Big Map definitions. Native
+> input now uses current authoritative identity plus the real collision map;
+> visible card feedback and bounded route diagnostics are added. Reproduction
+> changes 0/3 to 3/3; Windows input 97/97 and shared-client route tests 9/9 pass.
+> Build/package the client, retain Gateway `e65bdc4eb`, and switch only after
+> normal user exit. Native visual acceptance remains open.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-route-card-20260923.md).
+
 > 2026-09-23 immediate handoff: ordinary entrance metadata repair `e65bdc4eb`
 > is deployed as Gateway PID36484 with native client `192e14ce1` / PID35936
 > after user close and saved-position/backup verification. Original store/keys

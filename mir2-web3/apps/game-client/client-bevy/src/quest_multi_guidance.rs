@@ -210,6 +210,9 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
                 },
             ));
         }
+        if let Some(feedback) = state.feedback.as_ref() {
+            line(card, feedback.message.clone(), if feedback.is_error { FEEDBACK_ERR } else { FEEDBACK_OK });
+        }
         button(card, "查看任务详情", QuestUiButton::SelectQuest { quest_index: primary });
         button(card, "打开大地图", QuestUiButton::OpenDestinationMap);
         if !nearby.is_empty() { line(card, "附近可顺便完成", PANEL_HIGHLIGHT); }
@@ -353,6 +356,35 @@ mod tests {
                 quest_index: 2_110_010, reset_epoch: 41, map_index, x: 147, y: 33,
             }) if *map_index == bichon.map_index
         )));
+    }
+
+    #[test]
+    fn d401_route_card_displays_navigation_feedback_with_its_outcome_color() {
+        let d401 = mir2_game_data::crystal_respawn_manifest_ref().maps.iter()
+            .find(|map| map.map_file_name == "D401").expect("imported D401 map");
+        assert_eq!(d401.map_index, 47);
+        let tracker = QuestTracker { active_quests: vec![quest(2_110_010)] };
+        let map = MapModel { center_x: 23, center_y: 176, ..default() };
+        let big_map = BigMapModel { current_map_index: Some(d401.map_index), reset_epoch: 41, ..default() };
+
+        for (message, is_error, expected_color) in [
+            ("前往入口 (24,182)", false, FEEDBACK_OK),
+            ("入口引导已更新，请使用当前任务路线", true, FEEDBACK_ERR),
+        ] {
+            let state = QuestUiState {
+                feedback: Some(QuestFeedback { message: message.into(), is_error }),
+                ..default()
+            };
+            let mut world = World::new();
+            let mut queue = bevy::ecs::world::CommandQueue::default();
+            let mut commands = Commands::new(&mut queue, &world);
+            commands.spawn_empty().with_children(|parent| {
+                assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map)));
+            });
+            queue.apply(&mut world);
+            assert!(world.query::<(&Text, &TextColor)>().iter(&world)
+                .any(|(text, color)| text.0 == message && color.0 == expected_color));
+        }
     }
 
     #[test]

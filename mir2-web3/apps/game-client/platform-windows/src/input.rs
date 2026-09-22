@@ -21,6 +21,7 @@ use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{CombatTargetModel, NpcDialogModel};
 use mir2_client_bevy::quest_ui::{
     QuestRouteNavigationIntent, QuestRouteNavigationIntentQueue, QuestUiIntent, QuestUiIntentQueue,
+    QuestUiState,
 };
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
@@ -1315,8 +1316,6 @@ fn quest_route_matches_current_map(
     model.is_some_and(|model| {
         model.reset_epoch == intent.reset_epoch
             && model.current_map_index == Some(intent.map_index)
-            && model.active_map_index == Some(intent.map_index)
-            && model.current_map().is_some()
     })
 }
 
@@ -1334,14 +1333,16 @@ fn begin_quest_route_navigation(
     if !quest_route_matches_current_map(intent, big_map) {
         return Err("入口导航已过期；请按当前地图重新选择。");
     }
-    let model = big_map.expect("validated above");
     let map_file = presentation
         .current_map_file_name()
         .ok_or("当前地图尚未加载。")?;
-    let parsed = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。")?;
-    let info = &model.current_map().expect("validated above").info;
-    if i32::from(parsed.width) != info.width || i32::from(parsed.height) != info.height {
-        return Err("地图尺寸尚未同步，请稍后重试。");
+    // Quest cards use imported entrances, independently of the Big Map view.
+    // NewMapInfo is only fetched on opening that panel. Validate the scene
+    // against authoritative identity, then plan on its actual collision map.
+    if mir2_game_data::crystal_map_respawns_ref(map_file)
+        .is_none_or(|map| map.map_index != intent.map_index)
+    {
+        return Err("地图正在切换，请稍后重试。");
     }
     let origin = movement.planning_origin(
         entities
@@ -1404,9 +1405,10 @@ pub fn mouse_world_interaction_system(
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
     (time, real_time): (Option<Res<Time>>, Option<Res<Time<bevy::time::Real>>>),
     windows: Query<&Window>,
-    (mut queue, mut route_navigation): (
+    (mut queue, mut route_navigation, mut quest_ui_state): (
         Option<ResMut<QuestUiIntentQueue>>,
         Option<ResMut<QuestRouteNavigationIntentQueue>>,
+        Option<ResMut<QuestUiState>>,
     ),
     commands: Option<Res<GatewayCommands>>,
     mut effects: Option<ResMut<NativeEffects>>,
@@ -1639,6 +1641,9 @@ pub fn mouse_world_interaction_system(
             || big_map.as_deref().and_then(|model| model.current_map_index) != Some(route.map_index)
     }) {
         movement.stop_auto_path(now_ms, "mapChanged");
+        if let Some(state) = quest_ui_state.as_deref_mut() {
+            state.clear_feedback();
+        }
     }
     // The HUD interaction state is refreshed after this sender. A fresh press
     // over a source HUD button must consume the press before it can become a
@@ -1711,7 +1716,8 @@ pub fn mouse_world_interaction_system(
             route_navigation.clear();
         }
     }
-    // The button is covered by the Quest panel, so the release frame must
+    // The button lives on the persistent task card, including with the diary
+    // closed. The release frame must
     // consume the queued route before that panel's general pointer shield.
     // A held mouse keeps the route queued and returns before any world click
     // can reach entities behind the button. Other modal/input owners cancel
@@ -1722,7 +1728,7 @@ pub fn mouse_world_interaction_system(
             .is_some_and(|queue| !queue.is_empty())
         && player_ui
             .as_deref()
-            .is_some_and(|ui| ui.quest_open() && !ui.blocks_gameplay_keys())
+            .is_some_and(|ui| !ui.blocks_gameplay_keys())
         && !over_skill_bar
         && !over_hero_window
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
@@ -1740,7 +1746,7 @@ pub fn mouse_world_interaction_system(
             .as_deref_mut()
             .and_then(|queue| take_quest_route_navigation_after_pointer_input(queue, false))
         {
-            match begin_quest_route_navigation(
+            let result = begin_quest_route_navigation(
                 &mut movement,
                 &entities,
                 presentation,
@@ -1748,9 +1754,30 @@ pub fn mouse_world_interaction_system(
                 big_map.as_deref(),
                 intent,
                 now_ms,
-            ) {
-                Ok(()) => {}
-                Err(message) => big_map_input::feedback(map_chat.as_deref_mut(), message),
+            );
+            crate::movement_trace::record(serde_json::json!({
+                "type": "questRouteNavigation", "atMs": now_ms,
+                "questIndex": intent.quest_index, "mapIndex": intent.map_index,
+                "destinationX": intent.x, "destinationY": intent.y,
+                "accepted": result.is_ok(), "error": result.as_ref().err(),
+            }));
+            match result {
+                Ok(()) => {
+                    // Starting travel dismisses the diary's world-input shield;
+                    // the persistent task card remains visible during movement.
+                    if let Some(ui) = player_ui.as_deref_mut().filter(|ui| ui.quest_open()) {
+                        ui.core.panel = mir2_ui_core::state::UiPanel::None;
+                    }
+                    if let Some(state) = quest_ui_state.as_deref_mut() {
+                        state.set_feedback(format!("已设置入口路线 ({},{}) · 按 Esc 可停止", intent.x, intent.y), false);
+                    }
+                }
+                Err(message) => {
+                    if let Some(state) = quest_ui_state.as_deref_mut() {
+                        state.set_feedback(message, true);
+                    }
+                    big_map_input::feedback(map_chat.as_deref_mut(), message);
+                }
             }
         }
         return;
@@ -2306,6 +2333,9 @@ pub fn mouse_world_interaction_system(
             {
                 Ok(path) => Some(path),
                 Err(message) => {
+                    if let Some(state) = quest_ui_state.as_deref_mut() {
+                        state.set_feedback(message, true);
+                    }
                     big_map_input::feedback(map_chat.as_deref_mut(), message);
                     None
                 }
@@ -3098,6 +3128,9 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 mod tests {
     mod big_map_input_tests {
         include!("big_map_input_tests.rs");
+    }
+    mod quest_route_input_tests {
+        include!("quest_route_input_tests.rs");
     }
     use super::*;
     use bevy::prelude::IntoScheduleConfigs;

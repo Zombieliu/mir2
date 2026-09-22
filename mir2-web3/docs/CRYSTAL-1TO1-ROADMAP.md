@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-23 quest entrance navigation: persistent task-card clicks no longer
+> require an open diary or a Big Map definition cache. Current-map/epoch and
+> actual collision checks remain; feedback is visible on the card. D401 input
+> reproduction 3/3, Windows input 97/97 and shared route UI 9/9 pass. Native
+> package/visual handoff remains separate; this custom guidance fix adds no
+> Crystal visual parity percentage.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-route-card-20260923.md).
+
 > 2026-09-23 map-identity follow-up: the user rejected the previous client-only
 > candidate. Real packets exposed ordinary entrance transfers retaining the
 > source map index/minimap/light. Destination Crystal metadata is now resolved
