@@ -372,6 +372,7 @@ fn parse_starter_atlas_manifest(manifest: &Value) -> Option<StarterAtlasIndex> {
 
 /// Decode a generated PNG into raw RGBA pixels.
 fn decode_png_rgba(bytes: &[u8]) -> Option<(u32, u32, Vec<u8>)> {
+    let _diagnostic = crate::timing::DiagnosticSpan::new("entityPngDecode");
     let decoder = png::Decoder::new(std::io::Cursor::new(bytes));
     let mut reader = decoder.read_info().ok()?;
     let output_size = reader.output_buffer_size().unwrap_or(0);

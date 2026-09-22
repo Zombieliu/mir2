@@ -3798,6 +3798,9 @@ where
                 }
                 "MapInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
+                    if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                    }
                     if let Some(payload) = event.payload.as_ref() {
                         map_packet_cursor.observe_map_information(payload);
                         if let Some(world) = last_world_payload.as_mut() {
@@ -3811,6 +3814,9 @@ where
                 }
                 "MapChanged" => {
                     eprintln!("[gateway-client] packet {packet}");
+                    if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                    }
                     if let Some(payload) = event.payload.as_ref() {
                         map_packet_cursor.observe_map_information(payload);
                         ui_cursor.observe_map_identity(payload);

@@ -1449,6 +1449,7 @@ pub fn load_map(map_file_name: &str) -> Option<Arc<ParsedMap>> {
             return Some(map);
         }
     }
+    let _diagnostic = crate::timing::DiagnosticSpan::new("mapCacheMissReadDecompressParse");
     let path = find_map_file(map_file_name)?;
     let compressed = fs::read(&path).ok()?;
     let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);

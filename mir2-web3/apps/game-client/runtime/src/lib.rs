@@ -20,6 +20,10 @@ mod mail_service_runtime_tests;
 mod fallback_hierarchy_tests;
 mod presentation_pose;
 mod remote_motion;
+#[cfg(not(target_arch = "wasm32"))]
+mod render_diagnostics;
+#[cfg(not(target_arch = "wasm32"))]
+pub use render_diagnostics::{record_native_render_marker, native_render_diagnostics_enabled};
 
 pub use presentation_pose::PresentationPoseBuffer;
 
@@ -1767,6 +1771,8 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 .in_set(RuntimePresentationSet),
         );
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_systems(Last, render_diagnostics::capture_committed_frame);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(
         Update,
@@ -4049,6 +4055,8 @@ fn sync_map_render(
     mut transform_query: Query<&mut Transform>,
     mut native_trace_state: Local<Option<String>>,
 ) {
+    #[cfg(not(target_arch = "wasm32"))]
+    let _render_timing = render_diagnostics::SyncTimer::map();
     let active = map_state
         .snapshot
         .as_ref()
@@ -4866,6 +4874,8 @@ fn sync_entity_render_layers(
         &mut MeshMaterial2d<additive_material::CrystalAdditiveMaterial>,
     >,
 ) {
+    #[cfg(not(target_arch = "wasm32"))]
+    let _render_timing = render_diagnostics::SyncTimer::entity();
     let Some(snapshot) = &entity_render_state.snapshot else {
         clear_entity_render_layers(
             &mut commands,
@@ -4874,6 +4884,8 @@ fn sync_entity_render_layers(
             &mut additive_materials,
         );
         presentation_poses.set_applied_entity_center(None);
+        #[cfg(not(target_arch = "wasm32"))]
+        render_diagnostics::record_applied_entity_center(None);
         return;
     };
 
@@ -4885,6 +4897,8 @@ fn sync_entity_render_layers(
             &mut additive_materials,
         );
         presentation_poses.set_applied_entity_center(None);
+        #[cfg(not(target_arch = "wasm32"))]
+        render_diagnostics::record_applied_entity_center(None);
         return;
     }
 
@@ -5259,6 +5273,8 @@ fn sync_entity_render_layers(
         .retain(|object_id, _| alive_actor_objects.contains(object_id));
 
     presentation_poses.set_applied_entity_center(entity_center);
+    #[cfg(not(target_arch = "wasm32"))]
+    render_diagnostics::record_applied_entity_center(entity_center.map(|c| [c.x,c.y]));
 }
 
 struct EntityRenderImageBinding {
