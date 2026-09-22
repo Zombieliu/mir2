@@ -72,8 +72,23 @@ Native release build and package are ready at
 `47efc7896bda9c855d6a410e663e511090ac67e7` and SHA256
 `210DAE35C3C7552FFB5FBD627930835BEAA6E371BDD5CD38ACEF898BDE08EE7C`.
 The local candidate manifest pins the client, Gateway and config hashes and
-records `deployed=false` / `visualAccepted=false`. The already repaired
-Gateway stays on its current original store and keys. Client replacement
-requires normal user exit/close; native click-through-arrival screenshot
-acceptance remains open. Daylight, movement cadence and atlas seam settings
-are retained.
+now records `deployed=true` / `visualAccepted=false`. Daylight, movement cadence
+and atlas seam settings are retained.
+
+## Deployment after normal exit
+
+The user confirmed normal exit. The previous native client's log ends in a
+confirmed Exit dialog and successful event-loop return; Gateway logs record an
+immutable checkpoint committed before connection teardown. No old native
+client process remained. The replacement launched as PID44352 at local
+2026-09-23 02:01, with the expected executable/config hashes and window title
+`numeron-legend of rebirth`. Startup logs confirm complete local assets,
+fixed daylight, enabled movement/render tracing, and WebSocket connection to
+`ws://127.0.0.1:19910/ws`; the process is responsive.
+
+Gateway PID36484 was retained with its original store and keys; no service
+restart, account edits or gameplay input were performed. Launch evidence:
+`C:/mir2-ui-repair-20260921/render-live/quest-route-card-client-launch.json`;
+startup and trace logs use prefix `20260923-020107-979` in the same directory.
+The user retains gameplay control. Native physical-click-through-arrival
+acceptance remains open and is not implied by successful startup.

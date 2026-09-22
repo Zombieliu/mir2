@@ -5,9 +5,10 @@
 > input now uses current authoritative identity plus the real collision map;
 > visible card feedback and bounded route diagnostics are added. Reproduction
 > changes 0/3 to 3/3; Windows input 97/97 and shared-client route tests 9/9 pass.
-> Client `47efc7896` is built and packaged at
-> `C:/numeron-legend-of-rebirth-20260923-quest-route-card`; switch after normal
-> user exit, retaining Gateway `e65bdc4eb`. Native visual acceptance remains open.
+> Client `47efc7896` is deployed as PID44352 from
+> `C:/numeron-legend-of-rebirth-20260923-quest-route-card` after normal user
+> exit; WebSocket is connected to retained Gateway `e65bdc4eb` / PID36484.
+> The user retains gameplay control. Native visual acceptance remains open.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-route-card-20260923.md).
 
 > 2026-09-23 immediate handoff: ordinary entrance metadata repair `e65bdc4eb`
