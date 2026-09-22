@@ -1,8 +1,9 @@
 # Agent Task Queue
 
-> 2026-09-23 immediate handoff: package the ordinary entrance metadata repair
-> with native client `192e14ce1`, then replace live Gateway only after the user
-> normally exits/closes the game. Preserve original store/keys. Simulation 7/7,
+> 2026-09-23 immediate handoff: ordinary entrance metadata repair `e65bdc4eb`
+> is deployed as Gateway PID36484 with native client `192e14ce1` / PID35936
+> after user close and saved-position/backup verification. Original store/keys
+> are preserved. Simulation 7/7,
 > Gateway 6/6, Windows 5/5 and isolated public Bichon/D401 roundtrip/save evidence
 > pass; the previous client-only fix failed the user's screenshot acceptance.
 > The user retains gameplay control. Native screenshots and seam/whole UI

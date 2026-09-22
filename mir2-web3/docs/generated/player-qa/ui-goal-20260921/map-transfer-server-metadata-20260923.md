@@ -90,3 +90,24 @@ Client SHA256:
 Live deployment is pending normal user logout and close. The original
 account store and identity/recovery keys must be retained. The user retains
 gameplay control; no native input was taken during this repair.
+
+## Deployment after user close
+
+After the user replied "关了", the old native process was absent and its log
+showed confirmed Exit / successful event-loop return. The old Gateway had no
+established player connections and confirmed a teardown recovery save. The
+persistent a1 record matched the final authoritative movement position:
+D401 (25,178), facing Up, level 16, gold 6960, experience 2580.
+
+The existing store was backed up to
+`C:/mir2-ui-repair-20260921/map-transfer-deploy-20260923-010913/accounts-before.json`;
+the backup/source hash was checked before stopping the idle old service and
+again afterward: `38F879A1EBB344A8C6A78EF6AEEA2C55E0C8A69D7F2AFF0C980344AF7AC930D9`.
+The new Gateway source `e65bdc4ebcd99b0c80658c087a1bf2f26c4cbc33` launched as
+PID36484 using the original live account store, profile and identity/recovery
+keys. Both 127.0.0.1:19900 and :19910 were verified before client launch.
+
+The paired client opened at 2026-09-23 01:10 Asia/Shanghai, PID35936, with trace
+prefix `C:/mir2-ui-repair-20260921/render-live/20260923-011007-250`.
+The package manifest records `deployed=true`, `visualAccepted=false`. The user
+continues personal testing; no gameplay inputs or automatic login were sent.

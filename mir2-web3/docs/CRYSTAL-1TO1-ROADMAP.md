@@ -6,7 +6,7 @@
 > before relocation. Simulation 7/7, Gateway 6/6 and Windows 5/5 pass; public
 > protocol on isolated save copies reproduces the old error and verifies the
 > repaired Bichon/D401 roundtrip with matching logout saves. Paired package
-> awaits normal user exit; native visual acceptance remains open.
+> is deployed after user close; native visual acceptance remains open.
 > [Evidence](generated/player-qa/ui-goal-20260921/map-transfer-server-metadata-20260923.md).
 
 > 2026-09-22 map transfer/floor seam candidate: packet map identity survives

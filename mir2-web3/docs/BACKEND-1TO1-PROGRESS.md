@@ -5,7 +5,8 @@
 > complete imported destination metadata before relocation. Simulation 7/7
 > and Gateway 6/6 pass. Isolated public-protocol before/after proves Bichon/D401
 > identity/image/light correction and matching normal logout saves. No live
-> save editing or debug movement; deployment awaits user logout.
+> save editing or debug movement; source `e65bdc4eb` is deployed after user
+> close with the original store/keys and a verified a1 save backup.
 > [Evidence](generated/player-qa/ui-goal-20260921/map-transfer-server-metadata-20260923.md).
 
 > 2026-09-22 movement owner deadline repair: movement-only wakes preserve
