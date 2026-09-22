@@ -4,8 +4,9 @@
 > to an unoccupied reachable tile in the authored spawn area. It preserves one
 > bounded search and ordinary movement authority, and stops without attacking.
 > Native input 104/104 and shared quest filter 154/154 pass. Turn-in readiness
-> is labelled `可交付` rather than `Complete`. Native packaging/visual and the
-> separately observed old-client rendering OOM remain distinct gates; no new
+> is labelled `可交付` rather than `Complete`. Release `215ea95b7` is packaged
+> and launched. Visual and the separately observed old-client rendering OOM
+> remain distinct gates; exact cache telemetry is enabled, and no new
 > Crystal parity percentage is claimed.
 > [Evidence](generated/player-qa/ui-goal-20260921/hunt-navigation-20260923.md).
 

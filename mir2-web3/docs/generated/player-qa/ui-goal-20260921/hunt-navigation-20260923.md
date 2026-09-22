@@ -84,7 +84,33 @@ While verifying the package handoff, the prior client PID29460 had exited.
 Its `20260923-042121-056-client.stderr.log` records `Out of Memory` from Bevy
 rendering at 20:38:13 UTC, followed by texture/bind-group validation errors and
 `event_loop_returned exit=Error(1)`. This was not a normal-exit confirmation.
-The local resource count had reached 85,565. Gateway PID45232 remains running;
+The local asset-resolution hit counter had reached 85,565; this is not a count
+of retained textures. Gateway PID45232 remains running;
 no Gateway restart, save edit, or native stop/input was issued by this repair.
-The crash is separate from the quest status semantics and remains under
-read-only cache investigation. This patch does not claim an OOM/soak pass.
+The crash is separate from the quest status semantics. Read-only cache review
+found map-image eviction and a bounded raw-frame pixel cache already present;
+old logs do not identify which Image/font/driver allocation exhausted memory.
+No speculative texture cap or fallback suppression was applied. The new launch
+enables the existing `MIR2_NATIVE_SOAK_METRICS=1` diagnostic, including font-atlas
+telemetry already built into Windows. This patch does not claim an OOM/soak pass.
+
+## Candidate handoff
+
+Native release build passed. Code `215ea95b7f3246deb55fdb756185b94e6539a85d`
+is packaged at `C:/numeron-legend-of-rebirth-20260923-hunt-navigation`:
+
+- Client SHA256: `F274EA732149005BD05D7D0CA71D8404B4E7B47F88DC4D9ED2F4D41501DB48B5`.
+- Retained Gateway source `e65bdc4ebcd99b0c80658c087a1bf2f26c4cbc33`, SHA256
+  `355E8461074A130C9E9B7CE2AA6039DC3DFBE25B2F58F8677EA29A74E7FD65D6`.
+- Config SHA256: `01E4A40E54A5B8C7D6B1DABD7E4C13F7BEF434EC26EAEB1B77180E4BCEFEE834`.
+
+With the previous client absent, the new client was launched as PID49816.
+The existing Gateway PID45232 and original store/keys remain in place. No
+normal logout was inferred from the previous crash and no account/save rewrite
+or rollback was performed. Launch record:
+`C:/mir2-ui-repair-20260921/render-live/hunt-navigation-client-launch.json`.
+New trace/log prefix is `20260923-052201-894`; soak metrics are enabled for
+the user-controlled gameplay session. WebSocket connection, subsequent
+`LoginSuccess` and `StartGame ack` are observed in the new log; these were user
+actions, with no native input issued by the agent. Exact `native-soak` image and
+font-atlas counters are being emitted. Visual and stability acceptance remain open.

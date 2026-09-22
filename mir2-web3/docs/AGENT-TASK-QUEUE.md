@@ -6,8 +6,9 @@
 > plus dynamic endpoint occupancy passes 18 fixture-ACK moves; native input
 > 104/104 and shared quest filter 154/154 pass. `ReadyToTurnIn` now says `可交付`;
 > the three Skeleton tasks are distinct authored content, not duplicate progress.
-> Release packaging is in progress. Prior client PID29460 exited with rendering
-> OOM; Gateway stays running. OOM/visual acceptance is not claimed.
+> Release `215ea95b7` is packaged and launched as PID49816. Prior client PID29460
+> exited with rendering OOM; new launch enables exact image/font/cache telemetry.
+> Gateway PID45232 stays running. OOM/visual acceptance is not claimed.
 > [Evidence](generated/player-qa/ui-goal-20260921/hunt-navigation-20260923.md).
 
 > 2026-09-23 missing arrival navigation: quest 2110009's `Oma Cave` flag text
