@@ -1782,13 +1782,17 @@ pub fn mouse_world_interaction_system(
         }
         return;
     }
-    if over_skill_bar
-        || over_hero_window
-        || notice.as_deref().is_some_and(NoticeDialogState::is_open)
-        || dialog_open
-        || dead
-        || (map_open && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused))
-        || player_ui.as_deref().is_some_and(|ui| {
+    // A committed map route is not a held world-pointer gesture. Passive HUD
+    // hover must not discard its destination. A real press (even if released
+    // in the same frame), a held button, or any modal/drag keeps the original
+    // input shield. This exception never starts a new route.
+    let continuing_map_route = movement.map_auto_path.is_some()
+        && mouse.get_pressed().next().is_none()
+        && mouse.get_just_pressed().next().is_none();
+    let ui_state_blocks = player_ui.as_deref().is_some_and(|ui| {
+            if continuing_map_route {
+                return ui.blocks_route_navigation();
+            }
             if map_open && (map_image_press || movement.map_auto_path.is_some()) {
                 return big_map_input::ui_blocks_except_map(ui);
             }
@@ -1804,11 +1808,52 @@ pub fn mouse_world_interaction_system(
                     ui.blocks_world_pointer_at(x, y)
                 },
             )
+        });
+    let blocker = if dead {
+        Some("playerDead")
+    } else if dialog_open {
+        Some("npcDialog")
+    } else if notice.as_deref().is_some_and(NoticeDialogState::is_open) {
+        Some("noticeDialog")
+    } else if map_open && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused) {
+        Some("mapSearch")
+    } else if !continuing_map_route && over_hero_window {
+        Some("heroPointer")
+    } else if (!continuing_map_route && over_skill_bar)
+        || player_ui.as_deref().is_some_and(|ui| {
+            (!continuing_map_route && ui.skill_bars.hovered) || ui.skill_bars.dragging.is_some()
         })
-        || player_ui
-            .as_deref()
-            .is_some_and(|ui| ui.skill_bars.hovered || ui.skill_bars.dragging.is_some())
     {
+        Some("skillPointer")
+    } else if ui_state_blocks {
+        Some("uiState")
+    } else {
+        None
+    };
+    if let Some(blocker) = blocker {
+        if movement.map_auto_path.is_some() {
+            crate::movement_trace::record(serde_json::json!({
+                "type": "autoPathUiBlocked", "atMs": now_ms, "blocker": blocker,
+                "pointerHeld": mouse.get_pressed().next().is_some(),
+                "pointerPressed": mouse.get_just_pressed().next().is_some(),
+                "ui": player_ui.as_deref().map(|ui| serde_json::json!({
+                    "panel": format!("{:?}", ui.core.panel), "chatFocused": ui.is_chat_focused(),
+                    "statusHovered": ui.status_hud.hovered, "buffHovered": ui.hero_buffs.rows.hovered,
+                    "heroModal": ui.hero.modal(), "heroDragging": ui.hero.dragging.is_some(),
+                    "skillHovered": ui.skill_bars.hovered, "skillDragging": ui.skill_bars.dragging.is_some(),
+                    "inventoryWindowDragging": ui.inventory_window.dragging(),
+                    "inventoryOperation": ui.inventory_operation.is_some(),
+                    "menuConsumed": ui.menu_pointer_consumed,
+                })),
+            }));
+            if let Some(state) = quest_ui_state.as_deref_mut() {
+                state.set_feedback(
+                    if dead { "自动寻路已停止：角色已死亡。" }
+                    else { "自动寻路已停止：界面正在接收操作，结束操作后可重新点击前往入口。" },
+                    true,
+                );
+            }
+        }
         if let Some(route_navigation) = route_navigation.as_deref_mut() {
             route_navigation.clear();
         }

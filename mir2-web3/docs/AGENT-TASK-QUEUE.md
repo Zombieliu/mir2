@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-23 route stop near Bichon `(205,62)`: the live trace records
+> `worldInputBlocked` after a confirmed move, not a collision correction.
+> Passive UI hover incorrectly cancelled established map routes; a dedicated
+> guard now excludes hover while retaining modal/drag/press/service-panel
+> protection. Windows input 100/100 and shared UI guards 12/12 pass; actual
+> Bichon collision plus a new entity is avoided over 58 fixture ACK steps.
+> Release package is ready at `C:/numeron-legend-of-rebirth-20260923-route-hover`;
+> switch after normal user exit. Gateway is unchanged.
+> Native visual acceptance stays open; the user retains gameplay control.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-route-hover-20260923.md).
+
 > 2026-09-23 latest task-card fix: the entrance button incorrectly depended on
 > the separate Quest Diary being open and cached Big Map definitions. Native
 > input now uses current authoritative identity plus the real collision map;

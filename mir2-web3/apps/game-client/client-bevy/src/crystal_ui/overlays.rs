@@ -1643,6 +1643,31 @@ impl NativePlayerUiState {
     }
 
     fn blocks_world_click_with_panel(&self, panel_blocks: bool) -> bool {
+        self.blocks_world_click_with_panel_and_hover(panel_blocks, true)
+    }
+
+    /// An established route owns its destination independently of pointer
+    /// hover. Keep every modal/transaction guard and active drag; only the
+    /// ordinary bag and Big Map may remain open without cancelling travel.
+    /// Do not use inventory_open(): it also includes NPC/storage/mail service
+    /// panels, which must retain their ordinary world-input protection.
+    pub fn blocks_route_navigation(&self) -> bool {
+        let panel_blocks = match self.core.panel {
+            mir2_ui_core::state::UiPanel::Inventory | mir2_ui_core::state::UiPanel::BigMap => {
+                self.core.chat_focused()
+            }
+            _ => self.core.blocks_world_click(),
+        };
+        self.blocks_world_click_with_panel_and_hover(panel_blocks, false)
+            || self.skill_bars.dragging.is_some()
+            || self.hero.dragging.is_some()
+            || self.inventory_window.dragging()
+            || self.inventory_item_drag.is_some()
+            || self.inventory_operation.is_some()
+            || self.equipment_item_drag.is_some()
+    }
+
+    fn blocks_world_click_with_panel_and_hover(&self, panel_blocks: bool, hover_blocks: bool) -> bool {
         self.game_shop_dialog.confirmation.is_some()
             || self.storage_password_prompt.is_some()
             || self.storage_password_input_consumed
@@ -1658,8 +1683,8 @@ impl NativePlayerUiState {
             || self.leave_game.blocks()
             || self.social_bonds.prompt.is_some()
             || equipment_creature_host::modal(self)
-            || self.hero_buffs.rows.hovered
-            || self.status_hud.hovered
+            || (hover_blocks && self.hero_buffs.rows.hovered)
+            || (hover_blocks && self.status_hud.hovered)
             || self.menu_pointer_consumed
             || self.equipment_dialogs.fishing
             || panel_blocks

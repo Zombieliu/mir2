@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-23 route/UI ownership: established routes no longer stop for passive
+> HUD, skill, hero or ordinary inventory hover. Actual modal/input and service
+> panel guards remain. Windows input 100/100, shared UI guards 12/12, and a
+> 58-step Bichon entrance controller route with real collision pass. Release
+> package is ready; normal-exit switch and visual acceptance remain open.
+> No new Crystal parity percentage is claimed.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-route-hover-20260923.md).
+
 > 2026-09-23 quest entrance navigation: persistent task-card clicks no longer
 > require an open diary or a Big Map definition cache. Current-map/epoch and
 > actual collision checks remain; feedback is visible on the card. D401 input
