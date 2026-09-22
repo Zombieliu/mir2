@@ -472,6 +472,7 @@ impl NativeLightingPublisher {
             .map(|root: std::path::PathBuf| NativeLightAssets::from_asset_root(root.as_path()))
             .unwrap_or_default();
         let mut bridge = NativeLightingBridge::default();
+        bridge.set_force_daylight(crate::map_parser::lighting::force_daylight_enabled());
         bridge.set_generation(generation);
         Self {
             bridge,
@@ -4796,6 +4797,12 @@ fn transform_map_model(payload: &Value) -> Value {
     let time_of_day_light_setting = value_u64(payload.get("lightSetting"))
         .and_then(|value| u8::try_from(value).ok())
         .filter(|value| *value <= 4);
+    // MapModel is the HUD projection. Preserve the received source payload and
+    // light bridge state while making its icon agree with the displayed scene.
+    let time_of_day_light_setting = crate::map_parser::lighting::presentation_light_setting(
+        time_of_day_light_setting,
+        crate::map_parser::lighting::force_daylight_enabled(),
+    );
     let mini_map_index = value_u64(payload.get("miniMapIndex"))
         .and_then(|value| u16::try_from(value).ok())
         .filter(|value| *value > 0);

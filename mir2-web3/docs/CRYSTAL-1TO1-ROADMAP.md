@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-22 user-requested development preference: Windows defaults to fixed
+> daylight, including the HUD sun icon, across map/logout/reconnect boundaries.
+> `[display] force_daylight = false` restores source lighting for original
+> comparison. Server time and saves are untouched. Lighting 14/14 and config
+> 11/11 pass; this convenience is not original lighting acceptance.
+> [Evidence](generated/player-qa/ui-goal-20260921/daylight-development-20260922.md).
+
 > 2026-09-22 sustained-run timing candidate: the single Zone owner now wakes
 > at pending movement deadlines and retains an absolute maintenance phase.
 > Ordinary 64-step public-WS A/B changes final-quarter ACK mean from 653.234 ms

@@ -132,6 +132,8 @@ pub struct NativeSessionConfig {
     pub auto_login: Option<NativeAutoLogin>,
     pub window_width: u32,
     pub window_height: u32,
+    /// Development display preference; server time and gameplay stay authoritative.
+    pub force_daylight: bool,
     pub reconnect: NativeReconnectConfig,
 }
 
@@ -141,6 +143,7 @@ struct ClientFileConfig {
     quest_guidance: Option<String>,
     window_width: Option<u32>,
     window_height: Option<u32>,
+    force_daylight: Option<bool>,
 }
 
 impl NativeSessionConfig {
@@ -160,6 +163,9 @@ impl NativeSessionConfig {
         config.reconnect = NativeReconnectConfig::from_env()?;
         if let Some(file) = file {
             config.quest_guidance = file.quest_guidance;
+            if let Some(force_daylight) = file.force_daylight {
+                config.force_daylight = force_daylight;
+            }
             if let Some(width) = file.window_width {
                 config.window_width = width;
             }
@@ -231,6 +237,7 @@ impl NativeSessionConfig {
             auto_login,
             window_width: DEFAULT_WINDOW_WIDTH,
             window_height: DEFAULT_WINDOW_HEIGHT,
+            force_daylight: true,
             reconnect: NativeReconnectConfig::default(),
         })
     }
@@ -323,6 +330,11 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
                         "height" => {
                             config.window_height =
                                 Some(parse_toml_u32(display_value, "display.height")?);
+                        }
+                        "force_daylight" => {
+                            config.force_daylight = Some(display_value.as_bool().ok_or_else(|| {
+                                format!("{CONFIG_FILE_NAME} display.force_daylight must be a boolean")
+                            })?);
                         }
                         other => {
                             return Err(format!("{CONFIG_FILE_NAME} unknown key display.{other}"));
@@ -469,6 +481,7 @@ mod tests {
         assert_eq!(config.auto_login, None);
         assert_eq!(config.window_width, 1024);
         assert_eq!(config.window_height, 768);
+        assert!(config.force_daylight, "development launches default to daylight");
     }
 
     #[test]
@@ -597,6 +610,7 @@ gateway_ws_url = "wss://candidate-gateway.example/ws"
 [display]
 width = 1024
 height = 768
+force_daylight = false
 "#,
         )
         .expect("valid candidate config");
@@ -606,6 +620,9 @@ height = 768
         );
         assert_eq!(parsed.window_width, Some(1024));
         assert_eq!(parsed.window_height, Some(768));
+        assert_eq!(parsed.force_daylight, Some(false));
+        assert_eq!(parse_client_toml("[display]\nforce_daylight = true").unwrap().force_daylight, Some(true));
+        assert!(parse_client_toml("[display]\nforce_daylight = 'false'").is_err());
         validate_gateway_url(parsed.gateway_ws_url.as_deref().unwrap()).unwrap();
     }
 

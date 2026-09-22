@@ -9,6 +9,7 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::atomic::{AtomicBool, Ordering as AtomicOrdering};
 
 use serde_json::{json, Value};
 
@@ -25,6 +26,22 @@ pub const MAX_NATIVE_LIGHTS: usize = 200;
 const LIGHT_TEXTURE_COUNT: usize = 10;
 const MAP_LIGHT_RANGE_X: i32 = 40;
 const MAP_LIGHT_RANGE_Y: i32 = 41;
+
+// Set once by native startup, before the WebSocket lighting producer starts.
+// Rendering never reads a file or changes the server's time/map state.
+static FORCE_DAYLIGHT: AtomicBool = AtomicBool::new(false);
+
+pub(crate) fn configure_force_daylight(enabled: bool) {
+    FORCE_DAYLIGHT.store(enabled, AtomicOrdering::Relaxed);
+}
+
+pub(crate) fn force_daylight_enabled() -> bool {
+    FORCE_DAYLIGHT.load(AtomicOrdering::Relaxed)
+}
+
+pub(crate) fn presentation_light_setting(setting: Option<u8>, force_daylight: bool) -> Option<u8> {
+    if force_daylight { Some(2) } else { setting }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct NativeLightAssets {
@@ -70,6 +87,7 @@ pub struct NativeLightingMotion {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct NativeLightingBridge {
+    force_daylight: bool,
     generation: Option<u64>,
     current_map_file_name: Option<String>,
     time_of_day_light_setting: Option<i32>,
@@ -163,6 +181,9 @@ fn capture_light_state_slug(
     if !same_map_file_name(current_map, map_file_name) {
         return None;
     }
+    if bridge.force_daylight {
+        return Some("setting=2;mapDarkLight=0;forceDaylight=true".to_owned());
+    }
     let setting = bridge
         .map_light_setting
         .or(bridge.time_of_day_light_setting)?;
@@ -236,6 +257,10 @@ fn render_effect_lighting_frame(
 }
 
 impl NativeLightingBridge {
+    pub(crate) fn set_force_daylight(&mut self, enabled: bool) {
+        self.force_daylight = enabled;
+    }
+
     pub fn set_generation(&mut self, generation: u64) {
         if self.generation != Some(generation) {
             self.reset_session();
@@ -366,6 +391,19 @@ impl NativeLightingBridge {
                 .as_deref()
                 .is_none_or(|current| same_map_file_name(current, payload))
         });
+        if self.force_daylight && map_matches && motion_is_finite(motion) {
+            return json!({
+                "enabled": true,
+                "mapFileName": self.current_map_file_name,
+                "stageWidth": STAGE_WIDTH,
+                "stageHeight": STAGE_HEIGHT,
+                "timeOfDayLightSetting": 2,
+                "mapLightSetting": 2,
+                "mapDarkLight": 0,
+                "mapLights": [],
+                "entityLights": [],
+            });
+        }
         let enabled = assets.complete()
             && self
                 .map_light_setting
@@ -650,6 +688,52 @@ mod tests {
                 {"objectId": 2000, "kind": "monster", "x": 11, "y": 19, "light": 1, "dead": false}
             ]
         })
+    }
+
+    #[test]
+    fn daylight_preference_survives_map_logout_and_generation_without_overwriting_source_lights() {
+        let mut bridge = NativeLightingBridge::default();
+        bridge.set_force_daylight(true);
+        let mut payload = world();
+        for generation in [1, 1, 2] {
+            bridge.reset_scene();
+            if generation == 2 {
+                bridge.observe_packet("LogOutSuccess", &Value::Null);
+            }
+            bridge.set_generation(generation);
+            payload["mapFileName"] = json!(if generation == 1 { "0" } else { "D401" });
+            bridge.observe_world_snapshot(&payload);
+            bridge.observe_packet("TimeOfDay", &json!({"lights": 4}));
+            bridge.observe_packet("MapInformation", &json!({
+                "fileName": payload["mapFileName"], "lights": 4, "mapDarkLight": 2
+            }));
+            let render = bridge.build_render_state_with_effects(
+                &payload, None, &HashMap::new(), &NativeLightingMotion::default(),
+                &NativeLightAssets::default(), &[],
+            );
+            assert_eq!(render["enabled"], true);
+            assert_eq!(render["timeOfDayLightSetting"], 2);
+            assert_eq!(render["mapLightSetting"], 2);
+            assert_eq!(render["mapDarkLight"], 0);
+            assert_eq!(render["entityLights"], json!([]));
+            assert_eq!(bridge.time_of_day_light_setting, Some(4));
+            assert_eq!(bridge.map_light_setting, Some(4));
+            assert_eq!(bridge.map_dark_light, 2);
+            assert_eq!(payload["lightSetting"], 4);
+            assert_eq!(capture_light_state_slug(Some(&bridge), payload["mapFileName"].as_str().unwrap()),
+                Some("setting=2;mapDarkLight=0;forceDaylight=true".to_owned()));
+        }
+        bridge.set_force_daylight(false);
+        let restored = bridge.build_render_state_with_effects(
+            &payload, None, &HashMap::new(), &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(), &[],
+        );
+        assert_eq!(restored["timeOfDayLightSetting"], 4);
+        assert_eq!(restored["mapLightSetting"], 4);
+        assert_eq!(restored["mapDarkLight"], 2);
+        assert_eq!(presentation_light_setting(Some(4), true), Some(2));
+        assert_eq!(presentation_light_setting(Some(4), false), Some(4));
+        assert_eq!(presentation_light_setting(None, false), None);
     }
 
     #[test]

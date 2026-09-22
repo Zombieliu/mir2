@@ -1,5 +1,10 @@
 # UI goal live ledger
 
+The Windows development client now defaults to fixed daylight at the user's
+request. This includes map/reconnect persistence and the sun icon; set
+`[display] force_daylight = false` before original lighting comparison.
+[Preference and checks](daylight-development-20260922.md).
+
 ## Current running-pause repair — 2026-09-22
 
 The user still reports per-step pauses on `67d18345e`. A fresh 64-step ordinary

@@ -125,6 +125,8 @@ fn main() -> bevy::app::AppExit {
         });
 
     timing::report("configuration", config_started);
+    map_parser::lighting::configure_force_daylight(session.force_daylight);
+    eprintln!("[display] force_daylight={}", session.force_daylight);
     let assets_started = std::time::Instant::now();
     // Cross-thread channels: Bevy owns visible UI state on the main thread; one
     // async task exclusively owns the WebSocket.
