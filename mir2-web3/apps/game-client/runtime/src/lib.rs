@@ -4910,9 +4910,25 @@ fn sync_entity_render_layers(
         (presentation_poses.applied_map_center(), entity_center),
         (Some(map), Some(entity)) if map != entity
     ) {
-        // The matching map snapshot has not committed yet. Keep the previous
-        // entity transforms/provenance so the renderer never publishes a
-        // mixed-center frame; this state is retried on the next Bevy tick.
+        // Keep the old center/images, but advance the retained self composite
+        // with the camera. Waiting for producer synchronization must not pause
+        // every movement command, or expose a camera-only frame.
+        if let Some(self_entity) = snapshot.entities.iter().find(|entity| entity.is_self) {
+            if let Some(previous) = registry.entity_render_actor_roots.get(&self_entity.object_id).copied() {
+                let offset = presentation_poses.self_entity_offset();
+                let current = retained_self_root(snapshot.stage_width, snapshot.stage_height, offset, previous.z);
+                let delta = current - previous;
+                for (key, handle) in &registry.entity_render_layers {
+                    if entity_render_key_is_actor(&self_entity.object_id, key) {
+                        if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
+                            transform.translation += delta;
+                        }
+                    }
+                }
+                registry.entity_render_actor_roots.insert(self_entity.object_id.clone(), current);
+                presentation_poses.record_entity(&self_entity.object_id, offset, presentation_pose::EntityPoseSource::LocalCommand);
+            }
+        }
         return;
     }
 
@@ -5517,6 +5533,13 @@ fn clear_entity_render_layers(
 /// offsets while a replacement frame is only partially ready tears the retained
 /// body/hair/weapon composite apart. Grid/center coordinates recover the common
 /// root so a deferred old composite can move as one rigid group.
+fn retained_self_root(stage_width: f32, stage_height: f32, offset: Vec2, depth: f32) -> Vec3 {
+    let origin_x = (stage_width * 0.5 / 48.0).floor() * 48.0;
+    let origin_y = ((stage_height * 0.5 / 32.0).floor() - 1.0) * 32.0;
+    Vec3::new(origin_x - stage_width * 0.5 + offset.x,
+        stage_height * 0.5 - origin_y - offset.y, depth)
+}
+
 fn entity_render_actor_root(
     snapshot: &EntityRenderState,
     entity: &EntityRenderEntry,
@@ -5902,7 +5925,7 @@ fn begin_presentation_pose_frame(
     let incoming_center = entity_render_state.snapshot.as_ref()
         .and_then(|snapshot| snapshot.center_x.zip(snapshot.center_y))
         .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
-    if matches!((presentation_poses.applied_map_center(), incoming_center),
+    if !local_motion.smooth_display_enabled() && matches!((presentation_poses.applied_map_center(), incoming_center),
         (Some(map), Some(entity)) if map != entity)
     {
         // sync_entity_render_layers retains the entire previous actor frame
@@ -6820,6 +6843,38 @@ mod entity_atlas_tests {
             .init_resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
             .add_systems(Update, sync_entity_render_layers);
         app
+    }
+
+    #[test]
+    fn retained_self_advances_during_center_wait_without_changing_its_screen_anchor() {
+        let mut app = entity_sync_test_app();
+        let state = |center| serde_json::from_value::<EntityRenderState>(serde_json::json!({
+            "enabled":true,"stageWidth":1024,"stageHeight":768,"centerX":center,"centerY":10,
+            "entities":[{"objectId":"self","isSelf":true,"gridX":center,"gridY":10,
+                "layers":[{"key":"self:body","path":"/original-ui/CArmour/00/body.png",
+                    "left":478,"top":350,"width":32,"height":48,"z":101005}]}]
+        })).unwrap();
+        app.world_mut().resource_mut::<RuntimeEntityRenderState>().snapshot = Some(state(10));
+        {
+            let mut poses = app.world_mut().resource_mut::<presentation_pose::PresentationPoseBuffer>();
+            poses.begin_frame(0.0, true);
+            poses.set_applied_map_provenance(Some(presentation_pose::PresentationGridCenter{x:10,y:10}),Some(1));
+        }
+        app.update();
+        let body = app.world().resource::<SceneRegistry>().entity_render_layers["self:body"].entity;
+        let old_body = app.world().get::<Transform>(body).unwrap().translation;
+        app.world_mut().resource_mut::<RuntimeEntityRenderState>().snapshot = Some(state(12));
+        for distance in [1.6, 3.2, 4.8] {
+            app.world_mut().resource_mut::<presentation_pose::PresentationPoseBuffer>()
+                .set_camera(Vec2::new(-distance,0.0), presentation_pose::CameraPoseSource::LocalCommand);
+            app.update();
+            let root = app.world().resource::<SceneRegistry>().entity_render_actor_roots["self"];
+            assert!((root.x - distance + 32.0).abs() < 0.001);
+            let moved = app.world().get::<Transform>(body).unwrap().translation;
+            assert!((moved.x - old_body.x - distance).abs() < 0.001);
+            assert_eq!(app.world().resource::<presentation_pose::PresentationPoseBuffer>().coherent_applied_center(),
+                Some(presentation_pose::PresentationGridCenter{x:10,y:10}));
+        }
     }
 
     fn rect(key: &str) -> EntityRenderAtlasRect {
