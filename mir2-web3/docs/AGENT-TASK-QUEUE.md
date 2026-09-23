@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-09-24 user-reported Warrior 0–30 acceptance is recorded. Next caster
+> gates: explicit material vendors and class-aware supply guidance; V2 MP/
+> poison departure checks; two fresh ordinary Wizard/Taoist routes with
+> per-chapter expenditure, actual restocking and save/relogin evidence, then
+> native player acceptance. Existing rewards, source tests and the Warrior
+> result do not establish either caster's completed route or supply balance.
+> [Audit and acceptance sequence](generated/player-qa/ui-goal-20260921/caster-acceptance-supplies-20260924.md).
+
 > 2026-09-24 practice/combat candidate: V2 class requirements now name each
 > skill in the task card and detail; hunting uses the actual training points,
 > remains available until practice completes, and clears stale arrival text.

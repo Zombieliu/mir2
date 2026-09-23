@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+> 2026-09-24 player acceptance: the user reports Warrior 0–30 gameplay passed
+> on the current practice/combat candidate. Wizard and Taoist remain open.
+> Before their independent routes, close class-specific supply guidance and
+> V2 departure checks for MP/poison; one-time small medicine rewards do not
+> prove sustainable supplies. Preserve historical timing/death ledgers and
+> the accepted Warrior save. No whole-game or three-class acceptance follows.
+> [Class/supply audit](generated/player-qa/ui-goal-20260921/caster-acceptance-supplies-20260924.md).
+
 > 2026-09-24 latest candidate supersedes the earlier V2 nine-actor training
 > setup: nine separated D022 points now have three actors each (spread3),
 > with the same training HP and respawn cadence. All nine points are reachable

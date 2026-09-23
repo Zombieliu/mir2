@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-24 human onboarding checkpoint: Warrior 0–30 is accepted by the
+> player; Wizard/Taoist journeys and sustainable supply budgets remain open.
+> This class-scoped newcomer acceptance does not alter original Crystal
+> visual parity, historical timed cohorts or whole-game stability status.
+> [Evidence and remaining caster gates](generated/player-qa/ui-goal-20260921/caster-acceptance-supplies-20260924.md).
+
 > 2026-09-24 weapon/presentation candidate: shared-Zone Thrusting keeps full
 > adjacent physical damage and applies the level multiplier before armor-free
 > second-cell damage. HalfMoon primary/extra cells and weapon-skill experience
