@@ -7,6 +7,7 @@
 use bevy::prelude::*;
 use bevy::ui::{widget::NodeImageMode, Display, Node, PositionType, Val};
 
+use crate::big_map::BigMapModel;
 use crate::crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState, OVERLAY_MINIMAP_Z};
 use crate::crystal_ui::quest_targets::tracker_targets_monster;
 use crate::entities::{EntityKind, EntityModel, EntityModelSet};
@@ -47,12 +48,58 @@ pub struct MiniMapCrop {
     pub height: f32,
 }
 
+/// Geometry of the image actually displayed during the preceding frame.
+/// Input must use this crop, not a newly predicted player/camera centre.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MiniMapView {
+    pub map_index: i32,
+    pub map_epoch: u64,
+    pub profile: MiniMapProfile,
+    pub crop: MiniMapCrop,
+}
+
+#[derive(Debug, Default, Resource)]
+pub struct MiniMapViewState {
+    pub displayed: Option<MiniMapView>,
+}
+
+pub fn mini_map_contains(point: Vec2) -> bool {
+    (VIEW_LEFT..VIEW_LEFT + VIEW_WIDTH).contains(&point.x)
+        && (VIEW_TOP..VIEW_TOP + VIEW_HEIGHT).contains(&point.y)
+}
+
+impl MiniMapView {
+    pub fn matches_map(self, map: &MapModel, identity: &BigMapModel) -> bool {
+        identity.current_map_index == Some(self.map_index)
+            && identity.reset_epoch == self.map_epoch
+            && map.mini_map_index == Some(self.profile.image_index)
+            && map.map_width.map(f32::from) == Some(self.profile.map_width)
+            && map.map_height.map(f32::from) == Some(self.profile.map_height)
+    }
+
+    /// Inverse of the ImageNode crop/stretch and marker projection above.
+    pub fn tile_at(self, point: Vec2) -> Option<(i32, i32)> {
+        if !mini_map_contains(point) {
+            return None;
+        }
+        let x = (self.crop.left + (point.x - VIEW_LEFT) * self.crop.width / VIEW_WIDTH)
+            * self.profile.map_width
+            / self.profile.image_width;
+        let y = (self.crop.top + (point.y - VIEW_TOP) * self.crop.height / VIEW_HEIGHT)
+            * self.profile.map_height
+            / self.profile.image_height;
+        ((0.0..self.profile.map_width).contains(&x) && (0.0..self.profile.map_height).contains(&y))
+            .then_some((x.floor() as i32, y.floor() as i32))
+    }
+}
+
 pub struct Mir2CrystalMiniMapPlugin;
 
 impl Plugin for Mir2CrystalMiniMapPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_crystal_minimap)
             .init_resource::<MiniMapAssetState>()
+            .init_resource::<MiniMapViewState>()
             .add_systems(
                 Update,
                 render_crystal_minimap.after(NativePlayerUiSet::Mutate),
@@ -148,8 +195,11 @@ fn render_crystal_minimap(
     mut commands: Commands,
     mut roots: Query<(Entity, &mut Node), With<CrystalMiniMapRoot>>,
     minimap_state: Option<Res<NativePlayerUiState>>,
+    map_identity: Option<Res<BigMapModel>>,
+    mut view_state: ResMut<MiniMapViewState>,
 ) {
     let Ok((root_entity, mut root_node)) = roots.single_mut() else {
+        view_state.displayed = None;
         return;
     };
     let in_game = shell
@@ -185,6 +235,7 @@ fn render_crystal_minimap(
         Display::None
     };
     if !visible {
+        view_state.displayed = None;
         commands.entity(root_entity).despawn_children();
         return;
     }
@@ -199,6 +250,9 @@ fn render_crystal_minimap(
             .as_ref()
             .is_some_and(|tracker| tracker.is_changed())
         && !minimap_changed
+        && !map_identity
+            .as_ref()
+            .is_some_and(|identity| identity.is_changed())
     {
         return;
     }
@@ -208,6 +262,14 @@ fn render_crystal_minimap(
         return;
     };
     let crop = source_crop(profile, map_model.center_x, map_model.center_y);
+    view_state.displayed = map_identity.as_deref().and_then(|identity| {
+        Some(MiniMapView {
+            map_index: identity.current_map_index?,
+            map_epoch: identity.reset_epoch,
+            profile,
+            crop,
+        })
+    });
     let image = asset_state
         .image
         .clone()
@@ -367,6 +429,84 @@ mod tests {
             marker_style(EntityKind::Monster, false),
             (2.0, marker_color(EntityKind::Monster))
         );
+    }
+
+    #[test]
+    fn click_inverse_uses_clamped_crop_and_small_image_stretch() {
+        for profile in [
+            mini_map_profile(Some(8), Some(200), Some(200), 300, 199).unwrap(),
+            mini_map_profile(Some(14), Some(100), Some(80), 70, 50).unwrap(),
+        ] {
+            for centre in [(0, 0), (50, 40), (199, 199)] {
+                let crop = source_crop(profile, centre.0, centre.1);
+                let view = MiniMapView {
+                    map_index: 1,
+                    map_epoch: 3,
+                    profile,
+                    crop,
+                };
+                for (dx, dy) in [(0.0, 0.0), (60.0, 54.0), (119.9, 107.9)] {
+                    let tile = view
+                        .tile_at(Vec2::new(VIEW_LEFT + dx, VIEW_TOP + dy))
+                        .unwrap();
+                    let expected = (
+                        ((crop.left + dx * crop.width / VIEW_WIDTH) / profile.image_width
+                            * profile.map_width)
+                            .floor() as i32,
+                        ((crop.top + dy * crop.height / VIEW_HEIGHT) / profile.image_height
+                            * profile.map_height)
+                            .floor() as i32,
+                    );
+                    assert_eq!(tile, expected);
+                    assert!(tile.0 >= 0 && (tile.0 as f32) < profile.map_width);
+                    assert!(tile.1 >= 0 && (tile.1 as f32) < profile.map_height);
+                }
+                for point in [
+                    Vec2::new(900.9, 40.0),
+                    Vec2::new(1021.0, 40.0),
+                    Vec2::new(920.0, 21.9),
+                    Vec2::new(920.0, 130.0),
+                    Vec2::splat(f32::NAN),
+                ] {
+                    assert_eq!(view.tile_at(point), None);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn click_snapshot_rejects_map_epoch_image_and_dimensions_but_retains_displayed_crop() {
+        let profile = mini_map_profile(Some(8), Some(200), Some(200), 300, 199).unwrap();
+        let view = MiniMapView {
+            map_index: 4,
+            map_epoch: 2,
+            profile,
+            crop: source_crop(profile, 100, 100),
+        };
+        let mut identity = BigMapModel::default();
+        identity.current_map_index = Some(4);
+        identity.reset_epoch = 2;
+        let mut map = MapModel {
+            mini_map_index: Some(8),
+            map_width: Some(200),
+            map_height: Some(200),
+            ..default()
+        };
+        assert!(view.matches_map(&map, &identity));
+        map.center_x = 105;
+        assert!(view.matches_map(&map, &identity));
+        assert_eq!(view.tile_at(Vec2::new(961.0, 76.0)), Some((100, 100)));
+        identity.reset_epoch += 1;
+        assert!(!view.matches_map(&map, &identity));
+        identity.reset_epoch -= 1;
+        identity.current_map_index = Some(5);
+        assert!(!view.matches_map(&map, &identity));
+        identity.current_map_index = Some(4);
+        map.mini_map_index = Some(9);
+        assert!(!view.matches_map(&map, &identity));
+        map.mini_map_index = Some(8);
+        map.map_width = Some(201);
+        assert!(!view.matches_map(&map, &identity));
     }
 
     #[test]

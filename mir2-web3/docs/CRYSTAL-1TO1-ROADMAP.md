@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-23 map pointer correction: Big Map coordinates share the click-route
+> image projection, retain the last valid hover tile and reset across scenes.
+> Mini Map gains guarded ordinary click routing from its actual rendered crop,
+> including clamped/stretched images and map-change input protection. Shared
+> 1074/1074 and native 728/728 pass; exact package and visual handoff remain
+> pending. Mini Map click navigation extends original Crystal and adds no
+> global parity percentage.
+> [Evidence](generated/player-qa/ui-goal-20260921/map-pointer-navigation-20260923.md).
+
 > 2026-09-23 font-cache stability: system fallback Blob identities now survive
 > cache expiry and text-entity teardown without changing font/face selection.
 > A failed before-fix mixed-text test becomes stable across 2,000 rebuild

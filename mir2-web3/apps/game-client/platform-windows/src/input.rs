@@ -39,6 +39,8 @@ use crate::native_protocol::NativeOutboundCommand;
 
 #[path = "big_map_input.rs"]
 mod big_map_input;
+#[path = "minimap_input.rs"]
+mod minimap_input;
 
 pub(crate) const NATIVE_INPUT_TRACE_ENV: &str = "MIR2_NATIVE_INPUT_TRACE";
 
@@ -644,7 +646,7 @@ fn gameplay_input_enabled(
 /// button. The native world-input sender runs in `PreUpdate`, before Bevy has
 /// refreshed the HUD's `Interaction`, so the sender must use the same Crystal
 /// stage-fit and source rectangles for a press arriving in that frame.
-fn cursor_over_native_hud_button(window: &Window) -> bool {
+fn cursor_over_native_hud_button(window: &Window, minimap_expanded: bool) -> bool {
     if !window.focused {
         return false;
     }
@@ -659,6 +661,11 @@ fn cursor_over_native_hud_button(window: &Window) -> bool {
         return false;
     }
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+    let mut mail = spec::hud::MAIL.rect;
+    let mut big_map = spec::hud::BIG_MAP.rect;
+    let footer = mir2_client_bevy::crystal_ui::hud::minimap_footer_top(minimap_expanded);
+    mail.top = footer;
+    big_map.top = footer;
     [
         spec::hud::CHARACTER.rect,
         spec::hud::INVENTORY.rect,
@@ -667,15 +674,15 @@ fn cursor_over_native_hud_button(window: &Window) -> bool {
         spec::hud::OPTION.rect,
         spec::hud::MENU.rect,
         spec::hud::GAME_SHOP.rect,
-        spec::hud::MAIL.rect,
-        spec::hud::BIG_MAP.rect,
+        mail,
+        big_map,
         spec::hud::MINIMAP_TOGGLE.rect,
     ]
     .into_iter()
     .any(|rect| rect.contains(x, y))
 }
 
-fn cursor_over_big_map_hud_button(window: &Window) -> bool {
+fn cursor_over_big_map_hud_button(window: &Window, minimap_expanded: bool) -> bool {
     if !window.focused {
         return false;
     }
@@ -690,7 +697,9 @@ fn cursor_over_big_map_hud_button(window: &Window) -> bool {
         return false;
     }
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-    spec::hud::BIG_MAP.rect.contains(x, y)
+    let mut rect = spec::hud::BIG_MAP.rect;
+    rect.top = mir2_client_bevy::crystal_ui::hud::minimap_footer_top(minimap_expanded);
+    rect.contains(x, y)
 }
 
 pub fn is_world_click_blocked(
@@ -1414,12 +1423,14 @@ pub fn mouse_world_interaction_system(
     mut player_ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
-    (ui_read_model, click_state, big_map, mut map_chat, big_map_ui): (
+    (ui_read_model, click_state, big_map, mut map_chat, big_map_ui, mini_map_view, map_model): (
         Option<Res<UiReadModel>>,
         Option<Res<NativeWorldClickState>>,
         Option<Res<mir2_client_bevy::big_map::BigMapModel>>,
         Option<ResMut<mir2_client_bevy::chat::ChatModel>>,
         Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+        Option<Res<mir2_client_bevy::crystal_ui::minimap::MiniMapViewState>>,
+        Option<Res<mir2_client_bevy::map::MapModel>>,
     ),
     entities: Option<Res<EntityModelSet>>,
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
@@ -1659,6 +1670,9 @@ pub fn mouse_world_interaction_system(
             .as_deref()
             .and_then(|model| big_map_input::image_position(window, model))
             .is_some();
+    let mini_map_image_press = (left_pressed || right_pressed)
+        && player_ui.as_deref().zip(map_model.as_deref())
+            .is_some_and(|(ui, map)| minimap_input::contains(window, ui, map, mini_map_view.as_deref()));
     if movement.map_auto_path.as_ref().is_some_and(|route| {
         presentation.current_map_file_name() != Some(route.map_file.as_str())
             || big_map.as_deref().and_then(|model| model.current_map_index) != Some(route.map_index)
@@ -1671,7 +1685,14 @@ pub fn mouse_world_interaction_system(
     // The HUD interaction state is refreshed after this sender. A fresh press
     // over a source HUD button must consume the press before it can become a
     // world walk, run, attack, or pickup on the frame that opens the panel.
-    if (left_pressed || right_pressed) && cursor_over_native_hud_button(window) {
+    let minimap_expanded = player_ui.as_deref().is_none_or(|ui| {
+        map_model.as_deref().map_or(ui.minimap_visible(), |map| {
+            mir2_client_bevy::crystal_ui::hud::minimap_is_expanded(
+                ui.minimap_visible(), map.mini_map_index, map.map_width, map.map_height,
+            )
+        })
+    });
+    if (left_pressed || right_pressed) && cursor_over_native_hud_button(window, minimap_expanded) {
         movement.stop_hold(now_ms, "hudButtonPress");
         movement.attack_target = None;
         movement.harvest_target = None;
@@ -1680,7 +1701,7 @@ pub fn mouse_world_interaction_system(
         // Toggling the Big Map is a view change, including the close path;
         // it must not discard an already-planned ordinary route. Other HUD
         // actions remain direct manual input and cancel it as before.
-        if !(movement.map_auto_path.is_some() && cursor_over_big_map_hud_button(window)) {
+        if !(movement.map_auto_path.is_some() && cursor_over_big_map_hud_button(window, minimap_expanded)) {
             movement.stop_auto_path(now_ms, "hudButtonPress");
         }
         return;
@@ -1826,7 +1847,7 @@ pub fn mouse_world_interaction_system(
             if continuing_map_route {
                 return ui.blocks_route_navigation();
             }
-            if map_open && (map_image_press || movement.map_auto_path.is_some()) {
+            if map_open && (map_image_press || mini_map_image_press || movement.map_auto_path.is_some()) {
                 return big_map_input::ui_blocks_except_map(ui);
             }
             window.cursor_position().map_or_else(
@@ -1953,24 +1974,53 @@ pub fn mouse_world_interaction_system(
         return;
     }
 
-    if map_image_press {
-        // Consume the image press before interpreting world actors beneath it.
-        // Crystal BigMap.OnMouseClick accepts both left and right buttons.
-        movement.stop_hold(now_ms, "bigMapClick");
-        movement.stop_auto_path(now_ms, "bigMapClick");
+    // Title, frame and coordinates are UI surfaces too. A failed/hidden map
+    // image must never start a world gesture through the HUD beneath it.
+    if (left_pressed || right_pressed) && !mini_map_image_press
+        && minimap_input::frame_contains(window, minimap_expanded
+            || mini_map_view.as_deref().is_some_and(|view| view.displayed.is_some()))
+    {
+        movement.stop_hold(now_ms, "miniMapFrame");
+        movement.stop_auto_path(now_ms, "miniMapFrame");
         movement.attack_target = None;
         movement.harvest_target = None;
         movement.harvest_direction = None;
+        return;
+    }
+
+    if map_image_press || mini_map_image_press {
+        // Consume the image press before interpreting world actors beneath it.
+        // Crystal BigMap.OnMouseClick accepts both left and right buttons.
+        let reason = if mini_map_image_press { "miniMapClick" } else { "bigMapClick" };
+        movement.stop_hold(now_ms, reason);
+        movement.stop_auto_path(now_ms, reason);
+        movement.attack_target = None;
+        movement.harvest_target = None;
+        movement.harvest_direction = None;
+        movement.next_harvest_request_at_ms = 0.0;
         if let Some(ui) = player_ui.as_deref_mut() {
             ui.local_keys.set_auto_run(false);
         }
         let request = (|| {
             let model = big_map.as_deref().ok_or("地图信息尚未加载。");
             let model = model?;
-            let destination = big_map_input::destination(
-                model,
-                big_map_input::image_position(window, model).unwrap(),
-            )?;
+            let (map_index, destination, dimensions) = if mini_map_image_press {
+                if player_ui.as_deref().is_some_and(|ui| !ui.minimap_visible() || ui.local_keys.camera_hidden) {
+                    return Err("小地图已隐藏。");
+                }
+                let map = map_model.as_deref().ok_or("小地图信息尚未加载。");
+                let map = map?;
+                let (index, tile) = minimap_input::destination(
+                    window, mini_map_view.as_deref(), map, model,
+                )?;
+                (index, tile, (i32::from(map.map_width.unwrap()), i32::from(map.map_height.unwrap())))
+            } else {
+                let tile = big_map_input::destination(
+                    model, big_map_input::image_position(window, model).unwrap(),
+                )?;
+                let info = &model.active_map().unwrap().info;
+                (model.current_map_index.unwrap(), tile, (info.width, info.height))
+            };
             let map_file = presentation
                 .current_map_file_name()
                 .ok_or("当前地图尚未加载。");
@@ -1978,9 +2028,14 @@ pub fn mouse_world_interaction_system(
             let parsed =
                 crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。");
             let parsed = parsed?;
-            let info = &model.active_map().unwrap().info;
-            if i32::from(parsed.width) != info.width || i32::from(parsed.height) != info.height {
+            if (i32::from(parsed.width), i32::from(parsed.height)) != dimensions {
                 return Err("地图尺寸尚未同步，请稍后重试。");
+            }
+            if mini_map_image_press
+                && !mir2_game_data::crystal_map_respawns_ref(map_file)
+                    .is_some_and(|map| map.map_index == map_index)
+            {
+                return Err("小地图正在切换，请稍后重试。");
             }
             let origin = movement.planning_origin(entity_position);
             let steps = big_map_input::plan(
@@ -1994,7 +2049,7 @@ pub fn mouse_world_interaction_system(
             )?;
             Ok(big_map_input::MapRoute {
                 map_file: map_file.to_owned(),
-                map_index: model.current_map_index.unwrap(),
+                map_index,
                 origin,
                 destination,
                 steps,
@@ -2003,6 +2058,11 @@ pub fn mouse_world_interaction_system(
         })();
         match request {
             Ok(route) if !route.steps.is_empty() => {
+                crate::movement_trace::record(serde_json::json!({
+                    "type": "mapClickRoute", "source": reason, "atMs": now_ms,
+                    "map": route.map_file, "origin": route.origin,
+                    "destination": route.destination, "steps": route.steps.len(),
+                }));
                 movement.auto_path_destination = Some(route.destination);
                 movement.map_auto_path = Some(route);
             }
@@ -3209,6 +3269,9 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 mod tests {
     mod big_map_input_tests {
         include!("big_map_input_tests.rs");
+    }
+    mod minimap_input_tests {
+        include!("minimap_input_tests.rs");
     }
     mod quest_route_input_tests {
         include!("quest_route_input_tests.rs");
@@ -5056,13 +5119,13 @@ mod tests {
         let (menu_x, menu_y) = spec::hud::MENU.rect.center();
         assert!(cursor_over_native_hud_button(&stage_window(
             bevy::prelude::Vec2::new(menu_x, menu_y),
-        )));
+        ), true));
         assert!(!cursor_over_native_hud_button(&stage_window(
             bevy::prelude::Vec2::new(spec::hud::MENU.rect.left - 0.1, menu_y),
-        )));
+        ), true));
         assert!(!cursor_over_native_hud_button(&stage_window(
             bevy::prelude::Vec2::new(512.0, 400.0),
-        )));
+        ), true));
     }
 
     #[test]

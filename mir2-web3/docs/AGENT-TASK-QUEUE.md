@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-09-23 map-pointer UI: Big Map XY now follows the displayed image's
+> mouse tile; a retained label and bounded render cache avoid hover rebuilds.
+> Mini Map left/right clicks invert the actual rendered crop and use ordinary
+> ACK-bounded movement, with map-epoch/collision/UI protection and no NewMapInfo
+> prerequisite. Old/hidden frame and collapsed footer input are shielded.
+> Shared 1074/1074 and native 728/728 pass (two existing GPU soaks excluded).
+> Mini Map navigation is a convenience extension; physical acceptance and
+> package handoff remain pending.
+> [Evidence](generated/player-qa/ui-goal-20260921/map-pointer-navigation-20260923.md).
+
 > 2026-09-23 font-cache OOM: reproduced unpinned system fallback source expiry
 > growing identical text from 9 to 49 MiB in eight cycles. Shared source lookup
 > plus retained actual layout font blobs keeps original glyph selection and

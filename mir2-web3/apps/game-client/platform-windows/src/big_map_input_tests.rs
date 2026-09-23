@@ -55,7 +55,7 @@ fn map_image_coordinates_follow_stage_fit_and_exclude_panel_controls() {
     assert!(big_map_input::destination(&remote, (200., 200.)).is_err());
 }
 
-fn navigation_app(
+pub(super) fn navigation_app(
     button: MouseButton,
 ) -> (
     bevy::prelude::App,

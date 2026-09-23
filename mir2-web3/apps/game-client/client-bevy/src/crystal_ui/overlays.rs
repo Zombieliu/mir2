@@ -14,6 +14,8 @@ pub mod skill_bars;
 mod skill_page;
 #[path = "npc_item_service.rs"]
 mod npc_item_service;
+#[path = "big_map_coordinates.rs"]
+mod big_map_coordinates;
 
 use std::collections::VecDeque;
 
@@ -3700,6 +3702,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     (
                         render_overlays,
+                        big_map_coordinates::update,
                         game_shop_dialog::render_confirmation_system,
                     )
                         .chain(),
@@ -11035,6 +11038,7 @@ fn render_overlays(
     mut commands: Commands,
     mut mail_cache: Local<MailRenderCache>,
     mut game_shop_cache: Local<GameShopRenderCache>,
+    mut big_map_cache: Local<big_map_coordinates::RenderCache>,
 ) {
     let OverlayRenderModels {
         asset_server,
@@ -11077,6 +11081,7 @@ fn render_overlays(
         if !in_game {
             mail_cache.key = None;
             game_shop_cache.key = None;
+            big_map_cache.reset();
             return;
         }
 
@@ -11171,11 +11176,15 @@ fn render_overlays(
                 )
             },
         );
-        fill_panel(
+        big_map_coordinates::fill_panel(
             &mut commands,
             &mut secondary.p1(),
             state.bigmap_open(),
-            |parent| render_bigmap(parent, asset_server.as_deref(), &big_map, &big_map_ui, &ui),
+            &big_map,
+            &big_map_ui,
+            &ui,
+            asset_server.as_deref(),
+            &mut big_map_cache,
         );
         fill_panel(
             &mut commands,
@@ -15714,8 +15723,8 @@ fn render_bigmap(
             }
         });
 
-    let location = model.player_location.unwrap_or_default();
     parent.spawn((
+        big_map_coordinates::CoordinateLabel,
         Node {
             position_type: PositionType::Absolute,
             left: Val::Px(519.0),
@@ -15724,7 +15733,7 @@ fn render_bigmap(
             height: Val::Px(15.0),
             ..default()
         },
-        Text::new(format!("[ {}, {} ]", location.x, location.y)),
+        Text::new(""),
         crate::crystal_ui::typography::crystal_text_font(11.0),
         TextColor(Color::WHITE),
     ));
