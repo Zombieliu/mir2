@@ -1,5 +1,157 @@
 # Agent Orchestration
 
+> 2026-09-24 player acceptance: the user reports Warrior 0–30 gameplay passed
+> on the current practice/combat candidate. Wizard and Taoist remain open.
+> Before their independent routes, close class-specific supply guidance and
+> V2 departure checks for MP/poison; one-time small medicine rewards do not
+> prove sustainable supplies. Preserve historical timing/death ledgers and
+> the accepted Warrior save. No whole-game or three-class acceptance follows.
+> [Class/supply audit](generated/player-qa/ui-goal-20260921/caster-acceptance-supplies-20260924.md).
+
+> 2026-09-24 latest candidate supersedes the earlier V2 nine-actor training
+> setup: nine separated D022 points now have three actors each (spread3),
+> with the same training HP and respawn cadence. All nine points are reachable
+> and have space for the groups; new three-class survival is not yet accepted.
+> Exact skill requirements and training-point navigation are visible in native
+> UI. Thrusting primary/secondary damage, accepted weapon progression and
+> native animation/motion clock alignment are tested. Matched release package
+> `20260924-practice-combat`, source `abee09b21`, was deployed after confirmed
+> normal logout on September 24 at 06:02 +08:00. Client55648 connects to
+> Gateway61900 with the original store/keys and a verified save backup.
+> Movement/render/soak diagnostics are active. D021 performance still
+> requires same-scene replay after measured resource-lookup and render changes.
+> [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
+
+> 2026-09-19 latest V2 handoff: strict cohort B ended 66/78, levels 28/26/27,
+> with matching normal logout saves; Wizard's fourth death invalidates its
+> two-hour/three-revival gate. The separate functional recheck retains old
+> clocks/deaths. Warrior N21 HalfMoon now has public spell-4/positive-damage
+> receipts after shared-Zone directional repair, but its next Thrusting swing
+> arrived during the server's 600 ms action lock; a 650 ms class-practice
+> spacing regression passes. Warrior later dealt only 144 damage to a 285-HP
+> imported WoomaFighter in the fixed 20-attack budget. Taoist N20 bought real
+> Amulets, used an owned BoneFamiliar, and suffered one ordinary death before
+> a blocked D021→D022 transfer paused its run. The familiar's one-damage
+> generic fallback contradicts its imported 12–23 DC; focused correction
+> passes. Candidate V2 content now has nine separated training actors (three
+> per quest target) and 120 HP on training Wooma only, preserving full-strength
+> imported actors and normal respawn timing. V2 runner targets only those
+> authored IDs; Node V2/combat tests pass 59/59 and 161/161, focused Rust
+> spawn integration 1/1. Rebuilt deployment and fresh live proof remain open. No 78/78 or visual
+> acceptance claim follows yet.
+
+> 2026-09-19 D022 safety correction: cohort B's Wizard completed N12 and
+> N16, then died a fourth time during N19 at (248,284). Six nearby Wooma
+> were present, including the three tightly grouped V2 WoomaSoldier spawns.
+> Its three lawful revivals were already spent, so strict cohort B 78/78 is
+> impossible. The next candidate separates one V2 monster per foothold at
+> (335,360), (320,345), and (300,335), with ordinary respawn waits. Static
+> collision paths and Node 57/57 pass; live safety and saved completion are
+> still unverified. Preserve the original 120-minute clocks and all deaths.
+
+> 2026-09-19 14:39 UTC strict saved cohort B check: 66/78, Warrior 23/26
+> level 28, Wizard 21/26 level 26, Taoist 22/26 level 27. All three had
+> normal logout and matching saved transforms. Warrior paused on N21 search;
+> Taoist consumed its real Amulets during N20, fell back to melee, and hit the
+> unchanged 20-action cap. A V2-only ordinary shop preflight for 100 Amulets
+> is coded and Node-tested, but live revalidation remains open. This cohort's
+> 78/78 within the original clock is impossible after Wizard's fourth death.
+
+> 2026-09-19 independent newcomer V2 cohort B keeps three original
+> 12:45:19–14:45:19 UTC ordinary clocks and the three-revival ceiling.
+> Wizard N12 and Warrior N16 now pass with public combat receipts after
+> bounded stale-cursor magic handling and a V2 N16 Zombie2 objective;
+> Taoist and Warrior reached N19, where the imported D022 Dung spread
+> exhausted the unchanged 30-second search. V2-only three-monster Dung,
+> WoomaSoldier, and WoomaFighter footholds are built; deployment and
+> strict three-class 78/78, level-30, save, timing, and visual gates remain open.
+> Cohort A's final 51/78 and paused V1 evidence are independent.
+
+> 2026-09-19 V2 same-clock update: Wizard N19 suffered a real fourth death
+> with its cumulative three revivals already spent; 78/78 is impossible under
+> the retained rules. Warrior and Taoist can continue lawful functional
+> checks. The verified saved tally remains 40/78; see newcomer V2 QA evidence.
+
+> 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
+> claims, six chapters and trusted committed server/Zone evidence are implemented.
+> Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
+> V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
+> Web guidance/goal and localization plus TypeScript pass; earlier controller checkpoint 288/288.
+> Latest affected V2/supply controller regressions pass 105/105; ordinary revalidation remains open.
+> Gateway pending-Zone monster lifecycle regressions pass 2/2 after a real
+> Zone kill and respawn; no ordinary Wizard N12 completion is claimed.
+> Separate functional recheck clock and recovery-ledger checks pass 62/62;
+> original two-hour route evidence and revival caps remain unchanged.
+> Active combat wakes the post-StartGame Gateway tick at the existing 75 ms
+> input grace (focused 1/1); release `3e5a29924` is deployed and prompt hits are live-proven.
+> Additional ordinary functional recheck verifies 40/78 after normal logout;
+> levels 24/19/18, with Warrior N15 and Taoist N10 newly completed.
+> All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
+> Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
+> Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.
+> Actual Gateway N4 self-Healing 1/1 and N5 arrival/autosave/rejection 4/4 pass;
+> movement map-transfer 4/4 and Simulation V2 15/15 plus Zone 7/7 reruns pass.
+> N5 release is deployed; safe-profile Zone 4/4, Gateway snapshot 1/1 and arrival 4/4 pass.
+> Safe-profile release is deployed; legacy safe-area/PvP plus profile reruns 9/9 pass.
+> Shared spell cooldown getter 3/3 and fresh Gateway journey bridge 11/11 pass.
+> Public owner readiness follows the Zone clock; the 6e1778957 release is deployed.
+> Fresh ordinary three-class accounts started on isolated ports 19800/19810, with unextended 120-minute ledgers.
+> Native clean-source release build and unauthenticated startup diagnostic pass; visual capture remains unaccepted.
+> Remaining ordinary route, timing, survival,
+> suitable equipment, exact native package and visual acceptance remain open.
+> This adds custom onboarding, no Crystal parity percentage. V1 evidence stays
+> separate. [Implementation evidence](generated/player-qa/newcomer-v2-20260918/runtime.md).
+
+> 2026-09-08 Windows repackaging checkpoint: clean snapshot `4264b9149`
+> builds and passes the signed Candidate verifier (37,534 files). Sound104
+> package/allowlist mismatch and malformed-Unicode PE scan false positive are
+> fixed with self-tests and independent review; 704 required paths are checked
+> against the verifier allowlist. The exact final EXE opened the real native
+> login window and connected to the rebuilt isolated local Gateway. Authentication
+> is a manual handoff; in-game trade/map, DPI/soak/human acceptance remain open.
+> Evidence: `docs/generated/player-qa/windows-repackage-20260908/README.md`.
+> `accepted=false`, `visualAccepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade gold custody checkpoint: positive incremental offers
+> now debit the wallet immediately; preparation/recovery only debit outstanding
+> gold. Persisted heldGold preserves legacy snapshots and is independent from
+> prepared item custody. Cancel/teardown and orphan positive-hold recovery refund
+> once; save failure restores custody. Cap/materialization failures retain final
+> retry authority. Ledger bootstrap occurs before the first eligible debit.
+> Any prepared participant blocks gold and item edits; item failure ACKs prevent
+> withdrawing an offer while reusing the peer's previous confirmation.
+> Simulation 1491 unit + 374 unique integration tests are verified. Gateway resolved
+> coverage is 695 passed / one existing environmental ignore: the initial full
+> run had one queued-notification fixture assertion, corrected by a test-only
+> change and a passing 10/10 gold rerun. Production code did not change for that
+> correction. Format/diff and independent bounded review pass. Exact raw results:
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-gold/README.md`.
+> Next: separate confirmation tickets from exact held-item custody, then editable
+> prepared offers and native deposit/retrieve/merge. Prepared unlock still cancels/
+> refunds; source capacity rejection retention, zero-held orphan cleanup, request
+> throttle/error chats, screenshots and all 33 backlog IDs remain open. No UI/
+> Windows-host rerun, package, interactive launch, live-store write or deployment
+> occurred. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+> 2026-09-08 Windows trade invitation/private-pair checkpoint: native source
+> MirMessageBox Yes/No and cancellation OK, invitation revision ownership,
+> keyboard disposal and modal input isolation are implemented. Shared Gateway
+> invitations go only to the facing recipient; accepted reciprocal presence
+> pairs own guest gold/item notifications and settlement matching. Refusal,
+> teardown, old-cleanup/new-invite ordering and bootstrap failure are covered.
+> Native UI 598/598, Windows 537/537, Gateway 685 passed / one existing ignored,
+> and new Gateway security tests 13/13 pass;
+> the final full Gateway result and source hashes are recorded in
+> `docs/generated/player-qa/native-ui-parity-20260908-trade-invitation/README.md`.
+> Next: positive-delta/immediate editable gold escrow and bilateral unlock,
+> then exact item custody and native deposit/retrieve/merge operations. Cells
+> remain read-only; prepared unlock still cancels/refunds. Request throttle,
+> complete error chats, original paired screenshots, package/light/DPI/soak/
+> legal/signing/human gates and all 33 IDs remain open. No interactive launch,
+> screenshot, production rollout or live-store write occurred this round.
+> `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`.
+
+
 > Latest Windows visual-parity sync (2026-08-28): VIS-04 Scarecrow Struck
 > audio revision `354bb9f9648758c9f38d5ce149a273ae07cd2a7e` binds Crystal's
 > exact `005-2.wav` flinch-first plus optional attacker-weapon `60..65.wav`
@@ -225,7 +377,18 @@ Stop and ask only when:
 
 The authoritative current round is in `docs/AGENT-TASK-QUEUE.md`. If this file and the queue disagree, trust the queue and update this section.
 
-Current checkpoint:
+Current checkpoint (2026-09-03):
+
+- User-requested publication/Android handoff: `docs/ANDROID-MAC-HANDOFF.md` assigns a separate proposed Mac execution lane from the verified Windows source branch, with Capacitor real-device baseline followed by a bounded native Bevy gap/implementation slice. The handoff is prepared, not dispatched or device-verified; Android does not take over the Windows trade leaf. Coordinate any edits to shared client modules and global docs before writing.
+- User-requested launch repair: native asset junctions now resolve the physical map-layout sibling; startup requires/decodes Bichon map 0. The reported viewport resolves 849 draws and 221 local images; native host tests pass 537/537 serially and the offline build passes. Three default-parallel GameShop queue failures are recorded separately. Repaired EXE opened at login; manual login/in-game visual verification is pending. Evidence: `docs/generated/player-qa/native-ui-parity-20260903-map-relocation/README.md`.
+- Current task: the Windows native Crystal UI/state/interaction parity goal remains incomplete, with all 33 user-observed backlog IDs retained. CLI publication resumed after user-authorized recovery of about 241 MiB from one verified, recoverably backed-up generated test PDB; no source, EXE, store, recording or process was removed/stopped.
+- Latest bounded source/headless checkpoint: `native-ui-parity-20260903-trade-completion`; personal lock and typed escrow preparation emit no completion. Successful delivery completes once; durable delivery waits for the saved projection/event marker. New escrowPrepared state preserves legacy saved debit recovery without another debit. Evidence, exact source hashes, storage recovery and diagnostics are in `docs/generated/player-qa/native-ui-parity-20260903-trade-completion/README.md`.
+- Final verification: Simulation 1491/1491 plus dedicated completion 7/7; Gateway 672 passed and one existing ignored PostgreSQL test; protocol 40/40, game-data 39/39, native UI 591/591, Windows 534/534, client runtime 212/212 and UI core 43/43. All 3629 non-overlapping tests pass. Focused incoming-carrier, two-session conservation and durable mark-retry tests also pass. The Windows host uses a fresh dedicated target after a mixed-cache compile failure.
+- Next CLI leaf (2026-09-08): separate confirmation tickets from exact held-item custody so post-confirm edits invalidate both confirmations without releasing assets; then native deposit/retrieve/merge. Positive-delta immediate gold custody before preparation is implemented. Prepared unlock and capacity rejection still cancel/refund. Close zero-held orphan cleanup, source request throttle/error messages and original paired screenshots in follow-up leaves. Preserve durable unknown-outcome holds and legacy/save/restart conservation. All 33 backlog IDs and global acceptance remain open.
+- The user explicitly resumed Computer Use for native launch/repair after the earlier Escape. Scoped launch/capture resumed; authentication remains a manual user handoff under the skill. Do not claim authenticated world visual acceptance from the login capture or headless tests.
+- Branch: `codex/windows-player-journey`; stacked PR #250 remains Draft. `visualAccepted=false`, `accepted=false`, `globalParityPercent=null`; original-pair/package/light/DPI/soak/legal/signing/human gates stay open.
+
+Historical checkpoint (2026-04-29; not current whole-project acceptance):
 
 - Active round: `2026-04-29-R309`.
 - Active task: keep accepted stable-diff packet parity green while closing remaining same-scene frontend visual/resource gaps before human visual/feel acceptance.
@@ -237,7 +400,7 @@ Current checkpoint:
 - Restart handoff file: `docs/AGENT-RESUME-HANDOFF.md`.
 - Windows continuation checklist: `docs/WINDOWS-CONTINUATION.md`.
 
-Latest completed rounds:
+Historical completed rounds:
 
 | Round | Result |
 | --- | --- |

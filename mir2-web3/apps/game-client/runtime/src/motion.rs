@@ -160,7 +160,7 @@ impl Plugin for CrystalMoveClockPlugin {
             .init_resource::<MoveClockSource>()
             .add_systems(
                 PreUpdate,
-                tick_crystal_move_clock_system.in_set(CrystalMoveClockSet),
+                tick_crystal_move_clock_system.in_set(CrystalMoveClockSet).before(super::NativeMotionProducerSet),
             );
     }
 }
@@ -879,6 +879,7 @@ mod tests {
         use crate::{EntityKind, WorldEntity, WorldSnapshot};
         crate::RuntimeWorldState {
             snapshot: Some(WorldSnapshot {
+                map_file_name: None,
                 map_title: None,
                 player_object_id: None,
                 selected_object_id: None,
@@ -1016,6 +1017,7 @@ mod tests {
         // New snapshot with mob-1 gone.
         let empty_state = crate::RuntimeWorldState {
             snapshot: Some(WorldSnapshot {
+                map_file_name: None,
                 map_title: None,
                 player_object_id: None,
                 selected_object_id: None,
@@ -1145,6 +1147,7 @@ mod tests {
         // Same frozen time, entity disappears from the snapshot → removed.
         let empty = crate::RuntimeWorldState {
             snapshot: Some(crate::WorldSnapshot {
+                map_file_name: None,
                 map_title: None,
                 player_object_id: None,
                 selected_object_id: None,

@@ -6,6 +6,8 @@
 use bevy::prelude::Resource;
 use serde::{Deserialize, Serialize};
 
+use crate::inventory::CrystalItemTooltipSourceModel;
+
 use crate::inventory::InventoryModel;
 
 pub const SHOP_QUANTITY_MIN: u16 = 1;
@@ -54,15 +56,44 @@ pub struct ShopGood {
     pub unique_id: u64,
     pub name: String,
     pub price: u32,
+    /// Authoritative NPCPearlGoods currency; never inferred from item identity.
+    pub use_pearls: bool,
     pub count: u16,
     pub stock: i32,
     pub panel_type: u8,
     /// Uses the same Crystal Items atlas exported for carried items.
     pub icon: u16,
+    /// Legacy full PNG-frame dimensions, not alpha-bound GetTrueSize.
+    /// The native renderer measures the loaded original pixels instead.
+    pub icon_width: u16,
+    pub icon_height: u16,
     pub description: String,
+    /// Exact Crystal `MirGoodsCell.Item` inputs for `CreateItemLabel`.
+    /// Missing metadata remains explicit so legacy packets never invent stats.
+    pub tooltip_source: Option<CrystalItemTooltipSourceModel>,
 }
 
 impl ShopGood {
+    pub fn price_label(&self) -> String {
+        if self.use_pearls {
+            format!(
+                "Price: {} pearl{}",
+                self.price,
+                if self.price > 1 { "s" } else { "" }
+            )
+        } else {
+            format!("Price: {} gold", self.price)
+        }
+    }
+
+    pub fn user_item_image_index(&self) -> Option<u16> {
+        crate::inventory::concrete_item_image_index(
+            self.icon,
+            u32::from(self.count),
+            self.tooltip_source.as_ref(),
+        )
+    }
+
     pub fn stock_label(&self) -> String {
         if self.stock < 0 {
             "∞".to_owned()
@@ -77,6 +108,9 @@ impl ShopGood {
 pub struct ShopModel {
     pub goods: Vec<ShopGood>,
     pub selected_id: Option<u64>,
+    /// Crystal's NPCGoods.HideAddedStats switch. It applies only while
+    /// constructing MirGoodsCell tooltips for this authoritative catalog.
+    pub hide_added_stats: bool,
     /// NPC sell selection is independent from Warehouse deposit selection.
     pub selected_bag_slot_for_sell: Option<u32>,
     /// NPC repair selection is independent from sell and Warehouse state.
@@ -172,6 +206,15 @@ pub fn shop_quantity_dec(q: u16) -> u16 {
 }
 
 pub fn shop_buy_enabled(shop: &ShopModel, inventory: &InventoryModel, quantity: u16) -> bool {
+    shop_buy_enabled_with_pearls(shop, inventory, quantity, 0)
+}
+
+pub fn shop_buy_enabled_with_pearls(
+    shop: &ShopModel,
+    inventory: &InventoryModel,
+    quantity: u16,
+    pearls: u32,
+) -> bool {
     let Some(good) = shop.selected() else {
         return false;
     };
@@ -183,7 +226,12 @@ pub fn shop_buy_enabled(shop: &ShopModel, inventory: &InventoryModel, quantity: 
         return false;
     }
     let total_price = good.price.saturating_mul(qty);
-    if inventory.gold < total_price {
+    let balance = if good.use_pearls {
+        pearls
+    } else {
+        inventory.gold
+    };
+    if balance < total_price {
         return false;
     }
     let occupied = inventory.items.iter().filter(|i| i.container == 0).count() as u32;
@@ -285,6 +333,7 @@ mod tests {
         let model = ShopModel {
             goods: vec![good(1, 10, -1)],
             selected_id: Some(1),
+            hide_added_stats: true,
             selected_bag_slot_for_sell: Some(2),
             selected_bag_slot_for_repair: Some(3),
             service_mode: NpcShopServiceMode::Buy,
@@ -377,5 +426,36 @@ mod tests {
             repair_rate: None,
         }));
         assert_eq!(model.service_mode, NpcShopServiceMode::Closed);
+    }
+}
+
+#[cfg(test)]
+mod pearl_tests {
+    use super::*;
+    #[test]
+    fn pearl_catalog_uses_pearls_without_spending_gold_for_ui_validation() {
+        let mut shop = ShopModel {
+            goods: vec![ShopGood {
+                unique_id: 1,
+                price: 50,
+                use_pearls: true,
+                stock: -1,
+                ..Default::default()
+            }],
+            selected_id: Some(1),
+            ..Default::default()
+        };
+        let mut inventory = InventoryModel::default();
+        inventory.gold = 10000;
+        assert!(!shop_buy_enabled(&shop, &inventory, 1));
+        assert!(!shop_buy_enabled_with_pearls(&shop, &inventory, 2, 99));
+        inventory.gold = 0;
+        assert!(shop_buy_enabled_with_pearls(&shop, &inventory, 2, 100));
+        assert_eq!(shop.goods[0].price_label(), "Price: 50 pearls");
+        shop.goods[0].price = 1;
+        assert_eq!(shop.goods[0].price_label(), "Price: 1 pearl");
+        shop.goods[0].use_pearls = false;
+        assert!(!shop_buy_enabled_with_pearls(&shop, &inventory, 1, 100));
+        assert_eq!(shop.goods[0].price_label(), "Price: 1 gold");
     }
 }

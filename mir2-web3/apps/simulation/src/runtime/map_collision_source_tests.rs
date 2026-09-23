@@ -3,9 +3,9 @@ use crate::config::{MonsterSpawnSource, SimulationConfig};
 use mir2_protocol::Point;
 
 use super::{
-    collision_data_for_map_or_config, is_static_spawnable_point_with_collision, point_in_bounds,
-    runtime_active_map_collision_data, runtime_map_collision_data,
-    runtime_world_map_collision_data,
+    collision_data_for_map_or_config, crystal_movement_transfer_records_for_map,
+    is_static_spawnable_point_with_collision, point_in_bounds, runtime_active_map_collision_data,
+    runtime_map_collision_data, runtime_world_map_collision_data,
 };
 
 #[test]
@@ -166,4 +166,33 @@ fn map_extension_aliases_share_world_cache_and_resolve_real_collision() {
             "{alias} should select the full CrystalWorld collision"
         );
     }
+}
+
+#[test]
+fn crystal_service_shop_exit_survives_closed_door_destination_validation() {
+    let transfers = crystal_movement_transfer_records_for_map("0120");
+    let shop_exit = transfers
+        .iter()
+        .find(|transfer| {
+            transfer.to_map_file_name == "2"
+                && transfer.from_bounds.min_x == 14
+                && transfer.from_bounds.min_y == 15
+        })
+        .expect("Crystal 0120 blacksmith must retain its only exit to Serpent Valley");
+
+    assert_eq!(shop_exit.to_position, Point { x: 517, y: 492 });
+    assert_eq!(shop_exit.from_bounds.max_x, 14);
+    assert_eq!(shop_exit.from_bounds.max_y, 15);
+
+    let valley = runtime_world_map_collision_data("2")
+        .expect("Serpent Valley collision should be available");
+    assert!(point_in_bounds(
+        &valley.collision.region_bounds,
+        &shop_exit.to_position
+    ));
+    assert!(!valley.blocked_set.contains(&(517, 492)));
+    assert!(
+        valley.closed_door_set.contains(&(517, 492)),
+        "the regression specifically exercises Crystal's valid closed-door landing cell"
+    );
 }

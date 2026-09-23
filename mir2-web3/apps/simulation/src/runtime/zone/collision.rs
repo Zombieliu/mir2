@@ -120,6 +120,10 @@ impl ZoneCollision {
             || self.blocked_cells.contains(&(point.x, point.y))
     }
 
+    pub(crate) fn bounds(&self) -> Option<ZoneBounds> {
+        self.bounds
+    }
+
     pub(crate) fn is_player_movement_blocked(&self, point: &Point) -> bool {
         // A direct-movement transfer source is always steppable by a player:
         // stepping onto it immediately fires the map transfer, so it must bypass

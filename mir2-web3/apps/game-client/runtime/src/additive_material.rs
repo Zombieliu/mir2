@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::{
-    asset::{embedded_asset, embedded_path, AssetPath},
+    asset::{embedded_asset, embedded_path, AssetId, AssetPath},
     color::LinearRgba,
     mesh::MeshVertexBufferLayoutRef,
     prelude::*,
@@ -76,7 +76,23 @@ impl Material2d for CrystalAdditiveMaterial {
 #[derive(Resource, Default)]
 pub(crate) struct CrystalAdditiveMaterialCache {
     unit_quad: Option<Handle<Mesh>>,
-    materials: HashMap<String, Handle<CrystalAdditiveMaterial>>,
+    aliases: HashMap<String, MaterialParameters>,
+    materials: HashMap<MaterialParameters, SharedMaterial>,
+}
+
+/// World placement belongs to the mesh entity, not its material. Repeated map
+/// animations can share this immutable binding without sharing transforms or
+/// changing the transparent draw order.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+struct MaterialParameters {
+    texture: AssetId<Image>,
+    opacity: u32,
+    uv: [u32; 4],
+}
+
+struct SharedMaterial {
+    handle: Handle<CrystalAdditiveMaterial>,
+    aliases: usize,
 }
 
 impl CrystalAdditiveMaterialCache {
@@ -110,23 +126,47 @@ impl CrystalAdditiveMaterialCache {
         uv_scale_offset: Vec4,
         materials: &mut Assets<CrystalAdditiveMaterial>,
     ) -> Handle<CrystalAdditiveMaterial> {
-        let tint = LinearRgba::new(1.0, 1.0, 1.0, opacity.clamp(0.0, 1.0));
-        if let Some(handle) = self.materials.get(cache_key) {
-            if let Some(mut material) = materials.get_mut(handle) {
-                material.texture = texture;
-                material.tint = tint;
-                material.uv_scale_offset = uv_scale_offset;
-                return handle.clone();
+        let opacity = opacity.clamp(0.0, 1.0);
+        let parameters = MaterialParameters {
+            texture: texture.id(),
+            opacity: opacity.to_bits(),
+            uv: uv_scale_offset.to_array().map(f32::to_bits),
+        };
+        let make_material = || CrystalAdditiveMaterial {
+            tint: LinearRgba::new(1.0, 1.0, 1.0, opacity),
+            uv_scale_offset,
+            texture: texture.clone(),
+        };
+
+        if self.aliases.get(cache_key) == Some(&parameters) {
+            if let Some(shared) = self.materials.get_mut(&parameters) {
+                if !materials.contains(shared.handle.id()) {
+                    shared.handle = materials.add(make_material());
+                }
+                // In particular, do not get_mut an unchanged asset: that marks
+                // it modified and needlessly rebuilds its GPU bind group.
+                return shared.handle.clone();
             }
+            self.aliases.remove(cache_key);
+        } else {
+            // A fade/frame/UV change must detach this alias, never mutate a
+            // material that another effect or map cell is still drawing.
+            self.evict(cache_key, materials);
         }
 
-        let handle = materials.add(CrystalAdditiveMaterial {
-            tint,
-            uv_scale_offset,
-            texture,
-        });
-        self.materials.insert(cache_key.to_owned(), handle.clone());
-        handle
+        let shared = self
+            .materials
+            .entry(parameters)
+            .or_insert_with(|| SharedMaterial {
+                handle: materials.add(make_material()),
+                aliases: 0,
+            });
+        if !materials.contains(shared.handle.id()) {
+            shared.handle = materials.add(make_material());
+        }
+        shared.aliases += 1;
+        self.aliases.insert(cache_key.to_owned(), parameters);
+        shared.handle.clone()
     }
 
     pub(crate) fn evict(
@@ -134,21 +174,34 @@ impl CrystalAdditiveMaterialCache {
         cache_key: &str,
         materials: &mut Assets<CrystalAdditiveMaterial>,
     ) {
-        if let Some(handle) = self.materials.remove(cache_key) {
-            materials.remove(handle.id());
+        let Some(parameters) = self.aliases.remove(cache_key) else {
+            return;
+        };
+        let last_alias = self.materials.get_mut(&parameters).is_some_and(|shared| {
+            shared.aliases -= 1;
+            shared.aliases == 0
+        });
+        if last_alias {
+            if let Some(shared) = self.materials.remove(&parameters) {
+                materials.remove(shared.handle.id());
+            }
         }
     }
 
     #[cfg(any(not(target_arch = "wasm32"), test))]
     pub(crate) fn len(&self) -> usize {
-        self.materials.len()
+        self.aliases.len()
     }
 
     #[cfg(any(not(target_arch = "wasm32"), test))]
     pub(crate) fn live_len(&self, materials: &Assets<CrystalAdditiveMaterial>) -> usize {
-        self.materials
+        self.aliases
             .values()
-            .filter(|handle| materials.get(*handle).is_some())
+            .filter(|parameters| {
+                self.materials
+                    .get(parameters)
+                    .is_some_and(|shared| materials.contains(shared.handle.id()))
+            })
             .count()
     }
 }
@@ -172,6 +225,10 @@ fn crystal_additive_blend_state() -> BlendState {
         },
     }
 }
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+#[path = "additive_material_gpu_tests.rs"]
+mod gpu_tests;
 
 #[cfg(test)]
 mod tests {
@@ -206,19 +263,107 @@ mod tests {
             cache.material(&key, dummy_image.clone(), 1.0, &mut materials);
         }
         assert_eq!(cache.len(), 120);
-        assert_eq!(materials.len(), 120);
+        assert_eq!(materials.len(), 1, "identical effects share a material");
         for i in 0..100 {
             let key = format!("fx-{i}");
             cache.evict(&key, &mut materials);
         }
         assert_eq!(cache.len(), 20);
-        assert_eq!(materials.len(), 20);
+        assert_eq!(materials.len(), 1, "surviving aliases retain their asset");
         for i in 120..200 {
             let key = format!("fx-{i}");
             cache.material(&key, dummy_image.clone(), 1.0, &mut materials);
         }
         assert!(cache.len() <= 100);
-        assert_eq!(cache.len(), materials.len());
+        assert_eq!(materials.len(), 1);
+        for i in 100..200 {
+            cache.evict(&format!("fx-{i}"), &mut materials);
+        }
+        assert_eq!(cache.len(), 0);
+        assert_eq!(materials.len(), 0);
+    }
+
+    #[test]
+    fn changing_one_shared_alias_preserves_other_effects_and_rejoins_exact_parameters() {
+        let mut cache = CrystalAdditiveMaterialCache::default();
+        let mut materials = Assets::<CrystalAdditiveMaterial>::default();
+        let mut images = Assets::<Image>::default();
+        let image = images.add(Image::default());
+        let other_image = images.add(Image::default());
+        let original = cache.material("left", image.clone(), 1.0, &mut materials);
+        let same = cache.material("right", image.clone(), 1.0, &mut materials);
+        assert_eq!(original, same);
+
+        let faded = cache.material("left", image.clone(), 0.4, &mut materials);
+        assert_ne!(faded, original);
+        assert_eq!(materials.get(&original).unwrap().tint.alpha, 1.0);
+        assert_eq!(materials.get(&faded).unwrap().tint.alpha, 0.4);
+        assert_eq!(materials.len(), 2);
+
+        let next_frame = cache.material("left", other_image.clone(), 0.4, &mut materials);
+        assert_ne!(next_frame, faded);
+        assert!(!materials.contains(faded.id()));
+        assert_eq!(materials.get(&original).unwrap().texture, image);
+        assert_eq!(materials.get(&next_frame).unwrap().texture, other_image);
+
+        let uv = Vec4::new(0.5, 0.5, 0.25, 0.25);
+        let cropped = cache.material_with_uv("left", image.clone(), 1.0, uv, &mut materials);
+        assert_ne!(cropped, original);
+        assert_eq!(
+            materials.get(&original).unwrap().uv_scale_offset,
+            Vec4::new(1.0, 1.0, 0.0, 0.0)
+        );
+        let rejoined = cache.material("left", image, 1.0, &mut materials);
+        assert_eq!(rejoined, original);
+        assert_eq!(materials.len(), 1);
+        cache.evict("left", &mut materials);
+        cache.evict("left", &mut materials); // Repeat removal cannot release another owner.
+        assert!(materials.contains(original.id()));
+        cache.evict("right", &mut materials);
+        assert_eq!(materials.len(), 0);
+    }
+
+    #[test]
+    fn unchanged_additive_lookup_does_not_emit_asset_modified_events() {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, AssetPlugin::default()))
+            .init_asset::<CrystalAdditiveMaterial>();
+        let image = Handle::<Image>::default();
+        let mut cache = CrystalAdditiveMaterialCache::default();
+        let handle = cache.material(
+            "light",
+            image.clone(),
+            1.0,
+            &mut app
+                .world_mut()
+                .resource_mut::<Assets<CrystalAdditiveMaterial>>(),
+        );
+        app.update();
+        app.world_mut()
+            .resource_mut::<Messages<AssetEvent<CrystalAdditiveMaterial>>>()
+            .drain()
+            .for_each(drop);
+        for _ in 0..100 {
+            let current = cache.material(
+                "light",
+                image.clone(),
+                1.0,
+                &mut app
+                    .world_mut()
+                    .resource_mut::<Assets<CrystalAdditiveMaterial>>(),
+            );
+            assert_eq!(current, handle);
+        }
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<Messages<AssetEvent<CrystalAdditiveMaterial>>>()
+                .drain()
+                .filter(|event| matches!(event, AssetEvent::Modified { .. }))
+                .count(),
+            0,
+            "stable material bindings must not be re-uploaded every display frame"
+        );
     }
 
     #[test]

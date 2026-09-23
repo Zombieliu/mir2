@@ -1,0 +1,1544 @@
+{
+  "runId": "1790086315546-725c2c1f",
+  "endpoint": "ws://127.0.0.1:19410/ws",
+  "measurement": "ordinary-public-WS-server-protocol-only",
+  "visualAcceptance": false,
+  "duration120MinuteAcceptance": false,
+  "nominalAnimationMs": 600,
+  "requestedCommands": 64,
+  "samples": [
+    {
+      "index": 0,
+      "from": {
+        "x": 288,
+        "y": 616
+      },
+      "target": {
+        "x": 288,
+        "y": 618
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "down",
+      "sentPerformanceMs": 2524.8212,
+      "receivedPerformanceMs": 2525.4685,
+      "ackMs": 0.6473000000000866,
+      "sendIntervalMs": null,
+      "degradedWalk": true,
+      "correction": false,
+      "packetSequence": 716
+    },
+    {
+      "index": 1,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "down",
+      "sentPerformanceMs": 3125.958,
+      "receivedPerformanceMs": 3126.4966,
+      "ackMs": 0.5385999999998603,
+      "sendIntervalMs": 601.1368000000002,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 718
+    },
+    {
+      "index": 2,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "down",
+      "sentPerformanceMs": 3731.9966,
+      "receivedPerformanceMs": 3732.8273,
+      "ackMs": 0.8306999999999789,
+      "sendIntervalMs": 606.0385999999999,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 724
+    },
+    {
+      "index": 3,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 623
+      },
+      "to": {
+        "x": 288,
+        "y": 623
+      },
+      "direction": "down",
+      "sentPerformanceMs": 4337.2976,
+      "receivedPerformanceMs": 4338.0379,
+      "ackMs": 0.7403000000003885,
+      "sendIntervalMs": 605.3009999999999,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 731
+    },
+    {
+      "index": 4,
+      "from": {
+        "x": 288,
+        "y": 623
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "up",
+      "sentPerformanceMs": 4944.1868,
+      "receivedPerformanceMs": 4945.6279,
+      "ackMs": 1.4411000000000058,
+      "sendIntervalMs": 606.8892000000005,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 736
+    },
+    {
+      "index": 5,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "up",
+      "sentPerformanceMs": 5549.5749,
+      "receivedPerformanceMs": 5550.3502,
+      "ackMs": 0.775300000000243,
+      "sendIntervalMs": 605.3880999999992,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 742
+    },
+    {
+      "index": 6,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "up",
+      "sentPerformanceMs": 6154.5647,
+      "receivedPerformanceMs": 6155.085,
+      "ackMs": 0.5203000000001339,
+      "sendIntervalMs": 604.9898000000003,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 746
+    },
+    {
+      "index": 7,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "up",
+      "sentPerformanceMs": 6759.6925,
+      "receivedPerformanceMs": 6760.3577,
+      "ackMs": 0.6651999999994587,
+      "sendIntervalMs": 605.1278000000002,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 750
+    },
+    {
+      "index": 8,
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "target": {
+        "x": 288,
+        "y": 613
+      },
+      "to": {
+        "x": 288,
+        "y": 613
+      },
+      "direction": "up",
+      "sentPerformanceMs": 7364.9255,
+      "receivedPerformanceMs": 7365.6515,
+      "ackMs": 0.725999999999658,
+      "sendIntervalMs": 605.2330000000002,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 753
+    },
+    {
+      "index": 9,
+      "from": {
+        "x": 288,
+        "y": 613
+      },
+      "target": {
+        "x": 288,
+        "y": 611
+      },
+      "to": {
+        "x": 288,
+        "y": 611
+      },
+      "direction": "up",
+      "sentPerformanceMs": 7971.0946,
+      "receivedPerformanceMs": 7971.8865,
+      "ackMs": 0.7918999999992593,
+      "sendIntervalMs": 606.1691000000001,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 758
+    },
+    {
+      "index": 10,
+      "from": {
+        "x": 288,
+        "y": 611
+      },
+      "target": {
+        "x": 288,
+        "y": 609
+      },
+      "to": {
+        "x": 288,
+        "y": 609
+      },
+      "direction": "up",
+      "sentPerformanceMs": 8577.3738,
+      "receivedPerformanceMs": 8577.846,
+      "ackMs": 0.47220000000015716,
+      "sendIntervalMs": 606.279199999999,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 762
+    },
+    {
+      "index": 11,
+      "from": {
+        "x": 288,
+        "y": 609
+      },
+      "target": {
+        "x": 288,
+        "y": 611
+      },
+      "to": {
+        "x": 288,
+        "y": 611
+      },
+      "direction": "down",
+      "sentPerformanceMs": 9184.2541,
+      "receivedPerformanceMs": 9185.2853,
+      "ackMs": 1.0311999999994441,
+      "sendIntervalMs": 606.8803000000007,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 764
+    },
+    {
+      "index": 12,
+      "from": {
+        "x": 288,
+        "y": 611
+      },
+      "target": {
+        "x": 288,
+        "y": 613
+      },
+      "to": {
+        "x": 288,
+        "y": 613
+      },
+      "direction": "down",
+      "sentPerformanceMs": 9790.6408,
+      "receivedPerformanceMs": 9791.2399,
+      "ackMs": 0.5991000000012718,
+      "sendIntervalMs": 606.3866999999991,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 769
+    },
+    {
+      "index": 13,
+      "from": {
+        "x": 288,
+        "y": 613
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "down",
+      "sentPerformanceMs": 10396.3123,
+      "receivedPerformanceMs": 10396.8779,
+      "ackMs": 0.565599999999904,
+      "sendIntervalMs": 605.6715000000004,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 774
+    },
+    {
+      "index": 14,
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "down",
+      "sentPerformanceMs": 11002.2279,
+      "receivedPerformanceMs": 11002.895,
+      "ackMs": 0.6671000000005733,
+      "sendIntervalMs": 605.9156000000003,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 778
+    },
+    {
+      "index": 15,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "down",
+      "sentPerformanceMs": 11608.8305,
+      "receivedPerformanceMs": 11609.3257,
+      "ackMs": 0.4951999999993859,
+      "sendIntervalMs": 606.6026000000002,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 780
+    },
+    {
+      "index": 16,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "down",
+      "sentPerformanceMs": 12214.5248,
+      "receivedPerformanceMs": 12215.1749,
+      "ackMs": 0.650100000000748,
+      "sendIntervalMs": 605.6942999999992,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 788
+    },
+    {
+      "index": 17,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 623
+      },
+      "to": {
+        "x": 288,
+        "y": 623
+      },
+      "direction": "down",
+      "sentPerformanceMs": 12821.9582,
+      "receivedPerformanceMs": 12822.5492,
+      "ackMs": 0.5910000000003492,
+      "sendIntervalMs": 607.4333999999999,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 793
+    },
+    {
+      "index": 18,
+      "from": {
+        "x": 288,
+        "y": 623
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "up",
+      "sentPerformanceMs": 13427.2244,
+      "receivedPerformanceMs": 13428.7301,
+      "ackMs": 1.505700000001525,
+      "sendIntervalMs": 605.2662,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 798
+    },
+    {
+      "index": 19,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "up",
+      "sentPerformanceMs": 14034.1569,
+      "receivedPerformanceMs": 14034.823,
+      "ackMs": 0.6661000000003696,
+      "sendIntervalMs": 606.9325000000008,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 804
+    },
+    {
+      "index": 20,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "up",
+      "sentPerformanceMs": 14638.7936,
+      "receivedPerformanceMs": 14639.3468,
+      "ackMs": 0.5531999999984691,
+      "sendIntervalMs": 604.6367000000009,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 808
+    },
+    {
+      "index": 21,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "up",
+      "sentPerformanceMs": 15244.1613,
+      "receivedPerformanceMs": 15244.7123,
+      "ackMs": 0.5509999999994761,
+      "sendIntervalMs": 605.3676999999989,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 812
+    },
+    {
+      "index": 22,
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "target": {
+        "x": 288,
+        "y": 613
+      },
+      "to": {
+        "x": 288,
+        "y": 613
+      },
+      "direction": "up",
+      "sentPerformanceMs": 15850.7539,
+      "receivedPerformanceMs": 15851.5745,
+      "ackMs": 0.8206000000009226,
+      "sendIntervalMs": 606.5926,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 815
+    },
+    {
+      "index": 23,
+      "from": {
+        "x": 288,
+        "y": 613
+      },
+      "target": {
+        "x": 288,
+        "y": 611
+      },
+      "to": {
+        "x": 288,
+        "y": 611
+      },
+      "direction": "up",
+      "sentPerformanceMs": 16456.8272,
+      "receivedPerformanceMs": 16457.5234,
+      "ackMs": 0.6961999999984982,
+      "sendIntervalMs": 606.0733,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 822
+    },
+    {
+      "index": 24,
+      "from": {
+        "x": 288,
+        "y": 611
+      },
+      "target": {
+        "x": 288,
+        "y": 609
+      },
+      "to": {
+        "x": 288,
+        "y": 609
+      },
+      "direction": "up",
+      "sentPerformanceMs": 17063.4393,
+      "receivedPerformanceMs": 17063.8514,
+      "ackMs": 0.4121000000013737,
+      "sendIntervalMs": 606.6120999999985,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 824
+    },
+    {
+      "index": 25,
+      "from": {
+        "x": 288,
+        "y": 609
+      },
+      "target": {
+        "x": 288,
+        "y": 611
+      },
+      "to": {
+        "x": 288,
+        "y": 611
+      },
+      "direction": "down",
+      "sentPerformanceMs": 17670.3841,
+      "receivedPerformanceMs": 17671.5606,
+      "ackMs": 1.176500000001397,
+      "sendIntervalMs": 606.9448000000011,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 835
+    },
+    {
+      "index": 26,
+      "from": {
+        "x": 288,
+        "y": 611
+      },
+      "target": {
+        "x": 288,
+        "y": 613
+      },
+      "to": {
+        "x": 288,
+        "y": 613
+      },
+      "direction": "down",
+      "sentPerformanceMs": 18276.8969,
+      "receivedPerformanceMs": 18277.6819,
+      "ackMs": 0.7849999999998545,
+      "sendIntervalMs": 606.5128000000004,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 842
+    },
+    {
+      "index": 27,
+      "from": {
+        "x": 288,
+        "y": 613
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "down",
+      "sentPerformanceMs": 18883.9503,
+      "receivedPerformanceMs": 18884.4541,
+      "ackMs": 0.5037999999985914,
+      "sendIntervalMs": 607.0534000000007,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 849
+    },
+    {
+      "index": 28,
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "down",
+      "sentPerformanceMs": 19489.2567,
+      "receivedPerformanceMs": 19489.8646,
+      "ackMs": 0.6078999999990629,
+      "sendIntervalMs": 605.3064000000013,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 854
+    },
+    {
+      "index": 29,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "down",
+      "sentPerformanceMs": 20095.6304,
+      "receivedPerformanceMs": 20096.2603,
+      "ackMs": 0.6299000000035448,
+      "sendIntervalMs": 606.3736999999965,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 858
+    },
+    {
+      "index": 30,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "down",
+      "sentPerformanceMs": 20702.0339,
+      "receivedPerformanceMs": 20702.5975,
+      "ackMs": 0.5636000000013155,
+      "sendIntervalMs": 606.4035000000003,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 866
+    },
+    {
+      "index": 31,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 623
+      },
+      "to": {
+        "x": 288,
+        "y": 623
+      },
+      "direction": "down",
+      "sentPerformanceMs": 21309.4551,
+      "receivedPerformanceMs": 21310.1134,
+      "ackMs": 0.6582999999991443,
+      "sendIntervalMs": 607.4212000000007,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 876
+    },
+    {
+      "index": 32,
+      "from": {
+        "x": 288,
+        "y": 623
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "up",
+      "sentPerformanceMs": 21914.5808,
+      "receivedPerformanceMs": 21915.4824,
+      "ackMs": 0.9016000000010536,
+      "sendIntervalMs": 605.1257000000005,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 887
+    },
+    {
+      "index": 33,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "up",
+      "sentPerformanceMs": 22520.1983,
+      "receivedPerformanceMs": 22521.0068,
+      "ackMs": 0.8084999999991851,
+      "sendIntervalMs": 605.6175000000003,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 900
+    },
+    {
+      "index": 34,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "up",
+      "sentPerformanceMs": 23126.9203,
+      "receivedPerformanceMs": 23127.3389,
+      "ackMs": 0.41859999999724096,
+      "sendIntervalMs": 606.7220000000016,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 909
+    },
+    {
+      "index": 35,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "up",
+      "sentPerformanceMs": 23732.7245,
+      "receivedPerformanceMs": 23733.3782,
+      "ackMs": 0.6536999999989348,
+      "sendIntervalMs": 605.8041999999987,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 913
+    },
+    {
+      "index": 36,
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "target": {
+        "x": 288,
+        "y": 613
+      },
+      "to": {
+        "x": 288,
+        "y": 613
+      },
+      "direction": "up",
+      "sentPerformanceMs": 24338.6418,
+      "receivedPerformanceMs": 24339.3754,
+      "ackMs": 0.7335999999995693,
+      "sendIntervalMs": 605.917300000001,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 922
+    },
+    {
+      "index": 37,
+      "from": {
+        "x": 288,
+        "y": 613
+      },
+      "target": {
+        "x": 288,
+        "y": 611
+      },
+      "to": {
+        "x": 288,
+        "y": 611
+      },
+      "direction": "up",
+      "sentPerformanceMs": 24944.9065,
+      "receivedPerformanceMs": 24945.6279,
+      "ackMs": 0.721399999998539,
+      "sendIntervalMs": 606.2646999999997,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 929
+    },
+    {
+      "index": 38,
+      "from": {
+        "x": 288,
+        "y": 611
+      },
+      "target": {
+        "x": 288,
+        "y": 609
+      },
+      "to": {
+        "x": 288,
+        "y": 609
+      },
+      "direction": "up",
+      "sentPerformanceMs": 25550.4476,
+      "receivedPerformanceMs": 25551.0319,
+      "ackMs": 0.5843000000022585,
+      "sendIntervalMs": 605.5410999999986,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 937
+    },
+    {
+      "index": 39,
+      "from": {
+        "x": 288,
+        "y": 609
+      },
+      "target": {
+        "x": 288,
+        "y": 611
+      },
+      "to": {
+        "x": 288,
+        "y": 611
+      },
+      "direction": "down",
+      "sentPerformanceMs": 26157.2956,
+      "receivedPerformanceMs": 26158.2125,
+      "ackMs": 0.9169000000001688,
+      "sendIntervalMs": 606.8480000000018,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 943
+    },
+    {
+      "index": 40,
+      "from": {
+        "x": 288,
+        "y": 611
+      },
+      "target": {
+        "x": 288,
+        "y": 613
+      },
+      "to": {
+        "x": 288,
+        "y": 613
+      },
+      "direction": "down",
+      "sentPerformanceMs": 26763.1961,
+      "receivedPerformanceMs": 26763.7411,
+      "ackMs": 0.5449999999982538,
+      "sendIntervalMs": 605.9004999999997,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 950
+    },
+    {
+      "index": 41,
+      "from": {
+        "x": 288,
+        "y": 613
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "down",
+      "sentPerformanceMs": 27369.5375,
+      "receivedPerformanceMs": 27370.1159,
+      "ackMs": 0.5784000000021479,
+      "sendIntervalMs": 606.3413999999975,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 957
+    },
+    {
+      "index": 42,
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "down",
+      "sentPerformanceMs": 27975.9883,
+      "receivedPerformanceMs": 27976.7498,
+      "ackMs": 0.7615000000005239,
+      "sendIntervalMs": 606.4508000000023,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 962
+    },
+    {
+      "index": 43,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "down",
+      "sentPerformanceMs": 28584.1071,
+      "receivedPerformanceMs": 28584.5361,
+      "ackMs": 0.4290000000000873,
+      "sendIntervalMs": 608.1188000000002,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 968
+    },
+    {
+      "index": 44,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "down",
+      "sentPerformanceMs": 29190.4553,
+      "receivedPerformanceMs": 29190.9672,
+      "ackMs": 0.511899999997695,
+      "sendIntervalMs": 606.3482000000004,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 974
+    },
+    {
+      "index": 45,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 623
+      },
+      "to": {
+        "x": 288,
+        "y": 623
+      },
+      "direction": "down",
+      "sentPerformanceMs": 29797.3202,
+      "receivedPerformanceMs": 29797.9308,
+      "ackMs": 0.6105999999999767,
+      "sendIntervalMs": 606.8648999999969,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 984
+    },
+    {
+      "index": 46,
+      "from": {
+        "x": 288,
+        "y": 623
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "up",
+      "sentPerformanceMs": 30403.2248,
+      "receivedPerformanceMs": 30404.4851,
+      "ackMs": 1.2603000000017346,
+      "sendIntervalMs": 605.9046000000017,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 997
+    },
+    {
+      "index": 47,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "up",
+      "sentPerformanceMs": 31009.601,
+      "receivedPerformanceMs": 31010.2787,
+      "ackMs": 0.6777000000001863,
+      "sendIntervalMs": 606.3761999999988,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1008
+    },
+    {
+      "index": 48,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "up",
+      "sentPerformanceMs": 31616.0802,
+      "receivedPerformanceMs": 31616.5216,
+      "ackMs": 0.44139999999970314,
+      "sendIntervalMs": 606.4792000000016,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1017
+    },
+    {
+      "index": 49,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "up",
+      "sentPerformanceMs": 32223.6231,
+      "receivedPerformanceMs": 32224.4855,
+      "ackMs": 0.8623999999981606,
+      "sendIntervalMs": 607.5429000000004,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1023
+    },
+    {
+      "index": 50,
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "target": {
+        "x": 288,
+        "y": 613
+      },
+      "to": {
+        "x": 288,
+        "y": 613
+      },
+      "direction": "up",
+      "sentPerformanceMs": 32828.7551,
+      "receivedPerformanceMs": 32829.3288,
+      "ackMs": 0.5737000000008265,
+      "sendIntervalMs": 605.1320000000014,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1030
+    },
+    {
+      "index": 51,
+      "from": {
+        "x": 288,
+        "y": 613
+      },
+      "target": {
+        "x": 288,
+        "y": 611
+      },
+      "to": {
+        "x": 288,
+        "y": 611
+      },
+      "direction": "up",
+      "sentPerformanceMs": 33435.2133,
+      "receivedPerformanceMs": 33436.1597,
+      "ackMs": 0.9463999999934458,
+      "sendIntervalMs": 606.4582000000009,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1037
+    },
+    {
+      "index": 52,
+      "from": {
+        "x": 288,
+        "y": 611
+      },
+      "target": {
+        "x": 288,
+        "y": 609
+      },
+      "to": {
+        "x": 288,
+        "y": 609
+      },
+      "direction": "up",
+      "sentPerformanceMs": 34042.4288,
+      "receivedPerformanceMs": 34043.0069,
+      "ackMs": 0.5780999999988126,
+      "sendIntervalMs": 607.2154999999984,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1045
+    },
+    {
+      "index": 53,
+      "from": {
+        "x": 288,
+        "y": 609
+      },
+      "target": {
+        "x": 288,
+        "y": 611
+      },
+      "to": {
+        "x": 288,
+        "y": 611
+      },
+      "direction": "down",
+      "sentPerformanceMs": 34648.431,
+      "receivedPerformanceMs": 34649.4829,
+      "ackMs": 1.051900000005844,
+      "sendIntervalMs": 606.0021999999954,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1052
+    },
+    {
+      "index": 54,
+      "from": {
+        "x": 288,
+        "y": 611
+      },
+      "target": {
+        "x": 288,
+        "y": 613
+      },
+      "to": {
+        "x": 288,
+        "y": 613
+      },
+      "direction": "down",
+      "sentPerformanceMs": 35254.7594,
+      "receivedPerformanceMs": 35255.2808,
+      "ackMs": 0.5213999999978114,
+      "sendIntervalMs": 606.3284000000058,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1058
+    },
+    {
+      "index": 55,
+      "from": {
+        "x": 288,
+        "y": 613
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "down",
+      "sentPerformanceMs": 35860.3291,
+      "receivedPerformanceMs": 35860.8339,
+      "ackMs": 0.5047999999951571,
+      "sendIntervalMs": 605.5697,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1065
+    },
+    {
+      "index": 56,
+      "from": {
+        "x": 288,
+        "y": 615
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "down",
+      "sentPerformanceMs": 36467.4471,
+      "receivedPerformanceMs": 36467.9229,
+      "ackMs": 0.475800000000163,
+      "sendIntervalMs": 607.1179999999949,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1072
+    },
+    {
+      "index": 57,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "down",
+      "sentPerformanceMs": 37072.9205,
+      "receivedPerformanceMs": 37073.5344,
+      "ackMs": 0.6138999999966472,
+      "sendIntervalMs": 605.4734000000026,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1076
+    },
+    {
+      "index": 58,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "down",
+      "sentPerformanceMs": 37679.2065,
+      "receivedPerformanceMs": 37679.7113,
+      "ackMs": 0.5048000000024331,
+      "sendIntervalMs": 606.2860000000001,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1082
+    },
+    {
+      "index": 59,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 623
+      },
+      "to": {
+        "x": 288,
+        "y": 623
+      },
+      "direction": "down",
+      "sentPerformanceMs": 38286.2776,
+      "receivedPerformanceMs": 38286.8885,
+      "ackMs": 0.610899999999674,
+      "sendIntervalMs": 607.071100000001,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1094
+    },
+    {
+      "index": 60,
+      "from": {
+        "x": 288,
+        "y": 623
+      },
+      "target": {
+        "x": 288,
+        "y": 621
+      },
+      "to": {
+        "x": 288,
+        "y": 621
+      },
+      "direction": "up",
+      "sentPerformanceMs": 38893.9163,
+      "receivedPerformanceMs": 38894.9748,
+      "ackMs": 1.058500000006461,
+      "sendIntervalMs": 607.6386999999959,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1105
+    },
+    {
+      "index": 61,
+      "from": {
+        "x": 288,
+        "y": 621
+      },
+      "target": {
+        "x": 288,
+        "y": 619
+      },
+      "to": {
+        "x": 288,
+        "y": 619
+      },
+      "direction": "up",
+      "sentPerformanceMs": 39500.3283,
+      "receivedPerformanceMs": 39501.2139,
+      "ackMs": 0.8856000000014319,
+      "sendIntervalMs": 606.4120000000039,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1116
+    },
+    {
+      "index": 62,
+      "from": {
+        "x": 288,
+        "y": 619
+      },
+      "target": {
+        "x": 288,
+        "y": 617
+      },
+      "to": {
+        "x": 288,
+        "y": 617
+      },
+      "direction": "up",
+      "sentPerformanceMs": 40106.2042,
+      "receivedPerformanceMs": 40107.0381,
+      "ackMs": 0.8338999999978114,
+      "sendIntervalMs": 605.8758999999991,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1125
+    },
+    {
+      "index": 63,
+      "from": {
+        "x": 288,
+        "y": 617
+      },
+      "target": {
+        "x": 288,
+        "y": 615
+      },
+      "to": {
+        "x": 288,
+        "y": 615
+      },
+      "direction": "up",
+      "sentPerformanceMs": 40713.0428,
+      "receivedPerformanceMs": 40713.7375,
+      "ackMs": 0.6947000000000116,
+      "sendIntervalMs": 606.8386000000028,
+      "degradedWalk": false,
+      "correction": false,
+      "packetSequence": 1131
+    }
+  ],
+  "status": "completed",
+  "logoutSuccess": true,
+  "mapFileName": "0",
+  "spawn": {
+    "x": 288,
+    "y": 616
+  },
+  "spawnInSafeZone": true,
+  "collisionSource": "E:\\mir2-player-journey\\mir2-web3\\apps\\web\\lib\\generated\\crystal-map-pack\\0.map.gz",
+  "corridor": {
+    "x": 0,
+    "y": 1,
+    "forward": "down",
+    "reverse": "up",
+    "low": -7,
+    "high": 7
+  },
+  "firstQuarterAck": {
+    "count": 16,
+    "minMs": 0.47220000000015716,
+    "meanMs": 0.7191937499999881,
+    "p50Ms": 0.6651999999994587,
+    "p95Ms": 1.0311999999994441,
+    "maxMs": 1.4411000000000058
+  },
+  "lastQuarterAck": {
+    "count": 16,
+    "minMs": 0.44139999999970314,
+    "meanMs": 0.6973874999996497,
+    "p50Ms": 0.610899999999674,
+    "p95Ms": 1.051900000005844,
+    "maxMs": 1.058500000006461
+  },
+  "firstQuarterSendIntervals": {
+    "count": 15,
+    "minMs": 601.1368000000002,
+    "meanMs": 605.6006199999999,
+    "p50Ms": 605.9156000000003,
+    "p95Ms": 606.8803000000007,
+    "maxMs": 606.8892000000005
+  },
+  "lastQuarterSendIntervals": {
+    "count": 16,
+    "minMs": 605.1320000000014,
+    "meanMs": 606.4651125000003,
+    "p50Ms": 606.4120000000039,
+    "p95Ms": 607.5429000000004,
+    "maxMs": 607.6386999999959
+  },
+  "sendIntervals": {
+    "count": 63,
+    "minMs": 601.1368000000002,
+    "meanMs": 606.1622476190475,
+    "p50Ms": 606.3284000000058,
+    "p95Ms": 607.4212000000007,
+    "maxMs": 608.1188000000002
+  },
+  "corrections": 0,
+  "noCorrectionObserved": true,
+  "degradedWalks": 1,
+  "completedCommands": 64
+}

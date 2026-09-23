@@ -147,6 +147,37 @@ pub(super) fn is_safe_zone_point(
         .unwrap_or(false)
 }
 
+/// Crystal `HumanObject.SetBindSafeZone`: walking, running, or teleporting
+/// into an imported safe area binds to that area's center, not the tile the
+/// player happened to occupy. The Zone calls this through its authoritative
+/// transform projection after an accepted step.
+pub(super) fn refresh_player_bind_at_position(world: &mut World, position: &Point) {
+    let map_file_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    let Some(safe_zone) = crystal_map_respawns_ref(&map_file_name).and_then(|map| {
+        map.safe_zones.iter().find(|safe_zone| {
+            let size = i32::from(safe_zone.size);
+            position.x >= safe_zone.location.x - size
+                && position.x <= safe_zone.location.x + size
+                && position.y >= safe_zone.location.y - size
+                && position.y <= safe_zone.location.y + size
+        })
+    }) else {
+        return;
+    };
+    let new_bind = crate::config::CharacterBindPoint {
+        map_file_name,
+        position: safe_zone.location.clone(),
+    };
+    let mut player = world.resource_mut::<PlayerRuntimeResource>();
+    if player.bind_point.as_ref() != Some(&new_bind) {
+        player.bind_point = Some(new_bind);
+    }
+}
+
 pub(super) fn current_map_drop_rule<'a>(
     config: &'a SimulationConfig,
     map: &MapRuntimeResource,
@@ -441,7 +472,17 @@ fn crystal_manifest_movement_destination_is_valid(
     destination: &Point,
 ) -> bool {
     runtime_full_map_collision_data(map_file_name)
-        .map(|collision| full_map_collision_walkable(&collision, destination))
+        .map(|collision| {
+            // Crystal's `Map.ValidPoint` checks the map cell's terrain validity
+            // before a movement completes. A closed door is a separate dynamic
+            // obstruction and does not invalidate an explicitly configured
+            // movement destination. Several real shop exits intentionally land
+            // beside/on a closed door cell (for example 0120 -> map 2 at
+            // 517,492); rejecting those destinations removes the only exit and
+            // strands the player inside the service map.
+            point_in_bounds(&collision.collision.region_bounds, destination)
+                && !collision.blocked_set.contains(&tile_key(destination))
+        })
         .unwrap_or(true)
 }
 
@@ -616,13 +657,19 @@ pub(super) fn apply_map_transfer(world: &mut World, key: &str) -> Vec<ServerPack
     }
 
     let current_map = world.resource::<MapRuntimeResource>().current_map.clone();
+    let mut destination_map = MapInformation {
+        file_name: transfer.to_map_file_name.clone(),
+        title: transfer.to_map_title.clone(),
+        ..current_map
+    };
+    // Ordinary entrance transfers must carry the destination's identity and
+    // presentation metadata, just as login does. Keeping the source map's
+    // index/minimap/light makes a real map change look like same-map movement.
+    // Custom maps absent from the Crystal manifest retain configured values.
+    crate::config::apply_crystal_map_metadata(&mut destination_map);
     relocate_player_to_map(
         world,
-        MapInformation {
-            file_name: transfer.to_map_file_name.clone(),
-            title: transfer.to_map_title.clone(),
-            ..current_map
-        },
+        destination_map,
         transfer.to_position,
         transfer.to_direction,
         None,
@@ -677,7 +724,8 @@ pub(super) fn relocate_player_to_map(
     reset_crystal_player_movement_timing(world);
     world
         .entity_mut(player)
-        .insert((Position(position), Facing(direction)));
+        .insert((Position(position.clone()), Facing(direction)));
+    refresh_player_bind_at_position(world, &position);
 
     refresh_runtime_map_collision(world);
     clear_non_player_world_entities(world);
@@ -1020,6 +1068,10 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
         query.iter(world).collect()
     };
     for entity in existing {
+        if let Some(vitals) = world.get::<PlayerVitals>(entity) {
+            let saved=crate::config::HeroVitalsState {hp:vitals.hp,mp:vitals.mp};
+            world.resource_mut::<super::resources::HeroInventoryResource>().saved_vitals=Some(saved);
+        }
         let _ = world.despawn(entity);
     }
 
@@ -1045,9 +1097,13 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
         .map(|facing| facing.0)?;
     let spawn_position =
         summon_spawn_position_near(world, &player_position, player_direction, 1, Some(player));
-    let max_hp = 60 + i32::from(hero.level).saturating_mul(6);
-    let max_mp = 30 + i32::from(hero.level).saturating_mul(4);
+    let max_hp=super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_HP).max(0);
+    let max_mp=super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_MP).max(0);
+    let saved=world.resource::<super::resources::HeroInventoryResource>().saved_vitals;
+    let hp=saved.map_or(max_hp,|v|v.hp.min(max_hp));
+    let mp=saved.map_or(max_mp,|v|v.mp.min(max_mp));
 
+    let looks=super::hero_inventory::appearance(world);
     Some(
         world
             .spawn((
@@ -1065,13 +1121,13 @@ pub(super) fn spawn_stage5_hero(world: &mut World) -> Option<Entity> {
                     class: hero.class,
                     gender: hero.gender,
                     level: hero.level,
-                    armour_shape: None,
-                    weapon_shape: None,
+                    armour_shape: u16::try_from(looks.armour).ok(),
+                    weapon_shape: u16::try_from(looks.weapon).ok(),
                 },
                 PlayerVitals {
-                    hp: max_hp,
+                    hp,
                     max_hp,
-                    mp: max_mp,
+                    mp,
                     max_mp,
                 },
             ))
@@ -2162,3 +2218,15 @@ impl SimulationSession {
 #[cfg(test)]
 #[path = "map_collision_source_tests.rs"]
 mod map_collision_source_tests;
+
+#[cfg(test)]
+#[path = "map_transfer_metadata_tests.rs"]
+mod map_transfer_metadata_tests;
+
+pub(super) fn current_map_disallows_intelligent_creatures(world: &World) -> bool {
+    let map = world.resource::<MapRuntimeResource>();
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    crystal_map_respawns_ref(&map.current_map.file_name)
+        .is_some_and(|map| map.no_intelligent_creatures)
+        || current_map_drop_rule(config, map).is_some_and(|rule| rule.no_intelligent_creatures)
+}

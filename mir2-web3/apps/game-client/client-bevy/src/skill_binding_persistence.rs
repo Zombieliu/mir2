@@ -1,4 +1,4 @@
-//! Native persistence adapter for Crystal's F1-F8 skill bindings.
+//! Native persistence adapter for Crystal's sixteen player skill bindings.
 //!
 //! The adapter deliberately owns no panel or input code.  `SkillBindingUi`
 //! already provides the bounded, sanitizing serde contract, so this module is

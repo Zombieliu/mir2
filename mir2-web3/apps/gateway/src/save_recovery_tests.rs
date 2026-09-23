@@ -17,6 +17,130 @@ use super::{
 use super::{stable_file_identity, validate_windows_file_id};
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(1);
+
+#[cfg(windows)]
+mod windows_path_regressions {
+    use super::super::{durable_rename, windows_extended_path};
+    use std::ffi::OsString;
+    use std::fs;
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn drive_and_unc_slashes_are_normalized_before_verbatim_prefix() {
+        for (input, expected) in [
+            (
+                "C:/new-parent/missing.json",
+                r"\\?\C:\new-parent\missing.json",
+            ),
+            (
+                r"C:/new-parent\child/missing.json",
+                r"\\?\C:\new-parent\child\missing.json",
+            ),
+            (
+                r"\\server\share\missing.json",
+                r"\\?\UNC\server\share\missing.json",
+            ),
+            (
+                "//server/share/missing.json",
+                r"\\?\UNC\server\share\missing.json",
+            ),
+            (
+                r"\\server/share\child/missing.json",
+                r"\\?\UNC\server\share\child\missing.json",
+            ),
+        ] {
+            let mut expected = expected.encode_utf16().collect::<Vec<_>>();
+            expected.push(0);
+            assert_eq!(
+                windows_extended_path(Path::new(input)).unwrap(),
+                expected,
+                "{input}"
+            );
+        }
+    }
+
+    #[test]
+    fn existing_extended_paths_and_utf16_are_preserved_exactly() {
+        for input in [
+            r"\\?\C:\a\..\missing.json",
+            r"\\?\UNC\server\share\missing.json",
+        ] {
+            let mut expected = input.encode_utf16().collect::<Vec<_>>();
+            expected.push(0);
+            assert_eq!(windows_extended_path(Path::new(input)).unwrap(), expected);
+        }
+        let mut units = r"\\?\C:\unpaired-".encode_utf16().collect::<Vec<_>>();
+        units.push(0xd800);
+        let path = PathBuf::from(OsString::from_wide(&units));
+        units.push(0);
+        assert_eq!(windows_extended_path(&path).unwrap(), units);
+    }
+
+    #[test]
+    fn relative_paths_and_dot_components_do_not_need_existing_targets() {
+        let input = Path::new("not-created/../new-name.json");
+        let absolute = std::env::current_dir().unwrap().join("new-name.json");
+        assert_eq!(
+            windows_extended_path(input).unwrap(),
+            windows_extended_path(&absolute).unwrap()
+        );
+        assert_eq!(
+            windows_extended_path(Path::new("C:/not-created/../new-name.json")).unwrap(),
+            windows_extended_path(Path::new(r"C:\new-name.json")).unwrap()
+        );
+    }
+
+    #[test]
+    fn embedded_nul_is_rejected_without_native_path_truncation() {
+        let path = PathBuf::from(OsString::from_wide(&[
+            b'C' as u16,
+            b':' as u16,
+            b'\\' as u16,
+            0,
+            b'x' as u16,
+        ]));
+        assert_eq!(
+            windows_extended_path(&path).unwrap_err().kind(),
+            std::io::ErrorKind::InvalidInput
+        );
+    }
+
+    #[test]
+    fn durable_rename_accepts_forward_slash_and_mixed_nonexistent_destination() {
+        let root = std::env::temp_dir().join(format!(
+            "mir2-extended-path-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir(&root).unwrap();
+        let from = root.join("before.json");
+        let to = root.join("after.json");
+        fs::write(&from, b"durable-path").unwrap();
+        let slash = |path: &Path| {
+            let units = path
+                .as_os_str()
+                .encode_wide()
+                .map(|u| if u == b'\\' as u16 { b'/' as u16 } else { u })
+                .collect::<Vec<_>>();
+            PathBuf::from(OsString::from_wide(&units))
+        };
+        assert!(!to.exists());
+        durable_rename(&slash(&from), &slash(&to), false).unwrap();
+        assert!(!from.exists());
+        assert_eq!(fs::read(&to).unwrap(), b"durable-path");
+        // Appending through PathBuf supplies a backslash after a slash root.
+        let mixed = slash(&root).join("third.json");
+        durable_rename(&to, &mixed, false).unwrap();
+        assert_eq!(fs::read(&mixed).unwrap(), b"durable-path");
+        fs::remove_file(mixed).unwrap();
+        fs::remove_dir(root).unwrap();
+    }
+}
+
 const TEST_RECOVERY_MAC_KEY: [u8; 32] = [
     0x10, 0x21, 0x32, 0x43, 0x54, 0x65, 0x76, 0x87, 0x98, 0xa9, 0xba, 0xcb, 0xdc, 0xed, 0xfe, 0x0f,
     0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xf1, 0x02,
@@ -507,8 +631,23 @@ fn recovery_directory_cannot_overlap_account_store_parent() {
 
     let error = replay_startup(&config).unwrap_err();
 
-    assert!(error.contains("must be dedicated"));
+    assert!(error.contains("must be dedicated"), "{error}");
     assert!(!state.root.join(DIRECTORY_OWNER_SENTINEL).exists());
+}
+
+#[test]
+fn recovery_path_comparison_resolves_missing_descendants_without_creating_them() {
+    let state = TestState::new("missing-descendants");
+    let missing = state.root.join("not-created").join("accounts.json");
+    let canonical = fs::canonicalize(&state.root).unwrap();
+    assert_eq!(
+        super::absolute_without_parent_components(&missing).unwrap(),
+        canonical.join("not-created").join("accounts.json")
+    );
+    assert!(!state.root.join("not-created").exists());
+    assert!(super::absolute_without_parent_components(&state.root.join(".."))
+        .unwrap_err()
+        .contains("parent-directory"));
 }
 
 #[test]

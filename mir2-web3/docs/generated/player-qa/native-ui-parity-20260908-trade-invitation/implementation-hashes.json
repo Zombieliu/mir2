@@ -1,0 +1,50 @@
+[
+  {
+    "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+    "sha256": "DC580CA70E4C7E770AAD540C62A868E770684F563AD778071D981D0BA0AFE229"
+  },
+  {
+    "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+    "sha256": "CA80F42F697F294D9777159DDC7ED5EFB0D7DBCAB4CCB029C47061D521D2A1E9"
+  },
+  {
+    "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+    "sha256": "9C55380D9517D2FD5F4AC6A29417D34D91B41BE3035D586AF86B7DBD03065907"
+  },
+  {
+    "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog_tests.rs",
+    "sha256": "57088E60EDF1C18A24B44B6C4B683F11302F30E5EB70DDB253653B909E0DE5F7"
+  },
+  {
+    "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs",
+    "sha256": "28F63FC75DF1A03E176EF96C047DFBB88C91CC7BA06A5840C0BF3454F0912433"
+  },
+  {
+    "path": "mir2-web3/apps/game-client/client-bevy/src/social_trade_tests.rs",
+    "sha256": "5AD3148FDA7F25EA47B1754EBCBFDAD9C8FB5B54BA7106BD550ECF2FC6B832C6"
+  },
+  {
+    "path": "mir2-web3/apps/game-client/client-bevy/src/social.rs",
+    "sha256": "7330E48B095289FB6AE8B803FAFBB316623575C3AA9F17B46514FD5F3F2DECC0"
+  },
+  {
+    "path": "mir2-web3/apps/gateway/src/routing.rs",
+    "sha256": "FA04628869C4D3D94A6E37522992BDFE9A25328908AF0AB683C8074BFD5DAE9B"
+  },
+  {
+    "path": "mir2-web3/apps/gateway/src/routing/tests/trade_completion_tests.rs",
+    "sha256": "05309C2931A9AAD1FFEC98C916D66AEE2F40F0E9B0E075A30305C66140047E78"
+  },
+  {
+    "path": "mir2-web3/apps/gateway/src/routing/tests/trade_invitation_tests.rs",
+    "sha256": "2CED85B18CD33B3E2FD8319E38BE89297D68B421766F9F4285265F88F45E7507"
+  },
+  {
+    "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+    "sha256": "7A55314C0CF767A8E11E7796DB1EB1C00FA3F076214F2BD6A0C50C4D91D3E161"
+  },
+  {
+    "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+    "sha256": "D0A43A9C586D06D1F28D1E3961A5303126921707E706EAA4A61A20B94F383055"
+  }
+]

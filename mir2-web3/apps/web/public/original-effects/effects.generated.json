@@ -3514,6 +3514,25 @@
   ],
   "client_effects": [
     {
+      "effect": "ImmortalSkinSecondary",
+      "kind": "target",
+      "library": "Magic3",
+      "base": 570,
+      "count": 5,
+      "interval": 120,
+      "blend": true,
+      "light": 6,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::MirAction.Spell",
+        "symbol": "ImmortalSkinSecondary"
+      }
+    },
+    {
       "effect": "LeftGuardRangeProjectile",
       "kind": "projectile",
       "library": "Magic",
@@ -3671,6 +3690,398 @@
       "provenance": {
         "source": "Crystal/Client/MirObjects/MonsterObject.cs::RightGuard/AttackRange1/FrameIndex4",
         "symbol": "RightGuardRangeHit"
+      }
+    },
+    {
+      "effect": "WarriorCrossHalfMoonAttack",
+      "kind": "attackOverlay",
+      "library": "Magic2",
+      "base": 40,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.7,
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 40,
+          "end": 45
+        },
+        {
+          "direction": 1,
+          "base": 50,
+          "end": 55
+        },
+        {
+          "direction": 2,
+          "base": 60,
+          "end": 65
+        },
+        {
+          "direction": 3,
+          "base": 70,
+          "end": 75
+        },
+        {
+          "direction": 4,
+          "base": 80,
+          "end": 85
+        },
+        {
+          "direction": 5,
+          "base": 90,
+          "end": 95
+        },
+        {
+          "direction": 6,
+          "base": 100,
+          "end": 105
+        },
+        {
+          "direction": 7,
+          "base": 110,
+          "end": 115
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+        "symbol": "WarriorCrossHalfMoonAttack"
+      }
+    },
+    {
+      "effect": "WarriorHalfMoonAttack",
+      "kind": "attackOverlay",
+      "library": "Magic",
+      "base": 2560,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.7,
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 2560,
+          "end": 2565
+        },
+        {
+          "direction": 1,
+          "base": 2570,
+          "end": 2575
+        },
+        {
+          "direction": 2,
+          "base": 2580,
+          "end": 2585
+        },
+        {
+          "direction": 3,
+          "base": 2590,
+          "end": 2595
+        },
+        {
+          "direction": 4,
+          "base": 2600,
+          "end": 2605
+        },
+        {
+          "direction": 5,
+          "base": 2610,
+          "end": 2615
+        },
+        {
+          "direction": 6,
+          "base": 2620,
+          "end": 2625
+        },
+        {
+          "direction": 7,
+          "base": 2630,
+          "end": 2635
+        }
+      ],
+      "valueCount": 4,
+      "valueStride": 90,
+      "valueRanges": [
+        {
+          "value": 0,
+          "base": 2560,
+          "end": 2565
+        },
+        {
+          "value": 1,
+          "base": 2650,
+          "end": 2655
+        },
+        {
+          "value": 2,
+          "base": 2740,
+          "end": 2745
+        },
+        {
+          "value": 3,
+          "base": 2830,
+          "end": 2835
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+        "symbol": "WarriorHalfMoonAttack"
+      }
+    },
+    {
+      "effect": "WarriorSlayingAttack",
+      "kind": "attackOverlay",
+      "library": "Magic",
+      "base": 1820,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.7,
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 1820,
+          "end": 1825
+        },
+        {
+          "direction": 1,
+          "base": 1830,
+          "end": 1835
+        },
+        {
+          "direction": 2,
+          "base": 1840,
+          "end": 1845
+        },
+        {
+          "direction": 3,
+          "base": 1850,
+          "end": 1855
+        },
+        {
+          "direction": 4,
+          "base": 1860,
+          "end": 1865
+        },
+        {
+          "direction": 5,
+          "base": 1870,
+          "end": 1875
+        },
+        {
+          "direction": 6,
+          "base": 1880,
+          "end": 1885
+        },
+        {
+          "direction": 7,
+          "base": 1890,
+          "end": 1895
+        }
+      ],
+      "valueCount": 4,
+      "valueStride": 90,
+      "valueRanges": [
+        {
+          "value": 0,
+          "base": 1820,
+          "end": 1825
+        },
+        {
+          "value": 1,
+          "base": 1910,
+          "end": 1915
+        },
+        {
+          "value": 2,
+          "base": 2000,
+          "end": 2005
+        },
+        {
+          "value": 3,
+          "base": 2090,
+          "end": 2095
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+        "symbol": "WarriorSlayingAttack"
+      }
+    },
+    {
+      "effect": "WarriorThrustingAttack",
+      "kind": "attackOverlay",
+      "library": "Magic",
+      "base": 2190,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.7,
+      "directionCount": 8,
+      "directionStride": 10,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 2190,
+          "end": 2195
+        },
+        {
+          "direction": 1,
+          "base": 2200,
+          "end": 2205
+        },
+        {
+          "direction": 2,
+          "base": 2210,
+          "end": 2215
+        },
+        {
+          "direction": 3,
+          "base": 2220,
+          "end": 2225
+        },
+        {
+          "direction": 4,
+          "base": 2230,
+          "end": 2235
+        },
+        {
+          "direction": 5,
+          "base": 2240,
+          "end": 2245
+        },
+        {
+          "direction": 6,
+          "base": 2250,
+          "end": 2255
+        },
+        {
+          "direction": 7,
+          "base": 2260,
+          "end": 2265
+        }
+      ],
+      "valueCount": 4,
+      "valueStride": 90,
+      "valueRanges": [
+        {
+          "value": 0,
+          "base": 2190,
+          "end": 2195
+        },
+        {
+          "value": 1,
+          "base": 2280,
+          "end": 2285
+        },
+        {
+          "value": 2,
+          "base": 2370,
+          "end": 2375
+        },
+        {
+          "value": 3,
+          "base": 2460,
+          "end": 2465
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+        "symbol": "WarriorThrustingAttack"
+      }
+    },
+    {
+      "effect": "WarriorTwinDrakeBladeAttack",
+      "kind": "attackOverlay",
+      "library": "Magic2",
+      "base": 220,
+      "count": 6,
+      "interval": 100,
+      "blend": true,
+      "light": 0,
+      "repeat": false,
+      "offset": {
+        "x": 0,
+        "y": 0
+      },
+      "rate": 0.7,
+      "directionCount": 8,
+      "directionStride": 20,
+      "directionRanges": [
+        {
+          "direction": 0,
+          "base": 220,
+          "end": 225
+        },
+        {
+          "direction": 1,
+          "base": 240,
+          "end": 245
+        },
+        {
+          "direction": 2,
+          "base": 260,
+          "end": 265
+        },
+        {
+          "direction": 3,
+          "base": 280,
+          "end": 285
+        },
+        {
+          "direction": 4,
+          "base": 300,
+          "end": 305
+        },
+        {
+          "direction": 5,
+          "base": 320,
+          "end": 325
+        },
+        {
+          "direction": 6,
+          "base": 340,
+          "end": 345
+        },
+        {
+          "direction": 7,
+          "base": 360,
+          "end": 365
+        }
+      ],
+      "provenance": {
+        "source": "Crystal/Client/MirObjects/PlayerObject.cs::DrawEffects/MirAction.Attack1",
+        "symbol": "WarriorTwinDrakeBladeAttack"
       }
     }
   ],

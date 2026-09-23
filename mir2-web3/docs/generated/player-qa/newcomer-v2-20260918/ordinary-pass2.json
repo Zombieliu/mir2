@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v2",
+  "checkedAt": "2026-09-17T18:18:37.955Z",
+  "denominator": 78,
+  "completedUnits": 9,
+  "allClassesCompleted": false,
+  "visualAccepted": false,
+  "globalParityPercent": null,
+  "classes": [
+    {
+      "className": "Warrior",
+      "name": "JW1afa9aab",
+      "runId": "2026-09-17T18-12-07-689Z",
+      "status": "paused",
+      "level": 7,
+      "completedUnits": 3,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 21,
+      "ordinaryStartedAt": "2026-09-17T17:57:15.577Z",
+      "ordinaryElapsedMs": 907426,
+      "pause": {
+        "reason": "awaitingPracticeDamage",
+        "questId": 2110004,
+        "message": "normal attack lacked a positive post-send target damage receipt",
+        "at": "2026-09-17T18:12:23.003Z"
+      },
+      "firstOwnedAttackMs": 895529,
+      "firstOwnedStruckMs": null,
+      "firstLearnedSkillMs": null,
+      "completed": false,
+      "visualAccepted": false
+    },
+    {
+      "className": "Wizard",
+      "name": "JWe9994c9a",
+      "runId": "2026-09-17T18-09-54-574Z",
+      "status": "paused",
+      "level": 7,
+      "completedUnits": 3,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 45,
+      "ordinaryStartedAt": "2026-09-17T17:58:00.449Z",
+      "ordinaryElapsedMs": 906717,
+      "pause": {
+        "reason": "awaitingPracticeDamage",
+        "questId": 2110004,
+        "message": "FireBall lacked a positive post-send target damage receipt",
+        "at": "2026-09-17T18:13:07.166Z"
+      },
+      "firstOwnedAttackMs": 719003,
+      "firstOwnedStruckMs": null,
+      "firstLearnedSkillMs": 881357,
+      "completed": false,
+      "visualAccepted": false
+    },
+    {
+      "className": "Taoist",
+      "name": "JT1c61008c",
+      "runId": "2026-09-17T18-09-44-433Z",
+      "status": "paused",
+      "level": 7,
+      "completedUnits": 3,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002,
+        2110003
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 17,
+      "ordinaryStartedAt": "2026-09-17T17:58:10.644Z",
+      "ordinaryElapsedMs": 758983,
+      "pause": {
+        "reason": "awaitingServerFlag",
+        "questId": 2110004,
+        "message": "q2110004 final practice flags were not server-confirmed",
+        "at": "2026-09-17T18:10:49.627Z"
+      },
+      "firstOwnedAttackMs": 696619,
+      "firstOwnedStruckMs": null,
+      "firstLearnedSkillMs": 746264,
+      "completed": false,
+      "visualAccepted": false
+    }
+  ]
+}

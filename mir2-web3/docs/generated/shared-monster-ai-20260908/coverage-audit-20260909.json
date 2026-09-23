@@ -1,0 +1,6106 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-09-08T17:12:22.641663+00:00",
+  "scope": "47 dedicated personal special-AI module identity and bounded shared integration audit, not full-game or all-monster completeness.",
+  "projectRoot": "E:/mir2-player-journey/mir2-web3",
+  "crystalRoot": "E:/mir2/Crystal",
+  "revision": "58eab9a4a6684b2d2d11d2c533049b64995e7458",
+  "sourceState": "Concurrent dirty working tree. Hashes below bind read snapshots; parent is integrating modules. No production edits or test/build runs by this audit.",
+  "ledger": {
+    "path": "docs/generated/shared-monster-ai-20260908/integration-ledger.json",
+    "line": 1
+  },
+  "globalComplete": false,
+  "globalParityPercent": null,
+  "fullFamilyParityClaimed": false,
+  "inventory": {
+    "ledgerModules": 47,
+    "personalDedicatedFiles": 47,
+    "exactNameSetMatch": true,
+    "coverageCounts": {
+      "shared_source_specific_partial": 23,
+      "shared_specific_not_connected": 17,
+      "shared_entry_only": 7
+    },
+    "distinctReferencedTestDefinitions": 74,
+    "countsMeaning": "Only classification of 47 file-level mechanisms. Tests are source definitions, not a pass count. No global completeness percentage follows."
+  },
+  "statusDefinitions": {
+    "shared_source_specific_partial": "Dedicated shared mechanism exists; full source family parity is not claimed and execution evidence is separate.",
+    "shared_entry_only": "Shared summon/generic or AI-indexed attack entry exists, but ledger-named special state producer is missing.",
+    "shared_specific_not_connected": "No corresponding special Zone hook found in inspected dispatch/modules; does not claim the monster cannot spawn or use generic behavior."
+  },
+  "keyMappingCorrections": [
+    "Exact key frost_tiger_sitting maps AI34 FrostTiger.",
+    "AI41 and AI42 both instantiate YinDevilNode, not SpiderBat/SpiderNode.",
+    "TownArcher57, ConquestArcher80 and ArcherGuard113 tests are not interchangeable.",
+    "StoneTrap255 differs from TrapRock47 and GuardianRock48.",
+    "summoned_monster is cross-cutting with no single AI.",
+    "zuma_monster includes AI17 also covered by zuma_taurus_stage; never count as distinct monsters.",
+    "RootSpider39 has no dedicated personal file row; preserve cross-cutting inline attack producer inventory."
+  ],
+  "modules": [
+    {
+      "module": "armadillo",
+      "ai": [
+        124,
+        125
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/armadillo.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_armadillo_state",
+          "line": 15
+        },
+        {
+          "symbol": "armadillo_dig_out_spell_packet",
+          "line": 67
+        },
+        {
+          "symbol": "update_armadillo_run_away_state",
+          "line": 83
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 124,
+          "crystalClass": "Armadillo",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 284
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Armadillo.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "SpawnDigOutEffect",
+              "line": 17
+            },
+            {
+              "member": "Attacked",
+              "line": 38
+            },
+            {
+              "member": "Attacked",
+              "line": 48
+            },
+            {
+              "member": "Attack",
+              "line": 58
+            },
+            {
+              "member": "CompleteRangeAttack",
+              "line": 147
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 166
+            }
+          ]
+        },
+        {
+          "ai": 125,
+          "crystalClass": "ArmadilloElder",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 286
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ArmadilloElder.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Attack",
+              "line": 14
+            },
+            {
+              "member": "CompleteRangeAttack",
+              "line": 59
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/armadillo_ai.rs",
+          "line": 21,
+          "symbol": "armadillo_attacked"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/armadillo_ai.rs",
+          "line": 48,
+          "symbol": "tick_armadillo_player_ai"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/armadillo_ai.rs",
+          "line": 319,
+          "symbol": "tick_armadillo_retreat_hits"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_armadillo_ai.rs",
+          "line": 123,
+          "test": "armadillo_all_six_roll_outcomes_preserve_original_delays_and_elder_push_only"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_armadillo_ai.rs",
+          "line": 182,
+          "test": "elder_push_owner_and_aoi_edges_receive_correct_surfaces"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "axe_skeleton_fear",
+      "ai": [
+        8
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/axe_skeleton_fear.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_axe_skeleton_fear_state",
+          "line": 15
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 8,
+          "crystalClass": "AxeSkeleton",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 34
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/AxeSkeleton.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 23
+            },
+            {
+              "member": "Attack",
+              "line": 28
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 50
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/reactive_ai.rs",
+          "line": 138,
+          "symbol": "try_tick_reactive_monster"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 85,
+          "test": "blocked_approach_rotates_to_a_free_tile_and_starts_the_attack_window"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 119,
+          "test": "blocked_retreat_tries_a_free_direction_instead_of_overlapping_or_attacking"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 170,
+          "test": "white_fox_slow_is_delayed_non_damage_and_checkpoint_replays_one_cast"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 189,
+          "test": "white_fox_full_poison_resistance_blocks_slow_without_replacing_it_with_damage"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 201,
+          "test": "red_fox_adjacent_teleport_uses_effect_two_and_persists_ten_second_cooldown"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 251,
+          "test": "axe_skeleton_retreats_before_shooting_and_broadcasts_the_same_move"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 281,
+          "test": "fear_expiry_is_strict_and_checkpoint_does_not_restart_the_window"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "bomb_spider",
+      "ai": [
+        40
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/bomb_spider.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_bomb_spider_state",
+          "line": 11
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 40,
+          "crystalClass": "BombSpider",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 104
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/BombSpider.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "ProcessTarget",
+              "line": 16
+            },
+            {
+              "member": "Die",
+              "line": 31
+            },
+            {
+              "member": "CompleteDeath",
+              "line": 37
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity.",
+        "RootSpider child placement avoids occupied tiles rather than original same-cell stacking.",
+        "Configurable BombSpiderName/spawn script overrides and full opposing player/pet explosion/green poison engine semantics remain open."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+          "line": 73,
+          "symbol": "initialize_spider_monster"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+          "line": 152,
+          "symbol": "spider_monster_on_death"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+          "line": 205,
+          "symbol": "tick_spider_lifecycles"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+          "line": 751,
+          "symbol": "explode_bomb_spider"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 159,
+          "test": "adjacent_spider_dies_then_explodes_once_at_500ms_for_both_observers"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 199,
+          "test": "player_kill_awards_drops_once_and_personal_refresh_cannot_cancel_pending_explosion"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 241,
+          "test": "pending_explosion_checkpoint_replays_identical_damage_and_never_reexecutes"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 260,
+          "test": "explosion_uses_impact_positions_and_never_hits_outside_radius_one"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 284,
+          "test": "five_minute_lifetime_is_strict_and_survives_blocked_movement"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 305,
+          "test": "missing_target_triggers_death_and_corpse_expires_without_resurrection"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 328,
+          "test": "full_poison_resistance_blocks_explosion_poison_while_damage_still_lands"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 350,
+          "test": "ordinary_monster_has_no_spider_lifecycle_state"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 367,
+          "test": "damaged_spider_suicide_credits_owner_once_but_expired_tag_does_not"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 499,
+          "test": "root_spider_summons_one_shared_child_after_500ms_with_source_relationship_and_cadence"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 570,
+          "test": "root_pending_spawn_survives_producer_death_refresh_and_checkpoint_exactly_once"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 623,
+          "test": "root_children_keep_independent_drop_rolls_and_reward_only_their_actual_deaths"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 695,
+          "test": "root_twenty_live_child_cap_survives_repeated_ticks_and_replenishes_a_dead_child"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "bone_lord",
+      "ai": [
+        30
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/bone_lord.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_bone_lord_state",
+          "line": 17
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 30,
+          "crystalClass": "BoneLord",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 81
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/BoneLord.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 16
+            },
+            {
+              "member": "Attack",
+              "line": 21
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 54
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/stage_summons.rs",
+          "line": 141,
+          "symbol": "tick_stage_summon_states"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/stage_summons.rs",
+          "line": 183,
+          "symbol": "tick_stage_summon_boss"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_stage_summons.rs",
+          "line": 86,
+          "test": "bone_wave_is_one_shared_batch_with_parent_target_and_two_second_startup"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_stage_summons.rs",
+          "line": 143,
+          "test": "bone_requires_a_living_visible_target_but_zuma_does_not"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_stage_summons.rs",
+          "line": 156,
+          "test": "checkpoint_keeps_exact_wave_identity_without_replaying_spawn_or_shortening_startup"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "boulder_spirit",
+      "ai": [
+        170
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/boulder_spirit.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_boulder_spirit_state",
+          "line": 37
+        },
+        {
+          "symbol": "boulder_spirit_has_visible_target",
+          "line": 95
+        },
+        {
+          "symbol": "detonate_boulder_spirit",
+          "line": 131
+        },
+        {
+          "symbol": "boulder_spirit_arms_then_detonates_and_damages_player",
+          "line": 230
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 170,
+          "crystalClass": "BoulderSpirit",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 380
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/BoulderSpirit.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 8
+            },
+            {
+              "member": "CanAttack",
+              "line": 9
+            },
+            {
+              "member": "CanRegen",
+              "line": 10
+            },
+            {
+              "member": "Walk",
+              "line": 16
+            },
+            {
+              "member": "ProcessAI",
+              "line": 21
+            },
+            {
+              "member": "Die",
+              "line": 33
+            },
+            {
+              "member": "CompleteDeath",
+              "line": 39
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "Stationary proximity mine and delayed death explosion.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "cannibal_plant",
+      "ai": [
+        5
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/cannibal_plant.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_cannibal_plant_state",
+          "line": 10
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 5,
+          "crystalClass": "CannibalPlant",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 28
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/CannibalPlant.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanAttack",
+              "line": 12
+            },
+            {
+              "member": "CanMove",
+              "line": 19
+            },
+            {
+              "member": "Blocking",
+              "line": 20
+            },
+            {
+              "member": "ProcessAI",
+              "line": 34
+            },
+            {
+              "member": "Turn",
+              "line": 66
+            },
+            {
+              "member": "Walk",
+              "line": 70
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 72
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 76
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 81
+            },
+            {
+              "member": "ProcessSearch",
+              "line": 83
+            },
+            {
+              "member": "GetInfo",
+              "line": 89
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+          "line": 87,
+          "symbol": "tick_monster_visibility_states"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+          "line": 61,
+          "symbol": "monster_visibility_is_attackable"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 120,
+          "test": "hidden_plants_have_no_spawn_until_shared_player_proximity_reveals_once"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 147,
+          "test": "stone_zuma_visible_at_spawn_and_wake_wave_does_not_recurse"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 187,
+          "test": "all_supported_stone_families_start_visible_and_unawake"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 199,
+          "test": "centipede_keeps_seven_tile_visibility_and_plants_hide_on_strict_deadline"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 240,
+          "test": "personal_broadcast_cannot_restone_awakened_zuma_or_expose_hidden_plant"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 311,
+          "test": "poison_cloud_cannot_poison_hidden_or_stoned_monster"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 336,
+          "test": "lion_roar_cannot_control_stone_before_wake"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 355,
+          "test": "dig_out_families_reveal_once_with_original_delayed_persistent_ground_effect"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "deer_run_away",
+      "ai": [
+        2
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/deer_run_away.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_deer_run_away_state",
+          "line": 11
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 2,
+          "crystalClass": "Deer",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 21
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Deer.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanAttack",
+              "line": 9
+            },
+            {
+              "member": "RefreshAll",
+              "line": 34
+            },
+            {
+              "member": "FindTarget",
+              "line": 40
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 46
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+          "line": 27,
+          "symbol": "initialize_passive_monster"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+          "line": 53,
+          "symbol": "passive_monster_on_damage"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+          "line": 72,
+          "symbol": "try_tick_passive_monster"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_passive_ai.rs",
+          "line": 112,
+          "test": "timid_deer_flees_direct_attacker_without_turning_hostile_and_respects_speed"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_passive_ai.rs",
+          "line": 135,
+          "test": "ordinary_deer_only_retaliates_after_a_real_hit"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_passive_ai.rs",
+          "line": 148,
+          "test": "saved_temperament_does_not_reroll_or_double_speed_discount_and_leaving_clears_target"
+        }
+      ],
+      "testExecution": "Audit did not run tests.",
+      "mappingNote": "Crystal AI1 and AI2 both instantiate Deer; this personal mechanism and shared timid branch specifically cover AI2.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "dig_out_zombie",
+      "ai": [
+        24
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/dig_out_zombie.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_dig_out_zombie_state",
+          "line": 10
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 24,
+          "crystalClass": "DigOutZombie",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 68
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/DigOutZombie.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanAttack",
+              "line": 14
+            },
+            {
+              "member": "CanMove",
+              "line": 21
+            },
+            {
+              "member": "Blocking",
+              "line": 28
+            },
+            {
+              "member": "ProcessAI",
+              "line": 42
+            },
+            {
+              "member": "Walk",
+              "line": 89
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 94
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 98
+            },
+            {
+              "member": "ProcessSearch",
+              "line": 103
+            },
+            {
+              "member": "GetInfo",
+              "line": 111
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+          "line": 87,
+          "symbol": "tick_monster_visibility_states"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 120,
+          "test": "hidden_plants_have_no_spawn_until_shared_player_proximity_reveals_once"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 147,
+          "test": "stone_zuma_visible_at_spawn_and_wake_wave_does_not_recurse"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 187,
+          "test": "all_supported_stone_families_start_visible_and_unawake"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 199,
+          "test": "centipede_keeps_seven_tile_visibility_and_plants_hide_on_strict_deadline"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 240,
+          "test": "personal_broadcast_cannot_restone_awakened_zuma_or_expose_hidden_plant"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 311,
+          "test": "poison_cloud_cannot_poison_hidden_or_stoned_monster"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 336,
+          "test": "lion_roar_cannot_control_stone_before_wake"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 355,
+          "test": "dig_out_families_reveal_once_with_original_delayed_persistent_ground_effect"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "dragon_statue_sleep",
+      "ai": [
+        54
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/dragon_statue_sleep.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_dragon_statue_sleep_state",
+          "line": 10
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 54,
+          "crystalClass": "DragonStatue",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 133
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/DragonStatue.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 12
+            },
+            {
+              "member": "Spawned",
+              "line": 20
+            },
+            {
+              "member": "Turn",
+              "line": 28
+            },
+            {
+              "member": "Walk",
+              "line": 32
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 34
+            },
+            {
+              "member": "ProcessSearch",
+              "line": 36
+            },
+            {
+              "member": "ProcessAI",
+              "line": 42
+            },
+            {
+              "member": "InAttackRange",
+              "line": 54
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 58
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 75
+            },
+            {
+              "member": "Attacked",
+              "line": 92
+            },
+            {
+              "member": "Attacked",
+              "line": 97
+            },
+            {
+              "member": "Struck",
+              "line": 102
+            },
+            {
+              "member": "ChangeHP",
+              "line": 106
+            },
+            {
+              "member": "Die",
+              "line": 111
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+          "line": 96,
+          "symbol": "intercept_sleep_monster_death"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+          "line": 168,
+          "symbol": "tick_sleep_monster_states"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 105,
+          "test": "frost_tiger_does_not_aggro_nearby_players_and_sits_until_attacked"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 130,
+          "test": "statue_lethal_damage_sleeps_without_kill_rewards_and_metadata_cannot_wake_it"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 154,
+          "test": "statue_checkpoint_preserves_sleep_and_wakes_strictly_after_fifteen_minutes"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 182,
+          "test": "sleeping_statue_ignores_stale_harvest_remove_and_ai_metadata"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 215,
+          "test": "sleeping_and_awakened_statue_remain_alive_for_late_observers_after_checkpoint"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "evil_centipede",
+      "ai": [
+        14
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/evil_centipede.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_evil_centipede_state",
+          "line": 10
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 14,
+          "crystalClass": "EvilCentipede",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 48
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/EvilCentipede.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanAttack",
+              "line": 12
+            },
+            {
+              "member": "CanMove",
+              "line": 19
+            },
+            {
+              "member": "Blocking",
+              "line": 20
+            },
+            {
+              "member": "ProcessAI",
+              "line": 35
+            },
+            {
+              "member": "Turn",
+              "line": 69
+            },
+            {
+              "member": "Walk",
+              "line": 73
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 75
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 79
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 84
+            },
+            {
+              "member": "ProcessSearch",
+              "line": 86
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 92
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 104
+            },
+            {
+              "member": "Attack",
+              "line": 118
+            },
+            {
+              "member": "GetInfo",
+              "line": 130
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+          "line": 87,
+          "symbol": "tick_monster_visibility_states"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 120,
+          "test": "hidden_plants_have_no_spawn_until_shared_player_proximity_reveals_once"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 147,
+          "test": "stone_zuma_visible_at_spawn_and_wake_wave_does_not_recurse"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 187,
+          "test": "all_supported_stone_families_start_visible_and_unawake"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 199,
+          "test": "centipede_keeps_seven_tile_visibility_and_plants_hide_on_strict_deadline"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 240,
+          "test": "personal_broadcast_cannot_restone_awakened_zuma_or_expose_hidden_plant"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 311,
+          "test": "poison_cloud_cannot_poison_hidden_or_stoned_monster"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 336,
+          "test": "lion_roar_cannot_control_stone_before_wake"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 355,
+          "test": "dig_out_families_reveal_once_with_original_delayed_persistent_ground_effect"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "evil_mir",
+      "ai": [
+        52
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/evil_mir.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "evil_mir_targeted_damage",
+          "line": 72
+        },
+        {
+          "symbol": "evil_mir_player_poison",
+          "line": 82
+        },
+        {
+          "symbol": "update_evil_mir_state",
+          "line": 99
+        },
+        {
+          "symbol": "evil_mir_set_direction",
+          "line": 342
+        },
+        {
+          "symbol": "evil_mir_sleeps_immobile_then_wakes_and_attacks",
+          "line": 375
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 52,
+          "crystalClass": "EvilMir",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 129
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/EvilMir.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Target",
+              "line": 11
+            },
+            {
+              "member": "CanAttack",
+              "line": 35
+            },
+            {
+              "member": "CanMove",
+              "line": 42
+            },
+            {
+              "member": "Turn",
+              "line": 50
+            },
+            {
+              "member": "Walk",
+              "line": 54
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 56
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 60
+            },
+            {
+              "member": "InAttackRange",
+              "line": 64
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 69
+            },
+            {
+              "member": "ProcessSearch",
+              "line": 71
+            },
+            {
+              "member": "ProcessAI",
+              "line": 77
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 89
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 104
+            },
+            {
+              "member": "Attack",
+              "line": 139
+            },
+            {
+              "member": "Attacked",
+              "line": 152
+            },
+            {
+              "member": "Attacked",
+              "line": 157
+            },
+            {
+              "member": "Struck",
+              "line": 162
+            },
+            {
+              "member": "ChangeHP",
+              "line": 167
+            },
+            {
+              "member": "Die",
+              "line": 173
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "Sleep/awakening, fixed position, special attack selection and DragonLink lifecycle.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "football",
+      "ai": [
+        68
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/football.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_football_state",
+          "line": 25
+        },
+        {
+          "symbol": "football_is_passive_non_combatant",
+          "line": 65
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 68,
+          "crystalClass": "Football",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 163
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Football.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanAttack",
+              "line": 8
+            },
+            {
+              "member": "FindTarget",
+              "line": 18
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 20
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 22
+            },
+            {
+              "member": "Attacked",
+              "line": 24
+            },
+            {
+              "member": "Attacked",
+              "line": 53
+            },
+            {
+              "member": "Struck",
+              "line": 55
+            },
+            {
+              "member": "Die",
+              "line": 60
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI68 kick reaction/rebound, noncombatant behavior and damage immunity.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "foxman_fear",
+      "ai": [
+        45,
+        46
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/foxman_fear.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_foxman_fear_state",
+          "line": 13
+        },
+        {
+          "symbol": "foxman_teleport_destination",
+          "line": 120
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 45,
+          "crystalClass": "RedFoxman",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 114
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/RedFoxman.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 18
+            },
+            {
+              "member": "Attack",
+              "line": 23
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 48
+            },
+            {
+              "member": "TeleportRandom",
+              "line": 109
+            }
+          ]
+        },
+        {
+          "ai": 46,
+          "crystalClass": "WhiteFoxman",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 116
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/WhiteFoxman.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 16
+            },
+            {
+              "member": "Attack",
+              "line": 21
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 57
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 70
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/reactive_ai.rs",
+          "line": 138,
+          "symbol": "try_tick_reactive_monster"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/reactive_ai.rs",
+          "line": 53,
+          "symbol": "tick_reactive_effects"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 85,
+          "test": "blocked_approach_rotates_to_a_free_tile_and_starts_the_attack_window"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 119,
+          "test": "blocked_retreat_tries_a_free_direction_instead_of_overlapping_or_attacking"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 170,
+          "test": "white_fox_slow_is_delayed_non_damage_and_checkpoint_replays_one_cast"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 189,
+          "test": "white_fox_full_poison_resistance_blocks_slow_without_replacing_it_with_damage"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 201,
+          "test": "red_fox_adjacent_teleport_uses_effect_two_and_persists_ten_second_cooldown"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 251,
+          "test": "axe_skeleton_retreats_before_shooting_and_broadcasts_the_same_move"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+          "line": 281,
+          "test": "fear_expiry_is_strict_and_checkpoint_does_not_restart_the_window"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "frost_tiger_sitting",
+      "ai": [
+        34
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/frost_tiger_sitting.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_frost_tiger_sitting_state",
+          "line": 12
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 34,
+          "crystalClass": "FrostTiger",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 91
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/FrostTiger.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanAttack",
+              "line": 30
+            },
+            {
+              "member": "CanMove",
+              "line": 38
+            },
+            {
+              "member": "Walk",
+              "line": 46
+            },
+            {
+              "member": "InAttackRange",
+              "line": 51
+            },
+            {
+              "member": "FindTarget",
+              "line": 62
+            },
+            {
+              "member": "Attack",
+              "line": 64
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 132
+            },
+            {
+              "member": "ProcessAI",
+              "line": 154
+            },
+            {
+              "member": "GetInfo",
+              "line": 164
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+          "line": 73,
+          "symbol": "sleep_monster_on_damage"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+          "line": 142,
+          "symbol": "sleep_monster_target"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+          "line": 168,
+          "symbol": "tick_sleep_monster_states"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 105,
+          "test": "frost_tiger_does_not_aggro_nearby_players_and_sits_until_attacked"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 130,
+          "test": "statue_lethal_damage_sleeps_without_kill_rewards_and_metadata_cannot_wake_it"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 154,
+          "test": "statue_checkpoint_preserves_sleep_and_wakes_strictly_after_fifteen_minutes"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 182,
+          "test": "sleeping_statue_ignores_stale_harvest_remove_and_ai_metadata"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+          "line": 215,
+          "test": "sleeping_and_awakened_statue_remain_alive_for_late_observers_after_checkpoint"
+        }
+      ],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "gate",
+      "ai": [
+        81
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/gate.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "gate_damage_level",
+          "line": 60
+        },
+        {
+          "symbol": "gate_closed_facing",
+          "line": 71
+        },
+        {
+          "symbol": "update_gate_state",
+          "line": 76
+        },
+        {
+          "symbol": "world_with_map",
+          "line": 155
+        },
+        {
+          "symbol": "spawn_sabuk_gate",
+          "line": 178
+        },
+        {
+          "symbol": "gate_is_immobile_blocks_cells_and_faces_up_at_full_hp",
+          "line": 217
+        },
+        {
+          "symbol": "gate_facing_tracks_damage_level",
+          "line": 282
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 81,
+          "crystalClass": "Gate",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 191
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Gate.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Despawn",
+              "line": 73
+            },
+            {
+              "member": "Attacked",
+              "line": 77
+            },
+            {
+              "member": "Attacked",
+              "line": 86
+            },
+            {
+              "member": "OpenDoor",
+              "line": 95
+            },
+            {
+              "member": "CloseDoor",
+              "line": 118
+            },
+            {
+              "member": "RepairGate",
+              "line": 131
+            },
+            {
+              "member": "GetDamageLevel",
+              "line": 141
+            },
+            {
+              "member": "CanRegen",
+              "line": 150
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "Native AI81 structural direction/block array, opening/closing and conquest-aware damage. Separate conquest structures do not prove this native branch.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "general_meow_meow",
+      "ai": [
+        123
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/general_meow_meow.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_general_meow_meow_state",
+          "line": 20
+        },
+        {
+          "symbol": "general_meow_meow_shield_phase",
+          "line": 117
+        },
+        {
+          "symbol": "cast_general_meow_meow_mass_thunder",
+          "line": 122
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 123,
+          "crystalClass": "GeneralMeowMeow",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 282
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/GeneralMeowMeow.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 36
+            },
+            {
+              "member": "Attack",
+              "line": 41
+            },
+            {
+              "member": "ProcessAI",
+              "line": 123
+            },
+            {
+              "member": "Spawned",
+              "line": 170
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 178
+            },
+            {
+              "member": "CompleteRangeAttack",
+              "line": 190
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 243
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_entry_only",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "AI123 ranged MC selection exists; slave waves and shield lifecycle do not have a dedicated shared state producer."
+      ],
+      "open": [
+        "No dedicated shared producer identified for this personal special state; generic attack profile is not completion."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12312,
+          "symbol": "zone_native_monster_prefers_ranged"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12340,
+          "symbol": "zone_native_monster_player_attack_damage"
+        }
+      ],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "great_fox_spirit",
+      "ai": [
+        50
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/great_fox_spirit.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_great_fox_spirit_state",
+          "line": 20
+        },
+        {
+          "symbol": "try_great_fox_spirit_recall",
+          "line": 69
+        },
+        {
+          "symbol": "entity",
+          "line": 124
+        },
+        {
+          "symbol": "great_fox_spirit_recall_targets",
+          "line": 138
+        },
+        {
+          "symbol": "great_fox_spirit_target_sort_key",
+          "line": 177
+        },
+        {
+          "symbol": "great_fox_spirit_is_attack_target",
+          "line": 192
+        },
+        {
+          "symbol": "great_fox_spirit_target_magic_mitigated",
+          "line": 254
+        },
+        {
+          "symbol": "teleport_great_fox_spirit_target",
+          "line": 264
+        },
+        {
+          "symbol": "set_guardian_rocks_active_near",
+          "line": 319
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 50,
+          "crystalClass": "GreatFoxSpirit",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 124
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/GreatFoxSpirit.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 13
+            },
+            {
+              "member": "InAttackRange",
+              "line": 20
+            },
+            {
+              "member": "ProcessAI",
+              "line": 25
+            },
+            {
+              "member": "Turn",
+              "line": 44
+            },
+            {
+              "member": "Walk",
+              "line": 48
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 50
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 52
+            },
+            {
+              "member": "Attack",
+              "line": 92
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 125
+            },
+            {
+              "member": "Die",
+              "line": 139
+            },
+            {
+              "member": "Spawned",
+              "line": 146
+            },
+            {
+              "member": "GetInfo",
+              "line": 179
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_entry_only",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "AI50 ranged selection exists; guardian activation, HP stage and player recall lack a dedicated shared producer."
+      ],
+      "open": [
+        "No dedicated shared producer identified for this personal special state; generic attack profile is not completion."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12312,
+          "symbol": "zone_native_monster_prefers_ranged"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12340,
+          "symbol": "zone_native_monster_player_attack_damage"
+        }
+      ],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "hell_bomb",
+      "ai": [
+        99
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/hell_bomb.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_hell_bomb_state",
+          "line": 12
+        },
+        {
+          "symbol": "hell_bomb_name_for_tick",
+          "line": 42
+        },
+        {
+          "symbol": "hell_bomb_spawn_position",
+          "line": 50
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 99,
+          "crystalClass": "HellBomb",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 230
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HellBomb.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 11
+            },
+            {
+              "member": "CanRegen",
+              "line": 12
+            },
+            {
+              "member": "FindTarget",
+              "line": 21
+            },
+            {
+              "member": "Turn",
+              "line": 23
+            },
+            {
+              "member": "Walk",
+              "line": 27
+            },
+            {
+              "member": "ProcessRegen",
+              "line": 32
+            },
+            {
+              "member": "ProcessSearch",
+              "line": 33
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 34
+            },
+            {
+              "member": "ApplyPoison",
+              "line": 36
+            },
+            {
+              "member": "Struck",
+              "line": 39
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 44
+            },
+            {
+              "member": "Die",
+              "line": 49
+            },
+            {
+              "member": "CompleteDeath",
+              "line": 60
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI99 lifetime and explosion; BombSpider AI40 is a different mechanism.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "hell_lord",
+      "ai": [
+        98
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/hell_lord.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_hell_lord_state",
+          "line": 18
+        },
+        {
+          "symbol": "hell_lord_knight_name",
+          "line": 112
+        },
+        {
+          "symbol": "hell_lord_knight_spawn_position",
+          "line": 122
+        },
+        {
+          "symbol": "queue_hell_lord_summon",
+          "line": 139
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 98,
+          "crystalClass": "HellLord",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 228
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HellLord.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 10
+            },
+            {
+              "member": "CanRegen",
+              "line": 11
+            },
+            {
+              "member": "InAttackRange",
+              "line": 34
+            },
+            {
+              "member": "Turn",
+              "line": 41
+            },
+            {
+              "member": "Walk",
+              "line": 44
+            },
+            {
+              "member": "Attacked",
+              "line": 47
+            },
+            {
+              "member": "Attacked",
+              "line": 56
+            },
+            {
+              "member": "ApplyPoison",
+              "line": 66
+            },
+            {
+              "member": "Process",
+              "line": 71
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 82
+            },
+            {
+              "member": "Attack",
+              "line": 113
+            },
+            {
+              "member": "GetInfo",
+              "line": 240
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI98 staged HellKnight/HellBomb summons and rage.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "holy_deva_fear",
+      "ai": [
+        38
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/holy_deva_fear.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_holy_deva_fear_state",
+          "line": 15
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 38,
+          "crystalClass": "HolyDeva",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 100
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HolyDeva.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 18
+            },
+            {
+              "member": "Attack",
+              "line": 23
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 46
+            },
+            {
+              "member": "Spawned",
+              "line": 99
+            },
+            {
+              "member": "GetInfo",
+              "line": 106
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_entry_only",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Owned HolyDeva has a shared six-tile ranged attack with named test."
+      ],
+      "open": [
+        "Owned ranged pet support is not the ledger-named wild AI38 five-second fear/retreat state.",
+        "Source MoveToMaster/target semantics and MAC damage need separate closure."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12398,
+          "symbol": "zone_native_summon_attack_range"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12407,
+          "symbol": "zone_native_summon_hit_delay_ms"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9650,
+          "symbol": "tick_native_summon_monster"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 8863,
+          "test": "zone_native_holy_deva_uses_ranged_summon_attack_against_hostile_monster"
+        }
+      ],
+      "testExecution": "Named tests exist in shared_zone; parent reports a prior 204-test pass. Not independently rerun against audit hashes.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "horned_archer",
+      "ai": [
+        164
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/horned_archer.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_horned_archer_state",
+          "line": 59
+        },
+        {
+          "symbol": "horned_archer_pick_friend",
+          "line": 167
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 164,
+          "crystalClass": "HornedArcher",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 368
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedArcher.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "ProcessTarget",
+              "line": 15
+            },
+            {
+              "member": "Attack",
+              "line": 48
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 74
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI164 inherited fear/ranged behavior and allied buff selection.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "horned_commander",
+      "ai": [
+        171
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/horned_commander.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_horned_commander_state",
+          "line": 68
+        },
+        {
+          "symbol": "persist_facing",
+          "line": 409
+        },
+        {
+          "symbol": "facing_direction",
+          "line": 416
+        },
+        {
+          "symbol": "typed_attack_packet_with_level",
+          "line": 429
+        },
+        {
+          "symbol": "spawn_boulder",
+          "line": 451
+        },
+        {
+          "symbol": "spawn_slave",
+          "line": 492
+        },
+        {
+          "symbol": "queue_horned_commander_summon",
+          "line": 523
+        },
+        {
+          "symbol": "mass_spawn_rock_fall",
+          "line": 565
+        },
+        {
+          "symbol": "spawn_rock_spike_grid",
+          "line": 627
+        },
+        {
+          "symbol": "schedule_point_damage",
+          "line": 675
+        },
+        {
+          "symbol": "schedule_area_damage",
+          "line": 700
+        },
+        {
+          "symbol": "schedule_area_damage_internal",
+          "line": 725
+        },
+        {
+          "symbol": "teleport_random",
+          "line": 782
+        },
+        {
+          "symbol": "mir_direction_from_index",
+          "line": 838
+        },
+        {
+          "symbol": "boss_agent",
+          "line": 862
+        },
+        {
+          "symbol": "direction_ring_matches_crystal_indices",
+          "line": 889
+        },
+        {
+          "symbol": "dead_boss_falls_through_to_default",
+          "line": 904
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 171,
+          "crystalClass": "HornedCommander",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 382
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedCommander.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "IsAttackTarget",
+              "line": 57
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 62
+            },
+            {
+              "member": "ProcessAI",
+              "line": 67
+            },
+            {
+              "member": "ProcessBuffEnd",
+              "line": 139
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 149
+            },
+            {
+              "member": "Attack",
+              "line": 174
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 281
+            },
+            {
+              "member": "CompleteRangeAttack",
+              "line": 310
+            },
+            {
+              "member": "TeleportRandom",
+              "line": 338
+            },
+            {
+              "member": "Die",
+              "line": 596
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI171 source-specific state/attack producer.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "horned_mage",
+      "ai": [
+        163
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/horned_mage.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_horned_mage_state",
+          "line": 59
+        },
+        {
+          "symbol": "horned_mage_attack",
+          "line": 156
+        },
+        {
+          "symbol": "nearby_monster_splash_targets",
+          "line": 294
+        },
+        {
+          "symbol": "horned_mage_teleport_target",
+          "line": 319
+        },
+        {
+          "symbol": "horned_mage_moves_closer_before_fear_window",
+          "line": 393
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 163,
+          "crystalClass": "HornedMage",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 366
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedMage.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Attack",
+              "line": 15
+            },
+            {
+              "member": "CompleteRangeAttack",
+              "line": 85
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 96
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI163 fear, teleport and special attack branches.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "horned_sorceror",
+      "ai": [
+        169
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/horned_sorceror.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_horned_sorceror_state",
+          "line": 56
+        },
+        {
+          "symbol": "charged_stomp",
+          "line": 285
+        },
+        {
+          "symbol": "dust_tornado",
+          "line": 380
+        },
+        {
+          "symbol": "thrust",
+          "line": 448
+        },
+        {
+          "symbol": "line_attack",
+          "line": 536
+        },
+        {
+          "symbol": "step_toward_target",
+          "line": 589
+        },
+        {
+          "symbol": "face_direction",
+          "line": 627
+        },
+        {
+          "symbol": "push_attack_packet",
+          "line": 641
+        },
+        {
+          "symbol": "rebroadcast_self_spawn",
+          "line": 667
+        },
+        {
+          "symbol": "monster_hp_percent",
+          "line": 677
+        },
+        {
+          "symbol": "horned_sorceror_raw_spell_damage",
+          "line": 690
+        },
+        {
+          "symbol": "session_with_player",
+          "line": 714
+        },
+        {
+          "symbol": "place_player",
+          "line": 727
+        },
+        {
+          "symbol": "spawn_boss",
+          "line": 736
+        },
+        {
+          "symbol": "run_tick",
+          "line": 778
+        },
+        {
+          "symbol": "dead_boss_falls_through_to_default",
+          "line": 828
+        },
+        {
+          "symbol": "in_range_boss_emits_an_attack_packet",
+          "line": 873
+        },
+        {
+          "symbol": "charged_stomp_immune_window_blocks_damage_then_recovers",
+          "line": 921
+        },
+        {
+          "symbol": "dust_tornado_registers_a_persistent_mc_field",
+          "line": 975
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 169,
+          "crystalClass": "HornedSorceror",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 378
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedSorceror.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 27
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 32
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 37
+            },
+            {
+              "member": "Attack",
+              "line": 42
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 135
+            },
+            {
+              "member": "CompleteRangeAttack",
+              "line": 234
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 255
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI169 stomp/tornado/thrust state machine.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "horned_warrior",
+      "ai": [
+        165
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/horned_warrior.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_horned_warrior_state",
+          "line": 47
+        },
+        {
+          "symbol": "horned_warrior_in_attack_range",
+          "line": 214
+        },
+        {
+          "symbol": "horned_warrior_move_away",
+          "line": 231
+        },
+        {
+          "symbol": "horned_warrior_wide_line_attack",
+          "line": 294
+        },
+        {
+          "symbol": "wide_line_target_delay_ms",
+          "line": 354
+        },
+        {
+          "symbol": "horned_warrior_wide_line_points",
+          "line": 363
+        },
+        {
+          "symbol": "warrior_agent",
+          "line": 393
+        },
+        {
+          "symbol": "in_attack_range_matches_crystal_pattern",
+          "line": 418
+        },
+        {
+          "symbol": "wide_line_points_form_three_lanes_of_length_four",
+          "line": 457
+        },
+        {
+          "symbol": "low_health_raises_shield_and_broadcasts_type_two",
+          "line": 488
+        },
+        {
+          "symbol": "shielded_warrior_does_not_attack",
+          "line": 557
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 165,
+          "crystalClass": "HornedWarrior",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 370
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedWarrior.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 16
+            },
+            {
+              "member": "Attack",
+              "line": 29
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 86
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI165 source-specific state/attack producer.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "hugger",
+      "ai": [
+        70
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/hugger.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_hugger_state",
+          "line": 52
+        },
+        {
+          "symbol": "hugger_has_target",
+          "line": 100
+        },
+        {
+          "symbol": "explode_hugger",
+          "line": 133
+        },
+        {
+          "symbol": "spawn_hugger",
+          "line": 215
+        },
+        {
+          "symbol": "hugger_detonates_when_fuse_expires",
+          "line": 269
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 70,
+          "crystalClass": "Hugger",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 167
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Hugger.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "ProcessTarget",
+              "line": 16
+            },
+            {
+              "member": "Die",
+              "line": 49
+            },
+            {
+              "member": "CompleteDeath",
+              "line": 55
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI70 target-loss/lifetime death and delayed death explosion.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "kirin_ice_thrust",
+      "ai": [
+        186
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/kirin_ice_thrust.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_kirin_ice_thrust_state",
+          "line": 17
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 186,
+          "crystalClass": "Kirin",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 416
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Kirin.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 16
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 36
+            },
+            {
+              "member": "Attack",
+              "line": 81
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI186 IceThrust state/line damage producer.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "mud_zombie",
+      "ai": [
+        108
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/mud_zombie.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_mud_zombie_state",
+          "line": 72
+        },
+        {
+          "symbol": "mud_zombie_in_view_range",
+          "line": 168
+        },
+        {
+          "symbol": "mud_zombie_is_ranged",
+          "line": 175
+        },
+        {
+          "symbol": "mud_zombie_line_attack",
+          "line": 186
+        },
+        {
+          "symbol": "mud_zombie_range_attack",
+          "line": 262
+        },
+        {
+          "symbol": "mud_zombie_green_poison",
+          "line": 319
+        },
+        {
+          "symbol": "mud_zombie_line_damage",
+          "line": 329
+        },
+        {
+          "symbol": "mud_zombie_range_damage",
+          "line": 341
+        },
+        {
+          "symbol": "mud_zombie_line_delay_ms",
+          "line": 352
+        },
+        {
+          "symbol": "agent_set_next_attack",
+          "line": 358
+        },
+        {
+          "symbol": "mud_zombie_agent",
+          "line": 380
+        },
+        {
+          "symbol": "spawn_mud_zombie",
+          "line": 402
+        },
+        {
+          "symbol": "in_view_range_is_chebyshev_view_range",
+          "line": 424
+        },
+        {
+          "symbol": "branch_split_is_line_within_two_else_ranged",
+          "line": 449
+        },
+        {
+          "symbol": "green_poison_matches_crystal_args",
+          "line": 463
+        },
+        {
+          "symbol": "out_of_view_range_falls_through_to_chase",
+          "line": 477
+        },
+        {
+          "symbol": "in_view_but_cooling_down_owns_tick",
+          "line": 515
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 108,
+          "crystalClass": "MudZombie",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 250
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/MudZombie.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 14
+            },
+            {
+              "member": "Attack",
+              "line": 19
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 58
+            },
+            {
+              "member": "CompleteRangeAttack",
+              "line": 71
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 84
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI108 line/ranged poison split.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "poison_hugger",
+      "ai": [
+        69
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/poison_hugger.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_poison_hugger_state",
+          "line": 82
+        },
+        {
+          "symbol": "detonate_poison_hugger",
+          "line": 180
+        },
+        {
+          "symbol": "poison_hugger_range_attack",
+          "line": 299
+        },
+        {
+          "symbol": "poison_hugger_step_toward_player",
+          "line": 360
+        },
+        {
+          "symbol": "spawn_poison_hugger",
+          "line": 409
+        },
+        {
+          "symbol": "poison_hugger_detonates_when_adjacent",
+          "line": 465
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 69,
+          "crystalClass": "PoisonHugger",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 165
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/PoisonHugger.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 18
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 23
+            },
+            {
+              "member": "Die",
+              "line": 76
+            },
+            {
+              "member": "CompleteDeath",
+              "line": 88
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI69 proximity/lifetime explosion and optional ranged attack.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "reviving_zombie",
+      "ai": [
+        25
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/reviving_zombie.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_reviving_zombie_state",
+          "line": 11
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 25,
+          "crystalClass": "RevivingZombie",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 70
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/RevivingZombie.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Experience",
+              "line": 11
+            },
+            {
+              "member": "Die",
+              "line": 23
+            },
+            {
+              "member": "ProcessAI",
+              "line": 30
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity.",
+        "Old reviving corpse and ordinary respawn slot are not yet independently represented; original corpse/respawn coexistence remains open."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/revival_ai.rs",
+          "line": 77,
+          "symbol": "initialize_native_monster_revival"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/revival_ai.rs",
+          "line": 93,
+          "symbol": "revival_death_reward"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/revival_ai.rs",
+          "line": 168,
+          "symbol": "tick_native_monster_revivals"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+          "line": 171,
+          "test": "random_zero_one_or_two_revivals_scale_each_life_and_reward_independently"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+          "line": 244,
+          "test": "revival_delay_includes_four_and_twenty_three_seconds_without_fixed_count"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+          "line": 261,
+          "test": "checkpointed_dead_zombie_replays_one_revival_without_reroll_or_second_reward"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+          "line": 295,
+          "test": "expired_corpse_is_removed_before_overdue_revival_after_long_offline_interval"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+          "line": 313,
+          "test": "personal_spawn_refresh_cannot_replace_a_pending_self_revival_without_respawn_policy"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+          "line": 349,
+          "test": "revival_discards_prior_life_control_deadline_and_retained_poison"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+          "line": 391,
+          "test": "final_death_clears_poison_from_body_and_late_observer_snapshot_once"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "shinsu",
+      "ai": [
+        18
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/shinsu.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_shinsu_state",
+          "line": 13
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 18,
+          "crystalClass": "Shinsu",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 56
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Shinsu.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanAttack",
+              "line": 13
+            },
+            {
+              "member": "ProcessAI",
+              "line": 26
+            },
+            {
+              "member": "InAttackRange",
+              "line": 49
+            },
+            {
+              "member": "Attack",
+              "line": 63
+            },
+            {
+              "member": "Spawned",
+              "line": 84
+            },
+            {
+              "member": "GetInfo",
+              "line": 91
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_entry_only",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "SummonShinsu creates an owned shared monster and generic pet tick attacks hostile monsters."
+      ],
+      "open": [
+        "No AI18 Mode/ModeTime, 30-second target mode or ObjectShow/ObjectHide state was found.",
+        "Shared summon range defaults to 1 and damage to 1 plus buffs; source rolls DC and uses a directional 2-tile LineAttack.",
+        "Existing spawn/ordinary-attack test does not verify transformation, line hits or source damage."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 8939,
+          "symbol": "resolve_pending_native_summon"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9650,
+          "symbol": "tick_native_summon_monster"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12398,
+          "symbol": "zone_native_summon_attack_range"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12420,
+          "symbol": "zone_native_summon_monster_attack_damage"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 8950,
+          "test": "zone_native_summon_shinsu_spawns_owned_pet_and_attacks_hostile_monster"
+        }
+      ],
+      "testExecution": "Named tests exist in shared_zone; parent reports a prior 204-test pass. Not independently rerun against audit hashes.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "snake_totem",
+      "ai": [
+        62
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/snake_totem.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_snake_totem_state",
+          "line": 18
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 62,
+          "crystalClass": "SnakeTotem",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 149
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/SnakeTotem.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Name",
+              "line": 20
+            },
+            {
+              "member": "Turn",
+              "line": 26
+            },
+            {
+              "member": "Walk",
+              "line": 30
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 32
+            },
+            {
+              "member": "Process",
+              "line": 34
+            },
+            {
+              "member": "Process",
+              "line": 55
+            },
+            {
+              "member": "ProcessAI",
+              "line": 65
+            },
+            {
+              "member": "Die",
+              "line": 154
+            },
+            {
+              "member": "Spawned",
+              "line": 169
+            },
+            {
+              "member": "GetInfo",
+              "line": 175
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Owned static totem, capped CharmedSnake spawn, expiry, paralysis and triggered cascade exist."
+      ],
+      "open": [
+        "Shared spawn requires a target and uses 600ms cadence; Crystal SearchDelay is 3000ms and SpawnMinion runs below cap even without a target.",
+        "Shared totem turns and chooses a free neighboring child tile; source fixes Up and spawns on the totem cell.",
+        "No SnakeTotem-specific AgroAllMobsInRange target override was found.",
+        "Expiry/owner-distance cascade exists, but arbitrary central death marks dead before specialized alive-only death predicates; all-death cascade is not closed.",
+        "Child entry delay, MAC/Agility and hostile player/pet target coverage require further closure."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9744,
+          "symbol": "tick_native_snake_totem"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9164,
+          "symbol": "native_snake_totem_should_die"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9217,
+          "symbol": "kill_native_snake_totem"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9191,
+          "symbol": "native_charmed_snake_should_die"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9272,
+          "symbol": "explode_native_charmed_snake"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9391,
+          "test": "zone_native_archer_summon_snakes_spawns_static_totem_profile"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9465,
+          "test": "zone_native_charmed_snake_hit_applies_paralysis_poison"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9525,
+          "test": "zone_native_snake_totem_caps_minions_and_respawns_after_minion_expiry"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9596,
+          "test": "zone_native_snake_totem_self_destruct_kills_owned_minions"
+        }
+      ],
+      "testExecution": "Named tests exist in shared_zone; parent reports a prior 204-test pass. Not independently rerun against audit hashes.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "snow_wolf_king",
+      "ai": [
+        180
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/snow_wolf_king.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "spawn_snow_wolf_king_slaves",
+          "line": 19
+        },
+        {
+          "symbol": "schedule_snow_wolf_king_death_explosion",
+          "line": 81
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 180,
+          "crystalClass": "SnowWolfKing",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 402
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/SnowWolfKing.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Attacked",
+              "line": 17
+            },
+            {
+              "member": "Attacked",
+              "line": 31
+            },
+            {
+              "member": "Attack",
+              "line": 83
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 144
+            },
+            {
+              "member": "Die",
+              "line": 155
+            },
+            {
+              "member": "CompleteDeath",
+              "line": 161
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI180 low-HP slave producer in personal attack dispatch.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "spitting_toad",
+      "ai": [
+        61
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/spitting_toad.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_spitting_toad_state",
+          "line": 9
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 61,
+          "crystalClass": "SpittingToad",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 147
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/SpittingToad.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Name",
+              "line": 17
+            },
+            {
+              "member": "Process",
+              "line": 23
+            },
+            {
+              "member": "Process",
+              "line": 38
+            },
+            {
+              "member": "ProcessAI",
+              "line": 61
+            },
+            {
+              "member": "InAttackRange",
+              "line": 87
+            },
+            {
+              "member": "Attack",
+              "line": 101
+            },
+            {
+              "member": "Spawned",
+              "line": 127
+            },
+            {
+              "member": "GetInfo",
+              "line": 133
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Owned stationary shared toad has range12 and distance*50+500ms projectile delay."
+      ],
+      "open": [
+        "Source SearchDelay=3000ms and AttackTime adds 500ms; shared generic pet clocks do not reproduce both.",
+        "Owner death/range15 lifecycle and source MAC damage remain incomplete."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12398,
+          "symbol": "zone_native_summon_attack_range"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12407,
+          "symbol": "zone_native_summon_hit_delay_ms"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12438,
+          "symbol": "zone_native_summon_can_move"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9650,
+          "symbol": "tick_native_summon_monster"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9340,
+          "test": "zone_native_archer_summon_toad_uses_ranged_pet_attack"
+        }
+      ],
+      "testExecution": "Named tests exist in shared_zone; parent reports a prior 204-test pass. Not independently rerun against audit hashes.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "stone_trap",
+      "ai": [
+        255
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/stone_trap.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_stone_trap_state",
+          "line": 10
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 255,
+          "crystalClass": "StoneTrap",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 488
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/StoneTrap.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Name",
+              "line": 22
+            },
+            {
+              "member": "ProcessRegen",
+              "line": 28
+            },
+            {
+              "member": "Attack",
+              "line": 30
+            },
+            {
+              "member": "ProcessAI",
+              "line": 32
+            },
+            {
+              "member": "Turn",
+              "line": 95
+            },
+            {
+              "member": "Walk",
+              "line": 98
+            },
+            {
+              "member": "Spawned",
+              "line": 102
+            },
+            {
+              "member": "Process",
+              "line": 107
+            },
+            {
+              "member": "Struck",
+              "line": 127
+            },
+            {
+              "member": "GetInfo",
+              "line": 132
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Shared stationary expiring trap exists and hostile monsters select it as a decoy."
+      ],
+      "open": [
+        "No dedicated StoneTrap owner-dead/range15 death hook found; generic expiry directly removes the object.",
+        "Crystal Struck returns zero; audited shared central damage has no AI255 exception.",
+        "Fixed facing and source death lifecycle need separate verification beyond zero attack/movement range."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 13520,
+          "symbol": "native_summon_spell_profile"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 10201,
+          "symbol": "nearest_native_monster_decoy_target"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12438,
+          "symbol": "zone_native_summon_can_move"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9667,
+          "test": "zone_native_archer_stonetrap_spawns_static_trap_and_expires"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9724,
+          "test": "zone_native_stonetrap_draws_hostile_monster_aggro_without_player_damage"
+        }
+      ],
+      "testExecution": "Named tests exist in shared_zone; parent reports a prior 204-test pass. Not independently rerun against audit hashes.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "summoned_monster",
+      "ai": [],
+      "mappingKind": "cross_cutting_component",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/summoned_monster.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_summoned_monster_state",
+          "line": 12
+        },
+        {
+          "symbol": "kill_summoned_minions",
+          "line": 89
+        }
+      ],
+      "crystal": [],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Shared admission/pending spawn, owned identity, cap/recall, combat, expiry and disconnect cleanup exist."
+      ],
+      "open": [
+        "This is a cross-cutting component/helper, not one Crystal AI/class.",
+        "Owner disconnect removes generated objects. Owner death while session continues makes generic pet tick inert rather than consistently running source death/lifecycle.",
+        "Generic recall emits ObjectWalk rather than complete teleport-out/remove/in observer lifecycle.",
+        "AI-specific master/slave death effects and PetMode cannot be inferred from ordinary summon tests."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 8939,
+          "symbol": "resolve_pending_native_summon"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9650,
+          "symbol": "tick_native_summon_monster"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9062,
+          "symbol": "recall_native_summon"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 1712,
+          "symbol": "remove_owner_generated_zone_objects"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 8596,
+          "test": "zone_native_player_summon_skeleton_spawns_owned_friendly_summon_after_delay"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 8697,
+          "test": "zone_native_player_summon_skeleton_recalls_existing_owned_summon_without_respawn"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 8785,
+          "test": "zone_native_summon_attacks_hostile_monster_for_owner_without_hitting_players"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9018,
+          "test": "zone_native_pet_enhancer_buffs_owned_summon_and_increases_damage"
+        }
+      ],
+      "testExecution": "Named tests exist in shared_zone; parent reports a prior 204-test pass. Not independently rerun against audit hashes.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "thunder_element",
+      "ai": [
+        49
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/thunder_element.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_thunder_element_state",
+          "line": 17
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 49,
+          "crystalClass": "ThunderElement",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 122
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ThunderElement.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CompleteAttack",
+              "line": 14
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 34
+            },
+            {
+              "member": "Attack",
+              "line": 61
+            },
+            {
+              "member": "Attacked",
+              "line": 79
+            },
+            {
+              "member": "Attacked",
+              "line": 85
+            },
+            {
+              "member": "Pushed",
+              "line": 91
+            },
+            {
+              "member": "PoisonDamage",
+              "line": 109
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/thunder_ai.rs",
+          "line": 24,
+          "symbol": "thunder_accepts_damage"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/thunder_ai.rs",
+          "line": 237,
+          "symbol": "try_tick_thunder_monster"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/thunder_ai.rs",
+          "line": 335,
+          "symbol": "tick_thunder_effects"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_thunder_ai.rs",
+          "line": 97,
+          "test": "thunder_rejects_ordinary_lethal_damage_without_a_reward"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_thunder_ai.rs",
+          "line": 117,
+          "test": "thunder_burst_is_delayed_shared_aoe_and_checkpoint_resumes_once"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_thunder_ai.rs",
+          "line": 136,
+          "test": "successful_repulsion_can_kill_thunder_and_rewards_exactly_once"
+        }
+      ],
+      "testExecution": "Parent reports current compilation/regression in progress; source presence is not a pass result.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "town_archer",
+      "ai": [
+        57
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/town_archer.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_town_archer_state",
+          "line": 23
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 57,
+          "crystalClass": "TownArcher",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 139
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TownArcher.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 12
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 19
+            },
+            {
+              "member": "Spawned",
+              "line": 21
+            },
+            {
+              "member": "Attack",
+              "line": 28
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 50
+            },
+            {
+              "member": "FindTarget",
+              "line": 79
+            },
+            {
+              "member": "InAttackRange",
+              "line": 116
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_entry_only",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "AI57 is in generic ranged selection; PK>=200 filter and FearTime state are not connected."
+      ],
+      "open": [
+        "Source range10, PKPoints>=200 visible-player selection and 2000ms FearTime are not connected to a dedicated AI57 shared state."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12312,
+          "symbol": "zone_native_monster_prefers_ranged"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12340,
+          "symbol": "zone_native_monster_player_attack_damage"
+        }
+      ],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "relatedButNotCoveringTests": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9982,
+          "test": "conquest_archer_guard_ignores_defender_guild_and_attacks_enemy_guild"
+        }
+      ],
+      "mappingNote": "That related test is AI80 ConquestArcher, not AI57 TownArcher or AI113 ArcherGuard.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "trap_rock",
+      "ai": [
+        47
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/trap_rock.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_trap_rock_state",
+          "line": 17
+        },
+        {
+          "symbol": "spawn_trap_rock_child_rocks",
+          "line": 79
+        },
+        {
+          "symbol": "trap_rock_visible_destination",
+          "line": 170
+        },
+        {
+          "symbol": "trap_rock_spawn_corner_direction",
+          "line": 199
+        },
+        {
+          "symbol": "trap_rock_spawn_corner_index",
+          "line": 211
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 47,
+          "crystalClass": "TrapRock",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 118
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TrapRock.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanAttack",
+              "line": 15
+            },
+            {
+              "member": "CanMove",
+              "line": 22
+            },
+            {
+              "member": "Blocking",
+              "line": 23
+            },
+            {
+              "member": "Target",
+              "line": 39
+            },
+            {
+              "member": "ProcessAI",
+              "line": 53
+            },
+            {
+              "member": "Attack",
+              "line": 84
+            },
+            {
+              "member": "Die",
+              "line": 110
+            },
+            {
+              "member": "Attacked",
+              "line": 136
+            },
+            {
+              "member": "Attacked",
+              "line": 147
+            },
+            {
+              "member": "Struck",
+              "line": 158
+            },
+            {
+              "member": "ChangeHP",
+              "line": 163
+            },
+            {
+              "member": "Turn",
+              "line": 171
+            },
+            {
+              "member": "Walk",
+              "line": 175
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 177
+            },
+            {
+              "member": "GetInfo",
+              "line": 179
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+          "line": 27,
+          "symbol": "initialize_trap_rock"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+          "line": 66,
+          "symbol": "trap_rock_direct_hit"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+          "line": 86,
+          "symbol": "tick_trap_rocks"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+          "line": 305,
+          "symbol": "kill_trap_group"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_trap_rock_ai.rs",
+          "line": 109,
+          "test": "trap_rock_delayed_ring_has_no_damage_and_first_parent_hit_kills_group"
+        }
+      ],
+      "testExecution": "Parent reports current compilation/regression in progress; source presence is not a pass result.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "tree_queen",
+      "ai": [
+        142
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/tree_queen.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "root_timer_initial",
+          "line": 69
+        },
+        {
+          "symbol": "ground_root_timer_initial",
+          "line": 73
+        },
+        {
+          "symbol": "update_tree_queen_state",
+          "line": 82
+        },
+        {
+          "symbol": "spawn_roots",
+          "line": 213
+        },
+        {
+          "symbol": "spawn_mass_roots",
+          "line": 302
+        },
+        {
+          "symbol": "spawn_ground_roots",
+          "line": 355
+        },
+        {
+          "symbol": "tree_queen_melee",
+          "line": 434
+        },
+        {
+          "symbol": "emit_root_field",
+          "line": 494
+        },
+        {
+          "symbol": "root_spell_packet",
+          "line": 520
+        },
+        {
+          "symbol": "schedule_field_damage_if_on_cell",
+          "line": 542
+        },
+        {
+          "symbol": "mass_roots_range_packet",
+          "line": 569
+        },
+        {
+          "symbol": "deterministic_chance_roll_nonzero",
+          "line": 593
+        },
+        {
+          "symbol": "tree_queen_is_immobile_faces_up_and_arms_timers",
+          "line": 625
+        },
+        {
+          "symbol": "timer_offsets_match_crystal_spawned",
+          "line": 764
+        },
+        {
+          "symbol": "chance_roll_nonzero_inverts_zero_slot",
+          "line": 770
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 142,
+          "crystalClass": "TreeQueen",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 320
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TreeQueen.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 10
+            },
+            {
+              "member": "CanRegen",
+              "line": 11
+            },
+            {
+              "member": "InAttackRange",
+              "line": 30
+            },
+            {
+              "member": "Turn",
+              "line": 35
+            },
+            {
+              "member": "Walk",
+              "line": 37
+            },
+            {
+              "member": "Attacked",
+              "line": 39
+            },
+            {
+              "member": "Attacked",
+              "line": 44
+            },
+            {
+              "member": "ApplyPoison",
+              "line": 49
+            },
+            {
+              "member": "Attack",
+              "line": 54
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 102
+            },
+            {
+              "member": "Spawned",
+              "line": 289
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 298
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_specific_not_connected",
+      "sharedEntryPresent": false,
+      "fullFamilyParityClaimed": false,
+      "implemented": [],
+      "open": [
+        "AI142 immobile map-root timers/fields and poison immunity.",
+        "No corresponding source-specific hook found in inspected Zone dispatch/modules. Generic spawning/attacking and personal code are not this mechanism."
+      ],
+      "sharedEvidence": [],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "tucson_general",
+      "ai": [
+        131
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/tucson_general.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_tucson_general_state",
+          "line": 18
+        },
+        {
+          "symbol": "schedule_tucson_general_rocks",
+          "line": 73
+        },
+        {
+          "symbol": "tucson_general_rock_target_positions",
+          "line": 178
+        },
+        {
+          "symbol": "tucson_general_scattered_rock_position",
+          "line": 210
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 131,
+          "crystalClass": "TucsonGeneral",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 298
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TucsonGeneral.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 20
+            },
+            {
+              "member": "Attack",
+              "line": 25
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 128
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 154
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_entry_only",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "AI131 range attack type and SC selection exist; rage rock/ground-field producer is not connected."
+      ],
+      "open": [
+        "No dedicated shared producer identified for this personal special state; generic attack profile is not completion."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12312,
+          "symbol": "zone_native_monster_prefers_ranged"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12340,
+          "symbol": "zone_native_monster_player_attack_damage"
+        }
+      ],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "vampire_spider",
+      "ai": [
+        60
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/vampire_spider.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_vampire_spider_state",
+          "line": 10
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 60,
+          "crystalClass": "VampireSpider",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 145
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/VampireSpider.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Name",
+              "line": 19
+            },
+            {
+              "member": "Process",
+              "line": 25
+            },
+            {
+              "member": "Process",
+              "line": 41
+            },
+            {
+              "member": "ProcessAI",
+              "line": 64
+            },
+            {
+              "member": "Die",
+              "line": 73
+            },
+            {
+              "member": "InAttackRange",
+              "line": 111
+            },
+            {
+              "member": "Attack",
+              "line": 122
+            },
+            {
+              "member": "Spawned",
+              "line": 187
+            },
+            {
+              "member": "GetInfo",
+              "line": 193
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Owned spawn/recall, bleeding/owner heal and triggered expiry/distance explosion exist."
+      ],
+      "open": [
+        "Source Die explodes for every cause; shared self-destruct predicate excludes already-dead monsters, bypassing arbitrary central death.",
+        "Source accumulates VampAmount for a 1000ms delayed heal; shared owner heal happens immediately.",
+        "Shared pet damage uses max DC/raw hit path; source rolls DC and MACAgility.",
+        "Shared explosion enumerates hostile native monsters; full opposing player/pet coverage is open."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 8845,
+          "symbol": "apply_native_vampire_spider_master_vampire"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9360,
+          "symbol": "native_vampire_spider_should_self_destruct"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9387,
+          "symbol": "explode_native_vampire_spider"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9110,
+          "test": "zone_native_archer_summon_vampire_spawns_at_target_and_recalls_existing_pet"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9212,
+          "test": "zone_native_vampire_spider_hit_bleeds_target_and_heals_owner"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9276,
+          "test": "zone_native_vampire_spider_explodes_on_expiry_and_vampires_nearby_target"
+        }
+      ],
+      "testExecution": "Named tests exist in shared_zone; parent reports a prior 204-test pass. Not independently rerun against audit hashes.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "wooma_taurus",
+      "ai": [
+        11
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/wooma_taurus.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_wooma_taurus_state",
+          "line": 16
+        },
+        {
+          "symbol": "wooma_taurus_blocked_neighbor_count",
+          "line": 104
+        },
+        {
+          "symbol": "wooma_taurus_teleport_destination",
+          "line": 127
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 11,
+          "crystalClass": "WoomaTaurus",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 42
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/WoomaTaurus.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "ProcessAI",
+              "line": 18
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "shared_mechanism_tests_passed_full_family_parity_not_claimed",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity.",
+        "Full-map teleport excludes occupied and original tiles for shared collision safety; original random candidate set is not exactly preserved."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/special_ai.rs",
+          "line": 46,
+          "symbol": "tick_special_monster_states"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/special_ai.rs",
+          "line": 172,
+          "symbol": "teleport_special_monster"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_special_ai.rs",
+          "line": 130,
+          "test": "wooma_surrounded_teleport_reconciles_two_observers_without_fake_walk_or_duplicate_tick"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_special_ai.rs",
+          "line": 227,
+          "test": "wooma_hp_stage_uses_crystal_rage_speeds_and_expires_strictly_after_eight_seconds"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_special_ai.rs",
+          "line": 260,
+          "test": "wooma_checkpoint_preserves_rage_phase_and_does_not_retrigger_for_unchanged_hp"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_special_ai.rs",
+          "line": 292,
+          "test": "ordinary_monster_does_not_acquire_wooma_state_or_rage_speeds"
+        }
+      ],
+      "testExecution": "Ledger reports prior mechanism checkpoint passed. Audit hashes have not been rerun.",
+      "ledgerCorrectionNeeded": false
+    },
+    {
+      "module": "yimoogi",
+      "ai": [
+        36
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/yimoogi.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_yimoogi_state",
+          "line": 17
+        },
+        {
+          "symbol": "yimoogi_should_final_teleport",
+          "line": 106
+        },
+        {
+          "symbol": "yimoogi_final_teleport_destination",
+          "line": 113
+        },
+        {
+          "symbol": "spawn_yimoogi_child",
+          "line": 149
+        },
+        {
+          "symbol": "spawn_yimoogi_runtime_monster",
+          "line": 188
+        },
+        {
+          "symbol": "spawn_yimoogi_white_serpents",
+          "line": 249
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 36,
+          "crystalClass": "Yimoogi",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 96
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Yimoogi.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Target",
+              "line": 16
+            },
+            {
+              "member": "InAttackRange",
+              "line": 44
+            },
+            {
+              "member": "FindTarget",
+              "line": 62
+            },
+            {
+              "member": "Attack",
+              "line": 67
+            },
+            {
+              "member": "ProcessAI",
+              "line": 115
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 161
+            },
+            {
+              "member": "TeleportRandom",
+              "line": 212
+            },
+            {
+              "member": "Drop",
+              "line": 230
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_entry_only",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "AI36 ranged selection exists; parent/child split and final teleport are not connected."
+      ],
+      "open": [
+        "No dedicated shared producer identified for this personal special state; generic attack profile is not completion."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12312,
+          "symbol": "zone_native_monster_prefers_ranged"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 12340,
+          "symbol": "zone_native_monster_player_attack_damage"
+        }
+      ],
+      "testEvidence": [],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "yin_devil_node",
+      "ai": [
+        41,
+        42
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/yin_devil_node.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_yin_devil_node_state",
+          "line": 29
+        },
+        {
+          "symbol": "yin_devil_node_complete_attack",
+          "line": 78
+        },
+        {
+          "symbol": "yin_devil_node_buff",
+          "line": 127
+        },
+        {
+          "symbol": "yin_devil_node_friendly_targets",
+          "line": 144
+        },
+        {
+          "symbol": "crystal_ai41_and_ai42_select_their_source_buff_stat",
+          "line": 198
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 41,
+          "crystalClass": "YinDevilNode",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 106
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/YinDevilNode.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 8
+            },
+            {
+              "member": "Turn",
+              "line": 15
+            },
+            {
+              "member": "Walk",
+              "line": 19
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 21
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 23
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 45
+            }
+          ]
+        },
+        {
+          "ai": 42,
+          "crystalClass": "YinDevilNode",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 107
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/YinDevilNode.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 8
+            },
+            {
+              "member": "Turn",
+              "line": 15
+            },
+            {
+              "member": "Walk",
+              "line": 19
+            },
+            {
+              "member": "ProcessRoam",
+              "line": 21
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 23
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 45
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/node_ai.rs",
+          "line": 14,
+          "symbol": "tick_node_ai"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/node_ai.rs",
+          "line": 90,
+          "symbol": "complete_node_cast"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_node_ai.rs",
+          "line": 122,
+          "test": "node_delayed_source_intersection_buffs_players_not_ordinary_wild_allies"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_node_ai.rs",
+          "line": 189,
+          "test": "node_attack_buff_affects_real_player_hit_and_expiry_restores_base_damage"
+        }
+      ],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "zuma_monster",
+      "ai": [
+        15,
+        16,
+        17,
+        173,
+        174
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/zuma_monster.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_zuma_monster_state",
+          "line": 13
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 15,
+          "crystalClass": "ZumaMonster",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 50
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ZumaMonster.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "CanMove",
+              "line": 14
+            },
+            {
+              "member": "CanAttack",
+              "line": 21
+            },
+            {
+              "member": "Pushed",
+              "line": 34
+            },
+            {
+              "member": "ApplyPoison",
+              "line": 39
+            },
+            {
+              "member": "AddBuff",
+              "line": 45
+            },
+            {
+              "member": "IsFriendlyTarget",
+              "line": 52
+            },
+            {
+              "member": "ProcessAI",
+              "line": 59
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 111
+            },
+            {
+              "member": "IsAttackTarget",
+              "line": 115
+            },
+            {
+              "member": "Walk",
+              "line": 120
+            },
+            {
+              "member": "GetInfo",
+              "line": 180
+            }
+          ]
+        },
+        {
+          "ai": 16,
+          "crystalClass": "RedThunderZuma",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 52
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/RedThunderZuma.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 14
+            },
+            {
+              "member": "Attack",
+              "line": 19
+            },
+            {
+              "member": "ProcessTarget",
+              "line": 56
+            }
+          ]
+        },
+        {
+          "ai": 17,
+          "crystalClass": "ZumaTaurus",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 54
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ZumaTaurus.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "ProcessAI",
+              "line": 16
+            },
+            {
+              "member": "Attack",
+              "line": 32
+            }
+          ]
+        },
+        {
+          "ai": 173,
+          "crystalClass": "TurtleGrass",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 387
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TurtleGrass.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "InAttackRange",
+              "line": 14
+            },
+            {
+              "member": "Attack",
+              "line": 27
+            }
+          ]
+        },
+        {
+          "ai": 174,
+          "crystalClass": "ManTree",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 389
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ManTree.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "Attack",
+              "line": 15
+            },
+            {
+              "member": "CompleteAttack",
+              "line": 62
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+          "line": 87,
+          "symbol": "tick_monster_visibility_states"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+          "line": 65,
+          "symbol": "monster_visibility_can_act"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 120,
+          "test": "hidden_plants_have_no_spawn_until_shared_player_proximity_reveals_once"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 147,
+          "test": "stone_zuma_visible_at_spawn_and_wake_wave_does_not_recurse"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 187,
+          "test": "all_supported_stone_families_start_visible_and_unawake"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 199,
+          "test": "centipede_keeps_seven_tile_visibility_and_plants_hide_on_strict_deadline"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 240,
+          "test": "personal_broadcast_cannot_restone_awakened_zuma_or_expose_hidden_plant"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 311,
+          "test": "poison_cloud_cannot_poison_hidden_or_stoned_monster"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 336,
+          "test": "lion_roar_cannot_control_stone_before_wake"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+          "line": 355,
+          "test": "dig_out_families_reveal_once_with_original_delayed_persistent_ground_effect"
+        }
+      ],
+      "testExecution": "Audit did not run tests.",
+      "mappingNote": "AI17 also has zuma_taurus_stage; 47 module rows are not 47 distinct monsters.",
+      "ledgerCorrectionNeeded": true
+    },
+    {
+      "module": "zuma_taurus_stage",
+      "ai": [
+        17
+      ],
+      "mappingKind": "crystal_factory_ai",
+      "personalSource": {
+        "path": "apps/simulation/src/runtime/monster_ai/zuma_taurus_stage.rs",
+        "line": 1
+      },
+      "personalFunctions": [
+        {
+          "symbol": "update_zuma_taurus_stage_state",
+          "line": 15
+        }
+      ],
+      "crystal": [
+        {
+          "ai": 17,
+          "crystalClass": "ZumaTaurus",
+          "factory": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+            "line": 54
+          },
+          "source": {
+            "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ZumaTaurus.cs",
+            "line": 1
+          },
+          "overrideLines": [
+            {
+              "member": "ProcessAI",
+              "line": 16
+            },
+            {
+              "member": "Attack",
+              "line": 32
+            }
+          ]
+        }
+      ],
+      "ledgerStatusSnapshot": "pending_source_comparison_and_shared_tests",
+      "coverageStatus": "shared_source_specific_partial",
+      "sharedEntryPresent": true,
+      "fullFamilyParityClaimed": false,
+      "implemented": [
+        "Dedicated shared state/lifecycle hooks exist; see symbols."
+      ],
+      "open": [
+        "Mechanism-level code/tests do not establish full family attack, defence, targeting, lifecycle, data/configuration or original global RNG parity."
+      ],
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/stage_summons.rs",
+          "line": 141,
+          "symbol": "tick_stage_summon_states"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/stage_summons.rs",
+          "line": 183,
+          "symbol": "tick_stage_summon_boss"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_stage_summons.rs",
+          "line": 86,
+          "test": "bone_wave_is_one_shared_batch_with_parent_target_and_two_second_startup"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_stage_summons.rs",
+          "line": 143,
+          "test": "bone_requires_a_living_visible_target_but_zuma_does_not"
+        },
+        {
+          "path": "apps/simulation/tests/shared_monster_stage_summons.rs",
+          "line": 156,
+          "test": "checkpoint_keeps_exact_wave_identity_without_replaying_spawn_or_shortening_startup"
+        }
+      ],
+      "testExecution": "Audit did not run tests.",
+      "ledgerCorrectionNeeded": true
+    }
+  ],
+  "additionalMechanismsOutside47": [
+    {
+      "name": "RootSpider",
+      "ai": 39,
+      "crystal": {
+        "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/RootSpider.cs",
+        "line": 1
+      },
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+          "line": 325,
+          "symbol": "tick_root_spider"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+          "line": 476,
+          "symbol": "resolve_root_spider_spawn"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+          "line": 499,
+          "test": "root_spider_summons_one_shared_child_after_500ms_with_source_relationship_and_cadence"
+        }
+      ],
+      "status": "shared_source_specific_partial",
+      "execution": "Parent explicitly reports 13 combined AI39/40 tests passed before audit."
+    },
+    {
+      "name": "GuardianRock",
+      "ai": 48,
+      "crystal": {
+        "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/GuardianRock.cs",
+        "line": 1
+      },
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+          "line": 86,
+          "symbol": "tick_trap_rocks"
+        }
+      ],
+      "status": "Related trap-ring mechanism exists; parent integration checks in progress."
+    },
+    {
+      "name": "CharmedSnake",
+      "ai": 63,
+      "crystal": {
+        "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/CharmedSnake.cs",
+        "line": 1
+      },
+      "sharedEvidence": [
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9744,
+          "symbol": "tick_native_snake_totem"
+        },
+        {
+          "path": "apps/simulation/src/runtime/zone/runtime.rs",
+          "line": 9272,
+          "symbol": "explode_native_charmed_snake"
+        }
+      ],
+      "testEvidence": [
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9465,
+          "test": "zone_native_charmed_snake_hit_applies_paralysis_poison"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9525,
+          "test": "zone_native_snake_totem_caps_minions_and_respawns_after_minion_expiry"
+        },
+        {
+          "path": "apps/simulation/tests/shared_zone.rs",
+          "line": 9596,
+          "test": "zone_native_snake_totem_self_destruct_kills_owned_minions"
+        }
+      ],
+      "status": "Shared partial; exact spawn/search cadence, all-death explosion and defence/targets remain open."
+    }
+  ],
+  "validation": {
+    "noBuildOrTestRunByAudit": true,
+    "onlyNewAuditFileWritten": true,
+    "exact47MappingsValidated": true,
+    "factoryClassesAndPathsValidated": true,
+    "symbolsAndTestDefinitionsValidated": true,
+    "currentTreeFinalVerification": false
+  },
+  "limitations": [
+    "Older parent/ledger pass reports are not a certificate for concurrently changing current hashes.",
+    "Unconnected rows are a bounded mapping/dispatch audit, not exhaustive Crystal branch reviews.",
+    "Defence schools, poison, player HP floor, PVP/pet targeting and lifecycle remain cross-cutting obligations.",
+    "Personal module comments can describe approximations/deferred features; their existence is not original parity proof."
+  ],
+  "sourceSnapshots": [
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs",
+      "sha256Utf8": "73e6d6e529f3c20262151e9bbee871501d8c923f3e26aac28b80f7d97832a9e2",
+      "lineCount": 3870
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Armadillo.cs",
+      "sha256Utf8": "c0e587bc11ce1dba686c163482424da108d3a044f61a42a20ceeb4af79221673",
+      "lineCount": 201
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ArmadilloElder.cs",
+      "sha256Utf8": "d5aa06abc3abd86b0e7cf3e5ab729f06486ed8e053da813d9ad21be477c00f0f",
+      "lineCount": 64
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/AxeSkeleton.cs",
+      "sha256Utf8": "c71523bfa89da8552e3e6f12a821b45846e719020eea36073550160434111abb",
+      "lineCount": 103
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/BombSpider.cs",
+      "sha256Utf8": "d68b9f37c63a2562a44ae6da0aabd594a4f6d556a3ed71eb6fcd8f00cdbc5e2c",
+      "lineCount": 59
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/BoneLord.cs",
+      "sha256Utf8": "962bbfe6616f1a45076cf2fa2236b7aad497072722ff2f57a1e90bacf9513891",
+      "lineCount": 123
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/BoulderSpirit.cs",
+      "sha256Utf8": "61070682e17f79df6b9887893a58389985ab259085b66134f93e4e41c9eb4658",
+      "lineCount": 53
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/CannibalPlant.cs",
+      "sha256Utf8": "236a1f4e204b7527d4660b5f10ac060def170771269be71be70d5e342ef7184a",
+      "lineCount": 96
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/CharmedSnake.cs",
+      "sha256Utf8": "b587f54e6d482a4a33d89bbdd7c70542bb43b497c7983b44c50e8f50a329b1fd",
+      "lineCount": 252
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Deer.cs",
+      "sha256Utf8": "70211813a932db7013324c800a12a9f1300c846134f01f84b0d000637047be29",
+      "lineCount": 81
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/DigOutZombie.cs",
+      "sha256Utf8": "99ad28be7bf8007e22ee8eea7de61102fbf10f1ae3568395c1ab2287a62a40fe",
+      "lineCount": 116
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/DragonStatue.cs",
+      "sha256Utf8": "db1853277418d054dcd701e04c73d19ff99ebbf5e5165383407deeeba1ec817d",
+      "lineCount": 119
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/EvilCentipede.cs",
+      "sha256Utf8": "e0a17b745f28f587d6d6306dc266199caa8d66e9b702b9cabfb94925563ad581",
+      "lineCount": 135
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/EvilMir.cs",
+      "sha256Utf8": "8c218f99169cad2d3f7b3fbbce71602544cff1d95b499467d1461e66d6092de9",
+      "lineCount": 205
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Football.cs",
+      "sha256Utf8": "ebcb0939472cc7f8aa1a493e0bd797ab613c5de4c2545bfc79e9fa47bdd78e11",
+      "lineCount": 62
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/FrostTiger.cs",
+      "sha256Utf8": "7fcbfee73c0e91855a70d94afff98bd5e476d0a360f9a9b1fb3a01f722d57b36",
+      "lineCount": 171
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Gate.cs",
+      "sha256Utf8": "b1464d95260467200943709679466946752ef59b41b6f55ed14c78bcc60a6727",
+      "lineCount": 158
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/GeneralMeowMeow.cs",
+      "sha256Utf8": "eaa28ae5d4e02dfad590f2ad388bd1b4fefabef9f5d5f39020d05117d694e088",
+      "lineCount": 265
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/GreatFoxSpirit.cs",
+      "sha256Utf8": "6f32d5749df110b767309c5fce8c33540317dfb6cf61d9f062f3c4e405e40cfc",
+      "lineCount": 186
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/GuardianRock.cs",
+      "sha256Utf8": "8cf225fe440c70677df984f2ba3aaa6698b96e297542ecd993b923acd4f8695d",
+      "lineCount": 95
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HellBomb.cs",
+      "sha256Utf8": "f0a848faf428840e05a6e19e08685d23f08626dbd4b08791d8a5f2651f9860bc",
+      "lineCount": 88
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HellLord.cs",
+      "sha256Utf8": "c334ca16ca0ab44e6a7c4f93bd4311acb2b705f7d0c21511fc0893a8a1dd5346",
+      "lineCount": 247
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HolyDeva.cs",
+      "sha256Utf8": "c36b32ca443245dabdd3a610bbb8dcb7bd1e475ab078de61cf419c0554b7f315",
+      "lineCount": 114
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedArcher.cs",
+      "sha256Utf8": "80e8f9ccf148a37efd61f27f10d11a91a8ca505379c93004b79703ccc72cc1d7",
+      "lineCount": 113
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedCommander.cs",
+      "sha256Utf8": "24f3cea46636c4a6f1e3217e4565e8a6f73ac2c4e232afa4c4d07a1b2f2a1055",
+      "lineCount": 604
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedMage.cs",
+      "sha256Utf8": "0d148a7f54cd861de94602f40fe5ce51b376659d7d19a26496900b1e982c3f60",
+      "lineCount": 113
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedSorceror.cs",
+      "sha256Utf8": "498d3440a90ae7d6e1aa06fb525824101d9a33d64b6e40a7aebff45087ed16aa",
+      "lineCount": 281
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/HornedWarrior.cs",
+      "sha256Utf8": "fa02955b4bdc66a11e46749c3074def62e5c0fa56b00bde666425a52c75148bd",
+      "lineCount": 136
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Hugger.cs",
+      "sha256Utf8": "2279b99594f7bdb96b61427669ee72e33ee5dc9edca844ad48672c37e9c5ecb2",
+      "lineCount": 72
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Kirin.cs",
+      "sha256Utf8": "f17844c2e5432581ccbe1ed4eea012e8d7c78458600c06c3e39c00ee0e19fed8",
+      "lineCount": 192
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ManTree.cs",
+      "sha256Utf8": "f3f24ef2b352bc3b50ce272894c92dd0fd0e511316a4aba42daf5deb9a77b150",
+      "lineCount": 121
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/MudZombie.cs",
+      "sha256Utf8": "aaf509288ba132ae1cb501751a2e42126d9b7a075cb5b066da2307fc129c6da1",
+      "lineCount": 103
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/PoisonHugger.cs",
+      "sha256Utf8": "c33ca28539fbcab0f77d8be2eafb9fe5d0c52af8373d0cc718189575a2ffbdb1",
+      "lineCount": 99
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/RedFoxman.cs",
+      "sha256Utf8": "cfd7a4f4585d2eeaa66f329ab3381f9c7fa73844c45fee5e7bda0fcd9445d3d8",
+      "lineCount": 127
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/RedThunderZuma.cs",
+      "sha256Utf8": "8837e407f3e52aa2e983a5fc7d00c1c2d634572aa959a67dc13901c7db78ace1",
+      "lineCount": 75
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/RevivingZombie.cs",
+      "sha256Utf8": "49cf9372e71c64ae55b61de65f9c300a981e2f7a9336dec9ebbbed0d38370972",
+      "lineCount": 43
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/RootSpider.cs",
+      "sha256Utf8": "0370eacf1ddb7eafa096317fe8071b0bfdb41dd6524350c5b93977bfdf2f0173",
+      "lineCount": 56
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Shinsu.cs",
+      "sha256Utf8": "74471bedbcfa6c2b925e4638942734e931c9efd08353b8c041f90e4ad5ecd860",
+      "lineCount": 99
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/SnakeTotem.cs",
+      "sha256Utf8": "b4ced07a49fde77defa05d6f7a21918542e970f21327984ee6913e4ced5e5d7e",
+      "lineCount": 183
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/SnowWolfKing.cs",
+      "sha256Utf8": "8dedfcba630e8d7b85248afe92816db7a46ec6866e716ce24f73d75f912aad98",
+      "lineCount": 224
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/SpittingToad.cs",
+      "sha256Utf8": "8d625fb5e9de59e4ef2a18cffc351fc56cfff87efd9b4d23d91be595d858acab",
+      "lineCount": 141
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/StoneTrap.cs",
+      "sha256Utf8": "efe6ee217fad7a9a3e1344c6330b056a3b577548b1bff9a39313d10ca91f4a0b",
+      "lineCount": 140
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ThunderElement.cs",
+      "sha256Utf8": "278fc4d338feeb87b21de8ebe5fbc771fe39a5e1ef02279a30a5d745dcd7b245",
+      "lineCount": 114
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TownArcher.cs",
+      "sha256Utf8": "bb86af6b1601cdcd42b44b30ce75d490c348a38db23fa434f10cf41191d2d4e0",
+      "lineCount": 121
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TrapRock.cs",
+      "sha256Utf8": "6100e3170c2bc40312193ce2e40ae8c405c0c92bae57d8b34cfbc8d6cfcfa903",
+      "lineCount": 224
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TreeQueen.cs",
+      "sha256Utf8": "9cd4c86094e6ea0b78763c8b50648f1e3c1895f124b2aa2d3db89c12e9737168",
+      "lineCount": 336
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TucsonGeneral.cs",
+      "sha256Utf8": "68b6417f8275ac70e48b84c125d88ce0f468f988475d450737fb37d6d325831c",
+      "lineCount": 173
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/TurtleGrass.cs",
+      "sha256Utf8": "1304f8cb71ea95a5e328cc2e9b228552da655bb23e8a63ab197bec83e52f6a41",
+      "lineCount": 57
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/VampireSpider.cs",
+      "sha256Utf8": "3a1cd08c9abd5bddd2b6e0d4e2e7901224ea4971bd7e4deb7ee8248414842f96",
+      "lineCount": 202
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/WhiteFoxman.cs",
+      "sha256Utf8": "6d928d4a0d24d3c38c0c5324d79657182a7052cb9d963972227e0d1323044f95",
+      "lineCount": 123
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/WoomaTaurus.cs",
+      "sha256Utf8": "1d80ed04a89a83ca8124f2982cffbf73bd371db25a9150ca2d611b61d3133f11",
+      "lineCount": 82
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/Yimoogi.cs",
+      "sha256Utf8": "41728ccdf48df3197c1c57d54e50eb21d1b80db6ae3fbd67d55ee7a82084f66f",
+      "lineCount": 236
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/YinDevilNode.cs",
+      "sha256Utf8": "d6147c25fe8d85b2195596eceb9f31e4028912cfa19b66addfbbb49e33af7872",
+      "lineCount": 58
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ZumaMonster.cs",
+      "sha256Utf8": "51d533fb24c3ec668e4729b51b149555f95fac39c26b5f0eed8d33c9b2abb3fc",
+      "lineCount": 187
+    },
+    {
+      "path": "E:/mir2/Crystal/Server/MirObjects/Monsters/ZumaTaurus.cs",
+      "sha256Utf8": "9d689e7aa076ae3de5c143f90a8b086edc8799215195111323d3fdd32606ec45",
+      "lineCount": 98
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/armadillo.rs",
+      "sha256Utf8": "639ab9871db19fb68a5226f209b089d154e87ebf9fbf0a71a2bf6db39257f45e",
+      "lineCount": 135
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/axe_skeleton_fear.rs",
+      "sha256Utf8": "0de0bd96032fbd2715f20abc04f47d5576bf19f2f6fcf23f7620e1595809f080",
+      "lineCount": 74
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/bomb_spider.rs",
+      "sha256Utf8": "87cd50a55a00de48b4601e83dec73ea0fbefc17b4c61646aeec45698e5823baf",
+      "lineCount": 32
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/bone_lord.rs",
+      "sha256Utf8": "e4d6df13f705f2ce5389bbaa9811496117ecb7f7f73592b3792348baa6dac7be",
+      "lineCount": 82
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/boulder_spirit.rs",
+      "sha256Utf8": "4cf124041f0448a680ce442b9fc1dcf2c59586838a7d1507140776ee50668af8",
+      "lineCount": 393
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/cannibal_plant.rs",
+      "sha256Utf8": "af08123c51a2691012667248c656ba3dcb1b388e601408c4e05ae8eab257057f",
+      "lineCount": 57
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/deer_run_away.rs",
+      "sha256Utf8": "cca567a9b141d39158b3a7703a1104edd48fa8d9b34e343b3bf133c4422f533d",
+      "lineCount": 68
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/dig_out_zombie.rs",
+      "sha256Utf8": "18a7fa57bdcd84df6a97b37f8384c1897683bed9d8d8c609df1aa98538e56fdc",
+      "lineCount": 39
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/dragon_statue_sleep.rs",
+      "sha256Utf8": "d8b2d7747eddbabaf8b68c42cdde3fdebee9aaef77409be1a2846eb9e23496af",
+      "lineCount": 42
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/evil_centipede.rs",
+      "sha256Utf8": "1435637092433bba657985c4ab8524abb400ddd1964acdcd5c871f7ebdb4d44f",
+      "lineCount": 59
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/evil_mir.rs",
+      "sha256Utf8": "6501bcf4cd9a1aa29d41deb6b4d7c5211e35c7877ab16f1b9d43f27963588557",
+      "lineCount": 606
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/football.rs",
+      "sha256Utf8": "e02f7cd8fc6036f8aaddeeb5b2032667bb6b797c562c9af1b6c5c8b111f42228",
+      "lineCount": 193
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/foxman_fear.rs",
+      "sha256Utf8": "0c1f3c1501cf84964ec34040d2d0205464e2fc11353a165c671f8c0d4349f4d2",
+      "lineCount": 150
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/frost_tiger_sitting.rs",
+      "sha256Utf8": "7f69ff5c125eef6a687847ee0274d4e0d66c1ed4d9fb9c548b7445af5e99ff37",
+      "lineCount": 51
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/gate.rs",
+      "sha256Utf8": "46441dbb2ee0b25780b57bc17fe64a0958342ab359fe5f5694ff17813580bc7a",
+      "lineCount": 289
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/general_meow_meow.rs",
+      "sha256Utf8": "4ece265827196493bfb7c8f4538ca3c7b15fc065f61df614829d4305e17f96e1",
+      "lineCount": 199
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/great_fox_spirit.rs",
+      "sha256Utf8": "28e4bf2003444d2e2d931cadbb836ea2d4a99099f05b62a36daabb1c637c4913",
+      "lineCount": 348
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/hell_bomb.rs",
+      "sha256Utf8": "de10255a71a755a1f0b43eb29869d99d94e4e2e5095381d8a41d0e4c971692a6",
+      "lineCount": 75
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/hell_lord.rs",
+      "sha256Utf8": "febbb1583275f87ec7ad6603eb943947f62807c180c37525dbedf2fe5e77848c",
+      "lineCount": 168
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/holy_deva_fear.rs",
+      "sha256Utf8": "6bdc829381729270f8fdfa7e9a91a1c56990f78cd0af2d09fe46d820838a80d6",
+      "lineCount": 77
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_archer.rs",
+      "sha256Utf8": "89253283148c2b14dbdab1e3d047631bc49e5d1d479d06e43dbf56074e543ee6",
+      "lineCount": 219
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_commander.rs",
+      "sha256Utf8": "c041c3666d6afd9423025067642b7b525a6e0c278280a6f82563514db9a2115c",
+      "lineCount": 943
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_mage.rs",
+      "sha256Utf8": "21d4ad791ce61fefa912e3458fb85ee494142b23b450ad35e6c2b8885d669701",
+      "lineCount": 502
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_sorceror.rs",
+      "sha256Utf8": "292151b63f1ceb2af19c9c47ee681463a521f7eb8511d16c1dbb13dcb73104b0",
+      "lineCount": 1040
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/horned_warrior.rs",
+      "sha256Utf8": "4fbc0ca1d9438a59990dbbe97cb610149d5b8360a017cabf38b0af773788ca92",
+      "lineCount": 612
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/hugger.rs",
+      "sha256Utf8": "6429730a034e7fac5cfbc93e0672713ae23b309fb132acffa024c7b3ffbe5a58",
+      "lineCount": 341
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/kirin_ice_thrust.rs",
+      "sha256Utf8": "51b711681e87903441e913d350f7b19535e7b432b62f76712786f59425e48017",
+      "lineCount": 96
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/mud_zombie.rs",
+      "sha256Utf8": "a58dd3ae19e40d0fc3439027563249ff374e8ad07b13425c8926eadb329b13d8",
+      "lineCount": 549
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/poison_hugger.rs",
+      "sha256Utf8": "5d886076b6eaa9fc7d5ee57a849a9b689bd1d13d6f07d9262c941c64548db727",
+      "lineCount": 533
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/reviving_zombie.rs",
+      "sha256Utf8": "64aadbe1f12c2609cc2782603661053528debce2a56394d0d88b2a158c24ef38",
+      "lineCount": 54
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/shinsu.rs",
+      "sha256Utf8": "0c3241467edeff46537ca3cd499795fdad3813dfc5f6084a3f0bc004696f87d3",
+      "lineCount": 61
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/snake_totem.rs",
+      "sha256Utf8": "3f9b728c0ba4b01b1ebd5de5b6d3a85ade73cabe894022da0c52ad2f171d45e7",
+      "lineCount": 139
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/snow_wolf_king.rs",
+      "sha256Utf8": "88a9860d22cea6e58e00a7ffe1545419062e97a1b0041b9897e75b1f68055f1e",
+      "lineCount": 129
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/spitting_toad.rs",
+      "sha256Utf8": "d5faeffc3463713a68a55c23f309905ed86d3bb1dbb418f8fd1eb6f56e329953",
+      "lineCount": 19
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/stone_trap.rs",
+      "sha256Utf8": "d2aae9821b3e975513103a6eedc0522123e0beb870155c2beb65a1c20daa361a",
+      "lineCount": 59
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/summoned_monster.rs",
+      "sha256Utf8": "46793edf62dea626c127f8251406ffd5b4a3c835a995b8337a4f3d57772df608",
+      "lineCount": 110
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/thunder_element.rs",
+      "sha256Utf8": "2883e9b155ffd3ec40b2177bc0f7d4b18d13f02006a1497e16993eef89f3ae51",
+      "lineCount": 134
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/town_archer.rs",
+      "sha256Utf8": "a78138310bd4b954538fbf71b9ababcc74d4a949f0cdcf3dcb7133c7745cb65d",
+      "lineCount": 103
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/trap_rock.rs",
+      "sha256Utf8": "53c58c2ad24836c0d171c69e1b3854a60cbe2cdb8f123899b64e64c6b356bae1",
+      "lineCount": 213
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/tree_queen.rs",
+      "sha256Utf8": "fb54bda02701bdfe38bd8822570be61ef783df79843b960fea508291a7c9cd00",
+      "lineCount": 779
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/tucson_general.rs",
+      "sha256Utf8": "c94ab8e96f1827a1fd7e480c73c7c96fb724fa4cb7e2f5ace217b86be8beae8d",
+      "lineCount": 244
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/vampire_spider.rs",
+      "sha256Utf8": "89e0a45474ee69eb28024668f0ad5df122e2cfa6b4cd373aebbe2522ba46eee1",
+      "lineCount": 35
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/wooma_taurus.rs",
+      "sha256Utf8": "46c1fc4c458823d2543cdb699f88e6389747e08cfb3d90b0a6392cf3ef23304a",
+      "lineCount": 159
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/yimoogi.rs",
+      "sha256Utf8": "ff02e0af5175e2fc74b5adf7a8bbff433662a4d1f047c051f325ec6547a87c56",
+      "lineCount": 272
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/yin_devil_node.rs",
+      "sha256Utf8": "3ffa9150e8be14ba632f55f1938ee8da2adda29e8f0fd2014b0afb0bada107dd",
+      "lineCount": 202
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/zuma_monster.rs",
+      "sha256Utf8": "0b3513fdf7a521dc91e70f4acdab0a33e7090f50de5748d35425a9cc9f573181",
+      "lineCount": 74
+    },
+    {
+      "path": "apps/simulation/src/runtime/monster_ai/zuma_taurus_stage.rs",
+      "sha256Utf8": "24f9a3691dbe514cdd639f4408eaad27000ac13e46d9d2bc9fd01271984a1e95",
+      "lineCount": 68
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256Utf8": "15afc40cba290814bbbc4020690607c5e3b611a1cdf479207f75e907fc347d97",
+      "lineCount": 15353
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/armadillo_ai.rs",
+      "sha256Utf8": "18fcb664c120e37c9774269ade05588db57870f3d73cfba0bc4b743e5157c280",
+      "lineCount": 425
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/node_ai.rs",
+      "sha256Utf8": "047b05dadbc1e9f4ea21aa89179198620d79f401ae91cabcc3f0b68feb9601c7",
+      "lineCount": 190
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/passive_ai.rs",
+      "sha256Utf8": "505434b94e7163cb4546cb7bbb518336d6cecaefcc1b54f2085ec720c0a4e145",
+      "lineCount": 216
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/reactive_ai.rs",
+      "sha256Utf8": "1f15c87fd6daf99d26ad408bb6fbf02183b9695f377554780683a353c4704523",
+      "lineCount": 337
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/revival_ai.rs",
+      "sha256Utf8": "a582131a36f81fb2081b52febdcc5d1dad782477735c3b47fcade9e6a5fa65ed",
+      "lineCount": 363
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/sleep_ai.rs",
+      "sha256Utf8": "9b0bc920b2ff31c3f973488b959b7213b128be2d5a663344abcf7d51ba733105",
+      "lineCount": 267
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/special_ai.rs",
+      "sha256Utf8": "937079958fc2e8bbb3ba1336b58a891e6489d845eb7de2080dabccf843295a47",
+      "lineCount": 273
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/spider_ai.rs",
+      "sha256Utf8": "1afbe289d907ac258a4c433d3bca0346cb7e2e8965a3dd64f4154ef90161534e",
+      "lineCount": 853
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/stage_summons.rs",
+      "sha256Utf8": "a821112b4a0e5b1d50c0536eeb3fa11cab96b30e490e7d66461c86f87c0cd157",
+      "lineCount": 376
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/thunder_ai.rs",
+      "sha256Utf8": "32b9d9c50f8ea79fc199d545b119296beac4b840c8e5d6497989fb1e4f0885e1",
+      "lineCount": 436
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/trap_rock_ai.rs",
+      "sha256Utf8": "b835b7301b6494f9156de8f42a60a1ebed42b5edf3d66abd30ec109be98dfec8",
+      "lineCount": 345
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/visibility_ai.rs",
+      "sha256Utf8": "698e79de82f636dc36cc2a24c550fa1d0677357498e341b92184bacf59b5be95",
+      "lineCount": 307
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_armadillo_ai.rs",
+      "sha256Utf8": "92504a9493cd53414e4c44a899d403b2b15dfafa103f8d4460cbe42fbf384afd",
+      "lineCount": 224
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_node_ai.rs",
+      "sha256Utf8": "2646615504b316bdff57b333f6c3eb72f34f52b936c515aab5f1412cddfaf78d",
+      "lineCount": 212
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_passive_ai.rs",
+      "sha256Utf8": "c6af8b45a660d72c8fd545bc9d554dc7728874962c6ea14c019ff410a72aa74f",
+      "lineCount": 169
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_reactive_ai.rs",
+      "sha256Utf8": "7937315e0aeed256553303eb05e542d218cd0b922b2fa2b6ce4ecc6dfde1d29b",
+      "lineCount": 299
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_revival_ai.rs",
+      "sha256Utf8": "0ef450f9d879dc9a1c544b9cf6876df35d454cd87ddc7b4bcd2d1615a263283a",
+      "lineCount": 437
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_sleep_ai.rs",
+      "sha256Utf8": "9575660a53d2c505a1fcd8791763b024f8d0d44aad591c2c3652d009c6e4e279",
+      "lineCount": 228
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_special_ai.rs",
+      "sha256Utf8": "043fd2d1ff781425c8396ab203c02b6cc835cb6e8df94ab95b7a8055e316a882",
+      "lineCount": 311
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_spider_ai.rs",
+      "sha256Utf8": "a666b438e454860930261bce135e7ca316e2e1dda746d8e0fdc181bafadafc96",
+      "lineCount": 759
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_stage_summons.rs",
+      "sha256Utf8": "037e35b0da470b89805018f257e9c515784cadf78d97863629a5f0e1a9459862",
+      "lineCount": 175
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_thunder_ai.rs",
+      "sha256Utf8": "bba2594abc9d612bfb99b4fb2597697739a1f80e03e81773816eacd7b47a781a",
+      "lineCount": 158
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_trap_rock_ai.rs",
+      "sha256Utf8": "902b7b5458770310d79cafb494dd62ab2d26882fbb5c8c3292a8749958993c0b",
+      "lineCount": 187
+    },
+    {
+      "path": "apps/simulation/tests/shared_monster_visibility_ai.rs",
+      "sha256Utf8": "0c70beb24b309ef4ded7cddeaca47cee1c7e19b5816c90f77235a303dc220b1c",
+      "lineCount": 414
+    },
+    {
+      "path": "apps/simulation/tests/shared_zone.rs",
+      "sha256Utf8": "4cde3fac6743f6a3d77889c8a2a8d0bf3221c2091982351402ed976f2ab3ecff",
+      "lineCount": 13640
+    },
+    {
+      "path": "docs/generated/shared-monster-ai-20260908/integration-ledger.json",
+      "sha256Utf8": "dcb7de2dba9a8338c49906eebfd123f644b3b463ec66daaffc323a1333191937",
+      "lineCount": 211
+    }
+  ]
+}

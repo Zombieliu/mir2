@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v2",
+  "maxLevel": 30,
+  "maxObjectiveGroups": 3,
+  "chapters": [
+    {"id":"village","title":"Village Beginnings","minLevel":1,"maxLevel":7,"questIds":[2110001,2110002,2110003,2110004],"goal":"Prepare your weapon and first class skill outside Bichon Village.","rewardSummary":"Starter weapon and first skill materials.","classHints":{"Warrior":"Use Fencing after learning it.","Wizard":"Use FireBall after learning it.","Taoist":"Use Healing after learning it and carry MP medicine."}},
+    {"id":"forest","title":"Bichon Forest","minLevel":8,"maxLevel":14,"questIds":[2110005,2110006,2110007,2110008,2120015],"goal":"Travel safely, restock, and report the forest route.","rewardSummary":"Level-15 growth weapon and class skill.","classHints":{"Warrior":"Restock HP before Forest Yetis.","Wizard":"Bring MP medicine for FireBall.","Taoist":"Bring MP medicine and Amulets."}},
+    {"id":"cave","title":"Cave Rescue","minLevel":15,"maxLevel":19,"questIds":[2110009,2110010,2110011,2110012,2120020],"goal":"Clear the certified D001 rescue route and report to the Board.","rewardSummary":"Level-20 growth weapon.","classHints":{"Warrior":"Practise Slaying on Skeletons.","Wizard":"Use GreatFireBall with MP supplies.","Taoist":"Use SoulFireBall and prepare Amulets."}},
+    {"id":"mine","title":"Dead Mine","minLevel":20,"maxLevel":24,"questIds":[2110013,2110014,2110015,2110016,2120025],"goal":"Secure the D401 mine mouth and complete class combat practice.","rewardSummary":"Level-25 armour and weapon.","classHints":{"Warrior":"Practise Thrusting safely.","Wizard":"Use FireWall after learning it.","Taoist":"Use Poisoning with legal poison supplies."}},
+    {"id":"expedition","title":"Wooma Expedition","minLevel":25,"maxLevel":27,"questIds":[2110017,2110018,2110019],"goal":"Prepare at the Board and scout the certified Wooma route.","rewardSummary":"Expedition supplies and safe-route practice.","classHints":{"Warrior":"Prepare HalfMoon and healing supplies.","Wizard":"Prepare Lightning and MP medicine.","Taoist":"Prepare SummonSkeleton, Amulets, and poison."}},
+    {"id":"graduation","title":"Wooma Graduation","minLevel":28,"maxLevel":30,"questIds":[2110020,2110021,2110022,2120030],"goal":"Finish the Wooma expedition and deliver its final report.","rewardSummary":"Level-30 growth reward and next-adventure choice.","classHints":{"Warrior":"Use HalfMoon and Thrusting together.","Wizard":"Use Lightning and FireWall with legal repositioning.","Taoist":"Use your skeleton, SoulFireBall, and poison."}}
+  ],
+  "questOverrides": [
+    {"questId":2110001,"startNpc":{"npcId":3,"name":"Assistant Jane","mapName":"BichonProvince","mapFileName":"0","x":284,"y":606},"finishNpc":{"npcId":3,"name":"Assistant Jane","mapName":"BichonProvince","mapFileName":"0","x":284,"y":606}},
+    {"questId":2110002,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110003,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110004,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110005,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110006,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110007,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110008,"startInDiary":true,"finishNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259}},
+    {"questId":2120015,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110009,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110010,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110011,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110012,"startInDiary":true,"finishNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259}},
+    {"questId":2120020,"startNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259},"finishNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259}},
+    {"questId":2110013,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110014,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110015,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110016,"startInDiary":true,"finishNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259}},
+    {"questId":2120025,"startNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259},"finishNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259}},
+    {"questId":2110017,"startNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259},"finishNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259}},
+    {"questId":2110018,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110019,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110020,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110021,"startInDiary":true,"finishInDiary":true},
+    {"questId":2110022,"startInDiary":true,"finishNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259}},
+    {"questId":2120030,"startNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259},"finishNpc":{"npcId":24,"name":"Board","mapName":"BichonProvince","mapFileName":"0","x":334,"y":259}}
+  ]
+}

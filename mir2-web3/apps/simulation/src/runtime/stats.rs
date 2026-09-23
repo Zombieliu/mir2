@@ -12,16 +12,16 @@
 use std::collections::BTreeMap;
 
 use bevy_ecs::prelude::{Resource, World};
-use mir2_protocol::MirClass;
+use mir2_protocol::{MirClass, UserItemStat};
 
 use super::crystal_compat::*;
 use super::equipment::EquipmentState;
 use super::items::{crystal_item_template_for_item_key, ItemState};
 use super::resources::{BuffResource, InventoryResource, SessionResource, Stage5SystemsResource};
 
-/// Crystal social experience-rate bonuses. Marriage, mentorship, and guild
-/// membership each grant the player a small bonus to experience gained, mirroring
-/// the Crystal lover/mentee/guild systems (previously stored but inert).
+/// Legacy personal-session social approximations, NOT authoritative Crystal
+/// eligibility. Shared rewards must use verified peer/buff/group conditions;
+/// a stored partner or guild name alone never proves entitlement.
 pub(super) const CRYSTAL_LOVER_EXP_RATE_PERCENT: i32 = 5;
 pub(super) const CRYSTAL_MENTEE_EXP_RATE_PERCENT: i32 = 10;
 pub(super) const CRYSTAL_GUILD_EXP_RATE_PERCENT: i32 = 3;
@@ -40,6 +40,19 @@ impl PlayerStats {
     /// Raw value for a Crystal stat index (0 when absent).
     pub(super) fn get(&self, stat: u8) -> i32 {
         self.values.get(&stat).copied().unwrap_or(0)
+    }
+
+    /// Stable stat-id/value projection for client-side Crystal presentation.
+    /// Absent ids are authoritative zero once the containing snapshot field is
+    /// present; old clients/snapshots can still distinguish missing wholesale.
+    pub(super) fn snapshot_entries(&self) -> Vec<UserItemStat> {
+        self.values
+            .iter()
+            .map(|(stat, value)| UserItemStat {
+                stat: *stat,
+                value: *value,
+            })
+            .collect()
     }
 
     fn add(&mut self, stat: u8, value: i32) {
@@ -349,20 +362,24 @@ pub(super) fn crystal_player_social_exp_rate_percent(world: &World) -> i32 {
     if !state.mentor.name.is_empty() {
         rate += CRYSTAL_MENTEE_EXP_RATE_PERCENT;
     }
-    if !state.guild.name.is_empty() {
+    if !super::shared_guilds::enabled(world) && !state.guild.name.is_empty() {
         rate += CRYSTAL_GUILD_EXP_RATE_PERCENT;
     }
     rate
 }
 
-/// Apply the social experience-rate bonus to a raw experience amount.
+/// Legacy personal social approximation plus actual general EXP stats.
+/// TODO: replace the name-only social helper with authoritative gain context;
+/// source ordered arithmetic is `experience_rates::apply_crystal_experience_rates`.
 pub(super) fn crystal_apply_social_exp_rate(world: &World, base_experience: u32) -> u32 {
     let rate = crystal_player_social_exp_rate_percent(world);
-    if rate <= 0 || base_experience == 0 {
-        return base_experience;
-    }
-    let bonus = (u64::from(base_experience) * rate as u64) / 100;
-    base_experience.saturating_add(u32::try_from(bonus).unwrap_or(u32::MAX))
+    let social_bonus = (u64::from(base_experience) * rate.max(0) as u64) / 100;
+    let after_social = base_experience.saturating_add(u32::try_from(social_bonus).unwrap_or(u32::MAX));
+    // Crystal GainExp applies general ExpRatePercent after relationship bonuses.
+    // Read live stats so an expired WonderDrug cannot affect a delayed award.
+    let rate = player_stats(world).get(100).max(0) as u64;
+    let bonus = (u64::from(after_social) * rate) / 100;
+    after_social.saturating_add(u32::try_from(bonus).unwrap_or(u32::MAX))
 }
 
 /// Read the live player stat block. Always computed fresh (read-only and cheap:
@@ -394,10 +411,14 @@ pub(super) fn compute_player_stats(world: &World) -> PlayerStats {
     // --- Equipment. ---
     let inventory = world.resource::<InventoryResource>();
     accumulate_equipment(&mut stats, inventory);
+    accumulate_equipment_sets(&mut stats, inventory, class, level as u16, world.resource::<super::resources::MountResource>().riding_mount);
 
     // --- Buffs. ---
     let buffs = world.resource::<BuffResource>();
     accumulate_buffs(&mut stats, buffs);
+    for entry in super::shared_guilds::buffs::active_stats(world) {
+        stats.add(entry.stat,entry.value);
+    }
 
     // --- Percent multipliers, then caps (Crystal RefreshStats tail + RefreshStatCaps). ---
     apply_rate_multipliers(&mut stats);
@@ -582,8 +603,39 @@ fn accumulate_equipment(stats: &mut PlayerStats, inventory: &InventoryResource) 
     }
 }
 
+fn accumulate_equipment_sets(stats: &mut PlayerStats, inventory: &InventoryResource, class: MirClass, level: u16, riding: bool) {
+    let mut sets = Vec::new();
+    let mut special = 0i16;
+    for item in inventory.equipment_items.iter().filter(|item| !item.is_broken()) {
+        let Some(base) = crystal_item_template_for_item_key(&item.key) else { continue; };
+        if matches!(base.shape, 49 | 50) { continue; }
+        let real = mir2_game_data::crystal_real_item_for_player(&base, level, class);
+        let Some(slot) = super::equipment::equipment_slot_index(item.slot) else { continue; };
+        sets.push((slot as u8, real.item_set, real.item_type));
+        special |= real.unique;
+        if real.item_type != 19 || riding {
+            for socket in &item.socketed {
+                if socket.durability_max.unwrap_or_default() > 0 && socket.durability_current.unwrap_or_default() == 0 { continue; }
+                if let Some(base) = crystal_item_template_for_item_key(&socket.key) {
+                    special |= mir2_game_data::crystal_real_item_for_player(&base, level, class).unique;
+                }
+            }
+        }
+    }
+    // RefreshEquipmentStats applies Muscle before RefreshItemSetStats, so
+    // later set capacity bonuses are not themselves doubled.
+    if special & 0x20 != 0 {
+        for stat in [CRYSTAL_STAT_BAG_WEIGHT, CRYSTAL_STAT_WEAR_WEIGHT, CRYSTAL_STAT_HAND_WEIGHT] {
+            stats.values.insert(stat, stats.get(stat).saturating_mul(2));
+        }
+    }
+    sets.sort_by_key(|&(slot, _, _)| slot);
+    super::item_sets::apply_sets(&mut stats.values, &sets);
+}
+
 fn accumulate_buffs(stats: &mut PlayerStats, buffs: &BuffResource) {
     for buff in &buffs.buffs {
+        if buff.real_time_expired() { continue; }
         // Buff scalar attack/defence bonuses map onto MaxDC/MaxAC, mirroring the
         // historical `buff_attack_bonus`/`buff_defence_bonus` helpers.
         let attack_from_stats = buff
@@ -667,4 +719,38 @@ pub(super) fn deterministic_range_roll(
         span,
     );
     low.saturating_add(i32::try_from(roll).unwrap_or(0))
+}
+
+#[cfg(test)]
+mod item_set_tests {
+    use super::*;
+    use crate::{EquipmentSlot, ItemContainer};
+    fn equipment(index: i32, slot: EquipmentSlot) -> EquipmentState {
+        let template = mir2_game_data::crystal_item_by_index(index).unwrap();
+        let item = super::super::items::embedded_item_state_from_template(&template, ItemContainer::Bag1, 0);
+        super::super::equipment::equipment_state_from_item_state(&item, slot)
+    }
+    #[test]
+    fn player_item_sets_real_mundane_pair_and_broken_item() {
+        let mut inv = InventoryResource::new(80);
+        inv.equipment_items = vec![equipment(33, EquipmentSlot::BraceletLeft), equipment(34, EquipmentSlot::RingLeft)];
+        let mut stats = PlayerStats::default();
+        accumulate_equipment_sets(&mut stats, &inv, MirClass::Warrior, 40, false);
+        assert_eq!(stats.get(CRYSTAL_STAT_HP), 50);
+        inv.equipment_items[0].durability_current = 0;
+        let mut stats = PlayerStats::default();
+        accumulate_equipment_sets(&mut stats, &inv, MirClass::Warrior, 40, false);
+        assert_eq!(stats.get(CRYSTAL_STAT_HP), 0);
+    }
+    #[test]
+    fn player_item_sets_duplicate_type_is_not_a_complete_set() {
+        let mut inv = InventoryResource::new(80);
+        inv.equipment_items = vec![equipment(33, EquipmentSlot::BraceletLeft), equipment(33, EquipmentSlot::BraceletRight)];
+        let mut stats = PlayerStats::default();
+        accumulate_equipment_sets(&mut stats, &inv, MirClass::Warrior, 40, false);
+        assert_eq!(stats.get(CRYSTAL_STAT_HP), 0);
+        inv.equipment_items.extend([equipment(34, EquipmentSlot::RingLeft), equipment(34, EquipmentSlot::RingRight)]);
+        accumulate_equipment_sets(&mut stats, &inv, MirClass::Warrior, 40, false);
+        assert_eq!(stats.get(CRYSTAL_STAT_HP), 100);
+    }
 }

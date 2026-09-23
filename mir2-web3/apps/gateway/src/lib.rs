@@ -11,6 +11,7 @@ pub mod economy;
 pub mod events;
 pub mod gate14;
 pub mod gate15;
+pub mod guild_clock;
 pub mod guild_node_foundation {
     pub use dubhe_network_core::capacity::*;
 }

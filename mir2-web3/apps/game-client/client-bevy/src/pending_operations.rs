@@ -92,6 +92,16 @@ pub enum PendingOperationKey {
     },
     Repair(u64),
     SpecialRepair(u64),
+    Equip {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+    },
+    Remove {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+    },
     StorageDeposit {
         unique_id: u64,
         from: i32,
@@ -121,6 +131,10 @@ pub enum PendingOperationKey {
         unique_id: u64,
         count: u16,
         hero_inventory: bool,
+    },
+    DeleteItem {
+        unique_id: u64,
+        count: u16,
     },
     Move {
         grid: String,
@@ -254,6 +268,11 @@ pub enum InventoryOperationAck {
         hero_inventory: bool,
         success: bool,
     },
+    Delete {
+        unique_id: u64,
+        count: u16,
+        success: bool,
+    },
     Move {
         grid: String,
         from: i32,
@@ -278,26 +297,44 @@ pub enum InventoryOperationAck {
         count: u16,
         success: bool,
     },
+    Equip {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+        success: bool,
+    },
+    Remove {
+        grid: String,
+        unique_id: u64,
+        to: i32,
+        success: bool,
+    },
 }
 
 impl InventoryOperationAck {
     pub fn success(&self) -> bool {
         match self {
             Self::Drop { success, .. }
+            | Self::Delete { success, .. }
             | Self::Move { success, .. }
             | Self::Merge { success, .. }
             | Self::Split { success, .. }
-            | Self::Sell { success, .. } => *success,
+            | Self::Sell { success, .. }
+            | Self::Equip { success, .. }
+            | Self::Remove { success, .. } => *success,
         }
     }
 
     pub fn label(&self) -> &'static str {
         match self {
             Self::Drop { .. } => "Drop",
+            Self::Delete { .. } => "Delete",
             Self::Move { .. } => "Move",
             Self::Merge { .. } => "Merge",
             Self::Split { .. } => "Split",
             Self::Sell { .. } => "Sell",
+            Self::Equip { .. } => "Equip",
+            Self::Remove { .. } => "Remove",
         }
     }
 }
@@ -329,6 +366,15 @@ pub fn apply_inventory_operation_ack(
                 hero_inventory: pending_hero,
             },
         ) => unique_id == pending_id && count == pending_count && hero_inventory == pending_hero,
+        (
+            InventoryOperationAck::Delete {
+                unique_id, count, ..
+            },
+            PendingOperationKey::DeleteItem {
+                unique_id: pending_id,
+                count: pending_count,
+            },
+        ) => unique_id == pending_id && count == pending_count,
         (
             InventoryOperationAck::Move { grid, from, to, .. },
             PendingOperationKey::Move {
@@ -384,6 +430,40 @@ pub fn apply_inventory_operation_ack(
                 count: pending_count,
             },
         ) => unique_id == pending_id && count == pending_count,
+        (
+            InventoryOperationAck::Equip {
+                grid,
+                unique_id,
+                to,
+                ..
+            },
+            PendingOperationKey::Equip {
+                grid: pending_grid,
+                unique_id: pending_id,
+                to: pending_to,
+            },
+        ) => {
+            grid.eq_ignore_ascii_case(pending_grid)
+                && unique_id == pending_id
+                && to == pending_to
+        }
+        (
+            InventoryOperationAck::Remove {
+                grid,
+                unique_id,
+                to,
+                ..
+            },
+            PendingOperationKey::Remove {
+                grid: pending_grid,
+                unique_id: pending_id,
+                to: pending_to,
+            },
+        ) => {
+            grid.eq_ignore_ascii_case(pending_grid)
+                && unique_id == pending_id
+                && to == pending_to
+        }
         _ => false,
     });
     feedback.last = Some(ack);
@@ -532,10 +612,8 @@ impl Default for PendingOperations {
 impl PendingOperations {
     /// Register a logical operation.
     ///
-    /// Crystal's storage transfer ACKs do not contain the source item id. A
-    /// deposit/withdraw pair therefore acts as an indistinguishable protocol
-    /// slot: allowing two item ids in the same slot would make a later ACK
-    /// impossible to correlate safely. Other operation families retain their
+    /// Storage gestures reserve their live source/destination identities until
+    /// the corresponding authoritative result. Other operation families retain
     /// exact-key de-duplication semantics.
     pub fn try_begin(&mut self, key: PendingOperationKey) -> bool {
         if self.entries.contains(&key)
@@ -637,6 +715,16 @@ impl PendingOperations {
         self.quest_request_ids.clear();
     }
 
+    /// Native warehouse drag input calls this before it reserves a new
+    /// Store/TakeBack/Merge operation. Unlike the general pending registry,
+    /// this deliberately locks an item or known cell across the three storage
+    /// gesture variants until an authoritative result arrives.
+    pub fn has_storage_drag_conflict(&self, key: &PendingOperationKey) -> bool {
+        self.entries
+            .iter()
+            .any(|pending| storage_drag_conflicts(pending, key))
+    }
+
     pub fn contains(&self, key: &PendingOperationKey) -> bool {
         self.entries.contains(key)
     }
@@ -690,6 +778,10 @@ impl PendingOperations {
     }
 }
 
+/// Preserve legacy `try_begin` semantics for transport callers. Their V2
+/// request ids are exact acknowledgement identities, so multiple V2 packets
+/// sharing coordinates remain correlatable; the native drag surface applies
+/// its stronger per-item/cell lock through `has_storage_drag_conflict`.
 fn storage_transfer_slot_conflicts(
     pending: &PendingOperationKey,
     candidate: &PendingOperationKey,
@@ -721,6 +813,117 @@ fn storage_transfer_slot_conflicts(
         ) => pending_from == candidate_from && pending_to == candidate_to,
         _ => false,
     }
+}
+
+/// Storage drag operations lock only the item identities and concrete cells
+/// they touch. A Store/TakeBack request supplies both cells; a MergeItem has
+/// the two live item identities. This keeps independent warehouse gestures
+/// concurrent while preventing a second release from retargeting an item that
+/// is still awaiting an authoritative result.
+fn storage_drag_conflicts(
+    pending: &PendingOperationKey,
+    candidate: &PendingOperationKey,
+) -> bool {
+    let pending_cells = storage_drag_cells(pending);
+    let candidate_cells = storage_drag_cells(candidate);
+    let cells_conflict = pending_cells.iter().flatten().any(|(pending_grid, pending_slot)| {
+        candidate_cells
+            .iter()
+            .flatten()
+            .any(|(candidate_grid, candidate_slot)| {
+                pending_grid == candidate_grid && pending_slot == candidate_slot
+            })
+    });
+    cells_conflict || storage_drag_item_conflicts(pending, candidate)
+}
+
+fn storage_drag_cells(key: &PendingOperationKey) -> [Option<(&'static str, i32)>; 2] {
+    match key {
+        PendingOperationKey::StorageDeposit { from, to, .. }
+        | PendingOperationKey::StorageDepositV2 { from, to, .. } => {
+            [Some(("inventory", *from)), Some(("storage", *to))]
+        }
+        PendingOperationKey::StorageWithdraw { from, to, .. }
+        | PendingOperationKey::StorageWithdrawV2 { from, to, .. } => {
+            [Some(("storage", *from)), Some(("inventory", *to))]
+        }
+        PendingOperationKey::Move { grid, from, to, .. } if grid == "storage" => {
+            [Some(("storage", *from)), Some(("storage", *to))]
+        }
+        PendingOperationKey::Equip { grid, to, .. } if grid == "storage" => {
+            [None, Some(("equipment", *to))]
+        }
+        PendingOperationKey::Remove { grid, to, .. } if grid == "storage" => {
+            [None, Some(("storage", *to))]
+        }
+        _ => [None, None],
+    }
+}
+
+fn storage_drag_item_endpoints<'a>(key: &'a PendingOperationKey) -> [Option<(&'a str, u64)>; 2] {
+    match key {
+        PendingOperationKey::StorageDeposit { unique_id, .. }
+        | PendingOperationKey::StorageDepositV2 { unique_id, .. } => {
+            [Some(("inventory", *unique_id)), None]
+        }
+        PendingOperationKey::StorageWithdraw { unique_id, .. }
+        | PendingOperationKey::StorageWithdrawV2 { unique_id, .. } => {
+            [Some(("storage", *unique_id)), None]
+        }
+        PendingOperationKey::Move {
+            grid, unique_id, ..
+        } if matches!(grid.as_str(), "inventory" | "storage") => {
+            [Some((grid, *unique_id)), None]
+        }
+        PendingOperationKey::Equip {
+            grid, unique_id, ..
+        } if grid == "storage" => [Some(("storage", *unique_id)), None],
+        PendingOperationKey::Remove {
+            grid, unique_id, ..
+        } if grid == "storage" => [Some(("equipment", *unique_id)), None],
+        PendingOperationKey::Split {
+            grid, unique_id, ..
+        } if grid == "inventory" => [Some(("inventory", *unique_id)), None],
+        PendingOperationKey::Sell { unique_id, .. }
+        | PendingOperationKey::Repair(unique_id)
+        | PendingOperationKey::SpecialRepair(unique_id)
+        | PendingOperationKey::DeleteItem { unique_id, .. }
+        | PendingOperationKey::Drop { unique_id, .. } => {
+            [Some(("inventory", *unique_id)), None]
+        }
+        PendingOperationKey::Merge {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+        } if matches!(
+            (grid_from.as_str(), grid_to.as_str()),
+            ("inventory", "storage")
+                | ("storage", "inventory")
+                | ("inventory", "inventory")
+                | ("storage", "storage")
+                | ("equipment", "storage")
+                | ("storage", "equipment")
+        ) => [Some((grid_from, *id_from)), Some((grid_to, *id_to))],
+        _ => [None, None],
+    }
+}
+
+fn storage_drag_item_conflicts(
+    pending: &PendingOperationKey,
+    candidate: &PendingOperationKey,
+) -> bool {
+    storage_drag_item_endpoints(pending)
+        .iter()
+        .flatten()
+        .any(|(pending_grid, pending_id)| {
+            storage_drag_item_endpoints(candidate)
+                .iter()
+                .flatten()
+                .any(|(candidate_grid, candidate_id)| {
+                    pending_grid == candidate_grid && pending_id == candidate_id
+                })
+        })
 }
 
 /// Monotonic counters proving that a renderer-neutral authoritative model was
@@ -907,6 +1110,7 @@ pub fn reconcile_inventory_refresh(
         PendingOperationKey::Drop {
             unique_id, count, ..
         }
+        | PendingOperationKey::DeleteItem { unique_id, count }
         | PendingOperationKey::Sell { unique_id, count }
         | PendingOperationKey::Split {
             unique_id, count, ..
@@ -937,7 +1141,12 @@ pub fn reconcile_inventory_refresh(
             });
             old_at_source && new_at_target
         }
-        PendingOperationKey::Merge { id_from, id_to, .. } => {
+        PendingOperationKey::Merge {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+        } if !grid_from.eq_ignore_ascii_case("Trade") && !grid_to.eq_ignore_ascii_case("Trade") => {
             if has_ambiguous_replacement_without_instance_id(old, new, *id_from)
                 || has_ambiguous_replacement_without_instance_id(old, new, *id_to)
             {
@@ -1070,6 +1279,9 @@ pub fn reconcile_storage_refresh(
         PendingOperationKey::StorageRemovePassword => old.has_password && !new.has_password,
         PendingOperationKey::StorageExpand => {
             (!old.has_expanded && new.has_expanded) || new.size > old.size
+                || (new.has_expanded
+                    && ((new.expiry as u64) & 0x3fff_ffff_ffff_ffff)
+                        > ((old.expiry as u64) & 0x3fff_ffff_ffff_ffff))
         }
         _ => false,
     })
@@ -1357,6 +1569,9 @@ mod tests {
         crate::mail::MailMessage {
             id,
             sender: "System".into(),
+            can_reply: false,
+            date_sent_binary_datetime: 0,
+            metadata_known: false,
             subject: "Subject".into(),
             body: "Body".into(),
             gold: 10,
@@ -1433,6 +1648,7 @@ mod tests {
                     claimed: false,
                     locked: true,
                     read: true,
+                    ..Default::default()
                 },
             ],
             selected_id: None,
@@ -1457,6 +1673,7 @@ mod tests {
                 claimed: false,
                 locked: true,
                 read: true,
+                ..Default::default()
             }],
             selected_id: None,
         };
@@ -1537,6 +1754,41 @@ mod tests {
         assert_eq!(
             feedback.last.as_ref().map(InventoryOperationAck::success),
             Some(false)
+        );
+    }
+
+    #[test]
+    fn delete_receipt_releases_only_matching_instance_and_count() {
+        let mut pending = PendingOperations::default();
+        let exact = PendingOperationKey::DeleteItem {
+            unique_id: 70,
+            count: 2,
+        };
+        let other_count = PendingOperationKey::DeleteItem {
+            unique_id: 70,
+            count: 1,
+        };
+        assert!(pending.try_begin(exact.clone()));
+        assert!(pending.try_begin(other_count.clone()));
+        let mut feedback = InventoryOperationFeedback::default();
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Delete {
+                    unique_id: 70,
+                    count: 2,
+                    success: true,
+                },
+            ),
+            1
+        );
+        assert!(!pending.contains(&exact));
+        assert!(pending.contains(&other_count));
+        assert_eq!(
+            feedback.last.as_ref().map(InventoryOperationAck::label),
+            Some("Delete")
         );
     }
 
@@ -1632,6 +1884,71 @@ mod tests {
         }
         assert_eq!(reconcile_inventory_refresh(&mut pending, &old, &new), 5);
         assert!(pending.is_empty());
+    }
+
+    #[test]
+    fn trade_merge_inventory_deltas_never_substitute_for_matching_ack() {
+        let old = crate::inventory::InventoryModel {
+            items: vec![item(20, 5, 0, 0), item(21, 3, 1, 0)],
+            ..Default::default()
+        };
+        let new = crate::inventory::InventoryModel {
+            items: vec![item(20, 2, 0, 0), item(21, 6, 1, 0)],
+            ..Default::default()
+        };
+        for (grid_from, grid_to) in [
+            ("Trade", "inventory"),
+            ("inventory", "tRaDe"),
+            ("TRADE", "Trade"),
+        ] {
+            for success in [true, false] {
+                let mut pending = PendingOperations::default();
+                let key = PendingOperationKey::Merge {
+                    grid_from: grid_from.into(),
+                    grid_to: grid_to.into(),
+                    id_from: 20,
+                    id_to: 21,
+                };
+                assert!(pending.try_begin(key.clone()));
+                assert_eq!(
+                    reconcile_inventory_refresh(&mut pending, &old, &new),
+                    0,
+                    "balanced quantities do not prove a trade receipt"
+                );
+                assert!(pending.contains(&key));
+                let mut feedback = InventoryOperationFeedback::default();
+                assert_eq!(
+                    apply_inventory_operation_ack(
+                        &mut pending,
+                        &mut feedback,
+                        InventoryOperationAck::Merge {
+                            grid_from: grid_from.into(),
+                            grid_to: grid_to.into(),
+                            id_from: 20,
+                            id_to: 99,
+                            success
+                        }
+                    ),
+                    0
+                );
+                assert!(pending.contains(&key));
+                assert_eq!(
+                    apply_inventory_operation_ack(
+                        &mut pending,
+                        &mut feedback,
+                        InventoryOperationAck::Merge {
+                            grid_from: grid_from.into(),
+                            grid_to: grid_to.into(),
+                            id_from: 20,
+                            id_to: 21,
+                            success
+                        }
+                    ),
+                    1
+                );
+                assert!(pending.is_empty());
+            }
+        }
     }
 
     #[test]
@@ -2126,6 +2443,9 @@ mod tests {
             finish_npc_index: Some(2),
             title: format!("Quest {quest_index}"),
             npc_name: None,
+            group: None,
+            min_level_needed: 0,
+            detail: Default::default(),
             status,
             objectives: Vec::new(),
             rewards: Vec::new(),
@@ -2172,6 +2492,9 @@ mod tests {
             finish_npc_index: Some(2),
             title: "Quest 40".to_owned(),
             npc_name: None,
+            group: None,
+            min_level_needed: 0,
+            detail: Default::default(),
             status,
             objectives: Vec::new(),
             rewards: Vec::new(),
@@ -2191,6 +2514,88 @@ mod tests {
         assert!(pending.contains(&key));
         assert_eq!(reconcile_quest_refresh(&mut pending, &old, &aborted), 1);
         assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn storage_renewal_releases_only_after_authoritative_expiry_extension() {
+        let old = crate::storage::StorageModel {
+            has_expanded: true,
+            size: crate::storage::STORAGE_EXPANDED_SIZE,
+            expiry: 1000,
+            ..Default::default()
+        };
+        let mut pending = PendingOperations::default();
+        let key = PendingOperationKey::StorageExpand;
+        assert!(pending.try_begin(key.clone()));
+        let inventory = crate::inventory::InventoryModel::default();
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &old), 0);
+        let mut new = old.clone();
+        new.expiry = 999;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 0);
+        // DateTime kind bits are not elapsed time or renewal evidence.
+        new.expiry = ((1u64 << 63) | 1000) as i64;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 0);
+        new.expiry = ((1u64 << 63) | 1001) as i64;
+        assert_eq!(reconcile_storage_refresh(&mut pending, &inventory, &old, &new), 1);
+        assert!(!pending.contains(&key));
+    }
+
+    #[test]
+    fn equipment_storage_receipts_release_only_the_exact_grid_item_and_slot() {
+        let mut pending = PendingOperations::default();
+        let remove = PendingOperationKey::Remove {
+            grid: "storage".into(),
+            unique_id: 90,
+            to: 5,
+        };
+        let equip = PendingOperationKey::Equip {
+            grid: "storage".into(),
+            unique_id: 91,
+            to: 9,
+        };
+        let other_slot = PendingOperationKey::Remove {
+            grid: "storage".into(),
+            unique_id: 90,
+            to: 6,
+        };
+        assert!(pending.try_begin(remove.clone()));
+        assert!(pending.try_begin(equip.clone()));
+        assert!(pending.try_begin(other_slot.clone()));
+        let mut feedback = InventoryOperationFeedback::default();
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Remove {
+                    grid: "Storage".into(),
+                    unique_id: 90,
+                    to: 5,
+                    success: false,
+                },
+            ),
+            1,
+        );
+        assert!(!pending.contains(&remove));
+        assert!(pending.contains(&equip));
+        assert!(pending.contains(&other_slot));
+
+        assert_eq!(
+            apply_inventory_operation_ack(
+                &mut pending,
+                &mut feedback,
+                InventoryOperationAck::Equip {
+                    grid: "STORAGE".into(),
+                    unique_id: 91,
+                    to: 9,
+                    success: true,
+                },
+            ),
+            1,
+        );
+        assert!(!pending.contains(&equip));
+        assert!(pending.contains(&other_slot));
+        assert_eq!(feedback.last.as_ref().map(InventoryOperationAck::label), Some("Equip"));
     }
 
     #[test]
@@ -2343,7 +2748,7 @@ mod native_ui_tests {
         {
             let mut state = app.world_mut().resource_mut::<QuestUiState>();
             state.selected_quest_index = Some(7);
-            state.tracking_quest_index = Some(7);
+            state.tracked_quest_indices.push(7);
             state.set_feedback("A quest", false);
         }
         app.world_mut()
@@ -2355,6 +2760,9 @@ mod native_ui_tests {
                 finish_npc_index: Some(2),
                 title: "A quest".to_owned(),
                 npc_name: Some("A NPC".to_owned()),
+                group: None,
+                min_level_needed: 0,
+                detail: Default::default(),
                 status: QuestStatus::InProgress,
                 objectives: Vec::new(),
                 rewards: Vec::new(),
@@ -2393,10 +2801,11 @@ mod native_ui_tests {
             .active_quests
             .is_empty());
         assert!(app.world().resource::<CombatTargetModel>().target.is_none());
-        assert_eq!(
-            app.world().resource::<QuestUiState>().tracking_quest_index,
-            None
-        );
+        assert!(app
+            .world()
+            .resource::<QuestUiState>()
+            .tracked_quest_indices
+            .is_empty());
         assert!(app
             .world_mut()
             .resource_mut::<QuestUiIntentQueue>()
@@ -2427,12 +2836,14 @@ mod native_ui_tests {
             message: "one".into(),
             gold: 1,
             attachment_unique_ids: vec![7],
+            stamped: false,
         };
         let second_send = NativePlayerUiIntent::SendMail {
             recipient: "B".into(),
             message: "two".into(),
             gold: 2,
             attachment_unique_ids: vec![8],
+            stamped: false,
         };
         assert!(!queue.push_pending_intent(&mut pending, first_send.clone()));
         assert_eq!(queue.drain_intents().len(), 1);

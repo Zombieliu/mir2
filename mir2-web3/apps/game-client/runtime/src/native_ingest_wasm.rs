@@ -25,6 +25,7 @@ pub(crate) enum NativeInboundMessage {
     DataResetPreservingExactGameShopReceipt(mir2_client_bevy::game_shop::GameShopReceipt),
     SceneReset,
     MailModel(String),
+    MailService(String),
     ShopModel(String),
     GameShopInfo(String),
     GameShopStock(String),
@@ -34,6 +35,9 @@ pub(crate) enum NativeInboundMessage {
     StorageItems(String),
     StoragePatch(String),
     SkillModel(String),
+    HeroModel(String),
+    HeroModelReceipt(String),
+    SkillModelReceipt(String),
     SocialModel(String),
     EntityRenderAtlas {
         key: String,

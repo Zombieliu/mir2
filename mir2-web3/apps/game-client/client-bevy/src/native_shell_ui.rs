@@ -16,7 +16,8 @@ use bevy::{
 use crate::crystal_ui::assets::{safe_key_assets, CrystalButtonAssetSet};
 use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, CrystalLoginAction};
 use crate::crystal_ui::select::{
-    animate_character_previews, spawn_character_select_screen, CrystalSelectAction,
+    animate_character_previews, spawn_character_preview_at, spawn_character_select_screen,
+    CrystalSelectAction,
 };
 use crate::crystal_ui::spec::{self, CrystalButtonSpec};
 use crate::crystal_ui::widget::{
@@ -24,8 +25,9 @@ use crate::crystal_ui::widget::{
     CrystalImageButtonSprite,
 };
 use crate::native_shell::{
+    parse_registration_birth_date, valid_registration_email, validate_registration_fields,
     ChangePasswordFocus, CharacterCreateFocus, LoginFocus, NativeShellModel, NativeShellScreen,
-    NativeUiIntent, NativeUiIntentQueue,
+    NativeUiIntent, NativeUiIntentQueue, RegistrationFocus,
 };
 
 const ROOT_BG: Color = Color::srgba(0.06, 0.05, 0.03, 0.82);
@@ -47,12 +49,13 @@ const GENDERS: [&str; 2] = ["Male", "Female"];
 const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
     spec::CrystalRect::new(348.0, 224.0, 328.0, 350.0);
 const AUX_CONFIRM_PANEL: spec::CrystalRect = spec::CrystalRect::new(348.0, 286.0, 328.0, 196.0);
+const CONNECTION_LOST_PANEL: spec::CrystalRect = spec::CrystalRect::new(284.0, 289.0, 456.0, 190.0);
 
 const NEW_CHARACTER_FRAME: spec::CrystalRect = spec::CrystalRect::new(218.0, 154.0, 588.0, 460.0);
 const NEW_CHARACTER_TITLE: spec::CrystalRect = spec::CrystalRect::new(424.0, 165.0, 187.0, 20.0);
 const NEW_CHARACTER_NAME_FIELD: spec::CrystalRect =
     spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0);
-const NEW_CHARACTER_PREVIEW: spec::CrystalRect = spec::CrystalRect::new(338.0, 404.0, 196.0, 302.0);
+const NEW_CHARACTER_PREVIEW_ANCHOR: (f32, f32) = (338.0, 404.0);
 const NEW_CHARACTER_CLASS_BUTTONS: [spec::CrystalRect; 3] = [
     spec::CrystalRect::new(541.0, 450.0, 44.0, 42.0),
     spec::CrystalRect::new(591.0, 450.0, 44.0, 42.0),
@@ -64,11 +67,27 @@ const NEW_CHARACTER_GENDER_BUTTONS: [spec::CrystalRect; 2] = [
 ];
 const NEW_CHARACTER_CREATE: spec::CrystalRect = spec::CrystalRect::new(378.0, 579.0, 100.0, 25.0);
 const NEW_CHARACTER_CANCEL: spec::CrystalRect = spec::CrystalRect::new(643.0, 579.0, 100.0, 25.0);
+const NEW_ACCOUNT_FRAME: spec::CrystalRect = spec::CrystalRect::new(218.0, 154.0, 588.0, 460.0);
+const NEW_ACCOUNT_FIELDS: [(RegistrationFocus, spec::CrystalRect); 8] = [
+    (RegistrationFocus::AccountId, spec::CrystalRect::new(444.0, 257.0, 136.0, 18.0)),
+    (RegistrationFocus::Password, spec::CrystalRect::new(444.0, 283.0, 136.0, 18.0)),
+    (RegistrationFocus::ConfirmPassword, spec::CrystalRect::new(444.0, 309.0, 136.0, 18.0)),
+    (RegistrationFocus::UserName, spec::CrystalRect::new(444.0, 343.0, 136.0, 18.0)),
+    (RegistrationFocus::BirthDate, spec::CrystalRect::new(444.0, 369.0, 136.0, 18.0)),
+    (RegistrationFocus::SecretQuestion, spec::CrystalRect::new(444.0, 404.0, 190.0, 18.0)),
+    (RegistrationFocus::SecretAnswer, spec::CrystalRect::new(444.0, 430.0, 190.0, 18.0)),
+    (RegistrationFocus::EmailAddress, spec::CrystalRect::new(444.0, 465.0, 136.0, 18.0)),
+];
+const NEW_ACCOUNT_DESCRIPTION: spec::CrystalRect =
+    spec::CrystalRect::new(233.0, 494.0, 300.0, 70.0);
+const NEW_ACCOUNT_OK: spec::CrystalRect = spec::CrystalRect::new(353.0, 579.0, 76.0, 25.0);
+const NEW_ACCOUNT_CANCEL: spec::CrystalRect = spec::CrystalRect::new(627.0, 579.0, 76.0, 25.0);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Component)]
-enum NativeShellField {
+pub(crate) enum NativeShellField {
     CharacterName,
     ChangePassword(ChangePasswordFocus),
+    Registration(RegistrationFocus),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -214,11 +233,37 @@ pub fn cycle_create_focus(current: CharacterCreateFocus, reverse: bool) -> Chara
     }
 }
 
+pub fn cycle_registration_focus(current: RegistrationFocus, reverse: bool) -> RegistrationFocus {
+    use RegistrationFocus::*;
+    match (current, reverse) {
+        (AccountId, false) => Password,
+        (Password, false) => ConfirmPassword,
+        (ConfirmPassword, false) => UserName,
+        (UserName, false) => BirthDate,
+        (BirthDate, false) => SecretQuestion,
+        (SecretQuestion, false) => SecretAnswer,
+        (SecretAnswer, false) => EmailAddress,
+        (EmailAddress, false) => SubmitButton,
+        (SubmitButton, false) => CancelButton,
+        (CancelButton, false) => AccountId,
+        (AccountId, true) => CancelButton,
+        (Password, true) => AccountId,
+        (ConfirmPassword, true) => Password,
+        (UserName, true) => ConfirmPassword,
+        (BirthDate, true) => UserName,
+        (SecretQuestion, true) => BirthDate,
+        (SecretAnswer, true) => SecretQuestion,
+        (EmailAddress, true) => SecretAnswer,
+        (SubmitButton, true) => EmailAddress,
+        (CancelButton, true) => SubmitButton,
+    }
+}
+
 fn is_gateway_intent(intent: &NativeUiIntent) -> bool {
     matches!(
         intent,
         NativeUiIntent::Login
-            | NativeUiIntent::RegisterAccount
+            | NativeUiIntent::SubmitRegistration { .. }
             | NativeUiIntent::CreateCharacter { .. }
             | NativeUiIntent::ConfirmDeleteCharacter
             | NativeUiIntent::SubmitChangePassword { .. }
@@ -254,6 +299,24 @@ fn change_password_submit_intent(model: &NativeShellModel) -> NativeUiIntent {
     }
 }
 
+fn registration_submit_intent(model: &NativeShellModel) -> Result<NativeUiIntent, &'static str> {
+    Ok(NativeUiIntent::SubmitRegistration {
+        account_id: model.registration.account_id.clone(),
+        password: model.registration.password.clone(),
+        confirm_password: model.registration.confirm_password.clone(),
+        birth_date: model.registration.birth_date.clone(),
+        birth_date_binary: parse_registration_birth_date(&model.registration.birth_date)?,
+        user_name: model.registration.user_name.clone(),
+        secret_question: model.registration.secret_question.clone(),
+        secret_answer: model.registration.secret_answer.clone(),
+        email_address: model.registration.email_address.clone(),
+    })
+}
+
+fn registration_submit_enabled(model: &NativeShellModel) -> bool {
+    !model.register_request_in_flight && validate_registration_fields(&model.registration).is_ok()
+}
+
 pub fn cycle_change_password_focus(
     current: ChangePasswordFocus,
     reverse: bool,
@@ -281,7 +344,7 @@ struct NativeShellRoot;
 struct NativeShellContent;
 
 #[derive(Component)]
-enum NativeShellButton {
+pub(crate) enum NativeShellButton {
     CancelCreate,
     SubmitCreate,
     SelectCreateClass(u8),
@@ -293,6 +356,8 @@ enum NativeShellButton {
     CancelDelete,
     SubmitChangePassword,
     CancelChangePassword,
+    SubmitRegistration,
+    CancelRegistration,
     CloseSafeKey,
     SafeKeyFocusAccount,
     SafeKeyFocusPassword,
@@ -304,6 +369,40 @@ enum NativeShellButton {
 
 pub struct Mir2NativeShellUiPlugin;
 
+#[derive(Component)]
+struct NativeLoginDoorBackground;
+
+#[derive(Resource)]
+struct NativeLoginDoorFrames(Vec<Handle<Image>>);
+
+fn animate_login_door(
+    time: Res<Time>,
+    mut shell: Option<ResMut<NativeShellModel>>,
+    frames: Option<Res<NativeLoginDoorFrames>>,
+    images: Res<Assets<Image>>,
+    mut backgrounds: Query<&mut ImageNode, With<NativeLoginDoorBackground>>,
+) {
+    let (Some(shell), Some(frames)) = (shell.as_deref_mut(), frames) else {
+        return;
+    };
+    // Keep the first frame visible until all frames are resident. Do not skip
+    // the opening sequence on a cold disk or flash missing image placeholders.
+    let ready = frames.0.iter().all(|frame| images.contains(frame.id()));
+    if ready {
+        shell.advance_login_opening(time.delta());
+    }
+    let frame = if ready {
+        shell.login_opening_frame() as usize
+    } else {
+        0
+    };
+    for mut image in &mut backgrounds {
+        if image.image != frames.0[frame] {
+            image.image = frames.0[frame].clone();
+        }
+    }
+}
+
 impl Plugin for Mir2NativeShellUiPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<NativeUiIntentQueue>()
@@ -313,6 +412,7 @@ impl Plugin for Mir2NativeShellUiPlugin {
             .add_systems(
                 Update,
                 (
+                    animate_login_door,
                     update_root_visibility,
                     shell_keyboard_input,
                     shell_pointer_input,
@@ -333,6 +433,11 @@ impl Plugin for Mir2NativeShellUiPlugin {
 }
 
 fn spawn_shell_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(NativeLoginDoorFrames(
+        (0..19)
+            .map(|index| asset_server.load(format!("original-ui/ChrSel/{index}.png")))
+            .collect(),
+    ));
     commands
         .spawn((
             NativeShellRoot,
@@ -353,6 +458,7 @@ fn spawn_shell_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|root| {
             root.spawn((
+                NativeLoginDoorBackground,
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(0.0),
@@ -462,7 +568,7 @@ fn shell_pointer_input(
                 apply_and_queue(&mut shell, &mut queue, NativeUiIntent::Login);
             }
             CrystalLoginAction::RegisterAccount => {
-                apply_and_queue(&mut shell, &mut queue, NativeUiIntent::RegisterAccount);
+                let _ = shell.apply_ui_intent(NativeUiIntent::OpenRegistration);
             }
             CrystalLoginAction::ChangePassword => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::OpenChangePassword);
@@ -471,6 +577,7 @@ fn shell_pointer_input(
                 let _ = shell.apply_ui_intent(NativeUiIntent::OpenSafeKey);
             }
             CrystalLoginAction::Cancel => {
+                eprintln!("[native-lifecycle] exit_source=login_cancel");
                 app_exit.write(AppExit::Success);
             }
         }
@@ -509,6 +616,7 @@ fn shell_pointer_input(
             // Crystal's SelectScene credits handler is intentionally empty.
             CrystalSelectAction::Credits => {}
             CrystalSelectAction::Exit => {
+                eprintln!("[native-lifecycle] exit_source=character_select_exit");
                 app_exit.write(AppExit::Success);
             }
         }
@@ -529,6 +637,12 @@ fn shell_pointer_input(
                     && !shell.change_password_request_in_flight =>
             {
                 shell.change_password.focus = *focus;
+            }
+            NativeShellField::Registration(focus)
+                if shell.screen == NativeShellScreen::Registration
+                    && !shell.register_request_in_flight =>
+            {
+                shell.registration.focus = *focus;
             }
             _ => {}
         }
@@ -595,6 +709,18 @@ fn shell_pointer_input(
             }
             NativeShellButton::CancelChangePassword => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::CancelChangePassword);
+            }
+            NativeShellButton::SubmitRegistration => {
+                if let Ok(intent) = registration_submit_intent(&shell) {
+                    apply_and_queue(&mut shell, &mut queue, intent);
+                } else {
+                    shell.notice = Some(crate::native_shell::ShellNotice::error(
+                        "birth date must use YYYY-MM-DD",
+                    ));
+                }
+            }
+            NativeShellButton::CancelRegistration => {
+                let _ = shell.apply_ui_intent(NativeUiIntent::CancelRegistration);
             }
             NativeShellButton::CloseSafeKey => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::CloseSafeKey);
@@ -675,7 +801,7 @@ fn shell_keyboard_input(
                         apply_and_queue(&mut shell, &mut queue, NativeUiIntent::Login);
                     }
                     LoginFocus::NewAccountButton => {
-                        apply_and_queue(&mut shell, &mut queue, NativeUiIntent::RegisterAccount);
+                        let _ = shell.apply_ui_intent(NativeUiIntent::OpenRegistration);
                     }
                 }
                 return;
@@ -761,6 +887,107 @@ fn shell_keyboard_input(
             }
             if keys.just_pressed(KeyCode::Enter) {
                 apply_and_queue(&mut shell, &mut queue, NativeUiIntent::StartGame);
+            }
+        }
+
+        NativeShellScreen::Registration => {
+            if keys.just_pressed(KeyCode::Tab) {
+                shell.registration.focus =
+                    cycle_registration_focus(shell.registration.focus, shifted);
+                return;
+            }
+            if keys.just_pressed(KeyCode::Escape) {
+                let _ = shell.apply_ui_intent(NativeUiIntent::CancelRegistration);
+                return;
+            }
+            if keys.just_pressed(KeyCode::Enter) {
+                match shell.registration.focus {
+                    RegistrationFocus::SubmitButton => match registration_submit_intent(&shell) {
+                        Ok(intent) => {
+                            apply_and_queue(&mut shell, &mut queue, intent);
+                        }
+                        Err(message) => shell.notice = Some(
+                            crate::native_shell::ShellNotice::error(message),
+                        ),
+                    },
+                    RegistrationFocus::CancelButton => {
+                        let _ = shell.apply_ui_intent(NativeUiIntent::CancelRegistration);
+                    }
+                    focus => shell.registration.focus = cycle_registration_focus(focus, false),
+                }
+                return;
+            }
+            if shell.register_request_in_flight {
+                return;
+            }
+            match shell.registration.focus {
+                RegistrationFocus::AccountId => {
+                    pop_editable_tail(&mut shell.registration.account_id, edit_delete_count)
+                }
+                RegistrationFocus::Password => {
+                    pop_editable_tail(&mut shell.registration.password, edit_delete_count)
+                }
+                RegistrationFocus::ConfirmPassword => pop_editable_tail(
+                    &mut shell.registration.confirm_password,
+                    edit_delete_count,
+                ),
+                RegistrationFocus::UserName => {
+                    pop_editable_tail(&mut shell.registration.user_name, edit_delete_count)
+                }
+                RegistrationFocus::BirthDate => {
+                    pop_editable_tail(&mut shell.registration.birth_date, edit_delete_count)
+                }
+                RegistrationFocus::SecretQuestion => pop_editable_tail(
+                    &mut shell.registration.secret_question,
+                    edit_delete_count,
+                ),
+                RegistrationFocus::SecretAnswer => pop_editable_tail(
+                    &mut shell.registration.secret_answer,
+                    edit_delete_count,
+                ),
+                RegistrationFocus::EmailAddress => {
+                    pop_editable_tail(&mut shell.registration.email_address, edit_delete_count)
+                }
+                RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => {}
+            }
+            for c in typed_text.chars() {
+                match shell.registration.focus {
+                    RegistrationFocus::AccountId => append_alphanumeric_field(
+                        &mut shell.registration.account_id,
+                        c,
+                        MAX_CHANGE_ACCOUNT,
+                    ),
+                    RegistrationFocus::Password => append_alphanumeric_field(
+                        &mut shell.registration.password,
+                        c,
+                        MAX_CHANGE_PASSWORD,
+                    ),
+                    RegistrationFocus::ConfirmPassword => append_alphanumeric_field(
+                        &mut shell.registration.confirm_password,
+                        c,
+                        MAX_CHANGE_PASSWORD,
+                    ),
+                    RegistrationFocus::UserName => {
+                        append_editable_field(&mut shell.registration.user_name, c, 20)
+                    }
+                    RegistrationFocus::BirthDate => {
+                        if c.is_ascii_digit() || c == '-' {
+                            append_editable_field(&mut shell.registration.birth_date, c, 10)
+                        }
+                    }
+                    RegistrationFocus::SecretQuestion => {
+                        append_editable_field(&mut shell.registration.secret_question, c, 30)
+                    }
+                    RegistrationFocus::SecretAnswer => {
+                        append_editable_field(&mut shell.registration.secret_answer, c, 30)
+                    }
+                    RegistrationFocus::EmailAddress => {
+                        if !c.is_control() {
+                            append_editable_field(&mut shell.registration.email_address, c, 50)
+                        }
+                    }
+                    RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => {}
+                }
             }
         }
 
@@ -991,6 +1218,10 @@ fn render_shell_ui(
                     info_block(panel, "Authenticating", "Authenticating account...");
                 });
             }
+            NativeShellScreen::OpeningLogin => {
+                // The original login dialog is disposed before the door opens.
+                // No widgets or generic loading panel may obscure the frames.
+            }
             NativeShellScreen::StartingGame => {
                 with_generic_panel(screen, |panel| {
                     info_block(panel, "Starting", "Entering game world...");
@@ -1009,6 +1240,9 @@ fn render_shell_ui(
             }
             NativeShellScreen::CharacterCreate => {
                 render_character_create(screen, &asset_server, &model);
+            }
+            NativeShellScreen::Registration => {
+                render_registration(screen, &asset_server, &model);
             }
             NativeShellScreen::ChangePassword => {
                 render_change_password(screen, &asset_server, &model);
@@ -1085,14 +1319,12 @@ fn render_character_create(
         "original-ui/Title/20.png",
         NEW_CHARACTER_TITLE,
     );
-    spawn_native_image(
+    spawn_character_preview_at(
         parent,
         asset_server,
-        character_preview_asset(
-            &model.character_create.class_name,
-            &model.character_create.gender_name,
-        ),
-        NEW_CHARACTER_PREVIEW,
+        &model.character_create.class_name,
+        &model.character_create.gender_name,
+        NEW_CHARACTER_PREVIEW_ANCHOR,
     );
     spawn_aux_text(
         parent,
@@ -1196,121 +1428,222 @@ fn render_character_create(
     );
 }
 
-fn render_change_password(
+fn render_registration(
     parent: &mut ChildSpawnerCommands,
     asset_server: &AssetServer,
     model: &NativeShellModel,
 ) {
-    spawn_auxiliary_panel(parent, asset_server, AUX_CHANGE_PASSWORD_PANEL);
-    spawn_aux_text(
-        parent,
-        "Change Password",
-        spec::CrystalRect::new(366.0, 240.0, 292.0, 28.0),
-        19.0,
-        GOLD,
-        Justify::Center,
-    );
-    let old_password = password_mask(&model.change_password.old_password);
-    let new_password = password_mask(&model.change_password.new_password);
-    let confirm_password = password_mask(&model.change_password.confirm_password);
-    let fields = [
-        (
-            "Account ID",
-            model.change_password.account_id.as_str(),
-            ChangePasswordFocus::AccountId,
-            282.0,
-        ),
-        (
-            "Current Password",
-            old_password.as_str(),
-            ChangePasswordFocus::OldPassword,
-            322.0,
-        ),
-        (
-            "New Password",
-            new_password.as_str(),
-            ChangePasswordFocus::NewPassword,
-            362.0,
-        ),
-        (
-            "Confirm Password",
-            confirm_password.as_str(),
-            ChangePasswordFocus::ConfirmPassword,
-            402.0,
-        ),
-    ];
-    for (label, value, focus, top) in fields {
-        spawn_aux_text(
+    // Crystal's LoginScene.NewAccountDialog uses Prguse frame 63 at the centre
+    // of the 1024x768 stage.  Its labels are part of the exported source art;
+    // only its text boxes, description, and Title buttons are live controls.
+    spawn_native_image(parent, asset_server, "original-ui/Prguse/63.png", NEW_ACCOUNT_FRAME);
+
+    let form = &model.registration;
+    let password = password_mask(&form.password);
+    let confirm_password = password_mask(&form.confirm_password);
+    for (focus, rect) in NEW_ACCOUNT_FIELDS {
+        let value = match focus {
+            RegistrationFocus::AccountId => form.account_id.as_str(),
+            RegistrationFocus::Password => password.as_str(),
+            RegistrationFocus::ConfirmPassword => confirm_password.as_str(),
+            RegistrationFocus::UserName => form.user_name.as_str(),
+            RegistrationFocus::BirthDate => form.birth_date.as_str(),
+            RegistrationFocus::SecretQuestion => form.secret_question.as_str(),
+            RegistrationFocus::SecretAnswer => form.secret_answer.as_str(),
+            RegistrationFocus::EmailAddress => form.email_address.as_str(),
+            RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => unreachable!(),
+        };
+        spawn_registration_field(
             parent,
-            label,
-            spec::CrystalRect::new(366.0, top, 112.0, 26.0),
-            12.0,
-            CREAM,
-            Justify::Left,
-        );
-        spawn_aux_field(
-            parent,
-            spec::CrystalRect::new(482.0, top - 2.0, 160.0, 28.0),
+            rect,
             value,
-            model.change_password.focus == focus,
-            !model.change_password_request_in_flight,
-            NativeShellField::ChangePassword(focus),
+            !model.register_request_in_flight,
+            focus,
+            registration_field_border_color(form, focus),
         );
     }
+
+    spawn_aux_text(
+        parent,
+        registration_description(form.focus),
+        NEW_ACCOUNT_DESCRIPTION,
+        11.0,
+        CREAM,
+        Justify::Left,
+    );
     if let Some(notice) = &model.notice {
         spawn_aux_notice(
             parent,
             &notice.message,
             notice.kind,
-            spec::CrystalRect::new(366.0, 466.0, 292.0, 20.0),
+            spec::CrystalRect::new(538.0, 494.0, 252.0, 70.0),
         );
     }
-    let submit_spec = CrystalButtonSpec::new(
-        "Title",
-        320,
-        321,
-        322,
-        spec::CrystalRect::new(575.0, 492.0, 42.0, 42.0),
-        48.0,
-        48.0,
-    );
-    let cancel_spec = CrystalButtonSpec::new(
-        "Title",
-        329,
-        330,
-        331,
-        spec::CrystalRect::new(458.0, 501.0, 100.0, 25.0),
-        100.0,
-        25.0,
-    );
+
+    let submit_spec = CrystalButtonSpec::new("Title", 200, 201, 202, NEW_ACCOUNT_OK, 76.0, 25.0);
+    let cancel_spec =
+        CrystalButtonSpec::new("Title", 203, 204, 205, NEW_ACCOUNT_CANCEL, 76.0, 25.0);
     spawn_crystal_image_button(
         parent,
         asset_server,
         submit_spec,
         CrystalButtonAssetSet::from_spec(submit_spec),
-        NativeShellButton::SubmitChangePassword,
-        model.change_password.focus == ChangePasswordFocus::SubmitButton,
-        !model.change_password_request_in_flight,
+        NativeShellButton::SubmitRegistration,
+        form.focus == RegistrationFocus::SubmitButton,
+        registration_submit_enabled(model),
     );
     spawn_crystal_image_button(
         parent,
         asset_server,
         cancel_spec,
         CrystalButtonAssetSet::from_spec(cancel_spec),
-        NativeShellButton::CancelChangePassword,
-        model.change_password.focus == ChangePasswordFocus::CancelButton,
-        !model.change_password_request_in_flight,
+        NativeShellButton::CancelRegistration,
+        form.focus == RegistrationFocus::CancelButton,
+        !model.register_request_in_flight,
     );
-    if model.change_password_request_in_flight {
-        spawn_aux_text(
-            parent,
-            "Submitting...",
-            spec::CrystalRect::new(366.0, 540.0, 292.0, 20.0),
-            12.0,
-            GOLD,
-            Justify::Center,
-        );
+}
+
+fn spawn_registration_field(
+    parent: &mut ChildSpawnerCommands,
+    rect: spec::CrystalRect,
+    value: &str,
+    enabled: bool,
+    focus: RegistrationFocus,
+    border_color: Color,
+) {
+    let mut node = absolute_node(rect);
+    node.border = UiRect::all(Val::Px(1.0));
+    node.padding = UiRect::horizontal(Val::Px(2.0));
+    node.overflow = Overflow::clip();
+    node.align_items = AlignItems::Center;
+    let mut field = parent.spawn((
+        node,
+        BackgroundColor(Color::BLACK),
+        BorderColor::all(border_color),
+        NativeShellField::Registration(focus),
+    ));
+    if enabled {
+        field.insert(Button);
     }
+    field.with_children(|field| {
+        field.spawn((
+            Text::new(value.to_owned()),
+            body_font(11.0),
+            TextColor(Color::WHITE),
+        ));
+    });
+}
+
+fn registration_field_border_color(
+    form: &crate::native_shell::RegistrationForm,
+    focus: RegistrationFocus,
+) -> Color {
+    let neutral = Color::srgb_u8(128, 128, 128);
+    let valid = Color::srgb(0.0, 0.5, 0.0);
+    let invalid = Color::srgb(0.75, 0.0, 0.0);
+    let alphanumeric = |value: &str, min, max| {
+        let length = value.chars().count();
+        (min..=max).contains(&length) && value.chars().all(|character| character.is_ascii_alphanumeric())
+    };
+    match focus {
+        RegistrationFocus::AccountId => {
+            if form.account_id.is_empty() {
+                neutral
+            } else if alphanumeric(&form.account_id, 3, 15) {
+                valid
+            } else {
+                invalid
+            }
+        }
+        RegistrationFocus::Password => {
+            if form.password.is_empty() {
+                neutral
+            } else if alphanumeric(&form.password, 5, 15) {
+                valid
+            } else {
+                invalid
+            }
+        }
+        RegistrationFocus::ConfirmPassword => {
+            if form.confirm_password.is_empty() {
+                neutral
+            } else if alphanumeric(&form.confirm_password, 5, 15)
+                && form.confirm_password == form.password
+            {
+                valid
+            } else {
+                invalid
+            }
+        }
+        RegistrationFocus::UserName => optional_field_color(&form.user_name, 20, neutral, valid, invalid),
+        RegistrationFocus::BirthDate => {
+            if form.birth_date.is_empty() {
+                neutral
+            } else if parse_registration_birth_date(&form.birth_date).is_ok() {
+                valid
+            } else {
+                invalid
+            }
+        }
+        RegistrationFocus::SecretQuestion => {
+            optional_field_color(&form.secret_question, 30, neutral, valid, invalid)
+        }
+        RegistrationFocus::SecretAnswer => {
+            optional_field_color(&form.secret_answer, 30, neutral, valid, invalid)
+        }
+        RegistrationFocus::EmailAddress => {
+            if form.email_address.is_empty() {
+                neutral
+            } else if form.email_address.chars().count() <= 50
+                && valid_registration_email(&form.email_address)
+            {
+                valid
+            } else {
+                invalid
+            }
+        }
+        RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => neutral,
+    }
+}
+
+fn optional_field_color(
+    value: &str,
+    max_chars: usize,
+    neutral: Color,
+    valid: Color,
+    invalid: Color,
+) -> Color {
+    if value.is_empty() {
+        neutral
+    } else if value.chars().count() <= max_chars {
+        valid
+    } else {
+        invalid
+    }
+}
+
+fn registration_description(focus: RegistrationFocus) -> &'static str {
+    match focus {
+        RegistrationFocus::AccountId => "Account ID: 3-15 letters or numbers.",
+        RegistrationFocus::Password | RegistrationFocus::ConfirmPassword => {
+            "Password: 5-15 letters or numbers. Confirm it exactly."
+        }
+        RegistrationFocus::UserName => "Optional user name: up to 20 characters.",
+        RegistrationFocus::BirthDate => "Optional birth date: YYYY-MM-DD.",
+        RegistrationFocus::SecretQuestion => "Optional secret question: up to 30 characters.",
+        RegistrationFocus::SecretAnswer => "Optional secret answer: up to 30 characters.",
+        RegistrationFocus::EmailAddress => "Optional email address: up to 50 characters.",
+        RegistrationFocus::SubmitButton => "Create the account with these details.",
+        RegistrationFocus::CancelButton => "Return to the login screen.",
+    }
+}
+
+fn render_change_password(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    model: &NativeShellModel,
+) {
+    crate::crystal_ui::change_password::spawn_change_password(parent, asset_server, model);
 }
 
 fn render_safe_key(
@@ -1542,40 +1875,38 @@ fn render_connection_lost(
     model: &NativeShellModel,
     aux_focus: NativeShellAuxFocus,
 ) {
-    spawn_auxiliary_panel(parent, asset_server, AUX_CONFIRM_PANEL);
+    spawn_native_image(
+        parent,
+        asset_server,
+        "original-ui/Prguse/360.png",
+        CONNECTION_LOST_PANEL,
+    );
     spawn_aux_text(
         parent,
         "Connection Lost",
-        spec::CrystalRect::new(366.0, 304.0, 292.0, 28.0),
-        19.0,
+        spec::CrystalRect::new(319.0, 316.0, 390.0, 24.0),
+        18.0,
         GOLD,
         Justify::Center,
     );
     spawn_aux_text(
         parent,
         "Press Enter, Escape, or Retry to reconnect.",
-        spec::CrystalRect::new(366.0, 350.0, 292.0, 25.0),
-        13.0,
+        spec::CrystalRect::new(319.0, 348.0, 390.0, 30.0),
+        12.0,
         CREAM,
         Justify::Center,
     );
     if let Some(notice) = &model.notice {
+        let notice_summary = connection_notice_summary(&notice.message);
         spawn_aux_notice(
             parent,
-            &notice.message,
+            &notice_summary,
             notice.kind,
-            spec::CrystalRect::new(366.0, 374.0, 292.0, 20.0),
+            spec::CrystalRect::new(319.0, 388.0, 390.0, 34.0),
         );
     }
-    let retry_spec = CrystalButtonSpec::new(
-        "Title",
-        320,
-        321,
-        322,
-        spec::CrystalRect::new(575.0, 398.0, 42.0, 42.0),
-        48.0,
-        48.0,
-    );
+    let retry_spec = connection_lost_retry_spec();
     spawn_crystal_image_button(
         parent,
         asset_server,
@@ -1585,14 +1916,35 @@ fn render_connection_lost(
         aux_focus.connection_retry,
         true,
     );
-    spawn_aux_text(
-        parent,
-        "Retry",
-        spec::CrystalRect::new(524.0, 444.0, 144.0, 20.0),
-        12.0,
-        CREAM,
-        Justify::Center,
-    );
+}
+
+const fn connection_lost_retry_spec() -> CrystalButtonSpec {
+    CrystalButtonSpec::new(
+        "Title",
+        200,
+        201,
+        202,
+        spec::CrystalRect::new(644.0, 446.0, 76.0, 25.0),
+        76.0,
+        25.0,
+    )
+}
+
+fn connection_notice_summary(message: &str) -> String {
+    if let Some(start) = message.rfind("(os error ") {
+        if let Some(relative_end) = message[start..].find(')') {
+            let end = start + relative_end + 1;
+            return format!("Cannot reach the local Gateway.\n{}", &message[start..end]);
+        }
+    }
+
+    const MAX_NOTICE_CHARS: usize = 72;
+    let mut summary = message.split_whitespace().collect::<Vec<_>>().join(" ");
+    if summary.chars().count() > MAX_NOTICE_CHARS {
+        summary = summary.chars().take(MAX_NOTICE_CHARS - 1).collect();
+        summary.push('…');
+    }
+    summary
 }
 
 fn character_class_index(class_name: &str) -> u16 {
@@ -1607,21 +1959,6 @@ fn character_gender_index(gender_name: &str) -> u16 {
         .iter()
         .position(|candidate| candidate.eq_ignore_ascii_case(gender_name))
         .unwrap_or(0) as u16
-}
-
-fn character_preview_asset(class_name: &str, gender_name: &str) -> String {
-    let class_index = character_class_index(class_name);
-    let gender_index = character_gender_index(gender_name);
-    let frame = match (class_index, gender_index) {
-        (0, 0) => 20,
-        (0, 1) => 300,
-        (1, 0) => 40,
-        (1, 1) => 320,
-        (2, 0) => 60,
-        (2, 1) => 340,
-        _ => 20,
-    };
-    format!("original-ui/ChrSel/{frame}.png")
 }
 
 fn character_description(class_name: &str) -> &'static str {
@@ -1689,8 +2026,10 @@ fn spawn_aux_text(
     color: Color,
     justify: Justify,
 ) {
+    let mut node = absolute_node(rect);
+    node.overflow = Overflow::clip();
     parent.spawn((
-        absolute_node(rect),
+        node,
         Text::new(value.to_owned()),
         body_font(size),
         TextColor(color),
@@ -1944,6 +2283,59 @@ fn body_font(size: f32) -> TextFont {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn door_waits_for_all_frames_then_updates_the_real_background_handle() {
+        use super::*;
+        let mut images = Assets::<Image>::default();
+        let frames = (0..19)
+            .map(|_| images.add(Image::default()))
+            .collect::<Vec<_>>();
+        let missing = images.remove(frames[18].id()).unwrap();
+        let mut app = App::new();
+        app.insert_resource(images);
+        app.insert_resource(NativeLoginDoorFrames(frames.clone()));
+        app.insert_resource(Time::<()>::default());
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::OpeningLogin;
+        app.insert_resource(model);
+        let background = app
+            .world_mut()
+            .spawn((NativeLoginDoorBackground, ImageNode::default()))
+            .id();
+        app.add_systems(Update, animate_login_door);
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(100));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .login_opening_elapsed,
+            std::time::Duration::ZERO
+        );
+        assert_eq!(
+            app.world().get::<ImageNode>(background).unwrap().image,
+            frames[0]
+        );
+        app.world_mut()
+            .resource_mut::<Assets<Image>>()
+            .insert(frames[18].id(), missing)
+            .unwrap();
+        app.update();
+        assert_eq!(
+            app.world().get::<ImageNode>(background).unwrap().image,
+            frames[2]
+        );
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(1700));
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            NativeShellScreen::CharacterSelect
+        );
+    }
+
     use super::*;
     use crate::native_shell::{CharacterSummary, NativeGatewayEvent};
 
@@ -2238,10 +2630,7 @@ mod tests {
             NEW_CHARACTER_NAME_FIELD,
             spec::CrystalRect::new(543.0, 422.0, 240.0, 20.0)
         );
-        assert_eq!(
-            NEW_CHARACTER_PREVIEW,
-            spec::CrystalRect::new(338.0, 404.0, 196.0, 302.0)
-        );
+        assert_eq!(NEW_CHARACTER_PREVIEW_ANCHOR, (338.0, 404.0));
         assert_eq!(
             NEW_CHARACTER_CREATE,
             spec::CrystalRect::new(378.0, 579.0, 100.0, 25.0)
@@ -2260,18 +2649,6 @@ mod tests {
             .into_iter()
             .chain(NEW_CHARACTER_GENDER_BUTTONS)
             .all(|rect| NEW_CHARACTER_FRAME.contains(rect.left, rect.top)));
-        assert_eq!(
-            character_preview_asset("Warrior", "Male"),
-            "original-ui/ChrSel/20.png"
-        );
-        assert_eq!(
-            character_preview_asset("Wizard", "Female"),
-            "original-ui/ChrSel/320.png"
-        );
-        assert_eq!(
-            character_preview_asset("Taoist", "Male"),
-            "original-ui/ChrSel/60.png"
-        );
         assert_eq!(
             spec::CrystalFrameSpec::new("Prguse", 73, NEW_CHARACTER_FRAME).asset_path(),
             "original-ui/Prguse/73.png"
@@ -2324,31 +2701,26 @@ mod tests {
     }
 
     #[test]
-    fn different_gateway_commands_are_not_swallowed_by_a_nonempty_queue() {
+    fn valid_registration_is_the_only_registration_intent_queued() {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::Login;
-        model.login.account = "hero".to_owned();
-        model.login.password = "secret".to_owned();
         let mut queue = NativeUiIntentQueue::default();
-
-        assert!(apply_and_queue(
-            &mut model,
-            &mut queue,
-            NativeUiIntent::RegisterAccount,
-        ));
-        assert!(apply_and_queue(
-            &mut model,
-            &mut queue,
-            NativeUiIntent::Login
-        ));
-
-        assert_eq!(
-            queue.drain().collect::<Vec<_>>(),
-            vec![NativeUiIntent::RegisterAccount, NativeUiIntent::Login]
-        );
-        assert_eq!(model.screen, NativeShellScreen::Authenticating);
+        assert!(model.apply_ui_intent(NativeUiIntent::OpenRegistration));
+        let intent = NativeUiIntent::SubmitRegistration {
+            account_id: "hero".to_owned(),
+            password: "secret".to_owned(),
+            confirm_password: "secret".to_owned(),
+            birth_date: "2000-01-01".to_owned(),
+            birth_date_binary: parse_registration_birth_date("2000-01-01").unwrap(),
+            user_name: "Hero".to_owned(),
+            secret_question: "pet?".to_owned(),
+            secret_answer: "cat".to_owned(),
+            email_address: "hero@example.test".to_owned(),
+        };
+        assert!(apply_and_queue(&mut model, &mut queue, intent.clone()));
+        assert_eq!(queue.drain().collect::<Vec<_>>(), vec![intent]);
+        assert_eq!(model.screen, NativeShellScreen::Registration);
         assert!(model.register_request_in_flight);
-        assert!(model.login_request_in_flight);
     }
 
     #[test]
@@ -2381,18 +2753,22 @@ mod tests {
     }
 
     #[test]
-    fn operation_failure_releases_register_and_login_for_recovery() {
+    fn registration_failure_releases_submission_for_recovery() {
         let mut model = NativeShellModel::default();
-        model.screen = NativeShellScreen::Login;
-        model.login.account = "hero".to_owned();
-        model.login.password = "secret".to_owned();
+        model.screen = NativeShellScreen::Registration;
         let mut queue = NativeUiIntentQueue::default();
-
-        assert!(apply_and_queue(
-            &mut model,
-            &mut queue,
-            NativeUiIntent::RegisterAccount,
-        ));
+        let intent = NativeUiIntent::SubmitRegistration {
+            account_id: "hero".to_owned(),
+            password: "secret".to_owned(),
+            confirm_password: "secret".to_owned(),
+            birth_date: String::new(),
+            birth_date_binary: 0,
+            user_name: String::new(),
+            secret_question: String::new(),
+            secret_answer: String::new(),
+            email_address: String::new(),
+        };
+        assert!(apply_and_queue(&mut model, &mut queue, intent.clone()));
         queue.drain().for_each(drop);
         assert!(
             model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
@@ -2400,44 +2776,32 @@ mod tests {
             })
         );
         assert!(!model.register_request_in_flight);
-        assert!(apply_and_queue(
-            &mut model,
-            &mut queue,
-            NativeUiIntent::RegisterAccount,
-        ));
-        queue.drain().for_each(drop);
-
-        assert!(model.apply_gateway_event(NativeGatewayEvent::Disconnect {
-            reason: Some("network lost".to_owned()),
-        }));
-        assert!(model.apply_ui_intent(NativeUiIntent::Retry));
-        assert!(model.retry_request_in_flight);
-        assert!(model.apply_gateway_event(NativeGatewayEvent::Connected));
-        assert!(!model.retry_request_in_flight);
-        assert_eq!(model.screen, NativeShellScreen::Login);
+        assert!(apply_and_queue(&mut model, &mut queue, intent));
+        assert_eq!(queue.drain().count(), 1);
     }
 
     #[test]
-    fn duplicate_register_click_is_rejected_after_queue_drain_without_logging_password() {
+    fn duplicate_registration_submit_is_rejected_without_logging_password() {
         let mut model = NativeShellModel::default();
-        model.screen = NativeShellScreen::Login;
-        model.login.account = "hero".to_owned();
-        model.login.password = "super-secret".to_owned();
+        model.screen = NativeShellScreen::Registration;
         let mut queue = NativeUiIntentQueue::default();
-
-        assert!(apply_and_queue(
-            &mut model,
-            &mut queue,
-            NativeUiIntent::RegisterAccount,
-        ));
+        let intent = NativeUiIntent::SubmitRegistration {
+            account_id: "hero".to_owned(),
+            password: "supersecret".to_owned(),
+            confirm_password: "supersecret".to_owned(),
+            birth_date: String::new(),
+            birth_date_binary: 0,
+            user_name: String::new(),
+            secret_question: String::new(),
+            secret_answer: String::new(),
+            email_address: String::new(),
+        };
+        assert!(apply_and_queue(&mut model, &mut queue, intent.clone()));
         queue.drain().for_each(drop);
-        assert!(!apply_and_queue(
-            &mut model,
-            &mut queue,
-            NativeUiIntent::RegisterAccount,
-        ));
+        assert!(!apply_and_queue(&mut model, &mut queue, intent.clone()));
         assert!(queue.is_empty());
-        assert!(!format!("{model:?}").contains("super-secret"));
+        assert!(!format!("{model:?}").contains("supersecret"));
+        assert!(!format!("{intent:?}").contains("supersecret"));
         assert!(!format!(
             "{:?}",
             NativeUiIntent::SubmitChangePassword {
@@ -2495,6 +2859,76 @@ mod tests {
     }
 
     #[test]
+    fn registration_submit_intent_preserves_every_supported_new_account_field() {
+        let mut model = NativeShellModel::default();
+        model.registration.account_id = "newhero".to_owned();
+        model.registration.password = "Secret1".to_owned();
+        model.registration.confirm_password = "Secret1".to_owned();
+        model.registration.birth_date = "2001-02-03".to_owned();
+        model.registration.user_name = "New Hero".to_owned();
+        model.registration.secret_question = "first pet?".to_owned();
+        model.registration.secret_answer = "cat".to_owned();
+        model.registration.email_address = "hero@example.test".to_owned();
+
+        assert_eq!(
+            registration_submit_intent(&model),
+            Ok(NativeUiIntent::SubmitRegistration {
+                account_id: "newhero".to_owned(),
+                password: "Secret1".to_owned(),
+                confirm_password: "Secret1".to_owned(),
+                birth_date: "2001-02-03".to_owned(),
+                birth_date_binary: parse_registration_birth_date("2001-02-03").unwrap(),
+                user_name: "New Hero".to_owned(),
+                secret_question: "first pet?".to_owned(),
+                secret_answer: "cat".to_owned(),
+                email_address: "hero@example.test".to_owned(),
+            })
+        );
+    }
+
+    #[test]
+    fn registration_renderer_enables_submit_only_for_a_valid_idle_form() {
+        let mut model = NativeShellModel::default();
+        assert!(!registration_submit_enabled(&model));
+
+        model.registration.account_id = "newhero".to_owned();
+        model.registration.password = "Secret1".to_owned();
+        model.registration.confirm_password = "Secret1".to_owned();
+        assert!(registration_submit_enabled(&model));
+
+        model.register_request_in_flight = true;
+        assert!(!registration_submit_enabled(&model));
+    }
+
+    #[test]
+    fn registration_focus_order_covers_every_crystal_dialog_control() {
+        use RegistrationFocus::*;
+
+        let mut focus = AccountId;
+        let mut visited = Vec::new();
+        for _ in 0..10 {
+            visited.push(focus);
+            focus = cycle_registration_focus(focus, false);
+        }
+        assert_eq!(focus, AccountId);
+        assert_eq!(
+            visited,
+            vec![
+                AccountId,
+                Password,
+                ConfirmPassword,
+                UserName,
+                BirthDate,
+                SecretQuestion,
+                SecretAnswer,
+                EmailAddress,
+                SubmitButton,
+                CancelButton,
+            ]
+        );
+    }
+
+    #[test]
     fn delete_click_and_cancel_enqueue_no_gateway_packet() {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::CharacterSelect;
@@ -2519,5 +2953,43 @@ mod tests {
         ));
         assert!(queue.is_empty());
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
+    }
+
+    #[test]
+    fn connection_notice_collapses_localized_socket_text_to_a_bounded_summary() {
+        assert_eq!(
+            connection_notice_summary(
+                "gateway connect failed: IO error: 由于目标计算机积极拒绝，无法连接。 (os error 10061)"
+            ),
+            "Cannot reach the local Gateway.\n(os error 10061)"
+        );
+    }
+
+    #[test]
+    fn connection_notice_truncation_is_unicode_safe() {
+        let source = "网关连接失败".repeat(20);
+        let summary = connection_notice_summary(&source);
+        assert_eq!(summary.chars().count(), 72);
+        assert!(summary.ends_with('…'));
+    }
+
+    #[test]
+    fn connection_lost_dialog_uses_crystal_message_box_and_ok_button_geometry() {
+        assert_eq!(
+            CONNECTION_LOST_PANEL,
+            spec::CrystalRect::new(284.0, 289.0, 456.0, 190.0)
+        );
+        assert_eq!(
+            connection_lost_retry_spec(),
+            CrystalButtonSpec::new(
+                "Title",
+                200,
+                201,
+                202,
+                spec::CrystalRect::new(644.0, 446.0, 76.0, 25.0),
+                76.0,
+                25.0,
+            )
+        );
     }
 }
