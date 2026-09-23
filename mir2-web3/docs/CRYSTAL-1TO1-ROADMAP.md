@@ -7,7 +7,8 @@
 > clocks now agree. V2-specific practice labels, bounded hunting points and
 > training population changes improve onboarding without claiming original
 > UI/population parity. Shared1083/native738/render275/Zone209+10/Gateway2/
-> training1/Node64 pass; paired binaries are packaged but not deployed.
+> training1/Node64 pass. Source `abee09b21` is deployed after confirmed normal
+> logout (client55648/Gateway61900), with a verified backup and active diagnostics.
 > D021 live performance acceptance remains open despite measured lookup savings.
 > [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
 

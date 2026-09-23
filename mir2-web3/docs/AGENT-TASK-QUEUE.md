@@ -10,7 +10,9 @@
 > measured filesystem hot path; material/visibility changes preserve D021
 > GPU pixels. Shared UI1083, native738, renderer275, Zone209+10, training1,
 > Gateway2 and Node64 pass. Matched release binaries are hash-verified in
-> `20260924-practice-combat`, awaiting normal logout/close before cutover.
+> `20260924-practice-combat`. After confirmed normal logout, source `abee09b21`
+> is running on client55648/Gateway61900 with a verified save backup and
+> movement/render/soak diagnostics; local WebSocket connection is established.
 > Actual D021 frame improvement and physical acceptance remain open.
 > [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
 

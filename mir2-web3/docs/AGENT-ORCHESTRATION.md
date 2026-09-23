@@ -7,8 +7,10 @@
 > Exact skill requirements and training-point navigation are visible in native
 > UI. Thrusting primary/secondary damage, accepted weapon progression and
 > native animation/motion clock alignment are tested. Matched release package
-> `20260924-practice-combat` is hash-verified and **not deployed**; wait for
-> normal logout/close before replacing the live pair. D021 performance still
+> `20260924-practice-combat`, source `abee09b21`, was deployed after confirmed
+> normal logout on September 24 at 06:02 +08:00. Client55648 connects to
+> Gateway61900 with the original store/keys and a verified save backup.
+> Movement/render/soak diagnostics are active. D021 performance still
 > requires same-scene replay after measured resource-lookup and render changes.
 > [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
 

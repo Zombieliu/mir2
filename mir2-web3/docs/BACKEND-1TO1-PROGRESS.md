@@ -7,9 +7,10 @@
 > Gateway uses a legal Zone primary-target snapshot before dispatch and grants
 > weapon experience only after accepted ObjectAttack. Zone209+10, Gateway2
 > and V2 training-spawn1 tests pass. V2 D022 uses nine three-actor training
-> groups; imported original cadence is untouched. Matched Gateway is packaged,
-> not deployed; player save, impact timing and standalone compatibility combat
-> remain outside this correction.
+> groups; imported original cadence is untouched. Matched source `abee09b21`
+> is deployed on Gateway61900 after confirmed normal logout and a verified
+> save backup; client55648 connects using the original store/keys. Save editing,
+> impact timing and standalone compatibility combat remain outside this correction.
 > [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
 
 > 2026-09-24 safe-area binding and combat-order candidate: the saved

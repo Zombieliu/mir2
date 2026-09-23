@@ -7,8 +7,9 @@
 > retries do not. Existing Zone209, focused melee10 and Gateway2 pass.
 > Original impact timing and AI49 remain separate open work; no global combat
 > parity claim. V2-only three-actor training groups are an onboarding policy,
-> validated separately from original-cadence spawning. Release is packaged
-> but awaits ordinary logout/close for deployment.
+> validated separately from original-cadence spawning. Source `abee09b21`
+> is deployed after confirmed normal logout (Gateway61900/client55648), with
+> the original store/keys, a verified save backup and active diagnostics.
 > [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
 
 > 2026-09-24 candidate: `SetBindSafeZone` parity stores the last entered

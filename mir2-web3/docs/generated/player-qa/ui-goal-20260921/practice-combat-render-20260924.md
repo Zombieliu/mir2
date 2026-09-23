@@ -119,10 +119,34 @@ The client and Gateway are copied and hash-verified in
 Gateway SHA-256:
 `A79307FB7F7ED779771E5C6C49A3E47504196C59F2353D6B5C60B010FFA5D201`.
 The launcher preserves the existing store and identity keys, shared assets,
-fixed-daylight setting and movement/render diagnostics. The package is **not
-deployed**; normal player logout/close is required before switching the pair.
-Physical acceptance, three-class survival and whole-game stability remain
-open. The user's live client and account store were left untouched.
+fixed-daylight setting and movement/render diagnostics.
+
+### Live handoff: September 24, 06:02 +08:00
+
+After the user confirmed normal exit, the previous client was absent and the
+old Gateway had no established connections. Source
+`abee09b21d33a7e5a23f36609ee31f0da3246f83` is now deployed as client PID 55648
+and Gateway PID 61900. Both binary hashes match the packaged manifest.
+Settings were copied again after logout, preserving the latest user settings.
+
+The original account store was backed up before switching to
+`C:/mir2-ui-repair-20260921/player-save-backups/20260924-060127-726-practice-combat-accounts.json`.
+The copy and live store SHA-256 matched:
+`5B5EB20EF4892DAEE3BDA0F8ECCCE78C2C3649CDD341A4C535F272FB75E73C95`.
+No character records were edited and no items or progression were granted.
+
+The Gateway owns both local listeners (19900 and 19910); the responsive native
+client has an established WebSocket connection and received its first snapshot.
+Resource-index/map-pack discovery succeeded without a startup crash.
+Movement and render traces use
+`C:/mir2-ui-repair-20260921/render-live/20260924-060209-524-{movement,render}.jsonl`;
+native soak metrics are also enabled. Gateway stderr is
+`C:/mir2-ui-repair-20260921/render-live/20260924-060128-531-gateway.stderr.log`.
+
+This verifies launch and connection only. Physical acceptance, D021 whole-frame
+improvement, three-class survival and whole-game stability remain open;
+the package manifest retains false acceptance flags. The client is open for
+the user's gameplay check.
 
 Evidence logs live in `C:/mir2-ui-repair-20260921`: shared/Node test logs,
 `thrusting-gateway-fixture-tests.log`, `thrusting-training-spawns-tests.log`,
