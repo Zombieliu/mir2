@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-24 source-and-test candidate: dynamic bind follows Crystal
+> `SetBindSafeZone` at the most recently entered safe-area center and persists
+> through logout. TownTeleport, DungeonEscape, TownRevive and immediate
+> Gateway UseItem use that authoritative point. Accepted combat supersedes
+> older buffered movement in the shared Zone; client attacks no longer wait on
+> a delayed movement ACK or replay stale target intents. V2-only quest diary
+> tabs/paging and measured-height guidance rows address the reported UI clutter.
+> Shared UI 1079, native 732, Zone 209 and scroll integration 7 pass, plus
+> focused Gateway/revive cases. Release and live human acceptance are pending;
+> the V2 tab layout does not increase original Crystal visual parity.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).
+
 > 2026-09-23 map pointer correction: Big Map coordinates share the click-route
 > image projection, retain the last valid hover tile and reset across scenes.
 > Mini Map gains guarded ordinary click routing from its actual rendered crop,

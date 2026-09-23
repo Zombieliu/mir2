@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-09-24 candidate: newcomer V2 Quest Diary separates the current main
+> route, ready turn-ins and imported side quests with paging; task-card rows
+> reserve wrapped text height. Native combat no longer pauses on a delayed
+> single movement ACK or passive HUD hover, and stale attacks are not retried
+> ahead of a new target. Shared Zone cancels pre-attack queued steps only after
+> accepted combat. Crystal's latest-safe-zone binding is saved and used for
+> TownTeleport, DungeonEscape and TownRevive, including immediate Zone→UseItem.
+> Shared UI 1079/1079, native 732/732 (two GPU soaks excluded), Zone 209/209,
+> scroll 7/7 and focused Gateway/revive cases pass. Release packaging, normal
+> logout cutover and physical gameplay acceptance remain open. Do not edit the
+> running a1 save: the user selected original latest-safe-zone semantics and
+> the old save currently stands in the village safe area.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).
+
 > 2026-09-23 map-pointer UI: Big Map XY now follows the displayed image's
 > mouse tile; a retained label and bounded render cache avoid hover rebuilds.
 > Mini Map left/right clicks invert the actual rendered crop and use ordinary

@@ -1766,6 +1766,10 @@ pub struct CharacterSaveRecord {
     pub map_title: String,
     pub position: Point,
     pub direction: MirDirection,
+    /// Crystal `BindMapIndex`/`BindLocation`: updated on entering a safe zone.
+    /// Legacy saves fall back to the configured starting safe zone.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bind_point: Option<CharacterBindPoint>,
     pub hp: i32,
     pub max_hp: i32,
     pub mp: i32,
@@ -1834,6 +1838,12 @@ pub struct CharacterSaveRecord {
     pub stage5_systems_json: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CharacterBindPoint {
+    pub map_file_name: String,
+    pub position: Point,
+}
+
 pub fn crystal_base_vitals(class: MirClass, level: u16) -> (i32, i32) {
     let level = f32::from(level);
     let hp = match class {
@@ -1863,6 +1873,7 @@ impl CharacterSaveRecord {
             map_title: String::new(),
             position: Point { x: 0, y: 0 },
             direction: MirDirection::Down,
+            bind_point: None,
             hp: max_hp,
             max_hp,
             mp,

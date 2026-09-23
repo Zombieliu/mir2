@@ -2341,7 +2341,18 @@ pub fn forward_quest_ui_intents(
             .unwrap_or(dialog_open || dead);
 
     let mut retry_intents = Vec::new();
-    for intent in pending {
+    // Combat selection expresses the latest target, not a FIFO of attacks.
+    // A burst of UI/world input can cross this bridge in one batch; only the
+    // most recent target is still the player's selected intent.
+    let latest_attack_index = pending
+        .iter()
+        .rposition(|intent| matches!(intent, QuestUiIntent::AttackTarget { .. }));
+    for (index, intent) in pending.into_iter().enumerate() {
+        if matches!(&intent, QuestUiIntent::AttackTarget { .. })
+            && Some(index) != latest_attack_index
+        {
+            continue;
+        }
         let retry_intent = intent.clone();
         let traced_attack_target = match &intent {
             QuestUiIntent::AttackTarget { object_id } => Some(*object_id),
@@ -2495,7 +2506,30 @@ pub fn forward_quest_ui_intents(
                 }
             }
             QuestUiIntent::AttackTarget { object_id } => {
-                if world_actions_blocked {
+                // Passive HUD hover can occur while a selected monster is
+                // still being pursued. Only a real modal/drag or a different
+                // input owner may stop that ongoing action.
+                let ongoing_target = movement
+                    .as_deref()
+                    .is_some_and(|state| state.attack_target() == Some(object_id));
+                let attack_actions_blocked = notice
+                    .as_deref()
+                    .is_some_and(NoticeDialogState::is_open)
+                    || dialog_open
+                    || dead
+                    || player_ui_state.as_deref().is_some_and(|ui| {
+                        if ongoing_target {
+                            ui.blocks_route_navigation()
+                        } else {
+                            ui.blocks_world_action(false, false)
+                        }
+                    });
+                if attack_actions_blocked {
+                    crate::movement_trace::record(serde_json::json!({
+                        "type": "attackForwardBlocked",
+                        "targetId": object_id,
+                        "ongoingTarget": ongoing_target,
+                    }));
                     if native_input_trace_enabled() {
                         eprintln!(
                             "[native-input-trace] forward target={object_id} result=blocked-world-actions"
@@ -2598,6 +2632,15 @@ pub fn forward_quest_ui_intents(
         }
         let command_type = command.command_type();
         let sent = commands.send_command(GatewayCommand::Wire(command));
+        if let Some(object_id) = traced_attack_target {
+            crate::movement_trace::record(serde_json::json!({
+                "type": "attackForwarded",
+                "targetId": object_id,
+                "command": command_type,
+                "sent": sent,
+                "retryQueued": false,
+            }));
+        }
         if native_input_trace_enabled() {
             if let Some(object_id) = traced_attack_target {
                 eprintln!(
@@ -2610,7 +2653,7 @@ pub fn forward_quest_ui_intents(
                 );
             }
         }
-        if !sent {
+        if !sent && !matches!(&retry_intent, QuestUiIntent::AttackTarget { .. }) {
             retry_intents.push(retry_intent);
         }
     }
@@ -5682,6 +5725,68 @@ mod tests {
             0,
             "closing must not duplicate the action"
         );
+    }
+
+    #[test]
+    fn retained_combat_selection_survives_passive_hud_hover_but_not_modal_input() {
+        let mut ui = NativePlayerUiState::default();
+        ui.status_hud.hovered = true;
+        ui.hero_buffs.rows.hovered = true;
+        let (mut app, receiver) = quest_gate_app(ui, NpcDialogModel::default());
+        let mut movement = WorldPointerMovementState::default();
+        movement.pursue_attack_target(42);
+        app.insert_resource(movement);
+        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
+        app.update();
+        assert!(matches!(
+            receiver.try_recv(),
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 42 }))
+        ));
+
+        app.world_mut().resource_mut::<NativePlayerUiState>().toggle_options();
+        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
+        app.update();
+        assert!(receiver.try_recv().is_err(), "a modal still blocks combat");
+    }
+
+    #[test]
+    fn combat_batch_keeps_latest_target_and_saturated_lane_never_replays_old_attack() {
+        let (sender, mut receiver) = crate::gateway::command_channel(8);
+        let (mut app, _unused_receiver) = quest_gate_app(
+            NativePlayerUiState::default(), NpcDialogModel::default(),
+        );
+        app.insert_resource(GatewayCommands::new(sender.clone()));
+        app.insert_resource(WorldPointerMovementState::default());
+        for _ in 0..8 {
+            assert!(sender.send(GatewayCommand::Player(crate::gateway::PlayerIntent::Walk {
+                direction: "up".to_owned(),
+            })).is_ok());
+        }
+        {
+            let mut queue = app.world_mut().resource_mut::<QuestUiIntentQueue>();
+            queue.push_intent(QuestUiIntent::AttackTarget { object_id: 41 });
+            queue.push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
+        }
+        app.update();
+        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target(), Some(42));
+        assert!(app.world().resource::<QuestUiIntentQueue>().is_empty(),
+            "failed attacks must not remain ahead of the next target");
+        assert_eq!(app.world().resource::<QuestUiIntentQueue>().retry_len(), 0);
+
+        assert!(receiver.try_command().is_ok());
+        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 43 });
+        app.update();
+        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target(), Some(43));
+        let forwarded: Vec<_> = std::iter::from_fn(|| receiver.try_command().ok()).collect();
+        assert_eq!(forwarded.iter().filter(|command| matches!(command,
+            GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 43 })
+        )).count(), 1);
+        assert!(!forwarded.iter().any(|command| matches!(command,
+            GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 41 | 42 })
+        )));
     }
 
     #[test]

@@ -2,6 +2,14 @@
 use super::*;
 use crate::big_map::BigMapModel;
 use crate::quest_model::QuestStatus;
+use unicode_width::UnicodeWidthChar;
+
+// The tracker is 304 px wide, with 282 px of usable content (270 px inside a
+// button). Count wide Latin glyphs as two columns alongside CJK glyphs; this
+// leaves margin at 12 px Microsoft YaHei. Bevy's intrinsic text height can lag
+// a wrapped line by a frame, so every row reserves its full height up front.
+const CARD_WRAP_COLUMNS: usize = 38;
+const CARD_LINE_HEIGHT: f32 = 18.0;
 
 /// Manual active choice wins until authoritative completion/removal. Journey's
 /// recommended next step (including accept/turn-in) otherwise remains primary.
@@ -143,19 +151,82 @@ fn objective_lines(quest: &Quest) -> Vec<String> {
     quest.objectives.iter().map(|o| format!("{}  {}/{}", o.text, o.current, o.target)).collect()
 }
 
+fn card_char_columns(ch: char) -> usize {
+    let width = UnicodeWidthChar::width(ch).unwrap_or(0).max(1);
+    if ch.is_ascii_uppercase() || matches!(ch, 'm' | 'w' | '@' | '#' | '%' | '&') {
+        width.max(2)
+    } else {
+        width
+    }
+}
+
+fn card_columns(text: &str) -> usize {
+    text.chars().map(card_char_columns).sum()
+}
+
+fn wrap_card_text(text: &str) -> Vec<String> {
+    let mut lines = Vec::new();
+    for paragraph in text.split('\n') {
+        if card_columns(paragraph) <= CARD_WRAP_COLUMNS {
+            lines.push(paragraph.to_owned());
+            continue;
+        }
+        let mut current = String::new();
+        let mut width = 0;
+        for word in paragraph.split_whitespace() {
+            let word_width = card_columns(word);
+            if !current.is_empty() && width + 1 + word_width > CARD_WRAP_COLUMNS {
+                lines.push(std::mem::take(&mut current));
+                width = 0;
+            }
+            if word_width > CARD_WRAP_COLUMNS {
+                if !current.is_empty() {
+                    lines.push(std::mem::take(&mut current));
+                    width = 0;
+                }
+                for ch in word.chars() {
+                    let char_width = card_char_columns(ch);
+                    if !current.is_empty() && width + char_width > CARD_WRAP_COLUMNS {
+                        lines.push(std::mem::take(&mut current));
+                        width = 0;
+                    }
+                    current.push(ch);
+                    width += char_width;
+                }
+            } else {
+                if !current.is_empty() {
+                    current.push(' ');
+                    width += 1;
+                }
+                current.push_str(word);
+                width += word_width;
+            }
+        }
+        lines.push(current);
+    }
+    lines
+}
+
+fn card_text_height(text: &str) -> f32 {
+    wrap_card_text(text).len() as f32 * CARD_LINE_HEIGHT
+}
+
 fn line(parent: &mut ChildSpawnerCommands, text: impl Into<String>, color: Color) {
+    let wrapped = wrap_card_text(&text.into());
     parent.spawn((
-        Node { width: Val::Percent(100.0), min_height: Val::Px(18.0), flex_shrink: 0.0, ..default() },
-        Text::new(text),
+        Node { width: Val::Percent(100.0), height: Val::Px(wrapped.len() as f32 * CARD_LINE_HEIGHT),
+            flex_shrink: 0.0, ..default() },
+        Text::new(wrapped.join("\n")),
         TextFont { font: FontSource::Family("Microsoft YaHei".into()), font_size: FontSize::Px(12.0), ..default() },
-        TextColor(color), TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+        TextColor(color), TextLayout::new(Justify::Left, LineBreak::NoWrap),
     ));
 }
 
 fn button(parent: &mut ChildSpawnerCommands, text: &str, action: QuestUiButton) {
+    let height = (card_text_height(text) + 6.0).max(25.0);
     parent.spawn((
         Button, action, QuestUiButtonVisual { enabled: true },
-        Node { min_height: Val::Px(25.0), width: Val::Percent(100.0), padding: UiRect::axes(Val::Px(6.0), Val::Px(3.0)),
+        Node { height: Val::Px(height), width: Val::Percent(100.0), padding: UiRect::axes(Val::Px(6.0), Val::Px(3.0)),
             align_items: AlignItems::Center, justify_content: JustifyContent::Center, flex_shrink: 0.0, ..default() },
         BackgroundColor(BUTTON_BG), FocusPolicy::Block,
     )).with_children(|node| line(node, text, PANEL_HIGHLIGHT));
@@ -325,6 +396,47 @@ mod tests {
         assert!(lines[3].ends_with("3/100"));
         assert!(lines[0].starts_with(&q.objectives[0].text));
     }
+
+    #[test]
+    fn long_route_and_other_map_rows_reserve_every_wrapped_line() {
+        let route = "下一步 · 入口 (84,277) · 进入 WoomaTempleEntrance";
+        let other = "Help Needed · SerpentValley · Merchant Robert (505,479)";
+        for text in [route, other, "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"] {
+            let wrapped = wrap_card_text(text);
+            assert!(wrapped.len() > 1, "{text}");
+            assert!(wrapped.iter().all(|line| card_columns(line) <= CARD_WRAP_COLUMNS), "{wrapped:?}");
+            assert_eq!(wrapped.join(" ").split_whitespace().collect::<String>(),
+                text.split_whitespace().collect::<String>());
+        }
+
+        let mut world = World::new();
+        let mut queue = bevy::ecs::world::CommandQueue::default();
+        let mut commands = Commands::new(&mut queue, &world);
+        commands.spawn_empty().with_children(|parent| {
+            line(parent, route, FEEDBACK_OK);
+            button(parent, other, QuestUiButton::SelectQuest { quest_index: 1 });
+        });
+        queue.apply(&mut world);
+
+        let route_row = world.query::<(&Text, &Node, &TextLayout)>().iter(&world)
+            .find(|(text, _, _)| text.0.contains("WoomaTempleEntrance"))
+            .expect("route row");
+        assert_eq!(route_row.1.height, Val::Px(card_text_height(route)));
+        assert_eq!(route_row.2.linebreak, LineBreak::NoWrap);
+        let button_row = world.query::<(&QuestUiButton, &Node)>().iter(&world).next()
+            .expect("other-map button");
+        assert_eq!(button_row.1.height, Val::Px((card_text_height(other) + 6.0).max(25.0)));
+    }
+
+    #[test]
+    fn long_unbroken_word_after_short_label_keeps_word_boundary() {
+        let long_name = "W".repeat(CARD_WRAP_COLUMNS);
+        let label = format!("入口 {long_name}");
+        let wrapped = wrap_card_text(&label);
+        assert_eq!(wrapped.first().map(String::as_str), Some("入口"));
+        assert_eq!(wrapped[1..].concat(), long_name);
+        assert!(wrapped.iter().all(|line| card_columns(line) <= CARD_WRAP_COLUMNS));
+    }
     #[test]
     fn nearest_two_other_tasks_only_use_actual_visible_targets() {
         let mut tracker = QuestTracker { active_quests: (1..=5).map(quest).collect() };
@@ -368,7 +480,8 @@ mod tests {
         });
         queue.apply(&mut world);
         let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str())
-            .collect::<Vec<_>>().join("\n");
+            .collect::<Vec<_>>().join(" ");
+        let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
         assert!(text.contains("当前位置 (288,616)"));
         assert!(text.contains("入口 (147,33)"));
         assert!(text.contains("OmaCave_1F"));

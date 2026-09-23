@@ -908,9 +908,10 @@ impl SimulationSession {
         }
         {
             let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
-            runtime.player_position = position;
+            runtime.player_position = position.clone();
             runtime.player_direction = direction;
         }
+        super::map::refresh_player_bind_at_position(world, &position);
         advance_runtime_tick(world);
     }
 

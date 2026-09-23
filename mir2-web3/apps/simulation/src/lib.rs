@@ -20,7 +20,7 @@ pub use config::{
     AccountBanStatus, AccountRecord, AccountStore, AccountStoreDatabaseMode,
     SharedGuildRecord, SharedGuildMember, SharedGuildRank, SharedGuildStoredItem, SharedGuildBuff,
     AccountStoreRepository, AccountStoreRepositorySave, AccountStoreRepositoryStatus,
-    AccountStoreRuntimeBackend, BuffSnapshot, CharacterRecord, CharacterSaveRecord,
+    AccountStoreRuntimeBackend, BuffSnapshot, CharacterBindPoint, CharacterRecord, CharacterSaveRecord,
     EquipmentItemSnapshot, EquipmentSlot, FileAccountStoreRepository, GroundDropItemPayload,
     GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, MapTransferRecord,
     MonsterSpawnSource, NpcDialogLinkSnapshot, NpcDialogSnapshot, PostgresAccountStoreRepository,

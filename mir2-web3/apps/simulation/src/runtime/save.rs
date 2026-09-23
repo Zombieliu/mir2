@@ -94,6 +94,10 @@ pub(super) fn default_save_for_character(
     save.map_file_name = config.map.file_name.clone();
     save.map_title = config.map.title.clone();
     save.direction = MirDirection::Down;
+    save.bind_point = Some(crate::config::CharacterBindPoint {
+        map_file_name: config.map.file_name.clone(),
+        position: config.spawn.clone(),
+    });
     save.hp = max_hp;
     save.max_hp = max_hp;
     save.mp = mp;
@@ -253,6 +257,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         map_title: map.current_map.title.clone(),
         position,
         direction,
+        bind_point: player_runtime.bind_point.clone(),
         hp: vitals.hp,
         max_hp: vitals.max_hp,
         mp: vitals.mp,
@@ -1842,6 +1847,10 @@ pub(super) fn crystal_new_character_save(
     };
     let mut save = CharacterSaveRecord::new(character);
     save.max_experience = config.experience_required_for_level(save.character.level);
+    save.bind_point = Some(crate::config::CharacterBindPoint {
+        map_file_name: config.map.file_name.clone(),
+        position: config.spawn.clone(),
+    });
     save.gold = 0;
     save.inventory_items_json = if crystal_starter_loadout {
         encode_state_vec(&crystal_start_inventory_items(&save.character))
@@ -2692,6 +2701,12 @@ fn apply_character_save_with_timing(
             save.position.clone()
         };
         player_runtime.player_direction = save.direction;
+        player_runtime.bind_point = save.bind_point.clone().or_else(|| {
+            Some(crate::config::CharacterBindPoint {
+                map_file_name: config.map.file_name.clone(),
+                position: config.spawn.clone(),
+            })
+        });
         let restored_max_mp = if save.max_mp > 0 {
             save.max_mp
         } else {
@@ -2717,6 +2732,13 @@ fn apply_character_save_with_timing(
         player_runtime.chat_ban_until_ms = save.chat_ban_until_ms;
         player_runtime.chat_next_allowed_at_ms = 0;
         player_runtime.chat_spam_tick = 0;
+    }
+    // Old saves did not persist BindMapIndex/BindLocation. If the character
+    // logged out inside an imported safe area, recover the binding from that
+    // observed position instead of silently retaining the starter village.
+    if save.bind_point.is_none() {
+        let position = world.resource::<PlayerRuntimeResource>().player_position.clone();
+        super::map::refresh_player_bind_at_position(world, &position);
     }
     super::shared_guild_experience::restore(world, &save.guild_experience_journal);
     *world.resource_mut::<InventoryResource>() = restored_inventory;

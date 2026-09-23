@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+> 2026-09-24 safe-area binding and combat-order candidate: the saved
+> `bind_point` now follows the imported current-map safe-area center after
+> accepted local/Zone movement and map arrival. The same point drives
+> TownTeleport, DungeonEscape and TownRevive; Gateway synchronizes Zone
+> position before immediate UseItem. A newly accepted melee/range/magic action
+> cancels only older buffered Zone steps and corrects the owner; rejected
+> actions retain movement. Scroll integration 7/7, Zone 209/209, focused
+> simulation revival 1/1 and Gateway immediate-scroll/revival 1/1 each pass.
+> Player save migration was deliberately not attempted: a1's old save is
+> presently in the village safe area, and the player selected original
+> most-recent-safe-zone behavior. Live deployment/acceptance remain open.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).
+
 > 2026-09-23 ordinary entrance metadata: destination filename/title previously
 > inherited the source index, images and lighting. Transfers now apply the
 > complete imported destination metadata before relocation. Simulation 7/7

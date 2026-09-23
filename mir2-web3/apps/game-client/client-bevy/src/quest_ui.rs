@@ -112,6 +112,7 @@ const QUEST_DIARY_MAX_CURRENT: usize = 20;
 const QUEST_DIARY_GROUP_LEFT: f32 = 15.0;
 const QUEST_DIARY_FIRST_ROW_TOP: f32 = 40.0;
 const QUEST_DIARY_ROW_HEIGHT: f32 = 15.0;
+const GUIDED_DIARY_PAGE_SIZE: usize = 8;
 pub const QUEST_DETAIL_DESIGN_WIDTH: f32 = 316.0;
 pub const QUEST_DETAIL_DESIGN_HEIGHT: f32 = 466.0;
 pub const QUEST_DETAIL_DESIGN_LEFT: f32 = 532.0;
@@ -570,6 +571,17 @@ impl QuestUiIntentQueue {
         self.intents.clear();
     }
 
+    /// A manual move, cancellation or target switch supersedes unsent combat
+    /// requests. Keep quest and NPC operations in their original FIFO order.
+    pub fn clear_attack_intents(&mut self) -> usize {
+        let before = self.len();
+        self.retry_intents
+            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. }));
+        self.intents
+            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. }));
+        before - self.len()
+    }
+
     pub fn is_empty(&self) -> bool {
         self.retry_intents.is_empty() && self.intents.is_empty()
     }
@@ -623,6 +635,10 @@ pub struct QuestUiState {
     pub feedback: Option<QuestFeedback>,
     pub stage_filter: QuestStageFilter,
     pub page: usize,
+    /// Newcomer V2 only: keep optional Crystal tasks separate from the active
+    /// journey without changing their authoritative quest state.
+    pub diary_tab: GuidedDiaryTab,
+    pub diary_page: usize,
     /// Crystal expands every diary group by default and remembers only groups
     /// the player explicitly collapsed during the current client session.
     pub collapsed_groups: Vec<String>,
@@ -641,6 +657,26 @@ pub enum QuestStageFilter {
     ReadyToTurnIn,
     NotStarted,
     Completed,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum GuidedDiaryTab {
+    #[default]
+    Main,
+    Ready,
+    Side,
+}
+
+impl GuidedDiaryTab {
+    const ALL: [Self; 3] = [Self::Main, Self::Ready, Self::Side];
+
+    const fn label(self) -> &'static str {
+        match self {
+            Self::Main => "主线",
+            Self::Ready => "可交付",
+            Self::Side => "支线",
+        }
+    }
 }
 
 impl QuestStageFilter {
@@ -1001,6 +1037,9 @@ enum QuestUiButton {
     ToggleQuestGroup {
         group: String,
     },
+    SelectGuidedDiaryTab(GuidedDiaryTab),
+    GuidedDiaryPrevious,
+    GuidedDiaryNext,
     SelectGraduationDirection {
         direction: GraduationDirection,
     },
@@ -1835,6 +1874,25 @@ fn process_quest_ui_input(
             }
             QuestUiButton::ToggleQuestGroup { group } => {
                 quest_state.toggle_group(group);
+            }
+            QuestUiButton::SelectGuidedDiaryTab(tab) => {
+                quest_state.diary_tab = tab;
+                quest_state.diary_page = 0;
+                quest_state.clear_diary_selection();
+            }
+            QuestUiButton::GuidedDiaryPrevious => {
+                quest_state.diary_page = quest_state.diary_page.saturating_sub(1);
+                quest_state.clear_diary_selection();
+            }
+            QuestUiButton::GuidedDiaryNext => {
+                let page_count = guided_diary_quests(
+                    tracker, guidance, journey.as_ref(), quest_state.diary_tab,
+                )
+                    .len()
+                    .div_ceil(GUIDED_DIARY_PAGE_SIZE);
+                quest_state.diary_page = (quest_state.diary_page + 1)
+                    .min(page_count.saturating_sub(1));
+                quest_state.clear_diary_selection();
             }
             QuestUiButton::SelectGraduationDirection { direction } => {
                 if quest_state.toggle_graduation_direction(direction) {
@@ -3761,6 +3819,231 @@ fn quest_diary_status_label(quest: &Quest) -> &'static str {
     }
 }
 
+/// The V2 journey and imported Crystal side quests share one authoritative
+/// tracker, but need separate presentation. No status or server order is
+/// changed here. A quest outside the configured journey remains accessible on
+/// the side and turn-in tabs even when the journey is the default view.
+fn guided_diary_quests<'a>(
+    tracker: &'a QuestTracker,
+    guidance: Option<&QuestGuidance>,
+    journey: Option<&JourneyView>,
+    tab: GuidedDiaryTab,
+) -> Vec<&'a Quest> {
+    let next_id = journey.and_then(|view| view.next.as_ref().map(|step| step.quest_id));
+    let mut quests = tracker
+        .active_quests
+        .iter()
+        .enumerate()
+        .filter(|(_, quest)| {
+            quest.status.is_active()
+                || (can_accept_quest(quest)
+                    && (newcomer_diary_accept_authorized(quest, guidance)
+                        || next_id == Some(quest.quest_index)))
+        })
+        .filter(|(_, quest)| match tab {
+            GuidedDiaryTab::Main => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_some(),
+            GuidedDiaryTab::Ready => {
+                quest.status == crate::quest_model::QuestStatus::ReadyToTurnIn
+            }
+            GuidedDiaryTab::Side => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_none(),
+        })
+        .collect::<Vec<_>>();
+    quests.sort_by_key(|(position, quest)| {
+        let status_rank = match quest.status {
+            crate::quest_model::QuestStatus::ReadyToTurnIn => 0,
+            crate::quest_model::QuestStatus::InProgress => 1,
+            _ => 2,
+        };
+        let order = match tab {
+            GuidedDiaryTab::Main => guidance
+                .map(|guide| guide.sort_key(quest.quest_index, *position).1)
+                .unwrap_or(i32::MAX),
+            GuidedDiaryTab::Ready | GuidedDiaryTab::Side => {
+                -quest.min_level_needed.max(0)
+            }
+        };
+        (
+            u8::from(tab == GuidedDiaryTab::Main && next_id != Some(quest.quest_index)),
+            status_rank,
+            order,
+            *position,
+        )
+    });
+    quests.into_iter().map(|(_, quest)| quest).collect()
+}
+
+fn render_guided_quest_diary_panel(
+    parent: &mut ChildSpawnerCommands,
+    tracker: &QuestTracker,
+    guidance: &QuestGuidance,
+    journey: Option<&JourneyView>,
+    state: &QuestUiState,
+    asset_server: Option<&AssetServer>,
+) {
+    let layout = quest_diary_layout(1.0);
+    quest_log_image_at(parent, asset_server, QUEST_DIARY_TITLE_ASSET, layout.title);
+    let count_label = journey.map_or_else(
+        || "主线进度 --/--".to_owned(),
+        |view| match (view.completed_count, view.quest_count) {
+            (Some(done), Some(total)) => format!("本章 {done}/{total}"),
+            _ => "本章 --/--".to_owned(),
+        },
+    );
+    quest_log_text_at(parent, &count_label, layout.taken_count, 8.0, PANEL_TEXT, Justify::Left);
+    quest_log_image_button_at(
+        parent, asset_server, QUEST_DIARY_TOP_CLOSE_ASSET, layout.top_close,
+        QuestUiButton::CloseQuestLog, true,
+    );
+    quest_log_image_button_at(
+        parent, asset_server, QUEST_DIARY_BOTTOM_CLOSE_ASSET, layout.bottom_close,
+        QuestUiButton::CloseQuestLog, true,
+    );
+
+    for (index, tab) in GuidedDiaryTab::ALL.into_iter().enumerate() {
+        let count = guided_diary_quests(tracker, Some(guidance), journey, tab).len();
+        let label = format!("{} {count}", tab.label());
+        quest_log_text_button_at(
+            parent,
+            QuestLogRect::new(15.0 + index as f32 * 96.0, 37.0, 92.0, 23.0),
+            &label,
+            QuestUiButton::SelectGuidedDiaryTab(tab),
+            true,
+        );
+        if state.diary_tab == tab {
+            quest_log_text_at(
+                parent, "●", QuestLogRect::new(18.0 + index as f32 * 96.0, 42.0, 12.0, 12.0),
+                8.0, PANEL_HIGHLIGHT, Justify::Left,
+            );
+        }
+    }
+
+    let heading = match state.diary_tab {
+        GuidedDiaryTab::Main => journey
+            .map(|view| format!("当前章节 · {}", truncate_chars(&view.chapter_title, 20)))
+            .unwrap_or_else(|| "当前主线".to_owned()),
+        GuidedDiaryTab::Ready => "已完成目标 · 可前往交付".to_owned(),
+        GuidedDiaryTab::Side => "其他任务 · 可自行选择完成".to_owned(),
+    };
+    quest_log_text_at(
+        parent, &heading, QuestLogRect::new(19.0, 68.0, 276.0, 15.0),
+        9.0, PANEL_HIGHLIGHT, Justify::Left,
+    );
+    quest_log_text_at(
+        parent, "左键查看详情 · 右键跟踪任务", QuestLogRect::new(19.0, 86.0, 276.0, 15.0),
+        8.0, PANEL_TEXT, Justify::Left,
+    );
+
+    let quests = guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab);
+    let page_count = quests.len().div_ceil(GUIDED_DIARY_PAGE_SIZE).max(1);
+    let page = state.diary_page.min(page_count - 1);
+    for (index, quest) in quests
+        .into_iter()
+        .skip(page * GUIDED_DIARY_PAGE_SIZE)
+        .take(GUIDED_DIARY_PAGE_SIZE)
+        .enumerate()
+    {
+        let y = 108.0 + index as f32 * 36.0;
+        let quest_index = quest.quest_index;
+        let current = journey.and_then(|view| view.next.as_ref())
+            .is_some_and(|step| step.quest_id == quest_index);
+        if state.selected_quest_index == Some(quest_index) {
+            quest_log_image_at(
+                parent, asset_server, QUEST_DIARY_SELECTED_ASSET,
+                QuestLogRect::new(23.0, y, 252.0, 16.0),
+            );
+        }
+        if state.is_tracked(quest_index) {
+            quest_log_image_at(
+                parent, asset_server, QUEST_DIARY_TRACKED_ASSET,
+                QuestLogRect::new(17.0, y + 18.0, 16.0, 12.0),
+            );
+        }
+        let status = match quest.status {
+            crate::quest_model::QuestStatus::NotStarted => "待领取",
+            crate::quest_model::QuestStatus::ReadyToTurnIn => "可交付",
+            _ => "进行中",
+        };
+        let area = if state.diary_tab == GuidedDiaryTab::Main {
+            journey.map(|view| view.chapter_title.as_str()).unwrap_or("主线")
+        } else {
+            quest.group.as_deref().unwrap_or("其他地图")
+        };
+        let subtitle = format!("Lv{} · {status} · {}", quest.min_level_needed.max(0),
+            truncate_chars(area, 24));
+        parent.spawn((
+            Button,
+            QuestUiButton::SelectQuest { quest_index },
+            QuestDiaryRow { quest_index },
+            RelativeCursorPosition::default(),
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(25.0), top: Val::Px(y),
+                width: Val::Px(270.0), height: Val::Px(33.0),
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+            FocusPolicy::Block,
+        )).with_children(|row| {
+            quest_log_text_at(
+                row, &truncate_chars(&quest.title, 31),
+                QuestLogRect::new(6.0, 0.0, 220.0, 15.0),
+                9.0, if current { PANEL_HIGHLIGHT } else { PANEL_TEXT }, Justify::Left,
+            );
+            if current {
+                quest_log_text_at(
+                    row, "当前", QuestLogRect::new(225.0, 0.0, 40.0, 15.0),
+                    8.0, FEEDBACK_OK, Justify::Left,
+                );
+            }
+            quest_log_text_at(
+                row, &subtitle, QuestLogRect::new(6.0, 17.0, 255.0, 15.0),
+                8.0, PANEL_TEXT, Justify::Left,
+            );
+        });
+    }
+
+    if state.diary_tab == GuidedDiaryTab::Main {
+        if let Some(graduation) = journey.and_then(|view| view.graduation.as_ref()) {
+            for (index, option) in graduation.options.iter().enumerate() {
+                let selected = state.selected_graduation_direction == Some(option.direction);
+                quest_log_text_button_at(
+                    parent,
+                    QuestLogRect::new(22.0, 114.0 + index as f32 * 72.0, 272.0, 27.0),
+                    &format!("{} {}", if selected { "●" } else { "+" },
+                        truncate_chars(&option.title, 29)),
+                    QuestUiButton::SelectGraduationDirection { direction: option.direction },
+                    true,
+                );
+                quest_log_text_at(
+                    parent, &truncate_chars(&option.summary, 42),
+                    QuestLogRect::new(27.0, 145.0 + index as f32 * 72.0, 264.0, 30.0),
+                    8.0, PANEL_TEXT, Justify::Left,
+                );
+            }
+        } else if page_count == 1 && guided_diary_quests(tracker, Some(guidance), journey,
+            GuidedDiaryTab::Main).is_empty() {
+            quest_log_text_at(
+                parent, "暂无可显示的主线，完成前置任务后刷新。",
+                QuestLogRect::new(22.0, 119.0, 274.0, 32.0),
+                9.0, PANEL_TEXT, Justify::Left,
+            );
+        }
+    }
+    quest_log_text_button_at(
+        parent, QuestLogRect::new(22.0, 408.0, 62.0, 22.0), "上一页",
+        QuestUiButton::GuidedDiaryPrevious, page > 0,
+    );
+    quest_log_text_at(
+        parent, &format!("{}/{page_count}", page + 1),
+        QuestLogRect::new(131.0, 412.0, 54.0, 15.0),
+        9.0, PANEL_TEXT, Justify::Center,
+    );
+    quest_log_text_button_at(
+        parent, QuestLogRect::new(228.0, 408.0, 62.0, 22.0), "下一页",
+        QuestUiButton::GuidedDiaryNext, page + 1 < page_count,
+    );
+}
+
 fn render_quest_diary_panel(
     parent: &mut ChildSpawnerCommands,
     tracker: &QuestTracker,
@@ -3770,6 +4053,10 @@ fn render_quest_diary_panel(
     _pending: &PendingOperations,
     asset_server: Option<&AssetServer>,
 ) {
+    if guidance.profile_name() == Some("newcomer-v2") {
+        render_guided_quest_diary_panel(parent, tracker, guidance, journey, state, asset_server);
+        return;
+    }
     let layout = quest_diary_layout(1.0);
     let groups = quest_diary_groups(tracker, Some(guidance));
     let current_count = groups.iter().map(|group| group.quests.len()).sum::<usize>();
@@ -6400,6 +6687,23 @@ mod tests {
     }
 
     #[test]
+    fn manual_input_clears_only_stale_attacks_from_both_intent_lanes() {
+        let mut queue = QuestUiIntentQueue::default();
+        queue.retain_failed_intents([
+            QuestUiIntent::AttackTarget { object_id: 7 },
+            QuestUiIntent::PickUpObject { object_id: 8 },
+        ]);
+        queue.push_intent(QuestUiIntent::AttackTarget { object_id: 9 });
+        queue.push_intent(QuestUiIntent::InteractNpc { npc_object_id: 10 });
+        assert_eq!(queue.clear_attack_intents(), 2);
+        assert_eq!(queue.retry_len(), 1);
+        assert_eq!(queue.drain_intents(), vec![
+            QuestUiIntent::PickUpObject { object_id: 8 },
+            QuestUiIntent::InteractNpc { npc_object_id: 10 },
+        ]);
+    }
+
+    #[test]
     fn queue_is_empty_after_draining() {
         let mut queue = queue_sample();
         assert!(!queue.is_empty());
@@ -8322,6 +8626,69 @@ mod tests {
         assert!(state.is_group_collapsed("BichonProvince"));
         state.toggle_group("BichonProvince".to_owned());
         assert!(!state.is_group_collapsed("BichonProvince"));
+    }
+
+    #[test]
+    fn newcomer_v2_diary_keeps_main_visible_and_pages_all_imported_tasks() {
+        let guidance = QuestGuidance::from_profile_name("newcomer-v2");
+        let mut main = quest(2_110_013, QuestStatus::NotStarted);
+        main.accept_npc_index = Some(0);
+        main.title = "Enter the Dead Mine".to_owned();
+        let mut imported = (30..=40)
+            .map(|id| quest(id, QuestStatus::InProgress))
+            .collect::<Vec<_>>();
+        imported[0].status = QuestStatus::ReadyToTurnIn;
+        imported[1].status = QuestStatus::ReadyToTurnIn;
+        let mut all = vec![main];
+        all.extend(imported);
+        let tracker = QuestTracker { active_quests: all };
+
+        let main_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Main);
+        assert_eq!(main_rows.iter().map(|quest| quest.quest_index).collect::<Vec<_>>(),
+            vec![2_110_013]);
+        let side_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Side);
+        assert_eq!(side_rows.len(), 11);
+        assert_eq!(side_rows.len().div_ceil(GUIDED_DIARY_PAGE_SIZE), 2);
+        assert_eq!(side_rows[0].status, QuestStatus::ReadyToTurnIn);
+        let ready_rows = guided_diary_quests(&tracker, Some(&guidance), None, GuidedDiaryTab::Ready);
+        assert_eq!(ready_rows.len(), 2);
+        assert!(ready_rows.iter().all(|quest| quest.status == QuestStatus::ReadyToTurnIn));
+    }
+
+    #[test]
+    fn guided_diary_side_pages_fit_inside_the_crystal_frame() {
+        let guidance = QuestGuidance::from_profile_name("newcomer-v2");
+        let tracker = QuestTracker {
+            active_quests: (30..=40)
+                .map(|id| quest(id, QuestStatus::InProgress))
+                .collect(),
+        };
+        for (page, expected_rows) in [(0, 8), (1, 3)] {
+            let mut world = World::new();
+            let mut queue = bevy::ecs::world::CommandQueue::default();
+            let state = QuestUiState {
+                diary_tab: GuidedDiaryTab::Side,
+                diary_page: page,
+                ..default()
+            };
+            let mut commands = Commands::new(&mut queue, &world);
+            commands.spawn_empty().with_children(|parent| {
+                render_guided_quest_diary_panel(
+                    parent, &tracker, &guidance, None, &state, None,
+                );
+            });
+            queue.apply(&mut world);
+            let rows = world.query::<(&QuestDiaryRow, &Node)>().iter(&world)
+                .collect::<Vec<_>>();
+            assert_eq!(rows.len(), expected_rows);
+            assert!(rows.iter().all(|(_, node)| match (node.top, node.height) {
+                (Val::Px(top), Val::Px(height)) => top + height <= 408.0,
+                _ => false,
+            }));
+            assert_eq!(world.query::<&QuestUiButton>().iter(&world)
+                .filter(|button| matches!(button, QuestUiButton::SelectGuidedDiaryTab(_)))
+                .count(), 3);
+        }
     }
 
     #[test]

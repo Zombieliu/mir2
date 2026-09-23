@@ -275,7 +275,9 @@ mod tests {
         queue.apply(&mut world);
         assert!(world.query::<&QuestUiButton>().iter(&world).any(|button|
             matches!(button, QuestUiButton::PrepareQuestFinish { quest_index: 2_110_012 })));
-        let text = world.query::<&Text>().iter(&world).map(|t| t.0.as_str()).collect::<Vec<_>>().join("\n");
+        let text = world.query::<&Text>().iter(&world).map(|t| t.0.as_str())
+            .collect::<Vec<_>>().join(" ");
+        let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
         assert!(text.contains("BichonWall Board (334,259)"));
         assert!(!text.contains("Kyle"));
     }

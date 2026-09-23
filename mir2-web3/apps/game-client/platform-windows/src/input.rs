@@ -1479,6 +1479,14 @@ pub fn mouse_world_interaction_system(
     if right_released {
         trace_pointer_input(now_ms, "right", "up");
     }
+    // A new physical press supersedes attacks left in the UI producer lane
+    // from a previous target or hold. The current press may enqueue its own
+    // fresh target below (or in the later UI pass).
+    if left_pressed || right_pressed {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
+    }
     let ack_waiting = gameplay_inbox
         .as_deref()
         .is_some_and(GameplayEventInbox::has_movement_acks);
@@ -1509,11 +1517,17 @@ pub fn mouse_world_interaction_system(
     let (Some(shell), Some(entities), Some(presentation)) =
         (shell, entities, presentation.as_deref_mut())
     else {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
         movement.reset_controller(now_ms, "missingResources");
         return;
     };
     let Ok(window) = windows.single() else {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         movement.attack_target = None;
         movement.harvest_target = None;
         movement.harvest_direction = None;
@@ -1523,6 +1537,9 @@ pub fn mouse_world_interaction_system(
         return;
     };
     if shell.screen != NativeShellScreen::InGame {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         if let Some(route_navigation) = route_navigation.as_deref_mut() {
             route_navigation.clear();
         }
@@ -1536,6 +1553,9 @@ pub fn mouse_world_interaction_system(
 
     let Some((object_id, entity_position, entity_direction)) = authoritative_player(&entities)
     else {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         if movement.self_object_id.is_some() || !movement.pending.is_empty() {
             push_movement_shadow(serde_json::json!({"type": "clear", "atMs": now_ms}));
             movement.reset_controller(now_ms, "missingPlayer");
@@ -1551,6 +1571,9 @@ pub fn mouse_world_interaction_system(
         return;
     };
     if movement.observe_identity(&object_id, entity_position, entity_direction.as_str()) {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         push_movement_shadow_reset(
             now_ms,
             &object_id,
@@ -1647,6 +1670,9 @@ pub fn mouse_world_interaction_system(
     }
 
     if !window.focused {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         if let Some(route_navigation) = route_navigation.as_deref_mut() {
             route_navigation.clear();
         }
@@ -1790,6 +1816,9 @@ pub fn mouse_world_interaction_system(
             .as_deref_mut()
             .and_then(|queue| take_quest_route_navigation_after_pointer_input(queue, false))
         {
+            if let Some(queue) = queue.as_deref_mut() {
+                queue.clear_attack_intents();
+            }
             let result = begin_quest_route_navigation(
                 &mut movement,
                 &entities,
@@ -1843,8 +1872,17 @@ pub fn mouse_world_interaction_system(
     let continuing_map_route = movement.map_auto_path.is_some()
         && mouse.get_pressed().next().is_none()
         && mouse.get_just_pressed().next().is_none();
+    // Target pursuit is also an established automatic action. Moving the
+    // cursor across passive HUD controls after selecting a monster must not
+    // silently drop the target; actual presses, modals and drags still own
+    // input. A held left button is the original monster-selection gesture.
+    let continuing_attack = movement.attack_target.is_some()
+        && !left_pressed
+        && !right_pressed
+        && !mouse.pressed(MouseButton::Right);
+    let continuing_auto_action = continuing_map_route || continuing_attack;
     let ui_state_blocks = player_ui.as_deref().is_some_and(|ui| {
-            if continuing_map_route {
+            if continuing_auto_action {
                 return ui.blocks_route_navigation();
             }
             if map_open && (map_image_press || mini_map_image_press || movement.map_auto_path.is_some()) {
@@ -1871,11 +1909,11 @@ pub fn mouse_world_interaction_system(
         Some("noticeDialog")
     } else if map_open && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused) {
         Some("mapSearch")
-    } else if !continuing_map_route && over_hero_window {
+    } else if !continuing_auto_action && over_hero_window {
         Some("heroPointer")
-    } else if (!continuing_map_route && over_skill_bar)
+    } else if (!continuing_auto_action && over_skill_bar)
         || player_ui.as_deref().is_some_and(|ui| {
-            (!continuing_map_route && ui.skill_bars.hovered) || ui.skill_bars.dragging.is_some()
+            (!continuing_auto_action && ui.skill_bars.hovered) || ui.skill_bars.dragging.is_some()
         })
     {
         Some("skillPointer")
@@ -1885,6 +1923,9 @@ pub fn mouse_world_interaction_system(
         None
     };
     if let Some(blocker) = blocker {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         if movement.map_auto_path.is_some() {
             crate::movement_trace::record(serde_json::json!({
                 "type": "autoPathUiBlocked", "atMs": now_ms, "blocker": blocker,
@@ -1931,6 +1972,9 @@ pub fn mouse_world_interaction_system(
         if map_open && movement.map_auto_path.is_some() {
             return;
         }
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         if let Some(route_navigation) = route_navigation.as_deref_mut() {
             route_navigation.clear();
         }
@@ -1950,6 +1994,9 @@ pub fn mouse_world_interaction_system(
                     .is_some_and(|ui| key_owned_by_binding(&ui.keyboard, keys, *key))
         })
     }) {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         if let Some(route_navigation) = route_navigation.as_deref_mut() {
             route_navigation.clear();
         }
@@ -2288,6 +2335,9 @@ pub fn mouse_world_interaction_system(
     // Arm only an accepted world press; blocked UI/actor presses must not
     // become movement merely because the cursor later leaves that surface.
     if auto_run && presentation.hovered_grid_position().is_some() {
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_attack_intents();
+        }
         movement.begin(WorldPointerMovementMode::Run, now_ms);
         movement.attack_target = None;
         movement.auto_path_destination = None;
@@ -2313,6 +2363,9 @@ pub fn mouse_world_interaction_system(
     if let Some(target_id) = movement.attack_target {
         if modifiers.alt || modifiers.shift {
             movement.attack_target = None;
+            if let Some(queue) = queue.as_deref_mut() {
+                queue.clear_attack_intents();
+            }
             movement.stop_auto_path(now_ms, "combatModifier");
             return;
         }
@@ -2323,11 +2376,16 @@ pub fn mouse_world_interaction_system(
         });
         let valid = click_state.as_deref().is_none_or(|state| {
             state.targets.get(&target_id).is_some_and(|target| {
-                target.dead == Some(false) && !matches!(target.ai, Some(64 | 70))
+                // A partial actor refresh may omit `dead`; only an explicit
+                // death or immune AI state retires an existing selection.
+                target.dead != Some(true) && !matches!(target.ai, Some(64 | 70))
             })
         });
         let Some(target) = target.filter(|_| valid) else {
             movement.attack_target = None;
+            if let Some(queue) = queue.as_deref_mut() {
+                queue.clear_attack_intents();
+            }
             movement.stop_auto_path(now_ms, "targetUnavailable");
             return;
         };
@@ -2346,8 +2404,10 @@ pub fn mouse_world_interaction_system(
         let origin = movement.authoritative_position.unwrap_or(entity_position);
         if (target.x - origin.0).abs().max((target.y - origin.1).abs()) <= reach {
             movement.stop_auto_path(now_ms, "targetInRange");
-            if movement.pending.is_empty()
-                && now_ms >= movement.next_move_send_at_ms
+            // This origin is packet-authoritative. An unrelated, delayed move
+            // ACK must not lock combat when the target is already in range;
+            // keep that move slot occupied and let the Zone validate the hit.
+            if now_ms >= movement.next_move_send_at_ms
                 && now_ms >= movement.next_attack_request_at_ms
             {
                 if queue.as_deref_mut().is_some_and(|queue| {
@@ -2355,6 +2415,13 @@ pub fn mouse_world_interaction_system(
                         object_id: target_id,
                     })
                 }) {
+                    crate::movement_trace::record(serde_json::json!({
+                        "type": "attackRequestQueued",
+                        "atMs": now_ms,
+                        "targetId": target_id,
+                        "pendingMovement": movement.pending.len(),
+                        "pendingMovementAgeMs": movement.pending.front().map(|pending| now_ms - pending.sent_at_ms),
+                    }));
                     // Request pacing only; the Gateway owns attack eligibility and cooldown.
                     let interval = crystal_attack_request_interval_ms(ui_read_model.as_deref());
                     movement.next_attack_request_at_ms = now_ms + interval;
@@ -2407,6 +2474,9 @@ pub fn mouse_world_interaction_system(
         }
         let Some(destination) = best.and_then(|path| path.last().copied()) else {
             movement.attack_target = None;
+            if let Some(queue) = queue.as_deref_mut() {
+                queue.clear_attack_intents();
+            }
             movement.stop_auto_path(now_ms, "targetUnreachable");
             return;
         };
@@ -4577,6 +4647,95 @@ mod tests {
             .resource_mut::<QuestUiIntentQueue>()
             .drain_intents()
             .is_empty());
+    }
+
+    #[test]
+    fn selected_monster_keeps_attacking_through_passive_hud_hover_and_delayed_walk_ack() {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(world_entities());
+        let mut ui = NativePlayerUiState::default();
+        ui.status_hud.hovered = true;
+        ui.hero_buffs.rows.hovered = true;
+        ui.skill_bars.hovered = true;
+        app.insert_resource(ui);
+        let mut click_state = NativeWorldClickState::default();
+        click_state.targets.insert(2001, crate::gameplay_bridge::CrystalWorldClickTarget {
+            kind: EntityKind::Monster,
+            object_id: 2001,
+            x: 10,
+            y: 11,
+            dead: None, // a partial refresh is not evidence the monster died
+            ai: Some(0),
+            harvestable: Some(false),
+        });
+        app.insert_resource(click_state);
+        app.init_resource::<QuestUiIntentQueue>();
+        {
+            let mut state = app.world_mut().resource_mut::<WorldPointerMovementState>();
+            state.observe_identity("1000", (10, 10), "right");
+            state.attack_target = Some(2001);
+            state.pending.push_back(pending_test_move(
+                (10, 10), (11, 10), WorldPointerMovementMode::Walk, 0.0,
+            ));
+            state.next_move_send_at_ms = 600.0;
+        }
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        advance_movement_clock(&mut app, 600);
+        app.update();
+        assert_eq!(
+            app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }],
+            "a delayed movement ACK and passive HUD hover must not freeze combat"
+        );
+        assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
+        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, Some(2001));
+        assert!(receiver.try_recv().is_err(), "do not resend an unconfirmed move");
+
+        // The old walk stays owned by the server; subsequent attacks obey
+        // attack speed and stop once the target is explicitly dead.
+        advance_movement_clock(&mut app, 1400);
+        app.update();
+        assert_eq!(
+            app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+            vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
+        );
+        app.world_mut().resource_mut::<NativeWorldClickState>()
+            .targets.get_mut(&2001).unwrap().dead = Some(true);
+        advance_movement_clock(&mut app, 1400);
+        app.update();
+        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
+        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+    }
+
+    #[test]
+    fn new_world_press_discards_old_queued_attack_without_releasing_pending_move() {
+        let (mut app, receiver) = input_app();
+        app.world_mut().spawn(Window::default());
+        app.insert_resource(ButtonInput::<MouseButton>::default());
+        app.insert_resource(world_entities());
+        app.insert_resource(NativePlayerUiState::default());
+        app.init_resource::<QuestUiIntentQueue>();
+        {
+            let mut state = app.world_mut().resource_mut::<WorldPointerMovementState>();
+            state.observe_identity("1000", (10, 10), "right");
+            state.attack_target = Some(2001);
+            state.pending.push_back(pending_test_move(
+                (10, 10), (11, 10), WorldPointerMovementMode::Walk, 0.0,
+            ));
+        }
+        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        app.update();
+        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
+        assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
+        assert!(receiver.try_recv().is_err(), "old movement still awaits server ACK");
     }
 
     #[test]

@@ -168,6 +168,34 @@ fn zone_hex_lower(bytes: &[u8]) -> String {
 const ZONE_NATIVE_MONSTER_AGGRO_X: i32 = 8;
 const ZONE_NATIVE_MONSTER_AGGRO_Y: i32 = 6;
 
+fn zone_outbounds_contain_accepted_player_action(
+    outbounds: &[ZoneOutbound],
+    session_id: &SessionId,
+    actor_id: u32,
+) -> bool {
+    outbounds.iter().any(|outbound| {
+        let (packets, owner) = match outbound {
+            ZoneOutbound::ToSession {
+                session_id: recipient,
+                packets,
+            } => (packets, recipient == session_id),
+            ZoneOutbound::ToMany { packets, .. } | ZoneOutbound::ToAll { packets } => {
+                (packets, false)
+            }
+            _ => return false,
+        };
+        packets.iter().any(|packet| match packet {
+            ServerPacket::ObjectAttack { info } => info.object_id == actor_id,
+            ServerPacket::ObjectRangeAttack { info } => info.object_id == actor_id,
+            ServerPacket::ObjectMagic { object_id, .. } => *object_id == actor_id,
+            // A relocation spell can address the owner without a same-zone
+            // observer action; its accepted owner packet is still decisive.
+            ServerPacket::Magic { .. } | ServerPacket::RangeAttack { .. } => owner,
+            _ => false,
+        })
+    })
+}
+
 fn zone_native_monster_is_authoritatively_hostile(monster: &ZoneNativeMonster) -> bool {
     monster.hostile_to_player
         && monster.disposition == Some(crate::config::WorldEntityDisposition::Hostile)
@@ -1114,7 +1142,32 @@ impl ZoneRuntime {
     }
 
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
+        // An accepted combat action supersedes movement that reached the Zone
+        // before it. Otherwise the buffered step can run on the next movement
+        // tick after the attack has already launched, pulling the player out of
+        // range. Inspect the authoritative action packet after admission so a
+        // rejected attack leaves movement untouched; a new movement command
+        // arriving after this handle call can still queue normally.
+        let combat_actor = match &command {
+            ZoneCommand::PlayerAttackObject { session_id, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
+            | ZoneCommand::PlayerCastMagic { session_id, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { session_id, .. } => self
+                .players
+                .get(session_id)
+                .map(|player| (session_id.clone(), player.object_id)),
+            _ => None,
+        };
         let mut out = self.handle_inner(command);
+        if let Some((session_id, actor_id)) = combat_actor {
+            if zone_outbounds_contain_accepted_player_action(&out, &session_id, actor_id) {
+                let mut correction = self.cancel_pending_movement(&session_id);
+                correction.append(&mut out);
+                out = correction;
+            }
+        }
         out.extend(self.flush_vampire_deaths());
         out.extend(self.sync_native_poison_masks());
         out

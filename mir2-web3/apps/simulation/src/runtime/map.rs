@@ -147,6 +147,37 @@ pub(super) fn is_safe_zone_point(
         .unwrap_or(false)
 }
 
+/// Crystal `HumanObject.SetBindSafeZone`: walking, running, or teleporting
+/// into an imported safe area binds to that area's center, not the tile the
+/// player happened to occupy. The Zone calls this through its authoritative
+/// transform projection after an accepted step.
+pub(super) fn refresh_player_bind_at_position(world: &mut World, position: &Point) {
+    let map_file_name = world
+        .resource::<MapRuntimeResource>()
+        .current_map
+        .file_name
+        .clone();
+    let Some(safe_zone) = crystal_map_respawns_ref(&map_file_name).and_then(|map| {
+        map.safe_zones.iter().find(|safe_zone| {
+            let size = i32::from(safe_zone.size);
+            position.x >= safe_zone.location.x - size
+                && position.x <= safe_zone.location.x + size
+                && position.y >= safe_zone.location.y - size
+                && position.y <= safe_zone.location.y + size
+        })
+    }) else {
+        return;
+    };
+    let new_bind = crate::config::CharacterBindPoint {
+        map_file_name,
+        position: safe_zone.location.clone(),
+    };
+    let mut player = world.resource_mut::<PlayerRuntimeResource>();
+    if player.bind_point.as_ref() != Some(&new_bind) {
+        player.bind_point = Some(new_bind);
+    }
+}
+
 pub(super) fn current_map_drop_rule<'a>(
     config: &'a SimulationConfig,
     map: &MapRuntimeResource,
@@ -693,7 +724,8 @@ pub(super) fn relocate_player_to_map(
     reset_crystal_player_movement_timing(world);
     world
         .entity_mut(player)
-        .insert((Position(position), Facing(direction)));
+        .insert((Position(position.clone()), Facing(direction)));
+    refresh_player_bind_at_position(world, &position);
 
     refresh_runtime_map_collision(world);
     clear_non_player_world_entities(world);

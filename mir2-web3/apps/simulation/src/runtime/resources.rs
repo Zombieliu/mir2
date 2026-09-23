@@ -488,6 +488,7 @@ impl SessionResource {
 pub(super) struct PlayerRuntimeResource {
     pub(super) player_position: Point,
     pub(super) player_direction: MirDirection,
+    pub(super) bind_point: Option<crate::config::CharacterBindPoint>,
     pub(super) player_vitals: PlayerVitals,
     pub(super) experience: i64,
     pub(super) max_experience: i64,
@@ -517,6 +518,10 @@ impl PlayerRuntimeResource {
         Self {
             player_position: config.spawn.clone(),
             player_direction: MirDirection::Down,
+            bind_point: Some(crate::config::CharacterBindPoint {
+                map_file_name: config.map.file_name.clone(),
+                position: config.spawn.clone(),
+            }),
             player_vitals: PlayerVitals {
                 hp: default_max_hp,
                 max_hp: default_max_hp,

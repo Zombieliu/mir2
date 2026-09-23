@@ -13788,6 +13788,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 | WorldCommand::SubmitNpcInput { .. }
                 | WorldCommand::ClientPacket(
                     ClientPacket::PickUp
+                        | ClientPacket::UseItem { .. }
                         | ClientPacket::GuildStorageGoldChange { .. }
                         | ClientPacket::GuildStorageItemChange { .. }
                         | ClientPacket::Harvest { .. }
@@ -24697,17 +24698,9 @@ mod tests {
             .world_snapshot()
             .player_object_id
             .expect("started session should expose its local player id");
-        let bind_position = runtime
-            .inner
-            .world_snapshot()
-            .entities
-            .into_iter()
-            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
-            .map(|entity| Point {
-                x: entity.x,
-                y: entity.y,
-            })
-            .expect("started session should expose its bind position");
+        // Crystal binds to the imported safe-zone center, not the arbitrary
+        // starting tile (330,270) occupied by this test character.
+        let bind_position = Point { x: 328, y: 264 };
         let bind_map_file_name = runtime
             .inner
             .world_snapshot()
@@ -24793,6 +24786,91 @@ mod tests {
                 .map(|(position, _)| position),
             Some(bind_position)
         );
+    }
+
+    #[test]
+    fn town_scroll_immediately_after_safe_zone_step_uses_zone_bind() {
+        struct ResetFullWorldCollision;
+        impl Drop for ResetFullWorldCollision {
+            fn drop(&mut self) {
+                mir2_simulation::set_crystal_full_world_zone_collision(false);
+            }
+        }
+        mir2_simulation::set_crystal_full_world_zone_collision(true);
+        let _reset_full_world_collision = ResetFullWorldCollision;
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let config = GatewayConfig::default().with_crystal_world_runtime();
+        let account_store = config.account_store.clone();
+        let village = Point { x: 288, y: 616 };
+        let city = Point { x: 328, y: 264 };
+        let scroll = mir2_game_data::crystal_item_by_name("TownTeleport")
+            .expect("Crystal town scroll fixture");
+        let scroll_id = 91_777;
+        {
+            let mut store = account_store.lock().expect("isolated account store");
+            let save = store.accounts.get_mut("demo").expect("demo fixture")
+                .saves.get_mut(&0).expect("demo character fixture");
+            save.map_file_name = "0".to_owned();
+            save.map_title = "BichonProvince".to_owned();
+            save.position = city.clone();
+            save.bind_point = Some(mir2_simulation::CharacterBindPoint {
+                map_file_name: "0".to_owned(),
+                position: village.clone(),
+            });
+            save.inventory_items_json = vec![serde_json::json!({
+                "key": format!("crystal-item-{}", scroll.item_index),
+                "name": scroll.name,
+                "icon": scroll.image,
+                "slot": 0,
+                "unique_id": scroll_id,
+                "container": "bag1",
+                "quantity": 1,
+                "description": "Town scroll Zone bind fixture",
+                "durability_current": null,
+                "durability_max": null,
+                "weight": scroll.weight,
+                "equip_slot": "amulet",
+                "grade": "common",
+                "attack": 0,
+                "defence": 0,
+                "heal_hp": 0,
+                "heal_mp": 0,
+                "user_item_metadata": { "item_index": scroll.item_index }
+            }).to_string()];
+            save.belt_items_json.clear();
+        }
+        let mut runtime = shared_session_runtime(zone_state);
+        runtime.inner = InProcessWorldRuntime::new(config);
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::Login {
+            account_id: "demo".to_owned(),
+            password: "demo".to_owned(),
+        })).expect("isolated login");
+        runtime.execute(WorldCommand::ClientPacket(ClientPacket::StartGame {
+            character_index: 0,
+        })).expect("isolated character start");
+
+        // An accepted Zone walk within the city safe area is enough to change
+        // the binding. Keep the private session deliberately stale to exercise
+        // the immediate UseItem reconciliation, before a background tick.
+        let packets = runtime.execute(WorldCommand::ClientPacket(ClientPacket::Walk {
+            direction: MirDirection::Right,
+        })).expect("ordinary Zone walk");
+        assert!(packets.iter().any(|packet| matches!(
+            packet, ServerPacket::UserLocation { location }
+                if location.position == (Point { x: 329, y: 264 })
+        )), "Zone walk must be accepted before the scroll: {packets:?}");
+        runtime.inner.force_authoritative_player_transform(village, MirDirection::Down);
+        let packets = runtime.execute(WorldCommand::ClientPacket(ClientPacket::UseItem {
+            unique_id: scroll_id,
+            grid: MirGridType::Inventory,
+        })).expect("immediate town scroll");
+        assert!(packets.iter().any(|packet| matches!(
+            packet, ServerPacket::UseItem { unique_id, success: true, .. }
+                if *unique_id == scroll_id
+        )), "scroll should be consumed normally: {packets:?}");
+        assert!(packets.iter().any(|packet| matches!(
+            packet, ServerPacket::UserLocation { location } if location.position == city
+        )), "scroll should return to the last visited city safe area: {packets:?}");
     }
 
     #[test]

@@ -12,7 +12,7 @@ use super::components::{
 use super::map::{
     apply_current_player_position_map_transfer, collision_data_for_map_or_config,
     is_current_map_transfer_source, is_static_spawnable_point_with_collision,
-    normalize_map_file_name, relocate_player_to_map,
+    normalize_map_file_name, refresh_player_bind_at_position, relocate_player_to_map,
 };
 use super::map_events::map_coordinate_hint_packets_for_path;
 use super::monster_ai::advance_world;
@@ -201,12 +201,29 @@ pub(super) fn current_location(world: &World) -> UserLocation {
 }
 
 pub(super) fn town_teleport_packets(world: &mut World) -> Vec<ServerPacket> {
-    let (bind_position, direction) = {
-        let config = &world.resource::<RuntimeConfigResource>().config;
-        let direction = world.resource::<PlayerRuntimeResource>().player_direction;
-        (config.spawn.clone(), direction)
-    };
-    teleport_to_bind_map(world, bind_position, direction)
+    let (bind_map, bind_position) = bound_town_destination(world);
+    let direction = world.resource::<PlayerRuntimeResource>().player_direction;
+    teleport_to_bind_map(world, bind_map, bind_position, direction)
+}
+
+fn bound_town_destination(world: &World) -> (mir2_protocol::MapInformation, Point) {
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let bind = world
+        .resource::<PlayerRuntimeResource>()
+        .bind_point
+        .as_ref()
+        .filter(|bind| !bind.map_file_name.is_empty() && config.map_is_allowed(&bind.map_file_name));
+    match bind {
+        Some(bind) => {
+            let mut map = super::npc_script::crystal_npc_move_map_information(
+                world,
+                &bind.map_file_name,
+            );
+            crate::config::apply_crystal_map_metadata(&mut map);
+            (map, bind.position.clone())
+        }
+        None => (config.map.clone(), config.spawn.clone()),
+    }
 }
 
 /// Crystal `PlayerObject.TeleportEscape(20)` samples at most twenty valid
@@ -218,8 +235,7 @@ pub(super) fn crystal_dungeon_escape_packets(world: &mut World) -> Option<Vec<Se
     let start = entity_position(world, player)?;
     let (config, bind_map, bind_position, direction) = {
         let config = world.resource::<RuntimeConfigResource>().config.clone();
-        let bind_map = config.map.clone();
-        let bind_position = config.spawn.clone();
+        let (bind_map, bind_position) = bound_town_destination(world);
         let direction = world.resource::<PlayerRuntimeResource>().player_direction;
         (config, bind_map, bind_position, direction)
     };
@@ -265,7 +281,7 @@ pub(super) fn crystal_dungeon_escape_packets(world: &mut World) -> Option<Vec<Se
             &collision,
             &candidate,
         ) {
-            return Some(teleport_to_bind_map(world, candidate, direction));
+            return Some(teleport_to_bind_map(world, bind_map, candidate, direction));
         }
     }
     None
@@ -273,10 +289,10 @@ pub(super) fn crystal_dungeon_escape_packets(world: &mut World) -> Option<Vec<Se
 
 fn teleport_to_bind_map(
     world: &mut World,
+    bind_map: mir2_protocol::MapInformation,
     position: Point,
     direction: MirDirection,
 ) -> Vec<ServerPacket> {
-    let bind_map = world.resource::<RuntimeConfigResource>().config.map.clone();
     let current_map_file_name = world
         .resource::<MapRuntimeResource>()
         .current_map
@@ -344,11 +360,11 @@ pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
     };
 
     let (bind_map, bind_position, current_map_file_name) = {
-        let config = &world.resource::<RuntimeConfigResource>().config;
+        let (bind_map, bind_position) = bound_town_destination(world);
         let current_map = &world.resource::<MapRuntimeResource>().current_map;
         (
-            config.map.clone(),
-            config.spawn.clone(),
+            bind_map,
+            bind_position,
             current_map.file_name.clone(),
         )
     };
@@ -673,7 +689,8 @@ pub(super) fn step_player(world: &mut World, amount: i32) -> bool {
         if let Some(destination) =
             player_directional_destination(world, &position, direction, amount, Some(player))
         {
-            world.entity_mut(player).insert(Position(destination));
+            world.entity_mut(player).insert(Position(destination.clone()));
+            refresh_player_bind_at_position(world, &destination);
             return true;
         }
     }
@@ -899,7 +916,8 @@ impl SimulationSession {
                         self.app
                             .world_mut()
                             .entity_mut(player_entity)
-                            .insert((Position(next_step), Facing(direction)));
+                            .insert((Position(next_step.clone()), Facing(direction)));
+                        refresh_player_bind_at_position(self.app.world_mut(), &next_step);
 
                         packets.push(player_motion_packet(self.app.world(), running));
                         follow_player_with_stage5_hero(

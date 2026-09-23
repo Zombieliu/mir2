@@ -26608,7 +26608,8 @@ fn gm_die_emits_self_death_and_object_died() {
 fn town_revive_respawns_dead_player_at_bind_point() {
     // Crystal `PlayerObject.TownRevive` (PlayerObject.cs:1392): a dead player respawns
     // at the bind/town point with restored vitals, replying `S.Revived` + broadcast
-    // `S.ObjectRevived`. The single-map world binds to the configured spawn.
+    // `S.ObjectRevived`. The configured spawn is inside the imported Bichon
+    // safe zone, whose binding is its center rather than that spawn tile.
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     let _ = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -26620,6 +26621,7 @@ fn town_revive_respawns_dead_player_at_bind_point() {
         .config
         .spawn
         .clone();
+    let bind = Point { x: 328, y: 264 };
 
     // Walk away from the bind point, then die.
     set_player_position(
@@ -26648,7 +26650,7 @@ fn town_revive_respawns_dead_player_at_bind_point() {
     // HP restored, dead flag cleared, respawned back at the bind/town point.
     let snapshot = session.world_snapshot();
     assert!(snapshot.player_hp.unwrap_or(0) > 0);
-    assert_eq!(player_position(&session), spawn);
+    assert_eq!(player_position(&session), bind);
     let self_entity = snapshot
         .entities
         .iter()

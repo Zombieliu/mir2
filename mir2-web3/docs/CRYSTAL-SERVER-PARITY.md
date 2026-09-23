@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> 2026-09-24 candidate: `SetBindSafeZone` parity stores the last entered
+> imported safe-area center, including after authoritative shared-Zone steps,
+> and uses it for the three original bind destinations. Gateway UseItem syncs
+> the Zone transform first. Accepted combat now fences earlier pending
+> movement so a queued Walk/Run cannot pull the actor after the attack;
+> rejection preserves that step. Zone 209/209, scroll 7/7 and focused
+> Gateway/revival tests pass. No original-client physical acceptance or
+> whole-game parity percentage is claimed.
+> [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).
+
 > 2026-09-23 map transfer: ordinary entrance packets now use the destination's
 > imported index, title, minimap, big map, light, music, weather and flags.
 > D401 is index 47/image 8; Bichon is index 1/image 101. Source-field inheritance
