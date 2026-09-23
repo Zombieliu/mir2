@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-23 font-cache stability: system fallback Blob identities now survive
+> cache expiry and text-entity teardown without changing font/face selection.
+> A failed before-fix mixed-text test becomes stable across 2,000 rebuild
+> cycles; original raster pixels and layout match. Native 722/722 passes,
+> and the explicit real-GPU comparison changes unbounded atlas growth to
+> constant 8 MiB over 660 seconds/39,375 frames. Candidate release is built.
+> This closes the reproduced font-cache leak; whole-game visual/stability
+> acceptance remains open.
+> [Evidence](generated/player-qa/ui-goal-20260921/font-fallback-identity-20260923.md).
+
 > 2026-09-23 NPC/task candidate: native ObjectNpc image dispatch now follows
 > Crystal NPC/Flag library selection. Board/Kyle identity confusion is removed;
 > ready NPC tasks gain a guarded detail Finish convenience using an ordinary

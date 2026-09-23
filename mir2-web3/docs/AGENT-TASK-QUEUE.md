@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-09-23 font-cache OOM: reproduced unpinned system fallback source expiry
+> growing identical text from 9 to 49 MiB in eight cycles. Shared source lookup
+> plus retained actual layout font blobs keeps original glyph selection and
+> prevents new IDs after UI teardown. Windows 722/722 passes; explicit GPU
+> negative control reproduces growth, while the fixed 660-second/39,375-frame
+> GPU run holds 5 IDs/8 MiB and 12 CPU/12 GPU images. Mixed glyph pixels and
+> positions remain identical. Candidate is built; physical gameplay acceptance
+> is separate from this verified cache-lifetime repair.
+> [Evidence](generated/player-qa/ui-goal-20260921/font-fallback-identity-20260923.md).
+
 > 2026-09-23 NPC appearance and turn-in: native packet-only NPCs now retain
 > their image-derived library rather than NPC/00. Quest endpoint lookup uses
 > canonical loaded IDs, fixing Board24/static35 versus Kyle17/static24 and
