@@ -6,7 +6,8 @@
 > prevents new IDs after UI teardown. Windows 722/722 passes; explicit GPU
 > negative control reproduces growth, while the fixed 660-second/39,375-frame
 > GPU run holds 5 IDs/8 MiB and 12 CPU/12 GPU images. Mixed glyph pixels and
-> positions remain identical. Candidate is built; physical gameplay acceptance
+> positions remain identical. Release `5c0b381c7` is deployed (client25920,
+> Gateway39152) with original store/keys and active diagnostics; physical gameplay acceptance
 > is separate from this verified cache-lifetime repair.
 > [Evidence](generated/player-qa/ui-goal-20260921/font-fallback-identity-20260923.md).
 

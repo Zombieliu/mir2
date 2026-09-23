@@ -101,3 +101,13 @@ The original account file was copied and hash-verified at
 `C:/mir2-ui-repair-20260921/player-save-backups/20260923-201539-559-font-memory-accounts.json`.
 Launch retains the original account store/profile/identity keys, fixed-daylight
 setting and prior NPC/quest fixes. Physical gameplay acceptance remains pending.
+
+Source `5c0b381c77cbe7ae3c96a1147457391087541072` was committed and pushed.
+The unchanged Gateway was launched as PID 39152; client PID 25920 is responsive
+with title `numeron-legend of rebirth` and a confirmed WebSocket connection.
+Exact render/font diagnostics remain enabled. No native login/gameplay input
+or forced process close was issued. Launch record:
+`C:/mir2-ui-repair-20260921/render-live/font-memory-client-launch.json`.
+Client log prefix: `20260923-202103-948`. The package explicitly records
+`fontCacheLeakResolved=true`, `wholeGameStabilityAccepted=false`, and
+`visualAccepted=false`.

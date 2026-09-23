@@ -5,7 +5,8 @@
 > A failed before-fix mixed-text test becomes stable across 2,000 rebuild
 > cycles; original raster pixels and layout match. Native 722/722 passes,
 > and the explicit real-GPU comparison changes unbounded atlas growth to
-> constant 8 MiB over 660 seconds/39,375 frames. Candidate release is built.
+> constant 8 MiB over 660 seconds/39,375 frames. Release `5c0b381c7` is deployed
+> with the retained Gateway/store/keys and active diagnostics.
 > This closes the reproduced font-cache leak; whole-game visual/stability
 > acceptance remains open.
 > [Evidence](generated/player-qa/ui-goal-20260921/font-fallback-identity-20260923.md).
