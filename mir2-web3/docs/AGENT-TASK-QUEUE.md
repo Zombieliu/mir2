@@ -7,7 +7,8 @@
 > prerequisite. Old/hidden frame and collapsed footer input are shielded.
 > Shared 1074/1074 and native 728/728 pass (two existing GPU soaks excluded).
 > Release `d26e0d73e` is hash-verified in the `20260923-map-ui` package;
-> old client25920 remains running, awaiting ordinary logout for handoff.
+> after ordinary logout, client43284 is responsive and connected to unchanged
+> Gateway39152 with the backed-up original store and active diagnostics.
 > Mini Map navigation is a convenience extension; physical acceptance remains pending.
 > [Evidence](generated/player-qa/ui-goal-20260921/map-pointer-navigation-20260923.md).
 

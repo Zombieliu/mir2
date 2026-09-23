@@ -83,7 +83,13 @@ At preparation, old client PID 25920 was still responsive and the unchanged
 Gateway PID 39152 remained live. Requested ordinary logout and client close
 before replacement to preserve the player's active progress. No forced stop,
 store modification or second interactive game process was issued.
-Package manifest records `deployed=false`, `visualAccepted=false` and
-`wholeGameStabilityAccepted=false` until the normal-exit handoff occurs.
+After the user confirmed normal exit, the old client was absent. The original
+store was copied and hash-verified to the package manifest's `saveBackup` path.
+New client PID **43284** is responsive with title `numeron-legend of rebirth`
+and logged a successful WebSocket connection; unchanged Gateway PID **39152**
+continues serving the same store. Movement/render/font metrics remain enabled.
+Launch record: `C:/mir2-ui-repair-20260921/render-live/map-ui-client-launch.json`.
+Log prefix: `20260923-214030-876`. Package manifest now records `deployed=true`,
+`visualAccepted=false` and `wholeGameStabilityAccepted=false`.
 Source tests establish controller behavior; physical player acceptance and
 full-game visual/stability acceptance remain separate and pending.
