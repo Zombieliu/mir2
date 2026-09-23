@@ -68,6 +68,22 @@ Logs under `C:/mir2-ui-repair-20260921/`:
 
 ## Handoff
 
-Native release packaging and normal-exit handoff are recorded below when
-ready. Source tests establish controller behavior; physical player acceptance
-and full-game visual/stability acceptance remain separate and pending.
+Code source `d26e0d73ec43febb704a3923118c9c9215431532` is committed and pushed.
+The offline Windows release build passes (1m 50s). Hash-verified package:
+`C:/numeron-legend-of-rebirth-20260923-map-ui`.
+
+- Client SHA256: `C514129FCF2935138D7BB42219994D50766B2D662F1E18C7564C8E2D742C5FF3`.
+- Unchanged Gateway SHA256: `355E8461074A130C9E9B7CE2AA6039DC3DFBE25B2F58F8677EA29A74E7FD65D6`.
+- Unchanged config SHA256: `01E4A40E54A5B8C7D6B1DABD7E4C13F7BEF434EC26EAEB1B77180E4BCEFEE834`.
+- Assets share the existing project public-directory junction. Fixed daylight,
+  newcomer V2 and the previous font/NPC/turn-in fixes are retained.
+- Release build log: `C:/mir2-ui-repair-20260921/map-ui-release-build-20260923.log`.
+
+At preparation, old client PID 25920 was still responsive and the unchanged
+Gateway PID 39152 remained live. Requested ordinary logout and client close
+before replacement to preserve the player's active progress. No forced stop,
+store modification or second interactive game process was issued.
+Package manifest records `deployed=false`, `visualAccepted=false` and
+`wholeGameStabilityAccepted=false` until the normal-exit handoff occurs.
+Source tests establish controller behavior; physical player acceptance and
+full-game visual/stability acceptance remain separate and pending.

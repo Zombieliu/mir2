@@ -4,8 +4,9 @@
 > image projection, retain the last valid hover tile and reset across scenes.
 > Mini Map gains guarded ordinary click routing from its actual rendered crop,
 > including clamped/stretched images and map-change input protection. Shared
-> 1074/1074 and native 728/728 pass; exact package and visual handoff remain
-> pending. Mini Map click navigation extends original Crystal and adds no
+> 1074/1074 and native 728/728 pass; release `d26e0d73e` is packaged with verified
+> hashes, awaiting ordinary logout for handoff. Visual acceptance remains open.
+> Mini Map click navigation extends original Crystal and adds no
 > global parity percentage.
 > [Evidence](generated/player-qa/ui-goal-20260921/map-pointer-navigation-20260923.md).
 

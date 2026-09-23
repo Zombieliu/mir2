@@ -6,8 +6,9 @@
 > ACK-bounded movement, with map-epoch/collision/UI protection and no NewMapInfo
 > prerequisite. Old/hidden frame and collapsed footer input are shielded.
 > Shared 1074/1074 and native 728/728 pass (two existing GPU soaks excluded).
-> Mini Map navigation is a convenience extension; physical acceptance and
-> package handoff remain pending.
+> Release `d26e0d73e` is hash-verified in the `20260923-map-ui` package;
+> old client25920 remains running, awaiting ordinary logout for handoff.
+> Mini Map navigation is a convenience extension; physical acceptance remains pending.
 > [Evidence](generated/player-qa/ui-goal-20260921/map-pointer-navigation-20260923.md).
 
 > 2026-09-23 font-cache OOM: reproduced unpinned system fallback source expiry
