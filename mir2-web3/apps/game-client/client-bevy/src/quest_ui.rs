@@ -2079,7 +2079,8 @@ fn process_quest_ui_input(
             }
             QuestUiButton::QuestDetailScrollDown => {
                 if let Some(quest) = quest_state.detail_quest(tracker) {
-                    let line_count = quest_detail_lines(quest, guidance).len();
+                    let class_name = models.read_model.as_deref().and_then(|model| model.player.class_name.as_deref()).unwrap_or("");
+                    let line_count = quest_detail_lines(quest, guidance, class_name).len();
                     quest_state.scroll_detail_down(line_count);
                 }
             }
@@ -2687,6 +2688,7 @@ fn render_quest_ui(
                     &journey_models.entities,
                     &journey_models.map,
                     journey_models.big_map.as_deref(),
+                    ui_model.player.class_name.as_deref().unwrap_or(""),
                 );
             } else if is_dialog.is_some() {
                 render_dialog_panel(
@@ -2866,8 +2868,9 @@ fn render_quest_tracker_panel(
     entities: &EntityModelSet,
     map_model: &MapModel,
     big_map: Option<&crate::big_map::BigMapModel>,
+    class_name: &str,
 ) {
-    if journey.is_some() && multi_guidance::render(parent, tracker, state, journey, entities, map_model, big_map) {
+    if journey.is_some() && multi_guidance::render(parent, tracker, state, journey, entities, map_model, big_map, class_name) {
         return;
     }
     if primary_quest_index(tracker, state, journey) == Some(2_110_005)
@@ -4334,11 +4337,18 @@ fn quest_objective_detail_text(objective: &crate::quest_model::QuestObjective) -
     }
 }
 
-fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>) -> Vec<QuestDetailLine> {
+fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_name: &str) -> Vec<QuestDetailLine> {
     let mut lines = vec![QuestDetailLine {
         text: quest.title.clone(),
         kind: QuestDetailLineKind::Title,
     }];
+
+    if let Some(practice) = crate::quest_practice::practice_guide(quest.quest_index, class_name) {
+        let complete = quest.objectives.get(practice.objective_index)
+            .is_some_and(|objective| objective.target > 0 && objective.current >= objective.target);
+        let details = practice.instructions.into_iter().flat_map(|text| multi_guidance::wrap_card_text(&text)).collect::<Vec<_>>();
+        push_quest_detail_section(&mut lines, if complete { "职业练习（已完成）" } else { "职业练习要求（全部完成）" }, details);
+    }
 
     let mut description = quest.detail.description_lines.clone();
     if description.is_empty() {
@@ -4396,6 +4406,9 @@ fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>) -> Vec<Qu
                 .collect::<Vec<_>>(),
         );
     }
+    let supplies = crate::quest_practice::supply_instructions(quest.quest_index).into_iter()
+        .flat_map(|text| multi_guidance::wrap_card_text(&text)).collect::<Vec<_>>();
+    push_quest_detail_section(&mut lines, "回城补给", supplies);
     lines
 }
 
@@ -4844,7 +4857,7 @@ fn render_quest_detail_panel(
             if state.pinned_primary_quest_index == Some(quest.quest_index) { "当前引导" } else { "设为当前" },
             QuestUiButton::MakePrimary { quest_index: quest.quest_index }, true);
     }
-    let lines = quest_detail_lines(quest, Some(guidance));
+    let lines = quest_detail_lines(quest, Some(guidance), player.class_name.as_deref().unwrap_or(""));
     let max_top = lines.len().saturating_sub(QUEST_DETAIL_LINE_COUNT);
     let scroll_top = state.detail_scroll_top.min(max_top);
 
@@ -8559,7 +8572,7 @@ mod tests {
         current.objectives[0].current = 1;
         current.objectives[0].target = 3;
 
-        let lines = quest_detail_lines(&current, None);
+        let lines = quest_detail_lines(&current, None, "Warrior");
         let visible = lines
             .iter()
             .map(|line| (line.kind, line.text.as_str()))
@@ -8724,7 +8737,7 @@ mod tests {
     #[test]
     fn newcomer_detail_wraps_hint_into_scrollable_logical_lines() {
         let guidance = QuestGuidance::from_profile_name("newcomer-v1");
-        let lines = quest_detail_lines(&quest(1, QuestStatus::InProgress), Some(&guidance));
+        let lines = quest_detail_lines(&quest(1, QuestStatus::InProgress), Some(&guidance), "Warrior");
         assert!(lines.iter().any(|line| line.text == "Newcomer Guide"));
         assert!(lines
             .iter()

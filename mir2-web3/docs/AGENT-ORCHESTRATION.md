@@ -1,5 +1,17 @@
 # Agent Orchestration
 
+> 2026-09-24 latest candidate supersedes the earlier V2 nine-actor training
+> setup: nine separated D022 points now have three actors each (spread3),
+> with the same training HP and respawn cadence. All nine points are reachable
+> and have space for the groups; new three-class survival is not yet accepted.
+> Exact skill requirements and training-point navigation are visible in native
+> UI. Thrusting primary/secondary damage, accepted weapon progression and
+> native animation/motion clock alignment are tested. Matched release package
+> `20260924-practice-combat` is hash-verified and **not deployed**; wait for
+> normal logout/close before replacing the live pair. D021 performance still
+> requires same-scene replay after measured resource-lookup and render changes.
+> [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
+
 > 2026-09-19 latest V2 handoff: strict cohort B ended 66/78, levels 28/26/27,
 > with matching normal logout saves; Wizard's fourth death invalidates its
 > two-hour/three-revival gate. The separate functional recheck retains old

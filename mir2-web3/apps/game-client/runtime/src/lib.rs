@@ -3316,10 +3316,11 @@ fn sync_lighting_render(
             let cache_key = lighting_material_cache_key(&light.key);
             let material =
                 additive_cache.material(&cache_key, image, light.opacity, &mut additive_materials);
+            // Shared immutable materials may change on opacity alone.
+            if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
+                binding.set_if_neq(MeshMaterial2d(material));
+            }
             if handle.image_key != image_key {
-                if let Ok(mut binding) = additive_material_query.get_mut(handle.entity) {
-                    *binding = MeshMaterial2d(material);
-                }
                 handle.image_key = image_key;
             }
             if let Ok(mut transform) = transform_query.get_mut(handle.entity) {
@@ -3945,16 +3946,44 @@ fn map_animation_frame_visible(count: u64, frame: &MapAnimationFrame) -> bool {
     crystal_map_animation_phase(count, frame.frame_count, frame.animation_tick) == frame.phase
 }
 
-fn animate_map_tiles(time: Res<Time>, mut frames: Query<(&MapAnimationFrame, &mut Visibility)>) {
+fn animate_map_tiles(
+    time: Res<Time>,
+    mut frames: Query<(&MapAnimationFrame, &mut Visibility)>,
+    mut trace_interval: Local<u64>,
+) {
+    #[cfg(not(target_arch = "wasm32"))]
+    let diagnostic_started = render_diagnostics::native_render_diagnostics_enabled()
+        .then(std::time::Instant::now);
     let count = crystal_map_animation_count(time.elapsed());
+    let mut phase_count = 0;
+    let mut changed_count = 0;
     for (frame, mut visibility) in &mut frames {
         let active = map_animation_frame_visible(count, frame);
-        *visibility = if active {
+        let next = if active {
             Visibility::Visible
         } else {
             Visibility::Hidden
         };
+        // A Crystal phase lasts at least 100 ms. Rewriting all retained phases
+        // at display Hz also dirties visibility/render extraction at display Hz.
+        changed_count += usize::from(visibility.set_if_neq(next));
+        phase_count += 1;
     }
+    let interval = (time.elapsed().as_millis() / 10_000) as u64;
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(started) = diagnostic_started {
+        let duration_ms = started.elapsed().as_secs_f64() * 1000.0;
+        if interval != *trace_interval || duration_ms >= 2.0 {
+            render_diagnostics::record_native_render_marker("cpuStage", serde_json::json!({
+                "stage":"mapAnimationVisibility", "durationMs":duration_ms,
+                "preloadedPhases":phase_count, "changedPhases":changed_count,
+                "measurement":"cpuElapsedNotGpuPresent",
+            }));
+        }
+    }
+    #[cfg(target_arch = "wasm32")]
+    let _ = (phase_count, changed_count);
+    *trace_interval = interval;
 }
 
 fn sync_map_animation_component(
@@ -4046,6 +4075,45 @@ mod map_animation_tests {
             assert_eq!(visible.len(), 1, "count {count} must expose one phase");
             assert_eq!(visible[0] as u32, crystal_map_animation_phase(count, 3, 1));
         }
+    }
+
+    #[test]
+    fn unchanged_sixteen_ms_map_frames_do_not_dirty_visibility() {
+        #[derive(Resource, Default)]
+        struct Changes(Vec<usize>);
+        fn record_changes(
+            changed: Query<Entity, (With<MapAnimationFrame>, Changed<Visibility>)>,
+            mut changes: ResMut<Changes>,
+        ) {
+            changes.0.push(changed.iter().count());
+        }
+        let mut app = App::new();
+        app.init_resource::<Time>()
+            .init_resource::<Changes>()
+            .add_systems(Update, (animate_map_tiles, record_changes).chain());
+        // Dense Wooma entrance: 25 eight-phase additive map animations.
+        for _ in 0..25 {
+            for phase in 0..8 {
+                app.world_mut().spawn((
+                    MapAnimationFrame { phase, frame_count: 8, animation_tick: 0 },
+                    if phase == 0 { Visibility::Visible } else { Visibility::Hidden },
+                ));
+            }
+        }
+        app.update();
+        for _ in 0..6 {
+            app.world_mut().resource_mut::<Time>().advance_by(std::time::Duration::from_millis(16));
+            app.update();
+        }
+        app.world_mut().resource_mut::<Time>().advance_by(std::time::Duration::from_millis(4));
+        app.update();
+        app.world_mut().resource_mut::<Time>().advance_by(std::time::Duration::from_millis(16));
+        app.update();
+        assert_eq!(app.world().resource::<Changes>().0, [200, 0, 0, 0, 0, 0, 0, 50, 0]);
+        let visible = app.world_mut().query::<(&MapAnimationFrame, &Visibility)>()
+            .iter(app.world()).filter(|(_, visibility)| **visibility == Visibility::Visible)
+            .map(|(frame, _)| frame.phase).collect::<Vec<_>>();
+        assert_eq!(visible, vec![1; 25], "only the two changed phases per family affect rendering");
     }
 }
 
@@ -8862,6 +8930,50 @@ mod effect_mask_shadow_tests {
             .world()
             .resource::<crate::additive_material::CrystalAdditiveMaterialCache>();
         assert_eq!(cache.len(), 0, "materials recycled on disable");
+    }
+
+    #[test]
+    fn shared_light_material_rebinds_an_opacity_only_change_without_fading_its_neighbor() {
+        let mut app = sync_test_app();
+        let state: lighting::LightingRenderState = serde_json::from_value(serde_json::json!({
+            "enabled": true, "stageWidth": 1024, "stageHeight": 768,
+            "timeOfDayLightSetting": 4,
+            "entityLights": [
+                {"key":"left", "drawX":100, "drawY":100, "kind":"player", "light":3},
+                {"key":"right", "drawX":200, "drawY":100, "kind":"player", "light":3}
+            ]
+        })).unwrap();
+        app.world_mut().resource_mut::<RuntimeLightingRenderState>().snapshot = Some(state);
+        app.update();
+        let (left, right) = {
+            let registry = app.world().resource::<SceneRegistry>();
+            (registry.lighting_layers["entity:left"].entity,
+                registry.lighting_layers["entity:right"].entity)
+        };
+        let binding = |app: &App, entity| {
+            app.world().get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(entity)
+                .unwrap().0.clone()
+        };
+        let original = binding(&app, left);
+        assert_eq!(original, binding(&app, right));
+        app.world_mut().resource_mut::<RuntimeLightingRenderState>().snapshot
+            .as_mut().unwrap().entity_lights[0].light = Some(18); // Same range, brighter torch.
+        app.update();
+        let brighter = binding(&app, left);
+        assert_ne!(brighter, original);
+        assert_eq!(binding(&app, right), original);
+        let materials = app.world().resource::<Assets<additive_material::CrystalAdditiveMaterial>>();
+        assert_eq!(materials.get(&original).unwrap().opacity(), 60.0 / 255.0);
+        assert_eq!(materials.get(&brighter).unwrap().opacity(), 120.0 / 255.0);
+        app.world_mut().resource_mut::<RuntimeLightingRenderState>().snapshot
+            .as_mut().unwrap().entity_lights.pop();
+        app.update();
+        let materials = app.world().resource::<Assets<additive_material::CrystalAdditiveMaterial>>();
+        assert!(!materials.contains(original.id()));
+        assert!(materials.contains(brighter.id()));
+        app.world_mut().resource_mut::<SceneResetRevision>().0 = 1;
+        app.update();
+        assert_eq!(app.world().resource::<Assets<additive_material::CrystalAdditiveMaterial>>().len(), 0);
     }
 
     #[test]

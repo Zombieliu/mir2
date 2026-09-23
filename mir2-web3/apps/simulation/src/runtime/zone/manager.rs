@@ -544,6 +544,20 @@ impl ZoneManager {
         ))
     }
 
+    /// Read the current Zone's legal front-cell target before a melee dispatch.
+    /// The caller commits progression only after that same swing is accepted.
+    pub fn melee_primary_target_present(
+        &self,
+        session_id: &SessionId,
+        direction: MirDirection,
+        materialized: Option<&super::types::ZoneMonsterSpawn>,
+    ) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.melee_primary_target_present(session_id, direction, materialized))
+    }
+
     pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_last_seen_move_seq(session_id)

@@ -3,6 +3,7 @@
 use std::io::Write;
 use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::{Duration, Instant};
 
 static R2_HITS: AtomicUsize = AtomicUsize::new(0);
 static LOCAL_HITS: AtomicUsize = AtomicUsize::new(0);
@@ -63,9 +64,62 @@ pub fn crystal_map_path(asset_root: &Path, map_file_name: &str) -> Option<PathBu
 /// directory). Development builds discover the repository from the process
 /// working directory. No compile-machine path is embedded in the executable.
 pub fn asset_root() -> Option<PathBuf> {
-    match resolve_asset_root() {
-        AssetRootStatus::Found(path) => Some(path),
-        AssetRootStatus::Incomplete { .. } | AssetRootStatus::Missing { .. } => None,
+    static CACHE: OnceLock<Mutex<AssetRootCache>> = OnceLock::new();
+    let context = AssetRootContext::current();
+    CACHE
+        .get_or_init(|| Mutex::new(AssetRootCache::default()))
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .resolve(context, Instant::now(), || match resolve_asset_root() {
+            AssetRootStatus::Found(path) => Some(path),
+            AssetRootStatus::Incomplete { .. } | AssetRootStatus::Missing { .. } => None,
+        })
+}
+
+#[derive(Clone, PartialEq, Eq)]
+struct AssetRootContext {
+    configured: Option<std::ffi::OsString>,
+    working_directory: Option<PathBuf>,
+}
+
+impl AssetRootContext {
+    fn current() -> Self {
+        Self {
+            configured: std::env::var_os(ASSET_ROOT_ENV)
+                .or_else(|| std::env::var_os(ASSET_ROOT_ENV_ALIAS)),
+            working_directory: std::env::current_dir().ok(),
+        }
+    }
+}
+
+/// Cache only the successful bundle diagnosis, never individual file presence.
+/// Animated actors/effects request frames every tick; checking all required
+/// manifests/icons for every frame otherwise multiplies filesystem work by
+/// scene density. One entry bounds memory and isolates configuration changes.
+/// Periodic revalidation notices a replaced/removed bundle; missing roots are
+/// retried immediately, as are local/R2 frames downloaded while playing.
+#[derive(Default)]
+struct AssetRootCache {
+    found: Option<(AssetRootContext, PathBuf, Instant)>,
+}
+
+impl AssetRootCache {
+    fn resolve(
+        &mut self,
+        context: AssetRootContext,
+        now: Instant,
+        resolve: impl FnOnce() -> Option<PathBuf>,
+    ) -> Option<PathBuf> {
+        if let Some((cached_context, path, checked_at)) = &self.found {
+            if cached_context == &context
+                && now.saturating_duration_since(*checked_at) < Duration::from_secs(1)
+            {
+                return Some(path.clone());
+            }
+        }
+        let result = resolve();
+        self.found = result.clone().map(|path| (context, path, now));
+        result
     }
 }
 
@@ -453,6 +507,125 @@ pub fn asset_path(web_path: &str) -> Option<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn successful_root_cache_is_bounded_and_revalidates_changed_context_or_expiry() {
+        let start = Instant::now();
+        let mut cache = AssetRootCache::default();
+        let context = AssetRootContext {
+            configured: Some("root-a".into()),
+            working_directory: Some("cwd-a".into()),
+        };
+        assert_eq!(
+            cache.resolve(context.clone(), start, || Some("a".into())),
+            Some("a".into())
+        );
+        assert_eq!(
+            cache.resolve(
+                context.clone(),
+                start + Duration::from_millis(999),
+                || panic!("cache hit")
+            ),
+            Some("a".into())
+        );
+        let changed = AssetRootContext {
+            configured: Some("root-b".into()),
+            ..context.clone()
+        };
+        assert_eq!(
+            cache.resolve(changed.clone(), start, || Some("b".into())),
+            Some("b".into())
+        );
+        let changed_cwd = AssetRootContext {
+            working_directory: Some("cwd-b".into()),
+            ..changed
+        };
+        assert_eq!(
+            cache.resolve(changed_cwd.clone(), start, || Some("c".into())),
+            Some("c".into())
+        );
+        assert_eq!(
+            cache.resolve(changed_cwd.clone(), start + Duration::from_secs(1), || None),
+            None
+        );
+        assert!(cache.found.is_none());
+        assert_eq!(
+            cache.resolve(changed_cwd, start + Duration::from_secs(1), || Some(
+                "repaired".into()
+            )),
+            Some("repaired".into())
+        );
+        assert_eq!(cache.found.as_ref().unwrap().1, PathBuf::from("repaired"));
+    }
+
+    #[test]
+    fn cached_root_does_not_hide_a_new_or_removed_frame() {
+        let dir = map_fixture_root("root-cache-frame-arrival");
+        std::fs::create_dir_all(&dir).unwrap();
+        let context = AssetRootContext {
+            configured: Some(dir.clone().into_os_string()),
+            working_directory: None,
+        };
+        let mut cache = AssetRootCache::default();
+        let now = Instant::now();
+        let root = cache
+            .resolve(context.clone(), now, || Some(dir.clone()))
+            .unwrap();
+        let frame = root.join("new-frame.png");
+        assert!(!frame.is_file());
+        std::fs::write(&frame, b"downloaded").unwrap();
+        let cached = cache
+            .resolve(context.clone(), now, || {
+                panic!("positive root already cached")
+            })
+            .unwrap();
+        assert!(cached.join("new-frame.png").is_file());
+        std::fs::remove_file(&frame).unwrap();
+        assert!(!cache
+            .resolve(context, now, || panic!("root cached"))
+            .unwrap()
+            .join("new-frame.png")
+            .is_file());
+        std::fs::remove_dir(dir).unwrap();
+    }
+
+    #[test]
+    #[ignore = "offline asset lookup timing; requires MIR2_ASSET_PROBE_ROOT"]
+    fn measure_asset_root_diagnosis_per_frame() {
+        let root = PathBuf::from(std::env::var_os("MIR2_ASSET_PROBE_ROOT").expect("asset root"));
+        assert!(diagnose_asset_root(&root).is_complete);
+        let context = AssetRootContext {
+            configured: Some(root.clone().into_os_string()),
+            working_directory: None,
+        };
+        let frame = "original-ui/Items/0.png";
+        for lookups in [1, 16, 32, 64] {
+            for cached in [false, true, true, false] {
+                let mut cache = AssetRootCache::default();
+                let mut diagnoses = 0;
+                let mut samples = Vec::new();
+                for _ in 0..120 {
+                    let start = Instant::now();
+                    for _ in 0..lookups {
+                        let mut resolve = || {
+                            diagnoses += 1;
+                            assert!(diagnose_asset_root(&root).is_complete);
+                            Some(root.clone())
+                        };
+                        let found = if cached {
+                            cache.resolve(context.clone(), Instant::now(), resolve)
+                        } else {
+                            resolve()
+                        };
+                        assert!(std::hint::black_box(found.unwrap().join(frame).is_file()));
+                    }
+                    samples.push(start.elapsed().as_secs_f64() * 1000.0);
+                }
+                samples.sort_by(f64::total_cmp);
+                eprintln!("asset-root-probe cached={cached} lookups={lookups} frames=120 diagnoses={diagnoses} median_ms={:.3} p95_ms={:.3} max_ms={:.3}", samples[60], samples[114], samples[119]);
+            }
+        }
+    }
 
     fn map_fixture_root(label: &str) -> PathBuf {
         let nonce = std::time::SystemTime::now()

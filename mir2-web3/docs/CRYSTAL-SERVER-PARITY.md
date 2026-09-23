@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> 2026-09-24 Thrusting/HalfMoon candidate follows original primary versus
+> secondary cells rather than scaling every armor-reduced hit. Monster,
+> materialized and PvP paths share direction/damage rules. Accepted primary
+> hits advance learned weapon skills; second-cell-only Thrusting and rejected
+> retries do not. Existing Zone209, focused melee10 and Gateway2 pass.
+> Original impact timing and AI49 remain separate open work; no global combat
+> parity claim. V2-only three-actor training groups are an onboarding policy,
+> validated separately from original-cadence spawning. Release is packaged
+> but awaits ordinary logout/close for deployment.
+> [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
+
 > 2026-09-24 candidate: `SetBindSafeZone` parity stores the last entered
 > imported safe-area center, including after authoritative shared-Zone steps,
 > and uses it for the three original bind destinations. Gateway UseItem syncs

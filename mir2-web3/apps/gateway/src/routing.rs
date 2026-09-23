@@ -11599,6 +11599,14 @@ impl SharedInProcessZoneSessionRuntime {
             ZoneNativePlayerAttackKind::Melee { spell, .. } => Spell::try_from(*spell).ok(),
             _ => None,
         };
+        // Snapshot the legal front cell before an accepted lethal swing removes
+        // its target. A second-cell-only Thrusting hit must not train the skill.
+        let primary_target_present = melee_spell_to_commit.is_some()
+            && self.zone_state.lock()
+                .expect("shared zone presence mutex should not be poisoned")
+                .zone_manager.melee_primary_target_present(
+                    &session_id, attack.direction, materialized_monster.as_ref(),
+                );
         let command = match attack.kind {
             ZoneNativePlayerAttackKind::Melee { spell, attack_type } => {
                 if is_player_target {
@@ -11700,7 +11708,7 @@ impl SharedInProcessZoneSessionRuntime {
                 )
             });
             if accepted {
-                dispatched.extend(self.inner.commit_zone_melee_attack_spell(spell));
+                dispatched.extend(self.inner.commit_zone_melee_attack_spell_with_primary(spell, primary_target_present));
                 if spell == Spell::TwinDrakeBlade {
                     // The Zone already charged the accepted swing atomically.
                     // Refresh only mana: a queued hit/death must never be

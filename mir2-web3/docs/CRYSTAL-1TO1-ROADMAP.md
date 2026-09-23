@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-24 weapon/presentation candidate: shared-Zone Thrusting keeps full
+> adjacent physical damage and applies the level multiplier before armor-free
+> second-cell damage. HalfMoon primary/extra cells and weapon-skill experience
+> use the same original distinction. Native attack/action and camera-motion
+> clocks now agree. V2-specific practice labels, bounded hunting points and
+> training population changes improve onboarding without claiming original
+> UI/population parity. Shared1083/native738/render275/Zone209+10/Gateway2/
+> training1/Node64 pass; paired binaries are packaged but not deployed.
+> D021 live performance acceptance remains open despite measured lookup savings.
+> [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
+
 > 2026-09-24 source-and-test candidate: dynamic bind follows Crystal
 > `SetBindSafeZone` at the most recently entered safe-area center and persists
 > through logout. TownTeleport, DungeonEscape, TownRevive and immediate

@@ -3236,7 +3236,8 @@ impl SimulationSession {
             let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
             let mp = player_entity(world)
                 .and_then(|player| world.get::<PlayerVitals>(player))
-                .map(|vitals| vitals.mp).unwrap_or_default();
+                .map(|vitals| vitals.mp)
+                .unwrap_or_default();
             if mp < cost {
                 return (Spell::None, 0, base_damage);
             }
@@ -3244,11 +3245,32 @@ impl SimulationSession {
         (
             active_spell,
             level,
-            crystal_magic_damage_from_base(&magic, level, base_damage).max(1),
+            // These shapes contain an ordinary front-cell hit and a scaled
+            // secondary hit. Keep the fallback DC base until the Zone knows
+            // which cell it is resolving, just like its authoritative stat roll.
+            if matches!(
+                active_spell,
+                Spell::Thrusting | Spell::HalfMoon | Spell::CrossHalfMoon
+            ) {
+                base_damage
+            } else {
+                crystal_magic_damage_from_base(&magic, level, base_damage).max(1)
+            },
         )
     }
 
     pub fn commit_zone_melee_attack_spell(&mut self, spell: Spell) -> Vec<ServerPacket> {
+        self.commit_zone_melee_attack_spell_with_primary(spell, true)
+    }
+
+    /// Crystal advances the selected weapon technique when the front cell has
+    /// an attack target. A Thrusting hit on only the second cell does not invoke
+    /// LevelMagic; the Gateway supplies this fact from the accepted Zone swing.
+    pub fn commit_zone_melee_attack_spell_with_primary(
+        &mut self,
+        spell: Spell,
+        primary_target_present: bool,
+    ) -> Vec<ServerPacket> {
         if !is_in_world(self.app.world()) {
             return Vec::new();
         }
@@ -3259,16 +3281,24 @@ impl SimulationSession {
         // attempts never reach this method.
         let tick = runtime_tick(self.app.world());
         let mut packets = melee_passive_skill_progression_packets(self.app.world_mut(), tick);
-        if matches!(spell, Spell::Slaying | Spell::FlamingSword | Spell::TwinDrakeBlade)
-            && skill_toggle_state(self.app.world(), spell)
+        if matches!(
+            spell,
+            Spell::Slaying | Spell::FlamingSword | Spell::TwinDrakeBlade
+        ) && skill_toggle_state(self.app.world(), spell)
         {
             if spell == Spell::TwinDrakeBlade {
                 if let (Some((magic, level)), Some(player)) = (
                     crystal_skill_magic(self.app.world(), "TwinDrakeBlade"),
                     player_entity(self.app.world()),
                 ) {
-                    let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
-                    self.app.world_mut().entity_mut(player).get_mut::<PlayerVitals>().expect("player vitals").mp -= cost;
+                    let cost =
+                        i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
+                    self.app
+                        .world_mut()
+                        .entity_mut(player)
+                        .get_mut::<PlayerVitals>()
+                        .expect("player vitals")
+                        .mp -= cost;
                     if let Some(info) = object_mana_info_for_entity(self.app.world(), player) {
                         packets.push(ServerPacket::ObjectMana { info });
                     }
@@ -3276,13 +3306,47 @@ impl SimulationSession {
             }
             set_skill_toggle_state(self.app.world_mut(), spell, false);
             if spell == Spell::Slaying {
-                self.app.world_mut().resource_mut::<SkillResource>().slaying_armed = false;
+                self.app
+                    .world_mut()
+                    .resource_mut::<SkillResource>()
+                    .slaying_armed = false;
             }
             packets.push(ServerPacket::SpellToggle {
                 object_id: current_player_object_id(self.app.world()).unwrap_or_default(),
                 spell,
                 can_use: false,
             });
+        }
+        if primary_target_present
+            && matches!(
+                spell,
+                Spell::Slaying
+                    | Spell::Thrusting
+                    | Spell::HalfMoon
+                    | Spell::CrossHalfMoon
+                    | Spell::TwinDrakeBlade
+                    | Spell::FlamingSword
+            )
+        {
+            let key = normalize_crystal_skill_key(&format!("{spell:?}"));
+            let learned = self
+                .app
+                .world()
+                .resource::<SkillResource>()
+                .skills
+                .iter()
+                .position(|skill| skill.key == key);
+            if let (Some(index), Some(magic)) =
+                (learned, crystal_magic_by_spell(&format!("{spell:?}")))
+            {
+                packets.extend(advance_magic_progression(
+                    self.app.world_mut(),
+                    index,
+                    spell,
+                    &magic,
+                    tick,
+                ));
+            }
         }
         let roll = slaying_attack_roll(self.app.world());
         packets.extend(prepare_slaying_after_attack(self.app.world_mut(), roll));

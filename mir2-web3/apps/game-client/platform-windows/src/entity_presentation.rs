@@ -74,6 +74,7 @@ pub struct NativeEntityPresentation {
     self_object_id: Option<String>,
     last_positions: HashMap<String, (i32, i32)>,
     motion_windows: HashMap<String, NativeMotionWindow>,
+    last_attack_motion_overlap: Option<(u64, u64)>,
     payload_dirty: bool,
 }
 
@@ -96,6 +97,7 @@ impl Default for NativeEntityPresentation {
             self_object_id: None,
             last_positions: HashMap::new(),
             motion_windows: HashMap::new(),
+            last_attack_motion_overlap: None,
             payload_dirty: false,
         }
     }
@@ -297,6 +299,12 @@ impl NativeEntityPresentation {
         self.motion_windows
             .values()
             .any(|window| now_ms < window.expires_ms)
+    }
+
+    pub(crate) fn self_motion_remaining_ms(&self, now_ms: u64) -> u64 {
+        self.self_object_id.as_deref()
+            .and_then(|object_id| self.motion_windows.get(object_id))
+            .map_or(0, |window| window.expires_ms.saturating_sub(now_ms))
     }
 
     pub(crate) fn has_active_non_self_motion(&self, now_ms: u64) -> bool {
@@ -1112,6 +1120,37 @@ impl NativeEntityPresentation {
                 )
             })
             .collect::<HashMap<_, _>>();
+        // Combat and locomotion use separate clocks. Capture only a real
+        // rendered overlap, once per attack/window pair, rather than emitting
+        // one movement trace row on every frame of an ordinary run.
+        let overlap = self.self_object_id.as_deref().and_then(|object_id| {
+            let window = self.motion_windows.get(object_id)?;
+            let action = frames.get(object_id)?.1;
+            (motion_now_ms < window.expires_ms && is_attack_action(action))
+                .then_some((object_id, *window, action))
+        });
+        if let Some((object_id, window, action)) = overlap {
+            let action_sequence = self.world.active_state(object_id)
+                .and_then(|state| state.pose().last_started_event_sequence)
+                .unwrap_or(0);
+            let overlap_key = (window.started_ms, action_sequence);
+            if self.last_attack_motion_overlap != Some(overlap_key) {
+                crate::movement_trace::record(serde_json::json!({
+                    "type": "attackMotionOverlapRendered",
+                    "action": format!("{action:?}"),
+                    "objectId": object_id,
+                    "actionSequence": action_sequence,
+                    "movementSequence": window.animation_sequence,
+                    "movementRemainingMs": window.expires_ms.saturating_sub(motion_now_ms),
+                    "locallyPredicted": window.locally_predicted,
+                    "animationAtMs": animation_now_ms,
+                    "motionAtUnixMs": motion_now_ms,
+                }));
+                self.last_attack_motion_overlap = Some(overlap_key);
+            }
+        } else {
+            self.last_attack_motion_overlap = None;
+        }
         if !self.payload_dirty && frames == self.last_frames && !effect_visibility_changed {
             return None;
         }
@@ -1169,16 +1208,28 @@ impl NativeEntityPresentation {
     }
 }
 
+fn is_attack_action(action: AnimationAction) -> bool {
+    matches!(
+        action,
+        AnimationAction::Attack1
+            | AnimationAction::Attack2
+            | AnimationAction::Attack3
+            | AnimationAction::Attack4
+            | AnimationAction::AttackRange1
+            | AnimationAction::AttackRange2
+            | AnimationAction::DashAttack
+    )
+}
+
 pub fn tick_native_entity_presentation(
-    time: Res<Time>,
     mut presentation: ResMut<NativeEntityPresentation>,
     movement: Option<Res<crate::input::WorldPointerMovementState>>,
     player_ui: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
     shell: Option<Res<mir2_client_bevy::native_shell::NativeShellModel>>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
-    let animation_now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let motion_now_ms = native_motion_clock_ms();
+    let animation_now_ms = motion_now_ms;
     let effect_visible = player_ui
         .as_deref()
         .map(|state| state.core.options.effect)
@@ -2146,6 +2197,78 @@ mod tests {
         assert_eq!(rendered["entities"][0]["motionSortY"], json!(10));
         assert_eq!(rendered["entities"][0]["motionStartedMs"], json!(1_100));
         assert_eq!(presentation.last_applied_sequence.get("1"), Some(&9));
+    }
+
+    #[test]
+    fn attack_packet_waits_for_local_run_window_before_rendering_attack_pose() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut initial = player_payload(7);
+        initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        presentation.replace_payload(initial);
+        presentation.render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+            Some(payload.clone())
+        }).expect("initial player");
+        assert!(presentation.begin_local_self_motion(
+            "1", (10, 10), (12, 10), "right", true, 100, 1_100,
+        ));
+
+        let mut attack = player_payload(9);
+        attack["entities"][0]["x"] = json!(12);
+        attack["sceneView"]["center"]["x"] = json!(12);
+        attack["entities"][0]["direction"] = json!("right");
+        attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+        presentation.replace_payload(attack);
+        presentation.render_state_if_changed_with_clocks(200, 1_200, true, |payload, frames, _| {
+            assert_eq!(frames["1"].1, AnimationAction::Running);
+            assert!(payload["entities"][0].get("motionStartedMs").is_some());
+            Some(payload.clone())
+        }).expect("run still visible while early attack is queued");
+        assert!(presentation.last_attack_motion_overlap.is_none());
+
+        presentation.render_state_if_changed_with_clocks(700, 1_700, true, |payload, frames, _| {
+            assert_eq!(frames["1"].1, AnimationAction::Attack1);
+            assert!(payload["entities"][0].get("motionStartedMs").is_none());
+            Some(payload.clone())
+        }).expect("attack starts only after run pixels settle");
+        assert!(presentation.last_attack_motion_overlap.is_none());
+    }
+
+    #[test]
+    fn mismatched_animation_and_motion_clocks_detect_attack_motion_overlap_once() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.replace_payload(player_payload(7));
+        presentation.render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+            Some(payload.clone())
+        }).expect("initial player");
+        assert!(presentation.begin_local_self_motion(
+            "1", (10, 10), (12, 10), "right", true, 100, 1_100,
+        ));
+        let mut attack = player_payload(9);
+        attack["entities"][0]["x"] = json!(12);
+        attack["sceneView"]["center"]["x"] = json!(12);
+        attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+        presentation.replace_payload(attack);
+        presentation.render_state_if_changed_with_clocks(200, 1_200, true, |payload, _, _| {
+            Some(payload.clone())
+        }).expect("attack queued behind run");
+
+        // Deliberately advance the animation clock ahead of the wall-clock
+        // motion window: this is the exact visual anomaly the sparse trace
+        // must distinguish from a harmless delayed network ACK.
+        presentation.render_state_if_changed_with_clocks(700, 1_300, true, |payload, frames, _| {
+            assert_eq!(frames["1"].1, AnimationAction::Attack1);
+            assert!(payload["entities"][0].get("motionStartedMs").is_some());
+            Some(payload.clone())
+        }).expect("skewed attack pose overlaps active motion");
+        let first = presentation.last_attack_motion_overlap.expect("overlap recorded");
+        presentation.render_state_if_changed_with_clocks(750, 1_350, true, |payload, _, _| {
+            Some(payload.clone())
+        });
+        assert_eq!(presentation.last_attack_motion_overlap, Some(first));
+        presentation.render_state_if_changed_with_clocks(800, 1_700, true, |payload, _, _| {
+            Some(payload.clone())
+        });
+        assert!(presentation.last_attack_motion_overlap.is_none());
     }
 
     #[test]

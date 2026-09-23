@@ -8,67 +8,67 @@
       "monster": "Dung",
       "monsterIndex": 242,
       "position": { "x": 340, "y": 355 },
-      "count": 1,
-      "spread": 0,
+      "count": 3,
+      "spread": 3,
       "delayMinutes": 0,
       "respawnIndex": 10019,
       "sourceQuestId": 2110019,
-      "sourceNote": "V2-only Dung foothold near the D022 entrance; the opt-in V2 profile keeps imported groups and timing but limits each imported group to one roaming actor."
+      "sourceNote": "V2-only three-monster Dung foothold near the D022 entrance; the opt-in V2 profile keeps imported groups and timing but limits each imported group to one roaming actor."
     },
     {
       "mapFileName": "D022",
       "monster": "WoomaSoldier",
       "monsterIndex": 244,
       "position": { "x": 370, "y": 340 },
-      "count": 1,
-      "spread": 0,
+      "count": 3,
+      "spread": 3,
       "delayMinutes": 0,
       "respawnIndex": 10020,
       "maxHp": 120,
       "sourceQuestId": 2110020,
-      "sourceNote": "V2-only 120-HP WoomaSoldier foothold; imported Crystal group stats and timing remain, with one roaming actor per group in this profile."
+      "sourceNote": "V2-only three-monster 120-HP WoomaSoldier foothold; imported Crystal group stats and timing remain, with one roaming actor per group in this profile."
     },
     {
       "mapFileName": "D022",
       "monster": "WoomaFighter",
       "monsterIndex": 246,
       "position": { "x": 300, "y": 385 },
-      "count": 1,
-      "spread": 0,
+      "count": 3,
+      "spread": 3,
       "delayMinutes": 0,
       "respawnIndex": 10021,
       "maxHp": 120,
       "sourceQuestId": 2110021,
-      "sourceNote": "V2-only 120-HP WoomaFighter foothold; imported Crystal group stats and timing remain, with one roaming actor per group in this profile."
+      "sourceNote": "V2-only three-monster 120-HP WoomaFighter foothold; imported Crystal group stats and timing remain, with one roaming actor per group in this profile."
     },
     {
       "mapFileName": "D022", "monster": "Dung", "monsterIndex": 242,
-      "position": { "x": 360, "y": 355 }, "count": 1, "spread": 0,
+      "position": { "x": 360, "y": 355 }, "count": 3, "spread": 3,
       "delayMinutes": 0, "respawnIndex": 10022, "sourceQuestId": 2110019
     },
     {
       "mapFileName": "D022", "monster": "Dung", "monsterIndex": 242,
-      "position": { "x": 335, "y": 380 }, "count": 1, "spread": 0,
+      "position": { "x": 335, "y": 380 }, "count": 3, "spread": 3,
       "delayMinutes": 0, "respawnIndex": 10023, "sourceQuestId": 2110019
     },
     {
       "mapFileName": "D022", "monster": "WoomaSoldier", "monsterIndex": 244,
-      "position": { "x": 320, "y": 395 }, "count": 1, "spread": 0,
+      "position": { "x": 320, "y": 395 }, "count": 3, "spread": 3,
       "delayMinutes": 0, "respawnIndex": 10024, "maxHp": 120, "sourceQuestId": 2110020
     },
     {
       "mapFileName": "D022", "monster": "WoomaSoldier", "monsterIndex": 244,
-      "position": { "x": 370, "y": 325 }, "count": 1, "spread": 0,
+      "position": { "x": 370, "y": 325 }, "count": 3, "spread": 3,
       "delayMinutes": 0, "respawnIndex": 10025, "maxHp": 120, "sourceQuestId": 2110020
     },
     {
       "mapFileName": "D022", "monster": "WoomaFighter", "monsterIndex": 246,
-      "position": { "x": 280, "y": 340 }, "count": 1, "spread": 0,
+      "position": { "x": 280, "y": 340 }, "count": 3, "spread": 3,
       "delayMinutes": 0, "respawnIndex": 10026, "maxHp": 120, "sourceQuestId": 2110021
     },
     {
       "mapFileName": "D022", "monster": "WoomaFighter", "monsterIndex": 246,
-      "position": { "x": 300, "y": 330 }, "count": 1, "spread": 0,
+      "position": { "x": 300, "y": 330 }, "count": 3, "spread": 3,
       "delayMinutes": 0, "respawnIndex": 10027, "maxHp": 120, "sourceQuestId": 2110021
     }
   ],

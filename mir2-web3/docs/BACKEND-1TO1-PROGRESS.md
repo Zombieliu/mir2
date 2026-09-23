@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> 2026-09-24 shared melee candidate: fixes the incorrect 0.25 multiplier on
+> Thrusting's adjacent hit. With DC40/AC16 the primary deals24, secondary
+> deals10/20/30/40 at levels0–3 and ignores AC. Directional monster/PvP/mixed
+> targets are deduplicated; HalfMoon primary/three extra cells are corrected.
+> Gateway uses a legal Zone primary-target snapshot before dispatch and grants
+> weapon experience only after accepted ObjectAttack. Zone209+10, Gateway2
+> and V2 training-spawn1 tests pass. V2 D022 uses nine three-actor training
+> groups; imported original cadence is untouched. Matched Gateway is packaged,
+> not deployed; player save, impact timing and standalone compatibility combat
+> remain outside this correction.
+> [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
+
 > 2026-09-24 safe-area binding and combat-order candidate: the saved
 > `bind_point` now follows the imported current-map safe-area center after
 > accepted local/Zone movement and map arrival. The same point drives

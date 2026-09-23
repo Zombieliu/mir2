@@ -55,8 +55,9 @@ test('V2 training footholds are data-defined, bounded, and separate from importe
   ];
   for (const [kill, ids] of expected) {
     assert.deepEqual(kill.spawnCandidates.map(row => row.respawnIndex).sort(), ids,
-      'V2 searches three separated authored actors instead of the broad imported spread');
-    assert.ok(kill.spawnCandidates.every(row => row.count === 1 && row.spread === 0 && row.delayMinutes === 0));
+      'V2 searches three separated authored groups instead of the broad imported spread');
+    assert.ok(kill.spawnCandidates.every(row => row.count === 3 && row.spread === 3 && row.delayMinutes === 0));
+    assert.equal(kill.spawnCandidates.reduce((count, row) => count + row.count, 0), 9);
   }
   assert.ok([...soldier.spawnCandidates, ...fighter.spawnCandidates].every(row => row.maxHp === 120));
   const footholds = expected.flatMap(([kill]) => kill.spawnCandidates.map(row => row.position));
@@ -95,6 +96,14 @@ test('all three D022 training footholds have a static walk path from the ordinar
     { x: 370, y: 325 }, { x: 280, y: 340 }, { x: 300, y: 330 },
   ]) {
     assert.equal(map.blocked[target.y * map.width + target.x], 0);
+    let freeTiles = 0;
+    for (let y = target.y - 3; y <= target.y + 3; y += 1) {
+      for (let x = target.x - 3; x <= target.x + 3; x += 1) {
+        if (map.blocked[y * map.width + x] === 0 &&
+            !blockedTransfers.some(tile => tile.x === x && tile.y === y)) freeTiles += 1;
+      }
+    }
+    assert.ok(freeTiles >= 3, `training group needs three free tiles near ${target.x},${target.y}`);
     assert.ok(findProtocolWalkPath({
       map, start: { x: 338, y: 356 }, target, dynamicObstacles: blockedTransfers,
     }), `D022 entry cannot reach ${target.x},${target.y}`);

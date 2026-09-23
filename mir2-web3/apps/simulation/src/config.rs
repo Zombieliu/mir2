@@ -3554,7 +3554,7 @@ impl ContentProfileRuntime {
             .map(|map| map.respawns)
             .unwrap_or_default();
         // The V2 newcomer route enters D022 at level 26. Its authored
-        // one-monster practice footholds are not usable when each imported
+        // small practice groups are not usable when each imported
         // wide-spread Crystal group contributes dozens of roaming hostiles to
         // the same entrance. Keep every original group and its stats/timing,
         // but use one actor per group only in this opt-in onboarding profile.

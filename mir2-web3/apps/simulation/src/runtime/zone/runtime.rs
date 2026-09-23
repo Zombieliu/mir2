@@ -859,6 +859,48 @@ impl ZoneRuntime {
             .map(|player| PlayerId(player.object_id))
     }
 
+    /// Capture this before dispatch, then use it only if the swing is accepted:
+    /// an immediate lethal hit can remove the primary target before progression
+    /// is committed. Mirror the same legal targets as melee resolution rather
+    /// than treating an arbitrary visible front-cell occupant as an attack.
+    pub fn melee_primary_target_present(
+        &self,
+        session_id: &SessionId,
+        direction: MirDirection,
+        materialized: Option<&ZoneMonsterSpawn>,
+    ) -> bool {
+        let Some(player) = self.players.get(session_id) else {
+            return false;
+        };
+        if player.dead || player.hp <= 0 {
+            return false;
+        }
+        let front = offset_point(&player.position, direction, 1);
+        if self.native_monsters.values().any(|target| {
+            target.position == front
+                && !target.dead
+                && target.hp > 0
+                && zone_native_monster_is_authoritatively_melee_attackable(target)
+        }) || self.players.values().any(|target| {
+            target.position == front && zone_player_can_attack_player(player, target)
+        }) {
+            return true;
+        }
+        // A trusted not-yet-materialized target must obey the same initial
+        // visibility/disposition rules. An existing ID always wins over stale
+        // personal metadata, including a corpse or another type of object.
+        materialized.is_some_and(|spawn| {
+            spawn.position == front
+                && !self.object_id_in_use(spawn.object_id)
+                && {
+                    let target = ZoneNativeMonster::from_spawn(spawn, spawn.object_id);
+                    !target.dead
+                        && target.hp > 0
+                        && zone_native_monster_is_authoritatively_melee_attackable(&target)
+                }
+        })
+    }
+
     /// Reports the authoritative AOI bookkeeping for one retained world object.
     /// `None` distinguishes an unknown player/object from a retained object that
     /// is currently outside the player's viewport.
@@ -3698,12 +3740,25 @@ impl ZoneRuntime {
             return self.owner_location_correction(session_id);
         }
         let attack_spell = Spell::try_from(spell).unwrap_or(Spell::None);
+        let is_area_skill = matches!(
+            attack_spell,
+            Spell::Thrusting | Spell::HalfMoon | Spell::CrossHalfMoon
+        );
+        let area_hit = zone_melee_area_hit(
+            &player.position,
+            direction,
+            &monster.position,
+            attack_spell,
+            level,
+        );
         let max_range = if attack_spell == Spell::Thrusting {
             2
         } else {
             1
         };
-        if !points_within_action_range(&player.position, &monster.position, max_range) {
+        if !points_within_action_range(&player.position, &monster.position, max_range)
+            || (is_area_skill && area_hit.is_none())
+        {
             return self.correct_player_location(session_id, now_ms);
         }
         let Some(live_player) = self.players.get_mut(session_id) else {
@@ -3735,17 +3790,17 @@ impl ZoneRuntime {
             out.extend(kick);
             return out;
         }
-        if let Some(resolved_damage) =
-            zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
-        {
-            // The legacy fallback supplied by the personal session is already
-            // skill-scaled.  Only the authoritative Zone stat roll still needs
-            // the Crystal UserMagic multiplier applied here.
-            let resolved_damage = if player.combat_stats.has_authoritative_damage() {
-                zone_apply_melee_skill_damage(attack_spell, level, resolved_damage)
-            } else {
-                resolved_damage
-            };
+        if let Some(resolved_damage) = zone_resolve_player_melee_area_attack(
+            &player, &monster, object_id, damage, now_ms, area_hit,
+        ) {
+            // Ordinary skill fallbacks are already scaled. The area techniques
+            // resolve their front/secondary formula before armour above.
+            let resolved_damage =
+                if player.combat_stats.has_authoritative_damage() && !is_area_skill {
+                    zone_apply_melee_skill_damage(attack_spell, level, resolved_damage)
+                } else {
+                    resolved_damage
+                };
             self.pending_native_hits.push(PendingNativeMonsterHit {
                 ready_at_ms: if attack_spell == Spell::TwinDrakeBlade {
                     now_ms.saturating_add(300)
@@ -3806,69 +3861,15 @@ impl ZoneRuntime {
                 poison: CRYSTAL_POISON_STUN,
             });
         }
-        if matches!(attack_spell, Spell::HalfMoon | Spell::CrossHalfMoon) {
-            let offsets: &[i8] = if attack_spell == Spell::CrossHalfMoon {
-                &[-4, -3, -2, -1, 1, 2, 3]
-            } else {
-                &[-1, 1, 2, 3]
-            };
-            let secondary_ids = offsets
-                .iter()
-                .flat_map(|offset| {
-                    let point = offset_point(
-                        &player.position,
-                        zone_rotated_direction(direction, *offset),
-                        1,
-                    );
-                    self.native_monsters
-                        .iter()
-                        .filter_map(move |(target_id, target)| {
-                            (*target_id != object_id
-                                && !target.dead
-                                && target.hp > 0
-                                && target.hostile_to_player
-                                && target.position == point)
-                                .then_some(*target_id)
-                        })
-                })
-                .collect::<BTreeSet<_>>();
-            for target_id in secondary_ids {
-                let Some(target) = self.native_monsters.get(&target_id) else {
-                    continue;
-                };
-                if let Some(hit_damage) =
-                    zone_resolve_player_physical_attack(&player, target, target_id, damage, now_ms)
-                {
-                    self.pending_native_hits.push(PendingNativeMonsterHit {
-                        ready_at_ms: now_ms.saturating_add(300),
-                        session_id: session_id.clone(),
-                        attacker_object_id: player.object_id,
-                        object_id: target_id,
-                        damage: if player.combat_stats.has_authoritative_damage() {
-                            zone_apply_melee_skill_damage(attack_spell, level, hit_damage)
-                        } else {
-                            hit_damage
-                        },
-                        soulfire_practice: None,
-                        journey_event: zone_journey_physical_technique(attack_spell).map(
-                            |technique| {
-                                self.journey_event_draft(
-                                    &player,
-                                    ZoneJourneyEventKind::PhysicalDamage { technique },
-                                    now_ms,
-                                    player.object_id,
-                                    Some(target_id),
-                                    Some(target.position.clone()),
-                                    None,
-                                    false,
-                                )
-                            },
-                        ),
-                        fire_bounce: None,
-                    });
-                }
-            }
-        }
+        let mut extra_hits = self.apply_melee_area_other_targets(
+            &player,
+            object_id,
+            direction,
+            attack_spell,
+            level,
+            damage,
+            now_ms,
+        );
         self.apply_zone_object_packets(std::slice::from_ref(&attack_packet), now_ms);
         let recipients = self.native_monster_action_recipients(
             session_id,
@@ -3879,12 +3880,130 @@ impl ZoneRuntime {
         if recipients.is_empty() {
             return Vec::new();
         }
-        vec![ZoneOutbound::ToMany {
+        let mut outbounds = vec![ZoneOutbound::ToMany {
             session_ids: recipients,
             packets: std::iter::once(attack_packet)
                 .chain(skill_packets)
                 .collect(),
-        }]
+        }];
+        outbounds.append(&mut extra_hits);
+        outbounds
+    }
+
+    /// Resolve the other cells of one accepted swing. Target selection must not
+    /// change the front/secondary formula or cause the selected target to be hit
+    /// twice, including when a player and monster occupy the two thrust cells.
+    fn apply_melee_area_other_targets(
+        &mut self,
+        attacker: &ZonePlayer,
+        selected_id: u32,
+        direction: MirDirection,
+        spell: Spell,
+        level: u8,
+        fallback_damage: i32,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let cells = zone_melee_area_cells(&attacker.position, direction, spell);
+        if cells.is_empty() {
+            return Vec::new();
+        }
+        let selected_position = self
+            .native_monsters
+            .get(&selected_id)
+            .map(|target| target.position.clone())
+            .or_else(|| {
+                self.players
+                    .values()
+                    .find(|target| target.object_id == selected_id)
+                    .map(|target| target.position.clone())
+            });
+        let mut outbounds = Vec::new();
+        for (point, secondary) in cells {
+            if selected_position.as_ref() == Some(&point) {
+                continue;
+            }
+            let hit = Some((spell, level, secondary));
+            let target = self
+                .native_monsters
+                .iter()
+                .find(|(id, target)| {
+                    **id != selected_id
+                        && !target.dead
+                        && target.hp > 0
+                        && target.position == point
+                        && zone_native_monster_is_authoritatively_melee_attackable(target)
+                })
+                .map(|(id, target)| (*id, target.clone()));
+            if let Some((target_id, target)) = target {
+                if let Some(damage) = zone_resolve_player_melee_area_attack(
+                    attacker,
+                    &target,
+                    target_id,
+                    fallback_damage,
+                    now_ms,
+                    hit,
+                ) {
+                    self.pending_native_hits.push(PendingNativeMonsterHit {
+                        ready_at_ms: if secondary
+                            && matches!(spell, Spell::HalfMoon | Spell::CrossHalfMoon)
+                        {
+                            now_ms.saturating_add(300)
+                        } else {
+                            now_ms
+                        },
+                        session_id: attacker.session_id.clone(),
+                        attacker_object_id: attacker.object_id,
+                        object_id: target_id,
+                        damage,
+                        soulfire_practice: None,
+                        journey_event: zone_journey_physical_technique(spell).map(|technique| {
+                            self.journey_event_draft(
+                                attacker,
+                                ZoneJourneyEventKind::PhysicalDamage { technique },
+                                now_ms,
+                                attacker.object_id,
+                                Some(target_id),
+                                Some(target.position.clone()),
+                                None,
+                                false,
+                            )
+                        }),
+                        fire_bounce: None,
+                    });
+                }
+                continue;
+            }
+            let target = self
+                .players
+                .values()
+                .find(|target| {
+                    target.object_id != selected_id
+                        && target.position == point
+                        && zone_player_can_attack_player(attacker, target)
+                })
+                .cloned();
+            if let Some(target) = target {
+                if let Some(damage) = zone_resolve_player_pvp_melee_area_attack(
+                    attacker,
+                    &target,
+                    fallback_damage,
+                    now_ms,
+                    hit,
+                ) {
+                    if let Some((packets, settlements)) = self.apply_native_player_pvp_damage(
+                        &target.session_id,
+                        attacker.object_id,
+                        damage,
+                        0,
+                        now_ms,
+                    ) {
+                        outbounds.push(ZoneOutbound::ToAll { packets });
+                        outbounds.extend(settlements);
+                    }
+                }
+            }
+        }
+        outbounds
     }
 
     fn player_attack_native_player(
@@ -3910,16 +4029,34 @@ impl ZoneRuntime {
         } else {
             1
         };
+        let is_area_skill = matches!(
+            attack_spell,
+            Spell::Thrusting | Spell::HalfMoon | Spell::CrossHalfMoon
+        );
+        let area_hit = zone_melee_area_hit(
+            &attacker.position,
+            direction,
+            &target.position,
+            attack_spell,
+            level,
+        );
         if !zone_player_can_attack_player(&attacker, &target)
             || !points_within_action_range(&attacker.position, &target.position, max_range)
+            || (is_area_skill && area_hit.is_none())
         {
             return self.correct_player_location(session_id, now_ms);
         }
 
-        let resolved_damage =
-            zone_resolve_player_pvp_physical_attack(&attacker, &target, fallback_damage, now_ms)
-                .unwrap_or_default();
-        let resolved_damage = if attacker.combat_stats.has_authoritative_damage() {
+        let resolved_damage = zone_resolve_player_pvp_melee_area_attack(
+            &attacker,
+            &target,
+            fallback_damage,
+            now_ms,
+            area_hit,
+        )
+        .unwrap_or_default();
+        let resolved_damage = if attacker.combat_stats.has_authoritative_damage() && !is_area_skill
+        {
             zone_apply_melee_skill_damage(attack_spell, level, resolved_damage)
         } else {
             resolved_damage
@@ -4025,6 +4162,15 @@ impl ZoneRuntime {
                 settlement,
             });
         }
+        outbounds.extend(self.apply_melee_area_other_targets(
+            &attacker,
+            target.object_id,
+            direction,
+            attack_spell,
+            level,
+            fallback_damage,
+            now_ms,
+        ));
         outbounds
     }
 
@@ -14112,6 +14258,61 @@ fn zone_apply_melee_skill_damage(spell: Spell, level: u8, base_damage: i32) -> i
         .unwrap_or(base_damage)
 }
 
+/// The front cell is always an ordinary weapon blow for these techniques.
+/// Only the extra cells use UserMagic.GetDamage (HumanObject.Attack).
+fn zone_melee_area_damage_base(base: i32, hit: Option<(Spell, u8, bool)>) -> i32 {
+    match hit {
+        Some((spell, level, true)) => crystal_magic_by_spell(&format!("{spell:?}"))
+            .map(|magic| crate::runtime::skills::crystal_magic_get_damage(&magic, level, base))
+            .unwrap_or(base),
+        _ => base,
+    }
+}
+
+fn zone_melee_area_cells(
+    position: &Point,
+    direction: MirDirection,
+    spell: Spell,
+) -> Vec<(Point, bool)> {
+    if !matches!(
+        spell,
+        Spell::Thrusting | Spell::HalfMoon | Spell::CrossHalfMoon
+    ) {
+        return Vec::new();
+    }
+    let mut cells = vec![(offset_point(position, direction, 1), false)];
+    match spell {
+        Spell::Thrusting => cells.push((offset_point(position, direction, 2), true)),
+        Spell::HalfMoon | Spell::CrossHalfMoon => {
+            let offsets: &[i8] = if spell == Spell::HalfMoon {
+                &[-1, 1, 2]
+            } else {
+                &[-4, -3, -2, -1, 1, 2, 3]
+            };
+            cells.extend(offsets.iter().map(|offset| {
+                (
+                    offset_point(position, zone_rotated_direction(direction, *offset), 1),
+                    true,
+                )
+            }));
+        }
+        _ => return Vec::new(),
+    }
+    cells
+}
+
+fn zone_melee_area_hit(
+    position: &Point,
+    direction: MirDirection,
+    target: &Point,
+    spell: Spell,
+    level: u8,
+) -> Option<(Spell, u8, bool)> {
+    zone_melee_area_cells(position, direction, spell)
+        .into_iter()
+        .find_map(|(cell, secondary)| (cell == *target).then_some((spell, level, secondary)))
+}
+
 fn zone_journey_physical_technique(spell: Spell) -> Option<ZoneJourneyPhysicalTechnique> {
     match spell {
         Spell::None => Some(ZoneJourneyPhysicalTechnique::Normal),
@@ -14213,6 +14414,24 @@ fn zone_resolve_player_physical_attack(
     fallback_damage: i32,
     now_ms: u64,
 ) -> Option<i32> {
+    zone_resolve_player_melee_area_attack(
+        player,
+        monster,
+        monster_object_id,
+        fallback_damage,
+        now_ms,
+        None,
+    )
+}
+
+fn zone_resolve_player_melee_area_attack(
+    player: &ZonePlayer,
+    monster: &ZoneNativeMonster,
+    monster_object_id: u32,
+    fallback_damage: i32,
+    now_ms: u64,
+    area_hit: Option<(Spell, u8, bool)>,
+) -> Option<i32> {
     // The browser acceptance gate accelerates the real authoritative hit
     // result. Applying this after accuracy, attack-power, and armour
     // resolution is important: characters with authoritative combat stats do
@@ -14221,9 +14440,9 @@ fn zone_resolve_player_physical_attack(
     let qa_damage_multiplier = qa_natural_kill_damage_multiplier();
     let stats = player.combat_stats;
     if !stats.has_authoritative_damage() {
-        return Some(
-            zone_player_native_damage(player, fallback_damage).saturating_mul(qa_damage_multiplier),
-        );
+        let base = zone_player_native_damage(player, fallback_damage);
+        let base = zone_melee_area_damage_base(base, area_hit);
+        return Some(base.saturating_mul(qa_damage_multiplier));
     }
 
     let agility = monster.defense.agility.max(0);
@@ -14252,7 +14471,13 @@ fn zone_resolve_player_physical_attack(
         base,
         zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC_RATE_PERCENT),
     );
+    let base = zone_melee_area_damage_base(base, area_hit);
     let base = zone_apply_player_critical(base, &stats, player.object_id, now_ms);
+    // Crystal's second thrust tile and the non-front HalfMoon tiles use
+    // DefenceType.Agility: dodge is still checked, but AC is not subtracted.
+    if area_hit.is_some_and(|(_, _, secondary)| secondary) {
+        return Some(base.max(0).saturating_mul(qa_damage_multiplier));
+    }
     let (min_ac, max_ac) = horned_stat_range(
         monster,
         HornedStat::Ac,
@@ -14505,6 +14730,16 @@ fn zone_resolve_player_pvp_physical_attack(
     fallback_damage: i32,
     now_ms: u64,
 ) -> Option<i32> {
+    zone_resolve_player_pvp_melee_area_attack(attacker, target, fallback_damage, now_ms, None)
+}
+
+fn zone_resolve_player_pvp_melee_area_attack(
+    attacker: &ZonePlayer,
+    target: &ZonePlayer,
+    fallback_damage: i32,
+    now_ms: u64,
+    area_hit: Option<(Spell, u8, bool)>,
+) -> Option<i32> {
     let stats = attacker.combat_stats;
     if stats.has_authoritative_damage() && target.combat_stats.agility > 0 {
         let roll = crate::runtime::combat::crystal_accuracy_roll(
@@ -14532,17 +14767,27 @@ fn zone_resolve_player_pvp_physical_attack(
             base,
             zone_player_buff_stat_total(attacker, CRYSTAL_STAT_MAX_DC_RATE_PERCENT),
         );
+        let base = zone_melee_area_damage_base(base, area_hit);
         zone_apply_player_critical(base, &stats, attacker.object_id, now_ms)
     } else {
-        zone_player_native_damage(attacker, fallback_damage)
+        zone_melee_area_damage_base(
+            zone_player_native_damage(attacker, fallback_damage),
+            area_hit,
+        )
     };
     // Keep the browser acceptance accelerator consistent for native monsters
     // and PvP. Production remains exact because the explicit QA environment
     // variable defaults to one; accuracy and armour are still resolved before
     // the accepted hit is amplified.
     Some(
-        zone_player_native_incoming_damage(target, base, false, now_ms)
-            .saturating_mul(qa_natural_kill_damage_multiplier()),
+        zone_player_native_incoming_damage_with_armour(
+            target,
+            base,
+            false,
+            now_ms,
+            !area_hit.is_some_and(|(_, _, secondary)| secondary),
+        )
+        .saturating_mul(qa_natural_kill_damage_multiplier()),
     )
 }
 
@@ -14737,6 +14982,16 @@ fn zone_player_native_incoming_damage(
     magic: bool,
     now_ms: u64,
 ) -> i32 {
+    zone_player_native_incoming_damage_with_armour(player, base_damage, magic, now_ms, true)
+}
+
+fn zone_player_native_incoming_damage_with_armour(
+    player: &ZonePlayer,
+    base_damage: i32,
+    magic: bool,
+    now_ms: u64,
+    subtract_armour: bool,
+) -> i32 {
     let buff_armour = zone_player_buff_stat_total(
         player,
         if magic {
@@ -14761,10 +15016,14 @@ fn zone_player_native_incoming_damage(
         player.object_id,
         if magic { 0x3AC } else { 0x4AC },
     );
-    let mitigated = base_damage
-        .max(0)
-        .saturating_sub(buff_armour)
-        .saturating_sub(base_armour);
+    let mitigated = if subtract_armour {
+        base_damage
+            .max(0)
+            .saturating_sub(buff_armour)
+            .saturating_sub(base_armour)
+    } else {
+        base_damage.max(0)
+    };
     let reduction_percent =
         zone_player_buff_stat_total(player, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT).clamp(0, 100);
     mitigated

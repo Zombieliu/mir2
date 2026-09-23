@@ -37,6 +37,71 @@ fn skeleton_hunt_app(origin: (i32, i32)) -> (
 }
 
 #[test]
+fn completed_hunt_arrival_feedback_expires_when_area_map_or_primary_quest_changes() {
+    let (app, _receiver, intent) = skeleton_hunt_app((250, 260));
+    let map = app.world().resource::<BigMapModel>().clone();
+    let tracker = app.world().resource::<QuestTracker>().clone();
+    let QuestRouteTarget::HuntRegion { radius, .. } = intent.target else {
+        panic!("fixture has a hunt target");
+    };
+    let arrival = HuntArrival {
+        map_file: "D001".into(),
+        map_index: intent.map_index,
+        area: big_map_input::HuntArea { center: (intent.x, intent.y), radius },
+        quest_route: Some(intent),
+    };
+    let mut movement = WorldPointerMovementState::default();
+    let mut state = QuestUiState::default();
+    state.pinned_primary_quest_index = Some(intent.quest_index);
+    state.set_feedback(HUNT_ARRIVAL_FEEDBACK, false);
+    movement.hunt_arrival = Some(arrival.clone());
+
+    clear_stale_hunt_arrival_feedback(
+        &mut movement, Some(&mut state), Some("D001"), Some(&map),
+        (intent.x + radius, intent.y), Some(&tracker),
+    );
+    assert!(movement.hunt_arrival.is_some());
+    assert_eq!(state.feedback.as_ref().unwrap().message, HUNT_ARRIVAL_FEEDBACK);
+
+    for (map_file, position, primary) in [
+        ("D001", (intent.x + radius + 1, intent.y), intent.quest_index),
+        ("D022", (intent.x, intent.y), intent.quest_index),
+        ("D001", (intent.x, intent.y), intent.quest_index + 1),
+    ] {
+        movement.hunt_arrival = Some(arrival.clone());
+        state.pinned_primary_quest_index = Some(primary);
+        state.set_feedback(HUNT_ARRIVAL_FEEDBACK, false);
+        clear_stale_hunt_arrival_feedback(
+            &mut movement, Some(&mut state), Some(map_file), Some(&map),
+            position, Some(&tracker),
+        );
+        assert!(movement.hunt_arrival.is_none());
+        assert!(state.feedback.is_none());
+    }
+
+    let mut completed_tracker = tracker.clone();
+    let objective = &mut completed_tracker.active_quests[0].objectives[0];
+    objective.current = objective.target;
+    movement.hunt_arrival = Some(arrival.clone());
+    state.pinned_primary_quest_index = Some(intent.quest_index);
+    state.set_feedback(HUNT_ARRIVAL_FEEDBACK, false);
+    clear_stale_hunt_arrival_feedback(
+        &mut movement, Some(&mut state), Some("D001"), Some(&map),
+        (intent.x, intent.y), Some(&completed_tracker),
+    );
+    assert!(movement.hunt_arrival.is_none());
+    assert!(state.feedback.is_none());
+
+    movement.hunt_arrival = Some(arrival);
+    state.set_feedback("另一条任务提示", false);
+    clear_stale_hunt_arrival_feedback(
+        &mut movement, Some(&mut state), Some("D022"), Some(&map),
+        (intent.x, intent.y), Some(&tracker),
+    );
+    assert_eq!(state.feedback.as_ref().unwrap().message, "另一条任务提示");
+}
+
+#[test]
 fn hunt_navigation_d001_route_avoids_new_occupancy_and_stops_on_authoritative_arrival() {
     let map = crate::map_parser::load_map("D001").expect("actual D001 collision map");
     assert!(!map.cell_blocks_movement(211, 320));

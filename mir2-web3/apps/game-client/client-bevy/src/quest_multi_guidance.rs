@@ -147,8 +147,19 @@ fn nearby_indices(primary: i32, tracker: &QuestTracker, entities: &EntityModelSe
     candidates.into_iter().take(2).map(|(_, id)| id).collect()
 }
 
-fn objective_lines(quest: &Quest) -> Vec<String> {
-    quest.objectives.iter().map(|o| format!("{}  {}/{}", o.text, o.current, o.target)).collect()
+fn objective_lines(quest: &Quest, class_name: &str) -> Vec<String> {
+    let practice = crate::quest_practice::practice_guide(quest.quest_index, class_name);
+    quest.objectives.iter().enumerate().map(|(index, o)| {
+        if let Some(guide) = practice.as_ref().filter(|guide| guide.objective_index == index) {
+            if o.target > 0 && o.current >= o.target {
+                format!("职业练习已完成  {}/{}", o.current, o.target)
+            } else {
+                format!("职业练习 {}/{}：{}", o.current, o.target, guide.summary)
+            }
+        } else {
+            format!("{}  {}/{}", o.text, o.current, o.target)
+        }
+    }).collect()
 }
 
 fn card_char_columns(ch: char) -> usize {
@@ -164,7 +175,7 @@ fn card_columns(text: &str) -> usize {
     text.chars().map(card_char_columns).sum()
 }
 
-fn wrap_card_text(text: &str) -> Vec<String> {
+pub(super) fn wrap_card_text(text: &str) -> Vec<String> {
     let mut lines = Vec::new();
     for paragraph in text.split('\n') {
         if card_columns(paragraph) <= CARD_WRAP_COLUMNS {
@@ -233,7 +244,7 @@ fn button(parent: &mut ChildSpawnerCommands, text: &str, action: QuestUiButton) 
 }
 
 pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, state: &QuestUiState,
-    journey: Option<&JourneyView>, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>) -> bool {
+    journey: Option<&JourneyView>, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>, class_name: &str) -> bool {
     let Some(primary) = primary_quest_index(tracker, state, journey) else { return false; };
     let Some(quest) = tracker.active_quests.iter().find(|q| q.quest_index == primary) else { return false; };
     let nearby = nearby_indices(primary, tracker, entities, map, big_map);
@@ -247,7 +258,7 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
             line(card, format!("{} · {}", journey.chapter_title, journey.progress_label()), PANEL_TEXT);
         }
         line(card, format!("当前任务 · {}", quest.title), PANEL_HIGHLIGHT);
-        for objective in objective_lines(quest) { line(card, objective, Color::WHITE); }
+        for objective in objective_lines(quest, class_name) { line(card, objective, Color::WHITE); }
         let next = journey.and_then(|j| j.next.as_ref()).filter(|s| s.quest_id == primary);
         if quest.status == QuestStatus::ReadyToTurnIn {
             line(card, next.map(|s| s.action.clone()).unwrap_or_else(|| quest.npc_name.as_ref()
@@ -378,7 +389,7 @@ mod tests {
         let mut queue = bevy::ecs::world::CommandQueue::default();
         let mut commands = Commands::new(&mut queue, &world);
         commands.spawn_empty().with_children(|parent| {
-            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &MapModel::default(), None));
+            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &MapModel::default(), None, "Warrior"));
         });
         queue.apply(&mut world);
         let text = world.query::<&Text>().iter(&world).map(|t| t.0.as_str()).collect::<Vec<_>>().join("\n");
@@ -388,10 +399,25 @@ mod tests {
         assert!(!text.contains("当前任务 · Quest 2"));
     }
     #[test]
+    fn practice_card_names_skills_for_the_players_class_and_keeps_server_completion() {
+        let mut q = quest(2110021);
+        q.objectives = vec![
+            QuestObjective { objective_id: "kill".into(), text: "Defeat 3 WoomaFighter".into(), current: 3, target: 3 },
+            QuestObjective { objective_id: "practice".into(), text: "Complete your class practice".into(), current: 0, target: 1 },
+        ];
+        let lines = objective_lines(&q, "Warrior");
+        assert!(lines[1].contains("半月弯刀造成伤害；刺杀剑术造成伤害"));
+        assert!(lines[1].contains("0/1"));
+        assert!(wrap_card_text(&lines[1]).iter().all(|line| card_columns(line) <= CARD_WRAP_COLUMNS));
+        assert!(objective_lines(&q, "Wizard")[1].contains("雷电术"));
+        q.objectives[1].current = 1;
+        assert_eq!(objective_lines(&q, "Warrior")[1], "职业练习已完成  1/1");
+    }
+    #[test]
     fn full_counters_are_never_truncated() {
         let mut q = quest(1);
         q.objectives = (0..4).map(|i| QuestObjective { objective_id: i.to_string(), text: "A long objective description".repeat(5), current: i, target: 100 }).collect();
-        let lines = objective_lines(&q);
+        let lines = objective_lines(&q, "Warrior");
         assert_eq!(lines.len(), 4);
         assert!(lines[3].ends_with("3/100"));
         assert!(lines[0].starts_with(&q.objectives[0].text));
@@ -476,7 +502,7 @@ mod tests {
         let mut queue = bevy::ecs::world::CommandQueue::default();
         let mut commands = Commands::new(&mut queue, &world);
         commands.spawn_empty().with_children(|parent| {
-            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map)));
+            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior"));
         });
         queue.apply(&mut world);
         let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str())
@@ -514,7 +540,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map)));
+                assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior"));
             });
             queue.apply(&mut world);
             assert!(world.query::<(&Text, &TextColor)>().iter(&world)
@@ -601,7 +627,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map)));
+                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior"));
             });
             queue.apply(&mut world);
             assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
@@ -659,7 +685,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map)));
+                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior"));
             });
             queue.apply(&mut world);
             assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,

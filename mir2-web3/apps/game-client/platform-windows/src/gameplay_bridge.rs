@@ -2070,7 +2070,7 @@ pub fn drain_gameplay_events(
             ui.ranking.apply_packet(packet);
         }
     }
-    let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    let now_ms = crate::entity_presentation::native_motion_clock_ms();
     // HUD state may coalesce to the latest snapshot; actor action feeds may
     // not. Consume every packet projection before selecting the final UI view.
     for payload in snapshots

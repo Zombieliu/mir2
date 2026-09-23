@@ -706,6 +706,15 @@ impl InProcessWorldRuntime {
         self.session.commit_zone_melee_attack_spell(spell)
     }
 
+    pub fn commit_zone_melee_attack_spell_with_primary(
+        &mut self,
+        spell: Spell,
+        primary_target_present: bool,
+    ) -> Vec<ServerPacket> {
+        self.session
+            .commit_zone_melee_attack_spell_with_primary(spell, primary_target_present)
+    }
+
     pub fn zone_range_attack_profile(&self) -> (Spell, u8, i32) {
         self.session.zone_range_attack_profile()
     }

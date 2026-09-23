@@ -312,6 +312,8 @@ pub struct WorldPointerMovementState {
     /// Only NewMove pointer paths are canceled when that option is disabled.
     pointer_auto_path: bool,
     map_auto_path: Option<big_map_input::MapRoute>,
+    pending_hunt_route: Option<QuestRouteNavigationIntent>,
+    hunt_arrival: Option<HuntArrival>,
     attack_target: Option<u32>,
     next_attack_request_at_ms: f64,
     harvest_target: Option<u32>,
@@ -336,6 +338,16 @@ pub struct WorldPointerMovementState {
     last_plan_block_trace_at_ms: Option<f64>,
 }
 
+const HUNT_ARRIVAL_FEEDBACK: &str = "已到达狩猎区域，请选择怪物战斗";
+
+#[derive(Debug, Clone)]
+struct HuntArrival {
+    map_file: String,
+    map_index: i32,
+    area: big_map_input::HuntArea,
+    quest_route: Option<QuestRouteNavigationIntent>,
+}
+
 impl WorldPointerMovementState {
     /// Current native combat selection. Crystal redraws the selected actor in
     /// a post-world blend pass, which keeps targets readable behind trees and
@@ -355,6 +367,7 @@ impl WorldPointerMovementState {
         self.auto_path_destination = None;
         self.pointer_auto_path = false;
         self.map_auto_path = None;
+        self.pending_hunt_route = None;
         self.attack_target = Some(object_id);
         self.next_attack_request_at_ms = 0.0;
         self.harvest_target = None;
@@ -389,6 +402,7 @@ impl WorldPointerMovementState {
 
     fn start_auto_path(&mut self, destination: (i32, i32), at_ms: f64) {
         self.map_auto_path = None;
+        self.pending_hunt_route = None;
         self.stop_hold(at_ms, "autoPathStarted");
         if self.auto_path_destination != Some(destination) {
             crate::movement_trace::record(serde_json::json!({
@@ -405,6 +419,7 @@ impl WorldPointerMovementState {
 
     fn stop_auto_path(&mut self, at_ms: f64, reason: &'static str) {
         self.map_auto_path = None;
+        self.pending_hunt_route = None;
         self.pointer_auto_path = false;
         if let Some(destination) = self.auto_path_destination.take() {
             crate::movement_trace::record(serde_json::json!({
@@ -548,6 +563,8 @@ impl WorldPointerMovementState {
         self.auto_path_destination = None;
         self.pointer_auto_path = false;
         self.map_auto_path = None;
+        self.pending_hunt_route = None;
+        self.hunt_arrival = None;
         self.active = None;
         self.next_move_send_at_ms = 0.0;
         self.run_primed_until_ms = 0.0;
@@ -1172,7 +1189,7 @@ fn send_pointer_move(
     direction: &'static str,
     requested_mode: WorldPointerMovementMode,
     now_ms: f64,
-    animation_now_ms: u64,
+    presentation_now_ms: u64,
 ) -> bool {
     let effective_mode = movement.effective_mode(requested_mode, now_ms);
     let distance = if effective_mode == WorldPointerMovementMode::Run {
@@ -1211,8 +1228,8 @@ fn send_pointer_move(
         pending.to,
         direction,
         effective_mode == WorldPointerMovementMode::Run,
-        animation_now_ms,
-        crate::entity_presentation::native_motion_clock_ms(),
+        presentation_now_ms,
+        presentation_now_ms,
     );
     push_movement_shadow_command(now_ms, &pending);
     movement.next_move_send_at_ms = pending.visual_until_ms;
@@ -1382,14 +1399,24 @@ fn begin_quest_route_navigation(
     };
     movement.stop_hold(now_ms, "questRouteStarted");
     movement.stop_auto_path(now_ms, "questRouteStarted");
+    movement.hunt_arrival = None;
     movement.attack_target = None;
     movement.harvest_target = None;
     movement.harvest_direction = None;
     movement.next_harvest_request_at_ms = 0.0;
     let destination = steps.last().copied().unwrap_or(origin);
     if steps.is_empty() {
+        if let Some(area) = hunt_area {
+            movement.hunt_arrival = Some(HuntArrival {
+                map_file: map_file.to_owned(),
+                map_index: intent.map_index,
+                area,
+                quest_route: Some(intent),
+            });
+        }
         return Ok(destination);
     }
+    movement.pending_hunt_route = hunt_area.map(|_| intent);
     movement.auto_path_destination = Some(destination);
     movement.pointer_auto_path = false;
     movement.map_auto_path = Some(big_map_input::MapRoute {
@@ -1403,10 +1430,84 @@ fn begin_quest_route_navigation(
     Ok(destination)
 }
 
-fn quest_hunt_arrival_feedback(movement: &WorldPointerMovementState, state: Option<&mut QuestUiState>) {
-    if movement.map_auto_path.as_ref().is_some_and(|route| route.hunt_area.is_some()) {
+fn quest_hunt_arrival_feedback(movement: &mut WorldPointerMovementState, state: Option<&mut QuestUiState>) {
+    if let Some(route) = movement.map_auto_path.as_ref() {
+        if let Some(area) = route.hunt_area {
+            movement.hunt_arrival = Some(HuntArrival {
+                map_file: route.map_file.clone(),
+                map_index: route.map_index,
+                area,
+                quest_route: movement.pending_hunt_route.take(),
+            });
+        }
+    }
+    if movement.hunt_arrival.is_some() {
         if let Some(state) = state {
-            state.set_feedback("已到达狩猎区域，请选择怪物战斗", false);
+            state.set_feedback(HUNT_ARRIVAL_FEEDBACK, false);
+        }
+    }
+}
+
+fn attack_request_ready(
+    movement: &WorldPointerMovementState,
+    presentation: &NativeEntityPresentation,
+    now_ms: f64,
+    motion_now_ms: u64,
+) -> bool {
+    now_ms >= movement.next_move_send_at_ms
+        && now_ms >= movement.next_attack_request_at_ms
+        && presentation.self_motion_remaining_ms(motion_now_ms) == 0
+}
+
+fn hunt_arrival_is_valid(
+    arrival: &HuntArrival,
+    current_map_file: Option<&str>,
+    big_map: Option<&mir2_client_bevy::big_map::BigMapModel>,
+    position: (i32, i32),
+    pinned_primary: Option<i32>,
+    tracker: Option<&QuestTracker>,
+) -> bool {
+    if current_map_file != Some(arrival.map_file.as_str())
+        || big_map.and_then(|map| map.current_map_index) != Some(arrival.map_index)
+        || (position.0 - arrival.area.center.0)
+            .abs()
+            .max((position.1 - arrival.area.center.1).abs()) > arrival.area.radius
+    {
+        return false;
+    }
+    arrival.quest_route.is_none_or(|intent| {
+        !pinned_primary.is_some_and(|primary| primary != intent.quest_index)
+            && quest_route_matches_current_map(intent, big_map)
+            && tracker.is_some_and(|tracker| intent.matches_active_hunt_region(tracker))
+    })
+}
+
+fn clear_stale_hunt_arrival_feedback(
+    movement: &mut WorldPointerMovementState,
+    state: Option<&mut QuestUiState>,
+    current_map_file: Option<&str>,
+    big_map: Option<&mir2_client_bevy::big_map::BigMapModel>,
+    position: (i32, i32),
+    tracker: Option<&QuestTracker>,
+) {
+    let pinned_primary = state.as_ref().and_then(|state| state.pinned_primary_quest_index);
+    if movement.hunt_arrival.as_ref().is_some_and(|arrival| {
+        !hunt_arrival_is_valid(
+            arrival,
+            current_map_file,
+            big_map,
+            position,
+            pinned_primary,
+            tracker,
+        )
+    }) {
+        movement.hunt_arrival = None;
+    }
+    if movement.hunt_arrival.is_none() {
+        if let Some(state) = state {
+            if state.feedback.as_ref().is_some_and(|feedback| feedback.message == HUNT_ARRIVAL_FEEDBACK) {
+                state.clear_feedback();
+            }
         }
     }
 }
@@ -1592,7 +1693,7 @@ pub fn mouse_world_interaction_system(
             let outcome = movement.reconcile_ack(&ack, now_ms);
             push_movement_shadow_authoritative(now_ms, &ack, predicted, outcome);
             if movement.auto_path_destination == Some((ack.x, ack.y)) {
-                quest_hunt_arrival_feedback(&movement, quest_ui_state.as_deref_mut());
+                quest_hunt_arrival_feedback(&mut movement, quest_ui_state.as_deref_mut());
                 movement.stop_auto_path(now_ms, "destinationReached");
             }
             if matches!(
@@ -1633,7 +1734,7 @@ pub fn mouse_world_interaction_system(
         let outcome = movement.reconcile_ack(&snapshot, now_ms);
         push_movement_shadow_authoritative(now_ms, &snapshot, predicted, outcome);
         if movement.auto_path_destination == Some(entity_position) {
-            quest_hunt_arrival_feedback(&movement, quest_ui_state.as_deref_mut());
+            quest_hunt_arrival_feedback(&mut movement, quest_ui_state.as_deref_mut());
             movement.stop_auto_path(now_ms, "destinationReached");
         }
         if matches!(
@@ -1708,6 +1809,15 @@ pub fn mouse_world_interaction_system(
             state.clear_feedback();
         }
     }
+    let authoritative_position = movement.authoritative_position.unwrap_or(entity_position);
+    clear_stale_hunt_arrival_feedback(
+        &mut movement,
+        quest_ui_state.as_deref_mut(),
+        presentation.current_map_file_name(),
+        big_map.as_deref(),
+        authoritative_position,
+        quest_tracker.as_deref(),
+    );
     // The HUD interaction state is refreshed after this sender. A fresh press
     // over a source HUD button must consume the press before it can become a
     // world walk, run, attack, or pickup on the frame that opens the panel.
@@ -2111,6 +2221,7 @@ pub fn mouse_world_interaction_system(
                     "destination": route.destination, "steps": route.steps.len(),
                 }));
                 movement.auto_path_destination = Some(route.destination);
+                movement.pending_hunt_route = None;
                 movement.map_auto_path = Some(route);
             }
             Ok(_) => return,
@@ -2343,6 +2454,7 @@ pub fn mouse_world_interaction_system(
         movement.auto_path_destination = None;
         movement.pointer_auto_path = false;
         movement.map_auto_path = None;
+        movement.pending_hunt_route = None;
     }
     if right_pressed && presentation.hovered_grid_position().is_some() {
         movement.begin(WorldPointerMovementMode::Run, now_ms);
@@ -2407,9 +2519,12 @@ pub fn mouse_world_interaction_system(
             // This origin is packet-authoritative. An unrelated, delayed move
             // ACK must not lock combat when the target is already in range;
             // keep that move slot occupied and let the Zone validate the hit.
-            if now_ms >= movement.next_move_send_at_ms
-                && now_ms >= movement.next_attack_request_at_ms
-            {
+            if attack_request_ready(
+                &movement,
+                presentation,
+                now_ms,
+                crate::entity_presentation::native_motion_clock_ms(),
+            ) {
                 if queue.as_deref_mut().is_some_and(|queue| {
                     queue.push_intent(QuestUiIntent::AttackTarget {
                         object_id: target_id,
@@ -2534,7 +2649,7 @@ pub fn mouse_world_interaction_system(
     let run_distance = presentation.self_run_distance(&object_id).max(2);
     let (direction, requested_mode) = if let Some(destination) = auto_path_destination {
         if origin == destination {
-            quest_hunt_arrival_feedback(&movement, quest_ui_state.as_deref_mut());
+            quest_hunt_arrival_feedback(&mut movement, quest_ui_state.as_deref_mut());
             movement.stop_auto_path(now_ms, "destinationReached");
             return;
         }
@@ -2567,7 +2682,7 @@ pub fn mouse_world_interaction_system(
             return;
         };
         let Some(first) = path.first().copied() else {
-            quest_hunt_arrival_feedback(&movement, quest_ui_state.as_deref_mut());
+            quest_hunt_arrival_feedback(&mut movement, quest_ui_state.as_deref_mut());
             movement.stop_auto_path(now_ms, "destinationReached");
             return;
         };
@@ -2664,7 +2779,7 @@ pub fn mouse_world_interaction_system(
         planned.direction,
         planned.mode,
         now_ms,
-        animation_now_ms,
+        crate::entity_presentation::native_motion_clock_ms(),
     );
 }
 
@@ -2808,10 +2923,7 @@ pub fn keyboard_movement_system(
         movement.trace_plan_blocked(now_ms, origin, direction, requested_mode);
         return;
     };
-    let animation_now_ms = time
-        .as_deref()
-        .map(|time| time.elapsed().as_millis().min(u128::from(u64::MAX)) as u64)
-        .unwrap_or(0);
+    let presentation_now_ms = crate::entity_presentation::native_motion_clock_ms();
     let _ = send_pointer_move(
         commands,
         presentation,
@@ -2821,7 +2933,7 @@ pub fn keyboard_movement_system(
         planned.direction,
         planned.mode,
         now_ms,
-        animation_now_ms,
+        presentation_now_ms,
     );
 }
 
@@ -4708,6 +4820,37 @@ mod tests {
         app.update();
         assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
         assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+    }
+
+    #[test]
+    fn attack_waits_for_visible_self_motion_but_not_delayed_ack() {
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.observe_packet_payload(serde_json::json!({
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "entities": [{
+                "objectId": 1000,
+                "kind": "selfPlayer",
+                "x": 10,
+                "y": 10,
+                "direction": "right",
+                "dead": false,
+                "_nativeAnimationAction": "standing",
+                "_nativeAnimationSequence": 1,
+                "sprite": {"bodyLibrary": "AArmour/00", "directionStride": 4, "frameBaseOffset": 0}
+            }]
+        }), 0);
+        assert!(presentation.begin_local_self_motion(
+            "1000", (10, 10), (12, 10), "right", true, 100, 1_000,
+        ));
+        let mut movement = WorldPointerMovementState::default();
+        movement.next_move_send_at_ms = 600.0;
+        movement.pending.push_back(pending_test_move(
+            (10, 10), (12, 10), WorldPointerMovementMode::Run, 0.0,
+        ));
+        assert!(!attack_request_ready(&movement, &presentation, 599.0, 1_599));
+        assert!(!attack_request_ready(&movement, &presentation, 600.0, 1_599));
+        assert!(attack_request_ready(&movement, &presentation, 600.0, 1_600));
+        assert_eq!(movement.pending.len(), 1, "ACK remains outstanding when visual motion ends");
     }
 
     #[test]

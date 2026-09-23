@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-09-24 practice/combat candidate: V2 class requirements now name each
+> skill in the task card and detail; hunting uses the actual training points,
+> remains available until practice completes, and clears stale arrival text.
+> Each of nine D022 training points now has three actors within radius 3;
+> original-cadence populations are unchanged. Shared Zone fixes Thrusting
+> primary/secondary damage and accepted primary-target skill experience.
+> Native action/motion clocks are unified. Resource-root caching removes a
+> measured filesystem hot path; material/visibility changes preserve D021
+> GPU pixels. Shared UI1083, native738, renderer275, Zone209+10, training1,
+> Gateway2 and Node64 pass. Matched release binaries are hash-verified in
+> `20260924-practice-combat`, awaiting normal logout/close before cutover.
+> Actual D021 frame improvement and physical acceptance remain open.
+> [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
+
 > 2026-09-24 candidate: newcomer V2 Quest Diary separates the current main
 > route, ready turn-ins and imported side quests with paging; task-card rows
 > reserve wrapped text height. Native combat no longer pauses on a delayed

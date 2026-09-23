@@ -12868,7 +12868,7 @@ fn level50_warrior_melee_skills_keep_crystal_range_shapes_and_hit_timing() {
     });
     assert_eq!(
         damage_indicator_for(&half_moon_zone.tick(20), 9_100),
-        Some(60)
+        Some(100)
     );
     let half_moon_impact = half_moon_zone.tick(320);
     assert_eq!(damage_indicator_for(&half_moon_impact, 9_101), Some(60));

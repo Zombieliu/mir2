@@ -42,12 +42,17 @@ fn v2_training_spawns_are_real_profile_sources_and_do_not_change_other_cadences(
         assert_eq!(spawn.monster_name, name);
         assert_eq!(spawn.location.x, x);
         assert_eq!(spawn.location.y, y);
-        assert_eq!(spawn.count, 1);
-        assert_eq!(spawn.spread, 0);
+        assert_eq!(spawn.count, 3);
+        assert_eq!(spawn.spread, 3);
         assert_eq!(spawn.delay_minutes, 0);
         if [10020, 10021, 10024, 10025, 10026, 10027].contains(&index) {
             assert_eq!(spawn.monster_hp, 120);
         }
+    }
+    for name in ["Dung", "WoomaSoldier", "WoomaFighter"] {
+        assert_eq!(v2.iter().filter(|spawn| (10019..=10027).contains(&spawn.respawn_index)
+            && spawn.monster_name == name).map(|spawn| u32::from(spawn.count)).sum::<u32>(), 9,
+            "each objective has three bounded groups, enough for combat and practice");
     }
     assert_eq!(v2.iter().find(|spawn| spawn.respawn_index == 940).unwrap().monster_hp, original_soldier_hp);
     assert_eq!(v2.iter().find(|spawn| spawn.respawn_index == 941).unwrap().monster_hp, original_fighter_hp);
