@@ -83,3 +83,16 @@ a later visit to the village safe area binds the village again, as in Crystal.
 Physical gameplay acceptance and a sustained combat replay remain open. The
 test results establish command ordering and source behavior; they do not claim
 that every visual or combat issue in the whole game is complete.
+
+## Live handoff
+
+After the player confirmed ordinary logout, the old client exited and
+`accounts.json` was copied to
+`C:\mir2-ui-repair-20260921\player-save-backups\20260924-013506-303-quest-combat-bind-accounts.json`
+with SHA-256
+`5248CC6134ECD3A718F7D05673F11B5C0EE3BD1C2E42FA6D19A019BAD1F46943`.
+The original account store and identity keys were retained. Source commit
+`c1bc4187a89ff93713cd14686ff64033d5194944` is running as client PID 56428
+and Gateway PID 57160 from the hash-verified package. Both Gateway ports
+19900 and 19910 listen, the client is responsive and its WebSocket is
+established. The client was launched for the player's gameplay test.

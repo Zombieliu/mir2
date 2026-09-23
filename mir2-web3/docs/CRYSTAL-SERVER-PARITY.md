@@ -6,7 +6,8 @@
 > the Zone transform first. Accepted combat now fences earlier pending
 > movement so a queued Walk/Run cannot pull the actor after the attack;
 > rejection preserves that step. Zone 209/209, scroll 7/7 and focused
-> Gateway/revival tests pass. No original-client physical acceptance or
+> Gateway/revival tests pass. Source `c1bc4187a` is deployed on Gateway57160
+> after normal logout and a verified save backup. No original-client physical acceptance or
 > whole-game parity percentage is claimed.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).
 

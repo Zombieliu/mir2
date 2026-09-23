@@ -8,8 +8,10 @@
 > accepted combat. Crystal's latest-safe-zone binding is saved and used for
 > TownTeleport, DungeonEscape and TownRevive, including immediate Zone→UseItem.
 > Shared UI 1079/1079, native 732/732 (two GPU soaks excluded), Zone 209/209,
-> scroll 7/7 and focused Gateway/revive cases pass. Release packaging, normal
-> logout cutover and physical gameplay acceptance remain open. Do not edit the
+> scroll 7/7 and focused Gateway/revive cases pass. Source `c1bc4187a` is
+> packaged and running after normal logout (client56428/Gateway57160) with
+> the original store and a hash-verified backup. Physical gameplay acceptance
+> remains open. Do not edit the
 > running a1 save: the user selected original latest-safe-zone semantics and
 > the old save currently stands in the village safe area.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).

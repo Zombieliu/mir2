@@ -10,7 +10,9 @@
 > simulation revival 1/1 and Gateway immediate-scroll/revival 1/1 each pass.
 > Player save migration was deliberately not attempted: a1's old save is
 > presently in the village safe area, and the player selected original
-> most-recent-safe-zone behavior. Live deployment/acceptance remain open.
+> most-recent-safe-zone behavior. Source `c1bc4187a` is running on
+> Gateway57160 with the original store and a hash-verified pre-cutover backup;
+> in-game acceptance remains open.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).
 
 > 2026-09-23 ordinary entrance metadata: destination filename/title previously

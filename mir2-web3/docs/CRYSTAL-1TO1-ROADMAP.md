@@ -8,7 +8,8 @@
 > a delayed movement ACK or replay stale target intents. V2-only quest diary
 > tabs/paging and measured-height guidance rows address the reported UI clutter.
 > Shared UI 1079, native 732, Zone 209 and scroll integration 7 pass, plus
-> focused Gateway/revive cases. Release and live human acceptance are pending;
+> focused Gateway/revive cases. Source `c1bc4187a` is deployed after normal
+> logout (client56428/Gateway57160); live human acceptance is pending;
 > the V2 tab layout does not increase original Crystal visual parity.
 > [Evidence](generated/player-qa/ui-goal-20260921/quest-combat-bind-20260924.md).
 
