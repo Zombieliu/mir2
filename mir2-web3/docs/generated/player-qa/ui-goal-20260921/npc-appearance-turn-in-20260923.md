@@ -59,8 +59,8 @@ tracking prevents duplicate reward requests.
 - Native adapter/bridge regression: 95/95 passed, including packet-only Board
   and Peter, full-snapshot precedence, and the dedicated detail interaction's
   modal/death/notice/identity checks. Native atlas regression: 33/33 passed.
-  Together with shared and server checks, 288 related tests pass. Release
-  packaging and physical UI verification remain pending.
+  Together with shared and server checks, 288 related tests pass. Native
+  offline release build passes in 1m19s; physical UI verification is pending.
 
 Logs use prefix `npc-turn-in-` under `C:/mir2-ui-repair-20260921`.
 The first server test invocation omitted `--lib`, compiled unrelated integration
@@ -71,7 +71,30 @@ checks. No source, game binary, asset or player store was removed. Subsequent
 server verification targets the library test explicitly.
 
 The old client PID49816 separately exited with rendering OOM at 21:32:27 UTC.
-Its enabled telemetry shows font-atlas bytes and font IDs growing sharply.
+Its telemetry grows from 2 MiB/two font IDs at 10 seconds to 15,125 MiB/8,866
+font IDs at 620 seconds. These are measured font-atlas allocations, distinct
+from the cumulative local asset-resolution counter.
 This repair does not resolve or accept that separate stability issue. No
 native gameplay input, live store rewrite or live reward grant was issued.
 Physical UI and original-client visual acceptance remain open.
+
+## Deployment
+
+Source `8d567e93ba18120c1e20e8ace5c806ad64bf3333` was committed and pushed.
+Package: `C:/numeron-legend-of-rebirth-20260923-npc-turn-in`.
+
+- Client SHA256: `0985D533BB3158110865081B50D3A855A557D64CAA213651C4C4D566FD7F3EFF`.
+- Retained Gateway source `e65bdc4ebcd99b0c80658c087a1bf2f26c4cbc33`, SHA256
+  `355E8461074A130C9E9B7CE2AA6039DC3DFBE25B2F58F8677EA29A74E7FD65D6`.
+- Config SHA256: `01E4A40E54A5B8C7D6B1DABD7E4C13F7BEF434EC26EAEB1B77180E4BCEFEE834`.
+
+After the user's continuation, both previous game processes and both listening
+ports were absent. The existing account store was copied to a timestamped
+backup and checked by hash; original store/profile/identity keys were retained.
+The unmodified Gateway binary was started as PID32864 on 19900/19910 and
+checked before launching client PID4196. No live process was forced closed.
+The native window reports `numeron-legend of rebirth`; login/gameplay remains
+user-controlled. Exact cache diagnostics remain enabled. Launch record:
+`C:/mir2-ui-repair-20260921/render-live/npc-turn-in-client-launch.json`, log
+prefix `20260923-165018-432`. `deployed=true`, `visualAccepted=false` and
+`renderOomResolved=false` remain explicit in the package manifest.

@@ -7,7 +7,9 @@
 > ordinary NPC conversation and waits for its offered operation; stale/map/
 > range/modal/reward guards remain enforced. Shared 159/159, native bridge
 > 95/95, atlas 33/33 and cave-patrol server authorization/settlement 1/1 pass.
-> Packaging/physical acceptance remain pending. Prior client PID49816 also
+> Release `8d567e93b` is packaged and launched (client4196/Gateway32864),
+> retaining the original backed-up store and keys. Physical acceptance remains
+> pending. Prior client PID49816 also
 > exited with a separately observed font-atlas OOM; this patch does not fix it.
 > [Evidence](generated/player-qa/ui-goal-20260921/npc-appearance-turn-in-20260923.md).
 
