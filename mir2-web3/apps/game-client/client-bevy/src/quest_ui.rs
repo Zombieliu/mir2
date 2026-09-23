@@ -13,6 +13,10 @@ use std::collections::VecDeque;
 mod multi_guidance;
 #[path = "quest_route.rs"]
 mod route;
+#[path = "quest_turn_in.rs"]
+mod turn_in;
+pub use turn_in::{PendingQuestTurnIn, begin_detail_quest_turn_in, pending_quest_turn_in_allows_interaction,
+    quest_turn_in_ui_allows_interaction};
 pub use multi_guidance::primary_quest_index;
 
 use bevy::ecs::system::SystemParam;
@@ -310,6 +314,8 @@ const CRYSTAL_TARGET_PANEL_VISIBLE: bool = false;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum QuestUiIntent {
+    /// Detail-window action, separately scoped from world-click interaction.
+    InteractQuestNpc { quest_index: i32, npc_object_id: u32 },
     InteractNpc {
         npc_object_id: u32,
     },
@@ -471,6 +477,7 @@ impl QuestUiIntent {
                 quest_index: *quest_index,
             }),
             Self::InteractNpc { .. }
+            | Self::InteractQuestNpc { .. }
             | Self::SelectNpcDialog { .. }
             | Self::ShareQuest { .. }
             | Self::AttackTarget { .. }
@@ -622,6 +629,8 @@ pub struct QuestUiState {
     /// A local-only V2 graduation target. It is never serialized, bridged, or
     /// treated as a server quest; `reset` clears it with the client session.
     pub selected_graduation_direction: Option<GraduationDirection>,
+    /// One explicit detail Finish click awaiting the ordinary NPC reply.
+    pub pending_turn_in: Option<PendingQuestTurnIn>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -666,6 +675,7 @@ impl QuestStageFilter {
 
 impl QuestUiState {
     pub fn select_quest(&mut self, quest_index: i32) {
+        self.pending_turn_in = None;
         self.selected_quest_index = Some(quest_index);
         self.detail_quest_index = Some(quest_index);
         self.detail_scroll_top = 0;
@@ -685,6 +695,7 @@ impl QuestUiState {
     }
 
     pub fn close_detail(&mut self) {
+        self.pending_turn_in = None;
         self.detail_quest_index = None;
         self.detail_scroll_top = 0;
         self.selected_reward_index = None;
@@ -956,6 +967,7 @@ struct QuestUiButtonVisual {
 
 #[derive(Component, Clone, Debug, PartialEq, Eq)]
 enum QuestUiButton {
+    PrepareQuestFinish { quest_index: i32 },
     MakePrimary { quest_index: i32 },
     OpenDestinationMap,
     NavigateQuestRoute(QuestRouteNavigationIntent),
@@ -1687,6 +1699,8 @@ fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetS
 
 #[derive(SystemParam)]
 struct QuestInputModels<'w> {
+    map: Option<Res<'w, MapModel>>,
+    notice: Option<Res<'w, crate::crystal_ui::notice::NoticeDialogState>>,
     tracker: Res<'w, QuestTracker>,
     guidance: Option<Res<'w, QuestGuidance>>,
     entities: Option<Res<'w, EntityModelSet>>,
@@ -1750,6 +1764,9 @@ fn process_quest_ui_input(
     let quest_log_open = player_ui.quest_open();
     let dialog_open = dialog.is_open;
     let blocks_gameplay_keys = player_ui.blocks_gameplay_keys();
+    let turn_in_blocked = !quest_turn_in_ui_allows_interaction(Some(&player_ui))
+        || models.notice.as_deref().is_some_and(crate::crystal_ui::notice::NoticeDialogState::is_open)
+        || models.read_model.as_deref().is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     let mut route_navigation = models.route_navigation;
     let guidance = models.guidance.as_deref();
     let tracker: &QuestTracker = &models.tracker;
@@ -1801,7 +1818,21 @@ fn process_quest_ui_input(
         if *interaction != Interaction::Pressed {
             continue;
         }
+        if !matches!(action, QuestUiButton::PrepareQuestFinish { .. }) {
+            quest_state.pending_turn_in = None;
+        }
         match action.clone() {
+            QuestUiButton::PrepareQuestFinish { quest_index } => {
+                if turn_in_blocked {
+                    quest_state.pending_turn_in = None;
+                    quest_state.set_feedback("当前状态无法交付，请关闭其他弹窗并确认角色存活", true);
+                    continue;
+                }
+                turn_in::begin(quest_index, &turn_in::TurnInContext {
+                    tracker, dialog: &dialog, map: models.map.as_deref(),
+                    entities: models.entities.as_deref(), big_map: models.big_map.as_deref(),
+                }, &mut quest_state, &mut queue, &mut pending);
+            }
             QuestUiButton::ToggleQuestGroup { group } => {
                 quest_state.toggle_group(group);
             }
@@ -2323,6 +2354,15 @@ fn process_quest_ui_input(
                 }
             }
         }
+    }
+
+    if keys.just_pressed(KeyCode::Escape) || turn_in_blocked {
+        quest_state.pending_turn_in = None;
+    } else {
+        turn_in::advance(&turn_in::TurnInContext {
+            tracker, dialog: &dialog, map: models.map.as_deref(),
+            entities: models.entities.as_deref(), big_map: models.big_map.as_deref(),
+        }, &mut quest_state, &mut queue, &mut pending);
     }
 
     // Crystal `MirMessageBox` owns Escape/Enter while visible. It is the only
@@ -4663,6 +4703,14 @@ fn render_quest_detail_panel(
             },
             quest_finish_enabled(quest, state.selected_reward_index) && !pending,
         );
+    } else if can_finish_quest(quest) {
+        let waiting = state.pending_turn_in.as_ref().is_some_and(|request| request.quest_index == quest.quest_index)
+            || pending.contains(&PendingOperationKey::QuestFinish {
+                quest_index: quest.quest_index,
+                selected_item_index: state.selected_reward_index.unwrap_or(-1),
+            });
+        quest_log_image_button_at(parent, asset_server, QUEST_LIST_FINISH_ASSET, layout.share,
+            QuestUiButton::PrepareQuestFinish { quest_index: quest.quest_index }, !waiting);
     } else {
         quest_log_image_button_at(
             parent,

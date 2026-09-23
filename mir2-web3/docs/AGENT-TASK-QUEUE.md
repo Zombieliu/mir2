@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-09-23 NPC appearance and turn-in: native packet-only NPCs now retain
+> their image-derived library rather than NPC/00. Quest endpoint lookup uses
+> canonical loaded IDs, fixing Board24/static35 versus Kyle17/static24 and
+> preserving Alice33 on imported quests. Detail Finish opens the correct
+> ordinary NPC conversation and waits for its offered operation; stale/map/
+> range/modal/reward guards remain enforced. Shared 159/159, native bridge
+> 95/95, atlas 33/33 and cave-patrol server authorization/settlement 1/1 pass.
+> Packaging/physical acceptance remain pending. Prior client PID49816 also
+> exited with a separately observed font-atlas OOM; this patch does not fix it.
+> [Evidence](generated/player-qa/ui-goal-20260921/npc-appearance-turn-in-20260923.md).
+
 > 2026-09-23 hunting-area follow-up: local task cards now have a typed ordinary
 > hunt-region route, independent of live target visibility. Shared/native
 > validation rejects stale progress/primary/map/area metadata. Real D001 collision

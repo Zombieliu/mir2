@@ -52,20 +52,10 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
             distance: target.distance,
         };
     }
-    let npc_index = match quest.status {
-        QuestStatus::ReadyToTurnIn => quest.finish_npc_index,
-        QuestStatus::NotStarted => quest.accept_npc_index,
-        _ => None,
-    };
-    if let (Some(index), Some(big_map)) = (npc_index.filter(|id| *id > 0), big_map) {
-        for entry in big_map.maps.values() {
-            if let Some(npc) = entry.info.npcs.iter().find(|npc| u32::try_from(npc.index) == Ok(index)) {
-                let label = format!("{} · {} ({},{})", entry.info.title, npc.name, npc.location.x, npc.location.y);
-                return if big_map.current_map_index == Some(entry.map_index) {
-                    Place::Current { label, distance: map.center_x.abs_diff(npc.location.x).max(map.center_y.abs_diff(npc.location.y)) }
-                } else { Place::Other(label) };
-            }
-        }
+    if let Some(npc) = super::turn_in::destination(quest) {
+        return if big_map.and_then(|model| model.current_map_index) == Some(npc.map_index) {
+            Place::Current { label: npc.label(), distance: map.center_x.abs_diff(npc.x).max(map.center_y.abs_diff(npc.y)) }
+        } else { Place::Other(npc.label()) };
     }
     if quest.status == QuestStatus::InProgress {
         if let Some(current_map) = big_map.and_then(|model| model.current_map_index) {

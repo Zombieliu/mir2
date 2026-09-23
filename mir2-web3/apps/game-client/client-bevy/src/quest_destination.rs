@@ -7,13 +7,25 @@ pub const BICHON_SAFE_RADIUS: i32 = 10;
 
 /// Display-only authored semantics, shared by destination and monster hints.
 /// None preserves the legacy packet-label matcher for non-V2 quests.
-pub(crate) fn authored_quest_definition(quest_index: i32) -> Option<&'static serde_json::Value> {
+fn authored_config() -> &'static serde_json::Value {
     static CONFIG: std::sync::OnceLock<serde_json::Value> = std::sync::OnceLock::new();
-    let config = CONFIG.get_or_init(|| serde_json::from_str(include_str!(
+    CONFIG.get_or_init(|| serde_json::from_str(include_str!(
         "../../../../config/quest-guidance/newcomer-journey-v2.json"
-    )).expect("bundled V2 guidance"));
+    )).expect("bundled V2 guidance"))
+}
+
+pub(crate) fn authored_quest_definition(quest_index: i32) -> Option<&'static serde_json::Value> {
+    let config = authored_config();
     config["quests"].as_array()?.iter()
         .find(|quest| quest["id"].as_i64() == Some(i64::from(quest_index)))
+}
+
+/// V2 uses loaded NPC object IDs, including its separate growth claims.
+pub(crate) fn uses_loaded_npc_ids(quest_index: i32) -> bool {
+    ["quests", "growthRewards"].iter().any(|key| {
+        authored_config()[key].as_array().is_some_and(|quests| quests.iter()
+            .any(|quest| quest["id"].as_i64() == Some(i64::from(quest_index))))
+    })
 }
 
 /// Imported V2 task-map declarations resolved to Crystal map identities.

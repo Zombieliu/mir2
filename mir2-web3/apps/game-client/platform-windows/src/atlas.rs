@@ -535,6 +535,18 @@ pub fn starter_frame(
     (library.to_owned(), frame)
 }
 
+/// Crystal's `NPCObject.LoadLibrary` selects ordinary NPC libraries below
+/// 1000 and the separate flag table for 1000..=1099. Keep this conversion
+/// close to native sprite resolution so packet-only ObjectNpc updates can
+/// retain the same visual identity as a complete world snapshot.
+pub(crate) fn crystal_npc_library_from_image(image: u32) -> Option<String> {
+    match image {
+        0..=999 => Some(format!("NPC/{image:02}")),
+        1000..=1099 => Some(format!("Flag/{:02}", image - 1000)),
+        _ => None,
+    }
+}
+
 fn sprite_library(sprite: Option<&Value>, field: &str) -> Option<String> {
     let raw = sprite?.get(field)?.as_str()?.trim();
     if raw.is_empty() || raw.contains("..") || raw.contains(['\\', ':']) {
@@ -2175,6 +2187,21 @@ mod tests {
         assert!(starter_frame("monster", "x", "down", None, None)
             .0
             .contains("Monster"));
+    }
+
+    #[test]
+    fn crystal_npc_image_libraries_keep_npcs_and_flags_separate() {
+        assert_eq!(crystal_npc_library_from_image(8).as_deref(), Some("NPC/08"));
+        assert_eq!(crystal_npc_library_from_image(45).as_deref(), Some("NPC/45"));
+        assert_eq!(
+            crystal_npc_library_from_image(1000).as_deref(),
+            Some("Flag/00")
+        );
+        assert_eq!(
+            crystal_npc_library_from_image(1099).as_deref(),
+            Some("Flag/99")
+        );
+        assert_eq!(crystal_npc_library_from_image(1100), None);
     }
 
     #[test]

@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-23 NPC/task candidate: native ObjectNpc image dispatch now follows
+> Crystal NPC/Flag library selection. Board/Kyle identity confusion is removed;
+> ready NPC tasks gain a guarded detail Finish convenience using an ordinary
+> conversation followed by the server-offered FinishQuest. Server permissions,
+> rewards and saves are unchanged. Related tests pass 288/288; packaging and
+> physical visual acceptance are pending. Separate font-atlas OOM remains open.
+> [Evidence](generated/player-qa/ui-goal-20260921/npc-appearance-turn-in-20260923.md).
+
 > 2026-09-23 task hunting travel: an explicit same-map hunting action now routes
 > to an unoccupied reachable tile in the authored spawn area. It preserves one
 > bounded search and ordinary movement authority, and stops without attacking.

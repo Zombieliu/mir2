@@ -19,6 +19,7 @@ use mir2_client_bevy::entities::EntityKind;
 use mir2_client_bevy::entities::EntityModelSet;
 use mir2_client_bevy::game_shop::GameShopModel;
 use mir2_client_bevy::inventory::InventoryModel;
+use mir2_client_bevy::map::MapModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::pending_operations::{
     apply_quest_operation_ack, mark_authoritative_refresh, reconcile_quest_refresh,
@@ -30,7 +31,12 @@ use mir2_client_bevy::quest_model::{
     NearbyNpcModel, NpcDialogModel, NpcDialogOption, NpcDialogUpdate, Quest, QuestDetailText,
     QuestObjective, QuestReward, QuestStatus, QuestTracker, RecentPickup,
 };
-use mir2_client_bevy::quest_ui::{QuestUiIntent, QuestUiIntentQueue};
+use mir2_client_bevy::quest_ui::{
+    pending_quest_turn_in_allows_interaction, quest_turn_in_ui_allows_interaction,
+    QuestUiIntent, QuestUiIntentQueue, QuestUiState,
+};
+#[cfg(test)]
+use mir2_client_bevy::quest_ui::begin_detail_quest_turn_in;
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
 use serde_json::Value;
@@ -1367,6 +1373,24 @@ impl NativeGameplayAdapter {
                 "questIcon",
             ],
         );
+        if kind == "npc" {
+            let packet_has_explicit_body_library = body
+                .get("sprite")
+                .and_then(|sprite| sprite.get("bodyLibrary"))
+                .and_then(Value::as_str)
+                .is_some_and(|library| !library.trim().is_empty());
+            if packet_has_explicit_body_library {
+                overlay.remove("_nativeDerivedNpcSprite");
+            } else if let Some(image) = body.get("image").and_then(value_u32) {
+                if let Some(body_library) = crate::atlas::crystal_npc_library_from_image(image) {
+                    overlay.insert(
+                        "sprite".to_owned(),
+                        serde_json::json!({"bodyLibrary": body_library}),
+                    );
+                    overlay.insert("_nativeDerivedNpcSprite".to_owned(), Value::Bool(true));
+                }
+            }
+        }
         patch_location_fields(body, overlay);
         true
     }
@@ -2205,6 +2229,9 @@ fn trade_item_pending_operation(intent: &NativePlayerUiIntent) -> Option<SocialP
 pub struct NativeQuestWorldInput<'w> {
     entities: Option<Res<'w, EntityModelSet>>,
     click_state: Option<Res<'w, NativeWorldClickState>>,
+    quest_ui_state: Option<Res<'w, QuestUiState>>,
+    map: Option<Res<'w, MapModel>>,
+    big_map: Option<Res<'w, BigMapModel>>,
     movement: Option<ResMut<'w, WorldPointerMovementState>>,
 }
 
@@ -2257,6 +2284,9 @@ pub fn forward_quest_ui_intents(
     let NativeQuestWorldInput {
         entities,
         click_state,
+        quest_ui_state,
+        map,
+        big_map,
         mut movement,
     } = world;
     let pending = intents.drain_intents();
@@ -2322,6 +2352,39 @@ pub fn forward_quest_ui_intents(
             _ => None,
         };
         let command = match intent {
+            QuestUiIntent::InteractQuestNpc {
+                quest_index,
+                npc_object_id,
+            } => {
+                let allowed = !dead
+                    && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
+                    && quest_turn_in_ui_allows_interaction(player_ui_state.as_deref())
+                    && matches!(
+                        (
+                            quest_ui_state.as_deref(),
+                            tracker.as_deref(),
+                            map.as_deref(),
+                            entities.as_deref(),
+                            big_map.as_deref(),
+                        ),
+                        (Some(state), Some(tracker), Some(map), Some(entities), Some(big_map))
+                            if pending_quest_turn_in_allows_interaction(
+                                quest_index,
+                                npc_object_id,
+                                state,
+                                tracker,
+                                map,
+                                entities,
+                                big_map,
+                            )
+                    );
+                if !allowed {
+                    continue;
+                }
+                NativeOutboundCommand::Interact {
+                    object_id: npc_object_id,
+                }
+            }
             QuestUiIntent::InteractNpc { npc_object_id } => {
                 if world_actions_blocked {
                     continue;
@@ -3286,7 +3349,30 @@ fn merge_object_fields(target: &mut Value, overlay: &serde_json::Map<String, Val
 }
 
 fn merge_zone_entity(target: &mut Value, overlay: &serde_json::Map<String, Value>) {
-    merge_object_fields(target, overlay);
+    let derived_npc_sprite = overlay
+        .get("_nativeDerivedNpcSprite")
+        .and_then(Value::as_bool)
+        .unwrap_or(false);
+    let target_has_sprite = target
+        .get("sprite")
+        .and_then(|sprite| sprite.get("bodyLibrary"))
+        .and_then(Value::as_str)
+        .is_some_and(|library| !library.trim().is_empty());
+    if derived_npc_sprite && target_has_sprite {
+        if let Some(target) = target.as_object_mut() {
+            for (field, value) in overlay {
+                if matches!(field.as_str(), "sprite" | "_nativeDerivedNpcSprite") {
+                    continue;
+                }
+                target.insert(field.clone(), value.clone());
+            }
+        }
+    } else {
+        merge_object_fields(target, overlay);
+        if let Some(target) = target.as_object_mut() {
+            target.remove("_nativeDerivedNpcSprite");
+        }
+    }
     normalize_packet_health(target);
 }
 
@@ -4742,6 +4828,134 @@ mod tests {
         .insert_resource(GatewayCommands::new(sender))
         .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
         (app, receiver)
+    }
+
+    fn ready_detail_turn_in_app() -> (App, std::sync::mpsc::Receiver<GatewayCommand>) {
+        let (mut app, receiver) = quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
+        let tracker = QuestTracker {
+            active_quests: vec![Quest {
+                quest_index: 2110012,
+                accept_npc_index: Some(0),
+                finish_npc_index: Some(24),
+                title: "Complete the cave patrol".to_owned(),
+                npc_name: None,
+                group: None,
+                min_level_needed: 0,
+                detail: Default::default(),
+                status: QuestStatus::ReadyToTurnIn,
+                objectives: Vec::new(),
+                rewards: Vec::new(),
+                unknown_text: None,
+            }],
+        };
+        let map = MapModel {
+            center_x: 334,
+            center_y: 260,
+            ..Default::default()
+        };
+        let big_map = BigMapModel {
+            current_map_index: Some(1),
+            ..Default::default()
+        };
+        let entities = EntityModelSet {
+            entities: vec![mir2_client_bevy::entities::EntityModel {
+                object_id: "24".to_owned(),
+                kind: EntityKind::Npc,
+                name: "BichonWall_Board".to_owned(),
+                x: 334,
+                y: 259,
+                level: None,
+                direction: None,
+            }],
+        };
+        let mut state = QuestUiState {
+            detail_quest_index: Some(2110012),
+            ..Default::default()
+        };
+        let mut queue = QuestUiIntentQueue::default();
+        let mut pending = PendingOperations::default();
+        begin_detail_quest_turn_in(
+            2110012,
+            &mut state,
+            &tracker,
+            &map,
+            &entities,
+            &big_map,
+            &NpcDialogModel::default(),
+            &mut queue,
+            &mut pending,
+        );
+        app.insert_resource(tracker)
+            .insert_resource(map)
+            .insert_resource(big_map)
+            .insert_resource(entities)
+            .insert_resource(state)
+            .insert_resource(queue)
+            .insert_resource(pending);
+        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
+            mir2_ui_core::state::UiPanel::QuestLog;
+        (app, receiver)
+    }
+
+    #[test]
+    fn detail_turn_in_interaction_revalidates_pending_scope_without_opening_world_clicks() {
+        let (mut app, mut receiver) = ready_detail_turn_in_app();
+        app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::InteractNpc { npc_object_id: 24 });
+
+        app.update();
+        assert!(matches!(
+            receiver.try_command(),
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Interact { object_id: 24 }))
+        ));
+        assert!(matches!(receiver.try_command(), Err(std::sync::mpsc::TryRecvError::Empty)), "ordinary world interaction stays blocked");
+    }
+
+    #[test]
+    fn detail_turn_in_interaction_rejects_dead_notice_wrong_npc_and_stale_quest_state() {
+        for rejection in ["dead", "notice", "wrong-npc", "stale-status"] {
+            let (mut app, mut receiver) = ready_detail_turn_in_app();
+            match rejection {
+                "dead" => {
+                    let mut model = app.world_mut().resource_mut::<UiReadModel>();
+                    model.player.max_hp = 100;
+                    model.player.hp = 0;
+                }
+                "notice" => {
+                    let mut notice = NoticeDialogState::default();
+                    assert!(notice.observe(NoticePacketUpdate {
+                        generation: 1,
+                        sequence: 1,
+                        title: "Notice".to_owned(),
+                        message: "Blocked".to_owned(),
+                    }));
+                    app.insert_resource(notice);
+                }
+                "wrong-npc" => {
+                    app.world_mut()
+                        .resource_mut::<QuestUiIntentQueue>()
+                        .drain_intents();
+                    app.world_mut()
+                        .resource_mut::<QuestUiIntentQueue>()
+                        .push_intent(QuestUiIntent::InteractQuestNpc {
+                            quest_index: 2110012,
+                            npc_object_id: 26,
+                        });
+                }
+                "stale-status" => {
+                    app.world_mut().resource_mut::<QuestTracker>().active_quests[0].status =
+                        QuestStatus::InProgress;
+                }
+                _ => unreachable!(),
+            }
+            app.update();
+            assert!(
+                matches!(receiver.try_command(), Err(std::sync::mpsc::TryRecvError::Empty)),
+                "{rejection} must not send an NPC interaction"
+            );
+        }
     }
 
     fn quest_gate_app_without_player_ui(
@@ -7278,6 +7492,109 @@ mod tests {
         assert_eq!(payload["entities"][0]["x"], json!(285));
         assert_eq!(payload["entities"][0]["questIds"], json!([1]));
         assert_eq!(payload["entities"][0]["questIcon"], json!(2));
+    }
+
+    #[test]
+    fn packet_only_npcs_derive_crystal_image_libraries_without_npc_zero_fallback() {
+        let mut adapter = NativeGameplayAdapter::default();
+        for (object_id, name, image) in [(24, "BichonWall_Board", 45), (26, "MirGuide_Peter", 8)] {
+            assert!(adapter.observe_packet(&PacketEvent::Other {
+                packet: "ObjectNpc".to_owned(),
+                payload: json!({
+                    "objectId": object_id,
+                    "name": name,
+                    "location": {"x": 334, "y": 259},
+                    "direction": "Up",
+                    "image": image,
+                }),
+            }));
+        }
+
+        let mut payload = json!({"sceneView": {"center": {"x": 334, "y": 259}}, "entities": []});
+        adapter.apply_authoritative_overlay(&mut payload);
+        let entities = payload["entities"].as_array().expect("packet-only NPCs");
+        let board = entities
+            .iter()
+            .find(|entity| entity["objectId"] == json!(24))
+            .expect("Board");
+        let peter = entities
+            .iter()
+            .find(|entity| entity["objectId"] == json!(26))
+            .expect("Peter");
+        assert_eq!(board["sprite"]["bodyLibrary"], json!("NPC/45"));
+        assert_eq!(peter["sprite"]["bodyLibrary"], json!("NPC/08"));
+        assert_eq!(
+            crate::atlas::resolved_native_sprite(
+                board,
+                mir2_bevy_runtime::entity_animation::AnimationAction::Standing,
+            )
+            .body_library,
+            "/original-ui/NPC/45"
+        );
+        assert_eq!(
+            crate::atlas::native_frame_geometry("/original-ui/NPC/45", 0)
+                .expect("Board geometry").width,
+            140
+        );
+        assert_eq!(
+            crate::atlas::native_frame_geometry("/original-ui/NPC/08", 0)
+                .expect("Peter geometry").width,
+            60
+        );
+    }
+
+    #[test]
+    fn npc_image_derivation_preserves_explicit_sprite_and_yields_to_snapshot_sprite() {
+        let mut adapter = NativeGameplayAdapter::default();
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectNpc".to_owned(),
+            payload: json!({
+                "objectId": 24,
+                "image": 45,
+                "location": {"x": 334, "y": 259},
+            }),
+        }));
+        let mut snapshot = json!({"entities": [{
+            "objectId": 24,
+            "kind": "npc",
+            "sprite": {"bodyLibrary": "NPC/08"}
+        }]});
+        adapter.apply_authoritative_overlay(&mut snapshot);
+        assert_eq!(snapshot["entities"][0]["sprite"]["bodyLibrary"], json!("NPC/08"));
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "NewNpcInfo".to_owned(),
+            payload: json!({
+                "objectId": 24,
+                "image": 45,
+                "sprite": {"bodyLibrary": "NPC/45"},
+            }),
+        }));
+        let mut packet_only = json!({"entities": []});
+        adapter.apply_authoritative_overlay(&mut packet_only);
+        assert_eq!(
+            packet_only["entities"][0]["sprite"]["bodyLibrary"],
+            json!("NPC/45")
+        );
+
+        assert!(adapter.observe_packet(&PacketEvent::Other {
+            packet: "ObjectNpc".to_owned(),
+            payload: json!({
+                "objectId": 25,
+                "image": 1000,
+                "location": {"x": 1, "y": 1},
+            }),
+        }));
+        adapter.apply_authoritative_overlay(&mut packet_only);
+        assert_eq!(
+            packet_only["entities"]
+                .as_array()
+                .expect("entities")
+                .iter()
+                .find(|entity| entity["objectId"] == json!(25))
+                .expect("flag")["sprite"]["bodyLibrary"],
+            json!("Flag/00")
+        );
     }
 
     #[test]

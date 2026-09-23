@@ -202,9 +202,9 @@ pub struct QuestDetailText {
 pub struct Quest {
     /// Crystal quest index used by `AcceptQuest` / `FinishQuest` packets.
     pub quest_index: i32,
-    /// Crystal NPC index that offers the quest.
+    /// Quest endpoint ID (canonical loaded object ID, legacy static fallback).
     pub accept_npc_index: Option<u32>,
-    /// Crystal NPC index that receives the finished quest.
+    /// Receiving endpoint ID; not the big map's static NPC index.
     pub finish_npc_index: Option<u32>,
     pub title: String,
     pub npc_name: Option<String>,
