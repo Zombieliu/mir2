@@ -4546,7 +4546,7 @@ async fn handle_socket(
     let mut save_queue = WebSessionSaveQueue::new(GatewaySaveQueueConfig::from_env());
     let mut route_refresh = WebSessionRouteRefresh::new(GatewayRouteRefreshConfig::from_env());
     let mut native_resume = NativeResumeConnectionState::new();
-    let mut explicit_world_leave_completed = false;
+    let mut explicit_world_leave = ExplicitWorldLeaveState::default();
     handle_socket_inner(
         socket,
         &mut session,
@@ -4558,7 +4558,7 @@ async fn handle_socket(
         &mut save_queue,
         &mut route_refresh,
         &mut native_resume,
-        &mut explicit_world_leave_completed,
+        &mut explicit_world_leave,
         state.injector.clone(),
         realm_info,
         state.chat_hub.clone(),
@@ -4569,9 +4569,15 @@ async fn handle_socket(
         user_agent,
     )
     .await;
-    if explicit_world_leave_completed {
+    if explicit_world_leave.completed {
         native_resume.disable_and_revoke(state.reconnect_sessions.as_ref());
-        let _ = remove_owned_session_cache(state.session_cache.as_ref(), &session);
+        // LogOut has already cleared active_identity. Keep the original owner
+        // captured before execution so cache failures can still be retried.
+        if let Err(error) = tokio::task::block_in_place(|| {
+            explicit_world_leave.retry_release(state.session_cache.as_ref())
+        }) {
+            eprintln!("completed explicit leave route release retry failed: {error}");
+        }
         return;
     }
     let persistence_outcome =
@@ -5128,7 +5134,7 @@ async fn handle_socket_inner(
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     native_resume: &mut NativeResumeConnectionState,
-    explicit_world_leave_completed: &mut bool,
+    explicit_world_leave: &mut ExplicitWorldLeaveState,
     injector: crate::inject::LiveSessionInjector,
     realm_info: Value,
     chat_hub: ChatBroadcastHub,
@@ -5520,6 +5526,10 @@ async fn handle_socket_inner(
                     SessionAction::Packet(ClientPacket::StartGame { .. })
                 );
                 let leaves_world = is_explicit_session_leave_action(&action);
+                let disconnects = matches!(&action, SessionAction::Packet(ClientPacket::Disconnect));
+                let leaving_route = leaves_world.then(|| {
+                    tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))
+                }).flatten();
 
                 let should_send_snapshot_by_action = should_send_world_snapshot_for_action(&action);
                 let low_latency_action = is_low_latency_action(&action);
@@ -5852,9 +5862,34 @@ async fn handle_socket_inner(
                 };
                 let (responses, native_game_shop_post_execution) = execution_result;
                 if leaves_world {
-                    *explicit_world_leave_completed = true;
-                    native_resume.disable_and_revoke(reconnect_sessions.as_ref());
-                    active_session_permit.take();
+                    let release = tokio::task::block_in_place(|| explicit_world_leave.finish(
+                        session_cache.as_ref(), session, leaving_route, &responses,
+                        &background_route_refresh_record,
+                    ));
+                    if explicit_world_leave.completed {
+                        native_resume.disable_and_revoke(reconnect_sessions.as_ref());
+                        active_session_permit.take();
+                    }
+                    if let Err(error) = release {
+                        eprintln!("completed explicit leave route release failed: {error}");
+                        let _ = send_fixed_error_event(
+                            &sender,
+                            "routeReleaseUnavailable",
+                            "Your character was saved and logged out, but immediate re-entry is temporarily unavailable.",
+                        ).await;
+                        return;
+                    }
+                    if disconnects && explicit_world_leave.completed {
+                        // Crystal Disconnect retains its private identity for
+                        // teardown, unlike LogOut. Do not refresh that departed
+                        // identity or re-register it after releasing its lease.
+                        for packet in &responses {
+                            if send_server_packet(&sender, packet).await.is_err() {
+                                return;
+                            }
+                        }
+                        return;
+                    }
                 }
                 let quest_operation_ack = quest_operation_request
                     .as_ref()
@@ -5905,6 +5940,9 @@ async fn handle_socket_inner(
                 }
                 let active_identity =
                     tokio::task::block_in_place(|| session.active_identity());
+                if starts_game && active_identity.is_some() {
+                    *explicit_world_leave = ExplicitWorldLeaveState::default();
+                }
                 if leaves_world || active_identity.is_none() {
                     chat_presence = None;
                 }
@@ -6768,7 +6806,11 @@ fn enforce_auth_rate_limits(
     context: &AuthSecurityContext,
 ) -> Result<(), String> {
     let peer = identity.peer_fingerprint(peer_address)?;
-    let device = identity.peer_fingerprint(&format!("device:{}", user_agent.trim()))?;
+    // User-Agent is caller supplied, not a device identity. Scope this
+    // supplementary bucket to the already trusted peer so native clients
+    // sharing an empty/common UA do not become one global registration user.
+    // The independent peer, account and pair limits remain authoritative.
+    let device = identity.peer_fingerprint(&format!("device:{peer}:{}", user_agent.trim()))?;
     let account = context.account_id.trim().to_ascii_lowercase();
     if account.is_empty() || account.len() > 160 {
         return Err("invalid authentication request".to_string());
@@ -6855,6 +6897,79 @@ fn is_explicit_session_leave_action(action: &SessionAction) -> bool {
         action,
         SessionAction::Packet(ClientPacket::Disconnect | ClientPacket::LogOut)
     )
+}
+
+#[derive(Debug, Clone)]
+struct OwnedSessionRoute {
+    key: GatewaySessionCacheKey,
+    owner: String,
+    character_name: String,
+}
+
+impl OwnedSessionRoute {
+    fn capture(session: &GatewaySession) -> Option<Self> {
+        let identity = session.active_identity()?;
+        Some(Self {
+            key: GatewaySessionCacheKey {
+                account_id: identity.account_id,
+                character_index: identity.character_index,
+            },
+            owner: session.session_id().to_string(),
+            character_name: identity.character_name,
+        })
+    }
+}
+
+#[derive(Debug, Default)]
+struct ExplicitWorldLeaveState {
+    completed: bool,
+    pending_route: Option<OwnedSessionRoute>,
+}
+
+impl ExplicitWorldLeaveState {
+    fn finish(
+        &mut self,
+        cache: &dyn crate::cache::GatewaySessionCache,
+        session: &GatewaySession,
+        captured: Option<OwnedSessionRoute>,
+        responses: &[ServerPacket],
+        refresh_record: &SharedBackgroundRouteRefreshRecord,
+    ) -> Result<bool, String> {
+        let disconnected = responses
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::Disconnect { reason: 0 }));
+        let logged_out = session.active_identity().is_none()
+            && responses
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. }));
+        if (!disconnected && !logged_out)
+            || responses
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::LogOutFailed))
+        {
+            return Ok(false);
+        }
+        // Saving/Leaving has succeeded. A cache outage does not put this
+        // character back in-world or make it eligible for native resume.
+        self.completed = true;
+        self.pending_route = captured;
+        *refresh_record
+            .lock()
+            .expect("background route refresh record lock should not be poisoned") = None;
+        self.retry_release(cache)?;
+        Ok(true)
+    }
+
+    fn retry_release(
+        &mut self,
+        cache: &dyn crate::cache::GatewaySessionCache,
+    ) -> Result<(), String> {
+        if let Some(route) = self.pending_route.as_ref() {
+            cache.release_owned_session_route(&route.key, &route.owner, &route.character_name)?;
+            self.pending_route = None;
+        }
+        Ok(())
+    }
 }
 
 fn keep_alive_time_for_action(action: &SessionAction) -> Option<i64> {
@@ -12228,6 +12343,14 @@ fn movement_json(
 #[cfg(test)]
 #[path = "web_save_fail_closed_tests.rs"]
 mod web_save_fail_closed_tests;
+
+#[cfg(test)]
+#[path = "web_explicit_leave_route_tests.rs"]
+mod web_explicit_leave_route_tests;
+
+#[cfg(test)]
+#[path = "web_auth_peer_bucket_tests.rs"]
+mod web_auth_peer_bucket_tests;
 
 #[cfg(test)]
 mod tests {

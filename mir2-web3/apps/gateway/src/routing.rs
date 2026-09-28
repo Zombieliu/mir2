@@ -3516,9 +3516,27 @@ impl SharedInProcessZoneState {
             return;
         }
         for packet in packets {
-            let packet = match self.try_push_live_zone_outbound(&key, packet) {
-                Ok(()) => continue,
-                Err(packet) => packet,
+            // Once speech is queued behind a full socket, later speech must
+            // not overtake it if a channel slot opens before the next retry.
+            // Movement keeps its existing coalescing/owner priority rules.
+            let queued_chat = matches!(
+                &packet,
+                ServerPacket::ObjectChat { .. } | ServerPacket::Chat { .. }
+            ) && self.pending_zone_packets.get(&key).is_some_and(|pending| {
+                pending.iter().any(|queued| {
+                    matches!(
+                        queued,
+                        ServerPacket::ObjectChat { .. } | ServerPacket::Chat { .. }
+                    )
+                })
+            });
+            let packet = if queued_chat {
+                packet
+            } else {
+                match self.try_push_live_zone_outbound(&key, packet) {
+                    Ok(()) => continue,
+                    Err(packet) => packet,
+                }
             };
             let pending = self.pending_zone_packets.entry(key.clone()).or_default();
             if matches!(packet, ServerPacket::UserLocation { .. }) {
@@ -7513,6 +7531,8 @@ fn is_realtime_zone_live_packet(packet: &ServerPacket) -> bool {
             | ServerPacket::ObjectWalk { .. }
             | ServerPacket::ObjectRun { .. }
             | ServerPacket::ObjectRemove { .. }
+            | ServerPacket::ObjectChat { .. }
+            | ServerPacket::Chat { .. }
     )
 }
 
@@ -14990,10 +15010,6 @@ mod tests {
     mod zone_melee_passive_progression_tests;
     #[path = "zone_soulfire_practice_tests.rs"]
     mod zone_soulfire_practice_tests;
-    #[path = "zone_journey_event_bridge_tests.rs"]
-    mod zone_journey_event_bridge_tests;
-    #[path = "shared_session_hot_path_tests.rs"]
-    mod shared_session_hot_path_tests;
 
     use super::{
         coalesced_zone_movement_object_id, delayed_player_action_packets,

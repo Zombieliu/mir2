@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> 2026-09-29 ordinary multiplayer playtest found idle-recipient chat delayed about
+> 11 seconds and successful LogOut retaining its session route. Bounded Gateway
+> fixes add live chat delivery and atomic owner-fenced release after successful
+> save/leave, including stale refresh/new owner races. Peer-scoped UA limits avoid
+> cross-player registration denial without removing account/IP safeguards.
+> Focused Gateway 15/15, Node 21/21 and isolated real Redis nine groups/32 races
+> pass; broad regression and the matched public build remain under validation.
+> These are implementation corrections, not a new Crystal live-parity acceptance.
+
 > 2026-09-24 Thrusting/HalfMoon candidate follows original primary versus
 > secondary cells rather than scaling every armor-reduced hit. Monster,
 > materialized and PvP paths share direction/damage rules. Accepted primary

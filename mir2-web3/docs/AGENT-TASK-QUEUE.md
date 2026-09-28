@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-09-29 invited release in progress: the clean d33708e1f Windows build
+> passes and its full asset ZIP is being staged. Real Linux security gates pass;
+> an independent PostgreSQL realm and loopback-only Redis are prepared. Ordinary
+> multiplayer checks found chat and logout-lease regressions, now covered by
+> 15 focused Gateway tests, 21 Node tests and real Redis concurrency checks.
+> Next: authenticated Linux artifact, isolated Gateway/Caddy activation, paired
+> WSS accounts and native package verification. Original services/saves remain.
+> Broad regression, clean-PC deployment and caster routes are not yet accepted.
+
 > 2026-09-28 release-readiness audit: public Web and Gateway health are live,
 > but this September development client still uses loopback and linked assets.
 > External testers need a matching WSS test realm and a self-contained client

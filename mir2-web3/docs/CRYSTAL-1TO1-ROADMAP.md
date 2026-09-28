@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-29 invited-playtest corrections: ordinary two-account traffic exposed
+> approximately 11-second idle-recipient chat latency and a route lease retained
+> after successful LogOut. Chat now uses live Zone delivery with queue ordering;
+> explicit leave captures and atomically releases its original owner after save.
+> Shared User-Agent auth buckets are scoped by the trusted peer without changing
+> peer/account/pair limits. Focused Gateway 15/15, Node 21/21 and real isolated
+> Redis nine groups (including 32 concurrency races) pass. Full Gateway and
+> deployed WSS validation remain in progress. Clean native source d33708e1f
+> builds successfully; resource packaging and public realm activation are pending.
+> No caster, capacity, visual or whole-game acceptance follows.
+> [Deployment evidence](PLAYER-PLAYTEST-RELEASE-20260928.md).
+
 > 2026-09-29 invited-playtest preparation: native initial/resume WebSockets
 > now include the endpoint's HTTP Origin and compile TLS with OS certificate
 > roots. Four new handshake/security checks and the full native suite pass

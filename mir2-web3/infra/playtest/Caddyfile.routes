@@ -1,0 +1,17 @@
+# Import INSIDE the existing site block serving 165.154.65.136.sslip.io.
+# Keep its certificates, original default proxy and other routes intact.
+# Paths outside /playtest remain owned by the original site configuration.
+@mir2_playtest path /playtest /playtest/*
+handle @mir2_playtest {
+    # Explicit ordering ensures the final 404 cannot preempt the player routes.
+    route {
+        uri strip_prefix /playtest
+        @mir2_playtest_public path /ws /health
+        reverse_proxy @mir2_playtest_public 127.0.0.1:7210 {
+            # Overwrite any caller-provided value; Gateway only listens on
+            # loopback and uses this trusted address for authentication limits.
+            header_up CF-Connecting-IP {http.request.remote.host}
+        }
+        respond "Not found" 404
+    }
+}

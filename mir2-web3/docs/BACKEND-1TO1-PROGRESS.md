@@ -1,5 +1,15 @@
 # Backend 1:1 Progress
 
+> 2026-09-29 playtest regression: ObjectChat/Chat now reach idle observers via the
+> live Zone channel while preserving queued speech order. Successful explicit
+> logout captures its route owner before the session clears identity, stops old
+> refresh and atomically releases record/lease/index; failed saves retain ownership,
+> cache outages retain a retryable captured owner, and old cleanup cannot erase a
+> new owner. Same-UA clients no longer share a global auth bucket; existing peer,
+> pair and account limits remain. Gateway focused 15/15, Node 21/21 and real Redis
+> nine groups/32 races pass. Full suite and fresh deployed WSS proof remain open;
+> no parity percentage or frontend acceptance is raised.
+
 > 2026-09-24 shared melee candidate: fixes the incorrect 0.25 multiplier on
 > Thrusting's adjacent hit. With DC40/AC16 the primary deals24, secondary
 > deals10/20/30/40 at levels0–3 and ignores AC. Directional monster/PvP/mixed
