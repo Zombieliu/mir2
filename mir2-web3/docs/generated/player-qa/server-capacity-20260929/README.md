@@ -109,7 +109,7 @@ Fifteen already have ordinary-created characters;85 await ordinary
 Login/NewCharacter. No levels, gear, currency, GM privileges or characters were
 inserted administratively. Public registration capacity is still unmeasured.
 
-## Candidate code changes, not yet deployed
+## Candidate code changes and isolated deployment
 
 - Disabled spectator capture now avoids building a snapshot; 400 guarded
   invocations in the regression produce zero snapshots. Enabled capture retains
@@ -132,7 +132,8 @@ inserted administratively. Public registration capacity is still unmeasured.
   in76.25s on dedicated database `mir2_playtest_lifecycle_20260929`, validating
   actual registry/cached-client destruction and connection counts returning to
   zero under both Tokio runtime models. The actual game databases were not used
-  for these lifecycle fixtures. Real Linux service-stop acceptance remains open.
+  for these lifecycle fixtures. The real Linux service-stop check below also
+  passes after deploying this candidate.
 - Eight immutable game-data catalogues now provide borrowed access for singular
   item/monster/NPC/drop/magic/buff/stat queries. Existing owned APIs, case rules,
   first-match ordering and class/level item selection remain equivalent; only
@@ -168,6 +169,72 @@ changed; production movement/pickup rules did not. The failed combined run is
 retained. The new complete integrated run passes816 tests,0 failures,17 ignored
 in201.75s (`gateway-full-candidate3.log`); it is the deployment candidate result.
 
+CI run36482905615 built pushed revision
+`318d3e7721c7f14b8f4992c10080b324cae9c9c5` successfully. Authenticated artifact
+metadata, archive digest, exact release revision and binary hash were checked
+before deploying only the drained isolated realm. Linux Gateway binary SHA256
+is `6423f056aec7770b0f7dd2e5d8b7f30248e8747d51b05598ea623a84b29a06d3`.
+The old map pack and15-player admission configuration remain unchanged for the
+first code comparison. Root-private pre-change backup is
+`/var/backups/mir2-playtest-before-318d3e7721c7f14b8f4992c10080b324cae9c9c5`;
+the database dump SHA256 is
+`81b7024522f470cd2a018867dca27838daeb031ef217528a901e776d19546316`.
+The old binary again aborted6 on normal service stop after all players drained;
+the candidate's deliberate normal stop reports `Result=success`, exit0 and no
+PostgreSQL destructor panic. It was restarted with PID2170906. Original
+production's PID3855184, release link and health were verified unchanged.
+The same1–15-player baseline completed as report `1790630105912-c0f4e30b`
+(21:15:05–21:32:40 UTC). All seven90-second stages and the15-player300-second
+steady stage pass. The latter has movement P95=555.64ms, chat P95=144.28ms,
+zero gameplay timeouts, CPU median72.31% of one core and peak cgroup memory
+305.63MiB during that stage. Two normal logout/relogin fingerprints match.
+No memory/health protection, OOM or service restart occurred. The12-player
+short stage had one timeout (0.0561%); it is retained rather than rounded to
+an all-run zero. Whole-run memory peaked341.83MiB during lifecycle checks.
+
+Resource comparisons below use only each declared90-second stage, deduplicated
+three-second monitor samples; they exclude admission/cleanup and later probes.
+
+| Active actors | Old CPU median, one core=100% | Candidate CPU median | Old/candidate stage peak cgroup MiB |
+| --- | ---: | ---: | ---: |
+| 1 | 33.39% | 5.78% | 312.17 / 82.44 |
+| 2 | 64.85% | 10.57% | 330.23 / 96.48 |
+| 3 | 101.28% | 14.72% | 331.88 / 122.53 |
+| 5 | 152.53% | 24.75% | 372.78 / 168.21 |
+| 8 | 231.72% | 41.19% | 478.48 / 213.60 |
+
+This baseline includes real movement and incidental melee, but its combat
+capacity flag stays false. It establishes15 active actors over the declared
+five-minute workload, not50–100-player or hour-long acceptance. Its17 actual
+login receipts have been conservatively imported into the persistent same-IP
+login budget before further tests; no rate-limit buckets were bypassed.
+
+After zero connections/sessions/leases, the reviewed capacity-only operation
+`20260929-cap51-01` raised test admission from15 to51 (WebSocket66,
+reconnect51). Normal stop exits0; the new process is2173664. The immutable
+binary/map pack, all authentication limits, CPU/memory limits and original
+production identity remain unchanged. A fresh root-private backup at
+`/var/backups/mir2-playtest-capacity-15-to-51-20260929-cap51-01` contains the
+pre-change database dump SHA256
+`78d1d261f71323e52af6479cceec26f112a8f5653ac79a0d9bec80fb00804bff`.
+These51 slots allow50 protocol actors plus one native client; no51-player
+capacity claim follows from opening admission.
+
+## Follow-up hydration candidate
+
+The private-monster hydration path now reads the existing current-map getter
+instead of constructing a full world snapshot just to obtain its map name.
+Four existing-threshold slow-stage measurements distinguish monster activation,
+shared-entity projection, pending-state lock wait and journey repositioning.
+Gameplay rules, packets, saves and AOI remain unchanged. Sixty-five distinct
+focused/adjacent Gateway checks pass, including explicit V2 environment cases
+and StartGame/transfer/logout getter equivalence. An explicit release fixture
+uses15 ordinary-created native sessions across all three classes, CrystalWorld
+and platinum176. Across five alternating trials,750 map-name reads take median
+1,856,402 microseconds with complete snapshots versus33 with the getter. The
+record counts describe eliminated projections, not heap bytes or a capacity
+ratio. This follow-up is not yet deployed;318 remains the live measured binary.
+
 ## Continuous capacity driver validation
 
 The separate long-run driver passes30 local socket/unit regressions and an
@@ -184,3 +251,13 @@ shared positive damage, native resume with old-ticket replay rejected and no
 login fallback,20-second post-resume gameplay observation, and one normal
 save/relogin state match. All actors drained and test/production health stayed
 ready. **This is a tool/protocol probe; capacity acceptance remains false.**
+
+The added native-cadence mode uses650/750ms movement, ordinary attack speed,
+one unacknowledged owner movement and bounded observer evidence. It requires
+at least50% Run actions and80 traversed cells/minute throughout admission waits
+as well as measured stages. First real750ms probe `1790632099789-0a54fa76`
+failed this offered-load gate: its30-second first stage produced39 Walk and
+zero Run, despite all39 owner acknowledgements succeeding, movement P95=136ms
+and no corrections/timeouts. Cleanup succeeded. This is a driver/scenario
+coverage failure, not evidence that the server cannot support one player.
+The failed report is retained while the patrol issue is investigated.

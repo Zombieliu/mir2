@@ -6,10 +6,15 @@
 > destroy safely outside an ambient Tokio runtime;11 regressions plus2 explicit
 > real-PG lifecycle tests pass on a dedicated database. Original test-service
 > stop panic and failed load runs are retained. User's50–100 active-player goal
-> is in progress; no stable capacity or global parity claim.
+> is in progress. Deployed318d3e772 exits0 on Linux normal stop and passes the
+> 15-actor/300s movement baseline, P95=556ms, with sampled save/relogin matches.
+> This is no50/100 hour-long, full-combat or global parity acceptance.
 > Single-record lookups now borrow eight immutable catalogues instead of
 > cloning them wholesale; game-data53/53 and an explicit release benchmark pass,
 > preserving original case/order/selection semantics and all gameplay data.
+> Follow-up hydration reads the map name directly and adds four slow-stage
+> timings;65 focused Gateway checks and an explicit release benchmark pass.
+> This follow-up is not yet deployed or capacity-accepted.
 > [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
 
 > 2026-09-29 invited-playtest corrections: ordinary two-account traffic exposed

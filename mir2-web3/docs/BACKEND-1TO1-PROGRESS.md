@@ -4,12 +4,16 @@
 > AOI before cloning; disabled spectator capture does no snapshot work. Focused
 > snapshot/adjacent27 pass. Real channel identity pool and optional Zone cached
 > PostgreSQL client receive synchronous-safe final destruction;11 regressions
-> and2 real-PG lifecycle tests pass on an isolated fixture database. Deployment,
-> Linux normal-stop verification and50–100-player capacity remain open. No
-> packet/SQL/gameplay-rule changes or global parity claim.
+> and2 real-PG lifecycle tests pass on an isolated fixture database.318d3e772 is
+> deployed with a real Linux exit0 stop/restart.15 active actors pass300s of
+> movement (P95=556ms) and two saved-state relogins;50–100 hour-long/combat gates
+> remain open. No packet/SQL/gameplay-rule changes or global parity claim.
 > Eight game catalogues now borrow before singular lookup/selected clone;
 > game-data53/53 plus one explicit function benchmark pass. Existing profile
 > version26 is reflected in its stale test fixture; catalogue data is unchanged.
+> A further map-name getter removes one hydration snapshot and adds bounded
+> stage timings;65 focused/adjacent checks and an explicit release benchmark
+> pass. Live capacity remains measured on318 until a backed-up upgrade.
 > [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
 
 > 2026-09-29 playtest regression: ObjectChat/Chat now reach idle observers via the

@@ -7,9 +7,16 @@
 > it is not stable capacity. Normal native exit and backed-up test-only
 > spectator-off configuration are complete. Corrected baseline passes90-second
 > stages through8 actors, then fails the eleventh StartGame snapshot deadline;
-> no five-minute stable result. Snapshot/catalogue optimizations and safe-PG
-> shutdown candidate are tested locally, pending Linux deployment and renewed
-> load.100 empty ordinary load accounts are prepared; no50/100 acceptance claim.
+> no five-minute stable result on that old binary. Pushed318d3e772 is now deployed
+> to the isolated realm: Linux normal stop exits0, and renewed1–15 baseline plus
+> 15 actors/300s passes with movement P95=556ms, zero steady-stage timeouts and
+> two matching saved-state relogins. Original production is unchanged. Test
+> admission is now51 for the next bounded run; this is only a configured limit.
+> 100 ordinary accounts are prepared;50/100 hour-long acceptance remains open.
+> Follow-up hydration getter/timing candidate passes65 focused Gateway checks;
+> its explicit15-session benchmark removes full snapshots from map-name reads.
+> First native-cadence probe failed Run coverage, with no movement errors;
+> correct the driver before drawing capacity conclusions.
 > [Acceptance and retained evidence](generated/player-qa/server-capacity-20260929/README.md).
 
 > 2026-09-29 invited release delivered: native d33708e1f and Gateway20aeb345f

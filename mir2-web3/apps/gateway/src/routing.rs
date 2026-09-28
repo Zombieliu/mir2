@@ -9383,22 +9383,27 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
         };
-        self.inner.reconcile_current_map_monster_activation();
-        let snapshot = self.inner.world_snapshot();
-        let Some(map_file_name) = snapshot.map_file_name.as_deref() else {
+        {
+            let _stage = GatewaySlowStage::start("shared_session.predrain.monster_activation");
+            self.inner.reconcile_current_map_monster_activation();
+        }
+        let Some(map_file_name) = self.inner.current_map_file_name() else {
             return Vec::new();
         };
-        let active_monsters = self
-            .inner
-            .current_map_shared_entity_snapshots()
-            .into_iter()
-            .filter(|entity| {
-                entity.kind == WorldEntityKind::Monster
-                    && !entity.dead
-                    && !entity.hp.is_some_and(|hp| hp <= 0)
-                    && !self.owner_dead_entity_ids.contains(&entity.object_id)
-            })
-            .collect::<Vec<_>>();
+        let active_monsters = {
+            let _stage =
+                GatewaySlowStage::start("shared_session.predrain.shared_entity_projection");
+            self.inner
+                .current_map_shared_entity_snapshots()
+                .into_iter()
+                .filter(|entity| {
+                    entity.kind == WorldEntityKind::Monster
+                        && !entity.dead
+                        && !entity.hp.is_some_and(|hp| hp <= 0)
+                        && !self.owner_dead_entity_ids.contains(&entity.object_id)
+                })
+                .collect::<Vec<_>>()
+        };
         let zone_key = ZoneKey::for_map(map_file_name);
         let missing_object_ids = {
             let zone_state = self
@@ -9595,10 +9600,12 @@ impl SharedInProcessZoneSessionRuntime {
             player_damages,
             player_heals,
         ) = {
+            let lock_wait = GatewaySlowStage::start("shared_session.predrain.pending_lock_wait");
             let mut zone_state = self
                 .zone_state
                 .lock()
                 .expect("shared zone presence mutex should not be poisoned");
+            drop(lock_wait);
             (
                 zone_state.take_pending_zone_packets(&key),
                 zone_state.take_pending_zone_transform(&key),
@@ -9626,6 +9633,7 @@ impl SharedInProcessZoneSessionRuntime {
             });
         self.apply_zone_transform(transform);
         if completed_authoritative_position_change {
+            let _stage = GatewaySlowStage::start("shared_session.predrain.journey_reposition");
             packets.extend(self.inner.commit_zone_journey_reposition());
         }
         let mut deferred_monster_spawns = Vec::new();
@@ -15049,6 +15057,8 @@ mod tests {
     mod zone_journey_event_bridge_tests;
     #[path = "shared_session_hot_path_tests.rs"]
     mod shared_session_hot_path_tests;
+    #[path = "predrain_performance_tests.rs"]
+    mod predrain_performance_tests;
     #[path = "live_chat_tests.rs"]
     mod live_chat_tests;
 

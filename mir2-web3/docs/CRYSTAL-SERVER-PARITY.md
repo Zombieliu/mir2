@@ -5,11 +5,15 @@
 > copying before visibility filtering. Snapshot/adjacent27 regressions pass.
 > Actual synchronous PostgreSQL resource owners are safely destroyed on async
 > cancellation/error;11 regressions and2 dedicated real-PG lifecycle checks pass.
-> The original stop panic and load failures remain recorded. Stable50–100-player
-> and real Linux shutdown acceptance are pending, not inferred from these tests.
+> The original stop panic and load failures remain recorded. Real Linux shutdown
+> now exits0 on deployed318d3e772. Its15-actor/300s movement baseline and sampled
+> save/relogin pass; stable50–100-player hour-long/combat acceptance remains open.
 > Singular lookups borrow cached game catalogues and clone only the selected
 > record; game-data53/53 plus one explicit release benchmark pass. Original
 > lookup ordering, class/level selection and catalogue contents remain intact.
+> Follow-up hydration getter/timing changes pass65 focused/adjacent checks and
+> an explicit release benchmark; no further gameplay rule or live-capacity
+> acceptance is inferred from these local measurements.
 > [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
 
 > 2026-09-29 ordinary multiplayer playtest found idle-recipient chat delayed about
