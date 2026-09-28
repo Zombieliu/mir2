@@ -1562,10 +1562,10 @@ fn install_isolated_map_fixture(
     {
         let mut map = session.app.world_mut().resource_mut::<MapRuntimeResource>();
         map.map_region_bounds = bounds;
-        map.blocked_cells.clear();
+        std::sync::Arc::make_mut(&mut map.blocked_cells).clear();
         map.closed_door_cells.clear();
         map.doors = super::super::resources::DoorRegistry::default();
-        map.fishing_cells.clear();
+        std::sync::Arc::make_mut(&mut map.fishing_cells).clear();
     }
     let mut config = session
         .app
@@ -67849,8 +67849,8 @@ fn crystal_fishing_uses_map_fishing_cell_three_tiles_ahead() {
             .world_mut()
             .resource_mut::<super::MapRuntimeResource>();
         // The cell three tiles ahead (323, 270) is fishable; also seed another.
-        map.fishing_cells.insert((323, 270), 0);
-        map.fishing_cells.insert((400, 400), 3);
+        std::sync::Arc::make_mut(&mut map.fishing_cells).insert((323, 270), 0);
+        std::sync::Arc::make_mut(&mut map.fishing_cells).insert((400, 400), 3);
     }
 
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });
@@ -67878,7 +67878,7 @@ fn crystal_fishing_rejected_when_no_fishing_cell_ahead() {
             .app
             .world_mut()
             .resource_mut::<super::MapRuntimeResource>();
-        map.fishing_cells.insert((400, 400), 3);
+        std::sync::Arc::make_mut(&mut map.fishing_cells).insert((400, 400), 3);
     }
 
     session.handle_packet(ClientPacket::FishingCast { cast_out: true });

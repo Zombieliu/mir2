@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> 2026-09-29 static-map sharing preserves terrain/fishing contents, fallback
+> source selection, private doors and shared-Zone collision semantics;319
+> selected checks plus explicit clone benchmarks pass. Short650/750ms gameplay
+> probes pass on664; the first50-target run fails AOI validation at10 admissions.
+> This is retained diagnostic evidence, not a capacity or global parity pass.
+> [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 capacity candidate preserves AOI/snapshot and ordinary gameplay
 > semantics while eliminating disabled-spectator snapshots and full-map deep
 > copying before visibility filtering. Snapshot/adjacent27 regressions pass.

@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+> 2026-09-29 immutable map data now shares allocations across personal worlds;
+> mutable doors remain private and cold concurrent cache publication returns
+> one allocation.319 selected regressions and explicit Debug/Release benchmarks
+> pass. Calibrated native650/750ms probes pass; the first50-target run fails AOI
+> validation at10 admissions and remains under diagnosis. Larger steady-state
+> acceptance is open. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 capacity candidate: shared-map snapshots filter by authoritative
 > AOI before cloning; disabled spectator capture does no snapshot work. Focused
 > snapshot/adjacent27 pass. Real channel identity pool and optional Zone cached

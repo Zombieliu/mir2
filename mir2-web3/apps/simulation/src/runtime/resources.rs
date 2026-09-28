@@ -630,11 +630,11 @@ impl DoorRegistry {
 pub(super) struct MapRuntimeResource {
     pub(super) current_map: MapInformation,
     pub(super) map_region_bounds: MapBounds,
-    pub(super) blocked_cells: BTreeSet<(i32, i32)>,
+    pub(super) blocked_cells: Arc<BTreeSet<(i32, i32)>>,
     pub(super) closed_door_cells: BTreeSet<(i32, i32)>,
     pub(super) doors: DoorRegistry,
     /// Cells flagged fishable in the `.map` file → their fishing attribute.
-    pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
+    pub(super) fishing_cells: Arc<BTreeMap<(i32, i32), i8>>,
     pub(super) conquest_wars: BTreeMap<i32, bool>,
     /// Conquest index → owning guild name (gates conquest movements).
     pub(super) conquest_owners: BTreeMap<i32, String>,
@@ -644,10 +644,10 @@ impl MapRuntimeResource {
     pub(super) fn new(
         config: &SimulationConfig,
         map_region_bounds: MapBounds,
-        blocked_cells: BTreeSet<(i32, i32)>,
+        blocked_cells: Arc<BTreeSet<(i32, i32)>>,
         closed_door_cells: BTreeSet<(i32, i32)>,
         doors: DoorRegistry,
-        fishing_cells: BTreeMap<(i32, i32), i8>,
+        fishing_cells: Arc<BTreeMap<(i32, i32), i8>>,
     ) -> Self {
         Self {
             current_map: config.map.clone(),

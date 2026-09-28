@@ -308,3 +308,47 @@ have median604.961ms/P95 615.133ms; input-to-ACK-consumption median140.952ms,
 P95 182.572ms. This11-second low-load trace does not measure FPS, full Turn
 traffic or multiplayer capacity. Raw trace and the reusable analyser are kept
 under the external load evidence root.
+
+The650ms calibrated public probe `1790634115849-c2343b34` also passes on664,
+including positive shared damage, native-protocol resume, post-resume activity
+and normal saved-state comparison. An independent streaming analyser compares
+the750/650 raw samples against reports with4,006/4,045 assertions and no
+differences;18 negative analyser regressions pass. These approximately137-second
+probes establish no50-player result. Raw rows retain the driver's bilateral-hit
+verdict, not both original damage packets; save assertions are runtime checks,
+not an independently replayable raw pre-save fingerprint.
+
+Native combat actors now first walk/run to their declared forest home through
+ordinary commands before hunting. Transit stays in continuous-load accounting;
+settling waits for authoritative arrival, and later chases do not pull them back.
+Five focused real-map/socket regressions pass, also independently5/5. The first
+50-target run `1790635646996-cf829559` stops at10 admitted actors on persistent
+AOI membership failure. It is retained as failed and requires diagnosis; neither
+a capacity ceiling nor stable10-player acceptance follows from this run.
+
+## Immutable static-map sharing candidate
+
+Personal map resources share the immutable terrain template, blocked cells and
+fishing cells through Arc. Door sets and timers remain independent; the shared
+Zone still builds its owned door-aware collision projection. Three map caches
+now return the first published allocation after concurrent cold parsing, while
+retaining negative-result caching and keeping I/O outside the mutex. The first
+focused test exposed the cold-publication race and its failed log is preserved.
+
+The corrected candidate passes319 unique selected regular regressions:95
+collision/door/fishing/mining/movement/transfer unit cases,2 gate fixtures,
+7 big-map,3 coordinate-event,3 map-event binding and209 shared-Zone integrations.
+Eleven source cases also pass in Release. The explicit benchmark passes in
+Debug and Release; it is not counted as a skipped acceptance requirement.
+The Gateway rebuild and four deferred movement/map-transfer regressions pass.
+Door independence, cross-map refresh/return, exact static contents, fallback
+selection and four simultaneous real-map cold parses are covered.
+
+Five Release trials of25 clone/drop operations yield median68,796 microseconds
+for the formerly owned fields versus56 for shared fields. This removes75 static
+deep clones per sample and retains25 private door clones. A separate allocator
+audit measured1,777,936 bytes for the old persistent blocked/fishing copy per
+personal Bichon world (about1.696 MiB); this describes requested allocation,
+not measured Linux RSS or capacity. Live deployment and capacity verification
+remain separate. Logs, source hashes and the retained first failure are recorded
+in the external `collision-memory-audit/IMPLEMENTATION.md` evidence file.

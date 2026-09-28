@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
 
@@ -205,6 +205,56 @@ test('real Bichon collision map and BorderVillage NPCs produce a full four-corne
   }
   assert.equal(commands[0], 'walk'); assert.ok(commands.slice(5).every(kind => kind === 'run'));
   assert.deepEqual(corners, new Set([[0, 0], [2, 0], [2, 2], [0, 2]].map(([dx, dy]) => `${homes[0].x + dx},${homes[0].y + dy}`)));
+});
+
+test('native combat walks the real village-to-forest route before hunting, without requiring an observer to arrive', async () => {
+  const map = await loadProtocolCollisionMap('0'), npcs = await loadStationaryNpcObstacles('0'), evidence = [];
+  const manifest = JSON.parse(await fs.readFile(new URL('../lib/generated/crystal_respawn_manifest.json', import.meta.url), 'utf8'));
+  const transfers = manifest.maps.find(entry => entry.map_file_name === '0').movements.map(move => ({ bounds: {
+    minX: move.source.x, maxX: move.source.x, minY: move.source.y, maxY: move.source.y } }));
+  const policy = capacityPolicy({ profile: 'probe', activityMode: 'native', stages: '2', combatActors: 1 });
+  const context = { policy, map, runId: 'real-combat-transit', phase: 'settle', monsterNames: ['Hen', 'Deer'], targetClaims: new Map(),
+    clients: [], writer: { add: row => evidence.push(row) } };
+  const owner = { objectId: 1000, kind: 'player', name: 'fighter', x: 276, y: 612, direction: 'Right', level: 1 };
+  const hen = { objectId: 900, kind: 'monster', name: 'Hen', x: 277, y: 612, hp: 5 };
+  const client = { label: 'fighter', snapshot: { mapFileName: '0', playerObjectId: 1000, mapTransfers: transfers,
+    entities: [owner, hen, ...npcs.map((npc, index) => ({ ...npc, kind: 'npc', objectId: 20000 + index }))] },
+    context, home: { x: 275, y: 556 }, role: 'combat', ready: true, inGame: true, failedTargets: new Map(),
+    targetCursor: 0, movementCount: 0, sequence: 1, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity,
+    plan: new NativePlan(0), nativeRunPrimedUntil: 0 };
+  context.clients.push(client);
+  assert.equal(actorsReachedScenario(context), false, 'a combat-only cohort cannot settle at its village login location');
+  const commands = [];
+  for (let step = 0; step < 100 && !client.combatArrival; step++) {
+    const plan = selectNativeAction(client, context, 0);
+    if (client.combatArrival) break;
+    assert.ok(plan); assert.equal(plan.initialCombatTransit, true); assert.ok(['walk', 'run'].includes(plan.command.type));
+    for (const cell of [plan.first, plan.target]) {
+      assert.equal(protocolMapCellIsWalkable(map, cell), true);
+      assert.equal(npcs.some(npc => npc.x === cell.x && npc.y === cell.y), false);
+      assert.equal(transfers.some(transfer => transfer.bounds.minX === cell.x && transfer.bounds.minY === cell.y), false);
+    }
+    commands.push(plan.command.type); Object.assign(owner, plan.target); client.sequence++;
+    client.movementCount++; client.nativeRunPrimedUntil = performance.now() + 1200;
+  }
+  assert.deepEqual(client.combatArrival?.actual, client.home);
+  assert.equal(actorsReachedScenario(context), true); assert.equal(commands[0], 'walk'); assert.ok(commands.includes('run'));
+  assert.ok(commands.length > 20, 'the declared forest requires actual travel, not nearby village combat');
+  assert.equal(evidence.filter(row => row.type === 'combatArrival').length, 1);
+
+  // Arrival is a one-time requirement. After a chase, a reachable adjacent
+  // monster with a real observer must not force the fighter back home again.
+  Object.assign(owner, { x: 280, y: 557, direction: 'Right' }); Object.assign(hen, { x: 281, y: 557 });
+  const peer = { label: 'peer', inGame: true, snapshot: { mapFileName: '0', playerObjectId: 1000, entities: [
+    { objectId: 1000, kind: 'player', name: 'peer', x: 279, y: 557 }, { ...owner, objectId: 50001 }, { ...hen }] } };
+  context.clients.push(peer);
+  assert.equal(selectNativeAction(client, context, 0).command.type, 'attack');
+  assert.equal(evidence.filter(row => row.type === 'combatArrival').length, 1); assert.equal(actorsReachedScenario(context), true);
+
+  const baseline = { ...context, policy: capacityPolicy({ profile: 'probe', stages: '2', combatActors: 1 }) };
+  client.combatArrival = undefined; client.home = { x: 275, y: 556 };
+  assert.equal(selectNativeAction(client, baseline, 0).command.type, 'attack', 'baseline hunting remains unchanged');
+  assert.equal(client.combatArrival, undefined); assert.equal(actorsReachedScenario(baseline), true);
 });
 
 test('native pending evidence is recorded separately and never sends another attack into an ambiguous hit window', () => {
@@ -587,6 +637,38 @@ function runOptions(realm, directory) {
     wallSeconds: 120, loginNotBefore: new Date().toISOString(), mapRoot: realm.maps };
 }
 
+test('native combat arrival uses real socket movement without observers and keeps the entire transit in continuous activity', async () => withDirectory(async directory => {
+  const realm = await fakeRealm(directory), rows = [], evidence = [], errors = [];
+  const policy = capacityPolicy({ profile: 'probe', activityMode: 'native', movementIntervalMs: 650, stages: '2', combatActors: 1 });
+  const continuous = new ContinuousAcceptance(policy);
+  const context = { endpoint: realm.endpoint, policy, runId: 'combat-arrival-wire', phase: 'settle', clients: [],
+    map: await loadProtocolCollisionMap('capacityfixture', { mapRoot: realm.maps, packagedMapRoot: realm.maps }),
+    mapName: 'capacityfixture', monsterNames: ['Hen'], targetClaims: new Map(),
+    guard: { assert() {}, stop: message => errors.push(message) }, writer: { add: row => evidence.push(row) },
+    add: row => { rows.push(row); continuous.add(row); } };
+  const client = new CapacityClient(realm.endpoint, actor(0), context); context.clients.push(client);
+  try {
+    await client.connect(); await client.request({ type: 'login', accountId: client.account.accountId, password: client.account.password }, 'LoginSuccess');
+    await client.request({ type: 'newCharacter', name: client.label, class: 'Warrior', gender: 'Male' }, 'NewCharacterSuccess');
+    await client.request({ type: 'startGame', characterIndex: 17 }, 'StartGame');
+    client.role = 'combat'; client.ready = true; client.home = { x: 16, y: 8 };
+    client.nextNativeChatAt = Infinity; client.nextNativeTurnAt = Infinity;
+    client.activityStartedAtMs = performance.now(); continuous.join(client.label, client.role, client.activityStartedAtMs);
+    client.plan = new NativePlan(performance.now() + 1200);
+    const deadline = performance.now() + 8000;
+    while (!client.combatArrival && performance.now() < deadline) { offerNativeAction(client, context); await sleep(20); }
+    await awaitPendingActions([client]); continuous.pause(client.label); continuous.finish();
+    assert.deepEqual(errors, []); assert.deepEqual(client.combatArrival?.actual, { x: 16, y: 8 });
+    assert.equal(actorsReachedScenario(context), true); assert.ok(client.combatArrival.activeElapsedMs >= 3000);
+    assert.equal(evidence.filter(row => row.type === 'combatArrival').length, 1);
+    const moves = rows.filter(row => ['walk', 'run'].includes(row.kind));
+    assert.ok(moves.length >= 5); assert.ok(moves.every(row => row.status === 'success' && row.initialCombatTransit));
+    assert.equal(moves.reduce((sum, row) => sum + row.movedCells, 0), 8);
+    assert.ok(continuous.summary().actors[0].activeSeconds >= 3, 'ordinary transit is never paused out of load coverage');
+    assert.equal(realm.types.some(row => ['attack', 'moveTo', 'stage5Command'].includes(row.type)), false);
+  } finally { await awaitPendingActions([client]); client.draining = true; await client.close(); await realm.close(); }
+}));
+
 test('real socket protocol stops after auth rejection without retry, StartGame or rewriting account progress', async () => withDirectory(async directory => {
   const realm = await fakeRealm(directory, { rateLimit: true });
   try {
@@ -740,7 +822,7 @@ for (const { lateFirstHit, sparseStats } of [{ lateFirstHit: false, sparseStats:
   : sparseStats ? 'native real sockets read sparse authoritative zero AttackSpeed without inventing pacing'
   : 'native real sockets keep running while old observer evidence is pending and attacks respect current stats', async () => {
   const server = new WebSocketServer({ host: '127.0.0.1', port: 0 }); await new Promise(resolve => server.once('listening', resolve));
-  const endpoint = `ws://127.0.0.1:${server.address().port}/ws`, active = new Map(), commands = [], rows = [], errors = [];
+  const endpoint = `ws://127.0.0.1:${server.address().port}/ws`, active = new Map(), commands = [], rows = [], errors = [], evidence = [];
   const monster = { objectId: 900, name: 'Hen', kind: 'monster', x: 13, y: 10, hp: 100, maxHp: 100, dead: false };
   server.on('connection', socket => {
     let index;
@@ -792,7 +874,7 @@ for (const { lateFirstHit, sparseStats } of [{ lateFirstHit: false, sparseStats:
   const policy = capacityPolicy({ profile: 'probe', activityMode: 'native', movementIntervalMs: 650, stages: '2', combatActors: 1 });
   const context = { endpoint, policy, runId: 'native-wire-fixture', phase: 'native-wire-fixture', clients: [],
     map: { width: 32, height: 32, blocked: new Uint8Array(1024) }, mapName: '0', monsterNames: ['Hen'], targetClaims: new Map(),
-    guard: { assert() {}, stop: error => errors.push(error) }, writer: { add() {} }, add: row => rows.push(row) };
+    guard: { assert() {}, stop: error => errors.push(error) }, writer: { add: row => evidence.push(row) }, add: row => rows.push(row) };
   const clients = [0, 1].map(index => new CapacityClient(endpoint, actor(index), context)); context.clients = clients;
   try {
     for (const [index, client] of clients.entries()) {
@@ -820,6 +902,8 @@ for (const { lateFirstHit, sparseStats } of [{ lateFirstHit: false, sparseStats:
       assert.equal(commands.filter(command => command.type === 'attack').length, 1);
       assert.equal(rows.some(row => row.kind === 'attack' && row.sharedHealthVerified), false);
       assert.equal(clients[1].failedTargets.get(900).until, Infinity);
+      assert.equal(clients[1].combatHunting.attempts, 1); assert.equal(clients[1].combatHunting.positiveHits, 0);
+      assert.deepEqual(clients[1].combatArrival.actual, clients[1].home);
       assert.deepEqual(errors, []); return;
     }
     while (performance.now() < start + 5500) {
@@ -836,6 +920,12 @@ for (const { lateFirstHit, sparseStats } of [{ lateFirstHit: false, sparseStats:
     assert.ok(attackTimes.length >= 4);
     for (let i = 1; i < attackTimes.length; i++) assert.ok(attackTimes[i] - attackTimes[i - 1] >= (sparseStats ? 1358 : 1182));
     assert.ok(rows.filter(row => row.kind === 'attack' && row.sharedHealthVerified && row.damage === 3).length >= 4);
+    assert.equal(evidence.filter(row => row.type === 'combatArrival').length, 1);
+    assert.deepEqual(clients[1].combatArrival.actual, { x: 12, y: 10 });
+    assert.equal(clients[1].combatHunting.attempts, attackTimes.length);
+    assert.equal(clients[1].combatHunting.positiveHits, attackTimes.length);
+    assert.deepEqual(clients[1].combatHunting.targetBounds, { minX: 13, maxX: 13, minY: 10, maxY: 10 });
+    assert.equal(clients[1].combatHunting.maximumTargetDistanceFromHome, 1);
     if (sparseStats) for (const row of rows.filter(row => row.kind === 'attack')) {
       assert.equal(row.pacingKnown, true); assert.equal(row.cadence.attackSpeedSource, 'authoritative-sparse-zero');
       assert.equal(row.cadence.level, 3); assert.equal(row.cadence.attackSpeed, 0); assert.equal(row.plannedIntervalMs, 1408);

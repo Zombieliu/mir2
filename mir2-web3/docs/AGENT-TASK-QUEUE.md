@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-09-29 continued capacity work: calibrated650/750ms real movement/combat
+> probes on664 pass with resume/save checks, but are only short probes. The first
+> 50-target forest run stops at10 admitted actors on AOI membership validation;
+> diagnose the retained failure before retrying. Immutable static-map sharing
+> now passes319 selected regressions and explicit Debug/Release clone benchmarks;
+> private doors remain independent. Deployment and50/100 long-soak gates remain
+> open. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 active capacity goal: user authorized approximately 10–12 hours of
 > continuous work to measure the existing limit, reach at least 50 stable active
 > ordinary sessions and attempt100. Preserve original production/data and auth

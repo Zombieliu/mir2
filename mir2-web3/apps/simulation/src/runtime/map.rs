@@ -42,10 +42,12 @@ use crate::MapTransferRecord;
 
 #[derive(Debug, Clone)]
 pub(super) struct RuntimeMapCollisionData {
-    pub(super) collision: StarterMapCollision,
-    pub(super) blocked_set: BTreeSet<(i32, i32)>,
+    // Parsed terrain is immutable and reused by every personal world on this map.
+    // Closed doors remain owned because their runtime state changes independently.
+    pub(super) collision: Arc<StarterMapCollision>,
+    pub(super) blocked_set: Arc<BTreeSet<(i32, i32)>>,
     pub(super) closed_door_set: BTreeSet<(i32, i32)>,
-    pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
+    pub(super) fishing_cells: Arc<BTreeMap<(i32, i32), i8>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -96,7 +98,9 @@ pub(crate) fn zone_map_collision_data(map_file_name: &str) -> Option<ZoneMapColl
     } else {
         runtime_map_collision_data(map_file_name)?
     };
-    let mut blocked_cells = collision.blocked_set;
+    // The Zone merges doors into this set and mutates it when they open/close.
+    // Keep its owned projection separate from the cached immutable terrain.
+    let mut blocked_cells = collision.blocked_set.as_ref().clone();
     blocked_cells.extend(collision.closed_door_set);
     let mut transfer_source_cells = crystal_direct_movement_transfer_source_cells(map_file_name);
     transfer_source_cells.extend(crystal_map_coordinate_source_cells(map_file_name));
@@ -1215,6 +1219,22 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
     }
 }
 
+fn publish_map_collision<T: Clone>(
+    cache: &Mutex<BTreeMap<String, Option<T>>>,
+    normalized: String,
+    parsed: Option<T>,
+) -> Option<T> {
+    // Parsing stays outside the lock. A concurrent loader may have already
+    // published this map; return that same allocation instead of overwriting it.
+    // None is still a cached result, including when it is the first publisher.
+    cache
+        .lock()
+        .expect("runtime map collision cache should not be poisoned")
+        .entry(normalized)
+        .or_insert(parsed)
+        .clone()
+}
+
 pub(super) fn runtime_map_collision_data(map_file_name: &str) -> Option<RuntimeMapCollisionData> {
     let normalized = normalize_map_file_name(map_file_name);
     static RUNTIME_MAP_COLLISION_CACHE: OnceLock<
@@ -1231,11 +1251,7 @@ pub(super) fn runtime_map_collision_data(map_file_name: &str) -> Option<RuntimeM
     }
 
     let parsed = runtime_map_collision_data_uncached(&normalized);
-    cache
-        .lock()
-        .expect("runtime map collision cache should not be poisoned")
-        .insert(normalized, parsed.clone());
-    parsed
+    publish_map_collision(cache, normalized, parsed)
 }
 
 pub(super) fn runtime_map_collision_data_uncached(
@@ -1297,10 +1313,10 @@ pub(super) fn runtime_map_collision_from_template(
         .collect();
 
     RuntimeMapCollisionData {
-        collision,
-        blocked_set,
+        collision: Arc::new(collision),
+        blocked_set: Arc::new(blocked_set),
         closed_door_set,
-        fishing_cells,
+        fishing_cells: Arc::new(fishing_cells),
     }
 }
 
@@ -1866,11 +1882,7 @@ pub(super) fn runtime_full_map_collision_data(
         .and_then(|bytes| parse_runtime_map_collision(&normalized, &bytes))
         .map(runtime_map_collision_from_template)
         .map(Arc::new);
-    cache
-        .lock()
-        .expect("runtime full map collision cache should not be poisoned")
-        .insert(normalized, parsed.clone());
-    parsed
+    publish_map_collision(cache, normalized, parsed)
 }
 
 /// Full per-map collision for the activated Crystal world. Prefers an
@@ -1878,8 +1890,8 @@ pub(super) fn runtime_full_map_collision_data(
 /// map-pack so it works with no client present. Unlike
 /// [`runtime_map_collision_data`], it returns the *full* Bichon map for "0"
 /// (the pack's `0.map`) instead of the starter slice, so a fully-activated map
-/// spawns across its real walkable cells. Cached per map (the pack is
-/// decompressed at most once per map file).
+/// spawns across its real walkable cells. Cached per map; concurrent cold loads
+/// may parse independently but all return the same published allocation.
 pub(super) fn runtime_world_map_collision_data(
     map_file_name: &str,
 ) -> Option<Arc<RuntimeMapCollisionData>> {
@@ -1903,11 +1915,7 @@ pub(super) fn runtime_world_map_collision_data(
             .map(runtime_map_collision_from_template)
             .map(Arc::new)
     });
-    cache
-        .lock()
-        .expect("runtime world map collision cache should not be poisoned")
-        .insert(normalized, parsed.clone());
-    parsed
+    publish_map_collision(cache, normalized, parsed)
 }
 
 pub(super) fn refresh_runtime_map_collision(world: &mut World) {

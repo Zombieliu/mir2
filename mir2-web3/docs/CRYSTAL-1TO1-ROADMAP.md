@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-29 static-map sharing candidate passes319 selected regressions and
+> explicit clone benchmarks. Immutable terrain/fishing collections are shared;
+> personal door state and Zone collision behavior remain independent. Calibrated
+> native650/750ms short probes pass, but the first50-target run stops on AOI
+> validation at10 admissions. No50/100 capacity or additional parity acceptance.
+> [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 capacity candidate: disabled spectator capture skips complete
 > snapshots; authoritative AOI filtering precedes shared-map cloning. Snapshot
 > and adjacent regressions27 pass. Actual PostgreSQL pool/client owners now

@@ -281,6 +281,13 @@ export function stableFanoutRange(kind, policy) {
 }
 function combatPlan(client, context) {
   const owner = self(client);
+  if (context.policy?.activityMode === 'native' && !client.combatArrival) {
+    if (distance(owner, client.home) !== 0) {
+      const plan = movement(client, client.home, context.map);
+      return plan ? { ...plan, initialCombatTransit: true } : null;
+    }
+    recordCombatArrival(client, context);
+  }
   for (const [id, failure] of client.failedTargets) if (failure.until < Date.now() - 30000) client.failedTargets.delete(id);
   const candidates = combatCandidates(client, context);
   for (const target of candidates.slice(0, 4)) {
@@ -288,7 +295,7 @@ function combatPlan(client, context) {
     if (distance(owner, target) === 1 && observer) {
       const facing = directionOf(owner, target);
       if (owner.direction !== facing) return { command: { type: 'turn', direction: facing }, hunting: target.name };
-      return { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer,
+      return { command: { type: 'attack', objectId: target.objectId }, targetEntity: target, observer, hunting: target.name,
         peerAttackerId: observedPlayerId(observer, client.label) };
     }
     const adjacent = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
@@ -299,6 +306,34 @@ function combatPlan(client, context) {
     }
   }
   return patrol(client, context);
+}
+
+function recordCombatArrival(client, context) {
+  const owner = self(client);
+  if (context.policy?.activityMode !== 'native' || client.role !== 'combat' || client.combatArrival ||
+      !owner || distance(owner, client.home) !== 0) return;
+  client.combatArrival = { at: Date.now(), phase: context.phase, mapFileName: client.snapshot.mapFileName,
+    declaredHome: { ...client.home }, actual: { x: owner.x, y: owner.y }, authoritativeSequence: client.sequence,
+    activeElapsedMs: Number.isFinite(client.activityStartedAtMs) ? performance.now() - client.activityStartedAtMs : null };
+  context.writer?.add({ type: 'combatArrival', actor: client.label, ...client.combatArrival });
+}
+
+function recordHuntAttempt(client, owner, target) {
+  const pointBounds = point => ({ minX: point.x, maxX: point.x, minY: point.y, maxY: point.y });
+  const hunt = client.combatHunting ??= { attempts: 0, positiveHits: 0, totalDamage: 0, firstAt: Date.now(),
+    ownerBounds: pointBounds(owner), targetBounds: pointBounds(target), maximumTargetDistanceFromHome: 0 };
+  for (const [bounds, point] of [[hunt.ownerBounds, owner], [hunt.targetBounds, target]]) {
+    bounds.minX = Math.min(bounds.minX, point.x); bounds.maxX = Math.max(bounds.maxX, point.x);
+    bounds.minY = Math.min(bounds.minY, point.y); bounds.maxY = Math.max(bounds.maxY, point.y);
+  }
+  hunt.attempts++; hunt.lastAt = Date.now();
+  hunt.maximumTargetDistanceFromHome = Math.max(hunt.maximumTargetDistanceFromHome, distance(client.home, target));
+}
+
+export function actorsReachedScenario(context) {
+  return context.clients.filter(client => client.ready).every(client => client.role === 'movement'
+    ? distance(self(client), client.home) <= 3
+    : context.policy.activityMode !== 'native' || Boolean(client.combatArrival));
 }
 
 export class FixedPlan {
@@ -346,10 +381,13 @@ async function action(client, context, planned, preparedPlan) {
   }
   if (kind === 'attack') context.targetClaims.set(command.objectId, client.label);
   const row = { actor: client.label, phase, kind, plannedGameplay: true, scheduledAtMs: plannedAt, sentAtMs: sentAt,
-    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, ...nativeMeta };
+    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, ...nativeMeta,
+    ...(native && client.role === 'combat' ? { declaredHome: client.home, initialCombatTransit: Boolean(plan.initialCombatTransit),
+      targetPosition: plan.targetEntity ? { x: plan.targetEntity.x, y: plan.targetEntity.y } : undefined } : {}) };
   try {
     client.waitReason = ['attack', 'chat'].includes(kind) ? 'evidence-wait' : 'owner-ack-wait';
     client.send(command);
+    if (native && kind === 'attack') recordHuntAttempt(client, owner, row.targetPosition);
     if (native) {
       client.plan.sent(sentAt, planned.cadence.cooldownMs);
       if (kind === 'chat') client.nextNativeChatAt = sentAt + context.policy.nativeChatIntervalMs;
@@ -374,10 +412,14 @@ async function action(client, context, planned, preparedPlan) {
       if (status === 'success') { client.movementCount++; client.nativeRunPrimedUntil = sentAt + 1200; }
       row.actual = { x: actual.x, y: actual.y }; row.direction = actual.direction;
       row.movedCells = distance(owner, actual);
+      recordCombatArrival(client, context);
     } else if (kind === 'turn' && receipt.payload?.direction !== command.direction) status = 'corrected';
     context.add({ ...row, status, latencyMs: receipt.monotonicMs - sentAt, plannedLatencyMs: receipt.monotonicMs - plannedAt,
       damage: receipt.damage, sharedHealthVerified: receipt.sharedHealthVerified, healthPercent: receipt.healthPercent });
-    if (kind === 'attack') client.failedTargets.delete(command.objectId);
+    if (kind === 'attack') {
+      client.failedTargets.delete(command.objectId);
+      if (native) { client.combatHunting.positiveHits++; client.combatHunting.totalDamage += receipt.damage; }
+    }
     if (kind === 'chat') context.add({ actor: client.label, phase, kind: observers.length ? 'peerChat' : 'selfChat', status: 'success', latencyMs: receipt.monotonicMs - sentAt });
     if (status === 'success' && ['walk', 'run', 'turn', 'chat'].includes(kind)) {
       const verifyObservers = async () => {
@@ -534,7 +576,7 @@ async function settleClients(context) {
   context.phase = 'settle'; const deadline = Date.now() + 180000;
   while (Date.now() < deadline) {
     context.guard.assert();
-    if (context.clients.filter(client => client.ready && client.role === 'movement').every(client => distance(self(client), client.home) <= 3)) return;
+    if (actorsReachedScenario(context)) return;
     await sleep(250);
   }
   throw new Error('Ordinary paths did not reach the declared scenario within 180 seconds');
@@ -608,6 +650,8 @@ async function resumeActor(original, context) {
     if (liveAck.payload?.direction !== direction) throw new Error('Resumed owner no longer accepts ordinary authoritative commands');
     restored.home = original.home; restored.role = original.role; restored.ready = true;
     restored.failedTargets = original.failedTargets;
+    restored.combatArrival = original.combatArrival; restored.combatHunting = original.combatHunting;
+    restored.activityStartedAtMs = original.activityStartedAtMs;
     initializePlan(restored, context, performance.now() + 1000); restored.nextRtt = Date.now() + 5000; restored.nextRefresh = Date.now() + 60000;
     context.clients[context.clients.indexOf(original)] = restored; original.ready = false;
     return { actor: original.label, status: 'passed', elapsedMs: performance.now() - started, characterIndex: original.account.characterIndex,
@@ -728,7 +772,7 @@ export async function runCapacity(options) {
         initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
         client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
         context.clients.push(client);
-        context.continuous.join(client.label, client.role);
+        client.activityStartedAtMs = performance.now(); context.continuous.join(client.label, client.role, client.activityStartedAtMs);
         writer.add({ type: 'admitted', actor: client.label, role: client.role, characterIndex: client.account.characterIndex, at: Date.now(), controlledActors: context.clients.length });
         options.onProgress?.({ stage: 'admitted', controlledActors: context.clients.length, target: count });
         await guard.afterAdmission(Date.now());
@@ -806,6 +850,12 @@ export async function runCapacity(options) {
       ambiguousAttackRule: 'Unverified attacks permanently quarantine that actor/target pair for this run; more than 64 such targets stops the test',
       continuousRunningRule: 'The Run ratio and cell-rate gates also apply throughout ramp, anchor travel and ordinary login-window waits',
       limitations: ['Warrior starter melee only', 'No caster AOE, summons or cross-map raid proof', 'No native GPU/render acceptance', 'No simultaneous auth burst or automatic revival'] };
+    if (policy.activityMode === 'native') report.combatScenario = {
+      rule: 'First reach the declared home by ordinary Walk/Run, then hunt; initial transit stays in continuous activity and stage measurement starts only after arrival',
+      searchRadiusFromCurrentPosition: 16, monsterNames: context.monsterNames,
+      huntingRangeMeaning: 'Actual attack positions; chasing may leave the initial home. Authored spawns do not prove live target supply',
+      actors: context.clients.filter(client => client.role === 'combat').map(client => ({ actor: client.label,
+        declaredHome: client.home, arrival: client.combatArrival ?? null, hunting: client.combatHunting ?? null })) };
     report.boundedStorage = { retainedMonitorSamples: guard.history.length, maximumMonitorSamples: guard.maximumHistory,
       monitorTimeBucketMs: guard.timeline.bucketMs, rawMonitorSamples: guard.timeline.rawSamples,
       maximumEventsPerConnection: 2048, writerMaximumBufferedBytes: writer.maximumBufferedBytes, writerLimitBytes: writer.maxBufferedBytes };
