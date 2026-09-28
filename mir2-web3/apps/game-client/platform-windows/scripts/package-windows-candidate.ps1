@@ -1,4 +1,4 @@
-# Stage a Windows Candidate package from an explicitly attested Release EXE.
+﻿# Stage a Windows Candidate package from an explicitly attested Release EXE.
 # The script never builds. -DryRun validates only and never writes dist/target.
 [CmdletBinding()]
 param(
@@ -7,6 +7,11 @@ param(
     [string]$CandidateVersion = '',
     [string]$SourceRevision = '',
     [string]$SignerThumbprint = '',
+    [string]$GatewayWsUrl = $env:MIR2_CANDIDATE_GATEWAY_WS_URL,
+    [ValidateSet('crystal', 'newcomer-v1', 'newcomer-v2')][string]$QuestGuidance = 'newcomer-v2',
+    [bool]$ForceDaylight = $true,
+    [string[]]$NativeMapFileNames = @(),
+    [string]$FullCrystalPackRoot = $env:MIR2_FULL_PACK_ROOT,
     [string]$OutputRoot = '',
     [switch]$AllowDirtyWorktree,
     [switch]$DryRun,
@@ -22,6 +27,9 @@ if (-not (Test-Path -LiteralPath $EntityAtlasClosureScript -PathType Leaf)) { th
 $PlayerSpriteClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'player-sprite-closure.ps1'
 if (-not (Test-Path -LiteralPath $PlayerSpriteClosureScript -PathType Leaf)) { throw "player sprite closure validator missing: $PlayerSpriteClosureScript" }
 . $PlayerSpriteClosureScript
+$ReleaseProfileScript = Join-Path (Split-Path -Parent $PSCommandPath) 'candidate-release-profile.ps1'
+if (-not (Test-Path -LiteralPath $ReleaseProfileScript -PathType Leaf)) { throw 'Candidate release profile validator missing' }
+. $ReleaseProfileScript
 $PetGuildClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'pet-guild-asset-closure.ps1'
 if (-not (Test-Path -LiteralPath $PetGuildClosureScript -PathType Leaf)) { throw 'pet/guild closure validator missing' }
 . $PetGuildClosureScript
@@ -582,6 +590,7 @@ function Test-PathContainsDangerousDotToken {
 
 function Test-PackageRelativeFileAllowed {
     param([string]$RelativePath, [string]$ExeName)
+    if (Test-CandidateActorFileAllowed -RelativePath $RelativePath) { return $true }
     if ($RelativePath -ceq $ExeName) { return $true }
     if (Test-PathContainsDangerousDotToken -RelativePath $RelativePath) { return $false }
     $rootFiles = @('mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s')
@@ -596,7 +605,7 @@ function Test-PackageRelativeFileAllowed {
     if (@('mir2-assets/original-ui/Sound/Login2.wav','mir2-assets/original-ui/Sound/Select2.wav','mir2-assets/original-ui/Sound/103.wav','mir2-assets/original-ui/Sound/70.wav','mir2-assets/original-ui/Sound/71.wav','mir2-assets/original-ui/Sound/72.wav','mir2-assets/original-ui/Sound/73.wav','mir2-assets/original-ui/Sound/80.wav','mir2-assets/original-ui/Sound/81.wav','mir2-assets/original-ui/Sound/82.wav','mir2-assets/original-ui/Sound/83.wav','mir2-assets/original-ui/Sound/138.wav','mir2-assets/original-ui/Sound/139.wav','mir2-assets/original-ui/Sound/144.wav','mir2-assets/original-ui/Sound/145.wav','mir2-assets/original-ui/Sound/tiger_struck_1.wav','mir2-assets/original-ui/Sound/tiger_struck_2.wav','mir2-assets/original-ui/Sound/wolf_struck1.wav','mir2-assets/original-ui/Sound/M8-1.wav','mir2-assets/original-ui/Sound/M31-0.wav','mir2-assets/original-ui/Sound/M31-1.wav','mir2-assets/original-ui/Sound/M31-2.wav','mir2-assets/original-ui/Sound/M34-0.wav','mir2-assets/original-ui/Sound/M34-1.wav','mir2-assets/original-ui/Sound/M34-2.wav','mir2-assets/original-ui/Sound/M39-0.wav','mir2-assets/original-ui/Sound/M39-1.wav','mir2-assets/original-ui/Sound/M40-0.wav','mir2-assets/original-ui/Sound/M61-0.wav','mir2-assets/original-ui/Sound/M61-1.wav','mir2-assets/original-ui/Sound/M64-0.wav','mir2-assets/original-ui/Sound/M64-1.wav','mir2-assets/original-ui/Sound/M64-2.wav','mir2-assets/original-ui/Sound/M79-1.wav') -ccontains $RelativePath) { return $true }
     if (@('mir2-assets/original-ui/Cursors/Cursor_Default.png','mir2-assets/original-ui/Cursors/Cursor_Normal_Atk.png','mir2-assets/original-ui/Cursors/Cursor_Compulsion_Atk.png','mir2-assets/original-ui/Cursors/Cursor_Npc.png') -ccontains $RelativePath) { return $true }
     if ($RelativePath.StartsWith('mir2-assets/crystal-map-pack/', [StringComparison]::Ordinal)) { return $RelativePath.EndsWith('.map.gz', [StringComparison]::OrdinalIgnoreCase) }
-    $imageJsonRoots = @('mir2-assets/original-ui/Pet/','mir2-assets/bevy-entity-atlases/', 'mir2-assets/generated/map-atlas/', 'mir2-assets/generated/native-map-keyed/', 'mir2-assets/original-effects/', 'mir2-assets/original-ui/ChrSel/', 'mir2-assets/original-ui/Help/', 'mir2-assets/original-ui/MMap/', 'mir2-assets/original-ui/Prguse/', 'mir2-assets/original-ui/DNItems/', 'mir2-assets/original-ui/GuildSkill/','mir2-assets/original-ui/MagIcon2/','mir2-assets/original-ui/MagIcon/','mir2-assets/original-ui/BuffIcon/', 'mir2-assets/original-ui/Prguse2/', 'mir2-assets/original-ui/StateItem/', 'mir2-assets/original-ui/UI_32bit/', 'mir2-assets/original-ui/Title/', 'mir2-assets/original-ui/Monster/000/', 'mir2-assets/original-ui/NPC/00/')
+    $imageJsonRoots = @('mir2-assets/original-ui/Pet/','mir2-assets/bevy-entity-atlases/', 'mir2-assets/generated/map-atlas/', 'mir2-assets/generated/native-map-keyed/', 'mir2-assets/original-effects/', 'mir2-assets/original-ui/ChrSel/', 'mir2-assets/original-ui/Help/', 'mir2-assets/original-ui/MMap/', 'mir2-assets/original-ui/Prguse/', 'mir2-assets/original-ui/DNItems/', 'mir2-assets/original-ui/GuildSkill/','mir2-assets/original-ui/MagIcon2/','mir2-assets/original-ui/MagIcon/','mir2-assets/original-ui/BuffIcon/', 'mir2-assets/original-ui/Prguse2/', 'mir2-assets/original-ui/StateItem/', 'mir2-assets/original-ui/UI_32bit/', 'mir2-assets/original-ui/Title/')
     foreach ($familyName in $PlayerSpriteFamilyNames) { $imageJsonRoots += "mir2-assets/original-ui/$familyName/" }
     foreach ($prefix in $imageJsonRoots) { if ($RelativePath.StartsWith($prefix, [StringComparison]::Ordinal)) { return $RelativePath.EndsWith('.json', [StringComparison]::OrdinalIgnoreCase) -or $RelativePath.EndsWith('.png', [StringComparison]::OrdinalIgnoreCase) } }
     foreach ($petSound in $PetSoundNames) { if ($RelativePath -ceq ('mir2-assets/original-ui/Sound/' + $petSound)) { return $true } }
@@ -605,9 +614,10 @@ function Test-PackageRelativeFileAllowed {
 
 function Test-PackageRelativeDirectoryAllowed {
     param([string]$RelativePath)
+    if (Test-CandidateActorDirectoryAllowed -RelativePath $RelativePath) { return $true }
     if (Test-PathContainsDangerousDotToken -RelativePath $RelativePath) { return $false }
     if (@('logs', 'mir2-assets', 'mir2-assets/generated', 'mir2-assets/original-ui', 'mir2-assets/original-ui/Cursors', 'mir2-assets/original-ui/Items', 'mir2-assets/original-ui/Monster', 'mir2-assets/original-ui/NPC', 'mir2-assets/original-ui/Sound') -ccontains $RelativePath) { return $true }
-    $treeRoots = @('mir2-assets/original-ui/Pet','mir2-assets/bevy-entity-atlases', 'mir2-assets/generated/map-atlas', 'mir2-assets/generated/native-map-keyed', 'mir2-assets/crystal-map-pack', 'mir2-assets/original-effects', 'mir2-assets/original-ui/ChrSel', 'mir2-assets/original-ui/Help', 'mir2-assets/original-ui/Items', 'mir2-assets/original-ui/MMap', 'mir2-assets/original-ui/Prguse', 'mir2-assets/original-ui/DNItems', 'mir2-assets/original-ui/GuildSkill','mir2-assets/original-ui/MagIcon2','mir2-assets/original-ui/MagIcon','mir2-assets/original-ui/BuffIcon', 'mir2-assets/original-ui/Prguse2', 'mir2-assets/original-ui/StateItem', 'mir2-assets/original-ui/UI_32bit', 'mir2-assets/original-ui/Title', 'mir2-assets/original-ui/Monster/000', 'mir2-assets/original-ui/NPC/00')
+    $treeRoots = @('mir2-assets/original-ui/Pet','mir2-assets/bevy-entity-atlases', 'mir2-assets/generated/map-atlas', 'mir2-assets/generated/native-map-keyed', 'mir2-assets/crystal-map-pack', 'mir2-assets/original-effects', 'mir2-assets/original-ui/ChrSel', 'mir2-assets/original-ui/Help', 'mir2-assets/original-ui/Items', 'mir2-assets/original-ui/MMap', 'mir2-assets/original-ui/Prguse', 'mir2-assets/original-ui/DNItems', 'mir2-assets/original-ui/GuildSkill','mir2-assets/original-ui/MagIcon2','mir2-assets/original-ui/MagIcon','mir2-assets/original-ui/BuffIcon', 'mir2-assets/original-ui/Prguse2', 'mir2-assets/original-ui/StateItem', 'mir2-assets/original-ui/UI_32bit', 'mir2-assets/original-ui/Title')
     foreach ($familyName in $PlayerSpriteFamilyNames) { $treeRoots += "mir2-assets/original-ui/$familyName" }
     foreach ($root in $treeRoots) { if ($RelativePath -ceq $root -or $RelativePath.StartsWith($root + '/', [StringComparison]::Ordinal)) { return $true } }
     return $false
@@ -620,6 +630,7 @@ function Assert-PackageAllowlist {
 }
 
 if ($SelfTest) {
+    Test-CandidateReleaseConfiguration
     $dateVector = ConvertFrom-JsonPreservingDateStrings -Text '{"buildCompletedUtc":"2026-08-25T20:51:33.9697458+00:00"}'
     if (-not ($dateVector.buildCompletedUtc -is [string]) -or [string]$dateVector.buildCompletedUtc -cne '2026-08-25T20:51:33.9697458+00:00') {
         throw 'JSON parser changed an attestation UTC string into a locale-dependent value'
@@ -701,9 +712,10 @@ if ($SelfTest) {
         $stateItemClosure = Assert-StateItemClosure -OriginalUiRoot (Join-Path $selfRepo 'apps\web\public\original-ui')
         if ($stateItemClosure.pngCount -ne 218) { throw "Character StateItem source closure count changed: $($stateItemClosure.pngCount)" }
         $sourceMappings = @(
-            [pscustomobject]@{ source='apps\web\public\bevy-entity-atlases'; destination='mir2-assets/bevy-entity-atlases' }, [pscustomobject]@{ source='apps\web\public\generated\map-atlas'; destination='mir2-assets/generated/map-atlas' }, [pscustomobject]@{ source='apps\web\public\generated\native-map-keyed'; destination='mir2-assets/generated/native-map-keyed' }, [pscustomobject]@{ source='apps\web\lib\generated\crystal-map-pack'; destination='mir2-assets/crystal-map-pack' }, [pscustomobject]@{ source='apps\web\public\original-effects'; destination='mir2-assets/original-effects' }, [pscustomobject]@{ source='apps\web\public\original-ui\ChrSel'; destination='mir2-assets/original-ui/ChrSel' }, [pscustomobject]@{ source='apps\web\public\original-ui\Help'; destination='mir2-assets/original-ui/Help' }, [pscustomobject]@{ source='apps\web\public\original-ui\Items'; destination='mir2-assets/original-ui/Items' }, [pscustomobject]@{ source='apps\web\public\original-ui\MMap'; destination='mir2-assets/original-ui/MMap' }, [pscustomobject]@{ source='apps\web\public\original-ui\Prguse'; destination='mir2-assets/original-ui/Prguse' }, [pscustomobject]@{ source='apps\web\public\original-ui\DNItems'; destination='mir2-assets/original-ui/DNItems' }, [pscustomobject]@{ source='apps\web\public\original-ui\Pet'; destination='mir2-assets/original-ui/Pet' }, [pscustomobject]@{ source='apps\web\public\original-ui\GuildSkill'; destination='mir2-assets/original-ui/GuildSkill' }, [pscustomobject]@{ source='apps\web\public\original-ui\MagIcon2'; destination='mir2-assets/original-ui/MagIcon2' }, [pscustomobject]@{ source='apps\web\public\original-ui\MagIcon'; destination='mir2-assets/original-ui/MagIcon' }, [pscustomobject]@{ source='apps\web\public\original-ui\BuffIcon'; destination='mir2-assets/original-ui/BuffIcon' }, [pscustomobject]@{ source='apps\web\public\original-ui\Prguse2'; destination='mir2-assets/original-ui/Prguse2' }, [pscustomobject]@{ source='apps\web\public\original-ui\StateItem'; destination='mir2-assets/original-ui/StateItem' }, [pscustomobject]@{ source='apps\web\public\original-ui\UI_32bit'; destination='mir2-assets/original-ui/UI_32bit' }, [pscustomobject]@{ source='apps\web\public\original-ui\Title'; destination='mir2-assets/original-ui/Title' }, [pscustomobject]@{ source='apps\web\public\original-ui\Monster\000'; destination='mir2-assets/original-ui/Monster/000' }, [pscustomobject]@{ source='apps\web\public\original-ui\NPC\00'; destination='mir2-assets/original-ui/NPC/00' }
+            [pscustomobject]@{ source='apps\web\public\bevy-entity-atlases'; destination='mir2-assets/bevy-entity-atlases' }, [pscustomobject]@{ source='apps\web\public\generated\map-atlas'; destination='mir2-assets/generated/map-atlas' }, [pscustomobject]@{ source='apps\web\public\generated\native-map-keyed'; destination='mir2-assets/generated/native-map-keyed' }, [pscustomobject]@{ source='apps\web\lib\generated\crystal-map-pack'; destination='mir2-assets/crystal-map-pack' }, [pscustomobject]@{ source='apps\web\public\original-effects'; destination='mir2-assets/original-effects' }, [pscustomobject]@{ source='apps\web\public\original-ui\ChrSel'; destination='mir2-assets/original-ui/ChrSel' }, [pscustomobject]@{ source='apps\web\public\original-ui\Help'; destination='mir2-assets/original-ui/Help' }, [pscustomobject]@{ source='apps\web\public\original-ui\Items'; destination='mir2-assets/original-ui/Items' }, [pscustomobject]@{ source='apps\web\public\original-ui\MMap'; destination='mir2-assets/original-ui/MMap' }, [pscustomobject]@{ source='apps\web\public\original-ui\Prguse'; destination='mir2-assets/original-ui/Prguse' }, [pscustomobject]@{ source='apps\web\public\original-ui\DNItems'; destination='mir2-assets/original-ui/DNItems' }, [pscustomobject]@{ source='apps\web\public\original-ui\Pet'; destination='mir2-assets/original-ui/Pet' }, [pscustomobject]@{ source='apps\web\public\original-ui\GuildSkill'; destination='mir2-assets/original-ui/GuildSkill' }, [pscustomobject]@{ source='apps\web\public\original-ui\MagIcon2'; destination='mir2-assets/original-ui/MagIcon2' }, [pscustomobject]@{ source='apps\web\public\original-ui\MagIcon'; destination='mir2-assets/original-ui/MagIcon' }, [pscustomobject]@{ source='apps\web\public\original-ui\BuffIcon'; destination='mir2-assets/original-ui/BuffIcon' }, [pscustomobject]@{ source='apps\web\public\original-ui\Prguse2'; destination='mir2-assets/original-ui/Prguse2' }, [pscustomobject]@{ source='apps\web\public\original-ui\StateItem'; destination='mir2-assets/original-ui/StateItem' }, [pscustomobject]@{ source='apps\web\public\original-ui\UI_32bit'; destination='mir2-assets/original-ui/UI_32bit' }, [pscustomobject]@{ source='apps\web\public\original-ui\Title'; destination='mir2-assets/original-ui/Title' }, [pscustomobject]@{ source='apps\web\public\original-ui\Monster'; destination='mir2-assets/original-ui/Monster' }, [pscustomobject]@{ source='apps\web\public\original-ui\NPC'; destination='mir2-assets/original-ui/NPC' }
          )
-         foreach ($familyName in $PlayerSpriteFamilyNames) { $sourceMappings += [pscustomobject]@{ source="apps\web\public\original-ui\$familyName"; destination="mir2-assets/original-ui/$familyName" } }
+         foreach ($familyName in @('Gate', 'MapLinkIcon') + $PlayerSpriteFamilyNames) { $sourceMappings += [pscustomobject]@{ source="apps\web\public\original-ui\$familyName"; destination="mir2-assets/original-ui/$familyName" } }
+         Test-CandidateSpriteClosureGuards -OriginalUiRoot (Join-Path $selfRepo 'apps/web/public/original-ui') -TemporaryRoot $selfRoot
          foreach ($mapping in $sourceMappings) { $sourceRoot=Join-Path $selfRepo $mapping.source; if(-not(Test-Path -LiteralPath $sourceRoot -PathType Container)){throw "allowlist source tree missing: $($mapping.source)"}; foreach($sourceFile in Get-ChildItem -LiteralPath $sourceRoot -Recurse -File -Force){$sourceRel=Get-RelativeUnixPath -Root $sourceRoot -Path $sourceFile.FullName;$targetRel=$mapping.destination+'/'+$sourceRel;if(-not(Test-PackageRelativeFileAllowed -RelativePath $targetRel -ExeName 'mir2-platform-windows.exe')){throw "actual required resource rejected by strict allowlist: $targetRel"}} }
          $frameSetSource = Join-Path $selfRepo 'apps\web\public\original-ui\frame-sets.generated.json'; if (-not (Test-Path -LiteralPath $frameSetSource -PathType Leaf)) { throw 'frame-set catalog source file missing from repository' }; if (-not (Test-PackageRelativeFileAllowed -RelativePath 'mir2-assets/original-ui/frame-sets.generated.json' -ExeName 'mir2-platform-windows.exe')) { throw 'frame-set catalog was rejected by strict allowlist' }
         $layoutRoot = Join-Path $selfRoot 'package-layout'; New-Item -ItemType Directory -Path (Join-Path $layoutRoot 'logs') -Force | Out-Null; New-Item -ItemType Directory -Path (Join-Path $layoutRoot 'mir2-assets\original-effects') -Force | Out-Null; New-Item -ItemType Directory -Path (Join-Path $layoutRoot 'mir2-assets\crystal-map-pack') -Force | Out-Null
@@ -734,10 +746,18 @@ if ($CandidateVersion -notmatch '^WN-CANDIDATE-[A-Za-z0-9._-]+$') { $invalid += 
 if ($SourceRevision -notmatch '^[0-9a-fA-F]{40}$') { $invalid += 'SourceRevision' }
 if ((Normalize-Thumbprint -Thumbprint $SignerThumbprint) -notmatch '^[0-9A-F]{40}$') { $invalid += 'SignerThumbprint' }
 if ($invalid.Count -gt 0) { throw ('mandatory attested inputs missing or invalid: ' + ($invalid -join ', ')) }
+$GatewayWsUrl = Resolve-CandidateGatewayWsUrl -Value $GatewayWsUrl
+if ($NativeMapFileNames.Count -eq 0) { $NativeMapFileNames = @(Get-CandidateRequiredMapNames) }
+$NativeMapFileNames = @(Resolve-CandidateMapNames -MapNames $NativeMapFileNames)
+$candidateToml = New-CandidateClientConfiguration -GatewayWsUrl $GatewayWsUrl -QuestGuidance $QuestGuidance -ForceDaylight $ForceDaylight
+Assert-CandidateClientConfiguration -Text $candidateToml | Out-Null
 
 $ScriptDir = Split-Path -Parent $PSCommandPath
 $RepoRoot = Find-RepoRoot -StartPath $ScriptDir
 $PublicRoot = Join-Path $RepoRoot 'apps\web\public'
+if ([string]::IsNullOrWhiteSpace($FullCrystalPackRoot)) { $FullCrystalPackRoot = Join-Path $PublicRoot 'generated\crystal-packs\full' }
+$FullCrystalPackRoot = Resolve-FullPath -Path $FullCrystalPackRoot
+Assert-NoReparseTree -Path $FullCrystalPackRoot
 $MapPackRoot = Join-Path $RepoRoot 'apps\web\lib\generated\crystal-map-pack'
 $DistRoot = Join-Path $RepoRoot 'dist'
 $EvidenceDir = Join-Path $RepoRoot 'docs\generated\player-qa\windows-package-preflight'
@@ -761,16 +781,26 @@ $attestation = Read-BuildAttestation -Path $attestationFull
 $attested = Assert-Attestation -Attestation $attestation -AttestationPath $attestationFull -Exe $exe -Worktree $worktree -DirtyAllowed:$AllowDirtyWorktree
 
 $webRoot = Join-Path $RepoRoot 'apps\web'
-$dryRunNativeKeyedRoot = $null
+$nativeKeyedTemporaryRoot = $null
+$mapAtlasTemporaryRoot = $null
 try {
-    if ($DryRun) {
-        $dryRunNativeKeyedRoot = Join-Path ([IO.Path]::GetTempPath()) ('native-keyed-map-dryrun-' + [guid]::NewGuid().ToString('N'))
-        & npm.cmd --prefix $webRoot run assets:native-map-keyed:build -- --outputRoot $dryRunNativeKeyedRoot
-    } else {
-        & npm.cmd --prefix $webRoot run assets:native-map-keyed:build
-    }
+    # Always generate the exact shipped map set outside the development asset
+    # cache. The former npm default rebuilt only 0/0141 over newer cave assets.
+    $nativeKeyedTemporaryRoot = Join-Path ([IO.Path]::GetTempPath()) ('native-keyed-map-candidate-' + [guid]::NewGuid().ToString('N'))
+    $mapList = $NativeMapFileNames -join ','
+    & node (Join-Path $webRoot 'scripts\build-native-keyed-map-pack.mjs') --maps $mapList --fullPackFallbackMaps $mapList --fullPackRoot $FullCrystalPackRoot --outputRoot $nativeKeyedTemporaryRoot
     if ($LASTEXITCODE -ne 0) { throw "native keyed map generation failed with exit code $LASTEXITCODE" }
-    $nativeKeyedMapRoot = if ($DryRun) { $dryRunNativeKeyedRoot } else { Join-Path $PublicRoot 'generated\native-map-keyed' }
+    $nativeKeyedMapRoot = $nativeKeyedTemporaryRoot
+    $mapAtlasTemporaryRoot = Join-Path ([IO.Path]::GetTempPath()) ('native-keyed-map-candidate-atlas-' + [guid]::NewGuid().ToString('N'))
+    $coverageScript = Join-Path $ScriptDir 'audit-candidate-map-coverage.mjs'
+    $generatedMapManifest = Join-Path $nativeKeyedMapRoot 'manifest.json'
+    & node $coverageScript --manifest $generatedMapManifest --fullPackRoot $FullCrystalPackRoot --completeAtlasRoot $mapAtlasTemporaryRoot
+    if ($LASTEXITCODE -ne 0) { throw 'Candidate floor atlas completion failed' }
+    & node $coverageScript --manifest $generatedMapManifest --atlasRoot $mapAtlasTemporaryRoot --fullPackRoot $FullCrystalPackRoot --output (Join-Path $nativeKeyedMapRoot 'coverage-audit.json')
+    if ($LASTEXITCODE -ne 0) { throw 'Candidate has missing drawable map resources' }
+    Assert-CandidateMapCoverageReport -NativeMapRoot $nativeKeyedMapRoot -MapAtlasRoot $mapAtlasTemporaryRoot | Out-Null
+    $generatedMapClosure = Assert-CandidateNativeMapClosure -NativeMapRoot $nativeKeyedMapRoot -ExpectedMapNames $NativeMapFileNames
+    Write-Host "generatedMapClosure=maps:$($generatedMapClosure.maps.Count),frames:$($generatedMapClosure.frameCount),missing:$($generatedMapClosure.missingSourceCount),sourceNoDraw:$($generatedMapClosure.noDrawReferenceCount)"
 
  $playerCombatSoundNames = @('70.wav','71.wav','72.wav','73.wav','80.wav','81.wav','82.wav','83.wav','138.wav','139.wav','144.wav','145.wav','tiger_struck_1.wav','tiger_struck_2.wav','wolf_struck1.wav')
  $monsterCombatSoundNames = @('005-1.wav','005-2.wav','005-3.wav','60.wav','61.wav','62.wav','63.wav','64.wav','65.wav')
@@ -864,7 +894,7 @@ $candidateSoundIdentities = @(
     [pscustomobject]@{ name='M79-1.wav'; size=[int64]484496; sha256='9098F96106FB880720711FB829B9CCDFEB8DB1883132BC680629FCD0360EA83D' }
 )
 foreach ($identity in $candidateSoundIdentities) { $soundPath = Join-Path $PublicRoot ('original-ui\Sound\' + $identity.name); if (-not (Test-FileIdentity -Path $soundPath -ExpectedSize $identity.size -ExpectedSha256 $identity.sha256)) { throw "$($identity.name) source identity mismatch" } }
-$requiredSourceTrees = @((Join-Path $PublicRoot 'bevy-entity-atlases'), (Join-Path $PublicRoot 'generated\map-atlas'), $nativeKeyedMapRoot, $MapPackRoot, (Join-Path $PublicRoot 'original-effects'), (Join-Path $PublicRoot 'original-ui\ChrSel'), (Join-Path $PublicRoot 'original-ui\Cursors'), (Join-Path $PublicRoot 'original-ui\Help'), (Join-Path $PublicRoot 'original-ui\DNItems'), (Join-Path $PublicRoot 'original-ui\Items'), (Join-Path $PublicRoot 'original-ui\MMap'), (Join-Path $PublicRoot 'original-ui\Prguse'), (Join-Path $PublicRoot 'original-ui\Prguse2'), (Join-Path $PublicRoot 'original-ui\StateItem'), (Join-Path $PublicRoot 'original-ui\UI_32bit'), (Join-Path $PublicRoot 'original-ui\Title'), (Join-Path $PublicRoot 'original-ui\Monster\000'), (Join-Path $PublicRoot 'original-ui\NPC\00'))
+$requiredSourceTrees = @((Join-Path $PublicRoot 'bevy-entity-atlases'), (Join-Path $PublicRoot 'generated\map-atlas'), $nativeKeyedMapRoot, $MapPackRoot, (Join-Path $PublicRoot 'original-effects'), (Join-Path $PublicRoot 'original-ui\ChrSel'), (Join-Path $PublicRoot 'original-ui\Cursors'), (Join-Path $PublicRoot 'original-ui\Help'), (Join-Path $PublicRoot 'original-ui\DNItems'), (Join-Path $PublicRoot 'original-ui\Items'), (Join-Path $PublicRoot 'original-ui\MMap'), (Join-Path $PublicRoot 'original-ui\Prguse'), (Join-Path $PublicRoot 'original-ui\Prguse2'), (Join-Path $PublicRoot 'original-ui\StateItem'), (Join-Path $PublicRoot 'original-ui\UI_32bit'), (Join-Path $PublicRoot 'original-ui\Title'), (Join-Path $PublicRoot 'original-ui\Monster'), (Join-Path $PublicRoot 'original-ui\NPC'), (Join-Path $PublicRoot 'original-ui\Gate'), (Join-Path $PublicRoot 'original-ui\MapLinkIcon'))
 foreach ($familyName in $PlayerSpriteFamilyNames) { $requiredSourceTrees += (Join-Path $PublicRoot "original-ui\$familyName") }
 foreach ($sourceTree in $requiredSourceTrees) { if (-not (Test-Path -LiteralPath $sourceTree -PathType Container)) { throw "required source tree missing: $sourceTree" }; Assert-NoReparseTree -Path $sourceTree; Assert-NoAlternateDataStreams -Path $sourceTree }
 foreach ($soundName in @('Login2.wav','Select2.wav','103.wav','M8-1.wav','M31-0.wav','M31-1.wav','M31-2.wav','M34-0.wav','M34-1.wav','M34-2.wav','M39-0.wav','M39-1.wav','M40-0.wav','M61-0.wav','M61-1.wav','M64-0.wav','M64-1.wav','M64-2.wav','M79-1.wav') + $PetSoundNames + $playerCombatSoundNames + $monsterCombatSoundNames + $frostCrunchSoundNames + $hallucinationSoundNames + $blessedArmourSoundNames) { $sound = Join-Path $PublicRoot ('original-ui\Sound\' + $soundName); Assert-NoReparseTree -Path $sound; Assert-NoAlternateDataStreams -Path $sound }
@@ -880,6 +910,8 @@ foreach ($soundName in @('Login2.wav','Select2.wav','103.wav','M8-1.wav','M31-0.
  Write-Host "itemIconClosure=files:$($itemIconClosure.fileCount),png:$($itemIconClosure.pngCount)"
  $stateItemClosure = Assert-StateItemClosure -OriginalUiRoot (Join-Path $PublicRoot 'original-ui')
  Write-Host "stateItemClosure=files:$($stateItemClosure.fileCount),png:$($stateItemClosure.pngCount)"
+ $actorClosure = Assert-CandidateActorClosure -OriginalUiRoot (Join-Path $PublicRoot 'original-ui')
+ Write-Host "actorClosure=libraries:$($actorClosure.libraryCount),frames:$($actorClosure.frameCount)"
 
 $output = if ([string]::IsNullOrWhiteSpace($OutputRoot)) { Join-Path $DistRoot ('mir2-windows-candidate\' + $CandidateVersion) } else { $OutputRoot }
 $output = Assert-SafeDistTarget -Path $output -DistRoot $DistRoot
@@ -889,11 +921,17 @@ if ($DryRun) {
     Write-Host "attestationSha256=$($attested.attestationSha256)"
     Write-Host "sourceRevision=$($worktree.revision) dirty=$($worktree.dirty) statusSha256=$($worktree.statusSha256)"
     Write-Host "outputPlan=$output"
+    Write-Host "gatewayWsUrl=$GatewayWsUrl questGuidance=$QuestGuidance forceDaylight=$ForceDaylight nativeMaps=$mapList"
     Write-Host 'no build, package, dist write, GUI, or repository target creation performed'
 }
+} catch {
+    foreach ($temporaryRoot in @($nativeKeyedTemporaryRoot, $mapAtlasTemporaryRoot)) {
+        if ($null -ne $temporaryRoot -and (Test-Path -LiteralPath $temporaryRoot)) { Remove-SafeTemporaryTree -Path $temporaryRoot -RequiredPrefix 'native-keyed-map-candidate-' }
+    }
+    throw
 } finally {
-    if ($null -ne $dryRunNativeKeyedRoot -and (Test-Path -LiteralPath $dryRunNativeKeyedRoot)) {
-        Remove-SafeTemporaryTree -Path $dryRunNativeKeyedRoot -RequiredPrefix 'native-keyed-map-dryrun-'
+    foreach ($temporaryRoot in @($nativeKeyedTemporaryRoot, $mapAtlasTemporaryRoot)) {
+        if ($DryRun -and $null -ne $temporaryRoot -and (Test-Path -LiteralPath $temporaryRoot)) { Remove-SafeTemporaryTree -Path $temporaryRoot -RequiredPrefix 'native-keyed-map-candidate-' }
     }
 }
 if ($DryRun) { exit 0 }
@@ -912,8 +950,8 @@ try {
     $assetDest = Join-Path $staging 'mir2-assets'; New-Item -ItemType Directory -Path $assetDest | Out-Null
      $treeCopies = @(
         @((Join-Path $PublicRoot 'bevy-entity-atlases'), (Join-Path $assetDest 'bevy-entity-atlases')),
-        @((Join-Path $PublicRoot 'generated\map-atlas'), (Join-Path $assetDest 'generated\map-atlas')),
-        @((Join-Path $PublicRoot 'generated\native-map-keyed'), (Join-Path $assetDest 'generated\native-map-keyed')),
+        @($mapAtlasTemporaryRoot, (Join-Path $assetDest 'generated\map-atlas')),
+        @($nativeKeyedMapRoot, (Join-Path $assetDest 'generated\native-map-keyed')),
         @($MapPackRoot, (Join-Path $assetDest 'crystal-map-pack')),
          @((Join-Path $PublicRoot 'original-effects'), (Join-Path $assetDest 'original-effects')),
         @((Join-Path $PublicRoot 'original-ui\frame-sets.generated.json'), (Join-Path $assetDest 'original-ui\frame-sets.generated.json')),
@@ -932,10 +970,10 @@ try {
         @((Join-Path $PublicRoot 'original-ui\StateItem'), (Join-Path $assetDest 'original-ui\StateItem')),
         @((Join-Path $PublicRoot 'original-ui\UI_32bit'), (Join-Path $assetDest 'original-ui\UI_32bit')),
         @((Join-Path $PublicRoot 'original-ui\Title'), (Join-Path $assetDest 'original-ui\Title')),
-        @((Join-Path $PublicRoot 'original-ui\Monster\000'), (Join-Path $assetDest 'original-ui\Monster\000')),
-        @((Join-Path $PublicRoot 'original-ui\NPC\00'), (Join-Path $assetDest 'original-ui\NPC\00'))
+        @((Join-Path $PublicRoot 'original-ui\Monster'), (Join-Path $assetDest 'original-ui\Monster')),
+        @((Join-Path $PublicRoot 'original-ui\NPC'), (Join-Path $assetDest 'original-ui\NPC'))
     )
-     foreach ($familyName in $PlayerSpriteFamilyNames) { $treeCopies += ,@((Join-Path $PublicRoot "original-ui\$familyName"), (Join-Path $assetDest "original-ui\$familyName")) }
+     foreach ($familyName in @('Gate', 'MapLinkIcon') + $PlayerSpriteFamilyNames) { $treeCopies += ,@((Join-Path $PublicRoot "original-ui\$familyName"), (Join-Path $assetDest "original-ui\$familyName")) }
      foreach ($copy in $treeCopies) {
          if ((Get-Item -LiteralPath $copy[0]).PSIsContainer) { Copy-Tree -Source $copy[0] -Destination $copy[1] } else { Copy-CandidateAssetFile -Source $copy[0] -Destination $copy[1] }
      }
@@ -960,11 +998,41 @@ try {
     if ((Get-FileHash -LiteralPath $attestationFull -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.attestationSha256 -or (Get-FileHash -LiteralPath (Join-Path $staging 'BUILD-ATTESTATION.json') -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.attestationSha256) { throw 'build attestation changed during staging copy' }
     Assert-NoAlternateDataStreams -Path $staging
 
-    $toml = "# Candidate client configuration; credentials are forbidden.`n[server]`ngateway_ws_url = `"wss://candidate-gateway.example/ws`"`n[display]`nwidth = 1024`nheight = 768`n"
-    Write-Utf8NoBom -Path (Join-Path $staging 'mir2-client.toml') -Text $toml
-    Write-Utf8NoBom -Path (Join-Path $staging 'README-START.txt') -Text "Mir2 Windows Native Candidate — client only`nThis package is staged, not Accepted. It includes no server or credentials.`nRemote gateways require wss://. Visual, human, WebSocket black-box, DPI and soak gates remain open.`n"
-    Write-Utf8NoBom -Path (Join-Path $staging 'CONTROLS.txt') -Text "Windows Native Candidate controls`nLogin: Tab/Shift+Tab, Enter, Escape, mouse fields/buttons.`nGame: hold left mouse on empty world to walk; hold right mouse on empty world to run; click monsters/NPCs with left mouse to attack/interact; WASD/arrows walk; Shift run; E turns right while gameplay input is enabled; Q opens/closes Quest Log; T talk; F attack; R pick up; V revive; 1-6 belt; F1-F8 skills; I bag; C character/equipment; Escape close/menu; Enter chat; U use; G equip; L logout from menu.`nF12 capture requires an explicit capture directory. Long-range pathfinding around obstacles is not claimed.`n"
-    Write-Utf8NoBom -Path (Join-Path $staging 'KNOWN-ISSUES.md') -Text "# Known acceptance gaps`nThis client-only Candidate is not Crystal 1:1 Accepted.`nVisual parity, human play feel, authenticated WebSocket black-box, 125%/150% DPI, lighting and 30-minute soak are not certified by this package.`n"
+    Write-Utf8NoBom -Path (Join-Path $staging 'mir2-client.toml') -Text $candidateToml
+    Write-Utf8NoBom -Path (Join-Path $staging 'README-START.txt') -Text @"
+传奇 Windows 邀请内测版
+版本：$CandidateVersion
+服务器：$GatewayWsUrl
+
+1. 将 ZIP 完整解压到一个文件夹，双击 mir2-platform-windows.exe 启动。mir2-assets 文件夹须与程序放在一起，无需另装本地服务器。
+2. 每位玩家自行注册独立账号，密码至少 10 个字符。请勿共用同一账号同时登录。
+3. 创建角色后进入游戏，按 Q 查看任务并选择当前任务。路线、补给指引和操作方式见 CONTROLS.txt。
+4. 离开游戏时请先正常退出角色，回到角色或登录界面，再关闭窗口，让服务器保存进度。
+
+本次测试范围为 0–30 级。出现问题时请一并提供版本号、地图名称、坐标及复现操作；已知限制见 KNOWN-ISSUES.md。
+"@
+    Write-Utf8NoBom -Path (Join-Path $staging 'CONTROLS.txt') -Text @"
+常用操作
+
+登录：点击输入框填写账号与密码；Tab / Shift+Tab 切换输入框，Enter 确认。
+移动：按住场景空地上的鼠标左键走路，右键奔跑；也可使用 WASD / 方向键移动，配合 Shift 奔跑。
+战斗与交互：左键点击怪物攻击，点击 NPC 交谈；F1–F8 使用已设置的技能，1–6 使用快捷栏物品。
+角色与背包：I 打开背包，C 打开人物装备，Enter 打开聊天输入。
+任务：Q 打开任务列表，将需要的任务设为当前任务；任务引导中的“前往”按钮可开始寻路，补给指引可帮助寻找商店。
+地图：点击任务引导中的“打开大地图”；在当前地图上点击目标位置可寻路，小地图也可点击寻路。关闭地图后路线继续执行，Esc 停止寻路。
+狩猎：到达任务狩猎区域后，请自行选择怪物战斗。
+退出：使用游戏菜单正常退出角色，再关闭客户端窗口。
+"@
+    Write-Utf8NoBom -Path (Join-Path $staging 'KNOWN-ISSUES.md') -Text @"
+# 本次内测的已知限制
+
+- 测试范围为 0–30 级。战士路线已做人工体验，法师和道士尚未完成全程人工验收。
+- 部分旧 NPC、物品和任务仍有英文名称或文字，中文统一工作尚未完成。
+- 服务器限同时在线 15 人。这是本次内测人数限制，并非已通过 15 人压力测试。
+- 内测版尚未完成正式发行签名流程。
+
+如遇卡顿、黑块、任务无法推进或异常退出，请记录版本、地图、坐标及触发操作，交给测试负责人排查。
+"@
     New-Item -ItemType Directory -Path (Join-Path $staging 'logs') | Out-Null
 
     Assert-NoReparseTree -Path $staging
@@ -973,6 +1041,11 @@ try {
     Write-Host "stagedPlayerSpriteClosure=families:$($stagedPlayerSpriteClosure.familyCount),libraries:$($stagedPlayerSpriteClosure.libraryCount),frames:$($stagedPlayerSpriteClosure.frameCount)"
     $stagedItemIconClosure = Assert-ItemIconClosure -OriginalUiRoot (Join-Path $assetDest 'original-ui')
     Write-Host "stagedItemIconClosure=files:$($stagedItemIconClosure.fileCount),png:$($stagedItemIconClosure.pngCount)"
+    $stagedActorClosure = Assert-CandidateActorClosure -OriginalUiRoot (Join-Path $assetDest 'original-ui')
+    $stagedMapClosure = Assert-CandidateNativeMapClosure -AssetRoot $assetDest -ExpectedMapNames $NativeMapFileNames
+    Assert-CandidateMapCoverageReport -NativeMapRoot (Join-Path $assetDest 'generated/native-map-keyed') -MapAtlasRoot (Join-Path $assetDest 'generated/map-atlas') | Out-Null
+    Write-Host "stagedActorClosure=libraries:$($stagedActorClosure.libraryCount),frames:$($stagedActorClosure.frameCount)"
+    Write-Host "stagedMapClosure=maps:$($stagedMapClosure.maps.Count),frames:$($stagedMapClosure.frameCount),missing:$($stagedMapClosure.missingSourceCount),sourceNoDraw:$($stagedMapClosure.noDrawReferenceCount)"
     Assert-PackageAllowlist -Root $staging -ExeName $ExeName
     $manifestPath = Join-Path $staging 'PACKAGE-MANIFEST.json'
     $manifest = Write-PackageManifest -Root $staging -OutputPath $manifestPath
@@ -1010,4 +1083,7 @@ try {
     Write-Host "staged attested Candidate at $output"
 } finally {
     if (-not $completed -and (Test-Path -LiteralPath $staging)) { Remove-SafeTree -Path $staging -DistRoot $DistRoot }
+    foreach ($temporaryRoot in @($nativeKeyedTemporaryRoot, $mapAtlasTemporaryRoot)) {
+        if ($null -ne $temporaryRoot -and (Test-Path -LiteralPath $temporaryRoot)) { Remove-SafeTemporaryTree -Path $temporaryRoot -RequiredPrefix 'native-keyed-map-candidate-' }
+    }
 }

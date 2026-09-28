@@ -20,6 +20,9 @@ if (-not (Test-Path -LiteralPath $EntityAtlasClosureScript -PathType Leaf)) { th
 $PlayerSpriteClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'player-sprite-closure.ps1'
 if (-not (Test-Path -LiteralPath $PlayerSpriteClosureScript -PathType Leaf)) { throw "player sprite closure validator missing: $PlayerSpriteClosureScript" }
 . $PlayerSpriteClosureScript
+$ReleaseProfileScript = Join-Path (Split-Path -Parent $PSCommandPath) 'candidate-release-profile.ps1'
+if (-not (Test-Path -LiteralPath $ReleaseProfileScript -PathType Leaf)) { throw 'Candidate release profile validator missing' }
+. $ReleaseProfileScript
 $PetGuildClosureScript = Join-Path (Split-Path -Parent $PSCommandPath) 'pet-guild-asset-closure.ps1'
 if (-not (Test-Path -LiteralPath $PetGuildClosureScript -PathType Leaf)) { throw 'pet/guild closure validator missing' }
 . $PetGuildClosureScript
@@ -228,6 +231,7 @@ function Test-PathContainsDangerousDotToken {
 
 function Test-PackageRelativeFileAllowed {
     param([string]$RelativePath,[string]$ExeName)
+    if (Test-CandidateActorFileAllowed -RelativePath $RelativePath) { return $true }
     if($RelativePath -ceq $ExeName){return $true}
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
     $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
@@ -239,7 +243,7 @@ function Test-PackageRelativeFileAllowed {
     if(@('mir2-assets/original-ui/Sound/Login2.wav','mir2-assets/original-ui/Sound/Select2.wav','mir2-assets/original-ui/Sound/103.wav','mir2-assets/original-ui/Sound/70.wav','mir2-assets/original-ui/Sound/71.wav','mir2-assets/original-ui/Sound/72.wav','mir2-assets/original-ui/Sound/73.wav','mir2-assets/original-ui/Sound/80.wav','mir2-assets/original-ui/Sound/81.wav','mir2-assets/original-ui/Sound/82.wav','mir2-assets/original-ui/Sound/83.wav','mir2-assets/original-ui/Sound/138.wav','mir2-assets/original-ui/Sound/139.wav','mir2-assets/original-ui/Sound/144.wav','mir2-assets/original-ui/Sound/145.wav','mir2-assets/original-ui/Sound/tiger_struck_1.wav','mir2-assets/original-ui/Sound/tiger_struck_2.wav','mir2-assets/original-ui/Sound/wolf_struck1.wav','mir2-assets/original-ui/Sound/M8-1.wav','mir2-assets/original-ui/Sound/M31-0.wav','mir2-assets/original-ui/Sound/M31-1.wav','mir2-assets/original-ui/Sound/M31-2.wav','mir2-assets/original-ui/Sound/M34-0.wav','mir2-assets/original-ui/Sound/M34-1.wav','mir2-assets/original-ui/Sound/M34-2.wav','mir2-assets/original-ui/Sound/M39-0.wav','mir2-assets/original-ui/Sound/M39-1.wav','mir2-assets/original-ui/Sound/M40-0.wav','mir2-assets/original-ui/Sound/M61-0.wav','mir2-assets/original-ui/Sound/M61-1.wav','mir2-assets/original-ui/Sound/M64-0.wav','mir2-assets/original-ui/Sound/M64-1.wav','mir2-assets/original-ui/Sound/M64-2.wav','mir2-assets/original-ui/Sound/M79-1.wav') -ccontains $RelativePath){return $true}
     if(@('mir2-assets/original-ui/Cursors/Cursor_Default.png','mir2-assets/original-ui/Cursors/Cursor_Normal_Atk.png','mir2-assets/original-ui/Cursors/Cursor_Compulsion_Atk.png','mir2-assets/original-ui/Cursors/Cursor_Npc.png') -ccontains $RelativePath){return $true}
     if($RelativePath.StartsWith('mir2-assets/crystal-map-pack/',[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.map.gz',[StringComparison]::OrdinalIgnoreCase)}
-    $imageJsonRoots=@('mir2-assets/original-ui/Pet/','mir2-assets/bevy-entity-atlases/','mir2-assets/generated/map-atlas/','mir2-assets/generated/native-map-keyed/','mir2-assets/original-effects/','mir2-assets/original-ui/ChrSel/','mir2-assets/original-ui/Help/','mir2-assets/original-ui/MMap/','mir2-assets/original-ui/Prguse/','mir2-assets/original-ui/DNItems/', 'mir2-assets/original-ui/GuildSkill/','mir2-assets/original-ui/MagIcon2/','mir2-assets/original-ui/MagIcon/','mir2-assets/original-ui/BuffIcon/', 'mir2-assets/original-ui/Prguse2/','mir2-assets/original-ui/StateItem/','mir2-assets/original-ui/UI_32bit/','mir2-assets/original-ui/Title/','mir2-assets/original-ui/Monster/000/','mir2-assets/original-ui/NPC/00/')
+    $imageJsonRoots=@('mir2-assets/original-ui/Pet/','mir2-assets/bevy-entity-atlases/','mir2-assets/generated/map-atlas/','mir2-assets/generated/native-map-keyed/','mir2-assets/original-effects/','mir2-assets/original-ui/ChrSel/','mir2-assets/original-ui/Help/','mir2-assets/original-ui/MMap/','mir2-assets/original-ui/Prguse/','mir2-assets/original-ui/DNItems/', 'mir2-assets/original-ui/GuildSkill/','mir2-assets/original-ui/MagIcon2/','mir2-assets/original-ui/MagIcon/','mir2-assets/original-ui/BuffIcon/', 'mir2-assets/original-ui/Prguse2/','mir2-assets/original-ui/StateItem/','mir2-assets/original-ui/UI_32bit/','mir2-assets/original-ui/Title/')
     foreach($familyName in $PlayerSpriteFamilyNames){$imageJsonRoots += "mir2-assets/original-ui/$familyName/"}
     foreach($prefix in $imageJsonRoots){if($RelativePath.StartsWith($prefix,[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.json',[StringComparison]::OrdinalIgnoreCase)-or$RelativePath.EndsWith('.png',[StringComparison]::OrdinalIgnoreCase)}}
     foreach ($petSound in $PetSoundNames) { if ($RelativePath -ceq ('mir2-assets/original-ui/Sound/' + $petSound)) { return $true } }
@@ -248,9 +252,10 @@ function Test-PackageRelativeFileAllowed {
 
 function Test-PackageRelativeDirectoryAllowed {
     param([string]$RelativePath)
+    if (Test-CandidateActorDirectoryAllowed -RelativePath $RelativePath) { return $true }
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
     if(@('logs','mir2-assets','mir2-assets/generated','mir2-assets/original-ui','mir2-assets/original-ui/Cursors','mir2-assets/original-ui/Items','mir2-assets/original-ui/Monster','mir2-assets/original-ui/NPC','mir2-assets/original-ui/Sound') -ccontains $RelativePath){return $true}
-    $treeRoots=@('mir2-assets/original-ui/Pet','mir2-assets/bevy-entity-atlases','mir2-assets/generated/map-atlas','mir2-assets/generated/native-map-keyed','mir2-assets/crystal-map-pack','mir2-assets/original-effects','mir2-assets/original-ui/ChrSel','mir2-assets/original-ui/Help','mir2-assets/original-ui/Items','mir2-assets/original-ui/MMap','mir2-assets/original-ui/Prguse','mir2-assets/original-ui/DNItems', 'mir2-assets/original-ui/GuildSkill','mir2-assets/original-ui/MagIcon2','mir2-assets/original-ui/MagIcon','mir2-assets/original-ui/BuffIcon', 'mir2-assets/original-ui/Prguse2','mir2-assets/original-ui/StateItem','mir2-assets/original-ui/UI_32bit','mir2-assets/original-ui/Title','mir2-assets/original-ui/Monster/000','mir2-assets/original-ui/NPC/00')
+    $treeRoots=@('mir2-assets/original-ui/Pet','mir2-assets/bevy-entity-atlases','mir2-assets/generated/map-atlas','mir2-assets/generated/native-map-keyed','mir2-assets/crystal-map-pack','mir2-assets/original-effects','mir2-assets/original-ui/ChrSel','mir2-assets/original-ui/Help','mir2-assets/original-ui/Items','mir2-assets/original-ui/MMap','mir2-assets/original-ui/Prguse','mir2-assets/original-ui/DNItems', 'mir2-assets/original-ui/GuildSkill','mir2-assets/original-ui/MagIcon2','mir2-assets/original-ui/MagIcon','mir2-assets/original-ui/BuffIcon', 'mir2-assets/original-ui/Prguse2','mir2-assets/original-ui/StateItem','mir2-assets/original-ui/UI_32bit','mir2-assets/original-ui/Title')
     foreach($familyName in $PlayerSpriteFamilyNames){$treeRoots += "mir2-assets/original-ui/$familyName"}
     foreach($root in $treeRoots){if($RelativePath -ceq $root -or $RelativePath.StartsWith($root+'/',[StringComparison]::Ordinal)){return $true}}
     return $false
@@ -440,6 +445,9 @@ function Get-RequiredCandidateFiles {
     foreach($index in @(400..413) + @(570..577)){ $required += "mir2-assets\original-effects\Magic2\$index.png" }
     foreach($index in 1110..1119){ $required += "mir2-assets\original-effects\Magic2\$index.png" }
     foreach($index in 500..509){ $required += "mir2-assets\original-effects\Magic3\$index.png" }
+    foreach ($library in @((Get-CandidateActorLibraryNames)) + @('MapLinkIcon')) { $required += ('mir2-assets/original-ui/' + $library + '/meta.json').Replace('/', '\') }
+    foreach ($mapName in Get-CandidateRequiredMapNames) { $required += "mir2-assets\crystal-map-pack\$mapName.map.gz" }
+    $required += 'mir2-assets\generated\native-map-keyed\coverage-audit.json'
     return $required
 }
 
@@ -457,6 +465,7 @@ function Test-FileIdentity {
 }
 
 if ($SelfTest) {
+    Test-CandidateReleaseConfiguration
     foreach ($requiredFile in @(Get-RequiredCandidateFiles -ExeName 'mir2-platform-windows.exe')) {
         if (-not (Test-PackageRelativeFileAllowed -RelativePath ($requiredFile.Replace('\', '/')) -ExeName 'mir2-platform-windows.exe')) {
             throw "required-file/allowlist contradiction: $requiredFile"
@@ -469,6 +478,7 @@ if ($SelfTest) {
     try {
         if ($Launch) { throw 'SelfTest must preserve default nonlaunch behavior' }
         $selfRepo = Find-RepoRoot -StartPath (Split-Path -Parent $PSCommandPath)
+        Test-CandidateSpriteClosureGuards -OriginalUiRoot (Join-Path $selfRepo 'apps/web/public/original-ui') -TemporaryRoot $selfRoot
         Test-PetGuildAssetClosure -OriginalUiRoot (Join-Path $selfRepo 'apps\web\public\original-ui') -TemporaryRoot $selfRoot
         $stateItemClosure = Assert-StateItemClosure -OriginalUiRoot (Join-Path $selfRepo 'apps\web\public\original-ui')
         if ($stateItemClosure.pngCount -ne 218) { throw "Character StateItem source closure count changed: $($stateItemClosure.pngCount)" }
@@ -714,7 +724,21 @@ foreach ($file in $allFiles | Where-Object { $textExtensions -contains $_.Extens
     if ($text -match '(?im)^\s*(?:password|token|passkey|secret|authorization)\s*=|"(?:password|token|passkey|secret|authorization)"\s*:') { Fail "credential field: $(Get-RelativeUnixPath -Root $PackageRoot -Path $file.FullName)" }
     if ($text -match '(?im)qa\.giveItem|event\.spawn|crystal:[^\s"`]+') { Fail "QA/admin/debug command: $(Get-RelativeUnixPath -Root $PackageRoot -Path $file.FullName)" }
 }
-$tomlPath = Join-Path $PackageRoot 'mir2-client.toml'; if (Test-Path -LiteralPath $tomlPath -PathType Leaf) { $toml = Get-Content -LiteralPath $tomlPath -Raw; if ($toml -notmatch '(?m)^\s*gateway_ws_url\s*=\s*"wss://') { Fail 'mir2-client.toml must use wss://' } }
+$clientProfile = $null
+$tomlPath = Join-Path $PackageRoot 'mir2-client.toml'
+if (Test-Path -LiteralPath $tomlPath -PathType Leaf) {
+    try { $clientProfile = Assert-CandidateClientConfiguration -Text (Get-Content -LiteralPath $tomlPath -Raw) }
+    catch { Fail "Candidate client configuration invalid: $($_.Exception.Message)" }
+}
+try {
+    $actorClosure = Assert-CandidateActorClosure -OriginalUiRoot (Join-Path $PackageRoot 'mir2-assets/original-ui')
+    Write-Host "actorClosure=libraries:$($actorClosure.libraryCount),frames:$($actorClosure.frameCount)"
+} catch { Fail "Candidate actor closure invalid: $($_.Exception.Message)" }
+try {
+    $mapClosure = Assert-CandidateNativeMapClosure -AssetRoot (Join-Path $PackageRoot 'mir2-assets')
+    Assert-CandidateMapCoverageReport -NativeMapRoot (Join-Path $PackageRoot 'mir2-assets/generated/native-map-keyed') -MapAtlasRoot (Join-Path $PackageRoot 'mir2-assets/generated/map-atlas') | Out-Null
+    Write-Host "nativeMapClosure=maps:$($mapClosure.maps.Count),frames:$($mapClosure.frameCount),missing:$($mapClosure.missingSourceCount),sourceNoDraw:$($mapClosure.noDrawReferenceCount)"
+} catch { Fail "Candidate native map closure invalid: $($_.Exception.Message)" }
 
 $exePath = Join-Path $PackageRoot $ExeName; $exeHash = ''; $exeItem = $null; $pe = [ordered]@{ valid = $false; imports = @(); delayImports = @() }
 if (Test-Path -LiteralPath $exePath -PathType Leaf) {
