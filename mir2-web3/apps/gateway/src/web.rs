@@ -12470,7 +12470,7 @@ mod tests {
         assert_eq!(event["type"], "realmInfo");
         assert_eq!(event["payload"]["schema"], "mir2-realm-handshake/1");
         assert_eq!(event["payload"]["profileId"], "platinum_176");
-        assert_eq!(event["payload"]["profileVersion"], 25);
+        assert_eq!(event["payload"]["profileVersion"], 26);
         assert_eq!(event["payload"]["acceptanceLevel"], 50);
         assert_eq!(
             event["payload"]["ratePolicy"]["monsterExperienceTiers"][0]["multiplier"],

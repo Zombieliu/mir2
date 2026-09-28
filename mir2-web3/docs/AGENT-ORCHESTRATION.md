@@ -1,5 +1,15 @@
 # Agent Orchestration
 
+> 2026-09-29 invited playtest delivered: fixed native d33708e1f/Gateway20aeb345f
+> pair, standalone signed-manifest ZIP, isolated public PostgreSQL/Redis realm,
+> ordinary two-account11/11 and native-resume protocol9/9. Exact extracted EXE
+> logged in over WSS and rendered scene/quest/map/bag. Original production and
+> accepted Warrior save are preserved. Gateway813 unique passes/8 unexecuted
+> environment checks are resolved across documented runs, not a clean second
+> full pass. Clean-PC/DPI/soak, GUI reconnect, server restart, capacity, casters,
+> full Chinese text and panel-click consumption remain follow-ups. No 100% claim.
+> [Evidence](generated/player-qa/invited-playtest-20260929/README.md).
+
 > 2026-09-28 caster-supply candidate: Chinese newcomer quest/supply UI now
 > checks eligible carried stock and offers class-aware ordinary vendor routes.
 > V2 departure checks cover MP/poison and receipted minimum-first purchases.

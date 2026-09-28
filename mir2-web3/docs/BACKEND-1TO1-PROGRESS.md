@@ -7,8 +7,13 @@
 > cache outages retain a retryable captured owner, and old cleanup cannot erase a
 > new owner. Same-UA clients no longer share a global auth bucket; existing peer,
 > pair and account limits remain. Gateway focused 15/15, Node 21/21 and real Redis
-> nine groups/32 races pass. Full suite and fresh deployed WSS proof remain open;
-> no parity percentage or frontend acceptance is raised.
+> nine groups/32 races pass. Isolated public Gateway20aeb345f now passes ordinary
+> two-account11/11 and actual native-resume protocol9/9, including rotated-ticket
+> replay denial. Resolved regression813 unique passes retains the full805/1/15
+> result, stale-profile fixture correction and seven separate V2 passes; eight
+> PostgreSQL environment checks remain unexecuted. Original production is unchanged.
+> Load/server-restart recovery and global parity remain open.
+> [Release evidence](generated/player-qa/invited-playtest-20260929/README.md).
 
 > 2026-09-24 shared melee candidate: fixes the incorrect 0.25 multiplier on
 > Thrusting's adjacent hit. With DC40/AC16 the primary deals24, secondary

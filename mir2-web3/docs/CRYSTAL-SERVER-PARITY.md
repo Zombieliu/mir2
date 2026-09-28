@@ -6,8 +6,13 @@
 > save/leave, including stale refresh/new owner races. Peer-scoped UA limits avoid
 > cross-player registration denial without removing account/IP safeguards.
 > Focused Gateway 15/15, Node 21/21 and isolated real Redis nine groups/32 races
-> pass; broad regression and the matched public build remain under validation.
-> These are implementation corrections, not a new Crystal live-parity acceptance.
+> pass. Public Gateway20aeb345f paired with native d33708e1f passes ordinary
+> two-account11/11 and native-resume protocol9/9. Gateway regression resolves to813
+> unique passes,8 existing environment tests unexecuted; full-run failures and
+> test-only fixture corrections remain disclosed. No production store was replaced.
+> These implementation corrections and bounded playtests are not whole-game
+> Crystal acceptance, load or server-restart-recovery proof.
+> [Fixed artifacts and limits](generated/player-qa/invited-playtest-20260929/README.md).
 
 > 2026-09-24 Thrusting/HalfMoon candidate follows original primary versus
 > secondary cells rather than scaling every armor-reduced hit. Monster,

@@ -1,13 +1,16 @@
 # Agent Task Queue
 
-> 2026-09-29 invited release in progress: the clean d33708e1f Windows build
-> passes and its full asset ZIP is being staged. Real Linux security gates pass;
-> an independent PostgreSQL realm and loopback-only Redis are prepared. Ordinary
-> multiplayer checks found chat and logout-lease regressions, now covered by
-> 15 focused Gateway tests, 21 Node tests and real Redis concurrency checks.
-> Next: authenticated Linux artifact, isolated Gateway/Caddy activation, paired
-> WSS accounts and native package verification. Original services/saves remain.
-> Broad regression, clean-PC deployment and caster routes are not yet accepted.
+> 2026-09-29 invited release delivered: native d33708e1f and Gateway20aeb345f
+> are the verified source pair. Independent PostgreSQL/Redis realm is live at
+> `/playtest/ws`; original service/data remain unchanged. Strict signed package,
+> independent ZIP extraction, public ordinary two-account11/11, real native-resume
+> protocol9/9 and exact-EXE WSS login/map/quest/bag observations pass. Gateway
+> resolved regression totals813 unique passes with8 environment tests unexecuted;
+> original failed runs and focused fixture corrections remain recorded.
+> Next: clean-PC/DPI/soak and load gates, Wizard/Taoist human routes, remaining
+> English text and focused panel-click consumption follow-up. Native GUI reconnect
+> and server-restart recovery are not proven by the protocol resume test.
+> [Exact artifacts and limits](generated/player-qa/invited-playtest-20260929/README.md).
 
 > 2026-09-28 release-readiness audit: public Web and Gateway health are live,
 > but this September development client still uses loopback and linked assets.

@@ -6,13 +6,17 @@
 > explicit leave captures and atomically releases its original owner after save.
 > Shared User-Agent auth buckets are scoped by the trusted peer without changing
 > peer/account/pair limits. Focused Gateway 15/15, Node 21/21 and real isolated
-> Redis nine groups (including 32 concurrency races) pass. Full Gateway and
-> deployed WSS validation remain in progress. Clean native source d33708e1f
-> builds successfully; resource packaging and public realm activation are pending.
-> No caster, capacity, visual or whole-game acceptance follows.
-> [Deployment evidence](PLAYER-PLAYTEST-RELEASE-20260928.md).
+> Redis nine groups (including 32 concurrency races) pass. Resolved Gateway
+> regression:813 unique passes,8 existing environment checks unexecuted, retaining
+> the full run's stale-fixture failure and focused correction. Native d33708e1f
+> package and Gateway20aeb345f are deployed as a verified pair: public ordinary
+> smoke11/11, native-resume protocol9/9 and exact unpacked EXE WSS/scene/quest/map
+> smoke pass. ZIP byte/CMS validation passes; original production stays unchanged.
+> Caster routes, capacity, clean-PC/DPI/soak, GUI reconnect and complete UI acceptance
+> remain open; no global parity claim.
+> [Delivery evidence](generated/player-qa/invited-playtest-20260929/README.md).
 
-> 2026-09-29 invited-playtest preparation: native initial/resume WebSockets
+> Earlier 2026-09-29 preparation checkpoint: native initial/resume WebSockets
 > now include the endpoint's HTTP Origin and compile TLS with OS certificate
 > roots. Four new handshake/security checks and the full native suite pass
 > (753 passed, three existing explicit ignores). This fixes remote connection
