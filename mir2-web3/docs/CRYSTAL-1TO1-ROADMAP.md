@@ -7,6 +7,8 @@
 > explicit GPU fixture pass. Three offline screenshots establish layout only.
 > These onboarding conveniences add no original-Crystal parity percentage;
 > fresh caster routes, complete localization and player acceptance remain open.
+> Source `dee30a74d` is pushed and hash-verified in the running local candidate
+> (client52320/Gateway33580); the original store has a verified pre-launch backup.
 > [Evidence](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
 
 > 2026-09-24 human onboarding checkpoint: Warrior 0–30 is accepted by the

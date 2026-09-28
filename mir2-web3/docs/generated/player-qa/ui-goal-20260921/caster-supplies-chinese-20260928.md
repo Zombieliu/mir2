@@ -116,5 +116,39 @@ and deaths. Full translation, live all-map performance/stability and Crystal
 visual acceptance remain separate. This convenience UI adds no global parity
 percentage.
 
-Package and push evidence will follow the source commit. Both old game
-processes were stopped when checked during this September 28 handoff.
+Source commit `dee30a74d96c986d92922f3f0269cbb43f42e271` was pushed to
+`origin/codex/windows-player-journey`; `git ls-remote` confirmed the same SHA.
+The development package is `C:/numeron-legend-of-rebirth-20260928-caster-supplies`.
+It retains the Gateway built from `abee09b21d33a7e5a23f36609ee31f0da3246f83`,
+the existing client configuration, shared asset junction, fixed daylight,
+store and identity/recovery keys.
+
+| Packaged file | SHA-256 |
+| --- | --- |
+| `mir2-platform-windows.exe` | `B852102B77BCB2FECB4ED9875174F6DE112D30447A20EB6B489E9E9A12C15653` |
+| `mir2-gateway.exe` | `A79307FB7F7ED779771E5C6C49A3E47504196C59F2353D6B5C60B010FFA5D201` |
+| `mir2-client.toml` | `01E4A40E54A5B8C7D6B1DABD7E4C13F7BEF434EC26EAEB1B77180E4BCEFEE834` |
+
+Both old game processes and ports were stopped before handoff. The existing
+`accounts.json` was copied to the local player-save-backups directory and the
+copy's SHA-256 checked against the source before launch; the package's local
+`candidate-manifest.json` retains its exact path/hash. Gateway33580 starts
+against that original store on ports 19900/19910. Native client52320 is
+responsive with window title `numeron-legend of rebirth`; the established
+WebSocket and client log confirm generation1 connected to port19910.
+This is startup/connection evidence, not a new authenticated caster run.
+Movement/render logs use `20260928-230421-929` in the local `render-live`
+directory. No player character was edited or driven for this handoff.
+
+## Separate repository maintenance finding
+
+The source commit succeeded, but its automatic Git garbage-collection step
+reported a corrupt historical object
+`1ae7f886fa87573bdbb59caf0772103929fac94c`. History identifies it as an older
+`apps/web/public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm` blob associated
+with commit `064fbcd159085e3f5e10d2e7ea1b83c4ebf36a8f`. The current worktree no
+longer contains that file. An attempted GitHub blob API recovery returned404;
+the object store was not altered. This maintenance issue remains open.
+The new branch push succeeded and its remote SHA was independently checked;
+the native release was built and launched successfully. Pre-existing generated
+quest-agent JSON changes were preserved outside this task's commits.

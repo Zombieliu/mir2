@@ -2,12 +2,16 @@
 
 > 2026-09-28 class-supply and Chinese newcomer UI pass shared 1100/native
 > 749/Node 166 tests, the native release build and one explicit offline GPU
-> fixture (three screenshots/nine cases). Next: release handoff, then fresh
+> fixture (three screenshots/nine cases). Source `dee30a74d` is pushed and the
+> hash-verified local package is running on client52320/Gateway33580 with the
+> backed-up original store and active diagnostics. Next: fresh
 > ordinary Wizard/Taoist 0–30 routes with actual mid-route purchases and normal
 > save/relogin evidence. Preserve Warrior acceptance and historical ledgers.
 > Legacy English NPC prose/UI, including Bull's outdated scroll dialogue,
 > remains a separate localization gap. These tests do not establish caster
 > survival or whole-game localization.
+> Separate repository maintenance: automatic GC found corrupt historical
+> WebAssembly blob `1ae7f886`; push and native startup succeeded, repair remains open.
 > [Evidence](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
 
 > 2026-09-24 user-reported Warrior 0–30 acceptance is recorded. Next caster

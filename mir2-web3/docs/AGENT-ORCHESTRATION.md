@@ -7,6 +7,8 @@
 > offline GPU fixture pass. Three screenshots verify layout, not authenticated
 > gameplay. Warrior acceptance is retained; fresh caster 0–30/save/supply gates
 > and legacy English prose/UI remain open. No save edits or global parity claim.
+> Source `dee30a74d` is pushed and deployed to the local development package
+> (client52320/Gateway33580), with the original backed-up store and diagnostics.
 > [Evidence](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
 
 > 2026-09-24 player acceptance: the user reports Warrior 0–30 gameplay passed
