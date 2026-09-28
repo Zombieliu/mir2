@@ -397,3 +397,53 @@ fn remote_map_and_modal_clicks_never_fall_through_to_world_input() {
         .auto_path_destination
         .is_none());
 }
+
+#[test]
+fn travis_supply_route_walks_bichon_and_both_ordinary_shop_rooms() {
+    let manifest = mir2_game_data::crystal_respawn_manifest_ref();
+    for (file, map_index, origin, destination, next_map) in [
+        ("0", 1, (334, 258), (326, 288), Some((4, (8, 12)))),
+        ("0108", 4, (8, 12), (4, 15), Some((5, (7, 6)))),
+        ("0109", 5, (7, 6), (5, 8), None),
+    ] {
+        let source = manifest.maps.iter().find(|map| map.map_file_name == file).unwrap();
+        assert_eq!(source.map_index, map_index);
+        if let Some((target_map, landing)) = next_map {
+            let edge = source.movements.iter().find(|edge| (edge.source.x, edge.source.y) == destination).unwrap();
+            assert_eq!((edge.map_index, (edge.destination.x, edge.destination.y)), (target_map, landing));
+            assert!(!edge.need_hole && !edge.need_move && edge.conquest_index == 0);
+        }
+        let entities = EntityModelSet { entities: if file == "0109" {
+            vec![mir2_client_bevy::entities::EntityModel {
+                object_id: "431".into(), kind: EntityKind::Npc, name: "Specialist_Travis".into(),
+                x: 4, y: 9, level: None, direction: None,
+            }]
+        } else { Vec::new() } };
+        let presentation = NativeEntityPresentation::default();
+        let mut movement = WorldPointerMovementState::default();
+        let steps = big_map_input::plan(&movement, &entities, &presentation, "self", file, origin, destination)
+            .unwrap_or_else(|error| panic!("{file}: {origin:?} -> {destination:?}: {error}"));
+        assert_eq!(steps.last(), Some(&destination));
+        assert!(steps.iter().all(|&(x, y)| crate::map_parser::map_cell_blocks_player_movement(file, x, y) == Some(false)));
+        let penultimate = steps.get(steps.len().saturating_sub(2)).copied().unwrap_or(origin);
+        movement.map_auto_path = Some(big_map_input::MapRoute {
+            map_file: file.into(), map_index, reset_epoch: 0, origin, destination, steps,
+            hunt_area: None, supply_area: None,
+        });
+        assert_eq!(big_map_input::advance(&mut movement, &entities, &presentation, "self", penultimate).unwrap(), vec![destination]);
+    }
+}
+
+#[test]
+fn authored_shop_door_still_rejects_occupancy_and_neighboring_walls() {
+    let entities = EntityModelSet { entities: vec![mir2_client_bevy::entities::EntityModel {
+        object_id: "blocker".into(), kind: EntityKind::Npc, name: "Door occupant".into(),
+        x: 326, y: 288, level: None, direction: None,
+    }] };
+    let movement = WorldPointerMovementState::default();
+    let presentation = NativeEntityPresentation::default();
+    assert_eq!(big_map_input::plan(&movement, &entities, &presentation, "self", "0", (327, 289), (326, 288)),
+        Err("入口当前被实体占用，请稍后重试。"));
+    assert_eq!(big_map_input::plan(&movement, &EntityModelSet::default(), &presentation, "self", "0", (327, 289), (325, 288)),
+        Err("目标位置有障碍，无法到达。"));
+}

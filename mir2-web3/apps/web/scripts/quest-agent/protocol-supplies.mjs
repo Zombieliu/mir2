@@ -1,5 +1,6 @@
 import { observedPlayerHp } from './protocol-observation.mjs';
 import { supersededProgressionGearForSale } from './policy.mjs';
+import { V2_SUPPLY_CONFIG, V2_SUPPLY_ITEMS, v2SupplyItem, v2SupplyStock, v2SupplyStatus } from './newcomer-v2-supply-policy.mjs';
 
 const RUBEN = Object.freeze({ name: 'Merchant_Ruben', x: 288, y: 608 });
 const SCOTT = Object.freeze({ name: 'Merchant_Scott', x: 291, y: 610 });
@@ -679,6 +680,121 @@ export async function purchaseV2BasicHpPotion(client, navigateNear, options = {}
     merchant: { objectId: numericId(npc.objectId, 'Alchemist Samuel objectId'), name: npc.name, x: Number(npc.x), y: Number(npc.y) },
     purchase: { itemIndex: SUPPLIES.hp.itemIndex, name: SUPPLIES.hp.name, shopItemId: shopRowId(row), quantity: 1, unitPrice, cost: unitPrice },
   };
+}
+
+/**
+ * V2-only shops. Buy all departure minima before optional top-ups so a large
+ * HP purchase cannot spend the gold needed for MP, poison or an escape scroll.
+ * No grants, selling, debug travel, infinite funding or unbounded shop retries.
+ */
+export async function restockV2Supplies(client, navigateNear, { policy, travel, clearBlockingMonster } = {}) {
+  if (!client?.snapshot || !policy) throw new Error('V2 supplies require an authoritative snapshot and policy');
+  const initial = v2SupplyStatus(client.snapshot, policy);
+  if (initial.ready) return { status: 'sufficient', ...initial };
+  if (String(client.snapshot.mapFileName) !== '0') return { status: 'blocked', reason: 'notInBichon', ...initial };
+  const desired = new Set(initial.missing.map(value => value.kind));
+  const purchases = [];
+  const groups = [
+    { merchant: V2_SUPPLY_CONFIG.merchants.potions, kinds: ['hp', 'mp'] },
+    { merchant: V2_SUPPLY_CONFIG.merchants.general, kinds: ['amulet', 'townTeleport', 'randomTeleport'] },
+    { merchant: V2_SUPPLY_CONFIG.merchants.poison, kinds: ['poison'] },
+  ];
+  const blocked = reason => ({ status: 'blocked', reason, purchases, ...v2SupplyStatus(client.snapshot, policy) });
+  for (const phase of ['minimum', 'target']) {
+    for (const { merchant, kinds } of groups) {
+      for (const missing of v2SupplyStatus(client.snapshot, policy).missing) desired.add(missing.kind);
+      const needs = kind => desired.has(kind) && v2SupplyStock(client.snapshot)[kind] < policy[kind][phase];
+      if (!kinds.some(needs)) continue;
+      if (String(client.snapshot.mapFileName) !== merchant.mapFileName) {
+        if (typeof travel !== 'function') return blocked(`legal route required to ${merchant.name} on ${merchant.mapFileName}`);
+        try { await travel(merchant.mapFileName); }
+        catch (error) {
+          if (/deadline/i.test(error?.reason ?? '')) throw error;
+          return blocked(`legal route to ${merchant.name} is blocked: ${error.message}`);
+        }
+        if (String(client.snapshot.mapFileName) !== merchant.mapFileName) return blocked(`no authoritative arrival at ${merchant.mapFileName}`);
+      }
+      try { await navigateSupplyService(client, navigateNear, merchant, clearBlockingMonster); }
+      catch (error) {
+        if (/deadline/i.test(error?.reason ?? '')) throw error;
+        return blocked(`cannot reach ${merchant.name}: ${error.message}`);
+      }
+      const findNpc = snapshot => (snapshot?.entities ?? []).find(entity =>
+        normalized(entity?.kind) === 'npc' && normalized(entity?.name) === normalized(merchant.name) &&
+        Number(entity?.x) === merchant.x && Number(entity?.y) === merchant.y) ?? null;
+      let service;
+      try { service = await openBuyService(client, findNpc, merchant.name); }
+      catch (error) {
+        if (/deadline/i.test(error?.reason ?? '')) throw error;
+        return blocked(`shop unavailable: ${merchant.name}: ${error.message}`);
+      }
+      const goods = service.goodsEvent?.payload;
+      if (!goods || Number(goods.panelType) !== 0 || !Array.isArray(goods.list)) return blocked(`invalid ordinary goods panel: ${merchant.name}`);
+      for (const kind of kinds) {
+        if (!needs(kind)) continue;
+        const supply = V2_SUPPLY_ITEMS.find(value => value.itemIndex === policy[kind].itemIndex);
+        const row = supplyRow(goods.list, supply);
+        if (!row) return blocked(`${merchant.name} does not offer ${supply.name}`);
+        const unitPrice = Number(row.price);
+        if (!Number.isSafeInteger(unitPrice) || unitPrice <= 0) return blocked(`invalid live price for ${supply.name}`);
+        let remaining = Math.max(0, policy[kind][phase] - v2SupplyStock(client.snapshot)[kind]);
+        while (remaining > 0) {
+          // Shop travel and blocker combat are live time. A floor checked at
+          // the end of the previous phase may have been consumed since then;
+          // preserve its replacement money instead of buying an optional full
+          // stack first. The next explicit attempt can rebuild the minima.
+          if (phase === 'target' && !v2SupplyStatus(client.snapshot, policy).ready) {
+            return blocked('supplies fell below a departure minimum before optional top-up; gold preserved');
+          }
+          const beforeGold = integer(client.snapshot.gold, 'snapshot.gold');
+          const affordable = Math.floor(beforeGold / unitPrice);
+          if (phase === 'minimum' && affordable < remaining) return blocked(`insufficient gold for ${supply.name}: need ${remaining * unitPrice}, have ${beforeGold}`);
+          if (affordable <= 0) break; // Optional top-up, every minimum was already checked.
+          const quantity = Math.min(remaining, affordable, supply.stackSize);
+          const weight = Number(client.snapshot.playerWeights?.bag ?? client.snapshot.currentWeight);
+          const maxWeight = Number(client.snapshot.maxWeight);
+          // Crystal charges Amulet item weight once per stack, not per charge.
+          const carried = [...(client.snapshot.inventoryItems ?? []), ...(client.snapshot.beltItems ?? [])];
+          const stackHasRoom = carried.some(item => v2SupplyItem(item)?.itemIndex === supply.itemIndex &&
+            Number(item.quantity ?? 0) + quantity <= supply.stackSize);
+          const gainWeight = ['amulet', 'poison'].includes(kind) ? (stackHasRoom ? 0 : supply.weight) : quantity * supply.weight;
+          if (Number.isFinite(weight) && Number.isFinite(maxWeight) && maxWeight >= 0 && weight + gainWeight > maxWeight) {
+            return blocked(`bag weight prevents ${supply.name}: ${weight}+${gainWeight}>${maxWeight}`);
+          }
+          const beforeQuantity = v2SupplyStock(client.snapshot)[kind];
+          const afterCommand = Number(client.sequence);
+          client.send({ type: 'buyItem', itemIndex: shopRowId(row), count: quantity, panelType: 0 });
+          try {
+            await client.wait(() => client.events.some(event =>
+              event?.sequence > afterCommand && event?.direction === 'received' && event?.type === 'worldSnapshot' &&
+              Number(event?.payload?.gold) === beforeGold - quantity * unitPrice &&
+              v2SupplyStock(event.payload)[kind] === beforeQuantity + quantity),
+            `V2 authoritative purchase of ${supply.name}`, WAIT_MS);
+          } catch (error) {
+            if (/deadline/i.test(error?.reason ?? '')) throw error;
+            return blocked(`purchase rejected or unconfirmed for ${supply.name}; check gold, bag capacity and weight`);
+          }
+          purchases.push({ merchant: merchant.name, itemIndex: supply.itemIndex, name: supply.name,
+            quantity, unitPrice, cost: quantity * unitPrice });
+          remaining -= quantity;
+        }
+      }
+    }
+    if (phase === 'minimum' && !v2SupplyStatus(client.snapshot, policy).ready) return blocked('supplies consumed during shop travel');
+  }
+  // Poison shopping is an ordinary map transition. Rejoin the city route and
+  // recheck every minimum after travel, not the earlier shop snapshot.
+  if (String(client.snapshot.mapFileName) !== '0') {
+    if (typeof travel !== 'function') return blocked('legal return from the poison shop is required');
+    try { await travel('0'); }
+    catch (error) {
+      if (/deadline/i.test(error?.reason ?? '')) throw error;
+      return blocked(`legal return from poison shop is blocked: ${error.message}`);
+    }
+    if (String(client.snapshot.mapFileName) !== '0') return blocked('poison-shop return lacked authoritative Bichon arrival');
+  }
+  const final = v2SupplyStatus(client.snapshot, policy);
+  return final.ready ? { status: 'restocked', purchases, ...final } : blocked('fresh stock fell below the departure minimum');
 }
 
 /**

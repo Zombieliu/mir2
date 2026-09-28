@@ -33,7 +33,7 @@ pub(super) struct QuestNpcDestination {
 
 impl QuestNpcDestination {
     pub fn label(&self) -> String {
-        format!("{} · {} ({},{})", self.map_title, self.name, self.x, self.y)
+        format!("{} · {} ({},{})", crate::player_text::name(&self.map_title), crate::player_text::name(&self.name), self.x, self.y)
     }
 }
 
@@ -270,7 +270,8 @@ mod tests {
         commands.spawn_empty().with_children(|parent| {
             multi_guidance::render(parent, &QuestTracker { active_quests: vec![quest.clone()] },
                 &state, None, &EntityModelSet::default(), &MapModel::default(),
-                Some(&BigMapModel { current_map_index: Some(1), ..default() }), "Warrior");
+                Some(&BigMapModel { current_map_index: Some(1), ..default() }), "Warrior",
+                &crate::quest_supplies::plan(&crate::read_model::PlayerStats::default(), &crate::inventory::InventoryModel::default(), None, None));
         });
         queue.apply(&mut world);
         assert!(world.query::<&QuestUiButton>().iter(&world).any(|button|
@@ -278,7 +279,7 @@ mod tests {
         let text = world.query::<&Text>().iter(&world).map(|t| t.0.as_str())
             .collect::<Vec<_>>().join(" ");
         let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
-        assert!(text.contains("BichonWall Board (334,259)"));
+        assert!(text.contains("比奇城墙公告板 (334,259)"));
         assert!(!text.contains("Kyle"));
     }
 
@@ -343,6 +344,6 @@ mod tests {
         app.world_mut().resource_mut::<MapModel>().center_y = 314;
         click_finish(&mut app);
         assert!(drain(&mut app).is_empty());
-        assert!(app.world().resource::<QuestUiState>().quest_alert_message.as_ref().unwrap().contains("Board (334,259)"));
+        assert!(app.world().resource::<QuestUiState>().quest_alert_message.as_ref().unwrap().contains("比奇城墙公告板 (334,259)"));
     }
 }

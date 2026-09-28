@@ -1,5 +1,10 @@
 # Class acceptance and supplies — 2026-09-24
 
+> The [September 28 implementation](caster-supplies-chinese-20260928.md) adds
+> source, regression and offline visual coverage for the class supply gaps
+> below. This document preserves the original audit. Caster live balance/
+> playthrough acceptance and legacy NPC prose remain open.
+
 ## Acceptance scope
 
 The player reports: "OK-0-30级我战士都验收完毕了。法师道士怎么办?中途药品道具什么的怎么版？"

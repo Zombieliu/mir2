@@ -12874,7 +12874,7 @@ fn overlay_absolute_shop_good_button(
                 top: Val::Px(0.0),
                 ..default()
             },
-            Text::new(good.name.clone()),
+            Text::new(crate::player_text::name(&good.name)),
             crate::crystal_ui::typography::crystal_text_font(9.0),
             TextColor(Color::WHITE),
             TextLayout::new(Justify::Left, LineBreak::NoWrap),
@@ -12887,7 +12887,7 @@ fn overlay_absolute_shop_good_button(
                 top: Val::Px(14.0),
                 ..default()
             },
-            Text::new(good.price_label()),
+            Text::new(crate::player_text::text(&good.price_label())),
             crate::crystal_ui::typography::crystal_text_font(9.0),
             TextColor(Color::WHITE),
             TextLayout::new(Justify::Left, LineBreak::NoWrap),
@@ -16004,7 +16004,7 @@ fn render_shop(
     }
     overlay_text_at(
         parent,
-        &format!("Gold {}", inventory.gold),
+        &crate::player_text::text(&format!("Gold {}", inventory.gold)),
         CrystalRect::new(10.0, 8.0, 150.0, 16.0),
         10.0,
         GOLD,
@@ -17512,7 +17512,7 @@ mod tests {
             world.query_filtered::<(&CrystalItemHint, Option<&OverlayButton>), With<Button>>();
         let (hint, action) = query
             .iter(world)
-            .find(|(hint, _)| hint.0.plain_text().contains("Wooden Sword"))
+            .find(|(hint, _)| hint.0.plain_text().contains("木剑"))
             .expect("occupied inventory cell stays hoverable while its action is disabled");
         assert!(hint.0.source_complete);
         assert!(hint.0.plain_text().contains("Weapon"));
@@ -17560,7 +17560,7 @@ mod tests {
             world.query_filtered::<(&CrystalItemHint, Option<&OverlayButton>), With<Button>>();
         let (hint, action) = query
             .iter(world)
-            .find(|(hint, _)| hint.0.plain_text().contains("Small HP Drug (5)"))
+            .find(|(hint, _)| hint.0.plain_text().contains("小型红药 (5)"))
             .expect("concurrent warehouse bag must remain a rich item hover target");
         assert!(hint.0.source_complete);
         assert!(hint.0.plain_text().contains("Potion"));
@@ -17782,9 +17782,9 @@ mod tests {
             let (text, node) = query.single(world).expect("count label");
             (text.0.clone(), node.left, node.top)
         };
-        assert_eq!(name, "Wooden Sword");
+        assert_eq!(name, "木剑");
         assert_eq!((name_left, name_top), (Val::Px(44.0), Val::Px(0.0)));
-        assert_eq!(price, "Price: 50 gold");
+        assert_eq!(price, "价格：50 金币");
         assert_eq!((price_left, price_top), (Val::Px(44.0), Val::Px(14.0)));
         assert_eq!(count, "3");
         assert_eq!((count_left, count_top), (Val::Px(23.0), Val::Px(17.0)));

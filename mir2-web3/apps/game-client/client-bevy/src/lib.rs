@@ -48,6 +48,10 @@ pub mod quest_hunt_regions;
 #[cfg(feature = "native-ui")]
 pub mod quest_practice;
 #[cfg(feature = "native-ui")]
+pub mod quest_supplies;
+#[cfg(feature = "native-ui")]
+pub mod player_text;
+#[cfg(feature = "native-ui")]
 pub mod quest_journey;
 #[cfg(feature = "native-ui")]
 pub mod quest_model;

@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-28 newcomer supply/localization candidate: stock-aware class supplies,
+> ordinary vendor navigation, safe NPC approaches and Chinese quest/practice/
+> shop presentation are implemented. V2 purchases require fresh receipts and
+> preserve one-time rewards. Shared 1100/native 749/Node 166, release build and
+> explicit GPU fixture pass. Three offline screenshots establish layout only.
+> These onboarding conveniences add no original-Crystal parity percentage;
+> fresh caster routes, complete localization and player acceptance remain open.
+> [Evidence](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
+
 > 2026-09-24 human onboarding checkpoint: Warrior 0–30 is accepted by the
 > player; Wizard/Taoist journeys and sustainable supply budgets remain open.
 > This class-scoped newcomer acceptance does not alter original Crystal

@@ -926,7 +926,7 @@ fn auto_path_step_blocked(
         || movement.step_was_rejected(origin, direction, WorldPointerMovementMode::Run)
         || entity_blocks_movement(entities, presentation, self_object_id, destination)
         || map_file_name.is_some_and(|map_file_name| {
-            crate::map_parser::map_cell_blocks_movement(map_file_name, destination.0, destination.1)
+            crate::map_parser::map_cell_blocks_player_movement(map_file_name, destination.0, destination.1)
                 == Some(true)
         })
 }
@@ -1086,7 +1086,7 @@ fn movement_step_blocked(
         let point = movement_target(origin, direction, step);
         entity_blocks_movement(entities, presentation, self_object_id, point)
             || map_file_name.is_some_and(|map_file_name| {
-                crate::map_parser::map_cell_blocks_movement(map_file_name, point.0, point.1)
+                crate::map_parser::map_cell_blocks_player_movement(map_file_name, point.0, point.1)
                     == Some(true)
             })
     })
@@ -1359,9 +1359,14 @@ fn begin_quest_route_navigation(
     now_ms: f64,
 ) -> Result<(i32, i32), &'static str> {
     if !quest_route_matches_current_map(intent, big_map) {
-        return Err(if matches!(intent.target, QuestRouteTarget::Entrance) {
-            "入口导航已过期；请按当前地图重新选择。"
-        } else { "狩猎区域导航已过期；请按当前地图重新选择。" });
+        return Err(match intent.target {
+            QuestRouteTarget::Entrance => "入口导航已过期；请按当前地图重新选择。",
+            QuestRouteTarget::Supply { .. } => "补给导航已过期；请按当前地图重新选择。",
+            QuestRouteTarget::HuntRegion { .. } => "狩猎区域导航已过期；请按当前地图重新选择。",
+        });
+    }
+    if matches!(intent.target, QuestRouteTarget::Supply { .. }) && !intent.matches_supply_destination() {
+        return Err("补给地点已更新，请重新选择商店。");
     }
     if matches!(intent.target, QuestRouteTarget::HuntRegion { .. })
         && (pinned_primary.is_some_and(|primary| primary != intent.quest_index)
@@ -1389,10 +1394,14 @@ fn begin_quest_route_navigation(
     );
     let destination = (intent.x, intent.y);
     let hunt_area = match intent.target {
-        QuestRouteTarget::Entrance => None,
+        QuestRouteTarget::Entrance | QuestRouteTarget::Supply { .. } => None,
         QuestRouteTarget::HuntRegion { radius, .. } => Some(big_map_input::HuntArea { center: destination, radius }),
     };
-    let steps = if let Some(area) = hunt_area {
+    let supply_area = if let QuestRouteTarget::Supply { vendor } = intent.target {
+        vendor.route(intent.map_index).filter(|route| !route.is_entrance)
+            .map(|_| big_map_input::HuntArea { center: destination, radius: 2 })
+    } else { None };
+    let steps = if let Some(area) = hunt_area.or(supply_area) {
         big_map_input::plan_hunt_region(movement, entities, presentation, self_id, map_file, origin, area)?
     } else {
         big_map_input::plan(movement, entities, presentation, self_id, map_file, origin, destination)?
@@ -1422,10 +1431,12 @@ fn begin_quest_route_navigation(
     movement.map_auto_path = Some(big_map_input::MapRoute {
         map_file: map_file.to_owned(),
         map_index: intent.map_index,
+        reset_epoch: intent.reset_epoch,
         origin,
         destination,
         steps,
         hunt_area,
+        supply_area,
     });
     Ok(destination)
 }
@@ -1802,7 +1813,10 @@ pub fn mouse_world_interaction_system(
             .is_some_and(|(ui, map)| minimap_input::contains(window, ui, map, mini_map_view.as_deref()));
     if movement.map_auto_path.as_ref().is_some_and(|route| {
         presentation.current_map_file_name() != Some(route.map_file.as_str())
-            || big_map.as_deref().and_then(|model| model.current_map_index) != Some(route.map_index)
+            || !big_map.as_deref().is_some_and(|model| {
+                model.current_map_index == Some(route.map_index)
+                    && model.reset_epoch == route.reset_epoch
+            })
     }) {
         movement.stop_auto_path(now_ms, "mapChanged");
         if let Some(state) = quest_ui_state.as_deref_mut() {
@@ -1929,7 +1943,11 @@ pub fn mouse_world_interaction_system(
             if let Some(queue) = queue.as_deref_mut() {
                 queue.clear_attack_intents();
             }
-            let result = begin_quest_route_navigation(
+            let stale_supply = matches!(intent.target, QuestRouteTarget::Supply { vendor }
+                if !quest_ui_state.as_deref().is_some_and(|state| state.supply_open && state.supply_vendor == Some(vendor)));
+            let result = if stale_supply {
+                Err("补给选择已变更，请重新选择商店。")
+            } else { begin_quest_route_navigation(
                 &mut movement,
                 &entities,
                 presentation,
@@ -1939,7 +1957,7 @@ pub fn mouse_world_interaction_system(
                 quest_tracker.as_deref(),
                 quest_ui_state.as_deref().and_then(|state| state.pinned_primary_quest_index),
                 now_ms,
-            );
+            ) };
             crate::movement_trace::record(serde_json::json!({
                 "type": "questRouteNavigation", "atMs": now_ms,
                 "questIndex": intent.quest_index, "mapIndex": intent.map_index,
@@ -2207,10 +2225,12 @@ pub fn mouse_world_interaction_system(
             Ok(big_map_input::MapRoute {
                 map_file: map_file.to_owned(),
                 map_index,
+                reset_epoch: model.reset_epoch,
                 origin,
                 destination,
                 steps,
                 hunt_area: None,
+                supply_area: None,
             })
         })();
         match request {

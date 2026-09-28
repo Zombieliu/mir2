@@ -16,10 +16,14 @@ pub(super) struct HuntArea {
 pub(super) struct MapRoute {
     pub map_file: String,
     pub map_index: i32,
+    pub reset_epoch: u64,
     pub origin: (i32, i32),
     pub destination: (i32, i32),
     pub steps: Vec<(i32, i32)>,
     pub hunt_area: Option<HuntArea>,
+    // An NPC approach can choose another free nearby cell after an actor
+    // occupies its first endpoint, without acquiring hunting-arrival semantics.
+    pub supply_area: Option<HuntArea>,
 }
 
 pub(super) fn image_position(window: &Window, model: &BigMapModel) -> Option<(f32, f32)> {
@@ -185,7 +189,8 @@ pub(super) fn plan(
 ) -> Result<Vec<(i32, i32)>, &'static str> {
     let map = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。");
     let map = map?;
-    if map.cell_blocks_movement(destination.0, destination.1) {
+    let collision = map.player_movement_collision(map_file);
+    if collision.cell_blocks_movement(destination.0, destination.1) {
         return Err("目标位置有障碍，无法到达。");
     }
     if entity_blocks_movement(entities, Some(presentation), self_id, destination) {
@@ -197,7 +202,7 @@ pub(super) fn plan(
         origin,
         destination,
         |from, to| {
-            map.cell_blocks_movement(to.0, to.1)
+            collision.cell_blocks_movement(to.0, to.1)
                 || auto_path_step_blocked(
                     movement,
                     entities,
@@ -221,14 +226,15 @@ pub(super) fn plan_hunt_region(
     area: HuntArea,
 ) -> Result<Vec<(i32, i32)>, &'static str> {
     let map = crate::map_parser::load_map(map_file).ok_or("当前地图的寻路数据尚未加载。")?;
+    let collision = map.player_movement_collision(map_file);
     if chebyshev_distance(origin, area.center) <= area.radius
-        && (map.cell_blocks_movement(origin.0, origin.1)
+        && (collision.cell_blocks_movement(origin.0, origin.1)
             || entity_blocks_movement(entities, Some(presentation), self_id, origin))
     {
         return Err("当前位置被占用，无法确认到达狩猎区域。");
     }
     search_region(i32::from(map.width), i32::from(map.height), origin, area.center, area.radius,
-        |from, to| map.cell_blocks_movement(to.0, to.1)
+        |from, to| collision.cell_blocks_movement(to.0, to.1)
             || auto_path_step_blocked(movement, entities, Some(presentation), self_id, None, from, to))
 }
 
@@ -272,7 +278,7 @@ pub(super) fn advance(
     }
     let map_file = route.map_file.clone();
     let destination = route.destination;
-    let steps = if let Some(area) = route.hunt_area {
+    let steps = if let Some(area) = route.hunt_area.or(route.supply_area) {
         plan_hunt_region(movement, entities, presentation, self_id, &map_file, origin, area)?
     } else {
         plan(movement, entities, presentation, self_id, &map_file, origin, destination)?

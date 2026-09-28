@@ -1,5 +1,14 @@
 # Agent Orchestration
 
+> 2026-09-28 caster-supply candidate: Chinese newcomer quest/supply UI now
+> checks eligible carried stock and offers class-aware ordinary vendor routes.
+> V2 departure checks cover MP/poison and receipted minimum-first purchases.
+> Shared 1100/native 749/Node 166, the native release build and an explicit
+> offline GPU fixture pass. Three screenshots verify layout, not authenticated
+> gameplay. Warrior acceptance is retained; fresh caster 0–30/save/supply gates
+> and legacy English prose/UI remain open. No save edits or global parity claim.
+> [Evidence](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
+
 > 2026-09-24 player acceptance: the user reports Warrior 0–30 gameplay passed
 > on the current practice/combat candidate. Wizard and Taoist remain open.
 > Before their independent routes, close class-specific supply guidance and

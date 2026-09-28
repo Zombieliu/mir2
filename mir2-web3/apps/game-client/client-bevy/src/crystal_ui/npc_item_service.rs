@@ -397,7 +397,7 @@ fn render_contents(
     };
     overlay_text_at(
         parent,
-        &info,
+        &crate::player_text::text(&info),
         CrystalRect::new(30.0, 10.0, 140.0, 20.0),
         10.0,
         TEXT,
@@ -422,7 +422,7 @@ fn render_contents(
                     ));
                 });
         } else {
-            overlay_text_at(parent, &item.name, ITEM, 10.0, TEXT);
+            overlay_text_at(parent, &crate::player_text::name(&item.name), ITEM, 10.0, TEXT);
         }
     }
 
@@ -986,7 +986,7 @@ mod tests {
             (confirm.left, confirm.top, confirm.width, confirm.height),
             (Val::Px(114.0), Val::Px(62.0), Val::Px(48.0), Val::Px(25.0))
         );
-        assert!(labels.iter().any(|text| text == "Repair: 188 gold"));
+        assert!(labels.iter().any(|text| text == "修理：188 金币"));
         assert!(controls.iter().filter(|(action, _)| {
             matches!(
                 action,
@@ -1024,7 +1024,7 @@ mod tests {
         app.update();
         let world = app.world_mut();
         let labels: Vec<_> = world.query::<&Text>().iter(world).map(|text| text.0.clone()).collect();
-        assert!(labels.iter().any(|text| text == "Quote unavailable"));
+        assert!(labels.iter().any(|text| text == "暂无报价"));
     }
 
     #[test]

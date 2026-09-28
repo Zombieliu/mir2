@@ -1363,19 +1363,20 @@ fn added_colour(value: i32) -> CrystalItemTooltipColour {
     }
 }
 
-fn display_name(item: &ItemModel) -> &str {
-    if item.name.is_empty() {
+fn display_name(item: &ItemModel) -> String {
+    let source = if item.name.is_empty() {
         item.key.as_str()
     } else {
         item.name.as_str()
-    }
+    };
+    crate::player_text::name(source)
 }
 
 fn user_item_friendly_name(item: &ItemModel, user: Option<&CrystalUserItemModel>) -> String {
     let name = display_name(item);
     match user.map(|user| user.count).filter(|count| *count > 1) {
         Some(count) => format!("{name} ({count})"),
-        None => name.to_owned(),
+        None => name,
     }
 }
 
@@ -1389,7 +1390,7 @@ fn user_item_weight(info: &CrystalItemInfoModel, user: Option<&CrystalUserItemMo
 }
 
 fn socket_friendly_name(info: &CrystalItemInfoModel, count: u16) -> String {
-    let name = crystal_info_friendly_name(&info.name);
+    let name = crate::player_text::name(&crystal_info_friendly_name(&info.name));
     if count > 1 {
         format!("{name} ({count})")
     } else {
@@ -1688,6 +1689,32 @@ mod tests {
     }
 
     #[test]
+    fn localized_item_names_keep_instance_count_refine_prefix_and_source_identity() {
+        let mut item = potion();
+        item.name = "(MP)DrugSmall".to_owned();
+        item.tooltip_source.as_mut().unwrap().user_item.as_mut().unwrap().refine_added = 1;
+        let before = item.clone();
+        let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
+        assert_eq!(document.sections[0].lines[0].text, "(*)小型蓝药 (5)");
+        assert_eq!(item, before, "display translation cannot rewrite carried item data");
+
+        let mut socket = CrystalItemInfoModel {
+            name: "Amulet[Practice]12".to_owned(),
+            ..Default::default()
+        };
+        assert_eq!(socket_friendly_name(&socket, 100), "护身符 (100)");
+        assert_eq!(socket_friendly_name(&socket, 1), "护身符");
+        assert_eq!(socket.name, "Amulet[Practice]12");
+        socket.name = "CustomItem".to_owned();
+        assert_eq!(socket_friendly_name(&socket, 2), "CustomItem (2)");
+
+        item.tooltip_source = None;
+        item.name.clear();
+        item.key = "GreenPoison".to_owned();
+        assert_eq!(crystal_item_tooltip_document(&item, &PlayerStats::default()).sections[0].lines[0].text, "绿毒粉");
+    }
+
+    #[test]
     fn common_potion_follows_crystal_section_order_and_instance_count_weight() {
         let document = crystal_item_tooltip_document(&potion(), &PlayerStats::default());
         assert!(document.source_complete);
@@ -1706,7 +1733,7 @@ mod tests {
         );
         assert_eq!(
             document.plain_text(),
-            "Small HP Drug (5)\nPotion\nW: 5\nMax HP + 30\nSelling Price : 100 Gold\nMax Combine Count : 20\nShift + Left click to split the stack"
+            "小型红药 (5)\nPotion\nW: 5\nMax HP + 30\nSelling Price : 100 Gold\nMax Combine Count : 20\nShift + Left click to split the stack"
         );
         assert!(!document.plain_text().contains("Quantity"));
     }
@@ -1836,7 +1863,7 @@ mod tests {
         let document = crystal_item_tooltip_document(&item, &player);
         assert_eq!(
             document.plain_text(),
-            "Wooden Sword\nCommon\nWeapon\nW: 4  Durability: 3/4\nDC + 2~5 (+1)\nRequired Level : 5\nSelling Price : 25 Gold"
+            "木剑\nCommon\nWeapon\nW: 4  Durability: 3/4\nDC + 2~5 (+1)\nRequired Level : 5\nSelling Price : 25 Gold"
         );
         let required = document
             .sections

@@ -172,6 +172,95 @@ impl ParsedMap {
         };
         (cell.back_image & 0x2000_0000) != 0 || (cell.front_image as u16 & 0x8000) != 0
     }
+
+    /// Reuse the manifest lookup across a full-map route search. The raw map
+    /// stays immutable; only an ordinary player entrance can exempt its cell.
+    pub(crate) fn player_movement_collision(&self, map_file_name: &str) -> PlayerMovementCollision<'_> {
+        let entrances = map_cache_key(map_file_name)
+            .and_then(|key| ordinary_player_entrances().get(&key));
+        PlayerMovementCollision { map: self, entrances }
+    }
+}
+
+struct OrdinaryEntranceDestination {
+    map_file_name: String,
+    x: i32,
+    y: i32,
+    // Map geometry and the bundled movement manifest are immutable. A missing
+    // local map is not cached, so a subsequently available pack can be retried.
+    valid_landing: OnceLock<bool>,
+}
+
+impl OrdinaryEntranceDestination {
+    fn has_valid_landing(&self) -> bool {
+        if let Some(valid) = self.valid_landing.get() {
+            return *valid;
+        }
+        let Some(map) = load_map(&self.map_file_name) else {
+            return false;
+        };
+        let valid = !map.cell_blocks_movement(self.x, self.y);
+        let _ = self.valid_landing.set(valid);
+        valid
+    }
+}
+
+type OrdinaryEntranceCells = HashMap<(i32, i32), Vec<OrdinaryEntranceDestination>>;
+
+/// Static collision for a player's ordinary Walk/Run, with the same source-cell
+/// exemption used by the server. It does not authorize a transfer or bypass
+/// occupancy; the input controller and the Zone retain those checks.
+pub(crate) struct PlayerMovementCollision<'a> {
+    map: &'a ParsedMap,
+    entrances: Option<&'a OrdinaryEntranceCells>,
+}
+
+impl PlayerMovementCollision<'_> {
+    pub(crate) fn cell_blocks_movement(&self, x: i32, y: i32) -> bool {
+        if !self.map.cell_blocks_movement(x, y) {
+            return false;
+        }
+        if x < 0 || y < 0 || x >= i32::from(self.map.width) || y >= i32::from(self.map.height) {
+            return true;
+        }
+        !self.entrances
+            .and_then(|entrances| entrances.get(&(x, y)))
+            .is_some_and(|destinations| destinations.iter().any(OrdinaryEntranceDestination::has_valid_landing))
+    }
+}
+
+fn build_ordinary_player_entrances(
+    maps: &[mir2_game_data::CrystalRespawnMap],
+) -> HashMap<String, OrdinaryEntranceCells> {
+    let by_index = maps.iter().map(|map| (map.map_index, map)).collect::<HashMap<_, _>>();
+    let mut result = HashMap::<String, OrdinaryEntranceCells>::new();
+    for map in maps {
+        let Some(source_key) = map_cache_key(&map.map_file_name) else { continue; };
+        for movement in &map.movements {
+            // Mirror valid direct server movements, while refusing conditional
+            // conquest edges because the client has no authority to grant them.
+            if movement.need_hole || movement.need_move || movement.conquest_index != 0
+                || (movement.destination.x == 0 && movement.destination.y == 0)
+            {
+                continue;
+            }
+            let Some(target) = by_index.get(&movement.map_index) else { continue; };
+            result.entry(source_key.clone()).or_default()
+                .entry((movement.source.x, movement.source.y)).or_default()
+                .push(OrdinaryEntranceDestination {
+                    map_file_name: target.map_file_name.clone(),
+                    x: movement.destination.x,
+                    y: movement.destination.y,
+                    valid_landing: OnceLock::new(),
+                });
+        }
+    }
+    result
+}
+
+fn ordinary_player_entrances() -> &'static HashMap<String, OrdinaryEntranceCells> {
+    static ENTRANCES: OnceLock<HashMap<String, OrdinaryEntranceCells>> = OnceLock::new();
+    ENTRANCES.get_or_init(|| build_ordinary_player_entrances(&mir2_game_data::crystal_respawn_manifest_ref().maps))
 }
 
 fn parsed_map_cache() -> &'static Mutex<ParsedMapCache> {
@@ -1476,6 +1565,15 @@ pub fn map_cell_blocks_movement(map_file_name: &str, x: i32, y: i32) -> Option<b
     Some(map.cell_blocks_movement(x, y))
 }
 
+/// Player movement must be able to enter an authored ordinary doorway even
+/// when its art cell is flagged as a wall (for example Bichon 399,225).
+/// Out-of-bounds cells, arbitrary walls, conditional entrances and invalid
+/// landing cells remain blocked. This never returns a teleport instruction.
+pub fn map_cell_blocks_player_movement(map_file_name: &str, x: i32, y: i32) -> Option<bool> {
+    let map = load_map(map_file_name)?;
+    Some(map.player_movement_collision(map_file_name).cell_blocks_movement(x, y))
+}
+
 /// Validate and normalize the map cache key before touching the filesystem.
 /// This mirrors `find_map_file`'s path policy, but turns equivalent `0`,
 /// `0.map`, and `0.map.gz` payload spellings into one retained parse.
@@ -1497,6 +1595,10 @@ pub fn has_local_map_atlas() -> bool {
         && find_map_atlas_manifest().is_some()
         && find_native_keyed_manifest().is_some()
 }
+
+#[cfg(test)]
+#[path = "map_player_movement_tests.rs"]
+mod player_movement_tests;
 
 #[cfg(test)]
 mod tests {

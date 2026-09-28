@@ -4,7 +4,8 @@ import { interactQuest } from './protocol-quest-actions.mjs';
 import { createNavigator, reviveInTown, selfPlayer } from './protocol-play.mjs';
 import { createMapTraveler } from './protocol-travel.mjs';
 import { prepareLoadout, combatAction, combatApproachRange, meleeCombatAction, useSupplies } from './protocol-loadout.mjs';
-import { purchaseV2BasicHpPotion, equipHeldAmulet, moveHeldBeltItemToInventory, restockInVillage, townTeleportCount, useTownTeleport } from './protocol-supplies.mjs';
+import { purchaseV2BasicHpPotion, equipHeldAmulet, moveHeldBeltItemToInventory, restockInVillage, restockV2Supplies, townTeleportCount, useTownTeleport } from './protocol-supplies.mjs';
+import { v2SupplyPolicy } from './newcomer-v2-supply-policy.mjs';
 import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
 import { amuletStock, hpDrugCount } from './protocol-survival.mjs';
@@ -407,7 +408,7 @@ export async function runNewcomerV2Journey({ client, className, gender, report, 
           // potions. Complete the ordinary departure check before map travel
           // or practice can issue a combat command.
           if (typeof survival.ensureReady === 'function') {
-            const readiness = await survival.ensureReady(boundedClient, quest, navigate);
+            const readiness = await survival.ensureReady(boundedClient, quest, navigate, { travel });
             if (readiness?.status !== 'ready') {
               throw new V2Pause('awaitingSafeSupplies', quest.questId,
                 String(readiness?.message ?? `q${quest.questId} needs ordinary travel supplies before combat`));
@@ -641,11 +642,9 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
     }
     if (String(client.snapshot?.mapFileName ?? '') !== '0') await travel('0');
     checkDeadline();
-    const readiness = await restockInVillage(client, navigate, {
-      targetHp: 24, lowStockHp: 12,
-      targetMp: 24, lowStockMp: 12,
-      targetAmulet: 100, lowStockAmulet: 100,
-    });
+    const policy = v2SupplyPolicy(client.snapshot, quest, className);
+    policy.amulet.minimum = 100;
+    const readiness = await restockV2Supplies(client, navigate, { policy, travel });
     const held = Number(readiness?.after?.amulet ?? readiness?.stock?.amulet ?? 0);
     if (!['restocked', 'sufficient'].includes(readiness?.status) || held < 100) {
       throw new V2Pause('awaitingWoomaAmulets', quest.questId,
@@ -719,12 +718,12 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // the same quest loop. Recheck real potions and escape scrolls before
       // its next ordinary map transfer, not only at quest acceptance.
       beforeTravel: async (owner, destination) => {
-        if (!wizardCaveQuest ||
+        if (!['Wizard', 'Taoist'].includes(className) ||
             String(owner.snapshot?.mapFileName ?? '') !== '0' ||
             String(destination?.mapFileName ?? '') === '0' ||
             typeof survival.ensureReady !== 'function') return;
         checkDeadline();
-        const readiness = await survival.ensureReady(owner, quest, navigate);
+        const readiness = await survival.ensureReady(owner, quest, navigate, { travel });
         if (readiness?.status !== 'ready') {
           throw new V2Pause('awaitingSafeSupplies', quest.questId,
             String(readiness?.message ?? `q${quest.questId} needs real supplies before cave travel`));

@@ -13,6 +13,7 @@ import { expectedItemRewards, verifyItemRewards } from './protocol-rewards.mjs';
 import { prepareLoadout, combatAction, combatApproachRange, startEmergencyHpRecovery, useClassRecovery, useSupplies } from './protocol-loadout.mjs';
 import {
   restockInVillage,
+  restockV2Supplies,
   createRandomTeleportEmergencyEscape,
   equipHeldAmulet,
   randomTeleportCount,
@@ -22,6 +23,7 @@ import {
   journeyWeaponFundingGold,
   hpMediumDrugCount,
 } from './protocol-supplies.mjs';
+import { createV2SupplyReadiness } from './newcomer-v2-supply-policy.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
 import { loadV2FunctionalRecheckLedger, loadV2RecoveryLedger, persistV2FunctionalRecheckLedger, primeV2RunReport } from './newcomer-v2-recovery-ledger.mjs';
 import { claimAvailableMilestones, JOURNEY_MILESTONES } from './protocol-milestones.mjs';
@@ -191,7 +193,7 @@ try {
   await client.wait(() => client.snapshot?.entities?.some(e => e.objectId === client.snapshot.playerObjectId && e.name === credentials.name), 'personal snapshot', bootstrapTimeoutMs);
   report.bootstrapPassed = true;
   if (isNewcomerV2Run) {
-    const { runNewcomerV2Journey, practicePlan } = await import('./protocol-newcomer-v2.mjs');
+    const { runNewcomerV2Journey } = await import('./protocol-newcomer-v2.mjs');
     // V2 uses the same public, receipted RandomTeleport route as the ordinary
     // controller. It is unavailable without a live stack and `useRandomTeleport`
     // proves both item consumption and an authoritative relocation.
@@ -227,55 +229,13 @@ try {
       },
       sustain: (owner, thresholds) => useSupplies(owner, thresholds),
       recoverAfterUnsafeRetreat: owner => useSupplies(owner, { hpThreshold: 0.85, mpThreshold: 0.35 }),
-      ensureReady: async (owner, quest, navigateNear) => {
-        const hpRatio = () => Number(owner.snapshot?.playerHp ?? 0) /
-          Math.max(1, Number(owner.snapshot?.playerMaxHp ?? 1));
-        const needsAmulet = () => className === 'Taoist' && amuletStock(owner.snapshot) < 4 &&
-          practicePlan(owner.snapshot, quest, className).some(step =>
-            step.kind === 'summon' || (step.kind === 'spell' && step.spell === 'SoulFireBall'));
-        const needsWizardEscapeStock = () => className === 'Wizard' &&
-          Number(quest.questId) >= 2110010 && Number(quest.questId) <= 2110021 &&
-          townTeleportCount(owner.snapshot) < 2;
-        if (hpRatio() >= 0.35 && hpDrugCount(owner.snapshot) >= minimumJourneyHpStock &&
-            !needsAmulet() && !needsWizardEscapeStock()) {
-          return { status: 'ready' };
-        }
-        if (String(owner.snapshot?.mapFileName ?? '') !== '0') {
-          if (townTeleportCount(owner.snapshot) <= 0) {
-            return { status: 'blocked', message: `q${quest.questId} cannot begin combat critically undersupplied outside town without an ordinary TownTeleport` };
-          }
-          await useTownTeleport(owner);
-          if (String(owner.snapshot?.mapFileName ?? '') !== '0') {
-            return { status: 'blocked', message: `q${quest.questId} TownTeleport lacked an authoritative village arrival` };
-          }
-        }
-        const restock = await restockInVillage(owner, navigateNear, {
-          targetHp: 24, targetMp: 12, targetAmulet: 6, lowStock: minimumJourneyHpStock, reserveGold: 0,
-          ...(className === 'Wizard' && Number(quest.questId) >= 2110010 &&
-            Number(quest.questId) <= 2110021 ? { emergencyTownTeleportCount: 2 } : {}),
-        });
-        if (!['restocked', 'sufficient'].includes(restock.status) ||
-            hpDrugCount(owner.snapshot) < minimumJourneyHpStock || needsAmulet() ||
-            needsWizardEscapeStock()) {
-          return { status: 'blocked', message: `q${quest.questId} needs real HP potions and class casting materials before combat (${restock.status})` };
-        }
-        if (hpRatio() < 0.35) {
-          await useSupplies(owner, { hpThreshold: 0.65, mpThreshold: 0.35 });
-          if (hpRatio() < 0.35) {
-            // Small medicines restore over server ticks. A same-packet HP
-            // check can pause a safe, stocked character before that ordinary
-            // recovery has had any chance to apply.
-            try {
-              await waitForPassiveHealthRecovery(owner, { requiredRatio: 0.35, timeoutMs: 30_000 });
-            } catch {
-              return { status: 'blocked', message: `q${quest.questId} remains below safe departure HP after ordinary supplies` };
-            }
-          }
-        }
-        return hpRatio() >= 0.35
-          ? { status: 'ready' }
-          : { status: 'blocked', message: `q${quest.questId} remains below safe departure HP after ordinary supplies` };
-      },
+      ensureReady: createV2SupplyReadiness({
+        className,
+        restock: restockV2Supplies,
+        useTownTeleport,
+        useSupplies,
+        waitForHealth: waitForPassiveHealthRecovery,
+      }),
     };
     const result = await runNewcomerV2Journey({
       client,

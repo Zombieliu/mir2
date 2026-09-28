@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-28 Chinese newcomer/supply flow: 22 main quests, four growth claims,
+> chapter/practice text, quest controls and related shop/item labels display
+> Chinese without changing source IDs. Stock, price estimates, capacity and
+> ordinary vendor routes are visible. Shared 1100/native 749/Node 166 tests and
+> an explicit offline GPU fixture pass; three screenshots/nine cases check
+> actual bounds and row separation. Legacy prose, world labels and older UI
+> can still be English. Live caster 0–30/native player acceptance remain open.
+> [Screenshots and limits](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
+
 > 2026-09-21 multi-task guidance: one manually overridable primary task,
 > full counters, nearby/other-map grouping and primary-colored map hunt areas
 > are implemented using source/read-model destinations. Full UI tests 883/883;

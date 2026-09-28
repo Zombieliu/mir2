@@ -2,6 +2,294 @@ use super::*;
 use mir2_client_bevy::big_map::BigMapModel;
 use mir2_client_bevy::chat::ChatModel;
 use mir2_client_bevy::quest_ui::QuestUiState;
+use mir2_client_bevy::quest_supplies::SupplyVendor;
+
+fn poison_supply_app(file: &str, map_index: i32, origin: (i32, i32)) -> (
+    bevy::prelude::App,
+    std::sync::mpsc::Receiver<GatewayCommand>,
+    QuestRouteNavigationIntent,
+) {
+    let (mut app, receiver, mut intent) = d401_route_app();
+    app.world_mut().resource_mut::<BigMapModel>().set_current_map(map_index);
+    let epoch = app.world().resource::<BigMapModel>().reset_epoch;
+    let route = SupplyVendor::Poison.route(map_index).expect("ordinary poison-vendor route");
+    intent.target = QuestRouteTarget::Supply { vendor: SupplyVendor::Poison };
+    intent.quest_index = 0;
+    intent.map_index = map_index;
+    intent.reset_epoch = epoch;
+    intent.x = route.x;
+    intent.y = route.y;
+    {
+        let mut state = app.world_mut().resource_mut::<QuestUiState>();
+        state.supply_open = true;
+        state.supply_vendor = Some(SupplyVendor::Poison);
+        state.supply_epoch = Some(epoch);
+        state.pinned_primary_quest_index = Some(2_110_021);
+    }
+    {
+        let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+        entities.entities.retain(|entity| entity.kind == EntityKind::SelfPlayer);
+        entities.entities[0].x = origin.0;
+        entities.entities[0].y = origin.1;
+        if file == "0109" {
+            entities.entities.push(EntityModel {
+                object_id: "431".into(), kind: EntityKind::Npc, name: "Specialist_Travis".into(),
+                x: 4, y: 9, level: None, direction: None,
+            });
+        }
+    }
+    app.world_mut().resource_mut::<NativeEntityPresentation>()
+        .observe_packet_payload(serde_json::json!({"mapFileName": file}), 0);
+    (app, receiver, intent)
+}
+
+#[test]
+fn supply_navigation_reaches_both_poison_shop_entrances_and_a_free_npc_neighbor() {
+    for (file, map_index, origin, authored_target, is_entrance) in [
+        ("0", 1, (334, 258), (326, 288), true),
+        ("0108", 4, (8, 12), (4, 15), true),
+        ("0109", 5, (7, 6), (4, 9), false),
+    ] {
+        let (mut app, receiver, intent) = poison_supply_app(file, map_index, origin);
+        assert_eq!((intent.x, intent.y), authored_target);
+        assert!(app.world().resource::<BigMapModel>().current_map().is_none(), "supply navigation needs no open Big Map");
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "the supply-card click must not leak to the world");
+        assert!(!app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.clear_just_pressed(MouseButton::Left);
+            mouse.release(MouseButton::Left);
+        }
+        app.update();
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear();
+        let resolved = app.world().resource::<WorldPointerMovementState>().auto_path_destination
+            .expect("every fixture starts outside the destination range");
+        if is_entrance {
+            assert_eq!(resolved, authored_target, "an entrance requires its exact trigger tile");
+        } else {
+            assert_ne!(resolved, authored_target, "never walk onto the live NPC");
+            assert!(chebyshev_distance(resolved, authored_target) <= 2);
+        }
+
+        let mut arrived = false;
+        for _ in 0..96 {
+            app.update();
+            let command = receiver.try_recv().expect("supply route sends the next ordinary move");
+            assert!(matches!(command, GatewayCommand::Player(PlayerIntent::Walk { .. } | PlayerIntent::Run { .. })),
+                "no debug teleport, map change, interaction or purchase command is allowed: {command:?}");
+            let pending = app.world().resource::<WorldPointerMovementState>().pending.back().unwrap().clone();
+            let (dx, dy) = direction_to_delta(pending.direction);
+            for step in 1..=chebyshev_distance(pending.from, pending.to) {
+                let point = (pending.from.0 + dx * step, pending.from.1 + dy * step);
+                assert_eq!(crate::map_parser::map_cell_blocks_player_movement(file, point.0, point.1), Some(false));
+                if !is_entrance { assert_ne!(point, authored_target, "NPC occupancy is not exempted"); }
+            }
+            app.update();
+            assert!(receiver.try_recv().is_err(), "one authority acknowledgement at a time");
+            {
+                let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+                entities.entities[0].x = pending.to.0;
+                entities.entities[0].y = pending.to.1;
+            }
+            push_test_movement_ack(&app, pending.to.0, pending.to.1, pending.direction);
+            advance_movement_clock(&mut app, 600);
+            if pending.to == resolved {
+                app.update();
+                assert!(receiver.try_recv().is_err());
+                let movement = app.world().resource::<WorldPointerMovementState>();
+                assert!(movement.map_auto_path.is_none());
+                assert!(movement.auto_path_destination.is_none());
+                assert!(movement.hunt_arrival.is_none(), "a vendor is not a hunting objective");
+                assert!(movement.attack_target.is_none());
+                assert_eq!(app.world().resource::<BigMapModel>().current_map_index, Some(map_index),
+                    "arrival does not fabricate the server's next-map acknowledgement");
+                arrived = true;
+                break;
+            }
+        }
+        assert!(arrived, "{file} supply route exceeded its bounded movement budget");
+    }
+}
+
+#[test]
+fn supply_navigation_revalidates_open_card_vendor_and_map_after_pointer_release() {
+    for changed in ["closed", "vendor", "missing-state", "epoch", "map", "scene-map", "quest-id", "coordinate"] {
+        let (mut app, receiver, mut intent) = poison_supply_app("0", 1, (334, 258));
+        if changed == "quest-id" { intent.quest_index = 2_110_021; }
+        if changed == "coordinate" { intent.x += 1; }
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        assert!(!app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        match changed {
+            "closed" => app.world_mut().resource_mut::<QuestUiState>().supply_open = false,
+            "vendor" => app.world_mut().resource_mut::<QuestUiState>().supply_vendor = Some(SupplyVendor::General),
+            "missing-state" => { app.world_mut().remove_resource::<QuestUiState>(); },
+            "epoch" => {
+                let mut map = app.world_mut().resource_mut::<BigMapModel>();
+                map.reset_epoch = map.reset_epoch.wrapping_add(1);
+            }
+            "map" => app.world_mut().resource_mut::<BigMapModel>().set_current_map(4),
+            "scene-map" => app.world_mut().resource_mut::<NativeEntityPresentation>()
+                .observe_packet_payload(serde_json::json!({"mapFileName": "0108"}), 0),
+            _ => (),
+        }
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.clear_just_pressed(MouseButton::Left);
+            mouse.release(MouseButton::Left);
+        }
+        app.update();
+        assert!(receiver.try_recv().is_err(), "rejected {changed} intent must not produce any world command");
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        assert!(movement.map_auto_path.is_none(), "{changed}");
+        assert!(movement.auto_path_destination.is_none(), "{changed}");
+        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty(), "{changed}");
+        if changed != "missing-state" {
+            assert!(app.world().resource::<QuestUiState>().feedback.as_ref().is_some_and(|feedback| feedback.is_error), "{changed}");
+        }
+    }
+}
+
+#[test]
+fn supply_navigation_rejects_forged_room_and_npc_coordinates() {
+    for (file, map_index, origin) in [("0108", 4, (8, 12)), ("0109", 5, (7, 6))] {
+        let (mut app, receiver, mut intent) = poison_supply_app(file, map_index, origin);
+        intent.x += 1;
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        assert!(app.world().resource::<WorldPointerMovementState>().map_auto_path.is_none());
+        assert!(app.world().resource::<QuestUiState>().feedback.as_ref().is_some_and(|feedback| feedback.is_error));
+    }
+}
+
+#[test]
+fn supply_navigation_already_beside_travis_neither_attacks_nor_opens_a_shop_remotely() {
+    let (mut app, receiver, intent) = poison_supply_app("0109", 5, (5, 8));
+    app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+    app.update();
+    assert!(receiver.try_recv().is_err());
+    let movement = app.world().resource::<WorldPointerMovementState>();
+    assert!(movement.map_auto_path.is_none());
+    assert!(movement.attack_target.is_none());
+    assert!(movement.hunt_arrival.is_none());
+    assert!(!app.world().resource::<NpcDialogModel>().is_open);
+    assert!(app.world().resource::<QuestUiState>().feedback.as_ref()
+        .is_some_and(|feedback| !feedback.is_error && feedback.message.contains("已到达")));
+}
+
+#[test]
+fn supply_navigation_reselects_a_free_npc_neighbor_when_its_endpoint_becomes_occupied() {
+    let (mut app, receiver, intent) = poison_supply_app("0109", 5, (8, 6));
+    app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+    app.update();
+    assert!(receiver.try_recv().is_err());
+    let original_destination = app.world().resource::<WorldPointerMovementState>()
+        .map_auto_path.as_ref().unwrap().destination;
+    assert!(chebyshev_distance(original_destination, (4, 9)) <= 2);
+
+    // First take an ordinary acknowledged step. Another player then enters
+    // the selected approach cell while this route is already under way.
+    app.update();
+    assert!(matches!(receiver.try_recv().unwrap(), GatewayCommand::Player(PlayerIntent::Walk { .. })));
+    let first = app.world().resource::<WorldPointerMovementState>().pending.back().unwrap().clone();
+    assert_ne!(first.to, original_destination);
+    {
+        let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+        entities.entities[0].x = first.to.0;
+        entities.entities[0].y = first.to.1;
+        entities.entities.push(EntityModel {
+            object_id: "9999".into(), kind: EntityKind::Player, name: "Other player".into(),
+            x: original_destination.0, y: original_destination.1, level: Some(20), direction: None,
+        });
+    }
+    push_test_movement_ack(&app, first.to.0, first.to.1, first.direction);
+    advance_movement_clock(&mut app, 600);
+
+    let mut replanned_moves = 0;
+    for _ in 0..16 {
+        app.update();
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        if movement.map_auto_path.is_none() {
+            assert!(replanned_moves > 0, "an occupied endpoint must be replaced, not cancel travel");
+            assert!(receiver.try_recv().is_err());
+            assert!(movement.auto_path_destination.is_none());
+            assert!(movement.hunt_arrival.is_none(), "a supply approach is not a hunting arrival");
+            assert!(movement.pending_hunt_route.is_none());
+            assert!(movement.attack_target.is_none());
+            let player = &app.world().resource::<EntityModelSet>().entities[0];
+            assert!(chebyshev_distance((player.x, player.y), (4, 9)) <= 2);
+            assert_ne!((player.x, player.y), original_destination);
+            assert_ne!((player.x, player.y), (4, 9));
+            assert!(!app.world().resource::<NpcDialogModel>().is_open);
+            assert!(!app.world().resource::<QuestUiState>().feedback.as_ref().unwrap().is_error);
+            return;
+        }
+        let route = movement.map_auto_path.as_ref().unwrap();
+        assert_ne!(route.destination, original_destination);
+        assert!(route.hunt_area.is_none());
+        assert!(route.supply_area.is_some());
+        assert_eq!(route.reset_epoch, intent.reset_epoch);
+        let command = receiver.try_recv().expect("replanned supply route continues with an ordinary move");
+        assert!(matches!(command, GatewayCommand::Player(PlayerIntent::Walk { .. } | PlayerIntent::Run { .. })),
+            "no teleport, shop interaction, purchase or attack: {command:?}");
+        let pending = movement.pending.back().unwrap().clone();
+        let (dx, dy) = direction_to_delta(pending.direction);
+        for step in 1..=chebyshev_distance(pending.from, pending.to) {
+            let point = (pending.from.0 + dx * step, pending.from.1 + dy * step);
+            assert_eq!(crate::map_parser::map_cell_blocks_player_movement("0109", point.0, point.1), Some(false));
+            assert_ne!(point, original_destination);
+            assert_ne!(point, (4, 9));
+        }
+        app.update();
+        assert!(receiver.try_recv().is_err(), "replanning still waits for authority ACK");
+        {
+            let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+            entities.entities[0].x = pending.to.0;
+            entities.entities[0].y = pending.to.1;
+        }
+        push_test_movement_ack(&app, pending.to.0, pending.to.1, pending.direction);
+        advance_movement_clock(&mut app, 600);
+        replanned_moves += 1;
+    }
+    panic!("supply replanning exceeded the bounded room-navigation budget");
+}
+
+#[test]
+fn active_supply_navigation_cancels_on_same_map_reset_map_change_or_escape() {
+    for changed in ["same-map-reset", "map", "scene-map", "escape"] {
+        let (mut app, receiver, intent) = poison_supply_app("0109", 5, (8, 6));
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        let route = app.world().resource::<WorldPointerMovementState>().map_auto_path.as_ref().unwrap();
+        assert_eq!(route.reset_epoch, intent.reset_epoch);
+        assert!(route.supply_area.is_some());
+        match changed {
+            "same-map-reset" => {
+                app.world_mut().resource_mut::<BigMapModel>().reset_for_map(5, None);
+                assert_eq!(app.world().resource::<BigMapModel>().current_map_index, Some(5));
+            }
+            "map" => app.world_mut().resource_mut::<BigMapModel>().set_current_map(4),
+            "scene-map" => app.world_mut().resource_mut::<NativeEntityPresentation>()
+                .observe_packet_payload(serde_json::json!({"mapFileName": "0108"}), 0),
+            "escape" => app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Escape),
+            _ => unreachable!(),
+        }
+        app.update();
+        assert!(receiver.try_recv().is_err(), "{changed}: stale supply route emitted movement");
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        assert!(movement.map_auto_path.is_none(), "{changed}");
+        assert!(movement.auto_path_destination.is_none(), "{changed}");
+        assert!(movement.hunt_arrival.is_none(), "{changed}");
+        assert!(movement.attack_target.is_none(), "{changed}");
+    }
+}
 
 fn skeleton_hunt_app(origin: (i32, i32)) -> (
     bevy::prelude::App,

@@ -5,6 +5,7 @@ import {
   equipHeldAmulet,
   randomTeleportCount,
   restockInVillage,
+  restockV2Supplies,
   townTeleportCount,
   useTownTeleport,
   useRandomTeleport,
@@ -12,6 +13,7 @@ import {
   purchaseV2BasicHpPotion,
   warriorWeaponFundingGold,
 } from './protocol-supplies.mjs';
+import { V2_SUPPLY_CONFIG, V2_SUPPLY_ITEMS, v2SupplyPolicy, v2SupplyStock } from './newcomer-v2-supply-policy.mjs';
 
 const HP = 658;
 const HP_MEDIUM = 660;
@@ -222,6 +224,115 @@ function goods() {
     { id: 73, uniqueId: 73, itemIndex: AMULET, name: 'Amulet', price: 25, count: 1 },
   ];
 }
+
+function v2ShopClient(state, options = {}) {
+  const merchantIds = { potions: 20, general: 22, poison: 431 };
+  for (const [key, merchant] of Object.entries(V2_SUPPLY_CONFIG.merchants)) {
+    state.entities.push({ ...merchant, objectId: merchantIds[key], kind: 'npc' });
+  }
+  const rows = kinds => V2_SUPPLY_ITEMS.filter(value => kinds.includes(value.kind)).map(value => ({
+    id: value.itemIndex * 100, uniqueId: value.itemIndex * 100, itemIndex: value.itemIndex, name: value.name,
+    price: value.price, count: 1, requiredLevel: value.minimumLevel,
+  }));
+  return new FakeClient(state, { enforceMerchantOwnership: true, goodsByNpc: {
+    20: rows(['hp', 'mp']), 22: rows(['amulet', 'townTeleport', 'randomTeleport']), 431: rows(['poison']),
+  }, ...options });
+}
+
+test('V2 shops choose medium/large MP by level while retaining real carried small medicine', async () => {
+  for (const [level, expectedIndex, expectedTarget] of [[16, 661, 20], [25, 663, 24]]) {
+    const state = snapshot({ className: 'Wizard', level, gold: 20_000, hp: 4, mp: 3 });
+    state.inventoryItems.push(item(TOWN_TELEPORT, 2, 'TownTeleport'));
+    const client = v2ShopClient(state);
+    const policy = v2SupplyPolicy(client.snapshot, { questId: 2110015 }, 'Wizard');
+    const result = await restockV2Supplies(client, async () => {}, { policy });
+    assert.equal(result.status, 'restocked');
+    assert.equal(v2SupplyStock(client.snapshot).mp, expectedTarget);
+    assert.ok(result.purchases.every(value => value.itemIndex === expectedIndex));
+    assert.equal(client.snapshot.inventoryItems.find(value => value.name === '(MP)DrugSmall').quantity, 3);
+    assert.equal(result.purchases.reduce((sum, value) => sum + value.quantity, 0), expectedTarget - 3);
+  }
+});
+
+test('V2 buys all minima before optional top-ups instead of spending MP/escape money on HP', async () => {
+  const client = v2ShopClient(snapshot({ className: 'Wizard', level: 28, gold: 5600 }));
+  const policy = v2SupplyPolicy(client.snapshot, { questId: 2110020 }, 'Wizard');
+  const result = await restockV2Supplies(client, async () => {}, { policy });
+  assert.equal(result.status, 'restocked');
+  assert.deepEqual(v2SupplyStock(client.snapshot), { hp: 4, mp: 12, amulet: 0, poison: 0, townTeleport: 2, randomTeleport: 0 });
+  assert.equal(client.snapshot.gold, 0);
+  assert.deepEqual(result.purchases.map(value => [value.itemIndex, value.quantity]), [[662, 4], [663, 12], [719, 2]]);
+});
+
+test('V2 Taoist buys real charges at Bull and Travis using normal room travel and receipts', async () => {
+  const state = snapshot({ className: 'Taoist', level: 28, gold: 10_000, hp: 4, mp: 12 });
+  state.knownSkills = [{ spell: 'SoulFireBall' }, { spell: 'Poisoning' }];
+  const client = v2ShopClient(state);
+  const maps = [];
+  const policy = v2SupplyPolicy(client.snapshot, { questId: 2110021 }, 'Taoist');
+  const result = await restockV2Supplies(client, async () => {}, { policy, travel: async map => {
+    maps.push(map); client.receive({ ...client.snapshot, mapFileName: map });
+  } });
+  assert.equal(result.status, 'restocked');
+  assert.equal(v2SupplyStock(client.snapshot).amulet, 100);
+  assert.equal(v2SupplyStock(client.snapshot).poison, 20);
+  assert.equal(client.snapshot.gold, 6700);
+  assert.deepEqual(maps, ['0109', '0', '0109', '0']);
+  assert.ok(result.purchases.some(value => value.merchant === 'Specialist_Travis'));
+  assert.equal(client.snapshot.mapFileName, '0');
+});
+
+test('V2 insufficient gold, excess weight and unconfirmed purchases return blocked', async () => {
+  for (const failure of ['gold', 'weight', 'rejected', 'wrongDebit', 'wrongQuantity']) {
+    const state = snapshot({ className: 'Wizard', level: 28, gold: failure === 'gold' ? 1 : 20_000, hp: 4 });
+    state.inventoryItems.push(item(TOWN_TELEPORT, 2, 'TownTeleport'));
+    if (failure === 'weight') { state.currentWeight = 10; state.maxWeight = 11; }
+    const client = v2ShopClient(state, {
+      rejectBuy: failure === 'rejected', wrongGoldDelta: failure === 'wrongDebit' ? 1 : 0,
+      wrongItemDelta: failure === 'wrongQuantity' ? 1 : 0,
+    });
+    const result = await restockV2Supplies(client, async () => {}, { policy: v2SupplyPolicy(client.snapshot, { questId: 2110015 }, 'Wizard') });
+    assert.equal(result.status, 'blocked', failure);
+    if (['gold', 'weight'].includes(failure)) assert.equal(client.sent.some(value => value.type === 'buyItem'), false);
+    else assert.equal(client.sent.filter(value => value.type === 'buyItem').length, 1);
+  }
+});
+
+test('V2 return travel that consumes the final material never returns restocked', async () => {
+  const state = snapshot({ className: 'Taoist', level: 28, gold: 5000, hp: 4, mp: 12 });
+  state.knownSkills = [{ spell: 'Poisoning' }];
+  const client = v2ShopClient(state);
+  const policy = v2SupplyPolicy(client.snapshot, { questId: 2110015 }, 'Taoist');
+  const result = await restockV2Supplies(client, async () => {}, { policy, travel: async map => {
+    const next = structuredClone(client.snapshot);
+    next.mapFileName = map;
+    if (map === '0') next.inventoryItems = next.inventoryItems.filter(value => value.name !== 'GreenPoison');
+    client.receive(next);
+  } });
+  assert.equal(result.status, 'blocked');
+  assert.equal(v2SupplyStock(client.snapshot).poison, 0);
+  assert.ok(result.missing.some(value => value.kind === 'poison'));
+});
+
+test('V2 optional top-up preserves money when shop travel consumes another material minimum', async () => {
+  const state = snapshot({ className: 'Taoist', level: 28, gold: 10_000, hp: 0, mp: 12, amulet: 100 });
+  state.knownSkills = [{ spell: 'SoulFireBall' }, { spell: 'Poisoning' }];
+  const client = v2ShopClient(state);
+  const policy = v2SupplyPolicy(client.snapshot, { questId: 2110020 }, 'Taoist');
+  const result = await restockV2Supplies(client, async () => {}, { policy, travel: async map => {
+    const next = structuredClone(client.snapshot);
+    next.mapFileName = map;
+    if (map === '0') next.inventoryItems.find(value => value.name === 'Amulet').quantity--;
+    client.receive(next);
+  } });
+  assert.equal(result.status, 'blocked');
+  assert.match(result.reason, /before optional top-up; gold preserved/);
+  assert.equal(v2SupplyStock(client.snapshot).amulet, 99);
+  assert.equal(v2SupplyStock(client.snapshot).hp, 4);
+  assert.equal(client.snapshot.gold, 8940);
+  assert.deepEqual(result.purchases.map(value => [value.itemIndex, value.quantity]), [[662, 4], [710, 4]]);
+  assert.equal(client.sent.filter(value => value.type === 'buyItem').length, 2);
+});
 
 function emergencyGoods() {
   return [...goods(), { id: 71701, uniqueId: 71701, itemIndex: RANDOM_TELEPORT, name: 'RandomTeleport', price: 100, count: 1 }];

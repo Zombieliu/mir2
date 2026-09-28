@@ -56,7 +56,7 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
     }
     if let Some(target) = nearest_quest_monster(tracker, Some(quest.quest_index), entities, map.center_x, map.center_y) {
         return Place::Current {
-            label: format!("{} ({},{}) · {} 格", target.entity.name, target.entity.x, target.entity.y, target.distance),
+            label: format!("{} ({},{}) · {} 格", crate::player_text::name(&target.entity.name), target.entity.x, target.entity.y, target.distance),
             distance: target.distance,
         };
     }
@@ -94,7 +94,7 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
                 return Place::Current {
                     label: format!(
                         "狩猎区域 · {} ({},{}) · {} 格",
-                        region.name, region.center.x, region.center.y, distance
+                        crate::player_text::name(&region.name), region.center.x, region.center.y, distance
                     ),
                     distance,
                 };
@@ -113,7 +113,7 @@ fn authored_other_map(quest_index: i32, current_map: Option<i32>) -> Option<Stri
     let maps = &mir2_game_data::crystal_respawn_manifest_ref().maps;
     let labels = targets.into_iter().filter_map(|target| maps.iter()
         .find(|map| map.map_index == target)
-        .map(|map| map.map_title.as_str()))
+        .map(|map| crate::player_text::name(&map.map_title)))
         .collect::<Vec<_>>();
     (!labels.is_empty()).then(|| labels.join(" / "))
 }
@@ -157,7 +157,7 @@ fn objective_lines(quest: &Quest, class_name: &str) -> Vec<String> {
                 format!("职业练习 {}/{}：{}", o.current, o.target, guide.summary)
             }
         } else {
-            format!("{}  {}/{}", o.text, o.current, o.target)
+            format!("{}  {}/{}", crate::player_text::quest_objective(&o.text), o.current, o.target)
         }
     }).collect()
 }
@@ -223,7 +223,7 @@ fn card_text_height(text: &str) -> f32 {
 }
 
 fn line(parent: &mut ChildSpawnerCommands, text: impl Into<String>, color: Color) {
-    let wrapped = wrap_card_text(&text.into());
+    let wrapped = wrap_card_text(&crate::player_text::text(&text.into()));
     parent.spawn((
         Node { width: Val::Percent(100.0), height: Val::Px(wrapped.len() as f32 * CARD_LINE_HEIGHT),
             flex_shrink: 0.0, ..default() },
@@ -234,7 +234,8 @@ fn line(parent: &mut ChildSpawnerCommands, text: impl Into<String>, color: Color
 }
 
 fn button(parent: &mut ChildSpawnerCommands, text: &str, action: QuestUiButton) {
-    let height = (card_text_height(text) + 6.0).max(25.0);
+    let text = crate::player_text::text(text);
+    let height = (card_text_height(&text) + 6.0).max(25.0);
     parent.spawn((
         Button, action, QuestUiButtonVisual { enabled: true },
         Node { height: Val::Px(height), width: Val::Percent(100.0), padding: UiRect::axes(Val::Px(6.0), Val::Px(3.0)),
@@ -244,7 +245,8 @@ fn button(parent: &mut ChildSpawnerCommands, text: &str, action: QuestUiButton) 
 }
 
 pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, state: &QuestUiState,
-    journey: Option<&JourneyView>, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>, class_name: &str) -> bool {
+    journey: Option<&JourneyView>, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>, class_name: &str,
+    supplies: &crate::quest_supplies::SupplyPlan) -> bool {
     let Some(primary) = primary_quest_index(tracker, state, journey) else { return false; };
     let Some(quest) = tracker.active_quests.iter().find(|q| q.quest_index == primary) else { return false; };
     let nearby = nearby_indices(primary, tracker, entities, map, big_map);
@@ -255,14 +257,14 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
         BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.90)), BorderColor::all(PANEL_HIGHLIGHT),
     )).with_children(|card| {
         if let Some(journey) = journey {
-            line(card, format!("{} · {}", journey.chapter_title, journey.progress_label()), PANEL_TEXT);
+            line(card, format!("{} · {}", crate::player_text::text(&journey.chapter_title), crate::player_text::text(&journey.progress_label())), PANEL_TEXT);
         }
-        line(card, format!("当前任务 · {}", quest.title), PANEL_HIGHLIGHT);
+        line(card, format!("当前任务 · {}", crate::player_text::quest_title(quest.quest_index, &quest.title)), PANEL_HIGHLIGHT);
         for objective in objective_lines(quest, class_name) { line(card, objective, Color::WHITE); }
         let next = journey.and_then(|j| j.next.as_ref()).filter(|s| s.quest_id == primary);
         if quest.status == QuestStatus::ReadyToTurnIn {
             line(card, next.map(|s| s.action.clone()).unwrap_or_else(|| quest.npc_name.as_ref()
-                .map(|n| format!("返回 {n} 交付任务")).unwrap_or_else(|| "打开任务详情查看交付方式".into())), FEEDBACK_OK);
+                .map(|n| format!("返回 {} 交付任务", crate::player_text::name(n))).unwrap_or_else(|| "打开任务详情查看交付方式".into())), FEEDBACK_OK);
         } else if quest.status == QuestStatus::NotStarted {
             line(card, next.map(|s| s.action.as_str()).unwrap_or("查看详情领取任务"), FEEDBACK_OK);
         }
@@ -277,8 +279,8 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
                     None
                 }
                 Place::Route(step) => {
-                    line(card, format!("当前地图 · {} · 当前位置 ({},{})", step.current_map_title, map.center_x, map.center_y), PANEL_TEXT);
-                    line(card, format!("下一步 · 入口 ({},{}) · 进入 {}", step.entrance_x, step.entrance_y, step.next_map_title), FEEDBACK_OK);
+                    line(card, format!("当前地图 · {} · 当前位置 ({},{})", crate::player_text::name(&step.current_map_title), map.center_x, map.center_y), PANEL_TEXT);
+                    line(card, format!("下一步 · 入口 ({},{}) · 进入 {}", step.entrance_x, step.entrance_y, crate::player_text::name(&step.next_map_title)), FEEDBACK_OK);
                     if step.remaining_hops > 1 {
                         line(card, format!("到目标仍需经过 {} 个地图入口", step.remaining_hops), PANEL_TEXT);
                     }
@@ -318,10 +320,11 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
         }
         button(card, "查看任务详情", QuestUiButton::SelectQuest { quest_index: primary });
         button(card, "打开大地图", QuestUiButton::OpenDestinationMap);
+        button(card, &supplies.summary(), QuestUiButton::ToggleSupplies);
         if !nearby.is_empty() { line(card, "附近可顺便完成", PANEL_HIGHLIGHT); }
         for id in &nearby {
             let other = tracker.active_quests.iter().find(|q| q.quest_index == *id).unwrap();
-            button(card, &format!("切换 · {} · {}", other.title, other.progress_label()), QuestUiButton::MakePrimary { quest_index: *id });
+            button(card, &format!("切换 · {} · {}", crate::player_text::quest_title(other.quest_index, &other.title), other.progress_label()), QuestUiButton::MakePrimary { quest_index: *id });
         }
         let mut remote = 0;
         let mut remaining = 0;
@@ -329,7 +332,7 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
             if let Place::Other(label) = place(other, tracker, entities, map, big_map) {
                 if remote < 2 {
                     if remote == 0 { line(card, "其他地图", PANEL_HIGHLIGHT); }
-                    button(card, &format!("{} · {}", other.title, label), QuestUiButton::MakePrimary { quest_index: other.quest_index });
+                    button(card, &format!("{} · {}", crate::player_text::quest_title(other.quest_index, &other.title), label), QuestUiButton::MakePrimary { quest_index: other.quest_index });
                     remote += 1;
                     continue;
                 }
@@ -341,8 +344,78 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
     true
 }
 
+/// Supplies replace the tracker while expanded, so the six inventory rows and
+/// route guidance cannot push quest text into the bottom HUD.
+pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUiState,
+    big_map: Option<&BigMapModel>, supplies: &crate::quest_supplies::SupplyPlan) {
+    let displayed_cost = supplies.rows.iter()
+        .filter(|row| state.supply_vendor.is_none_or(|vendor| row.vendor == vendor))
+        .map(|row| row.shortage().saturating_mul(row.unit_price)).fold(0_u32, u32::saturating_add);
+    parent.spawn((
+        Node { position_type: PositionType::Absolute, left: Val::Px(8.0), top: Val::Px(16.0), width: Val::Px(304.0),
+            flex_direction: FlexDirection::Column, row_gap: Val::Px(3.0), padding: UiRect::all(Val::Px(10.0)),
+            border: UiRect::all(Val::Px(1.0)), ..default() },
+        BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.96)), BorderColor::all(PANEL_HIGHLIGHT),
+    )).with_children(|card| {
+        line(card, "出发补给 · 现有 / 建议", PANEL_HIGHLIGHT);
+        for row in supplies.rows.iter().filter(|row| state.supply_vendor.is_none_or(|vendor| row.vendor == vendor)) {
+            line(card, row.line(), if row.is_low() { FEEDBACK_ERR } else { PANEL_TEXT });
+        }
+        if state.supply_vendor.is_none_or(|vendor| vendor == crate::quest_supplies::SupplyVendor::Potions) {
+            let medicines = if supplies.rows.iter().any(|row| row.label == "蓝药") { "红药、蓝药" } else { "红药" };
+            line(card, format!("当前推荐：{}{medicines}", supplies.potion_size), PANEL_TEXT);
+        }
+        line(card, format!("金币 {} · 补足约 {}", supplies.gold, displayed_cost),
+            if supplies.gold < displayed_cost { FEEDBACK_ERR } else { PANEL_TEXT });
+        if supplies.gold < displayed_cost {
+            line(card, "金币不足：优先急缺品和回城卷。", FEEDBACK_ERR);
+        }
+        if let Some((weight, max)) = supplies.bag_weight {
+            line(card, format!("背包负重 {weight}/{max}"), if weight >= max { FEEDBACK_ERR } else { PANEL_TEXT });
+        }
+        if supplies.bag_full { line(card, "背包已满，可先出售闲置物品。", FEEDBACK_ERR); }
+        if supplies.needs_material_switch { line(card, "火符/召唤用符；施毒用毒粉。", PANEL_TEXT); }
+        for vendor in crate::quest_supplies::SupplyVendor::ALL {
+            if state.supply_vendor.is_some() { break; }
+            if vendor == crate::quest_supplies::SupplyVendor::Poison
+                && !supplies.rows.iter().any(|row| row.vendor == vendor) { continue; }
+            button(card, &format!("购买 · {}", vendor.goods()), QuestUiButton::SelectSupplyVendor(vendor));
+        }
+        if let Some(vendor) = state.supply_vendor {
+            if let Some(destination) = vendor.destination() {
+                line(card, format!("{} ({},{})", vendor.label(), destination.x, destination.y), PANEL_HIGHLIGHT);
+            }
+            if let Some((big_map, route)) = big_map.and_then(|model| vendor.route(model.current_map_index?).map(|route| (model, route))) {
+                if let Some(next) = &route.next_map_title {
+                    line(card, format!("下一段：{}入口 ({},{})", crate::player_text::name(next), route.x, route.y), PANEL_TEXT);
+                } else {
+                    line(card, "到店后点击商人购买，以店内报价为准。", PANEL_TEXT);
+                }
+                button(card, if route.is_entrance { "前往店铺入口 · 自动寻路" } else { "前往商人 · 自动寻路" },
+                    QuestUiButton::NavigateQuestRoute(QuestRouteNavigationIntent {
+                        target: QuestRouteTarget::Supply { vendor }, quest_index: 0,
+                        reset_epoch: big_map.reset_epoch, map_index: route.map_index, x: route.x, y: route.y,
+                    }));
+            } else { line(card, "暂无可走路线，请打开大地图查看入口。", FEEDBACK_ERR); }
+        }
+        // Route feedback is bounded to a single wrapped message and refreshes
+        // through the existing epoch/ordinary movement state machine.
+        if let Some(feedback) = state.feedback.as_ref() {
+            line(card, &feedback.message, if feedback.is_error { FEEDBACK_ERR } else { FEEDBACK_OK });
+        }
+        if state.supply_vendor.is_some() {
+            button(card, "查看全部补给", QuestUiButton::ShowSupplyInventory);
+        }
+        button(card, "返回任务引导", QuestUiButton::ToggleSupplies);
+    });
+}
+
 #[cfg(test)]
 mod tests {
+    fn test_supplies() -> crate::quest_supplies::SupplyPlan {
+        crate::quest_supplies::plan(&crate::read_model::PlayerStats::default(), &crate::inventory::InventoryModel::default(), None, None)
+    }
+
     use super::*;
     use crate::quest_model::{QuestDetailText, QuestObjective};
     fn quest(id: i32) -> Quest {
@@ -389,7 +462,7 @@ mod tests {
         let mut queue = bevy::ecs::world::CommandQueue::default();
         let mut commands = Commands::new(&mut queue, &world);
         commands.spawn_empty().with_children(|parent| {
-            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &MapModel::default(), None, "Warrior"));
+            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &MapModel::default(), None, "Warrior", &test_supplies()));
         });
         queue.apply(&mut world);
         let text = world.query::<&Text>().iter(&world).map(|t| t.0.as_str()).collect::<Vec<_>>().join("\n");
@@ -481,7 +554,7 @@ mod tests {
         let bichon = maps.iter().find(|m| m.map_file_name == "0").unwrap();
         let wooma = maps.iter().find(|m| m.map_file_name == "D022").unwrap();
         assert_eq!(authored_other_map(2_110_019, Some(wooma.map_index)), None);
-        assert!(authored_other_map(2_110_019, Some(bichon.map_index)).unwrap().contains(&wooma.map_title));
+        assert!(authored_other_map(2_110_019, Some(bichon.map_index)).unwrap().contains(&crate::player_text::name(&wooma.map_title)));
         assert_eq!(authored_other_map(2_110_019, None), None);
         assert_eq!(authored_other_map(12345, Some(bichon.map_index)), None);
     }
@@ -502,7 +575,7 @@ mod tests {
         let mut queue = bevy::ecs::world::CommandQueue::default();
         let mut commands = Commands::new(&mut queue, &world);
         commands.spawn_empty().with_children(|parent| {
-            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior"));
+            assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior", &test_supplies()));
         });
         queue.apply(&mut world);
         let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str())
@@ -510,7 +583,7 @@ mod tests {
         let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
         assert!(text.contains("当前位置 (288,616)"));
         assert!(text.contains("入口 (147,33)"));
-        assert!(text.contains("OmaCave_1F"));
+        assert!(text.contains("半兽人洞穴一层"));
         assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
             QuestUiButton::NavigateQuestRoute(crate::quest_ui::QuestRouteNavigationIntent {
                 target: QuestRouteTarget::Entrance,
@@ -540,7 +613,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior"));
+                assert!(render(parent, &tracker, &state, None, &EntityModelSet::default(), &map, Some(&big_map), "Warrior", &test_supplies()));
             });
             queue.apply(&mut world);
             assert!(world.query::<(&Text, &TextColor)>().iter(&world)
@@ -582,7 +655,7 @@ mod tests {
         assert_eq!(
             place(&cats, &tracker, &empty_entities, &map, Some(&big_map)),
             Place::Current {
-                label: "狩猎区域 · RakingCat (340,550) · 64 格".into(),
+                label: "狩猎区域 · 钉耙猫 (340,550) · 64 格".into(),
                 distance: 64,
             },
         );
@@ -627,7 +700,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior"));
+                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior", &test_supplies()));
             });
             queue.apply(&mut world);
             assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
@@ -639,7 +712,7 @@ mod tests {
             let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str()).collect::<Vec<_>>().join("\n");
             assert!(text.contains("入口 (147,33)"));
             assert!(!text.contains("Oma (420,91)"));
-            assert!(text.contains("Reach the Oma Cave entrance  0/1"));
+            assert!(text.contains("抵达半兽人洞穴入口  0/1"));
         }
     }
 
@@ -685,7 +758,7 @@ mod tests {
             let mut queue = bevy::ecs::world::CommandQueue::default();
             let mut commands = Commands::new(&mut queue, &world);
             commands.spawn_empty().with_children(|parent| {
-                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior"));
+                assert!(render(parent, &tracker, &QuestUiState::default(), None, &entities, &map, Some(&big_map), "Warrior", &test_supplies()));
             });
             queue.apply(&mut world);
             assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button,
@@ -696,7 +769,7 @@ mod tests {
             )), "visible Skeleton={visible} must retain the hunting-area action");
             let text = world.query::<&Text>().iter(&world).map(|text| text.0.as_str()).collect::<Vec<_>>().join("\n");
             assert!(text.contains("前往狩猎区域 · 自动寻路"));
-            assert!(text.contains("Defeat 4 Skeleton.  0/4"));
+            assert!(text.contains("消灭 4 只骷髅  0/4"));
         }
     }
 }
