@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-09-28 release-readiness audit: public Web and Gateway health are live,
+> but this September development client still uses loopback and linked assets.
+> External testers need a matching WSS test realm and a self-contained client
+> ZIP; the existing formal packager still emits a placeholder Gateway URL.
+> Installer creation is not required for the first invited playtest. Full Git
+> fsck found two damaged base objects and two affected dependents in old local
+> WebAssembly history; none is reachable from current release HEAD. The pack
+> is hash-backed up, no old copy is known, and old-history recovery remains open.
+> An independent current-source shallow snapshot was rebuilt without object
+> links and passes full fsck; its commit matches the verified remote release.
+> [Investigation and handoff plan](PLAYER-PLAYTEST-RELEASE-20260928.md).
+
 > 2026-09-28 class-supply and Chinese newcomer UI pass shared 1100/native
 > 749/Node 166 tests, the native release build and one explicit offline GPU
 > fixture (three screenshots/nine cases). Source `dee30a74d` is pushed and the
