@@ -15010,6 +15010,12 @@ mod tests {
     mod zone_melee_passive_progression_tests;
     #[path = "zone_soulfire_practice_tests.rs"]
     mod zone_soulfire_practice_tests;
+    #[path = "zone_journey_event_bridge_tests.rs"]
+    mod zone_journey_event_bridge_tests;
+    #[path = "shared_session_hot_path_tests.rs"]
+    mod shared_session_hot_path_tests;
+    #[path = "live_chat_tests.rs"]
+    mod live_chat_tests;
 
     use super::{
         coalesced_zone_movement_object_id, delayed_player_action_packets,

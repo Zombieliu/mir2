@@ -18,14 +18,18 @@ fn town_revive_discards_stale_queued_spawn_and_reentering_aoi_gets_one_fresh_spa
     let shared = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
     let mut runtime = shared_session_runtime(shared.clone());
     start_demo_runtime(&mut runtime);
-    let key = runtime.current_presence_key().expect("presence should exist");
+    let key = runtime
+        .current_presence_key()
+        .expect("presence should exist");
     let session_id = runtime
         .current_zone_session_id()
         .expect("Zone session should exist");
     let bind = runtime
         .inner
-        .active_zone_join_snapshot(session_id.as_str())
-        .expect("active player should have a bind transform")
+        .active_character_checkpoint()
+        .expect("active player should have a saved checkpoint")
+        .bind_point
+        .expect("starting safe area should establish a TownRevive bind")
         .position;
     let requested_field = Point {
         x: bind.x.saturating_add(60),
@@ -83,14 +87,12 @@ fn town_revive_discards_stale_queued_spawn_and_reentering_aoi_gets_one_fresh_spa
         state.dispatch_zone_outbounds(outbounds, Some(&key)).0
     };
     assert_eq!(object_monster_count(&initial_packets, object_id), 1);
-    assert_eq!(
-        shared
-            .lock()
-            .expect("shared state should lock")
-            .zone_manager
-            .player_has_visible_object(&session_id, object_id),
-        Some(true)
-    );
+    let initially_visible = shared
+        .lock()
+        .expect("shared state should lock")
+        .zone_manager
+        .player_has_visible_object(&session_id, object_id);
+    assert_eq!(initially_visible, Some(true));
 
     let stale_spawn = zone_monster_spawn_packet(&spawn);
     {
@@ -123,24 +125,41 @@ fn town_revive_discards_stale_queued_spawn_and_reentering_aoi_gets_one_fresh_spa
     assert!(revive_packets.iter().any(
         |packet| matches!(packet, ServerPacket::ObjectRemove { object_id: id } if *id == object_id)
     ));
+    // Release the state mutex before asserting; a failing assertion must not
+    // poison the guard and cause a second panic in the runtime's Drop path.
+    let (revived_position, visible_after_revive) = {
+        let state = shared.lock().expect("shared state should lock");
+        (
+            state
+                .zone_manager
+                .player_transform(&session_id)
+                .map(|(position, _)| position),
+            state
+                .zone_manager
+                .player_has_visible_object(&session_id, object_id),
+        )
+    };
     assert_eq!(
-        shared
-            .lock()
-            .expect("shared state should lock")
-            .zone_manager
-            .player_transform(&session_id)
-            .map(|(position, _)| position),
+        revived_position,
         Some(bind.clone()),
         "TownRevive must move the authoritative Zone player, not only the private mirror"
     );
+    let personal_position = runtime
+        .inner
+        .world_snapshot()
+        .entities
+        .iter()
+        .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+        .map(|entity| Point {
+            x: entity.x,
+            y: entity.y,
+        });
     assert_eq!(
-        shared
-            .lock()
-            .expect("shared state should lock")
-            .zone_manager
-            .player_has_visible_object(&session_id, object_id),
-        Some(false)
+        personal_position,
+        Some(bind),
+        "the personal mirror and authoritative Zone must agree on the saved bind"
     );
+    assert_eq!(visible_after_revive, Some(false));
     assert!(!runtime
         .inner
         .world_snapshot()
@@ -150,13 +169,11 @@ fn town_revive_discards_stale_queued_spawn_and_reentering_aoi_gets_one_fresh_spa
 
     let returned_packets = {
         let mut state = shared.lock().expect("shared state should lock");
-        let outbounds = state
-            .zone_manager
-            .handle(ZoneCommand::SyncPlayerTransform {
-                session_id: session_id.clone(),
-                position: field,
-                direction: MirDirection::Right,
-            });
+        let outbounds = state.zone_manager.handle(ZoneCommand::SyncPlayerTransform {
+            session_id: session_id.clone(),
+            position: field,
+            direction: MirDirection::Right,
+        });
         state.dispatch_zone_outbounds(outbounds, Some(&key)).0
     };
     assert_eq!(
