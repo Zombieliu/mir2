@@ -2561,14 +2561,18 @@ async fn connect_gateway_with_resume_controls<R: CommandSource>(
     batch_limit: usize,
     game_shop_receipt_gate: &mut GameShopReceiptGate,
 ) -> ResumeLifecycle<GatewaySocket> {
+    let request = match gateway_handshake_request(base_url) {
+        Ok(request) => request,
+        Err(error) => return ResumeLifecycle::Failed(error),
+    };
     if !attempting_resume {
-        return tokio_tungstenite::connect_async(base_url)
+        return tokio_tungstenite::connect_async(request)
             .await
             .map(|(socket, _)| ResumeLifecycle::Complete(socket))
             .unwrap_or_else(|error| ResumeLifecycle::Failed(error.to_string()));
     }
 
-    let connect = tokio_tungstenite::connect_async(base_url);
+    let connect = tokio_tungstenite::connect_async(request);
     tokio::pin!(connect);
     let resume_timeout = async {
         if let Some(deadline) = resume_deadline {
@@ -2599,6 +2603,62 @@ async fn connect_gateway_with_resume_controls<R: CommandSource>(
             },
         }
     }
+}
+
+/// The staging Gateway applies its exact Origin allowlist to native clients as
+/// well as browsers. Derive the HTTP origin from the configured endpoint on
+/// every connection, including resume. Paths and query values stay in the
+/// WebSocket request and never enter this header. The normal TLS connector checks
+/// the server certificate and hostname against the operating system roots.
+fn gateway_handshake_request(
+    base_url: &str,
+) -> Result<tokio_tungstenite::tungstenite::http::Request<()>, String> {
+    use tokio_tungstenite::tungstenite::{
+        client::IntoClientRequest,
+        http::{header::ORIGIN, HeaderValue, Uri},
+    };
+
+    let uri = base_url
+        .parse::<Uri>()
+        .map_err(|_| "gateway URL must be a valid WebSocket URL".to_owned())?;
+    let authority = uri
+        .authority()
+        .ok_or_else(|| "gateway URL must include a host".to_owned())?;
+    if authority.as_str().contains('@') {
+        return Err("gateway URL must not contain credentials".to_owned());
+    }
+    let host = uri
+        .host()
+        .ok_or_else(|| "gateway URL must include a host".to_owned())?
+        .trim_matches(['[', ']']);
+    let is_loopback = host.eq_ignore_ascii_case("localhost")
+        || host
+            .parse::<std::net::IpAddr>()
+            .is_ok_and(|address| address.is_loopback());
+    let (scheme, default_port) = match uri.scheme_str() {
+        Some("wss") => ("https", 443),
+        Some("ws") if is_loopback => ("http", 80),
+        Some("ws") => return Err("gateway URL must use wss:// outside loopback".to_owned()),
+        _ => return Err("gateway URL must use ws:// or wss://".to_owned()),
+    };
+    let host = if host.contains(':') {
+        format!("[{}]", host.to_ascii_lowercase())
+    } else {
+        host.to_ascii_lowercase()
+    };
+    let origin = match uri.port_u16() {
+        Some(port) if port != default_port => format!("{scheme}://{host}:{port}"),
+        _ => format!("{scheme}://{host}"),
+    };
+    let mut request = base_url
+        .into_client_request()
+        .map_err(|_| "gateway WebSocket handshake URL is invalid".to_owned())?;
+    request.headers_mut().insert(
+        ORIGIN,
+        HeaderValue::from_str(&origin)
+            .map_err(|_| "gateway WebSocket origin is invalid".to_owned())?,
+    );
+    Ok(request)
 }
 
 async fn send_resume_frame_with_controls<R: CommandSource>(
@@ -6539,6 +6599,10 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
 #[cfg(test)]
 #[path = "gateway_map_identity_tests.rs"]
 mod map_identity_tests;
+
+#[cfg(test)]
+#[path = "gateway_handshake_tests.rs"]
+mod handshake_tests;
 
 #[cfg(test)]
 mod tests {

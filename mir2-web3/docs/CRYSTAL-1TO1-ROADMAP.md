@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-29 invited-playtest preparation: native initial/resume WebSockets
+> now include the endpoint's HTTP Origin and compile TLS with OS certificate
+> roots. Four new handshake/security checks and the full native suite pass
+> (753 passed, three existing explicit ignores). This fixes remote connection
+> prerequisites; real public WSS login, paired gameplay, independent packaging
+> and player acceptance remain pending. Linux release CI now supplies its
+> non-root publisher identity and runs the existing Linux security gate.
+> [Release work and limits](PLAYER-PLAYTEST-RELEASE-20260928.md).
+
 > 2026-09-28 newcomer supply/localization candidate: stock-aware class supplies,
 > ordinary vendor navigation, safe NPC approaches and Chinese quest/practice/
 > shop presentation are implemented. V2 purchases require fresh receipts and
