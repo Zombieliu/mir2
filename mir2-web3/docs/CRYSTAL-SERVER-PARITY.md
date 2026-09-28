@@ -12,8 +12,9 @@
 > record; game-data53/53 plus one explicit release benchmark pass. Original
 > lookup ordering, class/level selection and catalogue contents remain intact.
 > Follow-up hydration getter/timing changes pass65 focused/adjacent checks and
-> an explicit release benchmark; no further gameplay rule or live-capacity
-> acceptance is inferred from these local measurements.
+> an explicit release benchmark. Follow-up6643009e8 is deployed after verified
+> backup/drain and clean Linux stops; no gameplay-rule or live-capacity
+> acceptance is inferred from local measurements or deployment alone.
 > [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
 
 > 2026-09-29 ordinary multiplayer playtest found idle-recipient chat delayed about

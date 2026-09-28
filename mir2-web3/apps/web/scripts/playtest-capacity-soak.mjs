@@ -14,7 +14,7 @@ import { hasAuthoritativePlayerDeath } from './quest-agent/protocol-observation.
 import { selfActionBlockMask } from './quest-agent/protocol-status.mjs';
 import { equipStarterGear } from './quest-agent/protocol-play.mjs';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements,
-  AoiCoverage, ContinuousAcceptance, verifiedCombatHit, BoundedEvidence, CapacityMonitor, memoryTrend, self, distance, sleep, sanitize, fingerprint } from './playtest-capacity-soak-core.mjs';
+  AoiCoverage, ContinuousAcceptance, NativePlan, nativeCadence, verifiedCombatHit, BoundedEvidence, CapacityMonitor, memoryTrend, self, distance, sleep, sanitize, fingerprint } from './playtest-capacity-soak-core.mjs';
 
 const STEPS = [[0, -1, 'Up'], [1, -1, 'UpRight'], [1, 0, 'Right'], [1, 1, 'DownRight'],
   [0, 1, 'Down'], [-1, 1, 'DownLeft'], [-1, 0, 'Left'], [-1, -1, 'UpLeft']];
@@ -64,6 +64,7 @@ export class CapacityClient extends NativeResumeClient {
     if (!context.accountBudgets.has(account.accountId)) context.accountBudgets.set(account.accountId, new CommandBudget());
     this.budget = context.accountBudgets.get(account.accountId);
     this.bytes = { sent: 0, received: 0 }; this.recentSecrets = []; this.movementCount = 0; this.targetCursor = 0; this.failedTargets = new Map();
+    this.evidencePending = new Set(); this.nativeRunPrimedUntil = 0;
   }
   record(direction, value) {
     // Never retain worldSnapshot arrays in event history, nor an ever-growing
@@ -140,15 +141,24 @@ export class CapacityClient extends NativeResumeClient {
 
 // Anchors are reachable static cells chosen once. Every actual step still uses
 // public Walk/Run with current occupancy checks; these are never teleports.
-export function chooseHomes(map, origin, count, layout, transfers = [], explicit = []) {
+export async function loadStationaryNpcObstacles(mapFileName) {
+  const manifest = JSON.parse(await fs.readFile(new URL('../../../packages/game-data/data/generated/crystal_npc_info_manifest.json', import.meta.url), 'utf8'));
+  const entries = manifest.npcs.filter(npc => String(npc.map_file_name) === String(mapFileName));
+  if (entries.some(npc => !Number.isInteger(npc.location?.x) || !Number.isInteger(npc.location?.y))) throw new Error('Invalid authored NPC collision metadata');
+  return entries.map(npc => ({ ...npc.location, name: npc.name }));
+}
+
+export function chooseHomes(map, origin, count, layout, transfers = [], explicit = [], footprintSize = 1, stationaryObstacles = []) {
+  const stationary = new Set(stationaryObstacles.map(point => `${point.x},${point.y}`));
   const blockedTransfer = point => transfers.some(transfer => inside(point, transfer.bounds));
+  const clear = point => protocolMapCellIsWalkable(map, point) && !blockedTransfer(point) && !stationary.has(`${point.x},${point.y}`);
   const queue = [{ x: origin.x, y: origin.y }], seen = new Set([`${origin.x},${origin.y}`]), reachable = [];
   for (let cursor = 0; cursor < queue.length && cursor < 40000; cursor++) {
     const point = queue[cursor];
-    if (protocolMapCellIsWalkable(map, point) && !blockedTransfer(point)) reachable.push(point);
+    if (clear(point)) reachable.push(point);
     for (const [dx, dy] of STEPS.filter(([x, y]) => !x || !y)) {
       const next = { x: point.x + dx, y: point.y + dy }, key = `${next.x},${next.y}`;
-      if (seen.has(key) || distance(next, origin) > 96 || !protocolMapCellIsWalkable(map, next) || blockedTransfer(next)) continue;
+      if (seen.has(key) || distance(next, origin) > 96 || !clear(next)) continue;
       seen.add(key); queue.push(next);
     }
   }
@@ -159,15 +169,55 @@ export function chooseHomes(map, origin, count, layout, transfers = [], explicit
     let selected, best = Infinity;
     for (const point of reachable) {
       if (used.has(`${point.x},${point.y}`)) continue;
+      if (footprintSize > 1) {
+        let available = true;
+        for (let dy = 0; dy < footprintSize && available; dy++) for (let dx = 0; dx < footprintSize; dx++) {
+          const cell = { x: point.x + dx, y: point.y + dy };
+          if (!clear(cell) || used.has(`${cell.x},${cell.y}`)) { available = false; break; }
+        }
+        if (!available) continue;
+      }
       const score = distance(point, wanted) * 1000 + distance(point, origin);
       if (score >= best) continue;
-      if (STEPS.filter(([dx, dy]) => !dx || !dy).filter(([dx, dy]) =>
-        protocolMapCellIsWalkable(map, { x: point.x + dx, y: point.y + dy }) && !blockedTransfer({ x: point.x + dx, y: point.y + dy })).length < 2) continue;
+      if (STEPS.filter(([dx, dy]) => !dx || !dy).filter(([dx, dy]) => clear({ x: point.x + dx, y: point.y + dy })).length < 2) continue;
       selected = point; best = score;
     }
     if (!selected || (explicit[index] && distance(selected, explicit[index]) > 2)) throw new Error('Scenario lacks enough reachable patrol anchors');
-    used.add(`${selected.x},${selected.y}`); return selected;
+    for (let dy = 0; dy < footprintSize; dy++) for (let dx = 0; dx < footprintSize; dx++) used.add(`${selected.x + dx},${selected.y + dy}`);
+    return selected;
   });
+}
+
+export function spacingFourScenario(map, origin, center, count, mapFileName, transfers = [], stationaryObstacles = []) {
+  if (!Number.isInteger(count) || count < 1 || count > 100 || ![origin, center].every(point => Number.isInteger(point.x) && Number.isInteger(point.y))) throw new Error('Scenario requires integer coordinates and 1–100 actors');
+  const width = Math.ceil(Math.sqrt(count));
+  const requested = Array.from({ length: count }, (_, i) => ({ x: center.x + (i % width - (width - 1) / 2) * 4,
+    y: center.y + (Math.floor(i / width) - (width - 1) / 2) * 4 }));
+  const anchors = chooseHomes(map, origin, count, 'hotspot', transfers, requested, 3, stationaryObstacles);
+  const counts = anchors.map(owner => anchors.filter(peer => peer !== owner && distance(peer, owner) <= 16).length);
+  return { mapFileName, anchors, monsterNames: WEAK_MONSTERS, generated: { staticOnly: true, spacing: 4, origin, center,
+    actors: count, patrolFootprint: '3x3 clear, non-overlapping cells excluding known stationary NPCs', stationaryNpcCount: stationaryObstacles.length,
+    meanVisiblePeers: counts.reduce((sum, n) => sum + n, 0) / count,
+    minimumVisiblePeers: Math.min(...counts), maximumVisiblePeers: Math.max(...counts),
+    limitation: 'Static collision and doorway planning only; no login, movement, live occupancy, monster supply or performance acceptance' } };
+}
+
+export async function generateCapacityScenario(options) {
+  if (!options.mapRoot || !options.scenarioMap || !options.scenarioOrigin || !options.generateScenario) throw new Error('Scenario generation requires --map-root, --scenario-map, --scenario-origin and --generate-scenario');
+  const point = value => { const parts = String(value).split(',').map(Number); if (parts.length !== 2 || !parts.every(Number.isInteger)) throw new Error('Coordinates must be x,y integers'); return { x: parts[0], y: parts[1] }; };
+  const origin = point(options.scenarioOrigin), center = point(options.scenarioCenter ?? options.scenarioOrigin);
+  const map = await loadProtocolCollisionMap(options.scenarioMap, { mapRoot: options.mapRoot, packagedMapRoot: options.mapRoot });
+  // Resolve committed map transfers without contacting a Gateway or reading an account file.
+  const manifestPath = new URL('../lib/generated/crystal_respawn_manifest.json', import.meta.url);
+  const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
+  const metadata = manifest.maps.find(map => String(map.map_file_name) === String(options.scenarioMap));
+  if (!metadata) throw new Error('Unknown authored scenario map');
+  const transfers = metadata.movements.map(move => ({ bounds: { minX: move.source.x, maxX: move.source.x, minY: move.source.y, maxY: move.source.y } }));
+  const stationaryObstacles = await loadStationaryNpcObstacles(options.scenarioMap);
+  const scenario = spacingFourScenario(map, origin, center, Number(options.scenarioCount ?? 50), String(options.scenarioMap), transfers, stationaryObstacles);
+  const file = outsideRepository(options.generateScenario); await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, JSON.stringify(scenario, null, 2) + '\n', { flag: 'wx' });
+  return { file, ...scenario.generated };
 }
 
 export function directionOf(from, to) {
@@ -181,7 +231,8 @@ function movement(client, target, map) {
   const first = route[1];
   if ((client.snapshot.mapTransfers ?? []).some(transfer => inside(first, transfer.bounds))) return null;
   const direction = directionOf(owner, first); if (!direction) return null;
-  if (client.movementCount % 10 === 9 && route.length > 2 && route[2].x - first.x === first.x - owner.x && route[2].y - first.y === first.y - owner.y &&
+  const wantsRun = client.context?.policy.activityMode === 'native' ? performance.now() < client.nativeRunPrimedUntil : client.movementCount % 10 === 9;
+  if (wantsRun && route.length > 2 && route[2].x - first.x === first.x - owner.x && route[2].y - first.y === first.y - owner.y &&
       !(client.snapshot.mapTransfers ?? []).some(transfer => inside(route[2], transfer.bounds))) {
     return { command: { type: 'run', direction }, target: route[2], first };
   }
@@ -190,9 +241,13 @@ function movement(client, target, map) {
 function patrol(client, context) {
   const owner = self(client), map = context.map;
   if (distance(owner, client.home) > 2) return movement(client, client.home, map);
-  const points = [[2, 0], [2, 2], [0, 2], [0, 0], [-1, 0], [0, -1]];
+  const points = context.policy?.activityMode === 'native' ? [[2, 0], [2, 2], [0, 2], [0, 0]] : [[2, 0], [2, 2], [0, 2], [0, 0], [-1, 0], [0, -1]];
+  const initialCursor = client.targetCursor;
   for (let offset = 0; offset < points.length; offset++) {
-    const index = (client.targetCursor + offset) % points.length, [dx, dy] = points[index];
+    // Native patrol advances exactly one corner. Mutating the starting cursor
+    // inside this loop used to skip a corner and endlessly cut across NPCs.
+    // Keep the old baseline traversal for comparisons with its prior reports.
+    const index = ((context.policy?.activityMode === 'native' ? initialCursor : client.targetCursor) + offset) % points.length, [dx, dy] = points[index];
     const target = { x: client.home.x + dx, y: client.home.y + dy };
     if (distance(owner, target) === 0) { client.targetCursor = (index + 1) % points.length; continue; }
     const plan = movement(client, target, map);
@@ -214,10 +269,14 @@ export function combatCandidates(client, context, now = Date.now()) {
     .sort((a, b) => distance(a, owner) - distance(b, owner));
 }
 
-export function stableFanoutRange(kind) {
+export function stableFanoutRange(kind, policy) {
   // Both owners may already have a two-cell Run in flight. Complete AOI
   // membership is still checked at range 16 by AoiCoverage; only action-latency
   // probes use this explicitly narrower, stable initial geometry.
+  // During the full 2s receipt deadline a native peer can finish its already
+  // in-flight run and three more two-cell steps. Keep that geometry explicit;
+  // the independent AOI sampler still covers the complete 16-cell window.
+  if (policy?.activityMode === 'native') return kind === 'chat' ? 8 : 6;
   return kind === 'chat' ? 14 : 12;
 }
 function combatPlan(client, context) {
@@ -257,29 +316,45 @@ function checkOwner(client, context) {
   if (!self(client) || hasAuthoritativePlayerDeath(client.snapshot)) throw new Error(`Actor ${client.label} died or lost presence; no automatic resurrection`);
   if (String(client.snapshot.mapFileName) !== context.mapName) throw new Error('Actor left the declared same-map scenario');
 }
-async function action(client, context, planned) {
+export function selectNativeAction(client, context, now = performance.now()) {
+  if (now >= client.nextNativeChatAt) return { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${client.plan.index + 1}` } };
+  if (now >= client.nextNativeTurnAt && client.role !== 'combat') return { command: { type: 'turn', direction: self(client).direction === 'Up' ? 'Right' : 'Up' } };
+  return client.role === 'combat' ? combatPlan(client, context) : patrol(client, context);
+}
+
+async function action(client, context, planned, preparedPlan) {
   const phase = context.phase, owner = { ...self(client) }, plannedAt = planned.due;
+  const native = context.policy.activityMode === 'native';
+  const nativeMeta = native ? { nativeOpportunity: true, plannedIntervalMs: planned.intervalMs, pacingKnown: planned.cadence.pacingKnown,
+    cadence: planned.cadence } : {};
   let plan;
   if (selfActionBlockMask(client)) {
-    context.add({ actor: client.label, phase, kind: client.role === 'combat' ? 'attack' : 'walk', status: 'action-locked', plannedGameplay: true }); return;
+    context.add({ actor: client.label, phase, kind: client.role === 'combat' ? 'attack' : 'walk', status: 'action-locked', plannedGameplay: true, ...nativeMeta }); return;
   }
-  if (planned.index % 20 === 5) plan = { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${planned.index}` } };
+  if (native) plan = preparedPlan;
+  else if (planned.index % 20 === 5) plan = { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${planned.index}` } };
   else if (planned.index % 15 === 0) plan = { command: { type: 'turn', direction: owner.direction === 'Up' ? 'Right' : 'Up' } };
   else plan = client.role === 'combat' ? combatPlan(client, context) : patrol(client, context);
-  if (!plan) { context.add({ actor: client.label, phase, kind: 'walk', status: 'navigation-blocked', plannedGameplay: true }); return; }
+  if (!plan) { context.add({ actor: client.label, phase, kind: 'walk', status: 'navigation-blocked', plannedGameplay: true, ...nativeMeta }); return; }
   const command = plan.command, kind = command.type;
-  if (client.budget.remainingWait()) { context.add({ actor: client.label, phase, kind, status: 'budget-gap', plannedGameplay: true }); return; }
-  const observers = nearbyObservers(client, context, stableFanoutRange(kind)).map(peer => ({ peer, cursor: peer.sequence,
+  if (client.budget.remainingWait()) { context.add({ actor: client.label, phase, kind, status: 'budget-gap', plannedGameplay: true, ...nativeMeta }); return; }
+  const observers = nearbyObservers(client, context, stableFanoutRange(kind, context.policy)).map(peer => ({ peer, cursor: peer.sequence,
     objectId: observedPlayerId(peer, client.label) }));
   const observerCursor = plan.observer?.sequence, cursor = client.sequence, sentAt = performance.now();
   if (sentAt - plannedAt > context.policy.maximumSendLatenessMs) {
-    context.add({ actor: client.label, phase, kind, status: 'plan-gap', plannedGameplay: true, sendLatenessMs: sentAt - plannedAt }); return;
+    context.add({ actor: client.label, phase, kind, status: 'plan-gap', plannedGameplay: true, sendLatenessMs: sentAt - plannedAt, ...nativeMeta }); return;
   }
   if (kind === 'attack') context.targetClaims.set(command.objectId, client.label);
   const row = { actor: client.label, phase, kind, plannedGameplay: true, scheduledAtMs: plannedAt, sentAtMs: sentAt,
-    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting };
+    plannedTarget: plan.target, targetId: command.objectId, hunting: plan.hunting, ...nativeMeta };
   try {
+    client.waitReason = ['attack', 'chat'].includes(kind) ? 'evidence-wait' : 'owner-ack-wait';
     client.send(command);
+    if (native) {
+      client.plan.sent(sentAt, planned.cadence.cooldownMs);
+      if (kind === 'chat') client.nextNativeChatAt = sentAt + context.policy.nativeChatIntervalMs;
+      if (kind === 'turn') client.nextNativeTurnAt = sentAt + context.policy.nativeTurnIntervalMs;
+    }
     const receipt = await client.wait(() => {
       const own = fresh(client, cursor, sentAt), rejection = own.find(event => event.type === 'error');
       if (rejection) { const error = new Error('Public gameplay command rejected'); error.code = 'PUBLIC_COMMAND_REJECTED'; throw error; }
@@ -296,14 +371,16 @@ async function action(client, context, planned) {
       const actual = receipt.payload;
       if (!(actual.x === plan.target.x && actual.y === plan.target.y) &&
           !(kind === 'run' && actual.x === plan.first.x && actual.y === plan.first.y)) status = 'corrected';
-      if (status === 'success') client.movementCount++;
+      if (status === 'success') { client.movementCount++; client.nativeRunPrimedUntil = sentAt + 1200; }
       row.actual = { x: actual.x, y: actual.y }; row.direction = actual.direction;
+      row.movedCells = distance(owner, actual);
     } else if (kind === 'turn' && receipt.payload?.direction !== command.direction) status = 'corrected';
     context.add({ ...row, status, latencyMs: receipt.monotonicMs - sentAt, plannedLatencyMs: receipt.monotonicMs - plannedAt,
       damage: receipt.damage, sharedHealthVerified: receipt.sharedHealthVerified, healthPercent: receipt.healthPercent });
     if (kind === 'attack') client.failedTargets.delete(command.objectId);
     if (kind === 'chat') context.add({ actor: client.label, phase, kind: observers.length ? 'peerChat' : 'selfChat', status: 'success', latencyMs: receipt.monotonicMs - sentAt });
     if (status === 'success' && ['walk', 'run', 'turn', 'chat'].includes(kind)) {
+      const verifyObservers = async () => {
       // Wait only until this action's common deadline. No additional commands
       // are issued and every initially expected observer stays in the denominator.
       const deadline = sentAt + context.policy.actionTimeoutMs;
@@ -318,26 +395,46 @@ async function action(client, context, planned) {
       }
       if (observers.length) context.writer.add({ type: 'fanoutDistribution', actor: client.label, phase, kind, expected: observers.length,
         delivered, latencyUpperBoundsMs: [...distribution], at: Date.now() });
+      };
+      if (native && observers.length) {
+        const evidence = verifyObservers().catch(error => {
+          if (!(error instanceof SafetyStop)) context.guard.stop(`Observer evidence failed: ${sanitize(error.message, client.secrets)}`);
+        }).finally(() => client.evidencePending.delete(evidence));
+        client.evidencePending.add(evidence);
+      } else await verifyObservers();
     }
   } catch (error) {
     const swung = kind === 'attack' && fresh(client, cursor, sentAt).some(event => event.packet === 'ObjectAttack' && event.payload?.objectId === owner.objectId);
     if (kind === 'attack' && !(error instanceof SafetyStop)) {
       const prior = client.failedTargets.get(command.objectId);
-      client.failedTargets.set(command.objectId, { failures: (prior?.failures ?? 0) + 1, until: Date.now() + (prior ? 30000 : 3000) });
-      if (client.failedTargets.size > 64) client.failedTargets.delete(client.failedTargets.keys().next().value);
+      // The protocol has no strike request ID. Even an observed swing followed
+      // by silence may have damage in flight. Native mode cannot re-use this
+      // actor/target pair later and mistake that old damage for a new attack.
+      client.failedTargets.set(command.objectId, { failures: (prior?.failures ?? 0) + 1,
+        until: native ? Infinity : Date.now() + (prior ? 30000 : 3000), ambiguous: native });
+      if (client.failedTargets.size > 64) {
+        if (native) context.guard.stop('Native ambiguous-attack quarantine exceeded 64 targets; no old strike identities are evicted');
+        else client.failedTargets.delete(client.failedTargets.keys().next().value);
+      }
     }
     context.add({ ...row, status: actionFailureStatus(error, swung, client.closed),
       latencyMs: performance.now() - sentAt, plannedLatencyMs: performance.now() - plannedAt, error: sanitize(error.message, client.secrets),
-      targetStillAdjacent: kind === 'attack' ? client.snapshot.entities.some(entity => entity.objectId === command.objectId && !entity.dead && distance(entity, self(client)) === 1) : undefined });
+      targetStillAdjacent: kind === 'attack' ? client.snapshot.entities.some(entity => entity.objectId === command.objectId && !entity.dead && distance(entity, self(client)) === 1) : undefined,
+      ambiguousTargetQuarantined: kind === 'attack' && native && !(error instanceof SafetyStop) });
     if (error instanceof SafetyStop || client.closed) throw error;
-  } finally { if (kind === 'attack' && context.targetClaims.get(command.objectId) === client.label) context.targetClaims.delete(command.objectId); }
+  } finally { client.waitReason = null; if (kind === 'attack' && context.targetClaims.get(command.objectId) === client.label) context.targetClaims.delete(command.objectId); }
 }
 
 async function auxiliary(client, context) {
   const phase = context.phase, refresh = Date.now() >= client.nextRefresh;
   if (client.budget.remainingWait()) return;
   const kind = refresh ? 'refresh' : 'rtt', cursor = client.sequence, at = performance.now(), time = Date.now();
-  if (refresh) client.nextRefresh = time + 60000;
+  if (refresh) {
+    client.nextRefresh = time + 60000;
+    // One refresh also proves current transport liveness. Do not schedule a
+    // second auxiliary command beside two legal native movement commands.
+    if (context.policy.activityMode === 'native') client.nextRtt = time + 10000;
+  }
   else client.nextRtt = time + 10000;
   try {
     client.send(refresh ? { type: 'clientVersion' } : { type: 'keepAlive', time });
@@ -350,6 +447,32 @@ async function auxiliary(client, context) {
   }
 }
 
+function initializePlan(client, context, startAt) {
+  client.plan = context.policy.activityMode === 'native' ? new NativePlan(startAt) : new FixedPlan(startAt);
+  client.nextNativeChatAt = startAt + 5000; client.nextNativeTurnAt = startAt + context.policy.nativeTurnIntervalMs;
+}
+
+export function offerNativeAction(client, context, now = performance.now()) {
+  if (now < Math.max(client.plan.nextAt, client.plan.legalAt)) return;
+  const plan = selectNativeAction(client, context, now), kind = plan?.command.type ?? 'walk';
+  const cadence = nativeCadence(client.snapshot, kind, context.policy), planned = client.plan.take(now, cadence.intervalMs);
+  if (!planned) return;
+  planned.cadence = cadence;
+  const row = { actor: client.label, kind, plannedGameplay: true, nativeOpportunity: true,
+    plannedIntervalMs: cadence.intervalMs, pacingKnown: cadence.pacingKnown, cadence };
+  for (let n = 0; n < Math.min(planned.missed, 60); n++) context.add({ ...row, status: 'plan-gap' });
+  if (planned.missed > 60) { context.guard.stop('Native driver stalled over 60 legal action opportunities'); return; }
+  if (client.pending || client.evidencePending.size >= context.policy.maximumEvidenceInFlight) {
+    // Damage has no request id. Keep a single unresolved attack so one late
+    // strike cannot be credited to two requests. This observer/instrumentation
+    // wait stays in offered-load coverage, but is never called server busy.
+    context.add({ ...row, status: client.pending ? client.waitReason ?? 'owner-ack-wait' : 'evidence-wait' }); return;
+  }
+  client.pending = action(client, context, planned, plan).catch(error => {
+    if (!(error instanceof SafetyStop)) context.guard.stop(`Actor ${client.label}: ${sanitize(error.message, client.secrets)}`);
+  }).finally(() => { client.pending = null; });
+}
+
 function startEngine(context) {
   context.engine = setInterval(() => {
     try {
@@ -357,14 +480,17 @@ function startEngine(context) {
       for (const client of context.clients) {
         if (!client.ready || client.paused || client.draining) continue;
         checkOwner(client, context);
-        const planned = client.plan.take(performance.now());
-        if (planned) {
+        if (context.policy.activityMode === 'native') offerNativeAction(client, context);
+        else {
+          const planned = client.plan.take(performance.now());
+          if (planned) {
           for (let n = 0; n < Math.min(planned.missed, 60); n++) context.add({ actor: client.label, kind: 'walk', status: 'plan-gap', plannedGameplay: true });
           if (planned.missed > 60) context.guard.stop('Driver stalled over 60 planned seconds');
           if (client.pending) context.add({ actor: client.label, kind: client.role === 'combat' ? 'attack' : 'walk', status: 'busy', plannedGameplay: true });
           else client.pending = action(client, context, planned).catch(error => {
             if (!(error instanceof SafetyStop)) context.guard.stop(`Actor ${client.label}: ${sanitize(error.message, client.secrets)}`);
           }).finally(() => { client.pending = null; });
+          }
         }
         if (!client.pending && !client.auxPending && (Date.now() >= client.nextRtt || Date.now() >= client.nextRefresh)) {
           client.auxPending = auxiliary(client, context).catch(error => context.guard.stop(`Auxiliary transport failed: ${error.message}`))
@@ -429,7 +555,8 @@ async function measure(context, name, seconds) {
     }
   }
   const actors = context.clients.filter(client => client.ready).map(client => ({ name: client.label, role: client.role }));
-  const assessment = assessMeasurements(context.current, actors, seconds, context.policy, { requireChat: actors.length > 1, aoi: { ...context.aoi.stats } });
+  const assessment = assessMeasurements(context.current, actors, seconds, context.policy, {
+    requireChat: actors.length > 1 && (context.policy.activityMode !== 'native' || seconds * 1000 > context.policy.nativeChatIntervalMs), aoi: { ...context.aoi.stats } });
   const fanout = Object.entries(assessment.metrics).filter(([kind]) => kind.startsWith('fanout-'));
   const fanoutPassed = fanout.every(([, value]) => (value.status.timeout ?? 0) / Math.max(1, value.count) < .01 && value.fromSend.p95Ms <= 1000);
   const output = { name, controlledActors: actors.length, completed: true, ...assessment, fanoutPassed,
@@ -442,8 +569,11 @@ async function measure(context, name, seconds) {
 export async function awaitPendingActions(clients) {
   // Capture once. New actions may continue for unpaused actors, but any old
   // observer obligation must finish before its planned transport is removed.
-  const pending = clients.flatMap(client => [client.pending, client.auxPending]).filter(Boolean);
+  const pending = clients.flatMap(client => [client.pending, client.auxPending, ...(client.evidencePending ?? [])]).filter(Boolean);
   await Promise.allSettled(pending);
+  // A captured owner action can create its independent fanout waiter just
+  // before resolving. Include that waiter before transport teardown as well.
+  await Promise.allSettled(clients.flatMap(client => [...(client.evidencePending ?? [])]));
 }
 
 async function resumeActor(original, context) {
@@ -477,7 +607,8 @@ async function resumeActor(original, context) {
     const liveAck = await restored.request({ type: 'turn', direction }, 'UserLocation', 5000);
     if (liveAck.payload?.direction !== direction) throw new Error('Resumed owner no longer accepts ordinary authoritative commands');
     restored.home = original.home; restored.role = original.role; restored.ready = true;
-    restored.plan = new FixedPlan(performance.now() + 1000); restored.nextRtt = Date.now() + 5000; restored.nextRefresh = Date.now() + 60000;
+    restored.failedTargets = original.failedTargets;
+    initializePlan(restored, context, performance.now() + 1000); restored.nextRtt = Date.now() + 5000; restored.nextRefresh = Date.now() + 60000;
     context.clients[context.clients.indexOf(original)] = restored; original.ready = false;
     return { actor: original.label, status: 'passed', elapsedMs: performance.now() - started, characterIndex: original.account.characterIndex,
       before, restoredState, resumedOwnerTurnReceipt: liveAck.sequence, generation: restored.nativeTicket.generation, replayRejected: true, loginFallback: false };
@@ -583,13 +714,18 @@ export async function runCapacity(options) {
           context.mapName = String(client.snapshot.mapFileName);
           if (scenario.mapFileName && String(scenario.mapFileName) !== context.mapName) throw new Error('Ordinary character is not on the declared scenario map');
           context.map = await loadProtocolCollisionMap(context.mapName, options.mapRoot ? { mapRoot: options.mapRoot, packagedMapRoot: options.mapRoot } : {});
-          context.homes = chooseHomes(context.map, self(client), policy.stages.at(-1), policy.layout, client.snapshot.mapTransfers ?? [], scenario.anchors ?? []);
+          const stationaryObstacles = policy.activityMode === 'native' ? [
+            ...await loadStationaryNpcObstacles(context.mapName),
+            ...client.snapshot.entities.filter(entity => String(entity.kind).toLowerCase() === 'npc' && !entity.dead),
+          ] : [];
+          context.homes = chooseHomes(context.map, self(client), policy.stages.at(-1), policy.layout, client.snapshot.mapTransfers ?? [], scenario.anchors ?? [], policy.activityMode === 'native' ? 3 : 1, stationaryObstacles);
           report.scenario.mapFileName = context.mapName; report.scenario.anchors = context.homes;
+          if (policy.activityMode === 'native') report.scenario.knownStationaryNpcCount = new Set(stationaryObstacles.map(point => `${point.x},${point.y}`)).size;
         }
         checkOwner(client, context);
         await equipStarterGear(client);
         client.role = combatIndices.has(index) ? 'combat' : 'movement'; client.home = context.homes[index]; client.ready = true;
-        client.plan = new FixedPlan(performance.now() + 500 + (index % 10) * 40);
+        initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
         client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
         context.clients.push(client);
         context.continuous.join(client.label, client.role);
@@ -658,6 +794,18 @@ export async function runCapacity(options) {
     report.continuousAcceptance = context.continuous.summary();
     report.peakServerActive = guard.peakServerActive; report.bytes = context.allClients.reduce((sum, client) => ({ sent: sum.sent + client.bytes.sent, received: sum.received + client.bytes.received }), { sent: 0, received: 0 });
     report.bytesDefinition = 'WebSocket JSON payload bytes, excluding TLS and framing';
+    report.activityMode = policy.activityMode;
+    report.actorActivity = [...aggregate.actors].filter(([name]) => context.clients.some(client => client.label === name)).map(([actor, activity]) => ({ actor, ...activity }));
+    if (policy.activityMode === 'native') report.nativeLoadScope = {
+      movementIntervalMs: policy.movementIntervalMs, movementMinimumMs: 600, singleUnacknowledgedMovement: true,
+      attackFormula: 'max(max(550,1400-60*AttackSpeed-min(14*level,370)),600)+50ms',
+      nativeVsZoneFloorDifference: 'Native 550ms floor and Zone 600ms floor remain unchanged; this driver respects both',
+      chatIntervalMs: policy.nativeChatIntervalMs, maximumObserverEvidenceInFlight: policy.maximumEvidenceInFlight,
+      actionFanoutProbeRange: 6, chatFanoutProbeRange: 8, fullAoiMembershipRange: 16,
+      evidenceWaitMeaning: 'Instrumentation wait stays in offered-load denominator; insufficient coverage does not establish server overload',
+      ambiguousAttackRule: 'Unverified attacks permanently quarantine that actor/target pair for this run; more than 64 such targets stops the test',
+      continuousRunningRule: 'The Run ratio and cell-rate gates also apply throughout ramp, anchor travel and ordinary login-window waits',
+      limitations: ['Warrior starter melee only', 'No caster AOE, summons or cross-map raid proof', 'No native GPU/render acceptance', 'No simultaneous auth burst or automatic revival'] };
     report.boundedStorage = { retainedMonitorSamples: guard.history.length, maximumMonitorSamples: guard.maximumHistory,
       monitorTimeBucketMs: guard.timeline.bucketMs, rawMonitorSamples: guard.timeline.rawSamples,
       maximumEventsPerConnection: 2048, writerMaximumBufferedBytes: writer.maximumBufferedBytes, writerLimitBytes: writer.maxBufferedBytes };
@@ -677,7 +825,8 @@ export async function runCapacity(options) {
 
 export function parseArguments(args) {
   const result = {}, allowed = new Set(['realm', 'endpoint', 'accountsFile', 'monitor', 'output', 'profile', 'stages', 'stageSeconds', 'soakSeconds',
-    'wallSeconds', 'layout', 'combatActors', 'resumeSamples', 'saveSamples', 'mapRoot', 'loginNotBefore', 'scenarioFile']);
+    'wallSeconds', 'layout', 'combatActors', 'resumeSamples', 'saveSamples', 'mapRoot', 'loginNotBefore', 'scenarioFile',
+    'activityMode', 'movementIntervalMs', 'generateScenario', 'scenarioMap', 'scenarioOrigin', 'scenarioCenter', 'scenarioCount']);
   for (let i = 0; i < args.length; i += 2) {
     if (!args[i].startsWith('--') || args[i + 1] == null) throw new Error('Arguments must use --name value');
     const key = args[i].slice(2).replace(/-([a-z])/g, (_, char) => char.toUpperCase());
@@ -688,9 +837,14 @@ export function parseArguments(args) {
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   try {
-    const report = await runCapacity({ ...parseArguments(process.argv.slice(2)), onProgress: value => process.stdout.write(JSON.stringify(value) + '\n') });
+    const options = parseArguments(process.argv.slice(2));
+    if (options.generateScenario) {
+      process.stdout.write(JSON.stringify(await generateCapacityScenario(options), null, 2) + '\n');
+    } else {
+    const report = await runCapacity({ ...options, onProgress: value => process.stdout.write(JSON.stringify(value) + '\n') });
     process.stdout.write(JSON.stringify({ reportPath: report.reportPath, ok: report.ok, playableCapacityAccepted: report.playableCapacityAccepted,
       highestPassedStage: report.highestPassedStage, safetyStopped: report.safetyStopped, error: report.error }, null, 2) + '\n');
     process.exitCode = report.ok ? 0 : 1;
+    }
   } catch (error) { process.stderr.write(error.message + '\n'); process.exitCode = 1; }
 }

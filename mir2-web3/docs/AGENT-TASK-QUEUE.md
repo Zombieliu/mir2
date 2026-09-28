@@ -15,8 +15,10 @@
 > 100 ordinary accounts are prepared;50/100 hour-long acceptance remains open.
 > Follow-up hydration getter/timing candidate passes65 focused Gateway checks;
 > its explicit15-session benchmark removes full snapshots from map-name reads.
-> First native-cadence probe failed Run coverage, with no movement errors;
-> correct the driver before drawing capacity conclusions.
+> Follow-up6643009e8 is now deployed after backup/drain; both normal stop checks
+> exit0 and original production is unchanged. Native probes exposed patrol/NPC
+> selection and sparse-zero-stat driver defects, now covered by focused checks;
+> calibrated native-cadence capacity runs remain open.
 > [Acceptance and retained evidence](generated/player-qa/server-capacity-20260929/README.md).
 
 > 2026-09-29 invited release delivered: native d33708e1f and Gateway20aeb345f

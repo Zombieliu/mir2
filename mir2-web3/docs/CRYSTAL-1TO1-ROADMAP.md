@@ -14,7 +14,8 @@
 > preserving original case/order/selection semantics and all gameplay data.
 > Follow-up hydration reads the map name directly and adds four slow-stage
 > timings;65 focused Gateway checks and an explicit release benchmark pass.
-> This follow-up is not yet deployed or capacity-accepted.
+> This follow-up6643009e8 is deployed after verified backup/drain and Linux
+> normal stop checks; calibrated native-cadence capacity remains open.
 > [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
 
 > 2026-09-29 invited-playtest corrections: ordinary two-account traffic exposed

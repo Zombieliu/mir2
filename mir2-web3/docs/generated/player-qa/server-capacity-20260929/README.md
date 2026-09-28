@@ -233,7 +233,21 @@ uses15 ordinary-created native sessions across all three classes, CrystalWorld
 and platinum176. Across five alternating trials,750 map-name reads take median
 1,856,402 microseconds with complete snapshots versus33 with the getter. The
 record counts describe eliminated projections, not heap bytes or a capacity
-ratio. This follow-up is not yet deployed;318 remains the live measured binary.
+ratio. CI run36489347736 built clean revision
+`6643009e818b1c29c1b82ada365494eb357036ed`. Its authenticated artifact digest is
+`a18ce7d150de61e5d49ebda01435eaba090cef7109020b100de06fb10f7480ba`;
+the verified Linux Gateway SHA256 is
+`75f96a216ae1bd40b39d51a122f0477c4945e23bf3f65bc1399c481dc9298b66`.
+After all connections/sessions/leases drained, the reviewed operator passed
+15 independent offline checks and a real read-only preflight, then deployed
+the candidate. Prior and candidate deliberate normal stops both exit0 without
+panic. New PID2177631 serves the same51/66/51 admission, authentication,
+resource limits, state and immutable map pack. Original PID3855184 and release
+remain unchanged. Root-private backup
+`/var/backups/mir2-playtest-before-6643009e818b1c29c1b82ada365494eb357036ed`
+contains database dump SHA256
+`1947159bfd39fc9e9493754043ef18716ab5c6edca5e3c1907bada4a0ca11ba9`.
+The15-player baseline above remains evidence for318, not an unrun664 baseline.
 
 ## Continuous capacity driver validation
 
@@ -260,4 +274,37 @@ failed this offered-load gate: its30-second first stage produced39 Walk and
 zero Run, despite all39 owner acknowledgements succeeding, movement P95=136ms
 and no corrections/timeouts. Cleanup succeeded. This is a driver/scenario
 coverage failure, not evidence that the server cannot support one player.
-The failed report is retained while the patrol issue is investigated.
+The failed report is retained. The native-only patrol index skipped corners,
+and its static-only anchor overlapped BorderVillage_Board at(284,615).
+Native anchors now exclude committed and publicly observed fixed NPCs, and
+the corner index advances consistently. Four real-map/occupancy checks and
+four native socket checks pass; four map checks also pass independently.
+
+Corrected patrol probe `1790633113680-ddab9947` on318 passes its first stage
+(36 Run/38 moves,148 cells/minute); the second stage has17 confirmed shared
+positive hits,58/58 expected AOI observations and no corrections/timeouts.
+Its overall result still fails: the driver incorrectly marks absent zero-valued
+AttackSpeed as unknown. The public snapshot contract and native client both
+treat an omitted stat in a present valid sparse array as zero. The driver now
+uses that same rule; absent/malformed blocks and duplicate IDs remain unknown.
+Seven related checks and three independent checks pass. Both failed public
+runs remain separate from the calibrated native-cadence tests. The final
+integrated driver passes an independent46/46 suite with zero skips in210.436s;
+the earlier independent42/43 failure was a premature test-timer wakeup, repaired
+only in the fixture and covered by this full rerun.
+
+Calibrated750ms public probe `1790633939002-bfeb5809` on664 passes1→2 stages,
+short steady gameplay and all four continuous activity windows. It includes
+one active shared-combat actor, one native-protocol resume with rejected old
+ticket replay/no Login fallback, continued post-resume activity, and one
+matching saved-state relogin. Peak online is three including the actual native
+QA client. Cleanup has no errors and protection never triggers. As a bounded
+probe its playable-capacity acceptance flag correctly remains false.
+
+The unchanged extracted native EXE also completed one ordinary small-map route
+on318:19 commands (6 Walk,13 Run),32 cells, all matching owner acknowledgements,
+zero corrections and at most one unacknowledged movement. The18 send intervals
+have median604.961ms/P95 615.133ms; input-to-ACK-consumption median140.952ms,
+P95 182.572ms. This11-second low-load trace does not measure FPS, full Turn
+traffic or multiplayer capacity. Raw trace and the reusable analyser are kept
+under the external load evidence root.

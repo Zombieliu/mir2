@@ -22,13 +22,16 @@ export function sanitize(value, secrets = []) {
 export function capacityPolicy(options = {}) {
   const profile = options.profile ?? 'standard';
   if (!['standard', 'probe'].includes(profile)) throw new Error('Profile must be standard or probe');
+  const activityMode = options.activityMode ?? 'baseline';
+  if (!['baseline', 'native'].includes(activityMode)) throw new Error('Activity mode must be baseline or native');
+  const native = activityMode === 'native';
   const stages = String(options.stages ?? (profile === 'probe' ? '1,2' : '10,20,30,40,50')).split(',').map(Number);
   if (!stages.length || stages.length > 15 || stages.some((n, i) => !Number.isInteger(n) || n < 1 ||
       n > (profile === 'probe' ? 5 : 100) || (i && n <= stages[i - 1]))) throw new Error('Stages must increase, with an absolute maximum of 100 actors');
   const stageSeconds = Number(options.stageSeconds ?? (profile === 'probe' ? 30 : 300));
   const soakSeconds = Number(options.soakSeconds ?? (profile === 'probe' ? 30 : 3600));
   const wallSeconds = Number(options.wallSeconds ?? (profile === 'probe' ? 1800 : 10800));
-  const combatActors = Number(options.combatActors ?? 0), resumeSamples = Number(options.resumeSamples ?? (profile === 'probe' ? 0 : 2));
+  const combatActors = Number(options.combatActors ?? (native && profile === 'standard' ? Math.ceil(stages.at(-1) * .1) : 0)), resumeSamples = Number(options.resumeSamples ?? (profile === 'probe' ? 0 : 2));
   const saveSamples = Number(options.saveSamples ?? (profile === 'probe' ? 0 : 2));
   const layout = options.layout ?? 'dispersed';
   if (!['dispersed', 'hotspot'].includes(layout) || !Number.isInteger(stageSeconds) || stageSeconds < (profile === 'probe' ? 20 : 120) || stageSeconds > 600 ||
@@ -38,14 +41,59 @@ export function capacityPolicy(options = {}) {
       !Number.isInteger(resumeSamples) || resumeSamples < 0 || resumeSamples > 5 ||
       !Number.isInteger(saveSamples) || saveSamples < 0 || saveSamples > 5) throw new Error('Invalid finite scenario or duration bounds');
   if (profile === 'standard' && (resumeSamples < 1 || saveSamples < 1)) throw new Error('Standard acceptance requires native resume and save samples');
+  const movementIntervalMs = Number(options.movementIntervalMs ?? (native ? 750 : 1000));
+  if (native ? ![650, 750].includes(movementIntervalMs) : movementIntervalMs !== 1000) throw new Error('Native movement interval must be 650 or 750ms; baseline stays 1000ms');
+  if (native && profile === 'standard' && (combatActors < Math.ceil(stages.at(-1) * .1) || combatActors > Math.floor(stages.at(-1) * .25))) throw new Error('Native standard scenario requires 10–25 percent declared combat actors');
   if (resumeSamples > stages.at(-1) - combatActors || saveSamples > stages.at(-1)) throw new Error('Declared resume/save samples exceed the eligible actor cohort');
-  return Object.freeze({ profile, stages, stageSeconds, soakSeconds, wallSeconds, layout, combatActors, resumeSamples, saveSamples,
-    commandsPerSecond: 3, intentionIntervalMs: 1000, maximumSendLatenessMs: 250,
+  return Object.freeze({ profile, activityMode, movementIntervalMs, stages, stageSeconds, soakSeconds, wallSeconds, layout, combatActors, resumeSamples, saveSamples,
+    commandsPerSecond: 3, intentionIntervalMs: movementIntervalMs, variableActionCadence: native, maximumSendLatenessMs: 250,
     movementP95Ms: 750, chatP95Ms: 1000, actionTimeoutMs: 2000, timeoutExclusive: 0.01,
     maximumMissedPlanRatio: 0.05, maximumCorrectionRatio: 0.05, minimumMovesPerMinute: 30,
-    minimumCombatHitsPerMinute: 3, minimumCombatAttacksPerMinute: 12, aoiRange: 16, aoiGraceMs: 1000,
+    minimumCombatHitsPerMinute: native ? 12 : 3, minimumCombatAttacksPerMinute: native ? 18 : 12, aoiRange: 16, aoiGraceMs: 1000,
+    nativeChatIntervalMs: 30000, nativeTurnIntervalMs: 60000, minimumNativeRunRatio: .5, minimumNativeCellsPerMinute: 80,
+    maximumEvidenceInFlight: 4,
     maximumMemorySlopeMiBPerHour: 32, memoryWarmupSeconds: 300,
     maximumDriverLagP99Ms: 250, fullAcceptanceEligible: profile === 'standard' });
+}
+
+// Public snapshot values only. The native client requests attacks at this
+// stat-derived cadence; Zone currently has a separate 600ms acceptance floor.
+// Keep their 550/600ms difference explicit, without changing either runtime.
+export function nativeCadence(snapshot, kind, policy) {
+  const player = snapshot?.entities?.find(entity => entity.objectId === snapshot.playerObjectId);
+  const poison = Number(player?.poison ?? snapshot?.playerPoison ?? 0);
+  if (kind !== 'attack') {
+    const cooldownMs = kind === 'turn' ? 350 : kind === 'chat' ? 0 : poison & 4 ? 1200 : 600;
+    return { intervalMs: Math.max(policy.movementIntervalMs, cooldownMs + 50), cooldownMs, pacingKnown: true };
+  }
+  // WorldSnapshot.player_crystal_stats is an authoritative sparse block:
+  // stats.rs omits zero additions, and the native getter uses map_or(0).
+  // A PRESENT valid block without stat 14 therefore proves AttackSpeed=0.
+  // Whole-block absence or malformed data still cannot establish pacing.
+  const stats = snapshot?.playerCrystalStats, present = Array.isArray(stats);
+  const valid = present && stats.length <= 256 && stats.every(stat => Number.isInteger(stat?.stat) && stat.stat >= 0 && stat.stat <= 255 &&
+    Number.isInteger(stat.value) && stat.value >= -2147483648 && stat.value <= 2147483647) && new Set(stats.map(stat => stat.stat)).size === stats.length;
+  const entry = valid ? stats.find(stat => stat.stat === 14) : undefined;
+  const speed = valid ? entry?.value ?? 0 : undefined;
+  const known = Number.isInteger(player?.level) && player.level >= 1 && player.level <= 65535 && valid;
+  const nativeAttackMs = known ? Math.max(550, 1400 - 60 * speed - Math.min(14 * player.level, 370)) : 1400;
+  if (!Number.isFinite(nativeAttackMs) || nativeAttackMs > 60000) throw new Error('Unsupported authoritative native attack cadence');
+  return { intervalMs: Math.max(nativeAttackMs, 600) + 50, cooldownMs: Math.max(nativeAttackMs, 600), pacingKnown: known,
+    nativeAttackMs, zoneAttackFloorMs: 600, level: player?.level, attackSpeed: speed,
+    statBlockPresent: present, statCount: present ? stats.length : null,
+    attackSpeedSource: valid ? entry ? 'authoritative-stat-14' : 'authoritative-sparse-zero' : present ? 'invalid-stat-block' : 'unavailable-stat-block' };
+}
+
+export class NativePlan {
+  constructor(at) { this.nextAt = at; this.legalAt = at; this.index = 0; }
+  take(now, intervalMs) {
+    const first = Math.max(this.nextAt, this.legalAt);
+    if (now < first) return null;
+    const missed = Math.floor((now - first) / intervalMs), due = first + missed * intervalMs;
+    this.nextAt = due + intervalMs; this.index += missed + 1;
+    return { due, missed, index: this.index, intervalMs };
+  }
+  sent(at, cooldownMs) { this.legalAt = at + cooldownMs; }
 }
 
 export function validateCapacityPool(pool, endpoint) {
@@ -113,12 +161,23 @@ export class Measurements {
     if (!this.metrics.has(sample.kind)) this.metrics.set(sample.kind, { count: 0, status: {}, sent: new Histogram(), planned: new Histogram() });
     const metric = this.metrics.get(sample.kind); metric.count++; metric.status[sample.status] = (metric.status[sample.status] ?? 0) + 1;
     if (['success', 'corrected', 'positive-unobserved', 'miss'].includes(sample.status)) { metric.sent.add(sample.latencyMs); metric.planned.add(sample.plannedLatencyMs); }
-    if (!this.actors.has(sample.actor)) this.actors.set(sample.actor, { plans: 0, gaps: 0, moves: 0, attacks: 0, hits: 0, damage: 0, lastSuccessAt: 0 });
+    if (!this.actors.has(sample.actor)) this.actors.set(sample.actor, { plans: 0, gaps: 0, moves: 0, attacks: 0, hits: 0, damage: 0, lastSuccessAt: 0,
+      runs: 0, cells: 0, nativeOpportunities: 0, nativeCompleted: 0, offeredDurationMs: 0, evidenceWaits: 0, ownerAckWaits: 0, unknownPacing: 0 });
     const actor = this.actors.get(sample.actor);
     if (sample.plannedGameplay) actor.plans++;
-    if (['plan-gap', 'busy', 'navigation-blocked', 'budget-gap', 'action-locked'].includes(sample.status)) actor.gaps++;
-    if (['walk', 'run'].includes(sample.kind) && sample.status === 'success') actor.moves++;
-    if (sample.kind === 'attack' && !['plan-gap', 'busy', 'budget-gap', 'navigation-blocked', 'action-locked'].includes(sample.status)) actor.attacks++;
+    if (['plan-gap', 'busy', 'navigation-blocked', 'budget-gap', 'action-locked', 'owner-ack-wait'].includes(sample.status)) actor.gaps++;
+    if (['walk', 'run'].includes(sample.kind) && sample.status === 'success') {
+      actor.moves++; actor.cells += sample.movedCells ?? 1;
+      if (sample.kind === 'run' && sample.movedCells > 1) actor.runs++;
+    }
+    if (sample.kind === 'attack' && !['plan-gap', 'busy', 'budget-gap', 'navigation-blocked', 'action-locked', 'evidence-wait', 'owner-ack-wait'].includes(sample.status)) actor.attacks++;
+    if (sample.nativeOpportunity) {
+      actor.nativeOpportunities++; actor.offeredDurationMs += sample.plannedIntervalMs ?? 0;
+      if (sample.pacingKnown === false) actor.unknownPacing++;
+      if (['success', 'miss'].includes(sample.status)) actor.nativeCompleted++;
+      if (sample.status === 'evidence-wait') actor.evidenceWaits++;
+      if (sample.status === 'owner-ack-wait') actor.ownerAckWaits++;
+    }
     if (sample.kind === 'attack' && sample.status === 'success' && sample.damage > 0 && sample.sharedHealthVerified) { actor.hits++; actor.damage += sample.damage; }
     if (sample.status === 'success' && (['walk', 'run'].includes(sample.kind) || (sample.kind === 'attack' && sample.damage > 0))) actor.lastSuccessAt = sample.at;
   }
@@ -128,12 +187,27 @@ export class Measurements {
   }
 }
 
+export function nativeActivityVerdict(sample, role, seconds, policy, { requireRunning = true } = {}) {
+  if (policy.activityMode !== 'native') return { passed: true };
+  const completionRatio = (sample.nativeCompleted ?? 0) / Math.max(1, sample.nativeOpportunities ?? 0);
+  const runRatio = (sample.runs ?? 0) / Math.max(1, sample.moves ?? 0), cellsPerMinute = (sample.cells ?? 0) * 60 / Math.max(.001, seconds);
+  const sufficient = seconds >= 20;
+  return { passed: (!sufficient || ((sample.offeredDurationMs ?? 0) >= seconds * 800 && completionRatio >= 1 - policy.maximumMissedPlanRatio &&
+      (!requireRunning || role !== 'movement' || (runRatio >= policy.minimumNativeRunRatio && cellsPerMinute >= policy.minimumNativeCellsPerMinute)))) && !(sample.unknownPacing > 0),
+    completionRatio, runRatio, cellsPerMinute, positiveHitsPerMinute: (sample.hits ?? 0) * 60 / Math.max(.001, seconds),
+    evidenceWaits: sample.evidenceWaits ?? 0, ownerAckWaits: sample.ownerAckWaits ?? 0,
+    offeredDurationMs: sample.offeredDurationMs ?? 0, unknownPacing: sample.unknownPacing ?? 0,
+    coverageFailureMeaning: 'Insufficient native offered/completed load is not, by itself, proof of server overload' };
+}
+
 export function assessMeasurements(measurements, actors, seconds, policy, { requireChat = true, aoi } = {}) {
   const metrics = measurements.summary(), ratio = n => n / Math.max(.01, seconds / 60);
   const activity = actors.map(actor => {
     const sample = measurements.actors.get(actor.name) ?? { plans: 0, gaps: 0, moves: 0, attacks: 0, hits: 0, damage: 0 };
     const combat = actor.role === 'combat';
-    return { actor: actor.name, role: actor.role, ...sample, passed: sample.plans >= Math.floor(seconds * .8) &&
+    const nativeActivity = nativeActivityVerdict(sample, actor.role, seconds, policy);
+    return { actor: actor.name, role: actor.role, ...sample, nativeActivity, passed: nativeActivity.passed &&
+      (policy.activityMode === 'native' ? sample.offeredDurationMs >= seconds * 800 : sample.plans >= Math.floor(seconds * .8)) &&
       sample.gaps / Math.max(1, sample.plans) <= policy.maximumMissedPlanRatio &&
       (combat ? ratio(sample.hits) >= policy.minimumCombatHitsPerMinute && ratio(sample.attacks) >= policy.minimumCombatAttacksPerMinute : ratio(sample.moves) >= policy.minimumMovesPerMinute) };
   });
@@ -148,7 +222,10 @@ export function assessMeasurements(measurements, actors, seconds, policy, { requ
   const corrections = (metrics.walk?.status.corrected ?? 0) + (metrics.run?.status.corrected ?? 0);
   const moveMetrics = ['walk', 'run'].map(kind => metrics[kind]).filter(Boolean);
   const movementPassed = moveCount > 0 && moveMetrics.every(metric => metric.fromSend.p95Ms != null && metric.fromSend.p95Ms <= policy.movementP95Ms && metric.fromPlan.p95Ms <= policy.movementP95Ms + policy.maximumSendLatenessMs);
-  const chatPassed = !requireChat || (metrics.chat?.fromSend.p95Ms != null && metrics.chat.fromSend.p95Ms <= policy.chatP95Ms && (metrics.peerChat?.status.success ?? 0) > 0);
+  const chatPassed = policy.activityMode === 'native'
+    ? (!metrics.chat?.fromSend.count || metrics.chat.fromSend.p95Ms <= policy.chatP95Ms) &&
+      (!requireChat || (metrics.chat?.fromSend.p95Ms != null && (metrics.peerChat?.status.success ?? 0) > 0))
+    : !requireChat || (metrics.chat?.fromSend.p95Ms != null && metrics.chat.fromSend.p95Ms <= policy.chatP95Ms && (metrics.peerChat?.status.success ?? 0) > 0);
   const combatExpected = actors.some(actor => actor.role === 'combat');
   const combatCovered = combatExpected && activity.filter(actor => actor.role === 'combat').every(actor => actor.passed);
   return { passed: activity.length > 0 && activity.every(actor => actor.passed) && movementPassed && chatPassed &&
@@ -221,14 +298,15 @@ export class ContinuousAcceptance {
     const rate = count => count * 60 / Math.max(seconds, .001);
     const progressed = rate(activity.moves) >= this.policy.minimumMovesPerMinute ||
       (actor.role === 'combat' && rate(activity.hits) >= this.policy.minimumCombatHitsPerMinute && rate(activity.attacks) >= this.policy.minimumCombatAttacksPerMinute);
-    const activityPassed = !enoughDuration || (activity.plans >= Math.floor(seconds * .8) && progressed && activity.gaps / Math.max(1, activity.plans) <= this.policy.maximumMissedPlanRatio);
+    const nativeActivity = nativeActivityVerdict(activity, actor.role, seconds, this.policy);
+    const activityPassed = nativeActivity.passed && (!enoughDuration || ((this.policy.activityMode === 'native' ? activity.offeredDurationMs >= seconds * 800 : activity.plans >= Math.floor(seconds * .8)) && progressed && activity.gaps / Math.max(1, activity.plans) <= this.policy.maximumMissedPlanRatio));
     const latencyPassed = movement.every(metric => !metric.fromSend.count || (metric.fromSend.p95Ms <= this.policy.movementP95Ms &&
       metric.fromPlan.p95Ms != null && metric.fromPlan.p95Ms <= this.policy.movementP95Ms + this.policy.maximumSendLatenessMs)) &&
       (!metrics.chat?.fromSend.count || metrics.chat.fromSend.p95Ms <= this.policy.chatP95Ms);
     const fanoutPassed = Object.entries(metrics).filter(([kind]) => kind.startsWith('fanout-')).every(([, metric]) =>
       (metric.status.timeout ?? 0) / Math.max(1, metric.count) < this.policy.timeoutExclusive && (!metric.fromSend.count || metric.fromSend.p95Ms <= this.policy.chatP95Ms));
     const verdict = { actor: actor.name, role: actor.role, phases: [...actor.phases], seconds, final,
-      activityDurationSufficient: enoughDuration, activity, activityPassed, latencyPassed, fanoutPassed,
+      activityDurationSufficient: enoughDuration, activity, nativeActivity, activityPassed, latencyPassed, fanoutPassed,
       timeoutRatio: timeouts / Math.max(1, total), correctionRatio: corrections / Math.max(1, movementCount), metrics };
     verdict.passed = activityPassed && latencyPassed && fanoutPassed && verdict.timeoutRatio < this.policy.timeoutExclusive &&
       verdict.correctionRatio <= this.policy.maximumCorrectionRatio;

@@ -13,7 +13,8 @@
 > version26 is reflected in its stale test fixture; catalogue data is unchanged.
 > A further map-name getter removes one hydration snapshot and adds bounded
 > stage timings;65 focused/adjacent checks and an explicit release benchmark
-> pass. Live capacity remains measured on318 until a backed-up upgrade.
+> pass. Follow-up6643009e8 is deployed after backup/drain and clean Linux stops;
+> the15-player baseline remains318 evidence, with larger live gates open.
 > [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
 
 > 2026-09-29 playtest regression: ObjectChat/Chat now reach idle observers via the
