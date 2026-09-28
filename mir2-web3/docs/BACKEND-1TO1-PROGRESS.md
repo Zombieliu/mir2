@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> 2026-09-29 capacity candidate: shared-map snapshots filter by authoritative
+> AOI before cloning; disabled spectator capture does no snapshot work. Focused
+> snapshot/adjacent27 pass. Real channel identity pool and optional Zone cached
+> PostgreSQL client receive synchronous-safe final destruction;11 regressions
+> and2 real-PG lifecycle tests pass on an isolated fixture database. Deployment,
+> Linux normal-stop verification and50–100-player capacity remain open. No
+> packet/SQL/gameplay-rule changes or global parity claim.
+> Eight game catalogues now borrow before singular lookup/selected clone;
+> game-data53/53 plus one explicit function benchmark pass. Existing profile
+> version26 is reflected in its stale test fixture; catalogue data is unchanged.
+> [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 playtest regression: ObjectChat/Chat now reach idle observers via the
 > live Zone channel while preserving queued speech order. Successful explicit
 > logout captures its route owner before the session clears identity, stops old

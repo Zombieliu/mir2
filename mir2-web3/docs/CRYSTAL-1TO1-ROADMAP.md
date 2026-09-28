@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-29 capacity candidate: disabled spectator capture skips complete
+> snapshots; authoritative AOI filtering precedes shared-map cloning. Snapshot
+> and adjacent regressions27 pass. Actual PostgreSQL pool/client owners now
+> destroy safely outside an ambient Tokio runtime;11 regressions plus2 explicit
+> real-PG lifecycle tests pass on a dedicated database. Original test-service
+> stop panic and failed load runs are retained. User's50–100 active-player goal
+> is in progress; no stable capacity or global parity claim.
+> Single-record lookups now borrow eight immutable catalogues instead of
+> cloning them wholesale; game-data53/53 and an explicit release benchmark pass,
+> preserving original case/order/selection semantics and all gameplay data.
+> [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 invited-playtest corrections: ordinary two-account traffic exposed
 > approximately 11-second idle-recipient chat latency and a route lease retained
 > after successful LogOut. Chat now uses live Zone delivery with queue ordering;

@@ -2296,6 +2296,36 @@ struct ZoneMapSnapshotLayer {
     drop_expires_at_ms: BTreeMap<u32, u64>,
 }
 
+impl ZoneMapSnapshotLayer {
+    fn overlay_visible_snapshot(&self, snapshot: &mut WorldSnapshot) {
+        let self_position = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .map(|entity| (entity.x, entity.y));
+        let visible = |x: i32, y: i32| {
+            self_position.is_none_or(|(self_x, self_y)| {
+                let range = CRYSTAL_OBJECT_DATA_RANGE as u32;
+                self_x.abs_diff(x) <= range && self_y.abs_diff(y) <= range
+            })
+        };
+        snapshot.entities.retain(|entity| {
+            matches!(entity.kind, WorldEntityKind::SelfPlayer | WorldEntityKind::Player)
+        });
+        // Borrow the full map and filter before cloning. The removal/death and
+        // ownership ledgers, and objects outside this player's AOI, stay shared.
+        snapshot.entities.extend(
+            self.entities.values().filter(|entity| visible(entity.x, entity.y)).cloned(),
+        );
+        snapshot.ground_drops = self
+            .ground_drops
+            .values()
+            .filter(|drop| visible(drop.x, drop.y))
+            .cloned()
+            .collect();
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct SharedItemRentalInvite {
     partner_name: String,
@@ -14460,19 +14490,9 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             .zone_state
             .lock()
             .expect("shared zone presence mutex should not be poisoned");
-        if let Some(shared_map) = zone_state.map_layer(snapshot.map_file_name.as_deref()) {
-            snapshot.entities.retain(|entity| {
-                matches!(
-                    entity.kind,
-                    WorldEntityKind::SelfPlayer | WorldEntityKind::Player
-                )
-            });
-            snapshot.entities.extend(shared_map.entities.into_values());
-            for entity in &mut snapshot.entities {
-                entity.quest_icon = personal_quest_icons.get(&entity.object_id).copied();
-            }
-            snapshot.ground_drops = shared_map.ground_drops.into_values().collect();
-        }
+        // Movement can already be committed in the Zone while the personal
+        // mirror is stale. Establish the authoritative AOI centre before
+        // selecting shared objects, under the same lock as vitals/players.
         if let (Some(key), Some(map_file_name)) =
             (current_key.as_ref(), snapshot.map_file_name.as_deref())
         {
@@ -14489,6 +14509,20 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                     }
                 }
             }
+        }
+        if let Some(shared_map) = snapshot
+            .map_file_name
+            .as_deref()
+            .and_then(|name| zone_state.maps.get(name))
+        {
+            shared_map.overlay_visible_snapshot(&mut snapshot);
+            for entity in &mut snapshot.entities {
+                entity.quest_icon = personal_quest_icons.get(&entity.object_id).copied();
+            }
+        }
+        if let (Some(key), Some(map_file_name)) =
+            (current_key.as_ref(), snapshot.map_file_name.as_deref())
+        {
             if let Some(session_id) = zone_state.zone_sessions.get(key) {
                 if let Some(zone) = zone_state
                     .zone_manager
@@ -14537,6 +14571,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         let mut remote_players = zone_state
             .remote_player_entities(snapshot.map_file_name.as_deref(), current_key.as_ref());
         snapshot.entities.append(&mut remote_players);
+        drop(zone_state);
         if let Some((self_x, self_y)) = snapshot
             .entities
             .iter()
@@ -22949,6 +22984,220 @@ mod tests {
     }
 
     #[test]
+    fn snapshot_aoi_uses_authoritative_position_before_cloning_all_edge_objects() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "snapshot-authority", "Scout");
+        let key = runtime.current_presence_key().expect("active presence");
+        let personal = runtime.inner.world_snapshot();
+        let personal_self = personal
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        let centre = Point {
+            x: personal_self.x + 100,
+            y: personal_self.y + 100,
+        };
+        let range = super::CRYSTAL_OBJECT_DATA_RANGE;
+        let offsets = [
+            (-range, -range),
+            (-range, range),
+            (range, -range),
+            (range, range),
+            (-range, 0),
+            (range, 0),
+            (0, -range),
+            (0, range),
+            (-range - 1, 0),
+            (range + 1, 0),
+            (0, -range - 1),
+            (0, range + 1),
+        ];
+        {
+            let mut state = zone_state.lock().unwrap();
+            state.update_player_transform(&key, centre.clone(), MirDirection::Up);
+            let map = state.maps.entry("0".to_string()).or_default();
+            map.entities.clear();
+            map.ground_drops.clear();
+            for (index, (dx, dy)) in offsets.into_iter().enumerate() {
+                let id = 99_000 + index as u32;
+                let mut entity = shared_monster_entity(id);
+                entity.x = centre.x + dx;
+                entity.y = centre.y + dy;
+                map.ground_drops.insert(
+                    id + 100,
+                    shared_gold_drop(id + 100, entity.x, entity.y, Some(42), Some(13)),
+                );
+                map.entities.insert(id, entity);
+            }
+        }
+        let snapshot = runtime.world_snapshot();
+        let player = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!(
+            (player.x, player.y, player.direction),
+            (centre.x, centre.y, MirDirection::Up)
+        );
+        for index in 0..12 {
+            let expected = index < 8;
+            assert_eq!(
+                snapshot
+                    .entities
+                    .iter()
+                    .any(|entity| entity.object_id == 99_000 + index),
+                expected
+            );
+            assert_eq!(
+                snapshot
+                    .ground_drops
+                    .iter()
+                    .any(|drop| drop.object_id == 99_100 + index),
+                expected
+            );
+        }
+        assert!(snapshot
+            .ground_drops
+            .iter()
+            .all(|drop| drop.owner_object_id == Some(42)
+                && drop.ownership_remaining_ticks == Some(13)));
+        assert_eq!(zone_state.lock().unwrap().maps["0"].entities.len(), 12);
+        assert_eq!(zone_state.lock().unwrap().maps["0"].ground_drops.len(), 12);
+    }
+
+    #[test]
+    fn snapshot_aoi_ignores_presence_from_another_map() {
+        let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+        let mut runtime = shared_session_runtime(zone_state.clone());
+        start_new_runtime(&mut runtime, "snapshot-map-mismatch", "Scout");
+        let key = runtime.current_presence_key().unwrap();
+        let personal = runtime.inner.world_snapshot();
+        let player = personal
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        let (x, y) = (player.x, player.y);
+        {
+            let mut state = zone_state.lock().unwrap();
+            let presence = state.players.get_mut(&key).unwrap();
+            presence.map_file_name = "another-map".to_string();
+            presence.entity.x = x + 100;
+            presence.entity.y = y + 100;
+            let map = state.maps.entry("0".to_string()).or_default();
+            map.entities.clear();
+            for (id, offset) in [(99_201, 0), (99_202, 100)] {
+                let mut entity = shared_monster_entity(id);
+                entity.x = x + offset;
+                entity.y = y + offset;
+                map.entities.insert(id, entity);
+            }
+        }
+        let snapshot = runtime.world_snapshot();
+        let player = snapshot
+            .entities
+            .iter()
+            .find(|entity| entity.kind == WorldEntityKind::SelfPlayer)
+            .unwrap();
+        assert_eq!((player.x, player.y), (x, y));
+        assert!(snapshot
+            .entities
+            .iter()
+            .any(|entity| entity.object_id == 99_201));
+        assert!(!snapshot
+            .entities
+            .iter()
+            .any(|entity| entity.object_id == 99_202));
+    }
+
+    #[test]
+    fn snapshot_aoi_without_self_keeps_the_unfiltered_fallback() {
+        let runtime = InProcessWorldRuntime::new(GatewayConfig::default());
+        let mut snapshot = runtime.world_snapshot();
+        snapshot.entities.clear();
+        let mut map = super::ZoneMapSnapshotLayer::default();
+        let mut entity = shared_monster_entity(99_301);
+        entity.x = i32::MAX;
+        entity.y = i32::MIN;
+        map.entities.insert(entity.object_id, entity.clone());
+        let drop = shared_gold_drop(99_302, entity.x, entity.y, None, None);
+        map.ground_drops.insert(drop.object_id, drop.clone());
+        map.overlay_visible_snapshot(&mut snapshot);
+        assert_eq!(snapshot.entities, vec![entity]);
+        assert_eq!(snapshot.ground_drops, vec![drop]);
+    }
+
+    #[test]
+    fn snapshot_aoi_large_map_matches_previous_projection_without_full_map_clone() {
+        let runtime = InProcessWorldRuntime::new(GatewayConfig::default());
+        let mut personal = runtime.world_snapshot();
+        personal.entities = vec![shared_picker_entity(1, 330, 270)];
+        personal.ground_drops.clear();
+        let mut map = super::ZoneMapSnapshotLayer::default();
+        for index in 0..10_000_u32 {
+            let id = index + 100;
+            let mut entity = shared_monster_entity(id);
+            entity.x = if index < 2 {
+                330 + index as i32
+            } else {
+                500 + index as i32
+            };
+            entity.y = 270;
+            entity.name = format!("snapshot-benchmark-entity-{index}");
+            map.ground_drops
+                .insert(id, shared_gold_drop(id, entity.x, entity.y, None, None));
+            map.entities.insert(id, entity);
+            map.removed_entity_ids.insert(id + 20_000);
+            map.removed_drop_ids.insert(id + 20_000);
+            map.drop_expires_at_ms.insert(id, 123_456);
+        }
+        let previous_projection = || {
+            let mut snapshot = personal.clone();
+            let copied = map.clone();
+            snapshot.entities.extend(copied.entities.into_values());
+            snapshot.ground_drops = copied.ground_drops.into_values().collect();
+            let visible = |x: i32, y: i32| {
+                330_i32.abs_diff(x) <= super::CRYSTAL_OBJECT_DATA_RANGE as u32
+                    && 270_i32.abs_diff(y) <= super::CRYSTAL_OBJECT_DATA_RANGE as u32
+            };
+            snapshot
+                .entities
+                .retain(|entity| visible(entity.x, entity.y));
+            snapshot.ground_drops.retain(|drop| visible(drop.x, drop.y));
+            snapshot
+        };
+        let filtered_projection = || {
+            let mut snapshot = personal.clone();
+            map.overlay_visible_snapshot(&mut snapshot);
+            snapshot
+        };
+        let old = previous_projection();
+        let new = filtered_projection();
+        assert_eq!(old, new);
+        let selected_records = new.entities.len() - 1 + new.ground_drops.len();
+        assert_eq!(selected_records, 4);
+        assert_eq!(map.entities.len() + map.ground_drops.len(), 20_000);
+        let runs = 25;
+        let old_start = Instant::now();
+        for _ in 0..runs {
+            std::hint::black_box(previous_projection());
+        }
+        let old_time = old_start.elapsed();
+        let new_start = Instant::now();
+        for _ in 0..runs {
+            std::hint::black_box(filtered_projection());
+        }
+        let new_time = new_start.elapsed();
+        // Timing is evidence, not a flaky pass/fail threshold. Equality and the
+        // selected clone count are the deterministic regression checks.
+        eprintln!("snapshot AOI: old_cloned_records=20000 new_cloned_records={selected_records} runs={runs} old_us={} new_us={}",
+            old_time.as_micros(), new_time.as_micros());
+    }
+
+    #[test]
     fn shared_in_process_registry_routes_walk_through_shared_zone() {
         let (mut first, mut second) = started_shared_zone_sessions();
         first.transfer_map("crystal:0102:3:7");
@@ -29430,7 +29679,11 @@ mod tests {
 
     fn wait_for_shared_creature_pickup(session: &mut GatewaySession) -> Vec<ServerPacket> {
         let mut packets = Vec::new();
-        for _ in 0..120 {
+        // BabyPig moves every 900 ms and manual pickup completes 500 ms after
+        // its attack. Collision detours can exceed 120 * 25 ms; expensive old
+        // session ticks accidentally extended that loop's real-time budget.
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(12);
+        while std::time::Instant::now() < deadline {
             std::thread::sleep(std::time::Duration::from_millis(25));
             packets.extend(session.tick());
             if packets.iter().any(|p| matches!(p, ServerPacket::IntelligentCreaturePickup { .. })) { break; }

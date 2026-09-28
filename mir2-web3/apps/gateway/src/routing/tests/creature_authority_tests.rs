@@ -114,10 +114,12 @@ fn creature_mouse_pickup_rejects_remote_tile_and_baby_pig_can_pick_nearby() {
         },
     });
     packets.extend(wait_for_shared_creature_pickup(&mut second));
-    assert!(
+    assert_eq!(
         packets
             .iter()
-            .any(|p| matches!(p, ServerPacket::GainedGold { gold: 100 })),
+            .filter(|p| matches!(p, ServerPacket::GainedGold { gold: 100 }))
+            .count(),
+        1,
         "active={:?}, packets={packets:?}",
         second
             .world_snapshot()

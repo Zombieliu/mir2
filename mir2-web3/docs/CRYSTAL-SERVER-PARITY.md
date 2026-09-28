@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> 2026-09-29 capacity candidate preserves AOI/snapshot and ordinary gameplay
+> semantics while eliminating disabled-spectator snapshots and full-map deep
+> copying before visibility filtering. Snapshot/adjacent27 regressions pass.
+> Actual synchronous PostgreSQL resource owners are safely destroyed on async
+> cancellation/error;11 regressions and2 dedicated real-PG lifecycle checks pass.
+> The original stop panic and load failures remain recorded. Stable50–100-player
+> and real Linux shutdown acceptance are pending, not inferred from these tests.
+> Singular lookups borrow cached game catalogues and clone only the selected
+> record; game-data53/53 plus one explicit release benchmark pass. Original
+> lookup ordering, class/level selection and catalogue contents remain intact.
+> [Capacity evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 ordinary multiplayer playtest found idle-recipient chat delayed about
 > 11 seconds and successful LogOut retaining its session route. Bounded Gateway
 > fixes add live chat delivery and atomic owner-fenced release after successful

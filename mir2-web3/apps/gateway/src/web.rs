@@ -5120,6 +5120,21 @@ fn new_gateway_session_for_web(state: &WebState) -> GatewaySession {
     session
 }
 
+fn publish_spectator_frame_if_enabled(
+    spectator: &SpectatorHub,
+    snapshot: impl FnOnce() -> Option<mir2_simulation::WorldSnapshot>,
+) -> Result<Option<SpectatorFrame>, String> {
+    // Keep snapshot construction lazy: a disabled spectator must not clone the
+    // personal world or acquire the shared Zone lock on every capture interval.
+    if !spectator.config().enabled {
+        return Ok(None);
+    }
+    let Some(snapshot) = snapshot() else {
+        return Ok(None);
+    };
+    spectator.publish(&snapshot)
+}
+
 // `_injection_registration` is an RAII Drop-guard; reassigning it (to re-register on
 // re-login or unregister on logout) drops the prior guard intentionally.
 #[allow(unused_assignments)]
@@ -6246,12 +6261,13 @@ async fn handle_socket_inner(
                 }
                 let _ = reply.send(crate::inject::InjectionOutcome { packet_count });
             }
-            _ = spectator_publish_tick.tick() => {
-                if tokio::task::block_in_place(|| session.active_identity()).is_none() {
-                    continue;
-                }
-                let snapshot = tokio::task::block_in_place(|| session.world_snapshot());
-                if let Err(error) = spectator.publish(&snapshot) {
+            _ = spectator_publish_tick.tick(), if spectator.config().enabled => {
+                let result = tokio::task::block_in_place(|| {
+                    publish_spectator_frame_if_enabled(&spectator, || {
+                        session.active_identity().map(|_| session.world_snapshot())
+                    })
+                });
+                if let Err(error) = result {
                     eprintln!("spectator frame publish skipped: {error}");
                 }
             }
@@ -12388,6 +12404,75 @@ mod tests {
     use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    fn snapshot_test_spectator(enabled: bool) -> crate::spectator::SpectatorHub {
+        crate::spectator::SpectatorHub::new(crate::spectator::SpectatorConfig {
+            enabled,
+            recording_enabled: false,
+            public_enabled: true,
+            public_maps: vec!["0".to_string()],
+            director_token: None,
+            capture_interval_ms: 250,
+            public_delay_ms: 30_000,
+            max_delay_ms: 120_000,
+            ring_frames: 40,
+            max_entities: 128,
+            replay_limit: 100,
+            retention_hours: 1,
+            entity_stale_ms: 15_000,
+            data_dir: std::env::temp_dir().join("mir2-disabled-spectator-snapshot-test"),
+        })
+    }
+
+    #[test]
+    fn spectator_snapshot_disabled_never_constructs_world_or_publishes() {
+        let spectator = snapshot_test_spectator(false);
+        let mut snapshot_calls = 0;
+        for _ in 0..400 {
+            let frame = super::publish_spectator_frame_if_enabled(&spectator, || {
+                snapshot_calls += 1;
+                panic!("disabled spectator must not enter the snapshot closure")
+            })
+            .expect("disabled capture succeeds without work");
+            assert!(frame.is_none());
+        }
+        assert_eq!(snapshot_calls, 0);
+        assert_eq!(spectator.metrics().published_frames_total, 0);
+        assert_eq!(spectator.metrics().active_maps, 0);
+    }
+
+    #[test]
+    fn spectator_snapshot_enabled_keeps_publishing_and_private_redaction() {
+        let spectator = snapshot_test_spectator(true);
+        let mut session = mir2_simulation::SimulationSession::new(SimulationConfig::default());
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        let mut snapshot_calls = 0;
+        let frame = super::publish_spectator_frame_if_enabled(&spectator, || {
+            snapshot_calls += 1;
+            Some(session.world_snapshot())
+        })
+        .expect("enabled spectator should publish")
+        .expect("first active snapshot should produce a frame");
+        assert_eq!(snapshot_calls, 1);
+        assert_eq!(spectator.metrics().published_frames_total, 1);
+        assert_eq!(frame.world["mapFileName"], "0");
+        assert_eq!(frame.world["inventoryItems"], json!([]));
+        assert_eq!(frame.world["questLog"], json!([]));
+        assert!(!frame.targets().is_empty());
+    }
+
+    #[test]
+    fn spectator_snapshot_enabled_without_active_identity_does_not_publish() {
+        let spectator = snapshot_test_spectator(true);
+        assert!(super::publish_spectator_frame_if_enabled(&spectator, || None)
+            .expect("inactive session should be skipped")
+            .is_none());
+        assert_eq!(spectator.metrics().published_frames_total, 0);
+    }
 
     struct TestEnvRestoreGuard {
         previous: Vec<(String, Option<std::ffi::OsString>)>,

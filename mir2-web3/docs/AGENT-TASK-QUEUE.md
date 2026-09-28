@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-09-29 active capacity goal: user authorized approximately 10–12 hours of
+> continuous work to measure the existing limit, reach at least 50 stable active
+> ordinary sessions and attempt100. Preserve original production/data and auth
+> limits. The first 2-total-player short probe stopped on memory protection;
+> it is not stable capacity. Normal native exit and backed-up test-only
+> spectator-off configuration are complete. Corrected baseline passes90-second
+> stages through8 actors, then fails the eleventh StartGame snapshot deadline;
+> no five-minute stable result. Snapshot/catalogue optimizations and safe-PG
+> shutdown candidate are tested locally, pending Linux deployment and renewed
+> load.100 empty ordinary load accounts are prepared; no50/100 acceptance claim.
+> [Acceptance and retained evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 invited release delivered: native d33708e1f and Gateway20aeb345f
 > are the verified source pair. Independent PostgreSQL/Redis realm is live at
 > `/playtest/ws`; original service/data remain unchanged. Strict signed package,
