@@ -7,7 +7,9 @@
 > font atlases at16MiB. Fixed OS-logical constraints explain the reported150%-DPI
 > viewport/HUD mismatch; initial sizing and monitor-change regressions pass.
 > Actual Alienware, clean-install and human three-language acceptance remain
-> open. Capacity stays paused. Release packaging is recorded separately.
+> open. Capacity stays paused. Clean97144d6a0 Release, strict123030-file signed
+> Candidate and the branded three-language x64 r4 installer are built.
+> [Release hashes and limits](generated/player-qa/native-multilingual-20260930/release/README.md).
 > [Evidence](generated/player-qa/native-multilingual-20260930/README.md).
 
 > 2026-09-29 character-preview correction: Wizard effects now use Crystal's

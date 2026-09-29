@@ -109,6 +109,7 @@ was changed for these checks. The separate capacity optimization remains
 paused; no global parity or multiplayer capacity claim is added.
 
 Release build, signed Candidate and installer hashes are recorded separately
-after packaging; they are not inferred from these test EXEs.
+in the [completed r4 handoff](release/README.md); they are not inferred from
+these test EXEs.
 The [package guard and naming follow-up](packaging-guards.md) retains the first
 failed package result and the targeted verifier correction.

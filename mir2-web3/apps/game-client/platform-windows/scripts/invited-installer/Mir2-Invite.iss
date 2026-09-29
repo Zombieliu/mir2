@@ -195,8 +195,8 @@ begin
   Code := 'en';
   if ActiveLanguage = 'chinesetraditional' then Code := 'zh-TW';
   if ActiveLanguage = 'brazilianportuguese' then Code := 'pt-BR';
-  Temporary := GetTempFileName(Directory);
-  if Temporary = '' then exit;
+  Temporary := GenerateUniqueName(Directory, '.tmp');
+  if (Temporary = '') or not SafeLocalePath(Temporary) then exit;
   try
     if not SaveStringToFile(Temporary, '{"schema":1,"locale":"' + Code + '"}', False) then exit;
     if FileExists(Preference) or FileExists(Seed) then exit;

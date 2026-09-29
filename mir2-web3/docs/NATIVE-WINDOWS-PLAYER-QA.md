@@ -5,7 +5,9 @@
 > 共享1147、Windows777、词库工具12项通过；47张实际离线GPU截图通过，
 > 90次语言切换字体图集稳定在16MiB。移除高DPI下放大客户区的逻辑尺寸约束，
 > 并测试跨显示器尺寸恢复。外星人笔记本复测、全新安装及真人三语流程仍待验证；
-> 不等同全游戏验收。安装包构建证据随后单独记录。
+> 不等同全游戏验收。干净97144d6a0发布版、123030文件签名校验通过，
+> 三语x64安装包已构建，名称统一为 Numeron - Legend of Rebirth。
+> [安装包与校验值](generated/player-qa/native-multilingual-20260930/release/README.md)。
 > [证据与复现](generated/player-qa/native-multilingual-20260930/README.md)。
 
 > 2026-09-29 创建/选角预览：男女五职业共192张源帧逐像素与原版一致。
