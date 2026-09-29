@@ -28,6 +28,9 @@ registration attempts exceeding its existing three-per-hour account limit. The
 peer bucket was four of five; this was not a load-test peer-bucket exhaustion.
 The account bucket was expected to expire at 2026-09-29 10:17:36 UTC. No account,
 password, counter, server restart, or production data was changed during this fix.
+At 10:20:42 UTC a second read-only observation confirmed its natural expiry
+(`GET=null`, `PTTL=-2`); the account was still absent. This is a timed observation,
+not a guarantee that later repeated attempts cannot trigger the same policy.
 
 Shared `native_shell` regressions: 64 passed, zero failures/ignores. The focused
 registration filter also passed 17 checks; these overlap and are not additive.
@@ -48,10 +51,43 @@ Shared logs: `C:/mir2-build/client-bevy-r29-tests/registration-*-20260929.log`.
 
 ## Release status
 
-Clean attested rebuild, signed package, revised x64 installer and installed-file
-verification follow this code checkpoint. Inno's SetupArchitecture=x64 is needed
-so its runtime probe inspects the x64 system DLL. Do not reuse the old EXE's
-attestation or silently overwrite the previously delivered installer.
+Clean attested source `6b55b668c72ce56a95bc53c62cea22fcf03502d8` was pushed on
+`codex/playtest-registration`. Its pinned, locked Rust 1.95.0 release build
+completed successfully; the native EXE SHA-256 is
+`9A640907332E02907A7A19056AB3CDCE3DB7269614A6A9CDEB0BA50B7F33FA4A`.
+
+Candidate `WN-CANDIDATE-20260929-invited-02` contains 123,029 files and passes
+the strict package verifier with `sourceRepoCheck=checked`, a valid detached
+CMS signature, zero failures and `visualAccepted=false`. A separate exact-file,
+size and SHA-256 check verified all 741,601,990 installer-input bytes. The first
+packaging attempt failed Windows ADS enumeration on the long staging path;
+the unchanged script passed using its supported shorter `dist/r2` output path.
+No filesystem or signature checks were disabled.
+
+New artifact:
+`C:/mir2-playtest-releases/20260929-registration/Mir2-Invite-20260929-r2-Setup.exe`
+(594,793,744 bytes), SHA-256
+`DED4F0E306DF12ABD41EA7FFAD1E76CD644F64A074E24CF144ADDB0964340771`.
+The old delivered installer is retained unchanged. Inno Setup compilation exits
+zero, version is 2026.9.29.2 and the actual Setup PE machine is AMD64.
+`SetupArchitecture=x64` makes the runtime probe inspect the x64 system DLL.
+Bundled Microsoft runtime and the compiler have valid publisher signatures;
+the final Setup itself still has no publicly trusted Authenticode signature.
+
+The owned C-drive upgrade fixture was checked before installation. An initial
+guard detected the active F-drive client; a path-specific follow-up detected
+that the desktop shortcut also belongs to that F-drive client. Both stopped
+before launching Setup or changing installed files, shortcuts or registration.
+Installed-upgrade/uninstall and a new authenticated GUI registration remain
+unverified. The delivered artifact is a verified package/installer build, not
+an assertion that those user-machine flows have passed. The user can close the
+old client and install this revision; no running client was closed automatically.
+
+Installer recipe, exact input allowlist, compile log, CMS/package report,
+checksums and guard logs are retained under
+`C:/mir2-playtest-releases/20260929-registration/installer-build`.
+`registration-release.json` beside the Setup records the completed and open
+checks. No fresh account or password was created for the user.
 
 The user paused the capacity GOAL. These registration and installer corrections
 do not resume capacity work or establish 50–100 stable players. Original

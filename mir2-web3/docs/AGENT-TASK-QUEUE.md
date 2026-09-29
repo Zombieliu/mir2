@@ -3,8 +3,11 @@
 > 2026-09-29 registration correction: public flat Gateway errors now reach the
 > native dialog with their actual retry interval; new-account validation, field
 > colors and keyboard/paste paths agree with the commercial password minimum.
-> Shared64 and native762 pass (three existing native ignores). Clean installer
-> packaging follows; the capacity GOAL remains paused at the user's request.
+> Shared64 and native762 pass (three existing native ignores). Clean source6b55
+> produces the CMS-verified123,029-file Candidate02 and compiled x64 r2 Setup.
+> Upgrade preflight stopped before mutation on the active user's F-drive
+> shortcut; installed upgrade and GUI registration remain unverified.
+> The capacity GOAL remains paused at the user's request.
 > [Evidence](generated/player-qa/invited-playtest-20260929/registration-fix.md).
 
 > 2026-09-29 capacity follow-up: second full Gateway regression passes845/0

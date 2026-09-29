@@ -3,8 +3,10 @@
 > 2026-09-29 native registration feedback correction: preserve canonical and
 > legacy Gateway errors, explain server retry windows, and reject unsupported
 > new-account credentials before sending. Existing login remains compatible.
-> Shared64/native762 pass; three existing native ignores remain. Packaging and
-> player visual confirmation follow; no new whole-game or capacity acceptance.
+> Shared64/native762 pass; three existing native ignores remain. Clean6b55
+> Candidate02 passes CMS/package verification and produces x64 r2 Setup.
+> Installed upgrade and player GUI registration remain unverified; the guarded
+> upgrade check made no installation change. No whole-game/capacity acceptance.
 > [Evidence](generated/player-qa/invited-playtest-20260929/registration-fix.md).
 
 > 2026-09-29 capacity candidate9ac is live only on the isolated realm. Complete
