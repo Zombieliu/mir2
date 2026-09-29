@@ -1,10 +1,10 @@
-Mir2 Invited Playtest
+﻿Numeron - Legend of Rebirth — Invited Playtest
 
 Install on Windows 10/11 x64. The installer uses your Windows account's local program folder and can create a desktop shortcut. If the Microsoft Visual C++ x64 runtime is missing, Windows will request administrator permission for that Microsoft component. Restart Windows if requested before launching the game.
 
 Choose English, 繁體中文 or Português (Brasil) in the installer. On first installation this seeds the game's language; an existing game preference always wins. You can change the language on the login screen or in the in-game options. The choice is saved per Windows user outside the game folder. Player names, accounts and chat stay as entered.
 
-Launch Mir2 Playtest. Each player should create a separate account. Account IDs require 3–15 letters or digits; registration passwords require 10–15 letters or digits, must differ from the account, and must not be a common weak password. Do not share one account between simultaneous players.
+Launch Numeron - Legend of Rebirth. Each player should create a separate account. Account IDs require 3–15 letters or digits; registration passwords require 10–15 letters or digits, must differ from the account, and must not be a common weak password. Do not share one account between simultaneous players.
 Server: wss://165.154.65.136.sslip.io/playtest/ws
 
 Press Q for quests. Use the map and quest guidance controls to navigate. Exit your character normally to save progress before closing the game. Game progress is saved by the server; reinstalling the client is not a way to reset it.

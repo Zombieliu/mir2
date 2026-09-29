@@ -336,8 +336,11 @@ function New-BuildPathLeakRegex {
     $relative = "(?:$segment[\\/]){0,32}$segment"
     $hostName = '[A-Za-z0-9_](?:[A-Za-z0-9._-]{0,126}[A-Za-z0-9_])?'
     $minimumDriveTail = "(?=(?:$pathChar){3}|(?:$pathChar){1,255}[\\/])"
+    # Accented words such as JSON-encoded `padrão:\n` do not introduce an
+    # O: drive. Unicode views need the same word-boundary rule as ASCII.
+    $driveBoundary = if ($Unicode) { '(?<![\p{L}\p{M}\p{N}])' } else { '(?<![A-Za-z0-9])' }
     $patterns = @(
-        "(?<![A-Za-z0-9])[A-Z]:[\\/]$minimumDriveTail$relative",
+        "$driveBoundary[A-Z]:[\\/]$minimumDriveTail$relative",
         "\\\\[?.]\\(?:[A-Z]:\\$relative|UNC\\$hostName\\$segment(?:\\$segment){0,32})",
         "(?<!\\)\\\\$hostName\\$segment(?:\\$segment){0,32}",
         "(?<!:)//(?!rustc/[0-9a-f]{40}/library(?=$|[\\/]|[\x00-\x1F\x7F]))$hostName/$segment(?:/$segment){0,32}",
@@ -346,6 +349,51 @@ function New-BuildPathLeakRegex {
     )
     $options = [Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [Text.RegularExpressions.RegexOptions]::CultureInvariant
     return [regex]::new(('(?:' + ($patterns -join '|') + ')'), $options, [TimeSpan]::FromSeconds(30))
+}
+
+function Clear-PinnedFontVariationScanBytes {
+    param([byte[]]$Bytes, [object[]]$Ranges)
+    # Variable-font deltas are numeric binary data, not encoded build strings.
+    # Only this complete, independently pinned upstream font qualifies. Never
+    # exempt a font by its header/name alone or skip the whole .rdata section.
+    $fontLength = 11941968
+    if ($Bytes.Length -lt $fontLength) { return }
+    $fontPath = Join-Path (Split-Path -Parent $PSCommandPath) '..\assets\fonts\NotoSansTC.ttf'
+    if (-not (Test-Path -LiteralPath $fontPath -PathType Leaf)) { return }
+    $font = [IO.File]::ReadAllBytes($fontPath)
+    if ($font.Length -ne $fontLength -or
+        (Get-ByteSha256 -Bytes $font) -cne '864727D210D54F2537BBE23B3A839436C3992AF72DE9322AF5270897246BD44F') {
+        throw 'native font changed: the reviewed path-scan pin must be revalidated'
+    }
+    $tableCount = ([int]$font[4] -shl 8) -bor [int]$font[5]
+    $gvarTables = 0
+    for ($table = 0; $table -lt $tableCount; $table++) {
+        $record = 12 + 16 * $table
+        if ([Text.Encoding]::ASCII.GetString($font, $record, 4) -cne 'gvar') { continue }
+        $gvarTables++
+        $offsetBytes = [byte[]]$font[($record + 8)..($record + 11)]
+        $lengthBytes = [byte[]]$font[($record + 12)..($record + 15)]
+        [Array]::Reverse($offsetBytes); [Array]::Reverse($lengthBytes)
+        if ([BitConverter]::ToUInt32($offsetBytes, 0) -ne 7140372 -or
+            [BitConverter]::ToUInt32($lengthBytes, 0) -ne 4718420) {
+            throw 'native font variation-table bounds changed'
+        }
+    }
+    if ($gvarTables -ne 1) { throw 'native font variation table is missing or ambiguous' }
+    $encoding = [Text.Encoding]::GetEncoding(28591)
+    $needle = $encoding.GetString($font)
+    foreach ($range in $Ranges) {
+        if ($range.count -lt $fontLength) { continue }
+        $view = $encoding.GetString($Bytes, $range.offset, $range.count)
+        $start = 0
+        while (($found = $view.IndexOf($needle, $start, [StringComparison]::Ordinal)) -ge 0) {
+            # An exact full-font byte match proves these relative bounds. Mask
+            # only a private scan copy; the EXE and package bytes never change.
+            # name/meta/string tables and bytes around the font still scan.
+            [Array]::Clear($Bytes, $range.offset + $found + 7140372, 4718420)
+            $start = $found + $fontLength
+        }
+    }
 }
 
 function Assert-NoBuildPathStrings {
@@ -366,6 +414,7 @@ function Assert-NoBuildPathStrings {
         if ($ranges.Count -eq 0) { throw 'PE path inspection has no non-executable section data' }
     }
 
+    Clear-PinnedFontVariationScanBytes -Bytes $bytes -Ranges $ranges.ToArray()
     $asciiRegex = New-BuildPathLeakRegex
     $unicodeRegex = New-BuildPathLeakRegex -Unicode
     $singleByteEncoding = [Text.Encoding]::GetEncoding(28591)
@@ -557,6 +606,42 @@ if ($SelfTest) {
         if(-not(Test-StructuredBuildContract $exactAttestation)){throw 'exact build contract rejected'}; $nearMiss=$exactAttestation|ConvertTo-Json -Depth 8|ConvertFrom-Json; $nearMiss.buildCommand.target='i686-pc-windows-msvc'; if(Test-StructuredBuildContract $nearMiss){throw 'near-miss target accepted'}
         Initialize-Pkcs
         $pathScanFile = Join-Path $selfRoot 'path-scan.bin'
+        $fontScanSource = Join-Path $selfRepo 'apps\game-client\platform-windows\assets\fonts\NotoSansTC.ttf'
+        $pinnedFontBytes = [IO.File]::ReadAllBytes($fontScanSource)
+        [IO.File]::WriteAllBytes($pathScanFile, $pinnedFontBytes)
+        $unchangedFontHash = (Get-FileHash -LiteralPath $pathScanFile -Algorithm SHA256).Hash
+        Assert-NoBuildPathStrings -ExePath $pathScanFile
+        if ((Get-FileHash -LiteralPath $pathScanFile -Algorithm SHA256).Hash -cne $unchangedFontHash) {
+            throw 'path inspection modified the font file'
+        }
+        foreach ($encoding in @([Text.Encoding]::ASCII, [Text.Encoding]::UTF8, [Text.Encoding]::Unicode)) {
+            $leak = $encoding.GetBytes('C:\buildfarm\client.pdb' + [char]0)
+            foreach ($beforeFont in @($true, $false)) {
+                $probe = [IO.File]::Create($pathScanFile)
+                try {
+                    # Odd prefix also exercises UTF-16 on the opposite alignment.
+                    $probe.WriteByte(0)
+                    if ($beforeFont) { $probe.Write($leak, 0, $leak.Length) }
+                    $probe.Write($pinnedFontBytes, 0, $pinnedFontBytes.Length)
+                    if (-not $beforeFont) { $probe.Write($leak, 0, $leak.Length) }
+                } finally { $probe.Dispose() }
+                $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }
+                if (-not $rejected) { throw 'pinned font exemption hid an adjacent real machine path' }
+            }
+        }
+        foreach ($mutationOffset in @(256, 8000000)) {
+            $mutatedFont = [byte[]]$pinnedFontBytes.Clone()
+            $mutatedFont[$mutationOffset] = $mutatedFont[$mutationOffset] -bxor 1
+            [IO.File]::WriteAllBytes($pathScanFile, $mutatedFont)
+            $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }
+            if (-not $rejected) { throw 'path scanner exempted a changed font based on its SFNT header alone' }
+        }
+        $releaseProbe = Join-Path $selfRepo 'target-attested-windows-candidate\x86_64-pc-windows-msvc\release\mir2-platform-windows.exe'
+        if (Test-Path -LiteralPath $releaseProbe -PathType Leaf) {
+            Assert-NoBuildPathStrings -ExePath $releaseProbe -PeInfo (Read-PeInfo -Path $releaseProbe)
+            Write-Host 'EXISTING_RELEASE_PATH_SCAN=passed'
+        }
+        Write-Host 'PINNED_FONT_PATH_SCAN=passed (gvar only; exact full-font bytes; adjacent leaks and altered fonts rejected)'
         $blockedPaths = @(
             'D:\buildfarm\obj\client.pdb','C:\release\mir2.exe','C:/release/mir2.exe',
             '\\server\share\build\mir2.pdb','//host/share/build/mir2.pdb',
@@ -579,6 +664,18 @@ if ($SelfTest) {
             }
         }
         $unicodeBlockedPath = 'C:\' + ([string][char]0x6784) + ([string][char]0x5EFA) + '\' + ([string][char]0x5BA2) + ([string][char]0x6237) + '.pdb'
+        foreach ($encoding in @([Text.Encoding]::UTF8, [Text.Encoding]::Unicode)) {
+            $localizedHelp = 'padrão:\n• Pacífico'
+            [IO.File]::WriteAllBytes($pathScanFile, $encoding.GetBytes($localizedHelp))
+            Assert-NoBuildPathStrings -ExePath $pathScanFile
+            # A literal n is also a valid path prefix; never exempt \n globally.
+            foreach ($realPath in @('C:\new-release\client.exe', 'C:\n• Pacífico\client.exe', $unicodeBlockedPath)) {
+                [IO.File]::WriteAllBytes($pathScanFile, $encoding.GetBytes($localizedHelp + [char]0 + $realPath))
+                $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }
+                if (-not $rejected) { throw 'localized prose hid an adjacent real machine path' }
+            }
+        }
+        Write-Host 'UNICODE_PATH_BOUNDARY_SELFTEST=passed'
         [IO.File]::WriteAllBytes($pathScanFile, [Text.Encoding]::Unicode.GetBytes($unicodeBlockedPath)); $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }; if (-not $rejected) { throw 'build path scanner accepted a Unicode machine path' }
         [IO.File]::WriteAllBytes($pathScanFile, [Text.Encoding]::UTF8.GetBytes($unicodeBlockedPath)); $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }; if (-not $rejected) { throw 'build path scanner accepted a UTF-8 machine path' }
         $oddUnicodeBytes = [Text.Encoding]::Unicode.GetBytes('C:\odd\build\client.pdb'); $oddUnicodeVector = New-Object byte[] ($oddUnicodeBytes.Length + 1); $oddUnicodeVector[0] = 0xA5; [Array]::Copy($oddUnicodeBytes, 0, $oddUnicodeVector, 1, $oddUnicodeBytes.Length)

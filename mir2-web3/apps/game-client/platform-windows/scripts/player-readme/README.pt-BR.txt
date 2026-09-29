@@ -1,10 +1,10 @@
-Mir2 — Teste por convite
+﻿Numeron - Legend of Rebirth — Teste por convite
 
 Requer Windows 10/11 x64. O instalador usa a pasta de programas do seu usuário e pode criar um atalho na área de trabalho. Se faltar o runtime Microsoft Visual C++ x64, o Windows solicitará permissão de administrador para instalar esse componente Microsoft. Reinicie o Windows se solicitado antes de abrir o jogo.
 
 Escolha English, 繁體中文 ou Português (Brasil) no instalador. Na primeira instalação, essa escolha define o idioma inicial do jogo; uma preferência já salva sempre tem prioridade. Depois, altere o idioma na tela de login ou nas opções do jogo. A preferência é salva por usuário do Windows, fora da pasta do jogo. Contas, nomes de jogadores e mensagens permanecem como foram digitados.
 
-Abra o atalho Mir2 Playtest. Cada jogador deve criar sua própria conta. A conta exige 3–15 letras ou números; a senha de cadastro exige 10–15 letras ou números, deve ser diferente da conta e não pode ser uma senha comum. Não use a mesma conta simultaneamente.
+Abra o atalho Numeron - Legend of Rebirth. Cada jogador deve criar sua própria conta. A conta exige 3–15 letras ou números; a senha de cadastro exige 10–15 letras ou números, deve ser diferente da conta e não pode ser uma senha comum. Não use a mesma conta simultaneamente.
 Servidor: wss://165.154.65.136.sslip.io/playtest/ws
 
 Pressione Q para abrir as missões. Use os controles do mapa e da orientação de missão para navegar. Saia normalmente do personagem antes de fechar o jogo para salvar o progresso. O servidor guarda os personagens; reinstalar o cliente não os reinicia.

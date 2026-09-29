@@ -1,8 +1,13 @@
-# Invited Windows installer recipe
+# Numeron - Legend of Rebirth installer recipe
 
 This is the source of the three-language r4 Inno Setup recipe. It consumes an
 already built, attested and strictly CMS-verified client-only Candidate;
 it does not build the game, change saves or deploy a server.
+
+The player-facing product name is `Numeron - Legend of Rebirth`; the current
+output is `Numeron-Legend-of-Rebirth-20260930-r4-Setup.exe`, version
+`2026.09.30.4`. The internal recipe filename, Candidate family, AppId and
+default installation directory remain stable so existing installs can upgrade.
 
 Use a fresh build directory outside the checkout. Copy `Mir2-Invite.iss` and
 `prepare-installer-input.py` there, together with the three `README.*.txt`
